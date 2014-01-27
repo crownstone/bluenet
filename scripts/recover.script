@@ -1,0 +1,36 @@
+si 0
+t0
+sleep 1
+tck1
+sleep 1
+t1
+sleep 2
+t0
+sleep 2
+t1
+sleep 2
+t0
+sleep 2
+t1
+sleep 2
+t0
+sleep 2
+t1
+sleep 2
+t0
+sleep 2
+t1
+sleep 2
+t0
+sleep 2
+t1
+sleep 2
+t0
+sleep 2
+t1
+sleep 2
+tck0
+sleep 100
+si 1
+r
+exit

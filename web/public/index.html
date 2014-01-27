@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>uSVG Development</title>
+    <script src="vendor/socket.io.js"></script>
+    <script type="text/javascript" src="vendor/require-jquery.js" data-main="typescripts/ble.js"></script>
+
+    <script src="javascripts/display.js"></script>
+
+    <link rel="stylesheet/less" type="text/css" href="stylesheets/ble.less" />
+    <script src="vendor/less-1.3.3.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="main" id="main">
+    <div class="error"></div>
+    <div class="connect"><span class="peripheral">(Not connected.)</span><br>
+        <span class="peripheral_id"></span></div>
+
+    <form>
+
+        <img id="rendered"/>
+
+        <div>
+            <span id="characteristic" class="characteristic"></span> <span id="characteristic_id" class="characteristic_id"></span>
+        </div>
+        <input type="text" id="code" name="code"/><br>
+
+
+        <!--
+        <input type="button" id="make" value="make">
+        <input type="button" id="run" value="run">-->
+
+        <input type="button" id="write" value="write">
+        <input type="button" id="disconnect" value="disconnect">
+    </form>
+
+</div>
+<div class="tree" id="tree"></div>
+<div class="output">
+    <div class="output-header">Output</div>
+    <div class="output-content" id="output"></div>
+</div>
+</body>
+</html>

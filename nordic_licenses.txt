@@ -1,0 +1,379 @@
+Nordic Semiconductor ASA
+
+This license agreement (the "Agreement") is entered into by and between
+
+a) Nordic Semiconductor ASA, Otto Nielsens veg 12, NO-7004 Trondheim, Norway. Norwegian organization number 966 011 726, ("Nordic Semiconductor")
+
+and
+
+b) the legal entity that you represent and which have agreed with Nordic Semiconductor to receive this Licensed Technology (as defined below) and to use it in accordance with this Agreement (the "Licensee")
+
+each referred to as "Party" and collectively as "Parties".
+
+Licensee agrees to be bound by this Agreement by opening the package in which the Licensed Technology, as defined below, is packed or installing the Licensed Technology or in any other way taking the Licensed Technology into use either by the Licensee or by a licensee or a customer of the Licensee. 
+
+1.  DEFINITIONS
+
+"Licensed Technology" shall mean the Nordic Semiconductor Firmware and Software including without limitation, object code libraries, source code libraries and applications, and any accompanying written materials delivered or made available by Nordic Semiconductor to Licensee.
+
+"Source Code Components" shall mean any libraries or applications in source code form included in the Licensed Technology.
+
+"Licensed Technology Revisions" shall mean any modification of, revisions or improvements to, or derivative work of any Source Code Components, made, conceived or reduced by Licensee without limitation to bug-fixes.
+
+
+"Companion Devices" shall mean any device, provided by Nordic Semiconductor or third party, that integrates a microcontroller, contains the Licensed Technology embedded in an executable format, and that is used in conjunction with a Nordic Semiconductor Device to provide a radio frequency communication system.
+
+2.  SCOPE OF LICENSE
+
+2.1 Development License. Subject to the terms and conditions of this Agreement, Nordic Semiconductor hereby grants Licensee for the term of this agreement a limited, non-exclusive, non-transferable, non-sublicenseable, revocable, license to access, use internally and reproduce the Licensed Technology and create Licensed Technology Revisions solely for the purpose of development, testing, evaluation or manufacture of Licensee’s products that will (i) contain at least one Nordic Semiconductor Device and (ii) incorporate the Licensed Technology embedded in an executable format either on a Nordic Semiconductor Device or a Companion Device. It is explicitly agreed and understood by Licensee that any use of the Licensed Technology, Licensed Technology Revisions or any portion thereof, with radio frequency devices provided to the Licensee by any other entity than Nordic Semiconductor or its affiliates, is considered to be a material breach of this agreement.
+
+2.2 Limited Distribution License. Subject to the terms of this agreement, Nordic Semiconductor hereby grants Licensee for the term of this agreement a limited, non-exclusive, non-transferable, non-sublicensable, license to copy and distribute the Licensed Technology, Licensed Technology Revisions, and any portions thereof, as amended or developed by the License provided that in each instance (i) it contains at least one Nordic Semiconductor Device and (ii) it is distributed solely and exclusively in an executable format embedded in a Nordic Semiconductor Device or a Companion Device delivered to the Licensee by Nordic Semiconductor or its affiliates. It is explicitly agreed and understood by Licensee that any distribution of the Licensed Technology, Licensed Technology Revisions or any portion thereof, with radio frequency devices provided to the Licensee by any other entity than Nordic Semiconductor or its affiliates, is considered to be a material breach of this agreement.
+
+2.3 License for Limited Revisions. In connection with the licenses granted in Section 2.1 and 2.2, Licensee may use Source Code Components to create Licensed Technology Revisions. All Licensed Technology Revisions are subject to the terms and conditions of this Agreement, including but not limited to the license grants in Section 2.1 and 2.2.
+
+2.4 Feedback. Licensee may in its sole discretion provide feedback to Nordic Semiconductor regarding the License technology (herein after "Feedback"), including but not limited to bugs, Licensee’s Licensed Technology Revisions and suggestions for improvements. With respect to such Feedback, Licensee hereby grants Nordic Semiconductor a world wide, non-exclusive, perpetual, irrevocable, royalty free rights (i) to use, copy and modify Feedback and create  derivative works thereof, (ii) to make (or have made), use, import, sell, offer for sale, lease or otherwise distribute any products or services containing Feedback or implementing Feedback solely for the purpose of using the Feedback in Licensed Technology or in implementations of Licensed Technology, and (iii) to sublicense the aforementioned rights solely for the purpose of using  the Feedback in Licensed Technology or in implementations of Licensed Technology.
+
+2.5 Distribution Restrictions. Except as set forward in Sections 2.1 and 2.2 above, the Licensee may not disclose or distribute the Licensed Technology or Licensed Technology Revisions to any third party. Licensee agrees to provide reasonable security precautions to prevent unauthorized access to or use the Licensed Technology and Licensed Technology Revisions as proscribed herein. Licensee also agrees that use of and access to the Licensed Technology and Licensed Technology Revisions will be strictly limited to the employees and subcontractors of the Licensee necessary for the performance of development, verification and production tasks under this agreement. The Licensee is responsible for making sSuch employees and subcontractors agree on complying with the obligations concerning use and non-disclosure of the Licensed Technology and Licensed Technology Revisions.
+
+2.6 No Reverse Engineering. Except as set forth is Section 2.4 Licensee shall not reverse engineer, disassemble or decompile any non- Source Code Component parts of the Licensed Technology, or otherwise attempt to discover the source code of or modify the Licensed Technology.
+
+2.7 No Other Rights. Licensee shall use the Licensed Technology only in compliance with this Agreement and shall refrain from using the Licensed Technology in any way that may be contrary to this Agreement or detrimental to Nordic Semiconductor in any way, including, but not limited to its confidential information, intellectual property rights or goodwill.
+
+3.  FEES
+
+Nordic Semiconductor grants the License to the Licensee free of charge provided that the Licensee undertakes the obligations in the Agreement and warrants to comply with the Agreement. 
+
+4.  INTELLECTUAL PROPERTY RIGHTS
+
+The Licensee acknowledges that the Licensed Technology, the Licensed Technology Revisions any and all of the copyright, trademarks, trade names, patents and other intellectual property rights to material and documents created, developed or subsisting from Nordic Semiconductor or related to the Licensed Technology shall be the sole property of Nordic Semiconductor. 
+
+All modifications, amendments, development and other works derived from the intellectual property rights of Nordic Semiconductor, hereunder the Licensed Technology, as described in this Section 4 shall be automatically transferred to Nordic Semiconductor upon creation of the said.
+
+This Section 4 shall survive the termination of the Agreement. 
+
+
+
+
+5.  NO WARRANTY
+
+5.1 The Licensed Technology is provided “as is" without warranty of any kind express or implied and neither Nordic Semiconductor, its licensors or affiliates nor the copyright holders make any representations or warranties, express or implied, including but not limited to the warranties of merchantability or fitness for a particular purpose or that the Licensed Technology will not infringe any third party patents, copyrights, trademarks or other rights. There is no warranty by Nordic Semiconductor or by any other party that the functions contained in the Licensed Technology will meet the requirements of Licensee or that the operation of the Licensed Technology will be uninterrupted or error-free. Licensee assumes all responsibility and risk for the selection of the Licensed Technology to achieve Licensee’s intended results and for the installation, use and results obtained from it. 
+
+5.2 The Feedback is provided “as is" without warranty of any kind express or implied and neither Licensee, its licensors or affiliates nor the copyright holders make any representations or warranties, express or implied, including but not limited to the warranties of merchantability or fitness for a particular purpose or that the Feedback will not infringe any third party patents, copyrights, trademarks or other rights. There is no warranty by Licensee or by any other party that the functions contained in the Feedback, if any, will meet the requirements of Nordic Semiconductor or that the operation of the Licensed Technology will be uninterrupted or error-free. Nordic Semiconductor assumes all responsibility and risk for the selection of the Feedback to achieve Nordic Semiconductor’s intended results and for the installation, use and results obtained from it. 
+
+6.  LIMITATION OF LIABILITY
+
+6.1 In no event shall Nordic Semiconductor, its employees or suppliers or affiliates be liable for any lost profits, revenue, sales, data or costs of procurement of substitute goods or services, property damage, personal injury, interruption of business, loss of business information or for any special, direct, indirect, incidental, economic,  punitive, special or consequential damages, however caused and whether arising under contract, tort, negligence, or other theory of liability arising out of the use of or inability to use the Licensed Technology, even if Nordic Semiconductor or its employees or suppliers or affiliates are advised of the possibility of such damages. Because some countries/states/ jurisdictions do not allow the exclusion or limitation of liability, but may allow liability to be limited, in such cases, Nordic Semiconductor, its employees or licensors or affiliates’ liability shall be limited to USD 50. 
+
+6.2 In no event shall Licensee, its employees or suppliers or affiliates be liable for any lost profits, revenue, sales, data or costs of procurement of substitute goods or services, property damage, personal injury, interruption of business, loss of business information or for any special, direct, indirect, incidental, economic, punitive, special or consequential damages, however caused and whether arising under contract, tort, negligence, or other theory of liability arising out of the use of or inability to use the Feedback, even if Licensee or its employees or suppliers or affiliates are advised of the possibility of such damages. Because some countries/states/ jurisdictions do not allow the exclusion or limitation of liability, but may allow liability to be limited, in such cases, Licensee, its employees or licensors or affiliates' liability shall be limited to USD 50.
+ 
+
+
+7.  CONFIDENTIALITY
+
+7.1 Licensee agrees to keep the Confidential Information (as defined below) strictly confidential and shall not disclose the Confidential Information to any other party except to a court of law when required by court order, save that Licensee may disclose the Confidential Information only to its employees who:
+
+(i) Under the terms of their employment by Licensee are subject to an obligation not to disclose confidential information of Licensee, and
+
+(ii) Need to know the Confidential Information for the performance of their duties for Licensee.
+
+7.2 Licensee shall protect the Confidential Information with the same degree of care as it normally uses in the protection of its own confidential and proprietary information, but in no case with any less degree than reasonable care. Licensee shall, at Nordic Semiconductor's request, provide written assurances concerning the steps taken by Licensee to preserve the confidentiality of the Confidential Information. Licensee shall comply with all reasonable instructions from Nordic Semiconductor with regard to security and safety of the Confidential Information.
+
+7.3 "Confidential Information" shall mean any information delivered or communicated by Nordic Semiconductor to Licensee under this Agreement or any information contained in the Licensed Technology made available to Licensee by Nordic Semiconductor, or disclosed orally and identified as confidential or is known to be confidential or which Licensee should understand is confidential by the nature of the information. 
+
+This Section 7 shall survive the termination of the Agreement. 
+
+8.  BREACH OF CONTRACT
+
+Upon a breach of contract by the Licensee, Nordic Semiconductor is entitled to damages in respect of any direct loss which can be reasonably attributed to the breach by the Licensee. If the Licensee has acted with gross negligence or willful misconduct, the Licensee shall cover both direct and indirect costs for Nordic Semiconductor. 
+9.  INDEMNITY
+
+6.1	Licensee undertakes to indemnify, hold harmless and defend Nordic Semiconductor and its directors, officers, affiliates, shareholders, employees and agents from and against any claims or lawsuits, including attorney's fees, that arise or result from Licensee's execution of the License and which is not due to causes for which Nordic Semiconductor is responsible.
+
+
+9.  GOVERNING LAW
+
+This Agreement shall be construed according to the laws of Norway, and hereby submits to the exclusive jurisdiction of the Oslo tingrett.
+
+10. ASSIGNMENT
+
+Licensee shall not assign this Agreement or any rights or obligations hereunder without the prior written consent of Nordic Semiconductor. 
+ 
+
+11.  TERMINATION
+
+11.1 Without prejudice to any other rights, Nordic Semiconductor may cancel this Agreement if Licensee does not abide by the terms and conditions of this Agreement.
+
+11.2 Upon termination Licensee must promptly cease the use of the License and destroy all copies of the Licensed Technology and any other material provided by Nordic Semiconductor or its affiliate, or produced by the Licensee in connection with the Agreement or the Licensed Technology.
+
+
+
+
+====================================================================================================
+
+Nordic Semiconductor ASA
+This license agreement (the "Agreement") is entered into by and between
+
+a) Nordic Semiconductor ASA, Otto Nielsens veg 12, NO-7004 Trondheim, Norway. Norwegian organization number 966 011 726, ("Nordic Semiconductor")
+
+and
+
+b) the legal entity that you represent and which have agreed with Nordic Semiconductor to receive this Licensed Technology (as defined below) and to use it in accordance with this Agreement (the "Licensee")
+
+each referred to as "Party" and collectively as "Parties".
+
+Licensee agrees to be bound by this Agreement by opening the package in which the Licensed Technology, as defined below, is packed or installing the Licensed Technology or in any other way taking the Licensed Technology into use either by the Licensee or by a licensee or a customer of the Licensee. 
+
+1.  DEFINITIONS
+
+"Licensed Technology" shall mean the Nordic Semiconductor Firmware and Software including without limitation, object code libraries, source code libraries and applications, and any accompanying written materials delivered or made available by Nordic Semiconductor to Licensee.
+
+"Source Code Components" shall mean any libraries or applications in source code form included in the Licensed Technology.
+
+"Licensed Technology Revisions" shall mean any modification of, revisions or improvements to, or derivative work of any Source Code Components, made, conceived or reduced by Licensee without limitation to bug-fixes.
+
+"Companion Devices" shall mean any device, provided by Nordic Semiconductor or third party, that integrates a microcontroller, contains the Licensed Technology embedded in an executable format, and that is used in conjunction with a Nordic Semiconductor Device to provide a radio frequency communication system.
+
+2.  SCOPE OF LICENSE
+
+2.1 Development License. Subject to the terms and conditions of this Agreement, Nordic Semiconductor hereby grants Licensee for the term of this agreement a limited, non-exclusive, non-transferable, non-sublicenseable, revocable, license to access, use internally and reproduce the Licensed Technology and create Licensed Technology Revisions solely for the purpose of development, testing, evaluation or manufacture of Licensee’s products that will (i) contain at least one Nordic Semiconductor Device and (ii) incorporate the Licensed Technology embedded in an executable format either on a Nordic Semiconductor Device or a Companion Device. It is explicitly agreed and understood by Licensee that any use of the Licensed Technology, Licensed Technology Revisions or any portion thereof, with radio frequency devices provided to the Licensee by any other entity than Nordic Semiconductor or its affiliates, is considered to be a material breach of this agreement.
+
+2.2 Limited Distribution License. Subject to the terms of this agreement, Nordic Semiconductor hereby grants Licensee for the term of this agreement a limited, non-exclusive, non-transferable, non-sublicensable, license to copy and distribute the Licensed Technology, Licensed Technology Revisions, and any portions thereof, as amended or developed by the License provided that in each instance (i) it contains at least one Nordic Semiconductor Device and (ii) it is distributed solely and exclusively in an executable format embedded in a Nordic Semiconductor Device or a Companion Device delivered to the Licensee by Nordic Semiconductor or its affiliates. It is explicitly agreed and understood by Licensee that any distribution of the Licensed Technology, Licensed Technology Revisions or any portion thereof, with radio frequency devices provided to the Licensee by any other entity than Nordic Semiconductor or its affiliates, is considered to be a material breach of this agreement.
+
+2.3 License for Limited Revisions. In connection with the licenses granted in Section 2.1 and 2.2, Licensee may use Source Code Components to create Licensed Technology Revisions. All Licensed Technology Revisions are subject to the terms and conditions of this Agreement, including but not limited to the license grants in Section 2.1 and 2.2.
+
+2.4 Feedback. Licensee may in its sole discretion provide feedback to Nordic Semiconductor regarding the License technology (herein after "Feedback"), including but not limited to bugs, Licensee’s Licensed Technology Revisions and suggestions for improvements. With respect to such Feedback, Licensee hereby grants Nordic Semiconductor a world wide, non-exclusive, perpetual, irrevocable, royalty free rights (i) to use, copy and modify Feedback and create  derivative works thereof, (ii) to make (or have made), use, import, sell, offer for sale, lease or otherwise distribute any products or services containing Feedback or implementing Feedback solely for the purpose of using the Feedback in Licensed Technology or in implementations of Licensed Technology, and (iii) to sublicense the aforementioned rights solely for the purpose of using  the Feedback in Licensed Technology or in implementations of Licensed Technology.
+
+2.5 Distribution Restrictions. Except as set forward in Sections 2.1 and 2.2 above, the Licensee may not disclose or distribute the Licensed Technology or Licensed Technology Revisions to any third party. Licensee agrees to provide reasonable security precautions to prevent unauthorized access to or use the Licensed Technology and Licensed Technology Revisions as proscribed herein. Licensee also agrees that use of and access to the Licensed Technology and Licensed Technology Revisions will be strictly limited to the employees and subcontractors of the Licensee necessary for the performance of development, verification and production tasks under this agreement. The Licensee is responsible for making sSuch employees and subcontractors agree on complying with the obligations concerning use and non-disclosure of the Licensed Technology and Licensed Technology Revisions.
+
+2.6 No Reverse Engineering. Except as set forth is Section 2.4 Licensee shall not reverse engineer, disassemble or decompile any non- Source Code Component parts of the Licensed Technology, or otherwise attempt to discover the source code of or modify the Licensed Technology.
+
+2.7 No Other Rights. Licensee shall use the Licensed Technology only in compliance with this Agreement and shall refrain from using the Licensed Technology in any way that may be contrary to this Agreement or detrimental to Nordic Semiconductor in any way, including, but not limited to its confidential information, intellectual property rights or goodwill.
+
+3.  FEES
+
+Nordic Semiconductor grants the License to the Licensee free of charge provided that the Licensee undertakes the obligations in the Agreement and warrants to comply with the Agreement. 
+
+4.  INTELLECTUAL PROPERTY RIGHTS
+
+The Licensee acknowledges that the Licensed Technology, the Licensed Technology Revisions any and all of the copyright, trademarks, trade names, patents and other intellectual property rights to material and documents created, developed or subsisting from Nordic Semiconductor or related to the Licensed Technology shall be the sole property of Nordic Semiconductor. 
+
+All modifications, amendments, development and other works derived from the intellectual property rights of Nordic Semiconductor, hereunder the Licensed Technology, as described in this Section 4 shall be automatically transferred to Nordic Semiconductor upon creation of the said.
+
+This Section 4 shall survive the termination of the Agreement. 
+
+5.  NO WARRANTY
+
+5.1 The Licensed Technology is provided “as is" without warranty of any kind express or implied and neither Nordic Semiconductor, its licensors or affiliates nor the copyright holders make any representations or warranties, express or implied, including but not limited to the warranties of merchantability or fitness for a particular purpose or that the Licensed Technology will not infringe any third party patents, copyrights, trademarks or other rights. There is no warranty by Nordic Semiconductor or by any other party that the functions contained in the Licensed Technology will meet the requirements of Licensee or that the operation of the Licensed Technology will be uninterrupted or error-free. Licensee assumes all responsibility and risk for the selection of the Licensed Technology to achieve Licensee’s intended results and for the installation, use and results obtained from it. 
+
+5.2 The Feedback is provided “as is" without warranty of any kind express or implied and neither Licensee, its licensors or affiliates nor the copyright holders make any representations or warranties, express or implied, including but not limited to the warranties of merchantability or fitness for a particular purpose or that the Feedback will not infringe any third party patents, copyrights, trademarks or other rights. There is no warranty by Licensee or by any other party that the functions contained in the Feedback, if any, will meet the requirements of Nordic Semiconductor or that the operation of the Licensed Technology will be uninterrupted or error-free. Nordic Semiconductor assumes all responsibility and risk for the selection of the Feedback to achieve Nordic Semiconductor’s intended results and for the installation, use and results obtained from it. 
+
+6.  LIMITATION OF LIABILITY
+
+6.1 In no event shall Nordic Semiconductor, its employees or suppliers or affiliates be liable for any lost profits, revenue, sales, data or costs of procurement of substitute goods or services, property damage, personal injury, interruption of business, loss of business information or for any special, direct, indirect, incidental, economic,  punitive, special or consequential damages, however caused and whether arising under contract, tort, negligence, or other theory of liability arising out of the use of or inability to use the Licensed Technology, even if Nordic Semiconductor or its employees or suppliers or affiliates are advised of the possibility of such damages. Because some countries/states/ jurisdictions do not allow the exclusion or limitation of liability, but may allow liability to be limited, in such cases, Nordic Semiconductor, its employees or licensors or affiliates’ liability shall be limited to USD 50. 
+
+6.2 In no event shall Licensee, its employees or suppliers or affiliates be liable for any lost profits, revenue, sales, data or costs of procurement of substitute goods or services, property damage, personal injury, interruption of business, loss of business information or for any special, direct, indirect, incidental, economic, punitive, special or consequential damages, however caused and whether arising under contract, tort, negligence, or other theory of liability arising out of the use of or inability to use the Feedback, even if Licensee or its employees or suppliers or affiliates are advised of the possibility of such damages. Because some countries/states/ jurisdictions do not allow the exclusion or limitation of liability, but may allow liability to be limited, in such cases, Licensee, its employees or licensors or affiliates' liability shall be limited to USD 50.
+ 
+7.  CONFIDENTIALITY
+
+7.1 Licensee agrees to keep the Confidential Information (as defined below) strictly confidential and shall not disclose the Confidential Information to any other party except to a court of law when required by court order, save that Licensee may disclose the Confidential Information only to its employees who:
+
+(i) Under the terms of their employment by Licensee are subject to an obligation not to disclose confidential information of Licensee, and
+
+(ii) Need to know the Confidential Information for the performance of their duties for Licensee.
+
+7.2 Licensee shall protect the Confidential Information with the same degree of care as it normally uses in the protection of its own confidential and proprietary information, but in no case with any less degree than reasonable care. Licensee shall, at Nordic Semiconductor's request, provide written assurances concerning the steps taken by Licensee to preserve the confidentiality of the Confidential Information. Licensee shall comply with all reasonable instructions from Nordic Semiconductor with regard to security and safety of the Confidential Information.
+
+7.3 "Confidential Information" shall mean any information delivered or communicated by Nordic Semiconductor to Licensee under this Agreement or any information contained in the Licensed Technology made available to Licensee by Nordic Semiconductor, or disclosed orally and identified as confidential or is known to be confidential or which Licensee should understand is confidential by the nature of the information. 
+
+This Section 7 shall survive the termination of the Agreement. 
+
+8.  BREACH OF CONTRACT
+
+Upon a breach of contract by the Licensee, Nordic Semiconductor is entitled to damages in respect of any direct loss which can be reasonably attributed to the breach by the Licensee. If the Licensee has acted with gross negligence or willful misconduct, the Licensee shall cover both direct and indirect costs for Nordic Semiconductor. 
+
+9.  INDEMNITY
+
+Licensee undertakes to indemnify, hold harmless and defend Nordic Semiconductor and its directors, officers, affiliates, shareholders, employees and agents from and against any claims or lawsuits, including attorney's fees, that arise or result from Licensee's execution of the License and which is not due to causes for which Nordic Semiconductor is responsible.
+
+10.  GOVERNING LAW
+
+This Agreement shall be construed according to the laws of Norway, and hereby submits to the exclusive jurisdiction of the Oslo tingrett.
+
+11. ASSIGNMENT
+
+Licensee shall not assign this Agreement or any rights or obligations hereunder without the prior written consent of Nordic Semiconductor. 
+ 
+12.  TERMINATION
+
+12.1 Without prejudice to any other rights, Nordic Semiconductor may cancel this Agreement if Licensee does not abide by the terms and conditions of this Agreement.
+
+12.2 Upon termination Licensee must promptly cease the use of the License and destroy all copies of the Licensed Technology and any other material provided by Nordic Semiconductor or its affiliate, or produced by the Licensee in connection with the Agreement or the Licensed Technology.
+
+
+====================================================================================================
+
+This text contains three licenses (License #1, License #2 and License #3). 
+License #1 applies to the whole SDK, except i) the JLinkARM.dll file and ii) files including Dynastream copyright notices. 
+License #2 applies only to the JLinkARM.dll file. 
+License #3 applies only to files including Dynastream copyright notices. All must be read and accepted before proceeding.
+
+License #1
+
+
+License Agreement
+Nordic Semiconductor ASA (“Nordic”) 
+Software Development Kit 
+
+
+You (“You” or “Licensee”) must carefully and thoroughly read this License Agreement (“Agreement”), and accept to adhere to this Agreement before downloading, installing and/or using any software or content in the Software Development Kit (“SDK”) provided herewith. 
+
+You accept this License Agreement by (a) clicking accept or agree to this license agreement, where this option is made available to you; or (b) by actually using the SDK, in this case you agree that the use of the SDK constitutes acceptance of the Licensing Agreement from that point onwards.
+
+If you do not agree to be bound by the terMs of this agreement, then do not download, install/complete installation of, or in any other way make use OF the SDK or related content.
+
+
+1.	Grant of License 
+Subject to the terms in this Agreement Nordic grants Licensee a limited, non-exclusive, non-transferable, non-sub licensable, revocable license (“License”): (a) to use the SDK as a development platform solely in connection with a Nordic Integrated Circuit (“nRF IC”), (b) to modify any source code contained in the SDK solely as necessary to implement products developed by Licensee that incorporate an nRF IC (“Licensee Product”), and (c) to distribute the SDK solely as implemented in Licensee Product. Licensee shall not use the SDK for any purpose other than specifically authorized herein.
+
+2.	Title 
+As between the parties, Nordic retains full rights, title, and ownership of the SDK and any and all patents, copyrights, trade secrets, trade names, trademarks, and other intellectual property rights in and to the SDK. 
+
+3.	No Modifications or Reverse Engineering
+Licensee shall not, modify, reverse engineer, disassemble, decompile or otherwise attempt to discover the source code of any non-source code parts of the SDK including, but not limited to pre-compiled binaries and object code.
+
+4.	Distribution Restrictions
+Except as set forward in Section 1 above, the Licensee may not disclose or distribute any or all parts of the SDK to any third party. Licensee agrees to provide reasonable security precautions to prevent unauthorized access to or use of the SDK as proscribed herein. Licensee also agrees that use of and access to the SDK will be strictly limited to the employees and subcontractors of the Licensee necessary for the performance of development, verification and production tasks under this Agreement. The Licensee is responsible for making such employees and subcontractors agree on complying with the obligations concerning use and non-disclosure of the SDK.
+
+5.	No Other Rights 
+Licensee shall use the SDK only in compliance with this Agreement and shall refrain from using the SDK in any way that may be contrary to this Agreement.
+
+
+6.	Fees 
+Nordic grants the License to the Licensee free of charge provided that the Licensee undertakes the obligations in the Agreement and warrants to comply with the Agreement. 
+
+
+7.	Disclaimer of Warranty 
+The SDK is provided “as is" without warranty of any kind express or implied and neither Nordic, its licensors or affiliates nor the copyright holders make any representations or warranties, express or implied, including but not limited to the warranties of merchantability or fitness for a particular purpose or that the SDK will not infringe any third party patents, copyrights, trademarks or other rights. There is no warranty by Nordic or by any other party that the functions contained in the SDK will meet the requirements of Licensee or that the operation of the SDK will be uninterrupted or error-free. Licensee assumes all responsibility and risk for the selection of the SDK to achieve Licensee’s intended results and for the installation, use and results obtained from it. 
+
+8.	No Support
+Nordic is not obligated to furnish or make available to Licensee any further information, software, technical information, know-how, show-how, bug-fixes or support. Nordic reserves the right to make changes to the SDK without further notice.
+
+9.	Limitation of Liability
+In no event shall Nordic, its employees or suppliers or affiliates be liable for any lost profits, revenue, sales, data or costs of procurement of substitute goods or services, property damage, personal injury, interruption of business, loss of business information or for any special, direct, indirect, incidental, economic,  punitive, special or consequential damages, however caused and whether arising under contract, tort, negligence, or other theory of liability arising out of the use of or inability to use the SDK, even if Nordic or its employees or suppliers or affiliates are advised of the possibility of such damages. Because some countries/states/ jurisdictions do not allow the exclusion or limitation of liability, but may allow liability to be limited, in such cases, Nordic, its employees or licensors or affiliates’ liability shall be limited to USD 50. 
+
+10.	Breach of Contract
+Upon a breach of contract by the Licensee, Nordic is entitled to damages in respect of any direct loss which can be reasonably attributed to the breach by the Licensee. If the Licensee has acted with gross negligence or willful misconduct, the Licensee shall cover both direct and indirect costs for Nordic.
+
+11.	Indemnity
+
+Licensee undertakes to indemnify, hold harmless and defend Nordic and its directors, officers, affiliates, shareholders, employees and agents from and against any claims or lawsuits, including attorney's fees, that arise or result of the Licensee’s execution of the License and which is not due to causes for which Nordic is responsible.
+
+12.	Governing Law
+This Agreement shall be construed according to the laws of Norway, and hereby submits to the exclusive jurisdiction of the Oslo tingrett.
+
+13.	Assignment
+Licensee shall not assign this Agreement or any rights or obligations hereunder without the prior written consent of Nordic.
+
+14.	Termination
+Without prejudice to any other rights, Nordic may cancel this Agreement if Licensee does not abide by the terms and conditions of this Agreement. Upon termination Licensee must promptly cease the use of the License and destroy all copies of the Licensed Technology and any other material provided by Nordic or its affiliate, or produced by the Licensee in connection with the Agreement or the Licensed Technology.
+
+
+
+
+
+
+
+
+License #2
+
+Non-exclusive software license agreement for J-Link Software Development Kit (SDK) Version
+
+Important-Read carefully: This license contract is a legal agreement between YOU (either an individual or a single entity) and SEGGER Microcontroller GmbH & Co. KG. YOU agree to be bound by the terms of this agreement. By downloading and/or using the software, the individual or entity is consenting to be bound by and is becoming a party to this agreement. If YOU do not agree to all of the terms of this agreement, YOU must not install or use any of the software components developed by SEGGER Microcontroller GmbH & Co. KG.
+
+§ 1  Content of the contract/definitions
+- Licensor
+In this agreement "Licensor" shall mean SEGGER Microcontroller GmbH & Co. KG (called SEGGER).
+- Licensee
+In this agreement "Licensee" shall mean the receiving party of SEGGER software 
+In this agreement "Enduser"  means a person, company, or other legal entity receiving products or software components as listed in § 3 redistribution from "Licensee" to use Licensees Products for its own internal purposes and not for distribution to, or use on behalf of, others.
+- End user license agreement
+In this agreement "Enduser license agreement" shall mean a software license agreement in writing between "Licensee" and its customers or any other third party including restrictions with regard to the SEGGER software components 
+- Redistribution
+In this agreement "Redistribution" shall mean a non-transferable, non-exclusive, revocable authorization of Licensee to (sub)distribute J-Link SDK software components as listed in section § 3.
+- Source code
+In this agreement "Source Code" means the human-readable version of a software program that can be compiled into Object Code.
+- Object code
+In this agreement "Object Code" means the machine-readable, linkable and compiled version of a software program such as .dll, .lib.
+- J-Link 
+In this agreement "J-Link" shall mean the SEGGER J-Link or authorized OEM products only.
+- Software
+In this agreement "Software" shall mean all J-Link SDK files and components shipped by SEGGER to Licensee.
+1.  The J-Link SDK (hereinafter referred to as "software") governed by this contract, which includes computer software and printed material is protected by copyright laws.
+2.  Solely with respect to electronic documents included with the software product, YOU may make an unlimited number of copies (either in hardcopy or electronic form), provided that such copies shall be used only for   internal purposes and are not republished or distributed to any third party without agreement of SEGGER. 
+3.  The software is licensed, not sold, to YOU  for use only under the terms of this agreement. YOU acknowledge and agree that the product consists of proprietary, unpublished products of SEGGER, protected under    copyright and trade secret laws. Title, ownership rights, and intellectual property rights in the product   shall remain by SEGGER and/or its suppliers. Licensee acknowledges such ownership and intellectual property rights and will not take any action to jeopardize, limit or interfere in any manner with SEGGER or its suppliers' ownership of or rights with respect to the product.
+
+§ 2  Grant of License for object and executables code licensed under CW-OEL (company wide object executable license)
+1.  The licensee (YOU) will receive the software as object code (.dll, .lib) and executable from SEGGER.
+2.  The company wide license entitles all persons working on projects for your company to use the software within the company on SEGGER J-Links or authorized OEM products only.
+3.  Except as expressly permitted in § 3 of this agreement, any distribution or shipment of source code or code in linkable form or executable code requires the prior written authorization from SEGGER.
+4.  The software  is in "use" on a computer when it is loaded into temporary memory (i.e. RAM) or installed into permanent memory (e.g., hard disk, CD-ROM, or other storage device) of that computer.
+5.  YOU are entitled to make copies of the software for backup purposes. All copies of the software, including modifications to the software, must bear all copyright, trademarks and other proprietary notices included thereon by SEGGER.
+6.  Any other use of the software is prohibited without prior written authorization from SEGGER.
+
+§ 3  Redistribution
+1.  The following software components, designed and to be used with SEGGER J-Links or authorized OEM products only, may be redistributed to endusers free of charge:
+    - JLinkARM.dll
+    Any redistribution requires prior shipment of any such software components a separate license agreement between licensee and enduser. The sublicense must include all restrictions regarding the software components  as stipulated in sections § 2 no. 2-4, 6 § 3, § 4, § 5, and § 6 of this agreement. Any redistribution without enduser license agreement or under terms and conditions beyond that offered by SEGGER herein is prohibited and SEGGER can make YOU liable, if YOU should fail to do so. This grant of redistribution does not entitle YOU or enduser to receive from SEGGER hard-copy documentation, technical support, phone assistance, or enhancements or updates to the software unless a specific agreement clearly states otherwise. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE REDISTRIBUTED SOFTWARE IS BORNE BY LICENSEE.
+
+§ 4  Restrictions
+1.  Except as expressly permitted in § 3 the right to use any other software component by a third party requires the expressed, written consent of SEGGER.
+2.  YOU may not reverse engineer, decompile, or disassemble a software product shipped in source, object or executable form.
+3.  YOU may not rent or lease the software product.
+4.  By entering this license, YOU agree to commit yourself not to develop a software similar or competitive to the one licensed.
+5.  You shall not use nor permit the use of the Software licensed hereunder in any Weapon or Weapon System.  A "Weapon" or "Weapon System" is any tool, instrument or system designed with the priimary or substantial purpose of injuring, incapacitating or killing any person or adversary or destroying or damaging the property of such person or adversary or threatening such person or adversary, regardless of whether such Weapon or Weapon System may be used to attack, defend, threaten or protect.
+
+§ 5  Termination
+1.  Without prejudice to any other rights, SEGGER may terminate this agreement if YOU fail to comply with the terms and conditions of this agreement.
+2.  SEGGER can make YOU liable, if YOU should fail to comply with this license.
+
+§ 6  Disclaimer of Warranty
+1.  The software is provided on an "as is" basis, without warranty of any kind, including without limitation the warranties that it is free of defects, merchantable, fit for a particular purpose or non-infringing. In developing the Software SEGGER attempted to offer the most current, correct and clearly expressed information possible.  Nonetheless, errors can occur. SEGGER does not warrant that the software is free from bugs,errors, or other program limitations. The entire risk as to the quality and performance is borne by Licensee. Should the software prove defective in any respect, licensee and not licensor or its suppliers or Resellers assume the entire cost of any service and repair. This disclaimer of warranty constitutes an essential part of this agreement. No use of the software is authorized hereunder except under this disclaimer.
+2.  To the maximum extent permitted by applicable law, in no event will SEGGER or its suppliers or resellers be liable for any indirect, special, incidental or consequential damages arising out of the use of or inability to use the product, including, without limitation, damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses, even if advised of the possibility thereof, and regardless of the legal or equitable theory (contract, tort or otherwise) upon which the claim is based. In any case, licensor's entire liability under any provision of this agreement shall not exceed in the aggregate the sum of the fees licensee paid for this license (if any).
+
+§ 7  Limitation of liability
+1.  To the maximum extent permitted by applicable law, in no event will SEGGER or its suppliers or resellers be liable for any indirect, special, incidental or consequential damages arising out of the use of or inability to use the software, including, without limitation, damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses, even if advised of the possibility thereof, and regardless of the legal or equitable theory (contract, tort or otherwise) upon which the claim is based. In any case, SEGGERs entire liability under any provision of this agreement shall not exceed in the aggregate the sum of the fees licensee paid for this license (if any), with the exception of death or personal injury caused by the negligence of SEGGER to the extent applicable law prohibits the limitation of damages in such cases. Some jurisdictions do not allow the exclusion or limitation of incidental or consequential damages, so this exclusion and limitation may not be applicable. SEGGER is not responsible for any liability arising out of content provided by licensee or a third party that is accessed through the product and/or any material linked through such content.
+
+§ 8  Miscellaneous
+1.  This agreement is governed by German laws.
+2.  If any clause in this agreement is held by a court of law to be illegal or unenforceable the remaining provisions of the agreement shall not be affected thereby.
+3.  Inspection: SEGGER has the right to have an independent third party review and inspect Licensee use of the software at reasonable times to ensure compliance with the terms of this license.
+
+
+
+
+
+
+
+
+
+License #3
+
+This software is subject to the ANT+ Shared Source License www.thisisant.com/swlicenses
+Copyright (c) Dynastream Innovations Inc. 2012
+All rights reserved.
+
+Internal use of this software, in source or binary form, without redistribution, is permitted.
+
+Redistribution of this software in binary form, with or without modification, is permitted provided:
+
+(1)	the software is used in combination with ANT or ANT+ products only; and
+(2)	the above copyright notice and this license is included within the documentation and/or other materials provided with the redistributed software.
+
+The following actions are prohibited:
+
+(1)	redistribution of this software in source form;
+(2)	use of the software in combination with wireless formats other than ANT or ANT+;
+(3)	reverse engineering, decompilation, and/or disassembly of software provided in binary form under this license. 
+THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL DYNASTREAM INNOVATIONS INC. AND/OR THE COPYRIGHT OWNER(S) BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+

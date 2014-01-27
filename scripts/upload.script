@@ -1,0 +1,5 @@
+power on
+r
+loadbin @BIN@ 0x00014000
+r
+qc

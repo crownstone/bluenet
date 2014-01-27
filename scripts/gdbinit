@@ -1,0 +1,23 @@
+set history filename .gdb_history
+set history save
+set print object
+set print static off
+set print elements 1
+set confirm off
+
+define reset
+	!make last
+	load
+	monitor reset
+end
+
+
+target remote localhost:2331
+set remote memory-write-packet-size 1024
+#set remote memory-write-packet-size fixed
+load
+monitor reset
+b main
+b softdevice_assertion_handler
+catch throw
+c
