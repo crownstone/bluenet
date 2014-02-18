@@ -80,6 +80,7 @@ AS = $(COMPILERPATH)/arm-none-eabi-as
 OBJCOPY = $(COMPILERPATH)/arm-none-eabi-objcopy
 SIZE = $(COMPILERPATH)/arm-none-eabi-size
 GDB=$(COMPILERPATH)/arm-none-eabi-gdb
+NM=$(COMPILERPATH)/arm-none-eabi-nm
 
 #for some reason it's called JLink on windows and JLinkExe on mac.
 ifeq ($(OS),Windows_NT)
@@ -106,11 +107,9 @@ CXXFLAGS = -std=c++11 -fno-exceptions
 CPPFLAGS = -Wall -g3 ${OPTIMIZE} -mcpu=cortex-m0 -mthumb -nostdlib -ffunction-sections -fdata-sections -MMD ${DEFINES} ${INCLUDES}
 LDFLAGS = ${OPTIMIZE} -g3 -mcpu=cortex-m0 -mthumb -TnRF51822-$(if $(filter 1,$(NRF51_USE_SOFTDEVICE)),softdevice,bare).ld -Wl,--gc-sections
 
-#LIBS= -lc -lrdimon
-#LIBS= -lsupc++_s -lm -lc_s -lstdc++_s #-lrdimon_s
-
-LIBS= -lsupc++ -lm -lc -lstdc++
-
+# Use size-optimized libraries instead
+#LIBS= -lsupc++ -lm -lc -lstdc++
+LIBS = -lsupc++_s -lm -lc_s -lstdc++_s
 
 C_FILES := $(foreach dir,${LIB_DIRS}, $(wildcard ../libs/$(dir)/*.c)) $(wildcard *.c)
 
@@ -134,6 +133,9 @@ ${NRF_MAIN_BIN}:
 
 #all: main_blink.bin reset debug
 all: last main_hrs.bin debug
+
+# throws an error
+#all: last main_ble.bin debug
 
 
 # Here we redefine the OBJS needed for specific executables.  We do this because there are certain Nordic
@@ -166,11 +168,14 @@ main_displaylisttest.elf: OBJS := Arduino.o Debug.o NRF51_SPI.o Print.o Stream.o
         ../libs/epaper/EPD.o ../libs/epaper/EPD_Display.o ../libs/epaper/EPD_GFX.o ../libs/epaper/S5813A.o \
         ../libs/Adafruit_GFX/Adafruit_GFX.o emergency.o nRF51822.o syscalls.o
 
+# Thows an exception.
+# Catchpoint 3 (exception thrown), 0x0001763c in __cxa_throw ()
 main_ble.elf: OBJS := Arduino.o BluetoothLE.o Debug.o NRF51_SPI.o Print.o Stream.o error.o ../libs/usvg/Pool.o \
     emergency.o nRF51822.o syscalls.o ${NRF51822_SOURCE_BASE}/ble/ble_advdata.o \
 	${NRF51822_SOURCE_BASE}/ble/ble_debug_assert_handler.o ${NRF51822_SOURCE_BASE}/nrf_assert/nrf_assert.o
 
-main_hrs.elf: OBJS := nRF51822.o syscalls.o ${NRF51822_SOURCE_BASE}/app_common/app_button.o \
+main_hrs.elf: OBJS := nRF51822.o syscalls.o \
+	${NRF51822_SOURCE_BASE}/app_common/app_button.o \
 	${NRF51822_SOURCE_BASE}/app_common/app_fifo.o ${NRF51822_SOURCE_BASE}/app_common/app_gpiote.o \
 	${NRF51822_SOURCE_BASE}/app_common/app_scheduler.o ${NRF51822_SOURCE_BASE}/app_common/app_timer.o \
 	${NRF51822_SOURCE_BASE}/ble/ble_advdata.o \
@@ -183,11 +188,30 @@ main_hrs.elf: OBJS := nRF51822.o syscalls.o ${NRF51822_SOURCE_BASE}/app_common/a
 	${NRF51822_SOURCE_BASE}/ble/ble_services/ble_hrs.o \
 	${NRF51822_SOURCE_BASE}/ble/ble_srv_common.o ${NRF51822_SOURCE_BASE}/nrf_assert/nrf_assert.o
 
+main_prox.elf: OBJS := nRF51822.o syscalls.o \
+	${NRF51822_SOURCE_BASE}/app_common/app_button.o \
+	${NRF51822_SOURCE_BASE}/app_common/app_fifo.o ${NRF51822_SOURCE_BASE}/app_common/app_gpiote.o \
+	${NRF51822_SOURCE_BASE}/app_common/app_scheduler.o ${NRF51822_SOURCE_BASE}/app_common/app_timer.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_advdata.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_bondmngr.o ${NRF51822_SOURCE_BASE}/ble/ble_conn_params.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_debug_assert_handler.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_error_log.o ${NRF51822_SOURCE_BASE}/ble/ble_flash.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_racp.o ${NRF51822_SOURCE_BASE}/ble/ble_radio_notification.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_sensorsim.o ${NRF51822_SOURCE_BASE}/ble/ble_stack_handler.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_services/ble_dis.o ${NRF51822_SOURCE_BASE}/ble/ble_services/ble_bas.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_services/ble_ias_c.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_services/ble_ias.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_services/ble_tps.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_services/ble_lls.o \
+	${NRF51822_SOURCE_BASE}/ble/ble_srv_common.o ${NRF51822_SOURCE_BASE}/nrf_assert/nrf_assert.o
+
+
 # end magic.
 
 
 %.elf: %.o $$(OBJS) nRF51822-$(if $(NRF51_USE_SOFTDEVICE),softdevice,bare).ld
-	$(CXX) $(LDFLAGS) -o $@ $(@:.elf=.o) $(OBJS) $(LIBS)
+	echo "$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(@:.elf=.o) $(OBJS) $(LIBS)" > compile.txt
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(@:.elf=.o) $(OBJS) $(LIBS)
 	@ echo $@ > .last
 
 
@@ -226,10 +250,15 @@ wipe: clean
 	-"$(JLINK_EXE)" -Device nrf51822 -If SWD ../scripts/wipe.script
 
 debug:
-	-killall -9 -f JLinkGDBServer
+	-killall -9 -q JLinkGDBServer
+	echo "${JLINK_GDB}" ${JLINK_GDB_ARGS} 
 	"${JLINK_GDB}" ${JLINK_GDB_ARGS} > JLinkGdb.log &
+	echo -"${GDB}" -x ../scripts/gdbinit `cat .last`
 	-"${GDB}" -x ../scripts/gdbinit `cat .last`
 	-killall -9 JLinkGDBServer
+
+size:
+	${NM} --size-sort -S -l -C -A `cat .last`
 
 softdevice: reset
 

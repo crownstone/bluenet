@@ -760,6 +760,8 @@ int main(void)
     sec_params_init();
     radio_notification_init();
 
+//    int *t = new int[10];
+
     // Start execution
     application_timers_start();
     advertising_start();

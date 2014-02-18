@@ -22,8 +22,8 @@
 
 #ifdef __cplusplus
 #if !defined(__EXCEPTIONS) && !defined(_USTL)
-inline void * operator new(unsigned int size) __attribute__((always_inline, unused));
-inline void * operator new(unsigned int size)
+inline void * operator newt(unsigned int size) __attribute__((always_inline, unused));
+inline void * operator newt(unsigned int size)
 {
 	return malloc(size);
 }

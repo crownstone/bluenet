@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <new>
 #include <limits>
+#include <stdlib.h>
 
 #include "Debug.h"
 
@@ -81,6 +82,7 @@ class PoolImpl : public Pool{
   public:
     PoolImpl() : Pool(sz, cnt, 0) {
         buffer = new uint8_t[sz*cnt];
+	//buffer = (uint8_t*)malloc(sz*cnt*sizeof(uint8_t));
         uint8_t* prev = 0;
         for(int32_t i = count - 1; i > 0; --i) {
             *(uint8_t**)(buffer+i*sz) = prev;

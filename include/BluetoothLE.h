@@ -1,4 +1,3 @@
-
 #ifndef __BluetoothLE_h
 #define __BluetoothLE_h
 
@@ -86,7 +85,7 @@ namespace BLEpp {
     class UUID { // abstracts ble_uid_t
 
       protected:
-        const char*           _full; //* proprietary UID strung.  null for standard UIDs.
+        const char*           _full; //* proprietary UID string.  null for standard UIDs.
         uint16_t              _uuid; //*< 16-bit UUID value or octets 12-13 of 128-bit UUID.
         uint8_t               _type; //*< UUID type, see @ref BLE_UUID_TYPES.
 
@@ -310,7 +309,7 @@ namespace BLEpp {
             return sizeof(T);
         }
 
-        const T& getValue() const {
+        const T&  __attribute__((optimize("O0"))) getValue() const {
             return _value;
         }
 
@@ -630,7 +629,7 @@ namespace BLEpp {
 
         virtual Characteristics_t& getCharacteristics() = 0;
 
-        void on_ble_event(ble_evt_t * p_ble_evt);
+        virtual void on_ble_event(ble_evt_t * p_ble_evt);
 
         virtual void on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt);  // FIXME NRFAPI  friend??
 
@@ -666,6 +665,8 @@ namespace BLEpp {
 
             return *this;
         }
+
+//	virtual void on_ble_event(ble_evt_t * p_ble_evt);
     };
 
     class BatteryService : public GenericService {
@@ -674,24 +675,76 @@ namespace BLEpp {
         typedef function<uint8_t()> func_t;
 
       protected:
-        CharacteristicT<uint8_t> _characteristic;
+        //CharacteristicT<uint8_t> _characteristic;
+	CharacteristicT<uint8_t> *_characteristic;
         func_t _func;
       public:
-        BatteryService() {
+        BatteryService(): GenericService() {
             setUUID(UUID(BLE_UUID_BATTERY_SERVICE));
             setName("BatteryService");
+	
+            _characteristic = new CharacteristicT<uint8_t>();
 
-            _characteristic.setUUID(UUID(BLE_UUID_BATTERY_LEVEL_CHAR))
-                           .setName(string("battery level"))
+            (*_characteristic).setUUID(UUID(BLE_UUID_BATTERY_LEVEL_CHAR))
+                           .setName(string("battery"))
                            .setDefaultValue(100);
-
-            addCharacteristic(&_characteristic);
+	    addCharacteristic(_characteristic);
         }
 
         void setBatteryLevel(uint8_t batteryLevel){
-            _characteristic = batteryLevel;
+            (*_characteristic) = batteryLevel;
         }
         void setBatteryLevelHandler(func_t func) {
+            _func = func;
+        }
+    };
+
+
+    class IndoorLocalizationService : public GenericService {
+
+      public:
+        typedef function<uint8_t()> func_t;
+
+      protected:
+        CharacteristicT<uint8_t> *_characteristic;
+        func_t _func;
+      public:
+        IndoorLocalizationService() {
+            setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
+            setName("IndoorLocalizationService");
+            _characteristic = new CharacteristicT<uint8_t>();
+            (*_characteristic).setUUID(UUID(0x3801)) // there is no BLE_UUID for rssi level(?)
+                           .setName(string("Received signal level"))
+                           .setDefaultValue(1);
+
+            addCharacteristic(_characteristic);
+        }
+        
+	void on_ble_event(ble_evt_t * p_ble_evt) {
+		Service::on_ble_event(p_ble_evt);
+		switch (p_ble_evt->header.evt_id) {
+		case BLE_GAP_EVT_CONNECTED: {
+			sd_ble_gap_rssi_start(p_ble_evt->evt.gap_evt.conn_handle);
+			break;
+		}
+		case BLE_GAP_EVT_DISCONNECTED: {
+			sd_ble_gap_rssi_stop(p_ble_evt->evt.gap_evt.conn_handle);
+			break;
+		}
+		case BLE_GAP_EVT_RSSI_CHANGED: {
+			uint8_t rssi = p_ble_evt->evt.gap_evt.params.rssi_changed.rssi;
+			setRSSILevel(rssi);
+			break;
+		}
+		default: {
+		}
+		}
+	}
+
+        void setRSSILevel(uint8_t RSSILevel){
+            (*_characteristic) = RSSILevel;
+        }
+        void setRSSILevelHandler(func_t func) {
             _func = func;
         }
     };
@@ -865,6 +918,18 @@ namespace BLEpp {
 
         Service& createService() {
             GenericService* svc = new GenericService();
+            addService(svc);
+            return *svc;
+        }
+
+        BatteryService& createBatteryService() {
+            BatteryService* svc = new BatteryService();
+            addService(svc);
+            return *svc;
+        }
+
+        IndoorLocalizationService& createIndoorLocalizationService() {
+            IndoorLocalizationService* svc = new IndoorLocalizationService();
             addService(svc);
             return *svc;
         }

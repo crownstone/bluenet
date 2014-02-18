@@ -4,6 +4,7 @@ set print object
 set print static off
 set print elements 1
 set confirm off
+set print pretty on
 
 define reset
 	!make last
@@ -19,5 +20,39 @@ load
 monitor reset
 b main
 b softdevice_assertion_handler
-catch throw
+
+# This does not work so well for header files: variables get optimized out...
+#b BluetoothLE.h:313
+#commands
+#p _value
+#c
+#end
+#
+#b BluetoothLE.h:317
+#commands
+#p _value
+#c
+#end
+
+#b main_ble.cpp:89
+#commands
+#p nr
+#p value
+#c
+#end
+
+#b BluetoothLE.h:724
+#b BluetoothLE.cpp:602
+
+#commands
+#watch _value
+#commands
+#c
+#end
+#c
+#end
+
+#catch throw
 c
+
+info break
