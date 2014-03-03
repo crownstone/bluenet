@@ -24,7 +24,7 @@
 NRF51_USE_SOFTDEVICE=1
 
 # Available optimization levels are -O0, -O1, -O2, and -Os (for "size").  -O0 is useful for debugging.
-OPTIMIZE=-Os -fomit-frame-pointer -ffast-math
+OPTIMIZE=-Os -fomit-frame-pointer -ffast-math -fno-permissive
 #OPTIMIZE=-O0
 
 # version of NRF51822 softdevice. 
@@ -132,7 +132,9 @@ ${NRF_MAIN_BIN}:
 	${OBJCOPY} -Iihex -Obinary --remove-section .sec3 ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex ${NRF_MAIN_BIN}
 
 #all: main_blink.bin reset debug
-all: last main_hrs.bin debug
+#all: last main_hrs.bin debug
+
+all: main_ble.elf main_ble.bin debug
 
 # throws an error
 #all: last main_ble.bin debug
@@ -229,33 +231,41 @@ clean:
 #$(MAKE) -C ../assets/fonts clean
 
 reset: clean ${NRF_UICR_BIN} ${NRF_MAIN_BIN}
-	-killall -9 JLinkGDBServer
+	@ERR=$(killall -9 -q JLinkGDBServer)
 	sed "s|@SOFTDEVICE_DIR@|${SOFTDEVICE_DIR}|" ../scripts/reset.script > reset.script 
-	-"$(JLINK_EXE)" -Device nrf51822 -If SWD reset.script
+	echo "$(JLINK_EXE) -Device nrf51822 -If SWD reset.script" > cmd.sh
+	. ./cmd.sh
 
 recover:
-	-"$(JLINK_EXE)" -Device nrf51822 -If SWD ../scripts/recover.script
+	echo "$(JLINK_EXE) -Device nrf51822 -If SWD ../scripts/recover.script" > cmd.sh
+	. ./cmd.sh
 
 power:
-	-killall -9 JLinkGDBServer
+	-killall -9 -q JLinkGDBServer
 	cat ../scripts/power.script | "$(JLINK_EXE)" -Device nrf51822 -If SWD
 
 upload:
-	-killall -9 JLinkGDBServer
+	@echo "killall -9 -q JLinkGDBServer" > cmd.sh
+	@echo "exit 0" >> cmd.sh
+	@. ./cmd.sh
 	sed "s/@BIN@/"`cat .lastbin`"/" ../scripts/upload.script > upload.script
-	-"$(JLINK_EXE)" -Device nrf51822 -If SWD upload.script
+	@echo "$(JLINK_EXE) -Device nrf51822 -If SWD upload.script" > cmd.sh
+	@echo "exit 0" >> cmd.sh
+	@. ./cmd.sh
 
 wipe: clean
-	-killall -9 JLinkGDBServer
+	-killall -9 -q JLinkGDBServer
 	-"$(JLINK_EXE)" -Device nrf51822 -If SWD ../scripts/wipe.script
 
 debug:
-	-killall -9 -q JLinkGDBServer
+	@echo "killall -9 -q JLinkGDBServer" > cmd.sh
+	@echo "exit 0" >> cmd.sh
+	@. ./cmd.sh
 	echo "${JLINK_GDB}" ${JLINK_GDB_ARGS} 
 	"${JLINK_GDB}" ${JLINK_GDB_ARGS} > JLinkGdb.log &
 	echo -"${GDB}" -x ../scripts/gdbinit `cat .last`
 	-"${GDB}" -x ../scripts/gdbinit `cat .last`
-	-killall -9 JLinkGDBServer
+	-killall -9 -q JLinkGDBServer
 
 size:
 	${NM} --size-sort -S -l -C -A `cat .last`

@@ -12,14 +12,14 @@ define reset
 	monitor reset
 end
 
-
 target remote localhost:2331
 set remote memory-write-packet-size 1024
 #set remote memory-write-packet-size fixed
 load
 monitor reset
 b main
-b softdevice_assertion_handler
+
+#b softdevice_assertion_handler
 
 # This does not work so well for header files: variables get optimized out...
 #b BluetoothLE.h:313
@@ -34,6 +34,8 @@ b softdevice_assertion_handler
 #c
 #end
 
+#b main_blink.c:67
+
 #b main_ble.cpp:89
 #commands
 #p nr
@@ -41,11 +43,16 @@ b softdevice_assertion_handler
 #c
 #end
 
-#b BluetoothLE.h:724
-#b BluetoothLE.cpp:602
+# it is just not possible to set trace points
+#trace BluetoothLE.h:738
 
+#b BluetoothLE.h:738
 #commands
-#watch _value
+#p rssi
+#c
+#end
+
+#watch rssi
 #commands
 #c
 #end

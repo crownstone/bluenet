@@ -710,10 +710,12 @@ namespace BLEpp {
         func_t _func;
       public:
         IndoorLocalizationService() {
-            setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
+            setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
+	    //setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
             setName("IndoorLocalizationService");
             _characteristic = new CharacteristicT<uint8_t>();
-            (*_characteristic).setUUID(UUID(0x3801)) // there is no BLE_UUID for rssi level(?)
+            //.setUUID(UUID(service.getUUID(), 0x124))
+            (*_characteristic).setUUID(UUID(getUUID(), 0x2201)) // there is no BLE_UUID for rssi level(?)
                            .setName(string("Received signal level"))
                            .setDefaultValue(1);
 
@@ -732,7 +734,7 @@ namespace BLEpp {
 			break;
 		}
 		case BLE_GAP_EVT_RSSI_CHANGED: {
-			uint8_t rssi = p_ble_evt->evt.gap_evt.params.rssi_changed.rssi;
+			volatile uint8_t rssi = p_ble_evt->evt.gap_evt.params.rssi_changed.rssi;
 			setRSSILevel(rssi);
 			break;
 		}

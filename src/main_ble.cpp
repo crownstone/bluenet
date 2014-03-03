@@ -20,9 +20,10 @@ int main() {
     Nrf51822BluetoothStack stack(pool);
 
     // Set advertising parameters such as the device name and appearance.  These values will
-    stack.setDeviceName("DoBotsIndoors")
+    stack.setDeviceName("BLEpp");
          // controls how device appears in GUI.
-         .setAppearance(BLE_APPEARANCE_GENERIC_DISPLAY);
+//         .setAppearance(BLE_APPEARANCE_GENERIC_DISPLAY);
+//	 .setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
 
    // .setUUID(UUID("20CC0123-B57E-4365-9F35-31C9227D4C4B"));
 
@@ -78,8 +79,8 @@ int main() {
 
 
     // Now, build up the services and characteristics.
-    Service& service = stack.createIndoorLocalizationService();
-    //Service& service = stack.createBatteryService();
+    //Service& service = stack.createIndoorLocalizationService();
+    Service& service = stack.createBatteryService();
 /*
  * // Create a characteristic of type uint8_t (unsigned one byte integer).
     // This characteristic is by default read-only and

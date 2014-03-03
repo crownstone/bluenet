@@ -58,95 +58,101 @@ void SWI5_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 __attribute__ ((section(".vectors"), used))
 void (* const gVectors[])(void) =
 {        
-		(void (*)(void))((unsigned long)&_estack),	//  0 ARM: Initial Stack Pointer
-        ResetHandler,					//  1 ARM: Initial Program Counter
-        NMI_Handler,
-        HardFault_Handler,
-        0,              // reserved
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        SVC_Handler,
-        0,
-        0,
-        PendSV_Handler,
-        SysTick_Handler,
+	(void (*)(void))((unsigned long)&_estack),	//  0 ARM: Initial Stack Pointer
+	ResetHandler,					//  1 ARM: Initial Program Counter
+	NMI_Handler,
+	HardFault_Handler,
+	0,              // reserved
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	SVC_Handler,
+	0,
+	0,
+	PendSV_Handler,
+	SysTick_Handler,
 
-        /* External Interrupts */
-        POWER_CLOCK_IRQHandler,
-        RADIO_IRQHandler,
-        UART0_IRQHandler,
-        SPI0_TWI0_IRQHandler,
-        SPI1_TWI1_IRQHandler,
-        0,
-        GPIOTE_IRQHandler,
-        ADC_IRQHandler,
-        TIMER0_IRQHandler,
-        TIMER1_IRQHandler,
-        TIMER2_IRQHandler,
-        RTC0_IRQHandler,
-        TEMP_IRQHandler,
-        RNG_IRQHandler,
-        ECB_IRQHandler,
-        CCM_AAR_IRQHandler,
-        WDT_IRQHandler,
-        RTC1_IRQHandler,
-        QDEC_IRQHandler,
-        WUCOMP_COMP_IRQHandler,
-        SWI0_IRQHandler,
-        SWI1_IRQHandler,
-        SWI2_IRQHandler,
-        SWI3_IRQHandler,
-        SWI4_IRQHandler,
-        SWI5_IRQHandler,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        
+	/* External Interrupts */
+	POWER_CLOCK_IRQHandler,
+	RADIO_IRQHandler,
+	UART0_IRQHandler,
+	SPI0_TWI0_IRQHandler,
+	SPI1_TWI1_IRQHandler,
+	0,
+	GPIOTE_IRQHandler,
+	ADC_IRQHandler,
+	TIMER0_IRQHandler,
+	TIMER1_IRQHandler,
+	TIMER2_IRQHandler,
+	RTC0_IRQHandler,
+	TEMP_IRQHandler,
+	RNG_IRQHandler,
+	ECB_IRQHandler,
+	CCM_AAR_IRQHandler,
+	WDT_IRQHandler,
+	RTC1_IRQHandler,
+	QDEC_IRQHandler,
+	WUCOMP_COMP_IRQHandler,
+	SWI0_IRQHandler,
+	SWI1_IRQHandler,
+	SWI2_IRQHandler,
+	SWI3_IRQHandler,
+	SWI4_IRQHandler,
+	SWI5_IRQHandler,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+
 };
+
+#define RFDUINO
 
 __attribute__ ((section(".startup")))
 void ResetHandler(void) {
 
-    // Enable all RAM banks. See PAN_028_v1.6.pdf "16. POWER: RAMON reset value causes problems under certain conditions"
-    NRF51_POWER_RAMON |= 0xF;
+	// Enable all RAM banks. See PAN_028_v1.6.pdf "16. POWER: RAMON reset value causes problems under certain conditions"
+	NRF51_POWER_RAMON |= 0xF;
 
 	// Enable Peripherals.  See PAN_028_v1.6.pdf "25. System: Manual setup is required to enable use of peripherals"
 	*(uint32_t *)0x40000504 = 0xC007FFDF;
-    *(uint32_t *)0x40006C18 = 0x00008000;
+	*(uint32_t *)0x40006C18 = 0x00008000;
 
 	// start up crystal HF clock.
-    NRF51_CLOCK_HFCLKSTART = 1;
+	NRF51_CLOCK_HFCLKSTART = 1;
 	while(!NRF51_CLOCK_HFCLKSTARTED) /* wait */;
-	
+
 	// start up crystal LF clock.
-    NRF51_CLOCK_LFCLKSRC = NRF51_CLOCK_LFCLKSRC_XTAL;
-    NRF51_CLOCK_LFCLKSTART = 1;
-	
+#ifdef RFDUINO
+	NRF51_CLOCK_LFCLKSRC = NRF51_CLOCK_LFCLKSRC_SYNTH;
+#else
+	NRF51_CLOCK_LFCLKSRC = NRF51_CLOCK_LFCLKSRC_XTAL;
+#endif
+	NRF51_CLOCK_LFCLKSTART = 1;
+
 	while(!NRF51_CLOCK_LFCLKSTARTED) /* wait */;
-	
+
 	// enable constant latency mode.
 	NRF51_POWER_CONSTLAT = 1;
 
 
 
 	uint32_t *src = &_etext;
-    uint32_t *dest = &_sdata;
+	uint32_t *dest = &_sdata;
 
 	// copy data and clear bss
 	while (dest < &_edata) *dest++ = *src++;
-    while (dest < &_sbss) *dest++ = 0xdeadbeef;
-    dest = &_sbss;
+	while (dest < &_sbss) *dest++ = 0xdeadbeef;
+	dest = &_sbss;
 	while (dest < &_ebss) *dest++ = 0;
-    while (dest < &dest) *dest++ = 0xdeadbeef;
+	while (dest < &dest) *dest++ = 0xdeadbeef;
 
-    __libc_init_array();
+	__libc_init_array();
 
 	main();
 	while (1) ;

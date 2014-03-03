@@ -358,6 +358,8 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
     if (_evt_buffer) free(_evt_buffer);
 }
 
+//#define DEVICE_NAME "RFduino"
+
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
     if (_inited) return *this;
@@ -374,6 +376,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
     // set device name
     if (!_device_name.empty()) {
        BLE_CALL(sd_ble_gap_device_name_set, (&_sec_mode, (uint8_t*) _device_name.c_str(), _device_name.length()) );
+       //BLE_CALL(sd_ble_gap_device_name_set, (&_sec_mode, DEVICE_NAME, strlen(DEVICE_NAME)));
     }
     BLE_CALL(sd_ble_gap_appearance_set, (_appearance) );
 

@@ -56,6 +56,8 @@
 #define NRF51_CLOCK_CAL                 *(volatile uint32_t*) (NRF51_CLOCK + 0x010)          //Start calibration of LFCLK RC oscillator
 #define NRF51_CLOCK_CTSTART             *(volatile uint32_t*) (NRF51_CLOCK + 0x014)          //Start calibration timer
 #define NRF51_CLOCK_CTSTOP              *(volatile uint32_t*) (NRF51_CLOCK + 0x018)          //Stop calibration timer
+// Here there are 57 unsigned integers "reserved"
+
 //EVENTS
 #define NRF51_CLOCK_HFCLKSTARTED        *(volatile uint32_t*) (NRF51_CLOCK + 0x100)          //16 MHz oscillator started
 #define NRF51_CLOCK_LFCLKSTARTED        *(volatile uint32_t*) (NRF51_CLOCK + 0x104)          //32 kHz oscillator started
