@@ -377,6 +377,9 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
     if (!_device_name.empty()) {
        BLE_CALL(sd_ble_gap_device_name_set, (&_sec_mode, (uint8_t*) _device_name.c_str(), _device_name.length()) );
        //BLE_CALL(sd_ble_gap_device_name_set, (&_sec_mode, DEVICE_NAME, strlen(DEVICE_NAME)));
+    } else {
+       std::string name = "not set...";
+       BLE_CALL(sd_ble_gap_device_name_set, (&_sec_mode, (uint8_t*) name.c_str(), name.length()) );
     }
     BLE_CALL(sd_ble_gap_appearance_set, (_appearance) );
 
@@ -479,8 +482,11 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
     // Build and set advertising data
     memset(&advdata, 0, sizeof(advdata));
 
-    advdata.name_type               = BLE_ADVDATA_NO_NAME;
-    advdata.short_name_len          = 4;
+    //advdata.name_type               = BLE_ADVDATA_NO_NAME;
+
+    // Anne: setting NO_NAME breaks the Android Nordic nRF Master Console app.
+    advdata.name_type               = BLE_ADVDATA_FULL_NAME;
+    advdata.short_name_len          = 5;
     advdata.include_appearance      = _appearance != BLE_APPEARANCE_UNKNOWN;
     advdata.p_tx_power_level        = &_tx_power_level;
     advdata.flags.size              = sizeof(flags);
@@ -676,6 +682,9 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
     for(Service* svc : _services) {
         svc->on_ble_event(p_ble_evt);
     }
+
+    // Anne: dirty!
+    startAdvertising();
 }
 
 

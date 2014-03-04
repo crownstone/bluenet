@@ -24,7 +24,7 @@
 NRF51_USE_SOFTDEVICE=1
 
 # Available optimization levels are -O0, -O1, -O2, and -Os (for "size").  -O0 is useful for debugging.
-OPTIMIZE=-Os -fomit-frame-pointer -ffast-math -fno-permissive
+OPTIMIZE=-Os -fomit-frame-pointer -ffast-math 
 #OPTIMIZE=-O0
 
 # version of NRF51822 softdevice. 
@@ -43,21 +43,32 @@ SOFTDEVICE_DIR=${SOFTDEVICE_ROOT}
 #NRF51822_DIR=../nordic/nrf51822
 NRF51822_DIR=${NORDIC_ROOT}
 
-LIB_DIRS= usvg epaper Adafruit_GFX midi
+#LIB_DIRS= usvg epaper Adafruit_GFX midi
+LIB_DIRS=usvg
 
 BOARD=E_STICKY_v1
 #BOARD=EPAPER_DEMO_BOARD
 
 ### SDK Related variables
 ###
-SDK 		 = lib/nrf51sdk/Nordic/nrf51822/
+
+#SDK 		 = lib/nrf51sdk/Nordic/nrf51822/
+
+SDK              = /opt/s110/sdk/nrf51822/
 SDK_INCLUDE	 = $(SDK)Include/
 SDK_SRC		 = $(SDK)Source/
 SDK_TEMPLATE	 = $(SDK_SRC)templates/gcc/
 SDK_APP_COMMON 	 = $(SDK_SRC)app_common/
 SDK_EXT_SENSORS	 = $(SDK_SRC)ext_sensors/
+
+SDK_SD_COMMON    = $(SDK_INCLUDE)sd_common/
+SDK_BOARD        = $(SDK)/Board/pca10001/s110/ble_app_hrs/
+
+SDK_SD_COMMON    =
+SDK_BOARD        =
+
 SDK_BLE		 = ble/
-SDK_BLE		+= ble/ble_services/
+SDK_BLE		+= ble/ble_services/ 
 
 # END CONFIGURABLE #################################################################################
 
@@ -99,12 +110,13 @@ NRF51822_SOURCES = $(addprefix ${NRF51822_SOURCE_BASE}/%,${NRF51822_SOURCE_SUBDI
 NRF51822_INCLUDE_BASE=${NRF51822_DIR}/Include
 NRF51822_INCLUDE_SUBDIRS=app_common ${SDK_BLE} ble/softdevice gcc
 NRF51822_INCLUDES= -I${NRF51822_INCLUDE_BASE} $(patsubst %,-I${NRF51822_INCLUDE_BASE}/%,${NRF51822_INCLUDE_SUBDIRS})
-INCLUDES = -I- -I../include -I../assets -I. -I${SOFTDEVICE_INCLUDE} ${NRF51822_INCLUDES}  $(foreach dir,${LIB_DIRS}, -I../libs/${dir})
+INCLUDES = -I../include -I../assets -I. -I${SOFTDEVICE_INCLUDE} ${NRF51822_INCLUDES}  $(foreach dir,${LIB_DIRS}, -I../libs/${dir}) -I$(SDK_SD_COMMON) -I$(SDK_BOARD)
 
 DEFINES=-DNRF51 -DEPD_ENABLE_EXTRA_SRAM -DARDUINO=100 -D${BOARD} -DNRF51_USE_SOFTDEVICE=${NRF51_USE_SOFTDEVICE} -DUSE_RENDER_CONTEXT -DSYSCALLS -DUSING_FUNC
 CFLAGS = -std=gnu99
 CXXFLAGS = -std=c++11 -fno-exceptions
-CPPFLAGS = -Wall -g3 ${OPTIMIZE} -mcpu=cortex-m0 -mthumb -nostdlib -ffunction-sections -fdata-sections -MMD ${DEFINES} ${INCLUDES}
+CPPFLAGS = -g3 -Wall ${OPTIMIZE} -mcpu=cortex-m0 -mthumb -nostdlib -ffunction-sections -fdata-sections -MMD ${DEFINES} ${INCLUDES}
+#CPPFLAGS = -g3 ${OPTIMIZE} -Wno-unused-function -Wno-unused-parameter -Wno-unused-but-set-variable -ftree-ter -mcpu=cortex-m0 -mthumb -nostdlib -ffunction-sections -fdata-sections -MMD ${DEFINES} ${INCLUDES}
 LDFLAGS = ${OPTIMIZE} -g3 -mcpu=cortex-m0 -mthumb -TnRF51822-$(if $(filter 1,$(NRF51_USE_SOFTDEVICE)),softdevice,bare).ld -Wl,--gc-sections
 
 # Use size-optimized libraries instead
@@ -135,6 +147,8 @@ ${NRF_MAIN_BIN}:
 #all: last main_hrs.bin debug
 
 all: main_ble.elf main_ble.bin debug
+
+#all: main_hrs.elf main_hrs.bin debug
 
 # throws an error
 #all: last main_ble.bin debug
@@ -228,7 +242,6 @@ last:
 
 clean:
 	-rm -f $(ALL_OBJS) $(ALL_DEPS) *.d *.elf *.hex *.bin *.log *.map $(NRF_UICR_BIN) $(NRF_MAIN_BIN)
-#$(MAKE) -C ../assets/fonts clean
 
 reset: clean ${NRF_UICR_BIN} ${NRF_MAIN_BIN}
 	@ERR=$(killall -9 -q JLinkGDBServer)

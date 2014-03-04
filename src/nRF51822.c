@@ -1,4 +1,3 @@
-
 #include <stdint.h>
 #include "nRF51822.h"
 
@@ -129,18 +128,26 @@ void ResetHandler(void) {
 
 	// start up crystal LF clock.
 #ifdef RFDUINO
+	/**
+	 * The RFduino synthesizes the low frequency clock from the high frequency clock. There is no external crystal that 
+	 * can be used. It doesn't seem from the datasheets that there is a pin open for a crystal... Synthesizing the clock
+	 * is of course not very energy efficient. 
+	 */
 	NRF51_CLOCK_LFCLKSRC = NRF51_CLOCK_LFCLKSRC_SYNTH;
 #else
 	NRF51_CLOCK_LFCLKSRC = NRF51_CLOCK_LFCLKSRC_XTAL;
 #endif
 	NRF51_CLOCK_LFCLKSTART = 1;
-
 	while(!NRF51_CLOCK_LFCLKSTARTED) /* wait */;
 
+	/*
+	 * There are two power modes in the nRF51, system ON, and system OFF. The former has two sub power modes. The 
+	 * first is called "Constant Latency", the second is called "Low Power". The latter is saving most of the power, the
+	 * former keeps the CPU wakeup latency and automated task response at a minimum, but some resources will be kept
+	 * active when the device is in sleep mode, such as the 16MHz clock.
+	 */
 	// enable constant latency mode.
 	NRF51_POWER_CONSTLAT = 1;
-
-
 
 	uint32_t *src = &_etext;
 	uint32_t *dest = &_sdata;

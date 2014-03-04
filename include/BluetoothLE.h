@@ -776,8 +776,10 @@ namespace BLEpp {
     public:
         static const uint8_t MAX_SERVICE_COUNT = 5;
 
-        static const uint16_t                  defaultAppearance = BLE_APPEARANCE_UNKNOWN;
-        static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_XTAL_20_PPM;
+        //static const uint16_t                  defaultAppearance = BLE_APPEARANCE_UNKNOWN;
+	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_KEYRING;
+        //static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_XTAL_20_PPM;
+        static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
         static const uint8_t                   defaultMtu = BLE_L2CAP_MTU_DEF;
         static const uint16_t                  defaultMinConnectionInterval_1_25_ms = 400;
         static const uint16_t                  defaultMaxConnectionInterval_1_25_ms = 800;
@@ -824,7 +826,7 @@ namespace BLEpp {
 
         virtual ~Nrf51822BluetoothStack();
 
-        Nrf51822BluetoothStack&  init();
+        Nrf51822BluetoothStack& init();
 
         Nrf51822BluetoothStack& start();
 

@@ -4,9 +4,11 @@ This project aims at a wireless network with BLE nodes that use their mutual sig
 
 Bluetooth LE (BLE) does not inherently fit a wireless network. We have technology in-house (at the Almende group) that can do this [https://en.wikipedia.org/wiki/MyriaNed](Myrianed), but it has not been accepted in the mainstream yet. By the way, it is my personal opinion that solutions such as ZigBee, Z-Wave, MyriaNed, and other mesh solutions, will remain marginal except if they get accepted in a common handheld.
 
-That's why BLE is interesting. A lot of phones come with BLE, so a solution is automatically useful to a large variety of people. It is not the best technology for the job. The network topology is a Personal Area Network (PAN), not a Local Area Network (LAN). This means that you cannot have all nodes communicating with all other nodes at the same time. To get RSSI values we will have to set up connections to other nodes and tear them down again. Not very efficient. But it will do the job. Note that this considers a network with known nodes, so setting up connections will be relatively easy. On the moment I am not concerned with security so establishing some zeroconf method to detect which nodes belong to the network will not be part of this codebase. Feel free to clone.
+That's why BLE is interesting. A lot of phones come with BLE, so a solution is automatically useful to a large variety of people. It is not the best technology for the job. The network topology is a Personal Area Network (PAN), not a Local Area Network (LAN). This means that you cannot have all nodes communicating with all other nodes at the same time. To get RSSI values we will have to set up connections to other nodes and tear them down again. Not very efficient. But it will do the job. The new SoftDevice from Nordic (the S120 instead of the S110) might change this, but it is still in its alpha stage. So, for now we consider a network with known nodes, setting up connections amongst them will be relatively easy. On the moment I am not concerned with security so establishing some zeroconf method to detect which nodes belong to the network will not be part of this codebase yet. My idea however is to do this through synchronizing over the main switch in a home. Turn everything off and the network starts searching for a smartphone who is advertising authentication to use. When this is set, it will be used next time the power goes down. 
 
-The code base for this repository comes from [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf). Thanks a lot Christopher!
+Feel free to clone this repos.
+
+The code base comes from [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf). Thanks a lot Christopher!
 
 ## Todo list
 

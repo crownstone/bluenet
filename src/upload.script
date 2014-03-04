@@ -1,5 +1,5 @@
 power on
 r
-loadbin main_hrs.bin 0x00014000
+loadbin main_ble.bin 0x00014000
 r
 qc
