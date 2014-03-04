@@ -1,5 +1,0 @@
-power on
-r
-loadbin main_ble.bin 0x00014000
-r
-qc
