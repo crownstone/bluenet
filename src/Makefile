@@ -186,7 +186,7 @@ main_displaylisttest.elf: OBJS := Arduino.o Debug.o NRF51_SPI.o Print.o Stream.o
 
 # Thows an exception.
 # Catchpoint 3 (exception thrown), 0x0001763c in __cxa_throw ()
-main_ble.elf: OBJS := Arduino.o BluetoothLE.o Debug.o NRF51_SPI.o Print.o Stream.o error.o ../libs/usvg/Pool.o \
+main_ble.elf: OBJS := nrf_pwm.o Arduino.o BluetoothLE.o Debug.o NRF51_SPI.o Print.o Stream.o error.o ../libs/usvg/Pool.o \
     emergency.o nRF51822.o syscalls.o ${NRF51822_SOURCE_BASE}/ble/ble_advdata.o \
 	${NRF51822_SOURCE_BASE}/ble/ble_debug_assert_handler.o ${NRF51822_SOURCE_BASE}/nrf_assert/nrf_assert.o
 

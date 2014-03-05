@@ -9,7 +9,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <Arduino.h>
 
 using namespace BLEpp;
 
@@ -23,9 +22,31 @@ using namespace BLEpp;
  * See documentation for a detailed discussion of what's going on here.
  **/
 int main() {
-	//NRF51_GPIO_DIRSET = 1 << PIN_LED; // set pins to output
-	//NRF51_GPIO_OUTSET = 1 << PIN_LED; // set pins high -- LED off
-	//NRF51_GPIO_OUTCLR = 1 << PIN_LED; // set red led on.
+	//	NRF51_GPIO_DIRSET = 1 << PIN_GREEN; // set pins to output
+
+	//	tick_init();
+	//	pwm_init(PIN_GREEN, 1);
+	//	analogWrite(PIN_GREEN, 50);
+	//	volatile int i = 0;
+	//	while(1) {
+	//		i++;	
+	//	};
+	uint32_t counter = 0;
+
+	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
+
+	pwm_config.mode             = PWM_MODE_LED_100;
+	pwm_config.num_channels     = 3;
+	pwm_config.gpio_num[0]      = PIN_RED;
+	pwm_config.gpio_num[1]      = PIN_GREEN;
+	pwm_config.gpio_num[2]      = PIN_BLUE;    
+
+	// Initialize the PWM library
+	nrf_pwm_init(&pwm_config);
+
+
+	//NRF51_GPIO_OUTSET = 1 << PIN_GREEN; // set pins high -- LED off
+	//NRF51_GPIO_OUTCLR = 1 << PIN_GREEN; // set red led on.
 
 	// Memory pool of 30 blocks of 30 bytes each, this already crashes the thing...
 	PoolImpl<30> pool;
@@ -60,53 +81,39 @@ int main() {
 	// In particular we need it to set interrupt priorities.
 	stack.init();
 
-	tick_init();
-	pwm_init(PIN_GREEN, 0);
-//	pwm_init(PIN_BLUE, 0);
-	pwm_init(PIN_RED, 1);
-	
-//	pinMode(PIN_RED, OUTPUT);
-	analogWrite(PIN_RED, 250);
-//	delay(3000);
-
-//	pinMode(PIN_GREEN, OUTPUT);
-//	analogWrite(PIN_GREEN, 50);
-
-//	pinMode(PIN_BLUE, OUTPUT);
-//	analogWrite(PIN_BLUE, 50);
 
 	// Optional notification when radio is active.  Could be used to flash LED.
 	stack.onRadioNotificationInterrupt(800, [&](bool radio_active){
-		// NB: this executes in interrupt context, so make any global variables volatile.
-		if (radio_active) {
+			// NB: this executes in interrupt context, so make any global variables volatile.
+			if (radio_active) {
 			// radio is about to turn on.  Turn on LED.
 			// NRF51_GPIO_OUTSET = 1 << Pin_LED;
-		} else {
+			} else {
 			// radio has turned off.  Turn off LED.
 			// NRF51_GPIO_OUTCLR = 1 << Pin_LED;
-		}
-	});
+			}
+			});
 
 	//uint32_t err_code = NRF_SUCCESS;
 
 	stack.onConnect([&](uint16_t conn_handle) {
-		// A remote central has connected to us.  do something.
-		// TODO this signature needs to change
-		//NRF51_GPIO_OUTSET = 1 << PIN_LED;
-		uint32_t err_code __attribute__((unused)) = NRF_SUCCESS;
-		// first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
-		// be neater about it... we do not need to stop, only after a disconnect we do...
-		err_code = sd_ble_gap_rssi_stop(conn_handle);
-		err_code = sd_ble_gap_rssi_start(conn_handle);
-	})
+			// A remote central has connected to us.  do something.
+			// TODO this signature needs to change
+			//NRF51_GPIO_OUTSET = 1 << PIN_LED;
+			uint32_t err_code __attribute__((unused)) = NRF_SUCCESS;
+			// first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
+			// be neater about it... we do not need to stop, only after a disconnect we do...
+			err_code = sd_ble_gap_rssi_stop(conn_handle);
+			err_code = sd_ble_gap_rssi_start(conn_handle);
+			})
 	.onDisconnect([&](uint16_t conn_handle) {
-		// A remote central has disconnected from us.  do something.
-		//NRF51_GPIO_OUTCLR = 1 << PIN_LED;
-	});
+			// A remote central has disconnected from us.  do something.
+			//NRF51_GPIO_OUTCLR = 1 << PIN_LED;
+			});
 
 	// Now, build up the services and characteristics.
 	Service& service = stack.createIndoorLocalizationService();
-	
+
 	// Create a characteristic of type uint8_t (unsigned one byte integer).
 	// This characteristic is by default read-only and
 	Characteristic<uint8_t>& intChar = service.createCharacteristic<uint8_t>()
@@ -114,25 +121,44 @@ int main() {
 		.setName("number");
 
 	service.createCharacteristic<string>()
+		//service.createCharacteristic<uint8_t>()
 		.setUUID(UUID(service.getUUID(), 0x124))
+		//		.setName("number input")
 		.setName("text")
 		.setDefaultValue("")
 		.setWritable(true)
 		.onWrite([&](const string& value) -> void {
-			// set the value of the "number" characteristic to the value written to the text characteristic.
+				//.onWrite([&](const uint8_t& value) -> void {
+				// set the value of the "number" characteristic to the value written to the text characteristic.
+				//int nr = value;
 			int nr = atoi(value.c_str());
 			intChar = nr;
+			//	__asm("BKPT");
+
+			//				analogWrite(PIN_RED, nr);
+			//
+			// Update the 3 outputs with out of phase sine waves
+			counter = nr;
+			if (counter > 100) counter = 100;
+			nrf_pwm_set_value(0, sin_table[counter]);
+			nrf_pwm_set_value(1, sin_table[(counter + 33) % 100]);
+			nrf_pwm_set_value(2, sin_table[(counter + 66) % 100]);
+			//			counter = (counter + 1) % 100;
+
+			// Add a delay to control the speed of the sine wave
+			nrf_delay_us(8000);
 		});
-	
-
-	// Begin sending advertising packets over the air.  Again, may want to trigger this from a button press to save power.
-	stack.startAdvertising();
-
-	while(1) {
-		// Deliver events from the Bluetooth stack to the callbacks defined above.
-//		analogWrite(PIN_LED, 50);
-		stack.loop();
-	}
 
 
-}
+		// Begin sending advertising packets over the air.  Again, may want to trigger this from a button press to save power.
+		stack.startAdvertising();
+
+
+		while(1) {
+			// Deliver events from the Bluetooth stack to the callbacks defined above.
+			//		analogWrite(PIN_LED, 50);
+			stack.loop();
+		}
+
+
+		}

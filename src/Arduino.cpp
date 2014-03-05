@@ -126,11 +126,11 @@ void ppi_assign(uint8_t channel, volatile uint32_t* event, volatile uint32_t* ta
 	uint8_t sden;
 	sd_softdevice_is_enabled(&sden);
 	if (!sden) {
-		NRF51_PPI_CH_EEP(channel) = (uint32_t)&NRF51_TIMER2_COMPARE_0;
-		NRF51_PPI_CH_TEP(channel) = (uint32_t)&NRF51_GPIOTE_OUT_0;
+		NRF51_PPI_CH_EEP(channel) = (uint32_t)event;
+		NRF51_PPI_CH_TEP(channel) = (uint32_t)task;
 	} else {
 		volatile uint32_t error;
-		error = sd_ppi_channel_assign(channel, &(NRF51_TIMER2_COMPARE_0), &(NRF51_GPIOTE_OUT_0));
+		error = sd_ppi_channel_assign(channel, event, task);
 		if (error != 0) while(1) {}
 	}
 #else /* NRF51_USE_SOFTDEVICE */
@@ -171,21 +171,40 @@ void ppi_disable(uint32_t channels) {
 #endif
 }
 
+int8_t first_free_channel() {
+	uint8_t i; int8_t r = -1;
+	for (i = 0; i < 8; ++i) {
+		if (!(NRF_PPI->CHEN & (1 << i))) {
+			r = (int8_t)i;
+			return r;
+		}
+	}
+	return r;
+}
+
+// A struct to store the pin numbers for a channel.
 uint8_t pwm_pin_channel[31] = {};
 
 void pwm_init(uint8_t pin, uint8_t channel) {
 	// after pwm_example/main.c and nrf_gpiote.h from nordic SDK.
+	
+	// set interrupts for the high frequence timer 2
+	enable_irq(NRF51_TIMER2_IRQn, IRQ_APP_PRIORITY_LOW);
 
+	// BITMODE only 16-bit? http://forum.rfduino.com/index.php?topic=155.0
 
 	// set up the timer.  we'll use two compare registers, one to turn the pin on, and the other to turn it off.
 	// the value of the first compare register will determine the duty cycle of the PWM.
 	// TODO: choose which timer compare registers based on channel num so we can have more than one channel of PWM.
 	NRF51_TIMER2_STOP = 1;
 	NRF51_TIMER2_MODE = NRF51_TIMER2_MODE_TIMER;
-	NRF51_TIMER2_PRESCALER = 4;
-	NRF51_TIMER2_SHORTS = 1 << 1; // set timer2 compare1 to clear timer when it's reached.
-	NRF51_TIMER2_CC_0 = 25;
-	NRF51_TIMER2_CC_1 = 254;
+	NRF51_TIMER2_PRESCALER = 9;
+	NRF51_TIMER2_BITMODE = NRF51_TIMER2_BITMODE_16_BIT;
+	NRF51_TIMER2_SHORTS = NRF51_TIMER_SHORTS_COMPARE1_CLEAR; // set timer2 compare1 to clear timer when it's reached.
+	NRF51_TIMER2_CC_0 = 100; // when reaching the value in this compare register, the pin is turned on
+	NRF51_TIMER2_CC_1 = 255; // when reaching the value in this compare register, the pin is turned off
+
+	// set pin to output, and clear it
 	NRF51_GPIO_DIR_OUTPUT(pin);
 	NRF51_GPIO_OUTCLR = 1 << pin;
 
@@ -198,7 +217,7 @@ void pwm_init(uint8_t pin, uint8_t channel) {
 	__asm("NOP;");
 	__asm("NOP;");
 
-
+	// what do we do here? 
 	NRF51_GPIOTE_OUT_N(channel) = 1;
 
 	// configure the given pin as a task, where each invocation of the task flips (toggles) the state of the pin, and with initial value hi.
@@ -219,16 +238,18 @@ void pwm_init(uint8_t pin, uint8_t channel) {
 	ppi_enable( (1 << (channel * 2)) | (1 << (channel * 2 + 1)));
 
 	// keep track of which channel we used for this pin.
-	pwm_pin_channel[pin] = channel + 1;  // so 0 is uninitialized
-
+	pwm_pin_channel[pin] = channel + 1;  // so 0 is uninitialized, not really nice trick
 
 	NRF51_GPIOTE_CONFIG_N(channel) &= ~NRF51_GPIOTE_CONFIG_MODE_TASK;
+
+//	NRF51_GPIO_OUTCLR = 1 << pin;
+//	NRF51_TIMER2_START = 1;
 }
 
 
 
 void analogWrite(uint8_t pin, uint8_t val) {
-
+//	__asm("BKPT");
 	uint8_t channel = pwm_pin_channel[pin];
 	if (channel == 0) {
 		// throw?
@@ -245,9 +266,14 @@ void analogWrite(uint8_t pin, uint8_t val) {
 			NRF51_GPIO_OUTCLR = 1 << pin;
 		}
 	} else {
+		/**
+		 * The timer will be started. Before the pin is cleared. Then the timer is run. As soon as it reaches 
+		 * "val", it will be set to one. 
+		 */
 		NRF51_GPIOTE_CONFIG_N(channel) &= ~NRF51_GPIOTE_CONFIG_MODE_TASK;
 		ppi_enable( (1 << (channel * 2)) | (1 << (channel * 2 + 1)));
 		NRF51_GPIO_OUTCLR = 1 << pin;
+	//	NRF51_GPIOTE_CONFIG_N(channel) |= NRF51_GPIOTE_CONFIG_MODE_TASK;
 		NRF51_TIMER2_CC_0 = val;
 		NRF51_TIMER2_START = 1;
 		__asm("NOP;");
@@ -259,10 +285,7 @@ void analogWrite(uint8_t pin, uint8_t val) {
 		__asm("NOP;");
 		__asm("NOP;");
 		__asm("NOP;");
-
-
 	}
-
 }
 
 void yield() {}
