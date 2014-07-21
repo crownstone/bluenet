@@ -1,4 +1,6 @@
 # The CMake build system expects a few directories and the type of the compiler to use
+# You will need to copy this and adjust to your own system
+#   cp CMakeBuild.config.default CMakeBuild.config
 
 # This is the directory with /Source and /Include subdirectories from the Nordic SDK
 NRF51822_DIR=/opt/nrf51/lib/nrf51sdk/Nordic/nrf51822

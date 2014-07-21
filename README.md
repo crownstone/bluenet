@@ -10,6 +10,51 @@ Feel free to clone this repos.
 
 The code base comes from [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf). Thanks a lot Christopher!
 
+## Installation
+
+The installation should not be hard when you have the Nordic SDK. Get this from their website after buying a development kit. You also need a cross-compiler for ARM. You need the JLink utilities from Segger. And you need cmake for the build process.
+
+* [Nordic nRF51822 SDK](https://www.nordicsemi.com/eng/Products/Bluetooth-R-low-energy/nRF51822)
+* [Nordic S110 Softdevice](http://www.nordicsemi.com/eng/Products/S110-SoftDevice-v7.0)
+* [JLink Software](http://www.segger.com/jlink-software.html)
+* sudo aptitude install cmake
+
+Fork the code by clicking on:
+
+* Fork [https://github.com/mrquincle/bluenet/fork](https://github.com/mrquincle/bluenet/fork).
+* `git clone https://github.com/${YOUR_GITHUB_USERNAME}/bluenet`
+* let us call this directory $BLUENET
+
+Now you will have to set all fields in the configuration file:
+
+* cp CMakeBuild.config.default CMakeBuild.config
+* adjust the `NRF51822_DIR` to wherever you installed the Nordic SDK (it should have `/Include` and `/Source` subdirectories
+* adjust the `SOFTDEVICE_DIR` to wherever you unzipped the latest SoftDevice from Nordic
+* adjust the type `SOFTDEVICE` accordingly (basename of file without `_softdevice.hex`)
+* adjust the `COMPILER_PATH` and `COMPILER_TYPE` to your compiler (it will be used as `$COMPILER_PATH\bin\$COMPILER_TYPE-gcc`)
+* adjust `JLINK` to the full name of the JLink utility (JLinkExe on Linux)
+* adjust `JLINK_GDB_SERVER` to the full name of the JLink utility that supports gdb (JLinkGDBServer on Linux)
+
+Let us now install the SoftDevice on the nRF51822:
+
+* cd scripts
+* ./softdevice.sh build
+* ./softdevice.sh upload
+
+Now we can build our own software:
+
+* cd $BLUENET
+* make
+
+And we can upload it:
+
+* cd scripts
+* this would do the same as building above ./crownstone.sh build 
+* ./crownstone.sh upload
+* ./crownstone.sh debug
+
+And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish. 
+
 ## Todo list
 
 * Clean up code

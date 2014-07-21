@@ -2,7 +2,8 @@
 
 SCRIPT_DIR=jlink
 
-JLINK=/usr/bin/JLinkExe
+source ../CMakeBuild.config
+
 DEVICE=nrf51822
 
 SCRIPT=general.script

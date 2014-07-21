@@ -6,8 +6,9 @@ TEMP_DIR=tmp
 
 GDB_SCRIPT=gdbinit
 
-JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
-GDB=/opt/compiler/gcc-arm-none-eabi-4_8-2013q4/bin/arm-none-eabi-gdb
+source ../CMakeBuild.config
+
+GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}-gdb
 DEVICE=nrf51822
 
 TARGET=${1:? "$0 requires \"target\" as first argument"}
