@@ -1,0 +1,16 @@
+# The CMake build system expects a few directories and the type of the compiler to use
+
+# This is the directory with /Source and /Include subdirectories from the Nordic SDK
+NRF51822_DIR=/opt/nrf51/lib/nrf51sdk/Nordic/nrf51822
+
+# This is the directory where the .hex SoftDevice can be found
+SOFTDEVICE_DIR=/opt/softdevices
+
+# The name of the SoftDevicei (without _softdevice.hex)
+SOFTDEVICE=s110_nrf51822_5.2.1
+
+# This is the directory where the cross-compiler resides
+COMPILER_PATH=/opt/compiler/gcc-arm-none-eabi-4_8-2013q4
+
+# The compiler type 
+COMPILER_TYPE=arm-none-eabi

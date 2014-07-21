@@ -1,0 +1,24 @@
+# JLinkExe script for resetting nrf51822
+power on
+Sleep 1000
+st
+speed 1000
+# reset the device
+r
+Sleep 500
+# NVIC CONFIG EEN (erase enabled)
+w4 4001e504 2
+sleep 1000
+# NVIC ERASEALL (erase all flash including UICR)
+w4 4001e50c 1    
+sleep 1000
+r
+# NVIC CONFIG WEN (enable writing)
+w4 4001e504 1
+sleep 1000
+r
+# load the soft device binary.
+loadbin @SOFTDEVICE_DIR@_softdevice_uicr.bin 0x10001000
+loadbin @SOFTDEVICE_DIR@_softdevice_mainpart.bin 0
+r
+q

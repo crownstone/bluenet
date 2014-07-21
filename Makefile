@@ -1,2 +1,7 @@
+#!/bin/make -f
+
 all:
-	@cd src && make all
+	@mkdir -p build
+	@cd build && cmake -DCMAKE_TOOLCHAIN_FILE=../arm.toolchain.cmake .. && make
+
+.PHONY: all

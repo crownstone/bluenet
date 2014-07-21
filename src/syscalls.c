@@ -75,8 +75,8 @@ void * _sbrk(int incr)
 
     void* sp;
     asm("mov %0, sp" : "=r"(sp) : : );
-    if (sp <= heap_end+incr) {
-        return -1;
+    if ((char*)sp <= heap_end+incr) {
+        return (void*)-1;
     }
 
     char *prev = heap_end;

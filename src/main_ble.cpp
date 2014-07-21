@@ -17,22 +17,32 @@ using namespace BLEpp;
 #define PIN_GREEN            3
 #define PIN_BLUE             4
 
+#define PIN_LED  PIN_GREEN
+
+#define BINARY_LED
+
+// An RGB led as with the rfduino requires a sine wave, and thus a PWM signal
+//#define RGB_LED
+
 /** Example that sets up the Bluetooth stack with two characteristics:
  *   one textual characteristic available for write and one integer characteristic for read.
  * See documentation for a detailed discussion of what's going on here.
  **/
 int main() {
-	//	NRF51_GPIO_DIRSET = 1 << PIN_GREEN; // set pins to output
-
+#ifdef BINARY_LED
+	NRF51_GPIO_DIRSET = 1 << PIN_LED; // set pins to output
+	NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
+	uint32_t counter = 0;
+#endif
 	//	tick_init();
 	//	pwm_init(PIN_GREEN, 1);
-	//	analogWrite(PIN_GREEN, 50);
+	//analogWrite(PIN_GREEN, 50);
 	//	volatile int i = 0;
 	//	while(1) {
 	//		i++;	
 	//	};
+#ifdef RGB_LED
 	uint32_t counter = 0;
-
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
 
 	pwm_config.mode             = PWM_MODE_LED_100;
@@ -43,7 +53,7 @@ int main() {
 
 	// Initialize the PWM library
 	nrf_pwm_init(&pwm_config);
-
+#endif
 
 	//NRF51_GPIO_OUTSET = 1 << PIN_GREEN; // set pins high -- LED off
 	//NRF51_GPIO_OUTCLR = 1 << PIN_GREEN; // set red led on.
@@ -55,7 +65,7 @@ int main() {
 	Nrf51822BluetoothStack stack(pool);
 
 	// Set advertising parameters such as the device name and appearance.  These values will
-	stack.setDeviceName("CrownStone")
+	stack.setDeviceName("Stone")
 		// controls how device appears in GUI.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 	//	 .setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
@@ -131,6 +141,15 @@ int main() {
 				//.onWrite([&](const uint8_t& value) -> void {
 				// set the value of the "number" characteristic to the value written to the text characteristic.
 				//int nr = value;
+#ifdef BINARY_LED
+			counter++;
+			if (counter % 2) {
+				NRF51_GPIO_OUTSET = 1 << PIN_LED; // pin high, led goes on
+			} else {
+				NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
+			}
+#endif
+#ifdef RGB_LED
 			int nr = atoi(value.c_str());
 			intChar = nr;
 			//	__asm("BKPT");
@@ -147,6 +166,7 @@ int main() {
 
 			// Add a delay to control the speed of the sine wave
 			nrf_delay_us(8000);
+#endif
 		});
 
 

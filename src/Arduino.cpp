@@ -3,7 +3,7 @@
 #include "Debug.h"
 
 #if NRF51_USE_SOFTDEVICE == 1
-#warning "SoftDevice is used... Make sure SoftDevice headers are available"
+//#warning "SoftDevice is used... Make sure SoftDevice headers are available"
 #include "nrf_soc.h"
 #include "nrf51.h"
 #include "nrf_sdm.h"

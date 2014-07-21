@@ -54,6 +54,8 @@ static inline void digitalWrite(uint8_t pin, uint8_t val) {
 
 int analogRead(uint8_t pin);
 
+int8_t first_free_channel();
+
 void pwm_init(uint8_t pin, uint8_t channel);
 void analogWrite(uint8_t pin, uint8_t val);
 

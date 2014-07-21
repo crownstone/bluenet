@@ -21,6 +21,39 @@
 // Replace ^([^/ #\n\r]+)\[(\d+)\] (\S+) (.*)
 // With    #define NRF51_GPIOTE_$1_$2                *(volatile uint32_t*) (NRF51_GPIOTE + $3)          // $4
 
+// Todo: reorder this document
+//   POWER    
+//   CLOCK                   0x40000000                    Clock control
+//   RADIO                   0x40001000                    2.4 GHz radio
+//   UART                    0x40002000                    UART
+//   SPI0                    0x40003000                    First SPI
+//   TWI0                    0x40003000                    First TWI (I2C compatible)
+//   SPI1                    0x40004000                    Second SPI
+//   TWI1                    0x40004000                    Second TWI (I2C compatible)
+//   GPIOTE                  0x40006000                    GPIO tasks and events
+//   ADC                     0x40007000                    Analog-Digital converter
+//   TIMER0                  0x40008000                    High-frequency timer
+//   TIMER1                  0x40009000
+//   TIMER2                  0x4000A000
+//   RTC0                    0x4000B000                    Low-frequency counter (real-time counter)
+//   TEMP                    0x4000C000                    Temperature sensor
+//   RNG                     0x4000D000                    Random number generator
+//   ECB                     0x4000E000                    Crypto electronic codebook
+//   CCM                     0x4000F000                    AES
+//   AAR                     0x4000F000                    Accelerated address resolver
+//   WDT                     0x40010000                    Watchdog timer
+//   RTC1                    0x40011000                    Low-frequency counter (real-time counter)
+//   QDEC                    0x40012000                    Quadrature decoder
+//   NVMC                    0x4001E000                    Non-volatile memory controller
+//   PPI                     0x4001F000                    Programmable peripheral interconnect (not Blackfin PPI)
+//   GPIO                    0x50000000                    GPIO
+//
+// All these peripherals can be accessed through the standard ARM Cortex Advanced Peripheral Bus (APB) and the AMBA 
+// High-performance (AHB) registers. And they can be accessed through task, event, and interrupt registers.
+//
+// Tasks are used to indicate functionality within a peripheral. Each task in a peripheral has a separate register.
+// Events indicate information to be exchanged between the CPU and the peripherals, for example, some state change.
+// A shortcut connects a task with an event.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// NRF51_POWER //////////////////////////////////////////////////////////////////////////////////////////
@@ -104,13 +137,13 @@
 #define NRF51_TIMER0_INTENSET            *(volatile uint32_t*) (NRF51_TIMER0 + 0x304)       //Write-only - configures which events generate a Timer interrupt
 #define NRF51_TIMER0_INTENCLR            *(volatile uint32_t*) (NRF51_TIMER0 + 0x308)       //Write-only - configures which events do not generate a Timer interrupt
 #define NRF51_TIMER0_MODE                *(volatile uint32_t*) (NRF51_TIMER0 + 0x504)       //Timer mode selection
-#define NRF51_TIMER0_MODE_TIMER 0
-#define NRF51_TIMER0_MODE_COUNTER 1
-#define NRF51_TIMER0_BITMODE_16_BIT 0
-#define NRF51_TIMER0_BITMODE_8_BIT 1
-#define NRF51_TIMER0_BITMODE_24_BIT 2
-#define NRF51_TIMER0_BITMODE_32_BIT 3
+#define NRF51_TIMER0_MODE_TIMER          0
+#define NRF51_TIMER0_MODE_COUNTER        1
 #define NRF51_TIMER0_BITMODE             *(volatile uint32_t*) (NRF51_TIMER0 + 0x508)       //Configure the number of bits used by the TIMER
+#define NRF51_TIMER0_BITMODE_16_BIT      0
+#define NRF51_TIMER0_BITMODE_8_BIT       1
+#define NRF51_TIMER0_BITMODE_24_BIT      2
+#define NRF51_TIMER0_BITMODE_32_BIT      3
 #define NRF51_TIMER0_PRESCALER           *(volatile uint32_t*) (NRF51_TIMER0 + 0x510)       //Timer prescaler register
 #define NRF51_TIMER0_CC_0                *(volatile uint32_t*) (NRF51_TIMER0 + 0x540)       //Capture/Compare register 0
 #define NRF51_TIMER0_CC_1                *(volatile uint32_t*) (NRF51_TIMER0 + 0x544)       //Capture/Compare register 1
@@ -137,6 +170,22 @@
 #define NRF51_EVENT_INTERRUPT_N(perif, event) (1<<(((((uint32_t)&event) - ((uint32_t)perif)) - 0x100) >> 2))
 //REGISTERS
 #define NRF51_TIMER1_SHORTS              *(volatile uint32_t*) (NRF51_TIMER1 + 0x200)       //Shortcuts
+#define NRF51_TIMER1_INTENSET            *(volatile uint32_t*) (NRF51_TIMER1 + 0x304)       //Write-only - configures which events generate a Timer interrupt
+#define NRF51_TIMER1_INTENCLR            *(volatile uint32_t*) (NRF51_TIMER1 + 0x308)       //Write-only - configures which events do not generate a Timer interrupt
+#define NRF51_TIMER1_MODE                *(volatile uint32_t*) (NRF51_TIMER1 + 0x504)       //Timer mode selection, either TIMER, or COUNTER
+#define NRF51_TIMER1_MODE_TIMER          0
+#define NRF51_TIMER1_MODE_COUNTER        1
+#define NRF51_TIMER1_BITMODE             *(volatile uint16_t*) (NRF51_TIMER1 + 0x508)       //Configure the number of bits used by the TIMER
+#define NRF51_TIMER1_BITMODE_16_BIT      0
+#define NRF51_TIMER1_BITMODE_8_BIT       1
+#define NRF51_TIMER1_BITMODE_24_BIT      2
+#define NRF51_TIMER1_BITMODE_32_BIT      3
+#define NRF51_TIMER1_PRESCALER           *(volatile uint32_t*) (NRF51_TIMER1 + 0x510)       //Timer prescaler register
+#define NRF51_TIMER1_CC_0                *(volatile uint32_t*) (NRF51_TIMER1 + 0x540)       //Capture/Compare register 0
+#define NRF51_TIMER1_CC_1                *(volatile uint32_t*) (NRF51_TIMER1 + 0x544)       //Capture/Compare register 1
+#define NRF51_TIMER1_CC_2                *(volatile uint32_t*) (NRF51_TIMER1 + 0x548)       //Capture/Compare register 2
+#define NRF51_TIMER1_CC_3                *(volatile uint32_t*) (NRF51_TIMER1 + 0x54C)       //Capture/Compare register 3
+
 #define NRF51_TIMER_SHORTS_COMPARE0_CLEAR (1 << 0)
 #define NRF51_TIMER_SHORTS_COMPARE1_CLEAR (1 << 1)
 #define NRF51_TIMER_SHORTS_COMPARE2_CLEAR (1 << 2)
@@ -145,24 +194,6 @@
 #define NRF51_TIMER_SHORTS_COMPARE1_STOP  (1 << 9)
 #define NRF51_TIMER_SHORTS_COMPARE2_STOP  (1 << 10)
 #define NRF51_TIMER_SHORTS_COMPARE3_STOP  (1 << 11)
-
-
-#define NRF51_TIMER1_INTENSET            *(volatile uint32_t*) (NRF51_TIMER1 + 0x304)       //Write-only - configures which events generate a Timer interrupt
-#define NRF51_TIMER1_INTENCLR            *(volatile uint32_t*) (NRF51_TIMER1 + 0x308)       //Write-only - configures which events do not generate a Timer interrupt
-#define NRF51_TIMER1_MODE                *(volatile uint32_t*) (NRF51_TIMER1 + 0x504)       //Timer mode selection
-#define NRF51_TIMER1_MODE_TIMER 0
-#define NRF51_TIMER1_MODE_COUNTER 1
-#define NRF51_TIMER1_BITMODE_16_BIT 0
-#define NRF51_TIMER1_BITMODE_8_BIT 1
-#define NRF51_TIMER1_BITMODE_24_BIT 2
-#define NRF51_TIMER1_BITMODE_32_BIT 3
-#define NRF51_TIMER1_BITMODE             *(volatile uint16_t*) (NRF51_TIMER1 + 0x508)       //Configure the number of bits used by the TIMER
-#define NRF51_TIMER1_PRESCALER           *(volatile uint32_t*) (NRF51_TIMER1 + 0x510)       //Timer prescaler register
-#define NRF51_TIMER1_CC_0                *(volatile uint32_t*) (NRF51_TIMER1 + 0x540)       //Capture/Compare register 0
-#define NRF51_TIMER1_CC_1                *(volatile uint32_t*) (NRF51_TIMER1 + 0x544)       //Capture/Compare register 1
-#define NRF51_TIMER1_CC_2                *(volatile uint32_t*) (NRF51_TIMER1 + 0x548)       //Capture/Compare register 2
-#define NRF51_TIMER1_CC_3                *(volatile uint32_t*) (NRF51_TIMER1 + 0x54C)       //Capture/Compare register 3
-
 
 // TASKS
 #define NRF51_TIMER2                     (volatile uint8_t*) 0x4000A000
@@ -185,14 +216,14 @@
 #define NRF51_TIMER2_INTENSET            *(volatile uint32_t*) (NRF51_TIMER2 + 0x304)       //Write-only - configures which events generate a Timer interrupt
 #define NRF51_TIMER2_INTENCLR            *(volatile uint32_t*) (NRF51_TIMER2 + 0x308)       //Write-only - configures which events do not generate a Timer interrupt
 #define NRF51_TIMER2_MODE                *(volatile uint32_t*) (NRF51_TIMER2 + 0x504)       //Timer mode selection
-#define NRF51_TIMER2_MODE_TIMER 0
-#define NRF51_TIMER2_MODE_COUNTER 1
-#define NRF51_TIMER2_BITMODE_16_BIT 0
-#define NRF51_TIMER2_BITMODE_8_BIT 1
-#define NRF51_TIMER2_BITMODE_24_BIT 2
-#define NRF51_TIMER2_BITMODE_32_BIT 3
+#define NRF51_TIMER2_MODE_TIMER          0
+#define NRF51_TIMER2_MODE_COUNTER        1
 #define NRF51_TIMER2_BITMODE             *(volatile uint32_t*) (NRF51_TIMER2 + 0x508)       //Configure the number of bits used by the TIMER
-#define NRF51_TIMER2_PRESCALER           *(volatile uint32_t*) (NRF51_TIMER2 + 0x510)       //Timer prescaler register
+#define NRF51_TIMER2_BITMODE_16_BIT      0
+#define NRF51_TIMER2_BITMODE_8_BIT       1
+#define NRF51_TIMER2_BITMODE_24_BIT      2
+#define NRF51_TIMER2_BITMODE_32_BIT      3
+#define NRF51_TIMER2_PRESCALER           *(volatile uint32_t*) (NRF51_TIMER2 + 0x510)       //Timer prescaler register, [0-9]
 #define NRF51_TIMER2_CC_0                *(volatile uint32_t*) (NRF51_TIMER2 + 0x540)       //Capture/Compare register 0
 #define NRF51_TIMER2_CC_1                *(volatile uint32_t*) (NRF51_TIMER2 + 0x544)       //Capture/Compare register 1
 #define NRF51_TIMER2_CC_2                *(volatile uint32_t*) (NRF51_TIMER2 + 0x548)       //Capture/Compare register 2
@@ -429,20 +460,20 @@
 #define NRF51_SPI_FREQUENCY_8M         0x80000000    // 8 Mbps
 
 #define NRF51_SPI_CONFIG(n)            *(volatile uint32_t*) (NRF51_SPI_N(n) + 0x554)         //Configuration register
-#define NRF51_SPI_CONFIG_MSBFIRST ~1
-#define NRF51_SPI_CONFIG_LSBFIRST 2
-#define NRF51_SPI_CONFIG_ACTIVE_HIGH ~2
-#define NRF51_SPI_CONFIG_ACTIVE_LOW 2
-#define NRF51_SPI_CONFIG_CPHA_LEADING ~4
+#define NRF51_SPI_CONFIG_MSBFIRST      ~1
+#define NRF51_SPI_CONFIG_LSBFIRST      2
+#define NRF51_SPI_CONFIG_ACTIVE_HIGH   ~2
+#define NRF51_SPI_CONFIG_ACTIVE_LOW    2
+#define NRF51_SPI_CONFIG_CPHA_LEADING  ~4
 #define NRF51_SPI_CONFIG_CPHA_TRAILING 4
 
 
 // ARMV v6 ARM Table B3-18 NVIC register summary
-#define NRF51_NVIC_ISER *(volatile uint32_t*)0xE000E100                                       // Interrupt Set-Enable Register.
-#define NRF51_NVIC_ICER *(volatile uint32_t*)0xE000E180                                       // Interrupt Clear-Enable Register
-#define NRF51_NVIC_ISPR *(volatile uint32_t*)0xE000E200                                       // Interrupt Set-Pending Register
-#define NRF51_NVIC_ICPR *(volatile uint32_t*)0xE000E280                                       // Interrupt Clear-Pending Register
-#define NRF51_NVIC_IPRn(n) *(volatile uint32_t*)(0xE000E400+(4*n))                            // Interrupt Priority Registers
+#define NRF51_NVIC_ISER                *(volatile uint32_t*)0xE000E100                        // Interrupt Set-Enable Register.
+#define NRF51_NVIC_ICER                *(volatile uint32_t*)0xE000E180                        // Interrupt Clear-Enable Register
+#define NRF51_NVIC_ISPR                *(volatile uint32_t*)0xE000E200                        // Interrupt Set-Pending Register
+#define NRF51_NVIC_ICPR                *(volatile uint32_t*)0xE000E280                        // Interrupt Clear-Pending Register
+#define NRF51_NVIC_IPRn(n)             *(volatile uint32_t*)(0xE000E400+(4*n))                // Interrupt Priority Registers
 
 
 

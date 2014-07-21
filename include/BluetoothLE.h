@@ -25,9 +25,20 @@ extern "C" {
 
 }
 
+#include "nrf.h"
+#include "nrf_gpio.h"
+#include "nrf_delay.h"
+#include "nrf_pwm.h"
+
+
+
 using std::vector;
 using std::string;
 using std::exception;
+
+const uint8_t sin_table[] = {0, 0,1,2,4,6,9,12,16,20,24,29,35,40,	46,	53,	59,	66,	74,	81,	88,	96,	104,112,120,128,136,144,152,160,168,175,182,190,197,203,210,216,221,227,
+	232,236,240,244,247,250,252,254,255,255,255,255,255,254,252,250,247,244,240,236,232,227,221,216,210,203,197,190,182,175,168,160,152,144,136,128,120,112,104,
+	96,88,81,74,66,59,	53,	46,	40,	35,	29,24,	20,	16,	12,	9,	6,	4,	2,1,0};
 
 // TOOD replace vector with a fixed, in place array of size capacity.
 template<typename T> class tuple : public vector<T> {
@@ -735,6 +746,21 @@ namespace BLEpp {
 		}
 		case BLE_GAP_EVT_RSSI_CHANGED: {
 			volatile uint8_t rssi = p_ble_evt->evt.gap_evt.params.rssi_changed.rssi;
+
+			// set LED here
+			int sine_index = (rssi - 170) * 2;
+			if (sine_index < 0) sine_index = 0;
+			if (sine_index > 100) sine_index = 100;
+//			__asm("BKPT");
+//			int sine_index = (rssi % 10) *10;
+			nrf_pwm_set_value(0, sin_table[sine_index]);
+			nrf_pwm_set_value(1, sin_table[(sine_index + 33) % 100]);
+			nrf_pwm_set_value(2, sin_table[(sine_index + 66) % 100]);
+			//			counter = (counter + 1) % 100;
+
+			// Add a delay to control the speed of the sine wave
+			nrf_delay_us(8000);
+
 			setRSSILevel(rssi);
 			break;
 		}
