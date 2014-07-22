@@ -12,7 +12,7 @@ r
 w4 4001e504 1
 sleep 1000
 r
-loadbin @SOFTDEVICE_DIR@_softdevice_uicr.bin 0x10001000
-loadbin @SOFTDEVICE_DIR@_softdevice_mainpart.bin 0
+loadbin @SOFTDEVICE_DIR@/softdevice_uicr.bin 0x10001000
+loadbin @SOFTDEVICE_DIR@/softdevice_mainpart.bin 0
 r
 q

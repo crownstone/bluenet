@@ -17,9 +17,9 @@ if [ ! -e ${FULLNAME_SOFTDEVICE} ]; then
 fi
 
 # Output configuration file
-NRF_UICR_BIN=${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice_uicr.bin
+NRF_UICR_BIN=${SOFTDEVICE_DIR}/softdevice_uicr.bin
 # Output main file
-NRF_MAIN_BIN=${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice_mainpart.bin
+NRF_MAIN_BIN=${SOFTDEVICE_DIR}/softdevice_mainpart.bin
 
 OBJCOPY=${COMPILER_PATH}/bin/${COMPILER_TYPE}-objcopy
 
