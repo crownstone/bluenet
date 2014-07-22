@@ -65,6 +65,9 @@ endif()
 
 #######################################################################################################################
 
+MESSAGE(STATUS "Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld)
+
 # Libraries (math, stdc++ libraries, etc.)
 SET(LIBS "-lsupc++ -lm -lc_s -lstdc++_s")
 

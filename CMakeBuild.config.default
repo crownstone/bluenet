@@ -1,6 +1,4 @@
 # The CMake build system expects a few directories and the type of the compiler to use
-# You will need to copy this and adjust to your own system
-#   cp CMakeBuild.config.default CMakeBuild.config
 
 # This is the directory with /Source and /Include subdirectories from the Nordic SDK
 NRF51822_DIR=/opt/nrf51/lib/nrf51sdk/Nordic/nrf51822
@@ -9,10 +7,33 @@ NRF51822_DIR=/opt/nrf51/lib/nrf51sdk/Nordic/nrf51822
 SOFTDEVICE_DIR=/opt/softdevices
 
 # The name of the SoftDevicei (without _softdevice.hex)
-SOFTDEVICE=s110_nrf51822_5.2.1
+#SOFTDEVICE=s110_nrf51822_5.2.1
+#SOFTDEVICE=s110_nrf51822_6.0.0
+SOFTDEVICE=s110_nrf51822_7.0.0
+
+# Starting with SoftDevice S110 v7 there is no separate UICR section in the .hex file
+# Disable for v5 and v6
+#SOFTDEVICE_NO_SEPARATE_UICR_SECTION=0
+SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
+
+# If you have a SoftDevice without UICR section you need to start from 0x00015000
+# SoftDevice takes 80kB and application 176kB
+#APPLICATION_START_ADDRESS=0x00014000
+#APPLICATION_LENGTH=0x2c000
+
+# SoftDevice takes 88kB and application 168kB
+APPLICATION_START_ADDRESS=0x00016000
+APPLICATION_LENGTH=0x2a000
 
 # This is the directory where the cross-compiler resides
 COMPILER_PATH=/opt/compiler/gcc-arm-none-eabi-4_8-2013q4
 
 # The compiler type 
 COMPILER_TYPE=arm-none-eabi
+
+# The JLink utility (when using the Segger to flash the nRF)
+JLINK=/usr/bin/JLinkExe
+
+# The JLink utilty that can be used with gdb
+JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
+

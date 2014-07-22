@@ -28,4 +28,9 @@ if [[ ! $FILE == *.bin ]]; then
 fi
 
 sed "s|@BIN@|$FILE|" $SCRIPT_DIR/upload.script > $TEMP_DIR/upload.script
+
+echo "Program application starting from $APPLICATION_START_ADDRESS"
+
+sed -i "s|@START_ADDRESS@|$APPLICATION_START_ADDRESS|" $TEMP_DIR/upload.script
+
 $JLINK -Device $DEVICE -If SWD $TEMP_DIR/upload.script 

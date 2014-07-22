@@ -12,7 +12,8 @@ source ../CMakeBuild.config
 build() {
 	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"
 	echo "However, we still need to extract the binary and the config blob"
-	./softdevice_objcopy.sh $SOFTDEVICE_DIR $SOFTDEVICE $COMPILER_PATH $COMPILER_TYPE
+	echo "  from $SOFTDEVICE_DIR/$SOFTDEVICE"
+	./softdevice_objcopy.sh $SOFTDEVICE_DIR $SOFTDEVICE $COMPILER_PATH $COMPILER_TYPE $SOFTDEVICE_NO_SEPARATE_UICR_SECTION
 }
 
 upload() {

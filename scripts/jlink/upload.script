@@ -1,5 +1,5 @@
 power on
 r
-loadbin @BIN@ 0x00014000
+loadbin @BIN@ @START_ADDRESS@
 r
 qc
