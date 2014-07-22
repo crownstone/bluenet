@@ -63,6 +63,12 @@ And there you go. There are some more utility scripts, such as `reboot.sh`. Use 
 * Create an algorithm to come up with all locations of the nodes. These positions are relative, not absolute. The network will be known up to rotation and scale.
 * Implement this algorithm in a distributed fashion. The type of algorithm I have in mind is belief propagation / message passing.
 
+## Commercial use
+
+This code is used in a commercial product at DoBots, the [Crownstone](http://dobots.nl/products/crownstone). Our intellectual property exists on two levels. First, you can license our technology to create these extremely cheap BLE building blocks yourself. Second, we build services around BLE-enabled devices. This ranges from smartphones to [gadgets such as the "virtual memo"](http://dobots.nl/2014/07/15/ble-dobeacon-a-virtual-memo/). What this means for you as a developer is that we can be transparent about the software on the Crownstone, which is why this repository exists. Feel free to build your own services on top of it, and benefit from our software development as much as you want. 
+
+It would be much appreciated to state "DoBots inside" in which case we will be happy to provide you support from our staff.
+
 ## Copyrights
 
 Obviously, the copyrights of the code written by Christoper, belong to him.
