@@ -1,9 +1,13 @@
 #include "Pool.h"
 #include "BluetoothLE.h"
 #include "ble_error.h"
-#include "ble_stack_handler.h"
+
+#if(NORDIC_SDK_VERSION < 5)
+	#include "ble_stack_handler.h"
+	#include "ble_nrf6310_pins.h"
+#endif
+
 #include "nordic_common.h"
-#include "ble_nrf6310_pins.h"
 #include "nRF51822.h"
 
 #include <stdbool.h>

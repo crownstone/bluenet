@@ -23,7 +23,10 @@ extern "C" {
 #include "ble_gatts.h"
 #include "ble_gatt.h"
 
+#include "ble_error.h"
+
 }
+
 
 #include "nrf.h"
 #include "nrf_gpio.h"
@@ -75,7 +78,9 @@ namespace BLEpp {
     };
 
 
+// A macro to throw an exception if the given function does not have the result NRF_SUCCESS
 #define BLE_CALL(function, args) do {uint32_t result = function args; if (result != NRF_SUCCESS) throw ble_exception(# function, __FILE__, __LINE__); } while(0)
+
 #define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) throw ble_exception(message, __FILE__, __LINE__); } while(0)
 #define BLE_THROW(message) throw ble_exception(message, __FILE__, __LINE__)
 

@@ -19,6 +19,25 @@ The installation should not be hard when you have the Nordic SDK. Get this from 
 * [JLink Software](http://www.segger.com/jlink-software.html)
 * sudo aptitude install cmake
 
+### Bugs
+
+There is a bug in one of the SDK files, namely `nrf_svc.h` (different location depending on the SDK version):
+
+    /opt/nrf51_sdk/v6/nrf51822/Include/s110/nrf_svc.h
+    /opt/nrf51_sdk/v4/nrf51822/Include/ble/softdevice/nrf_svc.h
+
+Change the assembly line:
+
+        "bx r14" : : "I" (number) : "r0" \
+
+Into:
+
+        "bx r14" : : "I" ((uint16_t)number) : "r0" \
+
+
+
+### Configuration
+
 Fork the code by clicking on:
 
 * Fork [https://github.com/mrquincle/bluenet/fork](https://github.com/mrquincle/bluenet/fork).
