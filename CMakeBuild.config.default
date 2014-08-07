@@ -11,7 +11,7 @@ SOFTDEVICE_DIR=/opt/softdevices
 # APPLICATION_LENGTH                   - 176kB corresponds with 0x2c000 hex
 
 #######################################################################################################################
-# The old SoftDevice (v5) and the newer SDK version (v4)
+# The old SoftDevice (v5) and the older SDK version (v4)
 #######################################################################################################################
 NRF51822_DIR=/opt/nrf51_sdk/v4/nrf51822
 NORDIC_SDK_VERSION=4
