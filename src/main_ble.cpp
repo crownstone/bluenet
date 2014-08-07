@@ -69,7 +69,7 @@ int main() {
 	Nrf51822BluetoothStack stack(pool);
 
 	// Set advertising parameters such as the device name and appearance.  These values will
-	stack.setDeviceName("Stone")
+	stack.setDeviceName("Crown")
 		// controls how device appears in GUI.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 	//	 .setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
