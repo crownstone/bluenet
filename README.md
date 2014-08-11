@@ -34,7 +34,11 @@ Into:
 
         "bx r14" : : "I" ((uint16_t)number) : "r0" \
 
+## Usage
 
+You will have to attach a programmer/debugger somehow. Towards that you only need four pins. On the RFduino this is `GND`, `3V`, `RESET`, and `FACTORY` and they are subsequent pins on that side of the RFduino where there are most pins (the other side has the antenna stealing a bit of space for eventual pins). The pin layout of the JLink connector is written out on the [DoBots blog](http://dobots.nl/2014/03/05/rfduino-without-rfduino-code/).
+
+On the moment the current functionality is extremely simple. The service `00002220-0000-1000-8000-00805f9b34fb` provides a write characteristic `0124` to which can be written a value. If you attach a devices to pin `GPIO5` you will see it toggled.
 
 ### Configuration
 
