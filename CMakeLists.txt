@@ -122,10 +122,13 @@ INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble/ble_services")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/gcc")
 
 # Recent changes in directory structure with new SDK
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/s110")
+IF(${SOFTDEVICE_SERIES} STREQUAL "separate_softdevice_source")
+	MESSAGE(STATUS "Add s110 directory from SDK")
+	INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/s110")
+ENDIF()
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/sd_common")
 
-INCLUDE_DIRECTORIES("${SOFTDEVICE_DIR}/include")
+INCLUDE_DIRECTORIES("${SOFTDEVICE_DIR}/${SOFTDEVICE}_API/include")
 
 # Show which directories are actually included to the user
 GET_PROPERTY(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)

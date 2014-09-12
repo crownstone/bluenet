@@ -5,10 +5,10 @@
 #include "BluetoothLE.h"
 #include "nRF51822.h"
 
-#if(NORDIC_SDK_VERSION > 5)
-//#include "app_error.h"
+#if(NORDIC_SDK_VERSION >= 6)
 #include "nrf_soc.h"
 #endif
+
 #include "ble_error.h"
 
 using namespace BLEpp;
@@ -333,6 +333,7 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack(Pool& pool) :
 	_inited(false),
 	_started(false),
 	_advertising(false),
+	_scanning(false),
 
 	_conn_handle(BLE_CONN_HANDLE_INVALID),
 
@@ -365,8 +366,6 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	if (_evt_buffer) free(_evt_buffer);
 }
 
-//#define DEVICE_NAME "RFduino"
-
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	if (_inited) return *this;
@@ -374,11 +373,10 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	// Initialise SoftDevice
 	BLE_CALL(sd_softdevice_enable, (_clock_source, softdevice_assertion_handler) );
 
-	ble_version_t version({});
-	version.company_id = 12;
-
 	// enable the BLE stack
 #if(NORDIC_SDK_VERSION >= 6)
+
+#if(SOFTDEVICE_SERIES == 110) 
 	// do not define the service_changed characteristic, of course allow future changes
 	#define IS_SRVC_CHANGED_CHARACT_PRESENT  1
 	ble_enable_params_t ble_enable_params;
@@ -386,19 +384,20 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
 	BLE_CALL(sd_ble_enable, (&ble_enable_params) );
 #endif
+#endif
 
 	// according to the migration guide the address needs to be set directly after the sd_ble_enable call
 	// due to "an issue present in the s110_nrf51822_7.0.0 release
 #if(NORDIC_SDK_VERSION >= 7)
-	BLE_CALL(sd_ble_gap_enable);
+	BLE_CALL(sd_ble_gap_enable, () );
 	ble_gap_addr_t addr;
-	BLE_CALL(sd_ble_gap_address_get, (&addr));
-	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr));
+	BLE_CALL(sd_ble_gap_address_get, (&addr) );
+	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr) );
 #endif
 
+	ble_version_t version({});
+	version.company_id = 12;
 	BLE_CALL(sd_ble_version_get, (&version) );
-//	sd_ble_version_get(&version);
-//#endif
 
 	sd_nvic_EnableIRQ(SWI2_IRQn);
 
@@ -544,6 +543,30 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopAdvertising() {
 	return *this;
 }
 
+#if(SOFTDEVICE_SERIES != 110)
+
+/**
+ * Only call the following functions with a S120 or S130 device that can play a central role. The following functions
+ * are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone
+ * developer.
+ */
+Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
+	if (_scanning) return *this;
+	ble_gap_scan_params_t p_scan_params;
+	// todo: which fields to set here?
+	BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params) );
+	_scanning = true;
+	return *this;
+}
+
+Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopScanning() {
+	if (!_scanning) return *this;
+	BLE_CALL(sd_ble_gap_scan_stop, () );
+	_scanning = false;
+	return *this;
+}
+#endif
+
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback) {
 	_callback_radio = callback;
 
@@ -667,18 +690,33 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 			ble_gap_sec_params_t sec_params;
 
-
+#if(SOFTDEVICE_SERIES == 110) 
 			sec_params.timeout      = 30; // seconds
+#endif
 			sec_params.bond         = 1;  // perform bonding.
 			sec_params.mitm         = 0;  // man in the middle protection not required.
 			sec_params.io_caps      = BLE_GAP_IO_CAPS_NONE;  // no display capabilities.
 			sec_params.oob          = 0;  // out of band not available.
 			sec_params.min_key_size = 7;  // min key size
 			sec_params.max_key_size = 16; // max key size.
+
+
+#if(SOFTDEVICE_SERIES != 110) 
+// https://devzone.nordicsemi.com/documentation/nrf51/6.0.0/s120/html/a00527.html#ga7b23027c97b3df21f6cbc23170e55663
+			
+			// do not store the keys for now...
+			//ble_gap_sec_keyset_t sec_keyset;
+			//BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
+			//			BLE_GAP_SEC_STATUS_SUCCESS,
+			//			&sec_params, &sec_keyset) );
+			BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
+						BLE_GAP_SEC_STATUS_SUCCESS,
+						&sec_params, NULL) );
+#else 
 			BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
 						BLE_GAP_SEC_STATUS_SUCCESS,
 						&sec_params) );
-
+#endif
 			break;
 
 		case BLE_GAP_EVT_TIMEOUT:

@@ -843,6 +843,7 @@ namespace BLEpp {
         bool                                        _inited;
         bool                                        _started;
         bool                                        _advertising;
+        bool                                        _scanning;
 
         uint16_t                                    _conn_handle;
 
@@ -976,6 +977,11 @@ namespace BLEpp {
 
         Nrf51822BluetoothStack& stopAdvertising();
 
+#if(SOFTDEVICE_SERIES != 110)
+        Nrf51822BluetoothStack& startScanning();
+
+        Nrf51822BluetoothStack& stopScanning();
+#endif
         Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 
         virtual bool connected() {
