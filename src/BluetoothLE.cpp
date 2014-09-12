@@ -378,8 +378,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	version.company_id = 12;
 
 	// enable the BLE stack
-	// Debugging... Is this call different now? No, BLE_CALL to sd_ble_gap_device_name_set also fails
-#if(NORDIC_SDK_VERSION > 5)
+#if(NORDIC_SDK_VERSION >= 6)
 	// do not define the service_changed characteristic, of course allow future changes
 	#define IS_SRVC_CHANGED_CHARACT_PRESENT  1
 	ble_enable_params_t ble_enable_params;

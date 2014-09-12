@@ -17,7 +17,7 @@ set remote memory-write-packet-size 1024
 #set remote memory-write-packet-size fixed
 load
 monitor reset
-#b main
+b main
 
 #b softdevice_assertion_handler
 
@@ -34,7 +34,7 @@ monitor reset
 #c
 #end
 
-b main_ble.cpp:82
+#b main_fitbit.cpp:107
 
 #b main_ble.cpp:92
 
