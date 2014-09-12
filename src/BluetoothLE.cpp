@@ -377,12 +377,24 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	ble_version_t version({});
 	version.company_id = 12;
 
+	// enable the BLE stack
 	// Debugging... Is this call different now? No, BLE_CALL to sd_ble_gap_device_name_set also fails
 #if(NORDIC_SDK_VERSION > 5)
+	// do not define the service_changed characteristic, of course allow future changes
+	#define IS_SRVC_CHANGED_CHARACT_PRESENT  1
 	ble_enable_params_t ble_enable_params;
 	memset(&ble_enable_params, 0, sizeof(ble_enable_params));
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
-	BLE_CALL(sd_ble_enable, (ble_enable_params) );
+	BLE_CALL(sd_ble_enable, (&ble_enable_params) );
+#endif
+
+	// according to the migration guide the address needs to be set directly after the sd_ble_enable call
+	// due to "an issue present in the s110_nrf51822_7.0.0 release
+#if(NORDIC_SDK_VERSION >= 7)
+	BLE_CALL(sd_ble_gap_enable);
+	ble_gap_addr_t addr;
+	BLE_CALL(sd_ble_gap_address_get, (&addr));
+	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr));
 #endif
 
 	BLE_CALL(sd_ble_version_get, (&version) );
@@ -680,7 +692,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 }
 
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
-	ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
+	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
 	_advertising = false; // it seems like maybe we automatically stop advertising when we're connected.
 
 	BLE_CALL(sd_ble_gap_conn_param_update, (p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params) );
@@ -696,7 +708,7 @@ void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 }
 
 void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
-	ble_gap_evt_disconnected_t disconnected_evt = p_ble_evt->evt.gap_evt.params.disconnected;
+	//ble_gap_evt_disconnected_t disconnected_evt = p_ble_evt->evt.gap_evt.params.disconnected;
 	if (_callback_connected) {
 		_callback_disconnected(p_ble_evt->evt.gap_evt.conn_handle);
 	}
@@ -705,7 +717,8 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 		svc->on_ble_event(p_ble_evt);
 	}
 
-	// Anne: dirty!
+	// Of course this is not nice, but dirty! We immediately start advertising automatically after being 
+	// disconnected. But for now this will be the default behaviour.
 	startAdvertising();
 }
 

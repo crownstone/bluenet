@@ -1,3 +1,10 @@
+/**
+ * Author: Anne van Rossum
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: 14 Aug., 2014
+ * License: LGPLv3+
+ */
+
 #include "Pool.h"
 #include "BluetoothLE.h"
 #include "ble_error.h"
@@ -17,16 +24,20 @@
 using namespace BLEpp;
 
 // on the RFduino
-#define PIN_RED              2
-#define PIN_GREEN            3
-#define PIN_BLUE             4
+#define PIN_RED              2                   // this is GPIO 2 (bottom pin)
+#define PIN_GREEN            3                   // this is GPIO 3 (second pin)
+#define PIN_BLUE             4                   // this is GPIO 4 (third pin)
 
-#define PIN_LED  PIN_GREEN
+#define PIN_LED              PIN_GREEN
 
-#define BINARY_LED
+//#define BINARY_LED
 
 // An RGB led as with the rfduino requires a sine wave, and thus a PWM signal
 //#define RGB_LED
+
+#define MOTOR_CONTROL
+
+#define PIN_MOTOR            6                   // this is GPIO 6 (fifth pin)
 
 /** Example that sets up the Bluetooth stack with two characteristics:
  *   one textual characteristic available for write and one integer characteristic for read.
@@ -59,6 +70,19 @@ int main() {
 	nrf_pwm_init(&pwm_config);
 #endif
 
+#ifdef MOTOR_CONTROL
+	uint32_t counter = 50;
+//	uint32_t direction = 1;
+	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
+
+	// Set PWM to motor controller with 0-100 resolution, 20kHz PWM frequency, 2MHz timer frequency
+	pwm_config.mode             = PWM_MODE_MTR_100;
+	pwm_config.num_channels     = 1;
+	pwm_config.gpio_num[0]      = PIN_MOTOR;
+
+	// Initialize the PWM library
+	nrf_pwm_init(&pwm_config);
+#endif
 	//NRF51_GPIO_OUTSET = 1 << PIN_GREEN; // set pins high -- LED off
 	//NRF51_GPIO_OUTCLR = 1 << PIN_GREEN; // set red led on.
 
@@ -69,7 +93,7 @@ int main() {
 	Nrf51822BluetoothStack stack(pool);
 
 	// Set advertising parameters such as the device name and appearance.  These values will
-	stack.setDeviceName("Crown")
+	stack.setDeviceName("Arkwa")
 		// controls how device appears in GUI.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 	//	 .setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
@@ -171,18 +195,35 @@ int main() {
 			// Add a delay to control the speed of the sine wave
 			nrf_delay_us(8000);
 #endif
-		});
 
+#ifdef MOTOR_CONTROL
+			int nr = atoi(value.c_str());
+			intChar = nr;
+			counter = (int32_t) nr;	
+			// Update the output with out of phase sine waves
+			//counter = nr;
+			if (counter > 100) counter = 100;
+			if (counter < 50) counter = 50;
+/*
+			if (counter == 100) {
+				direction = 1;
+			}
+			if (counter == 50) {
+				direction = -1;
+			}
+			counter += direction;
+			*/
+			nrf_pwm_set_value(0, counter);
+			// Add a delay to control the speed of the sine wave
+			nrf_delay_us(8000);
+#endif
+		});
 
 		// Begin sending advertising packets over the air.  Again, may want to trigger this from a button press to save power.
 		stack.startAdvertising();
-
-
 		while(1) {
 			// Deliver events from the Bluetooth stack to the callbacks defined above.
 			//		analogWrite(PIN_LED, 50);
 			stack.loop();
 		}
-
-
-		}
+}
