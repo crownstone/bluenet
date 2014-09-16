@@ -21,6 +21,9 @@ b main
 
 #b softdevice_assertion_handler
 
+# The function main() is called from nRF51822.c
+b ResetHandler
+
 # This does not work so well for header files: variables get optimized out...
 #b BluetoothLE.h:313
 #commands

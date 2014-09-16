@@ -9,6 +9,10 @@
 #include "nrf_soc.h"
 #endif
 
+#ifndef SOFTDEVICE_SERIES
+#error "The SOFTDEVICE_SERIES macro is required for compilation. Set it to 110 for example"
+#endif
+
 #include "ble_error.h"
 
 using namespace BLEpp;
@@ -542,6 +546,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopAdvertising() {
 
 	return *this;
 }
+
 
 #if(SOFTDEVICE_SERIES != 110)
 

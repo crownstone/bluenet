@@ -110,15 +110,19 @@ void (* const gVectors[])(void) =
 
 };
 
+// Currently, very dirty set just RFDUINO here. We must make this of course more flexible and be able to compile
+// smoothly for different modules created around the nRF51822 chip.
 #define RFDUINO
 
 __attribute__ ((section(".startup")))
 void ResetHandler(void) {
 
-	// Enable all RAM banks. See PAN_028_v1.6.pdf "16. POWER: RAMON reset value causes problems under certain conditions"
+	// Enable all RAM banks. 
+	// See PAN_028_v1.6.pdf "16. POWER: RAMON reset value causes problems under certain conditions"
 	NRF51_POWER_RAMON |= 0xF;
 
-	// Enable Peripherals.  See PAN_028_v1.6.pdf "25. System: Manual setup is required to enable use of peripherals"
+	// Enable Peripherals. 
+	// See PAN_028_v1.6.pdf "25. System: Manual setup is required to enable use of peripherals"
 	*(uint32_t *)0x40000504 = 0xC007FFDF;
 	*(uint32_t *)0x40006C18 = 0x00008000;
 
@@ -129,9 +133,9 @@ void ResetHandler(void) {
 	// start up crystal LF clock.
 #ifdef RFDUINO
 	/**
-	 * The RFduino synthesizes the low frequency clock from the high frequency clock. There is no external crystal that 
-	 * can be used. It doesn't seem from the datasheets that there is a pin open for a crystal... Synthesizing the clock
-	 * is of course not very energy efficient. 
+	 * The RFduino synthesizes the low frequency clock from the high frequency clock. There is no external crystal 
+	 * that can be used. It doesn't seem from the datasheets that there is a pin open for a crystal... 
+	 * Synthesizing the clock is of course not very energy efficient. 
 	 */
 	NRF51_CLOCK_LFCLKSRC = NRF51_CLOCK_LFCLKSRC_SYNTH;
 #else
@@ -142,9 +146,9 @@ void ResetHandler(void) {
 
 	/*
 	 * There are two power modes in the nRF51, system ON, and system OFF. The former has two sub power modes. The 
-	 * first is called "Constant Latency", the second is called "Low Power". The latter is saving most of the power, the
-	 * former keeps the CPU wakeup latency and automated task response at a minimum, but some resources will be kept
-	 * active when the device is in sleep mode, such as the 16MHz clock.
+	 * first is called "Constant Latency", the second is called "Low Power". The latter is saving most of the 
+	 * power, the former keeps the CPU wakeup latency and automated task response at a minimum, but some resources
+	 * will be kept active when the device is in sleep mode, such as the 16MHz clock.
 	 */
 	// enable constant latency mode.
 	NRF51_POWER_CONSTLAT = 1;
@@ -159,6 +163,7 @@ void ResetHandler(void) {
 	while (dest < &_ebss) *dest++ = 0;
 	while (dest < &dest) *dest++ = 0xdeadbeef;
 
+	// include libc functionality
 	__libc_init_array();
 
 	main();

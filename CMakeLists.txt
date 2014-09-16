@@ -33,7 +33,7 @@ ENDIF(COMMAND cmake_policy)
 SET(TEST_COMPILERS CXX C)
 
 # Set application shorthand
-SET(APPLICATION_SHORTHAND "fitbit")
+SET(APPLICATION_SHORTHAND "crownstone")
 
 # Set name of project
 SET(PROJECT_NAME ${APPLICATION_SHORTHAND} ${TEST_COMPILERS})

@@ -31,6 +31,7 @@ int main() {
 #ifdef BINARY_LED
 	NRF51_GPIO_DIRSET = 1 << PIN_LED; // set pins to output
 	NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
+	NRF51_GPIO_OUTSET = 1 << PIN_LED; // pin low, led goes on
 	uint32_t counter = 0;
 #endif
 	// Memory pool of 30 blocks of 30 bytes each, this already crashes the thing...

@@ -60,6 +60,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //TASKS
+// Anne: is this correct? Shouldn't NRF51_POWER be equal to 0x40000000 ?
 #define NRF51_POWER                    (volatile uint8_t*) 0x4000B000
 #define NRF51_POWER_CONSTLAT           *(volatile uint32_t*) (NRF51_POWER + 0x078)          //Enable constant latency mode
 #define NRF51_POWER_LOWPWR             *(volatile uint32_t*) (NRF51_POWER + 0x07C)          //Enable low power mode (variable latency)
