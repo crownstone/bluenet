@@ -1,2 +1,3 @@
 CMakeBuild.config
+CMakeBuild.config.s*
 tags

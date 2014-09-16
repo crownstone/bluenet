@@ -28,9 +28,9 @@ using namespace BLEpp;
 #define PIN_GREEN            3                   // this is GPIO 3 (second pin)
 #define PIN_BLUE             4                   // this is GPIO 4 (third pin)
 
-#define PIN_LED              PIN_GREEN
+#define PIN_LED              0                   // this is GPIO 0
 
-//#define BINARY_LED
+#define BINARY_LED
 
 // An RGB led as with the rfduino requires a sine wave, and thus a PWM signal
 //#define RGB_LED
@@ -45,9 +45,10 @@ using namespace BLEpp;
  **/
 int main() {
 #ifdef BINARY_LED
+	uint32_t bin_counter = 0;
 	NRF51_GPIO_DIRSET = 1 << PIN_LED; // set pins to output
 	NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
-	uint32_t counter = 0;
+	NRF51_GPIO_OUTSET = 1 << PIN_LED; // pin low, led goes on
 #endif
 	//	tick_init();
 	//	pwm_init(PIN_GREEN, 1);
@@ -57,7 +58,7 @@ int main() {
 	//		i++;	
 	//	};
 #ifdef RGB_LED
-	uint32_t counter = 0;
+	uint32_t rgb_counter = 0;
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
 
 	pwm_config.mode             = PWM_MODE_LED_100;
@@ -71,7 +72,7 @@ int main() {
 #endif
 
 #ifdef MOTOR_CONTROL
-	uint32_t counter = 50;
+	uint32_t mtr_counter = 50;
 //	uint32_t direction = 1;
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
 
@@ -170,8 +171,8 @@ int main() {
 				// set the value of the "number" characteristic to the value written to the text characteristic.
 				//int nr = value;
 #ifdef BINARY_LED
-			counter++;
-			if (counter % 2) {
+			bin_counter++;
+			if (bin_counter % 2) {
 				NRF51_GPIO_OUTSET = 1 << PIN_LED; // pin high, led goes on
 			} else {
 				NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
@@ -185,12 +186,11 @@ int main() {
 			//				analogWrite(PIN_RED, nr);
 			//
 			// Update the 3 outputs with out of phase sine waves
-			counter = nr;
-			if (counter > 100) counter = 100;
-			nrf_pwm_set_value(0, sin_table[counter]);
-			nrf_pwm_set_value(1, sin_table[(counter + 33) % 100]);
-			nrf_pwm_set_value(2, sin_table[(counter + 66) % 100]);
-			//			counter = (counter + 1) % 100;
+			rgb_counter = nr;
+			if (rgb_counter > 100) rgb_counter = 100;
+			nrf_pwm_set_value(0, sin_table[rgb_counter]);
+			nrf_pwm_set_value(1, sin_table[(rgb_counter + 33) % 100]);
+			nrf_pwm_set_value(2, sin_table[(rgb_counter + 66) % 100]);
 
 			// Add a delay to control the speed of the sine wave
 			nrf_delay_us(8000);
@@ -199,21 +199,21 @@ int main() {
 #ifdef MOTOR_CONTROL
 			int nr = atoi(value.c_str());
 			intChar = nr;
-			counter = (int32_t) nr;	
+			mtr_counter = (int32_t) nr;	
 			// Update the output with out of phase sine waves
-			//counter = nr;
-			if (counter > 100) counter = 100;
-			if (counter < 50) counter = 50;
+			//mtr_counter = nr;
+			if (mtr_counter > 100) mtr_counter = 100;
+			if (mtr_counter < 50) mtr_counter = 50;
 /*
-			if (counter == 100) {
+			if (mtr_counter == 100) {
 				direction = 1;
 			}
-			if (counter == 50) {
+			if (mtr_counter == 50) {
 				direction = -1;
 			}
-			counter += direction;
+			mtr_counter += direction;
 			*/
-			nrf_pwm_set_value(0, counter);
+			nrf_pwm_set_value(0, mtr_counter);
 			// Add a delay to control the speed of the sine wave
 			nrf_delay_us(8000);
 #endif

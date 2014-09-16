@@ -1,6 +1,10 @@
 #include <stdint.h>
 #include "nRF51822.h"
 
+// Currently, very dirty set just RFDUINO here. We must make this of course more flexible and be able to compile
+// smoothly for different modules created around the nRF51822 chip.
+#define RFDUINO
+
 extern unsigned const long _stext;
 extern unsigned const long _etext;
 extern unsigned const long _sdata;
@@ -109,10 +113,6 @@ void (* const gVectors[])(void) =
 	0,
 
 };
-
-// Currently, very dirty set just RFDUINO here. We must make this of course more flexible and be able to compile
-// smoothly for different modules created around the nRF51822 chip.
-#define RFDUINO
 
 __attribute__ ((section(".startup")))
 void ResetHandler(void) {
