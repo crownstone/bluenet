@@ -34,17 +34,16 @@ extern "C" {
 #include "nrf_pwm.h"
 
 
-
-using std::vector;
-using std::string;
-using std::exception;
+//using std::vector;
+//using std::string;
+//using std::exception;
 
 const uint8_t sin_table[] = {0, 0,1,2,4,6,9,12,16,20,24,29,35,40,	46,	53,	59,	66,	74,	81,	88,	96,	104,112,120,128,136,144,152,160,168,175,182,190,197,203,210,216,221,227,
 	232,236,240,244,247,250,252,254,255,255,255,255,255,254,252,250,247,244,240,236,232,227,221,216,210,203,197,190,182,175,168,160,152,144,136,128,120,112,104,
 	96,88,81,74,66,59,	53,	46,	40,	35,	29,24,	20,	16,	12,	9,	6,	4,	2,1,0};
 
-// TOOD replace vector with a fixed, in place array of size capacity.
-template<typename T> class tuple : public vector<T> {
+// TOOD replace std::vector with a fixed, in place array of size capacity.
+template<typename T> class tuple : public std::vector<T> {
   public:
     tuple() {}
 };
@@ -57,7 +56,7 @@ template<typename T, uint8_t capacity> class fixed_tuple : public tuple<T> {
 };
 
 extern "C" {
-void ble_error_handler (string msg, uint32_t line_num, const char * p_file_name);
+void ble_error_handler (std::string msg, uint32_t line_num, const char * p_file_name);
 extern void softdevice_assertion_handler(uint32_t pc, uint16_t line_number, const uint8_t * p_file_name);
 void SWI1_IRQHandler(void);
 }
@@ -66,10 +65,10 @@ namespace BLEpp {
 
 #ifdef __EXCEPTIONS
 
-    class ble_exception : public exception {
+    class ble_exception : public std::exception {
       public:
-        string _message;
-        ble_exception(string message, string file = "<unknown>", int line = 0) : _message(message) {}
+        std::string _message;
+        ble_exception(std::string message, std::string file = "<unknown>", int line = 0) : _message(message) {}
         ~ble_exception() throw() {}
 
         virtual char const *what() const throw() {
@@ -78,7 +77,7 @@ namespace BLEpp {
     };
 
 
-// A macro to throw an exception if the given function does not have the result NRF_SUCCESS
+// A macro to throw an std::exception if the given function does not have the result NRF_SUCCESS
 #define BLE_CALL(function, args) do {uint32_t result = function args; if (result != NRF_SUCCESS) throw ble_exception(# function, __FILE__, __LINE__); } while(0)
 
 #define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) throw ble_exception(message, __FILE__, __LINE__); } while(0)
@@ -87,9 +86,9 @@ namespace BLEpp {
 
 #else /* __EXCEPTIONS */
 
-#define BLE_CALL(function, args) do {volatile uint32_t result = function args; if (result != NRF_SUCCESS) {string ble_error_message(# function ); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
-#define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) { string ble_error_message(message); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
-#define BLE_THROW(message) do { string ble_error_message(message); ble_error_handler(ble_error_message, __LINE__, __FILE__); } while(0)
+#define BLE_CALL(function, args) do {volatile uint32_t result = function args; if (result != NRF_SUCCESS) {std::string ble_error_message(# function ); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
+#define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) { std::string ble_error_message(message); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
+#define BLE_THROW(message) do { std::string ble_error_message(message); ble_error_handler(ble_error_message, __LINE__, __FILE__); } while(0)
 
 #endif /* __EXCEPTIONS */
 
@@ -101,7 +100,7 @@ namespace BLEpp {
     class UUID { // abstracts ble_uid_t
 
       protected:
-        const char*           _full; //* proprietary UID string.  null for standard UIDs.
+        const char*           _full; //* proprietary UID std::string.  null for standard UIDs.
         uint16_t              _uuid; //*< 16-bit UUID value or octets 12-13 of 128-bit UUID.
         uint8_t               _type; //*< UUID type, see @ref BLE_UUID_TYPES.
 
@@ -174,7 +173,7 @@ namespace BLEpp {
       protected:
 
         UUID                      _uuid;   // 8
-        string                    _name;  //4
+        std::string                    _name;  //4
 //        ble_gatts_attr_t          _attr_char_value;
 //        ble_gatts_char_pf_t       _presentation_format;
 //        ble_gatts_char_md_t       _char_md;
@@ -233,7 +232,7 @@ namespace BLEpp {
             return *this;
         }
 
-        CharacteristicBase& setName(const string& name);
+        CharacteristicBase& setName(const std::string& name);
 
         CharacteristicBase& setUnit(uint16_t unit);
 
@@ -266,7 +265,7 @@ namespace BLEpp {
     template<typename T> inline  uint8_t ble_type() {
         return BLE_GATT_CPF_FORMAT_STRUCT;
     }
-    template<> inline uint8_t ble_type<string>() {
+    template<> inline uint8_t ble_type<std::string>() {
         return BLE_GATT_CPF_FORMAT_UTF8S;
     }
     template<> inline uint8_t ble_type<uint8_t>() {
@@ -338,7 +337,7 @@ namespace BLEpp {
             return *this;
         }
 
-        Characteristic<T>& setName(const string& name) {
+        Characteristic<T>& setName(const std::string& name) {
             CharacteristicBase::setName(name);
             return *this;
         }
@@ -507,10 +506,10 @@ namespace BLEpp {
 
     };
 
-    template<> class CharacteristicT<string> : public Characteristic<string> {
+    template<> class CharacteristicT<std::string> : public Characteristic<std::string> {
       public:
-        CharacteristicT& operator=(const string& val) {
-            Characteristic<string>::operator=(val);
+        CharacteristicT& operator=(const std::string& val) {
+            Characteristic<std::string>::operator=(val);
             return *this;
         }
 
@@ -522,7 +521,7 @@ namespace BLEpp {
             return CharacteristicValue(getValue().length(), (uint8_t*)getValue().c_str());
         }
         virtual void setCharacteristicValue(const CharacteristicValue& value) {
-            setValue(string((char*)value.data, value.length));
+            setValue(std::string((char*)value.data, value.length));
         }
     };
 
@@ -569,7 +568,7 @@ namespace BLEpp {
 
         BLEStack*          _stack;
         UUID               _uuid;
-        string             _name;
+        std::string        _name;
         bool               _primary;
         uint16_t           _service_handle; // provided by stack.
         bool               _started;
@@ -577,7 +576,7 @@ namespace BLEpp {
       public:
         Service()
             :
-              _name(),
+              _name(""),
               _primary(true),
               _service_handle(BLE_CONN_HANDLE_INVALID),
               _started(false)
@@ -591,7 +590,7 @@ namespace BLEpp {
             // keep track of whether we allocated the characteristic or whether it was passed into us.
         }
 
-        Service& setName(const string& name) {
+        Service& setName(const std::string& name) {
             _name = name;
             return *this;
         }
@@ -626,7 +625,7 @@ namespace BLEpp {
         * characteristic in angle brackets before the parentheses for the method invocation:
         *
         * <pre>
-        *      service.createCharacteristic<string>().setName("Owner Name").setDefaultValue("Bob Roberts");
+        *      service.createCharacteristic<std::string>().setName("Owner Name").setDefaultValue("Bob Roberts");
         *      service.createCharacteristic<int>().setName("Owner Age").setDefaultValue(39);
         *      service.createCharacteristic<float>().setName("Yaw").setDefaultValue(0.0);
         * */
@@ -667,8 +666,9 @@ namespace BLEpp {
 
       public:
 
-        GenericService() : Service() {}
-
+        GenericService() : Service() {
+            setName(std::string("GenericService"));
+	}
 
         virtual Characteristics_t & getCharacteristics() {
             return _characteristics;
@@ -697,12 +697,12 @@ namespace BLEpp {
       public:
         BatteryService(): GenericService() {
             setUUID(UUID(BLE_UUID_BATTERY_SERVICE));
-            setName("BatteryService");
+            setName(std::string("BatteryService"));
 	
             _characteristic = new CharacteristicT<uint8_t>();
 
             (*_characteristic).setUUID(UUID(BLE_UUID_BATTERY_LEVEL_CHAR))
-                           .setName(string("battery"))
+                           .setName(std::string("battery"))
                            .setDefaultValue(100);
 	    addCharacteristic(_characteristic);
         }
@@ -728,12 +728,15 @@ namespace BLEpp {
         IndoorLocalizationService() {
             setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
 	    //setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
-            setName("IndoorLocalizationService");
+#ifndef BUG_PLETTED
+	    // we have to figure out why this goes wrong
+	    setName(std::string("IndoorLocalizationService"));
+#endif
             _characteristic = new CharacteristicT<uint8_t>();
             //.setUUID(UUID(service.getUUID(), 0x124))
-            (*_characteristic).setUUID(UUID(getUUID(), 0x2201)) // there is no BLE_UUID for rssi level(?)
-                           .setName(string("Received signal level"))
-                           .setDefaultValue(1);
+            (*_characteristic).setUUID(UUID(getUUID(), 0x2201)); // there is no BLE_UUID for rssi level(?)
+	    (*_characteristic).setName(std::string("Received signal level"));
+	    (*_characteristic).setDefaultValue(1);
 
             addCharacteristic(_characteristic);
         }
@@ -824,7 +827,7 @@ namespace BLEpp {
         Pool&                                       _pool;
 
 
-        string                                      _device_name; // 4
+        std::string                                      _device_name; // 4
         uint16_t                                    _appearance;
         fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  // 32
 
@@ -870,7 +873,7 @@ namespace BLEpp {
             return *this;
         }
 
-        Nrf51822BluetoothStack& setDeviceName(const string& deviceName) {
+        Nrf51822BluetoothStack& setDeviceName(const std::string& deviceName) {
             if (_inited) BLE_THROW("Already initialized.");
             _device_name = deviceName;
             return *this;
@@ -970,7 +973,7 @@ namespace BLEpp {
             return *svc;
         }
 
-        Service& getService(string name);
+        Service& getService(std::string name);
         Nrf51822BluetoothStack& addService(Service* svc);
 
         Nrf51822BluetoothStack& startAdvertising();

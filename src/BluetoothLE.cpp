@@ -43,8 +43,8 @@ uint16_t UUID::init() {
 			} else if (c >= 'a' && c <= 'f') {
 				vv = c - 'a' + 10;
 			} else {
-				char cc[] = {c};// can't just call string(c) apparently.
-				BLE_THROW(string("Invalid character ") + string(1,cc[0]) + " in UUID.");
+				char cc[] = {c};// can't just call std::string(c) apparently.
+				BLE_THROW(std::string("Invalid character ") + std::string(1,cc[0]) + " in UUID.");
 			}
 
 			v = v * 16 + vv;
@@ -112,7 +112,7 @@ CharacteristicBase::CharacteristicBase()
 		}
 
 
-CharacteristicBase& CharacteristicBase::setName(const string& name) {
+CharacteristicBase& CharacteristicBase::setName(const std::string& name) {
 	if (_inited) BLE_THROW("Already inited.");
 	_name = name;
 

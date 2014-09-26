@@ -6,8 +6,10 @@ cmd=${1:? "$0 requires \"cmd\" as first argument"}
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 working_path=$path
 
+config_file=CMakeBuild.config
+
 echo "Load SoftDevice directory from configuration file"
-source ../CMakeBuild.config
+source ../$config_file
 
 build() {
 	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"
@@ -18,6 +20,16 @@ build() {
 
 upload() {
 	./softdevice_upload.sh $SOFTDEVICE_DIR
+}
+
+switch() {
+	cd ..
+	echo "Switch configuration file to: $1"
+	rm $config_file
+	ln -s $config_file.$1 $config_file
+	ls -latr | grep $config_file
+	#source $config_file
+	#echo "Set current softdevice to: $SOFTDEVICE"
 }
 
 all() {
@@ -33,11 +45,15 @@ case "$cmd" in
 	upload)
 		upload
 		;;
+	switch)
+		shift
+		switch $@
+		;;
 	all)
 		all
 		;;
 	*)
-		echo $"Usage: $0 {build|upload|all}"
+		echo $"Usage: $0 {build|upload|switch|all}"
 		exit 1
 esac
 

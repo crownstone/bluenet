@@ -10,8 +10,9 @@
 * This does not appear to work however for reasons that escape me.
 */
 
+/*
 # define EMERGENCY_OBJ_SIZE	128
 # define EMERGENCY_OBJ_COUNT	2
 typedef char one_buffer[EMERGENCY_OBJ_SIZE] __attribute__((aligned));
 static one_buffer emergency_buffer[EMERGENCY_OBJ_COUNT];
-
+*/

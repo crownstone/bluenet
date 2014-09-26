@@ -153,18 +153,18 @@ void ResetHandler(void) {
 	// enable constant latency mode.
 	NRF51_POWER_CONSTLAT = 1;
 
-	uint32_t *src = &_etext;
-	uint32_t *dest = &_sdata;
+	uint32_t *src = (uint32_t*)&_etext;
+	uint32_t *dest = (uint32_t*)&_sdata;
 
 	// copy data and clear bss
-	while (dest < &_edata) *dest++ = *src++;
-	while (dest < &_sbss) *dest++ = 0xdeadbeef;
-	dest = &_sbss;
-	while (dest < &_ebss) *dest++ = 0;
-	while (dest < &dest) *dest++ = 0xdeadbeef;
+	while (dest < (uint32_t*)&_edata) *dest++ = *src++;
+	while (dest < (uint32_t*)&_sbss) *dest++ = 0xdeadbeef;
+	dest = (uint32_t*)&_sbss;
+	while (dest < (uint32_t*)&_ebss) *dest++ = 0;
+	while (dest < (uint32_t*)&dest) *dest++ = 0xdeadbeef;
 
 	// include libc functionality
-	__libc_init_array();
+	//__libc_init_array();
 
 	main();
 	while (1) ;

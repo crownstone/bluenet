@@ -35,15 +35,25 @@ using namespace BLEpp;
 // An RGB led as with the rfduino requires a sine wave, and thus a PWM signal
 //#define RGB_LED
 
-#define MOTOR_CONTROL
+//#define MOTOR_CONTROL
+
+
+//
+#define INDOOR_SERVICE
+
+// the characteristics that need to be included
+#define NUMBER_CHARAC
+#define CONTROL_CHARAC
 
 #define PIN_MOTOR            6                   // this is GPIO 6 (fifth pin)
+
 
 /** Example that sets up the Bluetooth stack with two characteristics:
  *   one textual characteristic available for write and one integer characteristic for read.
  * See documentation for a detailed discussion of what's going on here.
  **/
 int main() {
+
 #ifdef BINARY_LED
 	uint32_t bin_counter = 0;
 	NRF51_GPIO_DIRSET = 1 << PIN_LED; // set pins to output
@@ -94,7 +104,7 @@ int main() {
 	Nrf51822BluetoothStack stack(pool);
 
 	// Set advertising parameters such as the device name and appearance.  These values will
-	stack.setDeviceName("Arkwa")
+	stack.setDeviceName(std::string("Crrrr"))
 		// controls how device appears in GUI.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 	//	 .setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
@@ -150,23 +160,31 @@ int main() {
 			//NRF51_GPIO_OUTCLR = 1 << PIN_LED;
 			});
 
-	// Now, build up the services and characteristics.
-	Service& service = stack.createIndoorLocalizationService();
+	//Service& generalService = stack.createService();
+	//Service& batteryService = stack.createBatteryService();
 
+
+#ifdef INDOOR_SERVICE
+	// Now, build up the services and characteristics.
+	Service& localizationService = stack.createIndoorLocalizationService();
+
+
+#ifdef NUMBER_CHARAC
 	// Create a characteristic of type uint8_t (unsigned one byte integer).
 	// This characteristic is by default read-only and
-	Characteristic<uint8_t>& intChar = service.createCharacteristic<uint8_t>()
-		.setUUID(UUID(service.getUUID(), 0x125))  // based off the UUID of the service.
+	Characteristic<uint8_t>& intChar = localizationService.createCharacteristic<uint8_t>()
+		.setUUID(UUID(localizationService.getUUID(), 0x125))  // based off the UUID of the service.
 		.setName("number");
+#endif // _NUMBER_CHARAC
 
-	service.createCharacteristic<string>()
-		//service.createCharacteristic<uint8_t>()
-		.setUUID(UUID(service.getUUID(), 0x124))
+#ifdef CONTROL_CHARAC
+	localizationService.createCharacteristic<std::string>()
+		.setUUID(UUID(localizationService.getUUID(), 0x124))
 		//		.setName("number input")
 		.setName("text")
 		.setDefaultValue("")
 		.setWritable(true)
-		.onWrite([&](const string& value) -> void {
+		.onWrite([&](const std::string& value) -> void {
 				//.onWrite([&](const uint8_t& value) -> void {
 				// set the value of the "number" characteristic to the value written to the text characteristic.
 				//int nr = value;
@@ -180,7 +198,9 @@ int main() {
 #endif
 #ifdef RGB_LED
 			int nr = atoi(value.c_str());
+#ifdef NUMBER_CHARAC
 			intChar = nr;
+#endif
 			//	__asm("BKPT");
 
 			//				analogWrite(PIN_RED, nr);
@@ -198,7 +218,9 @@ int main() {
 
 #ifdef MOTOR_CONTROL
 			int nr = atoi(value.c_str());
+#ifdef NUMBER_CHARAC
 			intChar = nr;
+#endif
 			mtr_counter = (int32_t) nr;	
 			// Update the output with out of phase sine waves
 			//mtr_counter = nr;
@@ -218,6 +240,8 @@ int main() {
 			nrf_delay_us(8000);
 #endif
 		});
+#endif // _CONTROL_CHARAC
+#endif
 
 		// Begin sending advertising packets over the air.  Again, may want to trigger this from a button press to save power.
 		stack.startAdvertising();

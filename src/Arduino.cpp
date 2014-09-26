@@ -87,7 +87,8 @@ extern "C" {
 		}
 	}
 
-	extern volatile uint32_t overflow_counter = 0;
+	//extern 
+	volatile uint32_t overflow_counter = 0;
 
 	void RTC1_IRQHandler () {
 		if (NRF51_RTC1_COMPARE_0) {
