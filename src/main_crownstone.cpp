@@ -13,13 +13,14 @@
 	#include "ble_stack_handler.h"
 	#include "ble_nrf6310_pins.h"
 #endif
+#include "nrf51_bitfields.h"
 
 #include "nordic_common.h"
 #include "nRF51822.h"
 
 #include <stdbool.h>
 #include <stdint.h>
-
+#include <cstring>
 
 using namespace BLEpp;
 
@@ -47,12 +48,33 @@ using namespace BLEpp;
 
 #define PIN_MOTOR            6                   // this is GPIO 6 (fifth pin)
 
-
 /** Example that sets up the Bluetooth stack with two characteristics:
  *   one textual characteristic available for write and one integer characteristic for read.
  * See documentation for a detailed discussion of what's going on here.
  **/
 int main() {
+
+	NRF51_GPIO_DIRSET = 3<<8;
+	NRF51_UART_ENABLE = 0b100;
+
+	// Configure UART pins:    GPIO   UART
+	NRF51_UART_PSELRXD = 16;  	// P0.11  RXD
+	NRF51_UART_PSELTXD = 17;   	// P0.09  TXD
+	NRF51_UART_PSELRTS = 18;   	// P0.08  RTS
+	NRF51_UART_PSELCTS = 19;  	// P0.10  CTS
+
+	NRF51_UART_CONFIG = NRF51_UART_CONFIG_HWFC_ENABLED; // enable hardware flow control.
+	NRF51_UART_BAUDRATE = 38400;
+	NRF51_UART_STARTTX = 1;
+
+	const char* hello = "Hello, world.\n";	
+	uint8_t len = strlen(hello);
+
+	for(int i = 0; i < len; ++i) {
+		NRF51_UART_TXD = (uint8_t)hello[i];
+		while(!NRF51_UART_TXDRDY) /* wait */;
+		NRF51_UART_TXDRDY = 0;
+	}
 
 #ifdef BINARY_LED
 	uint32_t bin_counter = 0;
@@ -104,7 +126,7 @@ int main() {
 	Nrf51822BluetoothStack stack(pool);
 
 	// Set advertising parameters such as the device name and appearance.  These values will
-	stack.setDeviceName(std::string("Crrrr"))
+	stack.setDeviceName(std::string("Uart"))
 		// controls how device appears in GUI.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 	//	 .setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
@@ -196,6 +218,12 @@ int main() {
 				NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
 			}
 #endif
+			for(int i = 0; i < len; ++i) {
+				NRF51_UART_TXD = (uint8_t)hello[i];
+				while(!NRF51_UART_TXDRDY) /* wait */;
+				NRF51_UART_TXDRDY = 0;
+			}
+
 #ifdef RGB_LED
 			int nr = atoi(value.c_str());
 #ifdef NUMBER_CHARAC

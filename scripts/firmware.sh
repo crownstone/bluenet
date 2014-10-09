@@ -1,7 +1,7 @@
 #!/bin/sh
 
-cmd=${1:? "$0 requires \"cmd\" as first argument"}
-target=${2:? "$0 requires \"target\" as second argument"}
+cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
+target=${2:? "Usage: $0 \"cmd\", \"target\""}
 
 # get working path in absolute sense
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

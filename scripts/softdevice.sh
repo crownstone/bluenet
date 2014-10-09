@@ -7,9 +7,10 @@ path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 working_path=$path
 
 config_file=CMakeBuild.config
-
-echo "Load SoftDevice directory from configuration file"
-source ../$config_file
+if [ $cmd != "switch" ]; then
+	echo "Load SoftDevice directory from configuration file"
+	source ../$config_file
+fi
 
 build() {
 	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"
@@ -24,10 +25,14 @@ upload() {
 
 switch() {
 	cd ..
+	if [ -z "$1" ]; then
+		echo "Parameter required: s110 or s130"
+		return
+	fi
 	echo "Switch configuration file to: $1"
-	rm $config_file
+	rm -f $config_file
 	ln -s $config_file.$1 $config_file
-	ls -latr | grep $config_file
+	ls -latr | grep $config_file | tail -n1
 	#source $config_file
 	#echo "Set current softdevice to: $SOFTDEVICE"
 }
