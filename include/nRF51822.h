@@ -317,7 +317,7 @@
 #define NRF51_GPIO_DIRSET               *(volatile uint32_t*) (NRF51_GPIO + 0x518)          // setting a bit to 1 sets the corresponding pin to output.
 #define NRF51_GPIO_DIRCLR               *(volatile uint32_t*) (NRF51_GPIO + 0x518)          // setting a bit to 1 sets the corresponding pin to input.
 #define NRF51_GPIO_DIR_OUTPUT(n)        NRF51_GPIO_DIRSET = 1 << n
-#define NRF51_GPIO_DIR_INPUT (n)        NRF51_GPIO_DIRCLR = 1 << n
+#define NRF51_GPIO_DIR_INPUT(n)         NRF51_GPIO_DIRCLR = 1 << n
 #define NRF51_GPIO_PIN_CNF(n)           *(volatile uint32_t*) (NRF51_GPIO + 0x700 + (n*4))
 #define NRF51_GPIO_PIN_CNF_INPUT            ~1
 #define NRF51_GPIO_PIN_CNF_OUTPUT            1

@@ -24,12 +24,21 @@
 
 using namespace BLEpp;
 
+#define NRF6310_BOARD
+
 // on the RFduino
 #define PIN_RED              2                   // this is GPIO 2 (bottom pin)
 #define PIN_GREEN            3                   // this is GPIO 3 (second pin)
 #define PIN_BLUE             4                   // this is GPIO 4 (third pin)
 
+#ifdef NRF6310_BOARD
+#define PIN_LED              8                   // this is P1.0
+#else
 #define PIN_LED              0                   // this is GPIO 0
+#endif
+	
+#define NRF51_UART_9600_BAUD  0x00275000UL
+#define NRF51_UART_38400_BAUD 0x009D5000UL
 
 #define BINARY_LED
 
@@ -54,25 +63,31 @@ using namespace BLEpp;
  **/
 int main() {
 
-	NRF51_GPIO_DIRSET = 3<<8;
-	NRF51_UART_ENABLE = 0b100;
+	NRF51_GPIO_DIR_OUTPUT(17); // set pins to output
+	NRF51_GPIO_PIN_CNF(16) = NRF51_GPIO_PIN_CNF_PULL_DISABLED;
+	NRF51_GPIO_DIR_INPUT(16);
+	//NRF51_GPIO_DIRSET = 3<<8;
+	NRF51_UART_ENABLE = 0x04; // 0b00000100
 
 	// Configure UART pins:    GPIO   UART
-	NRF51_UART_PSELRXD = 16;  	// P0.11  RXD
-	NRF51_UART_PSELTXD = 17;   	// P0.09  TXD
-	NRF51_UART_PSELRTS = 18;   	// P0.08  RTS
-	NRF51_UART_PSELCTS = 19;  	// P0.10  CTS
+	NRF51_UART_PSELRXD = 16;  	// P0.11  RXD //16
+	NRF51_UART_PSELTXD = 17;   	// P0.09  TXD //17
+	//NRF51_UART_PSELRTS = 18;   	// P0.08  RTS //18
+	//NRF51_UART_PSELCTS = 19;  	// P0.10  CTS //19
 
-	NRF51_UART_CONFIG = NRF51_UART_CONFIG_HWFC_ENABLED; // enable hardware flow control.
-	NRF51_UART_BAUDRATE = 38400;
+	//NRF51_UART_CONFIG = NRF51_UART_CONFIG_HWFC_ENABLED; // enable hardware flow control.
+	NRF51_UART_BAUDRATE = NRF51_UART_38400_BAUD;
 	NRF51_UART_STARTTX = 1;
+	NRF51_UART_STARTRX = 1;
+	NRF51_UART_RXDRDY = 0;
+	NRF51_UART_TXDRDY = 0;
 
 	const char* hello = "Hello, world.\n";	
 	uint8_t len = strlen(hello);
 
 	for(int i = 0; i < len; ++i) {
 		NRF51_UART_TXD = (uint8_t)hello[i];
-		while(!NRF51_UART_TXDRDY) /* wait */;
+		while(NRF51_UART_TXDRDY != 1) /* wait */;
 		NRF51_UART_TXDRDY = 0;
 	}
 
@@ -220,7 +235,7 @@ int main() {
 #endif
 			for(int i = 0; i < len; ++i) {
 				NRF51_UART_TXD = (uint8_t)hello[i];
-				while(!NRF51_UART_TXDRDY) /* wait */;
+				while(NRF51_UART_TXDRDY != 1) /* wait */;
 				NRF51_UART_TXDRDY = 0;
 			}
 
