@@ -15,7 +15,18 @@
 
 #include "ble_error.h"
 
+#include <serial.h>
+
 using namespace BLEpp;
+
+/**@brief Variable length data encapsulation in terms of length and pointer to data */
+
+typedef struct
+{
+    uint8_t               * p_data;          /**< Pointer to data. */
+    uint16_t                data_len;        /**< Length of data. */
+} data_t;
+
 
 /// UUID //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -550,6 +561,10 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopAdvertising() {
 
 #if(SOFTDEVICE_SERIES != 110)
 
+#define SCAN_INTERVAL                    0x00A0         /**< Determines scan interval in units of 0.625 millisecond. */
+#define SCAN_WINDOW                      0x0050         /**< Determines scan window in units of 0.625 millisecond. */
+
+
 /**
  * Only call the following functions with a S120 or S130 device that can play a central role. The following functions
  * are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone
@@ -558,6 +573,14 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopAdvertising() {
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
 	if (_scanning) return *this;
 	ble_gap_scan_params_t p_scan_params;
+	// No devices in whitelist, hence non selective performed.
+	p_scan_params.active       = 0;            // Active scanning set.
+	p_scan_params.selective    = 0;            // Selective scanning not set.
+	p_scan_params.interval     = SCAN_INTERVAL;// Scan interval.
+	p_scan_params.window       = SCAN_WINDOW;  // Scan window.
+	p_scan_params.p_whitelist  = NULL;         // No whitelist provided.
+	p_scan_params.timeout      = 0x0000;       // No timeout.
+
 	// todo: which fields to set here?
 	BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params) );
 	_scanning = true;
@@ -723,7 +746,27 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 						&sec_params) );
 #endif
 			break;
+#if(SOFTDEVICE_SERIES != 110) 
+		case BLE_GAP_EVT_ADV_REPORT:
+		{
+			//data_t adv_data;
+			//data_t type_data;
+			// Initialize advertisement report for parsing.
+			const ble_gap_evt_t   * p_gap_evt = &p_ble_evt->evt.gap_evt;
+			//adv_data.p_data = (uint8_t *)p_gap_evt->params.adv_report.data;
+			//adv_data.data_len = p_gap_evt->params.adv_report.dlen;
 
+			uint8_t * adrs_ptr = (uint8_t*) &(p_gap_evt->params.adv_report.peer_addr.addr);
+			char addrs[28];
+			sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", 
+                                adrs_ptr[0], adrs_ptr[1], adrs_ptr[2],
+                                adrs_ptr[3], adrs_ptr[4], adrs_ptr[5]);
+			std::string msg = std::string("Advertisement from: ") + std::string(addrs) + std::string("\r\n");
+			const char* adv_msg = msg.c_str();	
+			write(adv_msg);
+		}
+			break;
+#endif
 		case BLE_GAP_EVT_TIMEOUT:
 			break;
 
