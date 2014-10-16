@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -ne 5 ]; then
 	echo "Error: Usage $0 \"softdevice dir\" \"softdevice\" \"compiler dir\" \"compiler type\" \"no separate section\""

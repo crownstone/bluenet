@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 cmd=${1:? "$0 requires \"cmd\" as first argument"}
 

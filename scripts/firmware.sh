@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
 target=${2:? "Usage: $0 \"cmd\", \"target\""}
