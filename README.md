@@ -53,6 +53,8 @@ Now you will have to set all fields in the configuration file:
 * cp CMakeBuild.config.default CMakeBuild.config
 * adjust the `NRF51822_DIR` to wherever you installed the Nordic SDK (it should have `/Include` and `/Source` subdirectories
 * adjust the `SOFTDEVICE_DIR` to wherever you unzipped the latest SoftDevice from Nordic
+* adjust the `SOFTDEVICE_SERIES` to for example `110` or `130` (SoftDevice name starts with it, without the `s`)
+* adjust the `SOFTDEVICE_DIR_API` to the directory with the SoftDevice include files
 * adjust the type `SOFTDEVICE` accordingly (basename of file without `_softdevice.hex`)
 * adjust the `COMPILER_PATH` and `COMPILER_TYPE` to your compiler (it will be used as `$COMPILER_PATH\bin\$COMPILER_TYPE-gcc`)
 * adjust `JLINK` to the full name of the JLink utility (JLinkExe on Linux)
@@ -72,9 +74,9 @@ Now we can build our own software:
 And we can upload it:
 
 * cd scripts
-* this would do the same as building above ./crownstone.sh build 
-* ./crownstone.sh upload
-* ./crownstone.sh debug
+* this would do the same as building above ./firmware build crownstone
+* ./firmware.sh upload crownstone
+* ./firmware.sh debug crownstone
 
 And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish. 
 
