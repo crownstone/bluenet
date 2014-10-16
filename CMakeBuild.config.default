@@ -5,8 +5,11 @@ SOFTDEVICE_DIR=/opt/softdevices
 
 # NRF51822_DIR                         - the directory with /Source and /Include subdirectories from the Nordic SDK
 # SOFTDEVICE                           - the name of the SoftDevice (without _softdevice.hex)
+# SOFTDEVICE_SERIES                    - the series of the SoftDevice (s110 vs s130 e.g.), used in the code
+# SOFTDEVICE_DIR_API                   - the name of the directory where the include files resides of the Softdevice
 # SOFTDEVICE_NO_SEPARATE_UICR_SECTION  - starting with SoftDevice S110 v7 there is no separate UICR section
-# SoftDevice takes 80kB and application 176kB
+# 
+# For the following examples, suppose the SoftDevice takes 80kB and the application 176kB
 # APPLICATION_START_ADDRESS            - 80kB corresponds with 0x00014000 hex
 # Check https://devzone.nordicsemi.com/question/15994/nrf51822-iram-and-irom-settings-for-v05-s130-sd/
 # APPLICATION_LENGTH                   - 176kB corresponds with 0x2c000 hex, should be 0x40000 - 0x14000 
@@ -18,7 +21,9 @@ SOFTDEVICE_DIR=/opt/softdevices
 #######################################################################################################################
 #NRF51822_DIR=/opt/nrf51_sdk/v4/nrf51822
 #NORDIC_SDK_VERSION=4
+#SOFTDEVICE_SERIES=110
 #SOFTDEVICE=s110_nrf51822_5.2.1
+#SOFTDEVICE_DIR_API=s110_nrf51822_5.2.1_API
 #SOFTDEVICE_NO_SEPARATE_UICR_SECTION=0
 #APPLICATION_START_ADDRESS=0x00014000
 #APPLICATION_LENGTH=0x2c000
@@ -29,14 +34,16 @@ SOFTDEVICE_DIR=/opt/softdevices
 # For the newer SoftDevice version (v7) and the newer SDK version (v6)
 # SoftDevice takes 88kB and application 168kB
 #######################################################################################################################
-NRF51822_DIR=/opt/nrf51_sdk/v6/nrf51822
-NORDIC_SDK_VERSION=6
-SOFTDEVICE=s110_nrf51822_7.0.0
-SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
-APPLICATION_START_ADDRESS=0x00016000
-APPLICATION_LENGTH=0x2a000
-RAM_R1_BASE=0x20002000
-RAM_SOFTDEVICE_AMOUNT=8K
+#NRF51822_DIR=/opt/nrf51_sdk/v6/nrf51822
+#NORDIC_SDK_VERSION=6
+#SOFTDEVICE_SERIES=110
+#SOFTDEVICE=s110_nrf51822_7.0.0
+#SOFTDEVICE_DIR_API=s110_nrf51822_7.0.0_API
+#SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
+#APPLICATION_START_ADDRESS=0x00016000
+#APPLICATION_LENGTH=0x2a000
+#RAM_R1_BASE=0x20002000
+#RAM_SOFTDEVICE_AMOUNT=8K
 
 #######################################################################################################################
 # For the S130 SoftDevice version (v0.5) and the SDK version (v6)
@@ -47,14 +54,16 @@ RAM_SOFTDEVICE_AMOUNT=8K
 # Wrong... It was right in the beginning. It is at 0x0001c000 just after the softdevice 
 # The spec is also wrong, about the amount of RAM, it is 0x1800 (6kB), not 10kB
 #######################################################################################################################
-#NRF51822_DIR=/opt/nrf51_sdk/v6/nrf51822
-#NORDIC_SDK_VERSION=6
-#SOFTDEVICE=s130_nrf51822_0.5.0-1.alpha
-#SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
-#APPLICATION_START_ADDRESS=0x0001c000
-#APPLICATION_LENGTH=0x24000
-#RAM_R1_BASE=0x20002800
-#RAM_SOFTDEVICE_AMOUNT=0x1800
+NRF51822_DIR=/opt/nrf51_sdk/v6/nrf51822
+NORDIC_SDK_VERSION=6
+SOFTDEVICE_SERIES=130
+SOFTDEVICE=s130_nrf51822_0.5.0-1.alpha
+SOFTDEVICE_DIR_API=s130_nrf51822_0.5.0-1.alpha_API
+SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
+APPLICATION_START_ADDRESS=0x0001c000
+APPLICATION_LENGTH=0x24000
+RAM_R1_BASE=0x20002800
+RAM_SOFTDEVICE_AMOUNT=0x1800
 
 # Use SoftDevice (setting to 0 is untested)
 NRF51_USE_SOFTDEVICE=1

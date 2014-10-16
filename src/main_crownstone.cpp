@@ -25,7 +25,7 @@
 
 using namespace BLEpp;
 
-#define NRF6310_BOARD
+//#define NRF6310_BOARD
 
 // on the RFduino
 #define PIN_RED              2                   // this is GPIO 2 (bottom pin)
@@ -38,6 +38,7 @@ using namespace BLEpp;
 #define PIN_LED              0                   // this is GPIO 0
 #endif
 	
+// this is the switch on the 220V plug!
 #define BINARY_LED
 
 // An RGB led as with the rfduino requires a sine wave, and thus a PWM signal
@@ -115,7 +116,7 @@ int main() {
 	Nrf51822BluetoothStack stack(pool);
 
 	// Set advertising parameters such as the device name and appearance.  These values will
-	stack.setDeviceName(std::string("Uart"))
+	stack.setDeviceName(std::string("Crown"))
 		// controls how device appears in GUI.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 	//	 .setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
@@ -182,7 +183,8 @@ int main() {
 
 #ifdef NUMBER_CHARAC
 	// Create a characteristic of type uint8_t (unsigned one byte integer).
-	// This characteristic is by default read-only and
+	// This characteristic is by default read-only (for the user)
+	// Note that in the next characteristic this variable intChar is set! 
 	Characteristic<uint8_t>& intChar = localizationService.createCharacteristic<uint8_t>()
 		.setUUID(UUID(localizationService.getUUID(), 0x125))  // based off the UUID of the service.
 		.setName("number");
