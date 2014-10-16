@@ -78,6 +78,19 @@ And we can upload it:
 
 And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish. 
 
+## UART
+
+Currently UART for debugging. In case you happen to have the nRFgo Motherboard (nRF6310, strongly recommended) you can 
+easily connect the pints at P2.0 and P2.1 to respectively the pins RXD and TXD on P15 on the board. Do not forget to
+switch on the RS232 switch. Subsequently you will need some RS232 to USB cable if you haven't an extremely old laptop.
+The current set baudrate you can find in `src/serial.cpp` and is `38400` baud. To read from serial, my personal 
+favorite application is  `minicom`, but feel free to use any other program.
+
+    (sudo) minicom -c on -s -D /dev/ttyUSB0
+
+The sudo rights are only necessary if your `udev` rights are not properly set. The above flags just set colors to `on`
+and define the right usb port to use (if you've multiple).
+
 ## Todo list
 
 * Clean up code

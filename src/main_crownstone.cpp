@@ -17,6 +17,7 @@
 
 #include "nordic_common.h"
 #include "nRF51822.h"
+#include "serial.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -37,9 +38,6 @@ using namespace BLEpp;
 #define PIN_LED              0                   // this is GPIO 0
 #endif
 	
-#define NRF51_UART_9600_BAUD  0x00275000UL
-#define NRF51_UART_38400_BAUD 0x009D5000UL
-
 #define BINARY_LED
 
 // An RGB led as with the rfduino requires a sine wave, and thus a PWM signal
@@ -62,35 +60,11 @@ using namespace BLEpp;
  * See documentation for a detailed discussion of what's going on here.
  **/
 int main() {
+	config_uart();
+	const char* hello = "Welcome at the nRF51822 code for meshing.\r\n";	
+	write(hello);
 
-	NRF51_GPIO_DIR_OUTPUT(17); // set pins to output
-	NRF51_GPIO_PIN_CNF(16) = NRF51_GPIO_PIN_CNF_PULL_DISABLED;
-	NRF51_GPIO_DIR_INPUT(16);
-	//NRF51_GPIO_DIRSET = 3<<8;
-	NRF51_UART_ENABLE = 0x04; // 0b00000100
-
-	// Configure UART pins:    GPIO   UART
-	NRF51_UART_PSELRXD = 16;  	// P0.11  RXD //16
-	NRF51_UART_PSELTXD = 17;   	// P0.09  TXD //17
-	//NRF51_UART_PSELRTS = 18;   	// P0.08  RTS //18
-	//NRF51_UART_PSELCTS = 19;  	// P0.10  CTS //19
-
-	//NRF51_UART_CONFIG = NRF51_UART_CONFIG_HWFC_ENABLED; // enable hardware flow control.
-	NRF51_UART_BAUDRATE = NRF51_UART_38400_BAUD;
-	NRF51_UART_STARTTX = 1;
-	NRF51_UART_STARTRX = 1;
-	NRF51_UART_RXDRDY = 0;
-	NRF51_UART_TXDRDY = 0;
-
-	const char* hello = "Hello, world.\n";	
-	uint8_t len = strlen(hello);
-
-	for(int i = 0; i < len; ++i) {
-		NRF51_UART_TXD = (uint8_t)hello[i];
-		while(NRF51_UART_TXDRDY != 1) /* wait */;
-		NRF51_UART_TXDRDY = 0;
-	}
-
+	int personal_threshold_level;
 #ifdef BINARY_LED
 	uint32_t bin_counter = 0;
 	NRF51_GPIO_DIRSET = 1 << PIN_LED; // set pins to output
@@ -233,12 +207,9 @@ int main() {
 				NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
 			}
 #endif
-			for(int i = 0; i < len; ++i) {
-				NRF51_UART_TXD = (uint8_t)hello[i];
-				while(NRF51_UART_TXDRDY != 1) /* wait */;
-				NRF51_UART_TXDRDY = 0;
-			}
-
+			std::string msg = std::string("Received message: ") + value + std::string("\r\n");
+			const char* received = msg.c_str();	
+			write(received);
 #ifdef RGB_LED
 			int nr = atoi(value.c_str());
 #ifdef NUMBER_CHARAC
@@ -285,6 +256,40 @@ int main() {
 		});
 #endif // _CONTROL_CHARAC
 #endif
+	// set scanning option
+	localizationService.createCharacteristic<uint8_t>()
+		.setUUID(UUID(localizationService.getUUID(), 0x123))
+		.setName("number")
+		.setDefaultValue(255)
+		.setWritable(true)
+		.onWrite([&](const uint8_t & value) -> void {
+			int nr = value;
+			switch(nr) {
+			case 0: {
+				const char* command = "Crown: start scanning\r\n";
+				write(command);
+				stack.startScanning();
+			}
+			break;
+			case 1: {
+				const char* command = "Crown: stop scanning\r\n";
+				write(command);
+				stack.stopScanning();
+			}
+			break;
+			}
+			
+		});
+
+	// set threshold level
+	localizationService.createCharacteristic<uint8_t>()
+		.setUUID(UUID(localizationService.getUUID(), 0x122))
+		.setName("number")
+		.setDefaultValue(255)
+		.setWritable(true)
+		.onWrite([&](const uint8_t & value) -> void {
+			personal_threshold_level = value;
+		});
 
 		// Begin sending advertising packets over the air.  Again, may want to trigger this from a button press to save power.
 		stack.startAdvertising();
