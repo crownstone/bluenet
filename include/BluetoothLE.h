@@ -8,6 +8,7 @@
 #include "function.h"
 #include "Serializable.h"
 #include "Pool.h"
+#include "log.h"
 
 extern "C" {
 
@@ -423,10 +424,12 @@ namespace BLEpp {
             CharacteristicValue value(len, data+offset);
             setCharacteristicValue(value);
 
+            LOG_DEBUG("%s: onWrite", _name.c_str());
             _callbackOnWrite(getValue());
         }
 
         void read() {
+            LOG_DEBUG("%s: onRead", _name.c_str());
             T newValue = _callbackOnRead();
             if (newValue != _value) {
                 operator=(newValue);

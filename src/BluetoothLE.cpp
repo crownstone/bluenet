@@ -15,7 +15,7 @@
 
 #include "ble_error.h"
 
-#include <serial.h>
+#include "log.h"
 
 using namespace BLEpp;
 
@@ -135,7 +135,7 @@ CharacteristicBase& CharacteristicBase::setUnit(uint16_t unit) {
 	_unit = unit;
 	return *this;
 }
-//
+
 //CharacteristicBase& CharacteristicBase::setUpdateIntervalMSecs(uint32_t msecs) {
 //    if (_updateIntervalMsecs != msecs) {
 //        _updateIntervalMsecs = msecs;
@@ -676,6 +676,9 @@ void Nrf51822BluetoothStack::loop() {
 
 
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
+//	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
+//		LOG_DEBUG("on_ble_event: %X", p_ble_evt->header.evt_id);
+//	}
 	switch (p_ble_evt->header.evt_id)
 	{
 		// TODO: how do we identify which service evt is for?
@@ -759,11 +762,9 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 			uint8_t * adrs_ptr = (uint8_t*) &(p_gap_evt->params.adv_report.peer_addr.addr);
 			char addrs[28];
 			sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", 
-                                adrs_ptr[0], adrs_ptr[1], adrs_ptr[2],
-                                adrs_ptr[3], adrs_ptr[4], adrs_ptr[5]);
-			std::string msg = std::string("Advertisement from: ") + std::string(addrs) + std::string("\r\n");
-			const char* adv_msg = msg.c_str();	
-			write(adv_msg);
+                                adrs_ptr[5], adrs_ptr[4], adrs_ptr[3],
+                                adrs_ptr[2], adrs_ptr[1], adrs_ptr[0]);
+			LOG_INFO("Advertisement from: %s", addrs);
 		}
 			break;
 #endif

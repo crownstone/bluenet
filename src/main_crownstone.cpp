@@ -17,15 +17,17 @@
 
 #include "nordic_common.h"
 #include "nRF51822.h"
-#include "serial.h"
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <cstring>
 
+#include "uart.h"
+#include "log.h"
+
 using namespace BLEpp;
 
-//#define NRF6310_BOARD
+#define NRF6310_BOARD
 
 // on the RFduino
 #define PIN_RED              2                   // this is GPIO 2 (bottom pin)
@@ -51,19 +53,26 @@ using namespace BLEpp;
 #define INDOOR_SERVICE
 
 // the characteristics that need to be included
-#define NUMBER_CHARAC
+//#define NUMBER_CHARAC
 #define CONTROL_CHARAC
 
 #define PIN_MOTOR            6                   // this is GPIO 6 (fifth pin)
+
+int32_t readTemp();
 
 /** Example that sets up the Bluetooth stack with two characteristics:
  *   one textual characteristic available for write and one integer characteristic for read.
  * See documentation for a detailed discussion of what's going on here.
  **/
 int main() {
-	config_uart();
-	const char* hello = "Welcome at the nRF51822 code for meshing.\r\n";	
-	write(hello);
+	uart_init(UART_BAUD_38K4);
+
+	// config_uart();
+
+	LOG_INFO("Welcome at the nRF51822 code for meshing.");
+
+	// const char* hello = "Welcome at the nRF51822 code for meshing.\r\n";	
+	// write(hello);
 
 	int personal_threshold_level;
 #ifdef BINARY_LED
@@ -144,16 +153,16 @@ int main() {
 
 
 	// Optional notification when radio is active.  Could be used to flash LED.
-	stack.onRadioNotificationInterrupt(800, [&](bool radio_active){
-			// NB: this executes in interrupt context, so make any global variables volatile.
-			if (radio_active) {
-			// radio is about to turn on.  Turn on LED.
-			// NRF51_GPIO_OUTSET = 1 << Pin_LED;
-			} else {
-			// radio has turned off.  Turn off LED.
-			// NRF51_GPIO_OUTCLR = 1 << Pin_LED;
-			}
-			});
+//	stack.onRadioNotificationInterrupt(800, [&](bool radio_active){
+//			// NB: this executes in interrupt context, so make any global variables volatile.
+//			if (radio_active) {
+//			// radio is about to turn on.  Turn on LED.
+//			// NRF51_GPIO_OUTSET = 1 << Pin_LED;
+//			} else {
+//			// radio has turned off.  Turn off LED.
+//			// NRF51_GPIO_OUTCLR = 1 << Pin_LED;
+//			}
+//			});
 
 	//uint32_t err_code = NRF_SUCCESS;
 
@@ -191,13 +200,13 @@ int main() {
 #endif // _NUMBER_CHARAC
 
 #ifdef CONTROL_CHARAC
-	localizationService.createCharacteristic<std::string>()
+	localizationService.createCharacteristic<uint8_t>()
 		.setUUID(UUID(localizationService.getUUID(), 0x124))
 		//		.setName("number input")
-		.setName("text")
-		.setDefaultValue("")
+		.setName("led")
+		.setDefaultValue(255)
 		.setWritable(true)
-		.onWrite([&](const std::string& value) -> void {
+		.onWrite([&](const uint8_t& value) -> void {
 				//.onWrite([&](const uint8_t& value) -> void {
 				// set the value of the "number" characteristic to the value written to the text characteristic.
 				//int nr = value;
@@ -209,9 +218,9 @@ int main() {
 				NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
 			}
 #endif
-			std::string msg = std::string("Received message: ") + value + std::string("\r\n");
-			const char* received = msg.c_str();	
-			write(received);
+//			std::string msg = std::string("Received message: ") + value;
+//			uart.println(msg.c_str());
+			LOG_INFO("Received message: %d", value);
 #ifdef RGB_LED
 			int nr = atoi(value.c_str());
 #ifdef NUMBER_CHARAC
@@ -232,50 +241,25 @@ int main() {
 			nrf_delay_us(8000);
 #endif
 
-#ifdef MOTOR_CONTROL
-			int nr = atoi(value.c_str());
-#ifdef NUMBER_CHARAC
-			intChar = nr;
-#endif
-			mtr_counter = (int32_t) nr;	
-			// Update the output with out of phase sine waves
-			//mtr_counter = nr;
-			if (mtr_counter > 100) mtr_counter = 100;
-			if (mtr_counter < 50) mtr_counter = 50;
-/*
-			if (mtr_counter == 100) {
-				direction = 1;
-			}
-			if (mtr_counter == 50) {
-				direction = -1;
-			}
-			mtr_counter += direction;
-			*/
-			nrf_pwm_set_value(0, mtr_counter);
-			// Add a delay to control the speed of the sine wave
-			nrf_delay_us(8000);
-#endif
 		});
 #endif // _CONTROL_CHARAC
 #endif
+
 	// set scanning option
 	localizationService.createCharacteristic<uint8_t>()
 		.setUUID(UUID(localizationService.getUUID(), 0x123))
-		.setName("number")
+		.setName("scan")
 		.setDefaultValue(255)
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
-			int nr = value;
-			switch(nr) {
+			switch(value) {
 			case 0: {
-				const char* command = "Crown: start scanning\r\n";
-				write(command);
+				LOG_INFO("Crown: start scanning");
 				stack.startScanning();
 			}
 			break;
 			case 1: {
-				const char* command = "Crown: stop scanning\r\n";
-				write(command);
+				LOG_INFO("Crown: stop scanning");
 				stack.stopScanning();
 			}
 			break;
@@ -286,18 +270,44 @@ int main() {
 	// set threshold level
 	localizationService.createCharacteristic<uint8_t>()
 		.setUUID(UUID(localizationService.getUUID(), 0x122))
-		.setName("number")
+		.setName("threshold")
 		.setDefaultValue(255)
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
 			personal_threshold_level = value;
+			LOG_INFO("Setting personal threshold level to: %d", value);
 		});
 
-		// Begin sending advertising packets over the air.  Again, may want to trigger this from a button press to save power.
-		stack.startAdvertising();
-		while(1) {
-			// Deliver events from the Bluetooth stack to the callbacks defined above.
-			//		analogWrite(PIN_LED, 50);
-			stack.loop();
-		}
+	 // get temperature value
+	 Characteristic<int16_t>& temperature = localizationService.createCharacteristic<int16_t>()
+	 	.setUUID(UUID(localizationService.getUUID(), 0x126))
+	 	.setName("temperature")
+	 	.setDefaultValue(0);
+
+	// Begin sending advertising packets over the air.
+	stack.startAdvertising();
+	while(1) {
+		// read temperature
+		temperature = readTemp();
+
+		// Deliver events from the Bluetooth stack to the callbacks defined above.
+		//		analogWrite(PIN_LED, 50);
+		stack.loop();
+	}
+}
+
+int32_t readTemp() {
+	int32_t temp;
+	uint32_t err_code;
+
+	err_code = sd_temp_get(&temp);
+	// TODO: check error code
+
+	//	LOG_DEBUG("raw temp: %d", temp);
+
+	temp = (temp / 4);
+
+	//	LOG_INFO("temp: %d", temp);
+
+	return temp;
 }

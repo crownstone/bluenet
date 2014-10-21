@@ -6,8 +6,7 @@
 #include <new>
 #include <limits>
 #include <stdlib.h>
-
-#include "Debug.h"
+#include "log.h"
 
 class Pool;
 
