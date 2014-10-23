@@ -755,6 +755,7 @@ namespace BLEpp {
 		case BLE_GAP_EVT_RSSI_CHANGED: {
 			volatile uint8_t rssi = p_ble_evt->evt.gap_evt.params.rssi_changed.rssi;
 
+/*
 			// set LED here
 			int sine_index = (rssi - 170) * 2;
 			if (sine_index < 0) sine_index = 0;
@@ -768,7 +769,7 @@ namespace BLEpp {
 
 			// Add a delay to control the speed of the sine wave
 			nrf_delay_us(8000);
-
+*/
 			setRSSILevel(rssi);
 			break;
 		}
