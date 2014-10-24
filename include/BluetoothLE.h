@@ -8,6 +8,7 @@
 #include "function.h"
 #include "Serializable.h"
 #include "Pool.h"
+
 #include "log.h"
 
 extern "C" {
@@ -719,75 +720,6 @@ namespace BLEpp {
     };
 
 
-    class IndoorLocalizationService : public GenericService {
-
-      public:
-        typedef function<uint8_t()> func_t;
-
-      protected:
-        CharacteristicT<uint8_t> *_characteristic;
-        func_t _func;
-      public:
-        IndoorLocalizationService() {
-            setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
-	    //setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
-#ifndef BUG_PLETTED
-	    // we have to figure out why this goes wrong
-	    setName(std::string("IndoorLocalizationService"));
-#endif
-            _characteristic = new CharacteristicT<uint8_t>();
-            //.setUUID(UUID(service.getUUID(), 0x124))
-            (*_characteristic).setUUID(UUID(getUUID(), 0x2201)); // there is no BLE_UUID for rssi level(?)
-	    (*_characteristic).setName(std::string("Received signal level"));
-	    (*_characteristic).setDefaultValue(1);
-
-            addCharacteristic(_characteristic);
-        }
-        
-	void on_ble_event(ble_evt_t * p_ble_evt) {
-		Service::on_ble_event(p_ble_evt);
-		switch (p_ble_evt->header.evt_id) {
-		case BLE_GAP_EVT_CONNECTED: {
-			sd_ble_gap_rssi_start(p_ble_evt->evt.gap_evt.conn_handle);
-			break;
-		}
-		case BLE_GAP_EVT_DISCONNECTED: {
-			sd_ble_gap_rssi_stop(p_ble_evt->evt.gap_evt.conn_handle);
-			break;
-		}
-		case BLE_GAP_EVT_RSSI_CHANGED: {
-			volatile uint8_t rssi = p_ble_evt->evt.gap_evt.params.rssi_changed.rssi;
-
-			// set LED here
-			int sine_index = (rssi - 170) * 2;
-			if (sine_index < 0) sine_index = 0;
-			if (sine_index > 100) sine_index = 100;
-//			__asm("BKPT");
-//			int sine_index = (rssi % 10) *10;
-			nrf_pwm_set_value(0, sin_table[sine_index]);
-			nrf_pwm_set_value(1, sin_table[(sine_index + 33) % 100]);
-			nrf_pwm_set_value(2, sin_table[(sine_index + 66) % 100]);
-			//			counter = (counter + 1) % 100;
-
-			// Add a delay to control the speed of the sine wave
-			nrf_delay_us(8000);
-
-			setRSSILevel(rssi);
-			break;
-		}
-		default: {
-		}
-		}
-	}
-
-        void setRSSILevel(uint8_t RSSILevel){
-            (*_characteristic) = RSSILevel;
-        }
-        void setRSSILevelHandler(func_t func) {
-            _func = func;
-        }
-    };
-
 
     /// Stack //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -966,12 +898,6 @@ namespace BLEpp {
 
         BatteryService& createBatteryService() {
             BatteryService* svc = new BatteryService();
-            addService(svc);
-            return *svc;
-        }
-
-        IndoorLocalizationService& createIndoorLocalizationService() {
-            IndoorLocalizationService* svc = new IndoorLocalizationService();
             addService(svc);
             return *svc;
         }

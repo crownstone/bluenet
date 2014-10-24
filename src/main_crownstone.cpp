@@ -25,6 +25,9 @@
 #include "uart.h"
 #include "log.h"
 
+#include "IndoorLocalisationService.h"
+#include "TemperatureService.h"
+
 using namespace BLEpp;
 
 #define NRF6310_BOARD
@@ -187,7 +190,7 @@ int main() {
 
 #ifdef INDOOR_SERVICE
 	// Now, build up the services and characteristics.
-	Service& localizationService = stack.createIndoorLocalizationService();
+	Service& localizationService = IndoorLocalizationService::createService(stack);
 
 
 #ifdef NUMBER_CHARAC
@@ -278,17 +281,20 @@ int main() {
 			LOG_INFO("Setting personal threshold level to: %d", value);
 		});
 
-	 // get temperature value
-	 Characteristic<int16_t>& temperature = localizationService.createCharacteristic<int16_t>()
-	 	.setUUID(UUID(localizationService.getUUID(), 0x126))
-	 	.setName("temperature")
-	 	.setDefaultValue(0);
+//	 // get temperature value
+//	 Characteristic<int16_t>& temperature = localizationService.createCharacteristic<int16_t>()
+//	 	.setUUID(UUID(localizationService.getUUID(), 0x126))
+//	 	.setName("temperature")
+//	 	.setDefaultValue(0);
+
+	 TemperatureService& temperatureService = TemperatureService::createService(stack);
+	 temperatureService.start();
 
 	// Begin sending advertising packets over the air.
 	stack.startAdvertising();
 	while(1) {
 		// read temperature
-		temperature = readTemp();
+//		temperature = readTemp();
 
 		// Deliver events from the Bluetooth stack to the callbacks defined above.
 		//		analogWrite(PIN_LED, 50);

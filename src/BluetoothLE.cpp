@@ -534,7 +534,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	advdata.p_tx_power_level        = &_tx_power_level;
 	advdata.flags.size              = sizeof(flags);
 	advdata.flags.p_data            = &flags;
-	advdata.uuids_complete.uuid_cnt = uidCount;
+	advdata.uuids_complete.uuid_cnt = 1;
 	advdata.uuids_complete.p_uuids  = adv_uuids;
 
 	BLE_CALL(ble_advdata_set, (&advdata, NULL) );

@@ -28,13 +28,16 @@
  *
  */
 
-#ifndef __UART_H__
-#define __UART_H__
+#ifndef __UART_HPP__
+#define __UART_HPP__
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>
-#include <cstdio>
+#include <stdio.h>
+
+#include "nrf51.h"
+#include "nrf51_bitfields.h"
 
 /** Some definitions needed for the ported console functions */
 #define UART_MODE_GENERIC_POLLING 0
@@ -88,12 +91,31 @@ typedef enum
     0x0009D000, 0x0013B000, 0x00275000, 0x003BA000, 0x004EA000, 0x0075F000, 0x009D4000, \
     0x00EBE000, 0x013A9000, 0x01D7D000, 0x03AFB000, 0x03FFF000, 0x075F6000, 0x10000000  }
 
+static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVISORS_ARRAY;
+
 /** @brief This function initializes the UART.
  *
  * @param baud_rate - the baud rate to be used, ::uart_baudrate_t.
  *
  */
-void uart_init(uart_baudrate_t const baud_rate);
+inline void uart_init(uart_baudrate_t const baud_rate) {
+	//  NRF_UART0->PSELRTS = BOARD_UART0_RTS;
+	//  NRF_UART0->PSELTXD = BOARD_UART0_TX;
+	//  NRF_UART0->PSELCTS = BOARD_UART0_CTS;
+	//  NRF_UART0->PSELRXD = BOARD_UART0_RX;
+
+	NRF_UART0->PSELRXD = 16;
+	NRF_UART0->PSELTXD = 17;
+	//  NRF_UART0->PSELRTS = 18;
+	//  NRF_UART0->PSELCTS = 19;
+
+	NRF_UART0->ENABLE           = 0x04;
+	NRF_UART0->BAUDRATE         = m_baudrates[baud_rate];
+	NRF_UART0->CONFIG           = (UART_CONFIG_HWFC_Enabled << UART_CONFIG_HWFC_Pos);
+	NRF_UART0->TASKS_STARTTX    = 1;
+	NRF_UART0->TASKS_STARTRX    = 1;
+	NRF_UART0->EVENTS_RXDRDY    = 0;
+}
 
 /** @brief Find number of characters in the UART receive buffer
  *
@@ -102,49 +124,51 @@ void uart_init(uart_baudrate_t const baud_rate);
  *
  * @return Number of characters available
  */
-bool uart_chars_available(void);
+inline bool uart_chars_available(void) {
+	return (NRF_UART0->EVENTS_RXDRDY == 1);
+}
 
 /** Function to write a character to the UART transmit buffer.
  * @param ch Character to write
  */
-void uart_putchar(uint8_t ch);
+inline void uart_putchar(uint8_t ch) {
+	NRF_UART0->EVENTS_TXDRDY = 0;
+	NRF_UART0->TXD = ch;
+	while(NRF_UART0->EVENTS_TXDRDY != 1){}  // Wait for TXD data to be sent
+	NRF_UART0->EVENTS_TXDRDY = 0;
+}
 
 /** Function to read a character from the UART receive buffer.
  * @return Character read
  */
-uint8_t uart_getchar(void);
+inline uint8_t uart_getchar(void) {
+	while(NRF_UART0->EVENTS_RXDRDY != 1){}  // Wait for RXD data to be received
+	NRF_UART0->EVENTS_RXDRDY = 0;
+	return (uint8_t)NRF_UART0->RXD;
+}
+
 
 /** Function to write and array of byts to UART.
  *
  * @param buf - buffer to be printed on the UART.
  * @param len - Number of bytes in buffer.
  */
-void uart_write_buf(uint8_t const *buf, uint32_t len);
+inline void uart_write_buf(uint8_t const *buf, uint32_t len) {
+	while(len--)
+		uart_putchar(*buf++);
+}
 
 /**@brief Logging function, used for formated output on the UART.
  */
-void uart_logf(const char *fmt, ...);
+inline void uart_logf(const char *fmt, ...) {
+    uint16_t i = 0;
+    static uint8_t logf_buf[150];
+    va_list args;
+    va_start(args, fmt);
+    i = vsprintf((char*)logf_buf, fmt, args);
+    logf_buf[i] = 0x00; /* Make sure its zero terminated */
+    uart_write_buf((uint8_t*)logf_buf, i);
+    va_end(args);
+}
 
-#endif // __UART_H__
-
-/*
-#ifndef UART_H
-#define UART_H
-
-#include "Print.h"
-#include <string>
-#include <cstring>
-
-class UART : public Print {
-
-public:
-	UART();
-
-	size_t write(uint8_t b);
-	void printf(const char* fmt, ...);
-	void printfln(const char* fmt, ...);
-
-};
-
-#endif
-*/
+#endif // __UART_HPP__
