@@ -12,6 +12,9 @@
 #include "function.h"
 
 #define INDOORLOCALISATION_UUID "00002220-0000-1000-8000-00805f9b34fb"
+// TODO -oDE: how did you come up with this UUID ??!!
+//  if I use any other UUID, the service UUID in the advertisement package
+//  is sent out as 128-bit, but with this UUID it is sent out as 16-bit ?!
 
 using namespace BLEpp;
 

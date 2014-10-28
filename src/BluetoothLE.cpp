@@ -530,12 +530,26 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	// Anne: setting NO_NAME breaks the Android Nordic nRF Master Console app.
 	advdata.name_type               = BLE_ADVDATA_FULL_NAME;
 	advdata.short_name_len          = 5;
-	advdata.include_appearance      = _appearance != BLE_APPEARANCE_UNKNOWN;
+//	advdata.include_appearance      = _appearance != BLE_APPEARANCE_UNKNOWN;
 	advdata.p_tx_power_level        = &_tx_power_level;
 	advdata.flags.size              = sizeof(flags);
 	advdata.flags.p_data            = &flags;
-	advdata.uuids_complete.uuid_cnt = 1;
-	advdata.uuids_complete.p_uuids  = adv_uuids;
+	// TODO -oDE: advertisement package is too small for 128-bit UUID plus
+	//  a 16-bit UUID. Even the include_appearance plus 128-bit UUID is too small
+	//  so to avoid an error when a too much data should be sent I removed the
+	//  appearance and only put one UUID in the package, no matter if it is a 16-bit
+	//  or a 128-bit. Could be handled differently, and probably it makes sense to
+	//  handle this depending on the application. for example 8 16-bit UUID can be
+	//  sent in the space 1 128-bit UUID occupies. So it really depends on the application
+	//  how this advertisement package should look like, so it doesn't really make sense
+    //  to have this function in the library.
+	if (uidCount > 1) {
+		advdata.uuids_more_available.uuid_cnt = 1;
+		advdata.uuids_more_available.p_uuids  = adv_uuids;
+	} else {
+		advdata.uuids_complete.uuid_cnt = 1;
+		advdata.uuids_complete.p_uuids  = adv_uuids;
+	}
 
 	BLE_CALL(ble_advdata_set, (&advdata, NULL) );
 

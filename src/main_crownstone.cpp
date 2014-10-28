@@ -30,19 +30,21 @@
 
 using namespace BLEpp;
 
-#define NRF6310_BOARD
+#define BOARD_NRF6310
+
+#include "boards.h"
 
 // on the RFduino
 #define PIN_RED              2                   // this is GPIO 2 (bottom pin)
 #define PIN_GREEN            3                   // this is GPIO 3 (second pin)
 #define PIN_BLUE             4                   // this is GPIO 4 (third pin)
 
-#ifdef NRF6310_BOARD
-#define PIN_LED              8                   // this is P1.0
+#ifdef BOARD_NRF6310
+#define PIN_LED              LED_0               // this is P1.0
 #else
 #define PIN_LED              0                   // this is GPIO 0
 #endif
-	
+
 // this is the switch on the 220V plug!
 #define BINARY_LED
 
@@ -281,20 +283,20 @@ int main() {
 			LOG_INFO("Setting personal threshold level to: %d", value);
 		});
 
-//	 // get temperature value
-//	 Characteristic<int16_t>& temperature = localizationService.createCharacteristic<int16_t>()
-//	 	.setUUID(UUID(localizationService.getUUID(), 0x126))
-//	 	.setName("temperature")
-//	 	.setDefaultValue(0);
+	//	 // get temperature value
+	//	 Characteristic<int16_t>& temperature = localizationService.createCharacteristic<int16_t>()
+	//	 	.setUUID(UUID(localizationService.getUUID(), 0x126))
+	//	 	.setName("temperature")
+	//	 	.setDefaultValue(0);
 
-	 TemperatureService& temperatureService = TemperatureService::createService(stack);
-	 temperatureService.start();
+	TemperatureService& temperatureService = TemperatureService::createService(stack);
+	temperatureService.start();
 
 	// Begin sending advertising packets over the air.
 	stack.startAdvertising();
 	while(1) {
 		// read temperature
-//		temperature = readTemp();
+		//		temperature = readTemp();
 
 		// Deliver events from the Bluetooth stack to the callbacks defined above.
 		//		analogWrite(PIN_LED, 50);
