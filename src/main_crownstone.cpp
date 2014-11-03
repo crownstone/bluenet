@@ -15,6 +15,11 @@
 #endif
 #include "nrf51_bitfields.h"
 
+extern "C" {
+	#include "ble_advdata_parser.h"
+	#include "nrf_delay.h"
+}
+
 #include "nordic_common.h"
 #include "nRF51822.h"
 
@@ -30,9 +35,9 @@
 
 using namespace BLEpp;
 
-#define BOARD_NRF6310
-
-#include "boards.h"
+//#ifndef BOARD_NRF6310
+//#define BOARD_NRF6310
+//#endif
 
 // on the RFduino
 #define PIN_RED              2                   // this is GPIO 2 (bottom pin)
@@ -40,9 +45,12 @@ using namespace BLEpp;
 #define PIN_BLUE             4                   // this is GPIO 4 (third pin)
 
 #ifdef BOARD_NRF6310
-#define PIN_LED              LED_0               // this is P1.0
+	extern "C" {
+	#include "boards.h"
+	}
+	#define PIN_LED          LED_0               // this is P1.0
 #else
-#define PIN_LED              0                   // this is GPIO 0
+	#define PIN_LED          0                   // this is GPIO 0
 #endif
 
 // this is the switch on the 220V plug!
@@ -53,9 +61,12 @@ using namespace BLEpp;
 
 //#define MOTOR_CONTROL
 
+//#define IBEACON
 
 //
 #define INDOOR_SERVICE
+#define TEMPERATURE_SERVICE
+
 
 // the characteristics that need to be included
 //#define NUMBER_CHARAC
@@ -63,7 +74,17 @@ using namespace BLEpp;
 
 #define PIN_MOTOR            6                   // this is GPIO 6 (fifth pin)
 
-int32_t readTemp();
+struct peripheral_t {
+//	uint8_t addr[BLE_GAP_ADDR_LEN];
+	char addrs[28];
+	uint16_t occurences;
+	int8_t rssi;
+};
+
+//static std::vector<peripheral_t> _history;
+#define HISTORY_SIZE 10
+peripheral_t _history[HISTORY_SIZE];
+uint8_t freeIdx = 0;
 
 /** Example that sets up the Bluetooth stack with two characteristics:
  *   one textual characteristic available for write and one integer characteristic for read.
@@ -72,12 +93,8 @@ int32_t readTemp();
 int main() {
 	uart_init(UART_BAUD_38K4);
 
-	// config_uart();
-
 	LOG_INFO("Welcome at the nRF51822 code for meshing.");
 
-	// const char* hello = "Welcome at the nRF51822 code for meshing.\r\n";	
-	// write(hello);
 
 	int personal_threshold_level;
 #ifdef BINARY_LED
@@ -101,7 +118,7 @@ int main() {
 	pwm_config.num_channels     = 3;
 	pwm_config.gpio_num[0]      = PIN_RED;
 	pwm_config.gpio_num[1]      = PIN_GREEN;
-	pwm_config.gpio_num[2]      = PIN_BLUE;    
+	pwm_config.gpio_num[2]      = PIN_BLUE;
 
 	// Initialize the PWM library
 	nrf_pwm_init(&pwm_config);
@@ -172,19 +189,137 @@ int main() {
 	//uint32_t err_code = NRF_SUCCESS;
 
 	stack.onConnect([&](uint16_t conn_handle) {
+		LOG_INFO("onConnect...");
 			// A remote central has connected to us.  do something.
 			// TODO this signature needs to change
 			//NRF51_GPIO_OUTSET = 1 << PIN_LED;
-			uint32_t err_code __attribute__((unused)) = NRF_SUCCESS;
 			// first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
 			// be neater about it... we do not need to stop, only after a disconnect we do...
-			err_code = sd_ble_gap_rssi_stop(conn_handle);
-			err_code = sd_ble_gap_rssi_start(conn_handle);
-			})
-	.onDisconnect([&](uint16_t conn_handle) {
+			sd_ble_gap_rssi_stop(conn_handle);
+			sd_ble_gap_rssi_start(conn_handle);
+		})
+		.onDisconnect([&](uint16_t conn_handle) {
+			LOG_INFO("onDisconnect...");
 			// A remote central has disconnected from us.  do something.
 			//NRF51_GPIO_OUTCLR = 1 << PIN_LED;
-			});
+
+			// Of course this is not nice, but dirty! We immediately start advertising automatically after being
+			// disconnected. But for now this will be the default behaviour.
+
+			stack.stopScanning();
+
+#ifdef IBEACON
+			stack.startIBeacon();
+#else
+			stack.startAdvertising();
+#endif
+		})
+		.onAdvertisement([&](ble_gap_evt_adv_report_t* p_adv_report) {
+			//data_t adv_data;
+			//data_t type_data;
+
+			uint8_t * adrs_ptr = (uint8_t*) &(p_adv_report->peer_addr.addr);
+			char addrs[28];
+			sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
+					adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
+					adrs_ptr[0]);
+
+//			LOG_INFO("Advertisement from: %s, rssi: %d", addrs, p_adv_report->rssi);
+
+//			std::vector<peripheral_t>::iterator it = _history.begin();
+			uint16_t occ;
+			bool found = false;
+//			LOG_INFO("addrs: %s", addrs);
+			for (int i = 0; i < freeIdx; ++i) {
+//				LOG_INFO("_history[%d]: %s", i, _history[i].addrs);
+				if (strcmp(addrs, _history[i].addrs) == 0) {
+//					LOG_INFO("found");
+					_history[i].occurences++;
+					occ = _history[i].occurences;
+					int avg_rssi = ((occ-1)*_history[i].rssi + p_adv_report->rssi)/occ;
+//					_history[i].rssi = p_adv_report->rssi;
+					_history[i].rssi = avg_rssi;
+					found = true;
+				}
+			}
+			if (!found) {
+				uint8_t idx;
+				if (freeIdx >= HISTORY_SIZE) {
+					// history full, throw out item with lowest occurence
+					uint16_t minOcc = UINT16_MAX;
+					for (int i = 0; i < HISTORY_SIZE; ++i) {
+						if (_history[i].occurences < minOcc) {
+							minOcc = _history[i].occurences;
+							idx = i;
+						}
+					}
+				} else {
+					idx = freeIdx++;
+					peripheral_t peripheral;
+					_history[idx] = peripheral;
+				}
+
+				LOG_INFO("NEW:\tAdvertisement from: %s, rssi: %d", addrs, p_adv_report->rssi);
+//				peripheral.addrs = addrs;
+				strcpy(_history[idx].addrs, addrs);
+				_history[idx].occurences = 1;
+				_history[idx].rssi = p_adv_report->rssi;
+			} else {
+//				LOG_INFO("\tAdvertisement from: %s, rssi: %d, occ: %d", addrs, p_adv_report->rssi, occ);
+			}
+
+//			ble_advdata_t advdata;
+//			memset(&advdata, 0, sizeof(advdata));
+//
+//
+//			uint8_t len = p_adv_report->dlen;
+//			unsigned char* p_name;
+//			if (NRF_SUCCESS == ble_advdata_parser_field_find(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME, p_adv_report->data, &len, &p_name)) {
+//
+//
+//				LOG_INFO("len: %d", len);
+//				char name[len+1];
+//				strncpy(name, (const char*)p_name, len);
+//				name[len] = '\0';
+//
+//				LOG_INFO("Advertisement from: %s %s, rssi: %d", name, addrs, p_adv_report->rssi);
+//
+//			} else {
+//				LOG_INFO("Advertisement from: %s, rssi: %d", addrs, p_adv_report->rssi);
+//			}
+
+			/*
+						 * 			uint8_t len = p_adv_report->dlen;
+						unsigned char* p_name;
+						char* _name = "";
+						if (NRF_SUCCESS == ble_advdata_parser_field_find(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME, p_adv_report->data, &len, &p_name)) {
+
+
+							LOG_INFO("len: %d", len);
+			//				char name[len+1];
+							_name = new char[len+1];
+			//				strncpy(_name, (const unsigned char*)p_name, len);
+							memcpy(_name, p_name, len);
+							_name[len] = '\0';
+
+			//				char* name = "OK";
+
+						} else {
+				//			LOG_INFO("no name found");
+			//				LOG_INFO("Advertisement from: %s, rssi: %d", addrs, p_adv_report->rssi);
+							_name = "";
+						}
+						LOG_INFO("Advertisement from: %s %s, rssi: %d", _name, addrs, p_adv_report->rssi);
+						 *
+			*/
+
+			// Initialize advertisement report for parsing.
+			//adv_data.p_data = (uint8_t *)p_gap_evt->params.adv_report.data;
+			//adv_data.data_len = p_gap_evt->params.adv_report.dlen;
+
+
+
+		});
 
 	//Service& generalService = stack.createService();
 	//Service& batteryService = stack.createBatteryService();
@@ -198,7 +333,7 @@ int main() {
 #ifdef NUMBER_CHARAC
 	// Create a characteristic of type uint8_t (unsigned one byte integer).
 	// This characteristic is by default read-only (for the user)
-	// Note that in the next characteristic this variable intChar is set! 
+	// Note that in the next characteristic this variable intChar is set!
 	Characteristic<uint8_t>& intChar = localizationService.createCharacteristic<uint8_t>()
 		.setUUID(UUID(localizationService.getUUID(), 0x125))  // based off the UUID of the service.
 		.setName("number");
@@ -248,7 +383,6 @@ int main() {
 
 		});
 #endif // _CONTROL_CHARAC
-#endif
 
 	// set scanning option
 	localizationService.createCharacteristic<uint8_t>()
@@ -261,15 +395,35 @@ int main() {
 			case 0: {
 				LOG_INFO("Crown: start scanning");
 				stack.startScanning();
+				break;
 			}
-			break;
 			case 1: {
 				LOG_INFO("Crown: stop scanning");
 				stack.stopScanning();
+				break;
 			}
-			break;
+		}
+
+	});
+
+	// get scan result
+	localizationService.createCharacteristic<uint8_t>()
+		.setUUID(UUID(localizationService.getUUID(), 0x121))
+		.setName("devices")
+		.setDefaultValue(255)
+		.setWritable(true)
+		.onWrite([&](const uint8_t & value) -> void {
+//			personal_threshold_level = value;
+//			LOG_INFO("Setting personal threshold level to: %d", value);
+
+			LOG_INFO("##################################################");
+			LOG_INFO("### listing detected peripherals #################");
+			LOG_INFO("##################################################");
+			for (int i = 0; i < freeIdx; ++i) {
+				LOG_INFO("%s\trssi: %d\tocc: %d", _history[i].addrs, _history[i].rssi, _history[i].occurences);
 			}
-			
+			LOG_INFO("##################################################");
+
 		});
 
 	// set threshold level
@@ -283,39 +437,40 @@ int main() {
 			LOG_INFO("Setting personal threshold level to: %d", value);
 		});
 
-	//	 // get temperature value
-	//	 Characteristic<int16_t>& temperature = localizationService.createCharacteristic<int16_t>()
-	//	 	.setUUID(UUID(localizationService.getUUID(), 0x126))
-	//	 	.setName("temperature")
-	//	 	.setDefaultValue(0);
+#endif /* LOCALISATION_SERVICE */
 
+#ifdef TEMPERATURE_SERVICE
+	//	 get temperature value
 	TemperatureService& temperatureService = TemperatureService::createService(stack);
-	temperatureService.start();
+//	temperatureService.start();
+#endif /* TEMPERATURE_SERVICE */
 
 	// Begin sending advertising packets over the air.
+#ifdef IBEACON
+	stack.startIBeacon();
+#else
 	stack.startAdvertising();
-	while(1) {
-		// read temperature
-		//		temperature = readTemp();
+#endif
 
+	LOG_INFO("running...");
+	while(1) {
 		// Deliver events from the Bluetooth stack to the callbacks defined above.
 		//		analogWrite(PIN_LED, 50);
 		stack.loop();
+
+#ifdef TEMPERATURE_SERVICE
+		// [31.10.14] correction, this only happens without optimization -Os !!!
+		// [31.10.14] this seems to interfere with the scanning / advertisement data
+		// coming in so if the temperature is read at the same time as scanning is
+		// performed the whole thing crashes after some time.
+		// NOTE: this probably needs to be done with other functionality too that has
+		// to run at the same time as the scanning
+//		if (!stack.isScanning() && stack.connected()) {
+//			LOG_INFO("temp.loop()");
+			temperatureService.loop();
+//		}
+#endif
+
+		nrf_delay_ms(50);
 	}
-}
-
-int32_t readTemp() {
-	int32_t temp;
-	uint32_t err_code;
-
-	err_code = sd_temp_get(&temp);
-	// TODO: check error code
-
-	//	LOG_DEBUG("raw temp: %d", temp);
-
-	temp = (temp / 4);
-
-	//	LOG_INFO("temp: %d", temp);
-
-	return temp;
 }

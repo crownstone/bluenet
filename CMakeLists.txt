@@ -40,6 +40,7 @@ SET(PROJECT_NAME ${APPLICATION_SHORTHAND} ${TEST_COMPILERS})
 
 # Set the main file to use for this application
 SET(MAIN_FILE "main_${APPLICATION_SHORTHAND}.cpp")
+#SET(MAIN_FILE "main.cpp")
 
 # Start a project
 PROJECT(${PROJECT_NAME})
@@ -85,9 +86,11 @@ MESSAGE(STATUS "Linked libraries: ${LIBS}")
 SET(SOURCE_DIR "src")
 SET(INCLUDE_DIR "include")
 
-# Add a single 
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/error.cpp")
+# essential, code doesn't run without this file !!!
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nRF51822.c")
+
+# Add a single 
+#LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/error.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/Pool.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/syscalls.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nrf_pwm.c")
@@ -97,12 +100,21 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/IndoorLocalisationService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/TemperatureService.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
+#LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/main.cpp")
+#LIST(APPEND FOLDER_SOURCE "/opt/nordic/Example/s130_demo_ap/src/main.cpp")
+#LIST(APPEND FOLDER_SOURCE "/opt/nordic/nrf51822/Board/nrf6310/blinky_example/main.c")
 
 # Add all header files without exception
-FILE(GLOB FOLDER_HEADER ${INCLUDE_DIR}/*.h ${INCLUDE_DIR}/*.hh ${INCLUDE_DIR}/*.hpp)
+#FILE(GLOB FOLDER_HEADER ${INCLUDE_DIR}/*.h ${INCLUDE_DIR}/*.hh ${INCLUDE_DIR}/*.hpp)
 
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
+LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
+LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/sd_common/softdevice_handler.c")
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
+LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
+
+#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/simple_uart/simple_uart.c")
+#LIST(APPEND FOLDER_SOURCE "/opt/nordic/Example/s130_demo_app/src/rtc1.c")
 
 # For Visual Studio group the files
 SOURCE_GROUP("Source files" FILES ${FOLDER_SOURCE})
@@ -110,12 +122,13 @@ SOURCE_GROUP("Header files" FILES ${FOLDER_HEADER})
 
 INCLUDE_DIRECTORIES(${INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${INCLUDE_DIR}/lib)
+#INCLUDE_DIRECTORIES("/opt/nordic/Example/s130_demo_app/inc")
 
 # Add to the -I flags
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/app_common")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble/softdevice")
+#INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble/softdevice")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble/ble_services")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/gcc")
 

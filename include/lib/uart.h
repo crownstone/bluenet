@@ -98,7 +98,7 @@ static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVI
  * @param baud_rate - the baud rate to be used, ::uart_baudrate_t.
  *
  */
-inline void uart_init(uart_baudrate_t const baud_rate) {
+static inline void uart_init(uart_baudrate_t const baud_rate) {
 	//  NRF_UART0->PSELRTS = BOARD_UART0_RTS;
 	//  NRF_UART0->PSELTXD = BOARD_UART0_TX;
 	//  NRF_UART0->PSELCTS = BOARD_UART0_CTS;
@@ -160,7 +160,7 @@ inline void uart_write_buf(uint8_t const *buf, uint32_t len) {
 
 /**@brief Logging function, used for formated output on the UART.
  */
-inline void uart_logf(const char *fmt, ...) {
+static inline void uart_logf(const char *fmt, ...) {
     uint16_t i = 0;
     static uint8_t logf_buf[150];
     va_list args;
