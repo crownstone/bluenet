@@ -27,13 +27,13 @@ extern "C" {
 
 #include "ble_error.h"
 
-}
-
-
 #include "nrf.h"
 #include "nrf_gpio.h"
 #include "nrf_delay.h"
 #include "nrf_pwm.h"
+
+}
+
 
 
 //using std::vector;
@@ -80,7 +80,8 @@ namespace BLEpp {
 
 
 // A macro to throw an std::exception if the given function does not have the result NRF_SUCCESS
-#define BLE_CALL(function, args) do {uint32_t result = function args; if (result != NRF_SUCCESS) throw ble_exception(# function, __FILE__, __LINE__); } while(0)
+//#define BLE_CALL(function, args) do {uint32_t result = function args; if (result != NRF_SUCCESS) throw ble_exception(# function, __FILE__, __LINE__); } while(0)
+#define BLE_CALL(function, args) do {uint32_t result = function args; APP_ERROR_CHECK(result); } while(0)
 
 #define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) throw ble_exception(message, __FILE__, __LINE__); } while(0)
 #define BLE_THROW(message) throw ble_exception(message, __FILE__, __LINE__)
@@ -111,7 +112,52 @@ namespace BLEpp {
             ble_uuid_t ret;
             ret.uuid = _uuid;
             ret.type = _type;
+
+//            LOG_INFO("get fullid: %s", _full);
+//            LOG_INFO("get uuid: %X", _uuid);
+
             return ret;
+        }
+
+        operator ble_uuid128_t() {
+        	ble_uuid128_t res;
+
+			int i = 0;
+			int j = 0;
+			int k = 0;
+			uint8_t c;
+			uint8_t v = 0;
+			for (; ((c = _full[i]) != 0) && (j < 16); i++) {
+				uint8_t vv = 0;
+
+				if (c == '-' || c == ' ') {
+					continue;
+				} else if (c >= '0' && c <= '9') {
+					vv = c - '0';
+				} else if (c >= 'A' && c <= 'F') {
+					vv = c - 'A' + 10;
+				} else if (c >= 'a' && c <= 'f') {
+					vv = c - 'a' + 10;
+				} else {
+					char cc[] = {c};// can't just call std::string(c) apparently.
+					BLE_THROW(std::string("Invalid character ") + std::string(1,cc[0]) + " in UUID.");
+				}
+
+				v = v * 16 + vv;
+
+				if (k++ % 2 == 1) {
+					res.uuid128[15 - (j++)] = v;
+					v = 0;
+				}
+
+			}
+			if (j < 16) {
+				BLE_THROW("UUID is too short,");
+			} else if (_full[i] != 0) {
+				BLE_THROW("UUID is too long.");
+			}
+
+			return res;
         }
 
         UUID() : _uuid(0xdead), _type(BLE_UUID_TYPE_UNKNOWN) {};
@@ -190,10 +236,12 @@ namespace BLEpp {
 
         bool                      _inited;
         bool                      _notifies;
+        bool					  _indicates;
         bool                      _writable;
         uint16_t                  _unit;   // 2
         uint32_t                  _updateIntervalMsecs; // 0 means don't update.  // 4
         //app_timer_id_t            _timer;  // 4
+        bool					  _notifyingEnabled;
 
       public:
 
@@ -212,6 +260,20 @@ namespace BLEpp {
 
         CharacteristicBase& setNotifies(bool notifies) {
             _notifies = notifies;
+            return *this;
+        }
+
+        bool isNotifyingEnabled() {
+        	return _notifyingEnabled;
+        }
+
+        void setNotifyingEnabled(bool enabled) {
+        	LOG_DEBUG("[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
+        	_notifyingEnabled = enabled;
+        }
+
+        CharacteristicBase& setIndicates(bool indicates) {
+            _indicates = indicates;
             return *this;
         }
 
@@ -244,6 +306,10 @@ namespace BLEpp {
 
         uint16_t getValueHandle() {
             return _handles.value_handle;
+        }
+
+        uint16_t getCccdHandle() {
+        	return _handles.cccd_handle;
         }
 
         CharacteristicBase& setUpdateIntervalMSecs(uint32_t msecs);
@@ -425,7 +491,7 @@ namespace BLEpp {
             CharacteristicValue value(len, data+offset);
             setCharacteristicValue(value);
 
-            LOG_DEBUG("%s: onWrite", _name.c_str());
+            LOG_DEBUG("%s: onWrite(%d, %X)", _name.c_str(), len, *((uint16_t*)data+offset));
             _callbackOnWrite(getValue());
         }
 
@@ -738,6 +804,7 @@ namespace BLEpp {
         typedef function<void(uint16_t conn_handle)>   callback_connected_t;
         typedef function<void(uint16_t conn_handle)>   callback_disconnected_t;
         typedef function<void(bool radio_active)>   callback_radio_t;
+        typedef function<void(ble_gap_evt_adv_report_t* p_adv_report)> callback_advertisement_t;
 
 
         static Nrf51822BluetoothStack * _stack;
@@ -790,6 +857,7 @@ namespace BLEpp {
         callback_radio_t                            _callback_radio;  // 16
         volatile uint8_t                            _radio_notify; // 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
 
+        callback_advertisement_t					_callback_advertisement;
     public:
 
         Nrf51822BluetoothStack(Pool& pool);
@@ -890,6 +958,11 @@ namespace BLEpp {
             return *this;
         }
 
+        Nrf51822BluetoothStack& onAdvertisement(const callback_advertisement_t& callback) {
+        	_callback_advertisement = callback;
+        	return *this;
+        }
+
         Service& createService() {
             GenericService* svc = new GenericService();
             addService(svc);
@@ -905,14 +978,18 @@ namespace BLEpp {
         Service& getService(std::string name);
         Nrf51822BluetoothStack& addService(Service* svc);
 
+        Nrf51822BluetoothStack& startIBeacon();
         Nrf51822BluetoothStack& startAdvertising();
 
         Nrf51822BluetoothStack& stopAdvertising();
 
+        bool isAdvertising();
 #if(SOFTDEVICE_SERIES != 110)
         Nrf51822BluetoothStack& startScanning();
 
         Nrf51822BluetoothStack& stopScanning();
+
+        bool isScanning();
 #endif
         Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 
@@ -932,6 +1009,7 @@ namespace BLEpp {
         void on_ble_evt(ble_evt_t * p_ble_evt);
         void on_connected(ble_evt_t * p_ble_evt);
         void on_disconnected(ble_evt_t * p_ble_evt);
+        void on_advertisement(ble_evt_t * p_ble_evt);
 
     };
 
