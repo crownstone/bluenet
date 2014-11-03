@@ -28,9 +28,10 @@
 
 using namespace BLEpp;
 
-//#define NRF6310_BOARD
+// are we programming a dongle, or a board, or an rfduino, or a crownstone?
+#define NRF6310_BOARD
 
-#define SHUNT_VALUE 120 // Resistance of the shunt in mili ohm
+#define SHUNT_VALUE          120                 // resistance of the shunt in milli ohm
 
 // on the RFduino
 #define PIN_RED              2                   // this is GPIO 2 (bottom pin)
@@ -40,10 +41,11 @@ using namespace BLEpp;
 #ifdef NRF6310_BOARD
 #define PIN_LED              8                   // this is P1.0
 #define PIN_ADC              2                   // AIN2 is P0.1
+#define PIN_ADC2             2                   // just set to the same
 #else
 #define PIN_LED              3                   // this is GPIO 3
-#define PIN_ADC2              5                   // AIN5 is pin 4
-#define PIN_ADC             6                   // AIN6 is pin 5
+#define PIN_ADC2             5                   // AIN5 is pin 4
+#define PIN_ADC              6                   // AIN6 is pin 5
 #endif
 
 // this is the switch on the 220V plug!
@@ -230,6 +232,9 @@ int main() {
 
 
 #ifdef CONTROL_CHARAC
+	volatile uint32_t curve_size = 200;
+	volatile uint32_t curve[curve_size];
+
 	localizationService.createCharacteristic<std::string>()
 		.setUUID(UUID(localizationService.getUUID(), 0x124))
 		//		.setName("number input")
@@ -250,13 +255,18 @@ int main() {
 			uint32_t voltage_max = 0;
 			// Start reading adc
 			uint32_t voltage;
-			for (uint32_t i=0; i<100*1000; ++i) {
+			uint32_t samples = 100000;
+			uint32_t subsample = samples / curve_size;
+			for (uint32_t i=0; i<samples; ++i) {
 				nrf_adc_read(PIN_ADC2, &voltage);
 				rms_sum += voltage*voltage;
 				if (voltage < voltage_min)
 					voltage_min = voltage;
 				if (voltage > voltage_max)
 					voltage_max = voltage;
+				//if (!(i % subsample)) 
+				if (i < curve_size)
+					curve[i] = voltage;
 			}
 			uint32_t rms = sqrt(rms_sum/(100*1000));
 
@@ -272,8 +282,17 @@ int main() {
 			uint16_t current = rms / SHUNT_VALUE; // mA
 
 			char text[128];
-			sprintf(text, "voltage(nV): last=%i rms=%i min=%i max=%i   current=%i mA\r\n", voltage, rms, voltage_min, voltage_max, current);
+			sprintf(text, "voltage(nV): last=%lu rms=%lu min=%lu max=%lu   current=%i mA\r\n", voltage, rms, voltage_min, voltage_max, current);
 			write(text);
+
+			char curve_text[128];
+			for (uint32_t i = 0; i < curve_size; ++i) {
+				sprintf(curve_text, "%lu, ", curve[i]);
+				if (!(i % 10)) sprintf(curve_text, "\r\n");
+				write(curve_text);
+				curve_text[0]='\0';
+			}
+			
 
 			uint64_t result = voltage_min;
 			result <<= 32;
