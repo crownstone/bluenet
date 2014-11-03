@@ -19,13 +19,18 @@
 #include "nRF51822.h"
 #include "serial.h"
 
+#include "nrf_adc.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <cstring>
+#include <cmath>
 
 using namespace BLEpp;
 
 //#define NRF6310_BOARD
+
+#define SHUNT_VALUE 120 // Resistance of the shunt in mili ohm
 
 // on the RFduino
 #define PIN_RED              2                   // this is GPIO 2 (bottom pin)
@@ -34,12 +39,15 @@ using namespace BLEpp;
 
 #ifdef NRF6310_BOARD
 #define PIN_LED              8                   // this is P1.0
+#define PIN_ADC              2                   // AIN2 is P0.1
 #else
-#define PIN_LED              0                   // this is GPIO 0
+#define PIN_LED              3                   // this is GPIO 3
+#define PIN_ADC2              5                   // AIN5 is pin 4
+#define PIN_ADC             6                   // AIN6 is pin 5
 #endif
-	
+
 // this is the switch on the 220V plug!
-#define BINARY_LED
+//#define BINARY_LED
 
 // An RGB led as with the rfduino requires a sine wave, and thus a PWM signal
 //#define RGB_LED
@@ -61,17 +69,32 @@ using namespace BLEpp;
  * See documentation for a detailed discussion of what's going on here.
  **/
 int main() {
-	config_uart();
-	const char* hello = "Welcome at the nRF51822 code for meshing.\r\n";	
-	write(hello);
-
 	int personal_threshold_level;
 #ifdef BINARY_LED
 	uint32_t bin_counter = 0;
-	NRF51_GPIO_DIRSET = 1 << PIN_LED; // set pins to output
-	NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
-	NRF51_GPIO_OUTSET = 1 << PIN_LED; // pin low, led goes on
+//	NRF51_GPIO_DIRSET = 1 << PIN_LED; // set pins to output
+//	NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
+//	NRF51_GPIO_OUTSET = 1 << PIN_LED; // pin low, led goes on
+
+	// Configure LED-pins as outputs.
+	nrf_gpio_cfg_output(PIN_LED);
+	nrf_gpio_pin_write(PIN_LED, 1); // led goes on
 #endif
+
+	// Configure current sensor pin as input
+	// NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_PULLDOWN, NRF_GPIO_PIN_NOPULL
+	// NRF_GPIO_PIN_NOSENSE, NRF_GPIO_PIN_SENSE_LOW, NRF_GPIO_PIN_SENSE_HIGH
+//	nrf_gpio_cfg_sense_input(PIN_CURRENT_SENS_1, NRF_GPIO_PIN_NOPULL, NRF_GPIO_PIN_SENSE_HIGH);
+
+
+	config_uart();
+	const char* hello = "Welcome at the nRF51822 code for meshing.\r\n";
+	write(hello);
+
+	char text[64];
+	sprintf(text, "Compilation time: %s \r\n", COMPILATION_TIME);
+	write(text);
+
 	//	tick_init();
 	//	pwm_init(PIN_GREEN, 1);
 	//analogWrite(PIN_GREEN, 50);
@@ -116,7 +139,15 @@ int main() {
 	Nrf51822BluetoothStack stack(pool);
 
 	// Set advertising parameters such as the device name and appearance.  These values will
-	stack.setDeviceName(std::string("Crown"))
+//	stack.setDeviceName(std::string("Crown_bart")) // Max len = BLE_GAP_DEVNAME_MAX_LEN (31)
+	char deviceName[32];
+	sprintf(deviceName, "Crow_%s", COMPILATION_TIME);
+//	std::string devName = std::string("2014-10-27:14");
+//	sprintf(text, "devname len: %i\r\n", devName.length());
+//	write(text);
+	sprintf(text, "devname len: %i\r\n", strlen(deviceName));
+	write(text);
+	stack.setDeviceName(std::string(deviceName)) // Max len = BLE_GAP_DEVNAME_MAX_LEN (31)
 		// controls how device appears in GUI.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 	//	 .setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
@@ -185,10 +216,18 @@ int main() {
 	// Create a characteristic of type uint8_t (unsigned one byte integer).
 	// This characteristic is by default read-only (for the user)
 	// Note that in the next characteristic this variable intChar is set! 
-	Characteristic<uint8_t>& intChar = localizationService.createCharacteristic<uint8_t>()
+	Characteristic<uint64_t>& intChar = localizationService.createCharacteristic<uint64_t>()
 		.setUUID(UUID(localizationService.getUUID(), 0x125))  // based off the UUID of the service.
+		.setDefaultValue(66)
 		.setName("number");
 #endif // _NUMBER_CHARAC
+
+
+	Characteristic<uint64_t>& intChar2 = localizationService.createCharacteristic<uint64_t>()
+		.setUUID(UUID(localizationService.getUUID(), 0x121))  // based off the UUID of the service.
+		.setDefaultValue(66)
+		.setName("number2");
+
 
 #ifdef CONTROL_CHARAC
 	localizationService.createCharacteristic<std::string>()
@@ -198,9 +237,55 @@ int main() {
 		.setDefaultValue("")
 		.setWritable(true)
 		.onWrite([&](const std::string& value) -> void {
+			std::string msg = std::string("Received message: ") + value + std::string("\r\n");
+			const char* received = msg.c_str();
+			write(received);
 				//.onWrite([&](const uint8_t& value) -> void {
 				// set the value of the "number" characteristic to the value written to the text characteristic.
 				//int nr = value;
+
+
+			uint64_t rms_sum = 0;
+			uint32_t voltage_min = 0xFFFFFFFF;
+			uint32_t voltage_max = 0;
+			// Start reading adc
+			uint32_t voltage;
+			for (uint32_t i=0; i<100*1000; ++i) {
+				nrf_adc_read(PIN_ADC2, &voltage);
+				rms_sum += voltage*voltage;
+				if (voltage < voltage_min)
+					voltage_min = voltage;
+				if (voltage > voltage_max)
+					voltage_max = voltage;
+			}
+			uint32_t rms = sqrt(rms_sum/(100*1000));
+
+			// 8A max --> 0.96V max --> voltage value is max 960000, which is smaller than 2^32
+
+			// measured voltage goes from 0-3.6V(due to 1/3 multiplier), measured as 0-255(8bit) or 0-1024(10bit)
+//			voltage = voltage*1000*1200*3/255; // nV   8 bit
+			voltage     = voltage    *1000*1200*3/1024; // nV   10 bit
+			voltage_min = voltage_min*1000*1200*3/1024;
+			voltage_max = voltage_max*1000*1200*3/1024;
+			rms         = rms        *1000*1200*3/1024;
+
+			uint16_t current = rms / SHUNT_VALUE; // mA
+
+			char text[128];
+			sprintf(text, "voltage(nV): last=%i rms=%i min=%i max=%i   current=%i mA\r\n", voltage, rms, voltage_min, voltage_max, current);
+			write(text);
+
+			uint64_t result = voltage_min;
+			result <<= 32;
+			result |= voltage_max;
+			intChar = result;
+
+			result = rms;
+			result <<= 32;
+			result |= current;
+			intChar2 = result;
+
+
 #ifdef BINARY_LED
 			bin_counter++;
 			if (bin_counter % 2) {
@@ -209,9 +294,8 @@ int main() {
 				NRF51_GPIO_OUTCLR = 1 << PIN_LED; // pin low, led goes off
 			}
 #endif
-			std::string msg = std::string("Received message: ") + value + std::string("\r\n");
-			const char* received = msg.c_str();	
-			write(received);
+
+
 #ifdef RGB_LED
 			int nr = atoi(value.c_str());
 #ifdef NUMBER_CHARAC
@@ -287,17 +371,39 @@ int main() {
 	localizationService.createCharacteristic<uint8_t>()
 		.setUUID(UUID(localizationService.getUUID(), 0x122))
 		.setName("number")
-		.setDefaultValue(255)
+		.setDefaultValue(0)
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
+			nrf_pwm_set_value(0, value);
+//			nrf_pwm_set_value(1, value);
+//			nrf_pwm_set_value(2, value);
+			char text[64];
+			sprintf(text, "set personal_threshold_value to %i \r\n", value);
+			//write("set personal_threshold_value\r\n");
+			write(text);
 			personal_threshold_level = value;
 		});
 
-		// Begin sending advertising packets over the air.  Again, may want to trigger this from a button press to save power.
-		stack.startAdvertising();
-		while(1) {
-			// Deliver events from the Bluetooth stack to the callbacks defined above.
-			//		analogWrite(PIN_LED, 50);
-			stack.loop();
-		}
+	// Begin sending advertising packets over the air.  Again, may want to trigger this from a button press to save power.
+	stack.startAdvertising();
+
+	// Init pwm
+	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
+	pwm_config.mode             = PWM_MODE_LED_100;
+	pwm_config.num_channels     = 2;
+	pwm_config.gpio_num[0]      = PIN_LED;
+	pwm_config.gpio_num[1]      = 9;
+//	pwm_config.gpio_num[2]      = 10;
+	nrf_pwm_init(&pwm_config);
+
+//	// Start with the power off
+//	nrf_gpio_pin_write(PIN_LED, 0);
+//	nrf_pwm_set_value(0, 0);
+
+
+	while(1) {
+		// Deliver events from the Bluetooth stack to the callbacks defined above.
+		//		analogWrite(PIN_LED, 50);
+		stack.loop();
+	}
 }

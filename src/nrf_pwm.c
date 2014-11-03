@@ -43,8 +43,10 @@ uint32_t nrf_pwm_init(nrf_pwm_config_t *config)
 	switch(config->mode)
 	{
 		case PWM_MODE_LED_100:   // 0-100 resolution, 156 Hz PWM frequency, 32 kHz timer frequency (prescaler 9)
-			PWM_TIMER->PRESCALER = 9; /* Prescaler 4 results in 1 tick == 1 microsecond */
-			pwm_max_value = 100;
+//			PWM_TIMER->PRESCALER = 9; /* Prescaler 4 results in 1 tick == 1 microsecond */
+//			pwm_max_value = 100;
+			PWM_TIMER->PRESCALER = 5; /* Prescaler 4 results in 1 tick == 1 microsecond */
+			pwm_max_value = 255;
 			break;
 		case PWM_MODE_LED_255:   // 8-bit resolution, 122 Hz PWM frequency, 65 kHz timer frequency (prescaler 8)
 			PWM_TIMER->PRESCALER = 8;
@@ -72,6 +74,7 @@ uint32_t nrf_pwm_init(nrf_pwm_config_t *config)
 		nrf_gpio_cfg_output(pwm_io_ch[i]);
 		pwm_running[i] = 0;
 		pwm_gpiote_channel[i] = config->gpiote_channel[i];
+		pwm_next_value[i] = 0;
 	}
 	PWM_TIMER->TASKS_CLEAR = 1;
 	// From example: NRF_TIMER2->BITMODE = (TIMER_BITMODE_BITMODE_16Bit << TIMER_BITMODE_BITMODE_Pos);
