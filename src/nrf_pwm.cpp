@@ -68,7 +68,7 @@ uint32_t nrf_pwm_init(nrf_pwm_config_t *config)
 			return 0xFFFFFFFF;
 	}
 	pwm_num_channels = config->num_channels;
-	for(int i = 0; i < pwm_num_channels; i++)
+	for(int i = 0; i < (int)pwm_num_channels; i++)
 	{
 		pwm_io_ch[i] = (uint32_t)config->gpio_num[i];
 		nrf_gpio_cfg_output(pwm_io_ch[i]);
@@ -84,7 +84,7 @@ uint32_t nrf_pwm_init(nrf_pwm_config_t *config)
 	PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk;
 	PWM_TIMER->EVENTS_COMPARE[0] = PWM_TIMER->EVENTS_COMPARE[1] = PWM_TIMER->EVENTS_COMPARE[2] = PWM_TIMER->EVENTS_COMPARE[3] = 0;     
 
-	for(int i = 0; i < pwm_num_channels; i++)
+	for(int i = 0; i < (int)pwm_num_channels; i++)
 	{
 		ppi_enable_channel(config->ppi_channel[i*2],  &PWM_TIMER->EVENTS_COMPARE[i], &NRF_GPIOTE->TASKS_OUT[pwm_gpiote_channel[i]]);
 		ppi_enable_channel(config->ppi_channel[i*2+1],&PWM_TIMER->EVENTS_COMPARE[3], &NRF_GPIOTE->TASKS_OUT[pwm_gpiote_channel[i]]);

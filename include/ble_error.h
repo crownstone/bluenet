@@ -1,5 +1,13 @@
+/**
+ * Author: Anne van Rossum
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: 4 Nov., 2014
+ * License: LGPLv3+
+ */
 #ifndef BLE_ERROR_H
 #define BLE_ERROR_H
+
+#include "nrf_error.h"
 
 #include <string> 
 #include <stdint.h> 

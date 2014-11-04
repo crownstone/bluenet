@@ -5,6 +5,8 @@
 #include "nrf_sdm.h"
 #endif
 
+#include <ble_error.h>
+
 //static uint32_t* adc_result;
 
 uint32_t nrf_adc_config(uint8_t pin) {

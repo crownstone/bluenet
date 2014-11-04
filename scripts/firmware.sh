@@ -31,6 +31,13 @@ all() {
 	debug
 }
 
+run() {
+	build
+	sleep 1
+	upload
+	sleep 1
+}
+
 case "$cmd" in 
 	build)
 		build
@@ -44,8 +51,11 @@ case "$cmd" in
 	all)
 		all
 		;;
+	run)
+		run
+		;;
 	*)
-		echo $"Usage: $0 {build|upload|debug|all}"
+		echo $"Usage: $0 {build|upload|debug|run|all}"
 		exit 1
 esac
 

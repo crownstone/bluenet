@@ -40,6 +40,7 @@ SET(PROJECT_NAME ${APPLICATION_SHORTHAND} ${TEST_COMPILERS})
 
 # Set the main file to use for this application
 SET(MAIN_FILE "main_${APPLICATION_SHORTHAND}.cpp")
+#SET(MAIN_FILE "main.cpp")
 
 # Start a project
 PROJECT(${PROJECT_NAME})
@@ -74,7 +75,7 @@ endif()
 MESSAGE(STATUS "Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld)
 
-# Libraries (math, stdc++ libraries, etc.)
+# Libraries (math, stdc++ libraries, etc., note that we use the size-constrained *_s versions!)
 SET(LIBS "-lsupc++ -lm -lc_s -lstdc++_s")
 
 # Some debug information
@@ -85,41 +86,46 @@ MESSAGE(STATUS "Linked libraries: ${LIBS}")
 SET(SOURCE_DIR "src")
 SET(INCLUDE_DIR "include")
 
-# Add a single 
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/serial.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/Print.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/error.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/emergency.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/Debug.cpp")
+# essential, code doesn't run without this file !!!
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nRF51822.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/Stream.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/NRF51_SPI.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/Arduino.cpp")
+
+# Add a single 
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/error.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/Peripherals.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/serial.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble_error.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/Pool.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/syscalls.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nrf_pwm.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nrf_adc.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble_error.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nrf_pwm.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nrf_adc.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/BluetoothLE.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/IndoorLocalisationService.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/TemperatureService.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
 # Add all header files without exception
-FILE(GLOB FOLDER_HEADER ${INCLUDE_DIR}/*.h ${INCLUDE_DIR}/*.hh ${INCLUDE_DIR}/*.hpp)
+#FILE(GLOB FOLDER_HEADER ${INCLUDE_DIR}/*.h ${INCLUDE_DIR}/*.hh ${INCLUDE_DIR}/*.hpp)
 
+# We add the source files explicitly. This is recommended in the cmake system and will also force us all the time to
+# consider the size of the final binary. Do not include things, if not necessary!
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
+LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
+LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
+LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
 
 # For Visual Studio group the files
 SOURCE_GROUP("Source files" FILES ${FOLDER_SOURCE})
 SOURCE_GROUP("Header files" FILES ${FOLDER_HEADER})
 
 INCLUDE_DIRECTORIES(${INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${INCLUDE_DIR}/lib)
 
 # Add to the -I flags
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/app_common")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble/softdevice")
+#INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble/softdevice")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble/ble_services")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/gcc")
 

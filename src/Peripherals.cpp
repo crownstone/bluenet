@@ -4,11 +4,9 @@
  * Date: 4 Nov., 2014
  * License: LGPLv3+
  */
+#include <Peripherals.h>
 
-#ifndef _error_h
-#define _error_h
+peripheral_t _history[history_size];
 
-#define NRF51_CRASH(x) __asm("BKPT"); \
-	while (1) {}
+uint8_t freeidx = 0;
 
-#endif /* _error_h */

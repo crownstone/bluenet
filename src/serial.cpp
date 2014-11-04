@@ -1,5 +1,16 @@
+/**
+ * Author: Anne van Rossum
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: 10 Oct., 2014
+ * License: LGPLv3+
+ */
+
 #include <serial.h>
 #include <cstring>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+
 #include "nRF51822.h"
 
 #define NRF51_UART_9600_BAUD  0x00275000UL
@@ -26,14 +37,50 @@ void config_uart() {
 	NRF51_UART_TXDRDY = 0;
 }
 
+/*
 void write(const char *str) {
 	uint8_t len = strlen(str);
 	for(int i = 0; i < len; ++i) {
 		NRF51_UART_TXD = (uint8_t)str[i];
-		while(NRF51_UART_TXDRDY != 1) /* wait */;
+		while(NRF51_UART_TXDRDY != 1) 
 		NRF51_UART_TXDRDY = 0;
 	}
+}*/
+
+/**
+ * A write function with a format specifier.
+ */
+int write(const char *str, ...) {
+	char buffer[128];
+	va_list ap;
+	va_start(ap, str);
+	uint8_t len = vsprintf(NULL, str, ap);
+	va_end(ap);
+
+	if (len < 0) return len;
+
+	// check if allocated buffer is big enough, if not allocate bigger buffer
+	if (sizeof buffer >= len + 1UL) {
+		va_start(ap, str);
+		len = vsprintf(buffer, str, ap);
+		for(int i = 0; i < len; ++i) {
+			NRF51_UART_TXD = (uint8_t)buffer[i];
+			while(NRF51_UART_TXDRDY != 1) /* wait */;
+			NRF51_UART_TXDRDY = 0;
+		}
+	} else {
+		char *p_buf = (char*)malloc(len + 1);
+		if (!p_buf) return -1;
+		va_start(ap, str);
+		len = vsprintf(p_buf, str, ap);
+		va_end(ap);
+		for(int i = 0; i < len; ++i) {
+			NRF51_UART_TXD = (uint8_t)str[i];
+			while(NRF51_UART_TXDRDY != 1) /* wait */;
+			NRF51_UART_TXDRDY = 0;
+		}
+		free(p_buf);
+	}
+	return len;
 }
-
-
 
