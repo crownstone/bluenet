@@ -1,11 +1,19 @@
-#include "nrf_adc.h"
+/**
+ * Author: Bart van Vliet
+ * Date: 4 Nov., 2014
+ * License: LGPLv3+
+ */
+
+#include "drivers/nrf_adc.h"
 #include "nrf.h"
 #include "nrf_gpio.h"
 #if(USE_WITH_SOFTDEVICE == 1)
 #include "nrf_sdm.h"
 #endif
 
-#include <ble_error.h>
+#include <common/boards.h>
+#include <drivers/serial.h>
+#include <util/ble_error.h>
 
 //static uint32_t* adc_result;
 
@@ -73,16 +81,17 @@ uint32_t nrf_adc_config(uint8_t pin) {
 }
 
 uint32_t nrf_adc_init(uint8_t pin) {
+	log(DEBUG, "Init AD converter");
+
+	uint32_t err_code;
 	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; // Interrupt adc
 
-	uint32_t err_code = nrf_adc_config(pin);
-
-	NRF_ADC->EVENTS_END = 0;
-	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
-
-	APP_ERROR_CHECK(err_code);
+#if(USE_WITH_SOFTDEVICE == 1)
+	log(DEBUG, "Run ADC converter with SoftDevice");
+#endif
 
 	// Enable ADC interrupt
+	log(DEBUG, "Clear pending ADC interrupts");
 #if(USE_WITH_SOFTDEVICE == 1)
 	err_code = sd_nvic_ClearPendingIRQ(ADC_IRQn);
 	APP_ERROR_CHECK(err_code);
@@ -90,6 +99,8 @@ uint32_t nrf_adc_init(uint8_t pin) {
 	NVIC_ClearPendingIRQ(ADC_IRQn);
 #endif
 
+	
+	log(DEBUG, "Set ADC priority");
 #if(USE_WITH_SOFTDEVICE == 1)
 	err_code = sd_nvic_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
 	APP_ERROR_CHECK(err_code);
@@ -98,23 +109,30 @@ uint32_t nrf_adc_init(uint8_t pin) {
 	NVIC_SetPriority(ADC_IRQn, 3);
 #endif
 
+	log(DEBUG, "Enable ADC Interrupt");
 #if(USE_WITH_SOFTDEVICE == 1)
 	err_code = sd_nvic_EnableIRQ(ADC_IRQn);
 	APP_ERROR_CHECK(err_code);
 #else
 	NVIC_EnableIRQ(ADC_IRQn);
 #endif
-
+	
+	log(DEBUG, "Configure ADC");
+	err_code = nrf_adc_config(pin);
+	APP_ERROR_CHECK(err_code);
+	
+	log(DEBUG, "Start ADC task");
+	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
 	NRF_ADC->EVENTS_END  = 0;    // Stop any running conversions.
-	NRF_ADC->TASKS_START = 1;
-
+	//NRF_ADC->TASKS_START = 1;    // If we start the task we cannot use the radio...
 
 #ifdef NRF6310_BOARD
+	log(DEBUG, "Test pins");
 	// --------- TEST -------------
 	// Configure pins as outputs.
 	for (uint8_t i=8; i<16; ++i) {
 		nrf_gpio_cfg_output(i);
-		nrf_gpio_pin_write(i, 0); // led goes off
+		nrf_gpio_pin_write(i, 1); // led goes off
 	}
 #endif
 
@@ -125,13 +143,15 @@ void nrf_adc_stop() {
 	NRF_ADC->TASKS_STOP = 1;
 }
 
-
+/**
+ * This doesn't work, correctly. Must be done properly.
+ */
 uint32_t nrf_adc_read(uint8_t pin, uint32_t* result) {
 //	adc_result = result;
 	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; // Interrupt adc
 
-	if (nrf_adc_config(pin))
-		return 0xFFFFFFFF; // error
+	//Anne: huh, config again!?!! if (nrf_adc_config(pin)) return 0xFFFFFFFF; // error
+	
 	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
 	NRF_ADC->EVENTS_END  = 0;    // Stop any running conversions.
 	NRF_ADC->TASKS_START = 1;

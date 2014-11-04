@@ -8,11 +8,11 @@
 #include <cmath> // try not to use this!
 #include <cstdio>
 
-#include "IndoorLocalisationService.h"
+#include <services/IndoorLocalisationService.h>
+#include <common/config.h>
+#include <common/boards.h>
+#include <drivers/nrf_adc.h>
 #include "Peripherals.h"
-#include <config.h>
-#include <boards.h>
-#include "nrf_adc.h"
 
 using namespace BLEpp;
 
@@ -82,7 +82,7 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 			uint32_t samples = 100000;
 			//uint32_t subsample = samples / curve_size;
 			for (uint32_t i=0; i<samples; ++i) {
-				nrf_adc_read(PIN_ADC2, &voltage);
+				nrf_adc_read(PIN_ADC, &voltage);
 				rms_sum += voltage*voltage;
 				if (voltage < voltage_min)
 					voltage_min = voltage;

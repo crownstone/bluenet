@@ -7,7 +7,7 @@
 
 #include "Pool.h"
 #include "BluetoothLE.h"
-#include "ble_error.h"
+#include "util/ble_error.h"
 
 #if(NORDIC_SDK_VERSION < 5)
 	#include "ble_stack_handler.h"
@@ -23,19 +23,20 @@ extern "C" {
 #include "nordic_common.h"
 #include "nRF51822.h"
 
-#include "nrf_adc.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <cstring>
 #include <cstdio>
 
-#include "serial.h"
+#include <common/boards.h>
+
+#include <drivers/nrf_adc.h>
+#include <drivers/serial.h>
 
 #include "Peripherals.h"
 
-#include "IndoorLocalisationService.h"
-#include "TemperatureService.h"
+#include <services/IndoorLocalisationService.h>
+#include <services/TemperatureService.h>
 
 using namespace BLEpp;
 
@@ -81,6 +82,10 @@ void configure(Nrf51822BluetoothStack &stack) {
 		// advertising for a set period of time, in order to save battery.
 		.setAdvertisingTimeoutSeconds(0);
 
+}
+
+void config_drivers() {
+	nrf_adc_init(PIN_ADC);
 }
 
 int main() {
@@ -205,6 +210,9 @@ int main() {
 #else
 	stack.startAdvertising();
 #endif
+	
+	// configure drivers
+	config_drivers();
 
 	log(INFO,"Running while loop..");
 

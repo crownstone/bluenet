@@ -9,7 +9,7 @@
 #define INDOORLOCALISATIONSERVICE_H_
 
 #include "BluetoothLE.h"
-#include "function.h"
+#include <util/function.h>
 
 #define INDOORLOCALISATION_UUID "00002220-0000-1000-8000-00805f9b34fb"
 // TODO -oDE: how did you come up with this UUID ??!!

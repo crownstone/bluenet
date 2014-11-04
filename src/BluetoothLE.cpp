@@ -13,9 +13,8 @@
 #error "The SOFTDEVICE_SERIES macro is required for compilation. Set it to 110 for example"
 #endif
 
-#include "ble_error.h"
-
-#include "utils.h"
+#include <util/ble_error.h>
+#include <util/utils.h>
 
 using namespace BLEpp;
 

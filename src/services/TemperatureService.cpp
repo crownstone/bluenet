@@ -5,7 +5,7 @@
  *      Author: dominik
  */
 
-#include "TemperatureService.h"
+#include <services/TemperatureService.h>
 #include "ble_hts.h"
 #include "nrf_temp.h"
 

@@ -1,3 +1,10 @@
+/**
+ * Author: Anne van Rossum
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: 4 Nov., 2014
+ * License: LGPLv3+
+ */
+
 #ifndef __BluetoothLE_h
 #define __BluetoothLE_h
 
@@ -5,10 +12,11 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include "function.h"
 #include "Serializable.h"
 #include "Pool.h"
-#include <serial.h>
+
+#include <util/function.h>
+#include <drivers/serial.h>
 
 extern "C" {
 
@@ -29,8 +37,8 @@ extern "C" {
 #include "nrf_delay.h"
 
 // Local wrapper  files
-#include "ble_error.h"
-#include "nrf_pwm.h"
+#include <util/ble_error.h>
+#include <drivers/nrf_pwm.h>
 
 }
 

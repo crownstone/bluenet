@@ -9,7 +9,7 @@
 #define TEMPERATURE_HPP_
 
 #include "nrf_soc.h"
-#include "ble_error.h"
+#include <util/ble_error.h>
 
 /*
  * get temperature from softdevice

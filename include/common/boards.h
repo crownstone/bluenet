@@ -17,7 +17,8 @@
 // CROWNSTONE
 
 // TODO: Board to compile for should actually be set in CMakeBuild.config
-#define CROWNSTONE
+//#define CROWNSTONE
+#define NRF6310_BOARD
 
 #ifdef RFDUINO
 
@@ -31,15 +32,13 @@
 
 #define PIN_LED              8                   // this is p1.0
 #define PIN_ADC              2                   // ain2 is p0.1
-#define PIN_ADC2             2                   // just set to the same
 
 #endif
 
 #ifdef CROWNSTONE
 
 #define PIN_LED              3                   // this is gpio 3
-#define PIN_ADC2             5                   // ain5 is pin 4
-#define PIN_ADC              6                   // ain6 is pin 5
+#define PIN_ADC              5                   // ain5 is pin 4
 
 #endif
 

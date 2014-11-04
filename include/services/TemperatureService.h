@@ -8,7 +8,7 @@
 #ifndef TEMPERATURESERVICE_H_
 #define TEMPERATURESERVICE_H_
 
-#include "temperature.h"
+#include <processing/temperature.h>
 #include "BluetoothLE.h"
 
 //extern "C" {

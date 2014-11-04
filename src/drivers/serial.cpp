@@ -5,7 +5,7 @@
  * License: LGPLv3+
  */
 
-#include <serial.h>
+#include <drivers/serial.h>
 #include <cstring>
 #include <cstdarg>
 #include <cstdio>

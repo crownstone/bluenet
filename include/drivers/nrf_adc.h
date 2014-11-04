@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 // Set this to 1 if the application uses a SoftDevice, 0 otherwise
-#define USE_WITH_SOFTDEVICE 0
+#define USE_WITH_SOFTDEVICE 1
 
 //#define NRF6310_BOARD
 

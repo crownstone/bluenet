@@ -1,4 +1,11 @@
-#include "nrf_pwm.h"
+/**
+ * Author: Anne van Rossum
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: 4 Nov., 2014
+ * License: LGPLv3+
+ */
+
+#include "drivers/nrf_pwm.h"
 #include "nrf.h"
 #include "nrf_gpiote.h"
 #include "nrf_gpio.h"
