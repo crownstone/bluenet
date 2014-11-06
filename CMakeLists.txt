@@ -111,7 +111,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
-LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/sd_common/softdevice_handler.c")
+#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/sd_common/softdevice_handler.c")
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
 
