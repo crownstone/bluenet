@@ -51,12 +51,10 @@ void TemperatureService::setTemperature(int32_t temperature) {
 //	APP_ERROR_CHECK(err_code);
 //}
 
-int32_t count = 0;
 void TemperatureService::loop() {
 
 	int32_t volatile temp;
-//	temp = getTemperature();
-	temp = count++;
+	temp = getTemperature();
 
 //	int32_t volatile temp;
 //    NRF_TEMP->TASKS_START = 1; /** Start the temperature measurement. */

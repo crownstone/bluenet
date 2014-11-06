@@ -33,11 +33,11 @@ extern "C" {
 #include "IndoorLocalisationService.h"
 #include "TemperatureService.h"
 
+#include "ScanResult.h"
+
 using namespace BLEpp;
 
-//#ifndef BOARD_NRF6310
-//#define BOARD_NRF6310
-//#endif
+#define BOARD_NRF6310
 
 // on the RFduino
 #define PIN_RED              2                   // this is GPIO 2 (bottom pin)
@@ -74,17 +74,14 @@ using namespace BLEpp;
 
 #define PIN_MOTOR            6                   // this is GPIO 6 (fifth pin)
 
-struct peripheral_t {
-//	uint8_t addr[BLE_GAP_ADDR_LEN];
-	char addrs[28];
-	uint16_t occurences;
-	int8_t rssi;
-};
-
 //static std::vector<peripheral_t> _history;
-#define HISTORY_SIZE 10
-peripheral_t _history[HISTORY_SIZE];
-uint8_t freeIdx = 0;
+//#define HISTORY_SIZE 10
+//peripheral_device_t _history[HISTORY_SIZE];
+ScanResult scanResult;
+//uint8_t freeIdx = 0;
+
+int counter = 0;
+
 
 /** Example that sets up the Bluetooth stack with two characteristics:
  *   one textual characteristic available for write and one integer characteristic for read.
@@ -95,6 +92,25 @@ int main() {
 
 	LOG_INFO("Welcome at the nRF51822 code for meshing.");
 
+//	_history = std::vector<peripheral_t>();
+
+    nrf_gpio_cfg_output(LED_0);
+    nrf_gpio_cfg_output(LED_1);
+    nrf_gpio_cfg_output(LED_2);
+    nrf_gpio_cfg_output(LED_3);
+    nrf_gpio_cfg_output(LED_4);
+    nrf_gpio_cfg_output(LED_5);
+    nrf_gpio_cfg_output(LED_6);
+    nrf_gpio_cfg_output(LED_7);
+
+    nrf_gpio_pin_clear(LED_0);
+    nrf_gpio_pin_clear(LED_1);
+    nrf_gpio_pin_clear(LED_2);
+    nrf_gpio_pin_clear(LED_3);
+    nrf_gpio_pin_clear(LED_4);
+    nrf_gpio_pin_clear(LED_5);
+    nrf_gpio_pin_clear(LED_6);
+    nrf_gpio_pin_clear(LED_7);
 
 	int personal_threshold_level;
 #ifdef BINARY_LED
@@ -147,7 +163,7 @@ int main() {
 	Nrf51822BluetoothStack stack(pool);
 
 	// Set advertising parameters such as the device name and appearance.  These values will
-	stack.setDeviceName(std::string("Crown"))
+	stack.setDeviceName(std::string("iCrown"))
 		// controls how device appears in GUI.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 	//	 .setUUID(UUID("00002220-0000-1000-8000-00805f9b34fb"));
@@ -197,6 +213,8 @@ int main() {
 			// be neater about it... we do not need to stop, only after a disconnect we do...
 			sd_ble_gap_rssi_stop(conn_handle);
 			sd_ble_gap_rssi_start(conn_handle);
+
+//			stack.startScanning();
 		})
 		.onDisconnect([&](uint16_t conn_handle) {
 			LOG_INFO("onDisconnect...");
@@ -206,7 +224,9 @@ int main() {
 			// Of course this is not nice, but dirty! We immediately start advertising automatically after being
 			// disconnected. But for now this will be the default behaviour.
 
-			stack.stopScanning();
+			if (stack.isScanning()) {
+				stack.stopScanning();
+			}
 
 #ifdef IBEACON
 			stack.startIBeacon();
@@ -218,54 +238,11 @@ int main() {
 			//data_t adv_data;
 			//data_t type_data;
 
-			uint8_t * adrs_ptr = (uint8_t*) &(p_adv_report->peer_addr.addr);
-			char addrs[28];
-			sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
-					adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
-					adrs_ptr[0]);
-
-//			LOG_INFO("Advertisement from: %s, rssi: %d", addrs, p_adv_report->rssi);
-
-//			std::vector<peripheral_t>::iterator it = _history.begin();
-			uint16_t occ;
-			bool found = false;
-//			LOG_INFO("addrs: %s", addrs);
-			for (int i = 0; i < freeIdx; ++i) {
-//				LOG_INFO("_history[%d]: %s", i, _history[i].addrs);
-				if (strcmp(addrs, _history[i].addrs) == 0) {
-//					LOG_INFO("found");
-					_history[i].occurences++;
-					occ = _history[i].occurences;
-					int avg_rssi = ((occ-1)*_history[i].rssi + p_adv_report->rssi)/occ;
-//					_history[i].rssi = p_adv_report->rssi;
-					_history[i].rssi = avg_rssi;
-					found = true;
-				}
-			}
-			if (!found) {
-				uint8_t idx;
-				if (freeIdx >= HISTORY_SIZE) {
-					// history full, throw out item with lowest occurence
-					uint16_t minOcc = UINT16_MAX;
-					for (int i = 0; i < HISTORY_SIZE; ++i) {
-						if (_history[i].occurences < minOcc) {
-							minOcc = _history[i].occurences;
-							idx = i;
-						}
-					}
-				} else {
-					idx = freeIdx++;
-					peripheral_t peripheral;
-					_history[idx] = peripheral;
-				}
-
-				LOG_INFO("NEW:\tAdvertisement from: %s, rssi: %d", addrs, p_adv_report->rssi);
-//				peripheral.addrs = addrs;
-				strcpy(_history[idx].addrs, addrs);
-				_history[idx].occurences = 1;
-				_history[idx].rssi = p_adv_report->rssi;
-			} else {
-//				LOG_INFO("\tAdvertisement from: %s, rssi: %d, occ: %d", addrs, p_adv_report->rssi, occ);
+			if (stack.isScanning()) {
+				counter++;
+				LOG_INFO("Count: %d", counter);
+				uint8_t * adrs_ptr = (uint8_t*) &(p_adv_report->peer_addr.addr);
+				scanResult.update(adrs_ptr, p_adv_report->rssi);
 			}
 
 //			ble_advdata_t advdata;
@@ -384,6 +361,12 @@ int main() {
 		});
 #endif // _CONTROL_CHARAC
 
+	Characteristic<ScanResult>& charac = localizationService.createCharacteristic<ScanResult>()
+		.setUUID(UUID(localizationService.getUUID(), 0x120))
+		.setName("Devices")
+		.setWritable(false);
+	charac.setNotifies(true);
+
 	// set scanning option
 	localizationService.createCharacteristic<uint8_t>()
 		.setUUID(UUID(localizationService.getUUID(), 0x123))
@@ -394,37 +377,35 @@ int main() {
 			switch(value) {
 			case 0: {
 				LOG_INFO("Crown: start scanning");
-				stack.startScanning();
+				if (!stack.isScanning()) {
+					scanResult.init(10);
+					stack.startScanning();
+				}
 				break;
 			}
 			case 1: {
 				LOG_INFO("Crown: stop scanning");
-				stack.stopScanning();
+				if (stack.isScanning()) {
+					stack.stopScanning();
+					charac = scanResult;
+				}
+//				scanResult.print();
 				break;
 			}
 		}
 
 	});
 
-	// get scan result
-	localizationService.createCharacteristic<uint8_t>()
-		.setUUID(UUID(localizationService.getUUID(), 0x121))
-		.setName("devices")
-		.setDefaultValue(255)
-		.setWritable(true)
-		.onWrite([&](const uint8_t & value) -> void {
-//			personal_threshold_level = value;
-//			LOG_INFO("Setting personal threshold level to: %d", value);
-
-			LOG_INFO("##################################################");
-			LOG_INFO("### listing detected peripherals #################");
-			LOG_INFO("##################################################");
-			for (int i = 0; i < freeIdx; ++i) {
-				LOG_INFO("%s\trssi: %d\tocc: %d", _history[i].addrs, _history[i].rssi, _history[i].occurences);
-			}
-			LOG_INFO("##################################################");
-
-		});
+//	// debug characteristic, prints the list of detected devices
+//	// on the uart
+//	localizationService.createCharacteristic<uint8_t>()
+//		.setUUID(UUID(localizationService.getUUID(), 0x121))
+//		.setName("List")
+//		.setDefaultValue(255)
+//		.setWritable(true)
+//		.onWrite([&](const uint8_t & value) -> void {
+//			scanResult.print();
+//		});
 
 	// set threshold level
 	localizationService.createCharacteristic<uint8_t>()
@@ -436,6 +417,13 @@ int main() {
 			personal_threshold_level = value;
 			LOG_INFO("Setting personal threshold level to: %d", value);
 		});
+
+
+//	Characteristic<int32_t>& mTemperatureCharacteristic = localizationService.createCharacteristic<int32_t>()
+//			.setUUID(UUID(localizationService.getUUID(), 0x01))
+//			.setName("Temperature")
+//			.setDefaultValue(0);
+//	mTemperatureCharacteristic.setNotifies(true);
 
 #endif /* LOCALISATION_SERVICE */
 
@@ -453,6 +441,9 @@ int main() {
 #endif
 
 	LOG_INFO("running...");
+
+//	stack.startScanning();
+
 	while(1) {
 		// Deliver events from the Bluetooth stack to the callbacks defined above.
 		//		analogWrite(PIN_LED, 50);

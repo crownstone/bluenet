@@ -208,11 +208,38 @@ void CharacteristicBase::notify() {
 
 	CharacteristicValue value = getCharacteristicValue();
 
-	BLE_CALL(sd_ble_gatts_value_set,
-			(_handles.value_handle, 0, &value.length, value.data));
+	if (!strcmp(_name.c_str(), "Devices")) {
+		_LOG_INFO("before set value, len:%d, : ", value.length);
+		for (int i = 0; i < value.length; ++i) {
+			_LOG_INFO("%.2X ", value.data[i]);
+		}
+		LOG_INFO("");
+	}
+
+//    LOG_INFO("value.length: %d", value.length);
+//    uint16_t leng = 12;
+//	BLE_CALL(sd_ble_gatts_value_set, (_handles.value_handle, 0, &value.length, value.data));
+	BLE_CALL(sd_ble_gatts_value_set, (_handles.value_handle, 0, &value.length, value.data));
+
+	uint16_t length = value.length;
+	uint8_t data[length];
 
 	if ((!_notifies) || (!_service->getStack()->connected()) || !_notifyingEnabled)
 		return;
+
+	_LOG_INFO("after set value, len:%d, : ", value.length);
+	for (int i = 0; i < value.length; ++i) {
+		_LOG_INFO("%.2X ", value.data[i]);
+	}
+	LOG_INFO("");
+
+	BLE_CALL(sd_ble_gatts_value_get, (_handles.value_handle, 0, &length, data));
+
+    _LOG_INFO("get value, len:%d, : ", length);
+    for (int i = 0; i < length; ++i) {
+    	_LOG_INFO("%.2X ", data[i]);
+    }
+    LOG_INFO("");
 
 	ble_gatts_hvx_params_t hvx_params;
 	uint16_t len = value.length;
@@ -226,18 +253,22 @@ void CharacteristicBase::notify() {
 	uint32_t err_code;
 	err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(),
 			&hvx_params);
-//	APP_ERROR_CHECK(err_code);
-	if ((err_code != NRF_SUCCESS)&&
-	(err_code != NRF_ERROR_INVALID_STATE) &&
-	(err_code != BLE_ERROR_NO_TX_BUFFERS) &&
-	(err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
-	){
-	APP_ERROR_HANDLER(err_code);
-} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
-	LOG_INFO("BLE_ERROR_GATTS_SYS_ATTR_MISSING");
-	err_code = sd_ble_gatts_sys_attr_set(_service->getStack()->getConnectionHandle(), NULL, 0);
 	APP_ERROR_CHECK(err_code);
-}
+
+//	if (value.free) {
+//		free(value.data);
+//	}
+//	if ((err_code != NRF_SUCCESS)&&
+//	(err_code != NRF_ERROR_INVALID_STATE) &&
+//	(err_code != BLE_ERROR_NO_TX_BUFFERS) &&
+//	(err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
+//	){
+//	APP_ERROR_HANDLER(err_code);
+//} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
+//	LOG_INFO("BLE_ERROR_GATTS_SYS_ATTR_MISSING");
+//	err_code = sd_ble_gatts_sys_attr_set(_service->getStack()->getConnectionHandle(), NULL, 0);
+//	APP_ERROR_CHECK(err_code);
+//}
 
 }
 
@@ -304,16 +335,17 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 
 		if (characteristic->getCccdHandle() == write_evt.handle && write_evt.len == 2) {
+			// received write to enable/disable notification
 			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(write_evt.data));
-		} else if (characteristic->getValueHandle()
-				== write_evt.context.value_handle) {
+			found = true;
+
+		} else if (characteristic->getValueHandle()	== write_evt.context.value_handle) {
 			// TODO: make a map.
 			found = true;
 
 			if (write_evt.op == BLE_GATTS_OP_WRITE_REQ
 					|| write_evt.op == BLE_GATTS_OP_WRITE_CMD
 					|| write_evt.op == BLE_GATTS_OP_SIGN_WRITE_CMD) {
-				LOG_INFO("write_evt.op: %X", write_evt.op);
 				characteristic->written(write_evt.len, write_evt.offset,
 						write_evt.data);
 			} else {

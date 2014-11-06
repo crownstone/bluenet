@@ -4,6 +4,8 @@
 #include <string> 
 #include <stdint.h> 
 
+#include "log.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -32,19 +34,20 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
     } while (0)
 
 
-/**@brief Macro for calling error handler function if supplied error code any other than NRF_SUCCESS. 
+/**@brief Macro for calling error handler function if supplied error code any other than NRF_SUCCESS.
  *
  * @param[in] ERR_CODE Error code supplied to the error handler.
- */    
+ */
 #define APP_ERROR_CHECK(ERR_CODE)                           \
     do                                                      \
     {                                                       \
         const uint32_t LOCAL_ERR_CODE = (ERR_CODE);         \
         if (LOCAL_ERR_CODE != NRF_SUCCESS)                  \
         {                                                   \
+        	LOG_DEBUG("ERR_CODE: %d", LOCAL_ERR_CODE);		\
             APP_ERROR_HANDLER(LOCAL_ERR_CODE);              \
         }                                                   \
-    } while (0)    
+    } while (0)
 
 
 #ifdef __cplusplus
