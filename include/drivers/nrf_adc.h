@@ -1,3 +1,9 @@
+/**
+ * Author: Bart van Vliet
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: 6 Nov., 2014
+ * License: LGPLv3+
+ */
 #ifndef __NRF_ADC__H__
 #define __NRF_ADC__H__
 
@@ -7,13 +13,8 @@
 extern "C" {
 #endif
 
-// Set this to 1 if the application uses a SoftDevice, 0 otherwise
-#define USE_WITH_SOFTDEVICE 1
-
-//#define NRF6310_BOARD
-
-uint32_t nrf_adc_config(uint8_t pin);
 uint32_t nrf_adc_init(uint8_t pin);
+uint32_t nrf_adc_config(uint8_t pin);
 void nrf_adc_stop();
 
 uint32_t nrf_adc_read(uint8_t pin, uint32_t* result);

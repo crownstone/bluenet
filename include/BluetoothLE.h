@@ -537,8 +537,6 @@ namespace BLEpp {
         virtual void setCharacteristicValue(const CharacteristicValue& value) = 0; // defined only in specializations.
     };
 
-
-
     // this specialization handles all built-in arithmetic types (int, float, etc)
     template<typename T > class CharacteristicT<T, typename std::enable_if<std::is_base_of<ISerializable, T>::value >::type> : public Characteristic<T> {
        public:

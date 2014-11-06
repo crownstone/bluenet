@@ -84,6 +84,9 @@ void configure(Nrf51822BluetoothStack &stack) {
 
 }
 
+/**
+ * This must be called after the SoftDevice has started.
+ */
 void config_drivers() {
 	nrf_adc_init(PIN_ADC);
 }
