@@ -83,8 +83,8 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 			uint32_t samples = 100000;
 			//uint32_t subsample = samples / curve_size;
 */
-			log(INFO, "Stop advertising");
-			stack->stopAdvertising();
+			//log(INFO, "Stop advertising");
+			//stack->stopAdvertising();
 
 			log(INFO, "Start ADC");
 			nrf_adc_start();
@@ -94,9 +94,9 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 				write(".\r\n");
 				nrf_delay_ms(100);
 			}
+			log(INFO, "Number of results: %u", adc_result.count());
 			log(INFO, "Stop ADC converter");
 			nrf_adc_stop();
-			stack->startAdvertising();
 /*
 			for (uint32_t i=0; i<samples; ++i) {
 
@@ -127,17 +127,21 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 			log(DEBUG, "voltage(nV): last=%lu", voltage);
 		       	//rms=%lu min=%lu max=%lu current=%i mA", voltage, rms, voltage_min, voltage_max, current);
 */
-
-			/*
+			
 			char curve_text[128];
-			curve_size = adc_result.count();
-			for (uint32_t i = 0; i < curve_size; ++i) {
-				sprintf(curve_text, "%lu, ", curve[i]);
-				if (!(i % 10)) sprintf(curve_text, "\r\n");
+			//curve_size = adc_result.count();
+			//for (int i = 0; i < adc_result.count()
+			int i = 0;
+			while (!adc_result.empty()) { 
+//			for (uint32_t i = 0; i < curve_size; ++i) {
+				sprintf(curve_text, "%lu, ", adc_result.pop());
+			//	sprintf(curve_text, "%lu, ", curve[i]);
+				if (!(i++ % 10)) sprintf(curve_text, "\r\n");
 				write(curve_text);
 				curve_text[0]='\0';
-			}*/
+			}
 			write("\r\n");	
+			//stack->startAdvertising(); // segfault
 /*
 			uint64_t result = voltage_min;
 			result <<= 32;

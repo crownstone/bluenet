@@ -25,13 +25,14 @@ struct buffer {
 		if (full()) return;
 		*ptr = value;
 		ptr++;
-		log(DEBUG, "Added item number %u", (uint8_t)(ptr-buffer));
+		//log(DEBUG, "Add #%u", (uint8_t)(ptr-buffer));
 	}
 
 	// pops till beginning... 0xdeafabba is an error code
 	uint32_t pop() {
 		uint32_t value = *ptr;
 		if (empty()) return 0xdeafabba;
+		ptr--;
 		return value;
 	}
 
@@ -48,7 +49,7 @@ struct buffer {
 	}
 
 	uint16_t count() {
-		log(DEBUG, "Current count: %u", ptr-buffer);
+		//log(DEBUG, "Current count: %u", ptr-buffer); //seems to wait..
 		return (uint16_t)(ptr - buffer);
 	}
 };
