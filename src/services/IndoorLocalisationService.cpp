@@ -12,6 +12,7 @@
 #include <common/config.h>
 #include <common/boards.h>
 #include <drivers/nrf_adc.h>
+#include "ScanResult.h"
 
 using namespace BLEpp;
 
@@ -174,12 +175,17 @@ void IndoorLocalizationService::AddScanControlCharacteristic() {
 			switch(value) {
 			case 0: {
 				log(INFO,"crown: start scanning");
-				stack->startScanning();
-				break;
+				if (!stack->isScanning()) {
+//					scanResult.init(10);
+					stack->startScanning();
+				}
 			}
 			case 1: {
 				log(INFO,"crown: stop scanning");
-				stack->stopScanning();
+				if (stack->isScanning()) {
+					stack->stopScanning();
+//					charac = scanResult;
+				}
 				break;
 			}
 		}
@@ -190,24 +196,21 @@ void IndoorLocalizationService::AddScanControlCharacteristic() {
 void IndoorLocalizationService::AddPeripheralListCharacteristic() {
 	// get scan result
 	log(DEBUG, "create characteristic to list found peripherals");
-	createCharacteristic<uint8_t>()
-		.setUUID(UUID(getUUID(), 0x121))
-		.setName("devices")
-		.setDefaultValue(255)
-		.setWritable(true)
-		.onWrite([&](const uint8_t & value) -> void {
-//			personal_threshold_level = value;
-//			log(INFO,"setting personal threshold level to: %d", value);
 
-//			log(INFO,"##################################################");
-//			log(INFO,"### listing detected peripherals #################");
-//			log(INFO,"##################################################");
-//			for (int i = 0; i < freeidx; ++i) {
-//				log(INFO,"%s\trssi: %d\tocc: %d", _history[i].addrs, _history[i].rssi, _history[i].occurences);
-//			}
-//			log(INFO,"##################################################");
+//	createCharacteristic<uint8_t>()
+//		.setUUID(UUID(getUUID(), 0x121))
+//		.setName("devices")
+//		.setDefaultValue(255)
+//		.setWritable(true)
+//		.onWrite([&](const uint8_t & value) -> void {
+//			scanResult.print();
+//		});
 
-		});
+	Characteristic<ScanResult>& charac = createCharacteristic<ScanResult>()
+		.setUUID(UUID(getUUID(), 0x120))
+		.setName("Devices")
+		.setWritable(false);
+	charac.setNotifies(true);
 }
 
 void IndoorLocalizationService::AddPersonalThresholdCharacteristic() {

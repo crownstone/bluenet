@@ -8,6 +8,8 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
+#include "stdint.h"
+
 // convert a short from LSB to MSB and vice versa
 uint16_t convertEndian(uint16_t val);
 

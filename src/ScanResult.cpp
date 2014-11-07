@@ -48,27 +48,24 @@ peripheral_device_t* ScanResult::getList() const {
 	return _list;
 }
 
+int count = 1;
 void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
-	log(INFO, "ScanResult.update()");
-
+	log(INFO, "count: %d", count++);
 	char addrs[28];
 	sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
 			adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
 			adrs_ptr[0]);
 
-//	log(INFO, "Advertisement from: %s, rssi: %d", addrs, rssi);
-
 	uint16_t occ;
 	bool found = false;
 	log(INFO, "addrs: %s", addrs);
 	for (int i = 0; i < _freeIdx; ++i) {
-		log(INFO, "_history[%d]: %s", i, _list[i].addrs);
-		if (strcmp(addrs, _list[i].addrs) == 0) {
+		log(INFO, "_history[%d]: [%02X %02X %02X %02X %02X %02X]", i, _list[i].addr[5],
+				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
+				_list[i].addr[0]);
+		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			log(INFO, "found");
 			occ = ++_list[i].occurences;
-			//					occ = _history[i].occurences;
-			//					int avg_rssi = ((occ-1)*_history[i].rssi + p_adv_report->rssi)/occ;
-			//					_history[i].rssi = avg_rssi;
 			_list[i].rssi = rssi;
 			found = true;
 		}
@@ -86,8 +83,6 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			}
 		} else {
 			idx = _freeIdx++;
-			//					peripheral_device_t peripheral;
-			//					_history[idx] = peripheral;
 		}
 
 		log(INFO, "NEW:\tAdvertisement from: %s, rssi: %d", addrs, rssi);
@@ -106,7 +101,11 @@ void ScanResult::print() const {
 	log(INFO, "### listing detected peripherals #################");
 	log(INFO, "##################################################");
 	for (int i = 0; i < _freeIdx; ++i) {
-		log(INFO, "%s\trssi: %d\tocc: %d", _list[i].addrs, _list[i].rssi, _list[i].occurences);
+		char addrs[28];
+		sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", _list[i].addr[5],
+				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
+				_list[i].addr[0]);
+		log(INFO, "%s\trssi: %d\tocc: %d", addrs, _list[i].rssi, _list[i].occurences);
 	}
 	log(INFO, "##################################################");
 
@@ -125,14 +124,10 @@ void ScanResult::serialize(Buffer& buffer) const {
 	ptr = buffer.data;
 
 	// copy number of elements
-//	*ptr++ = _size;
 	*ptr++ = _freeIdx;
 	for (uint16_t i = 0; i < _freeIdx; ++i) {
 		// copy address of device
 		peripheral_device_t* dev = &_list[i];
-
-//		memcpy(ptr, dev->addr, BLE_GAP_ADDR_LEN);
-//		ptr += BLE_GAP_ADDR_LEN;
 		for (int i= BLE_GAP_ADDR_LEN - 1; i >= 0; --i) {
 			*ptr++ = dev->addr[i];
 		}
@@ -158,29 +153,21 @@ void ScanResult::serialize(Buffer& buffer) const {
 
 /** Copy data from the given buffer into this object. */
 void ScanResult::deserialize(Buffer& buffer) {
-	log(INFO, "ScanResult.deserialize()");
-
 	uint8_t* ptr;
 	ptr = buffer.data;
-	_size = *ptr++;
-	_freeIdx = _size;
 
-	if (_list != NULL) {
-		free(_list);
-	}
-	_list = (peripheral_device_t*)malloc(_size * sizeof(peripheral_device_t));
+	init(*ptr++);
+	_freeIdx = _size;
 
 	for (uint16_t i = 0; i < _size; ++i) {
 		// copy address of device
 		peripheral_device_t* dev = &_list[i];
-//		memcpy(dev->addr, ptr, BLE_GAP_ADDR_LEN);
-//		ptr += BLE_GAP_ADDR_LEN;
 		for (int i= BLE_GAP_ADDR_LEN - 1; i >= 0; --i) {
 			dev->addr[i] = *ptr++;
 		}
-		sprintf(dev->addrs, "[%02X %02X %02X %02X %02X %02X]",
-				dev->addr[5], dev->addr[4], dev->addr[3], dev->addr[2],
-				dev->addr[1], dev->addr[0]);
+//		sprintf(dev->addrs, "[%02X %02X %02X %02X %02X %02X]",
+//				dev->addr[5], dev->addr[4], dev->addr[3], dev->addr[2],
+//				dev->addr[1], dev->addr[0]);
 
 		// copy rssi
 		dev->rssi = *ptr++;
@@ -192,5 +179,4 @@ void ScanResult::deserialize(Buffer& buffer) {
 		dev->occurences = *ptr++;
 
 	}
-	log(INFO, "32");
 }

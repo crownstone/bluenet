@@ -134,65 +134,13 @@ int main() {
 #endif
 		})
 		.onAdvertisement([&](ble_gap_evt_adv_report_t* p_adv_report) {
-			//data_t adv_data;
-			//data_t type_data;
+			if (stack.isScanning()) {
+//				scanResult.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+			}
 
-			uint8_t * adrs_ptr = (uint8_t*) &(p_adv_report->peer_addr.addr);
-			char addrs[28];
-			sprintf(addrs, "[%02x %02x %02x %02x %02x %02x]", adrs_ptr[5],
-					adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
-					adrs_ptr[0]);
 
-//			log(INFO,"advertisement from: %s, rssi: %d", addrs, p_adv_report->rssi);
 
-//			std::vector<peripheral_t>::iterator it = _history.begin();
-//			uint16_t occ;
-//			bool found = false;
-////			log(INFO,"addrs: %s", addrs);
-//			for (int i = 0; i < freeidx; ++i) {
-////				log(INFO,"_history[%d]: %s", i, _history[i].addrs);
-//				if (strcmp(addrs, _history[i].addrs) == 0) {
-////					log(INFO,"found");
-//					_history[i].occurences++;
-//					occ = _history[i].occurences;
-//					int avg_rssi = ((occ-1)*_history[i].rssi + p_adv_report->rssi)/occ;
-////					_history[i].rssi = p_adv_report->rssi;
-//					_history[i].rssi = avg_rssi;
-//					found = true;
-//				}
-//			}
-//			if (!found) {
-//				uint8_t idx = -1;
-//				if (freeidx >= history_size) {
-//					// history full, throw out item with lowest occurence
-//					uint16_t minocc = UINT16_MAX;
-//					for (int i = 0; i < history_size; ++i) {
-//						if (_history[i].occurences < minocc) {
-//							minocc = _history[i].occurences;
-//							idx = i;
-//						}
-//					}
-//				} else {
-//					idx = freeidx++;
-//					peripheral_t peripheral;
-//					_history[idx] = peripheral;
-//				}
-//				if (idx >= 0) {
-//
-//					log(INFO,"new:\tadvertisement from: %s, rssi: %d", addrs, p_adv_report->rssi);
-//					//				peripheral.addrs = addrs;
-//					strcpy(_history[idx].addrs, addrs);
-//					_history[idx].occurences = 1;
-//					_history[idx].rssi = p_adv_report->rssi;
-//				}
-//			} else {
-////				log(INFO,"\tadvertisement from: %s, rssi: %d, occ: %d", addrs, p_adv_report->rssi, occ);
-//			}
 		});
-
-	//service& generalservice = stack.createService();
-	//service& batteryservice = stack.createbatteryservice();
-
 
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
@@ -217,8 +165,10 @@ int main() {
 #else
 	stack.startAdvertising();
 #endif
-	
+
 	log(INFO,"Running while loop..");
+
+//	stack.startScanning();
 
 	while(1) {
 		// deliver events from the bluetooth stack to the callbacks defined above.

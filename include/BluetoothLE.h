@@ -97,9 +97,10 @@ namespace BLEpp {
 
 #else /* __EXCEPTIONS */
 
-#define BLE_CALL(function, args) do {volatile uint32_t result = function args; if (result != NRF_SUCCESS) {std::string ble_error_message(# function ); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
-#define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) { std::string ble_error_message(message); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
-#define BLE_THROW(message) do { std::string ble_error_message(message); ble_error_handler(ble_error_message, __LINE__, __FILE__); } while(0)
+//#define BLE_CALL(function, args) do {volatile uint32_t result = function args; if (result != NRF_SUCCESS) {std::string ble_error_message(# function ); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
+#define BLE_CALL(function, args) do {uint32_t result = function args; APP_ERROR_CHECK(result); } while(0)
+#define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) { std::string ble_error_message(message); log(DEBUG, "BLE_THROW: %s", ble_error_message.c_str()); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
+#define BLE_THROW(message) do { std::string ble_error_message(message); log(DEBUG, "BLE_THROW: %s", ble_error_message.c_str()); ble_error_handler(ble_error_message, __LINE__, __FILE__); } while(0)
 
 #endif /* __EXCEPTIONS */
 
@@ -260,12 +261,12 @@ namespace BLEpp {
 
         bool                      _inited;
         bool                      _notifies;
-        bool					  _indicates;
         bool                      _writable;
         uint16_t                  _unit;   // 2
         uint32_t                  _updateIntervalMsecs; // 0 means don't update.  // 4
         //app_timer_id_t            _timer;  // 4
         bool					  _notifyingEnabled;
+        bool					  _indicates;
 
       public:
 

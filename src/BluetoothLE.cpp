@@ -221,21 +221,7 @@ void CharacteristicBase::notify() {
 	hvx_params.p_len = &len;
 	hvx_params.p_data = (uint8_t*) value.data;
 
-	uint32_t err_code;
-	err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(),
-			&hvx_params);
-//	APP_ERROR_CHECK(err_code);
-	if ((err_code != NRF_SUCCESS)&&
-	(err_code != NRF_ERROR_INVALID_STATE) &&
-	(err_code != BLE_ERROR_NO_TX_BUFFERS) &&
-	(err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
-	){
-	APP_ERROR_HANDLER(err_code);
-} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
-	log(INFO,"BLE_ERROR_GATTS_SYS_ATTR_MISSING");
-	err_code = sd_ble_gatts_sys_attr_set(_service->getStack()->getConnectionHandle(), NULL, 0);
-	APP_ERROR_CHECK(err_code);
-}
+	BLE_CALL(sd_ble_gatts_hvx, (_service->getStack()->getConnectionHandle(), &hvx_params));
 
 }
 
@@ -302,16 +288,17 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 
 		if (characteristic->getCccdHandle() == write_evt.handle && write_evt.len == 2) {
+			// received write to enable/disable notification
 			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(write_evt.data));
-		} else if (characteristic->getValueHandle()
-				== write_evt.context.value_handle) {
+			found = true;
+
+		} else if (characteristic->getValueHandle()	== write_evt.context.value_handle) {
 			// TODO: make a map.
 			found = true;
 
 			if (write_evt.op == BLE_GATTS_OP_WRITE_REQ
 					|| write_evt.op == BLE_GATTS_OP_WRITE_CMD
 					|| write_evt.op == BLE_GATTS_OP_SIGN_WRITE_CMD) {
-				log(INFO,"write_evt.op: %X", write_evt.op);
 				characteristic->written(write_evt.len, write_evt.offset,
 						write_evt.data);
 			} else {
@@ -545,7 +532,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 	if (_advertising)
 		return *this;
 
-	log(INFO,"startIBeacon");
+	log(INFO,"startIBeacon ...");
 
 	init(); // we should already be.
 
@@ -612,7 +599,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 
 	_advertising = true;
 
-	log(INFO,"OK");
+	log(INFO,"... OK");
 
 	return *this;
 }
@@ -621,7 +608,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	if (_advertising)
 		return *this;
 
-	log(INFO, "Start advertising");
+	log(INFO, "Start advertising ...");
 
 	init(); // we should already be.
 
@@ -692,6 +679,8 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
 
 	_advertising = true;
+
+	log(INFO, "... OK");
 
 	return *this;
 }
@@ -877,7 +866,6 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-		log(INFO,"BLE_GATTS_EVT_SYS_ATTR_MISSING");
 		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0));
 		break;
 
