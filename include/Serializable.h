@@ -3,6 +3,7 @@
 #define _Serializable_h
 
 #include <stdint.h>
+#include <stdlib.h>
 
 struct Buffer {
     Buffer() : length(0), data(0), allocated(false) {}

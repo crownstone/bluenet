@@ -16,7 +16,7 @@
 
 struct peripheral_device_t {
 	uint8_t addr[BLE_GAP_ADDR_LEN];
-	char addrs[28];
+//	char addrs[28];
 	uint16_t occurences;
 	int8_t rssi;
 };
@@ -68,6 +68,10 @@ public:
 namespace BLEpp {
 
 template<> class CharacteristicT<ScanResult> : public Characteristic<ScanResult> {
+
+private:
+	Buffer mBuffer;
+
 public:
 
 	CharacteristicT& operator=(const ScanResult& val) {
@@ -75,28 +79,14 @@ public:
 		return *this;
 	}
 
-	Buffer b;
 	virtual CharacteristicValue getCharacteristicValue() {
 		CharacteristicValue value;
 		const ScanResult& t = this->getValue();
 		uint32_t len = t.getSerializedLength();
-		b.allocate(len);
-		t.serialize(b);
-
-//	    _LOG_INFO("after serialize value, len:%d, : ", b.length);
-//	    for (int i = 0; i < b.length; ++i) {
-//	    	_LOG_INFO("%.2X ", b.data[i]);
-//	    }
-//	    LOG_INFO("");
-
-		b.release();
-
-	    _LOG_INFO("after release value, len:%d, : ", b.length);
-	    for (int i = 0; i < b.length; ++i) {
-	    	_LOG_INFO("%.2X ", b.data[i]);
-	    }
-	    LOG_INFO("");
-		return CharacteristicValue(b.length, b.data, true);
+		mBuffer.allocate(len);
+		t.serialize(mBuffer);
+		mBuffer.release();
+		return CharacteristicValue(mBuffer.length, mBuffer.data, true);
 	}
 	virtual void setCharacteristicValue(const CharacteristicValue& value) {
 		ScanResult t;
@@ -109,19 +99,6 @@ public:
 		return BLE_GATTS_VAR_ATTR_LEN_MAX; // TODO
 	}
 };
-
-//class ScanResultCharacteristic : public CharacteristicT<ScanResult> {
-//public:
-//	ScanResultCharacteristic& operator=(const ScanResult& val) {
-//		CharacteristicT<ScanResult>::operator=(val);
-//		return *this;
-//	}
-//
-//	uint16_t getValueMaxLength() {
-//		LOG_INFO("[%s] getValueMaxLength: %d", CharacteristicT<ScanResult>::_name.c_str(), 512);
-//		return 512; // TODO
-//	}
-//};
 
 }
 
