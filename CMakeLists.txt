@@ -93,6 +93,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nRF51822.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/error.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/ble_error.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/syscalls.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/timer.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/pinmap.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/assert.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/gpio.c")
@@ -114,8 +115,8 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 # We add the source files explicitly. This is recommended in the cmake system and will also force us all the time to
 # consider the size of the final binary. Do not include things, if not necessary!
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
-LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
-LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
+#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
+#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
 
 # For Visual Studio group the files

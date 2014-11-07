@@ -20,9 +20,14 @@
 #define ERROR                3
 #define FATAL                4
 
+#define DEBUG_ON
+
+#ifdef DEBUG_ON
 #define log(level, fmt, ...) \
        write("[%s:%d] " fmt "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
-
+#else
+#define log(level, fmt, ...) 
+#endif
 
 /**
  * General configuration of the serial connection. This sets the pin to be used for UART, the baudrate, the parity 

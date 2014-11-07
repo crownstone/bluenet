@@ -27,7 +27,7 @@ protected:
 	BLEpp::CharacteristicT<int8_t> *_characteristic;
 	func_t _rssiHandler;
 
-
+	void AddSignalStrengthCharacteristic();
 	void AddNumberCharacteristic();
 	void AddNumber2Characteristic();
 	void AddVoltageCurveCharacteristic();
