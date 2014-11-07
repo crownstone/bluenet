@@ -90,7 +90,7 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 			nrf_adc_start();
 			//while(true);
 			// replace by timer!
-			while (adc_result.count() < 10) {
+			while (adc_result.count() < 99) {
 				write(".\r\n");
 				nrf_delay_ms(100);
 			}
