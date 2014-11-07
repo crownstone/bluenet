@@ -31,12 +31,12 @@ protected:
 	void AddNumberCharacteristic();
 	void AddNumber2Characteristic();
 	void AddVoltageCurveCharacteristic();
-	void AddScanControlCharacteristic(BLEpp::Nrf51822BluetoothStack& stack);
+	void AddScanControlCharacteristic();
 	void AddPeripheralListCharacteristic();
 	void AddPersonalThresholdCharacteristic();
 public:
 	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
-	void AddSpecificCharacteristics(BLEpp::Nrf51822BluetoothStack& stack);
+	void AddSpecificCharacteristics();
 
 	void on_ble_event(ble_evt_t * p_ble_evt);
 
@@ -48,6 +48,7 @@ public:
 private:
 	BLEpp::Characteristic<uint8_t>* intchar;
 	BLEpp::Characteristic<uint64_t>* intchar2;
+	BLEpp::Nrf51822BluetoothStack* stack;
 	
 	int personal_threshold_level;
 

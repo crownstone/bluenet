@@ -9,7 +9,7 @@
 #include "nrf.h"
 #include "nrf_gpiote.h"
 #include "nrf_gpio.h"
-#if(USE_WITH_SOFTDEVICE == 1)
+#if(NRF51_USE_SOFTDEVICE == 1)
 #include "nrf_sdm.h"
 #endif
 
@@ -21,7 +21,7 @@ static uint32_t pwm_num_channels;
 int32_t ppi_enable_channel(uint32_t ch_num, volatile uint32_t *event_ptr, volatile uint32_t *task_ptr)
 {
 	if(ch_num >= 16) return -1;
-#if(USE_WITH_SOFTDEVICE == 1)
+#if(NRF51_USE_SOFTDEVICE == 1)
 	sd_ppi_channel_assign(ch_num, event_ptr, task_ptr);
 	sd_ppi_channel_enable_set(1 << ch_num);
 #else
@@ -102,7 +102,7 @@ uint32_t nrf_pwm_init(nrf_pwm_config_t *config)
      * NRF_POWER->TASKS_CONSTLAT = 1;
 	 */
 
-#if(USE_WITH_SOFTDEVICE == 1)
+#if(NRF51_USE_SOFTDEVICE == 1)
 	sd_nvic_SetPriority(PWM_IRQn, 3);
 	sd_nvic_EnableIRQ(PWM_IRQn);
 #else
@@ -144,7 +144,7 @@ void nrf_pwm_set_value(uint32_t pwm_channel, uint32_t pwm_value)
 	PWM_TIMER->TASKS_START = 1;
 }
 
-void PWM_IRQHandler(void)
+extern "C" void PWM_IRQHandler(void)
 {
 	// Only triggers for compare[3]
 

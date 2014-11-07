@@ -16,9 +16,6 @@ extern "C" {
 // The maximum number of channels supported by the library. Should NOT be changed! 
 #define PWM_MAX_CHANNELS        3
 
-// Set this to 1 if the application uses a SoftDevice, 0 otherwise
-#define USE_WITH_SOFTDEVICE     1
-
 // To change the timer used for the PWM library replace the three defines below
 #define PWM_TIMER               NRF_TIMER2
 #define PWM_IRQHandler          TIMER2_IRQHandler
