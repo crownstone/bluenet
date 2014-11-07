@@ -91,18 +91,23 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 			//log(INFO, "Stop advertising");
 			//stack->stopAdvertising();
 
-			log(INFO, "Start ADC");
-			nrf_adc_start();
-			// replace by timer!
-			while (!adc_result.full()) {
-				nrf_delay_ms(100);
+			for (int i = 0; i < 10; i++) {
+				log(INFO, "Start ADC");
+				nrf_adc_start();
+				// replace by timer!
+				while (!adc_result.full()) {
+					nrf_delay_ms(1);
+				}
+				log(INFO, "Number of results: %u", adc_result.count());
+				log(INFO, "Stop ADC converter");
+				nrf_adc_stop();
+
+				timer_start();
+				while (timer_flag) {
+					nrf_delay_ms(1);
+				}
 			}
-			log(INFO, "Number of results: %u", adc_result.count());
-			log(INFO, "Stop ADC converter");
-			nrf_adc_stop();
-
-			timer_start();
-
+			
 /*
 			for (uint32_t i=0; i<samples; ++i) {
 

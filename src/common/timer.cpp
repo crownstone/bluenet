@@ -25,6 +25,8 @@
 */
 void timer_config(uint8_t ms)
 {
+	timer_flag = 0;
+
 	// enable the interrupt 
 	NVIC_EnableIRQ(RTC1_IRQn); 
 
@@ -76,6 +78,7 @@ extern "C" void RTC1_IRQHandler()
 {
 	if ((NRF_RTC1->EVENTS_COMPARE[0] != 0) && ((NRF_RTC1->INTENSET & RTC_INTENSET_COMPARE0_Msk) != 0))
 	{
+		timer_flag = 1;
 		NRF_RTC1->EVENTS_COMPARE[0] = 0;
 		//NRF_RTC1->INTENSET = 0;
 		NRF_RTC1->TASKS_STOP = 1;

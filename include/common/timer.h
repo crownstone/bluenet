@@ -10,9 +10,13 @@
 
 #include <stdint.h>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+	// make callback
+	static int timer_flag;
 
 	void timer_config(uint8_t ms);
 	void timer_start();
