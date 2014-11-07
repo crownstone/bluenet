@@ -13,6 +13,7 @@
 #include <cstdlib>
 
 #include "nRF51822.h"
+#include "common/boards.h"
 
 #define NRF51_UART_9600_BAUD  0x00275000UL
 #define NRF51_UART_38400_BAUD 0x009D5000UL
@@ -31,8 +32,8 @@ void config_uart() {
 	NRF51_UART_ENABLE = 0x04; // 0b00000100
 
 	// Configure UART pins:    GPIO   UART
-	NRF51_UART_PSELRXD = 16;  	// P0.11  RXD //16
-	NRF51_UART_PSELTXD = 17;   	// P0.09  TXD //17
+	NRF51_UART_PSELRXD = PIN_RX;  	// P0.11  RXD //16
+	NRF51_UART_PSELTXD = PIN_TX;   	// P0.09  TXD //17
 	//NRF51_UART_PSELRTS = 18;   	// P0.08  RTS //18
 	//NRF51_UART_PSELCTS = 19;  	// P0.10  CTS //19
 
@@ -82,7 +83,7 @@ int write(const char *str, ...) {
 		len = vsprintf(p_buf, str, ap);
 		va_end(ap);
 		for(int i = 0; i < len; ++i) {
-			NRF51_UART_TXD = (uint8_t)str[i];
+			NRF51_UART_TXD = (uint8_t)p_buf[i];
 			while(NRF51_UART_TXDRDY != 1) /* wait */;
 			NRF51_UART_TXDRDY = 0;
 		}

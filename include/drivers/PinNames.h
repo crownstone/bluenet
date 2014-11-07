@@ -17,6 +17,7 @@
 #define MBED_PINNAMES_H
 
 #include "cmsis.h"
+#include "common/boards.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -106,8 +107,8 @@ typedef enum {
     BUTTON1 = p16,
     BUTTON2 = p17,
         
-    RX_PIN_NUMBER = p16,
-    TX_PIN_NUMBER = p17,
+    RX_PIN_NUMBER = PIN_RX,
+    TX_PIN_NUMBER = PIN_TX,
     //RX_PIN_NUMBER = p11,
     //TX_PIN_NUMBER = p9,
     CTS_PIN_NUMBER = p10,
