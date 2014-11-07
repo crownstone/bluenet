@@ -30,6 +30,8 @@ buffer_t adc_result;
 gpio_t led0;
 gpio_t led1;
 
+#define ADC_BUFFER_SIZE 200
+
 /**
  * The init function is called once before operating the AD converter. Call it after you start the SoftDevice. Check 
  * the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
@@ -42,8 +44,8 @@ uint32_t nrf_adc_init(uint8_t pin) {
 	
 #endif
 	log(DEBUG, "Allocate buffer for ADC results");
-	if (adc_result.size != 100) {
-		adc_result.size = 100;
+	if (adc_result.size != ADC_BUFFER_SIZE) {
+		adc_result.size = ADC_BUFFER_SIZE;
 		adc_result.buffer = (uint32_t*)calloc( adc_result.size, sizeof(uint32_t*));
 		if (adc_result.buffer == NULL) {
 			log(FATAL, "Could not initialize buffer. Too big!?");
@@ -81,13 +83,11 @@ uint32_t nrf_adc_init(uint8_t pin) {
 
 	log(DEBUG, "Set ADC priority");
 #if(NRF51_USE_SOFTDEVICE == 1)
-	err_code = sd_nvic_SetPriority(ADC_IRQn, 3); //NRF_APP_PRIORITY_LOW);
+	err_code = sd_nvic_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
 	APP_ERROR_CHECK(err_code);
 #else
-	NVIC_SetPriority(ADC_IRQn, 3); //NRF_APP_PRIORITY_LOW);
+	NVIC_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
 #endif
-
-// somehow this disables the interrupt!!!
 
 	log(DEBUG, "Tell to use ADC interrupt handler");
 #if(NRF51_USE_SOFTDEVICE == 1)
@@ -115,7 +115,6 @@ uint32_t nrf_adc_config(uint8_t pin) {
 			(ADC_CONFIG_EXTREFSEL_None                       << ADC_CONFIG_EXTREFSEL_Pos);
 	if (pin < 8) {
 		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << (pin+ADC_CONFIG_PSEL_Pos);
-		//NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput2 << ADC_CONFIG_PSEL_Pos;
 	} else {
 		log(FATAL, "There is no such pin available");
 		return 0xFFFFFFFF; // error
@@ -131,6 +130,9 @@ void nrf_adc_stop() {
 	NRF_ADC->TASKS_STOP = 1;
 }
 
+/**
+ * Start the AD converter.
+ */
 void nrf_adc_start() {
 	log(INFO, "Start ADC sampling");
 	NRF_ADC->EVENTS_END  = 0;

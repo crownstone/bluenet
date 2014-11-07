@@ -88,10 +88,8 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 
 			log(INFO, "Start ADC");
 			nrf_adc_start();
-			//while(true);
 			// replace by timer!
-			while (adc_result.count() < 99) {
-				write(".\r\n");
+			while (!adc_result.full()) {
 				nrf_delay_ms(100);
 			}
 			log(INFO, "Number of results: %u", adc_result.count());
