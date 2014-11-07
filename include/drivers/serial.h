@@ -5,6 +5,9 @@
  * License: LGPLv3+
  */
 
+#ifndef CS_SERIAL_H
+#define CS_SERIAL_H
+
 /*
  * Commonly LOG functionality is provided with as first paramater the level of severity of the message. Subsequently
  * the message follows, eventually succeeded by content if the string contains format specifiers. This means that this
@@ -38,3 +41,4 @@ void config_uart();
  */
 int write(const char *str, ...);
 
+#endif

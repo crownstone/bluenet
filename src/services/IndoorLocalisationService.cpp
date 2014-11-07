@@ -31,10 +31,10 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& sta
 
 	addCharacteristic(_characteristic);
 
-
+	this->stack = &stack;
 }
 
-void IndoorLocalizationService::AddSpecificCharacteristics(Nrf51822BluetoothStack& stack) {
+void IndoorLocalizationService::AddSpecificCharacteristics() {
 	//AddNumberCharacteristic();
 	//AddNumber2Characteristic();
 	AddVoltageCurveCharacteristic();
@@ -72,8 +72,9 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 		.setDefaultValue(255)
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
-			log(INFO,"received message: %d", value);
+			log(INFO, "Received message: %d", value);
 
+/*
 			uint64_t rms_sum = 0;
 			uint32_t voltage_min = 0xffffffff;
 			uint32_t voltage_max = 0;
@@ -81,8 +82,26 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 			uint32_t voltage;
 			uint32_t samples = 100000;
 			//uint32_t subsample = samples / curve_size;
+*/
+			//log(INFO, "Stop advertising");
+			//stack->stopAdvertising();
+
+			log(INFO, "Start ADC");
+			nrf_adc_start();
+			//while(true);
+			// replace by timer!
+			while (adc_result.count() < 99) {
+				write(".\r\n");
+				nrf_delay_ms(100);
+			}
+			log(INFO, "Number of results: %u", adc_result.count());
+			log(INFO, "Stop ADC converter");
+			nrf_adc_stop();
+/*
 			for (uint32_t i=0; i<samples; ++i) {
+
 				nrf_adc_read(PIN_ADC, &voltage);
+
 				rms_sum += voltage*voltage;
 				if (voltage < voltage_min)
 					voltage_min = voltage;
@@ -107,16 +126,23 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 
 			log(DEBUG, "voltage(nV): last=%lu", voltage);
 		       	//rms=%lu min=%lu max=%lu current=%i mA", voltage, rms, voltage_min, voltage_max, current);
-
+*/
+			
 			char curve_text[128];
-			for (uint32_t i = 0; i < curve_size; ++i) {
-				sprintf(curve_text, "%lu, ", curve[i]);
-				if (!(i % 10)) sprintf(curve_text, "\r\n");
+			//curve_size = adc_result.count();
+			//for (int i = 0; i < adc_result.count()
+			int i = 0;
+			while (!adc_result.empty()) { 
+//			for (uint32_t i = 0; i < curve_size; ++i) {
+				sprintf(curve_text, "%lu, ", adc_result.pop());
+			//	sprintf(curve_text, "%lu, ", curve[i]);
+				if (!(i++ % 10)) sprintf(curve_text, "\r\n");
 				write(curve_text);
 				curve_text[0]='\0';
 			}
 			write("\r\n");	
-
+			//stack->startAdvertising(); // segfault
+/*
 			uint64_t result = voltage_min;
 			result <<= 32;
 			result |= voltage_max;
@@ -127,7 +153,7 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 			result |= current;
 			*intchar2 = result;
 #endif
-
+*/
 #ifdef BINARY_LED
 			bin_counter++;
 			if (bin_counter % 2) {
@@ -141,7 +167,7 @@ void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
 		});
 }
 
-void IndoorLocalizationService::AddScanControlCharacteristic(Nrf51822BluetoothStack& stack) {
+void IndoorLocalizationService::AddScanControlCharacteristic() {
 	// set scanning option
 	log(DEBUG, "create characteristic to stop/start scan");
 	createCharacteristic<uint8_t>()
@@ -153,12 +179,12 @@ void IndoorLocalizationService::AddScanControlCharacteristic(Nrf51822BluetoothSt
 			switch(value) {
 			case 0: {
 				log(INFO,"crown: start scanning");
-				stack.startScanning();
+				stack->startScanning();
 				break;
 			}
 			case 1: {
 				log(INFO,"crown: stop scanning");
-				stack.stopScanning();
+				stack->stopScanning();
 				break;
 			}
 		}
@@ -209,7 +235,7 @@ void IndoorLocalizationService::AddPersonalThresholdCharacteristic() {
 IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822BluetoothStack& stack) {
 	IndoorLocalizationService* svc = new IndoorLocalizationService(stack);
 	stack.addService(svc);
-	svc->AddSpecificCharacteristics(stack);
+	svc->AddSpecificCharacteristics();
 	return *svc;
 }
 

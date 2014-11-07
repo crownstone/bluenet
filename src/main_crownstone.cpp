@@ -84,6 +84,9 @@ void configure(Nrf51822BluetoothStack &stack) {
 
 }
 
+/**
+ * This must be called after the SoftDevice has started.
+ */
 void config_drivers() {
 	nrf_adc_init(PIN_ADC);
 }
@@ -106,6 +109,7 @@ int main() {
 	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	// in particular we need it to set interrupt priorities.
 	stack.init();
+	
 
 	stack.onConnect([&](uint16_t conn_handle) {
 			log(INFO,"onConnect...");
@@ -203,6 +207,11 @@ int main() {
 	TemperatureService& temperatureService = TemperatureService::createService(stack);
 //	temperatureservice.start();
 #endif /* temperature_service */
+	
+
+	// configure drivers
+	config_drivers();
+
 
 	// begin sending advertising packets over the air.
 #ifdef IBEACON
@@ -211,9 +220,6 @@ int main() {
 	stack.startAdvertising();
 #endif
 	
-	// configure drivers
-	config_drivers();
-
 	log(INFO,"Running while loop..");
 
 	while(1) {

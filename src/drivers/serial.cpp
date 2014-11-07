@@ -6,6 +6,7 @@
  */
 
 #include <drivers/serial.h>
+#include <drivers/gpio_api.h>
 #include <cstring>
 #include <cstdarg>
 #include <cstdio>
@@ -18,9 +19,15 @@
 #define NRF51_UART_38400_BAUD 0x009D5000UL
 
 void config_uart() {
-	NRF51_GPIO_DIR_OUTPUT(PIN_TX); // set pins to output
-	NRF51_GPIO_PIN_CNF(PIN_RX) = NRF51_GPIO_PIN_CNF_PULL_DISABLED;
-	NRF51_GPIO_DIR_INPUT(PIN_RX);
+	gpio_t uart_out;
+	gpio_t uart_in;
+
+	gpio_init_in(&uart_in, RX_PIN_NUMBER);
+	gpio_init_out(&uart_out, TX_PIN_NUMBER);
+
+	//NRF51_GPIO_DIR_OUTPUT(17); // set pins to output
+	NRF51_GPIO_PIN_CNF(16) = NRF51_GPIO_PIN_CNF_PULL_DISABLED;
+	//NRF51_GPIO_DIR_INPUT(16);
 	//NRF51_GPIO_DIRSET = 3<<8;
 	NRF51_UART_ENABLE = 0x04; // 0b00000100
 

@@ -9,38 +9,33 @@
 #include "nrf.h"
 #include "nrf_gpiote.h"
 #include "nrf_gpio.h"
-#if(USE_WITH_SOFTDEVICE == 1)
+#if(NRF51_USE_SOFTDEVICE == 1)
 #include "nrf_sdm.h"
 #endif
 
-static uint32_t pwm_max_value, pwm_next_value[PWM_MAX_CHANNELS], pwm_io_ch[PWM_MAX_CHANNELS], pwm_running[PWM_MAX_CHANNELS];
+static uint32_t pwm_max_value, pwm_next_value[PWM_MAX_CHANNELS], 
+		pwm_io_ch[PWM_MAX_CHANNELS], pwm_running[PWM_MAX_CHANNELS];
 static uint8_t pwm_gpiote_channel[3];
 static uint32_t pwm_num_channels;
 
 int32_t ppi_enable_channel(uint32_t ch_num, volatile uint32_t *event_ptr, volatile uint32_t *task_ptr)
 {
-	if(ch_num >= 16)
-	{
-		return -1;
-	}
-	else
-	{
-#if(USE_WITH_SOFTDEVICE == 1)
-		sd_ppi_channel_assign(ch_num, event_ptr, task_ptr);
-		sd_ppi_channel_enable_set(1 << ch_num);
+	if(ch_num >= 16) return -1;
+#if(NRF51_USE_SOFTDEVICE == 1)
+	sd_ppi_channel_assign(ch_num, event_ptr, task_ptr);
+	sd_ppi_channel_enable_set(1 << ch_num);
 #else
-		// Otherwise we configure the channel and return the channel number
-		NRF_PPI->CH[ch_num].EEP = (uint32_t)event_ptr;
-		NRF_PPI->CH[ch_num].TEP = (uint32_t)task_ptr;
-		NRF_PPI->CHENSET = (1 << ch_num);
-		/* From example:
-		 *  // Enable only PPI channels 0 and 1.
-		 *  NRF_PPI->CHEN = (PPI_CHEN_CH0_Enabled << PPI_CHEN_CH0_Pos) | (PPI_CHEN_CH1_Enabled << PPI_CHEN_CH1_Pos);
-		 */
+	// Otherwise we configure the channel and return the channel number
+	NRF_PPI->CH[ch_num].EEP = (uint32_t)event_ptr;
+	NRF_PPI->CH[ch_num].TEP = (uint32_t)task_ptr;
+	NRF_PPI->CHENSET = (1 << ch_num);
+	/* From example:
+	 *  // Enable only PPI channels 0 and 1.
+	 *  NRF_PPI->CHEN = (PPI_CHEN_CH0_Enabled << PPI_CHEN_CH0_Pos) | (PPI_CHEN_CH1_Enabled << PPI_CHEN_CH1_Pos);
+	 */
 
 #endif
-		return ch_num;
-	}
+	return ch_num;
 }
 
 uint32_t nrf_pwm_init(nrf_pwm_config_t *config)
@@ -89,12 +84,15 @@ uint32_t nrf_pwm_init(nrf_pwm_config_t *config)
 	PWM_TIMER->CC[3] = pwm_max_value*2;
 	PWM_TIMER->MODE = TIMER_MODE_MODE_Timer;
 	PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk;
-	PWM_TIMER->EVENTS_COMPARE[0] = PWM_TIMER->EVENTS_COMPARE[1] = PWM_TIMER->EVENTS_COMPARE[2] = PWM_TIMER->EVENTS_COMPARE[3] = 0;     
+	PWM_TIMER->EVENTS_COMPARE[0] = PWM_TIMER->EVENTS_COMPARE[1] = PWM_TIMER->EVENTS_COMPARE[2] = 
+		PWM_TIMER->EVENTS_COMPARE[3] = 0;     
 
 	for(int i = 0; i < (int)pwm_num_channels; i++)
 	{
-		ppi_enable_channel(config->ppi_channel[i*2],  &PWM_TIMER->EVENTS_COMPARE[i], &NRF_GPIOTE->TASKS_OUT[pwm_gpiote_channel[i]]);
-		ppi_enable_channel(config->ppi_channel[i*2+1],&PWM_TIMER->EVENTS_COMPARE[3], &NRF_GPIOTE->TASKS_OUT[pwm_gpiote_channel[i]]);
+		ppi_enable_channel(config->ppi_channel[i*2],  &PWM_TIMER->EVENTS_COMPARE[i], 
+				&NRF_GPIOTE->TASKS_OUT[pwm_gpiote_channel[i]]);
+		ppi_enable_channel(config->ppi_channel[i*2+1],&PWM_TIMER->EVENTS_COMPARE[3], 
+				&NRF_GPIOTE->TASKS_OUT[pwm_gpiote_channel[i]]);
 	}
 
 	/* From example:
@@ -104,7 +102,7 @@ uint32_t nrf_pwm_init(nrf_pwm_config_t *config)
      * NRF_POWER->TASKS_CONSTLAT = 1;
 	 */
 
-#if(USE_WITH_SOFTDEVICE == 1)
+#if(NRF51_USE_SOFTDEVICE == 1)
 	sd_nvic_SetPriority(PWM_IRQn, 3);
 	sd_nvic_EnableIRQ(PWM_IRQn);
 #else
@@ -146,7 +144,7 @@ void nrf_pwm_set_value(uint32_t pwm_channel, uint32_t pwm_value)
 	PWM_TIMER->TASKS_START = 1;
 }
 
-void PWM_IRQHandler(void)
+extern "C" void PWM_IRQHandler(void)
 {
 	// Only triggers for compare[3]
 

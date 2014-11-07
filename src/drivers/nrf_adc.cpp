@@ -7,7 +7,11 @@
 #include "drivers/nrf_adc.h"
 #include "nrf.h"
 #include "nrf_gpio.h"
-#if(USE_WITH_SOFTDEVICE == 1)
+
+//#undef NRF51_USE_SOFTDEVICE
+//#define NRF51_USE_SOFTDEVICE 0
+
+#if(NRF51_USE_SOFTDEVICE == 1)
 #include "nrf_sdm.h"
 #endif
 
@@ -15,191 +19,155 @@
 #include <drivers/serial.h>
 #include <util/ble_error.h>
 
-//static uint32_t* adc_result;
+#include <drivers/gpio_api.h>
 
-uint32_t nrf_adc_config(uint8_t pin) {
-	// Configure ADC
-	NRF_ADC->CONFIG     =
-			(ADC_CONFIG_RES_10bit                            << ADC_CONFIG_RES_Pos)     |
-//			(ADC_CONFIG_INPSEL_SupplyOneThirdPrescaling      << ADC_CONFIG_INPSEL_Pos)  | // Useful to measure supply voltage (disable input pin)
-//			(ADC_CONFIG_INPSEL_AnalogInputNoPrescaling       << ADC_CONFIG_INPSEL_Pos)  |
-			(ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos)  | // Multiply read value by 3, useful to read out higher voltages
-			(ADC_CONFIG_REFSEL_VBG                           << ADC_CONFIG_REFSEL_Pos)  |
-			(ADC_CONFIG_EXTREFSEL_None                       << ADC_CONFIG_EXTREFSEL_Pos);
-#ifdef NRF6310_BOARD
-	// --------- TEST -------------
-	NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << ADC_CONFIG_PSEL_Pos;
-	NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput1 << ADC_CONFIG_PSEL_Pos;
-	NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput2 << ADC_CONFIG_PSEL_Pos;
-	NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput3 << ADC_CONFIG_PSEL_Pos;
-	NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput4 << ADC_CONFIG_PSEL_Pos;
-	NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput5 << ADC_CONFIG_PSEL_Pos;
-	NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput6 << ADC_CONFIG_PSEL_Pos;
-	NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput7 << ADC_CONFIG_PSEL_Pos;
-#else
-	if (pin < 8) {
-		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << (pin+ADC_CONFIG_PSEL_Pos);
-	}
-	else {
-		return 0xFFFFFFFF; // error
-//		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_Disabled << ADC_CONFIG_PSEL_Pos;
-	}
-/*
-	switch (pin) {
-	case 0:
-		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << ADC_CONFIG_PSEL_Pos;
-		break;
-	case 1:
-		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput1 << ADC_CONFIG_PSEL_Pos;
-		break;
-	case 2:
-		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput2 << ADC_CONFIG_PSEL_Pos;
-		break;
-	case 3:
-		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput3 << ADC_CONFIG_PSEL_Pos;
-		break;
-	case 4:
-		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput4 << ADC_CONFIG_PSEL_Pos;
-		break;
-	case 5:
-		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput5 << ADC_CONFIG_PSEL_Pos;
-		break;
-	case 6:
-		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput6 << ADC_CONFIG_PSEL_Pos;
-		break;
-	case 7:
-		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput7 << ADC_CONFIG_PSEL_Pos;
-		break;
-	default:
-		return 0xFFFFFFFF; // error
-//		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_Disabled << ADC_CONFIG_PSEL_Pos;
-	}
-*/
-#endif
+#include <nRF51822.h>
 
-	return 0;
-}
+// allocate buffer struct (not array in buffer yet)
+buffer_t adc_result;
+	
+// debugging
+gpio_t led0;
+gpio_t led1;
 
+/**
+ * The init function is called once before operating the AD converter. Call it after you start the SoftDevice. Check 
+ * the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
+ */
 uint32_t nrf_adc_init(uint8_t pin) {
-	log(DEBUG, "Init AD converter");
-
-	uint32_t err_code;
-	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; // Interrupt adc
-
-#if(USE_WITH_SOFTDEVICE == 1)
+#if(NRF51_USE_SOFTDEVICE == 1)
 	log(DEBUG, "Run ADC converter with SoftDevice");
+#else 
+	log(DEBUG, "Run ADC converter without SoftDevice!!!");
+	
 #endif
+	log(DEBUG, "Allocate buffer for ADC results");
+	if (adc_result.size != 100) {
+		adc_result.size = 100;
+		adc_result.buffer = (uint32_t*)calloc( adc_result.size, sizeof(uint32_t*));
+		if (adc_result.buffer == NULL) {
+			log(FATAL, "Could not initialize buffer. Too big!?");
+			return 0xF0; 
+		}
+		adc_result.ptr = adc_result.buffer;
+	} 
+	// set some leds for debugging
+	gpio_init_out(&led0, p8);
+	gpio_write(&led0, 1);
+	gpio_init_out(&led1, p9);
+
+	log(DEBUG, "Init AD converter");
+	uint32_t err_code;
+
+	log(DEBUG, "Configure ADC on pin %u", pin);
+	err_code = nrf_adc_config(pin);
+	APP_ERROR_CHECK(err_code);
+
+	log(DEBUG, "Enable ADC");
+	NRF_ADC->EVENTS_END  = 0;    // Stop any running conversions.
+	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
+	
+	log(DEBUG, "Enable Interrupts for END event");
+	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; // Interrupt adc
 
 	// Enable ADC interrupt
 	log(DEBUG, "Clear pending ADC interrupts");
-#if(USE_WITH_SOFTDEVICE == 1)
+#if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_ClearPendingIRQ(ADC_IRQn);
 	APP_ERROR_CHECK(err_code);
 #else
 	NVIC_ClearPendingIRQ(ADC_IRQn);
 #endif
 
-	
 	log(DEBUG, "Set ADC priority");
-#if(USE_WITH_SOFTDEVICE == 1)
-	err_code = sd_nvic_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
+#if(NRF51_USE_SOFTDEVICE == 1)
+	err_code = sd_nvic_SetPriority(ADC_IRQn, 3); //NRF_APP_PRIORITY_LOW);
 	APP_ERROR_CHECK(err_code);
 #else
-//	NVIC_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
-	NVIC_SetPriority(ADC_IRQn, 3);
+	NVIC_SetPriority(ADC_IRQn, 3); //NRF_APP_PRIORITY_LOW);
 #endif
 
-	log(DEBUG, "Enable ADC Interrupt");
-#if(USE_WITH_SOFTDEVICE == 1)
+// somehow this disables the interrupt!!!
+
+	log(DEBUG, "Tell to use ADC interrupt handler");
+#if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_EnableIRQ(ADC_IRQn);
 	APP_ERROR_CHECK(err_code);
 #else
 	NVIC_EnableIRQ(ADC_IRQn);
 #endif
-	
-	log(DEBUG, "Configure ADC");
-	err_code = nrf_adc_config(pin);
-	APP_ERROR_CHECK(err_code);
-	
-	log(DEBUG, "Start ADC task");
-	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
-	NRF_ADC->EVENTS_END  = 0;    // Stop any running conversions.
-	//NRF_ADC->TASKS_START = 1;    // If we start the task we cannot use the radio...
-
-#ifdef NRF6310_BOARD
-	log(DEBUG, "Test pins");
-	// --------- TEST -------------
-	// Configure pins as outputs.
-	for (uint8_t i=8; i<16; ++i) {
-		nrf_gpio_cfg_output(i);
-		nrf_gpio_pin_write(i, 1); // led goes off
-	}
-#endif
-
 	return 0;
-}
-
-void nrf_adc_stop() {
-	NRF_ADC->TASKS_STOP = 1;
 }
 
 /**
- * This doesn't work, correctly. Must be done properly.
+ * Configure the AD converter.
+ *   - set the resolution to 10 bits
+ *   - set the prescaler for the input voltage (the input, not the input supply) 
+ *   - use the internal VGB reference (not the external one, so no need to use its multiplexer either)
+ *   - do not set the prescaler for the reference voltage, this means voltage is expected between 0 and 1.2V (VGB)
+ * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
  */
-uint32_t nrf_adc_read(uint8_t pin, uint32_t* result) {
-//	adc_result = result;
-	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; // Interrupt adc
-
-	//Anne: huh, config again!?!! if (nrf_adc_config(pin)) return 0xFFFFFFFF; // error
-	
-	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
-	NRF_ADC->EVENTS_END  = 0;    // Stop any running conversions.
-	NRF_ADC->TASKS_START = 1;
-
-	while (!NRF_ADC->EVENTS_END) {} // block
-	NRF_ADC->EVENTS_END  = 0;
-	*result = NRF_ADC->RESULT;
-	NRF_ADC->TASKS_STOP = 1;
+uint32_t nrf_adc_config(uint8_t pin) {
+	NRF_ADC->CONFIG     =
+			(ADC_CONFIG_RES_10bit                            << ADC_CONFIG_RES_Pos)     |
+			(ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos)  | 
+			(ADC_CONFIG_REFSEL_VBG                           << ADC_CONFIG_REFSEL_Pos)  |
+			(ADC_CONFIG_EXTREFSEL_None                       << ADC_CONFIG_EXTREFSEL_Pos);
+	if (pin < 8) {
+		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << (pin+ADC_CONFIG_PSEL_Pos);
+		//NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput2 << ADC_CONFIG_PSEL_Pos;
+	} else {
+		log(FATAL, "There is no such pin available");
+		return 0xFFFFFFFF; // error
+	}
 	return 0;
 }
 
-
-
-void ADC_IRQHandler(void) {
-	if (NRF_ADC->EVENTS_END != 0) {
-		uint32_t     adc_result;
-//		uint16_t    batt_lvl_in_milli_volts;
-//		uint8_t     percentage_batt_lvl;
-		uint32_t    err_code;
-
-#ifdef NRF6310_BOARD
-		for (uint8_t i=8, j=0; i<16; ++i, ++j) {
-			uint32_t comp = 1;
-			if (NRF_ADC->EVENTS_END && comp<<(24+j))
-				nrf_gpio_pin_write(i, 1); // led goes on
-			else
-				nrf_gpio_pin_write(i, 0); // led goes off
-		}
-#endif
-
-		NRF_ADC->EVENTS_END     = 0;
-		adc_result             = NRF_ADC->RESULT;
-//		NRF_ADC->TASKS_STOP     = 1;
-
-
-//		batt_lvl_in_milli_volts = ADC_RESULT_IN_MILLI_VOLTS(adc_result) +
-//				DIODE_FWD_VOLT_DROP_MILLIVOLTS;
-//		percentage_batt_lvl     = battery_level_in_percent(batt_lvl_in_milli_volts);
-//
-//		err_code = ble_bas_battery_level_update(&m_bas, percentage_batt_lvl);
-//		if (
-//				(err_code != NRF_SUCCESS) &&
-//				(err_code != NRF_ERROR_INVALID_STATE) &&
-//				(err_code != BLE_ERROR_NO_TX_BUFFERS) &&
-//				(err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)) {
-//			APP_ERROR_HANDLER(err_code);
-//		}
-
-	}
+/**
+ * Stop the AD converter.
+ */
+void nrf_adc_stop() {
+	log(INFO, "Stop ADC sampling");
+	NRF_ADC->TASKS_STOP = 1;
 }
+
+void nrf_adc_start() {
+	log(INFO, "Start ADC sampling");
+	NRF_ADC->EVENTS_END  = 0;
+	NRF_ADC->TASKS_START = 1;
+	gpio_write(&led1, 1);
+}
+
+/*
+ * The interrupt handler for an ADC data ready event.
+ */
+extern "C" void ADC_IRQHandler(void) {
+	uint32_t adc_value;
+
+	// set led for debugging
+	//gpio_write(&led0, 0);
+	gpio_write(&led1, 0);
+
+	// clear data-ready event
+	NRF_ADC->EVENTS_END     = 0;
+
+	// write value to buffer
+	adc_value               = NRF_ADC->RESULT;
+	adc_result.push(adc_value);
+
+	if (adc_result.full()) {
+		//log(INFO, "Buffer is full");
+		NRF_ADC->TASKS_STOP = 1;
+		//log(INFO, "Stopped task");
+	       	return;
+	}
+
+	// Use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
+	//NRF_ADC->TASKS_STOP = 1;
+
+	// next sample
+	NRF_ADC->TASKS_START = 1;
+
+}
+
 
