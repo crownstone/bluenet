@@ -1,3 +1,9 @@
+/**
+ * Author: Christopher Mason
+ * Date: 21 Sep., 2013
+ * License: TODO
+ */
+
 #ifndef _Pool_h
 #define _Pool_h
 
@@ -6,8 +12,9 @@
 #include <new>
 #include <limits>
 #include <stdlib.h>
+#include <sys/types.h>
 
-#include "Debug.h"
+#include <util/error.h>
 
 class Pool;
 

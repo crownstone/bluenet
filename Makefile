@@ -2,7 +2,7 @@
 
 all:
 	@mkdir -p build
-	@cd build && cmake -DCMAKE_TOOLCHAIN_FILE=../arm.toolchain.cmake .. && make
+	@cd build && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=../arm.toolchain.cmake .. && make
 
 clean: 
 	@cd build && make clean
