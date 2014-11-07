@@ -13,10 +13,8 @@
 #error "The SOFTDEVICE_SERIES macro is required for compilation. Set it to 110 for example"
 #endif
 
-#include "ble_error.h"
-
-#include "log.h"
-#include "utils.h"
+#include <util/ble_error.h>
+#include <util/utils.h>
 
 using namespace BLEpp;
 
@@ -31,8 +29,8 @@ typedef struct {
 
 UUID::UUID(const char* fullUid) :
 		_full(fullUid), _type(BLE_UUID_TYPE_UNKNOWN) {
-//	LOG_INFO("create fullid: %s", _full);
-//	LOG_INFO("create uuid: %X", _uuid);
+//	log(INFO,"create fullid: %s", _full);
+//	log(INFO,"create uuid: %X", _uuid);
 }
 
 uint16_t UUID::init() {
@@ -208,38 +206,11 @@ void CharacteristicBase::notify() {
 
 	CharacteristicValue value = getCharacteristicValue();
 
-	if (!strcmp(_name.c_str(), "Devices")) {
-		_LOG_INFO("before set value, len:%d, : ", value.length);
-		for (int i = 0; i < value.length; ++i) {
-			_LOG_INFO("%.2X ", value.data[i]);
-		}
-		LOG_INFO("");
-	}
-
-//    LOG_INFO("value.length: %d", value.length);
-//    uint16_t leng = 12;
-//	BLE_CALL(sd_ble_gatts_value_set, (_handles.value_handle, 0, &value.length, value.data));
-	BLE_CALL(sd_ble_gatts_value_set, (_handles.value_handle, 0, &value.length, value.data));
-
-	uint16_t length = value.length;
-	uint8_t data[length];
+	BLE_CALL(sd_ble_gatts_value_set,
+			(_handles.value_handle, 0, &value.length, value.data));
 
 	if ((!_notifies) || (!_service->getStack()->connected()) || !_notifyingEnabled)
 		return;
-
-	_LOG_INFO("after set value, len:%d, : ", value.length);
-	for (int i = 0; i < value.length; ++i) {
-		_LOG_INFO("%.2X ", value.data[i]);
-	}
-	LOG_INFO("");
-
-	BLE_CALL(sd_ble_gatts_value_get, (_handles.value_handle, 0, &length, data));
-
-    _LOG_INFO("get value, len:%d, : ", length);
-    for (int i = 0; i < length; ++i) {
-    	_LOG_INFO("%.2X ", data[i]);
-    }
-    LOG_INFO("");
 
 	ble_gatts_hvx_params_t hvx_params;
 	uint16_t len = value.length;
@@ -253,22 +224,18 @@ void CharacteristicBase::notify() {
 	uint32_t err_code;
 	err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(),
 			&hvx_params);
-	APP_ERROR_CHECK(err_code);
-
-//	if (value.free) {
-//		free(value.data);
-//	}
-//	if ((err_code != NRF_SUCCESS)&&
-//	(err_code != NRF_ERROR_INVALID_STATE) &&
-//	(err_code != BLE_ERROR_NO_TX_BUFFERS) &&
-//	(err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
-//	){
-//	APP_ERROR_HANDLER(err_code);
-//} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
-//	LOG_INFO("BLE_ERROR_GATTS_SYS_ATTR_MISSING");
-//	err_code = sd_ble_gatts_sys_attr_set(_service->getStack()->getConnectionHandle(), NULL, 0);
 //	APP_ERROR_CHECK(err_code);
-//}
+	if ((err_code != NRF_SUCCESS)&&
+	(err_code != NRF_ERROR_INVALID_STATE) &&
+	(err_code != BLE_ERROR_NO_TX_BUFFERS) &&
+	(err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
+	){
+	APP_ERROR_HANDLER(err_code);
+} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
+	log(INFO,"BLE_ERROR_GATTS_SYS_ATTR_MISSING");
+	err_code = sd_ble_gatts_sys_attr_set(_service->getStack()->getConnectionHandle(), NULL, 0);
+	APP_ERROR_CHECK(err_code);
+}
 
 }
 
@@ -335,17 +302,16 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 
 		if (characteristic->getCccdHandle() == write_evt.handle && write_evt.len == 2) {
-			// received write to enable/disable notification
 			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(write_evt.data));
-			found = true;
-
-		} else if (characteristic->getValueHandle()	== write_evt.context.value_handle) {
+		} else if (characteristic->getValueHandle()
+				== write_evt.context.value_handle) {
 			// TODO: make a map.
 			found = true;
 
 			if (write_evt.op == BLE_GATTS_OP_WRITE_REQ
 					|| write_evt.op == BLE_GATTS_OP_WRITE_CMD
 					|| write_evt.op == BLE_GATTS_OP_SIGN_WRITE_CMD) {
+				log(INFO,"write_evt.op: %X", write_evt.op);
 				characteristic->written(write_evt.len, write_evt.offset,
 						write_evt.data);
 			} else {
@@ -579,7 +545,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 	if (_advertising)
 		return *this;
 
-	LOG_INFO("startIBeacon");
+	log(INFO,"startIBeacon");
 
 	init(); // we should already be.
 
@@ -646,7 +612,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 
 	_advertising = true;
 
-	LOG_INFO("OK");
+	log(INFO,"OK");
 
 	return *this;
 }
@@ -655,7 +621,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	if (_advertising)
 		return *this;
 
-	LOG_INFO("startAdvertising");
+	log(INFO, "Start advertising");
 
 	init(); // we should already be.
 
@@ -666,6 +632,8 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 
 	uint8_t uidCount = _services.size();
+	log(INFO,"Number of services: %u", uidCount);
+	
 	ble_uuid_t adv_uuids[uidCount];
 
 	uint8_t cnt = 0;
@@ -674,7 +642,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	}
 
 	if (cnt == 0) {
-		BLE_THROW("No services.");
+		log(WARN, "No custom services!");
 	}
 
 	ble_gap_adv_params_t adv_params;
@@ -706,6 +674,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	//  sent in the space 1 128-bit UUID occupies. So it really depends on the application
 	//  how this advertisement package should look like, so it doesn't really make sense
 	//  to have this function in the library.
+	/*
 	if (uidCount > 1) {
 		advdata.uuids_more_available.uuid_cnt = 1;
 		advdata.uuids_more_available.p_uuids = adv_uuids;
@@ -713,10 +682,10 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 		advdata.uuids_complete.uuid_cnt = 1;
 		advdata.uuids_complete.p_uuids = adv_uuids;
 	}
-
+	*/
 	err_code = ble_advdata_set(&advdata, NULL);
 	if (err_code == NRF_ERROR_DATA_SIZE) {
-		LOG_DEBUG("FATAL ERROR!!!! advertisement data too big for package");
+		log(FATAL,"FATAL ERROR!!!! advertisement data too big for package");
 	}
 	APP_ERROR_CHECK(err_code);
 
@@ -755,7 +724,7 @@ bool Nrf51822BluetoothStack::isAdvertising() {
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
 	if (_scanning)
 		return *this;
-	LOG_INFO("startScanning");
+	log(INFO,"startScanning");
 	ble_gap_scan_params_t p_scan_params;
 	// No devices in whitelist, hence non selective performed.
 	p_scan_params.active = 0;            // Active scanning set.
@@ -774,7 +743,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopScanning() {
 	if (!_scanning)
 		return *this;
-	LOG_INFO("stopScanning");
+	log(INFO,"stopScanning");
 	BLE_CALL(sd_ble_gap_scan_stop, ());
 	_scanning = false;
 	return *this;
@@ -867,7 +836,7 @@ void Nrf51822BluetoothStack::loop() {
 
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
-//		LOG_DEBUG("on_ble_event: %X", p_ble_evt->header.evt_id);
+//		log(DEBUG,"on_ble_event: %X", p_ble_evt->header.evt_id);
 //	}
 	switch (p_ble_evt->header.evt_id) {
 	// TODO: how do we identify which service evt is for?
@@ -908,7 +877,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-		LOG_INFO("BLE_GATTS_EVT_SYS_ATTR_MISSING");
+		log(INFO,"BLE_GATTS_EVT_SYS_ATTR_MISSING");
 		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0));
 		break;
 

@@ -9,14 +9,14 @@
 #include "stdio.h"
 
 #include "ScanResult.h"
-#include "log.h"
-#include "utils.h"
+#include "drivers/serial.h"
+#include "util/utils.h"
 
 ScanResult::ScanResult() : _list(NULL), _size(0), _freeIdx(0) {
 }
 
 ScanResult::~ScanResult() {
-	LOG_INFO("~ScanResult");
+	log(INFO, "~ScanResult");
 	if (_list) {
 		free(_list);
 	}
@@ -27,7 +27,7 @@ bool ScanResult::operator!=(const ScanResult& val) {
 }
 
 void ScanResult::init(size_t size) {
-	LOG_INFO("ScanResult.init()");
+	log(INFO, "ScanResult.init()");
 
 	if (_list) {
 		free(_list);
@@ -49,22 +49,22 @@ peripheral_device_t* ScanResult::getList() const {
 }
 
 void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
-	LOG_INFO("ScanResult.update()");
+	log(INFO, "ScanResult.update()");
 
 	char addrs[28];
 	sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
 			adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
 			adrs_ptr[0]);
 
-//	LOG_INFO("Advertisement from: %s, rssi: %d", addrs, rssi);
+//	log(INFO, "Advertisement from: %s, rssi: %d", addrs, rssi);
 
 	uint16_t occ;
 	bool found = false;
-	LOG_INFO("addrs: %s", addrs);
+	log(INFO, "addrs: %s", addrs);
 	for (int i = 0; i < _freeIdx; ++i) {
-		LOG_INFO("_history[%d]: %s", i, _list[i].addrs);
+		log(INFO, "_history[%d]: %s", i, _list[i].addrs);
 		if (strcmp(addrs, _list[i].addrs) == 0) {
-			LOG_INFO("found");
+			log(INFO, "found");
 			occ = ++_list[i].occurences;
 			//					occ = _history[i].occurences;
 			//					int avg_rssi = ((occ-1)*_history[i].rssi + p_adv_report->rssi)/occ;
@@ -90,25 +90,25 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			//					_history[idx] = peripheral;
 		}
 
-		LOG_INFO("NEW:\tAdvertisement from: %s, rssi: %d", addrs, rssi);
+		log(INFO, "NEW:\tAdvertisement from: %s, rssi: %d", addrs, rssi);
 		memcpy(_list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
 		strcpy(_list[idx].addrs, addrs);
 		_list[idx].occurences = 1;
 		_list[idx].rssi = rssi;
 	} else {
-		LOG_INFO("\tAdvertisement from: %s, rssi: %d, occ: %d", addrs, rssi, occ);
+		log(INFO, "\tAdvertisement from: %s, rssi: %d, occ: %d", addrs, rssi, occ);
 	}
 }
 
 void ScanResult::print() const {
 
-	LOG_INFO("##################################################");
-	LOG_INFO("### listing detected peripherals #################");
-	LOG_INFO("##################################################");
+	log(INFO, "##################################################");
+	log(INFO, "### listing detected peripherals #################");
+	log(INFO, "##################################################");
 	for (int i = 0; i < _freeIdx; ++i) {
-		LOG_INFO("%s\trssi: %d\tocc: %d", _list[i].addrs, _list[i].rssi, _list[i].occurences);
+		log(INFO, "%s\trssi: %d\tocc: %d", _list[i].addrs, _list[i].rssi, _list[i].occurences);
 	}
-	LOG_INFO("##################################################");
+	log(INFO, "##################################################");
 
 }
 
@@ -149,16 +149,16 @@ void ScanResult::serialize(Buffer& buffer) const {
 
 	}
 //
-//    _LOG_INFO("serialize value, len:%d, : ", buffer.length);
+//    _log(INFO, "serialize value, len:%d, : ", buffer.length);
 //    for (int i = 0; i < buffer.length; ++i) {
-//    	_LOG_INFO("%.2X ", buffer.data[i]);
+//    	_log(INFO, "%.2X ", buffer.data[i]);
 //    }
-//    LOG_INFO("");
+//    log(INFO, "");
 }
 
 /** Copy data from the given buffer into this object. */
 void ScanResult::deserialize(Buffer& buffer) {
-	LOG_INFO("ScanResult.deserialize()");
+	log(INFO, "ScanResult.deserialize()");
 
 	uint8_t* ptr;
 	ptr = buffer.data;
@@ -192,5 +192,5 @@ void ScanResult::deserialize(Buffer& buffer) {
 		dev->occurences = *ptr++;
 
 	}
-	LOG_INFO("32");
+	log(INFO, "32");
 }

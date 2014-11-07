@@ -1,6 +1,10 @@
 #ifndef __nRF51822_h
 #define __nRF51822_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef NULL
 #define NULL ((void *)0)
 #endif
@@ -478,5 +482,8 @@
 #define NRF51_NVIC_IPRn(n)             *(volatile uint32_t*)(0xE000E400+(4*n))                // Interrupt Priority Registers
 
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __nRF51822_h */

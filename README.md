@@ -19,6 +19,8 @@ The installation should not be hard when you have the Nordic SDK. Get this from 
 * [JLink Software](http://www.segger.com/jlink-software.html)
 * sudo aptitude install cmake
 
+A cross-compiler for ARM is the `GCC` cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-src.tar.bz2).
+
 ### Bugs
 
 There is a bug in one of the SDK files, namely `nrf_svc.h` (different location depending on the SDK version):

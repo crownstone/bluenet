@@ -1,10 +1,17 @@
+/**
+ * Author: Anne van Rossum
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: 4 Nov., 2014
+ * License: LGPLv3+
+ */
 #ifndef BLE_ERROR_H
 #define BLE_ERROR_H
 
+#include "nrf_error.h"
+
 #include <string> 
 #include <stdint.h> 
-
-#include "log.h"
+#include "drivers/serial.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -44,7 +51,7 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
         const uint32_t LOCAL_ERR_CODE = (ERR_CODE);         \
         if (LOCAL_ERR_CODE != NRF_SUCCESS)                  \
         {                                                   \
-        	LOG_DEBUG("ERR_CODE: %d", LOCAL_ERR_CODE);		\
+        	log(DEBUG, "ERR_CODE: %d", LOCAL_ERR_CODE);		\
             APP_ERROR_HANDLER(LOCAL_ERR_CODE);              \
         }                                                   \
     } while (0)

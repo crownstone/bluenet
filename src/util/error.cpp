@@ -1,5 +1,11 @@
+/**
+ * Author: Christopher mason
+ * Date: 21 Sep., 2013
+ * License: TODO
+ */
+
 #include <stddef.h>
-#include "error.h"
+#include <util/error.h>
 
 /// ERROR HANDLING ROUTINES /////////////////////////////////////////////////////////////////////////
 

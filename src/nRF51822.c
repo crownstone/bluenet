@@ -1,6 +1,9 @@
 #include <stdint.h>
 #include "nRF51822.h"
 
+#include "nrf_gpio.h"
+#include "nrf.h"
+
 // Currently, very dirty set just RFDUINO here. We must make this of course more flexible and be able to compile
 // smoothly for different modules created around the nRF51822 chip.
 #define RFDUINO
@@ -12,15 +15,20 @@ extern unsigned const long _edata;
 extern unsigned const long _sbss;
 extern unsigned const long _ebss;
 extern unsigned const long _estack;
-extern unsigned const long __bss_start__;
-extern unsigned const long __bss_end__;
-extern unsigned const long __text_end__;
-extern unsigned const long __data_end__;
-extern unsigned const long __data_start__;
+//extern unsigned const long __bss_start__;
+//extern unsigned const long __bss_end__;
+//extern unsigned const long __text_end__;
+//extern unsigned const long __data_end__;
+//extern unsigned const long __data_start__;
 //extern void __init_array_start(void);
 //extern void __init_array_end(void);
 extern int main (void);
+
+void ADC_IRQHandler(void);
 void ResetHandler(void);
+
+// currently used for PWM
+void TIMER2_IRQHandler(void);
 
 void unused_isr(void)
 {
@@ -38,10 +46,10 @@ void UART0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SPI0_TWI0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SPI1_TWI1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void GPIOTE_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-void ADC_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+//void ADC_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void TIMER0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void TIMER1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-void TIMER2_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+//void TIMER2_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void RTC0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void TEMP_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void RNG_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));

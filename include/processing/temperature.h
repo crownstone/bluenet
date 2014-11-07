@@ -9,9 +9,7 @@
 #define TEMPERATURE_HPP_
 
 #include "nrf_soc.h"
-#include "ble_error.h"
-
-#include "log.h"
+#include <util/ble_error.h>
 
 /*
  * get temperature from softdevice
@@ -23,8 +21,8 @@ inline int32_t getTemperature() {
 	err_code = sd_temp_get(&temperature);
 	APP_ERROR_CHECK(err_code);
 
-//	LOG_DEBUG("raw temp: %d", temperature);
-//	LOG_INFO("temp: %d", temperature / 4);
+//	log(DEBUG,"raw temp: %d", temperature);
+//	log(INFO,"temp: %d", temperature / 4);
 
 	temperature = (temperature / 4);
 

@@ -75,7 +75,7 @@ endif()
 MESSAGE(STATUS "Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld)
 
-# Libraries (math, stdc++ libraries, etc.)
+# Libraries (math, stdc++ libraries, etc., note that we use the size-constrained *_s versions!)
 SET(LIBS "-lsupc++ -lm -lc_s -lstdc++_s")
 
 # Some debug information
@@ -90,41 +90,39 @@ SET(INCLUDE_DIR "include")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nRF51822.c")
 
 # Add a single 
-#LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/error.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/Pool.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/syscalls.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nrf_pwm.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble_error.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/BluetoothLE.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/IndoorLocalisationService.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/TemperatureService.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/utils.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/error.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/ble_error.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/syscalls.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/pinmap.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/assert.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/gpio.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/gpio_api.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/serial.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/nrf_pwm.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/nrf_adc.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ScanResult.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/Pool.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/BluetoothLE.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/IndoorLocalisationService.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/TemperatureService.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
-#LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/main.cpp")
-#LIST(APPEND FOLDER_SOURCE "/opt/nordic/Example/s130_demo_ap/src/main.cpp")
-#LIST(APPEND FOLDER_SOURCE "/opt/nordic/nrf51822/Board/nrf6310/blinky_example/main.c")
 
 # Add all header files without exception
 #FILE(GLOB FOLDER_HEADER ${INCLUDE_DIR}/*.h ${INCLUDE_DIR}/*.hh ${INCLUDE_DIR}/*.hpp)
 
+# We add the source files explicitly. This is recommended in the cmake system and will also force us all the time to
+# consider the size of the final binary. Do not include things, if not necessary!
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
-LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
-#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/sd_common/softdevice_handler.c")
-LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
+#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
+#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
-
-#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/simple_uart/simple_uart.c")
-#LIST(APPEND FOLDER_SOURCE "/opt/nordic/Example/s130_demo_app/src/rtc1.c")
 
 # For Visual Studio group the files
 SOURCE_GROUP("Source files" FILES ${FOLDER_SOURCE})
 SOURCE_GROUP("Header files" FILES ${FOLDER_HEADER})
 
 INCLUDE_DIRECTORIES(${INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${INCLUDE_DIR}/lib)
-#INCLUDE_DIRECTORIES("/opt/nordic/Example/s130_demo_app/inc")
 
 # Add to the -I flags
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include")

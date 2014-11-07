@@ -16,7 +16,7 @@
 
 struct peripheral_device_t {
 	uint8_t addr[BLE_GAP_ADDR_LEN];
-//	char addrs[28];
+	char addrs[28];
 	uint16_t occurences;
 	int8_t rssi;
 };
