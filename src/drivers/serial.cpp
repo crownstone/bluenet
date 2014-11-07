@@ -83,7 +83,7 @@ int write(const char *str, ...) {
 		len = vsprintf(p_buf, str, ap);
 		va_end(ap);
 		for(int i = 0; i < len; ++i) {
-			NRF51_UART_TXD = (uint8_t)str[i];
+			NRF51_UART_TXD = (uint8_t)p_buf[i];
 			while(NRF51_UART_TXDRDY != 1) /* wait */;
 			NRF51_UART_TXDRDY = 0;
 		}
