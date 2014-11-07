@@ -52,8 +52,8 @@ private:
 	
 	int personal_threshold_level;
 
-	uint32_t curve_size = 200;
-	uint32_t curve[200];
+//	uint32_t curve_size = 200;
+//	uint32_t curve[200];
 
 };
 

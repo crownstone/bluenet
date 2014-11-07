@@ -81,10 +81,10 @@ uint32_t nrf_adc_init(uint8_t pin) {
 
 	log(DEBUG, "Set ADC priority");
 #if(NRF51_USE_SOFTDEVICE == 1)
-	err_code = sd_nvic_SetPriority(ADC_IRQn, 1); //NRF_APP_PRIORITY_LOW);
+	err_code = sd_nvic_SetPriority(ADC_IRQn, 3); //NRF_APP_PRIORITY_LOW);
 	APP_ERROR_CHECK(err_code);
 #else
-	NVIC_SetPriority(ADC_IRQn, 1); //NRF_APP_PRIORITY_LOW);
+	NVIC_SetPriority(ADC_IRQn, 3); //NRF_APP_PRIORITY_LOW);
 #endif
 
 // somehow this disables the interrupt!!!
@@ -96,18 +96,6 @@ uint32_t nrf_adc_init(uint8_t pin) {
 #else
 	NVIC_EnableIRQ(ADC_IRQn);
 #endif
-
-	log(DEBUG, "Start first ADC task");
-	NRF_ADC->EVENTS_END  = 0;
-	NRF_ADC->TASKS_START = 1;  
-	gpio_write(&led0, 0);
-
-	// EVENTS_END does not arrive...
-	while (!NRF_ADC->EVENTS_END) {} // block
-	NRF_ADC->EVENTS_END  = 0;
-	NRF_ADC->TASKS_STOP = 1;
-	gpio_write(&led0, 1);
-
 	return 0;
 }
 
@@ -120,20 +108,18 @@ uint32_t nrf_adc_init(uint8_t pin) {
  * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
  */
 uint32_t nrf_adc_config(uint8_t pin) {
-/*	NRF_ADC->CONFIG     =
+	NRF_ADC->CONFIG     =
 			(ADC_CONFIG_RES_10bit                            << ADC_CONFIG_RES_Pos)     |
 			(ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos)  | 
 			(ADC_CONFIG_REFSEL_VBG                           << ADC_CONFIG_REFSEL_Pos)  |
 			(ADC_CONFIG_EXTREFSEL_None                       << ADC_CONFIG_EXTREFSEL_Pos);
 	if (pin < 8) {
-		//NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << (pin+ADC_CONFIG_PSEL_Pos);
-		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput2 << ADC_CONFIG_PSEL_Pos;
+		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << (pin+ADC_CONFIG_PSEL_Pos);
+		//NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput2 << ADC_CONFIG_PSEL_Pos;
 	} else {
 		log(FATAL, "There is no such pin available");
 		return 0xFFFFFFFF; // error
 	}
-	return 0;*/
-	NRF_ADC->CONFIG = ADC_CONFIG_RES_8bit << ADC_CONFIG_RES_Pos | ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos | ADC_CONFIG_REFSEL_SupplyOneThirdPrescaling << ADC_CONFIG_REFSEL_Pos | ADC_CONFIG_PSEL_AnalogInput2 << ADC_CONFIG_PSEL_Pos;
 	return 0;
 }
 
@@ -142,30 +128,14 @@ uint32_t nrf_adc_config(uint8_t pin) {
  */
 void nrf_adc_stop() {
 	log(INFO, "Stop ADC sampling");
-	//NRF_ADC->TASKS_STOP = 1;
+	NRF_ADC->TASKS_STOP = 1;
 }
 
 void nrf_adc_start() {
-//	nrf_adc_init(2);
-	//NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
-	//NRF_ADC->EVENTS_END  = 0;    // Stop any running conversions.
-	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; // Interrupt adc
-	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
 	log(INFO, "Start ADC sampling");
 	NRF_ADC->EVENTS_END  = 0;
 	NRF_ADC->TASKS_START = 1;
 	gpio_write(&led1, 1);
-	//while (!NRF_ADC->EVENTS_END) {} // block
-	//NRF_ADC->EVENTS_END  = 0;
-	//NRF_ADC->TASKS_STOP = 1;
-	//gpio_write(&led0, 1);
-	//log(INFO, "ADC sampling stopped");
-/*
-	while (!NRF_ADC->EVENTS_END) {} // block
-	NRF_ADC->EVENTS_END  = 0;
-	NRF_ADC->TASKS_STOP = 1;
-	log(INFO, "Result");	
-*/
 }
 
 /*
@@ -185,10 +155,15 @@ extern "C" void ADC_IRQHandler(void) {
 	adc_value               = NRF_ADC->RESULT;
 	adc_result.push(adc_value);
 
-	if (adc_result.full()) return;
+	if (adc_result.full()) {
+		//log(INFO, "Buffer is full");
+		NRF_ADC->TASKS_STOP = 1;
+		//log(INFO, "Stopped task");
+	       	return;
+	}
 
 	// Use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
-	NRF_ADC->TASKS_STOP = 1;
+	//NRF_ADC->TASKS_STOP = 1;
 
 	// next sample
 	NRF_ADC->TASKS_START = 1;
