@@ -20,8 +20,38 @@ ScanResult::ScanResult() : _freeIdx(0) {
 ScanResult::~ScanResult() {
 }
 
+// returns the number of elements stored so far
+uint16_t ScanResult::getSize() const {
+	// freeIdx points to the next free index of the array,
+	// but because the first element is at index 0,
+	// freeIdx is also the number of elements in the array so far
+	return _freeIdx;
+}
+
+void ScanResult::reset() {
+	memset(_list, 0, sizeof(_list));
+	_freeIdx = 0;
+}
+
 bool ScanResult::operator!=(const ScanResult& val) {
-	return true;
+
+	if (this->_freeIdx != val._freeIdx) {
+		return true;
+	}
+
+	for (int i = 0; i < this->_freeIdx; ++i) {
+		if (this->_list[i].occurences != val._list[i].occurences) {
+			return true;
+		}
+		if (this->_list[i].rssi != val._list[i].rssi) {
+			return true;
+		}
+		if (memcmp(this->_list[i].addr, val._list[i].addr, BLE_GAP_ADDR_LEN) != 0) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 //int count = 1;
@@ -32,7 +62,6 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
 			adrs_ptr[0]);
 
-	uint16_t occ;
 	bool found = false;
 //	log(DEBUG, "addrs: %s", addrs);
 	for (int i = 0; i < _freeIdx; ++i) {
@@ -49,7 +78,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 		}
 		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 //			log(DEBUG, "found");
-			occ = ++_list[i].occurences;
+			_list[i].occurences++;
 			_list[i].rssi = rssi;
 			found = true;
 		}
@@ -72,7 +101,6 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 
 		log(INFO, "NEW Advertisement from: %s, rssi: %d", addrs, rssi);
 		memcpy(_list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
-		strcpy(_list[idx].addrs, addrs);
 		_list[idx].occurences = 1;
 		_list[idx].rssi = rssi;
 	} else {
@@ -83,9 +111,9 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 void ScanResult::print() const {
 
 	log(INFO, "##################################################");
-	log(INFO, "### listing detected peripherals #################");
+	log(INFO, "### listing detected peripherals (%2d) ############", getSize());
 	log(INFO, "##################################################");
-	for (int i = 0; i < _freeIdx; ++i) {
+	for (int i = 0; i < getSize(); ++i) {
 		char addrs[28];
 		sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", _list[i].addr[5],
 				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
@@ -99,7 +127,7 @@ void ScanResult::print() const {
 /** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
 * it means that the object does not need external buffer space. */
 uint32_t ScanResult::getSerializedLength() const {
-	return _freeIdx * SERIALIZED_DEVICE_SIZE + HEADER_SIZE; // + 1 byte for header size (number of elements in array)
+	return getSize() * SERIALIZED_DEVICE_SIZE + HEADER_SIZE;
 }
 
 /** Copy data representing this object into the given buffer.  Buffer will be preallocated with at least
@@ -109,7 +137,7 @@ void ScanResult::serialize(uint8_t* buffer, uint16_t length) const {
 	ptr = buffer;
 
 	// copy number of elements
-	*ptr++ = _freeIdx;
+	*ptr++ = getSize();
 	for (uint16_t i = 0; i < _freeIdx; ++i) {
 		// copy address of device
 		for (uint8_t j= 1; j <= BLE_GAP_ADDR_LEN; ++j) {

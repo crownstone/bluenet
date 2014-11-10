@@ -14,15 +14,14 @@
 #include "Serializable.h"
 #include "BluetoothLE.h"
 
-struct peripheral_device_t {
+struct __attribute__((__packed__)) peripheral_device_t {
 	uint8_t addr[BLE_GAP_ADDR_LEN];
-	char addrs[28];
 	uint16_t occurences;
 	int8_t rssi;
 };
 
 #define HEADER_SIZE 1 // 1 BYTE for the header = number of elements in the list
-#define SERIALIZED_DEVICE_SIZE 9
+#define SERIALIZED_DEVICE_SIZE sizeof(peripheral_device_t)
 #define MAX_HISTORY 20
 
 class ScanResult {
@@ -40,6 +39,10 @@ public:
 	void print() const;
 
 	void update(uint8_t * adrs_ptr, int8_t rssi);
+
+	uint16_t getSize() const;
+
+	void reset();
 
 	//////////// serializable ////////////////////////////
 
