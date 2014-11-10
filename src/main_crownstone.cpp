@@ -135,6 +135,7 @@ int main() {
 			stack.startAdvertising();
 #endif
 		})
+#if(SOFTDEVICE_SERIES != 110)
 		.onAdvertisement([&](ble_gap_evt_adv_report_t* p_adv_report) {
 			//data_t adv_data;
 			//data_t type_data;
@@ -190,8 +191,9 @@ int main() {
 			} else {
 //				log(INFO,"\tadvertisement from: %s, rssi: %d, occ: %d", addrs, p_adv_report->rssi, occ);
 			}
-		});
-
+		})
+#endif
+		;
 	//service& generalservice = stack.createService();
 	//service& batteryservice = stack.createbatteryservice();
 
