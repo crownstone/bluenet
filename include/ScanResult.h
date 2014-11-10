@@ -21,13 +21,14 @@ struct peripheral_device_t {
 	int8_t rssi;
 };
 
+#define HEADER_SIZE 1 // 1 BYTE for the header = number of elements in the list
 #define SERIALIZED_DEVICE_SIZE 9
+#define MAX_HISTORY 20
 
-class ScanResult : public ISerializable {
+class ScanResult {
 
 private:
-	peripheral_device_t* _list;
-	size_t _size;
+	peripheral_device_t _list[MAX_HISTORY];
     uint8_t _freeIdx;
 
 public:
@@ -36,19 +37,11 @@ public:
 
 	bool operator!=(const ScanResult& val);
 
-	// init list for number of devices
-	void init(size_t size);
-
-	// return number of devices
-	size_t getSize() const;
-
-	peripheral_device_t* getList() const;
-
 	void print() const;
 
 	void update(uint8_t * adrs_ptr, int8_t rssi);
 
-	//////////// ISerializable ////////////////////////////
+	//////////// serializable ////////////////////////////
 
     /** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
     * it means that the object does not need external buffer space. */
@@ -56,13 +49,14 @@ public:
 
     /** Copy data representing this object into the given buffer.  Buffer will be preallocated with at least
     * getLength() bytes. */
-    virtual void serialize(Buffer& buffer) const;
+    void serialize(uint8_t* buffer, uint16_t length) const;
 
     /** Copy data from the given buffer into this object. */
-    virtual void deserialize(Buffer& buffer);
+    virtual void deserialize(uint8_t* buffer, uint16_t length);
 
 };
 
+extern ScanResult scanResult;
 
 // template has to be in the same namespace as the other CharacteristicT templates
 namespace BLEpp {
@@ -70,7 +64,7 @@ namespace BLEpp {
 template<> class CharacteristicT<ScanResult> : public Characteristic<ScanResult> {
 
 private:
-	Buffer mBuffer;
+	uint8_t data[MAX_HISTORY * SERIALIZED_DEVICE_SIZE + HEADER_SIZE];
 
 public:
 
@@ -83,15 +77,14 @@ public:
 		CharacteristicValue value;
 		const ScanResult& t = this->getValue();
 		uint32_t len = t.getSerializedLength();
-		mBuffer.allocate(len);
-		t.serialize(mBuffer);
-		mBuffer.release();
-		return CharacteristicValue(mBuffer.length, mBuffer.data, true);
+		memset(data, 0, len);
+		t.serialize(data, len);
+		return CharacteristicValue(len, data, false);
 	}
+
 	virtual void setCharacteristicValue(const CharacteristicValue& value) {
 		ScanResult t;
-		Buffer b(value.length, (uint8_t*) value.data);
-		t.deserialize(b);
+		t.deserialize(value.data, value.length);
 		this->setValue(t);
 	}
 

@@ -36,6 +36,8 @@ extern "C" {
 #include <services/IndoorLocalisationService.h>
 #include <services/TemperatureService.h>
 
+#include "ScanResult.h"
+
 using namespace BLEpp;
 
 /**********************************************************************************************************************
@@ -107,7 +109,6 @@ int main() {
 	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	// in particular we need it to set interrupt priorities.
 	stack.init();
-	
 
 	stack.onConnect([&](uint16_t conn_handle) {
 			log(INFO,"onConnect...");
@@ -135,11 +136,8 @@ int main() {
 		})
 		.onAdvertisement([&](ble_gap_evt_adv_report_t* p_adv_report) {
 			if (stack.isScanning()) {
-//				scanResult.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+				scanResult.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 			}
-
-
-
 		});
 
 #ifdef INDOOR_SERVICE
@@ -151,13 +149,10 @@ int main() {
 #ifdef TEMPERATURE_SERVICE
 	//	 get temperature value
 	TemperatureService& temperatureService = TemperatureService::createService(stack);
-//	temperatureservice.start();
 #endif /* temperature_service */
-	
 
 	// configure drivers
 	config_drivers();
-
 
 	// begin sending advertising packets over the air.
 #ifdef IBEACON
@@ -166,9 +161,7 @@ int main() {
 	stack.startAdvertising();
 #endif
 
-	log(INFO,"Running while loop..");
-
-//	stack.startScanning();
+	log(INFO, "Running while loop..");
 
 	while(1) {
 		// deliver events from the bluetooth stack to the callbacks defined above.
@@ -187,6 +180,6 @@ int main() {
 			temperatureService.loop();
 //		}
 #endif
-			nrf_delay_ms(50);
+		nrf_delay_ms(50);
 	}
 }

@@ -10,6 +10,7 @@
 
 #include "BluetoothLE.h"
 #include <util/function.h>
+#include "ScanResult.h"
 
 #define INDOORLOCALISATION_UUID "00002220-0000-1000-8000-00805f9b34fb"
 // TODO -oDE: how did you come up with this UUID ??!!
@@ -24,10 +25,9 @@ public:
 	typedef function<int8_t()> func_t;
 
 protected:
-	BLEpp::CharacteristicT<int8_t> *_characteristic;
 	func_t _rssiHandler;
 
-
+	void AddRssiCharacteristic();
 	void AddNumberCharacteristic();
 	void AddNumber2Characteristic();
 	void AddVoltageCurveCharacteristic();
@@ -36,6 +36,7 @@ protected:
 	void AddPersonalThresholdCharacteristic();
 public:
 	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
+
 	void AddSpecificCharacteristics();
 
 	void on_ble_event(ble_evt_t * p_ble_evt);
@@ -46,9 +47,12 @@ public:
 
 	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 private:
+	BLEpp::Nrf51822BluetoothStack* stack;
+
+	BLEpp::CharacteristicT<int8_t>* rssiCharac;
 	BLEpp::Characteristic<uint8_t>* intchar;
 	BLEpp::Characteristic<uint64_t>* intchar2;
-	BLEpp::Nrf51822BluetoothStack* stack;
+	BLEpp::Characteristic<ScanResult>* peripheralCharac;
 	
 	int personal_threshold_level;
 

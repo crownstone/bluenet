@@ -16,31 +16,35 @@
 
 using namespace BLEpp;
 
-IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& stack) {
+IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& stack) :
+		rssiCharac(NULL) {
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
 
 	// we have to figure out why this goes wrong
 	setName(std::string("IndoorLocalizationService"));
 
-	_characteristic = new CharacteristicT<int8_t>();
-	//.setUUID(UUID(service.getUUID(), 0x124))
-	(*_characteristic).setUUID(UUID(getUUID(), 0x2201)); // there is no BLE_UUID for rssi level(?)
-	(*_characteristic).setName(std::string("Received signal level"));
-	(*_characteristic).setDefaultValue(1);
-
-	addCharacteristic(_characteristic);
-
 	this->stack = &stack;
 }
 
 void IndoorLocalizationService::AddSpecificCharacteristics() {
-	//AddNumberCharacteristic();
-	//AddNumber2Characteristic();
-	AddVoltageCurveCharacteristic();
-	//AddScanControlCharacteristic(stack);
-	//AddPeripheralListCharacteristic();
-	//AddPersonalThresholdCharacteristic();
+//	AddRssiCharacteristic();
+//	AddNumberCharacteristic();
+//	AddNumber2Characteristic();
+//	AddVoltageCurveCharacteristic();
+	AddScanControlCharacteristic();
+	AddPeripheralListCharacteristic();
+//	AddPersonalThresholdCharacteristic();
+}
+
+void IndoorLocalizationService::AddRssiCharacteristic() {
+	rssiCharac = new CharacteristicT<int8_t>();
+	//.setUUID(UUID(service.getUUID(), 0x124))
+	(*rssiCharac).setUUID(UUID(getUUID(), 0x2201)); // there is no BLE_UUID for rssi level(?)
+	(*rssiCharac).setName(std::string("Received signal level"));
+	(*rssiCharac).setDefaultValue(1);
+
+	addCharacteristic(rssiCharac);
 }
 
 void IndoorLocalizationService::AddNumberCharacteristic() {
@@ -174,45 +178,32 @@ void IndoorLocalizationService::AddScanControlCharacteristic() {
 		.setDefaultValue(255)
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
-			switch(value) {
-			case 0: {
+			if(value) {
 				log(INFO,"crown: start scanning");
 				if (!stack->isScanning()) {
 //					scanResult.init(10);
 					stack->startScanning();
 				}
-			}
-			case 1: {
+			} else {
 				log(INFO,"crown: stop scanning");
 				if (stack->isScanning()) {
 					stack->stopScanning();
-//					charac = scanResult;
+					*peripheralCharac = scanResult;
+					scanResult.print();
 				}
-				break;
 			}
-		}
-
-	});
+		});
 }
 
 void IndoorLocalizationService::AddPeripheralListCharacteristic() {
 	// get scan result
 	log(DEBUG, "create characteristic to list found peripherals");
 
-//	createCharacteristic<uint8_t>()
-//		.setUUID(UUID(getUUID(), 0x121))
-//		.setName("devices")
-//		.setDefaultValue(255)
-//		.setWritable(true)
-//		.onWrite([&](const uint8_t & value) -> void {
-//			scanResult.print();
-//		});
-
-	Characteristic<ScanResult>& charac = createCharacteristic<ScanResult>()
-		.setUUID(UUID(getUUID(), 0x120))
-		.setName("Devices")
-		.setWritable(false);
-	charac.setNotifies(true);
+	peripheralCharac = createCharacteristicRef<ScanResult>();
+	peripheralCharac->setUUID(UUID(getUUID(), 0x120));
+	peripheralCharac->setName("Peripherals");
+	peripheralCharac->setWritable(false);
+	peripheralCharac->setNotifies(true);
 }
 
 void IndoorLocalizationService::AddPersonalThresholdCharacteristic() {
@@ -279,7 +270,9 @@ void IndoorLocalizationService::onRSSIChanged(int8_t rssi) {
 }
 
 void IndoorLocalizationService::setRSSILevel(int8_t RSSILevel) {
-	(*_characteristic) = RSSILevel;
+	if (rssiCharac) {
+		(*rssiCharac) = RSSILevel;
+	}
 }
 
 void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
