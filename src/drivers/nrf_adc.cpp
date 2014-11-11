@@ -24,13 +24,14 @@
 #include <nRF51822.h>
 
 // allocate buffer struct (not array in buffer yet)
-buffer_t adc_result;
+buffer_t<uint16_t> adc_result;
 	
 // debugging
 gpio_t led0;
 gpio_t led1;
 
-#define ADC_BUFFER_SIZE 200
+#define ADC_BUFFER_SIZE 400
+uint16_t adc_buffer[ADC_BUFFER_SIZE];
 
 /**
  * The init function is called once before operating the AD converter. Call it after you start the SoftDevice. Check 
@@ -46,11 +47,12 @@ uint32_t nrf_adc_init(uint8_t pin) {
 	log(DEBUG, "Allocate buffer for ADC results");
 	if (adc_result.size != ADC_BUFFER_SIZE) {
 		adc_result.size = ADC_BUFFER_SIZE;
-		adc_result.buffer = (uint32_t*)calloc( adc_result.size, sizeof(uint32_t*));
-		if (adc_result.buffer == NULL) {
-			log(FATAL, "Could not initialize buffer. Too big!?");
-			return 0xF0; 
-		}
+//		adc_result.buffer = (uint16_t*)calloc( adc_result.size, sizeof(uint16_t*));
+//		if (adc_result.buffer == NULL) {
+//			log(FATAL, "Could not initialize buffer. Too big!?");
+//			return 0xF0;
+//		}
+		adc_result.buffer = adc_buffer;
 		adc_result.ptr = adc_result.buffer;
 	} 
 	// set some leds for debugging
@@ -154,8 +156,10 @@ extern "C" void ADC_IRQHandler(void) {
 	NRF_ADC->EVENTS_END     = 0;
 
 	// write value to buffer
-	adc_value               = NRF_ADC->RESULT;
+	adc_value = NRF_ADC->RESULT;
 	adc_result.push(adc_value);
+	// Log RTC too
+	adc_result.push(nrf_rtc_getCount());
 
 	if (adc_result.full()) {
 		//log(INFO, "Buffer is full");
