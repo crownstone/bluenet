@@ -19,13 +19,18 @@
 
 using namespace BLEpp;
 
-IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& stack) {
+IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& stack) :
+		_characteristic(NULL),
+		_intchar(NULL),
+		_intchar2(NULL),
+		_stack(NULL)
+		{
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
 
 	// we have to figure out why this goes wrong
 	setName(std::string("IndoorLocalizationService"));
-	this->stack = &stack;
+	_stack = &stack;
 
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
@@ -55,16 +60,16 @@ void IndoorLocalizationService::AddNumberCharacteristic() {
 	// note that in the next characteristic this variable intchar is set!
 	log(DEBUG, "create characteristic to read a number for debugging");
 	//Characteristic<uint8_t>&
-	intchar = createCharacteristicRef<uint8_t>();
-	(*intchar)
+	_intchar = createCharacteristicRef<uint8_t>();
+	(*_intchar)
 		.setUUID(UUID(getUUID(), 0x125))  // based off the uuid of the service.
 		.setDefaultValue(66)
 		.setName("number");
 }
 
 void IndoorLocalizationService::AddNumber2Characteristic() {
-	intchar2 = createCharacteristicRef<uint64_t>();
-	(*intchar2)
+	_intchar2 = createCharacteristicRef<uint64_t>();
+	(*_intchar2)
 		.setUUID(UUID(getUUID(), 0x121))  // based off the uuid of the service.
 		.setDefaultValue(66)
 		.setName("number2");
@@ -105,12 +110,12 @@ void IndoorLocalizationService::AddScanControlCharacteristic() {
 			switch(value) {
 			case 0: {
 				log(INFO,"crown: start scanning");
-				stack->startScanning();
+				_stack->startScanning();
 				break;
 			}
 			case 1: {
 				log(INFO,"crown: stop scanning");
-				stack->stopScanning();
+				_stack->stopScanning();
 				break;
 			}
 		}
@@ -154,7 +159,7 @@ void IndoorLocalizationService::AddPersonalThresholdCharacteristic() {
 //			nrf_pwm_set_value(1, value);
 //			nrf_pwm_set_value(2, value);
 			log(INFO, "set personal_threshold_value to %i", value);
-			personal_threshold_level = value;
+			_personalThresholdLevel = value;
 		});
 }
 
@@ -307,7 +312,8 @@ void IndoorLocalizationService::onRSSIChanged(int8_t rssi) {
 }
 
 void IndoorLocalizationService::setRSSILevel(int8_t RSSILevel) {
-	(*_characteristic) = RSSILevel;
+	if (_characteristic)
+		*_characteristic = RSSILevel;
 }
 
 void IndoorLocalizationService::setRSSILevelHandler(func_t func) {

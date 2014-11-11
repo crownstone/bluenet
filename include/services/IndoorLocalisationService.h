@@ -50,11 +50,11 @@ public:
 
 	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 private:
-	BLEpp::Characteristic<uint8_t>* intchar;
-	BLEpp::Characteristic<uint64_t>* intchar2;
-	BLEpp::Nrf51822BluetoothStack* stack;
+	BLEpp::Characteristic<uint8_t>* _intchar;
+	BLEpp::Characteristic<uint64_t>* _intchar2;
+	BLEpp::Nrf51822BluetoothStack* _stack;
 	
-	int personal_threshold_level;
+	int _personalThresholdLevel;
 
 };
 
