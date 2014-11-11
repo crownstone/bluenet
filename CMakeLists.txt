@@ -116,7 +116,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 # consider the size of the final binary. Do not include things, if not necessary!
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
-LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
+#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
 
 # For Visual Studio group the files
