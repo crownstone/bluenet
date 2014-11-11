@@ -34,6 +34,10 @@ protected:
 	void AddScanControlCharacteristic();
 	void AddPeripheralListCharacteristic();
 	void AddPersonalThresholdCharacteristic();
+
+	void SampleAdcInit();
+	void SampleAdcStart();
+
 public:
 	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
 	void AddSpecificCharacteristics();
