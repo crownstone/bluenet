@@ -17,9 +17,9 @@
 #include <util/ble_error.h>
 // what for? #include <nRF51822.h>
 
-uint32_t nrf_rtc_init(uint32_t seconds) {
-	NRF_RTC1->PRESCALER = 0; // 12-bit prescaler for COUNTER frequency (32768/(PRESCALER+1)).
+#define LFCLK_FREQUENCY (32768UL)                               /**< LFCLK frequency in Hertz, constant. */
 
+uint32_t nrf_rtc_init(uint32_t ms) {
 	uint32_t err_code = 0;
 
 	// Enable ADC interrupt
@@ -47,26 +47,28 @@ uint32_t nrf_rtc_init(uint32_t seconds) {
 	NVIC_EnableIRQ(RTC1_IRQn);
 #endif
 
-	if (seconds) {
-		NRF_RTC1->CC[0]    = seconds; // 24 bit counter --> 2^24 / (32768/(prescaler+1)) = 512 seconds to overflow
+	if (ms) {
+		// 0xFFFFFF = 16777215
+		NRF_RTC1->PRESCALER = ms * LFCLK_FREQUENCY / 0xFFFFFFUL; // 12-bit prescaler for COUNTER frequency (32768/(PRESCALER+1)).
+		NRF_RTC1->CC[0] = ms * LFCLK_FREQUENCY / (NRF_RTC1->PRESCALER + 1) / 1000;
 		// Enable COMPARE0 event and COMPARE0 interrupt:
 		NRF_RTC1->EVTENSET = RTC_EVTENSET_COMPARE0_Msk;
 		NRF_RTC1->INTENSET = RTC_INTENSET_COMPARE0_Msk;
 	}
-
-	// Enable TICK event and TICK interrupt:
-	NRF_RTC1->EVTENSET = RTC_EVTENSET_TICK_Msk;
-	NRF_RTC1->INTENSET = RTC_INTENSET_TICK_Msk;
-
-
-	return 0;
-}
-
-uint32_t nrf_rtc_config(uint32_t seconds) {
-
+	else {
+		// 24 bit counter --> 2^24 / (32768/(prescaler+1)) = 512 seconds to overflow
+		NRF_RTC1->PRESCALER = 0; // 12-bit prescaler for COUNTER frequency (32768/(PRESCALER+1)).
+		// Enable TICK event and TICK interrupt:
+		NRF_RTC1->EVTENSET = RTC_EVTENSET_TICK_Msk;
+		NRF_RTC1->INTENSET = RTC_INTENSET_TICK_Msk;
+	}
 
 	return 0;
 }
+
+//uint32_t nrf_rtc_config(uint32_t ms) {
+//	return 0;
+//}
 
 void nrf_rtc_start() {
 	// Clear all events
@@ -76,6 +78,7 @@ void nrf_rtc_start() {
 	NRF_RTC1->EVENTS_COMPARE[2] = 0;
 	NRF_RTC1->EVENTS_COMPARE[3] = 0;
 	NRF_RTC1->EVENTS_OVRFLW = 0;
+	timer_flag = 0;
 	// Start the clock
 	NRF_RTC1->TASKS_START = 1;
 }
@@ -100,6 +103,8 @@ extern "C" void RTC1_IRQHandler(void) {
 	// Compare event
     if (NRF_RTC1->EVENTS_COMPARE[0] != 0 && (NRF_RTC1->INTENSET & RTC_INTENSET_COMPARE0_Msk) != 0) {
     	NRF_RTC1->EVENTS_COMPARE[0] = 0;
+    	timer_flag = 1;
+    	NRF_RTC1->TASKS_STOP = 1;
 //    	NRF_ADC->TASKS_START = 1;
     }
 }

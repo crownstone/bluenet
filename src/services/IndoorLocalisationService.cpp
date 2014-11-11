@@ -15,6 +15,8 @@
 #include "Peripherals.h"
 #include <drivers/nrf_rtc.h>
 
+//#include <common/timer.h>
+
 using namespace BLEpp;
 
 IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& stack) {
@@ -23,16 +25,10 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& sta
 
 	// we have to figure out why this goes wrong
 	setName(std::string("IndoorLocalizationService"));
-
-	_characteristic = new CharacteristicT<int8_t>();
-	//.setUUID(UUID(service.getUUID(), 0x124))
-	(*_characteristic).setUUID(UUID(getUUID(), 0x2201)); // there is no BLE_UUID for rssi level(?)
-	(*_characteristic).setName(std::string("Received signal level"));
-	(*_characteristic).setDefaultValue(1);
-
-	addCharacteristic(_characteristic);
-
 	this->stack = &stack;
+
+//	// set timer with compare interrupt every 10ms
+//	timer_config(10);
 }
 
 void IndoorLocalizationService::AddSpecificCharacteristics() {
@@ -42,6 +38,15 @@ void IndoorLocalizationService::AddSpecificCharacteristics() {
 	//AddScanControlCharacteristic(stack);
 	//AddPeripheralListCharacteristic();
 	//AddPersonalThresholdCharacteristic();
+}
+
+void IndoorLocalizationService::AddSignalStrengthCharacteristic() {
+	_characteristic = new CharacteristicT<int8_t>();
+	//.setUUID(UUID(service.getUUID(), 0x124))
+	(*_characteristic).setUUID(UUID(getUUID(), 0x2201)); // there is no BLE_UUID for rssi level(?)
+	(*_characteristic).setName(std::string("Received signal level"));
+	(*_characteristic).setDefaultValue(1);
+	addCharacteristic(_characteristic);
 }
 
 void IndoorLocalizationService::AddNumberCharacteristic() {

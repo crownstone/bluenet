@@ -15,8 +15,11 @@
 //extern "C" {
 //#endif
 
-uint32_t nrf_rtc_init(uint32_t seconds=0);
-uint32_t nrf_rtc_config(uint32_t seconds=0);
+// make callback
+static int timer_flag;
+
+uint32_t nrf_rtc_init(uint32_t ms=0);
+//uint32_t nrf_rtc_config(uint32_t ms=0);
 void nrf_rtc_start();
 void nrf_rtc_stop();
 uint32_t nrf_rtc_getCount();
