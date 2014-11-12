@@ -60,8 +60,6 @@ public:
 
 };
 
-extern ScanResult scanResult;
-
 // template has to be in the same namespace as the other CharacteristicT templates
 namespace BLEpp {
 

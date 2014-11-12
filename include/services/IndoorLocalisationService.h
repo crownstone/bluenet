@@ -27,6 +27,8 @@ public:
 protected:
 	func_t _rssiHandler;
 
+	// TODO -oDE: are really all of these characteristics part of the
+	//   indoor localisation?
 	void AddRssiCharacteristic();
 	void AddNumberCharacteristic();
 	void AddNumber2Characteristic();
@@ -45,6 +47,8 @@ public:
 	void setRSSILevel(int8_t RSSILevel);
 	void setRSSILevelHandler(func_t func);
 
+	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
+
 	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 private:
 	BLEpp::Nrf51822BluetoothStack* _stack;
@@ -55,6 +59,7 @@ private:
 	BLEpp::Characteristic<ScanResult>* _peripheralCharac;
 	
 	int _personalThresholdLevel;
+	ScanResult _scanResult;
 
 };
 

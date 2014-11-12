@@ -12,8 +12,6 @@
 #include "drivers/serial.h"
 #include "util/utils.h"
 
-ScanResult scanResult;
-
 ScanResult::ScanResult() : _freeIdx(0) {
 }
 

@@ -835,7 +835,6 @@ namespace BLEpp {
         typedef function<void(uint16_t conn_handle)>   callback_connected_t;
         typedef function<void(uint16_t conn_handle)>   callback_disconnected_t;
         typedef function<void(bool radio_active)>   callback_radio_t;
-        typedef function<void(ble_gap_evt_adv_report_t* p_adv_report)> callback_advertisement_t;
 
 
         static Nrf51822BluetoothStack * _stack;
@@ -887,8 +886,6 @@ namespace BLEpp {
         callback_disconnected_t                     _callback_disconnected;  // 16
         callback_radio_t                            _callback_radio;  // 16
         volatile uint8_t                            _radio_notify; // 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
-
-        callback_advertisement_t					_callback_advertisement;
     public:
 
         Nrf51822BluetoothStack(Pool& pool);
@@ -987,11 +984,6 @@ namespace BLEpp {
             _callback_disconnected = callback;
 
             return *this;
-        }
-
-        Nrf51822BluetoothStack& onAdvertisement(const callback_advertisement_t& callback) {
-        	_callback_advertisement = callback;
-        	return *this;
         }
 
         Service& createService() {

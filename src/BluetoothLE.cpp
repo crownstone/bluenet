@@ -944,7 +944,9 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 #if(SOFTDEVICE_SERIES != 110) 
 	case BLE_GAP_EVT_ADV_REPORT:
-		on_advertisement(p_ble_evt);
+		for (Service* svc : _services) {
+			svc->on_ble_event(p_ble_evt);
+		}
 		break;
 #endif
 	case BLE_GAP_EVT_TIMEOUT:
@@ -985,12 +987,6 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 	_conn_handle = BLE_CONN_HANDLE_INVALID;
 	for (Service* svc : _services) {
 		svc->on_ble_event(p_ble_evt);
-	}
-}
-
-void Nrf51822BluetoothStack::on_advertisement(ble_evt_t* p_ble_evt) {
-	if (_callback_advertisement) {
-		_callback_advertisement(&p_ble_evt->evt.gap_evt.params.adv_report);
 	}
 }
 

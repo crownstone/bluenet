@@ -182,15 +182,15 @@ void IndoorLocalizationService::AddScanControlCharacteristic() {
 			if(value) {
 				log(INFO,"crown: start scanning");
 				if (!_stack->isScanning()) {
-//					scanResult.init(10);
+					_scanResult.reset();
 					_stack->startScanning();
 				}
 			} else {
 				log(INFO,"crown: stop scanning");
 				if (_stack->isScanning()) {
 					_stack->stopScanning();
-					*_peripheralCharac = scanResult;
-					scanResult.print();
+					*_peripheralCharac = _scanResult;
+					_scanResult.print();
 				}
 			}
 		});
@@ -246,6 +246,13 @@ void IndoorLocalizationService::on_ble_event(ble_evt_t * p_ble_evt) {
 		onRSSIChanged(p_ble_evt->evt.gap_evt.params.rssi_changed.rssi);
 		break;
 	}
+
+#if(SOFTDEVICE_SERIES != 110)
+	case BLE_GAP_EVT_ADV_REPORT:
+		onAdvertisement(&p_ble_evt->evt.gap_evt.params.adv_report);
+		break;
+#endif
+
 	default: {
 	}
 	}
@@ -280,4 +287,8 @@ void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
 	_rssiHandler = func;
 }
 
-
+void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
+	if (_stack->isScanning()) {
+		_scanResult.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+	}
+}

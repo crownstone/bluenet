@@ -45,7 +45,7 @@ using namespace BLEpp;
  *********************************************************************************************************************/
 
 #define INDOOR_SERVICE
-//#define TEMPERATURE_SERVICE
+#define TEMPERATURE_SERVICE
 
 /**********************************************************************************************************************
  * Main functionality
@@ -133,11 +133,6 @@ int main() {
 #else
 			stack.startAdvertising();
 #endif
-		})
-		.onAdvertisement([&](ble_gap_evt_adv_report_t* p_adv_report) {
-			if (stack.isScanning()) {
-				scanResult.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
-			}
 		});
 
 #ifdef INDOOR_SERVICE
