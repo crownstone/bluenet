@@ -814,8 +814,9 @@ namespace BLEpp {
         typedef function<void(uint16_t conn_handle)>   callback_connected_t;
         typedef function<void(uint16_t conn_handle)>   callback_disconnected_t;
         typedef function<void(bool radio_active)>   callback_radio_t;
+#if(SOFTDEVICE_SERIES != 110) 
         typedef function<void(ble_gap_evt_adv_report_t* p_adv_report)> callback_advertisement_t;
-
+#endif
 
         static Nrf51822BluetoothStack * _stack;
 
@@ -867,7 +868,9 @@ namespace BLEpp {
         callback_radio_t                            _callback_radio;  // 16
         volatile uint8_t                            _radio_notify; // 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
 
+#if(SOFTDEVICE_SERIES != 110) 
         callback_advertisement_t					_callback_advertisement;
+#endif
     public:
 
         Nrf51822BluetoothStack(Pool& pool);
@@ -968,10 +971,12 @@ namespace BLEpp {
             return *this;
         }
 
+#if(SOFTDEVICE_SERIES != 110) 
         Nrf51822BluetoothStack& onAdvertisement(const callback_advertisement_t& callback) {
         	_callback_advertisement = callback;
         	return *this;
         }
+#endif
 
         Service& createService() {
             GenericService* svc = new GenericService();
@@ -1000,6 +1005,12 @@ namespace BLEpp {
         Nrf51822BluetoothStack& stopScanning();
 
         bool isScanning();
+#else
+        Nrf51822BluetoothStack& startScanning() {};
+
+        Nrf51822BluetoothStack& stopScanning() {};
+
+        bool isScanning() { return false; }
 #endif
         Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 

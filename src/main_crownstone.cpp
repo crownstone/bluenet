@@ -31,6 +31,7 @@ extern "C" {
 #include <common/boards.h>
 
 #include <drivers/nrf_adc.h>
+#include <drivers/nrf_pwm.h>
 #include <drivers/serial.h>
 
 #include "Peripherals.h"
@@ -89,6 +90,12 @@ void configure(Nrf51822BluetoothStack &stack) {
  */
 void config_drivers() {
 	nrf_adc_init(PIN_ADC);
+	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
+	pwm_config.num_channels = 1;
+	pwm_config.gpio_num[0] = PIN_LED;
+	pwm_config.mode = PWM_MODE_LED_255;
+
+	nrf_pwm_init(&pwm_config);
 }
 
 int main() {
@@ -135,6 +142,7 @@ int main() {
 			stack.startAdvertising();
 #endif
 		})
+#if(SOFTDEVICE_SERIES != 110)
 		.onAdvertisement([&](ble_gap_evt_adv_report_t* p_adv_report) {
 			//data_t adv_data;
 			//data_t type_data;
@@ -190,8 +198,9 @@ int main() {
 			} else {
 //				log(INFO,"\tadvertisement from: %s, rssi: %d, occ: %d", addrs, p_adv_report->rssi, occ);
 			}
-		});
-
+		})
+#endif
+		;
 	//service& generalservice = stack.createService();
 	//service& batteryservice = stack.createbatteryservice();
 

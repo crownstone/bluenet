@@ -954,9 +954,11 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 }
 
 void Nrf51822BluetoothStack::on_advertisement(ble_evt_t* p_ble_evt) {
+#if(SOFTDEVICE_SERIES != 110) 
 	if (_callback_advertisement) {
 		_callback_advertisement(&p_ble_evt->evt.gap_evt.params.adv_report);
 	}
+#endif
 }
 
 Nrf51822BluetoothStack * Nrf51822BluetoothStack::_stack = 0;
