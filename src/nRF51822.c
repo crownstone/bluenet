@@ -144,6 +144,8 @@ void ResetHandler(void) {
 	 * The RFduino synthesizes the low frequency clock from the high frequency clock. There is no external crystal 
 	 * that can be used. It doesn't seem from the datasheets that there is a pin open for a crystal... 
 	 * Synthesizing the clock is of course not very energy efficient. 
+	 *
+	 * Clock runs on 32768 Hz and is generated from the 16 MHz system clock
 	 */
 	NRF51_CLOCK_LFCLKSRC = NRF51_CLOCK_LFCLKSRC_SYNTH;
 #else

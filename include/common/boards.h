@@ -16,6 +16,7 @@
 #define NRF51822_EVKIT       3
 #define RFDUINO              4
 #define CROWNSTONE           5
+#define NRF51422             6
 
 #ifndef BOARD
 #error "Add BOARD=... to CMakeBuild.config"
@@ -57,6 +58,14 @@
 
 #endif
 
+#if(BOARD==NRF51422)
+
+#define PIN_LED              18
+#define PIN_ADC              2                   // ain 2 is p0.1
+#define PIN_RX               1
+#define PIN_TX               2
+
+#endif
 
 // Sanity check to see if all required pins are defined
 

@@ -9,14 +9,17 @@
 
 #include <stdint.h>
 
+#include <drivers/nrf_rtc.h>
+
 #include <common/buffer.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// TODO: do we really need this?
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 // declare buffer for ADC results
-extern buffer_t adc_result;
+extern buffer_t<uint16_t> adc_result;
 
 uint32_t nrf_adc_init(uint8_t pin);
 uint32_t nrf_adc_config(uint8_t pin);
@@ -26,8 +29,8 @@ void nrf_adc_stop();
 //uint32_t nrf_adc_read(uint8_t pin, uint32_t* result);
 
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 
 #endif

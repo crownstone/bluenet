@@ -25,17 +25,19 @@ public:
 	typedef function<int8_t()> func_t;
 
 protected:
-	func_t _rssiHandler;
-
 	// TODO -oDE: are really all of these characteristics part of the
 	//   indoor localisation?
-	void AddRssiCharacteristic();
+	void AddSignalStrengthCharacteristic();
 	void AddNumberCharacteristic();
 	void AddNumber2Characteristic();
 	void AddVoltageCurveCharacteristic();
 	void AddScanControlCharacteristic();
 	void AddPeripheralListCharacteristic();
 	void AddPersonalThresholdCharacteristic();
+
+	void SampleAdcInit();
+	void SampleAdcStart();
+
 public:
 	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
 
@@ -58,6 +60,8 @@ private:
 	BLEpp::Characteristic<uint64_t>* _intChar2;
 	BLEpp::Characteristic<ScanResult>* _peripheralCharac;
 	
+	func_t _rssiHandler;
+
 	int _personalThresholdLevel;
 	ScanResult _scanResult;
 

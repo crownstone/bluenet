@@ -20,19 +20,36 @@
 #define ERROR                3
 #define FATAL                4
 
-#define log(level, fmt, ...) \
-       write("[%s:%d] " fmt "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
-
-#define _log(level, fmt, ...) \
-		   write(fmt, ##__VA_ARGS__); \
+#define DEBUG_ON
 
 /*
-#include "string.h"
-#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#ifdef DEBUG_ON
+	#define log(level, fmt, ...) \
+		   write("[%s:%d] " fmt "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
 
-#define log(level, fmt, ...) \
-		   write("[%-30.30s : %-5d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__)
+	#define _log(level, fmt, ...) \
+			   write(fmt, ##__VA_ARGS__)
+#else
+	#define log(level, fmt, ...) 
+
+	#define _log(level, fmt, ...)
+#endif
 */
+
+#ifdef DEBUG_ON
+	#include "string.h"
+	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+	#define log(level, fmt, ...) \
+			   write("[%-30.30s : %-5d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__)
+
+	#define _log(level, fmt, ...) \
+			   write(fmt, ##__VA_ARGS__)
+#else
+	#define log(level, fmt, ...) 
+
+	#define _log(level, fmt, ...)
+#endif
 
 #define LOGd(fmt, ...) log(DEBUG, fmt, ##__VA_ARGS__)
 #define LOGi(fmt, ...) log(INFO, fmt, ##__VA_ARGS__)

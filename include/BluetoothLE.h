@@ -1013,6 +1013,12 @@ namespace BLEpp {
         Nrf51822BluetoothStack& stopScanning();
 
         bool isScanning();
+#else
+        Nrf51822BluetoothStack& startScanning() {};
+
+        Nrf51822BluetoothStack& stopScanning() {};
+
+        bool isScanning() { return false; }
 #endif
         Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 

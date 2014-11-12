@@ -31,12 +31,11 @@ extern "C" {
 #include <common/boards.h>
 
 #include <drivers/nrf_adc.h>
+#include <drivers/nrf_pwm.h>
 #include <drivers/serial.h>
 
 #include <services/IndoorLocalisationService.h>
 #include <services/TemperatureService.h>
-
-#include "ScanResult.h"
 
 using namespace BLEpp;
 
@@ -53,6 +52,7 @@ using namespace BLEpp;
 
 void welcome() {
 	config_uart();
+	_log(INFO, "\r\n\r\n");
 	log(INFO,"Welcome at the nRF51822 code for meshing.");
 	log(INFO, "Compilation time: %s", COMPILATION_TIME);
 }
@@ -89,6 +89,12 @@ void configure(Nrf51822BluetoothStack &stack) {
  */
 void config_drivers() {
 	nrf_adc_init(PIN_ADC);
+	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
+	pwm_config.num_channels = 1;
+	pwm_config.gpio_num[0] = PIN_LED;
+	pwm_config.mode = PWM_MODE_LED_255;
+
+	nrf_pwm_init(&pwm_config);
 }
 
 int main() {
@@ -155,7 +161,7 @@ int main() {
 #else
 	stack.startAdvertising();
 #endif
-
+	
 	log(INFO, "Running while loop..");
 
 	while(1) {

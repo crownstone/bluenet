@@ -15,13 +15,14 @@
 
 // define buffer
 // TODO: current implementation is crap
+template <class T>
 struct buffer {
-	uint32_t *buffer;
-	uint32_t *ptr;
+	T *buffer;
+	T *ptr;
 	uint16_t size;
 
 	// pushes till end of buffer
-	void push(uint32_t value) {
+	void push(T value) {
 		if (full()) return;
 		*ptr = value;
 		ptr++;
@@ -29,10 +30,12 @@ struct buffer {
 	}
 
 	// pops till beginning... 0xdeafabba is an error code
-	uint32_t pop() {
-		uint32_t value = *ptr;
-		if (empty()) return 0xdeafabba;
-		ptr--;
+	T pop() {
+//		uint32_t value = *ptr;
+//		if (empty()) return 0xdeafabba;
+//		ptr--;
+		if (empty()) return (T)0xdeafabba; // TODO: Assumes uint32_t for T
+		T value = *(--ptr);
 		return value;
 	}
 
@@ -55,6 +58,8 @@ struct buffer {
 };
 
 // define alias for struct buffer
-typedef struct buffer buffer_t;
+template <class T>
+using buffer_t = buffer<T>;
+//typedef struct buffer buffer_t;
 
 #endif // CS_BUFFER_H
