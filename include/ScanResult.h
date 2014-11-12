@@ -23,7 +23,9 @@ struct __attribute__((__packed__)) peripheral_device_t {
 #define HEADER_SIZE 1 // 1 BYTE for the header = number of elements in the list
 #define SERIALIZED_DEVICE_SIZE sizeof(peripheral_device_t) // only works if struct packed
 
-#define MAX_NR_DEVICES 20
+// FIXME BEWARE, because we are using fixed arrays, increasing the size will cause
+//   memory and runtime problems.
+#define MAX_NR_DEVICES 10
 
 class ScanResult {
 

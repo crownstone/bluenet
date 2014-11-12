@@ -1,8 +1,8 @@
-/*
- * TemperatureService.h
- *
- *  Created on: Oct 22, 2014
- *      Author: dominik
+/**
+ * Author: Dominik Egger
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: Oct 22, 2014
+ * License: LGPLv3+
  */
 
 #ifndef TEMPERATURESERVICE_H_

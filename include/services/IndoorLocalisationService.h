@@ -1,8 +1,8 @@
-/*
- * IndoorLocalisationService.h
- *
- *  Created on: Oct 21, 2014
- *      Author: dominik
+/**
+ * Author: Dominik Egger
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: Oct 21, 2014
+ * License: LGPLv3+
  */
 
 #ifndef INDOORLOCALISATIONSERVICE_H_
