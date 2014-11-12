@@ -51,7 +51,7 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
         const uint32_t LOCAL_ERR_CODE = (ERR_CODE);         \
         if (LOCAL_ERR_CODE != NRF_SUCCESS)                  \
         {                                                   \
-        	log(DEBUG, "ERR_CODE: %d", LOCAL_ERR_CODE);		\
+        	log(DEBUG, "ERR_CODE: %d (0x%X)", LOCAL_ERR_CODE, LOCAL_ERR_CODE);		\
             APP_ERROR_HANDLER(LOCAL_ERR_CODE);              \
         }                                                   \
     } while (0)

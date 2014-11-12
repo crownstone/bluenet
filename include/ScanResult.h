@@ -21,13 +21,14 @@ struct __attribute__((__packed__)) peripheral_device_t {
 };
 
 #define HEADER_SIZE 1 // 1 BYTE for the header = number of elements in the list
-#define SERIALIZED_DEVICE_SIZE sizeof(peripheral_device_t)
-#define MAX_HISTORY 20
+#define SERIALIZED_DEVICE_SIZE sizeof(peripheral_device_t) // only works if struct packed
+
+#define MAX_NR_DEVICES 20
 
 class ScanResult {
 
 private:
-	peripheral_device_t _list[MAX_HISTORY];
+	peripheral_device_t _list[MAX_NR_DEVICES];
     uint8_t _freeIdx;
 
 public:
@@ -67,10 +68,10 @@ namespace BLEpp {
 template<> class CharacteristicT<ScanResult> : public Characteristic<ScanResult> {
 
 private:
-	uint8_t data[MAX_HISTORY * SERIALIZED_DEVICE_SIZE + HEADER_SIZE];
+	uint8_t _buffer[HEADER_SIZE + MAX_NR_DEVICES * SERIALIZED_DEVICE_SIZE];
+	bool _notificationPending;
 
 public:
-
 	CharacteristicT& operator=(const ScanResult& val) {
 		Characteristic<ScanResult>::operator=(val);
 		return *this;
@@ -80,9 +81,9 @@ public:
 		CharacteristicValue value;
 		const ScanResult& t = this->getValue();
 		uint32_t len = t.getSerializedLength();
-		memset(data, 0, len);
-		t.serialize(data, len);
-		return CharacteristicValue(len, data, false);
+		memset(_buffer, 0, len);
+		t.serialize(_buffer, len);
+		return CharacteristicValue(len, _buffer);
 	}
 
 	virtual void setCharacteristicValue(const CharacteristicValue& value) {
@@ -94,6 +95,25 @@ public:
 	uint16_t getValueMaxLength() {
 		return BLE_GATTS_VAR_ATTR_LEN_MAX; // TODO
 	}
+
+	void onNotifyTxError() {
+		LOGw("[%s] no tx buffers, waiting for BLE_EVT_TX_COMPLETE!", _name.c_str());
+		_notificationPending = true;
+	}
+
+	void onTxComplete(ble_common_evt_t * p_ble_evt) {
+		// if we have a notification pending, try to send it
+		if (_notificationPending) {
+			uint32_t err_code = notify();
+			if (err_code != NRF_SUCCESS) {
+				LOGw("[%s] failed to resend notification!, err_code: %d", _name.c_str(), err_code);
+			} else {
+				LOGi("[%s] successfully resent notification", _name.c_str());
+				_notificationPending = false;
+			}
+		}
+	}
+
 };
 
 }

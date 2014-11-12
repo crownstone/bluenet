@@ -47,14 +47,14 @@ public:
 
 	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 private:
-	BLEpp::Nrf51822BluetoothStack* stack;
+	BLEpp::Nrf51822BluetoothStack* _stack;
 
-	BLEpp::CharacteristicT<int8_t>* rssiCharac;
-	BLEpp::Characteristic<uint8_t>* intchar;
-	BLEpp::Characteristic<uint64_t>* intchar2;
-	BLEpp::Characteristic<ScanResult>* peripheralCharac;
+	BLEpp::CharacteristicT<int8_t>* _rssiCharac;
+	BLEpp::Characteristic<uint8_t>* _intChar;
+	BLEpp::Characteristic<uint64_t>* _intChar2;
+	BLEpp::Characteristic<ScanResult>* _peripheralCharac;
 	
-	int personal_threshold_level;
+	int _personalThresholdLevel;
 
 };
 

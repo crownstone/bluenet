@@ -85,10 +85,10 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 	}
 	if (!found) {
 		uint8_t idx  = -1;
-		if (_freeIdx >= MAX_HISTORY) {
+		if (_freeIdx >= MAX_NR_DEVICES) {
 			// history full, throw out item with lowest occurence
 			uint16_t minOcc = UINT16_MAX;
-			for (int i = 0; i < MAX_HISTORY; ++i) {
+			for (int i = 0; i < MAX_NR_DEVICES; ++i) {
 				if (_list[i].occurences < minOcc) {
 					minOcc = _list[i].occurences;
 					idx = i;

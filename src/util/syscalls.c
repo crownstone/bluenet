@@ -69,6 +69,12 @@ void fsync() {}
 
 extern unsigned long _ebss;
 
+/*
+ * Dominik: isn't the following the case here too ??
+ *	  Highly dangerous: malloc() grab all memory up to the current position of the stackpointer
+ *	  (yes, the stackpointer position at the time of the malloc call). This means that malloc
+ *	  takes takes memory that I'd tried to reserved for the Stack! → Strange behaviour …
+ */
 void * _sbrk(int incr)
 {
     static char *heap_end = (char *)&_ebss;

@@ -7,23 +7,23 @@
 
 #include <services/TemperatureService.h>
 
-void onTimer(void * p_context) {
-	int32_t temperature = getTemperature();
-	((TemperatureService*)p_context)->setTemperature(temperature);
+TemperatureService::TemperatureService() :
+		_temperatureCharacteristic(NULL) {
+
+	setUUID(UUID(TEMPERATURE_UUID));
+	setName("Temperature Service");
+
+	addTemperatureCharacteristic();
 }
 
-TemperatureService::TemperatureService() {
-	setUUID(UUID(TEMPERATURE_UUID));
+void TemperatureService::addTemperatureCharacteristic() {
+	_temperatureCharacteristic = new CharacteristicT<int32_t>();
+	_temperatureCharacteristic->setUUID(UUID(getUUID(), 0x01));
+	_temperatureCharacteristic->setName("Temperature");
+	_temperatureCharacteristic->setDefaultValue(0);
+	_temperatureCharacteristic->setNotifies(true);
 
-//	setName(std::string("Temperature Service"));
-
-	mTemperatureCharacteristic = new CharacteristicT<int32_t>();
-	mTemperatureCharacteristic->setUUID(UUID(getUUID(), 0x01));
-	mTemperatureCharacteristic->setName("Temperature");
-	mTemperatureCharacteristic->setDefaultValue(0);
-	mTemperatureCharacteristic->setNotifies(true);
-
-	addCharacteristic(mTemperatureCharacteristic);
+	addCharacteristic(_temperatureCharacteristic);
 }
 
 TemperatureService& TemperatureService::createService(Nrf51822BluetoothStack& stack) {
@@ -33,7 +33,7 @@ TemperatureService& TemperatureService::createService(Nrf51822BluetoothStack& st
 }
 
 void TemperatureService::setTemperature(int32_t temperature) {
-	*mTemperatureCharacteristic = temperature;
+	*_temperatureCharacteristic = temperature;
 }
 
 void TemperatureService::loop() {

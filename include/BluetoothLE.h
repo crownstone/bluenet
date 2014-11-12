@@ -346,11 +346,14 @@ namespace BLEpp {
         virtual void read() = 0;
         virtual void written(uint16_t len, uint16_t offset, uint8_t* data) = 0;
 
+        virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
+
       protected:
 
         virtual void configurePresentationFormat(ble_gatts_char_pf_t &) {}
 
-        void notify();
+        uint32_t notify();
+        virtual void onNotifyTxError();
     };
 
 
@@ -516,7 +519,7 @@ namespace BLEpp {
             CharacteristicValue value(len, data+offset);
             setCharacteristicValue(value);
 
-            log(DEBUG, "%s: onWrite(%d, %X)", _name.c_str(), len, *((uint16_t*)data+offset));
+            log(DEBUG, "%s: onWrite()", _name.c_str());
             _callbackOnWrite(getValue());
         }
 
@@ -751,6 +754,7 @@ namespace BLEpp {
 
         virtual void on_write(ble_gatts_evt_write_t& write_evt);  // FIXME NRFAPI
 
+        virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
     };
 
     class GenericService : public Service {
@@ -1037,6 +1041,7 @@ namespace BLEpp {
         void on_connected(ble_evt_t * p_ble_evt);
         void on_disconnected(ble_evt_t * p_ble_evt);
         void on_advertisement(ble_evt_t * p_ble_evt);
+        void onTxComplete(ble_evt_t * p_ble_evt);
 
     };
 
