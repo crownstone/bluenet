@@ -202,7 +202,7 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	//	ci.char_md.char_props.write_wo_resp = ci.cccd_md.write_perm.lv > 0 ? 1 :0;
 }
 
-void CharacteristicBase::notify() {
+uint32_t CharacteristicBase::notify() {
 
 	CharacteristicValue value = getCharacteristicValue();
 
@@ -210,7 +210,7 @@ void CharacteristicBase::notify() {
 			(_handles.value_handle, 0, &value.length, value.data));
 
 	if ((!_notifies) || (!_service->getStack()->connected()) || !_notifyingEnabled)
-		return;
+		return NRF_SUCCESS;
 
 	ble_gatts_hvx_params_t hvx_params;
 	uint16_t len = value.length;
@@ -221,22 +221,44 @@ void CharacteristicBase::notify() {
 	hvx_params.p_len = &len;
 	hvx_params.p_data = (uint8_t*) value.data;
 
-	uint32_t err_code;
-	err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(),
-			&hvx_params);
-//	APP_ERROR_CHECK(err_code);
-	if ((err_code != NRF_SUCCESS)&&
-	(err_code != NRF_ERROR_INVALID_STATE) &&
-	(err_code != BLE_ERROR_NO_TX_BUFFERS) &&
-	(err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
-	){
-	APP_ERROR_HANDLER(err_code);
-} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
-	log(INFO,"BLE_ERROR_GATTS_SYS_ATTR_MISSING");
-	err_code = sd_ble_gatts_sys_attr_set(_service->getStack()->getConnectionHandle(), NULL, 0);
-	APP_ERROR_CHECK(err_code);
+//	BLE_CALL(sd_ble_gatts_hvx, (_service->getStack()->getConnectionHandle(), &hvx_params));
+	uint32_t err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
+	if (err_code != NRF_SUCCESS) {
+
+		if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
+			// Dominik: this happens if several characteristics want to send a notification,
+			//   but the system only has a limited number of tx buffers available. so queueing up
+			//   notifications faster than being able to send them out from the stack results
+			//   in this error.
+			onNotifyTxError();
+		} else if (
+		// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
+		//   it can happen that it tries to update it's value although notification was disabled in
+		//   in the meantime, in which case an invalid state error is returned. but this case we can
+		//   ignore
+		err_code == NRF_ERROR_INVALID_STATE ||
+		err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
+			// this is not a serious error, but better to at least write it to the log
+			LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
+		} else {
+			APP_ERROR_CHECK(err_code);
+		} 
+	}
+
+	return err_code;
 }
 
+void CharacteristicBase::onNotifyTxError() {
+	// in most cases we can just ignore the error, because the characteristic is updated frequently
+	// so the next update will probably be done as soon as the tx buffers are ready anyway, but in
+	// case there are characteristics that only get updated really infrequently, the notification
+	// should be buffered and sent again once the tx buffers are ready
+//	LOGd("[%s] no tx buffers, notification skipped!", _name.c_str());
+}
+
+void CharacteristicBase::onTxComplete(ble_common_evt_t * p_ble_evt) {
+	// if a characteristic buffers notification when it runs out of tx buffers it can use
+	// this callback to resend the buffered notification
 }
 
 /// Service ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -302,16 +324,17 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 
 		if (characteristic->getCccdHandle() == write_evt.handle && write_evt.len == 2) {
+			// received write to enable/disable notification
 			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(write_evt.data));
-		} else if (characteristic->getValueHandle()
-				== write_evt.context.value_handle) {
+			found = true;
+
+		} else if (characteristic->getValueHandle()	== write_evt.context.value_handle) {
 			// TODO: make a map.
 			found = true;
 
 			if (write_evt.op == BLE_GATTS_OP_WRITE_REQ
 					|| write_evt.op == BLE_GATTS_OP_WRITE_CMD
 					|| write_evt.op == BLE_GATTS_OP_SIGN_WRITE_CMD) {
-				log(INFO,"write_evt.op: %X", write_evt.op);
 				characteristic->written(write_evt.len, write_evt.offset,
 						write_evt.data);
 			} else {
@@ -324,6 +347,13 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 
 	if (!found) {
 		// tell someone?
+	}
+}
+
+// inform all characteristics that transmission was completed in case they have notifications pending
+void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
+	for (CharacteristicBase* characteristic : getCharacteristics()) {
+		characteristic->onTxComplete(p_ble_evt);
 	}
 }
 
@@ -545,7 +575,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 	if (_advertising)
 		return *this;
 
-	log(INFO,"startIBeacon");
+	log(INFO,"startIBeacon ...");
 
 	init(); // we should already be.
 
@@ -612,7 +642,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 
 	_advertising = true;
 
-	log(INFO,"OK");
+	log(INFO,"... OK");
 
 	return *this;
 }
@@ -621,7 +651,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	if (_advertising)
 		return *this;
 
-	log(INFO, "Start advertising");
+	log(INFO, "Start advertising ...");
 
 	init(); // we should already be.
 
@@ -692,6 +722,8 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
 
 	_advertising = true;
+
+	log(INFO, "... OK");
 
 	return *this;
 }
@@ -877,7 +909,6 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-		log(INFO,"BLE_GATTS_EVT_SYS_ATTR_MISSING");
 		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0));
 		break;
 
@@ -913,10 +944,16 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 #if(SOFTDEVICE_SERIES != 110) 
 	case BLE_GAP_EVT_ADV_REPORT:
-		on_advertisement(p_ble_evt);
+		for (Service* svc : _services) {
+			svc->on_ble_event(p_ble_evt);
+		}
 		break;
 #endif
 	case BLE_GAP_EVT_TIMEOUT:
+		break;
+
+	case BLE_EVT_TX_COMPLETE:
+		onTxComplete(p_ble_evt);
 		break;
 
 	default:
@@ -953,12 +990,11 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 	}
 }
 
-void Nrf51822BluetoothStack::on_advertisement(ble_evt_t* p_ble_evt) {
-#if(SOFTDEVICE_SERIES != 110) 
-	if (_callback_advertisement) {
-		_callback_advertisement(&p_ble_evt->evt.gap_evt.params.adv_report);
+// inform all services that transmission was completed in case they have notifications pending
+void Nrf51822BluetoothStack::onTxComplete(ble_evt_t * p_ble_evt) {
+	for (Service* svc: _services) {
+		svc->onTxComplete(&p_ble_evt->evt.common_evt);
 	}
-#endif
 }
 
 Nrf51822BluetoothStack * Nrf51822BluetoothStack::_stack = 0;

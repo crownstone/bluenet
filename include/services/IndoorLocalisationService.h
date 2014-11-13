@@ -1,8 +1,8 @@
-/*
- * IndoorLocalisationService.h
- *
- *  Created on: Oct 21, 2014
- *      Author: dominik
+/**
+ * Author: Dominik Egger
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: Oct 21, 2014
+ * License: LGPLv3+
  */
 
 #ifndef INDOORLOCALISATIONSERVICE_H_
@@ -10,6 +10,7 @@
 
 #include "BluetoothLE.h"
 #include <util/function.h>
+#include "ScanResult.h"
 
 #define INDOORLOCALISATION_UUID "00002220-0000-1000-8000-00805f9b34fb"
 // TODO -oDE: how did you come up with this UUID ??!!
@@ -24,9 +25,8 @@ public:
 	typedef function<int8_t()> func_t;
 
 protected:
-	BLEpp::CharacteristicT<int8_t> *_characteristic;
-	func_t _rssiHandler;
-
+	// TODO -oDE: are really all of these characteristics part of the
+	//   indoor localisation?
 	void AddSignalStrengthCharacteristic();
 	void AddNumberCharacteristic();
 	void AddNumber2Characteristic();
@@ -40,6 +40,7 @@ protected:
 
 public:
 	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
+
 	void AddSpecificCharacteristics();
 
 	void on_ble_event(ble_evt_t * p_ble_evt);
@@ -48,13 +49,21 @@ public:
 	void setRSSILevel(int8_t RSSILevel);
 	void setRSSILevelHandler(func_t func);
 
+	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
+
 	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 private:
-	BLEpp::Characteristic<uint8_t>* _intchar;
-	BLEpp::Characteristic<uint64_t>* _intchar2;
 	BLEpp::Nrf51822BluetoothStack* _stack;
+
+	BLEpp::CharacteristicT<int8_t>* _rssiCharac;
+	BLEpp::Characteristic<uint8_t>* _intChar;
+	BLEpp::Characteristic<uint64_t>* _intChar2;
+	BLEpp::Characteristic<ScanResult>* _peripheralCharac;
 	
+	func_t _rssiHandler;
+
 	int _personalThresholdLevel;
+	ScanResult _scanResult;
 
 };
 

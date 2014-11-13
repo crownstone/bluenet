@@ -1,9 +1,10 @@
-/*
- * IndoorLocalisationService.cpp
- *
- *  Created on: Oct 21, 2014
- *      Author: dominik
+/**
+ * Author: Dominik Egger
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: Oct 21, 2014
+ * License: LGPLv3+
  */
+
 
 #include <cmath> // try not to use this!
 #include <cstdio>
@@ -12,46 +13,46 @@
 #include <common/config.h>
 #include <common/boards.h>
 #include <drivers/nrf_adc.h>
-#include "Peripherals.h"
 #include <drivers/nrf_rtc.h>
 
 //#include <common/timer.h>
 
 using namespace BLEpp;
 
-IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& stack) :
-		_characteristic(NULL),
-		_intchar(NULL),
-		_intchar2(NULL),
-		_stack(NULL)
-		{
+IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _stack) :
+		_stack(&_stack),
+		_rssiCharac(NULL), _intChar(NULL), _intChar2(NULL), _peripheralCharac(NULL),
+		_personalThresholdLevel(0) {
+
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
 
 	// we have to figure out why this goes wrong
 	setName(std::string("IndoorLocalizationService"));
-	_stack = &stack;
 
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
 }
 
 void IndoorLocalizationService::AddSpecificCharacteristics() {
-	//AddNumberCharacteristic();
-	//AddNumber2Characteristic();
+	AddSignalStrengthCharacteristic();
+//	AddNumberCharacteristic();
+//	AddNumber2Characteristic();
 	AddVoltageCurveCharacteristic();
-	//AddScanControlCharacteristic(stack);
-	//AddPeripheralListCharacteristic();
-	//AddPersonalThresholdCharacteristic();
+	AddScanControlCharacteristic();
+	AddPeripheralListCharacteristic();
+	AddPersonalThresholdCharacteristic();
 }
 
 void IndoorLocalizationService::AddSignalStrengthCharacteristic() {
-	_characteristic = new CharacteristicT<int8_t>();
+	_rssiCharac = new CharacteristicT<int8_t>();
 	//.setUUID(UUID(service.getUUID(), 0x124))
-	(*_characteristic).setUUID(UUID(getUUID(), 0x2201)); // there is no BLE_UUID for rssi level(?)
-	(*_characteristic).setName(std::string("Received signal level"));
-	(*_characteristic).setDefaultValue(1);
-	addCharacteristic(_characteristic);
+	_rssiCharac->setUUID(UUID(getUUID(), 0x2201)); // there is no BLE_UUID for rssi level(?)
+	_rssiCharac->setName(std::string("Received signal level"));
+	_rssiCharac->setDefaultValue(1);
+	_rssiCharac->setNotifies(true);
+
+	addCharacteristic(_rssiCharac);
 }
 
 void IndoorLocalizationService::AddNumberCharacteristic() {
@@ -60,16 +61,16 @@ void IndoorLocalizationService::AddNumberCharacteristic() {
 	// note that in the next characteristic this variable intchar is set!
 	log(DEBUG, "create characteristic to read a number for debugging");
 	//Characteristic<uint8_t>&
-	_intchar = createCharacteristicRef<uint8_t>();
-	(*_intchar)
+	_intChar = createCharacteristicRef<uint8_t>();
+	(*_intChar)
 		.setUUID(UUID(getUUID(), 0x125))  // based off the uuid of the service.
 		.setDefaultValue(66)
 		.setName("number");
 }
 
 void IndoorLocalizationService::AddNumber2Characteristic() {
-	_intchar2 = createCharacteristicRef<uint64_t>();
-	(*_intchar2)
+	_intChar2 = createCharacteristicRef<uint64_t>();
+	(*_intChar2)
 		.setUUID(UUID(getUUID(), 0x121))  // based off the uuid of the service.
 		.setDefaultValue(66)
 		.setName("number2");
@@ -107,43 +108,32 @@ void IndoorLocalizationService::AddScanControlCharacteristic() {
 		.setDefaultValue(255)
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
-			switch(value) {
-			case 0: {
+			if(value) {
 				log(INFO,"crown: start scanning");
-				_stack->startScanning();
-				break;
-			}
-			case 1: {
+				if (!_stack->isScanning()) {
+					_scanResult.reset();
+					_stack->startScanning();
+				}
+			} else {
 				log(INFO,"crown: stop scanning");
-				_stack->stopScanning();
-				break;
+				if (_stack->isScanning()) {
+					_stack->stopScanning();
+					*_peripheralCharac = _scanResult;
+					_scanResult.print();
+				}
 			}
-		}
-
-	});
+		});
 }
 
 void IndoorLocalizationService::AddPeripheralListCharacteristic() {
 	// get scan result
 	log(DEBUG, "create characteristic to list found peripherals");
-	createCharacteristic<uint8_t>()
-		.setUUID(UUID(getUUID(), 0x121))
-		.setName("devices")
-		.setDefaultValue(255)
-		.setWritable(true)
-		.onWrite([&](const uint8_t & value) -> void {
-//			personal_threshold_level = value;
-//			log(INFO,"setting personal threshold level to: %d", value);
 
-			log(INFO,"##################################################");
-			log(INFO,"### listing detected peripherals #################");
-			log(INFO,"##################################################");
-			for (int i = 0; i < freeidx; ++i) {
-				log(INFO,"%s\trssi: %d\tocc: %d", _history[i].addrs, _history[i].rssi, _history[i].occurences);
-			}
-			log(INFO,"##################################################");
-
-		});
+	_peripheralCharac = createCharacteristicRef<ScanResult>();
+	_peripheralCharac->setUUID(UUID(getUUID(), 0x120));
+	_peripheralCharac->setName("devs");
+//	_peripheralCharac->setWritable(false);
+//	_peripheralCharac->setNotifies(true);
 }
 
 void IndoorLocalizationService::AddPersonalThresholdCharacteristic() {
@@ -235,17 +225,14 @@ void IndoorLocalizationService::SampleAdcStart() {
        	//rms=%lu min=%lu max=%lu current=%i mA", voltage, rms, voltage_min, voltage_max, current);
 */
 
-	char curve_text[128];
 	int i = 0;
 	while (!adc_result.empty()) {
-		sprintf(curve_text, "%u, ", adc_result.pop());
-		write(curve_text);
+		_log(INFO, "%u, ", adc_result.pop());
 		if (!(++i % 10)) {
-			sprintf(curve_text, "\r\n");
-			write(curve_text);
+			_log(INFO, "\r\n");
 		}
 	}
-	write("\r\n");
+	_log(INFO, "\r\n");
 	//stack->startAdvertising(); // segfault
 /*
 	uint64_t result = voltage_min;
@@ -261,11 +248,9 @@ void IndoorLocalizationService::SampleAdcStart() {
 */
 }
 
-
-
-IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822BluetoothStack& stack) {
-	IndoorLocalizationService* svc = new IndoorLocalizationService(stack);
-	stack.addService(svc);
+IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822BluetoothStack& _stack) {
+	IndoorLocalizationService* svc = new IndoorLocalizationService(_stack);
+	_stack.addService(svc);
 	svc->AddSpecificCharacteristics();
 	return *svc;
 }
@@ -285,6 +270,13 @@ void IndoorLocalizationService::on_ble_event(ble_evt_t * p_ble_evt) {
 		onRSSIChanged(p_ble_evt->evt.gap_evt.params.rssi_changed.rssi);
 		break;
 	}
+
+#if(SOFTDEVICE_SERIES != 110)
+	case BLE_GAP_EVT_ADV_REPORT:
+		onAdvertisement(&p_ble_evt->evt.gap_evt.params.adv_report);
+		break;
+#endif
+
 	default: {
 	}
 	}
@@ -312,12 +304,17 @@ void IndoorLocalizationService::onRSSIChanged(int8_t rssi) {
 }
 
 void IndoorLocalizationService::setRSSILevel(int8_t RSSILevel) {
-	if (_characteristic)
-		*_characteristic = RSSILevel;
+	if (_rssiCharac) {
+		*_rssiCharac = RSSILevel;
+	}
 }
 
 void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
 	_rssiHandler = func;
 }
 
-
+void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
+	if (_stack->isScanning()) {
+		_scanResult.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+	}
+}

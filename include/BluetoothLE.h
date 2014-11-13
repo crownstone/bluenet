@@ -97,9 +97,10 @@ namespace BLEpp {
 
 #else /* __EXCEPTIONS */
 
-#define BLE_CALL(function, args) do {volatile uint32_t result = function args; if (result != NRF_SUCCESS) {std::string ble_error_message(# function ); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
-#define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) { std::string ble_error_message(message); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
-#define BLE_THROW(message) do { std::string ble_error_message(message); ble_error_handler(ble_error_message, __LINE__, __FILE__); } while(0)
+//#define BLE_CALL(function, args) do {volatile uint32_t result = function args; if (result != NRF_SUCCESS) {std::string ble_error_message(# function ); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
+#define BLE_CALL(function, args) do {uint32_t result = function args; APP_ERROR_CHECK(result); } while(0)
+#define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) { std::string ble_error_message(message); log(DEBUG, "BLE_THROW: %s", ble_error_message.c_str()); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
+#define BLE_THROW(message) do { std::string ble_error_message(message); log(DEBUG, "BLE_THROW: %s", ble_error_message.c_str()); ble_error_handler(ble_error_message, __LINE__, __FILE__); } while(0)
 
 #endif /* __EXCEPTIONS */
 
@@ -121,8 +122,8 @@ namespace BLEpp {
             ret.uuid = _uuid;
             ret.type = _type;
 
-//            LOG_INFO("get fullid: %s", _full);
-//            LOG_INFO("get uuid: %X", _uuid);
+//            log(INFO, "get fullid: %s", _full);
+//            log(INFO, "get uuid: %X", _uuid);
 
             return ret;
         }
@@ -192,22 +193,38 @@ namespace BLEpp {
     /// Characteristics ////////////////////////////////////////////////////////////////////////////////////////////////
 
     struct CharacteristicValue {
-        uint16_t length;
-        const uint8_t* data; // TODO use refcount to manage lifetime?  current assumes it to be valid for as long as needed to send to stack.
-        CharacteristicValue(uint16_t _length, const uint8_t *const _data) : length(_length), data(_data) {}
-        CharacteristicValue() : length(0), data(0) {}
-        bool operator==(const CharacteristicValue& rhs) {
-            return rhs.data == data && rhs.length == length;
-        }
-        bool operator!=(const CharacteristicValue& rhs) {
-            return !operator==(rhs);
-        }
-        CharacteristicValue operator=(const CharacteristicValue& rhs) {
-            data = rhs.data;
-            length = rhs.length;
-            return *this;
-        }
-    };
+		uint16_t length;
+		uint8_t* data; // TODO use refcount to manage lifetime?  current assumes it to be valid for as long as needed to send to stack.
+		// Dominik: for the case of having a serialized object as a value, a buffer is allocated
+		// which has to be freed somewhere. It can't be freed at the same point where it is
+		// allocated or it will be freed before it can be sent t the stack, so the parameter
+		// free can be used to tell the CharacteristicValue to free the data when it is
+		// destroyed.
+		bool freeOnDestroy;
+		CharacteristicValue(uint16_t _length, uint8_t * const _data, bool _free = false) :
+					length(_length), data(_data), freeOnDestroy(_free) {
+		}
+		CharacteristicValue() :
+				length(0), data(0), freeOnDestroy(false) {
+		}
+		~CharacteristicValue() {
+			if (freeOnDestroy) {
+				log(INFO, "DESTROY");
+				free(data);
+			}
+		}
+		bool operator==(const CharacteristicValue& rhs) {
+			return rhs.data == data && rhs.length == length;
+		}
+		bool operator!=(const CharacteristicValue& rhs) {
+			return !operator==(rhs);
+		}
+		CharacteristicValue operator=(const CharacteristicValue& rhs) {
+			data = rhs.data;
+			length = rhs.length;
+			return *this;
+		}
+	};
 
     struct CharacteristicInit {
         ble_gatts_attr_t          attr_char_value;
@@ -244,12 +261,12 @@ namespace BLEpp {
 
         bool                      _inited;
         bool                      _notifies;
-        bool					  _indicates;
         bool                      _writable;
         uint16_t                  _unit;   // 2
         uint32_t                  _updateIntervalMsecs; // 0 means don't update.  // 4
         //app_timer_id_t            _timer;  // 4
         bool					  _notifyingEnabled;
+        bool					  _indicates;
 
       public:
 
@@ -329,11 +346,14 @@ namespace BLEpp {
         virtual void read() = 0;
         virtual void written(uint16_t len, uint16_t offset, uint8_t* data) = 0;
 
+        virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
+
       protected:
 
         virtual void configurePresentationFormat(ble_gatts_char_pf_t &) {}
 
-        void notify();
+        uint32_t notify();
+        virtual void onNotifyTxError();
     };
 
 
@@ -499,7 +519,7 @@ namespace BLEpp {
             CharacteristicValue value(len, data+offset);
             setCharacteristicValue(value);
 
-            log(DEBUG, "%s: onWrite(%d, %X)", _name.c_str(), len, *((uint16_t*)data+offset));
+            log(DEBUG, "%s: onWrite()", _name.c_str());
             _callbackOnWrite(getValue());
         }
 
@@ -734,6 +754,7 @@ namespace BLEpp {
 
         virtual void on_write(ble_gatts_evt_write_t& write_evt);  // FIXME NRFAPI
 
+        virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
     };
 
     class GenericService : public Service {
@@ -814,9 +835,7 @@ namespace BLEpp {
         typedef function<void(uint16_t conn_handle)>   callback_connected_t;
         typedef function<void(uint16_t conn_handle)>   callback_disconnected_t;
         typedef function<void(bool radio_active)>   callback_radio_t;
-#if(SOFTDEVICE_SERIES != 110) 
-        typedef function<void(ble_gap_evt_adv_report_t* p_adv_report)> callback_advertisement_t;
-#endif
+
 
         static Nrf51822BluetoothStack * _stack;
 
@@ -867,10 +886,6 @@ namespace BLEpp {
         callback_disconnected_t                     _callback_disconnected;  // 16
         callback_radio_t                            _callback_radio;  // 16
         volatile uint8_t                            _radio_notify; // 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
-
-#if(SOFTDEVICE_SERIES != 110) 
-        callback_advertisement_t					_callback_advertisement;
-#endif
     public:
 
         Nrf51822BluetoothStack(Pool& pool);
@@ -971,13 +986,6 @@ namespace BLEpp {
             return *this;
         }
 
-#if(SOFTDEVICE_SERIES != 110) 
-        Nrf51822BluetoothStack& onAdvertisement(const callback_advertisement_t& callback) {
-        	_callback_advertisement = callback;
-        	return *this;
-        }
-#endif
-
         Service& createService() {
             GenericService* svc = new GenericService();
             addService(svc);
@@ -1031,6 +1039,7 @@ namespace BLEpp {
         void on_connected(ble_evt_t * p_ble_evt);
         void on_disconnected(ble_evt_t * p_ble_evt);
         void on_advertisement(ble_evt_t * p_ble_evt);
+        void onTxComplete(ble_evt_t * p_ble_evt);
 
     };
 

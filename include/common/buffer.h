@@ -34,7 +34,7 @@ struct buffer {
 //		uint32_t value = *ptr;
 //		if (empty()) return 0xdeafabba;
 //		ptr--;
-		if (empty()) return 0xdeafabba; // TODO: Assumes uint32_t for T
+		if (empty()) return (T)0xdeafabba; // TODO: Assumes uint32_t for T
 		T value = *(--ptr);
 		return value;
 	}

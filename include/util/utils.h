@@ -5,21 +5,16 @@
  * License: LGPLv3+
  */
 
-#ifndef UTILS_HPP_
-#define UTILS_HPP_
+#ifndef UTILS_H_
+#define UTILS_H_
+
+#include "stdint.h"
 
 // convert a short from LSB to MSB and vice versa
-static inline uint16_t convertEndian(uint16_t val) {
-	return ((val >> 8) & 0xFF) | ((val & 0xFF) << 8);
-}
+uint16_t convertEndian(uint16_t val);
 
 // convert an integer from LSB to MSB and vice versa
-static inline uint32_t convertEndian(uint32_t val) {
-	return ((val >> 24) & 0xFF)
-		 | ((val >> 8) & 0xFF00)
-		 | ((val & 0xFF00) << 8)
-		 | ((val & 0xFF) << 24);
-}
+uint32_t convertEndian(uint32_t val);
 
 
-#endif /* UTILS_HPP_ */
+#endif /* UTILS_H_ */

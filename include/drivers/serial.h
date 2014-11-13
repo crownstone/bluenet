@@ -22,12 +22,40 @@
 
 #define DEBUG_ON
 
+/*
 #ifdef DEBUG_ON
-#define log(level, fmt, ...) \
-       write("[%s:%d] " fmt "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
+	#define log(level, fmt, ...) \
+		   write("[%s:%d] " fmt "\r\n", __FILE__, __LINE__, ##__VA_ARGS__)
+
+	#define _log(level, fmt, ...) \
+			   write(fmt, ##__VA_ARGS__)
 #else
-#define log(level, fmt, ...) 
+	#define log(level, fmt, ...) 
+
+	#define _log(level, fmt, ...)
 #endif
+*/
+
+#ifdef DEBUG_ON
+	#include "string.h"
+	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+	#define log(level, fmt, ...) \
+			   write("[%-30.30s : %-5d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__)
+
+	#define _log(level, fmt, ...) \
+			   write(fmt, ##__VA_ARGS__)
+#else
+	#define log(level, fmt, ...) 
+
+	#define _log(level, fmt, ...)
+#endif
+
+#define LOGd(fmt, ...) log(DEBUG, fmt, ##__VA_ARGS__)
+#define LOGi(fmt, ...) log(INFO, fmt, ##__VA_ARGS__)
+#define LOGw(fmt, ...) log(WARN, fmt, ##__VA_ARGS__)
+#define LOGe(fmt, ...) log(ERROR, fmt, ##__VA_ARGS__)
+#define LOGf(fmt, ...) log(FATAL, fmt, ##__VA_ARGS__)
 
 /**
  * General configuration of the serial connection. This sets the pin to be used for UART, the baudrate, the parity 

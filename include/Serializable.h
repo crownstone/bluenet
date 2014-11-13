@@ -3,7 +3,9 @@
 #define _Serializable_h
 
 #include <stdint.h>
+#include <stdlib.h>
 
+// Dominik: DO NOT USE! malloc fails completely or doesn't return a correct memory on the heap!!!! 
 struct Buffer {
     Buffer() : length(0), data(0), allocated(false) {}
     Buffer(uint16_t _length, uint8_t* _data) : length(_length), data(_data), allocated(false) {}
