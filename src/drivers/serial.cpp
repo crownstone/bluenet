@@ -73,18 +73,13 @@ int write(const char *str, ...) {
 	char buffer[128];
 	va_list ap;
 	va_start(ap, str);
-	// len is set to string without format specifier applied yet!
-	uint8_t len = vsprintf(NULL, str, ap);
+	uint16_t len = vsprintf(NULL, str, ap);
 	va_end(ap);
 
 	if (len < 0) return len;
 
-	// check if allocated buffer is big enough, if not allocate bigger buffer
-	//char debug[128];
-	//uint8_t len_debug = sprintf(debug, "Debug: buffer size=%u vs length=%u\r\n\0", sizeof buffer, len + 1UL);
-	//write_uart(debug);
-	//len = 300;
-	if (false) { //if (sizeof buffer >= len + 1UL) {
+	
+	if (sizeof buffer >= len + 1UL) {
 		va_start(ap, str);
 		len = vsprintf(buffer, str, ap);
 		for(int i = 0; i < len; ++i) {
@@ -103,7 +98,6 @@ int write(const char *str, ...) {
 			while(NRF51_UART_TXDRDY != 1) {}
 			NRF51_UART_TXDRDY = 0;
 		}
-		write_uart("\r\n\0");
 		free(p_buf);
 	}
 	return len;

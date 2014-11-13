@@ -359,8 +359,8 @@ void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
 
 /// Nrf51822BluetoothStack /////////////////////////////////////////////////////////////////////////////////////////////
 
-Nrf51822BluetoothStack::Nrf51822BluetoothStack(Pool& pool) :
-		_pool(pool), _appearance(defaultAppearance), _clock_source(
+Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
+		_appearance(defaultAppearance), _clock_source(
 				defaultClockSource), _mtu_size(defaultMtu), _tx_power_level(
 				defaultTxPowerLevel), _sec_mode( { }),
 		//_adv_params({}),

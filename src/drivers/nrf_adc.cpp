@@ -32,7 +32,7 @@ gpio_t led1;
 
 // FIXME BEWARE, because we are using fixed arrays, increasing the size will cause
 //   memory and runtime problems.
-#define ADC_BUFFER_SIZE 300
+#define ADC_BUFFER_SIZE 100
 uint16_t adc_buffer[ADC_BUFFER_SIZE];
 
 /**

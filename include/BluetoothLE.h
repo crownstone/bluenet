@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 #include "Serializable.h"
-#include "Pool.h"
 
 #include <util/function.h>
 #include <drivers/serial.h>
@@ -856,9 +855,6 @@ namespace BLEpp {
         static const int8_t                    defaultTxPowerLevel = -8;
 
     protected:
-        Pool&                                       _pool;
-
-
         std::string                                      _device_name; // 4
         uint16_t                                    _appearance;
         fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  // 32
@@ -888,7 +884,7 @@ namespace BLEpp {
         volatile uint8_t                            _radio_notify; // 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
     public:
 
-        Nrf51822BluetoothStack(Pool& pool);
+        Nrf51822BluetoothStack();
 
         virtual ~Nrf51822BluetoothStack();
 

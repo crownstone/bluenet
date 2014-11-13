@@ -9,10 +9,13 @@
  * Enable the services you want to run on the device
  *********************************************************************************************************************/
 
-//#define INDOOR_SERVICE
-//#define TEMPERATURE_SERVICE
+#define INDOOR_SERVICE
+#define TEMPERATURE_SERVICE
 
-#include "Pool.h"
+/**********************************************************************************************************************
+ * General includes
+ *********************************************************************************************************************/
+
 #include "BluetoothLE.h"
 #include "util/ble_error.h"
 
@@ -41,22 +44,27 @@ extern "C" {
 #include <drivers/nrf_pwm.h>
 #include <drivers/serial.h>
 
-//#include "Peripherals.h"
 
 #ifdef INDOOR_SERVICE
 #include <services/IndoorLocalisationService.h>
 #endif
+#ifdef TEMPERATURE_SERVICE
 #include <services/TemperatureService.h>
+#endif
 
 using namespace BLEpp;
 
 /**********************************************************************************************************************
- * Enable the services you want to run on the device
+ * Precompiler warnings/messages
  *********************************************************************************************************************/
 
-#define INDOOR_SERVICE
-#define TEMPERATURE_SERVICE
->>>>>>> upstream/master
+/*
+// BUFSIZ is used by sprintf for the internal buffer and is 1024 bytes.
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+#pragma message "BUFSIZ = " STR(BUFSIZ)
+*/
 
 /**********************************************************************************************************************
  * Main functionality
@@ -64,21 +72,18 @@ using namespace BLEpp;
 
 void welcome() {
 	config_uart();
-	_log(INFO, "\r\n\r\n");
+	_log(INFO, "\r\n");
+	uint8_t *p = (uint8_t*)malloc(1);
+	log(INFO, "Start of heap %p", p);
+	free(p);
 	log(INFO,"Welcome at the nRF51822 code for meshing.");
-	/*
-	log(INFO,"Welcome at the nRF51822 code for meshing. This is gonna be a long text to check the malloc functionality.\r\n \
-This is gonna be a long text to check the malloc functionality. \
-This is gonna be a long text to check the malloc functionality.\r\n \
-This is gonna be a long text to check the malloc functionality. \
-This is gonna be a long text to check the malloc functionality.");
-	*/
+	
 	log(INFO, "Compilation time: %s", COMPILATION_TIME);
 }
 
 void setName(Nrf51822BluetoothStack &stack) {
 	char devicename[32];
-	sprintf(devicename, "crow_%s", COMPILATION_TIME);
+	sprintf(devicename, "arow_%s", COMPILATION_TIME);
 	stack.setDeviceName(std::string(devicename)) // max len = ble_gap_devname_max_len (31)
 		// controls how device appears in gui.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
@@ -119,11 +124,8 @@ void config_drivers() {
 int main() {
 	welcome();
 
-	// memory pool of 30 blocks of 20 bytes each, this already crashes the thing...
-	PoolImpl<30> pool;
-
 	// set up the bluetooth stack that controls the hardware.
-	Nrf51822BluetoothStack stack(pool);
+	Nrf51822BluetoothStack stack;
 
 	// set advertising parameters such as the device name and appearance.  
 	setName(stack);
