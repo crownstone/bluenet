@@ -4,13 +4,12 @@
  * The SoftDevice takes a hugh part of the RAM at the beginning (which ends at ORIGIN of RAM for the application).
  * Use "make analyze" to see how much the .bss usurps: 2656 bytes and the data(VMA) part: 112 bytes.
  * The S130 on the moment uses 0x2800 bytes, 10240 bytes of the RAM, 10kB! So that leaves us less than 6kB...!
- * This leaves us a total of 13616-10240 bytes, so we can only build a heap of say around 1024 bytes. It will start
+ * This leaves us a total of 13616-10240 bytes, so we can only build a small heap.
+ * On the moment we need a heap of around 2kB. It will start
  * around 10240+2656+112 = 0x200032d0.
- * Then we have 2352 bytes left for the stack.
- * This seems enough space. However, still very big strings are not printed correctly, the vsprintf function
- * returns a len which is just really not big enough.
+ * Then we have only around 1kB left for the stack!!!
  *********************************************************************************************************************/
-HEAP_SIZE = 1024;
+HEAP_SIZE = 2048;
 
 SECTIONS
 {

@@ -86,6 +86,7 @@ void * _sbrk(int incr)
     asm("mov %0, sp" : "=r"(sp) : : );
     // return (void*)-1 if stackpointer gets below (stack grows downwards) the end of the heap (goes upwards)
     if ((char*)sp <= heap_end+incr) {
+	    __asm("BKPT"); // for now stop by force!
         return (void*)-1;
     }
 
@@ -110,6 +111,7 @@ void * _sbrk(int incr)
 
     // return (void*)-1 if heap goes beyond artificial set limit 
     if (heap_base+incr >= heap_limit) {
+	    __asm("BKPT"); // for now stop by force!
         return (void*)-1;
     }
 
