@@ -49,7 +49,7 @@ void config_uart() {
  * Write an individual character to UART.
  */
 void write_uart(const char *str) {
-	uint8_t len = strlen(str);
+	int16_t len = strlen(str);
 	for(int i = 0; i < len; ++i) {
 		NRF51_UART_TXD = (uint8_t)str[i];
 		while(NRF51_UART_TXDRDY != 1) {}
@@ -73,7 +73,7 @@ int write(const char *str, ...) {
 	char buffer[128];
 	va_list ap;
 	va_start(ap, str);
-	uint16_t len = vsprintf(NULL, str, ap);
+	int16_t len = vsprintf(NULL, str, ap);
 	va_end(ap);
 
 	if (len < 0) return len;
