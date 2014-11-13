@@ -167,6 +167,21 @@ ELSE()
 		DEPENDS ${PROJECT_NAME}
 		COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
 
+	ADD_CUSTOM_TARGET(analyze
+		COMMAND echo
+		COMMAND echo "*** Show headers"
+		COMMAND ${CMAKE_READELF} --headers ${PROJECT_NAME}.elf
+		#COMMAND ${CMAKE_OBJDUMP} -h ${PROJECT_NAME}.elf
+		COMMAND echo
+		COMMAND echo "*** Show largest symbols / functions"
+		COMMAND ${CMAKE_NM} --print-size --size-sort --radix=d ${PROJECT_NAME}.elf | tail
+		COMMAND echo
+		COMMAND echo "*** Show size of sections"
+		COMMAND ${CMAKE_SIZE} -A -d ${PROJECT_NAME}.elf
+		DEPENDS ${PROJECT_NAME}.tmp
+		COMMENT "Read headers ${PROJECT_NAME}.elf"
+		)
+
 	ADD_CUSTOM_TARGET(${PROJECT_NAME}.bin ALL DEPENDS ${PROJECT_NAME}.tmp)
 
 	SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)

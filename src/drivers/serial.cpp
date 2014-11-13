@@ -45,15 +45,26 @@ void config_uart() {
 	NRF51_UART_TXDRDY = 0;
 }
 
-/*
-void write(const char *str) {
+/**
+ * Write an individual character to UART.
+ */
+void write_uart(const char *str) {
 	uint8_t len = strlen(str);
 	for(int i = 0; i < len; ++i) {
 		NRF51_UART_TXD = (uint8_t)str[i];
-		while(NRF51_UART_TXDRDY != 1) 
+		while(NRF51_UART_TXDRDY != 1) {}
 		NRF51_UART_TXDRDY = 0;
 	}
-}*/
+}
+
+/**
+ * Read an individual character from UART.
+ */
+uint8_t read_uart() {
+	while(NRF51_UART_RXDRDY != 1) {}
+	NRF51_UART_RXDRDY = 0;
+	return (uint8_t)NRF51_UART_RXD;
+}
 
 /**
  * A write function with a format specifier.
@@ -62,18 +73,23 @@ int write(const char *str, ...) {
 	char buffer[128];
 	va_list ap;
 	va_start(ap, str);
+	// len is set to string without format specifier applied yet!
 	uint8_t len = vsprintf(NULL, str, ap);
 	va_end(ap);
 
 	if (len < 0) return len;
 
 	// check if allocated buffer is big enough, if not allocate bigger buffer
-	if (sizeof buffer >= len + 1UL) {
+	//char debug[128];
+	//uint8_t len_debug = sprintf(debug, "Debug: buffer size=%u vs length=%u\r\n\0", sizeof buffer, len + 1UL);
+	//write_uart(debug);
+	//len = 300;
+	if (false) { //if (sizeof buffer >= len + 1UL) {
 		va_start(ap, str);
 		len = vsprintf(buffer, str, ap);
 		for(int i = 0; i < len; ++i) {
 			NRF51_UART_TXD = (uint8_t)buffer[i];
-			while(NRF51_UART_TXDRDY != 1) /* wait */;
+			while(NRF51_UART_TXDRDY != 1) {}
 			NRF51_UART_TXDRDY = 0;
 		}
 	} else {
@@ -84,9 +100,10 @@ int write(const char *str, ...) {
 		va_end(ap);
 		for(int i = 0; i < len; ++i) {
 			NRF51_UART_TXD = (uint8_t)p_buf[i];
-			while(NRF51_UART_TXDRDY != 1) /* wait */;
+			while(NRF51_UART_TXDRDY != 1) {}
 			NRF51_UART_TXDRDY = 0;
 		}
+		write_uart("\r\n\0");
 		free(p_buf);
 	}
 	return len;

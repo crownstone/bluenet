@@ -5,6 +5,13 @@
  * License: LGPLv3+
  */
 
+/**********************************************************************************************************************
+ * Enable the services you want to run on the device
+ *********************************************************************************************************************/
+
+//#define INDOOR_SERVICE
+//#define TEMPERATURE_SERVICE
+
 #include "Pool.h"
 #include "BluetoothLE.h"
 #include "util/ble_error.h"
@@ -36,17 +43,13 @@ extern "C" {
 
 #include "Peripherals.h"
 
+#ifdef INDOOR_SERVICE
 #include <services/IndoorLocalisationService.h>
+#endif
 #include <services/TemperatureService.h>
 
 using namespace BLEpp;
 
-/**********************************************************************************************************************
- * Enable the services you want to run on the device
- *********************************************************************************************************************/
-
-#define INDOOR_SERVICE
-//#define TEMPERATURE_SERVICE
 
 /**********************************************************************************************************************
  * Main functionality
@@ -54,7 +57,17 @@ using namespace BLEpp;
 
 void welcome() {
 	config_uart();
+	int *test = (int*)malloc(1);
+	write("\r\nAllocated memory at %p\r\n", test);
+	free(test);
 	log(INFO,"Welcome at the nRF51822 code for meshing.");
+	/*
+	log(INFO,"Welcome at the nRF51822 code for meshing. This is gonna be a long text to check the malloc functionality.\r\n \
+This is gonna be a long text to check the malloc functionality. \
+This is gonna be a long text to check the malloc functionality.\r\n \
+This is gonna be a long text to check the malloc functionality. \
+This is gonna be a long text to check the malloc functionality.");
+*/
 	log(INFO, "Compilation time: %s", COMPILATION_TIME);
 }
 
@@ -101,7 +114,7 @@ void config_drivers() {
 int main() {
 	welcome();
 
-	// memory pool of 30 blocks of 30 bytes each, this already crashes the thing...
+	// memory pool of 30 blocks of 20 bytes each, this already crashes the thing...
 	PoolImpl<30> pool;
 
 	// set up the bluetooth stack that controls the hardware.

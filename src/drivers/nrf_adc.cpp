@@ -30,7 +30,7 @@ buffer_t<uint16_t> adc_result;
 gpio_t led0;
 gpio_t led1;
 
-#define ADC_BUFFER_SIZE 400
+#define ADC_BUFFER_SIZE 200
 uint16_t adc_buffer[ADC_BUFFER_SIZE];
 
 /**

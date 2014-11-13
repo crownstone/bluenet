@@ -67,23 +67,58 @@ int _write(int file, char *ptr, int len)
 
 void fsync() {}
 
-extern unsigned long _ebss;
+#define LET_HEAP_BE_FIXED
+//#define LET_HEAP_GROW_TO_STACKPOINTER
 
+/**
+ * The allocation of memory by malloc etc. uses this function internally. The end of the heap is set to _ebss in the
+ * linker script.
+ * Check also: https://devzone.nordicsemi.com/question/14581/nrf51822-with-gcc-stacksize-and-heapsize/
+ */
+#ifdef LET_HEAP_GROW_TO_STACKPOINTER
+extern unsigned long _ebss;
 void * _sbrk(int incr)
 {
     static char *heap_end = (char *)&_ebss;
 
+    // get stack pointer
     void* sp;
     asm("mov %0, sp" : "=r"(sp) : : );
+    // return (void*)-1 if stackpointer gets below (stack grows downwards) the end of the heap (goes upwards)
     if ((char*)sp <= heap_end+incr) {
         return (void*)-1;
     }
 
     char *prev = heap_end;
-
+    // heap grows upwards
     heap_end += incr;
     return prev;
 }
+#elif defined(LET_HEAP_BE_FIXED)
+
+extern unsigned long _heap_start;
+extern unsigned long _heap_end;
+
+/**
+ * This implementation uses a heap with a fixed size, it doesn't grow till the stack pointer. However, you will now
+ * run into memory allocation problems probably.
+ */
+void * _sbrk(int incr)
+{
+    static char *heap_base = (char *)&_heap_start;
+    static char *heap_limit = (char *)&_heap_end;
+
+    // return (void*)-1 if heap goes beyond artificial set limit 
+    if (heap_base+incr >= heap_limit) {
+        return (void*)-1;
+    }
+
+    char *prev = heap_base;
+    // heap grows upwards
+    heap_base += incr;
+    return prev;
+}
+#endif
 
 
 #endif
