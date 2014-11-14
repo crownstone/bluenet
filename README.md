@@ -57,7 +57,12 @@ Now you will have to set all fields in the configuration file:
 * adjust the `SOFTDEVICE_DIR` to wherever you unzipped the latest SoftDevice from Nordic
 * adjust the `SOFTDEVICE_SERIES` to for example `110` or `130` (SoftDevice name starts with it, without the `s`)
 * adjust the `SOFTDEVICE_DIR_API` to the directory with the SoftDevice include files
+* set `SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1` if you use one of the earlier s110 softdevices with a separate UICR section
 * adjust the type `SOFTDEVICE` accordingly (basename of file without `_softdevice.hex`)
+* set the `APPLICATION_START_ADDRESS` to start of application in FLASH (called `CODE_R1_BASE` in Nordic documentation)
+* set the `APPLICATION_LENGTH` to what remains of FLASH 
+* set `RAM_R1_BASE` to the start of RAM that is available (SoftDevice S130 v0.5 uses a staggering 10kB from the 16kB!)
+* set `RAM_APPLICATION_AMOUNT` to what remains for the application in RAM
 * adjust the `COMPILER_PATH` and `COMPILER_TYPE` to your compiler (it will be used as `$COMPILER_PATH\bin\$COMPILER_TYPE-gcc`)
 * adjust `JLINK` to the full name of the JLink utility (JLinkExe on Linux)
 * adjust `JLINK_GDB_SERVER` to the full name of the JLink utility that supports gdb (JLinkGDBServer on Linux)
@@ -79,6 +84,10 @@ And we can upload it:
 * this would do the same as building above ./firmware build crownstone
 * ./firmware.sh upload crownstone
 * ./firmware.sh debug crownstone
+
+You can also run:
+
+* ./firmware.sh all crownstone
 
 And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish. 
 
@@ -113,11 +122,11 @@ It would be much appreciated to state "DoBots inside" in which case we will be h
 
 Obviously, the copyrights of the code written by Christoper, belong to him.
 
-The copyrights (2014) for the rest of the code belongs to me and are provided under an noncontagious open-source license:
+The copyrights (2014) for the rest of the code belongs to the team of Distributed Organisms B.V. and are provided under an noncontagious open-source license:
 
-* Author: Anne van Rossum
+* Authors: Anne van Rossum, Dominik Egger, Bart van Vliet
 * Date: 27 Jan. 2014
-* License: LGPL v3
+* License: LGPL v3+, Apache, or MIT, your choice
 * Almende B.V., http://www.almende.com and DoBots B.V., http://www.dobots.nl
 * Rotterdam, The Netherlands
 

@@ -14,7 +14,7 @@ SOFTDEVICE_DIR=/opt/softdevices
 # Check https://devzone.nordicsemi.com/question/15994/nrf51822-iram-and-irom-settings-for-v05-s130-sd/
 # APPLICATION_LENGTH                   - 176kB corresponds with 0x2c000 hex, should be 0x40000 - 0x14000 
 # RAM_R1_BASE                          - starting point for softdevice in RAM
-# RAM_SOFTDEVICE_AMOUNT                - size of softdevice in RAM
+# RAM_APPLICATION_AMOUNT                - size of softdevice in RAM
 
 #######################################################################################################################
 # The old SoftDevice (v5) and the old SDK version (v4)
@@ -28,7 +28,7 @@ SOFTDEVICE_DIR=/opt/softdevices
 #APPLICATION_START_ADDRESS=0x00014000
 #APPLICATION_LENGTH=0x2c000
 #RAM_R1_BASE=0x20002000
-#RAM_SOFTDEVICE_AMOUNT=8K
+#RAM_APPLICATION_AMOUNT=8K
 
 #######################################################################################################################
 # For the newer SoftDevice version (v7) and the newer SDK version (v6)
@@ -43,7 +43,7 @@ SOFTDEVICE_DIR=/opt/softdevices
 #APPLICATION_START_ADDRESS=0x00016000
 #APPLICATION_LENGTH=0x2a000
 #RAM_R1_BASE=0x20002000
-#RAM_SOFTDEVICE_AMOUNT=8K
+#RAM_APPLICATION_AMOUNT=8K
 
 #######################################################################################################################
 # For the S130 SoftDevice version (v0.5) and the SDK version (v6)
@@ -63,7 +63,7 @@ SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
 APPLICATION_START_ADDRESS=0x0001c000
 APPLICATION_LENGTH=0x24000
 RAM_R1_BASE=0x20002800
-RAM_SOFTDEVICE_AMOUNT=0x1800
+RAM_APPLICATION_AMOUNT=0x1800
 
 # Use SoftDevice (setting to 0 is untested)
 NRF51_USE_SOFTDEVICE=1

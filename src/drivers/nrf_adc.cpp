@@ -6,10 +6,6 @@
 
 #include "drivers/nrf_adc.h"
 #include "nrf.h"
-#include "nrf_gpio.h"
-
-//#undef NRF51_USE_SOFTDEVICE
-//#define NRF51_USE_SOFTDEVICE 0
 
 #if(NRF51_USE_SOFTDEVICE == 1)
 #include "nrf_sdm.h"
@@ -19,21 +15,15 @@
 #include <drivers/serial.h>
 #include <util/ble_error.h>
 
-#include <drivers/gpio_api.h>
-
 #include <nRF51822.h>
 
 // allocate buffer struct (not array in buffer yet)
 buffer_t<uint16_t> adc_result;
 	
-// debugging
-gpio_t led0;
-gpio_t led1;
-
 // FIXME BEWARE, because we are using fixed arrays, increasing the size will cause
 //   memory and runtime problems.
 #define ADC_BUFFER_SIZE 100
-uint16_t adc_buffer[ADC_BUFFER_SIZE];
+//uint16_t adc_buffer[ADC_BUFFER_SIZE];
 
 /**
  * The init function is called once before operating the AD converter. Call it after you start the SoftDevice. Check 
@@ -46,38 +36,29 @@ uint32_t nrf_adc_init(uint8_t pin) {
 	log(DEBUG, "Run ADC converter without SoftDevice!!!");
 	
 #endif
-	log(DEBUG, "Allocate buffer for ADC results");
 	if (adc_result.size != ADC_BUFFER_SIZE) {
 		adc_result.size = ADC_BUFFER_SIZE;
-//		adc_result.buffer = (uint16_t*)calloc( adc_result.size, sizeof(uint16_t*));
-//		if (adc_result.buffer == NULL) {
-//			log(FATAL, "Could not initialize buffer. Too big!?");
-//			return 0xF0;
-//		}
-		adc_result.buffer = adc_buffer;
+		adc_result.buffer = (uint16_t*)calloc( adc_result.size, sizeof(uint16_t*));
+		if (adc_result.buffer == NULL) {
+			log(FATAL, "Could not initialize buffer. Too big!?");
+			return 0xF0;
+		}
+		//adc_result.buffer = adc_buffer;
 		adc_result.ptr = adc_result.buffer;
 	} 
-	// set some leds for debugging
-	gpio_init_out(&led0, p8);
-	gpio_write(&led0, 1);
-	gpio_init_out(&led1, p9);
 
-	log(DEBUG, "Init AD converter");
 	uint32_t err_code;
 
 	log(DEBUG, "Configure ADC on pin %u", pin);
 	err_code = nrf_adc_config(pin);
 	APP_ERROR_CHECK(err_code);
 
-	log(DEBUG, "Enable ADC");
 	NRF_ADC->EVENTS_END  = 0;    // Stop any running conversions.
 	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
 	
-	log(DEBUG, "Enable Interrupts for END event");
 	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; // Interrupt adc
 
 	// Enable ADC interrupt
-	log(DEBUG, "Clear pending ADC interrupts");
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_ClearPendingIRQ(ADC_IRQn);
 	APP_ERROR_CHECK(err_code);
@@ -85,7 +66,6 @@ uint32_t nrf_adc_init(uint8_t pin) {
 	NVIC_ClearPendingIRQ(ADC_IRQn);
 #endif
 
-	log(DEBUG, "Set ADC priority");
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
 	APP_ERROR_CHECK(err_code);
@@ -93,7 +73,6 @@ uint32_t nrf_adc_init(uint8_t pin) {
 	NVIC_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
 #endif
 
-	log(DEBUG, "Tell to use ADC interrupt handler");
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_EnableIRQ(ADC_IRQn);
 	APP_ERROR_CHECK(err_code);
@@ -130,7 +109,6 @@ uint32_t nrf_adc_config(uint8_t pin) {
  * Stop the AD converter.
  */
 void nrf_adc_stop() {
-	log(INFO, "Stop ADC sampling");
 	NRF_ADC->TASKS_STOP = 1;
 }
 
@@ -138,10 +116,8 @@ void nrf_adc_stop() {
  * Start the AD converter.
  */
 void nrf_adc_start() {
-	log(INFO, "Start ADC sampling");
 	NRF_ADC->EVENTS_END  = 0;
 	NRF_ADC->TASKS_START = 1;
-	gpio_write(&led1, 1);
 }
 
 /*
@@ -149,10 +125,6 @@ void nrf_adc_start() {
  */
 extern "C" void ADC_IRQHandler(void) {
 	uint32_t adc_value;
-
-	// set led for debugging
-	//gpio_write(&led0, 0);
-	gpio_write(&led1, 0);
 
 	// clear data-ready event
 	NRF_ADC->EVENTS_END     = 0;
