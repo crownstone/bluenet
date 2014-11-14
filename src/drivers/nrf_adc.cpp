@@ -1,7 +1,8 @@
 /**
  * Author: Bart van Vliet
+ * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 4 Nov., 2014
- * License: LGPLv3+
+ * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
 #include "drivers/nrf_adc.h"

@@ -2,7 +2,7 @@
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Nov 4, 2014
- * License: LGPLv3+
+ * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
 #include "util/utils.h"

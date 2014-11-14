@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2007, Markus Trenkwalder
+License:
 
 All rights reserved.
 

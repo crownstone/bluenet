@@ -2,7 +2,7 @@
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 10 Oct., 2014
- * License: LGPLv3+
+ * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
 #include <drivers/serial.h>
@@ -17,6 +17,9 @@
 #define NRF51_UART_9600_BAUD  0x00275000UL
 #define NRF51_UART_38400_BAUD 0x009D5000UL
 
+/**
+ * Configure the UART. Currently we set it on 38400 baud.
+ */
 void config_uart() {
 	// Enable UART
 	NRF51_UART_ENABLE = 0x04; 
@@ -55,7 +58,7 @@ uint8_t read_uart() {
 }
 
 /**
- * A write function with a format specifier.
+ * A write function with a format specifier. 
  */
 int write(const char *str, ...) {
 	char buffer[128];
@@ -66,7 +69,7 @@ int write(const char *str, ...) {
 
 	if (len < 0) return len;
 
-	
+	// if strings are small we do not need to allocate by malloc
 	if (sizeof buffer >= len + 1UL) {
 		va_start(ap, str);
 		len = vsprintf(buffer, str, ap);

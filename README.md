@@ -120,7 +120,7 @@ It would be much appreciated to state "DoBots inside" in which case we will be h
 
 ## Copyrights
 
-Obviously, the copyrights of the code written by Christoper, belong to him.
+Obviously, the copyrights of the code written by Christopher, belong to him.
 
 The copyrights (2014) for the rest of the code belongs to the team of Distributed Organisms B.V. and are provided under an noncontagious open-source license:
 
@@ -130,3 +130,8 @@ The copyrights (2014) for the rest of the code belongs to the team of Distribute
 * Almende B.V., http://www.almende.com and DoBots B.V., http://www.dobots.nl
 * Rotterdam, The Netherlands
 
+Note, that we do not use any header files from Nordic. The header files are rewritten from scratch by Christopher 
+especially for that purpose. This means you are not finding a Nordic license text in this repository. 
+Of course, this means that you will have to get those files from Nordic via different means (we recommend to buy the
+development kit). We just didn't want to "contaminate" this repository with files that we don't understand the license
+implications of.

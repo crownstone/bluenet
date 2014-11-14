@@ -2,7 +2,7 @@
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Nov 4, 2014
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
 #ifndef SCANRESULT_H_

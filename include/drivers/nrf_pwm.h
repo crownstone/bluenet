@@ -2,7 +2,7 @@
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 6 Nov., 2014
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License, or MIT, your choice
  */
 #ifndef __NRF_PWM__H__
 #define __NRF_PWM__H__

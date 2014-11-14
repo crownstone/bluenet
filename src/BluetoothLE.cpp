@@ -1,7 +1,9 @@
 /**
  * @author Christopher Mason
  * @author Anne van Rossum
+ * License: TODO
  */
+
 #include "BluetoothLE.h"
 #include "nRF51822.h"
 

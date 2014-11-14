@@ -1,5 +1,7 @@
 /*
 
+License: public domain
+
 From http://probablydance.com/2013/01/13/a-faster-implementation-of-stdfunction/
 
 This is free and unencumbered software released into the public domain.

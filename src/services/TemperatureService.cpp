@@ -2,7 +2,7 @@
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Oct 22, 2014
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
 #include <services/TemperatureService.h>

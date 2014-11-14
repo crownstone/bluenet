@@ -1,3 +1,8 @@
+/**
+ * @author Christopher Mason
+ * @author Anne van Rossum
+ * License: TODO
+ */
 
 #ifndef _Serializable_h
 #define _Serializable_h

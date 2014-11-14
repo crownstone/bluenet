@@ -2,11 +2,11 @@
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Oct 21, 2014
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
 
-#include <cmath> // try not to use this!
+//#include <cmath> // try not to use this!
 #include <cstdio>
 
 #include <services/IndoorLocalisationService.h>

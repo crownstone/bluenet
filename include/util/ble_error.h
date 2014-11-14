@@ -1,8 +1,7 @@
 /**
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: 4 Nov., 2014
- * License: LGPLv3+
+ * Author: Christopher mason
+ * Date: 21 Sep., 2013
+ * License: TODO
  */
 #ifndef BLE_ERROR_H
 #define BLE_ERROR_H

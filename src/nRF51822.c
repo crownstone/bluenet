@@ -1,3 +1,9 @@
+/**
+ * @author Christopher Mason
+ * @author Anne van Rossum
+ * License: TODO
+ */
+
 #include <stdint.h>
 #include "nRF51822.h"
 

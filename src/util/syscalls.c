@@ -1,3 +1,8 @@
+/**
+ * Author: Christopher Mason
+ * Date: 21 Sep., 2013
+ * License: TODO
+ */
 #ifdef SYSCALLS
 extern int errno;
 

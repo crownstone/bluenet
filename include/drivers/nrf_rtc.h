@@ -2,7 +2,7 @@
  * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 7 Nov., 2014
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
 #ifndef INCLUDE_DRIVERS_NRF_RTC_H_
