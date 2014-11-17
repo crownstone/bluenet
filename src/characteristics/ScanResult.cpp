@@ -8,7 +8,7 @@
 #include "string.h"
 #include "stdio.h"
 
-#include "ScanResult.h"
+#include "characteristics/ScanResult.h"
 #include "drivers/serial.h"
 #include "util/utils.h"
 
