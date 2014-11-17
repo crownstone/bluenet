@@ -706,7 +706,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	//  sent in the space 1 128-bit UUID occupies. So it really depends on the application
 	//  how this advertisement package should look like, so it doesn't really make sense
 	//  to have this function in the library.
-	/*
 	if (uidCount > 1) {
 		advdata.uuids_more_available.uuid_cnt = 1;
 		advdata.uuids_more_available.p_uuids = adv_uuids;
@@ -714,7 +713,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 		advdata.uuids_complete.uuid_cnt = 1;
 		advdata.uuids_complete.p_uuids = adv_uuids;
 	}
-	*/
+
 	err_code = ble_advdata_set(&advdata, NULL);
 	if (err_code == NRF_ERROR_DATA_SIZE) {
 		log(FATAL,"FATAL ERROR!!!! advertisement data too big for package");
