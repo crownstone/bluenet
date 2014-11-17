@@ -12,6 +12,8 @@
 #include <util/function.h>
 #include "ScanResult.h"
 
+#include <drivers/nrf_adc.h>
+
 #define INDOORLOCALISATION_UUID "00002220-0000-1000-8000-00805f9b34fb"
 // TODO -oDE: how did you come up with this UUID ??!!
 //  if I use any other UUID, the service UUID in the advertisement package
@@ -39,7 +41,7 @@ protected:
 	void SampleAdcStart();
 
 public:
-	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
+	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc);
 
 	void AddSpecificCharacteristics();
 
@@ -51,7 +53,7 @@ public:
 
 	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
 
-	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack);
+	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc);
 private:
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
@@ -65,6 +67,7 @@ private:
 	int _personalThresholdLevel;
 	ScanResult _scanResult;
 
+	ADC &_adc;
 };
 
 #endif /* INDOORLOCALISATIONSERVICE_H_ */

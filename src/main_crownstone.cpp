@@ -111,8 +111,8 @@ void configure(Nrf51822BluetoothStack &stack) {
 /**
  * This must be called after the SoftDevice has started.
  */
-void config_drivers() {
-	nrf_adc_init(PIN_ADC);
+void config_drivers(ADC &adc) {
+	adc.nrf_adc_init(PIN_ADC);
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
 	pwm_config.num_channels = 1;
 	pwm_config.gpio_num[0] = PIN_LED;
@@ -162,10 +162,13 @@ int main() {
 #endif
 		});
 
+	// Create ADC object
+	ADC adc;
+
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
 	//Service& localizationService = 
-	IndoorLocalizationService::createService(stack);
+	IndoorLocalizationService::createService(stack,adc);
 #endif
 
 #ifdef TEMPERATURE_SERVICE
@@ -174,7 +177,7 @@ int main() {
 #endif /* temperature_service */
 
 	// configure drivers
-	config_drivers();
+	config_drivers(adc);
 
 	// begin sending advertising packets over the air.
 #ifdef IBEACON

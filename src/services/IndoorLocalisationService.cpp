@@ -12,14 +12,14 @@
 #include <services/IndoorLocalisationService.h>
 #include <common/config.h>
 #include <common/boards.h>
-#include <drivers/nrf_adc.h>
 #include <drivers/nrf_rtc.h>
 
 //#include <common/timer.h>
 
 using namespace BLEpp;
 
-IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _stack) :
+IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _stack, ADC &adc) :
+		_adc(_adc),
 		_stack(&_stack),
 		_rssiCharac(NULL), _intChar(NULL), _intChar2(NULL), _peripheralCharac(NULL),
 		_personalThresholdLevel(0) {
@@ -174,20 +174,20 @@ void IndoorLocalizationService::SampleAdcInit() {
 				nrf_delay_us(100);
 
 				log(INFO, "Start ADC");
-				nrf_adc_start();
+				_adc.nrf_adc_start();
 				// replace by timer!
 
 }
 
 void IndoorLocalizationService::SampleAdcStart() {
-	while (!adc_result.full()) {
+	while (!_adc.getBuffer()->full()) {
 		nrf_delay_ms(100);
 	}
-	log(INFO, "Number of results: %u", adc_result.count()/2);
+	log(INFO, "Number of results: %u", _adc.getBuffer()->count()/2);
 	log(INFO, "Counter is at: %u", nrf_rtc_getCount());
 
 	log(INFO, "Stop ADC converter");
-	nrf_adc_stop();
+	_adc.nrf_adc_stop();
 
 	// Wait for the ADC to actually stop
 	nrf_delay_us(1000);
@@ -226,8 +226,8 @@ void IndoorLocalizationService::SampleAdcStart() {
 */
 
 	int i = 0;
-	while (!adc_result.empty()) {
-		_log(INFO, "%u, ", adc_result.pop());
+	while (!_adc.getBuffer()->empty()) {
+		_log(INFO, "%u, ", _adc.getBuffer()->pop());
 		if (!(++i % 10)) {
 			_log(INFO, "\r\n");
 		}
@@ -248,8 +248,8 @@ void IndoorLocalizationService::SampleAdcStart() {
 */
 }
 
-IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822BluetoothStack& _stack) {
-	IndoorLocalizationService* svc = new IndoorLocalizationService(_stack);
+IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822BluetoothStack& _stack, ADC &adc) {
+	IndoorLocalizationService* svc = new IndoorLocalizationService(_stack, adc);
 	_stack.addService(svc);
 	svc->AddSpecificCharacteristics();
 	return *svc;

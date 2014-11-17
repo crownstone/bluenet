@@ -13,24 +13,21 @@
 
 #include <common/buffer.h>
 
-// TODO: do we really need this?
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
+class ADC {
+	public:
+		ADC(): _buffer_size(100) {}
+		virtual ~ADC() {}
 
-// declare buffer for ADC results
-extern buffer_t<uint16_t> adc_result;
+		uint32_t nrf_adc_init(uint8_t pin);
+		uint32_t nrf_adc_config(uint8_t pin);
+		void nrf_adc_start();
+		void nrf_adc_stop();
 
-uint32_t nrf_adc_init(uint8_t pin);
-uint32_t nrf_adc_config(uint8_t pin);
-void nrf_adc_start();
-void nrf_adc_stop();
+		buffer_t<uint16_t>* getBuffer();
+	protected:
 
-//uint32_t nrf_adc_read(uint8_t pin, uint32_t* result);
-
-
-//#ifdef __cplusplus
-//}
-//#endif
+	private:
+		int _buffer_size;
+};
 
 #endif
