@@ -30,7 +30,8 @@ struct __attribute__((__packed__)) peripheral_device_t {
 class ScanResult {
 
 private:
-	peripheral_device_t _list[MAX_NR_DEVICES];
+//	peripheral_device_t _list[MAX_NR_DEVICES];
+	peripheral_device_t* _list;
     uint8_t _freeIdx;
 
 public:

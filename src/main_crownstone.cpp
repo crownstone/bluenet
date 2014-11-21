@@ -123,7 +123,7 @@ void config_drivers(ADC &adc) {
 	// TODO: Dominik, can we connect the adc init call with the characteristic / services
 	//   that actually use it? if there is no service that uses it there is no reason to
 	//   allocate space for it
-	adc.nrf_adc_init(PIN_ADC);
+//	adc.nrf_adc_init(PIN_ADC);
 
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
 	pwm_config.num_channels = 1;
@@ -201,11 +201,11 @@ int main() {
 #endif /* temperature_service */
 
 #ifdef POWER_SERVICE
-	PowerService::createService(stack, adc));
+	PowerService::createService(stack, adc);
 #endif
 
 	// configure drivers
-	config_drivers();
+	config_drivers(adc);
 
 	// begin sending advertising packets over the air.
 #ifdef IBEACON

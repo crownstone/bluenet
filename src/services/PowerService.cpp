@@ -12,7 +12,6 @@
 #include <services/PowerService.h>
 #include <common/config.h>
 #include <common/boards.h>
-#include <drivers/nrf_adc.h>
 #include <drivers/nrf_rtc.h>
 
 #include "nRF51822.h"
@@ -21,8 +20,8 @@
 
 using namespace BLEpp;
 
-PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
-		_stack(&_stack) {
+PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc) :
+		_stack(&_stack), _adc(adc) {
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
@@ -36,7 +35,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 
 void PowerService::addSpecificCharacteristics() {
 	addPWMCharacteristic();
-	addVoltageCurveCharacteristic();
+//	addVoltageCurveCharacteristic();
 	addPowerConsumptionCharachteristic();
 	addCurrentLimitCharacteristic();
 }
@@ -110,33 +109,33 @@ void PowerService::sampleAdcInit() {
 				//log(INFO, "Stop advertising");
 				//stack->stopAdvertising();
 
-//				log(INFO, "start RTC");
+				log(INFO, "start RTC");
 				nrf_rtc_init();
 				nrf_rtc_start();
 
 				// Wait for the RTC to actually start
 				nrf_delay_us(100);
 
-//				log(INFO, "Start ADC");
-				nrf_adc_start();
+				log(INFO, "Start ADC");
+				_adc.nrf_adc_start();
 				// replace by timer!
 
 }
 
 void PowerService::sampleAdcStart() {
-	while (!adc_result.full()) {
+	while (!_adc.getBuffer()->full()) {
 		nrf_delay_ms(100);
 	}
-//	log(INFO, "Number of results: %u", adc_result.count()/2);
-//	log(INFO, "Counter is at: %u", nrf_rtc_getCount());
+	log(INFO, "Number of results: %u", _adc.getBuffer()->count()/2);
+	log(INFO, "Counter is at: %u", nrf_rtc_getCount());
 
-//	log(INFO, "Stop ADC converter");
-	nrf_adc_stop();
+	log(INFO, "Stop ADC converter");
+	_adc.nrf_adc_stop();
 
 	// Wait for the ADC to actually stop
 	nrf_delay_us(1000);
 
-//	log(INFO, "Stop RTC");
+	log(INFO, "Stop RTC");
 	nrf_rtc_stop();
 /*
 	for (uint32_t i=0; i<samples; ++i) {
@@ -170,13 +169,13 @@ void PowerService::sampleAdcStart() {
 */
 
 	int i = 0;
-//	while (!adc_result.empty()) {
-//		_log(INFO, "%u, ", adc_result.pop());
-//		if (!(++i % 10)) {
-//			_log(INFO, "\r\n");
-//		}
-//	}
-//	_log(INFO, "\r\n");
+	while (!_adc.getBuffer()->empty()) {
+		_log(INFO, "%u, ", _adc.getBuffer()->pop());
+		if (!(++i % 10)) {
+			_log(INFO, "\r\n");
+		}
+	}
+	_log(INFO, "\r\n");
 	//stack->startAdvertising(); // segfault
 /*
 	uint64_t result = voltage_min;
@@ -192,9 +191,9 @@ void PowerService::sampleAdcStart() {
 */
 }
 
-PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack) {
+PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& adc) {
 //	LOGd("Create power service");
-	PowerService* svc = new PowerService(_stack);
+	PowerService* svc = new PowerService(_stack, adc);
 	_stack.addService(svc);
 	svc->addSpecificCharacteristics();
 	return *svc;

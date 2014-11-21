@@ -11,6 +11,8 @@
 #include "BluetoothLE.h"
 #include <util/function.h>
 
+#include <drivers/nrf_adc.h>
+
 #define POWER_SERVICE_UUID "5b8d7800-6f20-11e4-b116-123b93f75cba"
 
 #define PWM_UUID 					0x1
@@ -35,14 +37,15 @@ protected:
 	void sampleAdcStart();
 
 public:
-	PowerService(BLEpp::Nrf51822BluetoothStack& stack);
+	PowerService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc);
 
 	void addSpecificCharacteristics();
 
-	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack);
+	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc);
 private:
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
+	ADC &_adc;
 };
 
 #endif /* POWERSERVICE_H_ */
