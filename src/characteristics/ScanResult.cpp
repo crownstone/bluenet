@@ -12,10 +12,18 @@
 #include "drivers/serial.h"
 #include "util/utils.h"
 
-ScanResult::ScanResult() : _freeIdx(0) {
+ScanResult::ScanResult() : _list(NULL), _freeIdx(0) {
 }
 
 ScanResult::~ScanResult() {
+}
+
+void ScanResult::init() {
+	_freeIdx = 0;
+	if (_list) {
+		free(_list);
+	}
+	_list = (peripheral_device_t*)calloc(MAX_NR_DEVICES, sizeof(peripheral_device_t));
 }
 
 // returns the number of elements stored so far
@@ -68,7 +76,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 //				_list[i].addr[0]);
 		for (int j=0; j < BLE_GAP_ADDR_LEN; ++j) {
 			if (_list[i].addr[j] == 0) {
-				log(FATAL, "FATAL ERROR!!! i: %d, j:% d", i, j);
+//				log(FATAL, "FATAL ERROR!!! i: %d, j:% d", i, j);
 				print();
 				__asm("BKPT");
 				while(1);

@@ -207,7 +207,6 @@ namespace BLEpp {
 		}
 		~CharacteristicValue() {
 			if (freeOnDestroy) {
-				log(INFO, "DESTROY");
 				free(data);
 			}
 		}
@@ -291,7 +290,7 @@ namespace BLEpp {
         }
 
         void setNotifyingEnabled(bool enabled) {
-        	log(DEBUG, "[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
+//        	log(DEBUG, "[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
         	_notifyingEnabled = enabled;
         }
 
@@ -473,6 +472,7 @@ namespace BLEpp {
             return *this;
         }
 
+#ifdef ADVANCED_OPERATORS
         Characteristic<T>& operator+=(const T& val) {
             _value += val;
 
@@ -504,6 +504,7 @@ namespace BLEpp {
 
             return *this;
         }
+#endif
 
         Characteristic<T>& setDefaultValue(const T& t) {
             if (_inited) BLE_THROW("Already inited.");
@@ -517,12 +518,12 @@ namespace BLEpp {
             CharacteristicValue value(len, data+offset);
             setCharacteristicValue(value);
 
-            log(DEBUG, "%s: onWrite()", _name.c_str());
+//            log(DEBUG, "%s: onWrite()", _name.c_str());
             _callbackOnWrite(getValue());
         }
 
         void read() {
-            log(DEBUG, "%s: onRead", _name.c_str());
+//            log(DEBUG, "%s: onRead", _name.c_str());
             T newValue = _callbackOnRead();
             if (newValue != _value) {
                 operator=(newValue);

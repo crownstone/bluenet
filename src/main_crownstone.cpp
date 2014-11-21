@@ -11,6 +11,7 @@
 
 #define INDOOR_SERVICE
 #define TEMPERATURE_SERVICE
+#define POWER_SERVICE
 
 /**********************************************************************************************************************
  * General includes
@@ -40,6 +41,10 @@ extern "C" {
 
 #include <common/boards.h>
 
+#if(BOARD==PCA10001)
+	#include "nrf_gpio.h"
+#endif
+
 #include <drivers/nrf_adc.h>
 #include <drivers/nrf_pwm.h>
 #include <drivers/serial.h>
@@ -50,6 +55,9 @@ extern "C" {
 #endif
 #ifdef TEMPERATURE_SERVICE
 #include <services/TemperatureService.h>
+#endif
+#ifdef POWER_SERVICE
+#include <services/PowerService.h>
 #endif
 
 using namespace BLEpp;
@@ -72,10 +80,7 @@ using namespace BLEpp;
 
 void welcome() {
 	config_uart();
-	_log(INFO, "\r\n");
-	uint8_t *p = (uint8_t*)malloc(1);
-	log(INFO, "Start of heap %p", p);
-	free(p);
+	_log(INFO, "\r\n\r\n");
 	log(INFO,"Welcome at the nRF51822 code for meshing.");
 	
 	log(INFO, "Compilation time: %s", COMPILATION_TIME);
@@ -112,13 +117,21 @@ void configure(Nrf51822BluetoothStack &stack) {
  * This must be called after the SoftDevice has started.
  */
 void config_drivers() {
+	// TODO: Dominik, can we connect the adc init call with the characteristic / services
+	//   that actually use it? if there is no service that uses it there is no reason to
+	//   allocate space for it
 	nrf_adc_init(PIN_ADC);
+
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
 	pwm_config.num_channels = 1;
 	pwm_config.gpio_num[0] = PIN_LED;
 	pwm_config.mode = PWM_MODE_LED_255;
 
 	nrf_pwm_init(&pwm_config);
+
+#if(BOARD==PCA10001)
+	nrf_gpio_cfg_output(PIN_LED_CON);
+#endif
 }
 
 int main() {
@@ -145,6 +158,10 @@ int main() {
 			// be neater about it... we do not need to stop, only after a disconnect we do...
 			sd_ble_gap_rssi_stop(conn_handle);
 			sd_ble_gap_rssi_start(conn_handle);
+
+#if(BOARD==PCA10001)
+			nrf_gpio_pin_set(PIN_LED_CON);
+#endif
 		})
 		.onDisconnect([&](uint16_t conn_handle) {
 			log(INFO,"onDisconnect...");
@@ -152,6 +169,10 @@ int main() {
 
 			// of course this is not nice, but dirty! we immediately start advertising automatically after being
 			// disconnected. but for now this will be the default behaviour.
+
+#if(BOARD==PCA10001)
+			nrf_gpio_pin_clear(PIN_LED_CON);
+#endif
 
 			stack.stopScanning();
 
@@ -172,6 +193,10 @@ int main() {
 	//	 get temperature value
 	TemperatureService& temperatureService = TemperatureService::createService(stack);
 #endif /* temperature_service */
+
+#ifdef POWER_SERVICE
+	PowerService::createService(stack);
+#endif
 
 	// configure drivers
 	config_drivers();
