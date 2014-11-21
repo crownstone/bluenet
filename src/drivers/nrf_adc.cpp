@@ -21,24 +21,23 @@
 // allocate buffer struct (not array in buffer yet)
 buffer_t<uint16_t> adc_result;
 	
-// FIXME BEWARE, because we are using fixed arrays, increasing the size will cause
-//   memory and runtime problems.
-#define ADC_BUFFER_SIZE 100
-//uint16_t adc_buffer[ADC_BUFFER_SIZE];
+buffer_t<uint16_t>* ADC::getBuffer() {
+	return &adc_result;
+}
 
 /**
  * The init function is called once before operating the AD converter. Call it after you start the SoftDevice. Check 
  * the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
  */
-uint32_t nrf_adc_init(uint8_t pin) {
+uint32_t ADC::nrf_adc_init(uint8_t pin) {
 #if(NRF51_USE_SOFTDEVICE == 1)
 	log(DEBUG, "Run ADC converter with SoftDevice");
 #else 
 	log(DEBUG, "Run ADC converter without SoftDevice!!!");
 	
 #endif
-	if (adc_result.size != ADC_BUFFER_SIZE) {
-		adc_result.size = ADC_BUFFER_SIZE;
+	if (adc_result.size != _buffer_size) {
+		adc_result.size = _buffer_size;
 		adc_result.buffer = (uint16_t*)calloc( adc_result.size, sizeof(uint16_t*));
 		if (adc_result.buffer == NULL) {
 			log(FATAL, "Could not initialize buffer. Too big!?");
@@ -91,7 +90,7 @@ uint32_t nrf_adc_init(uint8_t pin) {
  *   - do not set the prescaler for the reference voltage, this means voltage is expected between 0 and 1.2V (VGB)
  * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
  */
-uint32_t nrf_adc_config(uint8_t pin) {
+uint32_t ADC::nrf_adc_config(uint8_t pin) {
 	NRF_ADC->CONFIG     =
 			(ADC_CONFIG_RES_10bit                            << ADC_CONFIG_RES_Pos)     |
 			(ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos)  | 
@@ -109,14 +108,14 @@ uint32_t nrf_adc_config(uint8_t pin) {
 /**
  * Stop the AD converter.
  */
-void nrf_adc_stop() {
+void ADC::nrf_adc_stop() {
 	NRF_ADC->TASKS_STOP = 1;
 }
 
 /**
  * Start the AD converter.
  */
-void nrf_adc_start() {
+void ADC::nrf_adc_start() {
 	NRF_ADC->EVENTS_END  = 0;
 	NRF_ADC->TASKS_START = 1;
 }

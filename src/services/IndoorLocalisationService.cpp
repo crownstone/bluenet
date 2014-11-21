@@ -30,7 +30,7 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
 
 	// we have to figure out why this goes wrong
-//	setName(std::string("IndoorLocalizationService"));
+	setName(std::string("IndoorLocalizationService"));
 
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
@@ -48,10 +48,10 @@ void IndoorLocalizationService::addSpecificCharacteristics() {
 }
 
 void IndoorLocalizationService::addSignalStrengthCharacteristic() {
-//	LOGd("create characteristic to read signal strength");
+	LOGd("create characteristic to read signal strength");
 	_rssiCharac = new CharacteristicT<int8_t>();
 	_rssiCharac->setUUID(UUID(getUUID(), RSSI_UUID)); // there is no BLE_UUID for rssi level(?)
-	_rssiCharac->setName(std::string("RSSI"));
+	_rssiCharac->setName(std::string("Received signal level"));
 	_rssiCharac->setDefaultValue(1);
 	_rssiCharac->setNotifies(true);
 
@@ -62,7 +62,7 @@ void IndoorLocalizationService::addNumberCharacteristic() {
 	// create a characteristic of type uint8_t (unsigned one byte integer).
 	// this characteristic is by default read-only (for the user)
 	// note that in the next characteristic this variable intchar is set!
-//	log(DEBUG, "create characteristic to read a number for debugging");
+	log(DEBUG, "create characteristic to read a number for debugging");
 	//Characteristic<uint8_t>&
 	_intChar = createCharacteristicRef<uint8_t>();
 	(*_intChar)
@@ -81,7 +81,7 @@ void IndoorLocalizationService::addNumber2Characteristic() {
 
 void IndoorLocalizationService::addScanControlCharacteristic() {
 	// set scanning option
-//	log(DEBUG, "create characteristic to stop/start scan");
+	log(DEBUG, "create characteristic to stop/start scan");
 	createCharacteristic<uint8_t>()
 		.setUUID(UUID(getUUID(), SCAN_DEVICE_UUID))
 		.setName("scan")
@@ -89,14 +89,13 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
 			if(value) {
-//				log(INFO,"crown: start scanning");
+				log(INFO,"crown: start scanning");
 				if (!_stack->isScanning()) {
-//					_scanResult.reset();
 					_scanResult.init();
 					_stack->startScanning();
 				}
 			} else {
-//				log(INFO,"crown: stop scanning");
+				log(INFO,"crown: stop scanning");
 				if (_stack->isScanning()) {
 					_stack->stopScanning();
 					*_peripheralCharac = _scanResult;
@@ -108,7 +107,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 
 void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	// get scan result
-//	log(DEBUG, "create characteristic to list found peripherals");
+	log(DEBUG, "create characteristic to list found peripherals");
 
 	_peripheralCharac = createCharacteristicRef<ScanResult>();
 	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
@@ -119,7 +118,7 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 
 void IndoorLocalizationService::addPersonalThresholdCharacteristic() {
 	// set threshold level
-//	log(DEBUG, "create characteristic to write personal threshold level");
+	log(DEBUG, "create characteristic to write personal threshold level");
 	createCharacteristic<uint8_t>()
 		.setUUID(UUID(getUUID(), PERSONAL_THRESHOLD_UUID))
 		.setName("Threshold")
@@ -129,7 +128,7 @@ void IndoorLocalizationService::addPersonalThresholdCharacteristic() {
 			nrf_pwm_set_value(0, value);
 //			nrf_pwm_set_value(1, value);
 //			nrf_pwm_set_value(2, value);
-//			log(INFO, "set personal_threshold_value to %i", value);
+			log(INFO, "set personal_threshold_value to %i", value);
 			_personalThresholdLevel = value;
 		});
 }
@@ -162,7 +161,7 @@ void IndoorLocalizationService::addRoomCharacteristic() {
 
 
 IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822BluetoothStack& _stack) {
-//	LOGd("Create indoor localisation service");
+	LOGd("Create indoor localisation service");
 	IndoorLocalizationService* svc = new IndoorLocalizationService(_stack);
 	_stack.addService(svc);
 	svc->addSpecificCharacteristics();

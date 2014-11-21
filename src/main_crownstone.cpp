@@ -80,7 +80,10 @@ using namespace BLEpp;
 
 void welcome() {
 	config_uart();
-	_log(INFO, "\r\n\r\n");
+	_log(INFO, "\r\n");
+	uint8_t *p = (uint8_t*)malloc(1);
+	log(INFO, "Start of heap %p", p);
+	free(p);
 	log(INFO,"Welcome at the nRF51822 code for meshing.");
 	
 	log(INFO, "Compilation time: %s", COMPILATION_TIME);
@@ -116,11 +119,11 @@ void configure(Nrf51822BluetoothStack &stack) {
 /**
  * This must be called after the SoftDevice has started.
  */
-void config_drivers() {
+void config_drivers(ADC &adc) {
 	// TODO: Dominik, can we connect the adc init call with the characteristic / services
 	//   that actually use it? if there is no service that uses it there is no reason to
 	//   allocate space for it
-	nrf_adc_init(PIN_ADC);
+	adc.nrf_adc_init(PIN_ADC);
 
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
 	pwm_config.num_channels = 1;
@@ -183,6 +186,9 @@ int main() {
 #endif
 		});
 
+	// Create ADC object
+	ADC adc;
+
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
 	//Service& localizationService = 
@@ -195,7 +201,7 @@ int main() {
 #endif /* temperature_service */
 
 #ifdef POWER_SERVICE
-	PowerService::createService(stack);
+	PowerService::createService(stack, adc));
 #endif
 
 	// configure drivers
