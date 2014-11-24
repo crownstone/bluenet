@@ -35,7 +35,7 @@ uint16_t ScanResult::getSize() const {
 }
 
 void ScanResult::reset() {
-	memset(_list, 0, sizeof(_list));
+	memset(_list, 0, MAX_NR_DEVICES * sizeof(peripheral_device_t));
 	_freeIdx = 0;
 }
 

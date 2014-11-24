@@ -32,7 +32,7 @@ class ScanResult {
 private:
 //	peripheral_device_t _list[MAX_NR_DEVICES];
 	peripheral_device_t* _list;
-    uint8_t _freeIdx;
+	uint8_t _freeIdx;
 
 public:
 	ScanResult();

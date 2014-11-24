@@ -5,9 +5,11 @@
  * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
+
 #ifndef CS_TIMER_H
 #define CS_TIMER_H
 
+/*
 #include <stdint.h>
 
 
@@ -25,5 +27,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
+*/
 #endif
+
