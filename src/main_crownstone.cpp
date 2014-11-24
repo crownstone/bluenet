@@ -10,7 +10,7 @@
  *********************************************************************************************************************/
 
 #define INDOOR_SERVICE
-#define TEMPERATURE_SERVICE
+//#define TEMPERATURE_SERVICE
 #define POWER_SERVICE
 
 /**********************************************************************************************************************
@@ -48,7 +48,7 @@ extern "C" {
 #include <drivers/nrf_adc.h>
 #include <drivers/nrf_pwm.h>
 #include <drivers/serial.h>
-
+#include <common/storage.h>
 
 #ifdef INDOOR_SERVICE
 #include <services/IndoorLocalisationService.h>
@@ -91,7 +91,7 @@ void welcome() {
 
 void setName(Nrf51822BluetoothStack &stack) {
 	char devicename[32];
-	sprintf(devicename, "arow_%s", COMPILATION_TIME);
+	sprintf(devicename, "row_%s", COMPILATION_TIME);
 	stack.setDeviceName(std::string(devicename)) // max len = ble_gap_devname_max_len (31)
 		// controls how device appears in gui.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
@@ -187,8 +187,15 @@ int main() {
 		});
 
 	// Create ADC object
+	// TODO: make service which enables other services and only init ADC when necessary
 	ADC adc;
 
+	// Create persistent memory object
+	// TODO: make service which enables other services and only init persistent memory when necessary
+	Storage storage;
+	storage.init(32);
+
+	log(INFO, "Create all services");
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
 	//Service& localizationService = 
@@ -201,7 +208,7 @@ int main() {
 #endif /* temperature_service */
 
 #ifdef POWER_SERVICE
-	PowerService::createService(stack, adc);
+	PowerService &powerService = PowerService::createService(stack, adc, storage);
 #endif
 
 	// configure drivers
@@ -220,6 +227,10 @@ int main() {
 		// deliver events from the bluetooth stack to the callbacks defined above.
 		//		analogwrite(pin_led, 50);
 		stack.loop();
+
+#ifdef POWER_SERVICE
+		powerService.loop();
+#endif
 
 #ifdef TEMPERATURE_SERVICE
 		// [31.10.14] correction, this only happens without optimization -Os !!!

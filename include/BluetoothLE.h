@@ -127,7 +127,7 @@ namespace BLEpp {
         }
 
 	/**
-	 * Generate a 128 Bluetooth address from the _full array.
+	 * Generate a 128-bit Bluetooth address from the _full array.
 	 */
 	operator ble_uuid128_t() {
 		ble_uuid128_t res;
@@ -521,12 +521,12 @@ namespace BLEpp {
             CharacteristicValue value(len, data+offset);
             setCharacteristicValue(value);
 
-//            log(DEBUG, "%s: onWrite()", _name.c_str());
+            log(DEBUG, "%s: onWrite()", _name.c_str());
             _callbackOnWrite(getValue());
         }
 
         void read() {
-//            log(DEBUG, "%s: onRead", _name.c_str());
+            log(DEBUG, "%s: onRead()", _name.c_str());
             T newValue = _callbackOnRead();
             if (newValue != _value) {
                 operator=(newValue);

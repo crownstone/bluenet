@@ -706,6 +706,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	//  sent in the space 1 128-bit UUID occupies. So it really depends on the application
 	//  how this advertisement package should look like, so it doesn't really make sense
 	//  to have this function in the library.
+//#ifdef YOU_WANT_TO_USE_SPACE
 	if (uidCount > 1) {
 		advdata.uuids_more_available.uuid_cnt = 1;
 		advdata.uuids_more_available.p_uuids = adv_uuids;
@@ -713,6 +714,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 		advdata.uuids_complete.uuid_cnt = 1;
 		advdata.uuids_complete.p_uuids = adv_uuids;
 	}
+//#endif
 
 	err_code = ble_advdata_set(&advdata, NULL);
 	if (err_code == NRF_ERROR_DATA_SIZE) {
@@ -893,8 +895,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	case BLE_GATTS_EVT_WRITE:
 		for (Service* svc : _services) {
 			// TODO use a map...
-			if (svc->getHandle()
-					== p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
+			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
 				svc->on_ble_event(p_ble_evt);
 			}
 		}
@@ -902,8 +903,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	case BLE_GATTS_EVT_HVC:
 		for (Service* svc : _services) {
-			if (svc->getHandle()
-					== p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
+			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
 				svc->on_ble_event(p_ble_evt);
 			}
 		}

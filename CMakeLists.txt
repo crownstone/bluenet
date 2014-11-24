@@ -96,11 +96,17 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
 # We add the source files explicitly. This is recommended in the cmake system and will also force us all the time to
 # consider the size of the final binary. Do not include things, if not necessary!
-LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
-#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
-#LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
-LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/pstorage.c")
-LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
+LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
+#LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
+#LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
+LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/pstorage.c")
+LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
+
+FOREACH(nordic_file ${NORDIC_SOURCE})
+	MESSAGE(STATUS "Include Nordic file: " ${nordic_file})
+ENDFOREACH()
+
+LIST(APPEND FOLDER_SOURCE ${NORDIC_SOURCE})
 
 # For Visual Studio group the files
 SOURCE_GROUP("Source files" FILES ${FOLDER_SOURCE})

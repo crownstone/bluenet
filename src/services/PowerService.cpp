@@ -20,11 +20,13 @@
 
 using namespace BLEpp;
 
-PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc) :
-		_stack(&_stack), _adc(adc) {
+PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage) :
+		_stack(&_stack), _adc(adc), _storage(storage), _current_limit(0) {
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
+	
+	log(INFO, "Create power service");
 
 	// we have to figure out why this goes wrong
 //	setName(std::string("Power Service"));
@@ -83,17 +85,43 @@ void PowerService::addPowerConsumptionCharachteristic() {
 		.setNotifies(true);
 }
 
+uint16_t PowerService::getCurrentLimit() {
+	_storage.getUint16(PS_CURRENT_LIMIT, &_current_limit);
+	LOGi("Obtained current limit from PM: %i", _current_limit);
+	return _current_limit;
+}
+
+
 void PowerService::addCurrentLimitCharacteristic() {
 //	LOGd("create characteristic to write current limit");
-	createCharacteristic<uint16_t>()
+	_currentLimitCharacteristic = createCharacteristicRef<uint16_t>();
+	(*_currentLimitCharacteristic)
 		.setUUID(UUID(getUUID(), CURRENT_LIMIT_UUID))
 		.setName("Current Limit")
-		.setDefaultValue(0)
+		.setDefaultValue(getCurrentLimit())
 		.setWritable(true)
 		.onWrite([&](const uint16_t &value) -> void {
-//			LOGi("set current limit to: %i", value);
-			// TODO: impelement persistent storage of device type
-		});
+			LOGi("Set current limit to: %i", value);
+			_current_limit = value;
+			_storage.setUint16(PS_CURRENT_LIMIT, &value);
+		})
+		/* // not necessary for us... isn't called anyway...
+		.onRead([&]() -> uint16_t {
+			LOGi("Read current limit: %i", _current_limit);
+			return getCurrentLimit();
+		}) */
+		;
+}
+
+static int tmp_cnt = 0;
+
+void PowerService::loop() {
+	// check if current is not beyond current_limit if the latter is set
+	if (++tmp_cnt > 100) {
+		getCurrentLimit();
+		*_currentLimitCharacteristic = _current_limit;
+		tmp_cnt = 0;
+	}
 }
 
 void PowerService::sampleAdcInit() {
@@ -191,9 +219,9 @@ void PowerService::sampleAdcStart() {
 */
 }
 
-PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& adc) {
+PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& adc, Storage& storage) {
 //	LOGd("Create power service");
-	PowerService* svc = new PowerService(_stack, adc);
+	PowerService* svc = new PowerService(_stack, adc, storage);
 	_stack.addService(svc);
 	svc->addSpecificCharacteristics();
 	return *svc;
