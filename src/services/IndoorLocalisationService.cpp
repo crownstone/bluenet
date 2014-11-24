@@ -42,9 +42,9 @@ void IndoorLocalizationService::addSpecificCharacteristics() {
 //	addNumber2Characteristic();
 	addScanControlCharacteristic();
 	addPeripheralListCharacteristic();
-	addPersonalThresholdCharacteristic();
-	addDeviceTypeCharactersitic();
-	addRoomCharacteristic();
+//	addPersonalThresholdCharacteristic();
+//	addDeviceTypeCharactersitic();
+//	addRoomCharacteristic();
 }
 
 void IndoorLocalizationService::addSignalStrengthCharacteristic() {

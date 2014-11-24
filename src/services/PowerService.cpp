@@ -35,9 +35,9 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc) :
 
 void PowerService::addSpecificCharacteristics() {
 	addPWMCharacteristic();
-//	addVoltageCurveCharacteristic();
-	addPowerConsumptionCharachteristic();
-	addCurrentLimitCharacteristic();
+	addVoltageCurveCharacteristic();
+//	addPowerConsumptionCharachteristic();
+//	addCurrentLimitCharacteristic();
 }
 
 void PowerService::addPWMCharacteristic() {

@@ -690,10 +690,26 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 
 //	advdata.name_type               = BLE_ADVDATA_NO_NAME;
 
+	/*
+	 * 31 bytes total payload
+	 *
+	 * 1 byte per element. in this case, 3 elements -> 3 bytes
+	 *
+	 * => 28 bytes available payload
+	 *
+	 * 2 bytes for flags (1 byte for type, 1 byte for data)
+	 * 2 bytes for tx power level (1 byte for type, 1 byte for data)
+	 * 17 bytes for UUID (1 byte for type, 16 byte for data)
+	 *
+	 * -> 7 bytes left
+	 *
+	 * Note: by adding an element, one byte will be lost because of the
+	 *   addition, so there are actually only 6 bytes left after adding
+	 *   an element, and 1 byte of that is used for the type, so 5 bytes
+	 *   are left for the data
+	 */
+
 	// Anne: setting NO_NAME breaks the Android Nordic nRF Master Console app.
-	advdata.name_type = BLE_ADVDATA_FULL_NAME;
-	advdata.short_name_len = 5;
-//	advdata.include_appearance      = _appearance != BLE_APPEARANCE_UNKNOWN;
 	advdata.p_tx_power_level = &_tx_power_level;
 	advdata.flags.size = sizeof(flags);
 	advdata.flags.p_data = &flags;
@@ -714,7 +730,24 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 		advdata.uuids_complete.p_uuids = adv_uuids;
 	}
 
-	err_code = ble_advdata_set(&advdata, NULL);
+	// Because of the limited amount of space in the advertisement data, additional
+	// data can be supplied in the scan response package. Same space restrictions apply
+	// here:
+	/*
+	 * 31 bytes total payload
+	 *
+	 * 1 byte per element. in this case, 1 element -> 1 bytes
+	 *
+	 * 30 bytes of available payload
+	 *
+	 * 1 byte for name type
+	 * -> 29 bytes left for name
+	 */
+	ble_advdata_t scan_resp;
+	memset(&scan_resp, 0, sizeof(scan_resp));
+	scan_resp.name_type = BLE_ADVDATA_FULL_NAME;
+
+	err_code = ble_advdata_set(&advdata, &scan_resp);
 	if (err_code == NRF_ERROR_DATA_SIZE) {
 		log(FATAL,"FATAL ERROR!!!! advertisement data too big for package");
 	}
