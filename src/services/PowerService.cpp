@@ -85,12 +85,12 @@ void PowerService::addPowerConsumptionCharachteristic() {
 
 void PowerService::addCurrentLimitCharacteristic() {
 //	LOGd("create characteristic to write current limit");
-	createCharacteristic<uint32_t>()
+	createCharacteristic<uint16_t>()
 		.setUUID(UUID(getUUID(), CURRENT_LIMIT_UUID))
 		.setName("Current Limit")
 		.setDefaultValue(0)
 		.setWritable(true)
-		.onWrite([&](const uint32_t &value) -> void {
+		.onWrite([&](const uint16_t &value) -> void {
 //			LOGi("set current limit to: %i", value);
 			// TODO: impelement persistent storage of device type
 		});

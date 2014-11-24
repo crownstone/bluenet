@@ -16,7 +16,7 @@
 //#endif
 
 // make callback
-static int timer_flag;
+static int rtc_timer_flag;
 
 uint32_t nrf_rtc_init(uint32_t ms=0);
 //uint32_t nrf_rtc_config(uint32_t ms=0);

@@ -67,7 +67,7 @@ MESSAGE(STATUS "Linked libraries: ${LIBS}")
 
 # Source directory
 SET(SOURCE_DIR "src")
-SET(INCLUDE_DIR "include")
+SET(INCLUDE_DIR "include" "include/common")
 
 # essential, code doesn't run without this file !!!
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nRF51822.c")
@@ -77,6 +77,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/error.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/ble_error.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/syscalls.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/utils.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/storage.cpp")
 #LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/timer.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/serial.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/nrf_pwm.cpp")
@@ -98,6 +99,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
 #LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
 #LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
+LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/app_common/pstorage.c")
 LIST(APPEND FOLDER_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
 
 # For Visual Studio group the files
@@ -153,7 +155,7 @@ ELSE()
 		#COMMAND ${CMAKE_OBJDUMP} -h ${PROJECT_NAME}.elf
 		COMMAND echo
 		COMMAND echo "*** Show largest symbols / functions"
-		COMMAND ${CMAKE_NM} --print-size --size-sort --radix=d ${PROJECT_NAME}.elf | tail
+		COMMAND ${CMAKE_NM} --print-size --size-sort --radix=d ${PROJECT_NAME}.elf | tail -n20
 		COMMAND echo
 		COMMAND echo "*** Show size of sections"
 		COMMAND ${CMAKE_SIZE} -A -d ${PROJECT_NAME}.elf
