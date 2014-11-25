@@ -415,6 +415,9 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	BLE_CALL(sd_softdevice_enable,
 			(_clock_source, softdevice_assertion_handler));
 
+	// Initialize the SoftDevice handler module.
+	SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, false);
+	
 	// enable the BLE stack
 #if(NORDIC_SDK_VERSION >= 6)
 
@@ -459,9 +462,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	setTxPowerLevel();
 
-	// Initialize the SoftDevice handler module.
-	SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, false);
-	
 	//BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
 	log(INFO, "Set sys event handler");
 	uint8_t err_code;

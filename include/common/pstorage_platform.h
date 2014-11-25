@@ -18,11 +18,10 @@
 #define PSTORAGE_FLASH_PAGE_SIZE    ((uint16_t)NRF_FICR->CODEPAGESIZE)   /**< Size of one flash page. */
 #define PSTORAGE_FLASH_EMPTY_MASK    0xFFFFFFFF                          /**< Bit mask that defines an empty address in flash. */
 
-#define PSTORAGE_FLASH_PAGE_END                                     \
-	((NRF_UICR->BOOTLOADERADDR != PSTORAGE_FLASH_EMPTY_MASK)    \
+#define PSTORAGE_FLASH_PAGE_END                                      \
+	((NRF_UICR->BOOTLOADERADDR != PSTORAGE_FLASH_EMPTY_MASK)     \
 	 ? (NRF_UICR->BOOTLOADERADDR / PSTORAGE_FLASH_PAGE_SIZE)     \
 	 : NRF_FICR->CODESIZE)
-
 
 #define PSTORAGE_MAX_APPLICATIONS   1                                                           /**< Maximum number of applications that can be registered with the module, configurable based on system requirements. */
 #define PSTORAGE_MIN_BLOCK_SIZE     0x0010                                                      /**< Minimum size of block that can be registered with the module. Should be configured based on system requirements, recommendation is not have this value to be at least size of word. */

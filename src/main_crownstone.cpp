@@ -67,13 +67,13 @@ using namespace BLEpp;
  * Precompiler warnings/messages
  *********************************************************************************************************************/
 
-/*
-// BUFSIZ is used by sprintf for the internal buffer and is 1024 bytes.
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
 
-#pragma message "BUFSIZ = " STR(BUFSIZ)
-*/
+// BUFSIZ is used by sprintf for the internal buffer and is 1024 bytes.
+//#define STR_HELPER(x) #x
+//#define STR(x) STR_HELPER(x)
+//#pragma message "PSTORAGE_FLASH_PAGE_SIZE = " STR(PSTORAGE_FLASH_PAGE_SIZE)
+//#pragma message "BUFSIZ = " STR(BUFSIZ)
+
 
 /**********************************************************************************************************************
  * Main functionality

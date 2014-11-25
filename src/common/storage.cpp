@@ -81,15 +81,19 @@ bool Storage::init(int size) {
 		APP_ERROR_CHECK(err_code);
 	}
 
-/*
+#define TEST_CLEAR
+#define TEST_WRITE
+
+#ifdef TEST_CLEAR
 	log(INFO, "Clear single block");
 	err_code = pstorage_clear(&handle, size);
 	if (err_code != NRF_SUCCESS) {
 		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
 		APP_ERROR_CHECK(err_code);
 	}
-*/
-	/*
+#endif
+
+#ifdef TEST_WRITE	
 	test[0] = 12;
 	test[1] = 13;
 	log(INFO, "Write something");
@@ -97,7 +101,7 @@ bool Storage::init(int size) {
 	pstorage_store(&handle, test, 2, 0);
 	//setUint16(0, &test);
 	app_sched_execute();
-*/
+#endif
 	uint32_t count;
 	err_code = pstorage_access_status_get(&count);
 	if (err_code != NRF_SUCCESS) {
