@@ -92,7 +92,7 @@ void welcome() {
 
 void setName(Nrf51822BluetoothStack &stack) {
 	char devicename[32];
-	sprintf(devicename, "row_%s", COMPILATION_TIME);
+	sprintf(devicename, "Crown_%s", COMPILATION_TIME);
 	stack.setDeviceName(std::string(devicename)) // max len = ble_gap_devname_max_len (31)
 		// controls how device appears in gui.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
