@@ -44,7 +44,8 @@ Storage::Storage() {
 Storage::~Storage() {
 }
 
-static uint8_t test[2];
+static uint8_t test[4];
+static uint16_t test1;
 
 /**
  * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
@@ -81,27 +82,34 @@ bool Storage::init(int size) {
 		APP_ERROR_CHECK(err_code);
 	}
 
-#define TEST_CLEAR
-#define TEST_WRITE
+//#define TEST_CLEAR
+//#define TEST_WRITE
+#define TEST_READ
 
 #ifdef TEST_CLEAR
 	log(INFO, "Clear single block");
-	err_code = pstorage_clear(&handle, size);
+	err_code = pstorage_clear(&block_handle, size);
 	if (err_code != NRF_SUCCESS) {
 		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
 		APP_ERROR_CHECK(err_code);
 	}
 #endif
 
+#ifdef TEST_READ
+	log(INFO, "Read something");
+	//pstorage_store(&block_handle, test, 4, 0);
+	getUint16(0, &test1);
+#endif
+
 #ifdef TEST_WRITE	
 	test[0] = 12;
 	test[1] = 13;
+	test[2] = 0;
+	test[3] = 0;
 	log(INFO, "Write something");
-	//uint16_t test = 12;
-	pstorage_store(&handle, test, 2, 0);
-	//setUint16(0, &test);
-	app_sched_execute();
+	pstorage_store(&block_handle, test, 4, 0);
 #endif
+	/*
 	uint32_t count;
 	err_code = pstorage_access_status_get(&count);
 	if (err_code != NRF_SUCCESS) {
@@ -109,7 +117,7 @@ bool Storage::init(int size) {
 		APP_ERROR_CHECK(err_code);
 	}
 	log(INFO, "Number of pending operations: %i", count);
-
+*/
 	return (err_code == NRF_SUCCESS);
 }
 
@@ -123,8 +131,15 @@ void Storage::setUint8(int index, uint8_t *item) {
 	pstorage_store(&block_handle, item, 1, index);
 }
 
+//#define PRINT_PENDING
+
 // Get 16-bit integer
 void Storage::getUint16(int index, uint16_t *item) {
+	static uint8_t word_aligned_item[4];
+	pstorage_load(word_aligned_item, &block_handle, 4, index); //todo: check endianness
+	*item = ((uint16_t)word_aligned_item[1]) << 8;
+       	*item |= word_aligned_item[0];
+#ifdef PRINT_PENDING
 	uint32_t err_code;
 	uint32_t count;
 	err_code = pstorage_access_status_get(&count);
@@ -133,28 +148,26 @@ void Storage::getUint16(int index, uint16_t *item) {
 		APP_ERROR_CHECK(err_code);
 	}
 	log(INFO, "Number of pending operations: %i", count);
-	pstorage_load((uint8_t*)item, &block_handle, 2, index); //todo: check endianness
-	app_sched_execute();
+#endif
 }
 
 // Set 16-bit integer
 void Storage::setUint16(int index, const uint16_t *item) {
-	pstorage_store(&block_handle, (uint8_t*)item, 2, index);
+	static uint8_t word_aligned_item[4];
+	word_aligned_item[0] = item[0];
+	word_aligned_item[1] = item[1];
+	word_aligned_item[2] = 0;
+	word_aligned_item[3] = 0;
+	pstorage_store(&block_handle, word_aligned_item, 4, index);
+#ifdef PRINT_PENDING
 	uint32_t err_code;
 	uint32_t count;
-	/*
-	uint32_t size = 32;
-	log(INFO, "Clear single block");
-	err_code = pstorage_clear(&block_handle, size);
-	if (err_code != NRF_SUCCESS) {
-		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
-		APP_ERROR_CHECK(err_code);
-	}*/
 	err_code = pstorage_access_status_get(&count);
 	if (err_code != NRF_SUCCESS) {
 		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
 		APP_ERROR_CHECK(err_code);
 	} 
 	log(INFO, "Number of pending operations: %i", count);
+#endif
 }	
 

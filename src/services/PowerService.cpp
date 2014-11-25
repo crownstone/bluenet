@@ -86,8 +86,14 @@ void PowerService::addPowerConsumptionCharachteristic() {
 }
 
 uint16_t PowerService::getCurrentLimit() {
+#ifdef STORAGE_WORKING
+	//LOGi("Get current limit from memory");
 	_storage.getUint16(PS_CURRENT_LIMIT, &_current_limit);
 	LOGi("Obtained current limit from PM: %i", _current_limit);
+#else
+	LOGi("Storage not working yet");
+	_current_limit = 666;
+#endif
 	return _current_limit;
 }
 
@@ -103,13 +109,19 @@ void PowerService::addCurrentLimitCharacteristic() {
 		.onWrite([&](const uint16_t &value) -> void {
 			// https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/
 			// should be done between connection/advertisement events...
-			//log(INFO, "Stop advertising");
-			//_stack->stopAdvertising();
+		//	if (_stack->isAdvertising()) {
+		//		log(INFO, "Stop advertising");
+		//		_stack->stopAdvertising();
+		//	}
+			LOGi("Set current limit to: %i", value);
 			_current_limit = value;
-			LOGi("Set current limit to: %i", _current_limit);
+#ifdef STORAGE_WORKING
 			_storage.setUint16(PS_CURRENT_LIMIT, &_current_limit);
-			//log(INFO, "Start advertising");
-			//_stack->startAdvertising();
+#endif
+		//	if (!_stack->isAdvertising()) {
+		//		log(INFO, "Start advertising");
+		//		_stack->startAdvertising();
+		//	}
 		})
 		/* // not necessary for us... isn't called anyway...
 		.onRead([&]() -> uint16_t {
@@ -119,12 +131,16 @@ void PowerService::addCurrentLimitCharacteristic() {
 		;
 }
 
-static int tmp_cnt = 0;
+static int tmp_cnt = 100;
+static int loop_cnt = 100;
 
 void PowerService::loop() {
 	// check if current is not beyond current_limit if the latter is set
-	if (++tmp_cnt > 100) {
+	if (++tmp_cnt > loop_cnt) {
 		getCurrentLimit();
+		log(INFO, "Write current_limit to characteristic");
+		//_currentLimitCharacteristic->setValue(_current_limit);
+		// this fails.... why!?
 		*_currentLimitCharacteristic = _current_limit;
 		tmp_cnt = 0;
 	}

@@ -9,7 +9,7 @@
  * Enable the services you want to run on the device
  *********************************************************************************************************************/
 
-#define INDOOR_SERVICE
+//#define INDOOR_SERVICE
 //#define TEMPERATURE_SERVICE
 #define POWER_SERVICE
 
@@ -67,6 +67,9 @@ using namespace BLEpp;
  * Precompiler warnings/messages
  *********************************************************************************************************************/
 
+#ifndef BLUETOOTH_NAME
+#error We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. "Crown" (with quotes)
+#endif
 
 // BUFSIZ is used by sprintf for the internal buffer and is 1024 bytes.
 //#define STR_HELPER(x) #x
@@ -92,7 +95,7 @@ void welcome() {
 
 void setName(Nrf51822BluetoothStack &stack) {
 	char devicename[32];
-	sprintf(devicename, "Crown_%s", COMPILATION_TIME);
+	sprintf(devicename, "%s_%s", BLUETOOTH_NAME, COMPILATION_TIME);
 	stack.setDeviceName(std::string(devicename)) // max len = ble_gap_devname_max_len (31)
 		// controls how device appears in gui.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
@@ -199,7 +202,9 @@ int main() {
 	// Create persistent memory object
 	// TODO: make service which enables other services and only init persistent memory when necessary
 	Storage storage;
+#ifdef STORAGE_WORKING
 	storage.init(32);
+#endif
 	
 	log(INFO, "Create all services");
 #ifdef INDOOR_SERVICE
