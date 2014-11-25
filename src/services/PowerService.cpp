@@ -101,9 +101,15 @@ void PowerService::addCurrentLimitCharacteristic() {
 		.setDefaultValue(getCurrentLimit())
 		.setWritable(true)
 		.onWrite([&](const uint16_t &value) -> void {
-			LOGi("Set current limit to: %i", value);
+			// https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/
+			// should be done between connection/advertisement events...
+			//log(INFO, "Stop advertising");
+			//_stack->stopAdvertising();
 			_current_limit = value;
-			_storage.setUint16(PS_CURRENT_LIMIT, &value);
+			LOGi("Set current limit to: %i", _current_limit);
+			_storage.setUint16(PS_CURRENT_LIMIT, &_current_limit);
+			//log(INFO, "Start advertising");
+			//_stack->startAdvertising();
 		})
 		/* // not necessary for us... isn't called anyway...
 		.onRead([&]() -> uint16_t {

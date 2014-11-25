@@ -1,3 +1,9 @@
+/**
+ * Author: Christopher Mason
+ * Author: Anne van Rossum
+ * License: TODO
+ */
+
 #ifndef __nRF51822_h
 #define __nRF51822_h
 

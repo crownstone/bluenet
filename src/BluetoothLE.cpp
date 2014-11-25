@@ -7,6 +7,7 @@
 #include "BluetoothLE.h"
 #include "nRF51822.h"
 
+
 #if(NORDIC_SDK_VERSION >= 6)
 #include "nrf_soc.h"
 #endif
@@ -17,6 +18,7 @@
 
 #include <util/ble_error.h>
 #include <util/utils.h>
+#include <handlers.h>
 
 using namespace BLEpp;
 
@@ -456,6 +458,18 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	setConnParams();
 
 	setTxPowerLevel();
+
+	// Initialize the SoftDevice handler module.
+	SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, false);
+	
+	//BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
+	log(INFO, "Set sys event handler");
+	uint8_t err_code;
+	err_code = softdevice_sys_evt_handler_set(sys_evt_dispatch);
+	if (err_code != NRF_SUCCESS) {
+		LOGd("BE ERR_CODE: %d (0x%X)", err_code, err_code);
+		APP_ERROR_CHECK(err_code);
+	}
 
 	_inited = true;
 

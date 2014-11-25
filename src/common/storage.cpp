@@ -14,29 +14,37 @@
 #include <util/ble_error.h>
 #include <drivers/serial.h>
 
+
 extern "C" {
+#include <app_scheduler.h>
+
 static pstorage_handle_t handle;
+static pstorage_handle_t block_handle;
 
 static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data, 
 		uint32_t data_len) {
-	log(INFO, "Opcode %i", op_code);
 	// we might want to check if things are actually stored, by using this callback	
-	if (op_code == PSTORAGE_LOAD_OP_CODE) {
-		LOGd("Error with loading data");
-	}
-	// do nothing
 	if (result != NRF_SUCCESS) {
 		LOGd("ERR_CODE: %d (0x%X)", result, result);
 		APP_ERROR_CHECK(result);
+		
+		if (op_code == PSTORAGE_LOAD_OP_CODE) {
+			LOGd("Error with loading data");
+		}
+	} else {
+		log(INFO, "Opcode %i executed (no error)", op_code);
 	}
 }
-}
+
+} // extern "C"
 
 Storage::Storage() {
 }
 
 Storage::~Storage() {
 }
+
+static uint8_t test[2];
 
 /**
  * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
@@ -66,30 +74,83 @@ bool Storage::init(int size) {
 		APP_ERROR_CHECK(err_code);
 	}
 
+	log(INFO, "Get block identifier");
+	err_code = pstorage_block_identifier_get(&handle, 0, &block_handle);
+	if (err_code != NRF_SUCCESS) {
+		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
+		APP_ERROR_CHECK(err_code);
+	}
+
+/*
+	log(INFO, "Clear single block");
+	err_code = pstorage_clear(&handle, size);
+	if (err_code != NRF_SUCCESS) {
+		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
+		APP_ERROR_CHECK(err_code);
+	}
+*/
+	/*
+	test[0] = 12;
+	test[1] = 13;
 	log(INFO, "Write something");
-	uint16_t test = 12;
-	setUint16(0, &test);
-	
+	//uint16_t test = 12;
+	pstorage_store(&handle, test, 2, 0);
+	//setUint16(0, &test);
+	app_sched_execute();
+*/
+	uint32_t count;
+	err_code = pstorage_access_status_get(&count);
+	if (err_code != NRF_SUCCESS) {
+		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
+		APP_ERROR_CHECK(err_code);
+	}
+	log(INFO, "Number of pending operations: %i", count);
+
 	return (err_code == NRF_SUCCESS);
 }
 
 // Get byte at location "index" 
 void Storage::getUint8(int index, uint8_t *item) {
-	pstorage_load(item, &handle, 1, index); 
+	pstorage_load(item, &block_handle, 1, index); 
 }
 
 // Store byte
 void Storage::setUint8(int index, uint8_t *item) {
-	pstorage_store(&handle, item, 1, index);
+	pstorage_store(&block_handle, item, 1, index);
 }
 
 // Get 16-bit integer
 void Storage::getUint16(int index, uint16_t *item) {
-	pstorage_load((uint8_t*)item, &handle, 2, index); //todo: check endianness
+	uint32_t err_code;
+	uint32_t count;
+	err_code = pstorage_access_status_get(&count);
+	if (err_code != NRF_SUCCESS) {
+		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
+		APP_ERROR_CHECK(err_code);
+	}
+	log(INFO, "Number of pending operations: %i", count);
+	pstorage_load((uint8_t*)item, &block_handle, 2, index); //todo: check endianness
+	app_sched_execute();
 }
 
 // Set 16-bit integer
 void Storage::setUint16(int index, const uint16_t *item) {
-	pstorage_store(&handle, (uint8_t*)item, 2, index);
+	pstorage_store(&block_handle, (uint8_t*)item, 2, index);
+	uint32_t err_code;
+	uint32_t count;
+	/*
+	uint32_t size = 32;
+	log(INFO, "Clear single block");
+	err_code = pstorage_clear(&block_handle, size);
+	if (err_code != NRF_SUCCESS) {
+		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
+		APP_ERROR_CHECK(err_code);
+	}*/
+	err_code = pstorage_access_status_get(&count);
+	if (err_code != NRF_SUCCESS) {
+		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
+		APP_ERROR_CHECK(err_code);
+	} 
+	log(INFO, "Number of pending operations: %i", count);
 }	
 

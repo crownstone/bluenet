@@ -21,14 +21,15 @@
 #include "util/ble_error.h"
 
 #if(NORDIC_SDK_VERSION < 5)
-	#include "ble_stack_handler.h"
-	#include "ble_nrf6310_pins.h"
+#include "ble_stack_handler.h"
+#include "ble_nrf6310_pins.h"
 #endif
 #include "nrf51_bitfields.h"
 
 extern "C" {
-	#include "ble_advdata_parser.h"
-	#include "nrf_delay.h"
+#include "ble_advdata_parser.h"
+#include "nrf_delay.h"
+#include "app_scheduler.h"
 }
 
 #include "nordic_common.h"
@@ -190,11 +191,16 @@ int main() {
 	// TODO: make service which enables other services and only init ADC when necessary
 	ADC adc;
 
+	// Scheduler must be initialized before persistent memory
+	const uint16_t max_size = 32;
+	const uint16_t queue_size = 16;
+	APP_SCHED_INIT(max_size, queue_size);
+
 	// Create persistent memory object
 	// TODO: make service which enables other services and only init persistent memory when necessary
 	Storage storage;
 	storage.init(32);
-
+	
 	log(INFO, "Create all services");
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
@@ -244,6 +250,8 @@ int main() {
 			temperatureService.loop();
 //		}
 #endif
+		app_sched_execute();
+
 		nrf_delay_ms(50);
 	}
 }
