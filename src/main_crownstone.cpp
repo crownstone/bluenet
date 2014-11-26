@@ -74,7 +74,6 @@ using namespace BLEpp;
 // BUFSIZ is used by sprintf for the internal buffer and is 1024 bytes.
 //#define STR_HELPER(x) #x
 //#define STR(x) STR_HELPER(x)
-//#pragma message "PSTORAGE_FLASH_PAGE_SIZE = " STR(PSTORAGE_FLASH_PAGE_SIZE)
 //#pragma message "BUFSIZ = " STR(BUFSIZ)
 
 
@@ -202,9 +201,7 @@ int main() {
 	// Create persistent memory object
 	// TODO: make service which enables other services and only init persistent memory when necessary
 	Storage storage;
-#ifdef STORAGE_WORKING
 	storage.init(32);
-#endif
 	
 	log(INFO, "Create all services");
 #ifdef INDOOR_SERVICE

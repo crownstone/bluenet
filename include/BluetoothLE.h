@@ -448,6 +448,11 @@ namespace BLEpp {
             return *this;
         }
 
+        Characteristic<T>& setNotifies(bool notifies) {
+            CharacteristicBase::setNotifies(notifies);
+            return *this;
+        }
+
         Characteristic<T>& onWrite(const callback_on_write_t& closure) {
             _callbackOnWrite = closure;
             return *this;

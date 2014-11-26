@@ -16,7 +16,7 @@
 
 #include "nRF51822.h"
 
-//#include <common/timer.h>
+#define STORAGE_WORKING
 
 using namespace BLEpp;
 
@@ -28,6 +28,11 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 	
 	log(INFO, "Create power service");
 
+	characStatus.push_back( { PWM_UUID, true });
+	characStatus.push_back( { VOLTAGE_CURVE_UUID, true });
+	characStatus.push_back( { POWER_CONSUMPTION_UUID, false });
+	characStatus.push_back( { CURRENT_LIMIT_UUID, true });
+
 	// we have to figure out why this goes wrong
 //	setName(std::string("Power Service"));
 
@@ -36,14 +41,45 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 }
 
 void PowerService::addSpecificCharacteristics() {
-	addPWMCharacteristic();
-	addVoltageCurveCharacteristic();
-//	addPowerConsumptionCharachteristic();
-//	addCurrentLimitCharacteristic();
+	for ( CharacteristicStatusT &status : characStatus) {
+		switch(status.UUID) {
+		case PWM_UUID: 
+			if (status.enabled) {
+				log(DEBUG, "Create characteristic %i to set PWM", PWM_UUID);
+				addPWMCharacteristic();
+			} else {
+				log(INFO, "Disabled PWM characteristic");
+			}
+		break;
+		case VOLTAGE_CURVE_UUID:
+			if (status.enabled) {
+				log(DEBUG, "Create characteristic %i to read voltage curve", VOLTAGE_CURVE_UUID);
+				addVoltageCurveCharacteristic();
+			} else {
+				log(INFO, "Disabled voltage curve characteristic");
+			}
+		break;
+		case POWER_CONSUMPTION_UUID:
+			if (status.enabled) {
+				log(DEBUG, "Create characteristic %i to read power consumption", POWER_CONSUMPTION_UUID);
+				addPowerConsumptionCharacteristic();
+			} else {
+				log(INFO, "Disabled power consumption characteristic");
+			}
+		break;
+		case CURRENT_LIMIT_UUID:
+			if (status.enabled) {
+				log(DEBUG, "Create characteristic %i to set current limit", CURRENT_LIMIT_UUID);
+				addCurrentLimitCharacteristic();
+			} else {
+				log(INFO, "Disabled current limit characteristic");
+			}
+		break;
+		}
+	}
 }
 
 void PowerService::addPWMCharacteristic() {
-//	log(DEBUG, "create characteristic to set PWM");
 	createCharacteristic<uint8_t>()
 		.setUUID(UUID(getUUID(), PWM_UUID))
 		.setName("PWM")
@@ -56,7 +92,6 @@ void PowerService::addPWMCharacteristic() {
 }
 
 void PowerService::addVoltageCurveCharacteristic() {
-//	log(DEBUG, "create characteristic to read voltage curve");
 	createCharacteristic<uint8_t>()
 		.setUUID(UUID(getUUID(), VOLTAGE_CURVE_UUID))
 		.setName("Voltage Curve")
@@ -75,7 +110,7 @@ void PowerService::addVoltageCurveCharacteristic() {
 		});
 }
 
-void PowerService::addPowerConsumptionCharachteristic() {
+void PowerService::addPowerConsumptionCharacteristic() {
 //	LOGd("create characteristic to read power consumption");
 	createCharacteristic<uint32_t>()
 		.setUUID(UUID(getUUID(), POWER_CONSUMPTION_UUID))
@@ -97,11 +132,13 @@ uint16_t PowerService::getCurrentLimit() {
 	return _current_limit;
 }
 
-
+/**
+ * The characteristic that writes a current limit to persistent memory.
+ */
 void PowerService::addCurrentLimitCharacteristic() {
-//	LOGd("create characteristic to write current limit");
 	_currentLimitCharacteristic = createCharacteristicRef<uint16_t>();
 	(*_currentLimitCharacteristic)
+		.setNotifies(true)
 		.setUUID(UUID(getUUID(), CURRENT_LIMIT_UUID))
 		.setName("Current Limit")
 		.setDefaultValue(getCurrentLimit())
@@ -116,18 +153,19 @@ void PowerService::addCurrentLimitCharacteristic() {
 			LOGi("Set current limit to: %i", value);
 			_current_limit = value;
 #ifdef STORAGE_WORKING
-			_storage.setUint16(PS_CURRENT_LIMIT, &_current_limit);
+			LOGi("Write value to persistent memory");
+			_storage.setUint16(PS_CURRENT_LIMIT, _current_limit);
 #endif
 		//	if (!_stack->isAdvertising()) {
 		//		log(INFO, "Start advertising");
 		//		_stack->startAdvertising();
 		//	}
 		})
-		/* // not necessary for us... isn't called anyway...
+		 // not necessary for us... isn't called anyway...
 		.onRead([&]() -> uint16_t {
-			LOGi("Read current limit: %i", _current_limit);
+			LOGi("Read current limit now! %i", _current_limit);
 			return getCurrentLimit();
-		}) */
+		})
 		;
 }
 
@@ -137,11 +175,11 @@ static int loop_cnt = 100;
 void PowerService::loop() {
 	// check if current is not beyond current_limit if the latter is set
 	if (++tmp_cnt > loop_cnt) {
-		getCurrentLimit();
-		log(INFO, "Write current_limit to characteristic");
-		//_currentLimitCharacteristic->setValue(_current_limit);
-		// this fails.... why!?
-		*_currentLimitCharacteristic = _current_limit;
+		if (_currentLimitCharacteristic) {
+			getCurrentLimit();
+			log(INFO, "Set characteristic to value from persistent memory");
+			*_currentLimitCharacteristic = _current_limit;
+		}
 		tmp_cnt = 0;
 	}
 }
