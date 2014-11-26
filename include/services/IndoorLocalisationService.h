@@ -10,7 +10,7 @@
 
 #include "BluetoothLE.h"
 #include <util/function.h>
-#include "ScanResult.h"
+#include "characteristics/ScanResult.h"
 
 #include <drivers/nrf_adc.h>
 
