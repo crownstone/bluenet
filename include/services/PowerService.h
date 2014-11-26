@@ -13,24 +13,10 @@
 
 #include <drivers/nrf_adc.h>
 #include <common/storage.h>
+#include <characteristics/charac_config.h>
 #include <vector>
 
 #define POWER_SERVICE_UUID "5b8d7800-6f20-11e4-b116-123b93f75cba"
-
-//enum CharacteristicUUIDs = {
-enum {
-	PWM_UUID                                 = 0x1,
-	VOLTAGE_CURVE_UUID                       = 0x2,
-	POWER_CONSUMPTION_UUID                   = 0x3,
-	CURRENT_LIMIT_UUID                       = 0x4,
-	CharacteristicUUIDCount                  = 4
-};
-
-struct CharacteristicStatus {
-	uint8_t UUID;
-	bool enabled;
-};
-typedef struct CharacteristicStatus CharacteristicStatusT;
 
 class PowerService : public BLEpp::GenericService {
 public:
@@ -44,14 +30,9 @@ public:
 	
 	void loop();
 protected:
-	// Array of enabled characteristics (to be set in constructor)
+	// Enabled characteristics (to be set in constructor)
 	std::vector<CharacteristicStatusT> characStatus;
-/*
-	int enabledCharacteristicsCount;
-	int *enabledCharacteristics;
-	int disabledCharacteristicsCount;
-	int *disabledCharacteristics;
-*/
+	
 	// The characteristics in this service
 	void addPWMCharacteristic();
 	void addVoltageCurveCharacteristic();

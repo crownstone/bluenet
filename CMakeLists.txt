@@ -86,7 +86,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/nrf_rtc.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/ScanResult.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/BluetoothLE.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/IndoorLocalisationService.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/TemperatureService.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/GeneralService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/PowerService.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")

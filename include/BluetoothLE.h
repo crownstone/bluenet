@@ -932,6 +932,9 @@ namespace BLEpp {
             return *this;
         }
 
+        Nrf51822BluetoothStack& updateDeviceName(const std::string& deviceName);
+	std::string & getDeviceName() { return _device_name; }
+
         /** Set radio transmit power in dBm (accepted values are -40, -20, -16, -12, -8, -4, 0, and 4 dBm). */
         Nrf51822BluetoothStack& setTxPowerLevel(int8_t powerLevel);
 

@@ -10,7 +10,7 @@
  *********************************************************************************************************************/
 
 //#define INDOOR_SERVICE
-//#define TEMPERATURE_SERVICE
+#define GENERAL_SERVICE
 #define POWER_SERVICE
 
 /**********************************************************************************************************************
@@ -54,8 +54,8 @@ extern "C" {
 #ifdef INDOOR_SERVICE
 #include <services/IndoorLocalisationService.h>
 #endif
-#ifdef TEMPERATURE_SERVICE
-#include <services/TemperatureService.h>
+#ifdef GENERAL_SERVICE
+#include <services/GeneralService.h>
 #endif
 #ifdef POWER_SERVICE
 #include <services/PowerService.h>
@@ -210,10 +210,10 @@ int main() {
 	IndoorLocalizationService::createService(stack);
 #endif
 
-#ifdef TEMPERATURE_SERVICE
-	//	 get temperature value
-	TemperatureService& temperatureService = TemperatureService::createService(stack);
-#endif /* temperature_service */
+#ifdef GENERAL_SERVICE
+	// general services, such as internal temperature, setting names, etc.
+	GeneralService& generalService = GeneralService::createService(stack);
+#endif 
 
 #ifdef POWER_SERVICE
 	PowerService &powerService = PowerService::createService(stack, adc, storage);
@@ -249,7 +249,7 @@ int main() {
 		// to run at the same time as the scanning
 //		if (!stack.isscanning() && stack.connected()) {
 //			log(INFO,"temp.loop()");
-			temperatureService.loop();
+			generalService.loop();
 //		}
 #endif
 		app_sched_execute();
