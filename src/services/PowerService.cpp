@@ -28,55 +28,20 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 	
 	log(INFO, "Create power service");
 
-	characStatus.push_back( { PWM_UUID, true });
-	characStatus.push_back( { VOLTAGE_CURVE_UUID, true });
-	characStatus.push_back( { POWER_CONSUMPTION_UUID, false });
-	characStatus.push_back( { CURRENT_LIMIT_UUID, true });
+	characStatus.push_back( { "PWM",				PWM_UUID, 				true,
+		static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
+	characStatus.push_back( { "Voltage Curve",		VOLTAGE_CURVE_UUID, 	true,
+		static_cast<addCharacteristicFunc>(&PowerService::addVoltageCurveCharacteristic)});
+	characStatus.push_back( { "Power Consumption",	POWER_CONSUMPTION_UUID, false,
+		static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
+	characStatus.push_back( { "Current Limit",		CURRENT_LIMIT_UUID, 	true,
+		static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
 
 	// we have to figure out why this goes wrong
 //	setName(std::string("Power Service"));
 
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
-}
-
-void PowerService::addSpecificCharacteristics() {
-	for ( CharacteristicStatusT &status : characStatus) {
-		switch(status.UUID) {
-		case PWM_UUID: 
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to set PWM", PWM_UUID);
-				addPWMCharacteristic();
-			} else {
-				log(INFO, "Disabled PWM characteristic");
-			}
-		break;
-		case VOLTAGE_CURVE_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to read voltage curve", VOLTAGE_CURVE_UUID);
-				addVoltageCurveCharacteristic();
-			} else {
-				log(INFO, "Disabled voltage curve characteristic");
-			}
-		break;
-		case POWER_CONSUMPTION_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to read power consumption", POWER_CONSUMPTION_UUID);
-				addPowerConsumptionCharacteristic();
-			} else {
-				log(INFO, "Disabled power consumption characteristic");
-			}
-		break;
-		case CURRENT_LIMIT_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to set current limit", CURRENT_LIMIT_UUID);
-				addCurrentLimitCharacteristic();
-			} else {
-				log(INFO, "Disabled current limit characteristic");
-			}
-		break;
-		}
-	}
 }
 
 void PowerService::addPWMCharacteristic() {
@@ -283,7 +248,7 @@ PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& a
 //	LOGd("Create power service");
 	PowerService* svc = new PowerService(_stack, adc, storage);
 	_stack.addService(svc);
-	svc->addSpecificCharacteristics();
+	svc->GenericService::addSpecificCharacteristics();
 	return *svc;
 }
 

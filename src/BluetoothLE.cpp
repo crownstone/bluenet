@@ -291,6 +291,21 @@ void Service::start(BLEStack* stack) {
 
 }
 
+/**
+ * Seperate function that actually adds the characteristics. This allows to introduce dependencies between construction
+ * of the different services and the characteristics on those services.
+ */
+void GenericService::addSpecificCharacteristics() {
+	for ( CharacteristicStatusT &status : characStatus) {
+		if (status.enabled) {
+			log(DEBUG, "Create characteristic %s (%i)", status.name.c_str(), status.UUID);
+			(this->*status.func)();
+		} else {
+			log(INFO, "Disabled characteristic %s (%i)", status.name.c_str(), status.UUID);
+		}
+	}
+}
+
 void Service::on_ble_event(ble_evt_t * p_ble_evt) {
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:

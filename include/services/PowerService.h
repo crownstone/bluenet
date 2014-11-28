@@ -31,7 +31,6 @@ public:
 	void loop();
 protected:
 	// Enabled characteristics (to be set in constructor)
-	std::vector<CharacteristicStatusT> characStatus;
 	
 	// The characteristics in this service
 	void addPWMCharacteristic();
