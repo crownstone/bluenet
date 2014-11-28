@@ -133,33 +133,6 @@ void IndoorLocalizationService::addPersonalThresholdCharacteristic() {
 		});
 }
 
-void IndoorLocalizationService::addDeviceTypeCharactersitic() {
-//	LOGd("create characteristic to read/write device type");
-	createCharacteristic<std::string>()
-		.setUUID(UUID(getUUID(), DEVICE_TYPE_UUID))
-		.setName("Device Type")
-		.setDefaultValue("Unknown")
-		.setWritable(true)
-		.onWrite([&](const std::string value) -> void {
-//			LOGi("set device type to: %s", value.c_str());
-			// TODO: impelement persistent storage of device type
-		});
-}
-
-void IndoorLocalizationService::addRoomCharacteristic() {
-//	LOGd("create characteristic to read/write room");
-	createCharacteristic<std::string>()
-		.setUUID(UUID(getUUID(), ROOM_UUID))
-		.setName("Room")
-		.setDefaultValue("Unknown")
-		.setWritable(true)
-		.onWrite([&](const std::string value) -> void {
-//			LOGi("set room to: %s", value.c_str());
-			// TODO: impelement persistent storage of room
-		});
-}
-
-
 IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822BluetoothStack& _stack) {
 	LOGd("Create indoor localisation service");
 	IndoorLocalizationService* svc = new IndoorLocalizationService(_stack);

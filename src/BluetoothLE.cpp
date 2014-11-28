@@ -742,15 +742,9 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	advdata.p_tx_power_level = &_tx_power_level;
 	advdata.flags.size = sizeof(flags);
 	advdata.flags.p_data = &flags;
-	// TODO -oDE: advertisement package is too small for 128-bit UUID plus
-	//  a 16-bit UUID. Even the include_appearance plus 128-bit UUID is too small
-	//  so to avoid an error when a too much data should be sent I removed the
-	//  appearance and only put one UUID in the package, no matter if it is a 16-bit
-	//  or a 128-bit. Could be handled differently, and probably it makes sense to
-	//  handle this depending on the application. for example 8 16-bit UUID can be
-	//  sent in the space 1 128-bit UUID occupies. So it really depends on the application
-	//  how this advertisement package should look like, so it doesn't really make sense
-	//  to have this function in the library.
+	// TODO -oDE: It doesn't really make sense to have this function in the library
+	//  because it really depends on the application on how many and what kind
+	//  of services are available and what should be advertised
 //#ifdef YOU_WANT_TO_USE_SPACE
 	if (uidCount > 1) {
 		advdata.uuids_more_available.uuid_cnt = 1;
