@@ -77,14 +77,14 @@ void nrf_rtc_start() {
 	NRF_RTC1->EVENTS_COMPARE[2] = 0;
 	NRF_RTC1->EVENTS_COMPARE[3] = 0;
 	NRF_RTC1->EVENTS_OVRFLW = 0;
-	timer_flag = 0;
+	rtc_timer_flag = 0;
 	// Start the clock
 	NRF_RTC1->TASKS_START = 1;
 }
 
 void nrf_rtc_stop() {
 	NRF_RTC1->TASKS_STOP = 1;
-//	nrf_delay_us(100);
+	//	nrf_delay_us(100);
 	NRF_RTC1->TASKS_CLEAR = 1;
 }
 
@@ -100,12 +100,12 @@ extern "C" void RTC1_IRQHandler(void) {
 	}
 
 	// Compare event
-    if (NRF_RTC1->EVENTS_COMPARE[0] != 0 && (NRF_RTC1->INTENSET & RTC_INTENSET_COMPARE0_Msk) != 0) {
-    	NRF_RTC1->EVENTS_COMPARE[0] = 0;
-    	timer_flag = 1;
-    	NRF_RTC1->TASKS_STOP = 1;
-//    	NRF_ADC->TASKS_START = 1;
-    }
+	if (NRF_RTC1->EVENTS_COMPARE[0] != 0 && (NRF_RTC1->INTENSET & RTC_INTENSET_COMPARE0_Msk) != 0) {
+		NRF_RTC1->EVENTS_COMPARE[0] = 0;
+		rtc_timer_flag = 1;
+		NRF_RTC1->TASKS_STOP = 1;
+		//    	NRF_ADC->TASKS_START = 1;
+	}
 }
 
 uint32_t nrf_rtc_getCount() {

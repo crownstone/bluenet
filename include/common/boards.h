@@ -45,6 +45,8 @@
 
 #define PIN_LED              3                   // this is gpio 3
 #define PIN_ADC              5                   // ain5 is pin 4
+#define PIN_RX               6
+#define PIN_TX               1
 
 #endif
 
@@ -55,6 +57,7 @@
 #define PIN_ADC              2                   // ain 2 is p0.1
 #define PIN_RX               11
 #define PIN_TX               9
+#define PIN_LED_CON			 19					 // shows connection state on the evaluation board
 
 #endif
 

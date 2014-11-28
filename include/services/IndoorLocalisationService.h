@@ -10,16 +10,19 @@
 
 #include "BluetoothLE.h"
 #include <util/function.h>
-#include "characteristics/ScanResult.h"
-
-#include <drivers/nrf_adc.h>
+#include <characteristics/ScanResult.h>
 
 #define INDOORLOCALISATION_UUID "00002220-0000-1000-8000-00805f9b34fb"
 // TODO -oDE: how did you come up with this UUID ??!!
 //  if I use any other UUID, the service UUID in the advertisement package
 //  is sent out as 128-bit, but with this UUID it is sent out as 16-bit ?!
 
-//using namespace BLEpp;
+#define RSSI_UUID					0x2201
+#define PERSONAL_THRESHOLD_UUID		0x122
+#define SCAN_DEVICE_UUID			0x123
+#define LIST_DEVICE_UUID			0x120
+#define DEVICE_TYPE_UUID			0x101
+#define ROOM_UUID					0x102
 
 class IndoorLocalizationService : public BLEpp::GenericService {
 
@@ -29,21 +32,20 @@ public:
 protected:
 	// TODO -oDE: are really all of these characteristics part of the
 	//   indoor localisation?
-	void AddSignalStrengthCharacteristic();
-	void AddNumberCharacteristic();
-	void AddNumber2Characteristic();
-	void AddVoltageCurveCharacteristic();
-	void AddScanControlCharacteristic();
-	void AddPeripheralListCharacteristic();
-	void AddPersonalThresholdCharacteristic();
+	void addSignalStrengthCharacteristic();
+	void addNumberCharacteristic();
+	void addNumber2Characteristic();
+	void addScanControlCharacteristic();
+	void addPeripheralListCharacteristic();
+	void addPersonalThresholdCharacteristic();
 
-	void SampleAdcInit();
-	void SampleAdcStart();
+	void addDeviceTypeCharactersitic();
+	void addRoomCharacteristic();
 
 public:
-	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc);
+	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
 
-	void AddSpecificCharacteristics();
+	void addSpecificCharacteristics();
 
 	void on_ble_event(ble_evt_t * p_ble_evt);
 
@@ -53,7 +55,7 @@ public:
 
 	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
 
-	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc);
+	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 private:
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
@@ -67,7 +69,6 @@ private:
 	int _personalThresholdLevel;
 	ScanResult _scanResult;
 
-	ADC &_adc;
 };
 
 #endif /* INDOORLOCALISATIONSERVICE_H_ */

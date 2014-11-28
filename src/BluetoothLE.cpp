@@ -7,6 +7,7 @@
 #include "BluetoothLE.h"
 #include "nRF51822.h"
 
+
 #if(NORDIC_SDK_VERSION >= 6)
 #include "nrf_soc.h"
 #endif
@@ -17,6 +18,7 @@
 
 #include <util/ble_error.h>
 #include <util/utils.h>
+#include <handlers.h>
 
 using namespace BLEpp;
 
@@ -413,6 +415,9 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	BLE_CALL(sd_softdevice_enable,
 			(_clock_source, softdevice_assertion_handler));
 
+	// Initialize the SoftDevice handler module.
+	SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, false);
+	
 	// enable the BLE stack
 #if(NORDIC_SDK_VERSION >= 6)
 
@@ -441,7 +446,39 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	sd_nvic_EnableIRQ(SWI2_IRQn);
 
-	// set device name
+	//updateDeviceName(_device_name);
+	
+	if (!_device_name.empty()) {
+		BLE_CALL(sd_ble_gap_device_name_set,
+				(&_sec_mode, (uint8_t*) _device_name.c_str(), _device_name.length()));
+		//BLE_CALL(sd_ble_gap_device_name_set, (&_sec_mode, DEVICE_NAME, strlen(DEVICE_NAME)));
+	} else {
+		std::string name = "not set...";
+		BLE_CALL(sd_ble_gap_device_name_set,
+				(&_sec_mode, (uint8_t*) name.c_str(), name.length()));
+	} 
+	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
+
+	setConnParams();
+
+	setTxPowerLevel();
+
+	//BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
+	log(INFO, "Set sys event handler");
+	uint8_t err_code;
+	err_code = softdevice_sys_evt_handler_set(sys_evt_dispatch);
+	if (err_code != NRF_SUCCESS) {
+		LOGd("BE ERR_CODE: %d (0x%X)", err_code, err_code);
+		APP_ERROR_CHECK(err_code);
+	}
+
+	_inited = true;
+
+	return *this;
+}
+        
+Nrf51822BluetoothStack& Nrf51822BluetoothStack::updateDeviceName(const std::string& deviceName) {
+	_device_name = deviceName;
 	if (!_device_name.empty()) {
 		BLE_CALL(sd_ble_gap_device_name_set,
 				(&_sec_mode, (uint8_t*) _device_name.c_str(), _device_name.length()));
@@ -451,14 +488,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 		BLE_CALL(sd_ble_gap_device_name_set,
 				(&_sec_mode, (uint8_t*) name.c_str(), name.length()));
 	}
-	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
-
-	setConnParams();
-
-	setTxPowerLevel();
-
-	_inited = true;
-
 	return *this;
 }
 
@@ -690,10 +719,26 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 
 //	advdata.name_type               = BLE_ADVDATA_NO_NAME;
 
+	/*
+	 * 31 bytes total payload
+	 *
+	 * 1 byte per element. in this case, 3 elements -> 3 bytes
+	 *
+	 * => 28 bytes available payload
+	 *
+	 * 2 bytes for flags (1 byte for type, 1 byte for data)
+	 * 2 bytes for tx power level (1 byte for type, 1 byte for data)
+	 * 17 bytes for UUID (1 byte for type, 16 byte for data)
+	 *
+	 * -> 7 bytes left
+	 *
+	 * Note: by adding an element, one byte will be lost because of the
+	 *   addition, so there are actually only 6 bytes left after adding
+	 *   an element, and 1 byte of that is used for the type, so 5 bytes
+	 *   are left for the data
+	 */
+
 	// Anne: setting NO_NAME breaks the Android Nordic nRF Master Console app.
-	advdata.name_type = BLE_ADVDATA_FULL_NAME;
-	advdata.short_name_len = 5;
-//	advdata.include_appearance      = _appearance != BLE_APPEARANCE_UNKNOWN;
 	advdata.p_tx_power_level = &_tx_power_level;
 	advdata.flags.size = sizeof(flags);
 	advdata.flags.p_data = &flags;
@@ -706,6 +751,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	//  sent in the space 1 128-bit UUID occupies. So it really depends on the application
 	//  how this advertisement package should look like, so it doesn't really make sense
 	//  to have this function in the library.
+//#ifdef YOU_WANT_TO_USE_SPACE
 	if (uidCount > 1) {
 		advdata.uuids_more_available.uuid_cnt = 1;
 		advdata.uuids_more_available.p_uuids = adv_uuids;
@@ -713,8 +759,26 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 		advdata.uuids_complete.uuid_cnt = 1;
 		advdata.uuids_complete.p_uuids = adv_uuids;
 	}
+//#endif
 
-	err_code = ble_advdata_set(&advdata, NULL);
+	// Because of the limited amount of space in the advertisement data, additional
+	// data can be supplied in the scan response package. Same space restrictions apply
+	// here:
+	/*
+	 * 31 bytes total payload
+	 *
+	 * 1 byte per element. in this case, 1 element -> 1 bytes
+	 *
+	 * 30 bytes of available payload
+	 *
+	 * 1 byte for name type
+	 * -> 29 bytes left for name
+	 */
+	ble_advdata_t scan_resp;
+	memset(&scan_resp, 0, sizeof(scan_resp));
+	scan_resp.name_type = BLE_ADVDATA_FULL_NAME;
+
+	err_code = ble_advdata_set(&advdata, &scan_resp);
 	if (err_code == NRF_ERROR_DATA_SIZE) {
 		log(FATAL,"FATAL ERROR!!!! advertisement data too big for package");
 	}
@@ -893,8 +957,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	case BLE_GATTS_EVT_WRITE:
 		for (Service* svc : _services) {
 			// TODO use a map...
-			if (svc->getHandle()
-					== p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
+			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
 				svc->on_ble_event(p_ble_evt);
 			}
 		}
@@ -902,8 +965,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	case BLE_GATTS_EVT_HVC:
 		for (Service* svc : _services) {
-			if (svc->getHandle()
-					== p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
+			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
 				svc->on_ble_event(p_ble_evt);
 			}
 		}

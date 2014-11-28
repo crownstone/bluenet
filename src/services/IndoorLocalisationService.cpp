@@ -12,14 +12,16 @@
 #include <services/IndoorLocalisationService.h>
 #include <common/config.h>
 #include <common/boards.h>
+#include <drivers/nrf_adc.h>
 #include <drivers/nrf_rtc.h>
+
+#include "nRF51822.h"
 
 //#include <common/timer.h>
 
 using namespace BLEpp;
 
-IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _stack, ADC &adc) :
-		_adc(_adc),
+IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _stack) :
 		_stack(&_stack),
 		_rssiCharac(NULL), _intChar(NULL), _intChar2(NULL), _peripheralCharac(NULL),
 		_personalThresholdLevel(0) {
@@ -34,20 +36,21 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 //	timer_config(10);
 }
 
-void IndoorLocalizationService::AddSpecificCharacteristics() {
-	AddSignalStrengthCharacteristic();
-//	AddNumberCharacteristic();
-//	AddNumber2Characteristic();
-	AddVoltageCurveCharacteristic();
-	AddScanControlCharacteristic();
-	AddPeripheralListCharacteristic();
-	AddPersonalThresholdCharacteristic();
+void IndoorLocalizationService::addSpecificCharacteristics() {
+	addSignalStrengthCharacteristic();
+//	addNumberCharacteristic();
+//	addNumber2Characteristic();
+	addScanControlCharacteristic();
+	addPeripheralListCharacteristic();
+//	addPersonalThresholdCharacteristic();
+//	addDeviceTypeCharactersitic();
+//	addRoomCharacteristic();
 }
 
-void IndoorLocalizationService::AddSignalStrengthCharacteristic() {
+void IndoorLocalizationService::addSignalStrengthCharacteristic() {
+	LOGd("create characteristic to read signal strength");
 	_rssiCharac = new CharacteristicT<int8_t>();
-	//.setUUID(UUID(service.getUUID(), 0x124))
-	_rssiCharac->setUUID(UUID(getUUID(), 0x2201)); // there is no BLE_UUID for rssi level(?)
+	_rssiCharac->setUUID(UUID(getUUID(), RSSI_UUID)); // there is no BLE_UUID for rssi level(?)
 	_rssiCharac->setName(std::string("Received signal level"));
 	_rssiCharac->setDefaultValue(1);
 	_rssiCharac->setNotifies(true);
@@ -55,7 +58,7 @@ void IndoorLocalizationService::AddSignalStrengthCharacteristic() {
 	addCharacteristic(_rssiCharac);
 }
 
-void IndoorLocalizationService::AddNumberCharacteristic() {
+void IndoorLocalizationService::addNumberCharacteristic() {
 	// create a characteristic of type uint8_t (unsigned one byte integer).
 	// this characteristic is by default read-only (for the user)
 	// note that in the next characteristic this variable intchar is set!
@@ -68,7 +71,7 @@ void IndoorLocalizationService::AddNumberCharacteristic() {
 		.setName("number");
 }
 
-void IndoorLocalizationService::AddNumber2Characteristic() {
+void IndoorLocalizationService::addNumber2Characteristic() {
 	_intChar2 = createCharacteristicRef<uint64_t>();
 	(*_intChar2)
 		.setUUID(UUID(getUUID(), 0x121))  // based off the uuid of the service.
@@ -76,34 +79,11 @@ void IndoorLocalizationService::AddNumber2Characteristic() {
 		.setName("number2");
 }
 
-void IndoorLocalizationService::AddVoltageCurveCharacteristic() {
-	log(DEBUG, "create characteristic to read voltage curve");
-	createCharacteristic<uint8_t>()
-		.setUUID(UUID(getUUID(), 0x124))
-		.setName("led")
-		.setDefaultValue(255)
-		.setWritable(true)
-		.onWrite([&](const uint8_t& value) -> void {
-			log(INFO, "Received message: %d", value);
-
-			SampleAdcInit();
-
-			nrf_pwm_set_value(0, value);
-//			nrf_pwm_set_value(1, value);
-//			nrf_pwm_set_value(2, value);
-//			log(INFO, "set pwm to %i", value);
-
-			SampleAdcStart();
-
-			log(DEBUG, "Successfully written");
-		});
-}
-
-void IndoorLocalizationService::AddScanControlCharacteristic() {
+void IndoorLocalizationService::addScanControlCharacteristic() {
 	// set scanning option
 	log(DEBUG, "create characteristic to stop/start scan");
 	createCharacteristic<uint8_t>()
-		.setUUID(UUID(getUUID(), 0x123))
+		.setUUID(UUID(getUUID(), SCAN_DEVICE_UUID))
 		.setName("scan")
 		.setDefaultValue(255)
 		.setWritable(true)
@@ -111,7 +91,7 @@ void IndoorLocalizationService::AddScanControlCharacteristic() {
 			if(value) {
 				log(INFO,"crown: start scanning");
 				if (!_stack->isScanning()) {
-					_scanResult.reset();
+					_scanResult.init();
 					_stack->startScanning();
 				}
 			} else {
@@ -125,23 +105,23 @@ void IndoorLocalizationService::AddScanControlCharacteristic() {
 		});
 }
 
-void IndoorLocalizationService::AddPeripheralListCharacteristic() {
+void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	// get scan result
 	log(DEBUG, "create characteristic to list found peripherals");
 
 	_peripheralCharac = createCharacteristicRef<ScanResult>();
-	_peripheralCharac->setUUID(UUID(getUUID(), 0x120));
-	_peripheralCharac->setName("devs");
-//	_peripheralCharac->setWritable(false);
-//	_peripheralCharac->setNotifies(true);
+	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
+	_peripheralCharac->setName("Devices");
+	_peripheralCharac->setWritable(false);
+	_peripheralCharac->setNotifies(true);
 }
 
-void IndoorLocalizationService::AddPersonalThresholdCharacteristic() {
+void IndoorLocalizationService::addPersonalThresholdCharacteristic() {
 	// set threshold level
 	log(DEBUG, "create characteristic to write personal threshold level");
 	createCharacteristic<uint8_t>()
-		.setUUID(UUID(getUUID(), 0x122))
-		.setName("threshold")
+		.setUUID(UUID(getUUID(), PERSONAL_THRESHOLD_UUID))
+		.setName("Threshold")
 		.setDefaultValue(0)
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
@@ -153,105 +133,38 @@ void IndoorLocalizationService::AddPersonalThresholdCharacteristic() {
 		});
 }
 
-void IndoorLocalizationService::SampleAdcInit() {
-	/*
-				uint64_t rms_sum = 0;
-				uint32_t voltage_min = 0xffffffff;
-				uint32_t voltage_max = 0;
-				// start reading adc
-				uint32_t voltage;
-				uint32_t samples = 100000;
-				//uint32_t subsample = samples / curve_size;
-	*/
-				//log(INFO, "Stop advertising");
-				//stack->stopAdvertising();
-
-				log(INFO, "start RTC");
-				nrf_rtc_init();
-				nrf_rtc_start();
-
-				// Wait for the RTC to actually start
-				nrf_delay_us(100);
-
-				log(INFO, "Start ADC");
-				_adc.nrf_adc_start();
-				// replace by timer!
-
+void IndoorLocalizationService::addDeviceTypeCharactersitic() {
+//	LOGd("create characteristic to read/write device type");
+	createCharacteristic<std::string>()
+		.setUUID(UUID(getUUID(), DEVICE_TYPE_UUID))
+		.setName("Device Type")
+		.setDefaultValue("Unknown")
+		.setWritable(true)
+		.onWrite([&](const std::string value) -> void {
+//			LOGi("set device type to: %s", value.c_str());
+			// TODO: impelement persistent storage of device type
+		});
 }
 
-void IndoorLocalizationService::SampleAdcStart() {
-	while (!_adc.getBuffer()->full()) {
-		nrf_delay_ms(100);
-	}
-	log(INFO, "Number of results: %u", _adc.getBuffer()->count()/2);
-	log(INFO, "Counter is at: %u", nrf_rtc_getCount());
-
-	log(INFO, "Stop ADC converter");
-	_adc.nrf_adc_stop();
-
-	// Wait for the ADC to actually stop
-	nrf_delay_us(1000);
-
-	log(INFO, "Stop RTC");
-	nrf_rtc_stop();
-/*
-	for (uint32_t i=0; i<samples; ++i) {
-
-		nrf_adc_read(PIN_ADC, &voltage);
-
-		rms_sum += voltage*voltage;
-		if (voltage < voltage_min)
-			voltage_min = voltage;
-		if (voltage > voltage_max)
-			voltage_max = voltage;
-		//if (!(i % subsample))
-		if (i < curve_size)
-			curve[i] = voltage;
-	}
-	uint32_t rms = sqrt(rms_sum/(100*1000));
-
-	// 8a max --> 0.96v max --> voltage value is max 960000, which is smaller than 2^32
-
-	// measured voltage goes from 0-3.6v(due to 1/3 multiplier), measured as 0-255(8bit) or 0-1024(10bit)
-//			voltage = voltage*1000*1200*3/255; // nv   8 bit
-	voltage     = voltage    *1000*1200*3/1024; // nv   10 bit
-	voltage_min = voltage_min*1000*1200*3/1024;
-	voltage_max = voltage_max*1000*1200*3/1024;
-	rms         = rms        *1000*1200*3/1024;
-
-	uint16_t current = rms / SHUNT_VALUE; // ma
-
-	log(DEBUG, "voltage(nV): last=%lu", voltage);
-       	//rms=%lu min=%lu max=%lu current=%i mA", voltage, rms, voltage_min, voltage_max, current);
-*/
-
-	int i = 0;
-	while (!_adc.getBuffer()->empty()) {
-		_log(INFO, "%u, ", _adc.getBuffer()->pop());
-		if (!(++i % 10)) {
-			_log(INFO, "\r\n");
-		}
-	}
-	_log(INFO, "\r\n");
-	//stack->startAdvertising(); // segfault
-/*
-	uint64_t result = voltage_min;
-	result <<= 32;
-	result |= voltage_max;
-#ifdef NUMBER_CHARAC
-	*intchar = result;
-	result = rms;
-	result <<= 32;
-	result |= current;
-	*intchar2 = result;
-#endif
-*/
+void IndoorLocalizationService::addRoomCharacteristic() {
+//	LOGd("create characteristic to read/write room");
+	createCharacteristic<std::string>()
+		.setUUID(UUID(getUUID(), ROOM_UUID))
+		.setName("Room")
+		.setDefaultValue("Unknown")
+		.setWritable(true)
+		.onWrite([&](const std::string value) -> void {
+//			LOGi("set room to: %s", value.c_str());
+			// TODO: impelement persistent storage of room
+		});
 }
 
-IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822BluetoothStack& _stack, ADC &adc) {
-	IndoorLocalizationService* svc = new IndoorLocalizationService(_stack, adc);
+
+IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822BluetoothStack& _stack) {
+	LOGd("Create indoor localisation service");
+	IndoorLocalizationService* svc = new IndoorLocalizationService(_stack);
 	_stack.addService(svc);
-	svc->AddSpecificCharacteristics();
+	svc->addSpecificCharacteristics();
 	return *svc;
 }
 

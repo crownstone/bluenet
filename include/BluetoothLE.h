@@ -126,46 +126,49 @@ namespace BLEpp {
             return ret;
         }
 
-        operator ble_uuid128_t() {
-        	ble_uuid128_t res;
+	/**
+	 * Generate a 128-bit Bluetooth address from the _full array.
+	 */
+	operator ble_uuid128_t() {
+		ble_uuid128_t res;
 
-			int i = 0;
-			int j = 0;
-			int k = 0;
-			uint8_t c;
-			uint8_t v = 0;
-			for (; ((c = _full[i]) != 0) && (j < 16); i++) {
-				uint8_t vv = 0;
+		int i = 0;
+		int j = 0;
+		int k = 0;
+		uint8_t c;
+		uint8_t v = 0;
+		for (; ((c = _full[i]) != 0) && (j < 16); i++) {
+			uint8_t vv = 0;
 
-				if (c == '-' || c == ' ') {
-					continue;
-				} else if (c >= '0' && c <= '9') {
-					vv = c - '0';
-				} else if (c >= 'A' && c <= 'F') {
-					vv = c - 'A' + 10;
-				} else if (c >= 'a' && c <= 'f') {
-					vv = c - 'a' + 10;
-				} else {
-					char cc[] = {c};// can't just call std::string(c) apparently.
-					BLE_THROW(std::string("Invalid character ") + std::string(1,cc[0]) + " in UUID.");
-				}
-
-				v = v * 16 + vv;
-
-				if (k++ % 2 == 1) {
-					res.uuid128[15 - (j++)] = v;
-					v = 0;
-				}
-
-			}
-			if (j < 16) {
-				BLE_THROW("UUID is too short,");
-			} else if (_full[i] != 0) {
-				BLE_THROW("UUID is too long.");
+			if (c == '-' || c == ' ') {
+				continue;
+			} else if (c >= '0' && c <= '9') {
+				vv = c - '0';
+			} else if (c >= 'A' && c <= 'F') {
+				vv = c - 'A' + 10;
+			} else if (c >= 'a' && c <= 'f') {
+				vv = c - 'a' + 10;
+			} else {
+				char cc[] = {c};// can't just call std::string(c) apparently.
+				BLE_THROW(std::string("Invalid character ") + std::string(1,cc[0]) + " in UUID.");
 			}
 
-			return res;
-        }
+			v = v * 16 + vv;
+
+			if (k++ % 2 == 1) {
+				res.uuid128[15 - (j++)] = v;
+				v = 0;
+			}
+
+		}
+		if (j < 16) {
+			BLE_THROW("UUID too short.");
+		} else if (_full[i] != 0) {
+			BLE_THROW("UUID too long.");
+		}
+
+		return res;
+	}
 
         UUID() : _uuid(0xdead), _type(BLE_UUID_TYPE_UNKNOWN) {};
         UUID(const char* fullUid);
@@ -207,7 +210,6 @@ namespace BLEpp {
 		}
 		~CharacteristicValue() {
 			if (freeOnDestroy) {
-				log(INFO, "DESTROY");
 				free(data);
 			}
 		}
@@ -291,7 +293,7 @@ namespace BLEpp {
         }
 
         void setNotifyingEnabled(bool enabled) {
-        	log(DEBUG, "[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
+//        	log(DEBUG, "[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
         	_notifyingEnabled = enabled;
         }
 
@@ -446,6 +448,11 @@ namespace BLEpp {
             return *this;
         }
 
+        Characteristic<T>& setNotifies(bool notifies) {
+            CharacteristicBase::setNotifies(notifies);
+            return *this;
+        }
+
         Characteristic<T>& onWrite(const callback_on_write_t& closure) {
             _callbackOnWrite = closure;
             return *this;
@@ -473,6 +480,7 @@ namespace BLEpp {
             return *this;
         }
 
+#ifdef ADVANCED_OPERATORS
         Characteristic<T>& operator+=(const T& val) {
             _value += val;
 
@@ -504,6 +512,7 @@ namespace BLEpp {
 
             return *this;
         }
+#endif
 
         Characteristic<T>& setDefaultValue(const T& t) {
             if (_inited) BLE_THROW("Already inited.");
@@ -522,7 +531,7 @@ namespace BLEpp {
         }
 
         void read() {
-            log(DEBUG, "%s: onRead", _name.c_str());
+            log(DEBUG, "%s: onRead()", _name.c_str());
             T newValue = _callbackOnRead();
             if (newValue != _value) {
                 operator=(newValue);
@@ -922,6 +931,9 @@ namespace BLEpp {
             _timeout = advertisingTimeoutSeconds;
             return *this;
         }
+
+        Nrf51822BluetoothStack& updateDeviceName(const std::string& deviceName);
+	std::string & getDeviceName() { return _device_name; }
 
         /** Set radio transmit power in dBm (accepted values are -40, -20, -16, -12, -8, -4, 0, and 4 dBm). */
         Nrf51822BluetoothStack& setTxPowerLevel(int8_t powerLevel);

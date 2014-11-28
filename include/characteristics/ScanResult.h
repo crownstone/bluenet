@@ -30,12 +30,15 @@ struct __attribute__((__packed__)) peripheral_device_t {
 class ScanResult {
 
 private:
-	peripheral_device_t _list[MAX_NR_DEVICES];
-    uint8_t _freeIdx;
+//	peripheral_device_t _list[MAX_NR_DEVICES];
+	peripheral_device_t* _list;
+	uint8_t _freeIdx;
 
 public:
 	ScanResult();
 	virtual ~ScanResult();
+
+	void init();
 
 	bool operator!=(const ScanResult& val);
 
@@ -97,7 +100,7 @@ public:
 	}
 
 	void onNotifyTxError() {
-		LOGw("[%s] no tx buffers, waiting for BLE_EVT_TX_COMPLETE!", _name.c_str());
+//		LOGw("[%s] no tx buffers, waiting for BLE_EVT_TX_COMPLETE!", _name.c_str());
 		_notificationPending = true;
 	}
 
@@ -106,9 +109,9 @@ public:
 		if (_notificationPending) {
 			uint32_t err_code = notify();
 			if (err_code != NRF_SUCCESS) {
-				LOGw("[%s] failed to resend notification!, err_code: %d", _name.c_str(), err_code);
+//				LOGw("[%s] failed to resend notification!, err_code: %d", _name.c_str(), err_code);
 			} else {
-				LOGi("[%s] successfully resent notification", _name.c_str());
+//				LOGi("[%s] successfully resent notification", _name.c_str());
 				_notificationPending = false;
 			}
 		}

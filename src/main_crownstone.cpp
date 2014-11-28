@@ -9,8 +9,9 @@
  * Enable the services you want to run on the device
  *********************************************************************************************************************/
 
-#define INDOOR_SERVICE
-#define TEMPERATURE_SERVICE
+//#define INDOOR_SERVICE
+#define GENERAL_SERVICE
+#define POWER_SERVICE
 
 /**********************************************************************************************************************
  * General includes
@@ -20,14 +21,15 @@
 #include "util/ble_error.h"
 
 #if(NORDIC_SDK_VERSION < 5)
-	#include "ble_stack_handler.h"
-	#include "ble_nrf6310_pins.h"
+#include "ble_stack_handler.h"
+#include "ble_nrf6310_pins.h"
 #endif
 #include "nrf51_bitfields.h"
 
 extern "C" {
-	#include "ble_advdata_parser.h"
-	#include "nrf_delay.h"
+#include "ble_advdata_parser.h"
+#include "nrf_delay.h"
+#include "app_scheduler.h"
 }
 
 #include "nordic_common.h"
@@ -40,16 +42,23 @@ extern "C" {
 
 #include <common/boards.h>
 
+#if(BOARD==PCA10001)
+	#include "nrf_gpio.h"
+#endif
+
 #include <drivers/nrf_adc.h>
 #include <drivers/nrf_pwm.h>
 #include <drivers/serial.h>
-
+#include <common/storage.h>
 
 #ifdef INDOOR_SERVICE
 #include <services/IndoorLocalisationService.h>
 #endif
-#ifdef TEMPERATURE_SERVICE
-#include <services/TemperatureService.h>
+#ifdef GENERAL_SERVICE
+#include <services/GeneralService.h>
+#endif
+#ifdef POWER_SERVICE
+#include <services/PowerService.h>
 #endif
 
 using namespace BLEpp;
@@ -58,13 +67,15 @@ using namespace BLEpp;
  * Precompiler warnings/messages
  *********************************************************************************************************************/
 
-/*
-// BUFSIZ is used by sprintf for the internal buffer and is 1024 bytes.
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+#ifndef BLUETOOTH_NAME
+#error We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. "Crown" (with quotes)
+#endif
 
-#pragma message "BUFSIZ = " STR(BUFSIZ)
-*/
+// BUFSIZ is used by sprintf for the internal buffer and is 1024 bytes.
+//#define STR_HELPER(x) #x
+//#define STR(x) STR_HELPER(x)
+//#pragma message "BUFSIZ = " STR(BUFSIZ)
+
 
 /**********************************************************************************************************************
  * Main functionality
@@ -83,7 +94,7 @@ void welcome() {
 
 void setName(Nrf51822BluetoothStack &stack) {
 	char devicename[32];
-	sprintf(devicename, "arow_%s", COMPILATION_TIME);
+	sprintf(devicename, "%s_%s", BLUETOOTH_NAME, COMPILATION_TIME);
 	stack.setDeviceName(std::string(devicename)) // max len = ble_gap_devname_max_len (31)
 		// controls how device appears in gui.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
@@ -112,13 +123,21 @@ void configure(Nrf51822BluetoothStack &stack) {
  * This must be called after the SoftDevice has started.
  */
 void config_drivers(ADC &adc) {
-	adc.nrf_adc_init(PIN_ADC);
+	// TODO: Dominik, can we connect the adc init call with the characteristic / services
+	//   that actually use it? if there is no service that uses it there is no reason to
+	//   allocate space for it
+//	adc.nrf_adc_init(PIN_ADC);
+
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
 	pwm_config.num_channels = 1;
 	pwm_config.gpio_num[0] = PIN_LED;
 	pwm_config.mode = PWM_MODE_LED_255;
 
 	nrf_pwm_init(&pwm_config);
+
+#if(BOARD==PCA10001)
+	nrf_gpio_cfg_output(PIN_LED_CON);
+#endif
 }
 
 int main() {
@@ -145,6 +164,10 @@ int main() {
 			// be neater about it... we do not need to stop, only after a disconnect we do...
 			sd_ble_gap_rssi_stop(conn_handle);
 			sd_ble_gap_rssi_start(conn_handle);
+
+#if(BOARD==PCA10001)
+			nrf_gpio_pin_set(PIN_LED_CON);
+#endif
 		})
 		.onDisconnect([&](uint16_t conn_handle) {
 			log(INFO,"onDisconnect...");
@@ -152,6 +175,10 @@ int main() {
 
 			// of course this is not nice, but dirty! we immediately start advertising automatically after being
 			// disconnected. but for now this will be the default behaviour.
+
+#if(BOARD==PCA10001)
+			nrf_gpio_pin_clear(PIN_LED_CON);
+#endif
 
 			stack.stopScanning();
 
@@ -163,18 +190,34 @@ int main() {
 		});
 
 	// Create ADC object
+	// TODO: make service which enables other services and only init ADC when necessary
 	ADC adc;
 
+	// Scheduler must be initialized before persistent memory
+	const uint16_t max_size = 32;
+	const uint16_t queue_size = 16;
+	APP_SCHED_INIT(max_size, queue_size);
+
+	// Create persistent memory object
+	// TODO: make service which enables other services and only init persistent memory when necessary
+	Storage storage;
+	storage.init(32);
+	
+	log(INFO, "Create all services");
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
 	//Service& localizationService = 
-	IndoorLocalizationService::createService(stack,adc);
+	IndoorLocalizationService::createService(stack);
 #endif
 
-#ifdef TEMPERATURE_SERVICE
-	//	 get temperature value
-	TemperatureService& temperatureService = TemperatureService::createService(stack);
-#endif /* temperature_service */
+#ifdef GENERAL_SERVICE
+	// general services, such as internal temperature, setting names, etc.
+	GeneralService& generalService = GeneralService::createService(stack);
+#endif 
+
+#ifdef POWER_SERVICE
+	PowerService &powerService = PowerService::createService(stack, adc, storage);
+#endif
 
 	// configure drivers
 	config_drivers(adc);
@@ -193,6 +236,10 @@ int main() {
 		//		analogwrite(pin_led, 50);
 		stack.loop();
 
+#ifdef POWER_SERVICE
+		powerService.loop();
+#endif
+
 #ifdef TEMPERATURE_SERVICE
 		// [31.10.14] correction, this only happens without optimization -Os !!!
 		// [31.10.14] this seems to interfere with the scanning / advertisement data
@@ -202,9 +249,11 @@ int main() {
 		// to run at the same time as the scanning
 //		if (!stack.isscanning() && stack.connected()) {
 //			log(INFO,"temp.loop()");
-			temperatureService.loop();
+			generalService.loop();
 //		}
 #endif
+		app_sched_execute();
+
 		nrf_delay_ms(50);
 	}
 }
