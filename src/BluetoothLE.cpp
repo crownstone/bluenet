@@ -717,6 +717,11 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	// Build and set advertising data
 	memset(&advdata, 0, sizeof(advdata));
 
+	ble_advdata_manuf_data_t manufac;
+	// TODO: made up ID, has to be replaced by official ID
+	manufac.company_identifier = 0x1111; // DoBots Company ID
+	manufac.data.size = 0;
+
 //	advdata.name_type               = BLE_ADVDATA_NO_NAME;
 
 	/*
@@ -742,6 +747,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	advdata.p_tx_power_level = &_tx_power_level;
 	advdata.flags.size = sizeof(flags);
 	advdata.flags.p_data = &flags;
+	advdata.p_manuf_specific_data = &manufac;
 	// TODO -oDE: It doesn't really make sense to have this function in the library
 	//  because it really depends on the application on how many and what kind
 	//  of services are available and what should be advertised
