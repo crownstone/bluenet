@@ -18,13 +18,13 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	setName("General Service");
 
 	log(INFO, "Create general service");
-	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	true,
+	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
 	characStatus.push_back( { "Change Name", 	CHANGE_NAME_UUID,	true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addChangeNameCharacteristic) });
-	characStatus.push_back( { "Device Type", 	DEVICE_TYPE_UUID,	true,
+	characStatus.push_back( { "Device Type", 	DEVICE_TYPE_UUID,	false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addDeviceTypeCharactersitic) });
-	characStatus.push_back( { "Room",			ROOM_UUID, 			true,
+	characStatus.push_back( { "Room",			ROOM_UUID, 			false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addRoomCharacteristic) });
 }
 

@@ -14,6 +14,7 @@
 #include <util/ble_error.h>
 #include <drivers/serial.h>
 
+#include <BluetoothLE.h> // TODO: now for BLE_CALL, should be moved to other unit
 
 extern "C" {
 #include <app_scheduler.h>
@@ -47,17 +48,12 @@ Storage::~Storage() {
 /**
  * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
  */
-bool Storage::init(int size) {
-	log(INFO, "Create persistent storage of size %i", size);
+void Storage::init(int size) {
+	log(INFO, "Create persistent storage (FLASH) of %i bytes", size);
 	_size = size;
-	uint32_t err_code;
 
 	// call once before using any other API calls of the persistent storage module
-	err_code = pstorage_init();
-	if (err_code != NRF_SUCCESS) {
-		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
-		APP_ERROR_CHECK(err_code);
-	}
+	BLE_CALL(pstorage_init, ());
 
 	// set parameter
 	pstorage_module_param_t param;
@@ -66,21 +62,10 @@ bool Storage::init(int size) {
 	param.cb = pstorage_callback_handler;
 
 	// register
-	log(INFO, "Register");
-	err_code = pstorage_register(&param, &handle);
-	if (err_code != NRF_SUCCESS) {
-		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
-		APP_ERROR_CHECK(err_code);
-	}
+	BLE_CALL ( pstorage_register, (&param, &handle) );
 
-	log(INFO, "Get block identifier");
-	err_code = pstorage_block_identifier_get(&handle, 0, &block_handle);
-	if (err_code != NRF_SUCCESS) {
-		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
-		APP_ERROR_CHECK(err_code);
-	}
-
-	return (err_code == NRF_SUCCESS);
+	// get block id
+	BLE_CALL ( pstorage_block_identifier_get,(&handle, 0, &block_handle) );
 }
 
 /**
@@ -88,18 +73,13 @@ bool Storage::init(int size) {
  */
 void Storage::clear() {
 	log(WARNING, "Nordic bug: clear entire block before writing to it");
-	uint32_t err_code;
-	err_code = pstorage_clear(&block_handle, _size);
-	if (err_code != NRF_SUCCESS) {
-		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
-		APP_ERROR_CHECK(err_code);
-	}
+	BLE_CALL (pstorage_clear, (&block_handle, _size) );
 }
 
 // Get byte at location "index" 
 void Storage::getUint8(int index, uint8_t *item) {
 	static uint8_t wg8[4];
-	pstorage_load(wg8, &block_handle, 4, index); 
+	BLE_CALL (pstorage_load, (wg8, &block_handle, 4, index)); 
 	*item = wg8[0];
 }
 
@@ -111,7 +91,7 @@ void Storage::setUint8(int index, const uint8_t item) {
 	ws8[1] = 0;
 	ws8[2] = 0;
 	ws8[3] = 0;
-	pstorage_store(&block_handle, ws8, 4, index);
+	BLE_CALL (pstorage_store, (&block_handle, ws8, 4, index) );
 }
 
 //#define PRINT_ITEMS
@@ -120,7 +100,7 @@ void Storage::setUint8(int index, const uint8_t item) {
 // Get 16-bit integer
 void Storage::getUint16(int index, uint16_t *item) {
 	static uint8_t wg16[4];
-	pstorage_load(wg16, &block_handle, 4, index); //todo: check endianness
+	BLE_CALL (pstorage_load, (wg16, &block_handle, 4, index) ); 
 #ifdef PRINT_ITEMS
 	LOGd("Load item[0]: %d", wg16[0]);
 	LOGd("Load item[1]: %d", wg16[1]);
@@ -131,20 +111,17 @@ void Storage::getUint16(int index, uint16_t *item) {
 	*item = ((uint16_t)wg16[1]) << 8;
        	*item |= wg16[0];
 #ifdef PRINT_PENDINSG
-	uint32_t err_code;
 	uint32_t count;
-	err_code = pstorage_access_status_get(&count);
-	if (err_code != NRF_SUCCESS) {
-		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
-		APP_ERROR_CHECK(err_code);
-	}
+	BLE_CALL ( pstorage_access_status_get, (&count) );
 	log(INFO, "Number of pending operations: %i", count);
 #endif
 }
 
 // Set 16-bit integer
 void Storage::setUint16(int index, const uint16_t item) {
+	// TODO: we now clear the entire block!
 	clear();
+
 	static uint8_t ws16[4];
 	ws16[0] = item;
 	ws16[1] = item >> 8;
@@ -156,15 +133,10 @@ void Storage::setUint16(int index, const uint16_t item) {
 	LOGd("Store item[2]: %d", ws16[2]);
 	LOGd("Store item[3]: %d", ws16[3]);
 #endif
-	pstorage_store(&block_handle, ws16, 4, index);
+	BLE_CALL (pstorage_store, (&block_handle, ws16, 4, index) );
 #ifdef PRINT_PENDING
-	uint32_t err_code;
 	uint32_t count;
-	err_code = pstorage_access_status_get(&count);
-	if (err_code != NRF_SUCCESS) {
-		LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
-		APP_ERROR_CHECK(err_code);
-	} 
+	BLE_CALL ( pstorage_access_status_get, (&count) );
 	log(INFO, "Number of pending operations: %i", count);
 #endif
 }	
