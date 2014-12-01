@@ -60,6 +60,27 @@ void PowerService::addPWMCharacteristic() {
 		});
 }
 
+// Do we really want to use the PWM for this, or just set the pin to zero?
+// TODO: turn off normally, but make sure we enable the completely PWM again on request
+void PowerService::TurnOff() {
+	nrf_pwm_set_value(0, 0);
+}
+
+// Do we really want to use the PWM for this, or just set the pin to zero?
+// TODO: turn on normally, but make sure we enable the completely PWM again on request
+void PowerService::TurnOn() {
+	nrf_pwm_set_value(0, (uint8_t)-1);
+}
+
+/**
+ * Dim the light, note that we use PWM. You might need another way to dim the light! For example by only turning on for
+ * a specific duty-cycle after the detection of a zero crossing.
+ */
+void PowerService::Dim(uint8_t value) {
+	nrf_pwm_set_value(0, value);
+}
+
+
 void PowerService::addVoltageCurveCharacteristic() {
 	createCharacteristic<uint8_t>()
 		.setUUID(UUID(getUUID(), VOLTAGE_CURVE_UUID))

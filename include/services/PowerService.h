@@ -44,6 +44,10 @@ protected:
 
 	uint16_t getCurrentLimit();
 
+	void TurnOff();
+	void TurnOn();
+	void Dim(uint8_t value);
+
 	// References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint16_t> *_currentLimitCharacteristic;
 private:
