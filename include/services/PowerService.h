@@ -16,7 +16,7 @@
 #include <characteristics/charac_config.h>
 #include <vector>
 
-#define POWER_SERVICE_UUID "5b8d7800-6f20-11e4-b116-123b93f75cba"
+#define POWER_SERVICE_UUID "5b8d0000-6f20-11e4-b116-123b93f75cba"
 
 class PowerService : public BLEpp::GenericService {
 public:
@@ -31,7 +31,6 @@ public:
 	void loop();
 protected:
 	// Enabled characteristics (to be set in constructor)
-	std::vector<CharacteristicStatusT> characStatus;
 	
 	// The characteristics in this service
 	void addPWMCharacteristic();

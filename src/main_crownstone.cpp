@@ -239,17 +239,8 @@ int main() {
 		powerService.loop();
 #endif
 
-#ifdef TEMPERATURE_SERVICE
-		// [31.10.14] correction, this only happens without optimization -Os !!!
-		// [31.10.14] this seems to interfere with the scanning / advertisement data
-		// coming in so if the temperature is read at the same time as scanning is
-		// performed the whole thing crashes after some time.
-		// note: this probably needs to be done with other functionality too that has
-		// to run at the same time as the scanning
-//		if (!stack.isscanning() && stack.connected()) {
-//			log(INFO,"temp.loop()");
-			generalService.loop();
-//		}
+#ifdef GENERAL_SERVICE
+		generalService.loop();
 #endif
 		app_sched_execute();
 

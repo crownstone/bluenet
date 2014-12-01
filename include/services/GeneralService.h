@@ -13,9 +13,7 @@
 #include <vector>
 #include <characteristics/charac_config.h>
 
-#define GENERAL_UUID "f5f93100-59f9-11e4-aa15-123b93f75cba"
-//#define GENERAL_UUID "00002220-0000-1000-8000-00805f9b34fb"
-
+#define GENERAL_UUID "f5f90000-59f9-11e4-aa15-123b93f75cba"
 
 class GeneralService: public BLEpp::GenericService {
 public:
@@ -30,22 +28,24 @@ public:
 	static GeneralService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 
 protected:
-	// Enabled characteristics (to be set in constructor)
-	std::vector<CharacteristicStatusT> characStatus;
+	BLEpp::Nrf51822BluetoothStack* _stack;
 
 	// References to characteristics
-	BLEpp::CharacteristicT<int32_t>* _temperatureCharacteristic; 
+	BLEpp::CharacteristicT<int32_t>* _temperatureCharacteristic;
 	BLEpp::Characteristic<std::string>* _changeNameCharacteristic; 
+	BLEpp::Characteristic<std::string>* _deviceTypeCharacteristic;
+	BLEpp::Characteristic<std::string>* _roomCharacteristic;
 
 	// Functions to add the characteristics
 	void addTemperatureCharacteristic();
 	void addChangeNameCharacteristic();
+	void addDeviceTypeCharactersitic();
+	void addRoomCharacteristic();
 
 	// Helper functions
 	std::string & getBLEName();
 	void setBLEName(std::string &name);
 private:
-	BLEpp::Nrf51822BluetoothStack* _stack;
 	std::string _name;
 };
 
