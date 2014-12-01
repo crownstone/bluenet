@@ -32,12 +32,5 @@ enum {
 	LIST_DEVICE_UUID						= 0x4,
 };
 
-struct CharacteristicStatus {
-	uint8_t UUID;
-	bool enabled;
-};
-
-typedef struct CharacteristicStatus CharacteristicStatusT;
-
 #endif // CS_CHARAC_CONFIG_H_
 

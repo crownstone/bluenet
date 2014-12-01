@@ -18,35 +18,14 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	setName("General Service");
 
 	log(INFO, "Create general service");
-	characStatus.push_back( { TEMPERATURE_UUID, true });
-	characStatus.push_back( { CHANGE_NAME_UUID, true });
-}
-
-/**
- * Seperate function that actually adds the characteristics. This allows to introduce dependencies between construction
- * of the different services and the characteristics on those services.
- */
-void GeneralService::addSpecificCharacteristics() {
-	for ( CharacteristicStatusT &status : characStatus) {
-		switch(status.UUID) {
-		case TEMPERATURE_UUID: 
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to read temperature", TEMPERATURE_UUID);
-				addTemperatureCharacteristic();
-			} else {
-				log(INFO, "Disabled temperature characteristic");
-			}
-		break;
-		case CHANGE_NAME_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to change BLE name", CHANGE_NAME_UUID);
-				addChangeNameCharacteristic();
-			} else {
-				log(INFO, "Disabled change name characteristic");
-			}
-		break;
-		}
-	}
+	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	true,
+		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
+	characStatus.push_back( { "Change Name", 	CHANGE_NAME_UUID,	true,
+		static_cast<addCharacteristicFunc>(&GeneralService::addChangeNameCharacteristic) });
+	characStatus.push_back( { "Device Type", 	DEVICE_TYPE_UUID,	true,
+		static_cast<addCharacteristicFunc>(&GeneralService::addDeviceTypeCharactersitic) });
+	characStatus.push_back( { "Room",			ROOM_UUID, 			true,
+		static_cast<addCharacteristicFunc>(&GeneralService::addRoomCharacteristic) });
 }
 
 void GeneralService::addTemperatureCharacteristic() {
@@ -123,7 +102,7 @@ void GeneralService::setBLEName(std::string &name) {
 GeneralService& GeneralService::createService(Nrf51822BluetoothStack& stack) {
 	GeneralService* svc = new GeneralService(stack);
 	stack.addService(svc);
-	svc->addSpecificCharacteristics();
+	svc->GenericService::addSpecificCharacteristics();
 	return *svc;
 }
 

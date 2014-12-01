@@ -28,8 +28,6 @@ public:
 	static GeneralService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 
 protected:
-	// Enabled characteristics (to be set in constructor)
-	std::vector<CharacteristicStatusT> characStatus;
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
 	// References to characteristics

@@ -31,7 +31,6 @@ public:
 	void loop();
 protected:
 	// Enabled characteristics (to be set in constructor)
-	std::vector<CharacteristicStatusT> characStatus;
 	
 	// The characteristics in this service
 	void addPWMCharacteristic();
@@ -44,6 +43,10 @@ protected:
 	void sampleAdcStart();
 
 	uint16_t getCurrentLimit();
+
+	void TurnOff();
+	void TurnOn();
+	void Dim(uint8_t value);
 
 	// References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint16_t> *_currentLimitCharacteristic;

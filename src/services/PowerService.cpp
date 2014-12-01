@@ -20,6 +20,8 @@
 
 using namespace BLEpp;
 
+#define STR_HELPER(str) #str
+
 PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage) :
 		_stack(&_stack), _adc(adc), _storage(storage), _current_limit(0) {
 
@@ -28,55 +30,22 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 	
 	log(INFO, "Create power service");
 
-	characStatus.push_back( { PWM_UUID, true });
-	characStatus.push_back( { VOLTAGE_CURVE_UUID, true });
-	characStatus.push_back( { POWER_CONSUMPTION_UUID, false });
-	characStatus.push_back( { CURRENT_LIMIT_UUID, true });
+	characStatus.push_back( { "PWM",				PWM_UUID, 				true,
+		static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
+	characStatus.push_back( { "Voltage Curve",		VOLTAGE_CURVE_UUID, 	true,
+		static_cast<addCharacteristicFunc>(&PowerService::addVoltageCurveCharacteristic)});
+	characStatus.push_back( { "Power Consumption",	POWER_CONSUMPTION_UUID, false,
+		static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
+	characStatus.push_back( { "Current Limit",		CURRENT_LIMIT_UUID, 	true,
+		static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
+
+	log(INFO, "Charac: %s", STR_HELPER(PWM_UUID));
 
 	// we have to figure out why this goes wrong
 //	setName(std::string("Power Service"));
 
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
-}
-
-void PowerService::addSpecificCharacteristics() {
-	for ( CharacteristicStatusT &status : characStatus) {
-		switch(status.UUID) {
-		case PWM_UUID: 
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to set PWM", PWM_UUID);
-				addPWMCharacteristic();
-			} else {
-				log(INFO, "Disabled PWM characteristic");
-			}
-		break;
-		case VOLTAGE_CURVE_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to read voltage curve", VOLTAGE_CURVE_UUID);
-				addVoltageCurveCharacteristic();
-			} else {
-				log(INFO, "Disabled voltage curve characteristic");
-			}
-		break;
-		case POWER_CONSUMPTION_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to read power consumption", POWER_CONSUMPTION_UUID);
-				addPowerConsumptionCharacteristic();
-			} else {
-				log(INFO, "Disabled power consumption characteristic");
-			}
-		break;
-		case CURRENT_LIMIT_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to set current limit", CURRENT_LIMIT_UUID);
-				addCurrentLimitCharacteristic();
-			} else {
-				log(INFO, "Disabled current limit characteristic");
-			}
-		break;
-		}
-	}
 }
 
 void PowerService::addPWMCharacteristic() {
@@ -90,6 +59,27 @@ void PowerService::addPWMCharacteristic() {
 			nrf_pwm_set_value(0, value);
 		});
 }
+
+// Do we really want to use the PWM for this, or just set the pin to zero?
+// TODO: turn off normally, but make sure we enable the completely PWM again on request
+void PowerService::TurnOff() {
+	nrf_pwm_set_value(0, 0);
+}
+
+// Do we really want to use the PWM for this, or just set the pin to zero?
+// TODO: turn on normally, but make sure we enable the completely PWM again on request
+void PowerService::TurnOn() {
+	nrf_pwm_set_value(0, (uint8_t)-1);
+}
+
+/**
+ * Dim the light, note that we use PWM. You might need another way to dim the light! For example by only turning on for
+ * a specific duty-cycle after the detection of a zero crossing.
+ */
+void PowerService::Dim(uint8_t value) {
+	nrf_pwm_set_value(0, value);
+}
+
 
 void PowerService::addVoltageCurveCharacteristic() {
 	createCharacteristic<uint8_t>()
@@ -283,7 +273,7 @@ PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& a
 //	LOGd("Create power service");
 	PowerService* svc = new PowerService(_stack, adc, storage);
 	_stack.addService(svc);
-	svc->addSpecificCharacteristics();
+	svc->GenericService::addSpecificCharacteristics();
 	return *svc;
 }
 
