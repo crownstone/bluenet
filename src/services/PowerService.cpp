@@ -41,7 +41,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
 			true,
-			static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
+			static_cast<addCharacteristicFunc>(&PowerService::addCurrentLimitCharacteristic)});
 
 	// we have to figure out why this goes wrong
 //	setName(std::string("Power Service"));
