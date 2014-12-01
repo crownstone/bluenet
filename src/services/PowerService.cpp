@@ -20,6 +20,8 @@
 
 using namespace BLEpp;
 
+#define STR_HELPER(str) #str
+
 PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage) :
 		_stack(&_stack), _adc(adc), _storage(storage), _current_limit(0) {
 
@@ -32,6 +34,8 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 	characStatus.push_back( { VOLTAGE_CURVE_UUID, true });
 	characStatus.push_back( { POWER_CONSUMPTION_UUID, false });
 	characStatus.push_back( { CURRENT_LIMIT_UUID, true });
+
+	log(INFO, "Charac: %s", STR_HELPER(PWM_UUID));
 
 	// we have to figure out why this goes wrong
 //	setName(std::string("Power Service"));
