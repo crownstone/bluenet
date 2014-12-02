@@ -33,7 +33,7 @@ static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_cod
 			LOGd("Error with loading data");
 		}
 	} else {
-		log(INFO, "Opcode %i executed (no error)", op_code);
+		LOGi("Opcode %i executed (no error)", op_code);
 	}
 }
 
@@ -49,7 +49,7 @@ Storage::~Storage() {
  * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
  */
 void Storage::init(int size) {
-	log(INFO, "Create persistent storage (FLASH) of %i bytes", size);
+	LOGi("Create persistent storage (FLASH) of %i bytes", size);
 	_size = size;
 
 	// call once before using any other API calls of the persistent storage module
@@ -72,7 +72,7 @@ void Storage::init(int size) {
  * We have to clear an entire block before we can write a value to one of the fields!
  */
 void Storage::clear() {
-	log(WARNING, "Nordic bug: clear entire block before writing to it");
+	LOGw("Nordic bug: clear entire block before writing to it");
 	BLE_CALL (pstorage_clear, (&block_handle, _size) );
 }
 
@@ -113,7 +113,7 @@ void Storage::getUint16(int index, uint16_t *item) {
 #ifdef PRINT_PENDINSG
 	uint32_t count;
 	BLE_CALL ( pstorage_access_status_get, (&count) );
-	log(INFO, "Number of pending operations: %i", count);
+	LOGi("Number of pending operations: %i", count);
 #endif
 }
 
@@ -137,7 +137,7 @@ void Storage::setUint16(int index, const uint16_t item) {
 #ifdef PRINT_PENDING
 	uint32_t count;
 	BLE_CALL ( pstorage_access_status_get, (&count) );
-	log(INFO, "Number of pending operations: %i", count);
+	LOGi("Number of pending operations: %i", count);
 #endif
 }	
 

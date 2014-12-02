@@ -17,7 +17,7 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	setUUID(UUID(GENERAL_UUID));
 	setName("General Service");
 
-	log(INFO, "Create general service");
+	LOGi("Create general service");
 	characStatus.reserve(4);
 
 	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	false,
@@ -77,7 +77,7 @@ void GeneralService::addChangeNameCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const std::string& value) -> void {
 			std::string name(value);
-			log(INFO, "Set bluetooth name to: %s", name.c_str());
+			LOGi("Set bluetooth name to: %s", name.c_str());
 			setBLEName(name);
 		})
 		;

@@ -25,7 +25,7 @@ uint32_t RealTimeClock::init(uint32_t ms) {
 	uint32_t err_code = 0;
 
 	// Enable ADC interrupt
-	log(DEBUG, "Clear pending RTC interrupts");
+	LOGd("Clear pending RTC interrupts");
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_ClearPendingIRQ(RTC1_IRQn);
 	APP_ERROR_CHECK(err_code);
@@ -33,7 +33,7 @@ uint32_t RealTimeClock::init(uint32_t ms) {
 	NVIC_ClearPendingIRQ(RTC1_IRQn);
 #endif
 
-	log(DEBUG, "Set RTC priority");
+	LOGd("Set RTC priority");
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_SetPriority(RTC1_IRQn, NRF_APP_PRIORITY_LOW);
 	APP_ERROR_CHECK(err_code);
@@ -41,7 +41,7 @@ uint32_t RealTimeClock::init(uint32_t ms) {
 	NVIC_SetPriority(RTC1_IRQn, NRF_APP_PRIORITY_LOW);
 #endif
 
-	log(DEBUG, "Tell to use RTC interrupt handler");
+	LOGd("Tell to use RTC interrupt handler");
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_EnableIRQ(RTC1_IRQn);
 	APP_ERROR_CHECK(err_code);

@@ -97,8 +97,8 @@ namespace BLEpp {
 
 //#define BLE_CALL(function, args) do {volatile uint32_t result = function args; if (result != NRF_SUCCESS) {std::string ble_error_message(# function ); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
 #define BLE_CALL(function, args) do {uint32_t result = function args; APP_ERROR_CHECK(result); } while(0)
-#define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) { std::string ble_error_message(message); log(DEBUG, "BLE_THROW: %s", ble_error_message.c_str()); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
-#define BLE_THROW(message) do { std::string ble_error_message(message); log(DEBUG, "BLE_THROW: %s", ble_error_message.c_str()); ble_error_handler(ble_error_message, __LINE__, __FILE__); } while(0)
+#define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) { std::string ble_error_message(message); LOGd("BLE_THROW: %s", ble_error_message.c_str()); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
+#define BLE_THROW(message) do { std::string ble_error_message(message); LOGd("BLE_THROW: %s", ble_error_message.c_str()); ble_error_handler(ble_error_message, __LINE__, __FILE__); } while(0)
 
 #endif /* __EXCEPTIONS */
 
@@ -120,8 +120,8 @@ namespace BLEpp {
             ret.uuid = _uuid;
             ret.type = _type;
 
-//            log(INFO, "get fullid: %s", _full);
-//            log(INFO, "get uuid: %X", _uuid);
+//            LOGi("get fullid: %s", _full);
+//            LOGi("get uuid: %X", _uuid);
 
             return ret;
         }
@@ -294,7 +294,7 @@ namespace BLEpp {
         }
 
         void setNotifyingEnabled(bool enabled) {
-//        	log(DEBUG, "[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
+//        	LOGd("[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
         	_notifyingEnabled = enabled;
         }
 
@@ -527,12 +527,12 @@ namespace BLEpp {
             CharacteristicValue value(len, data+offset);
             setCharacteristicValue(value);
 
-            log(DEBUG, "%s: onWrite()", _name.c_str());
+            LOGd("%s: onWrite()", _name.c_str());
             _callbackOnWrite(getValue());
         }
 
         void read() {
-            log(DEBUG, "%s: onRead()", _name.c_str());
+            LOGd("%s: onRead()", _name.c_str());
             T newValue = _callbackOnRead();
             if (newValue != _value) {
                 operator=(newValue);

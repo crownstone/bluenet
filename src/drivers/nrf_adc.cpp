@@ -35,9 +35,9 @@ void ADC::setClock(RealTimeClock &clock) {
  */
 uint32_t ADC::nrf_adc_init(uint8_t pin) {
 #if(NRF51_USE_SOFTDEVICE == 1)
-	log(DEBUG, "Run ADC converter with SoftDevice");
+	LOGd("Run ADC converter with SoftDevice");
 #else 
-	log(DEBUG, "Run ADC converter without SoftDevice!!!");
+	LOGd("Run ADC converter without SoftDevice!!!");
 	
 #endif
 	if (adc_result.size != _buffer_size) {
@@ -53,7 +53,7 @@ uint32_t ADC::nrf_adc_init(uint8_t pin) {
 
 	uint32_t err_code;
 
-	log(DEBUG, "Configure ADC on pin %u", pin);
+	LOGd("Configure ADC on pin %u", pin);
 	err_code = nrf_adc_config(pin);
 	APP_ERROR_CHECK(err_code);
 
@@ -153,9 +153,9 @@ extern "C" void ADC_IRQHandler(void) {
 	adc.update(adc_value);
 
 	if (adc_result.full()) {
-		//log(INFO, "Buffer is full");
+		//LOGi("Buffer is full");
 		NRF_ADC->TASKS_STOP = 1;
-		//log(INFO, "Stopped task");
+		//LOGi("Stopped task");
 	       	return;
 	}
 
