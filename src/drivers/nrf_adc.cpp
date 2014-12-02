@@ -103,7 +103,7 @@ uint32_t ADC::nrf_adc_config(uint8_t pin) {
 	if (pin < 8) {
 		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << (pin+ADC_CONFIG_PSEL_Pos);
 	} else {
-		log(FATAL, "There is no such pin available");
+		LOGf("There is no such pin available");
 		return 0xFFFFFFFF; // error
 	}
 	return 0;
