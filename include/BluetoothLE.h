@@ -767,13 +767,13 @@ namespace BLEpp {
 
     class GenericService;
 
-	typedef void (GenericService::*addCharacteristicFunc)();
+    typedef void (GenericService::*addCharacteristicFunc)();
 
     struct CharacteristicStatus {
-    	std::string name;
-    	uint8_t UUID;
-    	bool enabled;
-    	BLEpp::addCharacteristicFunc func;
+	    std::string name;
+	    uint8_t UUID;
+	    bool enabled;
+	    BLEpp::addCharacteristicFunc func;
     };
     typedef struct CharacteristicStatus CharacteristicStatusT;
 

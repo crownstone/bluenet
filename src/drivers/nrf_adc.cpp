@@ -24,6 +24,10 @@ buffer_t<uint16_t> adc_result;
 buffer_t<uint16_t>* ADC::getBuffer() {
 	return &adc_result;
 }
+	
+void ADC::setClock(RealTimeClock &clock) {
+	_clock = &clock;
+}
 
 /**
  * The init function is called once before operating the AD converter. Call it after you start the SoftDevice. Check 
@@ -120,6 +124,19 @@ void ADC::nrf_adc_start() {
 	NRF_ADC->TASKS_START = 1;
 }
 
+void ADC::update(uint32_t value) {
+	adc_result.push(value);
+	// Log RTC too
+	if (_clock) {
+		adc_result.push(_clock->getCount());
+	}
+
+}
+
+void ADC::tick() {
+	dispatch();
+}
+
 /*
  * The interrupt handler for an ADC data ready event.
  */
@@ -131,9 +148,9 @@ extern "C" void ADC_IRQHandler(void) {
 
 	// write value to buffer
 	adc_value = NRF_ADC->RESULT;
-	adc_result.push(adc_value);
-	// Log RTC too
-	adc_result.push(nrf_rtc_getCount());
+
+	ADC &adc = ADC::getInstance();
+	adc.update(adc_value);
 
 	if (adc_result.full()) {
 		//log(INFO, "Buffer is full");

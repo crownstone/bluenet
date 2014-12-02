@@ -9,23 +9,38 @@
 #define INCLUDE_DRIVERS_NRF_RTC_H_
 
 #include <stdint.h>
+#include <events/Dispatcher.h>
 
-// TODO: do we really need this?
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
+class RealTimeClock: public Dispatcher {
+private:
+	RealTimeClock() {};
+	RealTimeClock(RealTimeClock const&); // singleton, deny implementation
+	void operator=(RealTimeClock const &); // singleton, deny implementation
+public:
+	// use static variant of singelton, no dynamic memory allocation
+	static RealTimeClock& getInstance() {
+		static RealTimeClock instance;
+		return instance;
+	}
 
-// make callback
-static int rtc_timer_flag;
+	// initialize clock
+	uint32_t init(uint32_t ms=0);
 
-uint32_t nrf_rtc_init(uint32_t ms=0);
-//uint32_t nrf_rtc_config(uint32_t ms=0);
-void nrf_rtc_start();
-void nrf_rtc_stop();
-uint32_t nrf_rtc_getCount();
+	// the tick is used to dispatch events if they have accumulated
+	void tick();
 
-//#ifdef __cplusplus
-//}
-//#endif
+	// start clock
+	void start();
+
+	// stop clock
+	void stop();
+
+	// return number of ticks
+	uint32_t getCount();
+
+	// return reference to internal flag
+	int getFlag();
+private:
+};
 
 #endif /* INCLUDE_DRIVERS_NRF_RTC_H_ */

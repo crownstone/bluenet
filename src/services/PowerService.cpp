@@ -16,28 +16,32 @@
 
 #include "nRF51822.h"
 
-#define STORAGE_WORKING
-
 using namespace BLEpp;
 
-PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage) :
-		_stack(&_stack), _adc(adc), _storage(storage), _current_limit(0), _currentLimitCharacteristic(NULL) {
+PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage, RealTimeClock &clock) :
+		_stack(&_stack), _adc(adc), _storage(storage), _clock(&clock), _current_limit(0), _currentLimitCharacteristic(NULL) {
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
 	
 	log(INFO, "Create power service");
 
-	characStatus.reserve(4);
-
-	characStatus.push_back( { "PWM",				PWM_UUID, 				true,
-		static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
-	characStatus.push_back( { "Voltage Curve",		VOLTAGE_CURVE_UUID, 	true,
-		static_cast<addCharacteristicFunc>(&PowerService::addVoltageCurveCharacteristic)});
-	characStatus.push_back( { "Power Consumption",	POWER_CONSUMPTION_UUID, false,
-		static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
-	characStatus.push_back( { "Current Limit",		CURRENT_LIMIT_UUID, 	true,
-		static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
+	characStatus.push_back( { "PWM",
+			PWM_UUID,
+			false,
+			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
+	characStatus.push_back( { "Voltage Curve",
+			VOLTAGE_CURVE_UUID,
+			false,
+			static_cast<addCharacteristicFunc>(&PowerService::addVoltageCurveCharacteristic)});
+	characStatus.push_back( { "Power Consumption",
+			POWER_CONSUMPTION_UUID,
+			false,
+			static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
+	characStatus.push_back( { "Current Limit",
+			CURRENT_LIMIT_UUID,
+			true,
+			static_cast<addCharacteristicFunc>(&PowerService::addCurrentLimitCharacteristic)});
 
 	// we have to figure out why this goes wrong
 //	setName(std::string("Power Service"));
@@ -109,19 +113,16 @@ void PowerService::addPowerConsumptionCharacteristic() {
 }
 
 uint16_t PowerService::getCurrentLimit() {
-#ifdef STORAGE_WORKING
-	//LOGi("Get current limit from memory");
 	_storage.getUint16(PS_CURRENT_LIMIT, &_current_limit);
-	LOGi("Obtained current limit from PM: %i", _current_limit);
-#else
-	LOGi("Storage not working yet");
-	_current_limit = 666;
-#endif
+	LOGi("Obtained current limit from FLASH: %i", _current_limit);
 	return _current_limit;
 }
 
 /**
  * The characteristic that writes a current limit to persistent memory.
+ *
+ * TODO: Check https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/ 
+ *       Writing to persistent memory should be done between connection/advertisement events...
  */
 void PowerService::addCurrentLimitCharacteristic() {
 	_currentLimitCharacteristic = createCharacteristicRef<uint16_t>();
@@ -132,27 +133,10 @@ void PowerService::addCurrentLimitCharacteristic() {
 		.setDefaultValue(getCurrentLimit())
 		.setWritable(true)
 		.onWrite([&](const uint16_t &value) -> void {
-			// https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/
-			// should be done between connection/advertisement events...
-		//	if (_stack->isAdvertising()) {
-		//		log(INFO, "Stop advertising");
-		//		_stack->stopAdvertising();
-		//	}
 			LOGi("Set current limit to: %i", value);
 			_current_limit = value;
-#ifdef STORAGE_WORKING
 			LOGi("Write value to persistent memory");
 			_storage.setUint16(PS_CURRENT_LIMIT, _current_limit);
-#endif
-		//	if (!_stack->isAdvertising()) {
-		//		log(INFO, "Start advertising");
-		//		_stack->startAdvertising();
-		//	}
-		})
-		 // not necessary for us... isn't called anyway...
-		.onRead([&]() -> uint16_t {
-			LOGi("Read current limit now! %i", _current_limit);
-			return getCurrentLimit();
 		})
 		;
 }
@@ -160,12 +144,15 @@ void PowerService::addCurrentLimitCharacteristic() {
 static int tmp_cnt = 100;
 static int loop_cnt = 100;
 
+/**
+ * TODO: We should only need to do this once on startup.
+ */
 void PowerService::loop() {
 	// check if current is not beyond current_limit if the latter is set
 	if (++tmp_cnt > loop_cnt) {
 		if (_currentLimitCharacteristic) {
 			getCurrentLimit();
-			log(INFO, "Set characteristic to value from persistent memory");
+			log(INFO, "Set default current limit value to %i", _current_limit);
 			*_currentLimitCharacteristic = _current_limit;
 		}
 		tmp_cnt = 0;
@@ -186,8 +173,8 @@ void PowerService::sampleAdcInit() {
 				//stack->stopAdvertising();
 
 				log(INFO, "start RTC");
-				nrf_rtc_init();
-				nrf_rtc_start();
+				_clock->init();
+				_clock->start();
 
 				// Wait for the RTC to actually start
 				nrf_delay_us(100);
@@ -203,7 +190,7 @@ void PowerService::sampleAdcStart() {
 		nrf_delay_ms(100);
 	}
 	log(INFO, "Number of results: %u", _adc.getBuffer()->count()/2);
-	log(INFO, "Counter is at: %u", nrf_rtc_getCount());
+	log(INFO, "Counter is at: %u", _clock->getCount());
 
 	log(INFO, "Stop ADC converter");
 	_adc.nrf_adc_stop();
@@ -212,7 +199,7 @@ void PowerService::sampleAdcStart() {
 	nrf_delay_us(1000);
 
 	log(INFO, "Stop RTC");
-	nrf_rtc_stop();
+	_clock->stop();
 /*
 	for (uint32_t i=0; i<samples; ++i) {
 
@@ -267,9 +254,10 @@ void PowerService::sampleAdcStart() {
 */
 }
 
-PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& adc, Storage& storage) {
+PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& adc, Storage& storage, 
+		RealTimeClock &clock) {
 //	LOGd("Create power service");
-	PowerService* svc = new PowerService(_stack, adc, storage);
+	PowerService* svc = new PowerService(_stack, adc, storage, clock);
 	_stack.addService(svc);
 	svc->GenericService::addSpecificCharacteristics();
 	return *svc;

@@ -11,6 +11,7 @@
 #include "BluetoothLE.h"
 #include <util/function.h>
 
+#include <drivers/nrf_rtc.h>
 #include <drivers/nrf_adc.h>
 #include <common/storage.h>
 #include <characteristics/charac_config.h>
@@ -22,9 +23,12 @@ class PowerService : public BLEpp::GenericService {
 public:
 	typedef function<int8_t()> func_t;
 
-	PowerService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage);
+	PowerService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage, RealTimeClock &clock);
 
-	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage);
+	void addSpecificCharacteristics();
+
+	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage,
+			RealTimeClock &clock);
 	
 	void loop();
 protected:
@@ -57,6 +61,9 @@ private:
 
 	// We need persistent storage for this service
 	Storage &_storage;
+
+	// Real-time clock
+	RealTimeClock *_clock;
 
 	// Current limit
 	uint16_t _current_limit;

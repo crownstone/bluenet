@@ -10,7 +10,7 @@
  *********************************************************************************************************************/
 
 //#define INDOOR_SERVICE
-#define GENERAL_SERVICE
+//#define GENERAL_SERVICE
 #define POWER_SERVICE
 
 /**********************************************************************************************************************
@@ -46,6 +46,7 @@ extern "C" {
 	#include "nrf_gpio.h"
 #endif
 
+#include <drivers/nrf_rtc.h>
 #include <drivers/nrf_adc.h>
 #include <drivers/nrf_pwm.h>
 #include <drivers/serial.h>
@@ -70,12 +71,6 @@ using namespace BLEpp;
 #ifndef BLUETOOTH_NAME
 #error We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. "Crown" (with quotes)
 #endif
-
-// BUFSIZ is used by sprintf for the internal buffer and is 1024 bytes.
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-//#pragma message "BUFSIZ = " STR(BUFSIZ)
-
 
 /**********************************************************************************************************************
  * Main functionality
@@ -190,7 +185,7 @@ int main() {
 
 	// Create ADC object
 	// TODO: make service which enables other services and only init ADC when necessary
-	ADC adc;
+	ADC & adc = ADC::getInstance();
 
 	// Scheduler must be initialized before persistent memory
 	const uint16_t max_size = 32;
@@ -202,6 +197,8 @@ int main() {
 	Storage storage;
 	storage.init(32);
 	
+	RealTimeClock & clock = RealTimeClock::getInstance();
+
 	log(INFO, "Create all services");
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
@@ -215,7 +212,7 @@ int main() {
 #endif 
 
 #ifdef POWER_SERVICE
-	PowerService &powerService = PowerService::createService(stack, adc, storage);
+	PowerService &powerService = PowerService::createService(stack, adc, storage, clock);
 #endif
 
 	// configure drivers
@@ -235,13 +232,13 @@ int main() {
 		//		analogwrite(pin_led, 50);
 		stack.loop();
 
+#ifdef GENERAL_SERVICE
+		generalService.loop();
+#endif
 #ifdef POWER_SERVICE
 		powerService.loop();
 #endif
 
-#ifdef GENERAL_SERVICE
-		generalService.loop();
-#endif
 		app_sched_execute();
 
 		nrf_delay_ms(50);
