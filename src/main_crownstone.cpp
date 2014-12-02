@@ -46,6 +46,7 @@ extern "C" {
 	#include "nrf_gpio.h"
 #endif
 
+#include <drivers/nrf_rtc.h>
 #include <drivers/nrf_adc.h>
 #include <drivers/nrf_pwm.h>
 #include <drivers/serial.h>
@@ -196,6 +197,8 @@ int main() {
 	Storage storage;
 	storage.init(32);
 	
+	RealTimeClock & clock = RealTimeClock::getInstance();
+
 	log(INFO, "Create all services");
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
@@ -209,7 +212,7 @@ int main() {
 #endif 
 
 #ifdef POWER_SERVICE
-	PowerService &powerService = PowerService::createService(stack, adc, storage);
+	PowerService &powerService = PowerService::createService(stack, adc, storage, clock);
 #endif
 
 	// configure drivers

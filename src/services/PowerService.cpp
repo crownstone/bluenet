@@ -18,8 +18,8 @@
 
 using namespace BLEpp;
 
-PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage) :
-		_stack(&_stack), _adc(adc), _storage(storage), _current_limit(0) {
+PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage, RealTimeClock &clock) :
+		_stack(&_stack), _adc(adc), _storage(storage), _clock(&clock), _current_limit(0) {
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
@@ -173,8 +173,8 @@ void PowerService::sampleAdcInit() {
 				//stack->stopAdvertising();
 
 				log(INFO, "start RTC");
-				nrf_rtc_init();
-				nrf_rtc_start();
+				_clock->init();
+				_clock->start();
 
 				// Wait for the RTC to actually start
 				nrf_delay_us(100);
@@ -190,7 +190,7 @@ void PowerService::sampleAdcStart() {
 		nrf_delay_ms(100);
 	}
 	log(INFO, "Number of results: %u", _adc.getBuffer()->count()/2);
-	log(INFO, "Counter is at: %u", nrf_rtc_getCount());
+	log(INFO, "Counter is at: %u", _clock->getCount());
 
 	log(INFO, "Stop ADC converter");
 	_adc.nrf_adc_stop();
@@ -199,7 +199,7 @@ void PowerService::sampleAdcStart() {
 	nrf_delay_us(1000);
 
 	log(INFO, "Stop RTC");
-	nrf_rtc_stop();
+	_clock->stop();
 /*
 	for (uint32_t i=0; i<samples; ++i) {
 
@@ -254,9 +254,10 @@ void PowerService::sampleAdcStart() {
 */
 }
 
-PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& adc, Storage& storage) {
+PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& adc, Storage& storage, 
+		RealTimeClock &clock) {
 //	LOGd("Create power service");
-	PowerService* svc = new PowerService(_stack, adc, storage);
+	PowerService* svc = new PowerService(_stack, adc, storage, clock);
 	_stack.addService(svc);
 	svc->GenericService::addSpecificCharacteristics();
 	return *svc;
