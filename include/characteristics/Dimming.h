@@ -38,7 +38,7 @@ private:
 	// Reference to AD converter
 	ADC *_adc;
 
-	Timer *_timer;
+	//Timer *_timer;
 };
 
 #endif // CS_DIMMING_H_
