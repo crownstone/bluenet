@@ -20,10 +20,10 @@ extern "C" {
  * Call all event handlers on a system event.
  */
 	static void sys_evt_dispatch(uint32_t sys_evt) {
-		//log(INFO, "Sys evt dispatch");
+		//LOGi("Sys evt dispatch");
 		if ((sys_evt == NRF_EVT_FLASH_OPERATION_SUCCESS) ||
 				(sys_evt == NRF_EVT_FLASH_OPERATION_ERROR)) {
-			//log(INFO, "Flash evt dispatch");
+			//LOGi("Flash evt dispatch");
 			pstorage_sys_event_handler(sys_evt);
 		}
 	}

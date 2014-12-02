@@ -62,16 +62,16 @@ bool ScanResult::operator!=(const ScanResult& val) {
 
 //int count = 1;
 void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
-//	log(DEBUG, "count: %d", count++);
+//	LOGd("count: %d", count++);
 	char addrs[28];
 	sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
 			adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
 			adrs_ptr[0]);
 
 	bool found = false;
-//	log(DEBUG, "addrs: %s", addrs);
+//	LOGd("addrs: %s", addrs);
 	for (int i = 0; i < _freeIdx; ++i) {
-//		log(DEBUG, "_history[%d]: [%02X %02X %02X %02X %02X %02X]", i, _list[i].addr[5],
+//		LOGd("_history[%d]: [%02X %02X %02X %02X %02X %02X]", i, _list[i].addr[5],
 //				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
 //				_list[i].addr[0]);
 		for (int j=0; j < BLE_GAP_ADDR_LEN; ++j) {
@@ -83,7 +83,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			}
 		}
 		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
-//			log(DEBUG, "found");
+//			LOGd("found");
 			_list[i].occurences++;
 			_list[i].rssi = rssi;
 			found = true;
@@ -100,33 +100,33 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 					idx = i;
 				}
 			}
-//			log(DEBUG, "replacing item at idx: %d", idx);
+//			LOGd("replacing item at idx: %d", idx);
 		} else {
 			idx = _freeIdx++;
 		}
 
-		log(INFO, "NEW Advertisement from: %s, rssi: %d", addrs, rssi);
+		LOGi("NEW Advertisement from: %s, rssi: %d", addrs, rssi);
 		memcpy(_list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
 		_list[idx].occurences = 1;
 		_list[idx].rssi = rssi;
 	} else {
-//		log(DEBUG, "Advertisement from: %s, rssi: %d, occ: %d", addrs, rssi, occ);
+//		LOGd("Advertisement from: %s, rssi: %d, occ: %d", addrs, rssi, occ);
 	}
 }
 
 void ScanResult::print() const {
 
-	log(INFO, "##################################################");
-	log(INFO, "### listing detected peripherals (%2d) ############", getSize());
-	log(INFO, "##################################################");
+	LOGi("##################################################");
+	LOGi("### listing detected peripherals (%2d) ############", getSize());
+	LOGi("##################################################");
 	for (int i = 0; i < getSize(); ++i) {
 		char addrs[28];
 		sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", _list[i].addr[5],
 				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
 				_list[i].addr[0]);
-		log(INFO, "%s\trssi: %d\tocc: %d", addrs, _list[i].rssi, _list[i].occurences);
+		LOGi("%s\trssi: %d\tocc: %d", addrs, _list[i].rssi, _list[i].occurences);
 	}
-	log(INFO, "##################################################");
+	LOGi("##################################################");
 
 }
 
