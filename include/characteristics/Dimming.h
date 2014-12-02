@@ -16,45 +16,29 @@
  * Dimming of LEDs is by a simple duty cycle of the 230V/110V sine signal. 
  */
 class Dimming: public Listener {
-	public:
-		Dimming();
+public:
+	Dimming();
 
-		virtual ~Dimming();
+	~Dimming();
 
-		// We get a dispatch from the ZeroCrossing utility 
-		void handleEvent() {
-			zeroCrossing();
-		}
+	void configure();
 
-		// Function to be executed on a zero-crossing
-		void zeroCrossing();
-	private:
+	// We get a dispatch from the ZeroCrossing utility 
+	void handleEvent() {
+		zeroCrossing();
+	}
 
-		ADC *_adc;
+	// Function to be executed on a zero-crossing
+	void zeroCrossing();
+
+	void turnOn();
+
+	void turnOff();
+private:
+	// Reference to AD converter
+	ADC *_adc;
+
+	Timer *_timer;
 };
-
-/**
- * Calculate zero-crossing. This uses the LPCOMP circuitry. This disallows the use of ADC at the same time.
- */
-class ZeroCrossing: public Dispatcher {
-	public:
-		ZeroCrossing(ADC &adc);
-
-		virtual ~ZeroCrossing();
-
-	protected:
-		void crossEvent() {
-			dispatch();
-		}
-
-		void calculateCrossing();
-	private:
-		ADC *_adc;
-
-		uint8_t positive_current;
-
-		uint8_t inverted_current; // made positive, so uint8_t!
-}
-
 
 #endif // CS_DIMMING_H_

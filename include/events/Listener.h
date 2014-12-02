@@ -9,6 +9,7 @@
 #define CS_LISTENER_H
 
 class Listener {
+public:
 	// have a general listener
 	virtual void handleEvent();
 
