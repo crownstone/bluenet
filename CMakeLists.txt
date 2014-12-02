@@ -164,7 +164,7 @@ ELSE()
 		#COMMAND ${CMAKE_OBJDUMP} -h ${PROJECT_NAME}.elf
 		COMMAND echo
 		COMMAND echo "*** Show largest symbols / functions"
-		COMMAND ${CMAKE_NM} --print-size --size-sort --radix=d ${PROJECT_NAME}.elf | tail -n20
+		COMMAND ${CMAKE_NM} --print-size --size-sort --radix=d ${PROJECT_NAME}.elf
 		COMMAND echo
 		COMMAND echo "*** Show size of sections"
 		COMMAND ${CMAKE_SIZE} -A -d ${PROJECT_NAME}.elf
