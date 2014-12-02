@@ -13,8 +13,10 @@
 
 #include <drivers/nrf_rtc.h>
 #include <drivers/nrf_adc.h>
+#include <drivers/LPComp.h>
 #include <common/storage.h>
 #include <characteristics/charac_config.h>
+#include <characteristics/CurrentLimit.h>
 #include <vector>
 
 #define POWER_SERVICE_UUID "5b8d0000-6f20-11e4-b116-123b93f75cba"
@@ -23,12 +25,12 @@ class PowerService : public BLEpp::GenericService {
 public:
 	typedef function<int8_t()> func_t;
 
-	PowerService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage, RealTimeClock &clock);
+	PowerService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage, RealTimeClock &clock, LPComp &lpcomp);
 
 	void addSpecificCharacteristics();
 
 	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage,
-			RealTimeClock &clock);
+			RealTimeClock &clock, LPComp &lpcomp);
 	
 	void loop();
 protected:
@@ -66,7 +68,12 @@ private:
 	RealTimeClock *_clock;
 
 	// Current limit
-	uint16_t _current_limit;
+	uint16_t _current_limit_val;
+
+	// We need an LP comparator for this service
+	LPComp &_lpcomp;
+
+	CurrentLimit _currentLimit;
 };
 
 #endif /* POWERSERVICE_H_ */

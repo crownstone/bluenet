@@ -8,13 +8,15 @@
 #ifndef CS_LISTENER_H
 #define CS_LISTENER_H
 
+#include <stdint.h>
+
 class Listener {
 public:
 	// have a general listener
-	virtual void handleEvent();
+	virtual void handleEvent() = 0;
 
 	// or specify different types
-	virtual void handleEvent(uint8_t type);
+	virtual void handleEvent(uint8_t type) = 0;
 };
 
 #endif // CS_LISTENER_H

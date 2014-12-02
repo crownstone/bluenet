@@ -6,6 +6,7 @@
  */
 
 #include <events/Dispatcher.h>
+#include <algorithm>
 
 void Dispatcher::addListener(Listener *listener) {
 	_listeners.push_back(listener);
