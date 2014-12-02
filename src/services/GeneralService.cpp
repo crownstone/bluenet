@@ -18,7 +18,9 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	setName("General Service");
 
 	log(INFO, "Create general service");
-	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	true,
+	characStatus.reserve(4);
+
+	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
 	characStatus.push_back( { "Change Name", 	CHANGE_NAME_UUID,	true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addChangeNameCharacteristic) });
@@ -111,7 +113,9 @@ void GeneralService::setTemperature(int32_t temperature) {
 }
 
 void GeneralService::loop() {
-	int32_t temp;
-	temp = getTemperature();
-	setTemperature(temp);
+	if (_temperatureCharacteristic) {
+		int32_t temp;
+		temp = getTemperature();
+		setTemperature(temp);
+	}
 }

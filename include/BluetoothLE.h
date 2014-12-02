@@ -149,8 +149,9 @@ namespace BLEpp {
 			} else if (c >= 'a' && c <= 'f') {
 				vv = c - 'a' + 10;
 			} else {
-				char cc[] = {c};// can't just call std::string(c) apparently.
-				BLE_THROW(std::string("Invalid character ") + std::string(1,cc[0]) + " in UUID.");
+				BLE_THROW("invalid character");
+//				char cc[] = {c};// can't just call std::string(c) apparently.
+//				BLE_THROW(std::string("Invalid character ") + std::string(1,cc[0]) + " in UUID.");
 			}
 
 			v = v * 16 + vv;
@@ -791,7 +792,7 @@ namespace BLEpp {
 
       public:
 
-        GenericService() : Service() {
+        GenericService() : Service(), characStatus(0) {
             setName(std::string("GenericService"));
 	}
 

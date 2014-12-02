@@ -20,15 +20,15 @@
 
 using namespace BLEpp;
 
-#define STR_HELPER(str) #str
-
 PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage) :
-		_stack(&_stack), _adc(adc), _storage(storage), _current_limit(0) {
+		_stack(&_stack), _adc(adc), _storage(storage), _current_limit(0), _currentLimitCharacteristic(NULL) {
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
 	
 	log(INFO, "Create power service");
+
+	characStatus.reserve(4);
 
 	characStatus.push_back( { "PWM",				PWM_UUID, 				true,
 		static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
@@ -38,8 +38,6 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 		static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",		CURRENT_LIMIT_UUID, 	true,
 		static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
-
-	log(INFO, "Charac: %s", STR_HELPER(PWM_UUID));
 
 	// we have to figure out why this goes wrong
 //	setName(std::string("Power Service"));

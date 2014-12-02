@@ -19,8 +19,6 @@ class GeneralService: public BLEpp::GenericService {
 public:
 	GeneralService(BLEpp::Nrf51822BluetoothStack &stack);
 
-	void addSpecificCharacteristics();
-
 	void setTemperature(int32_t temperature);
 
 	void loop();

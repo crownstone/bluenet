@@ -32,23 +32,32 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 	// we have to figure out why this goes wrong
 	setName(std::string("IndoorLocalizationService"));
 
+	characStatus.reserve(3);
+
+	characStatus.push_back( { "Received signal level",	RSSI_UUID,			false,
+		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addSignalStrengthCharacteristic)});
+	characStatus.push_back( { "Start/Stop Scan",		SCAN_DEVICE_UUID, 	true,
+		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addScanControlCharacteristic)});
+	characStatus.push_back( { "Peripherals",			LIST_DEVICE_UUID, 	true,
+		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addPeripheralListCharacteristic)});
+
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
 }
 
-void IndoorLocalizationService::addSpecificCharacteristics() {
-	addSignalStrengthCharacteristic();
-//	addNumberCharacteristic();
-//	addNumber2Characteristic();
-	addScanControlCharacteristic();
-	addPeripheralListCharacteristic();
-//	addPersonalThresholdCharacteristic();
-//	addDeviceTypeCharactersitic();
-//	addRoomCharacteristic();
-}
+//void IndoorLocalizationService::addSpecificCharacteristics() {
+//	addSignalStrengthCharacteristic();
+////	addNumberCharacteristic();
+////	addNumber2Characteristic();
+//	addScanControlCharacteristic();
+//	addPeripheralListCharacteristic();
+////	addPersonalThresholdCharacteristic();
+////	addDeviceTypeCharactersitic();
+////	addRoomCharacteristic();
+//}
 
 void IndoorLocalizationService::addSignalStrengthCharacteristic() {
-	LOGd("create characteristic to read signal strength");
+//	LOGd("create characteristic to read signal strength");
 	_rssiCharac = new CharacteristicT<int8_t>();
 	_rssiCharac->setUUID(UUID(getUUID(), RSSI_UUID)); // there is no BLE_UUID for rssi level(?)
 	_rssiCharac->setName(std::string("Received signal level"));
@@ -62,7 +71,7 @@ void IndoorLocalizationService::addNumberCharacteristic() {
 	// create a characteristic of type uint8_t (unsigned one byte integer).
 	// this characteristic is by default read-only (for the user)
 	// note that in the next characteristic this variable intchar is set!
-	log(DEBUG, "create characteristic to read a number for debugging");
+//	log(DEBUG, "create characteristic to read a number for debugging");
 	//Characteristic<uint8_t>&
 	_intChar = createCharacteristicRef<uint8_t>();
 	(*_intChar)
@@ -81,7 +90,7 @@ void IndoorLocalizationService::addNumber2Characteristic() {
 
 void IndoorLocalizationService::addScanControlCharacteristic() {
 	// set scanning option
-	log(DEBUG, "create characteristic to stop/start scan");
+//	log(DEBUG, "create characteristic to stop/start scan");
 	createCharacteristic<uint8_t>()
 		.setUUID(UUID(getUUID(), SCAN_DEVICE_UUID))
 		.setName("scan")
@@ -107,7 +116,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 
 void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	// get scan result
-	log(DEBUG, "create characteristic to list found peripherals");
+//	log(DEBUG, "create characteristic to list found peripherals");
 
 	_peripheralCharac = createCharacteristicRef<ScanResult>();
 	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
@@ -118,7 +127,7 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 
 void IndoorLocalizationService::addPersonalThresholdCharacteristic() {
 	// set threshold level
-	log(DEBUG, "create characteristic to write personal threshold level");
+//	log(DEBUG, "create characteristic to write personal threshold level");
 	createCharacteristic<uint8_t>()
 		.setUUID(UUID(getUUID(), PERSONAL_THRESHOLD_UUID))
 		.setName("Threshold")

@@ -24,8 +24,6 @@ public:
 
 	PowerService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage);
 
-	void addSpecificCharacteristics();
-
 	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage);
 	
 	void loop();
