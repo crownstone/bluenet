@@ -84,8 +84,10 @@ SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
 # http://public.kitware.com/Bug/view.php?id=12652
 # CMake does send the compiler flags also to the linker
 
+SET(FLAG_WRITE_MAP_FILE "-Wl,-Map,prog.map")
+
 # do not define above as multiple linker flags, or else you will get redefines of MEMORY etc.
-SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} -Wl,--gc-sections ${CMAKE_SHARED_LINKER_FLAGS}")
+SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} -Wl,--gc-sections ${CMAKE_EXE_LINKER_FLAGS} ${FLAG_WRITE_MAP_FILE}")
 
 # We preferably want to run the cross-compiler tests without all the flags. This namely means we have to add for example the object out of syscalls.c to the compilation, etc. Or, differently, have different flags for the compiler tests. This is difficult to do!
 #SET(CMAKE_C_FLAGS "-nostdlib")
