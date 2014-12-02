@@ -62,7 +62,7 @@ void IndoorLocalizationService::addNumberCharacteristic() {
 	// create a characteristic of type uint8_t (unsigned one byte integer).
 	// this characteristic is by default read-only (for the user)
 	// note that in the next characteristic this variable intchar is set!
-	log(DEBUG, "create characteristic to read a number for debugging");
+	LOGd("create characteristic to read a number for debugging");
 	//Characteristic<uint8_t>&
 	_intChar = createCharacteristicRef<uint8_t>();
 	(*_intChar)
@@ -81,7 +81,7 @@ void IndoorLocalizationService::addNumber2Characteristic() {
 
 void IndoorLocalizationService::addScanControlCharacteristic() {
 	// set scanning option
-	log(DEBUG, "create characteristic to stop/start scan");
+	LOGd("create characteristic to stop/start scan");
 	createCharacteristic<uint8_t>()
 		.setUUID(UUID(getUUID(), SCAN_DEVICE_UUID))
 		.setName("scan")
@@ -89,13 +89,13 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
 			if(value) {
-				log(INFO,"crown: start scanning");
+				LOGi(,"crown: start scanning");
 				if (!_stack->isScanning()) {
 					_scanResult.init();
 					_stack->startScanning();
 				}
 			} else {
-				log(INFO,"crown: stop scanning");
+				LOGi(,"crown: stop scanning");
 				if (_stack->isScanning()) {
 					_stack->stopScanning();
 					*_peripheralCharac = _scanResult;
@@ -107,7 +107,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 
 void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	// get scan result
-	log(DEBUG, "create characteristic to list found peripherals");
+	LOGd("create characteristic to list found peripherals");
 
 	_peripheralCharac = createCharacteristicRef<ScanResult>();
 	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
@@ -118,7 +118,7 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 
 void IndoorLocalizationService::addPersonalThresholdCharacteristic() {
 	// set threshold level
-	log(DEBUG, "create characteristic to write personal threshold level");
+	LOGd("create characteristic to write personal threshold level");
 	createCharacteristic<uint8_t>()
 		.setUUID(UUID(getUUID(), PERSONAL_THRESHOLD_UUID))
 		.setName("Threshold")
@@ -128,7 +128,7 @@ void IndoorLocalizationService::addPersonalThresholdCharacteristic() {
 			nrf_pwm_set_value(0, value);
 //			nrf_pwm_set_value(1, value);
 //			nrf_pwm_set_value(2, value);
-			log(INFO, "set personal_threshold_value to %i", value);
+			LOGi("set personal_threshold_value to %i", value);
 			_personalThresholdLevel = value;
 		});
 }

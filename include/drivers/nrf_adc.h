@@ -8,46 +8,48 @@
 #define __NRF_ADC__H__
 
 #include <stdint.h>
-
 #include <drivers/nrf_rtc.h>
-
 #include <common/buffer.h>
-
 #include <events/Dispatcher.h>
 
 /**
  * Analog digital conversion class. 
  */
 class ADC: public Dispatcher {
-	private:
-		ADC(): _buffer_size(100) {}
-		ADC(ADC const&); // singleton, deny implementation
-		void operator=(ADC const &); // singleton, deny implementation
-	public:
-		// use static variant of singelton, no dynamic memory allocation
-		static ADC& getInstance() {
-			static ADC instance;
-			return instance;
-		}
+private:
+	ADC(): _buffer_size(100), _clock(NULL) {}
+	ADC(ADC const&); // singleton, deny implementation
+	void operator=(ADC const &); // singleton, deny implementation
+public:
+	// use static variant of singelton, no dynamic memory allocation
+	static ADC& getInstance() {
+		static ADC instance;
+		return instance;
+	}
 
-		// TODO: remove nrf_adc prefix. This is now C++.
-		uint32_t nrf_adc_init(uint8_t pin);
-		uint32_t nrf_adc_config(uint8_t pin);
-		void nrf_adc_start();
-		void nrf_adc_stop();
+	// if decorated with a real time clock, we can "timestamp" the adc values
+	void setClock(RealTimeClock &clock);
 
-		// function to be called from interrupt, do not do much there!
-		void update(uint32_t value);
+	// TODO: remove nrf_adc prefix. This is now C++.
+	uint32_t nrf_adc_init(uint8_t pin);
+	uint32_t nrf_adc_config(uint8_t pin);
+	void nrf_adc_start();
+	void nrf_adc_stop();
 
-		// in the program loop, time to dispatch events e.g.
-		void tick();
+	// function to be called from interrupt, do not do much there!
+	void update(uint32_t value);
 
-		buffer_t<uint16_t>* getBuffer();
+	// in the program loop, time to dispatch events e.g.
+	void tick();
 
-	protected:
+	// return reference to internal buffer
+	buffer_t<uint16_t>* getBuffer();
 
-	private:
-		int _buffer_size;
+protected:
+private:
+	int _buffer_size;
+
+	RealTimeClock *_clock;
 };
 
 

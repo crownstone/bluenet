@@ -24,6 +24,10 @@ buffer_t<uint16_t> adc_result;
 buffer_t<uint16_t>* ADC::getBuffer() {
 	return &adc_result;
 }
+	
+void ADC::setClock(RealTimeClock &clock) {
+	_clock = &clock;
+}
 
 /**
  * The init function is called once before operating the AD converter. Call it after you start the SoftDevice. Check 
@@ -31,9 +35,9 @@ buffer_t<uint16_t>* ADC::getBuffer() {
  */
 uint32_t ADC::nrf_adc_init(uint8_t pin) {
 #if(NRF51_USE_SOFTDEVICE == 1)
-	log(DEBUG, "Run ADC converter with SoftDevice");
+	LOGd("Run ADC converter with SoftDevice");
 #else 
-	log(DEBUG, "Run ADC converter without SoftDevice!!!");
+	LOGd("Run ADC converter without SoftDevice!!!");
 	
 #endif
 	if (adc_result.size != _buffer_size) {
@@ -49,7 +53,7 @@ uint32_t ADC::nrf_adc_init(uint8_t pin) {
 
 	uint32_t err_code;
 
-	log(DEBUG, "Configure ADC on pin %u", pin);
+	LOGd("Configure ADC on pin %u", pin);
 	err_code = nrf_adc_config(pin);
 	APP_ERROR_CHECK(err_code);
 
@@ -123,7 +127,9 @@ void ADC::nrf_adc_start() {
 void ADC::update(uint32_t value) {
 	adc_result.push(value);
 	// Log RTC too
-	adc_result.push(nrf_rtc_getCount());
+	if (_clock) {
+		adc_result.push(_clock->getCount());
+	}
 
 }
 
@@ -147,9 +153,9 @@ extern "C" void ADC_IRQHandler(void) {
 	adc.update(adc_value);
 
 	if (adc_result.full()) {
-		//log(INFO, "Buffer is full");
+		//LOGi("Buffer is full");
 		NRF_ADC->TASKS_STOP = 1;
-		//log(INFO, "Stopped task");
+		//LOGi("Stopped task");
 	       	return;
 	}
 

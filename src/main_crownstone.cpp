@@ -46,6 +46,7 @@ extern "C" {
 	#include "nrf_gpio.h"
 #endif
 
+#include <drivers/nrf_rtc.h>
 #include <drivers/nrf_adc.h>
 #include <drivers/nrf_pwm.h>
 #include <drivers/serial.h>
@@ -71,10 +72,10 @@ void welcome() {
 	config_uart();
 	_log(INFO, "\r\n");
 	uint8_t *p = (uint8_t*)malloc(1);
-	log(INFO, "Start of heap %p", p);
+	LOGd("Start of heap %p", p);
 	free(p);
-	log(INFO, "Welcome at the nRF51822 code for meshing.");
-	log(INFO, "Compilation time: %s", COMPILATION_TIME);
+	LOGi("Welcome at the nRF51822 code for meshing.");
+	LOGi("Compilation time: %s", COMPILATION_TIME);
 }
 
 void setName(Nrf51822BluetoothStack &stack) {
@@ -142,7 +143,7 @@ int main() {
 	stack.init();
 
 	stack.onConnect([&](uint16_t conn_handle) {
-			log(INFO,"onConnect...");
+			LOGi(,"onConnect...");
 			// todo this signature needs to change
 			//NRF51_GPIO_OUTSET = 1 << PIN_LED;
 			// first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
@@ -155,7 +156,7 @@ int main() {
 #endif
 		})
 		.onDisconnect([&](uint16_t conn_handle) {
-			log(INFO,"onDisconnect...");
+			LOGi(,"onDisconnect...");
 			//NRF51_GPIO_OUTCLR = 1 << PIN_LED;
 
 			// of course this is not nice, but dirty! we immediately start advertising automatically after being
@@ -188,7 +189,9 @@ int main() {
 	Storage storage;
 	storage.init(32);
 	
-	log(INFO, "Create all services");
+	RealTimeClock & clock = RealTimeClock::getInstance();
+
+	LOGi("Create all services");
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
 	//Service& localizationService = 
@@ -201,7 +204,7 @@ int main() {
 #endif 
 
 #ifdef POWER_SERVICE
-	PowerService &powerService = PowerService::createService(stack, adc, storage);
+	PowerService &powerService = PowerService::createService(stack, adc, storage, clock);
 #endif
 
 	// configure drivers
@@ -214,7 +217,7 @@ int main() {
 	stack.startAdvertising();
 #endif
 	
-	log(INFO, "Running while loop..");
+	LOGi("Running while loop..");
 
 	while(1) {
 		// deliver events from the bluetooth stack to the callbacks defined above.

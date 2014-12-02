@@ -18,11 +18,14 @@
 
 #define LFCLK_FREQUENCY (32768UL)                               /**< LFCLK frequency in Hertz, constant. */
 
-uint32_t nrf_rtc_init(uint32_t ms) {
+// bounded to local compilation unit
+static int rtc_timer_flag = 0;
+
+uint32_t RealTimeClock::init(uint32_t ms) {
 	uint32_t err_code = 0;
 
 	// Enable ADC interrupt
-	log(DEBUG, "Clear pending RTC interrupts");
+	LOGd("Clear pending RTC interrupts");
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_ClearPendingIRQ(RTC1_IRQn);
 	APP_ERROR_CHECK(err_code);
@@ -30,7 +33,7 @@ uint32_t nrf_rtc_init(uint32_t ms) {
 	NVIC_ClearPendingIRQ(RTC1_IRQn);
 #endif
 
-	log(DEBUG, "Set RTC priority");
+	LOGd("Set RTC priority");
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_SetPriority(RTC1_IRQn, NRF_APP_PRIORITY_LOW);
 	APP_ERROR_CHECK(err_code);
@@ -38,7 +41,7 @@ uint32_t nrf_rtc_init(uint32_t ms) {
 	NVIC_SetPriority(RTC1_IRQn, NRF_APP_PRIORITY_LOW);
 #endif
 
-	log(DEBUG, "Tell to use RTC interrupt handler");
+	LOGd("Tell to use RTC interrupt handler");
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_EnableIRQ(RTC1_IRQn);
 	APP_ERROR_CHECK(err_code);
@@ -65,11 +68,11 @@ uint32_t nrf_rtc_init(uint32_t ms) {
 	return 0;
 }
 
-//uint32_t nrf_rtc_config(uint32_t ms) {
+//uint32_t RealTimeClock::config(uint32_t ms) {
 //	return 0;
 //}
 
-void nrf_rtc_start() {
+void RealTimeClock::start() {
 	// Clear all events
 	NRF_RTC1->EVENTS_TICK = 0;
 	NRF_RTC1->EVENTS_COMPARE[0] = 0;
@@ -82,12 +85,15 @@ void nrf_rtc_start() {
 	NRF_RTC1->TASKS_START = 1;
 }
 
-void nrf_rtc_stop() {
+void RealTimeClock::stop() {
 	NRF_RTC1->TASKS_STOP = 1;
 	//	nrf_delay_us(100);
 	NRF_RTC1->TASKS_CLEAR = 1;
 }
 
+void RealTimeClock::tick() {
+	dispatch();
+}
 
 /*
  * The interrupt handler for an RTC data ready event.
@@ -108,7 +114,7 @@ extern "C" void RTC1_IRQHandler(void) {
 	}
 }
 
-uint32_t nrf_rtc_getCount() {
+uint32_t RealTimeClock::getCount() {
 	uint32_t count = NRF_RTC1->COUNTER;
 	return count;
 }

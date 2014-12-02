@@ -33,8 +33,8 @@ typedef struct {
 
 UUID::UUID(const char* fullUid) :
 		_full(fullUid), _type(BLE_UUID_TYPE_UNKNOWN) {
-//	log(INFO,"create fullid: %s", _full);
-//	log(INFO,"create uuid: %X", _uuid);
+//	LOGi(,"create fullid: %s", _full);
+//	LOGi(,"create uuid: %X", _uuid);
 }
 
 uint16_t UUID::init() {
@@ -298,10 +298,10 @@ void Service::start(BLEStack* stack) {
 void GenericService::addSpecificCharacteristics() {
 	for ( CharacteristicStatusT &status : characStatus) {
 		if (status.enabled) {
-			log(DEBUG, "Create characteristic %s (%i)", status.name.c_str(), status.UUID);
+			LOGd("Create characteristic %s (%i)", status.name.c_str(), status.UUID);
 			(this->*status.func)();
 		} else {
-			log(INFO, "Disabled characteristic %s (%i)", status.name.c_str(), status.UUID);
+			LOGi("Disabled characteristic %s (%i)", status.name.c_str(), status.UUID);
 		}
 	}
 }
@@ -478,14 +478,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	setTxPowerLevel();
 
-	//BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
-	log(INFO, "Set sys event handler");
-	uint8_t err_code;
-	err_code = softdevice_sys_evt_handler_set(sys_evt_dispatch);
-	if (err_code != NRF_SUCCESS) {
-		LOGd("BE ERR_CODE: %d (0x%X)", err_code, err_code);
-		APP_ERROR_CHECK(err_code);
-	}
+	BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
 
 	_inited = true;
 
@@ -621,7 +614,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 	if (_advertising)
 		return *this;
 
-	log(INFO,"startIBeacon ...");
+	LOGi(,"startIBeacon ...");
 
 	init(); // we should already be.
 
@@ -688,7 +681,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 
 	_advertising = true;
 
-	log(INFO,"... OK");
+	LOGi(,"... OK");
 
 	return *this;
 }
@@ -697,7 +690,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	if (_advertising)
 		return *this;
 
-	log(INFO, "Start advertising ...");
+	LOGi("Start advertising ...");
 
 	init(); // we should already be.
 
@@ -708,7 +701,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 
 	uint8_t uidCount = _services.size();
-	log(INFO,"Number of services: %u", uidCount);
+	LOGi(,"Number of services: %u", uidCount);
 	
 	ble_uuid_t adv_uuids[uidCount];
 
@@ -797,7 +790,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 
 	_advertising = true;
 
-	log(INFO, "... OK");
+	LOGi("... OK");
 
 	return *this;
 }
@@ -830,7 +823,7 @@ bool Nrf51822BluetoothStack::isAdvertising() {
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
 	if (_scanning)
 		return *this;
-	log(INFO,"startScanning");
+	LOGi(,"startScanning");
 	ble_gap_scan_params_t p_scan_params;
 	// No devices in whitelist, hence non selective performed.
 	p_scan_params.active = 0;            // Active scanning set.
@@ -849,7 +842,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopScanning() {
 	if (!_scanning)
 		return *this;
-	log(INFO,"stopScanning");
+	LOGi(,"stopScanning");
 	BLE_CALL(sd_ble_gap_scan_stop, ());
 	_scanning = false;
 	return *this;
@@ -942,7 +935,7 @@ void Nrf51822BluetoothStack::loop() {
 
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
-//		log(DEBUG,"on_ble_event: %X", p_ble_evt->header.evt_id);
+//		LOGd(,"on_ble_event: %X", p_ble_evt->header.evt_id);
 //	}
 	switch (p_ble_evt->header.evt_id) {
 	// TODO: how do we identify which service evt is for?

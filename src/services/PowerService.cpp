@@ -18,13 +18,13 @@
 
 using namespace BLEpp;
 
-PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage) :
-		_stack(&_stack), _adc(adc), _storage(storage), _current_limit(0) {
+PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage, RealTimeClock &clock) :
+		_stack(&_stack), _adc(adc), _storage(storage), _clock(&clock), _current_limit(0) {
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
 	
-	log(INFO, "Create power service");
+	LOGi("Create power service");
 
 	characStatus.push_back( { "PWM",
 			PWM_UUID,
@@ -57,7 +57,7 @@ void PowerService::addPWMCharacteristic() {
 		.setDefaultValue(255)
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
-//			log(INFO, "set pwm to %i", value);
+//			LOGi("set pwm to %i", value);
 			nrf_pwm_set_value(0, value);
 		});
 }
@@ -90,7 +90,7 @@ void PowerService::addVoltageCurveCharacteristic() {
 		.setDefaultValue(255)
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
-//			log(INFO, "start adc sampling");
+//			LOGi("start adc sampling");
 
 			sampleAdcInit();
 
@@ -98,7 +98,7 @@ void PowerService::addVoltageCurveCharacteristic() {
 
 			sampleAdcStart();
 
-//			log(DEBUG, "Successfully written");
+//			LOGd("Successfully written");
 		});
 }
 
@@ -152,7 +152,7 @@ void PowerService::loop() {
 	if (++tmp_cnt > loop_cnt) {
 		if (_currentLimitCharacteristic) {
 			getCurrentLimit();
-			log(INFO, "Set default current limit value to %i", _current_limit);
+			LOGi("Set default current limit value to %i", _current_limit);
 			*_currentLimitCharacteristic = _current_limit;
 		}
 		tmp_cnt = 0;
@@ -169,17 +169,17 @@ void PowerService::sampleAdcInit() {
 				uint32_t samples = 100000;
 				//uint32_t subsample = samples / curve_size;
 	*/
-				//log(INFO, "Stop advertising");
+				//LOGi("Stop advertising");
 				//stack->stopAdvertising();
 
-				log(INFO, "start RTC");
-				nrf_rtc_init();
-				nrf_rtc_start();
+				LOGi("start RTC");
+				_clock->init();
+				_clock->start();
 
 				// Wait for the RTC to actually start
 				nrf_delay_us(100);
 
-				log(INFO, "Start ADC");
+				LOGi("Start ADC");
 				_adc.nrf_adc_start();
 				// replace by timer!
 
@@ -189,17 +189,17 @@ void PowerService::sampleAdcStart() {
 	while (!_adc.getBuffer()->full()) {
 		nrf_delay_ms(100);
 	}
-	log(INFO, "Number of results: %u", _adc.getBuffer()->count()/2);
-	log(INFO, "Counter is at: %u", nrf_rtc_getCount());
+	LOGi("Number of results: %u", _adc.getBuffer()->count()/2);
+	LOGi("Counter is at: %u", _clock->getCount());
 
-	log(INFO, "Stop ADC converter");
+	LOGi("Stop ADC converter");
 	_adc.nrf_adc_stop();
 
 	// Wait for the ADC to actually stop
 	nrf_delay_us(1000);
 
-	log(INFO, "Stop RTC");
-	nrf_rtc_stop();
+	LOGi("Stop RTC");
+	_clock->stop();
 /*
 	for (uint32_t i=0; i<samples; ++i) {
 
@@ -227,7 +227,7 @@ void PowerService::sampleAdcStart() {
 
 	uint16_t current = rms / SHUNT_VALUE; // ma
 
-	log(DEBUG, "voltage(nV): last=%lu", voltage);
+	LOGd("voltage(nV): last=%lu", voltage);
        	//rms=%lu min=%lu max=%lu current=%i mA", voltage, rms, voltage_min, voltage_max, current);
 */
 
@@ -254,9 +254,10 @@ void PowerService::sampleAdcStart() {
 */
 }
 
-PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& adc, Storage& storage) {
+PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& adc, Storage& storage, 
+		RealTimeClock &clock) {
 //	LOGd("Create power service");
-	PowerService* svc = new PowerService(_stack, adc, storage);
+	PowerService* svc = new PowerService(_stack, adc, storage, clock);
 	_stack.addService(svc);
 	svc->GenericService::addSpecificCharacteristics();
 	return *svc;
