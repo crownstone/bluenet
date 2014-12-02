@@ -33,7 +33,7 @@ public:
 	virtual ~Storage();
 
 	// Initialize the storage class (in bytes)
-	bool init(int size);
+	void init(int size);
 
 	void clear();
 

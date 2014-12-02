@@ -10,7 +10,7 @@
  *********************************************************************************************************************/
 
 //#define INDOOR_SERVICE
-#define GENERAL_SERVICE
+//#define GENERAL_SERVICE
 #define POWER_SERVICE
 
 /**********************************************************************************************************************
@@ -71,12 +71,6 @@ using namespace BLEpp;
 #error We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. "Crown" (with quotes)
 #endif
 
-// BUFSIZ is used by sprintf for the internal buffer and is 1024 bytes.
-//#define STR_HELPER(x) #x
-//#define STR(x) STR_HELPER(x)
-//#pragma message "BUFSIZ = " STR(BUFSIZ)
-
-
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -87,8 +81,7 @@ void welcome() {
 	uint8_t *p = (uint8_t*)malloc(1);
 	log(INFO, "Start of heap %p", p);
 	free(p);
-	log(INFO,"Welcome at the nRF51822 code for meshing.");
-	
+	log(INFO, "Welcome at the nRF51822 code for meshing.");
 	log(INFO, "Compilation time: %s", COMPILATION_TIME);
 }
 
@@ -191,7 +184,7 @@ int main() {
 
 	// Create ADC object
 	// TODO: make service which enables other services and only init ADC when necessary
-	ADC adc;
+	ADC & adc = ADC::getInstance();
 
 	// Scheduler must be initialized before persistent memory
 	const uint16_t max_size = 32;
@@ -236,22 +229,13 @@ int main() {
 		//		analogwrite(pin_led, 50);
 		stack.loop();
 
+#ifdef GENERAL_SERVICE
+		generalService.loop();
+#endif
 #ifdef POWER_SERVICE
 		powerService.loop();
 #endif
 
-#ifdef TEMPERATURE_SERVICE
-		// [31.10.14] correction, this only happens without optimization -Os !!!
-		// [31.10.14] this seems to interfere with the scanning / advertisement data
-		// coming in so if the temperature is read at the same time as scanning is
-		// performed the whole thing crashes after some time.
-		// note: this probably needs to be done with other functionality too that has
-		// to run at the same time as the scanning
-//		if (!stack.isscanning() && stack.connected()) {
-//			log(INFO,"temp.loop()");
-			generalService.loop();
-//		}
-#endif
 		app_sched_execute();
 
 		nrf_delay_ms(50);

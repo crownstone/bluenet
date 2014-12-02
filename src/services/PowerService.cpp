@@ -16,8 +16,6 @@
 
 #include "nRF51822.h"
 
-#define STORAGE_WORKING
-
 using namespace BLEpp;
 
 PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage) :
@@ -28,55 +26,28 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 	
 	log(INFO, "Create power service");
 
-	characStatus.push_back( { PWM_UUID, true });
-	characStatus.push_back( { VOLTAGE_CURVE_UUID, true });
-	characStatus.push_back( { POWER_CONSUMPTION_UUID, false });
-	characStatus.push_back( { CURRENT_LIMIT_UUID, true });
+	characStatus.push_back( { "PWM",
+			PWM_UUID,
+			false,
+			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
+	characStatus.push_back( { "Voltage Curve",
+			VOLTAGE_CURVE_UUID,
+			false,
+			static_cast<addCharacteristicFunc>(&PowerService::addVoltageCurveCharacteristic)});
+	characStatus.push_back( { "Power Consumption",
+			POWER_CONSUMPTION_UUID,
+			false,
+			static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
+	characStatus.push_back( { "Current Limit",
+			CURRENT_LIMIT_UUID,
+			true,
+			static_cast<addCharacteristicFunc>(&PowerService::addCurrentLimitCharacteristic)});
 
 	// we have to figure out why this goes wrong
 //	setName(std::string("Power Service"));
 
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
-}
-
-void PowerService::addSpecificCharacteristics() {
-	for ( CharacteristicStatusT &status : characStatus) {
-		switch(status.UUID) {
-		case PWM_UUID: 
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to set PWM", PWM_UUID);
-				addPWMCharacteristic();
-			} else {
-				log(INFO, "Disabled PWM characteristic");
-			}
-		break;
-		case VOLTAGE_CURVE_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to read voltage curve", VOLTAGE_CURVE_UUID);
-				addVoltageCurveCharacteristic();
-			} else {
-				log(INFO, "Disabled voltage curve characteristic");
-			}
-		break;
-		case POWER_CONSUMPTION_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to read power consumption", POWER_CONSUMPTION_UUID);
-				addPowerConsumptionCharacteristic();
-			} else {
-				log(INFO, "Disabled power consumption characteristic");
-			}
-		break;
-		case CURRENT_LIMIT_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to set current limit", CURRENT_LIMIT_UUID);
-				addCurrentLimitCharacteristic();
-			} else {
-				log(INFO, "Disabled current limit characteristic");
-			}
-		break;
-		}
-	}
 }
 
 void PowerService::addPWMCharacteristic() {
@@ -90,6 +61,27 @@ void PowerService::addPWMCharacteristic() {
 			nrf_pwm_set_value(0, value);
 		});
 }
+
+// Do we really want to use the PWM for this, or just set the pin to zero?
+// TODO: turn off normally, but make sure we enable the completely PWM again on request
+void PowerService::TurnOff() {
+	nrf_pwm_set_value(0, 0);
+}
+
+// Do we really want to use the PWM for this, or just set the pin to zero?
+// TODO: turn on normally, but make sure we enable the completely PWM again on request
+void PowerService::TurnOn() {
+	nrf_pwm_set_value(0, (uint8_t)-1);
+}
+
+/**
+ * Dim the light, note that we use PWM. You might need another way to dim the light! For example by only turning on for
+ * a specific duty-cycle after the detection of a zero crossing.
+ */
+void PowerService::Dim(uint8_t value) {
+	nrf_pwm_set_value(0, value);
+}
+
 
 void PowerService::addVoltageCurveCharacteristic() {
 	createCharacteristic<uint8_t>()
@@ -121,19 +113,16 @@ void PowerService::addPowerConsumptionCharacteristic() {
 }
 
 uint16_t PowerService::getCurrentLimit() {
-#ifdef STORAGE_WORKING
-	//LOGi("Get current limit from memory");
 	_storage.getUint16(PS_CURRENT_LIMIT, &_current_limit);
-	LOGi("Obtained current limit from PM: %i", _current_limit);
-#else
-	LOGi("Storage not working yet");
-	_current_limit = 666;
-#endif
+	LOGi("Obtained current limit from FLASH: %i", _current_limit);
 	return _current_limit;
 }
 
 /**
  * The characteristic that writes a current limit to persistent memory.
+ *
+ * TODO: Check https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/ 
+ *       Writing to persistent memory should be done between connection/advertisement events...
  */
 void PowerService::addCurrentLimitCharacteristic() {
 	_currentLimitCharacteristic = createCharacteristicRef<uint16_t>();
@@ -144,27 +133,10 @@ void PowerService::addCurrentLimitCharacteristic() {
 		.setDefaultValue(getCurrentLimit())
 		.setWritable(true)
 		.onWrite([&](const uint16_t &value) -> void {
-			// https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/
-			// should be done between connection/advertisement events...
-		//	if (_stack->isAdvertising()) {
-		//		log(INFO, "Stop advertising");
-		//		_stack->stopAdvertising();
-		//	}
 			LOGi("Set current limit to: %i", value);
 			_current_limit = value;
-#ifdef STORAGE_WORKING
 			LOGi("Write value to persistent memory");
 			_storage.setUint16(PS_CURRENT_LIMIT, _current_limit);
-#endif
-		//	if (!_stack->isAdvertising()) {
-		//		log(INFO, "Start advertising");
-		//		_stack->startAdvertising();
-		//	}
-		})
-		 // not necessary for us... isn't called anyway...
-		.onRead([&]() -> uint16_t {
-			LOGi("Read current limit now! %i", _current_limit);
-			return getCurrentLimit();
 		})
 		;
 }
@@ -172,12 +144,15 @@ void PowerService::addCurrentLimitCharacteristic() {
 static int tmp_cnt = 100;
 static int loop_cnt = 100;
 
+/**
+ * TODO: We should only need to do this once on startup.
+ */
 void PowerService::loop() {
 	// check if current is not beyond current_limit if the latter is set
 	if (++tmp_cnt > loop_cnt) {
 		if (_currentLimitCharacteristic) {
 			getCurrentLimit();
-			log(INFO, "Set characteristic to value from persistent memory");
+			log(INFO, "Set default current limit value to %i", _current_limit);
 			*_currentLimitCharacteristic = _current_limit;
 		}
 		tmp_cnt = 0;
@@ -283,7 +258,7 @@ PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& a
 //	LOGd("Create power service");
 	PowerService* svc = new PowerService(_stack, adc, storage);
 	_stack.addService(svc);
-	svc->addSpecificCharacteristics();
+	svc->GenericService::addSpecificCharacteristics();
 	return *svc;
 }
 

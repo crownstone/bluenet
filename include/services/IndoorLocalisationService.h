@@ -11,18 +11,9 @@
 #include "BluetoothLE.h"
 #include <util/function.h>
 #include <characteristics/ScanResult.h>
+#include <characteristics/charac_config.h>
 
-#define INDOORLOCALISATION_UUID "00002220-0000-1000-8000-00805f9b34fb"
-// TODO -oDE: how did you come up with this UUID ??!!
-//  if I use any other UUID, the service UUID in the advertisement package
-//  is sent out as 128-bit, but with this UUID it is sent out as 16-bit ?!
-
-#define RSSI_UUID					0x2201
-#define PERSONAL_THRESHOLD_UUID		0x122
-#define SCAN_DEVICE_UUID			0x123
-#define LIST_DEVICE_UUID			0x120
-#define DEVICE_TYPE_UUID			0x101
-#define ROOM_UUID					0x102
+#define INDOORLOCALISATION_UUID "7e170000-429c-41aa-83d7-d91220abeb33"
 
 class IndoorLocalizationService : public BLEpp::GenericService {
 

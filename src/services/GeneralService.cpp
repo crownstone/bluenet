@@ -9,41 +9,23 @@
 
 using namespace BLEpp;
 
-GeneralService::GeneralService(Nrf51822BluetoothStack &stack) : _temperatureCharacteristic(NULL), _stack(&stack){
+GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
+		_stack(&stack),
+		_temperatureCharacteristic(NULL), _changeNameCharacteristic(NULL),
+		_deviceTypeCharacteristic(NULL), _roomCharacteristic(NULL) {
 
 	setUUID(UUID(GENERAL_UUID));
 	setName("General Service");
 
 	log(INFO, "Create general service");
-	characStatus.push_back( { TEMPERATURE_UUID, true });
-	characStatus.push_back( { CHANGE_NAME_UUID, true });
-}
-
-/**
- * Seperate function that actually adds the characteristics. This allows to introduce dependencies between construction
- * of the different services and the characteristics on those services.
- */
-void GeneralService::addSpecificCharacteristics() {
-	for ( CharacteristicStatusT &status : characStatus) {
-		switch(status.UUID) {
-		case TEMPERATURE_UUID: 
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to read temperature", TEMPERATURE_UUID);
-				addTemperatureCharacteristic();
-			} else {
-				log(INFO, "Disabled temperature characteristic");
-			}
-		break;
-		case CHANGE_NAME_UUID:
-			if (status.enabled) {
-				log(DEBUG, "Create characteristic %i to change BLE name", CHANGE_NAME_UUID);
-				addChangeNameCharacteristic();
-			} else {
-				log(INFO, "Disabled change name characteristic");
-			}
-		break;
-		}
-	}
+	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	false,
+		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
+	characStatus.push_back( { "Change Name", 	CHANGE_NAME_UUID,	true,
+		static_cast<addCharacteristicFunc>(&GeneralService::addChangeNameCharacteristic) });
+	characStatus.push_back( { "Device Type", 	DEVICE_TYPE_UUID,	false,
+		static_cast<addCharacteristicFunc>(&GeneralService::addDeviceTypeCharactersitic) });
+	characStatus.push_back( { "Room",			ROOM_UUID, 			false,
+		static_cast<addCharacteristicFunc>(&GeneralService::addRoomCharacteristic) });
 }
 
 void GeneralService::addTemperatureCharacteristic() {
@@ -54,6 +36,34 @@ void GeneralService::addTemperatureCharacteristic() {
 	_temperatureCharacteristic->setNotifies(true);
 
 	addCharacteristic(_temperatureCharacteristic);
+}
+
+void GeneralService::addDeviceTypeCharactersitic() {
+//	LOGd("create characteristic to read/write device type");
+	_deviceTypeCharacteristic = createCharacteristicRef<std::string>();
+	(*_deviceTypeCharacteristic)
+		.setUUID(UUID(getUUID(), DEVICE_TYPE_UUID))
+		.setName("Device Type")
+		.setDefaultValue("Unknown")
+		.setWritable(true)
+		.onWrite([&](const std::string value) -> void {
+//			LOGi("set device type to: %s", value.c_str());
+			// TODO: impelement persistent storage of device type
+		});
+}
+
+void GeneralService::addRoomCharacteristic() {
+//	LOGd("create characteristic to read/write room");
+	_roomCharacteristic = createCharacteristicRef<std::string>();
+	(*_roomCharacteristic)
+		.setUUID(UUID(getUUID(), ROOM_UUID))
+		.setName("Room")
+		.setDefaultValue("Unknown")
+		.setWritable(true)
+		.onWrite([&](const std::string value) -> void {
+//			LOGi("set room to: %s", value.c_str());
+			// TODO: impelement persistent storage of room
+		});
 }
 
 void GeneralService::addChangeNameCharacteristic() {
@@ -92,7 +102,7 @@ void GeneralService::setBLEName(std::string &name) {
 GeneralService& GeneralService::createService(Nrf51822BluetoothStack& stack) {
 	GeneralService* svc = new GeneralService(stack);
 	stack.addService(svc);
-	svc->addSpecificCharacteristics();
+	svc->GenericService::addSpecificCharacteristics();
 	return *svc;
 }
 
