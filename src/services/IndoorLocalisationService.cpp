@@ -88,13 +88,13 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
 			if(value) {
-				LOGi(,"crown: start scanning");
+				LOGi("crown: start scanning");
 				if (!_stack->isScanning()) {
 					_scanResult.init();
 					_stack->startScanning();
 				}
 			} else {
-				LOGi(,"crown: stop scanning");
+				LOGi("crown: stop scanning");
 				if (_stack->isScanning()) {
 					_stack->stopScanning();
 					*_peripheralCharac = _scanResult;
