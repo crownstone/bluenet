@@ -207,9 +207,18 @@ var parse = function(lines) {
 		
 		var chunk = {"name": sourceFile, "size": size};
 		// console.log(chunk);
-		
-		section.children.push(chunk);
-		chunkCount++;
+		if (section.children.length > 0) {
+			var last_chunk = section.children[section.children.length - 1];
+			if (last_chunk.name == chunk.name) {
+				last_chunk.size += chunk.size;
+			} else {
+				section.children.push(chunk);
+				chunkCount++;
+			}
+		} else {
+			section.children.push(chunk);
+			chunkCount++;
+		}
 	}
 	
 	console.log("Displaying " + chunkCount + " chunks of memory.");
@@ -266,7 +275,7 @@ var display = function(root) {
 	
 	var g = vis.selectAll("g")
 		.data(nodes)
-	.enter().append("svg:g")
+		.enter().append("svg:g")
 		.attr("transform", function(d) { return "translate(" + x(d.y) + "," + y(d.x) + ")"; })
 		.on("click", click);
 
@@ -290,7 +299,7 @@ var display = function(root) {
 
 	// On clicking a node, redo the layout with that node as the root.
 	function click(d) {
-		if (!d.children) return;
+		//if (!d.children) return;
 
 		kx = (d.y ? w - 40 : w) / (1 - d.y);
 		ky = h / d.dx;
