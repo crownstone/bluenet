@@ -36,7 +36,7 @@ private:
 
 public:
 	ScanResult();
-	virtual ~ScanResult();
+	~ScanResult();
 
 	void init();
 
@@ -54,14 +54,14 @@ public:
 
     /** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
     * it means that the object does not need external buffer space. */
-    virtual uint32_t getSerializedLength() const;
+    uint32_t getSerializedLength() const;
 
     /** Copy data representing this object into the given buffer.  Buffer will be preallocated with at least
     * getLength() bytes. */
     void serialize(uint8_t* buffer, uint16_t length) const;
 
     /** Copy data from the given buffer into this object. */
-    virtual void deserialize(uint8_t* buffer, uint16_t length);
+    void deserialize(uint8_t* buffer, uint16_t length);
 
 };
 
@@ -80,7 +80,7 @@ public:
 		return *this;
 	}
 
-	virtual CharacteristicValue getCharacteristicValue() {
+	CharacteristicValue getCharacteristicValue() {
 		CharacteristicValue value;
 		const ScanResult& t = this->getValue();
 		uint32_t len = t.getSerializedLength();
@@ -89,7 +89,7 @@ public:
 		return CharacteristicValue(len, _buffer);
 	}
 
-	virtual void setCharacteristicValue(const CharacteristicValue& value) {
+	void setCharacteristicValue(const CharacteristicValue& value) {
 		ScanResult t;
 		t.deserialize(value.data, value.length);
 		this->setValue(t);

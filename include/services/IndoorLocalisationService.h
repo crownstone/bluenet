@@ -36,7 +36,7 @@ protected:
 public:
 	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
 
-	void addSpecificCharacteristics();
+//	void addSpecificCharacteristics();
 
 	void on_ble_event(ble_evt_t * p_ble_evt);
 

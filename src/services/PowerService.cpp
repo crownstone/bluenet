@@ -19,7 +19,7 @@
 using namespace BLEpp;
 
 PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage, RealTimeClock &clock) :
-		_stack(&_stack), _adc(adc), _storage(storage), _clock(&clock), _current_limit(0) {
+		_stack(&_stack), _adc(adc), _storage(storage), _clock(&clock), _current_limit(0), _currentLimitCharacteristic(NULL) {
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
