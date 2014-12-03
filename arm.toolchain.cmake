@@ -46,7 +46,7 @@ SET(CMAKE_NM		${COMPILER_PATH}/bin/${COMPILER_TYPE}-nm)
 # There is a bug in CMAKE_OBJCOPY, it doesn't exist on execution for the first time
 SET(CMAKE_OBJCOPY_OVERLOAD                       ${COMPILER_PATH}/bin/${COMPILER_TYPE}-objcopy)
 
-SET(CMAKE_CXX_FLAGS                              "-std=c++11 -fno-exceptions"                    CACHE STRING "c++ flags")
+SET(CMAKE_CXX_FLAGS                              "-std=c++11 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions"                    CACHE STRING "c++ flags")
 SET(CMAKE_C_FLAGS                                "-std=gnu99"                                    CACHE STRING "c flags")
 SET(CMAKE_SHARED_LINKER_FLAGS                    ""                                              CACHE STRING "shared linker flags")
 SET(CMAKE_MODULE_LINKER_FLAGS                    ""                                              CACHE STRING "module linker flags")
@@ -55,7 +55,8 @@ SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS            "")
 SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "") 
 
 # Collect flags that have to do with optimization, optimize for size for now
-SET(OPTIMIZE "-Os -fomit-frame-pointer -ffast-math")
+#SET(FLAG_MATH "-ffast-math")
+SET(OPTIMIZE "-Os -fomit-frame-pointer ${FLAG_MATH}")
 
 # Collect flags that are used in the code, as macros
 #ADD_DEFINITIONS("-MMD -DNRF51 -DEPD_ENABLE_EXTRA_RAM -DARDUINO=100 -DE_STICKY_v1 -DNRF51_USE_SOFTDEVICE=${NRF51_USE_SOFTDEVICE} -DUSE_RENDER_CONTEXT -DSYSCALLS -DUSING_FUNC")
@@ -85,9 +86,10 @@ SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
 # CMake does send the compiler flags also to the linker
 
 SET(FLAG_WRITE_MAP_FILE "-Wl,-Map,prog.map")
+SET(FLAG_REMOVE_UNWINDING_CODE "-Wl,--wrap,__aeabi_unwind_cpp_pr0")
 
 # do not define above as multiple linker flags, or else you will get redefines of MEMORY etc.
-SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} -Wl,--gc-sections ${CMAKE_EXE_LINKER_FLAGS} ${FLAG_WRITE_MAP_FILE}")
+SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} -Wl,--gc-sections ${CMAKE_EXE_LINKER_FLAGS} ${FLAG_WRITE_MAP_FILE} ${FLAG_REMOVE_UNWINDING_CODE}")
 
 # We preferably want to run the cross-compiler tests without all the flags. This namely means we have to add for example the object out of syscalls.c to the compilation, etc. Or, differently, have different flags for the compiler tests. This is difficult to do!
 #SET(CMAKE_C_FLAGS "-nostdlib")
