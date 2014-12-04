@@ -5,9 +5,11 @@ cd ../build
 cp prog.map prog.tmp.map
 ex -c '%g/\.text\S*[\s]*$/j' -c "wq" prog.map
 ex -c '%g/\.rodata\S*[\s]*$/j' -c "wq" prog.map
+ex -c '%g/\.data\S*[\s]*$/j' -c "wq" prog.map
 ex -c '%g/\.bss\S*[\s]*$/j' -c "wq" prog.map
 sed -i 's/\.text\S*/.text/g' prog.map
 sed -i 's/\.rodata\S*/.rodata/g' prog.map
+sed -i 's/\.data\S*/.data/g' prog.map
 sed -i 's/\.bss\S*/.bss/g' prog.map
 
 cd ../util/memory
