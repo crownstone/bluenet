@@ -20,13 +20,13 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	LOGi("Create general service");
 	characStatus.reserve(4);
 
-	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	false,
+	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
 	characStatus.push_back( { "Change Name", 	CHANGE_NAME_UUID,	true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addChangeNameCharacteristic) });
-	characStatus.push_back( { "Device Type", 	DEVICE_TYPE_UUID,	false,
+	characStatus.push_back( { "Device Type", 	DEVICE_TYPE_UUID,	true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addDeviceTypeCharactersitic) });
-	characStatus.push_back( { "Room",			ROOM_UUID, 			false,
+	characStatus.push_back( { "Room",			ROOM_UUID, 			true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addRoomCharacteristic) });
 }
 
@@ -49,7 +49,7 @@ void GeneralService::addDeviceTypeCharactersitic() {
 		.setDefaultValue("Unknown")
 		.setWritable(true)
 		.onWrite([&](const std::string value) -> void {
-//			LOGi("set device type to: %s", value.c_str());
+			LOGi("set device type to: %s", value.c_str());
 			// TODO: impelement persistent storage of device type
 		});
 }
@@ -63,7 +63,7 @@ void GeneralService::addRoomCharacteristic() {
 		.setDefaultValue("Unknown")
 		.setWritable(true)
 		.onWrite([&](const std::string value) -> void {
-//			LOGi("set room to: %s", value.c_str());
+			LOGi("set room to: %s", value.c_str());
 			// TODO: impelement persistent storage of room
 		});
 }

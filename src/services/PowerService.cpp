@@ -29,7 +29,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 	characStatus.reserve(4);
 	characStatus.push_back( { "PWM",
 			PWM_UUID,
-			false,
+			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
 	characStatus.push_back( { "Voltage Curve",
 			VOLTAGE_CURVE_UUID,
@@ -37,7 +37,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 			static_cast<addCharacteristicFunc>(&PowerService::addVoltageCurveCharacteristic)});
 	characStatus.push_back( { "Power Consumption",
 			POWER_CONSUMPTION_UUID,
-			false,
+			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
@@ -153,7 +153,7 @@ void PowerService::loop() {
 	if (++tmp_cnt > loop_cnt) {
 		if (_currentLimitCharacteristic) {
 			getCurrentLimit();
-			LOGi("Set default current limit value to %i", _current_limit);
+			LOGi("Set current limit value to %i", _current_limit);
 			*_currentLimitCharacteristic = _current_limit;
 		}
 		tmp_cnt = 0;

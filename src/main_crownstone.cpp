@@ -9,8 +9,8 @@
  * Enable the services you want to run on the device
  *********************************************************************************************************************/
 
-//#define INDOOR_SERVICE
-//#define GENERAL_SERVICE
+#define INDOOR_SERVICE
+#define GENERAL_SERVICE
 #define POWER_SERVICE
 
 /**********************************************************************************************************************
@@ -18,7 +18,6 @@
  *********************************************************************************************************************/
 
 #include "BluetoothLE.h"
-#include "util/ble_error.h"
 
 #if(NORDIC_SDK_VERSION < 5)
 #include "ble_stack_handler.h"

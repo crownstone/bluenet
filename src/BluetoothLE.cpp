@@ -16,10 +16,6 @@
 #error "The SOFTDEVICE_SERIES macro is required for compilation. Set it to 110 for example"
 #endif
 
-#include <util/ble_error.h>
-#include <util/utils.h>
-#include <handlers.h>
-
 using namespace BLEpp;
 
 /**@brief Variable length data encapsulation in terms of length and pointer to data */
@@ -176,9 +172,11 @@ void CharacteristicBase::init(Service* svc) {
 
 	volatile uint16_t svc_handle = svc->getHandle();
 
-	volatile uint32_t err_code = sd_ble_gatts_characteristic_add(svc_handle,
-			&ci.char_md, &ci.attr_char_value, &_handles);
-	APP_ERROR_CHECK(err_code);
+//	volatile uint32_t err_code = sd_ble_gatts_characteristic_add(svc_handle,
+//			&ci.char_md, &ci.attr_char_value, &_handles);
+//	APP_ERROR_CHECK(err_code);
+	BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle,
+			&ci.char_md, &ci.attr_char_value, &_handles));
 
 	_inited = true;
 }
