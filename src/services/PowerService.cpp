@@ -26,6 +26,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 	
 	LOGi("Create power service");
 
+	characStatus.reserve(4);
 	characStatus.push_back( { "PWM",
 			PWM_UUID,
 			false,

@@ -36,7 +36,6 @@ private:
 
 public:
 	ScanResult();
-	~ScanResult();
 
 	void init();
 
