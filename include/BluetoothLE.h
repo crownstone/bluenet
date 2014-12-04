@@ -35,11 +35,14 @@ extern "C" {
 #include "nrf_delay.h"
 
 // Local wrapper  files
-#include <util/ble_error.h>
 #include <drivers/nrf_pwm.h>
+
+#include <handlers.h>
+#include <util/ble_error.h>
 
 }
 
+#include <util/utils.h>
 
 
 //using std::vector;

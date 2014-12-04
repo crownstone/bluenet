@@ -102,9 +102,9 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			idx = _freeIdx++;
 		}
 
-		LOGi("NEW Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", _list[idx].addr[5],
-				_list[idx].addr[4], _list[idx].addr[3], _list[idx].addr[2], _list[idx].addr[1],
-				_list[idx].addr[0], rssi);
+		LOGi("NEW Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", adrs_ptr[5],
+				adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
+				adrs_ptr[0], rssi);
 		memcpy(_list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
 		_list[idx].occurences = 1;
 		_list[idx].rssi = rssi;

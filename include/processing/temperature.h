@@ -21,8 +21,8 @@ inline int32_t getTemperature() {
 	err_code = sd_temp_get(&temperature);
 	APP_ERROR_CHECK(err_code);
 
-//	LOGd(,"raw temp: %d", temperature);
-//	LOGi(,"temp: %d", temperature / 4);
+//	LOGd("raw temp: %d", temperature);
+//	LOGi("temp: %d", temperature / 4);
 
 	temperature = (temperature / 4);
 
