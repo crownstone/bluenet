@@ -137,9 +137,12 @@ void ResetHandler(void) {
 
 	// Enable Peripherals. 
 	// See PAN_028_v1.6.pdf "25. System: Manual setup is required to enable use of peripherals"
+	// WARNING. This is only true for OLD hardware (check with ./scripts/hardware_version.sh)
+	// For new hardware this DISABLES for example the LPCOMP peripheral
+#ifdef OLD_HARDWARE
 	*(uint32_t *)0x40000504 = 0xC007FFDF;
 	*(uint32_t *)0x40006C18 = 0x00008000;
-
+#endif
 	// start up crystal HF clock.
 	NRF51_CLOCK_HFCLKSTART = 1;
 	while(!NRF51_CLOCK_HFCLKSTARTED) /* wait */;
