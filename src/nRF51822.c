@@ -36,6 +36,9 @@ void ResetHandler(void);
 // currently used for PWM
 void TIMER2_IRQHandler(void);
 
+// The LP comparator
+void WUCOMP_COMP_IRQHandler(void);
+
 void unused_isr(void)
 {
 }
@@ -64,7 +67,7 @@ void CCM_AAR_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void WDT_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void RTC1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void QDEC_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-void WUCOMP_COMP_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+//void WUCOMP_COMP_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI2_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));

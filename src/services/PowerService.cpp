@@ -18,8 +18,9 @@
 
 using namespace BLEpp;
 
-PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage, RealTimeClock &clock) :
-		_stack(&_stack), _adc(adc), _storage(storage), _clock(&clock), _current_limit(0), _currentLimitCharacteristic(NULL) {
+PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage, RealTimeClock &clock, LPComp &lpcomp) :
+		_stack(&_stack), _adc(adc), _storage(storage), _clock(&clock), _current_limit_val(0), _lpcomp(lpcomp),
+		_currentLimit(lpcomp), _currentLimitCharacteristic(NULL) {
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
@@ -114,9 +115,9 @@ void PowerService::addPowerConsumptionCharacteristic() {
 }
 
 uint16_t PowerService::getCurrentLimit() {
-	_storage.getUint16(PS_CURRENT_LIMIT, &_current_limit);
-	LOGi("Obtained current limit from FLASH: %i", _current_limit);
-	return _current_limit;
+	_storage.getUint16(PS_CURRENT_LIMIT, &_current_limit_val);
+	LOGi("Obtained current limit from FLASH: %i", _current_limit_val);
+	return _current_limit_val;
 }
 
 /**
@@ -135,11 +136,24 @@ void PowerService::addCurrentLimitCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const uint16_t &value) -> void {
 			LOGi("Set current limit to: %i", value);
-			_current_limit = value;
+			_current_limit_val = value;
 			LOGi("Write value to persistent memory");
-			_storage.setUint16(PS_CURRENT_LIMIT, _current_limit);
-		})
-		;
+			_storage.setUint16(PS_CURRENT_LIMIT, _current_limit_val);
+
+			_lpcomp.stop();
+			// There are only 6 levels...
+			if (_current_limit_val > 6)
+				_current_limit_val = 6;
+			_lpcomp.config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
+			_lpcomp.start();
+		});
+
+	// There are only 6 levels...
+	if (_current_limit_val > 6)
+		_current_limit_val = 6;
+	_lpcomp.config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
+	_lpcomp.start();
+	_currentLimit.init();
 }
 
 static int tmp_cnt = 100;
@@ -149,12 +163,13 @@ static int loop_cnt = 100;
  * TODO: We should only need to do this once on startup.
  */
 void PowerService::loop() {
+	_lpcomp.tick();
 	// check if current is not beyond current_limit if the latter is set
 	if (++tmp_cnt > loop_cnt) {
 		if (_currentLimitCharacteristic) {
 			getCurrentLimit();
-			LOGi("Set current limit value to %i", _current_limit);
-			*_currentLimitCharacteristic = _current_limit;
+			LOGi("Set default current limit value to %i", _current_limit_val);
+			*_currentLimitCharacteristic = _current_limit_val;
 		}
 		tmp_cnt = 0;
 	}
@@ -255,11 +270,11 @@ void PowerService::sampleAdcStart() {
 */
 }
 
-PowerService& PowerService::createService(Nrf51822BluetoothStack& _stack, ADC& adc, Storage& storage, 
-		RealTimeClock &clock) {
+PowerService& PowerService::createService(Nrf51822BluetoothStack& stack, ADC& adc, Storage& storage,
+		RealTimeClock &clock, LPComp &lpcomp) {
 //	LOGd("Create power service");
-	PowerService* svc = new PowerService(_stack, adc, storage, clock);
-	_stack.addService(svc);
+	PowerService* svc = new PowerService(stack, adc, storage, clock, lpcomp);
+	stack.addService(svc);
 	svc->GenericService::addSpecificCharacteristics();
 	return *svc;
 }

@@ -43,20 +43,22 @@
 
 #if(BOARD==CROWNSTONE)
 
-#define PIN_LED              3                   // this is gpio 3
-#define PIN_ADC              5                   // ain5 is pin 4
-#define PIN_RX               6
-#define PIN_TX               1
+#define PIN_LED              3                   // this is p0.03 or gpio 3
+#define PIN_ADC              5                   // ain5 is p0.04 or gpio 4
+#define PIN_LPCOMP           6                   // ain6 is p0.05 or gpio 5
+#define PIN_RX               6                   // this is p0.06 or gpio 6
+#define PIN_TX               1                   // this is p0.01 or gpio 1
 
 #endif
 
 
 #if(BOARD==PCA10001)
 
-#define PIN_LED              18
-#define PIN_ADC              2                   // ain 2 is p0.1
-#define PIN_RX               11
-#define PIN_TX               9
+#define PIN_LED              18                  // this is p0.18 or gpio 18
+#define PIN_ADC              2                   // ain2 is p0.01 or gpio 1
+#define PIN_LPCOMP           3                   // ain3 is p0.02 or gpio 2
+#define PIN_RX               11                  // this is p0.11 or gpio 11
+#define PIN_TX               9                   // this is p0.09 or gpio 9
 #define PIN_LED_CON			 19					 // shows connection state on the evaluation board
 
 #endif
@@ -64,7 +66,7 @@
 #if(BOARD==NRF51422)
 
 #define PIN_LED              18
-#define PIN_ADC              2                   // ain 2 is p0.1
+#define PIN_ADC              2                   // ain 2 is p0.01 or gpio 1
 #define PIN_RX               1
 #define PIN_TX               2
 
@@ -74,6 +76,10 @@
 
 #ifndef PIN_ADC
 #error "For AD conversion PIN_ADC must be defined"
+#endif
+
+#ifndef PIN_LPCOMP
+#error "For LP comparison PIN_LPCOMP must be defined"
 #endif
 
 #ifndef PIN_RX

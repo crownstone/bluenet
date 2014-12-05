@@ -48,6 +48,7 @@ extern "C" {
 #include <drivers/nrf_rtc.h>
 #include <drivers/nrf_adc.h>
 #include <drivers/nrf_pwm.h>
+#include <drivers/LPComp.h>
 #include <drivers/serial.h>
 #include <common/storage.h>
 
@@ -62,14 +63,6 @@ extern "C" {
 #endif
 
 using namespace BLEpp;
-
-/**********************************************************************************************************************
- * Precompiler warnings/messages
- *********************************************************************************************************************/
-
-#ifndef BLUETOOTH_NAME
-#error We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. "Crown" (with quotes)
-#endif
 
 /**********************************************************************************************************************
  * Main functionality
@@ -185,6 +178,7 @@ int main() {
 	// Create ADC object
 	// TODO: make service which enables other services and only init ADC when necessary
 	ADC & adc = ADC::getInstance();
+	LPComp& lpcomp = LPComp::getInstance();
 
 	// Scheduler must be initialized before persistent memory
 	const uint16_t max_size = 32;
@@ -211,7 +205,7 @@ int main() {
 #endif 
 
 #ifdef POWER_SERVICE
-	PowerService &powerService = PowerService::createService(stack, adc, storage, clock);
+	PowerService &powerService = PowerService::createService(stack, adc, storage, clock, lpcomp);
 #endif
 
 	// configure drivers
