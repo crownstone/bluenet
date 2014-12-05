@@ -15,9 +15,6 @@
 ScanResult::ScanResult() : _list(NULL), _freeIdx(0) {
 }
 
-ScanResult::~ScanResult() {
-}
-
 void ScanResult::init() {
 	_freeIdx = 0;
 	if (_list) {
@@ -63,10 +60,10 @@ bool ScanResult::operator!=(const ScanResult& val) {
 //int count = 1;
 void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 //	LOGd("count: %d", count++);
-	char addrs[28];
-	sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
-			adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
-			adrs_ptr[0]);
+//	char addrs[28];
+//	sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
+//			adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
+//			adrs_ptr[0]);
 
 	bool found = false;
 //	LOGd("addrs: %s", addrs);
@@ -105,7 +102,9 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			idx = _freeIdx++;
 		}
 
-		LOGi("NEW Advertisement from: %s, rssi: %d", addrs, rssi);
+		LOGi("NEW Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", adrs_ptr[5],
+				adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
+				adrs_ptr[0], rssi);
 		memcpy(_list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
 		_list[idx].occurences = 1;
 		_list[idx].rssi = rssi;
@@ -116,17 +115,15 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 
 void ScanResult::print() const {
 
-	LOGi("##################################################");
-	LOGi("### listing detected peripherals (%2d) ############", getSize());
-	LOGi("##################################################");
 	for (int i = 0; i < getSize(); ++i) {
-		char addrs[28];
-		sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", _list[i].addr[5],
+//		char addrs[28];
+//		sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", _list[i].addr[5],
+//				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
+//				_list[i].addr[0]);
+		LOGi("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tocc: %d", _list[i].addr[5],
 				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
-				_list[i].addr[0]);
-		LOGi("%s\trssi: %d\tocc: %d", addrs, _list[i].rssi, _list[i].occurences);
+				_list[i].addr[0], _list[i].rssi, _list[i].occurences);
 	}
-	LOGi("##################################################");
 
 }
 

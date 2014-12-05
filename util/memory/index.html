@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<!-- 
+Copyright 2014 Eliot Stock
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<style>
+	body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 12px; text-align: center; }
+	.chart { display: block; margin: auto; }
+	rect { stroke: #EEEEEE; fill: #AAAAAA; fill-opacity: 0.8; }
+	rect.parent { cursor: pointer; fill: steelblue; }
+	text { pointer-events: none; }
+</style>
+<body>
+<p>
+	Select an ld *.map file: <input id="file" type="file"/>
+</p>
+<p id="error">&nbsp;</p>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>
+<script src="http://d3js.org/d3.v3.min.js" type="text/javascript"></script>
+<script>
+
+var w = 1120,
+    h = 680,
+    x = d3.scale.linear().range([0, w]),
+    y = d3.scale.linear().range([0, h]);
+    
+var reader = new FileReader();
+
+var vis = d3.select("body").append("div")
+	.attr("class", "chart")
+	.style("width", w + "px")
+	.style("height", h + "px")
+	.append("svg:svg")
+	.attr("width", w)
+	.attr("height", h);
+
+var partition = d3.layout.partition()
+	.value(function(d) { return d.size; })
+	.sort(null); // Don't sort by size, just use the order in the map file.
+
+var checkForHtml5FileApis = function() {
+	if (window.File && window.FileReader) {
+		console.log("HTML5 File APIs supported.");
+	}
+	else {
+		$("p#error").html("HTML5 File APIs NOT supported. Can't continue. Please use a modern,"
+				+ " desktop web browser.");
+		$("p#error").show();
+	}
+};
+    
+$("#file").change(function(e) {
+	var files = e.target.files;
+	
+	if (files.length != 1) {
+		return error("Please select one and only one file.");
+	}
+	
+    // We could throw an error here if files[0].type !== "text/plain", but it would
+    // only be any good on Mac. Windows doesn't get a file type at all.
+	
+	// Calls back to reader.onload() below.
+	console.log("Reading file: " + files[0].name);
+	reader.readAsText(files[0]);
+});
+
+reader.onload = function(e) {
+	var inputFile = e.target.result;
+	
+	// Windows:							CRLF    \r\n
+	// Unix, inc. Mac OS:				LF      \n
+	// Excel for Mac "Save As CSV":		CR		\r
+	var lines = inputFile.split(/\r\n?|\n/); // Any of the above
+	parse(lines);
+    
+    // Blank out the file chooser field. If we don't do this, choosing the same file again
+    // after editing doesn't change the value and the change() handler is never called.
+    $("#file").val("");
+};
+
+var parse = function(lines) {
+	var root = {"name": "Memory", "children": []};
+	var inMemoryConfig = false;
+	var inBody = false;
+	var chunkCount = 0;
+	
+	for (var l = 0; l < lines.length; l++) {
+		var line = lines[l];
+		
+		// Memory configuration looks like this:
+		// Name             Origin             Length             Attributes
+		// FLASH            0x0000000000016000 0x000000000002a000 xr
+		// RAM              0x0000000020002000 0x0000000000002000 xrw
+		// *default*        0x0000000000000000 0xffffffffffffffff
+		if (line.indexOf("Name") != -1
+				&& line.indexOf("Origin") != -1
+				&& line.indexOf("Length") != -1) {
+			// Memory configuration starts on the next line
+			inMemoryConfig = true;
+			continue;
+		}
+		
+		// Split line into cells based on any whitespace.
+		var cells = line.trim().split(/\s+/);
+		
+		if (inMemoryConfig) {
+			var name = cells[0];
+			var origin = parseInt(removeLeading0x(cells[1]), 16);
+			var declaredSize = parseInt(removeLeading0x(cells[2]), 16);
+			var end = origin + declaredSize;
+			
+			// Ignore a line like:
+			// *default*        0x0000000000000000 0xffffffffffffffff
+			if (name == "*default*") {
+				continue;
+			}
+			
+			// We know we're done with the memory configuration section when we see a blank line.
+			if (cells.length == 1 && cells[0] == "") {
+				inMemoryConfig = false;
+				inBody = true;
+				continue;
+			}
+			
+			// A block's declared size is not just the sum of its children - it can have space left
+			// over. D3 will set the size of a node to the sum of it's children, but there's no
+			// child for free space left over. We create one later.
+			var block = {"name": name, "declaredSize": declaredSize, "origin": origin, "end": end,
+					"children": []};
+			root.children.push(block);
+			continue;
+		}
+		else if (!inBody) {
+			continue;
+		}
+
+		// We're done once we reach the end of the stack. Ignore debug symbols and so on.
+		if (line.indexOf("OUTPUT") == 0) {
+			break;
+		}
+		
+		// Ignore lines that aren't for a source file. Later we may want to go down to the symbol
+		// lines below that.
+		if (!isSourceLine(cells)) {
+			continue;
+		}
+		
+		// Memory section, eg. .text, .data., .bss.
+		var sectionName = cells[0];
+		
+		// Start address in memory, eg. 0x000000002000210c, as integer.
+		var startAddress = parseInt(removeLeading0x(cells[1]), 16);
+		
+		// Size of this chunk of memory, eg. 0x1f4, as integer.
+		var size = parseInt(removeLeading0x(cells[2]), 16);
+		
+		// C or assembler source file for this chunk of memory.
+		var sourceFile = filenameFromPath(cells[3]);
+		
+		// Ignore anything with size zero.
+		if (size == 0) {
+			continue;
+		}
+		
+		// Find the first block of memory that this start address falls within.
+		var block = null;
+		
+		for (var i = 0; i < root.children.length; i++) {
+			var b = root.children[i];
+			
+			if (startAddress >= b.origin && startAddress < b.end) {
+				block = b;
+				break;
+			}
+		}
+		
+		if (block == null) {
+			console.log("Can't find which block of memory " + startAddress
+					+ " is in. Ignoring " + sourceFile);
+			continue;
+		}
+
+		// Find the memory section within the block, or create it if this is the first time we've
+		// seen it.
+		var section = block.children.filter(function(child) {
+			return child.name == sectionName;
+		})[0];
+		
+		if (section == null) {
+			section = {"name": sectionName, "children": []};
+			block.children.push(section);
+		}
+		
+		var chunk = {"name": sourceFile, "size": size};
+		// console.log(chunk);
+		if (section.children.length > 0) {
+			var last_chunk = section.children[section.children.length - 1];
+			if (last_chunk.name == chunk.name) {
+				last_chunk.size += chunk.size;
+			} else {
+				section.children.push(chunk);
+				chunkCount++;
+			}
+		} else {
+			section.children.push(chunk);
+			chunkCount++;
+		}
+	}
+	
+	console.log("Displaying " + chunkCount + " chunks of memory.");
+	display(root);
+};
+
+var isSourceLine = function(cells) {
+	if (cells == null) return false;
+	
+	if (cells.length === undefined) return false;
+	
+	if (cells.length != 4) return false;
+	
+	// Second cell must start with 0x
+	if (cells[1].indexOf("0x") != 0) return false;
+	
+	// Third cell must also start with 0x
+	if (cells[2].indexOf("0x") != 0) return false;
+	
+	return true;
+};
+
+var removeLeading0x = function(value) {
+	if (!value) return value;
+	
+	if (value.indexOf("0x") != 0) {
+		return value;
+	}
+	
+	return value.substring(2, value.length);
+}
+
+var filenameFromPath = function(value) {
+	var lastSlash = value.lastIndexOf("/");
+	return value.substring(lastSlash + 1, value.length);
+}
+
+var display = function(root) {
+	var nodes = partition.nodes(root);
+	
+	// Now that d3 has calculated the size of each node based on the sum of their children, create
+	// nodes for left over free space in each block.
+	for (var i = 0; i < root.children.length; i++) {
+		var block = root.children[i];
+
+		if (block.value < block.declaredSize) {
+			var freeSpace = {"name": "FREE", "size": (block.declaredSize - block.value)};
+			block.children.push(freeSpace);
+		}
+	}
+	
+	// Let d3 process the nodes again now that the free space is there.
+	nodes = partition.nodes(root);
+	
+	var g = vis.selectAll("g")
+		.data(nodes)
+		.enter().append("svg:g")
+		.attr("transform", function(d) { return "translate(" + x(d.y) + "," + y(d.x) + ")"; })
+		.on("click", click);
+
+	var kx = w / root.dx,
+		ky = h / 1;
+
+	g.append("svg:rect")
+		.attr("width", root.dy * kx)
+		.attr("height", function(d) { return d.dx * ky; })
+		.attr("class", function(d) { return d.children ? "parent" : "child"; });
+
+	g.append("svg:text")
+		.attr("transform", transform)
+		.attr("dy", ".35em")
+		.style("opacity", function(d) { return d.dx * ky > 12 ? 1 : 0; })
+		.style("font-size", "1em")
+		.text(function(d) { return d.name + ": " + d.value.toLocaleString(); });
+
+	d3.select(window)
+		.on("click", function() { click(root); })
+
+	// On clicking a node, redo the layout with that node as the root.
+	function click(d) {
+		//if (!d.children) return;
+
+		kx = (d.y ? w - 40 : w) / (1 - d.y);
+		ky = h / d.dx;
+		x.domain([d.y, 1]).range([d.y ? 40 : 0, w]);
+		y.domain([d.x, d.x + d.dx]);
+
+		var t = g.transition()
+			.duration(d3.event.altKey ? 7500 : 750)
+			.attr("transform", function(d) { return "translate(" + x(d.y) + "," + y(d.x) + ")"; });
+
+		t.select("rect")
+			.attr("width", d.dy * kx)
+			.attr("height", function(d) { return d.dx * ky; });
+
+		t.select("text")
+			.attr("transform", transform)
+			.style("opacity", function(d) { return d.dx * ky > 12 ? 1 : 0; });
+
+		d3.event.stopPropagation();
+	}
+
+	function transform(d) {
+		return "translate(8," + d.dx * ky / 2 + ")";
+	}
+};
+
+$(document).ready(function() {
+	checkForHtml5FileApis();
+});
+</script>
+</html>

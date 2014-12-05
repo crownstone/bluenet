@@ -23,20 +23,16 @@ struct __attribute__((__packed__)) peripheral_device_t {
 #define HEADER_SIZE 1 // 1 BYTE for the header = number of elements in the list
 #define SERIALIZED_DEVICE_SIZE sizeof(peripheral_device_t) // only works if struct packed
 
-// FIXME BEWARE, because we are using fixed arrays, increasing the size will cause
-//   memory and runtime problems.
 #define MAX_NR_DEVICES 10
 
 class ScanResult {
 
 private:
-//	peripheral_device_t _list[MAX_NR_DEVICES];
 	peripheral_device_t* _list;
 	uint8_t _freeIdx;
 
 public:
 	ScanResult();
-	virtual ~ScanResult();
 
 	void init();
 
@@ -54,14 +50,14 @@ public:
 
     /** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
     * it means that the object does not need external buffer space. */
-    virtual uint32_t getSerializedLength() const;
+    uint32_t getSerializedLength() const;
 
     /** Copy data representing this object into the given buffer.  Buffer will be preallocated with at least
     * getLength() bytes. */
     void serialize(uint8_t* buffer, uint16_t length) const;
 
     /** Copy data from the given buffer into this object. */
-    virtual void deserialize(uint8_t* buffer, uint16_t length);
+    void deserialize(uint8_t* buffer, uint16_t length);
 
 };
 
@@ -80,7 +76,7 @@ public:
 		return *this;
 	}
 
-	virtual CharacteristicValue getCharacteristicValue() {
+	CharacteristicValue getCharacteristicValue() {
 		CharacteristicValue value;
 		const ScanResult& t = this->getValue();
 		uint32_t len = t.getSerializedLength();
@@ -89,7 +85,7 @@ public:
 		return CharacteristicValue(len, _buffer);
 	}
 
-	virtual void setCharacteristicValue(const CharacteristicValue& value) {
+	void setCharacteristicValue(const CharacteristicValue& value) {
 		ScanResult t;
 		t.deserialize(value.data, value.length);
 		this->setValue(t);

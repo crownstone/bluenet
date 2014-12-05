@@ -17,10 +17,10 @@
 #include <BluetoothLE.h> // TODO: now for BLE_CALL, should be moved to other unit
 
 extern "C" {
-#include <app_scheduler.h>
+//#include <app_scheduler.h>
 
-//static pstorage_handle_t handle;
-//static pstorage_handle_t block_handle;
+//#define PRINT_ITEMS
+//#define PRINT_PENDING
 
 static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data, 
 		uint32_t data_len) {
@@ -94,9 +94,6 @@ void Storage::setUint8(int index, const uint8_t item) {
 	BLE_CALL (pstorage_store, (&block_handle, ws8, 4, index) );
 }
 
-//#define PRINT_ITEMS
-//#define PRINT_PENDING
-
 // Get 16-bit integer
 void Storage::getUint16(int index, uint16_t *item) {
 	static uint8_t wg16[4];
@@ -107,13 +104,12 @@ void Storage::getUint16(int index, uint16_t *item) {
 	LOGd("Load item[2]: %d", wg16[2]);
 	LOGd("Load item[3]: %d", wg16[3]);
 #endif
-//	*item = 0;
 	*item = ((uint16_t)wg16[1]) << 8;
        	*item |= wg16[0];
 #ifdef PRINT_PENDINSG
 	uint32_t count;
 	BLE_CALL ( pstorage_access_status_get, (&count) );
-	LOGi("Number of pending operations: %i", count);
+	LOGd("Number of pending operations: %i", count);
 #endif
 }
 
@@ -137,7 +133,7 @@ void Storage::setUint16(int index, const uint16_t item) {
 #ifdef PRINT_PENDING
 	uint32_t count;
 	BLE_CALL ( pstorage_access_status_get, (&count) );
-	LOGi("Number of pending operations: %i", count);
+	LOGd("Number of pending operations: %i", count);
 #endif
 }	
 

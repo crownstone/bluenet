@@ -66,6 +66,7 @@ Now you will have to set all fields in the configuration file:
 * adjust the `COMPILER_PATH` and `COMPILER_TYPE` to your compiler (it will be used as `$COMPILER_PATH\bin\$COMPILER_TYPE-gcc`)
 * adjust `JLINK` to the full name of the JLink utility (JLinkExe on Linux)
 * adjust `JLINK_GDB_SERVER` to the full name of the JLink utility that supports gdb (JLinkGDBServer on Linux)
+* set `BLUETOOTH_NAME` to something you like
 
 Let us now install the SoftDevice on the nRF51822:
 
@@ -111,6 +112,20 @@ and define the right usb port to use (if you've multiple).
 * Set up management for establishing connections, getting RSSI values, and tear down connections again
 * Create an algorithm to come up with all locations of the nodes. These positions are relative, not absolute. The network will be known up to rotation and scale.
 * Implement this algorithm in a distributed fashion. The type of algorithm I have in mind is belief propagation / message passing.
+
+## Memory use
+
+Due to the fact that the SoftDevice S130 uses 10kB out of 16kB, we have to be really careful with the 6kB we have left. In the `util/memory` directory you can see a tool from Eliot Stock to visualize the foot print of functions. We removed for example exception handling.
+
+<p align="center">
+<img src="docs/text.png?raw=true" alt="Memory .text section" height="500px"/>
+</p>
+
+<p align="center">
+<img src="docs/rodata.png?raw=true" alt="Memory .rodata section" height="500px"/>
+</p>
+
+Tips to reduce memory usage are really welcome!
 
 ## Commercial use
 

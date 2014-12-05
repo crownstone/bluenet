@@ -38,6 +38,11 @@ run() {
 	sleep 1
 }
 
+clean() {
+	cd ..
+	make clean
+}
+
 case "$cmd" in 
 	build)
 		build
@@ -54,8 +59,11 @@ case "$cmd" in
 	run)
 		run
 		;;
+	clean)
+		clean
+		;;
 	*)
-		echo $"Usage: $0 {build|upload|debug|run|all}"
+		echo $"Usage: $0 {build|upload|debug|clean|run|all}"
 		exit 1
 esac
 

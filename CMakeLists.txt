@@ -59,7 +59,10 @@ MESSAGE(STATUS "Set application start address in linker script to ${APPLICATION_
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld)
 
 # Libraries (math, stdc++ libraries, etc., note that we use the size-constrained *_s versions!)
-SET(LIBS "-lsupc++ -lm -lc_s -lstdc++_s")
+#SET(LIBRARY_MATH "-lm")
+#SET(LIBRARY_RUNTIME "-lsupc++")
+
+SET(LIBS "-lstdc++_s ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lc_s")
 
 # Some debug information
 MESSAGE(STATUS "\"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
@@ -77,6 +80,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/error.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/ble_error.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/syscalls.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/utils.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/config.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/storage.cpp")
 #LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/timer.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/serial.cpp")
@@ -167,7 +171,7 @@ ELSE()
 		#COMMAND ${CMAKE_OBJDUMP} -h ${PROJECT_NAME}.elf
 		COMMAND echo
 		COMMAND echo "*** Show largest symbols / functions"
-		COMMAND ${CMAKE_NM} --print-size --size-sort --radix=d ${PROJECT_NAME}.elf | tail -n20
+		COMMAND ${CMAKE_NM} --print-size --size-sort --radix=d ${PROJECT_NAME}.elf
 		COMMAND echo
 		COMMAND echo "*** Show size of sections"
 		COMMAND ${CMAKE_SIZE} -A -d ${PROJECT_NAME}.elf

@@ -73,6 +73,7 @@ int write(const char *str, ...) {
 	if (sizeof buffer >= len + 1UL) {
 		va_start(ap, str);
 		len = vsprintf(buffer, str, ap);
+		va_end(ap);
 		for(int i = 0; i < len; ++i) {
 			NRF51_UART_TXD = (uint8_t)buffer[i];
 			while(NRF51_UART_TXDRDY != 1) {}

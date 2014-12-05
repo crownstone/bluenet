@@ -9,8 +9,8 @@
  * Enable the services you want to run on the device
  *********************************************************************************************************************/
 
-//#define INDOOR_SERVICE
-//#define GENERAL_SERVICE
+#define INDOOR_SERVICE
+#define GENERAL_SERVICE
 #define POWER_SERVICE
 
 /**********************************************************************************************************************
@@ -18,7 +18,6 @@
  *********************************************************************************************************************/
 
 #include "BluetoothLE.h"
-#include "util/ble_error.h"
 
 #if(NORDIC_SDK_VERSION < 5)
 #include "ble_stack_handler.h"
@@ -144,7 +143,7 @@ int main() {
 	stack.init();
 
 	stack.onConnect([&](uint16_t conn_handle) {
-			LOGi(,"onConnect...");
+			LOGi("onConnect...");
 			// todo this signature needs to change
 			//NRF51_GPIO_OUTSET = 1 << PIN_LED;
 			// first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
@@ -157,7 +156,7 @@ int main() {
 #endif
 		})
 		.onDisconnect([&](uint16_t conn_handle) {
-			LOGi(,"onDisconnect...");
+			LOGi("onDisconnect...");
 			//NRF51_GPIO_OUTCLR = 1 << PIN_LED;
 
 			// of course this is not nice, but dirty! we immediately start advertising automatically after being

@@ -16,10 +16,6 @@
 #error "The SOFTDEVICE_SERIES macro is required for compilation. Set it to 110 for example"
 #endif
 
-#include <util/ble_error.h>
-#include <util/utils.h>
-#include <handlers.h>
-
 using namespace BLEpp;
 
 /**@brief Variable length data encapsulation in terms of length and pointer to data */
@@ -33,8 +29,8 @@ typedef struct {
 
 UUID::UUID(const char* fullUid) :
 		_full(fullUid), _type(BLE_UUID_TYPE_UNKNOWN) {
-//	LOGi(,"create fullid: %s", _full);
-//	LOGi(,"create uuid: %X", _uuid);
+//	LOGi("create fullid: %s", _full);
+//	LOGi("create uuid: %X", _uuid);
 }
 
 uint16_t UUID::init() {
@@ -176,9 +172,11 @@ void CharacteristicBase::init(Service* svc) {
 
 	volatile uint16_t svc_handle = svc->getHandle();
 
-	volatile uint32_t err_code = sd_ble_gatts_characteristic_add(svc_handle,
-			&ci.char_md, &ci.attr_char_value, &_handles);
-	APP_ERROR_CHECK(err_code);
+//	volatile uint32_t err_code = sd_ble_gatts_characteristic_add(svc_handle,
+//			&ci.char_md, &ci.attr_char_value, &_handles);
+//	APP_ERROR_CHECK(err_code);
+	BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle,
+			&ci.char_md, &ci.attr_char_value, &_handles));
 
 	_inited = true;
 }
@@ -614,7 +612,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 	if (_advertising)
 		return *this;
 
-	LOGi(,"startIBeacon ...");
+	LOGi("startIBeacon ...");
 
 	init(); // we should already be.
 
@@ -681,7 +679,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 
 	_advertising = true;
 
-	LOGi(,"... OK");
+	LOGi("... OK");
 
 	return *this;
 }
@@ -701,7 +699,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 
 	uint8_t uidCount = _services.size();
-	LOGi(,"Number of services: %u", uidCount);
+	LOGi("Number of services: %u", uidCount);
 	
 	ble_uuid_t adv_uuids[uidCount];
 
@@ -711,7 +709,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	}
 
 	if (cnt == 0) {
-		log(WARN, "No custom services!");
+		LOGw("No custom services!");
 	}
 
 	ble_gap_adv_params_t adv_params;
@@ -724,6 +722,11 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 
 	// Build and set advertising data
 	memset(&advdata, 0, sizeof(advdata));
+
+	ble_advdata_manuf_data_t manufac;
+	// TODO: made up ID, has to be replaced by official ID
+	manufac.company_identifier = 0x1111; // DoBots Company ID
+	manufac.data.size = 0;
 
 //	advdata.name_type               = BLE_ADVDATA_NO_NAME;
 
@@ -750,6 +753,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	advdata.p_tx_power_level = &_tx_power_level;
 	advdata.flags.size = sizeof(flags);
 	advdata.flags.p_data = &flags;
+	advdata.p_manuf_specific_data = &manufac;
 	// TODO -oDE: It doesn't really make sense to have this function in the library
 	//  because it really depends on the application on how many and what kind
 	//  of services are available and what should be advertised
@@ -823,7 +827,7 @@ bool Nrf51822BluetoothStack::isAdvertising() {
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
 	if (_scanning)
 		return *this;
-	LOGi(,"startScanning");
+	LOGi("startScanning");
 	ble_gap_scan_params_t p_scan_params;
 	// No devices in whitelist, hence non selective performed.
 	p_scan_params.active = 0;            // Active scanning set.
@@ -842,7 +846,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopScanning() {
 	if (!_scanning)
 		return *this;
-	LOGi(,"stopScanning");
+	LOGi("stopScanning");
 	BLE_CALL(sd_ble_gap_scan_stop, ());
 	_scanning = false;
 	return *this;
@@ -935,7 +939,7 @@ void Nrf51822BluetoothStack::loop() {
 
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
-//		LOGd(,"on_ble_event: %X", p_ble_evt->header.evt_id);
+//		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
 //	}
 	switch (p_ble_evt->header.evt_id) {
 	// TODO: how do we identify which service evt is for?

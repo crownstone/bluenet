@@ -10,6 +10,5 @@
 
 #define SHUNT_VALUE          120                 // resistance of the shunt in milli ohm
 
-
 #endif // CS_CONFIG_T
 
