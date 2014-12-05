@@ -7,6 +7,7 @@
 
 
 #include <characteristics/CurrentLimit.h>
+#include <drivers/serial.h>
 
 CurrentLimit::CurrentLimit(LPComp& lpcomp): _lpcomp(lpcomp) {
 
@@ -21,6 +22,7 @@ void CurrentLimit::init() {
 }
 
 void CurrentLimit::handleEvent() {
+	LOGd("current limit exceeded!");
 	// Turn off the "led"
 	// TODO: do this in a neat way
 	nrf_pwm_set_value(0, 0);

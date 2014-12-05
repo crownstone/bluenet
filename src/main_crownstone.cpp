@@ -49,6 +49,7 @@ extern "C" {
 #include <drivers/nrf_rtc.h>
 #include <drivers/nrf_adc.h>
 #include <drivers/nrf_pwm.h>
+#include <drivers/LPComp.h>
 #include <drivers/serial.h>
 #include <common/storage.h>
 

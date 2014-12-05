@@ -8,6 +8,8 @@
 #include "drivers/LPComp.h"
 
 #include "nrf.h"
+#include "nrf_delay.h"
+#include "nrf_gpio.h"
 
 #if(NRF51_USE_SOFTDEVICE == 1)
 #include "nrf_sdm.h"
@@ -36,39 +38,21 @@ LPComp::~LPComp() {
  */
 uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 #if(NRF51_USE_SOFTDEVICE == 1)
-	LOGd("Run LPComp converter with SoftDevice");
+	LOGd("Run LPComp with SoftDevice");
 #else 
-	LOGd("Run LPComp converter without SoftDevice!!!");
+	LOGd("Run LPComp without SoftDevice!!!");
 #endif
 
-	LOGd("Configure LPComp on pin %u, level %u", pin, level);
-	if (pin < 8) {
-		NRF_LPCOMP->PSEL = LPCOMP_PSEL_PSEL_AnalogInput0 << (pin+LPCOMP_PSEL_PSEL_Pos);
-	} else {
-		LOGf("There is no such pin available");
-		APP_ERROR_CHECK(0xFFFFFFFF); // error
-	}
-	if (level < 7) {
-		NRF_LPCOMP->REFSEL = LPCOMP_REFSEL_REFSEL_SupplyOneEighthPrescaling << (level+LPCOMP_REFSEL_REFSEL_Pos);
-	}
-	else {
-		LOGf("There is no such level");
-		APP_ERROR_CHECK(0xFFFFFFFF); // error
-	}
-
-	NRF_LPCOMP->ENABLE     = LPCOMP_ENABLE_ENABLE_Enabled << LPCOMP_ENABLE_ENABLE_Pos; // Pin will be configured as analog input
-	NRF_LPCOMP->POWER      = LPCOMP_POWER_POWER_Enabled << LPCOMP_POWER_POWER_Pos;
-
-	// Enable interrupt on UP event
+	// Enable interrupt on given event
 	switch (event) {
 	case (CROSS):
-		NRF_LPCOMP->INTENSET   = LPCOMP_INTENSET_CROSS_Enabled << LPCOMP_INTENSET_CROSS_Pos;
+		NRF_LPCOMP->INTENSET = LPCOMP_INTENSET_CROSS_Enabled << LPCOMP_INTENSET_CROSS_Pos;
 		break;
 	case (UP):
-		NRF_LPCOMP->INTENSET   = LPCOMP_INTENSET_UP_Enabled << LPCOMP_INTENSET_UP_Pos;
+		NRF_LPCOMP->INTENSET = LPCOMP_INTENSET_UP_Enabled << LPCOMP_INTENSET_UP_Pos;
 		break;
 	case (DOWN):
-		NRF_LPCOMP->INTENSET   = LPCOMP_INTENSET_DOWN_Enabled << LPCOMP_INTENSET_DOWN_Pos;
+		NRF_LPCOMP->INTENSET = LPCOMP_INTENSET_DOWN_Enabled << LPCOMP_INTENSET_DOWN_Pos;
 		break;
 	default:
 		LOGf("Choose an event to listen for");
@@ -98,6 +82,34 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 #else
 	NVIC_EnableIRQ(LPCOMP_IRQn);
 #endif
+
+	LOGd("Configure LPComp on ain %u, level %u", pin, level);
+	if (level < 7) {
+		NRF_LPCOMP->REFSEL = level; // See LPCOMP_REFSEL_REFSEL_SupplyOneEighthPrescaling
+	}
+	else {
+		LOGf("There is no such level");
+		APP_ERROR_CHECK(0xFFFFFFFF); // error
+	}
+	if (pin < 8) {
+		NRF_LPCOMP->PSEL = pin; // See LPCOMP_PSEL_PSEL_AnalogInput0
+	} else {
+		LOGf("There is no such pin available");
+		APP_ERROR_CHECK(0xFFFFFFFF); // error
+	}
+
+//	// TODO: don't know if we need this..
+//	// Wait for the LCOMP config to have effect
+//	nrf_delay_us(100);
+//
+//
+//	// TODO: don't know if we need this..
+//	// Wait for the LCOMP config to have effect
+//	nrf_delay_us(100);
+
+	NRF_LPCOMP->POWER = LPCOMP_POWER_POWER_Enabled << LPCOMP_POWER_POWER_Pos;
+	NRF_LPCOMP->ENABLE = LPCOMP_ENABLE_ENABLE_Enabled << LPCOMP_ENABLE_ENABLE_Pos; // Pin will be configured as analog input
+
 	return 0;
 }
 
@@ -118,9 +130,10 @@ void LPComp::stop() {
  * Start the LP comparator.
  */
 void LPComp::start() {
-	NRF_LPCOMP->EVENTS_UP  = 0;
-	NRF_LPCOMP->EVENTS_DOWN  = 0;
-	NRF_LPCOMP->EVENTS_CROSS  = 0;
+	LOGd("Starting LPComp");
+	NRF_LPCOMP->EVENTS_UP = 0;
+	NRF_LPCOMP->EVENTS_DOWN = 0;
+	NRF_LPCOMP->EVENTS_CROSS = 0;
 	lastEvent = NONE;
 	NRF_LPCOMP->TASKS_START = 1;
 }
@@ -128,6 +141,9 @@ void LPComp::start() {
 
 void LPComp::update(Event_t event) {
 	lastEvent = event;
+//	// Test
+//	LOGd("update!");
+//	nrf_pwm_set_value(0, 0);
 }
 
 void LPComp::tick() {
@@ -140,15 +156,20 @@ void LPComp::tick() {
 
 /*
  * The interrupt handler for the LCOMP events.
+ * name defined in nRF51822.c
  */
-extern "C" void LPCOMP_IRQHandler(void) {
+extern "C" void WUCOMP_COMP_IRQHandler(void) {
+//	{
+//		LPComp &lpcomp = LPComp::getInstance();
+//		lpcomp.update(LPComp::NONE);
+//	}
 	if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_CROSS_Msk) != 0 && NRF_LPCOMP->EVENTS_CROSS != 0) {
 		LPComp &lpcomp = LPComp::getInstance();
 		lpcomp.update(LPComp::CROSS);
 
 		// Continue
 		NRF_LPCOMP->EVENTS_CROSS = 0;
-		NRF_LPCOMP->TASKS_START = 1; // Do we need this?
+//		NRF_LPCOMP->TASKS_START = 1; // Do we need this?
 	}
 	else if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_UP_Msk) != 0 && NRF_LPCOMP->EVENTS_UP != 0) {
 		LPComp &lpcomp = LPComp::getInstance();
@@ -156,7 +177,7 @@ extern "C" void LPCOMP_IRQHandler(void) {
 
 		// Continue
 		NRF_LPCOMP->EVENTS_UP = 0;
-		NRF_LPCOMP->TASKS_START = 1; // Do we need this?
+//		NRF_LPCOMP->TASKS_START = 1; // Do we need this?
 	}
 	else if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_DOWN_Msk) != 0 && NRF_LPCOMP->EVENTS_DOWN > 0) {
 		LPComp &lpcomp = LPComp::getInstance();
@@ -164,7 +185,7 @@ extern "C" void LPCOMP_IRQHandler(void) {
 
 		// Continue
 		NRF_LPCOMP->EVENTS_DOWN = 0;
-		NRF_LPCOMP->TASKS_START = 1; // Do we need this?
+//		NRF_LPCOMP->TASKS_START = 1; // Do we need this?
 	}
 }
 

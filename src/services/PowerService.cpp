@@ -29,7 +29,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &st
 
 	characStatus.push_back( { "PWM",
 			PWM_UUID,
-			false,
+			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
 	characStatus.push_back( { "Voltage Curve",
 			VOLTAGE_CURVE_UUID,
@@ -162,6 +162,7 @@ static int loop_cnt = 100;
  * TODO: We should only need to do this once on startup.
  */
 void PowerService::loop() {
+	_lpcomp.tick();
 	// check if current is not beyond current_limit if the latter is set
 	if (++tmp_cnt > loop_cnt) {
 		if (_currentLimitCharacteristic) {
