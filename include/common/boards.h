@@ -38,6 +38,8 @@
 #define PIN_RX               16
 #define PIN_TX               17
 
+#define PIN_LPCOMP           3                   // ain3 is p0.2 or gpio 2
+
 #endif
 
 
