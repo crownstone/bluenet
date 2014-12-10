@@ -28,9 +28,10 @@ extern "C" {
  */
 class Storage {
 public:
-	Storage();
-
-	virtual ~Storage();
+	static Storage& getInstance() {
+		static Storage instance;
+		return instance;
+	}
 
 	// Initialize the storage class (in bytes)
 	void init(int size);
@@ -50,6 +51,8 @@ public:
 	void setUint16(int index, const uint16_t item);
 
 private:
+	Storage();
+
 	// Handle to storage in FLASH
 	pstorage_handle_t handle;
 	

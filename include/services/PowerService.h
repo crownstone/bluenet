@@ -25,12 +25,11 @@ class PowerService : public BLEpp::GenericService {
 public:
 	typedef function<int8_t()> func_t;
 
-	PowerService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage, RealTimeClock &clock, LPComp &lpcomp);
+	PowerService(BLEpp::Nrf51822BluetoothStack& stack);
 
 	void addSpecificCharacteristics();
 
-	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage,
-			RealTimeClock &clock, LPComp &lpcomp);
+	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 	
 	void loop();
 protected:
@@ -58,20 +57,8 @@ private:
 	// References to stack, to e.g. stop advertising if required
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
-	// We need an AD converter for this service
-	ADC &_adc;
-
-	// We need persistent storage for this service
-	Storage &_storage;
-
-	// Real-time clock
-	RealTimeClock *_clock;
-
 	// Current limit
 	uint16_t _current_limit_val;
-
-	// We need an LP comparator for this service
-	LPComp &_lpcomp;
 
 	CurrentLimit _currentLimit;
 };

@@ -18,9 +18,8 @@
 
 using namespace BLEpp;
 
-PowerService::PowerService(Nrf51822BluetoothStack& _stack, ADC &adc, Storage &storage, RealTimeClock &clock, LPComp &lpcomp) :
-		_stack(&_stack), _adc(adc), _storage(storage), _clock(&clock), _current_limit_val(0), _lpcomp(lpcomp),
-		_currentLimit(lpcomp), _currentLimitCharacteristic(NULL) {
+PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
+		_currentLimitCharacteristic(NULL), _stack(&_stack), _current_limit_val(0) {
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
@@ -115,7 +114,7 @@ void PowerService::addPowerConsumptionCharacteristic() {
 }
 
 uint16_t PowerService::getCurrentLimit() {
-	_storage.getUint16(PS_CURRENT_LIMIT, &_current_limit_val);
+	Storage::getInstance().getUint16(PS_CURRENT_LIMIT, &_current_limit_val);
 	LOGi("Obtained current limit from FLASH: %i", _current_limit_val);
 	return _current_limit_val;
 }
@@ -138,21 +137,21 @@ void PowerService::addCurrentLimitCharacteristic() {
 			LOGi("Set current limit to: %i", value);
 			_current_limit_val = value;
 			LOGi("Write value to persistent memory");
-			_storage.setUint16(PS_CURRENT_LIMIT, _current_limit_val);
+			Storage::getInstance().setUint16(PS_CURRENT_LIMIT, _current_limit_val);
 
-			_lpcomp.stop();
+			LPComp::getInstance().stop();
 			// There are only 6 levels...
 			if (_current_limit_val > 6)
 				_current_limit_val = 6;
-			_lpcomp.config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
-			_lpcomp.start();
+			LPComp::getInstance().config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
+			LPComp::getInstance().start();
 		});
 
 	// There are only 6 levels...
 	if (_current_limit_val > 6)
 		_current_limit_val = 6;
-	_lpcomp.config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
-	_lpcomp.start();
+	LPComp::getInstance().config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
+	LPComp::getInstance().start();
 	_currentLimit.init();
 }
 
@@ -163,7 +162,7 @@ static int loop_cnt = 100;
  * TODO: We should only need to do this once on startup.
  */
 void PowerService::loop() {
-	_lpcomp.tick();
+	LPComp::getInstance().tick();
 	// check if current is not beyond current_limit if the latter is set
 	if (++tmp_cnt > loop_cnt) {
 		if (_currentLimitCharacteristic) {
@@ -189,33 +188,33 @@ void PowerService::sampleAdcInit() {
 				//stack->stopAdvertising();
 
 				LOGi("start RTC");
-				_clock->init();
-				_clock->start();
+				RealTimeClock::getInstance().init();
+				RealTimeClock::getInstance().start();
 
 				// Wait for the RTC to actually start
 				nrf_delay_us(100);
 
 				LOGi("Start ADC");
-				_adc.nrf_adc_start();
+				ADC::getInstance().nrf_adc_start();
 				// replace by timer!
 
 }
 
 void PowerService::sampleAdcStart() {
-	while (!_adc.getBuffer()->full()) {
+	while (!ADC::getInstance().getBuffer()->full()) {
 		nrf_delay_ms(100);
 	}
-	LOGi("Number of results: %u", _adc.getBuffer()->count()/2);
-	LOGi("Counter is at: %u", _clock->getCount());
+	LOGi("Number of results: %u", ADC::getInstance().getBuffer()->count()/2);
+	LOGi("Counter is at: %u", RealTimeClock::getInstance().getCount());
 
 	LOGi("Stop ADC converter");
-	_adc.nrf_adc_stop();
+	ADC::getInstance().nrf_adc_stop();
 
 	// Wait for the ADC to actually stop
 	nrf_delay_us(1000);
 
 	LOGi("Stop RTC");
-	_clock->stop();
+	RealTimeClock::getInstance().stop();
 /*
 	for (uint32_t i=0; i<samples; ++i) {
 
@@ -248,8 +247,8 @@ void PowerService::sampleAdcStart() {
 */
 
 	int i = 0;
-	while (!_adc.getBuffer()->empty()) {
-		_log(INFO, "%u, ", _adc.getBuffer()->pop());
+	while (!ADC::getInstance().getBuffer()->empty()) {
+		_log(INFO, "%u, ", ADC::getInstance().getBuffer()->pop());
 		if (!(++i % 10)) {
 			_log(INFO, "\r\n");
 		}
@@ -270,10 +269,9 @@ void PowerService::sampleAdcStart() {
 */
 }
 
-PowerService& PowerService::createService(Nrf51822BluetoothStack& stack, ADC& adc, Storage& storage,
-		RealTimeClock &clock, LPComp &lpcomp) {
+PowerService& PowerService::createService(Nrf51822BluetoothStack& stack) {
 //	LOGd("Create power service");
-	PowerService* svc = new PowerService(stack, adc, storage, clock, lpcomp);
+	PowerService* svc = new PowerService(stack);
 	stack.addService(svc);
 	svc->GenericService::addSpecificCharacteristics();
 	return *svc;

@@ -17,6 +17,7 @@ extern "C"
 {
 #endif
 
+
 // Called by BluetoothLE.h classes when exceptions are disabled.
 void ble_error_handler (std::string msg, uint32_t line_num, const char * p_file_name);
 
@@ -54,6 +55,38 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
             APP_ERROR_HANDLER(LOCAL_ERR_CODE);              \
         }                                                   \
     } while (0)
+
+
+#ifdef __EXCEPTIONS
+
+    class ble_exception : public std::exception {
+      public:
+        std::string _message;
+        ble_exception(std::string message, std::string file = "<unknown>", int line = 0) : _message(message) {}
+        ~ble_exception() throw() {}
+
+        virtual char const *what() const throw() {
+            return _message.c_str();
+        }
+    };
+
+
+// A macro to throw an std::exception if the given function does not have the result NRF_SUCCESS
+#define BLE_CALL(function, args) do {uint32_t result = function args; if (result != NRF_SUCCESS) throw ble_exception(# function, __FILE__, __LINE__); } while(0)
+#define BLE_CALL(function, args) do {uint32_t result = function args; APP_ERROR_CHECK(result); } while(0)
+
+#define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) throw ble_exception(message, __FILE__, __LINE__); } while(0)
+#define BLE_THROW(message) throw ble_exception(message, __FILE__, __LINE__)
+
+
+#else /* __EXCEPTIONS */
+
+//define BLE_CALL(function, args) do {volatile uint32_t result = function args; if (result != NRF_SUCCESS) {std::string ble_error_message(# function ); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
+#define BLE_CALL(function, args) do {uint32_t result = function args; APP_ERROR_CHECK(result); } while(0)
+#define BLE_THROW_IF(result, message) do {if (result != NRF_SUCCESS) { std::string ble_error_message(message); LOGd("BLE_THROW: %s", ble_error_message.c_str()); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
+#define BLE_THROW(message) do { std::string ble_error_message(message); LOGd("BLE_THROW: %s", ble_error_message.c_str()); ble_error_handler(ble_error_message, __LINE__, __FILE__); } while(0)
+
+#endif /* __EXCEPTIONS */
 
 
 #ifdef __cplusplus
