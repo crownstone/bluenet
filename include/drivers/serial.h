@@ -20,7 +20,7 @@
 #define ERROR                3
 #define FATAL                4
 
-#define DEBUG_ON
+//#define DEBUG_ON
 
 #define VERBOSITY            INFO
 
