@@ -42,9 +42,6 @@ static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_cod
 Storage::Storage() {
 }
 
-Storage::~Storage() {
-}
-
 /**
  * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
  */
