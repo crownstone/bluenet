@@ -14,7 +14,7 @@
 #include <util/ble_error.h>
 #include <drivers/serial.h>
 
-#include <BluetoothLE.h> // TODO: now for BLE_CALL, should be moved to other unit
+//#include <BluetoothLE.h> // TODO: now for BLE_CALL, should be moved to other unit
 
 extern "C" {
 //#include <app_scheduler.h>

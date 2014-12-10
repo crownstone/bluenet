@@ -8,8 +8,8 @@
 #ifndef GENERALSERVICE_H_
 #define GENERALSERVICE_H_
 
-#include <processing/temperature.h>
 #include "BluetoothLE.h"
+#include <processing/temperature.h>
 #include <vector>
 #include <characteristics/charac_config.h>
 
