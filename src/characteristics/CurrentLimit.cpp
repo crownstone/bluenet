@@ -9,7 +9,7 @@
 #include <characteristics/CurrentLimit.h>
 #include <drivers/serial.h>
 
-CurrentLimit::CurrentLimit(LPComp& lpcomp): _lpcomp(lpcomp) {
+CurrentLimit::CurrentLimit() {
 
 }
 
@@ -18,7 +18,7 @@ CurrentLimit::~CurrentLimit() {
 }
 
 void CurrentLimit::init() {
-	_lpcomp.addListener(this);
+	LPComp::getInstance().addListener(this);
 }
 
 void CurrentLimit::handleEvent() {
