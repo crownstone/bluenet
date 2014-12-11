@@ -15,6 +15,7 @@
 extern "C" {
 // the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
 #include <pstorage.h>
+#include <string.h>
 }
 
 #include <pstorage_platform.h>
