@@ -8,12 +8,12 @@
 #include "util/utils.h"
 
 // convert a short from LSB to MSB and vice versa
-uint16_t convertEndian(uint16_t val) {
+uint16_t convertEndian16(uint16_t val) {
 	return ((val >> 8) & 0xFF) | ((val & 0xFF) << 8);
 }
 
 // convert an integer from LSB to MSB and vice versa
-uint32_t convertEndian(uint32_t val) {
+uint32_t convertEndian32(uint32_t val) {
 	return ((val >> 24) & 0xFF)
 		 | ((val >> 8) & 0xFF00)
 		 | ((val & 0xFF00) << 8)

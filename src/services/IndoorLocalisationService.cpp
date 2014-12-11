@@ -34,11 +34,17 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 
 	characStatus.reserve(3);
 
-	characStatus.push_back( { "Received signal level",	RSSI_UUID,			false,
+	characStatus.push_back( { "Received signal level",
+		RSSI_UUID,
+		false,
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addSignalStrengthCharacteristic)});
-	characStatus.push_back( { "Start/Stop Scan",		SCAN_DEVICE_UUID, 	true,
+	characStatus.push_back( { "Start/Stop Scan",
+		SCAN_DEVICE_UUID,
+		true,
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addScanControlCharacteristic)});
-	characStatus.push_back( { "Peripherals",			LIST_DEVICE_UUID, 	true,
+	characStatus.push_back( { "Peripherals",
+		LIST_DEVICE_UUID,
+		true,
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addPeripheralListCharacteristic)});
 
 //	// set timer with compare interrupt every 10ms

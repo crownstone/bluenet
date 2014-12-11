@@ -177,8 +177,8 @@ int main() {
 
 	// Create ADC object
 	// TODO: make service which enables other services and only init ADC when necessary
-	ADC::getInstance();
-	LPComp::getInstance();
+	//	ADC::getInstance();
+	//	LPComp::getInstance();
 
 	// Scheduler must be initialized before persistent memory
 	const uint16_t max_size = 32;
@@ -187,12 +187,13 @@ int main() {
 
 	// Create persistent memory object
 	// TODO: make service which enables other services and only init persistent memory when necessary
-	Storage::getInstance().init(32);
+	//	Storage::getInstance().init(32);
 
-	RealTimeClock::getInstance();
+	//	RealTimeClock::getInstance();
 
 	LOGi("Create all services");
-#ifdef INDOOR_SERVICE
+
+	#ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
 	//Service& localizationService =
 	IndoorLocalizationService::createService(stack);
@@ -206,6 +207,7 @@ int main() {
 #ifdef POWER_SERVICE
 	PowerService &powerService = PowerService::createService(stack);
 #endif
+
 
 	// configure drivers
 	config_drivers();

@@ -39,73 +39,104 @@ static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_cod
 
 } // extern "C"
 
+// NOTE: PSTORAGE_MAX_APPLICATIONS in pstorage_platform.h
+//   has to be adjusted to the number of elements defined here
+
+// NOTE: DO NOT CHANGE ORDER OF THE ELEMENTS OR THE FLASH
+//   STORAGE WILL GET MESSED UP!! NEW ENTRIES ALWAYS AT THE END
+static storage_config_t config[] {
+	{PS_ID_POWER_SERVICE, {}, sizeof(ps_power_service_t)},
+	{PS_ID_GENERAL_SERVICE, {}, sizeof(ps_general_service_t)}
+};
+
+#define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
+
 Storage::Storage() {
+	LOGi("Storage create");
+
+	// call once before using any other API calls of the persistent storage module
+	BLE_CALL(pstorage_init, ());
+
+	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
+		initBlocks(1, config[i].storage_size, config[i].handle);
+	}
 }
 
-Storage::~Storage() {
+bool Storage::getHandle(ps_storage_id storageID, pstorage_handle_t& handle) {
+	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
+		if (config[i].id == storageID) {
+			handle = config[i].handle;
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
  * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
  */
-void Storage::init(int size) {
+void Storage::initBlocks(int blocks, int size, pstorage_handle_t& handle) {
 	LOGi("Create persistent storage (FLASH) of %i bytes", size);
 	_size = size;
-
-	// call once before using any other API calls of the persistent storage module
-	BLE_CALL(pstorage_init, ());
 
 	// set parameter
 	pstorage_module_param_t param;
 	param.block_size = size;
-	param.block_count = 1;
+	param.block_count = blocks;
 	param.cb = pstorage_callback_handler;
 
 	// register
 	BLE_CALL ( pstorage_register, (&param, &handle) );
-
-	// get block id
-	BLE_CALL ( pstorage_block_identifier_get,(&handle, 0, &block_handle) );
 }
 
 /**
  * We have to clear an entire block before we can write a value to one of the fields!
  */
-void Storage::clear() {
+void Storage::clearBlock(pstorage_handle_t handle, int blockID) {
+
+	pstorage_handle_t block_handle;
+	BLE_CALL ( pstorage_block_identifier_get,(&handle, blockID, &block_handle) );
+
 	LOGw("Nordic bug: clear entire block before writing to it");
 	BLE_CALL (pstorage_clear, (&block_handle, _size) );
 }
 
 // Get byte at location "index" 
-void Storage::getUint8(int index, uint8_t *item) {
+void Storage::getUint8(pstorage_handle_t handle, int blockID, uint8_t *item) {
 	static uint8_t wg8[4];
-	BLE_CALL (pstorage_load, (wg8, &block_handle, 4, index)); 
-	*item = wg8[0];
+	pstorage_handle_t block_handle;
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
+	BLE_CALL (pstorage_load, (wg8, &block_handle, 4, 0));
+	memcpy(item, wg8, 1);
 }
 
 // Store byte
-void Storage::setUint8(int index, const uint8_t item) {
-	clear();
+void Storage::setUint8(pstorage_handle_t handle, int blockID, const uint8_t item) {
 	static uint8_t ws8[4];
-	ws8[0] = item;
-	ws8[1] = 0;
-	ws8[2] = 0;
-	ws8[3] = 0;
-	BLE_CALL (pstorage_store, (&block_handle, ws8, 4, index) );
+	pstorage_handle_t block_handle;
+
+//	clearBlock(handle, blockID);
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
+	memcpy(ws8, &item, 1);
+	BLE_CALL (pstorage_update, (&block_handle, ws8, 4, 0) );
 }
 
 // Get 16-bit integer
-void Storage::getUint16(int index, uint16_t *item) {
+void Storage::getUint16(pstorage_handle_t handle, int blockID, uint16_t *item) {
 	static uint8_t wg16[4];
-	BLE_CALL (pstorage_load, (wg16, &block_handle, 4, index) ); 
+	pstorage_handle_t block_handle;
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
+	BLE_CALL (pstorage_load, (wg16, &block_handle, 4, 0) );
 #ifdef PRINT_ITEMS
 	LOGd("Load item[0]: %d", wg16[0]);
 	LOGd("Load item[1]: %d", wg16[1]);
 	LOGd("Load item[2]: %d", wg16[2]);
 	LOGd("Load item[3]: %d", wg16[3]);
 #endif
-	*item = ((uint16_t)wg16[1]) << 8;
-       	*item |= wg16[0];
+	memcpy(item, wg16, 2);
 #ifdef PRINT_PENDINSG
 	uint32_t count;
 	BLE_CALL ( pstorage_access_status_get, (&count) );
@@ -114,22 +145,22 @@ void Storage::getUint16(int index, uint16_t *item) {
 }
 
 // Set 16-bit integer
-void Storage::setUint16(int index, const uint16_t item) {
-	// TODO: we now clear the entire block!
-	clear();
+void Storage::setUint16(pstorage_handle_t handle, int blockID, const uint16_t item) {
+	pstorage_handle_t block_handle;
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
+
+//	clearBlock(handle, blockID);
 
 	static uint8_t ws16[4];
-	ws16[0] = item;
-	ws16[1] = item >> 8;
-	ws16[2] = 0;
-	ws16[3] = 0;
+	memcpy(ws16, &item, 2);
 #ifdef PRINT_ITEMS
 	LOGd("Store item[0]: %d", ws16[0]);
 	LOGd("Store item[1]: %d", ws16[1]);
 	LOGd("Store item[2]: %d", ws16[2]);
 	LOGd("Store item[3]: %d", ws16[3]);
 #endif
-	BLE_CALL (pstorage_store, (&block_handle, ws16, 4, index) );
+	BLE_CALL (pstorage_update, (&block_handle, ws16, 4, 0) );
 #ifdef PRINT_PENDING
 	uint32_t count;
 	BLE_CALL ( pstorage_access_status_get, (&count) );
@@ -137,3 +168,39 @@ void Storage::setUint16(int index, const uint16_t item) {
 #endif
 }	
 
+void Storage::getString(pstorage_handle_t handle, int blockID, char* item, int16_t length) {
+	pstorage_handle_t block_handle;
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
+
+	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, length, 0) );
+}
+
+void Storage::setString(pstorage_handle_t handle, int blockID, const char* item, int16_t length) {
+	pstorage_handle_t block_handle;
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
+
+//	clearBlock(handle, blockID);
+
+	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, length, 0) );
+}
+
+void Storage::getStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
+	pstorage_handle_t block_handle;
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
+
+	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, size, 0) );
+}
+
+void Storage::setStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
+	pstorage_handle_t block_handle;
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
+
+	//	clearBlock(handle, blockID);
+
+	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
+
+}
