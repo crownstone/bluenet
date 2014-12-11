@@ -45,7 +45,7 @@ protected:
 	void sampleAdcInit();
 	void sampleAdcStart();
 
-	uint16_t getCurrentLimit();
+	uint8_t getCurrentLimit();
 
 	void TurnOff();
 	void TurnOn();
@@ -58,10 +58,10 @@ private:
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
 	// References to characteristics that need to be written from other functions
-	BLEpp::Characteristic<uint16_t> *_currentLimitCharacteristic;
+	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
 
 	// Current limit
-//	uint16_t _current_limit_val;
+	uint8_t _current_limit_val;
 
 	CurrentLimit _currentLimit;
 

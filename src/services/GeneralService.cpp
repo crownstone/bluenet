@@ -61,7 +61,7 @@ void GeneralService::addTemperatureCharacteristic() {
 }
 
 void GeneralService::addDeviceTypeCharactersitic() {
-	_storageStruct.getString(_storageStruct.device_type, _type, "Unknown");
+	Storage::getString(_storageStruct.device_type, _type, "Unknown");
 
 //	LOGd("create characteristic to read/write device type");
 	_deviceTypeCharacteristic = createCharacteristicRef<std::string>();
@@ -72,13 +72,13 @@ void GeneralService::addDeviceTypeCharactersitic() {
 		.setWritable(true)
 		.onWrite([&](const std::string value) -> void {
 			LOGi("set device type to: %s", value.c_str());
-			_storageStruct.setString(value, _storageStruct.device_type);
+			Storage::setString(value, _storageStruct.device_type);
 			savePersistentStorage();
 		});
 }
 
 void GeneralService::addRoomCharacteristic() {
-	_storageStruct.getString(_storageStruct.room, _room, "Unknown");
+	Storage::getString(_storageStruct.room, _room, "Unknown");
 
 //	LOGd("create characteristic to read/write room");
 	_roomCharacteristic = createCharacteristicRef<std::string>();
@@ -89,13 +89,13 @@ void GeneralService::addRoomCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const std::string value) -> void {
 			LOGi("set room to: %s", value.c_str());
-			_storageStruct.setString(value, _storageStruct.room);
+			Storage::setString(value, _storageStruct.room);
 			savePersistentStorage();
 		});
 }
 
 void GeneralService::addChangeNameCharacteristic() {
-	_storageStruct.getString(_storageStruct.device_name, _name, getBLEName());
+	Storage::getString(_storageStruct.device_name, _name, getBLEName());
 	setBLEName(_name);
 
 	_nameCharacteristic = createCharacteristicRef<std::string>();
@@ -107,7 +107,7 @@ void GeneralService::addChangeNameCharacteristic() {
 		.onWrite([&](const std::string& value) -> void {
 			LOGi("Set bluetooth name to: %s", value.c_str());
 			setBLEName(value);
-			_storageStruct.setString(value, _storageStruct.device_name);
+			Storage::setString(value, _storageStruct.device_name);
 			savePersistentStorage();
 		});
 }

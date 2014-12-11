@@ -19,8 +19,7 @@
 using namespace BLEpp;
 
 PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
-		_stack(&_stack), _currentLimitCharacteristic(NULL)
-//		, _current_limit_val(0)
+		_stack(&_stack), _currentLimitCharacteristic(NULL), _current_limit_val(0)
 {
 
 	setUUID(UUID(POWER_SERVICE_UUID));
@@ -126,10 +125,11 @@ void PowerService::addPowerConsumptionCharacteristic() {
 		.setNotifies(true);
 }
 
-uint16_t PowerService::getCurrentLimit() {
+uint8_t PowerService::getCurrentLimit() {
 	loadPersistentStorage();
-	LOGi("Obtained current limit from FLASH: %i", _storageStruct.current_limit);
-	return _storageStruct.current_limit;
+	Storage::getUint8(_storageStruct.current_limit, _current_limit_val, 0);
+	LOGi("Obtained current limit from FLASH: %i", _current_limit_val);
+	return _current_limit_val;
 }
 
 /**
@@ -139,31 +139,32 @@ uint16_t PowerService::getCurrentLimit() {
  *       Writing to persistent memory should be done between connection/advertisement events...
  */
 void PowerService::addCurrentLimitCharacteristic() {
-	_currentLimitCharacteristic = createCharacteristicRef<uint16_t>();
+	_currentLimitCharacteristic = createCharacteristicRef<uint8_t>();
 	(*_currentLimitCharacteristic)
 		.setNotifies(true)
 		.setUUID(UUID(getUUID(), CURRENT_LIMIT_UUID))
 		.setName("Current Limit")
 		.setDefaultValue(getCurrentLimit())
 		.setWritable(true)
-		.onWrite([&](const uint16_t &value) -> void {
+		.onWrite([&](const uint8_t &value) -> void {
 			LOGi("Set current limit to: %i", value);
-			_storageStruct.current_limit = value;
+			_current_limit_val = value;
 			LOGi("Write value to persistent memory");
+			Storage::setUint8(_current_limit_val, _storageStruct.current_limit);
 			savePersistentStorage();
 
 			LPComp::getInstance().stop();
 			// There are only 6 levels...
-			if (_storageStruct.current_limit > 6)
-				_storageStruct.current_limit = 6;
-			LPComp::getInstance().config(PIN_LPCOMP, _storageStruct.current_limit, LPComp::UP);
+			if (_current_limit_val > 6)
+				_current_limit_val = 6;
+			LPComp::getInstance().config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
 			LPComp::getInstance().start();
 		});
 
 	// There are only 6 levels...
-	if (_storageStruct.current_limit > 6)
-		_storageStruct.current_limit = 6;
-	LPComp::getInstance().config(PIN_LPCOMP, _storageStruct.current_limit, LPComp::UP);
+	if (_current_limit_val > 6)
+		_current_limit_val = 6;
+	LPComp::getInstance().config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
 	LPComp::getInstance().start();
 	_currentLimit.init();
 }
@@ -180,8 +181,8 @@ void PowerService::loop() {
 	if (++tmp_cnt > loop_cnt) {
 		if (_currentLimitCharacteristic) {
 			getCurrentLimit();
-			LOGi("Set default current limit value to %i", _storageStruct.current_limit);
-			*_currentLimitCharacteristic = _storageStruct.current_limit;
+			LOGi("Set default current limit value to %i", _current_limit_val);
+			*_currentLimitCharacteristic = _current_limit_val;
 		}
 		tmp_cnt = 0;
 	}

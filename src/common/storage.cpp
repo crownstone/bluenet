@@ -58,6 +58,7 @@ Storage::Storage() {
 	BLE_CALL(pstorage_init, ());
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
+		LOGi("Init %i bytes persistent storage (FLASH) for id %d", config[i].storage_size, config[i].id);
 		initBlocks(1, config[i].storage_size, config[i].handle);
 	}
 }
@@ -76,7 +77,6 @@ bool Storage::getHandle(ps_storage_id storageID, pstorage_handle_t& handle) {
  * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
  */
 void Storage::initBlocks(int blocks, int size, pstorage_handle_t& handle) {
-	LOGi("Create persistent storage (FLASH) of %i bytes", size);
 	_size = size;
 
 	// set parameter
@@ -203,4 +203,58 @@ void Storage::setStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint1
 
 	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
 
+}
+
+void Storage::setString(std::string value, char* target) {
+	if (value.length() < MAX_STRING_SIZE) {
+		memset(target, 0, MAX_STRING_SIZE);
+		memcpy(target, value.c_str(), value.length());
+	} else {
+		LOGe("string too long!!");
+	}
+}
+
+// helper function to get std::string from char array, or default value
+// if the value read is empty, unassigned (filled with FF) or too long
+void Storage::getString(char* value, std::string& target, std::string default_value) {
+
+#ifdef PRINT_ITEMS
+	LOGi("raw value: %s", value);
+	_log(INFO, "stored value: ");
+	for (int i = 0; i < MAX_STRING_SIZE; i++) {
+		_log(INFO, "%X ", value[i]);
+	}
+	_log(INFO, "\r\n");
+#endif
+
+	target = std::string(value);
+	// if the last char is equal to FF that means the memory
+	// is new and has not yet been written to, so we use the
+	// default value. same if the stored value is an empty string
+	if (target == "" || value[MAX_STRING_SIZE-1] == 0xFF) {
+		LOGd("use default value");
+		target = default_value;
+	} else {
+		LOGd("found stored value: %s", target.c_str());
+	}
+}
+
+void Storage::setUint8(uint8_t value, uint32_t& target) {
+	target = value;
+}
+
+void Storage::getUint8(uint32_t value, uint8_t& target, uint8_t default_value) {
+
+#ifdef PRINT_ITEMS
+	uint8_t* tmp = (uint8_t*)&value;
+	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+#endif
+
+	if (value & (0xFF << 3)) {
+		LOGd("use default value");
+		target = default_value;
+	} else {
+		target = value;
+		LOGd("found stored value: %d", target);
+	}
 }

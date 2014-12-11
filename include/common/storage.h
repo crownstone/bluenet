@@ -31,6 +31,10 @@ extern "C" {
  *   3. add a new element to the config array found in storage.cpp
  *      in the form of:
  *   	  {ENUM_ID, {}, sizeof(struct)}
+ *
+ *  NOTE: we can't store less than 4 bytes, so even if you only want
+ *    to store a byte, the element in the struct has to be defined as
+ *    uint32_t
  */
 
 // define the maximum size for strings to be stored
@@ -38,26 +42,6 @@ extern "C" {
 
 struct ps_storage_base_t {
 
-	// helper function to convert std::string to char array
-	void setString(std::string value, char* target) {
-		if (value.length() < MAX_STRING_SIZE) {
-			memset(target, 0, MAX_STRING_SIZE);
-			memcpy(target, value.c_str(), value.length());
-		}
-	}
-
-	// helper function to get std::string from char array, or default value
-	// if the value read is empty, unassigned (filled with FF) or too long
-	void getString(char* value, std::string& target, std::string default_value) {
-		target = std::string(value);
-		// use MAX_STRING_SIZE - 1 to avoid reading in area from the
-		// flash which has not been written yet and is all FF
-		if (target == "" || target.length() > MAX_STRING_SIZE - 1) {
-			LOGd("use default value");
-			target = default_value;
-		}
-		LOGd("found stored value: %s", target.c_str());
-	}
 };
 
 enum ps_storage_id {
@@ -121,6 +105,25 @@ public:
 	// Set/Get struct
 	void getStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
 	void setStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t length);
+
+	// helper functions //////////////////////////////////////////
+
+	// helper function to convert std::string to char array
+	static void setString(std::string value, char* target);
+
+	// helper function to get std::string from char array, or default value
+	// if the value read is empty or unassigned (filled with FF)
+	static void getString(char* value, std::string& target, std::string default_value);
+
+	// helper function to set a byte
+	static void setUint8(uint8_t value, uint32_t& target);
+
+	// helper function to read a byte from the storage, or default value
+	// if the value is 0 or unassigned (FF)
+	static void getUint8(uint32_t value, uint8_t& target, uint8_t default_value);
+
+
+
 private:
 	Storage();
 
