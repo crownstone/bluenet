@@ -164,6 +164,16 @@ ELSE()
 		DEPENDS ${PROJECT_NAME}
 		COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
 
+	ADD_CUSTOM_TARGET(combine
+		COMMAND echo
+		COMMAND echo "*** Use srec_cat to create one combined softdevice+app file"
+		COMMAND echo
+		COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
+		COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
+		DEPENDS ${PROJECT_NAME}.tmp
+		COMMENT "Combine as one hex file"
+		)
+
 	ADD_CUSTOM_TARGET(analyze
 		COMMAND echo
 		COMMAND echo "*** Show headers"

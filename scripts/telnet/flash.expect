@@ -1,0 +1,47 @@
+#!/usr/bin/expect
+
+set timeout 20
+set command [lindex $argv 0]
+set binary [lindex $argv 1]
+set address [lindex $argv 2]
+
+# The binary to flash
+if { $command == "" || $binary == "" }  {
+	puts "Usage: <command> <binary> to send>\n"
+	exit 1
+}
+
+# Optional parameter address, set to 0 if absent
+# If you only flash the application (and didn't combine with the softdevice) you need to place it after the softdevice
+if { $address == "" } {
+	set address 0
+}
+
+spawn telnet 127.0.0.1 4444
+
+# Expect the thing to be a debugger
+expect "Open On-Chip Debugger"
+
+if { $command == "all" } {
+	# Flash both memory banks
+	send "flash banks\r"
+
+	# Expect the last bank to be preceded by #1
+	expect "#1"
+}
+
+# Stop before flashing image
+send "halt\r"
+
+# Expect last line of halting command to be abount xPSR or just ">" if target was already halted before
+expect {
+	"xPSR" { send "flash write_image erase ../build/$binary $address\r" }
+	-re ">" { send "flash write_image erase ../build/$binary $address\r" }
+}
+
+# Expect this to be written
+expect "wrote"
+send "reset\r"
+
+# Hand over the rest to the user
+#interact
