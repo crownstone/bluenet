@@ -13,6 +13,7 @@
 #include <common/storage.h>
 #include <util/ble_error.h>
 #include <drivers/serial.h>
+#include <limits.h>
 
 //#include <BluetoothLE.h> // TODO: now for BLE_CALL, should be moved to other unit
 
@@ -250,7 +251,57 @@ void Storage::getUint8(uint32_t value, uint8_t& target, uint8_t default_value) {
 	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
+	// check if last byte is FF which means that memory is unnassigned
+	// and value has to be ignored
 	if (value & (0xFF << 3)) {
+		LOGd("use default value");
+		target = default_value;
+	} else {
+		target = value;
+		LOGd("found stored value: %d", target);
+	}
+}
+
+void Storage::setUint16(uint16_t value, uint32_t& target) {
+	target = value;
+}
+
+void Storage::getUint16(uint32_t value, uint16_t& target, uint16_t default_value) {
+
+#ifdef PRINT_ITEMS
+	uint8_t* tmp = (uint8_t*)&value;
+	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+#endif
+
+	// check if last byte is FF which means that memory is unnassigned
+	// and value has to be ignored
+	if (value & (0xFF << 3)) {
+		LOGd("use default value");
+		target = default_value;
+	} else {
+		target = value;
+		LOGd("found stored value: %d", target);
+	}
+}
+
+void Storage::setUint32(uint32_t value, uint32_t& target) {
+	if (value & 1 << 31) {
+		LOGe("value %d too big, can only write max %d", value, INT_MAX & ~(1 << 31));
+	} else {
+		target = value;
+	}
+}
+
+void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value) {
+
+#ifdef PRINT_ITEMS
+	uint8_t* tmp = (uint8_t*)&value;
+	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+#endif
+
+	// check if last bit is 1 which means that memory is unnassigned
+	// and value has to be ignored
+	if (value & (1 << 31)) {
 		LOGd("use default value");
 		target = default_value;
 	} else {

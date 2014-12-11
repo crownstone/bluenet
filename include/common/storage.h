@@ -122,7 +122,13 @@ public:
 	// if the value is 0 or unassigned (FF)
 	static void getUint8(uint32_t value, uint8_t& target, uint8_t default_value);
 
+	static void setUint16(uint16_t value, uint32_t& target);
 
+	static void getUint16(uint32_t value, uint16_t& target, uint16_t default_value);
+
+	static void setUint32(uint32_t value, uint32_t& target);
+
+	static void getUint32(uint32_t value, uint32_t& target, uint32_t default_value);
 
 private:
 	Storage();
