@@ -157,14 +157,14 @@ void PowerService::addCurrentLimitCharacteristic() {
 			// There are only 6 levels...
 			if (_current_limit_val > 6)
 				_current_limit_val = 6;
-			LPComp::getInstance().config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
+			LPComp::getInstance().config(PIN_AIN_LPCOMP, _current_limit_val, LPComp::UP);
 			LPComp::getInstance().start();
 		});
 
 	// There are only 6 levels...
 	if (_current_limit_val > 6)
 		_current_limit_val = 6;
-	LPComp::getInstance().config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
+	LPComp::getInstance().config(PIN_AIN_LPCOMP, _current_limit_val, LPComp::UP);
 	LPComp::getInstance().start();
 	_currentLimit.init();
 }

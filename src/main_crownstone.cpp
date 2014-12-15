@@ -116,13 +116,13 @@ void config_drivers() {
 
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
 	pwm_config.num_channels = 1;
-	pwm_config.gpio_num[0] = PIN_LED;
+	pwm_config.gpio_num[0] = PIN_GPIO_LED;
 	pwm_config.mode = PWM_MODE_LED_255;
 
 	nrf_pwm_init(&pwm_config);
 
 #if(BOARD==PCA10001)
-	nrf_gpio_cfg_output(PIN_LED_CON);
+	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 #endif
 }
 
@@ -152,7 +152,7 @@ int main() {
 			sd_ble_gap_rssi_start(conn_handle);
 
 #if(BOARD==PCA10001)
-			nrf_gpio_pin_set(PIN_LED_CON);
+			nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
 		})
 		.onDisconnect([&](uint16_t conn_handle) {
@@ -163,7 +163,7 @@ int main() {
 			// disconnected. but for now this will be the default behaviour.
 
 #if(BOARD==PCA10001)
-			nrf_gpio_pin_clear(PIN_LED_CON);
+			nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
 
 			stack.stopScanning();
