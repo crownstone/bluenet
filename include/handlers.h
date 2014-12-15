@@ -11,9 +11,13 @@
 extern "C" {
 #endif
 
-#include <common/storage.h>
 #include <softdevice_handler.h>
+// undefine APP_ERROR_CHECK macro from nordic's app_error.h
+#undef APP_ERROR_CHECK
+// include ble_error.h to redefine our APP_ERROR_CHECK macro
+#include "util/ble_error.h"
 
+#include <common/storage.h>
 #include <drivers/serial.h>
 
 /**

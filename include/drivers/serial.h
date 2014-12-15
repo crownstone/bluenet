@@ -8,6 +8,10 @@
 #ifndef CS_SERIAL_H
 #define CS_SERIAL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * Commonly LOG functionality is provided with as first paramater the level of severity of the message. Subsequently
  * the message follows, eventually succeeded by content if the string contains format specifiers. This means that this
@@ -20,6 +24,7 @@
 #define ERROR                3
 #define FATAL                4
 
+//#define DEBUG_ON
 #define DEBUG_ON
 
 #define VERBOSITY            INFO
@@ -81,5 +86,9 @@ void config_uart();
  * Write a string with printf functionality.
  */
 int write(const char *str, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

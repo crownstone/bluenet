@@ -13,7 +13,7 @@
 
 class CurrentLimit: public Listener {
 public:
-	CurrentLimit(LPComp& lpcomp);
+	CurrentLimit();
 
 	~CurrentLimit();
 
@@ -22,10 +22,6 @@ public:
 	// We get a dispatch from the LP comparator
 	void handleEvent();
 	void handleEvent(uint8_t type);
-
-private:
-	// Reference to LP comparator
-	LPComp &_lpcomp;
 };
 
 

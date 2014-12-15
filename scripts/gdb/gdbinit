@@ -17,6 +17,8 @@ set remote memory-write-packet-size 1024
 #set remote memory-write-packet-size fixed
 load
 monitor reset
+
+# If you want to enable a breakpoint before program start
 #b main
 
 #b softdevice_assertion_handler

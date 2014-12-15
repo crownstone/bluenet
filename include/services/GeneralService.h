@@ -8,10 +8,11 @@
 #ifndef GENERALSERVICE_H_
 #define GENERALSERVICE_H_
 
-#include <processing/temperature.h>
 #include "BluetoothLE.h"
+#include <processing/temperature.h>
 #include <vector>
 #include <characteristics/charac_config.h>
+#include <common/storage.h>
 
 #define GENERAL_UUID "f5f90000-59f9-11e4-aa15-123b93f75cba"
 
@@ -30,7 +31,7 @@ protected:
 
 	// References to characteristics
 	BLEpp::CharacteristicT<int32_t>* _temperatureCharacteristic;
-	BLEpp::Characteristic<std::string>* _changeNameCharacteristic; 
+	BLEpp::Characteristic<std::string>* _nameCharacteristic;
 	BLEpp::Characteristic<std::string>* _deviceTypeCharacteristic;
 	BLEpp::Characteristic<std::string>* _roomCharacteristic;
 
@@ -41,10 +42,18 @@ protected:
 	void addRoomCharacteristic();
 
 	// Helper functions
-	std::string & getBLEName();
-	void setBLEName(std::string &name);
+	std::string&  getBLEName();
+	void setBLEName(const std::string &name);
+
+	void loadPersistentStorage();
+	void savePersistentStorage();
 private:
 	std::string _name;
+	std::string _room;
+	std::string _type;
+
+	pstorage_handle_t _storageHandle;
+	ps_general_service_t _storageStruct;
 };
 
 #endif /* GENERALSERVICE_H_ */

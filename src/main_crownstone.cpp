@@ -108,11 +108,11 @@ void configure(Nrf51822BluetoothStack &stack) {
 /**
  * This must be called after the SoftDevice has started.
  */
-void config_drivers(ADC &adc) {
+void config_drivers() {
 	// TODO: Dominik, can we connect the adc init call with the characteristic / services
 	//   that actually use it? if there is no service that uses it there is no reason to
 	//   allocate space for it
-//	adc.nrf_adc_init(PIN_ADC);
+//	ADC::getInstance().nrf_adc_init(PIN_ADC);
 
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
 	pwm_config.num_channels = 1;
@@ -177,39 +177,40 @@ int main() {
 
 	// Create ADC object
 	// TODO: make service which enables other services and only init ADC when necessary
-	ADC & adc = ADC::getInstance();
-	LPComp& lpcomp = LPComp::getInstance();
+	//	ADC::getInstance();
+	//	LPComp::getInstance();
 
 	// Scheduler must be initialized before persistent memory
 	const uint16_t max_size = 32;
-	const uint16_t queue_size = 16;
+	const uint16_t queue_size = 4;
 	APP_SCHED_INIT(max_size, queue_size);
 
 	// Create persistent memory object
 	// TODO: make service which enables other services and only init persistent memory when necessary
-	Storage storage;
-	storage.init(32);
-	
-	RealTimeClock & clock = RealTimeClock::getInstance();
+	//	Storage::getInstance().init(32);
+
+	//	RealTimeClock::getInstance();
 
 	LOGi("Create all services");
-#ifdef INDOOR_SERVICE
+
+	#ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
-	//Service& localizationService = 
+	//Service& localizationService =
 	IndoorLocalizationService::createService(stack);
 #endif
 
 #ifdef GENERAL_SERVICE
 	// general services, such as internal temperature, setting names, etc.
 	GeneralService& generalService = GeneralService::createService(stack);
-#endif 
-
-#ifdef POWER_SERVICE
-	PowerService &powerService = PowerService::createService(stack, adc, storage, clock, lpcomp);
 #endif
 
+#ifdef POWER_SERVICE
+	PowerService &powerService = PowerService::createService(stack);
+#endif
+
+
 	// configure drivers
-	config_drivers(adc);
+	config_drivers();
 
 	// begin sending advertising packets over the air.
 #ifdef IBEACON

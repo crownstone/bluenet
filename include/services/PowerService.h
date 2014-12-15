@@ -25,12 +25,11 @@ class PowerService : public BLEpp::GenericService {
 public:
 	typedef function<int8_t()> func_t;
 
-	PowerService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage, RealTimeClock &clock, LPComp &lpcomp);
+	PowerService(BLEpp::Nrf51822BluetoothStack& stack);
 
 	void addSpecificCharacteristics();
 
-	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack, ADC &adc, Storage &storage,
-			RealTimeClock &clock, LPComp &lpcomp);
+	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 	
 	void loop();
 protected:
@@ -46,34 +45,28 @@ protected:
 	void sampleAdcInit();
 	void sampleAdcStart();
 
-	uint16_t getCurrentLimit();
+	uint8_t getCurrentLimit();
 
 	void TurnOff();
 	void TurnOn();
 	void Dim(uint8_t value);
 
-	// References to characteristics that need to be written from other functions
-	BLEpp::Characteristic<uint16_t> *_currentLimitCharacteristic;
+	void loadPersistentStorage();
+	void savePersistentStorage();
 private:
 	// References to stack, to e.g. stop advertising if required
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
-	// We need an AD converter for this service
-	ADC &_adc;
-
-	// We need persistent storage for this service
-	Storage &_storage;
-
-	// Real-time clock
-	RealTimeClock *_clock;
+	// References to characteristics that need to be written from other functions
+	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
 
 	// Current limit
-	uint16_t _current_limit_val;
-
-	// We need an LP comparator for this service
-	LPComp &_lpcomp;
+	uint8_t _current_limit_val;
 
 	CurrentLimit _currentLimit;
+
+	pstorage_handle_t _storageHandle;
+	ps_power_service_t _storageStruct;
 };
 
 #endif /* POWERSERVICE_H_ */

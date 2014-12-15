@@ -12,7 +12,9 @@ working_path=$path
 build() {
 	cd $working_path/..	
 	make all
+	result=$?
 	cd $working_path
+	return $result
 }
 
 upload() {
@@ -25,17 +27,20 @@ debug() {
 
 all() {
 	build
-	sleep 1
-	upload
-	sleep 1
-	debug
+	if [ $? -eq 0 ]; then 
+		sleep 1
+		upload
+		sleep 1
+		debug
+	fi
 }
 
 run() {
 	build
-	sleep 1
-	upload
-	sleep 1
+	if [ $? -eq 0 ]; then 
+		sleep 1
+		upload
+	fi
 }
 
 clean() {

@@ -38,6 +38,8 @@
 #define PIN_RX               16
 #define PIN_TX               17
 
+#define PIN_LPCOMP           3                   // ain3 is p0.2 or gpio 2
+
 #endif
 
 
@@ -45,7 +47,7 @@
 
 #define PIN_LED              3                   // this is p0.03 or gpio 3
 #define PIN_ADC              5                   // ain5 is p0.04 or gpio 4
-#define PIN_LPCOMP           6                   // ain6 is p0.05 or gpio 5
+#define PIN_LPCOMP           7                   // ain6 is p0.05 or gpio 5 (changed in from 6 which conflict with uart)
 #define PIN_RX               6                   // this is p0.06 or gpio 6
 #define PIN_TX               1                   // this is p0.01 or gpio 1
 
