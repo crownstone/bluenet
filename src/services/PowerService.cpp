@@ -34,15 +34,15 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
 	characStatus.push_back( { "Voltage Curve",
 			VOLTAGE_CURVE_UUID,
-			false,
+			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addVoltageCurveCharacteristic)});
 	characStatus.push_back( { "Power Consumption",
 			POWER_CONSUMPTION_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentLimitCharacteristic)});
 
 	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
@@ -113,6 +113,7 @@ void PowerService::addVoltageCurveCharacteristic() {
 
 //			LOGd("Successfully written");
 		});
+	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
 void PowerService::addPowerConsumptionCharacteristic() {
@@ -204,12 +205,13 @@ void PowerService::sampleAdcInit() {
 				LOGi("start RTC");
 				RealTimeClock::getInstance().init();
 				RealTimeClock::getInstance().start();
+				ADC::getInstance().setClock(RealTimeClock::getInstance());
 
 				// Wait for the RTC to actually start
 				nrf_delay_us(100);
 
 				LOGi("Start ADC");
-				ADC::getInstance().nrf_adc_start();
+				ADC::getInstance().start();
 				// replace by timer!
 
 }
@@ -222,7 +224,7 @@ void PowerService::sampleAdcStart() {
 	LOGi("Counter is at: %u", RealTimeClock::getInstance().getCount());
 
 	LOGi("Stop ADC converter");
-	ADC::getInstance().nrf_adc_stop();
+	ADC::getInstance().stop();
 
 	// Wait for the ADC to actually stop
 	nrf_delay_us(1000);
@@ -260,14 +262,30 @@ void PowerService::sampleAdcStart() {
        	//rms=%lu min=%lu max=%lu current=%i mA", voltage, rms, voltage_min, voltage_max, current);
 */
 
+	uint16_t voltage_max = 0;
 	int i = 0;
 	while (!ADC::getInstance().getBuffer()->empty()) {
-		_log(INFO, "%u, ", ADC::getInstance().getBuffer()->pop());
+		uint16_t voltage = ADC::getInstance().getBuffer()->pop();
+
+		// First and last elements of the buffer are timestamps
+		if (voltage > voltage_max && i>0 && ADC::getInstance().getBuffer()->count() > 1) {
+			voltage_max = voltage;
+		}
+
+		_log(INFO, "%u, ", voltage);
 		if (!(++i % 10)) {
 			_log(INFO, "\r\n");
 		}
 	}
 	_log(INFO, "\r\n");
+
+	// measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
+	// 1023 * 1200 / 1023 = 1200 < 2^16
+	voltage_max = voltage_max*1200/1023; // mV
+	uint16_t current_rms = voltage_max * 1000 / SHUNT_VALUE * 1000 / 1414; // mA
+	_log(INFO, "Irms = %u mA\r\n", current_rms);
+
+
 	//stack->startAdvertising(); // segfault
 /*
 	uint64_t result = voltage_min;

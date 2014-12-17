@@ -9,7 +9,7 @@
  * Enable the services you want to run on the device
  *********************************************************************************************************************/
 
-#define INDOOR_SERVICE
+//#define INDOOR_SERVICE
 #define GENERAL_SERVICE
 #define POWER_SERVICE
 
@@ -112,7 +112,7 @@ void config_drivers() {
 	// TODO: Dominik, can we connect the adc init call with the characteristic / services
 	//   that actually use it? if there is no service that uses it there is no reason to
 	//   allocate space for it
-//	ADC::getInstance().nrf_adc_init(PIN_ADC);
+//	ADC::getInstance().init(PIN_AIN_ADC); // Moved to PowerService.cpp
 
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
 	pwm_config.num_channels = 1;
@@ -193,7 +193,7 @@ int main() {
 
 	LOGi("Create all services");
 
-	#ifdef INDOOR_SERVICE
+#ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
 	//Service& localizationService =
 	IndoorLocalizationService::createService(stack);

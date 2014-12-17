@@ -17,7 +17,7 @@
  */
 class ADC: public Dispatcher {
 private:
-	ADC(): _buffer_size(100), _clock(NULL) {}
+	ADC(): _buffer_size(130), _clock(NULL) {}
 	ADC(ADC const&); // singleton, deny implementation
 	void operator=(ADC const &); // singleton, deny implementation
 public:
@@ -31,10 +31,10 @@ public:
 	void setClock(RealTimeClock &clock);
 
 	// TODO: remove nrf_adc prefix. This is now C++.
-	uint32_t nrf_adc_init(uint8_t pin);
-	uint32_t nrf_adc_config(uint8_t pin);
-	void nrf_adc_start();
-	void nrf_adc_stop();
+	uint32_t init(uint8_t pin);
+	uint32_t config(uint8_t pin);
+	void start();
+	void stop();
 
 	// function to be called from interrupt, do not do much there!
 	void update(uint32_t value);
@@ -48,6 +48,8 @@ public:
 protected:
 private:
 	int _buffer_size;
+	uint16_t _last_result;
+	bool _store;
 
 	RealTimeClock *_clock;
 };
