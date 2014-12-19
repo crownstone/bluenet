@@ -37,13 +37,14 @@ protected:
 	
 	// The characteristics in this service
 	void addPWMCharacteristic();
-	void addVoltageCurveCharacteristic();
-	void addPowerConsumptionCharacteristic();
+	void addGetCurrentCharacteristic();
+	void addCurrentCurveCharacteristic();
+	void addCurrentConsumptionCharacteristic();
 	void addCurrentLimitCharacteristic();
 
 	// Some helper functions
-	void sampleAdcInit();
-	void sampleAdcStart();
+	void sampleCurrentInit();
+	uint16_t sampleCurrentFinish(uint8_t type);
 
 	uint8_t getCurrentLimit();
 
@@ -59,6 +60,8 @@ private:
 
 	// References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
+	BLEpp::Characteristic<uint16_t> *_currentConsumptionCharacteristic;
+	BLEpp::Characteristic<uint16_t> *_currentCurveCharacteristic;
 
 	// Current limit
 	uint8_t _current_limit_val;

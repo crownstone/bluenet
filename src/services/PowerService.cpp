@@ -32,14 +32,18 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 			PWM_UUID,
 			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
-	characStatus.push_back( { "Voltage Curve",
-			VOLTAGE_CURVE_UUID,
+	characStatus.push_back( { "Get Current",
+			CURRENT_GET_UUID,
 			true,
-			static_cast<addCharacteristicFunc>(&PowerService::addVoltageCurveCharacteristic)});
-	characStatus.push_back( { "Power Consumption",
-			POWER_CONSUMPTION_UUID,
-			false,
-			static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
+			static_cast<addCharacteristicFunc>(&PowerService::addGetCurrentCharacteristic)});
+	characStatus.push_back( { "Current Curve",
+			CURRENT_CURVE_UUID,
+			true,
+			static_cast<addCharacteristicFunc>(&PowerService::addCurrentCurveCharacteristic)});
+	characStatus.push_back( { "Current Consumption",
+			CURRENT_CONSUMPTION_UUID,
+			true,
+			static_cast<addCharacteristicFunc>(&PowerService::addCurrentConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
 			false,
@@ -95,32 +99,48 @@ void PowerService::Dim(uint8_t value) {
 	nrf_pwm_set_value(0, value);
 }
 
-
-void PowerService::addVoltageCurveCharacteristic() {
+void PowerService::addGetCurrentCharacteristic() {
 	createCharacteristic<uint8_t>()
-		.setUUID(UUID(getUUID(), VOLTAGE_CURVE_UUID))
-		.setName("Voltage Curve")
-		.setDefaultValue(255)
+		.setUUID(UUID(getUUID(), CURRENT_GET_UUID))
+		.setName("Get Current")
+		.setDefaultValue(0)
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
-//			LOGi("start adc sampling");
-
-			sampleAdcInit();
-
-//			nrf_pwm_set_value(0, value);
-
-			sampleAdcStart();
-
-//			LOGd("Successfully written");
+			sampleCurrentInit();
+			uint16_t current_rms = sampleCurrentFinish(value);
+			if ((value & 0x01) && _currentConsumptionCharacteristic != NULL) {
+				(*_currentConsumptionCharacteristic) = current_rms;
+			}
+			if ((value & 0x02) && _currentCurveCharacteristic != NULL) {
+				(*_currentCurveCharacteristic) = 1; // TODO: stream curve
+			}
 		});
+}
+
+void PowerService::addCurrentCurveCharacteristic() {
+	_currentCurveCharacteristic = &createCharacteristic<uint16_t>()
+		.setUUID(UUID(getUUID(), CURRENT_CURVE_UUID))
+		.setName("Current Curve")
+		.setDefaultValue(0)
+		.setWritable(false)
+		.setNotifies(true);
+//		.onWrite([&](const uint16_t& value) -> void {
+//			sampleVoltageCurveInit();
+////			nrf_pwm_set_value(0, value);
+//			sampleVoltageCurveFinish();
+//		})
+//		.onRead([&] () -> uint16_t {
+//			sampleVoltageCurveInit();
+//			return sampleVoltageCurveFinish();
+//		});
 	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
-void PowerService::addPowerConsumptionCharacteristic() {
+void PowerService::addCurrentConsumptionCharacteristic() {
 //	LOGd("create characteristic to read power consumption");
-	createCharacteristic<uint32_t>()
-		.setUUID(UUID(getUUID(), POWER_CONSUMPTION_UUID))
-		.setName("Power consumption")
+	_currentConsumptionCharacteristic = &createCharacteristic<uint16_t>()
+		.setUUID(UUID(getUUID(), CURRENT_CONSUMPTION_UUID))
+		.setName("Current Consumption")
 		.setDefaultValue(0)
 		.setWritable(false)
 		.setNotifies(true);
@@ -189,7 +209,7 @@ void PowerService::loop() {
 //	}
 }
 
-void PowerService::sampleAdcInit() {
+void PowerService::sampleCurrentInit() {
 	/*
 				uint64_t rms_sum = 0;
 				uint32_t voltage_min = 0xffffffff;
@@ -216,14 +236,12 @@ void PowerService::sampleAdcInit() {
 
 }
 
-void PowerService::sampleAdcStart() {
+uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 	while (!ADC::getInstance().getBuffer()->full()) {
 		nrf_delay_ms(100);
 	}
-	LOGi("Number of results: %u", ADC::getInstance().getBuffer()->count()/2);
-	LOGi("Counter is at: %u", RealTimeClock::getInstance().getCount());
 
-	LOGi("Stop ADC converter");
+	LOGi("Stop ADC");
 	ADC::getInstance().stop();
 
 	// Wait for the ADC to actually stop
@@ -268,37 +286,31 @@ void PowerService::sampleAdcStart() {
 		uint16_t voltage = ADC::getInstance().getBuffer()->pop();
 
 		// First and last elements of the buffer are timestamps
-		if (voltage > voltage_max && i>0 && ADC::getInstance().getBuffer()->count() > 1) {
+		if ((type & 0x1) && (voltage > voltage_max) && (i>0) && (ADC::getInstance().getBuffer()->count() > 1)) {
 			voltage_max = voltage;
 		}
 
-		_log(INFO, "%u, ", voltage);
-		if (!(++i % 10)) {
-			_log(INFO, "\r\n");
+		if (type & 0x2) {
+			_log(INFO, "%u, ", voltage);
+			if (!(++i % 10)) {
+				_log(INFO, "\r\n");
+			}
 		}
 	}
-	_log(INFO, "\r\n");
+	if (type & 0x2) {
+		_log(INFO, "\r\n");
+	}
 
-	// measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
-	// 1023 * 1200 / 1023 = 1200 < 2^16
-	voltage_max = voltage_max*1200/1023; // mV
-	uint16_t current_rms = voltage_max * 1000 / SHUNT_VALUE * 1000 / 1414; // mA
-	_log(INFO, "Irms = %u mA\r\n", current_rms);
+	if (type & 0x1) {
+		// measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
+		// 1023 * 1200 / 1023 = 1200 < 2^16
+		voltage_max = voltage_max*1200/1023; // mV
+		uint16_t current_rms = voltage_max * 1000 / SHUNT_VALUE * 1000 / 1414; // mA
+		LOGi("Irms = %u mA\r\n", current_rms);
+		return current_rms;
+	}
 
-
-	//stack->startAdvertising(); // segfault
-/*
-	uint64_t result = voltage_min;
-	result <<= 32;
-	result |= voltage_max;
-#ifdef NUMBER_CHARAC
-	*intchar = result;
-	result = rms;
-	result <<= 32;
-	result |= current;
-	*intchar2 = result;
-#endif
-*/
+	return 0;
 }
 
 PowerService& PowerService::createService(Nrf51822BluetoothStack& stack) {
