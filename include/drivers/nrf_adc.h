@@ -15,9 +15,12 @@
 /**
  * Analog digital conversion class. 
  */
+
+#define ADC_BUFFER_SIZE 130
+
 class ADC: public Dispatcher {
 private:
-	ADC(): _buffer_size(130), _clock(NULL) {}
+	ADC(): _buffer_size(ADC_BUFFER_SIZE), _clock(NULL) {}
 	ADC(ADC const&); // singleton, deny implementation
 	void operator=(ADC const &); // singleton, deny implementation
 public:
@@ -49,6 +52,7 @@ protected:
 private:
 	int _buffer_size;
 	uint16_t _last_result;
+	uint16_t _num_samples;
 	bool _store;
 
 	RealTimeClock *_clock;

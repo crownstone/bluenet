@@ -126,16 +126,18 @@ void ADC::stop() {
 void ADC::start() {
 	_last_result = 1;
 	_store = false;
+	_num_samples = 0;
 	NRF_ADC->EVENTS_END  = 0;
 	NRF_ADC->TASKS_START = 1;
 }
 
 void ADC::update(uint32_t value) {
-	if (!_store && _last_result == 0 && value > 0) {
+	++_num_samples;
+	if (!_store && ((_last_result == 0 && value > 0) || _num_samples > 2*ADC_BUFFER_SIZE)) {
 		_store = true;
 		// Log first RTC count
 		if (_clock)
-			adc_result.push(_clock->getCount());
+			adc_result.push(_clock->getCount()); // TODO: getCount returns 32 bit value!
 //		else
 //			adc_result.push(_last_result);
 	}
@@ -151,7 +153,7 @@ void ADC::update(uint32_t value) {
 	}
 	// Log last RTC count
 	if (_clock && adc_result.count() + 1 == adc_result.size) {
-		adc_result.push(_clock->getCount());
+		adc_result.push(_clock->getCount()); // TODO: getCount returns 32 bit value!
 	}
 }
 
