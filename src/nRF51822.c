@@ -13,6 +13,7 @@
 // Currently, very dirty set just RFDUINO here. We must make this of course more flexible and be able to compile
 // smoothly for different modules created around the nRF51822 chip.
 #define RFDUINO
+#define OLD_HARDWARE
 
 extern unsigned const long _stext;
 extern unsigned const long _etext;
@@ -142,7 +143,7 @@ void ResetHandler(void) {
 	// See PAN_028_v1.6.pdf "25. System: Manual setup is required to enable use of peripherals"
 	// WARNING. This is only true for OLD hardware (check with ./scripts/hardware_version.sh)
 	// For new hardware this DISABLES for example the LPCOMP peripheral
-#ifdef OLD_HARDWARE
+#if(HARDWARE_VERSION == 0x001D)
 	*(uint32_t *)0x40000504 = 0xC007FFDF;
 	*(uint32_t *)0x40006C18 = 0x00008000;
 #endif

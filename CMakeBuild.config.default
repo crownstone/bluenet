@@ -80,3 +80,5 @@ JLINK=/usr/bin/JLinkExe
 # The JLink utilty that can be used with gdb
 JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
 
+# Version of the nrf51 chip, use script/hardware_version.sh to check your version
+HARDWARE_VERSION=0x001D
