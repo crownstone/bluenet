@@ -84,6 +84,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			_list[i].occurences++;
 			_list[i].rssi = rssi;
 			found = true;
+			// TODO: Any reason not to break here?
 		}
 	}
 	if (!found) {
