@@ -23,7 +23,8 @@ using namespace BLEpp;
 
 IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _stack) :
 		_stack(&_stack),
-		_rssiCharac(NULL), _intChar(NULL), _intChar2(NULL), _peripheralCharac(NULL),
+		_rssiCharac(NULL), _peripheralCharac(NULL),
+		//_intChar(NULL), _intChar2(NULL),
 		_personalThresholdLevel(0) {
 
 	setUUID(UUID(INDOORLOCALISATION_UUID));
@@ -63,26 +64,26 @@ void IndoorLocalizationService::addSignalStrengthCharacteristic() {
 	addCharacteristic(_rssiCharac);
 }
 
-void IndoorLocalizationService::addNumberCharacteristic() {
-	// create a characteristic of type uint8_t (unsigned one byte integer).
-	// this characteristic is by default read-only (for the user)
-	// note that in the next characteristic this variable intchar is set!
-//	LOGd("create characteristic to read a number for debugging");
-	//Characteristic<uint8_t>&
-	_intChar = createCharacteristicRef<uint8_t>();
-	(*_intChar)
-		.setUUID(UUID(getUUID(), 0x125))  // based off the uuid of the service.
-		.setDefaultValue(66)
-		.setName("number");
-}
-
-void IndoorLocalizationService::addNumber2Characteristic() {
-	_intChar2 = createCharacteristicRef<uint64_t>();
-	(*_intChar2)
-		.setUUID(UUID(getUUID(), 0x121))  // based off the uuid of the service.
-		.setDefaultValue(66)
-		.setName("number2");
-}
+//void IndoorLocalizationService::addNumberCharacteristic() {
+//	// create a characteristic of type uint8_t (unsigned one byte integer).
+//	// this characteristic is by default read-only (for the user)
+//	// note that in the next characteristic this variable intchar is set!
+////	LOGd("create characteristic to read a number for debugging");
+//	//Characteristic<uint8_t>&
+//	_intChar = createCharacteristicRef<uint8_t>();
+//	(*_intChar)
+//		.setUUID(UUID(getUUID(), 0x125))  // based off the uuid of the service.
+//		.setDefaultValue(66)
+//		.setName("number");
+//}
+//
+//void IndoorLocalizationService::addNumber2Characteristic() {
+//	_intChar2 = createCharacteristicRef<uint64_t>();
+//	(*_intChar2)
+//		.setUUID(UUID(getUUID(), 0x121))  // based off the uuid of the service.
+//		.setDefaultValue(66)
+//		.setName("number2");
+//}
 
 void IndoorLocalizationService::addScanControlCharacteristic() {
 	// set scanning option
@@ -124,15 +125,12 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 void IndoorLocalizationService::addPersonalThresholdCharacteristic() {
 	// set threshold level
 //	LOGd("create characteristic to write personal threshold level");
-	createCharacteristic<uint8_t>()
+	createCharacteristic<int8_t>()
 		.setUUID(UUID(getUUID(), PERSONAL_THRESHOLD_UUID))
 		.setName("Threshold")
 		.setDefaultValue(0)
 		.setWritable(true)
-		.onWrite([&](const uint8_t & value) -> void {
-			nrf_pwm_set_value(0, value);
-//			nrf_pwm_set_value(1, value);
-//			nrf_pwm_set_value(2, value);
+		.onWrite([&](const int8_t & value) -> void {
 			LOGi("set personal_threshold_value to %i", value);
 			_personalThresholdLevel = value;
 		});
