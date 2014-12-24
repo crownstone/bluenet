@@ -13,14 +13,13 @@
 #include "nrf_sdm.h"
 #endif
 
-static uint32_t pwm_max_value, pwm_next_value[PWM_MAX_CHANNELS], 
-		pwm_io_ch[PWM_MAX_CHANNELS], pwm_running[PWM_MAX_CHANNELS];
-static uint8_t pwm_gpiote_channel[3];
-static uint32_t pwm_num_channels;
+//static uint32_t pwm_max_value, pwm_next_value[PWM_MAX_CHANNELS],
+//		pwm_io_ch[PWM_MAX_CHANNELS], pwm_running[PWM_MAX_CHANNELS];
+//static uint8_t pwm_gpiote_channel[3];
+//static uint32_t pwm_num_channels;
 
-int32_t ppi_enable_channel(uint32_t ch_num, volatile uint32_t *event_ptr, volatile uint32_t *task_ptr)
-{
-	if(ch_num >= 16) return -1;
+int32_t PWM::ppiEnableChannel(uint32_t ch_num, volatile uint32_t *event_ptr, volatile uint32_t *task_ptr) {
+	if (ch_num >= 16) return -1;
 #if(NRF51_USE_SOFTDEVICE == 1)
 	sd_ppi_channel_assign(ch_num, event_ptr, task_ptr);
 	sd_ppi_channel_enable_set(1 << ch_num);
@@ -38,61 +37,58 @@ int32_t ppi_enable_channel(uint32_t ch_num, volatile uint32_t *event_ptr, volati
 	return ch_num;
 }
 
-uint32_t nrf_pwm_init(nrf_pwm_config_t *config)
-{
-	if(config->num_channels < 1 || config->num_channels > 3) return 0xFFFFFFFF;
+uint32_t PWM::init(pwm_config_t *config) {
+	if (config->num_channels < 1 || config->num_channels > PWM_MAX_CHANNELS) {
+		return 0xFFFFFFFF;
+	}
 
-	switch(config->mode)
-	{
+	switch (config->mode) {
 		case PWM_MODE_LED_100:   // 0-100 resolution, 156 Hz PWM frequency, 32 kHz timer frequency (prescaler 9)
 			PWM_TIMER->PRESCALER = 9; /* Prescaler 4 results in 1 tick == 1 microsecond */
-			pwm_max_value = 100;
-//			PWM_TIMER->PRESCALER = 5; /* Prescaler 4 results in 1 tick == 1 microsecond */
-//			pwm_max_value = 255;
+			_maxValue = 100;
 			break;
 		case PWM_MODE_LED_255:   // 8-bit resolution, 122 Hz PWM frequency, 65 kHz timer frequency (prescaler 8)
 			PWM_TIMER->PRESCALER = 8;
-			pwm_max_value = 255;        
+			_maxValue = 255;
 			break;
 		case PWM_MODE_LED_1000:  // 0-1000 resolution, 250 Hz PWM frequency, 500 kHz timer frequency (prescaler 5)
 			PWM_TIMER->PRESCALER = 5;
-			pwm_max_value = 1000;
+			_maxValue = 1000;
 			break;
 		case PWM_MODE_MTR_100:   // 0-100 resolution, 20 kHz PWM frequency, 4MHz timer frequency (prescaler 2)
 			PWM_TIMER->PRESCALER = 2;
-			pwm_max_value = 100;
+			_maxValue = 100;
 			break;
 		case PWM_MODE_MTR_255:    // 8-bit resolution, 31 kHz PWM frequency, 16MHz timer frequency (prescaler 0)	
 			PWM_TIMER->PRESCALER = 0;
-			pwm_max_value = 255;
+			_maxValue = 255;
 			break;
 		default:
 			return 0xFFFFFFFF;
 	}
-	pwm_num_channels = config->num_channels;
-	for(int i = 0; i < (int)pwm_num_channels; i++)
-	{
-		pwm_io_ch[i] = (uint32_t)config->gpio_num[i];
-		nrf_gpio_cfg_output(pwm_io_ch[i]);
-		pwm_running[i] = 0;
-		pwm_gpiote_channel[i] = config->gpiote_channel[i];
-		pwm_next_value[i] = 0;
+	_numChannels = config->num_channels;
+	for (uint32_t i = 0; i < _numChannels; ++i) {
+		_gpioPin[i] = (uint32_t)config->gpio_pin[i];
+		nrf_gpio_cfg_output(_gpioPin[i]);
+		_running[i] = 0;
+		_gpioteChannel[i] = config->gpiote_channel[i];
+		_nextValue[i] = 0;
 	}
 	PWM_TIMER->TASKS_CLEAR = 1;
-	// From example: NRF_TIMER2->BITMODE = (TIMER_BITMODE_BITMODE_16Bit << TIMER_BITMODE_BITMODE_Pos);
-	PWM_TIMER->BITMODE = TIMER_BITMODE_BITMODE_16Bit;
-	PWM_TIMER->CC[3] = pwm_max_value*2;
+	PWM_TIMER->BITMODE = TIMER_BITMODE_BITMODE_16Bit << TIMER_BITMODE_BITMODE_Pos;
+	PWM_TIMER->CC[3] = _maxValue*2;
 	PWM_TIMER->MODE = TIMER_MODE_MODE_Timer;
 	PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk;
-	PWM_TIMER->EVENTS_COMPARE[0] = PWM_TIMER->EVENTS_COMPARE[1] = PWM_TIMER->EVENTS_COMPARE[2] = 
-		PWM_TIMER->EVENTS_COMPARE[3] = 0;     
+	PWM_TIMER->EVENTS_COMPARE[0] = 0;
+	PWM_TIMER->EVENTS_COMPARE[1] = 0;
+	PWM_TIMER->EVENTS_COMPARE[2] = 0;
+	PWM_TIMER->EVENTS_COMPARE[3] = 0;
 
-	for(int i = 0; i < (int)pwm_num_channels; i++)
-	{
-		ppi_enable_channel(config->ppi_channel[i*2],  &PWM_TIMER->EVENTS_COMPARE[i], 
-				&NRF_GPIOTE->TASKS_OUT[pwm_gpiote_channel[i]]);
-		ppi_enable_channel(config->ppi_channel[i*2+1],&PWM_TIMER->EVENTS_COMPARE[3], 
-				&NRF_GPIOTE->TASKS_OUT[pwm_gpiote_channel[i]]);
+	for (uint32_t i = 0; i < _numChannels; ++i) {
+		ppiEnableChannel(config->ppi_channel[i*2],  &PWM_TIMER->EVENTS_COMPARE[i],
+				&NRF_GPIOTE->TASKS_OUT[_gpioteChannel[i]]);
+		ppiEnableChannel(config->ppi_channel[i*2+1],&PWM_TIMER->EVENTS_COMPARE[3],
+				&NRF_GPIOTE->TASKS_OUT[_gpioteChannel[i]]);
 	}
 
 	/* From example:
@@ -113,51 +109,45 @@ uint32_t nrf_pwm_init(nrf_pwm_config_t *config)
 	return 0;
 }
 
-void nrf_pwm_set_value(uint32_t pwm_channel, uint32_t pwm_value)
-{
-	pwm_next_value[pwm_channel] = pwm_value;
+void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
+	_nextValue[pwm_channel] = pwm_value;
 	PWM_TIMER->EVENTS_COMPARE[3] = 0;
 	PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk | TIMER_SHORTS_COMPARE3_STOP_Msk;
 
-	static uint32_t i;
-	for(i = 0; i < pwm_num_channels; i++)
-	{
-		if(pwm_next_value[i] == 0)
-		{
-			nrf_gpiote_unconfig(pwm_gpiote_channel[i]);
-			nrf_gpio_pin_write(pwm_io_ch[i], 0);
-			pwm_running[i] = 0;
+	for (uint32_t i = 0; i < _numChannels; ++i) {
+		if(_nextValue[i] == 0) {
+			nrf_gpiote_unconfig(_gpioteChannel[i]);
+			nrf_gpio_pin_write(_gpioPin[i], 0);
+			_running[i] = 0;
 		}
-		else if (pwm_next_value[i] >= pwm_max_value)
+		else if (_nextValue[i] >= _maxValue)
 		{
-			nrf_gpiote_unconfig(pwm_gpiote_channel[i]);
-			nrf_gpio_pin_write(pwm_io_ch[i], 1); 
-			pwm_running[i] = 0;
+			nrf_gpiote_unconfig(_gpioteChannel[i]);
+			nrf_gpio_pin_write(_gpioPin[i], 1);
+			_running[i] = 0;
 		}
 	}
 
-	if((PWM_TIMER->INTENSET & TIMER_INTENSET_COMPARE3_Msk) == 0)
-	{
+	if((PWM_TIMER->INTENSET & TIMER_INTENSET_COMPARE3_Msk) == 0) {
 		PWM_TIMER->TASKS_STOP = 1;
-		PWM_TIMER->INTENSET = TIMER_INTENSET_COMPARE3_Msk; // Reset timer by compare[3] ??
+		PWM_TIMER->INTENSET = TIMER_INTENSET_COMPARE3_Msk;
 	}
 	PWM_TIMER->TASKS_START = 1;
 }
 
-extern "C" void PWM_IRQHandler(void)
-{
+extern "C" void PWM_IRQHandler(void) {
 	// Only triggers for compare[3]
-
 	PWM_TIMER->EVENTS_COMPARE[3] = 0;
-	PWM_TIMER->INTENCLR = 0xFFFFFFFF; // ?Interupts can be given again?
+	PWM_TIMER->INTENCLR = 0xFFFFFFFF;
 
 	static uint32_t i;
-	for (i = 0; i < pwm_num_channels; i++) {
-		if ((pwm_next_value[i] != 0) && (pwm_next_value[i] < pwm_max_value)) {
-			PWM_TIMER->CC[i] = pwm_next_value[i] * 2;
-			if (!pwm_running[i]) {
-				nrf_gpiote_task_config(pwm_gpiote_channel[i], pwm_io_ch[i], NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_HIGH);
-				pwm_running[i] = 1;
+	PWM &pwm = PWM::getInstance();
+	for (i = 0; i < pwm._numChannels; i++) {
+		if ((pwm._nextValue[i] != 0) && (pwm._nextValue[i] < pwm._maxValue)) {
+			PWM_TIMER->CC[i] = pwm._nextValue[i] * 2;
+			if (!pwm._running[i]) {
+				nrf_gpiote_task_config(pwm._gpioteChannel[i], pwm._gpioPin[i], NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_HIGH);
+				pwm._running[i] = 1;
 			}
 		}
 	}

@@ -4,8 +4,8 @@
  * Date: 6 Nov., 2014
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
-#ifndef __NRF_ADC__H__
-#define __NRF_ADC__H__
+#ifndef __ADC__H__
+#define __ADC__H__
 
 #include <stdint.h>
 #include <drivers/nrf_rtc.h>
@@ -33,7 +33,6 @@ public:
 	// if decorated with a real time clock, we can "timestamp" the adc values
 	void setClock(RealTimeClock &clock);
 
-	// TODO: remove nrf_adc prefix. This is now C++.
 	uint32_t init(uint8_t pin);
 	uint32_t config(uint8_t pin);
 	void start();

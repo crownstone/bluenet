@@ -114,12 +114,12 @@ void config_drivers() {
 	//   allocate space for it
 //	ADC::getInstance().init(PIN_AIN_ADC); // Moved to PowerService.cpp
 
-	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
+	pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
 	pwm_config.num_channels = 1;
-	pwm_config.gpio_num[0] = PIN_GPIO_LED;
+	pwm_config.gpio_pin[0] = PIN_GPIO_LED;
 	pwm_config.mode = PWM_MODE_LED_255;
 
-	nrf_pwm_init(&pwm_config);
+	PWM::getInstance().init(&pwm_config);
 
 #if(BOARD==PCA10001)
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);

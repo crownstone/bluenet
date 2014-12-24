@@ -75,20 +75,20 @@ void PowerService::addPWMCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
 //			LOGi("set pwm to %i", value);
-			nrf_pwm_set_value(0, value);
+		PWM::getInstance().setValue(0, value);
 		});
 }
 
 // Do we really want to use the PWM for this, or just set the pin to zero?
 // TODO: turn off normally, but make sure we enable the completely PWM again on request
 void PowerService::TurnOff() {
-	nrf_pwm_set_value(0, 0);
+	PWM::getInstance().setValue(0, 0);
 }
 
 // Do we really want to use the PWM for this, or just set the pin to zero?
 // TODO: turn on normally, but make sure we enable the completely PWM again on request
 void PowerService::TurnOn() {
-	nrf_pwm_set_value(0, (uint8_t)-1);
+	PWM::getInstance().setValue(0, (uint8_t)-1);
 }
 
 /**
@@ -96,7 +96,7 @@ void PowerService::TurnOn() {
  * a specific duty-cycle after the detection of a zero crossing.
  */
 void PowerService::Dim(uint8_t value) {
-	nrf_pwm_set_value(0, value);
+	PWM::getInstance().setValue(0, value);
 }
 
 void PowerService::addGetCurrentCharacteristic() {
@@ -126,7 +126,7 @@ void PowerService::addCurrentCurveCharacteristic() {
 		.setNotifies(true);
 //		.onWrite([&](const uint16_t& value) -> void {
 //			sampleVoltageCurveInit();
-////			nrf_pwm_set_value(0, value);
+////			PWM::getInstance().setValue(0, value);
 //			sampleVoltageCurveFinish();
 //		})
 //		.onRead([&] () -> uint16_t {

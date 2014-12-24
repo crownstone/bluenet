@@ -180,9 +180,9 @@ void IndoorLocalizationService::onRSSIChanged(int8_t rssi) {
 	if (sine_index > 100) sine_index = 100;
 	//			__asm("BKPT");
 	//			int sine_index = (rssi % 10) *10;
-	nrf_pwm_set_value(0, sin_table[sine_index]);
-	nrf_pwm_set_value(1, sin_table[(sine_index + 33) % 100]);
-	nrf_pwm_set_value(2, sin_table[(sine_index + 66) % 100]);
+	PWM::getInstance().setValue(0, sin_table[sine_index]);
+	PWM::getInstance().setValue(1, sin_table[(sine_index + 33) % 100]);
+	PWM::getInstance().setValue(2, sin_table[(sine_index + 66) % 100]);
 	//			counter = (counter + 1) % 100;
 
 	// Add a delay to control the speed of the sine wave
