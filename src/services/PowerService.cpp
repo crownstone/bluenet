@@ -170,23 +170,14 @@ void PowerService::addCurrentLimitCharacteristic() {
 		.onWrite([&](const uint8_t &value) -> void {
 			LOGi("Set current limit to: %i", value);
 			_current_limit_val = value;
+
+			_currentLimit.start(&_current_limit_val);
 			LOGi("Write value to persistent memory");
 			Storage::setUint8(_current_limit_val, _storageStruct.current_limit);
 			savePersistentStorage();
-
-			LPComp::getInstance().stop();
-			// There are only 6 levels...
-			if (_current_limit_val > 6)
-				_current_limit_val = 6;
-			LPComp::getInstance().config(PIN_AIN_LPCOMP, _current_limit_val, LPComp::UP);
-			LPComp::getInstance().start();
 		});
 
-	// There are only 6 levels...
-	if (_current_limit_val > 6)
-		_current_limit_val = 6;
-	LPComp::getInstance().config(PIN_AIN_LPCOMP, _current_limit_val, LPComp::UP);
-	LPComp::getInstance().start();
+	_currentLimit.start(&_current_limit_val);
 	_currentLimit.init();
 }
 
