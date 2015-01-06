@@ -158,6 +158,7 @@ ELSE()
 	# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
 	ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.tmp
 		COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -j .text -j .data -O binary ${PROJECT_NAME} ${PROJECT_NAME}.tmp
+		COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -j .text -j .data -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
 		COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME}.tmp ${PROJECT_NAME}.bin
 		COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
 		COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
