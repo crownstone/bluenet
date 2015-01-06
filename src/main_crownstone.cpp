@@ -9,9 +9,9 @@
  * Enable the services you want to run on the device
  *********************************************************************************************************************/
 
-#define INDOOR_SERVICE
+//#define INDOOR_SERVICE
 #define GENERAL_SERVICE
-#define POWER_SERVICE
+//#define POWER_SERVICE
 
 /**********************************************************************************************************************
  * General includes
@@ -224,6 +224,11 @@ int main() {
 	while(1) {
 		// deliver events from the bluetooth stack to the callbacks defined above.
 		//		analogwrite(pin_led, 50);
+//#define TEST_BOOTLOADER
+//#ifdef TEST_BOOTLOADER
+//		sd_power_gpregret_set(1);
+//		sd_nvic_SystemReset();
+//#endif
 		stack.loop();
 
 #ifdef GENERAL_SERVICE

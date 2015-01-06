@@ -9,6 +9,9 @@
 
 using namespace BLEpp;
 
+// needs to be the same command as defined in the bootloader
+#define COMMAND_ENTER_RADIO_BOOTLOADER          1 
+
 GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		_stack(&stack),
 		_temperatureCharacteristic(NULL), _changeNameCharacteristic(NULL),
@@ -18,7 +21,7 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	setName("General Service");
 
 	LOGi("Create general service");
-	characStatus.reserve(4);
+	characStatus.reserve(5);
 
 	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
@@ -26,8 +29,10 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		static_cast<addCharacteristicFunc>(&GeneralService::addChangeNameCharacteristic) });
 	characStatus.push_back( { "Device Type", 	DEVICE_TYPE_UUID,	true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addDeviceTypeCharactersitic) });
-	characStatus.push_back( { "Room",			ROOM_UUID, 			true,
+	characStatus.push_back( { "Room",		ROOM_UUID, 		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addRoomCharacteristic) });
+	characStatus.push_back( { "Firmware",		FIRMWARE_UUID, 		true,
+		static_cast<addCharacteristicFunc>(&GeneralService::addFirmwareCharacteristic) });
 }
 
 void GeneralService::addTemperatureCharacteristic() {
@@ -50,7 +55,7 @@ void GeneralService::addDeviceTypeCharactersitic() {
 		.setWritable(true)
 		.onWrite([&](const std::string value) -> void {
 			LOGi("set device type to: %s", value.c_str());
-			// TODO: impelement persistent storage of device type
+			// TODO: implement persistent storage of device type
 		});
 }
 
@@ -64,7 +69,30 @@ void GeneralService::addRoomCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const std::string value) -> void {
 			LOGi("set room to: %s", value.c_str());
-			// TODO: impelement persistent storage of room
+			// TODO: implement persistent storage of room
+		});
+}
+
+void GeneralService::addFirmwareCharacteristic() {
+	_firmwareCharacteristic = createCharacteristicRef<int32_t>();
+	(*_firmwareCharacteristic)
+		.setUUID(UUID(getUUID(), FIRMWARE_UUID))
+		.setName("Update firmware")
+		.setDefaultValue(0)
+		.setWritable(true)
+		.onWrite([&](const int32_t & value) -> void {
+			if (value != 0) {
+				LOGi("Update firmware");
+				uint8_t err_code;
+				err_code = sd_power_gpregret_clr(0xFF);
+				APP_ERROR_CHECK(err_code);
+				uint32_t cmd = COMMAND_ENTER_RADIO_BOOTLOADER;
+				err_code = sd_power_gpregret_set(cmd);
+				APP_ERROR_CHECK(err_code);
+				sd_nvic_SystemReset();				
+			} else {
+				LOGi("Update firmware? Write nonzero value");
+			}
 		});
 }
 

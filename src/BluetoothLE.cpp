@@ -425,8 +425,14 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 		return *this;
 
 	// Initialise SoftDevice
-	BLE_CALL(sd_softdevice_enable,
-			(_clock_source, softdevice_assertion_handler));
+	uint8_t enabled;
+	BLE_CALL(sd_softdevice_is_enabled, (&enabled));
+	if (enabled) {
+		log(INFO,"Awkward. Softdevice is already enabled. Try to disable.");
+		BLE_CALL(sd_softdevice_disable, ());
+	}
+
+	BLE_CALL(sd_softdevice_enable, (_clock_source, softdevice_assertion_handler));
 
 	// Initialize the SoftDevice handler module.
 	// this would call with different clock!

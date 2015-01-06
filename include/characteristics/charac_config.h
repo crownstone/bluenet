@@ -10,6 +10,7 @@
 
 // TODO Dominik: how about moving the Service UUIDs here too
 //   or at least make a similar config file?
+// TODO Anne: always use spaces rather than tabs in column-wise enumerations
 
 enum {
 	PWM_UUID								= 0x1,
@@ -22,7 +23,8 @@ enum {
 	TEMPERATURE_UUID						= 0x1,
 	CHANGE_NAME_UUID						= 0x2,
 	DEVICE_TYPE_UUID						= 0x3,
-	ROOM_UUID								= 0x4,
+	ROOM_UUID							= 0x4,
+	FIRMWARE_UUID							= 0x5,
 };
 
 enum {

@@ -44,8 +44,9 @@ public:
 	void setRSSILevel(int8_t RSSILevel);
 	void setRSSILevelHandler(func_t func);
 
+#if(SOFTDEVICE_SERIES != 110)
 	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
-
+#endif
 	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 private:
 	BLEpp::Nrf51822BluetoothStack* _stack;

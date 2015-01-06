@@ -19,7 +19,7 @@ load
 monitor reset
 
 # If you want to enable a breakpoint before program start
-b main
+# b main
 
 #b softdevice_assertion_handler
 
