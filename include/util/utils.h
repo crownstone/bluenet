@@ -11,10 +11,11 @@
 #include "stdint.h"
 
 // convert a short from LSB to MSB and vice versa
-uint16_t convertEndian(uint16_t val);
+uint16_t convertEndian16(uint16_t val);
 
 // convert an integer from LSB to MSB and vice versa
-uint32_t convertEndian(uint32_t val);
+uint32_t convertEndian32(uint32_t val);
 
+#define SIZEOF_ARRAY( a ) (sizeof( a ) / sizeof( a[ 0 ] ))
 
 #endif /* UTILS_H_ */

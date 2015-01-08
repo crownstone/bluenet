@@ -6,6 +6,7 @@
  */
 
 #include <services/GeneralService.h>
+#include <common/storage.h>
 
 using namespace BLEpp;
 
@@ -14,7 +15,7 @@ using namespace BLEpp;
 
 GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		_stack(&stack),
-		_temperatureCharacteristic(NULL), _changeNameCharacteristic(NULL),
+		_temperatureCharacteristic(NULL), _nameCharacteristic(NULL),
 		_deviceTypeCharacteristic(NULL), _roomCharacteristic(NULL) {
 
 	setUUID(UUID(GENERAL_UUID));
@@ -23,16 +24,38 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	LOGi("Create general service");
 	characStatus.reserve(5);
 
-	characStatus.push_back( { "Temperature", 	TEMPERATURE_UUID,	true,
+	characStatus.push_back( { "Temperature",
+		TEMPERATURE_UUID,
+		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
-	characStatus.push_back( { "Change Name", 	CHANGE_NAME_UUID,	true,
+	characStatus.push_back( { "Change Name",
+		CHANGE_NAME_UUID,
+		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addChangeNameCharacteristic) });
-	characStatus.push_back( { "Device Type", 	DEVICE_TYPE_UUID,	true,
+	characStatus.push_back( { "Device Type",
+		DEVICE_TYPE_UUID,
+		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addDeviceTypeCharactersitic) });
-	characStatus.push_back( { "Room",		ROOM_UUID, 		true,
+	characStatus.push_back( { "Room",
+		ROOM_UUID,
+		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addRoomCharacteristic) });
-	characStatus.push_back( { "Firmware",		FIRMWARE_UUID, 		true,
+	characStatus.push_back( { "Firmware",
+		FIRMWARE_UUID, 
+		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addFirmwareCharacteristic) });
+
+	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
+	loadPersistentStorage();
+}
+
+void GeneralService::loadPersistentStorage() {
+	Storage::getInstance().getStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+}
+
+void GeneralService::savePersistentStorage() {
+	Storage::getInstance().setStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+>>>>>>> upstream/master
 }
 
 void GeneralService::addTemperatureCharacteristic() {
@@ -46,30 +69,36 @@ void GeneralService::addTemperatureCharacteristic() {
 }
 
 void GeneralService::addDeviceTypeCharactersitic() {
+	Storage::getString(_storageStruct.device_type, _type, "Unknown");
+
 //	LOGd("create characteristic to read/write device type");
 	_deviceTypeCharacteristic = createCharacteristicRef<std::string>();
 	(*_deviceTypeCharacteristic)
 		.setUUID(UUID(getUUID(), DEVICE_TYPE_UUID))
 		.setName("Device Type")
-		.setDefaultValue("Unknown")
+		.setDefaultValue(_type)
 		.setWritable(true)
 		.onWrite([&](const std::string value) -> void {
 			LOGi("set device type to: %s", value.c_str());
-			// TODO: implement persistent storage of device type
+			Storage::setString(value, _storageStruct.device_type);
+			savePersistentStorage();
 		});
 }
 
 void GeneralService::addRoomCharacteristic() {
+	Storage::getString(_storageStruct.room, _room, "Unknown");
+
 //	LOGd("create characteristic to read/write room");
 	_roomCharacteristic = createCharacteristicRef<std::string>();
 	(*_roomCharacteristic)
 		.setUUID(UUID(getUUID(), ROOM_UUID))
 		.setName("Room")
-		.setDefaultValue("Unknown")
+		.setDefaultValue(_room)
 		.setWritable(true)
 		.onWrite([&](const std::string value) -> void {
 			LOGi("set room to: %s", value.c_str());
-			// TODO: implement persistent storage of room
+			Storage::setString(value, _storageStruct.room);
+			savePersistentStorage();
 		});
 }
 
@@ -97,29 +126,32 @@ void GeneralService::addFirmwareCharacteristic() {
 }
 
 void GeneralService::addChangeNameCharacteristic() {
-	_changeNameCharacteristic = createCharacteristicRef<std::string>();
-	(*_changeNameCharacteristic)
+	Storage::getString(_storageStruct.device_name, _name, getBLEName());
+	setBLEName(_name);
+
+	_nameCharacteristic = createCharacteristicRef<std::string>();
+	(*_nameCharacteristic)
 		.setUUID(UUID(getUUID(), CHANGE_NAME_UUID))
 		.setName("Change Name")
-		.setDefaultValue(getBLEName())
+		.setDefaultValue(_name)
 		.setWritable(true)
 		.onWrite([&](const std::string& value) -> void {
-			std::string name(value);
-			LOGi("Set bluetooth name to: %s", name.c_str());
-			setBLEName(name);
-		})
-		;
+			LOGi("Set bluetooth name to: %s", value.c_str());
+			setBLEName(value);
+			Storage::setString(value, _storageStruct.device_name);
+			savePersistentStorage();
+		});
 }
 
 std::string & GeneralService::getBLEName() {
-	_name = "not set";
+	_name = "Unknown";
 	if (_stack) {
-		_name = _stack->getDeviceName();
+		return _name = _stack->getDeviceName();
 	}
 	return _name;
 }
 
-void GeneralService::setBLEName(std::string &name) {
+void GeneralService::setBLEName(const std::string &name) {
 	if (name.length() > 31) {
 		log(ERROR, "Name is too long");
 		return;

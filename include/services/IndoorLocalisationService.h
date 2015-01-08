@@ -24,8 +24,8 @@ protected:
 	// TODO -oDE: are really all of these characteristics part of the
 	//   indoor localisation?
 	void addSignalStrengthCharacteristic();
-	void addNumberCharacteristic();
-	void addNumber2Characteristic();
+//	void addNumberCharacteristic();
+//	void addNumber2Characteristic();
 	void addScanControlCharacteristic();
 	void addPeripheralListCharacteristic();
 	void addPersonalThresholdCharacteristic();
@@ -52,13 +52,13 @@ private:
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
 	BLEpp::CharacteristicT<int8_t>* _rssiCharac;
-	BLEpp::Characteristic<uint8_t>* _intChar;
-	BLEpp::Characteristic<uint64_t>* _intChar2;
+//	BLEpp::Characteristic<uint8_t>* _intChar;
+//	BLEpp::Characteristic<uint64_t>* _intChar2;
 	BLEpp::Characteristic<ScanResult>* _peripheralCharac;
 	
 	func_t _rssiHandler;
 
-	int _personalThresholdLevel;
+	int8_t _personalThresholdLevel;
 	ScanResult _scanResult;
 
 };

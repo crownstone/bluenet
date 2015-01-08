@@ -598,7 +598,7 @@ public:
 
 	void toArray(uint8_t* array) {
 
-		*((uint16_t*) array) = convertEndian(_adv_indicator);
+		*((uint16_t*) array) = convertEndian16(_adv_indicator);
 		array += 2;
 
 		ble_uuid128_t uuid = (ble_uuid128_t) _uuid;
@@ -606,10 +606,10 @@ public:
 			*array++ = uuid.uuid128[15 - i];
 		}
 
-		*((uint16_t*) array) = convertEndian(_major);
+		*((uint16_t*) array) = convertEndian16(_major);
 		array += 2;
 
-		*((uint16_t*) array) = convertEndian(_minor);
+		*((uint16_t*) array) = convertEndian16(_minor);
 		array += 2;
 
 		*array = _rssi;

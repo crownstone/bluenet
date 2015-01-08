@@ -20,7 +20,7 @@
 
 // allocate buffer struct (not array in buffer yet)
 buffer_t<uint16_t> adc_result;
-	
+
 buffer_t<uint16_t>* ADC::getBuffer() {
 	return &adc_result;
 }
@@ -33,7 +33,7 @@ void ADC::setClock(RealTimeClock &clock) {
  * The init function is called once before operating the AD converter. Call it after you start the SoftDevice. Check 
  * the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
  */
-uint32_t ADC::nrf_adc_init(uint8_t pin) {
+uint32_t ADC::init(uint8_t pin) {
 #if(NRF51_USE_SOFTDEVICE == 1)
 	LOGd("Run ADC converter with SoftDevice");
 #else 
@@ -54,7 +54,7 @@ uint32_t ADC::nrf_adc_init(uint8_t pin) {
 	uint32_t err_code;
 
 	LOGd("Configure ADC on pin %u", pin);
-	err_code = nrf_adc_config(pin);
+	err_code = config(pin);
 	APP_ERROR_CHECK(err_code);
 
 	NRF_ADC->EVENTS_END  = 0;    // Stop any running conversions.
@@ -94,10 +94,14 @@ uint32_t ADC::nrf_adc_init(uint8_t pin) {
  *   - do not set the prescaler for the reference voltage, this means voltage is expected between 0 and 1.2V (VGB)
  * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
  */
-uint32_t ADC::nrf_adc_config(uint8_t pin) {
+uint32_t ADC::config(uint8_t pin) {
 	NRF_ADC->CONFIG     =
 			(ADC_CONFIG_RES_10bit                            << ADC_CONFIG_RES_Pos)     |
-			(ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos)  | 
+#if(BOARD==CROWNSTONE)
+			(ADC_CONFIG_INPSEL_AnalogInputNoPrescaling       << ADC_CONFIG_INPSEL_Pos)  |
+#else
+			(ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos)  |
+#endif
 			(ADC_CONFIG_REFSEL_VBG                           << ADC_CONFIG_REFSEL_Pos)  |
 			(ADC_CONFIG_EXTREFSEL_None                       << ADC_CONFIG_EXTREFSEL_Pos);
 	if (pin < 8) {
@@ -112,25 +116,45 @@ uint32_t ADC::nrf_adc_config(uint8_t pin) {
 /**
  * Stop the AD converter.
  */
-void ADC::nrf_adc_stop() {
+void ADC::stop() {
 	NRF_ADC->TASKS_STOP = 1;
 }
 
 /**
  * Start the AD converter.
  */
-void ADC::nrf_adc_start() {
+void ADC::start() {
+	_last_result = 1;
+	_store = false;
+	_num_samples = 0;
 	NRF_ADC->EVENTS_END  = 0;
 	NRF_ADC->TASKS_START = 1;
 }
 
 void ADC::update(uint32_t value) {
-	adc_result.push(value);
-	// Log RTC too
-	if (_clock) {
-		adc_result.push(_clock->getCount());
+	++_num_samples;
+	if (!_store && ((_last_result == 0 && value > 0) || _num_samples > 2*ADC_BUFFER_SIZE)) {
+		_store = true;
+		// Log first RTC count
+		if (_clock)
+			adc_result.push(_clock->getCount()); // TODO: getCount returns 32 bit value!
+//		else
+//			adc_result.push(_last_result);
 	}
-
+	if (_store) {
+		adc_result.push(value);
+//		// Log RTC too
+//		if (_clock) {
+//			adc_result.push(_clock->getCount());
+//		}
+	}
+	else {
+		_last_result = value;
+	}
+	// Log last RTC count
+	if (_clock && adc_result.count() + 1 == adc_result.size) {
+		adc_result.push(_clock->getCount()); // TODO: getCount returns 32 bit value!
+	}
 }
 
 void ADC::tick() {

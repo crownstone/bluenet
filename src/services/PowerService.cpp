@@ -19,7 +19,8 @@
 using namespace BLEpp;
 
 PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
-		_currentLimitCharacteristic(NULL), _stack(&_stack), _current_limit_val(0) {
+		_stack(&_stack), _currentLimitCharacteristic(NULL), _current_limit_val(0)
+{
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
@@ -31,24 +32,39 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 			PWM_UUID,
 			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
-	characStatus.push_back( { "Voltage Curve",
-			VOLTAGE_CURVE_UUID,
-			false,
-			static_cast<addCharacteristicFunc>(&PowerService::addVoltageCurveCharacteristic)});
-	characStatus.push_back( { "Power Consumption",
-			POWER_CONSUMPTION_UUID,
+	characStatus.push_back( { "Get Current",
+			CURRENT_GET_UUID,
 			true,
-			static_cast<addCharacteristicFunc>(&PowerService::addPowerConsumptionCharacteristic)});
+			static_cast<addCharacteristicFunc>(&PowerService::addGetCurrentCharacteristic)});
+	characStatus.push_back( { "Current Curve",
+			CURRENT_CURVE_UUID,
+			true,
+			static_cast<addCharacteristicFunc>(&PowerService::addCurrentCurveCharacteristic)});
+	characStatus.push_back( { "Current Consumption",
+			CURRENT_CONSUMPTION_UUID,
+			true,
+			static_cast<addCharacteristicFunc>(&PowerService::addCurrentConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentLimitCharacteristic)});
+
+	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
+	loadPersistentStorage();
 
 	// we have to figure out why this goes wrong
 //	setName(std::string("Power Service"));
 
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
+}
+
+void PowerService::loadPersistentStorage() {
+	Storage::getInstance().getStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+}
+
+void PowerService::savePersistentStorage() {
+	Storage::getInstance().setStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void PowerService::addPWMCharacteristic() {
@@ -59,20 +75,20 @@ void PowerService::addPWMCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
 //			LOGi("set pwm to %i", value);
-			nrf_pwm_set_value(0, value);
+		PWM::getInstance().setValue(0, value);
 		});
 }
 
 // Do we really want to use the PWM for this, or just set the pin to zero?
 // TODO: turn off normally, but make sure we enable the completely PWM again on request
 void PowerService::TurnOff() {
-	nrf_pwm_set_value(0, 0);
+	PWM::getInstance().setValue(0, 0);
 }
 
 // Do we really want to use the PWM for this, or just set the pin to zero?
 // TODO: turn on normally, but make sure we enable the completely PWM again on request
 void PowerService::TurnOn() {
-	nrf_pwm_set_value(0, (uint8_t)-1);
+	PWM::getInstance().setValue(0, (uint8_t)-1);
 }
 
 /**
@@ -80,41 +96,59 @@ void PowerService::TurnOn() {
  * a specific duty-cycle after the detection of a zero crossing.
  */
 void PowerService::Dim(uint8_t value) {
-	nrf_pwm_set_value(0, value);
+	PWM::getInstance().setValue(0, value);
 }
 
-
-void PowerService::addVoltageCurveCharacteristic() {
+void PowerService::addGetCurrentCharacteristic() {
 	createCharacteristic<uint8_t>()
-		.setUUID(UUID(getUUID(), VOLTAGE_CURVE_UUID))
-		.setName("Voltage Curve")
-		.setDefaultValue(255)
+		.setUUID(UUID(getUUID(), CURRENT_GET_UUID))
+		.setName("Get Current")
+		.setDefaultValue(0)
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
-//			LOGi("start adc sampling");
-
-			sampleAdcInit();
-
-//			nrf_pwm_set_value(0, value);
-
-			sampleAdcStart();
-
-//			LOGd("Successfully written");
+			sampleCurrentInit();
+			uint16_t current_rms = sampleCurrentFinish(value);
+			if ((value & 0x01) && _currentConsumptionCharacteristic != NULL) {
+				(*_currentConsumptionCharacteristic) = current_rms;
+			}
+			if ((value & 0x02) && _currentCurveCharacteristic != NULL) {
+				(*_currentCurveCharacteristic) = 1; // TODO: stream curve
+			}
 		});
 }
 
-void PowerService::addPowerConsumptionCharacteristic() {
+void PowerService::addCurrentCurveCharacteristic() {
+	_currentCurveCharacteristic = &createCharacteristic<uint16_t>()
+		.setUUID(UUID(getUUID(), CURRENT_CURVE_UUID))
+		.setName("Current Curve")
+		.setDefaultValue(0)
+		.setWritable(false)
+		.setNotifies(true);
+//		.onWrite([&](const uint16_t& value) -> void {
+//			sampleVoltageCurveInit();
+////			PWM::getInstance().setValue(0, value);
+//			sampleVoltageCurveFinish();
+//		})
+//		.onRead([&] () -> uint16_t {
+//			sampleVoltageCurveInit();
+//			return sampleVoltageCurveFinish();
+//		});
+	ADC::getInstance().init(PIN_AIN_ADC);
+}
+
+void PowerService::addCurrentConsumptionCharacteristic() {
 //	LOGd("create characteristic to read power consumption");
-	createCharacteristic<uint32_t>()
-		.setUUID(UUID(getUUID(), POWER_CONSUMPTION_UUID))
-		.setName("Power consumption")
+	_currentConsumptionCharacteristic = &createCharacteristic<uint16_t>()
+		.setUUID(UUID(getUUID(), CURRENT_CONSUMPTION_UUID))
+		.setName("Current Consumption")
 		.setDefaultValue(0)
 		.setWritable(false)
 		.setNotifies(true);
 }
 
-uint16_t PowerService::getCurrentLimit() {
-	Storage::getInstance().getUint16(PS_CURRENT_LIMIT, &_current_limit_val);
+uint8_t PowerService::getCurrentLimit() {
+	loadPersistentStorage();
+	Storage::getUint8(_storageStruct.current_limit, _current_limit_val, 0);
 	LOGi("Obtained current limit from FLASH: %i", _current_limit_val);
 	return _current_limit_val;
 }
@@ -126,37 +160,38 @@ uint16_t PowerService::getCurrentLimit() {
  *       Writing to persistent memory should be done between connection/advertisement events...
  */
 void PowerService::addCurrentLimitCharacteristic() {
-	_currentLimitCharacteristic = createCharacteristicRef<uint16_t>();
+	_currentLimitCharacteristic = createCharacteristicRef<uint8_t>();
 	(*_currentLimitCharacteristic)
 		.setNotifies(true)
 		.setUUID(UUID(getUUID(), CURRENT_LIMIT_UUID))
 		.setName("Current Limit")
 		.setDefaultValue(getCurrentLimit())
 		.setWritable(true)
-		.onWrite([&](const uint16_t &value) -> void {
+		.onWrite([&](const uint8_t &value) -> void {
 			LOGi("Set current limit to: %i", value);
 			_current_limit_val = value;
 			LOGi("Write value to persistent memory");
-			Storage::getInstance().setUint16(PS_CURRENT_LIMIT, _current_limit_val);
+			Storage::setUint8(_current_limit_val, _storageStruct.current_limit);
+			savePersistentStorage();
 
 			LPComp::getInstance().stop();
 			// There are only 6 levels...
 			if (_current_limit_val > 6)
 				_current_limit_val = 6;
-			LPComp::getInstance().config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
+			LPComp::getInstance().config(PIN_AIN_LPCOMP, _current_limit_val, LPComp::UP);
 			LPComp::getInstance().start();
 		});
 
 	// There are only 6 levels...
 	if (_current_limit_val > 6)
 		_current_limit_val = 6;
-	LPComp::getInstance().config(PIN_LPCOMP, _current_limit_val, LPComp::UP);
+	LPComp::getInstance().config(PIN_AIN_LPCOMP, _current_limit_val, LPComp::UP);
 	LPComp::getInstance().start();
 	_currentLimit.init();
 }
 
-static int tmp_cnt = 100;
-static int loop_cnt = 100;
+//static int tmp_cnt = 100;
+//static int loop_cnt = 100;
 
 /**
  * TODO: We should only need to do this once on startup.
@@ -164,17 +199,17 @@ static int loop_cnt = 100;
 void PowerService::loop() {
 	LPComp::getInstance().tick();
 	// check if current is not beyond current_limit if the latter is set
-	if (++tmp_cnt > loop_cnt) {
-		if (_currentLimitCharacteristic) {
-			getCurrentLimit();
-			LOGi("Set default current limit value to %i", _current_limit_val);
-			*_currentLimitCharacteristic = _current_limit_val;
-		}
-		tmp_cnt = 0;
-	}
+//	if (++tmp_cnt > loop_cnt) {
+//		if (_currentLimitCharacteristic) {
+//			getCurrentLimit();
+//			LOGi("Set default current limit value to %i", _current_limit_val);
+//			*_currentLimitCharacteristic = _current_limit_val;
+//		}
+//		tmp_cnt = 0;
+//	}
 }
 
-void PowerService::sampleAdcInit() {
+void PowerService::sampleCurrentInit() {
 	/*
 				uint64_t rms_sum = 0;
 				uint32_t voltage_min = 0xffffffff;
@@ -190,25 +225,24 @@ void PowerService::sampleAdcInit() {
 				LOGi("start RTC");
 				RealTimeClock::getInstance().init();
 				RealTimeClock::getInstance().start();
+				ADC::getInstance().setClock(RealTimeClock::getInstance());
 
 				// Wait for the RTC to actually start
 				nrf_delay_us(100);
 
 				LOGi("Start ADC");
-				ADC::getInstance().nrf_adc_start();
+				ADC::getInstance().start();
 				// replace by timer!
 
 }
 
-void PowerService::sampleAdcStart() {
+uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 	while (!ADC::getInstance().getBuffer()->full()) {
 		nrf_delay_ms(100);
 	}
-	LOGi("Number of results: %u", ADC::getInstance().getBuffer()->count()/2);
-	LOGi("Counter is at: %u", RealTimeClock::getInstance().getCount());
 
-	LOGi("Stop ADC converter");
-	ADC::getInstance().nrf_adc_stop();
+	LOGi("Stop ADC");
+	ADC::getInstance().stop();
 
 	// Wait for the ADC to actually stop
 	nrf_delay_us(1000);
@@ -246,27 +280,37 @@ void PowerService::sampleAdcStart() {
        	//rms=%lu min=%lu max=%lu current=%i mA", voltage, rms, voltage_min, voltage_max, current);
 */
 
+	uint16_t voltage_max = 0;
 	int i = 0;
 	while (!ADC::getInstance().getBuffer()->empty()) {
-		_log(INFO, "%u, ", ADC::getInstance().getBuffer()->pop());
-		if (!(++i % 10)) {
-			_log(INFO, "\r\n");
+		uint16_t voltage = ADC::getInstance().getBuffer()->pop();
+
+		// First and last elements of the buffer are timestamps
+		if ((type & 0x1) && (voltage > voltage_max) && (i>0) && (ADC::getInstance().getBuffer()->count() > 1)) {
+			voltage_max = voltage;
+		}
+
+		if (type & 0x2) {
+			_log(INFO, "%u, ", voltage);
+			if (!(++i % 10)) {
+				_log(INFO, "\r\n");
+			}
 		}
 	}
-	_log(INFO, "\r\n");
-	//stack->startAdvertising(); // segfault
-/*
-	uint64_t result = voltage_min;
-	result <<= 32;
-	result |= voltage_max;
-#ifdef NUMBER_CHARAC
-	*intchar = result;
-	result = rms;
-	result <<= 32;
-	result |= current;
-	*intchar2 = result;
-#endif
-*/
+	if (type & 0x2) {
+		_log(INFO, "\r\n");
+	}
+
+	if (type & 0x1) {
+		// measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
+		// 1023 * 1200 / 1023 = 1200 < 2^16
+		voltage_max = voltage_max*1200/1023; // mV
+		uint16_t current_rms = voltage_max * 1000 / SHUNT_VALUE * 1000 / 1414; // mA
+		LOGi("Irms = %u mA\r\n", current_rms);
+		return current_rms;
+	}
+
+	return 0;
 }
 
 PowerService& PowerService::createService(Nrf51822BluetoothStack& stack) {

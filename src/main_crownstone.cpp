@@ -114,17 +114,17 @@ void config_drivers() {
 	// TODO: Dominik, can we connect the adc init call with the characteristic / services
 	//   that actually use it? if there is no service that uses it there is no reason to
 	//   allocate space for it
-//	ADC::getInstance().nrf_adc_init(PIN_ADC);
+//	ADC::getInstance().init(PIN_AIN_ADC); // Moved to PowerService.cpp
 
-	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG
+	pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
 	pwm_config.num_channels = 1;
-	pwm_config.gpio_num[0] = PIN_LED;
+	pwm_config.gpio_pin[0] = PIN_GPIO_LED;
 	pwm_config.mode = PWM_MODE_LED_255;
 
-	nrf_pwm_init(&pwm_config);
+	PWM::getInstance().init(&pwm_config);
 
 #if(BOARD==PCA10001)
-	nrf_gpio_cfg_output(PIN_LED_CON);
+	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 #endif
 }
 
@@ -154,7 +154,7 @@ int main() {
 			sd_ble_gap_rssi_start(conn_handle);
 
 #if(BOARD==PCA10001)
-			nrf_gpio_pin_set(PIN_LED_CON);
+			nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
 		})
 		.onDisconnect([&](uint16_t conn_handle) {
@@ -165,7 +165,7 @@ int main() {
 			// disconnected. but for now this will be the default behaviour.
 
 #if(BOARD==PCA10001)
-			nrf_gpio_pin_clear(PIN_LED_CON);
+			nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
 
 			stack.stopScanning();
@@ -179,8 +179,8 @@ int main() {
 
 	// Create ADC object
 	// TODO: make service which enables other services and only init ADC when necessary
-	ADC::getInstance();
-	LPComp::getInstance();
+	//	ADC::getInstance();
+	//	LPComp::getInstance();
 
 	// Scheduler must be initialized before persistent memory
 	const uint16_t max_size = 32;
@@ -189,11 +189,12 @@ int main() {
 
 	// Create persistent memory object
 	// TODO: make service which enables other services and only init persistent memory when necessary
-	Storage::getInstance().init(32);
+	//	Storage::getInstance().init(32);
 
-	RealTimeClock::getInstance();
+	//	RealTimeClock::getInstance();
 
 	LOGi("Create all services");
+
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
 	//Service& localizationService =
@@ -208,6 +209,7 @@ int main() {
 #ifdef POWER_SERVICE
 	PowerService &powerService = PowerService::createService(stack);
 #endif
+
 
 	// configure drivers
 	config_drivers();

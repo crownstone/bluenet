@@ -25,7 +25,7 @@ void CurrentLimit::handleEvent() {
 	LOGd("current limit exceeded!");
 	// Turn off the "led"
 	// TODO: do this in a neat way
-	nrf_pwm_set_value(0, 0);
+	PWM::getInstance().setValue(0, 0);
 }
 
 void CurrentLimit::handleEvent(uint8_t type) {

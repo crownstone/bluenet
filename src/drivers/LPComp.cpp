@@ -143,7 +143,7 @@ void LPComp::update(Event_t event) {
 	lastEvent = event;
 //	// Test
 //	LOGd("update!");
-//	nrf_pwm_set_value(0, 0);
+//	PWM::getInstance().setValue(0, 0);
 }
 
 void LPComp::tick() {
