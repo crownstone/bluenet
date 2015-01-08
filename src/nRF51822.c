@@ -152,7 +152,7 @@ void ResetHandler(void) {
 	while(!NRF51_CLOCK_HFCLKSTARTED) /* wait */;
 
 	// start up crystal LF clock.
-#ifdef RFDUINO
+//#ifdef RFDUINO
 	/**
 	 * The RFduino synthesizes the low frequency clock from the high frequency clock. There is no external crystal 
 	 * that can be used. It doesn't seem from the datasheets that there is a pin open for a crystal... 
@@ -161,9 +161,9 @@ void ResetHandler(void) {
 	 * Clock runs on 32768 Hz and is generated from the 16 MHz system clock
 	 */
 	NRF51_CLOCK_LFCLKSRC = NRF51_CLOCK_LFCLKSRC_SYNTH;
-#else
-	NRF51_CLOCK_LFCLKSRC = NRF51_CLOCK_LFCLKSRC_XTAL;
-#endif
+//#else
+//	NRF51_CLOCK_LFCLKSRC = NRF51_CLOCK_LFCLKSRC_XTAL;
+//#endif
 	NRF51_CLOCK_LFCLKSTART = 1;
 	while(!NRF51_CLOCK_LFCLKSTARTED) /* wait */;
 

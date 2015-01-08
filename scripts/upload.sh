@@ -9,9 +9,15 @@ DEVICE=nrf51822
 
 FILE=${1:? "$0 requires \"file\" as first argument"}
 
+ADDRESS=$2
+
 if [ ! -e ${FILE} ]; then
 	echo "Error: ${FILE} does not exist..."
 	exit
+fi
+
+if [ -z "${ADDRESS}" ]; then
+	ADDRESS=$APPLICATION_START_ADDRESS
 fi
 
 #check_mime=$(mimetype $FILE)
@@ -21,16 +27,16 @@ fi
 #	exit
 #fi
 
-if [[ ! $FILE == *.bin ]]; then
+if [[ $FILE != *.bin ]]; then
 	echo "Error: ${FILE} has not the extension .bin"
-	echo "Are you perhaps trying to upload the .elf file?"
+	echo "Are you perhaps trying to upload the .elf file or the .hex file?"
 	exit
 fi
 
 sed "s|@BIN@|$FILE|" $SCRIPT_DIR/upload.script > $TEMP_DIR/upload.script
 
-echo "Program application starting from $APPLICATION_START_ADDRESS"
+echo "Program application starting from $ADDRESS"
 
-sed -i "s|@START_ADDRESS@|$APPLICATION_START_ADDRESS|" $TEMP_DIR/upload.script
+sed -i "s|@START_ADDRESS@|$ADDRESS|" $TEMP_DIR/upload.script
 
 $JLINK -Device $DEVICE -If SWD $TEMP_DIR/upload.script 

@@ -1,6 +1,6 @@
 #!/usr/bin/expect
 
-set timeout 20
+set timeout 120
 set command [lindex $argv 0]
 set binary [lindex $argv 1]
 set address [lindex $argv 2]
@@ -44,4 +44,4 @@ expect "wrote"
 send "reset\r"
 
 # Hand over the rest to the user
-#interact
+interact

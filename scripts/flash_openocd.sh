@@ -1,13 +1,16 @@
 #!/bin/bash
 
 cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
-target=${2:? "Usage: $0 \"cmd\", \"target\""}
+
+if [[ $cmd != "help" && $cmd != "init" && $cmd != "combined" && $cmd != "connect" ]]; then
+	target=${2:? "Usage: $0 \"cmd\", \"target\""}
+fi
 
 source ../CMakeBuild.config
 
 debug_target=$target.elf
-binary_target=$target.bin
-combined_target=combined.bin
+binary_target=$target
+combined_target=combined.hex
 
 COMPILER_PATH=/opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin
 
@@ -34,6 +37,10 @@ debug() {
 	$COMPILER_PATH/arm-none-eabi-gdb -tui ../build/$debug_target
 }
 
+help() {
+	echo $"Usage: $0 {init|connect|upload|combined|debug}"
+}
+
 case "$cmd" in 
 	init)
 		init
@@ -49,6 +56,9 @@ case "$cmd" in
 		;;
 	debug)
 		debug
+		;;
+	help)
+		help
 		;;
 	*)
 		echo $"Usage: $0 {init|connect|upload|combined|debug}"

@@ -24,6 +24,7 @@ enum {
 	CHANGE_NAME_UUID                        = 0x2,
 	DEVICE_TYPE_UUID                        = 0x3,
 	ROOM_UUID                               = 0x4,
+	FIRMWARE_UUID                           = 0x5,
 };
 
 enum {

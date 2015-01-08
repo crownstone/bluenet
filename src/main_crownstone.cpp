@@ -11,7 +11,7 @@
 
 //#define INDOOR_SERVICE
 #define GENERAL_SERVICE
-#define POWER_SERVICE
+//#define POWER_SERVICE
 
 /**********************************************************************************************************************
  * General includes
@@ -69,6 +69,8 @@ using namespace BLEpp;
  *********************************************************************************************************************/
 
 void welcome() {
+	nrf_gpio_cfg_output(PIN_LED);
+	nrf_gpio_pin_set(PIN_LED);
 	config_uart();
 	_log(INFO, "\r\n");
 	uint8_t *p = (uint8_t*)malloc(1);
@@ -224,6 +226,11 @@ int main() {
 	while(1) {
 		// deliver events from the bluetooth stack to the callbacks defined above.
 		//		analogwrite(pin_led, 50);
+//#define TEST_BOOTLOADER
+//#ifdef TEST_BOOTLOADER
+//		sd_power_gpregret_set(1);
+//		sd_nvic_SystemReset();
+//#endif
 		stack.loop();
 
 #ifdef GENERAL_SERVICE

@@ -425,11 +425,18 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 		return *this;
 
 	// Initialise SoftDevice
-	BLE_CALL(sd_softdevice_enable,
-			(_clock_source, softdevice_assertion_handler));
+	uint8_t enabled;
+	BLE_CALL(sd_softdevice_is_enabled, (&enabled));
+	if (enabled) {
+		log(INFO,"Awkward. Softdevice is already enabled. Try to disable.");
+		BLE_CALL(sd_softdevice_disable, ());
+	}
+
+	BLE_CALL(sd_softdevice_enable, (_clock_source, softdevice_assertion_handler));
 
 	// Initialize the SoftDevice handler module.
-	SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, false);
+	// this would call with different clock!
+	//SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, false);
 	
 	// enable the BLE stack
 #if(NORDIC_SDK_VERSION >= 6)
@@ -446,11 +453,13 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	// according to the migration guide the address needs to be set directly after the sd_ble_enable call
 	// due to "an issue present in the s110_nrf51822_7.0.0 release
+#if(SOFTDEVICE_SERIES == 110) 
 #if(NORDIC_SDK_VERSION >= 7)
 	BLE_CALL(sd_ble_gap_enable, () );
 	ble_gap_addr_t addr;
 	BLE_CALL(sd_ble_gap_address_get, (&addr) );
 	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr) );
+#endif
 #endif
 
 	ble_version_t version( { });

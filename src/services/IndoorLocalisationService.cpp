@@ -202,8 +202,11 @@ void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
 	_rssiHandler = func;
 }
 
+#if(SOFTDEVICE_SERIES != 110)
 void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 	if (_stack->isScanning()) {
 		_scanResult.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 	}
 }
+#endif
+

@@ -34,12 +34,14 @@ protected:
 	BLEpp::Characteristic<std::string>* _nameCharacteristic;
 	BLEpp::Characteristic<std::string>* _deviceTypeCharacteristic;
 	BLEpp::Characteristic<std::string>* _roomCharacteristic;
+	BLEpp::Characteristic<int32_t>* _firmwareCharacteristic;
 
 	// Functions to add the characteristics
 	void addTemperatureCharacteristic();
 	void addChangeNameCharacteristic();
 	void addDeviceTypeCharactersitic();
 	void addRoomCharacteristic();
+	void addFirmwareCharacteristic();
 
 	// Helper functions
 	std::string&  getBLEName();

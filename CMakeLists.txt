@@ -72,6 +72,8 @@ MESSAGE(STATUS "Linked libraries: ${LIBS}")
 SET(SOURCE_DIR "src")
 SET(INCLUDE_DIR "include" "include/common")
 
+SET(BOOTLOADER "_bootloader_.hex")
+
 # essential, code doesn't run without this file !!!
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nRF51822.c")
 
@@ -157,6 +159,7 @@ ELSE()
 	# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
 	ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.tmp
 		COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -j .text -j .data -O binary ${PROJECT_NAME} ${PROJECT_NAME}.tmp
+		COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -j .text -j .data -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
 		COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME}.tmp ${PROJECT_NAME}.bin
 		COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
 		COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
@@ -169,8 +172,14 @@ ELSE()
 		COMMAND echo
 		COMMAND echo "*** Use srec_cat to create one combined softdevice+app file"
 		COMMAND echo
-		COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
-		COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
+		#COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
+		#COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
+		#COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -intel ${BOOTLOADER} -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o combined.hex -intel"
+		#COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -intel ${BOOTLOADER} -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o combined.hex -intel
+		COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel _bootloader_.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
+		COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel _bootloader_.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
+		COMMAND echo "We should do something like"
+	       	COMMAND echo "srec_cat /opt/softdevices/s130_nrf51822_0.5.0-1.alpha_softdevice.hex -intel _bootloader_.hex -intel crownstone.bin -binary -offset 0x0001c000 -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o combined.hex -intel"
 		DEPENDS ${PROJECT_NAME}.tmp
 		COMMENT "Combine as one hex file"
 		)

@@ -3,6 +3,9 @@
 cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
 target=${2:? "Usage: $0 \"cmd\", \"target\""}
 
+# optional address
+address=$3
+
 # get working path in absolute sense
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 working_path=$path
@@ -18,7 +21,7 @@ build() {
 }
 
 upload() {
-	./upload.sh ../build/$target.bin
+	./upload.sh ../build/$target.bin $address
 }
 
 debug() {
