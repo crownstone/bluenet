@@ -93,5 +93,8 @@
 #error "For UART, PIN_TX must be defined"
 #endif
 
+#ifndef HARDWARE_VERSION
+#error "You have to specify the hardware version of your chip"
+#endif
 
 #endif // CS_BOARDS_T
