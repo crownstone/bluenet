@@ -69,8 +69,8 @@ using namespace BLEpp;
  *********************************************************************************************************************/
 
 void welcome() {
-	nrf_gpio_cfg_output(PIN_LED);
-	nrf_gpio_pin_set(PIN_LED);
+	nrf_gpio_cfg_output(PIN_GPIO_LED);
+	nrf_gpio_pin_set(PIN_GPIO_LED);
 	config_uart();
 	_log(INFO, "\r\n");
 	uint8_t *p = (uint8_t*)malloc(1);

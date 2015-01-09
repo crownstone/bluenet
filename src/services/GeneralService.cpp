@@ -55,7 +55,6 @@ void GeneralService::loadPersistentStorage() {
 
 void GeneralService::savePersistentStorage() {
 	Storage::getInstance().setStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
->>>>>>> upstream/master
 }
 
 void GeneralService::addTemperatureCharacteristic() {
