@@ -11,6 +11,7 @@
 #include "BluetoothLE.h"
 #include <util/function.h>
 #include <characteristics/ScanResult.h>
+#include <characteristics/TrackDevices.h>
 #include <characteristics/charac_config.h>
 
 #define INDOORLOCALISATION_UUID "7e170000-429c-41aa-83d7-d91220abeb33"
@@ -24,11 +25,10 @@ protected:
 	// TODO -oDE: are really all of these characteristics part of the
 	//   indoor localisation?
 	void addSignalStrengthCharacteristic();
-//	void addNumberCharacteristic();
-//	void addNumber2Characteristic();
 	void addScanControlCharacteristic();
 	void addPeripheralListCharacteristic();
-	void addPersonalThresholdCharacteristic();
+	void addTrackedDeviceListCharacteristic();
+	void addTrackedDeviceCharacteristic();
 
 	void addDeviceTypeCharactersitic();
 	void addRoomCharacteristic();
@@ -52,14 +52,14 @@ private:
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
 	BLEpp::CharacteristicT<int8_t>* _rssiCharac;
-//	BLEpp::Characteristic<uint8_t>* _intChar;
-//	BLEpp::Characteristic<uint64_t>* _intChar2;
 	BLEpp::Characteristic<ScanResult>* _peripheralCharac;
+	BLEpp::Characteristic<TrackedDeviceList>* _trackedDeviceListCharac;
+	BLEpp::Characteristic<TrackedDevice>* _trackedDeviceCharac;
 	
 	func_t _rssiHandler;
 
-	int8_t _personalThresholdLevel;
-	ScanResult _scanResult;
+	ScanResult* _scanResult;
+	TrackedDeviceList _trackedDeviceList;
 
 };
 

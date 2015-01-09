@@ -23,9 +23,7 @@ using namespace BLEpp;
 
 IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _stack) :
 		_stack(&_stack),
-		_rssiCharac(NULL), _peripheralCharac(NULL),
-		//_intChar(NULL), _intChar2(NULL),
-		_personalThresholdLevel(0) {
+		_rssiCharac(NULL), _peripheralCharac(NULL), _scanResult(NULL) {
 
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
@@ -33,7 +31,7 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 	// we have to figure out why this goes wrong
 	setName(std::string("IndoorLocalizationService"));
 
-	characStatus.reserve(3);
+	characStatus.reserve(5);
 
 	characStatus.push_back( { "Received signal level",
 		RSSI_UUID,
@@ -41,12 +39,20 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addSignalStrengthCharacteristic)});
 	characStatus.push_back( { "Start/Stop Scan",
 		SCAN_DEVICE_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addScanControlCharacteristic)});
 	characStatus.push_back( { "Peripherals",
 		LIST_DEVICE_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addPeripheralListCharacteristic)});
+	characStatus.push_back( { "List tracked devices",
+		TRACKED_DEVICE_LIST_UUID,
+		true,
+		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addTrackedDeviceListCharacteristic)});
+	characStatus.push_back( { "Add tracked device",
+		TRACKED_DEVICE_UUID,
+		true,
+		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addTrackedDeviceCharacteristic)});
 
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
@@ -64,27 +70,6 @@ void IndoorLocalizationService::addSignalStrengthCharacteristic() {
 	addCharacteristic(_rssiCharac);
 }
 
-//void IndoorLocalizationService::addNumberCharacteristic() {
-//	// create a characteristic of type uint8_t (unsigned one byte integer).
-//	// this characteristic is by default read-only (for the user)
-//	// note that in the next characteristic this variable intchar is set!
-////	LOGd("create characteristic to read a number for debugging");
-//	//Characteristic<uint8_t>&
-//	_intChar = createCharacteristicRef<uint8_t>();
-//	(*_intChar)
-//		.setUUID(UUID(getUUID(), 0x125))  // based off the uuid of the service.
-//		.setDefaultValue(66)
-//		.setName("number");
-//}
-//
-//void IndoorLocalizationService::addNumber2Characteristic() {
-//	_intChar2 = createCharacteristicRef<uint64_t>();
-//	(*_intChar2)
-//		.setUUID(UUID(getUUID(), 0x121))  // based off the uuid of the service.
-//		.setDefaultValue(66)
-//		.setName("number2");
-//}
-
 void IndoorLocalizationService::addScanControlCharacteristic() {
 	// set scanning option
 //	LOGd("create characteristic to stop/start scan");
@@ -97,15 +82,19 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 			if(value) {
 				LOGi("crown: start scanning");
 				if (!_stack->isScanning()) {
-					_scanResult.init();
+					if (_scanResult != NULL) {
+						_scanResult->init();
+					}
 					_stack->startScanning();
 				}
 			} else {
 				LOGi("crown: stop scanning");
 				if (_stack->isScanning()) {
 					_stack->stopScanning();
-					*_peripheralCharac = _scanResult;
-					_scanResult.print();
+					if (_scanResult != NULL) {
+						*_peripheralCharac = *_scanResult;
+						_scanResult->print();
+					}
 				}
 			}
 		});
@@ -114,7 +103,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	// get scan result
 //	LOGd("create characteristic to list found peripherals");
-
+	_scanResult = new ScanResult();
 	_peripheralCharac = createCharacteristicRef<ScanResult>();
 	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
 	_peripheralCharac->setName("Devices");
@@ -122,18 +111,29 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	_peripheralCharac->setNotifies(true);
 }
 
-void IndoorLocalizationService::addPersonalThresholdCharacteristic() {
-	// set threshold level
-//	LOGd("create characteristic to write personal threshold level");
-	createCharacteristic<int8_t>()
-		.setUUID(UUID(getUUID(), PERSONAL_THRESHOLD_UUID))
-		.setName("Threshold")
-		.setDefaultValue(0)
-		.setWritable(true)
-		.onWrite([&](const int8_t & value) -> void {
-			LOGi("set personal_threshold_value to %i", value);
-			_personalThresholdLevel = value;
-		});
+void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
+	_trackedDeviceListCharac = createCharacteristicRef<TrackedDeviceList>();
+	_trackedDeviceListCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_LIST_UUID));
+	_trackedDeviceListCharac->setName("List tracked devices");
+	_trackedDeviceListCharac->setWritable(false);
+	_trackedDeviceListCharac->setNotifies(false);
+
+	// Add some address and rssi
+//	tracked_device_t dev;
+//	dev.addr
+}
+
+void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
+	_trackedDeviceCharac = createCharacteristicRef<TrackedDevice>();
+	_trackedDeviceCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_UUID));
+	_trackedDeviceCharac->setName("Add tracked device");
+	_trackedDeviceCharac->setWritable(true);
+	_trackedDeviceCharac->setNotifies(false);
+//	_trackedDeviceCharac->setDefaultValue();
+	_trackedDeviceCharac->onWrite([&](const TrackedDevice& value) -> void {
+		LOGi("Add tracked device");
+		// TODO: actually add it =]
+	});
 }
 
 IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822BluetoothStack& _stack) {
@@ -205,7 +205,10 @@ void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
 #if(SOFTDEVICE_SERIES != 110)
 void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 	if (_stack->isScanning()) {
-		_scanResult.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+		if (_scanResult != NULL) {
+			_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+		}
+		_trackedDeviceList.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 	}
 }
 #endif

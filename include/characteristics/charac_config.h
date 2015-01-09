@@ -29,9 +29,10 @@ enum {
 
 enum {
 	RSSI_UUID                               = 0x1,
-	PERSONAL_THRESHOLD_UUID                 = 0x2,
+	TRACKED_DEVICE_UUID                     = 0x2,
 	SCAN_DEVICE_UUID                        = 0x3,
 	LIST_DEVICE_UUID                        = 0x4,
+	TRACKED_DEVICE_LIST_UUID                = 0x5,
 };
 
 #endif // CS_CHARAC_CONFIG_H_

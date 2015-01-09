@@ -30,15 +30,15 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
 	characStatus.push_back( { "Change Name",
 		CHANGE_NAME_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addChangeNameCharacteristic) });
 	characStatus.push_back( { "Device Type",
 		DEVICE_TYPE_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addDeviceTypeCharactersitic) });
 	characStatus.push_back( { "Room",
 		ROOM_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addRoomCharacteristic) });
 	characStatus.push_back( { "Firmware",
 		FIRMWARE_UUID, 
@@ -55,7 +55,6 @@ void GeneralService::loadPersistentStorage() {
 
 void GeneralService::savePersistentStorage() {
 	Storage::getInstance().setStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
->>>>>>> upstream/master
 }
 
 void GeneralService::addTemperatureCharacteristic() {
