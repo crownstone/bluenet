@@ -27,7 +27,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 	
 	LOGi("Create power service");
 
-	characStatus.reserve(4);
+	characStatus.reserve(5);
 	characStatus.push_back( { "PWM",
 			PWM_UUID,
 			true,
@@ -38,11 +38,11 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 			static_cast<addCharacteristicFunc>(&PowerService::addGetCurrentCharacteristic)});
 	characStatus.push_back( { "Current Curve",
 			CURRENT_CURVE_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentCurveCharacteristic)});
 	characStatus.push_back( { "Current Consumption",
 			CURRENT_CONSUMPTION_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
@@ -115,6 +115,7 @@ void PowerService::addGetCurrentCharacteristic() {
 				(*_currentCurveCharacteristic) = 1; // TODO: stream curve
 			}
 		});
+	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
 void PowerService::addCurrentCurveCharacteristic() {
@@ -133,7 +134,6 @@ void PowerService::addCurrentCurveCharacteristic() {
 //			sampleVoltageCurveInit();
 //			return sampleVoltageCurveFinish();
 //		});
-	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
 void PowerService::addCurrentConsumptionCharacteristic() {
