@@ -35,17 +35,27 @@ private:
 public:
 	TrackedDeviceList();
 
+	/** Initializes the list, must be called before any other function! */
 	void init();
 
 	bool operator!=(const TrackedDeviceList& val);
 
+	/** Prints the list. */
 	void print() const;
 
 	void update(uint8_t * adrs_ptr, int8_t rssi);
 
+	/** Returns the current size of the list */
 	uint16_t getSize() const;
 
+	/** Clears the list. */
 	void reset();
+
+	/** Adds/updates an address with given rssi threshold to/in the list. Returns true on success. */
+	bool add(uint8_t* adrs_ptr, int8_t rssi_threshold);
+
+	/** Removes an address from the list. Returns true on success, false when it's not in the list. */
+	bool rem(uint8_t* adrs_ptr);
 
 	//////////// serializable ////////////////////////////
 
