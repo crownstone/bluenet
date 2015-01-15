@@ -75,7 +75,7 @@ void PowerService::addPWMCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
 //			LOGi("set pwm to %i", value);
-		PWM::getInstance().setValue(0, value);
+			PWM::getInstance().setValue(0, value);
 		});
 }
 
