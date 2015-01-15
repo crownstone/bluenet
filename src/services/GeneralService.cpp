@@ -16,7 +16,8 @@ using namespace BLEpp;
 GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		_stack(&stack),
 		_temperatureCharacteristic(NULL), _nameCharacteristic(NULL),
-		_deviceTypeCharacteristic(NULL), _roomCharacteristic(NULL) {
+		_deviceTypeCharacteristic(NULL), _roomCharacteristic(NULL),
+		_firmwareCharacteristic(NULL) {
 
 	setUUID(UUID(GENERAL_UUID));
 	setName("General Service");
