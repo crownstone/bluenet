@@ -118,9 +118,24 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	_trackedDeviceListCharac->setWritable(false);
 	_trackedDeviceListCharac->setNotifies(false);
 
-	// Add some address and rssi
-//	tracked_device_t dev;
-//	dev.addr
+	// Add a hardcoded address (reversed order) and rssi
+	uint8_t addr[BLE_GAP_ADDR_LEN];
+//	// Memo
+//	addr[5] = 0xDF;
+//	addr[4] = 0x96;
+//	addr[3] = 0x2D;
+//	addr[2] = 0xC8;
+//	addr[1] = 0xF1;
+//	addr[0] = 0x3B;
+
+	// usb nrf
+	addr[5] = 0xC4;
+	addr[4] = 0x4C;
+	addr[3] = 0xCA;
+	addr[2] = 0xD7;
+	addr[1] = 0xA6;
+	addr[0] = 0xED;
+	_trackedDeviceList.add(addr, -70);
 }
 
 void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
@@ -132,7 +147,13 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 //	_trackedDeviceCharac->setDefaultValue();
 	_trackedDeviceCharac->onWrite([&](const TrackedDevice& value) -> void {
 		LOGi("Add tracked device");
-		// TODO: actually add it =]
+//		_trackedDeviceList.add(value); // TODO: make this work
+
+		// Start scanning
+		if (!_stack->isScanning()) {
+			LOGi("Start scanning");
+			_stack->startScanning();
+		}
 	});
 }
 
