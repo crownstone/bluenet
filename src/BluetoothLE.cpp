@@ -296,7 +296,7 @@ void Service::start(BLEStack* stack) {
 void GenericService::addSpecificCharacteristics() {
 	for ( CharacteristicStatusT &status : characStatus) {
 		if (status.enabled) {
-			LOGd("Create characteristic %s (%i)", status.name.c_str(), status.UUID);
+			LOGi("Create characteristic %s (%i)", status.name.c_str(), status.UUID);
 			(this->*status.func)();
 		} else {
 			LOGi("Disabled characteristic %s (%i)", status.name.c_str(), status.UUID);

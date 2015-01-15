@@ -18,6 +18,7 @@ public:
 	~CurrentLimit();
 
 	void init();
+	void start(uint8_t* limit_value);
 
 	// We get a dispatch from the LP comparator
 	void handleEvent();

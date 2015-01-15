@@ -27,7 +27,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 	
 	LOGi("Create power service");
 
-	characStatus.reserve(4);
+	characStatus.reserve(5);
 	characStatus.push_back( { "PWM",
 			PWM_UUID,
 			true,
@@ -38,11 +38,11 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 			static_cast<addCharacteristicFunc>(&PowerService::addGetCurrentCharacteristic)});
 	characStatus.push_back( { "Current Curve",
 			CURRENT_CURVE_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentCurveCharacteristic)});
 	characStatus.push_back( { "Current Consumption",
 			CURRENT_CONSUMPTION_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
@@ -75,7 +75,7 @@ void PowerService::addPWMCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
 //			LOGi("set pwm to %i", value);
-		PWM::getInstance().setValue(0, value);
+			PWM::getInstance().setValue(0, value);
 		});
 }
 
@@ -115,6 +115,7 @@ void PowerService::addGetCurrentCharacteristic() {
 				(*_currentCurveCharacteristic) = 1; // TODO: stream curve
 			}
 		});
+	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
 void PowerService::addCurrentCurveCharacteristic() {
@@ -133,7 +134,6 @@ void PowerService::addCurrentCurveCharacteristic() {
 //			sampleVoltageCurveInit();
 //			return sampleVoltageCurveFinish();
 //		});
-	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
 void PowerService::addCurrentConsumptionCharacteristic() {
@@ -170,23 +170,14 @@ void PowerService::addCurrentLimitCharacteristic() {
 		.onWrite([&](const uint8_t &value) -> void {
 			LOGi("Set current limit to: %i", value);
 			_current_limit_val = value;
+
+			_currentLimit.start(&_current_limit_val);
 			LOGi("Write value to persistent memory");
 			Storage::setUint8(_current_limit_val, _storageStruct.current_limit);
 			savePersistentStorage();
-
-			LPComp::getInstance().stop();
-			// There are only 6 levels...
-			if (_current_limit_val > 6)
-				_current_limit_val = 6;
-			LPComp::getInstance().config(PIN_AIN_LPCOMP, _current_limit_val, LPComp::UP);
-			LPComp::getInstance().start();
 		});
 
-	// There are only 6 levels...
-	if (_current_limit_val > 6)
-		_current_limit_val = 6;
-	LPComp::getInstance().config(PIN_AIN_LPCOMP, _current_limit_val, LPComp::UP);
-	LPComp::getInstance().start();
+	_currentLimit.start(&_current_limit_val);
 	_currentLimit.init();
 }
 

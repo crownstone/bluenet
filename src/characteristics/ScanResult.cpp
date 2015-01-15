@@ -71,14 +71,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 //		LOGd("_history[%d]: [%02X %02X %02X %02X %02X %02X]", i, _list[i].addr[5],
 //				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
 //				_list[i].addr[0]);
-		for (int j=0; j < BLE_GAP_ADDR_LEN; ++j) {
-			if (_list[i].addr[j] == 0) {
-//				log(FATAL, "FATAL ERROR!!! i: %d, j:% d", i, j);
-				print();
-				__asm("BKPT");
-				while(1);
-			}
-		}
+
 		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 //			LOGd("found");
 			_list[i].occurences++;

@@ -92,7 +92,7 @@ public:
 	}
 
 	uint16_t getValueMaxLength() {
-		return BLE_GATTS_VAR_ATTR_LEN_MAX; // TODO
+		return HEADER_SIZE + MAX_NR_DEVICES * SERIALIZED_DEVICE_SIZE;
 	}
 
 	void onNotifyTxError() {

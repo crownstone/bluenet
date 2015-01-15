@@ -9,9 +9,9 @@
  * Enable the services you want to run on the device
  *********************************************************************************************************************/
 
-//#define INDOOR_SERVICE
+#define INDOOR_SERVICE
 #define GENERAL_SERVICE
-//#define POWER_SERVICE
+#define POWER_SERVICE
 
 /**********************************************************************************************************************
  * General includes
