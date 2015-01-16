@@ -40,6 +40,9 @@ public:
 
 	bool operator!=(const TrackedDeviceList& val);
 
+	/** Print a single address */
+	void print(uint8_t *addr) const;
+
 	/** Prints the list. */
 	void print() const;
 

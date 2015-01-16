@@ -12,10 +12,15 @@
 #include "drivers/serial.h"
 #include "util/utils.h"
 
+/**********************************************************************************************************************
+ * List of tracked devices
+ *********************************************************************************************************************/
+
 TrackedDeviceList::TrackedDeviceList() : _list(NULL), _freeIdx(0) {
 }
 
 void TrackedDeviceList::init() {
+	LOGd("Initialize tracked device list");
 	_freeIdx = 0;
 	if (_list) {
 		free(_list);
@@ -49,17 +54,35 @@ bool TrackedDeviceList::operator!=(const TrackedDeviceList& val) {
 	return false;
 }
 
-void TrackedDeviceList::update(uint8_t * adrs_ptr, int8_t rssi) {
-//	LOGd("addrs: %s", addrs);
+void TrackedDeviceList::update(uint8_t * addrs_ptr, int8_t rssi) {
+	bool found = false;
 	for (int i = 0; i < getSize(); ++i) {
-		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
+		if (memcmp(addrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			if (rssi >= _list[i].rssi_threshold) {
 				_list[i].counter = 0;
 				LOGd("Tracked device present");
+			} else {
+				LOGd("Tracked device found, but not nearby (%i < %i)", rssi, _list[i].rssi_threshold);
 			}
+			found = true;
 			break;
 		}
 	}
+	/*
+	if (!found) {
+		LOGd("Device found, but not to-be tracked:");
+		print(addrs_ptr);
+		LOGd("To-be tracked devices:");
+		for (int i = 0; i < getSize(); ++i) {
+			print(_list[i].addr);
+		}
+	}
+	*/
+}
+
+void TrackedDeviceList::print(uint8_t *addr) const {
+	LOGd("[%02X %02X %02X %02X %02X %02X]", 
+			addr[5], addr[4], addr[3], addr[2], addr[1], addr[0]);
 }
 
 void TrackedDeviceList::print() const {
@@ -91,8 +114,16 @@ bool TrackedDeviceList::add(uint8_t* adrs_ptr, int8_t rssi_threshold) {
 	memcpy(_list[_freeIdx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
 	_list[_freeIdx].rssi_threshold = rssi_threshold;
 	LOGi("Added [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
+			_list[_freeIdx].addr[5], _list[_freeIdx].addr[4], _list[_freeIdx].addr[3], _list[_freeIdx].addr[2],
+			_list[_freeIdx].addr[1], _list[_freeIdx].addr[0], rssi_threshold);
+	LOGi("Added [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
 			adrs_ptr[5], adrs_ptr[4], adrs_ptr[3], adrs_ptr[2],
 			adrs_ptr[1], adrs_ptr[0], rssi_threshold);
+
+	if (memcmp(adrs_ptr, _list[_freeIdx].addr, BLE_GAP_ADDR_LEN)) {
+		LOGi("Adding the address did not work, very likely due to memory issues!");
+		return false;
+	}
 
 	++_freeIdx;
 	return true;
@@ -163,13 +194,16 @@ void TrackedDeviceList::deserialize(uint8_t* buffer, uint16_t length) {
 	}
 }
 
+/**********************************************************************************************************************
+ * A specific tracked device
+ *********************************************************************************************************************/
 
-
-
-
-
-
-
+/**
+ * From a device we track
+ *   RSSI level
+ *   presence counter
+ *   the Bluetooth address
+ */
 
 TrackedDevice::TrackedDevice() {
 }
@@ -190,14 +224,18 @@ bool TrackedDevice::operator!=(const TrackedDevice& val) {
 	return false;
 }
 
-/** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
-* it means that the object does not need external buffer space. */
+/** 
+ * Return length of buffer required to store the serialized form of this object. If this method returns 0,
+ * it means that the object does not need external buffer space. 
+ */
 uint32_t TrackedDevice::getSerializedLength() const {
 	return TRACKDEVICES_SERIALIZED_SIZE;
 }
 
-/** Copy data representing this object into the given buffer.  Buffer will be preallocated with at least
-* getLength() bytes. */
+/** 
+ * Copy data representing this object into the given buffer. Buffer will be preallocated with at least
+ * getLength() bytes. 
+ */
 void TrackedDevice::serialize(uint8_t* buffer, uint16_t length) const {
 	uint8_t *ptr;
 	ptr = buffer;
@@ -223,11 +261,4 @@ void TrackedDevice::deserialize(uint8_t* buffer, uint16_t length) {
 	// copy rssi threshold
 	_trackedDevice.rssi_threshold = *ptr++;
 }
-
-
-
-
-
-
-
 

@@ -112,30 +112,23 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 }
 
 void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
+	
+	_trackedDeviceList = new TrackedDeviceList();
+
 	_trackedDeviceListCharac = createCharacteristicRef<TrackedDeviceList>();
 	_trackedDeviceListCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_LIST_UUID));
 	_trackedDeviceListCharac->setName("List tracked devices");
 	_trackedDeviceListCharac->setWritable(false);
 	_trackedDeviceListCharac->setNotifies(false);
+	
+	// init before adding!	
+	_trackedDeviceList->init();
 
 	// Add a hardcoded address (reversed order) and rssi
-	uint8_t addr[BLE_GAP_ADDR_LEN];
-//	// Memo
-//	addr[5] = 0xDF;
-//	addr[4] = 0x96;
-//	addr[3] = 0x2D;
-//	addr[2] = 0xC8;
-//	addr[1] = 0xF1;
-//	addr[0] = 0x3B;
-
-	// usb nrf
-	addr[5] = 0xC4;
-	addr[4] = 0x4C;
-	addr[3] = 0xCA;
-	addr[2] = 0xD7;
-	addr[1] = 0xA6;
-	addr[0] = 0xED;
-	_trackedDeviceList.add(addr, -70);
+        // [CD 12 B7 B4 3F 8D]
+	//uint8_t addr[BLE_GAP_ADDR_LEN] = { 0x8D, 0x3F, 0xB4, 0xB7, 0x12, 0xCD };
+	uint8_t addr[BLE_GAP_ADDR_LEN] = { 0xED, 0xA6, 0xD7, 0xCA, 0x4C, 0xC4 };
+	_trackedDeviceList->add(addr, -70);
 }
 
 void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
@@ -147,12 +140,20 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 //	_trackedDeviceCharac->setDefaultValue();
 	_trackedDeviceCharac->onWrite([&](const TrackedDevice& value) -> void {
 		LOGi("Add tracked device");
-//		_trackedDeviceList.add(value); // TODO: make this work
+//		_trackedDeviceList->add(value); // TODO: make this work
 
 		// Start scanning
 		if (!_stack->isScanning()) {
 			LOGi("Start scanning");
-			_stack->startScanning();
+			if (!_stack->isScanning()) {
+//				if (_trackedDeviceList != NULL) {
+//					_trackedDeviceList->init();
+//				}
+				_stack->startScanning();
+			}
+		} else {
+			LOGi("Stop scanning");
+			_stack->stopScanning();
 		}
 	});
 }
@@ -229,7 +230,7 @@ void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_
 		if (_scanResult != NULL) {
 			_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 		}
-		_trackedDeviceList.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+		_trackedDeviceList->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 	}
 }
 #endif

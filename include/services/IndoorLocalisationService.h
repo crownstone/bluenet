@@ -59,7 +59,7 @@ private:
 	func_t _rssiHandler;
 
 	ScanResult* _scanResult;
-	TrackedDeviceList _trackedDeviceList;
+	TrackedDeviceList* _trackedDeviceList;
 
 };
 

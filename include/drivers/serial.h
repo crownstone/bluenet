@@ -26,7 +26,7 @@ extern "C" {
 
 #define DEBUG_ON
 
-#define VERBOSITY            INFO
+#define VERBOSITY            DEBUG
 
 #ifdef DEBUG_ON
 	#include "string.h"
