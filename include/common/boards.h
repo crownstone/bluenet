@@ -5,6 +5,11 @@
  * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
+/**
+ * Convention:
+ *   * use TABS for identation, but use SPACES for column-wise representations!
+ */
+
 #ifndef CS_BOARDS_T
 #define CS_BOARDS_T
 
@@ -24,6 +29,9 @@
 
 #if(BOARD==RFDUINO)
 
+#define PIN_GPIO_LED0        2                   // gpio 2
+#define PIN_GPIO_LED1        3                   // gpio 3
+
 #define PIN_RED              2                   // this is gpio 2 (bottom pin)
 #define PIN_GREEN            3                   // this is gpio 3 (second pin)
 #define PIN_BLUE             4                   // this is gpio 4 (third pin)
@@ -33,7 +41,10 @@
 
 #if(BOARD==NRF6310)
 
-#define PIN_GPIO_LED         8                   // this is p1.0 or gpio 8
+#define PIN_GPIO_LED0        8                   // this is p1.0 or gpio 8
+#define PIN_GPIO_LED1        9                   // this is p1.1 or gpio 9
+
+#define PIN_GPIO_SWITCH      PIN_GPIO_LED1       // just show switch as LED
 #define PIN_AIN_ADC          2                   // ain2 is p0.1 or gpio 1
 #define PIN_GPIO_RX          16
 #define PIN_GPIO_TX          17
@@ -44,7 +55,10 @@
 
 #if(BOARD==CROWNSTONE)
 
-#define PIN_GPIO_LED         3                   // this is p0.03 or gpio 3
+#define PIN_GPIO_LED0        8                   // something we don't use! 
+#define PIN_GPIO_LED1        8                   // something we don't use! 
+
+#define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
 #define PIN_AIN_ADC          5                   // ain5 is p0.04 or gpio 4
 #define PIN_AIN_LPCOMP       6                   // ain6 is p0.05 or gpio 5
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -56,19 +70,25 @@
 
 #if(BOARD==PCA10001)
 
-#define PIN_GPIO_LED         18                  // this is p0.18 or gpio 18
+#define PIN_GPIO_LED0        20                  // led
+#define PIN_GPIO_LED1        21                  // led
+
+#define PIN_GPIO_SWITCH      18                  // this is p0.18 or gpio 18
 #define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 #define PIN_AIN_LPCOMP       3                   // ain3 is p0.02 or gpio 2
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 #define PIN_GPIO_RX          11                  // this is p0.11 or gpio 11
 #define PIN_GPIO_TX          9                   // this is p0.09 or gpio 9
-#define PIN_GPIO_LED_CON     19					 // shows connection state on the evaluation board
+#define PIN_GPIO_LED_CON     19                  // shows connection state on the evaluation board
 
 #endif
 
 #if(BOARD==NRF51422)
 
-#define PIN_GPIO_LED         18
+#define PIN_GPIO_LED0        20                  // led
+#define PIN_GPIO_LED1        21                  // led
+
+#define PIN_GPIO_SWITCH     18
 #define PIN_AIN_ADC          2                   // ain 2 is p0.01 or gpio 1
 #define PIN_GPIO_RX          1
 #define PIN_GPIO_TX          2

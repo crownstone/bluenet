@@ -38,7 +38,7 @@ class LPComp: public Dispatcher {
 		// function to be called from interrupt, do not do much there!
 		void update(Event_t event);
 
-		// in the program loop, time to dispatch events e.g.
+		// each program tick, we have time to dispatch events e.g.
 		void tick();
 
 	protected:

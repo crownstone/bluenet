@@ -41,7 +41,7 @@ public:
 	// function to be called from interrupt, do not do much there!
 	void update(uint32_t value);
 
-	// in the program loop, time to dispatch events e.g.
+	// each tick we have time to dispatch events e.g.
 	void tick();
 
 	// return reference to internal buffer

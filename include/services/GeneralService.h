@@ -22,7 +22,7 @@ public:
 
 	void setTemperature(int32_t temperature);
 
-	void loop();
+	void tick();
 
 	static GeneralService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 

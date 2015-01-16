@@ -30,7 +30,7 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 
 	// we have to figure out why this goes wrong
 	setName(std::string("IndoorLocalizationService"));
-
+	
 	characStatus.reserve(5);
 
 	characStatus.push_back( { "Received signal level",
@@ -54,10 +54,27 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 		true,
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addTrackedDeviceCharacteristic)});
 
+	_trackMode = false;
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
 }
 
+void IndoorLocalizationService::tick() {
+
+	if (!_trackMode) return;
+
+	// this function checks the counter for each device, if everybody is gone, turn off the light
+	bool alone = false;
+	if (_trackedDeviceList != NULL) {
+		alone = (_trackedDeviceList->isAlone() == TDL_IS_ALONE);
+	}
+
+	if (alone) {
+		PWM::getInstance().setValue(0, 0);
+	} else {
+		PWM::getInstance().setValue(0, (uint8_t)-1);
+	}
+}
 
 void IndoorLocalizationService::addSignalStrengthCharacteristic() {
 //	LOGd("create characteristic to read signal strength");
@@ -128,7 +145,7 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
         // [CD 12 B7 B4 3F 8D]
 	//uint8_t addr[BLE_GAP_ADDR_LEN] = { 0x8D, 0x3F, 0xB4, 0xB7, 0x12, 0xCD };
 	uint8_t addr[BLE_GAP_ADDR_LEN] = { 0xED, 0xA6, 0xD7, 0xCA, 0x4C, 0xC4 };
-	_trackedDeviceList->add(addr, -70);
+	_trackedDeviceList->add(addr, -95);
 }
 
 void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
@@ -151,9 +168,11 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 //				}
 				_stack->startScanning();
 			}
+			_trackMode = true;
 		} else {
 			LOGi("Stop scanning");
 			_stack->stopScanning();
+			_trackMode = false;
 		}
 	});
 }
@@ -230,7 +249,9 @@ void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_
 		if (_scanResult != NULL) {
 			_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 		}
-		_trackedDeviceList->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+		if (_trackedDeviceList != NULL) {
+			_trackedDeviceList->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+		}
 	}
 }
 #endif

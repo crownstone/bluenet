@@ -17,14 +17,18 @@
 struct __attribute__((__packed__)) tracked_device_t {
 	uint8_t addr[BLE_GAP_ADDR_LEN];
 	int8_t rssi_threshold;
-	uint8_t counter;
+	uint16_t counter;
 };
 
 #define TRACKDEVICES_HEADER_SIZE 1 // 1 BYTE for the header = number of elements in the list
 #define TRACKDEVICES_SERIALIZED_SIZE (sizeof(tracked_device_t)-1) // only works if struct packed. Subtract 1, as counter is not serialized
 
-#define TRACKDEVICES_MAX_NR_DEVICES 2
-#define COUNTER_MAX 5
+#define TRACKDEVICES_MAX_NR_DEVICES              2
+#define COUNTER_MAX                              5
+	
+#define TDL_IS_ALONE                             1
+#define TDL_SOMEONE_NEARBY                       2
+#define TDL_NOT_TRACKING                         3
 
 class TrackedDeviceList {
 
@@ -39,6 +43,9 @@ public:
 	void init();
 
 	bool operator!=(const TrackedDeviceList& val);
+
+	/** No entity to be tracked nearby  */
+	uint8_t isAlone();
 
 	/** Print a single address */
 	void print(uint8_t *addr) const;

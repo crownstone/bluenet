@@ -56,7 +56,12 @@ public:
 	uint32_t init(pwm_config_t *config);
 	void setValue(uint8_t pwm_channel, uint32_t pwm_value);
 
+	void getValue(uint8_t &pwm_channel, uint32_t &pwm_value);
 private:
+	// store values last set
+	uint8_t _pwm_channel;
+	uint32_t _pwm_value;
+
 	int32_t ppiEnableChannel(uint32_t ch_num, volatile uint32_t *event_ptr, volatile uint32_t *task_ptr);
 
 public: // TODO: make these private

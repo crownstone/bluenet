@@ -917,7 +917,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
 //	}
 //}
 
-void Nrf51822BluetoothStack::loop() {
+void Nrf51822BluetoothStack::tick() {
 
 #if(NORDIC_SDK_VERSION > 5)
 	BLE_CALL(sd_app_evt_wait, ());

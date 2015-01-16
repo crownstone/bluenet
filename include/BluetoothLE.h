@@ -1026,7 +1026,7 @@ namespace BLEpp {
             return _conn_handle;
         }
         /** Call this as often as possible.  Callbacks on services and characteristics will be invoked from here. */
-        void loop();
+        void tick();
 
     protected:
         void setTxPowerLevel();

@@ -182,15 +182,15 @@ void PowerService::addCurrentLimitCharacteristic() {
 }
 
 //static int tmp_cnt = 100;
-//static int loop_cnt = 100;
+//static int tick_cnt = 100;
 
 /**
  * TODO: We should only need to do this once on startup.
  */
-void PowerService::loop() {
+void PowerService::tick() {
 	LPComp::getInstance().tick();
 	// check if current is not beyond current_limit if the latter is set
-//	if (++tmp_cnt > loop_cnt) {
+//	if (++tmp_cnt > tick_cnt) {
 //		if (_currentLimitCharacteristic) {
 //			getCurrentLimit();
 //			LOGi("Set default current limit value to %i", _current_limit_val);

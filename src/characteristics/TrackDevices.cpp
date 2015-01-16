@@ -55,16 +55,16 @@ bool TrackedDeviceList::operator!=(const TrackedDeviceList& val) {
 }
 
 void TrackedDeviceList::update(uint8_t * addrs_ptr, int8_t rssi) {
-	bool found = false;
+	//bool found = false;
 	for (int i = 0; i < getSize(); ++i) {
 		if (memcmp(addrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			if (rssi >= _list[i].rssi_threshold) {
 				_list[i].counter = 0;
-				LOGd("Tracked device present");
+				LOGd("Tracked device present nearby (%i >= %i)", rssi, _list[i].rssi_threshold);
 			} else {
 				LOGd("Tracked device found, but not nearby (%i < %i)", rssi, _list[i].rssi_threshold);
 			}
-			found = true;
+			//found = true;
 			break;
 		}
 	}
@@ -78,6 +78,22 @@ void TrackedDeviceList::update(uint8_t * addrs_ptr, int8_t rssi) {
 		}
 	}
 	*/
+}
+
+uint8_t TrackedDeviceList::isAlone() {
+	// special case in which nothing needs to be tracked
+	if (!getSize()) return TDL_NOT_TRACKING;
+	
+	bool none_nearby = true;
+	uint16_t result;
+	static uint16_t threshold = 2000;
+	for (int i = 0; i < getSize(); ++i) {
+		uint16_t count = _list[i].counter;
+		_list[i].counter++;
+		none_nearby = none_nearby && (count > threshold);
+	}
+	result = (none_nearby ? TDL_IS_ALONE : TDL_SOMEONE_NEARBY);
+	return result;
 }
 
 void TrackedDeviceList::print(uint8_t *addr) const {

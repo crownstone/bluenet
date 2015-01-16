@@ -110,6 +110,9 @@ uint32_t PWM::init(pwm_config_t *config) {
 }
 
 void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
+	_pwm_channel = pwm_channel;
+	_pwm_value = pwm_value;
+
 	_nextValue[pwm_channel] = pwm_value;
 	PWM_TIMER->EVENTS_COMPARE[3] = 0;
 	PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk | TIMER_SHORTS_COMPARE3_STOP_Msk;
@@ -133,6 +136,11 @@ void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 		PWM_TIMER->INTENSET = TIMER_INTENSET_COMPARE3_Msk;
 	}
 	PWM_TIMER->TASKS_START = 1;
+}
+
+void PWM::getValue(uint8_t &pwm_channel, uint32_t &pwm_value) {
+	pwm_channel = _pwm_channel;
+	pwm_value = _pwm_value;
 }
 
 extern "C" void PWM_IRQHandler(void) {

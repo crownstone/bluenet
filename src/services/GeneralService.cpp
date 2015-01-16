@@ -172,7 +172,7 @@ void GeneralService::setTemperature(int32_t temperature) {
 	*_temperatureCharacteristic = temperature;
 }
 
-void GeneralService::loop() {
+void GeneralService::tick() {
 	if (_temperatureCharacteristic) {
 		int32_t temp;
 		temp = getTemperature();

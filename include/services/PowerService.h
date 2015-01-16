@@ -31,7 +31,7 @@ public:
 
 	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 	
-	void loop();
+	void tick();
 protected:
 	// Enabled characteristics (to be set in constructor)
 	

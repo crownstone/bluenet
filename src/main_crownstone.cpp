@@ -69,8 +69,8 @@ using namespace BLEpp;
  *********************************************************************************************************************/
 
 void welcome() {
-	nrf_gpio_cfg_output(PIN_GPIO_LED);
-	nrf_gpio_pin_set(PIN_GPIO_LED);
+	nrf_gpio_cfg_output(PIN_GPIO_LED0);
+	nrf_gpio_pin_set(PIN_GPIO_LED0);
 	config_uart();
 	_log(INFO, "\r\n");
 	uint8_t *p = (uint8_t*)malloc(1);
@@ -118,7 +118,7 @@ void config_drivers() {
 
 	pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
 	pwm_config.num_channels = 1;
-	pwm_config.gpio_pin[0] = PIN_GPIO_LED;
+	pwm_config.gpio_pin[0] = PIN_GPIO_SWITCH;
 	pwm_config.mode = PWM_MODE_LED_255;
 
 	PWM::getInstance().init(&pwm_config);
@@ -197,8 +197,7 @@ int main() {
 
 #ifdef INDOOR_SERVICE
 	// now, build up the services and characteristics.
-	//Service& localizationService =
-	IndoorLocalizationService::createService(stack);
+	IndoorLocalizationService& localizationService = IndoorLocalizationService::createService(stack);
 #endif
 
 #ifdef GENERAL_SERVICE
@@ -221,7 +220,7 @@ int main() {
 	stack.startAdvertising();
 #endif
 	
-	LOGi("Running while loop..");
+	LOGi("Running while tick..");
 
 	while(1) {
 		// deliver events from the bluetooth stack to the callbacks defined above.
@@ -231,13 +230,15 @@ int main() {
 //		sd_power_gpregret_set(1);
 //		sd_nvic_SystemReset();
 //#endif
-		stack.loop();
-
+		stack.tick();
 #ifdef GENERAL_SERVICE
-		generalService.loop();
+		generalService.tick();
 #endif
 #ifdef POWER_SERVICE
-		powerService.loop();
+		powerService.tick();
+#endif
+#ifdef INDOOR_SERVICE
+		localizationService.tick();
 #endif
 
 		app_sched_execute();
