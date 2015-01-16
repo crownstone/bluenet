@@ -144,8 +144,8 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	// Add a hardcoded address (reversed order) and rssi
         // [CD 12 B7 B4 3F 8D]
 	//uint8_t addr[BLE_GAP_ADDR_LEN] = { 0x8D, 0x3F, 0xB4, 0xB7, 0x12, 0xCD };
-	uint8_t addr[BLE_GAP_ADDR_LEN] = { 0xED, 0xA6, 0xD7, 0xCA, 0x4C, 0xC4 };
-	_trackedDeviceList->add(addr, -95);
+	//uint8_t addr[BLE_GAP_ADDR_LEN] = { 0xED, 0xA6, 0xD7, 0xCA, 0x4C, 0xC4 };
+	//_trackedDeviceList->add(addr, -95);
 }
 
 void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
@@ -157,7 +157,13 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 //	_trackedDeviceCharac->setDefaultValue();
 	_trackedDeviceCharac->onWrite([&](const TrackedDevice& value) -> void {
 		LOGi("Add tracked device");
-//		_trackedDeviceList->add(value); // TODO: make this work
+		value.print();
+
+		_trackedDeviceList->add(value.getAddress(), value.getRSSI());
+
+//		LOGi("RSSI threshold: %i", value.rssi_threshold);
+//		LOGi("Received value from [%02X %02X %02X %02X %02X %02X]", value.addr[5],
+//			value.addr[4], value.addr[3], value.addr[2], value.addr[1], value.addr[0]);
 
 		// Start scanning
 		if (!_stack->isScanning()) {

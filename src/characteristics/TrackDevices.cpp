@@ -54,7 +54,7 @@ bool TrackedDeviceList::operator!=(const TrackedDeviceList& val) {
 	return false;
 }
 
-void TrackedDeviceList::update(uint8_t * addrs_ptr, int8_t rssi) {
+void TrackedDeviceList::update(const uint8_t * addrs_ptr, int8_t rssi) {
 	//bool found = false;
 	for (int i = 0; i < getSize(); ++i) {
 		if (memcmp(addrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
@@ -114,7 +114,7 @@ void TrackedDeviceList::reset() {
 	_freeIdx = 0;
 }
 
-bool TrackedDeviceList::add(uint8_t* adrs_ptr, int8_t rssi_threshold) {
+bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 	for (int i=0; i<getSize(); ++i) {
 		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			_list[i].rssi_threshold = rssi_threshold;
@@ -247,6 +247,12 @@ bool TrackedDevice::operator!=(const TrackedDevice& val) {
  */
 uint32_t TrackedDevice::getSerializedLength() const {
 	return TRACKDEVICES_SERIALIZED_SIZE;
+}
+
+void TrackedDevice::print() const {
+	LOGi("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tstate: %d", _trackedDevice.addr[5],
+		_trackedDevice.addr[4], _trackedDevice.addr[3], _trackedDevice.addr[2], _trackedDevice.addr[1],
+		_trackedDevice.addr[0], _trackedDevice.rssi_threshold, _trackedDevice.counter);
 }
 
 /** 

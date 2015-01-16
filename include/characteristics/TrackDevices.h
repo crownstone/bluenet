@@ -53,7 +53,7 @@ public:
 	/** Prints the list. */
 	void print() const;
 
-	void update(uint8_t * adrs_ptr, int8_t rssi);
+	void update(const uint8_t * adrs_ptr, int8_t rssi);
 
 	/** Returns the current size of the list */
 	uint16_t getSize() const;
@@ -62,7 +62,7 @@ public:
 	void reset();
 
 	/** Adds/updates an address with given rssi threshold to/in the list. Returns true on success. */
-	bool add(uint8_t* adrs_ptr, int8_t rssi_threshold);
+	bool add(const uint8_t* adrs_ptr, int8_t rssi_threshold);
 
 	/** Removes an address from the list. Returns true on success, false when it's not in the list. */
 	bool rem(uint8_t* adrs_ptr);
@@ -98,19 +98,22 @@ public:
 
 	void print() const;
 
+	int8_t getRSSI() const { return _trackedDevice.rssi_threshold; }
+	
+	const uint8_t* getAddress() const { return _trackedDevice.addr; }
+
 	//////////// serializable ////////////////////////////
 
-    /** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
-    * it means that the object does not need external buffer space. */
-    uint32_t getSerializedLength() const;
+	/** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
+	 * it means that the object does not need external buffer space. */
+	uint32_t getSerializedLength() const;
 
-    /** Copy data representing this object into the given buffer.  Buffer will be preallocated with at least
-    * getLength() bytes. */
-    void serialize(uint8_t* buffer, uint16_t length) const;
+	/** Copy data representing this object into the given buffer.  Buffer will be preallocated with at least
+	 * getLength() bytes. */
+	void serialize(uint8_t* buffer, uint16_t length) const;
 
-    /** Copy data from the given buffer into this object. */
-    void deserialize(uint8_t* buffer, uint16_t length);
-
+	/** Copy data from the given buffer into this object. */
+	void deserialize(uint8_t* buffer, uint16_t length);
 };
 
 
