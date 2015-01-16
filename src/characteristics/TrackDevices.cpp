@@ -135,6 +135,7 @@ bool TrackedDeviceList::rem(uint8_t* adrs_ptr) {
 			// Decrease size
 			--_freeIdx;
 			// Shift array
+			// TODO: Anne: order within the array shouldn't matter isn't it? so just copy the last item on slot i
 			for (int j=i; j<getSize(); ++j) {
 				memcpy(_list[j].addr, _list[j+1].addr, BLE_GAP_ADDR_LEN);
 				_list[j].rssi_threshold = _list[j+1].rssi_threshold;

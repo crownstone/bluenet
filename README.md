@@ -105,6 +105,27 @@ favorite application is  `minicom`, but feel free to use any other program.
 The sudo rights are only necessary if your `udev` rights are not properly set. The above flags just set colors to `on`
 and define the right usb port to use (if you've multiple).
 
+## Bootloader
+
+To upload a new program when the Crownstone is embedded in a wall socket is cumbersome. For that reason for deployment
+we recommend to add a bootloader. The default bootloader from Nordic does not work with the S130 devices. You will
+need our fork:
+
+    git clone https://github.com/mrquincle/nrf51-dfu-bootloader-for-gcc-compiler
+    cd scripts
+    ./all.sh
+
+Subsequently, you will have to set some fields such that the bootloader is loaded rather than the application directly.
+
+    ./softdevice.sh all
+    ./writebyte.sh 0x10001014 0x00034000
+    ./firmware.sh all bootloader 0x00034000
+
+And you should be good to upload binaries, for example with the following python script:
+
+    git clone https://github.com/mrquincle/nrf51_dfu_linux
+    python dfu.py -f crownstone.hex -a CD:E3:4A:47:1C:E4
+
 ## Todo list
 
 * Clean up code
