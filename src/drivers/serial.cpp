@@ -12,7 +12,7 @@
 #include <cstdlib>
 
 #include "nRF51822.h"
-#include "common/boards.h"
+#include "common/cs_boards.h"
 
 #define NRF51_UART_1200_BAUD  0x0004F000UL
 #define NRF51_UART_9600_BAUD  0x00275000UL

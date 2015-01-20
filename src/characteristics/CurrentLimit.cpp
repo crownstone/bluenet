@@ -8,7 +8,7 @@
 
 #include <characteristics/CurrentLimit.h>
 #include <drivers/serial.h>
-#include <boards.h>
+#include <common/cs_boards.h>
 
 CurrentLimit::CurrentLimit() {
 

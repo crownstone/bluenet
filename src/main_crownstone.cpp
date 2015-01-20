@@ -6,12 +6,17 @@
  */
 
 /**********************************************************************************************************************
- * Enable the services you want to run on the device
+ * The Crownstone is a high-voltage (domestic) switch. It can be used to combine:
+ *   - indoor localization
+ *   - building automation
+ * It is therefore one of the first real internet-of-things devices entering the market.
+ * Read more on: https://dobots.nl/products/crownstone/
+ *
+ * A large part of the software is open-source. You can find it at: https://github.com/dobots/bluenet. The README
+ * file at that repository will get you started.
+ *
+ * Almost all configuration options should be set in CMakeBuild.config.
  *********************************************************************************************************************/
-
-#define INDOOR_SERVICE
-#define GENERAL_SERVICE
-#define POWER_SERVICE
 
 /**********************************************************************************************************************
  * General includes
@@ -39,7 +44,7 @@ extern "C" {
 #include <cstring>
 #include <cstdio>
 
-#include <common/boards.h>
+#include <common/cs_boards.h>
 
 #if(BOARD==PCA10001)
 	#include "nrf_gpio.h"
@@ -52,13 +57,21 @@ extern "C" {
 #include <drivers/serial.h>
 #include <common/storage.h>
 
-#ifdef INDOOR_SERVICE
+#if MESHING==1
+extern "C" {
+#include <protocol/rbc_mesh.h>
+#include <protocol/rbc_mesh_common.h>
+#include <protocol/led_config.h>
+}
+#endif
+
+#if INDOOR_SERVICE==1
 #include <services/IndoorLocalisationService.h>
 #endif
-#ifdef GENERAL_SERVICE
+#if GENERAL_SERVICE==1
 #include <services/GeneralService.h>
 #endif
-#ifdef POWER_SERVICE
+#if POWER_SERVICE==1
 #include <services/PowerService.h>
 #endif
 
@@ -68,6 +81,10 @@ using namespace BLEpp;
  * Main functionality
  *********************************************************************************************************************/
 
+/**
+ * If UART is enabled this will be the message printed out over a serial connection. Connectors are expensive, so UART
+ * is not available in the final product.
+ */
 void welcome() {
 	nrf_gpio_cfg_output(PIN_GPIO_LED0);
 	nrf_gpio_pin_set(PIN_GPIO_LED0);
@@ -80,11 +97,13 @@ void welcome() {
 	LOGi("Compilation time: %s", COMPILATION_TIME);
 }
 
+/**
+ * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
+ */
 void setName(Nrf51822BluetoothStack &stack) {
 	char devicename[32];
 	sprintf(devicename, "%s_%s", BLUETOOTH_NAME, COMPILATION_TIME);
 	stack.setDeviceName(std::string(devicename)) // max len = ble_gap_devname_max_len (31)
-		// controls how device appears in gui.
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
@@ -128,9 +147,147 @@ void config_drivers() {
 #endif
 }
 
+#if MESHING==1
+
+/**********************************************************************************************************************
+ * Interlude for meshing. Will need to be integrated with the code!
+ *********************************************************************************************************************/
+
+extern "C" {
+
+#warning "TEST"
+/**
+ * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
+ * thing.
+ */
+void setup_mesh() {
+	LOGi("For now only testing meshing.");
+	nrf_gpio_pin_clear(PIN_GPIO_LED0);
+
+	rbc_mesh_init_params_t init_params;
+
+	init_params.access_addr = 0xA541A68F;
+	init_params.adv_int_ms = 100;
+	init_params.channel = 38;
+	init_params.handle_count = 2;
+	init_params.packet_format = RBC_MESH_PACKET_FORMAT_ORIGINAL;
+	init_params.radio_mode = RBC_MESH_RADIO_MODE_BLE_1MBIT;
+
+	uint8_t error_code;
+	error_code = rbc_mesh_init(init_params);
+	APP_ERROR_CHECK(error_code);
+
+	error_code = rbc_mesh_value_enable(1);
+	APP_ERROR_CHECK(error_code);
+	error_code = rbc_mesh_value_enable(2);
+	APP_ERROR_CHECK(error_code);
+
+
+	sd_nvic_EnableIRQ(SD_EVT_IRQn);
+	
+	LOGi("Start waiting for events.");
+
+	/* sleep */
+	while (true)
+	{
+		sd_app_evt_wait();
+	}
+}
+
+/**                                                                                                                     
+* @brief Softdevice event handler                                                                                       
+*/                                                                                                                      
+void SD_EVT_IRQHandler(void)                                                                                            
+{                                                                                                                       
+    rbc_mesh_sd_irq_handler();                                                                                          
+}  
+
+void rbc_mesh_event_handler(rbc_mesh_event_t* evt)                                                                      
+{                                                                                                                       
+	TICK_PIN(28);                                                                                                       
+	nrf_gpio_pin_toggle(PIN_GPIO_LED7);
+	switch (evt->event_type)                                                                                            
+	{                                                                                                                   
+		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:                                                                       
+		case RBC_MESH_EVENT_TYPE_NEW_VAL:                                                                               
+		case RBC_MESH_EVENT_TYPE_UPDATE_VAL:                                                                            
+
+			if (evt->value_handle > 2)                                                                                  
+				break; 
+			if (evt->data[0]) {
+				LOGi("Got data in: %i, %i", evt->value_handle, evt->data[0]);
+			}    
+			led_config(evt->value_handle, evt->data[0]);  
+			break; 
+	}                                                                                                                   
+}        
+
+//#ifdef BOARD_PCA10001                                                                                                   
+/* configure button interrupt for evkits */                                                                             
+static void gpiote_init(void)                                                                                           
+{                                                                                                                       
+    NRF_GPIO->PIN_CNF[BUTTON_0] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)                                    
+                                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)                                   
+               //                 | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)                                                
+                                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)                                
+                                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);                                     
+                                                                                                                        
+    NRF_GPIO->PIN_CNF[BUTTON_1] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)                                    
+                                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)                                   
+                 //               | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)                                                
+                                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)                                
+                                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);                                     
+                                                                                                                        
+                                                                                                                        
+    /* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it                                     
+    in APP_LOW in order to use the mesh API */                                                                          
+    NVIC_SetPriority(GPIOTE_IRQn, 3);                                                                                   
+                                                                                                                        
+    NVIC_EnableIRQ(GPIOTE_IRQn);                                                                                        
+    NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_PORT_Msk;                                                                    
+}                                                                                                                       
+                                                                                                                        
+//#endif                                                                                                                  
+                                                                                                                        
+void GPIOTE_IRQHandler(void)                                                                                            
+{                                                                                                                       
+	NRF_GPIOTE->EVENTS_PORT = 0;                                                                                        
+	for (uint8_t i = 0; i < 2; ++i)                                                                                     
+	{
+		if (NRF_GPIO->IN & (1 << (BUTTON_0 + i)))                                                                       
+		{                                                                                                               
+			LOGi("Button %i pressed", i); 
+			uint8_t val[28];                                                                                            
+			uint16_t len;                                                                                               
+			APP_ERROR_CHECK(rbc_mesh_value_get(i + 1, val, &len, NULL));                                                
+			LOGi("Current mesh data of %i = %i", i + 1, val[0]);
+			val[0] = !val[0];                                                                          
+			led_config(i + 1, val[0]);                                                                                  
+			LOGi("Set mesh data %i to %i", i+1, val[0]);
+			APP_ERROR_CHECK(rbc_mesh_value_set(i + 1, &val[0], 1));                                                     
+		}                                                               
+	} 
+}
+
+
+}
+
+#endif
+
+
+/**********************************************************************************************************************
+ * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
+ * the code within the bootloader has been processed before. But also after the bootloader, the code in 
+ * nRF51822.c will set event handlers and other stuff (such as coping with product anomalies, PAN), before calling 
+ * main. If you enable a new peripheral device, make sure you enable the corresponding event handler there as well.
+ *********************************************************************************************************************/
+
 int main() {
 	welcome();
 
+#if MESHING==1
+	gpiote_init();
+#endif
 	// set up the bluetooth stack that controls the hardware.
 	Nrf51822BluetoothStack stack;
 
@@ -143,6 +300,10 @@ int main() {
 	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	// in particular we need it to set interrupt priorities.
 	stack.init();
+
+#if MESHING==1
+	setup_mesh();
+#endif
 
 	stack.onConnect([&](uint16_t conn_handle) {
 			LOGi("onConnect...");
@@ -195,17 +356,17 @@ int main() {
 
 	LOGi("Create all services");
 
-#ifdef INDOOR_SERVICE
+#if INDOOR_SERVICE==1
 	// now, build up the services and characteristics.
 	IndoorLocalizationService& localizationService = IndoorLocalizationService::createService(stack);
 #endif
 
-#ifdef GENERAL_SERVICE
+#if GENERAL_SERVICE==1
 	// general services, such as internal temperature, setting names, etc.
 	GeneralService& generalService = GeneralService::createService(stack);
 #endif
 
-#ifdef POWER_SERVICE
+#if POWER_SERVICE==1
 	PowerService &powerService = PowerService::createService(stack);
 #endif
 
@@ -225,19 +386,14 @@ int main() {
 	while(1) {
 		// deliver events from the bluetooth stack to the callbacks defined above.
 		//		analogwrite(pin_led, 50);
-//#define TEST_BOOTLOADER
-//#ifdef TEST_BOOTLOADER
-//		sd_power_gpregret_set(1);
-//		sd_nvic_SystemReset();
-//#endif
 		stack.tick();
-#ifdef GENERAL_SERVICE
+#if GENERAL_SERVICE==1
 		generalService.tick();
 #endif
-#ifdef POWER_SERVICE
+#if POWER_SERVICE==1
 		powerService.tick();
 #endif
-#ifdef INDOOR_SERVICE
+#if INDOOR_SERVICE==1
 		localizationService.tick();
 #endif
 

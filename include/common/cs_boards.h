@@ -43,6 +43,12 @@
 
 #define PIN_GPIO_LED0        8                   // this is p1.0 or gpio 8
 #define PIN_GPIO_LED1        9                   // this is p1.1 or gpio 9
+#define PIN_GPIO_LED2        10
+#define PIN_GPIO_LED3        11          
+#define PIN_GPIO_LED4        12          
+#define PIN_GPIO_LED5        13          
+#define PIN_GPIO_LED6        14          
+#define PIN_GPIO_LED7        15          
 
 #define PIN_GPIO_SWITCH      PIN_GPIO_LED1       // just show switch as LED
 #define PIN_AIN_ADC          2                   // ain2 is p0.1 or gpio 1

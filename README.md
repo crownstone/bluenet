@@ -67,6 +67,8 @@ Now you will have to set all fields in the configuration file:
 * adjust `JLINK` to the full name of the JLink utility (JLinkExe on Linux)
 * adjust `JLINK_GDB_SERVER` to the full name of the JLink utility that supports gdb (JLinkGDBServer on Linux)
 * set `BLUETOOTH_NAME` to something you like
+* adjust `INDOOR_SERVICE` to `1` if you want to enable it, the same is true for the other services
+* adjust `MESHING` to `1` if you want to enable meshing functionality
 
 Let us now install the SoftDevice on the nRF51822:
 
@@ -171,3 +173,10 @@ especially for that purpose. This means you are not finding a Nordic license tex
 Of course, this means that you will have to get those files from Nordic via different means (we recommend to buy the
 development kit). We just didn't want to "contaminate" this repository with files that we don't understand the license
 implications of.
+
+The only exception is the code for the meshing functionality that is put online by Nordic itself on 
+https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh. This functionality can be found in `src/protocol` and
+`include/protocol/` and falls of course under the Nordic license. You can disable the meshing functionality with
+`MESHING=0` if you do not want to exclude that code from becoming part of the binary. You can still use the services
+for individual nodes, but they won't be able to communicate with each other in that case.
+

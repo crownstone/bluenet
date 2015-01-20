@@ -419,6 +419,16 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 		free(_evt_buffer);
 }
 
+#define OWN_HANDLER
+
+#ifdef OWN_HANDLER
+void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name)                            
+{                                                                                                                       
+    UNUSED_PARAMETER(pc);                                                                                               
+    assert_nrf_callback(line_num, file_name);                                                                           
+}      
+#endif
+
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	if (_inited)
@@ -432,6 +442,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 		BLE_CALL(sd_softdevice_disable, ());
 	}
 
+	log(INFO,"Enable Softdevice, set assertion handler.");
 	BLE_CALL(sd_softdevice_enable, (_clock_source, softdevice_assertion_handler));
 
 	// Initialize the SoftDevice handler module.
@@ -485,8 +496,9 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	setTxPowerLevel();
 
+#ifndef OWN_HANDLER
 	BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
-
+#endif
 	_inited = true;
 
 	return *this;

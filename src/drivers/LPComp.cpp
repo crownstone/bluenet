@@ -15,7 +15,7 @@
 #include "nrf_sdm.h"
 #endif
 
-#include <common/boards.h>
+#include <common/cs_boards.h>
 #include <drivers/serial.h>
 #include <util/ble_error.h>
 

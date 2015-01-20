@@ -70,7 +70,9 @@ MESSAGE(STATUS "Linked libraries: ${LIBS}")
 
 # Source directory
 SET(SOURCE_DIR "src")
-SET(INCLUDE_DIR "include" "include/common")
+
+# Add separately include directories if we are to lazy to specify e.g. "#include <protocol/rbc_mesh.h>"
+SET(INCLUDE_DIR "include" "include/common" "include/protocol")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
@@ -95,12 +97,35 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/ScanResult.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/CurrentLimit.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/TrackDevices.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/BluetoothLE.cpp")
+IF(${INDOOR_SERVICE} STRGREATER "0")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/IndoorLocalisationService.cpp")
+ENDIF()
+IF(${GENERAL_SERVICE} STRGREATER "0")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/GeneralService.cpp")
+ENDIF()
+IF(${POWER_SERVICE} STRGREATER "0")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/PowerService.cpp")
+ENDIF()
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/Dispatcher.cpp")
 
+IF(${MESHING} STRGREATER "0")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh_srv.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/radio_control.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/rbc_mesh.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/timer_control.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/timeslot_handler.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/transport_control.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/trickle.c")
+
+	# temporarily
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/led_config.c")
+ENDIF()
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
+
+FOREACH(crownstone_file ${FOLDER_SOURCE})
+	MESSAGE(STATUS "Include Crownstone file: " ${crownstone_file})
+ENDFOREACH()
 
 # Add all header files without exception
 #FILE(GLOB FOLDER_HEADER ${INCLUDE_DIR}/*.h ${INCLUDE_DIR}/*.hh ${INCLUDE_DIR}/*.hpp)
@@ -113,7 +138,7 @@ LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/app_scheduler.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/pstorage.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/sd_common/softdevice_handler.c")
+#LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/sd_common/softdevice_handler.c")
 
 FOREACH(nordic_file ${NORDIC_SOURCE})
 	MESSAGE(STATUS "Include Nordic file: " ${nordic_file})

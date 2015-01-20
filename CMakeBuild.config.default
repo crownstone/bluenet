@@ -65,8 +65,29 @@ APPLICATION_LENGTH=0x24000
 RAM_R1_BASE=0x20002800
 RAM_APPLICATION_AMOUNT=0x1800
 
+# Should be 5 characters or less (we need room for compilation date after it)
+BLUETOOTH_NAME="crown"
+
+# The different boards that can be used:
+# PCA10001             0
+# NRF6310              1
+# NRF51822_DONGLE      2
+# NRF51822_EVKIT       3
+# RFDUINO              4
+# CROWNSTONE           5
+# NRF51422             6
+BOARD=1
+
 # Use SoftDevice (setting to 0 is untested)
 NRF51_USE_SOFTDEVICE=1
+
+# Enable or disable meshing functionality
+MESHING=0
+
+# Enable or disable different services (at times required to preserve memory)
+INDOOR_SERVICE=0
+GENERAL_SERVICE=1
+POWER_SERVICE=0
 
 # This is the directory where the cross-compiler resides
 COMPILER_PATH=/opt/compiler/gcc-arm-none-eabi-4_8-2013q4

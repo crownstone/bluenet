@@ -11,7 +11,7 @@
 
 #include <services/PowerService.h>
 #include <common/config.h>
-#include <common/boards.h>
+#include <common/cs_boards.h>
 #include <drivers/nrf_rtc.h>
 
 #include "nRF51822.h"
