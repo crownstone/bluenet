@@ -84,12 +84,18 @@ ADD_DEFINITIONS("-DMESHING=${MESHING}")
 # only required if Nordic files are used
 ADD_DEFINITIONS("-DBOARD_NRF6310")
 
-
+# the bluetooth name is optional
 IF(BLUETOOTH_NAME)
 	ADD_DEFINITIONS("-DBLUETOOTH_NAME=${BLUETOOTH_NAME}")
 ELSE()
 	MESSAGE(FATAL_ERROR "We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. \"Crown\" (with quotes)")
 ENDIF()
+
+GET_DIRECTORY_PROPERTY( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS )
+
+FOREACH(definition ${DirDefs})
+	MESSAGE(STATUS "Definition: " ${definition})
+ENDFOREACH()
 
 # Set the compiler flags
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=cortex-m0 -mthumb -ffunction-sections -fdata-sections ${DEFINES}")

@@ -9,7 +9,14 @@
  * TODO: Build up the structure with servers and peripheral roles such that we can reach everybody from every position.
  */
 
-class Mesh {
-	public:
-};
+//class Mesh {
+//	public:
+//};
+
+#pragma once
+
+#include <protocol/rbc_mesh.h>
+
+void rbc_mesh_event_handler(rbc_mesh_event_t* evt);
+
 

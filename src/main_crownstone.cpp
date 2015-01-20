@@ -93,6 +93,10 @@ void welcome() {
 	uint8_t *p = (uint8_t*)malloc(1);
 	LOGd("Start of heap %p", p);
 	free(p);
+	LOGd("Bootloader starts at 0x00035000.");
+        // To have DFU, keep application limited to (BOOTLOADER_START - APPLICATION_START_CODE) / 2
+	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800 
+	// Very probably FLASH (32MB) is not a problem though, but RAM will be (16kB)!
 	LOGi("Welcome at the nRF51822 code for meshing.");
 	LOGi("Compilation time: %s", COMPILATION_TIME);
 }
@@ -173,6 +177,7 @@ void setup_mesh() {
 	init_params.radio_mode = RBC_MESH_RADIO_MODE_BLE_1MBIT;
 
 	uint8_t error_code;
+	// checks if softdevice is enabled etc.
 	error_code = rbc_mesh_init(init_params);
 	APP_ERROR_CHECK(error_code);
 
@@ -185,12 +190,12 @@ void setup_mesh() {
 	sd_nvic_EnableIRQ(SD_EVT_IRQn);
 	
 	LOGi("Start waiting for events.");
-
-	/* sleep */
+/*
 	while (true)
 	{
 		sd_app_evt_wait();
 	}
+	*/
 }
 
 /**                                                                                                                     
@@ -198,28 +203,8 @@ void setup_mesh() {
 */                                                                                                                      
 void SD_EVT_IRQHandler(void)                                                                                            
 {                                                                                                                       
-    rbc_mesh_sd_irq_handler();                                                                                          
+	rbc_mesh_sd_irq_handler();                                                                                          
 }  
-
-void rbc_mesh_event_handler(rbc_mesh_event_t* evt)                                                                      
-{                                                                                                                       
-	TICK_PIN(28);                                                                                                       
-	nrf_gpio_pin_toggle(PIN_GPIO_LED7);
-	switch (evt->event_type)                                                                                            
-	{                                                                                                                   
-		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:                                                                       
-		case RBC_MESH_EVENT_TYPE_NEW_VAL:                                                                               
-		case RBC_MESH_EVENT_TYPE_UPDATE_VAL:                                                                            
-
-			if (evt->value_handle > 2)                                                                                  
-				break; 
-			if (evt->data[0]) {
-				LOGi("Got data in: %i, %i", evt->value_handle, evt->data[0]);
-			}    
-			led_config(evt->value_handle, evt->data[0]);  
-			break; 
-	}                                                                                                                   
-}        
 
 //#ifdef BOARD_PCA10001                                                                                                   
 /* configure button interrupt for evkits */                                                                             
@@ -380,11 +365,13 @@ int main() {
 	stack.startAdvertising();
 #endif
 	
-	LOGi("Running while tick..");
+	LOGi("Running while ticking..");
 
+	//static long int dbg_counter = 0;
 	while(1) {
-		// deliver events from the bluetooth stack to the callbacks defined above.
-		//		analogwrite(pin_led, 50);
+		//LOGd("Tick %li", ++dbg_counter); // we really have to monitor the frequence of our ticks
+		
+		// The tick will halt everything until there is a connection made...
 		stack.tick();
 #if GENERAL_SERVICE==1
 		generalService.tick();
