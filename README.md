@@ -177,6 +177,6 @@ implications of.
 The only exception is the code for the meshing functionality that is put online by Nordic itself on 
 https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh. This functionality can be found in `src/protocol` and
 `include/protocol/` and falls of course under the Nordic license. You can disable the meshing functionality with
-`MESHING=0` if you do not want to exclude that code from becoming part of the binary. You can still use the services
+`MESHING=0` if you do want to exclude that code from becoming part of the binary. You can still use the services
 for individual nodes, but they won't be able to communicate with each other in that case.
 
