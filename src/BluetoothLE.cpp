@@ -304,16 +304,18 @@ void GenericService::addSpecificCharacteristics() {
 	}
 }
 
+/**
+ * A service can receive a BLE event. Currently we pass the connection events through as well as the write event.
+ * The latter is wired through on_write() which we pass the evt.gatts_evt.params.write part of the event.
+ */
 void Service::on_ble_event(ble_evt_t * p_ble_evt) {
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
-		on_connect(p_ble_evt->evt.gap_evt.conn_handle,
-				p_ble_evt->evt.gap_evt.params.connected);
+		on_connect(p_ble_evt->evt.gap_evt.conn_handle, p_ble_evt->evt.gap_evt.params.connected);
 		break;
 
 	case BLE_GAP_EVT_DISCONNECTED:
-		on_disconnect(p_ble_evt->evt.gap_evt.conn_handle,
-				p_ble_evt->evt.gap_evt.params.disconnected);
+		on_disconnect(p_ble_evt->evt.gap_evt.conn_handle, p_ble_evt->evt.gap_evt.params.disconnected);
 		break;
 
 	case BLE_GATTS_EVT_WRITE:
@@ -325,16 +327,24 @@ void Service::on_ble_event(ble_evt_t * p_ble_evt) {
 	}
 }
 
-void Service::on_connect(uint16_t conn_handle,
-		ble_gap_evt_connected_t& gap_evt) {
+void Service::on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt) {
 	// nothing here yet.
 }
 
-void Service::on_disconnect(uint16_t conn_handle,
-		ble_gap_evt_disconnected_t& gap_evt) {
+void Service::on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& gap_evt) {
 	// nothing here yet.
 }
 
+/**
+ * On an incoming write event we go through the characteristics that belong to this service and compare a handle
+ * to see which one we have to write. Subsequently, characteristic->written will be called with length, offset, and
+ * the data itself. Depending on the characteristic this can be retrieved as a string or any kind of data type.
+ * There is currently no exception handling when the characteristic cannot be found.
+ *
+ * Note that the write can also be not the value, but the flag to enable or disable notification. In this case 
+ * write_evt.handle is compared instead of write_evt.context.value_handle. Of course, the corresponding handle in
+ * the characteristic object is also different.
+ */
 void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 	bool found = false;
 
@@ -345,7 +355,7 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(write_evt.data));
 			found = true;
 
-		} else if (characteristic->getValueHandle()	== write_evt.context.value_handle) {
+		} else if (characteristic->getValueHandle() == write_evt.context.value_handle) {
 			// TODO: make a map.
 			found = true;
 
@@ -357,9 +367,7 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 			} else {
 				found = false;
 			}
-
 		}
-
 	}
 
 	if (!found) {
@@ -377,22 +385,17 @@ void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
 /// Nrf51822BluetoothStack /////////////////////////////////////////////////////////////////////////////////////////////
 
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
-		_appearance(defaultAppearance), _clock_source(
-				defaultClockSource), _mtu_size(defaultMtu), _tx_power_level(
-				defaultTxPowerLevel), _sec_mode( { }),
-		//_adv_params({}),
+		_appearance(defaultAppearance), _clock_source(defaultClockSource), _mtu_size(defaultMtu), 
+		_tx_power_level(defaultTxPowerLevel), _sec_mode({ }),
 		_interval(defaultAdvertisingInterval_0_625_ms), _timeout(
 				defaultAdvertisingTimeout_seconds), _gap_conn_params( { }),
-
 		_inited(false), _started(false), _advertising(false), _scanning(false),
-
 		_conn_handle(BLE_CONN_HANDLE_INVALID),
-
 		_radio_notify(0)
-
 {
-	if (_stack)
+	if (_stack) {
 		BLE_THROW("Can't have more than one Nrf51822BluetoothStack");
+	}
 	_stack = this;
 
 	_evt_buffer_size = sizeof(ble_evt_t) + (_mtu_size) * sizeof(uint32_t);
@@ -407,11 +410,14 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 	_gap_conn_params.min_conn_interval = defaultMinConnectionInterval_1_25_ms;
 	_gap_conn_params.max_conn_interval = defaultMaxConnectionInterval_1_25_ms;
 	_gap_conn_params.slave_latency = defaultSlaveLatencyCount;
-	_gap_conn_params.conn_sup_timeout =
-			defaultConnectionSupervisionTimeout_10_ms;
-
+	_gap_conn_params.conn_sup_timeout = defaultConnectionSupervisionTimeout_10_ms;
 }
 
+/**
+ * The destructor shuts down the stack. 
+ *
+ * TODO: The SoftDevice should be disabled as well.
+ */
 Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	shutdown();
 
@@ -422,6 +428,10 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 #define OWN_HANDLER
 
 #ifdef OWN_HANDLER
+/**
+ * This assertion handler gets called when there is something amiss in the execution. Attach gdb to see the function
+ * parameters.
+ */
 void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name)                            
 {                                                                                                                       
     UNUSED_PARAMETER(pc);                                                                                               
@@ -429,6 +439,19 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
 }      
 #endif
 
+/**
+ * Performs a series of tasks:
+ *   - disables softdevice if it is currently enabled
+ *   - enables softdevice with own clock and assertion handler
+ *   - enable service changed characteristic for S110
+ *   - disable automatic address recycling for S110
+ *   - enable IRQ (SWI2_IRQn) for the softdevice
+ *   - set BLE device name
+ *   - set appearance (e.g. used in GUIs to interface with BLE devices)
+ *   - set connection parameters
+ *   - set Tx power level
+ *   - set the callback for BLE events (if we use Source/sd_common/softdevice_handler.c in Nordic's SDK)
+ */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	if (_inited)
@@ -445,14 +468,9 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	log(INFO,"Enable Softdevice, set assertion handler.");
 	BLE_CALL(sd_softdevice_enable, (_clock_source, softdevice_assertion_handler));
 
-	// Initialize the SoftDevice handler module.
-	// this would call with different clock!
-	//SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, false);
-	
 	// enable the BLE stack
-#if(NORDIC_SDK_VERSION >= 6)
-
 #if(SOFTDEVICE_SERIES == 110) 
+#if(NORDIC_SDK_VERSION >= 6)
 	// do not define the service_changed characteristic, of course allow future changes
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1
 	ble_enable_params_t ble_enable_params;
@@ -463,7 +481,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 #endif
 
 	// according to the migration guide the address needs to be set directly after the sd_ble_enable call
-	// due to "an issue present in the s110_nrf51822_7.0.0 release
+	// due to "an issue present in the s110_nrf51822_7.0.0 release"
 #if(SOFTDEVICE_SERIES == 110) 
 #if(NORDIC_SDK_VERSION >= 7)
 	BLE_CALL(sd_ble_gap_enable, () );
@@ -479,12 +497,9 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	sd_nvic_EnableIRQ(SWI2_IRQn);
 
-	//updateDeviceName(_device_name);
-	
 	if (!_device_name.empty()) {
 		BLE_CALL(sd_ble_gap_device_name_set,
 				(&_sec_mode, (uint8_t*) _device_name.c_str(), _device_name.length()));
-		//BLE_CALL(sd_ble_gap_device_name_set, (&_sec_mode, DEVICE_NAME, strlen(DEVICE_NAME)));
 	} else {
 		std::string name = "not set...";
 		BLE_CALL(sd_ble_gap_device_name_set,
@@ -509,7 +524,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::updateDeviceName(const std::stri
 	if (!_device_name.empty()) {
 		BLE_CALL(sd_ble_gap_device_name_set,
 				(&_sec_mode, (uint8_t*) _device_name.c_str(), _device_name.length()));
-		//BLE_CALL(sd_ble_gap_device_name_set, (&_sec_mode, DEVICE_NAME, strlen(DEVICE_NAME)));
 	} else {
 		std::string name = "not set...";
 		BLE_CALL(sd_ble_gap_device_name_set,
@@ -518,6 +532,11 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::updateDeviceName(const std::stri
 	return *this;
 }
 
+/**
+ * Start can only be called once. It starts all services. If one of these services cannot be started, there is 
+ * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in 
+ * init().
+ */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::start() {
 	if (_started)
 		return *this;
@@ -531,14 +550,20 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::start() {
 	return *this;
 }
 
+/**
+ * The function shutdown() is the counterpart of start(). It does stop all services. It does not check if these 
+ * services have actually been started. 
+ *
+ * It will also stop advertising. The SoftDevice will not be shut down.
+ *
+ * After a shutdown() the function start() can be called again.
+ */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::shutdown() {
 	stopAdvertising();
 
 	for (Service* svc : _services) {
 		svc->stop();
 	}
-
-	// TODO: shutdown soft device.
 
 	_inited = false;
 
@@ -561,17 +586,11 @@ void Nrf51822BluetoothStack::setConnParams() {
 	BLE_CALL(sd_ble_gap_ppcp_set, (&_gap_conn_params));
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::setTxPowerLevel(
-		int8_t powerLevel) {
+Nrf51822BluetoothStack& Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
 	if (_tx_power_level != powerLevel) {
 		_tx_power_level = powerLevel;
 		if (_inited)
 			setTxPowerLevel();
-
-		//        if (_advertising) {
-		//            stopAdvertising();
-		//            startAdvertising();
-		//        }
 	}
 }
 
@@ -929,6 +948,10 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
 //	}
 //}
 
+/**
+ * Every module on the system gets a tick in which it regularly gets some attention. Of course, everything that is
+ * important should be done within interrupt handlers. 
+ */
 void Nrf51822BluetoothStack::tick() {
 
 #if(NORDIC_SDK_VERSION > 5)
@@ -958,6 +981,12 @@ void Nrf51822BluetoothStack::tick() {
 	}
 }
 
+/**
+ * A BLE event is generated, these can be connect or disconnect events. It can also be RSSI values that changed, or
+ * an authorization request. Not all event structures are exactly the same over the different SoftDevices, so there
+ * are some defines for minor changes. And of course, e.g. the S110 softdevice cannot listen to advertisements at all,
+ * so BLE_GAP_EVT_ADV_REPORT is entirely disabled.
+ */
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
 //		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);

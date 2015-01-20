@@ -155,7 +155,6 @@ void config_drivers() {
 
 extern "C" {
 
-#warning "TEST"
 /**
  * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
  * thing.
