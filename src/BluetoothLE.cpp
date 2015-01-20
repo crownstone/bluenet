@@ -12,6 +12,13 @@
 #include "nrf_soc.h"
 #endif
 
+#if MESHING==1
+extern "C" {
+#include <protocol/mesh.h>
+#include <protocol/rbc_mesh.h>
+}
+#endif
+
 #ifndef SOFTDEVICE_SERIES
 #error "The SOFTDEVICE_SERIES macro is required for compilation. Set it to 110 for example"
 #endif
@@ -907,12 +914,17 @@ bool Nrf51822BluetoothStack::isScanning() {
 }
 #endif
 
+/**
+ * Function that sets up radio notification interrupts. It sets the IRQ priority, enables it, and sets some 
+ * configuration values related to distance.
+ *
+ * Currently not used. 
+ */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
 		uint32_t distanceUs, callback_radio_t callback) {
 	_callback_radio = callback;
 
-	nrf_radio_notification_distance_t distance =
-			NRF_RADIO_NOTIFICATION_DISTANCE_NONE;
+	nrf_radio_notification_distance_t distance = NRF_RADIO_NOTIFICATION_DISTANCE_NONE;
 
 	if (distanceUs >= 5500) {
 		distance = NRF_RADIO_NOTIFICATION_DISTANCE_5500US;
@@ -929,18 +941,15 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
 	}
 
 	uint32_t result = sd_nvic_SetPriority(SWI1_IRQn, NRF_APP_PRIORITY_LOW);
-
 	BLE_THROW_IF(result, "Could not set radio notification IRQ priority.");
 
 	result = sd_nvic_EnableIRQ(SWI1_IRQn);
-
 	BLE_THROW_IF(result, "Could not enable radio notification IRQ.");
 
 	result = sd_radio_notification_cfg_set(
 			distance == NRF_RADIO_NOTIFICATION_DISTANCE_NONE ?
 					NRF_RADIO_NOTIFICATION_TYPE_NONE :
 					NRF_RADIO_NOTIFICATION_TYPE_INT_ON_BOTH, distance);
-
 	BLE_THROW_IF(result, "Could not configure radio notification.");
 
 	return *this;
@@ -1008,7 +1017,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
 //	}
 #if MESHING==1
-	APP_ERROR_CHECK(rbc_mesh_ble_evt_handler(evt));
+	APP_ERROR_CHECK(rbc_mesh_ble_evt_handler(p_ble_evt));
 #endif
 
 	switch (p_ble_evt->header.evt_id) {
