@@ -384,6 +384,11 @@ void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
 
 /// Nrf51822BluetoothStack /////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. However,
+ * the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the init() 
+ * function.
+ */
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 		_appearance(defaultAppearance), _clock_source(defaultClockSource), _mtu_size(defaultMtu), 
 		_tx_power_level(defaultTxPowerLevel), _sec_mode({ }),
@@ -490,7 +495,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr) );
 #endif
 #endif
-
+	// version is not saved or shown yet
 	ble_version_t version( { });
 	version.company_id = 12;
 	BLE_CALL(sd_ble_version_get, (&version));
@@ -518,7 +523,12 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	return *this;
 }
-        
+
+/**
+ * We want to change the device name halfway. This can be done through a characteristic, which is easy during
+ * development (you can separate otherwise similar devices). It is probably not functionality you want to have for
+ * the end-user.
+ */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::updateDeviceName(const std::string& deviceName) {
 	_device_name = deviceName;
 	if (!_device_name.empty()) {
@@ -951,6 +961,9 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
 /**
  * Every module on the system gets a tick in which it regularly gets some attention. Of course, everything that is
  * important should be done within interrupt handlers. 
+ *
+ * This function goes through the buffer and calls on_ble_evt for every BLE message in the buffer, till the buffer is
+ * empty. It then returns.
  */
 void Nrf51822BluetoothStack::tick() {
 
@@ -986,14 +999,19 @@ void Nrf51822BluetoothStack::tick() {
  * an authorization request. Not all event structures are exactly the same over the different SoftDevices, so there
  * are some defines for minor changes. And of course, e.g. the S110 softdevice cannot listen to advertisements at all,
  * so BLE_GAP_EVT_ADV_REPORT is entirely disabled.
+ *
+ * TODO: Currently we loop through every service and send e.g. BLE_GATTS_EVT_WRITE only when some handle matches. It
+ * is faster to set up maps from handles to directly the right function.
  */
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
 //		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
 //	}
-	switch (p_ble_evt->header.evt_id) {
-	// TODO: how do we identify which service evt is for?
+#if MESHING==1
+	APP_ERROR_CHECK(rbc_mesh_ble_evt_handler(evt));
+#endif
 
+	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
 		on_connected(p_ble_evt);
 		break;
@@ -1012,7 +1030,6 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	case BLE_GATTS_EVT_WRITE:
 		for (Service* svc : _services) {
-			// TODO use a map...
 			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
 				svc->on_ble_event(p_ble_evt);
 			}
@@ -1081,19 +1098,20 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	}
 }
 
+/**
+ * On a connection request send it to all services.
+ */
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
 	_advertising = false; // it seems like maybe we automatically stop advertising when we're connected.
 
-	BLE_CALL(sd_ble_gap_conn_param_update,
-			(p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params));
+	BLE_CALL(sd_ble_gap_conn_param_update, (p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params));
 
 	if (_callback_connected) {
 		_callback_connected(p_ble_evt->evt.gap_evt.conn_handle);
 	}
 	_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
-	for (size_t i = 0; i < _services.size(); ++i) {
-		Service* svc = _services[i];
+	for (Service* svc : _services) {
 		svc->on_ble_event(p_ble_evt);
 	}
 }
