@@ -40,7 +40,6 @@ Into:
 
 You will have to attach a programmer/debugger somehow. Towards that you only need four pins. On the RFduino this is `GND`, `3V`, `RESET`, and `FACTORY` and they are subsequent pins on that side of the RFduino where there are most pins (the other side has the antenna stealing a bit of space for eventual pins). The pin layout of the JLink connector is written out on the [DoBots blog](http://dobots.nl/2014/03/05/rfduino-without-rfduino-code/).
 
-On the moment the current functionality is extremely simple. The service `00002220-0000-1000-8000-00805f9b34fb` provides a write characteristic `0124` to which can be written a value. If you attach a devices to pin `GPIO5` you will see it toggled.
 
 ### Configuration
 
@@ -66,9 +65,11 @@ Now you will have to set all fields in the configuration file:
 * adjust the `COMPILER_PATH` and `COMPILER_TYPE` to your compiler (it will be used as `$COMPILER_PATH\bin\$COMPILER_TYPE-gcc`)
 * adjust `JLINK` to the full name of the JLink utility (JLinkExe on Linux)
 * adjust `JLINK_GDB_SERVER` to the full name of the JLink utility that supports gdb (JLinkGDBServer on Linux)
-* set `BLUETOOTH_NAME` to something you like
+* set `BLUETOOTH_NAME` to something you like, but make sure it's short.
 * adjust `INDOOR_SERVICE` to `1` if you want to enable it, the same is true for the other services
 * adjust `MESHING` to `1` if you want to enable meshing functionality
+* adjust `BOARD` to the correct number for your board. This determines the pin layout.
+* adjust `HARDWARE_VERSION` to the correct version of the NRF51 chip you have. Use script/hardware_version.sh to check your version.
 
 Let us now install the SoftDevice on the nRF51822:
 
