@@ -73,25 +73,29 @@ Now you will have to set all fields in the configuration file:
 
 Let us now install the SoftDevice on the nRF51822:
 
-* cd scripts
-* ./softdevice.sh build
-* ./softdevice.sh upload
+    cd scripts
+    ./softdevice.sh build
+    ./softdevice.sh upload
 
 Now we can build our own software:
 
-* cd $BLUENET
-* make
+    cd $BLUENET
+    make
 
-And we can upload it:
+Alternatively, you can build it using our script:
 
-* cd scripts
-* this would do the same as building above ./firmware build crownstone
-* ./firmware.sh upload crownstone
-* ./firmware.sh debug crownstone
+    cd scripts
+    ./firmware.sh build crownstone
 
-You can also run:
+There is also an upload and debug script. The first uses `JLink` to upload, the second uses `gdb` to attach itself
+to the running process:
 
-* ./firmware.sh all crownstone
+    ./firmware.sh upload crownstone
+    ./firmware.sh debug crownstone
+
+You can also run everything in sequence:
+
+    ./firmware.sh all crownstone
 
 And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish. 
 
@@ -127,18 +131,24 @@ and define the right usb port to use (if you've multiple).
 ## Bootloader
 
 To upload a new program when the Crownstone is embedded in a wall socket is cumbersome. For that reason for deployment
-we recommend to add a bootloader. The default bootloader from Nordic does not work with the S130 devices. You will
+we recommend to add a bootloader. The default bootloader from Nordic does not work with the `S130` devices. You will
 need our fork:
 
     git clone https://github.com/mrquincle/nrf51-dfu-bootloader-for-gcc-compiler
     cd scripts
     ./all.sh
 
-Subsequently, you will have to set some fields such that the bootloader is loaded rather than the application directly.
+Note, that if you want to use meshing you will need the `S110` version! This can be found in the `s110` tag (see also
+above).
+
+You will have to set some fields such that the bootloader is loaded rather than the application directly.
 
     ./softdevice.sh all
     ./writebyte.sh 0x10001014 0x00034000
     ./firmware.sh all bootloader 0x00034000
+
+Here we place the bootloader at position `0x00034000`. If the bootloader becomes larger in size, you will need to go
+down and adjust the code in the `dfu_types.h` file in the bootloader code.
 
 And you should be good to upload binaries, for example with the following python script:
 
