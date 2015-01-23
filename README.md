@@ -94,6 +94,22 @@ You can also run:
 
 And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish. 
 
+## Meshing
+
+The meshion functionality is the one we are currently integrating on the moment. So, this is a moving target. Set
+`MESHING` to `0` if you don't need it.
+
+For the meshing functionality we use https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh written by a master
+student at Norwegian University of Science and Technology and Nordic. This code makes use of the Timeslot API which
+is not supported yet in the alpha versions of the S130. Hence, if you want to use the meshing functionality, you will
+have to use the `S110`.
+
+This means that if you want to use a bootloader, you will also need the `S110` version of it, and the same is true
+for the upload script:
+
+* https://github.com/mrquincle/nrf51-dfu-bootloader-for-gcc-compiler/tree/s110
+* https://github.com/mrquincle/nrf51_dfu_linux
+
 ## UART
 
 Currently UART for debugging. In case you happen to have the nRFgo Motherboard (nRF6310, strongly recommended) you can 
@@ -127,6 +143,20 @@ And you should be good to upload binaries, for example with the following python
 
     git clone https://github.com/mrquincle/nrf51_dfu_linux
     python dfu.py -f crownstone.hex -a CD:E3:4A:47:1C:E4
+
+Currently the upload script needs to be changed depending on the SoftDevice used, for the `S130`:
+
+    ctrlpt_handle = 0x10
+    ctrlpt_cccd_handle = 0x11
+    data_handle = 0x0E
+
+And for the `S110`:
+
+    ctrlpt_handle = 0x0D
+    ctrlpt_cccd_handle = 0x0E
+    data_handle = 0x0B
+
+Of course, this is too cumbersome. We will soon implement something that figures out the right handles automatically.
 
 ## Todo list
 

@@ -18,6 +18,9 @@
  * Almost all configuration options should be set in CMakeBuild.config.
  *********************************************************************************************************************/
 
+// temporary defines
+#define MESHING_PARALLEL 1
+
 /**********************************************************************************************************************
  * General includes
  *********************************************************************************************************************/
@@ -186,16 +189,14 @@ void setup_mesh() {
 	error_code = rbc_mesh_value_enable(2);
 	APP_ERROR_CHECK(error_code);
 
-
-	sd_nvic_EnableIRQ(SD_EVT_IRQn);
-	
+#if MESHING_PARALLEL == 0
+	sd_nvic_EnableIRQ(SD_EVT_IRQn);	
 	LOGi("Start waiting for events.");
-/*
 	while (true)
 	{
 		sd_app_evt_wait();
 	}
-	*/
+#endif
 }
 
 /**                                                                                                                     
@@ -203,7 +204,8 @@ void setup_mesh() {
 */                                                                                                                      
 void SD_EVT_IRQHandler(void)                                                                                            
 {                                                                                                                       
-	rbc_mesh_sd_irq_handler();                                                                                          
+	LOGd("Received SoftDevice event.");
+	rbc_mesh_sd_irq_handler();     
 }  
 
 //#ifdef BOARD_PCA10001                                                                                                   
@@ -269,9 +271,6 @@ void GPIOTE_IRQHandler(void)
 int main() {
 	welcome();
 
-#if MESHING==1
-	gpiote_init();
-#endif
 	// set up the bluetooth stack that controls the hardware.
 	Nrf51822BluetoothStack stack;
 
@@ -284,10 +283,6 @@ int main() {
 	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	// in particular we need it to set interrupt priorities.
 	stack.init();
-
-#if MESHING==1
-	setup_mesh();
-#endif
 
 	stack.onConnect([&](uint16_t conn_handle) {
 			LOGi("onConnect...");
@@ -354,7 +349,6 @@ int main() {
 	PowerService &powerService = PowerService::createService(stack);
 #endif
 
-
 	// configure drivers
 	config_drivers();
 
@@ -364,14 +358,22 @@ int main() {
 #else
 	stack.startAdvertising();
 #endif
-	
+
+#if MESHING==1
+	gpiote_init();
+#endif
+
+#if MESHING==1
+	setup_mesh();
+#endif
+
 	LOGi("Running while ticking..");
 
 	//static long int dbg_counter = 0;
 	while(1) {
-		//LOGd("Tick %li", ++dbg_counter); // we really have to monitor the frequence of our ticks
+		//LOGd("Tick %li", ++dbg_counter); // we really have to monitor the frequency of our ticks
 		
-		// The tick will halt everything until there is a connection made...
+		// The stack tick will halt everything until there is a connection made...
 		stack.tick();
 #if GENERAL_SERVICE==1
 		generalService.tick();

@@ -7,4 +7,5 @@ path=$(pwd)
 cd /opt/nrf51_dfu_linux
 
 file=$path/../build/$PROGRAM
+echo python dfu.py -f $file -a $ADDRESS
 python dfu.py -f $file -a $ADDRESS
