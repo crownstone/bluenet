@@ -159,6 +159,14 @@ And for the `S110`:
 
 Of course, this is too cumbersome. We will soon implement something that figures out the right handles automatically.
 
+## iBeacon
+
+There is iBeacon functionality, if you want to try that out. For that you will need to set a define in the main file.
+
+    #define IBEACON
+
+This is not the normal operation mode of the Crownstones, and it is not guaranteed to stay.
+
 ## Todo list
 
 * Clean up code

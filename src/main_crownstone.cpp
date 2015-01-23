@@ -310,7 +310,7 @@ int main() {
 
 			stack.stopScanning();
 
-#ifdef ibeacon
+#ifdef IBEACON
 			stack.startIBeacon();
 #else
 			stack.startAdvertising();
