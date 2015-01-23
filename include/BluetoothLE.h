@@ -825,18 +825,30 @@ namespace BLEpp {
         // TODO more here.
     };
 
+    /**
+     * The Nrf51822BluetoothStack class is a direct descendent from BLEStack. It is implemented as a singleton, such
+     * that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt
+     * handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this
+     * stack object as an argument w.r.t. this object. This makes dependencies traceble for the user.
+     */
     class Nrf51822BluetoothStack : public BLEStack {
         friend void SWI2_IRQHandler();   // ble stack events.
         friend void ::SWI1_IRQHandler(); // radio notification
-      public:
+
+    private:
+	Nrf51822BluetoothStack(); // singleton, deny implementation
+	Nrf51822BluetoothStack(Nrf51822BluetoothStack const&); // singleton, deny implementation
+	void operator=(Nrf51822BluetoothStack const &); // singleton, deny implementation
+	virtual ~Nrf51822BluetoothStack();
+    public:
+	static Nrf51822BluetoothStack& getInstance() {
+		static Nrf51822BluetoothStack instance;
+		return instance;
+	}
         typedef function<void(uint16_t conn_handle)>   callback_connected_t;
         typedef function<void(uint16_t conn_handle)>   callback_disconnected_t;
         typedef function<void(bool radio_active)>   callback_radio_t;
 
-
-        static Nrf51822BluetoothStack * _stack;
-
-    public:
         static const uint8_t MAX_SERVICE_COUNT = 5;
 
         //static const uint16_t                  defaultAppearance = BLE_APPEARANCE_UNKNOWN;
@@ -881,11 +893,6 @@ namespace BLEpp {
         callback_radio_t                            _callback_radio;  // 16
         volatile uint8_t                            _radio_notify; // 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
     public:
-
-        Nrf51822BluetoothStack();
-
-        virtual ~Nrf51822BluetoothStack();
-
         Nrf51822BluetoothStack& init();
 
         Nrf51822BluetoothStack& start();

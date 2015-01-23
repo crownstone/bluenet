@@ -104,9 +104,10 @@ And there you go. There are some more utility scripts, such as `reboot.sh`. Use 
 The meshion functionality is the one we are currently integrating on the moment. So, this is a moving target. Set
 `MESHING` to `0` if you don't need it.
 
-For the meshing functionality we use https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh written by a master
-student at Norwegian University of Science and Technology and Nordic. This code makes use of the Timeslot API which
-is not supported yet in the alpha versions of the S130. Hence, if you want to use the meshing functionality, you will
+For the meshing functionality we use https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh written by a 
+Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and 
+Nordic Semiconductors). This code makes use of the Timeslot API which 
+is not supported yet in the alpha versions of the `S130`. Hence, if you want to use the meshing functionality, you will
 have to use the `S110`.
 
 This means that if you want to use a bootloader, you will also need the `S110` version of it, and the same is true

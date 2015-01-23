@@ -21,6 +21,8 @@
 // temporary defines
 #define MESHING_PARALLEL 1
 
+// #define IBEACON
+
 /**********************************************************************************************************************
  * General includes
  *********************************************************************************************************************/
@@ -101,7 +103,8 @@ void welcome() {
 	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800 
 	// Very probably FLASH (32MB) is not a problem though, but RAM will be (16kB)!
 	LOGi("Welcome at the nRF51822 code for meshing.");
-	LOGi("Compilation time: %s", COMPILATION_TIME);
+	LOGi("Compilation date: %s", COMPILATION_TIME);
+	LOGi("Compilation time: %s", __TIME__);
 }
 
 /**
@@ -167,7 +170,7 @@ extern "C" {
  * thing.
  */
 void setup_mesh() {
-	LOGi("For now only testing meshing.");
+	LOGi("For now we are testing the meshing functionality.");
 	nrf_gpio_pin_clear(PIN_GPIO_LED0);
 
 	rbc_mesh_init_params_t init_params;
@@ -179,11 +182,13 @@ void setup_mesh() {
 	init_params.packet_format = RBC_MESH_PACKET_FORMAT_ORIGINAL;
 	init_params.radio_mode = RBC_MESH_RADIO_MODE_BLE_1MBIT;
 
+	LOGi("Call rbc_mesh_init");
 	uint8_t error_code;
 	// checks if softdevice is enabled etc.
 	error_code = rbc_mesh_init(init_params);
 	APP_ERROR_CHECK(error_code);
 
+	LOGi("Call rbc_mesh_value_enable");
 	error_code = rbc_mesh_value_enable(1);
 	APP_ERROR_CHECK(error_code);
 	error_code = rbc_mesh_value_enable(2);
@@ -199,59 +204,71 @@ void setup_mesh() {
 #endif
 }
 
-/**                                                                                                                     
-* @brief Softdevice event handler                                                                                       
-*/                                                                                                                      
-void SD_EVT_IRQHandler(void)                                                                                            
-{                                                                                                                       
-	LOGd("Received SoftDevice event.");
-	rbc_mesh_sd_irq_handler();     
-}  
+/**
+ * @brief Softdevice event handler
+ *
+ * Currently this interrupt screws up the main program. So apparently we have to set priorities somewhere or to tell
+ * the program that it is entering a protected region or something like that.
+ */               
+void SD_EVT_IRQHandler(void)
+{   
+	// do not print in IRQ handler, use LEDs if you have to
+//	LOGd("Received SoftDevice event, call rbc_mesh_sd_irq_handler.");
+	rbc_mesh_sd_irq_handler(); 
+} 
 
-//#ifdef BOARD_PCA10001                                                                                                   
-/* configure button interrupt for evkits */                                                                             
-static void gpiote_init(void)                                                                                           
-{                                                                                                                       
-    NRF_GPIO->PIN_CNF[BUTTON_0] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)                                    
-                                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)                                   
-               //                 | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)                                                
-                                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)                                
-                                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);                                     
-                                                                                                                        
-    NRF_GPIO->PIN_CNF[BUTTON_1] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)                                    
-                                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)                                   
-                 //               | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)                                                
-                                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)                                
-                                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);                                     
-                                                                                                                        
-                                                                                                                        
-    /* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it                                     
-    in APP_LOW in order to use the mesh API */                                                                          
-    NVIC_SetPriority(GPIOTE_IRQn, 3);                                                                                   
-                                                                                                                        
-    NVIC_EnableIRQ(GPIOTE_IRQn);                                                                                        
-    NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_PORT_Msk;                                                                    
-}                                                                                                                       
-                                                                                                                        
-//#endif                                                                                                                  
-                                                                                                                        
-void GPIOTE_IRQHandler(void)                                                                                            
-{                                                                                                                       
-	NRF_GPIOTE->EVENTS_PORT = 0;                                                                                        
-	for (uint8_t i = 0; i < 2; ++i)                                                                                     
+//#ifdef BOARD_PCA10001             
+/* configure button interrupt for evkits */                    
+static void gpiote_init(void)                       
+{                              
+  NRF_GPIO->PIN_CNF[BUTTON_0] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)                  
+                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)                  
+        //         | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)                        
+                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)                
+                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);                   
+                                                            
+  NRF_GPIO->PIN_CNF[BUTTON_1] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)                  
+                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)                  
+         //        | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)                        
+                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)                
+                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);                   
+                                                            
+                                                            
+  /* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it                   
+  in APP_LOW in order to use the mesh API */                                     
+  NVIC_SetPriority(GPIOTE_IRQn, 3);                                          
+                                                            
+  NVIC_EnableIRQ(GPIOTE_IRQn);                                            
+  NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_PORT_Msk;                                  
+}                                                            
+                                                            
+//#endif                             
+                              
+void GPIOTE_IRQHandler(void)                       
+{      
+#ifdef STOP_ADV
+	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
+	
+	if (stack.isAdvertising()) {
+		LOGi("Stop advertising");
+		stack.stopAdvertising();
+	}
+#endif
+	NRF_GPIOTE->EVENTS_PORT = 0;                      
+	for (uint8_t i = 0; i < 2; ++i)                      
 	{
-		if (NRF_GPIO->IN & (1 << (BUTTON_0 + i)))                                                                       
-		{                                                                                                               
+		if (NRF_GPIO->IN & (1 << (BUTTON_0 + i)))                  
+		{                            
 			LOGi("Button %i pressed", i); 
-			uint8_t val[28];                                                                                            
-			uint16_t len;                                                                                               
-			APP_ERROR_CHECK(rbc_mesh_value_get(i + 1, val, &len, NULL));                                                
+			uint8_t val[28];                       
+			uint16_t len;                        
+			APP_ERROR_CHECK(rbc_mesh_value_get(i + 1, val, &len, NULL));            
 			LOGi("Current mesh data of %i = %i", i + 1, val[0]);
-			val[0] = !val[0];                                                                          
-			led_config(i + 1, val[0]);                                                                                  
+			val[0] = !val[0];                   
+			led_config(i + 1, val[0]);                     
 			LOGi("Set mesh data %i to %i", i+1, val[0]);
-			APP_ERROR_CHECK(rbc_mesh_value_set(i + 1, &val[0], 1));                                                     
-		}                                                               
+			APP_ERROR_CHECK(rbc_mesh_value_set(i + 1, &val[0], 1));              
+		}                
 	} 
 }
 
@@ -272,7 +289,7 @@ int main() {
 	welcome();
 
 	// set up the bluetooth stack that controls the hardware.
-	Nrf51822BluetoothStack stack;
+	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
 
 	// set advertising parameters such as the device name and appearance.  
 	setName(stack);

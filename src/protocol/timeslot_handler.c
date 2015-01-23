@@ -251,6 +251,7 @@ void ts_sd_event_handler(void)
     while (sd_evt_get(&evt) == NRF_SUCCESS)
     {
         PIN_OUT(evt, 32);
+	// print evt
         switch (evt)
         {
             case NRF_EVT_RADIO_SESSION_IDLE:
@@ -277,8 +278,14 @@ void ts_sd_event_handler(void)
             case NRF_EVT_RADIO_CANCELED:
                 timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
                 break;
-            default:
-                APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
+
+	    case NRF_EVT_FLASH_OPERATION_SUCCESS:
+		// we are so happy for you
+		break;
+            default: {
+                APP_ERROR_CHECK(evt);
+		//APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
+	    }
         }
     }
     CLEAR_PIN(6);

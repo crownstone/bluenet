@@ -245,10 +245,11 @@ uint32_t CharacteristicBase::notify() {
 		//   it can happen that it tries to update it's value although notification was disabled in
 		//   in the meantime, in which case an invalid state error is returned. but this case we can
 		//   ignore
-		err_code == NRF_ERROR_INVALID_STATE ||
-		err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
+		err_code == NRF_ERROR_INVALID_STATE) {
 			// this is not a serious error, but better to at least write it to the log
 			LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
+		} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
+			// Anne: do not complain for now... (meshing)
 		} else {
 			APP_ERROR_CHECK(err_code);
 		} 
@@ -405,11 +406,6 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 		_conn_handle(BLE_CONN_HANDLE_INVALID),
 		_radio_notify(0)
 {
-	if (_stack) {
-		BLE_THROW("Can't have more than one Nrf51822BluetoothStack");
-	}
-	_stack = this;
-
 	_evt_buffer_size = sizeof(ble_evt_t) + (_mtu_size) * sizeof(uint32_t);
 	_evt_buffer = (uint8_t*) malloc(_evt_buffer_size);
 
@@ -1013,9 +1009,9 @@ void Nrf51822BluetoothStack::tick() {
  * is faster to set up maps from handles to directly the right function.
  */
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
-//	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
-//		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
-//	}
+	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
+		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
+	}
 #if MESHING==1
 	APP_ERROR_CHECK(rbc_mesh_ble_evt_handler(p_ble_evt));
 #endif
@@ -1143,4 +1139,3 @@ void Nrf51822BluetoothStack::onTxComplete(ble_evt_t * p_ble_evt) {
 	}
 }
 
-Nrf51822BluetoothStack * Nrf51822BluetoothStack::_stack = 0;

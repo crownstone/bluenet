@@ -384,7 +384,7 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
     {
         return NRF_ERROR_INVALID_LENGTH;
     }
-    uint32_t error_code = 0;
+    uint8_t error_code = 0;
     
     mesh_char_metadata_t* ch_md = &g_mesh_service.char_metadata[index - 1];
     
@@ -431,9 +431,16 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
             {
                 g_active_conn_handle = CONN_HANDLE_INVALID;
             }
-            else
-            {
-                return NRF_ERROR_INTERNAL;
+            else if (error_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
+		    // this will be reached, error code 0x3401
+		    // (NRF_ERROR_STK_BASE 0x3... and NRF_GATTS_ERR_BASE 0x3400)
+		    return NRF_SUCCESS; // don't know if I can do this!
+            } else if (error_code == NRF_ERROR_SVC_HANDLER_MISSING) {
+		    return NRF_SUCCESS;
+	    } 
+	    else {
+                //return NRF_ERROR_INTERNAL;
+		return error_code;
             }
         }
     }
