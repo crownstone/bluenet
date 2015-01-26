@@ -1,9 +1,0 @@
-MEMORY
-{
-	FLASH (rx)  : ORIGIN = 0x0001c000, LENGTH = 0x24000
-	RAM  (rwx) : ORIGIN = 0x20002800, LENGTH = 0x1800
-
-}
-
-INCLUDE "nRF51822-common.ld"
-
