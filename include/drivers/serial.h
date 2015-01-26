@@ -23,12 +23,14 @@ extern "C" {
 #define WARN                 2
 #define ERROR                3
 #define FATAL                4
+#define NONE                 5
 
-#define DEBUG_ON
 
-#define VERBOSITY            DEBUG
+#ifndef SERIAL_VERBOSITY
+#error "You have to specify SERIAL_VERBOSITY"
+#endif
 
-#ifdef DEBUG_ON
+#if SERIAL_VERBOSITY<NONE
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -49,22 +51,22 @@ extern "C" {
 #define LOGe(fmt, ...) log(ERROR, fmt, ##__VA_ARGS__)
 #define LOGf(fmt, ...) log(FATAL, fmt, ##__VA_ARGS__)
 
-#if VERBOSITY>DEBUG
+#if SERIAL_VERBOSITY>DEBUG
 #undef LOGd
 #define LOGd(fmt, ...)
 #endif
 
-#if VERBOSITY>INFO
+#if SERIAL_VERBOSITY>INFO
 #undef LOGi
 #define LOGi(fmt, ...)
 #endif
 
-#if VERBOSITY>WARN
+#if SERIAL_VERBOSITY>WARN
 #undef LOGw
 #define LOGw(fmt, ...)
 #endif
 
-#if VERBOSITY>ERROR
+#if SERIAL_VERBOSITY>ERROR
 #undef LOGe
 #define LOGe(fmt, ...)
 #endif

@@ -103,3 +103,12 @@ JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
 
 # Version of the nrf51 chip, use script/hardware_version.sh to check your version
 HARDWARE_VERSION=0x001D
+
+# Verbosity of the UART
+# Debug     0
+# Info      1
+# Warning   2
+# Error     3
+# Fatal     4
+# None      5
+SERIAL_VERBOSITY=1
