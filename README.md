@@ -19,7 +19,18 @@ The installation should not be hard when you have the Nordic SDK. Get this from 
 * [JLink Software](http://www.segger.com/jlink-software.html)
 * sudo aptitude install cmake
 
-A cross-compiler for ARM is the `GCC` cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-src.tar.bz2).
+A cross-compiler for ARM is the `GCC` cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded).
+
+    curl -v -O https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2
+    tar -xvf gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2 -C /opt    
+    
+Unpack files to for example the `/opt/softdevices` and `/opt/nrf51_sdk` directories. 
+
+It is a `cmake` build system, so you will need it:
+
+    sudo apt-get install cmake
+
+You can now just type `make` in the main directory. Or you can build using the scripts (see below). Before that you'll have to adjust the default configuration settings (see below as well).
 
 ### Bugs
 
