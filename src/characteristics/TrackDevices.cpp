@@ -86,11 +86,10 @@ uint8_t TrackedDeviceList::isAlone() {
 	
 	bool none_nearby = true;
 	uint16_t result;
-	static uint16_t threshold = 2000;
 	for (int i = 0; i < getSize(); ++i) {
 		uint16_t count = _list[i].counter;
 		_list[i].counter++;
-		none_nearby = none_nearby && (count > threshold);
+		none_nearby = none_nearby && (count > ALONE_THRESHOLD);
 	}
 	result = (none_nearby ? TDL_IS_ALONE : TDL_SOMEONE_NEARBY);
 	return result;
@@ -118,6 +117,7 @@ bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 	for (int i=0; i<getSize(); ++i) {
 		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			_list[i].rssi_threshold = rssi_threshold;
+			_list[i].counter = ALONE_THRESHOLD;
 			LOGi("Updated [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
 					adrs_ptr[5], adrs_ptr[4], adrs_ptr[3], adrs_ptr[2],
 					adrs_ptr[1], adrs_ptr[0], rssi_threshold);
@@ -129,6 +129,7 @@ bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 	}
 	memcpy(_list[_freeIdx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
 	_list[_freeIdx].rssi_threshold = rssi_threshold;
+	_list[_freeIdx].counter = ALONE_THRESHOLD;
 	LOGi("Added [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
 			_list[_freeIdx].addr[5], _list[_freeIdx].addr[4], _list[_freeIdx].addr[3], _list[_freeIdx].addr[2],
 			_list[_freeIdx].addr[1], _list[_freeIdx].addr[0], rssi_threshold);
@@ -250,9 +251,9 @@ uint32_t TrackedDevice::getSerializedLength() const {
 }
 
 void TrackedDevice::print() const {
-	LOGi("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tstate: %d", _trackedDevice.addr[5],
+	LOGi("[%02X %02X %02X %02X %02X %02X]\trssi: %d", _trackedDevice.addr[5],
 		_trackedDevice.addr[4], _trackedDevice.addr[3], _trackedDevice.addr[2], _trackedDevice.addr[1],
-		_trackedDevice.addr[0], _trackedDevice.rssi_threshold, _trackedDevice.counter);
+		_trackedDevice.addr[0], _trackedDevice.rssi_threshold);
 }
 
 /** 

@@ -45,13 +45,13 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 
 	// Enable interrupt on given event
 	switch (event) {
-	case (CROSS):
+	case (LPC_CROSS):
 		NRF_LPCOMP->INTENSET = LPCOMP_INTENSET_CROSS_Enabled << LPCOMP_INTENSET_CROSS_Pos;
 		break;
-	case (UP):
+	case (LPC_UP):
 		NRF_LPCOMP->INTENSET = LPCOMP_INTENSET_UP_Enabled << LPCOMP_INTENSET_UP_Pos;
 		break;
-	case (DOWN):
+	case (LPC_DOWN):
 		NRF_LPCOMP->INTENSET = LPCOMP_INTENSET_DOWN_Enabled << LPCOMP_INTENSET_DOWN_Pos;
 		break;
 	default:
@@ -134,7 +134,7 @@ void LPComp::start() {
 	NRF_LPCOMP->EVENTS_UP = 0;
 	NRF_LPCOMP->EVENTS_DOWN = 0;
 	NRF_LPCOMP->EVENTS_CROSS = 0;
-	lastEvent = NONE;
+	lastEvent = LPC_NONE;
 	NRF_LPCOMP->TASKS_START = 1;
 }
 
@@ -147,9 +147,9 @@ void LPComp::update(Event_t event) {
 }
 
 void LPComp::tick() {
-	if (lastEvent != NONE) {
+	if (lastEvent != LPC_NONE) {
 		dispatch();
-		lastEvent = NONE;
+		lastEvent = LPC_NONE;
 	}
 }
 
@@ -165,7 +165,7 @@ extern "C" void WUCOMP_COMP_IRQHandler(void) {
 //	}
 	if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_CROSS_Msk) != 0 && NRF_LPCOMP->EVENTS_CROSS != 0) {
 		LPComp &lpcomp = LPComp::getInstance();
-		lpcomp.update(LPComp::CROSS);
+		lpcomp.update(LPComp::LPC_CROSS);
 
 		// Continue
 		NRF_LPCOMP->EVENTS_CROSS = 0;
@@ -173,7 +173,7 @@ extern "C" void WUCOMP_COMP_IRQHandler(void) {
 	}
 	else if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_UP_Msk) != 0 && NRF_LPCOMP->EVENTS_UP != 0) {
 		LPComp &lpcomp = LPComp::getInstance();
-		lpcomp.update(LPComp::UP);
+		lpcomp.update(LPComp::LPC_UP);
 
 		// Continue
 		NRF_LPCOMP->EVENTS_UP = 0;
@@ -181,7 +181,7 @@ extern "C" void WUCOMP_COMP_IRQHandler(void) {
 	}
 	else if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_DOWN_Msk) != 0 && NRF_LPCOMP->EVENTS_DOWN > 0) {
 		LPComp &lpcomp = LPComp::getInstance();
-		lpcomp.update(LPComp::DOWN);
+		lpcomp.update(LPComp::LPC_DOWN);
 
 		// Continue
 		NRF_LPCOMP->EVENTS_DOWN = 0;

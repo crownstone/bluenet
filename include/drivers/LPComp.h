@@ -20,10 +20,10 @@ class LPComp: public Dispatcher {
 		}
 
 		enum Event_t {
-			CROSS=0,
-			UP,
-			DOWN,
-			NONE
+			LPC_CROSS=0,
+			LPC_UP,
+			LPC_DOWN,
+			LPC_NONE
 		};
 
 		uint32_t config(uint8_t pin, uint8_t level, Event_t event);
