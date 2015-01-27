@@ -22,6 +22,7 @@
 #define RFDUINO              4
 #define CROWNSTONE           5
 #define NRF51422             6
+#define VIRTUALMEMO          7
 
 #ifndef BOARD
 #error "Add BOARD=... to CMakeBuild.config"
@@ -98,6 +99,27 @@
 #define PIN_AIN_ADC          2                   // ain 2 is p0.01 or gpio 1
 #define PIN_GPIO_RX          1
 #define PIN_GPIO_TX          2
+
+#endif
+
+#if(BOARD==VIRTUALMEMO)
+
+#define PIN_GPIO_LED0        7                   // this is p0.07 or gpio 7
+#define PIN_GPIO_LED1        8                   // this is p0.08 or gpio 8
+#define PIN_GPIO_LED2        9
+#define PIN_GPIO_LED3        10
+#define PIN_GPIO_LED4        11
+#define PIN_GPIO_LED5        12
+#define PIN_GPIO_LED6        13
+#define PIN_GPIO_LED7        14
+
+#define PIN_GPIO_RX          15
+#define PIN_GPIO_TX          16
+
+#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
+#define PIN_AIN_LPCOMP       3                   // ain3 is p0.02 or gpio 2
+#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
+#define PIN_GPIO_SWITCH      18                  // this is p0.18 or gpio 18
 
 #endif
 
