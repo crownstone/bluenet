@@ -160,6 +160,7 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 		value.print();
 
 		_trackedDeviceList->add(value.getAddress(), value.getRSSI());
+		*_trackedDeviceListCharac = *_trackedDeviceList;
 
 //		LOGi("RSSI threshold: %i", value.rssi_threshold);
 //		LOGi("Received value from [%02X %02X %02X %02X %02X %02X]", value.addr[5],
@@ -167,7 +168,7 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 
 		// Start scanning
 		if (!_stack->isScanning()) {
-			LOGi("Start scanning");
+			LOGi("Start tracking");
 			if (!_stack->isScanning()) {
 //				if (_trackedDeviceList != NULL) {
 //					_trackedDeviceList->init();
@@ -176,7 +177,7 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 			}
 			_trackMode = true;
 		} else {
-			LOGi("Stop scanning");
+			LOGi("Stop tracking");
 			_stack->stopScanning();
 			_trackMode = false;
 		}

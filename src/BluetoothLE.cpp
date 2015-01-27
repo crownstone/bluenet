@@ -469,11 +469,11 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	uint8_t enabled;
 	BLE_CALL(sd_softdevice_is_enabled, (&enabled));
 	if (enabled) {
-		log(INFO,"Awkward. Softdevice is already enabled. Try to disable.");
+		LOGw("Softdevice is already enabled. Try to disable.");
 		BLE_CALL(sd_softdevice_disable, ());
 	}
 
-	log(INFO,"Enable Softdevice, set assertion handler.");
+	LOGi("Enable Softdevice, set assertion handler.");
 	BLE_CALL(sd_softdevice_enable, (_clock_source, softdevice_assertion_handler));
 
 	// enable the BLE stack

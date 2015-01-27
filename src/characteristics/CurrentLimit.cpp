@@ -27,7 +27,7 @@ void CurrentLimit::start(uint8_t* limit_value) {
 	if (*limit_value > 6)
 		*limit_value = 6;
 	LPComp::getInstance().stop();
-	LPComp::getInstance().config(PIN_AIN_LPCOMP, *limit_value, LPComp::UP);
+	LPComp::getInstance().config(PIN_AIN_LPCOMP, *limit_value, LPComp::LPC_UP);
 	LPComp::getInstance().start();
 }
 

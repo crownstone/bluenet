@@ -21,10 +21,11 @@ struct __attribute__((__packed__)) tracked_device_t {
 };
 
 #define TRACKDEVICES_HEADER_SIZE 1 // 1 BYTE for the header = number of elements in the list
-#define TRACKDEVICES_SERIALIZED_SIZE (sizeof(tracked_device_t)-1) // only works if struct packed. Subtract 1, as counter is not serialized
+#define TRACKDEVICES_SERIALIZED_SIZE (sizeof(tracked_device_t)-2) // only works if struct packed. Subtract 2, as counter is not serialized
 
 #define TRACKDEVICES_MAX_NR_DEVICES              2
 #define COUNTER_MAX                              5
+#define ALONE_THRESHOLD							 2000
 	
 #define TDL_IS_ALONE                             1
 #define TDL_SOMEONE_NEARBY                       2
