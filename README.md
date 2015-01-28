@@ -111,6 +111,30 @@ You can also run everything in sequence:
 
 And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish. 
 
+## Flashing
+
+The above assumes you have the J-Link programmer from Nordic. If you do not have that device, you can still program something like the RFduino or the Crownstone, by using an ST-Link. A full explanation can be found on <https://dobots.nl/2015/01/23/programming-the-nrf51822-with-the-st-link/>. 
+
+Rather than downloading `openocd` from the Ubuntu repositories, it is recommended to get the newest software from the source:
+
+    cd /opt
+    git clone https://github.com/ntfreak/openocd
+    cd openocd
+    ./bootstrap
+    ./configure
+    make
+    sudo make install
+
+You can now use the `flash_openocd.sh` script in the `scripts` directory:
+
+    ./flash_openocd.sh init
+
+And in another console:
+
+    ./flash_openocd.sh upload combined.hex
+
+Here the binary `combined.hex` is the softdevice and application combined.
+
 ## Meshing
 
 The meshion functionality is the one we are currently integrating on the moment. So, this is a moving target. Set
