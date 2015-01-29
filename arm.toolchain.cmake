@@ -18,7 +18,9 @@ SET(CMAKE_SYSTEM_PROCESSOR arm)
 SET(CMAKE_CROSSCOMPILING 1)
 
 # Load compiler options from configuration file
-INCLUDE(${PROJECT_SOURCE_DIR}/CMakeConfig.cmake)
+SET(CONFIG_FILE ${CMAKE_SOURCE_DIR}/CMakeConfig.cmake)
+MESSAGE(STATUS "Load config file ${CONFIG_FILE}")
+INCLUDE(${CONFIG_FILE})
 
 # type of compiler we want to use 
 SET(COMPILER_TYPE_PREFIX ${COMPILER_TYPE}-)

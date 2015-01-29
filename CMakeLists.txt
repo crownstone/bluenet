@@ -26,19 +26,20 @@ SET(PROJECT_NAME ${APPLICATION_SHORTHAND} ${TEST_COMPILERS})
 SET(MAIN_FILE "main_${APPLICATION_SHORTHAND}.cpp")
 
 # Start a project
-PROJECT(${PROJECT_NAME})
+PROJECT(${PROJECT_NAME} NONE)
 
 # The directory with some of the FindXXX modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 MESSAGE(STATUS "Search for FindX files in ${CMAKE_SOURCE_DIR}/cmake")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
 #######################################################################################################################
 
-SET(CONFIGURATION_FILE "CMakeBuild.config")
-IF(EXISTS ${CMAKE_SOURCE_DIR}/${CONFIGURATION_FILE})
-	file(STRINGS ${CMAKE_SOURCE_DIR}/${CONFIGURATION_FILE} ConfigContents)
+SET(CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/CMakeConfig.cmake")
+#SET(CONFIG_FILE "CMakeBuild.config")
+IF(EXISTS ${CONFIG_FILE})
+	file(STRINGS ${CONFIG_FILE} ConfigContents)
 	foreach(NameAndValue ${ConfigContents})
 		# Strip leading spaces
 		string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
@@ -50,7 +51,7 @@ IF(EXISTS ${CMAKE_SOURCE_DIR}/${CONFIGURATION_FILE})
 		set(${Name} "${Value}")
 	endforeach()
 else()
-	MESSAGE(FATAL_ERROR "Could not find file ${CONFIGURATION_FILE}, copy from ${CONFIGURATION_FILE}.default and adjust!")
+	MESSAGE(FATAL_ERROR "Could not find file ${CONFIG_FILE}, copy from ${CONFIG_FILE}.default and adjust!")
 endif()
 
 #######################################################################################################################

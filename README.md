@@ -119,11 +119,17 @@ Rather than downloading `openocd` from the Ubuntu repositories, it is recommende
 
     cd /opt
     git clone https://github.com/ntfreak/openocd
+    sudo aptitude install libtool automake
     cd openocd
-    ./bootstrap
-    ./configure
+    ./bootstrap 
+    ./configure --enable-stlink
     make
     sudo make install
+
+Also, make sure you can use the USB ST-Link device without sudo rights:
+
+    sudo cp scripts/openocd/49-stlinkv2.rules /etc/udev/rules.d
+    sudo restart udev
 
 You can now use the `flash_openocd.sh` script in the `scripts` directory:
 
