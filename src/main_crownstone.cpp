@@ -55,20 +55,16 @@ extern "C" {
 	#include "nrf_gpio.h"
 #endif
 
+#if MESHING==1
+#include <protocol/mesh.h>
+#endif
+
 #include <drivers/nrf_rtc.h>
 #include <drivers/nrf_adc.h>
 #include <drivers/nrf_pwm.h>
 #include <drivers/LPComp.h>
 #include <drivers/serial.h>
 #include <common/storage.h>
-
-#if MESHING==1
-extern "C" {
-#include <protocol/rbc_mesh.h>
-#include <protocol/rbc_mesh_common.h>
-#include <protocol/led_config.h>
-}
-#endif
 
 #if INDOOR_SERVICE==1
 #include <services/IndoorLocalisationService.h>
@@ -166,45 +162,6 @@ void config_drivers() {
 extern "C" {
 
 /**
- * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
- * thing.
- */
-void setup_mesh() {
-	LOGi("For now we are testing the meshing functionality.");
-	nrf_gpio_pin_clear(PIN_GPIO_LED0);
-
-	rbc_mesh_init_params_t init_params;
-
-	init_params.access_addr = 0xA541A68F;
-	init_params.adv_int_ms = 100;
-	init_params.channel = 38;
-	init_params.handle_count = 2;
-	init_params.packet_format = RBC_MESH_PACKET_FORMAT_ORIGINAL;
-	init_params.radio_mode = RBC_MESH_RADIO_MODE_BLE_1MBIT;
-
-	LOGi("Call rbc_mesh_init");
-	uint8_t error_code;
-	// checks if softdevice is enabled etc.
-	error_code = rbc_mesh_init(init_params);
-	APP_ERROR_CHECK(error_code);
-
-	LOGi("Call rbc_mesh_value_enable");
-	error_code = rbc_mesh_value_enable(1);
-	APP_ERROR_CHECK(error_code);
-	error_code = rbc_mesh_value_enable(2);
-	APP_ERROR_CHECK(error_code);
-
-#if MESHING_PARALLEL == 0
-	sd_nvic_EnableIRQ(SD_EVT_IRQn);	
-	LOGi("Start waiting for events.");
-	while (true)
-	{
-		sd_app_evt_wait();
-	}
-#endif
-}
-
-/**
  * @brief Softdevice event handler
  *
  * Currently this interrupt screws up the main program. So apparently we have to set priorities somewhere or to tell
@@ -244,8 +201,8 @@ static void gpiote_init(void)
                                                             
 //#endif                             
                               
-void GPIOTE_IRQHandler(void)                       
-{      
+void GPIOTE_IRQHandler(void)
+{
 #ifdef STOP_ADV
 	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
 	
@@ -254,21 +211,29 @@ void GPIOTE_IRQHandler(void)
 		stack.stopAdvertising();
 	}
 #endif
-	NRF_GPIOTE->EVENTS_PORT = 0;                      
-	for (uint8_t i = 0; i < 2; ++i)                      
+ 	CMesh & mesh = CMesh::getInstance();
+	NRF_GPIOTE->EVENTS_PORT = 0; 
+	for (uint8_t i = 0; i < 2; ++i) 
 	{
-		if (NRF_GPIO->IN & (1 << (BUTTON_0 + i)))                  
-		{                            
-			LOGi("Button %i pressed", i); 
-			uint8_t val[28];                       
-			uint16_t len;                        
-			APP_ERROR_CHECK(rbc_mesh_value_get(i + 1, val, &len, NULL));            
+		if (NRF_GPIO->IN & (1 << (BUTTON_0 + i)))
+		{
+			LOGi("Button %i pressed", i);
+			uint32_t value = mesh.receive(i+1);
+			value = 1 - value;
+			led_config(i + 1, value);
+			mesh.send(i + 1, value);
+
+/*
+			uint8_t val[28];
+			uint16_t len;
+			APP_ERROR_CHECK(rbc_mesh_value_get(i + 1, val, &len, NULL)); 
 			LOGi("Current mesh data of %i = %i", i + 1, val[0]);
-			val[0] = !val[0];                   
-			led_config(i + 1, val[0]);                     
+			val[0] = !val[0]; 
+			led_config(i + 1, val[0]); 
 			LOGi("Set mesh data %i to %i", i+1, val[0]);
-			APP_ERROR_CHECK(rbc_mesh_value_set(i + 1, &val[0], 1));              
-		}                
+			APP_ERROR_CHECK(rbc_mesh_value_set(i + 1, &val[0], 1)); 
+*/
+		} 
 	} 
 }
 
@@ -381,7 +346,9 @@ int main() {
 #endif
 
 #if MESHING==1
-	setup_mesh();
+ 	CMesh & mesh = CMesh::getInstance();
+	mesh.init();
+	//setup_mesh();
 #endif
 
 	LOGi("Running while ticking..");

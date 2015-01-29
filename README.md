@@ -16,15 +16,23 @@ The installation should not be hard when you have the Nordic SDK. Get this from 
 
 * [Nordic nRF51822 SDK](https://www.nordicsemi.com/eng/Products/Bluetooth-R-low-energy/nRF51822)
 * [Nordic S110 Softdevice](http://www.nordicsemi.com/eng/Products/S110-SoftDevice-v7.0)
-* [JLink Software](http://www.segger.com/jlink-software.html)
+* [JLink Software](http://www.segger.com/jlink-software.html), there is a [.deb file](https://www.segger.com/jlink-software.html?step=1&file=JLinkLinuxDEB64_4.96.4)
 * sudo aptitude install cmake
 
 A cross-compiler for ARM is the `GCC` cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded).
 
     curl -v -O https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2
     tar -xvf gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2 -C /opt    
+
+This is a 32-bit application, so you will need some dependencies:
+
+    sudo apt-get install libstdc++6:i386 libncurses5:i386
+
+If the cross-compiler does not work, make sure you check if all its dependencies are met:
+
+    ldd /opt/gcc-arm-none-eabi-4_8-2014q3/bin/arm-none-eabi-gcc
     
-Unpack files to for example the `/opt/softdevices` and `/opt/nrf51_sdk` directories. 
+Unpack the Nordic files to for example the `/opt/softdevices` and `/opt/nrf51_sdk` directories. 
 
 It is a `cmake` build system, so you will need it:
 

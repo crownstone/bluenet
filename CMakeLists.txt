@@ -14,19 +14,21 @@ IF(COMMAND cmake_policy)
 	cmake_policy(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
 
+# Makes compilation go wrong first time
 SET(TEST_COMPILERS CXX C)
+#SET(TEST_COMPILERS "")
 
 # Set application shorthand
 SET(APPLICATION_SHORTHAND "crownstone")
 
 # Set name of project
-SET(PROJECT_NAME ${APPLICATION_SHORTHAND} ${TEST_COMPILERS})
+SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
 
 # Set the main file to use for this application
 SET(MAIN_FILE "main_${APPLICATION_SHORTHAND}.cpp")
 
 # Start a project
-PROJECT(${PROJECT_NAME} NONE)
+PROJECT(${PROJECT_NAME} ${TEST_COMPILERS})
 
 # The directory with some of the FindXXX modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
@@ -110,7 +112,7 @@ ENDIF()
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/Dispatcher.cpp")
 
 IF(${MESHING} STRGREATER "0")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh_srv.c")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/radio_control.c")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/rbc_mesh.c")
