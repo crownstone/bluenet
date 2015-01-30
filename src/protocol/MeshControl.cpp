@@ -17,7 +17,7 @@ MeshControl::MeshControl() {
  * Get incoming messages and perform certain actions.
  */
 void MeshControl::process(uint8_t channel, uint32_t message) {
-	if (channel == 32) {
+	if (channel == 1) {
 		if (message == 1) {
 			LOGi("Turn lamp/device on");
 			PWM::getInstance().setValue(0, (uint8_t)-1);
