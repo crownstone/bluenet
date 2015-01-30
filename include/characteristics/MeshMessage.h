@@ -18,7 +18,7 @@
 class MeshMessage {
 private:
 	uint8_t _id;
-	uint8_t _channel;
+	uint8_t _handle;
 	uint8_t _value; // currently just one value in msg
 public:
 	MeshMessage();
@@ -32,7 +32,7 @@ public:
 	void deserialize(uint8_t *buffer, uint16_t length);
 
 	inline uint8_t id() const { return _id; } 
-	inline uint8_t channel() const { return _channel; }
+	inline uint8_t handle() const { return _handle; }
 	inline uint8_t value() const { return _value; }
 };
 

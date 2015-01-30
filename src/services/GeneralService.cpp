@@ -143,10 +143,10 @@ void GeneralService::addMeshCharacteristic() {
 		.onWrite([&](const MeshMessage & value) -> void {
 			LOGi("Send mesh message");
 			//uint8_t id = value.id(); // not used
-			uint8_t channel = value.channel();
+			uint8_t handle = value.handle();
 			uint8_t val = value.value();
 			CMesh &mesh = CMesh::getInstance();
-			mesh.send(channel, val);
+			mesh.send(handle, val);
 		});
 }
 

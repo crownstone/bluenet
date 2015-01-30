@@ -41,10 +41,10 @@ public:
 	void init();
 
 	// send message
-	void send(uint8_t channel, uint32_t value);
+	void send(uint8_t handle, uint32_t value);
 
 	// returns last received message
-	uint32_t receive(uint8_t channel);
+	uint32_t receive(uint8_t handle);
 
 	// set callback to receive message
 	void set_callback();
