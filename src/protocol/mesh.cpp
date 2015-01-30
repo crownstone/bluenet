@@ -73,25 +73,25 @@ void CMesh::init() {
 	error_code = rbc_mesh_init(init_params);
 	APP_ERROR_CHECK(error_code);
 
-	LOGi("Call rbc_mesh_value_enable");
+	LOGi("Call rbc_mesh_value_enable. Todo. Do this on send() and receive()!");
 	error_code = rbc_mesh_value_enable(1);
 	APP_ERROR_CHECK(error_code);
 	error_code = rbc_mesh_value_enable(2);
 	APP_ERROR_CHECK(error_code);
 }
 
-void CMesh::send(uint8_t channel, uint32_t value) {
+void CMesh::send(uint8_t handle, uint32_t value) {
 	uint8_t val[28];
 	val[0] = (uint8_t)value;
-	LOGi("Set mesh data %i to %i", val[0], channel);
-	APP_ERROR_CHECK(rbc_mesh_value_set(channel, &val[0], 1));
+	LOGi("Set mesh data %i to %i", val[0], handle);
+	APP_ERROR_CHECK(rbc_mesh_value_set(handle, &val[0], 1));
 }
 
 // returns last received message
-uint32_t CMesh::receive(uint8_t channel) {
+uint32_t CMesh::receive(uint8_t handle) {
 	uint8_t val[28];                       
 	uint16_t len;                        
-	APP_ERROR_CHECK(rbc_mesh_value_get(channel, val, &len, NULL));
+	APP_ERROR_CHECK(rbc_mesh_value_get(handle, val, &len, NULL));
 	if (!len) return 0;
 	return (uint32_t)val[0];
 }
