@@ -220,27 +220,15 @@ void GPIOTE_IRQHandler(void)
 			value = 1 - value;
 			led_config(i + 1, value);
 			mesh.send(i + 1, value);
-
-/*
-			uint8_t val[28];
-			uint16_t len;
-			APP_ERROR_CHECK(rbc_mesh_value_get(i + 1, val, &len, NULL)); 
-			LOGi("Current mesh data of %i = %i", i + 1, val[0]);
-			val[0] = !val[0]; 
-			led_config(i + 1, val[0]); 
-			LOGi("Set mesh data %i to %i", i+1, val[0]);
-			APP_ERROR_CHECK(rbc_mesh_value_set(i + 1, &val[0], 1)); 
-*/
 		} 
 	} 
 }
 
-#endif
+#endif // nRF6310
 
-}
+} // extern "C"
 
-#endif
-
+#endif // MESHING == 1
 
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
