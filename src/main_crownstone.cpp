@@ -238,11 +238,13 @@ void SD_EVT_IRQHandler(void)
     }
 
 
-    }
+
 
     #endif
+
 #endif
 
+}
 
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
@@ -343,7 +345,7 @@ int main() {
 #endif
 
 #if MESHING==1
-	gpiote_init();
+	//gpiote_init();
 #endif
 
 #if MESHING==1
