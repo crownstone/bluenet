@@ -113,23 +113,28 @@ void setName(Nrf51822BluetoothStack &stack) {
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
+/**
+ * Sets default parameters of the Bluetooth connection.
+ *
+ * On transmission of data within a connection
+ *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 10 ms)
+ *   - maximum connection interval (in steps of 1.25 ms, 32*1.25 = 20 ms)
+ * The supervision timeout multiplier is 400
+ * The slave latency is 10
+ * On advertising:
+ *   - advertising interval (in steps of 0.625 ms, 1600*0.625 = 1 sec) (can be between 0x0020 and 0x4000)
+ *   - advertising timeout (disabled, can be between 0x0001 and 0x3FFF, and is in steps of seconds)
+ *
+ * There is no whitelist defined, nor peer addresses.
+ */
 void configure(Nrf51822BluetoothStack &stack) {
-	// set connection parameters.  these trade off responsiveness and range for battery life. 
-	// see apple bluetooth accessory guidelines for details.
-	// you could omit these; there are reasonable defaults that support medium throughput and long battery life.
-	//   interval is set from 20 ms to 40 ms
-	//   slave latency is 10
-	//   supervision timeout multiplier is 400
 	stack.setTxPowerLevel(-4)
 		.setMinConnectionInterval(16)
 		.setMaxConnectionInterval(32)
 		.setConnectionSupervisionTimeout(400)
 		.setSlaveLatency(10)
 		.setAdvertisingInterval(1600)
-		// advertise forever.  you may instead want to have a button press or something begin
-		// advertising for a set period of time, in order to save battery.
 		.setAdvertisingTimeoutSeconds(0);
-
 }
 
 /**
