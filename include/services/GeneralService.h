@@ -12,6 +12,7 @@
 #include <processing/temperature.h>
 #include <vector>
 #include <characteristics/charac_config.h>
+#include <characteristics/MeshMessage.h>
 #include <common/storage.h>
 
 #define GENERAL_UUID "f5f90000-59f9-11e4-aa15-123b93f75cba"
@@ -35,13 +36,15 @@ protected:
 	BLEpp::Characteristic<std::string>* _deviceTypeCharacteristic;
 	BLEpp::Characteristic<std::string>* _roomCharacteristic;
 	BLEpp::Characteristic<int32_t>* _firmwareCharacteristic;
+	BLEpp::Characteristic<MeshMessage>* _meshCharacteristic;
 
 	// Functions to add the characteristics
 	void addTemperatureCharacteristic();
 	void addChangeNameCharacteristic();
-	void addDeviceTypeCharactersitic();
+	void addDeviceTypeCharacteristic();
 	void addRoomCharacteristic();
 	void addFirmwareCharacteristic();
+	void addMeshCharacteristic();
 
 	// Helper functions
 	std::string&  getBLEName();

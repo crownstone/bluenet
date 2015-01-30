@@ -13,27 +13,34 @@
 #include <drivers/serial.h>
 #include <util/ble_error.h>
 
+#include <protocol/MeshControl.h>
+
 extern "C" {
 
-void rbc_mesh_event_handler(rbc_mesh_event_t* evt)                                   
-{                                                            
-	TICK_PIN(28);                                                    
+/**
+ * Event handler on receiving a message from 
+ */
+void rbc_mesh_event_handler(rbc_mesh_event_t* evt)                  
+{                              
+	TICK_PIN(28);                          
 	nrf_gpio_pin_toggle(PIN_GPIO_LED7);
-	switch (evt->event_type)                                              
-	{                                                          
-		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:                                    
-		case RBC_MESH_EVENT_TYPE_NEW_VAL:                                        
-		case RBC_MESH_EVENT_TYPE_UPDATE_VAL:                                      
+	switch (evt->event_type)                       
+	{                             
+		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:                  
+		case RBC_MESH_EVENT_TYPE_NEW_VAL:                    
+		case RBC_MESH_EVENT_TYPE_UPDATE_VAL:                   
 
-			if (evt->value_handle > 2)                                         
+			if (evt->value_handle > 2)                     
 				break; 
 			if (evt->data[0]) {
 				LOGi("Got data in: %i, %i", evt->value_handle, evt->data[0]);
-			}  
+				MeshControl &meshControl = MeshControl::getInstance();
+				meshControl.process(evt->value_handle, evt->data[0]);
+			} 
 			led_config(evt->value_handle, evt->data[0]); 
 			break; 
-	}                                                          
-}    
+	}                             
+}
 
 }
 
@@ -76,7 +83,7 @@ void CMesh::init() {
 void CMesh::send(uint8_t channel, uint32_t value) {
 	uint8_t val[28];
 	val[0] = (uint8_t)value;
-	LOGi("Set mesh data %i to %i", channel, val[0]);
+	LOGi("Set mesh data %i to %i", val[0], channel);
 	APP_ERROR_CHECK(rbc_mesh_value_set(channel, &val[0], 1));
 }
 
