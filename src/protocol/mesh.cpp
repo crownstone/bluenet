@@ -23,7 +23,7 @@ extern "C" {
 void rbc_mesh_event_handler(rbc_mesh_event_t* evt)                  
 {                              
 	TICK_PIN(28);                          
-	nrf_gpio_pin_toggle(PIN_GPIO_LED7);
+	//nrf_gpio_pin_toggle(PIN_GPIO_LED1);
 	switch (evt->event_type)                       
 	{                             
 		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:                  

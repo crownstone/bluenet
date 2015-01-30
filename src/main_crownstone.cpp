@@ -174,7 +174,7 @@ void SD_EVT_IRQHandler(void)
 	rbc_mesh_sd_irq_handler(); 
 } 
 
-//#ifdef BOARD_PCA10001             
+#ifdef BOARD_PCA10001             
 /* configure button interrupt for evkits */                    
 static void gpiote_init(void)                       
 {                              
@@ -198,8 +198,6 @@ static void gpiote_init(void)
   NVIC_EnableIRQ(GPIOTE_IRQn);                                            
   NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_PORT_Msk;                                  
 }                                                            
-                                                            
-//#endif                             
                               
 void GPIOTE_IRQHandler(void)
 {
@@ -237,6 +235,7 @@ void GPIOTE_IRQHandler(void)
 	} 
 }
 
+#endif
 
 }
 
@@ -342,7 +341,9 @@ int main() {
 #endif
 
 #if MESHING==1
+#ifdef BOARD_PCA10001             
 	gpiote_init();
+#endif
 #endif
 
 #if MESHING==1

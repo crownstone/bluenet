@@ -63,6 +63,12 @@
 
 #define PIN_GPIO_LED0        8                   // something we don't use! 
 #define PIN_GPIO_LED1        8                   // something we don't use! 
+#define PIN_GPIO_LED2        8                   // something we don't use! 
+#define PIN_GPIO_LED3        8                   // something we don't use! 
+#define PIN_GPIO_LED4        8                   // something we don't use! 
+#define PIN_GPIO_LED5        8                   // something we don't use! 
+#define PIN_GPIO_LED6        8                   // something we don't use! 
+#define PIN_GPIO_LED7        8                   // something we don't use! 
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
 #define PIN_AIN_ADC          5                   // ain5 is p0.04 or gpio 4
