@@ -334,9 +334,11 @@ int main() {
 #endif
 
 #if MESHING==1
-#ifdef BOARD_PCA10001             
+#ifdef BOARD_PCA10001
 	gpiote_init();
 #endif
+
+#if BOARD == VIRTUALMEMO
 	//gpiote_init();
 	nrf_gpio_range_cfg_output(7,14);
 
@@ -348,6 +350,7 @@ int main() {
 //    nrf_gpio_pin_set(12);
 //    nrf_gpio_pin_set(13);
 //    nrf_gpio_pin_set(14);
+#endif
 #endif
 
 #if MESHING==1

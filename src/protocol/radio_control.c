@@ -527,8 +527,8 @@ void radio_order(radio_event_t* radio_event)
                 else if (radio_event->event_type == RADIO_EVENT_TYPE_RX)
                 {
                     NRF_RADIO->SHORTS |= RADIO_SHORTS_DISABLED_RXEN_Msk;
-	    		LOGi("Enable RSSI");
-			radio_rssi_enable();
+//	    		    LOGi("Enable RSSI");
+//			        radio_rssi_enable();
                 }
                 else /* going to TX */
                 {

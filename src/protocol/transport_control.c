@@ -181,10 +181,10 @@ static void search_callback(uint8_t* data)
     timeslot_queue_async_event(&async_evt);
     
     /** @TODO: add packet chain handling */
-	uint8_t value;
-	value = radio_rssi_get();
-
-    LOGi("RSSI value: %i", value);
+//	uint8_t value;
+//	value = radio_rssi_get();
+//
+//    LOGi("RSSI value: %i", value);
 }
 
 /**
