@@ -174,72 +174,73 @@ void SD_EVT_IRQHandler(void)
 	rbc_mesh_sd_irq_handler(); 
 } 
 
-//#ifdef BOARD_PCA10001             
-/* configure button interrupt for evkits */                    
-static void gpiote_init(void)                       
-{                              
-  NRF_GPIO->PIN_CNF[BUTTON_0] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)                  
-                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)                  
-        //         | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)                        
-                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)                
-                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);                   
-                                                            
-  NRF_GPIO->PIN_CNF[BUTTON_1] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)                  
-                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)                  
-         //        | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)                        
-                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)                
-                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);                   
-                                                            
-                                                            
-  /* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it                   
-  in APP_LOW in order to use the mesh API */                                     
-  NVIC_SetPriority(GPIOTE_IRQn, 3);                                          
-                                                            
-  NVIC_EnableIRQ(GPIOTE_IRQn);                                            
-  NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_PORT_Msk;                                  
-}                                                            
-                                                            
-//#endif                             
-                              
-void GPIOTE_IRQHandler(void)
-{
-#ifdef STOP_ADV
-	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
-	
-	if (stack.isAdvertising()) {
-		LOGi("Stop advertising");
-		stack.stopAdvertising();
-	}
-#endif
- 	CMesh & mesh = CMesh::getInstance();
-	NRF_GPIOTE->EVENTS_PORT = 0; 
-	for (uint8_t i = 0; i < 2; ++i) 
-	{
-		if (NRF_GPIO->IN & (1 << (BUTTON_0 + i)))
-		{
-			LOGi("Button %i pressed", i);
-			uint32_t value = mesh.receive(i+1);
-			value = 1 - value;
-			led_config(i + 1, value);
-			mesh.send(i + 1, value);
-
-/*
-			uint8_t val[28];
-			uint16_t len;
-			APP_ERROR_CHECK(rbc_mesh_value_get(i + 1, val, &len, NULL)); 
-			LOGi("Current mesh data of %i = %i", i + 1, val[0]);
-			val[0] = !val[0]; 
-			led_config(i + 1, val[0]); 
-			LOGi("Set mesh data %i to %i", i+1, val[0]);
-			APP_ERROR_CHECK(rbc_mesh_value_set(i + 1, &val[0], 1)); 
-*/
-		} 
-	} 
-}
+#ifdef BOARD_PCA10001
+    /* configure button interrupt for evkits */
+    static void gpiote_init(void)
+    {
+    //  NRF_GPIO->PIN_CNF[BUTTON_0] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)
+    //                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+    //        //         | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)
+    //                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
+    //                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
+    //
+    //  NRF_GPIO->PIN_CNF[BUTTON_1] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)
+    //                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+    //         //        | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)
+    //                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
+    //                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
 
 
-}
+      /* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it
+      in APP_LOW in order to use the mesh API */
+      NVIC_SetPriority(GPIOTE_IRQn, 3);
 
+      NVIC_EnableIRQ(GPIOTE_IRQn);
+      NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_PORT_Msk;
+    }
+
+
+
+    void GPIOTE_IRQHandler(void)
+    {
+    #ifdef STOP_ADV
+        Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
+
+        if (stack.isAdvertising()) {
+            LOGi("Stop advertising");
+            stack.stopAdvertising();
+        }
+    #endif
+        CMesh & mesh = CMesh::getInstance();
+        NRF_GPIOTE->EVENTS_PORT = 0;
+        for (uint8_t i = 0; i < 2; ++i)
+        {
+            if (NRF_GPIO->IN & (1 << (BUTTON_0 + i)))
+            {
+                LOGi("Button %i pressed", i);
+                uint32_t value = mesh.receive(i+1);
+                value = 1 - value;
+                led_config(i + 1, value);
+                mesh.send(i + 1, value);
+
+    /*
+                uint8_t val[28];
+                uint16_t len;
+                APP_ERROR_CHECK(rbc_mesh_value_get(i + 1, val, &len, NULL));
+                LOGi("Current mesh data of %i = %i", i + 1, val[0]);
+                val[0] = !val[0];
+                led_config(i + 1, val[0]);
+                LOGi("Set mesh data %i to %i", i+1, val[0]);
+                APP_ERROR_CHECK(rbc_mesh_value_set(i + 1, &val[0], 1));
+    */
+            }
+        }
+    }
+
+
+    }
+
+    #endif
 #endif
 
 
