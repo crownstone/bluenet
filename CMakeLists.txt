@@ -14,31 +14,34 @@ IF(COMMAND cmake_policy)
 	cmake_policy(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
 
+# Makes compilation go wrong first time
 SET(TEST_COMPILERS CXX C)
+#SET(TEST_COMPILERS "")
 
 # Set application shorthand
 SET(APPLICATION_SHORTHAND "crownstone")
 
 # Set name of project
-SET(PROJECT_NAME ${APPLICATION_SHORTHAND} ${TEST_COMPILERS})
+SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
 
 # Set the main file to use for this application
 SET(MAIN_FILE "main_${APPLICATION_SHORTHAND}.cpp")
 
 # Start a project
-PROJECT(${PROJECT_NAME})
+PROJECT(${PROJECT_NAME} ${TEST_COMPILERS})
 
 # The directory with some of the FindXXX modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 MESSAGE(STATUS "Search for FindX files in ${CMAKE_SOURCE_DIR}/cmake")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
 #######################################################################################################################
 
-SET(CONFIGURATION_FILE "CMakeBuild.config")
-IF(EXISTS ${CMAKE_SOURCE_DIR}/${CONFIGURATION_FILE})
-	file(STRINGS ${CMAKE_SOURCE_DIR}/${CONFIGURATION_FILE} ConfigContents)
+SET(CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/CMakeConfig.cmake")
+#SET(CONFIG_FILE "CMakeBuild.config")
+IF(EXISTS ${CONFIG_FILE})
+	file(STRINGS ${CONFIG_FILE} ConfigContents)
 	foreach(NameAndValue ${ConfigContents})
 		# Strip leading spaces
 		string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
@@ -50,7 +53,7 @@ IF(EXISTS ${CMAKE_SOURCE_DIR}/${CONFIGURATION_FILE})
 		set(${Name} "${Value}")
 	endforeach()
 else()
-	MESSAGE(FATAL_ERROR "Could not find file ${CONFIGURATION_FILE}, copy from ${CONFIGURATION_FILE}.default and adjust!")
+	MESSAGE(FATAL_ERROR "Could not find file ${CONFIG_FILE}, copy from ${CONFIG_FILE}.default and adjust!")
 endif()
 
 #######################################################################################################################
@@ -96,6 +99,12 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/Dimming.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/ScanResult.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/CurrentLimit.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/TrackDevices.cpp")
+IF(${GENERAL_SERVICE} STRGREATER "0")
+IF(${MESHING} STRGREATER "0")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/MeshMessage.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/MeshControl.cpp")
+ENDIF()
+ENDIF()
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/BluetoothLE.cpp")
 IF(${INDOOR_SERVICE} STRGREATER "0")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/IndoorLocalisationService.cpp")
@@ -108,8 +117,9 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/PowerService.cpp")
 ENDIF()
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/Dispatcher.cpp")
 
+
 IF(${MESHING} STRGREATER "0")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh_srv.c")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/radio_control.c")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/rbc_mesh.c")

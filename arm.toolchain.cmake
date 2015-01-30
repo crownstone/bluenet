@@ -18,7 +18,11 @@ SET(CMAKE_SYSTEM_PROCESSOR arm)
 SET(CMAKE_CROSSCOMPILING 1)
 
 # Load compiler options from configuration file
-INCLUDE(${PROJECT_SOURCE_DIR}/CMakeConfig.cmake)
+SET(CONFIG_FILE ${CMAKE_SOURCE_DIR}/CMakeConfig.cmake)
+MESSAGE(STATUS "Load config file ${CONFIG_FILE}")
+INCLUDE(${CONFIG_FILE})
+
+UNSET(CMAKE_TRY_COMPILE_CONFIGURATION)
 
 # type of compiler we want to use 
 SET(COMPILER_TYPE_PREFIX ${COMPILER_TYPE}-)
@@ -119,8 +123,8 @@ SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} -Wl,--gc-s
 # We preferably want to run the cross-compiler tests without all the flags. This namely means we have to add for example the object out of syscalls.c to the compilation, etc. Or, differently, have different flags for the compiler tests. This is difficult to do!
 #SET(CMAKE_C_FLAGS "-nostdlib")
 
-SET(CMAKE_C_COMPILER_WORKS 1)
-SET(CMAKE_CXX_COMPILER_WORKS 1)
+#SET(CMAKE_C_COMPILER_WORKS 1)
+#SET(CMAKE_CXX_COMPILER_WORKS 1)
 
 # find the libraries
 # http://qmcpack.cmscc.org/getting-started/using-cmake-toolchain-file

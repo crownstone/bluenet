@@ -8,6 +8,10 @@
 #include <services/GeneralService.h>
 #include <common/storage.h>
 
+#if MESHING==1 
+#include <protocol/mesh.h>
+#endif
+
 using namespace BLEpp;
 
 // needs to be the same command as defined in the bootloader
@@ -36,7 +40,7 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	characStatus.push_back( { "Device Type",
 		DEVICE_TYPE_UUID,
 		false,
-		static_cast<addCharacteristicFunc>(&GeneralService::addDeviceTypeCharactersitic) });
+		static_cast<addCharacteristicFunc>(&GeneralService::addDeviceTypeCharacteristic) });
 	characStatus.push_back( { "Room",
 		ROOM_UUID,
 		false,
@@ -45,6 +49,11 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		FIRMWARE_UUID, 
 		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addFirmwareCharacteristic) });
+	characStatus.push_back( { "Mesh",
+		MESH_UUID, 
+		true,
+		static_cast<addCharacteristicFunc>(&GeneralService::addMeshCharacteristic) });
+
 
 	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
 	loadPersistentStorage();
@@ -68,7 +77,7 @@ void GeneralService::addTemperatureCharacteristic() {
 	addCharacteristic(_temperatureCharacteristic);
 }
 
-void GeneralService::addDeviceTypeCharactersitic() {
+void GeneralService::addDeviceTypeCharacteristic() {
 	Storage::getString(_storageStruct.device_type, _type, "Unknown");
 
 //	LOGd("create characteristic to read/write device type");
@@ -122,6 +131,22 @@ void GeneralService::addFirmwareCharacteristic() {
 			} else {
 				LOGi("Update firmware? Write nonzero value");
 			}
+		});
+}
+
+void GeneralService::addMeshCharacteristic() {
+	_meshCharacteristic = createCharacteristicRef<MeshMessage>();
+	(*_meshCharacteristic)
+		.setUUID(UUID(getUUID(), MESH_UUID))
+		.setName("Mesh")
+		.setWritable(true)
+		.onWrite([&](const MeshMessage & value) -> void {
+			LOGi("Send mesh message");
+			//uint8_t id = value.id(); // not used
+			uint8_t channel = value.channel();
+			uint8_t val = value.value();
+			CMesh &mesh = CMesh::getInstance();
+			mesh.send(channel, val);
 		});
 }
 

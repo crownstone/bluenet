@@ -25,6 +25,7 @@ enum {
 	DEVICE_TYPE_UUID                        = 0x3,
 	ROOM_UUID                               = 0x4,
 	FIRMWARE_UUID                           = 0x5,
+	MESH_UUID                               = 0x6,
 };
 
 enum {

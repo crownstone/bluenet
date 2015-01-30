@@ -9,14 +9,45 @@
  * TODO: Build up the structure with servers and peripheral roles such that we can reach everybody from every position.
  */
 
-//class Mesh {
-//	public:
-//};
-
 #pragma once
 
+extern "C" {
 #include <protocol/rbc_mesh.h>
+#include <protocol/rbc_mesh_common.h>
+#include <protocol/led_config.h>
 
 void rbc_mesh_event_handler(rbc_mesh_event_t* evt);
 
+}
+
+class CMesh {
+private:
+	// constructor is hidden from the user
+	CMesh();
+
+	// destructor is hidden from the user
+	~CMesh();
+	
+	CMesh(CMesh const&); // singleton, deny implementation
+	void operator=(CMesh const &); // singleton, deny implementation
+public:
+	// use static variant of singleton, no dynamic memory allocation
+	static CMesh& getInstance() {
+		static CMesh instance;
+		return instance;
+	}
+
+	// initialize
+	void init();
+
+	// send message
+	void send(uint8_t channel, uint32_t value);
+
+	// returns last received message
+	uint32_t receive(uint8_t channel);
+
+	// set callback to receive message
+	void set_callback();
+
+};
 
