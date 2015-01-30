@@ -32,11 +32,11 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 
 			if (evt->value_handle > 2)                     
 				break; 
-			if (evt->data[0]) {
-				LOGi("Got data in: %i, %i", evt->value_handle, evt->data[0]);
-				MeshControl &meshControl = MeshControl::getInstance();
-				meshControl.process(evt->value_handle, evt->data[0]);
-			} 
+			//if (evt->data[0]) {
+			LOGi("Got data in: %i, %i", evt->value_handle, evt->data[0]);
+			MeshControl &meshControl = MeshControl::getInstance();
+			meshControl.process(evt->value_handle, evt->data[0]);
+			//} 
 			led_config(evt->value_handle, evt->data[0]); 
 			break; 
 	}                             
