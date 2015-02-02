@@ -49,11 +49,12 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		FIRMWARE_UUID, 
 		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addFirmwareCharacteristic) });
+#if MESHING==1
 	characStatus.push_back( { "Mesh",
 		MESH_UUID, 
 		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addMeshCharacteristic) });
-
+#endif
 
 	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
 	loadPersistentStorage();
@@ -134,6 +135,7 @@ void GeneralService::addFirmwareCharacteristic() {
 		});
 }
 
+#if MESHING==1
 void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic = createCharacteristicRef<MeshMessage>();
 	(*_meshCharacteristic)
@@ -149,6 +151,7 @@ void GeneralService::addMeshCharacteristic() {
 			mesh.send(handle, val);
 		});
 }
+#endif
 
 void GeneralService::addChangeNameCharacteristic() {
 	Storage::getString(_storageStruct.device_name, _name, getBLEName());
