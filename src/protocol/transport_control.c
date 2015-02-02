@@ -80,8 +80,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* minimum time to be left in the timeslot for there to be any point in ordering the radio */
 #define RADIO_SAFETY_TIMING_US      (500)
+#define RSSI_ENABLE
 
-
+static uint8_t radio_rssi;
 static uint8_t tx_data[(PACKET_DATA_MAX_LEN + PACKET_DATA_POS) * PACKET_MAX_CHAIN_LEN];
 static uint32_t global_time = 0;
 static uint8_t step_timer_index = 0xFF;
@@ -156,9 +157,14 @@ static inline bool packet_is_data_packet(uint8_t* data)
 static void search_callback(uint8_t* data)
 {
     SET_PIN(PIN_RX);
-    
+
+#ifdef RSSI_ENABLE
+    // By having the RSSI here, we almost always get a value, if we put it down below, we hardly ever get one. Radio closed there?
+    radio_rssi = radio_rssi_get();
+//    LOGi("RSSI value: %i", radio_rssi); // I think having a log in this function leads to messed up timings, resulting in a softdevice assertion error breakpoint.
+#endif
+
     uint32_t checksum = (NRF_RADIO->RXCRC & 0x00FFFFFF);
-    
     /* check if timeslot is about to end */
     uint32_t radio_time_left = timeslot_get_remaining_time();
     
@@ -172,8 +178,7 @@ static void search_callback(uint8_t* data)
     
     if (data == NULL || !packet_is_data_packet(data))
         return;
-    
-    
+
     async_event_t async_evt;
     async_evt.type = EVENT_TYPE_PACKET;
     packet_create_from_data(data, &async_evt.callback.packet);
@@ -181,12 +186,7 @@ static void search_callback(uint8_t* data)
     timeslot_queue_async_event(&async_evt);
     
     /** @TODO: add packet chain handling */
-#ifdef RSSI_ENABLE
-    uint8_t value;
-    value = radio_rssi_get();
 
-    LOGi("RSSI value: %i", value);
-#endif
 }
 
 /**
