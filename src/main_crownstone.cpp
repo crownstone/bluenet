@@ -334,29 +334,18 @@ int main() {
 #endif
 
 #if MESHING==1
-#ifdef BOARD_PCA10001
-	gpiote_init();
-#endif
+    #ifdef BOARD_PCA10001
+        gpiote_init();
+    #endif
 
-#if BOARD == VIRTUALMEMO
-	//gpiote_init();
-	nrf_gpio_range_cfg_output(7,14);
-
-//	nrf_gpio_pin_set(7);
-//	nrf_gpio_pin_set(8);
-//	nrf_gpio_pin_set(9);
-//    nrf_gpio_pin_set(10);
-//    nrf_gpio_pin_set(11);
-//    nrf_gpio_pin_set(12);
-//    nrf_gpio_pin_set(13);
-//    nrf_gpio_pin_set(14);
-#endif
+    #if BOARD == VIRTUALMEMO
+        nrf_gpio_range_cfg_output(7,14);
+    #endif
 #endif
 
 #if MESHING==1
  	CMesh & mesh = CMesh::getInstance();
 	mesh.init();
-	//setup_mesh();
 #endif
 
 	LOGi("Running while ticking..");
