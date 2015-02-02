@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define RADIO_EVENT(evt)  (NRF_RADIO->evt == 1)
 
-
+//#define RSSI_ENABLE
 
 /** 
 * Internal enum denoting radio state. 
@@ -492,7 +492,6 @@ void radio_order(radio_event_t* radio_event)
         if (radio_event->start_time == 0)
         {
             NRF_RADIO->SHORTS |= RADIO_SHORTS_READY_START_Msk;
-	    //radio_rssi_enable();
         }
         else
         {
@@ -527,8 +526,10 @@ void radio_order(radio_event_t* radio_event)
                 else if (radio_event->event_type == RADIO_EVENT_TYPE_RX)
                 {
                     NRF_RADIO->SHORTS |= RADIO_SHORTS_DISABLED_RXEN_Msk;
-//	    		    LOGi("Enable RSSI");
-//			        radio_rssi_enable();
+#ifdef RSSI_ENABLE
+	    		LOGi("Enable RSSI");
+			radio_rssi_enable();
+#endif
                 }
                 else /* going to TX */
                 {
