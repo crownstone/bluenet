@@ -82,7 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PIN_TIMER_SIGNAL    (4)
 #define PIN_IN_TIMESLOT     (6)
 
-#define DEBUG_RADIO         (1)
+#define DEBUG_RADIO         (0)
 
 #define PIN_RADIO_STATE_RX  (14)
 #define PIN_RADIO_STATE_TX  (13)
