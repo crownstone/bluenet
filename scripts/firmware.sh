@@ -1,7 +1,10 @@
 #!/bin/bash
 
 cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
-target=${2:? "Usage: $0 \"cmd\", \"target\""}
+
+if [[ $cmd != "help" && $cmd != "bootloader" ]]; then
+	target=${2:? "Usage: $0 \"cmd\", \"target\""}
+fi
 
 # optional address
 address=$3
