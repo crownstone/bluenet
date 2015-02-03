@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static uint32_t g_trickle_time; /* global trickle time that all time variables are relative to */
 
 static uint8_t rng_vals[64];
-static uint8_t rng_index;
+static uint8_t rng_index = 0;
 
 /*global parameters for trickle behavior, set in trickle_setup() */
 static uint32_t g_i_min, g_i_max;
@@ -73,11 +73,11 @@ static void trickle_interval_begin(trickle_t* trickle)
 {
     trickle->c = 0;
     
-    uint32_t rand_number =  ((uint32_t) rng_vals[(rng_index++) & 0x3F])       |
-                            ((uint32_t) rng_vals[(rng_index++) & 0x3F]) << 8  |
-                            ((uint32_t) rng_vals[(rng_index++) & 0x3F]) << 16 |
-                            ((uint32_t) rng_vals[(rng_index++) & 0x3F]) << 24;
-    
+    uint32_t rand_number =  ((uint32_t) rng_vals[(rng_index+0) & 0x3F])       |
+                            ((uint32_t) rng_vals[(rng_index+1) & 0x3F]) << 8  |
+                            ((uint32_t) rng_vals[(rng_index+2) & 0x3F]) << 16 |
+                            ((uint32_t) rng_vals[(rng_index+3) & 0x3F]) << 24;
+    rng_index += 4;
     uint32_t i_half = trickle->i_relative / 2;
     trickle->t = g_trickle_time + i_half + (rand_number % i_half);
     trickle->i = g_trickle_time + trickle->i_relative;
