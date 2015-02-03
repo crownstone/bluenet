@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _RBC_MESH_COMMON_H__
 #include <stdint.h>
 
-//#define RBC_MESH_DEBUG  (1)
+#define RBC_MESH_DEBUG  (0)
 
 /******************************************************************************
 * Debug related defines
@@ -84,9 +84,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DEBUG_RADIO         (0)
 
-#define PIN_RADIO_STATE_RX  (1)
-#define PIN_RADIO_STATE_TX  (2)
-#define PIN_RADIO_STATE_IDLE (3)
+#define PIN_RADIO_STATE_RX  (14)
+#define PIN_RADIO_STATE_TX  (13)
+#define PIN_RADIO_STATE_IDLE (12)
 
 #if DEBUG_RADIO
     #define DEBUG_RADIO_SET_PIN(x) NRF_GPIO->OUTSET = (1 << (x))

@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define RADIO_EVENT(evt)  (NRF_RADIO->evt == 1)
 
-//#define RSSI_ENABLE
+#define RSSI_ENABLE
 
 /** 
 * Internal enum denoting radio state. 
@@ -468,7 +468,7 @@ void radio_order(radio_event_t* radio_event)
         {
             NRF_RADIO->PACKETPTR = (uint32_t) rx_data[current_rx_buf]; /* double pointer */
             NRF_RADIO->TASKS_RXEN = 1;
-            
+
             /* if the event is not an "as soon as possible", we setup an RX timeout,
                 else the user must do it themselves */
             if (radio_event->start_time != 0)
@@ -479,6 +479,7 @@ void radio_order(radio_event_t* radio_event)
             radio_state = RADIO_STATE_RX;
             NRF_RADIO->INTENSET = RADIO_INTENSET_ADDRESS_Msk;
             DEBUG_RADIO_SET_PIN(PIN_RADIO_STATE_RX);
+
         }
         else
         {
@@ -497,7 +498,7 @@ void radio_order(radio_event_t* radio_event)
         {
             timer_order_ppi(radio_event->start_time, (uint32_t*) &(NRF_RADIO->TASKS_START));
         }
-        
+
         NRF_RADIO->INTENSET = RADIO_INTENSET_END_Msk;
         
     }
@@ -505,7 +506,6 @@ void radio_order(radio_event_t* radio_event)
     {
         //NRF_RADIO->INTENSET = RADIO_INTENSET_END_Msk;
         /* queue the event */
-        
         if (!radio_will_go_to_disabled_state())
         {
             uint8_t queue_length = radio_fifo_get_length();
@@ -526,10 +526,6 @@ void radio_order(radio_event_t* radio_event)
                 else if (radio_event->event_type == RADIO_EVENT_TYPE_RX)
                 {
                     NRF_RADIO->SHORTS |= RADIO_SHORTS_DISABLED_RXEN_Msk;
-#ifdef RSSI_ENABLE
-	    		LOGi("Enable RSSI");
-			radio_rssi_enable();
-#endif
                 }
                 else /* going to TX */
                 {
@@ -538,6 +534,11 @@ void radio_order(radio_event_t* radio_event)
             }
         }   
     }
+#ifdef RSSI_ENABLE
+    // if we do this always, we never get a invalid rssi value (3), it also does not mess up the tx.
+//    LOGi("Enabling RSSI"); // this causes a breakpoint. No UART in the radio loop appearently, messes up the timings.
+    radio_rssi_enable();
+#endif
 }
 
 
@@ -599,7 +600,7 @@ void radio_rssi_enable (void)
 #define RADIO_RSSI_INVALID 3
 uint8_t radio_rssi_get (void)
 {
-	static uint8_t sample;
+	uint8_t sample;
 
 	/* First check if sample is available */
 	if (NRF_RADIO->EVENTS_RSSIEND != 0)
