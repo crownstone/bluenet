@@ -119,15 +119,33 @@ You can also run everything in sequence:
 
 And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish. 
 
-## Flashing
+## Flashing with the ST-Link
 
 The above assumes you have the J-Link programmer from Nordic. If you do not have that device, you can still program something like the RFduino or the Crownstone, by using an ST-Link. A full explanation can be found on <https://dobots.nl/2015/01/23/programming-the-nrf51822-with-the-st-link/>. 
+
+### Combine softdevice and firmware
+
+First of all you should combine all the required binaries into one big binary. This is done by the script combine.sh. Before you use it, you will need to install srec_cat on your system.
+
+    sudo apt-get install srecord
+
+If you call the script it basically just runs srec_cat:
+
+    ./combine.sh
+
+And you will see that it runs something like this:
+
+    srec_cat /opt/softdevices/s110_nrf51822_7.0.0_softdevice.hex -intel crownstone.bin -binary -offset 0x00016000 -o combined.bin
+
+You have to adjust that file on the moment manually to switch between softdevice
+
+### Upload with OpenOCD
 
 Rather than downloading `openocd` from the Ubuntu repositories, it is recommended to get the newest software from the source:
 
     cd /opt
     git clone https://github.com/ntfreak/openocd
-    sudo aptitude install libtool automake
+    sudo aptitude install libtool automake libusb-1.0-0-dev expect
     cd openocd
     ./bootstrap 
     ./configure --enable-stlink
@@ -145,9 +163,9 @@ You can now use the `flash_openocd.sh` script in the `scripts` directory:
 
 And in another console:
 
-    ./flash_openocd.sh upload combined.hex
+    ./flash_openocd.sh upload combined.bin
 
-Here the binary `combined.hex` is the softdevice and application combined.
+Here the binary `combined.bin` is the softdevice and application combined.
 
 ## Meshing
 
