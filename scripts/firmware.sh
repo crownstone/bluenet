@@ -51,6 +51,12 @@ clean() {
 	make clean
 }
 
+bootloader() {
+	./softdevice.sh all
+	./writebyte.sh 0x10001014 0x00034000
+	./firmware.sh all bootloader 0x00034000
+}
+
 case "$cmd" in 
 	build)
 		build
@@ -69,6 +75,9 @@ case "$cmd" in
 		;;
 	clean)
 		clean
+		;;
+	bootloader)
+		bootloader
 		;;
 	*)
 		echo $"Usage: $0 {build|upload|debug|clean|run|all}"
