@@ -75,7 +75,7 @@ MESSAGE(STATUS "Linked libraries: ${LIBS}")
 SET(SOURCE_DIR "src")
 
 # Add separately include directories if we are to lazy to specify e.g. "#include <protocol/rbc_mesh.h>"
-SET(INCLUDE_DIR "include" "include/third/nrf" "include/third/protocol")
+SET(INCLUDE_DIR "include" "include/third" "include/third/nrf" "include/third/protocol")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
@@ -119,7 +119,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_Dispatcher.cpp")
 
 
 IF(${MESHING} STRGREATER "0")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/mesh.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_Mesh.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/mesh_srv.c")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/radio_control.c")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/rbc_mesh.c")

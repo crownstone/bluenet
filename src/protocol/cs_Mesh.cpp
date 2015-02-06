@@ -5,15 +5,15 @@
  * License: LGPLv3+, Apache, or MIT, your choice
  */
 
-#include <protocol/mesh.h>
+#include <protocol/cs_Mesh.h>
 #include <protocol/led_config.h>
 #include <protocol/rbc_mesh_common.h>
 
-#include "../../include/common/cs_Boards.h"
+#include <common/cs_Boards.h>
 
-#include "../../include/drivers/CS_serial.h"
-#include "../../include/protocol/cs_MeshControl.h"
-#include "../../include/util/cs_BleError.h"
+#include <drivers/cs_Serial.h>
+#include <protocol/cs_MeshControl.h>
+#include <util/cs_BleError.h>
 
 extern "C" {
 

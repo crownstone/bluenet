@@ -56,7 +56,7 @@ extern "C" {
 #endif
 
 #if MESHING==1
-#include <third/protocol/mesh.h>
+#include <protocol/cs_Mesh.h>
 #endif
 
 #include "drivers/cs_RTC.h"
