@@ -1,14 +1,16 @@
 #!/bin/bash
 
-if [ $# -ne 5 ]; then
-	echo "Error: Usage $0 \"softdevice dir\" \"softdevice\" \"compiler dir\" \"compiler type\" \"no separate section\""
+if [ $# -ne 6 ]; then
+	echo "Error: Usage $0 \"softdevice dir\" \"softdevice bin dir\" \"softdevice\" \"compiler dir\" \"compiler type\" \"no separate section\""
 	exit
 fi
 SOFTDEVICE_DIR=$1
-SOFTDEVICE=$2
-COMPILER_PATH=$3
-COMPILER_TYPE=$4
-SOFTDEVICE_NO_SEPARATE_UICR_SECTION=$5
+SD_BINDIR=$2
+SOFTDEVICE=$3
+COMPILER_PATH=$4
+COMPILER_TYPE=$5
+SOFTDEVICE_NO_SEPARATE_UICR_SECTION=$6
+
 
 FULLNAME_SOFTDEVICE=${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex
 
@@ -17,10 +19,11 @@ if [ ! -e ${FULLNAME_SOFTDEVICE} ]; then
 	exit
 fi
 
+mkdir -p $SD_BINDIR
 # Output configuration file
-NRF_UICR_BIN=${SOFTDEVICE_DIR}/softdevice_uicr.bin
+NRF_UICR_BIN=${SD_BINDIR}/softdevice_uicr.bin
 # Output main file
-NRF_MAIN_BIN=${SOFTDEVICE_DIR}/softdevice_mainpart.bin
+NRF_MAIN_BIN=${SD_BINDIR}/softdevice_mainpart.bin
 
 # Remove old files
 rm -f ${NRF_MAIN_BIN}

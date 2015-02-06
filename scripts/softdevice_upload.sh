@@ -7,7 +7,7 @@ TEMP_DIR=tmp
 source ../CMakeBuild.config
 DEVICE=nrf51822
 
-SOFTDEVICE_DIR=${1:? "$0 requires \"softdevice directory\" as first argument"}
+SOFTDEVICE_DIR=${1:? "$0 requires \"softdevice bin directory\" as first argument"}
 
 if [ ! -e ${SOFTDEVICE_DIR} ]; then
 	echo "Error: ${SOFTDEVICE_DIR} does not exist..."

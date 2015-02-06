@@ -6,6 +6,8 @@ cmd=${1:? "$0 requires \"cmd\" as first argument"}
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 working_path=$path
 
+SD_BINDIR=${path}/../build/softdevice
+
 config_file=CMakeBuild.config
 if [ $cmd != "switch" ]; then
 	echo "Load SoftDevice directory from configuration file"
@@ -16,11 +18,11 @@ build() {
 	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"
 	echo "However, we still need to extract the binary and the config blob"
 	echo "  from $SOFTDEVICE_DIR/$SOFTDEVICE"
-	./softdevice_objcopy.sh $SOFTDEVICE_DIR $SOFTDEVICE $COMPILER_PATH $COMPILER_TYPE $SOFTDEVICE_NO_SEPARATE_UICR_SECTION
+	./softdevice_objcopy.sh $SOFTDEVICE_DIR $SD_BINDIR $SOFTDEVICE $COMPILER_PATH $COMPILER_TYPE $SOFTDEVICE_NO_SEPARATE_UICR_SECTION
 }
 
 upload() {
-	./softdevice_upload.sh $SOFTDEVICE_DIR
+	./softdevice_upload.sh $SD_BINDIR
 }
 
 switch() {
