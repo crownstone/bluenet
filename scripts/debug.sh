@@ -6,7 +6,7 @@ TEMP_DIR=tmp
 
 GDB_SCRIPT=gdbinit
 
-source ../CMakeBuild.config
+source config.sh
 
 GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}-gdb
 DEVICE=nrf51822

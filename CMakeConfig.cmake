@@ -1,6 +1,8 @@
 SET(CONFIGURATION_FILE "CMakeBuild.config")
-IF(EXISTS ${CMAKE_SOURCE_DIR}/${CONFIGURATION_FILE})
-	file(STRINGS ${CMAKE_SOURCE_DIR}/${CONFIGURATION_FILE} ConfigContents)
+SET(CONFIG_DIR "$ENV{BLUENET_DIR}")
+
+IF(EXISTS ${CONFIG_DIR}/${CONFIGURATION_FILE})
+	file(STRINGS ${CONFIG_DIR}/${CONFIGURATION_FILE} ConfigContents)
 	foreach(NameAndValue ${ConfigContents})
 		# Strip leading spaces
 		string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
@@ -12,6 +14,5 @@ IF(EXISTS ${CMAKE_SOURCE_DIR}/${CONFIGURATION_FILE})
 		set(${Name} "${Value}")
 	endforeach()
 else()
-	MESSAGE(FATAL_ERROR "Could not find file ${CONFIGURATION_FILE}, copy from ${CONFIGURATION_FILE}.default and adjust!")
+	MESSAGE(FATAL_ERROR "Could not find file ${CONFIG_DIR}/${CONFIGURATION_FILE}, copy from ${CONFIGURATION_FILE}.default and adjust!")
 endif()
-

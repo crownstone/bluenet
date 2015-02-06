@@ -4,7 +4,7 @@ SCRIPT_DIR=jlink
 TEMP_DIR=tmp
 mkdir -p $TEMP_DIR
 
-source ../CMakeBuild.config
+source config.sh
 DEVICE=nrf51822
 
 cp $SCRIPT_DIR/hardware_version.script $TEMP_DIR/hardware_version.script

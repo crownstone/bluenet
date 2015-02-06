@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SCRIPT_DIR=jlink
 mkdir -p tmp
@@ -6,7 +6,7 @@ TEMP_DIR=tmp
 
 GDB_SCRIPT=gdbreset
 
-source ../CMakeBuild.config
+source config.sh
 
 GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}-gdb
 DEVICE=nrf51822

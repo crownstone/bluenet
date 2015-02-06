@@ -7,7 +7,7 @@ mkdir -p $TEMP_DIR
 ADDRESS=${1:? "Requires address as argument"}
 DEVICE=nrf51822
 
-source ../CMakeBuild.config
+source config.sh
 
 sed "s|@ADDRESS@|$ADDRESS|" $SCRIPT_DIR/readbyte.script > $TEMP_DIR/readbyte.script
 

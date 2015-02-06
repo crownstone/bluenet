@@ -8,7 +8,7 @@ ADDRESS=${1:? "Requires address as argument"}
 VALUE=$2
 DEVICE=nrf51822
 
-source ../CMakeBuild.config
+source config.sh
 
 sed "s|@ADDRESS@|$ADDRESS|" $SCRIPT_DIR/writebyte.script > $TEMP_DIR/writebyte.script.1
 sed "s|@VALUE@|$VALUE|" $TEMP_DIR/writebyte.script.1 > $TEMP_DIR/writebyte.script

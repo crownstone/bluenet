@@ -4,7 +4,7 @@ SCRIPT_DIR=jlink
 mkdir -p tmp
 TEMP_DIR=tmp
 
-source ../CMakeBuild.config
+source config.sh
 DEVICE=nrf51822
 
 SOFTDEVICE_DIR=${1:? "$0 requires \"softdevice bin directory\" as first argument"}

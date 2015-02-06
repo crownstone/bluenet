@@ -6,13 +6,10 @@ cmd=${1:? "$0 requires \"cmd\" as first argument"}
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 working_path=$path
 
-SD_BINDIR=${path}/../build/softdevice
+#SD_BINDIR=${path}/../build/softdevice
+SD_BINDIR=${BLUENET_DIR}/build
 
-config_file=CMakeBuild.config
-if [ $cmd != "switch" ]; then
-	echo "Load SoftDevice directory from configuration file"
-	source ../$config_file
-fi
+source config.sh
 
 build() {
 	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"
@@ -23,20 +20,6 @@ build() {
 
 upload() {
 	./softdevice_upload.sh $SD_BINDIR
-}
-
-switch() {
-	cd ..
-	if [ -z "$1" ]; then
-		echo "Parameter required: s110 or s130"
-		return
-	fi
-	echo "Switch configuration file to: $1"
-	rm -f $config_file
-	ln -s $config_file.$1 $config_file
-	ls -latr | grep $config_file | tail -n1
-	#source $config_file
-	#echo "Set current softdevice to: $SOFTDEVICE"
 }
 
 all() {
@@ -52,10 +35,6 @@ case "$cmd" in
 	upload)
 		upload
 		;;
-	switch)
-		shift
-		switch $@
-		;;
 	all)
 		all
 		;;
@@ -63,4 +42,3 @@ case "$cmd" in
 		echo $"Usage: $0 {build|upload|switch|all}"
 		exit 1
 esac
-

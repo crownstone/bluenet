@@ -6,7 +6,7 @@ if [[ $cmd != "help" && $cmd != "init" && $cmd != "combined" && $cmd != "connect
 	target=${2:? "Usage: $0 \"cmd\", \"target\""}
 fi
 
-source ../CMakeBuild.config
+source config.sh
 
 debug_target=$target.elf
 binary_target=$target
