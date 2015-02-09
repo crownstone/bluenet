@@ -12,13 +12,12 @@
 #   Date: Feb. 3, 2014
 #######################################################################################################################
 
-cd ../build
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd ${path}/../build
 
 add_bootloader=true
 add_softdevice=true
 add_binary=false
-
-softdevice="s110"
 
 if [[ "$add_bootloader" == true ]]; then
 	# These settings are already incorporated in the bootloader.hex binary, so you don't need to add them here
@@ -27,16 +26,16 @@ if [[ "$add_bootloader" == true ]]; then
 	ADD_BOOTLOADER="bootloader.hex -intel"
 fi
 
-if [[ "$softdevice" == "s110" ]]; then
+if [[ "$SOFTDEVICE_SERIES" == "110" ]]; then
 	if [[ "$add_softdevice" == true ]]; then
-		ADD_SOFTDEVICE="/opt/softdevices/s110_nrf51822_7.0.0_softdevice.hex -intel"
+		ADD_SOFTDEVICE="${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel"
 	fi
 	if [[ "$add_binary" == true ]]; then
 		ADD_BINARY="crownstone.bin -binary -offset 0x00016000"
 	fi
 else
 	if [[ "$add_softdevice" == true ]]; then
-		ADD_SOFTDEVICE="/opt/softdevices/s130_nrf51822_0.5.0-1.alpha_softdevice.hex -intel"
+		ADD_SOFTDEVICE="${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel"
 	fi
 	if [[ "$add_binary" == true ]]; then
 		ADD_BINARY="crownstone.bin -binary -offset 0x0001c000"
