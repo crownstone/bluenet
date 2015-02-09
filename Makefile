@@ -21,7 +21,8 @@ build:
 	@mkdir -p build
 	@mkdir -p build/CMakeFiles/CMakeTmp
 	@cp CMakeConfig.cmake build/CMakeFiles/CMakeTmp
-	@cp $(BLUENET_DIR)/CMakeBuild.config build/CMakeFiles/CMakeTmp
+	@if [ -e CMakeBuild.config ]; then cp -v CMakeBuild.config build/CMakeFiles/CMakeTmp; fi
+	@if [ -e ${BLUENET_DIR}/CMakeBuild.config ]; then cp -v ${BLUENET_DIR}/CMakeBuild.config build/CMakeFiles/CMakeTmp; fi
 	@mkdir -p build/CMakeFiles/CMakeTmp/conf
 	@cp conf/nRF51822-softdevice.ld.in conf/nRF51822-softdevice.ld
 	@sed -i "s/@APPLICATION_START_ADDRESS@/0x16000/" conf/nRF51822-softdevice.ld 
