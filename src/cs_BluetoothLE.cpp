@@ -12,6 +12,8 @@
 #include "nrf_soc.h"
 #endif
 
+#include "softdevice_handler.h"
+
 #if MESHING==1
 extern "C" {
 #include <protocol/mesh.h>
@@ -433,7 +435,7 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 		free(_evt_buffer);
 }
 
-#define OWN_HANDLER
+//#define OWN_HANDLER
 
 #ifdef OWN_HANDLER
 /**
@@ -473,8 +475,10 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 		BLE_CALL(sd_softdevice_disable, ());
 	}
 
-	LOGi("Enable Softdevice, set assertion handler.");
-	BLE_CALL(sd_softdevice_enable, (_clock_source, softdevice_assertion_handler));
+	LOGi("Enable and initialize softdevice/handler, set assertion handler.");
+	// Initialize the SoftDevice handler module.
+	// this would call with different clock!
+	SOFTDEVICE_HANDLER_INIT(_clock_source, false);
 
 	// enable the BLE stack
 #if(SOFTDEVICE_SERIES == 110) 

@@ -194,14 +194,33 @@ void Storage::getStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint1
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
 
 	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, size, 0) );
+
+#ifdef PRINT_ITEMS
+	uint8_t* ptr = (uint8_t*)item;
+	_log(INFO, "getStruct: ");
+	for (int i = 0; i < size; i++) {
+		_log(INFO, "%X ", ptr[i]);
+	}
+	_log(INFO, "\r\n");
+#endif
+
 }
 
 void Storage::setStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
 	pstorage_handle_t block_handle;
 
+#ifdef PRINT_ITEMS
+	uint8_t* ptr = (uint8_t*)item;
+	_log(INFO, "set struct: ");
+	for (int i = 0; i < size; i++) {
+		_log(INFO, "%X ", ptr[i]);
+	}
+	_log(INFO, "\r\n");
+#endif
+
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
 
-	//	clearBlock(handle, blockID);
+	//	clearBlock(handle, 0);
 
 	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
 
@@ -221,8 +240,7 @@ void Storage::setString(std::string value, char* target) {
 void Storage::getString(char* value, std::string& target, std::string default_value) {
 
 #ifdef PRINT_ITEMS
-	LOGi("raw value: %s", value);
-	_log(INFO, "stored value: ");
+	_log(INFO, "get string (raw) : ");
 	for (int i = 0; i < MAX_STRING_SIZE; i++) {
 		_log(INFO, "%X ", value[i]);
 	}
