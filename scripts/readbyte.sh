@@ -1,13 +1,14 @@
 #!/bin/bash
 
-SCRIPT_DIR=jlink
-TEMP_DIR=tmp
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/config.sh
+
+SCRIPT_DIR=$path/jlink
+TEMP_DIR=$path/tmp
 mkdir -p $TEMP_DIR
 
 ADDRESS=${1:? "Requires address as argument"}
 DEVICE=nrf51822
-
-source config.sh
 
 sed "s|@ADDRESS@|$ADDRESS|" $SCRIPT_DIR/readbyte.script > $TEMP_DIR/readbyte.script
 
