@@ -12,7 +12,7 @@
 
 all: build
 	@cd build && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=../arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Release .. && make
-	@if [ -e ${BLUENET_DIR} ]; then echo "Copy binaries to ${BLUENET_DIR}/build"; mkdir -p ${BLUENET_DIR}/build; cp build/*.hex build/*.bin build/*.elf ${BLUENET_DIR}/build; fi
+	@if [ -d "${BLUENET_DIR}" ]; then echo "Copy binaries to ${BLUENET_DIR}/build"; mkdir -p ${BLUENET_DIR}/build; cp build/*.hex build/*.bin build/*.elf ${BLUENET_DIR}/build; fi
 
 clean: 
 	@cd build && make clean
