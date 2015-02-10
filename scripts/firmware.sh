@@ -55,12 +55,13 @@ clean() {
 bootloader() {
 	# perhaps do this separate anyway
 	# ${path}/softdevice.sh all
-	# is now done automatically (part of bootloader binary)
-	${path}/writebyte.sh 0x10001014 0x00034000
 
 	# note that within the bootloader the JLINK doesn't work anymore...
 	# so perhaps first flash the binary and then the bootloader
 	${path}/firmware.sh upload bootloader 0x00034000
+
+	# and set to load it
+	${path}/writebyte.sh 0x10001014 0x00034000
 }
 
 case "$cmd" in 

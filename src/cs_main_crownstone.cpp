@@ -98,7 +98,7 @@ void welcome() {
 	uint8_t *p = (uint8_t*)malloc(1);
 	LOGd("Start of heap %p", p);
 	free(p);
-	LOGd("Bootloader starts at 0x00035000.");
+	LOGd("Bootloader starts at 0x00034000.");
         // To have DFU, keep application limited to (BOOTLOADER_START - APPLICATION_START_CODE) / 2
 	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800 
 	// Very probably FLASH (32MB) is not a problem though, but RAM will be (16kB)!

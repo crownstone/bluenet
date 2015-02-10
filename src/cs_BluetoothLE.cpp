@@ -498,7 +498,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	// Initialize the SoftDevice handler module.
 	// this would call with different clock!
 	SOFTDEVICE_HANDLER_INIT(_clock_source, false);
-
+	
 	// enable the BLE stack
 #if(SOFTDEVICE_SERIES == 110) 
 #if(NORDIC_SDK_VERSION >= 6)

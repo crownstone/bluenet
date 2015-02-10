@@ -19,8 +19,10 @@ if [ ! -e ${FILE} ]; then
 fi
 
 if [ -z "${ADDRESS}" ]; then
+	echo "No address as parameter so overwrite with config value"
 	ADDRESS=$APPLICATION_START_ADDRESS
 fi
+echo "Write to address: $ADDRESS"
 
 #check_mime=$(mimetype $FILE)
 #if [ $check_mime != "application/octet-stream" ]; then
