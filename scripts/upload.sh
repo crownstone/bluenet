@@ -1,10 +1,12 @@
 #!/bin/bash
 
-SCRIPT_DIR=jlink
-mkdir -p tmp
-TEMP_DIR=tmp
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/config.sh
 
-source config.sh
+SCRIPT_DIR=$path/jlink
+TEMP_DIR=$path/tmp
+mkdir -p $TEMP_DIR
+
 DEVICE=nrf51822
 
 FILE=${1:? "$0 requires \"file\" as first argument"}

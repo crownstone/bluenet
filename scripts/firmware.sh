@@ -6,29 +6,27 @@ if [[ $cmd != "help" && $cmd != "bootloader" ]]; then
 	target=${2:? "Usage: $0 \"cmd\", \"target\""}
 fi
 
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/config.sh
+
 # optional address
 address=$3
 
-# get working path in absolute sense
-path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-working_path=$path
-
 # todo: add more code to check if target exists
-
 build() {
-	cd $working_path/..	
+	cd ${path}/..
 	make all
 	result=$?
-	cd $working_path
+	cd $path
 	return $result
 }
 
 upload() {
-	./upload.sh ../build/$target.bin $address
+	${path}/upload.sh $BLUENET_DIR/build/$target.bin $address
 }
 
 debug() {
-	./debug.sh ../build/$target.elf
+	${path}/debug.sh $BLUENET_DIR/build/$target.elf
 }
 
 all() {
@@ -50,17 +48,18 @@ run() {
 }
 
 clean() {
-	cd ..
+	cd ${path}/..
 	make clean
 }
 
 bootloader() {
-	./softdevice.sh all
+	${path}/softdevice.sh all
 	# is now done automatically (part of bootloader binary)
-	#./writebyte.sh 0x10001014 0x00034000
+	# ${path}/writebyte.sh 0x10001014 0x00034000
+
 	# note that within the bootloader the JLINK doesn't work anymore...
 	# so perhaps first flash the binary and then the bootloader
-	./firmware.sh all bootloader 0x00034000
+	${path}/firmware.sh all bootloader 0x00034000
 }
 
 case "$cmd" in 

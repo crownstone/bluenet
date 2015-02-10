@@ -13,7 +13,9 @@
 #######################################################################################################################
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd ${path}/../build
+source $path/config.sh
+
+cd ${BLUENET_DIR}/build
 
 add_bootloader=true
 add_softdevice=true
