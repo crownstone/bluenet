@@ -25,6 +25,17 @@ extern "C" {
 #error "The SOFTDEVICE_SERIES macro is required for compilation. Set it to 110 for example"
 #endif
 
+/**********************************************************************************************************************
+ * Defines, local to this file
+ *********************************************************************************************************************/
+
+// use our own event handler (not the one in softdevice_handler.h)
+#define OWN_EVENT_HANDLER
+
+/**********************************************************************************************************************
+ * Code start
+ *********************************************************************************************************************/
+
 using namespace BLEpp;
 
 /**@brief Variable length data encapsulation in terms of length and pointer to data */
@@ -435,25 +446,25 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 		free(_evt_buffer);
 }
 
-//#define OWN_HANDLER
-
-#ifdef OWN_HANDLER
+#ifdef OWN_ASSERTION_HANDLER
 /**
  * This assertion handler gets called when there is something amiss in the execution. Attach gdb to see the function
  * parameters.
  */
-void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name)                            
+extern "C" void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name)                            
 {                                                                                                                       
     UNUSED_PARAMETER(pc);                                                                                               
     assert_nrf_callback(line_num, file_name);                                                                           
 }      
 #endif
 
+// define your OWN_EVENT_HANDLER, makes only sense actually when MESHING
+#ifdef OWN_EVENT_HANDLER
+extern "C" void softdevice_event_handler(uint32_t evt_id) {
 #if MESHING==1
-extern "C" {
-uint32_t softdevice_evt_schedule_mesh() {
 	rbc_mesh_sd_irq_handler();
-}
+#endif
+	sys_evt_dispatch(evt_id);
 }
 #endif
 
@@ -486,8 +497,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	LOGi("Enable and initialize softdevice/handler, set assertion handler.");
 	// Initialize the SoftDevice handler module.
 	// this would call with different clock!
-	//SOFTDEVICE_HANDLER_INIT(_clock_source, false);
-	softdevice_handler_init(_clock_source, NULL, 0, softdevice_evt_schedule_mesh);
+	SOFTDEVICE_HANDLER_INIT(_clock_source, false);
 
 	// enable the BLE stack
 #if(SOFTDEVICE_SERIES == 110) 
@@ -532,8 +542,10 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	setTxPowerLevel();
 
-#ifndef OWN_HANDLER
+#ifndef OWN_EVENT_HANDLER
 	BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
+#else
+	BLE_CALL(softdevice_sys_evt_handler_set, (softdevice_event_handler));
 #endif
 	_inited = true;
 
