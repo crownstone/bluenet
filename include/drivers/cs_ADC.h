@@ -17,10 +17,12 @@
  */
 
 #define ADC_BUFFER_SIZE 130
+#define DEFAULT_RECORDING_THRESHOLD 1
 
 class ADC: public Dispatcher {
 private:
-	ADC(): _bufferSize(ADC_BUFFER_SIZE), _clock(NULL) {}
+	ADC(): _bufferSize(ADC_BUFFER_SIZE), _clock(NULL), 
+		_threshold(DEFAULT_RECORDING_THRESHOLD) {}
 	ADC(ADC const&); // singleton, deny implementation
 	void operator=(ADC const &); // singleton, deny implementation
 public:
@@ -47,12 +49,15 @@ public:
 	// return reference to internal buffer
 	buffer_t<uint16_t>* getBuffer();
 
+	// set threshold (default threshold is DEFAULT_RECORDING_THRESHOLD)
+	inline void setThreshold(uint8_t threshold) { _threshold = threshold; }
 protected:
 private:
 	int _bufferSize;
 	uint16_t _lastResult;
 	uint16_t _numSamples;
 	bool _store;
+	uint8_t _threshold;
 
 	RealTimeClock *_clock;
 };
