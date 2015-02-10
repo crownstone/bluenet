@@ -31,9 +31,10 @@ echo "Write to address: $ADDRESS"
 #	exit
 #fi
 
-if [[ $FILE != *.bin ]]; then
-	echo "Error: ${FILE} has not the extension .bin"
-	echo "Are you perhaps trying to upload the .elf file or the .hex file?"
+if [[ $FILE != *.hex ]]; then
+	echo "Error: ${FILE} has not the extension .hex"
+	echo "Are you perhaps trying to upload the .elf file or the .bin file?"
+	echo "Often a .bin file can be uploaded, but not if you have set configuration in other parts of memory"
 	exit
 fi
 
