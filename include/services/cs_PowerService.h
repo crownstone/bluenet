@@ -63,7 +63,6 @@ private:
 
 	// Current limit
 	uint8_t _currentLimitVal;
-
 	CurrentLimit _currentLimit;
 
 	pstorage_handle_t _storageHandle;

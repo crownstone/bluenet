@@ -134,7 +134,8 @@ void ADC::start() {
 
 void ADC::update(uint32_t value) {
 	++_numSamples;
-	if (!_store && ((_lastResult == 0 && value > 0) || _numSamples > 2*ADC_BUFFER_SIZE)) {
+	static int threshold = 1;
+	if (!_store && ((/*_lastResult <= threshold && */ value > threshold) || _numSamples > 2*ADC_BUFFER_SIZE)) {
 		_store = true;
 		// Log first RTC count
 		if (_clock)

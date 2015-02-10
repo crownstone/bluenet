@@ -33,15 +33,15 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
 	characStatus.push_back( { "Get Current",
 			CURRENT_GET_UUID,
-			false,
+			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addGetCurrentCharacteristic)});
 	characStatus.push_back( { "Current Curve",
 			CURRENT_CURVE_UUID,
-			false,
+			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentCurveCharacteristic)});
 	characStatus.push_back( { "Current Consumption",
 			CURRENT_CONSUMPTION_UUID,
-			false,
+			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
@@ -212,7 +212,7 @@ void PowerService::sampleCurrentInit() {
 				//LOGi("Stop advertising");
 				//stack->stopAdvertising();
 
-				LOGi("start RTC");
+				LOGi("Start RTC");
 				RealTimeClock::getInstance().init();
 				RealTimeClock::getInstance().start();
 				ADC::getInstance().setClock(RealTimeClock::getInstance());

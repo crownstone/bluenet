@@ -6,6 +6,11 @@ cmd=${1:? "$0 requires \"cmd\" as first argument"}
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 working_path=$path
 
+if [ ! -d "${BLUENET_DIR}" ]; then
+	echo "BLUENET_DIR does not exist. Use .. as default"
+	BLUENET_DIR=..
+fi
+
 #SD_BINDIR=${path}/../build/softdevice
 SD_BINDIR=${BLUENET_DIR}/build
 
