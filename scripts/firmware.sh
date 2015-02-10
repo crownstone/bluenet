@@ -56,7 +56,7 @@ bootloader() {
 	# perhaps do this separate anyway
 	# ${path}/softdevice.sh all
 	# is now done automatically (part of bootloader binary)
-	# ${path}/writebyte.sh 0x10001014 0x00034000
+	${path}/writebyte.sh 0x10001014 0x00034000
 
 	# note that within the bootloader the JLINK doesn't work anymore...
 	# so perhaps first flash the binary and then the bootloader
