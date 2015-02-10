@@ -16,7 +16,7 @@
 
 #if MESHING==1
 extern "C" {
-#include <protocol/mesh.h>
+#include <protocol/cs_Mesh.h>
 #include <protocol/rbc_mesh.h>
 }
 #endif
@@ -449,6 +449,14 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
 }      
 #endif
 
+#if MESHING==1
+extern "C" {
+uint32_t softdevice_evt_schedule_mesh() {
+	rbc_mesh_sd_irq_handler();
+}
+}
+#endif
+
 /**
  * Performs a series of tasks:
  *   - disables softdevice if it is currently enabled
@@ -478,7 +486,8 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	LOGi("Enable and initialize softdevice/handler, set assertion handler.");
 	// Initialize the SoftDevice handler module.
 	// this would call with different clock!
-	SOFTDEVICE_HANDLER_INIT(_clock_source, false);
+	//SOFTDEVICE_HANDLER_INIT(_clock_source, false);
+	softdevice_handler_init(_clock_source, NULL, 0, softdevice_evt_schedule_mesh);
 
 	// enable the BLE stack
 #if(SOFTDEVICE_SERIES == 110) 
