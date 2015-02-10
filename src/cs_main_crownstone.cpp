@@ -23,6 +23,10 @@
 
 // #define IBEACON
 
+// if softdevice_handler.c is used, we cannot also define SWI2_IRQHandler but will need to set evt_schedule_func in the 
+// softdevice_handler_init call
+#define USE_DEFAULT_SOFTDEVICE_HANDLER
+
 /**********************************************************************************************************************
  * General includes
  *********************************************************************************************************************/
@@ -172,12 +176,14 @@ extern "C" {
  * Currently this interrupt screws up the main program. So apparently we have to set priorities somewhere or to tell
  * the program that it is entering a protected region or something like that.
  */               
+#ifndef USE_DEFAULT_SOFTDEVICE_HANDLER
 void SD_EVT_IRQHandler(void)
 {   
 	// do not print in IRQ handler, use LEDs if you have to
 //	LOGd("Received SoftDevice event, call rbc_mesh_sd_irq_handler.");
 	rbc_mesh_sd_irq_handler(); 
 } 
+#endif
 
 #ifdef BOARD_PCA10001             
 /* configure button interrupt for evkits */                    

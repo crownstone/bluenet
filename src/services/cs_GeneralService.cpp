@@ -9,7 +9,7 @@
 #include "services/cs_GeneralService.h"
 
 #if MESHING==1 
-#include <protocol/mesh.h>
+#include <protocol/cs_Mesh.h>
 #endif
 
 using namespace BLEpp;
