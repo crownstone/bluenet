@@ -26,7 +26,7 @@ upload() {
 }
 
 debug() {
-	${path}/debug.sh $BLUENET_DIR/$target.elf
+	${path}/debug.sh $BLUENET_DIR/build/$target.elf
 }
 
 all() {
