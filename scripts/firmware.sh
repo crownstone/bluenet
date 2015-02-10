@@ -22,7 +22,8 @@ build() {
 }
 
 upload() {
-	${path}/upload.sh $BLUENET_DIR/build/$target.bin $address
+	${path}/upload.sh $BLUENET_DIR/build/$target.hex
+#	${path}/upload.sh $BLUENET_DIR/build/$target.bin $address
 }
 
 debug() {
