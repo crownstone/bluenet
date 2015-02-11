@@ -1,10 +1,12 @@
 #!/bin/bash
 
-SCRIPT_DIR=jlink
-TEMP_DIR=tmp
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/config.sh
+
+SCRIPT_DIR=$path/jlink
+TEMP_DIR=$path/tmp
 mkdir -p $TEMP_DIR
 
-source config.sh
 DEVICE=nrf51822
 
 cp $SCRIPT_DIR/hardware_version.script $TEMP_DIR/hardware_version.script
