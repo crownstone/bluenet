@@ -111,17 +111,16 @@ void PowerService::addGetCurrentCharacteristic() {
 				(*_currentConsumptionCharacteristic) = current_rms;
 			}
 			if ((value & 0x02) && _currentCurveCharacteristic != NULL) {
-				(*_currentCurveCharacteristic) = 1; // TODO: stream curve
+				(*_currentCurveCharacteristic) = _streamBuffer; // TODO: stream curve
 			}
 		});
 	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
 void PowerService::addCurrentCurveCharacteristic() {
-	_currentCurveCharacteristic = &createCharacteristic<uint16_t>()
+	_currentCurveCharacteristic = &createCharacteristic<StreamBuffer>()
 		.setUUID(UUID(getUUID(), CURRENT_CURVE_UUID))
 		.setName("Current Curve")
-		.setDefaultValue(0)
 		.setWritable(false)
 		.setNotifies(true);
 //		.onWrite([&](const uint16_t& value) -> void {
@@ -201,28 +200,28 @@ void PowerService::tick() {
 
 void PowerService::sampleCurrentInit() {
 	/*
-				uint64_t rms_sum = 0;
-				uint32_t voltage_min = 0xffffffff;
-				uint32_t voltage_max = 0;
-				// start reading adc
-				uint32_t voltage;
-				uint32_t samples = 100000;
-				//uint32_t subsample = samples / curve_size;
+	   uint64_t rms_sum = 0;
+	   uint32_t voltage_min = 0xffffffff;
+	   uint32_t voltage_max = 0;
+	// start reading adc
+	uint32_t voltage;
+	uint32_t samples = 100000;
+	//uint32_t subsample = samples / curve_size;
 	*/
-				//LOGi("Stop advertising");
-				//stack->stopAdvertising();
+	//LOGi("Stop advertising");
+	//stack->stopAdvertising();
 
-				LOGi("Start RTC");
-				RealTimeClock::getInstance().init();
-				RealTimeClock::getInstance().start();
-				ADC::getInstance().setClock(RealTimeClock::getInstance());
+	LOGi("Start RTC");
+	RealTimeClock::getInstance().init();
+	RealTimeClock::getInstance().start();
+	ADC::getInstance().setClock(RealTimeClock::getInstance());
 
-				// Wait for the RTC to actually start
-				nrf_delay_us(100);
+	// Wait for the RTC to actually start
+	nrf_delay_us(100);
 
-				LOGi("Start ADC");
-				ADC::getInstance().start();
-				// replace by timer!
+	LOGi("Start ADC");
+	ADC::getInstance().start();
+	// replace by timer!
 
 }
 
@@ -281,6 +280,8 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 		}
 
 		if (type & 0x2) {
+			// cast to uint8_t
+			_streamBuffer.add((uint8_t)voltage);
 			_log(INFO, "%u, ", voltage);
 			if (!(++i % 10)) {
 				_log(INFO, "\r\n");
