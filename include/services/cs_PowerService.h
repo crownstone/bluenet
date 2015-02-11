@@ -11,6 +11,7 @@
 
 #include "characteristics/cs_CurrentLimit.h"
 #include "characteristics/cs_UuidConfig.h"
+#include "characteristics/cs_StreamBuffer.h"
 #include "common/cs_Storage.h"
 #include "cs_BluetoothLE.h"
 #include "drivers/cs_ADC.h"
@@ -59,11 +60,13 @@ private:
 	// References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
 	BLEpp::Characteristic<uint16_t> *_currentConsumptionCharacteristic;
-	BLEpp::Characteristic<uint16_t> *_currentCurveCharacteristic;
+	BLEpp::Characteristic<StreamBuffer> *_currentCurveCharacteristic;
 
 	// Current limit
 	uint8_t _currentLimitVal;
 	CurrentLimit _currentLimit;
+
+	StreamBuffer _streamBuffer;
 
 	pstorage_handle_t _storageHandle;
 	ps_power_service_t _storageStruct;
