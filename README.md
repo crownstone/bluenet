@@ -135,9 +135,9 @@ If you call the script it basically just runs srec_cat:
 
 And you will see that it runs something like this:
 
-    srec_cat /opt/softdevices/s110_nrf51822_7.0.0_softdevice.hex -intel crownstone.bin -binary -offset 0x00016000 -o combined.bin
+    srec_cat /opt/softdevices/s110_nrf51822_7.0.0_softdevice.hex -intel crownstone.bin -binary -offset 0x00016000 -o combined.hex -intel
 
-You have to adjust that file on the moment manually to switch between softdevice
+You have to adjust that file on the moment manually to switch between softdevices or to add/remove the bootloader, sorry! Note that the result is a `.hex` file. Such a file does haveinformation across multiple memory sections. If you upload a `.bin` file often configuration bits/bytes will not be set! 
 
 ### Upload with OpenOCD
 
@@ -210,7 +210,7 @@ need our fork:
 Note, that if you want to use meshing you will need the `S110` version! This can be found in the `s110` tag (see also
 above).
 
-You will have to set some fields such that the bootloader is loaded rather than the application directly.
+You will have to set some fields such that the bootloader is loaded rather than the application directly. If you use the `J-Link` this is the sequence of commands you will need:
 
     ./softdevice.sh all
     ./writebyte.sh 0x10001014 0x00034000
@@ -237,6 +237,20 @@ And for the `S110`:
     data_handle = 0x0B
 
 Of course, this is too cumbersome. We will soon implement something that figures out the right handles automatically.
+
+### Debugging bootloader
+
+Make sure the bootloader is actually loaded and the proper address for the application is set. If you use the `J-Link` you can use `./general_command.sh` to read individual memory locations:
+
+    mem 0x10001014 4
+
+This should be `0x34000` if you use the bootloader. If it is `0xFFFF` the application will be loaded from the application start address.
+
+If the bootloader does not find a valid app, there might indeed not be an app available, o its configuration field that tells it that the app is correct isn't set properly:
+
+    mem 3FC00 10
+
+This should return `0000 0001 0000 0000 0000 00FE 0000 0000`. If it isn't set correctly, make sure you have uploaded the `bootloader.hex` file (and not only the `bootloader.bin` file).
 
 ## iBeacon
 
