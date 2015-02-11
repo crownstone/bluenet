@@ -23,13 +23,13 @@ connect() {
 
 upload() {
 	cd $path/telnet
-	./flash.expect app $binary_target $APPLICATION_START_ADDRESS
+	./flash.expect app $binary_target $APPLICATION_START_ADDRESS $BLUENET_DIR/build
 }
 
 # Flash application and firmware as combined binary
 combined() {
 	cd $path/telnet
-	./flash.expect all $combined_target 0
+	./flash.expect all $combined_target 0 $BLUENET_DIR/build
 }
 
 debug() {
