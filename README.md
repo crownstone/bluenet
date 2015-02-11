@@ -64,7 +64,7 @@ You will have to attach a programmer/debugger somehow. Towards that you only nee
 
 Fork the code by clicking on:
 
-* Fork [https://github.com/mrquincle/bluenet/fork](https://github.com/mrquincle/bluenet/fork).
+* Fork [https://github.com/dobots/bluenet/fork](https://github.com/dobots/bluenet/fork).
 * `git clone https://github.com/${YOUR_GITHUB_USERNAME}/bluenet`
 * let us call this directory $BLUENET
 
@@ -181,8 +181,8 @@ have to use the `S110`.
 This means that if you want to use a bootloader, you will also need the `S110` version of it, and the same is true
 for the upload script:
 
-* https://github.com/mrquincle/nrf51-dfu-bootloader-for-gcc-compiler/tree/s110
-* https://github.com/mrquincle/nrf51_dfu_linux
+* https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler/tree/s110
+* https://github.com/dobots/nrf51_dfu_linux
 
 ## UART
 
@@ -203,7 +203,7 @@ To upload a new program when the Crownstone is embedded in a wall socket is cumb
 we recommend to add a bootloader. The default bootloader from Nordic does not work with the `S130` devices. You will
 need our fork:
 
-    git clone https://github.com/mrquincle/nrf51-dfu-bootloader-for-gcc-compiler
+    git clone https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler
     cd scripts
     ./all.sh
 
@@ -221,7 +221,7 @@ down and adjust the code in the `dfu_types.h` file in the bootloader code.
 
 And you should be good to upload binaries, for example with the following python script:
 
-    git clone https://github.com/mrquincle/nrf51_dfu_linux
+    git clone https://github.com/dobots/nrf51_dfu_linux
     python dfu.py -f crownstone.hex -a CD:E3:4A:47:1C:E4
 
 Currently the upload script needs to be changed depending on the SoftDevice used, for the `S130`:
