@@ -4,6 +4,7 @@ set timeout 120
 set command [lindex $argv 0]
 set binary [lindex $argv 1]
 set address [lindex $argv 2]
+set bindir [lindex $argv 3]
 
 # The binary to flash
 if { $command == "" || $binary == "" }  {
@@ -35,8 +36,8 @@ send "halt\r"
 
 # Expect last line of halting command to be abount xPSR or just ">" if target was already halted before
 expect {
-	"xPSR" { send "flash write_image erase ../build/$binary $address\r" }
-	-re ">" { send "flash write_image erase ../build/$binary $address\r" }
+	"xPSR" { send "flash write_image erase $bindir/$binary $address\r" }
+	-re ">" { send "flash write_image erase $bindir/$binary $address\r" }
 }
 
 # Expect this to be written
