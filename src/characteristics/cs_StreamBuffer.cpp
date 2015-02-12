@@ -8,7 +8,7 @@
 #include "characteristics/cs_StreamBuffer.h"
 
 
-StreamBuffer::StreamBuffer() {
+StreamBuffer::StreamBuffer() : _type(0), _length(0) {
 	_payload = (uint8_t*)calloc(MAX_BUFFER_SERIALIZED_SIZE, sizeof(uint8_t));
 }
 
