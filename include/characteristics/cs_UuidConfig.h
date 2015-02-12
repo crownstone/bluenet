@@ -11,7 +11,7 @@
 
 enum {
 	PWM_UUID                                = 0x1,
-	CURRENT_GET_UUID                        = 0x2,
+	SAMPLE_CURRENT_UUID                     = 0x2,
 	CURRENT_CURVE_UUID                      = 0x3,
 	CURRENT_CONSUMPTION_UUID                = 0x4,
 	CURRENT_LIMIT_UUID                      = 0x5,
