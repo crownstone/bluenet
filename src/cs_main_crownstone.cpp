@@ -27,6 +27,8 @@
 // softdevice_handler_init call
 #define USE_DEFAULT_SOFTDEVICE_HANDLER
 
+#define DEFAULT_ON
+
 /**********************************************************************************************************************
  * General includes
  *********************************************************************************************************************/
@@ -113,6 +115,7 @@ void welcome() {
 void setName(Nrf51822BluetoothStack &stack) {
 	char devicename[32];
 	sprintf(devicename, "%s_%s", BLUETOOTH_NAME, COMPILATION_TIME);
+	LOGi("Set name to %s", BLUETOOTH_NAME);
 	stack.setDeviceName(std::string(devicename)) // max len = ble_gap_devname_max_len (31)
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
@@ -353,9 +356,13 @@ int main() {
  	CMesh & mesh = CMesh::getInstance();
 	mesh.init();
 #endif
-
+#if POWER_SERVICE==1
+#ifdef DEFAULT_ON
+	nrf_delay_ms(1000);
+	powerService.turnOn();
+#endif
+#endif
 	LOGi("Running while ticking..");
-
 	//static long int dbg_counter = 0;
 	while(1) {
 		//LOGd("Tick %li", ++dbg_counter); // we really have to monitor the frequency of our ticks

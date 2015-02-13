@@ -87,7 +87,7 @@ void PowerService::turnOff() {
 // Do we really want to use the PWM for this, or just set the pin to zero?
 // TODO: turn on normally, but make sure we enable the completely PWM again on request
 void PowerService::turnOn() {
-	PWM::getInstance().setValue(0, (uint8_t)-1);
+	PWM::getInstance().setValue(0, 255);
 }
 
 /**
