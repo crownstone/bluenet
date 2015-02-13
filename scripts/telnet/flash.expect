@@ -37,14 +37,14 @@ expect {
 expect -re ">"
 
 if { $command == "all" } {
-	send "echo "We will do a mass-erase\r"
+	send "echo We will do a mass-erase\r"
 
 	expect -re ">"
 	
 	# Mass erase
-	# send "nrf51 mass_erase\r"
+	send "nrf51 mass_erase\r"
 	# maybe wait a bit?, first wait?
-	# expect -re ">"
+	expect -re ">"
 }
 
 send "flash write_image erase $bindir/$binary $address\r" 
