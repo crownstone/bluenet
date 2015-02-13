@@ -19,7 +19,7 @@ cd ${BLUENET_DIR}/build
 
 add_bootloader=true
 add_softdevice=true
-add_binary=false
+add_binary=true
 
 if [[ "$add_bootloader" == true ]]; then
 	# These settings are already incorporated in the bootloader.hex binary, so you don't need to add them here
