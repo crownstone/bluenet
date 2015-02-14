@@ -21,7 +21,8 @@
 // temporary defines
 #define MESHING_PARALLEL 1
 
-// #define IBEACON
+// currently does not compile(!)
+//#define IBEACON
 
 // if softdevice_handler.c is used, we cannot also define SWI2_IRQHandler but will need to set evt_schedule_func in the 
 // softdevice_handler_init call

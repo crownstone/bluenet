@@ -7,7 +7,6 @@
 #include "cs_BluetoothLE.h"
 #include "cs_nRF51822.h"
 
-
 #if(NORDIC_SDK_VERSION >= 6)
 #include "nrf_soc.h"
 #endif
@@ -20,6 +19,8 @@ extern "C" {
 #include <protocol/rbc_mesh.h>
 }
 #endif
+
+#include <cs_iBeacon.h>
 
 #ifndef SOFTDEVICE_SERIES
 #error "The SOFTDEVICE_SERIES macro is required for compilation. Set it to 110 for example"
@@ -631,60 +632,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLeve
 			setTxPowerLevel();
 	}
 }
-
-// TODO: not exactly part of this file, needs to be moved to it's own file
-class IBeacon {
-private:
-	uint16_t _adv_indicator;
-	UUID _uuid;
-	uint16_t _major;
-	uint16_t _minor;
-	uint8_t _rssi;
-
-public:
-	IBeacon(UUID uuid, uint16_t major, uint16_t minor, uint8_t rssi) {
-		// advertisement indicator for an iBeacon is defined as 0x0215
-		_adv_indicator = 0x0215;
-		_uuid = uuid;
-		_major = major;
-		_minor = minor;
-		_rssi = rssi;
-	}
-
-	/*
-	 * size is calculated as:
-	 * 		2B		advertisement indicator
-	 * 		16B		uuid (as byte array)
-	 * 		2B		major
-	 * 		2B		minor
-	 * 		1B		rssi
-	 * 	--------------------------------------
-	 * 		23B		total
-	 */
-	uint8_t size() {
-		return 23;
-	}
-
-	void toArray(uint8_t* array) {
-
-		*((uint16_t*) array) = convertEndian16(_adv_indicator);
-		array += 2;
-
-		ble_uuid128_t uuid = (ble_uuid128_t) _uuid;
-		for (int i = 0; i < 16; ++i) {
-			*array++ = uuid.uuid128[15 - i];
-		}
-
-		*((uint16_t*) array) = convertEndian16(_major);
-		array += 2;
-
-		*((uint16_t*) array) = convertEndian16(_minor);
-		array += 2;
-
-		*array = _rssi;
-	}
-
-};
 
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 	if (_advertising)

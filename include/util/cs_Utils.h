@@ -6,12 +6,16 @@
  */
 #pragma once
 
-#include "stdint.h"
+#include <stdint.h>
+
+namespace BLEutil {
 
 // convert a short from LSB to MSB and vice versa
 uint16_t convertEndian16(uint16_t val);
 
 // convert an integer from LSB to MSB and vice versa
 uint32_t convertEndian32(uint32_t val);
+
+}
 
 #define SIZEOF_ARRAY( a ) (int)(sizeof( a ) / sizeof( a[ 0 ] ))

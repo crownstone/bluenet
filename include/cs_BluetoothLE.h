@@ -32,15 +32,15 @@ extern "C" {
 
 }
 
-// Local wrapper  files
-#include "drivers/cs_PWM.h"
+// Local wrapper files
+#include <drivers/cs_PWM.h>
 
-#include "util/cs_BleError.h"
-#include "drivers/cs_Serial.h"
-#include "cs_Serializable.h"
+#include <util/cs_BleError.h>
+#include <drivers/cs_Serial.h>
+#include <cs_Serializable.h>
 
-#include "third/std/function.h"
-#include "util/cs_Utils.h"
+#include <third/std/function.h>
+
 
 // TOOD replace std::vector with a fixed, in place array of size capacity.
 template<typename T> class tuple : public std::vector<T> {
@@ -1036,4 +1036,5 @@ namespace BLEpp {
 
     };
 
-}
+
+} // end of namespace
