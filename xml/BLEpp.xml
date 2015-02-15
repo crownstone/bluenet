@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <namespace id="BLEpp" name="BLEpp" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <functiontemplate id="BLEpp::ble_type" name="ble_type">
+    <brief>The default ble_type</brief>
     <return>
       <type name="uint8_t" />
     </return>
@@ -11,6 +12,7 @@
     <brief> BLEStack defines a chip-agnostic Bluetooth Low-Energy stack</brief>
   </class>
   <classtemplate name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
+    <brief> Characteristic of generic type T</brief>
     <templatetypeparameter id="BLEpp::Characteristic::T" name="T" />
   </classtemplate>
   <class name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase">
@@ -19,11 +21,16 @@
   <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
   <struct name="CharacteristicStatus" ref="BLEpp::CharacteristicStatus#BLEpp::CharacteristicStatus" />
   <classtemplate name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+    <brief> A default characteristic</brief>
     <templatetypeparameter id="BLEpp::CharacteristicT::T" name="T" />
     <templatetypeparameter id="BLEpp::CharacteristicT::E" name="E" />
   </classtemplate>
-  <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT" />
-  <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT" />
+  <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+    <brief>A characteristic for strings</brief>
+  </class>
+  <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+    <brief>A characteristic for CharacteristicValue</brief>
+  </class>
   <struct name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue">
     <brief> A value which can be written to or read from a characteristic </brief>
   </struct>
@@ -47,11 +54,13 @@
     <type name="CharacteristicStatus" ref="BLEpp::CharacteristicStatus#BLEpp::CharacteristicStatus" />
   </typedef>
   <function id="BLEpp::ble_type" name="ble_type">
+    <brief>A ble_type for strings</brief>
     <return>
       <type name="uint8_t" />
     </return>
   </function>
   <function id="BLEpp::ble_type" name="ble_type">
+    <brief>A ble_type for 8-bit unsigned chars</brief>
     <return>
       <type name="uint8_t" />
     </return>

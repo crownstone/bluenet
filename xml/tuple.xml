@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <classtemplate id="tuple" name="tuple" xmlns="http://jessevdk.github.com/cldoc/1.0">
-  <brief>TOOD replace std::vector with a fixed, in place array of size capacity.</brief>
+  <brief> A tuple is a vector with a templated type and a public constructor.</brief>
   <base access="public">
     <type name="" />
   </base>

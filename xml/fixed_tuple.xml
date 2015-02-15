@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <classtemplate id="fixed_tuple" name="fixed_tuple" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> A fixed tuple is a vector with a templated type and a reserved capacity.</brief>
   <base access="public">
     <type name="" />
   </base>

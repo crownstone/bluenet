@@ -1,5 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <classtemplate id="BLEpp::Characteristic" name="Characteristic" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Characteristic of generic type T</brief>
+  <doc>A characteristic first of all contains a templated "value" which might be a string, an integer, or a
+buffer, depending on the need at hand.
+It allows also for callbacks to be defined on writing to the characteristic, or reading from the
+characteristic.
+</doc>
   <base access="public">
     <type name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
     <brief> Non-template base class for Characteristics.</brief>
