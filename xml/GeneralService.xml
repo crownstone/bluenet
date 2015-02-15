@@ -1,5 +1,12 @@
 <?xml version='1.0' encoding='utf-8'?>
 <class id="GeneralService" interface="true" name="GeneralService" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> General Service for the Crownstone</brief>
+  <doc>There are several characteristics that fit into the general service description. There is a characteristic
+that measures the temperature, there are several characteristics that defines the crownstone, namely by
+name, by type, or by location (room), and there is a characteristic to update its firmware.
+
+If meshing is enabled, it is also possible to send a message into the mesh network using a characteristic.
+</doc>
   <base access="public">
     <type name="BLEpp::GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
   </base>
@@ -9,6 +16,7 @@
     </argument>
   </constructor>
   <method abstract="yes" id="GeneralService::createService" name="createService" static="yes">
+    <brief>* Helper function to generate a GeneralService object</brief>
     <return>
       <type name="GeneralService" qualifier=" &amp;" ref="GeneralService#GeneralService" />
     </return>
@@ -17,6 +25,7 @@
     </argument>
   </method>
   <method abstract="yes" id="GeneralService::setTemperature" name="setTemperature">
+    <brief>Update the temperature characteristic.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
@@ -25,6 +34,11 @@
     </argument>
   </method>
   <method abstract="yes" id="GeneralService::tick" name="tick">
+    <brief>Perform non urgent functionality every main loop.</brief>
+    <doc>Every component has a "tick" function which is for non-urgent things. Urgent matters have to be
+resolved immediately in interrupt service handlers. The temperature for example is updated every
+tick, because timing is not important for this at all.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
@@ -52,53 +66,71 @@
     <type name="BLEpp::Characteristic&lt;MeshMessage&gt;" qualifier="*" />
   </field>
   <method abstract="yes" access="protected" id="GeneralService::addChangeNameCharacteristic" name="addChangeNameCharacteristic">
+    <brief>Enable the change name characteristic.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="GeneralService::addDeviceTypeCharacteristic" name="addDeviceTypeCharacteristic">
+    <brief>Enable the device type characteristic.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="GeneralService::addFirmwareCharacteristic" name="addFirmwareCharacteristic">
+    <brief>Enable the firmware upgrade characteristic.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="GeneralService::addMeshCharacteristic" name="addMeshCharacteristic">
+    <brief>Enable the mesh characteristic.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="GeneralService::addRoomCharacteristic" name="addRoomCharacteristic">
+    <brief>Enable the room characteristic.</brief>
+    <doc>The room needs to be set by the user. There is not yet functionality in place in the crownstone
+software to figure this out for itself.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="GeneralService::addTemperatureCharacteristic" name="addTemperatureCharacteristic">
-    <brief>Functions to add the characteristics</brief>
+    <brief>Enable the temperature characteristic.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="GeneralService::getBLEName" name="getBLEName">
-    <brief>Helper functions</brief>
+    <brief>Retrieve the Bluetooth name from the object representing the BLE stack.</brief>
     <return>
       <type name="std::string" qualifier=" &amp;" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="GeneralService::loadPersistentStorage" name="loadPersistentStorage">
+    <brief>Get a handle to the persistent storage struct and load it from FLASH.</brief>
+    <doc>Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
+writing less than a minimal block strains the memory just as much as flashing the entire block.
+Hence, there is an entire struct that can be filled and flashed at once.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="GeneralService::savePersistentStorage" name="savePersistentStorage">
+    <brief>Save to FLASH.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="GeneralService::setBLEName" name="setBLEName">
+    <brief>Write the Bluetooth name to the object representing the BLE stack.</brief>
+    <doc>This updates the Bluetooth name immediately, however, it does not update the name persistently. It
+has to be written to FLASH in that case.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>

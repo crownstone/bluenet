@@ -117,7 +117,7 @@ return values.
         <location column="5" file="../include/cs_BluetoothLE.h" line="755" />
       </undocumented>
     </type>
-    <type documented="19" name="method" undocumented="123">
+    <type documented="30" name="method" undocumented="112">
       <undocumented id="AllocatedBuffer::allocate" name="allocate">
         <location column="5" file="../include/cs_Serializable.h" line="19" />
       </undocumented>
@@ -454,39 +454,6 @@ return values.
       <undocumented id="BLEpp::UUID::init" name="init">
         <location column="9" file="../include/cs_BluetoothLE.h" line="168" />
       </undocumented>
-      <undocumented id="GeneralService::addChangeNameCharacteristic" name="addChangeNameCharacteristic">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="42" />
-      </undocumented>
-      <undocumented id="GeneralService::addDeviceTypeCharacteristic" name="addDeviceTypeCharacteristic">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="43" />
-      </undocumented>
-      <undocumented id="GeneralService::addFirmwareCharacteristic" name="addFirmwareCharacteristic">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="45" />
-      </undocumented>
-      <undocumented id="GeneralService::addMeshCharacteristic" name="addMeshCharacteristic">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="46" />
-      </undocumented>
-      <undocumented id="GeneralService::addRoomCharacteristic" name="addRoomCharacteristic">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="44" />
-      </undocumented>
-      <undocumented id="GeneralService::createService" name="createService">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="27" />
-      </undocumented>
-      <undocumented id="GeneralService::loadPersistentStorage" name="loadPersistentStorage">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="52" />
-      </undocumented>
-      <undocumented id="GeneralService::savePersistentStorage" name="savePersistentStorage">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="53" />
-      </undocumented>
-      <undocumented id="GeneralService::setBLEName" name="setBLEName">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="50" />
-      </undocumented>
-      <undocumented id="GeneralService::setTemperature" name="setTemperature">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="23" />
-      </undocumented>
-      <undocumented id="GeneralService::tick" name="tick">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="25" />
-      </undocumented>
     </type>
     <type documented="0" name="templatenontypeparameter" undocumented="1">
       <undocumented id="fixed_tuple::capacity" name="capacity">
@@ -624,22 +591,22 @@ return values.
         <location column="9" file="../include/cs_BluetoothLE.h" line="659" />
       </undocumented>
       <undocumented id="GeneralService::_deviceTypeCharacteristic" name="_deviceTypeCharacteristic">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="35" />
+        <location column="2" file="../include/services/cs_GeneralService.h" line="53" />
       </undocumented>
       <undocumented id="GeneralService::_firmwareCharacteristic" name="_firmwareCharacteristic">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="37" />
+        <location column="2" file="../include/services/cs_GeneralService.h" line="55" />
       </undocumented>
       <undocumented id="GeneralService::_meshCharacteristic" name="_meshCharacteristic">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="38" />
+        <location column="2" file="../include/services/cs_GeneralService.h" line="56" />
       </undocumented>
       <undocumented id="GeneralService::_nameCharacteristic" name="_nameCharacteristic">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="34" />
+        <location column="2" file="../include/services/cs_GeneralService.h" line="52" />
       </undocumented>
       <undocumented id="GeneralService::_roomCharacteristic" name="_roomCharacteristic">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="36" />
+        <location column="2" file="../include/services/cs_GeneralService.h" line="54" />
       </undocumented>
       <undocumented id="GeneralService::_stack" name="_stack">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="30" />
+        <location column="2" file="../include/services/cs_GeneralService.h" line="48" />
       </undocumented>
     </type>
     <type documented="1" name="functiontemplate" undocumented="0" />
@@ -699,7 +666,7 @@ return values.
         <location column="9" file="../include/cs_BluetoothLE.h" line="157" />
       </undocumented>
       <undocumented id="GeneralService::GeneralService" name="GeneralService">
-        <location column="2" file="../include/services/cs_GeneralService.h" line="21" />
+        <location column="2" file="../include/services/cs_GeneralService.h" line="29" />
       </undocumented>
       <undocumented id="fixed_tuple::fixed_tuple&lt;T, capacity&gt;" name="fixed_tuple&lt;T, capacity&gt;">
         <location column="5" file="../include/cs_BluetoothLE.h" line="59" />
@@ -761,16 +728,13 @@ return values.
         <location column="9" file="../include/cs_BluetoothLE.h" line="676" />
       </undocumented>
     </type>
-    <type documented="8" name="class" undocumented="3">
+    <type documented="9" name="class" undocumented="2">
       <undocumented id="BLEpp::BatteryService" name="BatteryService">
         <location column="5" file="../include/cs_BluetoothLE.h" line="801" />
       </undocumented>
       <undocumented id="BLEpp::GenericService" name="GenericService">
         <location column="5" file="../include/cs_BluetoothLE.h" line="753" />
         <location column="5" file="../include/cs_BluetoothLE.h" line="765" />
-      </undocumented>
-      <undocumented id="GeneralService" name="GeneralService">
-        <location column="1" file="../include/services/cs_GeneralService.h" line="19" />
       </undocumented>
     </type>
   </coverage>
@@ -868,9 +832,22 @@ return values.
       <location column="5" file="../include/cs_Serializable.h" line="49" />
       <undocumented name="buffer" />
     </function>
-    <function id="GeneralService::getBLEName" name="getBLEName">
-      <location column="2" file="../include/services/cs_GeneralService.h" line="49" />
+    <function id="GeneralService::setTemperature" name="setTemperature">
+      <location column="2" file="../include/services/cs_GeneralService.h" line="33" />
+      <undocumented name="temperature" />
+    </function>
+    <function id="GeneralService::createService" name="createService">
+      <location column="2" file="../include/services/cs_GeneralService.h" line="45" />
       <undocumented-return />
+      <undocumented name="stack" />
+    </function>
+    <function id="GeneralService::getBLEName" name="getBLEName">
+      <location column="2" file="../include/services/cs_GeneralService.h" line="82" />
+      <undocumented-return />
+    </function>
+    <function id="GeneralService::setBLEName" name="setBLEName">
+      <location column="2" file="../include/services/cs_GeneralService.h" line="88" />
+      <undocumented name="name" />
     </function>
   </arguments>
   <references>
