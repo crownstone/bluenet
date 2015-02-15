@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="BLEpp::BLEStack" interface="true" name="BLEStack" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> BLEStack defines a chip-agnostic Bluetooth Low-Energy stack</brief>
+  <doc>Currently, this class does not leverage much of the general Bluetooth Low-Energy functionality into
+chip-agnostic code. However, this might be recommendable in the future.
+</doc>
+  <subclass access="public" name="Nrf51822BluetoothStack" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack">
+    <brief> nRF51822 specific implementation of the BLEStack</brief>
+  </subclass>
+  <method abstract="yes" id="BLEpp::BLEStack::connected" name="connected" virtual="yes">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::BLEStack::getConnectionHandle" name="getConnectionHandle" virtual="yes">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+</class>
