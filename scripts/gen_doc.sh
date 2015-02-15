@@ -33,6 +33,8 @@ files+=("$rel_path/src/cs_BluetoothLE.cpp")
 files+=("$rel_path/src/cs_iBeacon.cpp")
 files+=("$rel_path/include/cs_iBeacon.h")
 files+=("$rel_path/include/cs_BluetoothLE.h")
+files+=("$rel_path/include/cs_Serializable.h")
+files+=("$rel_path/include/services/cs_GeneralService.h")
 files=$(printf "%s " "${files[@]}")
 
 # prefix every dir with "-I"
@@ -74,7 +76,7 @@ macros+=("-DBLUETOOTH_NAME=${BLUETOOTH_NAME}")
 #macros+=("-D__MSVCRT__=1")
 macro_defs=$(printf "%s " "${macros[@]}")
 
-command="cldoc generate $include_dirs $compiler_options $macro_defs -- --output docs/html --report $files --basedir=.."
+command="cldoc generate $include_dirs $compiler_options $macro_defs -- --output $rel_path/docs/html --report $files --basedir=.."
 echo $command
 $command
 

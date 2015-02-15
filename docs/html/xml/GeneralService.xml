@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="GeneralService" interface="true" name="GeneralService" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="BLEpp::GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+  </base>
+  <constructor abstract="yes" id="GeneralService::GeneralService" name="GeneralService">
+    <argument id="GeneralService::GeneralService::stack" name="stack">
+      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </argument>
+  </constructor>
+  <method abstract="yes" id="GeneralService::createService" name="createService" static="yes">
+    <return>
+      <type name="GeneralService" qualifier=" &amp;" ref="GeneralService#GeneralService" />
+    </return>
+    <argument id="GeneralService::createService::stack" name="stack">
+      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </argument>
+  </method>
+  <method abstract="yes" id="GeneralService::setTemperature" name="setTemperature">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::setTemperature::temperature" name="temperature">
+      <type name="int32_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="GeneralService::tick" name="tick">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <field access="protected" id="GeneralService::_stack" name="_stack">
+    <type name="BLEpp::Nrf51822BluetoothStack" qualifier="*" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+  </field>
+  <field access="protected" id="GeneralService::_temperatureCharacteristic" name="_temperatureCharacteristic">
+    <brief>References to characteristics</brief>
+    <type name="BLEpp::CharacteristicT&lt;int, void&gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_nameCharacteristic" name="_nameCharacteristic">
+    <type name="BLEpp::Characteristic&lt;std::basic_string&lt;char&gt; &gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_deviceTypeCharacteristic" name="_deviceTypeCharacteristic">
+    <type name="BLEpp::Characteristic&lt;std::basic_string&lt;char&gt; &gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_roomCharacteristic" name="_roomCharacteristic">
+    <type name="BLEpp::Characteristic&lt;std::basic_string&lt;char&gt; &gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_firmwareCharacteristic" name="_firmwareCharacteristic">
+    <type name="BLEpp::Characteristic&lt;int&gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_meshCharacteristic" name="_meshCharacteristic">
+    <type name="BLEpp::Characteristic&lt;MeshMessage&gt;" qualifier="*" />
+  </field>
+  <method abstract="yes" access="protected" id="GeneralService::addChangeNameCharacteristic" name="addChangeNameCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addDeviceTypeCharacteristic" name="addDeviceTypeCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addFirmwareCharacteristic" name="addFirmwareCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addMeshCharacteristic" name="addMeshCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addRoomCharacteristic" name="addRoomCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addTemperatureCharacteristic" name="addTemperatureCharacteristic">
+    <brief>Functions to add the characteristics</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::getBLEName" name="getBLEName">
+    <brief>Helper functions</brief>
+    <return>
+      <type name="std::string" qualifier=" &amp;" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::loadPersistentStorage" name="loadPersistentStorage">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::savePersistentStorage" name="savePersistentStorage">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::setBLEName" name="setBLEName">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::setBLEName::name" name="name">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+</class>

@@ -6,6 +6,7 @@
       <brief> BLEStack defines a chip-agnostic Bluetooth Low-Energy stack</brief>
     </class>
     <classtemplate name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
+      <brief> Characteristic of generic type T</brief>
       <templatetypeparameter id="BLEpp::Characteristic::T" name="T" />
     </classtemplate>
     <class name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase">
@@ -14,11 +15,16 @@
     <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
     <struct name="CharacteristicStatus" ref="BLEpp::CharacteristicStatus#BLEpp::CharacteristicStatus" />
     <classtemplate name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+      <brief> A default characteristic</brief>
       <templatetypeparameter id="BLEpp::CharacteristicT::T" name="T" />
       <templatetypeparameter id="BLEpp::CharacteristicT::E" name="E" />
     </classtemplate>
-    <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT" />
-    <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT" />
+    <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+      <brief>A characteristic for strings</brief>
+    </class>
+    <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+      <brief>A characteristic for CharacteristicValue</brief>
+    </class>
     <struct name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue">
       <brief> A value which can be written to or read from a characteristic </brief>
     </struct>
@@ -36,19 +42,24 @@
       <brief> A Universally Unique IDentifier. </brief>
     </class>
   </namespace>
+  <struct name="AllocatedBuffer" ref="AllocatedBuffer#AllocatedBuffer">
+    <brief>Dominik: DO NOT USE! malloc fails completely or doesn't return a correct memory on the heap!!!!</brief>
+  </struct>
   <classtemplate name="fixed_tuple" ref="fixed_tuple#fixed_tuple">
+    <brief> A fixed tuple is a vector with a templated type and a reserved capacity.</brief>
     <templatetypeparameter id="fixed_tuple::T" name="T" />
     <templatenontypeparameter id="fixed_tuple::capacity" name="capacity">
       <type name="uint8_t" />
     </templatenontypeparameter>
   </classtemplate>
+  <class name="GeneralService" ref="GeneralService#GeneralService" />
+  <struct name="ISerializable" ref="ISerializable#ISerializable" />
   <classtemplate name="tuple" ref="tuple#tuple">
-    <brief>TOOD replace std::vector with a fixed, in place array of size capacity.</brief>
+    <brief> A tuple is a vector with a templated type and a public constructor.</brief>
     <templatetypeparameter id="tuple::T" name="T" />
   </classtemplate>
   <function id="SWI1_IRQHandler" name="SWI1_IRQHandler">
-    <brief>void ble_error_handler (std::string msg, uint32_t line_num, const char * p_file_name);</brief>
-    <doc>extern void softdevice_assertion_handler(uint32_t pc, uint16_t line_number, const uint8_t * p_file_name);</doc>
+    <brief> Interrupt request for SoftDevice</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>

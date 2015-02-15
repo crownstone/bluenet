@@ -6,7 +6,9 @@ contribute to code size.
 
 
 </doc>
-  <subclass access="public" name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+  <subclass access="public" name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
+    <brief> Characteristic of generic type T</brief>
+  </subclass>
   <constructor abstract="yes" id="BLEpp::CharacteristicBase::CharacteristicBase" name="CharacteristicBase" />
   <destructor id="BLEpp::CharacteristicBase::~CharacteristicBase" name="~CharacteristicBase" virtual="yes" />
   <method id="BLEpp::CharacteristicBase::getCccdHandle" name="getCccdHandle">

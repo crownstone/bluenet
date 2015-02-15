@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <class id="BLEpp::CharacteristicT" name="CharacteristicT" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>A characteristic for CharacteristicValue</brief>
   <base access="public">
     <type name="Characteristic&lt;BLEpp::CharacteristicValue&gt;" />
   </base>
