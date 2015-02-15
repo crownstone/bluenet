@@ -17,14 +17,6 @@ using namespace BLEpp;
 // needs to be the same command as defined in the bootloader
 #define COMMAND_ENTER_RADIO_BOOTLOADER          1 
 
-/* General Service for the Crownstone
- *
- * There are several characteristics that fit into the general service description. There is a characteristic
- * that measures the temperature, there are several characteristics that defines the crownstone, namely by
- * name, by type, or by location (room), and there is a characteristic to update its firmware.
- *
- * If meshing is enabled, it is also possible to send a message into the mesh network using a characteristic.
- */
 GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		_stack(&stack),
 		_temperatureCharacteristic(NULL), _nameCharacteristic(NULL),
@@ -68,24 +60,14 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	loadPersistentStorage();
 }
 
-/* Get a handle to the persistent storage struct and load it from FLASH.
- *
- * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that writing less
- * than a minimal block strains the memory just as much as flashing the entire block. Hence, there is an
- * entire struct that can be filled and flashed at once.
- */
 void GeneralService::loadPersistentStorage() {
 	Storage::getInstance().getStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
-/* Save to FLASH.
- */
 void GeneralService::savePersistentStorage() {
 	Storage::getInstance().setStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
-/* Enable the temperature characteristic.
- */
 void GeneralService::addTemperatureCharacteristic() {
 	_temperatureCharacteristic = new CharacteristicT<int32_t>();
 	_temperatureCharacteristic->setUUID(UUID(getUUID(), TEMPERATURE_UUID));
@@ -96,8 +78,6 @@ void GeneralService::addTemperatureCharacteristic() {
 	addCharacteristic(_temperatureCharacteristic);
 }
 
-/* Enable the device type characteristic.
- */
 void GeneralService::addDeviceTypeCharacteristic() {
 	Storage::getString(_storageStruct.device_type, _type, "Unknown");
 
@@ -115,11 +95,6 @@ void GeneralService::addDeviceTypeCharacteristic() {
 		});
 }
 
-/* Enable the room characteristic.
- *
- * The room needs to be set by the user. There is not yet functionality in place in the crownstone software to
- * figure this out for itself.
- */
 void GeneralService::addRoomCharacteristic() {
 	Storage::getString(_storageStruct.room, _room, "Unknown");
 
@@ -137,8 +112,6 @@ void GeneralService::addRoomCharacteristic() {
 		});
 }
 
-/* Enable the firmware upgrade characteristic.
- */
 void GeneralService::addFirmwareCharacteristic() {
 	_firmwareCharacteristic = createCharacteristicRef<int32_t>();
 	(*_firmwareCharacteristic)
@@ -164,8 +137,6 @@ void GeneralService::addFirmwareCharacteristic() {
 
 #if MESHING==1
 
-/* Enable the mesh characteristic.
- */
 void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic = createCharacteristicRef<MeshMessage>();
 	(*_meshCharacteristic)
@@ -183,8 +154,6 @@ void GeneralService::addMeshCharacteristic() {
 }
 #endif
 
-/* Enable the change name characteristic.
- */
 void GeneralService::addChangeNameCharacteristic() {
 	Storage::getString(_storageStruct.device_name, _name, getBLEName());
 	setBLEName(_name);
@@ -203,8 +172,6 @@ void GeneralService::addChangeNameCharacteristic() {
 		});
 }
 
-/* Retrieve the Bluetooth name from the object representing the BLE stack.
- */
 std::string & GeneralService::getBLEName() {
 	_name = "Unknown";
 	if (_stack) {
@@ -213,11 +180,6 @@ std::string & GeneralService::getBLEName() {
 	return _name;
 }
 
-/* Write the Bluetooth name to the object representing the BLE stack.
- *
- * This updates the Bluetooth name immediately, however, it does not update the name persistently. It has to
- * be written to FLASH in that case.
- */
 void GeneralService::setBLEName(const std::string &name) {
 	if (name.length() > 31) {
 		log(ERROR, "Name is too long");
@@ -228,8 +190,6 @@ void GeneralService::setBLEName(const std::string &name) {
 	}
 }
 
-/** Helper function to generate a GeneralService object
- */
 GeneralService& GeneralService::createService(Nrf51822BluetoothStack& stack) {
 	GeneralService* svc = new GeneralService(stack);
 	stack.addService(svc);
@@ -237,18 +197,10 @@ GeneralService& GeneralService::createService(Nrf51822BluetoothStack& stack) {
 	return *svc;
 }
 
-/* Update the temperature characteristic.
- */
 void GeneralService::setTemperature(int32_t temperature) {
 	*_temperatureCharacteristic = temperature;
 }
 
-/* Perform non urgent functionality every main loop.
- *
- * Every component has a "tick" function which is for non-urgent things. Urgent matters have to be resolved
- * immediately in interrupt service handlers. The temperature for example is updated every tick, because timing
- * is not important for this at all.
- */
 void GeneralService::tick() {
 	if (_temperatureCharacteristic) {
 		int32_t temp;

@@ -31,6 +31,7 @@ files=()
 #files="src/cs_main_crownstone.cpp src/cs_BluetoothLE.cpp"
 files+=("$rel_path/src/cs_BluetoothLE.cpp")
 files+=("$rel_path/src/cs_iBeacon.cpp")
+files+=("$rel_path/src/services/cs_GeneralService.cpp")
 files+=("$rel_path/include/cs_iBeacon.h")
 files+=("$rel_path/include/cs_BluetoothLE.h")
 files+=("$rel_path/include/cs_Serializable.h")

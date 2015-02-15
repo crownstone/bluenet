@@ -52,7 +52,9 @@
       <type name="uint8_t" />
     </templatenontypeparameter>
   </classtemplate>
-  <class name="GeneralService" ref="GeneralService#GeneralService" />
+  <class name="GeneralService" ref="GeneralService#GeneralService">
+    <brief> General Service for the Crownstone</brief>
+  </class>
   <struct name="ISerializable" ref="ISerializable#ISerializable" />
   <classtemplate name="tuple" ref="tuple#tuple">
     <brief> A tuple is a vector with a templated type and a public constructor.</brief>
