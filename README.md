@@ -2,7 +2,7 @@
 
 Source for the website at http://dobots.github.io/bluenet/.
 
-The code is generated using [https://github.com/jessevdk/cldoc](cldoc).
+The code is generated using [cldoc](https://github.com/jessevdk/cldoc).
 
 ## Copyrights
 
