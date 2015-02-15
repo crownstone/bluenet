@@ -42,12 +42,17 @@ extern "C" {
 #include <third/std/function.h>
 
 
-// TOOD replace std::vector with a fixed, in place array of size capacity.
+// TODO: replace std::vector with a fixed, in place array of size capacity.
+
+/* A tuple is a vector with a templated type and a public constructor.
+ */
 template<typename T> class tuple : public std::vector<T> {
   public:
     tuple() {}
 };
 
+/* A fixed tuple is a vector with a templated type and a reserved capacity.
+ */
 template<typename T, uint8_t capacity> class fixed_tuple : public tuple<T> {
   public:
 
@@ -58,6 +63,9 @@ template<typename T, uint8_t capacity> class fixed_tuple : public tuple<T> {
 extern "C" {
 //void ble_error_handler (std::string msg, uint32_t line_num, const char * p_file_name);
 //extern void softdevice_assertion_handler(uint32_t pc, uint16_t line_number, const uint8_t * p_file_name);
+
+/* Interrupt request for SoftDevice
+ */
 void SWI1_IRQHandler(void);
 }
 
@@ -331,14 +339,15 @@ namespace BLEpp {
         virtual void onNotifyTxError();
     };
 
-
-
+    // The default ble_type
     template<typename T> inline  uint8_t ble_type() {
         return BLE_GATT_CPF_FORMAT_STRUCT;
     }
+    // A ble_type for strings
     template<> inline uint8_t ble_type<std::string>() {
         return BLE_GATT_CPF_FORMAT_UTF8S;
     }
+    // A ble_type for 8-bit unsigned chars
     template<> inline uint8_t ble_type<uint8_t>() {
         return BLE_GATT_CPF_FORMAT_UINT8;
     }
@@ -367,6 +376,13 @@ namespace BLEpp {
         return BLE_GATT_CPF_FORMAT_BOOLEAN;
     }
 
+    /* Characteristic of generic type T
+     *
+     * A characteristic first of all contains a templated "value" which might be a string, an integer, or a
+     * buffer, depending on the need at hand.
+     * It allows also for callbacks to be defined on writing to the characteristic, or reading from the
+     * characteristic.
+     */
     template<class T>
     class Characteristic : public CharacteristicBase {
 
@@ -524,8 +540,10 @@ namespace BLEpp {
       private:
     };
 
-
-    template<typename T, typename E = void> class CharacteristicT : public Characteristic<T> {
+    /* A default characteristic
+     */
+    template<typename T, typename E = void> 
+    class CharacteristicT : public Characteristic<T> {
       public:
         CharacteristicT()
         : Characteristic<T>() {
@@ -539,8 +557,9 @@ namespace BLEpp {
         virtual void setCharacteristicValue(const CharacteristicValue& value) = 0; // defined only in specializations.
     };
 
-    // this specialization handles all types that implement ISerializable
-    template<typename T > class CharacteristicT<T, typename std::enable_if<std::is_base_of<ISerializable, T>::value >::type> : public Characteristic<T> {
+    // A characteristic that implements ISerializable
+    template<typename T > 
+    class CharacteristicT<T, typename std::enable_if<std::is_base_of<ISerializable, T>::value >::type> : public Characteristic<T> {
        public:
         CharacteristicT& operator=(const T& val) {
             Characteristic<T>::operator=(val);
@@ -564,7 +583,7 @@ namespace BLEpp {
         }
     };
 
-    // this specialization handles all built-in arithmetic types (int, float, etc)
+    // A characteristic for built-in arithmetic types (int, float, etc)
     template<typename T > class CharacteristicT<T, typename std::enable_if<std::is_arithmetic<T>::value >::type> : public Characteristic<T> {
     public:
         CharacteristicT& operator=(const T& val) {
@@ -584,6 +603,7 @@ namespace BLEpp {
 
     };
 
+    // A characteristic for strings
     template<> class CharacteristicT<std::string> : public Characteristic<std::string> {
       public:
         CharacteristicT& operator=(const std::string& val) {
@@ -603,6 +623,7 @@ namespace BLEpp {
         }
     };
 
+    // A characteristic for CharacteristicValue
     template<> class CharacteristicT<CharacteristicValue> : public Characteristic<CharacteristicValue> {
     public:
         CharacteristicT& operator=(const CharacteristicValue& val) {
