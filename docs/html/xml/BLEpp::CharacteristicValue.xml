@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="BLEpp::CharacteristicValue" name="CharacteristicValue" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> A value which can be written to or read from a characteristic </brief>
+  <field id="BLEpp::CharacteristicValue::length" name="length">
+    <type name="uint16_t" />
+  </field>
+  <field id="BLEpp::CharacteristicValue::data" name="data">
+    <type name="uint8_t" qualifier="*" />
+  </field>
+  <field id="BLEpp::CharacteristicValue::freeOnDestroy" name="freeOnDestroy">
+    <brief>TODO use refcount to manage lifetime?  current assumes it to be valid for as long as needed to send to stack.</brief>
+    <doc>Dominik: for the case of having a serialized object as a value, a buffer is allocated
+which has to be freed somewhere. It can't be freed at the same point where it is
+allocated or it will be freed before it can be sent t the stack, so the parameter
+free can be used to tell the CharacteristicValue to free the data when it is
+destroyed.</doc>
+    <type builtin="yes" name="bool" />
+  </field>
+  <constructor id="BLEpp::CharacteristicValue::CharacteristicValue" name="CharacteristicValue">
+    <argument id="BLEpp::CharacteristicValue::CharacteristicValue::_length" name="_length">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::CharacteristicValue::CharacteristicValue::_data" name="_data">
+      <type name="uint8_t" qualifier=" const *" />
+    </argument>
+    <argument id="BLEpp::CharacteristicValue::CharacteristicValue::_free" name="_free">
+      <type builtin="yes" name="bool" />
+    </argument>
+  </constructor>
+  <constructor id="BLEpp::CharacteristicValue::CharacteristicValue" name="CharacteristicValue" />
+  <destructor id="BLEpp::CharacteristicValue::~CharacteristicValue" name="~CharacteristicValue" />
+  <method id="BLEpp::CharacteristicValue::operator!=" name="operator!=">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="BLEpp::CharacteristicValue::operator!=::rhs" name="rhs">
+      <type name="CharacteristicValue" qualifier=" const &amp;" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicValue::operator=" name="operator=">
+    <return>
+      <type name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
+    </return>
+    <argument id="BLEpp::CharacteristicValue::operator=::rhs" name="rhs">
+      <type name="CharacteristicValue" qualifier=" const &amp;" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicValue::operator==" name="operator==">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="BLEpp::CharacteristicValue::operator==::rhs" name="rhs">
+      <type name="CharacteristicValue" qualifier=" const &amp;" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
+    </argument>
+  </method>
+</struct>

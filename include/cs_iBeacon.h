@@ -11,6 +11,19 @@
 
 namespace BLEpp {
 
+/* Implementation of the iBeacon specification.
+ *
+ * The implementation of the iBeacon specification is only about advertising at predefined intervals and 
+ * casting a payload in the form of a specific structure:
+ *
+ *  * Apple Prefix
+ *  * UUID of company
+ *  * major (group level identifier, e.g. on the level of a building)
+ *  * minor (individual nodes)
+ *
+ * Note that you might not be able to use this commercially! Although I would be surprised if it is possible
+ * to patent a "struct" or the Apple prefix.
+ */
 class IBeacon {
 	private:
 		uint16_t _adv_indicator;
@@ -29,7 +42,8 @@ class IBeacon {
 			_rssi = rssi;
 		}
 
-		/*
+		/* The size of the iBeacon advertisement
+		 *
 		 * size is calculated as:
 		 * 		2B		advertisement indicator
 		 * 		16B		uuid (as byte array)

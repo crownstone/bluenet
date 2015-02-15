@@ -1,0 +1,170 @@
+<?xml version='1.0' encoding='utf-8'?>
+<classtemplate id="BLEpp::Characteristic" name="Characteristic" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    <brief> Non-template base class for Characteristics.</brief>
+  </base>
+  <templatetypeparameter id="BLEpp::Characteristic::T" name="T" />
+  <typedef id="BLEpp::Characteristic::callback_on_write_t" name="callback_on_write_t">
+    <type name="func::function&lt;typename&gt;" />
+  </typedef>
+  <typedef id="BLEpp::Characteristic::callback_on_read_t" name="callback_on_read_t">
+    <type name="T" />
+  </typedef>
+  <field access="protected" id="BLEpp::Characteristic::_value" name="_value">
+    <type name="T" />
+  </field>
+  <field access="protected" id="BLEpp::Characteristic::_callbackOnWrite" name="_callbackOnWrite">
+    <type name="Characteristic&lt;T&gt;::callback_on_write_t" ref="BLEpp::Characteristic#BLEpp::Characteristic::callback_on_write_t" />
+  </field>
+  <field access="protected" id="BLEpp::Characteristic::_callbackOnRead" name="_callbackOnRead">
+    <type name="Characteristic&lt;T&gt;::callback_on_read_t" ref="BLEpp::Characteristic#BLEpp::Characteristic::callback_on_read_t" />
+  </field>
+  <constructor id="BLEpp::Characteristic::Characteristic&lt;T&gt;" name="Characteristic&lt;T&gt;" />
+  <destructor id="BLEpp::Characteristic::~Characteristic&lt;T&gt;" name="~Characteristic&lt;T&gt;" virtual="yes" />
+  <method id="BLEpp::Characteristic::getValueLength" name="getValueLength" virtual="yes">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method id="BLEpp::Characteristic::getValueMaxLength" name="getValueMaxLength" override="yes" virtual="yes">
+    <return>
+      <type name="uint16_t" />
+    </return>
+    <override name="CharacteristicBase::getValueMaxLength" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::getValueMaxLength" />
+  </method>
+  <method id="BLEpp::Characteristic::getValue" name="getValue">
+    <return>
+      <type name="const T" qualifier=" const &amp;" />
+    </return>
+  </method>
+  <method id="BLEpp::Characteristic::setValue" name="setValue">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Characteristic::setValue::value" name="value">
+      <type name="const T" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="BLEpp::Characteristic::setUUID" name="setUUID" override="yes">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <argument id="BLEpp::Characteristic::setUUID::uuid" name="uuid">
+      <type name="UUID" qualifier=" const &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+    </argument>
+    <override name="CharacteristicBase::setUUID" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setUUID" />
+  </method>
+  <method id="BLEpp::Characteristic::setName" name="setName" override="yes">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <argument id="BLEpp::Characteristic::setName::name" name="name">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+    <override name="CharacteristicBase::setName" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setName" />
+  </method>
+  <method id="BLEpp::Characteristic::setUnit" name="setUnit" override="yes">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <argument id="BLEpp::Characteristic::setUnit::unit" name="unit">
+      <type name="uint16_t" />
+    </argument>
+    <override name="CharacteristicBase::setUnit" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setUnit" />
+  </method>
+  <method id="BLEpp::Characteristic::setWritable" name="setWritable" override="yes">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <argument id="BLEpp::Characteristic::setWritable::writable" name="writable">
+      <type builtin="yes" name="bool" />
+    </argument>
+    <override name="CharacteristicBase::setWritable" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setWritable" />
+  </method>
+  <method id="BLEpp::Characteristic::setNotifies" name="setNotifies" override="yes">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <argument id="BLEpp::Characteristic::setNotifies::notifies" name="notifies">
+      <type builtin="yes" name="bool" />
+    </argument>
+    <override name="CharacteristicBase::setNotifies" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setNotifies" />
+  </method>
+  <method id="BLEpp::Characteristic::onWrite" name="onWrite">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <argument id="BLEpp::Characteristic::onWrite::closure" name="closure">
+      <type name="Characteristic&lt;T&gt;::callback_on_write_t" qualifier=" const &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic::callback_on_write_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Characteristic::onRead" name="onRead">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <argument id="BLEpp::Characteristic::onRead::closure" name="closure">
+      <type name="Characteristic&lt;T&gt;::callback_on_read_t" qualifier=" const &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic::callback_on_read_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Characteristic::setUpdateIntervalMSecs" name="setUpdateIntervalMSecs" override="yes">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <argument id="BLEpp::Characteristic::setUpdateIntervalMSecs::msecs" name="msecs">
+      <type name="uint32_t" />
+    </argument>
+    <override name="CharacteristicBase::setUpdateIntervalMSecs" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setUpdateIntervalMSecs" />
+  </method>
+  <conversionfunction id="BLEpp::Characteristic::operator type-parameter-0-0 &amp;" name="operator type-parameter-0-0 &amp;">
+    <return>
+      <type name="T" qualifier=" &amp;" />
+    </return>
+  </conversionfunction>
+  <method id="BLEpp::Characteristic::operator=" name="operator=">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <argument id="BLEpp::Characteristic::operator=::val" name="val">
+      <type name="const T" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="BLEpp::Characteristic::setDefaultValue" name="setDefaultValue">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <argument id="BLEpp::Characteristic::setDefaultValue::t" name="t">
+      <type name="const T" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method access="protected" id="BLEpp::Characteristic::written" name="written" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Characteristic::written::len" name="len">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::Characteristic::written::offset" name="offset">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::Characteristic::written::data" name="data">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+    <override name="CharacteristicBase::written" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::written" />
+  </method>
+  <method access="protected" id="BLEpp::Characteristic::read" name="read" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="CharacteristicBase::read" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::read" />
+  </method>
+  <method access="protected" id="BLEpp::Characteristic::configurePresentationFormat" name="configurePresentationFormat" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Characteristic::configurePresentationFormat::presentation_format" name="presentation_format">
+      <type name="ble_gatts_char_pf_t" qualifier=" &amp;" />
+    </argument>
+    <override name="CharacteristicBase::configurePresentationFormat" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::configurePresentationFormat" />
+  </method>
+</classtemplate>

@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="BLEpp::BatteryService" name="BatteryService" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+  </base>
+  <typedef id="BLEpp::BatteryService::func_t" name="func_t">
+    <type name="uint8_t" />
+  </typedef>
+  <constructor id="BLEpp::BatteryService::BatteryService" name="BatteryService" />
+  <method id="BLEpp::BatteryService::setBatteryLevel" name="setBatteryLevel">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::BatteryService::setBatteryLevel::batteryLevel" name="batteryLevel">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::BatteryService::setBatteryLevelHandler" name="setBatteryLevelHandler">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::BatteryService::setBatteryLevelHandler::func" name="func">
+      <type name="func_t" ref="BLEpp::BatteryService#BLEpp::BatteryService::func_t" />
+    </argument>
+  </method>
+  <field access="protected" id="BLEpp::BatteryService::_characteristic" name="_characteristic">
+    <brief>CharacteristicT&amp;lt;uint8\_t&amp;gt; _characteristic;</brief>
+    <type name="CharacteristicT&lt;unsigned char, void&gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="BLEpp::BatteryService::_func" name="_func">
+    <type name="func_t" ref="BLEpp::BatteryService#BLEpp::BatteryService::func_t" />
+  </field>
+</class>

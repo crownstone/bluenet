@@ -30,6 +30,8 @@
 
 #define DEFAULT_ON
 
+#define STRINGIFY(str) #str
+
 /**********************************************************************************************************************
  * General includes
  *********************************************************************************************************************/
@@ -106,7 +108,7 @@ void welcome() {
 	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800 
 	// Very probably FLASH (32MB) is not a problem though, but RAM will be (16kB)!
 	LOGi("Welcome at the nRF51822 code for meshing.");
-	LOGi("Compilation date: %s", COMPILATION_TIME);
+	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
 	LOGi("Compilation time: %s", __TIME__);
 }
 
@@ -115,14 +117,13 @@ void welcome() {
  */
 void setName(Nrf51822BluetoothStack &stack) {
 	char devicename[32];
-	sprintf(devicename, "%s_%s", BLUETOOTH_NAME, COMPILATION_TIME);
-	LOGi("Set name to %s", BLUETOOTH_NAME);
+	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
+	LOGi("Set name to %s", STRINGIFY(BLUETOOTH_NAME));
 	stack.setDeviceName(std::string(devicename)) // max len = ble_gap_devname_max_len (31)
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
-/**
- * Sets default parameters of the Bluetooth connection.
+/* Sets default parameters of the Bluetooth connection.
  *
  * On transmission of data within a connection
  *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 10 ms)
