@@ -4,10 +4,14 @@
     <type name="Service" ref="BLEpp::Service#BLEpp::Service" />
     <brief> Service as defined in the GATT Specification.</brief>
   </base>
-  <subclass access="public" name="BatteryService" ref="BLEpp::BatteryService#BLEpp::BatteryService" />
   <subclass access="public" name="GeneralService" ref="GeneralService#GeneralService">
     <brief> General Service for the Crownstone</brief>
   </subclass>
+  <subclass access="public" name="IndoorLocalizationService" ref="IndoorLocalizationService#IndoorLocalizationService" />
+  <subclass access="public" name="BatteryService" ref="BLEpp::BatteryService#BLEpp::BatteryService">
+    <brief> Battery service</brief>
+  </subclass>
+  <subclass access="public" name="PowerService" ref="PowerService#PowerService" />
   <constructor id="BLEpp::GenericService::GenericService" name="GenericService" />
   <method id="BLEpp::GenericService::addCharacteristic" name="addCharacteristic" override="yes" virtual="yes">
     <return>

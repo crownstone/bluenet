@@ -26,16 +26,18 @@ dirs+=("/opt/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include")
 dirs+=("/opt/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/c++/4.8.4")
 dirs+=("/opt/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/c++/4.8.4/arm-none-eabi")
 
+# only include header files, source files are not considered
 files=()
-#files=( $(find include -maxdepth 1 -type f) )
-#files="src/cs_main_crownstone.cpp src/cs_BluetoothLE.cpp"
-files+=("$rel_path/src/cs_BluetoothLE.cpp")
-files+=("$rel_path/src/cs_iBeacon.cpp")
-files+=("$rel_path/src/services/cs_GeneralService.cpp")
+files+=("$rel_path/include/cs_nRF51822.h")
 files+=("$rel_path/include/cs_iBeacon.h")
 files+=("$rel_path/include/cs_BluetoothLE.h")
 files+=("$rel_path/include/cs_Serializable.h")
 files+=("$rel_path/include/services/cs_GeneralService.h")
+files+=("$rel_path/include/services/cs_PowerService.h")
+files+=("$rel_path/include/services/cs_IndoorLocalisationService.h")
+files+=("$rel_path/include/drivers/cs_PWM.h")
+files+=("$rel_path/include/drivers/cs_ADC.h")
+files+=("$rel_path/include/drivers/cs_Serial.h")
 files=$(printf "%s " "${files[@]}")
 
 # prefix every dir with "-I"
@@ -77,13 +79,6 @@ macros+=("-DBLUETOOTH_NAME=${BLUETOOTH_NAME}")
 #macros+=("-D__MSVCRT__=1")
 macro_defs=$(printf "%s " "${macros[@]}")
 
-command="cldoc generate $include_dirs $compiler_options $macro_defs -- --output $rel_path/docs/html --report $files --basedir=.."
+command="cldoc generate $include_dirs $compiler_options $macro_defs -- --output $rel_path/docs/html --report $files --basedir=$rel_path --merge=$rel_path/docs/source"
 echo $command
 $command
-
-#command="cldoc inspect $include_dirs $compiler_options $macro_defs -- $files"
-#echo $command
-#$command > file.html
-
-#cldoc serve docs/html &
-

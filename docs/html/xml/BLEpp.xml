@@ -7,7 +7,9 @@
     </return>
     <templatetypeparameter id="BLEpp::ble_type::T" name="T" />
   </functiontemplate>
-  <class name="BatteryService" ref="BLEpp::BatteryService#BLEpp::BatteryService" />
+  <class name="BatteryService" ref="BLEpp::BatteryService#BLEpp::BatteryService">
+    <brief> Battery service</brief>
+  </class>
   <class name="BLEStack" ref="BLEpp::BLEStack#BLEpp::BLEStack">
     <brief> BLEStack defines a chip-agnostic Bluetooth Low-Energy stack</brief>
   </class>

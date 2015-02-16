@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="PowerService" interface="true" name="PowerService" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="BLEpp::GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+  </base>
+  <typedef id="PowerService::func_t" name="func_t">
+    <type name="int8_t" />
+  </typedef>
+  <constructor abstract="yes" id="PowerService::PowerService" name="PowerService">
+    <argument id="PowerService::PowerService::stack" name="stack">
+      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </argument>
+  </constructor>
+  <method abstract="yes" id="PowerService::addSpecificCharacteristics" name="addSpecificCharacteristics" override="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="BLEpp::GenericService::addSpecificCharacteristics" ref="BLEpp::GenericService#BLEpp::GenericService::addSpecificCharacteristics" />
+  </method>
+  <method abstract="yes" id="PowerService::createService" name="createService" static="yes">
+    <return>
+      <type name="PowerService" qualifier=" &amp;" ref="PowerService#PowerService" />
+    </return>
+    <argument id="PowerService::createService::stack" name="stack">
+      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </argument>
+  </method>
+  <method abstract="yes" id="PowerService::dim" name="dim">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="PowerService::dim::value" name="value">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="PowerService::tick" name="tick">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="PowerService::turnOff" name="turnOff">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="PowerService::turnOn" name="turnOn">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="PowerService::addCurrentConsumptionCharacteristic" name="addCurrentConsumptionCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="PowerService::addCurrentCurveCharacteristic" name="addCurrentCurveCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="PowerService::addCurrentLimitCharacteristic" name="addCurrentLimitCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="PowerService::addGetCurrentCharacteristic" name="addGetCurrentCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="PowerService::addPWMCharacteristic" name="addPWMCharacteristic">
+    <brief>The characteristics in this service</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="PowerService::getCurrentLimit" name="getCurrentLimit">
+    <return>
+      <type name="uint8_t" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="PowerService::loadPersistentStorage" name="loadPersistentStorage">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="PowerService::sampleCurrentFinish" name="sampleCurrentFinish">
+    <return>
+      <type name="uint16_t" />
+    </return>
+    <argument id="PowerService::sampleCurrentFinish::type" name="type">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" access="protected" id="PowerService::sampleCurrentInit" name="sampleCurrentInit">
+    <brief>Some helper functions</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="PowerService::savePersistentStorage" name="savePersistentStorage">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

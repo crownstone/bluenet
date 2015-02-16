@@ -16,15 +16,23 @@
 #define PWM_IRQHandler          TIMER2_IRQHandler
 #define PWM_IRQn                TIMER2_IRQn
 
+/* Pulse Wide Modulation mode typedef
+ */
 typedef enum {
-    PWM_MODE_LED_100,   // 0-100 resolution, 156 Hz PWM frequency, 32 kHz timer frequency (prescaler 9)
-    PWM_MODE_LED_255,   // 8-bit resolution, 122 Hz PWM frequency, 65 kHz timer frequency (prescaler 8)
-    PWM_MODE_LED_1000,  // 0-1000 resolution, 125 Hz PWM frequency, 500 kHz timer frequency (prescaler 5)
-
-    PWM_MODE_MTR_100,   // 0-100 resolution, 20 kHz PWM frequency, 4MHz timer frequency (prescaler 2)
-    PWM_MODE_MTR_255    // 8-bit resolution, 31 kHz PWM frequency, 16MHz timer frequency (prescaler 0)
+    // 0-100 resolution, 156 Hz PWM frequency, 32 kHz timer frequency (prescaler 9)
+    PWM_MODE_LED_100,   
+    // 8-bit resolution, 122 Hz PWM frequency, 65 kHz timer frequency (prescaler 8)
+    PWM_MODE_LED_255,   
+    // 0-1000 resolution, 125 Hz PWM frequency, 500 kHz timer frequency (prescaler 5)
+    PWM_MODE_LED_1000,  
+    // 0-100 resolution, 20 kHz PWM frequency, 4MHz timer frequency (prescaler 2)
+    PWM_MODE_MTR_100,   
+    // 8-bit resolution, 31 kHz PWM frequency, 16MHz timer frequency (prescaler 0)
+    PWM_MODE_MTR_255    
 } pwm_mode_t;
 
+/* Pulse Wide Modulation struct
+ */
 typedef struct {
     uint8_t         num_channels;
     uint8_t         gpio_pin[3];
@@ -39,31 +47,41 @@ typedef struct {
                              .gpiote_channel = {2,3,0},          \
                              .mode           = PWM_MODE_LED_100}
 
-
+/* Pulse Wide Modulation class
+ *
+ * To turn on/off the power, as well as all intermediate stages, for example with dimming, the PWM class is used.
+ */
 class PWM {
 private:
+	// Private PWM constructor
 	PWM() {}
-	PWM(PWM const&); // singleton, deny implementation
-	void operator=(PWM const &); // singleton, deny implementation
-public:
-	// use static variant of singleton, no dynamic memory allocation
-	static PWM& getInstance() {
-		static PWM instance;
-		return instance;
-	}
-
-	uint32_t init(pwm_config_t *config);
-	void setValue(uint8_t pwm_channel, uint32_t pwm_value);
-
-	void getValue(uint8_t &pwm_channel, uint32_t &pwm_value);
-private:
+	// Private PWM copy constructor
+	PWM(PWM const&); 
+	// Private PWM copy assignment definition
+	void operator=(PWM const &); 
+	
 	// store values last set
 	uint8_t _pwmChannel;
 	uint32_t _pwmValue;
 
 	int32_t ppiEnableChannel(uint32_t ch_num, volatile uint32_t *event_ptr, volatile uint32_t *task_ptr);
+public:
+	// Gets a static singleton (no dynamic memory allocation) of the PWM clss
+	static PWM& getInstance() {
+		static PWM instance;
+		return instance;
+	}
+	// Initialize the pulse wide modulation settings
+	uint32_t init(pwm_config_t *config);
 
-public: // TODO: make these private
+	// Set the value of a specific channel
+	void setValue(uint8_t pwm_channel, uint32_t pwm_value);
+
+	void getValue(uint8_t &pwm_channel, uint32_t &pwm_value);
+	
+	//TODO: make the following private
+
+	// number of channels
 	uint8_t _numChannels;
 	uint16_t _maxValue;
 	uint16_t _nextValue[PWM_MAX_CHANNELS];
