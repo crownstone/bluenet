@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="ADC" name="ADC" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="Dispatcher" />
+  </base>
+  <method abstract="yes" id="ADC::config" name="config">
+    <return>
+      <type name="uint32_t" />
+    </return>
+    <argument id="ADC::config::pin" name="pin">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="ADC::getBuffer" name="getBuffer">
+    <brief>return reference to internal buffer</brief>
+    <return>
+      <type name="Buffer&lt;unsigned short&gt;" qualifier="*" />
+    </return>
+  </method>
+  <method id="ADC::getInstance" name="getInstance" static="yes">
+    <brief>use static variant of singleton, no dynamic memory allocation</brief>
+    <return>
+      <type name="ADC" qualifier=" &amp;" ref="ADC#ADC" />
+    </return>
+  </method>
+  <method abstract="yes" id="ADC::init" name="init">
+    <return>
+      <type name="uint32_t" />
+    </return>
+    <argument id="ADC::init::pin" name="pin">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="ADC::setClock" name="setClock">
+    <brief>if decorated with a real time clock, we can "timestamp" the adc values</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="ADC::setClock::clock" name="clock">
+      <type name="RealTimeClock" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method id="ADC::setThreshold" name="setThreshold">
+    <brief>set threshold (default threshold is DEFAULT_RECORDING_THRESHOLD)</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="ADC::setThreshold::threshold" name="threshold">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="ADC::start" name="start">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="ADC::stop" name="stop">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="ADC::tick" name="tick">
+    <brief>each tick we have time to dispatch events e.g.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="ADC::update" name="update">
+    <brief>function to be called from interrupt, do not do much there!</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="ADC::update::value" name="value">
+      <type name="uint32_t" />
+    </argument>
+  </method>
+</class>
