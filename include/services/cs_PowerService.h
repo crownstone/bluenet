@@ -31,6 +31,12 @@ public:
 	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 	
 	void tick();
+	
+	void turnOff();
+	
+	void turnOn();
+	
+	void dim(uint8_t value);
 protected:
 	// Enabled characteristics (to be set in constructor)
 	
@@ -46,10 +52,6 @@ protected:
 	uint16_t sampleCurrentFinish(uint8_t type);
 
 	uint8_t getCurrentLimit();
-
-	void turnOff();
-	void turnOn();
-	void dim(uint8_t value);
 
 	void loadPersistentStorage();
 	void savePersistentStorage();

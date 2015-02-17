@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="IndoorLocalizationService" interface="true" name="IndoorLocalizationService" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="BLEpp::GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+  </base>
+  <typedef id="IndoorLocalizationService::func_t" name="func_t">
+    <type name="int8_t" />
+  </typedef>
+  <constructor abstract="yes" id="IndoorLocalizationService::IndoorLocalizationService" name="IndoorLocalizationService">
+    <argument id="IndoorLocalizationService::IndoorLocalizationService::stack" name="stack">
+      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </argument>
+  </constructor>
+  <method abstract="yes" id="IndoorLocalizationService::createService" name="createService" static="yes">
+    <return>
+      <type name="IndoorLocalizationService" qualifier=" &amp;" ref="IndoorLocalizationService#IndoorLocalizationService" />
+    </return>
+    <argument id="IndoorLocalizationService::createService::stack" name="stack">
+      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </argument>
+  </method>
+  <method abstract="yes" id="IndoorLocalizationService::on_ble_event" name="on_ble_event" override="yes" virtual="yes">
+    <brief>void addSpecificCharacteristics();</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="IndoorLocalizationService::on_ble_event::p_ble_evt" name="p_ble_evt">
+      <type name="ble_evt_t" qualifier="*" />
+    </argument>
+    <override name="BLEpp::Service::on_ble_event" ref="BLEpp::Service#BLEpp::Service::on_ble_event" />
+  </method>
+  <method abstract="yes" id="IndoorLocalizationService::onRSSIChanged" name="onRSSIChanged">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="IndoorLocalizationService::onRSSIChanged::rssi" name="rssi">
+      <type name="int8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="IndoorLocalizationService::setRSSILevel" name="setRSSILevel">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="IndoorLocalizationService::setRSSILevel::RSSILevel" name="RSSILevel">
+      <type name="int8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="IndoorLocalizationService::setRSSILevelHandler" name="setRSSILevelHandler">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="IndoorLocalizationService::setRSSILevelHandler::func" name="func">
+      <type name="func_t" ref="IndoorLocalizationService#IndoorLocalizationService::func_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="IndoorLocalizationService::tick" name="tick">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::addDeviceTypeCharactersitic" name="addDeviceTypeCharactersitic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::addPeripheralListCharacteristic" name="addPeripheralListCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::addRoomCharacteristic" name="addRoomCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::addScanControlCharacteristic" name="addScanControlCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::addSignalStrengthCharacteristic" name="addSignalStrengthCharacteristic">
+    <brief>TODO -oDE: are really all of these characteristics part of the</brief>
+    <doc>indoor localisation?</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::addTrackedDeviceCharacteristic" name="addTrackedDeviceCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::addTrackedDeviceListCharacteristic" name="addTrackedDeviceListCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

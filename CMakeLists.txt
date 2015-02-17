@@ -118,6 +118,8 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_PowerService.cpp")
 ENDIF()
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_Dispatcher.cpp")
 
+# should be only when creating iBeacon
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_iBeacon.cpp")
 
 IF(${MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_Mesh.cpp")

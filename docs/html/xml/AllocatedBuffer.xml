@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="AllocatedBuffer" name="AllocatedBuffer" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Dominik: DO NOT USE! malloc fails completely or doesn't return a correct memory on the heap!!!!</brief>
+  <field id="AllocatedBuffer::length" name="length">
+    <type name="uint16_t" />
+  </field>
+  <field id="AllocatedBuffer::data" name="data">
+    <type name="uint8_t" qualifier="*" />
+  </field>
+  <field id="AllocatedBuffer::allocated" name="allocated">
+    <type builtin="yes" name="bool" />
+  </field>
+  <constructor id="AllocatedBuffer::AllocatedBuffer" name="AllocatedBuffer" />
+  <constructor id="AllocatedBuffer::AllocatedBuffer" name="AllocatedBuffer">
+    <argument id="AllocatedBuffer::AllocatedBuffer::_length" name="_length">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="AllocatedBuffer::AllocatedBuffer::_data" name="_data">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+  </constructor>
+  <destructor id="AllocatedBuffer::~AllocatedBuffer" name="~AllocatedBuffer" />
+  <method id="AllocatedBuffer::allocate" name="allocate">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="AllocatedBuffer::allocate::size" name="size">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method id="AllocatedBuffer::deallocate" name="deallocate">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="AllocatedBuffer::release" name="release">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</struct>

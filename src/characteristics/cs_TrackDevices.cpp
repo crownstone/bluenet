@@ -10,7 +10,6 @@
 
 #include "characteristics/cs_TrackDevices.h"
 #include "drivers/cs_Serial.h"
-#include "util/cs_Utils.h"
 
 /**********************************************************************************************************************
  * List of tracked devices

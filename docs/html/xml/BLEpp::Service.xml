@@ -1,0 +1,168 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="BLEpp::Service" name="Service" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Service as defined in the GATT Specification.</brief>
+  <subclass access="public" name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+  <methodtemplate id="BLEpp::Service::createCharacteristic" name="createCharacteristic">
+    <brief>* Registers a new Characteristic with the given uid, name, and intialValue. Pass the type of the</brief>
+    <doc>* characteristic in angle brackets before the parentheses for the method invocation:
+*
+* &amp;lt;pre&amp;gt;
+*      service.createCharacteristic&amp;lt;std::string&amp;gt;().setName("Owner Name").setDefaultValue("Bob Roberts");
+*      service.createCharacteristic&amp;lt;int&amp;gt;().setName("Owner Age").setDefaultValue(39);
+*      service.createCharacteristic&amp;lt;float&amp;gt;().setName("Yaw").setDefaultValue(0.0);
+*</doc>
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <templatetypeparameter id="BLEpp::Service::createCharacteristic::T" name="T" />
+  </methodtemplate>
+  <methodtemplate id="BLEpp::Service::createCharacteristicRef" name="createCharacteristicRef">
+    <return>
+      <type name="Characteristic&lt;T&gt;" qualifier="*" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
+    </return>
+    <templatetypeparameter id="BLEpp::Service::createCharacteristicRef::T" name="T" />
+  </methodtemplate>
+  <variable id="BLEpp::Service::defaultServiceName" name="defaultServiceName">
+    <type builtin="yes" name="char" qualifier=" const *" />
+  </variable>
+  <typedef id="BLEpp::Service::Characteristics_t" name="Characteristics_t">
+    <brief>"Generic Service"</brief>
+    <type name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+  </typedef>
+  <constructor id="BLEpp::Service::Service" name="Service" />
+  <destructor id="BLEpp::Service::~Service" name="~Service" virtual="yes" />
+  <method abstract="yes" id="BLEpp::Service::addCharacteristic" name="addCharacteristic" virtual="yes">
+    <return>
+      <type name="Service" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service" />
+    </return>
+    <argument id="BLEpp::Service::addCharacteristic::characteristic" name="characteristic">
+      <type name="CharacteristicBase" qualifier="*" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::Service::getCharacteristics" name="getCharacteristics" virtual="yes">
+    <return>
+      <type name="Characteristics_t" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service::Characteristics_t" />
+    </return>
+  </method>
+  <method id="BLEpp::Service::getHandle" name="getHandle">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method id="BLEpp::Service::getStack" name="getStack">
+    <return>
+      <type name="BLEStack" qualifier="*" ref="BLEpp::BLEStack#BLEpp::BLEStack" />
+    </return>
+  </method>
+  <method id="BLEpp::Service::getUUID" name="getUUID">
+    <return>
+      <type name="UUID" qualifier=" &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::Service::on_ble_event" name="on_ble_event" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Service::on_ble_event::p_ble_evt" name="p_ble_evt">
+      <type name="ble_evt_t" qualifier="*" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::Service::on_connect" name="on_connect" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Service::on_connect::conn_handle" name="conn_handle">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::Service::on_connect::gap_evt" name="gap_evt">
+      <type name="ble_gap_evt_connected_t" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::Service::on_disconnect" name="on_disconnect" virtual="yes">
+    <brief>FIXME NRFAPI  friend??</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Service::on_disconnect::conn_handle" name="conn_handle">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::Service::on_disconnect::gap_evt" name="gap_evt">
+      <type name="ble_gap_evt_disconnected_t" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::Service::on_write" name="on_write" virtual="yes">
+    <brief>FIXME NRFAPI</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Service::on_write::write_evt" name="write_evt">
+      <type name="ble_gatts_evt_write_t" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::Service::onTxComplete" name="onTxComplete" virtual="yes">
+    <brief>FIXME NRFAPI</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Service::onTxComplete::p_ble_evt" name="p_ble_evt">
+      <type name="ble_common_evt_t" qualifier="*" />
+    </argument>
+  </method>
+  <method id="BLEpp::Service::setIsPrimary" name="setIsPrimary">
+    <return>
+      <type name="Service" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service" />
+    </return>
+    <argument id="BLEpp::Service::setIsPrimary::isPrimary" name="isPrimary">
+      <type builtin="yes" name="bool" />
+    </argument>
+  </method>
+  <method id="BLEpp::Service::setName" name="setName">
+    <return>
+      <type name="Service" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service" />
+    </return>
+    <argument id="BLEpp::Service::setName::name" name="name">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="BLEpp::Service::setUUID" name="setUUID">
+    <return>
+      <type name="Service" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service" />
+    </return>
+    <argument id="BLEpp::Service::setUUID::uuid" name="uuid">
+      <type name="UUID" qualifier=" const &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::Service::start" name="start" virtual="yes">
+    <brief>internal:</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Service::start::stack" name="stack">
+      <type name="BLEStack" qualifier="*" ref="BLEpp::BLEStack#BLEpp::BLEStack" />
+    </argument>
+  </method>
+  <method id="BLEpp::Service::stop" name="stop" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <field access="protected" id="BLEpp::Service::_stack" name="_stack">
+    <type name="BLEStack" qualifier="*" ref="BLEpp::BLEStack#BLEpp::BLEStack" />
+  </field>
+  <field access="protected" id="BLEpp::Service::_uuid" name="_uuid">
+    <type name="UUID" ref="BLEpp::UUID#BLEpp::UUID" />
+  </field>
+  <field access="protected" id="BLEpp::Service::_name" name="_name">
+    <type name="std::string" />
+  </field>
+  <field access="protected" id="BLEpp::Service::_primary" name="_primary">
+    <type builtin="yes" name="bool" />
+  </field>
+  <field access="protected" id="BLEpp::Service::_service_handle" name="_service_handle">
+    <type name="uint16_t" />
+  </field>
+  <field access="protected" id="BLEpp::Service::_started" name="_started">
+    <brief>provided by stack.</brief>
+    <type builtin="yes" name="bool" />
+  </field>
+</class>

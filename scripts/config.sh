@@ -5,7 +5,7 @@
 #	exit 1
 #fi
 
-if [ ! -d ${BLUENET_DIR} ]; then
+if [ ! -d "${BLUENET_DIR}" ]; then
 	path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 	BLUENET_DIR=${path}/..
 	echo "BLUENET_DIR does not exist. Use ${path}/.. as default"

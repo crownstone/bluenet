@@ -21,12 +21,20 @@
 // temporary defines
 #define MESHING_PARALLEL 1
 
-// #define IBEACON
+// currently does not compile(!)
+//#define IBEACON
 
 // if softdevice_handler.c is used, we cannot also define SWI2_IRQHandler but will need to set evt_schedule_func in the 
 // softdevice_handler_init call
 #define USE_DEFAULT_SOFTDEVICE_HANDLER
 
+#define DEFAULT_ON
+
+#if __clang__
+#define STRINGIFY(str) #str
+#else
+#define STRINGIFY(str) str
+#endif
 /**********************************************************************************************************************
  * General includes
  *********************************************************************************************************************/
@@ -103,7 +111,7 @@ void welcome() {
 	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800 
 	// Very probably FLASH (32MB) is not a problem though, but RAM will be (16kB)!
 	LOGi("Welcome at the nRF51822 code for meshing.");
-	LOGi("Compilation date: %s", COMPILATION_TIME);
+	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
 	LOGi("Compilation time: %s", __TIME__);
 }
 
@@ -112,13 +120,13 @@ void welcome() {
  */
 void setName(Nrf51822BluetoothStack &stack) {
 	char devicename[32];
-	sprintf(devicename, "%s_%s", BLUETOOTH_NAME, COMPILATION_TIME);
+	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
+	LOGi("Set name to %s", STRINGIFY(BLUETOOTH_NAME));
 	stack.setDeviceName(std::string(devicename)) // max len = ble_gap_devname_max_len (31)
 		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
-/**
- * Sets default parameters of the Bluetooth connection.
+/* Sets default parameters of the Bluetooth connection.
  *
  * On transmission of data within a connection
  *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 10 ms)
@@ -353,9 +361,13 @@ int main() {
  	CMesh & mesh = CMesh::getInstance();
 	mesh.init();
 #endif
-
+#if POWER_SERVICE==1
+#ifdef DEFAULT_ON
+	nrf_delay_ms(1000);
+	powerService.turnOn();
+#endif
+#endif
 	LOGi("Running while ticking..");
-
 	//static long int dbg_counter = 0;
 	while(1) {
 		//LOGd("Tick %li", ++dbg_counter); // we really have to monitor the frequency of our ticks

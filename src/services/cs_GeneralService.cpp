@@ -136,6 +136,7 @@ void GeneralService::addFirmwareCharacteristic() {
 }
 
 #if MESHING==1
+
 void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic = createCharacteristicRef<MeshMessage>();
 	(*_meshCharacteristic)

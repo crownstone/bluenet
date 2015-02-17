@@ -5,7 +5,9 @@
  * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
-#include "util/cs_Utils.h"
+#include <util/cs_Utils.h>
+
+namespace BLEutil {
 
 // convert a short from LSB to MSB and vice versa
 uint16_t convertEndian16(uint16_t val) {
@@ -20,5 +22,4 @@ uint32_t convertEndian32(uint32_t val) {
 		 | ((val & 0xFF) << 24);
 }
 
-
-
+}

@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='utf-8'?>
+<index xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>Bluenet, a mesh combined with Bluetooth Low-Energy.</brief>
+  <doc># Bluenet Documentation
+
+This documentation describes the features of the Bluenet firmware.</doc>
+  <namespace name="BLEpp" ref="BLEpp#BLEpp">
+    <class name="BatteryService" ref="BLEpp::BatteryService#BLEpp::BatteryService">
+      <brief> Battery service</brief>
+    </class>
+    <class name="BLEStack" ref="BLEpp::BLEStack#BLEpp::BLEStack">
+      <brief> BLEStack defines a chip-agnostic Bluetooth Low-Energy stack</brief>
+    </class>
+    <classtemplate name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
+      <brief> Characteristic of generic type T</brief>
+      <templatetypeparameter id="BLEpp::Characteristic::T" name="T" />
+    </classtemplate>
+    <class name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase">
+      <brief> Non-template base class for Characteristics.</brief>
+    </class>
+    <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
+    <struct name="CharacteristicStatus" ref="BLEpp::CharacteristicStatus#BLEpp::CharacteristicStatus" />
+    <classtemplate name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+      <brief> A default characteristic</brief>
+      <templatetypeparameter id="BLEpp::CharacteristicT::T" name="T" />
+      <templatetypeparameter id="BLEpp::CharacteristicT::E" name="E" />
+    </classtemplate>
+    <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+      <brief>A characteristic for strings</brief>
+    </class>
+    <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+      <brief>A characteristic for CharacteristicValue</brief>
+    </class>
+    <struct name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue">
+      <brief> A value which can be written to or read from a characteristic </brief>
+    </struct>
+    <class name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+    <class name="IBeacon" ref="BLEpp::IBeacon#BLEpp::IBeacon">
+      <brief> Implementation of the iBeacon specification.</brief>
+    </class>
+    <class name="Nrf51822BluetoothStack" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack">
+      <brief> nRF51822 specific implementation of the BLEStack</brief>
+    </class>
+    <class name="Service" ref="BLEpp::Service#BLEpp::Service">
+      <brief> Service as defined in the GATT Specification.</brief>
+    </class>
+    <class name="UUID" ref="BLEpp::UUID#BLEpp::UUID">
+      <brief> A Universally Unique IDentifier. </brief>
+    </class>
+  </namespace>
+  <class name="ADC" ref="ADC#ADC" />
+  <struct name="AllocatedBuffer" ref="AllocatedBuffer#AllocatedBuffer">
+    <brief>Dominik: DO NOT USE! malloc fails completely or doesn't return a correct memory on the heap!!!!</brief>
+  </struct>
+  <classtemplate name="fixed_tuple" ref="fixed_tuple#fixed_tuple">
+    <brief> A fixed tuple is a vector with a templated type and a reserved capacity.</brief>
+    <templatetypeparameter id="fixed_tuple::T" name="T" />
+    <templatenontypeparameter id="fixed_tuple::capacity" name="capacity">
+      <type name="uint8_t" />
+    </templatenontypeparameter>
+  </classtemplate>
+  <class name="GeneralService" ref="GeneralService#GeneralService">
+    <brief> General Service for the Crownstone</brief>
+  </class>
+  <class name="IndoorLocalizationService" ref="IndoorLocalizationService#IndoorLocalizationService" />
+  <struct name="ISerializable" ref="ISerializable#ISerializable" />
+  <class name="PowerService" ref="PowerService#PowerService" />
+  <class name="PWM" ref="PWM#PWM">
+    <brief> Pulse Wide Modulation class</brief>
+  </class>
+  <struct name="pwm_config_t" ref="pwm_config_t#pwm_config_t">
+    <brief> Pulse Wide Modulation struct</brief>
+  </struct>
+  <classtemplate name="tuple" ref="tuple#tuple">
+    <brief> A tuple is a vector with a templated type and a public constructor.</brief>
+    <templatetypeparameter id="tuple::T" name="T" />
+  </classtemplate>
+  <enum anonymous="yes" id="(anonymous::1)" name="(anonymous::1)">
+    <enumvalue id="PWM_MODE_LED_100" name="PWM_MODE_LED_100" value="0">
+      <brief>0-100 resolution, 156 Hz PWM frequency, 32 kHz timer frequency (prescaler 9)</brief>
+    </enumvalue>
+    <enumvalue id="PWM_MODE_LED_255" name="PWM_MODE_LED_255" value="1">
+      <brief>8-bit resolution, 122 Hz PWM frequency, 65 kHz timer frequency (prescaler 8)</brief>
+    </enumvalue>
+    <enumvalue id="PWM_MODE_LED_1000" name="PWM_MODE_LED_1000" value="2">
+      <brief>0-1000 resolution, 125 Hz PWM frequency, 500 kHz timer frequency (prescaler 5)</brief>
+    </enumvalue>
+    <enumvalue id="PWM_MODE_MTR_100" name="PWM_MODE_MTR_100" value="3">
+      <brief>0-100 resolution, 20 kHz PWM frequency, 4MHz timer frequency (prescaler 2)</brief>
+    </enumvalue>
+    <enumvalue id="PWM_MODE_MTR_255" name="PWM_MODE_MTR_255" value="4">
+      <brief>8-bit resolution, 31 kHz PWM frequency, 16MHz timer frequency (prescaler 0)</brief>
+    </enumvalue>
+  </enum>
+  <typedef id="pwm_mode_t" name="pwm_mode_t">
+    <brief> Pulse Wide Modulation mode typedef</brief>
+    <type name="pwm_mode_t" ref="index#(anonymous::1)" />
+  </typedef>
+  <function id="config_uart" name="config_uart">
+    <brief>*</brief>
+    <doc>General configuration of the serial connection. This sets the pin to be used for UART, the baudrate, the parity
+bits, etc.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </function>
+  <function id="SWI1_IRQHandler" name="SWI1_IRQHandler">
+    <brief> Interrupt request for SoftDevice</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </function>
+  <function id="write" name="write">
+    <brief>*</brief>
+    <doc>Write a string with printf functionality.
+</doc>
+    <return>
+      <type builtin="yes" name="int" />
+    </return>
+    <argument id="write::str" name="str">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+  </function>
+  <report name="Documentation generator" ref="report" />
+</index>

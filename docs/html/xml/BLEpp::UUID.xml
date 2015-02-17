@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="BLEpp::UUID" name="UUID" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> A Universally Unique IDentifier. </brief>
+  <doc>This is a 128-bit sequence for non-standard profiles, services, characteristics, or descriptors.
+There are several identifiers predefined at
+https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx.
+Normally a 16-bit sequence is enough to distinguish the different services, a large part of the 128-bit
+sequence is repeated.
+</doc>
+  <constructor id="BLEpp::UUID::UUID" name="UUID" />
+  <constructor abstract="yes" id="BLEpp::UUID::UUID" name="UUID">
+    <argument id="BLEpp::UUID::UUID::fullUid" name="fullUid">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+  </constructor>
+  <constructor id="BLEpp::UUID::UUID" name="UUID">
+    <argument id="BLEpp::UUID::UUID::uuid" name="uuid">
+      <type name="uint16_t" />
+    </argument>
+  </constructor>
+  <constructor id="BLEpp::UUID::UUID" name="UUID">
+    <argument id="BLEpp::UUID::UUID::parent" name="parent">
+      <type name="UUID" qualifier=" &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+    </argument>
+    <argument id="BLEpp::UUID::UUID::uidValue" name="uidValue">
+      <type name="uint16_t" />
+    </argument>
+  </constructor>
+  <constructor id="BLEpp::UUID::UUID" name="UUID">
+    <argument id="BLEpp::UUID::UUID::rhs" name="rhs">
+      <type name="UUID" qualifier=" const &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+    </argument>
+  </constructor>
+  <constructor id="BLEpp::UUID::UUID" name="UUID">
+    <argument id="BLEpp::UUID::UUID::u" name="u">
+      <type name="ble_uuid_t" qualifier=" const &amp;" />
+    </argument>
+  </constructor>
+  <method id="BLEpp::UUID::getType" name="getType">
+    <return>
+      <type name="uint8_t" />
+    </return>
+  </method>
+  <method id="BLEpp::UUID::getUuid" name="getUuid">
+    <brief>FIXME NRFAPI</brief>
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::UUID::init" name="init">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <conversionfunction id="BLEpp::UUID::operator " name="operator ">
+    <brief>Generate a 128-bit Bluetooth address from the _full array.</brief>
+    <return>
+      <type name="ble_uuid_t" />
+    </return>
+  </conversionfunction>
+  <field access="protected" id="BLEpp::UUID::_full" name="_full">
+    <brief>proprietary UUID std::string. NULL fo standard UUIDs.</brief>
+    <type builtin="yes" name="char" qualifier=" const *" />
+  </field>
+  <field access="protected" id="BLEpp::UUID::_uuid" name="_uuid">
+    <brief>16-bit UUID value or octets 12-13 of 128-bit UUID.</brief>
+    <type name="uint16_t" />
+  </field>
+  <field access="protected" id="BLEpp::UUID::_type" name="_type">
+    <brief>UUID type, see @ref BLE_UUID_TYPES.</brief>
+    <type name="uint8_t" />
+  </field>
+</class>

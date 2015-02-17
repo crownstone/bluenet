@@ -1,0 +1,242 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="BLEpp::CharacteristicBase" name="CharacteristicBase" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Non-template base class for Characteristics.</brief>
+  <doc>A non-templated base class saves on code size. Note that every characteristic however does still
+contribute to code size.
+
+
+</doc>
+  <subclass access="public" name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
+    <brief> Characteristic of generic type T</brief>
+  </subclass>
+  <constructor abstract="yes" id="BLEpp::CharacteristicBase::CharacteristicBase" name="CharacteristicBase" />
+  <destructor id="BLEpp::CharacteristicBase::~CharacteristicBase" name="~CharacteristicBase" virtual="yes" />
+  <method id="BLEpp::CharacteristicBase::getCccdHandle" name="getCccdHandle">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::getCharacteristicValue" name="getCharacteristicValue" virtual="yes">
+    <return>
+      <type name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
+    </return>
+  </method>
+  <method id="BLEpp::CharacteristicBase::getUUID" name="getUUID">
+    <return>
+      <type name="UUID" qualifier=" const &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+    </return>
+  </method>
+  <method id="BLEpp::CharacteristicBase::getValueHandle" name="getValueHandle">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::getValueMaxLength" name="getValueMaxLength" virtual="yes">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::init" name="init">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::init::svc" name="svc">
+      <type name="Service" qualifier="*" ref="BLEpp::Service#BLEpp::Service" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicBase::isNotifyingEnabled" name="isNotifyingEnabled">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::onTxComplete" name="onTxComplete" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::onTxComplete::p_ble_evt" name="p_ble_evt">
+      <type name="ble_common_evt_t" qualifier="*" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::read" name="read" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::setCharacteristicValue" name="setCharacteristicValue" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setCharacteristicValue::value" name="value">
+      <type name="CharacteristicValue" qualifier=" const &amp;" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicBase::setIndicates" name="setIndicates">
+    <return>
+      <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setIndicates::indicates" name="indicates">
+      <type builtin="yes" name="bool" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::setName" name="setName">
+    <return>
+      <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setName::name" name="name">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicBase::setNotifies" name="setNotifies">
+    <return>
+      <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setNotifies::notifies" name="notifies">
+      <type builtin="yes" name="bool" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicBase::setNotifyingEnabled" name="setNotifyingEnabled">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setNotifyingEnabled::enabled" name="enabled">
+      <type builtin="yes" name="bool" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::setUnit" name="setUnit">
+    <return>
+      <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setUnit::unit" name="unit">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::setUpdateIntervalMSecs" name="setUpdateIntervalMSecs">
+    <return>
+      <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setUpdateIntervalMSecs::msecs" name="msecs">
+      <type name="uint32_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::setupWritePermissions" name="setupWritePermissions">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setupWritePermissions::ci" name="ci">
+      <type name="CharacteristicInit" qualifier=" &amp;" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicBase::setUUID" name="setUUID">
+    <return>
+      <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setUUID::uuid" name="uuid">
+      <type name="UUID" qualifier=" const &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicBase::setWritable" name="setWritable">
+    <return>
+      <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setWritable::writable" name="writable">
+      <type builtin="yes" name="bool" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicBase::setWritePermission" name="setWritePermission">
+    <brief> Security Mode 0 Level 0: No access permissions at all (this level is not defined by the Bluetooth Core specification).\n</brief>
+    <doc>Security Mode 1 Level 1: No security is needed (aka open link).\n
+Security Mode 1 Level 2: Encrypted link required, MITM protection not necessary.\n
+Security Mode 1 Level 3: MITM protected encrypted link required.\n
+Security Mode 2 Level 1: Signing or encryption required, MITM protection not necessary.\n
+Security Mode 2 Level 2: MITM protected signing required, unless link is MITM protected encrypted.\n
+</doc>
+    <return>
+      <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::setWritePermission::securityMode" name="securityMode">
+      <type name="uint8_t" />
+    </argument>
+    <argument id="BLEpp::CharacteristicBase::setWritePermission::securityLevel" name="securityLevel">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::written" name="written" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::written::len" name="len">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::CharacteristicBase::written::offset" name="offset">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::CharacteristicBase::written::data" name="data">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+  </method>
+  <field access="protected" id="BLEpp::CharacteristicBase::_uuid" name="_uuid">
+    <brief>Universally Unique Identifier (8 bytes)</brief>
+    <type name="UUID" ref="BLEpp::UUID#BLEpp::UUID" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_name" name="_name">
+    <brief>Name (4 bytes)</brief>
+    <type name="std::string" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_readperm" name="_readperm">
+    <brief>Read permission (1 byte)</brief>
+    <type name="ble_gap_conn_sec_mode_t" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_writeperm" name="_writeperm">
+    <brief>Write permission (1 byte)</brief>
+    <type name="ble_gap_conn_sec_mode_t" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_handles" name="_handles">
+    <brief>Handles (8 bytes)</brief>
+    <type name="ble_gatts_char_handles_t" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_service" name="_service">
+    <brief>Reference to corresponding service (4 bytes)</brief>
+    <type name="Service" qualifier="*" ref="BLEpp::Service#BLEpp::Service" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_inited" name="_inited">
+    <type builtin="yes" name="bool" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_notifies" name="_notifies">
+    <type builtin="yes" name="bool" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_writable" name="_writable">
+    <type builtin="yes" name="bool" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_unit" name="_unit">
+    <brief>Unit</brief>
+    <type name="uint16_t" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_updateIntervalMsecs" name="_updateIntervalMsecs">
+    <brief>Interval for updates (4 bytes), 0 means don't update</brief>
+    <type name="uint32_t" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_notifyingEnabled" name="_notifyingEnabled">
+    <type builtin="yes" name="bool" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicBase::_indicates" name="_indicates">
+    <type builtin="yes" name="bool" />
+  </field>
+  <method access="protected" id="BLEpp::CharacteristicBase::configurePresentationFormat" name="configurePresentationFormat" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicBase::configurePresentationFormat::" name="">
+      <type name="ble_gatts_char_pf_t" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" access="protected" id="BLEpp::CharacteristicBase::notify" name="notify">
+    <return>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="BLEpp::CharacteristicBase::onNotifyTxError" name="onNotifyTxError" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

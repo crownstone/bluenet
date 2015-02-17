@@ -31,8 +31,8 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 			PWM_UUID,
 			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
-	characStatus.push_back( { "Get Current",
-			CURRENT_GET_UUID,
+	characStatus.push_back( { "Sample Current",
+			SAMPLE_CURRENT_UUID,
 			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addGetCurrentCharacteristic)});
 	characStatus.push_back( { "Current Curve",
@@ -87,7 +87,7 @@ void PowerService::turnOff() {
 // Do we really want to use the PWM for this, or just set the pin to zero?
 // TODO: turn on normally, but make sure we enable the completely PWM again on request
 void PowerService::turnOn() {
-	PWM::getInstance().setValue(0, (uint8_t)-1);
+	PWM::getInstance().setValue(0, 255);
 }
 
 /**
@@ -100,8 +100,8 @@ void PowerService::dim(uint8_t value) {
 
 void PowerService::addGetCurrentCharacteristic() {
 	createCharacteristic<uint8_t>()
-		.setUUID(UUID(getUUID(), CURRENT_GET_UUID))
-		.setName("Get Current")
+		.setUUID(UUID(getUUID(), SAMPLE_CURRENT_UUID))
+		.setName("Sample Current")
 		.setDefaultValue(0)
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {

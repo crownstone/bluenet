@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="BLEpp::IBeacon" name="IBeacon" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Implementation of the iBeacon specification.</brief>
+  <doc>The implementation of the iBeacon specification is only about advertising at predefined intervals and
+casting a payload in the form of a specific structure:
+
+ * Apple Prefix
+ * UUID of company
+ * major (group level identifier, e.g. on the level of a building)
+ * minor (individual nodes)
+
+Note that you might not be able to use this commercially! Although I would be surprised if it is possible
+to patent a "struct" or the Apple prefix.
+</doc>
+  <constructor id="BLEpp::IBeacon::IBeacon" name="IBeacon">
+    <argument id="BLEpp::IBeacon::IBeacon::uuid" name="uuid">
+      <type name="UUID" ref="BLEpp::UUID#BLEpp::UUID" />
+    </argument>
+    <argument id="BLEpp::IBeacon::IBeacon::major" name="major">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::IBeacon::IBeacon::minor" name="minor">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::IBeacon::IBeacon::rssi" name="rssi">
+      <type name="uint8_t" />
+    </argument>
+  </constructor>
+  <method id="BLEpp::IBeacon::size" name="size">
+    <brief> The size of the iBeacon advertisement</brief>
+    <doc>size is calculated as:
+                2B              advertisement indicator
+                16B             uuid (as byte array)
+                2B              major
+                2B              minor
+                1B              rssi
+        --------------------------------------
+                23B             total
+</doc>
+    <return>
+      <type name="uint8_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::IBeacon::toArray" name="toArray">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::IBeacon::toArray::array" name="array">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+  </method>
+</class>

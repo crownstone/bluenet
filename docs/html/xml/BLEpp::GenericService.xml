@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="BLEpp::GenericService" name="GenericService" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <base access="public">
+    <type name="Service" ref="BLEpp::Service#BLEpp::Service" />
+    <brief> Service as defined in the GATT Specification.</brief>
+  </base>
+  <subclass access="public" name="GeneralService" ref="GeneralService#GeneralService">
+    <brief> General Service for the Crownstone</brief>
+  </subclass>
+  <subclass access="public" name="IndoorLocalizationService" ref="IndoorLocalizationService#IndoorLocalizationService" />
+  <subclass access="public" name="BatteryService" ref="BLEpp::BatteryService#BLEpp::BatteryService">
+    <brief> Battery service</brief>
+  </subclass>
+  <subclass access="public" name="PowerService" ref="PowerService#PowerService" />
+  <constructor id="BLEpp::GenericService::GenericService" name="GenericService" />
+  <method id="BLEpp::GenericService::addCharacteristic" name="addCharacteristic" override="yes" virtual="yes">
+    <return>
+      <type name="GenericService" qualifier=" &amp;" ref="BLEpp::GenericService#BLEpp::GenericService" />
+    </return>
+    <argument id="BLEpp::GenericService::addCharacteristic::characteristic" name="characteristic">
+      <type name="CharacteristicBase" qualifier="*" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    </argument>
+    <override name="Service::addCharacteristic" ref="BLEpp::Service#BLEpp::Service::addCharacteristic" />
+  </method>
+  <method abstract="yes" id="BLEpp::GenericService::addSpecificCharacteristics" name="addSpecificCharacteristics">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="BLEpp::GenericService::getCharacteristics" name="getCharacteristics" override="yes" virtual="yes">
+    <return>
+      <type name="Service::Characteristics_t" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service::Characteristics_t" />
+    </return>
+    <override name="Service::getCharacteristics" ref="BLEpp::Service#BLEpp::Service::getCharacteristics" />
+  </method>
+  <variable access="protected" id="BLEpp::GenericService::MAX_CHARACTERISTICS" name="MAX_CHARACTERISTICS">
+    <type name="uint8_t" qualifier=" const" />
+  </variable>
+  <field access="protected" id="BLEpp::GenericService::_characteristics" name="_characteristics">
+    <brief>by keeping the container in this subclass, we can in the future define services that more than MAX_CHARACTERISTICS characteristics.</brief>
+    <type name="fixed_tuple&lt;BLEpp::CharacteristicBase *, '\x06'&gt;" />
+  </field>
+  <field access="protected" id="BLEpp::GenericService::characStatus" name="characStatus">
+    <brief>Enabled characteristics (to be set in constructor)</brief>
+    <type name="std::vector&lt;BLEpp::CharacteristicStatus, std::allocator&lt;BLEpp::CharacteristicStatus&gt; &gt;" />
+  </field>
+</class>

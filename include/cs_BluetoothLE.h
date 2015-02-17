@@ -32,22 +32,27 @@ extern "C" {
 
 }
 
-// Local wrapper  files
-#include "drivers/cs_PWM.h"
+// Local wrapper files
+#include <drivers/cs_PWM.h>
 
-#include "util/cs_BleError.h"
-#include "drivers/cs_Serial.h"
-#include "cs_Serializable.h"
+#include <util/cs_BleError.h>
+#include <drivers/cs_Serial.h>
+#include <cs_Serializable.h>
 
-#include "third/std/function.h"
-#include "util/cs_Utils.h"
+#include <third/std/function.h>
 
-// TOOD replace std::vector with a fixed, in place array of size capacity.
+
+// TODO: replace std::vector with a fixed, in place array of size capacity.
+
+/* A tuple is a vector with a templated type and a public constructor.
+ */
 template<typename T> class tuple : public std::vector<T> {
   public:
     tuple() {}
 };
 
+/* A fixed tuple is a vector with a templated type and a reserved capacity.
+ */
 template<typename T, uint8_t capacity> class fixed_tuple : public tuple<T> {
   public:
 
@@ -58,6 +63,9 @@ template<typename T, uint8_t capacity> class fixed_tuple : public tuple<T> {
 extern "C" {
 //void ble_error_handler (std::string msg, uint32_t line_num, const char * p_file_name);
 //extern void softdevice_assertion_handler(uint32_t pc, uint16_t line_number, const uint8_t * p_file_name);
+
+/* Interrupt request for SoftDevice
+ */
 void SWI1_IRQHandler(void);
 }
 
@@ -66,14 +74,23 @@ namespace BLEpp {
     class Service;
     class BLEStack;
 
-    /// UUID ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    /* A Universally Unique IDentifier. 
+     *
+     * This is a 128-bit sequence for non-standard profiles, services, characteristics, or descriptors. 
+     * There are several identifiers predefined at 
+     * https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx.
+     * Normally a 16-bit sequence is enough to distinguish the different services, a large part of the 128-bit
+     * sequence is repeated.
+     */
     class UUID { // abstracts ble_uid_t
 
       protected:
-        const char*           _full; //* proprietary UID std::string.  null for standard UIDs.
-        uint16_t              _uuid; //*< 16-bit UUID value or octets 12-13 of 128-bit UUID.
-        uint8_t               _type; //*< UUID type, see @ref BLE_UUID_TYPES.
+	// proprietary UUID std::string. NULL fo standard UUIDs. 
+        const char*           _full;
+	// 16-bit UUID value or octets 12-13 of 128-bit UUID.
+        uint16_t              _uuid; 
+	// UUID type, see @ref BLE_UUID_TYPES.
+        uint8_t               _type; 
 
       public:
         operator ble_uuid_t() {
@@ -87,8 +104,7 @@ namespace BLEpp {
             return ret;
         }
 
-	/**
-	 * Generate a 128-bit Bluetooth address from the _full array.
+	/* Generate a 128-bit Bluetooth address from the _full array.
 	 */
 	operator ble_uuid128_t() {
 		ble_uuid128_t res;
@@ -153,8 +169,8 @@ namespace BLEpp {
 
     };
 
-    /// Characteristics ////////////////////////////////////////////////////////////////////////////////////////////////
-
+    /* A value which can be written to or read from a characteristic 
+     */
     struct CharacteristicValue {
 		uint16_t length;
 		uint8_t* data; // TODO use refcount to manage lifetime?  current assumes it to be valid for as long as needed to send to stack.
@@ -200,33 +216,38 @@ namespace BLEpp {
         CharacteristicInit() : presentation_format({}), char_md({}), cccd_md({}), attr_md({}) {}
     };
 
-    /** Non-template base class for Characteristics.  Saves on code size. */
+    /* Non-template base class for Characteristics.
+     *
+     * A non-templated base class saves on code size. Note that every characteristic however does still 
+     * contribute to code size. 
+     *
+     *
+     */
     class CharacteristicBase {
 
       public:
 
       protected:
-
-        UUID                      _uuid;   // 8
-        std::string                    _name;  //4
-//        ble_gatts_attr_t          _attr_char_value;
-//        ble_gatts_char_pf_t       _presentation_format;
-//        ble_gatts_char_md_t       _char_md;
-//        ble_gatts_attr_md_t       _cccd_md;
-//        ble_gatts_attr_md_t       _sccd_md;
-//        ble_gatts_attr_md_t       _attr_md;
-        ble_gap_conn_sec_mode_t   _readperm;  // 1
-        ble_gap_conn_sec_mode_t   _writeperm; // 1
-        ble_gatts_char_handles_t  _handles;   // 8
-
-        Service*                  _service;  // 4
+	// Universally Unique Identifier (8 bytes)
+        UUID                      _uuid; 
+	// Name (4 bytes)
+        std::string               _name;  
+	// Read permission (1 byte)
+        ble_gap_conn_sec_mode_t   _readperm;  
+	// Write permission (1 byte)
+        ble_gap_conn_sec_mode_t   _writeperm; 
+	// Handles (8 bytes)
+        ble_gatts_char_handles_t  _handles;   
+	// Reference to corresponding service (4 bytes)
+        Service*                  _service; 
 
         bool                      _inited;
         bool                      _notifies;
         bool                      _writable;
-        uint16_t                  _unit;   // 2
-        uint32_t                  _updateIntervalMsecs; // 0 means don't update.  // 4
-        //app_timer_id_t            _timer;  // 4
+	// Unit
+        uint16_t                  _unit;
+	// Interval for updates (4 bytes), 0 means don't update
+        uint32_t                  _updateIntervalMsecs; 
         bool					  _notifyingEnabled;
         bool					  _indicates;
 
@@ -318,14 +339,15 @@ namespace BLEpp {
         virtual void onNotifyTxError();
     };
 
-
-
+    // The default ble_type
     template<typename T> inline  uint8_t ble_type() {
         return BLE_GATT_CPF_FORMAT_STRUCT;
     }
+    // A ble_type for strings
     template<> inline uint8_t ble_type<std::string>() {
         return BLE_GATT_CPF_FORMAT_UTF8S;
     }
+    // A ble_type for 8-bit unsigned chars
     template<> inline uint8_t ble_type<uint8_t>() {
         return BLE_GATT_CPF_FORMAT_UINT8;
     }
@@ -354,6 +376,13 @@ namespace BLEpp {
         return BLE_GATT_CPF_FORMAT_BOOLEAN;
     }
 
+    /* Characteristic of generic type T
+     *
+     * A characteristic first of all contains a templated "value" which might be a string, an integer, or a
+     * buffer, depending on the need at hand.
+     * It allows also for callbacks to be defined on writing to the characteristic, or reading from the
+     * characteristic.
+     */
     template<class T>
     class Characteristic : public CharacteristicBase {
 
@@ -511,8 +540,10 @@ namespace BLEpp {
       private:
     };
 
-
-    template<typename T, typename E = void> class CharacteristicT : public Characteristic<T> {
+    /* A default characteristic
+     */
+    template<typename T, typename E = void> 
+    class CharacteristicT : public Characteristic<T> {
       public:
         CharacteristicT()
         : Characteristic<T>() {
@@ -526,8 +557,9 @@ namespace BLEpp {
         virtual void setCharacteristicValue(const CharacteristicValue& value) = 0; // defined only in specializations.
     };
 
-    // this specialization handles all types that implement ISerializable
-    template<typename T > class CharacteristicT<T, typename std::enable_if<std::is_base_of<ISerializable, T>::value >::type> : public Characteristic<T> {
+    // A characteristic that implements ISerializable
+    template<typename T > 
+    class CharacteristicT<T, typename std::enable_if<std::is_base_of<ISerializable, T>::value >::type> : public Characteristic<T> {
        public:
         CharacteristicT& operator=(const T& val) {
             Characteristic<T>::operator=(val);
@@ -551,7 +583,7 @@ namespace BLEpp {
         }
     };
 
-    // this specialization handles all built-in arithmetic types (int, float, etc)
+    // A characteristic for built-in arithmetic types (int, float, etc)
     template<typename T > class CharacteristicT<T, typename std::enable_if<std::is_arithmetic<T>::value >::type> : public Characteristic<T> {
     public:
         CharacteristicT& operator=(const T& val) {
@@ -571,6 +603,7 @@ namespace BLEpp {
 
     };
 
+    // A characteristic for strings
     template<> class CharacteristicT<std::string> : public Characteristic<std::string> {
       public:
         CharacteristicT& operator=(const std::string& val) {
@@ -590,6 +623,7 @@ namespace BLEpp {
         }
     };
 
+    // A characteristic for CharacteristicValue
     template<> class CharacteristicT<CharacteristicValue> : public Characteristic<CharacteristicValue> {
     public:
         CharacteristicT& operator=(const CharacteristicValue& val) {
@@ -609,18 +643,8 @@ namespace BLEpp {
         }
     };
 
-//    template<> class Characteristic<char*> : public CharacteristicT<char*> {
-//        virtual CharacteristicValue getCharacteristicValue() {
-//            const char* val = getValue();
-//
-//            return CharacteristicValue(val == 0 ? 0 : strlen(val), val == 0 ? 0 : (uint8_t*)val);
-//        }
-//    };
-
-    // TODO: more specializations.
-
-    /// Services ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    /* Service as defined in the GATT Specification.
+     */
     class Service {
         friend class BLEStack;
 
@@ -774,16 +798,24 @@ namespace BLEpp {
 //	virtual void on_ble_event(ble_evt_t * p_ble_evt);
     };
 
+    /* Battery service
+     *
+     * Defines a single characteristic to read a battery level. This is a predefined UUID, stored at 
+     * <BLE_UUID_BATTERY_LEVEL_CHAR>. The name is "battery", and the default value is 100.
+     */
     class BatteryService : public GenericService {
 
       public:
+	// Define func_t as a templated function with an unsigned byte
         typedef function<uint8_t()> func_t;
 
       protected:
-        //CharacteristicT<uint8_t> _characteristic;
+	// A single characteristic with an unsigned 8-bit value
 	CharacteristicT<uint8_t> *_characteristic;
+	// A function for callback, not in use
         func_t _func;
       public:
+	// Constructor sets name, allocate characteristic, sets UUID, and sets default value.
         BatteryService(): GenericService() {
             setUUID(UUID(BLE_UUID_BATTERY_SERVICE));
             setName(std::string("BatteryService"));
@@ -796,25 +828,39 @@ namespace BLEpp {
 	    addCharacteristic(_characteristic);
         }
 
+	/* Set the battery level
+	 * @batteryLevel level of the battery in percentage
+	 *
+	 * Indicates the level of the battery in a percentage to the user. This is of no use for a device attached to
+	 * the main line. This function writes to the characteristic to show it to the user.
+	 */
         void setBatteryLevel(uint8_t batteryLevel){
             (*_characteristic) = batteryLevel;
         }
+
+	/* Set a callback function for a battery level change
+	 * @func callback function
+	 *
+	 * Not in use
+	 */
         void setBatteryLevelHandler(func_t func) {
             _func = func;
         }
     };
 
-    /// Stack //////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
+    /* BLEStack defines a chip-agnostic Bluetooth Low-Energy stack
+     *
+     * Currently, this class does not leverage much of the general Bluetooth Low-Energy functionality into
+     * chip-agnostic code. However, this might be recommendable in the future.
+     */
     class BLEStack {
         public:
         virtual bool connected() = 0;
         virtual uint16_t getConnectionHandle() = 0;
-        // TODO more here.
     };
 
-    /**
+    /* nRF51822 specific implementation of the BLEStack
+     *
      * The Nrf51822BluetoothStack class is a direct descendent from BLEStack. It is implemented as a singleton, such
      * that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt
      * handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this
@@ -825,9 +871,10 @@ namespace BLEpp {
         friend void ::SWI1_IRQHandler(); // radio notification
 
     private:
-	Nrf51822BluetoothStack(); // singleton, deny implementation
-	Nrf51822BluetoothStack(Nrf51822BluetoothStack const&); // singleton, deny implementation
-	void operator=(Nrf51822BluetoothStack const &); // singleton, deny implementation
+	// The Nrf51822BluetoothStack is defined as a singleton
+	Nrf51822BluetoothStack(); 
+	Nrf51822BluetoothStack(Nrf51822BluetoothStack const&); 
+	void operator=(Nrf51822BluetoothStack const &); 
 	virtual ~Nrf51822BluetoothStack();
     public:
 	static Nrf51822BluetoothStack& getInstance() {
@@ -1036,4 +1083,5 @@ namespace BLEpp {
 
     };
 
-}
+
+} // end of namespace

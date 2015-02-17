@@ -1,6 +1,7 @@
 #!/usr/bin/expect
 
-set timeout 120
+# timeout around 15 minutes / 1000.000 msec
+set timeout 1000000
 set command [lindex $argv 0]
 set binary [lindex $argv 1]
 set address [lindex $argv 2]
@@ -23,26 +24,39 @@ spawn telnet 127.0.0.1 4444
 # Expect the thing to be a debugger
 expect "Open On-Chip Debugger"
 
-if { $command == "all" } {
-	# Flash both memory banks
-	send "flash banks\r"
-
-	# Expect the last bank to be preceded by #1
-	expect "#1"
-}
-
 # Stop before flashing image
 send "halt\r"
 
-# Expect last line of halting command to be abount xPSR or just ">" if target was already halted before
+# Expect last line of halting command to be about xPSR or just ">" if target was already halted before
+# Show current banks
 expect {
-	"xPSR" { send "flash write_image erase $bindir/$binary $address\r" }
-	-re ">" { send "flash write_image erase $bindir/$binary $address\r" }
+	"xPSR" { send "flash banks\r" }
+	-re ">" { send "flash banks\r" }
 }
+
+expect -re ">"
+
+if { $command == "all" } {
+	send "echo We will do a mass-erase\r"
+
+	expect -re ">"
+	
+	# Mass erase
+	send "nrf51 mass_erase\r"
+	# maybe wait a bit?, first wait?
+	expect -re ">"
+}
+
+send "flash write_image erase $bindir/$binary $address\r" 
 
 # Expect this to be written
 expect "wrote"
 send "reset\r"
 
 # Hand over the rest to the user
-interact
+# interact
+
+expect -re ">"
+
+# you can also send
+send "exit\r"

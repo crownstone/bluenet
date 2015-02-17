@@ -21,8 +21,9 @@
 
 class ADC: public Dispatcher {
 private:
-	ADC(): _bufferSize(ADC_BUFFER_SIZE), _clock(NULL), 
-		_threshold(DEFAULT_RECORDING_THRESHOLD) {}
+	ADC(): _bufferSize(ADC_BUFFER_SIZE), 
+		_threshold(DEFAULT_RECORDING_THRESHOLD),
+       		_clock(NULL) {}
 	ADC(ADC const&); // singleton, deny implementation
 	void operator=(ADC const &); // singleton, deny implementation
 public:

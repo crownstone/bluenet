@@ -16,6 +16,8 @@
 #include "drivers/cs_Serial.h"
 #include "util/cs_BleError.h"
 
+#include "util/cs_Utils.h"
+
 //#include <BluetoothLE.h> // TODO: now for BLE_CALL, should be moved to other unit
 
 extern "C" {
