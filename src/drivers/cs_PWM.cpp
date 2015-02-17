@@ -44,23 +44,23 @@ uint32_t PWM::init(pwm_config_t *config) {
 	}
 
 	switch (config->mode) {
-		case PWM_MODE_LED_100:   // 0-100 resolution, 156 Hz PWM frequency, 32 kHz timer frequency (prescaler 9)
+		case PWM_MODE_LED_100:   // 0-100 resolution, 312.5 Hz PWM frequency, 31.25 kHz timer frequency (prescaler 9)
 			PWM_TIMER->PRESCALER = 9; /* Prescaler 4 results in 1 tick == 1 microsecond */
 			_maxValue = 100;
 			break;
-		case PWM_MODE_LED_255:   // 8-bit resolution, 122 Hz PWM frequency, 65 kHz timer frequency (prescaler 8)
+		case PWM_MODE_LED_255:   // 8-bit resolution, 244.14 Hz PWM frequency, 62.5 kHz timer frequency (prescaler 8)
 			PWM_TIMER->PRESCALER = 8;
 			_maxValue = 255;
 			break;
-		case PWM_MODE_LED_1000:  // 0-1000 resolution, 250 Hz PWM frequency, 500 kHz timer frequency (prescaler 5)
+		case PWM_MODE_LED_1000:  // 0-1000 resolution, 500 Hz PWM frequency, 500 kHz timer frequency (prescaler 5)
 			PWM_TIMER->PRESCALER = 5;
 			_maxValue = 1000;
 			break;
-		case PWM_MODE_MTR_100:   // 0-100 resolution, 20 kHz PWM frequency, 4MHz timer frequency (prescaler 2)
+		case PWM_MODE_MTR_100:   // 0-100 resolution, 40 kHz PWM frequency, 4MHz timer frequency (prescaler 2)
 			PWM_TIMER->PRESCALER = 2;
 			_maxValue = 100;
 			break;
-		case PWM_MODE_MTR_255:    // 8-bit resolution, 31 kHz PWM frequency, 16MHz timer frequency (prescaler 0)	
+		case PWM_MODE_MTR_255:    // 8-bit resolution, 62.5 kHz PWM frequency, 16MHz timer frequency (prescaler 0)
 			PWM_TIMER->PRESCALER = 0;
 			_maxValue = 255;
 			break;
@@ -77,7 +77,8 @@ uint32_t PWM::init(pwm_config_t *config) {
 	}
 	PWM_TIMER->TASKS_CLEAR = 1;
 	PWM_TIMER->BITMODE = TIMER_BITMODE_BITMODE_16Bit << TIMER_BITMODE_BITMODE_Pos;
-	PWM_TIMER->CC[3] = _maxValue*2;
+//	PWM_TIMER->CC[3] = _maxValue*2; // TODO: why times 2?
+	PWM_TIMER->CC[3] = _maxValue;
 	PWM_TIMER->MODE = TIMER_MODE_MODE_Timer;
 	PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk;
 	PWM_TIMER->EVENTS_COMPARE[0] = 0;
@@ -115,6 +116,7 @@ void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 	_pwmValue = pwm_value;
 
 	_nextValue[pwm_channel] = pwm_value;
+
 	PWM_TIMER->EVENTS_COMPARE[3] = 0;
 	PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk | TIMER_SHORTS_COMPARE3_STOP_Msk;
 
@@ -132,6 +134,7 @@ void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 		}
 	}
 
+	// Reset timer
 	if((PWM_TIMER->INTENSET & TIMER_INTENSET_COMPARE3_Msk) == 0) {
 		PWM_TIMER->TASKS_STOP = 1;
 		PWM_TIMER->INTENSET = TIMER_INTENSET_COMPARE3_Msk;
@@ -153,7 +156,8 @@ extern "C" void PWM_IRQHandler(void) {
 	PWM &pwm = PWM::getInstance();
 	for (i = 0; i < pwm._numChannels; i++) {
 		if ((pwm._nextValue[i] != 0) && (pwm._nextValue[i] < pwm._maxValue)) {
-			PWM_TIMER->CC[i] = pwm._nextValue[i] * 2;
+//			PWM_TIMER->CC[i] = pwm._nextValue[i] * 2; // TODO: why times 2?
+			PWM_TIMER->CC[i] = pwm._nextValue[i];
 			if (!pwm._running[i]) {
 				nrf_gpiote_task_config(pwm._gpioteChannel[i], pwm._gpioPin[i], NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_HIGH);
 				pwm._running[i] = 1;

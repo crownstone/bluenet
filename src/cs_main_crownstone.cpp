@@ -161,7 +161,7 @@ void config_drivers() {
 	pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
 	pwm_config.num_channels = 1;
 	pwm_config.gpio_pin[0] = PIN_GPIO_SWITCH;
-	pwm_config.mode = PWM_MODE_LED_255;
+	pwm_config.mode = PWM_MODE_MTR_255;
 
 	PWM::getInstance().init(&pwm_config);
 
