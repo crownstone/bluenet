@@ -18,7 +18,6 @@ extern "C" {
 
 #include "pstorage_platform.h"
 #include "drivers/cs_Serial.h"
-#include "util/cs_Utils.h"
 
 /**
  * To add a new element to the storage requires the following steps:

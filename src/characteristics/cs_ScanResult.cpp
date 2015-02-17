@@ -10,7 +10,6 @@
 
 #include "characteristics/cs_ScanResult.h"
 #include "drivers/cs_Serial.h"
-#include "util/cs_Utils.h"
 
 ScanResult::ScanResult() : _list(NULL), _freeIdx(0) {
 }

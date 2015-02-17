@@ -7,7 +7,7 @@
 
 #include <util/cs_Utils.h>
 
-using namespace BLEutil;
+namespace BLEutil {
 
 // convert a short from LSB to MSB and vice versa
 uint16_t convertEndian16(uint16_t val) {
@@ -22,5 +22,4 @@ uint32_t convertEndian32(uint32_t val) {
 		 | ((val & 0xFF) << 24);
 }
 
-
-
+}

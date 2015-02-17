@@ -679,7 +679,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 	advdata.p_manuf_specific_data = &manufac;
 
 	ble_advdata_t scan_resp;
-	memset(&scan_resp, 0, sizeof(advdata));
+	memset(&scan_resp, 0, sizeof(scan_resp));
 //
 //	uint8_t uidCount = _services.size();
 //	ble_uuid_t adv_uuids[uidCount];
