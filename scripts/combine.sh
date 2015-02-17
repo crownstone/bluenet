@@ -15,11 +15,11 @@
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/config.sh
 
-cd ${BLUENET_DIR}/build
+cd ${BLUENET_DIR}/build && rm -f combined*
 
-add_bootloader=true
+add_bootloader=false
 add_softdevice=true
-add_binary=false
+add_binary=true
 
 if [[ "$add_bootloader" == true ]]; then
 	# These settings are already incorporated in the bootloader.hex binary, so you don't need to add them here
@@ -44,11 +44,17 @@ else
 	fi
 fi
 
-rm -f combined*
-
 echo "srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $ADD_BINARY $BOOTLOADER_SETTINGS -o combined.hex -intel"
 srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $ADD_BINARY $BOOTLOADER_SETTINGS -o combined.hex -intel
+res=$?
+if [ ! $res -eq 0 ]; then
+	echo "ERROR: srec_cat failed, check the results"
+	exit 1
+fi
 
-echo "Now run:"
-echo "./flash_openocd.sh combined"
-echo "this will place the binary at location 0 of FLASH memory of the target device"
+#echo "Now run:"
+#echo "./flash_openocd.sh combined"
+#echo "this will place the binary at location 0 of FLASH memory of the target device"
+echo "Combined binary is: ${BLUENET_DIR}/build/combined.hex"
+echo "Done!"
+
