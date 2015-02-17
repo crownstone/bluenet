@@ -1,7 +1,56 @@
-# The CMake build system expects a few directories and the type of the compiler to use
+# Configuration options, used by build systems and scripts.
+
+# The name that is advertised.
+# Should be 10 characters or less (we need room for compilation date after it)
+BLUETOOTH_NAME="crown"
+
+# Enable or disable different services (at times required to preserve memory)
+INDOOR_SERVICE=0
+GENERAL_SERVICE=1
+POWER_SERVICE=0
+
+# Enable or disable meshing functionality (1 or 0)
+MESHING=0
+
+# Verbosity of the UART
+# Debug     0
+# Info      1
+# Warning   2
+# Error     3
+# Fatal     4
+# None      5
+SERIAL_VERBOSITY=1
+
+# The different boards that can be used:
+# PCA10001             0
+# NRF6310              1
+# NRF51822_DONGLE      2
+# NRF51822_EVKIT       3
+# RFDUINO              4
+# CROWNSTONE           5
+# NRF51422             6
+BOARD=5
+
+# Version of the nrf51 chip, use script/hardware_version.sh to check your version
+HARDWARE_VERSION=0x001D
 
 # SOFTDEVICE_DIR - the directory where the .hex SoftDevice can be found
 SOFTDEVICE_DIR=/opt/softdevices
+
+# This is the directory where the cross-compiler resides
+COMPILER_PATH=/opt/compiler/gcc-arm-none-eabi-4_8-2014q3
+
+# The compiler type 
+COMPILER_TYPE=arm-none-eabi
+
+# The JLink utility (when using the Segger to flash the nRF)
+JLINK=/usr/bin/JLinkExe
+
+# The JLink utilty that can be used with gdb
+JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
+
+# Use SoftDevice (setting to 0 is untested)
+NRF51_USE_SOFTDEVICE=1
 
 # NRF51822_DIR                         - the directory with /Source and /Include subdirectories from the Nordic SDK
 # SOFTDEVICE                           - the name of the SoftDevice (without _softdevice.hex)
@@ -14,24 +63,10 @@ SOFTDEVICE_DIR=/opt/softdevices
 # Check https://devzone.nordicsemi.com/question/15994/nrf51822-iram-and-irom-settings-for-v05-s130-sd/
 # APPLICATION_LENGTH                   - 176kB corresponds with 0x2c000 hex, should be 0x40000 - 0x14000 
 # RAM_R1_BASE                          - starting point for softdevice in RAM
-# RAM_APPLICATION_AMOUNT                - size of softdevice in RAM
+# RAM_APPLICATION_AMOUNT               - size of softdevice in RAM
 
 #######################################################################################################################
-# The old SoftDevice (v5) and the old SDK version (v4)
-#######################################################################################################################
-#NRF51822_DIR=/opt/nrf51_sdk/v4/nrf51822
-#NORDIC_SDK_VERSION=4
-#SOFTDEVICE_SERIES=110
-#SOFTDEVICE=s110_nrf51822_5.2.1
-#SOFTDEVICE_DIR_API=s110_nrf51822_5.2.1_API
-#SOFTDEVICE_NO_SEPARATE_UICR_SECTION=0
-#APPLICATION_START_ADDRESS=0x00014000
-#APPLICATION_LENGTH=0x2c000
-#RAM_R1_BASE=0x20002000
-#RAM_APPLICATION_AMOUNT=8K
-
-#######################################################################################################################
-# For the newer SoftDevice version (v7) and the newer SDK version (v6)
+# For the S110 SoftDevice version (v7) and SDK version (v6)
 # SoftDevice takes 88kB and application 168kB
 #######################################################################################################################
 NRF51822_DIR=/opt/nrf51_sdk/v6/nrf51822
@@ -65,50 +100,3 @@ RAM_APPLICATION_AMOUNT=8K
 #RAM_R1_BASE=0x20002800
 #RAM_APPLICATION_AMOUNT=0x1800
 
-# Should be 5 characters or less (we need room for compilation date after it)
-BLUETOOTH_NAME="crown"
-
-# The different boards that can be used:
-# PCA10001             0
-# NRF6310              1
-# NRF51822_DONGLE      2
-# NRF51822_EVKIT       3
-# RFDUINO              4
-# CROWNSTONE           5
-# NRF51422             6
-BOARD=5
-
-# Use SoftDevice (setting to 0 is untested)
-NRF51_USE_SOFTDEVICE=1
-
-# Enable or disable meshing functionality
-MESHING=0
-
-# Enable or disable different services (at times required to preserve memory)
-INDOOR_SERVICE=0
-GENERAL_SERVICE=1
-POWER_SERVICE=0
-
-# This is the directory where the cross-compiler resides
-COMPILER_PATH=/opt/compiler/gcc-arm-none-eabi-4_8-2014q3
-
-# The compiler type 
-COMPILER_TYPE=arm-none-eabi
-
-# The JLink utility (when using the Segger to flash the nRF)
-JLINK=/usr/bin/JLinkExe
-
-# The JLink utilty that can be used with gdb
-JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
-
-# Version of the nrf51 chip, use script/hardware_version.sh to check your version
-HARDWARE_VERSION=0x001D
-
-# Verbosity of the UART
-# Debug     0
-# Info      1
-# Warning   2
-# Error     3
-# Fatal     4
-# None      5
-SERIAL_VERBOSITY=1
