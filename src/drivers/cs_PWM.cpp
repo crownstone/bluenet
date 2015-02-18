@@ -14,6 +14,8 @@
 #include "nrf_sdm.h"
 #endif
 
+#include <drivers/cs_Serial.h>
+
 //static uint32_t pwm_max_value, pwm_next_value[PWM_MAX_CHANNELS],
 //		pwm_io_ch[PWM_MAX_CHANNELS], pwm_running[PWM_MAX_CHANNELS];
 //static uint8_t pwm_gpiote_channel[3];
@@ -112,6 +114,8 @@ uint32_t PWM::init(pwm_config_t *config) {
 }
 
 void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
+	LOGd("set pwm channel %i to %i", pwm_channel, pwm_value);
+	
 	_pwmChannel = pwm_channel;
 	_pwmValue = pwm_value;
 
