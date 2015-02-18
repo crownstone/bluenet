@@ -19,16 +19,11 @@
 /* Pulse Wide Modulation mode typedef
  */
 typedef enum {
-    // 0-100 resolution, 156 Hz PWM frequency, 32 kHz timer frequency (prescaler 9)
-    PWM_MODE_LED_100,   
-    // 8-bit resolution, 122 Hz PWM frequency, 65 kHz timer frequency (prescaler 8)
-    PWM_MODE_LED_255,   
-    // 0-1000 resolution, 125 Hz PWM frequency, 500 kHz timer frequency (prescaler 5)
-    PWM_MODE_LED_1000,  
-    // 0-100 resolution, 20 kHz PWM frequency, 4MHz timer frequency (prescaler 2)
-    PWM_MODE_MTR_100,   
-    // 8-bit resolution, 31 kHz PWM frequency, 16MHz timer frequency (prescaler 0)
-    PWM_MODE_MTR_255    
+    PWM_MODE_122,    // 122 Hz PWM
+    PWM_MODE_244,    // 244 Hz PWM
+    PWM_MODE_976,    // 976 Hz PWM
+    PWM_MODE_15625,  // 15625 Hz PWM
+    PWM_MODE_62500   // 62500 Hz PWM
 } pwm_mode_t;
 
 /* Pulse Wide Modulation struct
@@ -45,7 +40,7 @@ typedef struct {
                              .gpio_pin       = {8,9,10},         \
                              .ppi_channel    = {0,1,2,3,4,5},    \
                              .gpiote_channel = {2,3,0},          \
-                             .mode           = PWM_MODE_LED_100}
+                             .mode           = PWM_MODE_122}
 
 /* Pulse Wide Modulation class
  *

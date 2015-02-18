@@ -44,23 +44,23 @@ uint32_t PWM::init(pwm_config_t *config) {
 	}
 
 	switch (config->mode) {
-		case PWM_MODE_LED_100:   // 0-100 resolution, 312.5 Hz PWM frequency, 31.25 kHz timer frequency (prescaler 9)
-			PWM_TIMER->PRESCALER = 9; /* Prescaler 4 results in 1 tick == 1 microsecond */
-			_maxValue = 100;
+		case PWM_MODE_122:     // 8-bit resolution, 122.07 Hz PWM frequency, 31.25 kHz timer frequency (prescaler 9)
+			PWM_TIMER->PRESCALER = 9;
+			_maxValue = 255;
 			break;
-		case PWM_MODE_LED_255:   // 8-bit resolution, 244.14 Hz PWM frequency, 62.5 kHz timer frequency (prescaler 8)
+		case PWM_MODE_244:     // 8-bit resolution, 244.14 Hz PWM frequency, 62.5 kHz timer frequency (prescaler 8)
 			PWM_TIMER->PRESCALER = 8;
 			_maxValue = 255;
 			break;
-		case PWM_MODE_LED_1000:  // 0-1000 resolution, 500 Hz PWM frequency, 500 kHz timer frequency (prescaler 5)
-			PWM_TIMER->PRESCALER = 5;
-			_maxValue = 1000;
+		case PWM_MODE_976:     // 8-bit resolution, 976.56 Hz PWM frequency, 250 kHz timer frequency (prescaler 6)
+			PWM_TIMER->PRESCALER = 6;
+			_maxValue = 255;
 			break;
-		case PWM_MODE_MTR_100:   // 0-100 resolution, 40 kHz PWM frequency, 4MHz timer frequency (prescaler 2)
+		case PWM_MODE_15625:   // 8-bit resolution, 15.625 kHz PWM frequency, 4MHz timer frequency (prescaler 2)
 			PWM_TIMER->PRESCALER = 2;
-			_maxValue = 100;
+			_maxValue = 255;
 			break;
-		case PWM_MODE_MTR_255:    // 8-bit resolution, 62.5 kHz PWM frequency, 16MHz timer frequency (prescaler 0)
+		case PWM_MODE_62500:   // 8-bit resolution, 62.5 kHz PWM frequency, 16MHz timer frequency (prescaler 0)
 			PWM_TIMER->PRESCALER = 0;
 			_maxValue = 255;
 			break;
