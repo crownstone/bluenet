@@ -290,6 +290,28 @@ This code is used in a commercial product at DoBots, the [Crownstone](http://dob
 
 It would be much appreciated to state "DoBots inside" in which case we will be happy to provide support to your organisation.
 
+If you want to buy our hardware, please navigate to our [website](http://dobots.nl/products/crownstone). We offer a
+hardware development kit for professional use.
+
+## See also
+
+The different other software tools and online resources have been mentioned above, but here is a short list:
+
+* [Bluenet (this repos)](https://github.com/dobots/bluenet)
+* [Bluenet documentation](http://dobots.github.io/bluenet/)
+* [Bluenet documentation branch](https://github.com/dobots/bluenet/tree/gh-pages)
+* [Bootloader](https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler/tree/s110)
+* [DFU upload tool](https://github.com/dobots/nrf51_dfu_linux)
+* [Crownstone website](http://dobots.nl/products/crownstone)
+* [Crownstone Android app](https://play.google.com/store/apps/details?id=nl.dobots.CrownStone)
+* [Crownstone app source](https://github.com/dobots/crownstone-app)
+* [Crownstone USB image](https://github.com/dobots/crownstone-image)
+* [Crownstone SDK manual](https://docs.google.com/a/almende.org/document/d/1uJ83c0rLC_swX-cVFDl0UyIFc9_81ccfRLK2vJJF1VE/edit)
+
+If you have any problems that are not solved by documentation, please ask them as a GitHub [issue](https://github.com/dobots/bluenet/issues).
+In that case everybody can profit from things that are currently incorrectly formulated, not yet formulated, or need
+some other attention from us developers.
+
 ## Copyrights
 
 Obviously, the copyrights of the code written by Christopher, belong to him.
