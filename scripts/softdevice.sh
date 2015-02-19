@@ -6,7 +6,7 @@ cmd=${1:? "$0 requires \"cmd\" as first argument"}
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/config.sh
 
-SD_BINDIR=${BLUENET_DIR}/build
+SD_BINDIR=${BLUENET_CONFIG_DIR}/build
 
 build() {
 	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"
