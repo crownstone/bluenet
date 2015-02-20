@@ -8,6 +8,7 @@
 
 #include <vector>
 
+#include "characteristics/cs_StreamBuffer.h"
 #include "characteristics/cs_MeshMessage.h"
 #include "characteristics/cs_UuidConfig.h"
 #include "common/cs_Storage.h"
@@ -55,14 +56,44 @@ protected:
 	BLEpp::Characteristic<int32_t>* _firmwareCharacteristic;
 	BLEpp::Characteristic<MeshMessage>* _meshCharacteristic;
 
+	/* Set configuration characteristic
+	 *
+	 * The configuration characteristic reuses the format of the mesh messages. The type are identifiers that are
+	 * established:
+	 *
+	 *  * 0 name
+	 *  * 1 device type 
+	 *  * 2 room
+	 *  * 3 floor level
+	 *  
+	 * As you see these are similar to current characteristics and will replace them in the future to save space.
+	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
+	 */
+	BLEpp::Characteristic<StreamBuffer>* _setConfigurationCharacteristic;
+	
+	/* Get configuration characteristic
+	 *
+	 * You will have to write to this configuration to subsequently read from it. You write the identifiers also
+	 * described in <_setConfigurationCharacteristic>. 
+	 *
+	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
+	 */
+	BLEpp::Characteristic<StreamBuffer>* _getConfigurationCharacteristic;
+
 	/* Enable the temperature characteristic.
-	*/
+ 	 */
 	void addTemperatureCharacteristic();
+	/* Enable the set configuration characteristic.
+	 */
+	void addSetConfigurationCharacteristic();
+	/* Enable the get configuration characteristic.
+	 */
+	void addGetConfigurationCharacteristic();
 	/* Enable the change name characteristic.
-	*/
+	 */
 	void addChangeNameCharacteristic();
 	/* Enable the device type characteristic.
-	*/
+	 */
 	void addDeviceTypeCharacteristic();
 	/* Enable the room characteristic.
 	 *
@@ -71,10 +102,10 @@ protected:
 	 */
 	void addRoomCharacteristic();
 	/* Enable the firmware upgrade characteristic.
-	*/
+	 */
 	void addFirmwareCharacteristic();
 	/* Enable the mesh characteristic.
-	*/
+	 */
 	void addMeshCharacteristic();
 
 	/* Retrieve the Bluetooth name from the object representing the BLE stack.

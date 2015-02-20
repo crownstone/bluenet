@@ -27,7 +27,7 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	setName("General Service");
 
 	LOGi("Create general service");
-	characStatus.reserve(5);
+	characStatus.reserve(8);
 
 	characStatus.push_back( { "Temperature",
 		TEMPERATURE_UUID,
@@ -55,6 +55,14 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addMeshCharacteristic) });
 #endif
+	characStatus.push_back( { "Set configuration",
+		SET_CONFIGURATION_UUID,
+		true,
+		static_cast<addCharacteristicFunc>(&GeneralService::addSetConfigurationCharacteristic) });
+	characStatus.push_back( { "Get configuration",
+		GET_CONFIGURATION_UUID,
+		true,
+		static_cast<addCharacteristicFunc>(&GeneralService::addGetConfigurationCharacteristic) });
 
 	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
 	loadPersistentStorage();
@@ -136,7 +144,6 @@ void GeneralService::addFirmwareCharacteristic() {
 }
 
 #if MESHING==1
-
 void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic = createCharacteristicRef<MeshMessage>();
 	(*_meshCharacteristic)
@@ -153,6 +160,35 @@ void GeneralService::addMeshCharacteristic() {
 		});
 }
 #endif
+
+void GeneralService::addSetConfigurationCharacteristic() {
+	_setConfigurationCharacteristic = createCharacteristicRef<StreamBuffer>();
+	(*_setConfigurationCharacteristic)
+		.setUUID(UUID(getUUID(), SET_CONFIGURATION_UUID))
+		.setName("Configuration")
+		.setWritable(true)
+		.onWrite([&](const StreamBuffer& value) -> void {
+			LOGi("Write configuration value");
+			uint8_t type = value.type();
+			switch(type) {
+			case CONFIG_NAME_UUID: {
+				LOGd("Write name");
+				std::string str;
+				setBLEName(str);
+				Storage::setString(str, _storageStruct.device_name);
+				savePersistentStorage();
+			}
+			case CONFIG_FLOOR_UUID:
+				LOGd("Set floor level");
+			default: 
+				LOGw("There is no such configuration id!");
+			}
+				
+		});
+}
+
+void GeneralService::addGetConfigurationCharacteristic() {
+}
 
 void GeneralService::addChangeNameCharacteristic() {
 	Storage::getString(_storageStruct.device_name, _name, getBLEName());

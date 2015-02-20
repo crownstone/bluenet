@@ -23,6 +23,12 @@ uint32_t StreamBuffer::getSerializedLength() const {
 	return MAX_BUFFER_SERIALIZED_SIZE;
 }
 
+bool StreamBuffer::toString(std::string &str) {
+	if (!_length) return false;
+	str = std::string((char*)_payload, _length);
+	return true;
+}
+
 uint8_t StreamBuffer::add(uint8_t value) {
 	if (_length >= MAX_BUFFER_SERIALIZED_SIZE - 1) return 1;
 	_length++;

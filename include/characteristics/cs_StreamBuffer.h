@@ -12,6 +12,7 @@
 
 #include "cs_BluetoothLE.h"
 #include "cs_Serializable.h"
+#include <string>
 
 #define MAX_BUFFER_SERIALIZED_SIZE                     20
 
@@ -31,6 +32,14 @@ public:
 	bool operator!=(const StreamBuffer &other);
 
 	uint32_t getSerializedLength() const;
+
+	/* Create a string from payload. 
+	 *
+	 * This creates a C++ string from the uint8_t payload array. Note that this not always makes sense! It will
+	 * use the _length field to establish the length of the array to be used. So, the array does not have to 
+	 * have a null-terminated byte.
+	 */
+	bool toString(std::string &str);
 
 	// return 0 on SUCCESS, positive value on FAILURE
 	uint8_t add(uint8_t value);

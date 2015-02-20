@@ -24,6 +24,8 @@ enum {
 	ROOM_UUID                               = 0x4,
 	FIRMWARE_UUID                           = 0x5,
 	MESH_UUID                               = 0x6,
+	SET_CONFIGURATION_UUID                  = 0x7,
+	GET_CONFIGURATION_UUID                  = 0x8,
 };
 
 enum {
@@ -32,4 +34,14 @@ enum {
 	SCAN_DEVICE_UUID                        = 0x3,
 	LIST_DEVICE_UUID                        = 0x4,
 	TRACKED_DEVICE_LIST_UUID                = 0x5,
+};
+
+/* Configuration types
+ *
+ */
+enum {
+	CONFIG_NAME_UUID                        = 0x0,
+	CONFIG_DEVICE_TYPE_UUID                 = 0x1,
+	CONFIG_ROOM_UUID                        = 0x2,
+	CONFIG_FLOOR_UUID                       = 0x3,
 };
