@@ -34,7 +34,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 	characStatus.push_back( { "Sample Current",
 			SAMPLE_CURRENT_UUID,
 			true,
-			static_cast<addCharacteristicFunc>(&PowerService::addGetCurrentCharacteristic)});
+			static_cast<addCharacteristicFunc>(&PowerService::addSampleCurrentCharacteristic)});
 	characStatus.push_back( { "Current Curve",
 			CURRENT_CURVE_UUID,
 			true,
@@ -98,7 +98,7 @@ void PowerService::dim(uint8_t value) {
 	PWM::getInstance().setValue(0, value);
 }
 
-void PowerService::addGetCurrentCharacteristic() {
+void PowerService::addSampleCurrentCharacteristic() {
 	createCharacteristic<uint8_t>()
 		.setUUID(UUID(getUUID(), SAMPLE_CURRENT_UUID))
 		.setName("Sample Current")
