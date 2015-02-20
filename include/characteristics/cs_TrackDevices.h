@@ -64,7 +64,7 @@ public:
 	bool add(const uint8_t* adrs_ptr, int8_t rssi_threshold);
 
 	/** Removes an address from the list. Returns true on success, false when it's not in the list. */
-	bool rem(uint8_t* adrs_ptr);
+	bool rem(const uint8_t* adrs_ptr);
 
 	//////////// serializable ////////////////////////////
 

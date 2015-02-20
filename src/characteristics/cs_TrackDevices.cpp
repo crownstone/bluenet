@@ -145,7 +145,7 @@ bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 	return true;
 }
 
-bool TrackedDeviceList::rem(uint8_t* adrs_ptr) {
+bool TrackedDeviceList::rem(const uint8_t* adrs_ptr) {
 	for (int i=0; i<getSize(); ++i) {
 		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			// Decrease size
