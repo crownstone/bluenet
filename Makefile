@@ -12,7 +12,7 @@
 
 all: build
 	@cd build && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=../arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Release .. && make
-	@if [ ! -z "${BLUENET_DIR}" ]; then echo "Copy binaries to ${BLUENET_DIR}/build"; mkdir -p ${BLUENET_DIR}/build; mkdir -p build/result; cp build/*.hex build/*.bin build/*.elf build/result; cp build/result/* ${BLUENET_DIR}/build; fi
+	@if [ ! -z "${BLUENET_CONFIG_DIR}" ]; then echo "Copy binaries to ${BLUENET_CONFIG_DIR}/build"; mkdir -p ${BLUENET_CONFIG_DIR}/build; mkdir -p build/result; cp build/*.hex build/*.bin build/*.elf build/result; cp build/result/* ${BLUENET_CONFIG_DIR}/build; fi
 
 clean: 
 	@cd build && make clean
@@ -23,7 +23,7 @@ build:
 	@mkdir -p build/CMakeFiles/CMakeTmp
 	@cp CMakeConfig.cmake build/CMakeFiles/CMakeTmp
 	@if [ -e CMakeBuild.config ]; then cp -v CMakeBuild.config build/CMakeFiles/CMakeTmp; fi
-	@if [ -e ${BLUENET_DIR}/CMakeBuild.config ]; then cp -v ${BLUENET_DIR}/CMakeBuild.config build/CMakeFiles/CMakeTmp; fi
+	@if [ -e ${BLUENET_CONFIG_DIR}/CMakeBuild.config ]; then cp -v ${BLUENET_CONFIG_DIR}/CMakeBuild.config build/CMakeFiles/CMakeTmp; fi
 	@mkdir -p build/CMakeFiles/CMakeTmp/conf
 	@cp conf/nRF51822-softdevice.ld.in conf/nRF51822-softdevice.ld
 	@sed -i "s/@APPLICATION_START_ADDRESS@/0x16000/" conf/nRF51822-softdevice.ld 

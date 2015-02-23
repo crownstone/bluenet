@@ -42,7 +42,7 @@ bool ScanResult::operator!=(const ScanResult& val) {
 	}
 
 	for (int i = 0; i < this->_freeIdx; ++i) {
-		if (this->_list[i].occurences != val._list[i].occurences) {
+		if (this->_list[i].occurrences != val._list[i].occurrences) {
 			return true;
 		}
 		if (this->_list[i].rssi != val._list[i].rssi) {
@@ -73,7 +73,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 
 		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 //			LOGd("found");
-			_list[i].occurences++;
+			_list[i].occurrences++;
 			_list[i].rssi = rssi;
 			found = true;
 			// TODO: Any reason not to break here?
@@ -85,8 +85,8 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			// history full, throw out item with lowest occurence
 			uint16_t minOcc = UINT16_MAX;
 			for (int i = 0; i < MAX_NR_DEVICES; ++i) {
-				if (_list[i].occurences < minOcc) {
-					minOcc = _list[i].occurences;
+				if (_list[i].occurrences < minOcc) {
+					minOcc = _list[i].occurrences;
 					idx = i;
 				}
 			}
@@ -99,7 +99,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 				adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
 				adrs_ptr[0], rssi);
 		memcpy(_list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
-		_list[idx].occurences = 1;
+		_list[idx].occurrences = 1;
 		_list[idx].rssi = rssi;
 	} else {
 //		LOGd("Advertisement from: %s, rssi: %d, occ: %d", addrs, rssi, occ);
@@ -115,7 +115,7 @@ void ScanResult::print() const {
 //				_list[i].addr[0]);
 		LOGi("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tocc: %d", _list[i].addr[5],
 				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
-				_list[i].addr[0], _list[i].rssi, _list[i].occurences);
+				_list[i].addr[0], _list[i].rssi, _list[i].occurrences);
 	}
 
 }
@@ -126,8 +126,8 @@ uint32_t ScanResult::getSerializedLength() const {
 	return getSize() * SERIALIZED_DEVICE_SIZE + HEADER_SIZE;
 }
 
-/** Copy data representing this object into the given buffer.  Buffer will be preallocated with at least
-* getLength() bytes. */
+/** Copy data representing this object into the given buffer. Buffer has to be preallocated with at least
+* getSerializedLength() bytes. */
 void ScanResult::serialize(uint8_t* buffer, uint16_t length) const {
 	uint8_t *ptr;
 	ptr = buffer;
@@ -143,10 +143,10 @@ void ScanResult::serialize(uint8_t* buffer, uint16_t length) const {
 		// copy rssi
 		*ptr++ = _list[i].rssi;
 
-		// copy occurences
+		// copy occurrences
 		// doesn't work because ptr is not aligned
-		*ptr++ = (_list[i].occurences >> 8) & 0xFF;
-		*ptr++ = _list[i].occurences & 0xFF;
+		*ptr++ = (_list[i].occurrences >> 8) & 0xFF;
+		*ptr++ = _list[i].occurrences & 0xFF;
 	}
 }
 
@@ -168,9 +168,9 @@ void ScanResult::deserialize(uint8_t* buffer, uint16_t length) {
 		// copy rssi
 		dev->rssi = *ptr++;
 
-		// copy occurences
+		// copy occurrences
 		// doesn't work because ptr is not aligned
-		dev->occurences |= (*ptr++ << 8) & 0xFF;
-		dev->occurences = *ptr++;
+		dev->occurrences |= (*ptr++ << 8) & 0xFF;
+		dev->occurrences = *ptr++;
 	}
 }

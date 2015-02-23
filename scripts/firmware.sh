@@ -22,12 +22,12 @@ build() {
 }
 
 upload() {
-	${path}/upload.sh $BLUENET_DIR/build/$target.hex
-#	${path}/upload.sh $BLUENET_DIR/build/$target.bin $address
+	${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.hex
+#	${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.bin $address
 }
 
 debug() {
-	${path}/debug.sh $BLUENET_DIR/build/$target.elf
+	${path}/debug.sh $BLUENET_CONFIG_DIR/build/$target.elf
 }
 
 all() {
