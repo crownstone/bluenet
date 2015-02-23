@@ -1042,6 +1042,9 @@ namespace BLEpp {
         Nrf51822BluetoothStack& addService(Service* svc);
 
         Nrf51822BluetoothStack& startIBeacon();
+
+        /** Start sending advertisement packets.
+        * This can not be called while scanning, start scanning while advertising is possible though */
         Nrf51822BluetoothStack& startAdvertising();
 
         Nrf51822BluetoothStack& stopAdvertising();

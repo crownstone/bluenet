@@ -841,8 +841,10 @@ bool Nrf51822BluetoothStack::isAdvertising() {
 
 #if(SOFTDEVICE_SERIES != 110)
 
+// See https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
 #define SCAN_INTERVAL                    0x00A0         /**< Determines scan interval in units of 0.625 millisecond. */
-#define SCAN_WINDOW                      0x0050         /**< Determines scan window in units of 0.625 millisecond. */
+//#define SCAN_WINDOW                      0x0050         /**< Determines scan window in units of 0.625 millisecond. */
+#define SCAN_WINDOW                      0x009E         /**< Determines scan window in units of 0.625 millisecond. */
 
 /**
  * Only call the following functions with a S120 or S130 device that can play a central role. The following functions
@@ -944,10 +946,12 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
  */
 void Nrf51822BluetoothStack::tick() {
 
+#if TICK_CONTINUOUSLY==0
 #if(NORDIC_SDK_VERSION > 5)
 	BLE_CALL(sd_app_evt_wait, ());
 #else
 	BLE_CALL(sd_app_event_wait, () );
+#endif
 #endif
 	while (1) {
 
