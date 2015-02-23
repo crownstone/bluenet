@@ -769,11 +769,17 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 
 	err_code = ble_advdata_set(&advdata, &scan_resp);
 	if (err_code == NRF_ERROR_DATA_SIZE) {
-		log(FATAL,"FATAL ERROR!!!! advertisement data too big for package");
-	}
+		log(FATAL,"FATAL ERROR!!! advertisement data too big for package");
+	} 
 	APP_ERROR_CHECK(err_code);
 
-	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
+	// segfault when advertisement cannot start, do we want that!?
+	//BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
+	err_code = sd_ble_gap_adv_start(&adv_params);
+	if (err_code == NRF_ERROR_INVALID_PARAM) {
+		log(FATAL, "FATAL ERROR!!! no valid advertisement configuration");
+	}
+	APP_ERROR_CHECK(err_code);
 
 	_advertising = true;
 

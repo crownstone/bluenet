@@ -51,7 +51,8 @@ public:
 	 * Initialize the object with the given fullUid.
 	 */
 	UUID(const char* fullUid):
-		_full(fullUid), _uuid(0x0), _type(BLE_UUID_TYPE_VENDOR_BEGIN) {};
+		_full(fullUid), _uuid(0x0), _type(BLE_UUID_TYPE_UNKNOWN) {};
+		//_full(fullUid), _uuid(0x0), _type(BLE_UUID_TYPE_VENDOR_BEGIN) {};
 
 	/* Constructor for Bluetooth SIG UUID (16-bit)
 	 *
