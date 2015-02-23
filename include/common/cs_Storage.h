@@ -49,7 +49,7 @@ enum ps_storage_id {
 struct storage_config_t {
 	ps_storage_id id;
 	pstorage_handle_t handle;
-	uint8_t storage_size;
+	pstorage_size_t storage_size;
 };
 
 // POWER SERVICE //////////////////
@@ -81,27 +81,9 @@ public:
 	//   above
 	bool getHandle(ps_storage_id storageID, pstorage_handle_t& handle);
 
-	void clearBlock(pstorage_handle_t handle, int blockID);
-
-	// Get byte at location "index" 
-	void getUint8(pstorage_handle_t handle, int blockID, uint8_t *item);
-
-	// Store byte
-	void setUint8(pstorage_handle_t handle, int blockID, const uint8_t item);
-
-	// Get 16-bit integer
-	void getUint16(pstorage_handle_t handle, int blockID, uint16_t *item);
-
-	// Set 16-bit integer
-	void setUint16(pstorage_handle_t handle, int blockID, const uint16_t item);
-
-	// Set/Get string
-	void getString(pstorage_handle_t handle, int blockID, char* item, int16_t length);
-	void setString(pstorage_handle_t handle, int blockID, const char* item, int16_t length);
-
 	// Set/Get struct
 	void getStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
-	void setStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t length);
+	void setStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
 
 	// helper functions //////////////////////////////////////////
 
@@ -131,7 +113,7 @@ private:
 	Storage();
 
 	// Initialize the storage class (in bytes)
-	void initBlocks(int blocks, int size, pstorage_handle_t& handle);
 
-	int _size;
+	void initBlocks(pstorage_size_t size, pstorage_handle_t& handle);
+	storage_config_t* getStorageConfig(ps_storage_id storageID);
 };
