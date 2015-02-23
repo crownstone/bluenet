@@ -24,13 +24,19 @@ If meshing is enabled, it is also possible to send a message into the mesh netwo
       <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </argument>
   </method>
-  <method abstract="yes" id="GeneralService::setTemperature" name="setTemperature">
-    <brief>Update the temperature characteristic.</brief>
+  <method abstract="yes" id="GeneralService::readConfiguration" name="readConfiguration">
+    <brief>Read configuration written by user.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="GeneralService::setTemperature::temperature" name="temperature">
-      <type name="int32_t" />
+    <argument id="GeneralService::readConfiguration::type" name="type">
+      <type name="uint8_t" />
+    </argument>
+    <argument id="GeneralService::readConfiguration::length" name="length">
+      <type name="uint8_t" />
+    </argument>
+    <argument id="GeneralService::readConfiguration::payload" name="payload">
+      <type name="uint8_t" qualifier="*" />
     </argument>
   </method>
   <method abstract="yes" id="GeneralService::tick" name="tick">
@@ -42,6 +48,24 @@ tick, because timing is not important for this at all.
     <return>
       <type builtin="yes" name="void" />
     </return>
+  </method>
+  <method abstract="yes" id="GeneralService::writeConfiguration" name="writeConfiguration">
+    <brief>Update the configuration characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::writeConfiguration::type" name="type">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="GeneralService::writeTemperature" name="writeTemperature">
+    <brief>Update the temperature characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::writeTemperature::temperature" name="temperature">
+      <type name="int32_t" />
+    </argument>
   </method>
   <field access="protected" id="GeneralService::_stack" name="_stack">
     <type name="BLEpp::Nrf51822BluetoothStack" qualifier="*" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
