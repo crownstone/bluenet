@@ -24,33 +24,55 @@
 class StreamBuffer {
 private:
 	uint8_t _type;
-	uint8_t _length; // length of payload
+	uint8_t _plength; // length of payload
 	uint8_t* _payload;
 public:
 	StreamBuffer();
 
 	bool operator!=(const StreamBuffer &other);
 
+	/* The (maximum) length of the entire struct.
+	 */
 	uint32_t getSerializedLength() const;
 
 	/* Create a string from payload. 
 	 *
 	 * This creates a C++ string from the uint8_t payload array. Note that this not always makes sense! It will
-	 * use the _length field to establish the length of the array to be used. So, the array does not have to 
+	 * use the _plength field to establish the length of the array to be used. So, the array does not have to 
 	 * have a null-terminated byte.
 	 */
 	bool toString(std::string &str);
 
+	/* Fill payload with string.
+	 */
+	bool fromString(const std::string & str);
+
 	// return 0 on SUCCESS, positive value on FAILURE
 	uint8_t add(uint8_t value);
 
+	/* Serialize entire class.
+	 *
+	 * This is used to stream this class over BLE. Note that length here includes the field for type and length,
+	 * and is hence larger than plength (which is just the length of the payload).
+	 */
 	void serialize(uint8_t *buffer, uint16_t length) const;
 
 	void deserialize(uint8_t *buffer, uint16_t length);
 
 	inline uint8_t type() const { return _type; } 
-	inline uint8_t length() const { return _length; }
+
+	/* Return the length/size of the payload.
+	 */
+	inline uint8_t length() const { return _plength; }
 	inline uint8_t* payload() const { return _payload; }
+
+	inline void setType(uint8_t type) { _type = type; }
+
+	/* Set payload of the buffer.
+	 *
+	 * Note that plength here is payload length.
+	 */
+	void setPayload(uint8_t *payload, uint8_t plength);
 };
 
 // template has to be in the same namespace as the other CharacteristicT templates

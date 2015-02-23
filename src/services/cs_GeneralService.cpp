@@ -21,7 +21,8 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		_stack(&stack),
 		_temperatureCharacteristic(NULL), _nameCharacteristic(NULL),
 		_deviceTypeCharacteristic(NULL), _roomCharacteristic(NULL),
-		_firmwareCharacteristic(NULL) {
+		_firmwareCharacteristic(NULL),
+		_selectConfiguration(0xFF) {
 
 	setUUID(UUID(GENERAL_UUID));
 	setName("General Service");
@@ -35,7 +36,7 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
 	characStatus.push_back( { "Change Name",
 		CHANGE_NAME_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addChangeNameCharacteristic) });
 	characStatus.push_back( { "Device Type",
 		DEVICE_TYPE_UUID,
@@ -172,30 +173,72 @@ void GeneralService::addSetConfigurationCharacteristic() {
 		.setName("Set Configuration")
 		.setWritable(true)
 		.onWrite([&](const StreamBuffer& value) -> void {
-			LOGi("Write configuration value");
 			uint8_t type = value.type();
-			switch(type) {
-			case CONFIG_NAME_UUID: {
-				LOGd("Write name");
-				std::string str = std::string((char*)value.payload());
-				setBLEName(str);
-				Storage::setString(str, _storageStruct.device_name);
-				savePersistentStorage();
-			}
-			case CONFIG_FLOOR_UUID: {
-				LOGd("Set floor level");
-				if (value.length() != 1) {
-					LOGw("We do not account for buildings of more than 255 floors yet");
-					return;
-				}
-				uint8_t floor = value.payload()[0];
-				LOGi("Set floor to %i", floor);
-				Storage::setUint8(floor, _storageStruct.floor);
-			} default: 
-				LOGw("There is no such configuration id!");
-			}
-				
+			LOGi("Write configuration type: %i", (int)type);
+			uint8_t *payload = value.payload();
+			uint8_t length = value.length();
+			readConfiguration(type, length, payload);
 		});
+}
+
+void GeneralService::readConfiguration(uint8_t type, uint8_t length, uint8_t* payload) {
+	switch(type) {
+	case CONFIG_NAME_UUID: {
+		LOGd("Write name");
+		std::string str = std::string((char*)payload);
+		setBLEName(str);
+		Storage::setString(str, _storageStruct.device_name);
+		savePersistentStorage();
+		break;
+	}
+	case CONFIG_FLOOR_UUID: {
+		LOGd("Set floor level");
+		if (length != 1) {
+			LOGw("We do not account for buildings of more than 255 floors yet");
+			return;
+		}
+		uint8_t floor = payload[0];
+		LOGi("Set floor to %i", floor);
+		Storage::setUint8(floor, _storageStruct.floor);
+		savePersistentStorage();
+		break;
+	} default: 
+		LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
+	}
+}
+
+void GeneralService::writeConfiguration(uint8_t type) {
+	switch(type) {
+	case CONFIG_NAME_UUID: {
+		LOGd("Read name");
+		std::string str = getBLEName();
+		StreamBuffer buf;
+		buf.setType(type);
+		buf.fromString(str);
+
+		*_getConfigurationCharacteristic = buf;
+		break;
+	}
+	case CONFIG_FLOOR_UUID: {
+		LOGd("Read floor");
+		loadPersistentStorage();
+		uint8_t floor;
+		Storage::getUint8(_storageStruct.floor, floor, 0);
+		StreamBuffer buf;
+		buf.setType(type);
+		uint8_t plen = 1;
+		uint8_t payload[plen];
+		payload[0] = floor;
+		buf.setPayload(payload, plen);
+		LOGd("Floor level set in payload: %i with len %i", buf.payload()[0], buf.length());
+
+		*_getConfigurationCharacteristic = buf;
+		break;
+	}
+	default: {
+		LOGd("There is no such configuration type (%i), or not yet implemented.", type);
+	}
+	}
 }
 
 void GeneralService::addSelectConfigurationCharacteristic() {
@@ -206,6 +249,7 @@ void GeneralService::addSelectConfigurationCharacteristic() {
 		.setWritable(true) 
 		.onWrite([&](const uint8_t& value) -> void {
 			if (value < CONFIG_TYPES) {
+				LOGd("Select configuration type: %i", (int)value);
 				_selectConfiguration = value;
 			} else {
 				LOGe("Cannot select %i", value);
@@ -264,14 +308,22 @@ GeneralService& GeneralService::createService(Nrf51822BluetoothStack& stack) {
 	return *svc;
 }
 
-void GeneralService::setTemperature(int32_t temperature) {
+void GeneralService::writeTemperature(int32_t temperature) {
 	*_temperatureCharacteristic = temperature;
 }
-
+	
 void GeneralService::tick() {
 	if (_temperatureCharacteristic) {
 		int32_t temp;
 		temp = getTemperature();
-		setTemperature(temp);
+		writeTemperature(temp);
+	}
+
+	if (_getConfigurationCharacteristic) {
+		if (_selectConfiguration != 0xFF) {
+			writeConfiguration(_selectConfiguration);
+			// only write once
+			_selectConfiguration = 0xFF;
+		}
 	}
 }

@@ -31,7 +31,15 @@ public:
 
 	/* Update the temperature characteristic.
 	*/
-	void setTemperature(int32_t temperature);
+	void writeTemperature(int32_t temperature);
+
+	/* Update the configuration characteristic.
+	 */
+	void writeConfiguration(uint8_t type);
+
+	/* Read configuration written by user.
+	 */
+	void readConfiguration(uint8_t type, uint8_t length, uint8_t* payload);
 
 	/* Perform non urgent functionality every main loop.
 	 *

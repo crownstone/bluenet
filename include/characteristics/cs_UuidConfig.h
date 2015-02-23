@@ -9,7 +9,7 @@
 // TODO Dominik: how about moving the Service UUIDs here too
 //   or at least make a similar config file?
 
-enum GeneralCharacteristics {
+enum PowerCharacteristicsIDs {
 	PWM_UUID                                = 0x1,
 	SAMPLE_CURRENT_UUID                     = 0x2,
 	CURRENT_CURVE_UUID                      = 0x3,
@@ -17,7 +17,7 @@ enum GeneralCharacteristics {
 	CURRENT_LIMIT_UUID                      = 0x5,
 };
 
-enum {
+enum GeneralCharacteristicsIDs {
 	TEMPERATURE_UUID                        = 0x1,
 	CHANGE_NAME_UUID                        = 0x2,
 	DEVICE_TYPE_UUID                        = 0x3,
@@ -29,7 +29,7 @@ enum {
 	GET_CONFIGURATION_UUID                  = 0x9,
 };
 
-enum {
+enum IndoorLocalizationCharacteristicsIDs {
 	RSSI_UUID                               = 0x1,
 	TRACKED_DEVICE_UUID                     = 0x2,
 	SCAN_DEVICE_UUID                        = 0x3,
@@ -39,8 +39,9 @@ enum {
 
 /* Configuration types
  *
+ * Use in the characteristic to read and write configurations in <CommonService>.
  */
-enum {
+enum ConfigurationTypes {
 	CONFIG_NAME_UUID                        = 0x0,
 	CONFIG_DEVICE_TYPE_UUID                 = 0x1,
 	CONFIG_ROOM_UUID                        = 0x2,
