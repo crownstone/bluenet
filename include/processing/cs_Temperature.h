@@ -10,8 +10,11 @@
 
 #include "util/cs_BleError.h"
 
-/*
- * get temperature from softdevice
+/* Get temperature reading from the softdevice
+ *
+ * The received value from the softdevice is in
+ * 0.25°C steps, so in order to get it in °C, the
+ * value is divided by 4
  */
 inline int32_t getTemperature() {
 	int32_t temperature;

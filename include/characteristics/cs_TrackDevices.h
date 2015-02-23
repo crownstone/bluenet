@@ -10,7 +10,9 @@
 #include "ble_gatts.h"
 
 #include "cs_BluetoothLE.h"
-#include "cs_Serializable.h"
+#include "characteristics/cs_Serializable.h"
+
+using namespace BLEpp;
 
 struct __attribute__((__packed__)) tracked_device_t {
 	uint8_t addr[BLE_GAP_ADDR_LEN];
@@ -30,7 +32,7 @@ struct __attribute__((__packed__)) tracked_device_t {
 #define TDL_IS_NEARBY                            2
 #define TDL_NOT_TRACKING                         3
 
-class TrackedDeviceList {
+class TrackedDeviceList : public Serializable {
 
 private:
 	tracked_device_t* _list;
@@ -38,6 +40,12 @@ private:
 
 public:
 	TrackedDeviceList();
+
+	~TrackedDeviceList() {
+		if (_list) {
+			free(_list);
+		}
+	}
 
 	/** Initializes the list, must be called before any other function! */
 	void init();
@@ -69,22 +77,25 @@ public:
 
 	//////////// serializable ////////////////////////////
 
-    /** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
-    * it means that the object does not need external buffer space. */
-    uint32_t getSerializedLength() const;
+	/* @inherit */
+    uint16_t getSerializedLength() const;
 
-    /** Copy data representing this object into the given buffer.  Buffer will be preallocated with at least
-    * getLength() bytes. */
+	/* @inherit */
+    uint16_t getMaxLength() const {
+		return TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE;
+    }
+
+	/* @inherit */
     void serialize(uint8_t* buffer, uint16_t length) const;
 
-    /** Copy data from the given buffer into this object. */
+	/* @inherit */
     void deserialize(uint8_t* buffer, uint16_t length);
 
 };
 
 
 
-class TrackedDevice {
+class TrackedDevice : public Serializable {
 
 private:
 	tracked_device_t _trackedDevice;
@@ -104,125 +115,129 @@ public:
 
 	//////////// serializable ////////////////////////////
 
-	/** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
-	 * it means that the object does not need external buffer space. */
-	uint32_t getSerializedLength() const;
+	/* @inherit */
+    uint16_t getSerializedLength() const;
 
-	/** Copy data representing this object into the given buffer.  Buffer will be preallocated with at least
-	 * getLength() bytes. */
-	void serialize(uint8_t* buffer, uint16_t length) const;
-
-	/** Copy data from the given buffer into this object. */
-	void deserialize(uint8_t* buffer, uint16_t length);
-};
-
-
-
-// template has to be in the same namespace as the other CharacteristicT templates
-namespace BLEpp {
-
-template<> class CharacteristicT<TrackedDeviceList> : public Characteristic<TrackedDeviceList> {
-
-private:
-	uint8_t _buffer[TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE];
-	bool _notificationPending;
-
-public:
-	CharacteristicT& operator=(const TrackedDeviceList& val) {
-		Characteristic<TrackedDeviceList>::operator=(val);
-		return *this;
-	}
-
-	CharacteristicValue getCharacteristicValue() {
-		CharacteristicValue value;
-		const TrackedDeviceList& t = this->getValue();
-		uint32_t len = t.getSerializedLength();
-		memset(_buffer, 0, len);
-		t.serialize(_buffer, len);
-		return CharacteristicValue(len, _buffer);
-	}
-
-	void setCharacteristicValue(const CharacteristicValue& value) {
-		TrackedDeviceList t;
-		t.deserialize(value.data, value.length);
-		this->setValue(t);
-	}
-
-	uint16_t getValueMaxLength() {
-		return TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE;
-	}
-
-	void onNotifyTxError() {
-//		LOGw("[%s] no tx buffers, waiting for BLE_EVT_TX_COMPLETE!", _name.c_str());
-		_notificationPending = true;
-	}
-
-	void onTxComplete(ble_common_evt_t * p_ble_evt) {
-		// if we have a notification pending, try to send it
-		if (_notificationPending) {
-			uint32_t err_code = notify();
-			if (err_code != NRF_SUCCESS) {
-//				LOGw("[%s] failed to resend notification!, err_code: %d", _name.c_str(), err_code);
-			} else {
-//				LOGi("[%s] successfully resent notification", _name.c_str());
-				_notificationPending = false;
-			}
-		}
-	}
-
-};
-
-
-
-template<> class CharacteristicT<TrackedDevice> : public Characteristic<TrackedDevice> {
-
-private:
-	uint8_t _buffer[TRACKDEVICES_SERIALIZED_SIZE];
-	bool _notificationPending;
-
-public:
-	CharacteristicT& operator=(const TrackedDevice& val) {
-		Characteristic<TrackedDevice>::operator=(val);
-		return *this;
-	}
-
-	CharacteristicValue getCharacteristicValue() {
-		CharacteristicValue value;
-		const TrackedDevice& t = this->getValue();
-		uint32_t len = t.getSerializedLength();
-		memset(_buffer, 0, len);
-		t.serialize(_buffer, len);
-		return CharacteristicValue(len, _buffer);
-	}
-
-	void setCharacteristicValue(const CharacteristicValue& value) {
-		TrackedDevice t;
-		t.deserialize(value.data, value.length);
-		this->setValue(t);
-	}
-
-	uint16_t getValueMaxLength() {
+	/* @inherit */
+    uint16_t getMaxLength() const {
 		return TRACKDEVICES_SERIALIZED_SIZE;
-	}
+    }
 
-	void onNotifyTxError() {
-//		LOGw("[%s] no tx buffers, waiting for BLE_EVT_TX_COMPLETE!", _name.c_str());
-		_notificationPending = true;
-	}
+	/* @inherit */
+    void serialize(uint8_t* buffer, uint16_t length) const;
 
-	void onTxComplete(ble_common_evt_t * p_ble_evt) {
-		// if we have a notification pending, try to send it
-		if (_notificationPending) {
-			uint32_t err_code = notify();
-			if (err_code != NRF_SUCCESS) {
-//				LOGw("[%s] failed to resend notification!, err_code: %d", _name.c_str(), err_code);
-			} else {
-//				LOGi("[%s] successfully resent notification", _name.c_str());
-				_notificationPending = false;
-			}
-		}
-	}
+	/* @inherit */
+    void deserialize(uint8_t* buffer, uint16_t length);
 
 };
 
-} // namespace BLEpp
+
+
+//// template has to be in the same namespace as the other CharacteristicT templates
+//namespace BLEpp {
+//
+//template<> class CharacteristicT<TrackedDeviceList> : public Characteristic<TrackedDeviceList> {
+//
+//private:
+//	uint8_t _buffer[TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE];
+//	bool _notificationPending;
+//
+//public:
+//	CharacteristicT& operator=(const TrackedDeviceList& val) {
+//		Characteristic<TrackedDeviceList>::operator=(val);
+//		return *this;
+//	}
+//
+//	CharacteristicValue getCharacteristicValue() {
+//		CharacteristicValue value;
+//		const TrackedDeviceList& t = this->getValue();
+//		uint32_t len = t.getSerializedLength();
+//		memset(_buffer, 0, len);
+//		t.serialize(_buffer, len);
+//		return CharacteristicValue(len, _buffer);
+//	}
+//
+//	void setCharacteristicValue(const CharacteristicValue& value) {
+//		TrackedDeviceList t;
+//		t.deserialize(value.data, value.length);
+//		this->setValue(t);
+//	}
+//
+//	uint16_t getValueMaxLength() {
+//		return TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE;
+//	}
+//
+//	void onNotifyTxError() {
+////		LOGw("[%s] no tx buffers, waiting for BLE_EVT_TX_COMPLETE!", _name.c_str());
+//		_notificationPending = true;
+//	}
+//
+//	void onTxComplete(ble_common_evt_t * p_ble_evt) {
+//		// if we have a notification pending, try to send it
+//		if (_notificationPending) {
+//			uint32_t err_code = notify();
+//			if (err_code != NRF_SUCCESS) {
+////				LOGw("[%s] failed to resend notification!, err_code: %d", _name.c_str(), err_code);
+//			} else {
+////				LOGi("[%s] successfully resent notification", _name.c_str());
+//				_notificationPending = false;
+//			}
+//		}
+//	}
+//
+//};
+//
+//
+//
+//template<> class CharacteristicT<TrackedDevice> : public Characteristic<TrackedDevice> {
+//
+//private:
+//	uint8_t _buffer[TRACKDEVICES_SERIALIZED_SIZE];
+//	bool _notificationPending;
+//
+//public:
+//	CharacteristicT& operator=(const TrackedDevice& val) {
+//		Characteristic<TrackedDevice>::operator=(val);
+//		return *this;
+//	}
+//
+//	CharacteristicValue getCharacteristicValue() {
+//		CharacteristicValue value;
+//		const TrackedDevice& t = this->getValue();
+//		uint32_t len = t.getSerializedLength();
+//		memset(_buffer, 0, len);
+//		t.serialize(_buffer, len);
+//		return CharacteristicValue(len, _buffer);
+//	}
+//
+//	void setCharacteristicValue(const CharacteristicValue& value) {
+//		TrackedDevice t;
+//		t.deserialize(value.data, value.length);
+//		this->setValue(t);
+//	}
+//
+//	uint16_t getValueMaxLength() {
+//		return TRACKDEVICES_SERIALIZED_SIZE;
+//	}
+//
+//	void onNotifyTxError() {
+////		LOGw("[%s] no tx buffers, waiting for BLE_EVT_TX_COMPLETE!", _name.c_str());
+//		_notificationPending = true;
+//	}
+//
+//	void onTxComplete(ble_common_evt_t * p_ble_evt) {
+//		// if we have a notification pending, try to send it
+//		if (_notificationPending) {
+//			uint32_t err_code = notify();
+//			if (err_code != NRF_SUCCESS) {
+////				LOGw("[%s] failed to resend notification!, err_code: %d", _name.c_str(), err_code);
+//			} else {
+////				LOGi("[%s] successfully resent notification", _name.c_str());
+//				_notificationPending = false;
+//			}
+//		}
+//	}
+//
+//};
+//
+//} // namespace BLEpp

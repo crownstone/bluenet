@@ -179,7 +179,7 @@ bool TrackedDeviceList::rem(const uint8_t* adrs_ptr) {
 
 /** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
 * it means that the object does not need external buffer space. */
-uint32_t TrackedDeviceList::getSerializedLength() const {
+uint16_t TrackedDeviceList::getSerializedLength() const {
 	return getSize() * TRACKDEVICES_SERIALIZED_SIZE + TRACKDEVICES_HEADER_SIZE;
 }
 
@@ -254,7 +254,7 @@ bool TrackedDevice::operator!=(const TrackedDevice& val) {
  * Return length of buffer required to store the serialized form of this object. If this method returns 0,
  * it means that the object does not need external buffer space. 
  */
-uint32_t TrackedDevice::getSerializedLength() const {
+uint16_t TrackedDevice::getSerializedLength() const {
 	return TRACKDEVICES_SERIALIZED_SIZE;
 }
 
