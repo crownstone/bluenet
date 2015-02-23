@@ -67,6 +67,7 @@ struct storage_config_t {
 };
 
 // POWER SERVICE /////////////////////////////////
+// TODO: move to cs_PowerService.h
 
 /* Struct used by the <PowerService> to store elements
  */
@@ -75,6 +76,7 @@ struct ps_power_service_t : ps_storage_base_t {
 };
 
 // GENERAL SERVICE ///////////////////////////////
+// TODO: move to cs_GeneralService.h
 
 /* Struct used by the <GeneralService> to store elements
  */
@@ -91,8 +93,13 @@ struct ps_general_service_t : ps_storage_base_t {
  *
  * Singleton class, can only exist once.
  *
- * This class provides helper functions to initialize, clear, write and read
+ * This class provides functions to initialize, clear, write and read
  * persistent memory (FLASH).
+ *
+ * The class also provides static helper functions to read and write
+ * values from/to the storage structs of the services. They do not operate
+ * on the Storage itself, just work with the provided parameters. As such
+ * they can be used without unnecessarily instantiating the storage instance.
  */
 class Storage {
 
@@ -151,7 +158,9 @@ public:
 	 */
 	void setStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
 
-	// helper functions //////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////
+	// helper functions
+	////////////////////////////////////////////////////////////////////////////////////////
 
 	/* Helper function to convert std::string to char array
 	 *

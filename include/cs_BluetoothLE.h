@@ -948,6 +948,19 @@ namespace BLEpp {
         Service& getService(std::string name);
         Nrf51822BluetoothStack& addService(Service* svc);
 
+        /* Start advertising as an iBeacon
+         *
+         * @beacon the object defining the parameters for the
+         *   advertisement package. See <IBeacon> for an explanation
+         *   of the parameters and values
+         *
+         * Initiates the advertisement package and fills the manufacturing
+         * data array with the values of the <IBeacon> object, then starts
+         * advertising as an iBeacon.
+         *
+         * **Note**: An iBeacon requires that the company identifier is
+         *   set to the Apple Company ID, otherwise it's not an iBeacon.
+         */
         Nrf51822BluetoothStack& startIBeacon(IBeacon beacon);
         Nrf51822BluetoothStack& startAdvertising();
 
