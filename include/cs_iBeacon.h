@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <cs_BluetoothLE.h>
+#include <cs_UUID.h>
 
 namespace BLEpp {
 

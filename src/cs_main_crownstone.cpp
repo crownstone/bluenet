@@ -21,8 +21,20 @@
 // temporary defines
 #define MESHING_PARALLEL 1
 
-// currently does not compile(!)
+// enable IBeacon functionality (advertises Crownstone as iBeacon)
 //#define IBEACON
+
+#ifdef IBEACON
+	// define the iBeacon advertisement package parameters
+	// the proximity UUID
+	#define BEACON_UUID   "ed3a6985-8872-4bb7-b784-c59ef3589844"
+	// the major number
+	#define BEACON_MAJOR  1
+    // the minor number
+	#define BEACON_MINOR  5
+    // the rssi
+	#define BEACON_RSSI   0xc7
+#endif
 
 // if softdevice_handler.c is used, we cannot also define SWI2_IRQHandler but will need to set evt_schedule_func in the 
 // softdevice_handler_init call
@@ -35,6 +47,7 @@
 #else
 #define STRINGIFY(str) str
 #endif
+
 /**********************************************************************************************************************
  * General includes
  *********************************************************************************************************************/
@@ -268,6 +281,12 @@ int main() {
 	// configure parameters for the Bluetooth stack
 	configure(stack);
 
+#ifdef IBEACON
+	// if enabled, create the iBeacon parameter object which will be used
+	// to start advertisment as an iBeacon
+	IBeacon beacon(UUID(BEACON_UUID), BEACON_MAJOR, BEACON_MINOR, BEACON_RSSI);
+#endif
+
 	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	// in particular we need it to set interrupt priorities.
 	stack.init();
@@ -299,7 +318,7 @@ int main() {
 			stack.stopScanning();
 
 #ifdef IBEACON
-			stack.startIBeacon();
+			stack.startIBeacon(beacon);
 #else
 			stack.startAdvertising();
 #endif
@@ -342,7 +361,7 @@ int main() {
 
 	// begin sending advertising packets over the air.
 #ifdef IBEACON
-	stack.startIBeacon();
+	stack.startIBeacon(beacon);
 #else
 	stack.startAdvertising();
 #endif
