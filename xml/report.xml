@@ -48,7 +48,7 @@ return values.
         <location column="2" file="include/cs_BluetoothLE.h" line="727" />
       </undocumented>
     </type>
-    <type documented="3" name="struct" undocumented="3">
+    <type documented="4" name="struct" undocumented="3">
       <undocumented id="BLEpp::CharacteristicInit" name="CharacteristicInit">
         <location column="5" file="include/cs_BluetoothLE.h" line="207" />
       </undocumented>
@@ -95,6 +95,7 @@ return values.
       <undocumented id="BLEpp" name="BLEpp">
         <location column="1" file="include/cs_iBeacon.h" line="12" />
         <location column="1" file="include/cs_BluetoothLE.h" line="72" />
+        <location column="1" file="include/characteristics/cs_ScanResult.h" line="163" />
       </undocumented>
     </type>
     <type documented="3" name="typedef" undocumented="9">
@@ -126,7 +127,7 @@ return values.
         <location column="2" file="include/services/cs_PowerService.h" line="25" />
       </undocumented>
     </type>
-    <type documented="45" name="method" undocumented="140">
+    <type documented="63" name="method" undocumented="140">
       <undocumented id="ADC::config" name="config">
         <location column="2" file="include/drivers/cs_ADC.h" line="40" />
       </undocumented>
@@ -503,7 +504,7 @@ return values.
         <location column="2" file="include/services/cs_IndoorLocalisationService.h" line="37" />
       </undocumented>
       <undocumented id="PWM::getValue" name="getValue">
-        <location column="2" file="include/drivers/cs_PWM.h" line="80" />
+        <location column="2" file="include/drivers/cs_PWM.h" line="75" />
       </undocumented>
       <undocumented id="PowerService::addCurrentConsumptionCharacteristic" name="addCurrentConsumptionCharacteristic">
         <location column="2" file="include/services/cs_PowerService.h" line="47" />
@@ -514,7 +515,7 @@ return values.
       <undocumented id="PowerService::addCurrentLimitCharacteristic" name="addCurrentLimitCharacteristic">
         <location column="2" file="include/services/cs_PowerService.h" line="48" />
       </undocumented>
-      <undocumented id="PowerService::addGetCurrentCharacteristic" name="addGetCurrentCharacteristic">
+      <undocumented id="PowerService::addSampleCurrentCharacteristic" name="addSampleCurrentCharacteristic">
         <location column="2" file="include/services/cs_PowerService.h" line="45" />
       </undocumented>
       <undocumented id="PowerService::addSpecificCharacteristics" name="addSpecificCharacteristics">
@@ -553,7 +554,7 @@ return values.
         <location column="22" file="include/cs_BluetoothLE.h" line="56" />
       </undocumented>
     </type>
-    <type documented="27" name="field" undocumented="58">
+    <type documented="30" name="field" undocumented="61">
       <undocumented id="AllocatedBuffer::allocated" name="allocated">
         <location column="5" file="include/cs_Serializable.h" line="18" />
       </undocumented>
@@ -681,61 +682,70 @@ return values.
         <location column="9" file="include/cs_BluetoothLE.h" line="659" />
       </undocumented>
       <undocumented id="GeneralService::_deviceTypeCharacteristic" name="_deviceTypeCharacteristic">
-        <location column="2" file="include/services/cs_GeneralService.h" line="53" />
-      </undocumented>
-      <undocumented id="GeneralService::_firmwareCharacteristic" name="_firmwareCharacteristic">
-        <location column="2" file="include/services/cs_GeneralService.h" line="55" />
-      </undocumented>
-      <undocumented id="GeneralService::_meshCharacteristic" name="_meshCharacteristic">
-        <location column="2" file="include/services/cs_GeneralService.h" line="56" />
-      </undocumented>
-      <undocumented id="GeneralService::_nameCharacteristic" name="_nameCharacteristic">
-        <location column="2" file="include/services/cs_GeneralService.h" line="52" />
-      </undocumented>
-      <undocumented id="GeneralService::_roomCharacteristic" name="_roomCharacteristic">
         <location column="2" file="include/services/cs_GeneralService.h" line="54" />
       </undocumented>
+      <undocumented id="GeneralService::_firmwareCharacteristic" name="_firmwareCharacteristic">
+        <location column="2" file="include/services/cs_GeneralService.h" line="56" />
+      </undocumented>
+      <undocumented id="GeneralService::_meshCharacteristic" name="_meshCharacteristic">
+        <location column="2" file="include/services/cs_GeneralService.h" line="57" />
+      </undocumented>
+      <undocumented id="GeneralService::_nameCharacteristic" name="_nameCharacteristic">
+        <location column="2" file="include/services/cs_GeneralService.h" line="53" />
+      </undocumented>
+      <undocumented id="GeneralService::_roomCharacteristic" name="_roomCharacteristic">
+        <location column="2" file="include/services/cs_GeneralService.h" line="55" />
+      </undocumented>
       <undocumented id="GeneralService::_stack" name="_stack">
-        <location column="2" file="include/services/cs_GeneralService.h" line="48" />
+        <location column="2" file="include/services/cs_GeneralService.h" line="49" />
       </undocumented>
       <undocumented id="PWM::_gpioPin" name="_gpioPin">
-        <location column="2" file="include/drivers/cs_PWM.h" line="89" />
+        <location column="2" file="include/drivers/cs_PWM.h" line="84" />
       </undocumented>
       <undocumented id="PWM::_gpioteChannel" name="_gpioteChannel">
-        <location column="2" file="include/drivers/cs_PWM.h" line="88" />
+        <location column="2" file="include/drivers/cs_PWM.h" line="83" />
       </undocumented>
       <undocumented id="PWM::_maxValue" name="_maxValue">
-        <location column="2" file="include/drivers/cs_PWM.h" line="86" />
+        <location column="2" file="include/drivers/cs_PWM.h" line="81" />
       </undocumented>
       <undocumented id="PWM::_nextValue" name="_nextValue">
-        <location column="2" file="include/drivers/cs_PWM.h" line="87" />
+        <location column="2" file="include/drivers/cs_PWM.h" line="82" />
       </undocumented>
       <undocumented id="PWM::_running" name="_running">
-        <location column="2" file="include/drivers/cs_PWM.h" line="90" />
+        <location column="2" file="include/drivers/cs_PWM.h" line="85" />
+      </undocumented>
+      <undocumented id="peripheral_device_t::addr" name="addr">
+        <location column="2" file="include/characteristics/cs_ScanResult.h" line="25" />
+      </undocumented>
+      <undocumented id="peripheral_device_t::occurrences" name="occurrences">
+        <location column="2" file="include/characteristics/cs_ScanResult.h" line="26" />
+      </undocumented>
+      <undocumented id="peripheral_device_t::rssi" name="rssi">
+        <location column="2" file="include/characteristics/cs_ScanResult.h" line="27" />
       </undocumented>
       <undocumented id="pwm_config_t::gpio_pin" name="gpio_pin">
-        <location column="5" file="include/drivers/cs_PWM.h" line="38" />
-        <location column="5" file="include/drivers/cs_PWM.h" line="38" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="33" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="33" />
       </undocumented>
       <undocumented id="pwm_config_t::gpiote_channel" name="gpiote_channel">
-        <location column="5" file="include/drivers/cs_PWM.h" line="40" />
-        <location column="5" file="include/drivers/cs_PWM.h" line="40" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="35" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="35" />
       </undocumented>
       <undocumented id="pwm_config_t::mode" name="mode">
-        <location column="5" file="include/drivers/cs_PWM.h" line="41" />
-        <location column="5" file="include/drivers/cs_PWM.h" line="41" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="36" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="36" />
       </undocumented>
       <undocumented id="pwm_config_t::num_channels" name="num_channels">
-        <location column="5" file="include/drivers/cs_PWM.h" line="37" />
-        <location column="5" file="include/drivers/cs_PWM.h" line="37" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="32" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="32" />
       </undocumented>
       <undocumented id="pwm_config_t::ppi_channel" name="ppi_channel">
-        <location column="5" file="include/drivers/cs_PWM.h" line="39" />
-        <location column="5" file="include/drivers/cs_PWM.h" line="39" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="34" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="34" />
       </undocumented>
     </type>
     <type documented="1" name="functiontemplate" undocumented="0" />
-    <type documented="1" name="constructor" undocumented="22">
+    <type documented="2" name="constructor" undocumented="22">
       <undocumented id="AllocatedBuffer::AllocatedBuffer" name="AllocatedBuffer">
         <location column="5" file="include/cs_Serializable.h" line="13" />
       </undocumented>
@@ -788,7 +798,7 @@ return values.
         <location column="9" file="include/cs_BluetoothLE.h" line="157" />
       </undocumented>
       <undocumented id="GeneralService::GeneralService" name="GeneralService">
-        <location column="2" file="include/services/cs_GeneralService.h" line="29" />
+        <location column="2" file="include/services/cs_GeneralService.h" line="30" />
       </undocumented>
       <undocumented id="IndoorLocalizationService::IndoorLocalizationService" name="IndoorLocalizationService">
         <location column="2" file="include/services/cs_IndoorLocalisationService.h" line="35" />
@@ -856,7 +866,7 @@ return values.
         <location column="9" file="include/cs_BluetoothLE.h" line="676" />
       </undocumented>
     </type>
-    <type documented="11" name="class" undocumented="4">
+    <type documented="13" name="class" undocumented="4">
       <undocumented id="ADC" name="ADC">
         <location column="1" file="include/drivers/cs_ADC.h" line="22" />
       </undocumented>
@@ -871,7 +881,12 @@ return values.
         <location column="1" file="include/services/cs_PowerService.h" line="23" />
       </undocumented>
     </type>
-    <type documented="5" name="enumvalue" undocumented="0" />
+    <type documented="4" name="enumvalue" undocumented="1">
+      <undocumented id="PWM_MODE_122" name="PWM_MODE_122">
+        <location column="5" file="include/drivers/cs_PWM.h" line="22" />
+        <location column="5" file="include/drivers/cs_PWM.h" line="22" />
+      </undocumented>
+    </type>
   </coverage>
   <arguments>
     <function id="BLEpp::IBeacon::size" name="size">
@@ -968,37 +983,70 @@ return values.
       <undocumented name="buffer" />
     </function>
     <function id="GeneralService::setTemperature" name="setTemperature">
-      <location column="2" file="include/services/cs_GeneralService.h" line="33" />
+      <location column="2" file="include/services/cs_GeneralService.h" line="34" />
       <undocumented name="temperature" />
     </function>
     <function id="GeneralService::createService" name="createService">
-      <location column="2" file="include/services/cs_GeneralService.h" line="45" />
+      <location column="2" file="include/services/cs_GeneralService.h" line="46" />
       <undocumented-return />
       <undocumented name="stack" />
     </function>
     <function id="GeneralService::getBLEName" name="getBLEName">
-      <location column="2" file="include/services/cs_GeneralService.h" line="82" />
+      <location column="2" file="include/services/cs_GeneralService.h" line="127" />
       <undocumented-return />
     </function>
     <function id="GeneralService::setBLEName" name="setBLEName">
-      <location column="2" file="include/services/cs_GeneralService.h" line="88" />
+      <location column="2" file="include/services/cs_GeneralService.h" line="133" />
       <undocumented name="name" />
     </function>
     <function id="IndoorLocalizationService::on_ble_event" name="on_ble_event">
       <location column="2" file="include/services/cs_IndoorLocalisationService.h" line="40" />
       <undocumented name="p_ble_evt" />
     </function>
+    <function id="ScanResult::operator!=" name="operator!=">
+      <location column="2" file="include/characteristics/cs_ScanResult.h" line="90" />
+      <undocumented-return />
+      <undocumented name="val" />
+    </function>
+    <function id="ScanResult::update" name="update">
+      <location column="2" file="include/characteristics/cs_ScanResult.h" line="107" />
+      <undocumented name="adrs_ptr" />
+      <undocumented name="rssi" />
+    </function>
+    <function id="ScanResult::serialize" name="serialize">
+      <location column="5" file="include/characteristics/cs_ScanResult.h" line="149" />
+      <undocumented name="buffer" />
+      <undocumented name="length" />
+    </function>
+    <function id="ScanResult::deserialize" name="deserialize">
+      <location column="5" file="include/characteristics/cs_ScanResult.h" line="159" />
+      <undocumented name="buffer" />
+      <undocumented name="length" />
+    </function>
+    <function id="CharacteristicT::operator=" name="operator=">
+      <location column="2" file="include/characteristics/cs_ScanResult.h" line="191" />
+      <undocumented-return />
+      <undocumented name="val" />
+    </function>
+    <function id="CharacteristicT::setCharacteristicValue" name="setCharacteristicValue">
+      <location column="2" file="include/characteristics/cs_ScanResult.h" line="222" />
+      <undocumented name="value" />
+    </function>
+    <function id="CharacteristicT::onTxComplete" name="onTxComplete">
+      <location column="2" file="include/characteristics/cs_ScanResult.h" line="262" />
+      <undocumented name="p_ble_evt" />
+    </function>
     <function id="PWM::getInstance" name="getInstance">
-      <location column="2" file="include/drivers/cs_PWM.h" line="70" />
+      <location column="2" file="include/drivers/cs_PWM.h" line="65" />
       <undocumented-return />
     </function>
     <function id="PWM::init" name="init">
-      <location column="2" file="include/drivers/cs_PWM.h" line="75" />
+      <location column="2" file="include/drivers/cs_PWM.h" line="70" />
       <undocumented-return />
       <undocumented name="config" />
     </function>
     <function id="PWM::setValue" name="setValue">
-      <location column="2" file="include/drivers/cs_PWM.h" line="78" />
+      <location column="2" file="include/drivers/cs_PWM.h" line="73" />
       <undocumented name="pwm_value" />
       <undocumented name="pwm_channel" />
     </function>
@@ -1044,5 +1092,35 @@ return values.
         <ref name="BLE_UUID_BATTERY_LEVEL_CHAR" />
       </doctype>
     </class>
+    <method id="ScanResult::getSerializedLength" name="getSerializedLength">
+      <location column="5" file="include/characteristics/cs_ScanResult.h" line="128" />
+      <doctype name="doc">
+        <ref name="SERIALIZED_DEVICE_SIZE" />
+        <ref name="HEADER_SIZE" />
+      </doctype>
+    </method>
+    <method id="CharacteristicT::getCharacteristicValue" name="getCharacteristicValue">
+      <location column="2" file="include/characteristics/cs_ScanResult.h" line="203" />
+      <doctype name="doc">
+        <ref name="CharacteristicValue" />
+      </doctype>
+      <doctype name="returns">
+        <ref name="CharacteristicValue" />
+      </doctype>
+    </method>
+    <method id="CharacteristicT::setCharacteristicValue" name="setCharacteristicValue">
+      <location column="2" file="include/characteristics/cs_ScanResult.h" line="222" />
+      <doctype name="brief">
+        <ref name="CharacteristicValue" />
+      </doctype>
+    </method>
+    <method id="CharacteristicT::getValueMaxLength" name="getValueMaxLength">
+      <location column="2" file="include/characteristics/cs_ScanResult.h" line="235" />
+      <doctype name="doc">
+        <ref name="HEADER_SIZE" />
+        <ref name="MAX_NR_DEVICES" />
+        <ref name="SERIALIZED_DEVICE_SIZE" />
+      </doctype>
+    </method>
   </references>
 </report>

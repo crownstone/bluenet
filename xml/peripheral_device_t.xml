@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="peripheral_device_t" name="peripheral_device_t" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Structure used to store peripheral devices detected during a scan.</brief>
+  <doc>We store the bluetooth address of the device, the number of times that the
+device was seen during scanning (occurrences) and the rssi (received signal
+strength indication) value of the last received advertisement.
+**note** the bluetooth address is stored in little-endian (LSB-first) so when
+displaying it to the user we need to start at the back of the array
+**note** struct has to be packed in order to avoid word alignment.
+</doc>
+  <field id="peripheral_device_t::addr" name="addr">
+    <type size="6">
+      <type name="uint8_t" />
+    </type>
+  </field>
+  <field id="peripheral_device_t::occurrences" name="occurrences">
+    <type name="uint16_t" />
+  </field>
+  <field id="peripheral_device_t::rssi" name="rssi">
+    <type name="int8_t" />
+  </field>
+</struct>

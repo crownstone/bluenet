@@ -63,13 +63,13 @@
       <type builtin="yes" name="void" />
     </return>
   </method>
-  <method abstract="yes" access="protected" id="PowerService::addGetCurrentCharacteristic" name="addGetCurrentCharacteristic">
+  <method abstract="yes" access="protected" id="PowerService::addPWMCharacteristic" name="addPWMCharacteristic">
+    <brief>The characteristics in this service</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
-  <method abstract="yes" access="protected" id="PowerService::addPWMCharacteristic" name="addPWMCharacteristic">
-    <brief>The characteristics in this service</brief>
+  <method abstract="yes" access="protected" id="PowerService::addSampleCurrentCharacteristic" name="addSampleCurrentCharacteristic">
     <return>
       <type builtin="yes" name="void" />
     </return>
