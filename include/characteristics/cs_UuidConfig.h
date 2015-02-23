@@ -9,7 +9,7 @@
 // TODO Dominik: how about moving the Service UUIDs here too
 //   or at least make a similar config file?
 
-enum {
+enum GeneralCharacteristics {
 	PWM_UUID                                = 0x1,
 	SAMPLE_CURRENT_UUID                     = 0x2,
 	CURRENT_CURVE_UUID                      = 0x3,
@@ -25,7 +25,8 @@ enum {
 	FIRMWARE_UUID                           = 0x5,
 	MESH_UUID                               = 0x6,
 	SET_CONFIGURATION_UUID                  = 0x7,
-	GET_CONFIGURATION_UUID                  = 0x8,
+	SELECT_CONFIGURATION_UUID               = 0x8,
+	GET_CONFIGURATION_UUID                  = 0x9,
 };
 
 enum {
@@ -44,4 +45,5 @@ enum {
 	CONFIG_DEVICE_TYPE_UUID                 = 0x1,
 	CONFIG_ROOM_UUID                        = 0x2,
 	CONFIG_FLOOR_UUID                       = 0x3,
+	CONFIG_TYPES
 };

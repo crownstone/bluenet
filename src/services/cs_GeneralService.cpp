@@ -59,6 +59,10 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		SET_CONFIGURATION_UUID,
 		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addSetConfigurationCharacteristic) });
+	characStatus.push_back( { "Select configuration",
+		SELECT_CONFIGURATION_UUID,
+		true,
+		static_cast<addCharacteristicFunc>(&GeneralService::addSelectConfigurationCharacteristic) });
 	characStatus.push_back( { "Get configuration",
 		GET_CONFIGURATION_UUID,
 		true,
@@ -165,7 +169,7 @@ void GeneralService::addSetConfigurationCharacteristic() {
 	_setConfigurationCharacteristic = createCharacteristicRef<StreamBuffer>();
 	(*_setConfigurationCharacteristic)
 		.setUUID(UUID(getUUID(), SET_CONFIGURATION_UUID))
-		.setName("Configuration")
+		.setName("Set Configuration")
 		.setWritable(true)
 		.onWrite([&](const StreamBuffer& value) -> void {
 			LOGi("Write configuration value");
@@ -173,21 +177,48 @@ void GeneralService::addSetConfigurationCharacteristic() {
 			switch(type) {
 			case CONFIG_NAME_UUID: {
 				LOGd("Write name");
-				std::string str;
+				std::string str = std::string((char*)value.payload());
 				setBLEName(str);
 				Storage::setString(str, _storageStruct.device_name);
 				savePersistentStorage();
 			}
-			case CONFIG_FLOOR_UUID:
+			case CONFIG_FLOOR_UUID: {
 				LOGd("Set floor level");
-			default: 
+				if (value.length() != 1) {
+					LOGw("We do not account for buildings of more than 255 floors yet");
+					return;
+				}
+				uint8_t floor = value.payload()[0];
+				LOGi("Set floor to %i", floor);
+				Storage::setUint8(floor, _storageStruct.floor);
+			} default: 
 				LOGw("There is no such configuration id!");
 			}
 				
 		});
 }
 
+void GeneralService::addSelectConfigurationCharacteristic() {
+	_selectConfigurationCharacteristic = createCharacteristicRef<uint8_t>();
+	(*_selectConfigurationCharacteristic)
+		.setUUID(UUID(getUUID(), SELECT_CONFIGURATION_UUID))
+		.setName("Select Configuration")
+		.setWritable(true) 
+		.onWrite([&](const uint8_t& value) -> void {
+			if (value < CONFIG_TYPES) {
+				_selectConfiguration = value;
+			} else {
+				LOGe("Cannot select %i", value);
+			}
+		});
+}
+
 void GeneralService::addGetConfigurationCharacteristic() {
+	_getConfigurationCharacteristic = createCharacteristicRef<StreamBuffer>();
+	(*_getConfigurationCharacteristic)
+		.setUUID(UUID(getUUID(), GET_CONFIGURATION_UUID))
+		.setName("Get Configuration")
+		.setWritable(false);
 }
 
 void GeneralService::addChangeNameCharacteristic() {

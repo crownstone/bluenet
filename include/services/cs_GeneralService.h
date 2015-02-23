@@ -71,9 +71,16 @@ protected:
 	 */
 	BLEpp::Characteristic<StreamBuffer>* _setConfigurationCharacteristic;
 	
+	/* Select configuration characteristic
+	 *
+	 * Just write an identifier to read subsequently from it using <_getConfigurationCharacteristic>. See for the
+	 * possible values <_setConfigurationCharacteristic>.
+	 */
+	BLEpp::Characteristic<uint8_t>* _selectConfigurationCharacteristic;
+
 	/* Get configuration characteristic
 	 *
-	 * You will have to write to this configuration to subsequently read from it. You write the identifiers also
+	 * You will have first to select a configuration before you can read from it. You write the identifiers also
 	 * described in <_setConfigurationCharacteristic>. 
 	 *
 	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
@@ -84,8 +91,15 @@ protected:
  	 */
 	void addTemperatureCharacteristic();
 	/* Enable the set configuration characteristic.
+	 *
+	 * See <_setConfigurationCharacteristic>.
 	 */
 	void addSetConfigurationCharacteristic();
+	/* Enable the set configuration characteristic.
+	 *
+	 * See <_selectConfigurationCharacteristic>.
+	 */
+	void addSelectConfigurationCharacteristic();
 	/* Enable the get configuration characteristic.
 	 */
 	void addGetConfigurationCharacteristic();
@@ -136,4 +150,8 @@ private:
 
 	pstorage_handle_t _storageHandle;
 	ps_general_service_t _storageStruct;
+
+	/* Select configuration for subsequent read actions on the get configuration characteristic.
+	 */
+	uint8_t _selectConfiguration;
 };

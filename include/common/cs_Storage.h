@@ -35,7 +35,8 @@ extern "C" {
  */
 
 // define the maximum size for strings to be stored
-#define MAX_STRING_SIZE 32
+#define MAX_STRING_SIZE                          32
+#define MIN_ARRAY_SIZE                           4
 
 struct ps_storage_base_t {
 
@@ -43,7 +44,7 @@ struct ps_storage_base_t {
 
 enum ps_storage_id {
 	PS_ID_POWER_SERVICE = 0,
-	PS_ID_GENERAL_SERVICE
+	PS_ID_GENERAL_SERVICE = 1
 };
 
 struct storage_config_t {
@@ -62,6 +63,7 @@ struct ps_general_service_t : ps_storage_base_t {
 	char device_name[MAX_STRING_SIZE];
 	char room[MAX_STRING_SIZE];
 	char device_type[MAX_STRING_SIZE];
+	uint32_t floor;
 };
 
 /////////////////
