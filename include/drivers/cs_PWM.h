@@ -19,11 +19,16 @@
 /* Pulse Wide Modulation mode typedef
  */
 typedef enum {
-    PWM_MODE_122,    // 122 Hz PWM
-    PWM_MODE_244,    // 244 Hz PWM
-    PWM_MODE_976,    // 976 Hz PWM
-    PWM_MODE_15625,  // 15625 Hz PWM
-    PWM_MODE_62500   // 62500 Hz PWM
+	// 122 Hz PWM
+    PWM_MODE_122,
+	// 244 Hz PWM
+    PWM_MODE_244,
+	// 976 Hz PWM
+    PWM_MODE_976,
+	// 15625 Hz PWM
+    PWM_MODE_15625,
+	// 62500 Hz PWM
+    PWM_MODE_62500
 } pwm_mode_t;
 
 /* Pulse Wide Modulation struct
