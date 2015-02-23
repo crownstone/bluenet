@@ -58,6 +58,7 @@ private:
 	func_t _rssiHandler;
 
 	bool _trackMode;
+	bool _trackIsNearby;
 	
 	ScanResult* _scanResult;
 	TrackedDeviceList* _trackedDeviceList;
