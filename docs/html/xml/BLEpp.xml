@@ -46,9 +46,6 @@
   <class name="Service" ref="BLEpp::Service#BLEpp::Service">
     <brief> Service as defined in the GATT Specification.</brief>
   </class>
-  <class name="UUID" ref="BLEpp::UUID#BLEpp::UUID">
-    <brief> A Universally Unique IDentifier. </brief>
-  </class>
   <typedef id="BLEpp::addCharacteristicFunc" name="addCharacteristicFunc">
     <type name="void (BLEpp::GenericService::*)()" />
   </typedef>

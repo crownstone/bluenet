@@ -3,8 +3,6 @@
   <brief> Non-template base class for Characteristics.</brief>
   <doc>A non-templated base class saves on code size. Note that every characteristic however does still
 contribute to code size.
-
-
 </doc>
   <subclass access="public" name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
     <brief> Characteristic of generic type T</brief>
@@ -23,7 +21,7 @@ contribute to code size.
   </method>
   <method id="BLEpp::CharacteristicBase::getUUID" name="getUUID">
     <return>
-      <type name="UUID" qualifier=" const &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+      <type name="UUID" qualifier=" const &amp;" />
     </return>
   </method>
   <method id="BLEpp::CharacteristicBase::getValueHandle" name="getValueHandle">
@@ -37,6 +35,16 @@ contribute to code size.
     </return>
   </method>
   <method abstract="yes" id="BLEpp::CharacteristicBase::init" name="init">
+    <brief>Initialize the characteristic.</brief>
+    <doc>Defaults:
+
++ readable: true
++ notifies: true
++ broadcast: false
++ indicates: false
+
+Side effect: sets member field <ref ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::_inited">BLEpp::CharacteristicBase::_inited</ref>.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
@@ -87,6 +95,7 @@ contribute to code size.
     </argument>
   </method>
   <method id="BLEpp::CharacteristicBase::setNotifies" name="setNotifies">
+    <brief>Set this characteristic to be notifiable.</brief>
     <return>
       <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
     </return>
@@ -131,10 +140,11 @@ contribute to code size.
       <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
     </return>
     <argument id="BLEpp::CharacteristicBase::setUUID::uuid" name="uuid">
-      <type name="UUID" qualifier=" const &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+      <type name="UUID" qualifier=" const &amp;" />
     </argument>
   </method>
   <method id="BLEpp::CharacteristicBase::setWritable" name="setWritable">
+    <brief>Set this characteristic to be writable.</brief>
     <return>
       <type name="CharacteristicBase" qualifier=" &amp;" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
     </return>
@@ -176,7 +186,7 @@ Security Mode 2 Level 2: MITM protected signing required, unless link is MITM pr
   </method>
   <field access="protected" id="BLEpp::CharacteristicBase::_uuid" name="_uuid">
     <brief>Universally Unique Identifier (8 bytes)</brief>
-    <type name="UUID" ref="BLEpp::UUID#BLEpp::UUID" />
+    <type name="UUID" />
   </field>
   <field access="protected" id="BLEpp::CharacteristicBase::_name" name="_name">
     <brief>Name (4 bytes)</brief>
@@ -202,9 +212,13 @@ Security Mode 2 Level 2: MITM protected signing required, unless link is MITM pr
     <type builtin="yes" name="bool" />
   </field>
   <field access="protected" id="BLEpp::CharacteristicBase::_notifies" name="_notifies">
+    <brief>This characteristic can be set to notify at regular intervals.</brief>
+    <doc>This interval cannot be set from the client side.
+</doc>
     <type builtin="yes" name="bool" />
   </field>
   <field access="protected" id="BLEpp::CharacteristicBase::_writable" name="_writable">
+    <brief>This characteristic can be written by another device.</brief>
     <type builtin="yes" name="bool" />
   </field>
   <field access="protected" id="BLEpp::CharacteristicBase::_unit" name="_unit">
@@ -213,12 +227,19 @@ Security Mode 2 Level 2: MITM protected signing required, unless link is MITM pr
   </field>
   <field access="protected" id="BLEpp::CharacteristicBase::_updateIntervalMsecs" name="_updateIntervalMsecs">
     <brief>Interval for updates (4 bytes), 0 means don't update</brief>
+    <doc>TODO: Currently, this is not in use.
+</doc>
     <type name="uint32_t" />
   </field>
   <field access="protected" id="BLEpp::CharacteristicBase::_notifyingEnabled" name="_notifyingEnabled">
+    <brief>If this characteristic can notify a listener (<ref ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::_notifies">BLEpp::CharacteristicBase::_notifies</ref>), this field enables it.</brief>
     <type builtin="yes" name="bool" />
   </field>
   <field access="protected" id="BLEpp::CharacteristicBase::_indicates" name="_indicates">
+    <brief>This characteristic can be set to indicate at regular intervals.</brief>
+    <doc>Indication is different from notification, in the sense that it requires ACKs.
+https://devzone.nordicsemi.com/question/310/notificationindication-difference/
+</doc>
     <type builtin="yes" name="bool" />
   </field>
   <method access="protected" id="BLEpp::CharacteristicBase::configurePresentationFormat" name="configurePresentationFormat" virtual="yes">
@@ -230,11 +251,21 @@ Security Mode 2 Level 2: MITM protected signing required, unless link is MITM pr
     </argument>
   </method>
   <method abstract="yes" access="protected" id="BLEpp::CharacteristicBase::notify" name="notify">
+    <brief>Notify any listening party.</brief>
+    <doc>If this characteristic can notify, and if notification is enabled, and if there is a connection calling
+this function will notify the listening party.
+
+Notification quickly fills an outgoing buffer in BLE. When this buffer gets full, an error code
+&amp;lt;BLE\_ERROR\_NO\_TX\_BUFFERS&amp;gt; is generated by the SoftDevice. In that case <ref ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::onNotifyTxError">BLEpp::CharacteristicBase::onNotifyTxError</ref> is called.
+
+</doc>
     <return>
+      <doc>err_code (which should be NRF_SUCCESS if no error occurred)</doc>
       <type name="uint32_t" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="BLEpp::CharacteristicBase::onNotifyTxError" name="onNotifyTxError" virtual="yes">
+    <brief>Any error in <ref ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::notify">BLEpp::CharacteristicBase::notify</ref> evokes onNotifyTxError.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
