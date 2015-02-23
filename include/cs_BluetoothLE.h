@@ -1011,6 +1011,10 @@ namespace BLEpp {
          *   set to the Apple Company ID, otherwise it's not an iBeacon.
          */
         Nrf51822BluetoothStack& startIBeacon(IBeacon beacon);
+
+		/* Start sending advertisement packets.
+ 	 	 * This can not be called while scanning, start scanning while advertising is possible though.
+ 	 	 */
         Nrf51822BluetoothStack& startAdvertising();
 
         Nrf51822BluetoothStack& stopAdvertising();

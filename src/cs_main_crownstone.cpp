@@ -315,6 +315,7 @@ int main() {
 			nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
 
+			bool wasScanning = stack.isScanning();
 			stack.stopScanning();
 
 #ifdef IBEACON
@@ -322,6 +323,10 @@ int main() {
 #else
 			stack.startAdvertising();
 #endif
+
+			if (wasScanning)
+				stack.startScanning();
+
 		});
 
 	// Create ADC object

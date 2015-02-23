@@ -22,11 +22,12 @@ struct __attribute__((__packed__)) tracked_device_t {
 #define TRACKDEVICES_SERIALIZED_SIZE (sizeof(tracked_device_t)-2) // only works if struct packed. Subtract 2, as counter is not serialized
 
 #define TRACKDEVICES_MAX_NR_DEVICES              2
-#define COUNTER_MAX                              5
-#define ALONE_THRESHOLD							 2000
-	
-#define TDL_IS_ALONE                             1
-#define TDL_SOMEONE_NEARBY                       2
+
+// Number of ticks the rssi of a device is not above threshold before a device is considered not nearby.
+#define ALONE_THRESHOLD							 200
+
+#define TDL_NONE_NEARBY                          1
+#define TDL_IS_NEARBY                            2
 #define TDL_NOT_TRACKING                         3
 
 class TrackedDeviceList {
@@ -43,8 +44,8 @@ public:
 
 	bool operator!=(const TrackedDeviceList& val);
 
-	/** No entity to be tracked nearby  */
-	uint8_t isAlone();
+	/** Returns TDL_IS_NEARBY if a tracked device is nearby, also increases counters */
+	uint8_t isNearby();
 
 	/** Print a single address */
 	void print(uint8_t *addr) const;
@@ -64,7 +65,7 @@ public:
 	bool add(const uint8_t* adrs_ptr, int8_t rssi_threshold);
 
 	/** Removes an address from the list. Returns true on success, false when it's not in the list. */
-	bool rem(uint8_t* adrs_ptr);
+	bool rem(const uint8_t* adrs_ptr);
 
 	//////////// serializable ////////////////////////////
 

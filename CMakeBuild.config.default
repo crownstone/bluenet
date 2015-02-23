@@ -31,6 +31,10 @@ SERIAL_VERBOSITY=1
 # NRF51422             6
 BOARD=5
 
+# Whether or not to tick continuously.
+# when set to 0, ticks only occur after an application interrupt.
+TICK_CONTINUOUSLY=1
+
 # Version of the nrf51 chip, use script/hardware_version.sh to check your version
 HARDWARE_VERSION=0x001D
 

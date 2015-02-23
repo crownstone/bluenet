@@ -22,7 +22,8 @@ using namespace BLEpp;
 
 IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _stack) :
 		_stack(&_stack),
-		_rssiCharac(NULL), _peripheralCharac(NULL), _scanResult(NULL) {
+		_rssiCharac(NULL), _peripheralCharac(NULL), _scanResult(NULL),
+		_trackedDeviceList(NULL), _trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL), _trackIsNearby(false) {
 
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
@@ -62,17 +63,20 @@ void IndoorLocalizationService::tick() {
 
 	if (!_trackMode) return;
 
-	// this function checks the counter for each device, if everybody is gone, turn off the light
-	bool alone = false;
+	// This function checks the counter for each device
+	// If no device is nearby, turn off the light
+	bool deviceNearby = false;
 	if (_trackedDeviceList != NULL) {
-		alone = (_trackedDeviceList->isAlone() == TDL_IS_ALONE);
+		deviceNearby = (_trackedDeviceList->isNearby() == TDL_IS_NEARBY);
 	}
 
-	if (alone) {
-		PWM::getInstance().setValue(0, 0);
-	} else {
+	// Change PWM only on change of nearby state
+	if (deviceNearby && !_trackIsNearby) {
 		PWM::getInstance().setValue(0, (uint8_t)-1);
+	} else if (!deviceNearby && _trackIsNearby) {
+		PWM::getInstance().setValue(0, 0);
 	}
+	_trackIsNearby = deviceNearby;
 }
 
 void IndoorLocalizationService::addSignalStrengthCharacteristic() {
@@ -96,21 +100,22 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
 			if(value) {
-				LOGi("crown: start scanning");
+				LOGi("Init scan result");
+				if (_scanResult != NULL) {
+					_scanResult->init();
+				}
 				if (!_stack->isScanning()) {
-					if (_scanResult != NULL) {
-						_scanResult->init();
-					}
 					_stack->startScanning();
 				}
 			} else {
-				LOGi("crown: stop scanning");
-				if (_stack->isScanning()) {
+				LOGi("Return scan result");
+				if (_scanResult != NULL) {
+					*_peripheralCharac = *_scanResult;
+					_scanResult->print();
+				}
+				// Only stop scanning if we're not also tracking devices
+				if (_stack->isScanning() && !_trackMode) {
 					_stack->stopScanning();
-					if (_scanResult != NULL) {
-						*_peripheralCharac = *_scanResult;
-						_scanResult->print();
-					}
 				}
 			}
 		});
@@ -155,30 +160,36 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 	_trackedDeviceCharac->setNotifies(false);
 //	_trackedDeviceCharac->setDefaultValue();
 	_trackedDeviceCharac->onWrite([&](const TrackedDevice& value) -> void {
-		LOGi("Add tracked device");
-		value.print();
-
-		_trackedDeviceList->add(value.getAddress(), value.getRSSI());
+		if (value.getRSSI() > 0) {
+			LOGi("Remove tracked device");
+			value.print();
+			_trackedDeviceList->rem(value.getAddress());
+		}
+		else {
+			LOGi("Add tracked device");
+			value.print();
+			_trackedDeviceList->add(value.getAddress(), value.getRSSI());
+		}
+		// Update list
 		*_trackedDeviceListCharac = *_trackedDeviceList;
 
-//		LOGi("RSSI threshold: %i", value.rssi_threshold);
-//		LOGi("Received value from [%02X %02X %02X %02X %02X %02X]", value.addr[5],
-//			value.addr[4], value.addr[3], value.addr[2], value.addr[1], value.addr[0]);
-
-		// Start scanning
-		if (!_stack->isScanning()) {
-			LOGi("Start tracking");
-			if (!_stack->isScanning()) {
-//				if (_trackedDeviceList != NULL) {
-//					_trackedDeviceList->init();
-//				}
-				_stack->startScanning();
+		if (_trackedDeviceList->getSize() > 0) {
+			if (!_trackMode) {
+				// Set to some value initially
+				_trackIsNearby = false;
 			}
 			_trackMode = true;
-		} else {
-			LOGi("Stop tracking");
-			_stack->stopScanning();
+			if (!_stack->isScanning()) {
+				LOGi("Start tracking");
+				_stack->startScanning();
+			}
+		}
+		else {
 			_trackMode = false;
+			if (_stack->isScanning()) {
+				LOGi("Stop tracking");
+				_stack->stopScanning();
+			}
 		}
 	});
 }
