@@ -20,8 +20,6 @@ extern "C" {
 }
 #endif
 
-#include <cs_iBeacon.h>
-
 #ifndef SOFTDEVICE_SERIES
 #error "The SOFTDEVICE_SERIES macro is required for compilation. Set it to 110 for example"
 #endif
@@ -45,41 +43,6 @@ typedef struct {
 	uint8_t * p_data; /**< Pointer to data. */
 	uint16_t data_len; /**< Length of data. */
 } data_t;
-
-/// UUID //////////////////////////////////////////////////////////////////////////////////////////
-
-UUID::UUID(const char* fullUid) :
-		_full(fullUid), _type(BLE_UUID_TYPE_UNKNOWN) {
-//	LOGi("create fullid: %s", _full);
-//	LOGi("create uuid: %X", _uuid);
-}
-
-uint16_t UUID::init() {
-
-	if (_full && _type == BLE_UUID_TYPE_UNKNOWN) {
-		ble_uuid128_t u = *this;
-
-		ble_uuid_t uu;
-
-		uint32_t error_code = sd_ble_uuid_decode(16, u.uuid128, &uu);
-
-		if (error_code == NRF_ERROR_NOT_FOUND) {
-			BLE_CALL(sd_ble_uuid_vs_add, (&u, &_type));
-
-			_uuid = (uint16_t) (u.uuid128[13] << 8 | u.uuid128[12]);
-		} else if (error_code == NRF_SUCCESS) {
-			_type = uu.type;
-			_uuid = uu.uuid;
-		} else {
-			BLE_THROW("Failed to add uuid.");
-		}
-	} else if (_type == BLE_UUID_TYPE_UNKNOWN) {
-		BLE_THROW("TODO generate random UUID");
-	} else {
-		// nothing to do.
-	}
-	return _type;
-}
 
 /// Characteristic /////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -633,7 +596,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLeve
 	}
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
+Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon(IBeacon beacon) {
 	if (_advertising)
 		return *this;
 
@@ -660,8 +623,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 	ble_advdata_manuf_data_t manufac;
 	manufac.company_identifier = 0x004C; // Apple Company ID, if it is not set to apple it's not recognized as an iBeacon
 
-	IBeacon beacon(UUID("ed3a6985-8872-4bb7-b784-c59ef3589844"), 1, 5, 0xc7);
-
 	uint8_t adv_manuf_data[beacon.size()];
 	memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
 	beacon.toArray(adv_manuf_data);
@@ -672,15 +633,13 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 	// Build and set advertising data
 	memset(&advdata, 0, sizeof(advdata));
 
-//	advdata.name_type               = BLE_ADVDATA_FULL_NAME;
-//    advdata.include_appearance      = false;
 	advdata.flags.size = sizeof(flags);
 	advdata.flags.p_data = &flags;
 	advdata.p_manuf_specific_data = &manufac;
 
 	ble_advdata_t scan_resp;
 	memset(&scan_resp, 0, sizeof(scan_resp));
-//
+
 //	uint8_t uidCount = _services.size();
 //	ble_uuid_t adv_uuids[uidCount];
 //
@@ -688,19 +647,18 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon() {
 //	for(Service* svc : _services ) {
 //		adv_uuids[cnt++] = svc->getUUID();
 //	}
+//
+//	if (cnt == 0) {
+//		LOGw("No custom services!");
+//	}
 
 	scan_resp.name_type = BLE_ADVDATA_FULL_NAME;
 //	scan_resp.uuids_more_available.uuid_cnt = 1;
 //	scan_resp.uuids_more_available.p_uuids  = adv_uuids;
 
-//	BLE_CALL(ble_advdata_set, (&advdata, &scan_resp));
-	err_code = ble_advdata_set(&advdata, &scan_resp);
-//	err_code = ble_advdata_set(&advdata, NULL);
-	APP_ERROR_CHECK(err_code);
+	BLE_CALL(ble_advdata_set, (&advdata, &scan_resp));
 
 	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
-//	err_code = sd_ble_gap_adv_start(&adv_params);
-//	APP_ERROR_CHECK(err_code);
 
 	_advertising = true;
 

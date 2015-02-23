@@ -37,7 +37,9 @@ extern "C" {
 
 #include <util/cs_BleError.h>
 #include <drivers/cs_Serial.h>
+#include <cs_UUID.h>
 #include <cs_Serializable.h>
+#include <cs_iBeacon.h>
 
 #include <third/std/function.h>
 
@@ -73,101 +75,6 @@ namespace BLEpp {
 
     class Service;
     class BLEStack;
-
-    /* A Universally Unique IDentifier. 
-     *
-     * This is a 128-bit sequence for non-standard profiles, services, characteristics, or descriptors. 
-     * There are several identifiers predefined at 
-     * https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx.
-     * Normally a 16-bit sequence is enough to distinguish the different services, a large part of the 128-bit
-     * sequence is repeated.
-     */
-    class UUID { // abstracts ble_uid_t
-
-      protected:
-	// proprietary UUID std::string. NULL fo standard UUIDs. 
-        const char*           _full;
-	// 16-bit UUID value or octets 12-13 of 128-bit UUID.
-        uint16_t              _uuid; 
-	// UUID type, see @ref BLE_UUID_TYPES.
-        uint8_t               _type; 
-
-      public:
-        operator ble_uuid_t() {
-            ble_uuid_t ret;
-            ret.uuid = _uuid;
-            ret.type = _type;
-
-//            LOGi("get fullid: %s", _full);
-//            LOGi("get uuid: %X", _uuid);
-
-            return ret;
-        }
-
-	/* Generate a 128-bit Bluetooth address from the _full array.
-	 */
-	operator ble_uuid128_t() {
-		ble_uuid128_t res;
-
-		int i = 0;
-		int j = 0;
-		int k = 0;
-		uint8_t c;
-		uint8_t v = 0;
-		for (; ((c = _full[i]) != 0) && (j < 16); i++) {
-			uint8_t vv = 0;
-
-			if (c == '-' || c == ' ') {
-				continue;
-			} else if (c >= '0' && c <= '9') {
-				vv = c - '0';
-			} else if (c >= 'A' && c <= 'F') {
-				vv = c - 'A' + 10;
-			} else if (c >= 'a' && c <= 'f') {
-				vv = c - 'a' + 10;
-			} else {
-				BLE_THROW("invalid character");
-//				char cc[] = {c};// can't just call std::string(c) apparently.
-//				BLE_THROW(std::string("Invalid character ") + std::string(1,cc[0]) + " in UUID.");
-			}
-
-			v = v * 16 + vv;
-
-			if (k++ % 2 == 1) {
-				res.uuid128[15 - (j++)] = v;
-				v = 0;
-			}
-
-		}
-		if (j < 16) {
-			BLE_THROW("UUID too short.");
-		} else if (_full[i] != 0) {
-			BLE_THROW("UUID too long.");
-		}
-
-		return res;
-	}
-
-        UUID() : _uuid(0xdead), _type(BLE_UUID_TYPE_UNKNOWN) {};
-        UUID(const char* fullUid);
-        UUID(uint16_t uuid) : _full(0), _uuid(uuid), _type(BLE_UUID_TYPE_BLE) { }
-        UUID(UUID& parent, uint16_t uidValue) : _full(0), _uuid(uidValue), _type(parent.init()) {
-        }
-        UUID(const UUID& rhs) :_full(rhs._full), _uuid(rhs._uuid), _type(rhs._type) {}
-        UUID(const ble_uuid_t& u) : _full(0), _uuid(u.uuid), _type(u.type) {} // FIXME NRFAPI
-
-        uint16_t getUuid() const {
-            return _uuid;
-        }
-
-        uint8_t getType() {
-            init();
-            return _type;
-        }
-
-        uint16_t init();
-
-    };
 
     /* A value which can be written to or read from a characteristic 
      */
@@ -220,8 +127,6 @@ namespace BLEpp {
      *
      * A non-templated base class saves on code size. Note that every characteristic however does still 
      * contribute to code size. 
-     *
-     *
      */
     class CharacteristicBase {
 
@@ -242,22 +147,58 @@ namespace BLEpp {
         Service*                  _service; 
 
         bool                      _inited;
+	
+	/* This characteristic can be set to notify at regular intervals.
+	 *
+	 * This interval cannot be set from the client side.
+	 */
         bool                      _notifies;
+	
+	/* This characteristic can be written by another device.
+	 */
         bool                      _writable;
+	
 	// Unit
         uint16_t                  _unit;
-	// Interval for updates (4 bytes), 0 means don't update
+
+	/* Interval for updates (4 bytes), 0 means don't update
+	 *
+	 * TODO: Currently, this is not in use. 
+	 */
         uint32_t                  _updateIntervalMsecs; 
-        bool					  _notifyingEnabled;
-        bool					  _indicates;
+	
+	/* If this characteristic can notify a listener (<_notifies>), this field enables it.
+	 */
+        bool                      _notifyingEnabled;
+	
+	/* This characteristic can be set to indicate at regular intervals.
+	 *
+	 * Indication is different from notification, in the sense that it requires ACKs.
+	 * https://devzone.nordicsemi.com/question/310/notificationindication-difference/
+	 */
+        bool                      _indicates;
 
       public:
 
         CharacteristicBase();
         virtual ~CharacteristicBase() {}
 
+	/* Initialize the characteristic.
+	 * @param svc BLE service this characteristic will belong to.
+	 *
+	 * Defaults: 
+	 *
+	 * + readable: true
+	 * + notifies: true
+	 * + broadcast: false
+	 * + indicates: false
+	 *
+	 * Side effect: sets member field <_inited>.
+	 */
         void init(Service* svc);
 
+	/* Set this characteristic to be writable.
+	 */
         CharacteristicBase& setWritable(bool writable) {
             _writable = writable;
             setWritePermission(1, 1);
@@ -266,6 +207,8 @@ namespace BLEpp {
 
         void setupWritePermissions(CharacteristicInit& ci);
 
+	/* Set this characteristic to be notifiable.
+	 */
         CharacteristicBase& setNotifies(bool notifies) {
             _notifies = notifies;
             return *this;
@@ -292,7 +235,7 @@ namespace BLEpp {
          * Security Mode 2 Level 1: Signing or encryption required, MITM protection not necessary.\n
          * Security Mode 2 Level 2: MITM protected signing required, unless link is MITM protected encrypted.\n
         */
-        CharacteristicBase&  setWritePermission(uint8_t securityMode, uint8_t securityLevel) {
+        CharacteristicBase& setWritePermission(uint8_t securityMode, uint8_t securityLevel) {
             _writeperm.sm = securityMode;
             _writeperm.lv = securityLevel;
             return *this;
@@ -335,7 +278,20 @@ namespace BLEpp {
 
         virtual void configurePresentationFormat(ble_gatts_char_pf_t &) {}
 
+	/* Notify any listening party.
+	 *
+	 * If this characteristic can notify, and if notification is enabled, and if there is a connection calling
+	 * this function will notify the listening party.
+	 *
+	 * Notification quickly fills an outgoing buffer in BLE. When this buffer gets full, an error code 
+	 * <BLE_ERROR_NO_TX_BUFFERS> is generated by the SoftDevice. In that case <onNotifyTxError> is called.
+	 *
+	 * @return err_code (which should be NRF_SUCCESS if no error occurred)
+	 */
         uint32_t notify();
+
+	/* Any error in <notify> evokes onNotifyTxError.
+	 */
         virtual void onNotifyTxError();
     };
 
@@ -1041,10 +997,24 @@ namespace BLEpp {
         Service& getService(std::string name);
         Nrf51822BluetoothStack& addService(Service* svc);
 
-        Nrf51822BluetoothStack& startIBeacon();
+        /* Start advertising as an iBeacon
+         *
+         * @beacon the object defining the parameters for the
+         *   advertisement package. See <IBeacon> for an explanation
+         *   of the parameters and values
+         *
+         * Initiates the advertisement package and fills the manufacturing
+         * data array with the values of the <IBeacon> object, then starts
+         * advertising as an iBeacon.
+         *
+         * **Note**: An iBeacon requires that the company identifier is
+         *   set to the Apple Company ID, otherwise it's not an iBeacon.
+         */
+        Nrf51822BluetoothStack& startIBeacon(IBeacon beacon);
 
-        /** Start sending advertisement packets.
-        * This can not be called while scanning, start scanning while advertising is possible though */
+		/* Start sending advertisement packets.
+ 	 	 * This can not be called while scanning, start scanning while advertising is possible though.
+ 	 	 */
         Nrf51822BluetoothStack& startAdvertising();
 
         Nrf51822BluetoothStack& stopAdvertising();

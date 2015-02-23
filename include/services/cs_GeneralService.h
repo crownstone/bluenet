@@ -8,6 +8,7 @@
 
 #include <vector>
 
+#include "characteristics/cs_StreamBuffer.h"
 #include "characteristics/cs_MeshMessage.h"
 #include "characteristics/cs_UuidConfig.h"
 #include "common/cs_Storage.h"
@@ -30,7 +31,15 @@ public:
 
 	/* Update the temperature characteristic.
 	*/
-	void setTemperature(int32_t temperature);
+	void writeTemperature(int32_t temperature);
+
+	/* Update the configuration characteristic.
+	 */
+	void writeConfiguration(uint8_t type);
+
+	/* Read configuration written by user.
+	 */
+	void readConfiguration(uint8_t type, uint8_t length, uint8_t* payload);
 
 	/* Perform non urgent functionality every main loop.
 	 *
@@ -55,14 +64,58 @@ protected:
 	BLEpp::Characteristic<int32_t>* _firmwareCharacteristic;
 	BLEpp::Characteristic<MeshMessage>* _meshCharacteristic;
 
+	/* Set configuration characteristic
+	 *
+	 * The configuration characteristic reuses the format of the mesh messages. The type are identifiers that are
+	 * established:
+	 *
+	 *  * 0 name
+	 *  * 1 device type 
+	 *  * 2 room
+	 *  * 3 floor level
+	 *  
+	 * As you see these are similar to current characteristics and will replace them in the future to save space.
+	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
+	 */
+	BLEpp::Characteristic<StreamBuffer>* _setConfigurationCharacteristic;
+	
+	/* Select configuration characteristic
+	 *
+	 * Just write an identifier to read subsequently from it using <_getConfigurationCharacteristic>. See for the
+	 * possible values <_setConfigurationCharacteristic>.
+	 */
+	BLEpp::Characteristic<uint8_t>* _selectConfigurationCharacteristic;
+
+	/* Get configuration characteristic
+	 *
+	 * You will have first to select a configuration before you can read from it. You write the identifiers also
+	 * described in <_setConfigurationCharacteristic>. 
+	 *
+	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
+	 */
+	BLEpp::Characteristic<StreamBuffer>* _getConfigurationCharacteristic;
+
 	/* Enable the temperature characteristic.
-	*/
+ 	 */
 	void addTemperatureCharacteristic();
+	/* Enable the set configuration characteristic.
+	 *
+	 * See <_setConfigurationCharacteristic>.
+	 */
+	void addSetConfigurationCharacteristic();
+	/* Enable the set configuration characteristic.
+	 *
+	 * See <_selectConfigurationCharacteristic>.
+	 */
+	void addSelectConfigurationCharacteristic();
+	/* Enable the get configuration characteristic.
+	 */
+	void addGetConfigurationCharacteristic();
 	/* Enable the change name characteristic.
-	*/
+	 */
 	void addChangeNameCharacteristic();
 	/* Enable the device type characteristic.
-	*/
+	 */
 	void addDeviceTypeCharacteristic();
 	/* Enable the room characteristic.
 	 *
@@ -71,10 +124,10 @@ protected:
 	 */
 	void addRoomCharacteristic();
 	/* Enable the firmware upgrade characteristic.
-	*/
+	 */
 	void addFirmwareCharacteristic();
 	/* Enable the mesh characteristic.
-	*/
+	 */
 	void addMeshCharacteristic();
 
 	/* Retrieve the Bluetooth name from the object representing the BLE stack.
@@ -105,4 +158,8 @@ private:
 
 	pstorage_handle_t _storageHandle;
 	ps_general_service_t _storageStruct;
+
+	/* Select configuration for subsequent read actions on the get configuration characteristic.
+	 */
+	uint8_t _selectConfiguration;
 };

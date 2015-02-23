@@ -57,7 +57,7 @@ characteristic.
       <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
     </return>
     <argument id="BLEpp::Characteristic::setUUID::uuid" name="uuid">
-      <type name="UUID" qualifier=" const &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+      <type name="UUID" qualifier=" const &amp;" />
     </argument>
     <override name="CharacteristicBase::setUUID" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setUUID" />
   </method>

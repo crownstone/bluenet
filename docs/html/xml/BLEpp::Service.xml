@@ -56,7 +56,7 @@
   </method>
   <method id="BLEpp::Service::getUUID" name="getUUID">
     <return>
-      <type name="UUID" qualifier=" &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+      <type name="UUID" qualifier=" &amp;" />
     </return>
   </method>
   <method abstract="yes" id="BLEpp::Service::on_ble_event" name="on_ble_event" virtual="yes">
@@ -129,7 +129,7 @@
       <type name="Service" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service" />
     </return>
     <argument id="BLEpp::Service::setUUID::uuid" name="uuid">
-      <type name="UUID" qualifier=" const &amp;" ref="BLEpp::UUID#BLEpp::UUID" />
+      <type name="UUID" qualifier=" const &amp;" />
     </argument>
   </method>
   <method abstract="yes" id="BLEpp::Service::start" name="start" virtual="yes">
@@ -150,7 +150,7 @@
     <type name="BLEStack" qualifier="*" ref="BLEpp::BLEStack#BLEpp::BLEStack" />
   </field>
   <field access="protected" id="BLEpp::Service::_uuid" name="_uuid">
-    <type name="UUID" ref="BLEpp::UUID#BLEpp::UUID" />
+    <type name="UUID" />
   </field>
   <field access="protected" id="BLEpp::Service::_name" name="_name">
     <type name="std::string" />

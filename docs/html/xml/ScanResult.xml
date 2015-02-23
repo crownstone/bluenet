@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="ScanResult" interface="true" name="ScanResult" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Result of a scan device operation</brief>
+  <doc>The ScanResult class stores a list of devices which were detected during
+a scan operation. It keeps track of how often a device was seen and with
+which RSSI value.
+</doc>
+  <constructor abstract="yes" id="ScanResult::ScanResult" name="ScanResult">
+    <brief>Default constructor</brief>
+  </constructor>
+  <method abstract="yes" id="ScanResult::deserialize" name="deserialize">
+    <brief> De-serialize the data from the byte array into this object</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="ScanResult::deserialize::buffer" name="buffer">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+    <argument id="ScanResult::deserialize::length" name="length">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="ScanResult::getSerializedLength" name="getSerializedLength">
+    <brief> Return length of buffer required to store the serialized form of this object.</brief>
+    <doc>The size is determined by multiplying the number of devices with
+&amp;lt;SERIALIZED\_DEVICE\_SIZE&amp;gt; and adding the header size &amp;lt;HEADER\_SIZE&amp;gt;
+
+</doc>
+    <return>
+      <doc>number of bytes required</doc>
+      <type name="uint32_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="ScanResult::getSize" name="getSize">
+    <brief>Return the number of devices already stored in the list</brief>
+    <return>
+      <doc>number of stored devices</doc>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="ScanResult::init" name="init">
+    <brief>Allocate and initialize an empty list</brief>
+    <doc>If there was already a list created earlier, the
+old list is freed and a new list is allocated
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="ScanResult::operator!=" name="operator!=">
+    <brief>Basic not equal operator</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="ScanResult::operator!=::val" name="val">
+      <type name="ScanResult" qualifier=" const &amp;" ref="ScanResult#ScanResult" />
+    </argument>
+  </method>
+  <method abstract="yes" id="ScanResult::print" name="print">
+    <brief>Print the list of devices for debug purposes to the UART</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="ScanResult::reset" name="reset">
+    <brief>Clear the list of devices</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="ScanResult::serialize" name="serialize">
+    <brief> Serialize the data into a byte array</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="ScanResult::serialize::buffer" name="buffer">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+    <argument id="ScanResult::serialize::length" name="length">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="ScanResult::update" name="update">
+    <brief>Update the list with the given device</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="ScanResult::update::adrs_ptr" name="adrs_ptr">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+    <argument id="ScanResult::update::rssi" name="rssi">
+      <type name="int8_t" />
+    </argument>
+  </method>
+</class>

@@ -2,19 +2,25 @@
 <class abstract="true" id="BLEpp::IBeacon" name="IBeacon" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <brief> Implementation of the iBeacon specification.</brief>
   <doc>The implementation of the iBeacon specification is only about advertising at predefined intervals and
-casting a payload in the form of a specific structure:
+casting a payload (the manufacturing data of an advertisement package) in the form of a specific
+structure:
 
- * Apple Prefix
- * UUID of company
- * major (group level identifier, e.g. on the level of a building)
- * minor (individual nodes)
+ * iBeacon Prefix
+ * proximity UUID. An identifier which should be used to distinguish your beacons from others (for a
+   given application, all of your iBeacons share the same UUID), the individual iBeacons are then
+   distinguished by major and minor numbers
+ * major (group level identifier, e.g. on the level of a building, unique amongst all nodes with a
+   given proximity UUID)
+ * minor (individual nodes, unique amongst all nodes with a given proximity UUID and major number)
+ * rssi value (known rssi value at 1m distance, used to calculate actual distance from the iBeacon)
 
 Note that you might not be able to use this commercially! Although I would be surprised if it is possible
 to patent a "struct" or the Apple prefix.
 </doc>
   <constructor id="BLEpp::IBeacon::IBeacon" name="IBeacon">
+    <brief> Default constructor for the iBeacon class</brief>
     <argument id="BLEpp::IBeacon::IBeacon::uuid" name="uuid">
-      <type name="UUID" ref="BLEpp::UUID#BLEpp::UUID" />
+      <type name="UUID" />
     </argument>
     <argument id="BLEpp::IBeacon::IBeacon::major" name="major">
       <type name="uint16_t" />
@@ -27,7 +33,7 @@ to patent a "struct" or the Apple prefix.
     </argument>
   </constructor>
   <method id="BLEpp::IBeacon::size" name="size">
-    <brief> The size of the iBeacon advertisement</brief>
+    <brief> The size of the iBeacon advertisement data</brief>
     <doc>size is calculated as:
                 2B              advertisement indicator
                 16B             uuid (as byte array)
@@ -36,12 +42,15 @@ to patent a "struct" or the Apple prefix.
                 1B              rssi
         --------------------------------------
                 23B             total
+
 </doc>
     <return>
+      <doc>the size of the advertisement data</doc>
       <type name="uint8_t" />
     </return>
   </method>
   <method abstract="yes" id="BLEpp::IBeacon::toArray" name="toArray">
+    <brief> Serializes the object to a byte array</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>

@@ -18,8 +18,6 @@
 
 #include "util/cs_Utils.h"
 
-//#include <BluetoothLE.h> // TODO: now for BLE_CALL, should be moved to other unit
-
 extern "C" {
 //#include <app_scheduler.h>
 
@@ -63,30 +61,40 @@ Storage::Storage() {
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
 		LOGi("Init %i bytes persistent storage (FLASH) for id %d", config[i].storage_size, config[i].id);
-		initBlocks(1, config[i].storage_size, config[i].handle);
+		initBlocks(config[i].storage_size, config[i].handle);
 	}
 }
 
-bool Storage::getHandle(ps_storage_id storageID, pstorage_handle_t& handle) {
+storage_config_t* Storage::getStorageConfig(ps_storage_id storageID) {
+
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
 		if (config[i].id == storageID) {
-			handle = config[i].handle;
-			return true;
+			return &config[i];
 		}
 	}
-	return false;
+
+	return NULL;
+}
+
+bool Storage::getHandle(ps_storage_id storageID, pstorage_handle_t& handle) {
+	storage_config_t* config;
+
+	if ((config = getStorageConfig(storageID))) {
+		handle = config->handle;
+		return true;
+	} else {
+		return false;
+	}
 }
 
 /**
  * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
  */
-void Storage::initBlocks(int blocks, int size, pstorage_handle_t& handle) {
-	_size = size;
-
+void Storage::initBlocks(pstorage_size_t size, pstorage_handle_t& handle) {
 	// set parameter
 	pstorage_module_param_t param;
 	param.block_size = size;
-	param.block_count = blocks;
+	param.block_count = 1;
 	param.cb = pstorage_callback_handler;
 
 	// register
@@ -94,100 +102,21 @@ void Storage::initBlocks(int blocks, int size, pstorage_handle_t& handle) {
 }
 
 /**
- * We have to clear an entire block before we can write a value to one of the fields!
+ * Nordic bug: We have to clear the entire block!
  */
-void Storage::clearBlock(pstorage_handle_t handle, int blockID) {
+void Storage::clearBlock(pstorage_handle_t handle, ps_storage_id storageID) {
+
+	storage_config_t* config;
+	if (!(config = getStorageConfig(storageID))) {
+		// if no config was found for the given storage ID return
+		return;
+	}
 
 	pstorage_handle_t block_handle;
-	BLE_CALL ( pstorage_block_identifier_get,(&handle, blockID, &block_handle) );
+	BLE_CALL ( pstorage_block_identifier_get,(&handle, 0, &block_handle) );
 
 	LOGw("Nordic bug: clear entire block before writing to it");
-	BLE_CALL (pstorage_clear, (&block_handle, _size) );
-}
-
-// Get byte at location "index" 
-void Storage::getUint8(pstorage_handle_t handle, int blockID, uint8_t *item) {
-	static uint8_t wg8[4];
-	pstorage_handle_t block_handle;
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
-	BLE_CALL (pstorage_load, (wg8, &block_handle, 4, 0));
-	memcpy(item, wg8, 1);
-}
-
-// Store byte
-void Storage::setUint8(pstorage_handle_t handle, int blockID, const uint8_t item) {
-	static uint8_t ws8[4];
-	pstorage_handle_t block_handle;
-
-//	clearBlock(handle, blockID);
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
-	memcpy(ws8, &item, 1);
-	BLE_CALL (pstorage_update, (&block_handle, ws8, 4, 0) );
-}
-
-// Get 16-bit integer
-void Storage::getUint16(pstorage_handle_t handle, int blockID, uint16_t *item) {
-	static uint8_t wg16[4];
-	pstorage_handle_t block_handle;
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
-	BLE_CALL (pstorage_load, (wg16, &block_handle, 4, 0) );
-#ifdef PRINT_ITEMS
-	LOGd("Load item[0]: %d", wg16[0]);
-	LOGd("Load item[1]: %d", wg16[1]);
-	LOGd("Load item[2]: %d", wg16[2]);
-	LOGd("Load item[3]: %d", wg16[3]);
-#endif
-	memcpy(item, wg16, 2);
-#ifdef PRINT_PENDINSG
-	uint32_t count;
-	BLE_CALL ( pstorage_access_status_get, (&count) );
-	LOGd("Number of pending operations: %i", count);
-#endif
-}
-
-// Set 16-bit integer
-void Storage::setUint16(pstorage_handle_t handle, int blockID, const uint16_t item) {
-	pstorage_handle_t block_handle;
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
-
-//	clearBlock(handle, blockID);
-
-	static uint8_t ws16[4];
-	memcpy(ws16, &item, 2);
-#ifdef PRINT_ITEMS
-	LOGd("Store item[0]: %d", ws16[0]);
-	LOGd("Store item[1]: %d", ws16[1]);
-	LOGd("Store item[2]: %d", ws16[2]);
-	LOGd("Store item[3]: %d", ws16[3]);
-#endif
-	BLE_CALL (pstorage_update, (&block_handle, ws16, 4, 0) );
-#ifdef PRINT_PENDING
-	uint32_t count;
-	BLE_CALL ( pstorage_access_status_get, (&count) );
-	LOGd("Number of pending operations: %i", count);
-#endif
-}	
-
-void Storage::getString(pstorage_handle_t handle, int blockID, char* item, int16_t length) {
-	pstorage_handle_t block_handle;
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
-
-	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, length, 0) );
-}
-
-void Storage::setString(pstorage_handle_t handle, int blockID, const char* item, int16_t length) {
-	pstorage_handle_t block_handle;
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, blockID, &block_handle) );
-
-//	clearBlock(handle, blockID);
-
-	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, length, 0) );
+	BLE_CALL (pstorage_clear, (&block_handle, config->storage_size) );
 }
 
 void Storage::getStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
@@ -222,7 +151,7 @@ void Storage::setStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint1
 
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
 
-	//	clearBlock(handle, 0);
+	//	clearBlock(handle);
 
 	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
 
@@ -306,8 +235,8 @@ void Storage::getUint16(uint32_t value, uint16_t& target, uint16_t default_value
 }
 
 void Storage::setUint32(uint32_t value, uint32_t& target) {
-	if (value & 1 << 31) {
-		LOGe("value %d too big, can only write max %d", value, INT_MAX & ~(1 << 31));
+	if (value == INT_MAX) {
+		LOGe("value %d too big, can only write max %d", value, INT_MAX-1);
 	} else {
 		target = value;
 	}
@@ -320,9 +249,9 @@ void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value
 	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
-	// check if last bit is 1 which means that memory is unnassigned
-	// and value has to be ignored
-	if (value & (1 << 31)) {
+	// check if value is equal to INT_MAX (FFFFFFFF) which means that memory is
+	// unnassigned and value has to be ignored
+	if (value == INT_MAX) {
 		LOGd("use default value");
 		target = default_value;
 	} else {

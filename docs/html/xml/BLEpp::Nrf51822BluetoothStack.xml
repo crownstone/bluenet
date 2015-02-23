@@ -250,9 +250,13 @@ stack object as an argument w.r.t. this object. This makes dependencies traceble
     </return>
   </method>
   <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::startIBeacon" name="startIBeacon">
+    <brief> Start advertising as an iBeacon</brief>
     <return>
       <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::startIBeacon::beacon" name="beacon">
+      <type name="IBeacon" ref="BLEpp::IBeacon#BLEpp::IBeacon" />
+    </argument>
   </method>
   <method id="BLEpp::Nrf51822BluetoothStack::startScanning" name="startScanning">
     <return>

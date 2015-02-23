@@ -24,13 +24,19 @@ If meshing is enabled, it is also possible to send a message into the mesh netwo
       <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </argument>
   </method>
-  <method abstract="yes" id="GeneralService::setTemperature" name="setTemperature">
-    <brief>Update the temperature characteristic.</brief>
+  <method abstract="yes" id="GeneralService::readConfiguration" name="readConfiguration">
+    <brief>Read configuration written by user.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="GeneralService::setTemperature::temperature" name="temperature">
-      <type name="int32_t" />
+    <argument id="GeneralService::readConfiguration::type" name="type">
+      <type name="uint8_t" />
+    </argument>
+    <argument id="GeneralService::readConfiguration::length" name="length">
+      <type name="uint8_t" />
+    </argument>
+    <argument id="GeneralService::readConfiguration::payload" name="payload">
+      <type name="uint8_t" qualifier="*" />
     </argument>
   </method>
   <method abstract="yes" id="GeneralService::tick" name="tick">
@@ -42,6 +48,24 @@ tick, because timing is not important for this at all.
     <return>
       <type builtin="yes" name="void" />
     </return>
+  </method>
+  <method abstract="yes" id="GeneralService::writeConfiguration" name="writeConfiguration">
+    <brief>Update the configuration characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::writeConfiguration::type" name="type">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="GeneralService::writeTemperature" name="writeTemperature">
+    <brief>Update the temperature characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::writeTemperature::temperature" name="temperature">
+      <type name="int32_t" />
+    </argument>
   </method>
   <field access="protected" id="GeneralService::_stack" name="_stack">
     <type name="BLEpp::Nrf51822BluetoothStack" qualifier="*" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
@@ -65,6 +89,37 @@ tick, because timing is not important for this at all.
   <field access="protected" id="GeneralService::_meshCharacteristic" name="_meshCharacteristic">
     <type name="BLEpp::Characteristic&lt;MeshMessage&gt;" qualifier="*" />
   </field>
+  <field access="protected" id="GeneralService::_setConfigurationCharacteristic" name="_setConfigurationCharacteristic">
+    <brief>Set configuration characteristic</brief>
+    <doc>The configuration characteristic reuses the format of the mesh messages. The type are identifiers that are
+established:
+
+ * 0 name
+ * 1 device type
+ * 2 room
+ * 3 floor level
+
+As you see these are similar to current characteristics and will replace them in the future to save space.
+Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
+</doc>
+    <type name="BLEpp::Characteristic&lt;StreamBuffer&gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_selectConfigurationCharacteristic" name="_selectConfigurationCharacteristic">
+    <brief>Select configuration characteristic</brief>
+    <doc>Just write an identifier to read subsequently from it using <ref ref="GeneralService#GeneralService::_getConfigurationCharacteristic">GeneralService::_getConfigurationCharacteristic</ref>. See for the
+possible values <ref ref="GeneralService#GeneralService::_setConfigurationCharacteristic">GeneralService::_setConfigurationCharacteristic</ref>.
+</doc>
+    <type name="BLEpp::Characteristic&lt;unsigned char&gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_getConfigurationCharacteristic" name="_getConfigurationCharacteristic">
+    <brief>Get configuration characteristic</brief>
+    <doc>You will have first to select a configuration before you can read from it. You write the identifiers also
+described in <ref ref="GeneralService#GeneralService::_setConfigurationCharacteristic">GeneralService::_setConfigurationCharacteristic</ref>.
+
+Then each of these returns a byte array, with e.g. a name, device type, room, etc.
+</doc>
+    <type name="BLEpp::Characteristic&lt;StreamBuffer&gt;" qualifier="*" />
+  </field>
   <method abstract="yes" access="protected" id="GeneralService::addChangeNameCharacteristic" name="addChangeNameCharacteristic">
     <brief>Enable the change name characteristic.</brief>
     <return>
@@ -83,6 +138,12 @@ tick, because timing is not important for this at all.
       <type builtin="yes" name="void" />
     </return>
   </method>
+  <method abstract="yes" access="protected" id="GeneralService::addGetConfigurationCharacteristic" name="addGetConfigurationCharacteristic">
+    <brief>Enable the get configuration characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
   <method abstract="yes" access="protected" id="GeneralService::addMeshCharacteristic" name="addMeshCharacteristic">
     <brief>Enable the mesh characteristic.</brief>
     <return>
@@ -93,6 +154,22 @@ tick, because timing is not important for this at all.
     <brief>Enable the room characteristic.</brief>
     <doc>The room needs to be set by the user. There is not yet functionality in place in the crownstone
 software to figure this out for itself.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addSelectConfigurationCharacteristic" name="addSelectConfigurationCharacteristic">
+    <brief>Enable the set configuration characteristic.</brief>
+    <doc>See <ref ref="GeneralService#GeneralService::_selectConfigurationCharacteristic">GeneralService::_selectConfigurationCharacteristic</ref>.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addSetConfigurationCharacteristic" name="addSetConfigurationCharacteristic">
+    <brief>Enable the set configuration characteristic.</brief>
+    <doc>See <ref ref="GeneralService#GeneralService::_setConfigurationCharacteristic">GeneralService::_setConfigurationCharacteristic</ref>.
 </doc>
     <return>
       <type builtin="yes" name="void" />

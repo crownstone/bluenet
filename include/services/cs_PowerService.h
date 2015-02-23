@@ -42,7 +42,7 @@ protected:
 	
 	// The characteristics in this service
 	void addPWMCharacteristic();
-	void addGetCurrentCharacteristic();
+	void addSampleCurrentCharacteristic();
 	void addCurrentCurveCharacteristic();
 	void addCurrentConsumptionCharacteristic();
 	void addCurrentLimitCharacteristic();
