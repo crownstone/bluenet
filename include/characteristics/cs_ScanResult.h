@@ -66,7 +66,7 @@ namespace BLEpp {
 template<> class CharacteristicT<ScanResult> : public Characteristic<ScanResult> {
 
 private:
-	uint8_t _buffer[HEADER_SIZE + MAX_NR_DEVICES * SERIALIZED_DEVICE_SIZE];
+	uint8_t* _buffer;
 	bool _notificationPending;
 
 public:
@@ -79,7 +79,10 @@ public:
 		CharacteristicValue value;
 		const ScanResult& t = this->getValue();
 		uint32_t len = t.getSerializedLength();
-		memset(_buffer, 0, len);
+		if (_buffer) {
+			free(_buffer);
+		}
+		_buffer = (uint8_t*)calloc(len, sizeof(uint8_t));
 		t.serialize(_buffer, len);
 		return CharacteristicValue(len, _buffer);
 	}
