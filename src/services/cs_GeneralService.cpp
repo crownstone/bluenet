@@ -74,11 +74,11 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 }
 
 void GeneralService::loadPersistentStorage() {
-	Storage::getInstance().getStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void GeneralService::savePersistentStorage() {
-	Storage::getInstance().setStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void GeneralService::addTemperatureCharacteristic() {
