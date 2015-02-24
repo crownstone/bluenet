@@ -127,7 +127,7 @@
 
 #endif
 
-// Sanity check to see if all required pins are defined
+// Sanity checks
 
 #ifndef PIN_AIN_ADC
 #error "For AD conversion PIN_ADC must be defined"
@@ -148,3 +148,12 @@
 #ifndef HARDWARE_VERSION
 #error "You have to specify the hardware version of your chip"
 #endif
+
+#ifndef TICK_CONTINUOUSLY
+#error "You have to specify TICK_CONTINUOUSLY in your config file"
+#endif
+
+#ifndef MESHING
+#error "You have to specify MESHING in your config file (values 0,1)"
+#endif
+

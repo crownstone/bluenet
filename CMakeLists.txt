@@ -101,9 +101,11 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_CurrentLimit.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_TrackDevices.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_StreamBuffer.cpp")
 IF(${GENERAL_SERVICE} STRGREATER "0")
+IF(${MESHING})
 IF(${MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_MeshMessage.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_MeshControl.cpp")
+ENDIF()
 ENDIF()
 ENDIF()
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_UUID.cpp")
@@ -122,6 +124,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_Dispatcher.cpp")
 # should be only when creating iBeacon
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_iBeacon.cpp")
 
+IF(${MESHING})
 IF(${MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_Mesh.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/mesh_srv.c")
@@ -134,7 +137,8 @@ IF(${MESHING} STRGREATER "0")
 
 	# temporarily
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/led_config.c")
-ENDIF()
+endif()
+endif()
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 

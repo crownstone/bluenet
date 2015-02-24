@@ -54,6 +54,8 @@
 
 #include "cs_BluetoothLE.h"
 
+#include <common/cs_Config.h>
+
 #if(NORDIC_SDK_VERSION < 5)
 #include "ble_stack_handler.h"
 #include "ble_nrf6310_pins.h"
