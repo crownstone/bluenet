@@ -72,4 +72,6 @@ private:
 
 	pstorage_handle_t _storageHandle;
 	ps_power_service_t _storageStruct;
+
+	bool _adcInitialized;
 };

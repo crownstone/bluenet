@@ -105,6 +105,12 @@ void PowerService::addSampleCurrentCharacteristic() {
 		.setDefaultValue(0)
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
+			if (!_adcInitialized) {
+				// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
+				ADC::getInstance().init(PIN_AIN_ADC);
+				_adcInitialized = true;
+			}
+
 			sampleCurrentInit();
 			uint16_t current_rms = sampleCurrentFinish(value);
 			if ((value & 0x01) && _currentConsumptionCharacteristic != NULL) {
@@ -114,7 +120,8 @@ void PowerService::addSampleCurrentCharacteristic() {
 				(*_currentCurveCharacteristic) = _streamBuffer; // TODO: stream curve
 			}
 		});
-	ADC::getInstance().init(PIN_AIN_ADC);
+	_adcInitialized = false;
+//	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
 void PowerService::addCurrentCurveCharacteristic() {

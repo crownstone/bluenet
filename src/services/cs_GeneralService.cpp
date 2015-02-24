@@ -58,15 +58,15 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 #endif
 	characStatus.push_back( { "Set configuration",
 		SET_CONFIGURATION_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addSetConfigurationCharacteristic) });
 	characStatus.push_back( { "Select configuration",
 		SELECT_CONFIGURATION_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addSelectConfigurationCharacteristic) });
 	characStatus.push_back( { "Get configuration",
 		GET_CONFIGURATION_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addGetConfigurationCharacteristic) });
 
 	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
