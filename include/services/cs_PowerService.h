@@ -74,4 +74,5 @@ private:
 	ps_power_service_t _storageStruct;
 
 	bool _adcInitialized;
+	bool _currentLimitInitialized;
 };

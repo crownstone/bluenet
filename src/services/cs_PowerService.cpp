@@ -175,15 +175,21 @@ void PowerService::addCurrentLimitCharacteristic() {
 		.onWrite([&](const uint8_t &value) -> void {
 			LOGi("Set current limit to: %i", value);
 			_currentLimitVal = value;
-
+			if (!_currentLimitInitialized) {
+				_currentLimit.init();
+				_currentLimitInitialized = true;
+			}
 			_currentLimit.start(&_currentLimitVal);
 			LOGi("Write value to persistent memory");
 			Storage::setUint8(_currentLimitVal, _storageStruct.current_limit);
 			savePersistentStorage();
 		});
 
-	_currentLimit.start(&_currentLimitVal);
-	_currentLimit.init();
+	// TODO: we have to delay the init, since there is a spike on the AIN pin at startup!
+	// For now: init at onWrite, so we can still test it.
+//	_currentLimit.start(&_currentLimitVal);
+//	_currentLimit.init();
+	_currentLimitInitialized = false;
 }
 
 //static int tmp_cnt = 100;
