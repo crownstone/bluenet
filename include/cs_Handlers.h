@@ -15,7 +15,8 @@ extern "C" {
 // include ble_error.h to redefine our APP_ERROR_CHECK macro
 #include "util/cs_BleError.h"
 
-#include "common/cs_Storage.h"
+#include <pstorage.h>
+
 #include "drivers/cs_Serial.h"
 
 /**

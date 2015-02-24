@@ -22,8 +22,10 @@ using namespace BLEpp;
 
 IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _stack) :
 		_stack(&_stack),
-		_rssiCharac(NULL), _peripheralCharac(NULL), _scanResult(NULL),
-		_trackedDeviceList(NULL), _trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL), _trackIsNearby(false) {
+		_rssiCharac(NULL), _peripheralCharac(NULL),
+		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL), _trackIsNearby(false),
+		_scanResult(NULL), _trackedDeviceList(NULL)
+{
 
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
@@ -57,6 +59,17 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 	_trackMode = false;
 //	// set timer with compare interrupt every 10ms
 //	timer_config(10);
+
+	Storage::getInstance().getHandle(PS_ID_INDOORLOCALISATION_SERVICE, _storageHandle);
+	loadPersistentStorage();
+}
+
+void IndoorLocalizationService::loadPersistentStorage() {
+	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+}
+
+void IndoorLocalizationService::savePersistentStorage() {
+	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void IndoorLocalizationService::tick() {

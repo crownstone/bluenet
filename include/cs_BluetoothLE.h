@@ -38,7 +38,7 @@ extern "C" {
 #include <util/cs_BleError.h>
 #include <drivers/cs_Serial.h>
 #include <cs_UUID.h>
-#include <cs_Serializable.h>
+#include <cs_AllocatedBuffer.h>
 #include <cs_iBeacon.h>
 
 #include <third/std/function.h>
@@ -513,31 +513,31 @@ namespace BLEpp {
         virtual void setCharacteristicValue(const CharacteristicValue& value) = 0; // defined only in specializations.
     };
 
-    // A characteristic that implements ISerializable
-    template<typename T > 
-    class CharacteristicT<T, typename std::enable_if<std::is_base_of<ISerializable, T>::value >::type> : public Characteristic<T> {
-       public:
-        CharacteristicT& operator=(const T& val) {
-            Characteristic<T>::operator=(val);
-            return *this;
-        }
-
-        virtual CharacteristicValue getCharacteristicValue() {
-            CharacteristicValue value;
-            const T& t = this->getValue();
-            AllocatedBuffer b;
-            b.allocate(t.getSerializedLength());
-            t.serialize(b);
-            b.release();
-            return CharacteristicValue(b.length, b.data);
-        }
-        virtual void setCharacteristicValue(const CharacteristicValue& value) {
-            T t;
-            AllocatedBuffer b(value.length, (uint8_t*)value.data);
-            t.deserialize(b);
-            this->setValue(t);
-        }
-    };
+//    // A characteristic that implements ISerializable
+//    template<typename T >
+//    class CharacteristicT<T, typename std::enable_if<std::is_base_of<ISerializable, T>::value >::type> : public Characteristic<T> {
+//       public:
+//        CharacteristicT& operator=(const T& val) {
+//            Characteristic<T>::operator=(val);
+//            return *this;
+//        }
+//
+//        virtual CharacteristicValue getCharacteristicValue() {
+//            CharacteristicValue value;
+//            const T& t = this->getValue();
+//            AllocatedBuffer b;
+//            b.allocate(t.getSerializedLength());
+//            t.serialize(b);
+//            b.release();
+//            return CharacteristicValue(b.length, b.data);
+//        }
+//        virtual void setCharacteristicValue(const CharacteristicValue& value) {
+//            T t;
+//            AllocatedBuffer b(value.length, (uint8_t*)value.data);
+//            t.deserialize(b);
+//            this->setValue(t);
+//        }
+//    };
 
     // A characteristic for built-in arithmetic types (int, float, etc)
     template<typename T > class CharacteristicT<T, typename std::enable_if<std::is_arithmetic<T>::value >::type> : public Characteristic<T> {

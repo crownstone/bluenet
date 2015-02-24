@@ -59,11 +59,11 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 }
 
 void PowerService::loadPersistentStorage() {
-	Storage::getInstance().getStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void PowerService::savePersistentStorage() {
-	Storage::getInstance().setStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void PowerService::addPWMCharacteristic() {

@@ -12,6 +12,8 @@
 #include "characteristics/cs_UuidConfig.h"
 #include "cs_BluetoothLE.h"
 
+#include "common/cs_Storage.h"
+
 #define INDOORLOCALISATION_UUID "7e170000-429c-41aa-83d7-d91220abeb33"
 
 class IndoorLocalizationService : public BLEpp::GenericService {
@@ -31,6 +33,17 @@ protected:
 	void addDeviceTypeCharactersitic();
 	void addRoomCharacteristic();
 
+	/* Get a handle to the persistent storage struct and load it from FLASH.
+	 *
+	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
+	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
+	 * Hence, there is an entire struct that can be filled and flashed at once.
+	 */
+	void loadPersistentStorage();
+
+	/* Save to FLASH.
+	*/
+	void savePersistentStorage();
 public:
 	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
 
@@ -63,4 +76,6 @@ private:
 	ScanResult* _scanResult;
 	TrackedDeviceList* _trackedDeviceList;
 
+	pstorage_handle_t _storageHandle;
+	ps_indoorlocalisation_service_t _storageStruct;
 };

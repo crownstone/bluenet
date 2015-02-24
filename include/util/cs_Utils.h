@@ -10,12 +10,30 @@
 
 namespace BLEutil {
 
-// convert a short from LSB to MSB and vice versa
+/* Convert a short (uint16_t) from LSB (little-endian) to
+ * MSB (big-endian) and vice versa
+ *
+ * @val the value to be converted
+ *
+ * @return the converted value
+ */
 uint16_t convertEndian16(uint16_t val);
 
-// convert an integer from LSB to MSB and vice versa
+/* Convert an integer (uint32_t) from LSB (little-endian) to
+ * MSB (big-endian) and vice versa
+ *
+ * @val the value to be converted
+ *
+ * @return the converted value
+ */
 uint32_t convertEndian32(uint32_t val);
 
-}
-
+/* Macro that returns the length of an array
+ *
+ * @a the array whose length should be calculated
+ *
+ * @return the length of the array
+ */
 #define SIZEOF_ARRAY( a ) (int)(sizeof( a ) / sizeof( a[ 0 ] ))
+
+}
