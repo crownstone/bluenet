@@ -17,6 +17,6 @@ sed -i 's/\.bss\S*/.bss/g' prog.map
 
 cd $path/../util/memory
 
-echo "Load now file prog.map from build directory in your browser"
-gnome-open index.html
+#echo "Load now file prog.map from build directory in your browser"
+#gnome-open index.html
 

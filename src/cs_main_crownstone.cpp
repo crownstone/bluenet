@@ -40,7 +40,7 @@
 // softdevice_handler_init call
 #define USE_DEFAULT_SOFTDEVICE_HANDLER
 
-//#define DEFAULT_ON
+#define DEFAULT_ON
 
 #if __clang__
 #define STRINGIFY(str) #str
