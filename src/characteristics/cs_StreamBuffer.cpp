@@ -19,7 +19,7 @@ bool StreamBuffer::operator!=(const StreamBuffer &other) {
 	return false;
 }
 
-uint32_t StreamBuffer::getSerializedLength() const {
+uint16_t StreamBuffer::getSerializedLength() const {
 	return MAX_BUFFER_SERIALIZED_SIZE;
 }
 

@@ -122,7 +122,7 @@ void ScanResult::print() const {
 
 /** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
 * it means that the object does not need external buffer space. */
-uint32_t ScanResult::getSerializedLength() const {
+uint16_t ScanResult::getSerializedLength() const {
 	return getSize() * SERIALIZED_DEVICE_SIZE + HEADER_SIZE;
 }
 

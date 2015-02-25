@@ -10,7 +10,9 @@
 #include "ble_gatts.h"
 
 #include "cs_BluetoothLE.h"
-#include "cs_Serializable.h"
+#include "characteristics/cs_Serializable.h"
+
+using namespace BLEpp;
 
 /* Structure used to store peripheral devices detected during a scan.
  *
@@ -53,7 +55,7 @@ struct __attribute__((__packed__)) peripheral_device_t {
  * a scan operation. It keeps track of how often a device was seen and with
  * which RSSI value.
  */
-class ScanResult {
+class ScanResult : public Serializable {
 
 private:
 	/* A pointer to the list of detected devices
@@ -68,6 +70,16 @@ public:
 	/* Default constructor
 	 */
 	ScanResult();
+
+	/* Default destructor
+	 *
+	 * Free list on destruction
+	 */
+	~ScanResult() {
+		if (_list) {
+			free(_list);
+		}
+	}
 
 	/* Allocate and initialize an empty list
 	 *
@@ -125,7 +137,18 @@ public:
      *
      * @return number of bytes required
      */
-    uint32_t getSerializedLength() const;
+    uint16_t getSerializedLength() const;
+
+	/* Return the maximum possible length of the serialized object
+	 *
+	 * This is defined by:
+	 * <HEADER_SIZE> + <MAX_NR_DEVICES> * <SERIALIZED_DEVICE_SIZE>
+	 *
+	 * @return the maximum possible length
+	 */
+    uint16_t getMaxLength() const {
+    	return HEADER_SIZE + MAX_NR_DEVICES * SERIALIZED_DEVICE_SIZE;
+    }
 
     /* Serialize the data into a byte array
      *
@@ -160,118 +183,118 @@ public:
 
 };
 
-namespace BLEpp { // template has to be in the same namespace as the other CharacteristicT templates
-
-/* Scan Result characteristic
- *
- * This template implements the functions specific for the Scan Result Characteristic.
- * It takes care of setting and reading the list of scanned devices and handles
- * notify requests for the characteristic, in particular making sure that the list
- * is sent over the air.
- */
-template<> class CharacteristicT<ScanResult> : public Characteristic<ScanResult> {
-
-private:
-	/* Pointer to buffer used to store the serialized ScanResult object
-	 */
-	uint8_t* _buffer;
-
-	/* Flag to indicate if notification is pending to be sent once currently waiting
-	 * tx operations are completed
-	 */
-	bool _notificationPending;
-
-public:
-	/* Default asign operator
-	 *
-	 * @val ScanResult object which should be assigned
-	 *
-	 * Assigns the ScanResult object to this characteristic
-	 */
-	CharacteristicT& operator=(const ScanResult& val) {
-		Characteristic<ScanResult>::operator=(val);
-		return *this;
-	}
-
-	/* Returns the ScanResult object currently assigned to the characteristic
-	 *
-	 * Serialized the ScanResult object into a byte buffer and returns it as a
-	 * <CharacteristicValue>
-	 *
-	 * @return the serialized ScanResult object in a <CharacteristicValue> object
-	 */
-	CharacteristicValue getCharacteristicValue() {
-		CharacteristicValue value;
-		const ScanResult& t = this->getValue();
-		uint32_t len = t.getSerializedLength();
-		if (_buffer) {
-			free(_buffer);
-		}
-		_buffer = (uint8_t*)calloc(len, sizeof(uint8_t));
-		t.serialize(_buffer, len);
-		return CharacteristicValue(len, _buffer);
-	}
-
-	/* Assign the given <CharacteristicValue> to this characteristic
-	 *
-	 * @value the <CharacteristicValue> object which should be assigned
-	 *
-	 * Deserializes the byte buffer obtained from the <CharacteristicValue>
-	 * into a ScanResult object and assigns that to the charachteristic
-	 */
-	void setCharacteristicValue(const CharacteristicValue& value) {
-		ScanResult t;
-		t.deserialize(value.data, value.length);
-		this->setValue(t);
-	}
-
-	/* Return the maximum possible length of the buffer
-	 *
-	 * This is defined by:
-	 * <HEADER_SIZE> + <MAX_NR_DEVICES> * <SERIALIZED_DEVICE_SIZE>
-	 *
-	 * @return the maximum possible length
-	 */
-	uint16_t getValueMaxLength() {
-		return HEADER_SIZE + MAX_NR_DEVICES * SERIALIZED_DEVICE_SIZE;
-	}
-
-	/* Callback function if a notify tx error occurs
-	 *
-	 * This is called when the notify operation fails with a tx error. This
-	 * can occur when too many tx operations are taking place at the same time.
-	 *
-	 * A <BLEpp::CharacteristicBase::notify> is called when the master device
-	 * connected to the Crownstone requests automatic notifications whenever
-	 * the value changes.
-	 */
-	void onNotifyTxError() {
-//		LOGw("[%s] no tx buffers, waiting for BLE_EVT_TX_COMPLETE!", _name.c_str());
-		_notificationPending = true;
-	}
-
-	/* Callback function once tx operations complete
-	 *
-	 * @p_ble_evt the event object which triggered the onTxComplete callback
-	 *
-	 * This is called whenever tx operations complete. If a notification is pending
-	 * <BLEpp::CharacteristicBase::notify> is called again and the notification
-	 * is cleared if the call eas successful. If not successful, it will be tried
-	 * again during the next callback call
-	 */
-	void onTxComplete(ble_common_evt_t * p_ble_evt) {
-		// if we have a notification pending, try to send it
-		if (_notificationPending) {
-			uint32_t err_code = notify();
-			if (err_code != NRF_SUCCESS) {
-//				LOGw("[%s] failed to resend notification!, err_code: %d", _name.c_str(), err_code);
-			} else {
-//				LOGi("[%s] successfully resent notification", _name.c_str());
-				_notificationPending = false;
-			}
-		}
-	}
-
-};
-
-}
+//namespace BLEpp { // template has to be in the same namespace as the other CharacteristicT templates
+//
+///* Scan Result characteristic
+// *
+// * This template implements the functions specific for the Scan Result Characteristic.
+// * It takes care of setting and reading the list of scanned devices and handles
+// * notify requests for the characteristic, in particular making sure that the list
+// * is sent over the air.
+// */
+//template<> class CharacteristicT<ScanResult> : public Characteristic<ScanResult> {
+//
+//private:
+//	/* Pointer to buffer used to store the serialized ScanResult object
+//	 */
+//	uint8_t* _buffer;
+//
+//	/* Flag to indicate if notification is pending to be sent once currently waiting
+//	 * tx operations are completed
+//	 */
+//	bool _notificationPending;
+//
+//public:
+//	/* Default asign operator
+//	 *
+//	 * @val ScanResult object which should be assigned
+//	 *
+//	 * Assigns the ScanResult object to this characteristic
+//	 */
+//	CharacteristicT& operator=(const ScanResult& val) {
+//		Characteristic<ScanResult>::operator=(val);
+//		return *this;
+//	}
+//
+//	/* Returns the ScanResult object currently assigned to the characteristic
+//	 *
+//	 * Serialized the ScanResult object into a byte buffer and returns it as a
+//	 * <CharacteristicValue>
+//	 *
+//	 * @return the serialized ScanResult object in a <CharacteristicValue> object
+//	 */
+//	CharacteristicValue getCharacteristicValue() {
+//		CharacteristicValue value;
+//		const ScanResult& t = this->getValue();
+//		uint32_t len = t.getSerializedLength();
+//		if (_buffer) {
+//			free(_buffer);
+//		}
+//		_buffer = (uint8_t*)calloc(len, sizeof(uint8_t));
+//		t.serialize(_buffer, len);
+//		return CharacteristicValue(len, _buffer);
+//	}
+//
+//	/* Assign the given <CharacteristicValue> to this characteristic
+//	 *
+//	 * @value the <CharacteristicValue> object which should be assigned
+//	 *
+//	 * Deserializes the byte buffer obtained from the <CharacteristicValue>
+//	 * into a ScanResult object and assigns that to the charachteristic
+//	 */
+//	void setCharacteristicValue(const CharacteristicValue& value) {
+//		ScanResult t;
+//		t.deserialize(value.data, value.length);
+//		this->setValue(t);
+//	}
+//
+//	/* Return the maximum possible length of the buffer
+//	 *
+//	 * This is defined by:
+//	 * <HEADER_SIZE> + <MAX_NR_DEVICES> * <SERIALIZED_DEVICE_SIZE>
+//	 *
+//	 * @return the maximum possible length
+//	 */
+//	uint16_t getValueMaxLength() {
+//		return HEADER_SIZE + MAX_NR_DEVICES * SERIALIZED_DEVICE_SIZE;
+//	}
+//
+//	/* Callback function if a notify tx error occurs
+//	 *
+//	 * This is called when the notify operation fails with a tx error. This
+//	 * can occur when too many tx operations are taking place at the same time.
+//	 *
+//	 * A <BLEpp::CharacteristicBase::notify> is called when the master device
+//	 * connected to the Crownstone requests automatic notifications whenever
+//	 * the value changes.
+//	 */
+//	void onNotifyTxError() {
+////		LOGw("[%s] no tx buffers, waiting for BLE_EVT_TX_COMPLETE!", _name.c_str());
+//		_notificationPending = true;
+//	}
+//
+//	/* Callback function once tx operations complete
+//	 *
+//	 * @p_ble_evt the event object which triggered the onTxComplete callback
+//	 *
+//	 * This is called whenever tx operations complete. If a notification is pending
+//	 * <BLEpp::CharacteristicBase::notify> is called again and the notification
+//	 * is cleared if the call eas successful. If not successful, it will be tried
+//	 * again during the next callback call
+//	 */
+//	void onTxComplete(ble_common_evt_t * p_ble_evt) {
+//		// if we have a notification pending, try to send it
+//		if (_notificationPending) {
+//			uint32_t err_code = notify();
+//			if (err_code != NRF_SUCCESS) {
+////				LOGw("[%s] failed to resend notification!, err_code: %d", _name.c_str(), err_code);
+//			} else {
+////				LOGi("[%s] successfully resent notification", _name.c_str());
+//				_notificationPending = false;
+//			}
+//		}
+//	}
+//
+//};
+//
+//}

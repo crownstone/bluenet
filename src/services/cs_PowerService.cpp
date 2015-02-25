@@ -59,11 +59,11 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 }
 
 void PowerService::loadPersistentStorage() {
-	Storage::getInstance().getStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void PowerService::savePersistentStorage() {
-	Storage::getInstance().setStruct(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void PowerService::addPWMCharacteristic() {
@@ -105,6 +105,12 @@ void PowerService::addSampleCurrentCharacteristic() {
 		.setDefaultValue(0)
 		.setWritable(true)
 		.onWrite([&](const uint8_t& value) -> void {
+			if (!_adcInitialized) {
+				// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
+				ADC::getInstance().init(PIN_AIN_ADC);
+				_adcInitialized = true;
+			}
+
 			sampleCurrentInit();
 			uint16_t current_rms = sampleCurrentFinish(value);
 			if ((value & 0x01) && _currentConsumptionCharacteristic != NULL) {
@@ -114,7 +120,8 @@ void PowerService::addSampleCurrentCharacteristic() {
 				(*_currentCurveCharacteristic) = _streamBuffer; // TODO: stream curve
 			}
 		});
-	ADC::getInstance().init(PIN_AIN_ADC);
+	_adcInitialized = false;
+//	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
 void PowerService::addCurrentCurveCharacteristic() {
@@ -168,15 +175,21 @@ void PowerService::addCurrentLimitCharacteristic() {
 		.onWrite([&](const uint8_t &value) -> void {
 			LOGi("Set current limit to: %i", value);
 			_currentLimitVal = value;
-
+			if (!_currentLimitInitialized) {
+				_currentLimit.init();
+				_currentLimitInitialized = true;
+			}
 			_currentLimit.start(&_currentLimitVal);
 			LOGi("Write value to persistent memory");
 			Storage::setUint8(_currentLimitVal, _storageStruct.current_limit);
 			savePersistentStorage();
 		});
 
-	_currentLimit.start(&_currentLimitVal);
-	_currentLimit.init();
+	// TODO: we have to delay the init, since there is a spike on the AIN pin at startup!
+	// For now: init at onWrite, so we can still test it.
+//	_currentLimit.start(&_currentLimitVal);
+//	_currentLimit.init();
+	_currentLimitInitialized = false;
 }
 
 //static int tmp_cnt = 100;

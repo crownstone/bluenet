@@ -12,7 +12,7 @@
 
 namespace BLEpp {
 
-// TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean way, methodical and understandable way
+// TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
 
 /* A Universally Unique IDentifier.
  *
@@ -52,7 +52,6 @@ public:
 	 */
 	UUID(const char* fullUid):
 		_full(fullUid), _uuid(0x0), _type(BLE_UUID_TYPE_UNKNOWN) {};
-		//_full(fullUid), _uuid(0x0), _type(BLE_UUID_TYPE_VENDOR_BEGIN) {};
 
 	/* Constructor for Bluetooth SIG UUID (16-bit)
 	 *

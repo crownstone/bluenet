@@ -21,9 +21,6 @@
 extern "C" {
 //#include <app_scheduler.h>
 
-//#define PRINT_ITEMS
-//#define PRINT_PENDING
-
 static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data, 
 		uint32_t data_len) {
 	// we might want to check if things are actually stored, by using this callback	
@@ -41,14 +38,12 @@ static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_cod
 
 } // extern "C"
 
-// NOTE: PSTORAGE_MAX_APPLICATIONS in pstorage_platform.h
-//   has to be adjusted to the number of elements defined here
-
 // NOTE: DO NOT CHANGE ORDER OF THE ELEMENTS OR THE FLASH
 //   STORAGE WILL GET MESSED UP!! NEW ENTRIES ALWAYS AT THE END
 static storage_config_t config[] {
 	{PS_ID_POWER_SERVICE, {}, sizeof(ps_power_service_t)},
-	{PS_ID_GENERAL_SERVICE, {}, sizeof(ps_general_service_t)}
+	{PS_ID_GENERAL_SERVICE, {}, sizeof(ps_general_service_t)},
+	{PS_ID_INDOORLOCALISATION_SERVICE, {}, sizeof(ps_indoorlocalisation_service_t)}
 };
 
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
@@ -119,7 +114,7 @@ void Storage::clearBlock(pstorage_handle_t handle, ps_storage_id storageID) {
 	BLE_CALL (pstorage_clear, (&block_handle, config->storage_size) );
 }
 
-void Storage::getStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
+void Storage::readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
 	pstorage_handle_t block_handle;
 
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
@@ -137,7 +132,7 @@ void Storage::getStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint1
 
 }
 
-void Storage::setStruct(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
+void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
 	pstorage_handle_t block_handle;
 
 #ifdef PRINT_ITEMS
