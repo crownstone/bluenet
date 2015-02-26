@@ -35,6 +35,10 @@ uint16_t TrackedDeviceList::getSize() const {
 	return _freeIdx;
 }
 
+bool TrackedDeviceList::isEmpty() const {
+	return getSize() == 0;
+}
+
 bool TrackedDeviceList::operator!=(const TrackedDeviceList& val) {
 	if (_freeIdx != val._freeIdx) {
 		return true;
@@ -123,6 +127,7 @@ void TrackedDeviceList::reset() {
 
 bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 	for (int i=0; i<getSize(); ++i) {
+		// check if it is already in the list, then update
 		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			_list[i].rssiThreshold = rssi_threshold;
 			//_list[i].counter = ALONE_THRESHOLD+1; // Don't update counter
@@ -217,6 +222,9 @@ void TrackedDeviceList::deserialize(uint8_t* buffer, uint16_t length) {
 		}
 		// copy rssi threshold
 		dev->rssiThreshold = *ptr++;
+
+		// initialize the counter with ALONE_THRESHOLD+1
+		dev->counter = ALONE_THRESHOLD+1;
 	}
 }
 
@@ -292,5 +300,8 @@ void TrackedDevice::deserialize(uint8_t* buffer, uint16_t length) {
 	}
 	// copy rssi threshold
 	_trackedDevice.rssiThreshold = *ptr++;
+
+	// initialize the counter with ALONE_THRESHOLD+1
+	_trackedDevice.counter = ALONE_THRESHOLD+1;
 }
 

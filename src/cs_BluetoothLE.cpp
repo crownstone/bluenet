@@ -6,6 +6,7 @@
 
 #include "cs_BluetoothLE.h"
 #include "cs_nRF51822.h"
+#include "util/cs_Utils.h"
 
 #if(NORDIC_SDK_VERSION >= 6)
 #include "nrf_soc.h"

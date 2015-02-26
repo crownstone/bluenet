@@ -102,17 +102,8 @@ struct ps_general_service_t : ps_storage_base_t {
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////
-// TODO: move to cs_IndoorLocalisationService.h
+// moved to cs_IndoorLocalisationService.h
 
-/* Struct used by the <IndoorLocalisationService> to store elements
- */
-struct ps_indoorlocalisation_service_t : ps_storage_base_t {
-	struct {
-		uint32_t test1[2];
-		uint16_t test2[4];
-		uint8_t test3[2];
-	} test;
-};
 
 ///////////////////////////////////////////////////
 
@@ -304,8 +295,8 @@ public:
 	 *
 	 * @dest pointer to the array field of the struct
 	 *
-	 * @length the number of elements in the array (both arrays need to have
-	 *   the same length!)
+	 * @length the number of elements in the source array. the destination
+	 *   array needs to have space for at least length elements
 	 *
 	 * Copies the data contained in the src array to the destination
 	 * array. It is not possible to write an array containing only FF

@@ -8,6 +8,8 @@
 
 #include <cstdint>
 
+#include <drivers/cs_Serial.h>
+
 namespace BLEutil {
 
 /* Convert a short (uint16_t) from LSB (little-endian) to
@@ -35,5 +37,13 @@ uint32_t convertEndian32(uint32_t val);
  * @return the length of the array
  */
 #define SIZEOF_ARRAY( a ) (int)(sizeof( a ) / sizeof( a[ 0 ] ))
+
+template<typename T>
+void printArray(T* arr, uint16_t len) {
+	for (int i = 0; i < len; ++i) {
+		_log(DEBUG, " %02X", arr[i]);
+	}
+	_log(DEBUG, "\r\n");
+}
 
 }

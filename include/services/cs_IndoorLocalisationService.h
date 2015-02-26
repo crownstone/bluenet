@@ -16,6 +16,14 @@
 
 #define INDOORLOCALISATION_UUID "7e170000-429c-41aa-83d7-d91220abeb33"
 
+/* Struct used by the <IndoorLocalisationService> to store elements
+ */
+struct ps_indoorlocalisation_service_t : ps_storage_base_t {
+	struct {
+		uint8_t list[TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE];
+	} trackedDevices;
+};
+
 class IndoorLocalizationService : public BLEpp::GenericService {
 
 public:
@@ -44,6 +52,13 @@ protected:
 	/* Save to FLASH.
 	*/
 	void savePersistentStorage();
+
+	void writeTrackedDevices();
+	void readTrackedDevices();
+
+	void startTracking();
+	void stopTracking();
+
 public:
 	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
 
@@ -73,6 +88,9 @@ private:
 	bool _trackMode;
 	bool _trackIsNearby;
 	
+	bool _initialized;
+	bool _scanMode;
+
 	ScanResult* _scanResult;
 	TrackedDeviceList* _trackedDeviceList;
 

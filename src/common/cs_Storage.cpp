@@ -12,6 +12,11 @@
 
 #include <limits.h>
 
+// TODO: if util/cs_BleError.h is include before the services, compilation fails. WHY??????
+#include "services/cs_IndoorLocalisationService.h"
+#include "services/cs_GeneralService.h"
+#include "services/cs_PowerService.h"
+
 #include "common/cs_Storage.h"
 #include "drivers/cs_Serial.h"
 #include "util/cs_BleError.h"
@@ -254,3 +259,48 @@ void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value
 		LOGd("found stored value: %d", target);
 	}
 }
+
+//template<typename T>
+//void Storage::setArray(T* src, T* dest, uint16_t length) {
+//	bool isUnassigned = true;
+//	for (int i = 0; i < length; ++i) {
+//		if (src[i] != 0xFF) {
+//			isUnassigned = false;
+//			break;
+//		}
+//	}
+//
+//	if (isUnassigned) {
+//		LOGe("cannot write all FF");
+//	} else {
+//		memccpy(dest, src, 0, length * sizeof(T));
+//	}
+//}
+//
+//template<typename T>
+//void Storage::getArray(T* src, T* dest, T* default_value, uint16_t length) {
+//
+//#ifdef PRINT_ITEMS
+//	_log(INFO, "raw value: ");
+//	for (int i = 0; i < length; ++i) {
+//		_log(INFO, "%X", src[i]);
+//	}
+//	_log(INFO, "\r\n");
+//#endif
+//
+//	bool isUnassigned = true;
+//	for (int i = 0; i < length; ++i) {
+//		if (src[i] != 0xFF) {
+//			isUnassigned = false;
+//			break;
+//		}
+//	}
+//
+//	if (isUnassigned) {
+//		LOGd("use default value");
+//		memccpy(dest, default_value, 0, length * sizeof(T));
+//	} else {
+//		memccpy(dest, src, 0, length * sizeof(T));
+//	}
+//
+//}

@@ -23,7 +23,7 @@ struct __attribute__((__packed__)) tracked_device_t {
 #define TRACKDEVICES_HEADER_SIZE 1 // 1 BYTE for the header = number of elements in the list
 #define TRACKDEVICES_SERIALIZED_SIZE (sizeof(tracked_device_t)-2) // only works if struct packed. Subtract 2, as counter is not serialized
 
-#define TRACKDEVICES_MAX_NR_DEVICES              2
+#define TRACKDEVICES_MAX_NR_DEVICES              5
 
 // Number of ticks the rssi of a device is not above threshold before a device is considered not nearby.
 #define ALONE_THRESHOLD							 200
@@ -66,6 +66,8 @@ public:
 	/** Returns the current size of the list */
 	uint16_t getSize() const;
 
+	bool isEmpty() const;
+
 	/** Clears the list. */
 	void reset();
 
@@ -82,7 +84,7 @@ public:
 
 	/* @inherit */
     uint16_t getMaxLength() const {
-		return TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE;
+    	return TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE;
     }
 
 	/* @inherit */

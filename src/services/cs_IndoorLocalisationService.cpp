@@ -24,6 +24,7 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 		_stack(&_stack),
 		_rssiCharac(NULL), _peripheralCharac(NULL),
 		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL), _trackIsNearby(false),
+		_initialized(false), _scanMode(false),
 		_scanResult(NULL), _trackedDeviceList(NULL)
 {
 
@@ -74,6 +75,14 @@ void IndoorLocalizationService::savePersistentStorage() {
 
 void IndoorLocalizationService::tick() {
 
+	if (!_initialized) {
+		readTrackedDevices();
+		if (!_trackedDeviceList->isEmpty()) {
+			startTracking();
+		}
+		_initialized = true;
+	}
+
 	if (!_trackMode) return;
 
 	// This function checks the counter for each device
@@ -120,6 +129,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 				if (!_stack->isScanning()) {
 					_stack->startScanning();
 				}
+				_scanMode = true;
 			} else {
 				LOGi("Return scan result");
 				if (_scanResult != NULL) {
@@ -130,6 +140,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 				if (_stack->isScanning() && !_trackMode) {
 					_stack->stopScanning();
 				}
+				_scanMode = false;
 			}
 		});
 }
@@ -165,6 +176,47 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	//_trackedDeviceList->add(addr, -95);
 }
 
+void IndoorLocalizationService::writeTrackedDevices() {
+	uint16_t length = _trackedDeviceList->getSerializedLength();
+	uint8_t* buffer = (uint8_t*)calloc(length, sizeof(uint8_t));
+	_trackedDeviceList->serialize(buffer, length);
+	Storage::setArray(buffer, _storageStruct.trackedDevices.list, length);
+}
+
+void IndoorLocalizationService::readTrackedDevices() {
+	uint16_t length = _trackedDeviceList->getMaxLength();
+	uint8_t* buffer = (uint8_t*)calloc(length, sizeof(uint8_t));
+	Storage::getArray(_storageStruct.trackedDevices.list, buffer, (uint8_t*)NULL, length);
+	_trackedDeviceList->deserialize(buffer, length);
+
+	if (!_trackedDeviceList->isEmpty()) {
+		LOGi("restored tracked devices (%d):", _trackedDeviceList->getSize());
+		_trackedDeviceList->print();
+	}
+
+	*_trackedDeviceListCharac = *_trackedDeviceList;
+}
+
+void IndoorLocalizationService::startTracking() {
+	if (!_trackMode) {
+		// Set to some value initially
+		_trackIsNearby = false;
+	}
+	_trackMode = true;
+	if (!_stack->isScanning()) {
+		LOGi("Start tracking");
+		_stack->startScanning();
+	}
+}
+
+void IndoorLocalizationService::stopTracking() {
+	_trackMode = false;
+	if (_stack->isScanning()) {
+		LOGi("Stop tracking");
+		_stack->stopScanning();
+	}
+}
+
 void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 	_trackedDeviceCharac = createCharacteristicRef<TrackedDevice>();
 	_trackedDeviceCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_UUID));
@@ -186,23 +238,18 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 		// Update list
 		*_trackedDeviceListCharac = *_trackedDeviceList;
 
+		LOGi("currently tracking devices:");
+		_trackedDeviceList->print();
+
+		// store in persistent memory
+		writeTrackedDevices();
+		savePersistentStorage();
+
 		if (_trackedDeviceList->getSize() > 0) {
-			if (!_trackMode) {
-				// Set to some value initially
-				_trackIsNearby = false;
-			}
-			_trackMode = true;
-			if (!_stack->isScanning()) {
-				LOGi("Start tracking");
-				_stack->startScanning();
-			}
+			startTracking();
 		}
 		else {
-			_trackMode = false;
-			if (_stack->isScanning()) {
-				LOGi("Stop tracking");
-				_stack->stopScanning();
-			}
+			stopTracking();
 		}
 	});
 }
@@ -276,10 +323,10 @@ void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
 #if(SOFTDEVICE_SERIES != 110)
 void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 	if (_stack->isScanning()) {
-		if (_scanResult != NULL) {
+		if (_scanMode && _scanResult != NULL) {
 			_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 		}
-		if (_trackedDeviceList != NULL) {
+		if (_trackMode && _trackedDeviceList != NULL) {
 			_trackedDeviceList->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 		}
 	}
