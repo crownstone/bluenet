@@ -25,8 +25,8 @@ struct __attribute__((__packed__)) tracked_device_t {
 
 #define TRACKDEVICES_MAX_NR_DEVICES              5
 
-// Number of ticks the rssi of a device is not above threshold before a device is considered not nearby.
-#define ALONE_THRESHOLD							 200
+// Initialize counter of tracked devices with this number.
+#define TDL_COUNTER_INIT                         ((uint16_t)-1)
 
 #define TDL_NONE_NEARBY                          1
 #define TDL_IS_NEARBY                            2
@@ -37,6 +37,7 @@ class TrackedDeviceList : public Serializable {
 private:
 	tracked_device_t* _list;
 	uint8_t _freeIdx;
+	uint16_t _timeoutCount;
 
 public:
 	TrackedDeviceList();
@@ -76,6 +77,12 @@ public:
 
 	/** Removes an address from the list. Returns true on success, false when it's not in the list. */
 	bool rem(const uint8_t* adrs_ptr);
+
+	/** Sets the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
+	void setTimeout(uint16_t counts);
+
+	/** Returns the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
+	uint16_t getTimeout();
 
 	//////////// serializable ////////////////////////////
 
