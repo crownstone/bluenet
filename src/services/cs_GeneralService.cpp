@@ -58,15 +58,15 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 #endif
 	characStatus.push_back( { "Set configuration",
 		SET_CONFIGURATION_UUID,
-		false,
+		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addSetConfigurationCharacteristic) });
 	characStatus.push_back( { "Select configuration",
 		SELECT_CONFIGURATION_UUID,
-		false,
+		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addSelectConfigurationCharacteristic) });
 	characStatus.push_back( { "Get configuration",
 		GET_CONFIGURATION_UUID,
-		false,
+		true,
 		static_cast<addCharacteristicFunc>(&GeneralService::addGetConfigurationCharacteristic) });
 
 	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
@@ -202,7 +202,18 @@ void GeneralService::readConfiguration(uint8_t type, uint8_t length, uint8_t* pa
 		Storage::setUint8(floor, _storageStruct.floor);
 		savePersistentStorage();
 		break;
-	} default: 
+	}
+	case CONFIG_NEARBY_TIMEOUT_UUID: {
+		if (length != 2) {
+			LOGw("Nearby timeout is of type uint16");
+			return;
+		}
+		uint16_t counts = ((uint16_t)payload)[0];
+		LOGd("setNearbyTimeout(%i)", counts);
+//		setNearbyTimeout(counts);
+		break;
+	}
+	default:
 		LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
 	}
 }

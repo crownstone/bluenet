@@ -46,5 +46,7 @@ enum ConfigurationTypes {
 	CONFIG_DEVICE_TYPE_UUID                 = 0x1,
 	CONFIG_ROOM_UUID                        = 0x2,
 	CONFIG_FLOOR_UUID                       = 0x3,
+	CONFIG_NEARBY_TIMEOUT_UUID              = 0x4,
+	CONFIG_PWM_FREQ_UUID                    = 0x5,
 	CONFIG_TYPES
 };
