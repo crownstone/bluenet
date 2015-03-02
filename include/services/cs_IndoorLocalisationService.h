@@ -22,6 +22,7 @@ struct ps_indoorlocalisation_service_t : ps_storage_base_t {
 	struct {
 		uint8_t list[TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE];
 	} trackedDevices;
+	uint32_t nearbyTimeout;
 };
 
 class IndoorLocalizationService : public BLEpp::GenericService {
@@ -64,6 +65,12 @@ public:
 
 	void tick();
 //	void addSpecificCharacteristics();
+
+	/** Sets the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
+	void setNearbyTimeout(uint16_t counts);
+
+	/** Returns the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
+	uint16_t getNearbyTimeout();
 
 	void on_ble_event(ble_evt_t * p_ble_evt);
 

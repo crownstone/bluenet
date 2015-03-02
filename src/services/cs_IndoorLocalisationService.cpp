@@ -166,14 +166,13 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	_trackedDeviceListCharac->setWritable(false);
 	_trackedDeviceListCharac->setNotifies(false);
 	
-	// init before adding!	
+	// Initialize before adding tracked devices!
 	_trackedDeviceList->init();
 
-	// Add a hardcoded address (reversed order) and rssi
-        // [CD 12 B7 B4 3F 8D]
-	//uint8_t addr[BLE_GAP_ADDR_LEN] = { 0x8D, 0x3F, 0xB4, 0xB7, 0x12, 0xCD };
-	//uint8_t addr[BLE_GAP_ADDR_LEN] = { 0xED, 0xA6, 0xD7, 0xCA, 0x4C, 0xC4 };
-	//_trackedDeviceList->add(addr, -95);
+	// Load the nearby timeout, use a default of 2000
+	uint16_t counts;
+	Storage::getUint16(_storageStruct.nearbyTimeout, counts, 2000);
+	_trackedDeviceList->setTimeout(counts);
 }
 
 void IndoorLocalizationService::writeTrackedDevices() {
@@ -195,6 +194,21 @@ void IndoorLocalizationService::readTrackedDevices() {
 	}
 
 	*_trackedDeviceListCharac = *_trackedDeviceList;
+}
+
+void IndoorLocalizationService::setNearbyTimeout(uint16_t counts) {
+	if (_trackedDeviceList != NULL) {
+		_trackedDeviceList->setTimeout(counts);
+	}
+	Storage::setUint16(counts, _storageStruct.nearbyTimeout);
+}
+
+uint16_t IndoorLocalizationService::getNearbyTimeout() {
+	if (_trackedDeviceList == NULL) {
+		return 0;
+	}
+	loadPersistentStorage();
+	return _trackedDeviceList->getTimeout();
 }
 
 void IndoorLocalizationService::startTracking() {
