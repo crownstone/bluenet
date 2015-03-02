@@ -111,6 +111,7 @@ void PowerService::addSampleCurrentCharacteristic() {
 				_adcInitialized = true;
 			}
 
+			_streamBuffer.clear();
 			sampleCurrentInit();
 			uint16_t current_rms = sampleCurrentFinish(value);
 			if ((value & 0x01) && _currentConsumptionCharacteristic != NULL) {
