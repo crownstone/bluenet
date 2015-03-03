@@ -14,7 +14,8 @@
 #include "characteristics/cs_Serializable.h"
 #include <string>
 
-#define MAX_BUFFER_SERIALIZED_SIZE                     20
+#define MAX_BUFFER_SIZE                     20
+#define BUFFER_HEADER_SIZE                  2
 
 using namespace BLEpp;
 
@@ -48,6 +49,8 @@ public:
 	// return 0 on SUCCESS, positive value on FAILURE
 	uint8_t add(uint8_t value);
 
+	void clear();
+
 	inline uint8_t type() const { return _type; } 
 
 	/* Return the length/size of the payload.
@@ -70,7 +73,7 @@ public:
 
 	/* @inherit */
     uint16_t getMaxLength() const {
-		return MAX_BUFFER_SERIALIZED_SIZE;
+		return MAX_BUFFER_SIZE + BUFFER_HEADER_SIZE;
     }
 
 	/* Serialize entire class.
@@ -91,7 +94,7 @@ public:
 //template<> class CharacteristicT<StreamBuffer> : public Characteristic<StreamBuffer> {
 //
 //private:
-//	uint8_t _buffer[MAX_BUFFER_SERIALIZED_SIZE];
+//	uint8_t _buffer[MAX_BUFFER_SIZE];
 //	bool _notificationPending;
 //
 //public:
@@ -116,7 +119,7 @@ public:
 //	}
 //
 //	uint16_t getValueMaxLength() {
-//		return MAX_BUFFER_SERIALIZED_SIZE;
+//		return MAX_BUFFER_SIZE + BUFFER_HEADER_SIZE;
 //	}
 //
 //	void onNotifyTxError() {
