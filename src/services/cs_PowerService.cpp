@@ -33,15 +33,15 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
 	characStatus.push_back( { "Sample Current",
 			SAMPLE_CURRENT_UUID,
-			false,
+			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addSampleCurrentCharacteristic)});
 	characStatus.push_back( { "Current Curve",
 			CURRENT_CURVE_UUID,
-			false,
+			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentCurveCharacteristic)});
 	characStatus.push_back( { "Current Consumption",
 			CURRENT_CONSUMPTION_UUID,
-			false,
+			true,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
@@ -117,7 +117,8 @@ void PowerService::addSampleCurrentCharacteristic() {
 				(*_currentConsumptionCharacteristic) = current_rms;
 			}
 			if ((value & 0x02) && _currentCurveCharacteristic != NULL) {
-				(*_currentCurveCharacteristic) = _streamBuffer; // TODO: stream curve
+				(*_currentCurveCharacteristic) = _currentCurve;
+				_currentCurve.clear();
 			}
 		});
 	_adcInitialized = false;
@@ -125,7 +126,7 @@ void PowerService::addSampleCurrentCharacteristic() {
 }
 
 void PowerService::addCurrentCurveCharacteristic() {
-	_currentCurveCharacteristic = &createCharacteristic<StreamBuffer>()
+	_currentCurveCharacteristic = &createCharacteristic<CurrentCurve>()
 		.setUUID(UUID(getUUID(), CURRENT_CURVE_UUID))
 		.setName("Current Curve")
 		.setWritable(false)
@@ -139,6 +140,7 @@ void PowerService::addCurrentCurveCharacteristic() {
 //			sampleVoltageCurveInit();
 //			return sampleVoltageCurveFinish();
 //		});
+	_currentCurve.init();
 }
 
 void PowerService::addCurrentConsumptionCharacteristic() {
@@ -292,9 +294,8 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 			voltage_max = voltage;
 		}
 
-		if (type & 0x2) {
-			// cast to uint8_t
-			_streamBuffer.add((uint8_t)voltage);
+		if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
+			_currentCurve.add(voltage);
 			_log(INFO, "%u, ", voltage);
 			if (!(++i % 10)) {
 				_log(INFO, "\r\n");
