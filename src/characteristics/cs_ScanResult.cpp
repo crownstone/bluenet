@@ -144,7 +144,6 @@ void ScanResult::serialize(uint8_t* buffer, uint16_t length) const {
 		*ptr++ = _list[i].rssi;
 
 		// copy occurrences
-		// doesn't work because ptr is not aligned
 		*ptr++ = (_list[i].occurrences >> 8) & 0xFF;
 		*ptr++ = _list[i].occurrences & 0xFF;
 	}
@@ -169,8 +168,7 @@ void ScanResult::deserialize(uint8_t* buffer, uint16_t length) {
 		dev->rssi = *ptr++;
 
 		// copy occurrences
-		// doesn't work because ptr is not aligned
-		dev->occurrences |= (*ptr++ << 8) & 0xFF;
-		dev->occurrences = *ptr++;
+		dev->occurrences = (*ptr++ << 8) & 0xFF00;
+		dev->occurrences |= *ptr++;
 	}
 }
