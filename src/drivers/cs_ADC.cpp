@@ -125,7 +125,7 @@ void ADC::stop() {
  * Start the AD converter.
  */
 void ADC::start() {
-	_lastResult = 1;
+	_lastResult = (uint16_t)-1;
 	_store = false;
 	_numSamples = 0;
 	NRF_ADC->EVENTS_END  = 0;
@@ -134,7 +134,9 @@ void ADC::start() {
 
 void ADC::update(uint32_t value) {
 	++_numSamples;
-	if (!_store && ((/*_lastResult <= threshold && */ value > _threshold) || _numSamples > 2*ADC_BUFFER_SIZE)) {
+	// Start storing when the previous value was below threshold and the current value is above threshold
+	// When this doesn't happen for some amount of samples, start storing anyway (power is probably off)
+	if (!_store && ((_lastResult <= _threshold && value > _threshold) || _numSamples > 2*ADC_BUFFER_SIZE)) {
 		_store = true;
 		// Log first RTC count
 		if (_clock)
