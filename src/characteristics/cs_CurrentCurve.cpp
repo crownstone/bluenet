@@ -51,7 +51,12 @@ void CurrentCurve::serialize(uint8_t* buffer, uint16_t length) const {
 	uint8_t *ptr = buffer;
 	*ptr++ = (_plength >> 8) & 0xFF;
 	*ptr++ = _plength & 0xFF;
-	if (_plength) memcpy(ptr, _payload, _plength*sizeof(uint16_t));
+	// Can't memcpy, since then it's LSB
+//	if (_plength) memcpy(ptr, _payload, _plength*sizeof(uint16_t));
+	for (int i=0; i<_plength; ++i) {
+		*ptr++ = (_payload[i] >> 8) & 0xFF;
+		*ptr++ = _payload[i] & 0xFF;
+	}
 }
 
 void CurrentCurve::deserialize(uint8_t* buffer, uint16_t length) {
@@ -62,6 +67,11 @@ void CurrentCurve::deserialize(uint8_t* buffer, uint16_t length) {
 	_plength |= *ptr++;
 	memset(_payload, 0, CURRENT_CURVE_SERIALIZED_SIZE);
 	_plength = ((_plength > ADC_BUFFER_SIZE) ? ADC_BUFFER_SIZE : _plength);
-	memcpy(_payload, ptr, _plength*sizeof(uint16_t));
+	// Can't memcpy, since then it's LSB
+//	memcpy(_payload, ptr, _plength*sizeof(uint16_t));
+	for (int i=0; i<_plength; ++i) {
+		_payload[i] = (*ptr++ << 8) & 0xFF00;
+		_payload[i] |= *ptr++;
+	}
 }
 
