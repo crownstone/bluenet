@@ -208,7 +208,7 @@ void GeneralService::readConfiguration(uint8_t type, uint8_t length, uint8_t* pa
 			LOGw("Nearby timeout is of type uint16");
 			return;
 		}
-		uint16_t counts = ((uint16_t)payload)[0];
+		uint16_t counts = ((uint16_t*)payload)[0]; //TODO: other byte order?
 		LOGd("setNearbyTimeout(%i)", counts);
 //		setNearbyTimeout(counts);
 		break;
