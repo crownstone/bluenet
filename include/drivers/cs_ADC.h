@@ -16,7 +16,8 @@
  * Analog digital conversion class. 
  */
 
-#define ADC_BUFFER_SIZE 144
+//#define ADC_BUFFER_SIZE 144
+#define ADC_BUFFER_SIZE 131
 #define DEFAULT_RECORDING_THRESHOLD 1
 
 class ADC: public Dispatcher {
