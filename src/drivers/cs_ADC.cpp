@@ -20,10 +20,10 @@
 #include "cs_nRF51822.h"
 
 // allocate buffer struct (not array in buffer yet)
-buffer_t<uint16_t> adc_result;
+CircularBuffer<uint16_t>* adc_result;
 
-buffer_t<uint16_t>* ADC::getBuffer() {
-	return &adc_result;
+CircularBuffer<uint16_t>* ADC::getBuffer() {
+	return adc_result;
 }
 	
 void ADC::setClock(RealTimeClock &clock) {
@@ -41,16 +41,16 @@ uint32_t ADC::init(uint8_t pin) {
 	LOGd("Run ADC converter without SoftDevice!!!");
 	
 #endif
-	if (adc_result.size != _bufferSize) {
-		adc_result.size = _bufferSize;
-		adc_result.buffer = (uint16_t*)calloc( adc_result.size, sizeof(uint16_t*));
-		if (adc_result.buffer == NULL) {
-			log(FATAL, "Could not initialize buffer. Too big!?");
-			return 0xF0;
-		}
-		//adc_result.buffer = adc_buffer;
-		adc_result.ptr = adc_result.buffer;
-	} 
+
+	if (adc_result == NULL || adc_result->capacity() != _bufferSize) {
+		delete adc_result;
+		adc_result = new CircularBuffer<uint16_t>(_bufferSize);
+	}
+
+	if (!adc_result->init()) {
+		log(FATAL, "Could not initialize buffer. Too big!?");
+		return 0xF0;
+	}
 
 	uint32_t err_code;
 
@@ -140,12 +140,12 @@ void ADC::update(uint32_t value) {
 		_store = true;
 		// Log first RTC count
 		if (_clock)
-			adc_result.push(_clock->getCount()); // TODO: getCount returns 32 bit value!
+			adc_result->push(_clock->getCount()); // TODO: getCount returns 32 bit value!
 //		else
 //			adc_result.push(_last_result);
 	}
 	if (_store) {
-		adc_result.push(value);
+		adc_result->push(value);
 //		// Log RTC too
 //		if (_clock) {
 //			adc_result.push(_clock->getCount());
@@ -155,8 +155,8 @@ void ADC::update(uint32_t value) {
 		_lastResult = value;
 	}
 	// Log last RTC count
-	if (_clock && adc_result.count() + 1 == adc_result.size) {
-		adc_result.push(_clock->getCount()); // TODO: getCount returns 32 bit value!
+	if (_clock && adc_result->size() + 1 == adc_result->capacity()) {
+		adc_result->push(_clock->getCount()); // TODO: getCount returns 32 bit value!
 	}
 }
 
@@ -179,8 +179,8 @@ extern "C" void ADC_IRQHandler(void) {
 	ADC &adc = ADC::getInstance();
 	adc.update(adc_value);
 
-	if (adc_result.full()) {
-		//LOGi("Buffer is full");
+	if (adc_result->full()) {
+//		LOGi("Buffer is full");
 		NRF_ADC->TASKS_STOP = 1;
 		//LOGi("Stopped task");
 	       	return;

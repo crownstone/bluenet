@@ -290,7 +290,7 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 		uint16_t voltage = ADC::getInstance().getBuffer()->pop();
 
 		// First and last elements of the buffer are timestamps
-		if ((type & 0x1) && (voltage > voltage_max) && (i>0) && (ADC::getInstance().getBuffer()->count() > 1)) {
+		if ((type & 0x1) && (voltage > voltage_max) && (i>0) && (ADC::getInstance().getBuffer()->size() > 1)) {
 			voltage_max = voltage;
 		}
 

@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 
-#include "common/cs_Buffer.h"
+#include "common/cs_CircularBuffer.h"
 #include "events/cs_Dispatcher.h"
 #include "cs_RTC.h"
 
@@ -49,7 +49,7 @@ public:
 	void tick();
 
 	// return reference to internal buffer
-	buffer_t<uint16_t>* getBuffer();
+	CircularBuffer<uint16_t>* getBuffer();
 
 	// set threshold (default threshold is DEFAULT_RECORDING_THRESHOLD)
 	inline void setThreshold(uint8_t threshold) { _threshold = threshold; }
