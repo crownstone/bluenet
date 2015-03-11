@@ -241,15 +241,16 @@ void PowerService::sampleCurrentInit() {
 }
 
 uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
-	while (!ADC::getInstance().getBuffer()->full()) {
-		nrf_delay_ms(100);
+//	while (!ADC::getInstance().getBuffer()->full()) {
+	while (!ADC::getInstance().getSamples()->buf->full()) {
+		nrf_delay_ms(10);
 	}
 
 	LOGi("Stop ADC");
 	ADC::getInstance().stop();
 
-	// Wait for the ADC to actually stop
-	nrf_delay_us(1000);
+//	// Wait for the ADC to actually stop
+//	nrf_delay_us(1000);
 
 	LOGi("Stop RTC");
 	RealTimeClock::getInstance().stop();
@@ -284,14 +285,15 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
        	//rms=%lu min=%lu max=%lu current=%i mA", voltage, rms, voltage_min, voltage_max, current);
 */
 
-	uint16_t voltage_max = 0;
+/*
+	uint16_t voltageMax = 0;
 	int i = 0;
 	while (!ADC::getInstance().getBuffer()->empty()) {
 		uint16_t voltage = ADC::getInstance().getBuffer()->pop();
 
 		// First and last elements of the buffer are timestamps
-		if ((type & 0x1) && (voltage > voltage_max) && (i>0) && (ADC::getInstance().getBuffer()->size() > 1)) {
-			voltage_max = voltage;
+		if ((type & 0x1) && (voltage > voltageMax) && (i>0) && (ADC::getInstance().getBuffer()->size() > 1)) {
+			voltageMax = voltage;
 		}
 
 		if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
@@ -309,11 +311,53 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 	if (type & 0x1) {
 		// measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
 		// 1023 * 1200 / 1023 = 1200 < 2^16
-		voltage_max = voltage_max*1200/1023; // mV
-		uint16_t current_rms = voltage_max * 1000 / SHUNT_VALUE * 1000 / 1414; // mA
-		LOGi("Irms = %u mA\r\n", current_rms);
-		return current_rms;
+		voltageMax = voltageMax*1200/1023; // mV
+		uint16_t currentRms = voltageMax * 1000 / SHUNT_VALUE * 1000 / 1414; // mA
+		LOGi("Irms = %u mA\r\n", currentRms);
+		return currentRms;
 	}
+*/
+
+
+
+	uint32_t voltageSquareMean = 0;
+	uint16_t numSamples = ADC::getInstance().getSamples()->buf->size();
+	int i = 0;
+	while (!ADC::getInstance().getSamples()->buf->empty()) {
+		uint16_t voltage = ADC::getInstance().getSamples()->buf->pop();
+
+		if (type & 0x1) {
+			voltageSquareMean += voltage*voltage;
+		}
+
+		if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
+			_currentCurve.add(voltage);
+			_log(INFO, "%u, ", voltage);
+			if (!(++i % 10)) {
+				_log(INFO, "\r\n");
+			}
+		}
+	}
+
+	if (type & 0x2) {
+		_log(INFO, "\r\n");
+	}
+
+	if (type & 0x1) {
+		// Take the mean
+		voltageSquareMean /= numSamples;
+
+		// Measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
+		// Convert to mV^2
+		voltageSquareMean = voltageSquareMean*1200/1023*1200/1023;
+
+		// Convert to A^2, use I=V/R
+		uint16_t currentSquareMean = voltageSquareMean * 1000 / SHUNT_VALUE * 1000 / SHUNT_VALUE * 1000*1000;
+
+		LOGi("currentSquareMean = %u mA^2", currentSquareMean);
+		return currentSquareMean;
+	}
+
 
 	return 0;
 }

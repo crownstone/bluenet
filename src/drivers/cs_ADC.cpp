@@ -22,8 +22,15 @@
 // allocate buffer struct (not array in buffer yet)
 CircularBuffer<uint16_t>* adc_result;
 
+AdcSamples* adcSamples;
+
+
 CircularBuffer<uint16_t>* ADC::getBuffer() {
 	return adc_result;
+}
+
+AdcSamples* ADC::getSamples() {
+	return adcSamples;
 }
 	
 void ADC::setClock(RealTimeClock &clock) {
@@ -42,15 +49,25 @@ uint32_t ADC::init(uint8_t pin) {
 	
 #endif
 
-	if (adc_result == NULL || adc_result->capacity() != _bufferSize) {
-		delete adc_result;
-		adc_result = new CircularBuffer<uint16_t>(_bufferSize);
+	if (adcSamples == NULL || adcSamples->buf->capacity() != _bufferSize) {
+		delete adcSamples->buf;
+		adcSamples->buf = new CircularBuffer<uint16_t>(_bufferSize);
 	}
-
-	if (!adc_result->init()) {
+	if (!adcSamples->buf->init()) {
 		log(FATAL, "Could not initialize buffer. Too big!?");
 		return 0xF0;
 	}
+
+
+//	if (adc_result == NULL || adc_result->capacity() != _bufferSize) {
+//		delete adc_result;
+//		adc_result = new CircularBuffer<uint16_t>(_bufferSize);
+//	}
+//
+//	if (!adc_result->init()) {
+//		log(FATAL, "Could not initialize buffer. Too big!?");
+//		return 0xF0;
+//	}
 
 	uint32_t err_code;
 
@@ -133,6 +150,7 @@ void ADC::start() {
 }
 
 void ADC::update(uint32_t value) {
+/*
 	++_numSamples;
 	// Start storing when the previous value was below threshold and the current value is above threshold
 	// When this doesn't happen for some amount of samples, start storing anyway (power is probably off)
@@ -157,6 +175,27 @@ void ADC::update(uint32_t value) {
 	// Log last RTC count
 	if (_clock && adc_result->size() + 1 == adc_result->capacity()) {
 		adc_result->push(_clock->getCount()); // TODO: getCount returns 32 bit value!
+	}
+*/
+
+	++_numSamples;
+	// Start storing when the previous value was below threshold and the current value is above threshold
+	// When this doesn't happen for some amount of samples, start storing anyway (power is probably off)
+	if (!_store && ((_lastResult <= _threshold && value > _threshold) || _numSamples > 2*ADC_BUFFER_SIZE)) {
+		_store = true;
+		// Log first RTC count
+		if (_clock)
+			adcSamples->timeStart = _clock->getCount();
+	}
+	if (_store) {
+		adcSamples->buf->push(value);
+	}
+	else {
+		_lastResult = value;
+	}
+	// Log last RTC count
+	if (_clock && adcSamples->buf->full()) {
+		adcSamples->timeEnd = _clock->getCount();
 	}
 }
 
