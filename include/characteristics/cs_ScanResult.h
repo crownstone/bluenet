@@ -34,20 +34,20 @@ struct __attribute__((__packed__)) peripheral_device_t {
  * Only one byte is used as header which defines the number of elements
  * in the list
  */
-#define HEADER_SIZE 1
+#define SR_HEADER_SIZE 1
 
 /* The size in bytes needed to store the device structure after serializing
  *
  * **Note** this only works if struct ist packed
  */
-#define SERIALIZED_DEVICE_SIZE sizeof(peripheral_device_t)
+#define SR_SERIALIZED_DEVICE_SIZE sizeof(peripheral_device_t)
 
 /* The maximum number of devices stored during a scan and returned as a list
  *
  * If the maximum number is exceeded, the devices with the lowest occurrence
  * will be replaced
  */
-#define MAX_NR_DEVICES 10
+#define SR_MAX_NR_DEVICES 10
 
 /* Result of a scan device operation
  *
@@ -147,7 +147,7 @@ public:
 	 * @return the maximum possible length
 	 */
     uint16_t getMaxLength() const {
-    	return HEADER_SIZE + MAX_NR_DEVICES * SERIALIZED_DEVICE_SIZE;
+    	return SR_HEADER_SIZE + SR_MAX_NR_DEVICES * SR_SERIALIZED_DEVICE_SIZE;
     }
 
     /* Serialize the data into a byte array
