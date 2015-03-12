@@ -108,10 +108,11 @@ void PowerService::addSampleCurrentCharacteristic() {
 			if (!_adcInitialized) {
 				// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
 				ADC::getInstance().init(PIN_AIN_ADC);
+				sampleCurrentInit();
 				_adcInitialized = true;
 			}
 
-			sampleCurrentInit();
+//			sampleCurrentInit();
 			uint16_t current_rms = sampleCurrentFinish(value);
 			if ((value & 0x01) && _currentConsumptionCharacteristic != NULL) {
 				(*_currentConsumptionCharacteristic) = current_rms;
@@ -226,6 +227,8 @@ void PowerService::sampleCurrentInit() {
 	//LOGi("Stop advertising");
 	//stack->stopAdvertising();
 
+	ADC::getInstance().getSamples()->clear();
+
 	LOGi("Start RTC");
 	RealTimeClock::getInstance().init();
 	RealTimeClock::getInstance().start();
@@ -236,24 +239,26 @@ void PowerService::sampleCurrentInit() {
 
 	LOGi("Start ADC");
 	ADC::getInstance().start();
-	// replace by timer!
 
+	// Wait for the ADC to actually start
+	nrf_delay_us(5000);
 }
 
 uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 //	while (!ADC::getInstance().getBuffer()->full()) {
-	while (!ADC::getInstance().getSamples()->buf->full()) {
-		nrf_delay_ms(10);
-	}
+//	while (!ADC::getInstance().getSamples()->buf->full()) {
+//		nrf_delay_ms(10);
+//	}
+//	nrf_delay_ms(20);
 
-	LOGi("Stop ADC");
-	ADC::getInstance().stop();
+//	LOGi("Stop ADC");
+//	ADC::getInstance().stop();
 
 //	// Wait for the ADC to actually stop
 //	nrf_delay_us(1000);
 
-	LOGi("Stop RTC");
-	RealTimeClock::getInstance().stop();
+//	LOGi("Stop RTC");
+//	RealTimeClock::getInstance().stop();
 /*
 	for (uint32_t i=0; i<samples; ++i) {
 
@@ -320,6 +325,7 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 
 
 
+/*
 	uint32_t voltageSquareMean = 0;
 	uint16_t numSamples = ADC::getInstance().getSamples()->buf->size();
 	int i = 0;
@@ -336,6 +342,34 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 			if (!(++i % 10)) {
 				_log(INFO, "\r\n");
 			}
+		}
+	}
+*/
+
+	// Give some time to sample
+	nrf_delay_us(50);
+
+	AdcSamples* samples = ADC::getInstance().getSamples();
+	uint32_t voltageSquareMean = 0;
+	uint16_t numSamples = samples->size();
+	int i = 0;
+	uint16_t voltage = samples->getFirstSample();
+	while (true) {
+		if (type & 0x1) {
+			voltageSquareMean += voltage*voltage;
+		}
+
+		if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
+			_currentCurve.add(voltage);
+			_log(INFO, "%u, ", voltage);
+			if (!(++i % 10)) {
+				_log(INFO, "\r\n");
+			}
+		}
+
+		voltage = samples->getNextSample();
+		if (voltage == (uint16_t)-1) {
+			break;
 		}
 	}
 

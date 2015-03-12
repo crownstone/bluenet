@@ -153,6 +153,15 @@ public:
 	void clear() {
 		_head = 0;
 		_tail = -1;
+		_contentsSize = 0;
+	}
+
+	/* Returns the Nth value, starting from oldest element
+	 *
+	 * Does NOT check if you reached the end, make sure you read no more than size().
+	 */
+	T operator[](uint16_t idx) const {
+		return _array[(_head+idx)%_capacity];
 	}
 
 private:
@@ -177,8 +186,9 @@ private:
 	 * wraps the tail around if the end of the array is reached.
 	 */
 	void incTail() {
-		++_tail;
+//		_tail = (_tail+1)%_capacity;
 		++_contentsSize;
+		++_tail;
 		if (_tail == _capacity) {
 			_tail = 0;
 		}
@@ -190,8 +200,9 @@ private:
 	 * It also wraps around the head if the end of the array is reached.
 	 */
 	void incHead() {
-		++_head;
+//		_head = (_head+1)%_capacity;
 		--_contentsSize;
+		++_head;
 		if (_head == _capacity) {
 			_head = 0;
 		}

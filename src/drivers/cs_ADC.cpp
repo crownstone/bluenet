@@ -49,14 +49,22 @@ uint32_t ADC::init(uint8_t pin) {
 	
 #endif
 
-	if (adcSamples == NULL || adcSamples->buf->capacity() != _bufferSize) {
-		delete adcSamples->buf;
-		adcSamples->buf = new CircularBuffer<uint16_t>(_bufferSize);
+	if (adcSamples == NULL) {
+		adcSamples = new AdcSamples();
+		if (!adcSamples->init(_bufferSize)) {
+			log(FATAL, "Could not initialize buffer. Too big!?");
+			return 0xF0;
+		}
 	}
-	if (!adcSamples->buf->init()) {
-		log(FATAL, "Could not initialize buffer. Too big!?");
-		return 0xF0;
-	}
+
+//	if (adcSamples == NULL || adcSamples->buf->capacity() != _bufferSize) {
+//		delete adcSamples->buf;
+//		adcSamples->buf = new CircularBuffer<uint16_t>(_bufferSize);
+//	}
+//	if (!adcSamples->buf->init()) {
+//		log(FATAL, "Could not initialize buffer. Too big!?");
+//		return 0xF0;
+//	}
 
 
 //	if (adc_result == NULL || adc_result->capacity() != _bufferSize) {
@@ -149,7 +157,7 @@ void ADC::start() {
 	NRF_ADC->TASKS_START = 1;
 }
 
-void ADC::update(uint32_t value) {
+void ADC::update(uint16_t value) {
 /*
 	++_numSamples;
 	// Start storing when the previous value was below threshold and the current value is above threshold
@@ -178,6 +186,7 @@ void ADC::update(uint32_t value) {
 	}
 */
 
+/*
 	++_numSamples;
 	// Start storing when the previous value was below threshold and the current value is above threshold
 	// When this doesn't happen for some amount of samples, start storing anyway (power is probably off)
@@ -185,7 +194,7 @@ void ADC::update(uint32_t value) {
 		_store = true;
 		// Log first RTC count
 		if (_clock)
-			adcSamples->timeStart = _clock->getCount();
+			adcSamples->_timeStart = _clock->getCount();
 	}
 	if (_store) {
 		adcSamples->buf->push(value);
@@ -195,12 +204,35 @@ void ADC::update(uint32_t value) {
 	}
 	// Log last RTC count
 	if (_clock && adcSamples->buf->full()) {
-		adcSamples->timeEnd = _clock->getCount();
+		adcSamples->_timeEnd = _clock->getCount();
 	}
+*/
+
+	if (!adcSamples->isLocked()) {
+
+//		if (_numSamples > 2000) return;
+//
+//		++_numSamples;
+//		_log(INFO, "%u, ", value);
+//		if (!(_numSamples % 10)) {
+//			_log(INFO, "\r\n");
+//		}
+
+		if (adcSamples->size() == 0 && _clock != NULL) {
+			adcSamples->_timeStart = _clock->getCount();
+		}
+
+		adcSamples->push(value);
+
+		if (adcSamples->full() && _clock != NULL && adcSamples->_timeEnd == 0) {
+			adcSamples->_timeEnd = _clock->getCount();
+		}
+	}
+
 }
 
 void ADC::tick() {
-	dispatch();
+//	dispatch();
 }
 
 /*
