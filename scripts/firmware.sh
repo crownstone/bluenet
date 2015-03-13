@@ -22,8 +22,12 @@ build() {
 }
 
 upload() {
-	${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.hex
-#	${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.bin $address
+	${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.hex 
+	if [ $? -eq 0 ]; then
+		echo "Error with uploading"
+		exit 1
+	fi
+	#${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.bin $address
 }
 
 debug() {
@@ -60,9 +64,12 @@ bootloader() {
 	# note that within the bootloader the JLINK doesn't work anymore...
 	# so perhaps first flash the binary and then the bootloader
 	${path}/firmware.sh upload bootloader 0x00034000
-
-	# and set to load it
-	${path}/writebyte.sh 0x10001014 0x00034000
+	
+	if [ $? -eq 0 ]; then 
+		sleep 1
+		# and set to load it
+		${path}/writebyte.sh 0x10001014 0x00034000
+	fi
 }
 
 case "$cmd" in 

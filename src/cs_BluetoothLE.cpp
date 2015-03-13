@@ -189,12 +189,25 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	//	ci.char_md.char_props.write_wo_resp = ci.cccd_md.write_perm.lv > 0 ? 1 :0;
 }
 
+#define SOFTDEVICE_130_09 strcmp(SOFTDEVICE, "s130_nrf51822_0.9.0-1.alpha")
+
 uint32_t CharacteristicBase::notify() {
 
 	CharacteristicValue value = getCharacteristicValue();
 
+#if $SOFTDEVICE_S130_09 == 0
+	ble_gatts_value_t p_value;
+	p_value.len = value.length;
+	p_value.offset = 0;
+	p_value.p_value= value.data;
+	// leads to error... 0007, invalid param, don't know why!
+	BLE_CALL(sd_ble_gatts_value_set,	(
+				_service->getStack()->getConnectionHandle(),
+				_handles.value_handle, &p_value));
+#else
 	BLE_CALL(sd_ble_gatts_value_set,
 			(_handles.value_handle, 0, &value.length, value.data));
+#endif
 
 	if ((!_notifies) || (!_service->getStack()->connected()) || !_notifyingEnabled)
 		return NRF_SUCCESS;
@@ -459,13 +472,14 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 		BLE_CALL(sd_softdevice_disable, ());
 	}
 
-	LOGi("Enable and initialize softdevice/handler, set assertion handler.");
+	LOGi("Initialize softdevice handler.");
 	// Initialize the SoftDevice handler module.
 	// this would call with different clock!
 	SOFTDEVICE_HANDLER_INIT(_clock_source, false);
 	
 	// enable the BLE stack
-#if(SOFTDEVICE_SERIES == 110) 
+	LOGi("Enable softdevice.");
+//#if(SOFTDEVICE_SERIES == 110) 
 #if(NORDIC_SDK_VERSION >= 6)
 	// do not define the service_changed characteristic, of course allow future changes
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1
@@ -474,18 +488,20 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
 	BLE_CALL(sd_ble_enable, (&ble_enable_params) );
 #endif
-#endif
+//#endif
 
 	// according to the migration guide the address needs to be set directly after the sd_ble_enable call
 	// due to "an issue present in the s110_nrf51822_7.0.0 release"
 #if(SOFTDEVICE_SERIES == 110) 
 #if(NORDIC_SDK_VERSION >= 7)
+	LOGi("Enable GAP in softdevice.");
 	BLE_CALL(sd_ble_gap_enable, () );
 	ble_gap_addr_t addr;
 	BLE_CALL(sd_ble_gap_address_get, (&addr) );
 	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr) );
 #endif
 #endif
+	LOGi("Get BLE version.");
 	// version is not saved or shown yet
 	ble_version_t version( { });
 	version.company_id = 12;
@@ -493,6 +509,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	sd_nvic_EnableIRQ(SWI2_IRQn);
 
+	LOGi("Set BLE name.");
 	if (!_device_name.empty()) {
 		BLE_CALL(sd_ble_gap_device_name_set,
 				(&_sec_mode, (uint8_t*) _device_name.c_str(), _device_name.length()));
