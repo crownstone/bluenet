@@ -20,14 +20,14 @@
 #include "cs_nRF51822.h"
 
 // allocate buffer struct (not array in buffer yet)
-CircularBuffer<uint16_t>* adc_result;
+//CircularBuffer<uint16_t>* adc_result;
 
 AdcSamples* adcSamples;
 
 
-CircularBuffer<uint16_t>* ADC::getBuffer() {
-	return adc_result;
-}
+//CircularBuffer<uint16_t>* ADC::getBuffer() {
+//	return adc_result;
+//}
 
 AdcSamples* ADC::getSamples() {
 	return adcSamples;
@@ -218,15 +218,18 @@ void ADC::update(uint16_t value) {
 //			_log(INFO, "\r\n");
 //		}
 
-		if (adcSamples->size() == 0 && _clock != NULL) {
+		// Add the start timestamp when we add the first sample
+		if (adcSamples->empty() && _clock != NULL) {
 			adcSamples->_timeStart = _clock->getCount();
+		}
+
+		// Add end timestamp when we add the last sample
+		if (adcSamples->size() == adcSamples->capacity()-1 && _clock != NULL) {
+			adcSamples->_timeEnd = _clock->getCount();
 		}
 
 		adcSamples->push(value);
 
-		if (adcSamples->full() && _clock != NULL && adcSamples->_timeEnd == 0) {
-			adcSamples->_timeEnd = _clock->getCount();
-		}
 	}
 
 }
@@ -250,12 +253,10 @@ extern "C" void ADC_IRQHandler(void) {
 	ADC &adc = ADC::getInstance();
 	adc.update(adc_value);
 
-	if (adc_result->full()) {
-//		LOGi("Buffer is full");
-		NRF_ADC->TASKS_STOP = 1;
-		//LOGi("Stopped task");
-	       	return;
-	}
+//	if (adc_result->full()) {
+//		NRF_ADC->TASKS_STOP = 1;
+//	       	return;
+//	}
 
 	// Use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
 	//NRF_ADC->TASKS_STOP = 1;

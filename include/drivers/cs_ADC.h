@@ -119,8 +119,12 @@ public:
 	/* Returns the number of elements in the buffer
 	 *
 	 */
-	uint16_t size() {
+	inline uint16_t size() {
 		return _size;
+	}
+
+	inline uint16_t capacity() {
+		return _increments->capacity()+1;
 	}
 
 	inline bool empty() {

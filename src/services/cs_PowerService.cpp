@@ -235,13 +235,13 @@ void PowerService::sampleCurrentInit() {
 	ADC::getInstance().setClock(RealTimeClock::getInstance());
 
 	// Wait for the RTC to actually start
-	nrf_delay_us(100);
+	nrf_delay_ms(1);
 
 	LOGi("Start ADC");
 	ADC::getInstance().start();
 
 	// Wait for the ADC to actually start
-	nrf_delay_us(5000);
+//	nrf_delay_ms(5);
 }
 
 uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
@@ -255,7 +255,7 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 //	ADC::getInstance().stop();
 
 //	// Wait for the ADC to actually stop
-//	nrf_delay_us(1000);
+//	nrf_delay_ms(1);
 
 //	LOGi("Stop RTC");
 //	RealTimeClock::getInstance().stop();
@@ -346,14 +346,26 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 	}
 */
 
-	// Give some time to sample
-	nrf_delay_us(50);
 
+
+	// Clear the samples, so we get new timestamps
+	// This shouldn't be necessary
 	AdcSamples* samples = ADC::getInstance().getSamples();
+	samples->clear();
+
+	// Give some time to sample
+	// This is no guarantee that the buffer will be full! (interrupt can happen before we get to lock the buffer)
+	while (!samples->full()) {
+		nrf_delay_ms(10);
+	}
+
+
 	uint32_t voltageSquareMean = 0;
-	uint16_t numSamples = samples->size();
 	int i = 0;
+	// When reading the first sample, we lock the buffer
 	uint16_t voltage = samples->getFirstSample();
+	uint16_t numSamples = samples->size();
+	LOGd("numSamples=%u   t_start=%u   t_end=%u", numSamples, samples->_timeStart, samples->_timeEnd);
 	while (true) {
 		if (type & 0x1) {
 			voltageSquareMean += voltage*voltage;
