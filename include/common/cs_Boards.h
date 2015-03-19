@@ -21,6 +21,7 @@
 #define CROWNSTONE           5
 #define NRF51422             6
 #define VIRTUALMEMO          7
+#define CROWNSTONE2          8
 
 #ifndef BOARD
 #error "Add BOARD=... to CMakeBuild.config"
@@ -70,11 +71,36 @@
 #define PIN_GPIO_LED7        8                   // something we don't use! 
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_AIN_ADC          5                   // ain5 is p0.04 or gpio 4
-#define PIN_AIN_LPCOMP       6                   // ain6 is p0.05 or gpio 5
+//#define PIN_AIN_ADC          5                   // ain5 is p0.04 or gpio 4
+//#define PIN_AIN_LPCOMP       6                   // ain6 is p0.05 or gpio 5
+#define PIN_AIN_ADC          6                   // ain6 is p0.05 or gpio 5
+#define PIN_AIN_LPCOMP       5                   // ain5 is p0.04 or gpio 4
+
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 #define PIN_GPIO_RX          6                   // this is p0.06 or gpio 6
 #define PIN_GPIO_TX          1                   // this is p0.01 or gpio 1
+
+#endif
+
+
+#if(BOARD==CROWNSTONE2)
+
+#define PIN_GPIO_LED0        8                   // something we don't use!
+#define PIN_GPIO_LED1        8                   // something we don't use!
+#define PIN_GPIO_LED2        8                   // something we don't use!
+#define PIN_GPIO_LED3        8                   // something we don't use!
+#define PIN_GPIO_LED4        8                   // something we don't use!
+#define PIN_GPIO_LED5        8                   // something we don't use!
+#define PIN_GPIO_LED6        8                   // something we don't use!
+#define PIN_GPIO_LED7        8                   // something we don't use!
+
+#define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
+#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
+#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
+
+#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
+#define PIN_GPIO_RX          4                   // this is p0.04 or gpio 4
+#define PIN_GPIO_TX          2                   // this is p0.02 or gpio 2
 
 #endif
 
