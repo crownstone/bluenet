@@ -67,7 +67,8 @@ void PowerService::savePersistentStorage() {
 }
 
 void PowerService::addPWMCharacteristic() {
-	createCharacteristic<uint8_t>()
+	_pwmCharacteristic = createCharacteristicRef<uint8_t>();
+	(*_pwmCharacteristic)
 		.setUUID(UUID(getUUID(), PWM_UUID))
 		.setName("PWM")
 		.setDefaultValue(255)
@@ -81,12 +82,16 @@ void PowerService::addPWMCharacteristic() {
 // Do we really want to use the PWM for this, or just set the pin to zero?
 // TODO: turn off normally, but make sure we enable the completely PWM again on request
 void PowerService::turnOff() {
+	// update pwm characteristic so that the current value can be read from the characteristic
+	(*_pwmCharacteristic) = 0;
 	PWM::getInstance().setValue(0, 0);
 }
 
 // Do we really want to use the PWM for this, or just set the pin to zero?
 // TODO: turn on normally, but make sure we enable the completely PWM again on request
 void PowerService::turnOn() {
+	// update pwm characteristic so that the current value can be read from the characteristic
+	(*_pwmCharacteristic) = 255;
 	PWM::getInstance().setValue(0, 255);
 }
 
@@ -95,6 +100,8 @@ void PowerService::turnOn() {
  * a specific duty-cycle after the detection of a zero crossing.
  */
 void PowerService::dim(uint8_t value) {
+	// update pwm characteristic so that the current value can be read from the characteristic
+	(*_pwmCharacteristic) = value;
 	PWM::getInstance().setValue(0, value);
 }
 
