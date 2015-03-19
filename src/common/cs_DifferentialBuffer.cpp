@@ -16,7 +16,7 @@ void DifferentialBuffer<uint16_t>::serialize(uint8_t* buffer) {
 	*ptr++ = (val >> 8) & 0xFF;
 	*ptr++ = val & 0xFF;
 	for (uint16_t i=0; i<size()-1; ++i) {
-		*ptr++ = _array[(_head+_readIdx++)%(_capacity-1)];
+		*ptr++ = _array[(_head + i)%(_capacity-1)];
 	}
 }
 
@@ -32,6 +32,6 @@ void DifferentialBuffer<uint32_t>::serialize(uint8_t* buffer) {
 	*ptr++ = (val >> 8) & 0xFF;
 	*ptr++ = val & 0xFF;
 	for (uint16_t i=0; i<size()-1; ++i) {
-		*ptr++ = _array[(_head+_readIdx++)%(_capacity-1)];
+		*ptr++ = _array[(_head + i)%(_capacity-1)];
 	}
 }

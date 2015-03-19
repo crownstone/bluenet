@@ -113,7 +113,7 @@ public:
 
 		_voltageBuf->serialize(ptr);
 
-		ptr = buf+_voltageBuf->getSerializedLength();
+		ptr += _voltageBuf->getSerializedLength();
 		*ptr++ = (tStart >> 24) & 0xFF;
 		*ptr++ = (tStart >> 16) & 0xFF;
 		*ptr++ = (tStart >> 8) & 0xFF;
