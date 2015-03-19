@@ -186,12 +186,9 @@ private:
 	 * wraps the tail around if the end of the array is reached.
 	 */
 	void incTail() {
-		_tail = (++_tail)%_capacity;
+		++_tail;
+		_tail %= _capacity;
 		++_contentsSize;
-//		++_tail;
-//		if (_tail == _capacity) {
-//			_tail = 0;
-//		}
 	}
 
 	/* Increases the head.
@@ -200,12 +197,9 @@ private:
 	 * It also wraps around the head if the end of the array is reached.
 	 */
 	void incHead() {
-		_head = (++_head)%_capacity;
+		++_head;
+		_head %= _capacity;
 		--_contentsSize;
-//		++_head;
-//		if (_head == _capacity) {
-//			_head = 0;
-//		}
 	}
 
 };
