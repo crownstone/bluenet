@@ -14,8 +14,11 @@
 #include "characteristics/cs_Serializable.h"
 #include <string>
 #include "util/cs_Utils.h"
+#include "drivers/cs_Serial.h"
 
 using namespace BLEpp;
+
+#define MAX_CAPACITY 100
 
 /**
  * General class that can be used to send arrays of values over Bluetooth, of which the first byte is a type
@@ -76,6 +79,10 @@ public:
 	 * is freed prior to the new allocation.
 	 */
 	void init(U capacity) {
+		if (capacity > MAX_CAPACITY) {
+			LOGe("requested capacity: %d, max capacity allowed: %d", capacity, MAX_CAPACITY);
+			return;
+		}
 		if (_payload) {
 			free(_payload);
 		}
@@ -250,7 +257,7 @@ public:
 
 	/* @inherit */
     uint16_t getMaxLength() const {
-		return BLE_GATTS_VAR_ATTR_LEN_MAX;
+		return MAX_CAPACITY;
     }
 
 	/* Serialize entire class.
