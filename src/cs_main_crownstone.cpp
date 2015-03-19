@@ -144,8 +144,8 @@ void setName(Nrf51822BluetoothStack &stack) {
 /* Sets default parameters of the Bluetooth connection.
  *
  * On transmission of data within a connection
- *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 10 ms)
- *   - maximum connection interval (in steps of 1.25 ms, 32*1.25 = 20 ms)
+ *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 20 ms)
+ *   - maximum connection interval (in steps of 1.25 ms, 32*1.25 = 40 ms)
  * The supervision timeout multiplier is 400
  * The slave latency is 10
  * On advertising:
@@ -160,7 +160,7 @@ void configure(Nrf51822BluetoothStack &stack) {
 		.setMaxConnectionInterval(32)
 		.setConnectionSupervisionTimeout(400)
 		.setSlaveLatency(10)
-		.setAdvertisingInterval(1600)
+		.setAdvertisingInterval(100)
 		.setAdvertisingTimeoutSeconds(0);
 }
 
