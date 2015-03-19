@@ -218,17 +218,23 @@ void ADC::update(uint16_t value) {
 //			_log(INFO, "\r\n");
 //		}
 
-		// Add the start timestamp when we add the first sample
-		if (adcSamples->empty() && _clock != NULL) {
-			adcSamples->_timeStart = _clock->getCount();
-		}
+//		// Add the start timestamp when we add the first sample
+//		if (adcSamples->empty() && _clock != NULL) {
+//			adcSamples->_timeStart = _clock->getCount();
+//		}
+//
+//		// Add end timestamp when we add the last sample
+//		if (adcSamples->size() == adcSamples->capacity()-1 && _clock != NULL) {
+//			adcSamples->_timeEnd = _clock->getCount();
+//		}
+//
+//		adcSamples->push(value);
 
-		// Add end timestamp when we add the last sample
-		if (adcSamples->size() == adcSamples->capacity()-1 && _clock != NULL) {
-			adcSamples->_timeEnd = _clock->getCount();
+		if (_clock != NULL) {
+			adcSamples->push(value, _clock->getCount());
+		} else {
+			adcSamples->push(value, 0);
 		}
-
-		adcSamples->push(value);
 
 	}
 

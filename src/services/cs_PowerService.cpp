@@ -227,7 +227,7 @@ void PowerService::sampleCurrentInit() {
 	//LOGi("Stop advertising");
 	//stack->stopAdvertising();
 
-	ADC::getInstance().getSamples()->clear();
+//	ADC::getInstance().getSamples()->clear();
 
 	LOGi("Start RTC");
 	RealTimeClock::getInstance().init();
@@ -348,63 +348,79 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 
 
 
-	// Clear the samples, so we get new timestamps
-	// This shouldn't be necessary
 	AdcSamples* samples = ADC::getInstance().getSamples();
-	samples->clear();
-
 	// Give some time to sample
 	// This is no guarantee that the buffer will be full! (interrupt can happen before we get to lock the buffer)
 	while (!samples->full()) {
 		nrf_delay_ms(10);
 	}
 
-
-	uint32_t voltageSquareMean = 0;
-	int i = 0;
-	// When reading the first sample, we lock the buffer
-	uint16_t voltage = samples->getFirstSample();
+	samples->lock();
 	uint16_t numSamples = samples->size();
-	LOGd("numSamples=%u   t_start=%u   t_end=%u", numSamples, samples->_timeStart, samples->_timeEnd);
-	while (true) {
-		if (type & 0x1) {
-			voltageSquareMean += voltage*voltage;
-		}
+	if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
+		// TODO: this is very ugly
+		uint8_t* buf = _currentCurve.payload();
+		samples->serialize(buf);
+		_currentCurve.setPayload(buf, samples->getSerializedLength());
 
-		if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
-			_currentCurve.add(voltage);
-			_log(INFO, "%u, ", voltage);
-			if (!(++i % 10)) {
-				_log(INFO, "\r\n");
+		uint16_t len = samples->getSerializedLength();
+		for (uint16_t i=0; i<len; ++i) {
+			_log(DEBUG, "%i ", (int8_t)buf[i]);
+			if (!((i+1) % 20)) {
+				_log(DEBUG, "\r\n");
 			}
 		}
+		_log(DEBUG, "\r\n");
+		for (uint16_t i=0; i<len; ++i) {
+			_log(DEBUG, "%u ", buf[i]);
+			if (!((i+1) % 20)) {
+				_log(DEBUG, "\r\n");
+			}
+		}
+		_log(DEBUG, "\r\n");
 
-		voltage = samples->getNextSample();
-		if (voltage == (uint16_t)-1) {
-			break;
+	}
+
+	LOGd("numSamples=%u", numSamples);
+	LOGd("samples->getSerializedLength()=%u", samples->getSerializedLength());
+	LOGd("_currentCurve.getMaxLength()=%u", _currentCurve.getMaxLength());
+	LOGd("_currentCurve.getSerializedLength()=%u", _currentCurve.getSerializedLength());
+
+	if (numSamples) {
+		uint32_t voltageSquareMean = 0;
+		uint32_t timestamp = 0;
+		uint16_t voltage = 0;
+		samples->getFirstElement(timestamp, voltage);
+		_log(INFO, "%u %u,  ", timestamp, voltage);
+		uint16_t i = 1;
+		while (samples->getNextElement(timestamp, voltage)) {
+			_log(INFO, "%u %u,  ", timestamp, voltage);
+			if (!(++i % 5)) {
+				_log(INFO, "\r\n");
+			}
+			voltageSquareMean += voltage*voltage;
+		}
+		_log(INFO, "\r\n");
+		LOGd("i=%u", i);
+
+		samples->unlock();
+
+		if (type & 0x1) {
+			// Take the mean
+			voltageSquareMean /= numSamples;
+
+			// Measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
+			// Convert to mV^2
+			voltageSquareMean = voltageSquareMean*1200/1023*1200/1023;
+
+			// Convert to A^2, use I=V/R
+			uint16_t currentSquareMean = voltageSquareMean * 1000 / SHUNT_VALUE * 1000 / SHUNT_VALUE * 1000*1000;
+
+			LOGi("currentSquareMean = %u mA^2", currentSquareMean);
+			return currentSquareMean;
 		}
 	}
-
-	if (type & 0x2) {
-		_log(INFO, "\r\n");
-	}
-
-	if (type & 0x1) {
-		// Take the mean
-		voltageSquareMean /= numSamples;
-
-		// Measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
-		// Convert to mV^2
-		voltageSquareMean = voltageSquareMean*1200/1023*1200/1023;
-
-		// Convert to A^2, use I=V/R
-		uint16_t currentSquareMean = voltageSquareMean * 1000 / SHUNT_VALUE * 1000 / SHUNT_VALUE * 1000*1000;
-
-		LOGi("currentSquareMean = %u mA^2", currentSquareMean);
-		return currentSquareMean;
-	}
-
-
+	samples->unlock();
 	return 0;
 }
 
