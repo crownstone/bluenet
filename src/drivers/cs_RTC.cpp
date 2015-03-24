@@ -119,3 +119,7 @@ uint32_t RealTimeClock::getCount() {
 	uint32_t count = NRF_RTC1->COUNTER;
 	return count;
 }
+
+uint32_t RealTimeClock::now() {
+	return getInstance().getCount() / (LFCLK_FREQUENCY / (NRF_RTC1->PRESCALER + 1) / 1000);
+}
