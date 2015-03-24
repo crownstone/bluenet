@@ -169,9 +169,9 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	// Initialize before adding tracked devices!
 	_trackedDeviceList->init();
 
-	// Load the nearby timeout, use a default of 2000
+	// Load the nearby timeout
 	uint16_t counts;
-	Storage::getUint16(_storageStruct.nearbyTimeout, counts, 2000);
+	Storage::getUint16(_storageStruct.nearbyTimeout, counts, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
 	_trackedDeviceList->setTimeout(counts);
 }
 

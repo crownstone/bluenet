@@ -20,6 +20,12 @@ struct __attribute__((__packed__)) tracked_device_t {
 	uint16_t counter;
 };
 
+// About 3 minutes
+//#define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 2000
+// About 20 seconds
+#define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 100
+
+
 #define TRACKDEVICES_HEADER_SIZE 1 // 1 BYTE for the header = number of elements in the list
 #define TRACKDEVICES_SERIALIZED_SIZE (sizeof(tracked_device_t)-2) // only works if struct packed. Subtract 2, as counter is not serialized
 
