@@ -93,6 +93,10 @@ extern "C" {
 #include "drivers/cs_Serial.h"
 #include "common/cs_Storage.h"
 
+#if (BOARD==CROWNSTONE_SENSOR)
+#include "cs_Sensors.h"
+#endif
+
 #if INDOOR_SERVICE==1
 #include <services/cs_IndoorLocalisationService.h>
 #endif
@@ -363,6 +367,10 @@ int main() {
 	PowerService &powerService = PowerService::createService(stack);
 #endif
 
+#if (BOARD==CROWNSTONE_SENSOR)
+	Sensors sensors;
+#endif
+
 	// configure drivers
 	config_drivers();
 
@@ -411,6 +419,10 @@ int main() {
 #endif
 #if INDOOR_SERVICE==1
 		localizationService.tick();
+#endif
+
+#if (BOARD==CROWNSTONE_SENSOR)
+		sensors.tick();
 #endif
 
 		app_sched_execute();
