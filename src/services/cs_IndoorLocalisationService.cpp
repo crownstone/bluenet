@@ -50,11 +50,11 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addPeripheralListCharacteristic)});
 	characStatus.push_back( { "List tracked devices",
 		TRACKED_DEVICE_LIST_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addTrackedDeviceListCharacteristic)});
 	characStatus.push_back( { "Add tracked device",
 		TRACKED_DEVICE_UUID,
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addTrackedDeviceCharacteristic)});
 
 	_trackMode = false;
@@ -76,9 +76,11 @@ void IndoorLocalizationService::savePersistentStorage() {
 void IndoorLocalizationService::tick() {
 
 	if (!_initialized) {
-		readTrackedDevices();
-		if (!_trackedDeviceList->isEmpty()) {
-			startTracking();
+		if (_trackedDeviceList != NULL) {
+			readTrackedDevices();
+			if (!_trackedDeviceList->isEmpty()) {
+				startTracking();
+			}
 		}
 		_initialized = true;
 	}
@@ -325,6 +327,10 @@ void IndoorLocalizationService::onRSSIChanged(int8_t rssi) {
 }
 
 void IndoorLocalizationService::setRSSILevel(int8_t RSSILevel) {
+#ifdef MICRO_VIEW
+	// Update rssi at the display
+	write("2 %i\r\n", RSSILevel);
+#endif
 	if (_rssiCharac) {
 		*_rssiCharac = RSSILevel;
 	}

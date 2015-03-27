@@ -399,9 +399,15 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 		uint16_t voltage = 0;
 		samples->getFirstElement(timestamp, voltage);
 		_log(INFO, "%u %u,  ", timestamp, voltage);
+#ifdef MICRO_VIEW
+		write("3 [%u %u ", timestamp, voltage);
+#endif
 		uint16_t i = 1;
 		while (samples->getNextElement(timestamp, voltage)) {
 			_log(INFO, "%u %u,  ", timestamp, voltage);
+#ifdef MICRO_VIEW
+			write("%u %u ", timestamp, voltage);
+#endif
 			if (!(++i % 5)) {
 				_log(INFO, "\r\n");
 			}
@@ -409,6 +415,9 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 		}
 		_log(INFO, "\r\n");
 		LOGd("i=%u", i);
+#ifdef MICRO_VIEW
+		write("]r\n");
+#endif
 
 		samples->unlock();
 
