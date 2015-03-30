@@ -4,126 +4,138 @@
  * Date: Mar 23, 2015
  * License: LGPLv3+
  */
+#include "cs_BluetoothLE.h"
 #include "cs_Sensors.h"
-#include "drivers/cs_Serial.h"
+
 #include "common/cs_Boards.h"
+#include "drivers/cs_Serial.h"
 #include "drivers/cs_ADC.h"
 #include "drivers/cs_RTC.h"
 
-#include "cs_BluetoothLE.h"
+/* NOE: only use with BOARDS = CROWNSTONE_SENSOR */
 
-#include "nrf_gpio.h"
-#include "nrf_gpiote.h"
-
+/*
+ * ENABLE SENSORS
+ * only one GPIO is available right now, so only
+ * one sensor can be used at a time
+ */
 //#define LIGHT_SENSOR_ENABLED
 //#define THERMAL_SENSOR_ENABLED
-#define PUSH_BUTTON_ENABLED
-//#define SWITCH_ENABLED
+//#define PUSH_BUTTON_ENABLED
+#define SWITCH_ENABLED
 
-// helper function
-#define freqToInterval(x) 1000 / x
+/* choose which way the switch should be checked
+ * 1. interrupt: get an interrupt from the GPIO
+ *		handler whenever the signal toggles.
+ *		BUT: can register a signal change wrongly if
+ *		switch is only moved slightly but doesnt change
+ *		position totally. Can be a problem of the switch
+ *		being tested
+ * 2. polling: check the state of the switch in
+ *		every execution of tick and update it accordingly
+ *		is not as fast, but does not have the above problem
+ */
+#ifdef SWITCH_ENABLED
+//#define SWITCH_INTERRUPT
+#define SWITCH_POLL
+#endif
 
-// light sensor
-#define LIGHT_THRESHOLD 0.2 * MAX_VALUE
-#define LIGHT_CHECK_INTERVAL freqToInterval(1) // 1 Hz
+/* choose which way the push button should be checked,
+ * see description above for switch
+ */
+#ifdef PUSH_BUTTON_ENABLED
+#define PUSH_BUTTON_INTERRUPT
+//#define PUSH_BUTTON_POLL
+#endif
 
-// thermistor
-#define THERMAL_CHECK_INTERVAL freqToInterval(1) // 1 Hz
-
-// push button
-#define PUSH_BUTTON_THRESHOLD 0.9 * MAX_VALUE
-#define PUSH_BUTTON_CHECK_INTERVAL freqToInterval(20) // 20 Hz
-
-// switch button
-#define SWITCH_THRESHOLD 0.9 * MAX_VALUE
-#define SWITCH_CHECK_INTERVAL freqToInterval(20) // 20 Hz
-
-// general
+/* compiler flag initializes ADC.
+ * add additional defined checks if another sensor needs to use
+ * the ADC
+ */
 #define ADC_USED defined(LIGHT_SENSOR_ENABLED) || defined(THERMAL_SENSOR_ENABLED)
 
-#define BUTTON_USED defined(PUSH_BUTTON_ENABLED) || defined(SWITCH_ENABLED)
+/* compiler flag starts interrupt handler
+ * add additional defined checks if interrupt handler should be used
+ * for other sensors
+ */
+#define INTERRUPT_USED defined(PUSH_BUTTON_INTERRUPT) || defined(SWITCH_INTERRUPT)
 
+/* Update defines for other boards (instead of adding meaningless PIN definitions
+ * to all other boards)
+ */
+#if (BOARD != CROWNSTONE_SENSOR)
+	#ifndef PIN_GPIO_BUTTON
+	#define PIN_GPIO_BUTTON 0
+	#endif
 
-
+	#ifndef PIN_AIN_SENSOR
+	#define PIN_AIN_SENSOR 0
+	#endif
+#endif
 
 Sensors::Sensors() : _initialized(false),
 	_lastLightCheck(0), _lastThermalCheck(0), _lastPushButtonCheck(0), _lastSwitchCheck(0),
-	_lastPushed(false), _lastSwitchOn(false)
+	_lastSwitchOn(false), _lastPushed(false)
 {
 	// NOTHING to do
 }
 
+#ifdef SWITCH_POLL
+/* Check Switch position
+ *
+ * return true if sensor was checked and switchOn variable
+ * contains a valid value
+ * return false if sensor was not checked / skipped
+ */
 bool Sensors::checkSwitch(uint32_t time, bool &switchOn) {
-	if (time - _lastSwitchCheck > 50) {
-		uint16_t sample = sampleSensor();
-
-		if (sample == -1) {
-			LOGe("failed to read ADC!!");
-			return false;
-		}
-
-		// do simple thresholding
-		if (sample > SWITCH_THRESHOLD) {
-			switchOn = true;
-
-			// a push was detected, debounce signal. skip checking for 100 ms
-			_lastSwitchCheck = time + 100;
-		} else {
-			switchOn = false;
-			_lastSwitchCheck = time;
-		}
+	if (time - _lastSwitchCheck > SWITCH_CHECK_INTERVAL) {
+		// check the state of the switch:
+		//   ON when signal is HIGH
+		//   OFF when signal is LOW
+		switchOn = nrf_gpio_pin_read(PIN_GPIO_BUTTON);
 
 		return true;
 	}
 
 	return false;
 }
+#endif
 
+#ifdef PUSH_BUTTON_POLL
+/* Check push button state
+ *
+ * return true if sensor was checked and pushed variable
+ * contains a valid value
+ * return false if sensor was not checked / skipped
+ */
 bool Sensors::checkPushButton(uint32_t time, bool &pushed) {
-	if (time - _lastPushButtonCheck > 50) {
-		uint16_t sample = sampleSensor();
-
-		if (sample == -1) {
-			LOGe("failed to read ADC!!");
-			return false;
-		}
-
-		// do simple thresholding
-		if (sample > PUSH_BUTTON_THRESHOLD) {
-			pushed = true;
-
-			// a push was detected, debounce signal. skip checking for 100 ms
-			_lastPushButtonCheck = time + 100;
-		} else {
-			pushed = false;
-			_lastPushButtonCheck = time;
-		}
+	if (time - _lastPushButtonCheck > PUSH_BUTTON_CHECK_INTERVAL) {
+		// check the state of the push button:
+		//   PUSHED when signal is HIGH
+		//   RELEASED when signal is LOW
+		pushed = nrf_gpio_pin_read(PIN_GPIO_BUTTON) == 0;
 
 		return true;
 	}
 
 	return false;
 }
+#endif
 
-
+/* Initialize ADC for sensor sampling
+ */
 void Sensors::initADC() {
 	ADC::getInstance().init(PIN_AIN_SENSOR);
 
-	LOGi("Start RTC");
-	RealTimeClock::getInstance().init();
-	RealTimeClock::getInstance().start();
 	ADC::getInstance().setClock(RealTimeClock::getInstance());
-
-	// Wait for the RTC to actually start
-	nrf_delay_ms(1);
 
 	LOGi("Start ADC");
 	ADC::getInstance().start();
 }
 
-/* Read the ADC to get light intensity values for an LDR (light dependent resistor)
+/* Read the ADC to get sensor values
  *
- * returns values 0-1023, where 1023 is max intensity
+ * returns values 0-1023, where 1023 is max value
  *  -1 for error
  */
 uint16_t Sensors::sampleSensor() {
@@ -143,15 +155,15 @@ uint16_t Sensors::sampleSensor() {
 		uint32_t timestamp = 0;
 		uint16_t voltage = 0;
 		samples->getFirstElement(timestamp, voltage);
-//		_log(INFO, "%u,  ", voltage);
+//		_log(DEBUG, "%u,  ", voltage);
 		do {
-//			_log(INFO, "%u,  ", voltage);
+//			_log(DEBUG, "%u,  ", voltage);
 //			if (!(++i % 5)) {
-//				_log(INFO, "\r\n");
+//				_log(DEBUG, "\r\n");
 //			}
 			average += voltage;
 		} while (samples->getNextElement(timestamp, voltage));
-//		_log(INFO, "\r\n");
+//		_log(DEBUG, "\r\n");
 
 		samples->unlock();
 
@@ -175,8 +187,10 @@ uint16_t Sensors::sampleSensor() {
 	return -1;
 }
 
+/* Check light sensor by sampling ADC values
+ */
 bool Sensors::checkLightSensor(uint32_t time, uint16_t &value) {
-	if (time - _lastLightCheck > 1000) {
+	if (time - _lastLightCheck > LIGHT_CHECK_INTERVAL) {
 		value = sampleSensor();
 
 		if (value == -1) {
@@ -185,7 +199,7 @@ bool Sensors::checkLightSensor(uint32_t time, uint16_t &value) {
 		}
 
 		// convert to percentage
-		LOGi("light intensity: %3d%%", (uint16_t)(100.0 * value/MAX_VALUE));
+		LOGd("light intensity: %3d%%", (uint16_t)(100.0 * value/MAX_VALUE));
 		_lastLightCheck = time;
 
 		return true;
@@ -194,8 +208,10 @@ bool Sensors::checkLightSensor(uint32_t time, uint16_t &value) {
 	return false;
 }
 
+/* Check thermistor sensor by sampling ADC values
+ */
 uint16_t Sensors::checkThermalSensor(uint32_t time) {
-	if (time - _lastThermalCheck > 1000) {
+	if (time - _lastThermalCheck > THERMAL_CHECK_INTERVAL) {
 		uint16_t thermalIntensity = sampleSensor();
 
 		if (thermalIntensity == -1) {
@@ -204,7 +220,7 @@ uint16_t Sensors::checkThermalSensor(uint32_t time) {
 		}
 
 		// convert to percentage
-		LOGi("thermal intensity: %3d%%", (uint16_t)(100.0 * thermalIntensity/MAX_VALUE));
+		LOGd("thermal intensity: %3d%%", (uint16_t)(100.0 * thermalIntensity/MAX_VALUE));
 		_lastThermalCheck = time;
 
 		return thermalIntensity;
@@ -213,85 +229,68 @@ uint16_t Sensors::checkThermalSensor(uint32_t time) {
 	return -1;
 }
 
-void switchPwmSignal() {
+/* Initialize enabled sensor(s)
+ *
+ */
+void Sensors::init() {
 
-	uint8_t pwmChannel;
-	uint32_t pwmValue;
-	// check first the current pwm value ...
-	PWM::getInstance().getValue(pwmChannel, pwmValue);
+	LOGi("Start RTC");
+	RealTimeClock::getInstance().init();
+	RealTimeClock::getInstance().start();
 
-	// if currently off, turn on, otherwise turn off
-	if (pwmValue == 0) {
-		PWM::getInstance().setValue(0, 255);
-	} else {
-		PWM::getInstance().setValue(0, 0);
-	}
+#if ADC_USED
+	initADC();
+#endif
+
+#ifdef PUSH_BUTTON_ENABLED
+	initPushButton();
+#endif
+
+#ifdef SWITCH_ENABLED
+	initSwitch();
+#endif
+
+	_initialized = true;
 }
 
-void switchPwmOn() {
-	uint8_t pwmChannel;
-	uint32_t pwmValue;
-	// check first the current pwm value ...
-	PWM::getInstance().getValue(pwmChannel, pwmValue);
-
-	// if currently off, turn on, otherwise do nothing
-	if (pwmValue == 0) {
-		PWM::getInstance().setValue(0, 255);
-	}
-}
-
-void switchPwmOff() {
-	uint8_t pwmChannel;
-	uint32_t pwmValue;
-	// check first the current pwm value ...
-	PWM::getInstance().getValue(pwmChannel, pwmValue);
-
-	// if currently on, turn off, otherwise do nothing
-	if (pwmValue == 255) {
-		PWM::getInstance().setValue(0, 0);
-	}
-}
-
+/* Tick function
+ * check enabled sensor and update PWM signal
+ * also initializes sensors on first run
+ */
 void Sensors::tick() {
 
 	if (!_initialized) {
-
-#if ADC_USED
-		initADC();
-#endif
-
-		uint8_t pwmChannel;
-		uint32_t pwmValue;
-		// check first the current pwm value ...
-		PWM::getInstance().getValue(pwmChannel, pwmValue);
-
-#ifdef SWITCH_ENABLED
-		// update last switch position to current pwm value, so
-		// that in case current switch position does not correspond
-		// to current pwm value, the pwm value can be updated
-		_lastSwitchOn = pwmValue != 0;
-#endif
-
-		_initialized = true;
-
-		gpiote_init();
+		init();
 	}
 
-//	LOGi("tick tock");
 	uint32_t now = RealTimeClock::now();
 
-#ifdef SWITCH_ENABLED
-	bool switchOn = false;
-
-	if (checkSwitch(now, switchOn)) {
-		if (switchOn && !_lastSwitchOn) {
-			LOGi("switch ON");
-			switchPwmOn();
-		} else if (!switchOn && _lastSwitchOn) {
-			LOGi("switch OFF");
-			switchPwmOff();
+#ifdef PUSH_BUTTON_POLL
+	bool pushed = false;
+	if (checkPushButton(now, pushed)) {
+		if (pushed != _lastPushed) {
+			if (pushed) {
+				LOGi("Button pushed, switch pwm signal");
+				Sensors::switchPwmSignal();
+			}
+			_lastPushed = pushed;
 		}
-		_lastSwitchOn = switchOn;
+	}
+#endif
+
+#ifdef SWITCH_POLL
+	bool switchOn = false;
+	if (checkSwitch(now, switchOn)) {
+		if (switchOn != _lastSwitchOn) {
+			if (switchOn) {
+				LOGi("switch ON");
+				switchPwmOn();
+			} else {
+				LOGi("switch OFF");
+				switchPwmOff();
+			}
+			_lastSwitchOn = switchOn;
+		}
 	}
 #endif
 
@@ -313,61 +312,216 @@ void Sensors::tick() {
 
 }
 
-#if BUTTON_USED
+#ifdef SWITCH_ENABLED
+/* initialize switch sensor based on compiler flags
+ */
+void Sensors::initSwitch() {
 
-void Sensors::gpiote_init(void) {
-	LOGi("gpio_init");
+#ifdef SWITCH_INTERRUPT
+	initGPIOTE();
+
+	nrf_gpiote_event_config(0, PIN_GPIO_BUTTON, NRF_GPIOTE_POLARITY_TOGGLE);
+	NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_IN0_Enabled << GPIOTE_INTENSET_IN0_Pos;
+#endif
+
+#ifdef SWITCH_POLL
+	nrf_gpio_cfg_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP);
+#endif
+
+	// check initial state of switch
+	if (nrf_gpio_pin_read(PIN_GPIO_BUTTON)) {
+		switchPwmOn();
+	} else {
+		switchPwmOff();
+	}
+
+}
+#endif
+
+#ifdef PUSH_BUTTON_ENABLED
+/* Initialize push button, uses GPIO interrupt event handler
+ */
+void Sensors::initPushButton() {
+
+#ifdef PUSH_BUTTON_POLL
+	nrf_gpio_cfg_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP);
+#endif
+
+#ifdef PUSH_BUTTON_INTERRUPT
+	initGPIOTE();
+
+	nrf_gpio_cfg_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP);
+	nrf_gpiote_event_config(0, PIN_GPIO_BUTTON, NRF_GPIOTE_POLARITY_TOGGLE);
+	NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_IN0_Enabled << GPIOTE_INTENSET_IN0_Pos;
+
+//	nrf_gpio_cfg_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP);
+//	nrf_gpio_cfg_sense_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
+//	NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_PORT_Enabled << GPIOTE_INTENSET_PORT_Pos;
+#endif
+}
+#endif
+
+#if INTERRUPT_USED
+/* Initialize GPIO interrupt event handler
+ */
+void Sensors::initGPIOTE() {
+	uint32_t err_code = 0;
 
 	/* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it
 	in APP_LOW in order to use */
-	NVIC_SetPriority(GPIOTE_IRQn, 3);
+#if(NRF51_USE_SOFTDEVICE == 1)
+	err_code = sd_nvic_SetPriority(GPIOTE_IRQn, NRF_APP_PRIORITY_LOW);
+	APP_ERROR_CHECK(err_code);
+#else
+	NVIC_SetPriority(GPIOTE_IRQn, NRF_APP_PRIORITY_LOW);
+#endif
+
+#if(NRF51_USE_SOFTDEVICE == 1)
+	err_code = sd_nvic_EnableIRQ(GPIOTE_IRQn);
+	APP_ERROR_CHECK(err_code);
+#else
 	NVIC_EnableIRQ(GPIOTE_IRQn);
+#endif
 
-    // #ifdef VERSION 1
-	nrf_gpio_cfg_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP);
-	nrf_gpio_cfg_sense_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
-	NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_PORT_Msk;
-	// #endif
-
-	// #ifdef VERSION 2 (gives more false events)
-	//	nrf_gpiote_event_config(0, PIN_GPIO_BUTTON, NRF_GPIOTE_POLARITY_HITOLO);
-	//	NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_IN0_Enabled << GPIOTE_INTENSET_IN0_Pos;
-	// #endif
-
-//	LOGi(".. done");
 }
 
+#ifdef SWITCH_INTERRUPT
+// keep track of the switch time. this variable is used to avoid flickering
+// signal for switch
+#endif
+static uint32_t _interruptTimeout = 0;
+
+#ifdef PUSH_BUTTON_INTERRUPT
+static bool _lastPushed = false;
+#endif
+
+/* GPIO interrupt event handler
+ */
 extern "C" void GPIOTE_IRQHandler()
 {
-//	LOGi("GPIOTE_IRQHandler");
+//	LOGd("GPIOTE_IRQHandler");
 
-	// #ifdef VERSION 1
+	// keep track of the GPIO pin states
 	uint32_t pins_state = NRF_GPIO->IN;
-	if ((pins_state & (1 << (PIN_GPIO_BUTTON))) == 0)
-	{
-		LOGi("Button pressed");
-	}
-	NRF_GPIOTE->EVENTS_PORT = 0;
-	// #endif
 
-	// #ifdef VERSION 2
-//	if ((NRF_GPIOTE->EVENTS_IN[0] == 1) &&
-//		(NRF_GPIOTE->INTENSET & GPIOTE_INTENSET_IN0_Msk))
-//	{
-//		LOGi("Button pressed %d", ++count);
-//		NRF_GPIOTE->EVENTS_IN[0] = 0;
-//	}
-	// #endif
+#ifdef PUSH_BUTTON_INTERRUPT
+	if ((NRF_GPIOTE->EVENTS_IN[0] == 1) &&
+		(NRF_GPIOTE->INTENSET & GPIOTE_INTENSET_IN0_Msk)) {
+
+		// signal seems to flicker some times when releasing the button
+		// to avoid a wrong push registration, ignore such an event
+		// if both pushed and _lastPushed are true, only register push
+		// button event if pushed and _lastPushed are not equal
+
+		bool pushed = (pins_state & (1 << PIN_GPIO_BUTTON)) == 0;
+
+		uint32_t now = RealTimeClock::getInstance().now();
+		if (now > _interruptTimeout) {
+
+//			if (pushed != _lastPushed) {
+				if (pushed && !_lastPushed) {
+					LOGi("Button pushed, switch pwm signal");
+					Sensors::switchPwmSignal();
+	//			} else {
+	//				LOGi("released");
+				}
+				_lastPushed = pushed;
+
+		//		NRF_GPIOTE->EVENTS_PORT = 0;
+				// clear the event again
+				NRF_GPIOTE->EVENTS_IN[0] = 0;
+//			}
+			_interruptTimeout = now + 100;
+		} else {
+			NRF_GPIOTE->EVENTS_IN[0] = 0;
+		}
+	}
+#endif
+
+#ifdef SWITCH_INTERRUPT
+
+	// check if the event is for us
+	if ((NRF_GPIOTE->EVENTS_IN[0] == 1) &&
+		(NRF_GPIOTE->INTENSET & GPIOTE_INTENSET_IN0_Msk)) {
+
+		bool switchON = (pins_state & (1 << PIN_GPIO_BUTTON)) == 0;
+
+		// if switch is moved really slowly, signal flickers on transition
+		// to avoid registering the signal all the time, add a delay
+		// and only register the signal again if no other signal has been
+		// received in the meantime.
+		uint32_t now = RealTimeClock::getInstance().now();
+		if (now > _interruptTimeout) {
+			if (switchON) {
+				LOGi("switch ON");
+				Sensors::switchPwmOn();
+			} else {
+				LOGi("switch OFF");
+				Sensors::switchPwmOff();
+			}
+		}
+		_interruptTimeout = now + 100;
+
+		// clear the event again
+		NRF_GPIOTE->EVENTS_IN[0] = 0;
+	}
+
+#endif
 
 //	for (int i = 31; i >= 0; --i) {
-//		//		LOGi("%d: %d", i, pins_state & (1 << i));
-//		_log(INFO, "%d", (pins_state & (1 << i)) != 0 ? 1 : 0);
-//		_log(INFO, "%s", i%4 == 0 ? " " : "");
+//		_log(DEBUG, "%d", (pins_state & (1 << i)) != 0 ? 1 : 0);
+//		_log(DEBUG, "%s", i%4 == 0 ? " " : "");
 //	}
-//	_log(INFO, "\r\n");
-//
-//	LOGi("... done");
+//	_log(DEBUG, "\r\n");
 
 }
 
 #endif
+
+/* Switch PWM signal.
+ * Checks current pwm signal, then toggles from ON to OFF and vice versa
+ */
+void Sensors::switchPwmSignal() {
+
+	uint8_t pwmChannel;
+	uint32_t pwmValue;
+	// check first the current pwm value ...
+	PWM::getInstance().getValue(pwmChannel, pwmValue);
+
+	// if currently off, turn on, otherwise turn off
+	if (pwmValue == 0) {
+		PWM::getInstance().setValue(0, 255);
+	} else {
+		PWM::getInstance().setValue(0, 0);
+	}
+}
+
+/* Switch PWM signal ON
+ * Checks current pwm signal and only changes if it is currently OFF
+ */
+void Sensors::switchPwmOn() {
+	uint8_t pwmChannel;
+	uint32_t pwmValue;
+	// check first the current pwm value ...
+	PWM::getInstance().getValue(pwmChannel, pwmValue);
+
+	// if currently off, turn on, otherwise do nothing
+	if (pwmValue == 0) {
+		PWM::getInstance().setValue(0, 255);
+	}
+}
+
+/* Switch PWM signal OFF
+ * Checks current pwm signal and only changes if it is currently ON
+ */
+void Sensors::switchPwmOff() {
+	uint8_t pwmChannel;
+	uint32_t pwmValue;
+	// check first the current pwm value ...
+	PWM::getInstance().getValue(pwmChannel, pwmValue);
+
+	// if currently on, turn off, otherwise do nothing
+	if (pwmValue == 255) {
+		PWM::getInstance().setValue(0, 0);
+	}
+}

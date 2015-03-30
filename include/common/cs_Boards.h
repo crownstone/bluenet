@@ -76,7 +76,6 @@
 //#define PIN_AIN_LPCOMP       6                   // ain6 is p0.05 or gpio 5
 #define PIN_AIN_ADC          6                   // ain6 is p0.05 or gpio 5
 #define PIN_AIN_LPCOMP       5                   // ain5 is p0.04 or gpio 4
-#define PIN_AIN_SENSOR       3                   // ain3 is p0.02 or gpio 2
 
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 #define PIN_GPIO_RX          6                   // this is p0.06 or gpio 6
