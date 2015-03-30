@@ -107,6 +107,12 @@ extern "C" {
 
 using namespace BLEpp;
 
+inline void print_heap(std::string msg) {
+	uint8_t *p = (uint8_t*)malloc(1);
+	LOGd("%s %p", msg.c_str(), p);
+	free(p);
+}
+
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -120,9 +126,7 @@ void welcome() {
 	nrf_gpio_pin_set(PIN_GPIO_LED0);
 	config_uart();
 	_log(INFO, "\r\n");
-	uint8_t *p = (uint8_t*)malloc(1);
-	LOGd("Start of heap %p", p);
-	free(p);
+	print_heap("Init");
 	LOGd("Bootloader starts at 0x00034000.");
         // To have DFU, keep application limited to (BOOTLOADER_START - APPLICATION_START_CODE) / 2
 	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800 
@@ -367,6 +371,7 @@ int main() {
 
 	// configure drivers
 	config_drivers();
+	print_heap("Drivers: ");
 
 	// begin sending advertising packets over the air.
 #ifdef IBEACON
@@ -374,6 +379,7 @@ int main() {
 #else
 	stack.startAdvertising();
 #endif
+	print_heap("Heap adv: ");
 
 #if MESHING==1
     #ifdef BOARD_PCA10001
