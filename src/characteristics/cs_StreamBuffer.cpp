@@ -7,73 +7,115 @@
 
 #include "characteristics/cs_StreamBuffer.h"
 
-StreamBuffer::StreamBuffer() : _type(0), _plength(0) {
-	_payload = (uint8_t*)calloc(MAX_BUFFER_SIZE, sizeof(uint8_t));
+/////////////////////////////////////////////////////////////////////////////////
+// uint8_t
+/////////////////////////////////////////////////////////////////////////////////
+
+template<>
+StreamBuffer<uint8_t>* StreamBuffer<uint8_t>::fromString(std::string& str) {
+	StreamBuffer<uint8_t>* buffer = new StreamBuffer<uint8_t>(str.length());
+	buffer->_plength = str.length();
+	memcpy(buffer->_payload, str.c_str(), buffer->_plength);
+	return buffer;
 }
 
-bool StreamBuffer::operator!=(const StreamBuffer &other) {
-	if (_type != other._type) return true;
-	if (_plength != other._plength) return true;
-	if (memcmp(_payload, other._payload, MAX_BUFFER_SIZE) != 0) return true;
-	return false;
-}
-
-uint16_t StreamBuffer::getSerializedLength() const {
-	return MAX_BUFFER_SIZE + BUFFER_HEADER_SIZE;
-}
-
-bool StreamBuffer::toString(std::string &str) {
-	if (!_plength) return false;
-	str = std::string((char*)_payload, _plength);
-	return true;
-}
-
-bool StreamBuffer::fromString(const std::string &str) {
-	_plength = str.length();
-	_plength = 
-		((_plength > MAX_BUFFER_SIZE) ? MAX_BUFFER_SIZE : _plength);
-	memcpy(_payload, str.c_str(), _plength*sizeof(uint8_t));
-}
-	
-void StreamBuffer::setPayload(uint8_t *payload, uint8_t plength) {
-	_plength = 
-		((plength > MAX_BUFFER_SIZE) ? MAX_BUFFER_SIZE : plength);
-	memcpy(_payload, payload, _plength*sizeof(uint8_t));
-}
-
-uint8_t StreamBuffer::add(uint8_t value) {
-	if (_plength >= MAX_BUFFER_SIZE) return 1;
-	_payload[_plength++] = value;
-	return 0;
-}
-
-void StreamBuffer::clear() {
-	if (_payload) {
-		free(_payload);
-	}
-	_payload = (uint8_t*)calloc(MAX_BUFFER_SIZE, sizeof(uint8_t));
-	_plength = 0;
-}
-
-void StreamBuffer::serialize(uint8_t* buffer, uint16_t length) const {
+template<>
+void StreamBuffer<uint8_t>::serialize(uint8_t* buffer, uint16_t length) const {
 	if (length < 3) return; // throw error
-	
+
 	uint8_t *ptr = buffer;
 	*ptr++ = _type;
 	*ptr++ = _plength;
 
-	if (_plength) memcpy(ptr, _payload, _plength*sizeof(uint8_t));
+	if (_plength) memcpy(ptr, _payload, _plength * sizeof(uint8_t));
+
+//	LOGd("serialize...");
+//	BLEutil::printArray(buffer, length);
 }
 
-void StreamBuffer::deserialize(uint8_t* buffer, uint16_t length) {
+template<>
+void StreamBuffer<uint8_t>::deserialize(uint8_t* buffer, uint16_t length) {
 	if (length < 3) return;
 
 	uint8_t *ptr = buffer;
 	_type = *ptr++;
 	_plength = *ptr++;
-	memset(_payload, 0, MAX_BUFFER_SIZE);
-	uint16_t corr_plength = 
-		((_plength > MAX_BUFFER_SIZE) ? MAX_BUFFER_SIZE : _plength);
-	memcpy(_payload, ptr, corr_plength*sizeof(uint8_t));
+
+	init(_plength);
+	memcpy(_payload, ptr, _plength * sizeof(uint8_t));
+
+//	LOGd("deserialize...");
+//	BLEutil::printArray(_payload, _plength);
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+// uint16_t
+/////////////////////////////////////////////////////////////////////////////////
+
+template<>
+void StreamBuffer<uint16_t>::serialize(uint8_t* buffer, uint16_t length) const {
+	if (length < 3) return; // throw error
+
+	uint8_t *ptr = buffer;
+	*ptr++ = _type;
+	*ptr++ = _plength;
+
+	for (int i = 0; i < _plength; ++i) {
+		*ptr++ = (_payload[i] >> 8) & 0xFF;
+		*ptr++ = _payload[i] & 0xFF;
+	}
+}
+
+template<>
+void StreamBuffer<uint16_t>::deserialize(uint8_t* buffer, uint16_t length) {
+	if (length < 3) return;
+
+	uint8_t *ptr = buffer;
+	_type = *ptr++;
+	_plength = *ptr++;
+
+	init(_plength);
+
+	for (int i = 0; i < _plength; ++i) {
+		_payload[i] = (*ptr++ << 8) & 0xFF00;
+		_payload[i] |= *ptr++;
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// uint32_t
+/////////////////////////////////////////////////////////////////////////////////
+
+template<>
+void StreamBuffer<uint32_t>::serialize(uint8_t* buffer, uint16_t length) const {
+	if (length < 3) return; // throw error
+
+	uint8_t *ptr = buffer;
+	*ptr++ = _type;
+	*ptr++ = _plength;
+
+	for (int i = 0; i < _plength; ++i) {
+		*ptr++ = (_payload[i] >> 24) & 0xFF;
+		*ptr++ = (_payload[i] >> 16) & 0xFF;
+		*ptr++ = (_payload[i] >> 8) & 0xFF;
+		*ptr++ = _payload[i] & 0xFF;
+	}
+}
+
+template<>
+void StreamBuffer<uint32_t>::deserialize(uint8_t* buffer, uint16_t length) {
+	if (length < 3) return;
+
+	uint8_t *ptr = buffer;
+	_type = *ptr++;
+	_plength = *ptr++;
+
+	init(_plength);
+
+	for (int i = 0; i < _plength; ++i) {
+		_payload[i] = (*ptr++ << 24) & 0xFF000000;
+		_payload[i] |= (*ptr++ << 16) & 0xFF0000;
+		_payload[i] |= (*ptr++ << 8) & 0xFF00;
+		_payload[i] |= *ptr++;
+	}
+}

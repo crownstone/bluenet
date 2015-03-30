@@ -20,10 +20,17 @@
 #include "cs_nRF51822.h"
 
 // allocate buffer struct (not array in buffer yet)
-buffer_t<uint16_t> adc_result;
+//CircularBuffer<uint16_t>* adc_result;
 
-buffer_t<uint16_t>* ADC::getBuffer() {
-	return &adc_result;
+AdcSamples* adcSamples;
+
+
+//CircularBuffer<uint16_t>* ADC::getBuffer() {
+//	return adc_result;
+//}
+
+AdcSamples* ADC::getSamples() {
+	return adcSamples;
 }
 	
 void ADC::setClock(RealTimeClock &clock) {
@@ -41,16 +48,34 @@ uint32_t ADC::init(uint8_t pin) {
 	LOGd("Run ADC converter without SoftDevice!!!");
 	
 #endif
-	if (adc_result.size != _bufferSize) {
-		adc_result.size = _bufferSize;
-		adc_result.buffer = (uint16_t*)calloc( adc_result.size, sizeof(uint16_t*));
-		if (adc_result.buffer == NULL) {
+
+	if (adcSamples == NULL) {
+		adcSamples = new AdcSamples();
+		if (!adcSamples->init(_bufferSize)) {
 			log(FATAL, "Could not initialize buffer. Too big!?");
 			return 0xF0;
 		}
-		//adc_result.buffer = adc_buffer;
-		adc_result.ptr = adc_result.buffer;
-	} 
+	}
+
+//	if (adcSamples == NULL || adcSamples->buf->capacity() != _bufferSize) {
+//		delete adcSamples->buf;
+//		adcSamples->buf = new CircularBuffer<uint16_t>(_bufferSize);
+//	}
+//	if (!adcSamples->buf->init()) {
+//		log(FATAL, "Could not initialize buffer. Too big!?");
+//		return 0xF0;
+//	}
+
+
+//	if (adc_result == NULL || adc_result->capacity() != _bufferSize) {
+//		delete adc_result;
+//		adc_result = new CircularBuffer<uint16_t>(_bufferSize);
+//	}
+//
+//	if (!adc_result->init()) {
+//		log(FATAL, "Could not initialize buffer. Too big!?");
+//		return 0xF0;
+//	}
 
 	uint32_t err_code;
 
@@ -132,7 +157,8 @@ void ADC::start() {
 	NRF_ADC->TASKS_START = 1;
 }
 
-void ADC::update(uint32_t value) {
+void ADC::update(uint16_t value) {
+/*
 	++_numSamples;
 	// Start storing when the previous value was below threshold and the current value is above threshold
 	// When this doesn't happen for some amount of samples, start storing anyway (power is probably off)
@@ -140,12 +166,12 @@ void ADC::update(uint32_t value) {
 		_store = true;
 		// Log first RTC count
 		if (_clock)
-			adc_result.push(_clock->getCount()); // TODO: getCount returns 32 bit value!
+			adc_result->push(_clock->getCount()); // TODO: getCount returns 32 bit value!
 //		else
 //			adc_result.push(_last_result);
 	}
 	if (_store) {
-		adc_result.push(value);
+		adc_result->push(value);
 //		// Log RTC too
 //		if (_clock) {
 //			adc_result.push(_clock->getCount());
@@ -155,13 +181,67 @@ void ADC::update(uint32_t value) {
 		_lastResult = value;
 	}
 	// Log last RTC count
-	if (_clock && adc_result.count() + 1 == adc_result.size) {
-		adc_result.push(_clock->getCount()); // TODO: getCount returns 32 bit value!
+	if (_clock && adc_result->size() + 1 == adc_result->capacity()) {
+		adc_result->push(_clock->getCount()); // TODO: getCount returns 32 bit value!
 	}
+*/
+
+/*
+	++_numSamples;
+	// Start storing when the previous value was below threshold and the current value is above threshold
+	// When this doesn't happen for some amount of samples, start storing anyway (power is probably off)
+	if (!_store && ((_lastResult <= _threshold && value > _threshold) || _numSamples > 2*ADC_BUFFER_SIZE)) {
+		_store = true;
+		// Log first RTC count
+		if (_clock)
+			adcSamples->_timeStart = _clock->getCount();
+	}
+	if (_store) {
+		adcSamples->buf->push(value);
+	}
+	else {
+		_lastResult = value;
+	}
+	// Log last RTC count
+	if (_clock && adcSamples->buf->full()) {
+		adcSamples->_timeEnd = _clock->getCount();
+	}
+*/
+
+	if (!adcSamples->isLocked()) {
+
+//		if (_numSamples > 2000) return;
+//
+//		++_numSamples;
+//		_log(INFO, "%u, ", value);
+//		if (!(_numSamples % 10)) {
+//			_log(INFO, "\r\n");
+//		}
+
+//		// Add the start timestamp when we add the first sample
+//		if (adcSamples->empty() && _clock != NULL) {
+//			adcSamples->_timeStart = _clock->getCount();
+//		}
+//
+//		// Add end timestamp when we add the last sample
+//		if (adcSamples->size() == adcSamples->capacity()-1 && _clock != NULL) {
+//			adcSamples->_timeEnd = _clock->getCount();
+//		}
+//
+//		adcSamples->push(value);
+
+		if (_clock != NULL) {
+			adcSamples->push(value, _clock->getCount());
+		} else {
+			adcSamples->push(value, 0);
+		}
+
+	}
+
 }
 
 void ADC::tick() {
-	dispatch();
+//	dispatch();
 }
 
 /*
@@ -179,12 +259,10 @@ extern "C" void ADC_IRQHandler(void) {
 	ADC &adc = ADC::getInstance();
 	adc.update(adc_value);
 
-	if (adc_result.full()) {
-		//LOGi("Buffer is full");
-		NRF_ADC->TASKS_STOP = 1;
-		//LOGi("Stopped task");
-	       	return;
-	}
+//	if (adc_result->full()) {
+//		NRF_ADC->TASKS_STOP = 1;
+//	       	return;
+//	}
 
 	// Use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
 	//NRF_ADC->TASKS_STOP = 1;

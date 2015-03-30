@@ -63,6 +63,7 @@ private:
 	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
 	BLEpp::Characteristic<uint16_t> *_currentConsumptionCharacteristic;
 	BLEpp::Characteristic<CurrentCurve> *_currentCurveCharacteristic;
+	BLEpp::Characteristic<uint8_t> *_pwmCharacteristic;
 
 	// Current limit
 	uint8_t _currentLimitVal;

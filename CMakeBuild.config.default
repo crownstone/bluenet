@@ -29,6 +29,8 @@ SERIAL_VERBOSITY=1
 # RFDUINO              4
 # CROWNSTONE           5
 # NRF51422             6
+# VIRTUALMEMO          7
+# CROWNSTONE2          8
 BOARD=5
 
 # Whether or not to tick continuously.

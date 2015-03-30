@@ -17,7 +17,7 @@
 // define buffer
 // TODO: current implementation is crap
 template <class T>
-struct Buffer {
+struct StackBuffer {
 	T *buffer;
 	T *ptr;
 	uint16_t size;
@@ -60,5 +60,5 @@ struct Buffer {
 
 // define alias for struct buffer
 template <class T>
-using buffer_t = Buffer<T>;
+using buffer_t = StackBuffer<T>;
 //typedef struct buffer buffer_t;

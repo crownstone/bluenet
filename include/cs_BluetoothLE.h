@@ -415,7 +415,7 @@ namespace BLEpp {
             return *this;
         }
 
-        operator T&() const {
+        operator T&() {
             return _value;
         }
 

@@ -67,7 +67,8 @@ void PowerService::savePersistentStorage() {
 }
 
 void PowerService::addPWMCharacteristic() {
-	createCharacteristic<uint8_t>()
+	_pwmCharacteristic = createCharacteristicRef<uint8_t>();
+	(*_pwmCharacteristic)
 		.setUUID(UUID(getUUID(), PWM_UUID))
 		.setName("PWM")
 		.setDefaultValue(255)
@@ -81,12 +82,16 @@ void PowerService::addPWMCharacteristic() {
 // Do we really want to use the PWM for this, or just set the pin to zero?
 // TODO: turn off normally, but make sure we enable the completely PWM again on request
 void PowerService::turnOff() {
+	// update pwm characteristic so that the current value can be read from the characteristic
+	(*_pwmCharacteristic) = 0;
 	PWM::getInstance().setValue(0, 0);
 }
 
 // Do we really want to use the PWM for this, or just set the pin to zero?
 // TODO: turn on normally, but make sure we enable the completely PWM again on request
 void PowerService::turnOn() {
+	// update pwm characteristic so that the current value can be read from the characteristic
+	(*_pwmCharacteristic) = 255;
 	PWM::getInstance().setValue(0, 255);
 }
 
@@ -95,6 +100,8 @@ void PowerService::turnOn() {
  * a specific duty-cycle after the detection of a zero crossing.
  */
 void PowerService::dim(uint8_t value) {
+	// update pwm characteristic so that the current value can be read from the characteristic
+	(*_pwmCharacteristic) = value;
 	PWM::getInstance().setValue(0, value);
 }
 
@@ -108,10 +115,11 @@ void PowerService::addSampleCurrentCharacteristic() {
 			if (!_adcInitialized) {
 				// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
 				ADC::getInstance().init(PIN_AIN_ADC);
+				sampleCurrentInit();
 				_adcInitialized = true;
 			}
 
-			sampleCurrentInit();
+//			sampleCurrentInit();
 			uint16_t current_rms = sampleCurrentFinish(value);
 			if ((value & 0x01) && _currentConsumptionCharacteristic != NULL) {
 				(*_currentConsumptionCharacteristic) = current_rms;
@@ -226,33 +234,38 @@ void PowerService::sampleCurrentInit() {
 	//LOGi("Stop advertising");
 	//stack->stopAdvertising();
 
+//	ADC::getInstance().getSamples()->clear();
+
 	LOGi("Start RTC");
 	RealTimeClock::getInstance().init();
 	RealTimeClock::getInstance().start();
 	ADC::getInstance().setClock(RealTimeClock::getInstance());
 
 	// Wait for the RTC to actually start
-	nrf_delay_us(100);
+	nrf_delay_ms(1);
 
 	LOGi("Start ADC");
 	ADC::getInstance().start();
-	// replace by timer!
 
+	// Wait for the ADC to actually start
+//	nrf_delay_ms(5);
 }
 
 uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
-	while (!ADC::getInstance().getBuffer()->full()) {
-		nrf_delay_ms(100);
-	}
+//	while (!ADC::getInstance().getBuffer()->full()) {
+//	while (!ADC::getInstance().getSamples()->buf->full()) {
+//		nrf_delay_ms(10);
+//	}
+//	nrf_delay_ms(20);
 
-	LOGi("Stop ADC");
-	ADC::getInstance().stop();
+//	LOGi("Stop ADC");
+//	ADC::getInstance().stop();
 
-	// Wait for the ADC to actually stop
-	nrf_delay_us(1000);
+//	// Wait for the ADC to actually stop
+//	nrf_delay_ms(1);
 
-	LOGi("Stop RTC");
-	RealTimeClock::getInstance().stop();
+//	LOGi("Stop RTC");
+//	RealTimeClock::getInstance().stop();
 /*
 	for (uint32_t i=0; i<samples; ++i) {
 
@@ -284,14 +297,15 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
        	//rms=%lu min=%lu max=%lu current=%i mA", voltage, rms, voltage_min, voltage_max, current);
 */
 
-	uint16_t voltage_max = 0;
+/*
+	uint16_t voltageMax = 0;
 	int i = 0;
 	while (!ADC::getInstance().getBuffer()->empty()) {
 		uint16_t voltage = ADC::getInstance().getBuffer()->pop();
 
 		// First and last elements of the buffer are timestamps
-		if ((type & 0x1) && (voltage > voltage_max) && (i>0) && (ADC::getInstance().getBuffer()->count() > 1)) {
-			voltage_max = voltage;
+		if ((type & 0x1) && (voltage > voltageMax) && (i>0) && (ADC::getInstance().getBuffer()->size() > 1)) {
+			voltageMax = voltage;
 		}
 
 		if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
@@ -309,12 +323,120 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 	if (type & 0x1) {
 		// measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
 		// 1023 * 1200 / 1023 = 1200 < 2^16
-		voltage_max = voltage_max*1200/1023; // mV
-		uint16_t current_rms = voltage_max * 1000 / SHUNT_VALUE * 1000 / 1414; // mA
-		LOGi("Irms = %u mA\r\n", current_rms);
-		return current_rms;
+		voltageMax = voltageMax*1200/1023; // mV
+		uint16_t currentRms = voltageMax * 1000 / SHUNT_VALUE * 1000 / 1414; // mA
+		LOGi("Irms = %u mA\r\n", currentRms);
+		return currentRms;
+	}
+*/
+
+
+
+/*
+	uint32_t voltageSquareMean = 0;
+	uint16_t numSamples = ADC::getInstance().getSamples()->buf->size();
+	int i = 0;
+	while (!ADC::getInstance().getSamples()->buf->empty()) {
+		uint16_t voltage = ADC::getInstance().getSamples()->buf->pop();
+
+		if (type & 0x1) {
+			voltageSquareMean += voltage*voltage;
+		}
+
+		if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
+			_currentCurve.add(voltage);
+			_log(INFO, "%u, ", voltage);
+			if (!(++i % 10)) {
+				_log(INFO, "\r\n");
+			}
+		}
+	}
+*/
+
+
+
+	AdcSamples* samples = ADC::getInstance().getSamples();
+	// Give some time to sample
+	// This is no guarantee that the buffer will be full! (interrupt can happen before we get to lock the buffer)
+	while (!samples->full()) {
+		nrf_delay_ms(10);
 	}
 
+	samples->lock();
+	uint16_t numSamples = samples->size();
+	if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
+		// TODO: this is very ugly
+		uint8_t* buf = _currentCurve.payload();
+		samples->serialize(buf);
+		_currentCurve.setPayload(buf, samples->getSerializedLength());
+
+		uint16_t len = samples->getSerializedLength();
+		for (uint16_t i=0; i<len; ++i) {
+			_log(DEBUG, "%i ", (int8_t)buf[i]);
+			if (!((i+1) % 20)) {
+				_log(DEBUG, "\r\n");
+			}
+		}
+		_log(DEBUG, "\r\n");
+		for (uint16_t i=0; i<len; ++i) {
+			_log(DEBUG, "%u ", buf[i]);
+			if (!((i+1) % 20)) {
+				_log(DEBUG, "\r\n");
+			}
+		}
+		_log(DEBUG, "\r\n");
+
+	}
+
+	LOGd("numSamples=%u", numSamples);
+	LOGd("samples->getSerializedLength()=%u", samples->getSerializedLength());
+	LOGd("_currentCurve.getMaxLength()=%u", _currentCurve.getMaxLength());
+	LOGd("_currentCurve.getSerializedLength()=%u", _currentCurve.getSerializedLength());
+
+	if (numSamples) {
+		uint32_t voltageSquareMean = 0;
+		uint32_t timestamp = 0;
+		uint16_t voltage = 0;
+		samples->getFirstElement(timestamp, voltage);
+		_log(INFO, "%u %u,  ", timestamp, voltage);
+#ifdef MICRO_VIEW
+		write("3 [%u %u ", timestamp, voltage);
+#endif
+		uint16_t i = 1;
+		while (samples->getNextElement(timestamp, voltage)) {
+			_log(INFO, "%u %u,  ", timestamp, voltage);
+#ifdef MICRO_VIEW
+			write("%u %u ", timestamp, voltage);
+#endif
+			if (!(++i % 5)) {
+				_log(INFO, "\r\n");
+			}
+			voltageSquareMean += voltage*voltage;
+		}
+		_log(INFO, "\r\n");
+		LOGd("i=%u", i);
+#ifdef MICRO_VIEW
+		write("]r\n");
+#endif
+
+		samples->unlock();
+
+		if (type & 0x1) {
+			// Take the mean
+			voltageSquareMean /= numSamples;
+
+			// Measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
+			// Convert to mV^2
+			voltageSquareMean = voltageSquareMean*1200/1023*1200/1023;
+
+			// Convert to A^2, use I=V/R
+			uint16_t currentSquareMean = voltageSquareMean * 1000 / SHUNT_VALUE * 1000 / SHUNT_VALUE * 1000*1000;
+
+			LOGi("currentSquareMean = %u mA^2", currentSquareMean);
+			return currentSquareMean;
+		}
+	}
+	samples->unlock();
 	return 0;
 }
 

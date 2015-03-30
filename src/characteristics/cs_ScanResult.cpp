@@ -19,7 +19,7 @@ void ScanResult::init() {
 	if (_list) {
 		free(_list);
 	}
-	_list = (peripheral_device_t*)calloc(MAX_NR_DEVICES, sizeof(peripheral_device_t));
+	_list = (peripheral_device_t*)calloc(SR_MAX_NR_DEVICES, sizeof(peripheral_device_t));
 }
 
 // returns the number of elements stored so far
@@ -31,7 +31,7 @@ uint16_t ScanResult::getSize() const {
 }
 
 void ScanResult::reset() {
-	memset(_list, 0, MAX_NR_DEVICES * sizeof(peripheral_device_t));
+	memset(_list, 0, SR_MAX_NR_DEVICES * sizeof(peripheral_device_t));
 	_freeIdx = 0;
 }
 
@@ -81,10 +81,10 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 	}
 	if (!found) {
 		uint8_t idx  = -1;
-		if (_freeIdx >= MAX_NR_DEVICES) {
+		if (_freeIdx >= SR_MAX_NR_DEVICES) {
 			// history full, throw out item with lowest occurence
 			uint16_t minOcc = UINT16_MAX;
-			for (int i = 0; i < MAX_NR_DEVICES; ++i) {
+			for (int i = 0; i < SR_MAX_NR_DEVICES; ++i) {
 				if (_list[i].occurrences < minOcc) {
 					minOcc = _list[i].occurrences;
 					idx = i;
@@ -123,7 +123,7 @@ void ScanResult::print() const {
 /** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
 * it means that the object does not need external buffer space. */
 uint16_t ScanResult::getSerializedLength() const {
-	return getSize() * SERIALIZED_DEVICE_SIZE + HEADER_SIZE;
+	return getSize() * SR_SERIALIZED_DEVICE_SIZE + SR_HEADER_SIZE;
 }
 
 /** Copy data representing this object into the given buffer. Buffer has to be preallocated with at least
