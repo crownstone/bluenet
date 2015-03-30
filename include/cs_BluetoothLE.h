@@ -23,12 +23,12 @@ extern "C" {
 #include "ble_srv_common.h"
 #include "ble_gatts.h"
 #include "ble_gatt.h"
-#include "nrf_sdm.h"
 
 // Refering to files in the Nordic SDK
 #include "nrf.h"
 #include "nrf_gpio.h"
 #include "nrf_delay.h"
+#include "nrf_sdm.h"
 
 }
 

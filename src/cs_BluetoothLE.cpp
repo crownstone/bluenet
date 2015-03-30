@@ -189,13 +189,11 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	//	ci.char_md.char_props.write_wo_resp = ci.cccd_md.write_perm.lv > 0 ? 1 :0;
 }
 
-#define SOFTDEVICE_130_09 strcmp(SOFTDEVICE, "s130_nrf51822_0.9.0-1.alpha")
-
 uint32_t CharacteristicBase::notify() {
 
 	CharacteristicValue value = getCharacteristicValue();
 
-#if $SOFTDEVICE_S130_09 == 0
+#if ($SOFTDEVICE_SERIES == 130) && ($SOFTDEVICE_MAJOR == 0) && ($SOFTDEVICE_MINOR == 9)
 	ble_gatts_value_t p_value;
 	p_value.len = value.length;
 	p_value.offset = 0;
@@ -480,6 +478,8 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	// enable the BLE stack
 	LOGi("Enable softdevice.");
 //#if(SOFTDEVICE_SERIES == 110) 
+
+#if (SOFTDEVICE_SERIES != 130) && (SOFTDEVICE_MINOR != 5) 
 #if(NORDIC_SDK_VERSION >= 6)
 	// do not define the service_changed characteristic, of course allow future changes
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1
@@ -487,6 +487,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	memset(&ble_enable_params, 0, sizeof(ble_enable_params));
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
 	BLE_CALL(sd_ble_enable, (&ble_enable_params) );
+#endif
 #endif
 //#endif
 
