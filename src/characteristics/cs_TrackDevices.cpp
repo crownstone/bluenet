@@ -15,7 +15,7 @@
  * List of tracked devices
  *********************************************************************************************************************/
 
-TrackedDeviceList::TrackedDeviceList() : _list(NULL), _freeIdx(0), _timeoutCount(2000) {
+TrackedDeviceList::TrackedDeviceList() : _list(NULL), _freeIdx(0), _timeoutCount(TRACKDEVICE_DEFAULT_TIMEOUT_COUNT) {
 }
 
 void TrackedDeviceList::init() {

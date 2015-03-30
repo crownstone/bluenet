@@ -21,6 +21,8 @@
 // temporary defines
 #define MESHING_PARALLEL 1
 
+#define MICRO_VIEW 1
+
 // enable IBeacon functionality (advertises Crownstone as iBeacon)
 //#define IBEACON
 

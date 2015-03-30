@@ -399,8 +399,14 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 		uint16_t voltage = 0;
 		samples->getFirstElement(timestamp, voltage);
 		uint16_t i = 0;
+#ifdef MICRO_VIEW
+		write("3 [");
+#endif
 		do {
 			_log(INFO, "%u %u,  ", timestamp, voltage);
+#ifdef MICRO_VIEW
+			write("%u %u ", timestamp, voltage);
+#endif
 			if (!(++i % 5)) {
 				_log(INFO, "\r\n");
 			}
@@ -408,6 +414,9 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 		} while (samples->getNextElement(timestamp, voltage));
 		_log(INFO, "\r\n");
 		LOGd("i=%u", i);
+#ifdef MICRO_VIEW
+		write("]r\n");
+#endif
 
 		samples->unlock();
 
@@ -420,7 +429,6 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 			voltageSquareMean = voltageSquareMean*1200/1023*1200/1023;
 
 			// Convert to A^2, use I=V/R
-			// OVERFLOW!!!! even with uint32_t
 			uint16_t currentSquareMean = voltageSquareMean * 1000 / SHUNT_VALUE * 1000 / SHUNT_VALUE * 1000*1000;
 
 			LOGi("currentSquareMean = %u mA^2", currentSquareMean);
