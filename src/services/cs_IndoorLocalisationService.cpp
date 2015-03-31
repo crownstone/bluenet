@@ -38,7 +38,7 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 
 	characStatus.push_back( { "Received signal level",
 		RSSI_UUID,
-		false,
+		true,
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addSignalStrengthCharacteristic)});
 	characStatus.push_back( { "Start/Stop Scan",
 		SCAN_DEVICE_UUID,
