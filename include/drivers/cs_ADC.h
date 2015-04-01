@@ -17,8 +17,12 @@
  * Analog digital conversion class. 
  */
 
-//#define ADC_BUFFER_SIZE 131
-#define ADC_BUFFER_SIZE 175
+#if (BOARD==CROWNSTONE_SENSOR)
+#define ADC_BUFFER_SIZE 5
+#else
+#define ADC_BUFFER_SIZE 131
+#endif
+
 #define DEFAULT_RECORDING_THRESHOLD 1
 
 

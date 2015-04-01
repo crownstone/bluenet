@@ -39,5 +39,8 @@ public:
 
 	// return reference to internal flag
 	int getFlag();
+
+	// return current clock in ms
+	static uint32_t now();
 private:
 };

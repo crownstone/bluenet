@@ -31,6 +31,7 @@ SERIAL_VERBOSITY=1
 # NRF51422             6
 # VIRTUALMEMO          7
 # CROWNSTONE2          8
+# CROWNSTONE_SENSOR    9
 BOARD=5
 
 # Whether or not to tick continuously.

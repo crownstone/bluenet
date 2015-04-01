@@ -98,7 +98,7 @@ private:
 	bool _initialized;
 	bool _scanMode;
 
-	ScanResult* _scanResult;
+//	ScanResult* _scanResult;
 	TrackedDeviceList* _trackedDeviceList;
 
 	pstorage_handle_t _storageHandle;

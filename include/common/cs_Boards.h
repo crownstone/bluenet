@@ -22,6 +22,7 @@
 #define NRF51422             6
 #define VIRTUALMEMO          7
 #define CROWNSTONE2          8
+#define CROWNSTONE_SENSOR    9
 
 #ifndef BOARD
 #error "Add BOARD=... to CMakeBuild.config"
@@ -104,6 +105,31 @@
 
 #endif
 
+#if(BOARD==CROWNSTONE_SENSOR)
+
+#define PIN_GPIO_LED0        8                   // something we don't use!
+#define PIN_GPIO_LED1        8                   // something we don't use!
+#define PIN_GPIO_LED2        8                   // something we don't use!
+#define PIN_GPIO_LED3        8                   // something we don't use!
+#define PIN_GPIO_LED4        8                   // something we don't use!
+#define PIN_GPIO_LED5        8                   // something we don't use!
+#define PIN_GPIO_LED6        8                   // something we don't use!
+#define PIN_GPIO_LED7        8                   // something we don't use!
+
+#define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
+
+#define PIN_AIN_ADC          6                   // ain6 is p0.05 or gpio 5
+#define PIN_AIN_LPCOMP       5                   // ain5 is p0.04 or gpio 4
+#define PIN_AIN_SENSOR       3                   // ain3 is p0.02 or gpio 2
+
+#define PIN_GPIO_BUTTON      2
+
+#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
+#define PIN_GPIO_RX          6                   // this is p0.06 or gpio 6
+#define PIN_GPIO_TX          1                   // this is p0.01 or gpio 1
+
+#endif
+
 
 #if(BOARD==PCA10001)
 
@@ -117,6 +143,7 @@
 #define PIN_GPIO_RX          11                  // this is p0.11 or gpio 11
 #define PIN_GPIO_TX          9                   // this is p0.09 or gpio 9
 #define PIN_GPIO_LED_CON     19                  // shows connection state on the evaluation board
+#define PIN_AIN_SENSOR       4
 
 #endif
 

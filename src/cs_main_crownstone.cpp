@@ -38,10 +38,6 @@
 	#define BEACON_RSSI   0xc7
 #endif
 
-// if softdevice_handler.c is used, we cannot also define SWI2_IRQHandler but will need to set evt_schedule_func in the 
-// softdevice_handler_init call
-#define USE_DEFAULT_SOFTDEVICE_HANDLER
-
 #define DEFAULT_ON
 
 #if __clang__
@@ -67,7 +63,6 @@
 extern "C" {
 #include "ble_advdata_parser.h"
 #include "nrf_delay.h"
-#include "app_scheduler.h"
 }
 
 #include "nordic_common.h"
@@ -94,6 +89,11 @@ extern "C" {
 #include "drivers/cs_LPComp.h"
 #include "drivers/cs_Serial.h"
 #include "common/cs_Storage.h"
+#include "util/cs_Utils.h"
+
+#if (BOARD==CROWNSTONE_SENSOR)
+#include "cs_Sensors.h"
+#endif
 
 #if INDOOR_SERVICE==1
 #include <services/cs_IndoorLocalisationService.h>
@@ -106,18 +106,6 @@ extern "C" {
 #endif
 
 using namespace BLEpp;
-
-inline void print_heap(const std::string & msg) {
-	uint8_t *p = (uint8_t*)malloc(1);
-	LOGd("%s %p", msg.c_str(), p);
-	free(p);
-}
-
-inline void print_stack(const std::string & msg) {
-	void* sp;
-	asm("mov %0, sp" : "=r"(sp) : : );
-	LOGd("%s %p", msg.c_str(), (uint8_t*)sp);
-}
 
 /**********************************************************************************************************************
  * Main functionality
@@ -132,8 +120,8 @@ void welcome() {
 	nrf_gpio_pin_set(PIN_GPIO_LED0);
 	config_uart();
 	_log(INFO, "\r\n");
-	print_heap("Heap init");
-	print_stack("Stack init");
+	BLEutil::print_heap("Heap init");
+	BLEutil::print_stack("Stack init");
 	LOGd("Bootloader starts at 0x00034000.");
         // To have DFU, keep application limited to (BOOTLOADER_START - APPLICATION_START_CODE) / 2
 	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800 
@@ -181,11 +169,6 @@ void configure(Nrf51822BluetoothStack &stack) {
  * This must be called after the SoftDevice has started.
  */
 void config_drivers() {
-	// TODO: Dominik, can we connect the adc init call with the characteristic / services
-	//   that actually use it? if there is no service that uses it there is no reason to
-	//   allocate space for it
-//	ADC::getInstance().init(PIN_AIN_ADC); // Moved to PowerService.cpp
-
 	pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
 	pwm_config.num_channels = 1;
 	pwm_config.gpio_pin[0] = PIN_GPIO_SWITCH;
@@ -205,21 +188,6 @@ void config_drivers() {
  *********************************************************************************************************************/
 
 extern "C" {
-
-/**
- * @brief Softdevice event handler
- *
- * Currently this interrupt screws up the main program. So apparently we have to set priorities somewhere or to tell
- * the program that it is entering a protected region or something like that.
- */               
-#ifndef USE_DEFAULT_SOFTDEVICE_HANDLER
-void SD_EVT_IRQHandler(void)
-{   
-	// do not print in IRQ handler, use LEDs if you have to
-//	LOGd("Received SoftDevice event, call rbc_mesh_sd_irq_handler.");
-	rbc_mesh_sd_irq_handler(); 
-} 
-#endif
 
 #ifdef BOARD_PCA10001             
 /* configure button interrupt for evkits */                    
@@ -344,21 +312,9 @@ int main() {
 
 		});
 
-	// Create ADC object
-	// TODO: make service which enables other services and only init ADC when necessary
-	//	ADC::getInstance();
-	//	LPComp::getInstance();
-
-	// Scheduler must be initialized before persistent memory
-	const uint16_t max_size = 32;
-	const uint16_t queue_size = 4;
-	APP_SCHED_INIT(max_size, queue_size);
-
-	// Create persistent memory object
-	// TODO: make service which enables other services and only init persistent memory when necessary
-	//	Storage::getInstance().init(32);
-
-	//	RealTimeClock::getInstance();
+	LOGi("Start RTC");
+	RealTimeClock::getInstance().init();
+	RealTimeClock::getInstance().start();
 
 	LOGi("Create all services");
 
@@ -376,10 +332,14 @@ int main() {
 	PowerService &powerService = PowerService::createService(stack);
 #endif
 
+#if (BOARD==CROWNSTONE_SENSOR)
+	Sensors sensors;
+#endif
+
 	// configure drivers
 	config_drivers();
-	print_heap("Heap drivers: ");
-	print_stack("Stack drivers: ");
+	BLEutil::print_heap("Heap drivers: ");
+	BLEutil::print_stack("Stack drivers: ");
 
 	// begin sending advertising packets over the air.
 #ifdef IBEACON
@@ -387,8 +347,8 @@ int main() {
 #else
 	stack.startAdvertising();
 #endif
-	print_heap("Heap adv: ");
-	print_stack("Stack adv: ");
+	BLEutil::print_heap("Heap adv: ");
+	BLEutil::print_stack("Stack adv: ");
 
 #if MESHING==1
     #ifdef BOARD_PCA10001
@@ -430,7 +390,11 @@ int main() {
 		localizationService.tick();
 #endif
 
-		app_sched_execute();
+#if (BOARD==CROWNSTONE_SENSOR)
+		sensors.tick();
+#endif
+
+//		app_sched_execute();
 
 		nrf_delay_ms(50);
 	}
