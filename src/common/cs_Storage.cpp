@@ -24,7 +24,6 @@
 #include "util/cs_Utils.h"
 
 extern "C" {
-//#include <app_scheduler.h>
 
 static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data, 
 		uint32_t data_len) {

@@ -23,7 +23,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
-	
+
 	LOGi("Create power service");
 
 	characStatus.reserve(5);

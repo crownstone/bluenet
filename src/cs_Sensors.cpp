@@ -234,10 +234,6 @@ uint16_t Sensors::checkThermalSensor(uint32_t time) {
  */
 void Sensors::init() {
 
-	LOGi("Start RTC");
-	RealTimeClock::getInstance().init();
-	RealTimeClock::getInstance().start();
-
 #if ADC_USED
 	initADC();
 #endif
