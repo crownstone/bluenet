@@ -107,12 +107,12 @@ public:
 		CharacteristicValue value;
 		const T& t = this->getValue();
 		uint32_t len = t.getSerializedLength();
-		if (_buffer) {
-			free(_buffer);
-		}
+//		if (_buffer) {
+//			free(_buffer);
+//		}
 		_buffer = (uint8_t*)calloc(len, sizeof(uint8_t));
 		t.serialize(_buffer, len);
-		return CharacteristicValue(len, _buffer);
+		return CharacteristicValue(len, _buffer, true);
 	}
 
 	/* Assign the given <CharacteristicValue> to this characteristic

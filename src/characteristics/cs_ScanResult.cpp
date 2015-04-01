@@ -19,7 +19,16 @@ void ScanResult::init() {
 	if (_list) {
 		free(_list);
 	}
+	LOGi("LIST alloc");
 	_list = (peripheral_device_t*)calloc(SR_MAX_NR_DEVICES, sizeof(peripheral_device_t));
+}
+
+void ScanResult::release() {
+	if (_list) {
+		LOGi("LIST free");
+		free(_list);
+	}
+	_list = NULL;
 }
 
 // returns the number of elements stored so far

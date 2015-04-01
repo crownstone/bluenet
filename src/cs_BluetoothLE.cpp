@@ -66,8 +66,8 @@ void set_attr_md_read_write(ble_gatts_attr_md_t& md) {
 }
 
 CharacteristicBase::CharacteristicBase() :
-		_handles( { }), _service(0), _inited(false), _notifies(false), _writable(false),
-		_unit(0), _updateIntervalMsecs(0), _notifyingEnabled(false), _indicates(false)
+				_handles( { }), _service(0), _inited(false), _notifies(false), _writable(false),
+				_unit(0), _updateIntervalMsecs(0), _notifyingEnabled(false), _indicates(false)
 {
 
 }
@@ -157,9 +157,9 @@ void CharacteristicBase::init(Service* svc) {
 
 	volatile uint16_t svc_handle = svc->getHandle();
 
-//	volatile uint32_t err_code = sd_ble_gatts_characteristic_add(svc_handle,
-//			&ci.char_md, &ci.attr_char_value, &_handles);
-//	APP_ERROR_CHECK(err_code);
+	//	volatile uint32_t err_code = sd_ble_gatts_characteristic_add(svc_handle,
+	//			&ci.char_md, &ci.attr_char_value, &_handles);
+	//	APP_ERROR_CHECK(err_code);
 	BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle,
 			&ci.char_md, &ci.attr_char_value, &_handles));
 
@@ -200,8 +200,8 @@ uint32_t CharacteristicBase::notify() {
 	p_value.p_value= value.data;
 	// leads to error... 0007, invalid param, don't know why!
 	BLE_CALL(sd_ble_gatts_value_set,	(
-				_service->getStack()->getConnectionHandle(),
-				_handles.value_handle, &p_value));
+			_service->getStack()->getConnectionHandle(),
+			_handles.value_handle, &p_value));
 #else
 	BLE_CALL(sd_ble_gatts_value_set,
 			(_handles.value_handle, 0, &value.length, value.data));
@@ -219,7 +219,7 @@ uint32_t CharacteristicBase::notify() {
 	hvx_params.p_len = &len;
 	hvx_params.p_data = (uint8_t*) value.data;
 
-//	BLE_CALL(sd_ble_gatts_hvx, (_service->getStack()->getConnectionHandle(), &hvx_params));
+	//	BLE_CALL(sd_ble_gatts_hvx, (_service->getStack()->getConnectionHandle(), &hvx_params));
 	uint32_t err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
 	if (err_code != NRF_SUCCESS) {
 
@@ -229,12 +229,12 @@ uint32_t CharacteristicBase::notify() {
 			//   notifications faster than being able to send them out from the stack results
 			//   in this error.
 			onNotifyTxError();
-		} else if (
-		// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
-		//   it can happen that it tries to update it's value although notification was disabled in
-		//   in the meantime, in which case an invalid state error is returned. but this case we can
-		//   ignore
-		err_code == NRF_ERROR_INVALID_STATE) {
+		} else if (err_code == NRF_ERROR_INVALID_STATE) {
+			// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
+			//   it can happen that it tries to update it's value although notification was disabled in
+			//   in the meantime, in which case an invalid state error is returned. but this case we can
+			//   ignore
+
 			// this is not a serious error, but better to at least write it to the log
 			LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
 		} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
@@ -252,7 +252,7 @@ void CharacteristicBase::onNotifyTxError() {
 	// so the next update will probably be done as soon as the tx buffers are ready anyway, but in
 	// case there are characteristics that only get updated really infrequently, the notification
 	// should be buffered and sent again once the tx buffers are ready
-//	LOGd("[%s] no tx buffers, notification skipped!", _name.c_str());
+	//	LOGd("[%s] no tx buffers, notification skipped!", _name.c_str());
 }
 
 void CharacteristicBase::onTxComplete(ble_common_evt_t * p_ble_evt) {
@@ -387,13 +387,13 @@ void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
  * function.
  */
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
-		_appearance(defaultAppearance), _clock_source(defaultClockSource), _mtu_size(defaultMtu), 
-		_tx_power_level(defaultTxPowerLevel), _sec_mode({ }),
-		_interval(defaultAdvertisingInterval_0_625_ms), _timeout(
-				defaultAdvertisingTimeout_seconds), _gap_conn_params( { }),
-		_inited(false), _started(false), _advertising(false), _scanning(false),
-		_conn_handle(BLE_CONN_HANDLE_INVALID),
-		_radio_notify(0)
+				_appearance(defaultAppearance), _clock_source(defaultClockSource), _mtu_size(defaultMtu),
+				_tx_power_level(defaultTxPowerLevel), _sec_mode({ }),
+				_interval(defaultAdvertisingInterval_0_625_ms), _timeout(
+						defaultAdvertisingTimeout_seconds), _gap_conn_params( { }),
+						_inited(false), _started(false), _advertising(false), _scanning(false),
+						_conn_handle(BLE_CONN_HANDLE_INVALID),
+						_radio_notify(0)
 {
 	_evt_buffer_size = sizeof(ble_evt_t) + (_mtu_size) * sizeof(uint32_t);
 	_evt_buffer = (uint8_t*) malloc(_evt_buffer_size);
@@ -421,28 +421,6 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	if (_evt_buffer)
 		free(_evt_buffer);
 }
-
-#ifdef OWN_ASSERTION_HANDLER
-/**
- * This assertion handler gets called when there is something amiss in the execution. Attach gdb to see the function
- * parameters.
- */
-extern "C" void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name)                            
-{                                                                                                                       
-    UNUSED_PARAMETER(pc);                                                                                               
-    assert_nrf_callback(line_num, file_name);                                                                           
-}      
-#endif
-
-// define your OWN_EVENT_HANDLER, makes only sense actually when MESHING
-#ifdef OWN_EVENT_HANDLER
-extern "C" void softdevice_event_handler(uint32_t evt_id) {
-#if MESHING==1
-	rbc_mesh_sd_irq_handler();
-#endif
-	sys_evt_dispatch(evt_id);
-}
-#endif
 
 /**
  * Performs a series of tasks:
@@ -525,11 +503,8 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	setTxPowerLevel();
 
-#ifndef OWN_EVENT_HANDLER
 	BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
-#else
-	BLE_CALL(softdevice_sys_evt_handler_set, (softdevice_event_handler));
-#endif
+
 	_inited = true;
 
 	return *this;
@@ -628,8 +603,8 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon(IBeacon beacon) {
 	uint32_t err_code __attribute__((unused));
 	ble_advdata_t advdata;
 	uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-//	uint8_t flags = BLE_GAP_ADV_FLAG_LE_GENERAL_DISC_MODE | BLE_GAP_ADV_FLAG_LE_BR_EDR_CONTROLLER
-//			| BLE_GAP_ADV_FLAG_LE_BR_EDR_HOST;
+	//	uint8_t flags = BLE_GAP_ADV_FLAG_LE_GENERAL_DISC_MODE | BLE_GAP_ADV_FLAG_LE_BR_EDR_CONTROLLER
+	//			| BLE_GAP_ADV_FLAG_LE_BR_EDR_HOST;
 
 	ble_gap_adv_params_t adv_params;
 
@@ -659,21 +634,21 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon(IBeacon beacon) {
 	ble_advdata_t scan_resp;
 	memset(&scan_resp, 0, sizeof(scan_resp));
 
-//	uint8_t uidCount = _services.size();
-//	ble_uuid_t adv_uuids[uidCount];
-//
-//	uint8_t cnt = 0;
-//	for(Service* svc : _services ) {
-//		adv_uuids[cnt++] = svc->getUUID();
-//	}
-//
-//	if (cnt == 0) {
-//		LOGw("No custom services!");
-//	}
+	//	uint8_t uidCount = _services.size();
+	//	ble_uuid_t adv_uuids[uidCount];
+	//
+	//	uint8_t cnt = 0;
+	//	for(Service* svc : _services ) {
+	//		adv_uuids[cnt++] = svc->getUUID();
+	//	}
+	//
+	//	if (cnt == 0) {
+	//		LOGw("No custom services!");
+	//	}
 
 	scan_resp.name_type = BLE_ADVDATA_FULL_NAME;
-//	scan_resp.uuids_more_available.uuid_cnt = 1;
-//	scan_resp.uuids_more_available.p_uuids  = adv_uuids;
+	//	scan_resp.uuids_more_available.uuid_cnt = 1;
+	//	scan_resp.uuids_more_available.p_uuids  = adv_uuids;
 
 	BLE_CALL(ble_advdata_set, (&advdata, &scan_resp));
 
@@ -702,7 +677,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 
 	uint8_t uidCount = _services.size();
 	LOGi("Number of services: %u", uidCount);
-	
+
 	ble_uuid_t adv_uuids[uidCount];
 
 	uint8_t cnt = 0;
@@ -730,7 +705,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	manufac.company_identifier = 0x1111; // DoBots Company ID
 	manufac.data.size = 0;
 
-//	advdata.name_type               = BLE_ADVDATA_NO_NAME;
+	//	advdata.name_type               = BLE_ADVDATA_NO_NAME;
 
 	/*
 	 * 31 bytes total payload
@@ -759,7 +734,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	// TODO -oDE: It doesn't really make sense to have this function in the library
 	//  because it really depends on the application on how many and what kind
 	//  of services are available and what should be advertised
-//#ifdef YOU_WANT_TO_USE_SPACE
+	//#ifdef YOU_WANT_TO_USE_SPACE
 	if (uidCount > 1) {
 		advdata.uuids_more_available.uuid_cnt = 1;
 		advdata.uuids_more_available.p_uuids = adv_uuids;
@@ -767,7 +742,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 		advdata.uuids_complete.uuid_cnt = 1;
 		advdata.uuids_complete.p_uuids = adv_uuids;
 	}
-//#endif
+	//#endif
 
 	// Because of the limited amount of space in the advertisement data, additional
 	// data can be supplied in the scan response package. Same space restrictions apply
@@ -968,9 +943,9 @@ void Nrf51822BluetoothStack::tick() {
  * is faster to set up maps from handles to directly the right function.
  */
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
-	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
-		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
-	}
+	//	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
+	//		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
+	//	}
 #if MESHING==1
 	APP_ERROR_CHECK(rbc_mesh_ble_evt_handler(p_ble_evt));
 #endif
@@ -1027,7 +1002,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		sec_params.max_key_size = 16; // max key size.
 
 #if(SOFTDEVICE_SERIES != 110) 
-// https://devzone.nordicsemi.com/documentation/nrf51/6.0.0/s120/html/a00527.html#ga7b23027c97b3df21f6cbc23170e55663
+		// https://devzone.nordicsemi.com/documentation/nrf51/6.0.0/s120/html/a00527.html#ga7b23027c97b3df21f6cbc23170e55663
 
 		// do not store the keys for now...
 		//ble_gap_sec_keyset_t sec_keyset;
@@ -1038,8 +1013,8 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 				(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &sec_params, NULL));
 #else 
 		BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
-						BLE_GAP_SEC_STATUS_SUCCESS,
-						&sec_params) );
+				BLE_GAP_SEC_STATUS_SUCCESS,
+				&sec_params) );
 #endif
 		break;
 #if(SOFTDEVICE_SERIES != 110) 
