@@ -76,6 +76,8 @@ Now you will have to set all fields in the configuration file:
 * adjust the `NRF51822_DIR` to wherever you installed the Nordic SDK (it should have `/Include` and `/Source` subdirectories
 * adjust the `SOFTDEVICE_DIR` to wherever you unzipped the latest SoftDevice from Nordic
 * adjust the `SOFTDEVICE_SERIES` to for example `110` or `130` (SoftDevice name starts with it, without the `s`)
+* adjust major accordingly `SOFTDEVICE_MAJOR=7`
+* adjust minor accordingly `SOFTDEVICE_MINOR=0`
 * adjust the `SOFTDEVICE_DIR_API` to the directory with the SoftDevice include files
 * set `SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1` if you use one of the earlier s110 softdevices with a separate UICR section
 * adjust the type `SOFTDEVICE` accordingly (basename of file without `_softdevice.hex`)

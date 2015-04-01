@@ -680,7 +680,7 @@ namespace BLEpp {
             return *base;
         }
         
-	template <typename T> Characteristic<T>* createCharacteristicRef() {
+		  template <typename T> Characteristic<T>* createCharacteristicRef() {
             Characteristic<T>* base = new CharacteristicT<T>();
             addCharacteristic(base);
             return base;

@@ -33,15 +33,15 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
 	characStatus.push_back( { "Sample Current",
 			SAMPLE_CURRENT_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addSampleCurrentCharacteristic)});
 	characStatus.push_back( { "Current Curve",
 			CURRENT_CURVE_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentCurveCharacteristic)});
 	characStatus.push_back( { "Current Consumption",
 			CURRENT_CONSUMPTION_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
