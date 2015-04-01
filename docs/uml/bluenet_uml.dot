@@ -89,8 +89,13 @@ digraph G {
 // ----------------------------------------------
 	Service [
 		label="{Service\n\n\
+|const char*             defaultServiceName\l\
+|BLEStack*               _stack\l\
 |<UUID>UUID              _uuid\l\
 |string                  _name\l\
+|bool                    _primary\l\
+|uint16_t                _service_handle\l\
+|bool                    _started\l\
 }"
 	];
 
@@ -120,8 +125,31 @@ digraph G {
 // ----------------------------------------------
 	CharacteristicBase [
 		label="{CharacteristicBase\n\n\
-|<UUID>UUID              _uuid\l\
-|string                  _name\l\
+|<UUID>UUID                                                _uuid\l\
+|string                                                    _name\l\
+|<ble_gap_conn_sec_mode_t>ble_gap_conn_sec_mode_t          _readperm\l\
+|<ble_gap_conn_sec_mode_t>ble_gap_conn_sec_mode_t          _writeperm\l\
+|<ble_gatts_char_handles_t>ble_gatts_char_handles_t        _handles\l\
+|<Service>Service*                                         _service\l\
+|bool                                                      _inited\l\
+|bool                                                      _notifies\l\
+|bool                                                      _writable\l\
+|uint16_t                                                  _unit\l\
+|uint32_t                                                  _updateIntervalMsecs\l\
+|bool                                                      _notifyingEnabled\l\
+|bool                                                      _indicates\l\
+}"
+	];
+
+
+// ----------------------------------------------
+// CharacteristicValue
+// ----------------------------------------------
+	CharacteristicValue [
+		label="{CharacteristicValue&lt;T&gt;\n\n\
+|uint16_t                   length\l\
+|uint8_t*                   data\l\
+|bool                       freeOnDestroy\l\
 }"
 	];
 
@@ -136,15 +164,28 @@ digraph G {
 }"
 	];
 
+
 // ----------------------------------------------
 // CharacteristicT
 // ----------------------------------------------
 	CharacteristicT [
-		label="{CharacteristicT\n\n\
+		label="{CharacteristicT&lt;T, E&gt;\n\n\
+|<CharacteristicValue>CharacteristicValue                  getCharacteristicValue()\l\
+|void                                                      setCharacteristicValue(const CharacteristicValue& value)\l\
+}"
+	];
+
+/*
+// ----------------------------------------------
+// CharacteristicT_Serializable
+// ----------------------------------------------
+	CharacteristicT_Serializable [
+		label="{CharacteristicT&lt;T, Serializable&gt;\n\n\
 |uint8_t*              _buffer\l\
 |bool                  _notificationPending\l\
 }"
 	];
+*/
 
 // ----------------------------------------------
 // Serializable
@@ -319,11 +360,14 @@ digraph G {
 	Characteristic -> CharacteristicT
 	Listener -> CurrentLimit
 
+
 	// ********************************
 	// Specialized versions of CharacteristicT
 	// ********************************
 	CharacteristicT -> MeshMessage [arrowtail="dot"]
+//	CharacteristicT -> CharacteristicT_Serializable [arrowtail="dot"]
 	CharacteristicT -> Serializable [arrowtail="dot"]
+
 
 	// ********************************
 	// Connections of member variables to class nodes
@@ -352,6 +396,8 @@ digraph G {
 	peripheral_device_t -> ScanResult:peripheral_device_t [style="dashed" arrowtail="dot"]
 	tracked_device_t -> TrackedDevice:tracked_device_t [style="dashed" arrowtail="dot"]
 	tracked_device_t -> TrackedDeviceList:tracked_device_t [style="dashed" arrowtail="dot"]
+
+	CharacteristicValue -> CharacteristicT:CharacteristicValue [style="dashed" arrowtail="dot"]
 
 /*
 	AllocatedBuffer
