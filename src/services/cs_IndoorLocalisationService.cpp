@@ -25,7 +25,8 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 		_rssiCharac(NULL), _peripheralCharac(NULL),
 		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL), _trackIsNearby(false),
 		_initialized(false), _scanMode(false),
-		_scanResult(NULL), _trackedDeviceList(NULL)
+//		_scanResult(NULL),
+		_trackedDeviceList(NULL)
 {
 
 	setUUID(UUID(INDOORLOCALISATION_UUID));
@@ -38,7 +39,7 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 
 	characStatus.push_back( { "Received signal level",
 		RSSI_UUID,
-		false,
+		true,
 		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addSignalStrengthCharacteristic)});
 	characStatus.push_back( { "Start/Stop Scan",
 		SCAN_DEVICE_UUID,
@@ -123,21 +124,26 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 		.setDefaultValue(255)
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
+			ScanResult& result = _peripheralCharac->getValue();
 			if(value) {
 				LOGi("Init scan result");
-				if (_scanResult != NULL) {
-					_scanResult->init();
-				}
+//				if (_scanResult != NULL) {
+					result.init();
+//				}
 				if (!_stack->isScanning()) {
 					_stack->startScanning();
 				}
 				_scanMode = true;
 			} else {
 				LOGi("Return scan result");
-				if (_scanResult != NULL) {
-					*_peripheralCharac = *_scanResult;
-					_scanResult->print();
-				}
+				result.print();
+				_peripheralCharac->notify();
+				result.release();
+//				if (_scanResult != NULL) {
+//					*_peripheralCharac = *_scanResult;
+//					_scanResult->print();
+//					_scanResult->release();
+//				}
 				// Only stop scanning if we're not also tracking devices
 				if (_stack->isScanning() && !_trackMode) {
 					_stack->stopScanning();
@@ -150,7 +156,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	// get scan result
 //	LOGd("create characteristic to list found peripherals");
-	_scanResult = new ScanResult();
+//	_scanResult = new ScanResult();
 	_peripheralCharac = createCharacteristicRef<ScanResult>();
 	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
 	_peripheralCharac->setName("Devices");
@@ -343,8 +349,9 @@ void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
 #if(SOFTDEVICE_SERIES != 110)
 void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 	if (_stack->isScanning()) {
-		if (_scanMode && _scanResult != NULL) {
-			_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+		if (_scanMode) {
+			ScanResult& result = _peripheralCharac->getValue();
+			result.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 		}
 		if (_trackMode && _trackedDeviceList != NULL) {
 			_trackedDeviceList->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);

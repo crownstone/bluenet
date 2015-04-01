@@ -31,6 +31,7 @@ SERIAL_VERBOSITY=1
 # NRF51422             6
 # VIRTUALMEMO          7
 # CROWNSTONE2          8
+# CROWNSTONE_SENSOR    9
 BOARD=5
 
 # Whether or not to tick continuously.
@@ -77,8 +78,10 @@ NRF51_USE_SOFTDEVICE=1
 #######################################################################################################################
 NRF51822_DIR=/opt/nrf51_sdk/v6/nrf51822
 NORDIC_SDK_VERSION=6
-SOFTDEVICE_SERIES=110
 SOFTDEVICE=s110_nrf51822_7.0.0
+SOFTDEVICE_SERIES=110
+SOFTDEVICE_MAJOR=7
+SOFTDEVICE_MINOR=0
 SOFTDEVICE_DIR_API=s110_nrf51822_7.0.0_API
 SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
 APPLICATION_START_ADDRESS=0x00016000

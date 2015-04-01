@@ -29,10 +29,20 @@ Global errors:
     #define NRF_ERROR_BUSY                        (NRF_ERROR_BASE_NUM + 17) ///< Busy
 
 
-STK errors are of the form `0x3...`:
+STK errors of the form `0x3X..`:
 
     #define NRF_L2CAP_ERR_BASE             (NRF_ERROR_STK_BASE_NUM+0x100) /**< L2CAP specific errors. */
     #define NRF_GAP_ERR_BASE               (NRF_ERROR_STK_BASE_NUM+0x200) /**< GAP specific errors. */
     #define NRF_GATTC_ERR_BASE             (NRF_ERROR_STK_BASE_NUM+0x300) /**< GATT client specific errors. */
     #define NRF_GATTS_ERR_BASE             (NRF_ERROR_STK_BASE_NUM+0x400) /**< GATT server specific errors. */
+
+STK errors of the form `0x3..X`:
+
+    #define BLE_ERROR_NOT_ENABLED            (NRF_ERROR_STK_BASE_NUM+0x001) /**< @ref sd_ble_enable has not been called. */
+    #define BLE_ERROR_INVALID_CONN_HANDLE    (NRF_ERROR_STK_BASE_NUM+0x002) /**< Invalid connection handle. */
+    #define BLE_ERROR_INVALID_ATTR_HANDLE    (NRF_ERROR_STK_BASE_NUM+0x003) /**< Invalid attribute handle. */
+    #define BLE_ERROR_NO_TX_BUFFERS          (NRF_ERROR_STK_BASE_NUM+0x004) /**< Buffer capacity exceeded. */
+    #define BLE_ERROR_INVALID_ROLE           (NRF_ERROR_STK_BASE_NUM+0x005) /**< Invalid role. */
+
+
 

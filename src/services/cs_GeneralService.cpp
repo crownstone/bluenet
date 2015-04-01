@@ -48,7 +48,7 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 		static_cast<addCharacteristicFunc>(&GeneralService::addRoomCharacteristic) });
 	characStatus.push_back( { "Firmware",
 		FIRMWARE_UUID, 
-		true,
+		false,
 		static_cast<addCharacteristicFunc>(&GeneralService::addFirmwareCharacteristic) });
 #if MESHING==1
 	characStatus.push_back( { "Mesh",

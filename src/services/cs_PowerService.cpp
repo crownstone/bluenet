@@ -23,7 +23,7 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
-	
+
 	LOGi("Create power service");
 
 	characStatus.reserve(5);
@@ -33,15 +33,15 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
 	characStatus.push_back( { "Sample Current",
 			SAMPLE_CURRENT_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addSampleCurrentCharacteristic)});
 	characStatus.push_back( { "Current Curve",
 			CURRENT_CURVE_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentCurveCharacteristic)});
 	characStatus.push_back( { "Current Consumption",
 			CURRENT_CONSUMPTION_UUID,
-			true,
+			false,
 			static_cast<addCharacteristicFunc>(&PowerService::addCurrentConsumptionCharacteristic)});
 	characStatus.push_back( { "Current Limit",
 			CURRENT_LIMIT_UUID,
@@ -398,12 +398,11 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 		uint32_t timestamp = 0;
 		uint16_t voltage = 0;
 		samples->getFirstElement(timestamp, voltage);
-		_log(INFO, "%u %u,  ", timestamp, voltage);
+		uint16_t i = 0;
 #ifdef MICRO_VIEW
-		write("3 [%u %u ", timestamp, voltage);
+		write("3 [");
 #endif
-		uint16_t i = 1;
-		while (samples->getNextElement(timestamp, voltage)) {
+		do {
 			_log(INFO, "%u %u,  ", timestamp, voltage);
 #ifdef MICRO_VIEW
 			write("%u %u ", timestamp, voltage);
@@ -412,7 +411,7 @@ uint16_t PowerService::sampleCurrentFinish(uint8_t type) {
 				_log(INFO, "\r\n");
 			}
 			voltageSquareMean += voltage*voltage;
-		}
+		} while (samples->getNextElement(timestamp, voltage));
 		_log(INFO, "\r\n");
 		LOGd("i=%u", i);
 #ifdef MICRO_VIEW

@@ -446,10 +446,20 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
     }
     else
     {
+#if ($SOFTDEVICE_SERIES == 130) && ($SOFTDEVICE_MAJOR == 0) && ($SOFTDEVICE_MINOR == 9)
+        ble_gatts_value_t p_value;
+        p_value.len = len;
+        p_value.offset = 0;
+        p_value.p_value = data;
+        error_code = sd_ble_gatts_value_set(g_active_conn_handle,
+            ch_md->char_value_handle, 
+            &p_value);
+
+#else
         error_code = sd_ble_gatts_value_set(
             ch_md->char_value_handle, 
             0, &len, data);
-        
+#endif   
         if (error_code != NRF_SUCCESS)
         {
             return NRF_ERROR_INTERNAL;

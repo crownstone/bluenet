@@ -18,7 +18,7 @@
 
 using namespace BLEpp;
 
-#define MAX_CAPACITY 100
+#define MAX_CAPACITY 200
 
 /**
  * General class that can be used to send arrays of values over Bluetooth, of which the first byte is a type
