@@ -14,22 +14,24 @@
 ScanResult::ScanResult() : _list(NULL), _freeIdx(0) {
 }
 
-void ScanResult::init() {
-	_freeIdx = 0;
-	if (_list) {
-		free(_list);
-	}
-	LOGi("LIST alloc");
-	_list = (peripheral_device_t*)calloc(SR_MAX_NR_DEVICES, sizeof(peripheral_device_t));
-}
+//void ScanResult::init() {
+//	_freeIdx = 0;
+//	if (_list) {
+//		free(_list);
+//	}
+//	LOGi("LIST alloc");
+//	BLEutil::print_heap("list alloc:");
+////	_list = (peripheral_device_t*)calloc(SR_MAX_NR_DEVICES, sizeof(peripheral_device_t));
+//	BLEutil::print_heap("list alloc done:");
+//}
 
-void ScanResult::release() {
-	if (_list) {
-		LOGi("LIST free");
-		free(_list);
-	}
-	_list = NULL;
-}
+//void ScanResult::release() {
+//	if (_list) {
+//		LOGi("LIST free");
+//		free(_list);
+//	}
+//	_list = NULL;
+//}
 
 // returns the number of elements stored so far
 uint16_t ScanResult::getSize() const {
@@ -40,11 +42,16 @@ uint16_t ScanResult::getSize() const {
 }
 
 void ScanResult::reset() {
-	memset(_list, 0, SR_MAX_NR_DEVICES * sizeof(peripheral_device_t));
+//	memset(_list, 0, sizeof(peripheral_device_list_t));
 	_freeIdx = 0;
 }
 
 bool ScanResult::operator!=(const ScanResult& val) {
+
+	if (_list == NULL) {
+		LOGe("scan result buffer was not assigned!!!");
+		return false;
+	}
 
 	if (this->_freeIdx != val._freeIdx) {
 		return true;
@@ -67,6 +74,12 @@ bool ScanResult::operator!=(const ScanResult& val) {
 
 //int count = 1;
 void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
+
+	if (_list == NULL) {
+		LOGe("scan result buffer was not assigned!!!");
+		return;
+	}
+
 //	LOGd("count: %d", count++);
 //	char addrs[28];
 //	sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
@@ -113,6 +126,8 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 	} else {
 //		LOGd("Advertisement from: %s, rssi: %d, occ: %d", addrs, rssi, occ);
 	}
+
+//	BLEutil::printArray<uint8_t>((uint8_t*)_list, SR_MAX_NR_DEVICES * SR_SERIALIZED_DEVICE_SIZE);
 }
 
 void ScanResult::print() const {
@@ -138,6 +153,14 @@ uint16_t ScanResult::getSerializedLength() const {
 /** Copy data representing this object into the given buffer. Buffer has to be preallocated with at least
 * getSerializedLength() bytes. */
 void ScanResult::serialize(uint8_t* buffer, uint16_t length) const {
+
+	LOGd("serialize, this: %p", this);
+
+	if (_list == NULL) {
+		LOGe("scan result buffer was not assigned!!!");
+		return;
+	}
+
 	uint8_t *ptr;
 	ptr = buffer;
 
@@ -160,6 +183,14 @@ void ScanResult::serialize(uint8_t* buffer, uint16_t length) const {
 
 /** Copy data from the given buffer into this object. */
 void ScanResult::deserialize(uint8_t* buffer, uint16_t length) {
+
+	LOGd("deserialize, this: %p", this);
+
+	if (_list == NULL) {
+		LOGe("scan result buffer was not assigned!!!");
+		return;
+	}
+
 	// TODO -oDE: untested!!
 	uint8_t* ptr;
 	ptr = buffer;

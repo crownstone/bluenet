@@ -16,6 +16,10 @@
 #include "drivers/cs_RTC.h"
 #include "services/cs_IndoorLocalisationService.h"
 
+#include "util/cs_Utils.h"
+
+#include "common/cs_MasterBuffer.h"
+
 //#include <common/timer.h>
 
 using namespace BLEpp;
@@ -128,10 +132,21 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
 			ScanResult& result = _peripheralCharac->getValue();
+			MasterBuffer& mb = MasterBuffer::getInstance();
 			if(value) {
 				LOGi("Init scan result");
 //				if (_scanResult != NULL) {
-					result.init();
+//					result.init();
+				uint8_t* buffer;
+				uint16_t maxLength;
+				if (!mb.isLocked()) {
+					mb.getBuffer(buffer, maxLength);
+					mb.lock();
+					result.assign(buffer, maxLength);
+				}
+
+//					BLEutil::print_heap("scan init after");
+//					BLEutil::print_stack("scan init after");
 //				}
 				if (!_stack->isScanning()) {
 					_stack->startScanning();
@@ -141,7 +156,14 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 				LOGi("Return scan result");
 				result.print();
 				_peripheralCharac->notify();
-				result.release();
+//				result.release();
+				if (mb.isLocked()) {
+					result.release();
+					mb.unlock();
+				}
+
+//				BLEutil::print_heap("scan finished");
+//				BLEutil::print_stack("scan finished");
 //				if (_scanResult != NULL) {
 //					*_peripheralCharac = *_scanResult;
 //					_scanResult->print();

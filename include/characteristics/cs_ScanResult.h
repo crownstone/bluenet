@@ -13,22 +13,9 @@
 #include "characteristics/cs_Serializable.h"
 #include "drivers/cs_Serial.h"
 
-using namespace BLEpp;
+#include "common/cs_MasterBuffer.h"
 
-/* Structure used to store peripheral devices detected during a scan.
- *
- * We store the bluetooth address of the device, the number of times that the
- * device was seen during scanning (occurrences) and the rssi (received signal
- * strength indication) value of the last received advertisement.
- * **note** the bluetooth address is stored in little-endian (LSB-first) so when
- * displaying it to the user we need to start at the back of the array
- * **note** struct has to be packed in order to avoid word alignment.
- */
-struct __attribute__((__packed__)) peripheral_device_t {
-	uint8_t addr[BLE_GAP_ADDR_LEN];
-	uint16_t occurrences;
-	int8_t rssi;
-};
+using namespace BLEpp;
 
 /* The size of the header used in the scan list message
  *
@@ -49,6 +36,21 @@ struct __attribute__((__packed__)) peripheral_device_t {
  * will be replaced
  */
 #define SR_MAX_NR_DEVICES 10
+
+/* Structure used to store peripheral devices detected during a scan.
+ *
+ * We store the bluetooth address of the device, the number of times that the
+ * device was seen during scanning (occurrences) and the rssi (received signal
+ * strength indication) value of the last received advertisement.
+ * **note** the bluetooth address is stored in little-endian (LSB-first) so when
+ * displaying it to the user we need to start at the back of the array
+ * **note** struct has to be packed in order to avoid word alignment.
+ */
+struct __attribute__((__packed__)) peripheral_device_t {
+	uint8_t addr[BLE_GAP_ADDR_LEN];
+	uint16_t occurrences;
+	int8_t rssi;
+};
 
 /* Result of a scan device operation
  *
@@ -77,9 +79,9 @@ public:
 	 * Free list on destruction
 	 */
 	~ScanResult() {
-		if (_list) {
-			free(_list);
-		}
+//		if (_list) {
+//			free(_list);
+//		}
 	}
 
 	/* Allocate and initialize an empty list
@@ -87,7 +89,20 @@ public:
 	 * If there was already a list created earlier, the
 	 * old list is freed and a new list is allocated
 	 */
-	void init();
+//	void init();
+
+	void assign(uint8_t* buffer, uint16_t maxLength) {
+		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
+//		if (sizeof(peripheral_device_list_t) < maxLength) {
+//			_list->ptr = buffer;
+		_list = (peripheral_device_t*)buffer;
+//		}
+	}
+
+	void release() {
+		LOGd("release");
+		_list = NULL;
+	}
 
 	/* Release allocated memory
 	 *
@@ -95,7 +110,7 @@ public:
 	 * to free up space. Before using the object again,
 	 * init() has to be called.
 	 */
-	void release();
+//	void release();
 
 	/* Basic not equal operator
 	 *
