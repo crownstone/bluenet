@@ -688,13 +688,13 @@ class GenericService;
 
 typedef void (GenericService::*addCharacteristicFunc)();
 
-struct CharacteristicStatus {
-	std::string name;
-	uint8_t UUID;
-	bool enabled;
-	BLEpp::addCharacteristicFunc func;
-};
-typedef struct CharacteristicStatus CharacteristicStatusT;
+//struct CharacteristicStatus {
+//	std::string name;
+//	uint8_t UUID;
+//	bool enabled;
+//	BLEpp::addCharacteristicFunc func;
+//};
+//typedef struct CharacteristicStatus CharacteristicStatusT;
 
 class GenericService : public Service {
 
@@ -707,11 +707,13 @@ protected:
 	fixed_tuple<CharacteristicBase*, MAX_CHARACTERISTICS> _characteristics;
 
 	// Enabled characteristics (to be set in constructor)
-	std::vector<CharacteristicStatusT> characStatus;
+//	std::vector<CharacteristicStatusT> characStatus;
 
 public:
 
-	GenericService() : Service(), characStatus(0) {
+	GenericService() : Service()
+//		, characStatus(0)
+	{
 		setName(std::string("GenericService"));
 	}
 
@@ -727,7 +729,7 @@ public:
 		return *this;
 	}
 
-	void addSpecificCharacteristics();
+//	void addSpecificCharacteristics();
 
 	//	virtual void on_ble_event(ble_evt_t * p_ble_evt);
 };

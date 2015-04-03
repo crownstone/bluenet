@@ -27,47 +27,37 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	setUUID(UUID(GENERAL_UUID));
 	setName("General Service");
 
-	LOGi("Create general service");
-	characStatus.reserve(8);
+//	LOGi("characStatus ...");
+//	characStatus.reserve(6);
 
-	characStatus.push_back( { "Temperature",
-		TEMPERATURE_UUID,
-		true,
-		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
-	characStatus.push_back( { "Change Name",
-		CHANGE_NAME_UUID,
-		false,
-		static_cast<addCharacteristicFunc>(&GeneralService::addChangeNameCharacteristic) });
-	characStatus.push_back( { "Device Type",
-		DEVICE_TYPE_UUID,
-		false,
-		static_cast<addCharacteristicFunc>(&GeneralService::addDeviceTypeCharacteristic) });
-	characStatus.push_back( { "Room",
-		ROOM_UUID,
-		false,
-		static_cast<addCharacteristicFunc>(&GeneralService::addRoomCharacteristic) });
-	characStatus.push_back( { "Firmware",
-		FIRMWARE_UUID, 
-		false,
-		static_cast<addCharacteristicFunc>(&GeneralService::addFirmwareCharacteristic) });
-#if MESHING==1
-	characStatus.push_back( { "Mesh",
-		MESH_UUID, 
-		false,
-		static_cast<addCharacteristicFunc>(&GeneralService::addMeshCharacteristic) });
-#endif
-	characStatus.push_back( { "Set configuration",
-		SET_CONFIGURATION_UUID,
-		false,
-		static_cast<addCharacteristicFunc>(&GeneralService::addSetConfigurationCharacteristic) });
-	characStatus.push_back( { "Select configuration",
-		SELECT_CONFIGURATION_UUID,
-		false,
-		static_cast<addCharacteristicFunc>(&GeneralService::addSelectConfigurationCharacteristic) });
-	characStatus.push_back( { "Get configuration",
-		GET_CONFIGURATION_UUID,
-		false,
-		static_cast<addCharacteristicFunc>(&GeneralService::addGetConfigurationCharacteristic) });
+//	characStatus.push_back( { "Temperature",
+//		TEMPERATURE_UUID,
+//		true,
+//		static_cast<addCharacteristicFunc>(&GeneralService::addTemperatureCharacteristic) });
+//	characStatus.push_back( { "Firmware",
+//		FIRMWARE_UUID,
+//		true,
+//		static_cast<addCharacteristicFunc>(&GeneralService::addFirmwareCharacteristic) });
+//#if MESHING==1
+//	characStatus.push_back( { "Mesh",
+//		MESH_UUID,
+//		false,
+//		static_cast<addCharacteristicFunc>(&GeneralService::addMeshCharacteristic) });
+//#endif
+//	characStatus.push_back( { "Set configuration",
+//		SET_CONFIGURATION_UUID,
+//		true,
+//		static_cast<addCharacteristicFunc>(&GeneralService::addSetConfigurationCharacteristic) });
+//	characStatus.push_back( { "Select configuration",
+//		SELECT_CONFIGURATION_UUID,
+//		true,
+//		static_cast<addCharacteristicFunc>(&GeneralService::addSelectConfigurationCharacteristic) });
+//	characStatus.push_back( { "Get configuration",
+//		GET_CONFIGURATION_UUID,
+//		true,
+//		static_cast<addCharacteristicFunc>(&GeneralService::addGetConfigurationCharacteristic) });
+
+//	LOGi("... done"); // 384
 
 	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
 	loadPersistentStorage();
@@ -316,9 +306,23 @@ void GeneralService::setBLEName(const std::string &name) {
 }
 
 GeneralService& GeneralService::createService(Nrf51822BluetoothStack& stack) {
+	LOGi("Create general service");
 	GeneralService* svc = new GeneralService(stack);
 	stack.addService(svc);
-	svc->GenericService::addSpecificCharacteristics();
+//	svc->GenericService::addSpecificCharacteristics();
+
+	svc->addTemperatureCharacteristic();
+	LOGi("svc->addTemperatureCharacteristic();");
+	svc->addFirmwareCharacteristic();
+	LOGi("svc->addFirmwareCharacteristic();");
+//	svc->addMeshCharacteristic();
+	svc->addSetConfigurationCharacteristic();
+	LOGi("svc->addSetConfigurationCharacteristic();");
+	svc->addSelectConfigurationCharacteristic();
+	LOGi("svc->addSelectConfigurationCharacteristic();");
+	svc->addGetConfigurationCharacteristic();
+	LOGi("svc->addGetConfigurationCharacteristic();");
+
 	return *svc;
 }
 

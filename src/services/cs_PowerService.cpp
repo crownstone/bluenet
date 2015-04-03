@@ -24,29 +24,29 @@ PowerService::PowerService(Nrf51822BluetoothStack& _stack) :
 	setUUID(UUID(POWER_SERVICE_UUID));
 	//setUUID(UUID(0x3800)); // there is no BLE_UUID for indoor localization (yet)
 
-	LOGi("Create power service");
-
-	characStatus.reserve(5);
-	characStatus.push_back( { "PWM",
-			PWM_UUID,
-			true,
-			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
-	characStatus.push_back( { "Sample Current",
-			SAMPLE_CURRENT_UUID,
-			false,
-			static_cast<addCharacteristicFunc>(&PowerService::addSampleCurrentCharacteristic)});
-	characStatus.push_back( { "Current Curve",
-			CURRENT_CURVE_UUID,
-			false,
-			static_cast<addCharacteristicFunc>(&PowerService::addCurrentCurveCharacteristic)});
-	characStatus.push_back( { "Current Consumption",
-			CURRENT_CONSUMPTION_UUID,
-			false,
-			static_cast<addCharacteristicFunc>(&PowerService::addCurrentConsumptionCharacteristic)});
-	characStatus.push_back( { "Current Limit",
-			CURRENT_LIMIT_UUID,
-			false,
-			static_cast<addCharacteristicFunc>(&PowerService::addCurrentLimitCharacteristic)});
+//	LOGi("Create power service");
+//
+//	characStatus.reserve(5);
+//	characStatus.push_back( { "PWM",
+//			PWM_UUID,
+//			true,
+//			static_cast<addCharacteristicFunc>(&PowerService::addPWMCharacteristic)});
+//	characStatus.push_back( { "Sample Current",
+//			SAMPLE_CURRENT_UUID,
+//			true,
+//			static_cast<addCharacteristicFunc>(&PowerService::addSampleCurrentCharacteristic)});
+//	characStatus.push_back( { "Current Curve",
+//			CURRENT_CURVE_UUID,
+//			true,
+//			static_cast<addCharacteristicFunc>(&PowerService::addCurrentCurveCharacteristic)});
+//	characStatus.push_back( { "Current Consumption",
+//			CURRENT_CONSUMPTION_UUID,
+//			true,
+//			static_cast<addCharacteristicFunc>(&PowerService::addCurrentConsumptionCharacteristic)});
+//	characStatus.push_back( { "Current Limit",
+//			CURRENT_LIMIT_UUID,
+//			false,
+//			static_cast<addCharacteristicFunc>(&PowerService::addCurrentLimitCharacteristic)});
 
 	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
 	loadPersistentStorage();
@@ -443,7 +443,15 @@ PowerService& PowerService::createService(Nrf51822BluetoothStack& stack) {
 //	LOGd("Create power service");
 	PowerService* svc = new PowerService(stack);
 	stack.addService(svc);
-	svc->GenericService::addSpecificCharacteristics();
+//	svc->GenericService::addSpecificCharacteristics();
+
+	svc->addPWMCharacteristic();
+	svc->addSampleCurrentCharacteristic();
+	svc->addCurrentCurveCharacteristic();
+	svc->addCurrentConsumptionCharacteristic();
+	svc->addCurrentLimitCharacteristic();
+
+
 	return *svc;
 }
 

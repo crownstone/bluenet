@@ -290,16 +290,16 @@ void Service::start(BLEStack* stack) {
  * Seperate function that actually adds the characteristics. This allows to introduce dependencies between construction
  * of the different services and the characteristics on those services.
  */
-void GenericService::addSpecificCharacteristics() {
-	for ( CharacteristicStatusT &status : characStatus) {
-		if (status.enabled) {
-			LOGi("Create characteristic %s (%i)", status.name.c_str(), status.UUID);
-			(this->*status.func)();
-		} else {
-			LOGi("Disabled characteristic %s (%i)", status.name.c_str(), status.UUID);
-		}
-	}
-}
+//void GenericService::addSpecificCharacteristics() {
+//	for ( CharacteristicStatusT &status : characStatus) {
+//		if (status.enabled) {
+//			LOGi("Create characteristic %s (%i)", status.name.c_str(), status.UUID);
+//			(this->*status.func)();
+//		} else {
+//			LOGi("Disabled characteristic %s (%i)", status.name.c_str(), status.UUID);
+//		}
+//	}
+//}
 
 /**
  * A service can receive a BLE event. Currently we pass the connection events through as well as the write event.

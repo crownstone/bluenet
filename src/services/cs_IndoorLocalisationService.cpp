@@ -35,28 +35,31 @@ IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _st
 	// we have to figure out why this goes wrong
 	setName(std::string("IndoorLocalizationService"));
 	
-	characStatus.reserve(5);
-
-	characStatus.push_back( { "Received signal level",
-		RSSI_UUID,
-		true,
-		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addSignalStrengthCharacteristic)});
-	characStatus.push_back( { "Start/Stop Scan",
-		SCAN_DEVICE_UUID,
-		false,
-		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addScanControlCharacteristic)});
-	characStatus.push_back( { "Peripherals",
-		LIST_DEVICE_UUID,
-		false,
-		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addPeripheralListCharacteristic)});
-	characStatus.push_back( { "List tracked devices",
-		TRACKED_DEVICE_LIST_UUID,
-		false,
-		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addTrackedDeviceListCharacteristic)});
-	characStatus.push_back( { "Add tracked device",
-		TRACKED_DEVICE_UUID,
-		false,
-		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addTrackedDeviceCharacteristic)});
+//	LOGi("characStatus ...");
+//	characStatus.reserve(5);
+//
+//	characStatus.push_back( { "Received signal level",
+//		RSSI_UUID,
+//		true,
+//		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addSignalStrengthCharacteristic)});
+//	characStatus.push_back( { "Start/Stop Scan",
+//		SCAN_DEVICE_UUID,
+//		true,
+//		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addScanControlCharacteristic)});
+//	characStatus.push_back( { "Peripherals",
+//		LIST_DEVICE_UUID,
+//		true,
+//		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addPeripheralListCharacteristic)});
+//	characStatus.push_back( { "List tracked devices",
+//		TRACKED_DEVICE_LIST_UUID,
+//		true,
+//		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addTrackedDeviceListCharacteristic)});
+//	characStatus.push_back( { "Add tracked device",
+//		TRACKED_DEVICE_UUID,
+//		true,
+//		static_cast<addCharacteristicFunc>(&IndoorLocalizationService::addTrackedDeviceCharacteristic)});
+//
+//	LOGi("... done"); // 248 bytes
 
 	_trackMode = false;
 //	// set timer with compare interrupt every 10ms
@@ -280,7 +283,14 @@ IndoorLocalizationService& IndoorLocalizationService::createService(Nrf51822Blue
 	LOGd("Create indoor localisation service");
 	IndoorLocalizationService* svc = new IndoorLocalizationService(_stack);
 	_stack.addService(svc);
-	svc->addSpecificCharacteristics();
+//	svc->addSpecificCharacteristics();
+
+//	svc->addSignalStrengthCharacteristic();
+	svc->addScanControlCharacteristic();
+	svc->addPeripheralListCharacteristic();
+//	svc->addTrackedDeviceListCharacteristic();
+//	svc->addTrackedDeviceCharacteristic();
+
 	return *svc;
 }
 

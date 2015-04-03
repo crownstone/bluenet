@@ -60,9 +60,6 @@ protected:
 
 	// References to characteristics
 	BLEpp::CharacteristicT<int32_t>* _temperatureCharacteristic;
-	BLEpp::Characteristic<std::string>* _nameCharacteristic;
-	BLEpp::Characteristic<std::string>* _deviceTypeCharacteristic;
-	BLEpp::Characteristic<std::string>* _roomCharacteristic;
 	BLEpp::Characteristic<int32_t>* _firmwareCharacteristic;
 	BLEpp::Characteristic<MeshMessage>* _meshCharacteristic;
 
@@ -113,18 +110,6 @@ protected:
 	/* Enable the get configuration characteristic.
 	 */
 	void addGetConfigurationCharacteristic();
-	/* Enable the change name characteristic.
-	 */
-	void addChangeNameCharacteristic();
-	/* Enable the device type characteristic.
-	 */
-	void addDeviceTypeCharacteristic();
-	/* Enable the room characteristic.
-	 *
-	 * The room needs to be set by the user. There is not yet functionality in place in the crownstone 
-	 * software to figure this out for itself.
-	 */
-	void addRoomCharacteristic();
 	/* Enable the firmware upgrade characteristic.
 	 */
 	void addFirmwareCharacteristic();
