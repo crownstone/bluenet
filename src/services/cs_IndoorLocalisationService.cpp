@@ -20,6 +20,7 @@
 
 #include "common/cs_MasterBuffer.h"
 
+#include "characteristics/cs_BufferCharacteristic.h"
 //#include <common/timer.h>
 
 using namespace BLEpp;
@@ -155,7 +156,13 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 			} else {
 				LOGi("Return scan result");
 				_scanResult->print();
+				uint8_t* buffer;
+				uint16_t length;
+				_scanResult->getBuffer(&buffer, length);
+				_peripheralCharac->setDataLength(length);
+				_peripheralCharac->setValue(buffer);
 				_peripheralCharac->notify();
+//				_peripheralCharac->notify();
 //				result.release();
 				if (mb.isLocked()) {
 					_scanResult->release();
@@ -183,12 +190,14 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 //	LOGd("create characteristic to list found peripherals");
 	_scanResult = new ScanResult();
 
-	_peripheralCharac = new CharacteristicT<ScanResult>();
+	_peripheralCharac = new CharacteristicT<uint8_t*>();
 	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
 	_peripheralCharac->setName("Devices");
 	_peripheralCharac->setWritable(false);
 	_peripheralCharac->setNotifies(true);
-	_peripheralCharac->setValue(*_scanResult);
+	_peripheralCharac->setValue(NULL);
+	_peripheralCharac->setMaxLength(_scanResult->getMaxLength());
+	_peripheralCharac->setDataLength(0);
 
 	addCharacteristic(_peripheralCharac);
 }

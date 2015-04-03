@@ -10,7 +10,7 @@
 #include "ble_gatts.h"
 
 #include "cs_BluetoothLE.h"
-#include "characteristics/cs_Serializable.h"
+#include "characteristics/cs_BufferAccessor.h"
 #include "drivers/cs_Serial.h"
 
 #include "common/cs_MasterBuffer.h"
@@ -66,7 +66,7 @@ struct peripheral_device_list_t {
  * a scan operation. It keeps track of how often a device was seen and with
  * which RSSI value.
  */
-class ScanResult : public Serializable {
+class ScanResult : public BufferAccessor {
 
 private:
 	/* A pointer to the list of detected devices
@@ -161,7 +161,7 @@ public:
 	 */
 	void reset();
 
-	//////////// serializable ////////////////////////////
+	//////////// BufferAccessor ////////////////////////////
 
     /* Return length of buffer required to store the serialized form of this object.
      *
@@ -170,7 +170,9 @@ public:
      *
      * @return number of bytes required
      */
-    uint16_t getSerializedLength() const;
+    uint16_t getDataLength() const {
+    	return getSize() * SR_SERIALIZED_DEVICE_SIZE + SR_HEADER_SIZE;
+    }
 
 	/* Return the maximum possible length of the serialized object
 	 *
@@ -184,10 +186,10 @@ public:
     }
 
 
-	void getBuffer(uint8_t** buffer, uint16_t& length) {
+	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {
 		LOGd("getBuffer: %p", this);
 		*buffer = (uint8_t*)_buffer;
-		length = SR_HEADER_SIZE + getSize() * SR_SERIALIZED_DEVICE_SIZE;
+		dataLength = getDataLength();
 	}
 
 };

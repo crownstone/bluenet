@@ -358,6 +358,11 @@ protected:
 	callback_on_write_t        _callbackOnWrite;
 	callback_on_read_t         _callbackOnRead;
 
+	/* Flag to indicate if notification is pending to be sent once currently waiting
+	 * tx operations are completed
+	 */
+	bool _notificationPending;
+
 public:
 	Characteristic() {
 	}
@@ -469,6 +474,40 @@ public:
 		if (_inited) BLE_THROW("Already inited.");
 		_value = t;
 		return *this;
+	}
+
+	/* Callback function if a notify tx error occurs
+	 *
+	 * This is called when the notify operation fails with a tx error. This
+	 * can occur when too many tx operations are taking place at the same time.
+	 *
+	 * A <BLEpp::CharacteristicBase::notify> is called when the master device
+	 * connected to the Crownstone requests automatic notifications whenever
+	 * the value changes.
+	 */
+	void onNotifyTxError() {
+		_notificationPending = true;
+	}
+
+	/* Callback function once tx operations complete
+	 *
+	 * @p_ble_evt the event object which triggered the onTxComplete callback
+	 *
+	 * This is called whenever tx operations complete. If a notification is pending
+	 * <BLEpp::CharacteristicBase::notify> is called again and the notification
+	 * is cleared if the call eas successful. If not successful, it will be tried
+	 * again during the next callback call
+	 */
+	void onTxComplete(ble_common_evt_t * p_ble_evt) {
+		// if we have a notification pending, try to send it
+		if (_notificationPending) {
+			// this-> is necessary so that the call of notify depends on the template
+			// parameter T
+			uint32_t err_code = this->notify();
+			if (err_code == NRF_SUCCESS) {
+				_notificationPending = false;
+			}
+		}
 	}
 
 protected:
