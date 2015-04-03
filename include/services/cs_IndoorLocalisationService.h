@@ -86,9 +86,9 @@ private:
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
 	BLEpp::CharacteristicT<int8_t>* _rssiCharac;
+	BLEpp::CharacteristicT<uint8_t*>* _peripheralCharac;
 	BLEpp::Characteristic<TrackedDeviceList>* _trackedDeviceListCharac;
 	BLEpp::Characteristic<TrackedDevice>* _trackedDeviceCharac;
-	BLEpp::CharacteristicT<uint8_t*>* _peripheralCharac;
 	
 	func_t _rssiHandler;
 
@@ -98,7 +98,7 @@ private:
 	bool _initialized;
 	bool _scanMode;
 
-//	ScanResult* _scanResult;
+	ScanResult* _scanResult;
 	TrackedDeviceList* _trackedDeviceList;
 
 	pstorage_handle_t _storageHandle;
