@@ -105,6 +105,8 @@ extern "C" {
 #include <services/cs_PowerService.h>
 #endif
 
+#include "common/cs_MasterBuffer.h"
+
 using namespace BLEpp;
 
 /**********************************************************************************************************************
@@ -254,6 +256,8 @@ void GPIOTE_IRQHandler(void)
 
 int main() {
 	welcome();
+
+	MasterBuffer::getInstance().alloc(500);
 
 	// set up the bluetooth stack that controls the hardware.
 	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
