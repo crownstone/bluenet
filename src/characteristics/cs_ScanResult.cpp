@@ -11,26 +11,26 @@
 #include "characteristics/cs_ScanResult.h"
 #include "drivers/cs_Serial.h"
 
-ScanResult::ScanResult() : _list(NULL), _freeIdx(0) {
+ScanResult::ScanResult() : _buffer(NULL) {
 }
 
 //void ScanResult::init() {
 //	_freeIdx = 0;
-//	if (_list) {
-//		free(_list);
+//	if (_buffer) {
+//		free(_buffer);
 //	}
 //	LOGi("LIST alloc");
 //	BLEutil::print_heap("list alloc:");
-////	_list = (peripheral_device_t*)calloc(SR_MAX_NR_DEVICES, sizeof(peripheral_device_t));
+////	_buffer = (peripheral_device_t*)calloc(SR_MAX_NR_DEVICES, sizeof(peripheral_device_t));
 //	BLEutil::print_heap("list alloc done:");
 //}
 
 //void ScanResult::release() {
-//	if (_list) {
+//	if (_buffer) {
 //		LOGi("LIST free");
-//		free(_list);
+//		free(_buffer);
 //	}
-//	_list = NULL;
+//	_buffer = NULL;
 //}
 
 // returns the number of elements stored so far
@@ -38,33 +38,36 @@ uint16_t ScanResult::getSize() const {
 	// freeIdx points to the next free index of the array,
 	// but because the first element is at index 0,
 	// freeIdx is also the number of elements in the array so far
-	return _freeIdx;
+	if (_buffer != NULL) {
+		return _buffer->size;
+	} else {
+		return 0;
+	}
 }
 
 void ScanResult::reset() {
-//	memset(_list, 0, sizeof(peripheral_device_list_t));
-	_freeIdx = 0;
+	memset(_buffer, 0, sizeof(peripheral_device_list_t));
 }
 
 bool ScanResult::operator!=(const ScanResult& val) {
 
-	if (_list == NULL) {
+	if (_buffer == NULL) {
 		LOGe("scan result buffer was not assigned!!!");
 		return false;
 	}
 
-	if (this->_freeIdx != val._freeIdx) {
+	if (this->getSize() != val.getSize()) {
 		return true;
 	}
 
-	for (int i = 0; i < this->_freeIdx; ++i) {
-		if (this->_list[i].occurrences != val._list[i].occurrences) {
+	for (int i = 0; i < this->getSize(); ++i) {
+		if (this->_buffer->list[i].occurrences != val._buffer->list[i].occurrences) {
 			return true;
 		}
-		if (this->_list[i].rssi != val._list[i].rssi) {
+		if (this->_buffer->list[i].rssi != val._buffer->list[i].rssi) {
 			return true;
 		}
-		if (memcmp(this->_list[i].addr, val._list[i].addr, BLE_GAP_ADDR_LEN) != 0) {
+		if (memcmp(this->_buffer->list[i].addr, val._buffer->list[i].addr, BLE_GAP_ADDR_LEN) != 0) {
 			return true;
 		}
 	}
@@ -75,7 +78,7 @@ bool ScanResult::operator!=(const ScanResult& val) {
 //int count = 1;
 void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 
-	if (_list == NULL) {
+	if (_buffer == NULL) {
 		LOGe("scan result buffer was not assigned!!!");
 		return;
 	}
@@ -88,58 +91,59 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 
 	bool found = false;
 //	LOGd("addrs: %s", addrs);
-	for (int i = 0; i < _freeIdx; ++i) {
-//		LOGd("_history[%d]: [%02X %02X %02X %02X %02X %02X]", i, _list[i].addr[5],
-//				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
-//				_list[i].addr[0]);
+	for (int i = 0; i < getSize(); ++i) {
+//		LOGd("_history[%d]: [%02X %02X %02X %02X %02X %02X]", i, _buffer->list[i].addr[5],
+//				_buffer->list[i].addr[4], _buffer->list[i].addr[3], _buffer->list[i].addr[2], _buffer->list[i].addr[1],
+//				_buffer->list[i].addr[0]);
 
-		if (memcmp(adrs_ptr, _list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
+		if (memcmp(adrs_ptr, _buffer->list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 //			LOGd("found");
-			_list[i].occurrences++;
-			_list[i].rssi = rssi;
+			_buffer->list[i].occurrences++;
+			_buffer->list[i].rssi = rssi;
 			found = true;
 			// TODO: Any reason not to break here?
 		}
 	}
 	if (!found) {
 		uint8_t idx  = -1;
-		if (_freeIdx >= SR_MAX_NR_DEVICES) {
+		if (getSize() >= SR_MAX_NR_DEVICES) {
 			// history full, throw out item with lowest occurence
 			uint16_t minOcc = UINT16_MAX;
 			for (int i = 0; i < SR_MAX_NR_DEVICES; ++i) {
-				if (_list[i].occurrences < minOcc) {
-					minOcc = _list[i].occurrences;
+				if (_buffer->list[i].occurrences < minOcc) {
+					minOcc = _buffer->list[i].occurrences;
 					idx = i;
 				}
 			}
 //			LOGd("replacing item at idx: %d", idx);
 		} else {
-			idx = _freeIdx++;
+			idx = _buffer->size++;
 		}
 
 		LOGi("NEW Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", adrs_ptr[5],
 				adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
 				adrs_ptr[0], rssi);
-		memcpy(_list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
-		_list[idx].occurrences = 1;
-		_list[idx].rssi = rssi;
+		memcpy(_buffer->list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
+		_buffer->list[idx].occurrences = 1;
+		_buffer->list[idx].rssi = rssi;
 	} else {
 //		LOGd("Advertisement from: %s, rssi: %d, occ: %d", addrs, rssi, occ);
 	}
 
-//	BLEutil::printArray<uint8_t>((uint8_t*)_list, SR_MAX_NR_DEVICES * SR_SERIALIZED_DEVICE_SIZE);
+//	BLEutil::printArray<uint8_t>((uint8_t*)_buffer, SR_MAX_NR_DEVICES * SR_SERIALIZED_DEVICE_SIZE);
 }
 
 void ScanResult::print() const {
+	LOGd("print: %p", this);
 
 	for (int i = 0; i < getSize(); ++i) {
 //		char addrs[28];
-//		sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", _list[i].addr[5],
-//				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
-//				_list[i].addr[0]);
-		LOGi("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tocc: %d", _list[i].addr[5],
-				_list[i].addr[4], _list[i].addr[3], _list[i].addr[2], _list[i].addr[1],
-				_list[i].addr[0], _list[i].rssi, _list[i].occurrences);
+//		sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", _buffer->list[i].addr[5],
+//				_buffer->list[i].addr[4], _buffer->list[i].addr[3], _buffer->list[i].addr[2], _buffer->list[i].addr[1],
+//				_buffer->list[i].addr[0]);
+		LOGi("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tocc: %d", _buffer->list[i].addr[5],
+				_buffer->list[i].addr[4], _buffer->list[i].addr[3], _buffer->list[i].addr[2], _buffer->list[i].addr[1],
+				_buffer->list[i].addr[0], _buffer->list[i].rssi, _buffer->list[i].occurrences);
 	}
 
 }
@@ -148,67 +152,4 @@ void ScanResult::print() const {
 * it means that the object does not need external buffer space. */
 uint16_t ScanResult::getSerializedLength() const {
 	return getSize() * SR_SERIALIZED_DEVICE_SIZE + SR_HEADER_SIZE;
-}
-
-/** Copy data representing this object into the given buffer. Buffer has to be preallocated with at least
-* getSerializedLength() bytes. */
-void ScanResult::serialize(uint8_t* buffer, uint16_t length) const {
-
-	LOGd("serialize, this: %p", this);
-
-	if (_list == NULL) {
-		LOGe("scan result buffer was not assigned!!!");
-		return;
-	}
-
-	uint8_t *ptr;
-	ptr = buffer;
-
-	// copy number of elements
-	*ptr++ = getSize();
-	for (uint16_t i = 0; i < _freeIdx; ++i) {
-		// copy address of device
-		for (uint8_t j= 1; j <= BLE_GAP_ADDR_LEN; ++j) {
-			*ptr++ = _list[i].addr[BLE_GAP_ADDR_LEN - j];
-		}
-
-		// copy rssi
-		*ptr++ = _list[i].rssi;
-
-		// copy occurrences
-		*ptr++ = (_list[i].occurrences >> 8) & 0xFF;
-		*ptr++ = _list[i].occurrences & 0xFF;
-	}
-}
-
-/** Copy data from the given buffer into this object. */
-void ScanResult::deserialize(uint8_t* buffer, uint16_t length) {
-
-	LOGd("deserialize, this: %p", this);
-
-	if (_list == NULL) {
-		LOGe("scan result buffer was not assigned!!!");
-		return;
-	}
-
-	// TODO -oDE: untested!!
-	uint8_t* ptr;
-	ptr = buffer;
-
-	_freeIdx = *ptr++;
-
-	for (uint16_t i = 0; i < _freeIdx; ++i) {
-		// copy address of device
-		peripheral_device_t* dev = &_list[i];
-		for (int i= BLE_GAP_ADDR_LEN - 1; i >= 0; --i) {
-			dev->addr[i] = *ptr++;
-		}
-
-		// copy rssi
-		dev->rssi = *ptr++;
-
-		// copy occurrences
-		dev->occurrences = (*ptr++ << 8) & 0xFF00;
-		dev->occurrences |= *ptr++;
-	}
 }

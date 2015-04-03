@@ -24,12 +24,6 @@ using namespace BLEpp;
  */
 #define SR_HEADER_SIZE 1
 
-/* The size in bytes needed to store the device structure after serializing
- *
- * **Note** this only works if struct ist packed
- */
-#define SR_SERIALIZED_DEVICE_SIZE sizeof(peripheral_device_t)
-
 /* The maximum number of devices stored during a scan and returned as a list
  *
  * If the maximum number is exceeded, the devices with the lowest occurrence
@@ -48,9 +42,23 @@ using namespace BLEpp;
  */
 struct __attribute__((__packed__)) peripheral_device_t {
 	uint8_t addr[BLE_GAP_ADDR_LEN];
-	uint16_t occurrences;
 	int8_t rssi;
+	uint16_t occurrences;
 };
+
+/* The size in bytes needed to store the device structure after serializing
+ *
+ * **Note** this only works if struct ist packed
+ */
+#define SR_SERIALIZED_DEVICE_SIZE sizeof(peripheral_device_t)
+
+/* Structure of the list of peripheral devices which is sent over Bluetooth
+ */
+struct peripheral_device_list_t {
+	uint8_t size;
+	peripheral_device_t list[SR_MAX_NR_DEVICES];
+};
+
 
 /* Result of a scan device operation
  *
@@ -63,11 +71,11 @@ class ScanResult : public Serializable {
 private:
 	/* A pointer to the list of detected devices
 	 */
-	peripheral_device_t* _list;
+	peripheral_device_list_t* _buffer;
 
 	/* The index in the list of the next free slot
 	 */
-	uint8_t _freeIdx;
+//	uint8_t _freeIdx;
 
 public:
 	/* Default constructor
@@ -79,8 +87,8 @@ public:
 	 * Free list on destruction
 	 */
 	~ScanResult() {
-//		if (_list) {
-//			free(_list);
+//		if (_buffer) {
+//			free(_buffer);
 //		}
 	}
 
@@ -94,14 +102,15 @@ public:
 	void assign(uint8_t* buffer, uint16_t maxLength) {
 		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
 //		if (sizeof(peripheral_device_list_t) < maxLength) {
-//			_list->ptr = buffer;
-		_list = (peripheral_device_t*)buffer;
+//			_buffer->ptr = buffer;
+		_buffer = (peripheral_device_list_t*)buffer;
+//		_buffer = (peripheral_device_t*)buffer;
 //		}
 	}
 
 	void release() {
 		LOGd("release");
-		_list = NULL;
+		_buffer = NULL;
 	}
 
 	/* Release allocated memory
@@ -174,36 +183,12 @@ public:
     	return SR_HEADER_SIZE + SR_MAX_NR_DEVICES * SR_SERIALIZED_DEVICE_SIZE;
     }
 
-    /* Serialize the data into a byte array
-     *
-     * @buffer buffer in which the data should be copied. **note** the buffer
-     *   has to be preallocated with at least <getSerializedLength> size
-     * @length length of the buffer in bytes
-     *
-     * Copy data representing this object into the given buffer. The buffer
-     * has to be preallocated with at least <getSerializedLength> bytes. The
-     * resulting buffer will have data stored in the form:
-     *
-     * NR_OF_DEVICES,DEVICE1_BT_ADDR,DEVICE1_RSSI,DEVICE1_OCCURRENCES,DEVICE2_BT_ADDR,
-     *   DEVICE_2_RSSI,...
-     *
-     * one byte for the number of devices, <BLE_GAP_ADDR_LEN> bytes for the
-     * bluetooth address of device 1 (in big-endian (MSB first)), one byte for the rssi
-     * of device 1, 2 bytes for the occurrences of device 1, <BLE_GAP_ADDR_LEN> bytes for
-     * the bluetooth address of device 2, one byte for the rssi of device 2, etc.
-     *
-     */
-    void serialize(uint8_t* buffer, uint16_t length) const;
 
-    /* De-serialize the data from the byte array into this object
-     *
-     * @buffer buffer containing the data of the object. for the form of the data, see
-     * the function <serialize>
-     * @length length of the buffer in bytes
-     *
-     * Copy the data from the given buffer into this object.
-     */
-    void deserialize(uint8_t* buffer, uint16_t length);
+	void getBuffer(uint8_t** buffer, uint16_t& length) {
+		LOGd("getBuffer: %p", this);
+		*buffer = (uint8_t*)_buffer;
+		length = SR_HEADER_SIZE + getSize() * SR_SERIALIZED_DEVICE_SIZE;
+	}
 
 };
 

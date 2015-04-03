@@ -131,7 +131,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 		.setDefaultValue(255)
 		.setWritable(true)
 		.onWrite([&](const uint8_t & value) -> void {
-			ScanResult& result = _peripheralCharac->getValue();
+//			ScanResult& result = _peripheralCharac->getValue();
 			MasterBuffer& mb = MasterBuffer::getInstance();
 			if(value) {
 				LOGi("Init scan result");
@@ -142,7 +142,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 				if (!mb.isLocked()) {
 					mb.getBuffer(buffer, maxLength);
 					mb.lock();
-					result.assign(buffer, maxLength);
+					_scanResult->assign(buffer, maxLength);
 				}
 
 //					BLEutil::print_heap("scan init after");
@@ -154,11 +154,11 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 				_scanMode = true;
 			} else {
 				LOGi("Return scan result");
-				result.print();
+				_scanResult->print();
 				_peripheralCharac->notify();
 //				result.release();
 				if (mb.isLocked()) {
-					result.release();
+					_scanResult->release();
 					mb.unlock();
 				}
 
@@ -181,67 +181,71 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	// get scan result
 //	LOGd("create characteristic to list found peripherals");
-//	_scanResult = new ScanResult();
-	_peripheralCharac = createCharacteristicRef<ScanResult>();
+	_scanResult = new ScanResult();
+
+	_peripheralCharac = new CharacteristicT<ScanResult>();
 	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
 	_peripheralCharac->setName("Devices");
 	_peripheralCharac->setWritable(false);
 	_peripheralCharac->setNotifies(true);
+	_peripheralCharac->setValue(*_scanResult);
+
+	addCharacteristic(_peripheralCharac);
 }
 
 void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
-	
-	_trackedDeviceList = new TrackedDeviceList();
-
-	_trackedDeviceListCharac = createCharacteristicRef<TrackedDeviceList>();
-	_trackedDeviceListCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_LIST_UUID));
-	_trackedDeviceListCharac->setName("List tracked devices");
-	_trackedDeviceListCharac->setWritable(false);
-	_trackedDeviceListCharac->setNotifies(false);
-	
-	// Initialize before adding tracked devices!
-	_trackedDeviceList->init();
-
-	// Load the nearby timeout
-	uint16_t counts;
-	Storage::getUint16(_storageStruct.nearbyTimeout, counts, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
-	_trackedDeviceList->setTimeout(counts);
+//
+//	_trackedDeviceList = new TrackedDeviceList();
+//
+//	_trackedDeviceListCharac = createCharacteristicRef<TrackedDeviceList>();
+//	_trackedDeviceListCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_LIST_UUID));
+//	_trackedDeviceListCharac->setName("List tracked devices");
+//	_trackedDeviceListCharac->setWritable(false);
+//	_trackedDeviceListCharac->setNotifies(false);
+//
+//	// Initialize before adding tracked devices!
+//	_trackedDeviceList->init();
+//
+//	// Load the nearby timeout
+//	uint16_t counts;
+//	Storage::getUint16(_storageStruct.nearbyTimeout, counts, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
+//	_trackedDeviceList->setTimeout(counts);
 }
 
 void IndoorLocalizationService::writeTrackedDevices() {
-	uint16_t length = _trackedDeviceList->getSerializedLength();
-	uint8_t* buffer = (uint8_t*)calloc(length, sizeof(uint8_t));
-	_trackedDeviceList->serialize(buffer, length);
-	Storage::setArray(buffer, _storageStruct.trackedDevices.list, length);
+//	uint16_t length = _trackedDeviceList->getSerializedLength();
+//	uint8_t* buffer = (uint8_t*)calloc(length, sizeof(uint8_t));
+//	_trackedDeviceList->serialize(buffer, length);
+//	Storage::setArray(buffer, _storageStruct.trackedDevices.list, length);
 }
 
 void IndoorLocalizationService::readTrackedDevices() {
-	uint16_t length = _trackedDeviceList->getMaxLength();
-	uint8_t* buffer = (uint8_t*)calloc(length, sizeof(uint8_t));
-	Storage::getArray(_storageStruct.trackedDevices.list, buffer, (uint8_t*)NULL, length);
-	_trackedDeviceList->deserialize(buffer, length);
-
-	if (!_trackedDeviceList->isEmpty()) {
-		LOGi("restored tracked devices (%d):", _trackedDeviceList->getSize());
-		_trackedDeviceList->print();
-	}
-
-	*_trackedDeviceListCharac = *_trackedDeviceList;
+//	uint16_t length = _trackedDeviceList->getMaxLength();
+//	uint8_t* buffer = (uint8_t*)calloc(length, sizeof(uint8_t));
+//	Storage::getArray(_storageStruct.trackedDevices.list, buffer, (uint8_t*)NULL, length);
+//	_trackedDeviceList->deserialize(buffer, length);
+//
+//	if (!_trackedDeviceList->isEmpty()) {
+//		LOGi("restored tracked devices (%d):", _trackedDeviceList->getSize());
+//		_trackedDeviceList->print();
+//	}
+//
+//	*_trackedDeviceListCharac = *_trackedDeviceList;
 }
 
 void IndoorLocalizationService::setNearbyTimeout(uint16_t counts) {
-	if (_trackedDeviceList != NULL) {
-		_trackedDeviceList->setTimeout(counts);
-	}
-	Storage::setUint16(counts, _storageStruct.nearbyTimeout);
+//	if (_trackedDeviceList != NULL) {
+//		_trackedDeviceList->setTimeout(counts);
+//	}
+//	Storage::setUint16(counts, _storageStruct.nearbyTimeout);
 }
 
 uint16_t IndoorLocalizationService::getNearbyTimeout() {
-	if (_trackedDeviceList == NULL) {
-		return 0;
-	}
-	loadPersistentStorage();
-	return _trackedDeviceList->getTimeout();
+//	if (_trackedDeviceList == NULL) {
+//		return 0;
+//	}
+//	loadPersistentStorage();
+//	return _trackedDeviceList->getTimeout();
 }
 
 void IndoorLocalizationService::startTracking() {
@@ -382,8 +386,8 @@ void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
 void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 	if (_stack->isScanning()) {
 		if (_scanMode) {
-			ScanResult& result = _peripheralCharac->getValue();
-			result.update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+//			ScanResult& result = _peripheralCharac->getValue();
+			_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 		}
 		if (_trackMode && _trackedDeviceList != NULL) {
 			_trackedDeviceList->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);

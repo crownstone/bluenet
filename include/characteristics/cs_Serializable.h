@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include "util/cs_Utils.h"
+
 namespace BLEpp {
 
 /* Base class for a serializable object
@@ -22,39 +24,13 @@ public:
 	 */
 	virtual ~Serializable() {};
 
-	/* Return length of buffer required to store the serialized form of this object.
-	 *
-	 * @return number of bytes required
-	 */
-	virtual uint16_t getSerializedLength() const = 0;
-
 	/* Return the maximum possible length of the object
 	 *
 	 * @return maximum possible length
 	 */
 	virtual uint16_t getMaxLength() const = 0;
 
-	/* Serialize the data into a byte array
-	 *
-	 * @buffer buffer in which the data should be copied. **note** the buffer
-	 *   has to be preallocated with at least <getSerializedLength> size
-	 * @length length of the buffer in bytes
-	 *
-	 * Copy data representing this object into the given buffer. The buffer
-	 * has to be preallocated with at least <getSerializedLength> bytes.
-	 *
-	 */
-	virtual void serialize(uint8_t* buffer, uint16_t length) const = 0;
-
-	/* De-serialize the data from the byte array into this object
-	 *
-	 * @buffer buffer containing the data of the object. for the form of the data, see
-	 * the function <serialize>
-	 * @length length of the buffer in bytes
-	 *
-	 * Copy the data from the given buffer into this object.
-	 */
-	virtual void deserialize(uint8_t* buffer, uint16_t length) = 0;
+	virtual void getBuffer(uint8_t** buffer, uint16_t& length) = 0;
 
 };
 
@@ -63,13 +39,14 @@ public:
  * and handles notify requests for the characteristic, in particular making sure
  * that the object is sent over the air.
  */
-template<typename T >
+template<typename T>
 class CharacteristicT<T, typename std::enable_if<std::is_base_of<Serializable, T>::value >::type> : public Characteristic<T> {
 
 private:
 	/* Pointer to buffer used to store the serialized object
 	 */
-	uint8_t* _buffer;
+//	uint8_t* _buffer;
+	T* _ref;
 
 	/* Flag to indicate if notification is pending to be sent once currently waiting
 	 * tx operations are completed
@@ -77,12 +54,14 @@ private:
 	bool _notificationPending;
 
 public:
-	/* Default destructor
-	 */
-	virtual ~CharacteristicT() {
-		if (_buffer) {
-			free(_buffer);
-		}
+	void setValue(T& value) {
+		LOGd("setValue");
+		_ref = &value;
+	}
+
+	T& getValue() {
+		LOGd("getValue");
+		return _ref;
 	}
 
 	/* Default assign operator
@@ -91,8 +70,8 @@ public:
 	 *
 	 * Assigns the object to this characteristic
 	 */
-	CharacteristicT& operator=(const T& val) {
-		Characteristic<T>::operator=(val);
+	CharacteristicT& operator=(T* val) {
+		_ref = val;
 		return *this;
 	}
 
@@ -104,15 +83,20 @@ public:
 	 * @return the serialized object in a <CharacteristicValue> object
 	 */
 	CharacteristicValue getCharacteristicValue() {
+		LOGd("getCharacteristicValue");
 		CharacteristicValue value;
-		const T& t = this->getValue();
-		uint32_t len = t.getSerializedLength();
+//		Serializable* t = this->getValue();
+//		uint32_t len = t.getSerializedLength();
 //		if (_buffer) {
 //			free(_buffer);
 //		}
-		_buffer = (uint8_t*)calloc(len, sizeof(uint8_t));
-		t.serialize(_buffer, len);
-		return CharacteristicValue(len, _buffer, true);
+//		_buffer = (uint8_t*)calloc(len, sizeof(uint8_t));
+		uint8_t* buffer;
+		uint16_t len;
+		_ref->getBuffer(&buffer, len);
+		BLEutil::printArray(buffer, len);
+//		t.serialize(_buffer, len);
+		return CharacteristicValue(len, buffer, false);
 	}
 
 	/* Assign the given <CharacteristicValue> to this characteristic
@@ -123,9 +107,17 @@ public:
 	 * into an object and assigns that to the charachteristic
 	 */
 	void setCharacteristicValue(const CharacteristicValue& value) {
-		T t;
-		t.deserialize(value.data, value.length);
-		this->setValue(t);
+		LOGd("setCharacteristicValue");
+//		T t;
+//		t.deserialize(value.data, value.length);
+//		this->setValue(t);
+
+		uint8_t* buffer;
+		uint16_t len;
+		_ref->getBuffer(&buffer, len);
+		if (buffer != NULL) {
+			memcpy(buffer, value.data, value.length);
+		}
 	}
 
 	/* Return the maximum possible length of the buffer
@@ -136,8 +128,9 @@ public:
 	 * @return the maximum possible length
 	 */
 	uint16_t getValueMaxLength() {
-		const T& t = this->getValue();
-		return t.getMaxLength();
+//		const T& t = this->getValue();
+//		return t.getMaxLength();
+		return _ref->getMaxLength();
 	}
 
 	/* Callback function if a notify tx error occurs
