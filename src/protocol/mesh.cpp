@@ -23,22 +23,26 @@ extern "C" {
 void rbc_mesh_event_handler(rbc_mesh_event_t* evt)                  
 {                              
 	TICK_PIN(28);                          
-	//nrf_gpio_pin_toggle(PIN_GPIO_LED1);
+	//nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
 	switch (evt->event_type)                       
 	{                             
 		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:                  
 		case RBC_MESH_EVENT_TYPE_NEW_VAL:                    
-		case RBC_MESH_EVENT_TYPE_UPDATE_VAL:                   
+		case RBC_MESH_EVENT_TYPE_UPDATE_VAL: {
 
-			if (evt->value_handle > 2)                     
-				break; 
-			//if (evt->data[0]) {
-			LOGi("Got data in: %i, %i", evt->value_handle, evt->data[0]);
-			MeshControl &meshControl = MeshControl::getInstance();
-			meshControl.process(evt->value_handle, evt->data[0]);
-			//} 
-			led_config(evt->value_handle, evt->data[0]); 
-			break; 
+            if (evt->value_handle > 2)
+                break;
+            //if (evt->data[0]) {
+            LOGi("Got data in: %i, %i", evt->value_handle, evt->data[0]);
+            MeshControl &meshControl = MeshControl::getInstance();
+            meshControl.process(evt->value_handle, evt->data[0]);
+            //}
+            led_config(evt->value_handle, evt->data[0]);
+            break;
+        }
+        default:
+            LOGi("Default: %i", evt->event_type);
+            break;
 	}                             
 }
 
