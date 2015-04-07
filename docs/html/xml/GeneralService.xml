@@ -1,0 +1,218 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="GeneralService" interface="true" name="GeneralService" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> General Service for the Crownstone</brief>
+  <doc>There are several characteristics that fit into the general service description. There is a characteristic
+that measures the temperature, there are several characteristics that defines the crownstone, namely by
+name, by type, or by location (room), and there is a characteristic to update its firmware.
+
+If meshing is enabled, it is also possible to send a message into the mesh network using a characteristic.
+</doc>
+  <base access="public">
+    <type name="BLEpp::GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+  </base>
+  <constructor abstract="yes" id="GeneralService::GeneralService" name="GeneralService">
+    <argument id="GeneralService::GeneralService::stack" name="stack">
+      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </argument>
+  </constructor>
+  <method abstract="yes" id="GeneralService::createService" name="createService" static="yes">
+    <brief>* Helper function to generate a GeneralService object</brief>
+    <return>
+      <type name="GeneralService" qualifier=" &amp;" ref="GeneralService#GeneralService" />
+    </return>
+    <argument id="GeneralService::createService::stack" name="stack">
+      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </argument>
+  </method>
+  <method abstract="yes" id="GeneralService::readConfiguration" name="readConfiguration">
+    <brief>Read configuration written by user.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::readConfiguration::type" name="type">
+      <type name="uint8_t" />
+    </argument>
+    <argument id="GeneralService::readConfiguration::length" name="length">
+      <type name="uint8_t" />
+    </argument>
+    <argument id="GeneralService::readConfiguration::payload" name="payload">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+  </method>
+  <method abstract="yes" id="GeneralService::tick" name="tick">
+    <brief>Perform non urgent functionality every main loop.</brief>
+    <doc>Every component has a "tick" function which is for non-urgent things. Urgent matters have to be
+resolved immediately in interrupt service handlers. The temperature for example is updated every
+tick, because timing is not important for this at all.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="GeneralService::writeConfiguration" name="writeConfiguration">
+    <brief>Update the configuration characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::writeConfiguration::type" name="type">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="GeneralService::writeTemperature" name="writeTemperature">
+    <brief>Update the temperature characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::writeTemperature::temperature" name="temperature">
+      <type name="int32_t" />
+    </argument>
+  </method>
+  <field access="protected" id="GeneralService::_stack" name="_stack">
+    <type name="BLEpp::Nrf51822BluetoothStack" qualifier="*" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+  </field>
+  <field access="protected" id="GeneralService::_temperatureCharacteristic" name="_temperatureCharacteristic">
+    <brief>References to characteristics</brief>
+    <type name="BLEpp::CharacteristicT&lt;int, void&gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_nameCharacteristic" name="_nameCharacteristic">
+    <type name="BLEpp::Characteristic&lt;std::basic_string&lt;char&gt; &gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_deviceTypeCharacteristic" name="_deviceTypeCharacteristic">
+    <type name="BLEpp::Characteristic&lt;std::basic_string&lt;char&gt; &gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_roomCharacteristic" name="_roomCharacteristic">
+    <type name="BLEpp::Characteristic&lt;std::basic_string&lt;char&gt; &gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_firmwareCharacteristic" name="_firmwareCharacteristic">
+    <type name="BLEpp::Characteristic&lt;int&gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_meshCharacteristic" name="_meshCharacteristic">
+    <type name="BLEpp::Characteristic&lt;MeshMessage&gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_setConfigurationCharacteristic" name="_setConfigurationCharacteristic">
+    <brief>Set configuration characteristic</brief>
+    <doc>The configuration characteristic reuses the format of the mesh messages. The type are identifiers that are
+established:
+
+ * 0 name
+ * 1 device type
+ * 2 room
+ * 3 floor level
+
+As you see these are similar to current characteristics and will replace them in the future to save space.
+Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
+</doc>
+    <type name="BLEpp::Characteristic&lt;StreamBuffer&gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_selectConfigurationCharacteristic" name="_selectConfigurationCharacteristic">
+    <brief>Select configuration characteristic</brief>
+    <doc>Just write an identifier to read subsequently from it using <ref ref="GeneralService#GeneralService::_getConfigurationCharacteristic">GeneralService::_getConfigurationCharacteristic</ref>. See for the
+possible values <ref ref="GeneralService#GeneralService::_setConfigurationCharacteristic">GeneralService::_setConfigurationCharacteristic</ref>.
+</doc>
+    <type name="BLEpp::Characteristic&lt;unsigned char&gt;" qualifier="*" />
+  </field>
+  <field access="protected" id="GeneralService::_getConfigurationCharacteristic" name="_getConfigurationCharacteristic">
+    <brief>Get configuration characteristic</brief>
+    <doc>You will have first to select a configuration before you can read from it. You write the identifiers also
+described in <ref ref="GeneralService#GeneralService::_setConfigurationCharacteristic">GeneralService::_setConfigurationCharacteristic</ref>.
+
+Then each of these returns a byte array, with e.g. a name, device type, room, etc.
+</doc>
+    <type name="BLEpp::Characteristic&lt;StreamBuffer&gt;" qualifier="*" />
+  </field>
+  <method abstract="yes" access="protected" id="GeneralService::addChangeNameCharacteristic" name="addChangeNameCharacteristic">
+    <brief>Enable the change name characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addDeviceTypeCharacteristic" name="addDeviceTypeCharacteristic">
+    <brief>Enable the device type characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addFirmwareCharacteristic" name="addFirmwareCharacteristic">
+    <brief>Enable the firmware upgrade characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addGetConfigurationCharacteristic" name="addGetConfigurationCharacteristic">
+    <brief>Enable the get configuration characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addMeshCharacteristic" name="addMeshCharacteristic">
+    <brief>Enable the mesh characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addRoomCharacteristic" name="addRoomCharacteristic">
+    <brief>Enable the room characteristic.</brief>
+    <doc>The room needs to be set by the user. There is not yet functionality in place in the crownstone
+software to figure this out for itself.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addSelectConfigurationCharacteristic" name="addSelectConfigurationCharacteristic">
+    <brief>Enable the set configuration characteristic.</brief>
+    <doc>See <ref ref="GeneralService#GeneralService::_selectConfigurationCharacteristic">GeneralService::_selectConfigurationCharacteristic</ref>.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addSetConfigurationCharacteristic" name="addSetConfigurationCharacteristic">
+    <brief>Enable the set configuration characteristic.</brief>
+    <doc>See <ref ref="GeneralService#GeneralService::_setConfigurationCharacteristic">GeneralService::_setConfigurationCharacteristic</ref>.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::addTemperatureCharacteristic" name="addTemperatureCharacteristic">
+    <brief>Enable the temperature characteristic.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::getBLEName" name="getBLEName">
+    <brief>Retrieve the Bluetooth name from the object representing the BLE stack.</brief>
+    <return>
+      <type name="std::string" qualifier=" &amp;" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::loadPersistentStorage" name="loadPersistentStorage">
+    <brief>Get a handle to the persistent storage struct and load it from FLASH.</brief>
+    <doc>Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
+writing less than a minimal block strains the memory just as much as flashing the entire block.
+Hence, there is an entire struct that can be filled and flashed at once.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::savePersistentStorage" name="savePersistentStorage">
+    <brief>Save to FLASH.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="GeneralService::setBLEName" name="setBLEName">
+    <brief>Write the Bluetooth name to the object representing the BLE stack.</brief>
+    <doc>This updates the Bluetooth name immediately, however, it does not update the name persistently. It
+has to be written to FLASH in that case.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::setBLEName::name" name="name">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+</class>

@@ -1,0 +1,413 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="BLEpp::Nrf51822BluetoothStack" name="Nrf51822BluetoothStack" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> nRF51822 specific implementation of the BLEStack</brief>
+  <doc>The Nrf51822BluetoothStack class is a direct descendent from BLEStack. It is implemented as a singleton, such
+that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt
+handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this
+stack object as an argument w.r.t. this object. This makes dependencies traceble for the user.
+</doc>
+  <base access="public">
+    <type name="BLEStack" ref="BLEpp::BLEStack#BLEpp::BLEStack" />
+    <brief> BLEStack defines a chip-agnostic Bluetooth Low-Energy stack</brief>
+  </base>
+  <variable id="BLEpp::Nrf51822BluetoothStack::defaultAdvertisingInterval_0_625_ms" name="defaultAdvertisingInterval_0_625_ms">
+    <type name="uint16_t" qualifier=" const" />
+  </variable>
+  <variable id="BLEpp::Nrf51822BluetoothStack::defaultAdvertisingTimeout_seconds" name="defaultAdvertisingTimeout_seconds">
+    <type name="uint16_t" qualifier=" const" />
+  </variable>
+  <variable id="BLEpp::Nrf51822BluetoothStack::defaultAppearance" name="defaultAppearance">
+    <brief>static const uint16_t                  defaultAppearance = BLE_APPEARANCE_UNKNOWN;</brief>
+    <type name="uint16_t" qualifier=" const" />
+  </variable>
+  <variable id="BLEpp::Nrf51822BluetoothStack::defaultClockSource" name="defaultClockSource">
+    <brief>static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_XTAL_20_PPM;</brief>
+    <type name="nrf_clock_lfclksrc_t" qualifier=" const" />
+  </variable>
+  <variable id="BLEpp::Nrf51822BluetoothStack::defaultConnectionSupervisionTimeout_10_ms" name="defaultConnectionSupervisionTimeout_10_ms">
+    <type name="uint16_t" qualifier=" const" />
+  </variable>
+  <variable id="BLEpp::Nrf51822BluetoothStack::defaultMaxConnectionInterval_1_25_ms" name="defaultMaxConnectionInterval_1_25_ms">
+    <type name="uint16_t" qualifier=" const" />
+  </variable>
+  <variable id="BLEpp::Nrf51822BluetoothStack::defaultMinConnectionInterval_1_25_ms" name="defaultMinConnectionInterval_1_25_ms">
+    <type name="uint16_t" qualifier=" const" />
+  </variable>
+  <variable id="BLEpp::Nrf51822BluetoothStack::defaultMtu" name="defaultMtu">
+    <type name="uint8_t" qualifier=" const" />
+  </variable>
+  <variable id="BLEpp::Nrf51822BluetoothStack::defaultSlaveLatencyCount" name="defaultSlaveLatencyCount">
+    <type name="uint16_t" qualifier=" const" />
+  </variable>
+  <variable id="BLEpp::Nrf51822BluetoothStack::defaultTxPowerLevel" name="defaultTxPowerLevel">
+    <type name="int8_t" qualifier=" const" />
+  </variable>
+  <variable id="BLEpp::Nrf51822BluetoothStack::MAX_SERVICE_COUNT" name="MAX_SERVICE_COUNT">
+    <type name="uint8_t" qualifier=" const" />
+  </variable>
+  <typedef id="BLEpp::Nrf51822BluetoothStack::callback_connected_t" name="callback_connected_t">
+    <type name="func::function&lt;void (unsigned short)&gt;" />
+  </typedef>
+  <typedef id="BLEpp::Nrf51822BluetoothStack::callback_disconnected_t" name="callback_disconnected_t">
+    <type name="func::function&lt;void (unsigned short)&gt;" />
+  </typedef>
+  <typedef id="BLEpp::Nrf51822BluetoothStack::callback_radio_t" name="callback_radio_t">
+    <type name="func::function&lt;void (bool)&gt;" />
+  </typedef>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::addService" name="addService">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::addService::svc" name="svc">
+      <type name="Service" qualifier="*" ref="BLEpp::Service#BLEpp::Service" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::connected" name="connected" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <override name="BLEStack::connected" ref="BLEpp::BLEStack#BLEpp::BLEStack::connected" />
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::createBatteryService" name="createBatteryService">
+    <return>
+      <type name="BatteryService" qualifier=" &amp;" ref="BLEpp::BatteryService#BLEpp::BatteryService" />
+    </return>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::createService" name="createService">
+    <return>
+      <type name="Service" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service" />
+    </return>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::getConnectionHandle" name="getConnectionHandle" override="yes" virtual="yes">
+    <return>
+      <type name="uint16_t" />
+    </return>
+    <override name="BLEStack::getConnectionHandle" ref="BLEpp::BLEStack#BLEpp::BLEStack::getConnectionHandle" />
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::getDeviceName" name="getDeviceName">
+    <return>
+      <type name="std::string" qualifier=" &amp;" />
+    </return>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::getInstance" name="getInstance" static="yes">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::getService" name="getService">
+    <return>
+      <type name="Service" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::getService::name" name="name">
+      <type name="std::string" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::getTxPowerLevel" name="getTxPowerLevel">
+    <return>
+      <type name="int8_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::init" name="init">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::isAdvertising" name="isAdvertising">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::isScanning" name="isScanning">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::onConnect" name="onConnect">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::onConnect::callback" name="callback">
+      <type name="callback_connected_t" qualifier=" const &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack::callback_connected_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::onDisconnect" name="onDisconnect">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::onDisconnect::callback" name="callback">
+      <type name="callback_disconnected_t" qualifier=" const &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack::callback_disconnected_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::onRadioNotificationInterrupt" name="onRadioNotificationInterrupt">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::onRadioNotificationInterrupt::distanceUs" name="distanceUs">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="BLEpp::Nrf51822BluetoothStack::onRadioNotificationInterrupt::callback" name="callback">
+      <type name="callback_radio_t" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack::callback_radio_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::setAdvertisingInterval" name="setAdvertisingInterval">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::setAdvertisingInterval::advertisingInterval" name="advertisingInterval">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::setAdvertisingTimeoutSeconds" name="setAdvertisingTimeoutSeconds">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::setAdvertisingTimeoutSeconds::advertisingTimeoutSeconds" name="advertisingTimeoutSeconds">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::setAppearance" name="setAppearance">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::setAppearance::appearance" name="appearance">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::setClockSource" name="setClockSource">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::setClockSource::clockSource" name="clockSource">
+      <type name="nrf_clock_lfclksrc_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::setConnectionSupervisionTimeout" name="setConnectionSupervisionTimeout">
+    <brief>* Set the connection supervision timeout in units of 10 ms. </brief>
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::setConnectionSupervisionTimeout::conSupTimeout_10_ms" name="conSupTimeout_10_ms">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::setDeviceName" name="setDeviceName">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::setDeviceName::deviceName" name="deviceName">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::setMaxConnectionInterval" name="setMaxConnectionInterval">
+    <brief>* Set the maximum connection interval in units of 1.25 ms. </brief>
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::setMaxConnectionInterval::connectionInterval_1_25_ms" name="connectionInterval_1_25_ms">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::setMinConnectionInterval" name="setMinConnectionInterval">
+    <brief>* Set the minimum connection interval in units of 1.25 ms. </brief>
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::setMinConnectionInterval::connectionInterval_1_25_ms" name="connectionInterval_1_25_ms">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::setSlaveLatency" name="setSlaveLatency">
+    <brief>* Set the slave latency count. </brief>
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::setSlaveLatency::slaveLatency" name="slaveLatency">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::setTxPowerLevel" name="setTxPowerLevel">
+    <brief>* Set radio transmit power in dBm (accepted values are -40, -20, -16, -12, -8, -4, 0, and 4 dBm). </brief>
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::setTxPowerLevel::powerLevel" name="powerLevel">
+      <type name="int8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::shutdown" name="shutdown">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::start" name="start">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::startAdvertising" name="startAdvertising">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::startIBeacon" name="startIBeacon">
+    <brief> Start advertising as an iBeacon</brief>
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::startIBeacon::beacon" name="beacon">
+      <type name="IBeacon" ref="BLEpp::IBeacon#BLEpp::IBeacon" />
+    </argument>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::startScanning" name="startScanning">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::stopAdvertising" name="stopAdvertising">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+  </method>
+  <method id="BLEpp::Nrf51822BluetoothStack::stopScanning" name="stopScanning">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::tick" name="tick">
+    <brief>* Call this as often as possible.  Callbacks on services and characteristics will be invoked from here. </brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::updateDeviceName" name="updateDeviceName">
+    <return>
+      <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::updateDeviceName::deviceName" name="deviceName">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_device_name" name="_device_name">
+    <type name="std::string" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_appearance" name="_appearance">
+    <brief>4</brief>
+    <type name="uint16_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_services" name="_services">
+    <type name="fixed_tuple&lt;BLEpp::Service *, '\x05'&gt;" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_clock_source" name="_clock_source">
+    <brief>32</brief>
+    <type name="nrf_clock_lfclksrc_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_mtu_size" name="_mtu_size">
+    <brief>4</brief>
+    <type name="uint8_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_tx_power_level" name="_tx_power_level">
+    <type name="int8_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_evt_buffer" name="_evt_buffer">
+    <type name="uint8_t" qualifier="*" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_evt_buffer_size" name="_evt_buffer_size">
+    <type name="uint32_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_sec_mode" name="_sec_mode">
+    <type name="ble_gap_conn_sec_mode_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_interval" name="_interval">
+    <brief>1</brief>
+    <doc>ble_gap_sec_params_t                        _sec_params; //6
+ble_gap_adv_params_t                        _adv_params; // 20</doc>
+    <type name="uint16_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_timeout" name="_timeout">
+    <type name="uint16_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_gap_conn_params" name="_gap_conn_params">
+    <type name="ble_gap_conn_params_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_inited" name="_inited">
+    <brief>8</brief>
+    <type builtin="yes" name="bool" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_started" name="_started">
+    <type builtin="yes" name="bool" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_advertising" name="_advertising">
+    <type builtin="yes" name="bool" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_scanning" name="_scanning">
+    <type builtin="yes" name="bool" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_conn_handle" name="_conn_handle">
+    <type name="uint16_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_callback_connected" name="_callback_connected">
+    <type name="callback_connected_t" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack::callback_connected_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_callback_disconnected" name="_callback_disconnected">
+    <brief>16</brief>
+    <type name="callback_disconnected_t" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack::callback_disconnected_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_callback_radio" name="_callback_radio">
+    <brief>16</brief>
+    <type name="callback_radio_t" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack::callback_radio_t" />
+  </field>
+  <field access="protected" id="BLEpp::Nrf51822BluetoothStack::_radio_notify" name="_radio_notify">
+    <brief>16</brief>
+    <type name="uint8_t" />
+  </field>
+  <method abstract="yes" access="protected" id="BLEpp::Nrf51822BluetoothStack::on_advertisement" name="on_advertisement">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::on_advertisement::p_ble_evt" name="p_ble_evt">
+      <type name="ble_evt_t" qualifier="*" />
+    </argument>
+  </method>
+  <method abstract="yes" access="protected" id="BLEpp::Nrf51822BluetoothStack::on_ble_evt" name="on_ble_evt">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::on_ble_evt::p_ble_evt" name="p_ble_evt">
+      <type name="ble_evt_t" qualifier="*" />
+    </argument>
+  </method>
+  <method abstract="yes" access="protected" id="BLEpp::Nrf51822BluetoothStack::on_connected" name="on_connected">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::on_connected::p_ble_evt" name="p_ble_evt">
+      <type name="ble_evt_t" qualifier="*" />
+    </argument>
+  </method>
+  <method abstract="yes" access="protected" id="BLEpp::Nrf51822BluetoothStack::on_disconnected" name="on_disconnected">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::on_disconnected::p_ble_evt" name="p_ble_evt">
+      <type name="ble_evt_t" qualifier="*" />
+    </argument>
+  </method>
+  <method abstract="yes" access="protected" id="BLEpp::Nrf51822BluetoothStack::onTxComplete" name="onTxComplete">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::Nrf51822BluetoothStack::onTxComplete::p_ble_evt" name="p_ble_evt">
+      <type name="ble_evt_t" qualifier="*" />
+    </argument>
+  </method>
+  <method abstract="yes" access="protected" id="BLEpp::Nrf51822BluetoothStack::setConnParams" name="setConnParams">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="BLEpp::Nrf51822BluetoothStack::setTxPowerLevel" name="setTxPowerLevel">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>

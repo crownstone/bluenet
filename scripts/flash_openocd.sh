@@ -6,16 +6,15 @@ if [[ $cmd != "help" && $cmd != "init" && $cmd != "combined" && $cmd != "connect
 	target=${2:? "Usage: $0 \"cmd\", \"target\""}
 fi
 
-source ../CMakeBuild.config
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/config.sh
 
 debug_target=$target.elf
 binary_target=$target
 combined_target=combined.hex
 
-COMPILER_PATH=/opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin
-
 init() {
-	openocd -d3 -f openocd/openocd.cfg
+	openocd -d3 -f ${path}/openocd/openocd.cfg
 }
 
 connect() {
@@ -23,18 +22,18 @@ connect() {
 }
 
 upload() {
-	cd telnet 
-	./flash.expect app $binary_target $APPLICATION_START_ADDRESS
+	cd $path/telnet
+	./flash.expect app $binary_target $APPLICATION_START_ADDRESS $BLUENET_CONFIG_DIR/build
 }
 
 # Flash application and firmware as combined binary
 combined() {
-	cd telnet
-	./flash.expect all $combined_target 0
+	cd $path/telnet
+	./flash.expect all $combined_target 0 $BLUENET_CONFIG_DIR/build
 }
 
 debug() {
-	$COMPILER_PATH/arm-none-eabi-gdb -tui ../build/$debug_target
+	${COMPILER_PATH}/bin/${COMPILER_TYPE}-gdb -tui ${BLUENET_CONFIG_DIR}/build/$debug_target
 }
 
 help() {

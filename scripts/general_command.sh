@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 SCRIPT_DIR=jlink
 
-source ../CMakeBuild.config
+source config.sh
 
 DEVICE=nrf51822
 

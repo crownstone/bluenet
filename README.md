@@ -2,9 +2,11 @@
 
 This project aims at a wireless network with BLE nodes that use their mutual signal strengths to build up a network with their relative locations. This can be used later by someone carrying a smartphone to establish their location indoors. Everybody say that they can do it, but very few solutions are actually out there. Let's hope we can change that.
 
-Bluetooth LE (BLE) does not inherently fit a wireless network. We have technology in-house (at the Almende group) that can do this [https://en.wikipedia.org/wiki/MyriaNed](Myrianed), but it has not been accepted in the mainstream yet. By the way, it is my personal opinion that solutions such as ZigBee, Z-Wave, MyriaNed, and other mesh solutions, will remain marginal except if they get accepted in a common handheld.
+Bluetooth LE (BLE) does not inherently fit a wireless network. We have technology in-house (at the Almende group) that can do this [Myrianed](https://en.wikipedia.org/wiki/MyriaNed), but it has not been accepted in the mainstream yet. By the way, it is my personal opinion that solutions such as ZigBee, Z-Wave, MyriaNed, and other mesh solutions, will remain marginal except if they get accepted in a common handheld.
 
-That's why BLE is interesting. A lot of phones come with BLE, so a solution is automatically useful to a large variety of people. It is not the best technology for the job. The network topology is a Personal Area Network (PAN), not a Local Area Network (LAN). This means that you cannot have all nodes communicating with all other nodes at the same time. To get RSSI values we will have to set up connections to other nodes and tear them down again. Not very efficient. But it will do the job. The new SoftDevice from Nordic (the S120 instead of the S110) might change this, but it is still in its alpha stage. So, for now we consider a network with known nodes, setting up connections amongst them will be relatively easy. On the moment I am not concerned with security so establishing some zeroconf method to detect which nodes belong to the network will not be part of this codebase yet. My idea however is to do this through synchronizing over the main switch in a home. Turn everything off and the network starts searching for a smartphone who is advertising authentication to use. When this is set, it will be used next time the power goes down. 
+That's why BLE is interesting. A lot of phones come with BLE, so a solution is automatically useful to a large variety of people. It is not the best technology for the job. The network topology is a Personal Area Network (PAN), not a Local Area Network (LAN). This means that you cannot have all nodes communicating with all other nodes at the same time. To get RSSI values we will have to set up connections to other nodes and tear them down again. Not very efficient. But it will do the job. 
+
+However, through the Timeslot API, it is possible to run a totally different protocol parallel to BLE using the same radio. This means that we can have a mesh network at the same time as providing for BLE functionality. The new S130 SoftDevice adds to that even multiple BLE roles at the same time. So many possibilities arise!
 
 Feel free to clone this repos.
 
@@ -64,7 +66,7 @@ You will have to attach a programmer/debugger somehow. Towards that you only nee
 
 Fork the code by clicking on:
 
-* Fork [https://github.com/mrquincle/bluenet/fork](https://github.com/mrquincle/bluenet/fork).
+* Fork [https://github.com/dobots/bluenet/fork](https://github.com/dobots/bluenet/fork).
 * `git clone https://github.com/${YOUR_GITHUB_USERNAME}/bluenet`
 * let us call this directory $BLUENET
 
@@ -74,6 +76,8 @@ Now you will have to set all fields in the configuration file:
 * adjust the `NRF51822_DIR` to wherever you installed the Nordic SDK (it should have `/Include` and `/Source` subdirectories
 * adjust the `SOFTDEVICE_DIR` to wherever you unzipped the latest SoftDevice from Nordic
 * adjust the `SOFTDEVICE_SERIES` to for example `110` or `130` (SoftDevice name starts with it, without the `s`)
+* adjust major accordingly `SOFTDEVICE_MAJOR=7`
+* adjust minor accordingly `SOFTDEVICE_MINOR=0`
 * adjust the `SOFTDEVICE_DIR_API` to the directory with the SoftDevice include files
 * set `SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1` if you use one of the earlier s110 softdevices with a separate UICR section
 * adjust the type `SOFTDEVICE` accordingly (basename of file without `_softdevice.hex`)
@@ -119,15 +123,33 @@ You can also run everything in sequence:
 
 And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish. 
 
-## Flashing
+## Flashing with the ST-Link
 
 The above assumes you have the J-Link programmer from Nordic. If you do not have that device, you can still program something like the RFduino or the Crownstone, by using an ST-Link. A full explanation can be found on <https://dobots.nl/2015/01/23/programming-the-nrf51822-with-the-st-link/>. 
+
+### Combine softdevice and firmware
+
+First of all you should combine all the required binaries into one big binary. This is done by the script combine.sh. Before you use it, you will need to install srec_cat on your system.
+
+    sudo apt-get install srecord
+
+If you call the script it basically just runs srec_cat:
+
+    ./combine.sh
+
+And you will see that it runs something like this:
+
+    srec_cat /opt/softdevices/s110_nrf51822_7.0.0_softdevice.hex -intel crownstone.bin -binary -offset 0x00016000 -o combined.hex -intel
+
+You have to adjust that file on the moment manually to switch between softdevices or to add/remove the bootloader, sorry! Note that the result is a `.hex` file. Such a file does haveinformation across multiple memory sections. If you upload a `.bin` file often configuration bits/bytes will not be set! 
+
+### Upload with OpenOCD
 
 Rather than downloading `openocd` from the Ubuntu repositories, it is recommended to get the newest software from the source:
 
     cd /opt
     git clone https://github.com/ntfreak/openocd
-    sudo aptitude install libtool automake
+    sudo aptitude install libtool automake libusb-1.0-0-dev expect
     cd openocd
     ./bootstrap 
     ./configure --enable-stlink
@@ -145,9 +167,9 @@ You can now use the `flash_openocd.sh` script in the `scripts` directory:
 
 And in another console:
 
-    ./flash_openocd.sh upload combined.hex
+    ./flash_openocd.sh upload combined.bin
 
-Here the binary `combined.hex` is the softdevice and application combined.
+Here the binary `combined.bin` is the softdevice and application combined.
 
 ## Meshing
 
@@ -163,8 +185,8 @@ have to use the `S110`.
 This means that if you want to use a bootloader, you will also need the `S110` version of it, and the same is true
 for the upload script:
 
-* https://github.com/mrquincle/nrf51-dfu-bootloader-for-gcc-compiler/tree/s110
-* https://github.com/mrquincle/nrf51_dfu_linux
+* https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler/tree/s110
+* https://github.com/dobots/nrf51_dfu_linux
 
 ## UART
 
@@ -185,14 +207,14 @@ To upload a new program when the Crownstone is embedded in a wall socket is cumb
 we recommend to add a bootloader. The default bootloader from Nordic does not work with the `S130` devices. You will
 need our fork:
 
-    git clone https://github.com/mrquincle/nrf51-dfu-bootloader-for-gcc-compiler
+    git clone https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler
     cd scripts
     ./all.sh
 
 Note, that if you want to use meshing you will need the `S110` version! This can be found in the `s110` tag (see also
 above).
 
-You will have to set some fields such that the bootloader is loaded rather than the application directly.
+You will have to set some fields such that the bootloader is loaded rather than the application directly. If you use the `J-Link` this is the sequence of commands you will need:
 
     ./softdevice.sh all
     ./writebyte.sh 0x10001014 0x00034000
@@ -203,7 +225,7 @@ down and adjust the code in the `dfu_types.h` file in the bootloader code.
 
 And you should be good to upload binaries, for example with the following python script:
 
-    git clone https://github.com/mrquincle/nrf51_dfu_linux
+    git clone https://github.com/dobots/nrf51_dfu_linux
     python dfu.py -f crownstone.hex -a CD:E3:4A:47:1C:E4
 
 Currently the upload script needs to be changed depending on the SoftDevice used, for the `S130`:
@@ -219,6 +241,20 @@ And for the `S110`:
     data_handle = 0x0B
 
 Of course, this is too cumbersome. We will soon implement something that figures out the right handles automatically.
+
+### Debugging bootloader
+
+Make sure the bootloader is actually loaded and the proper address for the application is set. If you use the `J-Link` you can use `./general_command.sh` to read individual memory locations:
+
+    mem 0x10001014 4
+
+This should be `0x34000` if you use the bootloader. If it is `0xFFFF` the application will be loaded from the application start address.
+
+If the bootloader does not find a valid app, there might indeed not be an app available, o its configuration field that tells it that the app is correct isn't set properly:
+
+    mem 3FC00 10
+
+This should return `0000 0001 0000 0000 0000 00FE 0000 0000`. If it isn't set correctly, make sure you have uploaded the `bootloader.hex` file (and not only the `bootloader.bin` file).
 
 ## iBeacon
 
@@ -255,6 +291,28 @@ Tips to reduce memory usage are really welcome!
 This code is used in a commercial product at DoBots, the [Crownstone](http://dobots.nl/products/crownstone). Our intellectual property exists on two levels. First, you can license our technology to create these extremely cheap BLE building blocks yourself. Second, we build services around BLE-enabled devices. This ranges from smartphones to [gadgets such as the "virtual memo"](http://dobots.nl/2014/07/15/ble-dobeacon-a-virtual-memo/). What this means for you as a developer is that we can be transparent about the software on the Crownstone, which is why this repository exists. Feel free to build your own services on top of it, and benefit from our software development as much as you want. 
 
 It would be much appreciated to state "DoBots inside" in which case we will be happy to provide support to your organisation.
+
+If you want to buy our hardware, please navigate to our [website](http://dobots.nl/products/crownstone). We offer a
+hardware development kit for professional use.
+
+## See also
+
+The different other software tools and online resources have been mentioned above, but here is a short list:
+
+* [Bluenet (this repos)](https://github.com/dobots/bluenet)
+* [Bluenet documentation](http://dobots.github.io/bluenet/)
+* [Bluenet documentation branch](https://github.com/dobots/bluenet/tree/gh-pages)
+* [Bootloader](https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler/tree/s110)
+* [DFU upload tool](https://github.com/dobots/nrf51_dfu_linux)
+* [Crownstone website](http://dobots.nl/products/crownstone)
+* [Crownstone Android app](https://play.google.com/store/apps/details?id=nl.dobots.CrownStone)
+* [Crownstone app source](https://github.com/dobots/crownstone-app)
+* [Crownstone USB image](https://github.com/dobots/crownstone-image)
+* [Crownstone SDK manual](https://docs.google.com/a/almende.org/document/d/1uJ83c0rLC_swX-cVFDl0UyIFc9_81ccfRLK2vJJF1VE/edit)
+
+If you have any problems that are not solved by documentation, please ask them as a GitHub [issue](https://github.com/dobots/bluenet/issues).
+In that case everybody can profit from things that are currently incorrectly formulated, not yet formulated, or need
+some other attention from us developers.
 
 ## Copyrights
 

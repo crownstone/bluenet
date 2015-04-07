@@ -25,7 +25,7 @@ SET(APPLICATION_SHORTHAND "crownstone")
 SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
 
 # Set the main file to use for this application
-SET(MAIN_FILE "main_${APPLICATION_SHORTHAND}.cpp")
+SET(MAIN_FILE "cs_main_${APPLICATION_SHORTHAND}.cpp")
 
 # Start a project
 PROJECT(${PROJECT_NAME} ${TEST_COMPILERS})
@@ -75,62 +75,73 @@ MESSAGE(STATUS "Linked libraries: ${LIBS}")
 SET(SOURCE_DIR "src")
 
 # Add separately include directories if we are to lazy to specify e.g. "#include <protocol/rbc_mesh.h>"
-SET(INCLUDE_DIR "include" "include/common" "include/protocol")
+SET(INCLUDE_DIR "include" "include/third" "include/third/nrf" "include/third/protocol")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
 # essential, code doesn't run without this file !!!
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/nRF51822.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_nRF51822.c")
 
 # Add a single 
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/error.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/ble_error.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/syscalls.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/utils.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/config.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/storage.cpp")
-#LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/timer.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/serial.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/nrf_pwm.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/nrf_adc.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/nrf_rtc.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/LPComp.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/Dimming.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/ScanResult.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/CurrentLimit.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/TrackDevices.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Error.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Utils.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Config.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Storage.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_DifferentialBuffer.cpp")
+#LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Timer.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Serial.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_PWM.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_ADC.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_RTC.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_LPComp.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_Dimming.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_ScanResult.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_CurrentCurve.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_CurrentLimit.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_TrackDevices.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_StreamBuffer.cpp")
 IF(${GENERAL_SERVICE} STRGREATER "0")
+IF(${MESHING})
 IF(${MESHING} STRGREATER "0")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/MeshMessage.cpp")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/MeshControl.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/characteristics/cs_MeshMessage.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_MeshControl.cpp")
 ENDIF()
 ENDIF()
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/BluetoothLE.cpp")
+ENDIF()
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_UUID.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_BluetoothLE.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_Sensors.cpp")
 IF(${INDOOR_SERVICE} STRGREATER "0")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/IndoorLocalisationService.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_IndoorLocalisationService.cpp")
 ENDIF()
 IF(${GENERAL_SERVICE} STRGREATER "0")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/GeneralService.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_GeneralService.cpp")
 ENDIF()
 IF(${POWER_SERVICE} STRGREATER "0")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/PowerService.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_PowerService.cpp")
 ENDIF()
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/Dispatcher.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_Dispatcher.cpp")
 
+# should be only when creating iBeacon
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_iBeacon.cpp")
 
+IF(${MESHING})
 IF(${MESHING} STRGREATER "0")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh.cpp")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh_srv.c")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/radio_control.c")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/rbc_mesh.c")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/timer_control.c")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/timeslot_handler.c")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/transport_control.c")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/trickle.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_Mesh.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/mesh_srv.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/radio_control.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/rbc_mesh.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/timer_control.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/timeslot_handler.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/transport_control.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/trickle.c")
 
 	# temporarily
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/led_config.c")
-ENDIF()
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/led_config.c")
+endif()
+endif()
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
@@ -146,10 +157,10 @@ ENDFOREACH()
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata.c")
 #LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/ble/ble_advdata_parser.c")
 #LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/app_scheduler.c")
+#LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/app_scheduler.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/pstorage.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
-#LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/sd_common/softdevice_handler.c")
+LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/sd_common/softdevice_handler.c")
 
 FOREACH(nordic_file ${NORDIC_SOURCE})
 	MESSAGE(STATUS "Include Nordic file: " ${nordic_file})
@@ -208,14 +219,8 @@ ELSE()
 		COMMAND echo
 		COMMAND echo "*** Use srec_cat to create one combined softdevice+app file"
 		COMMAND echo
-		#COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
-		#COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
-		#COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -intel ${BOOTLOADER} -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o combined.hex -intel"
-		#COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel ${PROJECT_NAME}.bin -intel ${BOOTLOADER} -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o combined.hex -intel
-		COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel _bootloader_.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
-		COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel _bootloader_.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
-		COMMAND echo "We should do something like"
-	       	COMMAND echo "srec_cat /opt/softdevices/s130_nrf51822_0.5.0-1.alpha_softdevice.hex -intel _bootloader_.hex -intel crownstone.bin -binary -offset 0x0001c000 -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o combined.hex -intel"
+		COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
+		COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
 		DEPENDS ${PROJECT_NAME}.tmp
 		COMMENT "Combine as one hex file"
 		)

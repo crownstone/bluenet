@@ -1,12 +1,13 @@
-#!/bin/sh
+#!/bin/bash
+
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/config.sh
 
 SCRIPT_DIR=jlink
-mkdir -p tmp
-TEMP_DIR=tmp
+TEMP_DIR=$path/tmp
+mkdir -p $TEMP_DIR
 
 GDB_SCRIPT=gdbreset
-
-source ../CMakeBuild.config
 
 GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}-gdb
 DEVICE=nrf51822
@@ -21,6 +22,6 @@ cleanup() {
 }
 trap "cleanup" INT QUIT TERM EXIT
 
-echo "$GDB -x gdb/$GDB_SCRIPT"
-$GDB -x gdb/$GDB_SCRIPT
+echo "$GDB -x ${path}/gdb/$GDB_SCRIPT"
+$GDB -x $path/gdb/$GDB_SCRIPT
 

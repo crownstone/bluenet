@@ -1,8 +1,11 @@
 #!/bin/sh
 
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/config.sh
+
 SCRIPT_DIR=jlink
 
-source ../CMakeBuild.config
+source config.sh
 
 DEVICE=nrf51822
 

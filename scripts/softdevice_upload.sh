@@ -1,13 +1,15 @@
 #!/bin/bash
 
-SCRIPT_DIR=jlink
-mkdir -p tmp
-TEMP_DIR=tmp
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/config.sh
 
-source ../CMakeBuild.config
+SCRIPT_DIR=$path/jlink
+TEMP_DIR=$path/tmp
+mkdir -p $TEMP_DIR
+
 DEVICE=nrf51822
 
-SOFTDEVICE_DIR=${1:? "$0 requires \"softdevice directory\" as first argument"}
+SOFTDEVICE_DIR=${1:? "$0 requires \"softdevice bin directory\" as first argument"}
 
 if [ ! -e ${SOFTDEVICE_DIR} ]; then
 	echo "Error: ${SOFTDEVICE_DIR} does not exist..."
@@ -19,6 +21,6 @@ sed "s|@SOFTDEVICE_DIR@|$SOFTDEVICE_DIR|" $SCRIPT_DIR/softdevice.script > $TEMP_
 if [ $SOFTDEVICE_NO_SEPARATE_UICR_SECTION == 1 ]; then
 	echo "No UICR section, so remove line to flash it"
 	sed -i '/uicr/d' $TEMP_DIR/softdevice.script
-fi 
+fi
 
-$JLINK -Device $DEVICE -If SWD $TEMP_DIR/softdevice.script 
+$JLINK -Device $DEVICE -If SWD $TEMP_DIR/softdevice.script
