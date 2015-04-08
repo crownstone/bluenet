@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *****************************************************************************/
 
 
-static uint32_t g_trickle_time; /* global trickle time that all time variables are relative to */
+static uint64_t g_trickle_time; /* global trickle time that all time variables are relative to */
 
 static uint8_t rng_vals[64];
 static uint8_t rng_index;
@@ -130,7 +130,7 @@ void trickle_time_increment(void)
     ++g_trickle_time;
 }
 
-void trickle_time_update(uint32_t time)
+void trickle_time_update(uint64_t time)
 {
     g_trickle_time = time;
 }
@@ -205,12 +205,12 @@ void trickle_step(trickle_t* trickle, bool* out_do_tx)
     }
 }
 
-uint32_t trickle_timestamp_get(void)
+uint64_t trickle_timestamp_get(void)
 {
     return g_trickle_time;
 }
 
-uint32_t trickle_next_processing_get(trickle_t* trickle)
+uint64_t trickle_next_processing_get(trickle_t* trickle)
 {
     if (trickle->trickle_flags & (1 << TRICKLE_FLAGS_T_DONE_Pos)) /* i is next timeout for this instance */
     {

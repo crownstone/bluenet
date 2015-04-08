@@ -125,7 +125,7 @@ ENDIF()
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_Dispatcher.cpp")
 
 # should be only when creating iBeacon
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_iBeacon.cpp")
+# LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_iBeacon.cpp")
 
 IF(${MESHING})
 IF(${MESHING} STRGREATER "0")
