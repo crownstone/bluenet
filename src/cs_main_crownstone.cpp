@@ -257,7 +257,7 @@ void GPIOTE_IRQHandler(void)
 int main() {
 	welcome();
 
-	MasterBuffer::getInstance().alloc(500);
+	MasterBuffer::getInstance().alloc(100);
 
 	// set up the bluetooth stack that controls the hardware.
 	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
