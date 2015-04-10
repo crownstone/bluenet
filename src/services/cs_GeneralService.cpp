@@ -68,11 +68,11 @@ void GeneralService::init(Nrf51822BluetoothStack & stack) {
 
 	_setConfigurationCharacteristic->setValue(buffer);
 	_setConfigurationCharacteristic->setMaxLength(size);
-	_setConfigurationCharacteristic->setDataLength(0);
+	_setConfigurationCharacteristic->setDataLength(size);
 
 	_getConfigurationCharacteristic->setValue(buffer);
 	_getConfigurationCharacteristic->setMaxLength(size);
-	_getConfigurationCharacteristic->setDataLength(0);
+	_getConfigurationCharacteristic->setDataLength(size);
 
 	LOGd("Set both set/get charac to buffer at %p", buffer);
 	//return *svc;
@@ -249,10 +249,14 @@ bool GeneralService::readFromStorage(uint8_t type) {
 	return false;
 }
 
+/* Write to the "get configuration" characteristic
+ *
+ * Writing is done by setting the data length properly and notifying the characteristic (and hence the softdevice)
+ * that there is a new value available.
+ */
 void GeneralService::writeToConfigCharac() {
 	uint16_t len = _streamBuffer->getDataLength();
 	uint8_t value = _streamBuffer->payload()[0];
-//	*_getConfigurationCharacteristic = *_streamBuffer;
 	uint8_t *pntr = _getConfigurationCharacteristic->getValue();
 	LOGd("Write to config length %i and value %i", len, value);
 	
