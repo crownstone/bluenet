@@ -10,13 +10,14 @@
 
 namespace BLEpp {
 
-/* This template implements the functions specific for a pointer to a buffer
+/* This template implements the functions specific for a pointer to a buffer.
+ *
  * It takes care of setting and getting the buffer
  * and handles notify requests for the characteristic, in particular making sure
  * that the object is sent over the air.
  */
 template<>
-class CharacteristicT<uint8_t*> : public Characteristic<uint8_t*> {
+class CharacteristicT<uint8_t*> : public CharacteristicGeneric<uint8_t*> {
 
 private:
 	// maximum length for this characteristic in bytes

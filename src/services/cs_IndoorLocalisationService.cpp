@@ -115,31 +115,35 @@ void IndoorLocalizationService::tick() {
 void IndoorLocalizationService::addSignalStrengthCharacteristic() {
 //	LOGd("create characteristic to read signal strength");
 	_rssiCharac = new CharacteristicT<int8_t>();
+	addCharacteristic(_rssiCharac);
+
 	_rssiCharac->setUUID(UUID(getUUID(), RSSI_UUID)); // there is no BLE_UUID for rssi level(?)
 	_rssiCharac->setName(std::string("Received signal level"));
 	_rssiCharac->setDefaultValue(1);
 	_rssiCharac->setNotifies(true);
-
-	addCharacteristic(_rssiCharac);
 }
 
 void IndoorLocalizationService::addScanControlCharacteristic() {
 	// set scanning option
 //	LOGd("create characteristic to stop/start scan");
-	createCharacteristic<uint8_t>()
-		.setUUID(UUID(getUUID(), SCAN_DEVICE_UUID))
-		.setName("scan")
-		.setDefaultValue(255)
-		.setWritable(true)
-		.onWrite([&](const uint8_t & value) -> void {
+	_scanControlCharac = new CharacteristicT<uint8_t>();
+	addCharacteristic(_scanControlCharac);
+
+	_scanControlCharac->setUUID(UUID(getUUID(), SCAN_DEVICE_UUID));
+	_scanControlCharac->setName("scan");
+	_scanControlCharac->setDefaultValue(255);
+	_scanControlCharac->setWritable(true);
+		//.onWrite([&](const uint8_t & value) -> void {
+	_scanControlCharac->onWrite([&]() -> void {
 //			ScanResult& result = _peripheralCharac->getValue();
 			MasterBuffer& mb = MasterBuffer::getInstance();
+			const uint8_t & value = _scanControlCharac->getValue();
 			if(value) {
 				LOGi("Init scan result");
 //				if (_scanResult != NULL) {
 //					result.init();
-				uint8_t* buffer;
-				uint16_t maxLength;
+				uint8_t* buffer = NULL;
+				uint16_t maxLength = 0;
 				if (!mb.isLocked()) {
 					mb.getBuffer(buffer, maxLength);
 					mb.lock();
@@ -191,6 +195,8 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	_scanResult = new ScanResult();
 
 	_peripheralCharac = new CharacteristicT<uint8_t*>();
+	addCharacteristic(_peripheralCharac);
+
 	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
 	_peripheralCharac->setName("Devices");
 	_peripheralCharac->setWritable(false);
@@ -198,15 +204,14 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	_peripheralCharac->setValue(NULL);
 	_peripheralCharac->setMaxLength(_scanResult->getMaxLength());
 	_peripheralCharac->setDataLength(0);
-
-	addCharacteristic(_peripheralCharac);
 }
 
 void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 //
 //	_trackedDeviceList = new TrackedDeviceList();
 //
-//	_trackedDeviceListCharac = createCharacteristicRef<TrackedDeviceList>();
+//	_trackedDeviceListCharac = new CharacteristicT<TrackedDeviceList>();
+//	addCharacteristic(_trackedDeviceListCharac);
 //	_trackedDeviceListCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_LIST_UUID));
 //	_trackedDeviceListCharac->setName("List tracked devices");
 //	_trackedDeviceListCharac->setWritable(false);
@@ -278,13 +283,17 @@ void IndoorLocalizationService::stopTracking() {
 }
 
 void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
-	_trackedDeviceCharac = createCharacteristicRef<TrackedDevice>();
+	_trackedDeviceCharac = new CharacteristicT<TrackedDevice>();
+	addCharacteristic(_trackedDeviceCharac);
+
 	_trackedDeviceCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_UUID));
 	_trackedDeviceCharac->setName("Add tracked device");
 	_trackedDeviceCharac->setWritable(true);
 	_trackedDeviceCharac->setNotifies(false);
 //	_trackedDeviceCharac->setDefaultValue();
-	_trackedDeviceCharac->onWrite([&](const TrackedDevice& value) -> void {
+//	_trackedDeviceCharac->onWrite([&](const TrackedDevice& value) -> void {
+	_trackedDeviceCharac->onWrite([&]() -> void {
+		const TrackedDevice &value = _trackedDeviceCharac->getValue();
 		if (value.getRSSI() > 0) {
 			LOGi("Remove tracked device");
 			value.print();

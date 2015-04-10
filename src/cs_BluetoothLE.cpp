@@ -345,6 +345,7 @@ void Service::on_ble_event(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_WRITE:
+		LOGd("Write event");
 		on_write(p_ble_evt->evt.gatts_evt.params.write);
 		break;
 
@@ -353,10 +354,20 @@ void Service::on_ble_event(ble_evt_t * p_ble_evt) {
 	}
 }
 
+/* On connect event for an individual service
+ *
+ * An individual service normally doesn't respond to a connect event. However, it can be used to for example allocate
+ * memory only when a user is connected.
+ */
 void Service::on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt) {
 	// nothing here yet.
 }
 
+/* On disconnect event for an individual service
+ *
+ * Just as on_connect this method can be used to for example deallocate structures that only need to exist when a user
+ * is connected.
+ */
 void Service::on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& gap_evt) {
 	// nothing here yet.
 }
@@ -399,6 +410,7 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 
 	if (!found) {
 		// tell someone?
+		LOGe("Could not find characteristic!");
 	}
 }
 

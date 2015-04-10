@@ -158,21 +158,21 @@ public:
 	uint16_t getSize() const;
 
 	/* Clear the list of devices
-	 */
+	*/
 	void reset();
 
 	//////////// BufferAccessor ////////////////////////////
 
-    /* Return length of buffer required to store the serialized form of this object.
-     *
-     * The size is determined by multiplying the number of devices with
-     * <SERIALIZED_DEVICE_SIZE> and adding the header size <HEADER_SIZE>
-     *
-     * @return number of bytes required
-     */
-    uint16_t getDataLength() const {
-    	return getSize() * SR_SERIALIZED_DEVICE_SIZE + SR_HEADER_SIZE;
-    }
+	/* Return length of buffer required to store the serialized form of this object.
+	 *
+	 * The size is determined by multiplying the number of devices with
+	 * <SERIALIZED_DEVICE_SIZE> and adding the header size <HEADER_SIZE>
+	 *
+	 * @return number of bytes required
+	 */
+	uint16_t getDataLength() const {
+		return SR_HEADER_SIZE + SR_SERIALIZED_DEVICE_SIZE * getSize();
+	}
 
 	/* Return the maximum possible length of the serialized object
 	 *
@@ -181,9 +181,9 @@ public:
 	 *
 	 * @return the maximum possible length
 	 */
-    uint16_t getMaxLength() const {
-    	return SR_HEADER_SIZE + SR_MAX_NR_DEVICES * SR_SERIALIZED_DEVICE_SIZE;
-    }
+	uint16_t getMaxLength() const {
+		return SR_HEADER_SIZE + SR_SERIALIZED_DEVICE_SIZE * SR_MAX_NR_DEVICES;
+	}
 
 
 	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {

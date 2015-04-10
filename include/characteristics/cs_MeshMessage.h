@@ -39,7 +39,7 @@ public:
 // template has to be in the same namespace as the other CharacteristicT templates
 namespace BLEpp {
 
-template<> class CharacteristicT<MeshMessage> : public Characteristic<MeshMessage> {
+template<> class CharacteristicT<MeshMessage> : public CharacteristicGeneric<MeshMessage> {
 
 private:
 	uint8_t _buffer[MESH_SERIALIZED_SIZE];
@@ -47,7 +47,7 @@ private:
 
 public:
 	CharacteristicT& operator=(const MeshMessage& val) {
-		Characteristic<MeshMessage>::operator=(val);
+		CharacteristicGeneric<MeshMessage>::operator=(val);
 		return *this;
 	}
 

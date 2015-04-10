@@ -257,7 +257,7 @@ void GPIOTE_IRQHandler(void)
 int main() {
 	welcome();
 
-	MasterBuffer::getInstance().alloc(100);
+	MasterBuffer::getInstance().alloc(GENERAL_BUFFER_SIZE);
 
 	// set up the bluetooth stack that controls the hardware.
 	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
@@ -325,11 +325,13 @@ int main() {
 #if INDOOR_SERVICE==1
 	// now, build up the services and characteristics.
 	IndoorLocalizationService& localizationService = IndoorLocalizationService::createService(stack);
+//	IndoorLocalizationService & localizationService = *new IndoorLocalizationService(stack);
 #endif
 
 #if GENERAL_SERVICE==1
 	// general services, such as internal temperature, setting names, etc.
-	GeneralService& generalService = GeneralService::createService(stack);
+	//GeneralService& generalService = GeneralService::createService(stack);
+	GeneralService& generalService = *new GeneralService(stack);
 #endif
 
 #if POWER_SERVICE==1

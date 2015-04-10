@@ -344,12 +344,13 @@ template<> inline uint8_t ble_type<bool>() {
  * characteristic.
  */
 template<class T>
-class Characteristic : public CharacteristicBase {
+class CharacteristicGeneric : public CharacteristicBase {
 
 	friend class Service;
 
 public:
-	typedef function<void(const T&)> callback_on_write_t;
+	//typedef function<void(const T&)> callback_on_write_t;
+	typedef function<void()> callback_on_write_t;
 	typedef function<T()> callback_on_read_t;
 
 protected:
@@ -364,9 +365,9 @@ protected:
 	bool _notificationPending;
 
 public:
-	Characteristic() {
+	CharacteristicGeneric() {
 	}
-	virtual ~Characteristic() {}
+	virtual ~CharacteristicGeneric() {}
 
 	virtual uint16_t getValueLength() {
 		return sizeof(T);
@@ -384,42 +385,42 @@ public:
 		_value = value;
 	}
 
-	Characteristic<T>& setUUID(const UUID& uuid) {
+	CharacteristicGeneric<T>& setUUID(const UUID& uuid) {
 		CharacteristicBase::setUUID(uuid);
 		return *this;
 	}
 
-	Characteristic<T>& setName(const std::string& name) {
+	CharacteristicGeneric<T>& setName(const std::string& name) {
 		CharacteristicBase::setName(name);
 		return *this;
 	}
 
-	Characteristic<T>& setUnit(uint16_t unit) {
+	CharacteristicGeneric<T>& setUnit(uint16_t unit) {
 		CharacteristicBase::setUnit(unit);
 		return *this;
 	}
 
-	Characteristic<T>& setWritable(bool writable) {
+	CharacteristicGeneric<T>& setWritable(bool writable) {
 		CharacteristicBase::setWritable(writable);
 		return *this;
 	}
 
-	Characteristic<T>& setNotifies(bool notifies) {
+	CharacteristicGeneric<T>& setNotifies(bool notifies) {
 		CharacteristicBase::setNotifies(notifies);
 		return *this;
 	}
 
-	Characteristic<T>& onWrite(const callback_on_write_t& closure) {
+	CharacteristicGeneric<T>& onWrite(const callback_on_write_t& closure) {
 		_callbackOnWrite = closure;
 		return *this;
 	}
 
-	Characteristic<T>& onRead(const callback_on_read_t& closure) {
+	CharacteristicGeneric<T>& onRead(const callback_on_read_t& closure) {
 		_callbackOnRead = closure;
 		return *this;
 	}
 
-	Characteristic<T>& setUpdateIntervalMSecs(uint32_t msecs) {
+	CharacteristicGeneric<T>& setUpdateIntervalMSecs(uint32_t msecs) {
 		CharacteristicBase::setUpdateIntervalMSecs(msecs);
 		return *this;
 	}
@@ -428,7 +429,7 @@ public:
 		return _value;
 	}
 
-	Characteristic<T>& operator=(const T& val) {
+	CharacteristicGeneric<T>& operator=(const T& val) {
 		_value = val;
 
 		notify();
@@ -437,7 +438,7 @@ public:
 	}
 
 #ifdef ADVANCED_OPERATORS
-	Characteristic<T>& operator+=(const T& val) {
+	CharacteristicGeneric<T>& operator+=(const T& val) {
 		_value += val;
 
 		notify();
@@ -445,7 +446,7 @@ public:
 		return *this;
 	}
 
-	Characteristic<T>& operator-=(const T& val) {
+	CharacteristicGeneric<T>& operator-=(const T& val) {
 		_value -= val;
 
 		notify();
@@ -453,7 +454,7 @@ public:
 		return *this;
 	}
 
-	Characteristic<T>& operator*=(const T& val) {
+	CharacteristicGeneric<T>& operator*=(const T& val) {
 		_value *= val;
 
 		notify();
@@ -461,7 +462,7 @@ public:
 		return *this;
 	}
 
-	Characteristic<T>& operator/=(const T& val) {
+	CharacteristicGeneric<T>& operator/=(const T& val) {
 		_value /= val;
 
 		notify();
@@ -470,7 +471,7 @@ public:
 	}
 #endif
 
-	Characteristic<T>& setDefaultValue(const T& t) {
+	CharacteristicGeneric<T>& setDefaultValue(const T& t) {
 		if (_inited) BLE_THROW("Already inited.");
 		_value = t;
 		return *this;
@@ -481,7 +482,7 @@ public:
 	 * This is called when the notify operation fails with a tx error. This
 	 * can occur when too many tx operations are taking place at the same time.
 	 *
-	 * A <BLEpp::CharacteristicBase::notify> is called when the master device
+	 * A <BLEpp::CharacteristicGenericBase::notify> is called when the master device
 	 * connected to the Crownstone requests automatic notifications whenever
 	 * the value changes.
 	 */
@@ -494,7 +495,7 @@ public:
 	 * @p_ble_evt the event object which triggered the onTxComplete callback
 	 *
 	 * This is called whenever tx operations complete. If a notification is pending
-	 * <BLEpp::CharacteristicBase::notify> is called again and the notification
+	 * <BLEpp::CharacteristicGenericBase::notify> is called again and the notification
 	 * is cleared if the call eas successful. If not successful, it will be tried
 	 * again during the next callback call
 	 */
@@ -517,7 +518,8 @@ protected:
 		setCharacteristicValue(value);
 
 		LOGd("%s: onWrite()", _name.c_str());
-		_callbackOnWrite(getValue());
+//		_callbackOnWrite(getValue());
+		_callbackOnWrite();
 	}
 
 	void read() {
@@ -542,14 +544,14 @@ private:
 /* A default characteristic
  */
 template<typename T, typename E = void>
-class CharacteristicT : public Characteristic<T> {
+class CharacteristicT : public CharacteristicGeneric<T> {
 public:
 	CharacteristicT()
-: Characteristic<T>() {
+: CharacteristicGeneric<T>() {
 	}
 
 	CharacteristicT& operator=(const T& val) {
-		Characteristic<T>::operator=(val);
+		CharacteristicGeneric<T>::operator=(val);
 		return *this;
 	}
 	virtual CharacteristicValue getCharacteristicValue() = 0; // defined only in specializations.
@@ -557,10 +559,11 @@ public:
 };
 
 // A characteristic for built-in arithmetic types (int, float, etc)
-template<typename T > class CharacteristicT<T, typename std::enable_if<std::is_arithmetic<T>::value >::type> : public Characteristic<T> {
+template<typename T > 
+class CharacteristicT<T, typename std::enable_if<std::is_arithmetic<T>::value >::type> : public CharacteristicGeneric<T> {
 public:
 	CharacteristicT& operator=(const T& val) {
-		Characteristic<T>::operator=(val);
+		CharacteristicGeneric<T>::operator=(val);
 		return *this;
 	}
 
@@ -577,10 +580,11 @@ public:
 };
 
 // A characteristic for strings
-template<> class CharacteristicT<std::string> : public Characteristic<std::string> {
+template<> 
+class CharacteristicT<std::string> : public CharacteristicGeneric<std::string> {
 public:
 	CharacteristicT& operator=(const std::string& val) {
-		Characteristic<std::string>::operator=(val);
+		CharacteristicGeneric<std::string>::operator=(val);
 		return *this;
 	}
 
@@ -597,10 +601,11 @@ public:
 };
 
 // A characteristic for CharacteristicValue
-template<> class CharacteristicT<CharacteristicValue> : public Characteristic<CharacteristicValue> {
+template<> 
+class CharacteristicT<CharacteristicValue> : public CharacteristicGeneric<CharacteristicValue> {
 public:
 	CharacteristicT& operator=(const CharacteristicValue& val) {
-		Characteristic<CharacteristicValue>::operator=(val);
+		CharacteristicGeneric<CharacteristicValue>::operator=(val);
 		return *this;
 	}
 
@@ -681,26 +686,6 @@ public:
 
 	uint16_t getHandle() {
 		return _service_handle;
-	}
-
-	/** Registers a new Characteristic with the given uid, name, and intialValue. Pass the type of the
-	 * characteristic in angle brackets before the parentheses for the method invocation:
-	 *
-	 * <pre>
-	 *      service.createCharacteristic<std::string>().setName("Owner Name").setDefaultValue("Bob Roberts");
-	 *      service.createCharacteristic<int>().setName("Owner Age").setDefaultValue(39);
-	 *      service.createCharacteristic<float>().setName("Yaw").setDefaultValue(0.0);
-	 * */
-	template <typename T> Characteristic<T>& createCharacteristic() {
-		Characteristic<T>* base = new CharacteristicT<T>();
-		addCharacteristic(base);
-		return *base;
-	}
-
-	template <typename T> Characteristic<T>* createCharacteristicRef() {
-		Characteristic<T>* base = new CharacteristicT<T>();
-		addCharacteristic(base);
-		return base;
 	}
 
 	// internal:

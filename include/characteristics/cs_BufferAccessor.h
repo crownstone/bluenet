@@ -47,7 +47,7 @@ public:
  * that the object is sent over the air.
  */
 template<>
-class CharacteristicT<BufferAccessor*> : public Characteristic<BufferAccessor*> {
+class CharacteristicT<BufferAccessor*> : public CharacteristicGeneric<BufferAccessor*> {
 
 private:
 

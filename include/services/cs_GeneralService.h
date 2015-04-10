@@ -35,9 +35,9 @@ public:
 
 	/* Update the configuration characteristic.
 	 */
-	StreamBuffer<uint8_t>* readFromStorage(uint8_t type);
+	bool readFromStorage(uint8_t type);
 
-	void writeToConfigCharac(StreamBuffer<uint8_t>& buffer);
+	void writeToConfigCharac();
 
 	/* Read configuration written by user.
 	 */
@@ -51,17 +51,19 @@ public:
 	 */
 	void tick();
 
-	/** Helper function to generate a GeneralService object
-	*/
-	static GeneralService& createService(BLEpp::Nrf51822BluetoothStack& stack);
+	/* Helper function to generate a GeneralService object
+	 */
+//	static GeneralService& createService(BLEpp::Nrf51822BluetoothStack& stack);
+	void init(BLEpp::Nrf51822BluetoothStack& stack);
+
 
 protected:
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
 	// References to characteristics
 	BLEpp::CharacteristicT<int32_t>* _temperatureCharacteristic;
-	BLEpp::Characteristic<int32_t>* _firmwareCharacteristic;
-	BLEpp::Characteristic<MeshMessage>* _meshCharacteristic;
+	BLEpp::CharacteristicT<int32_t>* _firmwareCharacteristic;
+	BLEpp::CharacteristicT<MeshMessage>* _meshCharacteristic;
 
 	/* Set configuration characteristic
 	 *
@@ -76,14 +78,14 @@ protected:
 	 * As you see these are similar to current characteristics and will replace them in the future to save space.
 	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
 	 */
-	BLEpp::Characteristic<StreamBuffer<uint8_t>>* _setConfigurationCharacteristic;
+	BLEpp::CharacteristicT<uint8_t*>* _setConfigurationCharacteristic;
 	
 	/* Select configuration characteristic
 	 *
 	 * Just write an identifier to read subsequently from it using <_getConfigurationCharacteristic>. See for the
 	 * possible values <_setConfigurationCharacteristic>.
 	 */
-	BLEpp::Characteristic<uint8_t>* _selectConfigurationCharacteristic;
+	BLEpp::CharacteristicT<uint8_t>* _selectConfigurationCharacteristic;
 
 	/* Get configuration characteristic
 	 *
@@ -92,7 +94,7 @@ protected:
 	 *
 	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
 	 */
-	BLEpp::Characteristic<StreamBuffer<uint8_t>>* _getConfigurationCharacteristic;
+	BLEpp::CharacteristicT<uint8_t*>* _getConfigurationCharacteristic;
 
 	/* Enable the temperature characteristic.
  	 */
@@ -139,12 +141,10 @@ protected:
 	*/
 	void savePersistentStorage();
 private:
-	std::string _name;
-	std::string _room;
-	std::string _type;
-
 	pstorage_handle_t _storageHandle;
 	ps_general_service_t _storageStruct;
+
+	StreamBuffer<uint8_t> *_streamBuffer;
 
 	/* Select configuration for subsequent read actions on the get configuration characteristic.
 	 */
