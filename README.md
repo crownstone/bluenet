@@ -338,3 +338,17 @@ https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh. This functionality 
 `MESHING=0` if you do want to exclude that code from becoming part of the binary. You can still use the services
 for individual nodes, but they won't be able to communicate with each other in that case.
 
+=======
+# Code Documentation
+
+Source for the website at http://dobots.github.io/bluenet/.
+
+The code is generated using [cldoc](https://github.com/jessevdk/cldoc).
+
+## Copyrights
+
+* Authors: Anne van Rossum, Dominik Egger, Bart van Vliet
+* Date: 2014
+* License:  LGPL v3+, Apache, or MIT, your choice
+* Company: Distributed Organisms B.V. (DoBots)
+* Location: Rotterdam, The Netherlands

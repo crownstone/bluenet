@@ -1005,9 +1005,13 @@ public:
 
 	bool isScanning();
 #else
-	Nrf51822BluetoothStack& startScanning() {};
+	Nrf51822BluetoothStack& startScanning() {
+		return *this;
+	};
 
-	Nrf51822BluetoothStack& stopScanning() {};
+	Nrf51822BluetoothStack& stopScanning() {
+		return *this;
+	};
 
 	bool isScanning() { return false; }
 #endif
