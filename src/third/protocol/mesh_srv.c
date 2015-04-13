@@ -56,6 +56,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MESH_PACKET_DATA_OFFSET         (MESH_PACKET_VERSION_OFFSET + MESH_PACKET_VERSION_LEN)
 
 #define CONN_HANDLE_INVALID             (0xFFFF)
+
+#define MESH_VALUE_LOLLIPOP_LIMIT       (200)
 /*****************************************************************************
 * Local Type Definitions
 *****************************************************************************/
@@ -384,7 +386,7 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
     {
         return NRF_ERROR_INVALID_LENGTH;
     }
-    uint8_t error_code = 0;
+    uint32_t error_code = 0;
     
     mesh_char_metadata_t* ch_md = &g_mesh_service.char_metadata[index - 1];
     
@@ -432,15 +434,14 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
                 g_active_conn_handle = CONN_HANDLE_INVALID;
             }
             else if (error_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
-		    // this will be reached, error code 0x3401
-		    // (NRF_ERROR_STK_BASE 0x3... and NRF_GATTS_ERR_BASE 0x3400)
-		    return NRF_SUCCESS; // don't know if I can do this!
-            } else if (error_code == NRF_ERROR_SVC_HANDLER_MISSING) {
-		    return NRF_SUCCESS;
-	    } 
-	    else {
-                //return NRF_ERROR_INTERNAL;
-		return error_code;
+                sd_ble_gatts_sys_attr_set(g_active_conn_handle, NULL, 0);
+            }
+            else if (error_code == NRF_ERROR_SVC_HANDLER_MISSING) {
+                return NRF_SUCCESS;
+            }
+            else {
+            //return NRF_ERROR_INTERNAL;
+            return error_code;
             }
         }
     }
@@ -614,8 +615,13 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
     }
     
     /* new version */
-    /**@TODO: Handle version overflow */
-    if (version > ch_md->version_number || uninitialized)
+    uint16_t separation = (version >= ch_md->version_number)?
+        (version - ch_md->version_number) :
+        (-(ch_md->version_number - MESH_VALUE_LOLLIPOP_LIMIT) + (version - MESH_VALUE_LOLLIPOP_LIMIT) - MESH_VALUE_LOLLIPOP_LIMIT);
+
+    if ((ch_md->version_number < MESH_VALUE_LOLLIPOP_LIMIT && version >= ch_md->version_number) ||
+        (ch_md->version_number >= MESH_VALUE_LOLLIPOP_LIMIT && separation < (UINT16_MAX - MESH_VALUE_LOLLIPOP_LIMIT)/2) ||
+        uninitialized)
     {
         /* update value */
         mesh_srv_char_val_set(handle, data, data_len, false);
