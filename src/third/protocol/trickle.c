@@ -35,12 +35,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "trickle.h"
 #include "rbc_mesh_common.h"
-#include "app_error.h"
 
 #include "nrf_soc.h"
 #include "nrf51_bitfields.h"
 #include <string.h>
 
+#include "util/cs_BleError.h"
 
 #define TRICKLE_RNG_POOL_SIZE   (64)
 
