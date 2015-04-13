@@ -41,7 +41,7 @@ characteristic.
   </method>
   <method id="BLEpp::Characteristic::getValue" name="getValue">
     <return>
-      <type name="const T" qualifier=" const &amp;" />
+      <type name="T" qualifier=" &amp;" />
     </return>
   </method>
   <method id="BLEpp::Characteristic::setValue" name="setValue">

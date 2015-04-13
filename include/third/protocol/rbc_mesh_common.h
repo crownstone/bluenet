@@ -84,6 +84,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DEBUG_RADIO         (0)
 
+//TODO: match these pins to appropriate leds for the board used.
 #define PIN_RADIO_STATE_RX  (14)
 #define PIN_RADIO_STATE_TX  (13)
 #define PIN_RADIO_STATE_IDLE (12)

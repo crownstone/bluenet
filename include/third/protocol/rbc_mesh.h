@@ -106,7 +106,12 @@ typedef enum
 /**
 * @brief Initialization parameter struct for the rbc_mesh_init() function.
 *
-* @param access_addr The access address the mesh will work on. This must be the 
+*
+* @note The nRF51 Softdevice must be initialized by the application before
+*    the mesh framework intialization is called, otherwise, the function will
+*    return NRF_ERROR_SOFTDEVICE_NOT_ENABLED.
+*
+* @param[in] access_addr The access address the mesh will work on. This must be the
 *    same for all nodes in the mesh. RBC_MESH_ACCESS_ADDRESS_BLE_ADV gives the mesh
 *    the same access address as regular BLE advertisements, which makes the
 *    traffic visible to external BLE devices (Note that other access addresses 
@@ -114,14 +119,14 @@ typedef enum
 *    regular BLE radios). Multiple meshes may in theory work concurrently in 
 *    the same area with different access addresses, but will be prone to 
 *    on-air collisions, and it is recommended to use separate channels for this
-* @param channel The BLE channel the mesh works on. It is strongly recommended 
+* @param[in] channel The BLE channel the mesh works on. It is strongly recommended
 *    to use one of the three adv channels 37, 38 or 39, as others may be prone
 *    to on-air collisions with WiFi channels. Separate meshes may work 
 *    concurrently without packet collision if they are assigned to different 
 *    channels. Must be between 1 and 39.
-* @param handle_count The maximum number of handle-value pairs available to the
+* @param[in] handle_count The maximum number of handle-value pairs available to the
 *    application. May not be higher than 155 due to BLE namespace requirements
-* @param adv_int_ms The minimum adv_interval for nodes in the network in 
+* @param[in] adv_int_ms The minimum adv_interval for nodes in the network in
 *    millis. Must be between 5 and 60000.
 * @param radio_mode The radio mode the mesh shall operate on. Must be the same
 *    across all nodes in the mesh. NOT YET IMPLEMENTED
@@ -132,7 +137,7 @@ typedef struct
     uint32_t access_addr;
     uint8_t channel;
     uint8_t handle_count;
-    uint8_t adv_int_ms;
+    uint32_t adv_int_ms;
     rbc_mesh_radio_mode_t radio_mode;
     rbc_mesh_packet_format_t packet_format;
 } rbc_mesh_init_params_t;

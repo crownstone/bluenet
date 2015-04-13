@@ -1,6 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
 <struct id="BLEpp::CharacteristicValue" name="CharacteristicValue" xmlns="http://jessevdk.github.com/cldoc/1.0">
-  <brief> A value which can be written to or read from a characteristic </brief>
+  <brief> A value which can be written to or read from a characteristic. Basically just</brief>
+  <doc>a wrapper for a pointer to a buffer + length of the buffer. Is not stored anywhere
+but just used to obtain data from the characteristic and write it to the GATT server
+and vice versa
+</doc>
   <field id="BLEpp::CharacteristicValue::length" name="length">
     <type name="uint16_t" />
   </field>
@@ -17,13 +21,13 @@ destroyed.</doc>
     <type builtin="yes" name="bool" />
   </field>
   <constructor id="BLEpp::CharacteristicValue::CharacteristicValue" name="CharacteristicValue">
-    <argument id="BLEpp::CharacteristicValue::CharacteristicValue::_length" name="_length">
+    <argument id="BLEpp::CharacteristicValue::CharacteristicValue::length" name="length">
       <type name="uint16_t" />
     </argument>
-    <argument id="BLEpp::CharacteristicValue::CharacteristicValue::_data" name="_data">
+    <argument id="BLEpp::CharacteristicValue::CharacteristicValue::data" name="data">
       <type name="uint8_t" qualifier=" const *" />
     </argument>
-    <argument id="BLEpp::CharacteristicValue::CharacteristicValue::_free" name="_free">
+    <argument id="BLEpp::CharacteristicValue::CharacteristicValue::free" name="free">
       <type builtin="yes" name="bool" />
     </argument>
   </constructor>

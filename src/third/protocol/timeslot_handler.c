@@ -118,7 +118,8 @@ static uint32_t g_timeslot_length;
 static uint32_t g_timeslot_end_timer;      
 static uint32_t g_next_timeslot_length;    
 static uint32_t g_start_time_ref = 0;     
-static uint32_t g_is_in_timeslot = false; 
+static bool g_is_in_timeslot = false;
+static bool g_framework_initialized = false;
 static uint32_t g_negotiate_timeslot_length = TIMESLOT_SLOT_LENGTH;
 
 #if USE_SWI_FOR_PROCESSING
@@ -173,11 +174,12 @@ static uint32_t event_fifo_get(async_event_t* evt)
     {
         return NRF_ERROR_NULL;
     }
-    
-    async_event_t* tail = &async_event_fifo_queue[event_fifo_tail & ASYNC_EVENT_FIFO_QUEUE_MASK];
-    
-    memcpy(evt, tail, sizeof(async_event_t));
-    
+    if (evt != NULL)
+    {
+        async_event_t* tail = &async_event_fifo_queue[event_fifo_tail & ASYNC_EVENT_FIFO_QUEUE_MASK];
+
+        memcpy(evt, tail, sizeof(async_event_t));
+    }
     ++event_fifo_tail;
     return NRF_SUCCESS;
 }
@@ -251,7 +253,6 @@ void ts_sd_event_handler(void)
     while (sd_evt_get(&evt) == NRF_SUCCESS)
     {
         PIN_OUT(evt, 32);
-	// print evt
         switch (evt)
         {
             case NRF_EVT_RADIO_SESSION_IDLE:
@@ -278,14 +279,8 @@ void ts_sd_event_handler(void)
             case NRF_EVT_RADIO_CANCELED:
                 timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
                 break;
-
-	    case NRF_EVT_FLASH_OPERATION_SUCCESS:
-		// we are so happy for you
-		break;
-            default: {
-                APP_ERROR_CHECK(evt);
-		//APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
-	    }
+            default:
+                APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
         }
     }
     CLEAR_PIN(6);
@@ -314,11 +309,11 @@ static void end_timer_handler(void)
 */
 void SWI0_IRQHandler(void)
 {
-    while (!event_fifo_empty() && g_is_in_timeslot)
+    while (!event_fifo_empty() && (g_is_in_timeslot || !g_framework_initialized))
     {
-        
         if (event_fifo_get(&evt) == NRF_SUCCESS)
         {
+            event_fifo_get(NULL); /* bump tail */
             async_event_execute(&evt);
         }
     }
@@ -465,7 +460,8 @@ void timeslot_handler_init(void)
     uint32_t error;
     
     g_is_in_callback = false;
-    
+    g_framework_initialized = true;
+
     error = sd_nvic_EnableIRQ(SD_EVT_IRQn);
     APP_ERROR_CHECK(error);
     
@@ -548,6 +544,8 @@ void timeslot_extend(uint32_t extra_time_us)
 void timeslot_queue_async_event(async_event_t* evt)
 {
 #if USE_SWI_FOR_PROCESSING
+    NVIC_EnableIRQ(SWI0_IRQn);
+    NVIC_SetPriority(SWI0_IRQn, 3);
     event_fifo_put(evt);
     NVIC_SetPendingIRQ(SWI0_IRQn);
 #else

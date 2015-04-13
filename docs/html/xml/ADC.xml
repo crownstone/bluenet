@@ -1,29 +1,184 @@
 <?xml version='1.0' encoding='utf-8'?>
 <class abstract="true" id="ADC" name="ADC" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>class AdcSamples {</brief>
+  <doc>public:
+AdcSamples(): _writeLock(false), _size(0), _increments(NULL) {
+
+}
+
+~AdcSamples() {
+delete _increments;
+}
+
+/* Initializes the buffer with a certain capacity
+*
+*/
+bool init(uint16_t capacity) {
+if (_increments == NULL || _increments-&gt;capacity() != capacity-1) {
+delete _increments;
+_increments = new CircularBuffer&amp;lt;int8\_t&amp;gt;(capacity-1);
+}
+if (!_increments-&gt;init()) {
+log(FATAL, "Could not initialize buffer. Too big!?");
+return false;
+}
+clear();
+return true;
+}
+
+/* Clears the buffer
+*
+*/
+void clear() {
+_increments-&gt;clear();
+_size=0;
+_timeStart=0;
+_timeEnd=0;
+}
+
+/* Write samples into a buffer.
+*
+* Make sure the buffer is large enough to contain size() elements.
+* Locks the buffer
+*/
+void getSamples(uint16_t* buf) {
+_writeLock = true;
+if (!_size) {
+_writeLock = false;
+return;
+}
+buf[0] = _firstSample;
+for (uint16_t i=0; i&amp;lt;\_increments-&amp;gt;size(); ++i) {
+buf[i+1] = buf[i]+_increments-&gt;operator[](i);
+}
+_writeLock = false;
+}
+
+/* Returns the first sample in the buffer
+*
+* Locks the buffer.
+* If the buffer is empty, it returns (uint16_t)-1 and unlocks
+*/
+uint16_t getFirstSample() {
+_writeLock = true;
+if (!_size) {
+_writeLock = false;
+return (uint16_t)-1;
+}
+_readIdx = 0;
+_readSample = _firstSample;
+//              LOGd("f=%u s=%u", _firstSample, _size);
+return _readSample;
+}
+
+/* Returns the next sample in the buffer
+*
+* Make sure you first called getFirstSample().
+* When the end has been reached: unlocks and returns (uint16_t)-1.
+*/
+uint16_t getNextSample() {
+if (!_writeLock) {
+return (uint16_t)-1;
+}
+//              LOGd("idx=%u inc=%i", _readIdx, _increments-&gt;operator [](_readIdx));
+if (_readIdx &gt;= _increments-&gt;size()) {
+_writeLock = false;
+return (uint16_t)-1;
+}
+_readSample += _increments-&gt;operator [](_readIdx++);
+return _readSample;
+}
+
+/* Returns the number of elements in the buffer
+*
+*/
+inline uint16_t size() {
+return _size;
+}
+
+inline uint16_t capacity() {
+return _increments-&gt;capacity()+1;
+}
+
+inline bool empty() {
+return _size == 0;
+}
+
+inline bool full() {
+return _increments-&gt;full();
+}
+
+
+/* Pushes a value to the buffer
+*
+*/
+void push(uint16_t val) {
+if (!_size) {
+_firstSample = val;
+_lastSample = val;
+_size=1;
+//                      LOGd("val=%u f=%u l=%u s=%u", val, _firstSample, _lastSample, _size);
+return;
+}
+
+int16_t diff = (int16_t)val - _lastSample;
+if (diff &gt; 127 || diff &lt; -127) {
+LOGe("difference too large! %i", diff);
+//                      LOGe("previous val=%u, current val=%u", _lastSample, val);
+clear();
+return;
+}
+
+if (_increments-&gt;full()) {
+_firstSample += _increments-&gt;peek();
+--_size;
+}
+
+_increments-&gt;push(diff);
+_lastSample = val;
+++_size;
+//              LOGd("val=%u f=%u l=%u s=%u d=%i", val, _firstSample, _lastSample, _size, diff);
+}
+
+/* Returns whether or not the buffer is locked for writing by ADC
+*
+*/
+bool isLocked() {
+return _writeLock;
+}
+
+uint32_t _timeStart;
+uint32_t _timeEnd;
+
+private:
+bool _writeLock;
+uint16_t _readIdx;
+uint16_t _readSample;
+
+uint16_t _size;
+uint16_t _firstSample;
+uint16_t _lastSample;
+
+CircularBuffer&amp;lt;int8\_t&amp;gt;* _increments;
+};</doc>
   <base access="public">
     <type name="Dispatcher" />
   </base>
-  <method abstract="yes" id="ADC::config" name="config">
-    <return>
-      <type name="uint32_t" />
-    </return>
-    <argument id="ADC::config::pin" name="pin">
-      <type name="uint8_t" />
-    </argument>
-  </method>
-  <method abstract="yes" id="ADC::getBuffer" name="getBuffer">
-    <brief>return reference to internal buffer</brief>
-    <return>
-      <type name="Buffer&lt;unsigned short&gt;" qualifier="*" />
-    </return>
-  </method>
   <method id="ADC::getInstance" name="getInstance" static="yes">
-    <brief>use static variant of singleton, no dynamic memory allocation</brief>
+    <brief>Use static variant of singleton, no dynamic memory allocation</brief>
     <return>
       <type name="ADC" qualifier=" &amp;" ref="ADC#ADC" />
     </return>
   </method>
+  <method abstract="yes" id="ADC::getSamples" name="getSamples">
+    <brief>Return reference to the sampled data</brief>
+    <return>
+      <doc>a reference to the sampled data</doc>
+      <type name="AdcSamples" qualifier="*" ref="AdcSamples#AdcSamples" />
+    </return>
+  </method>
   <method abstract="yes" id="ADC::init" name="init">
+    <brief>Initialize ADC, this will allocate memory for the samples.</brief>
     <return>
       <type name="uint32_t" />
     </return>
@@ -32,7 +187,7 @@
     </argument>
   </method>
   <method abstract="yes" id="ADC::setClock" name="setClock">
-    <brief>if decorated with a real time clock, we can "timestamp" the adc values</brief>
+    <brief>If decorated with a real time clock, we can "timestamp" the adc values.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
@@ -41,7 +196,9 @@
     </argument>
   </method>
   <method id="ADC::setThreshold" name="setThreshold">
-    <brief>set threshold (default threshold is DEFAULT_RECORDING_THRESHOLD)</brief>
+    <brief>Set threshold to start writing samples to buffer.</brief>
+    <doc>Default threshold is DEFAULT_RECORDING_THRESHOLD
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
@@ -50,28 +207,30 @@
     </argument>
   </method>
   <method abstract="yes" id="ADC::start" name="start">
+    <brief>Start the ADC sampling</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" id="ADC::stop" name="stop">
+    <brief>Stop the ADC sampling</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" id="ADC::tick" name="tick">
-    <brief>each tick we have time to dispatch events e.g.</brief>
+    <brief>Each tick we have time to dispatch events e.g.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" id="ADC::update" name="update">
-    <brief>function to be called from interrupt, do not do much there!</brief>
+    <brief>Function to be called from interrupt, do not do much there!</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
     <argument id="ADC::update::value" name="value">
-      <type name="uint32_t" />
+      <type name="uint16_t" />
     </argument>
   </method>
 </class>

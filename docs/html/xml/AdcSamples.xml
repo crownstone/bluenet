@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class id="AdcSamples" name="AdcSamples" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <doc>
+Class to store the samples
+
+The samples are compressed by storing only the difference with the first previous sample.
+</doc>
+  <constructor id="AdcSamples::AdcSamples" name="AdcSamples" />
+  <destructor id="AdcSamples::~AdcSamples" name="~AdcSamples" />
+  <method id="AdcSamples::full" name="full">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method id="AdcSamples::getFirstElement" name="getFirstElement">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="AdcSamples::getFirstElement::timestamp" name="timestamp">
+      <type name="uint32_t" qualifier=" &amp;" />
+    </argument>
+    <argument id="AdcSamples::getFirstElement::voltage" name="voltage">
+      <type name="uint16_t" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method id="AdcSamples::getNextElement" name="getNextElement">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="AdcSamples::getNextElement::timestamp" name="timestamp">
+      <type name="uint32_t" qualifier=" &amp;" />
+    </argument>
+    <argument id="AdcSamples::getNextElement::voltage" name="voltage">
+      <type name="uint16_t" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method id="AdcSamples::getSerializedLength" name="getSerializedLength">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method id="AdcSamples::init" name="init">
+    <brief>Initializes the buffer with a certain capacity</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="AdcSamples::init::capacity" name="capacity">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method id="AdcSamples::isLocked" name="isLocked">
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+  </method>
+  <method id="AdcSamples::lock" name="lock">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method id="AdcSamples::push" name="push">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="AdcSamples::push::voltage" name="voltage">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method id="AdcSamples::push" name="push">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="AdcSamples::push::voltage" name="voltage">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="AdcSamples::push::timestamp" name="timestamp">
+      <type name="uint32_t" />
+    </argument>
+  </method>
+  <method id="AdcSamples::serialize" name="serialize">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="AdcSamples::serialize::buf" name="buf">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+  </method>
+  <method id="AdcSamples::size" name="size">
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method id="AdcSamples::unlock" name="unlock">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+</class>
