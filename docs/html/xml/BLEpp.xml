@@ -34,7 +34,7 @@
     <brief>A characteristic for CharacteristicValue</brief>
   </class>
   <struct name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue">
-    <brief> A value which can be written to or read from a characteristic </brief>
+    <brief> A value which can be written to or read from a characteristic. Basically just</brief>
   </struct>
   <class name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
   <class name="IBeacon" ref="BLEpp::IBeacon#BLEpp::IBeacon">

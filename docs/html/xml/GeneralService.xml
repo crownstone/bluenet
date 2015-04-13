@@ -24,19 +24,13 @@ If meshing is enabled, it is also possible to send a message into the mesh netwo
       <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </argument>
   </method>
-  <method abstract="yes" id="GeneralService::readConfiguration" name="readConfiguration">
-    <brief>Read configuration written by user.</brief>
+  <method abstract="yes" id="GeneralService::readFromStorage" name="readFromStorage">
+    <brief>Update the configuration characteristic.</brief>
     <return>
-      <type builtin="yes" name="void" />
+      <type name="StreamBuffer&lt;unsigned char, unsigned char&gt;" qualifier="*" />
     </return>
-    <argument id="GeneralService::readConfiguration::type" name="type">
+    <argument id="GeneralService::readFromStorage::type" name="type">
       <type name="uint8_t" />
-    </argument>
-    <argument id="GeneralService::readConfiguration::length" name="length">
-      <type name="uint8_t" />
-    </argument>
-    <argument id="GeneralService::readConfiguration::payload" name="payload">
-      <type name="uint8_t" qualifier="*" />
     </argument>
   </method>
   <method abstract="yes" id="GeneralService::tick" name="tick">
@@ -49,21 +43,35 @@ tick, because timing is not important for this at all.
       <type builtin="yes" name="void" />
     </return>
   </method>
-  <method abstract="yes" id="GeneralService::writeConfiguration" name="writeConfiguration">
-    <brief>Update the configuration characteristic.</brief>
+  <method abstract="yes" id="GeneralService::writeToConfigCharac" name="writeToConfigCharac">
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="GeneralService::writeConfiguration::type" name="type">
-      <type name="uint8_t" />
+    <argument id="GeneralService::writeToConfigCharac::buffer" name="buffer">
+      <type name="StreamBuffer&lt;unsigned char, unsigned char&gt;" qualifier=" &amp;" />
     </argument>
   </method>
-  <method abstract="yes" id="GeneralService::writeTemperature" name="writeTemperature">
+  <method abstract="yes" id="GeneralService::writeToStorage" name="writeToStorage">
+    <brief>Read configuration written by user.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="GeneralService::writeToStorage::type" name="type">
+      <type name="uint8_t" />
+    </argument>
+    <argument id="GeneralService::writeToStorage::length" name="length">
+      <type name="uint8_t" />
+    </argument>
+    <argument id="GeneralService::writeToStorage::payload" name="payload">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+  </method>
+  <method abstract="yes" id="GeneralService::writeToTemperatureCharac" name="writeToTemperatureCharac">
     <brief>Update the temperature characteristic.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="GeneralService::writeTemperature::temperature" name="temperature">
+    <argument id="GeneralService::writeToTemperatureCharac::temperature" name="temperature">
       <type name="int32_t" />
     </argument>
   </method>
@@ -102,7 +110,7 @@ established:
 As you see these are similar to current characteristics and will replace them in the future to save space.
 Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
 </doc>
-    <type name="BLEpp::Characteristic&lt;StreamBuffer&gt;" qualifier="*" />
+    <type name="BLEpp::Characteristic&lt;StreamBuffer&lt;unsigned char, unsigned char&gt; &gt;" qualifier="*" />
   </field>
   <field access="protected" id="GeneralService::_selectConfigurationCharacteristic" name="_selectConfigurationCharacteristic">
     <brief>Select configuration characteristic</brief>
@@ -118,7 +126,7 @@ described in <ref ref="GeneralService#GeneralService::_setConfigurationCharacter
 
 Then each of these returns a byte array, with e.g. a name, device type, room, etc.
 </doc>
-    <type name="BLEpp::Characteristic&lt;StreamBuffer&gt;" qualifier="*" />
+    <type name="BLEpp::Characteristic&lt;StreamBuffer&lt;unsigned char, unsigned char&gt; &gt;" qualifier="*" />
   </field>
   <method abstract="yes" access="protected" id="GeneralService::addChangeNameCharacteristic" name="addChangeNameCharacteristic">
     <brief>Enable the change name characteristic.</brief>

@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="ps_indoorlocalisation_service_t" name="ps_indoorlocalisation_service_t" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Struct used by the &amp;lt;IndoorLocalisationService&amp;gt; to store elements</brief>
+  <base access="public">
+    <type name="ps_storage_base_t" ref="ps_storage_base_t#ps_storage_base_t" />
+    <brief> Base class for storage structures</brief>
+  </base>
+  <struct name="(anonymous::1)" ref="ps_indoorlocalisation_service_t::(anonymous::1)#ps_indoorlocalisation_service_t::(anonymous::1)" />
+  <field id="ps_indoorlocalisation_service_t::trackedDevices" name="trackedDevices">
+    <type name="struct (anonymous struct at /hd/home/anne/myworkspace/ble/bluenet/include/services/cs_IndoorLocalisationService.h:22:2)" ref="ps_indoorlocalisation_service_t::(anonymous::1)#ps_indoorlocalisation_service_t::(anonymous::1)" />
+  </field>
+  <field id="ps_indoorlocalisation_service_t::nearbyTimeout" name="nearbyTimeout">
+    <type name="uint32_t" />
+  </field>
+</struct>

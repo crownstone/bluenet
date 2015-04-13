@@ -1,14 +1,22 @@
 <?xml version='1.0' encoding='utf-8'?>
-<class id="ScanResult" interface="true" name="ScanResult" xmlns="http://jessevdk.github.com/cldoc/1.0">
+<class abstract="true" id="ScanResult" name="ScanResult" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <brief> Result of a scan device operation</brief>
   <doc>The ScanResult class stores a list of devices which were detected during
 a scan operation. It keeps track of how often a device was seen and with
 which RSSI value.
 </doc>
+  <base access="public">
+    <type name="BLEpp::Serializable" />
+  </base>
   <constructor abstract="yes" id="ScanResult::ScanResult" name="ScanResult">
     <brief>Default constructor</brief>
   </constructor>
-  <method abstract="yes" id="ScanResult::deserialize" name="deserialize">
+  <destructor id="ScanResult::~ScanResult" name="~ScanResult" virtual="yes">
+    <brief>Default destructor</brief>
+    <doc>Free list on destruction
+</doc>
+  </destructor>
+  <method abstract="yes" id="ScanResult::deserialize" name="deserialize" virtual="yes">
     <brief> De-serialize the data from the byte array into this object</brief>
     <return>
       <type builtin="yes" name="void" />
@@ -20,7 +28,18 @@ which RSSI value.
       <type name="uint16_t" />
     </argument>
   </method>
-  <method abstract="yes" id="ScanResult::getSerializedLength" name="getSerializedLength">
+  <method id="ScanResult::getMaxLength" name="getMaxLength" virtual="yes">
+    <brief>Return the maximum possible length of the serialized object</brief>
+    <doc>This is defined by:
+&amp;lt;HEADER\_SIZE&amp;gt; + &amp;lt;MAX\_NR\_DEVICES&amp;gt; * &amp;lt;SERIALIZED\_DEVICE\_SIZE&amp;gt;
+
+</doc>
+    <return>
+      <doc>the maximum possible length</doc>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="ScanResult::getSerializedLength" name="getSerializedLength" virtual="yes">
     <brief> Return length of buffer required to store the serialized form of this object.</brief>
     <doc>The size is determined by multiplying the number of devices with
 &amp;lt;SERIALIZED\_DEVICE\_SIZE&amp;gt; and adding the header size &amp;lt;HEADER\_SIZE&amp;gt;
@@ -28,7 +47,7 @@ which RSSI value.
 </doc>
     <return>
       <doc>number of bytes required</doc>
-      <type name="uint32_t" />
+      <type name="uint16_t" />
     </return>
   </method>
   <method abstract="yes" id="ScanResult::getSize" name="getSize">
@@ -62,13 +81,23 @@ old list is freed and a new list is allocated
       <type builtin="yes" name="void" />
     </return>
   </method>
+  <method abstract="yes" id="ScanResult::release" name="release">
+    <brief>Release allocated memory</brief>
+    <doc>Can be called once the list is not used anymore
+to free up space. Before using the object again,
+init() has to be called.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
   <method abstract="yes" id="ScanResult::reset" name="reset">
     <brief>Clear the list of devices</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
-  <method abstract="yes" id="ScanResult::serialize" name="serialize">
+  <method abstract="yes" id="ScanResult::serialize" name="serialize" virtual="yes">
     <brief> Serialize the data into a byte array</brief>
     <return>
       <type builtin="yes" name="void" />

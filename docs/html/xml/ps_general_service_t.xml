@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="ps_general_service_t" name="ps_general_service_t" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Struct used by the <ref ref="GeneralService#GeneralService">GeneralService</ref> to store elements</brief>
+  <base access="public">
+    <type name="ps_storage_base_t" ref="ps_storage_base_t#ps_storage_base_t" />
+    <brief> Base class for storage structures</brief>
+  </base>
+  <field id="ps_general_service_t::device_name" name="device_name">
+    <type size="32">
+      <type builtin="yes" name="char" />
+    </type>
+  </field>
+  <field id="ps_general_service_t::room" name="room">
+    <type size="32">
+      <type builtin="yes" name="char" />
+    </type>
+  </field>
+  <field id="ps_general_service_t::device_type" name="device_type">
+    <type size="32">
+      <type builtin="yes" name="char" />
+    </type>
+  </field>
+  <field id="ps_general_service_t::floor" name="floor">
+    <type name="uint32_t" />
+  </field>
+</struct>

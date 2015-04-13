@@ -1,0 +1,220 @@
+<?xml version='1.0' encoding='utf-8'?>
+<class abstract="true" id="Storage" name="Storage" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Class to store items persistently in FLASH</brief>
+  <doc>Singleton class, can only exist once.
+
+This class provides functions to initialize, clear, write and read
+persistent memory (FLASH).
+
+The class also provides static helper functions to read and write
+values from/to the storage structs of the services. They do not operate
+on the Storage itself, just work with the provided parameters. As such
+they can be used without unnecessarily instantiating the storage instance.
+</doc>
+  <methodtemplate id="Storage::getArray" name="getArray" static="yes">
+    <brief>Helper function to read an array from a field of a struct</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::getArray::src" name="src">
+      <type name="T" qualifier="*" />
+    </argument>
+    <argument id="Storage::getArray::dest" name="dest">
+      <type name="T" qualifier="*" />
+    </argument>
+    <argument id="Storage::getArray::default_value" name="default_value">
+      <type name="T" qualifier="*" />
+    </argument>
+    <argument id="Storage::getArray::length" name="length">
+      <type name="uint16_t" />
+    </argument>
+    <templatetypeparameter id="Storage::getArray::T" name="T" />
+  </methodtemplate>
+  <methodtemplate id="Storage::setArray" name="setArray" static="yes">
+    <brief>Helper function to write/copy an array to the field of a struct</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::setArray::src" name="src">
+      <type name="T" qualifier="*" />
+    </argument>
+    <argument id="Storage::setArray::dest" name="dest">
+      <type name="T" qualifier="*" />
+    </argument>
+    <argument id="Storage::setArray::length" name="length">
+      <type name="uint16_t" />
+    </argument>
+    <templatetypeparameter id="Storage::setArray::T" name="T" />
+  </methodtemplate>
+  <method abstract="yes" id="Storage::clearBlock" name="clearBlock">
+    <brief>Clears the block for the given handle</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::clearBlock::handle" name="handle">
+      <type name="pstorage_handle_t" />
+    </argument>
+    <argument id="Storage::clearBlock::storageID" name="storageID">
+      <type name="ps_storage_id" ref="index#ps_storage_id" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::getHandle" name="getHandle">
+    <brief>Get the handle to the persistent memory for the given storage ID.</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="Storage::getHandle::storageID" name="storageID">
+      <type name="ps_storage_id" ref="index#ps_storage_id" />
+    </argument>
+    <argument id="Storage::getHandle::handle" name="handle">
+      <type name="pstorage_handle_t" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method id="Storage::getInstance" name="getInstance" static="yes">
+    <brief>Returns the singleton instance of this class</brief>
+    <return>
+      <type name="Storage" qualifier=" &amp;" ref="Storage#Storage" />
+    </return>
+  </method>
+  <method abstract="yes" id="Storage::getString" name="getString" static="yes">
+    <brief>Helper function to get std::string from char array in the struct</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::getString::value" name="value">
+      <type builtin="yes" name="char" qualifier="*" />
+    </argument>
+    <argument id="Storage::getString::target" name="target">
+      <type name="std::string" qualifier=" &amp;" />
+    </argument>
+    <argument id="Storage::getString::default_value" name="default_value">
+      <type name="std::string" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::getUint8" name="getUint8" static="yes">
+    <brief>Helper function to read a byte from the field of a struct</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::getUint8::value" name="value">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="Storage::getUint8::target" name="target">
+      <type name="uint8_t" qualifier=" &amp;" />
+    </argument>
+    <argument id="Storage::getUint8::default_value" name="default_value">
+      <type name="uint8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::getUint16" name="getUint16" static="yes">
+    <brief>Helper function to read a short (uint16_t) from the field of a struct</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::getUint16::value" name="value">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="Storage::getUint16::target" name="target">
+      <type name="uint16_t" qualifier=" &amp;" />
+    </argument>
+    <argument id="Storage::getUint16::default_value" name="default_value">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::getUint32" name="getUint32" static="yes">
+    <brief>Helper function to read an integer (uint32_t) from the field of a struct</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::getUint32::value" name="value">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="Storage::getUint32::target" name="target">
+      <type name="uint32_t" qualifier=" &amp;" />
+    </argument>
+    <argument id="Storage::getUint32::default_value" name="default_value">
+      <type name="uint32_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::readStorage" name="readStorage">
+    <brief>Get the struct stored in persistent memory at the position defined by</brief>
+    <doc>the handle
+
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::readStorage::handle" name="handle">
+      <type name="pstorage_handle_t" />
+    </argument>
+    <argument id="Storage::readStorage::item" name="item">
+      <type name="ps_storage_base_t" qualifier="*" ref="ps_storage_base_t#ps_storage_base_t" />
+    </argument>
+    <argument id="Storage::readStorage::size" name="size">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::setString" name="setString" static="yes">
+    <brief>Helper function to convert std::string to char array</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::setString::value" name="value">
+      <type name="std::string" />
+    </argument>
+    <argument id="Storage::setString::target" name="target">
+      <type builtin="yes" name="char" qualifier="*" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::setUint8" name="setUint8" static="yes">
+    <brief>Helper function to set a byte in the field of a struct</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::setUint8::value" name="value">
+      <type name="uint8_t" />
+    </argument>
+    <argument id="Storage::setUint8::target" name="target">
+      <type name="uint32_t" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::setUint16" name="setUint16" static="yes">
+    <brief>Helper function to set a short (uint16_t) in the field of a struct</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::setUint16::value" name="value">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="Storage::setUint16::target" name="target">
+      <type name="uint32_t" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::setUint32" name="setUint32" static="yes">
+    <brief>Helper function to set an integer (uint32_t) in the field of a struct</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::setUint32::value" name="value">
+      <type name="uint32_t" />
+    </argument>
+    <argument id="Storage::setUint32::target" name="target">
+      <type name="uint32_t" qualifier=" &amp;" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::writeStorage" name="writeStorage">
+    <brief>Write the struct to persistent memory at the position defined by the handle</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="Storage::writeStorage::handle" name="handle">
+      <type name="pstorage_handle_t" />
+    </argument>
+    <argument id="Storage::writeStorage::item" name="item">
+      <type name="ps_storage_base_t" qualifier="*" ref="ps_storage_base_t#ps_storage_base_t" />
+    </argument>
+    <argument id="Storage::writeStorage::size" name="size">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+</class>

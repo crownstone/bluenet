@@ -19,8 +19,13 @@
       <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </argument>
   </method>
+  <method abstract="yes" id="IndoorLocalizationService::getNearbyTimeout" name="getNearbyTimeout">
+    <brief>* Returns the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. </brief>
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
   <method abstract="yes" id="IndoorLocalizationService::on_ble_event" name="on_ble_event" override="yes" virtual="yes">
-    <brief>void addSpecificCharacteristics();</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
@@ -35,6 +40,15 @@
     </return>
     <argument id="IndoorLocalizationService::onRSSIChanged::rssi" name="rssi">
       <type name="int8_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="IndoorLocalizationService::setNearbyTimeout" name="setNearbyTimeout">
+    <brief>* Sets the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. </brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="IndoorLocalizationService::setNearbyTimeout::counts" name="counts">
+      <type name="uint16_t" />
     </argument>
   </method>
   <method abstract="yes" id="IndoorLocalizationService::setRSSILevel" name="setRSSILevel">
@@ -91,6 +105,42 @@
     </return>
   </method>
   <method abstract="yes" access="protected" id="IndoorLocalizationService::addTrackedDeviceListCharacteristic" name="addTrackedDeviceListCharacteristic">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::loadPersistentStorage" name="loadPersistentStorage">
+    <brief>Get a handle to the persistent storage struct and load it from FLASH.</brief>
+    <doc>Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
+writing less than a minimal block strains the memory just as much as flashing the entire block.
+Hence, there is an entire struct that can be filled and flashed at once.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::readTrackedDevices" name="readTrackedDevices">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::savePersistentStorage" name="savePersistentStorage">
+    <brief>Save to FLASH.</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::startTracking" name="startTracking">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::stopTracking" name="stopTracking">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" access="protected" id="IndoorLocalizationService::writeTrackedDevices" name="writeTrackedDevices">
     <return>
       <type builtin="yes" name="void" />
     </return>
