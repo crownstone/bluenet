@@ -331,7 +331,8 @@ int main() {
 #if GENERAL_SERVICE==1
 	// general services, such as internal temperature, setting names, etc.
 	//GeneralService& generalService = GeneralService::createService(stack);
-	GeneralService& generalService = *new GeneralService(stack);
+	GeneralService generalService(stack); 
+	stack.addService(&generalService);
 #endif
 
 #if POWER_SERVICE==1
