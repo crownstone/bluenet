@@ -34,12 +34,9 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	init(stack);
 }
 
-//GeneralService& GeneralService::createService(Nrf51822BluetoothStack& stack) {
 void GeneralService::init(Nrf51822BluetoothStack & stack) {
 	LOGi("Create general service");
-//	GeneralService* svc = new GeneralService(stack);
 	stack.addService(this);
-//	svc->GenericService::addSpecificCharacteristics();
 
 	addTemperatureCharacteristic();
 	LOGi("addTemperatureCharacteristic();");
@@ -75,7 +72,6 @@ void GeneralService::init(Nrf51822BluetoothStack & stack) {
 	_getConfigurationCharacteristic->setDataLength(size);
 
 	LOGd("Set both set/get charac to buffer at %p", buffer);
-	//return *svc;
 }
 
 void GeneralService::loadPersistentStorage() {
@@ -100,13 +96,11 @@ void GeneralService::addFirmwareCharacteristic() {
 	_firmwareCharacteristic = new CharacteristicT<int32_t>();
 	addCharacteristic(_firmwareCharacteristic);
 
-	(*_firmwareCharacteristic)
-		.setUUID(UUID(getUUID(), FIRMWARE_UUID))
-		.setName("Update firmware")
-		.setDefaultValue(0)
-		.setWritable(true)
-		//.onWrite([&](const int32_t & value) -> void {
-		.onWrite([&]() -> void {
+	_firmwareCharacteristic->setUUID(UUID(getUUID(), FIRMWARE_UUID));
+	_firmwareCharacteristic->setName("Update firmware");
+	_firmwareCharacteristic->setDefaultValue(0);
+	_firmwareCharacteristic->setWritable(true);
+	_firmwareCharacteristic->onWrite([&]() -> void {
 			const int32_t & value = _firmwareCharacteristic->getValue();
 			if (value != 0) {
 				LOGi("Update firmware");
@@ -128,14 +122,12 @@ void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic = new CharacteristicT<MeshMessage>();
 	addCharacteristic(_meshCharacteristic);
 
-	(*_meshCharacteristic)
-		.setUUID(UUID(getUUID(), MESH_UUID))
-		.setName("Mesh")
-		.setWritable(true)
-		.onWrite([&]() -> void {
+	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_UUID));
+	_meshCharacteristic->setName("Mesh");
+	_meshCharacteristic->setWritable(true);
+	_meshCharacteristic->onWrite([&]() -> void {
 			const MeshMessage & value = _meshCharacteristic->getValue();
 			LOGi("Send mesh message");
-			//uint8_t id = value.id(); // not used
 			uint8_t handle = value.handle();
 			uint8_t val = value.value();
 			CMesh &mesh = CMesh::getInstance();
@@ -144,19 +136,13 @@ void GeneralService::addMeshCharacteristic() {
 }
 #endif
 
-/* Add characteristic to set a configuration value
- *
- * The parameter given with onWrite should actually also already be within the space allocated within the
- * characteristic.
- */
 void GeneralService::addSetConfigurationCharacteristic() {
 	_setConfigurationCharacteristic = new CharacteristicT<uint8_t*>();
 	addCharacteristic(_setConfigurationCharacteristic);
 
 	_setConfigurationCharacteristic->setUUID(UUID(getUUID(), SET_CONFIGURATION_UUID));
-	_setConfigurationCharacteristic->setName("Set Configuration");;
+	_setConfigurationCharacteristic->setName("Set Configuration");
 	_setConfigurationCharacteristic->setWritable(true);
-//	_setConfigurationCharacteristic->onWrite([&](const uint8_t& value) -> void {
 	_setConfigurationCharacteristic->onWrite([&]() -> void {
 			uint8_t *value = _setConfigurationCharacteristic->getValue();
 			if (!value) {
@@ -249,11 +235,6 @@ bool GeneralService::readFromStorage(uint8_t type) {
 	return false;
 }
 
-/* Write to the "get configuration" characteristic
- *
- * Writing is done by setting the data length properly and notifying the characteristic (and hence the softdevice)
- * that there is a new value available.
- */
 void GeneralService::writeToConfigCharac() {
 	uint16_t len = _streamBuffer->getDataLength();
 	uint8_t value = _streamBuffer->payload()[0];
@@ -271,12 +252,11 @@ void GeneralService::writeToConfigCharac() {
 void GeneralService::addSelectConfigurationCharacteristic() {
 	_selectConfigurationCharacteristic = new CharacteristicT<uint8_t>();
 	addCharacteristic(_selectConfigurationCharacteristic);
-	(*_selectConfigurationCharacteristic)
-		.setUUID(UUID(getUUID(), SELECT_CONFIGURATION_UUID))
-		.setName("Select Configuration")
-		.setWritable(true) 
-		//.onWrite([&](const uint8_t& value) -> void {
-		.onWrite([&]() -> void {
+
+	_selectConfigurationCharacteristic->setUUID(UUID(getUUID(), SELECT_CONFIGURATION_UUID));
+	_selectConfigurationCharacteristic->setName("Select Configuration");
+	_selectConfigurationCharacteristic->setWritable(true);
+	_selectConfigurationCharacteristic->onWrite([&]() -> void {
 			const uint8_t & value = _selectConfigurationCharacteristic->getValue();
 			if (value < CONFIG_TYPES) {
 				LOGd("Select configuration type: %i", (int)value);
@@ -290,10 +270,10 @@ void GeneralService::addSelectConfigurationCharacteristic() {
 void GeneralService::addGetConfigurationCharacteristic() {
 	_getConfigurationCharacteristic = new CharacteristicT<uint8_t*>();
 	addCharacteristic(_getConfigurationCharacteristic);
-	(*_getConfigurationCharacteristic)
-		.setUUID(UUID(getUUID(), GET_CONFIGURATION_UUID))
-		.setName("Get Configuration")
-		.setWritable(false);
+
+	_getConfigurationCharacteristic->setUUID(UUID(getUUID(), GET_CONFIGURATION_UUID));
+	_getConfigurationCharacteristic->setName("Get Configuration");
+	_getConfigurationCharacteristic->setWritable(false);
 }
 
 std::string & GeneralService::getBLEName() {

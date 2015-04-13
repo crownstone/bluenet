@@ -27,19 +27,45 @@
  */
 class GeneralService: public BLEpp::GenericService {
 public:
-	GeneralService(BLEpp::Nrf51822BluetoothStack &stack);
+	/* Constructor for general crownstone service object
+	 * @stack Bluetooth Stack to communicate with softdevice
+	 *
+	 * Creates persistent storage (FLASH) object which is used internally to store name and other information that is
+	 * set over so-called configuration characteristics. It also initializes all characteristics.
+	 */
+	 GeneralService(BLEpp::Nrf51822BluetoothStack &stack);
 
 	/* Update the temperature characteristic.
-	*/
+	 * @temperature A value in Celcius directly from the chip
+	 *
+	 * This writes a value to the temperature characteristic which can subsequently read out by the user. If we write
+	 * often to this characteristic this value will be updated.
+	 */
 	void writeToTemperatureCharac(int32_t temperature);
 
 	/* Update the configuration characteristic.
+	 * @type configuration type to read
+	 *
+	 * Persistent memory can be used to store multiple types of objects. The "name" of the device is one type for 
+	 * example, the "floor" is another. Type here specifies the category of the entity to be retrieved from FLASH.
 	 */
 	bool readFromStorage(uint8_t type);
 
+	/* Write to the "get configuration" characteristic
+	 *
+	 * Writing is done by setting the data length properly and notifying the characteristic (and hence the softdevice)
+	 * that there is a new value available.
+	 */
 	void writeToConfigCharac();
 
-	/* Read configuration written by user.
+	/* Write configuration to FLASH.
+	 * @type configuration type to write 
+	 * @length length of the data to write to FLASH
+	 * @payload the data itself to write to FLASH
+	 *
+	 * The configuration is (probably) set by the user through the "set configuration" characteristic and needs to be
+	 * written to FLASH. That is what this function takes care of. The writing itself will be done asynchronously, so
+	 * there is no return value that indicates success or not.
 	 */
 	void writeToStorage(uint8_t type, uint8_t length, uint8_t* payload);
 
@@ -51,18 +77,39 @@ public:
 	 */
 	void tick();
 
-	/* Helper function to generate a GeneralService object
+	/* Initialize a GeneralService object
+	 * @stack Bluetooth Stack to attach this service to
+	 * 
+	 * Add all characteristics and initialize them where necessary.
 	 */
-//	static GeneralService& createService(BLEpp::Nrf51822BluetoothStack& stack);
 	void init(BLEpp::Nrf51822BluetoothStack& stack);
 
 
 protected:
+	/* Reference to the Bluetooth LE stack.
+	 *
+	 * A reference to the BLE stack does allow this service to:
+	 *
+	 *  * add itself to the stack
+	 *  * stop/start advertising
+	 *  * set the BLE name
+	 */
 	BLEpp::Nrf51822BluetoothStack* _stack;
 
-	// References to characteristics
+	/* Temperature characteristic
+	 */
 	BLEpp::CharacteristicT<int32_t>* _temperatureCharacteristic;
+
+	/* Firmware characteristic
+	 *
+	 * Resets device
+	 */
 	BLEpp::CharacteristicT<int32_t>* _firmwareCharacteristic;
+
+	/* Mesh characteristic
+	 *
+	 * Sends a message over the mesh network
+	 */
 	BLEpp::CharacteristicT<MeshMessage>* _meshCharacteristic;
 
 	/* Set configuration characteristic
@@ -99,28 +146,37 @@ protected:
 	/* Enable the temperature characteristic.
  	 */
 	void addTemperatureCharacteristic();
+
 	/* Enable the set configuration characteristic.
 	 *
+	 * The parameter given with onWrite should actually also already be within the space allocated within the
+	 * characteristic.
 	 * See <_setConfigurationCharacteristic>.
 	 */
 	void addSetConfigurationCharacteristic();
+
 	/* Enable the set configuration characteristic.
 	 *
 	 * See <_selectConfigurationCharacteristic>.
 	 */
 	void addSelectConfigurationCharacteristic();
+
 	/* Enable the get configuration characteristic.
 	 */
 	void addGetConfigurationCharacteristic();
+
 	/* Enable the firmware upgrade characteristic.
 	 */
 	void addFirmwareCharacteristic();
+
 	/* Enable the mesh characteristic.
 	 */
 	void addMeshCharacteristic();
 
 	/* Retrieve the Bluetooth name from the object representing the BLE stack.
-	*/
+	 *
+	 * @return name of the device
+	 */
 	std::string&  getBLEName();
 	/* Write the Bluetooth name to the object representing the BLE stack.
 	 *
@@ -138,12 +194,16 @@ protected:
 	void loadPersistentStorage();
 
 	/* Save to FLASH.
-	*/
+	 */
 	void savePersistentStorage();
 private:
+	// handle to storage (required to write to and read from FLASH)
 	pstorage_handle_t _storageHandle;
+
+	// struct that storage object understands
 	ps_general_service_t _storageStruct;
 
+	// buffer object to read/write configuration characteristics
 	StreamBuffer<uint8_t> *_streamBuffer;
 
 	/* Select configuration for subsequent read actions on the get configuration characteristic.
