@@ -36,7 +36,6 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 
 void GeneralService::init(Nrf51822BluetoothStack & stack) {
 	LOGi("Create general service");
-	stack.addService(this);
 
 	addTemperatureCharacteristic();
 	LOGi("addTemperatureCharacteristic();");
