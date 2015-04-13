@@ -84,7 +84,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 static uint8_t radio_rssi;
 static uint8_t tx_data[(PACKET_DATA_MAX_LEN + PACKET_DATA_POS) * PACKET_MAX_CHAIN_LEN];
-static uint64_t global_time = 0;
+static uint32_t global_time = 0;
 static uint8_t step_timer_index = 0xFF;
 
 static void search_callback(uint8_t* data);
@@ -179,6 +179,7 @@ static void search_callback(uint8_t* data)
     if (data == NULL || !packet_is_data_packet(data))
         return;
 
+
     async_event_t async_evt;
     async_evt.type = EVENT_TYPE_PACKET;
     packet_create_from_data(data, &async_evt.callback.packet);
@@ -186,7 +187,6 @@ static void search_callback(uint8_t* data)
     timeslot_queue_async_event(&async_evt);
     
     /** @TODO: add packet chain handling */
-
 }
 
 /**
@@ -199,7 +199,7 @@ static void trickle_step_callback(void)
     if (timeslot_get_remaining_time() < RADIO_SAFETY_TIMING_US)
         return;
 
-    uint64_t time_now = global_time + timer_get_timestamp();
+    uint32_t time_now = global_time + timer_get_timestamp();
     trickle_time_update(time_now);
     
     packet_t packet;
@@ -270,7 +270,7 @@ static void trickle_step_callback(void)
     }
 }
 
-void transport_control_timeslot_begin(uint64_t global_timer_value)
+void transport_control_timeslot_begin(uint32_t global_timer_value)
 {
     uint32_t aa;    
     rbc_mesh_access_address_get(&aa);
@@ -288,8 +288,8 @@ void transport_control_timeslot_begin(uint64_t global_timer_value)
 
 void transport_control_step(void)
 {
-    uint64_t next_time;
-    uint64_t time_now = timer_get_timestamp() + global_time;
+    uint32_t next_time;
+    uint32_t time_now = timer_get_timestamp() + global_time;
     trickle_time_update(time_now);
     uint32_t error_code = mesh_srv_get_next_processing_time(&next_time);
     if (error_code != NRF_SUCCESS)
