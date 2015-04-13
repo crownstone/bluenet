@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static uint64_t g_trickle_time; /* global trickle time that all time variables are relative to */
 
 static uint8_t rng_vals[64];
-static uint8_t rng_index;
+static uint8_t rng_index = 0;
 
 /*global parameters for trickle behavior, set in trickle_setup() */
 static uint32_t g_i_min, g_i_max;
