@@ -2,19 +2,17 @@
 <struct id="storage_config_t" name="storage_config_t" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <brief> Storage configuration struct</brief>
   <doc>This struct is used to define the configuration of the storage
-
-  * id                  is the enum <ref ref="index#ps_storage_id">ps_storage_id</ref> which defines
-                                the type of storage structure
-  * handle              handle to the storage in FLASH
-  * storage_size        size of the storage structure
 </doc>
   <field id="storage_config_t::id" name="id">
+    <brief>enum <ref ref="index#ps_storage_id">ps_storage_id</ref> defines the type of storage structure</brief>
     <type name="ps_storage_id" ref="index#ps_storage_id" />
   </field>
   <field id="storage_config_t::handle" name="handle">
+    <brief>handle to the storage in FLASH</brief>
     <type name="pstorage_handle_t" />
   </field>
   <field id="storage_config_t::storage_size" name="storage_size">
+    <brief>size of the storage structure</brief>
     <type name="pstorage_size_t" />
   </field>
 </struct>

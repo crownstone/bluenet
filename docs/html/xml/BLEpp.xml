@@ -59,47 +59,55 @@
     </return>
   </function>
   <function id="BLEpp::ble_type" name="ble_type">
-    <brief>A ble_type for 8-bit unsigned chars</brief>
+    <brief>A ble_type for 8-bit unsigned values</brief>
     <return>
       <type name="uint8_t" />
     </return>
   </function>
   <function id="BLEpp::ble_type" name="ble_type">
+    <brief>A ble_type for 16-bit unsigned values</brief>
     <return>
       <type name="uint8_t" />
     </return>
   </function>
   <function id="BLEpp::ble_type" name="ble_type">
+    <brief>A ble_type for 32-bit unsigned values</brief>
     <return>
       <type name="uint8_t" />
     </return>
   </function>
   <function id="BLEpp::ble_type" name="ble_type">
+    <brief>A ble_type for 8-bit signed values</brief>
     <return>
       <type name="uint8_t" />
     </return>
   </function>
   <function id="BLEpp::ble_type" name="ble_type">
+    <brief>A ble_type for 16-bit signed values</brief>
     <return>
       <type name="uint8_t" />
     </return>
   </function>
   <function id="BLEpp::ble_type" name="ble_type">
+    <brief>A ble_type for 32-bit signed values</brief>
     <return>
       <type name="uint8_t" />
     </return>
   </function>
   <function id="BLEpp::ble_type" name="ble_type">
+    <brief>A ble_type for floats (32 bits)</brief>
     <return>
       <type name="uint8_t" />
     </return>
   </function>
   <function id="BLEpp::ble_type" name="ble_type">
+    <brief>A ble_type for doubles (64 bits)</brief>
     <return>
       <type name="uint8_t" />
     </return>
   </function>
   <function id="BLEpp::ble_type" name="ble_type">
+    <brief>A ble_type for booleans (8 bits)</brief>
     <return>
       <type name="uint8_t" />
     </return>

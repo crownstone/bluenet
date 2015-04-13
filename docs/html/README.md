@@ -6,6 +6,11 @@ The code is generated using [cldoc](https://github.com/jessevdk/cldoc). Please, 
 
 ## Requirements
 
+The `cldoc` code. Clone the above and install:
+
+    git clone https://github.com/jessevdk/cldoc
+    sudo make install
+
 The clang compiler:
 
     sudo apt-get install clang
@@ -31,6 +36,25 @@ There is a script to generate the documentation:
 This runs internally the `cldoc` command.
 
     cldoc generate $include_dirs $compiler_options $macro_defs -- --output $rel_path/docs/html --report $files --basedir=$rel_path --merge=$rel_path/docs/source"
+
+## Mistakes
+
+Do not use whitespace where you don't see it in the examples! The following is **correct**:
+
+    /* Get the struct stored in persistent memory at the position defined by the handle
+     * @handle the handle to the persistent memory where the struct is stored.
+    ..
+
+What is **incorrect** is:
+ 
+    /* Get the struct stored in persistent memory at the position defined 
+       by the handle
+     
+     * @handle the handle to the persistent memory where the struct is stored.
+    ..
+
+First error is that the "brief" summary wraps around. This is not allowed. The second error is that there is a new
+line before the `@handle` argument. The arguments should follow directly.
 
 ## Commit
 

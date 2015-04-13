@@ -307,31 +307,39 @@ template<typename T> inline  uint8_t ble_type() {
 template<> inline uint8_t ble_type<std::string>() {
 	return BLE_GATT_CPF_FORMAT_UTF8S;
 }
-// A ble_type for 8-bit unsigned chars
+// A ble_type for 8-bit unsigned values
 template<> inline uint8_t ble_type<uint8_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT8;
 }
+// A ble_type for 16-bit unsigned values
 template<> inline uint8_t ble_type<uint16_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT16;
 }
+// A ble_type for 32-bit unsigned values
 template<> inline uint8_t ble_type<uint32_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT32;
 }
+// A ble_type for 8-bit signed values
 template<> inline uint8_t ble_type<int8_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT8;
 }
+// A ble_type for 16-bit signed values
 template<> inline uint8_t ble_type<int16_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT16;
 }
+// A ble_type for 32-bit signed values
 template<> inline uint8_t ble_type<int32_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT32;
 }
+// A ble_type for floats (32 bits)
 template<> inline uint8_t ble_type<float>() {
 	return BLE_GATT_CPF_FORMAT_FLOAT32;
 }
+// A ble_type for doubles (64 bits)
 template<> inline uint8_t ble_type<double>() {
 	return BLE_GATT_CPF_FORMAT_FLOAT64;
 }
+// A ble_type for booleans (8 bits)
 template<> inline uint8_t ble_type<bool>() {
 	return BLE_GATT_CPF_FORMAT_BOOLEAN;
 }

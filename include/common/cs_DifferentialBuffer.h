@@ -12,19 +12,19 @@
 #include "drivers/cs_Serial.h"
 
 /* Differential Buffer implementation
+ * @T primitive type such as uint8_t
  *
  * Elements are added at the back and removed from the front. If the capacity
  * of the buffer is reached, the oldest element will be overwritten.
+ *
  */
-template <class T>
+template <typename T>
 class DifferentialBuffer {
 public:
 	/* Default constructor
-	 *
 	 * @capacity the size with which the buffer should be initialized. A maximum
 	 *   of capacity elements can be stored in the buffer before the oldest element
 	 *   will be overwritten
-	 *
 	 * @initialize if true, the array will be directly initialized, otherwise
 	 *   <DifferentialBuffer::init()> has to be called before accessing the buffer
 	 *
@@ -126,7 +126,6 @@ public:
 	}
 
 	/* Get the first element of the buffer
-	 *
 	 * @val the value of the oldest element
 	 *
 	 * @return false when the buffer was empty
@@ -142,7 +141,6 @@ public:
 	}
 
 	/* Get the next value of the buffer, after calling <DifferentialBuffer>>getFirstElement()>
-	 *
 	 * @val the previous value, will be set to the value of the next element
 	 *
 	 * @return false when the last element has been reached (this read is invalid).
@@ -160,7 +158,6 @@ public:
 	}
 
 	/* Get the first element of the buffer
-	 *
 	 * @val the value of the oldest element
 	 *
 	 * @return false when the buffer was empty
@@ -186,7 +183,6 @@ public:
 	}
 
 	/* Write all elements to a buffer
-	 *
 	 * @buffer buffer to which to write the elements
 	 *
 	 * The buffer has to be of the correct size, use <DifferentialBuffer>>getSerializedLength()>
@@ -209,7 +205,6 @@ public:
 	}
 
 	/* Add an element to the end of the buffer
-	 *
 	 * @value the element to be added
 	 *
 	 * Elements are added at the end of the buffer and

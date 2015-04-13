@@ -6,6 +6,7 @@
     <brief> Base class for storage structures</brief>
   </base>
   <field id="ps_power_service_t::current_limit" name="current_limit">
+    <brief>current limit value</brief>
     <type name="uint32_t" />
   </field>
 </struct>

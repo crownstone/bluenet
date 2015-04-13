@@ -12,53 +12,28 @@ return values.
 3. [References](#report/references): Unresolved cross references.
 </doc>
   <coverage>
-    <type documented="5" name="function" undocumented="8">
-      <undocumented id="BLEpp::ble_type" name="ble_type">
-        <location column="1" file="include/cs_BluetoothLE.h" line="314" />
-      </undocumented>
-      <undocumented id="BLEpp::ble_type" name="ble_type">
-        <location column="1" file="include/cs_BluetoothLE.h" line="317" />
-      </undocumented>
-      <undocumented id="BLEpp::ble_type" name="ble_type">
-        <location column="1" file="include/cs_BluetoothLE.h" line="320" />
-      </undocumented>
-      <undocumented id="BLEpp::ble_type" name="ble_type">
-        <location column="1" file="include/cs_BluetoothLE.h" line="323" />
-      </undocumented>
-      <undocumented id="BLEpp::ble_type" name="ble_type">
-        <location column="1" file="include/cs_BluetoothLE.h" line="326" />
-      </undocumented>
-      <undocumented id="BLEpp::ble_type" name="ble_type">
-        <location column="1" file="include/cs_BluetoothLE.h" line="329" />
-      </undocumented>
-      <undocumented id="BLEpp::ble_type" name="ble_type">
-        <location column="1" file="include/cs_BluetoothLE.h" line="332" />
-      </undocumented>
-      <undocumented id="BLEpp::ble_type" name="ble_type">
-        <location column="1" file="include/cs_BluetoothLE.h" line="335" />
-      </undocumented>
-    </type>
+    <type documented="13" name="function" undocumented="0" />
     <type documented="3" name="typedef" undocumented="9">
       <undocumented id="BLEpp::Characteristic::callback_on_read_t" name="callback_on_read_t">
-        <location column="2" file="include/cs_BluetoothLE.h" line="353" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="361" />
       </undocumented>
       <undocumented id="BLEpp::Characteristic::callback_on_write_t" name="callback_on_write_t">
-        <location column="2" file="include/cs_BluetoothLE.h" line="352" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="360" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicStatusT" name="CharacteristicStatusT">
-        <location column="1" file="include/cs_BluetoothLE.h" line="697" />
+        <location column="1" file="include/cs_BluetoothLE.h" line="705" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::callback_connected_t" name="callback_connected_t">
-        <location column="2" file="include/cs_BluetoothLE.h" line="818" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="826" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::callback_disconnected_t" name="callback_disconnected_t">
-        <location column="2" file="include/cs_BluetoothLE.h" line="819" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="827" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::callback_radio_t" name="callback_radio_t">
-        <location column="2" file="include/cs_BluetoothLE.h" line="820" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="828" />
       </undocumented>
       <undocumented id="BLEpp::addCharacteristicFunc" name="addCharacteristicFunc">
-        <location column="1" file="include/cs_BluetoothLE.h" line="689" />
+        <location column="1" file="include/cs_BluetoothLE.h" line="697" />
       </undocumented>
       <undocumented id="IndoorLocalizationService::func_t" name="func_t">
         <location column="2" file="include/services/cs_IndoorLocalisationService.h" line="31" />
@@ -69,7 +44,7 @@ return values.
     </type>
     <type documented="3" name="methodtemplate" undocumented="1">
       <undocumented id="BLEpp::Service::createCharacteristicRef" name="createCharacteristicRef">
-        <location column="2" file="include/cs_BluetoothLE.h" line="661" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="669" />
       </undocumented>
     </type>
     <type documented="8" name="struct" undocumented="3">
@@ -77,39 +52,30 @@ return values.
         <location column="1" file="include/cs_BluetoothLE.h" line="118" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicStatus" name="CharacteristicStatus">
-        <location column="1" file="include/cs_BluetoothLE.h" line="691" />
+        <location column="1" file="include/cs_BluetoothLE.h" line="699" />
       </undocumented>
       <undocumented id="ps_indoorlocalisation_service_t::(anonymous::1)" name="(anonymous::1)">
         <location column="2" file="include/services/cs_IndoorLocalisationService.h" line="22" />
       </undocumented>
     </type>
-    <type documented="0" name="templatetypeparameter" undocumented="11">
+    <type documented="3" name="templatetypeparameter" undocumented="8">
       <undocumented id="BLEpp::Characteristic::T" name="T">
-        <location column="10" file="include/cs_BluetoothLE.h" line="346" />
+        <location column="10" file="include/cs_BluetoothLE.h" line="354" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::E" name="E">
-        <location column="22" file="include/cs_BluetoothLE.h" line="505" />
+        <location column="22" file="include/cs_BluetoothLE.h" line="513" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::T" name="T">
-        <location column="10" file="include/cs_BluetoothLE.h" line="505" />
+        <location column="10" file="include/cs_BluetoothLE.h" line="513" />
       </undocumented>
       <undocumented id="BLEpp::Service::createCharacteristic::T" name="T">
-        <location column="12" file="include/cs_BluetoothLE.h" line="655" />
+        <location column="12" file="include/cs_BluetoothLE.h" line="663" />
       </undocumented>
       <undocumented id="BLEpp::Service::createCharacteristicRef::T" name="T">
-        <location column="12" file="include/cs_BluetoothLE.h" line="661" />
+        <location column="12" file="include/cs_BluetoothLE.h" line="669" />
       </undocumented>
       <undocumented id="BLEpp::ble_type::T" name="T">
         <location column="10" file="include/cs_BluetoothLE.h" line="303" />
-      </undocumented>
-      <undocumented id="DifferentialBuffer::T" name="T">
-        <location column="11" file="include/common/cs_DifferentialBuffer.h" line="19" />
-      </undocumented>
-      <undocumented id="Storage::getArray::T" name="T">
-        <location column="11" file="include/common/cs_Storage.h" line="343" />
-      </undocumented>
-      <undocumented id="Storage::setArray::T" name="T">
-        <location column="11" file="include/common/cs_Storage.h" line="306" />
       </undocumented>
       <undocumented id="fixed_tuple::T" name="T">
         <location column="10" file="include/cs_BluetoothLE.h" line="58" />
@@ -132,7 +98,7 @@ return values.
     </type>
     <type documented="0" name="conversionfunction" undocumented="1">
       <undocumented id="BLEpp::Characteristic::operator type-parameter-0-0 &amp;" name="operator type-parameter-0-0 &amp;">
-        <location column="2" file="include/cs_BluetoothLE.h" line="422" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="430" />
       </undocumented>
     </type>
     <type documented="99" name="method" undocumented="140">
@@ -170,61 +136,61 @@ return values.
         <location column="2" file="include/drivers/cs_ADC.h" line="73" />
       </undocumented>
       <undocumented id="BLEpp::BLEStack::connected" name="connected">
-        <location column="2" file="include/cs_BluetoothLE.h" line="792" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="800" />
       </undocumented>
       <undocumented id="BLEpp::BLEStack::getConnectionHandle" name="getConnectionHandle">
-        <location column="2" file="include/cs_BluetoothLE.h" line="793" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="801" />
       </undocumented>
       <undocumented id="BLEpp::Characteristic::configurePresentationFormat" name="configurePresentationFormat">
-        <location column="2" file="include/cs_BluetoothLE.h" line="493" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="501" />
       </undocumented>
       <undocumented id="BLEpp::Characteristic::getValue" name="getValue">
-        <location column="2" file="include/cs_BluetoothLE.h" line="374" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::getValueLength" name="getValueLength">
-        <location column="2" file="include/cs_BluetoothLE.h" line="366" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::getValueMaxLength" name="getValueMaxLength">
-        <location column="2" file="include/cs_BluetoothLE.h" line="370" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::onRead" name="onRead">
-        <location column="2" file="include/cs_BluetoothLE.h" line="412" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::onWrite" name="onWrite">
-        <location column="2" file="include/cs_BluetoothLE.h" line="407" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::operator=" name="operator=">
-        <location column="2" file="include/cs_BluetoothLE.h" line="426" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::read" name="read">
-        <location column="2" file="include/cs_BluetoothLE.h" line="484" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::setDefaultValue" name="setDefaultValue">
-        <location column="2" file="include/cs_BluetoothLE.h" line="468" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::setName" name="setName">
-        <location column="2" file="include/cs_BluetoothLE.h" line="387" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::setNotifies" name="setNotifies">
-        <location column="2" file="include/cs_BluetoothLE.h" line="402" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::setUUID" name="setUUID">
         <location column="2" file="include/cs_BluetoothLE.h" line="382" />
       </undocumented>
-      <undocumented id="BLEpp::Characteristic::setUnit" name="setUnit">
-        <location column="2" file="include/cs_BluetoothLE.h" line="392" />
+      <undocumented id="BLEpp::Characteristic::getValueLength" name="getValueLength">
+        <location column="2" file="include/cs_BluetoothLE.h" line="374" />
       </undocumented>
-      <undocumented id="BLEpp::Characteristic::setUpdateIntervalMSecs" name="setUpdateIntervalMSecs">
-        <location column="2" file="include/cs_BluetoothLE.h" line="417" />
-      </undocumented>
-      <undocumented id="BLEpp::Characteristic::setValue" name="setValue">
+      <undocumented id="BLEpp::Characteristic::getValueMaxLength" name="getValueMaxLength">
         <location column="2" file="include/cs_BluetoothLE.h" line="378" />
       </undocumented>
+      <undocumented id="BLEpp::Characteristic::onRead" name="onRead">
+        <location column="2" file="include/cs_BluetoothLE.h" line="420" />
+      </undocumented>
+      <undocumented id="BLEpp::Characteristic::onWrite" name="onWrite">
+        <location column="2" file="include/cs_BluetoothLE.h" line="415" />
+      </undocumented>
+      <undocumented id="BLEpp::Characteristic::operator=" name="operator=">
+        <location column="2" file="include/cs_BluetoothLE.h" line="434" />
+      </undocumented>
+      <undocumented id="BLEpp::Characteristic::read" name="read">
+        <location column="2" file="include/cs_BluetoothLE.h" line="492" />
+      </undocumented>
+      <undocumented id="BLEpp::Characteristic::setDefaultValue" name="setDefaultValue">
+        <location column="2" file="include/cs_BluetoothLE.h" line="476" />
+      </undocumented>
+      <undocumented id="BLEpp::Characteristic::setName" name="setName">
+        <location column="2" file="include/cs_BluetoothLE.h" line="395" />
+      </undocumented>
+      <undocumented id="BLEpp::Characteristic::setNotifies" name="setNotifies">
+        <location column="2" file="include/cs_BluetoothLE.h" line="410" />
+      </undocumented>
+      <undocumented id="BLEpp::Characteristic::setUUID" name="setUUID">
+        <location column="2" file="include/cs_BluetoothLE.h" line="390" />
+      </undocumented>
+      <undocumented id="BLEpp::Characteristic::setUnit" name="setUnit">
+        <location column="2" file="include/cs_BluetoothLE.h" line="400" />
+      </undocumented>
+      <undocumented id="BLEpp::Characteristic::setUpdateIntervalMSecs" name="setUpdateIntervalMSecs">
+        <location column="2" file="include/cs_BluetoothLE.h" line="425" />
+      </undocumented>
+      <undocumented id="BLEpp::Characteristic::setValue" name="setValue">
+        <location column="2" file="include/cs_BluetoothLE.h" line="386" />
+      </undocumented>
       <undocumented id="BLEpp::Characteristic::setWritable" name="setWritable">
-        <location column="2" file="include/cs_BluetoothLE.h" line="397" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="405" />
       </undocumented>
       <undocumented id="BLEpp::Characteristic::written" name="written">
-        <location column="2" file="include/cs_BluetoothLE.h" line="476" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="484" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicBase::configurePresentationFormat" name="configurePresentationFormat">
         <location column="2" file="include/cs_BluetoothLE.h" line="295" />
@@ -281,34 +247,34 @@ return values.
         <location column="2" file="include/cs_BluetoothLE.h" line="277" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::getCharacteristicValue" name="getCharacteristicValue">
-        <location column="2" file="include/cs_BluetoothLE.h" line="516" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="524" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::getCharacteristicValue" name="getCharacteristicValue">
-        <location column="2" file="include/cs_BluetoothLE.h" line="552" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="560" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::getCharacteristicValue" name="getCharacteristicValue">
-        <location column="2" file="include/cs_BluetoothLE.h" line="572" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="580" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::getValueMaxLength" name="getValueMaxLength">
-        <location column="2" file="include/cs_BluetoothLE.h" line="548" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="556" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::getValueMaxLength" name="getValueMaxLength">
-        <location column="2" file="include/cs_BluetoothLE.h" line="568" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="576" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::operator=" name="operator=">
-        <location column="2" file="include/cs_BluetoothLE.h" line="512" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="520" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::operator=" name="operator=">
-        <location column="2" file="include/cs_BluetoothLE.h" line="543" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="551" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::operator=" name="operator=">
+        <location column="2" file="include/cs_BluetoothLE.h" line="571" />
+      </undocumented>
+      <undocumented id="BLEpp::CharacteristicT::setCharacteristicValue" name="setCharacteristicValue">
         <location column="2" file="include/cs_BluetoothLE.h" line="563" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::setCharacteristicValue" name="setCharacteristicValue">
-        <location column="2" file="include/cs_BluetoothLE.h" line="555" />
-      </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::setCharacteristicValue" name="setCharacteristicValue">
-        <location column="2" file="include/cs_BluetoothLE.h" line="575" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="583" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicValue::operator!=" name="operator!=">
         <location column="2" file="include/cs_BluetoothLE.h" line="108" />
@@ -320,145 +286,145 @@ return values.
         <location column="2" file="include/cs_BluetoothLE.h" line="105" />
       </undocumented>
       <undocumented id="BLEpp::GenericService::addCharacteristic" name="addCharacteristic">
-        <location column="2" file="include/cs_BluetoothLE.h" line="721" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="729" />
       </undocumented>
       <undocumented id="BLEpp::GenericService::addSpecificCharacteristics" name="addSpecificCharacteristics">
-        <location column="2" file="include/cs_BluetoothLE.h" line="730" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="738" />
       </undocumented>
       <undocumented id="BLEpp::GenericService::getCharacteristics" name="getCharacteristics">
-        <location column="2" file="include/cs_BluetoothLE.h" line="718" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="726" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::addService" name="addService">
-        <location column="2" file="include/cs_BluetoothLE.h" line="976" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="984" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::connected" name="connected">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1020" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="1028" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::createBatteryService" name="createBatteryService">
-        <location column="2" file="include/cs_BluetoothLE.h" line="969" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="977" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::createService" name="createService">
-        <location column="2" file="include/cs_BluetoothLE.h" line="963" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="971" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::getConnectionHandle" name="getConnectionHandle">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1023" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::getDeviceName" name="getDeviceName">
-        <location column="2" file="include/cs_BluetoothLE.h" line="903" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::getInstance" name="getInstance">
-        <location column="2" file="include/cs_BluetoothLE.h" line="814" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::getService" name="getService">
-        <location column="2" file="include/cs_BluetoothLE.h" line="975" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::getTxPowerLevel" name="getTxPowerLevel">
-        <location column="2" file="include/cs_BluetoothLE.h" line="908" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::init" name="init">
-        <location column="2" file="include/cs_BluetoothLE.h" line="866" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::isAdvertising" name="isAdvertising">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1000" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::isScanning" name="isScanning">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1016" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::onConnect" name="onConnect">
-        <location column="2" file="include/cs_BluetoothLE.h" line="948" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::onDisconnect" name="onDisconnect">
-        <location column="2" file="include/cs_BluetoothLE.h" line="955" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::onRadioNotificationInterrupt" name="onRadioNotificationInterrupt">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1018" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::onTxComplete" name="onTxComplete">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1037" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::on_advertisement" name="on_advertisement">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1036" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::on_ble_evt" name="on_ble_evt">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1033" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::on_connected" name="on_connected">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1034" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::on_disconnected" name="on_disconnected">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1035" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::setAdvertisingInterval" name="setAdvertisingInterval">
-        <location column="2" file="include/cs_BluetoothLE.h" line="890" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::setAdvertisingTimeoutSeconds" name="setAdvertisingTimeoutSeconds">
-        <location column="2" file="include/cs_BluetoothLE.h" line="896" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::setAppearance" name="setAppearance">
-        <location column="2" file="include/cs_BluetoothLE.h" line="872" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::setClockSource" name="setClockSource">
-        <location column="2" file="include/cs_BluetoothLE.h" line="884" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::setConnParams" name="setConnParams">
         <location column="2" file="include/cs_BluetoothLE.h" line="1031" />
       </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::setDeviceName" name="setDeviceName">
-        <location column="2" file="include/cs_BluetoothLE.h" line="878" />
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::getDeviceName" name="getDeviceName">
+        <location column="2" file="include/cs_BluetoothLE.h" line="911" />
       </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::setTxPowerLevel" name="setTxPowerLevel">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1030" />
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::getInstance" name="getInstance">
+        <location column="2" file="include/cs_BluetoothLE.h" line="822" />
       </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::shutdown" name="shutdown">
-        <location column="2" file="include/cs_BluetoothLE.h" line="870" />
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::getService" name="getService">
+        <location column="2" file="include/cs_BluetoothLE.h" line="983" />
       </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::start" name="start">
-        <location column="2" file="include/cs_BluetoothLE.h" line="868" />
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::getTxPowerLevel" name="getTxPowerLevel">
+        <location column="2" file="include/cs_BluetoothLE.h" line="916" />
       </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::startScanning" name="startScanning">
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::init" name="init">
+        <location column="2" file="include/cs_BluetoothLE.h" line="874" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::isAdvertising" name="isAdvertising">
         <location column="2" file="include/cs_BluetoothLE.h" line="1008" />
       </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::isScanning" name="isScanning">
+        <location column="2" file="include/cs_BluetoothLE.h" line="1024" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::onConnect" name="onConnect">
+        <location column="2" file="include/cs_BluetoothLE.h" line="956" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::onDisconnect" name="onDisconnect">
+        <location column="2" file="include/cs_BluetoothLE.h" line="963" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::onRadioNotificationInterrupt" name="onRadioNotificationInterrupt">
+        <location column="2" file="include/cs_BluetoothLE.h" line="1026" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::onTxComplete" name="onTxComplete">
+        <location column="2" file="include/cs_BluetoothLE.h" line="1045" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::on_advertisement" name="on_advertisement">
+        <location column="2" file="include/cs_BluetoothLE.h" line="1044" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::on_ble_evt" name="on_ble_evt">
+        <location column="2" file="include/cs_BluetoothLE.h" line="1041" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::on_connected" name="on_connected">
+        <location column="2" file="include/cs_BluetoothLE.h" line="1042" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::on_disconnected" name="on_disconnected">
+        <location column="2" file="include/cs_BluetoothLE.h" line="1043" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::setAdvertisingInterval" name="setAdvertisingInterval">
+        <location column="2" file="include/cs_BluetoothLE.h" line="898" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::setAdvertisingTimeoutSeconds" name="setAdvertisingTimeoutSeconds">
+        <location column="2" file="include/cs_BluetoothLE.h" line="904" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::setAppearance" name="setAppearance">
+        <location column="2" file="include/cs_BluetoothLE.h" line="880" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::setClockSource" name="setClockSource">
+        <location column="2" file="include/cs_BluetoothLE.h" line="892" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::setConnParams" name="setConnParams">
+        <location column="2" file="include/cs_BluetoothLE.h" line="1039" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::setDeviceName" name="setDeviceName">
+        <location column="2" file="include/cs_BluetoothLE.h" line="886" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::setTxPowerLevel" name="setTxPowerLevel">
+        <location column="2" file="include/cs_BluetoothLE.h" line="1038" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::shutdown" name="shutdown">
+        <location column="2" file="include/cs_BluetoothLE.h" line="878" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::start" name="start">
+        <location column="2" file="include/cs_BluetoothLE.h" line="876" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::startScanning" name="startScanning">
+        <location column="2" file="include/cs_BluetoothLE.h" line="1016" />
+      </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::stopAdvertising" name="stopAdvertising">
-        <location column="2" file="include/cs_BluetoothLE.h" line="998" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="1006" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::stopScanning" name="stopScanning">
-        <location column="2" file="include/cs_BluetoothLE.h" line="1012" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="1020" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::updateDeviceName" name="updateDeviceName">
-        <location column="2" file="include/cs_BluetoothLE.h" line="902" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="910" />
       </undocumented>
       <undocumented id="BLEpp::Service::addCharacteristic" name="addCharacteristic">
-        <location column="2" file="include/cs_BluetoothLE.h" line="672" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="680" />
       </undocumented>
       <undocumented id="BLEpp::Service::getCharacteristics" name="getCharacteristics">
-        <location column="2" file="include/cs_BluetoothLE.h" line="674" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="682" />
       </undocumented>
       <undocumented id="BLEpp::Service::getHandle" name="getHandle">
-        <location column="2" file="include/cs_BluetoothLE.h" line="643" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="651" />
       </undocumented>
       <undocumented id="BLEpp::Service::getStack" name="getStack">
-        <location column="2" file="include/cs_BluetoothLE.h" line="635" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="643" />
       </undocumented>
       <undocumented id="BLEpp::Service::getUUID" name="getUUID">
-        <location column="2" file="include/cs_BluetoothLE.h" line="639" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="647" />
       </undocumented>
       <undocumented id="BLEpp::Service::on_ble_event" name="on_ble_event">
-        <location column="2" file="include/cs_BluetoothLE.h" line="676" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="684" />
       </undocumented>
       <undocumented id="BLEpp::Service::on_connect" name="on_connect">
-        <location column="2" file="include/cs_BluetoothLE.h" line="678" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="686" />
       </undocumented>
       <undocumented id="BLEpp::Service::setIsPrimary" name="setIsPrimary">
-        <location column="2" file="include/cs_BluetoothLE.h" line="628" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="636" />
       </undocumented>
       <undocumented id="BLEpp::Service::setName" name="setName">
-        <location column="2" file="include/cs_BluetoothLE.h" line="616" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="624" />
       </undocumented>
       <undocumented id="BLEpp::Service::setUUID" name="setUUID">
-        <location column="2" file="include/cs_BluetoothLE.h" line="621" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="629" />
       </undocumented>
       <undocumented id="BLEpp::Service::stop" name="stop">
-        <location column="2" file="include/cs_BluetoothLE.h" line="670" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="678" />
       </undocumented>
       <undocumented id="GeneralService::writeToConfigCharac" name="writeToConfigCharac">
         <location column="2" file="include/services/cs_GeneralService.h" line="40" />
@@ -562,15 +528,15 @@ return values.
         <location column="22" file="include/cs_BluetoothLE.h" line="58" />
       </undocumented>
     </type>
-    <type documented="31" name="field" undocumented="65">
+    <type documented="39" name="field" undocumented="57">
       <undocumented id="BLEpp::Characteristic::_callbackOnRead" name="_callbackOnRead">
-        <location column="2" file="include/cs_BluetoothLE.h" line="359" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="367" />
       </undocumented>
       <undocumented id="BLEpp::Characteristic::_callbackOnWrite" name="_callbackOnWrite">
-        <location column="2" file="include/cs_BluetoothLE.h" line="358" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="366" />
       </undocumented>
       <undocumented id="BLEpp::Characteristic::_value" name="_value">
-        <location column="2" file="include/cs_BluetoothLE.h" line="357" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="365" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicBase::_inited" name="_inited">
         <location column="2" file="include/cs_BluetoothLE.h" line="153" />
@@ -597,16 +563,16 @@ return values.
         <location column="2" file="include/cs_BluetoothLE.h" line="125" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicStatus::UUID" name="UUID">
-        <location column="2" file="include/cs_BluetoothLE.h" line="693" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="701" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicStatus::enabled" name="enabled">
-        <location column="2" file="include/cs_BluetoothLE.h" line="694" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="702" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicStatus::func" name="func">
-        <location column="2" file="include/cs_BluetoothLE.h" line="695" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="703" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicStatus::name" name="name">
-        <location column="2" file="include/cs_BluetoothLE.h" line="692" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="700" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicValue::data" name="data">
         <location column="2" file="include/cs_BluetoothLE.h" line="86" />
@@ -615,58 +581,58 @@ return values.
         <location column="2" file="include/cs_BluetoothLE.h" line="85" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::_advertising" name="_advertising">
-        <location column="2" file="include/cs_BluetoothLE.h" line="856" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="864" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::_callback_connected" name="_callback_connected">
-        <location column="2" file="include/cs_BluetoothLE.h" line="861" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="869" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::_conn_handle" name="_conn_handle">
-        <location column="2" file="include/cs_BluetoothLE.h" line="859" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="867" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::_device_name" name="_device_name">
-        <location column="2" file="include/cs_BluetoothLE.h" line="838" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::_evt_buffer" name="_evt_buffer">
-        <location column="2" file="include/cs_BluetoothLE.h" line="845" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::_evt_buffer_size" name="_evt_buffer_size">
         <location column="2" file="include/cs_BluetoothLE.h" line="846" />
       </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::_evt_buffer" name="_evt_buffer">
+        <location column="2" file="include/cs_BluetoothLE.h" line="853" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::_evt_buffer_size" name="_evt_buffer_size">
+        <location column="2" file="include/cs_BluetoothLE.h" line="854" />
+      </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::_gap_conn_params" name="_gap_conn_params">
-        <location column="2" file="include/cs_BluetoothLE.h" line="852" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="860" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::_scanning" name="_scanning">
-        <location column="2" file="include/cs_BluetoothLE.h" line="857" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="865" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::_sec_mode" name="_sec_mode">
-        <location column="2" file="include/cs_BluetoothLE.h" line="847" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::_services" name="_services">
-        <location column="2" file="include/cs_BluetoothLE.h" line="840" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::_started" name="_started">
         <location column="2" file="include/cs_BluetoothLE.h" line="855" />
       </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::_services" name="_services">
+        <location column="2" file="include/cs_BluetoothLE.h" line="848" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::_started" name="_started">
+        <location column="2" file="include/cs_BluetoothLE.h" line="863" />
+      </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::_timeout" name="_timeout">
-        <location column="2" file="include/cs_BluetoothLE.h" line="851" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="859" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::_tx_power_level" name="_tx_power_level">
-        <location column="2" file="include/cs_BluetoothLE.h" line="844" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="852" />
       </undocumented>
       <undocumented id="BLEpp::Service::_name" name="_name">
-        <location column="2" file="include/cs_BluetoothLE.h" line="594" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="602" />
       </undocumented>
       <undocumented id="BLEpp::Service::_primary" name="_primary">
-        <location column="2" file="include/cs_BluetoothLE.h" line="595" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="603" />
       </undocumented>
       <undocumented id="BLEpp::Service::_service_handle" name="_service_handle">
-        <location column="2" file="include/cs_BluetoothLE.h" line="596" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="604" />
       </undocumented>
       <undocumented id="BLEpp::Service::_stack" name="_stack">
-        <location column="2" file="include/cs_BluetoothLE.h" line="592" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="600" />
       </undocumented>
       <undocumented id="BLEpp::Service::_uuid" name="_uuid">
-        <location column="2" file="include/cs_BluetoothLE.h" line="593" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="601" />
       </undocumented>
       <undocumented id="GeneralService::_deviceTypeCharacteristic" name="_deviceTypeCharacteristic">
         <location column="2" file="include/services/cs_GeneralService.h" line="64" />
@@ -710,18 +676,6 @@ return values.
       <undocumented id="peripheral_device_t::rssi" name="rssi">
         <location column="2" file="include/characteristics/cs_ScanResult.h" line="30" />
       </undocumented>
-      <undocumented id="ps_general_service_t::device_name" name="device_name">
-        <location column="2" file="include/common/cs_Storage.h" line="98" />
-      </undocumented>
-      <undocumented id="ps_general_service_t::device_type" name="device_type">
-        <location column="2" file="include/common/cs_Storage.h" line="100" />
-      </undocumented>
-      <undocumented id="ps_general_service_t::floor" name="floor">
-        <location column="2" file="include/common/cs_Storage.h" line="101" />
-      </undocumented>
-      <undocumented id="ps_general_service_t::room" name="room">
-        <location column="2" file="include/common/cs_Storage.h" line="99" />
-      </undocumented>
       <undocumented id="ps_indoorlocalisation_service_t::(anonymous::1)::list" name="list">
         <location column="3" file="include/services/cs_IndoorLocalisationService.h" line="23" />
       </undocumented>
@@ -730,9 +684,6 @@ return values.
       </undocumented>
       <undocumented id="ps_indoorlocalisation_service_t::trackedDevices" name="trackedDevices">
         <location column="2" file="include/services/cs_IndoorLocalisationService.h" line="22" />
-      </undocumented>
-      <undocumented id="ps_power_service_t::current_limit" name="current_limit">
-        <location column="2" file="include/common/cs_Storage.h" line="89" />
       </undocumented>
       <undocumented id="pwm_config_t::gpio_pin" name="gpio_pin">
         <location column="5" file="include/drivers/cs_PWM.h" line="38" />
@@ -754,15 +705,6 @@ return values.
         <location column="5" file="include/drivers/cs_PWM.h" line="39" />
         <location column="5" file="include/drivers/cs_PWM.h" line="39" />
       </undocumented>
-      <undocumented id="storage_config_t::handle" name="handle">
-        <location column="2" file="include/common/cs_Storage.h" line="79" />
-      </undocumented>
-      <undocumented id="storage_config_t::id" name="id">
-        <location column="2" file="include/common/cs_Storage.h" line="78" />
-      </undocumented>
-      <undocumented id="storage_config_t::storage_size" name="storage_size">
-        <location column="2" file="include/common/cs_Storage.h" line="80" />
-      </undocumented>
     </type>
     <type documented="1" name="functiontemplate" undocumented="0" />
     <type documented="4" name="constructor" undocumented="14">
@@ -770,7 +712,7 @@ return values.
         <location column="2" file="include/drivers/cs_ADC.h" line="36" />
       </undocumented>
       <undocumented id="BLEpp::Characteristic::Characteristic&lt;T&gt;" name="Characteristic&lt;T&gt;">
-        <location column="2" file="include/cs_BluetoothLE.h" line="362" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="370" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicBase::CharacteristicBase" name="CharacteristicBase">
         <location column="2" file="include/cs_BluetoothLE.h" line="187" />
@@ -779,7 +721,7 @@ return values.
         <location column="2" file="include/cs_BluetoothLE.h" line="127" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicT::CharacteristicT&lt;T, E&gt;" name="CharacteristicT&lt;T, E&gt;">
-        <location column="2" file="include/cs_BluetoothLE.h" line="508" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="516" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicValue::CharacteristicValue" name="CharacteristicValue">
         <location column="2" file="include/cs_BluetoothLE.h" line="93" />
@@ -788,10 +730,10 @@ return values.
         <location column="2" file="include/cs_BluetoothLE.h" line="96" />
       </undocumented>
       <undocumented id="BLEpp::GenericService::GenericService" name="GenericService">
-        <location column="2" file="include/cs_BluetoothLE.h" line="714" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="722" />
       </undocumented>
       <undocumented id="BLEpp::Service::Service" name="Service">
-        <location column="2" file="include/cs_BluetoothLE.h" line="600" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="608" />
       </undocumented>
       <undocumented id="GeneralService::GeneralService" name="GeneralService">
         <location column="2" file="include/services/cs_GeneralService.h" line="30" />
@@ -811,37 +753,37 @@ return values.
     </type>
     <type documented="2" name="variable" undocumented="11">
       <undocumented id="BLEpp::GenericService::MAX_CHARACTERISTICS" name="MAX_CHARACTERISTICS">
-        <location column="2" file="include/cs_BluetoothLE.h" line="703" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="711" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::MAX_SERVICE_COUNT" name="MAX_SERVICE_COUNT">
-        <location column="2" file="include/cs_BluetoothLE.h" line="822" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultAdvertisingInterval_0_625_ms" name="defaultAdvertisingInterval_0_625_ms">
-        <location column="2" file="include/cs_BluetoothLE.h" line="833" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultAdvertisingTimeout_seconds" name="defaultAdvertisingTimeout_seconds">
-        <location column="2" file="include/cs_BluetoothLE.h" line="834" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultConnectionSupervisionTimeout_10_ms" name="defaultConnectionSupervisionTimeout_10_ms">
-        <location column="2" file="include/cs_BluetoothLE.h" line="832" />
-      </undocumented>
-      <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultMaxConnectionInterval_1_25_ms" name="defaultMaxConnectionInterval_1_25_ms">
         <location column="2" file="include/cs_BluetoothLE.h" line="830" />
       </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultAdvertisingInterval_0_625_ms" name="defaultAdvertisingInterval_0_625_ms">
+        <location column="2" file="include/cs_BluetoothLE.h" line="841" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultAdvertisingTimeout_seconds" name="defaultAdvertisingTimeout_seconds">
+        <location column="2" file="include/cs_BluetoothLE.h" line="842" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultConnectionSupervisionTimeout_10_ms" name="defaultConnectionSupervisionTimeout_10_ms">
+        <location column="2" file="include/cs_BluetoothLE.h" line="840" />
+      </undocumented>
+      <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultMaxConnectionInterval_1_25_ms" name="defaultMaxConnectionInterval_1_25_ms">
+        <location column="2" file="include/cs_BluetoothLE.h" line="838" />
+      </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultMinConnectionInterval_1_25_ms" name="defaultMinConnectionInterval_1_25_ms">
-        <location column="2" file="include/cs_BluetoothLE.h" line="829" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="837" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultMtu" name="defaultMtu">
-        <location column="2" file="include/cs_BluetoothLE.h" line="828" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="836" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultSlaveLatencyCount" name="defaultSlaveLatencyCount">
-        <location column="2" file="include/cs_BluetoothLE.h" line="831" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="839" />
       </undocumented>
       <undocumented id="BLEpp::Nrf51822BluetoothStack::defaultTxPowerLevel" name="defaultTxPowerLevel">
-        <location column="2" file="include/cs_BluetoothLE.h" line="835" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="843" />
       </undocumented>
       <undocumented id="BLEpp::Service::defaultServiceName" name="defaultServiceName">
-        <location column="2" file="include/cs_BluetoothLE.h" line="586" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="594" />
       </undocumented>
     </type>
     <type documented="5" name="classtemplate" undocumented="0" />
@@ -850,7 +792,7 @@ return values.
         <location column="2" file="include/drivers/cs_ADC.h" line="40" />
       </undocumented>
       <undocumented id="BLEpp::Characteristic::~Characteristic&lt;T&gt;" name="~Characteristic&lt;T&gt;">
-        <location column="2" file="include/cs_BluetoothLE.h" line="364" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="372" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicBase::~CharacteristicBase" name="~CharacteristicBase">
         <location column="2" file="include/cs_BluetoothLE.h" line="188" />
@@ -859,13 +801,13 @@ return values.
         <location column="2" file="include/cs_BluetoothLE.h" line="99" />
       </undocumented>
       <undocumented id="BLEpp::Service::~Service" name="~Service">
-        <location column="2" file="include/cs_BluetoothLE.h" line="610" />
+        <location column="2" file="include/cs_BluetoothLE.h" line="618" />
       </undocumented>
     </type>
     <type documented="14" name="class" undocumented="3">
       <undocumented id="BLEpp::GenericService" name="GenericService">
-        <location column="1" file="include/cs_BluetoothLE.h" line="687" />
-        <location column="1" file="include/cs_BluetoothLE.h" line="699" />
+        <location column="1" file="include/cs_BluetoothLE.h" line="695" />
+        <location column="1" file="include/cs_BluetoothLE.h" line="707" />
       </undocumented>
       <undocumented id="IndoorLocalizationService" name="IndoorLocalizationService">
         <location column="1" file="include/services/cs_IndoorLocalisationService.h" line="28" />
@@ -874,17 +816,7 @@ return values.
         <location column="1" file="include/services/cs_PowerService.h" line="23" />
       </undocumented>
     </type>
-    <type documented="5" name="enumvalue" undocumented="3">
-      <undocumented id="PS_ID_GENERAL_SERVICE" name="PS_ID_GENERAL_SERVICE">
-        <location column="2" file="include/common/cs_Storage.h" line="64" />
-      </undocumented>
-      <undocumented id="PS_ID_INDOORLOCALISATION_SERVICE" name="PS_ID_INDOORLOCALISATION_SERVICE">
-        <location column="2" file="include/common/cs_Storage.h" line="65" />
-      </undocumented>
-      <undocumented id="PS_ID_POWER_SERVICE" name="PS_ID_POWER_SERVICE">
-        <location column="2" file="include/common/cs_Storage.h" line="63" />
-      </undocumented>
-    </type>
+    <type documented="8" name="enumvalue" undocumented="0" />
   </coverage>
   <arguments>
     <function id="BLEpp::IBeacon::IBeacon" name="IBeacon">
@@ -931,177 +863,96 @@ return values.
       <location column="1" file="include/cs_BluetoothLE.h" line="311" />
       <undocumented-return />
     </function>
+    <function id="BLEpp::ble_type" name="ble_type">
+      <location column="1" file="include/cs_BluetoothLE.h" line="315" />
+      <undocumented-return />
+    </function>
+    <function id="BLEpp::ble_type" name="ble_type">
+      <location column="1" file="include/cs_BluetoothLE.h" line="319" />
+      <undocumented-return />
+    </function>
+    <function id="BLEpp::ble_type" name="ble_type">
+      <location column="1" file="include/cs_BluetoothLE.h" line="323" />
+      <undocumented-return />
+    </function>
+    <function id="BLEpp::ble_type" name="ble_type">
+      <location column="1" file="include/cs_BluetoothLE.h" line="327" />
+      <undocumented-return />
+    </function>
+    <function id="BLEpp::ble_type" name="ble_type">
+      <location column="1" file="include/cs_BluetoothLE.h" line="331" />
+      <undocumented-return />
+    </function>
+    <function id="BLEpp::ble_type" name="ble_type">
+      <location column="1" file="include/cs_BluetoothLE.h" line="335" />
+      <undocumented-return />
+    </function>
+    <function id="BLEpp::ble_type" name="ble_type">
+      <location column="1" file="include/cs_BluetoothLE.h" line="339" />
+      <undocumented-return />
+    </function>
+    <function id="BLEpp::ble_type" name="ble_type">
+      <location column="1" file="include/cs_BluetoothLE.h" line="343" />
+      <undocumented-return />
+    </function>
     <function id="BLEpp::CharacteristicT::setCharacteristicValue" name="setCharacteristicValue">
-      <location column="2" file="include/cs_BluetoothLE.h" line="517" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="525" />
       <undocumented name="value" />
     </function>
     <function id="BLEpp::Service::createCharacteristic" name="createCharacteristic">
-      <location column="2" file="include/cs_BluetoothLE.h" line="655" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="663" />
       <undocumented-return />
     </function>
     <function id="BLEpp::Service::start" name="start">
-      <location column="2" file="include/cs_BluetoothLE.h" line="669" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="677" />
       <undocumented name="stack" />
     </function>
     <function id="BLEpp::Service::on_disconnect" name="on_disconnect">
-      <location column="2" file="include/cs_BluetoothLE.h" line="680" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="688" />
       <undocumented name="conn_handle" />
       <undocumented name="gap_evt" />
     </function>
     <function id="BLEpp::Service::on_write" name="on_write">
-      <location column="2" file="include/cs_BluetoothLE.h" line="682" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="690" />
       <undocumented name="write_evt" />
     </function>
     <function id="BLEpp::Service::onTxComplete" name="onTxComplete">
-      <location column="2" file="include/cs_BluetoothLE.h" line="684" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="692" />
       <undocumented name="p_ble_evt" />
     </function>
     <function id="BLEpp::Nrf51822BluetoothStack::setTxPowerLevel" name="setTxPowerLevel">
-      <location column="2" file="include/cs_BluetoothLE.h" line="906" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="914" />
       <undocumented-return />
       <undocumented name="powerLevel" />
     </function>
     <function id="BLEpp::Nrf51822BluetoothStack::setMinConnectionInterval" name="setMinConnectionInterval">
-      <location column="2" file="include/cs_BluetoothLE.h" line="913" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="921" />
       <undocumented-return />
       <undocumented name="connectionInterval_1_25_ms" />
     </function>
     <function id="BLEpp::Nrf51822BluetoothStack::setMaxConnectionInterval" name="setMaxConnectionInterval">
-      <location column="2" file="include/cs_BluetoothLE.h" line="922" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="930" />
       <undocumented-return />
       <undocumented name="connectionInterval_1_25_ms" />
     </function>
     <function id="BLEpp::Nrf51822BluetoothStack::setSlaveLatency" name="setSlaveLatency">
-      <location column="2" file="include/cs_BluetoothLE.h" line="931" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="939" />
       <undocumented-return />
       <undocumented name="slaveLatency" />
     </function>
     <function id="BLEpp::Nrf51822BluetoothStack::setConnectionSupervisionTimeout" name="setConnectionSupervisionTimeout">
-      <location column="2" file="include/cs_BluetoothLE.h" line="940" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="948" />
       <undocumented-return />
       <undocumented name="conSupTimeout_10_ms" />
     </function>
     <function id="BLEpp::Nrf51822BluetoothStack::startIBeacon" name="startIBeacon">
-      <location column="2" file="include/cs_BluetoothLE.h" line="991" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="999" />
       <undocumented-return />
       <undocumented name="beacon" />
     </function>
     <function id="BLEpp::Nrf51822BluetoothStack::startAdvertising" name="startAdvertising">
-      <location column="2" file="include/cs_BluetoothLE.h" line="996" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="1004" />
       <undocumented-return />
-    </function>
-    <function id="Storage::getInstance" name="getInstance">
-      <location column="2" file="include/common/cs_Storage.h" line="126" />
-      <undocumented-return />
-    </function>
-    <function id="Storage::getHandle" name="getHandle">
-      <location column="2" file="include/common/cs_Storage.h" line="142" />
-      <undocumented-return />
-      <undocumented name="handle" />
-      <undocumented name="storageID" />
-    </function>
-    <function id="Storage::clearBlock" name="clearBlock">
-      <location column="2" file="include/common/cs_Storage.h" line="152" />
-      <undocumented name="handle" />
-      <undocumented name="storageID" />
-    </function>
-    <function id="Storage::readStorage" name="readStorage">
-      <location column="2" file="include/common/cs_Storage.h" line="165" />
-      <undocumented name="item" />
-      <undocumented name="handle" />
-      <undocumented name="size" />
-    </function>
-    <function id="Storage::writeStorage" name="writeStorage">
-      <location column="2" file="include/common/cs_Storage.h" line="176" />
-      <undocumented name="item" />
-      <undocumented name="handle" />
-      <undocumented name="size" />
-    </function>
-    <function id="Storage::setString" name="setString">
-      <location column="2" file="include/common/cs_Storage.h" line="188" />
-      <undocumented name="target" />
-      <undocumented name="value" />
-    </function>
-    <function id="Storage::getString" name="getString">
-      <location column="2" file="include/common/cs_Storage.h" line="206" />
-      <undocumented name="default_value" />
-      <undocumented name="target" />
-      <undocumented name="value" />
-    </function>
-    <function id="Storage::setUint8" name="setUint8">
-      <location column="2" file="include/common/cs_Storage.h" line="217" />
-      <undocumented name="target" />
-      <undocumented name="value" />
-    </function>
-    <function id="Storage::getUint8" name="getUint8">
-      <location column="2" file="include/common/cs_Storage.h" line="234" />
-      <undocumented name="default_value" />
-      <undocumented name="target" />
-      <undocumented name="value" />
-    </function>
-    <function id="Storage::setUint16" name="setUint16">
-      <location column="2" file="include/common/cs_Storage.h" line="245" />
-      <undocumented name="target" />
-      <undocumented name="value" />
-    </function>
-    <function id="Storage::getUint16" name="getUint16">
-      <location column="2" file="include/common/cs_Storage.h" line="262" />
-      <undocumented name="default_value" />
-      <undocumented name="target" />
-      <undocumented name="value" />
-    </function>
-    <function id="Storage::setUint32" name="setUint32">
-      <location column="2" file="include/common/cs_Storage.h" line="274" />
-      <undocumented name="target" />
-      <undocumented name="value" />
-    </function>
-    <function id="Storage::getUint32" name="getUint32">
-      <location column="2" file="include/common/cs_Storage.h" line="290" />
-      <undocumented name="default_value" />
-      <undocumented name="target" />
-      <undocumented name="value" />
-    </function>
-    <function id="Storage::setArray" name="setArray">
-      <location column="2" file="include/common/cs_Storage.h" line="306" />
-      <undocumented name="dest" />
-      <undocumented name="src" />
-      <undocumented name="length" />
-    </function>
-    <function id="Storage::getArray" name="getArray">
-      <location column="2" file="include/common/cs_Storage.h" line="343" />
-      <undocumented name="dest" />
-      <undocumented name="src" />
-      <undocumented name="length" />
-      <undocumented name="default_value" />
-    </function>
-    <function id="DifferentialBuffer::DifferentialBuffer&lt;T&gt;" name="DifferentialBuffer&lt;T&gt;">
-      <location column="2" file="include/common/cs_DifferentialBuffer.h" line="35" />
-      <undocumented name="initialize" />
-      <undocumented name="capacity" />
-    </function>
-    <function id="DifferentialBuffer::getFirstElement" name="getFirstElement">
-      <location column="2" file="include/common/cs_DifferentialBuffer.h" line="134" />
-      <undocumented-return />
-      <undocumented name="val" />
-    </function>
-    <function id="DifferentialBuffer::getNextElement" name="getNextElement">
-      <location column="2" file="include/common/cs_DifferentialBuffer.h" line="150" />
-      <undocumented-return />
-      <undocumented name="val" />
-    </function>
-    <function id="DifferentialBuffer::getLastElement" name="getLastElement">
-      <location column="2" file="include/common/cs_DifferentialBuffer.h" line="168" />
-      <undocumented-return />
-      <undocumented name="val" />
-    </function>
-    <function id="DifferentialBuffer::serialize" name="serialize">
-      <location column="2" file="include/common/cs_DifferentialBuffer.h" line="195" />
-      <undocumented name="buffer" />
-    </function>
-    <function id="DifferentialBuffer::push" name="push">
-      <location column="2" file="include/common/cs_DifferentialBuffer.h" line="221" />
-      <undocumented-return />
-      <undocumented name="value" />
     </function>
     <function id="GeneralService::writeToTemperatureCharac" name="writeToTemperatureCharac">
       <location column="2" file="include/services/cs_GeneralService.h" line="34" />
@@ -1213,7 +1064,7 @@ return values.
       </doctype>
     </method>
     <methodtemplate id="BLEpp::Service::createCharacteristic" name="createCharacteristic">
-      <location column="2" file="include/cs_BluetoothLE.h" line="655" />
+      <location column="2" file="include/cs_BluetoothLE.h" line="663" />
       <doctype name="doc">
         <ref name="pre" />
         <ref name="std::string" />
@@ -1222,11 +1073,20 @@ return values.
       </doctype>
     </methodtemplate>
     <class id="BLEpp::BatteryService" name="BatteryService">
-      <location column="1" file="include/cs_BluetoothLE.h" line="740" />
+      <location column="1" file="include/cs_BluetoothLE.h" line="748" />
       <doctype name="doc">
         <ref name="BLE_UUID_BATTERY_LEVEL_CHAR" />
       </doctype>
     </class>
+    <constructor id="DifferentialBuffer::DifferentialBuffer&lt;T&gt;" name="DifferentialBuffer&lt;T&gt;">
+      <location column="2" file="include/common/cs_DifferentialBuffer.h" line="35" />
+      <doctype name="doc">
+        <ref name="DifferentialBuffer::init()" />
+      </doctype>
+      <doctype component="initialize" name="params">
+        <ref name="DifferentialBuffer::init()" />
+      </doctype>
+    </constructor>
     <method id="DifferentialBuffer::peek" name="peek">
       <location column="2" file="include/common/cs_DifferentialBuffer.h" line="124" />
       <doctype name="doc">

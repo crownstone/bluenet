@@ -51,7 +51,9 @@ This documentation describes the features of the Bluenet firmware.</doc>
   <class name="AdcSamples" ref="AdcSamples#AdcSamples" />
   <classtemplate name="DifferentialBuffer" ref="DifferentialBuffer#DifferentialBuffer">
     <brief> Differential Buffer implementation</brief>
-    <templatetypeparameter id="DifferentialBuffer::T" name="T" />
+    <templatetypeparameter id="DifferentialBuffer::T" name="T">
+      <brief>primitive type such as uint8_t</brief>
+    </templatetypeparameter>
   </classtemplate>
   <classtemplate name="fixed_tuple" ref="fixed_tuple#fixed_tuple">
     <brief> A fixed tuple is a vector with a templated type and a reserved capacity.</brief>
@@ -119,9 +121,15 @@ This documentation describes the features of the Bluenet firmware.</doc>
   </enum>
   <enum anonymous="yes" id="ps_storage_id" name="ps_storage_id">
     <brief> Enumeration used to identify the different storage structures</brief>
-    <enumvalue id="PS_ID_POWER_SERVICE" name="PS_ID_POWER_SERVICE" value="0" />
-    <enumvalue id="PS_ID_GENERAL_SERVICE" name="PS_ID_GENERAL_SERVICE" value="1" />
-    <enumvalue id="PS_ID_INDOORLOCALISATION_SERVICE" name="PS_ID_INDOORLOCALISATION_SERVICE" value="2" />
+    <enumvalue id="PS_ID_POWER_SERVICE" name="PS_ID_POWER_SERVICE" value="0">
+      <brief>storage for the power wervice</brief>
+    </enumvalue>
+    <enumvalue id="PS_ID_GENERAL_SERVICE" name="PS_ID_GENERAL_SERVICE" value="1">
+      <brief>storage for the general service</brief>
+    </enumvalue>
+    <enumvalue id="PS_ID_INDOORLOCALISATION_SERVICE" name="PS_ID_INDOORLOCALISATION_SERVICE" value="2">
+      <brief>storage for the indoor localisation service</brief>
+    </enumvalue>
   </enum>
   <typedef id="pwm_mode_t" name="pwm_mode_t">
     <brief> Pulse Wide Modulation mode typedef</brief>

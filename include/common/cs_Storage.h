@@ -60,23 +60,24 @@ struct ps_storage_base_t {
 /* Enumeration used to identify the different storage structures
  */
 enum ps_storage_id {
+	// storage for the power wervice
 	PS_ID_POWER_SERVICE = 0,
+	// storage for the general service
 	PS_ID_GENERAL_SERVICE = 1,
+	// storage for the indoor localisation service
 	PS_ID_INDOORLOCALISATION_SERVICE = 2
 };
 
 /* Storage configuration struct
  *
  * This struct is used to define the configuration of the storage
- *
- *   * id 			is the enum <ps_storage_id> which defines
- *   				the type of storage structure
- *   * handle 		handle to the storage in FLASH
- *   * storage_size	size of the storage structure
  */
 struct storage_config_t {
+	// enum <ps_storage_id> defines the type of storage structure
 	ps_storage_id id;
+	// handle to the storage in FLASH
 	pstorage_handle_t handle;
+	// size of the storage structure
 	pstorage_size_t storage_size;
 };
 
@@ -86,6 +87,7 @@ struct storage_config_t {
 /* Struct used by the <PowerService> to store elements
  */
 struct ps_power_service_t : ps_storage_base_t {
+	// current limit value
 	uint32_t current_limit;
 };
 
@@ -95,9 +97,13 @@ struct ps_power_service_t : ps_storage_base_t {
 /* Struct used by the <GeneralService> to store elements
  */
 struct ps_general_service_t : ps_storage_base_t {
+	// device name
 	char device_name[MAX_STRING_SIZE];
+	// room name 
 	char room[MAX_STRING_SIZE];
+	// device type
 	char device_type[MAX_STRING_SIZE];
+	// floor level
 	uint32_t floor;
 };
 
@@ -122,55 +128,49 @@ struct ps_general_service_t : ps_storage_base_t {
 class Storage {
 
 public:
-	/* Returns the singleton instance of this class	*/
+	/* Returns the singleton instance of this class	
+	 *
+	 * @return static instance of Storage class
+	 */
 	static Storage& getInstance() {
 		static Storage instance;
 		return instance;
 	}
 
 	/* Get the handle to the persistent memory for the given storage ID.
-	 *
 	 * @storageID the enum defining the storage struct which should be
 	 *   accessed
-	 *
 	 * @handle returns the handle to the persistent memory where the
 	 *   requested struct is stored, subsequent calls to read and write
 	 *   from the storage will take this parameter as input
+	 *
+	 * Get the handle to persistent memory for a given storage ID. 
 	 *
 	 * @return true if operation successful, false otherwise
 	 */
 	bool getHandle(ps_storage_id storageID, pstorage_handle_t& handle);
 
 	/* Clears the block for the given handle
-	 *
 	 * @handle the handle to the persistent memory which was obtained by
 	 *   the <getHandle> function
-	 *
 	 * @storageID the enum defining the storage struct type, used to
 	 *   get the size of the struct
 	 */
 	void clearBlock(pstorage_handle_t handle, ps_storage_id storageID);
 
-	/* Get the struct stored in persistent memory at the position defined by
-	 * the handle
-	 *
+	/* Get the struct stored in persistent memory at the position defined by the handle
 	 * @handle the handle to the persistent memory where the struct is stored.
-	 *   obtain the hanlde with <getHandle>
-	 *
+	 *   obtain the handle with <getHandle>
 	 * @item pointer to the structure where the data from the persistent memory
 	 *   should be copied into
-	 *
 	 * @size size of the structure (usually sizeof(struct))
 	 */
 	void readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
 
 	/* Write the struct to persistent memory at the position defined by the handle
-	 *
 	 * @handle the handle to the persistent memory where the struct should be stored.
 	 *   obtain the hanlde with <getHandle>
-	 *
 	 * @item pointer to the structure which data should be stored into persitent memory
-	 *
 	 * @size size of the structure (usually sizeof(struct))
 	 */
 	void writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
@@ -180,19 +180,14 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	/* Helper function to convert std::string to char array
-	 *
 	 * @value the input string
-	 *
 	 * @target pointer to the output char array
 	 */
 	static void setString(std::string value, char* target);
 
 	/* Helper function to get std::string from char array in the struct
-	 *
 	 * @value pointer the input char array
-	 *
 	 * @target the output string
-	 *
 	 * @default_value the default string to be used if no valid string found
 	 *   in the char array
 	 *
@@ -206,9 +201,7 @@ public:
 	static void getString(char* value, std::string& target, std::string default_value);
 
 	/* Helper function to set a byte in the field of a struct
-	 *
 	 * @value the byte value to be copied to the struct
-	 *
 	 * @target pointer the field in the struct where the value should be set
 	 *
 	 * To show that a valid value was set, the last 3 bytes of the field
@@ -217,11 +210,8 @@ public:
 	static void setUint8(uint8_t value, uint32_t& target);
 
 	/* Helper function to read a byte from the field of a struct
-	 *
 	 * @value the field of the struct which should be read
-	 *
 	 * @target pointer to the byte where the value is returned
-	 *
 	 * @default_value the default value if the field of the struct is empty
 	 *
 	 * In order to show that the field of the struct is empty (or unassigned)
@@ -234,9 +224,7 @@ public:
 	static void getUint8(uint32_t value, uint8_t& target, uint8_t default_value);
 
 	/* Helper function to set a short (uint16_t) in the field of a struct
-	 *
 	 * @value the value to be copied to the struct
-	 *
 	 * @target pointer to the field in the struct where the value should be set
 	 *
 	 * To show that a valid value was set, the last 2 bytes of the field
@@ -245,11 +233,8 @@ public:
 	static void setUint16(uint16_t value, uint32_t& target);
 
 	/* Helper function to read a short (uint16_t) from the field of a struct
-	 *
 	 * @value the field of the struct which should be read
-	 *
 	 * @target pointer the uint16_t varaible where the value is returned
-	 *
 	 * @default_value the default value if the field of the struct is empty
 	 *
 	 * In order to show that the field of the struct is empty (or unassigned)
@@ -262,9 +247,7 @@ public:
 	static void getUint16(uint32_t value, uint16_t& target, uint16_t default_value);
 
 	/* Helper function to set an integer (uint32_t) in the field of a struct
-	 *
 	 * @value the value to be copied to the struct
-	 *
 	 * @target pointer to the field in the struct where the value should be set
 	 *
 	 * To show that a valid value was set, only values up to 2^32-2 (INT_MAX -1)
@@ -274,11 +257,8 @@ public:
 	static void setUint32(uint32_t value, uint32_t& target);
 
 	/* Helper function to read an integer (uint32_t) from the field of a struct
-	 *
 	 * @value the field of the struct which should be read
-	 *
 	 * @target pointer the uint16_t varaible where the value is returned
-	 *
 	 * @default_value the default value if the field of the struct is empty
 	 *
 	 * To show that a valid value was set, only values up to 2^32-2 (INT_MAX -1)
@@ -290,11 +270,9 @@ public:
 	static void getUint32(uint32_t value, uint32_t& target, uint32_t default_value);
 
 	/* Helper function to write/copy an array to the field of a struct
-	 *
+	 * @T primitive type, such as uint8_t
 	 * @src pointer to the array to be written
-	 *
 	 * @dest pointer to the array field of the struct
-	 *
 	 * @length the number of elements in the source array. the destination
 	 *   array needs to have space for at least length elements
 	 *
@@ -304,32 +282,29 @@ public:
 	 * uninitialized.
 	 */
 	template<typename T>
-	static void setArray(T* src, T* dest, uint16_t length) {
-		bool isUnassigned = true;
-		uint8_t* ptr = (uint8_t*)src;
-		for (int i = 0; i < length * sizeof(T); ++i) {
-			if (ptr[i] != 0xFF) {
-				isUnassigned = false;
-				break;
+		static void setArray(T* src, T* dest, uint16_t length) {
+			bool isUnassigned = true;
+			uint8_t* ptr = (uint8_t*)src;
+			for (int i = 0; i < length * sizeof(T); ++i) {
+				if (ptr[i] != 0xFF) {
+					isUnassigned = false;
+					break;
+				}
+			}
+
+			if (isUnassigned) {
+				LOGe("cannot write all FF");
+			} else {
+				memcpy(dest, src, length * sizeof(T));
 			}
 		}
 
-		if (isUnassigned) {
-			LOGe("cannot write all FF");
-		} else {
-			memcpy(dest, src, length * sizeof(T));
-		}
-	}
-
 	/* Helper function to read an array from a field of a struct
-	 *
+	 * @T primitive type, such as uint8_t
 	 * @src pointer to the array field of the struct
-	 *
 	 * @dest pointer to the destination array
-	 *
 	 * @default_value pointer to an array containing the default values
 	 *   can be NULL pointer
-	 *
 	 * @length number of elements in the array (all arrays need to have
 	 *   the same length!)
 	 *
@@ -341,35 +316,35 @@ public:
 	 * field will be copied to the destination array
 	 */
 	template<typename T>
-	static void getArray(T* src, T* dest, T* default_value, uint16_t length) {
+		static void getArray(T* src, T* dest, T* default_value, uint16_t length) {
 
-	#ifdef PRINT_ITEMS
-		_log(INFO, "raw value: ");
-		for (int i = 0; i < length; ++i) {
-			_log(INFO, "%X", src[i]);
-		}
-		_log(INFO, "\r\n");
-	#endif
-
-		bool isUnassigned = true;
-		uint8_t* ptr = (uint8_t*)src;
-		for (int i = 0; i < length * sizeof(T); ++i) {
-			if (ptr[i] != 0xFF) {
-				isUnassigned = false;
-				break;
+#ifdef PRINT_ITEMS
+			_log(INFO, "raw value: ");
+			for (int i = 0; i < length; ++i) {
+				_log(INFO, "%X", src[i]);
 			}
-		}
+			_log(INFO, "\r\n");
+#endif
 
-		if (isUnassigned) {
-			if (default_value != NULL) {
-				LOGd("use default value");
-				memcpy(dest, default_value, length * sizeof(T));
+			bool isUnassigned = true;
+			uint8_t* ptr = (uint8_t*)src;
+			for (int i = 0; i < length * sizeof(T); ++i) {
+				if (ptr[i] != 0xFF) {
+					isUnassigned = false;
+					break;
+				}
 			}
-		} else {
-			memcpy(dest, src, length * sizeof(T));
-		}
 
-	}
+			if (isUnassigned) {
+				if (default_value != NULL) {
+					LOGd("use default value");
+					memcpy(dest, default_value, length * sizeof(T));
+				}
+			} else {
+				memcpy(dest, src, length * sizeof(T));
+			}
+
+		}
 
 private:
 	/* Default constructor
@@ -382,16 +357,13 @@ private:
 	Storage();
 
 	/* Initialize blocks in persistent memory
-	 *
 	 * @size size of the block to be initialized
-	 *
 	 * @handle pointer to the handle which points to the persistent memory that
 	 *   was initialized
 	 */
 	void initBlocks(pstorage_size_t size, pstorage_handle_t& handle);
 
 	/* Helper function to obtain the config for the given storage ID
-	 *
 	 * @storageID enum which defines the storage struct for which the
 	 *   config should be obtained
 	 *

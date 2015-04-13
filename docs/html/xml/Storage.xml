@@ -13,38 +13,64 @@ they can be used without unnecessarily instantiating the storage instance.
 </doc>
   <methodtemplate id="Storage::getArray" name="getArray" static="yes">
     <brief>Helper function to read an array from a field of a struct</brief>
+    <doc>Checks the memory of the source array field. If it is all FF, that means
+the memory is unassigned. If an array is provided as default_value,
+that array will be copied to the destination array, if no default_value
+array is provided (NULL pointer), nothing happens and the destination
+array will remain as it was. Otherwise, the data from the source array
+field will be copied to the destination array
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::getArray::src" name="src">
+      <doc>pointer to the array field of the struct</doc>
       <type name="T" qualifier="*" />
     </argument>
     <argument id="Storage::getArray::dest" name="dest">
+      <doc>pointer to the destination array</doc>
       <type name="T" qualifier="*" />
     </argument>
     <argument id="Storage::getArray::default_value" name="default_value">
+      <doc>pointer to an array containing the default values
+  can be NULL pointer</doc>
       <type name="T" qualifier="*" />
     </argument>
     <argument id="Storage::getArray::length" name="length">
+      <doc>number of elements in the array (all arrays need to have
+  the same length!)</doc>
       <type name="uint16_t" />
     </argument>
-    <templatetypeparameter id="Storage::getArray::T" name="T" />
+    <templatetypeparameter id="Storage::getArray::T" name="T">
+      <brief>primitive type, such as uint8_t</brief>
+    </templatetypeparameter>
   </methodtemplate>
   <methodtemplate id="Storage::setArray" name="setArray" static="yes">
     <brief>Helper function to write/copy an array to the field of a struct</brief>
+    <doc>Copies the data contained in the src array to the destination
+array. It is not possible to write an array containing only FF
+to memory, since that is used to show that the array is
+uninitialized.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::setArray::src" name="src">
+      <doc>pointer to the array to be written</doc>
       <type name="T" qualifier="*" />
     </argument>
     <argument id="Storage::setArray::dest" name="dest">
+      <doc>pointer to the array field of the struct</doc>
       <type name="T" qualifier="*" />
     </argument>
     <argument id="Storage::setArray::length" name="length">
+      <doc>the number of elements in the source array. the destination
+  array needs to have space for at least length elements</doc>
       <type name="uint16_t" />
     </argument>
-    <templatetypeparameter id="Storage::setArray::T" name="T" />
+    <templatetypeparameter id="Storage::setArray::T" name="T">
+      <brief>primitive type, such as uint8_t</brief>
+    </templatetypeparameter>
   </methodtemplate>
   <method abstract="yes" id="Storage::clearBlock" name="clearBlock">
     <brief>Clears the block for the given handle</brief>
@@ -52,105 +78,161 @@ they can be used without unnecessarily instantiating the storage instance.
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::clearBlock::handle" name="handle">
+      <doc>the handle to the persistent memory which was obtained by
+  the <ref ref="Storage#Storage::getHandle">Storage::getHandle</ref> function</doc>
       <type name="pstorage_handle_t" />
     </argument>
     <argument id="Storage::clearBlock::storageID" name="storageID">
+      <doc>the enum defining the storage struct type, used to
+  get the size of the struct</doc>
       <type name="ps_storage_id" ref="index#ps_storage_id" />
     </argument>
   </method>
   <method abstract="yes" id="Storage::getHandle" name="getHandle">
     <brief>Get the handle to the persistent memory for the given storage ID.</brief>
+    <doc>Get the handle to persistent memory for a given storage ID.
+
+</doc>
     <return>
+      <doc>true if operation successful, false otherwise</doc>
       <type builtin="yes" name="bool" />
     </return>
     <argument id="Storage::getHandle::storageID" name="storageID">
+      <doc>the enum defining the storage struct which should be
+  accessed</doc>
       <type name="ps_storage_id" ref="index#ps_storage_id" />
     </argument>
     <argument id="Storage::getHandle::handle" name="handle">
+      <doc>returns the handle to the persistent memory where the
+  requested struct is stored, subsequent calls to read and write
+  from the storage will take this parameter as input</doc>
       <type name="pstorage_handle_t" qualifier=" &amp;" />
     </argument>
   </method>
   <method id="Storage::getInstance" name="getInstance" static="yes">
     <brief>Returns the singleton instance of this class</brief>
     <return>
+      <doc>static instance of Storage class</doc>
       <type name="Storage" qualifier=" &amp;" ref="Storage#Storage" />
     </return>
   </method>
   <method abstract="yes" id="Storage::getString" name="getString" static="yes">
     <brief>Helper function to get std::string from char array in the struct</brief>
+    <doc>In order to show that the field of the struct is unassigned, we use
+the fact that the last byte of the char array is set to FF.
+To show that the char array is empty, we fill it with 0.
+
+If the value read from the char array is empty or unassigned the default
+value will be returned instead
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::getString::value" name="value">
+      <doc>pointer the input char array</doc>
       <type builtin="yes" name="char" qualifier="*" />
     </argument>
     <argument id="Storage::getString::target" name="target">
+      <doc>the output string</doc>
       <type name="std::string" qualifier=" &amp;" />
     </argument>
     <argument id="Storage::getString::default_value" name="default_value">
+      <doc>the default string to be used if no valid string found
+  in the char array</doc>
       <type name="std::string" />
     </argument>
   </method>
   <method abstract="yes" id="Storage::getUint8" name="getUint8" static="yes">
     <brief>Helper function to read a byte from the field of a struct</brief>
+    <doc>In order to show that the field of the struct is empty (or unassigned)
+we use the fact that the last byte of the uint32_t field is set to FF.
+If a value is stored, that byte will be set to 0 to show that the field
+is assigned and that a valid value can be read.
+
+If the field is unassigned, the default value will be returned instead
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::getUint8::value" name="value">
+      <doc>the field of the struct which should be read</doc>
       <type name="uint32_t" />
     </argument>
     <argument id="Storage::getUint8::target" name="target">
+      <doc>pointer to the byte where the value is returned</doc>
       <type name="uint8_t" qualifier=" &amp;" />
     </argument>
     <argument id="Storage::getUint8::default_value" name="default_value">
+      <doc>the default value if the field of the struct is empty</doc>
       <type name="uint8_t" />
     </argument>
   </method>
   <method abstract="yes" id="Storage::getUint16" name="getUint16" static="yes">
     <brief>Helper function to read a short (uint16_t) from the field of a struct</brief>
+    <doc>In order to show that the field of the struct is empty (or unassigned)
+we use the fact that the last byte of the uint32_t field is set to FF.
+If a value is stored, that byte will be set to 0 to show that the field
+is assigned and that a valid value can be read.
+
+If the field is unassigned, the default value will be returned instead
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::getUint16::value" name="value">
+      <doc>the field of the struct which should be read</doc>
       <type name="uint32_t" />
     </argument>
     <argument id="Storage::getUint16::target" name="target">
+      <doc>pointer the uint16_t varaible where the value is returned</doc>
       <type name="uint16_t" qualifier=" &amp;" />
     </argument>
     <argument id="Storage::getUint16::default_value" name="default_value">
+      <doc>the default value if the field of the struct is empty</doc>
       <type name="uint16_t" />
     </argument>
   </method>
   <method abstract="yes" id="Storage::getUint32" name="getUint32" static="yes">
     <brief>Helper function to read an integer (uint32_t) from the field of a struct</brief>
-    <return>
-      <type builtin="yes" name="void" />
-    </return>
-    <argument id="Storage::getUint32::value" name="value">
-      <type name="uint32_t" />
-    </argument>
-    <argument id="Storage::getUint32::target" name="target">
-      <type name="uint32_t" qualifier=" &amp;" />
-    </argument>
-    <argument id="Storage::getUint32::default_value" name="default_value">
-      <type name="uint32_t" />
-    </argument>
-  </method>
-  <method abstract="yes" id="Storage::readStorage" name="readStorage">
-    <brief>Get the struct stored in persistent memory at the position defined by</brief>
-    <doc>the handle
+    <doc>To show that a valid value was set, only values up to 2^32-2 (INT_MAX -1)
+can be stored, while the value 2^32-1 (INT_MAX) will be used to show that
+it is unassigned
 
+If the field is unassigned, the default value will be returned instead
 </doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
+    <argument id="Storage::getUint32::value" name="value">
+      <doc>the field of the struct which should be read</doc>
+      <type name="uint32_t" />
+    </argument>
+    <argument id="Storage::getUint32::target" name="target">
+      <doc>pointer the uint16_t varaible where the value is returned</doc>
+      <type name="uint32_t" qualifier=" &amp;" />
+    </argument>
+    <argument id="Storage::getUint32::default_value" name="default_value">
+      <doc>the default value if the field of the struct is empty</doc>
+      <type name="uint32_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="Storage::readStorage" name="readStorage">
+    <brief>Get the struct stored in persistent memory at the position defined by the handle</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
     <argument id="Storage::readStorage::handle" name="handle">
+      <doc>the handle to the persistent memory where the struct is stored.
+  obtain the handle with <ref ref="Storage#Storage::getHandle">Storage::getHandle</ref></doc>
       <type name="pstorage_handle_t" />
     </argument>
     <argument id="Storage::readStorage::item" name="item">
+      <doc>pointer to the structure where the data from the persistent memory
+  should be copied into</doc>
       <type name="ps_storage_base_t" qualifier="*" ref="ps_storage_base_t#ps_storage_base_t" />
     </argument>
     <argument id="Storage::readStorage::size" name="size">
+      <doc>size of the structure (usually sizeof(struct))</doc>
       <type name="uint16_t" />
     </argument>
   </method>
@@ -160,45 +242,63 @@ they can be used without unnecessarily instantiating the storage instance.
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::setString::value" name="value">
+      <doc>the input string</doc>
       <type name="std::string" />
     </argument>
     <argument id="Storage::setString::target" name="target">
+      <doc>pointer to the output char array</doc>
       <type builtin="yes" name="char" qualifier="*" />
     </argument>
   </method>
   <method abstract="yes" id="Storage::setUint8" name="setUint8" static="yes">
     <brief>Helper function to set a byte in the field of a struct</brief>
+    <doc>To show that a valid value was set, the last 3 bytes of the field
+are set to 0
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::setUint8::value" name="value">
+      <doc>the byte value to be copied to the struct</doc>
       <type name="uint8_t" />
     </argument>
     <argument id="Storage::setUint8::target" name="target">
+      <doc>pointer the field in the struct where the value should be set</doc>
       <type name="uint32_t" qualifier=" &amp;" />
     </argument>
   </method>
   <method abstract="yes" id="Storage::setUint16" name="setUint16" static="yes">
     <brief>Helper function to set a short (uint16_t) in the field of a struct</brief>
+    <doc>To show that a valid value was set, the last 2 bytes of the field
+are set to 0
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::setUint16::value" name="value">
+      <doc>the value to be copied to the struct</doc>
       <type name="uint16_t" />
     </argument>
     <argument id="Storage::setUint16::target" name="target">
+      <doc>pointer to the field in the struct where the value should be set</doc>
       <type name="uint32_t" qualifier=" &amp;" />
     </argument>
   </method>
   <method abstract="yes" id="Storage::setUint32" name="setUint32" static="yes">
     <brief>Helper function to set an integer (uint32_t) in the field of a struct</brief>
+    <doc>To show that a valid value was set, only values up to 2^32-2 (INT_MAX -1)
+can be stored, while the value 2^32-1 (INT_MAX) will be used to show that
+it is unassigned
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::setUint32::value" name="value">
+      <doc>the value to be copied to the struct</doc>
       <type name="uint32_t" />
     </argument>
     <argument id="Storage::setUint32::target" name="target">
+      <doc>pointer to the field in the struct where the value should be set</doc>
       <type name="uint32_t" qualifier=" &amp;" />
     </argument>
   </method>
@@ -208,12 +308,16 @@ they can be used without unnecessarily instantiating the storage instance.
       <type builtin="yes" name="void" />
     </return>
     <argument id="Storage::writeStorage::handle" name="handle">
+      <doc>the handle to the persistent memory where the struct should be stored.
+  obtain the hanlde with <ref ref="Storage#Storage::getHandle">Storage::getHandle</ref></doc>
       <type name="pstorage_handle_t" />
     </argument>
     <argument id="Storage::writeStorage::item" name="item">
+      <doc>pointer to the structure which data should be stored into persitent memory</doc>
       <type name="ps_storage_base_t" qualifier="*" ref="ps_storage_base_t#ps_storage_base_t" />
     </argument>
     <argument id="Storage::writeStorage::size" name="size">
+      <doc>size of the structure (usually sizeof(struct))</doc>
       <type name="uint16_t" />
     </argument>
   </method>

@@ -6,21 +6,25 @@
     <brief> Base class for storage structures</brief>
   </base>
   <field id="ps_general_service_t::device_name" name="device_name">
+    <brief>device name</brief>
     <type size="32">
       <type builtin="yes" name="char" />
     </type>
   </field>
   <field id="ps_general_service_t::room" name="room">
+    <brief>room name</brief>
     <type size="32">
       <type builtin="yes" name="char" />
     </type>
   </field>
   <field id="ps_general_service_t::device_type" name="device_type">
+    <brief>device type</brief>
     <type size="32">
       <type builtin="yes" name="char" />
     </type>
   </field>
   <field id="ps_general_service_t::floor" name="floor">
+    <brief>floor level</brief>
     <type name="uint32_t" />
   </field>
 </struct>
