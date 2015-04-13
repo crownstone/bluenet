@@ -2,7 +2,44 @@
 
 Source for the website at http://dobots.github.io/bluenet/.
 
-The code is generated using [cldoc](https://github.com/jessevdk/cldoc).
+The code is generated using [cldoc](https://github.com/jessevdk/cldoc). Please, see that site to check what syntax to use.
+
+## Requirements
+
+The clang compiler:
+
+    sudo apt-get install clang
+
+Currently I am using version `3.5`. Different from `gcc` the `clang` compiler can already cross-compile, so you don't need to install something else. However, also different from `gcc`, a lot of stuff might not be recognized. So, please check your files if you use something `gcc` specific and make a `clang` if statement around it.
+
+One example in the code
+
+    #if __clang__
+    #define STRINGIFY(str) #str
+    #else
+    #define STRINGIFY(str) str
+    #endif
+
+Because stringifying the struct doesn't work in `clang`. Note that the above is not functional for `clang`, but we only use it for documentation generation anyway, so that's fine for now.
+
+## Usage
+
+There is a script to generate the documentation:
+
+    ./scripts/gen_doc.sh
+
+This runs internally the `cldoc` command.
+
+    cldoc generate $include_dirs $compiler_options $macro_defs -- --output $rel_path/docs/html --report $files --basedir=$rel_path --merge=$rel_path/docs/source"
+
+## Commit
+
+And you'll have to update subsequently the branch:
+
+    git checkout master
+    git subtree push --prefix docs/html upstream gh-pages
+
+So, you don't need to switch branch locally, but just update the folder only.
 
 ## Copyrights
 
