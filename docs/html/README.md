@@ -41,10 +41,14 @@ And you'll have to update subsequently the branch:
 
 So, you don't need to switch branch locally, but just update the folder only.
 
+## Check
+
+See the report generated at http://dobots.github.io/bluenet/#report
+
 ## Copyrights
 
 * Authors: Anne van Rossum, Dominik Egger, Bart van Vliet
 * Date: 2014
 * License:  LGPL v3+, Apache, or MIT, your choice
-* Company: Distributed Organisms B.V. (DoBots)
+* Company: Distributed Organisms B.V. | DoBots | https://dobots.nl
 * Location: Rotterdam, The Netherlands
