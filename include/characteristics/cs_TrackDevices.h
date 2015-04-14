@@ -10,54 +10,90 @@
 #include "ble_gatts.h"
 
 #include "cs_BluetoothLE.h"
-#include "characteristics/cs_Serializable.h"
+#include "characteristics/cs_BufferAccessor.h"
+
+#include "common/cs_MasterBuffer.h"
 
 using namespace BLEpp;
-
-struct __attribute__((__packed__)) tracked_device_t {
-	uint8_t addr[BLE_GAP_ADDR_LEN];
-	int8_t rssiThreshold;
-	uint16_t counter;
-};
 
 // About 3 minutes
 //#define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 2000
 // About 20 seconds
 #define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 100
 
-
-#define TRACKDEVICES_HEADER_SIZE 1 // 1 BYTE for the header = number of elements in the list
-#define TRACKDEVICES_SERIALIZED_SIZE (sizeof(tracked_device_t)-2) // only works if struct packed. Subtract 2, as counter is not serialized
-
-#define TRACKDEVICES_MAX_NR_DEVICES              5
-
 // Initialize counter of tracked devices with this number.
-#define TDL_COUNTER_INIT                         ((uint16_t)-1)
+#define TDL_COUNTER_INIT                         -1
+//#define TDL_COUNTER_INIT                         ((uint16_t)-1)
 
 #define TDL_NONE_NEARBY                          1
 #define TDL_IS_NEARBY                            2
 #define TDL_NOT_TRACKING                         3
 
-class TrackedDeviceList : public Serializable {
+#define TRACKDEVICES_HEADER_SIZE                 1 // 1 BYTE for the header = number of elements in the list
+
+#define TRACKDEVICES_MAX_NR_DEVICES              5
+
+struct __attribute__((__packed__)) tracked_device_t {
+	// bluetooth address
+	uint8_t addr[BLE_GAP_ADDR_LEN];
+	// rssi threshold
+	int8_t rssiThreshold;
+};
+
+#define TRACKDEVICES_SERIALIZED_SIZE sizeof(tracked_device_t)
+
+struct tracked_device_list_t {
+	/* number of elements */
+	uint8_t size;
+	/* list of tracked devices */
+	tracked_device_t list[TRACKDEVICES_MAX_NR_DEVICES];
+	/* list of counters (one counter per tracked device,
+	 * index corresponds to tracked device list */
+	uint16_t counters[TRACKDEVICES_MAX_NR_DEVICES];
+};
+
+class TrackedDeviceList : public BufferAccessor {
 
 private:
-	tracked_device_t* _list;
-	uint8_t _freeIdx;
+	/* buffer used to store the tracked devices and their counters */
+	tracked_device_list_t* _buffer;
+	/* defines timeout threshold */
 	uint16_t _timeoutCount;
 
 public:
-	TrackedDeviceList();
+	/* Default Constructor */
+	TrackedDeviceList() : _buffer(NULL), _timeoutCount(TRACKDEVICE_DEFAULT_TIMEOUT_COUNT) {};
 
-	~TrackedDeviceList() {
-		if (_list) {
-			free(_list);
-		}
+	/* Assign the buffer used to hold the tracked device list
+	 * @param buffer                the buffer to be used
+	 * @param maxLength             size of buffer (maximum number of bytes that
+	 *                              can be stored)
+	 */
+	void assign(uint8_t* buffer, uint16_t maxLength) {
+		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
+		assert(sizeof(tracked_device_list_t) <= maxLength, "buffer not large enough to hold tracked device list!");
+		_buffer = (tracked_device_list_t*)buffer;
 	}
 
-	/** Initializes the list, must be called before any other function! */
-	void init();
+	/* Release the assigned buffer */
+	void release() {
+		LOGd("release");
+		_buffer = NULL;
+	}
 
-	bool operator!=(const TrackedDeviceList& val);
+	/* Initialize tracked device list
+	 *
+	 * list of counters used for timeout has to be initialized to <TDL_COUNTER_INIT>
+	 */
+	void init() {
+		if (_buffer) {
+			memset(_buffer->counters, TDL_COUNTER_INIT, sizeof(_buffer->counters));
+			BLEutil::printArray(_buffer->counters, TRACKDEVICES_MAX_NR_DEVICES);
+		} else {
+			LOGe("Failed to init, buffer not assigned!");
+		}
+		print();
+	}
 
 	/** Returns TDL_IS_NEARBY if a tracked device is nearby, also increases counters */
 	uint8_t isNearby();
@@ -76,7 +112,7 @@ public:
 	bool isEmpty() const;
 
 	/** Clears the list. */
-	void reset();
+	void clear();
 
 	/** Adds/updates an address with given rssi threshold to/in the list. Returns true on success. */
 	bool add(const uint8_t* adrs_ptr, int8_t rssi_threshold);
@@ -90,59 +126,78 @@ public:
 	/** Returns the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
 	uint16_t getTimeout();
 
-	//////////// serializable ////////////////////////////
+	//////////// BufferAccessor ////////////////////////////
 
 	/* @inherit */
-    uint16_t getSerializedLength() const;
+	uint16_t getDataLength() const {
+		return TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_SERIALIZED_SIZE * getSize();
+	}
 
 	/* @inherit */
-    uint16_t getMaxLength() const {
+	uint16_t getMaxLength() const {
     	return TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE;
-    }
+	}
 
 	/* @inherit */
-    void serialize(uint8_t* buffer, uint16_t length) const;
-
-	/* @inherit */
-    void deserialize(uint8_t* buffer, uint16_t length);
+	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {
+		*buffer = (uint8_t*)_buffer;
+		dataLength = getDataLength();
+	}
 
 };
 
 
 
-class TrackedDevice : public Serializable {
+class TrackedDevice : public BufferAccessor {
 
 private:
-	tracked_device_t _trackedDevice;
+	tracked_device_t* _buffer;
 
 public:
-	TrackedDevice();
+	/* Default Constructor */
+	TrackedDevice() : _buffer(NULL) {};
 
-	void init();
+	/* Assign the buffer used to hold the tracked device list
+	 * @param buffer                the buffer to be used
+	 * @param maxLength             size of buffer (maximum number of bytes that
+	 *                              can be stored
+	 */
+	void assign(uint8_t* buffer, uint16_t maxLength) {
+		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
+		assert(sizeof(tracked_device_t) <= maxLength, "buffer not large enough to hold tracked device!");
+		_buffer = (tracked_device_t*)buffer;
+	}
 
-	bool operator!=(const TrackedDevice& val);
+	/* Release the assigned buffer */
+	void release() {
+		LOGd("release");
+		_buffer = NULL;
+	}
 
 	void print() const;
 
-	int8_t getRSSI() const { return _trackedDevice.rssiThreshold; }
+	int8_t getRSSI() const { return _buffer->rssiThreshold; }
 	
-	const uint8_t* getAddress() const { return _trackedDevice.addr; }
+	const uint8_t* getAddress() const { return _buffer->addr; }
 
-	//////////// serializable ////////////////////////////
-
-	/* @inherit */
-    uint16_t getSerializedLength() const;
+	//////////// BufferAccessor ////////////////////////////
 
 	/* @inherit */
-    uint16_t getMaxLength() const {
+	uint16_t getDataLength() const {
 		return TRACKDEVICES_SERIALIZED_SIZE;
-    }
+	}
 
 	/* @inherit */
-    void serialize(uint8_t* buffer, uint16_t length) const;
+	uint16_t getMaxLength() const {
+		return TRACKDEVICES_SERIALIZED_SIZE;
+	}
 
 	/* @inherit */
-    void deserialize(uint8_t* buffer, uint16_t length);
+	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {
+		LOGd("getBuffer: %p", this);
+		*buffer = (uint8_t*)_buffer;
+		dataLength = getDataLength();
+	}
 
 };
 

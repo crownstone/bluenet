@@ -37,6 +37,8 @@ public:
 	virtual uint16_t getDataLength() const = 0;
 
 	/* Return the pointer to the buffer and the length of data in Bytes
+	 * @buffer       pointer to the buffer
+	 * @dataLength   length of data in the buffer (in bytes)
 	 */
 	virtual void getBuffer(uint8_t** buffer, uint16_t& dataLength) = 0;
 
@@ -61,12 +63,10 @@ public:
 	 * @return the serialized object in a <CharacteristicValue> object
 	 */
 	CharacteristicValue getCharacteristicValue() {
-		LOGd("getCharacteristicValue");
 		CharacteristicValue value;
 		uint8_t* buffer;
 		uint16_t len;
 		_value->getBuffer(&buffer, len);
-		BLEutil::printArray(buffer, len);
 		return CharacteristicValue(len, buffer, false);
 	}
 
@@ -78,7 +78,6 @@ public:
 	 * into an object and assigns that to the charachteristic
 	 */
 	void setCharacteristicValue(const CharacteristicValue& value) {
-		LOGd("setCharacteristicValue");
 		uint8_t* buffer;
 		uint16_t len;
 		_value->getBuffer(&buffer, len);

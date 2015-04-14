@@ -41,8 +41,11 @@ using namespace BLEpp;
  * **note** struct has to be packed in order to avoid word alignment.
  */
 struct __attribute__((__packed__)) peripheral_device_t {
+	/* bluetooth address */
 	uint8_t addr[BLE_GAP_ADDR_LEN];
+	/* last rssi value */
 	int8_t rssi;
+	/* number of occurences (times seen during scan) */
 	uint16_t occurrences;
 };
 
@@ -55,7 +58,9 @@ struct __attribute__((__packed__)) peripheral_device_t {
 /* Structure of the list of peripheral devices which is sent over Bluetooth
  */
 struct peripheral_device_list_t {
+	// number of elements in the list
 	uint8_t size;
+	// list of scanned devices
 	peripheral_device_t list[SR_MAX_NR_DEVICES];
 };
 
@@ -73,73 +78,34 @@ private:
 	 */
 	peripheral_device_list_t* _buffer;
 
-	/* The index in the list of the next free slot
-	 */
-//	uint8_t _freeIdx;
-
 public:
 	/* Default constructor
 	 */
-	ScanResult();
+	ScanResult() : _buffer(NULL) {}
 
-	/* Default destructor
-	 *
-	 * Free list on destruction
+	/* Assign the buffer used to hold the scanned device list
+	 * @param buffer                the buffer to be used
+	 * @param maxLength             size of buffer (maximum number of bytes that
+	 *                              can be stored)
 	 */
-	~ScanResult() {
-//		if (_buffer) {
-//			free(_buffer);
-//		}
-	}
-
-	/* Allocate and initialize an empty list
-	 *
-	 * If there was already a list created earlier, the
-	 * old list is freed and a new list is allocated
-	 */
-//	void init();
-
 	void assign(uint8_t* buffer, uint16_t maxLength) {
-		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
-//		if (sizeof(peripheral_device_list_t) < maxLength) {
-//			_buffer->ptr = buffer;
+		LOGd("assign, this: %p, buff: %p, len: %d, sizeof(): %d", this, buffer, maxLength, sizeof(peripheral_device_list_t));
+		assert(sizeof(peripheral_device_list_t) <= maxLength, "buffer not large enough to hold scan device list!");
 		_buffer = (peripheral_device_list_t*)buffer;
-//		_buffer = (peripheral_device_t*)buffer;
-//		}
 	}
 
+	/* Release assigned buffer
+	 */
 	void release() {
 		LOGd("release");
 		_buffer = NULL;
 	}
-
-	/* Release allocated memory
-	 *
-	 * Can be called once the list is not used anymore
-	 * to free up space. Before using the object again,
-	 * init() has to be called.
-	 */
-//	void release();
-
-	/* Basic not equal operator
-	 *
-	 * @val ScanResult instance which should be compared
-	 *   with this instance
-	 *
-	 * Checks and compares the fields of the two instances
-	 * to determine if they are equal or not
-	 *
-	 * @return true if not equal,
-	 *         false otherwise
-	 */
-	bool operator!=(const ScanResult& val);
 
 	/* Print the list of devices for debug purposes to the UART
 	 */
 	void print() const;
 
 	/* Update the list with the given device
-	 *
 	 * @adrs_ptr pointer to an array of length <BLE_GAP_ADDR_LEN>
 	 *   which contains the bluetooth address of the device in little-endian
 	 * @rssi rssi value of the advertisement package
@@ -159,35 +125,22 @@ public:
 
 	/* Clear the list of devices
 	*/
-	void reset();
+	void clear();
 
 	//////////// BufferAccessor ////////////////////////////
 
-	/* Return length of buffer required to store the serialized form of this object.
-	 *
-	 * The size is determined by multiplying the number of devices with
-	 * <SERIALIZED_DEVICE_SIZE> and adding the header size <HEADER_SIZE>
-	 *
-	 * @return number of bytes required
-	 */
+	/* @inherit */
 	uint16_t getDataLength() const {
 		return SR_HEADER_SIZE + SR_SERIALIZED_DEVICE_SIZE * getSize();
 	}
 
-	/* Return the maximum possible length of the serialized object
-	 *
-	 * This is defined by:
-	 * <HEADER_SIZE> + <MAX_NR_DEVICES> * <SERIALIZED_DEVICE_SIZE>
-	 *
-	 * @return the maximum possible length
-	 */
+	/* @inherit */
 	uint16_t getMaxLength() const {
 		return SR_HEADER_SIZE + SR_SERIALIZED_DEVICE_SIZE * SR_MAX_NR_DEVICES;
 	}
 
-
+	/* @inherit */
 	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {
-		LOGd("getBuffer: %p", this);
 		*buffer = (uint8_t*)_buffer;
 		dataLength = getDataLength();
 	}

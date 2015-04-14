@@ -80,6 +80,10 @@ public:
 		}
 	}
 
+	buffer_ptr_t getBuffer() {
+		return _buffer;
+	}
+
 	uint16_t size() { return _size; }
 
 };

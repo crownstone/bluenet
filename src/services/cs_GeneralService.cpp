@@ -37,8 +37,13 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 void GeneralService::init(Nrf51822BluetoothStack & stack) {
 	LOGi("Create general service");
 
+#if TEMPERATURE==1
 	addTemperatureCharacteristic();
 	LOGi("addTemperatureCharacteristic();");
+#else
+	LOGi("skip Temperature Characteristic");
+#endif
+
 	addFirmwareCharacteristic();
 	LOGi("addFirmwareCharacteristic();");
 #if MESHING==1

@@ -88,8 +88,8 @@ private:
 	BLEpp::CharacteristicT<int8_t>* _rssiCharac;
 	BLEpp::CharacteristicT<uint8_t>* _scanControlCharac;
 	BLEpp::CharacteristicT<uint8_t*>* _peripheralCharac;
-	BLEpp::CharacteristicT<TrackedDeviceList>* _trackedDeviceListCharac;
-	BLEpp::CharacteristicT<TrackedDevice>* _trackedDeviceCharac;
+	BLEpp::CharacteristicT<uint8_t*>* _trackedDeviceListCharac;
+	BLEpp::CharacteristicT<uint8_t*>* _trackedDeviceCharac;
 	
 	func_t _rssiHandler;
 

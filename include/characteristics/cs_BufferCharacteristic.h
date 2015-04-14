@@ -20,6 +20,8 @@ template<>
 class CharacteristicT<uint8_t*> : public CharacteristicGeneric<uint8_t*> {
 
 private:
+	typedef uint8_t* buffer_ptr_t;
+
 	// maximum length for this characteristic in bytes
 	uint16_t _maxLength;
 
@@ -27,6 +29,11 @@ private:
 	uint16_t _dataLength;
 
 public:
+
+	void setValue(const buffer_ptr_t& value) {
+		assert(value, "Error: Don't assign NULL pointers! Pointer to buffer has to be correct from the start!");
+		_value = value;
+	}
 
 	void setMaxLength(uint16_t length) {
 		_maxLength = length;
@@ -44,7 +51,6 @@ public:
 	 * @return the serialized object in a <CharacteristicValue> object
 	 */
 	CharacteristicValue getCharacteristicValue() {
-		LOGd("getCharacteristicValue");
 		CharacteristicValue value;
 		return CharacteristicValue(_dataLength, _value, false);
 	}
@@ -57,9 +63,11 @@ public:
 	 * into an object and assigns that to the charachteristic
 	 */
 	void setCharacteristicValue(const CharacteristicValue& value) {
-		LOGd("setCharacteristicValue");
 		if (_value != NULL) {
 			memcpy(_value, value.data, value.length);
+			_dataLength = value.length;
+		} else {
+			LOGe("_value is NULL");
 		}
 	}
 
@@ -72,6 +80,10 @@ public:
 	 */
 	uint16_t getValueMaxLength() {
 		return _maxLength;
+	}
+
+	uint16_t getValueDataLength() {
+		return _dataLength;
 	}
 
 protected:

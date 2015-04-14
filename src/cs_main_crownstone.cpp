@@ -247,6 +247,10 @@ void GPIOTE_IRQHandler(void)
 
 #endif // MESHING == 1
 
+void on_exit(void) {
+	LOGi("PROGRAM TERMINATED");
+}
+
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
  * the code within the bootloader has been processed before. But also after the bootloader, the code in 
@@ -255,6 +259,8 @@ void GPIOTE_IRQHandler(void)
  *********************************************************************************************************************/
 
 int main() {
+	atexit(on_exit);
+
 	welcome();
 
 	MasterBuffer::getInstance().alloc(GENERAL_BUFFER_SIZE);

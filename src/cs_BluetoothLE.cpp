@@ -146,10 +146,9 @@ void CharacteristicBase::init(Service* svc) {
 	ci.attr_char_value.init_offs = 0;
 	ci.attr_char_value.init_len = initialValue.length;
 	ci.attr_char_value.max_len = getValueMaxLength();
-	ci.attr_char_value.p_value =
-			initialValue.length > 0 ? (uint8_t*) initialValue.data : 0;
+	ci.attr_char_value.p_value = (uint8_t*) initialValue.data;
 
-	LOGd("Char init with buffer[%i] with %p", initialValue.length, initialValue.data);
+	LOGd("%s init with buffer[%i] with %p", _name.c_str(), initialValue.length, initialValue.data);
 
 	ci.attr_char_value.p_uuid = &uid;
 

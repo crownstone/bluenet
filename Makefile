@@ -11,6 +11,10 @@
 #!/bin/make -f
 
 all: build
+	@cd build && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=../arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug .. && make
+	@if [ ! -z "${BLUENET_CONFIG_DIR}" ]; then echo "Copy binaries to ${BLUENET_CONFIG_DIR}/build"; mkdir -p ${BLUENET_CONFIG_DIR}/build; mkdir -p build/result; cp build/*.hex build/*.bin build/*.elf build/result; cp build/result/* ${BLUENET_CONFIG_DIR}/build; fi
+
+release: build
 	@cd build && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=../arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Release .. && make
 	@if [ ! -z "${BLUENET_CONFIG_DIR}" ]; then echo "Copy binaries to ${BLUENET_CONFIG_DIR}/build"; mkdir -p ${BLUENET_CONFIG_DIR}/build; mkdir -p build/result; cp build/*.hex build/*.bin build/*.elf build/result; cp build/result/* ${BLUENET_CONFIG_DIR}/build; fi
 

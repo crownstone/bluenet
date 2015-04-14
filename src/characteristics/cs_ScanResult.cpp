@@ -11,33 +11,9 @@
 #include "characteristics/cs_ScanResult.h"
 #include "drivers/cs_Serial.h"
 
-ScanResult::ScanResult() : _buffer(NULL) {
-}
-
-//void ScanResult::init() {
-//	_freeIdx = 0;
-//	if (_buffer) {
-//		free(_buffer);
-//	}
-//	LOGi("LIST alloc");
-//	BLEutil::print_heap("list alloc:");
-////	_buffer = (peripheral_device_t*)calloc(SR_MAX_NR_DEVICES, sizeof(peripheral_device_t));
-//	BLEutil::print_heap("list alloc done:");
-//}
-
-//void ScanResult::release() {
-//	if (_buffer) {
-//		LOGi("LIST free");
-//		free(_buffer);
-//	}
-//	_buffer = NULL;
-//}
 
 // returns the number of elements stored so far
 uint16_t ScanResult::getSize() const {
-	// freeIdx points to the next free index of the array,
-	// but because the first element is at index 0,
-	// freeIdx is also the number of elements in the array so far
 	if (_buffer != NULL) {
 		return _buffer->size;
 	} else {
@@ -45,34 +21,8 @@ uint16_t ScanResult::getSize() const {
 	}
 }
 
-void ScanResult::reset() {
+void ScanResult::clear() {
 	memset(_buffer, 0, sizeof(peripheral_device_list_t));
-}
-
-bool ScanResult::operator!=(const ScanResult& val) {
-
-	if (_buffer == NULL) {
-		LOGe("scan result buffer was not assigned!!!");
-		return false;
-	}
-
-	if (this->getSize() != val.getSize()) {
-		return true;
-	}
-
-	for (int i = 0; i < this->getSize(); ++i) {
-		if (this->_buffer->list[i].occurrences != val._buffer->list[i].occurrences) {
-			return true;
-		}
-		if (this->_buffer->list[i].rssi != val._buffer->list[i].rssi) {
-			return true;
-		}
-		if (memcmp(this->_buffer->list[i].addr, val._buffer->list[i].addr, BLE_GAP_ADDR_LEN) != 0) {
-			return true;
-		}
-	}
-
-	return false;
 }
 
 //int count = 1;
@@ -134,8 +84,6 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 }
 
 void ScanResult::print() const {
-	LOGd("print: %p", this);
-
 	for (int i = 0; i < getSize(); ++i) {
 //		char addrs[28];
 //		sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", _buffer->list[i].addr[5],
@@ -147,6 +95,3 @@ void ScanResult::print() const {
 	}
 
 }
-
-/** Return length of buffer required to store the serialized form of this object.  If this method returns 0,
-* it means that the object does not need external buffer space. */
