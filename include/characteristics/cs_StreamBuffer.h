@@ -71,7 +71,7 @@ public:
 	 *
 	 * @return 0 on SUCCESS, 1 on FAILURE (buffer required too large)
 	 */
-	int assign(T *buffer, uint16_t size) {
+	int assign(uint8_t *buffer, uint16_t size) {
 		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, size);
 		if (_capacity > size) {
 			LOGe("Assigned buffer is not large enough");
@@ -139,7 +139,7 @@ public:
 	 *         1 if buffer is full,
 	 *         2 if buffer is not initialized
 	 */
-	ERR_CODE add(uint8_t value) {
+	ERR_CODE add(T value) {
 		if (!_buffer) {
 			LOGe("Buffer not initialized!");
 			return SB_BUFFER_NOT_INITIALIZED;
