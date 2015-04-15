@@ -1663,9 +1663,9 @@ Discarded input sections
                 0x00000000        0x4 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp7Service4stopEv
                 0x00000000        0x2 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTI10ScanResultvE17getValueMaxLengthEv
+ .text._ZN5BLEpp15CharacteristicI10ScanResultvE17getValueMaxLengthEv
                 0x00000000        0x6 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTI10ScanResultvE15onNotifyTxErrorEv
+ .text._ZN5BLEpp15CharacteristicI10ScanResultvE15onNotifyTxErrorEv
                 0x00000000        0x8 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp18CharacteristicBaseD2Ev
                 0x00000000       0x18 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -1753,7 +1753,7 @@ Discarded input sections
                 0x00000000        0x8 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIyE17getValueMaxLengthEv
                 0x00000000        0x4 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIyvE22setCharacteristicValueERKNS_19CharacteristicValueE
+ .text._ZN5BLEpp15CharacteristicIyvE22setCharacteristicValueERKNS_19CharacteristicValueE
                 0x00000000        0xe CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIyE27configurePresentationFormatER19ble_gatts_char_pf_t
                 0x00000000       0x10 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -1761,7 +1761,7 @@ Discarded input sections
                 0x00000000        0x4 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIaE17getValueMaxLengthEv
                 0x00000000        0x4 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIavE22setCharacteristicValueERKNS_19CharacteristicValueE
+ .text._ZN5BLEpp15CharacteristicIavE22setCharacteristicValueERKNS_19CharacteristicValueE
                 0x00000000        0xa CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIaE27configurePresentationFormatER19ble_gatts_char_pf_t
                 0x00000000       0x10 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -1777,7 +1777,7 @@ Discarded input sections
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp7ServiceD0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTI10ScanResultvE12onTxCompleteEP16ble_common_evt_t
+ .text._ZN5BLEpp15CharacteristicI10ScanResultvE12onTxCompleteEP16ble_common_evt_t
                 0x00000000       0x18 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIyE4readEv
                 0x00000000       0x22 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -1807,9 +1807,9 @@ Discarded input sections
                 0x00000000       0x28 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIyED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIyvED2Ev
+ .text._ZN5BLEpp15CharacteristicIyvED2Ev
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIyvED0Ev
+ .text._ZN5BLEpp15CharacteristicIyvED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp19CharacteristicValueD2Ev
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -1831,7 +1831,7 @@ Discarded input sections
                 0x00000000       0x74 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZNK5BLEpp14CharacteristicI10ScanResultE8getValueEv
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTI10ScanResultvE22getCharacteristicValueEv
+ .text._ZN5BLEpp15CharacteristicI10ScanResultvE22getCharacteristicValueEv
                 0x00000000       0x56 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicI10ScanResultE7writtenEttPh
                 0x00000000       0x34 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -1841,9 +1841,9 @@ Discarded input sections
                 0x00000000       0x28 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIaED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIavED2Ev
+ .text._ZN5BLEpp15CharacteristicIavED2Ev
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIavED0Ev
+ .text._ZN5BLEpp15CharacteristicIavED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN25IndoorLocalizationService19setRSSILevelHandlerEN4func8functionIFavEEE
                 0x00000000       0x46 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -1859,25 +1859,25 @@ Discarded input sections
                 0x00000000       0x24 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZNK5BLEpp14CharacteristicIyE8getValueEv
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIyvE22getCharacteristicValueEv
+ .text._ZN5BLEpp15CharacteristicIyvE22getCharacteristicValueEv
                 0x00000000       0x18 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIyE7writtenEttPh
                 0x00000000       0x34 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZNK5BLEpp14CharacteristicIaE8getValueEv
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIavE22getCharacteristicValueEv
+ .text._ZN5BLEpp15CharacteristicIavE22getCharacteristicValueEv
                 0x00000000       0x18 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIaE7writtenEttPh
                 0x00000000       0x34 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTI10ScanResultvE22setCharacteristicValueERKNS_19CharacteristicValueE
+ .text._ZN5BLEpp15CharacteristicI10ScanResultvE22setCharacteristicValueERKNS_19CharacteristicValueE
                 0x00000000       0x2a CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicI10ScanResultED2Ev
                 0x00000000       0x30 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN5BLEpp14CharacteristicI10ScanResultED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTI10ScanResultvED2Ev
+ .text._ZN5BLEpp15CharacteristicI10ScanResultvED2Ev
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTI10ScanResultvED0Ev
+ .text._ZN5BLEpp15CharacteristicI10ScanResultvED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .text._ZN25IndoorLocalizationServiceD2Ev
                 0x00000000       0x28 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -1913,25 +1913,25 @@ Discarded input sections
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata._ZTSN5BLEpp14CharacteristicI10ScanResultEE
                 0x00000000       0x27 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .rodata._ZTIN5BLEpp15CharacteristicTI10ScanResultvEE
+ .rodata._ZTIN5BLEpp15CharacteristicI10ScanResultvEE
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .rodata._ZTSN5BLEpp15CharacteristicTI10ScanResultvEE
+ .rodata._ZTSN5BLEpp15CharacteristicI10ScanResultvEE
                 0x00000000       0x29 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata._ZTIN5BLEpp14CharacteristicIaEE
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata._ZTSN5BLEpp14CharacteristicIaEE
                 0x00000000       0x1c CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .rodata._ZTIN5BLEpp15CharacteristicTIavEE
+ .rodata._ZTIN5BLEpp15CharacteristicIavEE
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .rodata._ZTSN5BLEpp15CharacteristicTIavEE
+ .rodata._ZTSN5BLEpp15CharacteristicIavEE
                 0x00000000       0x1e CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata._ZTIN5BLEpp14CharacteristicIyEE
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata._ZTSN5BLEpp14CharacteristicIyEE
                 0x00000000       0x1c CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .rodata._ZTIN5BLEpp15CharacteristicTIyvEE
+ .rodata._ZTIN5BLEpp15CharacteristicIyvEE
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .rodata._ZTSN5BLEpp15CharacteristicTIyvEE
+ .rodata._ZTSN5BLEpp15CharacteristicIyvEE
                 0x00000000       0x1e CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata._ZTIPFavE
                 0x00000000       0x10 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -1959,15 +1959,15 @@ Discarded input sections
                 0x00000000       0x11 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata._ZTVN5BLEpp14CharacteristicI10ScanResultEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .rodata._ZTVN5BLEpp15CharacteristicTI10ScanResultvEE
+ .rodata._ZTVN5BLEpp15CharacteristicI10ScanResultvEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata._ZTVN5BLEpp14CharacteristicIaEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .rodata._ZTVN5BLEpp15CharacteristicTIavEE
+ .rodata._ZTVN5BLEpp15CharacteristicIavEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata._ZTVN5BLEpp14CharacteristicIyEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
- .rodata._ZTVN5BLEpp15CharacteristicTIyvEE
+ .rodata._ZTVN5BLEpp15CharacteristicIyvEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata._ZZN4func6detailL19get_default_managerIPFyvESaIS3_EEERKNS0_16function_managerEvE15default_manager
                 0x00000000       0x18 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -2267,7 +2267,7 @@ Discarded input sections
  .bss           0x00000000        0x0 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZL11sd_temp_getPl
                 0x00000000        0x4 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTISsvE17getValueMaxLengthEv
+ .text._ZN5BLEpp15CharacteristicISsvE17getValueMaxLengthEv
                 0x00000000        0x4 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN5BLEpp7Service4stopEv
                 0x00000000        0x2 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2349,7 +2349,7 @@ Discarded input sections
                 0x00000000        0x8 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIlE17getValueMaxLengthEv
                 0x00000000        0x4 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIlvE22setCharacteristicValueERKNS_19CharacteristicValueE
+ .text._ZN5BLEpp15CharacteristicIlvE22setCharacteristicValueERKNS_19CharacteristicValueE
                 0x00000000        0x8 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIlE27configurePresentationFormatER19ble_gatts_char_pf_t
                 0x00000000       0x10 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2365,7 +2365,7 @@ Discarded input sections
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN5BLEpp7ServiceD0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTISsvE22setCharacteristicValueERKNS_19CharacteristicValueE
+ .text._ZN5BLEpp15CharacteristicISsvE22setCharacteristicValueERKNS_19CharacteristicValueE
                 0x00000000       0x24 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN4func6detail39function_manager_inplace_specializationIZN14GeneralService27addDeviceTypeCharactersiticEvEUlSsE_SaIS3_EvE4callIvIRKSsEEET_RKNS0_15functor_paddingEDpT0_
                 0x00000000       0x10 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2393,9 +2393,9 @@ Discarded input sections
                 0x00000000       0x28 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIlED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIlvED2Ev
+ .text._ZN5BLEpp15CharacteristicIlvED2Ev
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIlvED0Ev
+ .text._ZN5BLEpp15CharacteristicIlvED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN5BLEpp14GenericServiceD2Ev
                 0x00000000       0x3c CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2423,7 +2423,7 @@ Discarded input sections
                 0x00000000       0x2c CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZNK5BLEpp14CharacteristicISsE8getValueEv
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTISsvE22getCharacteristicValueEv
+ .text._ZN5BLEpp15CharacteristicISsvE22getCharacteristicValueEv
                 0x00000000       0x1e CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN5BLEpp14CharacteristicISsE7writtenEttPh
                 0x00000000       0x34 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2437,9 +2437,9 @@ Discarded input sections
                 0x00000000       0x30 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN5BLEpp14CharacteristicISsED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTISsvED2Ev
+ .text._ZN5BLEpp15CharacteristicISsvED2Ev
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTISsvED0Ev
+ .text._ZN5BLEpp15CharacteristicISsvED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN5BLEpp14CharacteristicISsE7onWriteERKN4func8functionIFvRKSsEEE
                 0x00000000       0x48 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2461,7 +2461,7 @@ Discarded input sections
                 0x00000000       0x70 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZNK5BLEpp14CharacteristicIlE8getValueEv
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIlvE22getCharacteristicValueEv
+ .text._ZN5BLEpp15CharacteristicIlvE22getCharacteristicValueEv
                 0x00000000       0x18 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIlE7writtenEttPh
                 0x00000000       0x34 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2485,9 +2485,9 @@ Discarded input sections
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .rodata._ZTSN5BLEpp14CharacteristicISsEE
                 0x00000000       0x1d CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .rodata._ZTIN5BLEpp15CharacteristicTISsvEE
+ .rodata._ZTIN5BLEpp15CharacteristicISsvEE
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .rodata._ZTSN5BLEpp15CharacteristicTISsvEE
+ .rodata._ZTSN5BLEpp15CharacteristicISsvEE
                 0x00000000       0x1f CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .rodata._ZTIN5BLEpp14GenericServiceE
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2501,9 +2501,9 @@ Discarded input sections
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .rodata._ZTSN5BLEpp14CharacteristicIlEE
                 0x00000000       0x1c CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .rodata._ZTIN5BLEpp15CharacteristicTIlvEE
+ .rodata._ZTIN5BLEpp15CharacteristicIlvEE
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .rodata._ZTSN5BLEpp15CharacteristicTIlvEE
+ .rodata._ZTSN5BLEpp15CharacteristicIlvEE
                 0x00000000       0x1e CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .rodata._ZTIPFvRKSsE
                 0x00000000       0x10 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2523,7 +2523,7 @@ Discarded input sections
                 0x00000000        0x7 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .rodata._ZTVN5BLEpp14CharacteristicISsEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .rodata._ZTVN5BLEpp15CharacteristicTISsvEE
+ .rodata._ZTVN5BLEpp15CharacteristicISsvEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .rodata._ZTVN5BLEpp14GenericServiceE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2531,7 +2531,7 @@ Discarded input sections
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .rodata._ZTVN5BLEpp14CharacteristicIlEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
- .rodata._ZTVN5BLEpp15CharacteristicTIlvEE
+ .rodata._ZTVN5BLEpp15CharacteristicIlvEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
  .rodata._ZTSZN14GeneralService27addDeviceTypeCharactersiticEvEUlSsE_
                 0x00000000       0x3a CMakeFiles/crownstone.dir/src/services/GeneralService.cpp.obj
@@ -2902,7 +2902,7 @@ Discarded input sections
                 0x00000000        0x8 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIhE17getValueMaxLengthEv
                 0x00000000        0x4 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIhvE22setCharacteristicValueERKNS_19CharacteristicValueE
+ .text._ZN5BLEpp15CharacteristicIhvE22setCharacteristicValueERKNS_19CharacteristicValueE
                 0x00000000        0xa CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIhE27configurePresentationFormatER19ble_gatts_char_pf_t
                 0x00000000       0x10 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
@@ -2944,9 +2944,9 @@ Discarded input sections
                 0x00000000       0x24 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIhED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIhvED2Ev
+ .text._ZN5BLEpp15CharacteristicIhvED2Ev
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIhvED0Ev
+ .text._ZN5BLEpp15CharacteristicIhvED0Ev
                 0x00000000       0x12 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIhE7onWriteERKN4func8functionIFvRKhEEE
                 0x00000000       0x48 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
@@ -2962,7 +2962,7 @@ Discarded input sections
                 0x00000000       0x70 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .text._ZNK5BLEpp14CharacteristicIhE8getValueEv
                 0x00000000       0x14 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
- .text._ZN5BLEpp15CharacteristicTIhvE22getCharacteristicValueEv
+ .text._ZN5BLEpp15CharacteristicIhvE22getCharacteristicValueEv
                 0x00000000       0x18 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .text._ZN5BLEpp14CharacteristicIhE7writtenEttPh
                 0x00000000       0x34 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
@@ -2982,9 +2982,9 @@ Discarded input sections
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .rodata._ZTSN5BLEpp14CharacteristicIhEE
                 0x00000000       0x1c CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
- .rodata._ZTIN5BLEpp15CharacteristicTIhvEE
+ .rodata._ZTIN5BLEpp15CharacteristicIhvEE
                 0x00000000        0xc CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
- .rodata._ZTSN5BLEpp15CharacteristicTIhvEE
+ .rodata._ZTSN5BLEpp15CharacteristicIhvEE
                 0x00000000       0x1e CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .rodata._ZTIPFhvE
                 0x00000000       0x10 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
@@ -2998,7 +2998,7 @@ Discarded input sections
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .rodata._ZTVN5BLEpp14CharacteristicIhEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
- .rodata._ZTVN5BLEpp15CharacteristicTIhvEE
+ .rodata._ZTVN5BLEpp15CharacteristicIhvEE
                 0x00000000       0x38 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .rodata._ZZN4func6detailL19get_default_managerIPFhvESaIS3_EEERKNS0_16function_managerEvE15default_manager
                 0x00000000       0x18 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
@@ -5624,9 +5624,9 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
  .text._ZN5BLEpp14CharacteristicIhE17getValueMaxLengthEv
                 0x0001ddf8        0x4 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
                 0x0001ddf8                BLEpp::Characteristic<unsigned char>::getValueMaxLength()
- .text._ZN5BLEpp15CharacteristicTIhvE22setCharacteristicValueERKNS_19CharacteristicValueE
+ .text._ZN5BLEpp15CharacteristicIhvE22setCharacteristicValueERKNS_19CharacteristicValueE
                 0x0001ddfc        0xa CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
-                0x0001ddfc                BLEpp::CharacteristicT<unsigned char, void>::setCharacteristicValue(BLEpp::CharacteristicValue const&)
+                0x0001ddfc                BLEpp::Characteristic<unsigned char, void>::setCharacteristicValue(BLEpp::CharacteristicValue const&)
  .text._ZN5BLEpp14CharacteristicIhE27configurePresentationFormatER19ble_gatts_char_pf_t
                 0x0001de06       0x10 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
                 0x0001de06                BLEpp::Characteristic<unsigned char>::configurePresentationFormat(ble_gatts_char_pf_t&)
@@ -5653,10 +5653,10 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
  .text._ZN5BLEpp18CharacteristicBase7setUUIDERKNS_4UUIDE
                 0x0001deb8       0x50 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
                 0x0001deb8                BLEpp::CharacteristicBase::setUUID(BLEpp::UUID const&)
- .text._ZN5BLEpp15CharacteristicTIhvEC2Ev
+ .text._ZN5BLEpp15CharacteristicIhvEC2Ev
                 0x0001df08       0x30 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
-                0x0001df08                BLEpp::CharacteristicT<unsigned char, void>::CharacteristicT()
-                0x0001df08                BLEpp::CharacteristicT<unsigned char, void>::CharacteristicT()
+                0x0001df08                BLEpp::Characteristic<unsigned char, void>::Characteristic()
+                0x0001df08                BLEpp::Characteristic<unsigned char, void>::Characteristic()
  .text._ZN4func8functionIFhvEED2Ev
                 0x0001df38        0xe CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
                 0x0001df38                func::function<unsigned char ()>::~function()
@@ -5681,13 +5681,13 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
                 0x0001dff4       0x12 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
                 0x0001dff4                BLEpp::Characteristic<unsigned char>::~Characteristic()
  *fill*         0x0001e006        0x2 ff
- .text._ZN5BLEpp15CharacteristicTIhvED2Ev
+ .text._ZN5BLEpp15CharacteristicIhvED2Ev
                 0x0001e008       0x14 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
-                0x0001e008                BLEpp::CharacteristicT<unsigned char, void>::~CharacteristicT()
-                0x0001e008                BLEpp::CharacteristicT<unsigned char, void>::~CharacteristicT()
- .text._ZN5BLEpp15CharacteristicTIhvED0Ev
+                0x0001e008                BLEpp::Characteristic<unsigned char, void>::~Characteristic()
+                0x0001e008                BLEpp::Characteristic<unsigned char, void>::~Characteristic()
+ .text._ZN5BLEpp15CharacteristicIhvED0Ev
                 0x0001e01c       0x12 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
-                0x0001e01c                BLEpp::CharacteristicT<unsigned char, void>::~CharacteristicT()
+                0x0001e01c                BLEpp::Characteristic<unsigned char, void>::~Characteristic()
  .text._ZN5BLEpp14CharacteristicIhE7onWriteERKN4func8functionIFvRKhEEE
                 0x0001e02e       0x48 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
                 0x0001e02e                BLEpp::Characteristic<unsigned char>::onWrite(func::function<void (unsigned char const&)> const&)
@@ -5704,9 +5704,9 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
  .text._ZNK5BLEpp14CharacteristicIhE8getValueEv
                 0x0001e174       0x14 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
                 0x0001e174                BLEpp::Characteristic<unsigned char>::getValue() const
- .text._ZN5BLEpp15CharacteristicTIhvE22getCharacteristicValueEv
+ .text._ZN5BLEpp15CharacteristicIhvE22getCharacteristicValueEv
                 0x0001e188       0x18 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
-                0x0001e188                BLEpp::CharacteristicT<unsigned char, void>::getCharacteristicValue()
+                0x0001e188                BLEpp::Characteristic<unsigned char, void>::getCharacteristicValue()
  .text._ZN5BLEpp14CharacteristicIhE7writtenEttPh
                 0x0001e1a0       0x34 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
                 0x0001e1a0                BLEpp::Characteristic<unsigned char>::written(unsigned short, unsigned short, unsigned char*)
@@ -5814,9 +5814,9 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
  .text._ZN5BLEpp14CharacteristicItE17getValueMaxLengthEv
                 0x0001e498        0x4 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001e498                BLEpp::Characteristic<unsigned short>::getValueMaxLength()
- .text._ZN5BLEpp15CharacteristicTItvE22setCharacteristicValueERKNS_19CharacteristicValueE
+ .text._ZN5BLEpp15CharacteristicItvE22setCharacteristicValueERKNS_19CharacteristicValueE
                 0x0001e49c        0x8 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x0001e49c                BLEpp::CharacteristicT<unsigned short, void>::setCharacteristicValue(BLEpp::CharacteristicValue const&)
+                0x0001e49c                BLEpp::Characteristic<unsigned short, void>::setCharacteristicValue(BLEpp::CharacteristicValue const&)
  .text._ZN5BLEpp14CharacteristicItE27configurePresentationFormatER19ble_gatts_char_pf_t
                 0x0001e4a4       0x10 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001e4a4                BLEpp::Characteristic<unsigned short>::configurePresentationFormat(ble_gatts_char_pf_t&)
@@ -5826,9 +5826,9 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
  .text._ZN5BLEpp14CharacteristicImE17getValueMaxLengthEv
                 0x0001e4b8        0x4 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001e4b8                BLEpp::Characteristic<unsigned long>::getValueMaxLength()
- .text._ZN5BLEpp15CharacteristicTImvE22setCharacteristicValueERKNS_19CharacteristicValueE
+ .text._ZN5BLEpp15CharacteristicImvE22setCharacteristicValueERKNS_19CharacteristicValueE
                 0x0001e4bc        0x8 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x0001e4bc                BLEpp::CharacteristicT<unsigned long, void>::setCharacteristicValue(BLEpp::CharacteristicValue const&)
+                0x0001e4bc                BLEpp::Characteristic<unsigned long, void>::setCharacteristicValue(BLEpp::CharacteristicValue const&)
  .text._ZN5BLEpp14CharacteristicImE27configurePresentationFormatER19ble_gatts_char_pf_t
                 0x0001e4c4       0x10 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001e4c4                BLEpp::Characteristic<unsigned long>::configurePresentationFormat(ble_gatts_char_pf_t&)
@@ -5871,13 +5871,13 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
                 0x0001e62c       0x12 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001e62c                BLEpp::Characteristic<unsigned long>::~Characteristic()
  *fill*         0x0001e63e        0x2 ff
- .text._ZN5BLEpp15CharacteristicTImvED2Ev
+ .text._ZN5BLEpp15CharacteristicImvED2Ev
                 0x0001e640       0x14 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x0001e640                BLEpp::CharacteristicT<unsigned long, void>::~CharacteristicT()
-                0x0001e640                BLEpp::CharacteristicT<unsigned long, void>::~CharacteristicT()
- .text._ZN5BLEpp15CharacteristicTImvED0Ev
+                0x0001e640                BLEpp::Characteristic<unsigned long, void>::~Characteristic()
+                0x0001e640                BLEpp::Characteristic<unsigned long, void>::~Characteristic()
+ .text._ZN5BLEpp15CharacteristicImvED0Ev
                 0x0001e654       0x12 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x0001e654                BLEpp::CharacteristicT<unsigned long, void>::~CharacteristicT()
+                0x0001e654                BLEpp::Characteristic<unsigned long, void>::~Characteristic()
  *fill*         0x0001e666        0x2 ff
  .text._ZN12PowerServiceD2Ev
                 0x0001e668       0x14 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
@@ -5924,13 +5924,13 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
                 0x0001ea40       0x12 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001ea40                BLEpp::Characteristic<unsigned short>::~Characteristic()
  *fill*         0x0001ea52        0x2 ff
- .text._ZN5BLEpp15CharacteristicTItvED2Ev
+ .text._ZN5BLEpp15CharacteristicItvED2Ev
                 0x0001ea54       0x14 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x0001ea54                BLEpp::CharacteristicT<unsigned short, void>::~CharacteristicT()
-                0x0001ea54                BLEpp::CharacteristicT<unsigned short, void>::~CharacteristicT()
- .text._ZN5BLEpp15CharacteristicTItvED0Ev
+                0x0001ea54                BLEpp::Characteristic<unsigned short, void>::~Characteristic()
+                0x0001ea54                BLEpp::Characteristic<unsigned short, void>::~Characteristic()
+ .text._ZN5BLEpp15CharacteristicItvED0Ev
                 0x0001ea68       0x12 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x0001ea68                BLEpp::CharacteristicT<unsigned short, void>::~CharacteristicT()
+                0x0001ea68                BLEpp::Characteristic<unsigned short, void>::~Characteristic()
  .text._ZN5BLEpp14CharacteristicItE7onWriteERKN4func8functionIFvRKtEEE
                 0x0001ea7a       0x48 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001ea7a                BLEpp::Characteristic<unsigned short>::onWrite(func::function<void (unsigned short const&)> const&)
@@ -5948,18 +5948,18 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
  .text._ZNK5BLEpp14CharacteristicItE8getValueEv
                 0x0001edca       0x14 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001edca                BLEpp::Characteristic<unsigned short>::getValue() const
- .text._ZN5BLEpp15CharacteristicTItvE22getCharacteristicValueEv
+ .text._ZN5BLEpp15CharacteristicItvE22getCharacteristicValueEv
                 0x0001edde       0x18 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x0001edde                BLEpp::CharacteristicT<unsigned short, void>::getCharacteristicValue()
+                0x0001edde                BLEpp::Characteristic<unsigned short, void>::getCharacteristicValue()
  .text._ZN5BLEpp14CharacteristicItE7writtenEttPh
                 0x0001edf6       0x34 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001edf6                BLEpp::Characteristic<unsigned short>::written(unsigned short, unsigned short, unsigned char*)
  .text._ZNK5BLEpp14CharacteristicImE8getValueEv
                 0x0001ee2a       0x14 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001ee2a                BLEpp::Characteristic<unsigned long>::getValue() const
- .text._ZN5BLEpp15CharacteristicTImvE22getCharacteristicValueEv
+ .text._ZN5BLEpp15CharacteristicImvE22getCharacteristicValueEv
                 0x0001ee3e       0x18 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x0001ee3e                BLEpp::CharacteristicT<unsigned long, void>::getCharacteristicValue()
+                0x0001ee3e                BLEpp::Characteristic<unsigned long, void>::getCharacteristicValue()
  .text._ZN5BLEpp14CharacteristicImE7writtenEttPh
                 0x0001ee56       0x34 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x0001ee56                BLEpp::Characteristic<unsigned long>::written(unsigned short, unsigned short, unsigned char*)
@@ -6774,12 +6774,12 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
  .rodata._ZTSN5BLEpp14CharacteristicIhEE
                 0x000242b0       0x1c CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
                 0x000242b0                typeinfo name for BLEpp::Characteristic<unsigned char>
- .rodata._ZTIN5BLEpp15CharacteristicTIhvEE
+ .rodata._ZTIN5BLEpp15CharacteristicIhvEE
                 0x000242cc        0xc CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
-                0x000242cc                typeinfo for BLEpp::CharacteristicT<unsigned char, void>
- .rodata._ZTSN5BLEpp15CharacteristicTIhvEE
+                0x000242cc                typeinfo for BLEpp::Characteristic<unsigned char, void>
+ .rodata._ZTSN5BLEpp15CharacteristicIhvEE
                 0x000242d8       0x1e CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
-                0x000242d8                typeinfo name for BLEpp::CharacteristicT<unsigned char, void>
+                0x000242d8                typeinfo name for BLEpp::Characteristic<unsigned char, void>
  *fill*         0x000242f6        0x2 ff
  .rodata._ZTIPFhvE
                 0x000242f8       0x10 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
@@ -6800,9 +6800,9 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
  .rodata._ZTVN5BLEpp14CharacteristicIhEE
                 0x00024360       0x38 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
                 0x00024360                vtable for BLEpp::Characteristic<unsigned char>
- .rodata._ZTVN5BLEpp15CharacteristicTIhvEE
+ .rodata._ZTVN5BLEpp15CharacteristicIhvEE
                 0x00024398       0x38 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
-                0x00024398                vtable for BLEpp::CharacteristicT<unsigned char, void>
+                0x00024398                vtable for BLEpp::Characteristic<unsigned char, void>
  .rodata._ZZN4func6detailL19get_default_managerIPFhvESaIS3_EEERKNS0_16function_managerEvE15default_manager
                 0x000243d0       0x18 CMakeFiles/crownstone.dir/src/services/IndoorLocalisationService.cpp.obj
  .rodata.str1.1
@@ -6858,19 +6858,19 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
  .rodata._ZTSN5BLEpp14CharacteristicItEE
                 0x000245f8       0x1c CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x000245f8                typeinfo name for BLEpp::Characteristic<unsigned short>
- .rodata._ZTIN5BLEpp15CharacteristicTImvEE
+ .rodata._ZTIN5BLEpp15CharacteristicImvEE
                 0x00024614        0xc CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x00024614                typeinfo for BLEpp::CharacteristicT<unsigned long, void>
- .rodata._ZTSN5BLEpp15CharacteristicTImvEE
+                0x00024614                typeinfo for BLEpp::Characteristic<unsigned long, void>
+ .rodata._ZTSN5BLEpp15CharacteristicImvEE
                 0x00024620       0x1e CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x00024620                typeinfo name for BLEpp::CharacteristicT<unsigned long, void>
+                0x00024620                typeinfo name for BLEpp::Characteristic<unsigned long, void>
  *fill*         0x0002463e        0x2 ff
- .rodata._ZTIN5BLEpp15CharacteristicTItvEE
+ .rodata._ZTIN5BLEpp15CharacteristicItvEE
                 0x00024640        0xc CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x00024640                typeinfo for BLEpp::CharacteristicT<unsigned short, void>
- .rodata._ZTSN5BLEpp15CharacteristicTItvEE
+                0x00024640                typeinfo for BLEpp::Characteristic<unsigned short, void>
+ .rodata._ZTSN5BLEpp15CharacteristicItvEE
                 0x0002464c       0x1e CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x0002464c                typeinfo name for BLEpp::CharacteristicT<unsigned short, void>
+                0x0002464c                typeinfo name for BLEpp::Characteristic<unsigned short, void>
  *fill*         0x0002466a        0x2 ff
  .rodata._ZTIPFvRKtE
                 0x0002466c       0x10 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
@@ -6907,12 +6907,12 @@ LOAD /opt/compiler/gcc-arm-none-eabi-4_8-2014q3/bin/../lib/gcc/arm-none-eabi/4.8
  .rodata._ZTVN5BLEpp14CharacteristicItEE
                 0x00024740       0x38 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
                 0x00024740                vtable for BLEpp::Characteristic<unsigned short>
- .rodata._ZTVN5BLEpp15CharacteristicTImvEE
+ .rodata._ZTVN5BLEpp15CharacteristicImvEE
                 0x00024778       0x38 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x00024778                vtable for BLEpp::CharacteristicT<unsigned long, void>
- .rodata._ZTVN5BLEpp15CharacteristicTItvEE
+                0x00024778                vtable for BLEpp::Characteristic<unsigned long, void>
+ .rodata._ZTVN5BLEpp15CharacteristicItvEE
                 0x000247b0       0x38 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
-                0x000247b0                vtable for BLEpp::CharacteristicT<unsigned short, void>
+                0x000247b0                vtable for BLEpp::Characteristic<unsigned short, void>
  .rodata._ZZN4func6detailL19get_default_managerIPFmvESaIS3_EEERKNS0_16function_managerEvE15default_manager
                 0x000247e8       0x18 CMakeFiles/crownstone.dir/src/services/PowerService.cpp.obj
  .rodata._ZTIZN12PowerService29addCurrentLimitCharacteristicEvEUlRKtE_

@@ -58,14 +58,13 @@ void PowerService::savePersistentStorage() {
 }
 
 void PowerService::addPWMCharacteristic() {
-	_pwmCharacteristic = new CharacteristicT<uint8_t>();
+	_pwmCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_pwmCharacteristic);
 	_pwmCharacteristic->setUUID(UUID(getUUID(), PWM_UUID));
 	_pwmCharacteristic->setName("PWM");
 	_pwmCharacteristic->setDefaultValue(255);
 	_pwmCharacteristic->setWritable(true);
-	_pwmCharacteristic->onWrite([&]() -> void {
-			const uint8_t& value = _pwmCharacteristic->getValue();
+	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
 //			LOGi("set pwm to %i", value);
 			PWM::getInstance().setValue(0, value);
 		});
@@ -104,27 +103,26 @@ void PowerService::dim(uint8_t value) {
 }
 
 void PowerService::addSampleCurrentCharacteristic() {
-	_sampleCurrentCharacteristic = new CharacteristicT<uint8_t>();
+	_sampleCurrentCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_sampleCurrentCharacteristic);
 	_sampleCurrentCharacteristic->setUUID(UUID(getUUID(), SAMPLE_CURRENT_UUID));
 	_sampleCurrentCharacteristic->setName("Sample Current");
 	_sampleCurrentCharacteristic->setDefaultValue(0);
 	_sampleCurrentCharacteristic->setWritable(true);
-	_sampleCurrentCharacteristic->onWrite([&]() -> void {
-			const uint8_t &type = _sampleCurrentCharacteristic->getValue();
+	_sampleCurrentCharacteristic->onWrite([&](const uint8_t& value) -> void {
 			if (!_adcInitialized) {
 				// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
 				ADC::getInstance().init(PIN_AIN_ADC);
 				sampleCurrentInit();
 				_adcInitialized = true;
 			}
-			sampleCurrent(type);
+			sampleCurrent(value);
 		});
 //	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
 void PowerService::addCurrentCurveCharacteristic() {
-	_currentCurveCharacteristic = new CharacteristicT<uint8_t*>();
+	_currentCurveCharacteristic = new Characteristic<uint8_t*>();
 	addCharacteristic(_currentCurveCharacteristic);
 	_currentCurveCharacteristic->setUUID(UUID(getUUID(), CURRENT_CURVE_UUID));
 	_currentCurveCharacteristic->setName("Current Curve");
@@ -147,7 +145,7 @@ void PowerService::addCurrentCurveCharacteristic() {
 
 void PowerService::addCurrentConsumptionCharacteristic() {
 //	LOGd("create characteristic to read power consumption");
-	_currentConsumptionCharacteristic = new CharacteristicT<uint16_t>();
+	_currentConsumptionCharacteristic = new Characteristic<uint16_t>();
 	addCharacteristic(_currentConsumptionCharacteristic);
 	_currentConsumptionCharacteristic->setUUID(UUID(getUUID(), CURRENT_CONSUMPTION_UUID));
 	_currentConsumptionCharacteristic->setName("Current Consumption");
@@ -170,7 +168,7 @@ uint8_t PowerService::getCurrentLimit() {
  *       Writing to persistent memory should be done between connection/advertisement events...
  */
 void PowerService::addCurrentLimitCharacteristic() {
-	_currentLimitCharacteristic = new CharacteristicT<uint8_t>();
+	_currentLimitCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_currentLimitCharacteristic);
 	_currentLimitCharacteristic->setNotifies(true);
 	_currentLimitCharacteristic->setUUID(UUID(getUUID(), CURRENT_LIMIT_UUID));
@@ -178,8 +176,7 @@ void PowerService::addCurrentLimitCharacteristic() {
 	_currentLimitCharacteristic->setDefaultValue(getCurrentLimit());
 	_currentLimitCharacteristic->setWritable(true);
 		//.onWrite([&](const uint8_t &value) -> void {
-	_currentLimitCharacteristic->onWrite([&]() -> void {
-			const uint8_t& value = _currentLimitCharacteristic->getValue();
+	_currentLimitCharacteristic->onWrite([&](const uint8_t& value) -> void {
 			LOGi("Set current limit to: %i", value);
 			_currentLimitVal = value;
 			if (!_currentLimitInitialized) {
@@ -197,6 +194,9 @@ void PowerService::addCurrentLimitCharacteristic() {
 //	_currentLimit.start(&_currentLimitVal);
 //	_currentLimit.init();
 }
+
+//static int tmp_cnt = 100;
+//static int tick_cnt = 100;
 
 /**
  * TODO: We should only need to do this once on startup.

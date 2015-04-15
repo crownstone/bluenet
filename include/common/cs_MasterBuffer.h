@@ -10,12 +10,12 @@
 
 #include "drivers/cs_Serial.h"
 
+typedef uint8_t* buffer_ptr_t;
+
 class MasterBuffer {
 
-	typedef uint8_t* buffer_ptr_t;
-
 private:
-	uint8_t* _buffer;
+	buffer_ptr_t _buffer;
 	uint16_t _size;
 
 	bool _locked;
@@ -36,7 +36,7 @@ public:
 	void alloc(uint16_t size) {
 		LOGd("alloc %d", size);
 		_size = size;
-		_buffer = (uint8_t*)calloc(_size, sizeof(uint8_t));
+		_buffer = (buffer_ptr_t)calloc(_size, sizeof(uint8_t));
 		LOGd("buffer: %p", _buffer);
 	}
 

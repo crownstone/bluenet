@@ -64,7 +64,7 @@ public:
  * that the object is sent over the air.
  */
 template<typename T >
-class CharacteristicT<T, typename std::enable_if<std::is_base_of<Serializable, T>::value >::type> : public CharacteristicGeneric<T> {
+class Characteristic<T, typename std::enable_if<std::is_base_of<Serializable, T>::value >::type> : public CharacteristicGeneric<T> {
 
 private:
 	/* Pointer to buffer used to store the serialized object
@@ -79,7 +79,7 @@ private:
 public:
 	/* Default destructor
 	 */
-	virtual ~CharacteristicT() {
+	virtual ~Characteristic() {
 		if (_buffer) {
 			free(_buffer);
 		}
@@ -91,42 +91,42 @@ public:
 	 *
 	 * Assigns the object to this characteristic
 	 */
-	CharacteristicT& operator=(const T& val) {
+	Characteristic& operator=(const T& val) {
 		CharacteristicGeneric<T>::operator=(val);
 		return *this;
 	}
 
-	/* Returns the object currently assigned to the characteristic
-	 *
-	 * Serializes the object into a byte buffer and returns it as a
-	 * <CharacteristicValue>
-	 *
-	 * @return the serialized object in a <CharacteristicValue> object
-	 */
-	CharacteristicValue getCharacteristicValue() {
-		CharacteristicValue value;
-		const T& t = this->getValue();
-		uint32_t len = t.getSerializedLength();
-//		if (_buffer) {
-//			free(_buffer);
-//		}
-		_buffer = (uint8_t*)calloc(len, sizeof(uint8_t));
-		t.serialize(_buffer, len);
-		return CharacteristicValue(len, _buffer, true);
-	}
+//	/* Returns the object currently assigned to the characteristic
+//	 *
+//	 * Serializes the object into a byte buffer and returns it as a
+//	 * <CharacteristicValue>
+//	 *
+//	 * @return the serialized object in a <CharacteristicValue> object
+//	 */
+//	CharacteristicValue getCharacteristicValue() {
+//		CharacteristicValue value;
+//		const T& t = this->getValue();
+//		uint32_t len = t.getSerializedLength();
+////		if (_buffer) {
+////			free(_buffer);
+////		}
+//		_buffer = (uint8_t*)calloc(len, sizeof(uint8_t));
+//		t.serialize(_buffer, len);
+//		return CharacteristicValue(len, _buffer, true);
+//	}
 
-	/* Assign the given <CharacteristicValue> to this characteristic
-	 *
-	 * @value the <CharacteristicValue> object which should be assigned
-	 *
-	 * Deserializes the byte buffer obtained from the <CharacteristicValue>
-	 * into an object and assigns that to the charachteristic
-	 */
-	void setCharacteristicValue(const CharacteristicValue& value) {
-		T t;
-		t.deserialize(value.data, value.length);
-		this->setValue(t);
-	}
+//	/* Assign the given <CharacteristicValue> to this characteristic
+//	 *
+//	 * @value the <CharacteristicValue> object which should be assigned
+//	 *
+//	 * Deserializes the byte buffer obtained from the <CharacteristicValue>
+//	 * into an object and assigns that to the charachteristic
+//	 */
+//	void setCharacteristicValue(const CharacteristicValue& value) {
+//		T t;
+//		t.deserialize(value.data, value.length);
+//		this->setValue(t);
+//	}
 
 	/* Return the maximum possible length of the buffer
 	 *
@@ -138,6 +138,15 @@ public:
 	uint16_t getValueMaxLength() {
 		const T& t = this->getValue();
 		return t.getMaxLength();
+	}
+
+	uint16_t getValueLength() {
+		const T& t = this->getValue();
+		return t.getSerializedLength();
+	}
+
+	uint8_t* getValuePtr() {
+		return NULL;
 	}
 
 	/* Callback function if a notify tx error occurs

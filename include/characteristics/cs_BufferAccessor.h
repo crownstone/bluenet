@@ -24,6 +24,13 @@ public:
 	 */
 	virtual ~BufferAccessor() {};
 
+	/* Assign the buffer used to hold the scanned device list
+	 * @param buffer                the buffer to be used
+	 * @param maxLength             size of buffer (maximum number of bytes that
+	 *                              can be stored)
+	 */
+	virtual int assign(buffer_ptr_t buffer, uint16_t maxLength) = 0;
+
 	/* Return the maximum possible length of the object
 	 *
 	 * @return maximum possible length
@@ -40,61 +47,54 @@ public:
 	 * @buffer       pointer to the buffer
 	 * @dataLength   length of data in the buffer (in bytes)
 	 */
-	virtual void getBuffer(uint8_t** buffer, uint16_t& dataLength) = 0;
+	virtual void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) = 0;
 
 };
 
 /* This template implements the functions specific for a Characteristic with
- * and handles notify requests for the characteristic, in particular making sure
- * that the object is sent over the air.
+ * a BufferAccessor as the value
  */
 template<>
-class CharacteristicT<BufferAccessor*> : public CharacteristicGeneric<BufferAccessor*> {
+class Characteristic<BufferAccessor&> : public CharacteristicGeneric<BufferAccessor&> {
 
 private:
 
 public:
 
-	/* Returns the object currently assigned to the characteristic
-	 *
-	 * Serializes the object into a byte buffer and returns it as a
-	 * <CharacteristicValue>
-	 *
-	 * @return the serialized object in a <CharacteristicValue> object
-	 */
-	CharacteristicValue getCharacteristicValue() {
-		CharacteristicValue value;
-		uint8_t* buffer;
-		uint16_t len;
-		_value->getBuffer(&buffer, len);
-		return CharacteristicValue(len, buffer, false);
-	}
-
-	/* Assign the given <CharacteristicValue> to this characteristic
-	 *
-	 * @value the <CharacteristicValue> object which should be assigned
-	 *
-	 * Deserializes the byte buffer obtained from the <CharacteristicValue>
-	 * into an object and assigns that to the charachteristic
-	 */
-	void setCharacteristicValue(const CharacteristicValue& value) {
-		uint8_t* buffer;
-		uint16_t len;
-		_value->getBuffer(&buffer, len);
-		if (buffer != NULL) {
-			memcpy(buffer, value.data, value.length);
-		}
-	}
-
 	/* Return the maximum possible length of the buffer
 	 *
-	 * Checks the object assigned to this characteristics for the maximum
+	 * Checks the object assigned to this characteristic for the maximum
 	 * possible length
 	 *
 	 * @return the maximum possible length
 	 */
-	uint16_t getValueMaxLength() {
-		return _value->getMaxLength();
+	virtual uint16_t getValueMaxLength() {
+		return _value.getMaxLength();
+	}
+
+	/* Return the length of data in the buffer
+	 *
+	 * Checks the object assigned to this characteristic for the
+	 * length of data
+	 *
+	 * @return length of data contained in buffer
+	 */
+	virtual uint16_t getValueLength() {
+		return _value.getDataLength();
+	}
+
+	/* Return the pointer of the buffer
+	 *
+	 * Checks the buffer accessor assigned to this characteristic and
+	 * returns the pointer to the buffer
+	 *
+	 * @return pointer to the buffer
+	 */
+	virtual uint8_t* getValuePtr() {
+		buffer_ptr_t buffer;
+		uint16_t len;
+		_value.getBuffer(buffer, len);
+		return (uint8_t*)buffer;
 	}
 
 };

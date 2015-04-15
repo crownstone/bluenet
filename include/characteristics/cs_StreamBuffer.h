@@ -71,6 +71,7 @@ public:
 	 *
 	 * @return 0 on SUCCESS, 1 on FAILURE (buffer required too large)
 	 */
+	// TODO: should return ERR_CODE?
 	int assign(uint8_t *buffer, uint16_t size) {
 		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, size);
 		if (SB_HEADER_SIZE + _max_items*_item_size > size) {
@@ -88,13 +89,6 @@ public:
 	void release() {
 		LOGd("Release stream buffer. This will screw up SoftDevice if characteristic is not deleted.");
 		_buffer = NULL;
-	}
-
-	/* @inherit */
-	bool operator!=(const StreamBuffer &other) {
-		if (_buffer != other._buffer) return true;
-		//if (memcmp(_buffer->payload, other._buffer->payload, _capacity * sizeof(uint8_t)) != 0) return true;
-		return false;
 	}
 
 	/* Create a string from payload. 
@@ -218,18 +212,20 @@ public:
 
 	/////////// Bufferaccessor ////////////////////////////
 
+	/* @inherit */
 	uint16_t getDataLength() const {
 		return SB_HEADER_SIZE + _buffer->length;
 	}
 
+	/* @inherit */
 	uint16_t getMaxLength() const {
 		return GENERAL_BUFFER_SIZE;
 	}
 
 	// TODO: Why do we need this function!?
-	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {
-		LOGd("getBuffer: %p", this);
-		*buffer = (uint8_t*)_buffer;
+	/* @inherit */
+	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
+		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();
 	}
 

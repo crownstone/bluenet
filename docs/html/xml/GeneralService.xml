@@ -80,7 +80,7 @@ tick, because timing is not important for this at all.
   </field>
   <field access="protected" id="GeneralService::_temperatureCharacteristic" name="_temperatureCharacteristic">
     <brief>References to characteristics</brief>
-    <type name="BLEpp::CharacteristicT&lt;int, void&gt;" qualifier="*" />
+    <type name="BLEpp::Characteristic&lt;int, void&gt;" qualifier="*" />
   </field>
   <field access="protected" id="GeneralService::_nameCharacteristic" name="_nameCharacteristic">
     <type name="BLEpp::Characteristic&lt;std::basic_string&lt;char&gt; &gt;" qualifier="*" />

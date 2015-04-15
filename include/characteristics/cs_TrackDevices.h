@@ -64,17 +64,6 @@ public:
 	/* Default Constructor */
 	TrackedDeviceList() : _buffer(NULL), _timeoutCount(TRACKDEVICE_DEFAULT_TIMEOUT_COUNT) {};
 
-	/* Assign the buffer used to hold the tracked device list
-	 * @param buffer                the buffer to be used
-	 * @param maxLength             size of buffer (maximum number of bytes that
-	 *                              can be stored)
-	 */
-	void assign(uint8_t* buffer, uint16_t maxLength) {
-		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
-		assert(sizeof(tracked_device_list_t) <= maxLength, "buffer not large enough to hold tracked device list!");
-		_buffer = (tracked_device_list_t*)buffer;
-	}
-
 	/* Release the assigned buffer */
 	void release() {
 		LOGd("release");
@@ -88,7 +77,6 @@ public:
 	void init() {
 		if (_buffer) {
 			memset(_buffer->counters, TDL_COUNTER_INIT, sizeof(_buffer->counters));
-			BLEutil::printArray(_buffer->counters, TRACKDEVICES_MAX_NR_DEVICES);
 		} else {
 			LOGe("Failed to init, buffer not assigned!");
 		}
@@ -129,6 +117,14 @@ public:
 	//////////// BufferAccessor ////////////////////////////
 
 	/* @inherit */
+	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
+		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
+		assert(sizeof(tracked_device_list_t) <= maxLength, "buffer not large enough to hold tracked device list!");
+		_buffer = (tracked_device_list_t*)buffer;
+		return 0;
+	}
+
+	/* @inherit */
 	uint16_t getDataLength() const {
 		return TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_SERIALIZED_SIZE * getSize();
 	}
@@ -139,8 +135,8 @@ public:
 	}
 
 	/* @inherit */
-	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {
-		*buffer = (uint8_t*)_buffer;
+	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
+		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();
 	}
 
@@ -157,17 +153,6 @@ public:
 	/* Default Constructor */
 	TrackedDevice() : _buffer(NULL) {};
 
-	/* Assign the buffer used to hold the tracked device list
-	 * @param buffer                the buffer to be used
-	 * @param maxLength             size of buffer (maximum number of bytes that
-	 *                              can be stored
-	 */
-	void assign(uint8_t* buffer, uint16_t maxLength) {
-		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
-		assert(sizeof(tracked_device_t) <= maxLength, "buffer not large enough to hold tracked device!");
-		_buffer = (tracked_device_t*)buffer;
-	}
-
 	/* Release the assigned buffer */
 	void release() {
 		LOGd("release");
@@ -183,6 +168,14 @@ public:
 	//////////// BufferAccessor ////////////////////////////
 
 	/* @inherit */
+	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
+		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
+		assert(sizeof(tracked_device_t) <= maxLength, "buffer not large enough to hold tracked device!");
+		_buffer = (tracked_device_t*)buffer;
+		return 0;
+	}
+
+	/* @inherit */
 	uint16_t getDataLength() const {
 		return TRACKDEVICES_SERIALIZED_SIZE;
 	}
@@ -193,9 +186,9 @@ public:
 	}
 
 	/* @inherit */
-	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {
+	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
 		LOGd("getBuffer: %p", this);
-		*buffer = (uint8_t*)_buffer;
+		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();
 	}
 

@@ -41,7 +41,7 @@ the main line. This function writes to the characteristic to show it to the user
   </method>
   <field access="protected" id="BLEpp::BatteryService::_characteristic" name="_characteristic">
     <brief>A single characteristic with an unsigned 8-bit value</brief>
-    <type name="CharacteristicT&lt;unsigned char, void&gt;" qualifier="*" />
+    <type name="Characteristic&lt;unsigned char, void&gt;" qualifier="*" />
   </field>
   <field access="protected" id="BLEpp::BatteryService::_func" name="_func">
     <brief>A function for callback, not in use</brief>

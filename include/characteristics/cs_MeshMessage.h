@@ -11,84 +11,52 @@
 #include "ble_gatts.h"
 
 #include "cs_BluetoothLE.h"
-#include "cs_Serializable.h"
+#include "characteristics/cs_BufferAccessor.h"
 
-#define MESH_SERIALIZED_SIZE                     3
+using namespace BLEpp;
 
-class MeshMessage {
-private:
-	uint8_t _id;
-	uint8_t _handle;
-	uint8_t _value; // currently just one value in msg
-public:
-	MeshMessage();
-
-	bool operator!=(const MeshMessage &other);
-
-	uint32_t getSerializedLength() const;
-
-	void serialize(uint8_t *buffer, uint16_t length) const;
-
-	void deserialize(uint8_t *buffer, uint16_t length);
-
-	inline uint8_t id() const { return _id; } 
-	inline uint8_t handle() const { return _handle; }
-	inline uint8_t value() const { return _value; }
+struct __attribute__((__packed__)) mesh_message_t {
+	uint8_t id;
+	uint8_t handle;
+	uint8_t value; // currently just one value in msg
 };
 
-// template has to be in the same namespace as the other CharacteristicT templates
-namespace BLEpp {
+#define MM_SERIALIZED_SIZE sizeof(mesh_message_t)
 
-template<> class CharacteristicT<MeshMessage> : public CharacteristicGeneric<MeshMessage> {
-
+class MeshMessage : public BufferAccessor {
 private:
-	uint8_t _buffer[MESH_SERIALIZED_SIZE];
-	bool _notificationPending;
+	mesh_message_t* _buffer;
 
 public:
-	CharacteristicT& operator=(const MeshMessage& val) {
-		CharacteristicGeneric<MeshMessage>::operator=(val);
-		return *this;
+	MeshMessage() : _buffer(NULL) {};
+
+	inline uint8_t id() const { return _buffer->id; }
+	inline uint8_t handle() const { return _buffer->handle; }
+	inline uint8_t value() const { return _buffer->value; }
+
+	//////////// BufferAccessor ////////////////////////////
+
+	/* @inherit */
+	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
+		assert(sizeof(mesh_message_t) <= maxLength, "buffer not large enough to hold mesh message!");
+		_buffer = (mesh_message_t*)buffer;
+		return 0;
 	}
 
-	CharacteristicValue getCharacteristicValue() {
-		CharacteristicValue value;
-		const MeshMessage& t = this->getValue();
-		uint32_t len = t.getSerializedLength();
-		memset(_buffer, 0, len);
-		t.serialize(_buffer, len);
-		return CharacteristicValue(len, _buffer);
+	/* @inherit */
+	inline uint16_t getDataLength() const {
+		return MM_SERIALIZED_SIZE;
 	}
 
-	void setCharacteristicValue(const CharacteristicValue& value) {
-		MeshMessage t;
-		t.deserialize(value.data, value.length);
-		this->setValue(t);
+	/* @inherit */
+	inline uint16_t getMaxLength() const {
+		return MM_SERIALIZED_SIZE;
 	}
 
-	uint16_t getValueMaxLength() {
-		return MESH_SERIALIZED_SIZE;
-	}
-
-	void onNotifyTxError() {
-//		LOGw("[%s] no tx buffers, waiting for BLE_EVT_TX_COMPLETE!", _name.c_str());
-		_notificationPending = true;
-	}
-
-	void onTxComplete(ble_common_evt_t * p_ble_evt) {
-		// if we have a notification pending, try to send it
-		if (_notificationPending) {
-			uint32_t err_code = notify();
-			if (err_code != NRF_SUCCESS) {
-//				LOGw("[%s] failed to resend notification!, err_code: %d", _name.c_str(), err_code);
-			} else {
-//				LOGi("[%s] successfully resent notification", _name.c_str());
-				_notificationPending = false;
-			}
-		}
+	/* @inherit */
+	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
+		buffer = (buffer_ptr_t)_buffer;
+		dataLength = getDataLength();
 	}
 
 };
-
-} // end of namespace
-

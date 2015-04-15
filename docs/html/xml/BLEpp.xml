@@ -22,15 +22,15 @@
   </class>
   <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
   <struct name="CharacteristicStatus" ref="BLEpp::CharacteristicStatus#BLEpp::CharacteristicStatus" />
-  <classtemplate name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+  <classtemplate name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
     <brief> A default characteristic</brief>
-    <templatetypeparameter id="BLEpp::CharacteristicT::T" name="T" />
-    <templatetypeparameter id="BLEpp::CharacteristicT::E" name="E" />
+    <templatetypeparameter id="BLEpp::Characteristic::T" name="T" />
+    <templatetypeparameter id="BLEpp::Characteristic::E" name="E" />
   </classtemplate>
-  <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+  <class name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
     <brief>A characteristic for strings</brief>
   </class>
-  <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
+  <class name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
     <brief>A characteristic for CharacteristicValue</brief>
   </class>
   <struct name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue">

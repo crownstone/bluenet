@@ -11,3 +11,6 @@
 
 // size of the buffer used for characteristics
 #define GENERAL_BUFFER_SIZE                      100
+
+/* maximum length of strings used for characteristic values */
+#define MAX_STRING_LENGTH                        25

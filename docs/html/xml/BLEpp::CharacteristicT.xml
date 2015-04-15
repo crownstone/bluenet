@@ -1,32 +1,32 @@
 <?xml version='1.0' encoding='utf-8'?>
-<class id="BLEpp::CharacteristicT" name="CharacteristicT" xmlns="http://jessevdk.github.com/cldoc/1.0">
+<class id="BLEpp::Characteristic" name="Characteristic" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <brief>A characteristic for CharacteristicValue</brief>
   <base access="public">
     <type name="Characteristic&lt;BLEpp::CharacteristicValue&gt;" />
   </base>
-  <method id="BLEpp::CharacteristicT::getCharacteristicValue" name="getCharacteristicValue" virtual="yes">
+  <method id="BLEpp::Characteristic::getCharacteristicValue" name="getCharacteristicValue" virtual="yes">
     <return>
       <type name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
     </return>
   </method>
-  <method id="BLEpp::CharacteristicT::getValueMaxLength" name="getValueMaxLength" virtual="yes">
+  <method id="BLEpp::Characteristic::getValueMaxLength" name="getValueMaxLength" virtual="yes">
     <return>
       <type name="uint16_t" />
     </return>
   </method>
-  <method id="BLEpp::CharacteristicT::operator=" name="operator=">
+  <method id="BLEpp::Characteristic::operator=" name="operator=">
     <return>
-      <type name="CharacteristicT&lt;BLEpp::CharacteristicValue&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT" />
+      <type name="Characteristic&lt;BLEpp::CharacteristicValue&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
     </return>
-    <argument id="BLEpp::CharacteristicT::operator=::val" name="val">
+    <argument id="BLEpp::Characteristic::operator=::val" name="val">
       <type name="CharacteristicValue" qualifier=" const &amp;" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
     </argument>
   </method>
-  <method id="BLEpp::CharacteristicT::setCharacteristicValue" name="setCharacteristicValue" virtual="yes">
+  <method id="BLEpp::Characteristic::setCharacteristicValue" name="setCharacteristicValue" virtual="yes">
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="BLEpp::CharacteristicT::setCharacteristicValue::value" name="value">
+    <argument id="BLEpp::Characteristic::setCharacteristicValue::value" name="value">
       <type name="CharacteristicValue" qualifier=" const &amp;" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
     </argument>
   </method>

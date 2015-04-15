@@ -61,11 +61,11 @@ protected:
 	void savePersistentStorage();
 private:
 	// References to characteristics that need to be written from other functions
-	BLEpp::CharacteristicT<uint8_t> *_pwmCharacteristic;
-	BLEpp::CharacteristicT<uint8_t> *_sampleCurrentCharacteristic;
-	BLEpp::CharacteristicT<uint16_t> *_currentConsumptionCharacteristic;
-	BLEpp::CharacteristicT<uint8_t*> *_currentCurveCharacteristic;
-	BLEpp::CharacteristicT<uint8_t> *_currentLimitCharacteristic;
+	BLEpp::Characteristic<uint8_t> *_pwmCharacteristic;
+	BLEpp::Characteristic<uint8_t> *_sampleCurrentCharacteristic;
+	BLEpp::Characteristic<uint16_t> *_currentConsumptionCharacteristic;
+	BLEpp::Characteristic<uint8_t*> *_currentCurveCharacteristic;
+	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
 
 	CurrentCurve<uint16_t>* _currentCurve;
 

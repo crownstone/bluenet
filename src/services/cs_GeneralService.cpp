@@ -52,14 +52,16 @@ void GeneralService::init() {
 #endif
 #if MESHING==1
 	addMeshCharacteristic();
-	LOGi("addMeshCharacteristic();");
+	LOGi("add Mesh Characteristic");
+#else
+	LOGi("skip Mesh Characteristic");
 #endif
 
 #if CONFIGURATION==1
 	// if we use configuration characteristics, set up a buffer
 	_streamBuffer = new StreamBuffer<uint8_t>();
 	MasterBuffer& mb = MasterBuffer::getInstance();
-	uint8_t *buffer = NULL; 
+	buffer_ptr_t buffer = NULL;
 	uint16_t size = 0;
 	mb.getBuffer(buffer, size);
 
@@ -97,7 +99,7 @@ void GeneralService::savePersistentStorage() {
 }
 
 void GeneralService::addTemperatureCharacteristic() {
-	_temperatureCharacteristic = new CharacteristicT<int32_t>();
+	_temperatureCharacteristic = new Characteristic<int32_t>();
 	addCharacteristic(_temperatureCharacteristic);
 
 	_temperatureCharacteristic->setUUID(UUID(getUUID(), TEMPERATURE_UUID));
@@ -107,15 +109,14 @@ void GeneralService::addTemperatureCharacteristic() {
 }
 
 void GeneralService::addFirmwareCharacteristic() {
-	_firmwareCharacteristic = new CharacteristicT<int32_t>();
+	_firmwareCharacteristic = new Characteristic<int32_t>();
 	addCharacteristic(_firmwareCharacteristic);
 
 	_firmwareCharacteristic->setUUID(UUID(getUUID(), FIRMWARE_UUID));
 	_firmwareCharacteristic->setName("Update firmware");
 	_firmwareCharacteristic->setDefaultValue(0);
 	_firmwareCharacteristic->setWritable(true);
-	_firmwareCharacteristic->onWrite([&]() -> void {
-			const int32_t & value = _firmwareCharacteristic->getValue();
+	_firmwareCharacteristic->onWrite([&](const int32_t& value) -> void {
 			if (value != 0) {
 				LOGi("Update firmware");
 				uint8_t err_code;
@@ -133,32 +134,41 @@ void GeneralService::addFirmwareCharacteristic() {
 
 #if MESHING==1
 void GeneralService::addMeshCharacteristic() {
-	_meshCharacteristic = new CharacteristicT<MeshMessage>();
+	buffer_ptr_t buffer = MasterBuffer::getInstance().getBuffer();
+
+	_meshCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_meshCharacteristic);
 
 	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_UUID));
 	_meshCharacteristic->setName("Mesh");
 	_meshCharacteristic->setWritable(true);
-	_meshCharacteristic->onWrite([&]() -> void {
-			const MeshMessage & value = _meshCharacteristic->getValue();
+	_meshCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 			LOGi("Send mesh message");
-			uint8_t handle = value.handle();
-			uint8_t val = value.value();
+
+			MeshMessage msg;
+			msg.assign(_meshCharacteristic->getValue(), _meshCharacteristic->getValueLength());
+
+			uint8_t handle = msg.handle();
+			uint8_t val = msg.value();
 			CMesh &mesh = CMesh::getInstance();
 			mesh.send(handle, val);
 		});
+
+	_meshCharacteristic->setValue(buffer);
+	_meshCharacteristic->setMaxLength(MM_SERIALIZED_SIZE);
+	_meshCharacteristic->setDataLength(0);
+
 }
 #endif
 
 void GeneralService::addSetConfigurationCharacteristic() {
-	_setConfigurationCharacteristic = new CharacteristicT<uint8_t*>();
+	_setConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_setConfigurationCharacteristic);
 
 	_setConfigurationCharacteristic->setUUID(UUID(getUUID(), SET_CONFIGURATION_UUID));
 	_setConfigurationCharacteristic->setName("Set Configuration");
 	_setConfigurationCharacteristic->setWritable(true);
-	_setConfigurationCharacteristic->onWrite([&]() -> void {
-			uint8_t *value = _setConfigurationCharacteristic->getValue();
+	_setConfigurationCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
 			if (!value) {
 				LOGw("No value on writing to config. Bail out");
@@ -253,7 +263,7 @@ bool GeneralService::readFromStorage(uint8_t type) {
 void GeneralService::writeToConfigCharac() {
 	uint16_t len = _streamBuffer->getDataLength();
 	uint8_t value = _streamBuffer->payload()[0];
-	uint8_t *pntr = _getConfigurationCharacteristic->getValue();
+	buffer_ptr_t pntr = _getConfigurationCharacteristic->getValue();
 	LOGd("Write to config length %i and value %i", len, value);
 	
 	struct stream_t<uint8_t> *stream = (struct stream_t<uint8_t>*) pntr;
@@ -265,14 +275,13 @@ void GeneralService::writeToConfigCharac() {
 }
 
 void GeneralService::addSelectConfigurationCharacteristic() {
-	_selectConfigurationCharacteristic = new CharacteristicT<uint8_t>();
+	_selectConfigurationCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_selectConfigurationCharacteristic);
 
 	_selectConfigurationCharacteristic->setUUID(UUID(getUUID(), SELECT_CONFIGURATION_UUID));
 	_selectConfigurationCharacteristic->setName("Select Configuration");
 	_selectConfigurationCharacteristic->setWritable(true);
-	_selectConfigurationCharacteristic->onWrite([&]() -> void {
-			const uint8_t & value = _selectConfigurationCharacteristic->getValue();
+	_selectConfigurationCharacteristic->onWrite([&](const uint8_t& value) -> void {
 			if (value < CONFIG_TYPES) {
 				LOGd("Select configuration type: %i", (int)value);
 				_selectConfiguration = value;
@@ -283,7 +292,7 @@ void GeneralService::addSelectConfigurationCharacteristic() {
 }
 
 void GeneralService::addGetConfigurationCharacteristic() {
-	_getConfigurationCharacteristic = new CharacteristicT<uint8_t*>();
+	_getConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_getConfigurationCharacteristic);
 
 	_getConfigurationCharacteristic->setUUID(UUID(getUUID(), GET_CONFIGURATION_UUID));

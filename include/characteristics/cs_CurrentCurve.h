@@ -26,7 +26,7 @@ using namespace BLEpp;
 #define CC_BUFFER_NOT_LARGE_ENOUGH               2
 #define CC_DIFFERENCE_TOO_LARGE                  3
 
-typedef uint8_t ERR_CODE;
+typedef int CC_ERR_CODE;
 
 /* Structure for the Current Curve
  *
@@ -72,7 +72,7 @@ public:
 	 *
 	 * @return 0 on SUCCESS, 1 on FAILURE (buffer required too large)
 	 */
-	ERR_CODE assign(uint8_t* buffer, uint16_t size) {
+	CC_ERR_CODE assign(buffer_ptr_t buffer, uint16_t size) {
 		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, size);
 		if (_max_buf_size > size) {
 			LOGe("Assigned buffer is not large enough");
@@ -113,15 +113,7 @@ public:
 		return _buffer->length;
 	}
 
-//	ERR_CODE getFirstElement(T& voltage) {
-//		if (_buffer->_length > 0) {
-//			voltage = _buffer->firstValue;
-//			return CC_SUCCESS;
-//		}
-//		return CC_BUFFER_NOT_LARGE_ENOUGH;
-//	}
-
-	ERR_CODE getValue(uint16_t index, T& voltage) {
+	CC_ERR_CODE getValue(uint16_t index, T& voltage) {
 		if (index == 0) {
 			voltage = _buffer->firstValue;
 			return CC_SUCCESS;
@@ -144,7 +136,7 @@ public:
 	 *         1 if buffer is full,
 	 *         2 if buffer is not initialized
 	 */
-	ERR_CODE add(T value) {
+	CC_ERR_CODE add(T value) {
 		if (!_buffer) {
 			LOGe("Buffer not initialized!");
 			return CC_BUFFER_NOT_INITIALIZED;
@@ -175,7 +167,7 @@ public:
 	 *
 	 * Set "length" to 0
 	 */
-	ERR_CODE clear() {
+	CC_ERR_CODE clear() {
 		if (!_buffer) {
 			LOGe("Buffer not initialized!");
 			return CC_BUFFER_NOT_INITIALIZED;
@@ -207,9 +199,8 @@ public:
 
 	// TODO: Why do we need this function!?
 	// Why pointer of pointer?
-	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {
-		LOGd("getBuffer: %p", this);
-		*buffer = (uint8_t*)_buffer;
+	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
+		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();
 	}
 
