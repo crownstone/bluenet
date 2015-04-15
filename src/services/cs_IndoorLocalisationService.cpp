@@ -176,12 +176,12 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	_scanResult = new ScanResult();
 
 	MasterBuffer& mb = MasterBuffer::getInstance();
-	uint8_t *buffer = NULL;
+	buffer_ptr_t buffer = NULL;
 	uint16_t size = 0;
 	mb.getBuffer(buffer, size);
 	_scanResult->assign(buffer, size);
 
-	_peripheralCharac = new Characteristic<uint8_t*>();
+	_peripheralCharac = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_peripheralCharac);
 
 	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
@@ -203,18 +203,18 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	// received over BT
 
 	//	MasterBuffer& mb = MasterBuffer::getInstance();
-	//	uint8_t *buffer = NULL;
+	//	buffer_ptr_t buffer = NULL;
 	//	uint16_t size = 0;
 	//	mb.getBuffer(buffer, size);
 
 	// so instead allocate a separate buffer that the tracked device list can use
 	uint16_t size = sizeof(tracked_device_list_t);
-	uint8_t* buffer = (uint8_t*)calloc(size, sizeof(uint8_t));
+	buffer_ptr_t buffer = (buffer_ptr_t)calloc(size, sizeof(uint8_t));
 
 	_trackedDeviceList->assign(buffer, size);
 	_trackedDeviceList->init();
 
-	_trackedDeviceListCharac = new Characteristic<uint8_t*>();
+	_trackedDeviceListCharac = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_trackedDeviceListCharac);
 
 	_trackedDeviceListCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_LIST_UUID));
@@ -233,21 +233,20 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 }
 
 void IndoorLocalizationService::writeTrackedDevices() {
-	uint8_t* buffer;
+	buffer_ptr_t buffer;
 	uint16_t length;
-	_trackedDeviceList->getBuffer(&buffer, length);
+	_trackedDeviceList->getBuffer(buffer, length);
 	Storage::setArray(buffer, _storageStruct.trackedDevices.list, length);
 	LOGd("length: %d", length);
 }
 
 void IndoorLocalizationService::readTrackedDevices() {
-	uint8_t* buffer;
+	buffer_ptr_t buffer;
 	uint16_t length;
-	_trackedDeviceList->getBuffer(&buffer, length);
+	_trackedDeviceList->getBuffer(buffer, length);
 	length = _trackedDeviceList->getMaxLength();
 
-	Storage::getArray(_storageStruct.trackedDevices.list, buffer, (uint8_t*)NULL, length);
-	LOGd("length: %d", length);
+	Storage::getArray(_storageStruct.trackedDevices.list, buffer, (buffer_ptr_t)NULL, length);
 
 	if (!_trackedDeviceList->isEmpty()) {
 		LOGi("restored tracked devices (%d):", _trackedDeviceList->getSize());
@@ -295,9 +294,9 @@ void IndoorLocalizationService::stopTracking() {
 
 void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 
-	uint8_t *buffer = MasterBuffer::getInstance().getBuffer();
+	buffer_ptr_t buffer = MasterBuffer::getInstance().getBuffer();
 
-	_trackedDeviceCharac = new Characteristic<uint8_t*>();
+	_trackedDeviceCharac = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_trackedDeviceCharac);
 
 	_trackedDeviceCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_UUID));

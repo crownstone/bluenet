@@ -83,17 +83,6 @@ public:
 	 */
 	ScanResult() : _buffer(NULL) {}
 
-	/* Assign the buffer used to hold the scanned device list
-	 * @param buffer                the buffer to be used
-	 * @param maxLength             size of buffer (maximum number of bytes that
-	 *                              can be stored)
-	 */
-	void assign(uint8_t* buffer, uint16_t maxLength) {
-		LOGd("assign, this: %p, buff: %p, len: %d, sizeof(): %d", this, buffer, maxLength, sizeof(peripheral_device_list_t));
-		assert(sizeof(peripheral_device_list_t) <= maxLength, "buffer not large enough to hold scan device list!");
-		_buffer = (peripheral_device_list_t*)buffer;
-	}
-
 	/* Release assigned buffer
 	 */
 	void release() {
@@ -130,6 +119,13 @@ public:
 	//////////// BufferAccessor ////////////////////////////
 
 	/* @inherit */
+	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
+		assert(sizeof(peripheral_device_list_t) <= maxLength, "buffer not large enough to hold scan device list!");
+		_buffer = (peripheral_device_list_t*)buffer;
+		return 0;
+	}
+
+	/* @inherit */
 	uint16_t getDataLength() const {
 		return SR_HEADER_SIZE + SR_SERIALIZED_DEVICE_SIZE * getSize();
 	}
@@ -140,8 +136,8 @@ public:
 	}
 
 	/* @inherit */
-	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {
-		*buffer = (uint8_t*)_buffer;
+	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
+		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();
 	}
 

@@ -59,7 +59,7 @@ void GeneralService::init() {
 	// if we use configuration characteristics, set up a buffer
 	_streamBuffer = new StreamBuffer<uint8_t>();
 	MasterBuffer& mb = MasterBuffer::getInstance();
-	uint8_t *buffer = NULL; 
+	buffer_ptr_t buffer = NULL;
 	uint16_t size = 0;
 	mb.getBuffer(buffer, size);
 
@@ -253,7 +253,7 @@ bool GeneralService::readFromStorage(uint8_t type) {
 void GeneralService::writeToConfigCharac() {
 	uint16_t len = _streamBuffer->getDataLength();
 	uint8_t value = _streamBuffer->payload()[0];
-	uint8_t *pntr = _getConfigurationCharacteristic->getValue();
+	buffer_ptr_t pntr = _getConfigurationCharacteristic->getValue();
 	LOGd("Write to config length %i and value %i", len, value);
 	
 	struct stream_t<uint8_t> *stream = (struct stream_t<uint8_t>*) pntr;
@@ -283,7 +283,7 @@ void GeneralService::addSelectConfigurationCharacteristic() {
 }
 
 void GeneralService::addGetConfigurationCharacteristic() {
-	_getConfigurationCharacteristic = new Characteristic<uint8_t*>();
+	_getConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_getConfigurationCharacteristic);
 
 	_getConfigurationCharacteristic->setUUID(UUID(getUUID(), GET_CONFIGURATION_UUID));

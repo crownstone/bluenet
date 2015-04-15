@@ -17,11 +17,9 @@ namespace BLEpp {
  * that the object is sent over the air.
  */
 template<>
-class Characteristic<uint8_t*> : public CharacteristicGeneric<uint8_t*> {
+class Characteristic<buffer_ptr_t> : public CharacteristicGeneric<buffer_ptr_t> {
 
 private:
-	typedef uint8_t* buffer_ptr_t;
-
 	// maximum length for this characteristic in bytes
 	uint16_t _maxLength;
 
@@ -31,7 +29,7 @@ private:
 public:
 
 	void setValue(const buffer_ptr_t& value) {
-		assert(value, "Error: Don't assign NULL pointers! Pointer to buffer has to be correct from the start!");
+		assert(value, "Error: Don't assign NULL pointers! Pointer to buffer has to be valid from the start!");
 		_value = value;
 	}
 

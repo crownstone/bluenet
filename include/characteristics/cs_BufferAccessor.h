@@ -24,6 +24,13 @@ public:
 	 */
 	virtual ~BufferAccessor() {};
 
+	/* Assign the buffer used to hold the scanned device list
+	 * @param buffer                the buffer to be used
+	 * @param maxLength             size of buffer (maximum number of bytes that
+	 *                              can be stored)
+	 */
+	virtual int assign(buffer_ptr_t buffer, uint16_t maxLength) = 0;
+
 	/* Return the maximum possible length of the object
 	 *
 	 * @return maximum possible length
@@ -40,7 +47,7 @@ public:
 	 * @buffer       pointer to the buffer
 	 * @dataLength   length of data in the buffer (in bytes)
 	 */
-	virtual void getBuffer(uint8_t** buffer, uint16_t& dataLength) = 0;
+	virtual void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) = 0;
 
 };
 
@@ -64,9 +71,9 @@ public:
 	 */
 	CharacteristicValue getCharacteristicValue() {
 		CharacteristicValue value;
-		uint8_t* buffer;
+		buffer_ptr_t buffer;
 		uint16_t len;
-		_value->getBuffer(&buffer, len);
+		_value->getBuffer(buffer, len);
 		return CharacteristicValue(len, buffer, false);
 	}
 
@@ -78,9 +85,9 @@ public:
 	 * into an object and assigns that to the charachteristic
 	 */
 	void setCharacteristicValue(const CharacteristicValue& value) {
-		uint8_t* buffer;
+		buffer_ptr_t buffer;
 		uint16_t len;
-		_value->getBuffer(&buffer, len);
+		_value->getBuffer(buffer, len);
 		if (buffer != NULL) {
 			memcpy(buffer, value.data, value.length);
 		}

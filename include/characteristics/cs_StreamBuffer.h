@@ -90,13 +90,6 @@ public:
 		_buffer = NULL;
 	}
 
-	/* @inherit */
-	bool operator!=(const StreamBuffer &other) {
-		if (_buffer != other._buffer) return true;
-		//if (memcmp(_buffer->payload, other._buffer->payload, _capacity * sizeof(uint8_t)) != 0) return true;
-		return false;
-	}
-
 	/* Create a string from payload. 
 	 *
 	 * This creates a C++ string from the uint8_t payload array. Note that this not always makes sense! It will
@@ -218,18 +211,20 @@ public:
 
 	/////////// Bufferaccessor ////////////////////////////
 
+	/* @inherit */
 	uint16_t getDataLength() const {
 		return SB_HEADER_SIZE + _buffer->length;
 	}
 
+	/* @inherit */
 	uint16_t getMaxLength() const {
 		return GENERAL_BUFFER_SIZE;
 	}
 
 	// TODO: Why do we need this function!?
-	void getBuffer(uint8_t** buffer, uint16_t& dataLength) {
-		LOGd("getBuffer: %p", this);
-		*buffer = (uint8_t*)_buffer;
+	/* @inherit */
+	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
+		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();
 	}
 
