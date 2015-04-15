@@ -18,8 +18,9 @@
 
 using namespace BLEpp;
 
+#define CURRENT_CURVE_HEADER_SIZE                (sizeof(uint16_t) + 2*sizeof(T) + 2*sizeof(uint32_t))
 //#define CURRENT_CURVE_MAX_SAMPLES                90
-#define CURRENT_CURVE_MAX_SAMPLES                (GENERAL_BUFFER_SIZE - sizeof(uint16_t) - 2*sizeof(T) + 1)
+#define CURRENT_CURVE_MAX_SAMPLES                (GENERAL_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE + 1)
 
 #define CC_SUCCESS                               0
 #define CC_BUFFER_NOT_INITIALIZED                1
@@ -37,6 +38,8 @@ struct __attribute__((__packed__)) current_curve_t {
 	uint16_t length;
 	T firstValue;
 	T lastValue;
+	uint32_t firstTimeStamp;
+	uint32_t lastTimeStamp;
 	int8_t differences[CURRENT_CURVE_MAX_SAMPLES-1];
 };
 
@@ -54,7 +57,7 @@ private:
 	current_curve_t<T>* _buffer;
 
 //	const size_t _item_size = sizeof(T);
-	const size_t _max_buf_size = sizeof(uint16_t) + CURRENT_CURVE_MAX_SAMPLES-1 + 2*sizeof(T);
+	const size_t _max_buf_size = CURRENT_CURVE_HEADER_SIZE + CURRENT_CURVE_MAX_SAMPLES-1;
 public:
 	/* Default constructor
 	 *
@@ -113,16 +116,16 @@ public:
 		return _buffer->length;
 	}
 
-	CC_ERR_CODE getValue(uint16_t index, T& voltage) {
+	CC_ERR_CODE getValue(const uint16_t index, T& voltage) {
+		if (index >= _buffer->length) {
+			return CC_BUFFER_NOT_LARGE_ENOUGH;
+		}
 		if (index == 0) {
 			voltage = _buffer->firstValue;
 			return CC_SUCCESS;
 		}
-		if (index > _buffer->length) {
-			voltage += _buffer->differences[index-1];
-			return CC_SUCCESS;
-		}
-		return CC_BUFFER_NOT_LARGE_ENOUGH;
+		voltage += _buffer->differences[index-1];
+		return CC_SUCCESS;
 	}
 
 	/* Add a value to the current curve
@@ -136,7 +139,7 @@ public:
 	 *         1 if buffer is full,
 	 *         2 if buffer is not initialized
 	 */
-	CC_ERR_CODE add(T value) {
+	CC_ERR_CODE add(T value, uint32_t timeStamp=0) {
 		if (!_buffer) {
 			LOGe("Buffer not initialized!");
 			return CC_BUFFER_NOT_INITIALIZED;
@@ -147,9 +150,11 @@ public:
 		}
 
 		if (!_buffer->length) {
+			_buffer->length++;
 			_buffer->firstValue = value;
 			_buffer->lastValue = value;
-			_buffer->length++;
+			_buffer->firstTimeStamp = timeStamp;
+			_buffer->lastTimeStamp = timeStamp;
 		}
 		else {
 			int32_t diff = (int32_t)value - _buffer->lastValue;
@@ -159,6 +164,7 @@ public:
 			}
 			_buffer->differences[_buffer->length++] = diff;
 			_buffer->lastValue = value;
+			_buffer->lastTimeStamp = timeStamp;
 		}
 		return CC_SUCCESS;
 	}
@@ -172,8 +178,10 @@ public:
 			LOGe("Buffer not initialized!");
 			return CC_BUFFER_NOT_INITIALIZED;
 		}
-//		_buffer->firstValue = 0;
-//		_buffer->lastValue = 0;
+		_buffer->firstValue = 0;
+		_buffer->lastValue = 0;
+		_buffer->firstTimeStamp = 0;
+		_buffer->lastTimeStamp = 0;
 //		memset(_buffer->differences, 0, _capacity * _item_size);
 		_buffer->length = 0;
 		return CC_SUCCESS;
@@ -189,7 +197,7 @@ public:
 	/////////// Bufferaccessor ////////////////////////////
 
 	uint16_t getDataLength() const {
-		return sizeof(uint16_t) + 2*sizeof(T) + _buffer->length-1;
+		return CURRENT_CURVE_HEADER_SIZE + _buffer->length-1;
 	}
 
 	uint16_t getMaxLength() const {

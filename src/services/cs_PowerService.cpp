@@ -252,6 +252,7 @@ void PowerService::sampleCurrent(uint8_t type) {
 	ADC::getInstance().setCurrentCurve(NULL);
 
 	uint16_t numSamples = _currentCurve->length();
+	LOGd("numSamples = %i", numSamples);
 	if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
 		_currentCurveCharacteristic->setDataLength(_currentCurve->getDataLength());
 		_currentCurveCharacteristic->notify();
@@ -272,7 +273,7 @@ void PowerService::sampleCurrent(uint8_t type) {
 #ifdef MICRO_VIEW
 			write("%u %u ", timestamp, voltage);
 #endif
-			if (!(++i % 5)) {
+			if (!((i+1) % 5)) {
 				_log(INFO, "\r\n");
 			}
 			voltageSquareMean += voltage*voltage;

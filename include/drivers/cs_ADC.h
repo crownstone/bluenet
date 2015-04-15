@@ -64,10 +64,7 @@ private:
 	// This class is singleton, deny implementation
 	void operator=(ADC const &);
 
-//	uint16_t _bufferSize;
 	uint16_t _lastResult;
-//	uint16_t _numSamples;
-//	bool _store;
 //	uint8_t _threshold;
 	CurrentCurve<uint16_t>* _currentCurve;
 
