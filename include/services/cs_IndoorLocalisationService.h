@@ -66,6 +66,13 @@ public:
 	void tick();
 //	void addSpecificCharacteristics();
 
+	/* Initialize a IndoorLocalization object
+	 * @stack Bluetooth Stack to attach this service to
+	 *
+	 * Add all characteristics and initialize them where necessary.
+	 */
+	void init();
+
 	/** Sets the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
 	void setNearbyTimeout(uint16_t counts);
 
