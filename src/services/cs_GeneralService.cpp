@@ -38,18 +38,24 @@ void GeneralService::init() {
 	LOGi("Create general service");
 
 #if TEMPERATURE==1
+	LOGi("add Temperature Characteristic");
 	addTemperatureCharacteristic();
-	LOGi("addTemperatureCharacteristic();");
 #else
 	LOGi("skip Temperature Characteristic");
 #endif
 
+#if FIRMWARE==1
+	LOGi("add Firmware Characteristic");
 	addFirmwareCharacteristic();
-	LOGi("addFirmwareCharacteristic();");
+#else
+	LOGi("skip Firmware Characteristic");
+#endif
 #if MESHING==1
 	addMeshCharacteristic();
 	LOGi("addMeshCharacteristic();");
 #endif
+
+#if CONFIGURATION==1
 	// if we use configuration characteristics, set up a buffer
 	_streamBuffer = new StreamBuffer<uint8_t>();
 	MasterBuffer& mb = MasterBuffer::getInstance();
@@ -60,12 +66,12 @@ void GeneralService::init() {
 	LOGd("Assign buffer of size %i to stream buffer", size);
 	_streamBuffer->assign(buffer, size);
 
+	LOGi("add Set Configuration Characteristic");
 	addSetConfigurationCharacteristic();
-	LOGi("addSetConfigurationCharacteristic();");
+	LOGi("add Select Configuration Characteristic");
 	addSelectConfigurationCharacteristic();
-	LOGi("addSelectConfigurationCharacteristic();");
+	LOGi("add Get Configuration Characteristic");
 	addGetConfigurationCharacteristic();
-	LOGi("addGetConfigurationCharacteristic();");
 
 	_setConfigurationCharacteristic->setValue(buffer);
 	_setConfigurationCharacteristic->setMaxLength(size);
@@ -76,6 +82,10 @@ void GeneralService::init() {
 	_getConfigurationCharacteristic->setDataLength(size);
 
 	LOGd("Set both set/get charac to buffer at %p", buffer);
+#else
+	LOGi("skip Configuration Characteristics");
+#endif
+
 }
 
 void GeneralService::loadPersistentStorage() {

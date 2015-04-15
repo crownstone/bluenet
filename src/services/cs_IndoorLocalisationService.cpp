@@ -51,9 +51,14 @@ IndoorLocalizationService::IndoorLocalizationService() :
 void IndoorLocalizationService::init() {
 	LOGi("Create indoor localization service");
 
-//	addSignalStrengthCharacteristic();
+#if RSSI==1
+	LOGi("add Signal Strength characteristics");
+	addSignalStrengthCharacteristic();
+#else
+	LOGi("skip Signal Strength characteristics");
+#endif
 #if SCAN_DEVICES==1
-	LOGi("add Scan/Devices characteristics");
+	LOGi("add Scan Devices characteristics");
 	addScanControlCharacteristic();
 	addPeripheralListCharacteristic();
 #else

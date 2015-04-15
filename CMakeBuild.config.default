@@ -9,6 +9,19 @@ INDOOR_SERVICE=0
 GENERAL_SERVICE=1
 POWER_SERVICE=0
 
+# Enable or disable characteristics
+## General Service
+TEMPERATURE=1
+FIRMWARE=1
+CONFIGURATION=1
+
+## Indoor Localization Service
+RSSI=0
+SCAN_DEVICES=0
+TRACK_DEVICES=0
+
+## Power Service
+
 # Enable or disable meshing functionality (1 or 0)
 MESHING=0
 
