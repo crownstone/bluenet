@@ -544,13 +544,13 @@ private:
 /* A default characteristic
  */
 template<typename T, typename E = void>
-class CharacteristicT : public CharacteristicGeneric<T> {
+class Characteristic : public CharacteristicGeneric<T> {
 public:
-	CharacteristicT()
+	Characteristic()
 : CharacteristicGeneric<T>() {
 	}
 
-	CharacteristicT& operator=(const T& val) {
+	Characteristic& operator=(const T& val) {
 		CharacteristicGeneric<T>::operator=(val);
 		return *this;
 	}
@@ -560,9 +560,9 @@ public:
 
 // A characteristic for built-in arithmetic types (int, float, etc)
 template<typename T > 
-class CharacteristicT<T, typename std::enable_if<std::is_arithmetic<T>::value >::type> : public CharacteristicGeneric<T> {
+class Characteristic<T, typename std::enable_if<std::is_arithmetic<T>::value >::type> : public CharacteristicGeneric<T> {
 public:
-	CharacteristicT& operator=(const T& val) {
+	Characteristic& operator=(const T& val) {
 		CharacteristicGeneric<T>::operator=(val);
 		return *this;
 	}
@@ -581,9 +581,9 @@ public:
 
 // A characteristic for strings
 template<> 
-class CharacteristicT<std::string> : public CharacteristicGeneric<std::string> {
+class Characteristic<std::string> : public CharacteristicGeneric<std::string> {
 public:
-	CharacteristicT& operator=(const std::string& val) {
+	Characteristic& operator=(const std::string& val) {
 		CharacteristicGeneric<std::string>::operator=(val);
 		return *this;
 	}
@@ -602,9 +602,9 @@ public:
 
 // A characteristic for CharacteristicValue
 template<> 
-class CharacteristicT<CharacteristicValue> : public CharacteristicGeneric<CharacteristicValue> {
+class Characteristic<CharacteristicValue> : public CharacteristicGeneric<CharacteristicValue> {
 public:
-	CharacteristicT& operator=(const CharacteristicValue& val) {
+	Characteristic& operator=(const CharacteristicValue& val) {
 		CharacteristicGeneric<CharacteristicValue>::operator=(val);
 		return *this;
 	}
@@ -771,7 +771,7 @@ public:
 
 protected:
 	// A single characteristic with an unsigned 8-bit value
-	CharacteristicT<uint8_t> *_characteristic;
+	Characteristic<uint8_t> *_characteristic;
 	// A function for callback, not in use
 	func_t _func;
 public:
@@ -780,7 +780,7 @@ public:
 		setUUID(UUID(BLE_UUID_BATTERY_SERVICE));
 		setName(std::string("BatteryService"));
 
-		_characteristic = new CharacteristicT<uint8_t>();
+		_characteristic = new Characteristic<uint8_t>();
 
 		(*_characteristic).setUUID(UUID(BLE_UUID_BATTERY_LEVEL_CHAR))
                         				   .setName(std::string("battery"))

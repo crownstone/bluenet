@@ -96,19 +96,19 @@ protected:
 
 	/* Temperature characteristic
 	 */
-	BLEpp::CharacteristicT<int32_t>* _temperatureCharacteristic;
+	BLEpp::Characteristic<int32_t>* _temperatureCharacteristic;
 
 	/* Firmware characteristic
 	 *
 	 * Resets device
 	 */
-	BLEpp::CharacteristicT<int32_t>* _firmwareCharacteristic;
+	BLEpp::Characteristic<int32_t>* _firmwareCharacteristic;
 
 	/* Mesh characteristic
 	 *
 	 * Sends a message over the mesh network
 	 */
-	BLEpp::CharacteristicT<MeshMessage>* _meshCharacteristic;
+	BLEpp::Characteristic<MeshMessage>* _meshCharacteristic;
 
 	/* Set configuration characteristic
 	 *
@@ -123,14 +123,14 @@ protected:
 	 * As you see these are similar to current characteristics and will replace them in the future to save space.
 	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
 	 */
-	BLEpp::CharacteristicT<uint8_t*>* _setConfigurationCharacteristic;
+	BLEpp::Characteristic<uint8_t*>* _setConfigurationCharacteristic;
 	
 	/* Select configuration characteristic
 	 *
 	 * Just write an identifier to read subsequently from it using <_getConfigurationCharacteristic>. See for the
 	 * possible values <_setConfigurationCharacteristic>.
 	 */
-	BLEpp::CharacteristicT<uint8_t>* _selectConfigurationCharacteristic;
+	BLEpp::Characteristic<uint8_t>* _selectConfigurationCharacteristic;
 
 	/* Get configuration characteristic
 	 *
@@ -139,7 +139,7 @@ protected:
 	 *
 	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
 	 */
-	BLEpp::CharacteristicT<uint8_t*>* _getConfigurationCharacteristic;
+	BLEpp::Characteristic<uint8_t*>* _getConfigurationCharacteristic;
 
 	/* Enable the temperature characteristic.
  	 */

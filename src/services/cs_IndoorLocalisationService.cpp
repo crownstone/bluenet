@@ -114,7 +114,7 @@ void IndoorLocalizationService::tick() {
 
 void IndoorLocalizationService::addSignalStrengthCharacteristic() {
 //	LOGd("create characteristic to read signal strength");
-	_rssiCharac = new CharacteristicT<int8_t>();
+	_rssiCharac = new Characteristic<int8_t>();
 	addCharacteristic(_rssiCharac);
 
 	_rssiCharac->setUUID(UUID(getUUID(), RSSI_UUID)); // there is no BLE_UUID for rssi level(?)
@@ -126,7 +126,7 @@ void IndoorLocalizationService::addSignalStrengthCharacteristic() {
 void IndoorLocalizationService::addScanControlCharacteristic() {
 	// set scanning option
 //	LOGd("create characteristic to stop/start scan");
-	_scanControlCharac = new CharacteristicT<uint8_t>();
+	_scanControlCharac = new Characteristic<uint8_t>();
 	addCharacteristic(_scanControlCharac);
 
 	_scanControlCharac->setUUID(UUID(getUUID(), SCAN_DEVICE_UUID));
@@ -181,7 +181,7 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 	mb.getBuffer(buffer, size);
 	_scanResult->assign(buffer, size);
 
-	_peripheralCharac = new CharacteristicT<uint8_t*>();
+	_peripheralCharac = new Characteristic<uint8_t*>();
 	addCharacteristic(_peripheralCharac);
 
 	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
@@ -214,7 +214,7 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	_trackedDeviceList->assign(buffer, size);
 	_trackedDeviceList->init();
 
-	_trackedDeviceListCharac = new CharacteristicT<uint8_t*>();
+	_trackedDeviceListCharac = new Characteristic<uint8_t*>();
 	addCharacteristic(_trackedDeviceListCharac);
 
 	_trackedDeviceListCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_LIST_UUID));
@@ -297,7 +297,7 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 
 	uint8_t *buffer = MasterBuffer::getInstance().getBuffer();
 
-	_trackedDeviceCharac = new CharacteristicT<uint8_t*>();
+	_trackedDeviceCharac = new Characteristic<uint8_t*>();
 	addCharacteristic(_trackedDeviceCharac);
 
 	_trackedDeviceCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_UUID));

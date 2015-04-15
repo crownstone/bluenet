@@ -37,7 +37,7 @@ digraph G {
 // ----------------------------------------------
 	GeneralService [
 		label="{GeneralService\n\n\
-|<CharacteristicT>CharacteristicT&lt;int32_t&gt;*                    _temperatureCharacteristic\l\
+|<Characteristic>Characteristic&lt;int32_t&gt;*                    _temperatureCharacteristic\l\
 |<Characteristic>Characteristic&lt;string&gt;*                       _nameCharacteristic\l\
 |Characteristic&lt;string&gt;*                                       _deviceTypeCharacteristic\l\
 |Characteristic&lt;string&gt;*                                       _roomCharacteristic\l\
@@ -72,7 +72,7 @@ digraph G {
 // ----------------------------------------------
 	IndoorLocalizationService [
 		label="{IndoorLocalizationService\n\n\
-|<CharacteristicT>CharacteristicT&lt;int8_t&gt;*                     _rssiCharac\l\
+|<Characteristic>Characteristic&lt;int8_t&gt;*                     _rssiCharac\l\
 |<ScanResult>Characteristic&lt;ScanResult&gt;*                       _peripheralCharac\l\
 |<TrackedDeviceList>Characteristic&lt;TrackedDeviceList&gt;*         _trackedDeviceListCharac\l\
 |<TrackedDevice>Characteristic&lt;TrackedDevice&gt;*                 _trackedDeviceCharac\l\
@@ -166,10 +166,10 @@ digraph G {
 
 
 // ----------------------------------------------
-// CharacteristicT
+// Characteristic
 // ----------------------------------------------
-	CharacteristicT [
-		label="{CharacteristicT&lt;T, E&gt;\n\n\
+	Characteristic [
+		label="{Characteristic&lt;T, E&gt;\n\n\
 |<CharacteristicValue>CharacteristicValue                  getCharacteristicValue()\l\
 |void                                                      setCharacteristicValue(const CharacteristicValue& value)\l\
 }"
@@ -177,10 +177,10 @@ digraph G {
 
 /*
 // ----------------------------------------------
-// CharacteristicT_Serializable
+// Characteristic_Serializable
 // ----------------------------------------------
-	CharacteristicT_Serializable [
-		label="{CharacteristicT&lt;T, Serializable&gt;\n\n\
+	Characteristic_Serializable [
+		label="{Characteristic&lt;T, Serializable&gt;\n\n\
 |uint8_t*              _buffer\l\
 |bool                  _notificationPending\l\
 }"
@@ -357,16 +357,16 @@ digraph G {
 	Serializable -> TrackedDevice
 	Serializable -> CurrentCurve
 	CharacteristicBase -> Characteristic
-	Characteristic -> CharacteristicT
+	Characteristic -> Characteristic
 	Listener -> CurrentLimit
 
 
 	// ********************************
-	// Specialized versions of CharacteristicT
+	// Specialized versions of Characteristic
 	// ********************************
-	CharacteristicT -> MeshMessage [arrowtail="dot"]
-//	CharacteristicT -> CharacteristicT_Serializable [arrowtail="dot"]
-	CharacteristicT -> Serializable [arrowtail="dot"]
+	Characteristic -> MeshMessage [arrowtail="dot"]
+//	Characteristic -> Characteristic_Serializable [arrowtail="dot"]
+	Characteristic -> Serializable [arrowtail="dot"]
 
 
 	// ********************************
@@ -375,7 +375,7 @@ digraph G {
 	CharacteristicBase -> GenericService:CharacteristicBase [style="dashed" arrowtail="dot"]
 	CharacteristicStatus -> GenericService:CharacteristicStatus [style="dashed" arrowtail="dot"]
 
-//	CharacteristicT -> GeneralService:CharacteristicT [style="dashed" arrowtail="dot"]
+//	Characteristic -> GeneralService:Characteristic [style="dashed" arrowtail="dot"]
 //	Characteristic -> GeneralService:Characteristic [style="dashed" arrowtail="dot"]
 	MeshMessage -> GeneralService:MeshMessage [style="dashed" arrowtail="dot"]
 	StreamBuffer -> GeneralService:StreamBuffer [style="dashed" arrowtail="dot"]
@@ -384,7 +384,7 @@ digraph G {
 	CurrentCurve -> PowerService:CurrentCurve [style="dashed" arrowtail="dot"]
 	CurrentLimit -> PowerService:CurrentLimit [style="dashed" arrowtail="dot"]
 
-//	CharacteristicT -> IndoorLocalizationService:CharacteristicT [style="dashed" arrowtail="dot"]
+//	Characteristic -> IndoorLocalizationService:Characteristic [style="dashed" arrowtail="dot"]
 //	Characteristic -> IndoorLocalizationService:Characteristic [style="dashed" arrowtail="dot"]
 	ScanResult -> IndoorLocalizationService:ScanResult [style="dashed" arrowtail="dot"]
 	TrackedDeviceList -> IndoorLocalizationService:TrackedDeviceList [style="dashed" arrowtail="dot"]
@@ -397,13 +397,13 @@ digraph G {
 	tracked_device_t -> TrackedDevice:tracked_device_t [style="dashed" arrowtail="dot"]
 	tracked_device_t -> TrackedDeviceList:tracked_device_t [style="dashed" arrowtail="dot"]
 
-	CharacteristicValue -> CharacteristicT:CharacteristicValue [style="dashed" arrowtail="dot"]
+	CharacteristicValue -> Characteristic:CharacteristicValue [style="dashed" arrowtail="dot"]
 
 /*
 	AllocatedBuffer
 	CurrentLimit-> Listener
-//	CharacteristicT<T, typename std::enable_if<std::is_base_of<Serializable, T>::value >::type> -> Characteristic<T>
-	CharacteristicT -> Characteristic
+//	Characteristic<T, typename std::enable_if<std::is_base_of<Serializable, T>::value >::type> -> Characteristic<T>
+	Characteristic -> Characteristic
 	Dimming-> Listener
 	BLEStack
 	BLEStack

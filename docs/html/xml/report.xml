@@ -87,10 +87,10 @@ return values.
       <undocumented id="BLEpp::Characteristic::T" name="T">
         <location column="10" file="include/cs_BluetoothLE.h" line="346" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::E" name="E">
+      <undocumented id="BLEpp::Characteristic::E" name="E">
         <location column="22" file="include/cs_BluetoothLE.h" line="505" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::T" name="T">
+      <undocumented id="BLEpp::Characteristic::T" name="T">
         <location column="10" file="include/cs_BluetoothLE.h" line="505" />
       </undocumented>
       <undocumented id="BLEpp::Service::createCharacteristic::T" name="T">
@@ -280,34 +280,34 @@ return values.
       <undocumented id="BLEpp::CharacteristicBase::written" name="written">
         <location column="2" file="include/cs_BluetoothLE.h" line="277" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::getCharacteristicValue" name="getCharacteristicValue">
+      <undocumented id="BLEpp::Characteristic::getCharacteristicValue" name="getCharacteristicValue">
         <location column="2" file="include/cs_BluetoothLE.h" line="516" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::getCharacteristicValue" name="getCharacteristicValue">
+      <undocumented id="BLEpp::Characteristic::getCharacteristicValue" name="getCharacteristicValue">
         <location column="2" file="include/cs_BluetoothLE.h" line="552" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::getCharacteristicValue" name="getCharacteristicValue">
+      <undocumented id="BLEpp::Characteristic::getCharacteristicValue" name="getCharacteristicValue">
         <location column="2" file="include/cs_BluetoothLE.h" line="572" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::getValueMaxLength" name="getValueMaxLength">
+      <undocumented id="BLEpp::Characteristic::getValueMaxLength" name="getValueMaxLength">
         <location column="2" file="include/cs_BluetoothLE.h" line="548" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::getValueMaxLength" name="getValueMaxLength">
+      <undocumented id="BLEpp::Characteristic::getValueMaxLength" name="getValueMaxLength">
         <location column="2" file="include/cs_BluetoothLE.h" line="568" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::operator=" name="operator=">
+      <undocumented id="BLEpp::Characteristic::operator=" name="operator=">
         <location column="2" file="include/cs_BluetoothLE.h" line="512" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::operator=" name="operator=">
+      <undocumented id="BLEpp::Characteristic::operator=" name="operator=">
         <location column="2" file="include/cs_BluetoothLE.h" line="543" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::operator=" name="operator=">
+      <undocumented id="BLEpp::Characteristic::operator=" name="operator=">
         <location column="2" file="include/cs_BluetoothLE.h" line="563" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::setCharacteristicValue" name="setCharacteristicValue">
+      <undocumented id="BLEpp::Characteristic::setCharacteristicValue" name="setCharacteristicValue">
         <location column="2" file="include/cs_BluetoothLE.h" line="555" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::setCharacteristicValue" name="setCharacteristicValue">
+      <undocumented id="BLEpp::Characteristic::setCharacteristicValue" name="setCharacteristicValue">
         <location column="2" file="include/cs_BluetoothLE.h" line="575" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicValue::operator!=" name="operator!=">
@@ -778,7 +778,7 @@ return values.
       <undocumented id="BLEpp::CharacteristicInit::CharacteristicInit" name="CharacteristicInit">
         <location column="2" file="include/cs_BluetoothLE.h" line="127" />
       </undocumented>
-      <undocumented id="BLEpp::CharacteristicT::CharacteristicT&lt;T, E&gt;" name="CharacteristicT&lt;T, E&gt;">
+      <undocumented id="BLEpp::Characteristic::Characteristic&lt;T, E&gt;" name="Characteristic&lt;T, E&gt;">
         <location column="2" file="include/cs_BluetoothLE.h" line="508" />
       </undocumented>
       <undocumented id="BLEpp::CharacteristicValue::CharacteristicValue" name="CharacteristicValue">
@@ -931,7 +931,7 @@ return values.
       <location column="1" file="include/cs_BluetoothLE.h" line="311" />
       <undocumented-return />
     </function>
-    <function id="BLEpp::CharacteristicT::setCharacteristicValue" name="setCharacteristicValue">
+    <function id="BLEpp::Characteristic::setCharacteristicValue" name="setCharacteristicValue">
       <location column="2" file="include/cs_BluetoothLE.h" line="517" />
       <undocumented name="value" />
     </function>

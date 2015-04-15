@@ -55,7 +55,7 @@ void PowerService::savePersistentStorage() {
 }
 
 void PowerService::addPWMCharacteristic() {
-	_pwmCharacteristic = new CharacteristicT<uint8_t>();
+	_pwmCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_pwmCharacteristic);
 	(*_pwmCharacteristic)
 		.setUUID(UUID(getUUID(), PWM_UUID))
@@ -97,7 +97,7 @@ void PowerService::dim(uint8_t value) {
 }
 
 void PowerService::addSampleCurrentCharacteristic() {
-	_sampleCurrentCharacteristic = new CharacteristicT<uint8_t>();
+	_sampleCurrentCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_sampleCurrentCharacteristic);
 	(*_sampleCurrentCharacteristic)
 	  	.setUUID(UUID(getUUID(), SAMPLE_CURRENT_UUID))
@@ -129,7 +129,7 @@ void PowerService::addSampleCurrentCharacteristic() {
 }
 
 void PowerService::addCurrentCurveCharacteristic() {
-	_currentCurveCharacteristic = new CharacteristicT<CurrentCurve>();
+	_currentCurveCharacteristic = new Characteristic<CurrentCurve>();
 	addCharacteristic(_currentCurveCharacteristic);
 	(*_currentCurveCharacteristic)
 		.setUUID(UUID(getUUID(), CURRENT_CURVE_UUID))
@@ -150,7 +150,7 @@ void PowerService::addCurrentCurveCharacteristic() {
 
 void PowerService::addCurrentConsumptionCharacteristic() {
 //	LOGd("create characteristic to read power consumption");
-	_currentConsumptionCharacteristic = new CharacteristicT<uint16_t>();
+	_currentConsumptionCharacteristic = new Characteristic<uint16_t>();
 	addCharacteristic(_currentConsumptionCharacteristic);
 	(*_currentConsumptionCharacteristic)
 		.setUUID(UUID(getUUID(), CURRENT_CONSUMPTION_UUID))
@@ -174,7 +174,7 @@ uint8_t PowerService::getCurrentLimit() {
  *       Writing to persistent memory should be done between connection/advertisement events...
  */
 void PowerService::addCurrentLimitCharacteristic() {
-	_currentLimitCharacteristic = new CharacteristicT<uint8_t>();
+	_currentLimitCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_currentLimitCharacteristic);
 	(*_currentLimitCharacteristic)
 		.setNotifies(true)

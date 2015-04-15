@@ -97,7 +97,7 @@ void GeneralService::savePersistentStorage() {
 }
 
 void GeneralService::addTemperatureCharacteristic() {
-	_temperatureCharacteristic = new CharacteristicT<int32_t>();
+	_temperatureCharacteristic = new Characteristic<int32_t>();
 	addCharacteristic(_temperatureCharacteristic);
 
 	_temperatureCharacteristic->setUUID(UUID(getUUID(), TEMPERATURE_UUID));
@@ -107,7 +107,7 @@ void GeneralService::addTemperatureCharacteristic() {
 }
 
 void GeneralService::addFirmwareCharacteristic() {
-	_firmwareCharacteristic = new CharacteristicT<int32_t>();
+	_firmwareCharacteristic = new Characteristic<int32_t>();
 	addCharacteristic(_firmwareCharacteristic);
 
 	_firmwareCharacteristic->setUUID(UUID(getUUID(), FIRMWARE_UUID));
@@ -133,7 +133,7 @@ void GeneralService::addFirmwareCharacteristic() {
 
 #if MESHING==1
 void GeneralService::addMeshCharacteristic() {
-	_meshCharacteristic = new CharacteristicT<MeshMessage>();
+	_meshCharacteristic = new Characteristic<MeshMessage>();
 	addCharacteristic(_meshCharacteristic);
 
 	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_UUID));
@@ -151,7 +151,7 @@ void GeneralService::addMeshCharacteristic() {
 #endif
 
 void GeneralService::addSetConfigurationCharacteristic() {
-	_setConfigurationCharacteristic = new CharacteristicT<uint8_t*>();
+	_setConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_setConfigurationCharacteristic);
 
 	_setConfigurationCharacteristic->setUUID(UUID(getUUID(), SET_CONFIGURATION_UUID));
@@ -265,7 +265,7 @@ void GeneralService::writeToConfigCharac() {
 }
 
 void GeneralService::addSelectConfigurationCharacteristic() {
-	_selectConfigurationCharacteristic = new CharacteristicT<uint8_t>();
+	_selectConfigurationCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_selectConfigurationCharacteristic);
 
 	_selectConfigurationCharacteristic->setUUID(UUID(getUUID(), SELECT_CONFIGURATION_UUID));
@@ -283,7 +283,7 @@ void GeneralService::addSelectConfigurationCharacteristic() {
 }
 
 void GeneralService::addGetConfigurationCharacteristic() {
-	_getConfigurationCharacteristic = new CharacteristicT<uint8_t*>();
+	_getConfigurationCharacteristic = new Characteristic<uint8_t*>();
 	addCharacteristic(_getConfigurationCharacteristic);
 
 	_getConfigurationCharacteristic->setUUID(UUID(getUUID(), GET_CONFIGURATION_UUID));

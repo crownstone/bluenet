@@ -17,7 +17,7 @@ namespace BLEpp {
  * that the object is sent over the air.
  */
 template<>
-class CharacteristicT<uint8_t*> : public CharacteristicGeneric<uint8_t*> {
+class Characteristic<uint8_t*> : public CharacteristicGeneric<uint8_t*> {
 
 private:
 	typedef uint8_t* buffer_ptr_t;

@@ -64,7 +64,7 @@ public:
  * that the object is sent over the air.
  */
 template<typename T >
-class CharacteristicT<T, typename std::enable_if<std::is_base_of<Serializable, T>::value >::type> : public CharacteristicGeneric<T> {
+class Characteristic<T, typename std::enable_if<std::is_base_of<Serializable, T>::value >::type> : public CharacteristicGeneric<T> {
 
 private:
 	/* Pointer to buffer used to store the serialized object
@@ -79,7 +79,7 @@ private:
 public:
 	/* Default destructor
 	 */
-	virtual ~CharacteristicT() {
+	virtual ~Characteristic() {
 		if (_buffer) {
 			free(_buffer);
 		}
@@ -91,7 +91,7 @@ public:
 	 *
 	 * Assigns the object to this characteristic
 	 */
-	CharacteristicT& operator=(const T& val) {
+	Characteristic& operator=(const T& val) {
 		CharacteristicGeneric<T>::operator=(val);
 		return *this;
 	}

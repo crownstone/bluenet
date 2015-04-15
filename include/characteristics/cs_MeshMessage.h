@@ -36,17 +36,17 @@ public:
 	inline uint8_t value() const { return _value; }
 };
 
-// template has to be in the same namespace as the other CharacteristicT templates
+// template has to be in the same namespace as the other Characteristic templates
 namespace BLEpp {
 
-template<> class CharacteristicT<MeshMessage> : public CharacteristicGeneric<MeshMessage> {
+template<> class Characteristic<MeshMessage> : public CharacteristicGeneric<MeshMessage> {
 
 private:
 	uint8_t _buffer[MESH_SERIALIZED_SIZE];
 	bool _notificationPending;
 
 public:
-	CharacteristicT& operator=(const MeshMessage& val) {
+	Characteristic& operator=(const MeshMessage& val) {
 		CharacteristicGeneric<MeshMessage>::operator=(val);
 		return *this;
 	}
