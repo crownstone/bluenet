@@ -25,8 +25,7 @@
 
 using namespace BLEpp;
 
-IndoorLocalizationService::IndoorLocalizationService(Nrf51822BluetoothStack& _stack) :
-		_stack(&_stack),
+IndoorLocalizationService::IndoorLocalizationService() :
 		_rssiCharac(NULL), _peripheralCharac(NULL),
 		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL), _trackIsNearby(false),
 		_initialized(false), _scanMode(false),
@@ -141,8 +140,8 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 					LOGe("buffer already locked!");
 				}
 
-				if (!_stack->isScanning()) {
-					_stack->startScanning();
+				if (!getStack()->isScanning()) {
+					getStack()->startScanning();
 				}
 				_scanMode = true;
 			} else {
@@ -158,8 +157,8 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 				}
 
 				// Only stop scanning if we're not also tracking devices
-				if (_stack->isScanning() && !_trackMode) {
-					_stack->stopScanning();
+				if (getStack()->isScanning() && !_trackMode) {
+					getStack()->stopScanning();
 				}
 				_scanMode = false;
 			}
@@ -275,17 +274,17 @@ void IndoorLocalizationService::startTracking() {
 		_trackIsNearby = false;
 	}
 	_trackMode = true;
-	if (!_stack->isScanning()) {
+	if (!getStack()->isScanning()) {
 		LOGi("Start tracking");
-		_stack->startScanning();
+		getStack()->startScanning();
 	}
 }
 
 void IndoorLocalizationService::stopTracking() {
 	_trackMode = false;
-	if (_stack->isScanning()) {
+	if (getStack()->isScanning()) {
 		LOGi("Stop tracking");
-		_stack->stopScanning();
+		getStack()->stopScanning();
 	}
 }
 
@@ -401,7 +400,7 @@ void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
 
 #if(SOFTDEVICE_SERIES != 110)
 void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
-	if (_stack->isScanning()) {
+	if (getStack()->isScanning()) {
 		if (_scanMode) {
 //			ScanResult& result = _peripheralCharac->getValue();
 			_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);

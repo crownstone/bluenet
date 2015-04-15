@@ -330,19 +330,19 @@ int main() {
 
 #if INDOOR_SERVICE==1
 	// now, build up the services and characteristics.
-	IndoorLocalizationService& localizationService = IndoorLocalizationService::createService(stack);
-//	IndoorLocalizationService & localizationService = *new IndoorLocalizationService(stack);
+	IndoorLocalizationService localizationService;
+	stack.addService(&localizationService);
 #endif
 
 #if GENERAL_SERVICE==1
 	// general services, such as internal temperature, setting names, etc.
-	//GeneralService& generalService = GeneralService::createService(stack);
-	GeneralService generalService(stack); 
+	GeneralService generalService;
 	stack.addService(&generalService);
 #endif
 
 #if POWER_SERVICE==1
-	PowerService &powerService = PowerService::createService(stack);
+	PowerService powerService;
+	stack.addService(&powerService);
 #endif
 
 #if (BOARD==CROWNSTONE_SENSOR)

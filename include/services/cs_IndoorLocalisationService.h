@@ -61,7 +61,7 @@ protected:
 	void stopTracking();
 
 public:
-	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
+	IndoorLocalizationService();
 
 	void tick();
 //	void addSpecificCharacteristics();
@@ -88,10 +88,8 @@ public:
 #if(SOFTDEVICE_SERIES != 110)
 	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
 #endif
-	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack);
-private:
-	BLEpp::Nrf51822BluetoothStack* _stack;
 
+private:
 	BLEpp::CharacteristicT<int8_t>* _rssiCharac;
 	BLEpp::CharacteristicT<uint8_t>* _scanControlCharac;
 	BLEpp::CharacteristicT<uint8_t*>* _peripheralCharac;

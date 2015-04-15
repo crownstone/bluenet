@@ -28,12 +28,11 @@
 class GeneralService: public BLEpp::GenericService {
 public:
 	/* Constructor for general crownstone service object
-	 * @stack Bluetooth Stack to communicate with softdevice
 	 *
 	 * Creates persistent storage (FLASH) object which is used internally to store name and other information that is
 	 * set over so-called configuration characteristics. It also initializes all characteristics.
 	 */
-	 GeneralService(BLEpp::Nrf51822BluetoothStack &stack);
+	 GeneralService();
 
 	/* Update the temperature characteristic.
 	 * @temperature A value in Celcius directly from the chip
@@ -78,11 +77,10 @@ public:
 	void tick();
 
 	/* Initialize a GeneralService object
-	 * @stack Bluetooth Stack to attach this service to
 	 * 
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void init(BLEpp::Nrf51822BluetoothStack& stack);
+	void init();
 
 
 protected:
@@ -94,7 +92,7 @@ protected:
 	 *  * stop/start advertising
 	 *  * set the BLE name
 	 */
-	BLEpp::Nrf51822BluetoothStack* _stack;
+//	BLEpp::Nrf51822BluetoothStack* _stack;
 
 	/* Temperature characteristic
 	 */

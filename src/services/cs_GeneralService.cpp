@@ -19,8 +19,8 @@ using namespace BLEpp;
 // needs to be the same command as defined in the bootloader
 #define COMMAND_ENTER_RADIO_BOOTLOADER          1 
 
-GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
-		_stack(&stack),
+GeneralService::GeneralService() :
+//		_stack(&stack),
 		_temperatureCharacteristic(NULL),
 		_firmwareCharacteristic(NULL),
 		_selectConfiguration(0xFF) {
@@ -31,10 +31,10 @@ GeneralService::GeneralService(Nrf51822BluetoothStack &stack) :
 	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
 	loadPersistentStorage();
 
-	init(stack);
+	init();
 }
 
-void GeneralService::init(Nrf51822BluetoothStack & stack) {
+void GeneralService::init() {
 	LOGi("Create general service");
 
 #if TEMPERATURE==1
@@ -149,6 +149,7 @@ void GeneralService::addSetConfigurationCharacteristic() {
 	_setConfigurationCharacteristic->setWritable(true);
 	_setConfigurationCharacteristic->onWrite([&]() -> void {
 			uint8_t *value = _setConfigurationCharacteristic->getValue();
+
 			if (!value) {
 				LOGw("No value on writing to config. Bail out");
 			} else {

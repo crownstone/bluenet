@@ -24,12 +24,16 @@ class PowerService : public BLEpp::GenericService {
 public:
 	typedef function<int8_t()> func_t;
 
-	PowerService(BLEpp::Nrf51822BluetoothStack& stack);
+	PowerService();
+
+	/* Initialize a GeneralService object
+	 *
+	 * Add all characteristics and initialize them where necessary.
+	 */
+	void init();
 
 	void addSpecificCharacteristics();
 
-	static PowerService& createService(BLEpp::Nrf51822BluetoothStack& stack);
-	
 	void tick();
 	
 	void turnOff();
@@ -56,9 +60,6 @@ protected:
 	void loadPersistentStorage();
 	void savePersistentStorage();
 private:
-	// References to stack, to e.g. stop advertising if required
-	BLEpp::Nrf51822BluetoothStack* _stack;
-
 	// References to characteristics that need to be written from other functions
 	BLEpp::CharacteristicT<uint8_t> *_sampleCurrentCharacteristic;
 	BLEpp::CharacteristicT<uint8_t> *_currentLimitCharacteristic;

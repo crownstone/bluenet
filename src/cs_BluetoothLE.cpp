@@ -292,7 +292,7 @@ void CharacteristicBase::onTxComplete(ble_common_evt_t * p_ble_evt) {
 
 const char* Service::defaultServiceName = "unnamed";
 
-void Service::start(BLEStack* stack) {
+void Service::start(Nrf51822BluetoothStack* stack) {
 
 	_stack = stack;
 

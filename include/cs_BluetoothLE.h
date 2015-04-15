@@ -74,7 +74,7 @@ void SWI1_IRQHandler(void);
 namespace BLEpp {
 
 class Service;
-class BLEStack;
+class Nrf51822BluetoothStack;
 
 /* A value which can be written to or read from a characteristic. Basically just
  * a wrapper for a pointer to a buffer + length of the buffer. Is not stored anywhere
@@ -624,7 +624,7 @@ public:
 /* Service as defined in the GATT Specification.
  */
 class Service {
-	friend class BLEStack;
+	friend class Nrf51822BluetoothStack;
 
 public:
 	static const char* defaultServiceName; // "Generic Service"
@@ -633,7 +633,7 @@ public:
 
 protected:
 
-	BLEStack*          _stack;
+	Nrf51822BluetoothStack*          _stack;
 	UUID               _uuid;
 	std::string        _name;
 	bool               _primary;
@@ -676,7 +676,7 @@ public:
 		return *this;
 	}
 
-	BLEStack* getStack() {
+	Nrf51822BluetoothStack* getStack() {
 		return _stack;
 	}
 
@@ -690,7 +690,7 @@ public:
 
 	// internal:
 
-	virtual void start(BLEStack* stack);
+	virtual void start(Nrf51822BluetoothStack* stack);
 	virtual void stop() {}
 
 	virtual Service& addCharacteristic(CharacteristicBase* characteristic) = 0;
@@ -821,10 +821,10 @@ public:
 
 /* nRF51822 specific implementation of the BLEStack
  *
- * The Nrf51822BluetoothStack class is a direct descendent from BLEStack. It is implemented as a singleton, such
+ * The Nrf51822BluetoothStack class is a direct descendant from BLEStack. It is implemented as a singleton, such
  * that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt
  * handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this
- * stack object as an argument w.r.t. this object. This makes dependencies traceble for the user.
+ * stack object as an argument w.r.t. this object. This makes dependencies traceable for the user.
  */
 class Nrf51822BluetoothStack : public BLEStack {
 	friend void SWI2_IRQHandler();   // ble stack events.
