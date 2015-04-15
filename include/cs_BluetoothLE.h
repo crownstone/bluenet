@@ -40,9 +40,9 @@ extern "C" {
 #include <cs_UUID.h>
 #include <cs_AllocatedBuffer.h>
 #include <cs_iBeacon.h>
+#include <common/cs_MasterBuffer.h>
 
 #include <third/std/function.h>
-
 
 // TODO: replace std::vector with a fixed, in place array of size capacity.
 
@@ -349,8 +349,8 @@ class CharacteristicGeneric : public CharacteristicBase {
 	friend class Service;
 
 public:
-	//typedef function<void(const T&)> callback_on_write_t;
-	typedef function<void()> callback_on_write_t;
+	typedef function<void(const T&)> callback_on_write_t;
+//	typedef function<void()> callback_on_write_t;
 	typedef function<T()> callback_on_read_t;
 
 protected:
@@ -518,8 +518,8 @@ protected:
 		setCharacteristicValue(value);
 
 		LOGd("%s: onWrite()", _name.c_str());
-//		_callbackOnWrite(getValue());
-		_callbackOnWrite();
+		_callbackOnWrite(getValue());
+//		_callbackOnWrite();
 	}
 
 	void read() {

@@ -62,9 +62,7 @@ void PowerService::addPWMCharacteristic() {
 		.setName("PWM")
 		.setDefaultValue(255)
 		.setWritable(true)
-		//.onWrite([&](const uint8_t& value) -> void {
-		.onWrite([&]() -> void {
-			const uint8_t& value = _pwmCharacteristic->getValue();
+		.onWrite([&](const uint8_t& value) -> void {
 //			LOGi("set pwm to %i", value);
 			PWM::getInstance().setValue(0, value);
 		});
@@ -104,9 +102,7 @@ void PowerService::addSampleCurrentCharacteristic() {
 		.setName("Sample Current")
 		.setDefaultValue(0)
 		.setWritable(true)
-		//.onWrite([&](const uint8_t& value) -> void {
-		.onWrite([&]() -> void {
-			const uint8_t &value = _sampleCurrentCharacteristic->getValue();
+		.onWrite([&](const uint8_t& value) -> void {
 			if (!_adcInitialized) {
 				// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
 				ADC::getInstance().init(PIN_AIN_ADC);
@@ -182,9 +178,7 @@ void PowerService::addCurrentLimitCharacteristic() {
 		.setName("Current Limit")
 		.setDefaultValue(getCurrentLimit())
 		.setWritable(true)
-		//.onWrite([&](const uint8_t &value) -> void {
-		.onWrite([&]() -> void {
-			const uint8_t& value = _currentLimitCharacteristic->getValue();
+		.onWrite([&](const uint8_t &value) -> void {
 			LOGi("Set current limit to: %i", value);
 			_currentLimitVal = value;
 			if (!_currentLimitInitialized) {

@@ -114,8 +114,7 @@ void GeneralService::addFirmwareCharacteristic() {
 	_firmwareCharacteristic->setName("Update firmware");
 	_firmwareCharacteristic->setDefaultValue(0);
 	_firmwareCharacteristic->setWritable(true);
-	_firmwareCharacteristic->onWrite([&]() -> void {
-			const int32_t & value = _firmwareCharacteristic->getValue();
+	_firmwareCharacteristic->onWrite([&](const int32_t& value) -> void {
 			if (value != 0) {
 				LOGi("Update firmware");
 				uint8_t err_code;
@@ -139,8 +138,7 @@ void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_UUID));
 	_meshCharacteristic->setName("Mesh");
 	_meshCharacteristic->setWritable(true);
-	_meshCharacteristic->onWrite([&]() -> void {
-			const MeshMessage & value = _meshCharacteristic->getValue();
+	_meshCharacteristic->onWrite([&](const MeshMessage& value) -> void {
 			LOGi("Send mesh message");
 			uint8_t handle = value.handle();
 			uint8_t val = value.value();
@@ -157,8 +155,7 @@ void GeneralService::addSetConfigurationCharacteristic() {
 	_setConfigurationCharacteristic->setUUID(UUID(getUUID(), SET_CONFIGURATION_UUID));
 	_setConfigurationCharacteristic->setName("Set Configuration");
 	_setConfigurationCharacteristic->setWritable(true);
-	_setConfigurationCharacteristic->onWrite([&]() -> void {
-			uint8_t *value = _setConfigurationCharacteristic->getValue();
+	_setConfigurationCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
 			if (!value) {
 				LOGw("No value on writing to config. Bail out");
@@ -271,8 +268,7 @@ void GeneralService::addSelectConfigurationCharacteristic() {
 	_selectConfigurationCharacteristic->setUUID(UUID(getUUID(), SELECT_CONFIGURATION_UUID));
 	_selectConfigurationCharacteristic->setName("Select Configuration");
 	_selectConfigurationCharacteristic->setWritable(true);
-	_selectConfigurationCharacteristic->onWrite([&]() -> void {
-			const uint8_t & value = _selectConfigurationCharacteristic->getValue();
+	_selectConfigurationCharacteristic->onWrite([&](const uint8_t& value) -> void {
 			if (value < CONFIG_TYPES) {
 				LOGd("Select configuration type: %i", (int)value);
 				_selectConfiguration = value;

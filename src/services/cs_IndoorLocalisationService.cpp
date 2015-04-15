@@ -133,9 +133,8 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 	_scanControlCharac->setName("scan");
 	_scanControlCharac->setDefaultValue(255);
 	_scanControlCharac->setWritable(true);
-	_scanControlCharac->onWrite([&]() -> void {
+	_scanControlCharac->onWrite([&](const uint8_t& value) -> void {
 			MasterBuffer& mb = MasterBuffer::getInstance();
-			const uint8_t& value = _scanControlCharac->getValue();
 			if(value) {
 				LOGi("Init scan result");
 				if (!mb.isLocked()) {
@@ -303,7 +302,7 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 	_trackedDeviceCharac->setName("Add tracked device");
 	_trackedDeviceCharac->setWritable(true);
 	_trackedDeviceCharac->setNotifies(false);
-	_trackedDeviceCharac->onWrite([&]() -> void {
+	_trackedDeviceCharac->onWrite([&](const buffer_ptr_t& value) -> void {
 		TrackedDevice dev;
 		dev.assign(_trackedDeviceCharac->getValue(), _trackedDeviceCharac->getValueDataLength());
 
