@@ -108,7 +108,7 @@ protected:
 	 *
 	 * Sends a message over the mesh network
 	 */
-	BLEpp::Characteristic<MeshMessage>* _meshCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _meshCharacteristic;
 
 	/* Set configuration characteristic
 	 *

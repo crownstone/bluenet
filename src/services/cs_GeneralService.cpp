@@ -52,7 +52,9 @@ void GeneralService::init() {
 #endif
 #if MESHING==1
 	addMeshCharacteristic();
-	LOGi("addMeshCharacteristic();");
+	LOGi("add Mesh Characteristic");
+#else
+	LOGi("skip Mesh Characteristic");
 #endif
 
 #if CONFIGURATION==1
@@ -132,19 +134,30 @@ void GeneralService::addFirmwareCharacteristic() {
 
 #if MESHING==1
 void GeneralService::addMeshCharacteristic() {
-	_meshCharacteristic = new Characteristic<MeshMessage>();
+	buffer_ptr_t buffer = MasterBuffer::getInstance().getBuffer();
+
+	_meshCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_meshCharacteristic);
 
 	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_UUID));
 	_meshCharacteristic->setName("Mesh");
 	_meshCharacteristic->setWritable(true);
-	_meshCharacteristic->onWrite([&](const MeshMessage& value) -> void {
+	_meshCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 			LOGi("Send mesh message");
-			uint8_t handle = value.handle();
-			uint8_t val = value.value();
+
+			MeshMessage msg;
+			msg.assign(_meshCharacteristic->getValue(), _meshCharacteristic->getValueLength());
+
+			uint8_t handle = msg.handle();
+			uint8_t val = msg.value();
 			CMesh &mesh = CMesh::getInstance();
 			mesh.send(handle, val);
 		});
+
+	_meshCharacteristic->setValue(buffer);
+	_meshCharacteristic->setMaxLength(MM_SERIALIZED_SIZE);
+	_meshCharacteristic->setDataLength(0);
+
 }
 #endif
 
