@@ -11,10 +11,6 @@
 namespace BLEpp {
 
 /* This template implements the functions specific for a pointer to a buffer.
- *
- * It takes care of setting and getting the buffer
- * and handles notify requests for the characteristic, in particular making sure
- * that the object is sent over the air.
  */
 template<>
 class Characteristic<buffer_ptr_t> : public CharacteristicGeneric<buffer_ptr_t> {
@@ -28,45 +24,31 @@ private:
 
 public:
 
+	/* Set the value for this characteristic
+	 * @value the pointer to the buffer in memory
+	 *
+	 * only valid pointers are allowed, NULL is NOT allowed
+	 */
 	void setValue(const buffer_ptr_t& value) {
 		assert(value, "Error: Don't assign NULL pointers! Pointer to buffer has to be valid from the start!");
 		_value = value;
 	}
 
+	/* Set the maximum length of the buffer
+	 * @length maximum length in bytes
+	 *
+	 * This defines how many bytes were allocated for the buffer
+	 * so how many bytes can max be stored in the buffer
+	 */
 	void setMaxLength(uint16_t length) {
 		_maxLength = length;
 	}
 
+	/* Set the length of data stored in the buffer
+	 * @length length of data in bytes
+	 */
 	void setDataLength(uint16_t length) {
 		_dataLength = length;
-	}
-
-	/* Returns the object currently assigned to the characteristic
-	 *
-	 * Serializes the object into a byte buffer and returns it as a
-	 * <CharacteristicValue>
-	 *
-	 * @return the serialized object in a <CharacteristicValue> object
-	 */
-	CharacteristicValue getCharacteristicValue() {
-		CharacteristicValue value;
-		return CharacteristicValue(_dataLength, _value, false);
-	}
-
-	/* Assign the given <CharacteristicValue> to this characteristic
-	 *
-	 * @value the <CharacteristicValue> object which should be assigned
-	 *
-	 * Deserializes the byte buffer obtained from the <CharacteristicValue>
-	 * into an object and assigns that to the charachteristic
-	 */
-	void setCharacteristicValue(const CharacteristicValue& value) {
-		if (_value != NULL) {
-			memcpy(_value, value.data, value.length);
-			_dataLength = value.length;
-		} else {
-			LOGe("_value is NULL");
-		}
 	}
 
 	/* Return the maximum possible length of the buffer
@@ -80,8 +62,22 @@ public:
 		return _maxLength;
 	}
 
-	uint16_t getValueDataLength() {
+	/* Return the actual length of the value
+	 *
+	 * For a buffer, this is the length of data stored in the buffer in bytes
+	 *
+	 * @return number of bytes
+	 */
+	uint16_t getValueLength() {
 		return _dataLength;
+	}
+
+	/* Return the pointer to the memory where the value is stored
+	 *
+	 * For a buffer, this is the value itself
+	 */
+	uint8_t* getValuePtr() {
+		return getValue();
 	}
 
 protected:

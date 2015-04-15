@@ -51,20 +51,20 @@ public:
 		return *this;
 	}
 
-	CharacteristicValue getCharacteristicValue() {
-		CharacteristicValue value;
-		const MeshMessage& t = this->getValue();
-		uint32_t len = t.getSerializedLength();
-		memset(_buffer, 0, len);
-		t.serialize(_buffer, len);
-		return CharacteristicValue(len, _buffer);
-	}
+//	CharacteristicValue getCharacteristicValue() {
+//		CharacteristicValue value;
+//		const MeshMessage& t = this->getValue();
+//		uint32_t len = t.getSerializedLength();
+//		memset(_buffer, 0, len);
+//		t.serialize(_buffer, len);
+//		return CharacteristicValue(len, _buffer);
+//	}
 
-	void setCharacteristicValue(const CharacteristicValue& value) {
-		MeshMessage t;
-		t.deserialize(value.data, value.length);
-		this->setValue(t);
-	}
+//	void setCharacteristicValue(const CharacteristicValue& value) {
+//		MeshMessage t;
+//		t.deserialize(value.data, value.length);
+//		this->setValue(t);
+//	}
 
 	uint16_t getValueMaxLength() {
 		return MESH_SERIALIZED_SIZE;

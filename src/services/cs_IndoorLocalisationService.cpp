@@ -236,7 +236,6 @@ void IndoorLocalizationService::writeTrackedDevices() {
 	uint16_t length;
 	_trackedDeviceList->getBuffer(buffer, length);
 	Storage::setArray(buffer, _storageStruct.trackedDevices.list, length);
-	LOGd("length: %d", length);
 }
 
 void IndoorLocalizationService::readTrackedDevices() {
@@ -304,7 +303,7 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 	_trackedDeviceCharac->setNotifies(false);
 	_trackedDeviceCharac->onWrite([&](const buffer_ptr_t& value) -> void {
 		TrackedDevice dev;
-		dev.assign(_trackedDeviceCharac->getValue(), _trackedDeviceCharac->getValueDataLength());
+		dev.assign(_trackedDeviceCharac->getValue(), _trackedDeviceCharac->getValueLength());
 
 		if (dev.getRSSI() > 0) {
 			LOGi("Remove tracked device");

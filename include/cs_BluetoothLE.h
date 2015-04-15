@@ -41,6 +41,7 @@ extern "C" {
 #include <cs_AllocatedBuffer.h>
 #include <cs_iBeacon.h>
 #include <common/cs_MasterBuffer.h>
+#include <common/cs_Config.h>
 
 #include <third/std/function.h>
 
@@ -75,45 +76,6 @@ namespace BLEpp {
 
 class Service;
 class Nrf51822BluetoothStack;
-
-/* A value which can be written to or read from a characteristic. Basically just
- * a wrapper for a pointer to a buffer + length of the buffer. Is not stored anywhere
- * but just used to obtain data from the characteristic and write it to the GATT server
- * and vice versa
- */
-struct CharacteristicValue {
-	uint16_t length;
-	uint8_t* data; // TODO use refcount to manage lifetime?  current assumes it to be valid for as long as needed to send to stack.
-	// Dominik: for the case of having a serialized object as a value, a buffer is allocated
-	// which has to be freed somewhere. It can't be freed at the same point where it is
-	// allocated or it will be freed before it can be sent t the stack, so the parameter
-	// free can be used to tell the CharacteristicValue to free the data when it is
-	// destroyed.
-	bool freeOnDestroy;
-	CharacteristicValue(uint16_t length, uint8_t * const data, bool free = false) :
-		length(length), data(data), freeOnDestroy(free) {
-	}
-	CharacteristicValue() :
-		length(0), data(0), freeOnDestroy(false) {
-	}
-	~CharacteristicValue() {
-		if (freeOnDestroy) {
-			LOGi("data freed");
-			free(data);
-		}
-	}
-	bool operator==(const CharacteristicValue& rhs) {
-		return rhs.data == data && rhs.length == length;
-	}
-	bool operator!=(const CharacteristicValue& rhs) {
-		return !operator==(rhs);
-	}
-	CharacteristicValue operator=(const CharacteristicValue& rhs) {
-		data = rhs.data;
-		length = rhs.length;
-		return *this;
-	}
-};
 
 struct CharacteristicInit {
 	ble_gatts_attr_t          attr_char_value;
@@ -269,10 +231,21 @@ public:
 
 	CharacteristicBase& setUpdateIntervalMSecs(uint32_t msecs);
 
+	/* Return the maximum length of the value */
 	virtual uint16_t getValueMaxLength() = 0;
+	/* Return the actual length of the value */
+	virtual uint16_t getValueLength() = 0;
+	/* Return the pointer to the memory where the value is stored */
+	virtual uint8_t* getValuePtr() = 0;
 
-	virtual CharacteristicValue getCharacteristicValue() = 0;
-	virtual void setCharacteristicValue(const CharacteristicValue& value) = 0;
+	/* Set the actual length of the data
+	 * @length the length of the data to which the value points
+	 *
+	 * This is only necessary for buffer values. When a value is received
+	 * over BT we need to update the length of the data
+	 */
+	virtual void setDataLength(uint16_t length) {};
+
 	virtual void read() = 0;
 	virtual void written(uint16_t len, uint16_t offset, uint8_t* data) = 0;
 
@@ -350,7 +323,6 @@ class CharacteristicGeneric : public CharacteristicBase {
 
 public:
 	typedef function<void(const T&)> callback_on_write_t;
-//	typedef function<void()> callback_on_write_t;
 	typedef function<T()> callback_on_read_t;
 
 protected:
@@ -365,17 +337,9 @@ protected:
 	bool _notificationPending;
 
 public:
-	CharacteristicGeneric() {
-	}
-	virtual ~CharacteristicGeneric() {}
+	CharacteristicGeneric() : _notificationPending(false) {};
 
-	virtual uint16_t getValueLength() {
-		return sizeof(T);
-	}
-
-	virtual uint16_t getValueMaxLength() {
-		return sizeof(T);
-	}
+	virtual ~CharacteristicGeneric() {};
 
 	T&  __attribute__((optimize("O0"))) getValue() {
 		return _value;
@@ -491,7 +455,6 @@ public:
 	}
 
 	/* Callback function once tx operations complete
-	 *
 	 * @p_ble_evt the event object which triggered the onTxComplete callback
 	 *
 	 * This is called whenever tx operations complete. If a notification is pending
@@ -514,12 +477,10 @@ public:
 protected:
 
 	void written(uint16_t len, uint16_t offset, uint8_t* data) {
-		CharacteristicValue value(len, data+offset);
-		setCharacteristicValue(value);
+		setDataLength(len);
 
 		LOGd("%s: onWrite()", _name.c_str());
 		_callbackOnWrite(getValue());
-//		_callbackOnWrite();
 	}
 
 	void read() {
@@ -546,78 +507,86 @@ private:
 template<typename T, typename E = void>
 class Characteristic : public CharacteristicGeneric<T> {
 public:
-	Characteristic()
-: CharacteristicGeneric<T>() {
-	}
+	Characteristic() : CharacteristicGeneric<T>() {}
 
 	Characteristic& operator=(const T& val) {
 		CharacteristicGeneric<T>::operator=(val);
 		return *this;
 	}
-	virtual CharacteristicValue getCharacteristicValue() = 0; // defined only in specializations.
-	virtual void setCharacteristicValue(const CharacteristicValue& value) = 0; // defined only in specializations.
 };
 
 // A characteristic for built-in arithmetic types (int, float, etc)
 template<typename T > 
 class Characteristic<T, typename std::enable_if<std::is_arithmetic<T>::value >::type> : public CharacteristicGeneric<T> {
 public:
+
+	/* @inherit */
 	Characteristic& operator=(const T& val) {
 		CharacteristicGeneric<T>::operator=(val);
 		return *this;
 	}
 
-	virtual CharacteristicValue getCharacteristicValue() {
-		// TODO: endianness.
-		return CharacteristicValue(sizeof(T), (uint8_t*)&this->getValue());
-	}
-	virtual void setCharacteristicValue(const CharacteristicValue& value) {
-		// TODO: endianness.
-		this->setValue(*(T*)(value.data));
+	/* Return the actual length of the value
+	 *
+	 * The length of a basic data type is the size of the type
+	 */
+	virtual uint16_t getValueLength() {
+		return sizeof(T);
 	}
 
+	/* Return the maximum length of the value
+	 *
+	 * The maximum length of a basic data type is the size of the type
+	 */
+	virtual uint16_t getValueMaxLength() {
+		return sizeof(T);
+	}
 
+	/* Return the pointer to the memory where the value is stored
+	 *
+	 * For a basic data type return the address where the first byte
+	 * is stored
+	 */
+	virtual uint8_t* getValuePtr() {
+		return (uint8_t*)&this->getValue();
+	}
 };
 
 // A characteristic for strings
 template<> 
 class Characteristic<std::string> : public CharacteristicGeneric<std::string> {
 public:
+
+	/* @inherit */
 	Characteristic& operator=(const std::string& val) {
 		CharacteristicGeneric<std::string>::operator=(val);
 		return *this;
 	}
 
+	/* Return the actual length of the value
+	 *
+	 * Return the length of the string
+	 */
+	virtual uint16_t getValueLength() {
+		return getValue().length();
+	}
+
+	/* Return the maximum length of the value
+	 *
+	 * The maximum length of a string is defined as
+	 * <MAX_STRING_LENGTH>
+	 */
 	virtual uint16_t getValueMaxLength() {
-		return 25;
+		return MAX_STRING_LENGTH;
 	}
 
-	virtual CharacteristicValue getCharacteristicValue() {
-		return CharacteristicValue(getValue().length(), (uint8_t*)getValue().c_str());
-	}
-	virtual void setCharacteristicValue(const CharacteristicValue& value) {
-		setValue(std::string((char*)value.data, value.length));
-	}
-};
-
-// A characteristic for CharacteristicValue
-template<> 
-class Characteristic<CharacteristicValue> : public CharacteristicGeneric<CharacteristicValue> {
-public:
-	Characteristic& operator=(const CharacteristicValue& val) {
-		CharacteristicGeneric<CharacteristicValue>::operator=(val);
-		return *this;
-	}
-
-	virtual uint16_t getValueMaxLength() {
-		return 25; // TODO
-	}
-
-	virtual CharacteristicValue getCharacteristicValue() {
-		return getValue();
-	}
-	virtual void setCharacteristicValue(const CharacteristicValue& value) {
-		setValue(value);
+	/* Return the pointer to the memory where the value is stored
+	 *
+	 * For a string return pointer to null-terminated content of the
+	 * string
+	 */
+	virtual uint8_t* getValuePtr() {
+		return (uint8_t*)getValue().c_str();
 	}
 };
 
@@ -633,24 +602,24 @@ public:
 
 protected:
 
-	Nrf51822BluetoothStack*          _stack;
-	UUID               _uuid;
-	std::string        _name;
-	bool               _primary;
-	uint16_t           _service_handle; // provided by stack.
-	bool               _started;
+	Nrf51822BluetoothStack*  _stack;
+	UUID                     _uuid;
+	std::string              _name;
+	bool                     _primary;
+	uint16_t                 _service_handle; // provided by stack.
+	bool                     _started;
 
 public:
-	Service()
-:
-	_name(""),
-	_primary(true),
-	_service_handle(BLE_CONN_HANDLE_INVALID),
-	_started(false)
-{
+	Service() :
+		_stack(NULL),
+		_name(""),
+		_primary(true),
+		_service_handle(BLE_CONN_HANDLE_INVALID),
+		_started(false)
+	{
 
+	}
 
-}
 	virtual ~Service() {
 		// we don't currently delete our characteristics as we don't really support dynamic service destruction.
 		// if we wanted to allow services to be removed at runtime, we would need to, amongst many other things,
@@ -707,18 +676,6 @@ public:
 
 	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
 };
-
-class GenericService;
-
-typedef void (GenericService::*addCharacteristicFunc)();
-
-//struct CharacteristicStatus {
-//	std::string name;
-//	uint8_t UUID;
-//	bool enabled;
-//	BLEpp::addCharacteristicFunc func;
-//};
-//typedef struct CharacteristicStatus CharacteristicStatusT;
 
 class GenericService : public Service {
 

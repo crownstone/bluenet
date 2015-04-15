@@ -139,16 +139,14 @@ void CharacteristicBase::init(Service* svc) {
 	_uuid.init();
 	ble_uuid_t uid = _uuid;
 
-	CharacteristicValue initialValue = getCharacteristicValue();
-
 	ci.attr_char_value.p_attr_md = &ci.attr_md;
 
 	ci.attr_char_value.init_offs = 0;
-	ci.attr_char_value.init_len = initialValue.length;
+	ci.attr_char_value.init_len = getValueLength();
 	ci.attr_char_value.max_len = getValueMaxLength();
-	ci.attr_char_value.p_value = (uint8_t*) initialValue.data;
+	ci.attr_char_value.p_value = getValuePtr();
 
-	LOGd("%s init with buffer[%i] with %p", _name.c_str(), initialValue.length, initialValue.data);
+	LOGd("%s init with buffer[%i] with %p", _name.c_str(), getValueLength(), getValuePtr());
 
 	ci.attr_char_value.p_uuid = &uid;
 
@@ -217,20 +215,21 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
  */
 uint32_t CharacteristicBase::notify() {
 
-	CharacteristicValue value = getCharacteristicValue();
+	uint16_t valueLength = getValueLength();
+	uint8_t* valueAddress = getValuePtr();
 
 #if ($SOFTDEVICE_SERIES == 130) && ($SOFTDEVICE_MAJOR == 0) && ($SOFTDEVICE_MINOR == 9)
 	ble_gatts_value_t p_value;
-	p_value.len = value.length;
+	p_value.len = valueLength;
 	p_value.offset = 0;
-	p_value.p_value= value.data;
+	p_value.p_value = valueAddress;
 	// leads to error... 0007, invalid param, don't know why!
 	BLE_CALL(sd_ble_gatts_value_set,	(
 			_service->getStack()->getConnectionHandle(),
 			_handles.value_handle, &p_value));
 #else
 	BLE_CALL(sd_ble_gatts_value_set,
-			(_handles.value_handle, 0, &value.length, value.data));
+			(_handles.value_handle, 0, &valueLength, valueAddress));
 #endif
 
 	// stop here if we are not in notifying state
@@ -239,13 +238,13 @@ uint32_t CharacteristicBase::notify() {
 	}
 
 	ble_gatts_hvx_params_t hvx_params;
-	uint16_t len = value.length;
+	uint16_t len = valueLength;
 
 	hvx_params.handle = _handles.value_handle;
 	hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
 	hvx_params.offset = 0;
 	hvx_params.p_len = &len;
-	hvx_params.p_data = (uint8_t*) value.data;
+	hvx_params.p_data = valueAddress;
 
 	//	BLE_CALL(sd_ble_gatts_hvx, (_service->getStack()->getConnectionHandle(), &hvx_params));
 	uint32_t err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
