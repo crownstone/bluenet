@@ -53,7 +53,7 @@ protected:
 
 	// Some helper functions
 	void sampleCurrentInit();
-	uint16_t sampleCurrentFinish(uint8_t type);
+	void sampleCurrent(uint8_t type);
 
 	uint8_t getCurrentLimit();
 
@@ -61,17 +61,16 @@ protected:
 	void savePersistentStorage();
 private:
 	// References to characteristics that need to be written from other functions
-	BLEpp::CharacteristicT<uint8_t> *_sampleCurrentCharacteristic;
-	BLEpp::CharacteristicT<uint8_t> *_currentLimitCharacteristic;
-	BLEpp::CharacteristicT<uint16_t> *_currentConsumptionCharacteristic;
-	BLEpp::CharacteristicT<CurrentCurve> *_currentCurveCharacteristic;
 	BLEpp::CharacteristicT<uint8_t> *_pwmCharacteristic;
+	BLEpp::CharacteristicT<uint8_t> *_sampleCurrentCharacteristic;
+	BLEpp::CharacteristicT<uint16_t> *_currentConsumptionCharacteristic;
+	BLEpp::CharacteristicT<uint8_t*> *_currentCurveCharacteristic;
+	BLEpp::CharacteristicT<uint8_t> *_currentLimitCharacteristic;
 
-	// Current limit
+	CurrentCurve<uint16_t>* _currentCurve;
+
 	uint8_t _currentLimitVal;
 	CurrentLimit _currentLimit;
-
-	CurrentCurve _currentCurve;
 
 	pstorage_handle_t _storageHandle;
 	ps_power_service_t _storageStruct;

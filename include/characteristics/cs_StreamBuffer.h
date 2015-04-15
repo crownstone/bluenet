@@ -53,7 +53,7 @@ private:
 	stream_t<T>* _buffer;
 
 	const size_t _item_size = sizeof(T);
-	const size_t _capacity = (GENERAL_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
+	const size_t _max_items = (GENERAL_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
 public:
 	/* Default constructor
 	 *
@@ -73,7 +73,7 @@ public:
 	 */
 	int assign(uint8_t *buffer, uint16_t size) {
 		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, size);
-		if (_capacity > size) {
+		if (SB_HEADER_SIZE + _max_items*_item_size > size) {
 			LOGe("Assigned buffer is not large enough");
 			return 1;
 		}
@@ -119,7 +119,7 @@ public:
 	 * 
 	 */
 	ERR_CODE fromString(std::string& str) {
-		if (str.length() > (_capacity * _item_size)) {
+		if (str.length() > (_max_items * _item_size)) {
 			LOGe("Buffer is not large enough");
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}
@@ -144,7 +144,7 @@ public:
 			LOGe("Buffer not initialized!");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
-		if (_buffer->length > _capacity) {
+		if (_buffer->length >= _max_items) {
 			LOGe("Buffer is not large enough");
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}
@@ -161,7 +161,7 @@ public:
 			LOGe("Buffer not initialized!");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
-		memset(_buffer->payload, 0, _capacity * _item_size);
+		memset(_buffer->payload, 0, _max_items * _item_size);
 		_buffer->length = 0;
 		return SB_SUCCESS;
 	}
@@ -206,7 +206,7 @@ public:
 			LOGe("Buffer not initialized!");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
-		if (length > _capacity) { 
+		if (length > _max_items) { 
 			LOGe("Buffer is not large enough");
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}

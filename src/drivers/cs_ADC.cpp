@@ -22,16 +22,16 @@
 // allocate buffer struct (not array in buffer yet)
 //CircularBuffer<uint16_t>* adc_result;
 
-AdcSamples* adcSamples;
+//AdcSamples* adcSamples;
 
 
 //CircularBuffer<uint16_t>* ADC::getBuffer() {
 //	return adc_result;
 //}
 
-AdcSamples* ADC::getSamples() {
-	return adcSamples;
-}
+//AdcSamples* ADC::getSamples() {
+//	return adcSamples;
+//}
 	
 void ADC::setClock(RealTimeClock &clock) {
 	_clock = &clock;
@@ -49,13 +49,13 @@ uint32_t ADC::init(uint8_t pin) {
 	
 #endif
 
-	if (adcSamples == NULL) {
-		adcSamples = new AdcSamples();
-		if (!adcSamples->init(_bufferSize)) {
-			log(FATAL, "Could not initialize buffer. Too big!?");
-			return 0xF0;
-		}
-	}
+//	if (adcSamples == NULL) {
+//		adcSamples = new AdcSamples();
+//		if (!adcSamples->init(_bufferSize)) {
+//			log(FATAL, "Could not initialize buffer. Too big!?");
+//			return 0xF0;
+//		}
+//	}
 
 //	if (adcSamples == NULL || adcSamples->buf->capacity() != _bufferSize) {
 //		delete adcSamples->buf;
@@ -151,8 +151,8 @@ void ADC::stop() {
  */
 void ADC::start() {
 	_lastResult = (uint16_t)-1;
-	_store = false;
-	_numSamples = 0;
+//	_store = false;
+//	_numSamples = 0;
 	NRF_ADC->EVENTS_END  = 0;
 	NRF_ADC->TASKS_START = 1;
 }
@@ -208,34 +208,42 @@ void ADC::update(uint16_t value) {
 	}
 */
 
-	if (!adcSamples->isLocked()) {
-
-//		if (_numSamples > 2000) return;
+//	if (!adcSamples->isLocked()) {
 //
-//		++_numSamples;
-//		_log(INFO, "%u, ", value);
-//		if (!(_numSamples % 10)) {
-//			_log(INFO, "\r\n");
-//		}
-
-//		// Add the start timestamp when we add the first sample
-//		if (adcSamples->empty() && _clock != NULL) {
-//			adcSamples->_timeStart = _clock->getCount();
+////		if (_numSamples > 2000) return;
+////
+////		++_numSamples;
+////		_log(INFO, "%u, ", value);
+////		if (!(_numSamples % 10)) {
+////			_log(INFO, "\r\n");
+////		}
+//
+////		// Add the start timestamp when we add the first sample
+////		if (adcSamples->empty() && _clock != NULL) {
+////			adcSamples->_timeStart = _clock->getCount();
+////		}
+////
+////		// Add end timestamp when we add the last sample
+////		if (adcSamples->size() == adcSamples->capacity()-1 && _clock != NULL) {
+////			adcSamples->_timeEnd = _clock->getCount();
+////		}
+////
+////		adcSamples->push(value);
+//
+//		if (_clock != NULL) {
+//			adcSamples->push(value, _clock->getCount());
+//		} else {
+//			adcSamples->push(value, 0);
 //		}
 //
-//		// Add end timestamp when we add the last sample
-//		if (adcSamples->size() == adcSamples->capacity()-1 && _clock != NULL) {
-//			adcSamples->_timeEnd = _clock->getCount();
-//		}
-//
-//		adcSamples->push(value);
+//	}
 
+	if (_currentCurve != NULL) {
 		if (_clock != NULL) {
-			adcSamples->push(value, _clock->getCount());
+			_currentCurve->add(value);
 		} else {
-			adcSamples->push(value, 0);
+			_currentCurve->add(value);
 		}
-
 	}
 
 }
