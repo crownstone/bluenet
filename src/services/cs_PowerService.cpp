@@ -42,18 +42,31 @@ PowerService::PowerService() :
 void PowerService::init() {
 	LOGi("Create power service");
 
-#if PWM==1
+#if CHARACTERISTIC_PWM==1
+	LOGi("add PWM Characteristic");
 	addPWMCharacteristic();
+#else
+	LOGi("skip PWM Characteristic");
 #endif
 
 #if SAMPLE_CURRENT==1
+	LOGi("add Sample Current Characteristic");
 	addSampleCurrentCharacteristic();
+	LOGi("add Current Curve Characteristic");
 	addCurrentCurveCharacteristic();
+	LOGi("add Current Consumption Characteristic");
 	addCurrentConsumptionCharacteristic();
+#else
+	LOGi("skip Sample Current Characteristic");
+	LOGi("skip Current Curve Characteristic");
+	LOGi("skip Current Consumption Characteristic");
 #endif
 
 #if CURRENT_LIMIT==1
+	LOGi("add Current Limit Characteristic");
 	addCurrentLimitCharacteristic();
+#else
+	LOGi("skip Current Limit Characteristic");
 #endif
 }
 
