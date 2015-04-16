@@ -42,11 +42,19 @@ PowerService::PowerService() :
 void PowerService::init() {
 	LOGi("Create power service");
 
+#if PWM==1
 	addPWMCharacteristic();
+#endif
+
+#if SAMPLE_CURRENT==1
 	addSampleCurrentCharacteristic();
 	addCurrentCurveCharacteristic();
 	addCurrentConsumptionCharacteristic();
+#endif
+
+#if CURRENT_LIMIT==1
 	addCurrentLimitCharacteristic();
+#endif
 }
 
 void PowerService::loadPersistentStorage() {
@@ -110,15 +118,8 @@ void PowerService::addSampleCurrentCharacteristic() {
 	_sampleCurrentCharacteristic->setDefaultValue(0);
 	_sampleCurrentCharacteristic->setWritable(true);
 	_sampleCurrentCharacteristic->onWrite([&](const uint8_t& value) -> void {
-			if (!_adcInitialized) {
-				// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
-				ADC::getInstance().init(PIN_AIN_ADC);
-				sampleCurrentInit();
-				_adcInitialized = true;
-			}
 			sampleCurrent(value);
 		});
-//	ADC::getInstance().init(PIN_AIN_ADC);
 }
 
 void PowerService::addCurrentCurveCharacteristic() {
@@ -128,7 +129,6 @@ void PowerService::addCurrentCurveCharacteristic() {
 	_currentCurveCharacteristic->setName("Current Curve");
 	_currentCurveCharacteristic->setWritable(false);
 	_currentCurveCharacteristic->setNotifies(true);
-
 
 	_currentCurve = new CurrentCurve<uint16_t>();
 	MasterBuffer& mb = MasterBuffer::getInstance();
@@ -144,7 +144,6 @@ void PowerService::addCurrentCurveCharacteristic() {
 }
 
 void PowerService::addCurrentConsumptionCharacteristic() {
-//	LOGd("create characteristic to read power consumption");
 	_currentConsumptionCharacteristic = new Characteristic<uint16_t>();
 	addCharacteristic(_currentConsumptionCharacteristic);
 	_currentConsumptionCharacteristic->setUUID(UUID(getUUID(), CURRENT_CONSUMPTION_UUID));
@@ -202,6 +201,16 @@ void PowerService::addCurrentLimitCharacteristic() {
  * TODO: We should only need to do this once on startup.
  */
 void PowerService::tick() {
+
+	// Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
+	// TODO: This is not required anymore at later crownstone versions, so this should be done at init().
+	if (!_adcInitialized) {
+		// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
+		ADC::getInstance().init(PIN_AIN_ADC);
+		sampleCurrentInit();
+		_adcInitialized = true;
+	}
+
 	LPComp::getInstance().tick();
 	// check if current is not beyond current_limit if the latter is set
 //	if (++tmp_cnt > tick_cnt) {
