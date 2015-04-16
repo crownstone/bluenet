@@ -280,10 +280,13 @@ void PowerService::sampleCurrent(uint8_t type) {
 		_currentCurveCharacteristic->notify();
 	}
 
-	if (numSamples) {
+	if (numSamples>1) {
 		uint32_t voltageSquareMean = 0;
 		uint32_t timestamp = 0;
 		uint16_t voltage = 0;
+		uint32_t timeStart = _currentCurve->getTimeStart();
+		uint32_t timeEnd = _currentCurve->getTimeEnd();
+
 #ifdef MICRO_VIEW
 		write("3 [");
 #endif
@@ -291,6 +294,7 @@ void PowerService::sampleCurrent(uint8_t type) {
 			if (_currentCurve->getValue(i, voltage) != CC_SUCCESS) {
 				break;
 			}
+			timestamp = timeStart + i*(timeEnd-timeStart)/(numSamples-1);
 			_log(INFO, "%u %u,  ", timestamp, voltage);
 #ifdef MICRO_VIEW
 			write("%u %u ", timestamp, voltage);

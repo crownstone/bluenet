@@ -94,7 +94,7 @@ public:
 		_buffer = NULL;
 	}
 
-	bool isAssigned() {
+	bool isAssigned() const {
 		if (_buffer == NULL) return false;
 		return true;
 	}
@@ -112,11 +112,7 @@ public:
 		return false;
 	}
 
-	int16_t length() {
-		return _buffer->length;
-	}
-
-	CC_ERR_CODE getValue(const uint16_t index, T& voltage) {
+	CC_ERR_CODE getValue(const uint16_t index, T& voltage) const {
 		if (index >= _buffer->length) {
 			return CC_BUFFER_NOT_LARGE_ENOUGH;
 		}
@@ -126,6 +122,14 @@ public:
 		}
 		voltage += _buffer->differences[index-1];
 		return CC_SUCCESS;
+	}
+
+	uint32_t getTimeStart() const {
+		return _buffer->firstTimeStamp;
+	}
+
+	uint32_t getTimeEnd() const {
+		return _buffer->lastTimeStamp;
 	}
 
 	/* Add a value to the current curve
@@ -139,7 +143,7 @@ public:
 	 *         1 if buffer is full,
 	 *         2 if buffer is not initialized
 	 */
-	CC_ERR_CODE add(T value, uint32_t timeStamp=0) {
+	CC_ERR_CODE add(const T value, const uint32_t timeStamp=0) {
 		if (!_buffer) {
 			LOGe("Buffer not initialized!");
 			return CC_BUFFER_NOT_INITIALIZED;
