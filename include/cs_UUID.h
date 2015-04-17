@@ -7,7 +7,7 @@
 #pragma once
 
 #include "ble_types.h"
-
+#include "stdlib.h" // NULL
 #include "util/cs_BleError.h"
 
 namespace BLEpp {
