@@ -46,12 +46,15 @@ stack object as an argument w.r.t. this object. This makes dependencies traceabl
     <type name="uint8_t" qualifier=" const" />
   </variable>
   <typedef id="BLEpp::Nrf51822BluetoothStack::callback_connected_t" name="callback_connected_t">
+    <brief>Format of the callback when a connection has been made</brief>
     <type name="func::function&lt;void (unsigned short)&gt;" />
   </typedef>
   <typedef id="BLEpp::Nrf51822BluetoothStack::callback_disconnected_t" name="callback_disconnected_t">
+    <brief>Format of the callback after a disconnection event</brief>
     <type name="func::function&lt;void (unsigned short)&gt;" />
   </typedef>
   <typedef id="BLEpp::Nrf51822BluetoothStack::callback_radio_t" name="callback_radio_t">
+    <brief>Format of the callback of any radio event</brief>
     <type name="func::function&lt;void (bool)&gt;" />
   </typedef>
   <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::addService" name="addService">

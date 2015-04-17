@@ -63,15 +63,21 @@ public:
 
 };
 
-extern "C" {
-//void ble_error_handler (std::string msg, uint32_t line_num, const char * p_file_name);
-//extern void softdevice_assertion_handler(uint32_t pc, uint16_t line_number, const uint8_t * p_file_name);
-
-/* Interrupt request for SoftDevice
+/*
+ * Interrupt service requests are C, so need to be unmangled (and are henced wrapped in an extern "C" block)
  */
-void SWI1_IRQHandler(void);
+extern "C" {
+
+	/* Interrupt request for SoftDevice
+	 */
+	void SWI1_IRQHandler(void);
+
 }
 
+/* General BLE name service
+ *
+ * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
+ */
 namespace BLEpp {
 
 class Service;
@@ -336,13 +342,17 @@ class CharacteristicGeneric : public CharacteristicBase {
 	friend class Service;
 
 public:
+	// Format of callback on write (from user)
 	typedef function<void(const T&)> callback_on_write_t;
+	// Format of read callback 
 	typedef function<T()> callback_on_read_t;
 
 protected:
-
+	// The generic type is physically located in this field in this class (by value, not just by reference)
 	T                          _value;
+	// The callback to call on a write coming from the softdevice (and originating from the user)
 	callback_on_write_t        _callbackOnWrite;
+	// Callback on read
 	callback_on_read_t         _callbackOnRead;
 
 	/* Flag to indicate if notification is pending to be sent once currently waiting
@@ -517,6 +527,10 @@ private:
 };
 
 /* A default characteristic
+ * @T type of the value
+ * @E default type (subdefined for example for built-in types)
+ *
+ * Comes with an assignment operator, so we can assign characteristics to each other which copies the internal value.
  */
 template<typename T, typename E = void>
 class Characteristic : public CharacteristicGeneric<T> {
@@ -835,8 +849,11 @@ public:
 		static Nrf51822BluetoothStack instance;
 		return instance;
 	}
+	// Format of the callback when a connection has been made
 	typedef function<void(uint16_t conn_handle)>   callback_connected_t;
+	// Format of the callback after a disconnection event
 	typedef function<void(uint16_t conn_handle)>   callback_disconnected_t;
+	// Format of the callback of any radio event
 	typedef function<void(bool radio_active)>   callback_radio_t;
 
 	static const uint8_t MAX_SERVICE_COUNT = 5;

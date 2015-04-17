@@ -12,18 +12,23 @@ characteristic.
   </base>
   <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T" />
   <typedef id="BLEpp::CharacteristicGeneric::callback_on_write_t" name="callback_on_write_t">
+    <brief>Format of callback on write (from user)</brief>
     <type name="func::function&lt;typename&gt;" />
   </typedef>
   <typedef id="BLEpp::CharacteristicGeneric::callback_on_read_t" name="callback_on_read_t">
+    <brief>Format of read callback</brief>
     <type name="T" />
   </typedef>
   <field access="protected" id="BLEpp::CharacteristicGeneric::_value" name="_value">
+    <brief>The generic type is physically located in this field in this class (by value, not just by reference)</brief>
     <type name="T" />
   </field>
   <field access="protected" id="BLEpp::CharacteristicGeneric::_callbackOnWrite" name="_callbackOnWrite">
+    <brief>The callback to call on a write coming from the softdevice (and originating from the user)</brief>
     <type name="CharacteristicGeneric&lt;T&gt;::callback_on_write_t" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric::callback_on_write_t" />
   </field>
   <field access="protected" id="BLEpp::CharacteristicGeneric::_callbackOnRead" name="_callbackOnRead">
+    <brief>Callback on read</brief>
     <type name="CharacteristicGeneric&lt;T&gt;::callback_on_read_t" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric::callback_on_read_t" />
   </field>
   <field access="protected" id="BLEpp::CharacteristicGeneric::_notificationPending" name="_notificationPending">

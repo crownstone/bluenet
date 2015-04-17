@@ -1,5 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <namespace id="BLEpp" name="BLEpp" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> General BLE name service</brief>
+  <doc>All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
+</doc>
   <functiontemplate id="BLEpp::ble_type" name="ble_type">
     <brief>The default ble_type</brief>
     <return>
@@ -15,8 +18,12 @@
   </class>
   <classtemplate name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
     <brief> A default characteristic</brief>
-    <templatetypeparameter id="BLEpp::Characteristic::T" name="T" />
-    <templatetypeparameter id="BLEpp::Characteristic::E" name="E" />
+    <templatetypeparameter id="BLEpp::Characteristic::T" name="T">
+      <brief>type of the value</brief>
+    </templatetypeparameter>
+    <templatetypeparameter id="BLEpp::Characteristic::E" name="E">
+      <brief>default type (subdefined for example for built-in types)</brief>
+    </templatetypeparameter>
   </classtemplate>
   <class name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
     <brief>A characteristic for strings</brief>

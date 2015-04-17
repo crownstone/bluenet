@@ -15,6 +15,7 @@ The product that makes use of this firmware is the crownstone, which is currentl
 
 See: https://dobots.nl/products/crownstone/</doc>
   <namespace name="BLEpp" ref="BLEpp#BLEpp">
+    <brief> General BLE name service</brief>
     <class name="BatteryService" ref="BLEpp::BatteryService#BLEpp::BatteryService">
       <brief> Battery service</brief>
     </class>
@@ -23,8 +24,12 @@ See: https://dobots.nl/products/crownstone/</doc>
     </class>
     <classtemplate name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
       <brief> A default characteristic</brief>
-      <templatetypeparameter id="BLEpp::Characteristic::T" name="T" />
-      <templatetypeparameter id="BLEpp::Characteristic::E" name="E" />
+      <templatetypeparameter id="BLEpp::Characteristic::T" name="T">
+        <brief>type of the value</brief>
+      </templatetypeparameter>
+      <templatetypeparameter id="BLEpp::Characteristic::E" name="E">
+        <brief>default type (subdefined for example for built-in types)</brief>
+      </templatetypeparameter>
     </classtemplate>
     <class name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
       <brief>A characteristic for strings</brief>
@@ -143,7 +148,7 @@ bits, etc.
     </return>
   </function>
   <function id="SWI1_IRQHandler" name="SWI1_IRQHandler">
-    <brief> Interrupt request for SoftDevice</brief>
+    <brief>Interrupt request for SoftDevice</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
