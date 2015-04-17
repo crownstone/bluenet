@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<class abstract="true" id="BLEpp::GenericService" name="GenericService" xmlns="http://jessevdk.github.com/cldoc/1.0">
+<class id="BLEpp::GenericService" name="GenericService" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <base access="public">
     <type name="Service" ref="BLEpp::Service#BLEpp::Service" />
     <brief> Service as defined in the GATT Specification.</brief>
@@ -22,11 +22,6 @@
     </argument>
     <override name="Service::addCharacteristic" ref="BLEpp::Service#BLEpp::Service::addCharacteristic" />
   </method>
-  <method abstract="yes" id="BLEpp::GenericService::addSpecificCharacteristics" name="addSpecificCharacteristics">
-    <return>
-      <type builtin="yes" name="void" />
-    </return>
-  </method>
   <method id="BLEpp::GenericService::getCharacteristics" name="getCharacteristics" override="yes" virtual="yes">
     <return>
       <type name="Service::Characteristics_t" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service::Characteristics_t" />
@@ -39,9 +34,5 @@
   <field access="protected" id="BLEpp::GenericService::_characteristics" name="_characteristics">
     <brief>by keeping the container in this subclass, we can in the future define services that more than MAX_CHARACTERISTICS characteristics.</brief>
     <type name="fixed_tuple&lt;BLEpp::CharacteristicBase *, '\x06'&gt;" />
-  </field>
-  <field access="protected" id="BLEpp::GenericService::characStatus" name="characStatus">
-    <brief>Enabled characteristics (to be set in constructor)</brief>
-    <type name="std::vector&lt;BLEpp::CharacteristicStatus, std::allocator&lt;BLEpp::CharacteristicStatus&gt; &gt;" />
   </field>
 </class>

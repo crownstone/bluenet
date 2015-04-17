@@ -9,14 +9,17 @@ displaying it to the user we need to start at the back of the array
 **note** struct has to be packed in order to avoid word alignment.
 </doc>
   <field id="peripheral_device_t::addr" name="addr">
+    <brief>bluetooth address</brief>
     <type size="6">
       <type name="uint8_t" />
     </type>
   </field>
-  <field id="peripheral_device_t::occurrences" name="occurrences">
-    <type name="uint16_t" />
-  </field>
   <field id="peripheral_device_t::rssi" name="rssi">
+    <brief>last rssi value</brief>
     <type name="int8_t" />
+  </field>
+  <field id="peripheral_device_t::occurrences" name="occurrences">
+    <brief>number of occurences (times seen during scan)</brief>
+    <type name="uint16_t" />
   </field>
 </struct>

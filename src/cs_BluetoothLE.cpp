@@ -47,19 +47,32 @@ typedef struct {
 
 /// Characteristic /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void set_attr_md_read_only(ble_gatts_attr_md_t& md) {
+/* Set the default attributes of every characteristic
+ *
+ * There are two settings for the location of the memory of the buffer that is used to communicate with the SoftDevice.
+ *
+ * + BLE_GATTS_VLOC_STACK
+ * + BLE_GATTS_VLOC_USER
+ *
+ * The former makes the SoftDevice allocate the memory (the quantity of which is defined by the user). The latter 
+ * leaves it to the user. It is essential that with BLE_GATTS_VLOC_USER the calls to sd_ble_gatts_value_set() are
+ * handed persistent pointers to a buffer. If a temporary value is used, this will screw up the data read by the user.
+ * The same is true if this buffer is reused across characteristics. If it is meant as data for one characteristic
+ * and is read through another, this will resolve to nonsense to the user.
+ */
+void set_attr_md_read_only(ble_gatts_attr_md_t& md, char vloc) {
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.read_perm);
 	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&md.write_perm);
-	md.vloc = BLE_GATTS_VLOC_STACK;
+	md.vloc = vloc;
 	md.rd_auth = 0; // don't request read access every time a read is attempted.
 	md.wr_auth = 0;  // ditto for write.
 	md.vlen = 1;  // variable length.
 }
 
-void set_attr_md_read_write(ble_gatts_attr_md_t& md) {
+void set_attr_md_read_write(ble_gatts_attr_md_t& md, char vloc) {
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.read_perm);
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.write_perm);
-	md.vloc = BLE_GATTS_VLOC_STACK;
+	md.vloc = vloc;
 	md.rd_auth = 0; // don't request read access every time a read is attempted.
 	md.wr_auth = 0;  // ditto for write.
 	md.vlen = 1;  // variable length.
@@ -111,9 +124,9 @@ void CharacteristicBase::init(Service* svc) {
 	ci.char_md.char_props.indicate = 0; // allow indication
 
 	// initially readable but not writeable
-	set_attr_md_read_write(ci.cccd_md);
-	set_attr_md_read_only(ci.sccd_md);
-	set_attr_md_read_only(ci.attr_md);
+	set_attr_md_read_write(ci.cccd_md, BLE_GATTS_VLOC_STACK);
+	set_attr_md_read_only(ci.sccd_md, BLE_GATTS_VLOC_STACK);
+	set_attr_md_read_only(ci.attr_md, BLE_GATTS_VLOC_USER);
 
 	// these characteristic descriptors are optional, and I gather, not really used by anything.
 	// we fill them in if the user specifies any of the data (eg name).
@@ -126,15 +139,14 @@ void CharacteristicBase::init(Service* svc) {
 	_uuid.init();
 	ble_uuid_t uid = _uuid;
 
-	CharacteristicValue initialValue = getCharacteristicValue();
-
 	ci.attr_char_value.p_attr_md = &ci.attr_md;
 
 	ci.attr_char_value.init_offs = 0;
-	ci.attr_char_value.init_len = initialValue.length;
+	ci.attr_char_value.init_len = getValueLength();
 	ci.attr_char_value.max_len = getValueMaxLength();
-	ci.attr_char_value.p_value =
-			initialValue.length > 0 ? (uint8_t*) initialValue.data : 0;
+	ci.attr_char_value.p_value = getValuePtr();
+
+	LOGd("%s init with buffer[%i] with %p", _name.c_str(), getValueLength(), getValuePtr());
 
 	ci.attr_char_value.p_uuid = &uid;
 
@@ -149,7 +161,7 @@ void CharacteristicBase::init(Service* svc) {
 	// This is the metadata (eg security settings) for the description of this characteristic.
 	ci.char_md.p_user_desc_md = &ci.user_desc_metadata_md;
 
-	set_attr_md_read_only(ci.user_desc_metadata_md);
+	set_attr_md_read_only(ci.user_desc_metadata_md, BLE_GATTS_VLOC_STACK);
 
 	this->configurePresentationFormat(ci.presentation_format);
 	ci.presentation_format.unit = _unit;
@@ -157,11 +169,13 @@ void CharacteristicBase::init(Service* svc) {
 
 	volatile uint16_t svc_handle = svc->getHandle();
 
-	//	volatile uint32_t err_code = sd_ble_gatts_characteristic_add(svc_handle,
-	//			&ci.char_md, &ci.attr_char_value, &_handles);
-	//	APP_ERROR_CHECK(err_code);
-	BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle,
-			&ci.char_md, &ci.attr_char_value, &_handles));
+	uint32_t err_code = sd_ble_gatts_characteristic_add(svc_handle, &ci.char_md, &ci.attr_char_value, &_handles);
+	if (err_code != NRF_SUCCESS) {
+		LOGe("Something went wrong with creation of characteristic");
+		APP_ERROR_CHECK(err_code);
+	}
+
+	//BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle, &ci.char_md, &ci.attr_char_value, &_handles));
 
 	_inited = true;
 }
@@ -189,35 +203,48 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	//	ci.char_md.char_props.write_wo_resp = ci.cccd_md.write_perm.lv > 0 ? 1 :0;
 }
 
+/* Notifies the user of a new or updated value
+ *
+ * The function plays two roles:
+ *
+ * + if notifies and notifyingEnabled are both true, (and it's connected) it sets sd_ble_gatts_hvx
+ * + if either of them is false, it only writes the value with sd_ble_gatts_value_set 
+ *
+ * In either case the function sends a command over BLE by telling the SoftDevice (and the user) that there is a new 
+ * value available. 
+ */
 uint32_t CharacteristicBase::notify() {
 
-	CharacteristicValue value = getCharacteristicValue();
+	uint16_t valueLength = getValueLength();
+	uint8_t* valueAddress = getValuePtr();
 
 #if ($SOFTDEVICE_SERIES == 130) && ($SOFTDEVICE_MAJOR == 0) && ($SOFTDEVICE_MINOR == 9)
 	ble_gatts_value_t p_value;
-	p_value.len = value.length;
+	p_value.len = valueLength;
 	p_value.offset = 0;
-	p_value.p_value= value.data;
+	p_value.p_value = valueAddress;
 	// leads to error... 0007, invalid param, don't know why!
 	BLE_CALL(sd_ble_gatts_value_set,	(
 			_service->getStack()->getConnectionHandle(),
 			_handles.value_handle, &p_value));
 #else
 	BLE_CALL(sd_ble_gatts_value_set,
-			(_handles.value_handle, 0, &value.length, value.data));
+			(_handles.value_handle, 0, &valueLength, valueAddress));
 #endif
 
-	if ((!_notifies) || (!_service->getStack()->connected()) || !_notifyingEnabled)
+	// stop here if we are not in notifying state
+	if ((!_notifies) || (!_service->getStack()->connected()) || !_notifyingEnabled) {
 		return NRF_SUCCESS;
+	}
 
 	ble_gatts_hvx_params_t hvx_params;
-	uint16_t len = value.length;
+	uint16_t len = valueLength;
 
 	hvx_params.handle = _handles.value_handle;
 	hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
 	hvx_params.offset = 0;
 	hvx_params.p_len = &len;
-	hvx_params.p_data = (uint8_t*) value.data;
+	hvx_params.p_data = valueAddress;
 
 	//	BLE_CALL(sd_ble_gatts_hvx, (_service->getStack()->getConnectionHandle(), &hvx_params));
 	uint32_t err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
@@ -264,7 +291,7 @@ void CharacteristicBase::onTxComplete(ble_common_evt_t * p_ble_evt) {
 
 const char* Service::defaultServiceName = "unnamed";
 
-void Service::start(BLEStack* stack) {
+void Service::start(Nrf51822BluetoothStack* stack) {
 
 	_stack = stack;
 
@@ -290,16 +317,16 @@ void Service::start(BLEStack* stack) {
  * Seperate function that actually adds the characteristics. This allows to introduce dependencies between construction
  * of the different services and the characteristics on those services.
  */
-void GenericService::addSpecificCharacteristics() {
-	for ( CharacteristicStatusT &status : characStatus) {
-		if (status.enabled) {
-			LOGi("Create characteristic %s (%i)", status.name.c_str(), status.UUID);
-			(this->*status.func)();
-		} else {
-			LOGi("Disabled characteristic %s (%i)", status.name.c_str(), status.UUID);
-		}
-	}
-}
+//void GenericService::addSpecificCharacteristics() {
+//	for ( CharacteristicStatusT &status : characStatus) {
+//		if (status.enabled) {
+//			LOGi("Create characteristic %s (%i)", status.name.c_str(), status.UUID);
+//			(this->*status.func)();
+//		} else {
+//			LOGi("Disabled characteristic %s (%i)", status.name.c_str(), status.UUID);
+//		}
+//	}
+//}
 
 /**
  * A service can receive a BLE event. Currently we pass the connection events through as well as the write event.
@@ -316,6 +343,7 @@ void Service::on_ble_event(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_WRITE:
+		LOGd("Write event");
 		on_write(p_ble_evt->evt.gatts_evt.params.write);
 		break;
 
@@ -324,15 +352,26 @@ void Service::on_ble_event(ble_evt_t * p_ble_evt) {
 	}
 }
 
+/* On connect event for an individual service
+ *
+ * An individual service normally doesn't respond to a connect event. However, it can be used to for example allocate
+ * memory only when a user is connected.
+ */
 void Service::on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt) {
 	// nothing here yet.
 }
 
+/* On disconnect event for an individual service
+ *
+ * Just as on_connect this method can be used to for example deallocate structures that only need to exist when a user
+ * is connected.
+ */
 void Service::on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& gap_evt) {
 	// nothing here yet.
 }
 
-/**
+/* Write incoming value to data structures on the device.
+ *
  * On an incoming write event we go through the characteristics that belong to this service and compare a handle
  * to see which one we have to write. Subsequently, characteristic->written will be called with length, offset, and
  * the data itself. Depending on the characteristic this can be retrieved as a string or any kind of data type.
@@ -369,6 +408,7 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 
 	if (!found) {
 		// tell someone?
+		LOGe("Could not find characteristic!");
 	}
 }
 
@@ -381,7 +421,8 @@ void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
 
 /// Nrf51822BluetoothStack /////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
+/* Constructor of the BLE stack on the NRF51822
+ *
  * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. However,
  * the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the init() 
  * function.
@@ -422,7 +463,8 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 		free(_evt_buffer);
 }
 
-/**
+/* Initialization of the BLE stack
+ *
  * Performs a series of tasks:
  *   - disables softdevice if it is currently enabled
  *   - enables softdevice with own clock and assertion handler

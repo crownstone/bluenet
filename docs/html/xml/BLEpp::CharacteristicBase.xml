@@ -4,7 +4,7 @@
   <doc>A non-templated base class saves on code size. Note that every characteristic however does still
 contribute to code size.
 </doc>
-  <subclass access="public" name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
+  <subclass access="public" name="CharacteristicGeneric" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric">
     <brief> Characteristic of generic type T</brief>
   </subclass>
   <constructor abstract="yes" id="BLEpp::CharacteristicBase::CharacteristicBase" name="CharacteristicBase" />
@@ -12,11 +12,6 @@ contribute to code size.
   <method id="BLEpp::CharacteristicBase::getCccdHandle" name="getCccdHandle">
     <return>
       <type name="uint16_t" />
-    </return>
-  </method>
-  <method abstract="yes" id="BLEpp::CharacteristicBase::getCharacteristicValue" name="getCharacteristicValue" virtual="yes">
-    <return>
-      <type name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
     </return>
   </method>
   <method id="BLEpp::CharacteristicBase::getUUID" name="getUUID">
@@ -29,9 +24,22 @@ contribute to code size.
       <type name="uint16_t" />
     </return>
   </method>
-  <method abstract="yes" id="BLEpp::CharacteristicBase::getValueMaxLength" name="getValueMaxLength" virtual="yes">
+  <method abstract="yes" id="BLEpp::CharacteristicBase::getValueLength" name="getValueLength" virtual="yes">
+    <brief>Return the actual length of the value</brief>
     <return>
       <type name="uint16_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::getValueMaxLength" name="getValueMaxLength" virtual="yes">
+    <brief>Return the maximum length of the value</brief>
+    <return>
+      <type name="uint16_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="BLEpp::CharacteristicBase::getValuePtr" name="getValuePtr" virtual="yes">
+    <brief>Return the pointer to the memory where the value is stored</brief>
+    <return>
+      <type name="uint8_t" qualifier="*" />
     </return>
   </method>
   <method abstract="yes" id="BLEpp::CharacteristicBase::init" name="init">
@@ -84,12 +92,17 @@ Notification quickly fills an outgoing buffer in BLE. When this buffer gets full
       <type builtin="yes" name="void" />
     </return>
   </method>
-  <method abstract="yes" id="BLEpp::CharacteristicBase::setCharacteristicValue" name="setCharacteristicValue" virtual="yes">
+  <method id="BLEpp::CharacteristicBase::setDataLength" name="setDataLength" virtual="yes">
+    <brief>Set the actual length of the data</brief>
+    <doc>This is only necessary for buffer values. When a value is received
+over BT we need to update the length of the data
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="BLEpp::CharacteristicBase::setCharacteristicValue::value" name="value">
-      <type name="CharacteristicValue" qualifier=" const &amp;" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
+    <argument id="BLEpp::CharacteristicBase::setDataLength::length" name="length">
+      <doc>the length of the data to which the value points</doc>
+      <type name="uint16_t" />
     </argument>
   </method>
   <method id="BLEpp::CharacteristicBase::setIndicates" name="setIndicates">

@@ -105,6 +105,8 @@ extern "C" {
 #include <services/cs_PowerService.h>
 #endif
 
+#include "common/cs_MasterBuffer.h"
+
 using namespace BLEpp;
 
 /**********************************************************************************************************************
@@ -245,6 +247,10 @@ void GPIOTE_IRQHandler(void)
 
 #endif // MESHING == 1
 
+void on_exit(void) {
+	LOGi("PROGRAM TERMINATED");
+}
+
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
  * the code within the bootloader has been processed before. But also after the bootloader, the code in 
@@ -253,7 +259,11 @@ void GPIOTE_IRQHandler(void)
  *********************************************************************************************************************/
 
 int main() {
+	atexit(on_exit);
+
 	welcome();
+
+	MasterBuffer::getInstance().alloc(GENERAL_BUFFER_SIZE);
 
 	// set up the bluetooth stack that controls the hardware.
 	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
@@ -320,16 +330,19 @@ int main() {
 
 #if INDOOR_SERVICE==1
 	// now, build up the services and characteristics.
-	IndoorLocalizationService& localizationService = IndoorLocalizationService::createService(stack);
+	IndoorLocalizationService localizationService;
+	stack.addService(&localizationService);
 #endif
 
 #if GENERAL_SERVICE==1
 	// general services, such as internal temperature, setting names, etc.
-	GeneralService& generalService = GeneralService::createService(stack);
+	GeneralService generalService;
+	stack.addService(&generalService);
 #endif
 
 #if POWER_SERVICE==1
-	PowerService &powerService = PowerService::createService(stack);
+	PowerService powerService;
+	stack.addService(&powerService);
 #endif
 
 #if (BOARD==CROWNSTONE_SENSOR)

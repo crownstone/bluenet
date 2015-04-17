@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct id="peripheral_device_list_t" name="peripheral_device_list_t" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Structure of the list of peripheral devices which is sent over Bluetooth</brief>
+  <field id="peripheral_device_list_t::size" name="size">
+    <brief>number of elements in the list</brief>
+    <type name="uint8_t" />
+  </field>
+  <field id="peripheral_device_list_t::list" name="list">
+    <brief>list of scanned devices</brief>
+    <type size="10">
+      <type name="peripheral_device_t" ref="peripheral_device_t#peripheral_device_t" />
+    </type>
+  </field>
+</struct>

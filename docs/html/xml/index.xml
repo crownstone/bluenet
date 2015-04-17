@@ -12,32 +12,22 @@ This documentation describes the features of the Bluenet firmware.</doc>
       <brief> BLEStack defines a chip-agnostic Bluetooth Low-Energy stack</brief>
     </class>
     <classtemplate name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
-      <brief> Characteristic of generic type T</brief>
+      <brief> A default characteristic</brief>
       <templatetypeparameter id="BLEpp::Characteristic::T" name="T" />
+      <templatetypeparameter id="BLEpp::Characteristic::E" name="E" />
     </classtemplate>
+    <class name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
+      <brief>A characteristic for strings</brief>
+    </class>
     <class name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase">
       <brief> Non-template base class for Characteristics.</brief>
     </class>
-    <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
-    <struct name="CharacteristicStatus" ref="BLEpp::CharacteristicStatus#BLEpp::CharacteristicStatus" />
-    <classtemplate name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
-      <brief> A default characteristic</brief>
-      <templatetypeparameter id="BLEpp::CharacteristicT::T" name="T" />
-      <templatetypeparameter id="BLEpp::CharacteristicT::E" name="E" />
+    <classtemplate name="CharacteristicGeneric" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric">
+      <brief> Characteristic of generic type T</brief>
+      <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T" />
     </classtemplate>
-    <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
-      <brief>A characteristic for strings</brief>
-    </class>
-    <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
-      <brief>A characteristic for CharacteristicValue</brief>
-    </class>
-    <struct name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue">
-      <brief> A value which can be written to or read from a characteristic. Basically just</brief>
-    </struct>
+    <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
     <class name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
-    <class name="IBeacon" ref="BLEpp::IBeacon#BLEpp::IBeacon">
-      <brief> Implementation of the iBeacon specification.</brief>
-    </class>
     <class name="Nrf51822BluetoothStack" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack">
       <brief> nRF51822 specific implementation of the BLEStack</brief>
     </class>
@@ -45,16 +35,7 @@ This documentation describes the features of the Bluenet firmware.</doc>
       <brief> Service as defined in the GATT Specification.</brief>
     </class>
   </namespace>
-  <class name="ADC" ref="ADC#ADC">
-    <brief>class AdcSamples {</brief>
-  </class>
-  <class name="AdcSamples" ref="AdcSamples#AdcSamples" />
-  <classtemplate name="DifferentialBuffer" ref="DifferentialBuffer#DifferentialBuffer">
-    <brief> Differential Buffer implementation</brief>
-    <templatetypeparameter id="DifferentialBuffer::T" name="T">
-      <brief>primitive type such as uint8_t</brief>
-    </templatetypeparameter>
-  </classtemplate>
+  <class name="ADC" ref="ADC#ADC" />
   <classtemplate name="fixed_tuple" ref="fixed_tuple#fixed_tuple">
     <brief> A fixed tuple is a vector with a templated type and a reserved capacity.</brief>
     <templatetypeparameter id="fixed_tuple::T" name="T" />
@@ -66,6 +47,9 @@ This documentation describes the features of the Bluenet firmware.</doc>
     <brief> General Service for the Crownstone</brief>
   </class>
   <class name="IndoorLocalizationService" ref="IndoorLocalizationService#IndoorLocalizationService" />
+  <struct name="peripheral_device_list_t" ref="peripheral_device_list_t#peripheral_device_list_t">
+    <brief> Structure of the list of peripheral devices which is sent over Bluetooth</brief>
+  </struct>
   <struct name="peripheral_device_t" ref="peripheral_device_t#peripheral_device_t">
     <brief> Structure used to store peripheral devices detected during a scan.</brief>
   </struct>

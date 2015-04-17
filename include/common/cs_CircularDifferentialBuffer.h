@@ -19,20 +19,20 @@
  *
  */
 template <typename T>
-class DifferentialBuffer {
+class CircularDifferentialBuffer {
 public:
 	/* Default constructor
 	 * @capacity the size with which the buffer should be initialized. A maximum
 	 *   of capacity elements can be stored in the buffer before the oldest element
 	 *   will be overwritten
 	 * @initialize if true, the array will be directly initialized, otherwise
-	 *   <DifferentialBuffer::init()> has to be called before accessing the buffer
+	 *   <CircularDifferentialBuffer::init()> has to be called before accessing the buffer
 	 *
 	 * If <initialize> is set to true, the buffer will be directly initialized. To avoid
 	 * unnecessary allocation of memory, use initialize = false and call
-	 * <DifferentialBuffer::init()> only once the buffer is used.
+	 * <CircularDifferentialBuffer::init()> only once the buffer is used.
 	 */
-	DifferentialBuffer(uint16_t capacity = 32, bool initialize = false) :
+	CircularDifferentialBuffer(uint16_t capacity = 32, bool initialize = false) :
 		_array(NULL), _capacity(capacity), _head(0), _tail(-1), _contentSize(0)
 	{
 		if (initialize) {
@@ -44,7 +44,7 @@ public:
 	 *
 	 * Free memory allocated for the buffer
 	 */
-	virtual ~DifferentialBuffer() {
+	virtual ~CircularDifferentialBuffer() {
 		free(_array);
 	}
 
@@ -140,7 +140,8 @@ public:
 		return true;
 	}
 
-	/* Get the next value of the buffer, after calling <DifferentialBuffer>>getFirstElement()>
+	/* Get the next value of the buffer, after calling <CircularDifferentialBuffer>>getFirstElement()>
+	 *
 	 * @val the previous value, will be set to the value of the next element
 	 *
 	 * @return false when the last element has been reached (this read is invalid).
@@ -185,7 +186,7 @@ public:
 	/* Write all elements to a buffer
 	 * @buffer buffer to which to write the elements
 	 *
-	 * The buffer has to be of the correct size, use <DifferentialBuffer>>getSerializedLength()>
+	 * The buffer has to be of the correct size, use <CircularDifferentialBuffer>>getSerializedLength()>
 	 * First sizeof(T) bytes is the first value, the bytes afterwards are increments (int8_t).
 	 */
 	void serialize(uint8_t* buffer);

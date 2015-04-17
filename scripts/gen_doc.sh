@@ -29,13 +29,13 @@ dirs+=("/opt/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/c++/4.8.4/arm-no
 # only include header files, source files are not considered
 files=()
 files+=("$rel_path/include/cs_nRF51822.h")
-files+=("$rel_path/include/cs_iBeacon.h")
+#files+=("$rel_path/include/cs_iBeacon.h") does not compile
 files+=("$rel_path/include/cs_BluetoothLE.h")
 #files+=("$rel_path/include/cs_Serializable.h") compilation issues
 files+=("$rel_path/include/common/cs_Boards.h")
 files+=("$rel_path/include/common/cs_Config.h")
 files+=("$rel_path/include/common/cs_Storage.h")
-files+=("$rel_path/include/common/cs_DifferentialBuffer.h")
+#files+=("$rel_path/include/common/cs_DifferentialBuffer.h") does not compile
 files+=("$rel_path/include/common/cs_Timer.h")
 files+=("$rel_path/include/services/cs_GeneralService.h")
 files+=("$rel_path/include/services/cs_PowerService.h")

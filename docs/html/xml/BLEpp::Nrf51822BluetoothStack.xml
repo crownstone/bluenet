@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
 <class abstract="true" id="BLEpp::Nrf51822BluetoothStack" name="Nrf51822BluetoothStack" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <brief> nRF51822 specific implementation of the BLEStack</brief>
-  <doc>The Nrf51822BluetoothStack class is a direct descendent from BLEStack. It is implemented as a singleton, such
+  <doc>The Nrf51822BluetoothStack class is a direct descendant from BLEStack. It is implemented as a singleton, such
 that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt
 handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this
-stack object as an argument w.r.t. this object. This makes dependencies traceble for the user.
+stack object as an argument w.r.t. this object. This makes dependencies traceable for the user.
 </doc>
   <base access="public">
     <type name="BLEStack" ref="BLEpp::BLEStack#BLEpp::BLEStack" />
@@ -258,7 +258,7 @@ stack object as an argument w.r.t. this object. This makes dependencies traceble
       <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
     <argument id="BLEpp::Nrf51822BluetoothStack::startIBeacon::beacon" name="beacon">
-      <type name="IBeacon" ref="BLEpp::IBeacon#BLEpp::IBeacon" />
+      <type name="IBeacon" />
     </argument>
   </method>
   <method id="BLEpp::Nrf51822BluetoothStack::startScanning" name="startScanning">

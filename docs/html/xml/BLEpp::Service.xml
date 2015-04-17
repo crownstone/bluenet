@@ -2,26 +2,6 @@
 <class abstract="true" id="BLEpp::Service" name="Service" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <brief> Service as defined in the GATT Specification.</brief>
   <subclass access="public" name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
-  <methodtemplate id="BLEpp::Service::createCharacteristic" name="createCharacteristic">
-    <brief>* Registers a new Characteristic with the given uid, name, and intialValue. Pass the type of the</brief>
-    <doc>characteristic in angle brackets before the parentheses for the method invocation:
-
-&amp;lt;pre&amp;gt;
-     service.createCharacteristic&amp;lt;std::string&amp;gt;().setName("Owner Name").setDefaultValue("Bob Roberts");
-     service.createCharacteristic&amp;lt;int&amp;gt;().setName("Owner Age").setDefaultValue(39);
-     service.createCharacteristic&amp;lt;float&amp;gt;().setName("Yaw").setDefaultValue(0.0);
-</doc>
-    <return>
-      <type name="Characteristic&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
-    </return>
-    <templatetypeparameter id="BLEpp::Service::createCharacteristic::T" name="T" />
-  </methodtemplate>
-  <methodtemplate id="BLEpp::Service::createCharacteristicRef" name="createCharacteristicRef">
-    <return>
-      <type name="Characteristic&lt;T&gt;" qualifier="*" ref="BLEpp::Characteristic#BLEpp::Characteristic" />
-    </return>
-    <templatetypeparameter id="BLEpp::Service::createCharacteristicRef::T" name="T" />
-  </methodtemplate>
   <variable id="BLEpp::Service::defaultServiceName" name="defaultServiceName">
     <type builtin="yes" name="char" qualifier=" const *" />
   </variable>
@@ -51,7 +31,7 @@
   </method>
   <method id="BLEpp::Service::getStack" name="getStack">
     <return>
-      <type name="BLEStack" qualifier="*" ref="BLEpp::BLEStack#BLEpp::BLEStack" />
+      <type name="Nrf51822BluetoothStack" qualifier="*" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
   </method>
   <method id="BLEpp::Service::getUUID" name="getUUID">
@@ -138,7 +118,7 @@
       <type builtin="yes" name="void" />
     </return>
     <argument id="BLEpp::Service::start::stack" name="stack">
-      <type name="BLEStack" qualifier="*" ref="BLEpp::BLEStack#BLEpp::BLEStack" />
+      <type name="Nrf51822BluetoothStack" qualifier="*" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </argument>
   </method>
   <method id="BLEpp::Service::stop" name="stop" virtual="yes">
@@ -147,7 +127,7 @@
     </return>
   </method>
   <field access="protected" id="BLEpp::Service::_stack" name="_stack">
-    <type name="BLEStack" qualifier="*" ref="BLEpp::BLEStack#BLEpp::BLEStack" />
+    <type name="Nrf51822BluetoothStack" qualifier="*" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
   </field>
   <field access="protected" id="BLEpp::Service::_uuid" name="_uuid">
     <type name="UUID" />

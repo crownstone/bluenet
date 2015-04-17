@@ -40,12 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "trickle.h"
 #include "nrf.h"
 #include "nrf_sdm.h"
-#include "app_error.h"
 
 #include <stdbool.h>
 #include <string.h>
 
-#include "../../include/drivers/cs_Serial.h"
+#include "drivers/cs_Serial.h"
+#include "util/cs_BleError.h"
 
 #define RADIO_FIFO_QUEUE_SIZE 8 /* must be power of two */
 #define RADIO_FIFO_QUEUE_MASK (RADIO_FIFO_QUEUE_SIZE - 1)

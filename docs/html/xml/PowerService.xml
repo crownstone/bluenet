@@ -7,25 +7,16 @@
     <type name="int8_t" />
   </typedef>
   <constructor abstract="yes" id="PowerService::PowerService" name="PowerService">
-    <argument id="PowerService::PowerService::stack" name="stack">
-      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
-    </argument>
+    <brief>Constructor for power service object</brief>
+    <doc>Creates persistent storage (FLASH) object which is used internally to store current limit.
+It also initializes all characteristics.
+</doc>
   </constructor>
-  <method abstract="yes" id="PowerService::addSpecificCharacteristics" name="addSpecificCharacteristics" override="yes">
-    <return>
-      <type builtin="yes" name="void" />
-    </return>
-    <override name="BLEpp::GenericService::addSpecificCharacteristics" ref="BLEpp::GenericService#BLEpp::GenericService::addSpecificCharacteristics" />
-  </method>
-  <method abstract="yes" id="PowerService::createService" name="createService" static="yes">
-    <return>
-      <type name="PowerService" qualifier=" &amp;" ref="PowerService#PowerService" />
-    </return>
-    <argument id="PowerService::createService::stack" name="stack">
-      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
-    </argument>
-  </method>
   <method abstract="yes" id="PowerService::dim" name="dim">
+    <brief>Dim the light by using PWM.</brief>
+    <doc>You might need another way to dim the light! For example by only turning on for
+a specific duty-cycle after the detection of a zero crossing.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
@@ -33,17 +24,31 @@
       <type name="uint8_t" />
     </argument>
   </method>
+  <method abstract="yes" id="PowerService::init" name="init">
+    <brief>Initialize a GeneralService object</brief>
+    <doc>Add all characteristics and initialize them where necessary.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
   <method abstract="yes" id="PowerService::tick" name="tick">
+    <brief>Perform non urgent functionality every main loop.</brief>
+    <doc>Every component has a "tick" function which is for non-urgent things.
+Urgent matters have to be resolved immediately in interrupt service handlers.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" id="PowerService::turnOff" name="turnOff">
+    <brief>Switch off the light</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" id="PowerService::turnOn" name="turnOn">
+    <brief>Switch on the light</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
@@ -75,30 +80,39 @@
     </return>
   </method>
   <method abstract="yes" access="protected" id="PowerService::getCurrentLimit" name="getCurrentLimit">
+    <brief>Get the stored current limit.</brief>
     <return>
       <type name="uint8_t" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="PowerService::loadPersistentStorage" name="loadPersistentStorage">
+    <brief>Get a handle to the persistent storage struct and load it from FLASH.</brief>
+    <doc>Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
+writing less than a minimal block strains the memory just as much as flashing the entire block.
+Hence, there is an entire struct that can be filled and flashed at once.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
-  <method abstract="yes" access="protected" id="PowerService::sampleCurrentFinish" name="sampleCurrentFinish">
+  <method abstract="yes" access="protected" id="PowerService::sampleCurrent" name="sampleCurrent">
+    <brief>Fill up the current curve and send it out over bluetooth</brief>
     <return>
-      <type name="uint16_t" />
+      <type builtin="yes" name="void" />
     </return>
-    <argument id="PowerService::sampleCurrentFinish::type" name="type">
+    <argument id="PowerService::sampleCurrent::type" name="type">
+      <doc>specifies over which characteristic the current curve should be sent.</doc>
       <type name="uint8_t" />
     </argument>
   </method>
   <method abstract="yes" access="protected" id="PowerService::sampleCurrentInit" name="sampleCurrentInit">
-    <brief>Some helper functions</brief>
+    <brief>Initializes and starts the ADC</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" access="protected" id="PowerService::savePersistentStorage" name="savePersistentStorage">
+    <brief>Save to FLASH.</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>

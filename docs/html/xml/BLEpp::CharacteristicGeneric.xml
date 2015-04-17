@@ -1,0 +1,201 @@
+<?xml version='1.0' encoding='utf-8'?>
+<classtemplate id="BLEpp::CharacteristicGeneric" name="CharacteristicGeneric" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> Characteristic of generic type T</brief>
+  <doc>A characteristic first of all contains a templated "value" which might be a string, an integer, or a
+buffer, depending on the need at hand.
+It allows also for callbacks to be defined on writing to the characteristic, or reading from the
+characteristic.
+</doc>
+  <base access="public">
+    <type name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
+    <brief> Non-template base class for Characteristics.</brief>
+  </base>
+  <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T" />
+  <typedef id="BLEpp::CharacteristicGeneric::callback_on_write_t" name="callback_on_write_t">
+    <type name="func::function&lt;typename&gt;" />
+  </typedef>
+  <typedef id="BLEpp::CharacteristicGeneric::callback_on_read_t" name="callback_on_read_t">
+    <type name="T" />
+  </typedef>
+  <field access="protected" id="BLEpp::CharacteristicGeneric::_value" name="_value">
+    <type name="T" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicGeneric::_callbackOnWrite" name="_callbackOnWrite">
+    <type name="CharacteristicGeneric&lt;T&gt;::callback_on_write_t" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric::callback_on_write_t" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicGeneric::_callbackOnRead" name="_callbackOnRead">
+    <type name="CharacteristicGeneric&lt;T&gt;::callback_on_read_t" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric::callback_on_read_t" />
+  </field>
+  <field access="protected" id="BLEpp::CharacteristicGeneric::_notificationPending" name="_notificationPending">
+    <brief>Flag to indicate if notification is pending to be sent once currently waiting</brief>
+    <doc>tx operations are completed
+</doc>
+    <type builtin="yes" name="bool" />
+  </field>
+  <constructor id="BLEpp::CharacteristicGeneric::CharacteristicGeneric&lt;T&gt;" name="CharacteristicGeneric&lt;T&gt;" />
+  <destructor id="BLEpp::CharacteristicGeneric::~CharacteristicGeneric&lt;T&gt;" name="~CharacteristicGeneric&lt;T&gt;" virtual="yes" />
+  <method id="BLEpp::CharacteristicGeneric::getValue" name="getValue">
+    <return>
+      <type name="T" qualifier=" &amp;" />
+    </return>
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::setValue" name="setValue">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::setValue::value" name="value">
+      <type name="const T" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::setUUID" name="setUUID" override="yes">
+    <return>
+      <type name="CharacteristicGeneric&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::setUUID::uuid" name="uuid">
+      <type name="UUID" qualifier=" const &amp;" />
+    </argument>
+    <override name="CharacteristicBase::setUUID" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setUUID" />
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::setName" name="setName" override="yes">
+    <return>
+      <type name="CharacteristicGeneric&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::setName::name" name="name">
+      <type name="std::string" qualifier=" const &amp;" />
+    </argument>
+    <override name="CharacteristicBase::setName" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setName" />
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::setUnit" name="setUnit" override="yes">
+    <return>
+      <type name="CharacteristicGeneric&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::setUnit::unit" name="unit">
+      <type name="uint16_t" />
+    </argument>
+    <override name="CharacteristicBase::setUnit" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setUnit" />
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::setWritable" name="setWritable" override="yes">
+    <return>
+      <type name="CharacteristicGeneric&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::setWritable::writable" name="writable">
+      <type builtin="yes" name="bool" />
+    </argument>
+    <override name="CharacteristicBase::setWritable" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setWritable" />
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::setNotifies" name="setNotifies" override="yes">
+    <return>
+      <type name="CharacteristicGeneric&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::setNotifies::notifies" name="notifies">
+      <type builtin="yes" name="bool" />
+    </argument>
+    <override name="CharacteristicBase::setNotifies" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setNotifies" />
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::onWrite" name="onWrite">
+    <return>
+      <type name="CharacteristicGeneric&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::onWrite::closure" name="closure">
+      <type name="CharacteristicGeneric&lt;T&gt;::callback_on_write_t" qualifier=" const &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric::callback_on_write_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::onRead" name="onRead">
+    <return>
+      <type name="CharacteristicGeneric&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::onRead::closure" name="closure">
+      <type name="CharacteristicGeneric&lt;T&gt;::callback_on_read_t" qualifier=" const &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric::callback_on_read_t" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::setUpdateIntervalMSecs" name="setUpdateIntervalMSecs" override="yes">
+    <return>
+      <type name="CharacteristicGeneric&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::setUpdateIntervalMSecs::msecs" name="msecs">
+      <type name="uint32_t" />
+    </argument>
+    <override name="CharacteristicBase::setUpdateIntervalMSecs" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setUpdateIntervalMSecs" />
+  </method>
+  <conversionfunction id="BLEpp::CharacteristicGeneric::operator type-parameter-0-0 &amp;" name="operator type-parameter-0-0 &amp;">
+    <return>
+      <type name="T" qualifier=" &amp;" />
+    </return>
+  </conversionfunction>
+  <method id="BLEpp::CharacteristicGeneric::operator=" name="operator=">
+    <return>
+      <type name="CharacteristicGeneric&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::operator=::val" name="val">
+      <type name="const T" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::setDefaultValue" name="setDefaultValue">
+    <return>
+      <type name="CharacteristicGeneric&lt;T&gt;" qualifier=" &amp;" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::setDefaultValue::t" name="t">
+      <type name="const T" qualifier=" const &amp;" />
+    </argument>
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::onNotifyTxError" name="onNotifyTxError" override="yes" virtual="yes">
+    <brief>Callback function if a notify tx error occurs</brief>
+    <doc>This is called when the notify operation fails with a tx error. This
+can occur when too many tx operations are taking place at the same time.
+
+A &amp;lt;BLEpp::CharacteristicGenericBase::notify&amp;gt; is called when the master device
+connected to the Crownstone requests automatic notifications whenever
+the value changes.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="CharacteristicBase::onNotifyTxError" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::onNotifyTxError" />
+  </method>
+  <method id="BLEpp::CharacteristicGeneric::onTxComplete" name="onTxComplete" override="yes" virtual="yes">
+    <brief>Callback function once tx operations complete</brief>
+    <doc>This is called whenever tx operations complete. If a notification is pending
+&amp;lt;BLEpp::CharacteristicGenericBase::notify&amp;gt; is called again and the notification
+is cleared if the call eas successful. If not successful, it will be tried
+again during the next callback call
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::onTxComplete::p_ble_evt" name="p_ble_evt">
+      <doc>the event object which triggered the onTxComplete callback</doc>
+      <type name="ble_common_evt_t" qualifier="*" />
+    </argument>
+    <override name="CharacteristicBase::onTxComplete" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::onTxComplete" />
+  </method>
+  <method access="protected" id="BLEpp::CharacteristicGeneric::written" name="written" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::written::len" name="len">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::CharacteristicGeneric::written::offset" name="offset">
+      <type name="uint16_t" />
+    </argument>
+    <argument id="BLEpp::CharacteristicGeneric::written::data" name="data">
+      <type name="uint8_t" qualifier="*" />
+    </argument>
+    <override name="CharacteristicBase::written" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::written" />
+  </method>
+  <method access="protected" id="BLEpp::CharacteristicGeneric::read" name="read" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <override name="CharacteristicBase::read" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::read" />
+  </method>
+  <method access="protected" id="BLEpp::CharacteristicGeneric::configurePresentationFormat" name="configurePresentationFormat" override="yes" virtual="yes">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="BLEpp::CharacteristicGeneric::configurePresentationFormat::presentation_format" name="presentation_format">
+      <type name="ble_gatts_char_pf_t" qualifier=" &amp;" />
+    </argument>
+    <override name="CharacteristicBase::configurePresentationFormat" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::configurePresentationFormat" />
+  </method>
+</classtemplate>

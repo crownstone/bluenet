@@ -6,47 +6,50 @@ a scan operation. It keeps track of how often a device was seen and with
 which RSSI value.
 </doc>
   <base access="public">
-    <type name="BLEpp::Serializable" />
+    <type name="BLEpp::BufferAccessor" />
   </base>
-  <constructor abstract="yes" id="ScanResult::ScanResult" name="ScanResult">
+  <constructor id="ScanResult::ScanResult" name="ScanResult">
     <brief>Default constructor</brief>
   </constructor>
-  <destructor id="ScanResult::~ScanResult" name="~ScanResult" virtual="yes">
-    <brief>Default destructor</brief>
-    <doc>Free list on destruction
-</doc>
-  </destructor>
-  <method abstract="yes" id="ScanResult::deserialize" name="deserialize" virtual="yes">
-    <brief> De-serialize the data from the byte array into this object</brief>
+  <method id="ScanResult::assign" name="assign" virtual="yes">
+    <brief>@inherit</brief>
+    <return>
+      <type builtin="yes" name="int" />
+    </return>
+    <argument id="ScanResult::assign::buffer" name="buffer">
+      <type name="buffer_ptr_t" />
+    </argument>
+    <argument id="ScanResult::assign::maxLength" name="maxLength">
+      <type name="uint16_t" />
+    </argument>
+  </method>
+  <method abstract="yes" id="ScanResult::clear" name="clear">
+    <brief>Clear the list of devices</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="ScanResult::deserialize::buffer" name="buffer">
-      <type name="uint8_t" qualifier="*" />
+  </method>
+  <method id="ScanResult::getBuffer" name="getBuffer" virtual="yes">
+    <brief>@inherit</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="ScanResult::getBuffer::buffer" name="buffer">
+      <type name="buffer_ptr_t" qualifier=" &amp;" />
     </argument>
-    <argument id="ScanResult::deserialize::length" name="length">
-      <type name="uint16_t" />
+    <argument id="ScanResult::getBuffer::dataLength" name="dataLength">
+      <type name="uint16_t" qualifier=" &amp;" />
     </argument>
   </method>
-  <method id="ScanResult::getMaxLength" name="getMaxLength" virtual="yes">
-    <brief>Return the maximum possible length of the serialized object</brief>
-    <doc>This is defined by:
-&amp;lt;HEADER\_SIZE&amp;gt; + &amp;lt;MAX\_NR\_DEVICES&amp;gt; * &amp;lt;SERIALIZED\_DEVICE\_SIZE&amp;gt;
-
-</doc>
+  <method id="ScanResult::getDataLength" name="getDataLength" virtual="yes">
+    <brief>@inherit</brief>
     <return>
-      <doc>the maximum possible length</doc>
       <type name="uint16_t" />
     </return>
   </method>
-  <method abstract="yes" id="ScanResult::getSerializedLength" name="getSerializedLength" virtual="yes">
-    <brief> Return length of buffer required to store the serialized form of this object.</brief>
-    <doc>The size is determined by multiplying the number of devices with
-&amp;lt;SERIALIZED\_DEVICE\_SIZE&amp;gt; and adding the header size &amp;lt;HEADER\_SIZE&amp;gt;
-
-</doc>
+  <method id="ScanResult::getMaxLength" name="getMaxLength" virtual="yes">
+    <brief>@inherit</brief>
     <return>
-      <doc>number of bytes required</doc>
       <type name="uint16_t" />
     </return>
   </method>
@@ -57,67 +60,35 @@ which RSSI value.
       <type name="uint16_t" />
     </return>
   </method>
-  <method abstract="yes" id="ScanResult::init" name="init">
-    <brief>Allocate and initialize an empty list</brief>
-    <doc>If there was already a list created earlier, the
-old list is freed and a new list is allocated
-</doc>
-    <return>
-      <type builtin="yes" name="void" />
-    </return>
-  </method>
-  <method abstract="yes" id="ScanResult::operator!=" name="operator!=">
-    <brief>Basic not equal operator</brief>
-    <return>
-      <type builtin="yes" name="bool" />
-    </return>
-    <argument id="ScanResult::operator!=::val" name="val">
-      <type name="ScanResult" qualifier=" const &amp;" ref="ScanResult#ScanResult" />
-    </argument>
-  </method>
   <method abstract="yes" id="ScanResult::print" name="print">
     <brief>Print the list of devices for debug purposes to the UART</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
-  <method abstract="yes" id="ScanResult::release" name="release">
-    <brief>Release allocated memory</brief>
-    <doc>Can be called once the list is not used anymore
-to free up space. Before using the object again,
-init() has to be called.
+  <method id="ScanResult::release" name="release">
+    <brief>Release assigned buffer</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+  </method>
+  <method abstract="yes" id="ScanResult::update" name="update">
+    <brief>Update the list with the given device</brief>
+    <doc>If the bluetooth address is already in the list increase the occurrence by one
+and update the rssi value; if it is not yet in the list, add it to the list with
+occurrence=1; if the list is full, remove the device with lowest occurrence and
+add the new device to the list with occurence=1
 </doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
-  </method>
-  <method abstract="yes" id="ScanResult::reset" name="reset">
-    <brief>Clear the list of devices</brief>
-    <return>
-      <type builtin="yes" name="void" />
-    </return>
-  </method>
-  <method abstract="yes" id="ScanResult::serialize" name="serialize" virtual="yes">
-    <brief> Serialize the data into a byte array</brief>
-    <return>
-      <type builtin="yes" name="void" />
-    </return>
-    <argument id="ScanResult::serialize::buffer" name="buffer">
-      <type name="uint8_t" qualifier="*" />
-    </argument>
-    <argument id="ScanResult::serialize::length" name="length">
-      <type name="uint16_t" />
-    </argument>
-  </method>
-  <method abstract="yes" id="ScanResult::update" name="update">
-    <brief>Update the list with the given device</brief>
-    <return>
-      <type builtin="yes" name="void" />
-    </return>
     <argument id="ScanResult::update::adrs_ptr" name="adrs_ptr">
+      <doc>pointer to an array of length &amp;lt;BLE\_GAP\_ADDR\_LEN&amp;gt;
+  which contains the bluetooth address of the device in little-endian</doc>
       <type name="uint8_t" qualifier="*" />
     </argument>
     <argument id="ScanResult::update::rssi" name="rssi">
+      <doc>rssi value of the advertisement package</doc>
       <type name="int8_t" />
     </argument>
   </method>

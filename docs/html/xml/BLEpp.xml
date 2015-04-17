@@ -14,44 +14,28 @@
     <brief> BLEStack defines a chip-agnostic Bluetooth Low-Energy stack</brief>
   </class>
   <classtemplate name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
-    <brief> Characteristic of generic type T</brief>
+    <brief> A default characteristic</brief>
     <templatetypeparameter id="BLEpp::Characteristic::T" name="T" />
+    <templatetypeparameter id="BLEpp::Characteristic::E" name="E" />
   </classtemplate>
+  <class name="Characteristic" ref="BLEpp::Characteristic#BLEpp::Characteristic">
+    <brief>A characteristic for strings</brief>
+  </class>
   <class name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase">
     <brief> Non-template base class for Characteristics.</brief>
   </class>
-  <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
-  <struct name="CharacteristicStatus" ref="BLEpp::CharacteristicStatus#BLEpp::CharacteristicStatus" />
-  <classtemplate name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
-    <brief> A default characteristic</brief>
-    <templatetypeparameter id="BLEpp::CharacteristicT::T" name="T" />
-    <templatetypeparameter id="BLEpp::CharacteristicT::E" name="E" />
+  <classtemplate name="CharacteristicGeneric" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric">
+    <brief> Characteristic of generic type T</brief>
+    <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T" />
   </classtemplate>
-  <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
-    <brief>A characteristic for strings</brief>
-  </class>
-  <class name="CharacteristicT" ref="BLEpp::CharacteristicT#BLEpp::CharacteristicT">
-    <brief>A characteristic for CharacteristicValue</brief>
-  </class>
-  <struct name="CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue">
-    <brief> A value which can be written to or read from a characteristic. Basically just</brief>
-  </struct>
+  <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
   <class name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
-  <class name="IBeacon" ref="BLEpp::IBeacon#BLEpp::IBeacon">
-    <brief> Implementation of the iBeacon specification.</brief>
-  </class>
   <class name="Nrf51822BluetoothStack" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack">
     <brief> nRF51822 specific implementation of the BLEStack</brief>
   </class>
   <class name="Service" ref="BLEpp::Service#BLEpp::Service">
     <brief> Service as defined in the GATT Specification.</brief>
   </class>
-  <typedef id="BLEpp::addCharacteristicFunc" name="addCharacteristicFunc">
-    <type name="void (BLEpp::GenericService::*)()" />
-  </typedef>
-  <typedef id="BLEpp::CharacteristicStatusT" name="CharacteristicStatusT">
-    <type name="CharacteristicStatus" ref="BLEpp::CharacteristicStatus#BLEpp::CharacteristicStatus" />
-  </typedef>
   <function id="BLEpp::ble_type" name="ble_type">
     <brief>A ble_type for strings</brief>
     <return>

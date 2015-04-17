@@ -6,23 +6,19 @@
   <typedef id="IndoorLocalizationService::func_t" name="func_t">
     <type name="int8_t" />
   </typedef>
-  <constructor abstract="yes" id="IndoorLocalizationService::IndoorLocalizationService" name="IndoorLocalizationService">
-    <argument id="IndoorLocalizationService::IndoorLocalizationService::stack" name="stack">
-      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
-    </argument>
-  </constructor>
-  <method abstract="yes" id="IndoorLocalizationService::createService" name="createService" static="yes">
-    <return>
-      <type name="IndoorLocalizationService" qualifier=" &amp;" ref="IndoorLocalizationService#IndoorLocalizationService" />
-    </return>
-    <argument id="IndoorLocalizationService::createService::stack" name="stack">
-      <type name="BLEpp::Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
-    </argument>
-  </method>
+  <constructor abstract="yes" id="IndoorLocalizationService::IndoorLocalizationService" name="IndoorLocalizationService" />
   <method abstract="yes" id="IndoorLocalizationService::getNearbyTimeout" name="getNearbyTimeout">
     <brief>* Returns the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. </brief>
     <return>
       <type name="uint16_t" />
+    </return>
+  </method>
+  <method abstract="yes" id="IndoorLocalizationService::init" name="init">
+    <brief>Initialize a IndoorLocalization object</brief>
+    <doc>Add all characteristics and initialize them where necessary.
+</doc>
+    <return>
+      <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" id="IndoorLocalizationService::on_ble_event" name="on_ble_event" override="yes" virtual="yes">

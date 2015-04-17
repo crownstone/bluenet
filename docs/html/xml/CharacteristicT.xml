@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<class id="CharacteristicT" name="CharacteristicT" xmlns="http://jessevdk.github.com/cldoc/1.0">
+<class id="Characteristic" name="Characteristic" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <brief> Scan Result characteristic</brief>
   <doc>This template implements the functions specific for the Scan Result Characteristic.
 It takes care of setting and reading the list of scanned devices and handles
@@ -9,7 +9,7 @@ is sent over the air.
   <base access="public">
     <type name="BLEpp::Characteristic&lt;ScanResult&gt;" />
   </base>
-  <method id="CharacteristicT::getCharacteristicValue" name="getCharacteristicValue" virtual="yes">
+  <method id="Characteristic::getCharacteristicValue" name="getCharacteristicValue" virtual="yes">
     <brief>Returns the ScanResult object currently assigned to the characteristic</brief>
     <doc>Serialized the ScanResult object into a byte buffer and returns it as a
 &amp;lt;CharacteristicValue&amp;gt;
@@ -20,7 +20,7 @@ is sent over the air.
       <type name="BLEpp::CharacteristicValue" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
     </return>
   </method>
-  <method id="CharacteristicT::getValueMaxLength" name="getValueMaxLength" virtual="yes">
+  <method id="Characteristic::getValueMaxLength" name="getValueMaxLength" virtual="yes">
     <brief>Return the maximum possible length of the buffer</brief>
     <doc>This is defined by:
 &amp;lt;HEADER\_SIZE&amp;gt; + &amp;lt;MAX\_NR\_DEVICES&amp;gt; * &amp;lt;SERIALIZED\_DEVICE\_SIZE&amp;gt;
@@ -31,7 +31,7 @@ is sent over the air.
       <type name="uint16_t" />
     </return>
   </method>
-  <method id="CharacteristicT::onNotifyTxError" name="onNotifyTxError" virtual="yes">
+  <method id="Characteristic::onNotifyTxError" name="onNotifyTxError" virtual="yes">
     <brief>Callback function if a notify tx error occurs</brief>
     <doc>This is called when the notify operation fails with a tx error. This
 can occur when too many tx operations are taking place at the same time.
@@ -44,30 +44,30 @@ the value changes.
       <type builtin="yes" name="void" />
     </return>
   </method>
-  <method id="CharacteristicT::onTxComplete" name="onTxComplete" virtual="yes">
+  <method id="Characteristic::onTxComplete" name="onTxComplete" virtual="yes">
     <brief>Callback function once tx operations complete</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="CharacteristicT::onTxComplete::p_ble_evt" name="p_ble_evt">
+    <argument id="Characteristic::onTxComplete::p_ble_evt" name="p_ble_evt">
       <type name="ble_common_evt_t" qualifier="*" />
     </argument>
   </method>
-  <method id="CharacteristicT::operator=" name="operator=">
+  <method id="Characteristic::operator=" name="operator=">
     <brief>Default asign operator</brief>
     <return>
-      <type name="BLEpp::CharacteristicT&lt;ScanResult&gt;" qualifier=" &amp;" ref="CharacteristicT#CharacteristicT" />
+      <type name="BLEpp::Characteristic&lt;ScanResult&gt;" qualifier=" &amp;" ref="Characteristic#Characteristic" />
     </return>
-    <argument id="CharacteristicT::operator=::val" name="val">
+    <argument id="Characteristic::operator=::val" name="val">
       <type name="ScanResult" qualifier=" const &amp;" ref="ScanResult#ScanResult" />
     </argument>
   </method>
-  <method id="CharacteristicT::setCharacteristicValue" name="setCharacteristicValue" virtual="yes">
+  <method id="Characteristic::setCharacteristicValue" name="setCharacteristicValue" virtual="yes">
     <brief>Assign the given &amp;lt;CharacteristicValue&amp;gt; to this characteristic</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="CharacteristicT::setCharacteristicValue::value" name="value">
+    <argument id="Characteristic::setCharacteristicValue::value" name="value">
       <type name="BLEpp::CharacteristicValue" qualifier=" const &amp;" ref="BLEpp::CharacteristicValue#BLEpp::CharacteristicValue" />
     </argument>
   </method>

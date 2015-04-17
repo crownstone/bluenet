@@ -61,10 +61,17 @@ protected:
 	void stopTracking();
 
 public:
-	IndoorLocalizationService(BLEpp::Nrf51822BluetoothStack& stack);
+	IndoorLocalizationService();
 
 	void tick();
 //	void addSpecificCharacteristics();
+
+	/* Initialize a IndoorLocalization object
+	 * @stack Bluetooth Stack to attach this service to
+	 *
+	 * Add all characteristics and initialize them where necessary.
+	 */
+	void init();
 
 	/** Sets the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
 	void setNearbyTimeout(uint16_t counts);
@@ -81,14 +88,13 @@ public:
 #if(SOFTDEVICE_SERIES != 110)
 	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
 #endif
-	static IndoorLocalizationService& createService(BLEpp::Nrf51822BluetoothStack& stack);
-private:
-	BLEpp::Nrf51822BluetoothStack* _stack;
 
-	BLEpp::CharacteristicT<int8_t>* _rssiCharac;
-	BLEpp::Characteristic<ScanResult>* _peripheralCharac;
-	BLEpp::Characteristic<TrackedDeviceList>* _trackedDeviceListCharac;
-	BLEpp::Characteristic<TrackedDevice>* _trackedDeviceCharac;
+private:
+	BLEpp::Characteristic<int8_t>* _rssiCharac;
+	BLEpp::Characteristic<uint8_t>* _scanControlCharac;
+	BLEpp::Characteristic<buffer_ptr_t>* _peripheralCharac;
+	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceListCharac;
+	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceCharac;
 	
 	func_t _rssiHandler;
 
@@ -98,7 +104,7 @@ private:
 	bool _initialized;
 	bool _scanMode;
 
-//	ScanResult* _scanResult;
+	ScanResult* _scanResult;
 	TrackedDeviceList* _trackedDeviceList;
 
 	pstorage_handle_t _storageHandle;
