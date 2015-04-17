@@ -23,10 +23,7 @@ void ADC::setClock(RealTimeClock &clock) {
 	_clock = &clock;
 }
 
-/**
- * The init function is called once before operating the AD converter. Call it after you start the SoftDevice. Check 
- * the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
- */
+// Check the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
 uint32_t ADC::init(uint8_t pin) {
 #if(NRF51_USE_SOFTDEVICE == 1)
 	LOGd("Run ADC converter with SoftDevice");
@@ -69,8 +66,8 @@ uint32_t ADC::init(uint8_t pin) {
 	return 0;
 }
 
-/**
- * Configure the AD converter.
+/* Configure the AD converter.
+ *
  *   - set the resolution to 10 bits
  *   - set the prescaler for the input voltage (the input, not the input supply) 
  *   - use the internal VGB reference (not the external one, so no need to use its multiplexer either)
@@ -96,16 +93,10 @@ uint32_t ADC::config(uint8_t pin) {
 	return 0;
 }
 
-/**
- * Stop the AD converter.
- */
 void ADC::stop() {
 	NRF_ADC->TASKS_STOP = 1;
 }
 
-/**
- * Start the AD converter.
- */
 void ADC::start() {
 	_lastResult = (uint16_t)-1;
 	_sampleNum = 0;
@@ -128,8 +119,7 @@ void ADC::tick() {
 //	dispatch();
 }
 
-/*
- * The interrupt handler for an ADC data ready event.
+/* The interrupt handler for an ADC data ready event.
  */
 extern "C" void ADC_IRQHandler(void) {
 	uint32_t adc_value;

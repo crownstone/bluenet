@@ -25,9 +25,10 @@ public:
 	virtual ~BufferAccessor() {};
 
 	/* Assign the buffer used to hold the scanned device list
-	 * @param buffer                the buffer to be used
-	 * @param maxLength             size of buffer (maximum number of bytes that
-	 *                              can be stored)
+	 * @buffer                the buffer to be used
+	 * @maxLength             size of buffer (maximum number of bytes that can be stored)
+	 *
+	 * @return 0 on success
 	 */
 	virtual int assign(buffer_ptr_t buffer, uint16_t maxLength) = 0;
 

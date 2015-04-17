@@ -21,22 +21,29 @@ public:
 		return instance;
 	}
 
-	/* If decorated with a real time clock, we can "timestamp" the adc values.
-	 *
+	/* Assign a clock
 	 * @clock Clock that is running.
+	 *
+	 * If decorated with a real time clock, we can add time stamps to the adc samples.
 	 */
 	void setClock(RealTimeClock &clock);
 
-	/* Initialize ADC, this will allocate memory for the samples.
-	 *
+	/* Initialize ADC.
 	 * @pin The pin to use as input (AIN<pin>).
+	 *
+	 * The init function must called once before operating the AD converter.
+	 * Call it after you start the SoftDevice.
 	 */
 	uint32_t init(uint8_t pin);
 
-	// Start the ADC sampling
+	/* Start the ADC sampling
+	 *
+	 * Will add samples to the current curve if it's assigned.
+	 */
 	void start();
 
-	// Stop the ADC sampling
+	/* Stop the ADC sampling
+	 */
 	void stop();
 
 	// Each tick we have time to dispatch events e.g.

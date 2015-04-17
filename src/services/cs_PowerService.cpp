@@ -111,10 +111,6 @@ void PowerService::turnOn() {
 	PWM::getInstance().setValue(0, 255);
 }
 
-/**
- * Dim the light, note that we use PWM. You might need another way to dim the light! For example by only turning on for
- * a specific duty-cycle after the detection of a zero crossing.
- */
 void PowerService::dim(uint8_t value) {
 	// update pwm characteristic so that the current value can be read from the characteristic
 	if (_pwmCharacteristic != NULL) {
