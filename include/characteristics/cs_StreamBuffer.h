@@ -62,16 +62,7 @@ public:
 	StreamBuffer(): _buffer(NULL) {
 	};
 
-	/* Initialize the buffer 
-	 *
-	 * @param buffer                the buffer to be used
-	 * @param size                  size of buffer
-	 *
-	 * Size of the asigned buffer (should be equal or larger than capacity).
-	 *
-	 * @return 0 on SUCCESS, 1 on FAILURE (buffer required too large)
-	 */
-	// TODO: should return ERR_CODE?
+	/* @inherit */
 	int assign(uint8_t *buffer, uint16_t size) {
 		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, size);
 		if (SB_HEADER_SIZE + _max_items*_item_size > size) {

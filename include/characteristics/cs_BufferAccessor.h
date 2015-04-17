@@ -30,7 +30,7 @@ public:
 	 *
 	 * @return 0 on success
 	 */
-	virtual int assign(buffer_ptr_t buffer, uint16_t maxLength) = 0;
+	virtual int assign(buffer_ptr_t buffer, uint16_t maxLength) = 0; // TODO: should return ERR_CODE?
 
 	/* Return the maximum possible length of the object
 	 *
