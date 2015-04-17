@@ -318,7 +318,7 @@ some other attention from us developers.
 
 Obviously, the copyrights of the code written by Christopher, belong to him.
 
-The copyrights (2014) for the rest of the code belongs to the team of Distributed Organisms B.V. and are provided under an noncontagious open-source license:
+The copyrights (2014-2015) for the rest of the code belongs to the team of Distributed Organisms B.V. and are provided under an noncontagious open-source license:
 
 * Authors: Anne van Rossum, Dominik Egger, Bart van Vliet
 * Date: 27 Jan. 2014

@@ -77,13 +77,19 @@ namespace BLEpp {
 class Service;
 class Nrf51822BluetoothStack;
 
+/* CharacteristicInit collects fields required to define a BLE characteristic
+ */
 struct CharacteristicInit {
 	ble_gatts_attr_t          attr_char_value;
+	// pointer to a presentation format structure (p_char_pf)
 	ble_gatts_char_pf_t       presentation_format;
 	ble_gatts_char_md_t       char_md;
+	// attribute metadata for client characteristic configuration  (p_cccd_md)
 	ble_gatts_attr_md_t       cccd_md;
+	// attributed metadata for server characteristic configuration (p_sccd_md)
 	ble_gatts_attr_md_t       sccd_md;
 	ble_gatts_attr_md_t       attr_md;
+	// attribute metadata for user description (p_user_desc_md)
 	ble_gatts_attr_md_t       user_desc_metadata_md;
 
 	CharacteristicInit() : presentation_format({}), char_md({}), cccd_md({}), attr_md({}) {}

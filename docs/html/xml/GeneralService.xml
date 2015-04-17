@@ -9,7 +9,7 @@ If meshing is enabled, it is also possible to send a message into the mesh netwo
 </doc>
   <base access="public">
     <type name="BLEpp::GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
-    <brief> Generic Service is a Service with characteristics</brief>
+    <brief> Generic Service is a <ref ref="BLEpp::Service#BLEpp::Service">BLEpp::Service</ref> and <ref ref="BLEpp::Service#BLEpp::Service::Service">BLEpp::Service::Service</ref> with characteristics</brief>
   </base>
   <constructor abstract="yes" id="GeneralService::GeneralService" name="GeneralService">
     <brief>Constructor for general crownstone service object</brief>

@@ -3,7 +3,17 @@
   <brief>Bluenet, a mesh combined with Bluetooth Low-Energy.</brief>
   <doc># Bluenet Documentation
 
-This documentation describes the features of the Bluenet firmware.</doc>
+This documentation describes the features of the Bluenet firmware. If you are not on the http://dobots.github.io/bluenet/ page, you can navigate to it, to read this in your browser.
+
+# Bluenet Code
+
+The code for the firmware can be found at https://github.com/dobots/bluenet.
+
+# Crownstone
+
+The product that makes use of this firmware is the crownstone, which is currently one of the core technologies developed at DoBots. At the moment the status is just before launching our product, so as a development inclined person, you can see our work on github (and in this documentation) as a sneak preview.
+
+See: https://dobots.nl/products/crownstone/</doc>
   <namespace name="BLEpp" ref="BLEpp#BLEpp">
     <class name="BatteryService" ref="BLEpp::BatteryService#BLEpp::BatteryService">
       <brief> Battery service</brief>
@@ -26,9 +36,11 @@ This documentation describes the features of the Bluenet firmware.</doc>
       <brief> Characteristic of generic type T</brief>
       <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T" />
     </classtemplate>
-    <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
+    <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit">
+      <brief> CharacteristicInit collects fields required to define a BLE characteristic</brief>
+    </struct>
     <class name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService">
-      <brief> Generic Service is a Service with characteristics</brief>
+      <brief> Generic Service is a <ref ref="BLEpp::Service#BLEpp::Service">BLEpp::Service</ref> and <ref ref="BLEpp::Service#BLEpp::Service::Service">BLEpp::Service::Service</ref> with characteristics</brief>
     </class>
     <class name="Nrf51822BluetoothStack" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack">
       <brief> nRF51822 specific implementation of the BLEStack</brief>

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <class id="BLEpp::GenericService" name="GenericService" xmlns="http://jessevdk.github.com/cldoc/1.0">
-  <brief> Generic Service is a Service with characteristics</brief>
+  <brief> Generic Service is a <ref ref="BLEpp::Service#BLEpp::Service">BLEpp::Service</ref> and <ref ref="BLEpp::Service#BLEpp::Service::Service">BLEpp::Service::Service</ref> with characteristics</brief>
   <doc>Currently the number of characteristics is limited. By having this container in a separate class, in the future
 services that have more than MAX_CHARACTERISTICS can be defined.
 

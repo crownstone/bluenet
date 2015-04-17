@@ -1,24 +1,29 @@
 <?xml version='1.0' encoding='utf-8'?>
 <struct id="BLEpp::CharacteristicInit" name="CharacteristicInit" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> CharacteristicInit collects fields required to define a BLE characteristic</brief>
   <field id="BLEpp::CharacteristicInit::attr_char_value" name="attr_char_value">
     <type name="ble_gatts_attr_t" />
   </field>
   <field id="BLEpp::CharacteristicInit::presentation_format" name="presentation_format">
+    <brief>pointer to a presentation format structure (p_char_pf)</brief>
     <type name="ble_gatts_char_pf_t" />
   </field>
   <field id="BLEpp::CharacteristicInit::char_md" name="char_md">
     <type name="ble_gatts_char_md_t" />
   </field>
   <field id="BLEpp::CharacteristicInit::cccd_md" name="cccd_md">
+    <brief>attribute metadata for client characteristic configuration  (p_cccd_md)</brief>
     <type name="ble_gatts_attr_md_t" />
   </field>
   <field id="BLEpp::CharacteristicInit::sccd_md" name="sccd_md">
+    <brief>attributed metadata for server characteristic configuration (p_sccd_md)</brief>
     <type name="ble_gatts_attr_md_t" />
   </field>
   <field id="BLEpp::CharacteristicInit::attr_md" name="attr_md">
     <type name="ble_gatts_attr_md_t" />
   </field>
   <field id="BLEpp::CharacteristicInit::user_desc_metadata_md" name="user_desc_metadata_md">
+    <brief>attribute metadata for user description (p_user_desc_md)</brief>
     <type name="ble_gatts_attr_md_t" />
   </field>
   <constructor id="BLEpp::CharacteristicInit::CharacteristicInit" name="CharacteristicInit" />

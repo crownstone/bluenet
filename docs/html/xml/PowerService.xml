@@ -2,7 +2,7 @@
 <class id="PowerService" interface="true" name="PowerService" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <base access="public">
     <type name="BLEpp::GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
-    <brief> Generic Service is a Service with characteristics</brief>
+    <brief> Generic Service is a <ref ref="BLEpp::Service#BLEpp::Service">BLEpp::Service</ref> and <ref ref="BLEpp::Service#BLEpp::Service::Service">BLEpp::Service::Service</ref> with characteristics</brief>
   </base>
   <typedef id="PowerService::func_t" name="func_t">
     <type name="int8_t" />
