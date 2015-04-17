@@ -8,12 +8,16 @@ chip-agnostic code. However, this might be recommendable in the future.
     <brief> nRF51822 specific implementation of the BLEStack</brief>
   </subclass>
   <method abstract="yes" id="BLEpp::BLEStack::connected" name="connected" virtual="yes">
+    <brief>Connected?</brief>
     <return>
+      <doc>true if connected, false if not connected</doc>
       <type builtin="yes" name="bool" />
     </return>
   </method>
   <method abstract="yes" id="BLEpp::BLEStack::getConnectionHandle" name="getConnectionHandle" virtual="yes">
+    <brief>Handle to connection</brief>
     <return>
+      <doc>16-bit value that unique identifies the connection</doc>
       <type name="uint16_t" />
     </return>
   </method>

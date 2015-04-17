@@ -685,30 +685,45 @@ public:
 	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
 };
 
+/* Generic Service is a Service with characteristics
+ *
+ * Currently the number of characteristics is limited. By having this container in a separate class, in the future
+ * services that have more than MAX_CHARACTERISTICS can be defined.
+ *
+ * This class defines only two methods:
+ * + <getCharacteristics>
+ * + <addCharacteristic>
+ */
 class GenericService : public Service {
-
 protected:
-
+	// Currently maximum number of characteristics per service
 	static const uint8_t MAX_CHARACTERISTICS = 6;
 
-	// by keeping the container in this subclass, we can in the future define services that more than MAX_CHARACTERISTICS characteristics.
-
+	// List of characteristics
 	fixed_tuple<CharacteristicBase*, MAX_CHARACTERISTICS> _characteristics;
-
-	// Enabled characteristics (to be set in constructor)
-//	std::vector<CharacteristicStatusT> characStatus;
 
 public:
 
+	/* Constructor of GenericService 
+	 *
+	 * Sets GenericService as BLE name
+	 */
 	GenericService() : Service()
-//		, characStatus(0)
 	{
 		setName(std::string("GenericService"));
 	}
 
+	/* Get list of characteristics
+	 *
+	 * @return list of characteristics
+	 */
 	virtual Characteristics_t & getCharacteristics() {
 		return _characteristics;
 	}
+
+	/* Add a single characteristic to the list
+	 * @characteristic Characteristic to add
+	 */
 	virtual GenericService& addCharacteristic(CharacteristicBase* characteristic) {
 		if (_characteristics.size() == MAX_CHARACTERISTICS) {
 			BLE_THROW("Too many characteristics.");
@@ -717,10 +732,6 @@ public:
 
 		return *this;
 	}
-
-//	void addSpecificCharacteristics();
-
-	//	virtual void on_ble_event(ble_evt_t * p_ble_evt);
 };
 
 /* Battery service
@@ -780,7 +791,16 @@ public:
  */
 class BLEStack {
 public:
+	/* Connected?
+	 *
+	 * @return true if connected, false if not connected
+	 */
 	virtual bool connected() = 0;
+
+	/* Handle to connection
+	 *
+	 * @return 16-bit value that unique identifies the connection
+	 */
 	virtual uint16_t getConnectionHandle() = 0;
 };
 
@@ -792,8 +812,11 @@ public:
  * stack object as an argument w.r.t. this object. This makes dependencies traceable for the user.
  */
 class Nrf51822BluetoothStack : public BLEStack {
-	friend void SWI2_IRQHandler();   // ble stack events.
-	friend void ::SWI1_IRQHandler(); // radio notification
+	// Friend for BLE stack event handling
+	friend void SWI2_IRQHandler();
+
+	// Friend for radio notification handling
+	friend void ::SWI1_IRQHandler(); 
 
 private:
 	// The Nrf51822BluetoothStack is defined as a singleton

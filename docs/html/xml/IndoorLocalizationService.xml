@@ -2,6 +2,7 @@
 <class id="IndoorLocalizationService" interface="true" name="IndoorLocalizationService" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <base access="public">
     <type name="BLEpp::GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+    <brief> Generic Service is a Service with characteristics</brief>
   </base>
   <typedef id="IndoorLocalizationService::func_t" name="func_t">
     <type name="int8_t" />

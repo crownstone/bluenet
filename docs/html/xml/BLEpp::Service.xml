@@ -1,7 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <class abstract="true" id="BLEpp::Service" name="Service" xmlns="http://jessevdk.github.com/cldoc/1.0">
   <brief> Service as defined in the GATT Specification.</brief>
-  <subclass access="public" name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+  <subclass access="public" name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService">
+    <brief> Generic Service is a Service with characteristics</brief>
+  </subclass>
   <variable id="BLEpp::Service::defaultServiceName" name="defaultServiceName">
     <type builtin="yes" name="char" qualifier=" const *" />
   </variable>

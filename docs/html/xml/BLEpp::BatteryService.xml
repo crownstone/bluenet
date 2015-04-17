@@ -6,6 +6,7 @@
 </doc>
   <base access="public">
     <type name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+    <brief> Generic Service is a Service with characteristics</brief>
   </base>
   <typedef id="BLEpp::BatteryService::func_t" name="func_t">
     <brief>Define func_t as a templated function with an unsigned byte</brief>

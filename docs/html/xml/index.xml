@@ -27,7 +27,9 @@ This documentation describes the features of the Bluenet firmware.</doc>
       <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T" />
     </classtemplate>
     <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit" />
-    <class name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService" />
+    <class name="GenericService" ref="BLEpp::GenericService#BLEpp::GenericService">
+      <brief> Generic Service is a Service with characteristics</brief>
+    </class>
     <class name="Nrf51822BluetoothStack" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack">
       <brief> nRF51822 specific implementation of the BLEStack</brief>
     </class>
