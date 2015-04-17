@@ -55,6 +55,7 @@ public:
 };
 
 /* A fixed tuple is a vector with a templated type and a reserved capacity.
+ * @capacity Predefined capacity of the underlying std::vector.
  */
 template<typename T, uint8_t capacity> class fixed_tuple : public tuple<T> {
 public:
@@ -157,8 +158,12 @@ protected:
 	bool                      _indicates;
 
 public:
-
+	/* Default constructor for CharacteristicBase
+	 */
 	CharacteristicBase();
+
+	/* Empty destructor
+	 */
 	virtual ~CharacteristicBase() {}
 
 	/* Initialize the characteristic.
@@ -284,52 +289,66 @@ protected:
 	virtual void onNotifyTxError();
 };
 
-// The default ble_type
-template<typename T> inline  uint8_t ble_type() {
+/* The templated version of ble_type
+ * @T The class / primitive to template ble_type with
+ */
+template<typename T> 
+inline uint8_t ble_type() {
 	return BLE_GATT_CPF_FORMAT_STRUCT;
 }
 // A ble_type for strings
-template<> inline uint8_t ble_type<std::string>() {
+template<> 
+inline uint8_t ble_type<std::string>() {
 	return BLE_GATT_CPF_FORMAT_UTF8S;
 }
 // A ble_type for 8-bit unsigned values
-template<> inline uint8_t ble_type<uint8_t>() {
+template<> 
+inline uint8_t ble_type<uint8_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT8;
 }
 // A ble_type for 16-bit unsigned values
-template<> inline uint8_t ble_type<uint16_t>() {
+template<> 
+inline uint8_t ble_type<uint16_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT16;
 }
 // A ble_type for 32-bit unsigned values
-template<> inline uint8_t ble_type<uint32_t>() {
+template<> 
+inline uint8_t ble_type<uint32_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT32;
 }
 // A ble_type for 8-bit signed values
-template<> inline uint8_t ble_type<int8_t>() {
+template<> 
+inline uint8_t ble_type<int8_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT8;
 }
 // A ble_type for 16-bit signed values
-template<> inline uint8_t ble_type<int16_t>() {
+template<> 
+inline uint8_t ble_type<int16_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT16;
 }
 // A ble_type for 32-bit signed values
-template<> inline uint8_t ble_type<int32_t>() {
+template<> 
+inline uint8_t ble_type<int32_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT32;
 }
 // A ble_type for floats (32 bits)
-template<> inline uint8_t ble_type<float>() {
+template<> 
+inline uint8_t ble_type<float>() {
 	return BLE_GATT_CPF_FORMAT_FLOAT32;
 }
 // A ble_type for doubles (64 bits)
-template<> inline uint8_t ble_type<double>() {
+template<> 
+inline uint8_t ble_type<double>() {
 	return BLE_GATT_CPF_FORMAT_FLOAT64;
 }
 // A ble_type for booleans (8 bits)
-template<> inline uint8_t ble_type<bool>() {
+template<> 
+inline uint8_t ble_type<bool>() {
 	return BLE_GATT_CPF_FORMAT_BOOLEAN;
 }
 
 /* Characteristic of generic type T
+ * @T Generic type T
  *
  * A characteristic first of all contains a templated "value" which might be a string, an integer, or a
  * buffer, depending on the need at hand.
@@ -363,6 +382,7 @@ protected:
 public:
 	CharacteristicGeneric() : _notificationPending(false) {};
 
+	// Default empty destructor
 	virtual ~CharacteristicGeneric() {};
 
 	T&  __attribute__((optimize("O0"))) getValue() {
@@ -648,10 +668,13 @@ public:
 
 	}
 
+	/* Default empty destructor
+	 *
+	 * We don't currently delete our characteristics as we don't really support dynamic service destruction.
+	 * If we wanted to allow services to be removed at runtime, we would need to, amongst many other things,
+	 * keep track of whether we allocated the characteristic or whether it was passed into us.
+	 */
 	virtual ~Service() {
-		// we don't currently delete our characteristics as we don't really support dynamic service destruction.
-		// if we wanted to allow services to be removed at runtime, we would need to, amongst many other things,
-		// keep track of whether we allocated the characteristic or whether it was passed into us.
 	}
 
 	Service& setName(const std::string& name) {
