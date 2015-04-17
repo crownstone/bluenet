@@ -203,16 +203,6 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	//	ci.char_md.char_props.write_wo_resp = ci.cccd_md.write_perm.lv > 0 ? 1 :0;
 }
 
-/* Notifies the user of a new or updated value
- *
- * The function plays two roles:
- *
- * + if notifies and notifyingEnabled are both true, (and it's connected) it sets sd_ble_gatts_hvx
- * + if either of them is false, it only writes the value with sd_ble_gatts_value_set 
- *
- * In either case the function sends a command over BLE by telling the SoftDevice (and the user) that there is a new 
- * value available. 
- */
 uint32_t CharacteristicBase::notify() {
 
 	uint16_t valueLength = getValueLength();
@@ -421,12 +411,6 @@ void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
 
 /// Nrf51822BluetoothStack /////////////////////////////////////////////////////////////////////////////////////////////
 
-/* Constructor of the BLE stack on the NRF51822
- *
- * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. However,
- * the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the init() 
- * function.
- */
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_appearance(defaultAppearance), _clock_source(defaultClockSource), _mtu_size(defaultMtu),
 				_tx_power_level(defaultTxPowerLevel), _sec_mode({ }),
@@ -451,11 +435,6 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 	_gap_conn_params.conn_sup_timeout = defaultConnectionSupervisionTimeout_10_ms;
 }
 
-/**
- * The destructor shuts down the stack. 
- *
- * TODO: The SoftDevice should be disabled as well.
- */
 Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	shutdown();
 
@@ -463,20 +442,6 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 		free(_evt_buffer);
 }
 
-/* Initialization of the BLE stack
- *
- * Performs a series of tasks:
- *   - disables softdevice if it is currently enabled
- *   - enables softdevice with own clock and assertion handler
- *   - enable service changed characteristic for S110
- *   - disable automatic address recycling for S110
- *   - enable IRQ (SWI2_IRQn) for the softdevice
- *   - set BLE device name
- *   - set appearance (e.g. used in GUIs to interface with BLE devices)
- *   - set connection parameters
- *   - set Tx power level
- *   - set the callback for BLE events (if we use Source/sd_common/softdevice_handler.c in Nordic's SDK)
- */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	if (_inited)
@@ -552,11 +517,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	return *this;
 }
 
-/**
- * We want to change the device name halfway. This can be done through a characteristic, which is easy during
- * development (you can separate otherwise similar devices). It is probably not functionality you want to have for
- * the end-user.
- */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::updateDeviceName(const std::string& deviceName) {
 	_device_name = deviceName;
 	if (!_device_name.empty()) {
@@ -570,11 +530,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::updateDeviceName(const std::stri
 	return *this;
 }
 
-/**
- * Start can only be called once. It starts all services. If one of these services cannot be started, there is 
- * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in 
- * init().
- */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::start() {
 	if (_started)
 		return *this;
@@ -588,14 +543,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::start() {
 	return *this;
 }
 
-/**
- * The function shutdown() is the counterpart of start(). It does stop all services. It does not check if these 
- * services have actually been started. 
- *
- * It will also stop advertising. The SoftDevice will not be shut down.
- *
- * After a shutdown() the function start() can be called again.
- */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::shutdown() {
 	stopAdvertising();
 
@@ -846,12 +793,8 @@ bool Nrf51822BluetoothStack::isAdvertising() {
 //#define SCAN_WINDOW                      0x0050         /**< Determines scan window in units of 0.625 millisecond. */
 #define SCAN_WINDOW                      0x009E         /**< Determines scan window in units of 0.625 millisecond. */
 
-/**
- * Only call the following functions with a S120 or S130 device that can play a central role. The following functions
- * are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone
- * developer.
- */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
+#if(SOFTDEVICE_SERIES != 110)
 	if (_scanning)
 		return *this;
 	LOGi("startScanning");
@@ -867,29 +810,29 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
 	// todo: which fields to set here?
 	BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params));
 	_scanning = true;
+#endif
 	return *this;
 }
 
+
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopScanning() {
+#if(SOFTDEVICE_SERIES != 110)
 	if (!_scanning)
 		return *this;
 	LOGi("stopScanning");
 	BLE_CALL(sd_ble_gap_scan_stop, ());
 	_scanning = false;
+#endif
 	return *this;
 }
 
 bool Nrf51822BluetoothStack::isScanning() {
+#if(SOFTDEVICE_SERIES != 110)
 	return _scanning;
-}
 #endif
+	return false;
+}
 
-/**
- * Function that sets up radio notification interrupts. It sets the IRQ priority, enables it, and sets some 
- * configuration values related to distance.
- *
- * Currently not used. 
- */
 Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
 		uint32_t distanceUs, callback_radio_t callback) {
 	_callback_radio = callback;
@@ -937,13 +880,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
 //	}
 //}
 
-/**
- * Every module on the system gets a tick in which it regularly gets some attention. Of course, everything that is
- * important should be done within interrupt handlers. 
- *
- * This function goes through the buffer and calls on_ble_evt for every BLE message in the buffer, till the buffer is
- * empty. It then returns.
- */
 void Nrf51822BluetoothStack::tick() {
 
 #if TICK_CONTINUOUSLY==0
@@ -975,15 +911,6 @@ void Nrf51822BluetoothStack::tick() {
 	}
 }
 
-/**
- * A BLE event is generated, these can be connect or disconnect events. It can also be RSSI values that changed, or
- * an authorization request. Not all event structures are exactly the same over the different SoftDevices, so there
- * are some defines for minor changes. And of course, e.g. the S110 softdevice cannot listen to advertisements at all,
- * so BLE_GAP_EVT_ADV_REPORT is entirely disabled.
- *
- * TODO: Currently we loop through every service and send e.g. BLE_GATTS_EVT_WRITE only when some handle matches. It
- * is faster to set up maps from handles to directly the right function.
- */
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	//	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
 	//		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
@@ -1079,9 +1006,6 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	}
 }
 
-/**
- * On a connection request send it to all services.
- */
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
 	_advertising = false; // it seems like maybe we automatically stop advertising when we're connected.
@@ -1108,7 +1032,6 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 	}
 }
 
-// inform all services that transmission was completed in case they have notifications pending
 void Nrf51822BluetoothStack::onTxComplete(ble_evt_t * p_ble_evt) {
 	for (Service* svc: _services) {
 		svc->onTxComplete(&p_ble_evt->evt.common_evt);

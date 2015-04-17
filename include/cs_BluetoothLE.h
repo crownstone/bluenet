@@ -862,10 +862,21 @@ class Nrf51822BluetoothStack : public BLEStack {
 	friend void ::SWI1_IRQHandler(); 
 
 private:
-	// The Nrf51822BluetoothStack is defined as a singleton
+	/* Constructor of the BLE stack on the NRF51822
+	 *
+	 * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. However,
+	 * the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the init() 
+	 * function.
+	 */
 	Nrf51822BluetoothStack(); 
 	Nrf51822BluetoothStack(Nrf51822BluetoothStack const&); 
 	void operator=(Nrf51822BluetoothStack const &); 
+
+	/**
+	 * The destructor shuts down the stack. 
+	 *
+	 * TODO: The SoftDevice should be disabled as well.
+	 */
 	virtual ~Nrf51822BluetoothStack();
 public:
 	static Nrf51822BluetoothStack& getInstance() {
@@ -923,10 +934,39 @@ protected:
 	callback_radio_t                            _callback_radio;  // 16
 	volatile uint8_t                            _radio_notify; // 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
 public:
+	/* Initialization of the BLE stack
+	 *
+	 * Performs a series of tasks:
+	 *   - disables softdevice if it is currently enabled
+	 *   - enables softdevice with own clock and assertion handler
+	 *   - enable service changed characteristic for S110
+	 *   - disable automatic address recycling for S110
+	 *   - enable IRQ (SWI2_IRQn) for the softdevice
+	 *   - set BLE device name
+	 *   - set appearance (e.g. used in GUIs to interface with BLE devices)
+	 *   - set connection parameters
+	 *   - set Tx power level
+	 *   - set the callback for BLE events (if we use Source/sd_common/softdevice_handler.c in Nordic's SDK)
+	 */
 	Nrf51822BluetoothStack& init();
 
+	/* Start the BLE stack
+	 *
+	 * Start can only be called once. It starts all services. If one of these services cannot be started, there is 
+	 * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in 
+	 * init().
+	 */
 	Nrf51822BluetoothStack& start();
 
+	/* Shutdown the BLE stack
+	 *
+	 * The function shutdown() is the counterpart of start(). It does stop all services. It does not check if these 
+	 * services have actually been started. 
+	 *
+	 * It will also stop advertising. The SoftDevice will not be shut down.
+	 *
+	 * After a shutdown() the function start() can be called again.
+	 */
 	Nrf51822BluetoothStack& shutdown();
 
 	Nrf51822BluetoothStack& setAppearance(uint16_t appearance) {
@@ -959,6 +999,13 @@ public:
 		return *this;
 	}
 
+	/* Update device name
+	 * @deviceName limited string for device name
+	 *
+	 * We want to change the device name halfway. This can be done through a characteristic, which is easy during
+	 * development (you can separate otherwise similar devices). It is probably not functionality you want to have for
+	 * the end-user.
+	 */
 	Nrf51822BluetoothStack& updateDeviceName(const std::string& deviceName);
 	std::string & getDeviceName() { return _device_name; }
 
@@ -1058,23 +1105,30 @@ public:
 	Nrf51822BluetoothStack& stopAdvertising();
 
 	bool isAdvertising();
-#if(SOFTDEVICE_SERIES != 110)
+
+	/* Start scanning for devices
+	 *
+	 * Only call the following functions with a S120 or S130 device that can play a central role. The following functions
+	 * are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone
+	 * developer.
+	 */
 	Nrf51822BluetoothStack& startScanning();
 
+	/* Stop scanning for devices
+	 */
 	Nrf51822BluetoothStack& stopScanning();
 
+	/* Returns true if currently scanning
+	 */
 	bool isScanning();
-#else
-	Nrf51822BluetoothStack& startScanning() {
-		return *this;
-	};
 
-	Nrf51822BluetoothStack& stopScanning() {
-		return *this;
-	};
-
-	bool isScanning() { return false; }
-#endif
+	/* Set radion notification interrupts
+	 *
+	 * Function that sets up radio notification interrupts. It sets the IRQ priority, enables it, and sets some 
+	 * configuration values related to distance.
+	 *
+	 * Currently not used. 
+	 */
 	Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 
 	virtual bool connected() {
@@ -1083,17 +1137,45 @@ public:
 	virtual uint16_t getConnectionHandle() {  // TODO are multiple connections supported?
 		return _conn_handle;
 	}
-	/** Call this as often as possible.  Callbacks on services and characteristics will be invoked from here. */
+
+	/* Not time-critical functionality can be done in the tick
+	 *
+	 * Every module on the system gets a tick in which it regularly gets some attention. Of course, everything that is
+	 * important should be done within interrupt handlers. 
+	 *
+	 * This function goes through the buffer and calls on_ble_evt for every BLE message in the buffer, till the buffer is
+	 * empty. It then returns.
+	 */
 	void tick();
 
 protected:
 	void setTxPowerLevel();
 	void setConnParams();
 
+	/* Function that handles BLE events
+	 *
+	 * A BLE event is generated, these can be connect or disconnect events. It can also be RSSI values that changed, or
+	 * an authorization request. Not all event structures are exactly the same over the different SoftDevices, so there
+	 * are some defines for minor changes. And of course, e.g. the S110 softdevice cannot listen to advertisements at all,
+	 * so BLE_GAP_EVT_ADV_REPORT is entirely disabled.
+	 *
+	 * TODO: Currently we loop through every service and send e.g. BLE_GATTS_EVT_WRITE only when some handle matches. It
+	 * is faster to set up maps from handles to directly the right function.
+	 */
 	void on_ble_evt(ble_evt_t * p_ble_evt);
+
+	/* Connection request
+	 *
+	 * On a connection request send it to all services.
+	 */
 	void on_connected(ble_evt_t * p_ble_evt);
 	void on_disconnected(ble_evt_t * p_ble_evt);
 	void on_advertisement(ble_evt_t * p_ble_evt);
+
+	/* Transmission complete event
+	 *
+	 * Inform all services that transmission was completed in case they have notifications pending
+	 */
 	void onTxComplete(ble_evt_t * p_ble_evt);
 
 };
