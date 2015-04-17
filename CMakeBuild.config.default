@@ -5,9 +5,9 @@
 BLUETOOTH_NAME="crown"
 
 # Enable or disable different services (at times required to preserve memory)
-INDOOR_SERVICE=0
+INDOOR_SERVICE=1
 GENERAL_SERVICE=1
-POWER_SERVICE=0
+POWER_SERVICE=1
 
 # Enable or disable characteristics
 ## General Service
@@ -24,8 +24,6 @@ CURRENT_LIMIT=1
 RSSI=0
 SCAN_DEVICES=0
 TRACK_DEVICES=0
-
-## Power Service
 
 # Enable or disable meshing functionality (1 or 0)
 MESHING=0
