@@ -36,6 +36,6 @@ build:
 	@sed -i "s/@RAM_APPLICATION_AMOUNT@/0x4000/" conf/nRF51822-softdevice.ld 
 	#@sed -i build/CMakeFiles/CMakeTmp/conf/nRF51822-softdevice.ld 
 	@cp conf/* build/CMakeFiles/CMakeTmp/conf
-	@cd build && cmake --debug-trycompile -DCMAKE_TOOLCHAIN_FILE=../arm.toolchain.cmake --target analyze  ..
+	@cd build && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' --debug-trycompile -DCMAKE_TOOLCHAIN_FILE=../arm.toolchain.cmake --target analyze  ..
 
 .PHONY: all

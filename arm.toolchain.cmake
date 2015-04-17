@@ -118,7 +118,9 @@ GET_DIRECTORY_PROPERTY( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITION
 FOREACH(definition ${DirDefs})
 	MESSAGE(STATUS "Definition: " ${definition})
 	IF(${definition} MATCHES "=$")
-		MESSAGE(FATAL_ERROR "Definition ${definition} is not defined" )
+		IF(NOT ${definition} MATCHES "COMPILATION_TIME")
+			MESSAGE(FATAL_ERROR "Definition ${definition} is not defined" )
+		ENDIF()
 	ENDIF()
 ENDFOREACH()
 

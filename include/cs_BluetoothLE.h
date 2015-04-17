@@ -685,7 +685,7 @@ public:
 	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
 };
 
-/* Generic Service is a Service with characteristics
+/* Generic Service is a <Service> with characteristics
  *
  * Currently the number of characteristics is limited. By having this container in a separate class, in the future
  * services that have more than MAX_CHARACTERISTICS can be defined.
