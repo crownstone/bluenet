@@ -1,5 +1,7 @@
 #!/bin/sh
 
+./gen_doc.sh
+
 cd ..
 
 git add -u .

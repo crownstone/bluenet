@@ -7,8 +7,12 @@ contribute to code size.
   <subclass access="public" name="CharacteristicGeneric" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric">
     <brief> Characteristic of generic type T</brief>
   </subclass>
-  <constructor abstract="yes" id="BLEpp::CharacteristicBase::CharacteristicBase" name="CharacteristicBase" />
-  <destructor id="BLEpp::CharacteristicBase::~CharacteristicBase" name="~CharacteristicBase" virtual="yes" />
+  <constructor abstract="yes" id="BLEpp::CharacteristicBase::CharacteristicBase" name="CharacteristicBase">
+    <brief>Default constructor for CharacteristicBase</brief>
+  </constructor>
+  <destructor id="BLEpp::CharacteristicBase::~CharacteristicBase" name="~CharacteristicBase" virtual="yes">
+    <brief>Empty destructor</brief>
+  </destructor>
   <method id="BLEpp::CharacteristicBase::getCccdHandle" name="getCccdHandle">
     <return>
       <type name="uint16_t" />

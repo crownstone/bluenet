@@ -111,6 +111,19 @@ stack object as an argument w.r.t. this object. This makes dependencies traceabl
     </return>
   </method>
   <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::init" name="init">
+    <brief>Initialization of the BLE stack</brief>
+    <doc>Performs a series of tasks:
+  - disables softdevice if it is currently enabled
+  - enables softdevice with own clock and assertion handler
+  - enable service changed characteristic for S110
+  - disable automatic address recycling for S110
+  - enable IRQ (SWI2_IRQn) for the softdevice
+  - set BLE device name
+  - set appearance (e.g. used in GUIs to interface with BLE devices)
+  - set connection parameters
+  - set Tx power level
+  - set the callback for BLE events (if we use Source/sd_common/softdevice_handler.c in Nordic's SDK)
+</doc>
     <return>
       <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
@@ -120,7 +133,8 @@ stack object as an argument w.r.t. this object. This makes dependencies traceabl
       <type builtin="yes" name="bool" />
     </return>
   </method>
-  <method id="BLEpp::Nrf51822BluetoothStack::isScanning" name="isScanning">
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::isScanning" name="isScanning">
+    <brief>Returns true if currently scanning</brief>
     <return>
       <type builtin="yes" name="bool" />
     </return>
@@ -142,6 +156,12 @@ stack object as an argument w.r.t. this object. This makes dependencies traceabl
     </argument>
   </method>
   <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::onRadioNotificationInterrupt" name="onRadioNotificationInterrupt">
+    <brief>Set radion notification interrupts</brief>
+    <doc>Function that sets up radio notification interrupts. It sets the IRQ priority, enables it, and sets some
+configuration values related to distance.
+
+Currently not used.
+</doc>
     <return>
       <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
@@ -238,11 +258,24 @@ stack object as an argument w.r.t. this object. This makes dependencies traceabl
     </argument>
   </method>
   <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::shutdown" name="shutdown">
+    <brief>Shutdown the BLE stack</brief>
+    <doc>The function shutdown() is the counterpart of start(). It does stop all services. It does not check if these
+services have actually been started.
+
+It will also stop advertising. The SoftDevice will not be shut down.
+
+After a shutdown() the function start() can be called again.
+</doc>
     <return>
       <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
   </method>
   <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::start" name="start">
+    <brief>Start the BLE stack</brief>
+    <doc>Start can only be called once. It starts all services. If one of these services cannot be started, there is
+currently no exception handling. The stack does not start the Softdevice. This needs to be done before in
+init().
+</doc>
     <return>
       <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
@@ -264,7 +297,12 @@ stack object as an argument w.r.t. this object. This makes dependencies traceabl
       <type name="IBeacon" />
     </argument>
   </method>
-  <method id="BLEpp::Nrf51822BluetoothStack::startScanning" name="startScanning">
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::startScanning" name="startScanning">
+    <brief>Start scanning for devices</brief>
+    <doc>Only call the following functions with a S120 or S130 device that can play a central role. The following functions
+are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone
+developer.
+</doc>
     <return>
       <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
@@ -274,22 +312,35 @@ stack object as an argument w.r.t. this object. This makes dependencies traceabl
       <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
   </method>
-  <method id="BLEpp::Nrf51822BluetoothStack::stopScanning" name="stopScanning">
+  <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::stopScanning" name="stopScanning">
+    <brief>Stop scanning for devices</brief>
     <return>
       <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
   </method>
   <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::tick" name="tick">
-    <brief>* Call this as often as possible.  Callbacks on services and characteristics will be invoked from here. </brief>
+    <brief>Not time-critical functionality can be done in the tick</brief>
+    <doc>Every module on the system gets a tick in which it regularly gets some attention. Of course, everything that is
+important should be done within interrupt handlers.
+
+This function goes through the buffer and calls on_ble_evt for every BLE message in the buffer, till the buffer is
+empty. It then returns.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
   </method>
   <method abstract="yes" id="BLEpp::Nrf51822BluetoothStack::updateDeviceName" name="updateDeviceName">
+    <brief>Update device name</brief>
+    <doc>We want to change the device name halfway. This can be done through a characteristic, which is easy during
+development (you can separate otherwise similar devices). It is probably not functionality you want to have for
+the end-user.
+</doc>
     <return>
       <type name="Nrf51822BluetoothStack" qualifier=" &amp;" ref="BLEpp::Nrf51822BluetoothStack#BLEpp::Nrf51822BluetoothStack" />
     </return>
     <argument id="BLEpp::Nrf51822BluetoothStack::updateDeviceName::deviceName" name="deviceName">
+      <doc>limited string for device name</doc>
       <type name="std::string" qualifier=" const &amp;" />
     </argument>
   </method>
@@ -375,6 +426,15 @@ ble_gap_adv_params_t                        _adv_params; // 20</doc>
     </argument>
   </method>
   <method abstract="yes" access="protected" id="BLEpp::Nrf51822BluetoothStack::on_ble_evt" name="on_ble_evt">
+    <brief>Function that handles BLE events</brief>
+    <doc>A BLE event is generated, these can be connect or disconnect events. It can also be RSSI values that changed, or
+an authorization request. Not all event structures are exactly the same over the different SoftDevices, so there
+are some defines for minor changes. And of course, e.g. the S110 softdevice cannot listen to advertisements at all,
+so BLE_GAP_EVT_ADV_REPORT is entirely disabled.
+
+TODO: Currently we loop through every service and send e.g. BLE_GATTS_EVT_WRITE only when some handle matches. It
+is faster to set up maps from handles to directly the right function.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
@@ -383,6 +443,9 @@ ble_gap_adv_params_t                        _adv_params; // 20</doc>
     </argument>
   </method>
   <method abstract="yes" access="protected" id="BLEpp::Nrf51822BluetoothStack::on_connected" name="on_connected">
+    <brief>Connection request</brief>
+    <doc>On a connection request send it to all services.
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
@@ -399,6 +462,9 @@ ble_gap_adv_params_t                        _adv_params; // 20</doc>
     </argument>
   </method>
   <method abstract="yes" access="protected" id="BLEpp::Nrf51822BluetoothStack::onTxComplete" name="onTxComplete">
+    <brief>Transmission complete event</brief>
+    <doc>Inform all services that transmission was completed in case they have notifications pending
+</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>

@@ -10,7 +10,9 @@ characteristic.
     <type name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
     <brief> Non-template base class for Characteristics.</brief>
   </base>
-  <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T" />
+  <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T">
+    <brief>Generic type T</brief>
+  </templatetypeparameter>
   <typedef id="BLEpp::CharacteristicGeneric::callback_on_write_t" name="callback_on_write_t">
     <brief>Format of callback on write (from user)</brief>
     <type name="func::function&lt;typename&gt;" />
@@ -38,7 +40,9 @@ characteristic.
     <type builtin="yes" name="bool" />
   </field>
   <constructor id="BLEpp::CharacteristicGeneric::CharacteristicGeneric&lt;T&gt;" name="CharacteristicGeneric&lt;T&gt;" />
-  <destructor id="BLEpp::CharacteristicGeneric::~CharacteristicGeneric&lt;T&gt;" name="~CharacteristicGeneric&lt;T&gt;" virtual="yes" />
+  <destructor id="BLEpp::CharacteristicGeneric::~CharacteristicGeneric&lt;T&gt;" name="~CharacteristicGeneric&lt;T&gt;" virtual="yes">
+    <brief>Default empty destructor</brief>
+  </destructor>
   <method id="BLEpp::CharacteristicGeneric::getValue" name="getValue">
     <return>
       <type name="T" qualifier=" &amp;" />

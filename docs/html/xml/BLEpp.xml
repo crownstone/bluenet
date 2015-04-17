@@ -4,11 +4,13 @@
   <doc>All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
 </doc>
   <functiontemplate id="BLEpp::ble_type" name="ble_type">
-    <brief>The default ble_type</brief>
+    <brief> The templated version of ble_type</brief>
     <return>
       <type name="uint8_t" />
     </return>
-    <templatetypeparameter id="BLEpp::ble_type::T" name="T" />
+    <templatetypeparameter id="BLEpp::ble_type::T" name="T">
+      <brief>The class / primitive to template ble_type with</brief>
+    </templatetypeparameter>
   </functiontemplate>
   <class name="BatteryService" ref="BLEpp::BatteryService#BLEpp::BatteryService">
     <brief> Battery service</brief>
@@ -33,7 +35,9 @@
   </class>
   <classtemplate name="CharacteristicGeneric" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric">
     <brief> Characteristic of generic type T</brief>
-    <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T" />
+    <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T">
+      <brief>Generic type T</brief>
+    </templatetypeparameter>
   </classtemplate>
   <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit">
     <brief> CharacteristicInit collects fields required to define a BLE characteristic</brief>

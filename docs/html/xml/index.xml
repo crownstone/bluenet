@@ -39,7 +39,9 @@ See: https://dobots.nl/products/crownstone/</doc>
     </class>
     <classtemplate name="CharacteristicGeneric" ref="BLEpp::CharacteristicGeneric#BLEpp::CharacteristicGeneric">
       <brief> Characteristic of generic type T</brief>
-      <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T" />
+      <templatetypeparameter id="BLEpp::CharacteristicGeneric::T" name="T">
+        <brief>Generic type T</brief>
+      </templatetypeparameter>
     </classtemplate>
     <struct name="CharacteristicInit" ref="BLEpp::CharacteristicInit#BLEpp::CharacteristicInit">
       <brief> CharacteristicInit collects fields required to define a BLE characteristic</brief>
@@ -59,6 +61,7 @@ See: https://dobots.nl/products/crownstone/</doc>
     <brief> A fixed tuple is a vector with a templated type and a reserved capacity.</brief>
     <templatetypeparameter id="fixed_tuple::T" name="T" />
     <templatenontypeparameter id="fixed_tuple::capacity" name="capacity">
+      <brief>Predefined capacity of the underlying std::vector.</brief>
       <type name="uint8_t" />
     </templatenontypeparameter>
   </classtemplate>

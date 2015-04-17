@@ -12,7 +12,13 @@
     <type name="CharacteristicBase" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase" />
   </typedef>
   <constructor id="BLEpp::Service::Service" name="Service" />
-  <destructor id="BLEpp::Service::~Service" name="~Service" virtual="yes" />
+  <destructor id="BLEpp::Service::~Service" name="~Service" virtual="yes">
+    <brief>Default empty destructor</brief>
+    <doc>We don't currently delete our characteristics as we don't really support dynamic service destruction.
+If we wanted to allow services to be removed at runtime, we would need to, amongst many other things,
+keep track of whether we allocated the characteristic or whether it was passed into us.
+</doc>
+  </destructor>
   <method abstract="yes" id="BLEpp::Service::addCharacteristic" name="addCharacteristic" virtual="yes">
     <return>
       <type name="Service" qualifier=" &amp;" ref="BLEpp::Service#BLEpp::Service" />
