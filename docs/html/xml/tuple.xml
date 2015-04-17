@@ -4,6 +4,10 @@
   <base access="public">
     <type name="" />
   </base>
-  <templatetypeparameter id="tuple::T" name="T" />
-  <constructor id="tuple::tuple&lt;T&gt;" name="tuple&lt;T&gt;" />
+  <templatetypeparameter id="tuple::T" name="T">
+    <brief>templated element which goes into the vector</brief>
+  </templatetypeparameter>
+  <constructor id="tuple::tuple&lt;T&gt;" name="tuple&lt;T&gt;">
+    <brief>Default constructor</brief>
+  </constructor>
 </classtemplate>

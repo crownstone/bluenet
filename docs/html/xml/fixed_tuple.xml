@@ -4,10 +4,14 @@
   <base access="public">
     <type name="" />
   </base>
-  <templatetypeparameter id="fixed_tuple::T" name="T" />
+  <templatetypeparameter id="fixed_tuple::T" name="T">
+    <brief>templated type which goes into the vector</brief>
+  </templatetypeparameter>
   <templatenontypeparameter id="fixed_tuple::capacity" name="capacity">
     <brief>Predefined capacity of the underlying std::vector.</brief>
     <type name="uint8_t" />
   </templatenontypeparameter>
-  <constructor id="fixed_tuple::fixed_tuple&lt;T, capacity&gt;" name="fixed_tuple&lt;T, capacity&gt;" />
+  <constructor id="fixed_tuple::fixed_tuple&lt;T, capacity&gt;" name="fixed_tuple&lt;T, capacity&gt;">
+    <brief>Constructor reserves capacity in vector</brief>
+  </constructor>
 </classtemplate>

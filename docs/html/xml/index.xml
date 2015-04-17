@@ -59,7 +59,9 @@ See: https://dobots.nl/products/crownstone/</doc>
   <class name="ADC" ref="ADC#ADC" />
   <classtemplate name="fixed_tuple" ref="fixed_tuple#fixed_tuple">
     <brief> A fixed tuple is a vector with a templated type and a reserved capacity.</brief>
-    <templatetypeparameter id="fixed_tuple::T" name="T" />
+    <templatetypeparameter id="fixed_tuple::T" name="T">
+      <brief>templated type which goes into the vector</brief>
+    </templatetypeparameter>
     <templatenontypeparameter id="fixed_tuple::capacity" name="capacity">
       <brief>Predefined capacity of the underlying std::vector.</brief>
       <type name="uint8_t" />
@@ -106,7 +108,9 @@ See: https://dobots.nl/products/crownstone/</doc>
   </struct>
   <classtemplate name="tuple" ref="tuple#tuple">
     <brief> A tuple is a vector with a templated type and a public constructor.</brief>
-    <templatetypeparameter id="tuple::T" name="T" />
+    <templatetypeparameter id="tuple::T" name="T">
+      <brief>templated element which goes into the vector</brief>
+    </templatetypeparameter>
   </classtemplate>
   <enum anonymous="yes" id="(anonymous::1)" name="(anonymous::1)">
     <enumvalue id="PWM_MODE_122" name="PWM_MODE_122" value="0">

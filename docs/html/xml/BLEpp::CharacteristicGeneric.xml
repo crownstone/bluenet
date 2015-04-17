@@ -127,7 +127,9 @@ characteristic.
     <override name="CharacteristicBase::setUpdateIntervalMSecs" ref="BLEpp::CharacteristicBase#BLEpp::CharacteristicBase::setUpdateIntervalMSecs" />
   </method>
   <conversionfunction id="BLEpp::CharacteristicGeneric::operator type-parameter-0-0 &amp;" name="operator type-parameter-0-0 &amp;">
+    <brief>CharacteristicGeneric() returns value object</brief>
     <return>
+      <doc>value object</doc>
       <type name="T" qualifier=" &amp;" />
     </return>
   </conversionfunction>

@@ -11,38 +11,47 @@ stack object as an argument w.r.t. this object. This makes dependencies traceabl
     <brief> BLEStack defines a chip-agnostic Bluetooth Low-Energy stack</brief>
   </base>
   <variable id="BLEpp::Nrf51822BluetoothStack::defaultAdvertisingInterval_0_625_ms" name="defaultAdvertisingInterval_0_625_ms">
+    <brief>Advertising interval in 0.625 ms (40*0.625=25 ms)</brief>
     <type name="uint16_t" qualifier=" const" />
   </variable>
   <variable id="BLEpp::Nrf51822BluetoothStack::defaultAdvertisingTimeout_seconds" name="defaultAdvertisingTimeout_seconds">
+    <brief>Advertising timeout in seconds (180 sec)</brief>
     <type name="uint16_t" qualifier=" const" />
   </variable>
   <variable id="BLEpp::Nrf51822BluetoothStack::defaultAppearance" name="defaultAppearance">
-    <brief>static const uint16_t                  defaultAppearance = BLE_APPEARANCE_UNKNOWN;</brief>
+    <brief>The default BLE appearance is currently set to a Generic Keyring (576)</brief>
     <type name="uint16_t" qualifier=" const" />
   </variable>
   <variable id="BLEpp::Nrf51822BluetoothStack::defaultClockSource" name="defaultClockSource">
-    <brief>static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_XTAL_20_PPM;</brief>
+    <brief>The low-frequency clock, currently generated from the high frequency clock</brief>
     <type name="nrf_clock_lfclksrc_t" qualifier=" const" />
   </variable>
   <variable id="BLEpp::Nrf51822BluetoothStack::defaultConnectionSupervisionTimeout_10_ms" name="defaultConnectionSupervisionTimeout_10_ms">
+    <brief>Connection timeout in 10ms (400*10=4 sec)</brief>
     <type name="uint16_t" qualifier=" const" />
   </variable>
   <variable id="BLEpp::Nrf51822BluetoothStack::defaultMaxConnectionInterval_1_25_ms" name="defaultMaxConnectionInterval_1_25_ms">
+    <brief>Maximum connection interval in 1.25 ms (800*1.25=1 sec)</brief>
     <type name="uint16_t" qualifier=" const" />
   </variable>
   <variable id="BLEpp::Nrf51822BluetoothStack::defaultMinConnectionInterval_1_25_ms" name="defaultMinConnectionInterval_1_25_ms">
+    <brief>Minimum connection interval in 1.25 ms (400*1.25=500ms)</brief>
     <type name="uint16_t" qualifier=" const" />
   </variable>
   <variable id="BLEpp::Nrf51822BluetoothStack::defaultMtu" name="defaultMtu">
+    <brief>The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.</brief>
     <type name="uint8_t" qualifier=" const" />
   </variable>
   <variable id="BLEpp::Nrf51822BluetoothStack::defaultSlaveLatencyCount" name="defaultSlaveLatencyCount">
+    <brief>Default slave latency</brief>
     <type name="uint16_t" qualifier=" const" />
   </variable>
   <variable id="BLEpp::Nrf51822BluetoothStack::defaultTxPowerLevel" name="defaultTxPowerLevel">
+    <brief>Default transmission power</brief>
     <type name="int8_t" qualifier=" const" />
   </variable>
   <variable id="BLEpp::Nrf51822BluetoothStack::MAX_SERVICE_COUNT" name="MAX_SERVICE_COUNT">
+    <brief>Maximum number of services (currently set to 5)</brief>
     <type name="uint8_t" qualifier=" const" />
   </variable>
   <typedef id="BLEpp::Nrf51822BluetoothStack::callback_connected_t" name="callback_connected_t">

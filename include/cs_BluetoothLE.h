@@ -48,18 +48,21 @@ extern "C" {
 // TODO: replace std::vector with a fixed, in place array of size capacity.
 
 /* A tuple is a vector with a templated type and a public constructor.
+ * @T templated element which goes into the vector
  */
 template<typename T> class tuple : public std::vector<T> {
 public:
+	// Default constructor
 	tuple() {}
 };
 
 /* A fixed tuple is a vector with a templated type and a reserved capacity.
+ * @T templated type which goes into the vector
  * @capacity Predefined capacity of the underlying std::vector.
  */
 template<typename T, uint8_t capacity> class fixed_tuple : public tuple<T> {
 public:
-
+	// Constructor reserves capacity in vector
 	fixed_tuple<T, capacity>() : tuple<T>() {this->reserve(capacity);}
 
 };
@@ -433,6 +436,10 @@ public:
 		return *this;
 	}
 
+	/* CharacteristicGeneric() returns value object
+	 *
+	 * @return value object
+	 */
 	operator T&() {
 		return _value;
 	}
@@ -890,23 +897,34 @@ public:
 	// Format of the callback of any radio event
 	typedef function<void(bool radio_active)>   callback_radio_t;
 
+	// Maximum number of services (currently set to 5)
 	static const uint8_t MAX_SERVICE_COUNT = 5;
 
 	//static const uint16_t                  defaultAppearance = BLE_APPEARANCE_UNKNOWN;
+	
+	// The default BLE appearance is currently set to a Generic Keyring (576)
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_KEYRING;
-	//static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_XTAL_20_PPM;
+	// The low-frequency clock, currently generated from the high frequency clock
 	static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
+	// The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.
 	static const uint8_t                   defaultMtu = BLE_L2CAP_MTU_DEF;
+	// Minimum connection interval in 1.25 ms (400*1.25=500ms)
 	static const uint16_t                  defaultMinConnectionInterval_1_25_ms = 400;
+	// Maximum connection interval in 1.25 ms (800*1.25=1 sec)
 	static const uint16_t                  defaultMaxConnectionInterval_1_25_ms = 800;
+	// Default slave latency
 	static const uint16_t                  defaultSlaveLatencyCount = 0;
+	// Connection timeout in 10ms (400*10=4 sec)
 	static const uint16_t                  defaultConnectionSupervisionTimeout_10_ms = 400;
+	// Advertising interval in 0.625 ms (40*0.625=25 ms)
 	static const uint16_t                  defaultAdvertisingInterval_0_625_ms = 40;
+	// Advertising timeout in seconds (180 sec)
 	static const uint16_t                  defaultAdvertisingTimeout_seconds = 180;
+	// Default transmission power
 	static const int8_t                    defaultTxPowerLevel = -8;
 
 protected:
-	std::string                                      _device_name; // 4
+	std::string                                 _device_name; // 4
 	uint16_t                                    _appearance;
 	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  // 32
 
