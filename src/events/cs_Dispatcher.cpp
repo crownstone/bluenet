@@ -32,7 +32,9 @@ void Dispatcher::removeListener(Listener *listener) {
 
 void Dispatcher::dispatch() {
 	for (int i = 0; i < MAX_LISTENERS; i++) {
-		_listeners[i]->handleEvent();
+		if (_listeners[i] != NULL) {
+			_listeners[i]->handleEvent();
+		}
 	}
 	/*
 	for (auto listener : _listeners) {
