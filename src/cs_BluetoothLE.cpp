@@ -786,8 +786,6 @@ bool Nrf51822BluetoothStack::isAdvertising() {
 	return _advertising;
 }
 
-#if(SOFTDEVICE_SERIES != 110)
-
 // See https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
 #define SCAN_INTERVAL                    0x00A0         /**< Determines scan interval in units of 0.625 millisecond. */
 //#define SCAN_WINDOW                      0x0050         /**< Determines scan window in units of 0.625 millisecond. */

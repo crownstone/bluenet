@@ -9,15 +9,14 @@
 #include "services/cs_GeneralService.h"
 #include "common/cs_MasterBuffer.h"
 #include "characteristics/cs_BufferCharacteristic.h"
+#include "common/cs_Config.h"
+#include "common/cs_Strings.h"
 
 #if MESHING==1 
 #include <protocol/cs_Mesh.h>
 #endif
 
 using namespace BLEpp;
-
-// needs to be the same command as defined in the bootloader
-#define COMMAND_ENTER_RADIO_BOOTLOADER          1 
 
 GeneralService::GeneralService() :
 //		_stack(&stack),
@@ -26,7 +25,7 @@ GeneralService::GeneralService() :
 		_selectConfiguration(0xFF) {
 
 	setUUID(UUID(GENERAL_UUID));
-	setName("General Service");
+	setName(BLE_SERVICE_GENERAL);
 
 	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
 	loadPersistentStorage();
@@ -38,23 +37,23 @@ void GeneralService::init() {
 	LOGi("Create general service");
 
 #if TEMPERATURE==1
-	LOGi("add Temperature Characteristic");
+	LOGi("Add Temperature Characteristic");
 	addTemperatureCharacteristic();
 #else
-	LOGi("skip Temperature Characteristic");
+	LOGi("Skip Temperature Characteristic");
 #endif
 
 #if FIRMWARE==1
-	LOGi("add Firmware Characteristic");
+	LOGi("Add Firmware Characteristic");
 	addFirmwareCharacteristic();
 #else
-	LOGi("skip Firmware Characteristic");
+	LOGi("Skip Firmware Characteristic");
 #endif
 #if MESHING==1
+	LOGi("Add Mesh Characteristic");
 	addMeshCharacteristic();
-	LOGi("add Mesh Characteristic");
 #else
-	LOGi("skip Mesh Characteristic");
+	LOGi("Skip Mesh Characteristic");
 #endif
 
 #if CONFIGURATION==1
@@ -68,11 +67,11 @@ void GeneralService::init() {
 	LOGd("Assign buffer of size %i to stream buffer", size);
 	_streamBuffer->assign(buffer, size);
 
-	LOGi("add Set Configuration Characteristic");
+	LOGi("Add Set Configuration Characteristic");
 	addSetConfigurationCharacteristic();
-	LOGi("add Select Configuration Characteristic");
+	LOGi("Add Select Configuration Characteristic");
 	addSelectConfigurationCharacteristic();
-	LOGi("add Get Configuration Characteristic");
+	LOGi("Add Get Configuration Characteristic");
 	addGetConfigurationCharacteristic();
 
 	_setConfigurationCharacteristic->setValue(buffer);
@@ -85,7 +84,7 @@ void GeneralService::init() {
 
 	LOGd("Set both set/get charac to buffer at %p", buffer);
 #else
-	LOGi("skip Configuration Characteristics");
+	LOGi("Skip Configuration Characteristics");
 #endif
 
 }
@@ -118,7 +117,7 @@ void GeneralService::addFirmwareCharacteristic() {
 	_firmwareCharacteristic->setWritable(true);
 	_firmwareCharacteristic->onWrite([&](const int32_t& value) -> void {
 			if (value != 0) {
-				LOGi("Update firmware");
+				LOGi(MSG_FIRMWARE_UPDATE);
 				uint8_t err_code;
 				err_code = sd_power_gpregret_clr(0xFF);
 				APP_ERROR_CHECK(err_code);
@@ -143,7 +142,7 @@ void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic->setName("Mesh");
 	_meshCharacteristic->setWritable(true);
 	_meshCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
-			LOGi("Send mesh message");
+			LOGi(MSG_MESH_MESSAGE_WRITE);
 
 			MeshMessage msg;
 			msg.assign(_meshCharacteristic->getValue(), _meshCharacteristic->getValueLength());
@@ -171,9 +170,9 @@ void GeneralService::addSetConfigurationCharacteristic() {
 	_setConfigurationCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
 			if (!value) {
-				LOGw("No value on writing to config. Bail out");
+				log(WARNING, MSG_CHAR_VALUE_UNDEFINED);
 			} else {
-				LOGi("Write value!");
+				log(INFO, MSG_CHAR_VALUE_WRITE);
 				MasterBuffer& mb = MasterBuffer::getInstance();
 				if (!mb.isLocked()) {
 					mb.lock();
@@ -184,7 +183,7 @@ void GeneralService::addSetConfigurationCharacteristic() {
 					writeToStorage(type, length, payload);
 					mb.unlock();
 				} else {
-					LOGe("Buffer is locked. Cannot be written!");
+					log(ERROR, MSG_BUFFER_IS_LOCKED);
 				}
 			}
 		});
@@ -310,11 +309,13 @@ std::string & GeneralService::getBLEName() {
 
 void GeneralService::setBLEName(const std::string &name) {
 	if (name.length() > 31) {
-		log(ERROR, "Name is too long");
+		log(ERROR, MSG_NAME_TOO_LONG);
 		return;
 	}
 	if (_stack) {
 		_stack->updateDeviceName(name);
+	} else {
+		log(ERROR, MSG_STACK_UNDEFINED);
 	}
 }
 

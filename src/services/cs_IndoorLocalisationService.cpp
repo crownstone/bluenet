@@ -21,7 +21,7 @@
 #include "common/cs_MasterBuffer.h"
 
 #include "characteristics/cs_BufferCharacteristic.h"
-//#include <common/timer.h>
+#include <common/cs_Strings.h>
 
 using namespace BLEpp;
 
@@ -36,7 +36,7 @@ IndoorLocalizationService::IndoorLocalizationService() :
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 
 	// we have to figure out why this goes wrong
-	setName(std::string("IndoorLocalizationService"));
+	setName(BLE_SERVICE_INDOOR_LOCALIZATION);
 	
 	_trackMode = false;
 //	// set timer with compare interrupt every 10ms

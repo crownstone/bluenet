@@ -9,6 +9,7 @@
 
 #include "common/cs_Boards.h"
 #include "common/cs_Config.h"
+#include "common/cs_Strings.h"
 #include "cs_nRF51822.h"
 #include "drivers/cs_RTC.h"
 #include "services/cs_PowerService.h"
@@ -31,7 +32,7 @@ PowerService::PowerService() :
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 
-	setName(std::string("Power Service"));
+	setName(BLE_SERVICE_POWER);
 
 	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
 	loadPersistentStorage();
