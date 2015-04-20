@@ -105,6 +105,20 @@ struct CharacteristicInit {
 	CharacteristicInit() : presentation_format({}), char_md({}), cccd_md({}), attr_md({}) {}
 };
 
+
+typedef uint8_t boolean_t;
+
+#define STATUS_INITED 
+
+struct Status {
+	boolean_t inited                                  : 1;
+	boolean_t notifies                                : 1;
+	boolean_t writable                                : 1;
+	boolean_t notifyingEnabled                        : 1;
+	boolean_t indicates                               : 1;
+	boolean_t                                         : 3;
+};
+
 /* Non-template base class for Characteristics.
  *
  * A non-templated base class saves on code size. Note that every characteristic however does still
@@ -128,37 +142,41 @@ protected:
 	// Reference to corresponding service (4 bytes)
 	Service*                  _service;
 
-	bool                      _inited;
+	// Status of CharacteristicBase (basically a bunch of 1-bit flags)
+	Status                    _status;
+
+#ifdef BIG_SIZE_REQUIRED
+	bool                      .inited;
 
 	/* This characteristic can be set to notify at regular intervals.
 	 *
 	 * This interval cannot be set from the client side.
 	 */
-	bool                      _notifies;
+	bool                      .notifies;
 
 	/* This characteristic can be written by another device.
 	 */
-	bool                      _writable;
+	bool                      .writable;
 
-	// Unit
-	uint16_t                  _unit;
-
-	/* Interval for updates (4 bytes), 0 means don't update
-	 *
-	 * TODO: Currently, this is not in use. 
+	/* If this characteristic can notify a listener (<.notifies>), this field enables it.
 	 */
-	uint32_t                  _updateIntervalMsecs;
-
-	/* If this characteristic can notify a listener (<_notifies>), this field enables it.
-	 */
-	bool                      _notifyingEnabled;
+	bool                      .notifyingEnabled;
 
 	/* This characteristic can be set to indicate at regular intervals.
 	 *
 	 * Indication is different from notification, in the sense that it requires ACKs.
 	 * https://devzone.nordicsemi.com/question/310/notificationindication-difference/
 	 */
-	bool                      _indicates;
+	bool                      .indicates;
+#endif
+	// Unit
+//	uint16_t                  _unit;
+
+	/* Interval for updates (4 bytes), 0 means don't update
+	 *
+	 * TODO: Currently, this is not in use. 
+	 */
+//	uint32_t                  _updateIntervalMsecs;
 
 public:
 	/* Default constructor for CharacteristicBase
@@ -179,14 +197,14 @@ public:
 	 * + broadcast: false
 	 * + indicates: false
 	 *
-	 * Side effect: sets member field <_inited>.
+	 * Side effect: sets member field <_status.inited>.
 	 */
 	void init(Service* svc);
 
 	/* Set this characteristic to be writable.
 	 */
 	CharacteristicBase& setWritable(bool writable) {
-		_writable = writable;
+		_status.writable = writable;
 		setWritePermission(1, 1);
 		return *this;
 	}
@@ -196,21 +214,21 @@ public:
 	/* Set this characteristic to be notifiable.
 	 */
 	CharacteristicBase& setNotifies(bool notifies) {
-		_notifies = notifies;
+		_status.notifies = notifies;
 		return *this;
 	}
 
 	bool isNotifyingEnabled() {
-		return _notifyingEnabled;
+		return _status.notifyingEnabled;
 	}
 
 	void setNotifyingEnabled(bool enabled) {
 		//        	LOGd("[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
-		_notifyingEnabled = enabled;
+		_status.notifyingEnabled = enabled;
 	}
 
 	CharacteristicBase& setIndicates(bool indicates) {
-		_indicates = indicates;
+		_status.indicates = indicates;
 		return *this;
 	}
 
@@ -228,7 +246,7 @@ public:
 	}
 
 	CharacteristicBase& setUUID(const UUID& uuid) {
-		if (_inited) BLE_THROW("Already inited.");
+		if (_status.inited) BLE_THROW("Already inited.");
 		_uuid = uuid;
 		return *this;
 	}
@@ -487,7 +505,7 @@ public:
 #endif
 
 	CharacteristicGeneric<T>& setDefaultValue(const T& t) {
-		if (_inited) BLE_THROW("Already inited.");
+		if (_status.inited) BLE_THROW("Already inited.");
 		_value = t;
 		return *this;
 	}
@@ -938,19 +956,19 @@ public:
 	Nrf51822BluetoothStack& shutdown();
 
 	Nrf51822BluetoothStack& setAppearance(uint16_t appearance) {
-		if (_inited) BLE_THROW("Already initialized.");
+		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
 		_appearance = appearance;
 		return *this;
 	}
 
 	Nrf51822BluetoothStack& setDeviceName(const std::string& deviceName) {
-		if (_inited) BLE_THROW("Already initialized.");
+		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
 		_device_name = deviceName;
 		return *this;
 	}
 
 	Nrf51822BluetoothStack& setClockSource(nrf_clock_lfclksrc_t clockSource) {
-		if (_inited) BLE_THROW("Already initialized.");
+		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
 		_clock_source = clockSource;
 		return *this;
 	}

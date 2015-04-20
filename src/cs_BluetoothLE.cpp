@@ -79,24 +79,24 @@ void set_attr_md_read_write(ble_gatts_attr_md_t& md, char vloc) {
 }
 
 CharacteristicBase::CharacteristicBase() :
-				_handles( { }), _service(0), _inited(false), _notifies(false), _writable(false),
-				_unit(0), _updateIntervalMsecs(0), _notifyingEnabled(false), _indicates(false)
+				_handles( { }), _service(0)
+				/*nited(false), _notifies(false), _writable(false), */
+				/*_unit(0), */ /*_updateIntervalMsecs(0),*/ /* _notifyingEnabled(false), _indicates(false) */
 {
-
 }
 
 CharacteristicBase& CharacteristicBase::setName(const char * const name) {
-	if (_inited)
-		BLE_THROW("Already inited.");
+	if (_status.inited) BLE_THROW(MSG_BLE_CHAR_INITIALIZED);
 	_name = name;
 
 	return *this;
 }
 
+/*
 CharacteristicBase& CharacteristicBase::setUnit(uint16_t unit) {
 	_unit = unit;
 	return *this;
-}
+} */
 
 //CharacteristicBase& CharacteristicBase::setUpdateIntervalMSecs(uint32_t msecs) {
 //    if (_updateIntervalMsecs != msecs) {
@@ -166,7 +166,7 @@ void CharacteristicBase::init(Service* svc) {
 	set_attr_md_read_only(ci.user_desc_metadata_md, BLE_GATTS_VLOC_STACK);
 
 	this->configurePresentationFormat(ci.presentation_format);
-	ci.presentation_format.unit = _unit;
+	ci.presentation_format.unit = 0; //_unit;
 	ci.char_md.p_char_pf = &ci.presentation_format;
 
 	volatile uint16_t svc_handle = svc->getHandle();
@@ -179,23 +179,23 @@ void CharacteristicBase::init(Service* svc) {
 
 	//BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle, &ci.char_md, &ci.attr_char_value, &_handles));
 
-	_inited = true;
+	_status.inited = true;
 }
 
 void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	// Dominik: why set it if the whole struct is being overwritten anyway futher down??!!
 	//	ci.attr_md.write_perm.sm = _writable ? 1 : 0;
 	//	ci.attr_md.write_perm.lv = _writable ? 1 : 0;
-	ci.char_md.char_props.write = _writable ? 1 : 0;
+	ci.char_md.char_props.write = _status.writable ? 1 : 0;
 	// Dominik: why is write wo response automatically enabled when writable? shouldn't it
 	//  be handled independently?!
-	ci.char_md.char_props.write_wo_resp = _writable ? 1 : 0;
-	ci.char_md.char_props.notify = _notifies ? 1 : 0;
+	ci.char_md.char_props.write_wo_resp = _status.writable ? 1 : 0;
+	ci.char_md.char_props.notify = _status.notifies ? 1 : 0;
 	// Dominik: agreed, indications seem to be almost the same as notifications, but they
 	//  are not totally the same, so why set them together? they should be handled
 	//  independently!!
 	// ci.char_md.char_props.indicate = _notifies ? 1 : 0;
-	ci.char_md.char_props.indicate = _indicates ? 1 : 0;
+	ci.char_md.char_props.indicate = _status.indicates ? 1 : 0;
 	ci.attr_md.write_perm = _writeperm;
 	// Dominik: this overwrites the write permissions based on the security mode,
 	// so even setting writable to false will always have the write permissions set
@@ -225,7 +225,7 @@ uint32_t CharacteristicBase::notify() {
 #endif
 
 	// stop here if we are not in notifying state
-	if ((!_notifies) || (!_service->getStack()->connected()) || !_notifyingEnabled) {
+	if ((!_status.notifies) || (!_service->getStack()->connected()) || !_status.notifyingEnabled) {
 		return NRF_SUCCESS;
 	}
 
@@ -415,11 +415,11 @@ void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_appearance(defaultAppearance), _clock_source(defaultClockSource), _mtu_size(defaultMtu),
 				_tx_power_level(defaultTxPowerLevel), _sec_mode({ }),
-				_interval(defaultAdvertisingInterval_0_625_ms), _timeout(
-						defaultAdvertisingTimeout_seconds), _gap_conn_params( { }),
-						_inited(false), _started(false), _advertising(false), _scanning(false),
-						_conn_handle(BLE_CONN_HANDLE_INVALID),
-						_radio_notify(0)
+				_interval(defaultAdvertisingInterval_0_625_ms), _timeout(defaultAdvertisingTimeout_seconds),
+			  	_gap_conn_params( { }),
+				_inited(false), _started(false), _advertising(false), _scanning(false),
+				_conn_handle(BLE_CONN_HANDLE_INVALID),
+				_radio_notify(0)
 {
 	_evt_buffer_size = sizeof(ble_evt_t) + (_mtu_size) * sizeof(uint32_t);
 	_evt_buffer = (uint8_t*) malloc(_evt_buffer_size);

@@ -54,6 +54,7 @@
 #define MSG_BLE_CHAR_TOO_MANY                    "Error characteristic: Too many added to single service"
 #define MSG_BLE_CHAR_CREATION_ERROR              "Error characteristic: Creation"
 #define MSG_BLE_CHAR_CANNOT_FIND                 "Error characteristic: Cannot find"
+#define MSG_BLE_CHAR_INITIALIZED                 "Error characteristic: Already initialized"
 #define MSG_BLE_SOFTDEVICE_RUNNING               "Softdevice is already running"
 #define MSG_BLE_SOFTDEVICE_INIT                  "Softdevice init"
 #define MSG_BLE_SOFTDEVICE_ENABLE                "Softdevice enable"
@@ -63,6 +64,7 @@
 #define MSG_BLE_NO_CUSTOM_SERVICES               "Services, no custom ones!"
 #define MSG_BLE_ADVERTISEMENT_TOO_BIG            "Advertisement too big"
 #define MSG_BLE_ADVERTISEMENT_CONFIG_INVALID     "Advertisement invalid config"
+#define MSG_BLE_STACK_INITIALIZED                "Stack already initialized"
 
 #define MSG_SERVICE_GENERAL_INIT                 "Service General init"
 #define MSG_CHAR_TEMPERATURE_ADD                 "Characteristic Temperature added"
