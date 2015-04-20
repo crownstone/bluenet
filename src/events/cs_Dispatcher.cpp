@@ -34,7 +34,8 @@ void Dispatcher::dispatch() {
 	for (int i = 0; i < MAX_LISTENERS; i++) {
 		_listeners[i]->handleEvent();
 	}
+	/*
 	for (auto listener : _listeners) {
 		listener->handleEvent();
-	}
+	}*/
 }
