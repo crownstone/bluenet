@@ -43,7 +43,7 @@ void GeneralService::init() {
 	LOGi("Skip Temperature Characteristic");
 #endif
 
-#if RESET==1
+#if CHAR_RESET==1
 	LOGi("Add Reset Characteristic");
 	addResetCharacteristic();
 #else
