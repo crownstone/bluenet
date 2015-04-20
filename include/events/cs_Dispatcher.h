@@ -6,9 +6,11 @@
  */
 #pragma once
 
-#include <vector>
+//#include <vector>
 
 #include "cs_Listener.h"
+
+#define MAX_LISTENERS                            3
 
 class Dispatcher {
 public:
@@ -20,5 +22,5 @@ public:
 protected:
 	void dispatch();
 private:
-	std::vector<Listener*> _listeners;
+	Listener * _listeners[MAX_LISTENERS];
 };
