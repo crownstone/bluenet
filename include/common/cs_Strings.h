@@ -23,6 +23,8 @@
 #define BLE_SERVICE_GENERAL                      "General Service"
 #define BLE_SERVICE_INDOOR_LOCALIZATION          "Indoor Localization Service"
 #define BLE_SERVICE_POWER                        "Power Service"
+#define BLE_SERVICE_GENERIC                      "Generic Service"
+#define BLE_SERVICE_BATTERY                      "Battery Service"
 
 #define BLE_CHAR_TEMPERATURE                     "Temperature"
 #define BLE_CHAR_RESET                           "Reset"
@@ -30,6 +32,9 @@
 #define BLE_CHAR_CONFIG_SET                      "Config Set"
 #define BLE_CHAR_CONFIG_SELECT                   "Config Select"
 #define BLE_CHAR_CONFIG_GET                      "Config Get"
+#define BLE_CHAR_RSSI                            "RSSI"
+#define BLE_CHAR_SCAN                            "Scan"
+#define BLE_CHAR_PWM                             "PWM"
 
 /* Error messages
  * 
@@ -44,3 +49,5 @@
 #define MSG_MESH_MESSAGE_WRITE                   "Mesh message being written"
 #define MSG_FIRMWARE_UPDATE                      "Firmware, perform update"
 #define MSG_RESET                                "Reset"
+
+#define MSG_BLE_CHAR_TOO_MANY                    "Characteristics. Too many added to single service"

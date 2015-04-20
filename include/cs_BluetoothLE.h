@@ -42,7 +42,7 @@ extern "C" {
 #include <cs_iBeacon.h>
 #include <common/cs_MasterBuffer.h>
 #include <common/cs_Config.h>
-
+#include <common/cs_Strings.h>
 #include <third/std/function.h>
 
 // TODO: replace std::vector with a fixed, in place array of size capacity.
@@ -118,7 +118,7 @@ protected:
 	// Universally Unique Identifier (8 bytes)
 	UUID                      _uuid;
 	// Name (4 bytes)
-	std::string               _name;
+	const char *              _name;
 	// Read permission (1 byte)
 	ble_gap_conn_sec_mode_t   _readperm;
 	// Write permission (1 byte)
@@ -233,7 +233,7 @@ public:
 		return *this;
 	}
 
-	CharacteristicBase& setName(const std::string& name);
+	CharacteristicBase& setName(const char * const name);
 
 	CharacteristicBase& setUnit(uint16_t unit);
 
@@ -401,7 +401,7 @@ public:
 		return *this;
 	}
 
-	CharacteristicGeneric<T>& setName(const std::string& name) {
+	CharacteristicGeneric<T>& setName(const char * const name) {
 		CharacteristicBase::setName(name);
 		return *this;
 	}
@@ -530,12 +530,12 @@ protected:
 	void written(uint16_t len, uint16_t offset, uint8_t* data) {
 		setDataLength(len);
 
-		LOGd("%s: onWrite()", _name.c_str());
+		LOGd("%s: onWrite()", _name);
 		_callbackOnWrite(getValue());
 	}
 
 	void read() {
-		LOGd("%s: onRead()", _name.c_str());
+		LOGd("%s: onRead()", _name);
 		T newValue = _callbackOnRead();
 		if (newValue != _value) {
 			operator=(newValue);
@@ -684,7 +684,7 @@ public:
 	virtual ~Service() {
 	}
 
-	Service& setName(const std::string& name) {
+	Service& setName(const char * const name) {
 		_name = name;
 		return *this;
 	}
@@ -760,7 +760,7 @@ public:
 	 */
 	GenericService() : Service()
 	{
-		setName(std::string("GenericService"));
+		setName(BLE_SERVICE_GENERIC);
 	}
 
 	/* Get list of characteristics
@@ -776,61 +776,11 @@ public:
 	 */
 	virtual GenericService& addCharacteristic(CharacteristicBase* characteristic) {
 		if (_characteristics.size() == MAX_CHARACTERISTICS) {
-			BLE_THROW("Too many characteristics.");
+			BLE_THROW(MSG_BLE_CHAR_TOO_MANY);
 		}
 		_characteristics.push_back(characteristic);
 
 		return *this;
-	}
-};
-
-/* Battery service
- *
- * Defines a single characteristic to read a battery level. This is a predefined UUID, stored at
- * <BLE_UUID_BATTERY_LEVEL_CHAR>. The name is "battery", and the default value is 100.
- */
-class BatteryService : public GenericService {
-
-public:
-	// Define func_t as a templated function with an unsigned byte
-	typedef function<uint8_t()> func_t;
-
-protected:
-	// A single characteristic with an unsigned 8-bit value
-	Characteristic<uint8_t> *_characteristic;
-	// A function for callback, not in use
-	func_t _func;
-public:
-	// Constructor sets name, allocate characteristic, sets UUID, and sets default value.
-	BatteryService(): GenericService() {
-		setUUID(UUID(BLE_UUID_BATTERY_SERVICE));
-		setName(std::string("BatteryService"));
-
-		_characteristic = new Characteristic<uint8_t>();
-
-		(*_characteristic).setUUID(UUID(BLE_UUID_BATTERY_LEVEL_CHAR))
-                        				   .setName(std::string("battery"))
-										   .setDefaultValue(100);
-		addCharacteristic(_characteristic);
-	}
-
-	/* Set the battery level
-	 * @batteryLevel level of the battery in percentage
-	 *
-	 * Indicates the level of the battery in a percentage to the user. This is of no use for a device attached to
-	 * the main line. This function writes to the characteristic to show it to the user.
-	 */
-	void setBatteryLevel(uint8_t batteryLevel){
-		(*_characteristic) = batteryLevel;
-	}
-
-	/* Set a callback function for a battery level change
-	 * @func callback function
-	 *
-	 * Not in use
-	 */
-	void setBatteryLevelHandler(func_t func) {
-		_func = func;
 	}
 };
 
@@ -1085,17 +1035,12 @@ public:
 		return *this;
 	}
 
+	/*
 	Service& createService() {
 		GenericService* svc = new GenericService();
 		addService(svc);
 		return *svc;
-	}
-
-	BatteryService& createBatteryService() {
-		BatteryService* svc = new BatteryService();
-		addService(svc);
-		return *svc;
-	}
+	}*/
 
 	Service& getService(std::string name);
 	Nrf51822BluetoothStack& addService(Service* svc);

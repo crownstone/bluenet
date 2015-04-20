@@ -85,7 +85,7 @@ CharacteristicBase::CharacteristicBase() :
 
 }
 
-CharacteristicBase& CharacteristicBase::setName(const std::string& name) {
+CharacteristicBase& CharacteristicBase::setName(const char * const name) {
 	if (_inited)
 		BLE_THROW("Already inited.");
 	_name = name;
@@ -146,16 +146,18 @@ void CharacteristicBase::init(Service* svc) {
 	ci.attr_char_value.max_len = getValueMaxLength();
 	ci.attr_char_value.p_value = getValuePtr();
 
-	LOGd("%s init with buffer[%i] with %p", _name.c_str(), getValueLength(), getValuePtr());
+	std::string name = std::string(_name);
+
+	LOGd("%s init with buffer[%i] with %p", name.c_str(), getValueLength(), getValuePtr());
 
 	ci.attr_char_value.p_uuid = &uid;
 
 	setupWritePermissions(ci);
 
-	if (!_name.empty()) {
-		ci.char_md.p_char_user_desc = (uint8_t*) _name.c_str(); // todo utf8 conversion?
-		ci.char_md.char_user_desc_size = _name.length();
-		ci.char_md.char_user_desc_max_size = _name.length();
+	if (!name.empty()) {
+		ci.char_md.p_char_user_desc = (uint8_t*) name.c_str(); // todo utf8 conversion?
+		ci.char_md.char_user_desc_size = name.length();
+		ci.char_md.char_user_desc_max_size = name.length();
 	}
 
 	// This is the metadata (eg security settings) for the description of this characteristic.

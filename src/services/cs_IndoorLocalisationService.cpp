@@ -36,7 +36,7 @@ IndoorLocalizationService::IndoorLocalizationService() :
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 
 	// we have to figure out why this goes wrong
-	setName(std::string(BLE_SERVICE_INDOOR_LOCALIZATION));
+	setName(BLE_SERVICE_INDOOR_LOCALIZATION);
 	
 	_trackMode = false;
 //	// set timer with compare interrupt every 10ms
@@ -118,7 +118,7 @@ void IndoorLocalizationService::addSignalStrengthCharacteristic() {
 	addCharacteristic(_rssiCharac);
 
 	_rssiCharac->setUUID(UUID(getUUID(), RSSI_UUID)); // there is no BLE_UUID for rssi level(?)
-	_rssiCharac->setName(std::string("Received signal level"));
+	_rssiCharac->setName(BLE_CHAR_RSSI);
 	_rssiCharac->setDefaultValue(1);
 	_rssiCharac->setNotifies(true);
 }
@@ -130,7 +130,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 	addCharacteristic(_scanControlCharac);
 
 	_scanControlCharac->setUUID(UUID(getUUID(), SCAN_DEVICE_UUID));
-	_scanControlCharac->setName("scan");
+	_scanControlCharac->setName(BLE_CHAR_SCAN);
 	_scanControlCharac->setDefaultValue(255);
 	_scanControlCharac->setWritable(true);
 	_scanControlCharac->onWrite([&](const uint8_t& value) -> void {
