@@ -284,6 +284,10 @@ Due to the fact that the SoftDevice S130 uses 10kB out of 16kB, we have to be re
 <img src="docs/rodata.png?raw=true" alt="Memory .rodata section" height="500px"/>
 </p>
 
+<p align="center">
+<img src="docs/bss.png?raw=true" alt="Memory .bss section" height="500px"/>
+</p>
+
 Tips to reduce memory usage are really welcome!
 
 ## Commercial use
