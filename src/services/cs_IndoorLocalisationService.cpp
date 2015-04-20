@@ -217,7 +217,7 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	addCharacteristic(_trackedDeviceListCharac);
 
 	_trackedDeviceListCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_LIST_UUID));
-	_trackedDeviceListCharac->setName("List tracked devices");
+	_trackedDeviceListCharac->setName(BLE_CHAR_TRACK);
 	_trackedDeviceListCharac->setWritable(false);
 	_trackedDeviceListCharac->setNotifies(false);
 

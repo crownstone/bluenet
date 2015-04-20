@@ -34,6 +34,7 @@
 #define BLE_CHAR_CONFIG_GET                      "Config Get"
 #define BLE_CHAR_RSSI                            "RSSI"
 #define BLE_CHAR_SCAN                            "Scan"
+#define BLE_CHAR_TRACK                           "Track"
 #define BLE_CHAR_PWM                             "PWM"
 
 /* Error messages
