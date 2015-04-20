@@ -102,7 +102,7 @@ void GeneralService::addTemperatureCharacteristic() {
 	addCharacteristic(_temperatureCharacteristic);
 
 	_temperatureCharacteristic->setUUID(UUID(getUUID(), TEMPERATURE_UUID));
-	_temperatureCharacteristic->setName("Temperature");
+	_temperatureCharacteristic->setName(BLE_CHAR_TEMPERATURE);
 	_temperatureCharacteristic->setDefaultValue(0);
 	_temperatureCharacteristic->setNotifies(true);
 }
@@ -112,7 +112,7 @@ void GeneralService::addFirmwareCharacteristic() {
 	addCharacteristic(_firmwareCharacteristic);
 
 	_firmwareCharacteristic->setUUID(UUID(getUUID(), FIRMWARE_UUID));
-	_firmwareCharacteristic->setName("Update firmware");
+	_firmwareCharacteristic->setName(BLE_CHAR_RESET);
 	_firmwareCharacteristic->setDefaultValue(0);
 	_firmwareCharacteristic->setWritable(true);
 	_firmwareCharacteristic->onWrite([&](const int32_t& value) -> void {
@@ -139,7 +139,7 @@ void GeneralService::addMeshCharacteristic() {
 	addCharacteristic(_meshCharacteristic);
 
 	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_UUID));
-	_meshCharacteristic->setName("Mesh");
+	_meshCharacteristic->setName(BLE_CHAR_MESH);
 	_meshCharacteristic->setWritable(true);
 	_meshCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 			LOGi(MSG_MESH_MESSAGE_WRITE);
@@ -165,7 +165,7 @@ void GeneralService::addSetConfigurationCharacteristic() {
 	addCharacteristic(_setConfigurationCharacteristic);
 
 	_setConfigurationCharacteristic->setUUID(UUID(getUUID(), SET_CONFIGURATION_UUID));
-	_setConfigurationCharacteristic->setName("Set Configuration");
+	_setConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_SET);
 	_setConfigurationCharacteristic->setWritable(true);
 	_setConfigurationCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
@@ -278,7 +278,7 @@ void GeneralService::addSelectConfigurationCharacteristic() {
 	addCharacteristic(_selectConfigurationCharacteristic);
 
 	_selectConfigurationCharacteristic->setUUID(UUID(getUUID(), SELECT_CONFIGURATION_UUID));
-	_selectConfigurationCharacteristic->setName("Select Configuration");
+	_selectConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_SELECT);
 	_selectConfigurationCharacteristic->setWritable(true);
 	_selectConfigurationCharacteristic->onWrite([&](const uint8_t& value) -> void {
 			if (value < CONFIG_TYPES) {
@@ -295,7 +295,7 @@ void GeneralService::addGetConfigurationCharacteristic() {
 	addCharacteristic(_getConfigurationCharacteristic);
 
 	_getConfigurationCharacteristic->setUUID(UUID(getUUID(), GET_CONFIGURATION_UUID));
-	_getConfigurationCharacteristic->setName("Get Configuration");
+	_getConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_GET);
 	_getConfigurationCharacteristic->setWritable(false);
 }
 
