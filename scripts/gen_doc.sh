@@ -76,7 +76,7 @@ macros+=("-DTICK_CONTINUOUSLY=${TICK_CONTINUOUSLY}")
 macros+=("-DINDOOR_SERVICE=${INDOOR_SERVICE}")
 macros+=("-DGENERAL_SERVICE=${GENERAL_SERVICE}")
 macros+=("-DPOWER_SERVICE=${POWER_SERVICE}")
-macros+=("-DMESHING=${MESHING}")
+macros+=("-DCHAR_MESHING=${CHAR_MESHING}")
 
 # only required if Nordic files are used
 macros+=("-DBOARD_NRF6310")

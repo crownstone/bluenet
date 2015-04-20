@@ -31,7 +31,7 @@ static void sys_evt_dispatch(uint32_t sys_evt) {
 
 	//LOGi("Sys evt dispatch");
 
-#if MESHING==1
+#if CHAR_MESHING==1
 	rbc_mesh_sd_irq_handler();
 #endif
 

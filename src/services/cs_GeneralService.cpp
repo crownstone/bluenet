@@ -12,7 +12,7 @@
 #include "common/cs_Config.h"
 #include "common/cs_Strings.h"
 
-#if MESHING==1 
+#if CHAR_MESHING==1 
 #include <protocol/cs_Mesh.h>
 #endif
 
@@ -21,7 +21,7 @@ using namespace BLEpp;
 GeneralService::GeneralService() :
 //		_stack(&stack),
 		_temperatureCharacteristic(NULL),
-		_firmwareCharacteristic(NULL),
+		_resetCharacteristic(NULL),
 		_selectConfiguration(0xFF) {
 
 	setUUID(UUID(GENERAL_UUID));
@@ -36,27 +36,27 @@ GeneralService::GeneralService() :
 void GeneralService::init() {
 	LOGi("Create general service");
 
-#if TEMPERATURE==1
+#if CHAR_TEMPERATURE==1
 	LOGi("Add Temperature Characteristic");
 	addTemperatureCharacteristic();
 #else
 	LOGi("Skip Temperature Characteristic");
 #endif
 
-#if FIRMWARE==1
-	LOGi("Add Firmware Characteristic");
-	addFirmwareCharacteristic();
+#if RESET==1
+	LOGi("Add Reset Characteristic");
+	addResetCharacteristic();
 #else
-	LOGi("Skip Firmware Characteristic");
+	LOGi("Skip Reset Characteristic");
 #endif
-#if MESHING==1
+#if CHAR_MESHING==1
 	LOGi("Add Mesh Characteristic");
 	addMeshCharacteristic();
 #else
 	LOGi("Skip Mesh Characteristic");
 #endif
 
-#if CONFIGURATION==1
+#if CHAR_CONFIGURATION==1
 	// if we use configuration characteristics, set up a buffer
 	_streamBuffer = new StreamBuffer<uint8_t>();
 	MasterBuffer& mb = MasterBuffer::getInstance();
@@ -107,31 +107,36 @@ void GeneralService::addTemperatureCharacteristic() {
 	_temperatureCharacteristic->setNotifies(true);
 }
 
-void GeneralService::addFirmwareCharacteristic() {
-	_firmwareCharacteristic = new Characteristic<int32_t>();
-	addCharacteristic(_firmwareCharacteristic);
+void GeneralService::addResetCharacteristic() {
+	_resetCharacteristic = new Characteristic<int32_t>();
+	addCharacteristic(_resetCharacteristic);
 
-	_firmwareCharacteristic->setUUID(UUID(getUUID(), FIRMWARE_UUID));
-	_firmwareCharacteristic->setName(BLE_CHAR_RESET);
-	_firmwareCharacteristic->setDefaultValue(0);
-	_firmwareCharacteristic->setWritable(true);
-	_firmwareCharacteristic->onWrite([&](const int32_t& value) -> void {
+	_resetCharacteristic->setUUID(UUID(getUUID(), FIRMWARE_UUID));
+	_resetCharacteristic->setName(BLE_CHAR_RESET);
+	_resetCharacteristic->setDefaultValue(0);
+	_resetCharacteristic->setWritable(true);
+	_resetCharacteristic->onWrite([&](const int32_t& value) -> void {
 			if (value != 0) {
-				LOGi(MSG_FIRMWARE_UPDATE);
+				// copy to make sure this is nothing more than one value
+				uint32_t cmd = value;
+				if (cmd == COMMAND_ENTER_RADIO_BOOTLOADER) {
+					LOGi(MSG_FIRMWARE_UPDATE);
+				} else {
+					LOGi(MSG_RESET);
+				}
 				uint8_t err_code;
 				err_code = sd_power_gpregret_clr(0xFF);
 				APP_ERROR_CHECK(err_code);
-				uint32_t cmd = COMMAND_ENTER_RADIO_BOOTLOADER;
 				err_code = sd_power_gpregret_set(cmd);
 				APP_ERROR_CHECK(err_code);
 				sd_nvic_SystemReset();				
 			} else {
-				LOGi("Update firmware? Write nonzero value");
+				LOGw("To reset write a nonzero value");
 			}
 		});
 }
 
-#if MESHING==1
+#if CHAR_MESHING==1
 void GeneralService::addMeshCharacteristic() {
 	buffer_ptr_t buffer = MasterBuffer::getInstance().getBuffer();
 

@@ -98,11 +98,11 @@ protected:
 	 */
 	BLEpp::Characteristic<int32_t>* _temperatureCharacteristic;
 
-	/* Firmware characteristic
+	/* Reset characteristic
 	 *
 	 * Resets device
 	 */
-	BLEpp::Characteristic<int32_t>* _firmwareCharacteristic;
+	BLEpp::Characteristic<int32_t>* _resetCharacteristic;
 
 	/* Mesh characteristic
 	 *
@@ -163,9 +163,11 @@ protected:
 	 */
 	void addGetConfigurationCharacteristic();
 
-	/* Enable the firmware upgrade characteristic.
+	/* Enable the reset characteristic.
+	 *
+	 * The reset characteristic can be used to enter bootloader mode and update the firmware.
 	 */
-	void addFirmwareCharacteristic();
+	void addResetCharacteristic();
 
 	/* Enable the mesh characteristic.
 	 */

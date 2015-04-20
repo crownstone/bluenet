@@ -19,6 +19,6 @@
  *
  * This should be the same value as defined in the bootloader. 
  */
-#define COMMAND_ENTER_RADIO_BOOTLOADER           1 
+#define COMMAND_ENTER_RADIO_BOOTLOADER           66
 
 

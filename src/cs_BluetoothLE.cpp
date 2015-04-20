@@ -14,7 +14,7 @@
 
 #include "softdevice_handler.h"
 
-#if MESHING==1
+#if CHAR_MESHING==1
 extern "C" {
 #include <protocol/cs_Mesh.h>
 #include <protocol/rbc_mesh.h>
@@ -913,7 +913,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	//	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
 	//		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
 	//	}
-#if MESHING==1
+#if CHAR_MESHING==1
 	APP_ERROR_CHECK(rbc_mesh_ble_evt_handler(p_ble_evt));
 #endif
 

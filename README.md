@@ -90,7 +90,7 @@ Now you will have to set all fields in the configuration file:
 * adjust `JLINK_GDB_SERVER` to the full name of the JLink utility that supports gdb (JLinkGDBServer on Linux)
 * set `BLUETOOTH_NAME` to something you like, but make sure it's short.
 * adjust `INDOOR_SERVICE` to `1` if you want to enable it, the same is true for the other services
-* adjust `MESHING` to `1` if you want to enable meshing functionality
+* adjust `CHAR_MESHING` to `1` if you want to enable meshing functionality
 * adjust `BOARD` to the correct number for your board. This determines the pin layout.
 * adjust `HARDWARE_VERSION` to the correct version of the NRF51 chip you have. Use script/hardware_version.sh to check your version.
 * adjust `SERIAL_VERBOSITY` to the value you prefer. Set it to None to disable all logging over serial. The default is 1 (info).
@@ -174,7 +174,7 @@ Here the binary `combined.bin` is the softdevice and application combined.
 ## Meshing
 
 The meshion functionality is the one we are currently integrating on the moment. So, this is a moving target. Set
-`MESHING` to `0` if you don't need it.
+`CHAR_MESHING` to `0` if you don't need it.
 
 For the meshing functionality we use https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh written by a 
 Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and 
@@ -335,6 +335,6 @@ implications of.
 The only exception is the code for the meshing functionality that is put online by Nordic itself on 
 https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh. This functionality can be found in `src/protocol` and
 `include/protocol/` and falls of course under the Nordic license. You can disable the meshing functionality with
-`MESHING=0` if you do want to exclude that code from becoming part of the binary. You can still use the services
+`CHAR_MESHING=0` if you do want to exclude that code from becoming part of the binary. You can still use the services
 for individual nodes, but they won't be able to communicate with each other in that case.
 

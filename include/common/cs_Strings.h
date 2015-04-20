@@ -43,5 +43,4 @@
 #define MSG_CHAR_VALUE_WRITTEN                   "Characteristic value is written"
 #define MSG_MESH_MESSAGE_WRITE                   "Mesh message being written"
 #define MSG_FIRMWARE_UPDATE                      "Firmware, perform update"
-
-
+#define MSG_RESET                                "Reset"

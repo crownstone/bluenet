@@ -206,7 +206,3 @@
 #error "You have to specify TICK_CONTINUOUSLY in your config file"
 #endif
 
-#ifndef MESHING
-#error "You have to specify MESHING in your config file (values 0,1)"
-#endif
-

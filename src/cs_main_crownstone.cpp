@@ -79,7 +79,7 @@ extern "C" {
 	#include "nrf_gpio.h"
 #endif
 
-#if MESHING==1
+#if CHAR_MESHING==1
 #include <protocol/cs_Mesh.h>
 #endif
 
@@ -183,7 +183,7 @@ void config_drivers() {
 #endif
 }
 
-#if MESHING==1
+#if CHAR_MESHING==1
 
 /**********************************************************************************************************************
  * Interlude for meshing. Will need to be integrated with the code!
@@ -363,7 +363,7 @@ int main() {
 	BLEutil::print_heap("Heap adv: ");
 	BLEutil::print_stack("Stack adv: ");
 
-#if MESHING==1
+#if CHAR_MESHING==1
     #ifdef BOARD_PCA10001
         gpiote_init();
     #endif
@@ -373,7 +373,7 @@ int main() {
     #endif
 #endif
 
-#if MESHING==1
+#if CHAR_MESHING==1
  	CMesh & mesh = CMesh::getInstance();
 	mesh.init();
 #endif
