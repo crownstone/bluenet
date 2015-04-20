@@ -57,14 +57,14 @@ void IndoorLocalizationService::init() {
 #else
 	LOGi("skip Signal Strength characteristics");
 #endif
-#if SCAN_DEVICES==1
+#if CHAR_SCAN_DEVICES==1
 	LOGi("add Scan Devices characteristics");
 	addScanControlCharacteristic();
 	addPeripheralListCharacteristic();
 #else
 	LOGi("skip Scan/Devices characteristics");
 #endif
-#if TRACK_DEVICES==1
+#if CHAR_TRACK_DEVICES==1
 	LOGi("add Tracked Device characteristics");
 	addTrackedDeviceListCharacteristic();
 	addTrackedDeviceCharacteristic();
