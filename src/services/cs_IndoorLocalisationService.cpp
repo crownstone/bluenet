@@ -36,7 +36,7 @@ IndoorLocalizationService::IndoorLocalizationService() :
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 
 	// we have to figure out why this goes wrong
-	setName(BLE_SERVICE_INDOOR_LOCALIZATION);
+	setName(std::string(BLE_SERVICE_INDOOR_LOCALIZATION));
 	
 	_trackMode = false;
 //	// set timer with compare interrupt every 10ms

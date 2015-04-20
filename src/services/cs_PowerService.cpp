@@ -32,7 +32,7 @@ PowerService::PowerService() :
 
 	setUUID(UUID(POWER_SERVICE_UUID));
 
-	setName(BLE_SERVICE_POWER);
+	setName(std::string(BLE_SERVICE_POWER));
 
 	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
 	loadPersistentStorage();
