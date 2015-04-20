@@ -173,7 +173,7 @@ void CharacteristicBase::init(Service* svc) {
 
 	uint32_t err_code = sd_ble_gatts_characteristic_add(svc_handle, &ci.char_md, &ci.attr_char_value, &_handles);
 	if (err_code != NRF_SUCCESS) {
-		LOGe("Something went wrong with creation of characteristic");
+		LOGe(MSG_BLE_CHAR_CREATION_ERROR);
 		APP_ERROR_CHECK(err_code);
 	}
 
@@ -335,7 +335,6 @@ void Service::on_ble_event(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_WRITE:
-		LOGd("Write event");
 		on_write(p_ble_evt->evt.gatts_evt.params.write);
 		break;
 
@@ -400,7 +399,7 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 
 	if (!found) {
 		// tell someone?
-		LOGe("Could not find characteristic!");
+		LOGe(MSG_BLE_CHAR_CANNOT_FIND);
 	}
 }
 
@@ -453,17 +452,17 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	uint8_t enabled;
 	BLE_CALL(sd_softdevice_is_enabled, (&enabled));
 	if (enabled) {
-		LOGw("Softdevice is already enabled. Try to disable.");
+		LOGw(MSG_BLE_SOFTDEVICE_RUNNING);
 		BLE_CALL(sd_softdevice_disable, ());
 	}
 
-	LOGi("Initialize softdevice handler.");
+	LOGd(MSG_BLE_SOFTDEVICE_INIT);
 	// Initialize the SoftDevice handler module.
 	// this would call with different clock!
 	SOFTDEVICE_HANDLER_INIT(_clock_source, false);
 	
 	// enable the BLE stack
-	LOGi("Enable softdevice.");
+	LOGd(MSG_BLE_SOFTDEVICE_ENABLE);
 //#if(SOFTDEVICE_SERIES == 110) 
 
 #if (SOFTDEVICE_SERIES != 130) && (SOFTDEVICE_MINOR != 5) 
@@ -482,14 +481,13 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	// due to "an issue present in the s110_nrf51822_7.0.0 release"
 #if(SOFTDEVICE_SERIES == 110) 
 #if(NORDIC_SDK_VERSION >= 7)
-	LOGi("Enable GAP in softdevice.");
+	LOGd(MSG_BLE_SOFTDEVICE_ENABLE_GAP);
 	BLE_CALL(sd_ble_gap_enable, () );
 	ble_gap_addr_t addr;
 	BLE_CALL(sd_ble_gap_address_get, (&addr) );
 	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr) );
 #endif
 #endif
-	LOGi("Get BLE version.");
 	// version is not saved or shown yet
 	ble_version_t version( { });
 	version.company_id = 12;
@@ -497,7 +495,6 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	sd_nvic_EnableIRQ(SWI2_IRQn);
 
-	LOGi("Set BLE name.");
 	if (!_device_name.empty()) {
 		BLE_CALL(sd_ble_gap_device_name_set,
 				(&_sec_mode, (uint8_t*) _device_name.c_str(), _device_name.length()));
@@ -656,7 +653,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	if (_advertising)
 		return *this;
 
-	LOGi("Start advertising ...");
+	LOGi(MSG_BLE_ADVERTISING_START);
 
 	init(); // we should already be.
 
@@ -677,7 +674,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	}
 
 	if (cnt == 0) {
-		LOGw("No custom services!");
+		LOGw(MSG_BLE_NO_CUSTOM_SERVICES);
 	}
 
 	ble_gap_adv_params_t adv_params;
@@ -754,7 +751,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 
 	err_code = ble_advdata_set(&advdata, &scan_resp);
 	if (err_code == NRF_ERROR_DATA_SIZE) {
-		log(FATAL,"FATAL ERROR!!! advertisement data too big for package");
+		log(FATAL, MSG_BLE_ADVERTISEMENT_TOO_BIG);
 	} 
 	APP_ERROR_CHECK(err_code);
 
@@ -762,13 +759,13 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	//BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
 	err_code = sd_ble_gap_adv_start(&adv_params);
 	if (err_code == NRF_ERROR_INVALID_PARAM) {
-		log(FATAL, "FATAL ERROR!!! no valid advertisement configuration");
+		log(FATAL, MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
 	}
 	APP_ERROR_CHECK(err_code);
 
 	_advertising = true;
 
-	LOGi("... OK");
+	LOGi(MSG_BLE_ADVERTISING_STARTED);
 
 	return *this;
 }

@@ -33,29 +33,31 @@ GeneralService::GeneralService() :
 }
 
 void GeneralService::init() {
-	LOGi("Create general service");
+	LOGi(MSG_SERVICE_GENERAL_INIT);
 
 #if CHAR_TEMPERATURE==1
-	LOGi("Add Temperature Characteristic");
+	LOGi(MSG_CHAR_TEMPERATURE_ADD);
 	addTemperatureCharacteristic();
 #else
-	LOGi("Skip Temperature Characteristic");
+	LOGi(MSG_CHAR_TEMPERATURE_SKIP);
 #endif
 
 #if CHAR_RESET==1
-	LOGi("Add Reset Characteristic");
+	LOGi(MSG_CHAR_RESET_ADD);
 	addResetCharacteristic();
 #else
-	LOGi("Skip Reset Characteristic");
+	LOGi(MSG_CHAR_RESET_SKIP);
 #endif
 #if CHAR_MESHING==1
-	LOGi("Add Mesh Characteristic");
+	LOGi(MSG_CHAR_MESH_ADD);
 	addMeshCharacteristic();
 #else
-	LOGi("Skip Mesh Characteristic");
+	LOGi(MSG_CHAR_MESH_SKIP);
 #endif
 
 #if CHAR_CONFIGURATION==1
+	LOGi(MSG_CHAR_CONFIGURATION_ADD);
+
 	// if we use configuration characteristics, set up a buffer
 	_streamBuffer = new StreamBuffer<uint8_t>();
 	MasterBuffer& mb = MasterBuffer::getInstance();
@@ -66,11 +68,8 @@ void GeneralService::init() {
 	LOGd("Assign buffer of size %i to stream buffer", size);
 	_streamBuffer->assign(buffer, size);
 
-	LOGi("Add Set Configuration Characteristic");
 	addSetConfigurationCharacteristic();
-	LOGi("Add Select Configuration Characteristic");
 	addSelectConfigurationCharacteristic();
-	LOGi("Add Get Configuration Characteristic");
 	addGetConfigurationCharacteristic();
 
 	_setConfigurationCharacteristic->setValue(buffer);
@@ -83,7 +82,7 @@ void GeneralService::init() {
 
 	LOGd("Set both set/get charac to buffer at %p", buffer);
 #else
-	LOGi("Skip Configuration Characteristics");
+	LOGi(MSG_CHAR_CONFIGURATION_SKIP);
 #endif
 
 }
@@ -264,15 +263,14 @@ bool GeneralService::readFromStorage(uint8_t type) {
 }
 
 void GeneralService::writeToConfigCharac() {
+	/*
 	uint16_t len = _streamBuffer->getDataLength();
 	uint8_t value = _streamBuffer->payload()[0];
 	buffer_ptr_t pntr = _getConfigurationCharacteristic->getValue();
 	LOGd("Write to config length %i and value %i", len, value);
-	
 	struct stream_t<uint8_t> *stream = (struct stream_t<uint8_t>*) pntr;
-
 	LOGd("Write to config at %p with payload length %i and value %i", pntr, stream->length, stream->payload[0]);
-
+	*/
 	_getConfigurationCharacteristic->setDataLength(_streamBuffer->getDataLength());
 	_getConfigurationCharacteristic->notify();
 }
