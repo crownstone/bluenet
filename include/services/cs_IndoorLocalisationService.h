@@ -25,7 +25,7 @@ struct ps_indoorlocalisation_service_t : ps_storage_base_t {
 	uint32_t nearbyTimeout;
 };
 
-class IndoorLocalizationService : public BLEpp::GenericService {
+class IndoorLocalizationService : public BLEpp::Service {
 
 public:
 	typedef function<int8_t()> func_t;

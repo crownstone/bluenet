@@ -20,7 +20,7 @@
 
 #define POWER_SERVICE_UUID "5b8d0000-6f20-11e4-b116-123b93f75cba"
 
-class PowerService : public BLEpp::GenericService {
+class PowerService : public BLEpp::Service {
 public:
 	typedef function<int8_t()> func_t;
 

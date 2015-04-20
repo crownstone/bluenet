@@ -682,6 +682,12 @@ protected:
 	uint16_t                 _service_handle; // provided by stack.
 	bool                     _started;
 
+	// Currently maximum number of characteristics per service
+	static const uint8_t MAX_CHARACTERISTICS = 6;
+
+	// List of characteristics
+	fixed_tuple<CharacteristicBase*, MAX_CHARACTERISTICS> _characteristics;
+
 public:
 	Service() :
 		_stack(NULL),
@@ -738,10 +744,6 @@ public:
 	virtual void start(Nrf51822BluetoothStack* stack);
 	virtual void stop() {}
 
-	virtual Service& addCharacteristic(CharacteristicBase* characteristic) = 0;
-
-	virtual Characteristics_t& getCharacteristics() = 0;
-
 	virtual void on_ble_event(ble_evt_t * p_ble_evt);
 
 	virtual void on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt);  // FIXME NRFAPI  friend??
@@ -751,35 +753,6 @@ public:
 	virtual void on_write(ble_gatts_evt_write_t& write_evt);  // FIXME NRFAPI
 
 	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
-};
-
-/* Generic Service is a <Service> with characteristics
- *
- * Currently the number of characteristics is limited. By having this container in a separate class, in the future
- * services that have more than MAX_CHARACTERISTICS can be defined.
- *
- * This class defines only two methods:
- * + <getCharacteristics>
- * + <addCharacteristic>
- */
-class GenericService : public Service {
-protected:
-	// Currently maximum number of characteristics per service
-	static const uint8_t MAX_CHARACTERISTICS = 6;
-
-	// List of characteristics
-	fixed_tuple<CharacteristicBase*, MAX_CHARACTERISTICS> _characteristics;
-
-public:
-
-	/* Constructor of GenericService 
-	 *
-	 * Sets GenericService as BLE name
-	 */
-	GenericService() : Service()
-	{
-		setName(BLE_SERVICE_GENERIC);
-	}
 
 	/* Get list of characteristics
 	 *
@@ -792,7 +765,7 @@ public:
 	/* Add a single characteristic to the list
 	 * @characteristic Characteristic to add
 	 */
-	virtual GenericService& addCharacteristic(CharacteristicBase* characteristic) {
+	virtual Service& addCharacteristic(CharacteristicBase* characteristic) {
 		if (_characteristics.size() == MAX_CHARACTERISTICS) {
 			BLE_THROW(MSG_BLE_CHAR_TOO_MANY);
 		}
@@ -1052,13 +1025,6 @@ public:
 
 		return *this;
 	}
-
-	/*
-	Service& createService() {
-		GenericService* svc = new GenericService();
-		addService(svc);
-		return *svc;
-	}*/
 
 	Service& getService(std::string name);
 	Nrf51822BluetoothStack& addService(Service* svc);

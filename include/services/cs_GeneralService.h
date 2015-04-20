@@ -25,7 +25,7 @@
  *
  * If meshing is enabled, it is also possible to send a message into the mesh network using a characteristic.
  */
-class GeneralService: public BLEpp::GenericService {
+class GeneralService: public BLEpp::Service {
 public:
 	/* Constructor for general crownstone service object
 	 *
@@ -143,7 +143,7 @@ protected:
 
 	/* Enable the temperature characteristic.
  	 */
-	void addTemperatureCharacteristic();
+	inline void addTemperatureCharacteristic();
 
 	/* Enable the set configuration characteristic.
 	 *
@@ -151,27 +151,27 @@ protected:
 	 * characteristic.
 	 * See <_setConfigurationCharacteristic>.
 	 */
-	void addSetConfigurationCharacteristic();
+	inline void addSetConfigurationCharacteristic();
 
 	/* Enable the set configuration characteristic.
 	 *
 	 * See <_selectConfigurationCharacteristic>.
 	 */
-	void addSelectConfigurationCharacteristic();
+	inline void addSelectConfigurationCharacteristic();
 
 	/* Enable the get configuration characteristic.
 	 */
-	void addGetConfigurationCharacteristic();
+	inline void addGetConfigurationCharacteristic();
 
 	/* Enable the reset characteristic.
 	 *
 	 * The reset characteristic can be used to enter bootloader mode and update the firmware.
 	 */
-	void addResetCharacteristic();
+	inline void addResetCharacteristic();
 
 	/* Enable the mesh characteristic.
 	 */
-	void addMeshCharacteristic();
+	inline void addMeshCharacteristic();
 
 	/* Retrieve the Bluetooth name from the object representing the BLE stack.
 	 *
