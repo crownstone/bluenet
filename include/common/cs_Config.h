@@ -21,4 +21,8 @@
  */
 #define COMMAND_ENTER_RADIO_BOOTLOADER           66
 
-
+/*
+ */
+#define APP_TIMER_PRESCALER                      240
+#define APP_TIMER_MAX_TIMERS                     4
+#define APP_TIMER_OP_QUEUE_SIZE                  4
