@@ -18,8 +18,8 @@
 using namespace BLEpp;
 
 #define CURRENT_CURVE_HEADER_SIZE                (sizeof(uint16_t) + 2*sizeof(T) + 2*sizeof(uint32_t))
-//#define CURRENT_CURVE_MAX_SAMPLES                (GENERAL_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE + 1)
-#define CURRENT_CURVE_MAX_SAMPLES                ((GENERAL_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE) / 2 + 1)
+//#define CURRENT_CURVE_MAX_SAMPLES                (MASTER_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE + 1)
+#define CURRENT_CURVE_MAX_SAMPLES                ((MASTER_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE) / 2 + 1)
 
 #define CC_SUCCESS                               0
 #define CC_BUFFER_NOT_INITIALIZED                1

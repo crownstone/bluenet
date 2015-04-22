@@ -263,7 +263,7 @@ int main() {
 
 	welcome();
 
-	MasterBuffer::getInstance().alloc(GENERAL_BUFFER_SIZE);
+	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 
 	// set up the bluetooth stack that controls the hardware.
 	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
