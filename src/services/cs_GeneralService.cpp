@@ -223,6 +223,7 @@ void GeneralService::writeToStorage(uint8_t type, uint8_t length, uint8_t* paylo
 		uint16_t counts = ((uint16_t*)payload)[0]; //TODO: other byte order?
 		LOGd("setNearbyTimeout(%i)", counts);
 //		setNearbyTimeout(counts);
+		// TODO: write to persistent storage and trigger update event
 		break;
 	}
 	default:

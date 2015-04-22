@@ -31,7 +31,6 @@ files=()
 files+=("$rel_path/include/cs_nRF51822.h")
 #files+=("$rel_path/include/cs_iBeacon.h") does not compile
 files+=("$rel_path/include/cs_BluetoothLE.h")
-#files+=("$rel_path/include/cs_Serializable.h") compilation issues
 files+=("$rel_path/include/common/cs_Boards.h")
 files+=("$rel_path/include/common/cs_Config.h")
 files+=("$rel_path/include/common/cs_Storage.h")

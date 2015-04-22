@@ -20,7 +20,6 @@
 #include <util/cs_BleError.h>
 #include <drivers/cs_Serial.h>
 #include <cs_UUID.h>
-#include <cs_AllocatedBuffer.h>
 #include <cs_iBeacon.h>
 #include <common/cs_MasterBuffer.h>
 #include <common/cs_Config.h>
