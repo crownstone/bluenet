@@ -5,7 +5,7 @@
 BLUETOOTH_NAME="crown"
 
 # Enable or disable different services (at times required to preserve memory)
-INDOOR_SERVICE=1
+INDOOR_SERVICE=0
 GENERAL_SERVICE=1
 POWER_SERVICE=1
 
