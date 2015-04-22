@@ -59,7 +59,7 @@ public:
 //	inline void setThreshold(uint8_t threshold) { _threshold = threshold; }
 
 	// Function to be called from interrupt, do not do much there!
-	void update(uint16_t value);
+	void update(uint32_t value);
 
 private:
 	/* Constructor
@@ -72,7 +72,7 @@ private:
 	void operator=(ADC const &);
 
 	uint16_t _sampleNum;
-	uint16_t _lastResult;
+//	uint16_t _lastResult;
 //	uint8_t _threshold;
 	CurrentCurve<uint16_t>* _currentCurve;
 

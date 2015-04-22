@@ -63,6 +63,8 @@ uint32_t ADC::init(uint8_t pin) {
 #else
 	NVIC_EnableIRQ(ADC_IRQn);
 #endif
+
+	_sampleNum = 0;
 	return 0;
 }
 
@@ -98,13 +100,11 @@ void ADC::stop() {
 }
 
 void ADC::start() {
-	_lastResult = (uint16_t)-1;
-	_sampleNum = 0;
 	NRF_ADC->EVENTS_END  = 0;
 	NRF_ADC->TASKS_START = 1;
 }
 
-void ADC::update(uint16_t value) {
+void ADC::update(uint32_t value) {
 	// Subsample
 	if (_currentCurve != NULL && (_sampleNum++%2)) {
 		if (_clock != NULL) {
