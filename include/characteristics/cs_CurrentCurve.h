@@ -18,7 +18,8 @@
 using namespace BLEpp;
 
 #define CURRENT_CURVE_HEADER_SIZE                (sizeof(uint16_t) + 2*sizeof(T) + 2*sizeof(uint32_t))
-#define CURRENT_CURVE_MAX_SAMPLES                (GENERAL_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE + 1)
+//#define CURRENT_CURVE_MAX_SAMPLES                (GENERAL_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE + 1)
+#define CURRENT_CURVE_MAX_SAMPLES                ((GENERAL_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE) / 2 + 1)
 
 #define CC_SUCCESS                               0
 #define CC_BUFFER_NOT_INITIALIZED                1
@@ -38,7 +39,8 @@ struct __attribute__((__packed__)) current_curve_t {
 	T lastValue;
 	uint32_t firstTimeStamp;
 	uint32_t lastTimeStamp;
-	int8_t differences[CURRENT_CURVE_MAX_SAMPLES-1];
+	int8_t valueDiffs[CURRENT_CURVE_MAX_SAMPLES-1];
+	int8_t timeDiffs[CURRENT_CURVE_MAX_SAMPLES-1];
 };
 
 /* Current Curve
@@ -53,7 +55,8 @@ class CurrentCurve : public BufferAccessor {
 private:
 	current_curve_t<T>* _buffer;
 //	const size_t _item_size = sizeof(T);
-	const size_t _max_buf_size = CURRENT_CURVE_HEADER_SIZE + CURRENT_CURVE_MAX_SAMPLES-1;
+//	const size_t _max_buf_size = CURRENT_CURVE_HEADER_SIZE + CURRENT_CURVE_MAX_SAMPLES-1;
+	const size_t _max_buf_size = CURRENT_CURVE_HEADER_SIZE + 2*CURRENT_CURVE_MAX_SAMPLES-2;
 public:
 	/* Default constructor
 	 *
@@ -97,15 +100,17 @@ public:
 	 *
 	 * @return CC_SUCCESS on success.
 	 */
-	CC_ERR_CODE getValue(const uint16_t index, T& voltage) const {
+	CC_ERR_CODE getValue(const uint16_t index, T& value, uint32_t& timeStamp) const {
 		if (index >= _buffer->length) {
 			return CC_BUFFER_NOT_LARGE_ENOUGH;
 		}
 		if (index == 0) {
-			voltage = _buffer->firstValue;
+			value = _buffer->firstValue;
+			timeStamp = _buffer->firstTimeStamp;
 			return CC_SUCCESS;
 		}
-		voltage += _buffer->differences[index-1];
+		value += _buffer->valueDiffs[index-1];
+		timeStamp += _buffer->timeDiffs[index-1];
 		return CC_SUCCESS;
 	}
 
@@ -148,12 +153,19 @@ public:
 			_buffer->lastTimeStamp = timeStamp;
 		}
 		else {
+			int64_t dt = (int64_t)timeStamp - _buffer->lastTimeStamp;
+			if (dt > 127 || dt < -127) {
+				clear();
+				return CC_DIFFERENCE_TOO_LARGE;
+			}
+			_buffer->timeDiffs[_buffer->length] = dt;
+
 			int32_t diff = (int32_t)value - _buffer->lastValue;
 			if (diff > 127 || diff < -127) {
 				clear();
 				return CC_DIFFERENCE_TOO_LARGE;
 			}
-			_buffer->differences[_buffer->length++] = diff;
+			_buffer->valueDiffs[_buffer->length++] = diff;
 			_buffer->lastValue = value;
 			_buffer->lastTimeStamp = timeStamp;
 		}
@@ -198,7 +210,8 @@ public:
 
 	/* @inherit */
 	uint16_t getDataLength() const {
-		return CURRENT_CURVE_HEADER_SIZE + _buffer->length-1;
+//		return CURRENT_CURVE_HEADER_SIZE + _buffer->length-1;
+		return CURRENT_CURVE_HEADER_SIZE + 2*_buffer->length-2;
 	}
 
 	/* @inherit */
