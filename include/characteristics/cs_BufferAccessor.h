@@ -10,13 +10,9 @@
 
 namespace BLEpp {
 
-/* Base class for a serializable object
+/* Base class for a buffer accessor object
  *
- * Any characteristic that needs to send a non primitive type
- * can use this as a base class. The class has to implement
- * serialize and deserialize functions where the variables of
- * the class are written to / read from a byte buffer.
- *
+ * Any object that works on a buffer can use this as a base class.
  */
 class BufferAccessor {
 public:

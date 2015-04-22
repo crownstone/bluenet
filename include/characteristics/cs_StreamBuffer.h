@@ -11,7 +11,6 @@
 #include "ble_gatts.h"
 
 #include "cs_BluetoothLE.h"
-#include "characteristics/cs_Serializable.h"
 #include <string>
 #include "util/cs_Utils.h"
 #include "drivers/cs_Serial.h"
