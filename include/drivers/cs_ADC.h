@@ -21,13 +21,6 @@ public:
 		return instance;
 	}
 
-	/* Assign a clock
-	 * @clock Clock that is running.
-	 *
-	 * If decorated with a real time clock, we can add time stamps to the adc samples.
-	 */
-	void setClock(RealTimeClock &clock);
-
 	/* Initialize ADC.
 	 * @pin The pin to use as input (AIN<pin>).
 	 *
@@ -64,7 +57,7 @@ public:
 private:
 	/* Constructor
 	 */
-	ADC(): _currentCurve(NULL), _clock(NULL) {}
+	ADC(): _currentCurve(NULL) {}
 
 	// This class is singleton, deny implementation
 	ADC(ADC const&);
@@ -75,8 +68,6 @@ private:
 //	uint16_t _lastResult;
 //	uint8_t _threshold;
 	CurrentCurve<uint16_t>* _currentCurve;
-
-	RealTimeClock *_clock;
 
 	uint32_t config(uint8_t pin);
 };

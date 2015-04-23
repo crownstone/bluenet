@@ -8,12 +8,6 @@
 #include "cs_nRF51822.h"
 #include "util/cs_Utils.h"
 
-#if(NORDIC_SDK_VERSION >= 6)
-#include "nrf_soc.h"
-#endif
-
-#include "softdevice_handler.h"
-
 #if CHAR_MESHING==1
 extern "C" {
 #include <protocol/cs_Mesh.h>
@@ -29,8 +23,6 @@ extern "C" {
  * Defines, local to this file
  *********************************************************************************************************************/
 
-// use our own event handler (not the one in softdevice_handler.h)
-#define OWN_EVENT_HANDLER
 
 /**********************************************************************************************************************
  * Code start
@@ -40,10 +32,10 @@ using namespace BLEpp;
 
 /**@brief Variable length data encapsulation in terms of length and pointer to data */
 
-typedef struct {
-	uint8_t * p_data; /**< Pointer to data. */
-	uint16_t data_len; /**< Length of data. */
-} data_t;
+//typedef struct {
+//	uint8_t * p_data; /**< Pointer to data. */
+//	uint16_t data_len; /**< Length of data. */
+//} data_t;
 
 /// Characteristic /////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -79,6 +71,7 @@ void set_attr_md_read_write(ble_gatts_attr_md_t& md, char vloc) {
 }
 
 CharacteristicBase::CharacteristicBase() :
+				_name(NULL),
 				_handles( { }), _service(0)
 				/*nited(false), _notifies(false), _writable(false), */
 				/*_unit(0), */ /*_updateIntervalMsecs(0),*/ /* _notifyingEnabled(false), _indicates(false) */
@@ -283,7 +276,7 @@ void CharacteristicBase::onTxComplete(ble_common_evt_t * p_ble_evt) {
 
 const char* Service::defaultServiceName = "unnamed";
 
-void Service::start(Nrf51822BluetoothStack* stack) {
+void Service::startAdvertising(Nrf51822BluetoothStack* stack) {
 
 	_stack = stack;
 
@@ -304,21 +297,6 @@ void Service::start(Nrf51822BluetoothStack* stack) {
 	_started = true;
 
 }
-
-/**
- * Seperate function that actually adds the characteristics. This allows to introduce dependencies between construction
- * of the different services and the characteristics on those services.
- */
-//void GenericService::addSpecificCharacteristics() {
-//	for ( CharacteristicStatusT &status : characStatus) {
-//		if (status.enabled) {
-//			LOGi("Create characteristic %s (%i)", status.name.c_str(), status.UUID);
-//			(this->*status.func)();
-//		} else {
-//			LOGi("Disabled characteristic %s (%i)", status.name.c_str(), status.UUID);
-//		}
-//	}
-//}
 
 /**
  * A service can receive a BLE event. Currently we pass the connection events through as well as the write event.
@@ -421,11 +399,6 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0)
 {
-	_evt_buffer_size = sizeof(ble_evt_t) + (_mtu_size) * sizeof(uint32_t);
-	_evt_buffer = (uint8_t*) malloc(_evt_buffer_size);
-
-	//if (!is_word_aligned(_evt_buffer)) throw ble_exception("Event buffer not aligned.");
-
 	// setup default values.
 
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&_sec_mode);
@@ -438,15 +411,17 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 
 Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	shutdown();
-
-	if (_evt_buffer)
-		free(_evt_buffer);
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
+// called by softdevice handler on a ble event
+extern "C" void ble_evt_handler(ble_evt_t* p_ble_evt) {
+	Nrf51822BluetoothStack::getInstance().on_ble_evt(p_ble_evt);
+}
+
+void Nrf51822BluetoothStack::init() {
 
 	if (_inited)
-		return *this;
+		return;
 
 	// Initialise SoftDevice
 	uint8_t enabled;
@@ -460,12 +435,16 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	// Initialize the SoftDevice handler module.
 	// this would call with different clock!
 	SOFTDEVICE_HANDLER_INIT(_clock_source, false);
-	
+
 	// enable the BLE stack
 	LOGd(MSG_BLE_SOFTDEVICE_ENABLE);
-//#if(SOFTDEVICE_SERIES == 110) 
 
-#if (SOFTDEVICE_SERIES != 130) && (SOFTDEVICE_MINOR != 5) 
+	// assign ble event handler, forwards ble_evt to stack
+	BLE_CALL(softdevice_ble_evt_handler_set, (ble_evt_handler));
+
+//#if(SOFTDEVICE_SERIES == 110)
+
+#if (SOFTDEVICE_SERIES != 130) && (SOFTDEVICE_MINOR != 5)
 #if(NORDIC_SDK_VERSION >= 6)
 	// do not define the service_changed characteristic, of course allow future changes
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1
@@ -479,7 +458,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 
 	// according to the migration guide the address needs to be set directly after the sd_ble_enable call
 	// due to "an issue present in the s110_nrf51822_7.0.0 release"
-#if(SOFTDEVICE_SERIES == 110) 
+#if(SOFTDEVICE_SERIES == 110)
 #if(NORDIC_SDK_VERSION >= 7)
 	LOGd(MSG_BLE_SOFTDEVICE_ENABLE_GAP);
 	BLE_CALL(sd_ble_gap_enable, () );
@@ -502,7 +481,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 		std::string name = "not set...";
 		BLE_CALL(sd_ble_gap_device_name_set,
 				(&_sec_mode, (uint8_t*) name.c_str(), name.length()));
-	} 
+	}
 	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
 
 	setConnParams();
@@ -512,11 +491,9 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::init() {
 	BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
 
 	_inited = true;
-
-	return *this;
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::updateDeviceName(const std::string& deviceName) {
+void Nrf51822BluetoothStack::updateDeviceName(const std::string& deviceName) {
 	_device_name = deviceName;
 	if (!_device_name.empty()) {
 		BLE_CALL(sd_ble_gap_device_name_set,
@@ -526,40 +503,47 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::updateDeviceName(const std::stri
 		BLE_CALL(sd_ble_gap_device_name_set,
 				(&_sec_mode, (uint8_t*) name.c_str(), name.length()));
 	}
-	return *this;
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::start() {
+void Nrf51822BluetoothStack::startAdvertisingServices() {
 	if (_started)
-		return *this;
+		return;
 
 	for (Service* svc : _services) {
-		svc->start(this);
+		svc->startAdvertising(this);
 	}
 
 	_started = true;
-
-	return *this;
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::shutdown() {
+void Nrf51822BluetoothStack::startTicking() {
+	LOGi("Start ticking ...");
+	for (Service* svc : _services) {
+		svc->startTicking();
+	}
+}
+
+void Nrf51822BluetoothStack::stopTicking() {
+	LOGi("Stop ticking ...");
+	for (Service* svc : _services) {
+		svc->stopTicking();
+	}
+}
+
+void Nrf51822BluetoothStack::shutdown() {
 	stopAdvertising();
 
 	for (Service* svc : _services) {
-		svc->stop();
+		svc->stopAdvertising();
 	}
 
 	_inited = false;
-
-	return *this;
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::addService(Service* svc) {
+void Nrf51822BluetoothStack::addService(Service* svc) {
 	//APP_ERROR_CHECK_BOOL(_services.size() < MAX_SERVICE_COUNT);
 
 	_services.push_back(svc);
-
-	return *this;
 }
 
 void Nrf51822BluetoothStack::setTxPowerLevel() {
@@ -570,7 +554,7 @@ void Nrf51822BluetoothStack::setConnParams() {
 	BLE_CALL(sd_ble_gap_ppcp_set, (&_gap_conn_params));
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
+void Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
 	if (_tx_power_level != powerLevel) {
 		_tx_power_level = powerLevel;
 		if (_inited)
@@ -578,15 +562,15 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLeve
 	}
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon(IBeacon beacon) {
+void Nrf51822BluetoothStack::startIBeacon(IBeacon beacon) {
 	if (_advertising)
-		return *this;
+		return;
 
 	LOGi("startIBeacon ...");
 
 	init(); // we should already be.
 
-	start();
+	startAdvertisingServices();
 
 	uint32_t err_code __attribute__((unused));
 	ble_advdata_t advdata;
@@ -645,19 +629,17 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startIBeacon(IBeacon beacon) {
 	_advertising = true;
 
 	LOGi("... OK");
-
-	return *this;
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
+void Nrf51822BluetoothStack::startAdvertising() {
 	if (_advertising)
-		return *this;
+		return;
 
 	LOGi(MSG_BLE_ADVERTISING_START);
 
 	init(); // we should already be.
 
-	start();
+	startAdvertisingServices();
 
 	uint32_t err_code __attribute__((unused));
 	ble_advdata_t advdata;
@@ -752,7 +734,7 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	err_code = ble_advdata_set(&advdata, &scan_resp);
 	if (err_code == NRF_ERROR_DATA_SIZE) {
 		log(FATAL, MSG_BLE_ADVERTISEMENT_TOO_BIG);
-	} 
+	}
 	APP_ERROR_CHECK(err_code);
 
 	// segfault when advertisement cannot start, do we want that!?
@@ -766,34 +748,26 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startAdvertising() {
 	_advertising = true;
 
 	LOGi(MSG_BLE_ADVERTISING_STARTED);
-
-	return *this;
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopAdvertising() {
+void Nrf51822BluetoothStack::stopAdvertising() {
 	if (!_advertising)
-		return *this;
+		return;
 
 	BLE_CALL(sd_ble_gap_adv_stop, ());
 
 	_advertising = false;
-
-	return *this;
 }
 
 bool Nrf51822BluetoothStack::isAdvertising() {
 	return _advertising;
 }
 
-// See https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
-#define SCAN_INTERVAL                    0x00A0         /**< Determines scan interval in units of 0.625 millisecond. */
-//#define SCAN_WINDOW                      0x0050         /**< Determines scan window in units of 0.625 millisecond. */
-#define SCAN_WINDOW                      0x009E         /**< Determines scan window in units of 0.625 millisecond. */
-
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
+void Nrf51822BluetoothStack::startScanning() {
 #if(SOFTDEVICE_SERIES != 110)
 	if (_scanning)
-		return *this;
+		return;
+
 	LOGi("startScanning");
 	ble_gap_scan_params_t p_scan_params;
 	// No devices in whitelist, hence non selective performed.
@@ -808,19 +782,18 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::startScanning() {
 	BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params));
 	_scanning = true;
 #endif
-	return *this;
 }
 
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::stopScanning() {
+void Nrf51822BluetoothStack::stopScanning() {
 #if(SOFTDEVICE_SERIES != 110)
 	if (!_scanning)
-		return *this;
+		return;
+
 	LOGi("stopScanning");
 	BLE_CALL(sd_ble_gap_scan_stop, ());
 	_scanning = false;
 #endif
-	return *this;
 }
 
 bool Nrf51822BluetoothStack::isScanning() {
@@ -830,40 +803,40 @@ bool Nrf51822BluetoothStack::isScanning() {
 	return false;
 }
 
-Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
-		uint32_t distanceUs, callback_radio_t callback) {
-	_callback_radio = callback;
-
-	nrf_radio_notification_distance_t distance = NRF_RADIO_NOTIFICATION_DISTANCE_NONE;
-
-	if (distanceUs >= 5500) {
-		distance = NRF_RADIO_NOTIFICATION_DISTANCE_5500US;
-	} else if (distanceUs >= 4560) {
-		distance = NRF_RADIO_NOTIFICATION_DISTANCE_4560US;
-	} else if (distanceUs >= 3620) {
-		distance = NRF_RADIO_NOTIFICATION_DISTANCE_3620US;
-	} else if (distanceUs >= 2680) {
-		distance = NRF_RADIO_NOTIFICATION_DISTANCE_2680US;
-	} else if (distanceUs >= 1740) {
-		distance = NRF_RADIO_NOTIFICATION_DISTANCE_1740US;
-	} else if (distanceUs >= 800) {
-		distance = NRF_RADIO_NOTIFICATION_DISTANCE_800US;
-	}
-
-	uint32_t result = sd_nvic_SetPriority(SWI1_IRQn, NRF_APP_PRIORITY_LOW);
-	BLE_THROW_IF(result, "Could not set radio notification IRQ priority.");
-
-	result = sd_nvic_EnableIRQ(SWI1_IRQn);
-	BLE_THROW_IF(result, "Could not enable radio notification IRQ.");
-
-	result = sd_radio_notification_cfg_set(
-			distance == NRF_RADIO_NOTIFICATION_DISTANCE_NONE ?
-					NRF_RADIO_NOTIFICATION_TYPE_NONE :
-					NRF_RADIO_NOTIFICATION_TYPE_INT_ON_BOTH, distance);
-	BLE_THROW_IF(result, "Could not configure radio notification.");
-
-	return *this;
-}
+//Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
+//		uint32_t distanceUs, callback_radio_t callback) {
+//	_callback_radio = callback;
+//
+//	nrf_radio_notification_distance_t distance = NRF_RADIO_NOTIFICATION_DISTANCE_NONE;
+//
+//	if (distanceUs >= 5500) {
+//		distance = NRF_RADIO_NOTIFICATION_DISTANCE_5500US;
+//	} else if (distanceUs >= 4560) {
+//		distance = NRF_RADIO_NOTIFICATION_DISTANCE_4560US;
+//	} else if (distanceUs >= 3620) {
+//		distance = NRF_RADIO_NOTIFICATION_DISTANCE_3620US;
+//	} else if (distanceUs >= 2680) {
+//		distance = NRF_RADIO_NOTIFICATION_DISTANCE_2680US;
+//	} else if (distanceUs >= 1740) {
+//		distance = NRF_RADIO_NOTIFICATION_DISTANCE_1740US;
+//	} else if (distanceUs >= 800) {
+//		distance = NRF_RADIO_NOTIFICATION_DISTANCE_800US;
+//	}
+//
+//	uint32_t result = sd_nvic_SetPriority(SWI1_IRQn, NRF_APP_PRIORITY_LOW);
+//	BLE_THROW_IF(result, "Could not set radio notification IRQ priority.");
+//
+//	result = sd_nvic_EnableIRQ(SWI1_IRQn);
+//	BLE_THROW_IF(result, "Could not enable radio notification IRQ.");
+//
+//	result = sd_radio_notification_cfg_set(
+//			distance == NRF_RADIO_NOTIFICATION_DISTANCE_NONE ?
+//					NRF_RADIO_NOTIFICATION_TYPE_NONE :
+//					NRF_RADIO_NOTIFICATION_TYPE_INT_ON_BOTH, distance);
+//	BLE_THROW_IF(result, "Could not configure radio notification.");
+//
+//	return *this;
+//}
 
 //extern "C" {
 //	void SWI1_IRQHandler() { // radio notification IRQ handler
@@ -877,36 +850,36 @@ Nrf51822BluetoothStack& Nrf51822BluetoothStack::onRadioNotificationInterrupt(
 //	}
 //}
 
-void Nrf51822BluetoothStack::tick() {
-
-#if TICK_CONTINUOUSLY==0
-#if(NORDIC_SDK_VERSION > 5)
-	BLE_CALL(sd_app_evt_wait, ());
-#else
-	BLE_CALL(sd_app_event_wait, () );
-#endif
-#endif
-	while (1) {
-
-		//        uint8_t nested;
-		//        sd_nvic_critical_region_enter(&nested);
-		//        uint8_t radio_notify = _radio_notify = (radio_notify + 1) % 4;
-		//        sd_nvic_critical_region_exit(nested);
-		//        if ((radio_notify % 2 == 0) && _callback_radio) {
-		//            _callback_radio(radio_notify == 0);
-		//        }
-
-		uint16_t evt_len = _evt_buffer_size;
-		uint32_t err_code = sd_ble_evt_get(_evt_buffer, &evt_len);
-		if (err_code == NRF_ERROR_NOT_FOUND) {
-			break;
-		}
-		BLE_THROW_IF(err_code, "Error retrieving bluetooth event from stack.");
-
-		on_ble_evt((ble_evt_t *) _evt_buffer);
-
-	}
-}
+//void Nrf51822BluetoothStack::tick() {
+//
+//#if TICK_CONTINUOUSLY==0
+//#if(NORDIC_SDK_VERSION > 5)
+//	BLE_CALL(sd_app_evt_wait, ());
+//#else
+//	BLE_CALL(sd_app_event_wait, () );
+//#endif
+//#endif
+//	while (1) {
+//
+//		//        uint8_t nested;
+//		//        sd_nvic_critical_region_enter(&nested);
+//		//        uint8_t radio_notify = _radio_notify = (radio_notify + 1) % 4;
+//		//        sd_nvic_critical_region_exit(nested);
+//		//        if ((radio_notify % 2 == 0) && _callback_radio) {
+//		//            _callback_radio(radio_notify == 0);
+//		//        }
+//
+//		uint16_t evt_len = _evt_buffer_size;
+//		uint32_t err_code = sd_ble_evt_get(_evt_buffer, &evt_len);
+//		if (err_code == NRF_ERROR_NOT_FOUND) {
+//			break;
+//		}
+//		BLE_THROW_IF(err_code, "Error retrieving bluetooth event from stack.");
+//
+//		on_ble_evt((ble_evt_t *) _evt_buffer);
+//
+//	}
+//}
 
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	//	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
@@ -957,7 +930,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 		ble_gap_sec_params_t sec_params;
 
-#if(SOFTDEVICE_SERIES == 110) 
+#if(SOFTDEVICE_SERIES == 110)
 		sec_params.timeout = 30; // seconds
 #endif
 		sec_params.bond = 1;  // perform bonding.
@@ -967,7 +940,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		sec_params.min_key_size = 7;  // min key size
 		sec_params.max_key_size = 16; // max key size.
 
-#if(SOFTDEVICE_SERIES != 110) 
+#if(SOFTDEVICE_SERIES != 110)
 		// https://devzone.nordicsemi.com/documentation/nrf51/6.0.0/s120/html/a00527.html#ga7b23027c97b3df21f6cbc23170e55663
 
 		// do not store the keys for now...
@@ -977,13 +950,13 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		//			&sec_params, &sec_keyset) );
 		BLE_CALL(sd_ble_gap_sec_params_reply,
 				(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &sec_params, NULL));
-#else 
+#else
 		BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
 				BLE_GAP_SEC_STATUS_SUCCESS,
 				&sec_params) );
 #endif
 		break;
-#if(SOFTDEVICE_SERIES != 110) 
+#if(SOFTDEVICE_SERIES != 110)
 	case BLE_GAP_EVT_ADV_REPORT:
 		for (Service* svc : _services) {
 			svc->on_ble_event(p_ble_evt);

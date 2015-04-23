@@ -11,6 +11,7 @@
 #include "characteristics/cs_BufferCharacteristic.h"
 #include "common/cs_Config.h"
 #include "common/cs_Strings.h"
+#include "drivers/cs_RTC.h"
 
 #if CHAR_MESHING==1 
 #include <protocol/cs_Mesh.h>
@@ -30,6 +31,8 @@ GeneralService::GeneralService() :
 	loadPersistentStorage();
 
 	init();
+
+	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)GeneralService::staticTick);
 }
 
 void GeneralService::init() {
@@ -84,7 +87,39 @@ void GeneralService::init() {
 #else
 	LOGi(MSG_CHAR_CONFIGURATION_SKIP);
 #endif
+}
 
+void GeneralService::tick() {
+//	LOGi("Tick: %d", RTC::now());
+
+	if (_temperatureCharacteristic) {
+		int32_t temp;
+		temp = getTemperature();
+		writeToTemperatureCharac(temp);
+#ifdef MICRO_VIEW
+		// Update temperature at the display
+		write("1 %i\r\n", temp);
+#endif
+	}
+
+	if (_getConfigurationCharacteristic) {
+		if (_selectConfiguration != 0xFF) {
+			bool success = readFromStorage(_selectConfiguration);
+			if (success) {
+				writeToConfigCharac();
+			}
+			// only write once
+			_selectConfiguration = 0xFF;
+		}
+	}
+}
+
+void GeneralService::startTicking() {
+	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(GENERAL_SERVICE_UPDATE_FREQUENCY), this);
+}
+
+void GeneralService::stopTicking() {
+	Timer::getInstance().stop(_appTimerId);
 }
 
 void GeneralService::loadPersistentStorage() {
@@ -324,27 +359,4 @@ void GeneralService::setBLEName(const std::string &name) {
 
 void GeneralService::writeToTemperatureCharac(int32_t temperature) {
 	*_temperatureCharacteristic = temperature;
-}
-	
-void GeneralService::tick() {
-	if (_temperatureCharacteristic) {
-		int32_t temp;
-		temp = getTemperature();
-		writeToTemperatureCharac(temp);
-#ifdef MICRO_VIEW
-		// Update temperature at the display
-		write("1 %i\r\n", temp);
-#endif
-	}
-
-	if (_getConfigurationCharacteristic) {
-		if (_selectConfiguration != 0xFF) {
-			bool success = readFromStorage(_selectConfiguration);
-			if (success) {
-				writeToConfigCharac();
-			}
-			// only write once
-			_selectConfiguration = 0xFF;
-		}
-	}
 }

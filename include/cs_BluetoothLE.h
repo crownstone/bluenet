@@ -10,9 +10,9 @@
 #include <string>
 #include <vector>
 
-#include "cs_Handlers.h"
-
 #include <cs_Nordic.h>
+
+#include "cs_Handlers.h"
 
 // Local wrapper files
 #include <drivers/cs_PWM.h>
@@ -25,6 +25,8 @@
 #include <common/cs_Config.h>
 #include <common/cs_Strings.h>
 #include <third/std/function.h>
+
+#define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz, APP_TIMER_PRESCALER)
 
 // TODO: replace std::vector with a fixed, in place array of size capacity.
 
@@ -51,13 +53,13 @@ public:
 /*
  * Interrupt service requests are C, so need to be unmangled (and are henced wrapped in an extern "C" block)
  */
-extern "C" {
-
-	/* Interrupt request for SoftDevice
-	 */
-	void SWI1_IRQHandler(void);
-
-}
+//extern "C" {
+//
+//	/* Interrupt request for SoftDevice
+//	 */
+//	void SWI1_IRQHandler(void);
+//
+//}
 
 /* General BLE name service
  *
@@ -663,6 +665,9 @@ protected:
 	uint16_t                 _service_handle; // provided by stack.
 	bool                     _started;
 
+	// app timer id for tick function
+	uint32_t				 _appTimerId;
+
 	// Currently maximum number of characteristics per service
 	static const uint8_t MAX_CHARACTERISTICS = 6;
 
@@ -722,8 +727,16 @@ public:
 
 	// internal:
 
-	virtual void start(Nrf51822BluetoothStack* stack);
-	virtual void stop() {}
+	virtual void tick() {};
+	static void staticTick(Service* ptr) {
+		ptr->tick();
+	}
+
+	virtual void startTicking() {};
+	virtual void stopTicking() {};
+
+	virtual void startAdvertising(Nrf51822BluetoothStack* stack);
+	virtual void stopAdvertising() {};
 
 	virtual void on_ble_event(ble_evt_t * p_ble_evt);
 
@@ -785,10 +798,10 @@ public:
  */
 class Nrf51822BluetoothStack : public BLEStack {
 	// Friend for BLE stack event handling
-	friend void SWI2_IRQHandler();
+//	friend void SWI2_IRQHandler();
 
 	// Friend for radio notification handling
-	friend void ::SWI1_IRQHandler(); 
+//	friend void ::SWI1_IRQHandler();
 
 private:
 	/* Constructor of the BLE stack on the NRF51822
@@ -853,8 +866,6 @@ protected:
 	nrf_clock_lfclksrc_t                        _clock_source; //4
 	uint8_t                                     _mtu_size;
 	int8_t                                      _tx_power_level;
-	uint8_t *                                   _evt_buffer;
-	uint32_t                                    _evt_buffer_size;
 	ble_gap_conn_sec_mode_t                     _sec_mode;  //1
 	//ble_gap_sec_params_t                        _sec_params; //6
 	//ble_gap_adv_params_t                        _adv_params; // 20
@@ -888,7 +899,7 @@ public:
 	 *   - set Tx power level
 	 *   - set the callback for BLE events (if we use Source/sd_common/softdevice_handler.c in Nordic's SDK)
 	 */
-	Nrf51822BluetoothStack& init();
+	void init();
 
 	/* Start the BLE stack
 	 *
@@ -896,7 +907,17 @@ public:
 	 * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in 
 	 * init().
 	 */
-	Nrf51822BluetoothStack& start();
+	void startAdvertisingServices();
+
+	/*
+	 *
+	 */
+	void startTicking();
+
+	/*
+	 *
+	 */
+	void stopTicking();
 
 	/* Shutdown the BLE stack
 	 *
@@ -907,36 +928,31 @@ public:
 	 *
 	 * After a shutdown() the function start() can be called again.
 	 */
-	Nrf51822BluetoothStack& shutdown();
+	void shutdown();
 
-	Nrf51822BluetoothStack& setAppearance(uint16_t appearance) {
+	void setAppearance(uint16_t appearance) {
 		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
 		_appearance = appearance;
-		return *this;
 	}
 
-	Nrf51822BluetoothStack& setDeviceName(const std::string& deviceName) {
+	void setDeviceName(const std::string& deviceName) {
 		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
 		_device_name = deviceName;
-		return *this;
 	}
 
-	Nrf51822BluetoothStack& setClockSource(nrf_clock_lfclksrc_t clockSource) {
+	void setClockSource(nrf_clock_lfclksrc_t clockSource) {
 		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
 		_clock_source = clockSource;
-		return *this;
 	}
 
-	Nrf51822BluetoothStack& setAdvertisingInterval(uint16_t advertisingInterval){
+	void setAdvertisingInterval(uint16_t advertisingInterval){
 		// TODO: stop advertising?
 		_interval = advertisingInterval;
-		return *this;
 	}
 
-	Nrf51822BluetoothStack& setAdvertisingTimeoutSeconds(uint16_t advertisingTimeoutSeconds) {
+	void setAdvertisingTimeoutSeconds(uint16_t advertisingTimeoutSeconds) {
 		// TODO: stop advertising?
 		_timeout = advertisingTimeoutSeconds;
-		return *this;
 	}
 
 	/* Update device name
@@ -946,69 +962,62 @@ public:
 	 * development (you can separate otherwise similar devices). It is probably not functionality you want to have for
 	 * the end-user.
 	 */
-	Nrf51822BluetoothStack& updateDeviceName(const std::string& deviceName);
+	void updateDeviceName(const std::string& deviceName);
 	std::string & getDeviceName() { return _device_name; }
 
 	/** Set radio transmit power in dBm (accepted values are -40, -20, -16, -12, -8, -4, 0, and 4 dBm). */
-	Nrf51822BluetoothStack& setTxPowerLevel(int8_t powerLevel);
+	void setTxPowerLevel(int8_t powerLevel);
 
 	int8_t getTxPowerLevel() {
 		return _tx_power_level;
 	}
 
 	/** Set the minimum connection interval in units of 1.25 ms. */
-	Nrf51822BluetoothStack& setMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
+	void setMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
 		if (_gap_conn_params.min_conn_interval != connectionInterval_1_25_ms) {
 			_gap_conn_params.min_conn_interval = connectionInterval_1_25_ms;
 			if (_inited) setConnParams();
 		}
-		return *this;
 	}
 
 	/** Set the maximum connection interval in units of 1.25 ms. */
-	Nrf51822BluetoothStack& setMaxConnectionInterval(uint16_t connectionInterval_1_25_ms) {
+	void setMaxConnectionInterval(uint16_t connectionInterval_1_25_ms) {
 		if (_gap_conn_params.max_conn_interval != connectionInterval_1_25_ms) {
 			_gap_conn_params.max_conn_interval = connectionInterval_1_25_ms;
 			if (_inited) setConnParams();
 		}
-		return *this;
 	}
 
 	/** Set the slave latency count. */
-	Nrf51822BluetoothStack& setSlaveLatency(uint16_t slaveLatency) {
+	void setSlaveLatency(uint16_t slaveLatency) {
 		if ( _gap_conn_params.slave_latency != slaveLatency ) {
 			_gap_conn_params.slave_latency = slaveLatency;
 			if (_inited) setConnParams();
 		}
-		return *this;
 	}
 
 	/** Set the connection supervision timeout in units of 10 ms. */
-	Nrf51822BluetoothStack& setConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms) {
+	void setConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms) {
 		if (_gap_conn_params.conn_sup_timeout != conSupTimeout_10_ms) {
 			_gap_conn_params.conn_sup_timeout = conSupTimeout_10_ms;
 			if (_inited) setConnParams();
 		}
-		return *this;
 	}
 
-	Nrf51822BluetoothStack& onConnect(const callback_connected_t& callback) {
+	void onConnect(const callback_connected_t& callback) {
 		//if (callback && _callback_connected) BLE_THROW("Connected callback already registered.");
 
 		_callback_connected = callback;
 		if (_inited) setConnParams();
-		return *this;
 	}
-	Nrf51822BluetoothStack& onDisconnect(const callback_disconnected_t& callback) {
+	void onDisconnect(const callback_disconnected_t& callback) {
 		//if (callback && _callback_disconnected) BLE_THROW("Disconnected callback already registered.");
 
 		_callback_disconnected = callback;
-
-		return *this;
 	}
 
 	Service& getService(std::string name);
-	Nrf51822BluetoothStack& addService(Service* svc);
+	void addService(Service* svc);
 
 	/* Start advertising as an iBeacon
 	 *
@@ -1023,14 +1032,14 @@ public:
 	 * **Note**: An iBeacon requires that the company identifier is
 	 *   set to the Apple Company ID, otherwise it's not an iBeacon.
 	 */
-	Nrf51822BluetoothStack& startIBeacon(IBeacon beacon);
+	void startIBeacon(IBeacon beacon);
 
 	/* Start sending advertisement packets.
 	 * This can not be called while scanning, start scanning while advertising is possible though.
 	 */
-	Nrf51822BluetoothStack& startAdvertising();
+	void startAdvertising();
 
-	Nrf51822BluetoothStack& stopAdvertising();
+	void stopAdvertising();
 
 	bool isAdvertising();
 
@@ -1040,11 +1049,11 @@ public:
 	 * are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone
 	 * developer.
 	 */
-	Nrf51822BluetoothStack& startScanning();
+	void startScanning();
 
 	/* Stop scanning for devices
 	 */
-	Nrf51822BluetoothStack& stopScanning();
+	void stopScanning();
 
 	/* Returns true if currently scanning
 	 */
@@ -1057,7 +1066,7 @@ public:
 	 *
 	 * Currently not used. 
 	 */
-	Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
+//	Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 
 	virtual bool connected() {
 		return _conn_handle != BLE_CONN_HANDLE_INVALID;
@@ -1069,16 +1078,12 @@ public:
 	/* Not time-critical functionality can be done in the tick
 	 *
 	 * Every module on the system gets a tick in which it regularly gets some attention. Of course, everything that is
-	 * important should be done within interrupt handlers. 
+	 * important should be done within interrupt handlers.
 	 *
 	 * This function goes through the buffer and calls on_ble_evt for every BLE message in the buffer, till the buffer is
 	 * empty. It then returns.
 	 */
-	void tick();
-
-protected:
-	void setTxPowerLevel();
-	void setConnParams();
+//	void tick();
 
 	/* Function that handles BLE events
 	 *
@@ -1091,6 +1096,12 @@ protected:
 	 * is faster to set up maps from handles to directly the right function.
 	 */
 	void on_ble_evt(ble_evt_t * p_ble_evt);
+
+protected:
+
+	void setTxPowerLevel();
+	void setConnParams();
+
 
 	/* Connection request
 	 *

@@ -72,6 +72,7 @@ extern "C" {
 #include <stdint.h>
 #include <cstring>
 #include <cstdio>
+#include <functional>
 
 #include "common/cs_Boards.h"
 
@@ -90,6 +91,8 @@ extern "C" {
 #include "drivers/cs_Serial.h"
 #include "common/cs_Storage.h"
 #include "util/cs_Utils.h"
+#include "common/cs_Timer.h"
+#include "util/cs_Callback.h"
 
 #if (BOARD==CROWNSTONE_SENSOR)
 #include "cs_Sensors.h"
@@ -140,8 +143,8 @@ void setName(Nrf51822BluetoothStack &stack) {
 	char devicename[32];
 	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
 	LOGi("Set name to %s", STRINGIFY(BLUETOOTH_NAME));
-	stack.setDeviceName(std::string(devicename)) // max len = ble_gap_devname_max_len (31)
-		.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
+	stack.setDeviceName(std::string(devicename)); // max len = ble_gap_devname_max_len (31)
+	stack.setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
 /* Sets default parameters of the Bluetooth connection.
@@ -158,13 +161,13 @@ void setName(Nrf51822BluetoothStack &stack) {
  * There is no whitelist defined, nor peer addresses.
  */
 void configure(Nrf51822BluetoothStack &stack) {
-	stack.setTxPowerLevel(-4)
-		.setMinConnectionInterval(16)
-		.setMaxConnectionInterval(32)
-		.setConnectionSupervisionTimeout(400)
-		.setSlaveLatency(10)
-		.setAdvertisingInterval(100)
-		.setAdvertisingTimeoutSeconds(0);
+	stack.setTxPowerLevel(-4);
+	stack.setMinConnectionInterval(16);
+	stack.setMaxConnectionInterval(32);
+	stack.setConnectionSupervisionTimeout(400);
+	stack.setSlaveLatency(10);
+	stack.setAdvertisingInterval(100);
+	stack.setAdvertisingTimeoutSeconds(0);
 }
 
 /**
@@ -285,46 +288,46 @@ int main() {
 	stack.init();
 
 	stack.onConnect([&](uint16_t conn_handle) {
-			LOGi("onConnect...");
-			// todo this signature needs to change
-			//NRF51_GPIO_OUTSET = 1 << PIN_LED;
-			// first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
-			// be neater about it... we do not need to stop, only after a disconnect we do...
-			sd_ble_gap_rssi_stop(conn_handle);
-			sd_ble_gap_rssi_start(conn_handle);
+		LOGi("onConnect...");
+		// todo this signature needs to change
+		//NRF51_GPIO_OUTSET = 1 << PIN_LED;
+		// first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
+		// be neater about it... we do not need to stop, only after a disconnect we do...
+		sd_ble_gap_rssi_stop(conn_handle);
+		sd_ble_gap_rssi_start(conn_handle);
 
 #if(BOARD==PCA10001)
-			nrf_gpio_pin_set(PIN_GPIO_LED_CON);
+		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
-		})
-		.onDisconnect([&](uint16_t conn_handle) {
-			LOGi("onDisconnect...");
-			//NRF51_GPIO_OUTCLR = 1 << PIN_LED;
+	});
+	stack.onDisconnect([&](uint16_t conn_handle) {
+		LOGi("onDisconnect...");
+		//NRF51_GPIO_OUTCLR = 1 << PIN_LED;
 
-			// of course this is not nice, but dirty! we immediately start advertising automatically after being
-			// disconnected. but for now this will be the default behaviour.
+		// of course this is not nice, but dirty! we immediately start advertising automatically after being
+		// disconnected. but for now this will be the default behaviour.
 
 #if(BOARD==PCA10001)
-			nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
+		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
 
-			bool wasScanning = stack.isScanning();
-			stack.stopScanning();
+		bool wasScanning = stack.isScanning();
+		stack.stopScanning();
 
 #ifdef IBEACON
-			stack.startIBeacon(beacon);
+		stack.startIBeacon(beacon);
 #else
-			stack.startAdvertising();
+		stack.startAdvertising();
 #endif
 
-			if (wasScanning)
-				stack.startScanning();
+		if (wasScanning)
+			stack.startScanning();
 
-		});
+	});
 
-	LOGi("Start RTC");
-	RealTimeClock::getInstance().init();
-	RealTimeClock::getInstance().start();
+	LOGi("Create Timer and start RTC");
+	Timer::getInstance();
+	RTC::start();
 
 	LOGi("Create all services");
 
@@ -386,29 +389,22 @@ int main() {
 	LOGi("Set power OFF by default");
 #endif
 #endif
-	LOGi("Running while ticking..");
-	//static long int dbg_counter = 0;
-	while(1) {
-		//LOGd("Tick %li", ++dbg_counter); // we really have to monitor the frequency of our ticks
-		
-		// The stack tick will halt everything until there is a connection made...
-		stack.tick();
-#if GENERAL_SERVICE==1
-		generalService.tick();
-#endif
-#if POWER_SERVICE==1
-		powerService.tick();
-#endif
-#if INDOOR_SERVICE==1
-		localizationService.tick();
-#endif
+
+	stack.startTicking();
 
 #if (BOARD==CROWNSTONE_SENSOR)
-		sensors.tick();
+		sensors.startTicking();
 #endif
 
-//		app_sched_execute();
+	while(1) {
 
-		nrf_delay_ms(50);
+		app_sched_execute();
+
+#if(NORDIC_SDK_VERSION > 5)
+	BLE_CALL(sd_app_evt_wait, ());
+#else
+	BLE_CALL(sd_app_event_wait, () );
+#endif
+
 	}
 }

@@ -46,6 +46,8 @@ IndoorLocalizationService::IndoorLocalizationService() :
 	loadPersistentStorage();
 
 	init();
+
+	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)IndoorLocalizationService::staticTick);
 }
 
 void IndoorLocalizationService::init() {
@@ -74,15 +76,8 @@ void IndoorLocalizationService::init() {
 
 }
 
-void IndoorLocalizationService::loadPersistentStorage() {
-	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
-}
-
-void IndoorLocalizationService::savePersistentStorage() {
-	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
-}
-
 void IndoorLocalizationService::tick() {
+//	LOGi("Tick: %d", RTC::now());
 
 	if (!_initialized) {
 		if (_trackedDeviceList != NULL) {
@@ -110,6 +105,23 @@ void IndoorLocalizationService::tick() {
 		PWM::getInstance().setValue(0, 0);
 	}
 	_trackIsNearby = deviceNearby;
+}
+
+void IndoorLocalizationService::startTicking() {
+	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(LOCALIZATION_SERVICE_UPDATE_FREQUENCY), this);
+}
+
+void IndoorLocalizationService::stopTicking() {
+	Timer::getInstance().stop(_appTimerId);
+}
+
+
+void IndoorLocalizationService::loadPersistentStorage() {
+	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+}
+
+void IndoorLocalizationService::savePersistentStorage() {
+	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void IndoorLocalizationService::addSignalStrengthCharacteristic() {
@@ -176,9 +188,9 @@ void IndoorLocalizationService::addPeripheralListCharacteristic() {
 
 	MasterBuffer& mb = MasterBuffer::getInstance();
 	buffer_ptr_t buffer = NULL;
-	uint16_t size = 0;
-	mb.getBuffer(buffer, size);
-	_scanResult->assign(buffer, size);
+	uint16_t maxLength = 0;
+	mb.getBuffer(buffer, maxLength);
+	_scanResult->assign(buffer, maxLength);
 
 	_peripheralCharac = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_peripheralCharac);
@@ -203,8 +215,8 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 
 	//	MasterBuffer& mb = MasterBuffer::getInstance();
 	//	buffer_ptr_t buffer = NULL;
-	//	uint16_t size = 0;
-	//	mb.getBuffer(buffer, size);
+	//	uint16_t maxLength = 0;
+	//	mb.getBuffer(buffer, maxLength);
 
 	// so instead allocate a separate buffer that the tracked device list can use
 	uint16_t size = sizeof(tracked_device_list_t);

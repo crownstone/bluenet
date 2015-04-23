@@ -202,7 +202,7 @@
 #error "You have to specify the hardware version of your chip"
 #endif
 
-#ifndef TICK_CONTINUOUSLY
-#error "You have to specify TICK_CONTINUOUSLY in your config file"
-#endif
+//#ifndef TICK_CONTINUOUSLY
+//#error "You have to specify TICK_CONTINUOUSLY in your config file"
+//#endif
 

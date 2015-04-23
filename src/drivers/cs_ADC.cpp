@@ -19,10 +19,6 @@
 
 #include "cs_nRF51822.h"
 
-void ADC::setClock(RealTimeClock &clock) {
-	_clock = &clock;
-}
-
 // Check the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
 uint32_t ADC::init(uint8_t pin) {
 #if(NRF51_USE_SOFTDEVICE == 1)
@@ -107,11 +103,11 @@ void ADC::start() {
 void ADC::update(uint32_t value) {
 	// Subsample
 	if (_currentCurve != NULL && (_sampleNum++%2)) {
-		if (_clock != NULL) {
-			_currentCurve->add(value, _clock->getCount());
-		} else {
-			_currentCurve->add(value);
-		}
+//		if (_clock != NULL) {
+			_currentCurve->add(value, RTC::getCount());
+//		} else {
+//			_currentCurve->add(value);
+//		}
 	}
 }
 

@@ -17,6 +17,8 @@
 
 #define GENERAL_UUID "f5f90000-59f9-11e4-aa15-123b93f75cba"
 
+#define GENERAL_SERVICE_UPDATE_FREQUENCY 2 // hz
+
 /* General Service for the Crownstone
  *
  * There are several characteristics that fit into the general service description. There is a characteristic
@@ -75,6 +77,9 @@ public:
 	 * tick, because timing is not important for this at all.
 	 */
 	void tick();
+
+	void startTicking();
+	void stopTicking();
 
 	/* Initialize a GeneralService object
 	 * 
@@ -196,7 +201,9 @@ protected:
 	/* Save to FLASH.
 	 */
 	void savePersistentStorage();
+
 private:
+
 	// handle to storage (required to write to and read from FLASH)
 	pstorage_handle_t _storageHandle;
 

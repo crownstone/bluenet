@@ -73,11 +73,19 @@
 	#endif
 #endif
 
-Sensors::Sensors() : _initialized(false),
+Sensors::Sensors() : _appTimerId(0), _initialized(false),
 	_lastLightCheck(0), _lastThermalCheck(0), _lastPushButtonCheck(0), _lastSwitchCheck(0),
 	_lastSwitchOn(false), _lastPushed(false)
 {
-	// NOTHING to do
+	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Sensors::staticTick);
+}
+
+void Sensors::startTicking() {
+	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(SENSORS_UPDATE_FREQUENCY), this);
+}
+
+void Sensors::stopTicking() {
+	Timer::getInstance().stop(_appTimerId);
 }
 
 #ifdef SWITCH_POLL
@@ -127,8 +135,6 @@ bool Sensors::checkPushButton(uint32_t time, bool &pushed) {
 void Sensors::initADC() {
 	ADC::getInstance().init(PIN_AIN_SENSOR);
 
-	ADC::getInstance().setClock(RealTimeClock::getInstance());
-
 	LOGi("Start ADC");
 	ADC::getInstance().start();
 }
@@ -136,39 +142,53 @@ void Sensors::initADC() {
 /* Read the ADC to get sensor values
  *
  * returns values 0-1023, where 1023 is max value
- *  -1 for error
+ *  0xFFFF for error
  */
 uint16_t Sensors::sampleSensor() {
-	AdcSamples* samples = ADC::getInstance().getSamples();
+	uint16_t result = -1;
+
+	MasterBuffer& mb = MasterBuffer::getInstance();
+	if (!mb.isLocked()) {
+		mb.lock();
+	} else {
+		LOGe("Buffer is locked. Cannot be written!");
+		return result;
+	}
+
+	CurrentCurve<uint16_t> _currentCurve;
+
+	// Start storing the samples
+	_currentCurve.clear();
+	ADC::getInstance().setCurrentCurve(&_currentCurve);
 
 	// Give some time to sample
-	// This is no guarantee that the buffer will be full! (interrupt can happen before we get to lock the buffer)
-	while (!samples->full()) {
+	while (!_currentCurve.isFull()) {
 		nrf_delay_ms(10);
 	}
 
-	samples->lock();
-	uint16_t numSamples = samples->size();
+	// Stop storing the samples
+	ADC::getInstance().setCurrentCurve(NULL);
 
-	if (numSamples) {
-		uint32_t average = 0;
+	uint16_t numSamples = _currentCurve.length();
+	LOGd("numSamples = %i", numSamples);
+
+	if (numSamples>1) {
 		uint32_t timestamp = 0;
 		uint16_t voltage = 0;
-		samples->getFirstElement(timestamp, voltage);
-//		_log(DEBUG, "%u,  ", voltage);
-		do {
-//			_log(DEBUG, "%u,  ", voltage);
-//			if (!(++i % 5)) {
-//				_log(DEBUG, "\r\n");
-//			}
+		uint16_t average = 0;
+
+		for (uint16_t i=0; i<numSamples; ++i) {
+			if (_currentCurve.getValue(i, voltage, timestamp) != CC_SUCCESS) {
+				break;
+			}
+			//			_log(INFO, "%u %u,  ", timestamp, voltage);
+			//			if (!((i+1) % 5)) {
+			//				_log(INFO, "\r\n");
+			//			}
 			average += voltage;
-		} while (samples->getNextElement(timestamp, voltage));
-//		_log(DEBUG, "\r\n");
-
-		samples->unlock();
-
+		}
+		//		_log(INFO, "\r\n");
 		average /= numSamples;
-//		LOGd("average: %d", average);
 
 		// Measured voltage goes from 0-3.6V, measured as 0-1023(10 bit),
 		// but Input voltage is from 0-3V (for Nordic EK) and 0-3.3 for Crownstone
@@ -180,11 +200,13 @@ uint16_t Sensors::sampleSensor() {
 		average *= 3.6/3.0;
 #endif
 
-		return average;
+		result = average;
 	}
 
-	samples->unlock();
-	return -1;
+	// Unlock the buffer
+	mb.unlock();
+
+	return result;
 }
 
 /* Check light sensor by sampling ADC values
@@ -259,7 +281,7 @@ void Sensors::tick() {
 		init();
 	}
 
-	uint32_t now = RealTimeClock::now();
+	uint32_t now = RTC::now();
 
 #ifdef PUSH_BUTTON_POLL
 	bool pushed = false;
@@ -411,7 +433,7 @@ extern "C" void GPIOTE_IRQHandler()
 
 		bool pushed = (pins_state & (1 << PIN_GPIO_BUTTON)) == 0;
 
-		uint32_t now = RealTimeClock::getInstance().now();
+		uint32_t now = RTC::now();
 		if (now > _interruptTimeout) {
 
 //			if (pushed != _lastPushed) {
@@ -446,7 +468,7 @@ extern "C" void GPIOTE_IRQHandler()
 		// to avoid registering the signal all the time, add a delay
 		// and only register the signal again if no other signal has been
 		// received in the meantime.
-		uint32_t now = RealTimeClock::getInstance().now();
+		uint32_t now = RTC::now();
 		if (now > _interruptTimeout) {
 			if (switchON) {
 				LOGi("switch ON");

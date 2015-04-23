@@ -63,7 +63,7 @@ public:
 
 	/* @inherit */
 	int assign(uint8_t *buffer, uint16_t size) {
-		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, size);
+		LOGd("assign buff: %p, len: %d", buffer, size);
 		if (SB_HEADER_SIZE + _max_items*_item_size > size) {
 			LOGe("Assigned buffer is not large enough");
 			return 1;

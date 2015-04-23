@@ -8,6 +8,8 @@
 
 #include <cstdint>
 
+#define SENSORS_UPDATE_FREQUENCY 2 // hz
+
 #define MAX_VALUE 1023
 
 // helper function
@@ -34,6 +36,12 @@ public:
 	Sensors();
 
 	void tick();
+	static void staticTick(Sensors* ptr) {
+		ptr->tick();
+	}
+
+	void startTicking();
+	void stopTicking();
 
 	// helper functions, only operate on PWM instance
 	// static so that they can be used by the
@@ -43,6 +51,7 @@ public:
 	static void switchPwmOff();
 
 private:
+	uint32_t _appTimerId;
 	bool _initialized;
 	uint32_t _lastLightCheck, _lastThermalCheck;
 	uint32_t _lastPushButtonCheck, _lastSwitchCheck;

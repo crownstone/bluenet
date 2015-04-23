@@ -16,6 +16,8 @@
 
 #define INDOORLOCALISATION_UUID "7e170000-429c-41aa-83d7-d91220abeb33"
 
+#define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 2 // hz
+
 /* Struct used by the <IndoorLocalisationService> to store elements
  */
 struct ps_indoorlocalisation_service_t : ps_storage_base_t {
@@ -64,7 +66,9 @@ public:
 	IndoorLocalizationService();
 
 	void tick();
-//	void addSpecificCharacteristics();
+
+	void startTicking();
+	void stopTicking();
 
 	/* Initialize a IndoorLocalization object
 	 * @stack Bluetooth Stack to attach this service to

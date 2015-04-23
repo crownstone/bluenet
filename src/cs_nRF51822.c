@@ -10,10 +10,6 @@
 #include "nrf_gpio.h"
 #include "nrf.h"
 
-// Currently, very dirty set just RFDUINO here. We must make this of course more flexible and be able to compile
-// smoothly for different modules created around the nRF51822 chip.
-#define RFDUINO
-
 extern unsigned const long _stext;
 extern unsigned const long _etext;
 extern unsigned const long _sdata;
@@ -38,6 +34,8 @@ void TIMER2_IRQHandler(void);
 
 // The LP comparator
 void WUCOMP_COMP_IRQHandler(void);
+
+void RTC1_IRQHandler(void);
 
 void unused_isr(void)
 {
@@ -65,7 +63,7 @@ void RNG_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void ECB_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void CCM_AAR_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void WDT_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-void RTC1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+//void RTC1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void QDEC_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 //void WUCOMP_COMP_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));

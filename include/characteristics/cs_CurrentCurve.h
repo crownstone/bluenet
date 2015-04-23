@@ -198,7 +198,7 @@ public:
 
 	/* @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t size) {
-		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, size);
+		LOGd("assign buff: %p, len: %d", buffer, size);
 		if (_max_buf_size > size) {
 			LOGe("Assigned buffer is not large enough");
 			return 1;

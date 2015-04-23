@@ -7,12 +7,13 @@
 
 #include <cstdio>
 
+#include "services/cs_PowerService.h"
+
 #include "common/cs_Boards.h"
 #include "common/cs_Config.h"
 #include "common/cs_Strings.h"
 #include "cs_nRF51822.h"
 #include "drivers/cs_RTC.h"
-#include "services/cs_PowerService.h"
 #include "common/cs_MasterBuffer.h"
 #include "characteristics/cs_BufferCharacteristic.h"
 
@@ -38,6 +39,8 @@ PowerService::PowerService() :
 	loadPersistentStorage();
 
 	init();
+
+	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)PowerService::staticTick);
 }
 
 void PowerService::init() {
@@ -69,6 +72,41 @@ void PowerService::init() {
 #else
 	LOGi("skip Current Limit Characteristic");
 #endif
+}
+
+/**
+ * TODO: We should only need to do this once on startup.
+ */
+void PowerService::tick() {
+//	LOGi("Tick: %d", RTC::now());
+
+	// Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
+	// TODO: This is not required anymore at later crownstone versions, so this should be done at init().
+	if (!_adcInitialized) {
+		// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
+		ADC::getInstance().init(PIN_AIN_ADC);
+		sampleCurrentInit();
+		_adcInitialized = true;
+	}
+
+	LPComp::getInstance().tick();
+	// check if current is not beyond current_limit if the latter is set
+//	if (++tmp_cnt > tick_cnt) {
+//		if (_currentLimitCharacteristic) {
+//			getCurrentLimit();
+//			LOGi("Set default current limit value to %i", _current_limit_val);
+//			*_currentLimitCharacteristic = _current_limit_val;
+//		}
+//		tmp_cnt = 0;
+//	}
+}
+
+void PowerService::startTicking() {
+	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(POWER_SERVICE_UPDATE_FREQUENCY), this);
+}
+
+void PowerService::stopTicking() {
+	Timer::getInstance().stop(_appTimerId);
 }
 
 void PowerService::loadPersistentStorage() {
@@ -207,41 +245,7 @@ void PowerService::addCurrentLimitCharacteristic() {
 //static int tmp_cnt = 100;
 //static int tick_cnt = 100;
 
-/**
- * TODO: We should only need to do this once on startup.
- */
-void PowerService::tick() {
-
-	// Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
-	// TODO: This is not required anymore at later crownstone versions, so this should be done at init().
-	if (!_adcInitialized) {
-		// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
-		ADC::getInstance().init(PIN_AIN_ADC);
-		sampleCurrentInit();
-		_adcInitialized = true;
-	}
-
-	LPComp::getInstance().tick();
-	// check if current is not beyond current_limit if the latter is set
-//	if (++tmp_cnt > tick_cnt) {
-//		if (_currentLimitCharacteristic) {
-//			getCurrentLimit();
-//			LOGi("Set default current limit value to %i", _current_limit_val);
-//			*_currentLimitCharacteristic = _current_limit_val;
-//		}
-//		tmp_cnt = 0;
-//	}
-}
-
 void PowerService::sampleCurrentInit() {
-	LOGi("Start RTC");
-	RealTimeClock::getInstance().init();
-	RealTimeClock::getInstance().start();
-	ADC::getInstance().setClock(RealTimeClock::getInstance());
-
-	// Wait for the RTC to actually start
-	nrf_delay_ms(1);
-
 	LOGi("Start ADC");
 	ADC::getInstance().start();
 
@@ -253,9 +257,9 @@ void PowerService::sampleCurrent(uint8_t type) {
 	MasterBuffer& mb = MasterBuffer::getInstance();
 	if (!mb.isLocked()) {
 		mb.lock();
-
 	} else {
 		LOGe("Buffer is locked. Cannot be written!");
+		return;
 	}
 
 	// Start storing the samples
@@ -281,8 +285,8 @@ void PowerService::sampleCurrent(uint8_t type) {
 		uint32_t voltageSquareMean = 0;
 		uint32_t timestamp = 0;
 		uint16_t voltage = 0;
-		uint32_t timeStart = _currentCurve->getTimeStart();
-		uint32_t timeEnd = _currentCurve->getTimeEnd();
+//		uint32_t timeStart = _currentCurve->getTimeStart();
+//		uint32_t timeEnd = _currentCurve->getTimeEnd();
 
 #ifdef MICRO_VIEW
 		write("3 [");

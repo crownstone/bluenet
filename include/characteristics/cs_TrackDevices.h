@@ -118,7 +118,7 @@ public:
 
 	/* @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
-		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
+		LOGd("assign buff: %p, len: %d", buffer, maxLength);
 		assert(sizeof(tracked_device_list_t) <= maxLength, "buffer not large enough to hold tracked device list!");
 		_buffer = (tracked_device_list_t*)buffer;
 		return 0;
@@ -169,7 +169,7 @@ public:
 
 	/* @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
-		LOGd("assign, this: %p, buff: %p, len: %d", this, buffer, maxLength);
+		LOGd("assign buff: %p, len: %d", buffer, maxLength);
 		assert(sizeof(tracked_device_t) <= maxLength, "buffer not large enough to hold tracked device!");
 		_buffer = (tracked_device_t*)buffer;
 		return 0;

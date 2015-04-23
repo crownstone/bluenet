@@ -34,6 +34,4 @@ public:
 private:
 	// Reference to AD converter
 	ADC *_adc;
-
-	RealTimeClock *_clock;
 };
