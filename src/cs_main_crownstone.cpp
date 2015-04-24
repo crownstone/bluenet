@@ -23,10 +23,7 @@
 
 #define MICRO_VIEW 1
 
-// enable IBeacon functionality (advertises Crownstone as iBeacon)
-//#define IBEACON
-
-#ifdef IBEACON
+#if IBEACON==1
 	// define the iBeacon advertisement package parameters
 	// the proximity UUID
 	#define BEACON_UUID   "ed3a6985-8872-4bb7-b784-c59ef3589844"
@@ -277,7 +274,7 @@ int main() {
 	// configure parameters for the Bluetooth stack
 	configure(stack);
 
-#ifdef IBEACON
+#if IBEACON==1
 	// if enabled, create the iBeacon parameter object which will be used
 	// to start advertisment as an iBeacon
 	IBeacon beacon(UUID(BEACON_UUID), BEACON_MAJOR, BEACON_MINOR, BEACON_RSSI);
@@ -314,7 +311,7 @@ int main() {
 		bool wasScanning = stack.isScanning();
 		stack.stopScanning();
 
-#ifdef IBEACON
+#if IBEACON==1
 		stack.startIBeacon(beacon);
 #else
 		stack.startAdvertising();
@@ -358,7 +355,7 @@ int main() {
 	BLEutil::print_stack("Stack drivers: ");
 
 	// begin sending advertising packets over the air.
-#ifdef IBEACON
+#if IBEACON==1
 	stack.startIBeacon(beacon);
 #else
 	stack.startAdvertising();

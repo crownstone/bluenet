@@ -4,6 +4,9 @@
 # Should be 10 characters or less (we need room for compilation date after it)
 BLUETOOTH_NAME="crown"
 
+# Build as iBeacon (Crownstone will advertise itself as iBeacon)
+IBEACON=0
+
 # Enable or disable different services (at times required to preserve memory)
 INDOOR_SERVICE=1
 GENERAL_SERVICE=1
