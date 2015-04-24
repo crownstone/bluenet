@@ -84,7 +84,14 @@ void GeneralService::init() {
 #else
 	LOGi(MSG_CHAR_CONFIGURATION_SKIP);
 #endif
+	
+}
 
+void GeneralService::start(Nrf51822BluetoothStack* stack) {
+	Service::start(stack);
+	std::string str;
+	Storage::getString(_storageStruct.device_name, str, getBLEName());
+	setBLEName(str);
 }
 
 void GeneralService::loadPersistentStorage() {
@@ -234,7 +241,8 @@ bool GeneralService::readFromStorage(uint8_t type) {
 	switch(type) {
 	case CONFIG_NAME_UUID: {
 		LOGd("Read name");
-		std::string str = getBLEName();
+		std::string str; // = getBLEName();
+		Storage::getString(_storageStruct.device_name, str, getBLEName()); 
 		_streamBuffer->fromString(str);
 		_streamBuffer->setType(type);
 

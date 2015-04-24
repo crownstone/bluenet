@@ -146,6 +146,8 @@ void setName(Nrf51822BluetoothStack &stack) {
 
 /* Sets default parameters of the Bluetooth connection.
  *
+ * Data is transmitted with +4 dBm.
+ *
  * On transmission of data within a connection
  *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 20 ms)
  *   - maximum connection interval (in steps of 1.25 ms, 32*1.25 = 40 ms)
@@ -158,12 +160,12 @@ void setName(Nrf51822BluetoothStack &stack) {
  * There is no whitelist defined, nor peer addresses.
  */
 void configure(Nrf51822BluetoothStack &stack) {
-	stack.setTxPowerLevel(-4)
+	stack.setTxPowerLevel(+4)
 		.setMinConnectionInterval(16)
 		.setMaxConnectionInterval(32)
 		.setConnectionSupervisionTimeout(400)
 		.setSlaveLatency(10)
-		.setAdvertisingInterval(100)
+		.setAdvertisingInterval(80)
 		.setAdvertisingTimeoutSeconds(0);
 }
 
