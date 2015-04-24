@@ -11,7 +11,6 @@
 #include "ble_gatts.h"
 
 #include "cs_BluetoothLE.h"
-#include "characteristics/cs_Serializable.h"
 #include <string>
 #include "util/cs_Utils.h"
 #include "drivers/cs_Serial.h"
@@ -30,13 +29,13 @@ typedef uint8_t ERR_CODE;
 
 /* Structure for a StreamBuffer
  *
- * Requires GENERAL_BUFFER_SIZE to be set.
+ * Requires MASTER_BUFFER_SIZE to be set.
  */
 template <typename T>
 struct __attribute__((__packed__)) stream_t {
 	uint8_t type;
 	uint16_t length;
-	T payload[(GENERAL_BUFFER_SIZE-SB_HEADER_SIZE)/sizeof(T)];
+	T payload[(MASTER_BUFFER_SIZE-SB_HEADER_SIZE)/sizeof(T)];
 };
 
 /* General StreamBuffer with type, length, and payload
@@ -53,7 +52,7 @@ private:
 	stream_t<T>* _buffer;
 
 	const size_t _item_size = sizeof(T);
-	const size_t _max_items = (GENERAL_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
+	const size_t _max_items = (MASTER_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
 public:
 	/* Default constructor
 	 *
@@ -210,7 +209,7 @@ public:
 
 	/* @inherit */
 	uint16_t getMaxLength() const {
-		return GENERAL_BUFFER_SIZE;
+		return MASTER_BUFFER_SIZE;
 	}
 
 	// TODO: Why do we need this function!?

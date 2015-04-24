@@ -288,10 +288,10 @@ void PowerService::sampleCurrent(uint8_t type) {
 		write("3 [");
 #endif
 		for (uint16_t i=0; i<numSamples; ++i) {
-			if (_currentCurve->getValue(i, voltage) != CC_SUCCESS) {
+			if (_currentCurve->getValue(i, voltage, timestamp) != CC_SUCCESS) {
 				break;
 			}
-			timestamp = timeStart + i*(timeEnd-timeStart)/(numSamples-1);
+//			timestamp = timeStart + i*(timeEnd-timeStart)/(numSamples-1);
 			_log(INFO, "%u %u,  ", timestamp, voltage);
 #ifdef MICRO_VIEW
 			write("%u %u ", timestamp, voltage);

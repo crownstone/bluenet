@@ -10,7 +10,7 @@
 #define SHUNT_VALUE                              120
 
 // size of the buffer used for characteristics
-#define GENERAL_BUFFER_SIZE                      140
+//#define GENERAL_BUFFER_SIZE                      300
 
 /* maximum length of strings used for characteristic values */
 #define MAX_STRING_LENGTH                        25

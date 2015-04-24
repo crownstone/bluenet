@@ -5,7 +5,7 @@
 BLUETOOTH_NAME="crown"
 
 # Enable or disable different services (at times required to preserve memory)
-INDOOR_SERVICE=1
+INDOOR_SERVICE=0
 GENERAL_SERVICE=1
 POWER_SERVICE=1
 
@@ -21,12 +21,15 @@ CHAR_SAMPLE_CURRENT=1
 CHAR_CURRENT_LIMIT=1
 
 ## Indoor Localization Service
-CHAR_RSSI=0
-CHAR_SCAN_DEVICES=0
-CHAR_TRACK_DEVICES=0
+CHAR_RSSI=1
+CHAR_SCAN_DEVICES=1
+CHAR_TRACK_DEVICES=1
 
 # Enable or disable meshing functionality (1 or 0)
 CHAR_MESHING=0
+
+# Size of the master buffer
+MASTER_BUFFER_SIZE=300
 
 # Verbosity of the UART
 # Debug     0
