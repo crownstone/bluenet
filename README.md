@@ -94,6 +94,7 @@ Now you will have to set all fields in the configuration file:
 * adjust `BOARD` to the correct number for your board. This determines the pin layout.
 * adjust `HARDWARE_VERSION` to the correct version of the NRF51 chip you have. Use script/hardware_version.sh to check your version.
 * adjust `SERIAL_VERBOSITY` to the value you prefer. Set it to None to disable all logging over serial. The default is 1 (info).
+* adjust `MASTER_BUFFER_SIZE` if you want to have a larger buffer (this buffer is reused by all characteristics that use more than a single byte or string)
 
 Let us now install the SoftDevice on the nRF51822:
 
