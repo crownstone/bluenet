@@ -94,8 +94,8 @@ void GeneralService::init() {
 	
 }
 
-void GeneralService::start(Nrf51822BluetoothStack* stack) {
-	Service::start(stack);
+void GeneralService::startAdvertising(Nrf51822BluetoothStack* stack) {
+	Service::startAdvertising(stack);
 	std::string str;
 	Storage::getString(_storageStruct.device_name, str, getBLEName());
 	setBLEName(str);

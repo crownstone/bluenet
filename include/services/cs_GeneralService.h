@@ -14,13 +14,14 @@
 //#include "characteristics/cs_UuidConfig.h"
 //#include "common/cs_Storage.h"
 //#include "ble/cs_BluetoothLE.h"
+#include <ble/cs_Stack.h>
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 //#include "processing/cs_Temperature.h"
 
 #define GENERAL_UUID "f5f90000-59f9-11e4-aa15-123b93f75cba"
 
-#define GENERAL_SERVICE_UPDATE_FREQUENCY 2 // hz
+#define GENERAL_SERVICE_UPDATE_FREQUENCY 10 // hz
 
 /* General Service for the Crownstone
  *
@@ -41,7 +42,7 @@ public:
 
 	/* Overload start
 	 */
-	void start(Nrf51822BluetoothStack* stack);
+	void startAdvertising(BLEpp::Nrf51822BluetoothStack* stack);
 
 	/* Update the temperature characteristic.
 	 * @temperature A value in Celcius directly from the chip

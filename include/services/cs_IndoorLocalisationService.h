@@ -20,7 +20,7 @@
 
 #define INDOORLOCALISATION_UUID "7e170000-429c-41aa-83d7-d91220abeb33"
 
-#define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 2 // hz
+#define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10 // hz
 
 /* Struct used by the <IndoorLocalisationService> to store elements
  */
@@ -37,16 +37,11 @@ public:
 //	typedef function<int8_t()> func_t;
 
 protected:
-	// TODO -oDE: are really all of these characteristics part of the
-	//   indoor localisation?
 	void addSignalStrengthCharacteristic();
 	void addScanControlCharacteristic();
 	void addPeripheralListCharacteristic();
 	void addTrackedDeviceListCharacteristic();
 	void addTrackedDeviceCharacteristic();
-
-	void addDeviceTypeCharactersitic();
-	void addRoomCharacteristic();
 
 	/* Get a handle to the persistent storage struct and load it from FLASH.
 	 *

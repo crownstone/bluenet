@@ -24,7 +24,7 @@
 
 #define POWER_SERVICE_UUID "5b8d0000-6f20-11e4-b116-123b93f75cba"
 
-#define POWER_SERVICE_UPDATE_FREQUENCY 2 // hz
+#define POWER_SERVICE_UPDATE_FREQUENCY 10 // hz
 
 class PowerService : public BLEpp::Service {
 public:
