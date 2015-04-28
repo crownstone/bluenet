@@ -36,7 +36,7 @@ PowerService::PowerService() :
 		_currentLimitInitialized(false)
 {
 
-	setUUID(UUID(POWER_SERVICE_UUID));
+	setUUID(UUID(POWER_UUID));
 
 	setName(BLE_SERVICE_POWER);
 

@@ -156,7 +156,7 @@ void GeneralService::addResetCharacteristic() {
 	_resetCharacteristic = new Characteristic<int32_t>();
 	addCharacteristic(_resetCharacteristic);
 
-	_resetCharacteristic->setUUID(UUID(getUUID(), FIRMWARE_UUID));
+	_resetCharacteristic->setUUID(UUID(getUUID(), RESET_UUID));
 	_resetCharacteristic->setName(BLE_CHAR_RESET);
 	_resetCharacteristic->setDefaultValue(0);
 	_resetCharacteristic->setWritable(true);

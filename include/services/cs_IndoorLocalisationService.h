@@ -18,8 +18,6 @@
 //#include <common/cs_Types.h>
 #include <drivers/cs_Storage.h>
 
-#define INDOORLOCALISATION_UUID "7e170000-429c-41aa-83d7-d91220abeb33"
-
 #define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10 // hz
 
 /* Struct used by the <IndoorLocalisationService> to store elements

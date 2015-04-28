@@ -19,8 +19,6 @@
 #include <ble/cs_Characteristic.h>
 //#include "processing/cs_Temperature.h"
 
-#define GENERAL_UUID "f5f90000-59f9-11e4-aa15-123b93f75cba"
-
 #define GENERAL_SERVICE_UPDATE_FREQUENCY 10 // hz
 
 /* General Service for the Crownstone
