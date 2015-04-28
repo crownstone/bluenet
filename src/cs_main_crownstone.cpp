@@ -29,9 +29,9 @@
 	#define BEACON_UUID   "ed3a6985-8872-4bb7-b784-c59ef3589844"
 	// the major number
 	#define BEACON_MAJOR  1
-    // the minor number
+	// the minor number
 	#define BEACON_MINOR  5
-    // the rssi
+	// the rssi
 	#define BEACON_RSSI   0xc7
 #endif
 
