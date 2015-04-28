@@ -226,9 +226,8 @@ void Crownstone::setup() {
 
 	});
 
-	LOGi("Create Timer and start RTC");
+	LOGi("Create Timer");
 	Timer::getInstance();
-	RTC::start();
 
 	createServices();
 
