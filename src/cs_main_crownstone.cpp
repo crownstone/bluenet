@@ -103,6 +103,8 @@ void Crownstone::setName() {
 
 /* Sets default parameters of the Bluetooth connection.
  *
+ * Data is transmitted with +4 dBm.
+ *
  * On transmission of data within a connection
  *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 20 ms)
  *   - maximum connection interval (in steps of 1.25 ms, 32*1.25 = 40 ms)
@@ -115,12 +117,12 @@ void Crownstone::setName() {
  * There is no whitelist defined, nor peer addresses.
  */
 void Crownstone::configStack() {
-	_stack->setTxPowerLevel(-4);
+	_stack->setTxPowerLevel(+4);
 	_stack->setMinConnectionInterval(16);
 	_stack->setMaxConnectionInterval(32);
 	_stack->setConnectionSupervisionTimeout(400);
 	_stack->setSlaveLatency(10);
-	_stack->setAdvertisingInterval(100);
+	_stack->setAdvertisingInterval(80);
 	_stack->setAdvertisingTimeoutSeconds(0);
 }
 
@@ -165,7 +167,7 @@ void Crownstone::createServices() {
 void Crownstone::setup() {
 	welcome();
 
-	MasterBuffer::getInstance().alloc(GENERAL_BUFFER_SIZE);
+	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 
 	// set up the bluetooth stack that controls the hardware.
 	_stack = &Nrf51822BluetoothStack::getInstance();

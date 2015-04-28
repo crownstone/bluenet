@@ -39,6 +39,10 @@ public:
 	 */
 	 GeneralService();
 
+	/* Overload start
+	 */
+	void start(Nrf51822BluetoothStack* stack);
+
 	/* Update the temperature characteristic.
 	 * @temperature A value in Celcius directly from the chip
 	 *
