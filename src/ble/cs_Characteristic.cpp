@@ -174,7 +174,7 @@ uint32_t CharacteristicBase::notify() {
 	uint16_t valueLength = getValueLength();
 	uint8_t* valueAddress = getValuePtr();
 
-#if ($SOFTDEVICE_SERIES == 130) && ($SOFTDEVICE_MAJOR == 0) && ($SOFTDEVICE_MINOR == 9)
+#if (SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
 	ble_gatts_value_t p_value;
 	p_value.len = valueLength;
 	p_value.offset = 0;

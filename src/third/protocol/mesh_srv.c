@@ -447,7 +447,7 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
     }
     else
     {
-#if ($SOFTDEVICE_SERIES == 130) && ($SOFTDEVICE_MAJOR == 0) && ($SOFTDEVICE_MINOR == 9)
+#if (SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
         ble_gatts_value_t p_value;
         p_value.len = len;
         p_value.offset = 0;
@@ -484,9 +484,20 @@ uint32_t mesh_srv_char_val_get(uint8_t index, uint8_t* data, uint16_t* len, ble_
     
     *len = MAX_VALUE_LENGTH;
     
+#if (SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
+        ble_gatts_value_t p_value;
+        p_value.len = *len;
+        p_value.offset = 0;
+        p_value.p_value = data;
+        uint32_t error_code = sd_ble_gatts_value_get(g_active_conn_handle,
+        	g_mesh_service.char_metadata[index - 1].char_value_handle,
+            &p_value);
+
+#else
     uint32_t error_code = sd_ble_gatts_value_get(
         g_mesh_service.char_metadata[index - 1].char_value_handle, 
         0, len, data);
+#endif
     
     if (error_code != NRF_SUCCESS)
     {
@@ -513,9 +524,20 @@ uint32_t mesh_srv_char_md_get(mesh_metadata_char_t* metadata)
     uint8_t data_array[MESH_MD_CHAR_LEN];
     uint16_t len = MESH_MD_CHAR_LEN;
     
-    uint32_t error_code = sd_ble_gatts_value_get(
-        g_mesh_service.ble_md_char_handles.value_handle, 0, &len, data_array);
     
+#if (SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
+	ble_gatts_value_t p_value;
+	p_value.len = len;
+	p_value.offset = 0;
+	p_value.p_value = data_array;
+	uint32_t error_code = sd_ble_gatts_value_get(g_active_conn_handle,
+		g_mesh_service.ble_md_char_handles.value_handle,
+		&p_value);
+#else
+	uint32_t error_code = sd_ble_gatts_value_get(
+		g_mesh_service.ble_md_char_handles.value_handle, 0, &len, data_array);
+#endif
+
     if (error_code != NRF_SUCCESS)
     {
         return NRF_ERROR_INTERNAL;

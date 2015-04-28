@@ -17,7 +17,7 @@
 #include <ble/cs_Nordic.h>
 #include "drivers/cs_PWM.h"
 
-/* NOE: only use with BOARDS = CROWNSTONE_SENSOR */
+/* NOTE: only use with BOARDS = CROWNSTONE_SENSOR */
 
 /*
  * ENABLE SENSORS

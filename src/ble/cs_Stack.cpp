@@ -75,7 +75,7 @@ void Nrf51822BluetoothStack::init() {
 
 //#if(SOFTDEVICE_SERIES == 110)
 
-#if (SOFTDEVICE_SERIES != 130) && (SOFTDEVICE_MINOR != 5)
+#if (SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MINOR != 5)
 #if(NORDIC_SDK_VERSION >= 6)
 	// do not define the service_changed characteristic, of course allow future changes
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1
