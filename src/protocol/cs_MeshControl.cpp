@@ -5,9 +5,10 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
+#include "protocol/cs_MeshControl.h"
+
 #include "drivers/cs_PWM.h"
 #include "drivers/cs_Serial.h"
-#include "protocol/cs_MeshControl.h"
 
 MeshControl::MeshControl() {
 }

@@ -6,14 +6,17 @@
  */
 #pragma once
 
-#include <vector>
-
-#include "characteristics/cs_StreamBuffer.h"
-#include "characteristics/cs_MeshMessage.h"
-#include "characteristics/cs_UuidConfig.h"
-#include "common/cs_Storage.h"
-#include "cs_BluetoothLE.h"
-#include "processing/cs_Temperature.h"
+//#include <vector>
+//
+#include "drivers/cs_Storage.h"
+#include "structs/buffer/cs_StreamBuffer.h"
+//#include "characteristics/cs_MeshMessage.h"
+//#include "characteristics/cs_UuidConfig.h"
+//#include "common/cs_Storage.h"
+//#include "ble/cs_BluetoothLE.h"
+#include <ble/cs_Service.h>
+#include <ble/cs_Characteristic.h>
+//#include "processing/cs_Temperature.h"
 
 #define GENERAL_UUID "f5f90000-59f9-11e4-aa15-123b93f75cba"
 

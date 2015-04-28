@@ -5,17 +5,22 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
-#include <cstdio>
-
+//#include <cstdio>
+//
 #include "services/cs_PowerService.h"
-
-#include "common/cs_Boards.h"
-#include "common/cs_Config.h"
-#include "common/cs_Strings.h"
-#include "cs_nRF51822.h"
+//
+#include "cfg/cs_Boards.h"
+//#include "common/cs_Config.h"
+//#include "common/cs_Strings.h"
+//#include "cs_nRF51822.h"
 #include "drivers/cs_RTC.h"
-#include "common/cs_MasterBuffer.h"
-#include "characteristics/cs_BufferCharacteristic.h"
+#include "structs/buffer/cs_MasterBuffer.h"
+#include "cfg/cs_UuidConfig.h"
+
+#include "drivers/cs_ADC.h"
+#include "drivers/cs_PWM.h"
+#include <drivers/cs_Timer.h>
+#include <drivers/cs_LPComp.h>
 
 using namespace BLEpp;
 
@@ -78,7 +83,7 @@ void PowerService::init() {
  * TODO: We should only need to do this once on startup.
  */
 void PowerService::tick() {
-//	LOGi("Tick: %d", RTC::now());
+//	LOGi("Tock: %d", RTC::now());
 
 	// Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
 	// TODO: This is not required anymore at later crownstone versions, so this should be done at init().

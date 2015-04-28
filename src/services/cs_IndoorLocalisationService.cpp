@@ -5,23 +5,27 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
-
-//#include <cmath> // try not to use this!
-#include <cstdio>
-
-#include "common/cs_Boards.h"
-#include "common/cs_Config.h"
-#include "cs_nRF51822.h"
-#include "drivers/cs_ADC.h"
-#include "drivers/cs_RTC.h"
 #include "services/cs_IndoorLocalisationService.h"
 
-#include "util/cs_Utils.h"
+//#include <cmath> // try not to use this!
+//#include <cstdio>
+//
+//#include "common/cs_Boards.h"
+//#include "common/cs_Config.h"
+//#include "cs_nRF51822.h"
+//#include "drivers/cs_ADC.h"
+#include "drivers/cs_RTC.h"
+#include "drivers/cs_PWM.h"
+//
+//#include "util/cs_Utils.h"
+//
+#include "structs/buffer/cs_MasterBuffer.h"
+//
+#include "cfg/cs_UuidConfig.h"
 
-#include "common/cs_MasterBuffer.h"
+#include "drivers/cs_Timer.h"
 
-#include "characteristics/cs_BufferCharacteristic.h"
-#include <common/cs_Strings.h>
+//#include <common/cs_Strings.h>
 
 using namespace BLEpp;
 
@@ -77,7 +81,7 @@ void IndoorLocalizationService::init() {
 }
 
 void IndoorLocalizationService::tick() {
-//	LOGi("Tick: %d", RTC::now());
+//	LOGi("Tack: %d", RTC::now());
 
 	if (!_initialized) {
 		if (_trackedDeviceList != NULL) {
@@ -408,9 +412,9 @@ void IndoorLocalizationService::setRSSILevel(int8_t RSSILevel) {
 	}
 }
 
-void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
-	_rssiHandler = func;
-}
+//void IndoorLocalizationService::setRSSILevelHandler(func_t func) {
+//	_rssiHandler = func;
+//}
 
 #if(SOFTDEVICE_SERIES != 110)
 void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {

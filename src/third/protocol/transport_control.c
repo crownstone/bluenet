@@ -48,8 +48,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <stdlib.h>
 
-#include "../../include/common/cs_Boards.h"
-#include "../../include/drivers/cs_Serial.h"
+#include "cfg/cs_Boards.h"
+#include "drivers/cs_Serial.h"
 
 /**@file
 * 

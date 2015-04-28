@@ -5,9 +5,10 @@
  */
 #pragma once
 
-#include <cs_Nordic.h>
+#include <ble/cs_Nordic.h>
 
-#include <stdint.h> 
+//#include <stdint.h>
+//#include <common/cs_Types.h>
 
 #include "drivers/cs_Serial.h"
 

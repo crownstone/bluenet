@@ -5,36 +5,40 @@
  * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
+#include "drivers/cs_Serial.h"
+
 #include <cstring>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 
-#include "common/cs_Boards.h"
-#include "cs_nRF51822.h"
-#include "drivers/cs_Serial.h"
+#include <ble/cs_Nordic.h>
+#include "cfg/cs_Boards.h"
+//#include "ble/cs_nRF51822.h"
 
-#define NRF51_UART_1200_BAUD  0x0004F000UL
-#define NRF51_UART_9600_BAUD  0x00275000UL
-#define NRF51_UART_38400_BAUD 0x009D5000UL
+#define NRF_UART_1200_BAUD  0x0004F000UL
+#define NRF_UART_9600_BAUD  0x00275000UL
+#define NRF_UART_38400_BAUD 0x009D5000UL
+
+static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVISORS_ARRAY;
 
 /**
  * Configure the UART. Currently we set it on 38400 baud.
  */
 void config_uart() {
 	// Enable UART
-	NRF51_UART_ENABLE = 0x04; 
+	NRF_UART0->ENABLE = 0x04;
 
 	// Configure UART pins
-	NRF51_UART_PSELRXD = PIN_GPIO_RX;  
-	NRF51_UART_PSELTXD = PIN_GPIO_TX; 
+	NRF_UART0->PSELRXD = PIN_GPIO_RX;
+	NRF_UART0->PSELTXD = PIN_GPIO_TX;
 
-	//NRF51_UART_CONFIG = NRF51_UART_CONFIG_HWFC_ENABLED; // do not enable hardware flow control.
-	NRF51_UART_BAUDRATE = NRF51_UART_38400_BAUD;
-	NRF51_UART_STARTTX = 1;
-	NRF51_UART_STARTRX = 1;
-	NRF51_UART_RXDRDY = 0;
-	NRF51_UART_TXDRDY = 0;
+	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; // do not enable hardware flow control.
+	NRF_UART0->BAUDRATE = m_baudrates[UART_BAUD_38K4];
+	NRF_UART0->TASKS_STARTTX = 1;
+	NRF_UART0->TASKS_STARTRX = 1;
+	NRF_UART0->EVENTS_RXDRDY = 0;
+	NRF_UART0->EVENTS_TXDRDY = 0;
 }
 
 /**
@@ -43,9 +47,9 @@ void config_uart() {
 void write_uart(const char *str) {
 	int16_t len = strlen(str);
 	for(int i = 0; i < len; ++i) {
-		NRF51_UART_TXD = (uint8_t)str[i];
-		while(NRF51_UART_TXDRDY != 1) {}
-		NRF51_UART_TXDRDY = 0;
+		NRF_UART0->TXD = (uint8_t)str[i];
+		while(NRF_UART0->EVENTS_TXDRDY != 1) {}
+		NRF_UART0->EVENTS_TXDRDY = 0;
 	}
 }
 
@@ -53,9 +57,9 @@ void write_uart(const char *str) {
  * Read an individual character from UART.
  */
 uint8_t read_uart() {
-	while(NRF51_UART_RXDRDY != 1) {}
-	NRF51_UART_RXDRDY = 0;
-	return (uint8_t)NRF51_UART_RXD;
+	while(NRF_UART0->EVENTS_RXDRDY != 1) {}
+	NRF_UART0->EVENTS_RXDRDY = 0;
+	return (uint8_t)NRF_UART0->RXD;
 }
 
 /**
@@ -76,9 +80,9 @@ int write(const char *str, ...) {
 		len = vsprintf(buffer, str, ap);
 		va_end(ap);
 		for(int i = 0; i < len; ++i) {
-			NRF51_UART_TXD = (uint8_t)buffer[i];
-			while(NRF51_UART_TXDRDY != 1) {}
-			NRF51_UART_TXDRDY = 0;
+			NRF_UART0->TXD = (uint8_t)buffer[i];
+			while(NRF_UART0->EVENTS_TXDRDY != 1) {}
+			NRF_UART0->EVENTS_TXDRDY = 0;
 		}
 	} else {
 		char *p_buf = (char*)malloc(len + 1);
@@ -87,9 +91,9 @@ int write(const char *str, ...) {
 		len = vsprintf(p_buf, str, ap);
 		va_end(ap);
 		for(int i = 0; i < len; ++i) {
-			NRF51_UART_TXD = (uint8_t)p_buf[i];
-			while(NRF51_UART_TXDRDY != 1) {}
-			NRF51_UART_TXDRDY = 0;
+			NRF_UART0->TXD = (uint8_t)p_buf[i];
+			while(NRF_UART0->EVENTS_TXDRDY != 1) {}
+			NRF_UART0->EVENTS_TXDRDY = 0;
 		}
 		free(p_buf);
 	}

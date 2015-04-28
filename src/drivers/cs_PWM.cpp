@@ -5,15 +5,18 @@
  * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
-#include "nrf.h"
-#include "nrf_gpiote.h"
-#include "nrf_gpio.h"
-
 #include "drivers/cs_PWM.h"
-#if(NRF51_USE_SOFTDEVICE == 1)
-#include "nrf_sdm.h"
-#endif
 
+#include <ble/cs_Nordic.h>
+
+//#include "nrf.h"
+//#include "nrf_gpiote.h"
+//#include "nrf_gpio.h"
+//
+//#if(NRF51_USE_SOFTDEVICE == 1)
+//#include "nrf_sdm.h"
+//#endif
+//
 #include <drivers/cs_Serial.h>
 
 //static uint32_t pwm_max_value, pwm_next_value[PWM_MAX_CHANNELS],

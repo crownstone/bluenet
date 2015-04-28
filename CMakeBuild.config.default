@@ -7,6 +7,9 @@ BLUETOOTH_NAME="crown"
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=0
 
+# Set if crownstone should set power on by default when turning on
+DEFAULT_ON=1
+
 # Enable or disable different services (at times required to preserve memory)
 INDOOR_SERVICE=1
 GENERAL_SERVICE=1

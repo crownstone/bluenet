@@ -6,7 +6,10 @@
  */
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
+
+//#include <stdint.h>
+//#include <common/cs_Types.h>
 
 // The maximum number of channels supported by the library. Should NOT be changed!
 #define PWM_MAX_CHANNELS        3
@@ -33,19 +36,30 @@ typedef enum {
 
 /* Pulse Wide Modulation struct
  */
-typedef struct {
+struct pwm_config_t {
     uint8_t         num_channels;
     uint8_t         gpio_pin[3];
     uint8_t         ppi_channel[6];
     uint8_t         gpiote_channel[3];
     uint8_t         mode;
-} pwm_config_t;
 
+    // default values
+    pwm_config_t() :
+    	num_channels   (3),
+		gpio_pin       {8,9,10},
+		ppi_channel    {0,1,2,3,4,5},
+		gpiote_channel {2,3,0},
+		mode           (PWM_MODE_122)
+    {}
+};
+
+/*
 #define PWM_DEFAULT_CONFIG  {.num_channels   = 3,                \
                              .gpio_pin       = {8,9,10},         \
                              .ppi_channel    = {0,1,2,3,4,5},    \
                              .gpiote_channel = {2,3,0},          \
                              .mode           = PWM_MODE_122}
+*/
 
 /* Pulse Wide Modulation class
  *

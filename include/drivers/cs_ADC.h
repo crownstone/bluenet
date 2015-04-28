@@ -6,13 +6,15 @@
  */
 #pragma once
 
-#include <stdint.h>
-
+//#include <stdint.h>
+//
 #include "events/cs_Dispatcher.h"
-#include "cs_RTC.h"
-#include "characteristics/cs_CurrentCurve.h"
+//#include "cs_RTC.h"
+#include "structs/cs_CurrentCurve.h"
 
-class ADC: public Dispatcher {
+//#include "common/cs_Types.h"
+
+class ADC : public Dispatcher {
 
 public:
 	// Use static variant of singleton, no dynamic memory allocation
@@ -57,7 +59,7 @@ public:
 private:
 	/* Constructor
 	 */
-	ADC(): _currentCurve(NULL) {}
+	ADC(): _sampleNum(0), _currentCurve(NULL) {}
 
 	// This class is singleton, deny implementation
 	ADC(ADC const&);

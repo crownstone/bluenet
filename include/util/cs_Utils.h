@@ -6,9 +6,12 @@
  */
 #pragma once
 
-#include <cstdint>
+//#include <cstdint>
 #include <string>
 #include <cstdlib>
+//
+
+//#include <common/cs_Types.h>
 
 #include <drivers/cs_Serial.h>
 
@@ -21,7 +24,9 @@ namespace BLEutil {
  *
  * @return the converted value
  */
-uint16_t convertEndian16(uint16_t val);
+inline uint16_t convertEndian16(uint16_t val) {
+	return ((val >> 8) & 0xFF) | ((val & 0xFF) << 8);
+}
 
 /* Convert an integer (uint32_t) from LSB (little-endian) to
  * MSB (big-endian) and vice versa
@@ -30,7 +35,12 @@ uint16_t convertEndian16(uint16_t val);
  *
  * @return the converted value
  */
-uint32_t convertEndian32(uint32_t val);
+inline uint32_t convertEndian32(uint32_t val) {
+	return ((val >> 24) & 0xFF)
+		 | ((val >> 8) & 0xFF00)
+		 | ((val & 0xFF00) << 8)
+		 | ((val & 0xFF) << 24);
+}
 
 /* Macro that returns the length of an array
  *

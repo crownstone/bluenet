@@ -5,8 +5,9 @@
  * License: LGPLv3+, Apache License, or MIT, your choice                                                                
  */
 
-#include <algorithm>
 #include "events/cs_Dispatcher.h"
+//#include <algorithm>
+#include <cstddef>
 
 void Dispatcher::addListener(Listener *listener) {
 	for (int i = 0; i < MAX_LISTENERS; i++) {

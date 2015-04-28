@@ -6,10 +6,15 @@
  */
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
+
+//#include <stdint.h>
+//#include <common/cs_Types.h>
 
 class Listener {
 public:
+	virtual ~Listener() {};
+
 	// have a general listener
 	virtual void handleEvent() = 0;
 

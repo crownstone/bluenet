@@ -6,12 +6,12 @@
  */
 #pragma once
 
-#include <stdint.h>
-
-#include <cs_Nordic.h>
-
-#include <common/cs_Timer.h>
-#include <drivers/cs_Serial.h>
+//#include <stdint.h>
+//
+//#include <ble/cs_Nordic.h>
+//
+#include <drivers/cs_Timer.h>
+//#include <drivers/cs_Serial.h>
 
 /*
  * Wrapper class for RTC functions of app_timer.

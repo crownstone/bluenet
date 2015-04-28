@@ -6,13 +6,17 @@
  */
 #pragma once
 
-#include <third/std/function.h>
-#include "characteristics/cs_ScanResult.h"
-#include "characteristics/cs_TrackDevices.h"
-#include "characteristics/cs_UuidConfig.h"
-#include "cs_BluetoothLE.h"
+//#include <third/std/function.h>
+#include "structs/cs_ScanResult.h"
+#include "structs/cs_TrackDevices.h"
+//#include "characteristics/cs_UuidConfig.h"
+//#include "ble/cs_BluetoothLE.h"
+#include <ble/cs_Service.h>
+#include <ble/cs_Characteristic.h>
+//
 
-#include "common/cs_Storage.h"
+//#include <common/cs_Types.h>
+#include <drivers/cs_Storage.h>
 
 #define INDOORLOCALISATION_UUID "7e170000-429c-41aa-83d7-d91220abeb33"
 
@@ -30,7 +34,7 @@ struct ps_indoorlocalisation_service_t : ps_storage_base_t {
 class IndoorLocalizationService : public BLEpp::Service {
 
 public:
-	typedef function<int8_t()> func_t;
+//	typedef function<int8_t()> func_t;
 
 protected:
 	// TODO -oDE: are really all of these characteristics part of the
@@ -87,7 +91,7 @@ public:
 
 	void onRSSIChanged(int8_t rssi);
 	void setRSSILevel(int8_t RSSILevel);
-	void setRSSILevelHandler(func_t func);
+//	void setRSSILevelHandler(func_t func);
 
 #if(SOFTDEVICE_SERIES != 110)
 	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
@@ -100,7 +104,7 @@ private:
 	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceListCharac;
 	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceCharac;
 	
-	func_t _rssiHandler;
+//	func_t _rssiHandler;
 
 	bool _trackMode;
 	bool _trackIsNearby;

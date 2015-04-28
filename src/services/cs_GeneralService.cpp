@@ -5,16 +5,20 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
-#include "common/cs_Storage.h"
 #include "services/cs_GeneralService.h"
-#include "common/cs_MasterBuffer.h"
-#include "characteristics/cs_BufferCharacteristic.h"
-#include "common/cs_Config.h"
-#include "common/cs_Strings.h"
-#include "drivers/cs_RTC.h"
 
-#if CHAR_MESHING==1 
+#include "drivers/cs_Timer.h"
+
+#include "cfg/cs_UuidConfig.h"
+#include "structs/buffer/cs_MasterBuffer.h"
+#include "drivers/cs_Temperature.h"
+//#include "common/cs_Config.h"
+//#include "common/cs_Strings.h"
+#include "drivers/cs_RTC.h"
+//
+#if CHAR_MESHING==1
 #include <protocol/cs_Mesh.h>
+#include <structs/cs_MeshMessage.h>
 #endif
 
 using namespace BLEpp;

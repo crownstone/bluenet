@@ -5,19 +5,22 @@
  * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
-#include "nrf.h"
-
 #include "drivers/cs_ADC.h"
 
-#if(NRF51_USE_SOFTDEVICE == 1)
-#include "nrf_sdm.h"
-#endif
-
-#include "common/cs_Boards.h"
+//#include "nrf.h"
+//
+//
+//#if(NRF51_USE_SOFTDEVICE == 1)
+//#include "nrf_sdm.h"
+//#endif
+//
+//#include "common/cs_Boards.h"
 #include "drivers/cs_Serial.h"
 #include "util/cs_BleError.h"
+//
+//#include "cs_nRF51822.h"
 
-#include "cs_nRF51822.h"
+#include "drivers/cs_RTC.h"
 
 // Check the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
 uint32_t ADC::init(uint8_t pin) {

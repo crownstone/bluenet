@@ -11,10 +11,12 @@
 
 #pragma once
 
+//#include <common/cs_Types.h>
+
 extern "C" {
 #include <protocol/rbc_mesh.h>
-#include <protocol/rbc_mesh_common.h>
-#include <protocol/led_config.h>
+//#include <protocol/rbc_mesh_common.h>
+//#include <protocol/led_config.h>
 
 void rbc_mesh_event_handler(rbc_mesh_event_t* evt);
 

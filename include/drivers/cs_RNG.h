@@ -6,16 +6,16 @@
  */
 #pragma once
 
-#include "nrf_soc.h"
-#include "nrf_sdm.h"
+//#include "nrf_soc.h"
+//#include "nrf_sdm.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-	#include "app_error.h"
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
+//	#include "app_error.h"
+//#ifdef __cplusplus
+//}
+//#endif
 
 class RNG{
 public:

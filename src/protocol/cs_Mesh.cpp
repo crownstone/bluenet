@@ -6,16 +6,17 @@
  */
 
 #include <protocol/cs_Mesh.h>
-#include <protocol/led_config.h>
+
 #include <protocol/rbc_mesh_common.h>
 
-#include <common/cs_Boards.h>
+#include <cfg/cs_Boards.h>
 
 #include <drivers/cs_Serial.h>
 #include <protocol/cs_MeshControl.h>
 #include <util/cs_BleError.h>
 
 extern "C" {
+#include <protocol/led_config.h>
 
 /**
  * Event handler on receiving a message from 
