@@ -307,7 +307,7 @@ static void end_timer_handler(void)
 /**
 * @brief Async event dispatcher, works in APP LOW
 */
-void SWI0_IRQHandler(void)
+void SWI1_IRQHandler(void)
 {
     while (!event_fifo_empty() && (g_is_in_timeslot || !g_framework_initialized))
     {
@@ -339,7 +339,7 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
     switch (sig)
     {
         case NRF_RADIO_CALLBACK_SIGNAL_TYPE_START:
-            NVIC_ClearPendingIRQ(SWI0_IRQn);
+            NVIC_ClearPendingIRQ(SWI1_IRQn);
             g_is_in_timeslot = true;
             
             event_fifo_flush();
@@ -360,8 +360,8 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
             timeslot_extend(g_negotiate_timeslot_length);
             
 #if USE_SWI_FOR_PROCESSING
-            NVIC_EnableIRQ(SWI0_IRQn);
-            NVIC_SetPriority(SWI0_IRQn, 3);
+            NVIC_EnableIRQ(SWI1_IRQn);
+            NVIC_SetPriority(SWI1_IRQn, 3);
 #endif       
         
             /* sample RTC timer for trickle timing */
@@ -544,10 +544,10 @@ void timeslot_extend(uint32_t extra_time_us)
 void timeslot_queue_async_event(async_event_t* evt)
 {
 #if USE_SWI_FOR_PROCESSING
-    NVIC_EnableIRQ(SWI0_IRQn);
-    NVIC_SetPriority(SWI0_IRQn, 3);
+    NVIC_EnableIRQ(SWI1_IRQn);
+    NVIC_SetPriority(SWI1_IRQn, 3);
     event_fifo_put(evt);
-    NVIC_SetPendingIRQ(SWI0_IRQn);
+    NVIC_SetPendingIRQ(SWI1_IRQn);
 #else
     /* execute immediately */
     async_event_execute(evt);
