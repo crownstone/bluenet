@@ -38,7 +38,7 @@ extern "C" {
 	#define _log(level, fmt, ...) \
 			   write(fmt, ##__VA_ARGS__)
 #else
-	#define log(level, fmt, ...) 
+	#define log(level, fmt, ...)
 
 	#define _log(level, fmt, ...)
 #endif
@@ -96,13 +96,13 @@ typedef enum
     0x00EBE000, 0x013A9000, 0x01D7D000, 0x03AFB000, 0x03FFF000, 0x075F6000, 0x10000000  }
 
 /**
- * General configuration of the serial connection. This sets the pin to be used for UART, the baudrate, the parity 
+ * General configuration of the serial connection. This sets the pin to be used for UART, the baudrate, the parity
  * bits, etc.
  */
 void config_uart();
 
 /**
- * Write a string to the serial connection. Make sure you end with `\n` if you want to have new lines in the output. 
+ * Write a string to the serial connection. Make sure you end with `\n` if you want to have new lines in the output.
  * Also flushing the buffer might be done around new lines.
  */
 //void write(const char *str);

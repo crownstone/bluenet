@@ -76,7 +76,7 @@ uint8_t TrackedDeviceList::isNearby() {
 }
 
 void TrackedDeviceList::print(uint8_t *addr) const {
-	LOGd("[%02X %02X %02X %02X %02X %02X]", 
+	LOGd("[%02X %02X %02X %02X %02X %02X]",
 			addr[5], addr[4], addr[3], addr[2], addr[1], addr[0]);
 }
 

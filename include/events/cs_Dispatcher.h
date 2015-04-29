@@ -1,8 +1,8 @@
 /**
  * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)                                                                       
- * Date: 1 Dec., 2014                                                                                                   
- * License: LGPLv3+, Apache License, or MIT, your choice                                                                
+ * Copyright: Distributed Organisms B.V. (DoBots)
+ * Date: 1 Dec., 2014
+ * License: LGPLv3+, Apache License, or MIT, your choice
  */
 #pragma once
 

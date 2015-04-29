@@ -40,7 +40,7 @@ help() {
 	echo $"Usage: $0 {init|connect|upload|combined|debug}"
 }
 
-case "$cmd" in 
+case "$cmd" in
 	init)
 		init
 		;;

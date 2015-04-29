@@ -44,4 +44,4 @@ echo "Program application starting from $ADDRESS"
 
 sed -i "s|@START_ADDRESS@|$ADDRESS|" $TEMP_DIR/upload.script
 
-$JLINK -Device $DEVICE -If SWD $TEMP_DIR/upload.script 
+$JLINK -Device $DEVICE -If SWD $TEMP_DIR/upload.script

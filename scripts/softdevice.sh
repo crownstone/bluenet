@@ -25,7 +25,7 @@ all() {
 	upload
 }
 
-case "$cmd" in 
+case "$cmd" in
 	build)
 		build
 		;;

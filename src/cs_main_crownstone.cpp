@@ -29,9 +29,9 @@
 	#define BEACON_UUID   "ed3a6985-8872-4bb7-b784-c59ef3589844"
 	// the major number
 	#define BEACON_MAJOR  1
-    // the minor number
+	// the minor number
 	#define BEACON_MINOR  5
-    // the rssi
+	// the rssi
 	#define BEACON_RSSI   0xc7
 #endif
 
@@ -83,7 +83,7 @@ void Crownstone::welcome() {
 	BLEutil::print_stack("Stack init");
 	LOGd("Bootloader starts at 0x00034000.");
         // To have DFU, keep application limited to (BOOTLOADER_START - APPLICATION_START_CODE) / 2
-	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800 
+	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800
 	// Very probably FLASH (32MB) is not a problem though, but RAM will be (16kB)!
 	LOGi("Welcome at the nRF51822 code for meshing.");
 	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
@@ -172,7 +172,7 @@ void Crownstone::setup() {
 	// set up the bluetooth stack that controls the hardware.
 	_stack = &Nrf51822BluetoothStack::getInstance();
 
-	// set advertising parameters such as the device name and appearance.  
+	// set advertising parameters such as the device name and appearance.
 	setName();
 
 	// configure parameters for the Bluetooth stack

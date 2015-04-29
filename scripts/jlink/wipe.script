@@ -5,7 +5,7 @@ Sleep 500
 # NVIC CONFIG EEN (erase enabled)
 w4 4001e504 2
 # NVIC ERASEALL (erase all flash including UICR)
-w4 4001e50c 1      
+w4 4001e50c 1
 r
 # NVIC CONFIG WEN (enable writing)
 w4 4001e504 1

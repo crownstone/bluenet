@@ -31,7 +31,7 @@ public:
 
 	/* Create single shot timer. function will only be called once and after that timer will be
 	 * stopped
-	 * @timer_handle            An id or handle to reference the timer (actually, just a Uint32_t) 
+	 * @timer_handle            An id or handle to reference the timer (actually, just a Uint32_t)
 	 * @func                    The function to be called
 	 *
 	 * Create a timer for a specific purpose.

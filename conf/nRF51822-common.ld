@@ -71,14 +71,14 @@ SECTIONS
 
 	.bss : {
 		. = ALIGN(4);
-		_sbss = .; 
+		_sbss = .;
 		PROVIDE (__bss_start__ = _sbss);
 		*(.shbss)
 		*(.bss* .gnu.linkonce.b.*)
 		*(COMMON)
 		*(.ram.b .bss.ram)
 		. = ALIGN(4);
-		_ebss = .;   
+		_ebss = .;
 		__bss_end__ = .;
 	} > RAM
 	end = .;

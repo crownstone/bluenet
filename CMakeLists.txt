@@ -1,5 +1,5 @@
 #######################################################################################################################
-# The build systems uses CMake. All the automatically generated code falls under the Lesser General Public License 
+# The build systems uses CMake. All the automatically generated code falls under the Lesser General Public License
 # (LGPL GNU v3), the Apache License, or the MIT license, your choice.
 #
 # Author:	 Anne C. van Rossum (Distributed Organisms B.V.)
@@ -82,7 +82,7 @@ SET(BOOTLOADER "_bootloader_.hex")
 # essential, code doesn't run without this file !!!
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_sysNrf51.c")
 
-# Add a single 
+# Add a single
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Error.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
@@ -96,7 +96,6 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_ADC.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_LPComp.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Dimming.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_ScanResult.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_CurrentLimit.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_TrackDevices.cpp")
 #LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_StreamBuffer.cpp")
 IF(${GENERAL_SERVICE} STRGREATER "0")

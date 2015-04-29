@@ -13,7 +13,7 @@ extern "C"
 #endif
 
 // The header files for the SoftDevice. We're trying really hard to only them only here.
-// The user should not need to include files under a Nordic license. 
+// The user should not need to include files under a Nordic license.
 // This means that we can distribute our files in the end without the corresponding Nordic header files.
 #include "ble_gap.h"
 #include "ble.h"

@@ -70,9 +70,9 @@ private:
 	// Private PWM constructor
 	PWM() {}
 	// Private PWM copy constructor
-	PWM(PWM const&); 
+	PWM(PWM const&);
 	// Private PWM copy assignment definition
-	void operator=(PWM const &); 
+	void operator=(PWM const &);
 	
 	// store values last set
 	uint8_t _pwmChannel;

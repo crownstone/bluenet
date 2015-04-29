@@ -4,7 +4,7 @@ This project aims at a wireless network with BLE nodes that use their mutual sig
 
 Bluetooth LE (BLE) does not inherently fit a wireless network. We have technology in-house (at the Almende group) that can do this [Myrianed](https://en.wikipedia.org/wiki/MyriaNed), but it has not been accepted in the mainstream yet. By the way, it is my personal opinion that solutions such as ZigBee, Z-Wave, MyriaNed, and other mesh solutions, will remain marginal except if they get accepted in a common handheld.
 
-That's why BLE is interesting. A lot of phones come with BLE, so a solution is automatically useful to a large variety of people. It is not the best technology for the job. The network topology is a Personal Area Network (PAN), not a Local Area Network (LAN). This means that you cannot have all nodes communicating with all other nodes at the same time. To get RSSI values we will have to set up connections to other nodes and tear them down again. Not very efficient. But it will do the job. 
+That's why BLE is interesting. A lot of phones come with BLE, so a solution is automatically useful to a large variety of people. It is not the best technology for the job. The network topology is a Personal Area Network (PAN), not a Local Area Network (LAN). This means that you cannot have all nodes communicating with all other nodes at the same time. To get RSSI values we will have to set up connections to other nodes and tear them down again. Not very efficient. But it will do the job.
 
 However, through the Timeslot API, it is possible to run a totally different protocol parallel to BLE using the same radio. This means that we can have a mesh network at the same time as providing for BLE functionality. The new S130 SoftDevice adds to that even multiple BLE roles at the same time. So many possibilities arise!
 
@@ -24,7 +24,7 @@ The installation should not be hard when you have the Nordic SDK. Get this from 
 A cross-compiler for ARM is the `GCC` cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded).
 
     curl -v -O https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2
-    tar -xvf gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2 -C /opt    
+    tar -xvf gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2 -C /opt
 
 This is a 32-bit application, so you will need some dependencies:
 
@@ -33,8 +33,8 @@ This is a 32-bit application, so you will need some dependencies:
 If the cross-compiler does not work, make sure you check if all its dependencies are met:
 
     ldd /opt/gcc-arm-none-eabi-4_8-2014q3/bin/arm-none-eabi-gcc
-    
-Unpack the Nordic files to for example the `/opt/softdevices` and `/opt/nrf51_sdk` directories. 
+
+Unpack the Nordic files to for example the `/opt/softdevices` and `/opt/nrf51_sdk` directories.
 
 It is a `cmake` build system, so you will need it:
 
@@ -82,7 +82,7 @@ Now you will have to set all fields in the configuration file:
 * set `SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1` if you use one of the earlier s110 softdevices with a separate UICR section
 * adjust the type `SOFTDEVICE` accordingly (basename of file without `_softdevice.hex`)
 * set the `APPLICATION_START_ADDRESS` to start of application in FLASH (called `CODE_R1_BASE` in Nordic documentation)
-* set the `APPLICATION_LENGTH` to what remains of FLASH 
+* set the `APPLICATION_LENGTH` to what remains of FLASH
 * set `RAM_R1_BASE` to the start of RAM that is available (SoftDevice S130 v0.5 uses a staggering 10kB from the 16kB!)
 * set `RAM_APPLICATION_AMOUNT` to what remains for the application in RAM
 * adjust the `COMPILER_PATH` and `COMPILER_TYPE` to your compiler (it will be used as `$COMPILER_PATH\bin\$COMPILER_TYPE-gcc`)
@@ -122,11 +122,11 @@ You can also run everything in sequence:
 
     ./firmware.sh all crownstone
 
-And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish. 
+And there you go. There are some more utility scripts, such as `reboot.sh`. Use as you wish.
 
 ## Flashing with the ST-Link
 
-The above assumes you have the J-Link programmer from Nordic. If you do not have that device, you can still program something like the RFduino or the Crownstone, by using an ST-Link. A full explanation can be found on <https://dobots.nl/2015/01/23/programming-the-nrf51822-with-the-st-link/>. 
+The above assumes you have the J-Link programmer from Nordic. If you do not have that device, you can still program something like the RFduino or the Crownstone, by using an ST-Link. A full explanation can be found on <https://dobots.nl/2015/01/23/programming-the-nrf51822-with-the-st-link/>.
 
 ### Combine softdevice and firmware
 
@@ -142,7 +142,7 @@ And you will see that it runs something like this:
 
     srec_cat /opt/softdevices/s110_nrf51822_7.0.0_softdevice.hex -intel crownstone.bin -binary -offset 0x00016000 -o combined.hex -intel
 
-You have to adjust that file on the moment manually to switch between softdevices or to add/remove the bootloader, sorry! Note that the result is a `.hex` file. Such a file does haveinformation across multiple memory sections. If you upload a `.bin` file often configuration bits/bytes will not be set! 
+You have to adjust that file on the moment manually to switch between softdevices or to add/remove the bootloader, sorry! Note that the result is a `.hex` file. Such a file does haveinformation across multiple memory sections. If you upload a `.bin` file often configuration bits/bytes will not be set!
 
 ### Upload with OpenOCD
 
@@ -152,7 +152,7 @@ Rather than downloading `openocd` from the Ubuntu repositories, it is recommende
     git clone https://github.com/ntfreak/openocd
     sudo aptitude install libtool automake libusb-1.0-0-dev expect
     cd openocd
-    ./bootstrap 
+    ./bootstrap
     ./configure --enable-stlink
     make
     sudo make install
@@ -177,9 +177,9 @@ Here the binary `combined.bin` is the softdevice and application combined.
 The meshion functionality is the one we are currently integrating on the moment. So, this is a moving target. Set
 `CHAR_MESHING` to `0` if you don't need it.
 
-For the meshing functionality we use https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh written by a 
-Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and 
-Nordic Semiconductors). This code makes use of the Timeslot API which 
+For the meshing functionality we use https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh written by a
+Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and
+Nordic Semiconductors). This code makes use of the Timeslot API which
 is not supported yet in the alpha versions of the `S130`. Hence, if you want to use the meshing functionality, you will
 have to use the `S110`.
 
@@ -191,10 +191,10 @@ for the upload script:
 
 ## UART
 
-Currently UART for debugging. In case you happen to have the nRFgo Motherboard (nRF6310, strongly recommended) you can 
+Currently UART for debugging. In case you happen to have the nRFgo Motherboard (nRF6310, strongly recommended) you can
 easily connect the pints at P2.0 and P2.1 to respectively the pins RXD and TXD on P15 on the board. Do not forget to
 switch on the RS232 switch. Subsequently you will need some RS232 to USB cable if you haven't an extremely old laptop.
-The current set baudrate you can find in `src/serial.cpp` and is `38400` baud. To read from serial, my personal 
+The current set baudrate you can find in `src/serial.cpp` and is `38400` baud. To read from serial, my personal
 favorite application is  `minicom`, but feel free to use any other program.
 
     (sudo) minicom -c on -s -D /dev/ttyUSB0
@@ -293,7 +293,7 @@ Tips to reduce memory usage are really welcome!
 
 ## Commercial use
 
-This code is used in a commercial product at DoBots, the [Crownstone](http://dobots.nl/products/crownstone). Our intellectual property exists on two levels. First, you can license our technology to create these extremely cheap BLE building blocks yourself. Second, we build services around BLE-enabled devices. This ranges from smartphones to [gadgets such as the "virtual memo"](http://dobots.nl/2014/07/15/ble-dobeacon-a-virtual-memo/). What this means for you as a developer is that we can be transparent about the software on the Crownstone, which is why this repository exists. Feel free to build your own services on top of it, and benefit from our software development as much as you want. 
+This code is used in a commercial product at DoBots, the [Crownstone](http://dobots.nl/products/crownstone). Our intellectual property exists on two levels. First, you can license our technology to create these extremely cheap BLE building blocks yourself. Second, we build services around BLE-enabled devices. This ranges from smartphones to [gadgets such as the "virtual memo"](http://dobots.nl/2014/07/15/ble-dobeacon-a-virtual-memo/). What this means for you as a developer is that we can be transparent about the software on the Crownstone, which is why this repository exists. Feel free to build your own services on top of it, and benefit from our software development as much as you want.
 
 It would be much appreciated to state "DoBots inside" in which case we will be happy to provide support to your organisation.
 
@@ -331,13 +331,13 @@ The copyrights (2014-2015) for the rest of the code belongs to the team of Distr
 * Almende B.V., http://www.almende.com and DoBots B.V., http://www.dobots.nl
 * Rotterdam, The Netherlands
 
-Note, that we do not use any header files from Nordic. The header files are rewritten from scratch by Christopher 
-especially for that purpose. This means you are not finding a Nordic license text in this repository. 
+Note, that we do not use any header files from Nordic. The header files are rewritten from scratch by Christopher
+especially for that purpose. This means you are not finding a Nordic license text in this repository.
 Of course, this means that you will have to get those files from Nordic via different means (we recommend to buy the
 development kit). We just didn't want to "contaminate" this repository with files that we don't understand the license
 implications of.
 
-The only exception is the code for the meshing functionality that is put online by Nordic itself on 
+The only exception is the code for the meshing functionality that is put online by Nordic itself on
 https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh. This functionality can be found in `src/protocol` and
 `include/protocol/` and falls of course under the Nordic license. You can disable the meshing functionality with
 `CHAR_MESHING=0` if you do want to exclude that code from becoming part of the binary. You can still use the services

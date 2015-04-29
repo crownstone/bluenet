@@ -45,11 +45,11 @@
 #define PIN_GPIO_LED0        8                   // this is p1.0 or gpio 8
 #define PIN_GPIO_LED1        9                   // this is p1.1 or gpio 9
 #define PIN_GPIO_LED2        10
-#define PIN_GPIO_LED3        11          
-#define PIN_GPIO_LED4        12          
-#define PIN_GPIO_LED5        13          
-#define PIN_GPIO_LED6        14          
-#define PIN_GPIO_LED7        15          
+#define PIN_GPIO_LED3        11
+#define PIN_GPIO_LED4        12
+#define PIN_GPIO_LED5        13
+#define PIN_GPIO_LED6        14
+#define PIN_GPIO_LED7        15
 
 #define PIN_GPIO_SWITCH      PIN_GPIO_LED1       // just show switch as LED
 #define PIN_AIN_ADC          2                   // ain2 is p0.1 or gpio 1
@@ -62,14 +62,14 @@
 
 #if(BOARD==CROWNSTONE)
 
-#define PIN_GPIO_LED0        8                   // something we don't use! 
-#define PIN_GPIO_LED1        8                   // something we don't use! 
-#define PIN_GPIO_LED2        8                   // something we don't use! 
-#define PIN_GPIO_LED3        8                   // something we don't use! 
-#define PIN_GPIO_LED4        8                   // something we don't use! 
-#define PIN_GPIO_LED5        8                   // something we don't use! 
-#define PIN_GPIO_LED6        8                   // something we don't use! 
-#define PIN_GPIO_LED7        8                   // something we don't use! 
+#define PIN_GPIO_LED0        8                   // something we don't use!
+#define PIN_GPIO_LED1        8                   // something we don't use!
+#define PIN_GPIO_LED2        8                   // something we don't use!
+#define PIN_GPIO_LED3        8                   // something we don't use!
+#define PIN_GPIO_LED4        8                   // something we don't use!
+#define PIN_GPIO_LED5        8                   // something we don't use!
+#define PIN_GPIO_LED6        8                   // something we don't use!
+#define PIN_GPIO_LED7        8                   // something we don't use!
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
 //#define PIN_AIN_ADC          5                   // ain5 is p0.04 or gpio 4
@@ -138,7 +138,7 @@
 
 #define PIN_GPIO_SWITCH      18                  // this is p0.18 or gpio 18
 #define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
-#define PIN_AIN_LPCOMP       3                   // ain3 is p0.02 or gpio 2
+#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 #define PIN_GPIO_RX          11                  // this is p0.11 or gpio 11
 #define PIN_GPIO_TX          9                   // this is p0.09 or gpio 9

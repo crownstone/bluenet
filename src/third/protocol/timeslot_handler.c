@@ -65,7 +65,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if USE_SWI_FOR_PROCESSING
 #define ASYNC_EVENT_FIFO_QUEUE_SIZE (8)
-#define ASYNC_EVENT_FIFO_QUEUE_MASK (ASYNC_EVENT_FIFO_QUEUE_SIZE - 1)      
+#define ASYNC_EVENT_FIFO_QUEUE_MASK (ASYNC_EVENT_FIFO_QUEUE_SIZE - 1)
 #endif
 
 /*****************************************************************************
@@ -83,10 +83,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-static nrf_radio_request_t radio_request_normal = 
+static nrf_radio_request_t radio_request_normal =
                 {
                     .request_type = NRF_RADIO_REQ_TYPE_NORMAL,
-                    .params.normal = 
+                    .params.normal =
                     {
                         .hfclk = NRF_RADIO_HFCLK_CFG_DEFAULT,
                         .priority = NRF_RADIO_PRIORITY_NORMAL,
@@ -94,11 +94,11 @@ static nrf_radio_request_t radio_request_normal =
                         .length_us = TIMESLOT_SLOT_LENGTH
                     }
                 };
-                
-static nrf_radio_request_t radio_request_earliest = 
+
+static nrf_radio_request_t radio_request_earliest =
                 {
                     .request_type = NRF_RADIO_REQ_TYPE_EARLIEST,
-                    .params.earliest = 
+                    .params.earliest =
                     {
                         .hfclk = NRF_RADIO_HFCLK_CFG_DEFAULT,
                         .priority = NRF_RADIO_PRIORITY_NORMAL,
@@ -106,30 +106,30 @@ static nrf_radio_request_t radio_request_earliest =
                         .timeout_us = 10000 /* 10ms */
                     }
                 };
-                
-                
-                  
+
+
+
 static nrf_radio_signal_callback_return_param_t g_ret_param;
 //static nrf_radio_signal_callback_return_param_t g_final_ret_param;
 
 static bool g_is_in_callback = true;
-                
-static uint32_t g_timeslot_length;      
-static uint32_t g_timeslot_end_timer;      
-static uint32_t g_next_timeslot_length;    
-static uint32_t g_start_time_ref = 0;     
+
+static uint32_t g_timeslot_length;
+static uint32_t g_timeslot_end_timer;
+static uint32_t g_next_timeslot_length;
+static uint32_t g_start_time_ref = 0;
 static bool g_is_in_timeslot = false;
 static bool g_framework_initialized = false;
 static uint32_t g_negotiate_timeslot_length = TIMESLOT_SLOT_LENGTH;
 
 #if USE_SWI_FOR_PROCESSING
 static uint8_t event_fifo_head = 0;
-static uint8_t event_fifo_tail = 0;       
+static uint8_t event_fifo_tail = 0;
 static async_event_t async_event_fifo_queue[ASYNC_EVENT_FIFO_QUEUE_SIZE];
 
-static async_event_t evt;                
-#endif                
-                
+static async_event_t evt;
+#endif
+
 /*****************************************************************************
 * Static Functions
 *****************************************************************************/
@@ -160,11 +160,11 @@ static uint8_t event_fifo_put(async_event_t* evt)
     {
         APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
     }
-    
+
     async_event_t* head = &async_event_fifo_queue[event_fifo_head & ASYNC_EVENT_FIFO_QUEUE_MASK];
-    
+
     memcpy(head, evt, sizeof(async_event_t));
-    
+
     return ((event_fifo_head++) & ASYNC_EVENT_FIFO_QUEUE_MASK);
 }
 
@@ -191,11 +191,11 @@ static uint32_t event_fifo_peek_at(async_event_t* evt, uint8_t offset)
     {
         return NRF_ERROR_NULL;
     }
-    
+
     async_event_t* tail = &async_event_fifo_queue[(event_fifo_tail + offset) & ASYNC_EVENT_FIFO_QUEUE_MASK];
-    
+
     memcpy(evt, tail, sizeof(async_event_t));
-    
+
     return NRF_SUCCESS;
 }
 
@@ -243,7 +243,7 @@ static void async_event_execute(async_event_t* evt)
 
 /**
 * @brief Timeslot related events callback
-*   Called whenever the softdevice tries to change the original course of actions 
+*   Called whenever the softdevice tries to change the original course of actions
 *   related to the timeslots
 */
 void ts_sd_event_handler(void)
@@ -256,26 +256,26 @@ void ts_sd_event_handler(void)
         switch (evt)
         {
             case NRF_EVT_RADIO_SESSION_IDLE:
-                
+
                 timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
                 break;
-            
+
             case NRF_EVT_RADIO_SESSION_CLOSED:
                 APP_ERROR_CHECK(NRF_ERROR_INVALID_DATA);
-                
+
                 break;
-            
+
             case NRF_EVT_RADIO_BLOCKED:
-                /* something in the softdevice is blocking our requests, 
-                go into emergency mode, where slots are short, in order to 
+                /* something in the softdevice is blocking our requests,
+                go into emergency mode, where slots are short, in order to
                 avoid complete lockout */
                 timeslot_order_earliest(TIMESLOT_SLOT_EMERGENCY_LENGTH, true);
                 break;
-            
+
             case NRF_EVT_RADIO_SIGNAL_CALLBACK_INVALID_RETURN:
                 APP_ERROR_CHECK(NRF_ERROR_INVALID_DATA);
                 break;
-            
+
             case NRF_EVT_RADIO_CANCELED:
                 timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
                 break;
@@ -287,19 +287,19 @@ void ts_sd_event_handler(void)
 }
 
 /**
-* @brief Timeslot end guard timer callback. Attempts to extend the timeslot. 
+* @brief Timeslot end guard timer callback. Attempts to extend the timeslot.
 */
 static void end_timer_handler(void)
 {
     /*static uint8_t noise_val = 0xA7;
     noise_val ^= 0x55 + (noise_val >> 1);
-    
+
     uint32_t extend_len = ((g_emergency_timeslot_mode)?
-                                TIMESLOT_SLOT_EMERGENCY_LENGTH : 
+                                TIMESLOT_SLOT_EMERGENCY_LENGTH :
                                 TIMESLOT_SLOT_LENGTH + noise_val * 50);*/
     timeslot_order_earliest(((g_timeslot_length > 100000)? 100000 : g_timeslot_length), true);
 }
-    
+
 
 
 #if USE_SWI_FOR_PROCESSING
@@ -322,7 +322,7 @@ void SWI1_IRQHandler(void)
 
 
 /**
-* @brief Radio signal callback handler taking care of all signals in searching 
+* @brief Radio signal callback handler taking care of all signals in searching
 *   mode
 */
 static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t sig)
@@ -330,93 +330,93 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
     g_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_NONE;
     g_is_in_callback = true;
     static uint32_t requested_extend_time = 0;
-    static uint32_t successful_extensions = 0;  
+    static uint32_t successful_extensions = 0;
     static uint8_t noise_val = 0x5F;
     SET_PIN(PIN_SYNC_TIME);
-    
+
     uint64_t time_now = 0;
-    
+
     switch (sig)
     {
         case NRF_RADIO_CALLBACK_SIGNAL_TYPE_START:
             NVIC_ClearPendingIRQ(SWI1_IRQn);
             g_is_in_timeslot = true;
-            
+
             event_fifo_flush();
             timer_init();
             SET_PIN(2);
             successful_extensions = 0;
-        
+
             g_negotiate_timeslot_length = g_timeslot_length;
-        
+
             g_timeslot_length = g_next_timeslot_length;
-        
-            g_timeslot_end_timer = 
-                timer_order_cb_sync_exec(g_timeslot_length - TIMESLOT_END_SAFETY_MARGIN_US, 
+
+            g_timeslot_end_timer =
+                timer_order_cb_sync_exec(g_timeslot_length - TIMESLOT_END_SAFETY_MARGIN_US,
                     end_timer_handler);
-            
-            
+
+
             /* attempt to extend our time right away */
             timeslot_extend(g_negotiate_timeslot_length);
-            
+
 #if USE_SWI_FOR_PROCESSING
             NVIC_EnableIRQ(SWI1_IRQn);
             NVIC_SetPriority(SWI1_IRQn, 3);
-#endif       
-        
+#endif
+
             /* sample RTC timer for trickle timing */
             time_now = NRF_RTC0->COUNTER - g_start_time_ref;
-            
-            /* scale to become us */     
+
+            /* scale to become us */
             time_now = ((time_now << 15) / 1000);
-            
+
             transport_control_timeslot_begin(time_now);
-        
+
             break;
-        
+
         case NRF_RADIO_CALLBACK_SIGNAL_TYPE_RADIO:
             /* send to radio control module */
             TICK_PIN(PIN_RADIO_SIGNAL);
             radio_event_handler();
             break;
-        
+
         case NRF_RADIO_CALLBACK_SIGNAL_TYPE_TIMER0:
             /* send to timer control module */
             TICK_PIN(PIN_TIMER_SIGNAL);
             timer_event_handler();
             break;
-            
+
         case NRF_RADIO_CALLBACK_SIGNAL_TYPE_EXTEND_SUCCEEDED:
             g_timeslot_length += requested_extend_time;
             requested_extend_time = 0;
             ++successful_extensions;
             g_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_NONE;
-        
+
             timer_abort(g_timeslot_end_timer);
-        
-            g_timeslot_end_timer = 
-                timer_order_cb_sync_exec(g_timeslot_length - TIMESLOT_END_SAFETY_MARGIN_US, 
+
+            g_timeslot_end_timer =
+                timer_order_cb_sync_exec(g_timeslot_length - TIMESLOT_END_SAFETY_MARGIN_US,
                     end_timer_handler);
-            
+
             TICK_PIN(1);
             if (g_timeslot_length + g_negotiate_timeslot_length < TIMESLOT_MAX_LENGTH)
             {
-                timeslot_extend(g_negotiate_timeslot_length);   
+                timeslot_extend(g_negotiate_timeslot_length);
             }
             else
             {
                 /* done extending, check for new trickle event */
                 transport_control_step();
             }
-        
+
             break;
-        
-        case NRF_RADIO_CALLBACK_SIGNAL_TYPE_EXTEND_FAILED:    
+
+        case NRF_RADIO_CALLBACK_SIGNAL_TYPE_EXTEND_FAILED:
             g_negotiate_timeslot_length >>= 2;
             TICK_PIN(1);
             if (g_negotiate_timeslot_length > 1000)
             {
-                timeslot_extend(g_negotiate_timeslot_length);        
+                timeslot_extend(g_negotiate_timeslot_length);
             }
             else
             {
@@ -424,12 +424,12 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
                 transport_control_step();
             }
             break;
-        
+
         default:
             APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
     }
-    
-    
+
+
     g_is_in_callback = false;
     if (g_ret_param.callback_action == NRF_RADIO_SIGNAL_CALLBACK_ACTION_EXTEND)
     {
@@ -445,7 +445,7 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
     {
         requested_extend_time = 0;
     }
-    
+
     CLEAR_PIN(PIN_SYNC_TIME);
     return &g_ret_param;
 }
@@ -458,13 +458,13 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
 void timeslot_handler_init(void)
 {
     uint32_t error;
-    
+
     g_is_in_callback = false;
     g_framework_initialized = true;
 
     error = sd_nvic_EnableIRQ(SD_EVT_IRQn);
     APP_ERROR_CHECK(error);
-    
+
     error = sd_radio_session_open(&radio_signal_callback);
     APP_ERROR_CHECK(error);
     g_start_time_ref = NRF_RTC0->COUNTER;
@@ -481,9 +481,9 @@ void timeslot_order_earliest(uint32_t length_us, bool immediately)
         radio_request_earliest.params.earliest.length_us = length_us;
         g_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_REQUEST_AND_END;
         g_ret_param.params.request.p_next = &radio_request_earliest;
-        
+
         g_next_timeslot_length = length_us;
-        
+
         if (!g_is_in_callback)
         {
             sd_radio_request(&radio_request_earliest);
@@ -494,7 +494,7 @@ void timeslot_order_earliest(uint32_t length_us, bool immediately)
         radio_request_earliest.params.earliest.length_us = length_us;
         //g_final_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_REQUEST_AND_END;
         //g_final_ret_param.params.request.p_next = &radio_request_earliest;
-        
+
         g_next_timeslot_length = length_us;
     }
 }
@@ -508,9 +508,9 @@ void timeslot_order_normal(uint32_t length_us, uint32_t distance_us, bool immedi
         radio_request_normal.params.normal.distance_us = distance_us;
         g_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_REQUEST_AND_END;
         g_ret_param.params.request.p_next = &radio_request_normal;
-        
+
         g_next_timeslot_length = length_us;
-        
+
         if (!g_is_in_callback)
         {
             sd_radio_request(&radio_request_normal);
@@ -522,7 +522,7 @@ void timeslot_order_normal(uint32_t length_us, uint32_t distance_us, bool immedi
         radio_request_normal.params.normal.distance_us = distance_us;
         //g_final_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_REQUEST_AND_END;
         //g_final_ret_param.params.request.p_next = &radio_request_normal;
-        
+
         g_next_timeslot_length = length_us;
     }
 }
@@ -560,7 +560,7 @@ uint32_t timeslot_get_remaining_time(void)
     {
         return 0;
     }
-    
+
     uint32_t timestamp = timer_get_timestamp();
     if (timestamp > g_timeslot_length - TIMESLOT_END_SAFETY_MARGIN_US)
     {
@@ -578,6 +578,6 @@ uint32_t timeslot_get_end_time(void)
     {
         return 0;
     }
-    
+
     return g_timeslot_length;
 }

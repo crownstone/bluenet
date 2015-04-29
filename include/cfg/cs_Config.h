@@ -17,7 +17,7 @@
 
 /* Command to enter the bootloader and stay there.
  *
- * This should be the same value as defined in the bootloader. 
+ * This should be the same value as defined in the bootloader.
  */
 #define COMMAND_ENTER_RADIO_BOOTLOADER           66
 

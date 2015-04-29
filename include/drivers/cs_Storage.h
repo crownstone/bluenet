@@ -101,7 +101,7 @@ struct ps_power_service_t : ps_storage_base_t {
 struct ps_general_service_t : ps_storage_base_t {
 	// device name
 	char device_name[MAX_STRING_SIZE];
-	// room name 
+	// room name
 	char room[MAX_STRING_SIZE];
 	// device type
 	char device_type[MAX_STRING_SIZE];
@@ -146,7 +146,7 @@ public:
 	 *   requested struct is stored, subsequent calls to read and write
 	 *   from the storage will take this parameter as input
 	 *
-	 * Get the handle to persistent memory for a given storage ID. 
+	 * Get the handle to persistent memory for a given storage ID.
 	 *
 	 * @return true if operation successful, false otherwise
 	 */

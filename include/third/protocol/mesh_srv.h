@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
 * @file Module handling all data storage related functionality.
-*   Stores the mesh values in the Softdevice GATT server, within a GATT 
+*   Stores the mesh values in the Softdevice GATT server, within a GATT
 *   service. Processes and assembles packet payloads for the mesh.
 */
 
@@ -65,7 +65,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 /**
-* @brief Radio packet type 
+* @brief Radio packet type
 */
 typedef struct
 {
@@ -76,7 +76,7 @@ typedef struct
 } packet_t;
 
 /**
-* @brief Mesh value metadata type 
+* @brief Mesh value metadata type
 */
 typedef struct
 {
@@ -91,7 +91,7 @@ typedef struct
 /**
 * @brief Global mesh metadata characteristic type
 */
-typedef struct 
+typedef struct
 {
     uint32_t mesh_access_addr; /* operating access address */
     uint32_t mesh_adv_int_ms; /* operating minimum advertisement interval */
@@ -100,36 +100,36 @@ typedef struct
 } mesh_metadata_char_t;
 
 /**
-* @brief initialize mesh service, and all related data. Must be called before 
+* @brief initialize mesh service, and all related data. Must be called before
 *   any other mesh_srv function.
 *
 * @param[in] mesh_value_count The number of mesh values to be allocated in the
 *   service. Is static for the lifetime of the node in the mesh.
-* @param[in] access_address The access address the node should try to find 
-*   other mesh nodes on. All nodes in the same mesh must use the same access 
+* @param[in] access_address The access address the node should try to find
+*   other mesh nodes on. All nodes in the same mesh must use the same access
 *   address.
-* @param[in] channel The channel the node should try to find other mesh nodes 
+* @param[in] channel The channel the node should try to find other mesh nodes
 *   on. All nodes in the same mesh must use the same channel.
-* @param[in] adv_int_ms The minimum advertisement interval the node should 
+* @param[in] adv_int_ms The minimum advertisement interval the node should
 *   utilize.
-* 
+*
 * @return NRF_SUCCESS The mesh service has been correctly set up.
-* @return NRF_ERROR_INVALID_PARAM The provided mesh_value_count parameter 
+* @return NRF_ERROR_INVALID_PARAM The provided mesh_value_count parameter
 *   exceeds the maximum number of mesh values.
-* @return NRF_ERROR_INVALID_STATE The mesh service has already been 
+* @return NRF_ERROR_INVALID_STATE The mesh service has already been
 *   initialized.
 */
-uint32_t mesh_srv_init(uint8_t mesh_value_count, 
+uint32_t mesh_srv_init(uint8_t mesh_value_count,
     uint32_t access_address, uint8_t channel, uint32_t adv_int_ms);
 
 /**
-* @brief Set contents of the indicated mesh value. 
-* 
+* @brief Set contents of the indicated mesh value.
+*
 * @param[in] index The index of the value that is to be changed.
 * @param[in] data The data to be put in the indicated value slot.
-* @param[in] len The length of the data provided. May not exceed 
+* @param[in] len The length of the data provided. May not exceed
 *   MAX_VALUE_LENGTH.
-* @param[in] update_sender Whether to overwrite the originator field for the 
+* @param[in] update_sender Whether to overwrite the originator field for the
 *   given handle with own address. If false, the previous version's originator
 *   will still stand as originator.
 *
@@ -145,10 +145,10 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
 * @brief Get contents located at indicated value index.
 *
 * @param[in] index The index of the value that is to be read
-* @param[out] data, buffer to copy value contents to. Must be at least 
+* @param[out] data, buffer to copy value contents to. Must be at least
 *   MAX_VALUE_LENGTH long to ensure safe operation.
 * @param[out] len Returns the length of the copied data
-* @param[out] origin_addr Returns the BLE GAP address at which the current 
+* @param[out] origin_addr Returns the BLE GAP address at which the current
 *   version of this handle was first broadcasted.
 *
 * @return NRF_SUCCESS The value was successfully read
@@ -160,37 +160,37 @@ uint32_t mesh_srv_char_val_get(uint8_t index, uint8_t* data, uint16_t* len, ble_
 
 /**
 * @brief Get contents of mesh metadata characteristic
-* 
-* @param[out] metadata pointer to metadata type structure to copy the 
+*
+* @param[out] metadata pointer to metadata type structure to copy the
 *   metadata into.
-* 
-* @return NRF_SUCCESS the metadata was successfully read 
+*
+* @return NRF_SUCCESS the metadata was successfully read
 * @return NRF_ERROR_INVALID_STATE The mesh service has not been initialized.
 */
 uint32_t mesh_srv_char_md_get(mesh_metadata_char_t* metadata);
 
 /**
-* @brief Get the timestamp of the next time the mesh service has something to 
+* @brief Get the timestamp of the next time the mesh service has something to
 *   process, based on internal trickle instances.
-* 
-* @param[out] time Returns the timestamp at which the next processing is 
+*
+* @param[out] time Returns the timestamp at which the next processing is
 *   scheduled.
 *
 * @return NRF_SUCCESS The next processing time has succesfully been read.
 * @return NRF_ERROR_INVALID_STATE The mesh service has not been initialized.
-* @return NRF_ERROR_NOT_FOUND The mesh service has nothing to process. May 
+* @return NRF_ERROR_NOT_FOUND The mesh service has nothing to process. May
 *   indicate that there are no active mesh values.
 */
 uint32_t mesh_srv_get_next_processing_time(uint32_t* time);
 
 /**
-* @brief Process the payload of a received packet. 
-* 
-* @param[in] packet Pointer to packet to be processed 
-* 
+* @brief Process the payload of a received packet.
+*
+* @param[in] packet Pointer to packet to be processed
+*
 * @return NRF_SUCCESS The packet was processed successfully
 * @return NRF_ERROR_INVALID_STATE The mesh service has not been initialized.
-* @return NRF_ERROR_INVALID_LENGTH The length of the mesh value in the packet 
+* @return NRF_ERROR_INVALID_LENGTH The length of the mesh value in the packet
 *   is longer than MAX_VALUE_LENGTH
 * @return NRF_ERROR_INVALID_ADDR The index indicated in the packet is not in
 *   the range of handles this node services.
@@ -198,70 +198,70 @@ uint32_t mesh_srv_get_next_processing_time(uint32_t* time);
 uint32_t mesh_srv_packet_process(packet_t* packet);
 
 /**
-* @brief Register an update to the current softdevice connection handle. The 
+* @brief Register an update to the current softdevice connection handle. The
 *   mesh service needs this in order to provide GATT indication on new value
 *   updates.
-* 
+*
 * @param[in] conn_handle The new connection handle.
-* 
+*
 * @return NRF_SUCCESS the conn_handle was successfully updated.
 */
 uint32_t mesh_srv_conn_handle_update(uint16_t conn_handle);
 
 /**
-* @brief fills databuffer in the provided packet object with any mesh service 
+* @brief fills databuffer in the provided packet object with any mesh service
 *    that is to be sent. Indicates sending with the anything_to_send flag
 *
-* @param[in,out] packet Packet to be filled. data member must point to 
+* @param[in,out] packet Packet to be filled. data member must point to
 *    existing databuffer (i.e. not NULL)
-* @param[in] packet_max_len Maximum permitted length of message 
+* @param[in] packet_max_len Maximum permitted length of message
 *    (length of packet->data)
-* @param[out] has_anything_to_send Set to true if any operation was performed 
+* @param[out] has_anything_to_send Set to true if any operation was performed
 *    on the data buffer
-* 
+*
 * @return NRF_SUCCESS the packet was successfully assembled
 * @return NRF_ERROR_INVALID_STATE The mesh service has not been initialized.
 */
-uint32_t mesh_srv_packet_assemble(packet_t* packet, 
-    uint16_t packet_max_len, 
+uint32_t mesh_srv_packet_assemble(packet_t* packet,
+    uint16_t packet_max_len,
     bool* has_anything_to_send);
-    
+
 /**
-* @brief Register a Softdevice GATT Write event. Called from the softdevice 
+* @brief Register a Softdevice GATT Write event. Called from the softdevice
 *   event handler. Will filter out all non-related handles.
 *
 * @param[in] evt The Softdevice produced GATT server write event
-* 
+*
 * @return NRF_SUCCESS The GATT server event was successfully processed
 * @return NRF_ERROR_INVALID_STATE The mesh service has not been initialized.
 * @return NRF_ERROR_FORBIDDEN The service written to is not the mesh service.
 * @return NRF_ERROR_INVALID_ADDR The indicated characteristic was in the range
-*   of the mesh service, but did not belong to any characteristic values 
+*   of the mesh service, but did not belong to any characteristic values
 *   (may be a write to CCCD)
 */
 uint32_t mesh_srv_gatts_evt_write_handle(ble_gatts_evt_write_t* evt);
 
 /**
-* @brief Initialize the mesh value with the given handle. Initializes 
+* @brief Initialize the mesh value with the given handle. Initializes
 *   its trickle algorithm instance, starting broadcasting of the value.
-* 
+*
 * @param[in] index The index of the value that we wish to initialize.
 *
 * @return NRF_SUCCESS The value was successfully initilalized.
 * @return NRF_ERROR_INVALID_STATE The mesh service has not been initialized.
-* @return NRF_ERROR_INVALID_ADDR The indicated index is outside the range 
+* @return NRF_ERROR_INVALID_ADDR The indicated index is outside the range
 *   specified in the init function call.
 */
 uint32_t mesh_srv_char_val_enable(uint8_t index);
 
 /**
 * @brief Flag the value as disabled. It will no longer be rebroadcasted.
-* 
+*
 * @param[in] index The index of the value to be disabled.
-* 
+*
 * @return NRF_SUCCESS The value was successfully disabled.
 * @return NRF_ERROR_INVALID_STATE The mesh service has not been initialized.
-* @return NRF_ERROR_INVALID_ADDR The indicated index is outside the range 
+* @return NRF_ERROR_INVALID_ADDR The indicated index is outside the range
 *   specified in the init function call.
 */
 uint32_t mesh_srv_char_val_disable(uint8_t index);
