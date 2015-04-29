@@ -11,7 +11,6 @@
 
 //#include <common/cs_Types.h>
 
-#include "structs/cs_CurrentLimit.h"
 //#include "characteristics/cs_UuidConfig.h"
 #include "structs/cs_CurrentCurve.h"
 #include "drivers/cs_Storage.h"
