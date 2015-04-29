@@ -81,10 +81,10 @@ public:
 		_buffer = NULL;
 	}
 
-	/* Create a string from payload. 
+	/* Create a string from payload.
 	 *
 	 * This creates a C++ string from the uint8_t payload array. Note that this not always makes sense! It will
-	 * use the length field to establish the length of the array to be used. So, the array does not have to 
+	 * use the length field to establish the length of the array to be used. So, the array does not have to
 	 * have a null-terminated byte.
 	 */
 	ERR_CODE toString(std::string &str) {
@@ -100,7 +100,7 @@ public:
 	 *
 	 * @str the string with which the buffer should be filled
 	 *
-	 * 
+	 *
 	 */
 	ERR_CODE fromString(std::string& str) {
 		if (str.length() > (_max_items * _item_size)) {
@@ -154,7 +154,7 @@ public:
 	 *
 	 * @return the type, see <ConfigurationTypes>
 	 */
-	inline uint8_t type() const { return _buffer->type; } 
+	inline uint8_t type() const { return _buffer->type; }
 
 	/* Get the length/size of the payload in number of elements
 	 *
@@ -190,7 +190,7 @@ public:
 			LOGe("Buffer not initialized!");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
-		if (length > _max_items) { 
+		if (length > _max_items) {
 			LOGe("Buffer is not large enough");
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}

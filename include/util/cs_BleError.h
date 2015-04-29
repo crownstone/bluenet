@@ -30,7 +30,7 @@ void assert_nrf_callback (uint16_t line_num, const uint8_t *file_name);
 //called by soft device when it has an internal error.
 void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name);
 
-/**@brief Macro for calling error handler function. 
+/**@brief Macro for calling error handler function.
  *
  * @param[in] ERR_CODE Error code supplied to the error handler.
  */

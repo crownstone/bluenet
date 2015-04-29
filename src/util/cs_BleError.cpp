@@ -33,7 +33,7 @@ void assert_nrf_callback (uint16_t line_num, const uint8_t *file_name) {
 }
 
 /*
- 
+
 //called by soft device when it has an internal error.
 void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name){
 	volatile uint16_t line __attribute__((unused)) = line_num;

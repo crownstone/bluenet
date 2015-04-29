@@ -73,7 +73,7 @@ void SWI5_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 
 __attribute__ ((section(".vectors"), used))
 void (* const gVectors[])(void) =
-{        
+{
 	(void (*)(void))((unsigned long)&_estack),	//  0 ARM: Initial Stack Pointer
 	ResetHandler,					//  1 ARM: Initial Program Counter
 	NMI_Handler,
@@ -130,11 +130,11 @@ void (* const gVectors[])(void) =
 __attribute__ ((section(".startup")))
 void ResetHandler(void) {
 
-	// Enable all RAM banks. 
+	// Enable all RAM banks.
 	// See PAN_028_v1.6.pdf "16. POWER: RAMON reset value causes problems under certain conditions"
 	NRF_POWER->RAMON |= 0xF;
 
-	// Enable Peripherals. 
+	// Enable Peripherals.
 	// See PAN_028_v1.6.pdf "25. System: Manual setup is required to enable use of peripherals"
 	// WARNING. This is only true for OLD hardware (check with ./scripts/hardware_version.sh)
 	// For new hardware this DISABLES for example the LPCOMP peripheral
@@ -149,9 +149,9 @@ void ResetHandler(void) {
 	// start up crystal LF clock.
 //#ifdef RFDUINO
 	/**
-	 * The RFduino synthesizes the low frequency clock from the high frequency clock. There is no external crystal 
-	 * that can be used. It doesn't seem from the datasheets that there is a pin open for a crystal... 
-	 * Synthesizing the clock is of course not very energy efficient. 
+	 * The RFduino synthesizes the low frequency clock from the high frequency clock. There is no external crystal
+	 * that can be used. It doesn't seem from the datasheets that there is a pin open for a crystal...
+	 * Synthesizing the clock is of course not very energy efficient.
 	 *
 	 * Clock runs on 32768 Hz and is generated from the 16 MHz system clock
 	 */
@@ -163,8 +163,8 @@ void ResetHandler(void) {
 	while(!NRF_CLOCK->EVENTS_LFCLKSTARTED) /* wait */;
 
 	/*
-	 * There are two power modes in the nRF51, system ON, and system OFF. The former has two sub power modes. The 
-	 * first is called "Constant Latency", the second is called "Low Power". The latter is saving most of the 
+	 * There are two power modes in the nRF51, system ON, and system OFF. The former has two sub power modes. The
+	 * first is called "Constant Latency", the second is called "Low Power". The latter is saving most of the
 	 * power, the former keeps the CPU wakeup latency and automated task response at a minimum, but some resources
 	 * will be kept active when the device is in sleep mode, such as the 16MHz clock.
 	 */

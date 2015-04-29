@@ -19,16 +19,16 @@ extern "C" {
 #include <protocol/led_config.h>
 
 /**
- * Event handler on receiving a message from 
+ * Event handler on receiving a message from
  */
-void rbc_mesh_event_handler(rbc_mesh_event_t* evt)                  
-{                              
-	TICK_PIN(28);                          
+void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
+{
+	TICK_PIN(28);
 	//nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
-	switch (evt->event_type)                       
-	{                             
-		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:                  
-		case RBC_MESH_EVENT_TYPE_NEW_VAL:                    
+	switch (evt->event_type)
+	{
+		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
+		case RBC_MESH_EVENT_TYPE_NEW_VAL:
 		case RBC_MESH_EVENT_TYPE_UPDATE_VAL: {
 
             if (evt->value_handle > 2)
@@ -44,7 +44,7 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
         default:
             LOGi("Default: %i", evt->event_type);
             break;
-	}                             
+	}
 }
 
 }
@@ -94,8 +94,8 @@ void CMesh::send(uint8_t handle, uint32_t value) {
 
 // returns last received message
 uint32_t CMesh::receive(uint8_t handle) {
-	uint8_t val[28];                       
-	uint16_t len;                        
+	uint8_t val[28];
+	uint16_t len;
 	APP_ERROR_CHECK(rbc_mesh_value_get(handle, val, &len, NULL));
 	if (!len) return 0;
 	return (uint32_t)val[0];

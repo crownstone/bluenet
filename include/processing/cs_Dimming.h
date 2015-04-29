@@ -12,7 +12,7 @@
 #include <events/cs_Listener.h>
 
 /**
- * Dimming of LEDs is by a simple duty cycle of the 230V/110V sine signal. 
+ * Dimming of LEDs is by a simple duty cycle of the 230V/110V sine signal.
  */
 class Dimming: public Listener {
 public:
@@ -22,7 +22,7 @@ public:
 
 	void configure();
 
-	// We get a dispatch from the ZeroCrossing utility 
+	// We get a dispatch from the ZeroCrossing utility
 	void handleEvent() {
 		zeroCrossing();
 	}

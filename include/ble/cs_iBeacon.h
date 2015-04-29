@@ -13,7 +13,7 @@ namespace BLEpp {
 
 /* Implementation of the iBeacon specification.
  *
- * The implementation of the iBeacon specification is only about advertising at predefined intervals and 
+ * The implementation of the iBeacon specification is only about advertising at predefined intervals and
  * casting a payload (the manufacturing data of an advertisement package) in the form of a specific
  * structure:
  *

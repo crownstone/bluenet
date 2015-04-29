@@ -53,7 +53,7 @@ public:
 	/* Update the configuration characteristic.
 	 * @type configuration type to read
 	 *
-	 * Persistent memory can be used to store multiple types of objects. The "name" of the device is one type for 
+	 * Persistent memory can be used to store multiple types of objects. The "name" of the device is one type for
 	 * example, the "floor" is another. Type here specifies the category of the entity to be retrieved from FLASH.
 	 */
 	bool readFromStorage(uint8_t type);
@@ -66,7 +66,7 @@ public:
 	void writeToConfigCharac();
 
 	/* Write configuration to FLASH.
-	 * @type configuration type to write 
+	 * @type configuration type to write
 	 * @length length of the data to write to FLASH
 	 * @payload the data itself to write to FLASH
 	 *
@@ -78,8 +78,8 @@ public:
 
 	/* Perform non urgent functionality every main loop.
 	 *
-	 * Every component has a "tick" function which is for non-urgent things. Urgent matters have to be 
-	 * resolved immediately in interrupt service handlers. The temperature for example is updated every 
+	 * Every component has a "tick" function which is for non-urgent things. Urgent matters have to be
+	 * resolved immediately in interrupt service handlers. The temperature for example is updated every
 	 * tick, because timing is not important for this at all.
 	 */
 	void tick();
@@ -88,7 +88,7 @@ public:
 	void stopTicking();
 
 	/* Initialize a GeneralService object
-	 * 
+	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
 	void init();
@@ -127,10 +127,10 @@ protected:
 	 * established:
 	 *
 	 *  * 0 name
-	 *  * 1 device type 
+	 *  * 1 device type
 	 *  * 2 room
 	 *  * 3 floor level
-	 *  
+	 *
 	 * As you see these are similar to current characteristics and will replace them in the future to save space.
 	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
 	 */
@@ -146,7 +146,7 @@ protected:
 	/* Get configuration characteristic
 	 *
 	 * You will have first to select a configuration before you can read from it. You write the identifiers also
-	 * described in <_setConfigurationCharacteristic>. 
+	 * described in <_setConfigurationCharacteristic>.
 	 *
 	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
 	 */
@@ -191,15 +191,15 @@ protected:
 	std::string&  getBLEName();
 	/* Write the Bluetooth name to the object representing the BLE stack.
 	 *
-	 * This updates the Bluetooth name immediately, however, it does not update the name persistently. It 
+	 * This updates the Bluetooth name immediately, however, it does not update the name persistently. It
 	 * has to be written to FLASH in that case.
 	 */
 	void setBLEName(const std::string &name);
 
 	/* Get a handle to the persistent storage struct and load it from FLASH.
 	 *
-	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that 
-	 * writing less than a minimal block strains the memory just as much as flashing the entire block. 
+	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
+	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
 	 * Hence, there is an entire struct that can be filled and flashed at once.
 	 */
 	void loadPersistentStorage();

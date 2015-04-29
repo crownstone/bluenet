@@ -47,7 +47,7 @@ if { $command == "all" } {
 	expect -re ">"
 }
 
-send "flash write_image erase $bindir/$binary $address\r" 
+send "flash write_image erase $bindir/$binary $address\r"
 
 # Expect this to be written
 expect "wrote"

@@ -6,7 +6,7 @@ r
 Sleep 500
 w4 4001e504 2
 sleep 1000
-w4 4001e50c 1    
+w4 4001e50c 1
 sleep 1000
 r
 w4 4001e504 1

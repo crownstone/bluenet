@@ -26,7 +26,7 @@
 uint32_t ADC::init(uint8_t pin) {
 #if(NRF51_USE_SOFTDEVICE == 1)
 	LOGd("Run ADC converter with SoftDevice");
-#else 
+#else
 	LOGd("Run ADC converter without SoftDevice!!!");
 	
 #endif
@@ -70,7 +70,7 @@ uint32_t ADC::init(uint8_t pin) {
 /* Configure the AD converter.
  *
  *   - set the resolution to 10 bits
- *   - set the prescaler for the input voltage (the input, not the input supply) 
+ *   - set the prescaler for the input voltage (the input, not the input supply)
  *   - use the internal VGB reference (not the external one, so no need to use its multiplexer either)
  *   - do not set the prescaler for the reference voltage, this means voltage is expected between 0 and 1.2V (VGB)
  * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.

@@ -63,7 +63,7 @@ uint8_t read_uart() {
 }
 
 /**
- * A write function with a format specifier. 
+ * A write function with a format specifier.
  */
 int write(const char *str, ...) {
 	char buffer[128];

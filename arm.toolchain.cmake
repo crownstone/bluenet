@@ -1,5 +1,5 @@
 #######################################################################################################################
-# The build systems uses CMake. All the automatically generated code falls under the Lesser General Public License 
+# The build systems uses CMake. All the automatically generated code falls under the Lesser General Public License
 # (LGPL GNU v3), the Apache License, or the MIT license, your choice.
 #
 # Author:	 Anne C. van Rossum (Distributed Organisms B.V.)
@@ -24,7 +24,7 @@ INCLUDE(${CONFIG_FILE})
 
 UNSET(CMAKE_TRY_COMPILE_CONFIGURATION)
 
-# type of compiler we want to use 
+# type of compiler we want to use
 SET(COMPILER_TYPE_PREFIX ${COMPILER_TYPE}-)
 
 # The extension .obj is just ugly, set it back to .o (does not work)
@@ -55,8 +55,8 @@ SET(CMAKE_C_FLAGS                                "-std=gnu99"                   
 SET(CMAKE_SHARED_LINKER_FLAGS                    ""                                              CACHE STRING "shared linker flags")
 SET(CMAKE_MODULE_LINKER_FLAGS                    ""                                              CACHE STRING "module linker flags")
 SET(CMAKE_EXE_LINKER_FLAGS                       "-Wl,-z,nocopyreloc"                            CACHE STRING "executable linker flags")
-SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS            "") 
-SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "") 
+SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS            "")
+SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "")
 
 # Collect flags that have to do with optimization, optimize for size for now
 #SET(FLAG_MATH "-ffast-math")
@@ -133,8 +133,8 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=cortex-m0 -m
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=cortex-m0 -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
 
 # Tell the linker that we use a special memory layout
-SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld") 
-SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf") 
+SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
+SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
 
 # http://public.kitware.com/Bug/view.php?id=12652
 # CMake does send the compiler flags also to the linker
@@ -169,7 +169,7 @@ SET(CMAKE_INCLUDE_PATH ${DESTDIR}/usr/local/include)
 MESSAGE(STATUS "Add include path: ${CMAKE_INCLUDE_PATH}")
 
 # indicate where the linker is allowed to search for library / headers
-SET(CMAKE_FIND_ROOT_PATH 
+SET(CMAKE_FIND_ROOT_PATH
 	#${ARM_LINUX_SYSROOT}
 	${DESTDIR})
 #SET(CMAKE_FIND_ROOT_PATH ${CMAKE_FIND_ROOT_PATH} ${ARM_LINUX_SYSROOT})

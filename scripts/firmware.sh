@@ -22,7 +22,7 @@ build() {
 }
 
 upload() {
-	${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.hex 
+	${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.hex
 	if [ $? -eq 0 ]; then
 		echo "Error with uploading"
 		exit 1
@@ -36,7 +36,7 @@ debug() {
 
 all() {
 	build
-	if [ $? -eq 0 ]; then 
+	if [ $? -eq 0 ]; then
 		sleep 1
 		upload
 		sleep 1
@@ -46,7 +46,7 @@ all() {
 
 run() {
 	build
-	if [ $? -eq 0 ]; then 
+	if [ $? -eq 0 ]; then
 		sleep 1
 		upload
 	fi
@@ -65,14 +65,14 @@ bootloader() {
 	# so perhaps first flash the binary and then the bootloader
 	${path}/firmware.sh upload bootloader 0x00034000
 	
-	if [ $? -eq 0 ]; then 
+	if [ $? -eq 0 ]; then
 		sleep 1
 		# and set to load it
 		${path}/writebyte.sh 0x10001014 0x00034000
 	fi
 }
 
-case "$cmd" in 
+case "$cmd" in
 	build)
 		build
 		;;

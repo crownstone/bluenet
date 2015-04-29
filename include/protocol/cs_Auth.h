@@ -6,6 +6,6 @@
  */
 
 /**
- * TODO: Authentication code for Bluetooth. This concerns services that can be shown to devices depending on the 
- * information coming from that device. It does not need to be the case that the same services are shown to all users! 
+ * TODO: Authentication code for Bluetooth. This concerns services that can be shown to devices depending on the
+ * information coming from that device. It does not need to be the case that the same services are shown to all users!
  */

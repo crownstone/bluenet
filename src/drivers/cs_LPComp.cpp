@@ -45,7 +45,7 @@ LPComp::~LPComp() {
 uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 #if(NRF51_USE_SOFTDEVICE == 1)
 	LOGd("Run LPComp with SoftDevice");
-#else 
+#else
 	LOGd("Run LPComp without SoftDevice!!!");
 #endif
 

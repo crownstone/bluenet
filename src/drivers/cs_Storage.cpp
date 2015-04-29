@@ -24,7 +24,7 @@
 
 extern "C" {
 
-static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data, 
+static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
 		uint32_t data_len) {
 	// we might want to check if things are actually stored, by using this callback	
 	if (result != NRF_SUCCESS) {

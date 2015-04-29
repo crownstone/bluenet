@@ -283,7 +283,7 @@ bool GeneralService::readFromStorage(uint8_t type) {
 	case CONFIG_NAME_UUID: {
 		LOGd("Read name");
 		std::string str; // = getBLEName();
-		Storage::getString(_storageStruct.device_name, str, getBLEName()); 
+		Storage::getString(_storageStruct.device_name, str, getBLEName());
 		_streamBuffer->fromString(str);
 		_streamBuffer->setType(type);
 

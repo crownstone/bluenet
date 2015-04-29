@@ -218,7 +218,7 @@ uint8_t PowerService::getCurrentLimit() {
 	LOGi("Obtained current limit from FLASH: %i", _currentLimitVal);
 	return _currentLimitVal;
 }
- 
+
  void PowerService::setCurrentLimit(uint8_t value) {
 			LOGi("Set current limit to: %i", value);
 			_currentLimitVal = value;
@@ -233,11 +233,11 @@ uint8_t PowerService::getCurrentLimit() {
 			Storage::setUint8(_currentLimitVal, _storageStruct.current_limit);
 			savePersistentStorage();
  }
- 
+
 /**
  * The characteristic that writes a current limit to persistent memory.
  *
- * TODO: Check https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/ 
+ * TODO: Check https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/
  *       Writing to persistent memory should be done between connection/advertisement events...
  */
 void PowerService::addCurrentLimitCharacteristic() {

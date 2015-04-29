@@ -38,11 +38,11 @@
 #define BLE_CHAR_PWM                             "PWM"
 
 /* Error messages
- * 
- * Keep them concise. These shouldn't be part of the heap, only of the stack, and they contribute to code size. 
+ *
+ * Keep them concise. These shouldn't be part of the heap, only of the stack, and they contribute to code size.
  */
 #define MSG_NAME_TOO_LONG                        "Name is too long."
-#define MSG_STACK_UNDEFINED                      "Stack is undefined." 
+#define MSG_STACK_UNDEFINED                      "Stack is undefined."
 #define MSG_BUFFER_IS_LOCKED                     "Buffer is locked."
 #define MSG_CHAR_VALUE_UNDEFINED                 "Characteristic value is undefined"
 #define MSG_CHAR_VALUE_WRITE                     "Characteristic value is being written"
