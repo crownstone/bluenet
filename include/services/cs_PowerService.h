@@ -19,7 +19,7 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 //#include "drivers/cs_ADC.h"
-//#include "drivers/cs_LPComp.h"
+#include "drivers/cs_LPComp.h"
 //#include "drivers/cs_RTC.h"
 
 #define POWER_SERVICE_UPDATE_FREQUENCY 10 // hz
@@ -85,6 +85,7 @@ protected:
 	/* Get the stored current limit.
 	 */
 	uint8_t getCurrentLimit();
+	void setCurrentLimit(uint8_t value);
 
 	/* Get a handle to the persistent storage struct and load it from FLASH.
 	 *
@@ -108,7 +109,6 @@ private:
 	CurrentCurve<uint16_t>* _currentCurve;
 
 	uint8_t _currentLimitVal;
-	CurrentLimit _currentLimit;
 
 	pstorage_handle_t _storageHandle;
 	ps_power_service_t _storageStruct;

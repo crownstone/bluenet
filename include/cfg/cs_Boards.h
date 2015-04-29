@@ -138,7 +138,7 @@
 
 #define PIN_GPIO_SWITCH      18                  // this is p0.18 or gpio 18
 #define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
-#define PIN_AIN_LPCOMP       3                   // ain3 is p0.02 or gpio 2
+#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 #define PIN_GPIO_RX          11                  // this is p0.11 or gpio 11
 #define PIN_GPIO_TX          9                   // this is p0.09 or gpio 9
