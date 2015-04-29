@@ -30,13 +30,8 @@ class LPComp: public Dispatcher {
 		void start();
 		void stop();
 
-		Event_t getLastEvent() { return _lastEvent; }
-
 		// function to be called from interrupt, do not do much there!
-		void update(Event_t event);
-
-		// each program tick, we have time to dispatch events e.g.
-		void tick();
+		void interrupt();
 
 	protected:
 
@@ -46,5 +41,4 @@ class LPComp: public Dispatcher {
 		void operator=(LPComp const &); // singleton, deny implementation
 		~LPComp();
 
-		Event_t _lastEvent;
 };

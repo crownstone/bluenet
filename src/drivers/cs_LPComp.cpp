@@ -21,6 +21,9 @@
 
 #include "cs_nRF51822.h"
 
+#include "nrf_delay.h"
+	
+
 LPComp::LPComp() {
 
 }
@@ -55,7 +58,7 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 		NRF_LPCOMP->INTENSET = LPCOMP_INTENSET_DOWN_Enabled << LPCOMP_INTENSET_DOWN_Pos;
 		break;
 	default:
-		LOGf("Choose an event to listen for");
+		LOGf("Choose an event to listen for: LPC_CROSS, LPC_UP or LPC_DOWN");
 		APP_ERROR_CHECK(0xFFFFFFFF); // error
 		break;
 	}
@@ -84,7 +87,7 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 #endif
 
 	LOGd("Configure LPComp on ain %u, level %u", pin, level);
-	if (level < 7) {
+	if (level < 7) {  
 		NRF_LPCOMP->REFSEL = level; // See LPCOMP_REFSEL_REFSEL_SupplyOneEighthPrescaling
 	}
 	else {
@@ -101,11 +104,7 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 //	// TODO: don't know if we need this..
 //	// Wait for the LCOMP config to have effect
 //	nrf_delay_us(100);
-//
-//
-//	// TODO: don't know if we need this..
-//	// Wait for the LCOMP config to have effect
-//	nrf_delay_us(100);
+
 
 	NRF_LPCOMP->POWER = LPCOMP_POWER_POWER_Enabled << LPCOMP_POWER_POWER_Pos;
 	NRF_LPCOMP->ENABLE = LPCOMP_ENABLE_ENABLE_Enabled << LPCOMP_ENABLE_ENABLE_Pos; // Pin will be configured as analog input
@@ -118,12 +117,13 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
  */
 void LPComp::stop() {
 	// TODO: should we clear pending interrupts?
-	#if(NRF51_USE_SOFTDEVICE == 1)
-		APP_ERROR_CHECK(sd_nvic_ClearPendingIRQ(LPCOMP_IRQn));
-	#else
-		NVIC_ClearPendingIRQ(LPCOMP_IRQn);
-	#endif
+#if(NRF51_USE_SOFTDEVICE == 1)
+	APP_ERROR_CHECK(sd_nvic_ClearPendingIRQ(LPCOMP_IRQn));
+#else
+	NVIC_ClearPendingIRQ(LPCOMP_IRQn);
+#endif
 	NRF_LPCOMP->TASKS_STOP = 1;
+	nrf_delay_us(100);
 }
 
 /**
@@ -134,23 +134,13 @@ void LPComp::start() {
 	NRF_LPCOMP->EVENTS_UP = 0;
 	NRF_LPCOMP->EVENTS_DOWN = 0;
 	NRF_LPCOMP->EVENTS_CROSS = 0;
-	_lastEvent = LPC_NONE;
 	NRF_LPCOMP->TASKS_START = 1;
 }
 
 
-void LPComp::update(Event_t event) {
-	_lastEvent = event;
-//	// Test
-//	LOGd("update!");
-//	PWM::getInstance().setValue(0, 0);
-}
-
-void LPComp::tick() {
-	if (_lastEvent != LPC_NONE) {
-		dispatch();
-		_lastEvent = LPC_NONE;
-	}
+void LPComp::interrupt() {
+	LOGi("interrupt!");
+	PWM::getInstance().setValue(0, 0);
 }
 
 
@@ -165,7 +155,7 @@ extern "C" void WUCOMP_COMP_IRQHandler(void) {
 //	}
 	if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_CROSS_Msk) != 0 && NRF_LPCOMP->EVENTS_CROSS != 0) {
 		LPComp &lpcomp = LPComp::getInstance();
-		lpcomp.update(LPComp::LPC_CROSS);
+		lpcomp.interrupt();
 
 		// Continue
 		NRF_LPCOMP->EVENTS_CROSS = 0;
@@ -173,7 +163,7 @@ extern "C" void WUCOMP_COMP_IRQHandler(void) {
 	}
 	else if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_UP_Msk) != 0 && NRF_LPCOMP->EVENTS_UP != 0) {
 		LPComp &lpcomp = LPComp::getInstance();
-		lpcomp.update(LPComp::LPC_UP);
+		lpcomp.interrupt();
 
 		// Continue
 		NRF_LPCOMP->EVENTS_UP = 0;
@@ -181,7 +171,7 @@ extern "C" void WUCOMP_COMP_IRQHandler(void) {
 	}
 	else if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_DOWN_Msk) != 0 && NRF_LPCOMP->EVENTS_DOWN > 0) {
 		LPComp &lpcomp = LPComp::getInstance();
-		lpcomp.update(LPComp::LPC_DOWN);
+		lpcomp.interrupt();
 
 		// Continue
 		NRF_LPCOMP->EVENTS_DOWN = 0;

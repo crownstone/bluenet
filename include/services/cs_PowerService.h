@@ -9,7 +9,6 @@
 #include "third/std/function.h"
 #include <vector>
 
-#include "characteristics/cs_CurrentLimit.h"
 #include "characteristics/cs_UuidConfig.h"
 #include "characteristics/cs_CurrentCurve.h"
 #include "common/cs_Storage.h"
@@ -63,7 +62,7 @@ protected:
 	void addPWMCharacteristic();
 	void addSampleCurrentCharacteristic();
 	void addCurrentCurveCharacteristic();
-	void addCurrentConsumptionCharacteristic();
+	void addCurrentConsumptionCharacteristic();	
 	void addCurrentLimitCharacteristic();
 
 	/* Initializes and starts the ADC
@@ -78,6 +77,7 @@ protected:
 	/* Get the stored current limit.
 	 */
 	uint8_t getCurrentLimit();
+	void setCurrentLimit(uint8_t value);
 
 	/* Get a handle to the persistent storage struct and load it from FLASH.
 	 *
@@ -101,7 +101,6 @@ private:
 	CurrentCurve<uint16_t>* _currentCurve;
 
 	uint8_t _currentLimitVal;
-	CurrentLimit _currentLimit;
 
 	pstorage_handle_t _storageHandle;
 	ps_power_service_t _storageStruct;

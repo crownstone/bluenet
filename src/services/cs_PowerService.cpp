@@ -64,10 +64,10 @@ void PowerService::init() {
 #endif
 
 #if CHAR_CURRENT_LIMIT==1
-	LOGi("add Current Limit Characteristic");
+	LOGi("add Current Limitation");
 	addCurrentLimitCharacteristic();
 #else
-	LOGi("skip Current Limit Characteristic");
+	LOGi("skip Current Limitation");
 #endif
 }
 
@@ -176,6 +176,22 @@ uint8_t PowerService::getCurrentLimit() {
  * TODO: Check https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/ 
  *       Writing to persistent memory should be done between connection/advertisement events...
  */
+ 
+ void PowerService::setCurrentLimit(uint8_t value) {
+			LOGi("Set current limit to: %i", value);
+			_currentLimitVal = value;
+			//if (!_currentLimitInitialized) {
+				//_currentLimit.init();
+				//_currentLimitInitialized = true;
+			//}
+			LPComp::getInstance().stop();
+			LPComp::getInstance().config(PIN_AIN_LPCOMP, _currentLimitVal, LPComp::LPC_UP);
+			LPComp::getInstance().start();	 
+			LOGi("Write value to persistent memory");
+			Storage::setUint8(_currentLimitVal, _storageStruct.current_limit);
+			savePersistentStorage();
+ }
+ 
 void PowerService::addCurrentLimitCharacteristic() {
 	_currentLimitCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_currentLimitCharacteristic);
@@ -184,18 +200,9 @@ void PowerService::addCurrentLimitCharacteristic() {
 	_currentLimitCharacteristic->setName("Current Limit");
 	_currentLimitCharacteristic->setDefaultValue(getCurrentLimit());
 	_currentLimitCharacteristic->setWritable(true);
-		//.onWrite([&](const uint8_t &value) -> void {
 	_currentLimitCharacteristic->onWrite([&](const uint8_t& value) -> void {
-			LOGi("Set current limit to: %i", value);
-			_currentLimitVal = value;
-			if (!_currentLimitInitialized) {
-				_currentLimit.init();
-				_currentLimitInitialized = true;
-			}
-			_currentLimit.start(&_currentLimitVal);
-			LOGi("Write value to persistent memory");
-			Storage::setUint8(_currentLimitVal, _storageStruct.current_limit);
-			savePersistentStorage();
+			setCurrentLimit(value);
+			_currentLimitInitialized = true;
 		});
 
 	// TODO: we have to delay the init, since there is a spike on the AIN pin at startup!
@@ -214,14 +221,20 @@ void PowerService::tick() {
 
 	// Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
 	// TODO: This is not required anymore at later crownstone versions, so this should be done at init().
+	
+	if(!_currentLimitInitialized) {
+		setCurrentLimit(_currentLimitVal);
+		_currentLimitInitialized = true ;
+	}
+	
 	if (!_adcInitialized) {
 		// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
 		ADC::getInstance().init(PIN_AIN_ADC);
 		sampleCurrentInit();
 		_adcInitialized = true;
 	}
-
-	LPComp::getInstance().tick();
+	
+	//~ LPComp::getInstance().tick();
 	// check if current is not beyond current_limit if the latter is set
 //	if (++tmp_cnt > tick_cnt) {
 //		if (_currentLimitCharacteristic) {
