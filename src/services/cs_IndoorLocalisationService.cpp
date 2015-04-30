@@ -51,7 +51,7 @@ IndoorLocalizationService::IndoorLocalizationService() :
 
 	init();
 
-	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)IndoorLocalizationService::staticTick);
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)IndoorLocalizationService::staticTick);
 }
 
 void IndoorLocalizationService::init() {
@@ -109,16 +109,13 @@ void IndoorLocalizationService::tick() {
 		PWM::getInstance().setValue(0, 0);
 	}
 	_trackIsNearby = deviceNearby;
+
+	scheduleNextTick();
 }
 
-void IndoorLocalizationService::startTicking() {
+void IndoorLocalizationService::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(LOCALIZATION_SERVICE_UPDATE_FREQUENCY), this);
 }
-
-void IndoorLocalizationService::stopTicking() {
-	Timer::getInstance().stop(_appTimerId);
-}
-
 
 void IndoorLocalizationService::loadPersistentStorage() {
 	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));

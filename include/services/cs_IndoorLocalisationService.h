@@ -64,8 +64,7 @@ public:
 
 	void tick();
 
-	void startTicking();
-	void stopTicking();
+	void scheduleNextTick();
 
 	/* Initialize a IndoorLocalization object
 	 * @stack Bluetooth Stack to attach this service to

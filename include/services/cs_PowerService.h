@@ -47,8 +47,7 @@ public:
 	 */
 	void tick();
 	
-	void startTicking();
-	void stopTicking();
+	void scheduleNextTick();
 
 	/* Switch off the light
 	 */
@@ -114,4 +113,5 @@ private:
 
 	bool _adcInitialized;
 	bool _currentLimitInitialized;
+	uint8_t _samplingType;
 };

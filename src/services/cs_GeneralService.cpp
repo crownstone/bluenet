@@ -36,7 +36,7 @@ GeneralService::GeneralService() :
 
 	init();
 
-	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)GeneralService::staticTick);
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)GeneralService::staticTick);
 }
 
 void GeneralService::init() {
@@ -124,14 +124,12 @@ void GeneralService::tick() {
 			_selectConfiguration = 0xFF;
 		}
 	}
+
+	scheduleNextTick();
 }
 
-void GeneralService::startTicking() {
+void GeneralService::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(GENERAL_SERVICE_UPDATE_FREQUENCY), this);
-}
-
-void GeneralService::stopTicking() {
-	Timer::getInstance().stop(_appTimerId);
 }
 
 void GeneralService::loadPersistentStorage() {

@@ -84,8 +84,7 @@ public:
 	 */
 	void tick();
 
-	void startTicking();
-	void stopTicking();
+	void scheduleNextTick();
 
 	/* Initialize a GeneralService object
 	 *

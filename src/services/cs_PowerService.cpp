@@ -25,15 +25,16 @@
 using namespace BLEpp;
 
 PowerService::PowerService() :
-		_pwmCharacteristic(NULL),
-		_sampleCurrentCharacteristic(NULL),
-		_currentConsumptionCharacteristic(NULL),
-		_currentCurveCharacteristic(NULL),
-		_currentLimitCharacteristic(NULL),
-		_currentCurve(NULL),
-		_currentLimitVal(0),
-		_adcInitialized(false),
-		_currentLimitInitialized(false)
+								_pwmCharacteristic(NULL),
+								_sampleCurrentCharacteristic(NULL),
+								_currentConsumptionCharacteristic(NULL),
+								_currentCurveCharacteristic(NULL),
+								_currentLimitCharacteristic(NULL),
+								_currentCurve(NULL),
+								_currentLimitVal(0),
+								_adcInitialized(false),
+								_currentLimitInitialized(false),
+								_samplingType(0)
 {
 
 	setUUID(UUID(POWER_UUID));
@@ -45,7 +46,7 @@ PowerService::PowerService() :
 
 	init();
 
-	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)PowerService::staticTick);
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)PowerService::staticTick);
 }
 
 void PowerService::init() {
@@ -83,41 +84,44 @@ void PowerService::init() {
  * TODO: We should only need to do this once on startup.
  */
 void PowerService::tick() {
-//	LOGi("Tock: %d", RTC::now());
+	//	LOGi("Tock: %d", RTC::now());
 
 	// Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
 	// TODO: This is not required anymore at later crownstone versions, so this should be done at init().
-	
+
 	if(!_currentLimitInitialized) {
 		setCurrentLimit(_currentLimitVal);
 		_currentLimitInitialized = true;
 	}
-	
+
 	if (!_adcInitialized) {
 		// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
 		ADC::getInstance().init(PIN_AIN_ADC);
 		sampleCurrentInit();
 		_adcInitialized = true;
 	}
-	
+
+	if (_samplingType && _currentCurve->isFull()) {
+		sampleCurrent(_samplingType);
+		_samplingType = 0;
+	}
+
 	//~ LPComp::getInstance().tick();
 	// check if current is not beyond current_limit if the latter is set
-//	if (++tmp_cnt > tick_cnt) {
-//		if (_currentLimitCharacteristic) {
-//			getCurrentLimit();
-//			LOGi("Set default current limit value to %i", _current_limit_val);
-//			*_currentLimitCharacteristic = _current_limit_val;
-//		}
-//		tmp_cnt = 0;
-//	}
+	//	if (++tmp_cnt > tick_cnt) {
+	//		if (_currentLimitCharacteristic) {
+	//			getCurrentLimit();
+	//			LOGi("Set default current limit value to %i", _current_limit_val);
+	//			*_currentLimitCharacteristic = _current_limit_val;
+	//		}
+	//		tmp_cnt = 0;
+	//	}
+
+	scheduleNextTick();
 }
 
-void PowerService::startTicking() {
+void PowerService::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(POWER_SERVICE_UPDATE_FREQUENCY), this);
-}
-
-void PowerService::stopTicking() {
-	Timer::getInstance().stop(_appTimerId);
 }
 
 void PowerService::loadPersistentStorage() {
@@ -136,9 +140,9 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setDefaultValue(255);
 	_pwmCharacteristic->setWritable(true);
 	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
-//			LOGi("set pwm to %i", value);
-			PWM::getInstance().setValue(0, value);
-		});
+		//			LOGi("set pwm to %i", value);
+		PWM::getInstance().setValue(0, value);
+	});
 }
 
 // Do we really want to use the PWM for this, or just set the pin to zero?
@@ -177,8 +181,20 @@ void PowerService::addSampleCurrentCharacteristic() {
 	_sampleCurrentCharacteristic->setDefaultValue(0);
 	_sampleCurrentCharacteristic->setWritable(true);
 	_sampleCurrentCharacteristic->onWrite([&](const uint8_t& value) -> void {
-			sampleCurrent(value);
-		});
+		MasterBuffer& mb = MasterBuffer::getInstance();
+		if (!mb.isLocked()) {
+			mb.lock();
+		} else {
+			LOGe("Buffer is locked. Cannot be written!");
+			return;
+		}
+
+		// Start storing the samples
+		_currentCurve->clear();
+		ADC::getInstance().setCurrentCurve(_currentCurve);
+
+		_samplingType = value;
+	});
 }
 
 void PowerService::addCurrentCurveCharacteristic() {
@@ -219,20 +235,22 @@ uint8_t PowerService::getCurrentLimit() {
 	return _currentLimitVal;
 }
 
- void PowerService::setCurrentLimit(uint8_t value) {
-			LOGi("Set current limit to: %i", value);
-			_currentLimitVal = value;
-			//if (!_currentLimitInitialized) {
-				//_currentLimit.init();
-				//_currentLimitInitialized = true;
-			//}
-			LPComp::getInstance().stop();
-			LPComp::getInstance().config(PIN_AIN_LPCOMP, _currentLimitVal, LPComp::LPC_UP);
-			LPComp::getInstance().start();
-			LOGi("Write value to persistent memory");
-			Storage::setUint8(_currentLimitVal, _storageStruct.current_limit);
-			savePersistentStorage();
- }
+void PowerService::setCurrentLimit(uint8_t value) {
+#if CHAR_CURRENT_LIMIT==1
+	LOGi("Set current limit to: %i", value);
+	_currentLimitVal = value;
+	//if (!_currentLimitInitialized) {
+	//_currentLimit.init();
+	//_currentLimitInitialized = true;
+	//}
+	LPComp::getInstance().stop();
+	LPComp::getInstance().config(PIN_AIN_LPCOMP, _currentLimitVal, LPComp::LPC_UP);
+	LPComp::getInstance().start();
+	LOGi("Write value to persistent memory");
+	Storage::setUint8(_currentLimitVal, _storageStruct.current_limit);
+	savePersistentStorage();
+#endif
+}
 
 /**
  * The characteristic that writes a current limit to persistent memory.
@@ -249,14 +267,14 @@ void PowerService::addCurrentLimitCharacteristic() {
 	_currentLimitCharacteristic->setDefaultValue(getCurrentLimit());
 	_currentLimitCharacteristic->setWritable(true);
 	_currentLimitCharacteristic->onWrite([&](const uint8_t& value) -> void {
-			setCurrentLimit(value);
-			_currentLimitInitialized = true;
-		});
+		setCurrentLimit(value);
+		_currentLimitInitialized = true;
+	});
 
 	// TODO: we have to delay the init, since there is a spike on the AIN pin at startup!
 	// For now: init at onWrite, so we can still test it.
-//	_currentLimit.start(&_currentLimitVal);
-//	_currentLimit.init();
+	//	_currentLimit.start(&_currentLimitVal);
+	//	_currentLimit.init();
 }
 
 //static int tmp_cnt = 100;
@@ -266,28 +284,11 @@ void PowerService::sampleCurrentInit() {
 	LOGi("Start ADC");
 	ADC::getInstance().start();
 
-//	// Wait for the ADC to actually start
-//	nrf_delay_ms(5);
+	//	// Wait for the ADC to actually start
+	//	nrf_delay_ms(5);
 }
 
 void PowerService::sampleCurrent(uint8_t type) {
-	MasterBuffer& mb = MasterBuffer::getInstance();
-	if (!mb.isLocked()) {
-		mb.lock();
-	} else {
-		LOGe("Buffer is locked. Cannot be written!");
-		return;
-	}
-
-	// Start storing the samples
-	_currentCurve->clear();
-	ADC::getInstance().setCurrentCurve(_currentCurve);
-
-	// Give some time to sample
-	while (!_currentCurve->isFull()) {
-		nrf_delay_ms(10);
-	}
-
 	// Stop storing the samples
 	ADC::getInstance().setCurrentCurve(NULL);
 
@@ -302,8 +303,8 @@ void PowerService::sampleCurrent(uint8_t type) {
 		uint32_t voltageSquareMean = 0;
 		uint32_t timestamp = 0;
 		uint16_t voltage = 0;
-//		uint32_t timeStart = _currentCurve->getTimeStart();
-//		uint32_t timeEnd = _currentCurve->getTimeEnd();
+		//		uint32_t timeStart = _currentCurve->getTimeStart();
+		//		uint32_t timeEnd = _currentCurve->getTimeEnd();
 
 #ifdef MICRO_VIEW
 		write("3 [");
@@ -312,7 +313,7 @@ void PowerService::sampleCurrent(uint8_t type) {
 			if (_currentCurve->getValue(i, voltage, timestamp) != CC_SUCCESS) {
 				break;
 			}
-//			timestamp = timeStart + i*(timeEnd-timeStart)/(numSamples-1);
+			//			timestamp = timeStart + i*(timeEnd-timeStart)/(numSamples-1);
 			_log(INFO, "%u %u,  ", timestamp, voltage);
 #ifdef MICRO_VIEW
 			write("%u %u ", timestamp, voltage);
@@ -345,5 +346,5 @@ void PowerService::sampleCurrent(uint8_t type) {
 	}
 
 	// Unlock the buffer
-	mb.unlock();
+	MasterBuffer::getInstance().unlock();
 }

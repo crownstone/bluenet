@@ -21,7 +21,7 @@
 // temporary defines
 #define MESHING_PARALLEL 1
 
-#define MICRO_VIEW 1
+//#define MICRO_VIEW 1
 
 #if IBEACON==1
 	// define the iBeacon advertisement package parameters

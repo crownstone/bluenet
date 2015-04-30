@@ -13,6 +13,7 @@
 #include <common/cs_Tuple.h>
 #include <cfg/cs_Strings.h>
 #include <util/cs_BleError.h>
+#include <drivers/cs_Timer.h>
 
 #define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz, APP_TIMER_PRESCALER)
 
@@ -111,8 +112,8 @@ public:
 		ptr->tick();
 	}
 
-	virtual void startTicking() {};
-	virtual void stopTicking() {};
+	void startTicking() { Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this); };
+	void stopTicking() { Timer::getInstance().stop(_appTimerId); };
 
 	virtual void startAdvertising(Nrf51822BluetoothStack* stack);
 	virtual void stopAdvertising() {};
