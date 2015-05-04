@@ -50,8 +50,12 @@ extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {
 
 // called by softdevice handler on a ble event
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
+
+#if CHAR_MESHING==1
 	//  pass the incoming BLE event to the mesh framework
 	rbc_mesh_ble_evt_handler(p_ble_evt);
+#endif
+
 	// let the scheduler execute the event handle function
 	BLE_CALL(app_sched_event_put, (p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len, ble_evt_handler));
 }
