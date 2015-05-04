@@ -8,6 +8,8 @@
 
 #include "ble/cs_Characteristic.h"
 
+#include <ble/cs_Softdevice.h>
+
 using namespace BLEpp;
 
 CharacteristicBase::CharacteristicBase() :
@@ -174,19 +176,8 @@ uint32_t CharacteristicBase::notify() {
 	uint16_t valueLength = getValueLength();
 	uint8_t* valueAddress = getValuePtr();
 
-#if (SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
-	ble_gatts_value_t p_value;
-	p_value.len = valueLength;
-	p_value.offset = 0;
-	p_value.p_value = valueAddress;
-	// leads to error... 0007, invalid param, don't know why!
-	BLE_CALL(sd_ble_gatts_value_set,	(
-			_service->getStack()->getConnectionHandle(),
-			_handles.value_handle, &p_value));
-#else
-	BLE_CALL(sd_ble_gatts_value_set,
-			(_handles.value_handle, 0, &valueLength, valueAddress));
-#endif
+	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
+			_handles.value_handle, &valueLength, valueAddress));
 
 	// stop here if we are not in notifying state
 	if ((!_status.notifies) || (!_service->getStack()->connected()) || !_status.notifyingEnabled) {

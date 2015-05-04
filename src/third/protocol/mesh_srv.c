@@ -33,19 +33,17 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
 
-#include "mesh_srv.h"
-#include "rbc_mesh.h"
-#include "timeslot_handler.h"
-#include "trickle.h"
-#include "rbc_mesh_common.h"
+#include "third/protocol/mesh_srv.h"
 
-#include "nrf_soc.h"
-#include "nrf_error.h"
-#include "ble.h"
+#include "third/protocol/rbc_mesh.h"
+#include "third/protocol/timeslot_handler.h"
+#include "third/protocol/trickle.h"
+#include "third/protocol/rbc_mesh_common.h"
 
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
+#include <ble/cs_Nordic.h>
+#include <ble/cs_Softdevice.h>
+
+#include <drivers/cs_Serial.h>
 
 /* Packet related constants */
 #define MESH_PACKET_HANDLE_LEN          (1)
@@ -447,21 +445,10 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
     }
     else
     {
-#if (SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
-        ble_gatts_value_t p_value;
-        p_value.len = len;
-        p_value.offset = 0;
-        p_value.p_value = data;
-        error_code = sd_ble_gatts_value_set(g_active_conn_handle,
-            ch_md->char_value_handle,
-            &p_value);
+    	error_code = cs_sd_ble_gatts_value_set(g_active_conn_handle, ch_md->char_value_handle,
+            &len, data);
 
-#else
-        error_code = sd_ble_gatts_value_set(
-            ch_md->char_value_handle,
-            0, &len, data);
-#endif
-        if (error_code != NRF_SUCCESS)
+    	if (error_code != NRF_SUCCESS)
         {
             return NRF_ERROR_INTERNAL;
         }
@@ -484,20 +471,8 @@ uint32_t mesh_srv_char_val_get(uint8_t index, uint8_t* data, uint16_t* len, ble_
 
     *len = MAX_VALUE_LENGTH;
     
-#if (SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
-        ble_gatts_value_t p_value;
-        p_value.len = *len;
-        p_value.offset = 0;
-        p_value.p_value = data;
-        uint32_t error_code = sd_ble_gatts_value_get(g_active_conn_handle,
-        	g_mesh_service.char_metadata[index - 1].char_value_handle,
-            &p_value);
-
-#else
-    uint32_t error_code = sd_ble_gatts_value_get(
-        g_mesh_service.char_metadata[index - 1].char_value_handle,
-        0, len, data);
-#endif
+    uint32_t error_code = cs_sd_ble_gatts_value_get(g_active_conn_handle,
+    		g_mesh_service.char_metadata[index - 1].char_value_handle, len, data);
 
     if (error_code != NRF_SUCCESS)
     {
@@ -524,19 +499,8 @@ uint32_t mesh_srv_char_md_get(mesh_metadata_char_t* metadata)
     uint8_t data_array[MESH_MD_CHAR_LEN];
     uint16_t len = MESH_MD_CHAR_LEN;
 
-
-#if (SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
-	ble_gatts_value_t p_value;
-	p_value.len = len;
-	p_value.offset = 0;
-	p_value.p_value = data_array;
-	uint32_t error_code = sd_ble_gatts_value_get(g_active_conn_handle,
-		g_mesh_service.ble_md_char_handles.value_handle,
-		&p_value);
-#else
-	uint32_t error_code = sd_ble_gatts_value_get(
-		g_mesh_service.ble_md_char_handles.value_handle, 0, &len, data_array);
-#endif
+    uint32_t error_code = cs_sd_ble_gatts_value_get(g_active_conn_handle,
+    		g_mesh_service.ble_md_char_handles.value_handle, &len, data_array);
 
     if (error_code != NRF_SUCCESS)
     {
@@ -645,6 +609,8 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
         (ch_md->version_number >= MESH_VALUE_LOLLIPOP_LIMIT && separation < (UINT16_MAX - MESH_VALUE_LOLLIPOP_LIMIT)/2) ||
         uninitialized)
     {
+//        LOGd("UPDATE_VAL: old version: %d, new version: %d", ch_md->version_number, version);
+
         /* update value */
         mesh_srv_char_val_set(handle, data, data_len, false);
         ch_md->flags |= (1 << MESH_MD_FLAGS_INITIALIZED_POS);
@@ -692,6 +658,8 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
 
         if (conflicting)
         {
+//            LOGd("CONFLICTING_VAL: old version: %d, new version: %d", ch_md->version_number, version);
+
             TICK_PIN(7);
             rbc_mesh_event_t conflicting_evt;
 

@@ -30,13 +30,10 @@
 /*
  */
 /* Maximum size of scheduler events. */
-#define SCHED_MAX_EVENT_DATA_SIZE    ((CEIL_DIV(MAX(                                   \
-                                                             MAX(BLE_STACK_EVT_MSG_BUF_SIZE,    \
-                                                                 ANT_STACK_EVT_STRUCT_SIZE),    \
-                                                             SYS_EVT_MSG_BUF_SIZE               \
-                                                            ),                                  \
-                                                         sizeof(uint32_t))) *                   \
-                                               sizeof(uint32_t))
+#define SCHED_MAX_EVENT_DATA_SIZE                ((CEIL_DIV(MAX(MAX(BLE_STACK_EVT_MSG_BUF_SIZE,    \
+                                                                    ANT_STACK_EVT_STRUCT_SIZE),    \
+                                                                SYS_EVT_MSG_BUF_SIZE),             \
+                                                            sizeof(uint32_t))) * sizeof(uint32_t))
 /* Maximum number of events in the scheduler queue. */
 #define SCHED_QUEUE_SIZE                         10
 
