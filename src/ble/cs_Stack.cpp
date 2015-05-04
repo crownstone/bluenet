@@ -44,14 +44,16 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	shutdown();
 }
 
-extern "C" void handle_ble_event(void* p_event_data, uint16_t event_size) {
+extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {
 	Nrf51822BluetoothStack::getInstance().on_ble_evt((ble_evt_t *)p_event_data);
 }
 
 // called by softdevice handler on a ble event
-extern "C" void ble_evt_handler(ble_evt_t* p_ble_evt) {
+extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
+	//  pass the incoming BLE event to the mesh framework
+	rbc_mesh_ble_evt_handler(p_ble_evt);
 	// let the scheduler execute the event handle function
-	BLE_CALL(app_sched_event_put, (p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len, handle_ble_event));
+	BLE_CALL(app_sched_event_put, (p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len, ble_evt_handler));
 }
 
 void Nrf51822BluetoothStack::init() {
@@ -76,7 +78,7 @@ void Nrf51822BluetoothStack::init() {
 	LOGd(MSG_BLE_SOFTDEVICE_ENABLE);
 
 	// assign ble event handler, forwards ble_evt to stack
-	BLE_CALL(softdevice_ble_evt_handler_set, (ble_evt_handler));
+	BLE_CALL(softdevice_ble_evt_handler_set, (ble_evt_dispatch));
 
 //#if(SOFTDEVICE_SERIES == 110)
 

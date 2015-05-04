@@ -173,9 +173,9 @@ static uint32_t mesh_md_char_add(mesh_metadata_char_t* metadata)
 
     memset(&ble_attr, 0, sizeof(ble_attr));
 
-    ble_attr.init_len = 9;
+    ble_attr.init_len = MESH_MD_CHAR_LEN;
     ble_attr.init_offs = 0;
-    ble_attr.max_len = 9;
+    ble_attr.max_len = MESH_MD_CHAR_LEN;
     ble_attr.p_uuid = &ble_uuid;
     ble_attr.p_value = value_array;
     ble_attr.p_attr_md = &ble_attr_md;
@@ -440,8 +440,8 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
                 return NRF_SUCCESS;
             }
             else {
-            //return NRF_ERROR_INTERNAL;
-            return error_code;
+                //return NRF_ERROR_INTERNAL;
+                return error_code;
             }
         }
     }
@@ -641,7 +641,7 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
         (version - ch_md->version_number) :
         (-(ch_md->version_number - MESH_VALUE_LOLLIPOP_LIMIT) + (version - MESH_VALUE_LOLLIPOP_LIMIT) - MESH_VALUE_LOLLIPOP_LIMIT);
 
-    if ((ch_md->version_number < MESH_VALUE_LOLLIPOP_LIMIT && version >= ch_md->version_number) ||
+    if ((ch_md->version_number < MESH_VALUE_LOLLIPOP_LIMIT && version > ch_md->version_number) ||
         (ch_md->version_number >= MESH_VALUE_LOLLIPOP_LIMIT && separation < (UINT16_MAX - MESH_VALUE_LOLLIPOP_LIMIT)/2) ||
         uninitialized)
     {

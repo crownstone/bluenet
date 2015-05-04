@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 //#include "nrf_soc.h"
 //#include "nrf_sdm.h"
 

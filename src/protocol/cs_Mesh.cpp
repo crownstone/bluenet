@@ -16,7 +16,7 @@
 #include <util/cs_BleError.h>
 
 extern "C" {
-#include <protocol/led_config.h>
+//#include <protocol/led_config.h>
 
 /**
  * Event handler on receiving a message from
@@ -38,7 +38,7 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
             MeshControl &meshControl = MeshControl::getInstance();
             meshControl.process(evt->value_handle, evt->data[0]);
             //}
-            led_config(evt->value_handle, evt->data[0]);
+            //led_config(evt->value_handle, evt->data[0]);
             break;
         }
         default:

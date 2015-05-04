@@ -56,6 +56,7 @@
 
 #if CHAR_MESHING==1
 #include <protocol/cs_Mesh.h>
+#include <drivers/cs_RNG.h>
 #include <third/protocol/led_config.h>
 #endif
 
@@ -69,6 +70,76 @@
  *********************************************************************************************************************/
 
 using namespace BLEpp;
+
+
+#if CHAR_MESHING==1
+
+/**********************************************************************************************************************
+ * Interlude for meshing. Will need to be integrated with the code!
+ *********************************************************************************************************************/
+
+extern "C" {
+
+#if BOARD==PCA10001
+/* configure button interrupt for evkits */
+static void gpiote_init(void)
+{
+  NRF_GPIO->PIN_CNF[BUTTON_0] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)
+                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+        //         | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)
+                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
+                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
+
+  NRF_GPIO->PIN_CNF[BUTTON_1] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)
+                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+         //        | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)
+                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
+                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
+
+
+  /* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it
+  in APP_LOW in order to use the mesh API */
+  NVIC_SetPriority(GPIOTE_IRQn, 3);
+
+  NVIC_EnableIRQ(GPIOTE_IRQn);
+  NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_PORT_Msk;
+}
+
+RNG rng;
+
+void GPIOTE_IRQHandler(void)
+{
+#ifdef STOP_ADV
+	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
+
+	if (stack.isAdvertising()) {
+		LOGi("Stop advertising");
+		stack.stopAdvertising();
+	}
+#endif
+ 	CMesh & mesh = CMesh::getInstance();
+	NRF_GPIOTE->EVENTS_PORT = 0;
+	for (uint8_t i = 0; i < 2; ++i)
+	{
+		if (NRF_GPIO->IN & (1 << (BUTTON_0 + i)))
+		{
+			LOGi("Button %i pressed", i);
+			uint32_t value = mesh.receive(i+1);
+//			value = 1 - value;
+			value = rng.getRandom8();
+//			led_config(i + 1, value);
+			LOGi("1");
+			mesh.send(i + 1, value);
+		}
+	}
+}
+
+#endif
+
+} // extern "C"
+
+#endif // CHAR_MESHING == 1
+
 
 /**
  * If UART is enabled this will be the message printed out over a serial connection. Connectors are expensive, so UART
@@ -250,7 +321,7 @@ void Crownstone::setup() {
 	BLEutil::print_stack("Stack adv: ");
 
 #if CHAR_MESHING==1
-    #ifdef BOARD_PCA10001
+	#if BOARD==PCA10001
         gpiote_init();
     #endif
 
@@ -294,70 +365,6 @@ void Crownstone::run() {
 
 	}
 }
-
-#if CHAR_MESHING==1
-
-/**********************************************************************************************************************
- * Interlude for meshing. Will need to be integrated with the code!
- *********************************************************************************************************************/
-
-extern "C" {
-
-#ifdef BOARD_PCA10001
-/* configure button interrupt for evkits */
-static void gpiote_init(void)
-{
-  NRF_GPIO->PIN_CNF[BUTTON_0] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)
-                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
-        //         | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)
-                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
-                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
-
-  NRF_GPIO->PIN_CNF[BUTTON_1] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)
-                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
-         //        | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)
-                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
-                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
-
-
-  /* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it
-  in APP_LOW in order to use the mesh API */
-  NVIC_SetPriority(GPIOTE_IRQn, 3);
-
-  NVIC_EnableIRQ(GPIOTE_IRQn);
-  NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_PORT_Msk;
-}
-
-void GPIOTE_IRQHandler(void)
-{
-#ifdef STOP_ADV
-	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
-
-	if (stack.isAdvertising()) {
-		LOGi("Stop advertising");
-		stack.stopAdvertising();
-	}
-#endif
- 	CMesh & mesh = CMesh::getInstance();
-	NRF_GPIOTE->EVENTS_PORT = 0;
-	for (uint8_t i = 0; i < 2; ++i)
-	{
-		if (NRF_GPIO->IN & (1 << (BUTTON_0 + i)))
-		{
-			LOGi("Button %i pressed", i);
-			uint32_t value = mesh.receive(i+1);
-			value = 1 - value;
-			led_config(i + 1, value);
-			mesh.send(i + 1, value);
-		}
-	}
-}
-
-#endif // nRF6310
-
-} // extern "C"
-
-#endif // MESHING == 1
 
 void on_exit(void) {
 	LOGi("PROGRAM TERMINATED");

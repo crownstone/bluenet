@@ -58,6 +58,7 @@ typedef enum
     RBC_MESH_EVENT_TYPE_UPDATE_VAL,      /** Another node has updated the value */
     RBC_MESH_EVENT_TYPE_CONFLICTING_VAL, /** Another node has a conflicting version of the value */
     RBC_MESH_EVENT_TYPE_NEW_VAL,         /** A previously unallocated value has been received and allocated */
+    RBC_MESH_EVENT_TYPE_INITIALIZED      /** The framework has been initialized internally (most likely via serial interface) */
 } rbc_mesh_event_type_t;
 
 /**
@@ -258,6 +259,62 @@ uint32_t rbc_mesh_channel_get(uint8_t* ch);
 /**
 * @brief Get the amount of allocated handle-value pairs
 *
+* @param[out] handle_count Pointer location to put handle count in 
+*
+* @return NRF_SUCCESS the value was fetched successfully
+* @return NRF_ERROR_INVALID_STATE the framework has not been initialized
+*/
+uint32_t rbc_mesh_handle_count_get(uint8_t* handle_count);
+
+/**
+* @brief Get the mesh minimum advertise interval in ms
+*
+* @param[out] adv_int_ms Pointer location to put adv int in
+*
+* @return NRF_SUCCESS the value was fetched successfully
+ * @brief Get the contents of the data array pointed to by the provided handle
+*
+* @param[in] handle The handle of the value we want to update. Is mesh-global.
+* @param[out] data Databuffer to be copied into the value slot. Must be at least
+*    RBC_VALUE_MAX_LEN long
+* @param[out] len Length of the copied data. Will not exceed RBC_VALUE_MAX_LEN.
+* @param[out] origin_addr BLE GAP address of the node that first broadcasted
+*   the current version of this value. Set to NULL if the address is not of
+*   interest.
+* 
+* @return NRF_SUCCESS the value has been successfully fetched.
+* @return NRF_ERROR_INVALID_STATE the framework has not been initialized.
+* @return NRF_ERROR_INVALID_ADDR the handle is outside the range provided
+*    in @ref rbc_mesh_init.
+*/
+uint32_t rbc_mesh_value_get(uint8_t handle,
+    uint8_t* data,
+    uint16_t* len,
+    ble_gap_addr_t* origin_addr);
+
+/**
+* @brief Get current mesh access address
+*
+* @param[out] access_addr Pointer location to put access address in
+*
+* @return NRF_SUCCESS the value was fetched successfully
+* @return NRF_ERROR_INVALID_STATE the framework has not been initialized
+*/
+uint32_t rbc_mesh_access_address_get(uint32_t* access_address);
+
+/**
+* @brief Get current mesh channel
+*
+* @param[out] ch Pointer location to put mesh channel in
+*
+* @return NRF_SUCCESS the value was fetched successfully
+* @return NRF_ERROR_INVALID_STATE the framework has not been initialized
+*/
+uint32_t rbc_mesh_channel_get(uint8_t* ch);
+
+/**
+* @brief Get the amount of allocated handle-value pairs
+*
 * @param[out] handle_count Pointer location to put handle count in
 *
 * @return NRF_SUCCESS the value was fetched successfully
@@ -303,10 +360,19 @@ uint32_t rbc_mesh_ble_evt_handler(ble_evt_t* evt);
 * @brief Softdevice interrupt handler, checking if there are any
 *   incomming events related to the framework.
 *
+* @note Only use this if no softdevice_handler is used!!
 * @note Should be called from the SD_IRQHandler function. Will poll the
 *   softdevice for new sd_evt.
 */
-void rbc_mesh_sd_irq_handler(void);
+void rbc_mesh_sd_irq_handler();
+
+/**
+* @brief Softdevice sys event handler, checking if there are any
+*   incomming events related to the framework.
+*
+* @note Should be called from sys_evt_dispatch function.
+*/
+void rbc_mesh_sys_evt_handler(uint32_t evt);
 
 /**
  * @brief Application space event handler. TO BE IMPLEMENTED IN APPLICATION

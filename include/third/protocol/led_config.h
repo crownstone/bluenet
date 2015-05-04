@@ -36,7 +36,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _LED_CONFIG_H__
 #define _LED_CONFIG_H__
 
-#include "boards.h"
+// #include "boards.h"
+#include <cfg/cs_Boards.h>
 #include <stdint.h>
 
 /* Aliases for LEDs */

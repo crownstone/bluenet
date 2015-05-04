@@ -215,8 +215,15 @@ uint32_t rbc_mesh_ble_evt_handler(ble_evt_t* evt)
 
 /***** event handler ******/
 
-void rbc_mesh_sd_irq_handler(void)
+void rbc_mesh_sd_irq_handler()
 {
     /* call lower layer event handler */
     ts_sd_event_handler();
+}
+
+
+void rbc_mesh_sys_evt_handler(uint32_t evt)
+{
+    /* call lower layer event handler */
+	ts_sys_evt_handler(evt);
 }

@@ -83,8 +83,20 @@ typedef struct
     } callback;
 } async_event_t;
 
+/** @brief event handler for softdevice events
+ *
+ * @param[in] sys event from softdevice
+ *
+ * @note Use if softdevice_handler is used. Will NOT
+ *   consume the events
+ */
+void ts_sys_evt_handler(uint32_t evt);
 
-/** @brief event handler for softdevice events */
+/** @brief event handler for softdevice events
+ *
+ * @note Only use if no softdevice_handler is used!!
+ *   Will consume the events!!
+ */
 void ts_sd_event_handler(void);
 
 /** @brief initialize timeslot handler. Only called once */
@@ -124,5 +136,7 @@ uint32_t timeslot_get_remaining_time(void);
 
 /** @brief returns the timestamp the timeslot is set to end at */
 uint32_t timeslot_get_end_time(void);
+
+void rbc_mesh_SWI0_IRQHandler(void);
 
 #endif /* _TIMESLOT_HANDLER_H__ */

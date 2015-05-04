@@ -6,14 +6,12 @@
 
 #include "ble/cs_Handlers.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
 #include <pstorage.h>
-#include "third/protocol/rbc_mesh.h"
+#include <third/protocol/rbc_mesh.h>
 
 /**Function for dispatching a BLE stack event to all modules with a BLE stack event handler.
  *
@@ -26,15 +24,17 @@ void sys_evt_dispatch(uint32_t sys_evt) {
 
 	//LOGi("Sys evt dispatch");
 
+	pstorage_sys_event_handler(sys_evt);
+
 #if CHAR_MESHING==1
-	rbc_mesh_sd_irq_handler();
+	rbc_mesh_sys_evt_handler(sys_evt);
 #endif
 
-	if ((sys_evt == NRF_EVT_FLASH_OPERATION_SUCCESS) ||
-		(sys_evt == NRF_EVT_FLASH_OPERATION_ERROR)) {
-		//LOGi("Flash evt dispatch");
-		pstorage_sys_event_handler(sys_evt);
-	}
+//	if ((sys_evt == NRF_EVT_FLASH_OPERATION_SUCCESS) ||
+//		(sys_evt == NRF_EVT_FLASH_OPERATION_ERROR)) {
+//		//LOGi("Flash evt dispatch");
+//		pstorage_sys_event_handler(sys_evt);
+//	}
 }
 
 //// called by softdevice handler on a ble event

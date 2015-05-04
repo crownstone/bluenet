@@ -5,10 +5,14 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
+#include <drivers/cs_RNG.h>
+
+#include <ble/cs_Nordic.h>
+#include <util/cs_BleError.h>
+
 //#include "nrf_soc.h"
 //#include "nrf_sdm.h"
 //
-//#include "drivers/cs_RNG.h"
 //
 //#ifdef __cplusplus
 //extern "C" {

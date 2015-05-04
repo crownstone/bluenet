@@ -50,8 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
     #if RBC_MESH_DEBUG
         #define TICK_PIN(x) NRF_GPIO->OUTSET = (1 << (x)); \
-                                                        asm("nop");\
-                                                        asm("nop");\
+                                                        __nop();\
+                                                        __nop();\
                                                         NRF_GPIO->OUTCLR = (1 << (x))
 
         #define SET_PIN(x) NRF_GPIO->OUTSET = (1 << (x))

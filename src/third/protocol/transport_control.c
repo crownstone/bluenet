@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* minimum time to be left in the timeslot for there to be any point in ordering the radio */
 #define RADIO_SAFETY_TIMING_US      (500)
-#define RSSI_ENABLE
+//#define RSSI_ENABLE
 
 static uint8_t radio_rssi;
 static uint8_t tx_data[(PACKET_DATA_MAX_LEN + PACKET_DATA_POS) * PACKET_MAX_CHAIN_LEN];

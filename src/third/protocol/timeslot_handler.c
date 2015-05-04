@@ -43,17 +43,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "transport_control.h"
 
 #include "nrf_sdm.h"
-#include "app_error.h"
+//#include "app_error.h"
 #include "nrf_assert.h"
-#include "nrf_delay.h"
-#include "nrf_gpio.h"
 #include "nrf_soc.h"
-#include "boards.h"
-#include "simple_uart.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+
+#include <util/cs_BleError.h>
 
 #define USE_SWI_FOR_PROCESSING          (1)
 
@@ -287,6 +285,32 @@ void ts_sd_event_handler(void)
 }
 
 /**
+* @brief Timeslot related events callback
+*   Called whenever the softdevice tries to change the original course of actions
+*   related to the timeslots
+*/
+void ts_sys_evt_handler(uint32_t evt)
+{
+    switch (evt)
+    {
+        case NRF_EVT_RADIO_SESSION_IDLE:
+            timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
+            break;
+
+        case NRF_EVT_RADIO_BLOCKED:
+            timeslot_order_earliest(TIMESLOT_SLOT_EMERGENCY_LENGTH, true);
+            break;
+
+        case NRF_EVT_RADIO_CANCELED:
+            timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
+            break;
+
+        default:
+            break;
+    }
+}
+
+/**
 * @brief Timeslot end guard timer callback. Attempts to extend the timeslot.
 */
 static void end_timer_handler(void)
@@ -307,7 +331,7 @@ static void end_timer_handler(void)
 /**
 * @brief Async event dispatcher, works in APP LOW
 */
-void SWI1_IRQHandler(void)
+void rbc_mesh_SWI0_IRQHandler(void)
 {
     while (!event_fifo_empty() && (g_is_in_timeslot || !g_framework_initialized))
     {
@@ -339,7 +363,7 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
     switch (sig)
     {
         case NRF_RADIO_CALLBACK_SIGNAL_TYPE_START:
-            NVIC_ClearPendingIRQ(SWI1_IRQn);
+            NVIC_ClearPendingIRQ(SWI0_IRQn);
             g_is_in_timeslot = true;
 
             event_fifo_flush();
@@ -360,8 +384,8 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
             timeslot_extend(g_negotiate_timeslot_length);
 
 #if USE_SWI_FOR_PROCESSING
-            NVIC_EnableIRQ(SWI1_IRQn);
-            NVIC_SetPriority(SWI1_IRQn, 3);
+            NVIC_EnableIRQ(SWI0_IRQn);
+            NVIC_SetPriority(SWI0_IRQn, 3);
 #endif
 
             /* sample RTC timer for trickle timing */
@@ -544,10 +568,10 @@ void timeslot_extend(uint32_t extra_time_us)
 void timeslot_queue_async_event(async_event_t* evt)
 {
 #if USE_SWI_FOR_PROCESSING
-    NVIC_EnableIRQ(SWI1_IRQn);
-    NVIC_SetPriority(SWI1_IRQn, 3);
+    NVIC_EnableIRQ(SWI0_IRQn);
+    NVIC_SetPriority(SWI0_IRQn, 3);
     event_fifo_put(evt);
-    NVIC_SetPendingIRQ(SWI1_IRQn);
+    NVIC_SetPendingIRQ(SWI0_IRQn);
 #else
     /* execute immediately */
     async_event_execute(evt);
