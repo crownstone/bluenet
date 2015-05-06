@@ -57,6 +57,7 @@ SERIAL_VERBOSITY=1
 # VIRTUALMEMO          7
 # CROWNSTONE2          8
 # CROWNSTONE_SENSOR    9
+# PCA10000             10
 BOARD=5
 
 # Version of the nrf51 chip, use script/hardware_version.sh to check your version

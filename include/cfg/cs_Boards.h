@@ -23,6 +23,7 @@
 #define VIRTUALMEMO          7
 #define CROWNSTONE2          8
 #define CROWNSTONE_SENSOR    9
+#define PCA10000             10
 
 #ifndef BOARD
 #error "Add BOARD=... to CMakeBuild.config"
@@ -133,20 +134,44 @@
 
 #if(BOARD==PCA10001)
 
-#define PIN_GPIO_LED0        20                  // led
-#define PIN_GPIO_LED1        21                  // led
+#define PIN_GPIO_LED0        18                  // led
+#define PIN_GPIO_LED1        19                  // led
 
-#define PIN_GPIO_SWITCH      18                  // this is p0.18 or gpio 18
+#define PIN_GPIO_LED_CON     PIN_GPIO_LED1       // shows connection state on the evaluation board
+#define PIN_GPIO_SWITCH      PIN_GPIO_LED0       // toggle led 0
+
 #define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 #define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 #define PIN_GPIO_RX          11                  // this is p0.11 or gpio 11
 #define PIN_GPIO_TX          9                   // this is p0.09 or gpio 9
-#define PIN_GPIO_LED_CON     19                  // shows connection state on the evaluation board
 #define PIN_AIN_SENSOR       4
 
 #define BUTTON_0             16
 #define BUTTON_1             17
+
+#endif
+
+#if(BOARD==PCA10000)
+
+#define LED_RGB_RED          21
+#define LED_RGB_GREEN        22
+#define LED_RGB_BLUE         23
+
+#define PIN_GPIO_LED0        LED_RGB_RED         // led
+#define PIN_GPIO_LED1        LED_RGB_GREEN       // led
+
+#define PIN_GPIO_LED_CON     LED_RGB_GREEN       // shows connection state on the evaluation board
+#define PIN_GPIO_SWITCH      LED_RGB_RED         // toggle red led
+
+#define PIN_GPIO_RX          11                  // this is p0.11 or gpio 11
+#define PIN_GPIO_TX          9                   // this is p0.09 or gpio 9
+
+// undefined
+#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
+#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
+#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
+//#define PIN_AIN_SENSOR       4
 
 #endif
 

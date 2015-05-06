@@ -53,11 +53,21 @@ extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 #if CHAR_MESHING==1
 	//  pass the incoming BLE event to the mesh framework
-	rbc_mesh_ble_evt_handler(p_ble_evt);
+	BLE_CALL(rbc_mesh_ble_evt_handler, (p_ble_evt));
 #endif
 
-	// let the scheduler execute the event handle function
-	BLE_CALL(app_sched_event_put, (p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len, ble_evt_handler));
+	// Only dispatch ble write functions to the scheduler, and handle other ble events
+	// directly in the interrupt, otherwise app scheduler buffer might overflow fast
+	switch (p_ble_evt->header.evt_id) {
+	case BLE_GATTS_EVT_WRITE:
+		// let the scheduler execute the event handle function
+		BLE_CALL(app_sched_event_put, (p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len, ble_evt_handler));
+		break;
+	default:
+		ble_evt_handler(p_ble_evt, 0);
+//		Nrf51822BluetoothStack::getInstance().on_ble_evt(p_ble_evt);
+		break;
+	}
 }
 
 void Nrf51822BluetoothStack::init() {
@@ -528,10 +538,6 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	//	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
 	//		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
 	//	}
-#if CHAR_MESHING==1
-	APP_ERROR_CHECK(rbc_mesh_ble_evt_handler(p_ble_evt));
-#endif
-
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
 		on_connected(p_ble_evt);

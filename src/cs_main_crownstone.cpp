@@ -208,7 +208,7 @@ void Crownstone::configDrivers() {
 
 	PWM::getInstance().init(&pwm_config);
 
-#if BOARD==PCA10001
+#if BOARD==PCA10001 || BOARD==PCA10000
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 #endif
 }
@@ -268,7 +268,7 @@ void Crownstone::setup() {
 		sd_ble_gap_rssi_stop(conn_handle);
 		sd_ble_gap_rssi_start(conn_handle);
 
-#if BOARD==PCA10001
+#if BOARD==PCA10001 || BOARD==PCA10000
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
 	});
@@ -279,7 +279,7 @@ void Crownstone::setup() {
 		// of course this is not nice, but dirty! we immediately start advertising automatically after being
 		// disconnected. but for now this will be the default behaviour.
 
-#if BOARD==PCA10001
+#if BOARD==PCA10001 || BOARD==PCA10000
 		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
 
