@@ -415,36 +415,39 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
         ch_md->flags |= (1 << MESH_MD_FLAGS_IS_ORIGIN_POS);
     }
 
+    // TODO -oDE: check if this is necessary. in our case that a smartphone
+    //  is connected to the node this will lead to NRF_ERROR_INVALID_STATE errors
     /* notify the connected central node, if any */
-    if (g_active_conn_handle != CONN_HANDLE_INVALID)
-    {
-        ble_gatts_hvx_params_t notify_params;
-        notify_params.handle = ch_md->char_value_handle;
-        notify_params.offset = 0;
-        notify_params.p_data = data;
-        notify_params.p_len = &len;
-        notify_params.type = BLE_GATT_HVX_NOTIFICATION;
-        error_code = sd_ble_gatts_hvx(g_active_conn_handle, &notify_params);
-        if (error_code != NRF_SUCCESS)
-        {
-            if (error_code == BLE_ERROR_INVALID_CONN_HANDLE)
-            {
-                g_active_conn_handle = CONN_HANDLE_INVALID;
-            }
-            else if (error_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
-                sd_ble_gatts_sys_attr_set(g_active_conn_handle, NULL, 0);
-            }
-            else if (error_code == NRF_ERROR_SVC_HANDLER_MISSING) {
-                return NRF_SUCCESS;
-            }
-            else {
-                //return NRF_ERROR_INTERNAL;
-                return error_code;
-            }
-        }
-    }
-    else
-    {
+//    if (g_active_conn_handle != CONN_HANDLE_INVALID)
+//    {
+//        ble_gatts_hvx_params_t notify_params;
+//        notify_params.handle = ch_md->char_value_handle;
+//        notify_params.offset = 0;
+//        notify_params.p_data = data;
+//        notify_params.p_len = &len;
+//        notify_params.type = BLE_GATT_HVX_NOTIFICATION;
+//        error_code = sd_ble_gatts_hvx(g_active_conn_handle, &notify_params);
+//        if (error_code != NRF_SUCCESS)
+//        {
+//            if (error_code == BLE_ERROR_INVALID_CONN_HANDLE)
+//            {
+//                g_active_conn_handle = CONN_HANDLE_INVALID;
+//            }
+//            else if (error_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
+//                sd_ble_gatts_sys_attr_set(g_active_conn_handle, NULL, 0);
+//            }
+//            else if (error_code == NRF_ERROR_SVC_HANDLER_MISSING) {
+//                return NRF_SUCCESS;
+//            }
+//            else {
+//                //return NRF_ERROR_INTERNAL;
+//            	LOGi("b1");
+//                return error_code;
+//            }
+//        }
+//    }
+//    else
+//    {
     	error_code = cs_sd_ble_gatts_value_set(g_active_conn_handle, ch_md->char_value_handle,
             &len, data);
 
@@ -452,7 +455,7 @@ uint32_t mesh_srv_char_val_set(uint8_t index, uint8_t* data, uint16_t len, bool 
         {
             return NRF_ERROR_INTERNAL;
         }
-    }
+//    }
 
     return NRF_SUCCESS;
 }

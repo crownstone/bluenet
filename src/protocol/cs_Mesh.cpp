@@ -13,7 +13,10 @@
 
 #include <drivers/cs_Serial.h>
 #include <protocol/cs_MeshControl.h>
+#include <protocol/cs_MeshMessageTypes.h>
 #include <util/cs_BleError.h>
+
+#include <util/cs_Utils.h>
 
 extern "C" {
 //#include <protocol/led_config.h>
@@ -33,10 +36,12 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 
             if (evt->value_handle > 2)
                 break;
+
             //if (evt->data[0]) {
-            LOGi("Got data in: %i, %i", evt->value_handle, evt->data[0]);
+            LOGi("Got data ch: %i, val: %i, len: %d, orig_addr:", evt->value_handle, evt->data[0], evt->data_len);
+            BLEutil::printArray(evt->originator_address.addr, 6);
             MeshControl &meshControl = MeshControl::getInstance();
-            meshControl.process(evt->value_handle, evt->data[0]);
+            meshControl.process(evt->value_handle, evt->data, evt->data_len);
             //}
             //led_config(evt->value_handle, evt->data[0]);
             break;
@@ -120,4 +125,18 @@ void CMesh::set_callback() {
 }
 
 
+void CMesh::send(uint8_t handle, void* p_data, uint8_t length) {
+	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
+
+	LOGi("send %d, ch: %d, len: %d", *(uint8_t*)p_data, handle, length);
+	APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
+}
+
+bool CMesh::receive(uint8_t handle, void** p_data, uint16_t& length) {
+	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
+
+	APP_ERROR_CHECK(rbc_mesh_value_get(handle, (uint8_t*)*p_data, &length, NULL));
+	LOGi("recv %d, ch: %d, len: %d", *(uint8_t*)p_data, handle, length);
+	return length != 0;
+}
 

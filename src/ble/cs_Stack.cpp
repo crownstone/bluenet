@@ -56,8 +56,8 @@ extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 	BLE_CALL(rbc_mesh_ble_evt_handler, (p_ble_evt));
 #endif
 
-	// Only dispatch ble write functions to the scheduler, and handle other ble events
-	// directly in the interrupt, otherwise app scheduler buffer might overflow fast
+	// Only dispatch functions to the scheduler which might take long to execute, such as ble write functions
+	// and handle other ble events directly in the interrupt. Otherwise app scheduler buffer might overflow fast
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GATTS_EVT_WRITE:
 		// let the scheduler execute the event handle function

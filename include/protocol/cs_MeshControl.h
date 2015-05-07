@@ -11,7 +11,19 @@
 //#include <stdint.h>
 //#include <common/cs_Types.h>
 
-class MeshControl {
+#include <events/cs_EventListener.h>
+#include <events/cs_EventTypes.h>
+
+//struct __attribute__((__packed__)) EventMeshPackage {
+//	EventType evt;
+//	uint8_t* p_data;
+//};
+
+#define EVENT_CHANNEL 1
+#define PWM_CHANNEL   2
+
+
+class MeshControl : public EventListener {
 private:
 	MeshControl();
 	MeshControl(MeshControl const&); // singleton, deny implementation
@@ -26,6 +38,7 @@ public:
 	/**
 	 * Get incoming messages and perform certain actions.
 	 */
-	void process(uint8_t channel, uint32_t message);
+	void process(uint8_t channel, void* p_data, uint16_t length);
 
+	void handleEvent(EventType evt, void* p_data, uint16_t length);
 };

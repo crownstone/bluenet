@@ -32,6 +32,7 @@ private:
 	
 	CMesh(CMesh const&); // singleton, deny implementation
 	void operator=(CMesh const &); // singleton, deny implementation
+
 public:
 	// use static variant of singleton, no dynamic memory allocation
 	static CMesh& getInstance() {
@@ -45,11 +46,13 @@ public:
 	// send message
 	void send(uint8_t handle, uint32_t value);
 
+	void send(uint8_t handle, void* p_data, uint8_t length);
+	bool receive(uint8_t handle, void** p_data, uint16_t& length);
+
 	// returns last received message
 	uint32_t receive(uint8_t handle);
 
 	// set callback to receive message
 	void set_callback();
-
 };
 
