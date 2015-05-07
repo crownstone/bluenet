@@ -17,7 +17,10 @@
 //#include "nrf_sdm.h"
 //#endif
 //
+#include <cfg/cs_Boards.h>
 #include <drivers/cs_Serial.h>
+
+#include <events/cs_EventDispatcher.h>
 
 //static uint32_t pwm_max_value, pwm_next_value[PWM_MAX_CHANNELS],
 //		pwm_io_ch[PWM_MAX_CHANNELS], pwm_running[PWM_MAX_CHANNELS];
@@ -118,11 +121,19 @@ uint32_t PWM::init(pwm_config_t *config) {
 
 void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 	LOGd("set pwm channel %i to %i", pwm_channel, pwm_value);
-	
+
 	_pwmChannel = pwm_channel;
 	_pwmValue = pwm_value;
 
-	_nextValue[pwm_channel] = pwm_value;
+#if BOARD==PCA10000
+	_pwmValue = pwm_value != 0 ? 0 : 255;
+	LOGi("invert");
+#endif
+
+	_nextValue[pwm_channel] = _pwmValue;
+
+	EventType evt = pwm_value == 0 ? EVT_POWER_OFF : EVT_POWER_ON;
+	EventDispatcher::getInstance().dispatch(evt);
 
 	PWM_TIMER->EVENTS_COMPARE[3] = 0;
 	PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk | TIMER_SHORTS_COMPARE3_STOP_Msk;
@@ -152,6 +163,11 @@ void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 void PWM::getValue(uint8_t &pwm_channel, uint32_t &pwm_value) {
 	pwm_channel = _pwmChannel;
 	pwm_value = _pwmValue;
+
+#if BOARD==PCA10000
+	pwm_value = _pwmValue == 0 ? 255 : 0;
+	LOGi("invert");
+#endif
 }
 
 extern "C" void PWM_IRQHandler(void) {

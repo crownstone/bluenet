@@ -22,19 +22,21 @@
 #include <drivers/cs_Timer.h>
 #include <drivers/cs_LPComp.h>
 
+#include <protocol/cs_Mesh.h>
+
 using namespace BLEpp;
 
 PowerService::PowerService() :
-								_pwmCharacteristic(NULL),
-								_sampleCurrentCharacteristic(NULL),
-								_currentConsumptionCharacteristic(NULL),
-								_currentCurveCharacteristic(NULL),
-								_currentLimitCharacteristic(NULL),
-								_currentCurve(NULL),
-								_currentLimitVal(0),
-								_adcInitialized(false),
-								_currentLimitInitialized(false),
-								_samplingType(0)
+		_pwmCharacteristic(NULL),
+		_sampleCurrentCharacteristic(NULL),
+		_currentConsumptionCharacteristic(NULL),
+		_currentCurveCharacteristic(NULL),
+		_currentLimitCharacteristic(NULL),
+		_currentCurve(NULL),
+		_currentLimitVal(0),
+		_adcInitialized(false),
+		_currentLimitInitialized(false),
+		_samplingType(0)
 {
 
 	setUUID(UUID(POWER_UUID));
@@ -142,6 +144,11 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
 		//			LOGi("set pwm to %i", value);
 		PWM::getInstance().setValue(0, value);
+
+#if CHAR_MESHING==1
+		uint8_t state = value == 0 ? 0 : 1;
+		CMesh::getInstance().send(2, &state, 1);
+#endif
 	});
 }
 
