@@ -17,6 +17,7 @@ extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
 	#include "pstorage_platform.h"
 	#include "pstorage.h"
+	#include "ble_types.h"
 }
 
 //#include <common/cs_Types.h>
@@ -107,6 +108,14 @@ struct ps_general_service_t : ps_storage_base_t {
 	char device_type[MAX_STRING_SIZE];
 	// floor level
 	uint32_t floor;
+	// beacon
+	struct __attribute__((__packed__)) ps_beacon_t {
+		uint32_t major;
+		uint32_t minor;
+		ble_uuid128_t uuid;
+	} beacon;
+	// advertising tx power
+	int32_t txPower;
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////
@@ -270,6 +279,29 @@ public:
 	 * If the field is unassigned, the default value will be returned instead
 	 */
 	static void getUint32(uint32_t value, uint32_t& target, uint32_t default_value);
+
+	/* Helper function to set a signed byte in the field of a struct
+	 * @value the byte value to be copied to the struct
+	 * @target pointer the field in the struct where the value should be set
+	 *
+	 * To show that a valid value was set, the last 3 bytes of the field
+	 * are set to 0
+	 */
+	static void setInt8(int8_t value, int32_t& target);
+
+	/* Helper function to read a signed byte from the field of a struct
+	 * @value the field of the struct which should be read
+	 * @target pointer to the byte where the value is returned
+	 * @default_value the default value if the field of the struct is empty
+	 *
+	 * In order to show that the field of the struct is empty (or unassigned)
+	 * we use the fact that the last byte of the uint32_t field is set to FF.
+	 * If a value is stored, that byte will be set to 0 to show that the field
+	 * is assigned and that a valid value can be read.
+	 *
+	 * If the field is unassigned, the default value will be returned instead
+	 */
+	static void getInt8(int32_t value, int8_t& target, int8_t default_value);
 
 	/* Helper function to write/copy an array to the field of a struct
 	 * @T primitive type, such as uint8_t

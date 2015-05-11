@@ -271,6 +271,44 @@ void GeneralService::writeToStorage(uint8_t type, uint8_t length, uint8_t* paylo
 		// TODO: write to persistent storage and trigger update event
 		break;
 	}
+	case CONFIG_IBEACON_MAJOR: {
+		if (length != 1) {
+			LOGw("We do not account for a value of more than 255");
+		}
+		uint8_t major = payload[0];
+		LOGi("Set major to %d", major);
+		Storage::setUint8(major, (uint32_t&)_storageStruct.beacon.major);
+		savePersistentStorage();
+		break;
+	}
+	case CONFIG_IBEACON_MINOR: {
+		if (length != 1) {
+			LOGw("We do not account for a value of more than 255");
+		}
+		uint8_t minor = payload[0];
+		LOGi("Set minor to %d", minor);
+		Storage::setUint8(minor, (uint32_t&)_storageStruct.beacon.minor);
+		savePersistentStorage();
+		break;
+	}
+	case CONFIG_IBEACON_UUID: {
+		if (length != 16) {
+			LOGw("Expected 16 bytes for UUID");
+		}
+		Storage::setArray<uint8_t>(payload, _storageStruct.beacon.uuid.uuid128, 16);
+		savePersistentStorage();
+		break;
+	}
+	case CONFIG_TX_POWER: {
+		if (length != 1) {
+			LOGw("We do not account for a value of more than 255");
+		}
+		int8_t txPower = payload[0];
+		LOGi("Set TX Power to %d", txPower);
+		Storage::setInt8(txPower, _storageStruct.txPower);
+		savePersistentStorage();
+		break;
+	}
 	default:
 		LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
 	}
@@ -300,6 +338,55 @@ bool GeneralService::readFromStorage(uint8_t type) {
 
 		LOGd("Floor level set in payload: %i with len %i", _streamBuffer->payload()[0], _streamBuffer->length());
 
+		return true;
+	}
+	case CONFIG_IBEACON_MAJOR: {
+		LOGd("Read major");
+		loadPersistentStorage();
+		uint8_t plen = 1;
+		uint8_t payload[plen];
+		Storage::getUint8(_storageStruct.beacon.major, payload[0], 0);
+		_streamBuffer->setPayload(payload, plen);
+		_streamBuffer->setType(type);
+
+		LOGd("Major value set in payload: %d with len %d", _streamBuffer->payload()[0], _streamBuffer->length());
+		return true;
+	}
+	case CONFIG_IBEACON_MINOR: {
+		LOGd("Read minor");
+		loadPersistentStorage();
+		uint8_t plen = 1;
+		uint8_t payload[plen];
+		Storage::getUint8(_storageStruct.beacon.minor, payload[0], 0);
+		_streamBuffer->setPayload(payload, plen);
+		_streamBuffer->setType(type);
+
+		LOGd("Minor value set in payload: %d with len %d", _streamBuffer->payload()[0], _streamBuffer->length());
+		return true;
+	}
+
+	case CONFIG_IBEACON_UUID: {
+		LOGd("Read UUID");
+		loadPersistentStorage();
+		uint8_t plen = 16;
+		uint8_t payload[plen];
+		Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, payload, NULL, plen);
+		_streamBuffer->setPayload(payload, plen);
+		_streamBuffer->setType(type);
+
+		LOGd("UUID set in payload .. with len %d", _streamBuffer->length());
+		return true;
+	}
+	case CONFIG_TX_POWER: {
+		LOGd("Read tx power");
+		loadPersistentStorage();
+		uint8_t plen = 1;
+		uint8_t payload[plen];
+		Storage::getUint8(_storageStruct.txPower, payload[0], 0);
+		_streamBuffer->setPayload(payload, plen);
+		_streamBuffer->setType(type);
+
+		LOGd("Tx power value set in payload: %d with len %d", (int8_t)_streamBuffer->payload()[0], _streamBuffer->length());
 		return true;
 	}
 	default: {

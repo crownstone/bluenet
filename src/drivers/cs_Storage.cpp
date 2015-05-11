@@ -210,6 +210,28 @@ void Storage::getUint8(uint32_t value, uint8_t& target, uint8_t default_value) {
 	}
 }
 
+void Storage::setInt8(int8_t value, int32_t& target) {
+	target = value;
+}
+
+void Storage::getInt8(int32_t value, int8_t& target, int8_t default_value) {
+
+#ifdef PRINT_ITEMS
+	uint8_t* tmp = (uint8_t*)&value;
+	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+#endif
+
+	// check if last byte is FF which means that memory is unnassigned
+	// and value has to be ignored
+	if (value & (0xFF << 3)) {
+		LOGd("use default value");
+		target = default_value;
+	} else {
+		target = value;
+		LOGd("found stored value: %d", target);
+	}
+}
+
 void Storage::setUint16(uint16_t value, uint32_t& target) {
 	target = value;
 }

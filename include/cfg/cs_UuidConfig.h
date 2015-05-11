@@ -62,5 +62,9 @@ enum ConfigurationTypes {
 	CONFIG_FLOOR_UUID                       = 0x3,
 	CONFIG_NEARBY_TIMEOUT_UUID              = 0x4,
 	CONFIG_PWM_FREQ_UUID                    = 0x5,
+	CONFIG_IBEACON_MAJOR                    = 0x6,
+	CONFIG_IBEACON_MINOR                    = 0x7,
+	CONFIG_IBEACON_UUID                     = 0x8,
+	CONFIG_TX_POWER                         = 0x9,
 	CONFIG_TYPES
 };
