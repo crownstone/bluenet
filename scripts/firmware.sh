@@ -6,26 +6,27 @@ if [[ $cmd != "help" && $cmd != "bootloader" ]]; then
 	# target=${2:? "Usage: $0 \"cmd\", \"target\""}
 	target=$2
 
-	BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR${target:+/$target}
-	# BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR/$target
-	
-	case "$target" in
-		sirius)
-			serial_num=480110849
-			;;
-		capella)
-			serial_num=480207700
-			;;
-	esac
-
-	echo serial_num, $serial_num
+	if [[ $target != "bootloader" && $target != "crownstone" ]]; then
+		BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR${target:+/$target}
+		# BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR/$target
+		
+		case "$target" in
+			sirius)
+				serial_num=480110849
+				;;
+			capella)
+				serial_num=480207700
+				;;
+		esac
+		target=crownstone
+	fi
 fi
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/config.sh
 
-# optional address
-address=$3
+# optional address, use $APPLICATION_START_ADDRESS as default
+address=${3:-$APPLICATION_START_ADDRESS}
 
 # todo: add more code to check if target exists
 build() {
@@ -37,9 +38,7 @@ build() {
 }
 
 upload() {
-	echo serial_num, $serial_num
-
-	${path}/upload.sh $BLUENET_CONFIG_DIR/build/crownstone.hex $APPLICATION_START_ADDRESS $serial_num
+	${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.hex $address $serial_num
 	if [ $? -eq 0 ]; then
 		echo "Error with uploading"
 		exit 1
@@ -48,7 +47,7 @@ upload() {
 }
 
 debug() {
-	${path}/debug.sh $BLUENET_CONFIG_DIR/build/crownstone.elf
+	${path}/debug.sh $BLUENET_CONFIG_DIR/build/$target.elf
 }
 
 all() {
