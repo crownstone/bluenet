@@ -64,6 +64,7 @@
  * Custom includes
  *********************************************************************************************************************/
 
+#include <cfg/cs_ConfigHelper.h>
 
 /**********************************************************************************************************************
  * Main functionality
@@ -165,10 +166,17 @@ void Crownstone::welcome() {
  * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
  */
 void Crownstone::setName() {
+	// assemble default name from BLUETOOTH_NAME and COMPILATION_TIME
 	char devicename[32];
 	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
-	LOGi("Set name to %s", STRINGIFY(BLUETOOTH_NAME));
-	_stack->setDeviceName(std::string(devicename)); // max len = ble_gap_devname_max_len (31)
+	// check config (storage) if another name was stored
+	std::string device_name;
+	ps_general_service_t cfg = ConfigHelper::getInstance().getConfig();
+	// use default name in case no stored name is found
+	Storage::getString(cfg.device_name, device_name, std::string(devicename));
+	// assign name
+	LOGi("Set name to %s", device_name.c_str());
+	_stack->setDeviceName(device_name); // max len = ble_gap_devname_max_len (31)
 	_stack->setAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
