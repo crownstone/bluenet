@@ -15,6 +15,8 @@ void EventDispatcher::dispatch(EventType evt) {
 	dispatch(evt, NULL, 0);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wenum-compare"
 void EventDispatcher::dispatch(EventType evt, void* p_data, uint16_t length) {
 	LOGi("dispatch event: %d", evt);
 	for (int i = 0; i < MAX_LISTENERS; i++) {
@@ -25,6 +27,8 @@ void EventDispatcher::dispatch(EventType evt, void* p_data, uint16_t length) {
 		}
 	}
 }
+
+#pragma GCC diagnostic pop
 
 bool EventDispatcher::addListener(EventListener *listener) {
 	LOGi("addListener for event: %d", listener->getType());

@@ -19,7 +19,7 @@
 
 //using namespace BLEpp;
 
-#define SB_HEADER_SIZE 3
+#define SB_HEADER_SIZE 4
 
 #define SB_SUCCESS                               0
 #define SB_BUFFER_NOT_INITIALIZED                1
@@ -34,6 +34,7 @@ typedef uint8_t ERR_CODE;
 template <typename T>
 struct __attribute__((__packed__)) stream_t {
 	uint8_t type;
+	uint8_t reserved; // reserved for byte alignment
 	uint16_t length;
 	T payload[(MASTER_BUFFER_SIZE-SB_HEADER_SIZE)/sizeof(T)];
 };

@@ -22,6 +22,8 @@
 #include <drivers/cs_Timer.h>
 #include <drivers/cs_LPComp.h>
 
+#include <cfg/cs_ConfigHelper.h>
+
 using namespace BLEpp;
 
 PowerService::PowerService() :
@@ -41,8 +43,9 @@ PowerService::PowerService() :
 
 	setName(BLE_SERVICE_POWER);
 
-	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
-	loadPersistentStorage();
+	ConfigHelper::getInstance();
+//	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
+//	loadPersistentStorage();
 
 	init();
 
@@ -124,13 +127,13 @@ void PowerService::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(POWER_SERVICE_UPDATE_FREQUENCY), this);
 }
 
-void PowerService::loadPersistentStorage() {
-	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
-}
+//void PowerService::loadPersistentStorage() {
+//	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+//}
 
-void PowerService::savePersistentStorage() {
-	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
-}
+//void PowerService::savePersistentStorage() {
+//	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+//}
 
 void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic = new Characteristic<uint8_t>();
@@ -229,10 +232,10 @@ void PowerService::addCurrentConsumptionCharacteristic() {
 }
 
 uint8_t PowerService::getCurrentLimit() {
-	loadPersistentStorage();
-	Storage::getUint8(_storageStruct.current_limit, _currentLimitVal, 0);
-	LOGi("Obtained current limit from FLASH: %i", _currentLimitVal);
-	return _currentLimitVal;
+//	ps_configuration_t cfg = ConfigHelper::getInstance().getConfig();
+//	Storage::getUint8(cfg.current_limit, _currentLimitVal, 0);
+//	LOGi("Obtained current limit from FLASH: %i", _currentLimitVal);
+//	return _currentLimitVal;
 }
 
 void PowerService::setCurrentLimit(uint8_t value) {
