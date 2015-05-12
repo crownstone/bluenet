@@ -7,6 +7,7 @@ path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/config.sh
 
 SD_BINDIR=${BLUENET_CONFIG_DIR}/build
+SERIAL_NUM=$2
 
 build() {
 	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"
@@ -16,7 +17,7 @@ build() {
 }
 
 upload() {
-	$path/softdevice_upload.sh $SD_BINDIR
+	$path/softdevice_upload.sh $SD_BINDIR $SERIAL_NUM
 }
 
 all() {

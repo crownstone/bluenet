@@ -14,6 +14,14 @@ DEVICE=nrf51822
 
 TARGET=${1:? "$0 requires \"target\" as first argument"}
 
+SN=$2
+
+if [ -z $SN ]; then
+	$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 400 &
+else
+	$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 400 &
+fi
+
 # Run JLink gdb server
 $JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 400 &
 

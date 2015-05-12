@@ -11,6 +11,8 @@ DEVICE=nrf51822
 
 SOFTDEVICE_DIR=${1:? "$0 requires \"softdevice bin directory\" as first argument"}
 
+SN=$2
+
 if [ ! -e ${SOFTDEVICE_DIR} ]; then
 	echo "Error: ${SOFTDEVICE_DIR} does not exist..."
 	exit
@@ -23,4 +25,8 @@ if [ $SOFTDEVICE_NO_SEPARATE_UICR_SECTION == 1 ]; then
 	sed -i '/uicr/d' $TEMP_DIR/softdevice.script
 fi
 
-$JLINK -Device $DEVICE -If SWD $TEMP_DIR/softdevice.script
+if [ -z $2 ]; then
+	$JLINK -Device $DEVICE -If SWD $TEMP_DIR/softdevice.script
+else
+	$JLINK -Device $DEVICE -SelectEmuBySN $2 -If SWD $TEMP_DIR/softdevice.script
+fi

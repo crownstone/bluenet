@@ -3,7 +3,22 @@
 cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
 
 if [[ $cmd != "help" && $cmd != "bootloader" ]]; then
-	target=${2:? "Usage: $0 \"cmd\", \"target\""}
+	# target=${2:? "Usage: $0 \"cmd\", \"target\""}
+	target=$2
+
+	BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR${target:+/$target}
+	# BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR/$target
+	
+	case "$target" in
+		sirius)
+			serial_num=480110849
+			;;
+		capella)
+			serial_num=480207700
+			;;
+	esac
+
+	echo serial_num, $serial_num
 fi
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -22,7 +37,9 @@ build() {
 }
 
 upload() {
-	${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.hex
+	echo serial_num, $serial_num
+
+	${path}/upload.sh $BLUENET_CONFIG_DIR/build/crownstone.hex $APPLICATION_START_ADDRESS $serial_num
 	if [ $? -eq 0 ]; then
 		echo "Error with uploading"
 		exit 1
@@ -31,7 +48,7 @@ upload() {
 }
 
 debug() {
-	${path}/debug.sh $BLUENET_CONFIG_DIR/build/$target.elf
+	${path}/debug.sh $BLUENET_CONFIG_DIR/build/crownstone.elf
 }
 
 all() {
