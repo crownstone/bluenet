@@ -44,8 +44,7 @@ static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_cod
 // NOTE: DO NOT CHANGE ORDER OF THE ELEMENTS OR THE FLASH
 //   STORAGE WILL GET MESSED UP!! NEW ENTRIES ALWAYS AT THE END
 static storage_config_t config[] {
-	{PS_ID_POWER_SERVICE, {}, sizeof(ps_power_service_t)},
-	{PS_ID_GENERAL_SERVICE, {}, sizeof(ps_general_service_t)},
+	{PS_ID_CONFIGURATION, {}, sizeof(ps_configuration_t)},
 	{PS_ID_INDOORLOCALISATION_SERVICE, {}, sizeof(ps_indoorlocalisation_service_t)}
 };
 

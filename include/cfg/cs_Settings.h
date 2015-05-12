@@ -19,7 +19,7 @@
  * Use in the characteristic to read and write configurations in <CommonService>.
  */
 enum ConfigurationTypes {
-	CONFIG_NAME_UUID                        = Configuration,
+	CONFIG_NAME_UUID                        = Configuration_Base,
 	CONFIG_DEVICE_TYPE_UUID                 = 0x1,
 	CONFIG_ROOM_UUID                        = 0x2,
 	CONFIG_FLOOR_UUID                       = 0x3,
@@ -32,22 +32,22 @@ enum ConfigurationTypes {
 	CONFIG_TYPES
 };
 
-class ConfigHelper {
+class Settings {
 
 private:
-	ConfigHelper() {
-		Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
+	Settings() {
+		Storage::getInstance().getHandle(PS_ID_CONFIGURATION, _storageHandle);
 		loadPersistentStorage();
 	};
 
 	// This class is singleton, deny implementation
-	ConfigHelper(ConfigHelper const&);
+	Settings(Settings const&);
 	// This class is singleton, deny implementation
-	void operator=(ConfigHelper const &);
+	void operator=(Settings const &);
 
 public:
-	static ConfigHelper& getInstance() {
-		static ConfigHelper instance;
+	static Settings& getInstance() {
+		static Settings instance;
 		return instance;
 	}
 
@@ -84,6 +84,8 @@ public:
 			}
 			uint16_t counts = ((uint16_t*)payload)[0]; //TODO: other byte order?
 			LOGd("setNearbyTimeout(%i)", counts);
+			Storage::setUint16(counts, _storageStruct.nearbyTimeout);
+			savePersistentStorage();
 	//		setNearbyTimeout(counts);
 			// TODO: write to persistent storage and trigger update event
 			break;
@@ -91,6 +93,7 @@ public:
 		case CONFIG_IBEACON_MAJOR: {
 			if (length != 2) {
 				LOGw("We do not account for a value of more than %d");
+				return;
 			}
 //			uint16_t major;
 //			popUint16(major, payload);
@@ -103,6 +106,7 @@ public:
 		case CONFIG_IBEACON_MINOR: {
 			if (length != 2) {
 				LOGw("We do not account for a value of more than %d");
+				return;
 			}
 //			uint16_t minor;
 //			popUint16(minor, payload);
@@ -215,7 +219,7 @@ public:
 		return false;
 	}
 
-	ps_general_service_t getConfig() {
+	ps_configuration_t& getConfig() {
 		return _storageStruct;
 	}
 
@@ -274,7 +278,7 @@ protected:
 	pstorage_handle_t _storageHandle;
 
 	// struct that storage object understands
-	ps_general_service_t _storageStruct;
+	ps_configuration_t _storageStruct;
 
 };
 

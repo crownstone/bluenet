@@ -22,7 +22,7 @@
 #include <drivers/cs_Timer.h>
 #include <drivers/cs_LPComp.h>
 
-#include <cfg/cs_ConfigHelper.h>
+#include <cfg/cs_Settings.h>
 
 using namespace BLEpp;
 
@@ -43,7 +43,7 @@ PowerService::PowerService() :
 
 	setName(BLE_SERVICE_POWER);
 
-	ConfigHelper::getInstance();
+	Settings::getInstance();
 //	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
 //	loadPersistentStorage();
 
@@ -232,10 +232,9 @@ void PowerService::addCurrentConsumptionCharacteristic() {
 }
 
 uint8_t PowerService::getCurrentLimit() {
-//	ps_configuration_t cfg = ConfigHelper::getInstance().getConfig();
-//	Storage::getUint8(cfg.current_limit, _currentLimitVal, 0);
-//	LOGi("Obtained current limit from FLASH: %i", _currentLimitVal);
-//	return _currentLimitVal;
+	Storage::getUint8(Settings::getInstance().getConfig().current_limit, _currentLimitVal, 0);
+	LOGi("Obtained current limit from FLASH: %i", _currentLimitVal);
+	return _currentLimitVal;
 }
 
 void PowerService::setCurrentLimit(uint8_t value) {
@@ -250,8 +249,8 @@ void PowerService::setCurrentLimit(uint8_t value) {
 	LPComp::getInstance().config(PIN_AIN_LPCOMP, _currentLimitVal, LPComp::LPC_UP);
 	LPComp::getInstance().start();
 	LOGi("Write value to persistent memory");
-	Storage::setUint8(_currentLimitVal, _storageStruct.current_limit);
-	savePersistentStorage();
+	Storage::setUint8(_currentLimitVal, Settings::getInstance().getConfig().current_limit);
+	Settings::getInstance().savePersistentStorage();
 #endif
 }
 

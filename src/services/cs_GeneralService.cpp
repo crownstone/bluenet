@@ -21,7 +21,7 @@
 #include <structs/cs_MeshMessage.h>
 #endif
 
-#include <cfg/cs_ConfigHelper.h>
+#include <cfg/cs_Settings.h>
 
 using namespace BLEpp;
 
@@ -33,7 +33,7 @@ GeneralService::GeneralService() :
 	setUUID(UUID(GENERAL_UUID));
 	setName(BLE_SERVICE_GENERAL);
 
-	ConfigHelper::getInstance();
+	Settings::getInstance();
 
 //	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
 //	loadPersistentStorage();
@@ -123,7 +123,7 @@ void GeneralService::tick() {
 
 	if (_getConfigurationCharacteristic) {
 		if (_selectConfiguration != 0xFF) {
-			bool success = ConfigHelper::getInstance().readFromStorage(_selectConfiguration, _streamBuffer);
+			bool success = Settings::getInstance().readFromStorage(_selectConfiguration, _streamBuffer);
 			if (success) {
 				writeToConfigCharac();
 			}
@@ -236,7 +236,7 @@ void GeneralService::addSetConfigurationCharacteristic() {
 //					uint8_t *payload = _streamBuffer->payload();
 //					uint8_t length = _streamBuffer->length();
 //					writeToStorage(type, length, payload);
-					ConfigHelper::getInstance().writeToStorage(type, _streamBuffer);
+					Settings::getInstance().writeToStorage(type, _streamBuffer);
 					mb.unlock();
 				} else {
 					log(ERROR, MSG_BUFFER_IS_LOCKED);

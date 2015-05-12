@@ -64,7 +64,7 @@
  * Custom includes
  *********************************************************************************************************************/
 
-#include <cfg/cs_ConfigHelper.h>
+#include <cfg/cs_Settings.h>
 
 /**********************************************************************************************************************
  * Main functionality
@@ -171,13 +171,12 @@ void Crownstone::setName() {
 	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
 	// check config (storage) if another name was stored
 	std::string device_name;
-	ps_general_service_t cfg = ConfigHelper::getInstance().getConfig();
 	// use default name in case no stored name is found
-	Storage::getString(cfg.device_name, device_name, std::string(devicename));
+	Storage::getString(Settings::getInstance().getConfig().device_name, device_name, std::string(devicename));
 	// assign name
 	LOGi("Set name to %s", device_name.c_str());
-	_stack->setDeviceName(device_name); // max len = ble_gap_devname_max_len (31)
-	_stack->setAppearance(BLE_APPEARANCE_GENERIC_TAG);
+	_stack->updateDeviceName(device_name); // max len = ble_gap_devname_max_len (31)
+	_stack->updateAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
 /* Sets default parameters of the Bluetooth connection.
@@ -251,9 +250,6 @@ void Crownstone::setup() {
 	// set up the bluetooth stack that controls the hardware.
 	_stack = &Nrf51822BluetoothStack::getInstance();
 
-	// set advertising parameters such as the device name and appearance.
-	setName();
-
 	// configure parameters for the Bluetooth stack
 	configStack();
 
@@ -266,6 +262,10 @@ void Crownstone::setup() {
 	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	// in particular we need it to set interrupt priorities.
 	_stack->init();
+
+	// set advertising parameters such as the device name and appearance.
+	// Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
+	setName();
 
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");

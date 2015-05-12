@@ -63,12 +63,12 @@ struct ps_storage_base_t {
 /* Enumeration used to identify the different storage structures
  */
 enum ps_storage_id {
-	// storage for the power wervice
-	PS_ID_POWER_SERVICE = 0,
-	// storage for the general service
-	PS_ID_GENERAL_SERVICE = 1,
+	// storage for configuration items
+	PS_ID_CONFIGURATION = 0,
 	// storage for the indoor localisation service
-	PS_ID_INDOORLOCALISATION_SERVICE = 2
+	PS_ID_INDOORLOCALISATION_SERVICE = 1,
+	// number of elements
+	PS_ID_TYPES
 };
 
 /* Storage configuration struct
@@ -84,22 +84,11 @@ struct storage_config_t {
 	pstorage_size_t storage_size;
 };
 
-// POWER SERVICE /////////////////////////////////
-// TODO: move to cs_PowerService.h
+// Configuration ///////////////////////////////
 
-/* Struct used by the <PowerService> to store elements
+/* Struct used by the Configuration to store elements
  */
-struct ps_power_service_t : ps_storage_base_t {
-	// current limit value
-	uint32_t current_limit;
-};
-
-// GENERAL SERVICE ///////////////////////////////
-// TODO: move to cs_GeneralService.h
-
-/* Struct used by the <GeneralService> to store elements
- */
-struct ps_general_service_t : ps_storage_base_t {
+struct ps_configuration_t : ps_storage_base_t {
 	// device name
 	char device_name[MAX_STRING_SIZE];
 	// room name
@@ -116,6 +105,12 @@ struct ps_general_service_t : ps_storage_base_t {
 	} beacon;
 	// advertising tx power
 	int32_t txPower;
+
+	// current limit value
+	uint32_t current_limit;
+
+	// nearby timeout used for device tracking
+	uint32_t nearbyTimeout;
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////
