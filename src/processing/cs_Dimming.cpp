@@ -11,7 +11,7 @@ Dimming::Dimming() {
 }
 
 void Dimming::configure() {
-	_adc->addListener(this);
+//	_adc->addListener(this);
 	// configure timer for threshold
 	
 }

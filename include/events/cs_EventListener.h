@@ -13,17 +13,17 @@
 class EventListener {
 
 private:
-	EventType _type;
+	uint16_t _type;
 
 public:
-	EventListener(EventType type) {
+	EventListener(uint16_t type = EVT_ALL) {
 		_type = type;
 	}
 
-	inline EventType getType() { return _type; }
+	inline uint16_t getType() { return _type; }
 
 	virtual ~EventListener() {};
 
 	// handle events
-	virtual void handleEvent(EventType evt, void* p_data, uint16_t length) = 0;
+	virtual void handleEvent(uint16_t evt, void* p_data, uint16_t length) = 0;
 };

@@ -6,13 +6,14 @@
  */
 #pragma once
 
+#include <cstdint>
+
 //#include <stdint.h>
 //
 //#include <common/cs_Types.h>
-#include "events/cs_Dispatcher.h"
 //#include "cs_PWM.h"
 
-class LPComp : public Dispatcher {
+class LPComp {
 	public:
 		// use static variant of singleton, no dynamic memory allocation
 		static LPComp& getInstance() {

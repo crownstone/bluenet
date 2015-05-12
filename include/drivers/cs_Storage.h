@@ -102,9 +102,8 @@ struct ps_configuration_t : ps_storage_base_t {
 		uint32_t major;
 		uint32_t minor;
 		ble_uuid128_t uuid;
+		int32_t rssi;
 	} beacon;
-	// advertising tx power
-	int32_t txPower;
 
 	// current limit value
 	uint32_t current_limit;

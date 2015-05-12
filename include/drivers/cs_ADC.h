@@ -8,13 +8,12 @@
 
 //#include <stdint.h>
 //
-#include "events/cs_Dispatcher.h"
 //#include "cs_RTC.h"
 #include "structs/cs_CurrentCurve.h"
 
 //#include "common/cs_Types.h"
 
-class ADC : public Dispatcher {
+class ADC {
 
 public:
 	// Use static variant of singleton, no dynamic memory allocation

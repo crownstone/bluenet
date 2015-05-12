@@ -13,6 +13,9 @@
 #include <util/cs_Utils.h>
 
 #include <events/cs_EventTypes.h>
+#include <events/cs_EventDispatcher.h>
+
+#include <ble/cs_UUID.h>
 
 /* Configuration types
  *
@@ -28,9 +31,11 @@ enum ConfigurationTypes {
 	CONFIG_IBEACON_MAJOR                    = 0x6,
 	CONFIG_IBEACON_MINOR                    = 0x7,
 	CONFIG_IBEACON_UUID                     = 0x8,
-	CONFIG_TX_POWER                         = 0x9,
+	CONFIG_IBEACON_RSSI                     = 0x9,
 	CONFIG_TYPES
 };
+
+using namespace BLEpp;
 
 class Settings {
 
@@ -90,6 +95,7 @@ public:
 			// TODO: write to persistent storage and trigger update event
 			break;
 		}
+#if IBEACON==1
 		case CONFIG_IBEACON_MAJOR: {
 			if (length != 2) {
 				LOGw("We do not account for a value of more than %d");
@@ -101,6 +107,8 @@ public:
 			LOGi("Set major to %d", major);
 			Storage::setUint16(major, (uint32_t&)_storageStruct.beacon.major);
 			savePersistentStorage();
+
+			EventDispatcher::getInstance().dispatch((EventType)type, &_storageStruct.beacon.major, 4);
 			break;
 		}
 		case CONFIG_IBEACON_MINOR: {
@@ -114,6 +122,8 @@ public:
 			LOGi("Set minor to %d", minor);
 			Storage::setUint16(minor, (uint32_t&)_storageStruct.beacon.minor);
 			savePersistentStorage();
+
+			EventDispatcher::getInstance().dispatch((EventType)type, &_storageStruct.beacon.minor, 4);
 			break;
 		}
 		case CONFIG_IBEACON_UUID: {
@@ -122,18 +132,23 @@ public:
 			}
 			Storage::setArray<uint8_t>(payload, _storageStruct.beacon.uuid.uuid128, 16);
 			savePersistentStorage();
+
+			EventDispatcher::getInstance().dispatch((EventType)type, &_storageStruct.beacon.uuid.uuid128, 16);
 			break;
 		}
-		case CONFIG_TX_POWER: {
+		case CONFIG_IBEACON_RSSI: {
 			if (length != 1) {
 				LOGw("We do not account for a value of more than 255");
 			}
-			int8_t txPower = payload[0];
-			LOGi("Set TX Power to %d", txPower);
-			Storage::setInt8(txPower, _storageStruct.txPower);
+			int8_t rssi = payload[0];
+			LOGi("Set beacon rssi to %d", rssi);
+			Storage::setInt8(rssi, (int32_t&)_storageStruct.beacon.rssi);
 			savePersistentStorage();
+
+			EventDispatcher::getInstance().dispatch((EventType)type, &_storageStruct.beacon.rssi, 1);
 			break;
 		}
+#endif
 		default:
 			LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
 		}
@@ -164,12 +179,13 @@ public:
 
 			return true;
 		}
+#if IBEACON==1
 		case CONFIG_IBEACON_MAJOR: {
 			LOGd("Read major");
 			loadPersistentStorage();
 			uint8_t plen = 1;
 			uint16_t payload[plen];
-			Storage::getUint16(_storageStruct.beacon.major, payload[0], 0);
+			Storage::getUint16(_storageStruct.beacon.major, payload[0], BEACON_MAJOR);
 			streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
 			streamBuffer->setType(type);
 
@@ -181,7 +197,7 @@ public:
 			loadPersistentStorage();
 			uint8_t plen = 1;
 			uint16_t payload[plen];
-			Storage::getUint16(_storageStruct.beacon.minor, payload[0], 0);
+			Storage::getUint16(_storageStruct.beacon.minor, payload[0], BEACON_MINOR);
 			streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
 			streamBuffer->setType(type);
 
@@ -193,25 +209,26 @@ public:
 			loadPersistentStorage();
 			uint8_t plen = 16;
 			uint8_t payload[plen];
-			Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, payload, NULL, plen);
+			Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, payload, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, plen);
 			streamBuffer->setPayload(payload, plen);
 			streamBuffer->setType(type);
 
 			LOGd("UUID set in payload .. with len %d", streamBuffer->length());
 			return true;
 		}
-		case CONFIG_TX_POWER: {
+		case CONFIG_IBEACON_RSSI: {
 			LOGd("Read tx power");
 			loadPersistentStorage();
 			uint8_t plen = 1;
 			int8_t payload[plen];
-			Storage::getInt8(_storageStruct.txPower, payload[0], 0);
+			Storage::getInt8(_storageStruct.beacon.rssi, payload[0], BEACON_RSSI);
 			streamBuffer->setPayload((uint8_t*)payload, plen);
 			streamBuffer->setType(type);
 
-			LOGd("Tx power value set in payload: %d with len %d", (int8_t)streamBuffer->payload()[0], streamBuffer->length());
+			LOGd("Beacon rssi value set in payload: %d with len %d", payload[0], streamBuffer->length());
 			return true;
 		}
+#endif
 		default: {
 			LOGd("There is no such configuration type (%i), or not yet implemented.", type);
 		}

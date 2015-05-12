@@ -11,15 +11,13 @@
 
 #include <drivers/cs_Serial.h>
 
-void EventDispatcher::dispatch(EventType evt) {
+void EventDispatcher::dispatch(uint16_t evt) {
 	dispatch(evt, NULL, 0);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wenum-compare"
-void EventDispatcher::dispatch(EventType evt, void* p_data, uint16_t length) {
+void EventDispatcher::dispatch(uint16_t evt, void* p_data, uint16_t length) {
 	LOGi("dispatch event: %d", evt);
-	for (int i = 0; i < MAX_LISTENERS; i++) {
+	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] != NULL &&
 			(_listeners[i]->getType() == evt || _listeners[i]->getType() == EVT_ALL))
 		{
@@ -28,11 +26,9 @@ void EventDispatcher::dispatch(EventType evt, void* p_data, uint16_t length) {
 	}
 }
 
-#pragma GCC diagnostic pop
-
 bool EventDispatcher::addListener(EventListener *listener) {
 	LOGi("addListener for event: %d", listener->getType());
-	for (int i = 0; i < MAX_LISTENERS; i++) {
+	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] == NULL) {
 			_listeners[i] = listener;
 			return true;
@@ -43,7 +39,7 @@ bool EventDispatcher::addListener(EventListener *listener) {
 
 void EventDispatcher::removeListener(EventListener *listener) {
 	LOGi("remove listener");
-	for (int i = 0; i < MAX_LISTENERS; i++) {
+	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] == listener) {
 			_listeners[i] = NULL;
 		}

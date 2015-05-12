@@ -9,7 +9,7 @@
 #include <events/cs_EventTypes.h>
 #include <events/cs_EventListener.h>
 
-#define MAX_LISTENERS                            10
+#define MAX_EVENT_LISTENERS                            10
 
 class EventDispatcher {
 
@@ -21,7 +21,7 @@ private:
 	// This class is singleton, deny implementation
 	void operator=(EventDispatcher const &);
 
-	EventListener* _listeners[MAX_LISTENERS];
+	EventListener* _listeners[MAX_EVENT_LISTENERS];
 
 public:
 	static EventDispatcher& getInstance() {
@@ -35,9 +35,9 @@ public:
 	// remove one
 	void removeListener(EventListener *listener);
 
-	void dispatch(EventType evt);
+	void dispatch(uint16_t evt);
 
-	void dispatch(EventType evt, void* p_data, uint16_t length);
+	void dispatch(uint16_t evt, void* p_data, uint16_t length);
 };
 
 

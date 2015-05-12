@@ -9,12 +9,10 @@
 //#include "third/std/function.h"
 #include "drivers/cs_ADC.h"
 
-#include <events/cs_Listener.h>
-
 /**
  * Dimming of LEDs is by a simple duty cycle of the 230V/110V sine signal.
  */
-class Dimming: public Listener {
+class Dimming {
 public:
 	Dimming();
 

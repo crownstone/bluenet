@@ -23,18 +23,6 @@
 
 //#define MICRO_VIEW 1
 
-#if IBEACON==1
-	// define the iBeacon advertisement package parameters
-	// the proximity UUID
-	#define BEACON_UUID   "ed3a6985-8872-4bb7-b784-c59ef3589844"
-	// the major number
-	#define BEACON_MAJOR  1
-	// the minor number
-	#define BEACON_MINOR  5
-	// the rssi
-	#define BEACON_RSSI   0xc7
-#endif
-
 #if __clang__
 #define STRINGIFY(str) #str
 #else
@@ -65,6 +53,9 @@
  *********************************************************************************************************************/
 
 #include <cfg/cs_Settings.h>
+
+#include <events/cs_EventDispatcher.h>
+#include <events/cs_EventTypes.h>
 
 /**********************************************************************************************************************
  * Main functionality
@@ -247,6 +238,11 @@ void Crownstone::setup() {
 
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 
+	EventDispatcher::getInstance().addListener(this);
+
+	LOGi("Create Timer");
+	Timer::getInstance();
+
 	// set up the bluetooth stack that controls the hardware.
 	_stack = &Nrf51822BluetoothStack::getInstance();
 
@@ -256,7 +252,20 @@ void Crownstone::setup() {
 #if IBEACON==1
 	// if enabled, create the iBeacon parameter object which will be used
 	// to start advertisment as an iBeacon
-	_beacon = new IBeacon(UUID(BEACON_UUID), BEACON_MAJOR, BEACON_MINOR, BEACON_RSSI);
+
+	// get values from config
+	uint16_t major, minor;
+	uint8_t rssi;
+	ble_uuid128_t uuid;
+
+	ps_configuration_t cfg = Settings::getInstance().getConfig();
+	Storage::getUint16(cfg.beacon.major, major, BEACON_MAJOR);
+	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
+	Storage::getArray(cfg.beacon.uuid.uuid128, uuid.uuid128, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
+	Storage::getUint8(cfg.beacon.rssi, rssi, BEACON_RSSI);
+
+	// create ibeacon object
+	_beacon = new IBeacon(uuid, major, minor, rssi);
 #endif
 
 	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
@@ -304,9 +313,6 @@ void Crownstone::setup() {
 			_stack->startScanning();
 
 	});
-
-	LOGi("Create Timer");
-	Timer::getInstance();
 
 	createServices();
 
@@ -371,6 +377,28 @@ void Crownstone::run() {
 	BLE_CALL(sd_app_event_wait, () );
 #endif
 
+	}
+}
+
+void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	LOGi("handleEvent: %d", evt);
+	switch(evt) {
+	case CONFIG_IBEACON_MAJOR: {
+		_beacon->setMajor(*(uint32_t*)p_data);
+		break;
+	}
+	case CONFIG_IBEACON_MINOR: {
+		_beacon->setMinor(*(uint32_t*)p_data);
+		break;
+	}
+	case CONFIG_IBEACON_UUID: {
+		_beacon->setUUID(*(ble_uuid128_t*)p_data);
+		break;
+	}
+	case CONFIG_IBEACON_RSSI: {
+		_beacon->setRSSI(*(int8_t*)p_data);
+		break;
+	}
 	}
 }
 

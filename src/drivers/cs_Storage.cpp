@@ -180,10 +180,14 @@ void Storage::getString(char* value, std::string& target, std::string default_va
 	// is new and has not yet been written to, so we use the
 	// default value. same if the stored value is an empty string
 	if (target == "" || value[MAX_STRING_SIZE-1] == 0xFF) {
+#ifdef PRINT_ITEMS
 		LOGd("use default value");
+#endif
 		target = default_value;
 	} else {
+#ifdef PRINT_ITEMS
 		LOGd("found stored value: %s", target.c_str());
+#endif
 	}
 }
 
@@ -201,11 +205,15 @@ void Storage::getUint8(uint32_t value, uint8_t& target, uint8_t default_value) {
 	// check if last byte is FF which means that memory is unnassigned
 	// and value has to be ignored
 	if (value & (0xFF << 3)) {
+#ifdef PRINT_ITEMS
 		LOGd("use default value");
+#endif
 		target = default_value;
 	} else {
 		target = value;
+#ifdef PRINT_ITEMS
 		LOGd("found stored value: %d", target);
+#endif
 	}
 }
 
@@ -223,11 +231,15 @@ void Storage::getInt8(int32_t value, int8_t& target, int8_t default_value) {
 	// check if last byte is FF which means that memory is unnassigned
 	// and value has to be ignored
 	if (value & (0xFF << 3)) {
+#ifdef PRINT_ITEMS
 		LOGd("use default value");
+#endif
 		target = default_value;
 	} else {
 		target = value;
+#ifdef PRINT_ITEMS
 		LOGd("found stored value: %d", target);
+#endif
 	}
 }
 
@@ -245,11 +257,16 @@ void Storage::getUint16(uint32_t value, uint16_t& target, uint16_t default_value
 	// check if last byte is FF which means that memory is unnassigned
 	// and value has to be ignored
 	if (value & (0xFF << 3)) {
+#ifdef PRINT_ITEMS
 		LOGd("use default value");
+#endif
 		target = default_value;
 	} else {
 		target = value;
+
+#ifdef PRINT_ITEMS
 		LOGd("found stored value: %d", target);
+#endif
 	}
 }
 
@@ -271,11 +288,15 @@ void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value
 	// check if value is equal to INT_MAX (FFFFFFFF) which means that memory is
 	// unnassigned and value has to be ignored
 	if (value == INT_MAX) {
+#ifdef PRINT_ITEMS
 		LOGd("use default value");
 		target = default_value;
+#endif
 	} else {
 		target = value;
+#ifdef PRINT_ITEMS
 		LOGd("found stored value: %d", target);
+#endif
 	}
 }
 

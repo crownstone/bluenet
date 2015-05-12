@@ -260,6 +260,7 @@ void PowerService::setCurrentLimit(uint8_t value) {
  * TODO: Check https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/
  *       Writing to persistent memory should be done between connection/advertisement events...
  */
+// TODO -oDE: make part of configuration characteristic
 void PowerService::addCurrentLimitCharacteristic() {
 	_currentLimitCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_currentLimitCharacteristic);
