@@ -47,7 +47,7 @@ upload() {
 }
 
 debug() {
-	${path}/debug.sh $BLUENET_CONFIG_DIR/build/$target.elf
+	${path}/debug.sh $BLUENET_CONFIG_DIR/build/$target.elf $serial_num
 }
 
 all() {
