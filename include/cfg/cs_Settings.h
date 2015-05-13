@@ -32,7 +32,7 @@ enum ConfigurationTypes {
 	CONFIG_IBEACON_MINOR                    = 0x7,
 	CONFIG_IBEACON_UUID                     = 0x8,
 	CONFIG_IBEACON_RSSI                     = 0x9,
-	CONFIG_WIFI_SETTINGS                    = 0x10,
+	CONFIG_WIFI_SETTINGS                    = 0xA,
 	CONFIG_TYPES
 };
 
