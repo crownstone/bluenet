@@ -242,6 +242,7 @@ public:
 #endif
 		case CONFIG_WIFI_SETTINGS: {
 			LOGd("Read wifi settings. Does reset it.");
+			// copy string, because we clear it on read
 			std::string str;
 			if (_wifiSettings != "") {
 				str = "{}";
@@ -250,6 +251,7 @@ public:
 			}
 			streamBuffer->fromString(str);
 			streamBuffer->setType(type);
+			_wifiSettings = "";
 			LOGd("Wifi settings read");
 			return true;
 		}
