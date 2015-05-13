@@ -32,6 +32,7 @@ enum ConfigurationTypes {
 	CONFIG_IBEACON_MINOR                    = 0x7,
 	CONFIG_IBEACON_UUID                     = 0x8,
 	CONFIG_IBEACON_RSSI                     = 0x9,
+	CONFIG_WIFI_SETTINGS                    = 0x10,
 	CONFIG_TYPES
 };
 
@@ -149,6 +150,16 @@ public:
 			break;
 		}
 #endif
+		case CONFIG_WIFI_SETTINGS: {
+			LOGd("Temporarily store wifi settings");
+			// max length '{ ssid = 32 bytes, key = 32 bytes}', 64+19 bytes = 83 bytes
+			if (length > 83) {
+				LOGe("Wifi settings string too long");
+				break;
+			}
+			_wifiSettings = std::string((char*)payload, length);
+			break;
+		}
 		default:
 			LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
 		}
@@ -229,6 +240,19 @@ public:
 			return true;
 		}
 #endif
+		case CONFIG_WIFI_SETTINGS: {
+			LOGd("Read wifi settings. Does reset it.");
+			std::string str;
+			if (_wifiSettings != "") {
+				str = "unset";
+			} else {
+				str = _wifiSettings;
+			}
+			streamBuffer->fromString(str);
+			streamBuffer->setType(type);
+			LOGd("Wifi settings read");
+			return true;
+		}
 		default: {
 			LOGd("There is no such configuration type (%i), or not yet implemented.", type);
 		}
@@ -297,6 +321,8 @@ protected:
 	// struct that storage object understands
 	ps_configuration_t _storageStruct;
 
+	// non-persistent configuration options
+	std::string _wifiSettings;
 };
 
 

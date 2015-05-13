@@ -133,7 +133,7 @@ struct ps_configuration_t : ps_storage_base_t {
 class Storage {
 
 public:
-	/* Returns the singleton instance of this class	
+	/* Returns the singleton instance of this class
 	 *
 	 * @return static instance of Storage class
 	 */
