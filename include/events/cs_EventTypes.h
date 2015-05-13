@@ -7,7 +7,14 @@
 #pragma once
 
 enum EventType {
-	EVT_POWER_ON,
+	Configuration_Base = 0x000,
+	General_Base       = 0x100
+};
+
+// for Configuration event type see cs_ConfigHelper.h
+
+enum GeneralEventType {
+	EVT_POWER_ON = General_Base,
 	EVT_POWER_OFF,
 	EVT_ALL
 };

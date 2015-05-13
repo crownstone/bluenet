@@ -51,19 +51,19 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
             break;
 	}
 
-	switch (evt->event_type)
-	{
-	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
-		LOGd("conflicting value");
-		break;
-	case RBC_MESH_EVENT_TYPE_NEW_VAL:
-		LOGd("new value");
-		break;
-	case RBC_MESH_EVENT_TYPE_UPDATE_VAL:
-		LOGd("update value");
-		break;
-
-	}
+//	switch (evt->event_type)
+//	{
+//	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
+//		LOGd("conflicting value");
+//		break;
+//	case RBC_MESH_EVENT_TYPE_NEW_VAL:
+//		LOGd("new value");
+//		break;
+//	case RBC_MESH_EVENT_TYPE_UPDATE_VAL:
+//		LOGd("update value");
+//		break;
+//
+//	}
 }
 
 }

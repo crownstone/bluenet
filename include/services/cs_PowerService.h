@@ -91,11 +91,11 @@ protected:
 	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
 	 * Hence, there is an entire struct that can be filled and flashed at once.
 	 */
-	void loadPersistentStorage();
+//	void loadPersistentStorage();
 
 	/* Save to FLASH.
 	 */
-	void savePersistentStorage();
+//	void savePersistentStorage();
 private:
 	// References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint8_t> *_pwmCharacteristic;
@@ -108,8 +108,8 @@ private:
 
 	uint8_t _currentLimitVal;
 
-	pstorage_handle_t _storageHandle;
-	ps_power_service_t _storageStruct;
+//	pstorage_handle_t _storageHandle;
+//	ps_power_service_t _storageStruct;
 
 	bool _adcInitialized;
 	bool _currentLimitInitialized;

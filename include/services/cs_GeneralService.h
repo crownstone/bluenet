@@ -40,7 +40,7 @@ public:
 
 	/* Overload start
 	 */
-	void startAdvertising(BLEpp::Nrf51822BluetoothStack* stack);
+//	void startAdvertising(BLEpp::Nrf51822BluetoothStack* stack);
 
 	/* Update the temperature characteristic.
 	 * @temperature A value in Celcius directly from the chip
@@ -56,7 +56,7 @@ public:
 	 * Persistent memory can be used to store multiple types of objects. The "name" of the device is one type for
 	 * example, the "floor" is another. Type here specifies the category of the entity to be retrieved from FLASH.
 	 */
-	bool readFromStorage(uint8_t type);
+//	bool readFromStorage(uint8_t type);
 
 	/* Write to the "get configuration" characteristic
 	 *
@@ -74,7 +74,7 @@ public:
 	 * written to FLASH. That is what this function takes care of. The writing itself will be done asynchronously, so
 	 * there is no return value that indicates success or not.
 	 */
-	void writeToStorage(uint8_t type, uint8_t length, uint8_t* payload);
+//	void writeToStorage(uint8_t type, uint8_t length, uint8_t* payload);
 
 	/* Perform non urgent functionality every main loop.
 	 *
@@ -187,13 +187,13 @@ protected:
 	 *
 	 * @return name of the device
 	 */
-	std::string&  getBLEName();
+//	std::string&  getBLEName();
 	/* Write the Bluetooth name to the object representing the BLE stack.
 	 *
 	 * This updates the Bluetooth name immediately, however, it does not update the name persistently. It
 	 * has to be written to FLASH in that case.
 	 */
-	void setBLEName(const std::string &name);
+//	void setBLEName(const std::string &name);
 
 	/* Get a handle to the persistent storage struct and load it from FLASH.
 	 *
@@ -201,19 +201,13 @@ protected:
 	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
 	 * Hence, there is an entire struct that can be filled and flashed at once.
 	 */
-	void loadPersistentStorage();
+//	void loadPersistentStorage();
 
 	/* Save to FLASH.
 	 */
-	void savePersistentStorage();
+//	void savePersistentStorage();
 
 private:
-
-	// handle to storage (required to write to and read from FLASH)
-	pstorage_handle_t _storageHandle;
-
-	// struct that storage object understands
-	ps_general_service_t _storageStruct;
 
 	// buffer object to read/write configuration characteristics
 	StreamBuffer<uint8_t> *_streamBuffer;

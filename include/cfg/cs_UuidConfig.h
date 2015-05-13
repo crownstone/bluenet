@@ -50,17 +50,3 @@ enum IndoorLocalizationCharacteristicsIDs {
 	LIST_DEVICE_UUID                        = 0x4,
 	TRACKED_DEVICE_LIST_UUID                = 0x5,
 };
-
-/* Configuration types
- *
- * Use in the characteristic to read and write configurations in <CommonService>.
- */
-enum ConfigurationTypes {
-	CONFIG_NAME_UUID                        = 0x0,
-	CONFIG_DEVICE_TYPE_UUID                 = 0x1,
-	CONFIG_ROOM_UUID                        = 0x2,
-	CONFIG_FLOOR_UUID                       = 0x3,
-	CONFIG_NEARBY_TIMEOUT_UUID              = 0x4,
-	CONFIG_PWM_FREQ_UUID                    = 0x5,
-	CONFIG_TYPES
-};

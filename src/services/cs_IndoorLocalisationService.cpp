@@ -25,6 +25,8 @@
 
 #include "drivers/cs_Timer.h"
 
+#include <cfg/cs_Settings.h>
+
 //#include <common/cs_Strings.h>
 
 using namespace BLEpp;
@@ -240,7 +242,7 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 
 	// Load the nearby timeout
 	uint16_t counts;
-	Storage::getUint16(_storageStruct.nearbyTimeout, counts, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
+	Storage::getUint16(Settings::getInstance().getConfig().nearbyTimeout, counts, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
 	_trackedDeviceList->setTimeout(counts);
 }
 
@@ -272,14 +274,12 @@ void IndoorLocalizationService::setNearbyTimeout(uint16_t counts) {
 	if (_trackedDeviceList != NULL) {
 		_trackedDeviceList->setTimeout(counts);
 	}
-	Storage::setUint16(counts, _storageStruct.nearbyTimeout);
 }
 
 uint16_t IndoorLocalizationService::getNearbyTimeout() {
 	if (_trackedDeviceList == NULL) {
 		return 0;
 	}
-	loadPersistentStorage();
 	return _trackedDeviceList->getTimeout();
 }
 

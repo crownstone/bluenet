@@ -23,18 +23,6 @@
 
 //#define MICRO_VIEW 1
 
-#if IBEACON==1
-	// define the iBeacon advertisement package parameters
-	// the proximity UUID
-	#define BEACON_UUID   "ed3a6985-8872-4bb7-b784-c59ef3589844"
-	// the major number
-	#define BEACON_MAJOR  1
-	// the minor number
-	#define BEACON_MINOR  5
-	// the rssi
-	#define BEACON_RSSI   0xc7
-#endif
-
 #if __clang__
 #define STRINGIFY(str) #str
 #else
@@ -64,6 +52,10 @@
  * Custom includes
  *********************************************************************************************************************/
 
+#include <cfg/cs_Settings.h>
+
+#include <events/cs_EventDispatcher.h>
+#include <events/cs_EventTypes.h>
 
 /**********************************************************************************************************************
  * Main functionality
@@ -165,11 +157,17 @@ void Crownstone::welcome() {
  * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
  */
 void Crownstone::setName() {
+	// assemble default name from BLUETOOTH_NAME and COMPILATION_TIME
 	char devicename[32];
 	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
-	LOGi("Set name to %s", STRINGIFY(BLUETOOTH_NAME));
-	_stack->setDeviceName(std::string(devicename)); // max len = ble_gap_devname_max_len (31)
-	_stack->setAppearance(BLE_APPEARANCE_GENERIC_TAG);
+	// check config (storage) if another name was stored
+	std::string device_name;
+	// use default name in case no stored name is found
+	Storage::getString(Settings::getInstance().getConfig().device_name, device_name, std::string(devicename));
+	// assign name
+	LOGi("Set name to %s", device_name.c_str());
+	_stack->updateDeviceName(device_name); // max len = ble_gap_devname_max_len (31)
+	_stack->updateAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
 /* Sets default parameters of the Bluetooth connection.
@@ -244,24 +242,43 @@ void Crownstone::setup() {
 
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 
+	EventDispatcher::getInstance().addListener(this);
+
+	LOGi("Create Timer");
+	Timer::getInstance();
+
 	// set up the bluetooth stack that controls the hardware.
 	_stack = &Nrf51822BluetoothStack::getInstance();
-
-	// set advertising parameters such as the device name and appearance.
-	setName();
 
 	// configure parameters for the Bluetooth stack
 	configStack();
 
 #if IBEACON==1
 	// if enabled, create the iBeacon parameter object which will be used
-	// to start advertisment as an iBeacon
-	_beacon = new IBeacon(UUID(BEACON_UUID), BEACON_MAJOR, BEACON_MINOR, BEACON_RSSI);
+	// to start advertisement as an iBeacon
+
+	// get values from config
+	uint16_t major, minor;
+	uint8_t rssi;
+	ble_uuid128_t uuid;
+
+	ps_configuration_t cfg = Settings::getInstance().getConfig();
+	Storage::getUint16(cfg.beacon.major, major, BEACON_MAJOR);
+	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
+	Storage::getArray(cfg.beacon.uuid.uuid128, uuid.uuid128, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
+	Storage::getUint8(cfg.beacon.rssi, rssi, BEACON_RSSI);
+
+	// create ibeacon object
+	_beacon = new IBeacon(uuid, major, minor, rssi);
 #endif
 
 	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	// in particular we need it to set interrupt priorities.
 	_stack->init();
+
+	// set advertising parameters such as the device name and appearance.
+	// Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
+	setName();
 
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
@@ -306,9 +323,6 @@ void Crownstone::setup() {
 			_stack->startScanning();
 
 	});
-
-	LOGi("Create Timer");
-	Timer::getInstance();
 
 	createServices();
 
@@ -373,6 +387,30 @@ void Crownstone::run() {
 	BLE_CALL(sd_app_event_wait, () );
 #endif
 
+	}
+}
+
+void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	LOGi("handleEvent: %d", evt);
+	switch(evt) {
+#if IBEACON==1
+	case CONFIG_IBEACON_MAJOR: {
+		_beacon->setMajor(*(uint32_t*)p_data);
+		break;
+	}
+	case CONFIG_IBEACON_MINOR: {
+		_beacon->setMinor(*(uint32_t*)p_data);
+		break;
+	}
+	case CONFIG_IBEACON_UUID: {
+		_beacon->setUUID(*(ble_uuid128_t*)p_data);
+		break;
+	}
+	case CONFIG_IBEACON_RSSI: {
+		_beacon->setRSSI(*(int8_t*)p_data);
+		break;
+	}
+#endif
 	}
 }
 

@@ -216,6 +216,8 @@ public:
 		_timeout = advertisingTimeoutSeconds;
 	}
 
+	void updateAppearance(uint16_t appearance);
+
 	/* Update device name
 	 * @deviceName limited string for device name
 	 *

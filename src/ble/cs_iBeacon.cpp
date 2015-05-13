@@ -15,9 +15,8 @@ void IBeacon::toArray(uint8_t* array) {
 	*((uint16_t*) array) = BLEutil::convertEndian16(_adv_indicator);
 	array += 2;
 
-	ble_uuid128_t uuid = (ble_uuid128_t) _uuid;
 	for (int i = 0; i < 16; ++i) {
-		*array++ = uuid.uuid128[15 - i];
+		*array++ = _uuid.uuid128[15 - i];
 	}
 
 	*((uint16_t*) array) = BLEutil::convertEndian16(_major);

@@ -26,7 +26,6 @@ struct ps_indoorlocalisation_service_t : ps_storage_base_t {
 	struct {
 		uint8_t list[TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE];
 	} trackedDevices;
-	uint32_t nearbyTimeout;
 };
 
 class IndoorLocalizationService : public BLEpp::Service {

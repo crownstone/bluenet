@@ -68,7 +68,7 @@ void MeshControl::process(uint8_t handle, void* p_data, uint16_t length) {
 	}
 }
 
-void MeshControl::handleEvent(EventType evt, void* p_data, uint16_t length) {
+void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch(evt) {
 	case EVT_POWER_ON:
 	case EVT_POWER_OFF: {

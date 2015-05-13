@@ -9,6 +9,8 @@
 
 #include <ble/cs_UUID.h>
 
+#include <drivers/cs_Serial.h>
+
 namespace BLEpp {
 
 /* Implementation of the iBeacon specification.
@@ -38,7 +40,7 @@ class IBeacon {
 
 		/* proximity UUID, shared for all iBeacons for a given application
 		 */
-		UUID _uuid;
+		ble_uuid128_t _uuid;
 
 		/* Major number (group level identifier)
 		 */
@@ -55,7 +57,7 @@ class IBeacon {
 		 * smartphone together with the current rssi reading to calculate the current
 		 * distance from the iBeacon.
 		 */
-		uint8_t _rssi;
+		int8_t _rssi;
 
 	public:
 		/* Default constructor for the iBeacon class
@@ -68,7 +70,7 @@ class IBeacon {
 		 *
 		 * @rssi the calibrated rssi value at 1m distance
 		 */
-		IBeacon(UUID uuid, uint16_t major, uint16_t minor, uint8_t rssi) {
+		IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor, int8_t rssi) {
 			// advertisement indicator for an iBeacon is defined as 0x0215
 			_adv_indicator = 0x0215;
 			_uuid = uuid;
@@ -108,6 +110,26 @@ class IBeacon {
 		 * advertisement package
 		 */
 		void toArray(uint8_t* array);
+
+		/* Set major value */
+		inline void setMajor(uint16_t major) { LOGd("setMajor: %d", major); _major = major; }
+		/* Get major value  */
+		inline uint16_t getMajor() { return _major; }
+
+		/* Set minor value */
+		inline void setMinor(uint16_t minor) { LOGd("setMinor: %d", minor); _minor = minor; }
+		/* Get minor value */
+		inline uint16_t getMinor() { return _minor; }
+
+		/* Set UUID */
+		inline void setUUID(ble_uuid128_t uuid) { LOGd("setUUID"); _uuid = uuid; }
+		/* Get UUID */
+		inline ble_uuid128_t getUUID() { return _uuid; }
+
+		/* Set RSSI value */
+		inline void setRSSI(int8_t rssi) { LOGd("setRSSI: %d", rssi); _rssi = rssi; }
+		/* Get RSSI value */
+		inline int8_t getRSSI() { return _rssi; }
 };
 
 } // end namespace

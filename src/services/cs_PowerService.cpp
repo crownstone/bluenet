@@ -23,6 +23,7 @@
 #include <drivers/cs_LPComp.h>
 
 #include <protocol/cs_Mesh.h>
+#include <cfg/cs_Settings.h>
 
 using namespace BLEpp;
 
@@ -43,8 +44,9 @@ PowerService::PowerService() :
 
 	setName(BLE_SERVICE_POWER);
 
-	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
-	loadPersistentStorage();
+	Settings::getInstance();
+//	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
+//	loadPersistentStorage();
 
 	init();
 
@@ -126,13 +128,13 @@ void PowerService::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(POWER_SERVICE_UPDATE_FREQUENCY), this);
 }
 
-void PowerService::loadPersistentStorage() {
-	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
-}
+//void PowerService::loadPersistentStorage() {
+//	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+//}
 
-void PowerService::savePersistentStorage() {
-	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
-}
+//void PowerService::savePersistentStorage() {
+//	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+//}
 
 void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic = new Characteristic<uint8_t>();
@@ -236,8 +238,7 @@ void PowerService::addCurrentConsumptionCharacteristic() {
 }
 
 uint8_t PowerService::getCurrentLimit() {
-	loadPersistentStorage();
-	Storage::getUint8(_storageStruct.current_limit, _currentLimitVal, 0);
+	Storage::getUint8(Settings::getInstance().getConfig().current_limit, _currentLimitVal, 0);
 	LOGi("Obtained current limit from FLASH: %i", _currentLimitVal);
 	return _currentLimitVal;
 }
@@ -254,8 +255,8 @@ void PowerService::setCurrentLimit(uint8_t value) {
 	LPComp::getInstance().config(PIN_AIN_LPCOMP, _currentLimitVal, LPComp::LPC_UP);
 	LPComp::getInstance().start();
 	LOGi("Write value to persistent memory");
-	Storage::setUint8(_currentLimitVal, _storageStruct.current_limit);
-	savePersistentStorage();
+	Storage::setUint8(_currentLimitVal, Settings::getInstance().getConfig().current_limit);
+	Settings::getInstance().savePersistentStorage();
 #endif
 }
 
@@ -265,6 +266,7 @@ void PowerService::setCurrentLimit(uint8_t value) {
  * TODO: Check https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/
  *       Writing to persistent memory should be done between connection/advertisement events...
  */
+// TODO -oDE: make part of configuration characteristic
 void PowerService::addCurrentLimitCharacteristic() {
 	_currentLimitCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_currentLimitCharacteristic);

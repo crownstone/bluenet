@@ -158,6 +158,11 @@ void Nrf51822BluetoothStack::updateDeviceName(const std::string& deviceName) {
 	}
 }
 
+void Nrf51822BluetoothStack::updateAppearance(uint16_t appearance) {
+	_appearance = appearance;
+	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
+}
+
 void Nrf51822BluetoothStack::startAdvertisingServices() {
 	if (_started)
 		return;

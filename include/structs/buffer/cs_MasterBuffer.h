@@ -40,7 +40,7 @@ public:
 	}
 
 	void clear() {
-		LOGd("clear");
+//		LOGd("clear");
 		if (_buffer) {
 			memset(_buffer, 0, _size);
 		}
@@ -69,7 +69,7 @@ public:
 	bool isLocked() { return _locked; }
 
 	bool getBuffer(buffer_ptr_t& buffer, uint16_t& maxLength) {
-		LOGd("getBuffer");
+//		LOGd("getBuffer");
 		if (_buffer) {
 			buffer = _buffer;
 			maxLength = _size;

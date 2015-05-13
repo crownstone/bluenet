@@ -17,6 +17,7 @@ extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
 	#include "pstorage_platform.h"
 	#include "pstorage.h"
+	#include "ble_types.h"
 }
 
 //#include <common/cs_Types.h>
@@ -62,12 +63,12 @@ struct ps_storage_base_t {
 /* Enumeration used to identify the different storage structures
  */
 enum ps_storage_id {
-	// storage for the power wervice
-	PS_ID_POWER_SERVICE = 0,
-	// storage for the general service
-	PS_ID_GENERAL_SERVICE = 1,
+	// storage for configuration items
+	PS_ID_CONFIGURATION = 0,
 	// storage for the indoor localisation service
-	PS_ID_INDOORLOCALISATION_SERVICE = 2
+	PS_ID_INDOORLOCALISATION_SERVICE = 1,
+	// number of elements
+	PS_ID_TYPES
 };
 
 /* Storage configuration struct
@@ -83,22 +84,11 @@ struct storage_config_t {
 	pstorage_size_t storage_size;
 };
 
-// POWER SERVICE /////////////////////////////////
-// TODO: move to cs_PowerService.h
+// Configuration ///////////////////////////////
 
-/* Struct used by the <PowerService> to store elements
+/* Struct used by the Configuration to store elements
  */
-struct ps_power_service_t : ps_storage_base_t {
-	// current limit value
-	uint32_t current_limit;
-};
-
-// GENERAL SERVICE ///////////////////////////////
-// TODO: move to cs_GeneralService.h
-
-/* Struct used by the <GeneralService> to store elements
- */
-struct ps_general_service_t : ps_storage_base_t {
+struct ps_configuration_t : ps_storage_base_t {
 	// device name
 	char device_name[MAX_STRING_SIZE];
 	// room name
@@ -107,6 +97,19 @@ struct ps_general_service_t : ps_storage_base_t {
 	char device_type[MAX_STRING_SIZE];
 	// floor level
 	uint32_t floor;
+	// beacon
+	struct __attribute__((__packed__)) ps_beacon_t {
+		uint32_t major;
+		uint32_t minor;
+		ble_uuid128_t uuid;
+		int32_t rssi;
+	} beacon;
+
+	// current limit value
+	uint32_t current_limit;
+
+	// nearby timeout used for device tracking
+	uint32_t nearbyTimeout;
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////
@@ -130,7 +133,7 @@ struct ps_general_service_t : ps_storage_base_t {
 class Storage {
 
 public:
-	/* Returns the singleton instance of this class	
+	/* Returns the singleton instance of this class
 	 *
 	 * @return static instance of Storage class
 	 */
@@ -270,6 +273,29 @@ public:
 	 * If the field is unassigned, the default value will be returned instead
 	 */
 	static void getUint32(uint32_t value, uint32_t& target, uint32_t default_value);
+
+	/* Helper function to set a signed byte in the field of a struct
+	 * @value the byte value to be copied to the struct
+	 * @target pointer the field in the struct where the value should be set
+	 *
+	 * To show that a valid value was set, the last 3 bytes of the field
+	 * are set to 0
+	 */
+	static void setInt8(int8_t value, int32_t& target);
+
+	/* Helper function to read a signed byte from the field of a struct
+	 * @value the field of the struct which should be read
+	 * @target pointer to the byte where the value is returned
+	 * @default_value the default value if the field of the struct is empty
+	 *
+	 * In order to show that the field of the struct is empty (or unassigned)
+	 * we use the fact that the last byte of the uint32_t field is set to FF.
+	 * If a value is stored, that byte will be set to 0 to show that the field
+	 * is assigned and that a valid value can be read.
+	 *
+	 * If the field is unassigned, the default value will be returned instead
+	 */
+	static void getInt8(int32_t value, int8_t& target, int8_t default_value);
 
 	/* Helper function to write/copy an array to the field of a struct
 	 * @T primitive type, such as uint8_t

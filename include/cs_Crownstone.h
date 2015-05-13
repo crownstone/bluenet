@@ -20,13 +20,15 @@
 
 #include <processing/cs_Sensors.h>
 
+#include <events/cs_EventListener.h>
+
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
 
 using namespace BLEpp;
 
-class Crownstone {
+class Crownstone : EventListener {
 
 private:
 	Nrf51822BluetoothStack* _stack;
@@ -54,6 +56,8 @@ public:
 	void setup();
 
 	void run();
+
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 };
 

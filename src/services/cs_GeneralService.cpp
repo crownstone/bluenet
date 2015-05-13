@@ -21,6 +21,8 @@
 #include <structs/cs_MeshMessage.h>
 #endif
 
+#include <cfg/cs_Settings.h>
+
 using namespace BLEpp;
 
 GeneralService::GeneralService() :
@@ -31,8 +33,10 @@ GeneralService::GeneralService() :
 	setUUID(UUID(GENERAL_UUID));
 	setName(BLE_SERVICE_GENERAL);
 
-	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
-	loadPersistentStorage();
+	Settings::getInstance();
+
+//	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
+//	loadPersistentStorage();
 
 	init();
 
@@ -94,12 +98,15 @@ void GeneralService::init() {
 	
 }
 
-void GeneralService::startAdvertising(Nrf51822BluetoothStack* stack) {
-	Service::startAdvertising(stack);
-	std::string str;
-	Storage::getString(_storageStruct.device_name, str, getBLEName());
-	setBLEName(str);
-}
+//void GeneralService::startAdvertising(Nrf51822BluetoothStack* stack) {
+//	Service::startAdvertising(stack);
+//	std::string str = ConfigHelper::getInstance().getBLEName();
+//	LOGi("setDeviceName");
+//	BLEpp::Nrf51822BluetoothStack::getInstance().setDeviceName(str);
+////	ps_configuration_t cfg = ConfigHelper::getInstance().getConfig();
+////	Storage::getString(cfg.device_name, str, getBLEName());
+////	setBLEName(str);
+//}
 
 void GeneralService::tick() {
 //	LOGi("Tick: %d", RTC::now());
@@ -116,7 +123,7 @@ void GeneralService::tick() {
 
 	if (_getConfigurationCharacteristic) {
 		if (_selectConfiguration != 0xFF) {
-			bool success = readFromStorage(_selectConfiguration);
+			bool success = Settings::getInstance().readFromStorage(_selectConfiguration, _streamBuffer);
 			if (success) {
 				writeToConfigCharac();
 			}
@@ -132,13 +139,13 @@ void GeneralService::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(GENERAL_SERVICE_UPDATE_FREQUENCY), this);
 }
 
-void GeneralService::loadPersistentStorage() {
-	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
-}
+//void GeneralService::loadPersistentStorage() {
+//	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+//}
 
-void GeneralService::savePersistentStorage() {
-	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
-}
+//void GeneralService::savePersistentStorage() {
+//	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+//}
 
 void GeneralService::addTemperatureCharacteristic() {
 	_temperatureCharacteristic = new Characteristic<int32_t>();
@@ -226,87 +233,16 @@ void GeneralService::addSetConfigurationCharacteristic() {
 					mb.lock();
 					uint8_t type = _streamBuffer->type();
 					LOGi("Write configuration type: %i", (int)type);
-					uint8_t *payload = _streamBuffer->payload();
-					uint8_t length = _streamBuffer->length();
-					writeToStorage(type, length, payload);
+//					uint8_t *payload = _streamBuffer->payload();
+//					uint8_t length = _streamBuffer->length();
+//					writeToStorage(type, length, payload);
+					Settings::getInstance().writeToStorage(type, _streamBuffer);
 					mb.unlock();
 				} else {
 					log(ERROR, MSG_BUFFER_IS_LOCKED);
 				}
 			}
 		});
-}
-
-void GeneralService::writeToStorage(uint8_t type, uint8_t length, uint8_t* payload) {
-	switch(type) {
-	case CONFIG_NAME_UUID: {
-		LOGd("Write name");
-		std::string str = std::string((char*)payload, length);
-		LOGd("Set name to: %s", str.c_str());
-		setBLEName(str);
-		Storage::setString(str, _storageStruct.device_name);
-		savePersistentStorage();
-		break;
-	}
-	case CONFIG_FLOOR_UUID: {
-		LOGd("Set floor level");
-		if (length != 1) {
-			LOGw("We do not account for buildings of more than 255 floors yet");
-			return;
-		}
-		uint8_t floor = payload[0];
-		LOGi("Set floor to %i", floor);
-		Storage::setUint8(floor, _storageStruct.floor);
-		savePersistentStorage();
-		break;
-	}
-	case CONFIG_NEARBY_TIMEOUT_UUID: {
-		if (length != 2) {
-			LOGw("Nearby timeout is of type uint16");
-			return;
-		}
-		uint16_t counts = ((uint16_t*)payload)[0]; //TODO: other byte order?
-		LOGd("setNearbyTimeout(%i)", counts);
-//		setNearbyTimeout(counts);
-		// TODO: write to persistent storage and trigger update event
-		break;
-	}
-	default:
-		LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
-	}
-}
-
-bool GeneralService::readFromStorage(uint8_t type) {
-	switch(type) {
-	case CONFIG_NAME_UUID: {
-		LOGd("Read name");
-		std::string str; // = getBLEName();
-		Storage::getString(_storageStruct.device_name, str, getBLEName());
-		_streamBuffer->fromString(str);
-		_streamBuffer->setType(type);
-
-		LOGd("Name read %s", str.c_str());
-
-		return true;
-	}
-	case CONFIG_FLOOR_UUID: {
-		LOGd("Read floor");
-		loadPersistentStorage();
-		uint8_t plen = 1;
-		uint8_t payload[plen];
-		Storage::getUint8(_storageStruct.floor, payload[0], 0);
-		_streamBuffer->setPayload(payload, plen);
-		_streamBuffer->setType(type);
-
-		LOGd("Floor level set in payload: %i with len %i", _streamBuffer->payload()[0], _streamBuffer->length());
-
-		return true;
-	}
-	default: {
-		LOGd("There is no such configuration type (%i), or not yet implemented.", type);
-	}
-	}
-	return false;
 }
 
 void GeneralService::writeToConfigCharac() {
@@ -348,25 +284,25 @@ void GeneralService::addGetConfigurationCharacteristic() {
 	_getConfigurationCharacteristic->setWritable(false);
 }
 
-std::string & GeneralService::getBLEName() {
-	_name = "Unknown";
-	if (_stack) {
-		return _name = _stack->getDeviceName();
-	}
-	return _name;
-}
+//std::string & GeneralService::getBLEName() {
+//	_name = "Unknown";
+//	if (_stack) {
+//		return _name = _stack->getDeviceName();
+//	}
+//	return _name;
+//}
 
-void GeneralService::setBLEName(const std::string &name) {
-	if (name.length() > 31) {
-		log(ERROR, MSG_NAME_TOO_LONG);
-		return;
-	}
-	if (_stack) {
-		_stack->updateDeviceName(name);
-	} else {
-		log(ERROR, MSG_STACK_UNDEFINED);
-	}
-}
+//void GeneralService::setBLEName(const std::string &name) {
+//	if (name.length() > 31) {
+//		log(ERROR, MSG_NAME_TOO_LONG);
+//		return;
+//	}
+//	if (_stack) {
+//		_stack->updateDeviceName(name);
+//	} else {
+//		log(ERROR, MSG_STACK_UNDEFINED);
+//	}
+//}
 
 void GeneralService::writeToTemperatureCharac(int32_t temperature) {
 	*_temperatureCharacteristic = temperature;

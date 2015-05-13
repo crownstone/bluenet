@@ -30,9 +30,9 @@
 #define MAX_MESH_MESSAGE_LEN 25
 #define MAX_MESH_MESSAGE_PAYLOAD_LENGTH MAX_MESH_MESSAGE_LEN - BLE_GAP_ADDR_LEN
 
-#define MAX_EVENT_MESH_MESSAGE_DATA_LENGTH MAX_MESH_MESSAGE_PAYLOAD_LENGTH - sizeof(EventType)
+#define MAX_EVENT_MESH_MESSAGE_DATA_LENGTH MAX_MESH_MESSAGE_PAYLOAD_LENGTH - sizeof(uint16_t)
 struct __attribute__((__packed__)) event_mesh_message_t {
-	EventType type;
+	uint16_t type;
 	uint8_t data[MAX_EVENT_MESH_MESSAGE_DATA_LENGTH];
 };
 
