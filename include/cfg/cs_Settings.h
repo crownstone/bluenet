@@ -244,7 +244,7 @@ public:
 			LOGd("Read wifi settings. Does reset it.");
 			std::string str;
 			if (_wifiSettings != "") {
-				str = "unset";
+				str = "{}";
 			} else {
 				str = _wifiSettings;
 			}
