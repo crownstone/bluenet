@@ -33,7 +33,7 @@ void MeshControl::process(uint8_t handle, void* p_data, uint16_t length) {
 //			break;
 //		}
 
-		mesh_message_t* msg = (mesh_message_t*) p_data;
+		device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 //		LOGi("received event for:");
 //		BLEutil::printArray(msg->targetAddress, BLE_GAP_ADDR_LEN);
 		LOGi("type: %s (%d), from ???", msg->evtMsg.type == EVT_POWER_ON ? "EVT_POWER_ON" : "EVT_POWER_OFF", msg->evtMsg.type);
@@ -83,7 +83,7 @@ void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 		LOGi("send event %s", evt == EVT_POWER_ON ? "EVT_POWER_ON" : "EVT_POWER_OFF");
 
-		mesh_message_t msg;
+		device_mesh_message_t msg;
 		uint8_t targetAddress[BLE_GAP_ADDR_LEN] = {0x03, 0x24, 0x79, 0x56, 0xD6, 0xC6};
 		memcpy(msg.targetAddress, &targetAddress, BLE_GAP_ADDR_LEN);
 		msg.evtMsg.type = evt;
