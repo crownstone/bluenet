@@ -107,7 +107,7 @@ void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 void MeshControl::sendPwmValue(uint8_t value) {
 
-	mesh_message_t msg;
+	device_mesh_message_t msg;
 	uint8_t targetAddress[BLE_GAP_ADDR_LEN] = {};
 	memcpy(msg.targetAddress, &targetAddress, BLE_GAP_ADDR_LEN);
 	memset(msg.payload, 0, sizeof(msg.payload));

@@ -18,7 +18,6 @@
 //
 #if CHAR_MESHING==1
 #include <protocol/cs_Mesh.h>
-#include <structs/cs_MeshMessage.h>
 #endif
 
 #include <cfg/cs_Settings.h>
@@ -59,14 +58,32 @@ void GeneralService::init() {
 #else
 	LOGi(MSG_CHAR_RESET_SKIP);
 #endif
+
 #if CHAR_MESHING==1
+	{
 	LOGi(MSG_CHAR_MESH_ADD);
+
+	_meshMessage = new MeshMessage();
+
+	MasterBuffer& mb = MasterBuffer::getInstance();
+	buffer_ptr_t buffer = NULL;
+	uint16_t size = 0;
+	mb.getBuffer(buffer, size);
+
+	_meshMessage->assign(buffer, size);
+
 	addMeshCharacteristic();
+
+	_meshCharacteristic->setValue(buffer);
+	_meshCharacteristic->setMaxLength(size);
+	_meshCharacteristic->setDataLength(0);
+	}
 #else
 	LOGi(MSG_CHAR_MESH_SKIP);
 #endif
 
 #if CHAR_CONFIGURATION==1
+	{
 	LOGi(MSG_CHAR_CONFIGURATION_ADD);
 
 	// if we use configuration characteristics, set up a buffer
@@ -92,6 +109,7 @@ void GeneralService::init() {
 	_getConfigurationCharacteristic->setDataLength(size);
 
 	LOGd("Set both set/get charac to buffer at %p", buffer);
+	}
 #else
 	LOGi(MSG_CHAR_CONFIGURATION_SKIP);
 #endif
@@ -188,8 +206,6 @@ void GeneralService::addResetCharacteristic() {
 
 #if CHAR_MESHING==1
 void GeneralService::addMeshCharacteristic() {
-	buffer_ptr_t buffer = MasterBuffer::getInstance().getBuffer();
-
 	_meshCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_meshCharacteristic);
 
@@ -199,18 +215,24 @@ void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 			LOGi(MSG_MESH_MESSAGE_WRITE);
 
-			MeshMessage msg;
-			msg.assign(_meshCharacteristic->getValue(), _meshCharacteristic->getValueLength());
+//			MeshMessage msg;
+			LOGi("len: %d", _meshCharacteristic->getValueLength());
+//			msg.assign(_meshCharacteristic->getValue(), _meshCharacteristic->getValueLength());
 
-			uint8_t handle = msg.handle();
-			uint8_t val = msg.value();
+			uint8_t handle = _meshMessage->handle();
+
+			uint8_t* p_data;
+			uint16_t length;
+			_meshMessage->data(p_data, length);
+
 			CMesh &mesh = CMesh::getInstance();
+			mesh.send(handle, p_data, length);
 //			mesh.send(handle, val);
 		});
 
-	_meshCharacteristic->setValue(buffer);
-	_meshCharacteristic->setMaxLength(MM_SERIALIZED_SIZE);
-	_meshCharacteristic->setDataLength(0);
+//	_meshCharacteristic->setValue(buffer);
+//	_meshCharacteristic->setMaxLength(MM_SERIALIZED_SIZE);
+//	_meshCharacteristic->setDataLength(0);
 
 }
 #endif
@@ -283,26 +305,6 @@ void GeneralService::addGetConfigurationCharacteristic() {
 	_getConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_GET);
 	_getConfigurationCharacteristic->setWritable(false);
 }
-
-//std::string & GeneralService::getBLEName() {
-//	_name = "Unknown";
-//	if (_stack) {
-//		return _name = _stack->getDeviceName();
-//	}
-//	return _name;
-//}
-
-//void GeneralService::setBLEName(const std::string &name) {
-//	if (name.length() > 31) {
-//		log(ERROR, MSG_NAME_TOO_LONG);
-//		return;
-//	}
-//	if (_stack) {
-//		_stack->updateDeviceName(name);
-//	} else {
-//		log(ERROR, MSG_STACK_UNDEFINED);
-//	}
-//}
 
 void GeneralService::writeToTemperatureCharac(int32_t temperature) {
 	*_temperatureCharacteristic = temperature;
