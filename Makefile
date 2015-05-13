@@ -21,6 +21,9 @@ release: build
 clean:
 	@cd build && make clean
 
+# The build target is only executed when there is no build directory! So if there is a build directory, but the test
+# files cannot be found this will lead to an error on the first build. The next builds will be fine. So, the user only
+# needs to build two times in a row.
 build:
 	@echo "++ Create build directory"
 	@mkdir -p build
