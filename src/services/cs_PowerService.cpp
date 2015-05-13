@@ -23,6 +23,7 @@
 #include <drivers/cs_LPComp.h>
 
 #include <protocol/cs_Mesh.h>
+#include <protocol/cs_MeshControl.h>
 #include <cfg/cs_Settings.h>
 
 using namespace BLEpp;
@@ -149,7 +150,9 @@ void PowerService::addPWMCharacteristic() {
 
 #if CHAR_MESHING==1
 		uint8_t state = value == 0 ? 0 : 1;
+//		MeshControl::getInstance().sendPwmValue(state);
 		CMesh::getInstance().send(2, &state, 1);
+		_log(INFO, "\r\n");
 #endif
 	});
 }

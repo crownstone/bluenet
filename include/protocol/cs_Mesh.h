@@ -44,7 +44,7 @@ public:
 	void init();
 
 	// send message
-	void send(uint8_t handle, uint32_t value);
+//	void send(uint8_t handle, uint32_t value);
 
 	void send(uint8_t handle, void* p_data, uint8_t length);
 	bool receive(uint8_t handle, void** p_data, uint16_t& length);

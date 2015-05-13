@@ -28,6 +28,21 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 {
 	TICK_PIN(28);
 	//nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
+
+	switch (evt->event_type)
+	{
+	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
+		LOGd("conflicting value");
+		break;
+	case RBC_MESH_EVENT_TYPE_NEW_VAL:
+		LOGd("new value");
+		break;
+	case RBC_MESH_EVENT_TYPE_UPDATE_VAL:
+		LOGd("update value");
+		break;
+
+	}
+
 	switch (evt->event_type)
 	{
 		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
@@ -50,20 +65,6 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
             LOGi("Default: %i", evt->event_type);
             break;
 	}
-
-//	switch (evt->event_type)
-//	{
-//	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
-//		LOGd("conflicting value");
-//		break;
-//	case RBC_MESH_EVENT_TYPE_NEW_VAL:
-//		LOGd("new value");
-//		break;
-//	case RBC_MESH_EVENT_TYPE_UPDATE_VAL:
-//		LOGd("update value");
-//		break;
-//
-//	}
 }
 
 }
@@ -104,12 +105,12 @@ void CMesh::init() {
 	APP_ERROR_CHECK(error_code);
 }
 
-void CMesh::send(uint8_t handle, uint32_t value) {
-	uint8_t val[28];
-	val[0] = (uint8_t)value;
-	LOGi("Set mesh data %i to %i", val[0], handle);
-	APP_ERROR_CHECK(rbc_mesh_value_set(handle, &val[0], 1));
-}
+//void CMesh::send(uint8_t handle, uint32_t value) {
+//	uint8_t val[28];
+//	val[0] = (uint8_t)value;
+//	LOGi("Set mesh data %i to %i", val[0], handle);
+//	APP_ERROR_CHECK(rbc_mesh_value_set(handle, &val[0], 1));
+//}
 
 // returns last received message
 uint32_t CMesh::receive(uint8_t handle) {

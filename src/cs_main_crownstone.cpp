@@ -121,7 +121,7 @@ void GPIOTE_IRQHandler(void)
 			value = rng.getRandom8();
 //			led_config(i + 1, value);
 			LOGi("1");
-			mesh.send(i + 1, value);
+//			mesh.send(i + 1, value);
 		}
 	}
 }

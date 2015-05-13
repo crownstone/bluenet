@@ -205,7 +205,7 @@ void GeneralService::addMeshCharacteristic() {
 			uint8_t handle = msg.handle();
 			uint8_t val = msg.value();
 			CMesh &mesh = CMesh::getInstance();
-			mesh.send(handle, val);
+//			mesh.send(handle, val);
 		});
 
 	_meshCharacteristic->setValue(buffer);

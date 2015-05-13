@@ -127,13 +127,9 @@ void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 
 #if BOARD==PCA10000
 	_pwmValue = pwm_value != 0 ? 0 : 255;
-	LOGi("invert");
 #endif
 
 	_nextValue[pwm_channel] = _pwmValue;
-
-	EventType evt = pwm_value == 0 ? EVT_POWER_OFF : EVT_POWER_ON;
-	EventDispatcher::getInstance().dispatch(evt);
 
 	PWM_TIMER->EVENTS_COMPARE[3] = 0;
 	PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk | TIMER_SHORTS_COMPARE3_STOP_Msk;
@@ -166,7 +162,6 @@ void PWM::getValue(uint8_t &pwm_channel, uint32_t &pwm_value) {
 
 #if BOARD==PCA10000
 	pwm_value = _pwmValue == 0 ? 255 : 0;
-	LOGi("invert");
 #endif
 }
 

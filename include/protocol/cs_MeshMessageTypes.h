@@ -36,12 +36,16 @@ struct __attribute__((__packed__)) event_mesh_message_t {
 	uint8_t data[MAX_EVENT_MESH_MESSAGE_DATA_LENGTH];
 };
 
+struct __attribute__((__packed__)) power_mesh_message_t {
+	uint8_t pwmValue;
+};
 
 struct __attribute__((__packed__)) mesh_message_t {
 	uint8_t targetAddress[BLE_GAP_ADDR_LEN];
 	union {
 		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
 		event_mesh_message_t evtMsg;
+		power_mesh_message_t powerMsg;
 	};
 };
 
