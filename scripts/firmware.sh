@@ -6,9 +6,10 @@ if [[ $cmd != "help" && $cmd != "bootloader" ]]; then
 	# target=${2:? "Usage: $0 \"cmd\", \"target\""}
 	target=$2
 
+	BLUENET_BUILD_DIR=build
 	if [[ $target != "bootloader" && $target != "crownstone" ]]; then
 		BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR${target:+/$target}
-		BLUENET_BUILD_DIR=build${target:+/$target}
+		BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR${target:+/$target}
 		# BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR/$target
 		
 		case "$target" in
