@@ -251,7 +251,7 @@ void Crownstone::setup() {
 
 #if IBEACON==1
 	// if enabled, create the iBeacon parameter object which will be used
-	// to start advertisment as an iBeacon
+	// to start advertisement as an iBeacon
 
 	// get values from config
 	uint16_t major, minor;
@@ -383,6 +383,7 @@ void Crownstone::run() {
 void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	LOGi("handleEvent: %d", evt);
 	switch(evt) {
+#if IBEACON==1
 	case CONFIG_IBEACON_MAJOR: {
 		_beacon->setMajor(*(uint32_t*)p_data);
 		break;
@@ -399,6 +400,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_beacon->setRSSI(*(int8_t*)p_data);
 		break;
 	}
+#endif
 	}
 }
 

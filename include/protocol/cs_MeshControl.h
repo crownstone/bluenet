@@ -40,5 +40,5 @@ public:
 	 */
 	void process(uint8_t channel, void* p_data, uint16_t length);
 
-	void handleEvent(EventType evt, void* p_data, uint16_t length);
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 };
