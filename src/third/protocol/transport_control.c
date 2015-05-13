@@ -71,10 +71,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PACKET_TYPE_ADV_NONCONN     (0x02)
 
 #define PACKET_TYPE_MASK            (0x0F)
-#define PACKET_LENGTH_MASK          (0x3F)
+#define PACKET_LENGTH_MASK          (0xFF)
 #define PACKET_ADDR_TYPE_MASK       (0x40)
 
-#define PACKET_DATA_MAX_LEN         (28)
 #define PACKET_MAX_CHAIN_LEN        (1) /**@TODO: May be increased when RX
                                         callback packet chain handling is implemented.*/
 

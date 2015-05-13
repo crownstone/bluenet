@@ -37,6 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _TRANSPORT_CONTROL_H__
 #include <stdint.h>
 
+#define PACKET_DATA_MAX_LEN         (200)
+
 /**
 * @file This module takes care of all lower level packet processing and
 *   schedules the radio for transmission. Acts as the link between the radio

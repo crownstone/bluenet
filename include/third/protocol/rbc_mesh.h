@@ -40,10 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "nrf51.h"
 #include "ble.h"
 
+#include "mesh_srv.h"
+
 #define RBC_MESH_ACCESS_ADDRESS_BLE_ADV  (0x8E89BED6)
 #define RBC_MESH_ADV_INT_MIN             (5)
 #define RBC_MESH_ADV_INT_MAX             (60000)
-#define RBC_MESH_VALUE_MAX_LEN           (28)
+#define RBC_MESH_VALUE_MAX_LEN           (MAX_VALUE_LENGTH)
 /**
 * @brief Rebroadcast value handle type
 *

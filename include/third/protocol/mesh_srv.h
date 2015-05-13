@@ -40,6 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ble.h"
 #include <stdint.h>
 
+#include "transport_control.h"
+
 /**
 * @file Module handling all data storage related functionality.
 *   Stores the mesh values in the Softdevice GATT server, within a GATT
@@ -47,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #define MAX_VALUE_COUNT                 (155) /* The highest possible number of values stored in the mesh. */
-#define MAX_VALUE_LENGTH                (28) /* The maximum number of bytes available in one mesh value. */
+#define MAX_VALUE_LENGTH                (PACKET_DATA_MAX_LEN) /* The maximum number of bytes available in one mesh value. */
 
 #define MESH_SRV_UUID                   (0x0001) /* Mesh service UUID */
 #define MESH_MD_CHAR_UUID               (0x0002) /* Mesh metadata characteristic UUID */
