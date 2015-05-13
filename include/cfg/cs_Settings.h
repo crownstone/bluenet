@@ -152,7 +152,7 @@ public:
 #endif
 		case CONFIG_WIFI_SETTINGS: {
 			LOGd("Temporarily store wifi settings");
-			// max length '{ ssid = 32 bytes, key = 32 bytes}', 64+19 bytes = 83 bytes
+			// max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
 			if (length > 83) {
 				LOGe("Wifi settings string too long");
 				break;
