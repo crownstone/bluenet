@@ -153,7 +153,7 @@ public:
 		case CONFIG_WIFI_SETTINGS: {
 			LOGd("Temporarily store wifi settings");
 			// max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
-			if (length > 83) {
+			if (length > 88) {
 				LOGe("Wifi settings string too long");
 				break;
 			}
