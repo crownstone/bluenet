@@ -8,6 +8,7 @@ if [[ $cmd != "help" && $cmd != "bootloader" ]]; then
 
 	if [[ $target != "bootloader" && $target != "crownstone" ]]; then
 		BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR${target:+/$target}
+		BLUENET_BUILD_DIR=build${target:+/$target}
 		# BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR/$target
 		
 		case "$target" in
@@ -31,7 +32,7 @@ address=${3:-$APPLICATION_START_ADDRESS}
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
-	make all
+	make all BUILD_DIR=$BLUENET_BUILD_DIR
 	result=$?
 	cd $path
 	return $result
