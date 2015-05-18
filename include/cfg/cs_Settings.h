@@ -158,6 +158,7 @@ public:
 				break;
 			}
 			_wifiSettings = std::string((char*)payload, length);
+			LOGd("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
 			break;
 		}
 		default:
