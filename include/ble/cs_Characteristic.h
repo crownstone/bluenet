@@ -34,6 +34,7 @@ struct CharacteristicInit {
 	ble_gatts_attr_t          attr_char_value;
 	// pointer to a presentation format structure (p_char_pf)
 	ble_gatts_char_pf_t       presentation_format;
+	// characteristic metadata
 	ble_gatts_char_md_t       char_md;
 	// attribute metadata for client characteristic configuration  (p_cccd_md)
 	ble_gatts_attr_md_t       cccd_md;

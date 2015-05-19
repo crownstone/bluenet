@@ -148,6 +148,20 @@ void CharacteristicBase::init(Service* svc) {
 	_status.inited = true;
 }
 
+/* Setup default write permissions.
+ *
+ * Structure has the following layout:
+ *   ble_gatt_char_props_t       char_props;               Characteristic Properties.
+ *   ble_gatt_char_ext_props_t   char_ext_props;           Characteristic Extended Properties.
+ *   uint8_t                    *p_char_user_desc;         Pointer to a UTF-8, NULL if the descriptor is not required.
+ *   uint16_t                    char_user_desc_max_size;  The maximum size in bytes of the user description descriptor.
+ *   uint16_t                    char_user_desc_size;      The size of the user description, must be smaller or equal to char_user_desc_max_size.
+ *   ble_gatts_char_pf_t*        p_char_pf;                Pointer to a presentation format structure or NULL if the descriptor is not required.
+ *   ble_gatts_attr_md_t*        p_user_desc_md;           Attribute metadata for the User Description descriptor, or NULL for default values.
+ *   ble_gatts_attr_md_t*        p_cccd_md;                Attribute metadata for the Client Characteristic Configuration Descriptor, or NULL for default values.
+ *   ble_gatts_attr_md_t*        p_sccd_md;                Attribute metadata for the Server Characteristic Configuration Descriptor, or NULL for default values.
+ *
+ */
 void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	// Dominik: why set it if the whole struct is being overwritten anyway futher down??!!
 	//	ci.attr_md.write_perm.sm = _writable ? 1 : 0;
@@ -169,6 +183,9 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	// specification anyway. security mode is always at least 1 / 1. Doesnt make sense !!!
 	//	ci.char_md.char_props.write = ci.cccd_md.write_perm.lv > 0 ? 1 :0;
 	//	ci.char_md.char_props.write_wo_resp = ci.cccd_md.write_perm.lv > 0 ? 1 :0;
+
+   // BART
+	//ci.char_md.char_ext_props.reliable_wr = _status.writable ? 1 : 0;
 }
 
 uint32_t CharacteristicBase::notify() {
