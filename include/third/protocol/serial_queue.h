@@ -32,32 +32,32 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
+#ifndef _SERIAL_QUEUE_H__
+#define _SERIAL_QUEUE_H__
 
-#ifndef _TRANSPORT_CONTROL_H__
-#define _TRANSPORT_CONTROL_H__
+#include "serial_handler.h"
 #include <stdint.h>
+#include <stdbool.h>
 
-#define PACKET_DATA_MAX_LEN         (200)
+#define SERIAL_QUEUE_SIZE 4
 
-/**
-* @file This module takes care of all lower level packet processing and
-*   schedules the radio for transmission. Acts as the link between the radio
-*   and the mesh service.
-*/
+typedef struct
+{
+	serial_data_t		serial_data[SERIAL_QUEUE_SIZE];
+	uint8_t					head;
+	uint8_t 				tail;
+} serial_queue_t;
 
-/**
-* @brief Called at the beginning of a timeslot with a timestamp in order to let
-*   the system catch up with any lost time between timeslots
-*
-* @param[in] global_timer_value The timestamp to use as reference for whether
-*   there is anything to process.
-*/
+void serial_queue_init(serial_queue_t* queue);
 
-void transport_control_timeslot_begin(uint64_t global_timer_value);
+bool serial_queue_dequeue(serial_queue_t* queue, serial_data_t* data);
 
-/**
-* @brief Force a check for timed out values
-*/
-void transport_control_step(void);
+bool serial_queue_enqueue(serial_queue_t* queue, serial_data_t* data);
 
-#endif /* _TRANSPORT_CONTROL_H__ */
+bool serial_queue_is_empty(serial_queue_t* queue);
+
+bool serial_queue_is_full(serial_queue_t* queue);
+
+bool serial_queue_peek(serial_queue_t* queue, serial_data_t* data);
+
+#endif /* _SERIAL_QUEUE_H__ */

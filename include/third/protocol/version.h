@@ -1,5 +1,5 @@
 /***********************************************************************************
-Copyright (c) Nordic Semiconductor ASA
+  Copyright (c) Nordic Semiconductor ASA
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -32,32 +32,11 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
+#ifndef _VERSION_H__
+#define _VERSION_H__
 
-#ifndef _TRANSPORT_CONTROL_H__
-#define _TRANSPORT_CONTROL_H__
-#include <stdint.h>
+#define VERSION_MAJOR     (0)
+#define VERSION_MINOR1    (5)
+#define VERSION_MINOR2    (0)
 
-#define PACKET_DATA_MAX_LEN         (200)
-
-/**
-* @file This module takes care of all lower level packet processing and
-*   schedules the radio for transmission. Acts as the link between the radio
-*   and the mesh service.
-*/
-
-/**
-* @brief Called at the beginning of a timeslot with a timestamp in order to let
-*   the system catch up with any lost time between timeslots
-*
-* @param[in] global_timer_value The timestamp to use as reference for whether
-*   there is anything to process.
-*/
-
-void transport_control_timeslot_begin(uint64_t global_timer_value);
-
-/**
-* @brief Force a check for timed out values
-*/
-void transport_control_step(void);
-
-#endif /* _TRANSPORT_CONTROL_H__ */
+#endif /* _VERSION_H__ */

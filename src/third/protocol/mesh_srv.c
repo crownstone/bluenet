@@ -534,21 +534,21 @@ uint32_t mesh_srv_char_md_get(mesh_metadata_char_t* metadata)
     return NRF_SUCCESS;
 }
 
-uint32_t mesh_srv_get_next_processing_time(uint32_t* time)
+uint32_t mesh_srv_get_next_processing_time(uint64_t* time)
 {
     if (!is_initialized)
     {
         return NRF_ERROR_INVALID_STATE;
     }
     bool anything_to_process = false;
-    *time = UINT32_MAX;
+    *time = UINT64_MAX;
 
     for (uint8_t i = 0; i < g_mesh_service.value_count; ++i)
     {
         if ((g_mesh_service.char_metadata[i].flags & (1 << MESH_MD_FLAGS_USED_POS)) == 0)
             continue;
 
-        uint32_t temp_time = trickle_next_processing_get(&g_mesh_service.char_metadata[i].trickle);
+        uint64_t temp_time = trickle_next_processing_get(&g_mesh_service.char_metadata[i].trickle);
 
         if (temp_time < *time)
         {
@@ -634,6 +634,9 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
         memcpy(&update_evt.originator_address, &packet->sender, sizeof(ble_gap_addr_t));
 
         rbc_mesh_event_handler(&update_evt);
+#ifdef RBC_MESH_SERIAL
+            mesh_aci_rbc_event_handler(&update_evt);
+#endif
     }
     else if (version == ch_md->version_number)
     {
@@ -677,6 +680,9 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
             trickle_rx_inconsistent(&ch_md->trickle);
 
             rbc_mesh_event_handler(&conflicting_evt);
+#ifdef RBC_MESH_SERIAL
+            mesh_aci_rbc_event_handler(&conflicting_evt);
+#endif
         }
         else
         {
@@ -802,6 +808,9 @@ uint32_t mesh_srv_gatts_evt_write_handle(ble_gatts_evt_write_t* evt)
             memcpy(&update_evt.originator_address, &my_addr, sizeof(ble_gap_addr_t));
 
             rbc_mesh_event_handler(&update_evt);
+#ifdef RBC_MESH_SERIAL
+            mesh_aci_rbc_event_handler(&update_evt);
+#endif
 
             return NRF_SUCCESS;
         }

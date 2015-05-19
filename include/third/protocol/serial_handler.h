@@ -32,32 +32,32 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
+#ifndef _SERIAL_HANDLER_H__
+#define _SERIAL_HANDLER_H__
 
-#ifndef _TRANSPORT_CONTROL_H__
-#define _TRANSPORT_CONTROL_H__
+#define SERIAL_DATA_MAX_LEN  (36)
+
+#include "serial_evt.h"
+#include "serial_command.h"
+
 #include <stdint.h>
+#include <stdbool.h>
 
-#define PACKET_DATA_MAX_LEN         (200)
 
-/**
-* @file This module takes care of all lower level packet processing and
-*   schedules the radio for transmission. Acts as the link between the radio
-*   and the mesh service.
-*/
+typedef __packed struct
+{
+	uint8_t status_byte;
+	uint8_t buffer[SERIAL_DATA_MAX_LEN + 2];
+} serial_data_t;
 
-/**
-* @brief Called at the beginning of a timeslot with a timestamp in order to let
-*   the system catch up with any lost time between timeslots
-*
-* @param[in] global_timer_value The timestamp to use as reference for whether
-*   there is anything to process.
-*/
 
-void transport_control_timeslot_begin(uint64_t global_timer_value);
+void serial_handler_init(void);
 
-/**
-* @brief Force a check for timed out values
-*/
-void transport_control_step(void);
+bool serial_handler_event_send(serial_evt_t* evt);
 
-#endif /* _TRANSPORT_CONTROL_H__ */
+bool serial_handler_command_get(serial_cmd_t* evt);
+
+
+
+
+#endif /* _SERIAL_HANDLER_H__ */

@@ -42,7 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /******************************************************************************
 * Debug related defines
 ******************************************************************************/
-
 #ifdef BOARD_PCA10000
     #define TICK_PIN(x)
     #define SET_PIN(x)

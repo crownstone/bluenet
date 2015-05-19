@@ -261,7 +261,7 @@ uint32_t rbc_mesh_channel_get(uint8_t* ch);
 /**
 * @brief Get the amount of allocated handle-value pairs
 *
-* @param[out] handle_count Pointer location to put handle count in 
+* @param[out] handle_count Pointer location to put handle count in
 *
 * @return NRF_SUCCESS the value was fetched successfully
 * @return NRF_ERROR_INVALID_STATE the framework has not been initialized
@@ -283,7 +283,7 @@ uint32_t rbc_mesh_handle_count_get(uint8_t* handle_count);
 * @param[out] origin_addr BLE GAP address of the node that first broadcasted
 *   the current version of this value. Set to NULL if the address is not of
 *   interest.
-* 
+*
 * @return NRF_SUCCESS the value has been successfully fetched.
 * @return NRF_ERROR_INVALID_STATE the framework has not been initialized.
 * @return NRF_ERROR_INVALID_ADDR the handle is outside the range provided

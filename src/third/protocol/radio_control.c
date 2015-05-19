@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define RADIO_EVENT(evt)  (NRF_RADIO->evt == 1)
 
-#define RSSI_ENABLE
+//#define RSSI_ENABLE
 
 /**
 * Internal enum denoting radio state.
@@ -480,7 +480,6 @@ void radio_order(radio_event_t* radio_event)
             radio_state = RADIO_STATE_RX;
             NRF_RADIO->INTENSET = RADIO_INTENSET_ADDRESS_Msk;
             DEBUG_RADIO_SET_PIN(PIN_RADIO_STATE_RX);
-
         }
         else
         {
@@ -507,6 +506,7 @@ void radio_order(radio_event_t* radio_event)
     {
         //NRF_RADIO->INTENSET = RADIO_INTENSET_END_Msk;
         /* queue the event */
+
         if (!radio_will_go_to_disabled_state())
         {
             uint8_t queue_length = radio_fifo_get_length();
@@ -535,11 +535,11 @@ void radio_order(radio_event_t* radio_event)
             }
         }
     }
-#ifdef RSSI_ENABLE
-    // if we do this always, we never get a invalid rssi value (3), it also does not mess up the tx.
-//    LOGi("Enabling RSSI"); // this causes a breakpoint. No UART in the radio loop appearently, messes up the timings.
-    radio_rssi_enable();
-#endif
+//#ifdef RSSI_ENABLE
+//    // if we do this always, we never get a invalid rssi value (3), it also does not mess up the tx.
+////    LOGi("Enabling RSSI"); // this causes a breakpoint. No UART in the radio loop appearently, messes up the timings.
+//    radio_rssi_enable();
+//#endif
 }
 
 
@@ -590,33 +590,35 @@ void radio_event_handler(void)
     NRF_RADIO->EVENTS_PAYLOAD = 0;
     NRF_RADIO->EVENTS_END = 0;
     NRF_RADIO->EVENTS_DISABLED = 0;
+
+
 }
 
-void radio_rssi_enable (void)
-{
-	NRF_RADIO->EVENTS_RSSIEND = 0;
-	NRF_RADIO->SHORTS |= RADIO_SHORTS_ADDRESS_RSSISTART_Msk;
-}
+//void radio_rssi_enable (void)
+//{
+//	NRF_RADIO->EVENTS_RSSIEND = 0;
+//	NRF_RADIO->SHORTS |= RADIO_SHORTS_ADDRESS_RSSISTART_Msk;
+//}
 
-#define RADIO_RSSI_INVALID 3
-uint8_t radio_rssi_get (void)
-{
-	uint8_t sample;
-
-	/* First check if sample is available */
-	if (NRF_RADIO->EVENTS_RSSIEND != 0)
-	{
-		sample = (NRF_RADIO->RSSISAMPLE & RADIO_RSSISAMPLE_RSSISAMPLE_Msk);
-	}
-	else
-	{
-		sample = RADIO_RSSI_INVALID;
-	}
-
-	/* Clear event */
-	NRF_RADIO->EVENTS_RSSIEND = 0;
-
-	return sample;
-}
+//#define RADIO_RSSI_INVALID 3
+//uint8_t radio_rssi_get (void)
+//{
+//	uint8_t sample;
+//
+//	/* First check if sample is available */
+//	if (NRF_RADIO->EVENTS_RSSIEND != 0)
+//	{
+//		sample = (NRF_RADIO->RSSISAMPLE & RADIO_RSSISAMPLE_RSSISAMPLE_Msk);
+//	}
+//	else
+//	{
+//		sample = RADIO_RSSI_INVALID;
+//	}
+//
+//	/* Clear event */
+//	NRF_RADIO->EVENTS_RSSIEND = 0;
+//
+//	return sample;
+//}
 
 

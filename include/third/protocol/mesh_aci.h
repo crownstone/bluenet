@@ -32,32 +32,37 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
+#ifndef _MESH_ACI_H__
+#define _MESH_ACI_H__
 
-#ifndef _TRANSPORT_CONTROL_H__
-#define _TRANSPORT_CONTROL_H__
+#include "rbc_mesh.h"
+
 #include <stdint.h>
+#include <stdbool.h>
 
-#define PACKET_DATA_MAX_LEN         (200)
+typedef enum
+{
+  ACI_STATUS_SUCCESS                                        = 0x00,
+  ACI_STATUS_ERROR_UNKNOWN                                  = 0x80,
+  ACI_STATUS_ERROR_INTERNAL                                 = 0x81,
+  ACI_STATUS_ERROR_CMD_UNKNOWN                              = 0x82,
+  ACI_STATUS_ERROR_DEVICE_STATE_INVALID                     = 0x83,
+  ACI_STATUS_ERROR_INVALID_LENGTH                           = 0x84,
+  ACI_STATUS_ERROR_INVALID_PARAMETER                        = 0x85,
+  ACI_STATUS_ERROR_BUSY                                     = 0x86,
+  ACI_STATUS_ERROR_INVALID_DATA                             = 0x87,
+  ACI_STATUS_RESERVED_START                                 = 0xF0,
+  ACI_STATUS_RESERVED_END                                   = 0xFF
 
-/**
-* @file This module takes care of all lower level packet processing and
-*   schedules the radio for transmission. Acts as the link between the radio
-*   and the mesh service.
-*/
+} __packed aci_status_code_t;
 
-/**
-* @brief Called at the beginning of a timeslot with a timestamp in order to let
-*   the system catch up with any lost time between timeslots
-*
-* @param[in] global_timer_value The timestamp to use as reference for whether
-*   there is anything to process.
-*/
+/** @brief Initialize serial handler */
+void mesh_aci_init(void);
 
-void transport_control_timeslot_begin(uint64_t global_timer_value);
+/** @brief asynchronous command handler */
+void mesh_aci_command_check(void);
 
-/**
-* @brief Force a check for timed out values
-*/
-void transport_control_step(void);
+/** @brief rbc_mesh event handler */
+void mesh_aci_rbc_event_handler(rbc_mesh_event_t* evt);
 
-#endif /* _TRANSPORT_CONTROL_H__ */
+#endif /* _MESH_ACI_H__ */

@@ -28,7 +28,7 @@ static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_cod
 		uint32_t data_len) {
 	// we might want to check if things are actually stored, by using this callback	
 	if (result != NRF_SUCCESS) {
-		LOGd("ERR_CODE: %d (0x%X)", result, result);
+		LOGd("OPP_CODE: %d, ERR_CODE: %d (0x%X)", op_code, result, result);
 		APP_ERROR_CHECK(result);
 		
 		if (op_code == PSTORAGE_LOAD_OP_CODE) {
@@ -57,8 +57,8 @@ Storage::Storage() {
 	BLE_CALL(pstorage_init, ());
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
-		LOGi("Init %i bytes persistent storage (FLASH) for id %d", config[i].storage_size, config[i].id);
 		initBlocks(config[i].storage_size, config[i].handle);
+		LOGi("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
 	}
 }
 
@@ -146,6 +146,7 @@ void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, ui
 	_log(INFO, "\r\n");
 #endif
 
+	LOGi("writeStorage handle: %p, size: %d", handle.block_id, size);
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
 
 	//	clearBlock(handle);

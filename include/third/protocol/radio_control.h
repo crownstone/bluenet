@@ -64,8 +64,8 @@ typedef struct
     } callback;
 } radio_event_t;
 	
-void radio_rssi_enable();
-uint8_t radio_rssi_get();
+//void radio_rssi_enable();
+//uint8_t radio_rssi_get();
 
 /**
 * @brief Starts the radio init procedure

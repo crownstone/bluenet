@@ -32,32 +32,86 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
+#ifndef _SERIAL_COMMAND_H__
+#define _SERIAL_COMMAND_H__
 
-#ifndef _TRANSPORT_CONTROL_H__
-#define _TRANSPORT_CONTROL_H__
+#include "serial_handler.h"
+#include "rbc_mesh.h"
 #include <stdint.h>
 
-#define PACKET_DATA_MAX_LEN         (200)
+typedef __packed enum
+{
+    SERIAL_CMD_OPCODE_ECHO                  = 0x02,
+    SERIAL_CMD_OPCODE_INIT                  = 0x70,
+    SERIAL_CMD_OPCODE_VALUE_SET             = 0x71,
+    SERIAL_CMD_OPCODE_VALUE_ENABLE          = 0x72,
+    SERIAL_CMD_OPCODE_VALUE_DISABLE         = 0x73,
 
-/**
-* @file This module takes care of all lower level packet processing and
-*   schedules the radio for transmission. Acts as the link between the radio
-*   and the mesh service.
-*/
+    SERIAL_CMD_OPCODE_VALUE_GET             = 0x7A,
+    SERIAL_CMD_OPCODE_BUILD_VERSION_GET     = 0x7B,
+    SERIAL_CMD_OPCODE_ACCESS_ADDR_GET       = 0x7C,
+    SERIAL_CMD_OPCODE_CHANNEL_GET           = 0x7D,
+    SERIAL_CMD_OPCODE_HANDLE_COUNT_GET      = 0x7E,
+    SERIAL_CMD_OPCODE_ADV_INT_GET           = 0x7F
+} serial_cmd_opcode_t;
 
-/**
-* @brief Called at the beginning of a timeslot with a timestamp in order to let
-*   the system catch up with any lost time between timeslots
-*
-* @param[in] global_timer_value The timestamp to use as reference for whether
-*   there is anything to process.
-*/
 
-void transport_control_timeslot_begin(uint64_t global_timer_value);
+/****** CMD PARAMS ******/
+typedef __packed struct
+{
+	uint8_t data[29];
+} serial_cmd_params_echo_t;
 
-/**
-* @brief Force a check for timed out values
-*/
-void transport_control_step(void);
+typedef __packed struct
+{
+    uint32_t access_addr;
+    uint8_t channel;
+    uint8_t handle_count;
+    uint32_t adv_int_min;
+} serial_cmd_params_init_t;
 
-#endif /* _TRANSPORT_CONTROL_H__ */
+typedef __packed struct
+{
+    uint8_t handle;
+    uint8_t value[RBC_MESH_VALUE_MAX_LEN];
+} serial_cmd_params_value_set_t;
+
+typedef __packed struct
+{
+    uint8_t handle;
+} serial_cmd_params_value_enable_t;
+
+typedef __packed struct
+{
+    uint8_t handle;
+} serial_cmd_params_value_disable_t;
+
+
+typedef __packed struct
+{
+    uint8_t handle;
+} serial_cmd_params_value_get_t;
+
+
+
+
+
+
+
+typedef __packed struct
+{
+	uint8_t length;
+	serial_cmd_opcode_t opcode;
+    __packed union
+    {
+        serial_cmd_params_echo_t            echo;
+        serial_cmd_params_init_t            init;
+        serial_cmd_params_value_set_t       value_set;
+        serial_cmd_params_value_enable_t   value_enable;
+        serial_cmd_params_value_disable_t   value_disable;
+        serial_cmd_params_value_get_t       value_get;
+    } params;
+} serial_cmd_t;
+
+
+#endif /* _SERIAL_COMMAND_H__ */
