@@ -57,9 +57,10 @@ public:
 		return instance;
 	}
 
-	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
-		uint8_t length = streamBuffer->length();
-		uint8_t* payload = streamBuffer->payload();
+//	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
+	void writeToStorage(uint8_t type, uint8_t* payload, uint8_t length) {
+//		uint8_t length = streamBuffer->length();
+//		uint8_t* payload = streamBuffer->payload();
 
 		switch(type) {
 		case CONFIG_NAME_UUID: {

@@ -11,6 +11,8 @@
 //#include <stdint.h>
 //#include <common/cs_Types.h>
 
+#include <ble/cs_Nordic.h>
+
 #include <events/cs_EventListener.h>
 #include <events/cs_EventTypes.h>
 
@@ -19,9 +21,9 @@
 //	uint8_t* p_data;
 //};
 
-#define EVENT_CHANNEL 1
-#define PWM_CHANNEL   2
-
+#define EVENT_CHANNEL        1
+#define DATA_CHANNEL         2
+#define HUB_CHANNEL          3
 
 class MeshControl : public EventListener {
 private:
@@ -42,5 +44,11 @@ public:
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
-	void sendPwmValue(uint8_t value);
+	void sendPwmValue(uint8_t* address, uint8_t value);
+	void sendIBeaconMessage(uint8_t* address, uint16_t major, uint16_t minor, ble_uuid128_t uuid, int8_t rssi);
+
+private:
+
+	void decodeDataMessage(void* p_data, uint16_t length);
+
 };

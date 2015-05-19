@@ -255,10 +255,11 @@ void GeneralService::addSetConfigurationCharacteristic() {
 					mb.lock();
 					uint8_t type = _streamBuffer->type();
 					LOGi("Write configuration type: %i", (int)type);
-//					uint8_t *payload = _streamBuffer->payload();
-//					uint8_t length = _streamBuffer->length();
+					uint8_t *payload = _streamBuffer->payload();
+					uint8_t length = _streamBuffer->length();
 //					writeToStorage(type, length, payload);
-					Settings::getInstance().writeToStorage(type, _streamBuffer);
+//					Settings::getInstance().writeToStorage(type, _streamBuffer);
+					Settings::getInstance().writeToStorage(type, payload, length);
 					mb.unlock();
 				} else {
 					log(ERROR, MSG_BUFFER_IS_LOCKED);

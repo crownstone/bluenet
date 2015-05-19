@@ -24,7 +24,8 @@ using namespace BLEpp;
 
 struct __attribute__((__packed__)) mesh_message_t {
 	uint8_t handle; // defines the handle or channel on which the data should be sent in the mesh
-	uint8_t type; // defines the type of message, i.e. defines the data structure
+//	uint8_t type; // defines the type of message, i.e. defines the data structure
+	uint8_t reserverd;
 	uint16_t length; // length of data
 	uint8_t data[MM_MAX_DATA_LENGTH];
 };
@@ -40,7 +41,7 @@ public:
 	MeshMessage() : _buffer(NULL) {};
 
 	inline uint8_t handle() const { return _buffer->handle; }
-	inline uint8_t type() const { return _buffer->type; }
+//	inline uint8_t type() const { return _buffer->type; }
 
 	void data(buffer_ptr_t& p_data, uint16_t& length) const {
 		p_data = _buffer->data;
