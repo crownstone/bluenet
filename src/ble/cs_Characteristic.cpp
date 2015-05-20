@@ -169,7 +169,7 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	ci.char_md.char_props.write = _status.writable ? 1 : 0;
 	// Dominik: why is write wo response automatically enabled when writable? shouldn't it
 	//  be handled independently?!
-	ci.char_md.char_props.write_wo_resp = _status.writable ? 1 : 0;
+//	ci.char_md.char_props.write_wo_resp = _status.writable ? 1 : 0;
 	ci.char_md.char_props.notify = _status.notifies ? 1 : 0;
 	// Dominik: agreed, indications seem to be almost the same as notifications, but they
 	//  are not totally the same, so why set them together? they should be handled

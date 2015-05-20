@@ -11,6 +11,8 @@
 #include "cfg/cs_Config.h"
 #include "ble/cs_Handlers.h"
 
+#include "structs/buffer/cs_MasterBuffer.h"
+
 #if CHAR_MESHING==1
 extern "C" {
 #include <third/protocol/rbc_mesh.h>
@@ -22,7 +24,8 @@ extern "C" {
 using namespace BLEpp;
 
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
-				_appearance(defaultAppearance), _clock_source(defaultClockSource), _mtu_size(defaultMtu),
+				_appearance(defaultAppearance), _clock_source(defaultClockSource),
+//				_mtu_size(defaultMtu),
 				_tx_power_level(defaultTxPowerLevel), _sec_mode({ }),
 				_interval(defaultAdvertisingInterval_0_625_ms), _timeout(defaultAdvertisingTimeout_seconds),
 			  	_gap_conn_params( { }),
@@ -548,6 +551,23 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		on_connected(p_ble_evt);
 		break;
 
+	case BLE_EVT_USER_MEM_REQUEST: {
+
+		buffer_ptr_t buffer = NULL;
+		uint16_t size = 0;
+		MasterBuffer::getInstance().getBuffer(buffer, size);
+
+		_user_mem_block.len = size+6;
+		_user_mem_block.p_mem = buffer-6;
+        BLE_CALL(sd_ble_user_mem_reply, (getConnectionHandle(), &_user_mem_block));
+
+		break;
+	}
+
+	case BLE_EVT_USER_MEM_RELEASE:
+		// nothing to do
+		break;
+
 	case BLE_GAP_EVT_DISCONNECTED:
 		on_disconnected(p_ble_evt);
 		break;
@@ -560,18 +580,37 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		}
 		break;
 
-	case BLE_GATTS_EVT_WRITE:
-		for (Service* svc : _services) {
-			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
-				svc->on_ble_event(p_ble_evt);
+	case BLE_GATTS_EVT_WRITE: {
+
+		if (p_ble_evt->evt.gatts_evt.params.write.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
+
+			buffer_ptr_t buffer = NULL;
+			uint16_t size = 0;
+			MasterBuffer::getInstance().getBuffer(buffer, size);
+
+			uint16_t* header = (uint16_t*)(buffer-6);
+
+			for (Service* svc : _services) {
+				svc->on_write(p_ble_evt->evt.gatts_evt.params.write, header[0]);
+			}
+
+		} else {
+			for (Service* svc : _services) {
+				if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
+					svc->on_write(p_ble_evt->evt.gatts_evt.params.write, p_ble_evt->evt.gatts_evt.params.write.handle);
+					return;
+				}
 			}
 		}
+
 		break;
+	}
 
 	case BLE_GATTS_EVT_HVC:
 		for (Service* svc : _services) {
 			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
 				svc->on_ble_event(p_ble_evt);
+				return;
 			}
 		}
 		break;

@@ -52,7 +52,7 @@ void Service::on_ble_event(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_WRITE:
-		on_write(p_ble_evt->evt.gatts_evt.params.write);
+		on_write(p_ble_evt->evt.gatts_evt.params.write, p_ble_evt->evt.gatts_evt.params.write.handle);
 		break;
 
 	default:
@@ -89,7 +89,7 @@ void Service::on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& ga
  * write_evt.handle is compared instead of write_evt.context.value_handle. Of course, the corresponding handle in
  * the characteristic object is also different.
  */
-void Service::on_write(ble_gatts_evt_write_t& write_evt) {
+void Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) {
 	bool found = false;
 
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
@@ -99,17 +99,26 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt) {
 			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(write_evt.data));
 			found = true;
 
-		} else if (characteristic->getValueHandle() == write_evt.context.value_handle) {
+		} else if (characteristic->getValueHandle() == value_handle) {
 			// TODO: make a map.
 			found = true;
 
 			if (write_evt.op == BLE_GATTS_OP_WRITE_REQ
 					|| write_evt.op == BLE_GATTS_OP_WRITE_CMD
 					|| write_evt.op == BLE_GATTS_OP_SIGN_WRITE_CMD) {
-				characteristic->written(write_evt.len, write_evt.offset,
-						write_evt.data);
-			} else {
-				found = false;
+
+				characteristic->written(write_evt.len);
+
+			} else if (write_evt.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
+
+				// get length of data, header does not contain full length but rather the "step size"
+				uint16_t length = 0;
+				cs_sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(), &length, NULL);
+
+				characteristic->written(length);
+
+//			} else {
+//				found = false;
 			}
 		}
 	}

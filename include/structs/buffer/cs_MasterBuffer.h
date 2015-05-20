@@ -71,8 +71,9 @@ public:
 	bool getBuffer(buffer_ptr_t& buffer, uint16_t& maxLength) {
 //		LOGd("getBuffer");
 		if (_buffer) {
-			buffer = _buffer;
-			maxLength = _size;
+			// TODO: remove hack and solve correctly (long write)
+			buffer = _buffer + 6;
+			maxLength = _size - 6;
 			return true;
 		} else {
 			return false;
