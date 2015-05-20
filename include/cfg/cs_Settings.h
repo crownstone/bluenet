@@ -152,14 +152,14 @@ public:
 		}
 #endif
 		case CONFIG_WIFI_SETTINGS: {
-			LOGd("Temporarily store wifi settings");
+			LOGi("Temporarily store wifi settings");
 			// max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
 			if (length > 88) {
 				LOGe("Wifi settings string too long");
 				break;
 			}
 			_wifiSettings = std::string((char*)payload, length);
-			LOGd("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
+			LOGi("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
 			break;
 		}
 		default:
