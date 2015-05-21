@@ -586,9 +586,9 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 			buffer_ptr_t buffer = NULL;
 			uint16_t size = 0;
-			MasterBuffer::getInstance().getBuffer(buffer, size);
+			MasterBuffer::getInstance().getBuffer(buffer, size, 0);
 
-			uint16_t* header = (uint16_t*)(buffer-6);
+			uint16_t* header = (uint16_t*)buffer;
 
 			for (Service* svc : _services) {
 				svc->on_write(p_ble_evt->evt.gatts_evt.params.write, header[0]);

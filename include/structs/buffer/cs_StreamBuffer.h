@@ -16,6 +16,7 @@
 //#include "drivers/cs_Serial.h"
 //#include "common/cs_Config.h"
 #include "structs/cs_BufferAccessor.h"
+#include "util/cs_BleError.h"
 
 //using namespace BLEpp;
 
@@ -65,10 +66,7 @@ public:
 	/* @inherit */
 	int assign(uint8_t *buffer, uint16_t size) {
 		LOGd("assign buff: %p, len: %d", buffer, size);
-		if (SB_HEADER_SIZE + _max_items*_item_size > size) {
-			LOGe("Assigned buffer is not large enough");
-			return 1;
-		}
+		assert(SB_HEADER_SIZE + _max_items*_item_size <= size, "Assigned buffer is not large enough");
 		_buffer = (stream_t<T>*)buffer;
 		return 0;
 	}
