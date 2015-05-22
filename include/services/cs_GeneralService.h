@@ -19,9 +19,7 @@
 #include <ble/cs_Characteristic.h>
 //#include "processing/cs_Temperature.h"
 
-#if CHAR_MESHING==1
 #include <structs/cs_MeshMessage.h>
-#endif
 
 #define GENERAL_SERVICE_UPDATE_FREQUENCY 10 // hz
 
