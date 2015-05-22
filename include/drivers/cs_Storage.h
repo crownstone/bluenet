@@ -52,7 +52,7 @@ extern "C" {
 
 /* define the maximum size for strings to be stored
  */
-#define MAX_STRING_SIZE 32
+#define MAX_STRING_SIZE 16
 
 /* Base class for storage structures
  */
@@ -92,9 +92,9 @@ struct ps_configuration_t : ps_storage_base_t {
 	// device name
 	char device_name[MAX_STRING_SIZE];
 	// room name
-	char room[MAX_STRING_SIZE];
+//	char room[MAX_STRING_SIZE];
 	// device type
-	char device_type[MAX_STRING_SIZE];
+//	char device_type[MAX_STRING_SIZE];
 	// floor level
 	uint32_t floor;
 	// beacon
