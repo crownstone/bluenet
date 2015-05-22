@@ -13,6 +13,8 @@ extern "C" {
 #include <pstorage.h>
 #include <third/protocol/rbc_mesh.h>
 
+//#include <drivers/cs_Serial.h>
+
 /**Function for dispatching a BLE stack event to all modules with a BLE stack event handler.
  *
  * This function is called from the scheduler in the main loop after a BLE stack
@@ -22,19 +24,15 @@ extern "C" {
  */
 void sys_evt_dispatch(uint32_t sys_evt) {
 
-	//LOGi("Sys evt dispatch");
+	// NOTE: logging here may mess up the program
+//	LOGi("Sys evt dispatch: %d", sys_evt);
 
-	pstorage_sys_event_handler(sys_evt);
+    pstorage_sys_event_handler(sys_evt);
 
 #if CHAR_MESHING==1
-	rbc_mesh_sys_evt_handler(sys_evt);
+    rbc_mesh_sys_evt_handler(sys_evt);
 #endif
 
-//	if ((sys_evt == NRF_EVT_FLASH_OPERATION_SUCCESS) ||
-//		(sys_evt == NRF_EVT_FLASH_OPERATION_ERROR)) {
-//		//LOGi("Flash evt dispatch");
-//		pstorage_sys_event_handler(sys_evt);
-//	}
 }
 
 //// called by softdevice handler on a ble event

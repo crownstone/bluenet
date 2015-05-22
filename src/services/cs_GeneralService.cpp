@@ -225,6 +225,9 @@ void GeneralService::addMeshCharacteristic() {
 			uint16_t length;
 			_meshMessage->data(p_data, length);
 
+//			LOGi("len: %d", length);
+//			BLEutil::printArray(p_data, length);
+
 			CMesh &mesh = CMesh::getInstance();
 			mesh.send(handle, p_data, length);
 //			mesh.send(handle, val);

@@ -20,8 +20,6 @@ extern "C" {
 	#include "ble_types.h"
 }
 
-//#include <common/cs_Types.h>
-
 /* enable additional debug output */
 //#define PRINT_ITEMS
 

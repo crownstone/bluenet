@@ -76,6 +76,7 @@ private:
 	
 	// store values last set
 	uint8_t _pwmChannel;
+	// TODO -oDE: can we make this type consistent with _nextValue? and uint8_t should be enough?
 	uint32_t _pwmValue;
 
 	int32_t ppiEnableChannel(uint32_t ch_num, volatile uint32_t *event_ptr, volatile uint32_t *task_ptr);
@@ -97,7 +98,9 @@ public:
 
 	// number of channels
 	uint8_t _numChannels;
+	// TODO -oDE: can we make this type consistent with _pwmValue? and uint8_t should be enough?
 	uint16_t _maxValue;
+	// TODO -oDE: can we make this type consistent with _pwmValue? and uint8_t should be enough?
 	uint16_t _nextValue[PWM_MAX_CHANNELS];
 	uint8_t _gpioteChannel[PWM_MAX_CHANNELS];
 	uint8_t _gpioPin[PWM_MAX_CHANNELS];

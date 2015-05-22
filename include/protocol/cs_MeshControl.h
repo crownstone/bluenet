@@ -47,8 +47,8 @@ public:
 	void sendPwmValue(uint8_t* address, uint8_t value);
 	void sendIBeaconMessage(uint8_t* address, uint16_t major, uint16_t minor, ble_uuid128_t uuid, int8_t rssi);
 
+	void decodeDataMessage(void* p_data, uint16_t length);
 private:
 
-	void decodeDataMessage(void* p_data, uint16_t length);
 
 };

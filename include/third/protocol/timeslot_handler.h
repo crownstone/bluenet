@@ -139,4 +139,7 @@ uint64_t timeslot_get_end_time(void);
 
 void rbc_mesh_SWI0_IRQHandler(void);
 
+void timeslot_handler_pause();
+void timeslot_handler_resume();
+
 #endif /* _TIMESLOT_HANDLER_H__ */

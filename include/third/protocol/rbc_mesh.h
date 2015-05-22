@@ -388,5 +388,19 @@ void rbc_mesh_sys_evt_handler(uint32_t evt);
 */
 void rbc_mesh_event_handler(rbc_mesh_event_t* evt);
 
+/**
+ * Pause the mesh code.
+ *
+ * Note: call this from the application thread. Do not call this from an
+ * interrupt handler.
+ *
+ * the function waits for the NRF_EVT_RADIO_SESSION_CLOSED
+ * sys event to be received which will be blocked, resulting in a dead lock, if
+ * this function is called within an interrupt handler
+ */
+void rbc_mesh_pause();
+
+void rbc_mesh_resume();
+
 #endif /* _RBC_MESH_H__ */
 

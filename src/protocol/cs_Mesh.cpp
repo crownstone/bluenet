@@ -40,7 +40,9 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 	case RBC_MESH_EVENT_TYPE_UPDATE_VAL:
 		LOGd("update value");
 		break;
-
+	case RBC_MESH_EVENT_TYPE_INITIALIZED:
+		LOGd("initialized");
+		break;
 	}
 
 	switch (evt->event_type)
@@ -54,7 +56,7 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 
             //if (evt->data[0]) {
             LOGi("Got data ch: %i, val: %i, len: %d, orig_addr:", evt->value_handle, evt->data[0], evt->data_len);
-            BLEutil::printArray(evt->originator_address.addr, 6);
+//            BLEutil::printArray(evt->originator_address.addr, 6);
             MeshControl &meshControl = MeshControl::getInstance();
             meshControl.process(evt->value_handle, evt->data, evt->data_len);
             //}

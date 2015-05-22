@@ -24,7 +24,7 @@
 #define MAX_EVENT_MESH_MESSAGE_DATA_LENGTH MAX_MESH_MESSAGE_PAYLOAD_LENGTH - sizeof(uint16_t)
 struct __attribute__((__packed__)) event_mesh_message_t {
 	uint16_t event;
-	uint8_t data[MAX_EVENT_MESH_MESSAGE_DATA_LENGTH];
+//	uint8_t data[MAX_EVENT_MESH_MESSAGE_DATA_LENGTH];
 };
 
 struct __attribute__((__packed__)) power_mesh_message_t {
@@ -40,7 +40,7 @@ struct __attribute__((__packed__)) beacon_mesh_message_t {
 
 struct __attribute__((__packed__)) device_mesh_message_t {
 	uint8_t targetAddress[BLE_GAP_ADDR_LEN];
-	uint8_t messageType;
+	uint16_t messageType;
 	union {
 		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
 		event_mesh_message_t evtMsg;

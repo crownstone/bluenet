@@ -391,31 +391,45 @@ void Crownstone::run() {
 }
 
 void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	LOGi("handleEvent: %d", evt);
+
+//	LOGi("handleEvent: %d", evt);
+
+	bool restartAdvertising = false;
 	switch(evt) {
+
 #if IBEACON==1
 	case CONFIG_IBEACON_MAJOR: {
 		_beacon->setMajor(*(uint32_t*)p_data);
+		restartAdvertising = true;
 		break;
 	}
 	case CONFIG_IBEACON_MINOR: {
 		_beacon->setMinor(*(uint32_t*)p_data);
+		restartAdvertising = true;
 		break;
 	}
 	case CONFIG_IBEACON_UUID: {
 		_beacon->setUUID(*(ble_uuid128_t*)p_data);
+		restartAdvertising = true;
 		break;
 	}
 	case CONFIG_IBEACON_RSSI: {
 		_beacon->setRSSI(*(int8_t*)p_data);
+		restartAdvertising = true;
 		break;
 	}
 #endif
+
+	}
+
+	if (restartAdvertising && _stack->isAdvertising()) {
+		_stack->stopAdvertising();
+		_stack->startIBeacon(_beacon);
 	}
 }
 
 void on_exit(void) {
-	LOGi("PROGRAM TERMINATED");
+	LOGf("PROGRAM TERMINATED");
 }
 
 /**********************************************************************************************************************

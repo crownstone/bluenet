@@ -227,3 +227,11 @@ void rbc_mesh_sys_evt_handler(uint32_t evt)
     /* call lower layer event handler */
 	ts_sys_evt_handler(evt);
 }
+
+void rbc_mesh_pause() {
+	timeslot_handler_pause();
+}
+
+void rbc_mesh_resume() {
+	timeslot_handler_resume();
+}

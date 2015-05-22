@@ -126,6 +126,10 @@ static uint8_t event_fifo_tail = 0;
 static async_event_t async_event_fifo_queue[ASYNC_EVENT_FIFO_QUEUE_SIZE];
 
 static async_event_t evt;
+
+bool paused = false;
+bool pausing = false;
+
 #endif
 
 /*****************************************************************************
@@ -304,6 +308,12 @@ void ts_sys_evt_handler(uint32_t evt)
         case NRF_EVT_RADIO_CANCELED:
             timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
             break;
+
+        case NRF_EVT_RADIO_SESSION_CLOSED:
+        	if (pausing) {
+        		paused = true;
+        	}
+        	break;
 
         default:
             break;
@@ -511,7 +521,25 @@ void timeslot_handler_init(void)
     timeslot_order_earliest(g_timeslot_length, true);
 }
 
+void timeslot_handler_pause() {
+	if (paused) return;
 
+	LOGi("pausing mesh");
+	pausing = true;
+	sd_radio_session_close();
+	while (!paused) {
+		nrf_delay_ms(10);
+	}
+	pausing = false;
+}
+
+void timeslot_handler_resume() {
+	if (!paused) return;
+
+	LOGi("resuming mesh");
+	timeslot_handler_init();
+	paused = false;
+}
 
 void timeslot_order_earliest(uint32_t length_us, bool immediately)
 {

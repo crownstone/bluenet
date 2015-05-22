@@ -24,6 +24,10 @@
 
 extern "C" {
 
+#if CHAR_MESHING==1
+#include "third/protocol/rbc_mesh.h"
+#endif
+
 static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
 		uint32_t data_len) {
 	// we might want to check if things are actually stored, by using this callback	
@@ -37,6 +41,10 @@ static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_cod
 	} else {
 		LOGi("Opcode %i executed (no error)", op_code);
 	}
+
+#if CHAR_MESHING==1
+	rbc_mesh_resume();
+#endif
 }
 
 } // extern "C"
@@ -138,20 +146,29 @@ void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, ui
 	pstorage_handle_t block_handle;
 
 #ifdef PRINT_ITEMS
-	uint8_t* ptr = (uint8_t*)item;
-	_log(INFO, "set struct: ");
-	for (int i = 0; i < size; i++) {
-		_log(INFO, "%X ", ptr[i]);
-	}
-	_log(INFO, "\r\n");
+//	uint8_t* ptr = (uint8_t*)item;
+//	for (int i = 0; i < size; i++) {
+//		_log(INFO, "%X ", ptr[i]);
+//	}
+//	_log(INFO, "\r\n");
+	_log(INFO, "set struct: \r\n");
+	BLEutil::printArray((uint8_t*)item, size);
 #endif
 
 	LOGi("writeStorage handle: %p, size: %d", handle.block_id, size);
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
 
-	//	clearBlock(handle);
+//		clearBlock(handle);
+
+#if CHAR_MESHING==1
+	// we need to pause the mesh, otherwise the softdevice won't get time to
+	// update the storage
+	rbc_mesh_pause();
+#endif
 
 	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
+
+//	BLE_CALL (pstorage_store, (&block_handle, (uint8_t*)item, size, 0) );
 
 }
 
@@ -205,7 +222,7 @@ void Storage::getUint8(uint32_t value, uint8_t& target, uint8_t default_value) {
 
 	// check if last byte is FF which means that memory is unnassigned
 	// and value has to be ignored
-	if (value & (0xFF << 3)) {
+	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd("use default value");
 #endif
@@ -220,6 +237,7 @@ void Storage::getUint8(uint32_t value, uint8_t& target, uint8_t default_value) {
 
 void Storage::setInt8(int8_t value, int32_t& target) {
 	target = value;
+	target &= 0x000000FF;
 }
 
 void Storage::getInt8(int32_t value, int8_t& target, int8_t default_value) {
@@ -231,7 +249,7 @@ void Storage::getInt8(int32_t value, int8_t& target, int8_t default_value) {
 
 	// check if last byte is FF which means that memory is unnassigned
 	// and value has to be ignored
-	if (value & (0xFF << 3)) {
+	if (value == INT_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd("use default value");
 #endif
@@ -257,7 +275,7 @@ void Storage::getUint16(uint32_t value, uint16_t& target, uint16_t default_value
 
 	// check if last byte is FF which means that memory is unnassigned
 	// and value has to be ignored
-	if (value & (0xFF << 3)) {
+	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd("use default value");
 #endif
@@ -272,7 +290,7 @@ void Storage::getUint16(uint32_t value, uint16_t& target, uint16_t default_value
 }
 
 void Storage::setUint32(uint32_t value, uint32_t& target) {
-	if (value == INT_MAX) {
+	if (value == UINT32_MAX) {
 		LOGe("value %d too big, can only write max %d", value, INT_MAX-1);
 	} else {
 		target = value;
@@ -288,7 +306,7 @@ void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value
 
 	// check if value is equal to INT_MAX (FFFFFFFF) which means that memory is
 	// unnassigned and value has to be ignored
-	if (value == INT_MAX) {
+	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd("use default value");
 		target = default_value;
