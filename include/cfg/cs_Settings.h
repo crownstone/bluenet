@@ -16,6 +16,7 @@
 #include <events/cs_EventDispatcher.h>
 
 #include <ble/cs_UUID.h>
+#include <drivers/cs_Storage.h>
 
 /* Configuration types
  *
