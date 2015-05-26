@@ -43,8 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Softdevice.h>
 
-#include <drivers/cs_Serial.h>
-
 /* Packet related constants */
 #define MESH_PACKET_HANDLE_LEN          (1)
 #define MESH_PACKET_VERSION_LEN         (2)
@@ -603,8 +601,6 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
         trickle_rx_inconsistent(&ch_md->trickle);
     }
 
-    _log(INFO, "\r\n");
-
     /* new version */
     uint16_t separation = (version >= ch_md->version_number)?
         (version - ch_md->version_number) :
@@ -614,8 +610,6 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
         (ch_md->version_number >= MESH_VALUE_LOLLIPOP_LIMIT && separation < (UINT16_MAX - MESH_VALUE_LOLLIPOP_LIMIT)/2) ||
         uninitialized)
     {
-        LOGd("UPDATE_VAL: old version: %d, new version: %d", ch_md->version_number, version);
-
         /* update value */
         mesh_srv_char_val_set(handle, data, data_len, false);
         ch_md->flags |= (1 << MESH_MD_FLAGS_INITIALIZED_POS);
@@ -636,9 +630,6 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
         memcpy(&update_evt.originator_address, &packet->sender, sizeof(ble_gap_addr_t));
 
         rbc_mesh_event_handler(&update_evt);
-#ifdef RBC_MESH_SERIAL
-            mesh_aci_rbc_event_handler(&update_evt);
-#endif
     }
     else if (version == ch_md->version_number)
     {
@@ -666,8 +657,6 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
 
         if (conflicting)
         {
-            LOGd("CONFLICTING_VAL: old version: %d, new version: %d", ch_md->version_number, version);
-
             TICK_PIN(7);
             rbc_mesh_event_t conflicting_evt;
 
@@ -682,9 +671,6 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
             trickle_rx_inconsistent(&ch_md->trickle);
 
             rbc_mesh_event_handler(&conflicting_evt);
-#ifdef RBC_MESH_SERIAL
-            mesh_aci_rbc_event_handler(&conflicting_evt);
-#endif
         }
         else
         {
@@ -810,9 +796,6 @@ uint32_t mesh_srv_gatts_evt_write_handle(ble_gatts_evt_write_t* evt)
             memcpy(&update_evt.originator_address, &my_addr, sizeof(ble_gap_addr_t));
 
             rbc_mesh_event_handler(&update_evt);
-#ifdef RBC_MESH_SERIAL
-            mesh_aci_rbc_event_handler(&update_evt);
-#endif
 
             return NRF_SUCCESS;
         }

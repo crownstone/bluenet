@@ -52,6 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 
 #include <util/cs_BleError.h>
+#include <drivers/cs_Serial.h>
 
 #define USE_SWI_FOR_PROCESSING          (1)
 

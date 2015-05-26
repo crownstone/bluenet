@@ -147,13 +147,6 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
 		//			LOGi("set pwm to %i", value);
 		PWM::getInstance().setValue(0, value);
-
-#if CHAR_MESHING==1
-		uint8_t state = value == 0 ? 0 : 1;
-//		MeshControl::getInstance().sendPwmValue(state);
-		CMesh::getInstance().send(2, &state, 1);
-		_log(INFO, "\r\n");
-#endif
 	});
 }
 

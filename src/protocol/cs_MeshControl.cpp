@@ -66,7 +66,6 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 //		LOGi("received event for:");
 //		BLEutil::printArray(msg->targetAddress, BLE_GAP_ADDR_LEN);
 		LOGi("type: %s (%d), from ???", msg->evtMsg.event == EVT_POWER_ON ? "EVT_POWER_ON" : "EVT_POWER_OFF", msg->evtMsg.event);
-		_log(INFO, "\r\n");
 
 //		EventMeshPackage* msg = (EventMeshPackage*)p_data;
 //		LOGi("received %s (%d) event from ???", msg->evt == EVT_POWER_ON ? "EVT_POWER_ON" : "EVT_POWER_OFF", msg->evt);
@@ -95,8 +94,6 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 		} else {
 			LOGi("skip pwm message");
 		}
-
-		_log(INFO, "\r\n");
 
 		break;
 	}
@@ -154,8 +151,6 @@ void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 		CMesh::getInstance().send(DATA_CHANNEL, (uint8_t*)&msg, 7 + 2 + length);
 
-		_log(INFO, "\r\n");
-
 		break;
 	}
 	default:
@@ -179,7 +174,6 @@ void MeshControl::send(uint8_t handle, void* p_data, uint8_t length) {
 		// message is not for us, send it into mesh
 		LOGd("send it into mesh ...");
 		CMesh::getInstance().send(handle, p_data, length);
-
 	} else {
 		// message is for us, handle directly
 		LOGd("message is for us, handle directly");

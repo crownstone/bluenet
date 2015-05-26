@@ -44,7 +44,6 @@ class Settings {
 private:
 	Settings() {
 		Storage::getInstance().getHandle(PS_ID_CONFIGURATION, _storageHandle);
-		LOGi("crate: handle: module_id: %d, block_id: %d", _storageHandle.module_id, _storageHandle.block_id);
 		loadPersistentStorage();
 	};
 
@@ -101,7 +100,7 @@ public:
 			// TODO: write to persistent storage and trigger update event
 			break;
 		}
-		//#if IBEACON==1
+#if IBEACON==1
 		case CONFIG_IBEACON_MAJOR: {
 			if (length != 2) {
 				LOGw("We do not account for a value of more than %d");
@@ -159,12 +158,10 @@ public:
 				savePersistentStorage();
 			}
 
-			BLEutil::printArray((uint8_t*)&_storageStruct.beacon, sizeof(_storageStruct.beacon));
-
 			EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.rssi, 1);
 			break;
 		}
-		//#endif
+#endif
 		case CONFIG_WIFI_SETTINGS: {
 			LOGi("Temporarily store wifi settings");
 			// max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes

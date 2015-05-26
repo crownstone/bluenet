@@ -45,10 +45,8 @@ private:
     		// target address of package is set to our address
     		return true;
     	} else {
-//    		if (!isBroadcast(p_data)) {
-				_log(INFO, "message not for us, target: ");
-				BLEutil::printArray(msg->header.targetAddress, BLE_GAP_ADDR_LEN);
-//			}
+//    		_log(INFO, "message not for us, target: ");
+//    		BLEutil::printArray(msg->header.targetAddress, BLE_GAP_ADDR_LEN);
 			return false;
     	}
     }

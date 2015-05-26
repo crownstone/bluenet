@@ -215,9 +215,6 @@ void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 			LOGi(MSG_MESH_MESSAGE_WRITE);
 
-//			MeshMessage msg;
-//			LOGi("len: %d", _meshCharacteristic->getValueLength());
-//			msg.assign(_meshCharacteristic->getValue(), _meshCharacteristic->getValueLength());
 
 			uint8_t handle = _meshMessage->handle();
 
@@ -225,20 +222,9 @@ void GeneralService::addMeshCharacteristic() {
 			uint16_t length;
 			_meshMessage->data(p_data, length);
 
-//			LOGi("len: %d", length);
-//			BLEutil::printArray(p_data, length);
-
-//			CMesh &mesh = CMesh::getInstance();
-//			mesh.send(handle, p_data, length);
-
 			MeshControl::getInstance().send(handle, p_data, length);
 
-//			mesh.send(handle, val);
 		});
-
-//	_meshCharacteristic->setValue(buffer);
-//	_meshCharacteristic->setMaxLength(MM_SERIALIZED_SIZE);
-//	_meshCharacteristic->setDataLength(0);
 
 }
 #endif

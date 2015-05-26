@@ -145,7 +145,6 @@ void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, ui
 	BLEutil::printArray((uint8_t*)item, size);
 #endif
 
-	LOGi("writeStorage handle: %p, size: %d", handle.block_id, size);
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
 
 //		clearBlock(handle);
@@ -157,8 +156,6 @@ void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, ui
 #endif
 
 	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
-
-//	BLE_CALL (pstorage_store, (&block_handle, (uint8_t*)item, size, 0) );
 
 }
 

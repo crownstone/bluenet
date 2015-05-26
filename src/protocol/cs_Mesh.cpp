@@ -132,8 +132,8 @@ void CMesh::set_callback() {
 void CMesh::send(uint8_t handle, void* p_data, uint8_t length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
-	LOGi("send ch: %d, len: %d", handle, length);
-	BLEutil::printArray((uint8_t*)p_data, length);
+	//LOGi("send ch: %d, len: %d", handle, length);
+	//BLEutil::printArray((uint8_t*)p_data, length);
 	APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
 }
 
@@ -141,7 +141,7 @@ bool CMesh::receive(uint8_t handle, void** p_data, uint16_t& length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
 	APP_ERROR_CHECK(rbc_mesh_value_get(handle, (uint8_t*)*p_data, &length, NULL));
-	LOGi("recv ch: %d, len: %d", handle, length);
+	//LOGi("recv ch: %d, len: %d", handle, length);
 	return length != 0;
 }
 

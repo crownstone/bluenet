@@ -44,7 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdbool.h>
 #include <string.h>
 
-#include "drivers/cs_Serial.h"
 #include "util/cs_BleError.h"
 
 #define RADIO_FIFO_QUEUE_SIZE 8 /* must be power of two */

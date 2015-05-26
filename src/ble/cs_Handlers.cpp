@@ -24,7 +24,6 @@ extern "C" {
  */
 void sys_evt_dispatch(uint32_t sys_evt) {
 
-	// NOTE: logging here may mess up the program
 //	LOGi("Sys evt dispatch: %d", sys_evt);
 
     pstorage_sys_event_handler(sys_evt);
