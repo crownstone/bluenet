@@ -325,7 +325,7 @@ Obviously, the copyrights of the code written by Christopher, belong to him.
 
 The copyrights (2014-2015) for the rest of the code belongs to the team of Distributed Organisms B.V. and are provided under an noncontagious open-source license:
 
-* Authors: Anne van Rossum, Dominik Egger, Bart van Vliet
+* Authors: Anne van Rossum, Dominik Egger, Bart van Vliet, Marc Hulscher, Peet van Tooren, Christian Haas
 * Date: 27 Jan. 2014
 * License: LGPL v3+, Apache, or MIT, your choice
 * Almende B.V., http://www.almende.com and DoBots B.V., http://www.dobots.nl
