@@ -32,7 +32,7 @@ enum ConfigurationTypes {
 	CONFIG_IBEACON_MINOR                    = 0x7,
 	CONFIG_IBEACON_UUID                     = 0x8,
 	CONFIG_IBEACON_RSSI                     = 0x9,
-	CONFIG_WIFI_SETTINGS                    = 0x10,
+	CONFIG_WIFI_SETTINGS                    = 0x0A,
 	CONFIG_TYPES
 };
 
@@ -244,7 +244,7 @@ public:
 			LOGd("Read wifi settings. Does reset it.");
 			// copy string, because we clear it on read
 			std::string str;
-			if (_wifiSettings != "") {
+			if (_wifiSettings == "") {
 				str = "{}";
 			} else {
 				str = _wifiSettings;
