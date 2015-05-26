@@ -11,6 +11,9 @@
 #include <common/cs_Types.h>
 #include "drivers/cs_Serial.h"
 
+/* size of the header used for long write */
+#define DEFAULT_OFFSET 6
+
 class MasterBuffer {
 
 private:
@@ -34,7 +37,7 @@ public:
 
 	void alloc(uint16_t size) {
 		LOGd("alloc %d", size);
-		_size = size;
+		_size = size + DEFAULT_OFFSET;
 		_buffer = (buffer_ptr_t)calloc(_size, sizeof(uint8_t));
 		LOGd("buffer: %p", _buffer);
 	}
@@ -68,11 +71,11 @@ public:
 
 	bool isLocked() { return _locked; }
 
-	bool getBuffer(buffer_ptr_t& buffer, uint16_t& maxLength) {
+	bool getBuffer(buffer_ptr_t& buffer, uint16_t& maxLength, uint16_t offset = DEFAULT_OFFSET) {
 //		LOGd("getBuffer");
 		if (_buffer) {
-			buffer = _buffer;
-			maxLength = _size;
+			buffer = _buffer + offset;
+			maxLength = _size - offset;
 			return true;
 		} else {
 			return false;
@@ -83,6 +86,6 @@ public:
 		return _buffer;
 	}
 
-	uint16_t size() { return _size; }
+	uint16_t size(uint16_t offset = DEFAULT_OFFSET) { return _size - offset; }
 
 };

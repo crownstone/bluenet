@@ -249,9 +249,13 @@ void Crownstone::setup() {
 	// configure parameters for the Bluetooth stack
 	configStack();
 
+	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
+	// in particular we need it to set interrupt priorities.
+	_stack->init();
+
 #if IBEACON==1
 	// if enabled, create the iBeacon parameter object which will be used
-	// to start advertisment as an iBeacon
+	// to start advertisement as an iBeacon
 
 	// get values from config
 	uint16_t major, minor;
@@ -267,10 +271,6 @@ void Crownstone::setup() {
 	// create ibeacon object
 	_beacon = new IBeacon(uuid, major, minor, rssi);
 #endif
-
-	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
-	// in particular we need it to set interrupt priorities.
-	_stack->init();
 
 	// set advertising parameters such as the device name and appearance.
 	// Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
@@ -383,6 +383,7 @@ void Crownstone::run() {
 void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	LOGi("handleEvent: %d", evt);
 	switch(evt) {
+#if IBEACON==1
 	case CONFIG_IBEACON_MAJOR: {
 		_beacon->setMajor(*(uint32_t*)p_data);
 		break;
@@ -399,6 +400,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_beacon->setRSSI(*(int8_t*)p_data);
 		break;
 	}
+#endif
 	}
 }
 

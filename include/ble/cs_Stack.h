@@ -103,7 +103,7 @@ public:
 	// The low-frequency clock, currently generated from the high frequency clock
 	static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
 	// The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.
-	static const uint8_t                   defaultMtu = BLE_L2CAP_MTU_DEF;
+//	static const uint8_t                   defaultMtu = BLE_L2CAP_MTU_DEF;
 	// Minimum connection interval in 1.25 ms (400*1.25=500ms)
 	static const uint16_t                  defaultMinConnectionInterval_1_25_ms = 400;
 	// Maximum connection interval in 1.25 ms (800*1.25=1 sec)
@@ -125,7 +125,7 @@ protected:
 	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  // 32
 
 	nrf_clock_lfclksrc_t                        _clock_source; //4
-	uint8_t                                     _mtu_size;
+//	uint8_t                                     _mtu_size;
 	int8_t                                      _tx_power_level;
 	ble_gap_conn_sec_mode_t                     _sec_mode;  //1
 	//ble_gap_sec_params_t                        _sec_params; //6
@@ -145,6 +145,8 @@ protected:
 	callback_disconnected_t                     _callback_disconnected;  // 16
 	callback_radio_t                            _callback_radio;  // 16
 	volatile uint8_t                            _radio_notify; // 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
+
+	ble_user_mem_block_t 						_user_mem_block; // used for user memory (long write)
 public:
 	/* Initialization of the BLE stack
 	 *

@@ -124,7 +124,7 @@ public:
 
 	virtual void on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& gap_evt);  // FIXME NRFAPI
 
-	virtual void on_write(ble_gatts_evt_write_t& write_evt);  // FIXME NRFAPI
+	virtual void on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle);  // FIXME NRFAPI
 
 	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
 

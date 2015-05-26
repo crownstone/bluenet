@@ -34,6 +34,7 @@ struct CharacteristicInit {
 	ble_gatts_attr_t          attr_char_value;
 	// pointer to a presentation format structure (p_char_pf)
 	ble_gatts_char_pf_t       presentation_format;
+	// characteristic metadata
 	ble_gatts_char_md_t       char_md;
 	// attribute metadata for client characteristic configuration  (p_cccd_md)
 	ble_gatts_attr_md_t       cccd_md;
@@ -226,7 +227,7 @@ public:
 	virtual void setDataLength(uint16_t length) {};
 
 	virtual void read() = 0;
-	virtual void written(uint16_t len, uint16_t offset, uint8_t* data) = 0;
+	virtual void written(uint16_t len) = 0;
 
 	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
 
@@ -490,7 +491,7 @@ public:
 
 protected:
 
-	void written(uint16_t len, uint16_t offset, uint8_t* data) {
+	void written(uint16_t len) {
 		setDataLength(len);
 
 		LOGd("%s: onWrite()", _name);
