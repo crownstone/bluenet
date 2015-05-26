@@ -8,11 +8,9 @@
 #include "protocol/cs_MeshControl.h"
 
 #include "drivers/cs_PWM.h"
-#include "drivers/cs_Serial.h"
 
 #include <events/cs_EventDispatcher.h>
 #include <protocol/cs_Mesh.h>
-#include <protocol/cs_MeshMessageTypes.h>
 
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
@@ -21,10 +19,13 @@
 
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
+    sd_ble_gap_address_get(&_myAddr);
 }
 
 extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
-	MeshControl::getInstance().decodeDataMessage(p_event_data, event_size);
+
+	device_mesh_message_t* msg = (device_mesh_message_t*) p_event_data;
+	MeshControl::getInstance().decodeDataMessage(msg);
 }
 
 
@@ -34,18 +35,33 @@ extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
 void MeshControl::process(uint8_t handle, void* p_data, uint16_t length) {
 	LOGi("Process incoming mesh message");
 	switch(handle) {
-	case EVENT_CHANNEL: {
-		if (length < sizeof(device_mesh_message_t)) {
-			LOGi("wrong message received, length: %d, sizeof: %d", length, sizeof(device_mesh_message_t));
-			break;
+	case HUB_CHANNEL: {
+
+		break;
+	}
+	case DATA_CHANNEL: {
+		if (!isValidMessage(p_data, length)) {
+			return;
 		}
 
-		device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
-
-		if (msg->messageType != EVENT_MESSAGE) {
-			LOGi("wrong message received");
-			break;
+		if (isBroadcast(p_data) || isMessageForUs(p_data)) {
+			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 		}
+
+		break;
+	}
+	}
+}
+
+void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
+
+//	BLEutil::printArray((uint8_t*)msg, sizeof(msg));
+
+	switch(msg->header.messageType) {
+	case EVENT_MESSAGE: {
+//		if (!isValidMessage(p_data, length)) {
+//			return;
+//		}
 
 //		LOGi("received event for:");
 //		BLEutil::printArray(msg->targetAddress, BLE_GAP_ADDR_LEN);
@@ -57,25 +73,9 @@ void MeshControl::process(uint8_t handle, void* p_data, uint16_t length) {
 
 		break;
 	}
-	case DATA_CHANNEL: {
-
-		BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
-//		decodeDataMessage(p_data, length);
-		break;
-	}
-	}
-}
-
-void MeshControl::decodeDataMessage(void* p_data, uint16_t length) {
-
-	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
-//	BLEutil::printArray((uint8_t*)msg, sizeof(msg));
-
-	switch(msg->messageType) {
 	case POWER_MESSAGE: {
-//		if (length != 1) {
-//			LOGi("wrong message, length: %d", length);
-//			break;
+//		if (!isValidMessage(p_data, length)) {
+//			return;
 //		}
 
 		uint8_t pwmValue = msg->powerMsg.pwmValue;
@@ -101,14 +101,12 @@ void MeshControl::decodeDataMessage(void* p_data, uint16_t length) {
 		break;
 	}
 	case BEACON_MESSAGE: {
-//		if (length != 1) {
-//			LOGi("wrong message, length: %d", length);
-//			break;
+//		if (!isValidMessage(p_data, length)) {
+//			return;
 //		}
 
 		LOGi("Received Beacon Message");
-
-		BLEutil::printArray((uint8_t*)p_data, length);
+//		BLEutil::printArray((uint8_t*)msg, sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t));
 
 		uint16_t major = msg->beaconMsg.major;
 		uint16_t minor = msg->beaconMsg.minor;
@@ -148,20 +146,16 @@ void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		LOGi("send event %s", evt == EVT_POWER_ON ? "EVT_POWER_ON" : "EVT_POWER_OFF");
 
 		device_mesh_message_t msg;
-		uint8_t targetAddress[BLE_GAP_ADDR_LEN] = {0x03, 0x24, 0x79, 0x56, 0xD6, 0xC6};
-		memcpy(msg.targetAddress, &targetAddress, BLE_GAP_ADDR_LEN);
+		uint8_t targetAddress[BLE_GAP_ADDR_LEN] = BROADCAST_ADDRESS;
+		memcpy(msg.header.targetAddress, &targetAddress, BLE_GAP_ADDR_LEN);
 		msg.evtMsg.event = evt;
 //		memset(msg.evtMsg.data, 0, sizeof(msg.evtMsg.data));
 //		memcpy(msg.evtMsg.data, p_data, length);
 
-		CMesh::getInstance().send(EVENT_CHANNEL, (uint8_t*)&msg, 7 + 2 + length);
+		CMesh::getInstance().send(DATA_CHANNEL, (uint8_t*)&msg, 7 + 2 + length);
 
 		_log(INFO, "\r\n");
 
-//		EventMeshPackage msg;
-//		msg.evt = evt;
-//		msg.p_data = (uint8_t*)p_data;
-//		CMesh::getInstance().send(EVENT_CHANNEL, (uint8_t*)&msg, length + 1);
 		break;
 	}
 	default:
@@ -169,32 +163,27 @@ void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 }
 
+void MeshControl::send(uint8_t handle, void* p_data, uint8_t length) {
 
+	if (!isValidMessage(p_data, length)) {
+		return;
+	}
 
-void MeshControl::sendPwmValue(uint8_t* address, uint8_t value) {
+	if (isBroadcast(p_data)) {
+		// received broadcast message
+		LOGd("received broadcast, send into mesh and handle directly");
+		CMesh::getInstance().send(handle, p_data, length);
+		BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 
-	device_mesh_message_t msg = {};
-//	uint8_t targetAddress[BLE_GAP_ADDR_LEN] = {};
-//	memcpy(msg.targetAddress, &targetAddress, BLE_GAP_ADDR_LEN);
+	} else if (!isMessageForUs(p_data)) {
+		// message is not for us, send it into mesh
+		LOGd("send it into mesh ...");
+		CMesh::getInstance().send(handle, p_data, length);
 
-	memset(msg.payload, 0, sizeof(msg.payload));
-	msg.powerMsg.pwmValue = value;
-
-	CMesh::getInstance().send(DATA_CHANNEL, (uint8_t*)&msg, sizeof(msg));
-
-}
-
-void MeshControl::sendIBeaconMessage(uint8_t* address, uint16_t major, uint16_t minor, ble_uuid128_t uuid, int8_t rssi) {
-
-	device_mesh_message_t msg = {};
-//	uint8_t targetAddress[BLE_GAP_ADDR_LEN] = {};
-//	memcpy(msg.targetAddress, &targetAddress, BLE_GAP_ADDR_LEN);
-
-	msg.beaconMsg.major = major;
-	msg.beaconMsg.minor = minor;
-	memcpy(&msg.beaconMsg.uuid, &uuid, sizeof(uuid));
-	msg.beaconMsg.rssi = rssi;
-
-	CMesh::getInstance().send(DATA_CHANNEL, (uint8_t*)&msg, sizeof(msg));
+	} else {
+		// message is for us, handle directly
+		LOGd("message is for us, handle directly");
+		BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+	}
 
 }

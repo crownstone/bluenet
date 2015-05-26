@@ -19,7 +19,6 @@
 #include "services/cs_PowerService.h"
 
 #include "drivers/cs_Serial.h"
-#include "util/cs_Utils.h"
 #include "util/cs_BleError.h"
 
 extern "C" {
@@ -132,12 +131,8 @@ void Storage::readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uin
 	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, size, 0) );
 
 #ifdef PRINT_ITEMS
-	uint8_t* ptr = (uint8_t*)item;
-	_log(INFO, "getStruct: ");
-	for (int i = 0; i < size; i++) {
-		_log(INFO, "%X ", ptr[i]);
-	}
-	_log(INFO, "\r\n");
+	_log(INFO, "get struct: \r\n");
+	BLEutil::printArray((uint8_t*)item, size);
 #endif
 
 }
@@ -146,11 +141,6 @@ void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, ui
 	pstorage_handle_t block_handle;
 
 #ifdef PRINT_ITEMS
-//	uint8_t* ptr = (uint8_t*)item;
-//	for (int i = 0; i < size; i++) {
-//		_log(INFO, "%X ", ptr[i]);
-//	}
-//	_log(INFO, "\r\n");
 	_log(INFO, "set struct: \r\n");
 	BLEutil::printArray((uint8_t*)item, size);
 #endif
@@ -186,11 +176,8 @@ void Storage::setString(std::string value, char* target) {
 void Storage::getString(char* value, std::string& target, std::string default_value) {
 
 #ifdef PRINT_ITEMS
-	_log(INFO, "get string (raw) : ");
-	for (int i = 0; i < MAX_STRING_SIZE; i++) {
-		_log(INFO, "%X ", value[i]);
-	}
-	_log(INFO, "\r\n");
+	_log(INFO, "get string (raw): \r\n");
+	BLEutil::printArray((uint8_t*)value, MAX_STRING_SIZE);
 #endif
 
 	target = std::string(value);

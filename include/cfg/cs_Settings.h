@@ -44,6 +44,7 @@ class Settings {
 private:
 	Settings() {
 		Storage::getInstance().getHandle(PS_ID_CONFIGURATION, _storageHandle);
+		LOGi("crate: handle: module_id: %d, block_id: %d", _storageHandle.module_id, _storageHandle.block_id);
 		loadPersistentStorage();
 	};
 

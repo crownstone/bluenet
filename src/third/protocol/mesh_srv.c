@@ -603,6 +603,8 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
         trickle_rx_inconsistent(&ch_md->trickle);
     }
 
+    _log(INFO, "\r\n");
+
     /* new version */
     uint16_t separation = (version >= ch_md->version_number)?
         (version - ch_md->version_number) :
@@ -612,7 +614,7 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
         (ch_md->version_number >= MESH_VALUE_LOLLIPOP_LIMIT && separation < (UINT16_MAX - MESH_VALUE_LOLLIPOP_LIMIT)/2) ||
         uninitialized)
     {
-//        LOGd("UPDATE_VAL: old version: %d, new version: %d", ch_md->version_number, version);
+        LOGd("UPDATE_VAL: old version: %d, new version: %d", ch_md->version_number, version);
 
         /* update value */
         mesh_srv_char_val_set(handle, data, data_len, false);
@@ -664,7 +666,7 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
 
         if (conflicting)
         {
-//            LOGd("CONFLICTING_VAL: old version: %d, new version: %d", ch_md->version_number, version);
+            LOGd("CONFLICTING_VAL: old version: %d, new version: %d", ch_md->version_number, version);
 
             TICK_PIN(7);
             rbc_mesh_event_t conflicting_evt;

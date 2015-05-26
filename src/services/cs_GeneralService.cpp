@@ -17,7 +17,7 @@
 #include "drivers/cs_RTC.h"
 //
 #if CHAR_MESHING==1
-#include <protocol/cs_Mesh.h>
+#include <protocol/cs_MeshControl.h>
 #endif
 
 #include <cfg/cs_Settings.h>
@@ -216,7 +216,7 @@ void GeneralService::addMeshCharacteristic() {
 			LOGi(MSG_MESH_MESSAGE_WRITE);
 
 //			MeshMessage msg;
-			LOGi("len: %d", _meshCharacteristic->getValueLength());
+//			LOGi("len: %d", _meshCharacteristic->getValueLength());
 //			msg.assign(_meshCharacteristic->getValue(), _meshCharacteristic->getValueLength());
 
 			uint8_t handle = _meshMessage->handle();
@@ -228,8 +228,11 @@ void GeneralService::addMeshCharacteristic() {
 //			LOGi("len: %d", length);
 //			BLEutil::printArray(p_data, length);
 
-			CMesh &mesh = CMesh::getInstance();
-			mesh.send(handle, p_data, length);
+//			CMesh &mesh = CMesh::getInstance();
+//			mesh.send(handle, p_data, length);
+
+			MeshControl::getInstance().send(handle, p_data, length);
+
 //			mesh.send(handle, val);
 		});
 

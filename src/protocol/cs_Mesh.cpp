@@ -47,7 +47,7 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 
 	switch (evt->event_type)
 	{
-		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
+//		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
 		case RBC_MESH_EVENT_TYPE_NEW_VAL:
 		case RBC_MESH_EVENT_TYPE_UPDATE_VAL: {
 
@@ -133,6 +133,7 @@ void CMesh::send(uint8_t handle, void* p_data, uint8_t length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
 	LOGi("send ch: %d, len: %d", handle, length);
+	BLEutil::printArray((uint8_t*)p_data, length);
 	APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
 }
 
