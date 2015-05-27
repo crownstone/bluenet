@@ -48,7 +48,7 @@ The different other software tools and online resources have been mentioned abov
 * [Crownstone Android app](https://play.google.com/store/apps/details?id=nl.dobots.CrownStone)
 * [Crownstone app source](https://github.com/dobots/crownstone-app)
 * [Crownstone USB image](https://github.com/dobots/crownstone-image)
-* [Crownstone SDK manual](https://docs.google.com/a/almende.org/document/d/1uJ83c0rLC_swX-cVFDl0UyIFc9_81ccfRLK2vJJF1VE/edit)
+* [Crownstone SDK manual](https://docs.google.com/document/d/1W-UfzLD4jOh_F5iSbDKcMxwTOVEVfT2QVTTjQlZCXrc/edit)
 
 If you have any problems that are not solved by documentation, please ask them as a GitHub [issue](https://github.com/dobots/bluenet/issues).
 In that case everybody can profit from things that are currently incorrectly formulated, not yet formulated, or need

@@ -4,7 +4,7 @@
 
 Rather than going through this page, it is also possible to go through the SDK, which has a nice installation manual. It has been test driven by around 50 students, so it pretty thorougly captures most of the edge cases:
 
-* [Crownstone SDK manual](https://docs.google.com/a/almende.org/document/d/1uJ83c0rLC_swX-cVFDl0UyIFc9_81ccfRLK2vJJF1VE/edit)
+* [Crownstone SDK manual](https://docs.google.com/document/d/1W-UfzLD4jOh_F5iSbDKcMxwTOVEVfT2QVTTjQlZCXrc/edit)
 
 ## Prerequisites
 
