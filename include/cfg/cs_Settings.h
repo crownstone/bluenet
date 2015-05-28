@@ -257,7 +257,7 @@ public:
 			LOGd("Read wifi settings. Does reset it.");
 			// copy string, because we clear it on read
 			std::string str;
-			if (_wifiSettings != "") {
+			if (_wifiSettings == "") {
 				str = "{}";
 			} else {
 				str = _wifiSettings;
