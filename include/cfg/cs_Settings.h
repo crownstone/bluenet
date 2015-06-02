@@ -137,7 +137,8 @@ public:
 		}
 		case CONFIG_IBEACON_UUID: {
 			if (length != 16) {
-				LOGw("Expected 16 bytes for UUID");
+				LOGw("Expected 16 bytes for UUID, received: %d", length);
+				return;
 			}
 			Storage::setArray<uint8_t>(payload, _storageStruct.beacon.uuid.uuid128, 16);
 			if (persistent) {
@@ -150,6 +151,7 @@ public:
 		case CONFIG_IBEACON_RSSI: {
 			if (length != 1) {
 				LOGw("We do not account for a value of more than 255");
+				return;
 			}
 			int8_t rssi = payload[0];
 			LOGi("Set beacon rssi to %d", rssi);
