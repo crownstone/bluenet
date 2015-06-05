@@ -13,16 +13,17 @@ extern "C" {
 #include <pstorage.h>
 #include <third/protocol/rbc_mesh.h>
 
-/**Function for dispatching a BLE stack event to all modules with a BLE stack event handler.
+#include <drivers/cs_Serial.h>
+
+/**Function for dispatching a system event (not a BLE event) to all modules with a system event handler. This can also
+ * be events related to the radio, for example the NRF_EVT_RADIO_BLOCKED (4) and NRF_EVT_RADIO_SESSION_IDLE (7) events
+ * that are defined for the timeslot API.
  *
- * This function is called from the scheduler in the main loop after a BLE stack
- *   event has been received.
- *
- * @p_ble_evt   Bluetooth stack event.
+ * @sys_evt   System event.
  */
 void sys_evt_dispatch(uint32_t sys_evt) {
 
-	//LOGi("Sys evt dispatch");
+	LOGi("Sys evt dispatch: %i", sys_evt);
 
 	pstorage_sys_event_handler(sys_evt);
 

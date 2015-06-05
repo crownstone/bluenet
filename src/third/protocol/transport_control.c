@@ -80,7 +80,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* minimum time to be left in the timeslot for there to be any point in ordering the radio */
 #define RADIO_SAFETY_TIMING_US      (500)
-//#define RSSI_ENABLE
 
 static uint8_t radio_rssi;
 static uint8_t tx_data[(PACKET_DATA_MAX_LEN + PACKET_DATA_POS) * PACKET_MAX_CHAIN_LEN];
@@ -158,7 +157,7 @@ static void search_callback(uint8_t* data)
 {
     SET_PIN(PIN_RX);
 
-#ifdef RSSI_ENABLE
+#if RSSI_ENABLE==1
     // By having the RSSI here, we almost always get a value, if we put it down below, we hardly ever get one. Radio closed there?
     radio_rssi = radio_rssi_get();
 //    LOGi("RSSI value: %i", radio_rssi); // I think having a log in this function leads to messed up timings, resulting in a softdevice assertion error breakpoint.

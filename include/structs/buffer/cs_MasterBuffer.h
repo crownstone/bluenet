@@ -11,6 +11,8 @@
 #include <common/cs_Types.h>
 #include "drivers/cs_Serial.h"
 
+#include <cstring>
+
 /* size of the header used for long write */
 #define DEFAULT_OFFSET 6
 

@@ -191,7 +191,7 @@ void Crownstone::configStack() {
 	_stack->setMaxConnectionInterval(32);
 	_stack->setConnectionSupervisionTimeout(400);
 	_stack->setSlaveLatency(10);
-	_stack->setAdvertisingInterval(80);
+	_stack->setAdvertisingInterval(1600); //80
 	_stack->setAdvertisingTimeoutSeconds(0);
 }
 
@@ -282,8 +282,10 @@ void Crownstone::setup() {
 		//NRF51_GPIO_OUTSET = 1 << PIN_LED;
 		// first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
 		// be neater about it... we do not need to stop, only after a disconnect we do...
+#if RSSI_ENABLE==1
 		sd_ble_gap_rssi_stop(conn_handle);
 		sd_ble_gap_rssi_start(conn_handle);
+#endif
 
 #if BOARD==PCA10001 || BOARD==PCA10000
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);

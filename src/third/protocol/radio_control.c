@@ -55,8 +55,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define RADIO_EVENT(evt)  (NRF_RADIO->evt == 1)
 
-#define RSSI_ENABLE
-
 /**
 * Internal enum denoting radio state.
 */
@@ -392,7 +390,7 @@ void radio_init(uint32_t access_address)
 	/* Reset all states in the radio peripheral */
     NRF_RADIO->POWER            = ((RADIO_POWER_POWER_Disabled << RADIO_POWER_POWER_Pos) & RADIO_POWER_POWER_Msk);
     NRF_RADIO->POWER            = ((RADIO_POWER_POWER_Enabled  << RADIO_POWER_POWER_Pos) & RADIO_POWER_POWER_Msk);
-	
+
 
 
     /* Set radio configuration parameters */
@@ -535,7 +533,7 @@ void radio_order(radio_event_t* radio_event)
             }
         }
     }
-#ifdef RSSI_ENABLE
+#if RSSI_ENABLE==1
     // if we do this always, we never get a invalid rssi value (3), it also does not mess up the tx.
 //    LOGi("Enabling RSSI"); // this causes a breakpoint. No UART in the radio loop appearently, messes up the timings.
     radio_rssi_enable();

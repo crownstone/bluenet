@@ -42,6 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "timer_control.h"
 #include "transport_control.h"
 
+#include "drivers/cs_Serial.h"
+
 #include "nrf_sdm.h"
 //#include "app_error.h"
 #include "nrf_assert.h"
@@ -55,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define USE_SWI_FOR_PROCESSING          (1)
 
+//#define MESH_MAKE_ASYNC                 (1)
 
 #define TIMESLOT_END_SAFETY_MARGIN_US   (200)
 #define TIMESLOT_SLOT_LENGTH            (100000)
@@ -278,6 +281,7 @@ void ts_sd_event_handler(void)
                 timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
                 break;
             default:
+                LOGe("An unanticipated event. Will lead to invalid state!");
                 APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
         }
     }
@@ -310,6 +314,18 @@ void ts_sys_evt_handler(uint32_t evt)
     }
 }
 
+#if MESH_MAKE_ASYNC
+static bool g_end_timer_triggered = false;
+/**
+* @brief Timeslot end guard timer callback. Attempts to extend the timeslot.
+*/
+static void end_timer_handler(void)
+{
+   g_end_timer_triggered = true;
+    /* Fake a radio IRQ, making the SD call radio_signal_callback(), letting us end timeslot */
+   NVIC_SetPendingIRQ(RADIO_IRQn);
+}
+#else
 /**
 * @brief Timeslot end guard timer callback. Attempts to extend the timeslot.
 */
@@ -323,8 +339,7 @@ static void end_timer_handler(void)
                                 TIMESLOT_SLOT_LENGTH + noise_val * 50);*/
     timeslot_order_earliest(((g_timeslot_length > 100000)? 100000 : g_timeslot_length), true);
 }
-
-
+#endif
 
 #if USE_SWI_FOR_PROCESSING
 
@@ -375,10 +390,16 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
 
             g_timeslot_length = g_next_timeslot_length;
 
+            //https://devzone.nordicsemi.com/question/29359/rbc-mesh-timer-0-usage/
+#if MESH_MAKE_ASYNC
+            g_timeslot_end_timer =
+                timer_order_cb(g_timeslot_length - TIMESLOT_END_SAFETY_MARGIN_US,
+                    end_timer_handler);
+#else
             g_timeslot_end_timer =
                 timer_order_cb_sync_exec(g_timeslot_length - TIMESLOT_END_SAFETY_MARGIN_US,
                     end_timer_handler);
-
+#endif
 
             /* attempt to extend our time right away */
             timeslot_extend(g_negotiate_timeslot_length);
@@ -453,6 +474,19 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
             APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
     }
 
+#if MESH_MAKE_ASYNC
+    if (g_end_timer_triggered)
+    {
+        uint32_t length_us = ((g_timeslot_length > 100000)? 100000 : g_timeslot_length);
+        radio_request_earliest.params.earliest.length_us = length_us;
+        g_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_REQUEST_AND_END;
+        g_ret_param.params.request.p_next = &radio_request_earliest;
+
+        g_next_timeslot_length = length_us;
+
+        g_end_timer_triggered = false;
+    }
+#endif
 
     g_is_in_callback = false;
     if (g_ret_param.callback_action == NRF_RADIO_SIGNAL_CALLBACK_ACTION_EXTEND)
@@ -510,6 +544,7 @@ void timeslot_order_earliest(uint32_t length_us, bool immediately)
 
         if (!g_is_in_callback)
         {
+            LOGi("Schedule new request");
             sd_radio_request(&radio_request_earliest);
         }
     }

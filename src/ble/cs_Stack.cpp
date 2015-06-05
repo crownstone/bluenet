@@ -47,6 +47,7 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	shutdown();
 }
 
+// called by softdevice handler through ble_evt_dispatch on any event that passes through mesh and is not write
 extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {
 	Nrf51822BluetoothStack::getInstance().on_ble_evt((ble_evt_t *)p_event_data);
 }
@@ -54,21 +55,24 @@ extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {
 // called by softdevice handler on a ble event
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
+	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
+
 #if CHAR_MESHING==1
-	//  pass the incoming BLE event to the mesh framework
+	//  pass the incoming BLE event to the mesh framework, why also here?
 	BLE_CALL(rbc_mesh_ble_evt_handler, (p_ble_evt));
 #endif
 
 	// Only dispatch functions to the scheduler which might take long to execute, such as ble write functions
 	// and handle other ble events directly in the interrupt. Otherwise app scheduler buffer might overflow fast
 	switch (p_ble_evt->header.evt_id) {
+	case BLE_GAP_EVT_CONNECTED: // add also connected to scheduler for now (outside of IRQ)
+		break;
 	case BLE_GATTS_EVT_WRITE:
 		// let the scheduler execute the event handle function
 		BLE_CALL(app_sched_event_put, (p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len, ble_evt_handler));
 		break;
 	default:
 		ble_evt_handler(p_ble_evt, 0);
-//		Nrf51822BluetoothStack::getInstance().on_ble_evt(p_ble_evt);
 		break;
 	}
 }
@@ -543,9 +547,9 @@ bool Nrf51822BluetoothStack::isScanning() {
 //}
 
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
-	//	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
-	//		LOGd("on_ble_event: %X", p_ble_evt->header.evt_id);
-	//	}
+	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
+		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
+	}
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
 		on_connected(p_ble_evt);
@@ -559,7 +563,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 		_user_mem_block.len = size+6;
 		_user_mem_block.p_mem = buffer-6;
-        BLE_CALL(sd_ble_user_mem_reply, (getConnectionHandle(), &_user_mem_block));
+		BLE_CALL(sd_ble_user_mem_reply, (getConnectionHandle(), &_user_mem_block));
 
 		break;
 	}
