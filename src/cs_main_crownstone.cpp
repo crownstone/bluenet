@@ -191,7 +191,7 @@ void Crownstone::configStack() {
 	_stack->setMaxConnectionInterval(32);
 	_stack->setConnectionSupervisionTimeout(400);
 	_stack->setSlaveLatency(10);
-	_stack->setAdvertisingInterval(1600); //80
+	_stack->setAdvertisingInterval(80);
 	_stack->setAdvertisingTimeoutSeconds(0);
 }
 
@@ -383,7 +383,7 @@ void Crownstone::run() {
 }
 
 void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	LOGi("handleEvent: %d", evt);
+//	LOGi("handleEvent: %d", evt);
 	switch(evt) {
 #if IBEACON==1
 	case CONFIG_IBEACON_MAJOR: {

@@ -16,7 +16,7 @@ void EventDispatcher::dispatch(uint16_t evt) {
 }
 
 void EventDispatcher::dispatch(uint16_t evt, void* p_data, uint16_t length) {
-	LOGi("dispatch event: %d", evt);
+//	LOGi("dispatch event: %d", evt);
 	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] != NULL &&
 			(_listeners[i]->getType() == evt || _listeners[i]->getType() == EVT_ALL))
@@ -27,7 +27,7 @@ void EventDispatcher::dispatch(uint16_t evt, void* p_data, uint16_t length) {
 }
 
 bool EventDispatcher::addListener(EventListener *listener) {
-	LOGi("addListener for event: %d", listener->getType());
+//	LOGi("addListener for event: %d", listener->getType());
 	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] == NULL) {
 			_listeners[i] = listener;
@@ -38,7 +38,7 @@ bool EventDispatcher::addListener(EventListener *listener) {
 }
 
 void EventDispatcher::removeListener(EventListener *listener) {
-	LOGi("remove listener");
+//	LOGi("remove listener");
 	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] == listener) {
 			_listeners[i] = NULL;

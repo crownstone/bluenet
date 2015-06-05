@@ -131,6 +131,7 @@ public:
 			if (length != 16) {
 				LOGw("Expected 16 bytes for UUID");
 			}
+			LOGi("set uuid to ...");
 			Storage::setArray<uint8_t>(payload, _storageStruct.beacon.uuid.uuid128, 16);
 			savePersistentStorage();
 

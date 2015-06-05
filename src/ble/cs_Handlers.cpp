@@ -23,7 +23,7 @@ extern "C" {
  */
 void sys_evt_dispatch(uint32_t sys_evt) {
 
-	LOGi("Sys evt dispatch: %i", sys_evt);
+//	LOGi("Sys evt dispatch: %i", sys_evt);
 
 	pstorage_sys_event_handler(sys_evt);
 
