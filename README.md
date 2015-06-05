@@ -2,6 +2,11 @@
 
 This project aims at a wireless network with BLE nodes that use their mutual signal strengths to build up a network with their relative locations. This can be used later by someone carrying a smartphone to establish their location indoors. Everybody say that they can do it, but very few solutions are actually out there. Let's hope we can change that.
 
+## DoBeacon
+
+The DoBeacon is a simplified Crownstone which adheres to the iBeacon specification. If you have bought DoBeacons as a
+developer we would kindly like to refer you to our [DoBots SDK Manual](https://docs.google.com/document/d/17zn5TKdNAjYbNbA6akbSzFV_WQmOnvcjDFT3bwIvGzo/edit#). That document explains how to set a different signal strength, advertisement interval, etc.
+
 # Communication
 
 You can best communicate bugs and feature requests via the [issue tracker](https://github.com/dobots/bluenet/issues). For all other questions, please, feel free to ask us anything on [muut](https://muut.com/dobots).
