@@ -43,8 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Softdevice.h>
 
-#include <drivers/cs_Serial.h>
-
 /* Packet related constants */
 #define MESH_PACKET_HANDLE_LEN          (1)
 #define MESH_PACKET_VERSION_LEN         (2)
@@ -534,21 +532,21 @@ uint32_t mesh_srv_char_md_get(mesh_metadata_char_t* metadata)
     return NRF_SUCCESS;
 }
 
-uint32_t mesh_srv_get_next_processing_time(uint32_t* time)
+uint32_t mesh_srv_get_next_processing_time(uint64_t* time)
 {
     if (!is_initialized)
     {
         return NRF_ERROR_INVALID_STATE;
     }
     bool anything_to_process = false;
-    *time = UINT32_MAX;
+    *time = UINT64_MAX;
 
     for (uint8_t i = 0; i < g_mesh_service.value_count; ++i)
     {
         if ((g_mesh_service.char_metadata[i].flags & (1 << MESH_MD_FLAGS_USED_POS)) == 0)
             continue;
 
-        uint32_t temp_time = trickle_next_processing_get(&g_mesh_service.char_metadata[i].trickle);
+        uint64_t temp_time = trickle_next_processing_get(&g_mesh_service.char_metadata[i].trickle);
 
         if (temp_time < *time)
         {
@@ -612,8 +610,6 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
         (ch_md->version_number >= MESH_VALUE_LOLLIPOP_LIMIT && separation < (UINT16_MAX - MESH_VALUE_LOLLIPOP_LIMIT)/2) ||
         uninitialized)
     {
-//        LOGd("UPDATE_VAL: old version: %d, new version: %d", ch_md->version_number, version);
-
         /* update value */
         mesh_srv_char_val_set(handle, data, data_len, false);
         ch_md->flags |= (1 << MESH_MD_FLAGS_INITIALIZED_POS);
@@ -661,8 +657,6 @@ uint32_t mesh_srv_packet_process(packet_t* packet)
 
         if (conflicting)
         {
-//            LOGd("CONFLICTING_VAL: old version: %d, new version: %d", ch_md->version_number, version);
-
             TICK_PIN(7);
             rbc_mesh_event_t conflicting_evt;
 

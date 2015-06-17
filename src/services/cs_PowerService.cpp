@@ -22,21 +22,23 @@
 #include <drivers/cs_Timer.h>
 #include <drivers/cs_LPComp.h>
 
+#include <protocol/cs_Mesh.h>
+#include <protocol/cs_MeshControl.h>
 #include <cfg/cs_Settings.h>
 
 using namespace BLEpp;
 
 PowerService::PowerService() :
-								_pwmCharacteristic(NULL),
-								_sampleCurrentCharacteristic(NULL),
-								_currentConsumptionCharacteristic(NULL),
-								_currentCurveCharacteristic(NULL),
-								_currentLimitCharacteristic(NULL),
-								_currentCurve(NULL),
-								_currentLimitVal(0),
-								_adcInitialized(false),
-								_currentLimitInitialized(false),
-								_samplingType(0)
+		_pwmCharacteristic(NULL),
+		_sampleCurrentCharacteristic(NULL),
+		_currentConsumptionCharacteristic(NULL),
+		_currentCurveCharacteristic(NULL),
+		_currentLimitCharacteristic(NULL),
+		_currentCurve(NULL),
+		_currentLimitVal(0),
+		_adcInitialized(false),
+		_currentLimitInitialized(false),
+		_samplingType(0)
 {
 
 	setUUID(UUID(POWER_UUID));

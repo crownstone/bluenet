@@ -19,7 +19,7 @@ extern "C" {
 }
 #endif
 
-#include "ble_stack_handler_types.h"
+#include "sd_common/ble_stack_handler_types.h"
 
 using namespace BLEpp;
 
@@ -241,6 +241,25 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon) {
 	//	uint8_t flags = BLE_GAP_ADV_FLAG_LE_GENERAL_DISC_MODE | BLE_GAP_ADV_FLAG_LE_BR_EDR_CONTROLLER
 	//			| BLE_GAP_ADV_FLAG_LE_BR_EDR_HOST;
 
+	/*
+	 * 31 bytes total payload
+	 *
+	 * 1 byte per element for the length of it's data.
+	 * in this case, 4 elements -> 4 bytes
+	 *
+	 * => 27 bytes available payload
+	 *
+	 * 3 bytes for major (1 byte for type, 2 byte for data)
+	 * 3 bytes for minor (1 byte for type, 2 byte for data)
+	 * 17 bytes for UUID (1 byte for type, 16 byte for data)
+	 * 2 bytes for rssi (1 byte for type, 1 byte for data)
+	 *
+	 * -> 2 bytes left => FULL
+	 *
+	 * Note: each element has an overhead of 2 bytes. Since there
+	 * are only 2 bytes left, there is no more space left for additional
+	 * data
+	 */
 	ble_gap_adv_params_t adv_params;
 
 	adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
@@ -266,6 +285,17 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon) {
 	advdata.flags.p_data = &flags;
 	advdata.p_manuf_specific_data = &manufac;
 
+	/*
+	 * 31 bytes total payload
+	 *
+	 * 1 byte per element for the length of it's data.
+	 * in this case, 1 element -> 1 byte
+	 *
+	 * 30 bytes of available payload
+	 *
+	 * 1 byte for name type
+	 * -> 29 bytes left for name
+	 */
 	ble_advdata_t scan_resp;
 	memset(&scan_resp, 0, sizeof(scan_resp));
 
@@ -343,7 +373,8 @@ void Nrf51822BluetoothStack::startAdvertising() {
 	/*
 	 * 31 bytes total payload
 	 *
-	 * 1 byte per element. in this case, 3 elements -> 3 bytes
+	 * 1 byte per element for the length of it's data.
+	 * in this case, 3 elements -> 3 bytes
 	 *
 	 * => 28 bytes available payload
 	 *
@@ -383,7 +414,8 @@ void Nrf51822BluetoothStack::startAdvertising() {
 	/*
 	 * 31 bytes total payload
 	 *
-	 * 1 byte per element. in this case, 1 element -> 1 bytes
+	 * 1 byte per element for the length of it's data.
+	 * in this case, 1 element -> 1 byte
 	 *
 	 * 30 bytes of available payload
 	 *

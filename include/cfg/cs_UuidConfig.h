@@ -33,9 +33,9 @@ enum PowerCharacteristicsIDs {
 
 enum GeneralCharacteristicsIDs {
 	TEMPERATURE_UUID                        = 0x1,
-	CHANGE_NAME_UUID                        = 0x2,
-	DEVICE_TYPE_UUID                        = 0x3,
-	ROOM_UUID                               = 0x4,
+//	CHANGE_NAME_UUID                        = 0x2,
+//	DEVICE_TYPE_UUID                        = 0x3,
+//	ROOM_UUID                               = 0x4,
 	RESET_UUID                              = 0x5,
 	MESH_UUID                               = 0x6,
 	SET_CONFIGURATION_UUID                  = 0x7,

@@ -121,7 +121,7 @@ void GPIOTE_IRQHandler(void)
 			value = rng.getRandom8();
 //			led_config(i + 1, value);
 			LOGi("1");
-			mesh.send(i + 1, value);
+//			mesh.send(i + 1, value);
 		}
 	}
 }
@@ -206,8 +206,12 @@ void Crownstone::configDrivers() {
 
 	PWM::getInstance().init(&pwm_config);
 
-#if BOARD==PCA10001 || BOARD==PCA10000
+#if BOARD==PCA10001
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
+#endif
+#if BOARD==PCA10000
+	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
+	nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
 }
 
@@ -287,9 +291,12 @@ void Crownstone::setup() {
 		sd_ble_gap_rssi_start(conn_handle);
 #endif
 
-#if BOARD==PCA10001 || BOARD==PCA10000
+#if BOARD==PCA10001
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
+//#if BOARD==PCA10000
+//		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
+//#endif
 	});
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
@@ -298,9 +305,12 @@ void Crownstone::setup() {
 		// of course this is not nice, but dirty! we immediately start advertising automatically after being
 		// disconnected. but for now this will be the default behaviour.
 
-#if BOARD==PCA10001 || BOARD==PCA10000
+#if BOARD==PCA10001
 		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
+//#if BOARD==PCA10000
+//		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
+//#endif
 
 		bool wasScanning = _stack->isScanning();
 		_stack->stopScanning();
@@ -383,31 +393,45 @@ void Crownstone::run() {
 }
 
 void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+
 //	LOGi("handleEvent: %d", evt);
+
+	bool restartAdvertising = false;
 	switch(evt) {
+
 #if IBEACON==1
 	case CONFIG_IBEACON_MAJOR: {
 		_beacon->setMajor(*(uint32_t*)p_data);
+		restartAdvertising = true;
 		break;
 	}
 	case CONFIG_IBEACON_MINOR: {
 		_beacon->setMinor(*(uint32_t*)p_data);
+		restartAdvertising = true;
 		break;
 	}
 	case CONFIG_IBEACON_UUID: {
 		_beacon->setUUID(*(ble_uuid128_t*)p_data);
+		restartAdvertising = true;
 		break;
 	}
 	case CONFIG_IBEACON_RSSI: {
 		_beacon->setRSSI(*(int8_t*)p_data);
+		restartAdvertising = true;
 		break;
 	}
 #endif
+
+	}
+
+	if (restartAdvertising && _stack->isAdvertising()) {
+		_stack->stopAdvertising();
+		_stack->startIBeacon(_beacon);
 	}
 }
 
 void on_exit(void) {
-	LOGi("PROGRAM TERMINATED");
+	LOGf("PROGRAM TERMINATED");
 }
 
 /**********************************************************************************************************************

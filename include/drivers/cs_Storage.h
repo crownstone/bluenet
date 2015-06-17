@@ -12,15 +12,14 @@
 
 
 #include "drivers/cs_Serial.h"
+#include "util/cs_Utils.h"
 
 extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
 	#include "pstorage_platform.h"
-	#include "pstorage.h"
+	#include "app_common/pstorage.h"
 	#include "ble_types.h"
 }
-
-//#include <common/cs_Types.h>
 
 /* enable additional debug output */
 //#define PRINT_ITEMS
@@ -347,11 +346,8 @@ public:
 		static void getArray(T* src, T* dest, T* default_value, uint16_t length) {
 
 #ifdef PRINT_ITEMS
-			_log(INFO, "raw value: ");
-			for (int i = 0; i < length; ++i) {
-				_log(INFO, "%X", src[i]);
-			}
-			_log(INFO, "\r\n");
+			_log(INFO, "raw value: \r\n");
+			BLEutil::printArray((uint8_t*)src, length * sizeof(T));
 #endif
 
 			bool isUnassigned = true;

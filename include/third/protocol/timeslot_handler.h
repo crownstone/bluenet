@@ -135,8 +135,11 @@ void timeslot_queue_async_event(async_event_t* evt);
 uint32_t timeslot_get_remaining_time(void);
 
 /** @brief returns the timestamp the timeslot is set to end at */
-uint32_t timeslot_get_end_time(void);
+uint64_t timeslot_get_end_time(void);
 
 void rbc_mesh_SWI0_IRQHandler(void);
+
+void timeslot_handler_pause();
+void timeslot_handler_resume();
 
 #endif /* _TIMESLOT_HANDLER_H__ */

@@ -40,10 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "nrf51.h"
 #include "ble.h"
 
+#include "mesh_srv.h"
+
 #define RBC_MESH_ACCESS_ADDRESS_BLE_ADV  (0x8E89BED6)
 #define RBC_MESH_ADV_INT_MIN             (5)
 #define RBC_MESH_ADV_INT_MAX             (60000)
-#define RBC_MESH_VALUE_MAX_LEN           (28)
+#define RBC_MESH_VALUE_MAX_LEN           (MAX_VALUE_LENGTH)
 /**
 * @brief Rebroadcast value handle type
 *
@@ -259,7 +261,7 @@ uint32_t rbc_mesh_channel_get(uint8_t* ch);
 /**
 * @brief Get the amount of allocated handle-value pairs
 *
-* @param[out] handle_count Pointer location to put handle count in 
+* @param[out] handle_count Pointer location to put handle count in
 *
 * @return NRF_SUCCESS the value was fetched successfully
 * @return NRF_ERROR_INVALID_STATE the framework has not been initialized
@@ -281,7 +283,7 @@ uint32_t rbc_mesh_handle_count_get(uint8_t* handle_count);
 * @param[out] origin_addr BLE GAP address of the node that first broadcasted
 *   the current version of this value. Set to NULL if the address is not of
 *   interest.
-* 
+*
 * @return NRF_SUCCESS the value has been successfully fetched.
 * @return NRF_ERROR_INVALID_STATE the framework has not been initialized.
 * @return NRF_ERROR_INVALID_ADDR the handle is outside the range provided
@@ -385,6 +387,20 @@ void rbc_mesh_sys_evt_handler(uint32_t evt);
 * @param evt Framework generated event presented to the application.
 */
 void rbc_mesh_event_handler(rbc_mesh_event_t* evt);
+
+/**
+ * Pause the mesh code.
+ *
+ * Note: call this from the application thread. Do not call this from an
+ * interrupt handler.
+ *
+ * the function waits for the NRF_EVT_RADIO_SESSION_CLOSED
+ * sys event to be received which will be blocked, resulting in a dead lock, if
+ * this function is called within an interrupt handler
+ */
+void rbc_mesh_pause();
+
+void rbc_mesh_resume();
 
 #endif /* _RBC_MESH_H__ */
 

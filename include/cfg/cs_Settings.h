@@ -16,6 +16,7 @@
 #include <events/cs_EventDispatcher.h>
 
 #include <ble/cs_UUID.h>
+#include <drivers/cs_Storage.h>
 
 /* Configuration types
  *
@@ -57,9 +58,10 @@ public:
 		return instance;
 	}
 
-	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
-		uint8_t length = streamBuffer->length();
-		uint8_t* payload = streamBuffer->payload();
+	//	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
+	void writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool persistent = true) {
+		//		uint8_t length = streamBuffer->length();
+		//		uint8_t* payload = streamBuffer->payload();
 
 		switch(type) {
 		case CONFIG_NAME_UUID: {
@@ -67,8 +69,6 @@ public:
 			std::string str = std::string((char*)payload, length);
 			LOGd("Set name to: %s", str.c_str());
 			setBLEName(str);
-//			Storage::setString(str, _storageStruct.device_name);
-//			savePersistentStorage();
 			break;
 		}
 		case CONFIG_FLOOR_UUID: {
@@ -80,7 +80,9 @@ public:
 			uint8_t floor = payload[0];
 			LOGi("Set floor to %i", floor);
 			Storage::setUint8(floor, _storageStruct.floor);
-			savePersistentStorage();
+			if (persistent) {
+				savePersistentStorage();
+			}
 			break;
 		}
 		case CONFIG_NEARBY_TIMEOUT_UUID: {
@@ -91,8 +93,10 @@ public:
 			uint16_t counts = ((uint16_t*)payload)[0]; //TODO: other byte order?
 			LOGd("setNearbyTimeout(%i)", counts);
 			Storage::setUint16(counts, _storageStruct.nearbyTimeout);
-			savePersistentStorage();
-	//		setNearbyTimeout(counts);
+			if (persistent) {
+				savePersistentStorage();
+			}
+			//		setNearbyTimeout(counts);
 			// TODO: write to persistent storage and trigger update event
 			break;
 		}
@@ -102,14 +106,16 @@ public:
 				LOGw("We do not account for a value of more than %d");
 				return;
 			}
-//			uint16_t major;
-//			popUint16(major, payload);
+			//			uint16_t major;
+			//			popUint16(major, payload);
 			uint16_t major = ((uint16_t*)payload)[0];
 			LOGi("Set major to %d", major);
 			Storage::setUint16(major, (uint32_t&)_storageStruct.beacon.major);
-			savePersistentStorage();
+			if (persistent) {
+				savePersistentStorage();
+			}
 
-			EventDispatcher::getInstance().dispatch((EventType)type, &_storageStruct.beacon.major, 4);
+			EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.major, 4);
 			break;
 		}
 		case CONFIG_IBEACON_MINOR: {
@@ -117,37 +123,45 @@ public:
 				LOGw("We do not account for a value of more than %d");
 				return;
 			}
-//			uint16_t minor;
-//			popUint16(minor, payload);
+			//			uint16_t minor;
+			//			popUint16(minor, payload);
 			uint16_t minor = ((uint16_t*)payload)[0];
 			LOGi("Set minor to %d", minor);
 			Storage::setUint16(minor, (uint32_t&)_storageStruct.beacon.minor);
-			savePersistentStorage();
+			if (persistent) {
+				savePersistentStorage();
+			}
 
-			EventDispatcher::getInstance().dispatch((EventType)type, &_storageStruct.beacon.minor, 4);
+			EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.minor, 4);
 			break;
 		}
 		case CONFIG_IBEACON_UUID: {
 			if (length != 16) {
-				LOGw("Expected 16 bytes for UUID");
+				LOGw("Expected 16 bytes for UUID, received: %d", length);
+				return;
 			}
 			LOGi("set uuid to ...");
 			Storage::setArray<uint8_t>(payload, _storageStruct.beacon.uuid.uuid128, 16);
-			savePersistentStorage();
+			if (persistent) {
+				savePersistentStorage();
+			}
 
-			EventDispatcher::getInstance().dispatch((EventType)type, &_storageStruct.beacon.uuid.uuid128, 16);
+			EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.uuid.uuid128, 16);
 			break;
 		}
 		case CONFIG_IBEACON_RSSI: {
 			if (length != 1) {
 				LOGw("We do not account for a value of more than 255");
+				return;
 			}
 			int8_t rssi = payload[0];
 			LOGi("Set beacon rssi to %d", rssi);
 			Storage::setInt8(rssi, (int32_t&)_storageStruct.beacon.rssi);
-			savePersistentStorage();
+			if (persistent) {
+				savePersistentStorage();
+			}
 
-			EventDispatcher::getInstance().dispatch((EventType)type, &_storageStruct.beacon.rssi, 1);
+			EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.rssi, 1);
 			break;
 		}
 #endif
@@ -305,19 +319,21 @@ public:
 	 * This updates the Bluetooth name immediately, however, it does not update the name persistently. It
 	 * has to be written to FLASH in that case.
 	 */
-	void setBLEName(const std::string &name) {
+	void setBLEName(const std::string &name, bool persistent = true) {
 		if (name.length() > 31) {
 			log(ERROR, MSG_NAME_TOO_LONG);
 			return;
 		}
 		BLEpp::Nrf51822BluetoothStack::getInstance().updateDeviceName(name);
 		Storage::setString(name, _storageStruct.device_name);
-		savePersistentStorage();
+		if (persistent) {
+			savePersistentStorage();
+		}
 	}
 
 protected:
-//	pstorage_handle_t _storageHandles[PS_ID_TYPES];
-//	ps_configuration_t* _storageStructs[PS_ID_TYPES];
+	//	pstorage_handle_t _storageHandles[PS_ID_TYPES];
+	//	ps_configuration_t* _storageStructs[PS_ID_TYPES];
 
 	// handle to storage (required to write to and read from FLASH)
 	pstorage_handle_t _storageHandle;

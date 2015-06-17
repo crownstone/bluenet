@@ -37,6 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _TRANSPORT_CONTROL_H__
 #include <stdint.h>
 
+#define PACKET_DATA_MAX_LEN         (100)
+
 /**
 * @file This module takes care of all lower level packet processing and
 *   schedules the radio for transmission. Acts as the link between the radio
@@ -51,7 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *   there is anything to process.
 */
 
-void transport_control_timeslot_begin(uint32_t global_timer_value);
+void transport_control_timeslot_begin(uint64_t global_timer_value);
 
 /**
 * @brief Force a check for timed out values

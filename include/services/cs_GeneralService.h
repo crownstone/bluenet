@@ -19,6 +19,8 @@
 #include <ble/cs_Characteristic.h>
 //#include "processing/cs_Temperature.h"
 
+#include <structs/cs_MeshMessage.h>
+
 #define GENERAL_SERVICE_UPDATE_FREQUENCY 10 // hz
 
 /* General Service for the Crownstone
@@ -215,4 +217,6 @@ private:
 	/* Select configuration for subsequent read actions on the get configuration characteristic.
 	 */
 	uint8_t _selectConfiguration;
+
+	MeshMessage* _meshMessage;
 };
