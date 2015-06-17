@@ -19,7 +19,7 @@ extern "C" {
 }
 #endif
 
-#include "ble_stack_handler_types.h"
+#include "sd_common/ble_stack_handler_types.h"
 
 using namespace BLEpp;
 

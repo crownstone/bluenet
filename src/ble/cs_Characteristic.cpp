@@ -103,7 +103,7 @@ void CharacteristicBase::init(Service* svc) {
 	//  _char_md.p_sccd_md         = &_sccd_md;
 
 	_uuid.init();
-	ble_uuid_t uid = _uuid;
+	ble_uuid_t uuid = _uuid;
 
 	ci.attr_char_value.p_attr_md = &ci.attr_md;
 
@@ -116,7 +116,7 @@ void CharacteristicBase::init(Service* svc) {
 
 	LOGd("%s init with buffer[%i] with %p", name.c_str(), getValueLength(), getValuePtr());
 
-	ci.attr_char_value.p_uuid = &uid;
+	ci.attr_char_value.p_uuid = &uuid;
 
 	setupWritePermissions(ci);
 

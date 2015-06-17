@@ -17,8 +17,8 @@ extern "C"
 // This means that we can distribute our files in the end without the corresponding Nordic header files.
 #include "ble_gap.h"
 #include "ble.h"
-#include "ble_advdata.h"
-#include "ble_srv_common.h"
+#include "ble/ble_advdata.h"
+#include "ble/ble_services/ble_srv_common.h"
 #include "ble_gatts.h"
 #include "ble_gatt.h"
 
@@ -30,10 +30,11 @@ extern "C"
 #include "nrf_sdm.h"
 #include "nrf_error.h"
 
-#include "app_timer.h"
+#include "app_common/app_util.h"
+#include "app_common/app_timer.h"
 #undef APP_ERROR_CHECK // undefine again, we want to use our own macro defined in util/cs_BleError.h
 
-#include "softdevice_handler.h"
+#include "sd_common/softdevice_handler.h"
 
 #ifdef __cplusplus
 }
