@@ -217,6 +217,8 @@ void Nrf51822BluetoothStack::setConnParams() {
 	BLE_CALL(sd_ble_gap_ppcp_set, (&_gap_conn_params));
 }
 
+// accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm
+// Can be done at any moment (also when advertising)
 void Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
 	if (_tx_power_level != powerLevel) {
 		_tx_power_level = powerLevel;

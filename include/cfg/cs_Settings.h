@@ -34,6 +34,7 @@ enum ConfigurationTypes {
 	CONFIG_IBEACON_UUID                     = 0x8,
 	CONFIG_IBEACON_RSSI                     = 0x9,
 	CONFIG_WIFI_SETTINGS                    = 0xA,
+	CONFIG_TX_POWER                         = 0xB,
 	CONFIG_TYPES
 };
 
@@ -176,6 +177,21 @@ public:
 			LOGi("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
 			break;
 		}
+		case CONFIG_TX_POWER: {
+			if (length != 1) {
+				LOGw("Expected int8_t for tx power");
+				return;
+			}
+			int8_t txPower = payload[0];
+			LOGi("Set tx power to %d", txPower);
+			Storage::setInt8(txPower, (int32_t&)_storageStruct.txPower);
+			if (persistent) {
+				savePersistentStorage();
+			}
+
+			EventDispatcher::getInstance().dispatch(type, &_storageStruct.txPower, 1);
+			break;
+		}
 		default:
 			LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
 		}
@@ -186,7 +202,7 @@ public:
 		case CONFIG_NAME_UUID: {
 			LOGd("Read name");
 			std::string str = getBLEName();
-			streamBuffer->fromString(str);
+			streamBuffer->fromString(str); // TODO: can't we set this on buffer immediately?
 			streamBuffer->setType(type);
 
 			LOGd("Name read %s", str.c_str());
@@ -269,6 +285,18 @@ public:
 			streamBuffer->setType(type);
 			_wifiSettings = "";
 			LOGd("Wifi settings read");
+			return true;
+		}
+		case CONFIG_TX_POWER: {
+			LOGd("Read tx power");
+			loadPersistentStorage();
+			uint8_t plen = 1;
+			int8_t payload[plen];
+			Storage::getInt8(_storageStruct.txPower, payload[0], +4);
+			streamBuffer->setPayload((uint8_t*)payload, plen);
+			streamBuffer->setType(type);
+
+			LOGd("Tx power set in payload: %d with len %d", payload[0], streamBuffer->length());
 			return true;
 		}
 		default: {

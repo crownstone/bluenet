@@ -422,11 +422,23 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 #endif
 
+	case CONFIG_TX_POWER: {
+		//accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm
+		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
+		_stack->setTxPowerLevel(*(int8_t*)p_data);
+//			restartAdvertising = true;
+		break;
+	}
+
 	}
 
 	if (restartAdvertising && _stack->isAdvertising()) {
 		_stack->stopAdvertising();
+#if IBEACON==1
 		_stack->startIBeacon(_beacon);
+#else
+		_stack->startAdvertising();
+#endif
 	}
 }
 

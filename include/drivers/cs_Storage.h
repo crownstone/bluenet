@@ -109,6 +109,9 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	// nearby timeout used for device tracking
 	uint32_t nearbyTimeout;
+
+	// Transmission power in dBm, see ble_gap.h
+	int32_t txPower;
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////
