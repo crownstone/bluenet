@@ -71,6 +71,10 @@ SERIAL_VERBOSITY=1
 # PCA10000             10
 BOARD=CROWNSTONE2
 
+# Default transmission power
+# Can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4
+TX_POWER=4
+
 # Some config introduced by anne
 RSSI_ENABLE=1
 

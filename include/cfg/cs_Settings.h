@@ -292,7 +292,7 @@ public:
 			loadPersistentStorage();
 			uint8_t plen = 1;
 			int8_t payload[plen];
-			Storage::getInt8(_storageStruct.txPower, payload[0], +4);
+			Storage::getInt8(_storageStruct.txPower, payload[0], TX_POWER);
 			streamBuffer->setPayload((uint8_t*)payload, plen);
 			streamBuffer->setType(type);
 
