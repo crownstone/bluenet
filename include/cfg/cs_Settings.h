@@ -103,7 +103,7 @@ public:
 #if IBEACON==1
 		case CONFIG_IBEACON_MAJOR: {
 			if (length != 2) {
-				LOGw("We do not account for a value of more than %d");
+				LOGw("We do not account for a value of more than 65535");
 				return;
 			}
 			//			uint16_t major;
@@ -120,7 +120,7 @@ public:
 		}
 		case CONFIG_IBEACON_MINOR: {
 			if (length != 2) {
-				LOGw("We do not account for a value of more than %d");
+				LOGw("We do not account for a value of more than 65535");
 				return;
 			}
 			//			uint16_t minor;
