@@ -94,10 +94,12 @@ void PowerService::tick() {
 	// Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
 	// TODO: This is not required anymore at later crownstone versions, so this should be done at init().
 
+#if CHAR_CURRENT_LIMIT==1
 	if(!_currentLimitInitialized) {
 		setCurrentLimit(_currentLimitVal);
 		_currentLimitInitialized = true;
 	}
+#endif
 
 	if (!_adcInitialized) {
 		// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
@@ -240,7 +242,6 @@ uint8_t PowerService::getCurrentLimit() {
 }
 
 void PowerService::setCurrentLimit(uint8_t value) {
-#if CHAR_CURRENT_LIMIT==1
 	LOGi("Set current limit to: %i", value);
 	_currentLimitVal = value;
 	//if (!_currentLimitInitialized) {
@@ -253,7 +254,6 @@ void PowerService::setCurrentLimit(uint8_t value) {
 	LOGi("Write value to persistent memory");
 	Storage::setUint8(_currentLimitVal, Settings::getInstance().getConfig().current_limit);
 	Settings::getInstance().savePersistentStorage();
-#endif
 }
 
 /**
