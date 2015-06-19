@@ -17,6 +17,18 @@
 #include <common/cs_Tuple.h>
 #include <third/std/function.h>
 
+/////////////////////////////////////////////////
+// test
+
+extern "C" {
+#include "ble/device_manager/device_manager.h"
+#include "sdk/sdk_errors.h"
+}
+
+/////////////////////////////////////////////////
+
+
+
 // TODO: replace std::vector with a fixed, in place array of size capacity.
 
 /* General BLE name service
@@ -362,6 +374,14 @@ public:
 	 */
 	void on_ble_evt(ble_evt_t * p_ble_evt);
 
+	ble_gap_evt_auth_status_t		m_auth_status;
+	dm_application_instance_t       m_app_handle;
+	dm_handle_t                     m_dm_handle;
+	app_timer_id_t                  m_sec_req_timer_id;                         /**< Security Request timer. */
+	void device_manager_init();
+	uint32_t deviceManagerEvtHandler(dm_handle_t const    * p_handle,
+									   dm_event_t const     * p_event,
+									   api_result_t           event_result);
 protected:
 
 	void setTxPowerLevel();

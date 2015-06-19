@@ -328,6 +328,9 @@ void Crownstone::setup() {
 
 	createServices();
 
+	Settings::getInstance();
+//	_stack->device_manager_init();
+
 #if BOARD==CROWNSTONE_SENSOR
 	_sensors = new Sensors;
 #endif

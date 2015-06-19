@@ -41,8 +41,8 @@ CharacteristicBase& CharacteristicBase::setName(const char * const name) {
  * and is read through another, this will resolve to nonsense to the user.
  */
 void CharacteristicBase::setAttrMdReadOnly(ble_gatts_attr_md_t& md, char vloc) {
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.read_perm);
-	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&md.write_perm);
+//	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&md.read_perm);
+//	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&md.write_perm);
 	md.vloc = vloc;
 	md.rd_auth = 0; // don't request read access every time a read is attempted.
 	md.wr_auth = 0;  // ditto for write.
@@ -89,10 +89,15 @@ void CharacteristicBase::init(Service* svc) {
 	ci.char_md.char_props.broadcast = 0; // allow broadcast
 	ci.char_md.char_props.indicate = 0; // allow indication
 
-	// initially readable but not writeable
 	setAttrMdReadWrite(ci.cccd_md, BLE_GATTS_VLOC_STACK);
-	setAttrMdReadOnly(ci.sccd_md, BLE_GATTS_VLOC_STACK);
+
+//	setAttrMdReadOnly(ci.sccd_md, BLE_GATTS_VLOC_STACK);
+
 	setAttrMdReadOnly(ci.attr_md, BLE_GATTS_VLOC_USER);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
+//	BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&ci.attr_md.read_perm);
+//	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&ci.attr_md.write_perm);
 
 	// these characteristic descriptors are optional, and I gather, not really used by anything.
 	// we fill them in if the user specifies any of the data (eg name).
@@ -130,6 +135,9 @@ void CharacteristicBase::init(Service* svc) {
 	ci.char_md.p_user_desc_md = &ci.user_desc_metadata_md;
 
 	setAttrMdReadOnly(ci.user_desc_metadata_md, BLE_GATTS_VLOC_STACK);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
+//	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.user_desc_metadata_md.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&ci.user_desc_metadata_md.write_perm);
 
 	this->configurePresentationFormat(ci.presentation_format);
 	ci.presentation_format.unit = 0; //_unit;
