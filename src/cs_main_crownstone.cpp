@@ -191,7 +191,7 @@ void Crownstone::configStack() {
 	_stack->setMaxConnectionInterval(32);
 	_stack->setConnectionSupervisionTimeout(400);
 	_stack->setSlaveLatency(10);
-	_stack->setAdvertisingInterval(80);
+	_stack->setAdvertisingInterval(ADVERTISEMENT_INTERVAL);
 	_stack->setAdvertisingTimeoutSeconds(0);
 }
 
@@ -285,6 +285,11 @@ void Crownstone::setup() {
 	int8_t txPower;
 	Storage::getInt8(cfg.txPower, txPower, TX_POWER);
 	_stack->setTxPowerLevel(txPower);
+
+	// Set the stored advertisement interval
+	uint16_t advInterval;
+	Storage::getUint16(cfg.advInterval, advInterval, ADVERTISEMENT_INTERVAL);
+	_stack->setAdvertisingInterval(advInterval);
 
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
@@ -429,11 +434,17 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 #endif
 
 	case CONFIG_TX_POWER: {
-		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
+//		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
 		_stack->setTxPowerLevel(*(int8_t*)p_data);
 //			restartAdvertising = true;
 		break;
 	}
+	case CONFIG_ADV_INTERVAL: {
+		_stack->setAdvertisingInterval(*(uint32_t*)p_data);
+		restartAdvertising = true;
+		break;
+	}
+
 
 	}
 

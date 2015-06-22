@@ -35,6 +35,7 @@ enum ConfigurationTypes {
 	CONFIG_IBEACON_RSSI                     = 0x9,
 	CONFIG_WIFI_SETTINGS                    = 0xA,
 	CONFIG_TX_POWER                         = 0xB,
+	CONFIG_ADV_INTERVAL                     = 0xC,
 	CONFIG_TYPES
 };
 
@@ -116,6 +117,7 @@ public:
 				savePersistentStorage();
 			}
 
+			// TODO: should be length 2?
 			EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.major, 4);
 			break;
 		}
@@ -133,6 +135,7 @@ public:
 				savePersistentStorage();
 			}
 
+			// TODO: should be length 2?
 			EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.minor, 4);
 			break;
 		}
@@ -190,6 +193,22 @@ public:
 			}
 
 			EventDispatcher::getInstance().dispatch(type, &_storageStruct.txPower, 1);
+			break;
+		}
+		case CONFIG_ADV_INTERVAL: {
+			if (length != 2) {
+				LOGw("Expected uint16_t for advertisement interval");
+				return;
+			}
+			uint16_t interval = ((uint16_t*)payload)[0];
+			LOGi("Set advertisement interval to %d", interval);
+			Storage::setUint16(interval, (uint32_t&)_storageStruct.advInterval);
+			if (persistent) {
+				savePersistentStorage();
+			}
+
+			// TODO: should be length 2?
+			EventDispatcher::getInstance().dispatch(type, &_storageStruct.advInterval, 4);
 			break;
 		}
 		default:
@@ -297,6 +316,18 @@ public:
 			streamBuffer->setType(type);
 
 			LOGd("Tx power set in payload: %d with len %d", payload[0], streamBuffer->length());
+			return true;
+		}
+		case CONFIG_ADV_INTERVAL: {
+			LOGd("Read advertisement interval");
+			loadPersistentStorage();
+			uint8_t plen = 1;
+			uint16_t payload[plen];
+			Storage::getUint16(_storageStruct.advInterval, payload[0], ADVERTISEMENT_INTERVAL);
+			streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
+			streamBuffer->setType(type);
+
+			LOGd("Advertisement interval set in payload: %d with len %d", streamBuffer->payload()[0], streamBuffer->length());
 			return true;
 		}
 		default: {

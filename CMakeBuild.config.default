@@ -75,6 +75,10 @@ BOARD=CROWNSTONE2
 # Can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4
 TX_POWER=4
 
+# Default advertisement interval, in units of 0.625 ms
+# Must be between 32 and 16384
+ADVERTISEMENT_INTERVAL=80
+
 # Some config introduced by anne
 RSSI_ENABLE=1
 
