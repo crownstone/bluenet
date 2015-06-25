@@ -69,7 +69,7 @@ SERIAL_VERBOSITY=1
 # CROWNSTONE2          8
 # CROWNSTONE_SENSOR    9
 # PCA10000             10
-BOARD=CROWNSTONE2
+HARDWARE_BOARD=CROWNSTONE2
 
 # Default transmission power
 # Can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4

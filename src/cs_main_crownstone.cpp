@@ -72,7 +72,7 @@ using namespace BLEpp;
 
 extern "C" {
 
-#if BOARD==PCA10001
+#if HARDWARE_BOARD==PCA10001
 /* configure button interrupt for evkits */
 static void gpiote_init(void)
 {
@@ -206,10 +206,10 @@ void Crownstone::configDrivers() {
 
 	PWM::getInstance().init(&pwm_config);
 
-#if BOARD==PCA10001
+#if HARDWARE_BOARD==PCA10001
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 #endif
-#if BOARD==PCA10000
+#if HARDWARE_BOARD==PCA10000
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 	nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
@@ -302,10 +302,10 @@ void Crownstone::setup() {
 		sd_ble_gap_rssi_start(conn_handle);
 #endif
 
-#if BOARD==PCA10001
+#if HARDWARE_BOARD==PCA10001
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
-//#if BOARD==PCA10000
+//#if HARDWARE_BOARD==PCA10000
 //		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 //#endif
 	});
@@ -316,10 +316,10 @@ void Crownstone::setup() {
 		// of course this is not nice, but dirty! we immediately start advertising automatically after being
 		// disconnected. but for now this will be the default behaviour.
 
-#if BOARD==PCA10001
+#if HARDWARE_BOARD==PCA10001
 		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
-//#if BOARD==PCA10000
+//#if HARDWARE_BOARD==PCA10000
 //		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 //#endif
 
@@ -339,7 +339,7 @@ void Crownstone::setup() {
 
 	createServices();
 
-#if BOARD==CROWNSTONE_SENSOR
+#if HARDWARE_BOARD==CROWNSTONE_SENSOR
 	_sensors = new Sensors;
 #endif
 
@@ -358,11 +358,11 @@ void Crownstone::setup() {
 	BLEutil::print_stack("Stack adv: ");
 
 #if CHAR_MESHING==1
-	#if BOARD==PCA10001
+	#if HARDWARE_BOARD==PCA10001
         gpiote_init();
     #endif
 
-    #if BOARD == VIRTUALMEMO
+    #if HARDWARE_BOARD == VIRTUALMEMO
         nrf_gpio_range_cfg_output(7,14);
     #endif
 #endif
@@ -386,7 +386,7 @@ void Crownstone::run() {
 
 	_stack->startTicking();
 
-#if (BOARD==CROWNSTONE_SENSOR)
+#if (HARDWARE_BOARD==CROWNSTONE_SENSOR)
 		_sensors->startTicking();
 #endif
 

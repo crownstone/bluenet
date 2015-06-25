@@ -125,7 +125,7 @@ void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 	_pwmChannel = pwm_channel;
 	_pwmValue = pwm_value;
 
-#if BOARD==PCA10000
+#if HARDWARE_BOARD==PCA10000
 	_pwmValue = pwm_value != 0 ? 0 : 255;
 #endif
 
@@ -160,7 +160,7 @@ void PWM::getValue(uint8_t &pwm_channel, uint32_t &pwm_value) {
 	pwm_channel = _pwmChannel;
 	pwm_value = _pwmValue;
 
-#if BOARD==PCA10000
+#if HARDWARE_BOARD==PCA10000
 	pwm_value = _pwmValue == 0 ? 255 : 0;
 #endif
 }

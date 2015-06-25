@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 void led_config(uint8_t led, uint8_t conf)
 {
-#ifdef BOARD_PCA10000
+#if HARDWARE_BOARD==PCA10000
   if (!conf)
   {
     NRF_GPIO->OUTSET = (1 << (led - 1 + LED_0));
@@ -50,7 +50,7 @@ void led_config(uint8_t led, uint8_t conf)
     NRF_GPIO->OUTCLR = (1 << (led - 1 + LED_0));
   }
 #endif
-#ifdef BOARD_PCA10001
+#if HARDWARE_BOARD==PCA10001
   if (conf)
   {
     NRF_GPIO->OUTSET = (1 << (led - 1 + LED_0));
@@ -60,7 +60,7 @@ void led_config(uint8_t led, uint8_t conf)
     NRF_GPIO->OUTCLR = (1 << (led - 1 + LED_0));
   }
 #endif
-// or BOARD_PCA10004
+// or PCA10004
 #warning Overwrite led config (temporary thing anyway)
   if (conf)
   {

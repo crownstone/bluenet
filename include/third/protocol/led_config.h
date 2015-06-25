@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 
 /* Aliases for LEDs */
-#ifdef BOARD_PCA10000
+#if HARDWARE_BOARD==PCA10000
     #define LED_0 LED_RGB_RED
     #define LED_1 LED_RGB_GREEN
 #endif
