@@ -1,11 +1,11 @@
 #!/bin/sh
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/config.sh
+source $path/_config.sh
 
 SCRIPT_DIR=jlink
 
-source config.sh
+source _config.sh
 
 DEVICE=nrf51822
 

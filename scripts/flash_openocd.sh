@@ -7,7 +7,7 @@ if [[ $cmd != "help" && $cmd != "init" && $cmd != "combined" && $cmd != "connect
 fi
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/config.sh
+source $path/_config.sh
 
 debug_target=$target.elf
 binary_target=$target
