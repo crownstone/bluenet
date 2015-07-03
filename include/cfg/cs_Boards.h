@@ -24,6 +24,7 @@
 #define CROWNSTONE2          8
 #define CROWNSTONE_SENSOR    9
 #define PCA10000             10
+#define CROWNSTONE3          11
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
@@ -84,7 +85,6 @@
 
 #endif
 
-
 #if(HARDWARE_BOARD==CROWNSTONE2)
 
 #define PIN_GPIO_LED0        8                   // something we don't use!
@@ -103,6 +103,31 @@
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 #define PIN_GPIO_RX          4                   // this is p0.04 or gpio 4
 #define PIN_GPIO_TX          2                   // this is p0.02 or gpio 2
+
+#endif
+
+#if(HARDWARE_BOARD==CROWNSTONE3)
+
+#define PIN_GPIO_LED0        8                   // something we don't use!
+#define PIN_GPIO_LED1        8                   // something we don't use!
+#define PIN_GPIO_LED2        8                   // something we don't use!
+#define PIN_GPIO_LED3        8                   // something we don't use!
+#define PIN_GPIO_LED4        8                   // something we don't use!
+#define PIN_GPIO_LED5        8                   // something we don't use!
+#define PIN_GPIO_LED6        8                   // something we don't use!
+#define PIN_GPIO_LED7        8                   // something we don't use!
+
+#define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
+#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
+#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
+
+#define PIN_CURRENT_SENSE                        // gpio 1
+#define PIN_VOLTAGE_SENSE                        // gpio 6
+
+#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
+// NOTE THAT THE RX AND TX PINS ARE SWITCHED!!!
+#define PIN_GPIO_RX          2                   // this is p0.04 or gpio 4
+#define PIN_GPIO_TX          4                   // this is p0.02 or gpio 2
 
 #endif
 
