@@ -199,6 +199,10 @@ public:
 		return SB_SUCCESS;
 	}
 
+	void print() {
+		BLEutil::printArray((uint8_t*)_buffer, getDataLength());
+	}
+
 	/////////// Bufferaccessor ////////////////////////////
 
 	/* @inherit */

@@ -94,9 +94,9 @@ void CharacteristicBase::init(Service* svc) {
 //	setAttrMdReadOnly(ci.sccd_md, BLE_GATTS_VLOC_STACK);
 
 	setAttrMdReadOnly(ci.attr_md, BLE_GATTS_VLOC_USER);
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
+//	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
 //	BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&ci.attr_md.read_perm);
-//	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.read_perm);
 	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&ci.attr_md.write_perm);
 
 	// these characteristic descriptors are optional, and I gather, not really used by anything.
@@ -135,8 +135,8 @@ void CharacteristicBase::init(Service* svc) {
 	ci.char_md.p_user_desc_md = &ci.user_desc_metadata_md;
 
 	setAttrMdReadOnly(ci.user_desc_metadata_md, BLE_GATTS_VLOC_STACK);
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
-//	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.user_desc_metadata_md.read_perm);
+//	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.user_desc_metadata_md.read_perm);
 	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&ci.user_desc_metadata_md.write_perm);
 
 	this->configurePresentationFormat(ci.presentation_format);
