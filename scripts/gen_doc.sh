@@ -1,7 +1,7 @@
 #!/bin/bash
 
 crnt_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $crnt_path/config.sh
+source $crnt_path/_config.sh
 
 mkdir -p ../build/doc
 cd ../build/doc
@@ -66,7 +66,7 @@ macros+=("-DSOFTDEVICE_NO_SEPARATE_UICR_SECTION=${SOFTDEVICE_NO_SEPARATE_UICR_SE
 macros+=("-DAPPLICATION_START_ADDRESS=${APPLICATION_START_ADDRESS}")
 macros+=("-DAPPLICATION_LENGTH=${APPLICATION_LENGTH}")
 macros+=("-DCOMPILATION_TIME=${COMPILATION_TIME}")
-macros+=("-DBOARD=${BOARD}")
+macros+=("-DHARDWARE_BOARD=${HARDWARE_BOARD}")
 macros+=("-DHARDWARE_VERSION=${HARDWARE_VERSION}")
 macros+=("-DSERIAL_VERBOSITY=${SERIAL_VERBOSITY}")
 macros+=("-DTICK_CONTINUOUSLY=${TICK_CONTINUOUSLY}")

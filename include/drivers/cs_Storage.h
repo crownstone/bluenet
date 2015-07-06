@@ -112,6 +112,9 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	// Transmission power in dBm, see ble_gap.h
 	int32_t txPower;
+
+	// Advertisement interval in units of 0.625 ms
+	uint32_t advInterval;
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////

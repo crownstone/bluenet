@@ -28,7 +28,7 @@ uint32_t ADC::init(uint8_t pin) {
 	LOGd("Run ADC converter with SoftDevice");
 #else
 	LOGd("Run ADC converter without SoftDevice!!!");
-	
+
 #endif
 	uint32_t err_code;
 
@@ -38,7 +38,7 @@ uint32_t ADC::init(uint8_t pin) {
 
 	NRF_ADC->EVENTS_END  = 0;    // Stop any running conversions.
 	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
-	
+
 	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; // Interrupt adc
 
 	// Enable ADC interrupt
@@ -78,7 +78,7 @@ uint32_t ADC::init(uint8_t pin) {
 uint32_t ADC::config(uint8_t pin) {
 	NRF_ADC->CONFIG     =
 			(ADC_CONFIG_RES_10bit                            << ADC_CONFIG_RES_Pos)     |
-#if(BOARD==CROWNSTONE)
+#if(HARDWARE_BOARD==CROWNSTONE)
 			(ADC_CONFIG_INPSEL_AnalogInputNoPrescaling       << ADC_CONFIG_INPSEL_Pos)  |
 #else
 			(ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos)  |

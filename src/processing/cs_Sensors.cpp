@@ -17,7 +17,7 @@
 #include <ble/cs_Nordic.h>
 #include "drivers/cs_PWM.h"
 
-/* NOTE: only use with BOARDS = CROWNSTONE_SENSOR */
+/* NOTE: only use with HARDWARE_BOARD = CROWNSTONE_SENSOR */
 
 /*
  * ENABLE SENSORS
@@ -68,7 +68,7 @@
 /* Update defines for other boards (instead of adding meaningless PIN definitions
  * to all other boards)
  */
-#if (BOARD != CROWNSTONE_SENSOR)
+#if (HARDWARE_BOARD != CROWNSTONE_SENSOR)
 	#ifndef PIN_GPIO_BUTTON
 	#define PIN_GPIO_BUTTON 0
 	#endif
@@ -199,9 +199,9 @@ uint16_t Sensors::sampleSensor() {
 		// but Input voltage is from 0-3V (for Nordic EK) and 0-3.3 for Crownstone
 		// so we need to rescale the value to have max at 3V (or 3.3V resp)
 		// instead of 3.6V
-#if(BOARD==CROWNSTONE)
+#if(HARDWARE_BOARD==CROWNSTONE)
 		average *= 3.6/3.3;
-#elif(BOARD==PCA10001)
+#elif(HARDWARE_BOARD==PCA10001)
 		average *= 3.6/3.0;
 #endif
 

@@ -72,7 +72,7 @@ using namespace BLEpp;
 
 extern "C" {
 
-#if BOARD==PCA10001
+#if HARDWARE_BOARD==PCA10001
 /* configure button interrupt for evkits */
 static void gpiote_init(void)
 {
@@ -172,7 +172,7 @@ void Crownstone::setName() {
 
 /* Sets default parameters of the Bluetooth connection.
  *
- * Data is transmitted with +4 dBm.
+ * Data is transmitted with TX_POWER dBm.
  *
  * On transmission of data within a connection
  *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 20 ms)
@@ -186,12 +186,12 @@ void Crownstone::setName() {
  * There is no whitelist defined, nor peer addresses.
  */
 void Crownstone::configStack() {
-	_stack->setTxPowerLevel(+4);
+	_stack->setTxPowerLevel(TX_POWER);
 	_stack->setMinConnectionInterval(16);
 	_stack->setMaxConnectionInterval(32);
 	_stack->setConnectionSupervisionTimeout(400);
 	_stack->setSlaveLatency(10);
-	_stack->setAdvertisingInterval(80);
+	_stack->setAdvertisingInterval(ADVERTISEMENT_INTERVAL);
 	_stack->setAdvertisingTimeoutSeconds(0);
 }
 
@@ -206,10 +206,10 @@ void Crownstone::configDrivers() {
 
 	PWM::getInstance().init(&pwm_config);
 
-#if BOARD==PCA10001
+#if HARDWARE_BOARD==PCA10001
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 #endif
-#if BOARD==PCA10000
+#if HARDWARE_BOARD==PCA10000
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 	nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
@@ -257,6 +257,8 @@ void Crownstone::setup() {
 	// in particular we need it to set interrupt priorities.
 	_stack->init();
 
+	ps_configuration_t cfg = Settings::getInstance().getConfig();
+
 #if IBEACON==1
 	// if enabled, create the iBeacon parameter object which will be used
 	// to start advertisement as an iBeacon
@@ -266,7 +268,6 @@ void Crownstone::setup() {
 	uint8_t rssi;
 	ble_uuid128_t uuid;
 
-	ps_configuration_t cfg = Settings::getInstance().getConfig();
 	Storage::getUint16(cfg.beacon.major, major, BEACON_MAJOR);
 	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
 	Storage::getArray(cfg.beacon.uuid.uuid128, uuid.uuid128, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
@@ -280,6 +281,16 @@ void Crownstone::setup() {
 	// Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
 	setName();
 
+	// Set the stored tx power
+	int8_t txPower;
+	Storage::getInt8(cfg.txPower, txPower, TX_POWER);
+	_stack->setTxPowerLevel(txPower);
+
+	// Set the stored advertisement interval
+	uint16_t advInterval;
+	Storage::getUint16(cfg.advInterval, advInterval, ADVERTISEMENT_INTERVAL);
+	_stack->setAdvertisingInterval(advInterval);
+
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
 		// todo this signature needs to change
@@ -291,10 +302,10 @@ void Crownstone::setup() {
 		sd_ble_gap_rssi_start(conn_handle);
 #endif
 
-#if BOARD==PCA10001
+#if HARDWARE_BOARD==PCA10001
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
-//#if BOARD==PCA10000
+//#if HARDWARE_BOARD==PCA10000
 //		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 //#endif
 	});
@@ -305,10 +316,10 @@ void Crownstone::setup() {
 		// of course this is not nice, but dirty! we immediately start advertising automatically after being
 		// disconnected. but for now this will be the default behaviour.
 
-#if BOARD==PCA10001
+#if HARDWARE_BOARD==PCA10001
 		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
-//#if BOARD==PCA10000
+//#if HARDWARE_BOARD==PCA10000
 //		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 //#endif
 
@@ -328,10 +339,7 @@ void Crownstone::setup() {
 
 	createServices();
 
-	Settings::getInstance();
-//	_stack->device_manager_init();
-
-#if BOARD==CROWNSTONE_SENSOR
+#if HARDWARE_BOARD==CROWNSTONE_SENSOR
 	_sensors = new Sensors;
 #endif
 
@@ -350,11 +358,11 @@ void Crownstone::setup() {
 	BLEutil::print_stack("Stack adv: ");
 
 #if CHAR_MESHING==1
-	#if BOARD==PCA10001
+	#if HARDWARE_BOARD==PCA10001
         gpiote_init();
     #endif
 
-    #if BOARD == VIRTUALMEMO
+    #if HARDWARE_BOARD == VIRTUALMEMO
         nrf_gpio_range_cfg_output(7,14);
     #endif
 #endif
@@ -378,7 +386,7 @@ void Crownstone::run() {
 
 	_stack->startTicking();
 
-#if (BOARD==CROWNSTONE_SENSOR)
+#if (HARDWARE_BOARD==CROWNSTONE_SENSOR)
 		_sensors->startTicking();
 #endif
 
@@ -426,12 +434,17 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 #endif
 
 	case CONFIG_TX_POWER: {
-		//accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm
-		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
+//		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
 		_stack->setTxPowerLevel(*(int8_t*)p_data);
 //			restartAdvertising = true;
 		break;
 	}
+	case CONFIG_ADV_INTERVAL: {
+		_stack->setAdvertisingInterval(*(uint32_t*)p_data);
+		restartAdvertising = true;
+		break;
+	}
+
 
 	}
 

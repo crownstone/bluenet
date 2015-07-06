@@ -1,7 +1,7 @@
 #!/bin/bash
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/config.sh
+source $path/_config.sh
 
 SCRIPT_DIR=$path/jlink
 TEMP_DIR=$path/tmp
@@ -12,7 +12,12 @@ DEVICE=nrf51822
 cp $SCRIPT_DIR/hardware_version.script $TEMP_DIR/hardware_version.script
 
 echo "$JLINK -Device $DEVICE -If SWD $TEMP_DIR/hardware_version.script"
-$JLINK -Device $DEVICE -If SWD $TEMP_DIR/hardware_version.script
+
+if [ -z $1 ]; then
+	$JLINK -Device $DEVICE -If SWD $TEMP_DIR/hardware_version.script
+else
+	$JLINK -Device $DEVICE -SelectEmuBySN $1 -If SWD $TEMP_DIR/hardware_version.script
+fi
 
 echo "The result should be something like:"
 echo "    1000005C = 3C 00 FF FF"

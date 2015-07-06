@@ -220,8 +220,13 @@ public:
 		_clock_source = clockSource;
 	}
 
+	// Advertising interval between 0x0020 and 0x4000 (32 and 16384) in 0.625 ms units (20ms to 10.24s)
 	void setAdvertisingInterval(uint16_t advertisingInterval){
 		// TODO: stop advertising?
+		LOGd("Set advertising interval to %d", advertisingInterval);
+		if (advertisingInterval < 0x0020 || advertisingInterval > 0x4000) {
+			return;
+		}
 		_interval = advertisingInterval;
 	}
 

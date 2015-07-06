@@ -235,6 +235,19 @@ void Nrf51822BluetoothStack::setConnParams() {
 // accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm
 // Can be done at any moment (also when advertising)
 void Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
+	LOGd("Set tx power to %d", powerLevel);
+	switch (powerLevel) {
+	case -40: break;
+	case -30: break;
+	case -20: break;
+	case -16: break;
+	case -12: break;
+	case -8: break;
+	case -4: break;
+	case 0: break;
+	case 4: break;
+	default: return;
+	}
 	if (_tx_power_level != powerLevel) {
 		_tx_power_level = powerLevel;
 		if (_inited)

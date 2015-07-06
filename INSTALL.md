@@ -85,7 +85,7 @@ Now you will have to set all fields in the configuration file:
 * set `BLUETOOTH_NAME` to something you like, but make sure it's short.
 * adjust `INDOOR_SERVICE` to `1` if you want to enable it, the same is true for the other services
 * adjust `CHAR_MESHING` to `1` if you want to enable meshing functionality, the same is true for other characteristics
-* adjust `BOARD` to the correct number for your board. This determines the pin layout.
+* adjust `HARDWARE_BOARD` to the correct number for your board. This determines the pin layout.
 * adjust `HARDWARE_VERSION` to the correct version of the NRF51 chip you have. Use script/hardware_version.sh to check your version.
 * adjust `SERIAL_VERBOSITY` to the value you prefer. Set it to None to disable all logging over serial. The default is 1 (info).
 * adjust `MASTER_BUFFER_SIZE` if you want to have a larger buffer (this buffer is reused by all characteristics that use more than a single byte or string)

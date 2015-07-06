@@ -13,7 +13,7 @@
 #######################################################################################################################
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/config.sh
+source $path/_config.sh
 
 cd ${BLUENET_CONFIG_DIR}/build && rm -f combined*
 
@@ -24,7 +24,7 @@ add_binary=true
 if [[ "$add_bootloader" == true ]]; then
 	# These settings are already incorporated in the bootloader.hex binary, so you don't need to add them here
 	#BOOTLOADER_SETTINGS="-exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00"
-	
+
 	ADD_BOOTLOADER="bootloader.hex -intel"
 fi
 

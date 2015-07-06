@@ -233,7 +233,7 @@ void Storage::getInt8(int32_t value, int8_t& target, int8_t default_value) {
 
 	// check if last byte is FF which means that memory is unnassigned
 	// and value has to be ignored
-	if (value == INT_MAX) {
+	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd("use default value");
 #endif

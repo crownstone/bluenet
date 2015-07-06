@@ -2,30 +2,18 @@
 
 cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
 
-if [[ $cmd != "help" && $cmd != "bootloader" ]]; then
-	# target=${2:? "Usage: $0 \"cmd\", \"target\""}
-	target=$2
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-	BLUENET_BUILD_DIR=build
-	if [[ $target != "bootloader" && $target != "crownstone" ]]; then
-		BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR${target:+/$target}
-		BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR${target:+/$target}
-		# BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR/$target
-		
-		case "$target" in
-			sirius)
-				serial_num=480110849
-				;;
-			capella)
-				serial_num=480207700
-				;;
-		esac
-		target=crownstone
-	fi
+BLUENET_BUILD_DIR=build
+
+if [[ $cmd != "help" ]]; then
+	# adjust targets and sets serial_num
+	# call it with the . so that it get's the same arguments as the call to this script
+	# and so that the variables assigned in the script will be persistent afterwards
+	. ${path}/_check_targets.sh
 fi
 
-path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/config.sh
+source $path/_config.sh
 
 # optional address, use $APPLICATION_START_ADDRESS as default
 address=${3:-$APPLICATION_START_ADDRESS}
@@ -40,16 +28,15 @@ build() {
 }
 
 upload() {
-	${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.hex $address $serial_num
+	${path}/_upload.sh $BLUENET_CONFIG_DIR/build/$target.hex $address $serial_num
 	if [ $? -eq 0 ]; then
 		echo "Error with uploading"
 		exit 1
 	fi
-	#${path}/upload.sh $BLUENET_CONFIG_DIR/build/$target.bin $address
 }
 
 debug() {
-	${path}/debug.sh $BLUENET_CONFIG_DIR/build/$target.elf $serial_num
+	${path}/_debug.sh $BLUENET_CONFIG_DIR/build/$target.elf $serial_num
 }
 
 all() {
@@ -81,12 +68,12 @@ bootloader() {
 
 	# note that within the bootloader the JLINK doesn't work anymore...
 	# so perhaps first flash the binary and then the bootloader
-	${path}/firmware.sh upload bootloader 0x00034000
-	
+	${path}/_upload.sh $BLUENET_CONFIG_DIR/build/bootloader.hex 0x00034000 $serial_num
+
 	if [ $? -eq 0 ]; then
 		sleep 1
 		# and set to load it
-		${path}/writebyte.sh 0x10001014 0x00034000
+		${path}/_writebyte.sh 0x10001014 0x00034000
 	fi
 }
 

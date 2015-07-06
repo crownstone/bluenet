@@ -1,7 +1,7 @@
 #!/bin/bash
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/config.sh
+source $path/_config.sh
 
 SCRIPT_DIR=$path/jlink
 TEMP_DIR=$path/tmp
