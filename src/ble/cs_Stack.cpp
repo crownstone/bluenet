@@ -28,10 +28,19 @@ extern "C" {
 
 #include <drivers/cs_Storage.h>
 #include <cfg/cs_Settings.h>
+#include "util/cs_Utils.h"
 
 using namespace BLEpp;
 
-#define STATIC_PASSKEY              "123456"                                    /**< Static pin. */
+#define SEC_PARAM_TIMEOUT               30                                          /**< Timeout for Pairing Request or Security Request (in seconds). */
+#define SEC_PARAM_BOND                  1                                           /**< Perform bonding. */
+#define SEC_PARAM_MITM                  1                                           /**< Man In The Middle protection not required. */
+#define SEC_PARAM_IO_CAPABILITIES       BLE_GAP_IO_CAPS_DISPLAY_ONLY				/**< No I/O capabilities. */
+#define SEC_PARAM_OOB                   0                                           /**< Out Of Band data not available. */
+#define SEC_PARAM_MIN_KEY_SIZE          7                                           /**< Minimum encryption key size. */
+#define SEC_PARAM_MAX_KEY_SIZE          16                                          /**< Maximum encryption key size. */
+
+//#define STATIC_PASSKEY              "123456"                                    /**< Static pin. */
 uint8_t                             passkey[] = STATIC_PASSKEY;
 
 
@@ -157,15 +166,15 @@ void Nrf51822BluetoothStack::init() {
 
 	setConnParams();
 
-//#if SOFTDEVICE_SERIES==130
-//	ble_opt_t static_pin_option;
-//	static_pin_option.gap_opt.passkey.p_passkey = passkey;
-//	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
-//#elif SOFTDEVICE_SERIES==110
-//	ble_opt_t static_pin_option;
-//	static_pin_option.gap.passkey.p_passkey = passkey;
-//	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
-//#endif
+#if SOFTDEVICE_SERIES==130
+	ble_opt_t static_pin_option;
+	static_pin_option.gap_opt.passkey.p_passkey = passkey;
+	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
+#elif SOFTDEVICE_SERIES==110
+	ble_opt_t static_pin_option;
+	static_pin_option.gap.passkey.p_passkey = passkey;
+	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
+#endif
 
 	setTxPowerLevel();
 
@@ -624,7 +633,7 @@ static uint32_t device_manager_evt_handler(dm_handle_t const    * p_handle,
                                            dm_event_t const     * p_event,
                                            api_result_t           event_result)
 {
-	Nrf51822BluetoothStack::getInstance().deviceManagerEvtHandler(p_handle, p_event, event_result);
+	return Nrf51822BluetoothStack::getInstance().deviceManagerEvtHandler(p_handle, p_event, event_result);
 }
 
 #define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /**< Delay after connection until Security Request is sent, if necessary (ticks). */
@@ -633,7 +642,7 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
                                            dm_event_t const     * p_event,
                                            api_result_t           event_result)
 {
-	LOGd("deviceManagerEvtHandler: %X", p_event->event_id);
+	LOGd("deviceManagerEvtHandler: 0x%X", p_event->event_id);
 
     uint32_t err_code = NRF_SUCCESS;
 
@@ -646,8 +655,9 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
             // Start Security Request timer.
             if (m_dm_handle.device_id != DM_INVALID_ID)
             {
-                err_code = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
-                APP_ERROR_CHECK(err_code);
+            	LOGi("start sec timer");
+//                err_code = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
+//                APP_ERROR_CHECK(err_code);
             }
             break;
         default:
@@ -698,14 +708,6 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
 //}
 
 
-#define SEC_PARAM_TIMEOUT               30                                          /**< Timeout for Pairing Request or Security Request (in seconds). */
-#define SEC_PARAM_BOND                  1                                           /**< Perform bonding. */
-#define SEC_PARAM_MITM                  1                                           /**< Man In The Middle protection not required. */
-#define SEC_PARAM_IO_CAPABILITIES       BLE_GAP_IO_CAPS_NONE						/**< No I/O capabilities. */
-#define SEC_PARAM_OOB                   0                                           /**< Out Of Band data not available. */
-#define SEC_PARAM_MIN_KEY_SIZE          7                                           /**< Minimum encryption key size. */
-#define SEC_PARAM_MAX_KEY_SIZE          16                                          /**< Maximum encryption key size. */
-
 void Nrf51822BluetoothStack::device_manager_init()
 {
     uint32_t               err_code;
@@ -717,14 +719,17 @@ void Nrf51822BluetoothStack::device_manager_init()
     APP_ERROR_CHECK(err_code);
 
     // Clear all bonded centrals if the Bonds Delete button is pushed.
-    init_data.clear_persistent_data = 1;// (nrf_gpio_pin_read(BOND_DELETE_ALL_BUTTON_ID) == 0);
+//    init_data.clear_persistent_data = 1;// (nrf_gpio_pin_read(BOND_DELETE_ALL_BUTTON_ID) == 0);
+    init_data.clear_persistent_data = 0;// (nrf_gpio_pin_read(BOND_DELETE_ALL_BUTTON_ID) == 0);
 
     err_code = dm_init(&init_data);
     APP_ERROR_CHECK(err_code);
 
     memset(&register_param.sec_param, 0, sizeof(ble_gap_sec_params_t));
 
-//    register_param.sec_param.timeout      = SEC_PARAM_TIMEOUT;
+#if SOFTDEVICE_SERIES==110
+    register_param.sec_param.timeout      = SEC_PARAM_TIMEOUT;
+#endif
     register_param.sec_param.bond         = SEC_PARAM_BOND;
     register_param.sec_param.oob          = SEC_PARAM_OOB;
     register_param.sec_param.min_key_size = SEC_PARAM_MIN_KEY_SIZE;
@@ -738,6 +743,8 @@ void Nrf51822BluetoothStack::device_manager_init()
 
     err_code = dm_register(&m_app_handle, &register_param);
     APP_ERROR_CHECK(err_code);
+
+    LOGi("device_manager_init");
 }
 
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
@@ -745,10 +752,10 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
 	}
 
-//	dm_ble_evt_handler(p_ble_evt);
-
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
+		_log(INFO, "address: " );
+		BLEutil::printArray(p_ble_evt->evt.gap_evt.params.connected.peer_addr.addr, BLE_GAP_ADDR_LEN);
 		on_connected(p_ble_evt);
 		break;
 
@@ -822,7 +829,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	case BLE_GAP_EVT_AUTH_KEY_REQUEST:
 		LOGi("reply pass key");
-		BLE_CALL(sd_ble_gap_auth_key_reply, (getConnectionHandle(), BLE_GAP_AUTH_KEY_TYPE_PASSKEY, passkey));
+//		BLE_CALL(sd_ble_gap_auth_key_reply, (getConnectionHandle(), BLE_GAP_AUTH_KEY_TYPE_PASSKEY, passkey));
 		break;
 
 	case BLE_GAP_EVT_PASSKEY_DISPLAY: {
@@ -831,80 +838,81 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 	}
 
-//    case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-//    case BLE_GAP_EVT_SEC_INFO_REQUEST:
-////        case BLE_GAP_EVT_PASSKEY_DISPLAY:
-//        // Don't send delayed Security Request if security procedure is already in progress.
+    case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
+    case BLE_GAP_EVT_SEC_INFO_REQUEST:
+//        case BLE_GAP_EVT_PASSKEY_DISPLAY:
+        // Don't send delayed Security Request if security procedure is already in progress.
+    	LOGi("stop sec timer");
 //        BLE_CALL(app_timer_stop, (m_sec_req_timer_id));
-//        break;
+        break;
 
 //    case BLE_GAP_EVT_AUTH_STATUS:
 //        //Disconnect and start advertising again if you get PIN or KEY missing
 //        break;
 
-	case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
+//	case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
+//
+//		// go into low power mode
+//		LOGi("going into low power mode ...");
+//		setTxPowerLevel(-40);
 
-		// go into low power mode
-		LOGi("going into low power mode ...");
-		setTxPowerLevel(-40);
-
-		ble_gap_sec_params_t sec_params;
-
-#if(SOFTDEVICE_SERIES == 110)
-		sec_params.timeout = 30; // seconds
-#endif
-		sec_params.bond = 1;  // perform bonding.
-		sec_params.mitm = 1;  // man in the middle protection not required.
-		sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;  // no display capabilities.
-//		sec_params.io_caps = BLE_GAP_IO_CAPS_KEYBOARD_ONLY;  // no display capabilities.
-		sec_params.oob = 0;  // out of band not available.
-		sec_params.min_key_size = 7;  // min key size
-		sec_params.max_key_size = 16; // max key size.
-
-#if(SOFTDEVICE_SERIES != 110)
-		// https://devzone.nordicsemi.com/documentation/nrf51/6.0.0/s120/html/a00527.html#ga7b23027c97b3df21f6cbc23170e55663
-
-		// do not store the keys for now...
-		ble_gap_sec_keyset_t sec_keyset;
-		BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
-					BLE_GAP_SEC_STATUS_SUCCESS,
-					&sec_params, &sec_keyset) );
-//		BLE_CALL(sd_ble_gap_sec_params_reply,
-//				(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &sec_params, NULL));
-#else
-		BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
-				BLE_GAP_SEC_STATUS_SUCCESS,
-				&sec_params) );
-#endif
-		break;
-
-    case BLE_GAP_EVT_AUTH_STATUS:
-        m_auth_status = p_ble_evt->evt.gap_evt.params.auth_status;
-		LOGi("auth status: %X", m_auth_status.auth_status);
-
-		if (m_auth_status.auth_status == BLE_GAP_SEC_STATUS_SUCCESS) {
-			// go into high power mode
-			LOGi("going back into default power mode ...");
-
-			ps_configuration_t cfg = Settings::getInstance().getConfig();
-			setTxPowerLevel(cfg.txPower);
-		}
-
-        break;
-
-    case BLE_GAP_EVT_SEC_INFO_REQUEST:
-        ble_gap_enc_info_t *             p_enc_info;
-        p_enc_info = &m_auth_status.periph_keys.enc_info;
-        if (p_enc_info->div == p_ble_evt->evt.gap_evt.params.sec_info_request.div)
-        {
-            BLE_CALL(sd_ble_gap_sec_info_reply, (getConnectionHandle(), p_enc_info, NULL));
-        }
-        else
-        {
-            // No keys found for this device
-            BLE_CALL(sd_ble_gap_sec_info_reply, (getConnectionHandle(), NULL, NULL));
-        }
-        break;
+//		ble_gap_sec_params_t sec_params;
+//
+//#if(SOFTDEVICE_SERIES == 110)
+//		sec_params.timeout = 30; // seconds
+//#endif
+//		sec_params.bond = 1;  // perform bonding.
+//		sec_params.mitm = 1;  // man in the middle protection required.
+//		sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;  // no display capabilities.
+////		sec_params.io_caps = BLE_GAP_IO_CAPS_KEYBOARD_ONLY;  // no display capabilities.
+//		sec_params.oob = 0;  // out of band not available.
+//		sec_params.min_key_size = 7;  // min key size
+//		sec_params.max_key_size = 16; // max key size.
+//
+//#if(SOFTDEVICE_SERIES != 110)
+//		// https://devzone.nordicsemi.com/documentation/nrf51/6.0.0/s120/html/a00527.html#ga7b23027c97b3df21f6cbc23170e55663
+//
+//		// do not store the keys for now...
+//		ble_gap_sec_keyset_t sec_keyset;
+//		BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
+//					BLE_GAP_SEC_STATUS_SUCCESS,
+//					&sec_params, &sec_keyset) );
+////		BLE_CALL(sd_ble_gap_sec_params_reply,
+////				(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &sec_params, NULL));
+//#else
+//		BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
+//				BLE_GAP_SEC_STATUS_SUCCESS,
+//				&sec_params) );
+//#endif
+//		break;
+//
+//    case BLE_GAP_EVT_AUTH_STATUS:
+//        m_auth_status = p_ble_evt->evt.gap_evt.params.auth_status;
+//		LOGi("auth status: %X", m_auth_status.auth_status);
+//
+//		if (m_auth_status.auth_status == BLE_GAP_SEC_STATUS_SUCCESS) {
+//			// go into high power mode
+//			LOGi("going back into default power mode ...");
+//
+//			ps_configuration_t cfg = Settings::getInstance().getConfig();
+//			setTxPowerLevel(cfg.txPower);
+//		}
+//
+//        break;
+//
+//    case BLE_GAP_EVT_SEC_INFO_REQUEST:
+//        ble_gap_enc_info_t *             p_enc_info;
+//        p_enc_info = &m_auth_status.periph_keys.enc_info;
+//        if (p_enc_info->div == p_ble_evt->evt.gap_evt.params.sec_info_request.div)
+//        {
+//            BLE_CALL(sd_ble_gap_sec_info_reply, (getConnectionHandle(), p_enc_info, NULL));
+//        }
+//        else
+//        {
+//            // No keys found for this device
+//            BLE_CALL(sd_ble_gap_sec_info_reply, (getConnectionHandle(), NULL, NULL));
+//        }
+//        break;
 
 #if(SOFTDEVICE_SERIES != 110)
 	case BLE_GAP_EVT_ADV_REPORT:
@@ -924,6 +932,8 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	}
+
+	dm_ble_evt_handler(p_ble_evt);
 }
 
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {

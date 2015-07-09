@@ -257,7 +257,7 @@ void Crownstone::setup() {
 	// in particular we need it to set interrupt priorities.
 	_stack->init();
 
-	ps_configuration_t cfg = Settings::getInstance().getConfig();
+//	ps_configuration_t cfg = Settings::getInstance().getConfig();
 
 #if IBEACON==1
 	// if enabled, create the iBeacon parameter object which will be used
@@ -268,10 +268,10 @@ void Crownstone::setup() {
 	uint8_t rssi;
 	ble_uuid128_t uuid;
 
-	Storage::getUint16(cfg.beacon.major, major, BEACON_MAJOR);
-	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
-	Storage::getArray(cfg.beacon.uuid.uuid128, uuid.uuid128, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
-	Storage::getUint8(cfg.beacon.rssi, rssi, BEACON_RSSI);
+//	Storage::getUint16(cfg.beacon.major, major, BEACON_MAJOR);
+//	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
+//	Storage::getArray(cfg.beacon.uuid.uuid128, uuid.uuid128, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
+//	Storage::getUint8(cfg.beacon.rssi, rssi, BEACON_RSSI);
 
 	// create ibeacon object
 	_beacon = new IBeacon(uuid, major, minor, rssi);
@@ -281,15 +281,15 @@ void Crownstone::setup() {
 	// Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
 	setName();
 
-	// Set the stored tx power
-	int8_t txPower;
-	Storage::getInt8(cfg.txPower, txPower, TX_POWER);
-	_stack->setTxPowerLevel(txPower);
-
-	// Set the stored advertisement interval
-	uint16_t advInterval;
-	Storage::getUint16(cfg.advInterval, advInterval, ADVERTISEMENT_INTERVAL);
-	_stack->setAdvertisingInterval(advInterval);
+//	// Set the stored tx power
+//	int8_t txPower;
+//	Storage::getInt8(cfg.txPower, txPower, TX_POWER);
+//	_stack->setTxPowerLevel(txPower);
+//
+//	// Set the stored advertisement interval
+//	uint16_t advInterval;
+//	Storage::getUint16(cfg.advInterval, advInterval, ADVERTISEMENT_INTERVAL);
+//	_stack->setAdvertisingInterval(advInterval);
 
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
@@ -339,8 +339,8 @@ void Crownstone::setup() {
 
 	createServices();
 
-//	Settings::getInstance();
-//	_stack->device_manager_init();
+	Settings::getInstance();
+	_stack->device_manager_init();
 
 #if HARDWARE_BOARD==CROWNSTONE_SENSOR
 	_sensors = new Sensors;
