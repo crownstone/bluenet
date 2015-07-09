@@ -26,6 +26,9 @@ extern "C" {
 #include "app_common/app_util.h"
 }
 
+#include <drivers/cs_Storage.h>
+#include <cfg/cs_Settings.h>
+
 using namespace BLEpp;
 
 #define STATIC_PASSKEY              "123456"                                    /**< Static pin. */
