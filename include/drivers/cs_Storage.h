@@ -10,6 +10,7 @@
 //#include <cstdio>
 #include <string>
 
+#include <ble/cs_Nordic.h>
 
 #include "drivers/cs_Serial.h"
 #include "util/cs_Utils.h"
@@ -115,6 +116,9 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	// Advertisement interval in units of 0.625 ms
 	uint32_t advInterval;
+
+	// passkey used for bonding
+	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////

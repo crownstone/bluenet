@@ -159,7 +159,11 @@ protected:
 	volatile uint8_t                            _radio_notify; // 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
 
 	ble_user_mem_block_t 						_user_mem_block; // used for user memory (long write)
+
+	uint8_t                            			_passkey[BLE_GAP_PASSKEY_LEN];
+	dm_application_instance_t                   _dm_app_handle;
 public:
+
 	/* Initialization of the BLE stack
 	 *
 	 * Performs a series of tasks:
@@ -247,6 +251,8 @@ public:
 	void updateDeviceName(const std::string& deviceName);
 	std::string & getDeviceName() { return _device_name; }
 
+	void setPasskey(uint8_t* passkey);
+
 	/** Set radio transmit power in dBm (accepted values are -40, -20, -16, -12, -8, -4, 0, and 4 dBm). */
 	void setTxPowerLevel(int8_t powerLevel);
 
@@ -258,7 +264,7 @@ public:
 	void setMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
 		if (_gap_conn_params.min_conn_interval != connectionInterval_1_25_ms) {
 			_gap_conn_params.min_conn_interval = connectionInterval_1_25_ms;
-			if (_inited) setConnParams();
+			if (_inited) updateConnParams();
 		}
 	}
 
@@ -266,7 +272,7 @@ public:
 	void setMaxConnectionInterval(uint16_t connectionInterval_1_25_ms) {
 		if (_gap_conn_params.max_conn_interval != connectionInterval_1_25_ms) {
 			_gap_conn_params.max_conn_interval = connectionInterval_1_25_ms;
-			if (_inited) setConnParams();
+			if (_inited) updateConnParams();
 		}
 	}
 
@@ -274,7 +280,7 @@ public:
 	void setSlaveLatency(uint16_t slaveLatency) {
 		if ( _gap_conn_params.slave_latency != slaveLatency ) {
 			_gap_conn_params.slave_latency = slaveLatency;
-			if (_inited) setConnParams();
+			if (_inited) updateConnParams();
 		}
 	}
 
@@ -282,7 +288,7 @@ public:
 	void setConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms) {
 		if (_gap_conn_params.conn_sup_timeout != conSupTimeout_10_ms) {
 			_gap_conn_params.conn_sup_timeout = conSupTimeout_10_ms;
-			if (_inited) setConnParams();
+			if (_inited) updateConnParams();
 		}
 	}
 
@@ -290,7 +296,7 @@ public:
 		//if (callback && _callback_connected) BLE_THROW("Connected callback already registered.");
 
 		_callback_connected = callback;
-		if (_inited) setConnParams();
+		if (_inited) updateConnParams();
 	}
 	void onDisconnect(const callback_disconnected_t& callback) {
 		//if (callback && _callback_disconnected) BLE_THROW("Disconnected callback already registered.");
@@ -379,19 +385,25 @@ public:
 	 */
 	void on_ble_evt(ble_evt_t * p_ble_evt);
 
-	ble_gap_evt_auth_status_t		m_auth_status;
-	dm_application_instance_t       m_app_handle;
-	dm_handle_t                     m_dm_handle;
-	app_timer_id_t                  m_sec_req_timer_id;                         /**< Security Request timer. */
+	/*
+	 * Function to initialize the device manager.
+	 *
+	 * The device manager keeps track of the bonded devices and stores the bond information
+	 * in persistent storage.
+	 */
 	void device_manager_init();
-	uint32_t deviceManagerEvtHandler(dm_handle_t const    * p_handle,
-									   dm_event_t const     * p_event,
-									   api_result_t           event_result);
+
+	/*
+	 * Callback handler for device manager events
+	 */
+	uint32_t deviceManagerEvtHandler(dm_handle_t const    * p_handle, dm_event_t const     * p_event,
+			api_result_t           event_result);
+
 protected:
 
-	void setTxPowerLevel();
-	void setConnParams();
-
+	void updateTxPowerLevel();
+	void updateConnParams();
+	void updatePasskey();
 
 	/* Connection request
 	 *
@@ -406,6 +418,12 @@ protected:
 	 * Inform all services that transmission was completed in case they have notifications pending
 	 */
 	void onTxComplete(ble_evt_t * p_ble_evt);
+
+	uint32_t _lowPowerTimeoutId;
+	static void lowPowerTimeout(void* p_context);
+
+	void changeToLowPowerMode();
+	void changeToNormalPowerMode();
 
 };
 

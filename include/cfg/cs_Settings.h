@@ -36,6 +36,7 @@ enum ConfigurationTypes {
 	CONFIG_WIFI_SETTINGS                    = 0xA,
 	CONFIG_TX_POWER                         = 0xB,
 	CONFIG_ADV_INTERVAL                     = 0xC,
+	CONFIG_PASSKEY							= 0xD,
 	CONFIG_TYPES
 };
 
@@ -211,6 +212,20 @@ public:
 			EventDispatcher::getInstance().dispatch(type, &_storageStruct.advInterval, 4);
 			break;
 		}
+		case CONFIG_PASSKEY: {
+			if (length != BLE_GAP_PASSKEY_LEN) {
+				LOGw("Expected length %d for passkey", BLE_GAP_PASSKEY_LEN);
+				return;
+			}
+			LOGi("Set passkey to %s", std::string((char*)payload, length).c_str());
+			Storage::setArray(payload, _storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
+			if (persistent) {
+				savePersistentStorage();
+			}
+
+			EventDispatcher::getInstance().dispatch(type, &_storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
+			break;
+		}
 		default:
 			LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
 		}
@@ -329,6 +344,20 @@ public:
 
 			LOGd("Advertisement interval set in payload: %d with len %d", streamBuffer->payload()[0], streamBuffer->length());
 			return true;
+		}
+		case CONFIG_PASSKEY: {
+			LOGd("Reading passkey");
+			loadPersistentStorage();
+			uint8_t plen = BLE_GAP_PASSKEY_LEN;
+			uint8_t payload[BLE_GAP_PASSKEY_LEN];
+			Storage::getArray<uint8_t>(_storageStruct.passkey, payload, (uint8_t*)STATIC_PASSKEY, plen);
+			// should we return the passkey? probably not ...
+//			streamBuffer->setPayload((uint8_t*)payload, plen);
+//			streamBuffer->setType(type);
+
+			LOGd("passkey set in payload: %s", std::string((char*)payload, BLE_GAP_PASSKEY_LEN).c_str());
+//			return true;
+			return false;
 		}
 		default: {
 			LOGd("There is no such configuration type (%i), or not yet implemented.", type);

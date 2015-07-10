@@ -48,6 +48,8 @@ private:
 
 	void createServices();
 
+	void configure();
+
 public:
 	Crownstone() : _stack(NULL),
 		_generalService(NULL), _localizationService(NULL), _powerService(NULL),

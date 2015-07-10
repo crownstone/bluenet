@@ -32,18 +32,6 @@ extern "C" {
 
 using namespace BLEpp;
 
-#define SEC_PARAM_TIMEOUT               30                                          /**< Timeout for Pairing Request or Security Request (in seconds). */
-#define SEC_PARAM_BOND                  1                                           /**< Perform bonding. */
-#define SEC_PARAM_MITM                  1                                           /**< Man In The Middle protection not required. */
-#define SEC_PARAM_IO_CAPABILITIES       BLE_GAP_IO_CAPS_DISPLAY_ONLY				/**< No I/O capabilities. */
-#define SEC_PARAM_OOB                   0                                           /**< Out Of Band data not available. */
-#define SEC_PARAM_MIN_KEY_SIZE          7                                           /**< Minimum encryption key size. */
-#define SEC_PARAM_MAX_KEY_SIZE          16                                          /**< Maximum encryption key size. */
-
-//#define STATIC_PASSKEY              "123456"                                    /**< Static pin. */
-uint8_t                             passkey[] = STATIC_PASSKEY;
-
-
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_appearance(defaultAppearance), _clock_source(defaultClockSource),
 //				_mtu_size(defaultMtu),
@@ -55,6 +43,7 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_radio_notify(0)
 {
 	// setup default values.
+	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
 
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&_sec_mode);
 
@@ -164,19 +153,11 @@ void Nrf51822BluetoothStack::init() {
 	}
 	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
 
-	setConnParams();
+	updateConnParams();
 
-#if SOFTDEVICE_SERIES==130
-	ble_opt_t static_pin_option;
-	static_pin_option.gap_opt.passkey.p_passkey = passkey;
-	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
-#elif SOFTDEVICE_SERIES==110
-	ble_opt_t static_pin_option;
-	static_pin_option.gap.passkey.p_passkey = passkey;
-	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
-#endif
+	updatePasskey();
 
-	setTxPowerLevel();
+	updateTxPowerLevel();
 
 	BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
 
@@ -199,6 +180,27 @@ void Nrf51822BluetoothStack::updateDeviceName(const std::string& deviceName) {
 void Nrf51822BluetoothStack::updateAppearance(uint16_t appearance) {
 	_appearance = appearance;
 	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
+}
+
+void Nrf51822BluetoothStack::setPasskey(uint8_t* passkey) {
+	LOGd("setting passkey to: %s", std::string((char*)passkey, BLE_GAP_PASSKEY_LEN).c_str());
+	memcpy(_passkey, passkey, BLE_GAP_PASSKEY_LEN);
+
+	if (_inited) {
+		updatePasskey();
+	}
+}
+
+void Nrf51822BluetoothStack::updatePasskey() {
+#if SOFTDEVICE_SERIES==130
+	ble_opt_t static_pin_option;
+	static_pin_option.gap_opt.passkey.p_passkey = _passkey;
+	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
+#elif SOFTDEVICE_SERIES==110
+	ble_opt_t static_pin_option;
+	static_pin_option.gap.passkey.p_passkey = _passkey;
+	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
+#endif
 }
 
 void Nrf51822BluetoothStack::startAdvertisingServices() {
@@ -242,14 +244,6 @@ void Nrf51822BluetoothStack::addService(Service* svc) {
 	_services.push_back(svc);
 }
 
-void Nrf51822BluetoothStack::setTxPowerLevel() {
-	BLE_CALL(sd_ble_gap_tx_power_set, (_tx_power_level));
-}
-
-void Nrf51822BluetoothStack::setConnParams() {
-	BLE_CALL(sd_ble_gap_ppcp_set, (&_gap_conn_params));
-}
-
 // accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm
 // Can be done at any moment (also when advertising)
 void Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
@@ -269,8 +263,16 @@ void Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
 	if (_tx_power_level != powerLevel) {
 		_tx_power_level = powerLevel;
 		if (_inited)
-			setTxPowerLevel();
+			updateTxPowerLevel();
 	}
+}
+
+void Nrf51822BluetoothStack::updateTxPowerLevel() {
+	BLE_CALL(sd_ble_gap_tx_power_set, (_tx_power_level));
+}
+
+void Nrf51822BluetoothStack::updateConnParams() {
+	BLE_CALL(sd_ble_gap_ppcp_set, (&_gap_conn_params));
 }
 
 void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon) {
@@ -638,18 +640,32 @@ static uint32_t device_manager_evt_handler(dm_handle_t const    * p_handle,
 
 //#define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /**< Delay after connection until Security Request is sent, if necessary (ticks). */
 
+void Nrf51822BluetoothStack::lowPowerTimeout(void* p_context) {
+	LOGi("bonding timeout, going back to normal power mode ...");
+	((Nrf51822BluetoothStack*)p_context)->changeToNormalPowerMode();
+}
+
+void Nrf51822BluetoothStack::changeToLowPowerMode() {
+	setTxPowerLevel(LOW_TX_POWER);
+}
+
+void Nrf51822BluetoothStack::changeToNormalPowerMode() {
+	ps_configuration_t cfg = Settings::getInstance().getConfig();
+	int8_t txPower;
+	Storage::getInt8(cfg.txPower, txPower, TX_POWER);
+	setTxPowerLevel(txPower);
+}
+
 uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * p_handle,
                                            dm_event_t const     * p_event,
                                            api_result_t           event_result)
 {
 //	LOGd("deviceManagerEvtHandler: 0x%X", p_event->event_id);
 
-    m_dm_handle = *p_handle;
-
     if (event_result != BLE_GAP_SEC_STATUS_SUCCESS) {
-    	LOGe("[SECURITY ERROR] failed with code: %d", event_result);
+    	LOGe("[SECURITY ERROR] bonding failed with code: %d", event_result);
     	sd_ble_gap_disconnect(p_event->event_param.p_gap_param->conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-    	return NRF_ERROR_INTERNAL;
+//    	return NRF_ERROR_INTERNAL;
     }
 
     switch (p_event->event_id)
@@ -657,7 +673,7 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         case DM_EVT_CONNECTION:
         	LOGi("DM_EVT_CONNECTION");
             // Start Security Request timer.
-            if (m_dm_handle.device_id != DM_INVALID_ID)
+            if (p_handle->device_id != DM_INVALID_ID)
             {
 //            	  LOGi("start sec timer");
 //                err_code = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
@@ -665,62 +681,30 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
             }
             break;
         case DM_EVT_SECURITY_SETUP:
-        case DM_EVT_SECURITY_SETUP_REFRESH:
+        case DM_EVT_SECURITY_SETUP_REFRESH: {
         	LOGi("going into low power mode for bonding ...");
-//        	setTxPowerLevel(-40);
+
+        	// schedule timeout
+        	Timer::getInstance().createSingleShot(_lowPowerTimeoutId, lowPowerTimeout);
+        	Timer::getInstance().start(_lowPowerTimeoutId, MS_TO_TICKS(60000), this);
+
+        	changeToLowPowerMode();
         	break;
-        case DM_EVT_SECURITY_SETUP_COMPLETE:
+        }
+        case DM_EVT_SECURITY_SETUP_COMPLETE: {
         	LOGi("bonding completed, going into normal power mode ...");
-//			ps_configuration_t cfg = Settings::getInstance().getConfig();
-//			setTxPowerLevel(cfg.txPower);
+
+        	// clear timeout
+        	Timer::getInstance().stop(_lowPowerTimeoutId);
+
+			changeToNormalPowerMode();
         	break;
+        }
         default:
             break;
     }
     return NRF_SUCCESS;
 }
-
-/**@brief Function for the Device Manager initialization.
- */
-//void Nrf51822BluetoothStack::device_manager_init()
-//{
-//    uint32_t               err_code;
-//    dm_init_param_t        init_data;
-//    dm_application_param_t register_param;
-//
-//    // Initialize persistent storage module.
-////    err_code = pstorage_init();
-////    APP_ERROR_CHECK(err_code);
-//
-//    // Clear all bonded centrals if the Bonds Delete button is pushed.
-//    init_data.clear_persistent_data = true;
-////    init_data.clear_persistent_data = false;
-//
-//    err_code = dm_init(&init_data);
-//    APP_ERROR_CHECK(err_code);
-//
-//    memset(&register_param.sec_param, 0, sizeof(ble_gap_sec_params_t));
-//
-//#if(SOFTDEVICE_SERIES == 110)
-//    register_param.sec_param.timeout = 30; // seconds
-//#endif
-//    register_param.sec_param.bond = 1;  // perform bonding.
-//    register_param.sec_param.mitm = 1;  // man in the middle protection not required.
-//    register_param.sec_param.io_caps = BLE_GAP_IO_CAPS_NONE;  // no display capabilities.
-////    register_param.sec_param.io_caps = BLE_GAP_IO_CAPS_KEYBOARD_DISPLAY;  // no display capabilities.
-//    register_param.sec_param.oob = 0;  // out of band not available.
-//    register_param.sec_param.min_key_size = 7;  // min key size
-//    register_param.sec_param.max_key_size = 16; // max key size.
-//    register_param.evt_handler            = device_manager_evt_handler;
-//    register_param.service_type           = DM_PROTOCOL_CNTXT_ALL;
-//
-//    BLE_CALL(dm_register, (&m_app_handle, &register_param));
-//
-////    ble_opt_t static_pin_option;
-////    static_pin_option.gap.passkey.p_passkey = passkey;
-////    err_code =  sd_ble_opt_set(BLE_GAP_OPT_PASSKEY, &static_pin_option);
-//}
-
 
 void Nrf51822BluetoothStack::device_manager_init()
 {
@@ -728,13 +712,9 @@ void Nrf51822BluetoothStack::device_manager_init()
     dm_init_param_t        init_data;
     dm_application_param_t register_param;
 
-    // Initialize persistent storage module.
-//    err_code = pstorage_init();
-//    APP_ERROR_CHECK(err_code);
-
-    // Clear all bonded centrals if the Bonds Delete button is pushed.
-    init_data.clear_persistent_data = 1;// (nrf_gpio_pin_read(BOND_DELETE_ALL_BUTTON_ID) == 0);
-//    init_data.clear_persistent_data = 0;// (nrf_gpio_pin_read(BOND_DELETE_ALL_BUTTON_ID) == 0);
+    // Don't clear bonded centrals
+    init_data.clear_persistent_data = 0;//
+//    init_data.clear_persistent_data = 1;//
 
     err_code = dm_init(&init_data);
     APP_ERROR_CHECK(err_code);
@@ -755,7 +735,7 @@ void Nrf51822BluetoothStack::device_manager_init()
     register_param.sec_param.mitm    = SEC_PARAM_MITM;
     register_param.sec_param.io_caps = SEC_PARAM_IO_CAPABILITIES;
 
-    err_code = dm_register(&m_app_handle, &register_param);
+    err_code = dm_register(&_dm_app_handle, &register_param);
     APP_ERROR_CHECK(err_code);
 
     LOGi("device_manager_init");
@@ -765,6 +745,8 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
 		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
 	}
+
+	dm_ble_evt_handler(p_ble_evt);
 
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
@@ -846,82 +828,6 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 	}
 
-//    case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-//    case BLE_GAP_EVT_SEC_INFO_REQUEST:
-////        case BLE_GAP_EVT_PASSKEY_DISPLAY:
-//        // Don't send delayed Security Request if security procedure is already in progress.
-//    	LOGi("stop sec timer");
-////        BLE_CALL(app_timer_stop, (m_sec_req_timer_id));
-//        break;
-
-//    case BLE_GAP_EVT_AUTH_STATUS:
-//        //Disconnect and start advertising again if you get PIN or KEY missing
-//        break;
-
-//	case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-//
-//		// go into low power mode
-//		LOGi("going into low power mode ...");
-//		setTxPowerLevel(-40);
-
-//		ble_gap_sec_params_t sec_params;
-//
-//#if(SOFTDEVICE_SERIES == 110)
-//		sec_params.timeout = 30; // seconds
-//#endif
-//		sec_params.bond = 1;  // perform bonding.
-//		sec_params.mitm = 1;  // man in the middle protection required.
-//		sec_params.io_caps = BLE_GAP_IO_CAPS_NONE;  // no display capabilities.
-////		sec_params.io_caps = BLE_GAP_IO_CAPS_KEYBOARD_ONLY;  // no display capabilities.
-//		sec_params.oob = 0;  // out of band not available.
-//		sec_params.min_key_size = 7;  // min key size
-//		sec_params.max_key_size = 16; // max key size.
-//
-//#if(SOFTDEVICE_SERIES != 110)
-//		// https://devzone.nordicsemi.com/documentation/nrf51/6.0.0/s120/html/a00527.html#ga7b23027c97b3df21f6cbc23170e55663
-//
-//		// do not store the keys for now...
-//		ble_gap_sec_keyset_t sec_keyset;
-//		BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
-//					BLE_GAP_SEC_STATUS_SUCCESS,
-//					&sec_params, &sec_keyset) );
-////		BLE_CALL(sd_ble_gap_sec_params_reply,
-////				(p_ble_evt->evt.gap_evt.conn_handle, BLE_GAP_SEC_STATUS_SUCCESS, &sec_params, NULL));
-//#else
-//		BLE_CALL(sd_ble_gap_sec_params_reply, (p_ble_evt->evt.gap_evt.conn_handle,
-//				BLE_GAP_SEC_STATUS_SUCCESS,
-//				&sec_params) );
-//#endif
-//		break;
-//
-//    case BLE_GAP_EVT_AUTH_STATUS:
-//        m_auth_status = p_ble_evt->evt.gap_evt.params.auth_status;
-//		LOGi("auth status: %X", m_auth_status.auth_status);
-//
-//		if (m_auth_status.auth_status == BLE_GAP_SEC_STATUS_SUCCESS) {
-//			// go into high power mode
-//			LOGi("going back into default power mode ...");
-//
-//			ps_configuration_t cfg = Settings::getInstance().getConfig();
-//			setTxPowerLevel(cfg.txPower);
-//		}
-//
-//        break;
-//
-//    case BLE_GAP_EVT_SEC_INFO_REQUEST:
-//        ble_gap_enc_info_t *             p_enc_info;
-//        p_enc_info = &m_auth_status.periph_keys.enc_info;
-//        if (p_enc_info->div == p_ble_evt->evt.gap_evt.params.sec_info_request.div)
-//        {
-//            BLE_CALL(sd_ble_gap_sec_info_reply, (getConnectionHandle(), p_enc_info, NULL));
-//        }
-//        else
-//        {
-//            // No keys found for this device
-//            BLE_CALL(sd_ble_gap_sec_info_reply, (getConnectionHandle(), NULL, NULL));
-//        }
-//        break;
-
 #if(SOFTDEVICE_SERIES != 110)
 	case BLE_GAP_EVT_ADV_REPORT:
 		for (Service* svc : _services) {
@@ -940,8 +846,6 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	}
-
-	dm_ble_evt_handler(p_ble_evt);
 }
 
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {

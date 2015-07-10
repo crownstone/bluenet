@@ -21,6 +21,7 @@ BEACON_RSSI=0x0
 # Set to 1 to enable encryption of BLE Link (reading and writing to characteristics
 # needs bonding first)
 ENCRYPTION=0
+# the default passkey used for bonding. can be changed with configuration charac
 STATIC_PASSKEY="123456"
 
 # Set if crownstone should set power on by default when turning on

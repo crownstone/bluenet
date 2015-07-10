@@ -44,3 +44,15 @@
 //#define SCAN_WINDOW                            0x0050
 /* Determines scan window in units of 0.625 millisecond. */
 #define SCAN_WINDOW                              0x009E
+
+// bonding / security
+#define SEC_PARAM_TIMEOUT                        30                                          /**< Timeout for Pairing Request or Security Request (in seconds). */
+#define SEC_PARAM_BOND                           1                                           /**< Perform bonding. */
+#define SEC_PARAM_MITM                           1                                           /**< Man In The Middle protection not required. */
+#define SEC_PARAM_IO_CAPABILITIES                BLE_GAP_IO_CAPS_DISPLAY_ONLY				/**< No I/O capabilities. */
+#define SEC_PARAM_OOB                            0                                           /**< Out Of Band data not available. */
+#define SEC_PARAM_MIN_KEY_SIZE                   7                                           /**< Minimum encryption key size. */
+#define SEC_PARAM_MAX_KEY_SIZE                   16                                          /**< Maximum encryption key size. */
+
+// tx power used for low power mode during bonding
+#define LOW_TX_POWER                             -40

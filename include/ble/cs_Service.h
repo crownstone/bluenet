@@ -16,6 +16,7 @@
 #include <drivers/cs_Timer.h>
 
 #define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz, APP_TIMER_PRESCALER)
+#define MS_TO_TICKS(ms) APP_TIMER_TICKS(ms, APP_TIMER_PRESCALER)
 
 /* General BLE name service
  *
