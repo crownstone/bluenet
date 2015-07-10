@@ -636,18 +636,22 @@ static uint32_t device_manager_evt_handler(dm_handle_t const    * p_handle,
 	return Nrf51822BluetoothStack::getInstance().deviceManagerEvtHandler(p_handle, p_event, event_result);
 }
 
-#define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /**< Delay after connection until Security Request is sent, if necessary (ticks). */
+//#define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /**< Delay after connection until Security Request is sent, if necessary (ticks). */
 
 uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * p_handle,
                                            dm_event_t const     * p_event,
                                            api_result_t           event_result)
 {
-	LOGd("deviceManagerEvtHandler: 0x%X", p_event->event_id);
-
-    uint32_t err_code = NRF_SUCCESS;
+//	LOGd("deviceManagerEvtHandler: 0x%X", p_event->event_id);
 
     m_dm_handle = *p_handle;
-    APP_ERROR_CHECK(event_result);
+
+    if (event_result != BLE_GAP_SEC_STATUS_SUCCESS) {
+    	LOGe("[SECURITY ERROR] failed with code: %d", event_result);
+    	sd_ble_gap_disconnect(p_event->event_param.p_gap_param->conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+    	return NRF_ERROR_INTERNAL;
+    }
+
     switch (p_event->event_id)
     {
         case DM_EVT_CONNECTION:
@@ -655,11 +659,21 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
             // Start Security Request timer.
             if (m_dm_handle.device_id != DM_INVALID_ID)
             {
-            	LOGi("start sec timer");
+//            	  LOGi("start sec timer");
 //                err_code = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
 //                APP_ERROR_CHECK(err_code);
             }
             break;
+        case DM_EVT_SECURITY_SETUP:
+        case DM_EVT_SECURITY_SETUP_REFRESH:
+        	LOGi("going into low power mode for bonding ...");
+//        	setTxPowerLevel(-40);
+        	break;
+        case DM_EVT_SECURITY_SETUP_COMPLETE:
+        	LOGi("bonding completed, going into normal power mode ...");
+//			ps_configuration_t cfg = Settings::getInstance().getConfig();
+//			setTxPowerLevel(cfg.txPower);
+        	break;
         default:
             break;
     }
@@ -715,12 +729,12 @@ void Nrf51822BluetoothStack::device_manager_init()
     dm_application_param_t register_param;
 
     // Initialize persistent storage module.
-    err_code = pstorage_init();
-    APP_ERROR_CHECK(err_code);
+//    err_code = pstorage_init();
+//    APP_ERROR_CHECK(err_code);
 
     // Clear all bonded centrals if the Bonds Delete button is pushed.
-//    init_data.clear_persistent_data = 1;// (nrf_gpio_pin_read(BOND_DELETE_ALL_BUTTON_ID) == 0);
-    init_data.clear_persistent_data = 0;// (nrf_gpio_pin_read(BOND_DELETE_ALL_BUTTON_ID) == 0);
+    init_data.clear_persistent_data = 1;// (nrf_gpio_pin_read(BOND_DELETE_ALL_BUTTON_ID) == 0);
+//    init_data.clear_persistent_data = 0;// (nrf_gpio_pin_read(BOND_DELETE_ALL_BUTTON_ID) == 0);
 
     err_code = dm_init(&init_data);
     APP_ERROR_CHECK(err_code);
@@ -827,24 +841,18 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0));
 		break;
 
-	case BLE_GAP_EVT_AUTH_KEY_REQUEST:
-		LOGi("reply pass key");
-//		BLE_CALL(sd_ble_gap_auth_key_reply, (getConnectionHandle(), BLE_GAP_AUTH_KEY_TYPE_PASSKEY, passkey));
-		break;
-
 	case BLE_GAP_EVT_PASSKEY_DISPLAY: {
-		char* p_passkey = (char *)p_ble_evt->evt.gap_evt.params.passkey_display.passkey;
-		LOGi("PASSKEY: %s", p_passkey);
+		LOGi("PASSKEY: %.6s", p_ble_evt->evt.gap_evt.params.passkey_display.passkey);
 		break;
 	}
 
-    case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-    case BLE_GAP_EVT_SEC_INFO_REQUEST:
-//        case BLE_GAP_EVT_PASSKEY_DISPLAY:
-        // Don't send delayed Security Request if security procedure is already in progress.
-    	LOGi("stop sec timer");
-//        BLE_CALL(app_timer_stop, (m_sec_req_timer_id));
-        break;
+//    case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
+//    case BLE_GAP_EVT_SEC_INFO_REQUEST:
+////        case BLE_GAP_EVT_PASSKEY_DISPLAY:
+//        // Don't send delayed Security Request if security procedure is already in progress.
+//    	LOGi("stop sec timer");
+////        BLE_CALL(app_timer_stop, (m_sec_req_timer_id));
+//        break;
 
 //    case BLE_GAP_EVT_AUTH_STATUS:
 //        //Disconnect and start advertising again if you get PIN or KEY missing

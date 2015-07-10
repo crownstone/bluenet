@@ -61,12 +61,12 @@ Storage::Storage() {
 	LOGi("Storage create");
 
 	// call once before using any other API calls of the persistent storage module
-//	BLE_CALL(pstorage_init, ());
-//
-//	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
-//		initBlocks(config[i].storage_size, config[i].handle);
-//		LOGi("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
-//	}
+	BLE_CALL(pstorage_init, ());
+
+	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
+		initBlocks(config[i].storage_size, config[i].handle);
+		LOGi("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
+	}
 }
 
 storage_config_t* Storage::getStorageConfig(ps_storage_id storageID) {

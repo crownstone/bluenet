@@ -139,15 +139,15 @@ typedef enum
 #endif //DM_DISABLE_LOGS
 /** @} */
 
-void printArray(uint8_t* arr, uint16_t len) {
-    for (int i = 0; i < len; ++i) {
-        _log(DEBUG, " %02X", arr[i]);
-        if ((i+1) % 30 == 0) {
-            _log(DEBUG, "");
-        }
-    }
-    _log(DEBUG, "\r\n");
-}
+//void printArray(uint8_t* arr, uint16_t len) {
+//    for (int i = 0; i < len; ++i) {
+//        _log(DEBUG, " %02X", arr[i]);
+//        if ((i+1) % 30 == 0) {
+//            _log(DEBUG, "");
+//        }
+//    }
+//    _log(DEBUG, "\r\n");
+//}
 
 /**
  * @defgroup device_manager_mutex_lock_unlock Module's Mutex Lock/Unlock Macros.
@@ -650,11 +650,11 @@ static __INLINE api_result_t device_instance_allocate(uint8_t              * p_d
             {
                 m_peer_table[index].id_bitmap &= (~ADDR_ENTRY);
                 m_peer_table[index].peer_addr  = (*p_addr);
-        _log(INFO, "p_addr: ");
-        printArray(p_addr->addr, 6);
-        LOGi("index: %d", index);
-        _log(INFO, "m_peer_table[index].peer_addr: ");
-        printArray(m_peer_table[index].peer_addr.addr, 6);
+//        _log(INFO, "p_addr: ");
+//        printArray(p_addr->addr, 6);
+//        LOGi("index: %d", index);
+//        _log(INFO, "m_peer_table[index].peer_addr: ");
+//        printArray(m_peer_table[index].peer_addr.addr, 6);
             }
             else
             {
@@ -2140,8 +2140,8 @@ static void device_context_store(dm_handle_t const * p_handle, device_store_stat
                             PEER_ID_SIZE,
                             PEER_ID_STORAGE_OFFSET);
 
-        _log(INFO, "store: ");
-        printArray((uint8_t *)&m_peer_table[p_handle->device_id], 6);
+//        _log(INFO, "store: ");
+//        printArray((uint8_t *)&m_peer_table[p_handle->device_id], 6);
 
         if ((err_code == NRF_SUCCESS) && (state != UPDATE_PEER_ADDR))
         {
@@ -2202,11 +2202,11 @@ api_result_t dm_peer_addr_set(dm_handle_t const    * p_handle,
         (p_addr->addr_type != BLE_GAP_ADDR_TYPE_RANDOM_PRIVATE_RESOLVABLE))
     {
         m_peer_table[p_handle->device_id].peer_addr = (*p_addr);
-        _log(INFO, "p_addr: ");
-        printArray(p_addr->addr, 6);
-        LOGi("device_id: %d", p_handle->device_id);
-        _log(INFO, "m_peer_table[p_handle->device_id].peer_addr: ");
-        printArray(m_peer_table[p_handle->device_id].peer_addr.addr, 6);
+//        _log(INFO, "p_addr: ");
+//        printArray(p_addr->addr, 6);
+//        LOGi("device_id: %d", p_handle->device_id);
+//        _log(INFO, "m_peer_table[p_handle->device_id].peer_addr: ");
+//        printArray(m_peer_table[p_handle->device_id].peer_addr.addr, 6);
 
         update_status_bit_set(p_handle->device_id);
         device_context_store(p_handle, UPDATE_PEER_ADDR);
@@ -2426,9 +2426,9 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
                 m_connection_table[index].state       = STATE_CONNECTED;
                 m_connection_table[index].peer_addr   =
                     p_ble_evt->evt.gap_evt.params.connected.peer_addr;
-                _log(INFO, "m_connection_table[index].peer_addr: ");
-                printArray(m_connection_table[index].peer_addr.addr, 6);
-                LOGi("index: %d", index);
+//                _log(INFO, "m_connection_table[index].peer_addr: ");
+//                printArray(m_connection_table[index].peer_addr.addr, 6);
+//                LOGi("index: %d", index);
 
                 if (p_ble_evt->evt.gap_evt.params.connected.irk_match == 1)
                 {

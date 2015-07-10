@@ -45,7 +45,7 @@ class Settings {
 
 private:
 	Settings() {
-//		Storage::getInstance().getHandle(PS_ID_CONFIGURATION, _storageHandle);
+		Storage::getInstance().getHandle(PS_ID_CONFIGURATION, _storageHandle);
 		loadPersistentStorage();
 	};
 
@@ -348,13 +348,13 @@ public:
 	 * Hence, there is an entire struct that can be filled and flashed at once.
 	 */
 	void loadPersistentStorage() {
-//		Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+		Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 	}
 
 	/* Save to FLASH.
 	 */
 	void savePersistentStorage() {
-//		Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+		Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 	}
 
 //	void ConfigHelper::enable(ps_storage_id id, uint16_t size) {
