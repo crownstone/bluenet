@@ -119,6 +119,12 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	// passkey used for bonding
 	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
+
+	// Minimum temperature of environment
+	int32_t minEnvTemp;
+
+	// Maximum temperature of environment
+	int32_t maxEnvTemp;
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////
