@@ -85,6 +85,10 @@ TX_POWER=4
 # Must be between 32 and 16384
 ADVERTISEMENT_INTERVAL=80
 
+# Minimal and maximal environment temperatures
+MIN_ENV_TEMP=2
+MAX_ENV_TEMP=10
+
 # Some config introduced by anne
 RSSI_ENABLE=1
 
