@@ -15,9 +15,6 @@
 #include <util/cs_BleError.h>
 #include <drivers/cs_Timer.h>
 
-#define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz, APP_TIMER_PRESCALER)
-#define MS_TO_TICKS(ms) APP_TIMER_TICKS(ms, APP_TIMER_PRESCALER)
-
 /* General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
