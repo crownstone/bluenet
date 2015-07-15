@@ -17,6 +17,7 @@
 //#include "common/cs_Config.h"
 #include "structs/cs_BufferAccessor.h"
 #include "util/cs_BleError.h"
+#include "util/cs_Utils.h"
 
 //using namespace BLEpp;
 
