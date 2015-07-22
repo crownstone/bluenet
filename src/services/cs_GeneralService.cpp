@@ -175,6 +175,18 @@ void GeneralService::addTemperatureCharacteristic() {
 	_temperatureCharacteristic->setNotifies(true);
 }
 
+void reset(void* p_context) {
+	uint32_t cmd = *(int32_t*)p_context;
+	LOGi("executing reset: %d", cmd);
+	// copy to make sure this is nothing more than one value
+	uint8_t err_code;
+	err_code = sd_power_gpregret_clr(0xFF);
+	APP_ERROR_CHECK(err_code);
+	err_code = sd_power_gpregret_set(cmd);
+	APP_ERROR_CHECK(err_code);
+	sd_nvic_SystemReset();
+}
+
 void GeneralService::addResetCharacteristic() {
 	_resetCharacteristic = new Characteristic<int32_t>();
 	addCharacteristic(_resetCharacteristic);
@@ -185,19 +197,18 @@ void GeneralService::addResetCharacteristic() {
 	_resetCharacteristic->setWritable(true);
 	_resetCharacteristic->onWrite([&](const int32_t& value) -> void {
 			if (value != 0) {
-				// copy to make sure this is nothing more than one value
-				uint32_t cmd = value;
+
+				static uint32_t cmd = value;
 				if (cmd == COMMAND_ENTER_RADIO_BOOTLOADER) {
 					LOGi(MSG_FIRMWARE_UPDATE);
 				} else {
 					LOGi(MSG_RESET);
 				}
-				uint8_t err_code;
-				err_code = sd_power_gpregret_clr(0xFF);
-				APP_ERROR_CHECK(err_code);
-				err_code = sd_power_gpregret_set(cmd);
-				APP_ERROR_CHECK(err_code);
-				sd_nvic_SystemReset();				
+
+				app_timer_id_t resetTimer;
+				Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t)reset);
+				Timer::getInstance().start(resetTimer, MS_TO_TICKS(100), &cmd);
+
 			} else {
 				LOGw("To reset write a nonzero value");
 			}
