@@ -142,7 +142,11 @@ else()
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
 endif()
 
+IF(${SOFTDEVICE_SERIES} STREQUAL "110")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/device_manager_peripheral.c")
+else()
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/device_manager_central.c")
+endif()
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
