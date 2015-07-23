@@ -235,7 +235,7 @@ public:
 			}
 			int8_t temp = payload[0];
 			LOGi("Set min env temp to %d", temp);
-			Storage::setInt8(temp, (int32_t&)_storageStruct.txPower);
+			Storage::setInt8(temp, (int32_t&)_storageStruct.minEnvTemp);
 			if (persistent) {
 				savePersistentStorage();
 			}
@@ -249,7 +249,7 @@ public:
 			}
 			int8_t temp = payload[0];
 			LOGi("Set max env temp to %d", temp);
-			Storage::setInt8(temp, (int32_t&)_storageStruct.txPower);
+			Storage::setInt8(temp, (int32_t&)_storageStruct.maxEnvTemp);
 			if (persistent) {
 				savePersistentStorage();
 			}
