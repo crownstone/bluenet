@@ -365,6 +365,9 @@ void Crownstone::setup() {
 	_sensors = new Sensors;
 #endif
 
+	_fridge = new Fridge;
+	_fridge->startTicking();
+
 	// configure drivers
 	configDrivers();
 	BLEutil::print_heap("Heap drivers: ");
@@ -469,6 +472,21 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_stack->setPasskey((uint8_t*)p_data);
 		break;
 	}
+
+#if ALERT_SERVICE==1
+	case EVT_ENV_TEMP_LOW: {
+		if (_alertService != NULL) {
+			_alertService->alert(ALERT_TEMP_LOW);
+		}
+		break;
+	}
+	case EVT_ENV_TEMP_HIGH: {
+		if (_alertService != NULL) {
+			_alertService->alert(ALERT_TEMP_HIGH);
+		}
+		break;
+	}
+#endif
 
 	}
 

@@ -20,6 +20,7 @@
 #include <services/cs_AlertService.h>
 
 #include <processing/cs_Sensors.h>
+#include <processing/cs_Fridge.h>
 
 #include <events/cs_EventListener.h>
 
@@ -41,6 +42,7 @@ private:
 
 	IBeacon* _beacon;
 	Sensors* _sensors;
+	Fridge* _fridge;
 
 	void welcome();
 
