@@ -742,9 +742,9 @@ void Nrf51822BluetoothStack::device_manager_init()
 }
 
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
-	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
-		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
-	}
+//	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
+//		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
+//	}
 
 	dm_ble_evt_handler(p_ble_evt);
 

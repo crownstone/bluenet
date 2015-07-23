@@ -288,9 +288,11 @@ void Crownstone::configure() {
 	Storage::getUint16(cfg.advInterval, advInterval, ADVERTISEMENT_INTERVAL);
 	_stack->setAdvertisingInterval(advInterval);
 
+#if ENCRYPTION==1
 	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
 	Storage::getArray(cfg.passkey, passkey, (uint8_t*)STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
 	_stack->setPasskey(passkey);
+#endif
 
 	LOGi("... done");
 }
