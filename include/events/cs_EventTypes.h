@@ -16,6 +16,8 @@ enum EventType {
 enum GeneralEventType {
 	EVT_POWER_OFF = General_Base,
 	EVT_POWER_ON,
-	EVT_ALL
+	EVT_ENV_TEMP_LOW,
+	EVT_ENV_TEMP_HIGH,
+	EVT_ALL = 0xFFFF
 };
 

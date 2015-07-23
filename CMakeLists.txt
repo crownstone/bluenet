@@ -112,6 +112,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Characteristic.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Handlers.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Softdevice.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Sensors.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Fridge.cpp")
 IF(${INDOOR_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_IndoorLocalisationService.cpp")
 ENDIF()
@@ -121,6 +122,10 @@ ENDIF()
 IF(${POWER_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_PowerService.cpp")
 ENDIF()
+IF(${ALERT_SERVICE} STRGREATER "0")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_AlertService.cpp")
+ENDIF()
+
 
 # should be only when creating iBeacon
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_iBeacon.cpp")

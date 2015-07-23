@@ -31,6 +31,7 @@ DEFAULT_ON=1
 INDOOR_SERVICE=0
 GENERAL_SERVICE=1
 POWER_SERVICE=1
+ALERT_SERVICE=0
 
 # Enable or disable characteristics
 ## General Service
@@ -84,6 +85,10 @@ TX_POWER=4
 # Default advertisement interval, in units of 0.625 ms
 # Must be between 32 and 16384
 ADVERTISEMENT_INTERVAL=80
+
+# Minimal and maximal environment temperatures
+MIN_ENV_TEMP=2
+MAX_ENV_TEMP=10
 
 # Some config introduced by anne
 RSSI_ENABLE=1

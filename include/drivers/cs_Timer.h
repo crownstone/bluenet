@@ -11,6 +11,9 @@
 
 #include <cfg/cs_Config.h>
 
+#define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz, APP_TIMER_PRESCALER)
+#define MS_TO_TICKS(ms) APP_TIMER_TICKS(ms, APP_TIMER_PRESCALER)
+
 class Timer {
 
 private:
@@ -31,7 +34,7 @@ public:
 
 	/* Create single shot timer. function will only be called once and after that timer will be
 	 * stopped
-	 * @timer_handle            An id or handle to reference the timer (actually, just a Uint32_t)
+	 * @timer_handle            An id or handle to reference the timer, set by this function (actually, just a Uint32_t)
 	 * @func                    The function to be called
 	 *
 	 * Create a timer for a specific purpose.
@@ -43,7 +46,7 @@ public:
 
 	/* Create repeated timer. Timer will continue to trigger and function will be called until the
 	 * timer is stopped
-	 * @timer_handle            An id or handle to reference the timer (actually, just a Uint32_t)
+	 * @timer_handle            An id or handle to reference the timer, set by this function (actually, just a Uint32_t)
 	 * @func                    The function to be called
 	 *
 	 * Create a timer for a specific purpose.

@@ -235,6 +235,10 @@ void Crownstone::createServices() {
 	_stack->addService(_powerService);
 #endif
 
+#if ALERT_SERVICE==1
+	_alertService = new AlertService;
+	_stack->addService(_alertService);
+#endif
 }
 
 void Crownstone::configure() {
@@ -363,6 +367,9 @@ void Crownstone::setup() {
 	_sensors = new Sensors;
 #endif
 
+	_fridge = new Fridge;
+	_fridge->startTicking();
+
 	// configure drivers
 	configDrivers();
 	BLEutil::print_heap("Heap drivers: ");
@@ -455,7 +462,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case CONFIG_TX_POWER: {
 //		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
 		_stack->setTxPowerLevel(*(int8_t*)p_data);
-//			restartAdvertising = true;
+
 		break;
 	}
 	case CONFIG_ADV_INTERVAL: {
@@ -467,6 +474,21 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_stack->setPasskey((uint8_t*)p_data);
 		break;
 	}
+
+#if ALERT_SERVICE==1
+	case EVT_ENV_TEMP_LOW: {
+		if (_alertService != NULL) {
+			_alertService->alert(ALERT_TEMP_LOW);
+		}
+		break;
+	}
+	case EVT_ENV_TEMP_HIGH: {
+		if (_alertService != NULL) {
+			_alertService->alert(ALERT_TEMP_HIGH);
+		}
+		break;
+	}
+#endif
 
 	}
 

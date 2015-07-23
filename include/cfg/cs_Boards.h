@@ -126,8 +126,8 @@
 
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 // NOTE THAT THE RX AND TX PINS ARE SWITCHED!!!
-#define PIN_GPIO_RX          2                   // this is p0.04 or gpio 4
-#define PIN_GPIO_TX          4                   // this is p0.02 or gpio 2
+#define PIN_GPIO_RX          2                   // this is p0.02 or gpio 2
+#define PIN_GPIO_TX          4                   // this is p0.04 or gpio 4
 
 #endif
 

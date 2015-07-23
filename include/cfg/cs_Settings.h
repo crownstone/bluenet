@@ -37,6 +37,8 @@ enum ConfigurationTypes {
 	CONFIG_TX_POWER                         = 0xB,
 	CONFIG_ADV_INTERVAL                     = 0xC,
 	CONFIG_PASSKEY							= 0xD,
+	CONFIG_MIN_ENV_TEMP                     = 0xE,
+	CONFIG_MAX_ENV_TEMP                     = 0xF,
 	CONFIG_TYPES
 };
 
@@ -226,6 +228,34 @@ public:
 			EventDispatcher::getInstance().dispatch(type, &_storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
 			break;
 		}
+		case CONFIG_MIN_ENV_TEMP: {
+			if (length != 1) {
+				LOGw("Expected int8_t for min env temp");
+				return;
+			}
+			int8_t temp = payload[0];
+			LOGi("Set min env temp to %d", temp);
+			Storage::setInt8(temp, (int32_t&)_storageStruct.minEnvTemp);
+			if (persistent) {
+				savePersistentStorage();
+			}
+			EventDispatcher::getInstance().dispatch(type, &_storageStruct.minEnvTemp, 1);
+			break;
+		}
+		case CONFIG_MAX_ENV_TEMP: {
+			if (length != 1) {
+				LOGw("Expected int8_t for max env temp");
+				return;
+			}
+			int8_t temp = payload[0];
+			LOGi("Set max env temp to %d", temp);
+			Storage::setInt8(temp, (int32_t&)_storageStruct.maxEnvTemp);
+			if (persistent) {
+				savePersistentStorage();
+			}
+			EventDispatcher::getInstance().dispatch(type, &_storageStruct.maxEnvTemp, 1);
+			break;
+		}
 		default:
 			LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
 		}
@@ -358,6 +388,30 @@ public:
 			LOGd("passkey set in payload: %s", std::string((char*)payload, BLE_GAP_PASSKEY_LEN).c_str());
 //			return true;
 			return false;
+		}
+		case CONFIG_MIN_ENV_TEMP: {
+			LOGd("Read min env temp");
+			loadPersistentStorage();
+			uint8_t plen = 1;
+			int8_t payload[plen];
+			Storage::getInt8(_storageStruct.minEnvTemp, payload[0], MIN_ENV_TEMP);
+			streamBuffer->setPayload((uint8_t*)payload, plen);
+			streamBuffer->setType(type);
+
+			LOGd("Min env temp set in payload: %d with len %d", payload[0], streamBuffer->length());
+			return true;
+		}
+		case CONFIG_MAX_ENV_TEMP: {
+			LOGd("Read max env temp");
+			loadPersistentStorage();
+			uint8_t plen = 1;
+			int8_t payload[plen];
+			Storage::getInt8(_storageStruct.maxEnvTemp, payload[0], MAX_ENV_TEMP);
+			streamBuffer->setPayload((uint8_t*)payload, plen);
+			streamBuffer->setType(type);
+
+			LOGd("Max env temp set in payload: %d with len %d", payload[0], streamBuffer->length());
+			return true;
 		}
 		default: {
 			LOGd("There is no such configuration type (%i), or not yet implemented.", type);
