@@ -17,6 +17,7 @@
 #include <services/cs_IndoorLocalisationService.h>
 #include <services/cs_GeneralService.h>
 #include <services/cs_PowerService.h>
+#include <services/cs_AlertService.h>
 
 #include <processing/cs_Sensors.h>
 
@@ -36,6 +37,7 @@ private:
 	GeneralService* _generalService;
 	IndoorLocalizationService* _localizationService;
 	PowerService* _powerService;
+	AlertService* _alertService;
 
 	IBeacon* _beacon;
 	Sensors* _sensors;

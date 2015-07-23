@@ -31,6 +31,7 @@ DEFAULT_ON=1
 INDOOR_SERVICE=0
 GENERAL_SERVICE=1
 POWER_SERVICE=1
+ALERT_SERVICE=0
 
 # Enable or disable characteristics
 ## General Service
