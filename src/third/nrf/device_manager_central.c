@@ -433,7 +433,7 @@ typedef uint32_t (* storage_operation)(pstorage_handle_t * p_dest,
 #if(DEVICE_MANAGER_APP_CONTEXT_SIZE != 0)
 static uint8_t *               m_app_context_table[DEVICE_MANAGER_MAX_BONDS];         /**< Table to remember application contexts of bonded devices. */
 #endif // DEVICE_MANAGER_APP_CONTEXT_SIZE
-static peer_id_t               m_peer_table[DEVICE_MANAGER_MAX_BONDS];                /**< Table to maintain bonded devices' identification information, an instance is allocated in the table when a device is bonded and freed when bond information is deleted. */
+peer_id_t               m_peer_table[DEVICE_MANAGER_MAX_BONDS];               /**< Table to maintain bonded devices' identification information, an instance is allocated in the table when a device is bonded and freed when bond information is deleted. */
 static bond_context_t          m_bond_table[DEVICE_MANAGER_MAX_CONNECTIONS];          /**< Table to maintain bond information for active peers. */
 static dm_gatts_context_t      m_gatts_table[DEVICE_MANAGER_MAX_CONNECTIONS];         /**< Table for service information for active connection instances. */
 static connection_instance_t   m_connection_table[DEVICE_MANAGER_MAX_CONNECTIONS];    /**< Table to maintain active peer information. An instance is allocated in the table when a new connection is established and freed on disconnection. */
