@@ -27,6 +27,17 @@
 //static uint8_t pwm_gpiote_channel[3];
 //static uint32_t pwm_num_channels;
 
+#ifdef SWITCH_INVERSED
+#define PWM_GPIOTE_INITIAL_VALUE   NRF_GPIOTE_INITIAL_VALUE_LOW
+#define PWM_SWITCH_ON              0
+#define PWM_SWITCH_OFF             1
+#else
+#define PWM_GPIOTE_INITIAL_VALUE   NRF_GPIOTE_INITIAL_VALUE_HIGH
+#define PWM_SWITCH_ON              1
+#define PWM_SWITCH_OFF             0
+#endif
+
+
 int32_t PWM::ppiEnableChannel(uint32_t ch_num, volatile uint32_t *event_ptr, volatile uint32_t *task_ptr) {
 	if (ch_num >= 16) return -1;
 #if(NRF51_USE_SOFTDEVICE == 1)
@@ -124,11 +135,6 @@ void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 
 	_pwmChannel = pwm_channel;
 	_pwmValue = pwm_value;
-
-#if HARDWARE_BOARD==PCA10000
-	_pwmValue = pwm_value != 0 ? 0 : 255;
-#endif
-
 	_nextValue[pwm_channel] = _pwmValue;
 
 	PWM_TIMER->EVENTS_COMPARE[3] = 0;
@@ -137,13 +143,13 @@ void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 	for (uint32_t i = 0; i < _numChannels; ++i) {
 		if(_nextValue[i] == 0) {
 			nrf_gpiote_unconfig(_gpioteChannel[i]);
-			nrf_gpio_pin_write(_gpioPin[i], 0);
+			nrf_gpio_pin_write(_gpioPin[i], PWM_SWITCH_OFF);
 			_running[i] = 0;
 		}
 		else if (_nextValue[i] >= _maxValue)
 		{
 			nrf_gpiote_unconfig(_gpioteChannel[i]);
-			nrf_gpio_pin_write(_gpioPin[i], 1);
+			nrf_gpio_pin_write(_gpioPin[i], PWM_SWITCH_ON);
 			_running[i] = 0;
 		}
 	}
@@ -159,10 +165,6 @@ void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 void PWM::getValue(uint8_t &pwm_channel, uint32_t &pwm_value) {
 	pwm_channel = _pwmChannel;
 	pwm_value = _pwmValue;
-
-#if HARDWARE_BOARD==PCA10000
-	pwm_value = _pwmValue == 0 ? 255 : 0;
-#endif
 }
 
 extern "C" void PWM_IRQHandler(void) {
@@ -177,7 +179,7 @@ extern "C" void PWM_IRQHandler(void) {
 //			PWM_TIMER->CC[i] = pwm._nextValue[i] * 2; // TODO: why times 2?
 			PWM_TIMER->CC[i] = pwm._nextValue[i];
 			if (!pwm._running[i]) {
-				nrf_gpiote_task_config(pwm._gpioteChannel[i], pwm._gpioPin[i], NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_HIGH);
+				nrf_gpiote_task_config(pwm._gpioteChannel[i], pwm._gpioPin[i], NRF_GPIOTE_POLARITY_TOGGLE, PWM_GPIOTE_INITIAL_VALUE);
 				pwm._running[i] = 1;
 			}
 		}

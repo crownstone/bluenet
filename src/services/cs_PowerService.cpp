@@ -147,7 +147,7 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setDefaultValue(255);
 	_pwmCharacteristic->setWritable(true);
 	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		//			LOGi("set pwm to %i", value);
+//		LOGi("set pwm to %i", value);
 		PWM::getInstance().setValue(0, value);
 	});
 }
