@@ -129,6 +129,9 @@
 #define PIN_GPIO_RX          2                   // this is p0.02 or gpio 2
 #define PIN_GPIO_TX          4                   // this is p0.04 or gpio 4
 
+// Switch pin should be low to switch lights on
+#define SWITCH_INVERSED
+
 #endif
 
 #if(HARDWARE_BOARD==CROWNSTONE_SENSOR)
@@ -197,6 +200,9 @@
 #define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 //#define PIN_AIN_SENSOR       4
+
+// Switch pin should be low to switch lights on
+#define SWITCH_INVERSED
 
 #endif
 
