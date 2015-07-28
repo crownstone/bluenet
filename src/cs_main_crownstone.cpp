@@ -224,6 +224,9 @@ void Crownstone::createServices() {
 	_stack->addService(_generalService);
 #endif
 
+	_deviceInformationService = new DeviceInformationService();
+	_stack->addService(_deviceInformationService);
+
 #if INDOOR_SERVICE==1
 	// now, build up the services and characteristics.
 	_localizationService = new IndoorLocalizationService;
