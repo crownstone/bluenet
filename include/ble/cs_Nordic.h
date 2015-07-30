@@ -21,6 +21,7 @@ extern "C"
 #include "ble/ble_services/ble_srv_common.h"
 #include "ble_gatts.h"
 #include "ble_gatt.h"
+#include "ble_hci.h"
 
 // Refering to files in the Nordic SDK
 #include "nrf.h"

@@ -17,6 +17,7 @@
 //#include "common/cs_Config.h"
 #include "structs/cs_BufferAccessor.h"
 #include "util/cs_BleError.h"
+#include "util/cs_Utils.h"
 
 //using namespace BLEpp;
 
@@ -197,6 +198,10 @@ public:
 		//_buffer->length = ((length > _capacity) ? _capacity : plength);
 		memcpy(_buffer->payload, payload, length * _item_size);
 		return SB_SUCCESS;
+	}
+
+	void print() {
+		BLEutil::printArray((uint8_t*)_buffer, getDataLength());
 	}
 
 	/////////// Bufferaccessor ////////////////////////////

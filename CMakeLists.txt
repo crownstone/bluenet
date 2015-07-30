@@ -75,7 +75,7 @@ MESSAGE(STATUS "Linked libraries: ${LIBS}")
 SET(SOURCE_DIR "src")
 
 # Add separately include directories if we are to lazy to specify e.g. "#include <protocol/rbc_mesh.h>"
-SET(INCLUDE_DIR "include" "include/third" "include/third/nrf" "include/third/protocol")
+SET(INCLUDE_DIR "include" "include/third" "include/third/nrf" "include/third/protocol" "include/ble")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
@@ -112,6 +112,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Characteristic.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Handlers.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Softdevice.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Sensors.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Fridge.cpp")
 IF(${INDOOR_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_IndoorLocalisationService.cpp")
 ENDIF()
@@ -121,6 +122,10 @@ ENDIF()
 IF(${POWER_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_PowerService.cpp")
 ENDIF()
+IF(${ALERT_SERVICE} STRGREATER "0")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_AlertService.cpp")
+ENDIF()
+
 
 # should be only when creating iBeacon
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_iBeacon.cpp")
@@ -142,6 +147,12 @@ else()
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/app_timer.c")
 endif()
 
+IF(${SOFTDEVICE_SERIES} STREQUAL "110")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/device_manager_peripheral.c")
+else()
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/device_manager_central.c")
+endif()
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
 FOREACH(crownstone_file ${FOLDER_SOURCE})
@@ -159,6 +170,8 @@ LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/app_scheduler.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/app_common/pstorage.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/nrf_delay/nrf_delay.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/sd_common/softdevice_handler.c")
+#LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/ble/device_manager/device_manager_peripheral.c")
+#LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/Source/ble/device_manager/device_manager_central.c")
 
 FOREACH(nordic_file ${NORDIC_SOURCE})
 	MESSAGE(STATUS "Include Nordic file: " ${nordic_file})
@@ -175,9 +188,11 @@ INCLUDE_DIRECTORIES(${INCLUDE_DIR})
 # Add to the -I flags
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/app_common")
+INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/sdk")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble")
 #INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble/softdevice")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble/ble_services")
+INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/ble/device_manager")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/Include/gcc")
 
 # Recent changes in directory structure with new SDK
@@ -200,7 +215,7 @@ IF(FOLDER_SOURCE STREQUAL "")
 	MESSAGE(FATAL_ERROR "No source code files found. Please add something")
 ELSE()
 	ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES})
-	
+
 	# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
 	ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.tmp
 		COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -j .text -j .data -O binary ${PROJECT_NAME} ${PROJECT_NAME}.tmp

@@ -245,7 +245,7 @@ public:
 
 protected:
 
-	virtual void configurePresentationFormat(ble_gatts_char_pf_t &) {}
+	virtual bool configurePresentationFormat(ble_gatts_char_pf_t &) { return false; }
 
 	/* Any error in <notify> evokes onNotifyTxError.
 	 */
@@ -507,11 +507,12 @@ protected:
 	}
 
 
-	virtual void configurePresentationFormat(ble_gatts_char_pf_t& presentation_format) {
+	virtual bool configurePresentationFormat(ble_gatts_char_pf_t& presentation_format) {
 		presentation_format.format = ble_type<T>();
 		presentation_format.name_space = BLE_GATT_CPF_NAMESPACE_BTSIG;
 		presentation_format.desc = BLE_GATT_CPF_NAMESPACE_DESCRIPTION_UNKNOWN;
 		presentation_format.exponent = 1;
+		return true;
 	}
 
 private:

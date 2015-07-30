@@ -235,20 +235,15 @@ void Crownstone::createServices() {
 	_stack->addService(_powerService);
 #endif
 
+#if ALERT_SERVICE==1
+	_alertService = new AlertService;
+	_stack->addService(_alertService);
+#endif
 }
 
-void Crownstone::setup() {
-	welcome();
+void Crownstone::configure() {
 
-	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
-
-	EventDispatcher::getInstance().addListener(this);
-
-	LOGi("Create Timer");
-	Timer::getInstance();
-
-	// set up the bluetooth stack that controls the hardware.
-	_stack = &Nrf51822BluetoothStack::getInstance();
+	LOGi("Configure stack ...");
 
 	// configure parameters for the Bluetooth stack
 	configStack();
@@ -256,6 +251,8 @@ void Crownstone::setup() {
 	// start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	// in particular we need it to set interrupt priorities.
 	_stack->init();
+
+	LOGi("Loading configuration");
 
 	ps_configuration_t cfg = Settings::getInstance().getConfig();
 
@@ -290,6 +287,31 @@ void Crownstone::setup() {
 	uint16_t advInterval;
 	Storage::getUint16(cfg.advInterval, advInterval, ADVERTISEMENT_INTERVAL);
 	_stack->setAdvertisingInterval(advInterval);
+
+#if ENCRYPTION==1
+	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
+	Storage::getArray(cfg.passkey, passkey, (uint8_t*)STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
+	_stack->setPasskey(passkey);
+#endif
+
+	LOGi("... done");
+}
+
+void Crownstone::setup() {
+	welcome();
+
+	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
+
+	EventDispatcher::getInstance().addListener(this);
+
+	LOGi("Create Timer");
+	Timer::getInstance();
+
+	// set up the bluetooth stack that controls the hardware.
+	_stack = &Nrf51822BluetoothStack::getInstance();
+
+	// configuration has to be done after the stack was created!
+	configure();
 
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
@@ -339,9 +361,14 @@ void Crownstone::setup() {
 
 	createServices();
 
+	_stack->device_manager_init();
+
 #if HARDWARE_BOARD==CROWNSTONE_SENSOR
 	_sensors = new Sensors;
 #endif
+
+	_fridge = new Fridge;
+	_fridge->startTicking();
 
 	// configure drivers
 	configDrivers();
@@ -432,11 +459,10 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 #endif
-
 	case CONFIG_TX_POWER: {
 //		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
 		_stack->setTxPowerLevel(*(int8_t*)p_data);
-//			restartAdvertising = true;
+
 		break;
 	}
 	case CONFIG_ADV_INTERVAL: {
@@ -444,7 +470,25 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		restartAdvertising = true;
 		break;
 	}
+	case CONFIG_PASSKEY: {
+		_stack->setPasskey((uint8_t*)p_data);
+		break;
+	}
 
+#if ALERT_SERVICE==1
+	case EVT_ENV_TEMP_LOW: {
+		if (_alertService != NULL) {
+			_alertService->alert(ALERT_TEMP_LOW);
+		}
+		break;
+	}
+	case EVT_ENV_TEMP_HIGH: {
+		if (_alertService != NULL) {
+			_alertService->alert(ALERT_TEMP_HIGH);
+		}
+		break;
+	}
+#endif
 
 	}
 

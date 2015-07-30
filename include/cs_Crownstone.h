@@ -17,8 +17,10 @@
 #include <services/cs_IndoorLocalisationService.h>
 #include <services/cs_GeneralService.h>
 #include <services/cs_PowerService.h>
+#include <services/cs_AlertService.h>
 
 #include <processing/cs_Sensors.h>
+#include <processing/cs_Fridge.h>
 
 #include <events/cs_EventListener.h>
 
@@ -36,9 +38,11 @@ private:
 	GeneralService* _generalService;
 	IndoorLocalizationService* _localizationService;
 	PowerService* _powerService;
+	AlertService* _alertService;
 
 	IBeacon* _beacon;
 	Sensors* _sensors;
+	Fridge* _fridge;
 
 	void welcome();
 
@@ -47,6 +51,8 @@ private:
 	void configDrivers();
 
 	void createServices();
+
+	void configure();
 
 public:
 	Crownstone() : _stack(NULL),

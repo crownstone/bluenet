@@ -1,7 +1,7 @@
 #!/bin/bash
 
 crnt_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $crnt_path/config.sh
+source $crnt_path/_config.sh
 
 mkdir -p ../build/doc
 cd ../build/doc

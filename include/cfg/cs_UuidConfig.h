@@ -20,6 +20,7 @@
 #define POWER_UUID                          "5b8d0000-6f20-11e4-b116-123b93f75cba"
 #define GENERAL_UUID                        "f5f90000-59f9-11e4-aa15-123b93f75cba"
 #define INDOORLOCALISATION_UUID             "7e170000-429c-41aa-83d7-d91220abeb33"
+#define ALERT_UUID                          "33690000-2a0a-11e5-b345-feff819cdc9f"
 
 /* Characteristic UUIDs */
 
@@ -49,4 +50,12 @@ enum IndoorLocalizationCharacteristicsIDs {
 	SCAN_DEVICE_UUID                        = 0x3,
 	LIST_DEVICE_UUID                        = 0x4,
 	TRACKED_DEVICE_LIST_UUID                = 0x5,
+};
+
+enum AlertCharacteristicsIDs {
+	SUPPORTED_NEW_ALERT_UUID                = 0x1,
+	NEW_ALERT_UUID                          = 0x2,
+	SUPPORTED_UNREAD_ALERT_UUID             = 0x3,
+	UNREAD_ALERT_UUID                       = 0x4,
+	ALERT_CONTROL_POINT_UUID                = 0x5,
 };

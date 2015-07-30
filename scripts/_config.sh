@@ -17,4 +17,3 @@ if [ ! -e ${BLUENET_CONFIG_DIR}/CMakeBuild.config ]; then
 	exit 1
 fi
 source ${BLUENET_CONFIG_DIR}/CMakeBuild.config
-

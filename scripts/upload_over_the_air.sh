@@ -1,7 +1,7 @@
 #!/bin/bash
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/config.sh
+source $path/_config.sh
 
 PROGRAM=crownstone.hex
 ADDRESS=F2:E1:DE:0D:92:30

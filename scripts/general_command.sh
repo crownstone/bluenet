@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=jlink
 
-source config.sh
+source _config.sh
 
 DEVICE=nrf51822
 

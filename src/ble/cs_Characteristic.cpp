@@ -40,23 +40,23 @@ CharacteristicBase& CharacteristicBase::setName(const char * const name) {
  * The same is true if this buffer is reused across characteristics. If it is meant as data for one characteristic
  * and is read through another, this will resolve to nonsense to the user.
  */
-void CharacteristicBase::setAttrMdReadOnly(ble_gatts_attr_md_t& md, char vloc) {
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.read_perm);
-	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&md.write_perm);
-	md.vloc = vloc;
-	md.rd_auth = 0; // don't request read access every time a read is attempted.
-	md.wr_auth = 0;  // ditto for write.
-	md.vlen = 1;  // variable length.
-}
+//void CharacteristicBase::setAttrMdReadOnly(ble_gatts_attr_md_t& md, char vloc) {
+////	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&md.read_perm);
+////	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&md.write_perm);
+//	md.vloc = vloc;
+//	md.rd_auth = 0; // don't request read access every time a read is attempted.
+//	md.wr_auth = 0;  // ditto for write.
+//	md.vlen = 1;  // variable length.
+//}
 
-void CharacteristicBase::setAttrMdReadWrite(ble_gatts_attr_md_t& md, char vloc) {
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.read_perm);
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.write_perm);
-	md.vloc = vloc;
-	md.rd_auth = 0; // don't request read access every time a read is attempted.
-	md.wr_auth = 0;  // ditto for write.
-	md.vlen = 1;  // variable length.
-}
+//void CharacteristicBase::setAttrMdReadWrite(ble_gatts_attr_md_t& md, char vloc) {
+//	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.read_perm);
+//	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.write_perm);
+//	md.vloc = vloc;
+//	md.rd_auth = 0; // don't request read access every time a read is attempted.
+//	md.wr_auth = 0;  // ditto for write.
+//	md.vlen = 1;  // variable length.
+//}
 
 /*
 CharacteristicBase& CharacteristicBase::setUnit(uint16_t unit) {
@@ -82,62 +82,108 @@ void CharacteristicBase::init(Service* svc) {
 
 	CharacteristicInit ci;
 
-	// by default:
+    memset(&ci.char_md, 0, sizeof(ci.char_md));
+	setupWritePermissions(ci);
 
-	ci.char_md.char_props.read = 1; // allow read
-	ci.char_md.char_props.notify = 1; // allow notification
-	ci.char_md.char_props.broadcast = 0; // allow broadcast
-	ci.char_md.char_props.indicate = 0; // allow indication
+	////////////////////////////////////////////////////////////////
+	// attribute metadata for client characteristic configuration //
+	////////////////////////////////////////////////////////////////
 
-	// initially readable but not writeable
-	setAttrMdReadWrite(ci.cccd_md, BLE_GATTS_VLOC_STACK);
-	setAttrMdReadOnly(ci.sccd_md, BLE_GATTS_VLOC_STACK);
-	setAttrMdReadOnly(ci.attr_md, BLE_GATTS_VLOC_USER);
+    memset(&ci.cccd_md, 0, sizeof(ci.cccd_md));
+	ci.cccd_md.vloc = BLE_GATTS_VLOC_STACK;
+	ci.cccd_md.vlen = 1;
 
-	// these characteristic descriptors are optional, and I gather, not really used by anything.
-	// we fill them in if the user specifies any of the data (eg name).
-	ci.char_md.p_char_user_desc = NULL;
-	ci.char_md.p_char_pf = NULL;
-	ci.char_md.p_user_desc_md = NULL;
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.read_perm); // required
+
+#if ENCRYPTION==0
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.write_perm);
+#else
+	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.cccd_md.write_perm);
+#endif
+
 	ci.char_md.p_cccd_md = &ci.cccd_md; // the client characteristic metadata.
-	//  _char_md.p_sccd_md         = &_sccd_md;
+
+	/////////////////////
+	// attribute value //
+	/////////////////////
 
 	_uuid.init();
 	ble_uuid_t uuid = _uuid;
 
-	ci.attr_char_value.p_attr_md = &ci.attr_md;
+    memset(&ci.attr_char_value, 0, sizeof(ci.attr_char_value));
+
+	ci.attr_char_value.p_uuid = &uuid;
 
 	ci.attr_char_value.init_offs = 0;
 	ci.attr_char_value.init_len = getValueLength();
 	ci.attr_char_value.max_len = getValueMaxLength();
 	ci.attr_char_value.p_value = getValuePtr();
 
+	LOGd("%s init with buffer[%i] with %p", _name, getValueLength(), getValuePtr());
+
+	////////////////////////
+	// attribute metadata //
+	////////////////////////
+
+    memset(&ci.attr_md, 0, sizeof(ci.attr_md));
+	ci.attr_md.vloc = BLE_GATTS_VLOC_USER;
+	ci.attr_md.vlen = 1;
+
+#if ENCRYPTION==0
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.write_perm);
+#else
+	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.write_perm);
+#endif
+	ci.attr_char_value.p_attr_md = &ci.attr_md;
+
+	/////////////////////////////////////
+	// Characteristic User Description //
+	/////////////////////////////////////
+
+	// these characteristic descriptors are optional, and I gather, not really used by anything.
+	// we fill them in if the user specifies any of the data (eg name).
+	ci.char_md.p_char_user_desc = NULL;
+	ci.char_md.p_user_desc_md = NULL;
+
 	std::string name = std::string(_name);
-
-	LOGd("%s init with buffer[%i] with %p", name.c_str(), getValueLength(), getValuePtr());
-
-	ci.attr_char_value.p_uuid = &uuid;
-
-	setupWritePermissions(ci);
-
 	if (!name.empty()) {
 		ci.char_md.p_char_user_desc = (uint8_t*) name.c_str(); // todo utf8 conversion?
 		ci.char_md.char_user_desc_size = name.length();
 		ci.char_md.char_user_desc_max_size = name.length();
+
+		// This is the metadata (eg security settings) for the description of this characteristic.
+		memset(&ci.user_desc_metadata_md, 0, sizeof(ci.user_desc_metadata_md));
+
+		ci.user_desc_metadata_md.vloc = BLE_GATTS_VLOC_STACK;
+		ci.user_desc_metadata_md.vlen = 1;
+
+#if ENCRYPTION==0
+		BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
+#else
+		BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.user_desc_metadata_md.read_perm);
+#endif
+
+		BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&ci.user_desc_metadata_md.write_perm); // required
+
+		ci.char_md.p_user_desc_md = &ci.user_desc_metadata_md;
 	}
 
-	// This is the metadata (eg security settings) for the description of this characteristic.
-	ci.char_md.p_user_desc_md = &ci.user_desc_metadata_md;
+	/////////////////////////
+	// Presentation Format //
+	/////////////////////////
 
-	setAttrMdReadOnly(ci.user_desc_metadata_md, BLE_GATTS_VLOC_STACK);
+	// presentation format is optional, only fill out if characteristic supports
 
-	this->configurePresentationFormat(ci.presentation_format);
-	ci.presentation_format.unit = 0; //_unit;
-	ci.char_md.p_char_pf = &ci.presentation_format;
+	ci.char_md.p_char_pf = NULL;
+	if (configurePresentationFormat(ci.presentation_format)) {
+		ci.presentation_format.unit = 0; //_unit;
+		ci.char_md.p_char_pf = &ci.presentation_format;
+	}
 
-	volatile uint16_t svc_handle = svc->getHandle();
-
-	uint32_t err_code = sd_ble_gatts_characteristic_add(svc_handle, &ci.char_md, &ci.attr_char_value, &_handles);
+	// add all
+	uint32_t err_code = sd_ble_gatts_characteristic_add(svc->getHandle(), &ci.char_md, &ci.attr_char_value, &_handles);
 	if (err_code != NRF_SUCCESS) {
 		LOGe(MSG_BLE_CHAR_CREATION_ERROR);
 		APP_ERROR_CHECK(err_code);
@@ -163,29 +209,13 @@ void CharacteristicBase::init(Service* svc) {
  *
  */
 void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
-	// Dominik: why set it if the whole struct is being overwritten anyway futher down??!!
-	//	ci.attr_md.write_perm.sm = _writable ? 1 : 0;
-	//	ci.attr_md.write_perm.lv = _writable ? 1 : 0;
+	ci.char_md.char_props.read = 1; // allow read
+	ci.char_md.char_props.broadcast = 0; // don't allow broadcast
 	ci.char_md.char_props.write = _status.writable ? 1 : 0;
-	// Dominik: why is write wo response automatically enabled when writable? shouldn't it
-	//  be handled independently?!
-//	ci.char_md.char_props.write_wo_resp = _status.writable ? 1 : 0;
 	ci.char_md.char_props.notify = _status.notifies ? 1 : 0;
-	// Dominik: agreed, indications seem to be almost the same as notifications, but they
-	//  are not totally the same, so why set them together? they should be handled
-	//  independently!!
-	// ci.char_md.char_props.indicate = _notifies ? 1 : 0;
 	ci.char_md.char_props.indicate = _status.indicates ? 1 : 0;
-	ci.attr_md.write_perm = _writeperm;
-	// Dominik: this overwrites the write permissions based on the security mode,
-	// so even setting writable to false will always have the write permissions set
-	// to true because security mode of 0 / 0 is not defined by the Bluetooth Core
-	// specification anyway. security mode is always at least 1 / 1. Doesnt make sense !!!
-	//	ci.char_md.char_props.write = ci.cccd_md.write_perm.lv > 0 ? 1 :0;
-	//	ci.char_md.char_props.write_wo_resp = ci.cccd_md.write_perm.lv > 0 ? 1 :0;
 
-   // BART
-	//ci.char_md.char_ext_props.reliable_wr = _status.writable ? 1 : 0;
+	ci.attr_md.write_perm = _writeperm;
 }
 
 uint32_t CharacteristicBase::notify() {
