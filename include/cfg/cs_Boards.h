@@ -25,6 +25,7 @@
 #define CROWNSTONE_SENSOR    9
 #define PCA10000             10
 #define CROWNSTONE3          11
+#define CROWNSTONE4          12
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
@@ -86,7 +87,7 @@
 #endif
 
 #if(HARDWARE_BOARD==CROWNSTONE2)
-
+// v0.8x
 #define PIN_GPIO_LED0        8                   // something we don't use!
 #define PIN_GPIO_LED1        8                   // something we don't use!
 #define PIN_GPIO_LED2        8                   // something we don't use!
@@ -107,7 +108,7 @@
 #endif
 
 #if(HARDWARE_BOARD==CROWNSTONE3)
-
+// v0.90
 #define PIN_GPIO_LED0        8                   // something we don't use!
 #define PIN_GPIO_LED1        8                   // something we don't use!
 #define PIN_GPIO_LED2        8                   // something we don't use!
@@ -121,8 +122,8 @@
 #define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 #define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 
-#define PIN_CURRENT_SENSE                        // gpio 1
-#define PIN_VOLTAGE_SENSE                        // gpio 6
+#define PIN_CURRENT_SENSE    2                   // ain2 is gpio 1
+#define PIN_VOLTAGE_SENSE    7                   // ain7 is gpio 6
 
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 // NOTE THAT THE RX AND TX PINS ARE SWITCHED!!!
@@ -133,6 +134,35 @@
 #define SWITCH_INVERSED
 
 #endif
+
+#if(HARDWARE_BOARD==CROWNSTONE4)
+// v0.92
+#define PIN_GPIO_LED0        8                   // something we don't use!
+#define PIN_GPIO_LED1        8                   // something we don't use!
+#define PIN_GPIO_LED2        8                   // something we don't use!
+#define PIN_GPIO_LED3        8                   // something we don't use!
+#define PIN_GPIO_LED4        8                   // something we don't use!
+#define PIN_GPIO_LED5        8                   // something we don't use!
+#define PIN_GPIO_LED6        8                   // something we don't use!
+#define PIN_GPIO_LED7        8                   // something we don't use!
+
+#define PIN_GPIO_SWITCH      4                   // this is p0.04 or gpio 4
+#define PIN_GPIO_RELAIS      0                   // this is p0.00 or gpio 0
+#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
+#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
+
+#define PIN_CURRENT_SENSE    2                   // ain2 is p0.01 or gpio 1
+#define PIN_VOLTAGE_SENSE    7                   // ain7 is p0.06 or gpio 6
+
+#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
+#define PIN_GPIO_RX          2                   // this is p0.02 or gpio 2
+#define PIN_GPIO_TX          3                   // this is p0.03 or gpio 3
+
+// Switch pin should be low to switch lights on
+#define SWITCH_INVERSED
+
+#endif
+
 
 #if(HARDWARE_BOARD==CROWNSTONE_SENSOR)
 
