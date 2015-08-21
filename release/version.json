@@ -1,3 +1,12 @@
-{
-	"version": "0.0.1"
-}
+[
+	{
+		"version": "0.0.1",
+		"hardware": "A-3C",
+		"firmware": "pca10000.bin"
+	},
+	{
+		"version": "0.0.2",
+		"hardware": "0-3C",
+		"firmware": "pca10001.bin"
+	}
+]
