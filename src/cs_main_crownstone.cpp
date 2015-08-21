@@ -363,7 +363,7 @@ void Crownstone::setup() {
 
 	_stack->device_manager_init();
 
-#if HARDWARE_BOARD==CROWNSTONE_SENSOR
+#if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 	_sensors = new Sensors;
 #endif
 
@@ -413,7 +413,7 @@ void Crownstone::run() {
 
 	_stack->startTicking();
 
-#if (HARDWARE_BOARD==CROWNSTONE_SENSOR)
+#if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();
 #endif
 
