@@ -38,13 +38,6 @@ protected:
 //	void addSystemIDCharacteristic();
 //	void addRegulatoryCertificationDataListCharacteristic();
 
-//	void addSupportedNewAlertCharacteristic();
-//	void addNewAlertCharacteristic();
-//	void addSupportedUnreadAlertCharacteristic();
-//	void addUnreadAlertCharacteristic();
-//	void addControlPointCharacteristic();
-
-
 private:
 	// References to characteristics that need to be written from other functions
 //	BLEpp::Characteristic<std::string> *_manufacturerNameCharacteristic;
