@@ -8,5 +8,10 @@
 		"version": "0.0.2",
 		"hardware": "0-3C",
 		"firmware": "pca10001.bin"
+	},
+	{
+		"version": "0.0.1",
+		"hardware": "8-1D",
+		"firmware": "crownstone2.bin"
 	}
 ]
