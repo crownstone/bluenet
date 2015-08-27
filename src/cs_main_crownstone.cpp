@@ -239,6 +239,11 @@ void Crownstone::createServices() {
 	_alertService = new AlertService;
 	_stack->addService(_alertService);
 #endif
+
+#if SCHEDULE_SERVICE==1
+	_scheduleService = new ScheduleService;
+	_stack->addService(_scheduleService);
+#endif
 }
 
 void Crownstone::configure() {

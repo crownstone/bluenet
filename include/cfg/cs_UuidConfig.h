@@ -21,6 +21,7 @@
 #define GENERAL_UUID                        "f5f90000-59f9-11e4-aa15-123b93f75cba"
 #define INDOORLOCALISATION_UUID             "7e170000-429c-41aa-83d7-d91220abeb33"
 #define ALERT_UUID                          "33690000-2a0a-11e5-b345-feff819cdc9f"
+#define SCHEDULE_UUID                       "96d24000-4bcf-11e5-885d-feff819cdc9f"
 
 /* Characteristic UUIDs */
 
@@ -58,4 +59,8 @@ enum AlertCharacteristicsIDs {
 	SUPPORTED_UNREAD_ALERT_UUID             = 0x3,
 	UNREAD_ALERT_UUID                       = 0x4,
 	ALERT_CONTROL_POINT_UUID                = 0x5,
+};
+
+enum ScheduleCharacteristicsIDs {
+	CURRENT_TIME_UUID                       = 0x1,
 };
