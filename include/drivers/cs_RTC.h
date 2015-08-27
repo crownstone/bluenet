@@ -16,7 +16,8 @@
 /* Clock frequency of the RTC timer */
 #define RTC_CLOCK_FREQ          32768
 /* Maximum value of the RTC counter. */
-#define MAX_RTC_COUNTER_VAL     0x0007FFFF
+//#define MAX_RTC_COUNTER_VAL     0x0007FFFF // Where did this come from?
+#define MAX_RTC_COUNTER_VAL     0x00FFFFFF
 
 /*
  * Wrapper class for RTC functions.
@@ -60,12 +61,30 @@ public:
 
 	// return current clock in ms
 	inline static uint32_t now() {
+		return ticksToMs(getCount());
+	}
+
+	/* Return time in ms, given time in ticks */
+	inline static uint32_t ticksToMs(uint32_t ticks) {
 #if NRF51_USE_SOFTDEVICE==1
-		return getCount() / (RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
-//		return (uint32_t)ROUNDED_DIV(getCount(), (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
+		// Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
+		return ticks * (NRF_RTC0->PRESCALER + 1) / RTC_CLOCK_FREQ * 1000;
+//		return (uint32_t)ROUNDED_DIV(ticks, (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
 #else
-		return getCount() / (APP_TIMER_CLOCK_FREQ / (NRF_RTC1->PRESCALER + 1) / 1000);
-//		return (uint32_t)ROUNDED_DIV(getCount(), (uint64_t)APP_TIMER_CLOCK_FREQ / (NRF_RTC1->PRESCALER + 1) / 1000);
+		return ticks * (NRF_RTC1->PRESCALER + 1) / APP_TIMER_CLOCK_FREQ * 1000;
+//		return (uint32_t)ROUNDED_DIV(ticks, (uint64_t)APP_TIMER_CLOCK_FREQ / (NRF_RTC1->PRESCALER + 1) / 1000);
+#endif
+	}
+
+	/* Return time in ticks, given time in ms
+	 * Make sure time in ms is not too large! (limit is about 120,000 ms with current frequency)
+	 */
+	inline static uint32_t msToTicks(uint32_t ms) {
+#if NRF51_USE_SOFTDEVICE==1
+		// Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
+		return ms * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000;
+#else
+		return ms * APP_TIMER_CLOCK_FREQ / (NRF_RTC1->PRESCALER + 1) / 1000;
 #endif
 	}
 };
