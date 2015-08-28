@@ -372,8 +372,11 @@ void Crownstone::setup() {
 	_sensors = new Sensors;
 #endif
 
+	// TODO: other check than #if alert_service==1
+#if ALERT_SERVICE==1
 	_fridge = new Fridge;
 	_fridge->startTicking();
+#endif
 
 	// configure drivers
 	configDrivers();
