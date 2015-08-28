@@ -212,14 +212,14 @@ void Crownstone::configDrivers() {
 void Crownstone::createServices() {
 	LOGi("Create all services");
 
+	_deviceInformationService = new DeviceInformationService();
+	_stack->addService(_deviceInformationService);
+
 #if GENERAL_SERVICE==1
 	// general services, such as internal temperature, setting names, etc.
 	_generalService = new GeneralService;
 	_stack->addService(_generalService);
 #endif
-
-	_deviceInformationService = new DeviceInformationService();
-	_stack->addService(_deviceInformationService);
 
 #if INDOOR_SERVICE==1
 	// now, build up the services and characteristics.
