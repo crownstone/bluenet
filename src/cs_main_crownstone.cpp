@@ -411,8 +411,11 @@ void Crownstone::setup() {
 	LOGi("Set power ON by default");
 	nrf_delay_ms(1000);
 	_powerService->turnOn();
-#else
+#endif
+#if (POWER_SERVICE==1) and (DEFAULT_ON==0)
 	LOGi("Set power OFF by default");
+	nrf_delay_ms(1000);
+	_powerService->turnOff();
 #endif
 
 }
