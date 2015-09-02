@@ -26,6 +26,7 @@ static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVI
  * Configure the UART. Currently we set it on 38400 baud.
  */
 void config_uart() {
+#if SERIAL_VERBOSITY<NONE
 	// Enable UART
 	NRF_UART0->ENABLE = 0x04;
 
@@ -39,6 +40,7 @@ void config_uart() {
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
 	NRF_UART0->EVENTS_TXDRDY = 0;
+#endif
 }
 
 /**
