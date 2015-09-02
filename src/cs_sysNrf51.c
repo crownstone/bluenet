@@ -142,12 +142,10 @@ void ResetHandler(void) {
 	*(uint32_t *)0x40000504 = 0xC007FFDF;
 	*(uint32_t *)0x40006C18 = 0x00008000;
 #endif
-	// start up crystal HF clock.
-	NRF_CLOCK->TASKS_HFCLKSTART = 1;
-	while(!NRF_CLOCK->EVENTS_HFCLKSTARTED) /* wait */;
 
 	// start up crystal LF clock.
-//#ifdef RFDUINO
+	NRF_CLOCK->EVENTS_LFCLKSTARTED = 0;
+#if LOW_POWER_MODE==0
 	/**
 	 * The RFduino synthesizes the low frequency clock from the high frequency clock. There is no external crystal
 	 * that can be used. It doesn't seem from the datasheets that there is a pin open for a crystal...
@@ -155,12 +153,24 @@ void ResetHandler(void) {
 	 *
 	 * Clock runs on 32768 Hz and is generated from the 16 MHz system clock
 	 */
+	// start up crystal HF clock.
+	NRF_CLOCK->TASKS_HFCLKSTART = 1;
+	while(!NRF_CLOCK->EVENTS_HFCLKSTARTED) /* wait */;
+
 	NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_Synth;
-//#else
-//	NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_Xtal;
-//#endif
+#else
+	// TODO: make dependable on board
+
+	// Best option, but requires a 32kHz crystal on the pcb
+//	NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_Xtal << CLOCK_LFCLKSRC_SRC_Pos;
+
+	// Internal oscillator
+    NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_RC << CLOCK_LFCLKSRC_SRC_Pos;
+#endif
+
 	NRF_CLOCK->TASKS_LFCLKSTART = 1;
 	while(!NRF_CLOCK->EVENTS_LFCLKSTARTED) /* wait */;
+//	NRF_CLOCK->EVENTS_LFCLKSTARTED = 0;
 
 	/*
 	 * There are two power modes in the nRF51, system ON, and system OFF. The former has two sub power modes. The
@@ -168,8 +178,12 @@ void ResetHandler(void) {
 	 * power, the former keeps the CPU wakeup latency and automated task response at a minimum, but some resources
 	 * will be kept active when the device is in sleep mode, such as the 16MHz clock.
 	 */
+#if LOW_POWER_MODE==0
 	// enable constant latency mode.
 	NRF_POWER->TASKS_CONSTLAT = 1;
+#else
+	NRF_POWER->TASKS_LOWPWR = 1;
+#endif
 
 	uint32_t *src = (uint32_t*)&_etext;
 	uint32_t *dest = (uint32_t*)&_sdata;

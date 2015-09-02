@@ -138,8 +138,10 @@ void GPIOTE_IRQHandler(void)
  * is not available in the final product.
  */
 void Crownstone::welcome() {
+#if LOW_POWER_MODE==0
 	nrf_gpio_cfg_output(PIN_GPIO_LED0);
 	nrf_gpio_pin_set(PIN_GPIO_LED0);
+#endif
 	config_uart();
 	_log(INFO, "\r\n");
 	BLEutil::print_heap("Heap init");
@@ -186,6 +188,14 @@ void Crownstone::setName() {
  * There is no whitelist defined, nor peer addresses.
  */
 void Crownstone::configStack() {
+#if LOW_POWER_MODE==0
+	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM);
+#else
+	// TODO: depends on board!
+//	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_XTAL_50_PPM);
+	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_4000MS_CALIBRATION);
+#endif
+
 	_stack->setTxPowerLevel(TX_POWER);
 	_stack->setMinConnectionInterval(16);
 	_stack->setMaxConnectionInterval(32);
@@ -199,19 +209,23 @@ void Crownstone::configStack() {
  * This must be called after the SoftDevice has started.
  */
 void Crownstone::configDrivers() {
+#if PWM_ENABLE==1
 	pwm_config_t pwm_config;
 	pwm_config.num_channels = 1;
 	pwm_config.gpio_pin[0] = PIN_GPIO_SWITCH;
 	pwm_config.mode = PWM_MODE_976;
 
 	PWM::getInstance().init(&pwm_config);
+#endif
 
+#if LOW_POWER_MODE==0
 #if HARDWARE_BOARD==PCA10001
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 #endif
 #if HARDWARE_BOARD==PCA10000
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 	nrf_gpio_pin_set(PIN_GPIO_LED_CON);
+#endif
 #endif
 }
 
@@ -329,12 +343,14 @@ void Crownstone::setup() {
 		sd_ble_gap_rssi_start(conn_handle);
 #endif
 
+#if LOW_POWER_MODE==0
 #if HARDWARE_BOARD==PCA10001
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
 //#if HARDWARE_BOARD==PCA10000
 //		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 //#endif
+#endif
 	});
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
@@ -343,12 +359,14 @@ void Crownstone::setup() {
 		// of course this is not nice, but dirty! we immediately start advertising automatically after being
 		// disconnected. but for now this will be the default behaviour.
 
+#if LOW_POWER_MODE==0
 #if HARDWARE_BOARD==PCA10001
 		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
 //#if HARDWARE_BOARD==PCA10000
 //		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 //#endif
+#endif
 
 		bool wasScanning = _stack->isScanning();
 		_stack->stopScanning();
