@@ -174,7 +174,7 @@ void Crownstone::setName() {
  *
  * Data is transmitted with TX_POWER dBm.
  *
- * On transmission of data within a connection
+ * On transmission of data within a connection (higher interval -> lower power consumption, slow communication)
  *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 20 ms)
  *   - maximum connection interval (in steps of 1.25 ms, 32*1.25 = 40 ms)
  * The supervision timeout multiplier is 400
@@ -433,9 +433,9 @@ void Crownstone::run() {
 		app_sched_execute();
 
 #if(NORDIC_SDK_VERSION > 5)
-	BLE_CALL(sd_app_evt_wait, ());
+		BLE_CALL(sd_app_evt_wait, ());
 #else
-	BLE_CALL(sd_app_event_wait, () );
+		BLE_CALL(sd_app_event_wait, () );
 #endif
 
 	}

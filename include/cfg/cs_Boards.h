@@ -200,7 +200,7 @@
 #define PIN_GPIO_LED1        LED_RGB_GREEN       // led
 
 #define PIN_GPIO_LED_CON     LED_RGB_GREEN       // shows connection state on the evaluation board
-#define PIN_GPIO_SWITCH      LED_RGB_BLUE        // toggle red led
+#define PIN_GPIO_SWITCH      LED_RGB_BLUE        // toggle led
 
 #define PIN_GPIO_RX          11                  // this is p0.11 or gpio 11
 #define PIN_GPIO_TX          9                   // this is p0.09 or gpio 9
