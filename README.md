@@ -1,3 +1,7 @@
+# Kickstarter
+
+Currently the Crownstone is on Kickstarter! [Pledge](https://www.kickstarter.com/projects/dobots/crownstone) and make open-firmware a thing of the future!
+
 # Indoor Localization with BLE
 
 This project aims at a wireless network with BLE nodes that use their mutual signal strengths to build up a network with their relative locations. This can be used later by someone carrying a smartphone to establish their location indoors. Everybody say that they can do it, but very few solutions are actually out there. Let's hope we can change that.
