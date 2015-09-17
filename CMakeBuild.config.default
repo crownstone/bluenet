@@ -7,6 +7,10 @@ BLUETOOTH_NAME="crown"
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=0
 
+# Options to save energy
+LOW_POWER_MODE=0
+PWM_ENABLE=1
+
 # define the iBeacon advertisement package parameters
 # the proximity UUID.
 # only applies if IBEACON==1
@@ -32,6 +36,7 @@ INDOOR_SERVICE=0
 GENERAL_SERVICE=1
 POWER_SERVICE=1
 ALERT_SERVICE=0
+SCHEDULE_SERVICE=0
 
 # Enable or disable characteristics
 ## General Service

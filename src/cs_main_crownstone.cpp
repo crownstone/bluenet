@@ -138,8 +138,10 @@ void GPIOTE_IRQHandler(void)
  * is not available in the final product.
  */
 void Crownstone::welcome() {
+#if LOW_POWER_MODE==0
 	nrf_gpio_cfg_output(PIN_GPIO_LED0);
 	nrf_gpio_pin_set(PIN_GPIO_LED0);
+#endif
 	config_uart();
 	_log(INFO, "\r\n");
 	BLEutil::print_heap("Heap init");
@@ -174,7 +176,7 @@ void Crownstone::setName() {
  *
  * Data is transmitted with TX_POWER dBm.
  *
- * On transmission of data within a connection
+ * On transmission of data within a connection (higher interval -> lower power consumption, slow communication)
  *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 20 ms)
  *   - maximum connection interval (in steps of 1.25 ms, 32*1.25 = 40 ms)
  * The supervision timeout multiplier is 400
@@ -186,6 +188,14 @@ void Crownstone::setName() {
  * There is no whitelist defined, nor peer addresses.
  */
 void Crownstone::configStack() {
+#if LOW_POWER_MODE==0
+	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM);
+#else
+	// TODO: depends on board!
+//	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_XTAL_50_PPM);
+	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_4000MS_CALIBRATION);
+#endif
+
 	_stack->setTxPowerLevel(TX_POWER);
 	_stack->setMinConnectionInterval(16);
 	_stack->setMaxConnectionInterval(32);
@@ -199,19 +209,23 @@ void Crownstone::configStack() {
  * This must be called after the SoftDevice has started.
  */
 void Crownstone::configDrivers() {
+#if PWM_ENABLE==1
 	pwm_config_t pwm_config;
 	pwm_config.num_channels = 1;
 	pwm_config.gpio_pin[0] = PIN_GPIO_SWITCH;
 	pwm_config.mode = PWM_MODE_976;
 
 	PWM::getInstance().init(&pwm_config);
+#endif
 
+#if LOW_POWER_MODE==0
 #if HARDWARE_BOARD==PCA10001
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 #endif
 #if HARDWARE_BOARD==PCA10000
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 	nrf_gpio_pin_set(PIN_GPIO_LED_CON);
+#endif
 #endif
 }
 
@@ -238,6 +252,11 @@ void Crownstone::createServices() {
 #if ALERT_SERVICE==1
 	_alertService = new AlertService;
 	_stack->addService(_alertService);
+#endif
+
+#if SCHEDULE_SERVICE==1
+	_scheduleService = new ScheduleService;
+	_stack->addService(_scheduleService);
 #endif
 }
 
@@ -324,12 +343,14 @@ void Crownstone::setup() {
 		sd_ble_gap_rssi_start(conn_handle);
 #endif
 
+#if LOW_POWER_MODE==0
 #if HARDWARE_BOARD==PCA10001
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
 //#if HARDWARE_BOARD==PCA10000
 //		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 //#endif
+#endif
 	});
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
@@ -338,12 +359,14 @@ void Crownstone::setup() {
 		// of course this is not nice, but dirty! we immediately start advertising automatically after being
 		// disconnected. but for now this will be the default behaviour.
 
+#if LOW_POWER_MODE==0
 #if HARDWARE_BOARD==PCA10001
 		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
 //#if HARDWARE_BOARD==PCA10000
 //		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 //#endif
+#endif
 
 		bool wasScanning = _stack->isScanning();
 		_stack->stopScanning();
@@ -363,12 +386,15 @@ void Crownstone::setup() {
 
 	_stack->device_manager_init();
 
-#if HARDWARE_BOARD==CROWNSTONE_SENSOR
+#if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 	_sensors = new Sensors;
 #endif
 
+	// TODO: other check than #if alert_service==1
+#if ALERT_SERVICE==1
 	_fridge = new Fridge;
 	_fridge->startTicking();
+#endif
 
 	// configure drivers
 	configDrivers();
@@ -403,8 +429,11 @@ void Crownstone::setup() {
 	LOGi("Set power ON by default");
 	nrf_delay_ms(1000);
 	_powerService->turnOn();
-#else
+#endif
+#if (POWER_SERVICE==1) and (DEFAULT_ON==0)
 	LOGi("Set power OFF by default");
+	nrf_delay_ms(1000);
+	_powerService->turnOff();
 #endif
 
 }
@@ -413,7 +442,7 @@ void Crownstone::run() {
 
 	_stack->startTicking();
 
-#if (HARDWARE_BOARD==CROWNSTONE_SENSOR)
+#if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();
 #endif
 
@@ -422,9 +451,9 @@ void Crownstone::run() {
 		app_sched_execute();
 
 #if(NORDIC_SDK_VERSION > 5)
-	BLE_CALL(sd_app_evt_wait, ());
+		BLE_CALL(sd_app_evt_wait, ());
 #else
-	BLE_CALL(sd_app_event_wait, () );
+		BLE_CALL(sd_app_event_wait, () );
 #endif
 
 	}

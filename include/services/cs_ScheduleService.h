@@ -6,14 +6,13 @@
  */
 #pragma once
 
-//#include "drivers/cs_Storage.h"
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 #include "structs/cs_AlertAccessor.h"
 
-#define ALERT_SERVICE_UPDATE_FREQUENCY 10 // hz
+#define SCHEDULE_SERVICE_UPDATE_FREQUENCY 2 // hz
 
-class AlertService : public BLEpp::Service {
+class ScheduleService : public BLEpp::Service {
 public:
 //	typedef function<int8_t()> func_t;
 
@@ -22,7 +21,7 @@ public:
 	 * Creates persistent storage (FLASH) object which is used internally to store current limit.
 	 * It also initializes all characteristics.
 	 */
-	AlertService();
+	ScheduleService();
 
 	/* Initialize a GeneralService object
 	 *
@@ -30,10 +29,13 @@ public:
 	 */
 	void init();
 
-	/* Makes the service emit a new alert
-	 *
+	/* Returns the current time as posix time
+	 * returns 0 when no time was set yet
 	 */
-	void alert(uint8_t type);
+	uint32_t getTime();
+
+	/* Set current posix time */
+	void setTime(uint32_t time);
 
 	/* Perform non urgent functionality every main loop.
 	 *
@@ -44,20 +46,12 @@ public:
 	void scheduleNextTick();
 
 protected:
-	// The characteristics in this service, based on:
-	// https://developer.bluetooth.org/TechnologyOverview/Pages/ANS.aspx
-//	void addSupportedNewAlertCharacteristic();
-	void addNewAlertCharacteristic();
-//	void addSupportedUnreadAlertCharacteristic();
-//	void addUnreadAlertCharacteristic();
-//	void addControlPointCharacteristic();
+	void addCurrentTimeCharacteristic();
+
 
 
 private:
 	// References to characteristics that need to be written from other functions
-//	BLEpp::Characteristic<uint8_t> *_supportedNewAlertCharacteristic;
-	BLEpp::Characteristic<uint16_t> *_newAlertCharacteristic;
-//	BLEpp::Characteristic<uint8_t> *_supportedUnreadAlertCharacteristic;
-//	BLEpp::Characteristic<uint16_t> *_unreadAlertCharacteristic;
-//	BLEpp::Characteristic<uint16_t> *_controlPointCharacteristic;
+	BLEpp::Characteristic<uint32_t> *_currentTimeCharacteristic;
+	uint32_t _rtcTimeStamp;
 };

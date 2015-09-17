@@ -25,6 +25,8 @@
 #define CROWNSTONE_SENSOR    9
 #define PCA10000             10
 #define CROWNSTONE3          11
+#define CROWNSTONE4          12
+#define NORDIC_BEACON        13
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
@@ -67,11 +69,7 @@
 #define PIN_GPIO_LED0        8                   // something we don't use!
 #define PIN_GPIO_LED1        8                   // something we don't use!
 #define PIN_GPIO_LED2        8                   // something we don't use!
-#define PIN_GPIO_LED3        8                   // something we don't use!
-#define PIN_GPIO_LED4        8                   // something we don't use!
-#define PIN_GPIO_LED5        8                   // something we don't use!
-#define PIN_GPIO_LED6        8                   // something we don't use!
-#define PIN_GPIO_LED7        8                   // something we don't use!
+
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
 //#define PIN_AIN_ADC          5                   // ain5 is p0.04 or gpio 4
@@ -86,15 +84,11 @@
 #endif
 
 #if(HARDWARE_BOARD==CROWNSTONE2)
-
+// v0.8x
 #define PIN_GPIO_LED0        8                   // something we don't use!
 #define PIN_GPIO_LED1        8                   // something we don't use!
 #define PIN_GPIO_LED2        8                   // something we don't use!
-#define PIN_GPIO_LED3        8                   // something we don't use!
-#define PIN_GPIO_LED4        8                   // something we don't use!
-#define PIN_GPIO_LED5        8                   // something we don't use!
-#define PIN_GPIO_LED6        8                   // something we don't use!
-#define PIN_GPIO_LED7        8                   // something we don't use!
+
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
 #define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
@@ -107,22 +101,18 @@
 #endif
 
 #if(HARDWARE_BOARD==CROWNSTONE3)
-
+// v0.90
 #define PIN_GPIO_LED0        8                   // something we don't use!
 #define PIN_GPIO_LED1        8                   // something we don't use!
 #define PIN_GPIO_LED2        8                   // something we don't use!
-#define PIN_GPIO_LED3        8                   // something we don't use!
-#define PIN_GPIO_LED4        8                   // something we don't use!
-#define PIN_GPIO_LED5        8                   // something we don't use!
-#define PIN_GPIO_LED6        8                   // something we don't use!
-#define PIN_GPIO_LED7        8                   // something we don't use!
+
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
 #define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 #define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 
-#define PIN_CURRENT_SENSE                        // gpio 1
-#define PIN_VOLTAGE_SENSE                        // gpio 6
+#define PIN_CURRENT_SENSE    2                   // ain2 is gpio 1
+#define PIN_VOLTAGE_SENSE    7                   // ain7 is gpio 6
 
 #define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
 // NOTE THAT THE RX AND TX PINS ARE SWITCHED!!!
@@ -134,16 +124,36 @@
 
 #endif
 
+#if(HARDWARE_BOARD==CROWNSTONE4)
+// v0.92
+#define PIN_GPIO_LED0        8                   // something we don't use!
+#define PIN_GPIO_LED1        8                   // something we don't use!
+#define PIN_GPIO_LED2        8                   // something we don't use!
+
+
+#define PIN_GPIO_SWITCH      4                   // this is p0.04 or gpio 4
+#define PIN_GPIO_RELAIS      0                   // this is p0.00 or gpio 0
+#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
+#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
+
+#define PIN_CURRENT_SENSE    2                   // ain2 is p0.01 or gpio 1
+#define PIN_VOLTAGE_SENSE    7                   // ain7 is p0.06 or gpio 6
+
+#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
+#define PIN_GPIO_RX          2                   // this is p0.02 or gpio 2
+#define PIN_GPIO_TX          3                   // this is p0.03 or gpio 3
+
+// Switch pin should be low to switch lights on
+#define SWITCH_INVERSED
+
+#endif
+
+
 #if(HARDWARE_BOARD==CROWNSTONE_SENSOR)
 
 #define PIN_GPIO_LED0        8                   // something we don't use!
 #define PIN_GPIO_LED1        8                   // something we don't use!
 #define PIN_GPIO_LED2        8                   // something we don't use!
-#define PIN_GPIO_LED3        8                   // something we don't use!
-#define PIN_GPIO_LED4        8                   // something we don't use!
-#define PIN_GPIO_LED5        8                   // something we don't use!
-#define PIN_GPIO_LED6        8                   // something we don't use!
-#define PIN_GPIO_LED7        8                   // something we don't use!
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
 
@@ -190,7 +200,7 @@
 #define PIN_GPIO_LED1        LED_RGB_GREEN       // led
 
 #define PIN_GPIO_LED_CON     LED_RGB_GREEN       // shows connection state on the evaluation board
-#define PIN_GPIO_SWITCH      LED_RGB_BLUE        // toggle red led
+#define PIN_GPIO_SWITCH      LED_RGB_BLUE        // toggle led
 
 #define PIN_GPIO_RX          11                  // this is p0.11 or gpio 11
 #define PIN_GPIO_TX          9                   // this is p0.09 or gpio 9
@@ -236,6 +246,42 @@
 #define PIN_AIN_LPCOMP       3                   // only here because it is required for the checks below, does not work
 #define PIN_AIN_LPCOMP_REF   0                   // only here because it is required for the checks below, does not work
 #define PIN_GPIO_SWITCH      18                  // only here because it is required for the checks below, does not work
+
+#endif
+
+#if(HARDWARE_BOARD==NORDIC_BEACON)
+
+#define LED_RGB_RED          16                  // this is p0.16 or gpio 16
+#define LED_RGB_GREEN        12                  // this is p0.12 or gpio 12
+#define LED_RGB_BLUE         15                  // this is p0.15 or gpio 15
+
+
+#define PIN_GPIO_LED0        LED_RGB_RED
+#define PIN_GPIO_LED1        LED_RGB_GREEN
+#define PIN_GPIO_LED2        LED_RGB_BLUE
+
+//#define PIN_GPIO_RX          9                   // this is p0.09 or gpio 9
+//#define PIN_GPIO_TX          11                  // this is p0.11 or gpio 11
+//
+//#define PIN_AIN_ADC          2                   // this is p0.01 or gpio 1
+//#define PIN_AIN_LPCOMP       3                   // this is p0.02 or gpio 2
+//#define PIN_AIN_LPCOMP_REF   0                   // this is p0.00 or gpio 0
+
+#define PIN_GPIO_RX          9                   // this is p0.09 or gpio 9
+#define PIN_GPIO_TX          1                   // this is p0.01 or gpio 1
+
+#define PIN_AIN_ADC          5                   // Something we don't use (gpio 4)
+#define PIN_AIN_LPCOMP       5                   // Something we don't use (gpio 4)
+#define PIN_AIN_LPCOMP_REF   5                   // Something we don't use (gpio 4)
+
+
+
+#define PIN_GPIO_SWITCH      LED_RGB_RED
+#define PIN_GPIO_LED_CON     LED_RGB_BLUE
+
+#define PIN_GPIO_BUTTON      20                  // this is p0.20 or gpio 20
+
+#define SWITCH_INVERSED
 
 #endif
 

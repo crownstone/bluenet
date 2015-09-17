@@ -125,6 +125,9 @@ ENDIF()
 IF(${ALERT_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_AlertService.cpp")
 ENDIF()
+IF(${SCHEDULE_SERVICE} STRGREATER "0")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_ScheduleService.cpp")
+ENDIF()
 
 
 # should be only when creating iBeacon
