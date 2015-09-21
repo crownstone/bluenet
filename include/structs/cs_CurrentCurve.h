@@ -14,6 +14,7 @@
 //#include "common/cs_Config.h"
 #include <common/cs_Types.h>
 #include "structs/cs_BufferAccessor.h"
+#include "drivers/cs_RTC.h"
 
 using namespace BLEpp;
 
@@ -153,8 +154,10 @@ public:
 			_buffer->lastTimeStamp = timeStamp;
 		}
 		else {
-			int64_t dt = (int64_t)timeStamp - _buffer->lastTimeStamp;
-			if (dt > 127 || dt < -127) {
+			uint32_t dt = RTC::difference(timeStamp, _buffer->lastTimeStamp);
+//			int64_t dt = (int64_t)timeStamp - _buffer->lastTimeStamp;
+//			if (dt > 127 || dt < -127) {
+			if (dt > 127) {
 				clear();
 				return CC_DIFFERENCE_TOO_LARGE;
 			}
