@@ -305,11 +305,27 @@ void PowerService::sampleCurrent(uint8_t type) {
 	}
 
 	if (numSamples>1) {
-		uint32_t voltageSquareMean = 0;
+		uint32_t voltageSquareMeanAmped = 0;
 		uint32_t timestamp = 0;
 		uint16_t voltage = 0;
 		//		uint32_t timeStart = _currentCurve->getTimeStart();
 		//		uint32_t timeEnd = _currentCurve->getTimeEnd();
+
+		uint32_t voltageMeanAmped = 0;
+
+		for (uint16_t i=0; i<numSamples; ++i) {
+			if (_currentCurve->getValue(i, voltage, timestamp) != CC_SUCCESS) {
+				break;
+			}
+
+			voltageMeanAmped += voltage;
+		}
+
+		voltageMeanAmped /= numSamples;
+
+		LOGi("voltageMeanAmped = %u Bit", voltageMeanAmped);
+
+		uint16_t voltageAmped = 0;
 
 #ifdef MICRO_VIEW
 		write("3 [");
@@ -326,7 +342,8 @@ void PowerService::sampleCurrent(uint8_t type) {
 			if (!((i+1) % 5)) {
 				_log(INFO, "\r\n");
 			}
-			voltageSquareMean += voltage*voltage;
+			voltageAmped = voltage - voltageMeanAmped;
+			voltageSquareMeanAmped += voltageAmped*voltageAmped;
 		}
 		_log(INFO, "\r\n");
 #ifdef MICRO_VIEW
@@ -335,16 +352,24 @@ void PowerService::sampleCurrent(uint8_t type) {
 
 		if ((type & 0x1) && _currentConsumptionCharacteristic != NULL) {
 			// Take the mean
-			voltageSquareMean /= numSamples;
+			voltageSquareMeanAmped /= numSamples;
+
+			LOGi("voltageSquareMeanAmped = %u Bit^2", voltageSquareMeanAmped);
 
 			// Measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
 			// Convert to mV^2
-			voltageSquareMean = voltageSquareMean*1200/1023*1200/1023;
+			voltageSquareMeanAmped = voltageSquareMeanAmped*(1200.0/1023.0)*(1200.0/1023.0);
 
-			// Convert to A^2, use I=V/R
-			uint16_t currentSquareMean = voltageSquareMean * 1000 / SHUNT_VALUE * 1000 / SHUNT_VALUE * 1000*1000;
+			LOGi("voltageSquareMeanAmped = %u mV^2", voltageSquareMeanAmped);
 
-			LOGi("currentSquareMean = %u mA^2", currentSquareMean);
+			uint32_t voltageSquareMean = voltageSquareMeanAmped / (VOLTAGE_AMPLIFICATION * VOLTAGE_AMPLIFICATION);
+
+			LOGi("voltageSquareMeanEff = %u mV^2", voltageSquareMean);
+
+			// Convert to A^2, use I=V/R (measured over 2 shunts)
+			uint16_t currentSquareMean = voltageSquareMean / (2.0 * SHUNT_VALUE * SHUNT_VALUE);
+
+			LOGi("currentSquareMean = %u A^2", currentSquareMean);
 
 			*_currentConsumptionCharacteristic = currentSquareMean;
 		}
