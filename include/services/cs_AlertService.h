@@ -30,10 +30,18 @@ public:
 	 */
 	void init();
 
-	/* Makes the service emit a new alert
-	 *
+	new_alert_t getAlert();
+
+	/* Set the alert that the service sends out
 	 */
-	void alert(uint8_t type);
+	void setAlert(new_alert_t alert);
+
+	void setAlert(uint8_t type);
+
+	/* Adds an extended alert type to existing alert
+	 * See cs_AlertAccessor.h for available types
+	 */
+	void addAlert(uint8_t bluenetType);
 
 	/* Perform non urgent functionality every main loop.
 	 *

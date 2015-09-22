@@ -19,9 +19,18 @@ enum AlertType {
 	ALERT_PRIORITY         = 8,
 	ALERT_INSTANT_MESSAGE  = 9,
 
-	ALERT_TEMP_LOW         = 100,
-	ALERT_TEMP_HIGH        = 101
+	// Numbers above 100 are free to use. We'll use 7 bits so we can combine 7 different alarms
+	ALERT_BLUENET_BASE     = 128, // binary 1000 0000
+//	ALERT_TEMP_LOW         = 129, // binary 1000 0001
+//	ALERT_TEMP_HIGH        = 130, // binary 1000 0010
 };
+
+// Usage: AlertType type = ALERT_BLUENET_BASE
+//        type |= 1 << ALERT_TEMP_LOW_POS;
+//        type |= 1 << ALERT_TEMP_HIGH_POS;
+#define ALERT_TEMP_LOW_POS 0
+#define ALERT_TEMP_HIGH_POS 1
+
 
 /* The new alert struct can be casted to/from a uint16_t
  *

@@ -507,13 +507,15 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 #if ALERT_SERVICE==1
 	case EVT_ENV_TEMP_LOW: {
 		if (_alertService != NULL) {
-			_alertService->alert(ALERT_TEMP_LOW);
+			_alertService->addAlert(ALERT_TEMP_LOW_POS);
+//			_alertService->alert(ALERT_TEMP_LOW);
 		}
 		break;
 	}
 	case EVT_ENV_TEMP_HIGH: {
 		if (_alertService != NULL) {
-			_alertService->alert(ALERT_TEMP_HIGH);
+			_alertService->addAlert(ALERT_TEMP_HIGH_POS);
+//			_alertService->alert(ALERT_TEMP_HIGH);
 		}
 		break;
 	}
