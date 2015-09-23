@@ -4,6 +4,21 @@
 # Should be 10 characters or less (we need room for compilation date after it)
 BLUETOOTH_NAME="crown"
 
+# The device type defines how the device advertises itself, Apps and Bluenet Library
+# will use this to filter for device type.
+# It can be also be used to automatically enable and disable services and characteristics
+# based on the type
+# Ex 1: setting DEVICE_TYPE==DEVICE_DOBEACON will advertise device as an iBeacon,
+# and overrule the setting of the IBEACON flag.
+# Ex 2: setting DEVICE_TYPE==DEVICE_FRIDGE will enable General Service and
+# Alert Service and start with temperature measurements
+# The possible values are:
+# DEVICE_UNDEF       0
+# DEVICE_CROWNSTONE  1
+# DEVICE_DOBEACON    2
+# DEVICE_FRIDGE      3
+DEVICE_TYPE=DEVICE_UNDEF
+
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=0
 
@@ -13,7 +28,7 @@ PWM_ENABLE=1
 
 # define the iBeacon advertisement package parameters
 # the proximity UUID.
-# only applies if IBEACON==1
+# only applies if IBEACON==1 or DEVICE_TYPE==DEVICE_DOBEACON
 BEACON_UUID="00000000-0000-0000-0000-000000000000"
 # the major number
 BEACON_MAJOR=0

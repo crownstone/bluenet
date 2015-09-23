@@ -16,6 +16,7 @@
 #include <util/cs_BleError.h>
 #include <common/cs_Tuple.h>
 #include <third/std/function.h>
+#include <ble/cs_DoBotsManufac.h>
 
 /////////////////////////////////////////////////
 // test
@@ -320,12 +321,12 @@ public:
 	 * **Note**: An iBeacon requires that the company identifier is
 	 *   set to the Apple Company ID, otherwise it's not an iBeacon.
 	 */
-	void startIBeacon(IBeacon* beacon);
+	void startIBeacon(IBeacon* beacon, uint8_t deviceType);
 
 	/* Start sending advertisement packets.
 	 * This can not be called while scanning, start scanning while advertising is possible though.
 	 */
-	void startAdvertising();
+	void startAdvertising(uint8_t deviceType);
 
 	void stopAdvertising();
 

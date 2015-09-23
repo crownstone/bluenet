@@ -57,6 +57,8 @@
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventTypes.h>
 
+#include <ble/cs_DoBotsManufac.h>
+
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -232,7 +234,7 @@ void Crownstone::configDrivers() {
 void Crownstone::createServices() {
 	LOGi("Create all services");
 
-#if GENERAL_SERVICE==1
+#if GENERAL_SERVICE==1 || DEVICE_TYPE==DEVICE_FRIDGE
 	// general services, such as internal temperature, setting names, etc.
 	_generalService = new GeneralService;
 	_stack->addService(_generalService);
@@ -249,7 +251,7 @@ void Crownstone::createServices() {
 	_stack->addService(_powerService);
 #endif
 
-#if ALERT_SERVICE==1
+#if ALERT_SERVICE==1 || DEVICE_TYPE==DEVICE_FRIDGE
 	_alertService = new AlertService;
 	_stack->addService(_alertService);
 #endif
@@ -275,7 +277,7 @@ void Crownstone::configure() {
 
 	ps_configuration_t cfg = Settings::getInstance().getConfig();
 
-#if IBEACON==1
+#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	// if enabled, create the iBeacon parameter object which will be used
 	// to start advertisement as an iBeacon
 
@@ -371,11 +373,7 @@ void Crownstone::setup() {
 		bool wasScanning = _stack->isScanning();
 		_stack->stopScanning();
 
-#if IBEACON==1
-		_stack->startIBeacon(_beacon);
-#else
-		_stack->startAdvertising();
-#endif
+		startAdvertising();
 
 		if (wasScanning)
 			_stack->startScanning();
@@ -390,8 +388,7 @@ void Crownstone::setup() {
 	_sensors = new Sensors;
 #endif
 
-	// TODO: other check than #if alert_service==1
-#if ALERT_SERVICE==1
+#if DEVICE_TYPE==DEVICE_FRIDGE
 	_fridge = new Fridge;
 	_fridge->startTicking();
 #endif
@@ -402,11 +399,9 @@ void Crownstone::setup() {
 	BLEutil::print_stack("Stack drivers: ");
 
 	// begin sending advertising packets over the air.
-#if IBEACON==1
-	_stack->startIBeacon(_beacon);
-#else
-	_stack->startAdvertising();
-#endif
+
+	startAdvertising();
+
 	BLEutil::print_heap("Heap adv: ");
 	BLEutil::print_stack("Stack adv: ");
 
@@ -418,24 +413,33 @@ void Crownstone::setup() {
     #if HARDWARE_BOARD == VIRTUALMEMO
         nrf_gpio_range_cfg_output(7,14);
     #endif
-#endif
 
-#if CHAR_MESHING==1
  	CMesh & mesh = CMesh::getInstance();
 	mesh.init();
 #endif
 
-#if (POWER_SERVICE==1) and (DEFAULT_ON==1)
+#if (POWER_SERVICE==1)
+#if (DEFAULT_ON==1)
 	LOGi("Set power ON by default");
 	nrf_delay_ms(1000);
 	_powerService->turnOn();
-#endif
-#if (POWER_SERVICE==1) and (DEFAULT_ON==0)
+#elif (DEFAULT_ON==0)
 	LOGi("Set power OFF by default");
 	nrf_delay_ms(1000);
 	_powerService->turnOff();
 #endif
+#endif
 
+}
+
+// start advertising. the advertisment package depends on the device type,
+// and if IBEACON is enabled
+void Crownstone::startAdvertising() {
+#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
+	_stack->startIBeacon(_beacon, DEVICE_TYPE);
+#else
+	_stack->startAdvertising(DEVICE_TYPE);
+#endif
 }
 
 void Crownstone::run() {
@@ -466,7 +470,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	bool restartAdvertising = false;
 	switch(evt) {
 
-#if IBEACON==1
+#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	case CONFIG_IBEACON_MAJOR: {
 		_beacon->setMajor(*(uint32_t*)p_data);
 		restartAdvertising = true;
@@ -525,11 +529,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 	if (restartAdvertising && _stack->isAdvertising()) {
 		_stack->stopAdvertising();
-#if IBEACON==1
-		_stack->startIBeacon(_beacon);
-#else
-		_stack->startAdvertising();
-#endif
+		startAdvertising();
 	}
 }
 

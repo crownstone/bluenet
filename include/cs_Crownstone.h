@@ -56,10 +56,13 @@ private:
 
 	void configure();
 
+	void startAdvertising();
+
 public:
 	Crownstone() : _stack(NULL),
 		_generalService(NULL), _localizationService(NULL), _powerService(NULL),
-		_beacon(NULL), _sensors(NULL) {};
+		_alertService(NULL), _scheduleService(NULL),
+		_beacon(NULL), _sensors(NULL), _fridge(NULL) {};
 
 	void setup();
 

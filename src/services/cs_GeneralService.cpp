@@ -45,7 +45,7 @@ GeneralService::GeneralService() :
 void GeneralService::init() {
 	LOGi(MSG_SERVICE_GENERAL_INIT);
 
-#if CHAR_TEMPERATURE==1
+#if CHAR_TEMPERATURE==1 || DEVICE_TYPE==DEVICE_FRIDGE
 	LOGi(MSG_CHAR_TEMPERATURE_ADD);
 	addTemperatureCharacteristic();
 #else
@@ -82,7 +82,7 @@ void GeneralService::init() {
 	LOGi(MSG_CHAR_MESH_SKIP);
 #endif
 
-#if CHAR_CONFIGURATION==1
+#if CHAR_CONFIGURATION==1 || DEVICE_TYPE==DEVICE_FRIDGE
 	{
 	LOGi(MSG_CHAR_CONFIGURATION_ADD);
 

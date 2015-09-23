@@ -275,7 +275,7 @@ void Nrf51822BluetoothStack::updateConnParams() {
 	BLE_CALL(sd_ble_gap_ppcp_set, (&_gap_conn_params));
 }
 
-void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon) {
+void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	if (_advertising)
 		return;
 
@@ -318,22 +318,22 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon) {
 	adv_params.interval = _interval;
 	adv_params.timeout = _timeout;
 
-	ble_advdata_manuf_data_t manufac;
-	manufac.company_identifier = 0x004C; // Apple Company ID, if it is not set to apple it's not recognized as an iBeacon
+	ble_advdata_manuf_data_t manufac_apple;
+	manufac_apple.company_identifier = 0x004C; // Apple Company ID, if it is not set to apple it's not recognized as an iBeacon
 
-	uint8_t adv_manuf_data[beacon->size()];
-	memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
-	beacon->toArray(adv_manuf_data);
+	uint8_t adv_manuf_data_apple[beacon->size()];
+	memset(adv_manuf_data_apple, 0, sizeof(adv_manuf_data_apple));
+	beacon->toArray(adv_manuf_data_apple);
 
-	manufac.data.p_data = adv_manuf_data;
-	manufac.data.size = beacon->size();
+	manufac_apple.data.p_data = adv_manuf_data_apple;
+	manufac_apple.data.size = beacon->size();
 
 	// Build and set advertising data
 	memset(&advdata, 0, sizeof(advdata));
 
 	advdata.flags.size = sizeof(flags);
 	advdata.flags.p_data = &flags;
-	advdata.p_manuf_specific_data = &manufac;
+	advdata.p_manuf_specific_data = &manufac_apple;
 
 	/*
 	 * 31 bytes total payload
@@ -348,22 +348,27 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon) {
 	 */
 	ble_advdata_t scan_resp;
 	memset(&scan_resp, 0, sizeof(scan_resp));
-
-	//	uint8_t uidCount = _services.size();
-	//	ble_uuid_t adv_uuids[uidCount];
-	//
-	//	uint8_t cnt = 0;
-	//	for(Service* svc : _services ) {
-	//		adv_uuids[cnt++] = svc->getUUID();
-	//	}
-	//
-	//	if (cnt == 0) {
-	//		LOGw("No custom services!");
-	//	}
-
 	scan_resp.name_type = BLE_ADVDATA_FULL_NAME;
-	//	scan_resp.uuids_more_available.uuid_cnt = 1;
-	//	scan_resp.uuids_more_available.p_uuids  = adv_uuids;
+
+	if (deviceType != DEVICE_UNDEF) {
+
+		ble_advdata_manuf_data_t manufac_dobots;
+		// TODO: made up ID, has to be replaced by official ID
+		manufac_dobots.company_identifier = 0x1111; // DoBots Company ID
+		manufac_dobots.data.size = 0;
+
+		DoBotsManufac dobotsManufac(deviceType);
+
+		uint8_t adv_manuf_data_dobots[dobotsManufac.size()];
+		memset(adv_manuf_data_dobots, 0, sizeof(adv_manuf_data_dobots));
+		dobotsManufac.toArray(adv_manuf_data_dobots);
+
+		manufac_dobots.data.p_data = adv_manuf_data_dobots;
+		manufac_dobots.data.size = dobotsManufac.size();
+
+		scan_resp.p_manuf_specific_data = &manufac_dobots;
+
+	}
 
 	BLE_CALL(ble_advdata_set, (&advdata, &scan_resp));
 
@@ -374,7 +379,7 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon) {
 	LOGi("... OK");
 }
 
-void Nrf51822BluetoothStack::startAdvertising() {
+void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 	if (_advertising)
 		return;
 
@@ -413,10 +418,10 @@ void Nrf51822BluetoothStack::startAdvertising() {
 	// Build and set advertising data
 	memset(&advdata, 0, sizeof(advdata));
 
-	ble_advdata_manuf_data_t manufac;
-	// TODO: made up ID, has to be replaced by official ID
-	manufac.company_identifier = 0x1111; // DoBots Company ID
-	manufac.data.size = 0;
+//	ble_advdata_manuf_data_t manufac;
+//	// TODO: made up ID, has to be replaced by official ID
+//	manufac.company_identifier = 0x1111; // DoBots Company ID
+//	manufac.data.size = 0;
 
 	//	advdata.name_type               = BLE_ADVDATA_NO_NAME;
 
@@ -444,7 +449,7 @@ void Nrf51822BluetoothStack::startAdvertising() {
 	advdata.p_tx_power_level = &_tx_power_level;
 	advdata.flags.size = sizeof(flags);
 	advdata.flags.p_data = &flags;
-	advdata.p_manuf_specific_data = &manufac;
+//	advdata.p_manuf_specific_data = &manufac;
 	// TODO -oDE: It doesn't really make sense to have this function in the library
 	//  because it really depends on the application on how many and what kind
 	//  of services are available and what should be advertised
@@ -475,6 +480,25 @@ void Nrf51822BluetoothStack::startAdvertising() {
 	ble_advdata_t scan_resp;
 	memset(&scan_resp, 0, sizeof(scan_resp));
 	scan_resp.name_type = BLE_ADVDATA_FULL_NAME;
+
+	if (deviceType != DEVICE_UNDEF) {
+
+		ble_advdata_manuf_data_t manufac;
+		// TODO: made up ID, has to be replaced by official ID
+		manufac.company_identifier = 0x1111; // DoBots Company ID
+		manufac.data.size = 0;
+
+		DoBotsManufac dobotsManufac(deviceType);
+
+		uint8_t adv_manuf_data[dobotsManufac.size()];
+		memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
+		dobotsManufac.toArray(adv_manuf_data);
+
+		manufac.data.p_data = adv_manuf_data;
+		manufac.data.size = dobotsManufac.size();
+
+		scan_resp.p_manuf_specific_data = &manufac;
+	}
 
 	err_code = ble_advdata_set(&advdata, &scan_resp);
 	if (err_code == NRF_ERROR_DATA_SIZE) {
