@@ -105,7 +105,7 @@
 // resistance of the shunt in milli ohm
 #define SHUNT_VALUE                 20
 // amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       20
+#define VOLTAGE_AMPLIFICATION       5
 #endif
 
 #if(HARDWARE_BOARD==CROWNSTONE3)
