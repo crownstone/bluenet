@@ -81,6 +81,10 @@
 #define PIN_GPIO_RX          6                   // this is p0.06 or gpio 6
 #define PIN_GPIO_TX          1                   // this is p0.01 or gpio 1
 
+// resistance of the shunt in milli ohm
+#define SHUNT_VALUE                 120
+// amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       1
 #endif
 
 #if(HARDWARE_BOARD==CROWNSTONE2)
@@ -98,6 +102,10 @@
 #define PIN_GPIO_RX          4                   // this is p0.04 or gpio 4
 #define PIN_GPIO_TX          2                   // this is p0.02 or gpio 2
 
+// resistance of the shunt in milli ohm
+#define SHUNT_VALUE                 20
+// amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       20
 #endif
 
 #if(HARDWARE_BOARD==CROWNSTONE3)
@@ -121,7 +129,10 @@
 
 // Switch pin should be low to switch lights on
 #define SWITCH_INVERSED
-
+// resistance of the shunt in milli ohm
+#define SHUNT_VALUE                 1
+// amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       80
 #endif
 
 #if(HARDWARE_BOARD==CROWNSTONE4)
@@ -145,7 +156,10 @@
 
 // Switch pin should be low to switch lights on
 #define SWITCH_INVERSED
-
+// resistance of the shunt in milli ohm
+#define SHUNT_VALUE                 1
+// amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       80
 #endif
 
 
@@ -187,7 +201,10 @@
 
 #define BUTTON_0             16
 #define BUTTON_1             17
-
+// resistance of the shunt in milli ohm
+#define SHUNT_VALUE                 1
+// amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       1
 #endif
 
 #if(HARDWARE_BOARD==PCA10000)
@@ -213,7 +230,10 @@
 
 // Switch pin should be low to switch lights on
 #define SWITCH_INVERSED
-
+// resistance of the shunt in milli ohm
+#define SHUNT_VALUE                 1
+// amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       1
 #endif
 
 #if(HARDWARE_BOARD==NRF51422)

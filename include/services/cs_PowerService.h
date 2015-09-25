@@ -68,7 +68,7 @@ protected:
 	void addPWMCharacteristic();
 	void addSampleCurrentCharacteristic();
 	void addCurrentCurveCharacteristic();
-	void addCurrentConsumptionCharacteristic();
+	void addPowerConsumptionCharacteristic();
 	void addCurrentLimitCharacteristic();
 
 	/* Initializes and starts the ADC
@@ -100,7 +100,7 @@ private:
 	// References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint8_t> *_pwmCharacteristic;
 	BLEpp::Characteristic<uint8_t> *_sampleCurrentCharacteristic;
-	BLEpp::Characteristic<uint16_t> *_currentConsumptionCharacteristic;
+	BLEpp::Characteristic<uint16_t> *_powerConsumptionCharacteristic;
 	BLEpp::Characteristic<uint8_t*> *_currentCurveCharacteristic;
 	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
 

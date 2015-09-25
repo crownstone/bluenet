@@ -6,10 +6,6 @@
  */
 #pragma once
 
-// resistance of the shunt in milli ohm
-#define SHUNT_VALUE                              10
-#define VOLTAGE_AMPLIFICATION                    80
-
 // size of the buffer used for characteristics
 //#define GENERAL_BUFFER_SIZE                      300
 

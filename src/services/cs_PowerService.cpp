@@ -31,7 +31,7 @@ using namespace BLEpp;
 PowerService::PowerService() :
 		_pwmCharacteristic(NULL),
 		_sampleCurrentCharacteristic(NULL),
-		_currentConsumptionCharacteristic(NULL),
+		_powerConsumptionCharacteristic(NULL),
 		_currentCurveCharacteristic(NULL),
 		_currentLimitCharacteristic(NULL),
 		_currentCurve(NULL),
@@ -70,7 +70,7 @@ void PowerService::init() {
 	LOGi("add Current Curve Characteristic");
 	addCurrentCurveCharacteristic();
 	LOGi("add Current Consumption Characteristic");
-	addCurrentConsumptionCharacteristic();
+	addPowerConsumptionCharacteristic();
 #else
 	LOGi("skip Sample Current Characteristic");
 	LOGi("skip Current Curve Characteristic");
@@ -225,14 +225,14 @@ void PowerService::addCurrentCurveCharacteristic() {
 	_currentCurveCharacteristic->setDataLength(size);
 }
 
-void PowerService::addCurrentConsumptionCharacteristic() {
-	_currentConsumptionCharacteristic = new Characteristic<uint16_t>();
-	addCharacteristic(_currentConsumptionCharacteristic);
-	_currentConsumptionCharacteristic->setUUID(UUID(getUUID(), CURRENT_CONSUMPTION_UUID));
-	_currentConsumptionCharacteristic->setName("Current Consumption");
-	_currentConsumptionCharacteristic->setDefaultValue(0);
-	_currentConsumptionCharacteristic->setWritable(false);
-	_currentConsumptionCharacteristic->setNotifies(true);
+void PowerService::addPowerConsumptionCharacteristic() {
+	_powerConsumptionCharacteristic = new Characteristic<uint16_t>();
+	addCharacteristic(_powerConsumptionCharacteristic);
+	_powerConsumptionCharacteristic->setUUID(UUID(getUUID(), CURRENT_CONSUMPTION_UUID));
+	_powerConsumptionCharacteristic->setName("Power Consumption");
+	_powerConsumptionCharacteristic->setDefaultValue(0);
+	_powerConsumptionCharacteristic->setWritable(false);
+	_powerConsumptionCharacteristic->setNotifies(true);
 }
 
 uint8_t PowerService::getCurrentLimit() {
@@ -305,6 +305,53 @@ void PowerService::sampleCurrent(uint8_t type) {
 	}
 
 	if (numSamples>1) {
+		uint16_t voltage = 0;
+		uint32_t timestamp = 0;
+		uint32_t minVoltage = 1024;
+		uint32_t maxVoltage = 0;
+#ifdef MICRO_VIEW
+		write("3 [");
+#endif
+		for (uint16_t i=0; i<numSamples; ++i) {
+			if (_currentCurve->getValue(i, voltage, timestamp) != CC_SUCCESS) {
+				break;
+			}
+
+			_log(DEBUG, "%u %u,  ", timestamp, voltage);
+#ifdef MICRO_VIEW
+			write("%u %u ", timestamp, voltage);
+#endif
+			if (!((i+1) % 5)) {
+				_log(DEBUG, "\r\n");
+			}
+
+			if (voltage > maxVoltage) {
+				maxVoltage = voltage;
+			}
+			if (voltage < minVoltage) {
+				minVoltage = voltage;
+			}
+		}
+		_log(DEBUG, "\r\n");
+#ifdef MICRO_VIEW
+		write("]r\n");
+#endif
+
+		if ((type & 0x1) && _powerConsumptionCharacteristic != NULL) {
+			// 1023*1000*1200 = 1.3e9 < 4.3e9 (max uint32)
+			// voltageAmplitude is max: 1023*1000*1200/1023/2 = 600000
+			uint32_t voltageAmplitude = (maxVoltage-minVoltage) * 1000 * 1200 / 1023 / 2; // uV
+			// max of currentAmplitude depends on amplification and shunt value
+			uint32_t currentAmplitude = voltageAmplitude / VOLTAGE_AMPLIFICATION / SHUNT_VALUE; // mA
+			// currentRms should be max:  16000
+			uint32_t currentRms = currentAmplitude * 1000 / 1414; // mA
+			LOGi("currentRms = %i mA", currentRms);
+			uint32_t powerRms = currentRms * 230 / 1000; // Watt
+			LOGi("powerRms = %i Watt", powerRms);
+			*_powerConsumptionCharacteristic = powerRms;
+		}
+
+/*
 		uint32_t voltageSquareMeanAmped = 0;
 		uint32_t timestamp = 0;
 		uint16_t voltage = 0;
@@ -373,6 +420,7 @@ void PowerService::sampleCurrent(uint8_t type) {
 
 			*_currentConsumptionCharacteristic = currentSquareMean;
 		}
+*/
 	}
 
 	// Unlock the buffer
