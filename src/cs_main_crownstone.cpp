@@ -373,7 +373,12 @@ void Crownstone::setup() {
 		bool wasScanning = _stack->isScanning();
 		_stack->stopScanning();
 
-		startAdvertising();
+//		startAdvertising();
+#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
+	_stack->startIBeacon(_beacon, DEVICE_TYPE);
+#else
+	_stack->startAdvertising(DEVICE_TYPE);
+#endif
 
 		if (wasScanning)
 			_stack->startScanning();
@@ -400,7 +405,12 @@ void Crownstone::setup() {
 
 	// begin sending advertising packets over the air.
 
-	startAdvertising();
+//	startAdvertising();
+#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
+	_stack->startIBeacon(_beacon, DEVICE_TYPE);
+#else
+	_stack->startAdvertising(DEVICE_TYPE);
+#endif
 
 	BLEutil::print_heap("Heap adv: ");
 	BLEutil::print_stack("Stack adv: ");
@@ -434,13 +444,13 @@ void Crownstone::setup() {
 
 // start advertising. the advertisment package depends on the device type,
 // and if IBEACON is enabled
-void Crownstone::startAdvertising() {
-#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
-	_stack->startIBeacon(_beacon, DEVICE_TYPE);
-#else
-	_stack->startAdvertising(DEVICE_TYPE);
-#endif
-}
+//void Crownstone::startAdvertising() {
+//#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
+//	_stack->startIBeacon(_beacon, DEVICE_TYPE);
+//#else
+//	_stack->startAdvertising(DEVICE_TYPE);
+//#endif
+//}
 
 void Crownstone::run() {
 
@@ -529,7 +539,12 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 	if (restartAdvertising && _stack->isAdvertising()) {
 		_stack->stopAdvertising();
-		startAdvertising();
+//		startAdvertising();
+#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
+	_stack->startIBeacon(_beacon, DEVICE_TYPE);
+#else
+	_stack->startAdvertising(DEVICE_TYPE);
+#endif
 	}
 }
 
