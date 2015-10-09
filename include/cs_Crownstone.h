@@ -56,7 +56,7 @@ private:
 
 	void configure();
 
-//	void startAdvertising();
+	void startAdvertising();
 
 public:
 	Crownstone() : _stack(NULL),

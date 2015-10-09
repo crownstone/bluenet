@@ -402,6 +402,8 @@ public:
 
 protected:
 
+	void addDoBotsManufacturingData(ble_advdata_t& data, uint8_t deviceType);
+
 	void updateTxPowerLevel();
 	void updateConnParams();
 	void updatePasskey();
