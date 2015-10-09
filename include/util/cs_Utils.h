@@ -52,8 +52,9 @@ inline uint32_t convertEndian32(uint32_t val) {
 
 template<typename T>
 void printArray(T* arr, uint16_t len) {
+	uint8_t* ptr = (uint8_t*)arr;
 	for (int i = 0; i < len; ++i) {
-		_log(DEBUG, " %02X", arr[i]);
+		_log(DEBUG, " %02X", ptr[i]);
 		if ((i+1) % 30 == 0) {
 			_log(DEBUG, "\r\n");
 		}
