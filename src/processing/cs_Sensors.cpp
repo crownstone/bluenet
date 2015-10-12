@@ -26,8 +26,8 @@
  */
 //#define LIGHT_SENSOR_ENABLED
 //#define THERMAL_SENSOR_ENABLED
-//#define PUSH_BUTTON_ENABLED
-#define SWITCH_ENABLED
+#define PUSH_BUTTON_ENABLED
+//#define SWITCH_ENABLED
 
 /* choose which way the switch should be checked
  * 1. interrupt: get an interrupt from the GPIO
@@ -138,10 +138,10 @@ bool Sensors::checkPushButton(uint32_t time, bool &pushed) {
 /* Initialize ADC for sensor sampling
  */
 void Sensors::initADC() {
-	ADC::getInstance().init(PIN_AIN_SENSOR);
-
-	LOGi("Start ADC");
-	ADC::getInstance().start();
+//	ADC::getInstance().init(PIN_AIN_SENSOR);
+//
+//	LOGi("Start ADC");
+//	ADC::getInstance().start();
 }
 
 /* Read the ADC to get sensor values
@@ -164,15 +164,26 @@ uint16_t Sensors::sampleSensor() {
 
 	// Start storing the samples
 	_currentCurve.clear();
-	ADC::getInstance().setCurrentCurve(&_currentCurve);
+//	ADC::getInstance().setCurrentCurve(&_currentCurve);
 
-	// Give some time to sample
+	ADC::getInstance().init(PIN_AIN_SENSOR);
+	ADC::getInstance().start();
 	while (!_currentCurve.isFull()) {
-		nrf_delay_ms(10);
+		while(!NRF_ADC->EVENTS_END) {}
+		//			NRF_ADC->EVENTS_END	= 0;
+		//			LOGd("got sample");
+		_currentCurve.add(NRF_ADC->RESULT, RTC::getCount());
+		ADC::getInstance().start();
 	}
 
+
+//	// Give some time to sample
+//	while (!_currentCurve.isFull()) {
+//		nrf_delay_ms(10);
+//	}
+
 	// Stop storing the samples
-	ADC::getInstance().setCurrentCurve(NULL);
+//	ADC::getInstance().setCurrentCurve(NULL);
 
 	uint16_t numSamples = _currentCurve.length();
 	LOGd("numSamples = %i", numSamples);

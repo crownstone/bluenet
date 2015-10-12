@@ -34,7 +34,7 @@ PowerService::PowerService() :
 		_powerConsumptionCharacteristic(NULL),
 		_currentCurveCharacteristic(NULL),
 		_currentLimitCharacteristic(NULL),
-		_currentCurve(NULL),
+		_powerCurve(NULL),
 		_currentLimitVal(0),
 		_adcInitialized(false),
 		_currentLimitInitialized(false),
@@ -101,17 +101,17 @@ void PowerService::tick() {
 	}
 #endif
 
-	if (!_adcInitialized) {
-		// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
-		ADC::getInstance().init(PIN_AIN_ADC);
-		sampleCurrentInit();
-		_adcInitialized = true;
-	}
+//	if (!_adcInitialized) {
+//		// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
+//		ADC::getInstance().init(PIN_AIN_ADC);
+//		sampleCurrentInit();
+//		_adcInitialized = true;
+//	}
 
-	if (_samplingType && _currentCurve->isFull()) {
-		sampleCurrent(_samplingType);
-		_samplingType = 0;
-	}
+//	if (_samplingType && _currentCurve->isFull()) {
+//		sampleCurrentDone(_samplingType);
+//		_samplingType = 0;
+//	}
 
 	//~ LPComp::getInstance().tick();
 	// check if current is not beyond current_limit if the latter is set
@@ -197,10 +197,11 @@ void PowerService::addSampleCurrentCharacteristic() {
 		}
 
 		// Start storing the samples
-		_currentCurve->clear();
-		ADC::getInstance().setCurrentCurve(_currentCurve);
+//		_currentCurve->clear();
+//		ADC::getInstance().setCurrentCurve(_currentCurve);
+//		_samplingType = value;
 
-		_samplingType = value;
+		sampleCurrent(value);
 	});
 }
 
@@ -212,13 +213,13 @@ void PowerService::addCurrentCurveCharacteristic() {
 	_currentCurveCharacteristic->setWritable(false);
 	_currentCurveCharacteristic->setNotifies(true);
 
-	_currentCurve = new CurrentCurve<uint16_t>();
+	_powerCurve = new PowerCurve<uint16_t>();
 	MasterBuffer& mb = MasterBuffer::getInstance();
 	uint8_t *buffer = NULL;
 	uint16_t size = 0;
 	mb.getBuffer(buffer, size);
 	LOGd("Assign buffer of size %i to current curve", size);
-	_currentCurve->assign(buffer, size);
+	_powerCurve->assign(buffer, size);
 
 	_currentCurveCharacteristic->setValue(buffer);
 	_currentCurveCharacteristic->setMaxLength(size);
@@ -294,133 +295,114 @@ void PowerService::sampleCurrentInit() {
 }
 
 void PowerService::sampleCurrent(uint8_t type) {
-	// Stop storing the samples
-	ADC::getInstance().setCurrentCurve(NULL);
+	// Start storing the samples
+	_voltagePin = false;
+	_powerCurve->clear();
+//	ADC::getInstance().setPowerCurve(_powerCurve);
 
-	uint16_t numSamples = _currentCurve->length();
+	ADC::getInstance().init(PIN_AIN_CURRENT);
+	ADC::getInstance().start();
+	while (!_powerCurve->isFull()) {
+		while(!NRF_ADC->EVENTS_END) {}
+		//			NRF_ADC->EVENTS_END	= 0;
+		//			LOGd("got sample");
+		if (_voltagePin) {
+			PC_ERR_CODE res = _powerCurve->addVoltage(NRF_ADC->RESULT, RTC::getCount());
+//			LOGd("%i %i voltage: %i", res, _powerCurve->length(), NRF_ADC->RESULT);
+			ADC::getInstance().config(PIN_AIN_CURRENT);
+		}
+		else {
+			PC_ERR_CODE res = _powerCurve->addCurrent(NRF_ADC->RESULT, RTC::getCount());
+//			LOGd("%i %i current: %i", res, _powerCurve->length(), NRF_ADC->RESULT);
+			ADC::getInstance().config(PIN_AIN_VOLTAGE);
+		}
+		_voltagePin = !_voltagePin;
+		ADC::getInstance().start();
+	}
+	LOGd("sampleCurrentDone");
+	sampleCurrentDone(type);
+}
+
+void PowerService::sampleCurrentDone(uint8_t type) {
+//	// Stop storing the samples
+//	ADC::getInstance().setCurrentCurve(NULL);
+	ADC::getInstance().setPowerCurve(NULL);
+
+	uint16_t numSamples = _powerCurve->length();
 	LOGd("numSamples = %i", numSamples);
 	if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
-		_currentCurveCharacteristic->setDataLength(_currentCurve->getDataLength());
+		_currentCurveCharacteristic->setDataLength(_powerCurve->getDataLength());
 		_currentCurveCharacteristic->notify();
 	}
 
+#if SERIAL_VERBOSITY==DEBUG
 	if (numSamples>1) {
-		uint16_t voltage = 0;
-		uint32_t timestamp = 0;
-		uint32_t minVoltage = 1024;
-		uint32_t maxVoltage = 0;
-#ifdef MICRO_VIEW
-		write("3 [");
-#endif
+		uint16_t currentSample = 0;
+		uint16_t voltageSample = 0;
+		uint32_t currentTimestamp = 0;
+		uint32_t voltageTimestamp = 0;
+		LOGd("Samples:");
 		for (uint16_t i=0; i<numSamples; ++i) {
-			if (_currentCurve->getValue(i, voltage, timestamp) != CC_SUCCESS) {
+			if (_powerCurve->getValue(i, currentSample, voltageSample, currentTimestamp, voltageTimestamp) != PC_SUCCESS) {
 				break;
 			}
-
-			_log(DEBUG, "%u %u,  ", timestamp, voltage);
-#ifdef MICRO_VIEW
-			write("%u %u ", timestamp, voltage);
-#endif
-			if (!((i+1) % 5)) {
+			_log(DEBUG, "%u %u %u %u,  ", currentTimestamp, currentSample, voltageTimestamp, voltageSample);
+			if (!((i+1) % 3)) {
 				_log(DEBUG, "\r\n");
-			}
-
-			if (voltage > maxVoltage) {
-				maxVoltage = voltage;
-			}
-			if (voltage < minVoltage) {
-				minVoltage = voltage;
 			}
 		}
 		_log(DEBUG, "\r\n");
-#ifdef MICRO_VIEW
-		write("]r\n");
+	}
 #endif
 
-		if ((type & 0x1) && _powerConsumptionCharacteristic != NULL) {
-			// 1023*1000*1200 = 1.3e9 < 4.3e9 (max uint32)
-			// voltageAmplitude is max: 1023*1000*1200/1023/2 = 600000
-			uint32_t voltageAmplitude = (maxVoltage-minVoltage) * 1000 * 1200 / 1023 / 2; // uV
-			// max of currentAmplitude depends on amplification and shunt value
-			uint32_t currentAmplitude = voltageAmplitude / VOLTAGE_AMPLIFICATION / SHUNT_VALUE; // mA
-			// currentRms should be max:  16000
-			uint32_t currentRms = currentAmplitude * 1000 / 1414; // mA
-			LOGi("currentRms = %i mA", currentRms);
-			uint32_t powerRms = currentRms * 230 / 1000; // Watt
-			LOGi("powerRms = %i Watt", powerRms);
-			*_powerConsumptionCharacteristic = powerRms;
-		}
-
-/*
-		uint32_t voltageSquareMeanAmped = 0;
-		uint32_t timestamp = 0;
-		uint16_t voltage = 0;
-		//		uint32_t timeStart = _currentCurve->getTimeStart();
-		//		uint32_t timeEnd = _currentCurve->getTimeEnd();
-
-		uint32_t voltageMeanAmped = 0;
-
-		for (uint16_t i=0; i<numSamples; ++i) {
-			if (_currentCurve->getValue(i, voltage, timestamp) != CC_SUCCESS) {
-				break;
-			}
-
-			voltageMeanAmped += voltage;
-		}
-
-		voltageMeanAmped /= numSamples;
-
-		LOGi("voltageMeanAmped = %u Bit", voltageMeanAmped);
-
-		uint16_t voltageAmped = 0;
-
-#ifdef MICRO_VIEW
+#ifdef MIRCO_VIEW
+	if (numSamples>1) {
+		uint16_t currentSample = 0;
+		uint16_t voltageSample = 0;
+		uint32_t currentTimestamp = 0;
+		uint32_t voltageTimestamp = 0;
 		write("3 [");
-#endif
 		for (uint16_t i=0; i<numSamples; ++i) {
-			if (_currentCurve->getValue(i, voltage, timestamp) != CC_SUCCESS) {
+			if (_powerCurve->getValue(i, currentSample, voltageSample, currentTimestamp, voltageTimestamp) != PC_SUCCESS) {
 				break;
 			}
-			//			timestamp = timeStart + i*(timeEnd-timeStart)/(numSamples-1);
-			_log(INFO, "%u %u,  ", timestamp, voltage);
-#ifdef MICRO_VIEW
-			write("%u %u ", timestamp, voltage);
+			write("%u %u ", currentTimestamp, currentSample);
+//			write("%u %u %u %u ", currentTimestamp, currentSample, voltageTimestamp, voltageSample);
+		}
+	}
 #endif
-			if (!((i+1) % 5)) {
-				_log(INFO, "\r\n");
+
+	if (numSamples>1 && (type & 0x1) && _powerConsumptionCharacteristic != NULL) {
+		uint16_t currentSample = 0;
+		uint16_t voltageSample = 0;
+		uint32_t currentTimestamp = 0;
+		uint32_t voltageTimestamp = 0;
+		uint32_t minCurrentSample = 1024;
+		uint32_t maxCurrentSample = 0;
+		for (uint16_t i=0; i<numSamples; ++i) {
+			if (_powerCurve->getValue(i, currentSample, voltageSample, currentTimestamp, voltageTimestamp) != PC_SUCCESS) {
+				break;
 			}
-			voltageAmped = voltage - voltageMeanAmped;
-			voltageSquareMeanAmped += voltageAmped*voltageAmped;
+			if (currentSample > maxCurrentSample) {
+				maxCurrentSample = currentSample;
+			}
+			if (currentSample < minCurrentSample) {
+				minCurrentSample = currentSample;
+			}
+
+			// TODO: do some power = voltage * current, make sure we use timestamps too.
 		}
-		_log(INFO, "\r\n");
-#ifdef MICRO_VIEW
-		write("]r\n");
-#endif
-
-		if ((type & 0x1) && _currentConsumptionCharacteristic != NULL) {
-			// Take the mean
-			voltageSquareMeanAmped /= numSamples;
-
-			LOGi("voltageSquareMeanAmped = %u Bit^2", voltageSquareMeanAmped);
-
-			// Measured voltage goes from 0-1.2V, measured as 0-1023(10 bit)
-			// Convert to mV^2
-			voltageSquareMeanAmped = voltageSquareMeanAmped*(1200.0/1023.0)*(1200.0/1023.0);
-
-			LOGi("voltageSquareMeanAmped = %u mV^2", voltageSquareMeanAmped);
-
-			uint32_t voltageSquareMean = voltageSquareMeanAmped / (VOLTAGE_AMPLIFICATION * VOLTAGE_AMPLIFICATION);
-
-			LOGi("voltageSquareMeanEff = %u mV^2", voltageSquareMean);
-
-			// Convert to A^2, use I=V/R (measured over 2 shunts)
-			uint16_t currentSquareMean = voltageSquareMean / (2.0 * SHUNT_VALUE * SHUNT_VALUE);
-
-			LOGi("currentSquareMean = %u A^2", currentSquareMean);
-
-			*_currentConsumptionCharacteristic = currentSquareMean;
-		}
-*/
+		// 1023*1000*1200 = 1.3e9 < 4.3e9 (max uint32)
+		// currentSampleAmplitude is max: 1023*1000*1200/1023/2 = 600000
+		uint32_t currentSampleAmplitude = (maxCurrentSample-minCurrentSample) * 1000 * 1200 / 1023 / 2; // uV
+		// max of currentAmplitude depends on amplification and shunt value
+		uint32_t currentAmplitude = currentSampleAmplitude / VOLTAGE_AMPLIFICATION / SHUNT_VALUE; // mA
+		// currentRms should be max:  16000
+		uint32_t currentRms = currentAmplitude * 1000 / 1414; // mA
+		LOGi("currentRms = %i mA", currentRms);
+		uint32_t powerRms = currentRms * 230 / 1000; // Watt
+		LOGi("powerRms = %i Watt", powerRms);
+		*_powerConsumptionCharacteristic = powerRms;
 	}
 
 	// Unlock the buffer

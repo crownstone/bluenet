@@ -9,7 +9,8 @@
 //#include <stdint.h>
 //
 //#include "cs_RTC.h"
-#include "structs/cs_CurrentCurve.h"
+//#include "structs/cs_CurrentCurve.h"
+#include "structs/cs_PowerCurve.h"
 
 //#include "common/cs_Types.h"
 
@@ -43,7 +44,8 @@ public:
 	// Each tick we have time to dispatch events e.g.
 	void tick();
 
-	void setCurrentCurve(CurrentCurve<uint16_t>* curve) { _currentCurve = curve; }
+//	void setCurrentCurve(CurrentCurve<uint16_t>* curve) { _currentCurve = curve; }
+	void setPowerCurve(PowerCurve<uint16_t>* curve) { _powerCurve = curve; }
 
 
 //	/* Set threshold to start writing samples to buffer.
@@ -55,20 +57,23 @@ public:
 	// Function to be called from interrupt, do not do much there!
 	void update(uint32_t value);
 
+	// Function to set the input pin, this can be done after each sample
+	uint32_t config(uint8_t pin);
+
 private:
 	/* Constructor
 	 */
-	ADC(): _sampleNum(0), _currentCurve(NULL) {}
+//	ADC(): _currentCurve(NULL) {}
+	ADC(): _powerCurve(NULL) {}
 
 	// This class is singleton, deny implementation
 	ADC(ADC const&);
 	// This class is singleton, deny implementation
 	void operator=(ADC const &);
 
-	uint16_t _sampleNum;
+//	uint16_t _sampleNum;
 //	uint16_t _lastResult;
 //	uint8_t _threshold;
-	CurrentCurve<uint16_t>* _currentCurve;
-
-	uint32_t config(uint8_t pin);
+//	CurrentCurve<uint16_t>* _currentCurve;
+	PowerCurve<uint16_t>* _powerCurve;
 };

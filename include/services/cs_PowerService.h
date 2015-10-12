@@ -12,7 +12,7 @@
 //#include <common/cs_Types.h>
 
 //#include "characteristics/cs_UuidConfig.h"
-#include "structs/cs_CurrentCurve.h"
+#include "structs/cs_PowerCurve.h"
 #include "drivers/cs_Storage.h"
 //#include "ble/cs_BluetoothLE.h"
 #include <ble/cs_Service.h>
@@ -78,7 +78,7 @@ protected:
 	/* Fill up the current curve and send it out over bluetooth
 	 * @type specifies over which characteristic the current curve should be sent.
 	 */
-	void sampleCurrent(uint8_t type);
+	void sampleCurrentDone(uint8_t type);
 
 	/* Get the stored current limit.
 	 */
@@ -104,7 +104,7 @@ private:
 	BLEpp::Characteristic<uint8_t*> *_currentCurveCharacteristic;
 	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
 
-	CurrentCurve<uint16_t>* _currentCurve;
+	PowerCurve<uint16_t>* _powerCurve;
 
 	uint8_t _currentLimitVal;
 
@@ -114,4 +114,7 @@ private:
 	bool _adcInitialized;
 	bool _currentLimitInitialized;
 	uint8_t _samplingType;
+	bool _voltagePin;
+
+	void sampleCurrent(uint8_t type);
 };
