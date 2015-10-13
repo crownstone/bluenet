@@ -159,6 +159,9 @@ void ResetHandler(void) {
 
 	NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_Synth;
 #else
+	// Explicitly don't start the HF clock
+	NRF_CLOCK->TASKS_HFCLKSTART = 0;
+
 	// TODO: make dependable on board
 
 	// Best option, but requires a 32kHz crystal on the pcb

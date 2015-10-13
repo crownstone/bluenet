@@ -22,7 +22,7 @@
 
 // About 3 minutes
 //#define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 2000
-// About 20 seconds
+// About 10 seconds
 #define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 100
 
 // Initialize counter of tracked devices with this number.

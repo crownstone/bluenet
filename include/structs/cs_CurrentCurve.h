@@ -31,7 +31,7 @@ typedef uint8_t CC_ERR_CODE;
 
 /* Structure for the Current Curve
  *
- * Requires CURRENT_CURVE_SAMPLES to be set.
+ * Requires CURRENT_CURVE_MAX_SAMPLES to be set.
  */
 template <typename T>
 struct __attribute__((__packed__)) current_curve_t {

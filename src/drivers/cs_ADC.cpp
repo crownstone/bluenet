@@ -41,29 +41,29 @@ uint32_t ADC::init(uint8_t pin) {
 
 	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; // Interrupt adc
 
-	// Enable ADC interrupt
-#if(NRF51_USE_SOFTDEVICE == 1)
-	err_code = sd_nvic_ClearPendingIRQ(ADC_IRQn);
-	APP_ERROR_CHECK(err_code);
-#else
-	NVIC_ClearPendingIRQ(ADC_IRQn);
-#endif
+//	// Enable ADC interrupt
+//#if(NRF51_USE_SOFTDEVICE == 1)
+//	err_code = sd_nvic_ClearPendingIRQ(ADC_IRQn);
+//	APP_ERROR_CHECK(err_code);
+//#else
+//	NVIC_ClearPendingIRQ(ADC_IRQn);
+//#endif
+//
+//#if(NRF51_USE_SOFTDEVICE == 1)
+//	err_code = sd_nvic_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
+//	APP_ERROR_CHECK(err_code);
+//#else
+//	NVIC_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
+//#endif
+//
+//#if(NRF51_USE_SOFTDEVICE == 1)
+//	err_code = sd_nvic_EnableIRQ(ADC_IRQn);
+//	APP_ERROR_CHECK(err_code);
+//#else
+//	NVIC_EnableIRQ(ADC_IRQn);
+//#endif
 
-#if(NRF51_USE_SOFTDEVICE == 1)
-	err_code = sd_nvic_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
-	APP_ERROR_CHECK(err_code);
-#else
-	NVIC_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
-#endif
-
-#if(NRF51_USE_SOFTDEVICE == 1)
-	err_code = sd_nvic_EnableIRQ(ADC_IRQn);
-	APP_ERROR_CHECK(err_code);
-#else
-	NVIC_EnableIRQ(ADC_IRQn);
-#endif
-
-	_sampleNum = 0;
+//	_sampleNum = 0;
 	return 0;
 }
 
@@ -104,14 +104,14 @@ void ADC::start() {
 }
 
 void ADC::update(uint32_t value) {
-	// Subsample
-	if (_currentCurve != NULL && (_sampleNum++%2)) {
-//		if (_clock != NULL) {
-			_currentCurve->add(value, RTC::getCount());
-//		} else {
-//			_currentCurve->add(value);
-//		}
-	}
+//	// Subsample
+//	if (_currentCurve != NULL && (_sampleNum++%2)) {
+////		if (_clock != NULL) {
+//			_currentCurve->add(value, RTC::getCount());
+////		} else {
+////			_currentCurve->add(value);
+////		}
+//	}
 }
 
 void ADC::tick() {
