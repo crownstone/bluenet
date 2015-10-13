@@ -275,28 +275,6 @@ void Nrf51822BluetoothStack::updateConnParams() {
 	BLE_CALL(sd_ble_gap_ppcp_set, (&_gap_conn_params));
 }
 
-void Nrf51822BluetoothStack::addDoBotsManufacturingData(ble_advdata_t& data, uint8_t deviceType) {
-	// only add manufacturing data if device type is set
-	if (deviceType != DEVICE_UNDEF) {
-
-		ble_advdata_manuf_data_t manufac;
-		// TODO: made up ID, has to be replaced by official ID
-		manufac.company_identifier = DOBOTS_ID; // DoBots Company ID
-		manufac.data.size = 0;
-
-		DoBotsManufac dobotsManufac(deviceType);
-
-		uint8_t adv_manuf_data[dobotsManufac.size()];
-		memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
-		dobotsManufac.toArray(adv_manuf_data);
-
-		manufac.data.p_data = adv_manuf_data;
-		manufac.data.size = dobotsManufac.size();
-
-		data.p_manuf_specific_data = &manufac;
-	}
-}
-
 void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	if (_advertising)
 		return;
@@ -368,7 +346,26 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	// since advertisement data already has the manufacturing data
 	// of Apple for the iBeacon, we set our own manufacturing data
 	// in the scan response
-	addDoBotsManufacturingData(scan_resp, deviceType);
+
+	// only add manufacturing data if device type is set
+	if (deviceType != DEVICE_UNDEF) {
+
+		ble_advdata_manuf_data_t manufac;
+		// TODO: made up ID, has to be replaced by official ID
+		manufac.company_identifier = DOBOTS_ID; // DoBots Company ID
+		manufac.data.size = 0;
+
+		DoBotsManufac dobotsManufac(deviceType);
+
+		uint8_t adv_manuf_data[dobotsManufac.size()];
+		memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
+		dobotsManufac.toArray(adv_manuf_data);
+
+		manufac.data.p_data = adv_manuf_data;
+		manufac.data.size = dobotsManufac.size();
+
+		scan_resp.p_manuf_specific_data = &manufac;
+	}
 
 	BLE_CALL(ble_advdata_set, (&advdata, &scan_resp));
 
@@ -484,7 +481,27 @@ void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 	// add manufacturing data to the scan response instead of
 	// the advertisement data (more space, and to keep consistent with advertisement
 	// when set to iBeacon)
-	addDoBotsManufacturingData(scan_resp, deviceType);
+
+	// only add manufacturing data if device type is set
+	if (deviceType != DEVICE_UNDEF) {
+
+		ble_advdata_manuf_data_t manufac;
+		// TODO: made up ID, has to be replaced by official ID
+		manufac.company_identifier = DOBOTS_ID; // DoBots Company ID
+		manufac.data.size = 0;
+
+		DoBotsManufac dobotsManufac(deviceType);
+
+		uint8_t adv_manuf_data[dobotsManufac.size()];
+		memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
+		dobotsManufac.toArray(adv_manuf_data);
+
+		manufac.data.p_data = adv_manuf_data;
+		manufac.data.size = dobotsManufac.size();
+
+		scan_resp.p_manuf_specific_data = &manufac;
+	}
+
 
 	uint32_t err_code;
 	err_code = ble_advdata_set(&advdata, &scan_resp);
