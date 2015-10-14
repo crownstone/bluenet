@@ -516,11 +516,8 @@ extern "C" void GPIOTE_IRQHandler()
  * Checks current pwm signal, then toggles from ON to OFF and vice versa
  */
 void Sensors::switchPwmSignal() {
-
-	uint8_t pwmChannel;
-	uint32_t pwmValue;
 	// check first the current pwm value ...
-	PWM::getInstance().getValue(pwmChannel, pwmValue);
+	uint32_t pwmValue = PWM::getInstance().getValue(0);
 
 	// if currently off, turn on, otherwise turn off
 	if (pwmValue == 0) {
@@ -534,10 +531,8 @@ void Sensors::switchPwmSignal() {
  * Checks current pwm signal and only changes if it is currently OFF
  */
 void Sensors::switchPwmOn() {
-	uint8_t pwmChannel;
-	uint32_t pwmValue;
 	// check first the current pwm value ...
-	PWM::getInstance().getValue(pwmChannel, pwmValue);
+	uint32_t pwmValue = PWM::getInstance().getValue(0);
 
 	// if currently off, turn on, otherwise do nothing
 	if (pwmValue == 0) {
@@ -549,10 +544,8 @@ void Sensors::switchPwmOn() {
  * Checks current pwm signal and only changes if it is currently ON
  */
 void Sensors::switchPwmOff() {
-	uint8_t pwmChannel;
-	uint32_t pwmValue;
 	// check first the current pwm value ...
-	PWM::getInstance().getValue(pwmChannel, pwmValue);
+	uint32_t pwmValue = PWM::getInstance().getValue(0);
 
 	// if currently on, turn off, otherwise do nothing
 	if (pwmValue == 255) {

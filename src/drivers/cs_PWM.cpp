@@ -58,6 +58,10 @@ int32_t PWM::ppiEnableChannel(uint32_t ch_num, volatile uint32_t *event_ptr, vol
 }
 
 uint32_t PWM::init(pwm_config_t *config) {
+	if (_initialized) {
+		LOGw("Cannot initialize pwm: already initialized");
+		return 0xFFFFFFFF;
+	}
 	if (config->num_channels < 1 || config->num_channels > PWM_MAX_CHANNELS) {
 		return 0xFFFFFFFF;
 	}
@@ -127,15 +131,29 @@ uint32_t PWM::init(pwm_config_t *config) {
 	NVIC_EnableIRQ(PWM_IRQn);
 #endif
 	PWM_TIMER->TASKS_START = 1;
+	_initialized = true;
 	return 0;
 }
 
-void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
-	LOGd("set pwm channel %i to %i", pwm_channel, pwm_value);
+uint32_t PWM::deinit() {
+	// TODO: actually deinitialize
 
-	_pwmChannel = pwm_channel;
-	_pwmValue = pwm_value;
-	_nextValue[pwm_channel] = _pwmValue;
+	// Stop the timer
+	if((PWM_TIMER->INTENSET & TIMER_INTENSET_COMPARE3_Msk) == 0) {
+		PWM_TIMER->TASKS_STOP = 1;
+		PWM_TIMER->INTENSET = TIMER_INTENSET_COMPARE3_Msk;
+	}
+	_initialized = false;
+	return 0;
+}
+
+void PWM::setValue(uint8_t channel, uint32_t value) {
+	if (!_initialized) {
+		LOGw("Cannot set pwm: not initialized");
+		return;
+	}
+	LOGd("set pwm channel %i to %i", channel, value);
+	_nextValue[channel] = value;
 
 	PWM_TIMER->EVENTS_COMPARE[3] = 0;
 	PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk | TIMER_SHORTS_COMPARE3_STOP_Msk;
@@ -162,9 +180,33 @@ void PWM::setValue(uint8_t pwm_channel, uint32_t pwm_value) {
 	PWM_TIMER->TASKS_START = 1;
 }
 
-void PWM::getValue(uint8_t &pwm_channel, uint32_t &pwm_value) {
-	pwm_channel = _pwmChannel;
-	pwm_value = _pwmValue;
+void PWM::switchOff() {
+	LOGd("switch off all channels");
+	if (_initialized) {
+		PWM_TIMER->EVENTS_COMPARE[3] = 0;
+		PWM_TIMER->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk | TIMER_SHORTS_COMPARE3_STOP_Msk;
+
+	}
+
+	for (uint32_t i = 0; i < _numChannels; ++i) {
+		_nextValue[i] = 0;
+		nrf_gpiote_unconfig(_gpioteChannel[i]);
+		nrf_gpio_pin_write(_gpioPin[i], PWM_SWITCH_OFF);
+		_running[i] = 0;
+	}
+
+	if (_initialized) {
+		// Reset timer
+		if((PWM_TIMER->INTENSET & TIMER_INTENSET_COMPARE3_Msk) == 0) {
+			PWM_TIMER->TASKS_STOP = 1;
+			PWM_TIMER->INTENSET = TIMER_INTENSET_COMPARE3_Msk;
+		}
+		PWM_TIMER->TASKS_START = 1;
+	}
+}
+
+uint32_t PWM::getValue(uint8_t channel) {
+	return _nextValue[channel];
 }
 
 extern "C" void PWM_IRQHandler(void) {

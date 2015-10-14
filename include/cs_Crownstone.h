@@ -20,6 +20,7 @@
 #include <services/cs_AlertService.h>
 #include <services/cs_ScheduleService.h>
 
+#include <processing/cs_TemperatureGuard.h>
 #include <processing/cs_Sensors.h>
 #include <processing/cs_Fridge.h>
 
@@ -45,6 +46,7 @@ private:
 	IBeacon* _beacon;
 	Sensors* _sensors;
 	Fridge* _fridge;
+	TemperatureGuard* _temperatureGuard;
 
 	void welcome();
 

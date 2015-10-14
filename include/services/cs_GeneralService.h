@@ -17,7 +17,6 @@
 #include <ble/cs_Stack.h>
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
-//#include "processing/cs_Temperature.h"
 
 #include <structs/cs_MeshMessage.h>
 

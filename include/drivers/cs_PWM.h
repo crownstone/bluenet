@@ -68,17 +68,12 @@ struct pwm_config_t {
 class PWM {
 private:
 	// Private PWM constructor
-	PWM() {}
+	PWM() : _initialized(false) {}
 	// Private PWM copy constructor
 	PWM(PWM const&);
 	// Private PWM copy assignment definition
 	void operator=(PWM const &);
 	
-	// store values last set
-	uint8_t _pwmChannel;
-	// TODO -oDE: can we make this type consistent with _nextValue? and uint8_t should be enough?
-	uint32_t _pwmValue;
-
 	int32_t ppiEnableChannel(uint32_t ch_num, volatile uint32_t *event_ptr, volatile uint32_t *task_ptr);
 public:
 	// Gets a static singleton (no dynamic memory allocation) of the PWM clss
@@ -89,10 +84,16 @@ public:
 	// Initialize the pulse wide modulation settings
 	uint32_t init(pwm_config_t *config);
 
-	// Set the value of a specific channel
-	void setValue(uint8_t pwm_channel, uint32_t pwm_value);
+	uint32_t deinit();
 
-	void getValue(uint8_t &pwm_channel, uint32_t &pwm_value);
+	// Set the value of a specific channel
+	void setValue(uint8_t channel, uint32_t value);
+
+	// Switch off all channels
+	// Also works when not initialized (useful for emergencies)
+	void switchOff();
+
+	uint32_t getValue(uint8_t channel);
 	
 	//TODO: make the following private
 
@@ -105,4 +106,5 @@ public:
 	uint8_t _gpioteChannel[PWM_MAX_CHANNELS];
 	uint8_t _gpioPin[PWM_MAX_CHANNELS];
 	bool _running[PWM_MAX_CHANNELS];
+	bool _initialized;
 };
