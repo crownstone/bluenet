@@ -10,6 +10,7 @@
  * Then we have only around 1kB left for the stack!!!
  *********************************************************************************************************************/
 HEAP_SIZE = 2700;
+//HEAP_SIZE = 16700; // For 32kB chip
 
 SECTIONS
 {

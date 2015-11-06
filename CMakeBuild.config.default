@@ -73,6 +73,7 @@ CHAR_TRACK_DEVICES=1
 CHAR_MESHING=0
 
 # Size of the master buffer
+# Currently this should not be larger than BLE_GATTS_VAR_ATTR_LEN_MAX (512)
 MASTER_BUFFER_SIZE=300
 
 # Verbosity of the UART
@@ -163,6 +164,8 @@ APPLICATION_START_ADDRESS=0x00016000
 APPLICATION_LENGTH=0x2a000
 RAM_R1_BASE=0x20002000
 RAM_APPLICATION_AMOUNT=8K
+# For the 32kB chip:
+#RAM_APPLICATION_AMOUNT=24K
 
 #######################################################################################################################
 # For the S130 SoftDevice version (v0.5) and the SDK version (v6)
@@ -185,4 +188,6 @@ RAM_APPLICATION_AMOUNT=8K
 #APPLICATION_LENGTH=0x23000
 #RAM_R1_BASE=0x20002800
 #RAM_APPLICATION_AMOUNT=0x1800
+# For the 32kB chip:
+#RAM_APPLICATION_AMOUNT=0x5800
 
