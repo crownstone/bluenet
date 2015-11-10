@@ -218,6 +218,9 @@ void Crownstone::configDrivers() {
 	pwm_config.mode = PWM_MODE_976;
 
 	PWM::getInstance().init(&pwm_config);
+
+	_temperatureGuard = new TemperatureGuard();
+	_temperatureGuard->startTicking();
 #endif
 
 #if LOW_POWER_MODE==0

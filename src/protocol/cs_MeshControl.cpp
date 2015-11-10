@@ -78,10 +78,8 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 //		}
 
 		uint8_t pwmValue = msg->powerMsg.pwmValue;
-		uint32_t oldPwmValue;
-		uint8_t pwmChannel;
 
-		PWM::getInstance().getValue(pwmChannel, oldPwmValue);
+		uint32_t oldPwmValue = PWM::getInstance().getValue(0);
 		if (pwmValue != oldPwmValue) {
 			PWM::getInstance().setValue(0, pwmValue);
 			if (pwmValue == 0) {

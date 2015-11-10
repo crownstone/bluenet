@@ -22,8 +22,8 @@
 
 // About 3 minutes
 //#define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 2000
-// About 10 seconds
-#define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 100
+// About 30 seconds
+#define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 300
 
 // Initialize counter of tracked devices with this number.
 #define TDL_COUNTER_INIT                         -1
