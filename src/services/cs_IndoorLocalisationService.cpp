@@ -396,28 +396,6 @@ void IndoorLocalizationService::onRSSIChanged(int8_t rssi) {
 	nrf_delay_us(8000);
 #endif
 
-	int avg=0;
-	for (int i=1; i<RSSI_HIST_SIZE; ++i) {
-		rssi_hist[i-1] = rssi_hist[i];
-//		avg += rssi_hist[i];
-	}
-	rssi_hist[RSSI_HIST_SIZE-1] = rssi;
-//	avg += rssi;
-	for (int i=0; i<RSSI_HIST_SIZE; ++i) {
-		avg += rssi_hist[i];
-	}
-	avg /= RSSI_HIST_SIZE;
-
-	int val = (avg + 80)*3;
-//	int val = 0;
-//	if (avg > -70) {
-//		val = 255;
-//	}
-	if (val < 0) {
-		val = 0;
-	}
-//	LOGi("%i %i %i", rssi, avg, val);
-//	PWM::getInstance().setValue(0, val);
 	setRSSILevel(rssi);
 }
 
