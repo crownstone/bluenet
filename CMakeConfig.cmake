@@ -10,12 +10,19 @@ IF(EXISTS ${CONFIG_DIR}/${CONFIGURATION_FILE})
 	foreach(NameAndValue ${ConfigContents})
 		# Strip leading spaces
 		string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
-		# Find variable name
-		string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
-		# Find the value
-		string(REPLACE "${Name}=" "" Value ${NameAndValue})
-		# Set the variable
-		set(${Name} "${Value}")
+		# Ignore comments
+		string(REGEX REPLACE "^\#.*" "" NameAndValue ${NameAndValue})
+
+		if(NOT NameAndValue STREQUAL "")
+			# Find variable name
+			string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
+
+			# Find the value
+			string(REPLACE "${Name}=" "" Value ${NameAndValue})
+			# Set the variable
+			set(${Name} "${Value}")
+			MESSAGE(STATUS "Set ${Name} to ${Value}")
+		endif()
 	endforeach()
 else()
 	MESSAGE(FATAL_ERROR "Could not find file ${CONFIG_DIR}/${CONFIGURATION_FILE}, copy from ${CONFIGURATION_FILE}.default and adjust!")

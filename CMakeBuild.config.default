@@ -164,8 +164,10 @@ APPLICATION_START_ADDRESS=0x00016000
 APPLICATION_LENGTH=0x2a000
 RAM_R1_BASE=0x20002000
 RAM_APPLICATION_AMOUNT=8K
+HEAP_SIZE=2700;
 # For the 32kB chip:
 #RAM_APPLICATION_AMOUNT=24K
+#HEAP_SIZE=16700;
 
 #######################################################################################################################
 # For the S130 SoftDevice version (v0.5) and the SDK version (v6)
@@ -188,6 +190,7 @@ RAM_APPLICATION_AMOUNT=8K
 #APPLICATION_LENGTH=0x23000
 #RAM_R1_BASE=0x20002800
 #RAM_APPLICATION_AMOUNT=0x1800
+#HEAP_SIZE=2700;
 # For the 32kB chip:
 #RAM_APPLICATION_AMOUNT=0x5800
-
+#HEAP_SIZE=16700;
