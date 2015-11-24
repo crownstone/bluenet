@@ -63,7 +63,7 @@ void GeneralService::init() {
 	{
 	LOGi(MSG_CHAR_MESH_ADD);
 
-	_meshMessage = new MeshMessage();
+	_meshMessage = new MeshCharacteristicMessage();
 
 	MasterBuffer& mb = MasterBuffer::getInstance();
 	buffer_ptr_t buffer = NULL;
@@ -227,7 +227,7 @@ void GeneralService::addMeshCharacteristic() {
 			LOGi(MSG_MESH_MESSAGE_WRITE);
 
 
-			uint8_t handle = _meshMessage->handle();
+			uint8_t handle = _meshMessage->channel();
 
 			uint8_t* p_data;
 			uint16_t length;

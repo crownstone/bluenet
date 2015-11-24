@@ -21,6 +21,8 @@
 
 #include <protocol/cs_MeshMessageTypes.h>
 
+#include <structs/cs_ScanResult.h>
+
 //struct __attribute__((__packed__)) EventMeshPackage {
 //	EventType evt;
 //	uint8_t* p_data;
@@ -73,13 +75,13 @@ private:
 	uint16_t getMessageSize(uint16_t messageType) {
 		switch(messageType) {
 		case EVENT_MESSAGE:
-			return sizeof(mesh_header_t) + sizeof(event_mesh_message_t);
+			return sizeof(device_mesh_header_t) + sizeof(event_mesh_message_t);
 			break;
 		case POWER_MESSAGE:
-			return sizeof(mesh_header_t) + sizeof(power_mesh_message_t);
+			return sizeof(device_mesh_header_t) + sizeof(power_mesh_message_t);
 			break;
 		case BEACON_MESSAGE:
-			return sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t);
+			return sizeof(device_mesh_header_t) + sizeof(beacon_mesh_message_t);
 			break;
 		default:
 			break;
@@ -102,6 +104,8 @@ public:
 
 //	void sendPwmValue(uint8_t* address, uint8_t value);
 //	void sendIBeaconMessage(uint8_t* address, uint16_t major, uint16_t minor, ble_uuid128_t uuid, int8_t rssi);
+
+	void sendScanMessage(peripheral_device_t* p_list, uint8_t size);
 
 	void decodeDataMessage(device_mesh_message_t* msg);
 

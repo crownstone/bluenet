@@ -30,7 +30,7 @@
  * If the maximum number is exceeded, the devices with the lowest occurrence
  * will be replaced
  */
-#define SR_MAX_NR_DEVICES 10
+#define SR_MAX_NR_DEVICES 9
 
 /* Structure used to store peripheral devices detected during a scan.
  *
@@ -42,7 +42,7 @@
  * **note** struct has to be packed in order to avoid word alignment.
  */
 struct __attribute__((__packed__)) peripheral_device_t {
-	/* bluetooth address */
+	/* bluetooth address, in LITTLE_ENDIAN */
 	uint8_t addr[BLE_GAP_ADDR_LEN];
 	/* last rssi value */
 	int8_t rssi;
@@ -111,11 +111,15 @@ public:
 	 *
 	 * @return number of stored devices
 	 */
-	uint16_t getSize() const;
+	uint8_t getSize() const;
 
 	/* Clear the list of devices
 	*/
 	void clear();
+
+	peripheral_device_list_t* getList() {
+		return _buffer;
+	}
 
 	//////////// BufferAccessor ////////////////////////////
 

@@ -588,7 +588,6 @@ void timeslot_order_earliest(uint32_t length_us, bool immediately)
 
         if (!g_is_in_callback)
         {
-            LOGi("Schedule new request");
             sd_radio_request(&radio_request_earliest);
         }
     }

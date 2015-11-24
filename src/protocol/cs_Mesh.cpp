@@ -32,16 +32,16 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 	switch (evt->event_type)
 	{
 	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
-		LOGd("conflicting value");
+		LOGd("ch: %d, conflicting value", evt->value_handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_NEW_VAL:
-		LOGd("new value");
+		LOGd("ch: %d, new value", evt->value_handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_UPDATE_VAL:
-		LOGd("update value");
+		LOGd("ch: %d, update value", evt->value_handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_INITIALIZED:
-		LOGd("initialized");
+		LOGd("ch: %d, initialized", evt->value_handle);
 		break;
 	}
 
@@ -115,32 +115,18 @@ void CMesh::init() {
 //	APP_ERROR_CHECK(rbc_mesh_value_set(handle, &val[0], 1));
 //}
 
-// returns last received message
-uint32_t CMesh::receive(uint8_t handle) {
-	uint8_t val[28];
-	uint16_t len;
-	APP_ERROR_CHECK(rbc_mesh_value_get(handle, val, &len, NULL));
-	if (!len) return 0;
-	return (uint32_t)val[0];
-}
-
-// set callback to receive message
-void CMesh::set_callback() {
-}
-
-
-void CMesh::send(uint8_t handle, void* p_data, uint8_t length) {
+void CMesh::send(uint8_t channel, void* p_data, uint8_t length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
 	//LOGi("send ch: %d, len: %d", handle, length);
 	//BLEutil::printArray((uint8_t*)p_data, length);
-	APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
+	APP_ERROR_CHECK(rbc_mesh_value_set(channel, (uint8_t*)p_data, length));
 }
 
-bool CMesh::receive(uint8_t handle, void** p_data, uint16_t& length) {
+bool CMesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
-	APP_ERROR_CHECK(rbc_mesh_value_get(handle, (uint8_t*)*p_data, &length, NULL));
+	APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)*p_data, &length, NULL));
 	//LOGi("recv ch: %d, len: %d", handle, length);
 	return length != 0;
 }

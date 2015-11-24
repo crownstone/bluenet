@@ -27,6 +27,8 @@
 
 #include <cfg/cs_Settings.h>
 
+#include <protocol/cs_MeshControl.h>
+
 //#include <common/cs_Strings.h>
 
 using namespace BLEpp;
@@ -164,22 +166,28 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 				}
 				_scanMode = true;
 			} else {
+				// Only stop scanning if we're not also tracking devices
+				if (getStack()->isScanning() && !_trackMode) {
+					getStack()->stopScanning();
+				}
+				_scanMode = false;
+
 				LOGi("Return scan result");
 				if (mb.isLocked()) {
 					_scanResult->print();
 
 					_peripheralCharac->setDataLength(_scanResult->getDataLength());
 					_peripheralCharac->notify();
+
+
+					MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
+
 					mb.unlock();
 				} else {
 					LOGe("buffer not locked!");
 				}
 
-				// Only stop scanning if we're not also tracking devices
-				if (getStack()->isScanning() && !_trackMode) {
-					getStack()->stopScanning();
-				}
-				_scanMode = false;
+
 			}
 		});
 }

@@ -18,7 +18,7 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 
-#include <structs/cs_MeshMessage.h>
+#include <structs/cs_MeshCharacteristicMessage.h>
 
 #define GENERAL_SERVICE_UPDATE_FREQUENCY 10 // hz
 
@@ -217,5 +217,5 @@ private:
 	 */
 	uint8_t _selectConfiguration;
 
-	MeshMessage* _meshMessage;
+	MeshCharacteristicMessage* _meshMessage;
 };

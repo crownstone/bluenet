@@ -32,10 +32,35 @@ extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
 /**
  * Get incoming messages and perform certain actions.
  */
-void MeshControl::process(uint8_t handle, void* p_data, uint16_t length) {
+void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 	LOGi("Process incoming mesh message");
-	switch(handle) {
+	switch(channel) {
 	case HUB_CHANNEL: {
+
+		LOGi("received hub message:");
+		BLEutil::printArray((uint8_t*)p_data, length);
+
+		hub_mesh_message_t* msg = (hub_mesh_message_t*)p_data;
+		switch(msg->header.messageType) {
+		case SCAN_MESSAGE: {
+			_logFirst(INFO, "device ");
+			BLEutil::printInlineArray(msg->header.sourceAddress, BLE_GAP_ADDR_LEN);
+			_log(INFO, " scanned these devices:\r\n");
+			for (int i = 0; i < msg->scanMsg.numDevices; ++i) {
+				peripheral_device_t dev = msg->scanMsg.list[i];
+				LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
+						dev.addr[4], dev.addr[3], dev.addr[2], dev.addr[1],
+						dev.addr[0], dev.rssi, dev.occurrences);
+			}
+		}
+
+		}
+
+		// are we the hub? then process the message
+		// maybe answer on the data channel to the node that sent it that
+		// we received the message ??
+		// but basically we don't need to do anything, the
+		// hub can just read out the mesh characteristic for the hub channel
 
 		break;
 	}
@@ -46,6 +71,9 @@ void MeshControl::process(uint8_t handle, void* p_data, uint16_t length) {
 
 		if (isBroadcast(p_data) || isMessageForUs(p_data)) {
 			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+		} else {
+			_log(INFO, "Message not for us: ");
+			BLEutil::printArray(((device_mesh_message_t*)p_data)->header.targetAddress, BLE_GAP_ADDR_LEN);
 		}
 
 		break;
@@ -87,7 +115,7 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 				EventDispatcher::getInstance().dispatch(EVT_POWER_OFF);
 			} else {
 				LOGi("Turn lamp/device on");
-				EventDispatcher::getInstance().dispatch(EVT_POWER_ON);
+				EventDispatcher::getInstance().dispatch(EVT_POWER_ON, &pwmValue, sizeof(pwmValue));
 			}
 		} else {
 			LOGi("skip pwm message");
@@ -134,48 +162,92 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 
 void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch(evt) {
-	case EVT_POWER_ON:
-	case EVT_POWER_OFF: {
-		assert(length < MAX_EVENT_MESH_MESSAGE_DATA_LENGTH, "event data is too long");
-
-		LOGi("send event %s", evt == EVT_POWER_ON ? "EVT_POWER_ON" : "EVT_POWER_OFF");
-
-		device_mesh_message_t msg;
-		uint8_t targetAddress[BLE_GAP_ADDR_LEN] = BROADCAST_ADDRESS;
-		memcpy(msg.header.targetAddress, &targetAddress, BLE_GAP_ADDR_LEN);
-		msg.evtMsg.event = evt;
-//		memset(msg.evtMsg.data, 0, sizeof(msg.evtMsg.data));
-//		memcpy(msg.evtMsg.data, p_data, length);
-
-		CMesh::getInstance().send(DATA_CHANNEL, (uint8_t*)&msg, 7 + 2 + length);
-
-		break;
-	}
+//	case EVT_POWER_ON:
+//	case EVT_POWER_OFF: {
+//		assert(length < MAX_EVENT_MESH_MESSAGE_DATA_LENGTH, "event data is too long");
+//
+//		LOGi("send event %s", evt == EVT_POWER_ON ? "EVT_POWER_ON" : "EVT_POWER_OFF");
+//
+//		device_mesh_message_t msg;
+//		uint8_t targetAddress[BLE_GAP_ADDR_LEN] = BROADCAST_ADDRESS;
+//		memcpy(msg.header.targetAddress, &targetAddress, BLE_GAP_ADDR_LEN);
+//		msg.evtMsg.event = evt;
+////		memset(msg.evtMsg.data, 0, sizeof(msg.evtMsg.data));
+////		memcpy(msg.evtMsg.data, p_data, length);
+//
+//		CMesh::getInstance().send(DATA_CHANNEL, (uint8_t*)&msg, 7 + 2 + length);
+//
+//		break;
+//	}
 	default:
 		break;
 	}
 }
 
-void MeshControl::send(uint8_t handle, void* p_data, uint8_t length) {
+void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
-	if (!isValidMessage(p_data, length)) {
-		return;
+	switch(channel) {
+	case DATA_CHANNEL: {
+
+		if (!isValidMessage(p_data, length)) {
+			return;
+		}
+
+		if (isBroadcast(p_data)) {
+			// received broadcast message
+			LOGd("received broadcast, send into mesh and handle directly");
+			CMesh::getInstance().send(channel, p_data, length);
+			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+
+		} else if (!isMessageForUs(p_data)) {
+			// message is not for us, send it into mesh
+			LOGd("send it into mesh ...");
+			CMesh::getInstance().send(channel, p_data, length);
+		} else {
+			// message is for us, handle directly
+			LOGd("message is for us, handle directly");
+			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+		}
+
+		break;
+	}
+	case HUB_CHANNEL: {
+
+//		if (are we connected to a hub, or are we the hub??) {
+//			then store the message
+//			and notify the hub about the message
+//			since we are the hub, there is no reason to send it into the mesh, it would
+//			  just come back to us through the mesh
+//		} else {
+
+		// otherwise, send it into the mesh, so that it is being forwarded
+		// to the hub
+		CMesh::getInstance().send(channel, p_data, length);
+
+//		}
+
+		break;
+	}
 	}
 
-	if (isBroadcast(p_data)) {
-		// received broadcast message
-		LOGd("received broadcast, send into mesh and handle directly");
-		CMesh::getInstance().send(handle, p_data, length);
-		BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+}
 
-	} else if (!isMessageForUs(p_data)) {
-		// message is not for us, send it into mesh
-		LOGd("send it into mesh ...");
-		CMesh::getInstance().send(handle, p_data, length);
-	} else {
-		// message is for us, handle directly
-		LOGd("message is for us, handle directly");
-		BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
+
+	LOGi("sendScanMessage, size: %d", size);
+
+	if (size > 0) {
+		hub_mesh_message_t message;
+		memset(&message, 0, sizeof(message));
+		memcpy(&message.header.sourceAddress, &_myAddr.addr, BLE_GAP_ADDR_LEN);
+		message.header.messageType = SCAN_MESSAGE;
+		message.scanMsg.numDevices = size;
+		memcpy(&message.scanMsg.list, p_list, size * sizeof(peripheral_device_t));
+
+		LOGi("message data:");
+		BLEutil::printArray(&message, sizeof(message));
+		CMesh::getInstance().send(HUB_CHANNEL, &message, sizeof(message));
+
 	}
 
 }

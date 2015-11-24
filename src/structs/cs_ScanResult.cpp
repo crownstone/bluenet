@@ -13,7 +13,7 @@
 
 
 // returns the number of elements stored so far
-uint16_t ScanResult::getSize() const {
+uint8_t ScanResult::getSize() const {
 	if (_buffer != NULL) {
 		return _buffer->size;
 	} else {
@@ -48,20 +48,22 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 
 		if (memcmp(adrs_ptr, _buffer->list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 //			LOGd("found");
+			uint16_t occ = _buffer->list[i].occurrences;
+			int8_t oldRssi = _buffer->list[i].rssi ;
+			_buffer->list[i].rssi = (oldRssi * occ + rssi) / (occ + 1);
 			_buffer->list[i].occurrences++;
-			_buffer->list[i].rssi = rssi;
 			found = true;
 			// TODO: Any reason not to break here?
 		}
 	}
 	if (!found) {
-		uint8_t idx  = -1;
+		int8_t minRssi = INT8_MAX;
+		int8_t idx  = -1;
 		if (getSize() >= SR_MAX_NR_DEVICES) {
 			// history full, throw out item with lowest occurence
-			uint16_t minOcc = UINT16_MAX;
 			for (int i = 0; i < SR_MAX_NR_DEVICES; ++i) {
-				if (_buffer->list[i].occurrences < minOcc) {
-					minOcc = _buffer->list[i].occurrences;
+				if (_buffer->list[i].rssi < minRssi && _buffer->list[i].rssi < rssi) {
+					minRssi = _buffer->list[i].rssi;
 					idx = i;
 				}
 			}
@@ -70,12 +72,15 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			idx = _buffer->size++;
 		}
 
-		LOGi("NEW Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", adrs_ptr[5],
-				adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
-				adrs_ptr[0], rssi);
-		memcpy(_buffer->list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
-		_buffer->list[idx].occurrences = 1;
-		_buffer->list[idx].rssi = rssi;
+		if (idx >= 0) {
+			LOGi("idx: %d, minRssi: %d", idx, minRssi);
+			LOGi("NEW Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", adrs_ptr[5],
+					adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
+					adrs_ptr[0], rssi);
+			memcpy(_buffer->list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
+			_buffer->list[idx].occurrences = 1;
+			_buffer->list[idx].rssi = rssi;
+		}
 	} else {
 //		LOGd("Advertisement from: %s, rssi: %d, occ: %d", addrs, rssi, occ);
 	}

@@ -136,8 +136,8 @@ typedef enum
 #ifndef DM_DISABLE_LOGS
 #define DM_LOG  LOGi  /**< Used for logging details. */
 #define DM_ERR  LOGe  /**< Used for logging errors in the module. */
-#define DM_TRC  LOGi  /**< Used for getting trace of execution in the module. */
-#define DM_DUMP LOGi /**< Used for dumping octet information to get details of bond information etc. */
+#define DM_TRC(...)  /**< Used for getting trace of execution in the module. */
+#define DM_DUMP(...) /**< Used for dumping octet information to get details of bond information etc. */
 #else //DM_DISABLE_LOGS
 #define DM_DUMP(...)           /**< Disables dumping of octet streams. */
 #define DM_LOG(...)            /**< Disables detailed logs. */
@@ -549,7 +549,7 @@ static __INLINE bool update_status_bit_is_set(uint32_t index)
  */
 static __INLINE void application_instance_init(uint32_t index)
 {
-    LOGi("[DM]: Initializing Application Instance 0x%08X.\r\n", index);
+    DM_LOG("[DM]: Initializing Application Instance 0x%08X.\r\n", index);
 
     m_application_table[index].ntf_cb  = NULL;
     m_application_table[index].state   = 0x00;
@@ -563,7 +563,7 @@ static __INLINE void application_instance_init(uint32_t index)
  */
 static __INLINE void connection_instance_init(uint32_t index)
 {
-    LOGi("[DM]: Initializing Connection Instance 0x%08X.\r\n", index);
+    DM_LOG("[DM]: Initializing Connection Instance 0x%08X.\r\n", index);
 
     m_connection_table[index].state         = STATE_IDLE;
     m_connection_table[index].conn_handle   = BLE_CONN_HANDLE_INVALID;
@@ -579,7 +579,7 @@ static __INLINE void connection_instance_init(uint32_t index)
  */
 static __INLINE void peer_instance_init(uint32_t index)
 {
-    LOGi("[DM]: Initializing Peer Instance 0x%08X.\r\n", index);
+    DM_LOG("[DM]: Initializing Peer Instance 0x%08X.\r\n", index);
 
     memset(m_peer_table[index].peer_id.id_addr_info.addr, 0, BLE_GAP_ADDR_LEN);
     memset(m_peer_table[index].peer_id.id_info.irk, 0, BLE_GAP_SEC_KEY_LEN);
@@ -667,9 +667,9 @@ static __INLINE api_result_t device_instance_allocate(uint8_t *              p_d
 
     for (index = 0; index < DEVICE_MANAGER_MAX_BONDS; index++)
     {
-        LOGi("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
+        DM_LOG("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
                index, m_peer_table[index].peer_id.id_addr_info.addr_type);
-        LOGi("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
+        DM_LOG("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
                m_peer_table[index].peer_id.id_addr_info.addr[0],
                m_peer_table[index].peer_id.id_addr_info.addr[1],
                m_peer_table[index].peer_id.id_addr_info.addr[2],
@@ -692,7 +692,7 @@ static __INLINE api_result_t device_instance_allocate(uint8_t *              p_d
             (*p_device_index) = index;
             err_code          = NRF_SUCCESS;
 
-            LOGi("[DM]: Allocated device instance 0x%02X\r\n", index);
+            DM_LOG("[DM]: Allocated device instance 0x%02X\r\n", index);
 
             break;
         }
@@ -718,7 +718,7 @@ static __INLINE api_result_t device_instance_free(uint32_t device_index)
 
     if (err_code == NRF_SUCCESS)
     {
-        LOGi("[DM]:[DI 0x%02X]: Freeing Instance.\r\n", device_index);
+        DM_LOG("[DM]:[DI 0x%02X]: Freeing Instance.\r\n", device_index);
 
         //Request clearing of the block.
         err_code = pstorage_clear(&block_handle, ALL_CONTEXT_SIZE);
@@ -748,7 +748,7 @@ static api_result_t device_instance_find(ble_gap_addr_t const * p_addr, uint32_t
 
     err_code = NRF_ERROR_NOT_FOUND;
 
-    LOGi("[DM]: Searching for device 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
+    DM_LOG("[DM]: Searching for device 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
            p_addr->addr[0],
            p_addr->addr[1],
            p_addr->addr[2],
@@ -758,9 +758,9 @@ static api_result_t device_instance_find(ble_gap_addr_t const * p_addr, uint32_t
 
     for (index = 0; index < DEVICE_MANAGER_MAX_BONDS; index++)
     {
-        LOGi("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
+        DM_LOG("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
                index, m_peer_table[index].peer_id.id_addr_info.addr_type);
-        LOGi("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
+        DM_LOG("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
                m_peer_table[index].peer_id.id_addr_info.addr[0],
                m_peer_table[index].peer_id.id_addr_info.addr[1],
                m_peer_table[index].peer_id.id_addr_info.addr[2],
@@ -770,7 +770,7 @@ static api_result_t device_instance_find(ble_gap_addr_t const * p_addr, uint32_t
 
         if (memcmp(&m_peer_table[index].peer_id.id_addr_info, p_addr, sizeof(ble_gap_addr_t)) == 0)
         {
-            LOGi("[DM]: Found device at instance 0x%02X\r\n", index);
+            DM_LOG("[DM]: Found device at instance 0x%02X\r\n", index);
 
             (*p_device_index) = index;
             err_code          = NRF_SUCCESS;
@@ -797,7 +797,7 @@ static __INLINE void app_evt_notify(dm_handle_t const * const p_handle,
 
     DM_MUTEX_UNLOCK();
 
-    LOGi("[DM]: Notifying application of event 0x%02X\r\n", p_event->event_id);
+    DM_LOG("[DM]: Notifying application of event 0x%02X\r\n", p_event->event_id);
 
     //No need to do any kind of return value processing thus can be supressed.
     UNUSED_VARIABLE(app_cb(p_handle, p_event, event_result));
@@ -820,18 +820,18 @@ static __INLINE uint32_t connection_instance_allocate(uint32_t * p_instance)
 {
     uint32_t err_code;
 
-    LOGi("[DM]: Request to allocation connection instance\r\n");
+    DM_LOG("[DM]: Request to allocation connection instance\r\n");
 
     err_code = connection_instance_find(BLE_CONN_HANDLE_INVALID, STATE_IDLE, p_instance);
 
     if (err_code == NRF_SUCCESS)
     {
-        LOGi("[DM]:[%02X]: Connection Instance Allocated.\r\n", (*p_instance));
+        DM_LOG("[DM]:[%02X]: Connection Instance Allocated.\r\n", (*p_instance));
         m_connection_table[*p_instance].state = STATE_CONNECTED;
     }
     else
     {
-        LOGi("[DM]: No free connection instances available\r\n");
+        DM_LOG("[DM]: No free connection instances available\r\n");
         err_code = NRF_ERROR_NO_MEM;
     }
 
@@ -846,11 +846,11 @@ static __INLINE uint32_t connection_instance_allocate(uint32_t * p_instance)
  */
 static __INLINE void connection_instance_free(uint32_t const * p_instance)
 {
-    LOGi("[DM]:[CI 0x%02X]: Freeing connection instance\r\n", (*p_instance));
+    DM_LOG("[DM]:[CI 0x%02X]: Freeing connection instance\r\n", (*p_instance));
 
     if (m_connection_table[*p_instance].state != STATE_IDLE)
     {
-        LOGi("[DM]:[%02X]: Freed connection instance.\r\n", (*p_instance));
+        DM_LOG("[DM]:[%02X]: Freed connection instance.\r\n", (*p_instance));
         connection_instance_init(*p_instance);
     }
 }
@@ -889,7 +889,7 @@ static __INLINE void device_context_store(dm_handle_t const * p_handle, device_s
     storage_operation store_fn;
     api_result_t      err_code;
 
-    LOGi("[DM]: --> device_context_store\r\n");
+    DM_LOG("[DM]: --> device_context_store\r\n");
 
     err_code = pstorage_block_identifier_get(&m_storage_handle,
                                              p_handle->device_id,
@@ -901,21 +901,21 @@ static __INLINE void device_context_store(dm_handle_t const * p_handle, device_s
              (m_connection_table[p_handle->connection_id].state & STATE_BOND_INFO_UPDATE)) ||
             (state == UPDATE_PEER_ADDR))
         {
-            LOGi("[DM]:[DI %02X]:[CI %02X]: -> Updating bonding information.\r\n",
+            DM_LOG("[DM]:[DI %02X]:[CI %02X]: -> Updating bonding information.\r\n",
                    p_handle->device_id, p_handle->connection_id);
 
             store_fn = pstorage_update;
         }
         else if (state == FIRST_BOND_STORE)
         {
-            LOGi("[DM]:[DI %02X]:[CI %02X]: -> Storing bonding information.\r\n",
+            DM_LOG("[DM]:[DI %02X]:[CI %02X]: -> Storing bonding information.\r\n",
                    p_handle->device_id, p_handle->connection_id);
 
             store_fn = pstorage_store;
         }
         else
         {
-            LOGi("[DM]:[DI %02X]:[CI %02X]: -> No update in bonding information.\r\n",
+            DM_LOG("[DM]:[DI %02X]:[CI %02X]: -> No update in bonding information.\r\n",
                    p_handle->device_id, p_handle->connection_id);
 
             //No operation needed.
@@ -940,7 +940,7 @@ static __INLINE void device_context_store(dm_handle_t const * p_handle, device_s
 
             if (err_code != NRF_SUCCESS)
             {
-                LOGe("[DM]:[0x%02X]:Failed to store bond information, reason 0x%08X\r\n",
+                DM_ERR("[DM]:[0x%02X]:Failed to store bond information, reason 0x%08X\r\n",
                        p_handle->device_id, err_code);
             }
         }
@@ -957,7 +957,7 @@ static __INLINE void device_context_store(dm_handle_t const * p_handle, device_s
             if (err_code != NRF_SUCCESS)
             {
                 //Notify application of an error event.
-                LOGe("[DM]: Failed to store service context, reason %08X\r\n", err_code);
+                DM_ERR("[DM]: Failed to store service context, reason %08X\r\n", err_code);
             }
         }
     }
@@ -965,7 +965,7 @@ static __INLINE void device_context_store(dm_handle_t const * p_handle, device_s
     if (err_code != NRF_SUCCESS)
     {
         //Notify application of an error event.
-        LOGe("[DM]: Failed to store device context, reason %08X\r\n", err_code);
+        DM_ERR("[DM]: Failed to store device context, reason %08X\r\n", err_code);
     }
 }
 
@@ -980,7 +980,7 @@ static __INLINE void device_context_store(dm_handle_t const * p_handle, device_s
 static __INLINE api_result_t no_service_context_store(pstorage_handle_t const * p_block_handle,
                                                       dm_handle_t const       * p_handle)
 {
-    LOGi("[DM]: --> no_service_context_store\r\n");
+    DM_LOG("[DM]: --> no_service_context_store\r\n");
 
     return NRF_SUCCESS;
 }
@@ -1000,7 +1000,7 @@ static __INLINE api_result_t gatts_context_store(pstorage_handle_t const * p_blo
     uint16_t          attr_len = DM_GATT_SERVER_ATTR_MAX_SIZE;
     uint8_t           sys_data[DM_GATT_SERVER_ATTR_MAX_SIZE];
 
-    LOGi("[DM]: --> gatts_context_store\r\n");
+    DM_LOG("[DM]: --> gatts_context_store\r\n");
 
     uint32_t err_code = sd_ble_gatts_sys_attr_get(
         m_connection_table[p_handle->connection_id].conn_handle,
@@ -1012,13 +1012,13 @@ static __INLINE api_result_t gatts_context_store(pstorage_handle_t const * p_blo
         if (memcmp(m_gatts_table[p_handle->connection_id].attributes, sys_data, attr_len) == 0)
         {
             //No store operation is needed.
-            LOGi("[DM]:[0x%02X]: No change in GATTS Context information.\r\n",
+            DM_LOG("[DM]:[0x%02X]: No change in GATTS Context information.\r\n",
                    p_handle->device_id);
 
             if ((m_connection_table[p_handle->connection_id].state & STATE_CONNECTED) !=
                 STATE_CONNECTED)
             {
-                LOGi("[DM]:[0x%02X]: Resetting GATTS for active instance.\r\n",
+                DM_LOG("[DM]:[0x%02X]: Resetting GATTS for active instance.\r\n",
                        p_handle->connection_id);
 
                 //Reset GATTS information for the current context.
@@ -1030,14 +1030,14 @@ static __INLINE api_result_t gatts_context_store(pstorage_handle_t const * p_blo
             if (m_gatts_table[p_handle->connection_id].size != 0)
             {
                 //There is data already stored in persistent memory, therefore an update is needed.
-                LOGi("[DM]:[0x%02X]: Updating stored service context\r\n", p_handle->device_id);
+                DM_LOG("[DM]:[0x%02X]: Updating stored service context\r\n", p_handle->device_id);
 
                 store_fn = pstorage_update;
             }
             else
             {
                 //Fresh write, a store is needed.
-                LOGi("[DM]:[0x%02X]: Storing service context\r\n", p_handle->device_id);
+                DM_LOG("[DM]:[0x%02X]: Storing service context\r\n", p_handle->device_id);
 
                 store_fn = pstorage_store;
             }
@@ -1047,7 +1047,7 @@ static __INLINE api_result_t gatts_context_store(pstorage_handle_t const * p_blo
 
             DM_DUMP((uint8_t *)&m_gatts_table[p_handle->connection_id], sizeof(dm_gatts_context_t));
 
-            LOGi("[DM]:[0x%02X]: GATTS Data size 0x%08X\r\n",
+            DM_LOG("[DM]:[0x%02X]: GATTS Data size 0x%08X\r\n",
                    p_handle->device_id,
                    m_gatts_table[p_handle->connection_id].size);
 
@@ -1059,13 +1059,13 @@ static __INLINE api_result_t gatts_context_store(pstorage_handle_t const * p_blo
 
             if (err_code != NRF_SUCCESS)
             {
-                LOGe("[DM]:[0x%02X]:Failed to store service context, reason 0x%08X\r\n",
+                DM_ERR("[DM]:[0x%02X]:Failed to store service context, reason 0x%08X\r\n",
                        p_handle->device_id,
                        err_code);
             }
             else
             {
-                LOGi("[DM]: Service context successfully stored.\r\n");
+                DM_LOG("[DM]: Service context successfully stored.\r\n");
             }
         }
     }
@@ -1084,7 +1084,7 @@ static __INLINE api_result_t gatts_context_store(pstorage_handle_t const * p_blo
 static __INLINE api_result_t gattc_context_store(pstorage_handle_t const * p_block_handle,
                                                  dm_handle_t const       * p_handle)
 {
-    LOGi("[DM]: --> gattc_context_store\r\n");
+    DM_LOG("[DM]: --> gattc_context_store\r\n");
 
     return NRF_SUCCESS;
 }
@@ -1100,7 +1100,7 @@ static __INLINE api_result_t gattc_context_store(pstorage_handle_t const * p_blo
 static __INLINE api_result_t gattsc_context_store(pstorage_handle_t const * p_block_handle,
                                                   dm_handle_t const       * p_handle)
 {
-    LOGi("[DM]: --> gattsc_context_store\r\n");
+    DM_LOG("[DM]: --> gattsc_context_store\r\n");
 
     api_result_t err_code = gatts_context_store(p_block_handle, p_handle);
 
@@ -1123,7 +1123,7 @@ static __INLINE api_result_t gattsc_context_store(pstorage_handle_t const * p_bl
 static __INLINE api_result_t no_service_context_load(pstorage_handle_t const * p_block_handle,
                                                      dm_handle_t const       * p_handle)
 {
-    LOGi("[DM]: --> no_service_context_load\r\n");
+    DM_LOG("[DM]: --> no_service_context_load\r\n");
 
     return NRF_SUCCESS;
 }
@@ -1139,7 +1139,7 @@ static __INLINE api_result_t no_service_context_load(pstorage_handle_t const * p
 static __INLINE api_result_t gatts_context_load(pstorage_handle_t const * p_block_handle,
                                                 dm_handle_t const       * p_handle)
 {
-    LOGi("[DM]:[CI 0x%02X]:[DI 0x%02X]: --> gatts_context_load\r\n",
+    DM_LOG("[DM]:[CI 0x%02X]:[DI 0x%02X]: --> gatts_context_load\r\n",
            p_handle->connection_id,
            p_handle->device_id);
 
@@ -1150,7 +1150,7 @@ static __INLINE api_result_t gatts_context_load(pstorage_handle_t const * p_bloc
 
     if (err_code == NRF_SUCCESS)
     {
-        LOGi("[DM]:[%02X]:[Block ID 0x%08X]: Service context loaded, size 0x%08X\r\n",
+        DM_LOG("[DM]:[%02X]:[Block ID 0x%08X]: Service context loaded, size 0x%08X\r\n",
                p_handle->connection_id,
                p_block_handle->block_id,
                m_gatts_table[p_handle->connection_id].size);
@@ -1163,7 +1163,7 @@ static __INLINE api_result_t gatts_context_load(pstorage_handle_t const * p_bloc
     }
     else
     {
-        LOGe("[DM]:[%02X]: Failed to load Service context, reason %08X\r\n",
+        DM_ERR("[DM]:[%02X]: Failed to load Service context, reason %08X\r\n",
                p_handle->connection_id,
                err_code);
     }
@@ -1182,7 +1182,7 @@ static __INLINE api_result_t gatts_context_load(pstorage_handle_t const * p_bloc
 static __INLINE api_result_t gattc_context_load(pstorage_handle_t const * p_block_handle,
                                                 dm_handle_t const       * p_handle)
 {
-    LOGi("[DM]: --> gattc_context_load\r\n");
+    DM_LOG("[DM]: --> gattc_context_load\r\n");
 
     return NRF_SUCCESS;
 }
@@ -1198,7 +1198,7 @@ static __INLINE api_result_t gattc_context_load(pstorage_handle_t const * p_bloc
 static __INLINE api_result_t gattsc_context_load(pstorage_handle_t const * p_block_handle,
                                                  dm_handle_t const       * p_handle)
 {
-    LOGi("[DM]: --> gattsc_context_load\r\n");
+    DM_LOG("[DM]: --> gattsc_context_load\r\n");
 
     api_result_t err_code = gatts_context_load(p_block_handle, p_handle);
 
@@ -1219,8 +1219,8 @@ static __INLINE api_result_t gattsc_context_load(pstorage_handle_t const * p_blo
  */
 static __INLINE api_result_t no_service_context_apply(dm_handle_t * p_handle)
 {
-    LOGi("[DM]: --> no_service_context_apply\r\n");
-    LOGi("[DM]:[CI 0x%02X]: No Service context\r\n", p_handle->connection_id);
+    DM_LOG("[DM]: --> no_service_context_apply\r\n");
+    DM_LOG("[DM]:[CI 0x%02X]: No Service context\r\n", p_handle->connection_id);
 
     return NRF_SUCCESS;
 }
@@ -1240,8 +1240,8 @@ static __INLINE api_result_t gatts_context_apply(dm_handle_t * p_handle)
     uint8_t * p_gatts_context = NULL;
     uint16_t  context_len     = 0;
 
-    LOGi("[DM]: --> gatts_context_apply\r\n");
-    LOGi("[DM]:[CI 0x%02X]: State 0x%02X, Size 0x%08X\r\n",
+    DM_LOG("[DM]: --> gatts_context_apply\r\n");
+    DM_LOG("[DM]:[CI 0x%02X]: State 0x%02X, Size 0x%08X\r\n",
            p_handle->connection_id,
            m_connection_table[p_handle->connection_id].state,
            m_gatts_table[p_handle->connection_id].size);
@@ -1254,7 +1254,7 @@ static __INLINE api_result_t gatts_context_apply(dm_handle_t * p_handle)
         )
        )
     {
-        LOGi("[DM]: Setting stored context.\r\n");
+        DM_LOG("[DM]: Setting stored context.\r\n");
 
         p_gatts_context = &m_gatts_table[p_handle->connection_id].attributes[0];
         context_len     = m_gatts_table[p_handle->connection_id].size;
@@ -1266,7 +1266,7 @@ static __INLINE api_result_t gatts_context_apply(dm_handle_t * p_handle)
 
     if (err_code != NRF_SUCCESS)
     {
-        LOGi("[DM]: Failed to set system attributes, reason 0x%08X.\r\n", err_code);
+        DM_LOG("[DM]: Failed to set system attributes, reason 0x%08X.\r\n", err_code);
 
         err_code = DM_SERVICE_CONTEXT_NOT_APPLIED;
     }
@@ -1283,7 +1283,7 @@ static __INLINE api_result_t gatts_context_apply(dm_handle_t * p_handle)
  */
 static __INLINE api_result_t gattc_context_apply(dm_handle_t * p_handle)
 {
-    LOGi("[DM]: --> gattc_context_apply\r\n");
+    DM_LOG("[DM]: --> gattc_context_apply\r\n");
 
     return NRF_SUCCESS;
 }
@@ -1299,7 +1299,7 @@ static __INLINE api_result_t gattsc_context_apply(dm_handle_t * p_handle)
 {
     uint32_t err_code;
 
-    LOGi("[DM]: --> gattsc_context_apply\r\n");
+    DM_LOG("[DM]: --> gattsc_context_apply\r\n");
 
     err_code = gatts_context_apply(p_handle);
 
@@ -1316,7 +1316,7 @@ uint32_t initiate_security_request(const dm_handle_t * p_handle)
 {
     uint32_t err_code;
 
-    LOGi("[DM]: Initiating authentication request\r\n");
+    DM_LOG("[DM]: Initiating authentication request\r\n");
     DM_DUMP((uint8_t *)&m_application_table[p_handle->appl_id].sec_param,
             sizeof (ble_gap_sec_params_t));
 
@@ -1446,7 +1446,7 @@ static void dm_pstorage_cb_handler(pstorage_handle_t * p_handle,
 
                 if (index_count < DEVICE_MANAGER_MAX_CONNECTIONS)
                 {
-                    LOGi("[DM]:[0x%02X]:[0x%02X]: Bond context Event\r\n",
+                    DM_LOG("[DM]:[0x%02X]:[0x%02X]: Bond context Event\r\n",
                            dm_handle.device_id,
                            dm_handle.connection_id);
 
@@ -1472,7 +1472,7 @@ static void dm_pstorage_cb_handler(pstorage_handle_t * p_handle,
 
                     if (index_count < DEVICE_MANAGER_MAX_CONNECTIONS)
                     {
-                        LOGi("[DM]:[0x%02X]:[0x%02X]: Service context Event\r\n",
+                        DM_LOG("[DM]:[0x%02X]:[0x%02X]: Service context Event\r\n",
                                dm_handle.device_id,
                                dm_handle.connection_id);
 
@@ -1486,7 +1486,7 @@ static void dm_pstorage_cb_handler(pstorage_handle_t * p_handle,
                         if ((m_connection_table[index_count].state & STATE_CONNECTED) !=
                             STATE_CONNECTED)
                         {
-                            LOGi("[DM]:[0x%02X]:[0x%02X]: Resetting bond information for "
+                            DM_LOG("[DM]:[0x%02X]:[0x%02X]: Resetting bond information for "
                                    "active instance.\r\n",
                                    dm_handle.device_id,
                                    dm_handle.connection_id);
@@ -1498,7 +1498,7 @@ static void dm_pstorage_cb_handler(pstorage_handle_t * p_handle,
                     }
                     else
                     {
-                        LOGi("[DM]:[0x%02X]:[0x%02X]: App context Event\r\n",
+                        DM_LOG("[DM]:[0x%02X]:[0x%02X]: App context Event\r\n",
                                dm_handle.device_id,
                                dm_handle.connection_id);
 
@@ -1572,7 +1572,7 @@ api_result_t dm_init(dm_init_param_t const * const p_init_param)
     api_result_t            err_code;
     uint32_t                index;
 
-    LOGi("[DM]: >> dm_init.\r\n");
+    DM_LOG("[DM]: >> dm_init.\r\n");
 
     NULL_PARAM_CHECK(p_init_param);
 
@@ -1611,7 +1611,7 @@ api_result_t dm_init(dm_init_param_t const * const p_init_param)
 
         if (p_init_param->clear_persistent_data == false)
         {
-            LOGi("[DM]: Storage handle 0x%08X.\r\n", m_storage_handle.block_id);
+        	DM_LOG("[DM]: Storage handle 0x%08X.\r\n", m_storage_handle.block_id);
 
             //Copy bonded peer device address and IRK to RAM table.
 
@@ -1624,7 +1624,7 @@ api_result_t dm_init(dm_init_param_t const * const p_init_param)
                 //Issue read request if you successfully get the block identifier.
                 if (err_code == NRF_SUCCESS)
                 {
-                    LOGi("[DM]:[0x%02X]: Block handle 0x%08X.\r\n", index, block_handle.block_id);
+                	DM_LOG("[DM]:[0x%02X]: Block handle 0x%08X.\r\n", index, block_handle.block_id);
 
                     err_code = pstorage_load((uint8_t *)&m_peer_table[index],
                                              &block_handle,
@@ -1636,7 +1636,7 @@ api_result_t dm_init(dm_init_param_t const * const p_init_param)
                         // In case a peer device could not be loaded successfully, rest of the
                         // initialization procedure are skipped and an error is sent to the
                         // application.
-                        LOGe(
+                        DM_ERR(
                             "[DM]: Failed to load peer device %08X from storage, reason %08X.\r\n",
                             index,
                             err_code);
@@ -1646,10 +1646,10 @@ api_result_t dm_init(dm_init_param_t const * const p_init_param)
                     }
                     else
                     {
-                        LOGi("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
+                    	DM_LOG("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
                                index,
                                m_peer_table[index].peer_id.id_addr_info.addr_type);
-                        LOGi("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
+                    	DM_LOG("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
                                m_peer_table[index].peer_id.id_addr_info.addr[0],
                                m_peer_table[index].peer_id.id_addr_info.addr[1],
                                m_peer_table[index].peer_id.id_addr_info.addr[2],
@@ -1662,7 +1662,7 @@ api_result_t dm_init(dm_init_param_t const * const p_init_param)
                 {
                     //In case a peer device could not be loaded successfully, rest of the
                     //initialization procedure are skipped and an error is sent to the application.
-                    LOGi("[DM]: Failed to get block handle for instance %08X, reason %08X.\r\n",
+                	DM_LOG("[DM]: Failed to get block handle for instance %08X, reason %08X.\r\n",
                            index,
                            err_code);
 
@@ -1674,17 +1674,17 @@ api_result_t dm_init(dm_init_param_t const * const p_init_param)
         else
         {
             err_code = pstorage_clear(&m_storage_handle, (param.block_size * param.block_count));
-            LOGe("[DM]: Successfully requested clear of persistent data.\r\n");
+            DM_ERR("[DM]: Successfully requested clear of persistent data.\r\n");
         }
     }
     else
     {
-        LOGe("[DM]: Failed to register with storage module, reason 0x%08X.\r\n", err_code);
+        DM_ERR("[DM]: Failed to register with storage module, reason 0x%08X.\r\n", err_code);
     }
 
     DM_MUTEX_UNLOCK();
 
-    LOGi("[DM]: << dm_init.\r\n");
+    DM_LOG("[DM]: << dm_init.\r\n");
 
     return err_code;
 }
@@ -1700,14 +1700,14 @@ api_result_t dm_register(dm_application_instance_t    * p_appl_instance,
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_register.\r\n");
+    DM_LOG("[DM]: >> dm_register.\r\n");
 
     uint32_t err_code;
 
     //Verify if an application instance is available. Currently only one instance is supported.
     if (m_application_table[0].ntf_cb == NULL)
     {
-        LOGi("[DM]: Application Instance allocated.\r\n");
+    	DM_LOG("[DM]: Application Instance allocated.\r\n");
 
         //Mark instance as allocated.
         m_application_table[0].ntf_cb    = p_appl_param->evt_handler;
@@ -1725,7 +1725,7 @@ api_result_t dm_register(dm_application_instance_t    * p_appl_instance,
 
     DM_MUTEX_UNLOCK();
 
-    LOGi("[DM]: << dm_register.\r\n");
+    DM_LOG("[DM]: << dm_register.\r\n");
 
     return err_code;
 }
@@ -1740,7 +1740,7 @@ api_result_t dm_security_setup_req(dm_handle_t * p_handle)
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_security_setup_req\r\n");
+    DM_LOG("[DM]: >> dm_security_setup_req\r\n");
 
     uint32_t err_code = (NRF_ERROR_INVALID_STATE | DEVICE_MANAGER_ERR_BASE);
 
@@ -1772,7 +1772,7 @@ api_result_t dm_security_setup_req(dm_handle_t * p_handle)
                 if ((m_application_table[p_handle->appl_id].state &
                     STATE_CONTROL_PROCEDURE_IN_PROGRESS) == STATE_CONTROL_PROCEDURE_IN_PROGRESS)
                 {
-                    LOGi("[DM]: Marked pending\r\n");
+                	DM_LOG("[DM]: Marked pending\r\n");
 
                     m_connection_table[p_handle->connection_id].state |= STATE_PAIRING_PENDING;
                     m_application_table[p_handle->appl_id].state      |=
@@ -1787,7 +1787,7 @@ api_result_t dm_security_setup_req(dm_handle_t * p_handle)
         }
     }
 
-    LOGi("[DM]: << dm_security_setup_req, 0x%08X\r\n", err_code);
+    DM_LOG("[DM]: << dm_security_setup_req, 0x%08X\r\n", err_code);
 
     DM_MUTEX_UNLOCK();
 
@@ -1806,7 +1806,7 @@ api_result_t dm_security_status_req(dm_handle_t const    * p_handle,
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_security_status_req\r\n");
+    DM_LOG("[DM]: >> dm_security_status_req\r\n");
 
     if ((m_connection_table[p_handle->connection_id].state & STATE_PAIRING) ||
         (m_connection_table[p_handle->connection_id].state & STATE_PAIRING_PENDING))
@@ -1822,7 +1822,7 @@ api_result_t dm_security_status_req(dm_handle_t const    * p_handle,
         (*p_status) = NOT_ENCRYPTED;
     }
 
-    LOGi("[DM]: << dm_security_status_req\r\n");
+    DM_LOG("[DM]: << dm_security_status_req\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -1842,7 +1842,7 @@ api_result_t dm_whitelist_create(dm_application_instance_t const * p_handle,
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_whitelist_create\r\n");
+    DM_LOG("[DM]: >> dm_whitelist_create\r\n");
 
     uint32_t addr_count = 0;
     uint32_t irk_count  = 0;
@@ -1883,11 +1883,11 @@ api_result_t dm_whitelist_create(dm_application_instance_t const * p_handle,
     p_whitelist->addr_count = addr_count;
     p_whitelist->irk_count  = irk_count;
 
-    LOGi("[DM]: Created whitelist, number of IRK = 0x%02X, number of addr = 0x%02X\r\n",
+    DM_LOG("[DM]: Created whitelist, number of IRK = 0x%02X, number of addr = 0x%02X\r\n",
            irk_count,
            addr_count);
 
-    LOGi("[DM]: << dm_whitelist_create\r\n");
+    DM_LOG("[DM]: << dm_whitelist_create\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -1911,11 +1911,11 @@ api_result_t dm_device_delete(dm_handle_t const * p_handle)
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_device_delete\r\n");
+    DM_LOG("[DM]: >> dm_device_delete\r\n");
 
     uint32_t err_code = device_instance_free(p_handle->device_id);
 
-    LOGi("[DM]: << dm_device_delete\r\n");
+    DM_LOG("[DM]: << dm_device_delete\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -1933,7 +1933,7 @@ api_result_t dm_device_delete_all(dm_application_instance_t const * p_handle)
 
     uint32_t err_code = NRF_SUCCESS;
 
-    LOGi("[DM]: >> dm_device_delete_all\r\n");
+    DM_LOG("[DM]: >> dm_device_delete_all\r\n");
 
     for (uint32_t index = 0; index < DEVICE_MANAGER_MAX_BONDS; index++)
     {
@@ -1943,7 +1943,7 @@ api_result_t dm_device_delete_all(dm_application_instance_t const * p_handle)
         }
     }
 
-    LOGi("[DM]: << dm_device_delete_all\r\n");
+    DM_LOG("[DM]: << dm_device_delete_all\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -1963,7 +1963,7 @@ api_result_t dm_service_context_set(dm_handle_t const          * p_handle,
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_service_context_set\r\n");
+    DM_LOG("[DM]: >> dm_service_context_set\r\n");
 
     if ((p_context->context_data.p_data != NULL) &&
         (
@@ -1987,7 +1987,7 @@ api_result_t dm_service_context_set(dm_handle_t const          * p_handle,
 
     err_code = m_service_context_store[p_context->service_type](&block_handle, p_handle);
 
-    LOGi("[DM]: << dm_service_context_set\r\n");
+    DM_LOG("[DM]: << dm_service_context_set\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2006,14 +2006,14 @@ api_result_t dm_service_context_get(dm_handle_t const    * p_handle,
 
     if ((m_connection_table[p_handle->connection_id].state & STATE_CONNECTED) != STATE_CONNECTED)
     {
-        LOGi("[DM]: Device must be connected to get context. \r\n");
+        DM_LOG("[DM]: Device must be connected to get context. \r\n");
 
         return (FEATURE_NOT_ENABLED | DEVICE_MANAGER_ERR_BASE);
     }
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_service_context_get\r\n");
+    DM_LOG("[DM]: >> dm_service_context_get\r\n");
 
     if ((p_context->context_data.p_data == NULL) &&
         (p_context->context_data.len < DM_GATT_SERVER_ATTR_MAX_SIZE))
@@ -2032,7 +2032,7 @@ api_result_t dm_service_context_get(dm_handle_t const    * p_handle,
 
     err_code = m_service_context_load[p_context->service_type](&block_handle, p_handle);
 
-    LOGi("[DM]: << dm_service_context_get\r\n");
+    DM_LOG("[DM]: << dm_service_context_get\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2047,7 +2047,7 @@ api_result_t dm_service_context_delete(dm_handle_t const * p_handle)
     VERIFY_APP_REGISTERED(p_handle->appl_id);
     VERIFY_DEVICE_INSTANCE(p_handle->device_id);
 
-    LOGi("[DM]: Context delete is not supported yet.\r\n");
+    DM_LOG("[DM]: Context delete is not supported yet.\r\n");
 
     return (API_NOT_IMPLEMENTED | DEVICE_MANAGER_ERR_BASE);
 }
@@ -2067,7 +2067,7 @@ api_result_t dm_application_context_set(dm_handle_t const              * p_handl
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_application_context_set\r\n");
+    DM_LOG("[DM]: >> dm_application_context_set\r\n");
 
     uint32_t          err_code;
     uint32_t          context_len;
@@ -2091,7 +2091,7 @@ api_result_t dm_application_context_set(dm_handle_t const              * p_handl
             //Data already exists. Need an update.
             store_fn = pstorage_update;
 
-            LOGi("[DM]:[DI 0x%02X]: Updating existing application context, existing len 0x%08X, "
+            DM_LOG("[DM]:[DI 0x%02X]: Updating existing application context, existing len 0x%08X, "
                    "new length 0x%08X.\r\n",
                    p_handle->device_id,
                    context_len,
@@ -2099,7 +2099,7 @@ api_result_t dm_application_context_set(dm_handle_t const              * p_handl
         }
         else
         {
-            LOGi("[DM]: Storing application context.\r\n");
+            DM_LOG("[DM]: Storing application context.\r\n");
         }
 
         //Store/update context length.
@@ -2123,7 +2123,7 @@ api_result_t dm_application_context_set(dm_handle_t const              * p_handl
         }
     }
 
-    LOGi("[DM]: << dm_application_context_set\r\n");
+    DM_LOG("[DM]: << dm_application_context_set\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2147,7 +2147,7 @@ api_result_t dm_application_context_get(dm_handle_t const        * p_handle,
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_application_context_get\r\n");
+    DM_LOG("[DM]: >> dm_application_context_get\r\n");
 
     uint32_t          context_len;
     uint32_t          err_code;
@@ -2191,7 +2191,7 @@ api_result_t dm_application_context_get(dm_handle_t const        * p_handle,
         }
     }
 
-    LOGi("[DM]: << dm_application_context_get\r\n");
+    DM_LOG("[DM]: << dm_application_context_get\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2213,7 +2213,7 @@ api_result_t dm_application_context_delete(const dm_handle_t * p_handle)
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_application_context_delete\r\n");
+    DM_LOG("[DM]: >> dm_application_context_delete\r\n");
 
     uint32_t          err_code;
     uint32_t          context_len;
@@ -2239,7 +2239,7 @@ api_result_t dm_application_context_delete(const dm_handle_t * p_handle)
 
             if (err_code != NRF_SUCCESS)
             {
-                LOGe("[DM]: Failed to delete application context, reason 0x%08X\r\n", err_code);
+                DM_ERR("[DM]: Failed to delete application context, reason 0x%08X\r\n", err_code);
             }
             else
             {
@@ -2248,7 +2248,7 @@ api_result_t dm_application_context_delete(const dm_handle_t * p_handle)
         }
     }
 
-    LOGi("[DM]: << dm_application_context_delete\r\n");
+    DM_LOG("[DM]: << dm_application_context_delete\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2297,7 +2297,7 @@ api_result_t dm_peer_addr_set(dm_handle_t const    * p_handle,
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_peer_addr_set\r\n");
+    DM_LOG("[DM]: >> dm_peer_addr_set\r\n");
 
     api_result_t err_code;
 
@@ -2314,7 +2314,7 @@ api_result_t dm_peer_addr_set(dm_handle_t const    * p_handle,
         err_code = (NRF_ERROR_INVALID_PARAM | DEVICE_MANAGER_ERR_BASE);
     }
 
-    LOGi("[DM]: << dm_peer_addr_set\r\n");
+    DM_LOG("[DM]: << dm_peer_addr_set\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2332,7 +2332,7 @@ api_result_t dm_peer_addr_get(dm_handle_t const * p_handle,
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_peer_addr_get\r\n");
+    DM_LOG("[DM]: >> dm_peer_addr_get\r\n");
 
     api_result_t err_code;
 
@@ -2344,7 +2344,7 @@ api_result_t dm_peer_addr_get(dm_handle_t const * p_handle,
             ((m_connection_table[p_handle->connection_id].state & STATE_CONNECTED) ==
             STATE_CONNECTED))
         {
-            LOGi("[DM]:[CI 0x%02X]: Address get for non bonded active connection.\r\n",
+            DM_LOG("[DM]:[CI 0x%02X]: Address get for non bonded active connection.\r\n",
                    p_handle->connection_id);
 
             (*p_addr) = m_connection_table[p_handle->connection_id].peer_addr;
@@ -2355,7 +2355,7 @@ api_result_t dm_peer_addr_get(dm_handle_t const * p_handle,
     {
         if ((m_peer_table[p_handle->device_id].id_bitmap & ADDR_ENTRY) == 0)
         {
-            LOGi("[DM]:[DI 0x%02X]: Address get for bonded device.\r\n",
+            DM_LOG("[DM]:[DI 0x%02X]: Address get for bonded device.\r\n",
                    p_handle->device_id);
 
             (*p_addr) = m_peer_table[p_handle->device_id].peer_id.id_addr_info;
@@ -2363,7 +2363,7 @@ api_result_t dm_peer_addr_get(dm_handle_t const * p_handle,
         }
     }
 
-    LOGi("[DM]: << dm_peer_addr_get\r\n");
+    DM_LOG("[DM]: << dm_peer_addr_get\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2382,7 +2382,7 @@ api_result_t dm_distributed_keys_get(dm_handle_t const    * p_handle,
 
     DM_MUTEX_LOCK();
 
-    LOGi("[DM]: >> dm_distributed_keys_get\r\n");
+    DM_LOG("[DM]: >> dm_distributed_keys_get\r\n");
 
     api_result_t      err_code;
     ble_gap_enc_key_t peer_enc_key;
@@ -2417,7 +2417,7 @@ api_result_t dm_distributed_keys_get(dm_handle_t const    * p_handle,
         }
     }
 
-    LOGi("[DM]: << dm_distributed_keys_get\r\n");
+    DM_LOG("[DM]: << dm_distributed_keys_get\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2500,7 +2500,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
 
                     if (err_code == NRF_SUCCESS)
                     {
-                        LOGi("[DM]:[%02X]:[Block ID 0x%08X]:Loading bond information at %p, size 0x%08X, offset 0x%08X.\r\n",
+                        DM_LOG("[DM]:[%02X]:[Block ID 0x%08X]:Loading bond information at %p, size 0x%08X, offset 0x%08X.\r\n",
                                index,
                                block_handle.block_id,
                                &m_bond_table[index],
@@ -2514,12 +2514,12 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            LOGe("[DM]:[%02X]: Failed to load Bond information, reason %08X\r\n",
+                            DM_ERR("[DM]:[%02X]: Failed to load Bond information, reason %08X\r\n",
                                    index,
                                    err_code);
                         }
 
-                        LOGi("[DM]:[%02X]:Loading service context at %p, size 0x%08X, offset 0x%08X.\r\n",
+                        DM_LOG("[DM]:[%02X]:Loading service context at %p, size 0x%08X, offset 0x%08X.\r\n",
                                index,
                                &m_gatts_table[index],
                                sizeof(dm_gatts_context_t),
@@ -2530,14 +2530,14 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
 
                         if (err_code != NRF_SUCCESS)
                         {
-                            LOGe("[DM]:[%02X]: Failed to load service information, reason %08X\r\n",
+                            DM_ERR("[DM]:[%02X]: Failed to load service information, reason %08X\r\n",
                                    index,
                                    err_code);
                         }
                     }
                     else
                     {
-                        LOGe("[DM]:[%02X]: Failed to get block identifier for "
+                        DM_ERR("[DM]:[%02X]: Failed to get block identifier for "
                                "device %08X, reason %08X.\r\n",
                                index,
                                device_index,
@@ -2550,7 +2550,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
         case BLE_GAP_EVT_DISCONNECTED:
             //Disconnection could be peer or self initiated hence disconnecting and connecting
             //both states are permitted, however, connection handle must be known.
-            LOGi("[DM]: Disconnect Reason 0x%04X\r\n",
+            DM_LOG("[DM]: Disconnect Reason 0x%04X\r\n",
                    p_ble_evt->evt.gap_evt.params.disconnected.reason);
 
             m_connection_table[index].state &= (~STATE_CONNECTED);
@@ -2586,12 +2586,12 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
             break;
 
         case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
-            LOGi("[DM]: >> BLE_GAP_EVT_SEC_PARAMS_REQUEST\r\n");
+            DM_LOG("[DM]: >> BLE_GAP_EVT_SEC_PARAMS_REQUEST\r\n");
 
             notify_app = false;
             ble_gap_sec_keyset_t keys_exchanged;
 
-            LOGi("[DM]: 0x%02X, 0x%02X, 0x%02X, 0x%02X\r\n",
+            DM_LOG("[DM]: 0x%02X, 0x%02X, 0x%02X, 0x%02X\r\n",
                    p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_periph.enc,
                    p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_periph.id,
                    p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.kdist_periph.sign,
@@ -2612,7 +2612,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
 
             if (err_code != NRF_SUCCESS)
             {
-                LOGi("[DM]: Security parameter reply request failed, reason 0x%08X.\r\n", err_code);
+                DM_LOG("[DM]: Security parameter reply request failed, reason 0x%08X.\r\n", err_code);
                 event_result = err_code;
             }
             else
@@ -2623,7 +2623,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
 
         case BLE_GAP_EVT_AUTH_STATUS:
         {
-            LOGi("[DM]: >> BLE_GAP_EVT_AUTH_STATUS, status %08X\r\n",
+            DM_LOG("[DM]: >> BLE_GAP_EVT_AUTH_STATUS, status %08X\r\n",
                    p_ble_evt->evt.gap_evt.params.auth_status.auth_status);
 
             m_application_table[0].state    &= (~STATE_CONTROL_PROCEDURE_IN_PROGRESS);
@@ -2656,7 +2656,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
 
                         if (m_connection_table[index].bonded_dev_id != DM_INVALID_ID)
                         {
-                            LOGi("[DM]:[CI 0x%02X]:[DI 0x%02X]: Bonded!\r\n",
+                            DM_LOG("[DM]:[CI 0x%02X]:[DI 0x%02X]: Bonded!\r\n",
                                    index,
                                    handle.device_id);
 
@@ -2683,7 +2683,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
         }
 
         case BLE_GAP_EVT_CONN_SEC_UPDATE:
-            LOGi("[DM]: >> BLE_GAP_EVT_CONN_SEC_UPDATE, Mode 0x%02X, Level 0x%02X\r\n",
+            DM_LOG("[DM]: >> BLE_GAP_EVT_CONN_SEC_UPDATE, Mode 0x%02X, Level 0x%02X\r\n",
                    p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.sm,
                    p_ble_evt->evt.gap_evt.params.conn_sec_update.conn_sec.sec_mode.lv);
 
@@ -2710,7 +2710,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
 
                 if (err_code != NRF_SUCCESS)
                 {
-                    LOGe("[DM]:[CI 0x%02X]:[DI 0x%02X]: Failed to apply service context\r\n",
+                    DM_ERR("[DM]:[CI 0x%02X]:[DI 0x%02X]: Failed to apply service context\r\n",
                            handle.connection_id,
                            handle.device_id);
 
@@ -2723,14 +2723,14 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
             break;
 
         case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-            LOGi("[DM]: >> BLE_GATTS_EVT_SYS_ATTR_MISSING\r\n");
+            DM_LOG("[DM]: >> BLE_GATTS_EVT_SYS_ATTR_MISSING\r\n");
 
             //Apply service context.
             event_result = m_service_context_apply[m_application_table[0].service](&handle);
             break;
 
         case BLE_GAP_EVT_SEC_REQUEST:
-            LOGi("[DM]: >> BLE_GAP_EVT_SEC_REQUEST\r\n");
+            DM_LOG("[DM]: >> BLE_GAP_EVT_SEC_REQUEST\r\n");
 
             //Verify if the device is already bonded, and if it is bonded, initiate encryption.
             //If the device is not bonded, an instance needs to be allocated in order to initiate
@@ -2765,7 +2765,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
             dm_handle_t pending_handle;
             uint32_t    pending_index;
 
-            LOGi("[DM]:Queued request\r\n");
+            DM_LOG("[DM]:Queued request\r\n");
             err_code = connection_instance_find(BLE_CONN_HANDLE_INVALID,
                                                 STATE_PAIRING_PENDING,
                                                 &pending_index);
@@ -2776,14 +2776,14 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
                 pending_handle.connection_id = pending_index;
                 pending_handle.device_id     = m_connection_table[pending_index].bonded_dev_id;
                 err_code                     = initiate_security_request(&pending_handle);
-                LOGi("[DM]:[CI 0x%02X]:[DI 0x%02X]: Security request result 0x%08X\r\n",
+                DM_LOG("[DM]:[CI 0x%02X]:[DI 0x%02X]: Security request result 0x%08X\r\n",
                        pending_handle.connection_id,
                        pending_handle.device_id,
                        err_code);
             }
             else
             {
-                LOGi("[DM]:Nothing pending!\r\n");
+                DM_LOG("[DM]:Nothing pending!\r\n");
                 m_application_table[0].state &= (~STATE_QUEUED_CONTROL_REQUEST);
             }
         }
