@@ -339,9 +339,12 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	 * 1 byte for name type
 	 * -> 29 bytes left for name
 	 */
+#define MAXNAMELENGTH 29
+	uint8_t nameLength;
+
 	ble_advdata_t scan_resp;
 	memset(&scan_resp, 0, sizeof(scan_resp));
-	scan_resp.name_type = BLE_ADVDATA_FULL_NAME;
+	scan_resp.name_type = BLE_ADVDATA_SHORT_NAME;
 
 	// since advertisement data already has the manufacturing data
 	// of Apple for the iBeacon, we set our own manufacturing data
@@ -365,7 +368,23 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon, uint8_t deviceType) {
 		manufac.data.size = dobotsManufac.size();
 
 		scan_resp.p_manuf_specific_data = &manufac;
+
+		// we only have limited space available in the scan response data. so we have to adjust the maximum
+		// length available for the name, based on the size of the manufacturing data
+		nameLength = MAXNAMELENGTH - sizeof(adv_manuf_data) - sizeof(manufac.company_identifier) - 2 ; // last 2 comes from one byte for length + 1 byte for type
+	} else {
+		// if no manufacturing data is set, we can use the maximum available space for the name
+		nameLength = MAXNAMELENGTH;
 	}
+
+	// NOTE: if anything else is added to the scan response data, the nameLength has to be adjusted
+	//   similar to the case of manufacturing data
+	// last, make sure we don't try to use more letters than the name is long or it will attach
+	// garbage to the name
+	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
+
+	// and assign the value to the advertisement package
+	scan_resp.short_name_len = nameLength;
 
 	BLE_CALL(ble_advdata_set, (&advdata, &scan_resp));
 
@@ -474,9 +493,12 @@ void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 	 * 1 byte for name type
 	 * -> 29 bytes left for name
 	 */
+#define MAXNAMELENGTH 29
+	uint8_t nameLength;
+
 	ble_advdata_t scan_resp;
 	memset(&scan_resp, 0, sizeof(scan_resp));
-	scan_resp.name_type = BLE_ADVDATA_FULL_NAME;
+	scan_resp.name_type = BLE_ADVDATA_SHORT_NAME;
 
 	// add manufacturing data to the scan response instead of
 	// the advertisement data (more space, and to keep consistent with advertisement
@@ -500,8 +522,23 @@ void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 		manufac.data.size = dobotsManufac.size();
 
 		scan_resp.p_manuf_specific_data = &manufac;
+
+		// we only have limited space available in the scan response data. so we have to adjust the maximum
+		// length available for the name, based on the size of the manufacturing data
+		nameLength = MAXNAMELENGTH - sizeof(adv_manuf_data) - sizeof(manufac.company_identifier) - 2 ; // last 2 comes from one byte for length + 1 byte for type
+	} else {
+		// if no manufacturing data is set, we can use the maximum available space for the name
+		nameLength = MAXNAMELENGTH;
 	}
 
+	// NOTE: if anything else is added to the scan response data, the nameLength has to be adjusted
+	//   similar to the case of manufacturing data
+	// last, make sure we don't try to use more letters than the name is long or it will attach
+	// garbage to the name
+	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
+
+	// and assign the value to the advertisement package
+	scan_resp.short_name_len = nameLength;
 
 	uint32_t err_code;
 	err_code = ble_advdata_set(&advdata, &scan_resp);
