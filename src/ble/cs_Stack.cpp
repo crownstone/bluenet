@@ -786,9 +786,8 @@ void Nrf51822BluetoothStack::device_manager_init()
     dm_application_param_t register_param;
 
     // Don't clear bonded centrals
-//    init_data.clear_persistent_data = 0;//
-    // todo: DE since changing to SDK 8 and s130 1.0 this doesn't work anymore???!!
-    init_data.clear_persistent_data = 1;//
+    init_data.clear_persistent_data = 0;
+//    init_data.clear_persistent_data = 1;//
 
     err_code = dm_init(&init_data);
     APP_ERROR_CHECK(err_code);
