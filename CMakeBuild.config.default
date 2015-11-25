@@ -152,22 +152,22 @@ NRF51_USE_SOFTDEVICE=1
 # For the S110 SoftDevice version (v7) and SDK version (v6)
 # SoftDevice takes 88kB and application 168kB
 #######################################################################################################################
-#NRF51822_DIR=/opt/nrf51_sdk/v6/nrf51822
-#NORDIC_SDK_VERSION=6
-#SOFTDEVICE=s110_nrf51822_7.0.0
-#SOFTDEVICE_SERIES=110
-#SOFTDEVICE_MAJOR=7
+#NRF51822_DIR=/opt/nrf51_sdk/v8.1
+#NORDIC_SDK_VERSION=8
+#SOFTDEVICE_MAJOR=8
 #SOFTDEVICE_MINOR=0
-#SOFTDEVICE_DIR_API=s110_nrf51822_7.0.0_API
+#SOFTDEVICE_SERIES=110
+#SOFTDEVICE=s110_nrf51_8.0.0
+#SOFTDEVICE_DIR_API=s110_nrf51_8.0.0_API
 #SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
-#APPLICATION_START_ADDRESS=0x00016000
-#APPLICATION_LENGTH=0x2a000
+#APPLICATION_START_ADDRESS=0x00018000
+#APPLICATION_LENGTH=0x28000
 #RAM_R1_BASE=0x20002000
-#RAM_APPLICATION_AMOUNT=8K
-#HEAP_SIZE=2700;
-# For the 32kB chip:
+## RAM_APPLICATION_AMOUNT=8K
+## HEAP_SIZE=2700
+## For the 32kB chip:
 #RAM_APPLICATION_AMOUNT=24K
-#HEAP_SIZE=16700;
+#HEAP_SIZE=16700
 
 #######################################################################################################################
 # For the S130 SoftDevice version (v0.5) and the SDK version (v6)
