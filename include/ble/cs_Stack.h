@@ -22,7 +22,7 @@
 // test
 
 extern "C" {
-#include "ble/device_manager/device_manager.h"
+#include "device_manager.h"
 #include "sdk_errors.h"
 }
 

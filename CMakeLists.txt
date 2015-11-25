@@ -191,12 +191,7 @@ SOURCE_GROUP("Header files" FILES ${FOLDER_HEADER})
 INCLUDE_DIRECTORIES(${INCLUDE_DIR})
 
 # Add to the -I flags
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/app_common")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/sdk")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/common")
-#INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/softdevice")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/ble_services")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/device_manager")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/toolchain/")
