@@ -362,8 +362,15 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 void IndoorLocalizationService::on_ble_event(ble_evt_t * p_ble_evt) {
 	Service::on_ble_event(p_ble_evt);
 	switch (p_ble_evt->header.evt_id) {
+#if CHAR_RSSI==1
 	case BLE_GAP_EVT_CONNECTED: {
+
+#if (SOFTDEVICE_SERIES == 130 && SOFTDEVICE_MAJOR == 1 && SOFTDEVICE_MINOR == 0) || \
+	(SOFTDEVICE_SERIES == 110 && SOFTDEVICE_MAJOR == 8)
+		sd_ble_gap_rssi_start(p_ble_evt->evt.gap_evt.conn_handle, 0, 0);
+#else
 		sd_ble_gap_rssi_start(p_ble_evt->evt.gap_evt.conn_handle);
+#endif
 		break;
 	}
 	case BLE_GAP_EVT_DISCONNECTED: {
@@ -374,6 +381,7 @@ void IndoorLocalizationService::on_ble_event(ble_evt_t * p_ble_evt) {
 		onRSSIChanged(p_ble_evt->evt.gap_evt.params.rssi_changed.rssi);
 		break;
 	}
+#endif
 
 #if(SOFTDEVICE_SERIES != 110)
 	case BLE_GAP_EVT_ADV_REPORT:

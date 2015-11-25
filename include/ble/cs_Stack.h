@@ -23,7 +23,7 @@
 
 extern "C" {
 #include "ble/device_manager/device_manager.h"
-#include "sdk/sdk_errors.h"
+#include "sdk_errors.h"
 }
 
 /////////////////////////////////////////////////
@@ -398,7 +398,7 @@ public:
 	 * Callback handler for device manager events
 	 */
 	uint32_t deviceManagerEvtHandler(dm_handle_t const    * p_handle, dm_event_t const     * p_event,
-			api_result_t           event_result);
+			ret_code_t           event_result);
 
 protected:
 

@@ -344,8 +344,15 @@ void Crownstone::setup() {
 		// first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
 		// be neater about it... we do not need to stop, only after a disconnect we do...
 #if RSSI_ENABLE==1
+
 		sd_ble_gap_rssi_stop(conn_handle);
+
+#if (SOFTDEVICE_SERIES == 130 && SOFTDEVICE_MAJOR == 1 && SOFTDEVICE_MINOR == 0) || \
+	(SOFTDEVICE_SERIES == 110 && SOFTDEVICE_MAJOR == 8)
+		sd_ble_gap_rssi_start(conn_handle, 0, 0);
+#else
 		sd_ble_gap_rssi_start(conn_handle);
+#endif
 #endif
 
 #if LOW_POWER_MODE==0

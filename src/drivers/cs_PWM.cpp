@@ -160,13 +160,14 @@ void PWM::setValue(uint8_t channel, uint32_t value) {
 
 	for (uint32_t i = 0; i < _numChannels; ++i) {
 		if(_nextValue[i] == 0) {
-			nrf_gpiote_unconfig(_gpioteChannel[i]);
+			// todo: DE fix for new SDK
+//			nrf_gpiote_unconfig(_gpioteChannel[i]);
 			nrf_gpio_pin_write(_gpioPin[i], PWM_SWITCH_OFF);
 			_running[i] = 0;
 		}
 		else if (_nextValue[i] >= _maxValue)
 		{
-			nrf_gpiote_unconfig(_gpioteChannel[i]);
+//			nrf_gpiote_unconfig(_gpioteChannel[i]);
 			nrf_gpio_pin_write(_gpioPin[i], PWM_SWITCH_ON);
 			_running[i] = 0;
 		}
@@ -190,7 +191,7 @@ void PWM::switchOff() {
 
 	for (uint32_t i = 0; i < _numChannels; ++i) {
 		_nextValue[i] = 0;
-		nrf_gpiote_unconfig(_gpioteChannel[i]);
+//		nrf_gpiote_unconfig(_gpioteChannel[i]);
 		nrf_gpio_pin_write(_gpioPin[i], PWM_SWITCH_OFF);
 		_running[i] = 0;
 	}
@@ -221,7 +222,7 @@ extern "C" void PWM_IRQHandler(void) {
 //			PWM_TIMER->CC[i] = pwm._nextValue[i] * 2; // TODO: why times 2?
 			PWM_TIMER->CC[i] = pwm._nextValue[i];
 			if (!pwm._running[i]) {
-				nrf_gpiote_task_config(pwm._gpioteChannel[i], pwm._gpioPin[i], NRF_GPIOTE_POLARITY_TOGGLE, PWM_GPIOTE_INITIAL_VALUE);
+				nrf_gpiote_task_configure(pwm._gpioteChannel[i], pwm._gpioPin[i], NRF_GPIOTE_POLARITY_TOGGLE, PWM_GPIOTE_INITIAL_VALUE);
 				pwm._running[i] = 1;
 			}
 		}
