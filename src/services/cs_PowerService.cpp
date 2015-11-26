@@ -242,6 +242,7 @@ uint8_t PowerService::getCurrentLimit() {
 	return _currentLimitVal;
 }
 
+// TODO: doesn't work for now
 void PowerService::setCurrentLimit(uint8_t value) {
 	LOGi("Set current limit to: %i", value);
 	_currentLimitVal = value;
@@ -249,9 +250,9 @@ void PowerService::setCurrentLimit(uint8_t value) {
 	//_currentLimit.init();
 	//_currentLimitInitialized = true;
 	//}
-	LPComp::getInstance().stop();
-	LPComp::getInstance().config(PIN_AIN_LPCOMP, _currentLimitVal, LPComp::LPC_UP);
-	LPComp::getInstance().start();
+//	LPComp::getInstance().stop();
+//	LPComp::getInstance().config(PIN_AIN_LPCOMP, _currentLimitVal, LPComp::LPC_UP);
+//	LPComp::getInstance().start();
 	LOGi("Write value to persistent memory");
 	Storage::setUint8(_currentLimitVal, Settings::getInstance().getConfig().current_limit);
 	Settings::getInstance().savePersistentStorage();

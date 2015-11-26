@@ -140,10 +140,6 @@ using namespace BLEpp;
  * is not available in the final product.
  */
 void Crownstone::welcome() {
-#if LOW_POWER_MODE==0
-	nrf_gpio_cfg_output(PIN_GPIO_LED0);
-	nrf_gpio_pin_set(PIN_GPIO_LED0);
-#endif
 	config_uart();
 	_log(INFO, "\r\n");
 	BLEutil::print_heap("Heap init");
@@ -223,14 +219,8 @@ void Crownstone::configDrivers() {
 	_temperatureGuard->startTicking();
 #endif
 
-#if LOW_POWER_MODE==0
 #if HARDWARE_BOARD==PCA10001
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
-#endif
-#if HARDWARE_BOARD==PCA10000
-	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
-	nrf_gpio_pin_set(PIN_GPIO_LED_CON);
-#endif
 #endif
 }
 
@@ -348,14 +338,10 @@ void Crownstone::setup() {
 		sd_ble_gap_rssi_start(conn_handle);
 #endif
 
-#if LOW_POWER_MODE==0
 #if HARDWARE_BOARD==PCA10001
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
-//#if HARDWARE_BOARD==PCA10000
-//		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
-//#endif
-#endif
+
 	});
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
@@ -364,13 +350,8 @@ void Crownstone::setup() {
 		// of course this is not nice, but dirty! we immediately start advertising automatically after being
 		// disconnected. but for now this will be the default behaviour.
 
-#if LOW_POWER_MODE==0
 #if HARDWARE_BOARD==PCA10001
 		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
-#endif
-//#if HARDWARE_BOARD==PCA10000
-//		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
-//#endif
 #endif
 
 		bool wasScanning = _stack->isScanning();

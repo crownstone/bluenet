@@ -84,7 +84,7 @@ CMesh::~CMesh() {
  */
 void CMesh::init() {
 	LOGi("For now we are testing the meshing functionality.");
-	nrf_gpio_pin_clear(PIN_GPIO_LED0);
+//	nrf_gpio_pin_clear(PIN_GPIO_LED0);
 
 	rbc_mesh_init_params_t init_params;
 
