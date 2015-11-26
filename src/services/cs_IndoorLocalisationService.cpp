@@ -180,7 +180,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 					_peripheralCharac->notify();
 
 
-					MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
+//					MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
 
 					mb.unlock();
 				} else {
