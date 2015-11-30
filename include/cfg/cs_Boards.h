@@ -29,6 +29,10 @@
 #endif
 
 
+#define PIN_RELAY_ON         0 // gpio
+#define PIN_RELAY_OFF        5 // gpio
+#define HIGH_DURATION        20 // ms
+
 #if(HARDWARE_BOARD==CROWNSTONE)
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3

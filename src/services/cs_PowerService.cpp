@@ -140,6 +140,11 @@ void PowerService::scheduleNextTick() {
 //}
 
 void PowerService::addPWMCharacteristic() {
+	nrf_gpio_cfg_output(PIN_RELAY_OFF);
+	nrf_gpio_pin_clear(PIN_RELAY_OFF);
+	nrf_gpio_cfg_output(PIN_RELAY_ON);
+	nrf_gpio_pin_clear(PIN_RELAY_ON);
+
 	_pwmCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_pwmCharacteristic);
 	_pwmCharacteristic->setUUID(UUID(getUUID(), PWM_UUID));
@@ -148,7 +153,20 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setWritable(true);
 	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
 //		LOGi("set pwm to %i", value);
-		PWM::getInstance().setValue(0, value);
+//		PWM::getInstance().setValue(0, value);
+
+		if (value == 0) {
+			LOGi("trigger off pin");
+			nrf_gpio_pin_set(PIN_RELAY_OFF);
+			nrf_delay_ms(HIGH_DURATION);
+			nrf_gpio_pin_clear(PIN_RELAY_OFF);
+		} else {
+			LOGi("trigger on pin");
+			nrf_gpio_pin_set(PIN_RELAY_ON);
+			nrf_delay_ms(HIGH_DURATION);
+			nrf_gpio_pin_clear(PIN_RELAY_ON);
+		}
+
 	});
 }
 
