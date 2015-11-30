@@ -45,7 +45,6 @@
 #if CHAR_MESHING==1
 #include <protocol/cs_Mesh.h>
 #include <drivers/cs_RNG.h>
-#include <third/protocol/led_config.h>
 #endif
 
 /**********************************************************************************************************************
@@ -464,6 +463,10 @@ void Crownstone::run() {
 
 		app_sched_execute();
 
+#if CHAR_MESHING==1
+	    CMesh::getInstance().receive();
+#endif
+
 #if(NORDIC_SDK_VERSION > 5)
 		BLE_CALL(sd_app_evt_wait, ());
 #else
@@ -534,6 +537,21 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 #endif
+
+	case EVT_ADVERTISEMENT_PAUSE: {
+		if (_stack->isAdvertising()) {
+			_advertisementPaused = true;
+			_stack->stopAdvertising();
+		}
+		break;
+	}
+	case EVT_ADVERTISEMENT_RESUME: {
+		if (_advertisementPaused) {
+			_advertisementPaused = false;
+			startAdvertising();
+		}
+		break;
+	}
 
 	}
 

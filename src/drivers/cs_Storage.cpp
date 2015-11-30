@@ -22,10 +22,11 @@
 #include "util/cs_BleError.h"
 
 extern "C" {
+#include <third/protocol/timeslot_handler.h>
+}
 
-#if CHAR_MESHING==1
-#include "third/protocol/rbc_mesh.h"
-#endif
+
+extern "C"  {
 
 static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
 		uint32_t data_len) {
@@ -41,9 +42,10 @@ static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_cod
 		LOGi("Opcode %i executed (no error)", op_code);
 	}
 
-#if CHAR_MESHING==1
-	rbc_mesh_resume();
-#endif
+//#if CHAR_MESHING==1
+//	timeslot_handler_resume();
+////	rbc_mesh_resume();
+//#endif
 }
 
 } // extern "C"
@@ -149,11 +151,12 @@ void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, ui
 
 //		clearBlock(handle);
 
-#if CHAR_MESHING==1
-	// we need to pause the mesh, otherwise the softdevice won't get time to
-	// update the storage
-	rbc_mesh_pause();
-#endif
+//#if CHAR_MESHING==1
+//	// we need to pause the mesh, otherwise the softdevice won't get time to
+//	// update the storage
+//	timeslot_handler_pause();
+////	rbc_mesh_pause();
+//#endif
 
 	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
 

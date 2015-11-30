@@ -55,3 +55,5 @@
 
 // tx power used for low power mode during bonding
 #define LOW_TX_POWER                             -40
+
+#define CLOCK_SOURCE                             NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_8000MS_CALIBRATION

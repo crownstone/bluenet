@@ -925,7 +925,7 @@ void RTC1_IRQHandler(void)
  */
 void SWI0_IRQHandler(void)
 {
-	rbc_mesh_SWI0_IRQHandler();
+//	rbc_mesh_SWI0_IRQHandler();
     timer_list_handler();
 }
 

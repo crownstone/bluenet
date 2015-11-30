@@ -33,31 +33,33 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
 
-#ifndef _TRANSPORT_CONTROL_H__
-#define _TRANSPORT_CONTROL_H__
-#include <stdint.h>
-#include "mesh_packet.h"
-#include "ble.h"
+#ifndef _TOOLCHAIN_H__
+#define _TOOLCHAIN_H__
+#include "nrf51.h"
 
-/**
-* @file This module takes care of all lower level packet processing and 
-*   schedules the radio for transmission. Acts as the link between the radio
-*   and the mesh service.
-*/
- 
+#if defined(__CC_ARM)
 
+/* ARMCC and GCC have different ordering for packed typedefs, must separate macros */
+    #define __packed_gcc
+    #define __packed_armcc __packed
 
-void tc_init(uint32_t access_address, uint8_t channel);
+    #define _DISABLE_IRQS(_was_masked) _was_masked = __disable_irq()
+    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
 
-void tc_radio_params_set(uint32_t access_address, uint8_t channel);
+#elif defined(__GNUC__)
 
-void tc_on_ts_begin(void);
-/**
-* @brief: assemble a packet by getting data from server based on params,
-*   and place it on the radio queue
-*/
-uint32_t tc_tx(mesh_packet_t* p_packet);
+    #define __packed_armcc
+    #define __packed_gcc __attribute__((packed))
 
-void tc_packet_handler(uint8_t* data, uint32_t crc, uint64_t timestamp);
+    #define _DISABLE_IRQS(_was_masked) do{ \
+        __ASM volatile ("MRS %0, primask" : "=r" (_was_masked) );\
+        __ASM volatile ("cpsid i" : : : "memory");\
+    } while(0)
 
-#endif /* _TRANSPORT_CONTROL_H__ */
+    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
+
+#else
+    #warning "Unsupported toolchain"
+#endif
+
+#endif /* _TOOLCHAIN_H__ */

@@ -17,6 +17,12 @@
 #include <util/cs_BleError.h>
 
 #include <util/cs_Utils.h>
+#include <cfg/cs_Config.h>
+
+#define MESH_ACCESS_ADDR 0xA541A68E
+#define MESH_INTERVAL_MIN_MS 100
+#define MESH_CHANNEL 38
+#define MESH_CLOCK_SOURCE (CLOCK_SOURCE)
 
 extern "C" {
 //#include <protocol/led_config.h>
@@ -88,12 +94,10 @@ void CMesh::init() {
 
 	rbc_mesh_init_params_t init_params;
 
-	init_params.access_addr = 0xA541A68F;
-	init_params.adv_int_ms = 100;
-	init_params.channel = 38;
-	init_params.handle_count = 2;
-	init_params.packet_format = RBC_MESH_PACKET_FORMAT_ORIGINAL;
-	init_params.radio_mode = RBC_MESH_RADIO_MODE_BLE_1MBIT;
+	init_params.access_addr = MESH_ACCESS_ADDR;
+	init_params.interval_min_ms = MESH_INTERVAL_MIN_MS;
+	init_params.channel = MESH_CHANNEL;
+	init_params.lfclksrc = MESH_CLOCK_SOURCE;
 
 	LOGi("Call rbc_mesh_init");
 	uint8_t error_code;
@@ -116,6 +120,7 @@ void CMesh::init() {
 //}
 
 void CMesh::send(uint8_t channel, void* p_data, uint8_t length) {
+	LOGi("length: %d, MAX_MESH_MESSAGE_LEN: %d", length, MAX_MESH_MESSAGE_LEN);
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
 	//LOGi("send ch: %d, len: %d", handle, length);
@@ -126,8 +131,16 @@ void CMesh::send(uint8_t channel, void* p_data, uint8_t length) {
 bool CMesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
-	APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)*p_data, &length, NULL));
+	APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)*p_data, &length));
 	//LOGi("recv ch: %d, len: %d", handle, length);
 	return length != 0;
+}
+
+void CMesh::receive() {
+    rbc_mesh_event_t evt;
+	if (rbc_mesh_event_get(&evt) == NRF_SUCCESS) {
+		rbc_mesh_event_handler(&evt);
+		rbc_mesh_packet_release(evt.data);
+	}
 }
 

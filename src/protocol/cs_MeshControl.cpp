@@ -136,23 +136,42 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 		ble_uuid128_t& uuid = msg->beaconMsg.uuid;
 		int8_t& rssi = msg->beaconMsg.rssi;
 
-		if (major != 0) {
+		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_PAUSE);
+
+		bool hasChange = false;
+		ps_configuration_t cfg = Settings::getInstance().getConfig();
+
+		uint16_t oldMajor;
+		Storage::getUint16((uint32_t&)cfg.beacon.major, oldMajor, BEACON_MAJOR);
+		if (major != 0 && major != oldMajor) {
 			Settings::getInstance().writeToStorage(CONFIG_IBEACON_MAJOR, (uint8_t*)&major, sizeof(major), false);
+			hasChange = true;
 		}
 
-		if (minor != 0) {
+		uint16_t oldMinor;
+		Storage::getUint16((uint32_t&)cfg.beacon.minor, oldMinor, BEACON_MINOR);
+		if (minor != 0 && minor != oldMinor) {
 			Settings::getInstance().writeToStorage(CONFIG_IBEACON_MINOR, (uint8_t*)&minor, sizeof(minor), false);
+			hasChange = true;
 		}
 
-		if (memcmp(&uuid, new uint8_t[16] {}, 16)) {
+		if (memcmp(&uuid, new uint8_t[16] {}, 16) && memcmp(&uuid, cfg.beacon.uuid.uuid128, 16)) {
 			Settings::getInstance().writeToStorage(CONFIG_IBEACON_UUID, (uint8_t*)&uuid, sizeof(uuid), false);
+			hasChange = true;
 		}
 
-		if (rssi != 0) {
+		int8_t oldRssi;
+		Storage::getInt8((int32_t&)cfg.beacon.rssi, oldRssi, BEACON_RSSI);
+		if (rssi != 0 && rssi != oldRssi) {
 			Settings::getInstance().writeToStorage(CONFIG_IBEACON_RSSI, (uint8_t*)&rssi, sizeof(rssi), false);
+			hasChange = true;
 		}
 
-		Settings::getInstance().savePersistentStorage();
+		if (hasChange) {
+			Settings::getInstance().savePersistentStorage();
+		}
+
+		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_RESUME);
 
 		break;
 	}

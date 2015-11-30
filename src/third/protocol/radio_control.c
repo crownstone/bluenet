@@ -38,21 +38,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "timeslot_handler.h"
 #include "rbc_mesh_common.h"
 #include "trickle.h"
+#include "fifo.h"
 #include "nrf.h"
 #include "nrf_sdm.h"
+#include "app_error.h"
+#include "toolchain.h"
+#include "rbc_mesh.h"
 
 #include <stdbool.h>
 #include <string.h>
 
 #include "util/cs_BleError.h"
+#define RADIO_RX_TIMEOUT                (150 + 80)
 
-#define RADIO_FIFO_QUEUE_SIZE 8 /* must be power of two */
-#define RADIO_FIFO_QUEUE_MASK (RADIO_FIFO_QUEUE_SIZE - 1)
+#define RADIO_EVENT(evt)                (NRF_RADIO->evt == 1)
 
-#define RADIO_RX_TIMEOUT                (15080)
+#define PPI_CH_STOP_RX_ABORT            (TIMER_PPI_CH_START + 4)
 
-
-#define RADIO_EVENT(evt)  (NRF_RADIO->evt == 1)
+#define DEBUG_RADIO_SET_STATE(state) do {\
+    DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_TX);\
+    DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_RX);\
+    DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_IDLE);\
+    DEBUG_RADIO_SET_PIN(state);\
+    }while (0)
 
 /**
 * Internal enum denoting radio state.
@@ -61,7 +69,8 @@ typedef enum
 {
     RADIO_STATE_RX,
     RADIO_STATE_TX,
-    RADIO_STATE_DISABLED
+    RADIO_STATE_DISABLED,
+    RADIO_STATE_NEVER_USED
 } radio_state_t;
 
 
@@ -73,101 +82,20 @@ typedef enum
 /**
 * Global radio state
 */
-static radio_state_t radio_state = RADIO_STATE_RX;
+static radio_state_t radio_state = RADIO_STATE_NEVER_USED;
 
-/**
-* RX buffers
-*/
-static uint8_t rx_data_buf[512];
-static uint8_t* rx_data[2] = {&rx_data_buf[0], &rx_data_buf[256]};
-static uint8_t current_rx_buf = 0;
+static fifo_t radio_fifo;
+static radio_event_t radio_fifo_queue[RBC_MESH_RADIO_QUEUE_LENGTH];
+static radio_idle_cb g_idle_cb;
 
-static radio_event_t radio_fifo_queue[RADIO_FIFO_QUEUE_SIZE];
-
-static uint8_t radio_fifo_head;
-static uint8_t radio_fifo_tail;
-
-static uint8_t rx_abort_timer_index;
+static bool forced_wakeup = false;
 
 
 /*****************************************************************************
 * Static functions
 *****************************************************************************/
 
-static void rx_abort_cb(void);
-
-static bool radio_fifo_full(void)
-{
-    return ((radio_fifo_tail + RADIO_FIFO_QUEUE_SIZE) == radio_fifo_head);
-}
-
-static bool radio_fifo_empty(void)
-{
-    return (radio_fifo_head == radio_fifo_tail);
-}
-
-static uint8_t radio_fifo_get_length(void)
-{
-    return (radio_fifo_head - radio_fifo_tail) & 0xFF;
-}
-
-static uint8_t radio_fifo_put(radio_event_t* evt)
-{
-    if (radio_fifo_full())
-    {
-        APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
-    }
-
-    radio_event_t* head = &radio_fifo_queue[radio_fifo_head & RADIO_FIFO_QUEUE_MASK];
-
-    memcpy(head, evt, sizeof(radio_event_t));
-
-    return ((radio_fifo_head++) & RADIO_FIFO_QUEUE_MASK);
-}
-
-static uint32_t radio_fifo_get(radio_event_t* evt)
-{
-    if (radio_fifo_empty())
-    {
-        return NRF_ERROR_NULL;
-    }
-
-    radio_event_t* tail = &radio_fifo_queue[radio_fifo_tail & RADIO_FIFO_QUEUE_MASK];
-
-    memcpy(evt, tail, sizeof(radio_event_t));
-
-    ++radio_fifo_tail;
-
-    return NRF_SUCCESS;
-}
-
-
-static uint32_t radio_fifo_peek_at(radio_event_t* evt, uint8_t offset)
-{
-    if (radio_fifo_get_length() < offset)
-    {
-        return NRF_ERROR_NULL;
-    }
-
-    radio_event_t* tail = &radio_fifo_queue[(radio_fifo_tail + offset) & RADIO_FIFO_QUEUE_MASK];
-
-    memcpy(evt, tail, sizeof(radio_event_t));
-
-    return NRF_SUCCESS;
-}
-
-static uint32_t radio_fifo_peek(radio_event_t* evt)
-{
-    return radio_fifo_peek_at(evt, 0);
-}
-
-static void radio_fifo_flush(void)
-{
-    radio_fifo_tail = radio_fifo_head;
-}
-
-
-
+static void rx_abort_cb(uint64_t timestamp);
 
 static void radio_channel_set(uint8_t ch)
 {
@@ -192,19 +120,23 @@ static void radio_channel_set(uint8_t ch)
 static bool radio_will_go_to_disabled_state(void)
 {
     radio_event_t current_evt, next_evt;
-    radio_fifo_peek_at(&current_evt, 0);
-    radio_fifo_peek_at(&next_evt, 1);
+    fifo_peek(&radio_fifo, &current_evt);
+    fifo_peek_at(&radio_fifo, &next_evt, 1);
 
-    return ((radio_fifo_get_length() == 2 &&
+    return ((fifo_get_len(&radio_fifo) == 2 &&
         (NRF_RADIO->EVENTS_READY) && !(NRF_RADIO->EVENTS_END)) ||
         (current_evt.channel != next_evt.channel));
 }
 
-static void setup_rx_timeout(uint32_t rx_start_time)
+static void setup_rx_timeout(uint64_t rx_start_time)
 {
-    rx_abort_timer_index = timer_order_cb_ppi(rx_start_time + RADIO_RX_TIMEOUT,
+    timer_order_cb_ppi(TIMER_INDEX_RADIO, rx_start_time + RADIO_RX_TIMEOUT,
         rx_abort_cb,
         (uint32_t*) &(NRF_RADIO->TASKS_DISABLE));
+    /* setup the address event to abort the rx timeout */
+    NRF_PPI->CH[PPI_CH_STOP_RX_ABORT].EEP   = (uint32_t) &(NRF_RADIO->EVENTS_ADDRESS);
+    NRF_PPI->CH[PPI_CH_STOP_RX_ABORT].TEP   = (uint32_t) &(NRF_TIMER0->TASKS_CAPTURE[TIMER_INDEX_RADIO]);
+    NRF_PPI->CHENSET 			              = (1 << (PPI_CH_STOP_RX_ABORT));
 }
 
 /**
@@ -213,33 +145,33 @@ static void setup_rx_timeout(uint32_t rx_start_time)
 */
 static void radio_transition_end(bool successful_transmission)
 {
-    /**@NOTE: CRC bug workaround */
     bool crc_status = NRF_RADIO->CRCSTATUS;
+    uint32_t crc = NRF_RADIO->RXCRC;
 
     /* pop the event that just finished */
     radio_event_t prev_evt;
-    radio_fifo_get(&prev_evt);
+    uint32_t error_code = fifo_pop(&radio_fifo, &prev_evt);
+    APP_ERROR_CHECK(error_code);
+
     bool fly_through_disable = ((NRF_RADIO->SHORTS &
         (RADIO_SHORTS_DISABLED_RXEN_Msk | RADIO_SHORTS_DISABLED_TXEN_Msk)) > 0);
 
-    current_rx_buf = !current_rx_buf;
     NRF_RADIO->SHORTS = 0;
 
-    DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_RX);
-    DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_TX);
 
-    if (radio_fifo_empty())
+    if (fifo_is_empty(&radio_fifo))
     {
+        DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_IDLE);
         radio_state = RADIO_STATE_DISABLED;
+        NRF_RADIO->TASKS_DISABLE = 1; /* in case of any fly throughs still in place */
     }
     else
     {
-
         /* Take care of the upcoming event */
 
         bool start_manually = false;
         radio_event_t evt;
-        radio_fifo_peek(&evt);
+        fifo_peek(&radio_fifo, &evt);
 
         if (evt.start_time > 0)
         {
@@ -264,23 +196,20 @@ static void radio_transition_end(bool successful_transmission)
         }
         else
         {
-            timer_order_ppi(evt.start_time, (uint32_t*) &(NRF_RADIO->TASKS_START));
+            timer_order_cb_ppi(TIMER_INDEX_RADIO, evt.start_time, setup_rx_timeout, (uint32_t*) &(NRF_RADIO->TASKS_START));
         }
 
         /* setup buffers and addresses */
-        if (evt.event_type == RADIO_EVENT_TYPE_RX)
+        NRF_RADIO->PACKETPTR = (uint32_t) &evt.packet_ptr[0];
+
+        if (evt.event_type == RADIO_EVENT_TYPE_RX ||
+            evt.event_type == RADIO_EVENT_TYPE_RX_PREEMPTABLE)
         {
-            DEBUG_RADIO_SET_PIN(PIN_RADIO_STATE_RX);
+            DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_RX);
             NRF_RADIO->RXADDRESSES = evt.access_address;
             radio_state = RADIO_STATE_RX;
 
-            NRF_RADIO->PACKETPTR = (uint32_t) rx_data[current_rx_buf];
             NRF_RADIO->INTENSET = RADIO_INTENSET_ADDRESS_Msk;
-
-            if (evt.start_time != 0)
-            {
-                setup_rx_timeout(evt.start_time);
-            }
 
             /* manually begin ramp up */
             if (!fly_through_disable)
@@ -288,16 +217,14 @@ static void radio_transition_end(bool successful_transmission)
                 radio_channel_set(evt.channel);
                 NRF_RADIO->TASKS_RXEN = 1;
             }
-
         }
         else
         {
-            DEBUG_RADIO_SET_PIN(PIN_RADIO_STATE_TX);
+//        	LOGi("_1");
+            DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_TX);
             NRF_RADIO->TXADDRESS = evt.access_address;
             radio_state = RADIO_STATE_TX;
-            NRF_RADIO->PACKETPTR = (uint32_t) &evt.packet_ptr[0];
             NRF_RADIO->INTENCLR = RADIO_INTENCLR_ADDRESS_Msk;
-
 
             /* manually begin ramp up */
             if (!fly_through_disable)
@@ -313,9 +240,8 @@ static void radio_transition_end(bool successful_transmission)
             NRF_RADIO->TASKS_START = 1;
         }
 
-
         /* prepare shortcuts for next transmission */
-        if (radio_fifo_get_length() == 1)
+        if (fifo_get_len(&radio_fifo) == 1)
         {
             NRF_RADIO->SHORTS |= RADIO_SHORTS_END_DISABLE_Msk;
         }
@@ -323,7 +249,7 @@ static void radio_transition_end(bool successful_transmission)
         {
             /* More events after the upcoming one */
             radio_event_t next_evt;
-            radio_fifo_peek_at(&next_evt, 1);
+            fifo_peek_at(&radio_fifo, &next_evt, 1);
 
             if (next_evt.event_type != evt.event_type ||
                 next_evt.channel != evt.channel)
@@ -333,7 +259,8 @@ static void radio_transition_end(bool successful_transmission)
                 NRF_RADIO->SHORTS |= RADIO_SHORTS_END_DISABLE_Msk;
 
                 /* make shortcut through disabled to accelerate the process */
-                if (next_evt.event_type == RADIO_EVENT_TYPE_RX)
+                if (next_evt.event_type == RADIO_EVENT_TYPE_RX ||
+                    next_evt.event_type == RADIO_EVENT_TYPE_RX_PREEMPTABLE)
                 {
                     NRF_RADIO->SHORTS |= RADIO_SHORTS_DISABLED_RXEN_Msk;
                 }
@@ -346,51 +273,162 @@ static void radio_transition_end(bool successful_transmission)
     }
 
     /* send to super space */
-    if (prev_evt.event_type == RADIO_EVENT_TYPE_RX)
+
+    if (prev_evt.callback.tx != NULL)
     {
-        if (successful_transmission && crc_status)
+        CHECK_FP(prev_evt.callback.rx);
+        if (prev_evt.event_type == RADIO_EVENT_TYPE_RX ||
+            prev_evt.event_type == RADIO_EVENT_TYPE_RX_PREEMPTABLE)
         {
-            if (prev_evt.callback.rx != NULL)
-            {
-                (*prev_evt.callback.rx)(rx_data[!current_rx_buf]);
-            }
+            (*prev_evt.callback.rx)(prev_evt.packet_ptr, crc_status, crc);
         }
         else
         {
-            if (prev_evt.callback.rx != NULL)
-            {
-                (*prev_evt.callback.rx)(NULL);
-            }
+            (*prev_evt.callback.tx)(prev_evt.packet_ptr);
         }
     }
     else
     {
-        if (prev_evt.callback.tx != NULL)
-        {
-            (*prev_evt.callback.tx)();
-        }
+        APP_ERROR_CHECK(NRF_ERROR_NULL);
     }
 
+    if (fifo_is_empty(&radio_fifo))
+    {
+        DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_IDLE);
+        (*g_idle_cb)();
+    }
 }
 
-static void rx_abort_cb(void)
+static void rx_abort_cb(uint64_t timestamp)
 {
+    NRF_PPI->CHENCLR = (1 << (PPI_CH_STOP_RX_ABORT));
     radio_state = RADIO_STATE_DISABLED;
-    rx_abort_timer_index = 0xFF;
     radio_transition_end(false);
+}
+
+static void radio_wakeup(void)
+{
+    uint32_t events_in_queue = fifo_get_len(&radio_fifo);
+    while (events_in_queue > 1)
+    {
+        radio_event_t current_evt;
+        if (fifo_peek(&radio_fifo, &current_evt) == NRF_SUCCESS &&
+            current_evt.event_type == RADIO_EVENT_TYPE_RX_PREEMPTABLE)
+        {
+            /* event is preemptable, stop it */
+            fifo_pop(&radio_fifo, &current_evt);
+
+            /* propagate failed rx event */
+            (*current_evt.callback.rx)(current_evt.packet_ptr, false, 0xFFFFFFFF);
+            radio_disable();
+            --events_in_queue;
+        }
+        else
+        {
+            break;
+        }
+    }
+    if (events_in_queue == 1)
+    {
+        /* order radio right away */
+        radio_event_t radio_event;
+        fifo_peek(&radio_fifo, &radio_event);
+
+        radio_channel_set(radio_event.channel);
+
+        NRF_RADIO->SHORTS = RADIO_SHORTS_END_DISABLE_Msk;
+
+        if (radio_event.start_time > 0)
+        {
+            uint32_t curr_time = timer_get_timestamp();
+
+            if (radio_event.start_time < curr_time)
+            {
+                radio_event.start_time = 0;
+            }
+        }
+
+        NRF_RADIO->PACKETPTR = (uint32_t) &radio_event.packet_ptr[0];
+        if (radio_event.event_type == RADIO_EVENT_TYPE_RX ||
+            radio_event.event_type == RADIO_EVENT_TYPE_RX_PREEMPTABLE)
+        {
+            NRF_RADIO->TASKS_RXEN = 1;
+
+            radio_state = RADIO_STATE_RX;
+            NRF_RADIO->INTENSET = RADIO_INTENSET_ADDRESS_Msk;
+            DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_RX);
+        }
+        else
+        {
+//        	LOGi("_2");
+            NRF_RADIO->INTENCLR = RADIO_INTENCLR_ADDRESS_Msk;
+            NRF_RADIO->TASKS_TXEN = 1;
+            radio_state = RADIO_STATE_TX;
+            DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_TX);
+        }
+
+        if (radio_event.start_time == 0)
+        {
+            NRF_RADIO->SHORTS |= RADIO_SHORTS_READY_START_Msk;
+        }
+        else
+        {
+            timer_order_cb_ppi(TIMER_INDEX_RADIO, radio_event.start_time, setup_rx_timeout, (uint32_t*) &(NRF_RADIO->TASKS_START));
+        }
+
+        NRF_RADIO->INTENSET = RADIO_INTENSET_END_Msk;
+
+    }
+    else
+    {
+        uint8_t queue_length = fifo_get_len(&radio_fifo);
+
+        if (queue_length == 0)
+        {
+            DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_IDLE);
+        }
+        /* queue the event */
+        if (!radio_will_go_to_disabled_state())
+        {
+            if (queue_length == 2)
+            {
+                /* this event will come straight after the current */
+
+                /* get current event */
+                radio_event_t ev;
+                fifo_peek(&radio_fifo, &ev);
+
+                /* get next event */
+                radio_event_t radio_event;
+                fifo_peek_at(&radio_fifo, &radio_event, 1);
+
+                /* setup shorts */
+                if ((ev.event_type != RADIO_EVENT_TYPE_TX) == (radio_event.event_type != RADIO_EVENT_TYPE_TX))
+                {
+                    NRF_RADIO->SHORTS &= ~(RADIO_SHORTS_END_DISABLE_Msk);
+                }
+                else if (radio_event.event_type == RADIO_EVENT_TYPE_TX)
+                {
+                    NRF_RADIO->SHORTS |= RADIO_SHORTS_DISABLED_TXEN_Msk;
+                }
+                else /* going to TX */
+                {
+                    NRF_RADIO->SHORTS |= RADIO_SHORTS_DISABLED_RXEN_Msk;
+                }
+            }
+        }
+    }
 }
 
 /*****************************************************************************
 * Interface functions
 *****************************************************************************/
 
-void radio_init(uint32_t access_address)
+void radio_init(uint32_t access_address, radio_idle_cb idle_cb)
 {
 	/* Reset all states in the radio peripheral */
     NRF_RADIO->POWER            = ((RADIO_POWER_POWER_Disabled << RADIO_POWER_POWER_Pos) & RADIO_POWER_POWER_Msk);
     NRF_RADIO->POWER            = ((RADIO_POWER_POWER_Enabled  << RADIO_POWER_POWER_Pos) & RADIO_POWER_POWER_Msk);
-
-
 
     /* Set radio configuration parameters */
     NRF_RADIO->TXPOWER      = ((RADIO_TXPOWER_TXPOWER_0dBm << RADIO_TXPOWER_TXPOWER_Pos) & RADIO_TXPOWER_TXPOWER_Msk);
@@ -410,11 +448,13 @@ void radio_init(uint32_t access_address)
     NRF_RADIO->PCNF0 =  (
                           (((1UL) << RADIO_PCNF0_S0LEN_Pos) & RADIO_PCNF0_S0LEN_Msk)    // length of S0 field in bytes 0-1.
                         | (((2UL) << RADIO_PCNF0_S1LEN_Pos) & RADIO_PCNF0_S1LEN_Msk)    // length of S1 field in bits 0-8.
+//                        | (((6UL) << RADIO_PCNF0_LFLEN_Pos) & RADIO_PCNF0_LFLEN_Msk)    // length of length field in bits 0-8.
                         | (((8UL) << RADIO_PCNF0_LFLEN_Pos) & RADIO_PCNF0_LFLEN_Msk)    // length of length field in bits 0-8.
                       );
 
     /* Packet configuration */
     NRF_RADIO->PCNF1 =  (
+//                          (((37UL)                          << RADIO_PCNF1_MAXLEN_Pos)  & RADIO_PCNF1_MAXLEN_Msk)   // maximum length of payload in bytes [0-255]
                           (((255UL)                         << RADIO_PCNF1_MAXLEN_Pos)  & RADIO_PCNF1_MAXLEN_Msk)   // maximum length of payload in bytes [0-255]
                         | (((0UL)                           << RADIO_PCNF1_STATLEN_Pos) & RADIO_PCNF1_STATLEN_Msk)	// expand the payload with N bytes in addition to LENGTH [0-255]
                         | (((3UL)                           << RADIO_PCNF1_BALEN_Pos)   & RADIO_PCNF1_BALEN_Msk)    // base address length in number of bytes.
@@ -431,126 +471,73 @@ void radio_init(uint32_t access_address)
     /* Lock interframe spacing, so that the radio won't send too soon / start RX too early */
     NRF_RADIO->TIFS = 148;
 
-    rx_abort_timer_index = 0xFF;
+    /* init radio packet fifo */
+    if (radio_state == RADIO_STATE_NEVER_USED)
+    {
+        /* this flushes the queue */
+        radio_fifo.array_len = RBC_MESH_RADIO_QUEUE_LENGTH;
+        radio_fifo.elem_array = radio_fifo_queue;
+        radio_fifo.elem_size = sizeof(radio_event_t);
+        radio_fifo.memcpy_fptr = NULL;
+        fifo_init(&radio_fifo);
+    }
+    
     radio_state = RADIO_STATE_DISABLED;
-    radio_fifo_flush();
+
     NVIC_ClearPendingIRQ(RADIO_IRQn);
     NVIC_EnableIRQ(RADIO_IRQn);
+    g_idle_cb = idle_cb;
+
     DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_RX);
     DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_TX);
-}
 
-void radio_order(radio_event_t* radio_event)
-{
-    radio_fifo_put(radio_event);
-
-    if (radio_state == RADIO_STATE_DISABLED)
+    if (fifo_is_empty(&radio_fifo))
     {
-        /* order radio right away */
-
-        radio_channel_set(radio_event->channel);
-
-        NRF_RADIO->SHORTS = RADIO_SHORTS_END_DISABLE_Msk;
-
-        if (radio_event->start_time > 0)
-        {
-            uint32_t curr_time = timer_get_timestamp();
-
-            if (radio_event->start_time < curr_time)
-            {
-                radio_event->start_time = 0;
-            }
-        }
-
-        if (radio_event->event_type == RADIO_EVENT_TYPE_RX)
-        {
-            NRF_RADIO->PACKETPTR = (uint32_t) rx_data[current_rx_buf]; /* double pointer */
-            NRF_RADIO->TASKS_RXEN = 1;
-
-            /* if the event is not an "as soon as possible", we setup an RX timeout,
-                else the user must do it themselves */
-            if (radio_event->start_time != 0)
-            {
-                setup_rx_timeout(radio_event->start_time);
-            }
-
-            radio_state = RADIO_STATE_RX;
-            NRF_RADIO->INTENSET = RADIO_INTENSET_ADDRESS_Msk;
-            DEBUG_RADIO_SET_PIN(PIN_RADIO_STATE_RX);
-        }
-        else
-        {
-            NRF_RADIO->PACKETPTR = (uint32_t) &radio_event->packet_ptr[0];
-            NRF_RADIO->INTENCLR = RADIO_INTENCLR_ADDRESS_Msk;
-            NRF_RADIO->TASKS_TXEN = 1;
-            radio_state = RADIO_STATE_TX;
-            DEBUG_RADIO_SET_PIN(PIN_RADIO_STATE_TX);
-        }
-
-        if (radio_event->start_time == 0)
-        {
-            NRF_RADIO->SHORTS |= RADIO_SHORTS_READY_START_Msk;
-        }
-        else
-        {
-            timer_order_ppi(radio_event->start_time, (uint32_t*) &(NRF_RADIO->TASKS_START));
-        }
-
-        NRF_RADIO->INTENSET = RADIO_INTENSET_END_Msk;
-
+        (*g_idle_cb)();
     }
     else
     {
-        //NRF_RADIO->INTENSET = RADIO_INTENSET_END_Msk;
-        /* queue the event */
-        if (!radio_will_go_to_disabled_state())
+        if (timeslot_is_in_ts())
         {
-            uint8_t queue_length = radio_fifo_get_length();
-
-            if (queue_length == 2)
-            {
-                /* this event will come straight after the current */
-
-                /* get current event */
-                radio_event_t ev;
-                radio_fifo_peek(&ev);
-
-                /* setup shorts */
-                if (ev.event_type == radio_event->event_type)
-                {
-                    NRF_RADIO->SHORTS &= ~(RADIO_SHORTS_END_DISABLE_Msk);
-                }
-                else if (radio_event->event_type == RADIO_EVENT_TYPE_RX)
-                {
-                    NRF_RADIO->SHORTS |= RADIO_SHORTS_DISABLED_RXEN_Msk;
-                }
-                else /* going to TX */
-                {
-                    NRF_RADIO->SHORTS |= RADIO_SHORTS_DISABLED_TXEN_Msk;
-                }
-            }
+            forced_wakeup = true;
+            NVIC_SetPendingIRQ(RADIO_IRQn);
         }
     }
-#if RSSI_ENABLE==1
-    // if we do this always, we never get a invalid rssi value (3), it also does not mess up the tx.
-//    LOGi("Enabling RSSI"); // this causes a breakpoint. No UART in the radio loop appearently, messes up the timings.
-    radio_rssi_enable();
-#endif
+}
+
+bool radio_order(radio_event_t* radio_event)
+{
+    /* trigger radio callback */
+    uint32_t was_masked;
+    _DISABLE_IRQS(was_masked);
+
+    if (fifo_push(&radio_fifo, radio_event) != NRF_SUCCESS)
+    {
+        _ENABLE_IRQS(was_masked);
+        return false;
+    }
+
+
+    if (timeslot_is_in_ts())
+    {
+        forced_wakeup = true;
+        NVIC_SetPendingIRQ(RADIO_IRQn);
+    }
+
+    _ENABLE_IRQS(was_masked);
+    return true;
 }
 
 
 
 void radio_disable(void)
 {
-    DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_RX);
-    DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_TX);
-    radio_fifo_flush();
+    DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_IDLE);
     NRF_RADIO->SHORTS = 0;
     NRF_RADIO->INTENCLR = 0xFFFFFFFF;
     NRF_RADIO->TASKS_DISABLE = 1;
     radio_state = RADIO_STATE_DISABLED;
-    if (rx_abort_timer_index != 0xFF)
-        timer_abort(rx_abort_timer_index);
+    timer_abort(TIMER_INDEX_RADIO);
 }
 
 /**
@@ -558,6 +545,12 @@ void radio_disable(void)
 */
 void radio_event_handler(void)
 {
+    if (forced_wakeup)
+    {
+        forced_wakeup = false;
+        /* triggered wakeup event */
+        radio_wakeup();
+    }
     if (RADIO_EVENT(EVENTS_END))
     {
         NRF_RADIO->EVENTS_END = 0;
@@ -566,26 +559,19 @@ void radio_event_handler(void)
     switch (radio_state)
     {
         case RADIO_STATE_RX:
-            if (RADIO_EVENT(EVENTS_ADDRESS) && rx_abort_timer_index != 0xFF)
+            if (RADIO_EVENT(EVENTS_ADDRESS))
             {
-                timer_abort(rx_abort_timer_index);
+                timer_abort(TIMER_INDEX_RADIO);
             }
 
         case RADIO_STATE_TX:
-
-
             break;
-
         case RADIO_STATE_DISABLED:
-
+            break;
+        case RADIO_STATE_NEVER_USED:
             break;
     }
-
-    NRF_RADIO->EVENTS_READY = 0;
     NRF_RADIO->EVENTS_ADDRESS = 0;
-    NRF_RADIO->EVENTS_PAYLOAD = 0;
-    NRF_RADIO->EVENTS_END = 0;
-    NRF_RADIO->EVENTS_DISABLED = 0;
 }
 
 void radio_rssi_enable (void)

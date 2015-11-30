@@ -46,6 +46,8 @@ public:
 	// send message
 //	void send(uint8_t handle, uint32_t value);
 
+	void receive();
+
 	void send(uint8_t channel, void* p_data, uint8_t length);
 
 	// returns last message on channel

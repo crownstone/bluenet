@@ -39,7 +39,7 @@ enum GeneralCharacteristicsIDs {
 //	UNUSED                                  = 0x3,
 //	UNUSED                                  = 0x4,
 	RESET_UUID                              = 0x5,
-	MESH_UUID                               = 0x6,
+	MESH_CONTROL_UUID                       = 0x6,
 	SET_CONFIGURATION_UUID                  = 0x7,
 	SELECT_CONFIGURATION_UUID               = 0x8,
 	GET_CONFIGURATION_UUID                  = 0x9,

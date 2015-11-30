@@ -220,7 +220,7 @@ void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_meshCharacteristic);
 
-	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_UUID));
+	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_CONTROL_UUID));
 	_meshCharacteristic->setName(BLE_CHAR_MESH);
 	_meshCharacteristic->setWritable(true);
 	_meshCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {

@@ -69,7 +69,7 @@ extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 #if CHAR_MESHING==1
 	//  pass the incoming BLE event to the mesh framework
-	BLE_CALL(rbc_mesh_ble_evt_handler, (p_ble_evt));
+	rbc_mesh_ble_evt_handler(p_ble_evt);
 #endif
 
 	// Only dispatch functions to the scheduler which might take long to execute, such as ble write functions

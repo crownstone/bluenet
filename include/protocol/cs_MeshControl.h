@@ -109,7 +109,7 @@ public:
 
 	void decodeDataMessage(device_mesh_message_t* msg);
 
-	void send(uint8_t handle, void* p_data, uint8_t length);
+	void send(uint8_t channel, void* p_data, uint8_t length);
 
 private:
 

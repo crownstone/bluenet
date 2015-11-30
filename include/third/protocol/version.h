@@ -1,5 +1,5 @@
 /***********************************************************************************
-Copyright (c) Nordic Semiconductor ASA
+  Copyright (c) Nordic Semiconductor ASA
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -32,32 +32,11 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
+#ifndef _VERSION_H__
+#define _VERSION_H__
 
-#ifndef _TRANSPORT_CONTROL_H__
-#define _TRANSPORT_CONTROL_H__
-#include <stdint.h>
-#include "mesh_packet.h"
-#include "ble.h"
+#define VERSION_MAJOR     (0)
+#define VERSION_MINOR1    (7)
+#define VERSION_MINOR2    (0)
 
-/**
-* @file This module takes care of all lower level packet processing and 
-*   schedules the radio for transmission. Acts as the link between the radio
-*   and the mesh service.
-*/
- 
-
-
-void tc_init(uint32_t access_address, uint8_t channel);
-
-void tc_radio_params_set(uint32_t access_address, uint8_t channel);
-
-void tc_on_ts_begin(void);
-/**
-* @brief: assemble a packet by getting data from server based on params,
-*   and place it on the radio queue
-*/
-uint32_t tc_tx(mesh_packet_t* p_packet);
-
-void tc_packet_handler(uint8_t* data, uint32_t crc, uint64_t timestamp);
-
-#endif /* _TRANSPORT_CONTROL_H__ */
+#endif /* _VERSION_H__ */

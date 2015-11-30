@@ -10,7 +10,7 @@
 
 #include <ble_gap.h>
 
-#include <third/protocol/transport_control.h>
+#include <third/protocol/rbc_mesh.h>
 
 #include <structs/cs_ScanResult.h>
 
@@ -24,7 +24,7 @@
 
 #define BROADCAST_ADDRESS {}
 
-#define MAX_MESH_MESSAGE_LEN PACKET_DATA_MAX_LEN - 5
+#define MAX_MESH_MESSAGE_LEN RBC_MESH_VALUE_MAX_LEN - 5
 #define MAX_MESH_MESSAGE_PAYLOAD_LENGTH MAX_MESH_MESSAGE_LEN - BLE_GAP_ADDR_LEN - sizeof(uint16_t)
 
 #define MAX_EVENT_MESH_MESSAGE_DATA_LENGTH MAX_MESH_MESSAGE_PAYLOAD_LENGTH - sizeof(uint16_t)

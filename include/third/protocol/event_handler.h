@@ -32,44 +32,64 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
+#ifndef _EVENT_HANDLER_H__
+#define _EVENT_HANDLER_H__
+#include "radio_control.h"
+#include "timer_control.h"
+#include <stdint.h>
+#include <stdbool.h>
 
-#include "led_config.h"
-#include "nrf_soc.h"
 /**
-* @brief configure LEDs for easily visible status check
+* @brief Asynchronous event definitions
 */
-void led_config(uint8_t led, uint8_t conf)
+typedef enum
 {
-#if HARDWARE_BOARD==PCA10000
-  if (!conf)
-  {
-    NRF_GPIO->OUTSET = (1 << (led - 1 + LED_0));
-  }
-  else
-  {
-    NRF_GPIO->OUTCLR = (1 << (led - 1 + LED_0));
-  }
-#endif
-#if HARDWARE_BOARD==PCA10001
-  if (conf)
-  {
-    NRF_GPIO->OUTSET = (1 << (led - 1 + LED_0));
-  }
-  else
-  {
-    NRF_GPIO->OUTCLR = (1 << (led - 1 + LED_0));
-  }
-#endif
-// or PCA10004
-#warning Overwrite led config (temporary thing anyway)
-  if (conf)
-  {
-    NRF_GPIO->OUTSET = (1 << (led - 1 + LED_0));
-  }
-  else
-  {
-    NRF_GPIO->OUTCLR = (1 << (led - 1 + LED_0));
-  }
-}
+    EVENT_TYPE_TIMER,
+    EVENT_TYPE_GENERIC,
+    EVENT_TYPE_PACKET
+} event_type_t;
 
+/** @brief callback type for generic asynchronous events */
+typedef void(*generic_cb)(void);
+
+/**
+* @brief Asynchronous event type. 
+*/
+typedef struct
+{
+    event_type_t type;
+    union
+    {
+        struct
+        {
+            uint8_t* payload; /* packet to be processed */
+            uint32_t crc;
+            uint32_t timestamp;
+        } packet;
+        struct 
+        {
+            timer_callback cb;/*void return */
+            uint32_t timestamp;
+        } timer;
+        generic_cb generic; /*void return */
+    } callback;
+} async_event_t;
+
+
+void event_handler_init(void);
+
+/** @brief Queue an asynchronous event for execution later */
+uint32_t event_handler_push(async_event_t* evt);
+
+/** @brief called from ts handler upon ts exit */
+void event_handler_on_ts_end(void);
+
+/** @brief called from ts handler upon ts begin */
+void event_handler_on_ts_begin(void);
+
+void event_handler_critical_section_begin(void);
+
+void event_handler_critical_section_end(void);
+
+#endif /* _EVENT_HANDLER_H__ */
 

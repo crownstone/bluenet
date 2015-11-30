@@ -99,7 +99,7 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 			LOGw("Expected 16 bytes for UUID, received: %d", length);
 			return;
 		}
-		LOGi("set uuid to ...");
+		_log(INFO, "set uuid to: "); BLEutil::printArray(payload, 16);
 		Storage::setArray<uint8_t>(payload, _storageStruct.beacon.uuid.uuid128, 16);
 		if (persistent) {
 			savePersistentStorage();

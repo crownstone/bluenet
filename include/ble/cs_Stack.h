@@ -12,6 +12,7 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_iBeacon.h>
 
+#include <cfg/cs_Config.h>
 #include <cfg/cs_Strings.h>
 #include <util/cs_BleError.h>
 #include <common/cs_Tuple.h>
@@ -114,7 +115,7 @@ public:
 	// The default BLE appearance is currently set to a Generic Keyring (576)
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_KEYRING;
 	// The low-frequency clock, currently generated from the high frequency clock
-	static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
+	static const nrf_clock_lfclksrc_t      defaultClockSource = CLOCK_SOURCE;
 	// The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.
 //	static const uint8_t                   defaultMtu = BLE_L2CAP_MTU_DEF;
 	// Minimum connection interval in 1.25 ms (400*1.25=500ms)
