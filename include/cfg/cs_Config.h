@@ -24,7 +24,7 @@
  */
 #define APP_TIMER_PRESCALER                      0
 #define APP_TIMER_MAX_TIMERS                     10
-#define APP_TIMER_OP_QUEUE_SIZE                  4
+#define APP_TIMER_OP_QUEUE_SIZE                  10
 
 /*
  */

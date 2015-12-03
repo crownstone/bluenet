@@ -23,36 +23,53 @@ MeshControl::MeshControl() : EventListener(EVT_ALL) {
 }
 
 extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
-
 	device_mesh_message_t* msg = (device_mesh_message_t*) p_event_data;
 	MeshControl::getInstance().decodeDataMessage(msg);
 }
 
+//uint32_t lastCounter[3] = {};
+//uint32_t incident[3] = {};
 
 /**
  * Get incoming messages and perform certain actions.
  */
 void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
-	LOGi("Process incoming mesh message");
+//	LOGi("Process incoming mesh message");
 	switch(channel) {
+//	case 3:
 	case HUB_CHANNEL: {
 
-		LOGi("received hub message:");
-		BLEutil::printArray((uint8_t*)p_data, length);
+//		LOGi("ch %d: received hub message:", channel);
+//		BLEutil::printArray((uint8_t*)p_data, length);
 
 		hub_mesh_message_t* msg = (hub_mesh_message_t*)p_data;
 		switch(msg->header.messageType) {
 		case SCAN_MESSAGE: {
-			_logFirst(INFO, "device ");
-			BLEutil::printInlineArray(msg->header.sourceAddress, BLE_GAP_ADDR_LEN);
-			_log(INFO, " scanned these devices:\r\n");
+//			_logFirst(INFO, "device ");
+//			BLEutil::printInlineArray(msg->header.sourceAddress, BLE_GAP_ADDR_LEN);
+//			_log(INFO, " scanned these devices:\r\n");
+			LOGi("Device %02X %02X %02X %02X %02X %02X scanned these devices:", msg->header.sourceAddress[5],
+					msg->header.sourceAddress[4], msg->header.sourceAddress[3], msg->header.sourceAddress[2],
+					msg->header.sourceAddress[1], msg->header.sourceAddress[0]);
 			for (int i = 0; i < msg->scanMsg.numDevices; ++i) {
 				peripheral_device_t dev = msg->scanMsg.list[i];
 				LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
 						dev.addr[4], dev.addr[3], dev.addr[2], dev.addr[1],
 						dev.addr[0], dev.rssi, dev.occurrences);
 			}
+			break;
 		}
+//		case 102: {
+//			if (msg->testMsg.counter != 0 && lastCounter[channel-1] +1 != msg->testMsg.counter) {
+//				incident[channel-1] += msg->testMsg.counter - lastCounter[channel-1] - 1;
+//				double loss = incident[channel-1] * 100.0 / msg->testMsg.counter;
+//				LOGe("ch %d: %d missed, last: %d, current: %d, loss: %d %%", channel, incident[channel-1],
+//						lastCounter[channel-1], msg->testMsg.counter, (uint32_t)loss);
+//			}
+//			lastCounter[channel-1] = msg->testMsg.counter;
+////			LOGi(">> count: %d", msg->testMsg.counter);
+//			break;
+//		}
 
 		}
 
@@ -70,6 +87,11 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		}
 
 		if (isBroadcast(p_data) || isMessageForUs(p_data)) {
+			// [01.12.2015] I think this is not necessary anymore with the new ble mesh version
+			// since the receive is not anymore handled in an interrupt handler, but has to be done
+			// manually. so we are already doing it in a timer which is executed by the app scheduler.
+			// so now we handled it by the scheduler, then put it back in the scheduler queue and again
+			// pick it up later
 			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 		} else {
 			_log(INFO, "Message not for us: ");
@@ -128,6 +150,7 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 //			return;
 //		}
 
+#if BEACON==1
 		LOGi("Received Beacon Message");
 //		BLEutil::printArray((uint8_t*)msg, sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t));
 
@@ -172,6 +195,7 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 		}
 
 		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_RESUME);
+#endif
 
 		break;
 	}

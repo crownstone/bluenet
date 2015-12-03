@@ -71,6 +71,13 @@ using namespace BLEpp;
 // * Interlude for meshing. Will need to be integrated with the code!
 // *********************************************************************************************************************/
 //
+
+
+//#if CHAR_MESHING==1
+
+//#endif
+
+
 //extern "C" {
 //
 //#if HARDWARE_BOARD==PCA10001
@@ -455,6 +462,10 @@ void Crownstone::run() {
 
 	_stack->startTicking();
 
+#if CHAR_MESHING==1
+	CMesh::getInstance().startTicking();
+#endif
+
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();
 #endif
@@ -462,10 +473,6 @@ void Crownstone::run() {
 	while(1) {
 
 		app_sched_execute();
-
-#if CHAR_MESHING==1
-	    CMesh::getInstance().receive();
-#endif
 
 #if(NORDIC_SDK_VERSION > 5)
 		BLE_CALL(sd_app_evt_wait, ());
@@ -565,6 +572,33 @@ void on_exit(void) {
 	LOGf("PROGRAM TERMINATED");
 }
 
+
+/**********************************************************************************************************************/
+//uint32_t appTimerId = -1;
+//
+//uint32_t count[2] = {};
+////uint8_t idx = -1;
+//uint8_t idx = 0;
+//
+//
+//void sendMesh(void* ptr) {
+////	idx = (idx + 1) % 2;
+//
+//	LOGi("<< ch: %d", idx * 2 + 1);
+//	LOGi("<< count: %d", count[idx]);
+//	hub_mesh_message_t message;
+//	memset(&message, 0, sizeof(message));
+//	message.testMsg.counter = count[idx]++;
+//	message.header.messageType = 102;
+//
+//	LOGi("message data:");
+//	BLEutil::printArray(&message, sizeof(message));
+//	CMesh::getInstance().send(idx * 2 + 1, &message, sizeof(message));
+////	CMesh::getInstance().send(3, &message, sizeof(message));
+//
+//	Timer::getInstance().start(appTimerId, HZ_TO_TICKS(20), NULL);
+//}
+
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
  * the code within the bootloader has been processed before. But also after the bootloader, the code in
@@ -579,6 +613,11 @@ int main() {
 
 	// setup crownstone ...
 	crownstone.setup();
+
+//#if CHAR_MESHING==1
+//	Timer::getInstance().createSingleShot(appTimerId, (app_timer_timeout_handler_t)sendMesh);
+//	Timer::getInstance().start(appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), NULL);
+//#endif
 
 	// run forever ...
 	crownstone.run();

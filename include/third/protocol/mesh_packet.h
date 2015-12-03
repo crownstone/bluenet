@@ -43,7 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                              
 #define MESH_UUID                           (0xFEE4)
 #define MESH_ADV_DATA_TYPE                  (0x16)
-#define BLE_ADV_PACKET_PAYLOAD_MAX_LENGTH   (RBC_MESH_VALUE_MAX_LEN + 3)
+//#define BLE_ADV_PACKET_PAYLOAD_MAX_LENGTH   (RBC_MESH_VALUE_MAX_LEN + 3)
+#define BLE_ADV_PACKET_PAYLOAD_MAX_LENGTH   (31)
 
 #define MESH_PACKET_BLE_OVERHEAD            (BLE_GAP_ADDR_LEN)                                                      /* overhead before advertisement payload */
 #define MESH_PACKET_ADV_OVERHEAD            (1 /* adv_type */ + 2 /* UUID */ + 2 /* handle */ + 2 /* version */)    /* overhead inside adv data */

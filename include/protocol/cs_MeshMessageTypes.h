@@ -59,7 +59,8 @@ struct __attribute__((__packed__)) device_mesh_message_t {
 	};
 };
 
-#define NR_DEVICES_PER_MESSAGE SR_MAX_NR_DEVICES
+//#define NR_DEVICES_PER_MESSAGE SR_MAX_NR_DEVICES
+#define NR_DEVICES_PER_MESSAGE 1
 struct __attribute__((__packed__)) scan_mesh_message_t {
 	uint8_t numDevices;
 	peripheral_device_t list[NR_DEVICES_PER_MESSAGE];
@@ -70,11 +71,16 @@ struct __attribute__((__packed__)) hub_mesh_header_t {
 	uint16_t messageType;
 };
 
+struct __attribute__((__packed__)) test_mesh_message_t {
+	uint32_t counter;
+};
+
 struct __attribute__((__packed__)) hub_mesh_message_t {
 	hub_mesh_header_t header;
 	union {
 		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
 		scan_mesh_message_t scanMsg;
+		test_mesh_message_t testMsg;
 	};
 };
 

@@ -44,7 +44,7 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 		LOGd("ch: %d, new value", evt->value_handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_UPDATE_VAL:
-		LOGd("ch: %d, update value", evt->value_handle);
+//		LOGd("ch: %d, update value", evt->value_handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_INITIALIZED:
 		LOGd("ch: %d, initialized", evt->value_handle);
@@ -57,11 +57,11 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 		case RBC_MESH_EVENT_TYPE_NEW_VAL:
 		case RBC_MESH_EVENT_TYPE_UPDATE_VAL: {
 
-            if (evt->value_handle > 2)
-                break;
+//            if (evt->value_handle > 3)
+//                break;
 
             //if (evt->data[0]) {
-            LOGi("Got data ch: %i, val: %i, len: %d, orig_addr:", evt->value_handle, evt->data[0], evt->data_len);
+//            LOGi("Got data ch: %i, val: %i, len: %d, orig_addr:", evt->value_handle, evt->data[0], evt->data_len);
 //            BLEutil::printArray(evt->originator_address.addr, 6);
             MeshControl &meshControl = MeshControl::getInstance();
             meshControl.process(evt->value_handle, evt->data, evt->data_len);
@@ -77,11 +77,22 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 
 }
 
-CMesh::CMesh() {
+CMesh::CMesh() : _appTimerId(-1) {
 	MeshControl::getInstance();
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)CMesh::staticTick);
 }
 
 CMesh::~CMesh() {
+
+}
+
+void CMesh::tick() {
+	handleMeshReceive();
+	scheduleNextTick();
+}
+
+void CMesh::scheduleNextTick() {
+	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(MESH_UPDATE_FREQUENCY), this);
 }
 
 /**
@@ -110,6 +121,8 @@ void CMesh::init() {
 	APP_ERROR_CHECK(error_code);
 	error_code = rbc_mesh_value_enable(2);
 	APP_ERROR_CHECK(error_code);
+//	error_code = rbc_mesh_value_enable(3);
+//	APP_ERROR_CHECK(error_code);
 }
 
 //void CMesh::send(uint8_t handle, uint32_t value) {
@@ -120,7 +133,7 @@ void CMesh::init() {
 //}
 
 void CMesh::send(uint8_t channel, void* p_data, uint8_t length) {
-	LOGi("length: %d, MAX_MESH_MESSAGE_LEN: %d", length, MAX_MESH_MESSAGE_LEN);
+//	LOGi("length: %d, MAX_MESH_MESSAGE_LEN: %d", length, MAX_MESH_MESSAGE_LEN);
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
 	//LOGi("send ch: %d, len: %d", handle, length);
@@ -136,7 +149,7 @@ bool CMesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
 	return length != 0;
 }
 
-void CMesh::receive() {
+void CMesh::handleMeshReceive() {
     rbc_mesh_event_t evt;
 	if (rbc_mesh_event_get(&evt) == NRF_SUCCESS) {
 		rbc_mesh_event_handler(&evt);
