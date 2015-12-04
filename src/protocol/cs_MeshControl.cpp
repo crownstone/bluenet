@@ -17,6 +17,8 @@
 
 #include <cfg/cs_Settings.h>
 
+#include <drivers/cs_RTC.h>
+
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
     sd_ble_gap_address_get(&_myAddr);
@@ -27,8 +29,9 @@ extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
 	MeshControl::getInstance().decodeDataMessage(msg);
 }
 
-//uint32_t lastCounter[3] = {};
-//uint32_t incident[3] = {};
+uint32_t firstTimeStamp = 0;
+uint32_t lastCounter[3] = {};
+uint32_t incident[3] = {};
 
 /**
  * Get incoming messages and perform certain actions.
@@ -59,17 +62,27 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 			}
 			break;
 		}
-//		case 102: {
-//			if (msg->testMsg.counter != 0 && lastCounter[channel-1] +1 != msg->testMsg.counter) {
-//				incident[channel-1] += msg->testMsg.counter - lastCounter[channel-1] - 1;
-//				double loss = incident[channel-1] * 100.0 / msg->testMsg.counter;
+		case 102: {
+			if (firstTimeStamp == 0) {
+				firstTimeStamp = RTC::getCount();
+			}
+			if (msg->testMsg.counter != 0 && lastCounter[channel-1] +1 != msg->testMsg.counter) {
+				incident[channel-1] += msg->testMsg.counter - lastCounter[channel-1] - 1;
+				double loss = incident[channel-1] * 100.0 / msg->testMsg.counter;
+				uint32_t dt = RTC::ticksToMs(RTC::difference(RTC::getCount(), firstTimeStamp));
+				double msgsPerSecond = 0;
+				if (dt != 0) {
+					msgsPerSecond = 1000.0 * msg->testMsg.counter / dt;
+				}
 //				LOGe("ch %d: %d missed, last: %d, current: %d, loss: %d %%", channel, incident[channel-1],
 //						lastCounter[channel-1], msg->testMsg.counter, (uint32_t)loss);
-//			}
-//			lastCounter[channel-1] = msg->testMsg.counter;
-////			LOGi(">> count: %d", msg->testMsg.counter);
-//			break;
-//		}
+				LOGe("ch %d: %d missed, current: %d, loss: %d %%, msgs/s: %d", channel, incident[channel-1],
+						msg->testMsg.counter, (uint32_t)loss, (uint32_t)msgsPerSecond);
+			}
+			lastCounter[channel-1] = msg->testMsg.counter;
+//			LOGi(">> count: %d", msg->testMsg.counter);
+			break;
+		}
 
 		}
 
