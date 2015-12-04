@@ -471,7 +471,7 @@ void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 	if (uidCount > 1) {
 		advdata.uuids_more_available.uuid_cnt = 1;
 		advdata.uuids_more_available.p_uuids = adv_uuids;
-	} else {
+	} else if (uidCount == 1) {
 		advdata.uuids_complete.uuid_cnt = 1;
 		advdata.uuids_complete.p_uuids = adv_uuids;
 	}
