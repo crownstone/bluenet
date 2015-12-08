@@ -201,7 +201,7 @@ void Crownstone::configStack() {
 #else
 	// TODO: depends on board!
 //	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_XTAL_50_PPM);
-	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_4000MS_CALIBRATION);
+	_stack->setClockSource(CLOCK_SOURCE);
 #endif
 
 	_stack->setTxPowerLevel(TX_POWER);
