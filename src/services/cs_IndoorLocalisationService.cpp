@@ -89,7 +89,9 @@ void IndoorLocalizationService::tick() {
 
 	if (!_initialized) {
 		_scanner = new Scanner(getStack());
-//		_scanner->start();
+#if SENDER==1
+		_scanner->start();
+#endif
 
 		if (_trackedDeviceList != NULL) {
 			readTrackedDevices();
@@ -196,7 +198,9 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 //					_peripheralCharac->notify();
 //
 //
-//					MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
+#if CHAR_MESHING==1
+					MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
+#endif
 //
 //					mb.unlock();
 //				} else {

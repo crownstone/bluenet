@@ -112,7 +112,9 @@ void Scanner::executeScan() {
 }
 
 void Scanner::sendResults() {
+#if CHAR_MESHING==1
 	MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
+#endif
 }
 
 void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
