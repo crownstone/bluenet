@@ -154,10 +154,8 @@ void Crownstone::welcome() {
 	_log(INFO, "\r\n");
 	BLEutil::print_heap("Heap init");
 	BLEutil::print_stack("Stack init");
-	LOGd("Bootloader starts at 0x00034000.");
-        // To have DFU, keep application limited to (BOOTLOADER_START - APPLICATION_START_CODE) / 2
-	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800
-	// Very probably FLASH (32MB) is not a problem though, but RAM will be (16kB)!
+	// To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)
+	// For (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes)
 	LOGi("Welcome at the nRF51822 code for meshing.");
 	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
 	LOGi("Compilation time: %s", __TIME__);

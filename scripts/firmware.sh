@@ -39,6 +39,10 @@ debug() {
 	${path}/_debug.sh $BLUENET_CONFIG_DIR/build/$target.elf $serial_num
 }
 
+debugbl() {
+	${path}/_debug.sh $BLUENET_CONFIG_DIR/build/bootloader.elf $serial_num
+}
+
 all() {
 	build
 	if [ $? -eq 0 ]; then
@@ -68,12 +72,12 @@ bootloader() {
 
 	# note that within the bootloader the JLINK doesn't work anymore...
 	# so perhaps first flash the binary and then the bootloader
-	${path}/_upload.sh $BLUENET_CONFIG_DIR/build/bootloader.hex 0x00034000 $serial_num
+	${path}/_upload.sh $BLUENET_CONFIG_DIR/build/bootloader.hex $BOOTLOADER_REGION_START $serial_num
 
 	if [ $? -eq 0 ]; then
 		sleep 1
 		# and set to load it
-		${path}/_writebyte.sh 0x10001014 0x00034000
+		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_REGION_START
 	fi
 }
 
@@ -98,6 +102,9 @@ case "$cmd" in
 		;;
 	bootloader)
 		bootloader
+		;;
+	debugbl)
+		debugbl
 		;;
 	*)
 		echo $"Usage: $0 {build|upload|debug|clean|run|all}"
