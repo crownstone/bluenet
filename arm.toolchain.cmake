@@ -137,7 +137,7 @@ ADD_DEFINITIONS("-DCHAR_TRACK_DEVICES=${CHAR_TRACK_DEVICES}")
 # only required if Nordic files are used
 ADD_DEFINITIONS("-DBOARD_NRF6310")
 
-# the bluetooth name is optional
+# the bluetooth name is not optional
 IF(BLUETOOTH_NAME)
 	ADD_DEFINITIONS("-DBLUETOOTH_NAME=${BLUETOOTH_NAME}")
 ELSE()
