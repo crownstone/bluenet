@@ -36,11 +36,11 @@ upload() {
 }
 
 debug() {
-	${path}/_debug.sh $BLUENET_CONFIG_DIR/build/$target.elf $serial_num
+	${path}/_debug.sh $BLUENET_CONFIG_DIR/build/$target.elf $serial_num $gdb_port
 }
 
 debugbl() {
-	${path}/_debug.sh $BLUENET_CONFIG_DIR/build/bootloader.elf $serial_num
+	${path}/_debug.sh $BLUENET_CONFIG_DIR/build/bootloader.elf $serial_num $gdb_port
 }
 
 all() {
