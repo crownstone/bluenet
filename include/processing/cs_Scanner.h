@@ -9,8 +9,9 @@
 #include <ble/cs_Stack.h>
 #include <structs/cs_ScanResult.h>
 
-#define SCAN_DURATION 2000 // 1 sec
-#define SCAN_BREAK 10000 // 4 sec
+#define SCAN_DURATION  2000
+#define SCAN_SEND_WAIT 1000
+#define SCAN_BREAK     7000
 
 using namespace BLEpp;
 
@@ -38,7 +39,9 @@ public:
 private:
 
 	enum SCAN_OP_CODE {
-		SCAN_START, SCAN_STOP
+		SCAN_START,
+		SCAN_STOP,
+		SCAN_SEND_RESULT
 	};
 
 	SCAN_OP_CODE _opCode;

@@ -63,7 +63,8 @@ void Scanner::staticTick(Scanner* ptr) {
 void Scanner::start() {
 	_running = true;
 	_opCode = SCAN_START;
-	executeScan();
+	//executeScan();
+	Timer::getInstance().start(_appTimerId, MS_TO_TICKS(SCAN_BREAK), this);
 }
 
 void Scanner::stop() {
@@ -98,10 +99,16 @@ void Scanner::executeScan() {
 
 		_scanResult->print();
 
-		// sendResults
+		// Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
+		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(SCAN_SEND_WAIT), this);
+
+		_opCode = SCAN_SEND_RESULT;
+		break;
+	}
+	case SCAN_SEND_RESULT: {
 		sendResults();
 
-		// set timer to trigger in SCAN_BREAK sec, then start again
+		// Wait SCAN_BREAK ms, then start scanning again
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(SCAN_BREAK), this);
 
 		_opCode = SCAN_START;
