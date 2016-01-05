@@ -60,7 +60,8 @@ struct __attribute__((__packed__)) device_mesh_message_t {
 };
 
 //#define NR_DEVICES_PER_MESSAGE SR_MAX_NR_DEVICES
-#define NR_DEVICES_PER_MESSAGE 1
+//#define NR_DEVICES_PER_MESSAGE 1
+#define NR_DEVICES_PER_MESSAGE 9
 struct __attribute__((__packed__)) scan_mesh_message_t {
 	uint8_t numDevices;
 	peripheral_device_t list[NR_DEVICES_PER_MESSAGE];

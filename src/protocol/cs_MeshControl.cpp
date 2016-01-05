@@ -30,6 +30,7 @@ extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
 }
 
 uint32_t firstTimeStamp = 0;
+uint32_t firstCounter[3] = {0};
 uint32_t lastCounter[3] = {};
 uint32_t incident[3] = {};
 
@@ -48,31 +49,39 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		hub_mesh_message_t* msg = (hub_mesh_message_t*)p_data;
 		switch(msg->header.messageType) {
 		case SCAN_MESSAGE: {
-//			_logFirst(INFO, "device ");
-//			BLEutil::printInlineArray(msg->header.sourceAddress, BLE_GAP_ADDR_LEN);
-//			_log(INFO, " scanned these devices:\r\n");
+
 			LOGi("Device %02X %02X %02X %02X %02X %02X scanned these devices:", msg->header.sourceAddress[5],
 					msg->header.sourceAddress[4], msg->header.sourceAddress[3], msg->header.sourceAddress[2],
 					msg->header.sourceAddress[1], msg->header.sourceAddress[0]);
-			for (int i = 0; i < msg->scanMsg.numDevices; ++i) {
-				peripheral_device_t dev = msg->scanMsg.list[i];
-				LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
-						dev.addr[4], dev.addr[3], dev.addr[2], dev.addr[1],
-						dev.addr[0], dev.rssi, dev.occurrences);
+			if (msg->scanMsg.numDevices > NR_DEVICES_PER_MESSAGE) {
+				LOGe("Invalid number of devices!");
 			}
+			else {
+				for (int i = 0; i < msg->scanMsg.numDevices; ++i) {
+					peripheral_device_t dev = msg->scanMsg.list[i];
+//					if ((dev.addr[5] == 0xED && dev.addr[4] == 0x01 && dev.addr[3] == 0x53 && dev.addr[2] == 0xB8 && dev.addr[1] == 0x6F && dev.addr[0] == 0xCC) ||
+//						(dev.addr[5] == 0xC1 && dev.addr[4] == 0x1F && dev.addr[3] == 0xDC && dev.addr[2] == 0xF9 && dev.addr[1] == 0xB3 && dev.addr[0] == 0xFC)) {
+						LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
+								dev.addr[4], dev.addr[3], dev.addr[2], dev.addr[1],
+								dev.addr[0], dev.rssi, dev.occurrences);
+//					}
+				}
+			}
+
 			break;
 		}
 		case 102: {
 			if (firstTimeStamp == 0) {
 				firstTimeStamp = RTC::getCount();
+				firstCounter[channel-1] = msg->testMsg.counter;
 			}
-			if (msg->testMsg.counter != 0 && lastCounter[channel-1] +1 != msg->testMsg.counter) {
+			if (lastCounter[channel-1] != 0 && msg->testMsg.counter != 0 && lastCounter[channel-1] +1 != msg->testMsg.counter) {
 				incident[channel-1] += msg->testMsg.counter - lastCounter[channel-1] - 1;
-				double loss = incident[channel-1] * 100.0 / msg->testMsg.counter;
+				double loss = incident[channel-1] * 100.0 / (msg->testMsg.counter - firstCounter[channel-1]);
 				uint32_t dt = RTC::ticksToMs(RTC::difference(RTC::getCount(), firstTimeStamp));
 				double msgsPerSecond = 0;
 				if (dt != 0) {
-					msgsPerSecond = 1000.0 * msg->testMsg.counter / dt;
+					msgsPerSecond = 1000.0 * (msg->testMsg.counter - firstCounter[channel-1]) / dt;
 				}
 //				LOGe("ch %d: %d missed, last: %d, current: %d, loss: %d %%", channel, incident[channel-1],
 //						lastCounter[channel-1], msg->testMsg.counter, (uint32_t)loss);
@@ -80,7 +89,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 						msg->testMsg.counter, (uint32_t)loss, (uint32_t)msgsPerSecond);
 			}
 			lastCounter[channel-1] = msg->testMsg.counter;
-//			LOGi(">> count: %d", msg->testMsg.counter);
+			LOGi(">> count: %d", msg->testMsg.counter);
 			break;
 		}
 
