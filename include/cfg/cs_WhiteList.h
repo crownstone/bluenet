@@ -9,6 +9,7 @@
 #define INCLUDE_CFG_CS_WHITELIST_H_
 
 #include <stdint.h>
+#include "ble_gap.h"
 
 // Number of addresses in the white list
 #define WHITELIST_LENGTH 3

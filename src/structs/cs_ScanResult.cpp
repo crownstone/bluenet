@@ -11,6 +11,7 @@
 #include "structs/cs_ScanResult.h"
 //#include "drivers/cs_Serial.h"
 #include "cfg/cs_WhiteList.h"
+#include "cfg/cs_BlackList.h"
 
 // returns the number of elements stored so far
 uint8_t ScanResult::getSize() const {
@@ -40,16 +41,27 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 //			adrs_ptr[0]);
 //	LOGd("addrs: %s", addrs);
 
-	bool whiteListed = false;
-	for (int i=0; i<WHITELIST_LENGTH; i++) {
-		if (memcmp(adrs_ptr, WhiteList + i*BLE_GAP_ADDR_LEN, BLE_GAP_ADDR_LEN) == 0) {
-			whiteListed = true;
-			break;
-		}
-	}
-	if (!whiteListed) {
-		return;
-	}
+//	// Check if the address is in the white list
+//	// If not, return
+//	bool whiteListed = false;
+//	for (int i=0; i<WHITELIST_LENGTH; i++) {
+//		if (memcmp(adrs_ptr, WhiteList + i*BLE_GAP_ADDR_LEN, BLE_GAP_ADDR_LEN) == 0) {
+//			whiteListed = true;
+//			break;
+//		}
+//	}
+//	if (!whiteListed) {
+//		return;
+//	}
+
+//	// Check if the address is in the black list
+//	// If so, return
+//	for (int i=0; i<BLACKLIST_LENGTH; i++) {
+//		if (memcmp(adrs_ptr, BlackList + i*BLE_GAP_ADDR_LEN, BLE_GAP_ADDR_LEN) == 0) {
+//			return;
+//		}
+//	}
+
 
 //	bool found = false;
 	for (int i = 0; i < getSize(); ++i) {
