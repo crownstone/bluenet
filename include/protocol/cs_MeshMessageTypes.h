@@ -24,7 +24,7 @@
 
 #define BROADCAST_ADDRESS {}
 
-#define MAX_MESH_MESSAGE_LEN RBC_MESH_VALUE_MAX_LEN - 5
+#define MAX_MESH_MESSAGE_LEN RBC_MESH_VALUE_MAX_LEN
 #define MAX_MESH_MESSAGE_PAYLOAD_LENGTH MAX_MESH_MESSAGE_LEN - BLE_GAP_ADDR_LEN - sizeof(uint16_t)
 
 #define MAX_EVENT_MESH_MESSAGE_DATA_LENGTH MAX_MESH_MESSAGE_PAYLOAD_LENGTH - sizeof(uint16_t)
@@ -61,7 +61,7 @@ struct __attribute__((__packed__)) device_mesh_message_t {
 
 //#define NR_DEVICES_PER_MESSAGE SR_MAX_NR_DEVICES
 //#define NR_DEVICES_PER_MESSAGE 1
-#define NR_DEVICES_PER_MESSAGE 9
+#define NR_DEVICES_PER_MESSAGE 10
 struct __attribute__((__packed__)) scan_mesh_message_t {
 	uint8_t numDevices;
 	peripheral_device_t list[NR_DEVICES_PER_MESSAGE];

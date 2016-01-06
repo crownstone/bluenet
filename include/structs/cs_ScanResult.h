@@ -31,7 +31,7 @@
  * will be replaced
  */
 //#define SR_MAX_NR_DEVICES 1
-#define SR_MAX_NR_DEVICES 9
+#define SR_MAX_NR_DEVICES 10
 
 /* Structure used to store peripheral devices detected during a scan.
  *
