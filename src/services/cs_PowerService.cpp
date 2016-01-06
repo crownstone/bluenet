@@ -167,6 +167,21 @@ void PowerService::addPWMCharacteristic() {
 			nrf_gpio_pin_clear(PIN_RELAY_ON);
 		}
 
+//		if (value == 1) {
+//			LOGi("trigger off pin");
+//			nrf_gpio_pin_set(PIN_RELAY_OFF);
+//			nrf_delay_ms(HIGH_DURATION);
+//			nrf_gpio_pin_clear(PIN_RELAY_OFF);
+//		} else if (value == 2) {
+//			LOGi("trigger on pin");
+//			nrf_gpio_pin_set(PIN_RELAY_ON);
+//			nrf_delay_ms(HIGH_DURATION);
+//			nrf_gpio_pin_clear(PIN_RELAY_ON);
+//		} else {
+//			LOGi("set pwm to %i", value);
+//			PWM::getInstance().setValue(0, value);
+//		}
+
 	});
 }
 

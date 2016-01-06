@@ -31,7 +31,7 @@
 
 #define PIN_RELAY_ON         0 // gpio
 #define PIN_RELAY_OFF        5 // gpio
-#define HIGH_DURATION        20 // ms
+#define HIGH_DURATION        10 // ms
 
 #if(HARDWARE_BOARD==CROWNSTONE)
 
