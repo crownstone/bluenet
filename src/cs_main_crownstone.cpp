@@ -23,12 +23,6 @@
 
 //#define MICRO_VIEW 1
 
-#if __clang__
-#define STRINGIFY(str) #str
-#else
-#define STRINGIFY(str) str
-#endif
-
 /**********************************************************************************************************************
  * General includes
  *********************************************************************************************************************/
@@ -154,6 +148,9 @@ void Crownstone::configDrivers() {
 
 void Crownstone::createServices() {
 	LOGi("Create all services");
+
+	_deviceInformationService = new DeviceInformationService();
+	_stack->addService(_deviceInformationService);
 
 #if GENERAL_SERVICE==1 || DEVICE_TYPE==DEVICE_FRIDGE
 	// general services, such as internal temperature, setting names, etc.

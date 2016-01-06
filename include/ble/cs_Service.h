@@ -58,7 +58,7 @@ public:
 		_primary(true),
 		_service_handle(BLE_CONN_HANDLE_INVALID),
 		_started(false),
-		_appTimerId(-1)
+		_appTimerId(UINT32_MAX)
 {
 
 }
@@ -110,8 +110,17 @@ public:
 		ptr->tick();
 	}
 
-	void startTicking() { Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this); };
-	void stopTicking() { Timer::getInstance().stop(_appTimerId); };
+	void startTicking() {
+		if (_appTimerId != UINT32_MAX) {
+			Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this);
+		}
+	};
+
+	void stopTicking() {
+		if (_appTimerId != UINT32_MAX) {
+			Timer::getInstance().stop(_appTimerId);
+		}
+	};
 
 	virtual void startAdvertising(Nrf51822BluetoothStack* stack);
 	virtual void stopAdvertising() {};

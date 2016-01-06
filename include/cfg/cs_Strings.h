@@ -27,6 +27,7 @@
 #define BLE_SERVICE_BATTERY                      "Battery Service"
 #define BLE_SERVICE_ALERT                        "Alert Service"
 #define BLE_SERVICE_SCHEDULE                     "Schedule Service"
+#define BLE_SERVICE_DEVICE_INFORMATION           "Device Information"
 
 #define BLE_CHAR_TEMPERATURE                     "Temperature"
 #define BLE_CHAR_RESET                           "Reset"
