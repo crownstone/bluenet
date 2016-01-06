@@ -22,6 +22,7 @@
 #define INDOORLOCALISATION_UUID             "7e170000-429c-41aa-83d7-d91220abeb33"
 #define ALERT_UUID                          "33690000-2a0a-11e5-b345-feff819cdc9f"
 #define SCHEDULE_UUID                       "96d20000-4bcf-11e5-885d-feff819cdc9f"
+#define DEVICE_INFORMATION_UUID             "180a"
 
 /* Characteristic UUIDs */
 
