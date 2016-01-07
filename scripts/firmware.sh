@@ -72,7 +72,7 @@ bootloader() {
 
 	# note that within the bootloader the JLINK doesn't work anymore...
 	# so perhaps first flash the binary and then the bootloader
-	${path}/_upload.sh $BLUENET_CONFIG_DIR/build/bootloader.hex $BOOTLOADER_REGION_START $serial_num
+	${path}/_upload.sh $BLUENET_CONFIG_DIR/build/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
 
 	if [ $? -eq 0 ]; then
 		sleep 1
