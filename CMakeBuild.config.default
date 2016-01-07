@@ -4,6 +4,8 @@
 # Should be 10 characters or less (we need room for compilation date after it)
 BLUETOOTH_NAME="crown"
 
+FIRMWARE_VERSION="0.0.1"
+
 # The device type defines how the device advertises itself, Apps and Bluenet Library
 # will use this to filter for device type.
 # It can be also be used to automatically enable and disable services and characteristics
@@ -52,6 +54,7 @@ GENERAL_SERVICE=1
 POWER_SERVICE=1
 ALERT_SERVICE=0
 SCHEDULE_SERVICE=0
+DEVICE_INFO_SERVICE=0
 
 # Enable or disable characteristics
 ## General Service

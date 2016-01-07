@@ -19,6 +19,7 @@
 #include <services/cs_PowerService.h>
 #include <services/cs_AlertService.h>
 #include <services/cs_ScheduleService.h>
+#include <services/cs_DeviceInformationService.h>
 
 #include <processing/cs_TemperatureGuard.h>
 #include <processing/cs_Sensors.h>
@@ -42,6 +43,7 @@ private:
 	PowerService* _powerService;
 	AlertService* _alertService;
 	ScheduleService* _scheduleService;
+	DeviceInformationService* _deviceInformationService;
 
 	IBeacon* _beacon;
 	Sensors* _sensors;
@@ -65,7 +67,7 @@ private:
 public:
 	Crownstone() : _stack(NULL),
 		_generalService(NULL), _localizationService(NULL), _powerService(NULL),
-		_alertService(NULL), _scheduleService(NULL),
+		_alertService(NULL), _scheduleService(NULL), _deviceInformationService(NULL),
 		_beacon(NULL), _sensors(NULL), _fridge(NULL) {};
 
 	void setup();
