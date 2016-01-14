@@ -108,7 +108,7 @@ TX_POWER=4
 
 # Default advertisement interval, in units of 0.625 ms
 # Must be between 32 and 16384
-ADVERTISEMENT_INTERVAL=80
+ADVERTISEMENT_INTERVAL=160
 
 # Minimal and maximal environment temperatures in degrees celsius
 MIN_ENV_TEMP=2
