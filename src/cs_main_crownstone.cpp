@@ -22,6 +22,8 @@
 #define MESHING_PARALLEL 1
 
 //#define MICRO_VIEW 1
+#define CHANGE_NAME_ON_RESET
+#define CHANGE_MINOR_ON_RESET
 
 /**********************************************************************************************************************
  * General includes
@@ -79,6 +81,16 @@ void Crownstone::welcome() {
  * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
  */
 void Crownstone::setName() {
+#ifdef CHANGE_NAME_ON_RESET
+	uint16_t minor;
+	ps_configuration_t cfg = Settings::getInstance().getConfig();
+	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
+	char devicename[32];
+	sprintf(devicename, "%s_%d", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(minor));
+	std::string device_name = std::string(devicename);
+	// End test for wouter
+#else
+
 	// assemble default name from BLUETOOTH_NAME and COMPILATION_TIME
 	char devicename[32];
 	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
@@ -86,6 +98,7 @@ void Crownstone::setName() {
 	std::string device_name;
 	// use default name in case no stored name is found
 	Storage::getString(Settings::getInstance().getConfig().device_name, device_name, std::string(devicename));
+#endif
 	// assign name
 	LOGi("Set name to %s", device_name.c_str());
 	_stack->updateDeviceName(device_name); // max len = ble_gap_devname_max_len (31)
@@ -134,6 +147,7 @@ void Crownstone::configDrivers() {
 	pwm_config.num_channels = 1;
 	pwm_config.gpio_pin[0] = PIN_GPIO_SWITCH;
 	pwm_config.mode = PWM_MODE_976;
+//	pwm_config.mode = PWM_MODE_122;
 
 	PWM::getInstance().init(&pwm_config);
 
@@ -211,6 +225,12 @@ void Crownstone::configure() {
 	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
 	Storage::getArray(cfg.beacon.uuid.uuid128, uuid.uuid128, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
 	Storage::getUint8(cfg.beacon.rssi, rssi, BEACON_RSSI);
+
+#ifdef CHANGE_MINOR_ON_RESET
+	minor++;
+	LOGi("Increase minor to %d", minor);
+	Settings::getInstance().writeToStorage(CONFIG_IBEACON_MINOR, (uint8_t*)&minor, 2);
+#endif
 
 	// create ibeacon object
 	_beacon = new IBeacon(uuid, major, minor, rssi);
