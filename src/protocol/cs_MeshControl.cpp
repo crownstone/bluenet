@@ -19,9 +19,15 @@
 
 #include <drivers/cs_RTC.h>
 
+#include "drivers/cs_Timer.h"
+
+#include "drivers/cs_RNG.h"
+
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
     sd_ble_gap_address_get(&_myAddr);
+    Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t)MeshControl::reset);
+    Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
 }
 
 extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
@@ -39,6 +45,10 @@ uint32_t incident[3] = {};
  */
 void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //	LOGi("Process incoming mesh message");
+
+	Timer::getInstance().stop(_resetTimerId);
+	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
+
 	switch(channel) {
 //	case 3:
 	case HUB_CHANNEL: {
@@ -311,8 +321,24 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
 		LOGi("message data:");
 		BLEutil::printArray(&message, sizeof(message));
+
 		CMesh::getInstance().send(HUB_CHANNEL, &message, sizeof(message));
 
+//		RNG rng;
+//		uint8_t handle = (rng.getRandom8() % 2) + 3;
+//		CMesh::getInstance().send(handle, &message, sizeof(message));
 	}
 
+}
+
+void MeshControl::reset() {
+//	LOGw("reset due to mesh timeout");
+//	// copy to make sure this is nothing more than one value
+//	uint8_t err_code;
+//	err_code = sd_power_gpregret_clr(0xFF);
+//	APP_ERROR_CHECK(err_code);
+//	err_code = sd_power_gpregret_set(0x01); // Don't go to DFU mode
+//	APP_ERROR_CHECK(err_code);
+//	sd_nvic_SystemReset();
+	LOGi("Zombie node detected!");
 }
