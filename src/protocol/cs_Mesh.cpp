@@ -20,6 +20,7 @@
 #include <cfg/cs_Config.h>
 
 #define MESH_ACCESS_ADDR 0xA541A68E
+//#define MESH_ACCESS_ADDR 0xA641A69E
 #define MESH_INTERVAL_MIN_MS 100
 #define MESH_CHANNEL 38
 #define MESH_CLOCK_SOURCE (CLOCK_SOURCE)
@@ -51,6 +52,11 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 		break;
 	}
 
+	if (evt->value_handle != 1 && evt->value_handle != 2) {
+//	if (evt->value_handle == 1 || evt->value_handle > 4) {
+		rbc_mesh_value_disable(evt->value_handle);
+	}
+
 	switch (evt->event_type)
 	{
 //		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
@@ -70,12 +76,12 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
             break;
         }
         default:
-            LOGi("Default: %i", evt->event_type);
+//            LOGi("Default: %i", evt->event_type);
             break;
 	}
 }
 
-}
+} // extern "C"
 
 CMesh::CMesh() : _appTimerId(-1) {
 	MeshControl::getInstance();
@@ -121,7 +127,10 @@ void CMesh::init() {
 	APP_ERROR_CHECK(error_code);
 	error_code = rbc_mesh_value_enable(2);
 	APP_ERROR_CHECK(error_code);
+
 //	error_code = rbc_mesh_value_enable(3);
+//	APP_ERROR_CHECK(error_code);
+//	error_code = rbc_mesh_value_enable(4);
 //	APP_ERROR_CHECK(error_code);
 }
 
@@ -132,13 +141,13 @@ void CMesh::init() {
 //	APP_ERROR_CHECK(rbc_mesh_value_set(handle, &val[0], 1));
 //}
 
-void CMesh::send(uint8_t channel, void* p_data, uint8_t length) {
+void CMesh::send(uint8_t handle, void* p_data, uint8_t length) {
 //	LOGi("length: %d, MAX_MESH_MESSAGE_LEN: %d", length, MAX_MESH_MESSAGE_LEN);
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
-	//LOGi("send ch: %d, len: %d", handle, length);
+//	LOGd("send ch: %d, len: %d", handle, length);
 	//BLEutil::printArray((uint8_t*)p_data, length);
-	APP_ERROR_CHECK(rbc_mesh_value_set(channel, (uint8_t*)p_data, length));
+	APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
 }
 
 bool CMesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
