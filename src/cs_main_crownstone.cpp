@@ -317,13 +317,6 @@ void Crownstone::setup() {
 	BLEutil::print_heap("Heap drivers: ");
 	BLEutil::print_stack("Stack drivers: ");
 
-	// begin sending advertising packets over the air.
-
-	startAdvertising();
-
-	BLEutil::print_heap("Heap adv: ");
-	BLEutil::print_stack("Stack adv: ");
-
 #if CHAR_MESHING==1
 //	#if HARDWARE_BOARD==PCA10001
 //        gpiote_init();
@@ -335,7 +328,15 @@ void Crownstone::setup() {
 
  	CMesh & mesh = CMesh::getInstance();
 	mesh.init();
+	BLEutil::print_heap("Heap mesh: ");
+	BLEutil::print_stack("Stack mesh: ");
 #endif
+
+	// Begin sending advertising packets over the air.
+	// This should be done after initialization of the mesh
+	startAdvertising();
+	BLEutil::print_heap("Heap adv: ");
+	BLEutil::print_stack("Stack adv: ");
 
 #if (POWER_SERVICE==1)
 #if (DEFAULT_ON==1)

@@ -102,10 +102,12 @@ uint32_t rbc_mesh_init(rbc_mesh_init_params_t init_params) {
 	ble_enable.gatts_enable_params.attr_tab_size =
 			BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
 	ble_enable.gatts_enable_params.service_changed = 0;
-	error_code = sd_ble_enable(&ble_enable);
-	if (error_code != NRF_SUCCESS && error_code != NRF_ERROR_INVALID_STATE) {
-		return error_code;
-	}
+	// Should be removed according to integration doc
+	// https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh/blob/master/docs/integrating_w_SD_apps.adoc#step-6-initialization
+//	error_code = sd_ble_enable(&ble_enable);
+//	if (error_code != NRF_SUCCESS && error_code != NRF_ERROR_INVALID_STATE) {
+//		return error_code;
+//	}
 
 	error_code = mesh_gatt_init(init_params.access_addr, init_params.channel,
 			init_params.interval_min_ms);
