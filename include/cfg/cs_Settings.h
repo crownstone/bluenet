@@ -114,6 +114,15 @@ protected:
 
 	// non-persistent configuration options
 	std::string _wifiSettings;
+
+	/*
+	 * Writes value from storage to streambuffer
+	 */
+	bool getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue);
+	bool getInt8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, int32_t value, int8_t defaultValue);
+
+	bool setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
+	bool setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, int32_t& target);
 };
 
 
