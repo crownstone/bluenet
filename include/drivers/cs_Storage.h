@@ -125,6 +125,27 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	// Maximum temperature of environment
 	int32_t maxEnvTemp;
+
+	// Scan duration in ms
+	// TODO
+	uint32_t scanDuration;
+
+	// Time in ms, before sending the scan results over the mesh
+	// TODO
+	uint32_t scanSendDelay;
+
+	// Time in ms to wait before scanning, after sending the scan results
+	// TODO
+	uint32_t scanBreakDuration;
+
+	// Time (in ms) to wait before booting after reset
+	// TODO
+	uint32_t bootDelay;
+
+	// The temperature (in ??) at which the PWM and relay are switched off
+	// TODO
+	uint32_t maxChipTemp;
+
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////

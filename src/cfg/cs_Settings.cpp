@@ -72,7 +72,6 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 			savePersistentStorage();
 		}
 
-		// TODO: should be length 2?
 		EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.major, 4);
 		break;
 	}
@@ -90,7 +89,6 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 			savePersistentStorage();
 		}
 
-		// TODO: should be length 2?
 		EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.minor, 4);
 		break;
 	}
@@ -162,7 +160,6 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 			savePersistentStorage();
 		}
 
-		// TODO: should be length 2?
 		EventDispatcher::getInstance().dispatch(type, &_storageStruct.advInterval, 4);
 		break;
 	}
@@ -191,7 +188,7 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		if (persistent) {
 			savePersistentStorage();
 		}
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.minEnvTemp, 1);
+		EventDispatcher::getInstance().dispatch(type, &_storageStruct.minEnvTemp, 4);
 		break;
 	}
 	case CONFIG_MAX_ENV_TEMP: {
@@ -205,9 +202,81 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		if (persistent) {
 			savePersistentStorage();
 		}
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.maxEnvTemp, 1);
+		EventDispatcher::getInstance().dispatch(type, &_storageStruct.maxEnvTemp, 4);
 		break;
 	}
+	case CONFIG_SCAN_DURATION:{
+		if (length != 2) {
+			LOGw("Expected uint16_t for scan duration");
+			return;
+		}
+		uint16_t scanDuration = ((uint16_t*)payload)[0];
+		LOGi("Set scan duration to %d", scanDuration);
+		Storage::setUint16(scanDuration, (uint32_t&)_storageStruct.scanDuration);
+		if (persistent) {
+			savePersistentStorage();
+		}
+		EventDispatcher::getInstance().dispatch(type, &_storageStruct.scanDuration, 4);
+		break;
+	}
+	case CONFIG_SCAN_SEND_DELAY:{
+		if (length != 2) {
+			LOGw("Expected uint16_t for scan send delay");
+			return;
+		}
+		uint16_t scanSendDelay = ((uint16_t*)payload)[0];
+		LOGi("Set scan send delay to %d", scanSendDelay);
+		Storage::setUint16(scanSendDelay, (uint32_t&)_storageStruct.scanSendDelay);
+		if (persistent) {
+			savePersistentStorage();
+		}
+		EventDispatcher::getInstance().dispatch(type, &_storageStruct.scanSendDelay, 4);
+		break;
+	}
+	case CONFIG_SCAN_BREAK_DURATION:{
+		if (length != 2) {
+			LOGw("Expected uint16_t for scan break duration");
+			return;
+		}
+		uint16_t scanBreakDuration = ((uint16_t*)payload)[0];
+		LOGi("Set scan break duration to %d", scanBreakDuration);
+		Storage::setUint16(scanBreakDuration, (uint32_t&)_storageStruct.scanBreakDuration);
+		if (persistent) {
+			savePersistentStorage();
+		}
+		EventDispatcher::getInstance().dispatch(type, &_storageStruct.scanBreakDuration, 4);
+		break;
+	}
+	case CONFIG_BOOT_DELAY:{
+		if (length != 2) {
+			LOGw("Expected uint16_t for boot delay");
+			return;
+		}
+		uint16_t bootDelay = ((uint16_t*)payload)[0];
+		LOGi("Set boot delay to %d", bootDelay);
+		Storage::setUint16(bootDelay, (uint32_t&)_storageStruct.bootDelay);
+		if (persistent) {
+			savePersistentStorage();
+		}
+//		EventDispatcher::getInstance().dispatch(type, &_storageStruct.bootDelay, 4);
+		break;
+	}
+	case CONFIG_MAX_CHIP_TEMP:{
+		if (length != 1) {
+			LOGw("Expected int8_t for max chip temp");
+			return;
+		}
+		int8_t temp = payload[0];
+		LOGi("Set max chip temp to %d", temp);
+		Storage::setInt8(temp, (int32_t&)_storageStruct.maxChipTemp);
+		if (persistent) {
+			savePersistentStorage();
+		}
+		EventDispatcher::getInstance().dispatch(type, &_storageStruct.maxChipTemp, 4);
+		break;
+	}
+
+
 	default:
 		LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
 	}
@@ -365,6 +434,64 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		LOGd("Max env temp set in payload: %d with len %d", payload[0], streamBuffer->length());
 		return true;
 	}
+	case CONFIG_SCAN_DURATION: {
+		LOGd("Read scan duration");
+		loadPersistentStorage();
+		uint8_t plen = 1;
+		uint16_t payload[plen];
+		Storage::getUint16(_storageStruct.scanDuration, payload[0], SCAN_DURATION);
+		streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
+		streamBuffer->setType(type);
+		LOGd("Scan duration set in payload: %d with len %d", streamBuffer->payload()[0], streamBuffer->length());
+		return true;
+	}
+	case CONFIG_SCAN_SEND_DELAY: {
+		LOGd("Read scan send delay");
+		loadPersistentStorage();
+		uint8_t plen = 1;
+		uint16_t payload[plen];
+		Storage::getUint16(_storageStruct.scanSendDelay, payload[0], SCAN_SEND_DELAY);
+		streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
+		streamBuffer->setType(type);
+		LOGd("Scan send delay set in payload: %d with len %d", streamBuffer->payload()[0], streamBuffer->length());
+		return true;
+	}
+	case CONFIG_SCAN_BREAK_DURATION: {
+		LOGd("Read scan break duration");
+		loadPersistentStorage();
+		uint8_t plen = 1;
+		uint16_t payload[plen];
+		Storage::getUint16(_storageStruct.scanBreakDuration, payload[0], SCAN_BREAK_DURATION);
+		streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
+		streamBuffer->setType(type);
+		LOGd("Scan break duration set in payload: %d with len %d", streamBuffer->payload()[0], streamBuffer->length());
+		return true;
+	}
+	case CONFIG_BOOT_DELAY: {
+		LOGd("Read boot delay");
+		loadPersistentStorage();
+		uint8_t plen = 1;
+		uint16_t payload[plen];
+		Storage::getUint16(_storageStruct.bootDelay, payload[0], BOOT_DELAY);
+		streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
+		streamBuffer->setType(type);
+		LOGd("Boot delay set in payload: %d with len %d", streamBuffer->payload()[0], streamBuffer->length());
+		return true;
+	}
+	case CONFIG_MAX_CHIP_TEMP: {
+		LOGd("Read max chip temp");
+		loadPersistentStorage();
+		uint8_t plen = 1;
+		int8_t payload[plen];
+		Storage::getInt8(_storageStruct.maxChipTemp, payload[0], MAX_CHIP_TEMP);
+		streamBuffer->setPayload((uint8_t*)payload, plen);
+		streamBuffer->setType(type);
+
+		LOGd("Max chip temp set in payload: %d with len %d", payload[0], streamBuffer->length());
+		return true;
+	}
+
+
 	default: {
 		LOGd("There is no such configuration type (%i), or not yet implemented.", type);
 	}
