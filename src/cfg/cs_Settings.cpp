@@ -48,11 +48,11 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 	}
 #if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	case CONFIG_IBEACON_MAJOR: {
-		setUint16(type, payload, length, persistent, _storageStruct.beacon.major);
+		setUint16(type, payload, length, persistent, (uint32_t&)_storageStruct.beacon.major);
 		break;
 	}
 	case CONFIG_IBEACON_MINOR: {
-		setUint16(type, payload, length, persistent, _storageStruct.beacon.minor);
+		setUint16(type, payload, length, persistent, (uint32_t&)_storageStruct.beacon.minor);
 		break;
 	}
 	case CONFIG_IBEACON_UUID: {
@@ -70,7 +70,7 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		break;
 	}
 	case CONFIG_IBEACON_RSSI: {
-		setInt8(type, payload, length, persistent, _storageStruct.beacon.rssi);
+		setInt8(type, payload, length, persistent, (int32_t&)_storageStruct.beacon.rssi);
 		break;
 	}
 #endif
@@ -270,7 +270,7 @@ bool Settings::getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint
 	Storage::getUint16(value, payload[0], defaultValue);
 	streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
 	streamBuffer->setType(type);
-	LOGd("Value set in payload: %u with len %u", streamBuffer->payload()[0], streamBuffer->length());
+	LOGd("Value set in payload: %u with len %u", payload[0], streamBuffer->length());
 	return true;
 }
 
