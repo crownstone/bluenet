@@ -144,7 +144,7 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	// The temperature (in ??) at which the PWM and relay are switched off
 	// TODO
-	uint32_t maxChipTemp;
+	int32_t maxChipTemp;
 
 };
 
