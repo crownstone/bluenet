@@ -8,14 +8,11 @@
 
 #include <ble/cs_Stack.h>
 #include <structs/cs_ScanResult.h>
-
-#define SCAN_DURATION  2000
-#define SCAN_SEND_WAIT 1000
-#define SCAN_BREAK     7000
+#include <events/cs_EventListener.h>
 
 using namespace BLEpp;
 
-class Scanner {
+class Scanner : EventListener {
 
 public:
 
@@ -36,6 +33,8 @@ public:
 	void start();
 	void stop();
 
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
 private:
 
 	enum SCAN_OP_CODE {
@@ -48,6 +47,9 @@ private:
 
 	bool _scanning;
 	bool _running;
+	uint16_t _scanDuration;
+	uint16_t _scanSendDelay;
+	uint16_t _scanBreakDuration;
 
 	app_timer_id_t _appTimerId;
 

@@ -32,7 +32,7 @@
 #if(HARDWARE_BOARD==CROWNSTONE)
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_GPIO_RELAIS      8                   // something unused
+#define PIN_GPIO_RELAY       8                   // something unused
 //#define PIN_AIN_ADC          6                   // ain6 is p0.05 or gpio 5
 //#define PIN_AIN_LPCOMP       5                   // ain5 is p0.04 or gpio 4
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -51,7 +51,7 @@
 #if(HARDWARE_BOARD==CROWNSTONE2)
 // v0.86
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_GPIO_RELAIS      8                   // something unused
+#define PIN_GPIO_RELAY       8                   // something unused
 //#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -70,7 +70,7 @@
 #if(HARDWARE_BOARD==CROWNSTONE3)
 // v0.90
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_GPIO_RELAIS      8                   // something unused
+#define PIN_GPIO_RELAY       8                   // something unused
 //#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -91,7 +91,7 @@
 #if(HARDWARE_BOARD==CROWNSTONE4)
 // v0.92
 #define PIN_GPIO_SWITCH      4                   // this is p0.04 or gpio 4
-#define PIN_GPIO_RELAIS      0                   // this is p0.00 or gpio 0
+#define PIN_GPIO_RELAY       0                   // this is p0.00 or gpio 0
 //#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -112,7 +112,7 @@
 #if(HARDWARE_BOARD==CROWNSTONE_SENSOR)
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_GPIO_RELAIS      8                   // something unused
+#define PIN_GPIO_RELAY       8                   // something unused
 //#define PIN_AIN_ADC          6                   // ain6 is p0.05 or gpio 5
 //#define PIN_AIN_LPCOMP       5                   // ain5 is p0.04 or gpio 4
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -143,7 +143,7 @@
 #define PIN_GPIO_LED7        15
 
 #define PIN_GPIO_SWITCH      PIN_GPIO_LED1       // show switch as LED
-#define PIN_GPIO_RELAIS      PIN_GPIO_LED2       // show relais as LED
+#define PIN_GPIO_RELAY       PIN_GPIO_LED2       // show relay as LED
 //#define PIN_AIN_ADC          2                   // ain2 is p0.1 or gpio 1
 //#define PIN_AIN_LPCOMP       3                   // ain3 is p0.2 or gpio 2
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -166,7 +166,7 @@
 
 //#define PIN_GPIO_LED_CON     PIN_GPIO_LED1       // shows connection state on the evaluation board
 #define PIN_GPIO_SWITCH      PIN_GPIO_LED0       // show switch as LED
-#define PIN_GPIO_RELAIS      PIN_GPIO_LED1       // show relais as LED
+#define PIN_GPIO_RELAY       PIN_GPIO_LED1       // show relay as LED
 //#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP       3                   // ain3 is p0.02 or gpio 2
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -194,7 +194,7 @@
 
 //#define PIN_GPIO_LED_CON     PIN_GPIO_GREEN       // shows connection state on the evaluation board
 #define PIN_GPIO_SWITCH      LED_RGB_BLUE        // show switch as LED
-#define PIN_GPIO_RELAIS      LED_RGB_RED         // show relais as LED
+#define PIN_GPIO_RELAY       LED_RGB_RED         // show relay as LED
 //#define PIN_AIN_ADC          2                   // something unused
 //#define PIN_AIN_LPCOMP       2                   // something unused
 //#define PIN_AIN_LPCOMP_REF   0                   // something unused
@@ -240,7 +240,7 @@
 
 //#define PIN_GPIO_LED_CON     LED_RGB_GREEN       // shows connection state on the evaluation board
 #define PIN_GPIO_SWITCH      LED_RGB_BLUE        // show switch as LED
-#define PIN_GPIO_RELAIS      LED_RGB_RED         // show relais as LED
+#define PIN_GPIO_RELAY       LED_RGB_RED         // show relay as LED
 
 #define PIN_GPIO_BUTTON      20                  // this is p0.20 or gpio 20
 

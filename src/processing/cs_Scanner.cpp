@@ -7,8 +7,16 @@
 #include "processing/cs_Scanner.h"
 
 #include <protocol/cs_MeshControl.h>
+#include <cfg/cs_Settings.h>
 
-Scanner::Scanner(Nrf51822BluetoothStack* stack) : _opCode(SCAN_START), _scanning(false), _running(false), _stack(stack) {
+Scanner::Scanner(Nrf51822BluetoothStack* stack) :
+_opCode(SCAN_START),
+_scanning(false),
+_running(false),
+_scanDuration(SCAN_DURATION),
+_scanSendDelay(SCAN_SEND_DELAY),
+_scanBreakDuration(SCAN_BREAK_DURATION),
+_stack(stack) {
 
 	_scanResult = new ScanResult();
 
@@ -18,6 +26,13 @@ Scanner::Scanner(Nrf51822BluetoothStack* stack) : _opCode(SCAN_START), _scanning
 //	mb.getBuffer(buffer, maxLength);
 
 	_scanResult->assign(_scanBuffer, sizeof(_scanBuffer));
+
+	ps_configuration_t cfg = Settings::getInstance().getConfig();
+	Storage::getUint16(cfg.scanDuration, _scanDuration, SCAN_DURATION);
+	Storage::getUint16(cfg.scanSendDelay, _scanSendDelay, SCAN_SEND_DELAY);
+	Storage::getUint16(cfg.scanBreakDuration, _scanBreakDuration, SCAN_BREAK_DURATION);
+
+	EventDispatcher::getInstance().addListener(this);
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Scanner::staticTick);
 }
@@ -64,7 +79,7 @@ void Scanner::start() {
 	_running = true;
 	_opCode = SCAN_START;
 	//executeScan();
-	Timer::getInstance().start(_appTimerId, MS_TO_TICKS(SCAN_BREAK), this);
+	Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
 }
 
 void Scanner::stop() {
@@ -86,7 +101,7 @@ void Scanner::executeScan() {
 		manualStartScan();
 
 		// set timer to trigger in SCAN_DURATION sec, then stop again
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(SCAN_DURATION), this);
+		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanDuration), this);
 
 		_opCode = SCAN_STOP;
 		break;
@@ -100,7 +115,7 @@ void Scanner::executeScan() {
 		_scanResult->print();
 
 		// Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(SCAN_SEND_WAIT), this);
+		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanSendDelay), this);
 
 		_opCode = SCAN_SEND_RESULT;
 		break;
@@ -109,7 +124,7 @@ void Scanner::executeScan() {
 		sendResults();
 
 		// Wait SCAN_BREAK ms, then start scanning again
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(SCAN_BREAK), this);
+		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
 
 		_opCode = SCAN_START;
 		break;
@@ -137,7 +152,23 @@ void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 
 	if (isScanning()) {
 		_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
-	} else {
-		LOGw("why we getting advertisements if scan is not running?");
 	}
+//	else {
+//		LOGw("why are we getting advertisements if scan is not running?");
+//	}
+}
+
+void Scanner::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch (evt) {
+	case CONFIG_SCAN_DURATION:
+		_scanDuration = *(uint32_t*)p_data;
+		break;
+	case CONFIG_SCAN_SEND_DELAY:
+		_scanSendDelay = *(uint32_t*)p_data;
+		break;
+	case CONFIG_SCAN_BREAK_DURATION:
+		_scanBreakDuration = *(uint32_t*)p_data;
+		break;
+	}
+
 }

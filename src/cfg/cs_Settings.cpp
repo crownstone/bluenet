@@ -43,55 +43,16 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		break;
 	}
 	case CONFIG_NEARBY_TIMEOUT_UUID: {
-		if (length != 2) {
-			LOGw("Nearby timeout is of type uint16");
-			return;
-		}
-		uint16_t counts = ((uint16_t*)payload)[0]; //TODO: other byte order?
-		LOGd("setNearbyTimeout(%i)", counts);
-		Storage::setUint16(counts, _storageStruct.nearbyTimeout);
-		if (persistent) {
-			savePersistentStorage();
-		}
-		//		setNearbyTimeout(counts);
-		// TODO: write to persistent storage and trigger update event
+		setUint16(type, payload, length, persistent, _storageStruct.nearbyTimeout);
 		break;
 	}
 #if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	case CONFIG_IBEACON_MAJOR: {
-		if (length != 2) {
-			LOGw("We do not account for a value of more than 65535");
-			return;
-		}
-		//			uint16_t major;
-		//			popUint16(major, payload);
-		uint16_t major = ((uint16_t*)payload)[0];
-		LOGi("Set major to %d", major);
-		Storage::setUint16(major, (uint32_t&)_storageStruct.beacon.major);
-		if (persistent) {
-			savePersistentStorage();
-		}
-
-		// TODO: should be length 2?
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.major, 4);
+		setUint16(type, payload, length, persistent, (uint32_t&)_storageStruct.beacon.major);
 		break;
 	}
 	case CONFIG_IBEACON_MINOR: {
-		if (length != 2) {
-			LOGw("We do not account for a value of more than 65535");
-			return;
-		}
-		//			uint16_t minor;
-		//			popUint16(minor, payload);
-		uint16_t minor = ((uint16_t*)payload)[0];
-		LOGi("Set minor to %d", minor);
-		Storage::setUint16(minor, (uint32_t&)_storageStruct.beacon.minor);
-		if (persistent) {
-			savePersistentStorage();
-		}
-
-		// TODO: should be length 2?
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.minor, 4);
+		setUint16(type, payload, length, persistent, (uint32_t&)_storageStruct.beacon.minor);
 		break;
 	}
 	case CONFIG_IBEACON_UUID: {
@@ -109,18 +70,7 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		break;
 	}
 	case CONFIG_IBEACON_RSSI: {
-		if (length != 1) {
-			LOGw("We do not account for a value of more than 255");
-			return;
-		}
-		int8_t rssi = payload[0];
-		LOGi("Set beacon rssi to %d", rssi);
-		Storage::setInt8(rssi, (int32_t&)_storageStruct.beacon.rssi);
-		if (persistent) {
-			savePersistentStorage();
-		}
-
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.rssi, 1);
+		setInt8(type, payload, length, persistent, (int32_t&)_storageStruct.beacon.rssi);
 		break;
 	}
 #endif
@@ -136,34 +86,11 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		break;
 	}
 	case CONFIG_TX_POWER: {
-		if (length != 1) {
-			LOGw("Expected int8_t for tx power");
-			return;
-		}
-		int8_t txPower = payload[0];
-		LOGi("Set tx power to %d", txPower);
-		Storage::setInt8(txPower, (int32_t&)_storageStruct.txPower);
-		if (persistent) {
-			savePersistentStorage();
-		}
-
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.txPower, 1);
+		setInt8(type, payload, length, persistent, _storageStruct.txPower);
 		break;
 	}
 	case CONFIG_ADV_INTERVAL: {
-		if (length != 2) {
-			LOGw("Expected uint16_t for advertisement interval");
-			return;
-		}
-		uint16_t interval = ((uint16_t*)payload)[0];
-		LOGi("Set advertisement interval to %d", interval);
-		Storage::setUint16(interval, (uint32_t&)_storageStruct.advInterval);
-		if (persistent) {
-			savePersistentStorage();
-		}
-
-		// TODO: should be length 2?
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.advInterval, 4);
+		setUint16(type, payload, length, persistent, _storageStruct.advInterval);
 		break;
 	}
 	case CONFIG_PASSKEY: {
@@ -181,35 +108,35 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		break;
 	}
 	case CONFIG_MIN_ENV_TEMP: {
-		if (length != 1) {
-			LOGw("Expected int8_t for min env temp");
-			return;
-		}
-		int8_t temp = payload[0];
-		LOGi("Set min env temp to %d", temp);
-		Storage::setInt8(temp, (int32_t&)_storageStruct.minEnvTemp);
-		if (persistent) {
-			savePersistentStorage();
-		}
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.minEnvTemp, 1);
+		setInt8(type, payload, length, persistent, _storageStruct.minEnvTemp);
 		break;
 	}
 	case CONFIG_MAX_ENV_TEMP: {
-		if (length != 1) {
-			LOGw("Expected int8_t for max env temp");
-			return;
-		}
-		int8_t temp = payload[0];
-		LOGi("Set max env temp to %d", temp);
-		Storage::setInt8(temp, (int32_t&)_storageStruct.maxEnvTemp);
-		if (persistent) {
-			savePersistentStorage();
-		}
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.maxEnvTemp, 1);
+		setInt8(type, payload, length, persistent, _storageStruct.maxEnvTemp);
+		break;
+	}
+	case CONFIG_SCAN_DURATION:{
+		setUint16(type, payload, length, persistent, _storageStruct.scanDuration);
+		break;
+	}
+	case CONFIG_SCAN_SEND_DELAY:{
+		setUint16(type, payload, length, persistent, _storageStruct.scanSendDelay);
+		break;
+	}
+	case CONFIG_SCAN_BREAK_DURATION:{
+		setUint16(type, payload, length, persistent, _storageStruct.scanBreakDuration);
+		break;
+	}
+	case CONFIG_BOOT_DELAY:{
+		setUint16(type, payload, length, persistent, _storageStruct.bootDelay);
+		break;
+	}
+	case CONFIG_MAX_CHIP_TEMP:{
+		setInt8(type, payload, length, persistent, _storageStruct.maxChipTemp);
 		break;
 	}
 	default:
-		LOGw("There is no such configuration type (%i)! Or not yet implemented!", type);
+		LOGw("There is no such configuration type (%u).", type);
 	}
 }
 
@@ -241,27 +168,11 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 #if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	case CONFIG_IBEACON_MAJOR: {
 		LOGd("Read major");
-		loadPersistentStorage();
-		uint8_t plen = 1;
-		uint16_t payload[plen];
-		Storage::getUint16(_storageStruct.beacon.major, payload[0], BEACON_MAJOR);
-		streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
-		streamBuffer->setType(type);
-
-		LOGd("Major value set in payload: %d with len %d", streamBuffer->payload()[0], streamBuffer->length());
-		return true;
+		return getUint16(type, streamBuffer, _storageStruct.beacon.major, BEACON_MAJOR);
 	}
 	case CONFIG_IBEACON_MINOR: {
 		LOGd("Read minor");
-		loadPersistentStorage();
-		uint8_t plen = 1;
-		uint16_t payload[plen];
-		Storage::getUint16(_storageStruct.beacon.minor, payload[0], BEACON_MINOR);
-		streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
-		streamBuffer->setType(type);
-
-		LOGd("Minor value set in payload: %d with len %d", streamBuffer->payload()[0], streamBuffer->length());
-		return true;
+		return getUint16(type, streamBuffer, _storageStruct.beacon.minor, BEACON_MINOR);
 	}
 	case CONFIG_IBEACON_UUID: {
 		LOGd("Read UUID");
@@ -277,15 +188,7 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 	}
 	case CONFIG_IBEACON_RSSI: {
 		LOGd("Read tx power");
-		loadPersistentStorage();
-		uint8_t plen = 1;
-		int8_t payload[plen];
-		Storage::getInt8(_storageStruct.beacon.rssi, payload[0], BEACON_RSSI);
-		streamBuffer->setPayload((uint8_t*)payload, plen);
-		streamBuffer->setType(type);
-
-		LOGd("Beacon rssi value set in payload: %d with len %d", payload[0], streamBuffer->length());
-		return true;
+		return getInt8(type, streamBuffer, _storageStruct.beacon.rssi, BEACON_RSSI);
 	}
 #endif
 	case CONFIG_WIFI_SETTINGS: {
@@ -305,27 +208,11 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 	}
 	case CONFIG_TX_POWER: {
 		LOGd("Read tx power");
-		loadPersistentStorage();
-		uint8_t plen = 1;
-		int8_t payload[plen];
-		Storage::getInt8(_storageStruct.txPower, payload[0], TX_POWER);
-		streamBuffer->setPayload((uint8_t*)payload, plen);
-		streamBuffer->setType(type);
-
-		LOGd("Tx power set in payload: %d with len %d", payload[0], streamBuffer->length());
-		return true;
+		return getInt8(type, streamBuffer, _storageStruct.txPower, TX_POWER);
 	}
 	case CONFIG_ADV_INTERVAL: {
 		LOGd("Read advertisement interval");
-		loadPersistentStorage();
-		uint8_t plen = 1;
-		uint16_t payload[plen];
-		Storage::getUint16(_storageStruct.advInterval, payload[0], ADVERTISEMENT_INTERVAL);
-		streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
-		streamBuffer->setType(type);
-
-		LOGd("Advertisement interval set in payload: %d with len %d", streamBuffer->payload()[0], streamBuffer->length());
-		return true;
+		return getUint16(type, streamBuffer, _storageStruct.advInterval, ADVERTISEMENT_INTERVAL);
 	}
 	case CONFIG_PASSKEY: {
 		LOGd("Reading passkey");
@@ -343,33 +230,89 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 	}
 	case CONFIG_MIN_ENV_TEMP: {
 		LOGd("Read min env temp");
-		loadPersistentStorage();
-		uint8_t plen = 1;
-		int8_t payload[plen];
-		Storage::getInt8(_storageStruct.minEnvTemp, payload[0], MIN_ENV_TEMP);
-		streamBuffer->setPayload((uint8_t*)payload, plen);
-		streamBuffer->setType(type);
-
-		LOGd("Min env temp set in payload: %d with len %d", payload[0], streamBuffer->length());
-		return true;
+		return getInt8(type, streamBuffer, _storageStruct.minEnvTemp, MIN_ENV_TEMP);
 	}
 	case CONFIG_MAX_ENV_TEMP: {
 		LOGd("Read max env temp");
-		loadPersistentStorage();
-		uint8_t plen = 1;
-		int8_t payload[plen];
-		Storage::getInt8(_storageStruct.maxEnvTemp, payload[0], MAX_ENV_TEMP);
-		streamBuffer->setPayload((uint8_t*)payload, plen);
-		streamBuffer->setType(type);
-
-		LOGd("Max env temp set in payload: %d with len %d", payload[0], streamBuffer->length());
-		return true;
+		return getInt8(type, streamBuffer, _storageStruct.maxEnvTemp, MAX_ENV_TEMP);
+	}
+	case CONFIG_SCAN_DURATION: {
+		LOGd("Read scan duration");
+		return getUint16(type, streamBuffer, _storageStruct.scanDuration, SCAN_DURATION);
+	}
+	case CONFIG_SCAN_SEND_DELAY: {
+		LOGd("Read scan send delay");
+		return getUint16(type, streamBuffer, _storageStruct.scanSendDelay, SCAN_SEND_DELAY);
+	}
+	case CONFIG_SCAN_BREAK_DURATION: {
+		LOGd("Read scan break duration");
+		return getUint16(type, streamBuffer, _storageStruct.scanBreakDuration, SCAN_BREAK_DURATION);
+	}
+	case CONFIG_BOOT_DELAY: {
+		LOGd("Read boot delay");
+		return getUint16(type, streamBuffer, _storageStruct.bootDelay, BOOT_DELAY);
+	}
+	case CONFIG_MAX_CHIP_TEMP: {
+		LOGd("Read max chip temp");
+		return getInt8(type, streamBuffer, _storageStruct.maxChipTemp, MAX_CHIP_TEMP);
 	}
 	default: {
-		LOGd("There is no such configuration type (%i), or not yet implemented.", type);
+		LOGw("There is no such configuration type (%u).", type);
 	}
 	}
 	return false;
+}
+
+bool Settings::getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue) {
+	loadPersistentStorage();
+	uint8_t plen = 1;
+	uint16_t payload[plen];
+	Storage::getUint16(value, payload[0], defaultValue);
+	streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
+	streamBuffer->setType(type);
+	LOGd("Value set in payload: %u with len %u", payload[0], streamBuffer->length());
+	return true;
+}
+
+bool Settings::getInt8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, int32_t value, int8_t defaultValue) {
+	loadPersistentStorage();
+	uint8_t plen = 1;
+	int8_t payload[plen];
+	Storage::getInt8(value, payload[0], defaultValue);
+	streamBuffer->setPayload((uint8_t*)payload, plen);
+	streamBuffer->setType(type);
+	LOGd("Value set in payload: %i with len %u", payload[0], streamBuffer->length());
+	return true;
+}
+
+bool Settings::setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target) {
+	if (length != 2) {
+		LOGw("Expected uint16");
+		return false;
+	}
+	uint16_t val = ((uint16_t*)payload)[0];
+	LOGi("Set %u to %u", type, val);
+	Storage::setUint16(val, target);
+	if (persistent) {
+		savePersistentStorage();
+	}
+	EventDispatcher::getInstance().dispatch(type, &target, 4);
+	return true;
+}
+
+bool Settings::setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, int32_t& target) {
+	if (length != 1) {
+		LOGw("Expected int8");
+		return false;
+	}
+	int8_t val = payload[0];
+	LOGi("Set %u to %i", type, val);
+	Storage::setInt8(val, target);
+	if (persistent) {
+		savePersistentStorage();
+	}
+	EventDispatcher::getInstance().dispatch(type, &target, 4);
+	return true;
 }
 
 ps_configuration_t& Settings::getConfig() {

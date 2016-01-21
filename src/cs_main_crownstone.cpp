@@ -22,8 +22,8 @@
 #define MESHING_PARALLEL 1
 
 //#define MICRO_VIEW 1
-#define CHANGE_NAME_ON_RESET
-#define CHANGE_MINOR_ON_RESET
+//#define CHANGE_NAME_ON_RESET
+//#define CHANGE_MINOR_ON_RESET
 
 /**********************************************************************************************************************
  * General includes
@@ -274,6 +274,10 @@ void Crownstone::setup() {
 
 	// configuration has to be done after the stack was created!
 	configure();
+
+	uint16_t bootDelay;
+	Storage::getUint16(Settings::getInstance().getConfig().bootDelay, bootDelay, BOOT_DELAY);
+	nrf_delay_ms(bootDelay);
 
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
