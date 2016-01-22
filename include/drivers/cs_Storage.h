@@ -146,6 +146,9 @@ struct ps_configuration_t : ps_storage_base_t {
 	// TODO
 	int32_t maxChipTemp;
 
+	// current scan filter
+	uint32_t scanFilter;
+
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////

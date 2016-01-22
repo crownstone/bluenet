@@ -135,6 +135,10 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		setInt8(type, payload, length, persistent, _storageStruct.maxChipTemp);
 		break;
 	}
+	case CONFIG_SCAN_FILTER: {
+		setUint8(type, payload, length, persistent, _storageStruct.scanFilter);
+		break;
+	}
 	default:
 		LOGw("There is no such configuration type (%u).", type);
 	}
@@ -256,6 +260,10 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		LOGd("Read max chip temp");
 		return getInt8(type, streamBuffer, _storageStruct.maxChipTemp, MAX_CHIP_TEMP);
 	}
+	case CONFIG_SCAN_FILTER: {
+		LOGd("Read scan filter");
+		return getUint8(type, streamBuffer, _storageStruct.scanFilter, SCAN_FILTER);
+	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
 	}
@@ -279,6 +287,17 @@ bool Settings::getInt8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, int32_
 	uint8_t plen = 1;
 	int8_t payload[plen];
 	Storage::getInt8(value, payload[0], defaultValue);
+	streamBuffer->setPayload((uint8_t*)payload, plen);
+	streamBuffer->setType(type);
+	LOGd("Value set in payload: %i with len %u", payload[0], streamBuffer->length());
+	return true;
+}
+
+bool Settings::getUint8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint8_t defaultValue) {
+	loadPersistentStorage();
+	uint8_t plen = 1;
+	uint8_t payload[plen];
+	Storage::getUint8(value, payload[0], defaultValue);
 	streamBuffer->setPayload((uint8_t*)payload, plen);
 	streamBuffer->setType(type);
 	LOGd("Value set in payload: %i with len %u", payload[0], streamBuffer->length());
@@ -312,6 +331,21 @@ bool Settings::setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool pers
 		savePersistentStorage();
 	}
 	EventDispatcher::getInstance().dispatch(type, &target, 4);
+	return true;
+}
+
+bool Settings::setUint8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target) {
+	if (length != 1) {
+		LOGw("Expected int8");
+		return false;
+	}
+	uint8_t val = payload[0];
+	LOGi("Set %u to %i", type, val);
+	Storage::setUint8(val, target);
+	if (persistent) {
+		savePersistentStorage();
+	}
+	EventDispatcher::getInstance().dispatch(type, &val, 1);
 	return true;
 }
 

@@ -154,6 +154,26 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 
 		break;
 	}
+	case COMMAND_MESSAGE: {
+
+		switch(msg->commandMsg.commandType) {
+		case SCAN_START: {
+			bool start = (bool) msg->commandMsg.params[0];
+			if (start) {
+				LOGi("start scanner");
+				RNG rng;
+				uint16_t delay = 100.0 / rng.getRandom16() * 10000;
+				EventDispatcher::getInstance().dispatch(EVT_SCANNER_START, &delay, 2);
+			} else {
+				LOGi("stop scanner");
+				EventDispatcher::getInstance().dispatch(EVT_SCANNER_STOP);
+			}
+			break;
+		}
+		}
+
+		break;
+	}
 	case POWER_MESSAGE: {
 //		if (!isValidMessage(p_data, length)) {
 //			return;

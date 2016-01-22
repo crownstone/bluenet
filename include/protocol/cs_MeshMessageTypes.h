@@ -19,6 +19,12 @@
 #define POWER_MESSAGE 1
 #define BEACON_MESSAGE 2
 
+#define COMMAND_MESSAGE 3
+
+enum CommandTypes {
+	SCAN_START = 1,
+};
+
 // hub messages
 #define SCAN_MESSAGE 101
 
@@ -44,6 +50,11 @@ struct __attribute__((__packed__)) beacon_mesh_message_t {
 	int8_t rssi;
 };
 
+struct __attribute__((__packed__)) command_mesh_message_t {
+	uint16_t commandType;
+	uint8_t params[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - sizeof(uint16_t)];
+};
+
 struct __attribute__((__packed__)) device_mesh_header_t {
 	uint8_t targetAddress[BLE_GAP_ADDR_LEN];
 	uint16_t messageType;
@@ -56,6 +67,7 @@ struct __attribute__((__packed__)) device_mesh_message_t {
 		event_mesh_message_t evtMsg;
 		power_mesh_message_t powerMsg;
 		beacon_mesh_message_t beaconMsg;
+		command_mesh_message_t commandMsg;
 	};
 };
 

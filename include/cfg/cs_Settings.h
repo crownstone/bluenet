@@ -44,6 +44,7 @@ enum ConfigurationTypes {
 	CONFIG_SCAN_BREAK_DURATION              = 0x12,
 	CONFIG_BOOT_DELAY                       = 0x13,
 	CONFIG_MAX_CHIP_TEMP                    = 0x14,
+	CONFIG_SCAN_FILTER                      = 0x15,
 	CONFIG_TYPES
 };
 
@@ -120,9 +121,11 @@ protected:
 	 */
 	bool getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue);
 	bool getInt8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, int32_t value, int8_t defaultValue);
+	bool getUint8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint8_t defaultValue);
 
 	bool setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
 	bool setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, int32_t& target);
+	bool setUint8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
 };
 
 

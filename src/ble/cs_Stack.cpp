@@ -589,7 +589,7 @@ void Nrf51822BluetoothStack::startScanning() {
 	LOGi("startScanning");
 	ble_gap_scan_params_t p_scan_params;
 	// No devices in whitelist, hence non selective performed.
-	p_scan_params.active = 0;            // Active scanning set.
+	p_scan_params.active = 1;            // Active scanning set.
 	p_scan_params.selective = 0;            // Selective scanning not set.
 	p_scan_params.interval = SCAN_INTERVAL;            // Scan interval.
 	p_scan_params.window = SCAN_WINDOW;  // Scan window.
