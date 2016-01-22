@@ -206,8 +206,6 @@ uint32_t rbc_mesh_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 		return NRF_ERROR_INVALID_ADDR;
 	}
 
-	LOGi("rbc_mesh_value_set");
-
 	/* no critical errors if this call fails, ignore return */
 	mesh_gatt_value_set(handle, data, len);
 
@@ -343,9 +341,5 @@ uint32_t rbc_mesh_packet_release(uint8_t* p_data) {
 	}
 
 	return NRF_SUCCESS;
-}
-
-void rbc_mesh_on_tx_complete() {
-	mesh_on_tx_complete();
 }
 

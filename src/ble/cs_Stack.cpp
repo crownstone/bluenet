@@ -919,12 +919,8 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_EVT_TX_COMPLETE:
+//		LOGi("BLE_EVT_TX_COMPLETE");
 		onTxComplete(p_ble_evt);
-
-#if CHAR_MESHING==1
-		rbc_mesh_on_tx_complete();
-#endif
-
 		break;
 
 	default:

@@ -67,20 +67,11 @@ typedef struct
     uint8_t mesh_channel; /* Mesh channel */
 } mesh_metadata_char_t;
 
-typedef struct {
-	uint8_t data[RBC_MESH_VALUE_MAX_LEN];
-	uint8_t length;
-	uint8_t offset;
-	rbc_mesh_value_handle_t handle;
-} waiting_notification_t;
-
 uint32_t mesh_gatt_init(uint32_t access_address, uint8_t channel, uint32_t interval_min_ms);
 
 uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data, uint8_t length);
 
 void mesh_gatt_sd_ble_event_handle(ble_evt_t* p_ble_evt);
-
-void mesh_on_tx_complete();
 
 #endif /* _MESH_SRV_H__ */
 

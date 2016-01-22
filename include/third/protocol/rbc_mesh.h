@@ -477,7 +477,5 @@ void rbc_mesh_pause();
 
 void rbc_mesh_resume();
 
-void rbc_mesh_on_tx_complete();
-
 #endif /* _RBC_MESH_H__ */
 
