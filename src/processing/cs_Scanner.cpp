@@ -9,14 +9,19 @@
 #include <protocol/cs_MeshControl.h>
 #include <cfg/cs_Settings.h>
 
+#include <cfg/cs_DeviceTypes.h>
+#include <ble/cs_DoBotsManufac.h>
+
 Scanner::Scanner(Nrf51822BluetoothStack* stack) :
-_opCode(SCAN_START),
-_scanning(false),
-_running(false),
-_scanDuration(SCAN_DURATION),
-_scanSendDelay(SCAN_SEND_DELAY),
-_scanBreakDuration(SCAN_BREAK_DURATION),
-_stack(stack) {
+	_opCode(SCAN_START),
+	_scanning(false),
+	_running(false),
+	_scanDuration(SCAN_DURATION),
+	_scanSendDelay(SCAN_SEND_DELAY),
+	_scanBreakDuration(SCAN_BREAK_DURATION),
+	_scanFilter(SCAN_FILTER),
+	_stack(stack)
+{
 
 	_scanResult = new ScanResult();
 
@@ -31,6 +36,7 @@ _stack(stack) {
 	Storage::getUint16(cfg.scanDuration, _scanDuration, SCAN_DURATION);
 	Storage::getUint16(cfg.scanSendDelay, _scanSendDelay, SCAN_SEND_DELAY);
 	Storage::getUint16(cfg.scanBreakDuration, _scanBreakDuration, SCAN_BREAK_DURATION);
+	Storage::getUint8(cfg.scanFilter, _scanFilter, SCAN_FILTER);
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -78,14 +84,30 @@ void Scanner::staticTick(Scanner* ptr) {
 void Scanner::start() {
 	_running = true;
 	_opCode = SCAN_START;
-	//executeScan();
+	executeScan();
+}
+
+void Scanner::delayedStart(uint16_t delay) {
+	LOGi("delayed start by %d ms", delay);
+	_running = true;
+	_opCode = SCAN_START;
+	Timer::getInstance().start(_appTimerId, MS_TO_TICKS(delay), this);
+}
+
+void Scanner::delayedStart() {
+	_running = true;
+	_opCode = SCAN_START;
 	Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
 }
 
 void Scanner::stop() {
-	_opCode = SCAN_STOP;
-	executeScan();
 	_running = false;
+	_opCode = SCAN_STOP;
+	LOGi("force STOP");
+	manualStopScan();
+	// no need to execute scan on stop is there? we want to stop after all
+//	executeScan();
+//	_running = false;
 }
 
 void Scanner::executeScan() {
@@ -148,14 +170,102 @@ void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
 	}
 }
 
+/**
+ * @brief Parses advertisement data, providing length and location of the field in case
+ *        matching data is found.
+ *
+ * @param[in]  Type of data to be looked for in advertisement data.
+ * @param[in]  Advertisement report length and pointer to report.
+ * @param[out] If data type requested is found in the data report, type data length and
+ *             pointer to data will be populated here.
+ *
+ * @retval NRF_SUCCESS if the data type is found in the report.
+ * @retval NRF_ERROR_NOT_FOUND if the data type could not be found.
+ */
+static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata)
+{
+    uint32_t index = 0;
+    uint8_t * p_data;
+
+    p_data = p_advdata->p_data;
+
+    while (index < p_advdata->data_len)
+    {
+        uint8_t field_length = p_data[index];
+        uint8_t field_type = p_data[index+1];
+
+        if (field_type == type)
+        {
+            p_typedata->p_data = &p_data[index+2];
+            p_typedata->data_len = field_length-1;
+            return NRF_SUCCESS;
+        }
+        index += field_length+1;
+    }
+    return NRF_ERROR_NOT_FOUND;
+}
+
+bool Scanner::isFiltered(data_t* p_adv_data) {
+
+	data_t type_data;
+
+	uint32_t err_code = adv_report_parse(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
+										 p_adv_data,
+										 &type_data);
+
+	if (err_code == NRF_SUCCESS) {
+//		_logFirst(INFO, "found manufac data:");
+//		BLEutil::printArray(type_data.p_data, type_data.data_len);
+
+		ble_advdata_manuf_data_t* manufac = (ble_advdata_manuf_data_t*)type_data.p_data;
+		if (manufac->company_identifier == DOBOTS_ID) {
+//			LOGi("is dobots device!");
+
+//			_logFirst(INFO, "parse data");
+//			BLEutil::printArray(type_data.p_data+2, type_data.data_len-2);
+//
+			DoBotsManufac dobotsManufac;
+			dobotsManufac.parse(type_data.p_data+2, type_data.data_len-2);
+
+			switch (dobotsManufac.getDeviceType()) {
+			case DEVICE_DOBEACON: {
+//				LOGi("found dobeacon");
+				return _scanFilter & SCAN_FILTER_DOBEACON_MSK;
+			}
+			case DEVICE_CROWNSTONE: {
+//				LOGi("found crownstone");
+				return _scanFilter & SCAN_FILTER_CROWNSTONE_MSK;
+			}
+			default:
+				return false;
+			}
+
+		}
+
+	}
+
+	return false;
+}
+
 void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 
 	if (isScanning()) {
-		_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+		// we do active scanning, to avoid handling each device twice, only
+		// check the scan responses (as long as we don't care about the
+		// advertisement data)
+		if (p_adv_report->scan_rsp) {
+            data_t adv_data;
+
+            // Initialize advertisement report for parsing.
+            adv_data.p_data = (uint8_t *)p_adv_report->data;
+            adv_data.data_len = p_adv_report->dlen;
+
+            // check scan response  to determine if device passes the filter
+			if (!isFiltered(&adv_data)) {
+				_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+			}
+		}
 	}
-//	else {
-//		LOGw("why are we getting advertisements if scan is not running?");
-//	}
 }
 
 void Scanner::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
@@ -168,6 +278,19 @@ void Scanner::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	case CONFIG_SCAN_BREAK_DURATION:
 		_scanBreakDuration = *(uint32_t*)p_data;
+		break;
+	case CONFIG_SCAN_FILTER:
+		_scanFilter = *(uint8_t*)p_data;
+		break;
+	case EVT_SCANNER_START:
+		if (length == 0) {
+			start();
+		} else {
+			delayedStart(*(uint16_t*)p_data);
+		}
+		break;
+	case EVT_SCANNER_STOP:
+		stop();
 		break;
 	}
 

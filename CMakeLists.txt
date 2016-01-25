@@ -147,6 +147,7 @@ IF(${CHAR_MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/transport_control.c")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/trickle.c")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/version_handler.c")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/notification_buffer.c")
 endif()
 
 IF(${CHAR_MESHING} STRGREATER "0")

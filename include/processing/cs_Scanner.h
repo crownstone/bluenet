@@ -12,6 +12,20 @@
 
 using namespace BLEpp;
 
+#define SCAN_FILTER_CROWNSTONE_BIT    0
+#define SCAN_FILTER_DOBEACON_BIT      1
+
+#define SCAN_FILTER_CROWNSTONE_MSK    (1 << SCAN_FILTER_CROWNSTONE_BIT)
+#define SCAN_FILTER_DOBEACON_MSK      (1 << SCAN_FILTER_DOBEACON_BIT)
+#define SCAN_FILTER_DOBOTS_MSK        SCAN_FILTER_CROWNSTONE_MSK | SCAN_FILTER_DOBEACON_MSK
+
+/**@brief Variable length data encapsulation in terms of length and pointer to data */
+typedef struct
+{
+    uint8_t     * p_data;                                         /**< Pointer to data. */
+    uint16_t      data_len;                                       /**< Length of data. */
+} data_t;
+
 class Scanner : EventListener {
 
 public:
@@ -30,7 +44,13 @@ public:
 
 	static void staticTick(Scanner* ptr);
 
+	// start immediately
 	void start();
+	// delay start by delay ms
+	void delayedStart(uint16_t delay);
+	// delay start by _scanBreakDuration ms
+	void delayedStart();
+	// stop scan immediately (no results will be sent)
 	void stop();
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
@@ -47,9 +67,14 @@ private:
 
 	bool _scanning;
 	bool _running;
+	// scan for ... ms
 	uint16_t _scanDuration;
+	// wait ... ms before sending the scan result
 	uint16_t _scanSendDelay;
+	// wait ... ms before starting the next scan
 	uint16_t _scanBreakDuration;
+	// filter out devices based on mask
+	uint8_t _scanFilter;
 
 	app_timer_id_t _appTimerId;
 
@@ -57,6 +82,8 @@ private:
 
 	uint8_t _scanBuffer[sizeof(peripheral_device_list_t)];
 	ScanResult* _scanResult;
+
+	bool isFiltered(data_t* p_adv_data);
 
 	void executeScan();
 	void sendResults();

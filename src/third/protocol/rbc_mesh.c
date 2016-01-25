@@ -48,6 +48,8 @@
 
 #include "ble_gatts.h"
 
+#include <drivers/cs_Serial.h>
+
 #include <string.h>
 
 /*****************************************************************************

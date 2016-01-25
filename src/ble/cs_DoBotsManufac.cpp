@@ -12,4 +12,10 @@ void DoBotsManufac::toArray(uint8_t* array) {
 	*array = _deviceType;
 }
 
+void DoBotsManufac::parse(uint8_t* array, uint16_t len) {
+
+	_deviceType = *array;
+
+}
+
 } /* namespace BLEpp */
