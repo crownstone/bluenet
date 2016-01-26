@@ -162,7 +162,7 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 			if (start) {
 				LOGi("start scanner");
 				RNG rng;
-				uint16_t delay = 100.0 / rng.getRandom16() * 10000;
+				uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
 				EventDispatcher::getInstance().dispatch(EVT_SCANNER_START, &delay, 2);
 			} else {
 				LOGi("stop scanner");
