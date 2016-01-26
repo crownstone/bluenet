@@ -127,27 +127,26 @@ struct ps_configuration_t : ps_storage_base_t {
 	int32_t maxEnvTemp;
 
 	// Scan duration in ms
-	// TODO
 	uint32_t scanDuration;
 
 	// Time in ms, before sending the scan results over the mesh
-	// TODO
 	uint32_t scanSendDelay;
 
 	// Time in ms to wait before scanning, after sending the scan results
-	// TODO
 	uint32_t scanBreakDuration;
 
 	// Time (in ms) to wait before booting after reset
-	// TODO
 	uint32_t bootDelay;
 
-	// The temperature (in ??) at which the PWM and relay are switched off
-	// TODO
+	// The temperature (in C) at which the PWM and relay are switched off
 	int32_t maxChipTemp;
 
 	// current scan filter
 	uint32_t scanFilter;
+
+	// Filtered out devices are still sent once every N scan intervals
+	// Set to 0 to not send them ever
+	uint32_t scanFilterSendFraction;
 
 };
 

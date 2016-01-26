@@ -53,6 +53,8 @@ public:
 	// stop scan immediately (no results will be sent)
 	void stop();
 
+//	uint32_t getInterval() { return (uint32_t)_scanDuration + _scanSendDelay + _scanBreakDuration; }
+
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 private:
@@ -75,6 +77,11 @@ private:
 	uint16_t _scanBreakDuration;
 	// filter out devices based on mask
 	uint8_t _scanFilter;
+	// Filtered out devices are still sent once every N scan intervals
+	// Set to 0 to not send them ever
+	uint16_t _filterSendFraction;
+
+	uint16_t _scanCount;
 
 	app_timer_id_t _appTimerId;
 

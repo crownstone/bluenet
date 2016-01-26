@@ -45,6 +45,7 @@ enum ConfigurationTypes {
 	CONFIG_BOOT_DELAY                       = 0x13,
 	CONFIG_MAX_CHIP_TEMP                    = 0x14,
 	CONFIG_SCAN_FILTER                      = 0x15,
+	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16,
 	CONFIG_TYPES
 };
 

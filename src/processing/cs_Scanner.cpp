@@ -20,6 +20,8 @@ Scanner::Scanner(Nrf51822BluetoothStack* stack) :
 	_scanSendDelay(SCAN_SEND_DELAY),
 	_scanBreakDuration(SCAN_BREAK_DURATION),
 	_scanFilter(SCAN_FILTER),
+	_filterSendFraction(SCAN_FILTER_SEND_FRACTION),
+	_scanCount(0),
 	_stack(stack)
 {
 
@@ -83,6 +85,7 @@ void Scanner::staticTick(Scanner* ptr) {
 
 void Scanner::start() {
 	_running = true;
+	_scanCount = 0;
 	_opCode = SCAN_START;
 	executeScan();
 }
@@ -90,12 +93,14 @@ void Scanner::start() {
 void Scanner::delayedStart(uint16_t delay) {
 	LOGi("delayed start by %d ms", delay);
 	_running = true;
+	_scanCount = 0;
 	_opCode = SCAN_START;
 	Timer::getInstance().start(_appTimerId, MS_TO_TICKS(delay), this);
 }
 
 void Scanner::delayedStart() {
 	_running = true;
+	_scanCount = 0;
 	_opCode = SCAN_START;
 	Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
 }
@@ -121,6 +126,9 @@ void Scanner::executeScan() {
 
 		// start scanning
 		manualStartScan();
+		if (_filterSendFraction > 0) {
+			_scanCount = (_scanCount+1) % _filterSendFraction;
+		}
 
 		// set timer to trigger in SCAN_DURATION sec, then stop again
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanDuration), this);
@@ -207,6 +215,11 @@ static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_ty
 
 bool Scanner::isFiltered(data_t* p_adv_data) {
 
+	// If we want to send filtered scans once every N times, and now is that time, then just return false
+	if (_filterSendFraction > 0 && _scanCount == 0) {
+		return false;
+	}
+
 	data_t type_data;
 
 	uint32_t err_code = adv_report_parse(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
@@ -281,6 +294,9 @@ void Scanner::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	case CONFIG_SCAN_FILTER:
 		_scanFilter = *(uint8_t*)p_data;
+		break;
+	case CONFIG_SCAN_FILTER_SEND_FRACTION:
+		_filterSendFraction = *(uint32_t*)p_data;
 		break;
 	case EVT_SCANNER_START:
 		if (length == 0) {
