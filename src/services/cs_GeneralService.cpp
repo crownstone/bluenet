@@ -256,6 +256,7 @@ void GeneralService::addSetConfigurationCharacteristic() {
 				MasterBuffer& mb = MasterBuffer::getInstance();
 				if (!mb.isLocked()) {
 					mb.lock();
+					// TODO: check lenght with actual payload length!
 					uint8_t type = _streamBuffer->type();
 					LOGi("Write configuration type: %i", (int)type);
 					uint8_t *payload = _streamBuffer->payload();

@@ -90,7 +90,6 @@ void IndoorLocalizationService::tick() {
 	if (!_initialized) {
 		_scanner = new Scanner(getStack());
 //#if SENDER==1
-
 		_scanner->delayedStart();
 //#endif
 

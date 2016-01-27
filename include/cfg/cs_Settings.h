@@ -33,19 +33,19 @@ enum ConfigurationTypes {
 	CONFIG_IBEACON_MINOR                    = 0x07,
 	CONFIG_IBEACON_UUID                     = 0x08,
 	CONFIG_IBEACON_RSSI                     = 0x09,
-	CONFIG_WIFI_SETTINGS                    = 0x0A,
-	CONFIG_TX_POWER                         = 0x0B,
-	CONFIG_ADV_INTERVAL                     = 0x0C,
-	CONFIG_PASSKEY							= 0x0D,
-	CONFIG_MIN_ENV_TEMP                     = 0x0E,
-	CONFIG_MAX_ENV_TEMP                     = 0x0F,
-	CONFIG_SCAN_DURATION                    = 0x10,
-	CONFIG_SCAN_SEND_DELAY                  = 0x11,
-	CONFIG_SCAN_BREAK_DURATION              = 0x12,
-	CONFIG_BOOT_DELAY                       = 0x13,
-	CONFIG_MAX_CHIP_TEMP                    = 0x14,
-	CONFIG_SCAN_FILTER                      = 0x15,
-	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16,
+	CONFIG_WIFI_SETTINGS                    = 0x0A, // 10
+	CONFIG_TX_POWER                         = 0x0B, // 11
+	CONFIG_ADV_INTERVAL                     = 0x0C, // 12
+	CONFIG_PASSKEY							= 0x0D, // 13
+	CONFIG_MIN_ENV_TEMP                     = 0x0E, // 14
+	CONFIG_MAX_ENV_TEMP                     = 0x0F, // 15
+	CONFIG_SCAN_DURATION                    = 0x10, // 16
+	CONFIG_SCAN_SEND_DELAY                  = 0x11, // 17
+	CONFIG_SCAN_BREAK_DURATION              = 0x12, // 18
+	CONFIG_BOOT_DELAY                       = 0x13, // 19
+	CONFIG_MAX_CHIP_TEMP                    = 0x14, // 20
+	CONFIG_SCAN_FILTER                      = 0x15, // 21
+	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16, // 22
 	CONFIG_TYPES
 };
 

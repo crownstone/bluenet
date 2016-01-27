@@ -64,12 +64,17 @@ private:
 	bool isValidMessage(void* p_data, uint16_t length) {
 		device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 
-		if (msg->header.messageType == COMMAND_MESSAGE) {
+		switch (msg->header.messageType) {
+		case COMMAND_MESSAGE: {
 			// command message has an array for parameters which doesn't have to be filled
 			// so we don't know in advance how long it needs to be exactly. can only give
 			// a lower bound.
-			return length > getMessageSize(msg->header.messageType);
-		} else {
+			return (length > getMessageSize(COMMAND_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - 2));
+		}
+		case CONFIG_MESSAGE: {
+			return (length > getMessageSize(CONFIG_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - 4));
+		}
+		default:{
 			uint16_t desiredLength = getMessageSize(msg->header.messageType);
 			bool valid = length == desiredLength;
 
@@ -77,6 +82,7 @@ private:
 				LOGd("invalid message, length: %d != %d", length, desiredLength);
 			}
 			return valid;
+		}
 		}
 	}
 
@@ -90,6 +96,8 @@ private:
 			return sizeof(device_mesh_header_t) + sizeof(beacon_mesh_message_t);
 		case COMMAND_MESSAGE:
 			return sizeof(device_mesh_header_t) + sizeof(uint16_t);
+		case CONFIG_MESSAGE:
+			return sizeof(device_mesh_header_t) + 2*sizeof(uint8_t) + sizeof(uint16_t);
 		default:
 			return 0;
 		}

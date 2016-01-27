@@ -154,6 +154,13 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 
 		break;
 	}
+	case CONFIG_MESSAGE: {
+		uint8_t type = msg->configMsg.type;
+		uint16_t length = msg->configMsg.length;
+		uint8_t* payload = msg->configMsg.payload;
+		Settings::getInstance().writeToStorage(type, payload, length);
+		break;
+	}
 	case COMMAND_MESSAGE: {
 
 		switch(msg->commandMsg.commandType) {
@@ -162,7 +169,7 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 			if (start) {
 				LOGi("start scanner");
 				RNG rng;
-				uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
+				uint16_t delay = rng.getRandom16() / 1; // Delay in ms (about 0-60 seconds)
 				EventDispatcher::getInstance().dispatch(EVT_SCANNER_START, &delay, 2);
 			} else {
 				LOGi("stop scanner");

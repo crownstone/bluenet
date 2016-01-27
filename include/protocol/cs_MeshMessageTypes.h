@@ -15,11 +15,13 @@
 #include <structs/cs_ScanResult.h>
 
 // device messages
+// TODO: should be an enum?
 #define EVENT_MESSAGE 0
 #define POWER_MESSAGE 1
 #define BEACON_MESSAGE 2
 
 #define COMMAND_MESSAGE 3
+#define CONFIG_MESSAGE 4
 
 enum CommandTypes {
 	SCAN_START = 1,
@@ -55,6 +57,13 @@ struct __attribute__((__packed__)) command_mesh_message_t {
 	uint8_t params[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - sizeof(uint16_t)];
 };
 
+struct __attribute__((__packed__)) config_mesh_message_t {
+	uint8_t type;
+	uint8_t reserved; // reserved for byte alignment
+	uint16_t length;
+	uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - 4];
+};
+
 struct __attribute__((__packed__)) device_mesh_header_t {
 	uint8_t targetAddress[BLE_GAP_ADDR_LEN];
 	uint16_t messageType;
@@ -68,6 +77,7 @@ struct __attribute__((__packed__)) device_mesh_message_t {
 		power_mesh_message_t powerMsg;
 		beacon_mesh_message_t beaconMsg;
 		command_mesh_message_t commandMsg;
+		config_mesh_message_t configMsg;
 	};
 };
 
