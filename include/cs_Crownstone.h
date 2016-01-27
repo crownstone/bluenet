@@ -50,6 +50,8 @@ private:
 	Fridge* _fridge;
 	TemperatureGuard* _temperatureGuard;
 
+	bool _advertisementPaused;
+
 	void welcome();
 
 	void setName();

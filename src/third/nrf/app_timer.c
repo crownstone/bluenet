@@ -10,15 +10,15 @@
  *
  */
 
-#include "app_common/app_timer.h"
+#include "app_timer.h"
 #include <stdlib.h>
 #include "nrf51.h"
 #include "nrf51_bitfields.h"
 #include "nrf_soc.h"
-#include "app_common/app_error.h"
+//#include "app_error.h"
 #include "nrf_delay.h"
-#include "app_common/app_util.h"
-#include "sd_common/app_util_platform.h"
+#include "app_util.h"
+#include "app_util_platform.h"
 
 #include "protocol/timeslot_handler.h"
 
@@ -925,7 +925,7 @@ void RTC1_IRQHandler(void)
  */
 void SWI0_IRQHandler(void)
 {
-	rbc_mesh_SWI0_IRQHandler();
+//	rbc_mesh_SWI0_IRQHandler();
     timer_list_handler();
 }
 

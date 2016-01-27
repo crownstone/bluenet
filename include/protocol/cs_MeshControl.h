@@ -39,6 +39,7 @@ private:
 	void operator=(MeshControl const &); // singleton, deny implementation
 
     ble_gap_addr_t _myAddr;
+    app_timer_id_t _resetTimerId;
 
     bool isMessageForUs(void* p_data) {
     	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
@@ -63,30 +64,47 @@ private:
 	bool isValidMessage(void* p_data, uint16_t length) {
 		device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 
-		uint16_t desiredLength = getMessageSize(msg->header.messageType);
-		bool valid = length == desiredLength;
-
-		if (!valid) {
-			LOGd("invalid message, length: %d != %d", length, desiredLength);
+		switch (msg->header.messageType) {
+		case COMMAND_MESSAGE: {
+			// command message has an array for parameters which doesn't have to be filled
+			// so we don't know in advance how long it needs to be exactly. can only give
+			// a lower bound.
+			return (length > getMessageSize(COMMAND_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - 2));
 		}
-		return valid;
+		case CONFIG_MESSAGE: {
+			return (length > getMessageSize(CONFIG_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - 4));
+		}
+		default:{
+			uint16_t desiredLength = getMessageSize(msg->header.messageType);
+			bool valid = length == desiredLength;
+
+			if (!valid) {
+				LOGd("invalid message, length: %d != %d", length, desiredLength);
+			}
+			return valid;
+		}
+		}
 	}
 
 	uint16_t getMessageSize(uint16_t messageType) {
 		switch(messageType) {
 		case EVENT_MESSAGE:
 			return sizeof(device_mesh_header_t) + sizeof(event_mesh_message_t);
-			break;
 		case POWER_MESSAGE:
 			return sizeof(device_mesh_header_t) + sizeof(power_mesh_message_t);
-			break;
 		case BEACON_MESSAGE:
 			return sizeof(device_mesh_header_t) + sizeof(beacon_mesh_message_t);
-			break;
+		case COMMAND_MESSAGE:
+			return sizeof(device_mesh_header_t) + sizeof(uint16_t);
+		case CONFIG_MESSAGE:
+			return sizeof(device_mesh_header_t) + 2*sizeof(uint8_t) + sizeof(uint16_t);
 		default:
-			break;
+			return 0;
 		}
 	}
+
+	static void reset();
+
 
 public:
 	// use static variant of singelton, no dynamic memory allocation
@@ -109,7 +127,7 @@ public:
 
 	void decodeDataMessage(device_mesh_message_t* msg);
 
-	void send(uint8_t handle, void* p_data, uint8_t length);
+	void send(uint8_t channel, void* p_data, uint8_t length);
 
 private:
 

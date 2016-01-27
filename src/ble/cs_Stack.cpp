@@ -19,11 +19,11 @@ extern "C" {
 }
 #endif
 
-#include "sd_common/ble_stack_handler_types.h"
+#include "ble_stack_handler_types.h"
 
 extern "C" {
-#include "app_common/pstorage.h"
-#include "app_common/app_util.h"
+#include "pstorage.h"
+#include "app_util.h"
 }
 
 #include <drivers/cs_Storage.h>
@@ -69,7 +69,7 @@ extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 #if CHAR_MESHING==1
 	//  pass the incoming BLE event to the mesh framework
-	BLE_CALL(rbc_mesh_ble_evt_handler, (p_ble_evt));
+	rbc_mesh_ble_evt_handler(p_ble_evt);
 #endif
 
 	// Only dispatch functions to the scheduler which might take long to execute, such as ble write functions
@@ -102,7 +102,7 @@ void Nrf51822BluetoothStack::init() {
 	LOGd(MSG_BLE_SOFTDEVICE_INIT);
 	// Initialize the SoftDevice handler module.
 	// this would call with different clock!
-	SOFTDEVICE_HANDLER_INIT(_clock_source, false);
+	SOFTDEVICE_HANDLER_INIT(_clock_source, NULL);
 
 	// enable the BLE stack
 	LOGd(MSG_BLE_SOFTDEVICE_ENABLE);
@@ -127,15 +127,15 @@ void Nrf51822BluetoothStack::init() {
 
 	// according to the migration guide the address needs to be set directly after the sd_ble_enable call
 	// due to "an issue present in the s110_nrf51822_7.0.0 release"
-#if(SOFTDEVICE_SERIES == 110)
-#if(NORDIC_SDK_VERSION >= 7)
-	LOGd(MSG_BLE_SOFTDEVICE_ENABLE_GAP);
-	BLE_CALL(sd_ble_gap_enable, () );
-	ble_gap_addr_t addr;
-	BLE_CALL(sd_ble_gap_address_get, (&addr) );
-	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr) );
-#endif
-#endif
+//#if(SOFTDEVICE_SERIES == 110)
+//#if(NORDIC_SDK_VERSION >= 7)
+//	LOGd(MSG_BLE_SOFTDEVICE_ENABLE_GAP);
+//	BLE_CALL(sd_ble_gap_enable, () );
+//	ble_gap_addr_t addr;
+//	BLE_CALL(sd_ble_gap_address_get, (&addr) );
+//	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr) );
+//#endif
+//#endif
 	// version is not saved or shown yet
 	ble_version_t version( { });
 	version.company_id = 12;
@@ -192,7 +192,7 @@ void Nrf51822BluetoothStack::setPasskey(uint8_t* passkey) {
 }
 
 void Nrf51822BluetoothStack::updatePasskey() {
-#if SOFTDEVICE_SERIES==130
+#if SOFTDEVICE_SERIES==130 || (SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR == 8)
 	ble_opt_t static_pin_option;
 	static_pin_option.gap_opt.passkey.p_passkey = _passkey;
 	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
@@ -324,8 +324,7 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	ble_advdata_t advdata;
 	memset(&advdata, 0, sizeof(advdata));
 
-	advdata.flags.size = sizeof(flags);
-	advdata.flags.p_data = &flags;
+	advdata.flags = flags;
 	advdata.p_manuf_specific_data = &manufac_apple;
 
 	/*
@@ -461,8 +460,7 @@ void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 
 	// set flags of advertisement data
 	uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-	advdata.flags.size = sizeof(flags);
-	advdata.flags.p_data = &flags;
+	advdata.flags = flags;
 
 	// add (first) service uuid. there is only space for 1 uuid, since we use
 	// 128-bit UUDs
@@ -473,7 +471,7 @@ void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 	if (uidCount > 1) {
 		advdata.uuids_more_available.uuid_cnt = 1;
 		advdata.uuids_more_available.p_uuids = adv_uuids;
-	} else {
+	} else if (uidCount == 1) {
 		advdata.uuids_complete.uuid_cnt = 1;
 		advdata.uuids_complete.p_uuids = adv_uuids;
 	}
@@ -591,7 +589,7 @@ void Nrf51822BluetoothStack::startScanning() {
 	LOGi("startScanning");
 	ble_gap_scan_params_t p_scan_params;
 	// No devices in whitelist, hence non selective performed.
-	p_scan_params.active = 0;            // Active scanning set.
+	p_scan_params.active = 1;            // Active scanning set.
 	p_scan_params.selective = 0;            // Selective scanning not set.
 	p_scan_params.interval = SCAN_INTERVAL;            // Scan interval.
 	p_scan_params.window = SCAN_WINDOW;  // Scan window.
@@ -708,7 +706,7 @@ bool Nrf51822BluetoothStack::isScanning() {
  */
 static uint32_t device_manager_evt_handler(dm_handle_t const    * p_handle,
                                            dm_event_t const     * p_event,
-                                           api_result_t           event_result)
+                                           ret_code_t           event_result)
 {
 	return Nrf51822BluetoothStack::getInstance().deviceManagerEvtHandler(p_handle, p_event, event_result);
 }
@@ -733,7 +731,7 @@ void Nrf51822BluetoothStack::changeToNormalPowerMode() {
 
 uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * p_handle,
                                            dm_event_t const     * p_event,
-                                           api_result_t           event_result)
+										   ret_code_t           event_result)
 {
 //	LOGd("deviceManagerEvtHandler: 0x%X", p_event->event_id);
 
@@ -788,7 +786,7 @@ void Nrf51822BluetoothStack::device_manager_init()
     dm_application_param_t register_param;
 
     // Don't clear bonded centrals
-    init_data.clear_persistent_data = 0;//
+    init_data.clear_persistent_data = 0;
 //    init_data.clear_persistent_data = 1;//
 
     err_code = dm_init(&init_data);
@@ -796,7 +794,7 @@ void Nrf51822BluetoothStack::device_manager_init()
 
     memset(&register_param.sec_param, 0, sizeof(ble_gap_sec_params_t));
 
-#if SOFTDEVICE_SERIES==110
+#if SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR!=8
     register_param.sec_param.timeout      = SEC_PARAM_TIMEOUT;
 #endif
     register_param.sec_param.bond         = SEC_PARAM_BOND;
@@ -895,7 +893,14 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_SYS_ATTR_MISSING:
+#if (SOFTDEVICE_SERIES == 130)
+#if (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
 		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0));
+#elif (SOFTDEVICE_MAJOR == 1) && (SOFTDEVICE_MINOR == 0)
+		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0,
+                BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS));
+#endif
+#endif
 		break;
 
 	case BLE_GAP_EVT_PASSKEY_DISPLAY: {
@@ -914,6 +919,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_EVT_TX_COMPLETE:
+//		LOGi("BLE_EVT_TX_COMPLETE");
 		onTxComplete(p_ble_evt);
 		break;
 
