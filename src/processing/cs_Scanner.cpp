@@ -299,13 +299,13 @@ void Scanner::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_filterSendFraction = *(uint32_t*)p_data;
 		break;
 	case EVT_SCANNER_START:
-//#if SENDER==1
+#if INTERVAL_SCANNER_ENABLED==1
 		if (length == 0) {
 			start();
 		} else {
 			delayedStart(*(uint16_t*)p_data);
 		}
-//#endif
+#endif
 		break;
 	case EVT_SCANNER_STOP:
 		stop();

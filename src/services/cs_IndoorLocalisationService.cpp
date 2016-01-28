@@ -37,6 +37,7 @@ IndoorLocalizationService::IndoorLocalizationService() :
 		_rssiCharac(NULL), _peripheralCharac(NULL),
 		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL), _trackIsNearby(false),
 		_initialized(false), _scanMode(false),
+		_scanner(NULL),
 //		_scanResult(NULL),
 		_trackedDeviceList(NULL)
 {
@@ -89,9 +90,9 @@ void IndoorLocalizationService::tick() {
 
 	if (!_initialized) {
 		_scanner = new Scanner(getStack());
-//#if SENDER==1
+#if INTERVAL_SCANNER_ENABLED==1
 		_scanner->delayedStart();
-//#endif
+#endif
 
 		if (_trackedDeviceList != NULL) {
 			readTrackedDevices();
