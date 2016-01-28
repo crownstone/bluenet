@@ -121,6 +121,12 @@ MAX_CHIP_TEMP=80
 # Time (ms) to wait with during booting
 BOOT_DELAY=3000
 
+# Enable or disable interval scanner, will scann every
+# SCAN_SEND_DELAY + SCAN_BRAK_DURATION ms, for SCAN_DURATION ms
+# waits for SCAN_SEND_DELAY ms after scan end before sending result
+# into mesh (if CHAR_MESHING enabled)
+INTERVAL_SCANNER_ENABLED=0
+
 # Durations for the scanner in ms
 SCAN_DURATION=2000
 SCAN_SEND_DELAY=1000
