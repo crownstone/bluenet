@@ -1,4 +1,5 @@
 /**
+ * Author: Dominik Egger
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Jan. 30, 2015
@@ -35,13 +36,8 @@ extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
 	MeshControl::getInstance().decodeDataMessage(msg);
 }
 
-uint32_t firstTimeStamp = 0;
-uint32_t firstCounter[3] = {0};
-uint32_t lastCounter[3] = {};
-uint32_t incident[3] = {};
-
 /**
- * Get incoming messages and perform certain actions.
+ * process incoming mesh messages
  */
 void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //	LOGi("Process incoming mesh message");
@@ -50,8 +46,13 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
 
 	switch(channel) {
-//	case 3:
 	case HUB_CHANNEL: {
+
+		// are we the hub? then process the message
+		// maybe answer on the data channel to the node that sent it that
+		// we received the message ??
+		// but basically we don't need to do anything, the
+		// hub can just read out the mesh characteristic for the hub channel
 
 //		LOGi("ch %d: received hub message:", channel);
 //		BLEutil::printArray((uint8_t*)p_data, length);
@@ -105,12 +106,6 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 
 		}
 
-		// are we the hub? then process the message
-		// maybe answer on the data channel to the node that sent it that
-		// we received the message ??
-		// but basically we don't need to do anything, the
-		// hub can just read out the mesh characteristic for the hub channel
-
 		break;
 	}
 	case DATA_CHANNEL: {
@@ -122,9 +117,12 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 			// [01.12.2015] I think this is not necessary anymore with the new ble mesh version
 			// since the receive is not anymore handled in an interrupt handler, but has to be done
 			// manually. so we are already doing it in a timer which is executed by the app scheduler.
-			// so now we handled it by the scheduler, then put it back in the scheduler queue and again
+			// so now we handle it by the scheduler, then put it back in the scheduler queue and again
 			// pick it up later
-			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+//			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+
+			device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
+			MeshControl::getInstance().decodeDataMessage(msg);
 		} else {
 			_log(INFO, "Message not for us: ");
 			BLEutil::printArray(((device_mesh_message_t*)p_data)->header.targetAddress, BLE_GAP_ADDR_LEN);
@@ -141,9 +139,6 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 
 	switch(msg->header.messageType) {
 	case EVENT_MESSAGE: {
-//		if (!isValidMessage(p_data, length)) {
-//			return;
-//		}
 
 //		LOGi("received event for:");
 //		BLEutil::printArray(msg->targetAddress, BLE_GAP_ADDR_LEN);
@@ -168,6 +163,9 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 			bool start = (bool) msg->commandMsg.params[0];
 			if (start) {
 				LOGi("start scanner");
+				// need to use a random delay for starting the scanner, otherwise
+				// the devices in the mesh  will start scanning at the same time
+				// resulting in conflicts
 				RNG rng;
 				uint16_t delay = rng.getRandom16() / 1; // Delay in ms (about 0-60 seconds)
 				EventDispatcher::getInstance().dispatch(EVT_SCANNER_START, &delay, 2);
@@ -182,10 +180,6 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 		break;
 	}
 	case POWER_MESSAGE: {
-//		if (!isValidMessage(p_data, length)) {
-//			return;
-//		}
-
 		uint8_t pwmValue = msg->powerMsg.pwmValue;
 
 		uint32_t oldPwmValue = PWM::getInstance().getValue(0);
@@ -205,9 +199,6 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 		break;
 	}
 	case BEACON_MESSAGE: {
-//		if (!isValidMessage(p_data, length)) {
-//			return;
-//		}
 
 #if BEACON==1
 		LOGi("Received Beacon Message");
@@ -262,6 +253,8 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 
 }
 
+// handle event triggered by the EventDispatcher, in case we want to send events
+// into the mesh, e.g. for power on/off
 void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch(evt) {
 //	case EVT_POWER_ON:
@@ -286,6 +279,7 @@ void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 }
 
+// used by the mesh characteristic to send a message into the mesh
 void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
 	switch(channel) {
@@ -306,7 +300,7 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 			LOGd("send it into mesh ...");
 			CMesh::getInstance().send(channel, p_data, length);
 		} else {
-			// message is for us, handle directly
+			// message is for us, handle directly, no reason to send it into the mesh!
 			LOGd("message is for us, handle directly");
 			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 		}
@@ -334,10 +328,13 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
 }
 
+// sends the result of a scan, i.e. a list of scanned devices with rssi values
+// into the mesh on the hub channel so that it can be synced to the cloud
 void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
 	LOGi("sendScanMessage, size: %d", size);
 
+	// if no devices were scanned there is no reason to send a message!
 	if (size > 0) {
 		hub_mesh_message_t message;
 		memset(&message, 0, sizeof(message));
@@ -350,10 +347,6 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 		BLEutil::printArray(&message, sizeof(message));
 
 		CMesh::getInstance().send(HUB_CHANNEL, &message, sizeof(message));
-
-//		RNG rng;
-//		uint8_t handle = (rng.getRandom8() % 2) + 3;
-//		CMesh::getInstance().send(handle, &message, sizeof(message));
 	}
 
 }

@@ -15,6 +15,7 @@
 //#include "cs_nRF51822.h"
 //#include "drivers/cs_ADC.h"
 #include "drivers/cs_RTC.h"
+#include "drivers/cs_RNG.h"
 #include "drivers/cs_PWM.h"
 //
 //#include "util/cs_Utils.h"
@@ -91,7 +92,9 @@ void IndoorLocalizationService::tick() {
 	if (!_initialized) {
 		_scanner = new Scanner(getStack());
 #if INTERVAL_SCANNER_ENABLED==1
-		_scanner->delayedStart();
+		RNG rng;
+		uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
+		_scanner->delayedStart(delay);
 #endif
 
 		if (_trackedDeviceList != NULL) {

@@ -1,4 +1,5 @@
 /**
+ * Author: Dominik Egger
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Jan. 30, 2015
@@ -22,14 +23,6 @@
 #include <protocol/cs_MeshMessageTypes.h>
 
 #include <structs/cs_ScanResult.h>
-
-//struct __attribute__((__packed__)) EventMeshPackage {
-//	EventType evt;
-//	uint8_t* p_data;
-//};
-
-#define HUB_CHANNEL          1
-#define DATA_CHANNEL         2
 
 class MeshControl : public EventListener {
 private:
@@ -68,11 +61,12 @@ private:
 		case COMMAND_MESSAGE: {
 			// command message has an array for parameters which doesn't have to be filled
 			// so we don't know in advance how long it needs to be exactly. can only give
-			// a lower bound.
-			return (length > getMessageSize(COMMAND_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - 2));
+			// a lower  and upper bound.
+			return (length > getMessageSize(COMMAND_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - COMMAND_MM_HEADER_SIZE));
 		}
 		case CONFIG_MESSAGE: {
-			return (length > getMessageSize(CONFIG_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - 4));
+			// same as command message, does not have a fixed message size
+			return (length > getMessageSize(CONFIG_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - CONFIG_MM_HEADER_SIZE));
 		}
 		default:{
 			uint16_t desiredLength = getMessageSize(msg->header.messageType);
@@ -95,9 +89,9 @@ private:
 		case BEACON_MESSAGE:
 			return sizeof(device_mesh_header_t) + sizeof(beacon_mesh_message_t);
 		case COMMAND_MESSAGE:
-			return sizeof(device_mesh_header_t) + sizeof(uint16_t);
+			return sizeof(device_mesh_header_t) + COMMAND_MM_HEADER_SIZE;
 		case CONFIG_MESSAGE:
-			return sizeof(device_mesh_header_t) + 2*sizeof(uint8_t) + sizeof(uint16_t);
+			return sizeof(device_mesh_header_t) + CONFIG_MM_HEADER_SIZE;
 		default:
 			return 0;
 		}
@@ -105,6 +99,10 @@ private:
 
 	static void reset();
 
+	uint32_t firstTimeStamp = 0;
+	uint32_t firstCounter[3] = {0};
+	uint32_t lastCounter[3] = {};
+	uint32_t incident[3] = {};
 
 public:
 	// use static variant of singelton, no dynamic memory allocation

@@ -12,7 +12,7 @@
 #include <common/cs_Types.h>
 #include "structs/cs_BufferAccessor.h"
 #include <util/cs_BleError.h>
-//#include "drivers/cs_Serial.h"
+#include "drivers/cs_Serial.h"
 //
 //#include "common/cs_MasterBuffer.h"
 
@@ -30,7 +30,6 @@
  * If the maximum number is exceeded, the devices with the lowest occurrence
  * will be replaced
  */
-//#define SR_MAX_NR_DEVICES 1
 #define SR_MAX_NR_DEVICES 10
 
 /* Structure used to store peripheral devices detected during a scan.
