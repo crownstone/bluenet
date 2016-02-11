@@ -232,7 +232,12 @@ def parseHubData(filename):
 	startTimestamp = -1
 	endTimestamp = -1
 	for line in logfile:
-		jscan = json.loads(line)
+		try:
+			jscan = json.loads(line)
+		except:
+			print "json error at line:"
+			print line
+			exit()
 
 		timestamp = time.mktime(datetime.datetime.strptime(jscan["timestamp"], "%Y-%m-%dT%H:%M:%S").timetuple())
 		if (startTimestamp < 0):
@@ -327,6 +332,30 @@ def plotScansAsDots(data):
 		if (addr in beaconNames):
 			scannerName = beaconNames[addr]
 		plt.title("Devices scanned by " + scannerName)
+
+		duration = endTimestamp-startTimestamp
+		xticks = range(0, int(duration+1), int(duration/100))
+		formattedTimestamps = []
+
+		for i in xticks:
+			formattedTimestamps.append(datetime.datetime.fromtimestamp(i+startTimestamp).strftime("%m-%d %H:%M"))
+		plt.xticks(xticks, formattedTimestamps, rotation="vertical")
+
+		plt.grid(axis="x")
+#		# See http://stackoverflow.com/questions/12322738/how-do-i-change-the-axis-tick-font-in-a-matplotlib-plot-when-rendering-using-lat#12323891
+#		fontDict = {"family":"sans-serif",
+#					"sans-serif":["Helvetica"],
+#					"weight" : "normal",
+#					"size" : 12
+#					}
+#		fontDict = {
+#			"family":"monospace",
+#			"size" : 12
+#		}
+#		gca = plt.gca()
+#		gca.set_xticklabels(formattedTimestamps, fontDict)
+#		gca.set_yticklabels(names, fontDict)
+
 		plt.axis([0, endTimestamp-startTimestamp, -0.5, j-0.5])
 		i+=1
 
@@ -469,7 +498,7 @@ if __name__ == '__main__':
 
 
 #	logData = filterJawBones(logData)
-	logData = filterMostScannedDevices(logData, 100)
+	logData = filterMostScannedDevices(logData, 200)
 
 	plotScansAsDots(logData)
 #	plotScansAsDots2(logData)
