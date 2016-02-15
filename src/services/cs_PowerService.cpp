@@ -30,6 +30,7 @@ using namespace BLEpp;
 
 PowerService::PowerService() :
 		_pwmCharacteristic(NULL),
+		_relayCharacteristic(NULL),
 		_sampleCurrentCharacteristic(NULL),
 		_powerConsumptionCharacteristic(NULL),
 		_currentCurveCharacteristic(NULL),
@@ -62,6 +63,13 @@ void PowerService::init() {
 	addPWMCharacteristic();
 #else
 	LOGi("skip PWM Characteristic");
+#endif
+
+#if CHAR_RELAY==1
+	LOGi("add Relay Characteristic");
+	addRelayCharacteristic();
+#else
+	LOGi("skip Relay Characteristic");
 #endif
 
 #if CHAR_SAMPLE_CURRENT==1
@@ -147,8 +155,35 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setDefaultValue(255);
 	_pwmCharacteristic->setWritable(true);
 	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
-//		LOGi("set pwm to %i", value);
-		PWM::getInstance().setValue(0, value);
+			LOGi("set pwm to %i", value);
+			PWM::getInstance().setValue(0, value);
+	});
+}
+
+void PowerService::addRelayCharacteristic() {
+	nrf_gpio_cfg_output(PIN_GPIO_RELAY_OFF);
+	nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
+	nrf_gpio_cfg_output(PIN_GPIO_RELAY_ON);
+	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
+
+	_relayCharacteristic = new Characteristic<uint8_t>();
+	addCharacteristic(_relayCharacteristic);
+	_relayCharacteristic->setUUID(UUID(getUUID(), RELAY_UUID));
+	_relayCharacteristic->setName(BLE_CHAR_RELAY);
+	_relayCharacteristic->setDefaultValue(255);
+	_relayCharacteristic->setWritable(true);
+	_relayCharacteristic->onWrite([&](const uint8_t& value) -> void {
+		if (value == 0) {
+			LOGi("trigger relay off pin for %d ms", RELAY_HIGH_DURATION);
+			nrf_gpio_pin_set(PIN_GPIO_RELAY_OFF);
+			nrf_delay_ms(RELAY_HIGH_DURATION);
+			nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
+		} else {
+			LOGi("trigger relay on pin for %d ms", RELAY_HIGH_DURATION);
+			nrf_gpio_pin_set(PIN_GPIO_RELAY_ON);
+			nrf_delay_ms(RELAY_HIGH_DURATION);
+			nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
+		}
 	});
 }
 
