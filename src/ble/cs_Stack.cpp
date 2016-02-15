@@ -119,6 +119,9 @@ void Nrf51822BluetoothStack::init() {
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1
 	ble_enable_params_t ble_enable_params;
 	memset(&ble_enable_params, 0, sizeof(ble_enable_params));
+#ifdef ATTR_TABLE_SIZE
+	ble_enable_params.gatts_enable_params.attr_tab_size = ATTR_TABLE_SIZE;
+#endif
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
 	BLE_CALL(sd_ble_enable, (&ble_enable_params) );
 #endif
