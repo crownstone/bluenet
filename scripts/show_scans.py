@@ -9,11 +9,61 @@ import re
 import os
 import cPickle as pickle
 import json
+import operator
 
 """
 Parses a (timestamped!) minicom capture and plots graphs
 At the bottom, select what to plot
 """
+
+jawBones = {
+	"C5 4F A0 00 20 A6":"1",
+	"D6 49 EB 45 48 9B":"2",
+	"D3 41 EE 0F 5F DC":"3",
+	"EE E4 04 45 35 1C":"4",
+	"D9 30 DD 8B 08 07":"5",
+	"EF 5B 87 42 7A A8":"6",
+	"EC 9B F8 75 5E BA":"7",
+	"F6 1F 00 EE 76 F2":"8",
+	"D8 81 E2 53 8A 7A":"9",
+	"C7 3D B1 AB 43 8D":"10",
+	"C9 B1 1F DD 9F FF":"11",
+	"CB 18 6F 55 04 4C":"12",
+	"DE 3F 87 54 32 EF":"13",
+	"E7 6E 56 4D B0 12":"14",
+	"F2 E4 3A F3 EB 63":"15",
+	"F4 A9 86 17 16 81":"16",
+	"EE F9 B5 A5 26 6F":"17",
+	"D2 40 6A F8 ED 1B":"18",
+	"ED EC 18 BF BB 22":"19",
+	"D6 F4 3D F9 41 7E":"20",
+	"F8 D8 C1 27 DE A0":"21",
+	"EC 5C CC F6 CF B6":"22",
+	"DD 87 41 12 D2 61":"23",
+	"E9 7A E6 D7 60 12":"24",
+	"FE AD 80 17 81 32":"25",
+	"C3 A2 18 F9 FC D9":"26",
+	"F1 F2 5A C5 B3 86":"27",
+	"D1 29 15 DF 17 CD":"28",
+	"F6 5F FC B5 AC 4A":"29",
+	"D4 56 1C 38 30 D5":"30",
+	"DF 17 E6 41 65 83":"31",
+	"E5 A9 B2 CA 7B 7F":"32",
+	"D8 07 BC E7 75 03":"33",
+	"DA BD B2 3A CF A8":"34",
+	"D2 E3 0B F6 F1 21":"35",
+	"E5 8A 16 7D 83 B3":"36",
+	"ED 8B F9 3B 0E B6":"37",
+	"D8 9D 6E 77 2D A8":"38",
+	"CE F1 97 31 DB 51":"39",
+	"EF 59 29 1B D3 91":"40",
+	"CC C5 87 95 5B 18":"41",
+	"CB 44 67 84 81 F2":"42",
+	"D7 86 64 1E EE 9D":"43",
+	"CD A0 F7 6A D2 82":"44",
+	"D6 85 E3 9E C5 1A":"45",
+	"D6 20 51 29 D8 69":"46",
+}
 
 beaconNames = {
 	"E3 BF 7F 5F 59 0C":"kontakt 1",
@@ -160,6 +210,97 @@ def parse(filename):
 	return data
 
 
+
+
+def parseHubData(filename):
+	"""
+	Parses a log file and returns the parsed data
+	:param filename:
+	:return:
+	data["scans"]
+		scans["node address"] = [entry, entry, ...]
+			entry["time"] = timestamp
+			entry["address"] = address
+			entry["rssi"] = rssi
+			entry["occurances"] = occurances
+	data["startTimestamp"] = first seen timestamp
+	data["endTimestamp"] = last seen timestamp
+	"""
+	logfile = open(filename, "r")
+	scans = {}
+	data = {"scans" : scans}
+	startTimestamp = -1
+	endTimestamp = -1
+	for line in logfile:
+		try:
+			jscan = json.loads(line)
+		except:
+			print "json error at line:"
+			print line
+			exit()
+
+		timestamp = time.mktime(datetime.datetime.strptime(jscan["timestamp"], "%Y-%m-%dT%H:%M:%S").timetuple())
+		if (startTimestamp < 0):
+			startTimestamp = timestamp
+		endTimestamp = timestamp
+		scannedDevices = jscan["scannedDevices"]
+
+		for dev in scannedDevices:
+			nodeAddress = "00:00:00:00:00:00"
+			scannedAddress = dev["address"]
+			rssi = dev["rssi"]
+			entry = {"time":timestamp, "address":scannedAddress, "rssi":rssi}
+#			if (entry["address"] not in jawBones):
+#				continue
+			if (nodeAddress not in data["scans"]):
+				data["scans"][nodeAddress] = [entry]
+			else:
+				data["scans"][nodeAddress].append(entry)
+	logfile.close()
+	data["startTimestamp"] = startTimestamp
+	data["endTimestamp"] = endTimestamp
+	return data
+
+
+def filterJawBones(data):
+	# newData = data
+	# newData["scans"] = {}
+	scans = data["scans"]
+	for addr in scans:
+		for i in range(len(scans[addr])-1, -1,-1):
+			scan = scans[addr][i]
+			dev = scan["address"]
+			if (dev not in jawBones):
+				scans[addr].pop(i)
+	return data
+
+
+def filterMostScannedDevices(data, minNumTimesScanned):
+	numTimesScanned = {}
+	scans = data["scans"]
+	for addr in scans:
+		for scan in scans[addr]:
+			dev = scan["address"]
+			if (dev not in numTimesScanned):
+				numTimesScanned[dev] = 1
+			else:
+				numTimesScanned[dev] += 1
+
+#	numTimesScannedList = []
+#	for dev in numTimesScanned:
+#		numTimesScannedList.append({"address": dev, "num": numTimesScanned[dev]})
+#	sortedList = sorted(numTimesScannedList, key=lambda dev: dev["num"], reverse=True)
+#	sortedList = sorted(numTimesScannedList, key=operator.attrgetter("num"), reverse=True)
+
+	for addr in scans:
+		for i in range(len(scans[addr])-1, -1,-1):
+			scan = scans[addr][i]
+			dev = scan["address"]
+			if (numTimesScanned[dev] < minNumTimesScanned):
+				scans[addr].pop(i)
+	return data
+
+
 def plotScansAsDots(data):
 	scans = data["scans"]
 	startTimestamp = data["startTimestamp"]
@@ -191,6 +332,30 @@ def plotScansAsDots(data):
 		if (addr in beaconNames):
 			scannerName = beaconNames[addr]
 		plt.title("Devices scanned by " + scannerName)
+
+		duration = endTimestamp-startTimestamp
+		xticks = range(0, int(duration+1), int(duration/100))
+		formattedTimestamps = []
+
+		for i in xticks:
+			formattedTimestamps.append(datetime.datetime.fromtimestamp(i+startTimestamp).strftime("%m-%d %H:%M"))
+		plt.xticks(xticks, formattedTimestamps, rotation="vertical")
+
+		plt.grid(axis="x")
+#		# See http://stackoverflow.com/questions/12322738/how-do-i-change-the-axis-tick-font-in-a-matplotlib-plot-when-rendering-using-lat#12323891
+#		fontDict = {"family":"sans-serif",
+#					"sans-serif":["Helvetica"],
+#					"weight" : "normal",
+#					"size" : 12
+#					}
+#		fontDict = {
+#			"family":"monospace",
+#			"size" : 12
+#		}
+#		gca = plt.gca()
+#		gca.set_xticklabels(formattedTimestamps, fontDict)
+#		gca.set_yticklabels(names, fontDict)
+
 		plt.axis([0, endTimestamp-startTimestamp, -0.5, j-0.5])
 		i+=1
 
@@ -208,7 +373,8 @@ def plotScansAsDots2(data):
 		timestamps = []
 		for scan in scans[nodeAddr]:
 			timestamps.append(scan["time"] - startTimestamp)
-		plt.plot(timestamps, [i]*len(timestamps), ",")
+		plt.plot(timestamps, [i]*len(timestamps), ".")
+#		plt.plot(timestamps, [i]*len(timestamps), ",")
 
 		nodeName = nodeAddr
 		if (nodeAddr in beaconNames):
@@ -323,16 +489,20 @@ if __name__ == '__main__':
 		with open("filename", "r") as fp:
 			logData = json.load(fp)
 	else:
-		logData = parse(fileName)
+#		logData = parse(fileName)
+		logData = parseHubData(fileName)
 		with open(fileBaseName + ".p", "wb") as fp:
 			pickle.dump(logData, fp, pickle.HIGHEST_PROTOCOL)
 #		with open(fileBaseName + ".json", "w") as fp:
 #			json.dump(logData, fp)
 
 
-#	plotScansAsDots(logData)
-	plotScansAsDots2(logData)
-	plotBandwidth(logData)
+#	logData = filterJawBones(logData)
+	logData = filterMostScannedDevices(logData, 200)
+
+	plotScansAsDots(logData)
+#	plotScansAsDots2(logData)
+#	plotBandwidth(logData)
 #	plotBandwidth2(logData)
 	plt.show()
 
