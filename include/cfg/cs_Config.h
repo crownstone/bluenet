@@ -24,7 +24,7 @@
  */
 #define APP_TIMER_PRESCALER                      0
 #define APP_TIMER_MAX_TIMERS                     10
-#define APP_TIMER_OP_QUEUE_SIZE                  4
+#define APP_TIMER_OP_QUEUE_SIZE                  10
 
 /*
  */
@@ -55,3 +55,5 @@
 
 // tx power used for low power mode during bonding
 #define LOW_TX_POWER                             -40
+
+#define CLOCK_SOURCE                             NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_8000MS_CALIBRATION

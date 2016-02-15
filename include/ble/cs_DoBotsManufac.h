@@ -18,6 +18,10 @@ private:
 	uint8_t _deviceType;
 
 public:
+	DoBotsManufac() {
+		_deviceType = DEVICE_UNDEF;
+	};
+
 	DoBotsManufac(uint8_t deviceType) {
 		_deviceType = deviceType;
 	};
@@ -28,6 +32,10 @@ public:
 		return 1;
 	}
 
+	uint8_t getDeviceType() {
+		return _deviceType;
+	}
+
 	/* Serializes the object to a byte array
 	 *
 	 * @array pointer to the preallocated byte array where the
@@ -36,6 +44,8 @@ public:
 	 *
 	 */
 	void toArray(uint8_t* array);
+
+	void parse(uint8_t* array, uint16_t len);
 };
 
 } /* namespace BLEpp */

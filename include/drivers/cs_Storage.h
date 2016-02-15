@@ -18,7 +18,7 @@
 extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
 	#include "pstorage_platform.h"
-	#include "app_common/pstorage.h"
+	#include "pstorage.h"
 	#include "ble_types.h"
 }
 
@@ -125,6 +125,29 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	// Maximum temperature of environment
 	int32_t maxEnvTemp;
+
+	// Scan duration in ms
+	uint32_t scanDuration;
+
+	// Time in ms, before sending the scan results over the mesh
+	uint32_t scanSendDelay;
+
+	// Time in ms to wait before scanning, after sending the scan results
+	uint32_t scanBreakDuration;
+
+	// Time (in ms) to wait before booting after reset
+	uint32_t bootDelay;
+
+	// The temperature (in C) at which the PWM and relay are switched off
+	int32_t maxChipTemp;
+
+	// current scan filter
+	uint32_t scanFilter;
+
+	// Filtered out devices are still sent once every N scan intervals
+	// Set to 0 to not send them ever
+	uint32_t scanFilterSendFraction;
+
 };
 
 // INDOOR LOCALISATION SERVICE ///////////////////

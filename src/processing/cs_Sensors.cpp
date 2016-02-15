@@ -385,7 +385,7 @@ void Sensors::initPushButton() {
 	initGPIOTE();
 
 	nrf_gpio_cfg_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP);
-	nrf_gpiote_event_config(0, PIN_GPIO_BUTTON, NRF_GPIOTE_POLARITY_TOGGLE);
+	nrf_gpiote_event_configure(0, PIN_GPIO_BUTTON, NRF_GPIOTE_POLARITY_TOGGLE);
 	NRF_GPIOTE->INTENSET |= GPIOTE_INTENSET_IN0_Enabled << GPIOTE_INTENSET_IN0_Pos;
 
 //	nrf_gpio_cfg_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP);

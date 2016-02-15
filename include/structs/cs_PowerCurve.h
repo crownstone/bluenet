@@ -16,7 +16,9 @@ using namespace BLEpp;
 #define POWER_CURVE_HEADER_SIZE                (sizeof(uint16_t) + 4*sizeof(T) + 2*sizeof(uint32_t))
 
 // Make sure that max_samples is divisible by 2
-#define POWER_CURVE_MAX_SAMPLES                ((MASTER_BUFFER_SIZE - POWER_CURVE_HEADER_SIZE + 3) / 4 * 2)
+//#define POWER_CURVE_MAX_SAMPLES                ((MASTER_BUFFER_SIZE - POWER_CURVE_HEADER_SIZE + 3) / 4 * 2)
+#define POWER_CURVE_MAX_BUF_SIZE               (MASTER_BUFFER_SIZE > BLE_GATTS_VAR_ATTR_LEN_MAX ? BLE_GATTS_FIX_ATTR_LEN_MAX : MASTER_BUFFER_SIZE)
+#define POWER_CURVE_MAX_SAMPLES                ((POWER_CURVE_MAX_BUF_SIZE - POWER_CURVE_HEADER_SIZE + 3) / 4 * 2)
 
 #define PC_SUCCESS                               0
 #define PC_BUFFER_NOT_INITIALIZED                1
@@ -57,7 +59,8 @@ class PowerCurve : public BufferAccessor {
 private:
 	power_curve_t<T>* _buffer;
 //	const size_t _item_size = sizeof(T);
-	const size_t _max_buf_size = MASTER_BUFFER_SIZE;
+//	const size_t _max_buf_size = MASTER_BUFFER_SIZE;
+	const size_t _max_buf_size = POWER_CURVE_MAX_BUF_SIZE;
 
 public:
 	/* Default constructor

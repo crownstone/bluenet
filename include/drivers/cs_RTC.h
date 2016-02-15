@@ -68,11 +68,11 @@ public:
 	inline static uint32_t ticksToMs(uint32_t ticks) {
 #if NRF51_USE_SOFTDEVICE==1
 		// Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
-		return ticks * (NRF_RTC0->PRESCALER + 1) / RTC_CLOCK_FREQ * 1000;
-//		return (uint32_t)ROUNDED_DIV(ticks, (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
+//		return ticks * (NRF_RTC0->PRESCALER + 1) / RTC_CLOCK_FREQ * 1000;
+		return (uint32_t)ROUNDED_DIV(ticks, (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
 #else
-		return ticks * (NRF_RTC1->PRESCALER + 1) / APP_TIMER_CLOCK_FREQ * 1000;
-//		return (uint32_t)ROUNDED_DIV(ticks, (uint64_t)APP_TIMER_CLOCK_FREQ / (NRF_RTC1->PRESCALER + 1) / 1000);
+//		return ticks * (NRF_RTC1->PRESCALER + 1) / APP_TIMER_CLOCK_FREQ * 1000;
+		return (uint32_t)ROUNDED_DIV(ticks, (uint64_t)APP_TIMER_CLOCK_FREQ / (NRF_RTC1->PRESCALER + 1) / 1000);
 #endif
 	}
 

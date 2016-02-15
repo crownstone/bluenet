@@ -49,15 +49,22 @@ case "$target" in
 	# ENTER NEW TARGETS HERE in the form of:
 	# <target name>)
 	#   serial_num=<serial number>
+	#	gdb_port=<free port>
 	#   ;;
 	#
 	# for example:
 	#
 	# sirius)
 	# 	serial_num=480110849
+	#	gdb_port=2334
 	#	;;
 	# capella)
 	#	serial_num=480207700
+	#	gdb_port=2337
+	#	;;
+	# *)
+	#	serial_num=518004699
+	#	gdb_port=2331
 	#	;;
 esac
 target=crownstone

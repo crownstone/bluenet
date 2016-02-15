@@ -22,12 +22,8 @@
 #define MESHING_PARALLEL 1
 
 //#define MICRO_VIEW 1
-
-#if __clang__
-#define STRINGIFY(str) #str
-#else
-#define STRINGIFY(str) str
-#endif
+//#define CHANGE_NAME_ON_RESET
+//#define CHANGE_MINOR_ON_RESET
 
 /**********************************************************************************************************************
  * General includes
@@ -45,7 +41,6 @@
 #if CHAR_MESHING==1
 #include <protocol/cs_Mesh.h>
 #include <drivers/cs_RNG.h>
-#include <third/protocol/led_config.h>
 #endif
 
 /**********************************************************************************************************************
@@ -66,75 +61,6 @@
 using namespace BLEpp;
 
 
-//#if CHAR_MESHING==1
-//
-///**********************************************************************************************************************
-// * Interlude for meshing. Will need to be integrated with the code!
-// *********************************************************************************************************************/
-//
-//extern "C" {
-//
-//#if HARDWARE_BOARD==PCA10001
-///* configure button interrupt for evkits */
-//static void gpiote_init(void)
-//{
-//  NRF_GPIO->PIN_CNF[BUTTON_0] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)
-//                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
-//        //         | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)
-//                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
-//                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
-//
-//  NRF_GPIO->PIN_CNF[BUTTON_1] = (GPIO_PIN_CNF_SENSE_Low << GPIO_PIN_CNF_SENSE_Pos)
-//                | (GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
-//         //        | (BUTTON_PULL << GPIO_PIN_CNF_PULL_Pos)
-//                | (GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
-//                | (GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos);
-//
-//
-//  /* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it
-//  in APP_LOW in order to use the mesh API */
-//  NVIC_SetPriority(GPIOTE_IRQn, 3);
-//
-//  NVIC_EnableIRQ(GPIOTE_IRQn);
-//  NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_PORT_Msk;
-//}
-//
-//RNG rng;
-//
-//void GPIOTE_IRQHandler(void)
-//{
-//#ifdef STOP_ADV
-//	Nrf51822BluetoothStack &stack = Nrf51822BluetoothStack::getInstance();
-//
-//	if (stack.isAdvertising()) {
-//		LOGi("Stop advertising");
-//		stack.stopAdvertising();
-//	}
-//#endif
-// 	CMesh & mesh = CMesh::getInstance();
-//	NRF_GPIOTE->EVENTS_PORT = 0;
-//	for (uint8_t i = 0; i < 2; ++i)
-//	{
-//		if (NRF_GPIO->IN & (1 << (BUTTON_0 + i)))
-//		{
-//			LOGi("Button %i pressed", i);
-//			uint32_t value = mesh.receive(i+1);
-////			value = 1 - value;
-//			value = rng.getRandom8();
-////			led_config(i + 1, value);
-//			LOGi("1");
-////			mesh.send(i + 1, value);
-//		}
-//	}
-//}
-//
-//#endif
-//
-//} // extern "C"
-//
-//#endif // CHAR_MESHING == 1
-
-
 /**
  * If UART is enabled this will be the message printed out over a serial connection. Connectors are expensive, so UART
  * is not available in the final product.
@@ -144,10 +70,8 @@ void Crownstone::welcome() {
 	_log(INFO, "\r\n");
 	BLEutil::print_heap("Heap init");
 	BLEutil::print_stack("Stack init");
-	LOGd("Bootloader starts at 0x00034000.");
-        // To have DFU, keep application limited to (BOOTLOADER_START - APPLICATION_START_CODE) / 2
-	// For (0x35000 - 0x16000)/2 this is 0xF800, so from 0x16000 to 0x25800
-	// Very probably FLASH (32MB) is not a problem though, but RAM will be (16kB)!
+	// To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)
+	// For (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes)
 	LOGi("Welcome at the nRF51822 code for meshing.");
 	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
 	LOGi("Compilation time: %s", __TIME__);
@@ -157,6 +81,16 @@ void Crownstone::welcome() {
  * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
  */
 void Crownstone::setName() {
+#ifdef CHANGE_NAME_ON_RESET
+	uint16_t minor;
+	ps_configuration_t cfg = Settings::getInstance().getConfig();
+	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
+	char devicename[32];
+	sprintf(devicename, "%s_%d", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(minor));
+	std::string device_name = std::string(devicename);
+	// End test for wouter
+#else
+
 	// assemble default name from BLUETOOTH_NAME and COMPILATION_TIME
 	char devicename[32];
 	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
@@ -164,6 +98,7 @@ void Crownstone::setName() {
 	std::string device_name;
 	// use default name in case no stored name is found
 	Storage::getString(Settings::getInstance().getConfig().device_name, device_name, std::string(devicename));
+#endif
 	// assign name
 	LOGi("Set name to %s", device_name.c_str());
 	_stack->updateDeviceName(device_name); // max len = ble_gap_devname_max_len (31)
@@ -191,7 +126,7 @@ void Crownstone::configStack() {
 #else
 	// TODO: depends on board!
 //	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_XTAL_50_PPM);
-	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_4000MS_CALIBRATION);
+	_stack->setClockSource(CLOCK_SOURCE);
 #endif
 
 	_stack->setTxPowerLevel(TX_POWER);
@@ -212,6 +147,7 @@ void Crownstone::configDrivers() {
 	pwm_config.num_channels = 1;
 	pwm_config.gpio_pin[0] = PIN_GPIO_SWITCH;
 	pwm_config.mode = PWM_MODE_976;
+//	pwm_config.mode = PWM_MODE_122;
 
 	PWM::getInstance().init(&pwm_config);
 
@@ -226,6 +162,12 @@ void Crownstone::configDrivers() {
 
 void Crownstone::createServices() {
 	LOGi("Create all services");
+
+// should be available always, but for now, only enable if required
+#if DEVICE_INFO_SERVICE==1
+	_deviceInformationService = new DeviceInformationService();
+	_stack->addService(_deviceInformationService);
+#endif
 
 #if GENERAL_SERVICE==1 || DEVICE_TYPE==DEVICE_FRIDGE
 	// general services, such as internal temperature, setting names, etc.
@@ -284,6 +226,12 @@ void Crownstone::configure() {
 	Storage::getArray(cfg.beacon.uuid.uuid128, uuid.uuid128, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
 	Storage::getUint8(cfg.beacon.rssi, rssi, BEACON_RSSI);
 
+#ifdef CHANGE_MINOR_ON_RESET
+	minor++;
+	LOGi("Increase minor to %d", minor);
+	Settings::getInstance().writeToStorage(CONFIG_IBEACON_MINOR, (uint8_t*)&minor, 2);
+#endif
+
 	// create ibeacon object
 	_beacon = new IBeacon(uuid, major, minor, rssi);
 #endif
@@ -327,6 +275,10 @@ void Crownstone::setup() {
 	// configuration has to be done after the stack was created!
 	configure();
 
+	uint16_t bootDelay;
+	Storage::getUint16(Settings::getInstance().getConfig().bootDelay, bootDelay, BOOT_DELAY);
+	nrf_delay_ms(bootDelay);
+
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
 		// todo this signature needs to change
@@ -334,8 +286,15 @@ void Crownstone::setup() {
 		// first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
 		// be neater about it... we do not need to stop, only after a disconnect we do...
 #if RSSI_ENABLE==1
+
 		sd_ble_gap_rssi_stop(conn_handle);
+
+#if (SOFTDEVICE_SERIES == 130 && SOFTDEVICE_MAJOR == 1 && SOFTDEVICE_MINOR == 0) || \
+	(SOFTDEVICE_SERIES == 110 && SOFTDEVICE_MAJOR == 8)
+		sd_ble_gap_rssi_start(conn_handle, 0, 0);
+#else
 		sd_ble_gap_rssi_start(conn_handle);
+#endif
 #endif
 
 #if HARDWARE_BOARD==PCA10001
@@ -382,13 +341,6 @@ void Crownstone::setup() {
 	BLEutil::print_heap("Heap drivers: ");
 	BLEutil::print_stack("Stack drivers: ");
 
-	// begin sending advertising packets over the air.
-
-	startAdvertising();
-
-	BLEutil::print_heap("Heap adv: ");
-	BLEutil::print_stack("Stack adv: ");
-
 #if CHAR_MESHING==1
 //	#if HARDWARE_BOARD==PCA10001
 //        gpiote_init();
@@ -400,7 +352,15 @@ void Crownstone::setup() {
 
  	CMesh & mesh = CMesh::getInstance();
 	mesh.init();
+	BLEutil::print_heap("Heap mesh: ");
+	BLEutil::print_stack("Stack mesh: ");
 #endif
+
+	// Begin sending advertising packets over the air.
+	// This should be done after initialization of the mesh
+	startAdvertising();
+	BLEutil::print_heap("Heap adv: ");
+	BLEutil::print_stack("Stack adv: ");
 
 #if (POWER_SERVICE==1)
 #if (DEFAULT_ON==1)
@@ -429,6 +389,10 @@ void Crownstone::startAdvertising() {
 void Crownstone::run() {
 
 	_stack->startTicking();
+
+#if CHAR_MESHING==1
+	CMesh::getInstance().startTicking();
+#endif
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();
@@ -509,6 +473,21 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 #endif
 
+	case EVT_ADVERTISEMENT_PAUSE: {
+		if (_stack->isAdvertising()) {
+			_advertisementPaused = true;
+			_stack->stopAdvertising();
+		}
+		break;
+	}
+	case EVT_ADVERTISEMENT_RESUME: {
+		if (_advertisementPaused) {
+			_advertisementPaused = false;
+			startAdvertising();
+		}
+		break;
+	}
+
 	}
 
 	if (restartAdvertising && _stack->isAdvertising()) {
@@ -520,6 +499,33 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 void on_exit(void) {
 	LOGf("PROGRAM TERMINATED");
 }
+
+
+/**********************************************************************************************************************/
+#if CHAR_MESHING==1
+uint32_t appTimerId = -1;
+
+uint32_t count[2] = {};
+//uint8_t idx = -1;
+uint8_t idx = 0;
+
+void sendMesh(void* ptr) {
+//	idx = (idx + 1) % 2;
+
+	LOGi("<< ch: %d", idx * 2 + 1);
+	LOGi("<< count: %d", count[idx]);
+	hub_mesh_message_t message;
+	memset(&message, 0, sizeof(message));
+	message.testMsg.counter = count[idx]++;
+	message.header.messageType = 102;
+
+	LOGi("message data:");
+	BLEutil::printArray(&message, sizeof(message));
+	CMesh::getInstance().send(idx * 2 + 1, &message, sizeof(message));
+
+	Timer::getInstance().start(appTimerId, HZ_TO_TICKS(1), NULL);
+}
+#endif
 
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
@@ -535,6 +541,11 @@ int main() {
 
 	// setup crownstone ...
 	crownstone.setup();
+
+#if CHAR_MESHING==1
+//	Timer::getInstance().createSingleShot(appTimerId, (app_timer_timeout_handler_t)sendMesh);
+//	Timer::getInstance().start(appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), NULL);
+#endif
 
 	// run forever ...
 	crownstone.run();

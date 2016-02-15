@@ -11,6 +11,10 @@
 
 #include <cfg/cs_Config.h>
 
+extern "C" {
+#include <app_scheduler.h>
+}
+
 #define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz, APP_TIMER_PRESCALER)
 #define MS_TO_TICKS(ms) APP_TIMER_TICKS(ms, APP_TIMER_PRESCALER)
 
@@ -20,7 +24,7 @@ private:
 //	Timer();
 	Timer() {
 		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, true);
+		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
 	}
 
 	Timer(Timer const&);

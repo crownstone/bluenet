@@ -37,6 +37,18 @@
 #define PWM_SWITCH_OFF             0
 #endif
 
+/* [25.11.15] merging from NRF SDK 6 to SDK 8. the nrf_gpiote_unconfig function was removed in SDK 8,
+ *   and no other function replaces it ... according to nordic developer, can just copy it over from
+ *   SDK 6. See post https://devzone.nordicsemi.com/question/50020/what-has-replaced-nrf_gpiote_unconfig/
+ */
+static inline void nrf_gpiote_unconfig(uint32_t channel_number)
+{
+    /* Unonfigure the channel as the caller expects */
+    NRF_GPIOTE->CONFIG[channel_number] = (GPIOTE_CONFIG_MODE_Disabled   << GPIOTE_CONFIG_MODE_Pos) |
+                                         (31UL                          << GPIOTE_CONFIG_PSEL_Pos) |
+                                         (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos);
+}
+
 
 int32_t PWM::ppiEnableChannel(uint32_t ch_num, volatile uint32_t *event_ptr, volatile uint32_t *task_ptr) {
 	if (ch_num >= 16) return -1;
@@ -160,6 +172,7 @@ void PWM::setValue(uint8_t channel, uint32_t value) {
 
 	for (uint32_t i = 0; i < _numChannels; ++i) {
 		if(_nextValue[i] == 0) {
+			// todo: DE fix for new SDK
 			nrf_gpiote_unconfig(_gpioteChannel[i]);
 			nrf_gpio_pin_write(_gpioPin[i], PWM_SWITCH_OFF);
 			_running[i] = 0;
@@ -221,7 +234,7 @@ extern "C" void PWM_IRQHandler(void) {
 //			PWM_TIMER->CC[i] = pwm._nextValue[i] * 2; // TODO: why times 2?
 			PWM_TIMER->CC[i] = pwm._nextValue[i];
 			if (!pwm._running[i]) {
-				nrf_gpiote_task_config(pwm._gpioteChannel[i], pwm._gpioPin[i], NRF_GPIOTE_POLARITY_TOGGLE, PWM_GPIOTE_INITIAL_VALUE);
+				nrf_gpiote_task_configure(pwm._gpioteChannel[i], pwm._gpioPin[i], NRF_GPIOTE_POLARITY_TOGGLE, PWM_GPIOTE_INITIAL_VALUE);
 				pwm._running[i] = 1;
 			}
 		}

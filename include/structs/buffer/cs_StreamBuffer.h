@@ -53,6 +53,7 @@ private:
 	/* Pointer to the data to be sent
 	 */
 	stream_t<T>* _buffer;
+	uint16_t _maxLength;
 
 	const size_t _item_size = sizeof(T);
 	const size_t _max_items = (MASTER_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
@@ -61,7 +62,7 @@ public:
 	 *
 	 * Constructor does not initialize the payload.
 	 */
-	StreamBuffer(): _buffer(NULL) {
+	StreamBuffer(): _buffer(NULL), _maxLength(0) {
 	};
 
 	/* @inherit */
@@ -69,6 +70,7 @@ public:
 		LOGd("assign buff: %p, len: %d", buffer, size);
 		assert(SB_HEADER_SIZE + _max_items*_item_size <= size, "Assigned buffer is not large enough");
 		_buffer = (stream_t<T>*)buffer;
+		_maxLength = size;
 		return 0;
 	}
 
@@ -92,7 +94,7 @@ public:
 			LOGe("Buffer not initialized!");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
-		str = std::string((char*)_buffer->payload, _buffer->length);
+		str = std::string((char*)_buffer->payload, length());
 		return SB_SUCCESS;
 	}
 
@@ -160,7 +162,7 @@ public:
 	 *
 	 * @return number of elements stored
 	 */
-	inline uint16_t length() const { return _buffer->length; }
+	inline uint16_t length() const { return std::min(_buffer->length, _maxLength); }
 
 	/* Get a pointer to the payload array
 	 *
@@ -213,7 +215,8 @@ public:
 
 	/* @inherit */
 	uint16_t getMaxLength() const {
-		return MASTER_BUFFER_SIZE;
+		return _maxLength;
+//		return MASTER_BUFFER_SIZE;
 	}
 
 	// TODO: Why do we need this function!?

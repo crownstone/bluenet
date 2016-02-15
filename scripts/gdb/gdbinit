@@ -12,7 +12,7 @@ define reset
 	monitor reset
 end
 
-target remote localhost:2331
+target remote localhost:@gdb_port@
 set remote memory-write-packet-size 1024
 #set remote memory-write-packet-size fixed
 load

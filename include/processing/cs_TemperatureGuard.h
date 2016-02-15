@@ -11,18 +11,29 @@
 #include "drivers/cs_PWM.h"
 #include "drivers/cs_Temperature.h"
 #include <cstdint>
+#include "cfg/cs_Settings.h"
+#include "events/cs_EventListener.h"
 
 #define TEMPERATURE_UPDATE_FREQUENCY 0.2 // Hz
-#define TEMPERATURE_MAX 80 // Celsius
 
-class TemperatureGuard {
+class TemperatureGuard : EventListener {
 public:
-	TemperatureGuard() : _appTimerId(0) {
+	TemperatureGuard() :
+		_appTimerId(0),
+		EventListener(CONFIG_MAX_CHIP_TEMP),
+		_maxTemp(MAX_CHIP_TEMP)
+	{
+
+		ps_configuration_t cfg = Settings::getInstance().getConfig();
+		Storage::getInt8(cfg.maxChipTemp, _maxTemp, MAX_CHIP_TEMP);
+
+		EventDispatcher::getInstance().addListener(this);
+
 		Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
 //		Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
 	}
 	void tick() {
-		if (getTemperature() > TEMPERATURE_MAX) {
+		if (getTemperature() > _maxTemp) {
 			// Make sure pwm can't be set anymore
 			PWM::getInstance().deinit();
 			// Switch off all channels
@@ -43,8 +54,17 @@ public:
 	static void staticTick(TemperatureGuard* ptr) {
 		ptr->tick();
 	}
+
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+		switch (evt) {
+		case CONFIG_MAX_CHIP_TEMP:
+			_maxTemp = *(int32_t*)p_data;
+			break;
+		}
+	}
 private:
 	uint32_t _appTimerId;
+	int8_t _maxTemp;
 
 //	void scheduleNextTick() {
 //		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);

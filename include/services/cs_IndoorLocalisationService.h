@@ -18,6 +18,8 @@
 //#include <common/cs_Types.h>
 #include <drivers/cs_Storage.h>
 
+#include <processing/cs_Scanner.h>
+
 #define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10 // hz
 
 /* Struct used by the <IndoorLocalisationService> to store elements
@@ -103,7 +105,9 @@ private:
 	bool _initialized;
 	bool _scanMode;
 
-	ScanResult* _scanResult;
+	Scanner* _scanner;
+
+//	ScanResult* _scanResult;
 	TrackedDeviceList* _trackedDeviceList;
 
 	pstorage_handle_t _storageHandle;

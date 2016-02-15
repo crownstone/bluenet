@@ -22,6 +22,7 @@
 #define INDOORLOCALISATION_UUID             "7e170000-429c-41aa-83d7-d91220abeb33"
 #define ALERT_UUID                          "33690000-2a0a-11e5-b345-feff819cdc9f"
 #define SCHEDULE_UUID                       "96d20000-4bcf-11e5-885d-feff819cdc9f"
+#define DEVICE_INFORMATION_UUID             "180a"
 
 /* Characteristic UUIDs */
 
@@ -39,7 +40,7 @@ enum GeneralCharacteristicsIDs {
 //	UNUSED                                  = 0x3,
 //	UNUSED                                  = 0x4,
 	RESET_UUID                              = 0x5,
-	MESH_UUID                               = 0x6,
+	MESH_CONTROL_UUID                       = 0x6,
 	SET_CONFIGURATION_UUID                  = 0x7,
 	SELECT_CONFIGURATION_UUID               = 0x8,
 	GET_CONFIGURATION_UUID                  = 0x9,

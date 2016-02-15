@@ -12,6 +12,7 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_iBeacon.h>
 
+#include <cfg/cs_Config.h>
 #include <cfg/cs_Strings.h>
 #include <util/cs_BleError.h>
 #include <common/cs_Tuple.h>
@@ -22,8 +23,8 @@
 // test
 
 extern "C" {
-#include "ble/device_manager/device_manager.h"
-#include "sdk/sdk_errors.h"
+#include "device_manager.h"
+#include "sdk_errors.h"
 }
 
 /////////////////////////////////////////////////
@@ -398,7 +399,7 @@ public:
 	 * Callback handler for device manager events
 	 */
 	uint32_t deviceManagerEvtHandler(dm_handle_t const    * p_handle, dm_event_t const     * p_event,
-			api_result_t           event_result);
+			ret_code_t           event_result);
 
 protected:
 

@@ -15,6 +15,12 @@
 
 #include <drivers/cs_Serial.h>
 
+#if __clang__
+#define STRINGIFY(str) #str
+#else
+#define STRINGIFY(str) str
+#endif
+
 namespace BLEutil {
 
 /* Convert a short (uint16_t) from LSB (little-endian) to

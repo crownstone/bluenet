@@ -173,15 +173,7 @@ The meshion functionality is the one we are currently integrating on the moment.
 
 For the meshing functionality we use https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh written by a
 Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and
-Nordic Semiconductors). This code makes use of the Timeslot API which
-is not supported yet in the alpha versions of the `S130`. Hence, if you want to use the meshing functionality, you will
-have to use the `S110`.
-
-This means that if you want to use a bootloader, you will also need the `S110` version of it, and the same is true
-for the upload script:
-
-* https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler/tree/s110
-* https://github.com/dobots/nrf51_dfu_linux
+Nordic Semiconductors).
 
 ## UART
 
@@ -199,43 +191,22 @@ and define the right usb port to use (if you've multiple).
 ## Bootloader
 
 To upload a new program when the Crownstone is embedded in a wall socket is cumbersome. For that reason for deployment
-we recommend to add a bootloader. The default bootloader from Nordic does not work with the `S130` devices. You will
-need our fork:
+we recommend to add a bootloader. We adjusted the Nordic bootloader so that it works with the bluenet code:
 
     git clone https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler
     cd scripts
     ./all.sh
 
-Note, that if you want to use meshing you will need the `S110` version! This can be found in the `s110` tag (see also
-above).
+Make sure to choose the correct branch.
 
-You will have to set some fields such that the bootloader is loaded rather than the application directly. If you use the `J-Link` this is the sequence of commands you will need:
+You will have to set some fields such that the bootloader is loaded rather than the application directly. If you use the `J-Link` this script will install bootloader, softdevice, and application:
 
-    ./softdevice.sh all
-    ./writebyte.sh 0x10001014 0x00034000
-    ./firmware.sh all bootloader 0x00034000
-
-Here we place the bootloader at position `0x00034000`. If the bootloader becomes larger in size, you will need to go
-down and adjust the code in the `dfu_types.h` file in the bootloader code.
+    ./all.sh
 
 And you should be good to upload binaries, for example with the following python script:
 
     git clone https://github.com/dobots/nrf51_dfu_linux
     python dfu.py -f crownstone.hex -a CD:E3:4A:47:1C:E4
-
-Currently the upload script needs to be changed depending on the SoftDevice used, for the `S130`:
-
-    ctrlpt_handle = 0x10
-    ctrlpt_cccd_handle = 0x11
-    data_handle = 0x0E
-
-And for the `S110`:
-
-    ctrlpt_handle = 0x0D
-    ctrlpt_cccd_handle = 0x0E
-    data_handle = 0x0B
-
-Of course, this is too cumbersome. We will soon implement something that figures out the right handles automatically.
 
 ### Debugging bootloader
 
@@ -243,7 +214,7 @@ Make sure the bootloader is actually loaded and the proper address for the appli
 
     mem 0x10001014 4
 
-This should be `0x34000` if you use the bootloader. If it is `0xFFFF` the application will be loaded from the application start address.
+This should be equal to `BOOTLOADER_REGION_START` if you use the bootloader. If it is `0xFFFF` the application will be loaded from the application start address.
 
 If the bootloader does not find a valid app, there might indeed not be an app available, o its configuration field that tells it that the app is correct isn't set properly:
 

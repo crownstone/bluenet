@@ -9,15 +9,14 @@
  *
  */
 
-#include "ble/device_manager/device_manager.h"
-#include "ble/device_manager_cnfg.h"
+#include "device_manager.h"
 #include "app_trace.h"
-#include "ble/ble_advdata.h"
+#include "ble_advdata.h"
 #include "pstorage.h"
 #include "ble_hci.h"
 #include "app_error.h"
 #include "drivers/cs_Serial.h"
-#include "sdk/sdk_errors.h"
+#include "sdk_errors.h"
 #include "nordic_common.h"
 
 #define INVALID_ADDR_TYPE 0xFF /**< Identifier for an invalid address type. */
@@ -136,7 +135,7 @@ typedef enum
 #ifndef DM_DISABLE_LOGS
 #define DM_LOG  LOGi  /**< Used for logging details. */
 #define DM_ERR  LOGe  /**< Used for logging errors in the module. */
-#define DM_TRC(...)  /**< Used for getting trace of execution in the module. */
+#define DM_TRC  LOGi  /**< Used for getting trace of execution in the module. */
 #define DM_DUMP(...) /**< Used for dumping octet information to get details of bond information etc. */
 #else //DM_DISABLE_LOGS
 #define DM_DUMP(...)           /**< Disables dumping of octet streams. */
@@ -397,7 +396,7 @@ typedef struct
  *
  * @retval Operation result code.
  */
-typedef api_result_t (* service_context_access_t)(pstorage_handle_t const * p_block_handle,
+typedef ret_code_t (* service_context_access_t)(pstorage_handle_t const * p_block_handle,
                                                   dm_handle_t const       * p_handle);
 
 /**@brief Function for performing necessary action of applying the context information.
@@ -406,7 +405,7 @@ typedef api_result_t (* service_context_access_t)(pstorage_handle_t const * p_bl
  *
  * @retval Operation result code.
  */
-typedef api_result_t (* service_context_apply_t)(dm_handle_t * p_handle);
+typedef ret_code_t (* service_context_apply_t)(dm_handle_t * p_handle);
 
 /**@brief Function for performing necessary functions of storing or updating.
  *
@@ -433,7 +432,9 @@ typedef uint32_t (* storage_operation)(pstorage_handle_t * p_dest,
 #if(DEVICE_MANAGER_APP_CONTEXT_SIZE != 0)
 static uint8_t *               m_app_context_table[DEVICE_MANAGER_MAX_BONDS];         /**< Table to remember application contexts of bonded devices. */
 #endif // DEVICE_MANAGER_APP_CONTEXT_SIZE
-peer_id_t               m_peer_table[DEVICE_MANAGER_MAX_BONDS];               /**< Table to maintain bonded devices' identification information, an instance is allocated in the table when a device is bonded and freed when bond information is deleted. */
+__ALIGN(sizeof(uint32_t))
+static peer_id_t               m_peer_table[DEVICE_MANAGER_MAX_BONDS];                /**< Table to maintain bonded devices' identification information, an instance is allocated in the table when a device is bonded and freed when bond information is deleted. */
+__ALIGN(sizeof(uint32_t))
 static bond_context_t          m_bond_table[DEVICE_MANAGER_MAX_CONNECTIONS];          /**< Table to maintain bond information for active peers. */
 static dm_gatts_context_t      m_gatts_table[DEVICE_MANAGER_MAX_CONNECTIONS];         /**< Table for service information for active connection instances. */
 static connection_instance_t   m_connection_table[DEVICE_MANAGER_MAX_CONNECTIONS];    /**< Table to maintain active peer information. An instance is allocated in the table when a new connection is established and freed on disconnection. */
@@ -446,37 +447,37 @@ static bool                    m_module_initialized = false;                    
 SDK_MUTEX_DEFINE(m_dm_mutex) /**< Mutex variable. Currently unused, this declaration does not occupy any space in RAM. */
 /** @} */
 
-static __INLINE api_result_t no_service_context_store(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t no_service_context_store(pstorage_handle_t const * p_block_handle,
                                                       dm_handle_t const       * p_handle);
 
-static __INLINE api_result_t gatts_context_store(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gatts_context_store(pstorage_handle_t const * p_block_handle,
                                                  dm_handle_t const       * p_handle);
 
-static __INLINE api_result_t gattc_context_store(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gattc_context_store(pstorage_handle_t const * p_block_handle,
                                                  dm_handle_t const       * p_handle);
 
-static __INLINE api_result_t gattsc_context_store(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gattsc_context_store(pstorage_handle_t const * p_block_handle,
                                                   dm_handle_t const       * p_handle);
 
-static __INLINE api_result_t no_service_context_load(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t no_service_context_load(pstorage_handle_t const * p_block_handle,
                                                      dm_handle_t const       * p_handle);
 
-static __INLINE api_result_t gatts_context_load(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gatts_context_load(pstorage_handle_t const * p_block_handle,
                                                 dm_handle_t const       * p_handle);
 
-static __INLINE api_result_t gattc_context_load(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gattc_context_load(pstorage_handle_t const * p_block_handle,
                                                 dm_handle_t const       * p_handle);
 
-static __INLINE api_result_t gattsc_context_load(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gattsc_context_load(pstorage_handle_t const * p_block_handle,
                                                  dm_handle_t const       * p_handle);
 
-static __INLINE api_result_t no_service_context_apply(dm_handle_t * p_handle);
+static __INLINE ret_code_t no_service_context_apply(dm_handle_t * p_handle);
 
-static __INLINE api_result_t gatts_context_apply(dm_handle_t * p_handle);
+static __INLINE ret_code_t gatts_context_apply(dm_handle_t * p_handle);
 
-static __INLINE api_result_t gattc_context_apply(dm_handle_t * p_handle);
+static __INLINE ret_code_t gattc_context_apply(dm_handle_t * p_handle);
 
-static __INLINE api_result_t gattsc_context_apply(dm_handle_t * p_handle);
+static __INLINE ret_code_t gattsc_context_apply(dm_handle_t * p_handle);
 
 
 /**< Array of function pointers based on the types of service registered. */
@@ -549,7 +550,7 @@ static __INLINE bool update_status_bit_is_set(uint32_t index)
  */
 static __INLINE void application_instance_init(uint32_t index)
 {
-    DM_LOG("[DM]: Initializing Application Instance 0x%08X.\r\n", index);
+    DM_TRC("[DM]: Initializing Application Instance 0x%08X.\r\n", index);
 
     m_application_table[index].ntf_cb  = NULL;
     m_application_table[index].state   = 0x00;
@@ -563,8 +564,8 @@ static __INLINE void application_instance_init(uint32_t index)
  */
 static __INLINE void connection_instance_init(uint32_t index)
 {
-    DM_LOG("[DM]: Initializing Connection Instance 0x%08X.\r\n", index);
-
+    DM_TRC("[DM]: Initializing Connection Instance 0x%08X.\r\n", index);
+    
     m_connection_table[index].state         = STATE_IDLE;
     m_connection_table[index].conn_handle   = BLE_CONN_HANDLE_INVALID;
     m_connection_table[index].bonded_dev_id = DM_INVALID_ID;
@@ -579,8 +580,8 @@ static __INLINE void connection_instance_init(uint32_t index)
  */
 static __INLINE void peer_instance_init(uint32_t index)
 {
-    DM_LOG("[DM]: Initializing Peer Instance 0x%08X.\r\n", index);
-
+    DM_TRC("[DM]: Initializing Peer Instance 0x%08X.\r\n", index);
+    
     memset(m_peer_table[index].peer_id.id_addr_info.addr, 0, BLE_GAP_ADDR_LEN);
     memset(m_peer_table[index].peer_id.id_info.irk, 0, BLE_GAP_SEC_KEY_LEN);
 
@@ -614,11 +615,11 @@ static __INLINE void peer_instance_init(uint32_t index)
  * @retval NRF_ERROR_INVALID_STATE Operation failure. Invalid state
  * @retval NRF_ERROR_NOT_FOUND     Operation failure. Not found
  */
-static api_result_t connection_instance_find(uint16_t   conn_handle,
+static ret_code_t connection_instance_find(uint16_t   conn_handle,
                                              uint8_t    state,
                                              uint32_t * p_instance)
 {
-    api_result_t err_code;
+    ret_code_t err_code;
     uint32_t     index;
 
     err_code = NRF_ERROR_INVALID_STATE;
@@ -657,19 +658,19 @@ static api_result_t connection_instance_find(uint16_t   conn_handle,
  * @retval NRF_SUCCESS            Operation success.
  * @retval DM_DEVICE_CONTEXT_FULL Operation failure.
  */
-static __INLINE api_result_t device_instance_allocate(uint8_t *              p_device_index,
+static __INLINE ret_code_t device_instance_allocate(uint8_t *              p_device_index,
                                                       ble_gap_addr_t const * p_addr)
 {
-    api_result_t err_code;
+    ret_code_t err_code;
     uint32_t     index;
 
     err_code = DM_DEVICE_CONTEXT_FULL;
 
     for (index = 0; index < DEVICE_MANAGER_MAX_BONDS; index++)
     {
-        DM_LOG("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
+        DM_TRC("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
                index, m_peer_table[index].peer_id.id_addr_info.addr_type);
-        DM_LOG("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
+        DM_TRC("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
                m_peer_table[index].peer_id.id_addr_info.addr[0],
                m_peer_table[index].peer_id.id_addr_info.addr[1],
                m_peer_table[index].peer_id.id_addr_info.addr[2],
@@ -708,9 +709,9 @@ static __INLINE api_result_t device_instance_allocate(uint8_t *              p_d
  *
  * @retval NRF_SUCCESS On success, else an error code indicating reason for failure.
  */
-static __INLINE api_result_t device_instance_free(uint32_t device_index)
+static __INLINE ret_code_t device_instance_free(uint32_t device_index)
 {
-    api_result_t      err_code;
+    ret_code_t      err_code;
     pstorage_handle_t block_handle;
 
     //Get the block handle.
@@ -718,7 +719,7 @@ static __INLINE api_result_t device_instance_free(uint32_t device_index)
 
     if (err_code == NRF_SUCCESS)
     {
-        DM_LOG("[DM]:[DI 0x%02X]: Freeing Instance.\r\n", device_index);
+        DM_TRC("[DM]:[DI 0x%02X]: Freeing Instance.\r\n", device_index);
 
         //Request clearing of the block.
         err_code = pstorage_clear(&block_handle, ALL_CONTEXT_SIZE);
@@ -741,26 +742,26 @@ static __INLINE api_result_t device_instance_free(uint32_t device_index)
  * @retval NRF_SUCCESS         Operation success.
  * @retval NRF_ERROR_NOT_FOUND Operation failure.
  */
-static api_result_t device_instance_find(ble_gap_addr_t const * p_addr, uint32_t * p_device_index)
+static ret_code_t device_instance_find(ble_gap_addr_t const * p_addr, uint32_t * p_device_index)
 {
-    api_result_t err_code;
+    ret_code_t err_code;
     uint32_t     index;
 
     err_code = NRF_ERROR_NOT_FOUND;
-
-    DM_LOG("[DM]: Searching for device 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
-           p_addr->addr[0],
-           p_addr->addr[1],
-           p_addr->addr[2],
+    
+    DM_TRC("[DM]: Searching for device 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
+           p_addr->addr[0], 
+           p_addr->addr[1], 
+           p_addr->addr[2], 
            p_addr->addr[3],
-           p_addr->addr[4],
+           p_addr->addr[4], 
            p_addr->addr[5]);
 
     for (index = 0; index < DEVICE_MANAGER_MAX_BONDS; index++)
     {
-        DM_LOG("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
+        DM_TRC("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
                index, m_peer_table[index].peer_id.id_addr_info.addr_type);
-        DM_LOG("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
+        DM_TRC("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
                m_peer_table[index].peer_id.id_addr_info.addr[0],
                m_peer_table[index].peer_id.id_addr_info.addr[1],
                m_peer_table[index].peer_id.id_addr_info.addr[2],
@@ -797,7 +798,7 @@ static __INLINE void app_evt_notify(dm_handle_t const * const p_handle,
 
     DM_MUTEX_UNLOCK();
 
-    DM_LOG("[DM]: Notifying application of event 0x%02X\r\n", p_event->event_id);
+    DM_TRC("[DM]: Notifying application of event 0x%02X\r\n", p_event->event_id);
 
     //No need to do any kind of return value processing thus can be supressed.
     UNUSED_VARIABLE(app_cb(p_handle, p_event, event_result));
@@ -820,7 +821,7 @@ static __INLINE uint32_t connection_instance_allocate(uint32_t * p_instance)
 {
     uint32_t err_code;
 
-    DM_LOG("[DM]: Request to allocation connection instance\r\n");
+    DM_TRC("[DM]: Request to allocation connection instance\r\n");
 
     err_code = connection_instance_find(BLE_CONN_HANDLE_INVALID, STATE_IDLE, p_instance);
 
@@ -846,7 +847,7 @@ static __INLINE uint32_t connection_instance_allocate(uint32_t * p_instance)
  */
 static __INLINE void connection_instance_free(uint32_t const * p_instance)
 {
-    DM_LOG("[DM]:[CI 0x%02X]: Freeing connection instance\r\n", (*p_instance));
+    DM_TRC("[DM]:[CI 0x%02X]: Freeing connection instance\r\n", (*p_instance));
 
     if (m_connection_table[*p_instance].state != STATE_IDLE)
     {
@@ -887,7 +888,7 @@ static __INLINE void device_context_store(dm_handle_t const * p_handle, device_s
 {
     pstorage_handle_t block_handle;
     storage_operation store_fn;
-    api_result_t      err_code;
+    ret_code_t      err_code;
 
     DM_LOG("[DM]: --> device_context_store\r\n");
 
@@ -977,7 +978,7 @@ static __INLINE void device_context_store(dm_handle_t const * p_handle, device_s
  *
  * @retval NRF_SUCCESS
  */
-static __INLINE api_result_t no_service_context_store(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t no_service_context_store(pstorage_handle_t const * p_block_handle,
                                                       dm_handle_t const       * p_handle)
 {
     DM_LOG("[DM]: --> no_service_context_store\r\n");
@@ -993,7 +994,7 @@ static __INLINE api_result_t no_service_context_store(pstorage_handle_t const * 
  *
  * @retval NRF_SUCCESS Operation success.
  */
-static __INLINE api_result_t gatts_context_store(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gatts_context_store(pstorage_handle_t const * p_block_handle,
                                                  dm_handle_t const       * p_handle)
 {
     storage_operation store_fn;
@@ -1002,10 +1003,20 @@ static __INLINE api_result_t gatts_context_store(pstorage_handle_t const * p_blo
 
     DM_LOG("[DM]: --> gatts_context_store\r\n");
 
+#if (SOFTDEVICE_SERIES == 130)
+#if (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
     uint32_t err_code = sd_ble_gatts_sys_attr_get(
         m_connection_table[p_handle->connection_id].conn_handle,
         sys_data,
         &attr_len);
+#elif (SOFTDEVICE_MAJOR == 1) && (SOFTDEVICE_MINOR == 0)
+	    uint32_t err_code = sd_ble_gatts_sys_attr_get(
+	        m_connection_table[p_handle->connection_id].conn_handle,
+	        sys_data,
+	        &attr_len,
+	        BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS);
+#endif
+#endif
 
     if (err_code == NRF_SUCCESS)
     {
@@ -1081,7 +1092,7 @@ static __INLINE api_result_t gatts_context_store(pstorage_handle_t const * p_blo
  *
  * @retval NRF_SUCCESS Operation success.
  */
-static __INLINE api_result_t gattc_context_store(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gattc_context_store(pstorage_handle_t const * p_block_handle,
                                                  dm_handle_t const       * p_handle)
 {
     DM_LOG("[DM]: --> gattc_context_store\r\n");
@@ -1097,12 +1108,12 @@ static __INLINE api_result_t gattc_context_store(pstorage_handle_t const * p_blo
  *
  * @retval NRF_SUCCESS On success, else an error code indicating reason for failure.
  */
-static __INLINE api_result_t gattsc_context_store(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gattsc_context_store(pstorage_handle_t const * p_block_handle,
                                                   dm_handle_t const       * p_handle)
 {
     DM_LOG("[DM]: --> gattsc_context_store\r\n");
 
-    api_result_t err_code = gatts_context_store(p_block_handle, p_handle);
+    ret_code_t err_code = gatts_context_store(p_block_handle, p_handle);
 
     if (NRF_SUCCESS == err_code)
     {
@@ -1120,7 +1131,7 @@ static __INLINE api_result_t gattsc_context_store(pstorage_handle_t const * p_bl
  *
  * @retval NRF_SUCCESS
  */
-static __INLINE api_result_t no_service_context_load(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t no_service_context_load(pstorage_handle_t const * p_block_handle,
                                                      dm_handle_t const       * p_handle)
 {
     DM_LOG("[DM]: --> no_service_context_load\r\n");
@@ -1136,14 +1147,14 @@ static __INLINE api_result_t no_service_context_load(pstorage_handle_t const * p
  *
  * @retval NRF_SUCCESS On success, else an error code indicating reason for failure.
  */
-static __INLINE api_result_t gatts_context_load(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gatts_context_load(pstorage_handle_t const * p_block_handle,
                                                 dm_handle_t const       * p_handle)
 {
     DM_LOG("[DM]:[CI 0x%02X]:[DI 0x%02X]: --> gatts_context_load\r\n",
            p_handle->connection_id,
            p_handle->device_id);
 
-    api_result_t err_code = pstorage_load((uint8_t *)&m_gatts_table[p_handle->connection_id],
+    ret_code_t err_code = pstorage_load((uint8_t *)&m_gatts_table[p_handle->connection_id],
                                           (pstorage_handle_t *)p_block_handle,
                                           GATTS_SERVICE_CONTEXT_SIZE,
                                           SERVICE_STORAGE_OFFSET);
@@ -1179,7 +1190,7 @@ static __INLINE api_result_t gatts_context_load(pstorage_handle_t const * p_bloc
  *
  * @retval NRF_SUCCESS
  */
-static __INLINE api_result_t gattc_context_load(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gattc_context_load(pstorage_handle_t const * p_block_handle,
                                                 dm_handle_t const       * p_handle)
 {
     DM_LOG("[DM]: --> gattc_context_load\r\n");
@@ -1195,12 +1206,12 @@ static __INLINE api_result_t gattc_context_load(pstorage_handle_t const * p_bloc
  *
  * @retval NRF_SUCCESS On success, else an error code indicating reason for failure.
  */
-static __INLINE api_result_t gattsc_context_load(pstorage_handle_t const * p_block_handle,
+static __INLINE ret_code_t gattsc_context_load(pstorage_handle_t const * p_block_handle,
                                                  dm_handle_t const       * p_handle)
 {
     DM_LOG("[DM]: --> gattsc_context_load\r\n");
 
-    api_result_t err_code = gatts_context_load(p_block_handle, p_handle);
+    ret_code_t err_code = gatts_context_load(p_block_handle, p_handle);
 
     if (NRF_SUCCESS == err_code)
     {
@@ -1217,7 +1228,7 @@ static __INLINE api_result_t gattsc_context_load(pstorage_handle_t const * p_blo
  *
  * @retval NRF_SUCCESS
  */
-static __INLINE api_result_t no_service_context_apply(dm_handle_t * p_handle)
+static __INLINE ret_code_t no_service_context_apply(dm_handle_t * p_handle)
 {
     DM_LOG("[DM]: --> no_service_context_apply\r\n");
     DM_LOG("[DM]:[CI 0x%02X]: No Service context\r\n", p_handle->connection_id);
@@ -1233,7 +1244,7 @@ static __INLINE api_result_t no_service_context_apply(dm_handle_t * p_handle)
  * @retval NRF_SUCCESS                    On success.
  * @retval DM_SERVICE_CONTEXT_NOT_APPLIED On failure.
  */
-static __INLINE api_result_t gatts_context_apply(dm_handle_t * p_handle)
+static __INLINE ret_code_t gatts_context_apply(dm_handle_t * p_handle)
 {
     uint32_t err_code;
 
@@ -1260,9 +1271,18 @@ static __INLINE api_result_t gatts_context_apply(dm_handle_t * p_handle)
         context_len     = m_gatts_table[p_handle->connection_id].size;
     }
 
+#if (SOFTDEVICE_SERIES == 130)
+#if (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
     err_code = sd_ble_gatts_sys_attr_set(m_connection_table[p_handle->connection_id].conn_handle,
                                          p_gatts_context,
                                          context_len);
+#elif (SOFTDEVICE_MAJOR == 1) && (SOFTDEVICE_MINOR == 0)
+	err_code = sd_ble_gatts_sys_attr_set(m_connection_table[p_handle->connection_id].conn_handle,
+										 p_gatts_context,
+										 context_len,
+										 BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS);
+#endif
+#endif
 
     if (err_code != NRF_SUCCESS)
     {
@@ -1281,7 +1301,7 @@ static __INLINE api_result_t gatts_context_apply(dm_handle_t * p_handle)
  *
  * @retval NRF_SUCCESS On success.
  */
-static __INLINE api_result_t gattc_context_apply(dm_handle_t * p_handle)
+static __INLINE ret_code_t gattc_context_apply(dm_handle_t * p_handle)
 {
     DM_LOG("[DM]: --> gattc_context_apply\r\n");
 
@@ -1295,7 +1315,7 @@ static __INLINE api_result_t gattc_context_apply(dm_handle_t * p_handle)
  *
  * @retval NRF_SUCCESS On success, else an error code indicating reason for failure.
  */
-static __INLINE api_result_t gattsc_context_apply(dm_handle_t * p_handle)
+static __INLINE ret_code_t gattsc_context_apply(dm_handle_t * p_handle)
 {
     uint32_t err_code;
 
@@ -1565,11 +1585,11 @@ static void dm_pstorage_cb_handler(pstorage_handle_t * p_handle,
 }
 
 
-api_result_t dm_init(dm_init_param_t const * const p_init_param)
+ret_code_t dm_init(dm_init_param_t const * const p_init_param)
 {
     pstorage_module_param_t param;
     pstorage_handle_t       block_handle;
-    api_result_t            err_code;
+    ret_code_t            err_code;
     uint32_t                index;
 
     DM_LOG("[DM]: >> dm_init.\r\n");
@@ -1624,7 +1644,7 @@ api_result_t dm_init(dm_init_param_t const * const p_init_param)
                 //Issue read request if you successfully get the block identifier.
                 if (err_code == NRF_SUCCESS)
                 {
-                	DM_LOG("[DM]:[0x%02X]: Block handle 0x%08X.\r\n", index, block_handle.block_id);
+                    DM_TRC("[DM]:[0x%02X]: Block handle 0x%08X.\r\n", index, block_handle.block_id);
 
                     err_code = pstorage_load((uint8_t *)&m_peer_table[index],
                                              &block_handle,
@@ -1646,10 +1666,10 @@ api_result_t dm_init(dm_init_param_t const * const p_init_param)
                     }
                     else
                     {
-                    	DM_LOG("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
+                        DM_TRC("[DM]:[DI 0x%02X]: Device type 0x%02X.\r\n",
                                index,
                                m_peer_table[index].peer_id.id_addr_info.addr_type);
-                    	DM_LOG("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
+                        DM_TRC("[DM]: Device Addr 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X.\r\n",
                                m_peer_table[index].peer_id.id_addr_info.addr[0],
                                m_peer_table[index].peer_id.id_addr_info.addr[1],
                                m_peer_table[index].peer_id.id_addr_info.addr[2],
@@ -1684,13 +1704,13 @@ api_result_t dm_init(dm_init_param_t const * const p_init_param)
 
     DM_MUTEX_UNLOCK();
 
-    DM_LOG("[DM]: << dm_init.\r\n");
+    DM_TRC("[DM]: << dm_init.\r\n");
 
     return err_code;
 }
 
 
-api_result_t dm_register(dm_application_instance_t    * p_appl_instance,
+ret_code_t dm_register(dm_application_instance_t    * p_appl_instance,
                          dm_application_param_t const * p_appl_param)
 {
     VERIFY_MODULE_INITIALIZED();
@@ -1725,13 +1745,13 @@ api_result_t dm_register(dm_application_instance_t    * p_appl_instance,
 
     DM_MUTEX_UNLOCK();
 
-    DM_LOG("[DM]: << dm_register.\r\n");
+    DM_TRC("[DM]: << dm_register.\r\n");
 
     return err_code;
 }
 
 
-api_result_t dm_security_setup_req(dm_handle_t * p_handle)
+ret_code_t dm_security_setup_req(dm_handle_t * p_handle)
 {
     VERIFY_MODULE_INITIALIZED();
     NULL_PARAM_CHECK(p_handle);
@@ -1787,7 +1807,7 @@ api_result_t dm_security_setup_req(dm_handle_t * p_handle)
         }
     }
 
-    DM_LOG("[DM]: << dm_security_setup_req, 0x%08X\r\n", err_code);
+    DM_TRC("[DM]: << dm_security_setup_req, 0x%08X\r\n", err_code);
 
     DM_MUTEX_UNLOCK();
 
@@ -1795,7 +1815,7 @@ api_result_t dm_security_setup_req(dm_handle_t * p_handle)
 }
 
 
-api_result_t dm_security_status_req(dm_handle_t const    * p_handle,
+ret_code_t dm_security_status_req(dm_handle_t const    * p_handle,
                                     dm_security_status_t * p_status)
 {
     VERIFY_MODULE_INITIALIZED();
@@ -1822,7 +1842,7 @@ api_result_t dm_security_status_req(dm_handle_t const    * p_handle,
         (*p_status) = NOT_ENCRYPTED;
     }
 
-    DM_LOG("[DM]: << dm_security_status_req\r\n");
+    DM_TRC("[DM]: << dm_security_status_req\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -1830,7 +1850,7 @@ api_result_t dm_security_status_req(dm_handle_t const    * p_handle,
 }
 
 
-api_result_t dm_whitelist_create(dm_application_instance_t const * p_handle,
+ret_code_t dm_whitelist_create(dm_application_instance_t const * p_handle,
                                  ble_gap_whitelist_t             * p_whitelist)
 {
     VERIFY_MODULE_INITIALIZED();
@@ -1887,7 +1907,7 @@ api_result_t dm_whitelist_create(dm_application_instance_t const * p_handle,
            irk_count,
            addr_count);
 
-    DM_LOG("[DM]: << dm_whitelist_create\r\n");
+    DM_TRC("[DM]: << dm_whitelist_create\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -1895,14 +1915,14 @@ api_result_t dm_whitelist_create(dm_application_instance_t const * p_handle,
 }
 
 
-api_result_t dm_device_add(dm_handle_t               * p_handle,
+ret_code_t dm_device_add(dm_handle_t               * p_handle,
                            dm_device_context_t const * p_context)
 {
     return (API_NOT_IMPLEMENTED | DEVICE_MANAGER_ERR_BASE);
 }
 
 
-api_result_t dm_device_delete(dm_handle_t const * p_handle)
+ret_code_t dm_device_delete(dm_handle_t const * p_handle)
 {
     VERIFY_MODULE_INITIALIZED();
     NULL_PARAM_CHECK(p_handle);
@@ -1911,11 +1931,11 @@ api_result_t dm_device_delete(dm_handle_t const * p_handle)
 
     DM_MUTEX_LOCK();
 
-    DM_LOG("[DM]: >> dm_device_delete\r\n");
+    DM_TRC("[DM]: >> dm_device_delete\r\n");
 
     uint32_t err_code = device_instance_free(p_handle->device_id);
 
-    DM_LOG("[DM]: << dm_device_delete\r\n");
+    DM_TRC("[DM]: << dm_device_delete\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -1923,7 +1943,7 @@ api_result_t dm_device_delete(dm_handle_t const * p_handle)
 }
 
 
-api_result_t dm_device_delete_all(dm_application_instance_t const * p_handle)
+ret_code_t dm_device_delete_all(dm_application_instance_t const * p_handle)
 {
     VERIFY_MODULE_INITIALIZED();
     NULL_PARAM_CHECK(p_handle);
@@ -1933,7 +1953,7 @@ api_result_t dm_device_delete_all(dm_application_instance_t const * p_handle)
 
     uint32_t err_code = NRF_SUCCESS;
 
-    DM_LOG("[DM]: >> dm_device_delete_all\r\n");
+    DM_TRC("[DM]: >> dm_device_delete_all\r\n");
 
     for (uint32_t index = 0; index < DEVICE_MANAGER_MAX_BONDS; index++)
     {
@@ -1943,7 +1963,7 @@ api_result_t dm_device_delete_all(dm_application_instance_t const * p_handle)
         }
     }
 
-    DM_LOG("[DM]: << dm_device_delete_all\r\n");
+    DM_TRC("[DM]: << dm_device_delete_all\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -1951,7 +1971,7 @@ api_result_t dm_device_delete_all(dm_application_instance_t const * p_handle)
 }
 
 
-api_result_t dm_service_context_set(dm_handle_t const          * p_handle,
+ret_code_t dm_service_context_set(dm_handle_t const          * p_handle,
                                     dm_service_context_t const * p_context)
 {
     VERIFY_MODULE_INITIALIZED();
@@ -1963,7 +1983,7 @@ api_result_t dm_service_context_set(dm_handle_t const          * p_handle,
 
     DM_MUTEX_LOCK();
 
-    DM_LOG("[DM]: >> dm_service_context_set\r\n");
+    DM_TRC("[DM]: >> dm_service_context_set\r\n");
 
     if ((p_context->context_data.p_data != NULL) &&
         (
@@ -1987,7 +2007,7 @@ api_result_t dm_service_context_set(dm_handle_t const          * p_handle,
 
     err_code = m_service_context_store[p_context->service_type](&block_handle, p_handle);
 
-    DM_LOG("[DM]: << dm_service_context_set\r\n");
+    DM_TRC("[DM]: << dm_service_context_set\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -1995,7 +2015,7 @@ api_result_t dm_service_context_set(dm_handle_t const          * p_handle,
 }
 
 
-api_result_t dm_service_context_get(dm_handle_t const    * p_handle,
+ret_code_t dm_service_context_get(dm_handle_t const    * p_handle,
                                     dm_service_context_t * p_context)
 {
     VERIFY_MODULE_INITIALIZED();
@@ -2006,14 +2026,14 @@ api_result_t dm_service_context_get(dm_handle_t const    * p_handle,
 
     if ((m_connection_table[p_handle->connection_id].state & STATE_CONNECTED) != STATE_CONNECTED)
     {
-        DM_LOG("[DM]: Device must be connected to get context. \r\n");
+        DM_TRC("[DM]: Device must be connected to get context. \r\n");
 
         return (FEATURE_NOT_ENABLED | DEVICE_MANAGER_ERR_BASE);
     }
 
     DM_MUTEX_LOCK();
 
-    DM_LOG("[DM]: >> dm_service_context_get\r\n");
+    DM_TRC("[DM]: >> dm_service_context_get\r\n");
 
     if ((p_context->context_data.p_data == NULL) &&
         (p_context->context_data.len < DM_GATT_SERVER_ATTR_MAX_SIZE))
@@ -2032,7 +2052,7 @@ api_result_t dm_service_context_get(dm_handle_t const    * p_handle,
 
     err_code = m_service_context_load[p_context->service_type](&block_handle, p_handle);
 
-    DM_LOG("[DM]: << dm_service_context_get\r\n");
+    DM_TRC("[DM]: << dm_service_context_get\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2040,7 +2060,7 @@ api_result_t dm_service_context_get(dm_handle_t const    * p_handle,
 }
 
 
-api_result_t dm_service_context_delete(dm_handle_t const * p_handle)
+ret_code_t dm_service_context_delete(dm_handle_t const * p_handle)
 {
     VERIFY_MODULE_INITIALIZED();
     NULL_PARAM_CHECK(p_handle);
@@ -2053,7 +2073,7 @@ api_result_t dm_service_context_delete(dm_handle_t const * p_handle)
 }
 
 
-api_result_t dm_application_context_set(dm_handle_t const              * p_handle,
+ret_code_t dm_application_context_set(dm_handle_t const              * p_handle,
                                         dm_application_context_t const * p_context)
 {
 #if (DEVICE_MANAGER_APP_CONTEXT_SIZE != 0)
@@ -2067,7 +2087,7 @@ api_result_t dm_application_context_set(dm_handle_t const              * p_handl
 
     DM_MUTEX_LOCK();
 
-    DM_LOG("[DM]: >> dm_application_context_set\r\n");
+    DM_TRC("[DM]: >> dm_application_context_set\r\n");
 
     uint32_t          err_code;
     uint32_t          context_len;
@@ -2123,7 +2143,7 @@ api_result_t dm_application_context_set(dm_handle_t const              * p_handl
         }
     }
 
-    DM_LOG("[DM]: << dm_application_context_set\r\n");
+    DM_TRC("[DM]: << dm_application_context_set\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2135,7 +2155,7 @@ api_result_t dm_application_context_set(dm_handle_t const              * p_handl
 }
 
 
-api_result_t dm_application_context_get(dm_handle_t const        * p_handle,
+ret_code_t dm_application_context_get(dm_handle_t const        * p_handle,
                                         dm_application_context_t * p_context)
 {
 #if (DEVICE_MANAGER_APP_CONTEXT_SIZE != 0)
@@ -2147,7 +2167,7 @@ api_result_t dm_application_context_get(dm_handle_t const        * p_handle,
 
     DM_MUTEX_LOCK();
 
-    DM_LOG("[DM]: >> dm_application_context_get\r\n");
+    DM_TRC("[DM]: >> dm_application_context_get\r\n");
 
     uint32_t          context_len;
     uint32_t          err_code;
@@ -2191,7 +2211,7 @@ api_result_t dm_application_context_get(dm_handle_t const        * p_handle,
         }
     }
 
-    DM_LOG("[DM]: << dm_application_context_get\r\n");
+    DM_TRC("[DM]: << dm_application_context_get\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2203,7 +2223,7 @@ api_result_t dm_application_context_get(dm_handle_t const        * p_handle,
 }
 
 
-api_result_t dm_application_context_delete(const dm_handle_t * p_handle)
+ret_code_t dm_application_context_delete(const dm_handle_t * p_handle)
 {
 #if (DEVICE_MANAGER_APP_CONTEXT_SIZE != 0)
     VERIFY_MODULE_INITIALIZED();
@@ -2213,7 +2233,7 @@ api_result_t dm_application_context_delete(const dm_handle_t * p_handle)
 
     DM_MUTEX_LOCK();
 
-    DM_LOG("[DM]: >> dm_application_context_delete\r\n");
+    DM_TRC("[DM]: >> dm_application_context_delete\r\n");
 
     uint32_t          err_code;
     uint32_t          context_len;
@@ -2248,7 +2268,7 @@ api_result_t dm_application_context_delete(const dm_handle_t * p_handle)
         }
     }
 
-    DM_LOG("[DM]: << dm_application_context_delete\r\n");
+    DM_TRC("[DM]: << dm_application_context_delete\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2259,7 +2279,7 @@ api_result_t dm_application_context_delete(const dm_handle_t * p_handle)
 }
 
 
-api_result_t dm_application_instance_set(dm_application_instance_t const * p_appl_instance,
+ret_code_t dm_application_instance_set(dm_application_instance_t const * p_appl_instance,
                                          dm_handle_t                     * p_handle)
 {
     VERIFY_MODULE_INITIALIZED();
@@ -2286,7 +2306,7 @@ uint32_t dm_handle_initialize(dm_handle_t * p_handle)
 }
 
 
-api_result_t dm_peer_addr_set(dm_handle_t const    * p_handle,
+ret_code_t dm_peer_addr_set(dm_handle_t const    * p_handle,
                               ble_gap_addr_t const * p_addr)
 {
     VERIFY_MODULE_INITIALIZED();
@@ -2297,9 +2317,9 @@ api_result_t dm_peer_addr_set(dm_handle_t const    * p_handle,
 
     DM_MUTEX_LOCK();
 
-    DM_LOG("[DM]: >> dm_peer_addr_set\r\n");
+    DM_TRC("[DM]: >> dm_peer_addr_set\r\n");
 
-    api_result_t err_code;
+    ret_code_t err_code;
 
     if ((p_handle->connection_id == DM_INVALID_ID) &&
         (p_addr->addr_type != BLE_GAP_ADDR_TYPE_RANDOM_PRIVATE_RESOLVABLE))
@@ -2314,7 +2334,7 @@ api_result_t dm_peer_addr_set(dm_handle_t const    * p_handle,
         err_code = (NRF_ERROR_INVALID_PARAM | DEVICE_MANAGER_ERR_BASE);
     }
 
-    DM_LOG("[DM]: << dm_peer_addr_set\r\n");
+    DM_TRC("[DM]: << dm_peer_addr_set\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2322,7 +2342,7 @@ api_result_t dm_peer_addr_set(dm_handle_t const    * p_handle,
 }
 
 
-api_result_t dm_peer_addr_get(dm_handle_t const * p_handle,
+ret_code_t dm_peer_addr_get(dm_handle_t const * p_handle,
                               ble_gap_addr_t    * p_addr)
 {
     VERIFY_MODULE_INITIALIZED();
@@ -2332,9 +2352,9 @@ api_result_t dm_peer_addr_get(dm_handle_t const * p_handle,
 
     DM_MUTEX_LOCK();
 
-    DM_LOG("[DM]: >> dm_peer_addr_get\r\n");
+    DM_TRC("[DM]: >> dm_peer_addr_get\r\n");
 
-    api_result_t err_code;
+    ret_code_t err_code;
 
     err_code = (NRF_ERROR_NOT_FOUND | DEVICE_MANAGER_ERR_BASE);
 
@@ -2344,7 +2364,7 @@ api_result_t dm_peer_addr_get(dm_handle_t const * p_handle,
             ((m_connection_table[p_handle->connection_id].state & STATE_CONNECTED) ==
             STATE_CONNECTED))
         {
-            DM_LOG("[DM]:[CI 0x%02X]: Address get for non bonded active connection.\r\n",
+            DM_TRC("[DM]:[CI 0x%02X]: Address get for non bonded active connection.\r\n",
                    p_handle->connection_id);
 
             (*p_addr) = m_connection_table[p_handle->connection_id].peer_addr;
@@ -2355,7 +2375,7 @@ api_result_t dm_peer_addr_get(dm_handle_t const * p_handle,
     {
         if ((m_peer_table[p_handle->device_id].id_bitmap & ADDR_ENTRY) == 0)
         {
-            DM_LOG("[DM]:[DI 0x%02X]: Address get for bonded device.\r\n",
+            DM_TRC("[DM]:[DI 0x%02X]: Address get for bonded device.\r\n",
                    p_handle->device_id);
 
             (*p_addr) = m_peer_table[p_handle->device_id].peer_id.id_addr_info;
@@ -2363,7 +2383,7 @@ api_result_t dm_peer_addr_get(dm_handle_t const * p_handle,
         }
     }
 
-    DM_LOG("[DM]: << dm_peer_addr_get\r\n");
+    DM_TRC("[DM]: << dm_peer_addr_get\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2371,8 +2391,8 @@ api_result_t dm_peer_addr_get(dm_handle_t const * p_handle,
 }
 
 
-api_result_t dm_distributed_keys_get(dm_handle_t const    * p_handle,
-                                     ble_gap_sec_keyset_t * p_key_dist)
+ret_code_t dm_distributed_keys_get(dm_handle_t const * p_handle,
+                                     dm_sec_keyset_t   * p_key_dist)
 {
     VERIFY_MODULE_INITIALIZED();
     NULL_PARAM_CHECK(p_handle);
@@ -2382,18 +2402,18 @@ api_result_t dm_distributed_keys_get(dm_handle_t const    * p_handle,
 
     DM_MUTEX_LOCK();
 
-    DM_LOG("[DM]: >> dm_distributed_keys_get\r\n");
+    DM_TRC("[DM]: >> dm_distributed_keys_get\r\n");
 
-    api_result_t      err_code;
+    ret_code_t      err_code;
     ble_gap_enc_key_t peer_enc_key;
     pstorage_handle_t block_handle;
 
-    err_code                            = NRF_ERROR_NOT_FOUND;
-    p_key_dist->keys_central.p_enc_key  = NULL;
-    p_key_dist->keys_central.p_id_key   = &m_local_id_info;
-    p_key_dist->keys_central.p_sign_key = NULL;
-    p_key_dist->keys_periph.p_id_key    = &m_peer_table[p_handle->device_id].peer_id;
-    p_key_dist->keys_periph.p_sign_key  = NULL;
+    err_code                                   = NRF_ERROR_NOT_FOUND;
+    p_key_dist->keys_central.enc_key.p_enc_key = NULL;
+    p_key_dist->keys_central.p_id_key          = (dm_id_key_t *)&m_local_id_info;
+    p_key_dist->keys_central.p_sign_key        = NULL;
+    p_key_dist->keys_periph.p_id_key           = (dm_id_key_t *)&m_peer_table[p_handle->device_id].peer_id;
+    p_key_dist->keys_periph.p_sign_key         = NULL;
 
     err_code = pstorage_block_identifier_get(&m_storage_handle, p_handle->device_id, &block_handle);
 
@@ -2407,17 +2427,17 @@ api_result_t dm_distributed_keys_get(dm_handle_t const    * p_handle,
 
         if (err_code == NRF_SUCCESS)
         {
-            p_key_dist->keys_central.p_enc_key  = NULL;
-            p_key_dist->keys_central.p_id_key   = &m_local_id_info;
-            p_key_dist->keys_central.p_sign_key = NULL;
-            p_key_dist->keys_periph.p_id_key    = &m_peer_table[p_handle->device_id].peer_id;
-            p_key_dist->keys_periph.p_sign_key  = NULL;
-            p_key_dist->keys_periph.p_enc_key   = &peer_enc_key;
+            p_key_dist->keys_central.enc_key.p_enc_key = NULL;
+            p_key_dist->keys_central.p_id_key          = (dm_id_key_t *)&m_local_id_info;
+            p_key_dist->keys_central.p_sign_key        = NULL;
+            p_key_dist->keys_periph.p_id_key           = (dm_id_key_t *)&m_peer_table[p_handle->device_id].peer_id;
+            p_key_dist->keys_periph.p_sign_key         = NULL;
+            p_key_dist->keys_periph.enc_key.p_enc_key  = (dm_enc_key_t *)&peer_enc_key;
 
         }
     }
 
-    DM_LOG("[DM]: << dm_distributed_keys_get\r\n");
+    DM_TRC("[DM]: << dm_distributed_keys_get\r\n");
 
     DM_MUTEX_UNLOCK();
 
@@ -2501,10 +2521,10 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
                     if (err_code == NRF_SUCCESS)
                     {
                         DM_LOG("[DM]:[%02X]:[Block ID 0x%08X]:Loading bond information at %p, size 0x%08X, offset 0x%08X.\r\n",
-                               index,
+                               index, 
                                block_handle.block_id,
-                               &m_bond_table[index],
-                               BOND_SIZE,
+                               &m_bond_table[index], 
+                               BOND_SIZE, 
                                BOND_STORAGE_OFFSET);
 
                         err_code = pstorage_load((uint8_t *)&m_bond_table[index],
@@ -2531,16 +2551,16 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
                         if (err_code != NRF_SUCCESS)
                         {
                             DM_ERR("[DM]:[%02X]: Failed to load service information, reason %08X\r\n",
-                                   index,
+                                   index, 
                                    err_code);
                         }
                     }
                     else
                     {
                         DM_ERR("[DM]:[%02X]: Failed to get block identifier for "
-                               "device %08X, reason %08X.\r\n",
-                               index,
-                               device_index,
+                               "device %08X, reason %08X.\r\n", 
+                               index, 
+                               device_index, 
                                err_code);
                     }
                 }
@@ -2587,7 +2607,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
 
         case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
             DM_LOG("[DM]: >> BLE_GAP_EVT_SEC_PARAMS_REQUEST\r\n");
-
+            
             notify_app = false;
             ble_gap_sec_keyset_t keys_exchanged;
 
@@ -2598,7 +2618,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
                    p_ble_evt->evt.gap_evt.params.sec_params_request.peer_params.bond);
 
             keys_exchanged.keys_central.p_enc_key  = NULL;
-            keys_exchanged.keys_central.p_id_key   = &m_local_id_info;
+            keys_exchanged.keys_central.p_id_key   = NULL;
             keys_exchanged.keys_central.p_sign_key = NULL;
             keys_exchanged.keys_periph.p_enc_key   = &m_bond_table[index].peer_enc_key;
             keys_exchanged.keys_periph.p_id_key    =
@@ -2651,7 +2671,7 @@ void dm_ble_evt_handler(ble_evt_t * p_ble_evt)
                         //IRK and/or public address is shared, update it.
                         if (p_ble_evt->evt.gap_evt.params.auth_status.kdist_periph.id == 1)
                         {
-                            m_peer_table[index].id_bitmap &= (~IRK_ENTRY);
+                            m_peer_table[handle.device_id].id_bitmap &= (~IRK_ENTRY);
                         }
 
                         if (m_connection_table[index].bonded_dev_id != DM_INVALID_ID)
