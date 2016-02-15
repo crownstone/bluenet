@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 #from pylab import *
 import matplotlib.pyplot as plt
 import sys
@@ -126,7 +124,8 @@ beaconNames = {
 	"EC 9C 70 56 9F 90":"32k",
 }
 
-def parse(filename):
+
+def parseMinicom(filename):
 	"""
 	Parses a log file and returns the parsed data
 	:param filename:
@@ -222,7 +221,6 @@ def parseHubData(filename):
 			entry["time"] = timestamp
 			entry["address"] = address
 			entry["rssi"] = rssi
-			entry["occurances"] = occurances
 	data["startTimestamp"] = first seen timestamp
 	data["endTimestamp"] = last seen timestamp
 	"""
@@ -244,9 +242,11 @@ def parseHubData(filename):
 			startTimestamp = timestamp
 		endTimestamp = timestamp
 		scannedDevices = jscan["scannedDevices"]
+#		nodeAddress = "00:00:00:00:00:00"
+		nodeAddress = jscan["source_address"]
 
 		for dev in scannedDevices:
-			nodeAddress = "00:00:00:00:00:00"
+
 			scannedAddress = dev["address"]
 			rssi = dev["rssi"]
 			entry = {"time":timestamp, "address":scannedAddress, "rssi":rssi}
@@ -256,6 +256,51 @@ def parseHubData(filename):
 				data["scans"][nodeAddress] = [entry]
 			else:
 				data["scans"][nodeAddress].append(entry)
+	logfile.close()
+	data["startTimestamp"] = startTimestamp
+	data["endTimestamp"] = endTimestamp
+	for node in scans.keys():
+		print node
+
+	return data
+
+
+def parseRssiTest(filename):
+	"""
+	Parses a log file and returns the parsed data
+	:param filename:
+	:return:
+	data["scans"]
+		scans["node address"] = [entry, entry, ...]
+			entry["time"] = timestamp
+			entry["address"] = address
+			entry["rssi"] = rssi
+	data["startTimestamp"] = first seen timestamp
+	data["endTimestamp"] = last seen timestamp
+	"""
+	logfile = open(filename, "r")
+	scans = {}
+	data = {"scans" : scans}
+	startTimestamp = -1
+	endTimestamp = -1
+
+	nodeAddress = "00:00:00:00:00:00"
+	scans[nodeAddress] = []
+
+	for line in logfile:
+		items = line.rstrip().split(",")
+		if (len(items) is not 3):
+			continue
+
+		timestamp = time.mktime(datetime.datetime.strptime(items[0], "%Y-%m-%dT%H:%M:%S").timetuple())
+		address = items[1]
+		rssi = items[2]
+		entry = {"time":timestamp, "address":address, "rssi":rssi}
+		scans[nodeAddress].append(entry)
+
+		if (startTimestamp < 0):
+			startTimestamp = timestamp
+		endTimestamp = timestamp
 	logfile.close()
 	data["startTimestamp"] = startTimestamp
 	data["endTimestamp"] = endTimestamp
@@ -337,8 +382,8 @@ def plotScansAsDots(data):
 		xticks = range(0, int(duration+1), int(duration/100))
 		formattedTimestamps = []
 
-		for i in xticks:
-			formattedTimestamps.append(datetime.datetime.fromtimestamp(i+startTimestamp).strftime("%m-%d %H:%M"))
+		for timestamp in xticks:
+			formattedTimestamps.append(datetime.datetime.fromtimestamp(timestamp+startTimestamp).strftime("%m-%d %H:%M"))
 		plt.xticks(xticks, formattedTimestamps, rotation="vertical")
 
 		plt.grid(axis="x")
@@ -480,33 +525,7 @@ def plotBandwidth2(data):
 
 
 if __name__ == '__main__':
-	fileName = sys.argv[1]
-	fileBaseName, fileExtension = os.path.splitext(fileName)
-	if (fileExtension == ".p"):
-		with open(fileName, "r") as fp:
-			logData = pickle.load(fp)
-	elif (fileExtension == ".json"):
-		with open("filename", "r") as fp:
-			logData = json.load(fp)
-	else:
-#		logData = parse(fileName)
-		logData = parseHubData(fileName)
-		with open(fileBaseName + ".p", "wb") as fp:
-			pickle.dump(logData, fp, pickle.HIGHEST_PROTOCOL)
-#		with open(fileBaseName + ".json", "w") as fp:
-#			json.dump(logData, fp)
-
-
-#	logData = filterJawBones(logData)
-	logData = filterMostScannedDevices(logData, 200)
-
-	plotScansAsDots(logData)
-#	plotScansAsDots2(logData)
-#	plotBandwidth(logData)
-#	plotBandwidth2(logData)
-	plt.show()
-
-
+	print "File not intended as main."
 
 
 
