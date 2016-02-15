@@ -39,6 +39,7 @@
 #define BLE_CHAR_SCAN                            "Scan"
 #define BLE_CHAR_TRACK                           "Track"
 #define BLE_CHAR_PWM                             "PWM"
+#define BLE_CHAR_RELAY                           "Relay"
 #define BLE_CHAR_NEW_ALERT                       "New Alert"
 #define BLE_CHAR_CURRENT_TIME                    "Current Time"
 
