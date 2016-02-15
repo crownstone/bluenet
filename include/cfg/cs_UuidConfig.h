@@ -32,6 +32,7 @@ enum PowerCharacteristicsIDs {
 	CURRENT_CURVE_UUID                      = 0x3,
 	CURRENT_CONSUMPTION_UUID                = 0x4,
 	CURRENT_LIMIT_UUID                      = 0x5,
+	RELAY_UUID                              = 0x6,
 };
 
 enum GeneralCharacteristicsIDs {
