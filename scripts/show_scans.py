@@ -307,35 +307,17 @@ def parseRssiTest(filename):
 	return data
 
 
-def filterJawBones(data, remove=False):
-	# newData = data
-	# newData["scans"] = {}
+def filterDevAddresses(data, addresses, remove=False):
 	scans = data["scans"]
 	for addr in scans:
 		for i in range(len(scans[addr])-1, -1,-1):
 			scan = scans[addr][i]
 			dev = scan["address"]
-			if (dev in jawBones and remove):
+			if (dev in addresses and remove):
 				scans[addr].pop(i)
-			if (dev not in jawBones and not remove):
-				scans[addr].pop(i)
-	return data
-
-
-def filterBeacons(data, remove=False):
-	# newData = data
-	# newData["scans"] = {}
-	scans = data["scans"]
-	for addr in scans:
-		for i in range(len(scans[addr])-1, -1,-1):
-			scan = scans[addr][i]
-			dev = scan["address"]
-			if (dev in beaconNames and remove):
-				scans[addr].pop(i)
-			if (dev not in beaconNames and not remove):
+			if (dev not in addresses and not remove):
 				scans[addr].pop(i)
 	return data
-
 
 def filterMostScannedDevices(data, minNumTimesScanned):
 	numTimesScanned = {}
@@ -411,9 +393,9 @@ def getFrequencyPerDevicePerNode(data, windowSize):
 					rssi = scan["rssi"]
 					if (startTimes[tInd-1] <= timestamp < startTimes[tInd]):
 						numScans[devAddr][nodeAddr][-1] += 1.0
-					# Beacon 0, 5, 9 scan 6 times faster atm
-					if (nodeAddr in ["E8:00:93:4E:7B:D9", "F5:A7:4B:49:8C:7D", "FE:04:85:F9:8F:E9"]):
-						numScans[devAddr][nodeAddr][-1] /= 6.0
+				# Beacon 0, 5, 9 scan six times faster atm
+				if (nodeAddr in ["E8:00:93:4E:7B:D9", "F5:A7:4B:49:8C:7D", "FE:04:85:F9:8F:E9"]):
+					numScans[devAddr][nodeAddr][-1] /= 6.0
 	return {"numScansPerDev":numScans, "startTimes": startTimes}
 
 
