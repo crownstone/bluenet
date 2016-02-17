@@ -307,7 +307,7 @@ def parseRssiTest(filename):
 	return data
 
 
-def filterJawBones(data):
+def filterJawBones(data, remove=False):
 	# newData = data
 	# newData["scans"] = {}
 	scans = data["scans"]
@@ -315,7 +315,24 @@ def filterJawBones(data):
 		for i in range(len(scans[addr])-1, -1,-1):
 			scan = scans[addr][i]
 			dev = scan["address"]
-			if (dev not in jawBones):
+			if (dev in jawBones and remove):
+				scans[addr].pop(i)
+			if (dev not in jawBones and not remove):
+				scans[addr].pop(i)
+	return data
+
+
+def filterBeacons(data, remove=False):
+	# newData = data
+	# newData["scans"] = {}
+	scans = data["scans"]
+	for addr in scans:
+		for i in range(len(scans[addr])-1, -1,-1):
+			scan = scans[addr][i]
+			dev = scan["address"]
+			if (dev in beaconNames and remove):
+				scans[addr].pop(i)
+			if (dev not in beaconNames and not remove):
 				scans[addr].pop(i)
 	return data
 
@@ -501,8 +518,6 @@ def plotRssi(data):
 	lineColors = ["b", "g", "r", "c", "m", "y", "k"]
 	lineStyles = ["o", "^", "d", "+", "*"]
 	for devAddr in scansPerDev:
-		if (devAddr in beaconNames):
-			continue
 #		plt.figure()
 		fig, axarr = plt.subplots(len(scansPerDev[devAddr]), sharex=True, sharey=True)
 		devName = devAddr
@@ -564,8 +579,6 @@ def plotScanFrequency(data):
 	lineStyles = ["o", "^", "d", "+", "*"]
 
 	for devAddr in numScans:
-		if (devAddr in beaconNames):
-			continue
 #		plt.figure()
 		fig, axarr = plt.subplots(len(numScans[devAddr]), sharex=True, sharey=True)
 		devName = devAddr
