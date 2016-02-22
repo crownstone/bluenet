@@ -51,8 +51,8 @@
 #if(HARDWARE_BOARD==CROWNSTONE2)
 // v0.86
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    0                   // something unused
-#define PIN_GPIO_RELAY_OFF   5                   // something unused
+#define PIN_GPIO_RELAY_ON    5                   // something unused
+#define PIN_GPIO_RELAY_OFF   0                   // something unused
 //#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -71,8 +71,8 @@
 #if(HARDWARE_BOARD==CROWNSTONE3)
 // v0.90
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    0                   // something unused
-#define PIN_GPIO_RELAY_OFF   5                   // something unused
+#define PIN_GPIO_RELAY_ON    5                   // something unused
+#define PIN_GPIO_RELAY_OFF   0                   // something unused
 //#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -93,8 +93,8 @@
 #if(HARDWARE_BOARD==CROWNSTONE4)
 // v0.92
 #define PIN_GPIO_SWITCH      4                   // this is p0.04 or gpio 4
-#define PIN_GPIO_RELAY_ON    0                   // something unused
-#define PIN_GPIO_RELAY_OFF   5                   // something unused
+#define PIN_GPIO_RELAY_ON    5                   // something unused
+#define PIN_GPIO_RELAY_OFF   0                   // something unused
 //#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -115,8 +115,8 @@
 #if(HARDWARE_BOARD==CROWNSTONE_SENSOR)
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    0                   // something unused
-#define PIN_GPIO_RELAY_OFF   5                   // something unused
+#define PIN_GPIO_RELAY_ON    5                   // something unused
+#define PIN_GPIO_RELAY_OFF   0                   // something unused
 //#define PIN_AIN_ADC          6                   // ain6 is p0.05 or gpio 5
 //#define PIN_AIN_LPCOMP       5                   // ain5 is p0.04 or gpio 4
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
