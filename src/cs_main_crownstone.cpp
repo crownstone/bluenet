@@ -158,6 +158,11 @@ void Crownstone::configDrivers() {
 #if HARDWARE_BOARD==PCA10001
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 #endif
+
+#if HAS_LEDS==1
+	nrf_gpio_cfg_output(PIN_GPIO_LED_1);
+	nrf_gpio_cfg_output(PIN_GPIO_LED_2);
+#endif
 }
 
 void Crownstone::createServices() {
@@ -259,6 +264,23 @@ void Crownstone::configure() {
 	LOGi("... done");
 }
 
+//app_timer_id_t blinkyTimer;
+//bool led1On = true;
+//void blinkyblink() {
+////	LOGi("blinkyblink");
+//	if (led1On) {
+////		LOGi("green");
+//		nrf_gpio_pin_clear(PIN_GPIO_LED_1);
+//		nrf_gpio_pin_set(PIN_GPIO_LED_2);
+//	} else {
+////		LOGi("red");
+//		nrf_gpio_pin_set(PIN_GPIO_LED_1);
+//		nrf_gpio_pin_clear(PIN_GPIO_LED_2);
+//	}
+//	led1On = !led1On;
+//	Timer::getInstance().start(blinkyTimer, MS_TO_TICKS(2000), NULL);
+//}
+
 void Crownstone::setup() {
 	welcome();
 
@@ -268,6 +290,9 @@ void Crownstone::setup() {
 
 	LOGi("Create Timer");
 	Timer::getInstance();
+
+//	Timer::getInstance().createSingleShot(blinkyTimer, (app_timer_timeout_handler_t)blinkyblink);
+//	Timer::getInstance().start(blinkyTimer, MS_TO_TICKS(2000), NULL);
 
 	// set up the bluetooth stack that controls the hardware.
 	_stack = &Nrf51822BluetoothStack::getInstance();
@@ -396,6 +421,10 @@ void Crownstone::run() {
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();
+#endif
+
+#if POWER_SERVICE==1
+//	_powerService->startStaticSampling();
 #endif
 
 	while(1) {
