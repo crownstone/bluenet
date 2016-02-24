@@ -125,8 +125,8 @@
 #define PIN_GPIO_RX          2                   // this is p0.02 or gpio 2
 #define PIN_GPIO_TX          3                   // this is p0.03 or gpio 3
 
-#define PIN_GPIO_LED_1       6					 // this is p0.07, RED
-#define PIN_GPIO_LED_2       7					 // this is p0.07, GREEN
+#define PIN_GPIO_LED_1       6					 // this is p0.07, GREEN
+#define PIN_GPIO_LED_2       7					 // this is p0.07, RED
 #define HAS_LEDS             1
 
 // Switch pin should be low to switch lights on
