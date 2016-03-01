@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Nov 4, 2014
@@ -31,7 +31,6 @@ namespace BLEpp {
  * Note that you might not be able to use this commercially! Although I would be surprised if it is possible
  * to patent a "struct" or the Apple prefix.
  */
-
 class IBeacon {
 	private:
 	/** Advertisement indicator, defined as 0x0215 for iBeacons

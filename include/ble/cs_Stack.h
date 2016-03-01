@@ -20,7 +20,7 @@
 #include <ble/cs_DoBotsManufac.h>
 
 /////////////////////////////////////////////////
-//! test
+// test
 
 extern "C" {
 #include "device_manager.h"
@@ -33,9 +33,7 @@ extern "C" {
 
 // @TODO: replace std::vector with a fixed, in place array of size capacity.
 
-/**
- * @namespace BLEpp
- * General BLE name service
+/** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
