@@ -33,7 +33,7 @@ extern "C" {
 
 // TODO: replace std::vector with a fixed, in place array of size capacity.
 
-/* General BLE name service
+/**General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
@@ -41,7 +41,7 @@ namespace BLEpp {
 
 class Service;
 
-/* BLEStack defines a chip-agnostic Bluetooth Low-Energy stack
+/**BLEStack defines a chip-agnostic Bluetooth Low-Energy stack
  *
  * Currently, this class does not leverage much of the general Bluetooth Low-Energy functionality into
  * chip-agnostic code. However, this might be recommendable in the future.
@@ -50,13 +50,13 @@ class BLEStack {
 public:
 	virtual ~BLEStack() {};
 
-	/* Connected?
+	/** Connected?
 	 *
 	 * @return true if connected, false if not connected
 	 */
 	virtual bool connected() = 0;
 
-	/* Handle to connection
+	/** Handle to connection
 	 *
 	 * @return 16-bit value that unique identifies the connection
 	 */
@@ -64,7 +64,7 @@ public:
 };
 
 
-/* nRF51822 specific implementation of the BLEStack
+/**nRF51822 specific implementation of the BLEStack
  *
  * The Nrf51822BluetoothStack class is a direct descendant from BLEStack. It is implemented as a singleton, such
  * that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt
@@ -79,7 +79,7 @@ class Nrf51822BluetoothStack : public BLEStack {
 //	friend void ::SWI1_IRQHandler();
 
 private:
-	/* Constructor of the BLE stack on the NRF51822
+	/** Constructor of the BLE stack on the NRF51822
 	 *
 	 * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. However,
 	 * the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the init()
@@ -166,7 +166,7 @@ protected:
 	dm_application_instance_t                   _dm_app_handle;
 public:
 
-	/* Initialization of the BLE stack
+	/** Initialization of the BLE stack
 	 *
 	 * Performs a series of tasks:
 	 *   - disables softdevice if it is currently enabled
@@ -182,7 +182,7 @@ public:
 	 */
 	void init();
 
-	/* Start the BLE stack
+	/** Start the BLE stack
 	 *
 	 * Start can only be called once. It starts all services. If one of these services cannot be started, there is
 	 * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in
@@ -200,7 +200,7 @@ public:
 	 */
 	void stopTicking();
 
-	/* Shutdown the BLE stack
+	/** Shutdown the BLE stack
 	 *
 	 * The function shutdown() is the counterpart of start(). It does stop all services. It does not check if these
 	 * services have actually been started.
@@ -243,7 +243,7 @@ public:
 
 	void updateAppearance(uint16_t appearance);
 
-	/* Update device name
+	/** Update device name
 	 * @deviceName limited string for device name
 	 *
 	 * We want to change the device name halfway. This can be done through a characteristic, which is easy during
@@ -309,7 +309,7 @@ public:
 	Service& getService(std::string name);
 	void addService(Service* svc);
 
-	/* Start advertising as an iBeacon
+	/** Start advertising as an iBeacon
 	 *
 	 * @beacon the object defining the parameters for the
 	 *   advertisement package. See <IBeacon> for an explanation
@@ -324,7 +324,7 @@ public:
 	 */
 	void startIBeacon(IBeacon* beacon, uint8_t deviceType);
 
-	/* Start sending advertisement packets.
+	/** Start sending advertisement packets.
 	 * This can not be called while scanning, start scanning while advertising is possible though.
 	 */
 	void startAdvertising(uint8_t deviceType);
@@ -333,7 +333,7 @@ public:
 
 	bool isAdvertising();
 
-	/* Start scanning for devices
+	/** Start scanning for devices
 	 *
 	 * Only call the following functions with a S120 or S130 device that can play a central role. The following functions
 	 * are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone
@@ -341,15 +341,15 @@ public:
 	 */
 	void startScanning();
 
-	/* Stop scanning for devices
+	/** Stop scanning for devices
 	 */
 	void stopScanning();
 
-	/* Returns true if currently scanning
+	/** Returns true if currently scanning
 	 */
 	bool isScanning();
 
-	/* Set radion notification interrupts
+	/** Set radion notification interrupts
 	 *
 	 * Function that sets up radio notification interrupts. It sets the IRQ priority, enables it, and sets some
 	 * configuration values related to distance.
@@ -365,7 +365,7 @@ public:
 		return _conn_handle;
 	}
 
-	/* Not time-critical functionality can be done in the tick
+	/** Not time-critical functionality can be done in the tick
 	 *
 	 * Every module on the system gets a tick in which it regularly gets some attention. Of course, everything that is
 	 * important should be done within interrupt handlers.
@@ -375,7 +375,7 @@ public:
 	 */
 //	void tick();
 
-	/* Function that handles BLE events
+	/** Function that handles BLE events
 	 *
 	 * A BLE event is generated, these can be connect or disconnect events. It can also be RSSI values that changed, or
 	 * an authorization request. Not all event structures are exactly the same over the different SoftDevices, so there
@@ -407,7 +407,7 @@ protected:
 	void updateConnParams();
 	void updatePasskey();
 
-	/* Connection request
+	/** Connection request
 	 *
 	 * On a connection request send it to all services.
 	 */
@@ -415,7 +415,7 @@ protected:
 	void on_disconnected(ble_evt_t * p_ble_evt);
 	void on_advertisement(ble_evt_t * p_ble_evt);
 
-	/* Transmission complete event
+	/** Transmission complete event
 	 *
 	 * Inform all services that transmission was completed in case they have notifications pending
 	 */

@@ -59,7 +59,7 @@ public:
 
 	//////////// BufferAccessor ////////////////////////////
 
-	/* @inherit */
+	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
 		LOGi("sizeof(mesh_characteristic_message_t): %d, maxLength: %d", sizeof(mesh_characteristic_message_t), maxLength);
 		assert(sizeof(mesh_characteristic_message_t) <= maxLength, "buffer not large enough to hold mesh message!");
@@ -67,17 +67,17 @@ public:
 		return 0;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	inline uint16_t getDataLength() const {
 		return MM_SERIALIZED_SIZE;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	inline uint16_t getMaxLength() const {
 		return MM_SERIALIZED_SIZE;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
 		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();

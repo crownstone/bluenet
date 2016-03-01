@@ -17,14 +17,14 @@ class AlertService : public BLEpp::Service {
 public:
 //	typedef function<int8_t()> func_t;
 
-	/* Constructor for alert notification service object
+	/** Constructor for alert notification service object
 	 *
 	 * Creates persistent storage (FLASH) object which is used internally to store current limit.
 	 * It also initializes all characteristics.
 	 */
 	AlertService();
 
-	/* Initialize a GeneralService object
+	/** Initialize a GeneralService object
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
@@ -32,18 +32,18 @@ public:
 
 	new_alert_t getAlert();
 
-	/* Set the alert that the service sends out
+	/** Set the alert that the service sends out
 	 */
 	void setAlert(new_alert_t alert);
 
 	void setAlert(uint8_t type);
 
-	/* Adds an extended alert type to existing alert
+	/** Adds an extended alert type to existing alert
 	 * See cs_AlertAccessor.h for available types
 	 */
 	void addAlert(uint8_t bluenetType);
 
-	/* Perform non urgent functionality every main loop.
+	/** Perform non urgent functionality every main loop.
 	 *
 	 * Every component has a "tick" function which is for non-urgent things.
 	 * Urgent matters have to be resolved immediately in interrupt service handlers.

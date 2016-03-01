@@ -22,7 +22,7 @@
 
 #define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10 // hz
 
-/* Struct used by the <IndoorLocalisationService> to store elements
+/**Struct used by the <IndoorLocalisationService> to store elements
  */
 struct ps_indoorlocalisation_service_t : ps_storage_base_t {
 	struct {
@@ -42,7 +42,7 @@ protected:
 	void addTrackedDeviceListCharacteristic();
 	void addTrackedDeviceCharacteristic();
 
-	/* Get a handle to the persistent storage struct and load it from FLASH.
+	/** Get a handle to the persistent storage struct and load it from FLASH.
 	 *
 	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
 	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
@@ -50,7 +50,7 @@ protected:
 	 */
 	void loadPersistentStorage();
 
-	/* Save to FLASH.
+	/** Save to FLASH.
 	*/
 	void savePersistentStorage();
 
@@ -67,7 +67,7 @@ public:
 
 	void scheduleNextTick();
 
-	/* Initialize a IndoorLocalization object
+	/** Initialize a IndoorLocalization object
 	 * @stack Bluetooth Stack to attach this service to
 	 *
 	 * Add all characteristics and initialize them where necessary.

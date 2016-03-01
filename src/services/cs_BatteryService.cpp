@@ -11,7 +11,7 @@
 
 namespace BLEpp {
 
-/* Battery service
+/** Battery service
  *
  * Defines a single characteristic to read a battery level. This is a predefined UUID, stored at
  * <BLE_UUID_BATTERY_LEVEL_CHAR>. The name is "battery", and the default value is 100.
@@ -41,7 +41,7 @@ public:
 		_characteristic->setDefaultValue(100);
 	}
 
-	/* Set the battery level
+/** Set the battery level
 	 * @batteryLevel level of the battery in percentage
 	 *
 	 * Indicates the level of the battery in a percentage to the user. This is of no use for a device attached to
@@ -51,7 +51,7 @@ public:
 		(*_characteristic) = batteryLevel;
 	}
 
-	/* Set a callback function for a battery level change
+/** Set a callback function for a battery level change
 	 * @func callback function
 	 *
 	 * Not in use

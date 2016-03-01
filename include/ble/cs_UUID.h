@@ -15,7 +15,7 @@ namespace BLEpp {
 
 // TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
 
-/* A Universally Unique IDentifier.
+/**A Universally Unique IDentifier.
  *
  * This is a 128-bit sequence for non-standard profiles, services, characteristics, or descriptors.
  * There are several identifiers predefined at
@@ -26,26 +26,26 @@ namespace BLEpp {
 class UUID {
 
 protected:
-	/* proprietary UUID std::string. NULL for standard UUIDs.
+	/** proprietary UUID std::string. NULL for standard UUIDs.
 	 */
 	const char*           _full;
 
-	/* 16-bit UUID value or octets 12-13 of 128-bit UUID.
+	/** 16-bit UUID value or octets 12-13 of 128-bit UUID.
 	 */
 	uint16_t              _uuid;
 
-	/* UUID type, see <BLE_UUID_TYPES>.
+	/** UUID type, see <BLE_UUID_TYPES>.
 	 */
 	uint8_t               _type;
 
 public:
-	/* Empty constructor
+	/** Empty constructor
 	 *
 	 * Creates an empty UUID object, and sets all variables to unknown
 	 */
 	UUID() : _full(NULL), _uuid(0xdead), _type(BLE_UUID_TYPE_UNKNOWN) {};
 
-	/* Default constructor
+	/** Default constructor
 	 *
 	 * @fullUid the UUID as a string
 	 *
@@ -54,7 +54,7 @@ public:
 	UUID(const char* fullUid):
 		_full(fullUid), _uuid(0x0), _type(BLE_UUID_TYPE_UNKNOWN) {};
 
-	/* Constructor for Bluetooth SIG UUID (16-bit)
+	/** Constructor for Bluetooth SIG UUID (16-bit)
 	 *
 	 * @uuid the 16-bit UUID
 	 *
@@ -66,7 +66,7 @@ public:
 	UUID(uint16_t uuid) :
 		_full(NULL), _uuid(uuid), _type(BLE_UUID_TYPE_BLE) { }
 
-	/* Constructor for Characteristic UUID generation
+	/** Constructor for Characteristic UUID generation
 	 *
 	 * @parent the UUID of the Service
 	 *
@@ -82,7 +82,7 @@ public:
 	UUID(UUID& parent, uint16_t uidValue):
 		_full(NULL), _uuid(uidValue), _type(parent.init()) {}
 
-	/* Copy constructor
+	/** Copy constructor
 	 *
 	 * @rhs the <UUID> object from which the values should be taken over
 	 *
@@ -92,7 +92,7 @@ public:
 	UUID(const UUID& rhs):
 		_full(rhs._full), _uuid(rhs._uuid), _type(rhs._type) {}
 
-	/* Constructor
+	/** Constructor
 	 *
 	 * @value the values of the object as type <ble_uuid_t>
 	 *
@@ -101,7 +101,7 @@ public:
 	UUID(const ble_uuid_t& value):
 		_full(NULL), _uuid(value.uuid), _type(value.type) {} // FIXME NRFAPI
 
-	/* Getter for the 16-bit UUID
+	/** Getter for the 16-bit UUID
 	 *
 	 * @return the 16-bit UUID
 	 */
@@ -109,7 +109,7 @@ public:
 		return _uuid;
 	}
 
-	/* Getter for the type
+	/** Getter for the type
 	 *
 	 * @return the UUID type. See <BLE_UUID_TYPES>
 	 */
@@ -118,13 +118,13 @@ public:
 		return _type;
 	}
 
-	/* Initialize this object
+	/** Initialize this object
 	 *
 	 * @return the UUID type of this object. See <BLE_UUID_TYPES>
 	 */
 	uint16_t init();
 
-	/* Cast operator <ble_uuid_t>
+	/** Cast operator <ble_uuid_t>
 	 *
 	 * Casts or rather converts this object to the type
 	 * <ble_uuid_t>
@@ -133,7 +133,7 @@ public:
 	 */
 	operator ble_uuid_t();
 
-	/* Cast operator <ble_uuid128_t>
+	/** Cast operator <ble_uuid128_t>
 	 *
 	 * Casts or rather converts this object to the type
 	 * <ble_uuid128_t> by parsing the <_full> array and

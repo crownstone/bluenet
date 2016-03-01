@@ -19,7 +19,7 @@
 #define PWM_IRQHandler          TIMER2_IRQHandler
 #define PWM_IRQn                TIMER2_IRQn
 
-/* Pulse Wide Modulation mode typedef
+/**Pulse Wide Modulation mode typedef
  */
 typedef enum {
 	// 122 Hz PWM
@@ -34,7 +34,7 @@ typedef enum {
     PWM_MODE_62500
 } pwm_mode_t;
 
-/* Pulse Wide Modulation struct
+/**Pulse Wide Modulation struct
  */
 struct pwm_config_t {
     uint8_t         num_channels;
@@ -61,7 +61,7 @@ struct pwm_config_t {
                              .mode           = PWM_MODE_122}
 */
 
-/* Pulse Wide Modulation class
+/**Pulse Wide Modulation class
  *
  * To turn on/off the power, as well as all intermediate stages, for example with dimming, the PWM class is used.
  */

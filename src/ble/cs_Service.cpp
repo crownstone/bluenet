@@ -62,7 +62,7 @@ void Service::on_ble_event(ble_evt_t * p_ble_evt) {
 	}
 }
 
-/* On connect event for an individual service
+/** On connect event for an individual service
  *
  * An individual service normally doesn't respond to a connect event. However, it can be used to for example allocate
  * memory only when a user is connected.
@@ -71,7 +71,7 @@ void Service::on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt)
 	// nothing here yet.
 }
 
-/* On disconnect event for an individual service
+/** On disconnect event for an individual service
  *
  * Just as on_connect this method can be used to for example deallocate structures that only need to exist when a user
  * is connected.
@@ -80,7 +80,7 @@ void Service::on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& ga
 	// nothing here yet.
 }
 
-/* Write incoming value to data structures on the device.
+/** Write incoming value to data structures on the device.
  *
  * On an incoming write event we go through the characteristics that belong to this service and compare a handle
  * to see which one we have to write. Subsequently, characteristic->written will be called with length, offset, and

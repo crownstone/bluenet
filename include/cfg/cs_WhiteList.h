@@ -23,4 +23,4 @@ static const uint8_t WhiteList[WHITELIST_LENGTH * BLE_GAP_ADDR_LEN] = {
 
 
 
-#endif /* INCLUDE_CFG_CS_WHITELIST_H_ */
+#endif 	/** INCLUDE_CFG_CS_WHITELIST_H_ */

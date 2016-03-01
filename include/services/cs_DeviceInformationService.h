@@ -13,14 +13,14 @@
 
 class DeviceInformationService : public BLEpp::Service {
 public:
-	/* Constructor for alert notification service object
+	/** Constructor for alert notification service object
 	 *
 	 * Creates persistent storage (FLASH) object which is used internally to store current limit.
 	 * It also initializes all characteristics.
 	 */
 	DeviceInformationService();
 
-	/* Initialize a GeneralService object
+	/** Initialize a GeneralService object
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */

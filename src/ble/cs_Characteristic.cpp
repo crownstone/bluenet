@@ -1,4 +1,6 @@
 /**
+ * Bluetooth Low Energy Characteristic
+ *
  * Author: Christopher Mason
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
@@ -27,7 +29,7 @@ CharacteristicBase& CharacteristicBase::setName(const char * const name) {
 	return *this;
 }
 
-/* Set the default attributes of every characteristic
+/** Set the default attributes of every characteristic
  *
  * There are two settings for the location of the memory of the buffer that is used to communicate with the SoftDevice.
  *
@@ -199,7 +201,7 @@ void CharacteristicBase::init(Service* svc) {
 	_status.inited = true;
 }
 
-/* Setup default write permissions.
+/** Setup default write permissions.
  *
  * Structure has the following layout:
  *   ble_gatt_char_props_t       char_props;               Characteristic Properties.

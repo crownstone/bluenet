@@ -67,7 +67,7 @@ uint32_t ADC::init(uint8_t pin) {
 	return 0;
 }
 
-/* Configure the AD converter.
+/** Configure the AD converter.
  *
  *   - set the resolution to 10 bits
  *   - set the prescaler for the input voltage (the input, not the input supply)
@@ -118,7 +118,7 @@ void ADC::tick() {
 //	dispatch();
 }
 
-/* The interrupt handler for an ADC data ready event.
+/** The interrupt handler for an ADC data ready event.
  */
 extern "C" void ADC_IRQHandler(void) {
 	uint32_t adc_value;

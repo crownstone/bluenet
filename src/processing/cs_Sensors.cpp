@@ -1,4 +1,6 @@
 /**
+ * Sensors or peripheral devices
+ *
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Mar 23, 2015
@@ -29,7 +31,7 @@
 #define PUSH_BUTTON_ENABLED
 //#define SWITCH_ENABLED
 
-/* choose which way the switch should be checked
+/** Choose which way the switch should be checked
  * 1. interrupt: get an interrupt from the GPIO
  *		handler whenever the signal toggles.
  *		BUT: can register a signal change wrongly if
@@ -45,7 +47,7 @@
 #define SWITCH_POLL
 #endif
 
-/* choose which way the push button should be checked,
+/** Choose which way the push button should be checked,
  * see description above for switch
  */
 #ifdef PUSH_BUTTON_ENABLED
@@ -53,19 +55,19 @@
 //#define PUSH_BUTTON_POLL
 #endif
 
-/* compiler flag initializes ADC.
+/** Compiler flag initializes ADC.
  * add additional defined checks if another sensor needs to use
  * the ADC
  */
 #define ADC_USED defined(LIGHT_SENSOR_ENABLED) || defined(THERMAL_SENSOR_ENABLED)
 
-/* compiler flag starts interrupt handler
+/** Compiler flag starts interrupt handler
  * add additional defined checks if interrupt handler should be used
  * for other sensors
  */
 #define INTERRUPT_USED defined(PUSH_BUTTON_INTERRUPT) || defined(SWITCH_INTERRUPT)
 
-/* Update defines for other boards (instead of adding meaningless PIN definitions
+/** Update defines for other boards (instead of adding meaningless PIN definitions
  * to all other boards)
  */
 #if (HARDWARE_BOARD != CROWNSTONE_SENSOR)
@@ -94,7 +96,7 @@ void Sensors::stopTicking() {
 }
 
 #ifdef SWITCH_POLL
-/* Check Switch position
+/** Check Switch position
  *
  * return true if sensor was checked and switchOn variable
  * contains a valid value
@@ -115,7 +117,7 @@ bool Sensors::checkSwitch(uint32_t time, bool &switchOn) {
 #endif
 
 #ifdef PUSH_BUTTON_POLL
-/* Check push button state
+/** Check push button state
  *
  * return true if sensor was checked and pushed variable
  * contains a valid value
@@ -135,7 +137,7 @@ bool Sensors::checkPushButton(uint32_t time, bool &pushed) {
 }
 #endif
 
-/* Initialize ADC for sensor sampling
+/** Initialize ADC for sensor sampling
  */
 void Sensors::initADC() {
 //	ADC::getInstance().init(PIN_AIN_SENSOR);
@@ -144,7 +146,7 @@ void Sensors::initADC() {
 //	ADC::getInstance().start();
 }
 
-/* Read the ADC to get sensor values
+/** Read the ADC to get sensor values
  *
  * returns values 0-1023, where 1023 is max value
  *  0xFFFF for error
@@ -225,7 +227,7 @@ uint16_t Sensors::sampleSensor() {
 	return result;
 }
 
-/* Check light sensor by sampling ADC values
+/** Check light sensor by sampling ADC values
  */
 bool Sensors::checkLightSensor(uint32_t time, uint16_t &value) {
 	if (time - _lastLightCheck > LIGHT_CHECK_INTERVAL) {
@@ -246,7 +248,7 @@ bool Sensors::checkLightSensor(uint32_t time, uint16_t &value) {
 	return false;
 }
 
-/* Check thermistor sensor by sampling ADC values
+/** Check thermistor sensor by sampling ADC values
  */
 uint16_t Sensors::checkThermalSensor(uint32_t time) {
 	if (time - _lastThermalCheck > THERMAL_CHECK_INTERVAL) {
@@ -267,7 +269,7 @@ uint16_t Sensors::checkThermalSensor(uint32_t time) {
 	return -1;
 }
 
-/* Initialize enabled sensor(s)
+/** Initialize enabled sensor(s)
  *
  */
 void Sensors::init() {
@@ -287,7 +289,7 @@ void Sensors::init() {
 	_initialized = true;
 }
 
-/* Tick function
+/** Tick function
  * check enabled sensor and update PWM signal
  * also initializes sensors on first run
  */
@@ -347,7 +349,7 @@ void Sensors::tick() {
 }
 
 #ifdef SWITCH_ENABLED
-/* initialize switch sensor based on compiler flags
+/** Initialize switch sensor based on compiler flags
  */
 void Sensors::initSwitch() {
 
@@ -373,7 +375,7 @@ void Sensors::initSwitch() {
 #endif
 
 #ifdef PUSH_BUTTON_ENABLED
-/* Initialize push button, uses GPIO interrupt event handler
+/** Initialize push button, uses GPIO interrupt event handler
  */
 void Sensors::initPushButton() {
 
@@ -396,12 +398,12 @@ void Sensors::initPushButton() {
 #endif
 
 #if INTERRUPT_USED
-/* Initialize GPIO interrupt event handler
+/** Initialize GPIO interrupt event handler
  */
 void Sensors::initGPIOTE() {
 	uint32_t err_code = 0;
 
-	/* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it
+/** GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it
 	in APP_LOW in order to use */
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_SetPriority(GPIOTE_IRQn, NRF_APP_PRIORITY_LOW);
@@ -429,7 +431,7 @@ static uint32_t _interruptTimeout = 0;
 static bool _lastPushed = false;
 #endif
 
-/* GPIO interrupt event handler
+/** GPIO interrupt event handler
  */
 extern "C" void GPIOTE_IRQHandler()
 {
@@ -512,7 +514,7 @@ extern "C" void GPIOTE_IRQHandler()
 
 #endif
 
-/* Switch PWM signal.
+/** Switch PWM signal.
  * Checks current pwm signal, then toggles from ON to OFF and vice versa
  */
 void Sensors::switchPwmSignal() {
@@ -527,7 +529,7 @@ void Sensors::switchPwmSignal() {
 	}
 }
 
-/* Switch PWM signal ON
+/** Switch PWM signal ON
  * Checks current pwm signal and only changes if it is currently OFF
  */
 void Sensors::switchPwmOn() {
@@ -540,7 +542,7 @@ void Sensors::switchPwmOn() {
 	}
 }
 
-/* Switch PWM signal OFF
+/** Switch PWM signal OFF
  * Checks current pwm signal and only changes if it is currently ON
  */
 void Sensors::switchPwmOff() {

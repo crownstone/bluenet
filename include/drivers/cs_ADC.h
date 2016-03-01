@@ -23,7 +23,7 @@ public:
 		return instance;
 	}
 
-	/* Initialize ADC.
+	/** Initialize ADC.
 	 * @pin The pin to use as input (AIN<pin>).
 	 *
 	 * The init function must called once before operating the AD converter.
@@ -31,13 +31,13 @@ public:
 	 */
 	uint32_t init(uint8_t pin);
 
-	/* Start the ADC sampling
+	/** Start the ADC sampling
 	 *
 	 * Will add samples to the current curve if it's assigned.
 	 */
 	void start();
 
-	/* Stop the ADC sampling
+	/** Stop the ADC sampling
 	 */
 	void stop();
 
@@ -48,7 +48,7 @@ public:
 	void setPowerCurve(PowerCurve<uint16_t>* curve) { _powerCurve = curve; }
 
 
-//	/* Set threshold to start writing samples to buffer.
+//	/** Set threshold to start writing samples to buffer.
 //	 *
 //	 * Default threshold is DEFAULT_RECORDING_THRESHOLD
 //	 */
@@ -61,7 +61,7 @@ public:
 	uint32_t config(uint8_t pin);
 
 private:
-	/* Constructor
+	/** Constructor
 	 */
 //	ADC(): _currentCurve(NULL) {}
 	ADC(): _powerCurve(NULL) {}

@@ -22,7 +22,7 @@ extern "C" {
 	#include "ble_types.h"
 }
 
-/* enable additional debug output */
+/**enable additional debug output */
 //#define PRINT_ITEMS
 
 /**
@@ -50,17 +50,17 @@ extern "C" {
  *    uint32_t
  */
 
-/* define the maximum size for strings to be stored
+/**define the maximum size for strings to be stored
  */
 #define MAX_STRING_SIZE 32
 
-/* Base class for storage structures
+/**Base class for storage structures
  */
 struct ps_storage_base_t {
 
 };
 
-/* Enumeration used to identify the different storage structures
+/**Enumeration used to identify the different storage structures
  */
 enum ps_storage_id {
 	// storage for configuration items
@@ -71,7 +71,7 @@ enum ps_storage_id {
 	PS_ID_TYPES
 };
 
-/* Storage configuration struct
+/**Storage configuration struct
  *
  * This struct is used to define the configuration of the storage
  */
@@ -86,7 +86,7 @@ struct storage_config_t {
 
 // Configuration ///////////////////////////////
 
-/* Struct used by the Configuration to store elements
+/**Struct used by the Configuration to store elements
  */
 struct ps_configuration_t : ps_storage_base_t {
 	// device name
@@ -156,7 +156,7 @@ struct ps_configuration_t : ps_storage_base_t {
 
 ///////////////////////////////////////////////////
 
-/* Class to store items persistently in FLASH
+/**Class to store items persistently in FLASH
  *
  * Singleton class, can only exist once.
  *
@@ -171,7 +171,7 @@ struct ps_configuration_t : ps_storage_base_t {
 class Storage {
 
 public:
-	/* Returns the singleton instance of this class
+	/** Returns the singleton instance of this class
 	 *
 	 * @return static instance of Storage class
 	 */
@@ -180,7 +180,7 @@ public:
 		return instance;
 	}
 
-	/* Get the handle to the persistent memory for the given storage ID.
+	/** Get the handle to the persistent memory for the given storage ID.
 	 * @storageID the enum defining the storage struct which should be
 	 *   accessed
 	 * @handle returns the handle to the persistent memory where the
@@ -193,7 +193,7 @@ public:
 	 */
 	bool getHandle(ps_storage_id storageID, pstorage_handle_t& handle);
 
-	/* Clears the block for the given handle
+	/** Clears the block for the given handle
 	 * @handle the handle to the persistent memory which was obtained by
 	 *   the <getHandle> function
 	 * @storageID the enum defining the storage struct type, used to
@@ -201,7 +201,7 @@ public:
 	 */
 	void clearBlock(pstorage_handle_t handle, ps_storage_id storageID);
 
-	/* Get the struct stored in persistent memory at the position defined by the handle
+	/** Get the struct stored in persistent memory at the position defined by the handle
 	 * @handle the handle to the persistent memory where the struct is stored.
 	 *   obtain the handle with <getHandle>
 	 * @item pointer to the structure where the data from the persistent memory
@@ -210,7 +210,7 @@ public:
 	 */
 	void readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
 
-	/* Write the struct to persistent memory at the position defined by the handle
+	/** Write the struct to persistent memory at the position defined by the handle
 	 * @handle the handle to the persistent memory where the struct should be stored.
 	 *   obtain the hanlde with <getHandle>
 	 * @item pointer to the structure which data should be stored into persitent memory
@@ -222,13 +222,13 @@ public:
 	// helper functions
 	////////////////////////////////////////////////////////////////////////////////////////
 
-	/* Helper function to convert std::string to char array
+	/** Helper function to convert std::string to char array
 	 * @value the input string
 	 * @target pointer to the output char array
 	 */
 	static void setString(std::string value, char* target);
 
-	/* Helper function to get std::string from char array in the struct
+	/** Helper function to get std::string from char array in the struct
 	 * @value pointer the input char array
 	 * @target the output string
 	 * @default_value the default string to be used if no valid string found
@@ -243,7 +243,7 @@ public:
 	 */
 	static void getString(char* value, std::string& target, std::string default_value);
 
-	/* Helper function to set a byte in the field of a struct
+	/** Helper function to set a byte in the field of a struct
 	 * @value the byte value to be copied to the struct
 	 * @target pointer the field in the struct where the value should be set
 	 *
@@ -252,7 +252,7 @@ public:
 	 */
 	static void setUint8(uint8_t value, uint32_t& target);
 
-	/* Helper function to read a byte from the field of a struct
+	/** Helper function to read a byte from the field of a struct
 	 * @value the field of the struct which should be read
 	 * @target pointer to the byte where the value is returned
 	 * @default_value the default value if the field of the struct is empty
@@ -266,7 +266,7 @@ public:
 	 */
 	static void getUint8(uint32_t value, uint8_t& target, uint8_t default_value);
 
-	/* Helper function to set a short (uint16_t) in the field of a struct
+	/** Helper function to set a short (uint16_t) in the field of a struct
 	 * @value the value to be copied to the struct
 	 * @target pointer to the field in the struct where the value should be set
 	 *
@@ -275,7 +275,7 @@ public:
 	 */
 	static void setUint16(uint16_t value, uint32_t& target);
 
-	/* Helper function to read a short (uint16_t) from the field of a struct
+	/** Helper function to read a short (uint16_t) from the field of a struct
 	 * @value the field of the struct which should be read
 	 * @target pointer the uint16_t varaible where the value is returned
 	 * @default_value the default value if the field of the struct is empty
@@ -289,7 +289,7 @@ public:
 	 */
 	static void getUint16(uint32_t value, uint16_t& target, uint16_t default_value);
 
-	/* Helper function to set an integer (uint32_t) in the field of a struct
+	/** Helper function to set an integer (uint32_t) in the field of a struct
 	 * @value the value to be copied to the struct
 	 * @target pointer to the field in the struct where the value should be set
 	 *
@@ -299,7 +299,7 @@ public:
 	 */
 	static void setUint32(uint32_t value, uint32_t& target);
 
-	/* Helper function to read an integer (uint32_t) from the field of a struct
+	/** Helper function to read an integer (uint32_t) from the field of a struct
 	 * @value the field of the struct which should be read
 	 * @target pointer the uint16_t varaible where the value is returned
 	 * @default_value the default value if the field of the struct is empty
@@ -312,7 +312,7 @@ public:
 	 */
 	static void getUint32(uint32_t value, uint32_t& target, uint32_t default_value);
 
-	/* Helper function to set a signed byte in the field of a struct
+	/** Helper function to set a signed byte in the field of a struct
 	 * @value the byte value to be copied to the struct
 	 * @target pointer the field in the struct where the value should be set
 	 *
@@ -321,7 +321,7 @@ public:
 	 */
 	static void setInt8(int8_t value, int32_t& target);
 
-	/* Helper function to read a signed byte from the field of a struct
+	/** Helper function to read a signed byte from the field of a struct
 	 * @value the field of the struct which should be read
 	 * @target pointer to the byte where the value is returned
 	 * @default_value the default value if the field of the struct is empty
@@ -335,7 +335,7 @@ public:
 	 */
 	static void getInt8(int32_t value, int8_t& target, int8_t default_value);
 
-	/* Helper function to write/copy an array to the field of a struct
+	/** Helper function to write/copy an array to the field of a struct
 	 * @T primitive type, such as uint8_t
 	 * @src pointer to the array to be written
 	 * @dest pointer to the array field of the struct
@@ -365,7 +365,7 @@ public:
 			}
 		}
 
-	/* Helper function to read an array from a field of a struct
+	/** Helper function to read an array from a field of a struct
 	 * @T primitive type, such as uint8_t
 	 * @src pointer to the array field of the struct
 	 * @dest pointer to the destination array
@@ -410,7 +410,7 @@ public:
 		}
 
 private:
-	/* Default constructor
+	/** Default constructor
 	 *
 	 * Private because of the singleton class
 	 *
@@ -419,14 +419,14 @@ private:
 	 */
 	Storage();
 
-	/* Initialize blocks in persistent memory
+	/** Initialize blocks in persistent memory
 	 * @size size of the block to be initialized
 	 * @handle pointer to the handle which points to the persistent memory that
 	 *   was initialized
 	 */
 	void initBlocks(pstorage_size_t size, pstorage_handle_t& handle);
 
-	/* Helper function to obtain the config for the given storage ID
+	/** Helper function to obtain the config for the given storage ID
 	 * @storageID enum which defines the storage struct for which the
 	 *   config should be obtained
 	 *

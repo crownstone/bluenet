@@ -91,7 +91,7 @@ void (* const gVectors[])(void) =
 	PendSV_Handler,
 	SysTick_Handler,
 
-	/* External Interrupts */
+/** External Interrupts */
 	POWER_CLOCK_IRQHandler,
 	RADIO_IRQHandler,
 	UART0_IRQHandler,
@@ -155,7 +155,7 @@ void ResetHandler(void) {
 	 */
 	// start up crystal HF clock.
 	NRF_CLOCK->TASKS_HFCLKSTART = 1;
-	while(!NRF_CLOCK->EVENTS_HFCLKSTARTED) /* wait */;
+	while(!NRF_CLOCK->EVENTS_HFCLKSTARTED)/** wait */;
 
 	NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_Synth;
 #else
@@ -172,7 +172,7 @@ void ResetHandler(void) {
 #endif
 
 	NRF_CLOCK->TASKS_LFCLKSTART = 1;
-	while(!NRF_CLOCK->EVENTS_LFCLKSTARTED) /* wait */;
+	while(!NRF_CLOCK->EVENTS_LFCLKSTARTED)/** wait */;
 //	NRF_CLOCK->EVENTS_LFCLKSTARTED = 0;
 
 	/*

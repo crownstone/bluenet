@@ -11,17 +11,17 @@
 #include <common/cs_Types.h>
 //#include "util/cs_Utils.h"
 
-/* Base class for a buffer accessor object
+/**Base class for a buffer accessor object
  *
  * Any object that works on a buffer can use this as a base class.
  */
 class BufferAccessor {
 public:
-	/* Default destructor
+	/** Default destructor
 	 */
 	virtual ~BufferAccessor() {};
 
-	/* Assign the buffer used to hold the scanned device list
+	/** Assign the buffer used to hold the scanned device list
 	 * @buffer                the buffer to be used
 	 * @maxLength             size of buffer (maximum number of bytes that can be stored)
 	 *
@@ -29,19 +29,19 @@ public:
 	 */
 	virtual int assign(buffer_ptr_t buffer, uint16_t maxLength) = 0; // TODO: should return ERR_CODE?
 
-	/* Return the maximum possible length of the object
+	/** Return the maximum possible length of the object
 	 *
 	 * @return maximum possible length
 	 */
 	virtual uint16_t getMaxLength() const = 0;
 
-	/* Return the length of the data in the buffer
+	/** Return the length of the data in the buffer
 	 *
 	 * @return data length
 	 */
 	virtual uint16_t getDataLength() const = 0;
 
-	/* Return the pointer to the buffer and the length of data in Bytes
+	/** Return the pointer to the buffer and the length of data in Bytes
 	 * @buffer       pointer to the buffer
 	 * @dataLength   length of data in the buffer (in bytes)
 	 */
@@ -51,7 +51,7 @@ public:
 
 //namespace BLEpp {
 //
-///* This template implements the functions specific for a Characteristic with
+//	/** This template implements the functions specific for a Characteristic with
 // * a BufferAccessor as the value
 // */
 //template<>
@@ -61,7 +61,7 @@ public:
 //
 //public:
 //
-//	/* Return the maximum possible length of the buffer
+//	/** Return the maximum possible length of the buffer
 //	 *
 //	 * Checks the object assigned to this characteristic for the maximum
 //	 * possible length
@@ -72,7 +72,7 @@ public:
 //		return _value.getMaxLength();
 //	}
 //
-//	/* Return the length of data in the buffer
+//	/** Return the length of data in the buffer
 //	 *
 //	 * Checks the object assigned to this characteristic for the
 //	 * length of data
@@ -83,7 +83,7 @@ public:
 //		return _value.getDataLength();
 //	}
 //
-//	/* Return the pointer of the buffer
+//	/** Return the pointer of the buffer
 //	 *
 //	 * Checks the buffer accessor assigned to this characteristic and
 //	 * returns the pointer to the buffer
@@ -99,4 +99,4 @@ public:
 //
 //};
 //
-//} /* namespace BLEpp */
+//} 	/** namespace BLEpp */

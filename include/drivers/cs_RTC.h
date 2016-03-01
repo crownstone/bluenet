@@ -13,9 +13,9 @@
 #include <drivers/cs_Timer.h>
 //#include <drivers/cs_Serial.h>
 
-/* Clock frequency of the RTC timer */
+/**Clock frequency of the RTC timer */
 #define RTC_CLOCK_FREQ          32768
-/* Maximum value of the RTC counter. */
+/**Maximum value of the RTC counter. */
 //#define MAX_RTC_COUNTER_VAL     0x0007FFFF // Where did this come from?
 #define MAX_RTC_COUNTER_VAL     0x00FFFFFF
 
@@ -64,7 +64,7 @@ public:
 		return ticksToMs(getCount());
 	}
 
-	/* Return time in ms, given time in ticks */
+	/** Return time in ms, given time in ticks */
 	inline static uint32_t ticksToMs(uint32_t ticks) {
 #if NRF51_USE_SOFTDEVICE==1
 		// Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
@@ -76,7 +76,7 @@ public:
 #endif
 	}
 
-	/* Return time in ticks, given time in ms
+	/** Return time in ticks, given time in ms
 	 * Make sure time in ms is not too large! (limit is about 120,000 ms with current frequency)
 	 */
 	inline static uint32_t msToTicks(uint32_t ms) {

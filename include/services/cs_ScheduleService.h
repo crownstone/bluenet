@@ -16,28 +16,28 @@ class ScheduleService : public BLEpp::Service {
 public:
 //	typedef function<int8_t()> func_t;
 
-	/* Constructor for alert notification service object
+	/** Constructor for alert notification service object
 	 *
 	 * Creates persistent storage (FLASH) object which is used internally to store current limit.
 	 * It also initializes all characteristics.
 	 */
 	ScheduleService();
 
-	/* Initialize a GeneralService object
+	/** Initialize a GeneralService object
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
 	void init();
 
-	/* Returns the current time as posix time
+	/** Returns the current time as posix time
 	 * returns 0 when no time was set yet
 	 */
 	uint32_t getTime();
 
-	/* Set current posix time */
+	/** Set current posix time */
 	void setTime(uint32_t time);
 
-	/* Perform non urgent functionality every main loop.
+	/** Perform non urgent functionality every main loop.
 	 *
 	 * Every component has a "tick" function which is for non-urgent things.
 	 * Urgent matters have to be resolved immediately in interrupt service handlers.

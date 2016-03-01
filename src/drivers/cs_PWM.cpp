@@ -37,13 +37,15 @@
 #define PWM_SWITCH_OFF             0
 #endif
 
-/* [25.11.15] merging from NRF SDK 6 to SDK 8. the nrf_gpiote_unconfig function was removed in SDK 8,
+/** GPIO unconfiguration struct for legacy reasons.
+ *
+ * [25.11.15] merging from NRF SDK 6 to SDK 8. the nrf_gpiote_unconfig function was removed in SDK 8,
  *   and no other function replaces it ... according to nordic developer, can just copy it over from
  *   SDK 6. See post https://devzone.nordicsemi.com/question/50020/what-has-replaced-nrf_gpiote_unconfig/
  */
 static inline void nrf_gpiote_unconfig(uint32_t channel_number)
 {
-    /* Unonfigure the channel as the caller expects */
+   /** Unonfigure the channel as the caller expects */
     NRF_GPIOTE->CONFIG[channel_number] = (GPIOTE_CONFIG_MODE_Disabled   << GPIOTE_CONFIG_MODE_Pos) |
                                          (31UL                          << GPIOTE_CONFIG_PSEL_Pos) |
                                          (GPIOTE_CONFIG_POLARITY_Toggle << GPIOTE_CONFIG_POLARITY_Pos);
@@ -60,7 +62,7 @@ int32_t PWM::ppiEnableChannel(uint32_t ch_num, volatile uint32_t *event_ptr, vol
 	NRF_PPI->CH[ch_num].EEP = (uint32_t)event_ptr;
 	NRF_PPI->CH[ch_num].TEP = (uint32_t)task_ptr;
 	NRF_PPI->CHENSET = (1 << ch_num);
-	/* From example:
+/** From example:
 	 *  // Enable only PPI channels 0 and 1.
 	 *  NRF_PPI->CHEN = (PPI_CHEN_CH0_Enabled << PPI_CHEN_CH0_Pos) | (PPI_CHEN_CH1_Enabled << PPI_CHEN_CH1_Pos);
 	 */
@@ -128,7 +130,7 @@ uint32_t PWM::init(pwm_config_t *config) {
 				&NRF_GPIOTE->TASKS_OUT[_gpioteChannel[i]]);
 	}
 
-	/* From example:
+/** From example:
      * // @note This example does not go to low power mode therefore constant latency is not needed.
      * //       However this setting will ensure correct behaviour when routing TIMER events through
      * //       PPI (shown in this example) and low power mode simultaneously.

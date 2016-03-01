@@ -13,7 +13,7 @@ extern "C"
 
 #include <ble/cs_Nordic.h>
 
-/* introduces wrapper functions for the softdevice functions sd_ble_gatts_value_get and
+/**introduces wrapper functions for the softdevice functions sd_ble_gatts_value_get and
  * sd_ble_gatts_value_set because their parameters changed from softdevice 130 v0.5.0 to
  * s130 v0.9.0
  */

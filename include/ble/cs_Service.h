@@ -15,7 +15,7 @@
 #include <util/cs_BleError.h>
 #include <drivers/cs_Timer.h>
 
-/* General BLE name service
+/**General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
@@ -24,7 +24,7 @@ namespace BLEpp {
 class Nrf51822BluetoothStack;
 class CharacteristicBase;
 
-/* Service as defined in the GATT Specification.
+/**Service as defined in the GATT Specification.
  */
 class Service {
 
@@ -63,7 +63,7 @@ public:
 
 }
 
-	/* Default empty destructor
+	/** Default empty destructor
 	 *
 	 * We don't currently delete our characteristics as we don't really support dynamic service destruction.
 	 * If we wanted to allow services to be removed at runtime, we would need to, amongst many other things,
@@ -135,7 +135,7 @@ public:
 
 	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
 
-	/* Get list of characteristics
+	/** Get list of characteristics
 	 *
 	 * @return list of characteristics
 	 */
@@ -143,7 +143,7 @@ public:
 		return _characteristics;
 	}
 
-	/* Add a single characteristic to the list
+	/** Add a single characteristic to the list
 	 * @characteristic Characteristic to add
 	 */
 	virtual Service& addCharacteristic(CharacteristicBase* characteristic) {

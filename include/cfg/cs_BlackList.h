@@ -65,4 +65,4 @@ static const uint8_t BlackList[BLACKLIST_LENGTH * BLE_GAP_ADDR_LEN] = {
 };
 
 
-#endif /* INCLUDE_CFG_CS_BLACKLIST_H_ */
+#endif 	/** INCLUDE_CFG_CS_BLACKLIST_H_ */

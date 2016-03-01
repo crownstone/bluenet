@@ -15,7 +15,7 @@ extern "C" {
 
 #include <drivers/cs_Serial.h>
 
-/**Function for dispatching a system event (not a BLE event) to all modules with a system event handler. This can also
+/** Function for dispatching a system event (not a BLE event) to all modules with a system event handler. This can also
  * be events related to the radio, for example the NRF_EVT_RADIO_BLOCKED (4) and NRF_EVT_RADIO_SESSION_IDLE (7) events
  * that are defined for the timeslot API.
  *

@@ -105,7 +105,7 @@ void Crownstone::setName() {
 	_stack->updateAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
-/* Sets default parameters of the Bluetooth connection.
+/** Sets default parameters of the Bluetooth connection.
  *
  * Data is transmitted with TX_POWER dBm.
  *

@@ -86,7 +86,7 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
 
 	#define BLE_THROW(message) throw ble_exception(message, __FILE__, __LINE__)
 
-#else /* __EXCEPTIONS */
+#else 	/** __EXCEPTIONS */
 
 	//#define BLE_CALL(function, args) do {volatile uint32_t result = function args; if (result != NRF_SUCCESS) {std::string ble_error_message(# function ); ble_error_handler(ble_error_message, __LINE__, __FILE__); } } while(0)
 	#define BLE_CALL(function, args)                                    \
@@ -109,7 +109,7 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
 				ble_error_handler(message, __LINE__, __FILE__);         \
 			} while(0)
 
-#endif /* __EXCEPTIONS */
+#endif 	/** __EXCEPTIONS */
 
 #ifdef	NDEBUG
 

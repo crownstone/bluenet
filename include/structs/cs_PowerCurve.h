@@ -29,7 +29,7 @@ using namespace BLEpp;
 
 typedef uint8_t PC_ERR_CODE;
 
-/* Structure for the Power Curve
+/**Structure for the Power Curve
  *
  * Requires POWER_CURVE_SAMPLES to be set.
  */
@@ -48,7 +48,7 @@ struct __attribute__((__packed__)) power_curve_t {
 	int8_t timeDiffs[POWER_CURVE_MAX_SAMPLES-1];
 };
 
-/* Power Curve
+/**Power Curve
  *
  * Class used to send the current and voltage samples over Bluetooth.
  * In order to save space, only differences of the samples are stored.
@@ -63,14 +63,14 @@ private:
 	const size_t _max_buf_size = POWER_CURVE_MAX_BUF_SIZE;
 
 public:
-	/* Default constructor
+	/** Default constructor
 	 *
 	 * Constructor does not initialize the buffer.
 	 */
 	PowerCurve(): _buffer(NULL) {
 	};
 
-	/* Release the buffer
+	/** Release the buffer
 	 *
 	 * Sets pointer to zero, does not deallocate memory.
 	 */
@@ -79,7 +79,7 @@ public:
 		_buffer = NULL;
 	}
 
-	/* Check if a buffer is assigned
+	/** Check if a buffer is assigned
 	 *
 	 * @return true if a buffer is assigned
 	 */
@@ -88,7 +88,7 @@ public:
 		return true;
 	}
 
-	/* Check if the buffer is full
+	/** Check if the buffer is full
 	 *
 	 * @return true when you cannot <add> any more samples.
 	 */
@@ -99,7 +99,7 @@ public:
 		return false;
 	}
 
-	/* Get i-th current and voltage sample, with timestamps
+	/** Get i-th current and voltage sample, with timestamps
 	 * @index Index of the sample you want to get.
 	 * @current Value of previous current sample (index-1), this value will be set to the i-th sample.
 	 * @voltage Value of previous voltage sample (index-1), this value will be set to the i-th sample.
@@ -128,19 +128,19 @@ public:
 		return PC_SUCCESS;
 	}
 
-	/* Get the time stamp of the first sample.
+	/** Get the time stamp of the first sample.
 	 */
 	uint32_t getTimeStart() const {
 		return _buffer->firstTimeStamp;
 	}
 
-	/* Get the time stamp of the last sample.
+	/** Get the time stamp of the last sample.
 	 */
 	uint32_t getTimeEnd() const {
 		return _buffer->lastTimeStamp;
 	}
 
-	/* Add a current sample to the power curve
+	/** Add a current sample to the power curve
 	 * @value the sample to be added
 	 * @timeStamp the time stamp of the sample
 	 *
@@ -196,7 +196,7 @@ public:
 		}
 	}
 
-	/* Add a voltage sample to the power curve
+	/** Add a voltage sample to the power curve
 	 * @value the sample to be added
 	 * @timeStamp the time stamp of the sample
 	 *
@@ -252,7 +252,7 @@ public:
 
 
 
-	/* Clear the buffer
+	/** Clear the buffer
 	 */
 	PC_ERR_CODE clear() {
 		if (!_buffer) {
@@ -270,7 +270,7 @@ public:
 		return PC_SUCCESS;
 	}
 
-	/* Get number of added samples in the buffer
+	/** Get number of added samples in the buffer
 	 *
 	 * @return number of elements stored
 	 */
@@ -279,7 +279,7 @@ public:
 
 	/////////// Bufferaccessor ////////////////////////////
 
-	/* @inherit */
+	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t size) {
 		LOGd("assign buff: %p, len: %d", buffer, size);
 		if (_max_buf_size > size) {
@@ -290,17 +290,17 @@ public:
 		return 0;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	uint16_t getDataLength() const {
 		return POWER_CURVE_HEADER_SIZE + 2*_buffer->length-3;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	uint16_t getMaxLength() const {
 		return _max_buf_size;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
 		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();

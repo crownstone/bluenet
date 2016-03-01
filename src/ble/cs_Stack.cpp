@@ -1,4 +1,5 @@
-/**
+/** Bluenet Stack
+ *
  * Author: Christopher Mason
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
@@ -700,7 +701,7 @@ bool Nrf51822BluetoothStack::isScanning() {
 //}
 
 
-/**@brief Function for handling the Device Manager events.
+/** Function for handling the Device Manager events.
  *
  * @param[in]   p_evt   Data associated to the device manager event.
  */
@@ -711,7 +712,7 @@ static uint32_t device_manager_evt_handler(dm_handle_t const    * p_handle,
 	return Nrf51822BluetoothStack::getInstance().deviceManagerEvtHandler(p_handle, p_event, event_result);
 }
 
-//#define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /**< Delay after connection until Security Request is sent, if necessary (ticks). */
+//#define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /*< Delay after connection until Security Request is sent, if necessary (ticks). */
 
 void Nrf51822BluetoothStack::lowPowerTimeout(void* p_context) {
 	LOGi("bonding timeout, going back to normal power mode ...");

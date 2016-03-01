@@ -18,7 +18,7 @@
 #include <ble/cs_UUID.h>
 #include <drivers/cs_Storage.h>
 
-/* Configuration types
+/**Configuration types
  *
  * Use in the characteristic to read and write configurations in <CommonService>.
  */
@@ -74,7 +74,7 @@ public:
 
 	ps_configuration_t& getConfig();
 
-	/* Get a handle to the persistent storage struct and load it from FLASH.
+	/** Get a handle to the persistent storage struct and load it from FLASH.
 	 *
 	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
 	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
@@ -82,7 +82,7 @@ public:
 	 */
 	void loadPersistentStorage();
 
-	/* Save to FLASH.
+	/** Save to FLASH.
 	 */
 	void savePersistentStorage();
 
@@ -91,13 +91,13 @@ public:
 //		loadPersistentStorage(_storageHandles[id], );
 //	}
 
-	/* Retrieve the Bluetooth name from the object representing the BLE stack.
+	/** Retrieve the Bluetooth name from the object representing the BLE stack.
 	 *
 	 * @return name of the device
 	 */
 	std::string & getBLEName();
 
-	/* Write the Bluetooth name to the object representing the BLE stack.
+	/** Write the Bluetooth name to the object representing the BLE stack.
 	 *
 	 * This updates the Bluetooth name immediately, however, it does not update the name persistently. It
 	 * has to be written to FLASH in that case.

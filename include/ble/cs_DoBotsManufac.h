@@ -36,7 +36,7 @@ public:
 		return _deviceType;
 	}
 
-	/* Serializes the object to a byte array
+	/** Serializes the object to a byte array
 	 *
 	 * @array pointer to the preallocated byte array where the
 	 *   data should be copied into. Use <size> to get the required
@@ -48,4 +48,4 @@ public:
 	void parse(uint8_t* array, uint16_t len);
 };
 
-} /* namespace BLEpp */
+} 	/** namespace BLEpp */
