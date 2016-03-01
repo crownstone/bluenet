@@ -29,7 +29,7 @@
 
 typedef uint8_t ERR_CODE;
 
-/**Structure for a StreamBuffer
+/** Structure for a StreamBuffer
  *
  * Requires MASTER_BUFFER_SIZE to be set.
  */
@@ -41,7 +41,7 @@ struct __attribute__((__packed__)) stream_t {
 	T payload[(MASTER_BUFFER_SIZE-SB_HEADER_SIZE)/sizeof(T)];
 };
 
-/**General StreamBuffer with type, length, and payload
+/** General StreamBuffer with type, length, and payload
  *
  * General class that can be used to send arrays of values over Bluetooth, of which the first byte is a type
  * or identifier byte, the second one the length of the payload (so, minus identifier and length byte itself)

@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 24 Nov., 2014
@@ -22,7 +22,7 @@ extern "C" {
 	#include "ble_types.h"
 }
 
-/**enable additional debug output */
+/** enable additional debug output */
 //#define PRINT_ITEMS
 
 /**
@@ -50,17 +50,17 @@ extern "C" {
  *    uint32_t
  */
 
-/**define the maximum size for strings to be stored
+/** define the maximum size for strings to be stored
  */
 #define MAX_STRING_SIZE 32
 
-/**Base class for storage structures
+/** Base class for storage structures
  */
 struct ps_storage_base_t {
 
 };
 
-/**Enumeration used to identify the different storage structures
+/** Enumeration used to identify the different storage structures
  */
 enum ps_storage_id {
 	//! storage for configuration items
@@ -71,7 +71,7 @@ enum ps_storage_id {
 	PS_ID_TYPES
 };
 
-/**Storage configuration struct
+/** Storage configuration struct
  *
  * This struct is used to define the configuration of the storage
  */
@@ -84,9 +84,9 @@ struct storage_config_t {
 	pstorage_size_t storage_size;
 };
 
-//! Configuration ///////////////////////////////
+// Configuration ///////////////////////////////
 
-/**Struct used by the Configuration to store elements
+/** Struct used by the Configuration to store elements.
  */
 struct ps_configuration_t : ps_storage_base_t {
 	//! device name
@@ -156,7 +156,7 @@ struct ps_configuration_t : ps_storage_base_t {
 
 ///////////////////////////////////////////////////
 
-/**Class to store items persistently in FLASH
+/** Class to store items persistently in FLASH
  *
  * Singleton class, can only exist once.
  *

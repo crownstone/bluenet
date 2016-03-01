@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 4 Nov., 2014
@@ -26,6 +26,8 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt);
 
 #define MESH_UPDATE_FREQUENCY 10
 
+/** Wrapper class around the mesh protocol files.
+ */
 class CMesh {
 private:
 
@@ -37,7 +39,7 @@ private:
 
 	//! destructor is hidden from the user
 	~CMesh();
-	
+
 	CMesh(CMesh const&); //! singleton, deny implementation
 	void operator=(CMesh const &); //! singleton, deny implementation
 

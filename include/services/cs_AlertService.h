@@ -11,8 +11,12 @@
 #include <ble/cs_Characteristic.h>
 #include "structs/cs_AlertAccessor.h"
 
-#define ALERT_SERVICE_UPDATE_FREQUENCY 10 //! hz
+//! Alert update frequence in Hz (default 10 Hz)
+#define ALERT_SERVICE_UPDATE_FREQUENCY 10
 
+/** The AlertService sends alerts on a stage change, for example when the
+ * temperature drops below a value.
+ */
 class AlertService : public BLEpp::Service {
 public:
 //	typedef function<int8_t()> func_t;

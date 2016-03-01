@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Feb 23, 2015
@@ -11,7 +11,7 @@
 #include <common/cs_Types.h>
 //#include "util/cs_Utils.h"
 
-/**Base class for a buffer accessor object
+/** Base class for a buffer accessor object
  *
  * Any object that works on a buffer can use this as a base class.
  */

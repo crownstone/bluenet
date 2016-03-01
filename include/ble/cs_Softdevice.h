@@ -13,12 +13,12 @@ extern "C"
 
 #include <ble/cs_Nordic.h>
 
-/**introduces wrapper functions for the softdevice functions sd_ble_gatts_value_get and
+/** introduces wrapper functions for the softdevice functions sd_ble_gatts_value_get and
  * sd_ble_gatts_value_set because their parameters changed from softdevice 130 v0.5.0 to
  * s130 v0.9.0
  */
 
-/**Get the value of a given attribute.
+/** Get the value of a given attribute.
  *
  * @conn_handle[in]   Connection handle. If there is no connection (and value is not a CCCD), then BLE_CONN_HANDLE_INVALID can be used.
  * @handle[in]        Attribute handle.
@@ -36,7 +36,7 @@ extern "C"
  */
 uint32_t cs_sd_ble_gatts_value_get(uint16_t conn_handle, uint16_t handle, uint16_t * p_len, uint8_t* const p_data);
 
-/**Set the value of a given attribute.
+/** Set the value of a given attribute.
  *
  * @conn_handle[in]   Connection handle. If there is no connection (and value is not a CCCD), then BLE_CONN_HANDLE_INVALID can be used.
  * @handle[in]        Attribute handle.

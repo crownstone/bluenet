@@ -18,7 +18,7 @@
 #include <ble/cs_UUID.h>
 #include <drivers/cs_Storage.h>
 
-/**Configuration types
+/** Configuration types
  *
  * Use in the characteristic to read and write configurations in <CommonService>.
  */

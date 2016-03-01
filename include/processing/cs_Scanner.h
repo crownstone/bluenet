@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Dec 2, 2015
@@ -19,13 +19,15 @@ using namespace BLEpp;
 #define SCAN_FILTER_DOBEACON_MSK      (1 << SCAN_FILTER_DOBEACON_BIT)
 #define SCAN_FILTER_DOBOTS_MSK        SCAN_FILTER_CROWNSTONE_MSK | SCAN_FILTER_DOBEACON_MSK
 
-/**@brief Variable length data encapsulation in terms of length and pointer to data */
+/** @brief Variable length data encapsulation in terms of length and pointer to data */
 typedef struct
 {
-    uint8_t     * p_data;                                         /**< Pointer to data. */
-    uint16_t      data_len;                                       /**< Length of data. */
+    uint8_t     * p_data;                                         /** < Pointer to data. */
+    uint16_t      data_len;                                       /** < Length of data. */
 } data_t;
 
+/** Scanner scans for BLE devices.
+ */
 class Scanner : EventListener {
 
 public:

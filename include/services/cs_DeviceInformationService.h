@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Jul 13, 2015
@@ -11,6 +11,8 @@
 
 //#define STRINGIFY(str) #str
 
+/** The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions.
+ */
 class DeviceInformationService : public BLEpp::Service {
 public:
 	/** Constructor for alert notification service object

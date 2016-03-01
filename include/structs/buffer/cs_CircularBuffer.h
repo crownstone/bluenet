@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Feb 27, 2015
@@ -16,7 +16,8 @@
 //
 //#include "drivers/cs_Serial.h"
 
-/**Circular Buffer implementation
+/** Circular Buffer implementation
+ * @param T Element type of elements within the buffer.
  *
  * Elements are added at the back and removed from the front. If the capacity
  * of the buffer is reached, the oldest element will be overwritten.

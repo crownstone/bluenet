@@ -12,6 +12,8 @@
 
 namespace BLEpp {
 
+/** DoBotsManufac defines the different types of developed devices for within the advertisement packets.
+ */
 class DoBotsManufac {
 
 private:

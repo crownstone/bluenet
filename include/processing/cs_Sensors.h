@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Mar 23, 2015
@@ -32,7 +32,8 @@
 #define SWITCH_THRESHOLD 0.9 * MAX_VALUE
 #define SWITCH_CHECK_INTERVAL freqToInterval(20) //! 20 Hz
 
-
+/** Sensors such as the light sensor or the temperature sensor.
+ */
 class Sensors {
 public:
 	Sensors();

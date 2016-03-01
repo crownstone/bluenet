@@ -18,14 +18,14 @@
 
 //using namespace BLEpp;
 
-/**The size of the header used in the scan list message
+/** The size of the header used in the scan list message
  *
  * Only one byte is used as header which defines the number of elements
  * in the list
  */
 #define SR_HEADER_SIZE 1
 
-/**The maximum number of devices stored during a scan and returned as a list
+/** The maximum number of devices stored during a scan and returned as a list
  *
  * If the maximum number is exceeded, the devices with the lowest occurrence
  * will be replaced
@@ -33,14 +33,14 @@
 //#define SR_MAX_NR_DEVICES 1
 #define SR_MAX_NR_DEVICES 10
 
-/**Structure used to store peripheral devices detected during a scan.
+/** Structure used to store peripheral devices detected during a scan.
  *
  * We store the bluetooth address of the device, the number of times that the
  * device was seen during scanning (occurrences) and the rssi (received signal
  * strength indication) value of the last received advertisement.
- * **note** the bluetooth address is stored in little-endian (LSB-first) so when
+ * ** note** the bluetooth address is stored in little-endian (LSB-first) so when
  * displaying it to the user we need to start at the back of the array
- * **note** struct has to be packed in order to avoid word alignment.
+ * ** note** struct has to be packed in order to avoid word alignment.
  */
 struct __attribute__((__packed__)) peripheral_device_t {
 	/** bluetooth address, in LITTLE_ENDIAN */
@@ -51,13 +51,13 @@ struct __attribute__((__packed__)) peripheral_device_t {
 	uint16_t occurrences;
 };
 
-/**The size in bytes needed to store the device structure after serializing
+/** The size in bytes needed to store the device structure after serializing
  *
- * **Note** this only works if struct ist packed
+ * ** Note** this only works if struct ist packed
  */
 #define SR_SERIALIZED_DEVICE_SIZE sizeof(peripheral_device_t)
 
-/**Structure of the list of peripheral devices which is sent over Bluetooth
+/** Structure of the list of peripheral devices which is sent over Bluetooth
  */
 struct peripheral_device_list_t {
 	//! number of elements in the list
@@ -67,7 +67,7 @@ struct peripheral_device_list_t {
 };
 
 
-/**Result of a scan device operation
+/** Result of a scan device operation
  *
  * The ScanResult class stores a list of devices which were detected during
  * a scan operation. It keeps track of how often a device was seen and with

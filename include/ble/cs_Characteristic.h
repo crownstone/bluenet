@@ -52,6 +52,10 @@ typedef uint8_t boolean_t;
 
 #define STATUS_INITED
 
+/** Status of a Characteristic.
+ *
+ * The status can be initialized, with notifications, writable, etc.
+ */
 struct Status {
 	boolean_t inited                                  : 1;
 	boolean_t notifies                                : 1;

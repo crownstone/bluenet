@@ -21,9 +21,13 @@
 #define STRINGIFY(str) str
 #endif
 
+/** @namespace BLEutil
+ *
+ * Utilities, e.g. for printing over UART.
+ */
 namespace BLEutil {
 
-/**Convert a short (uint16_t) from LSB (little-endian) to
+/** Convert a short (uint16_t) from LSB (little-endian) to
  * MSB (big-endian) and vice versa
  *
  * @val the value to be converted
@@ -34,7 +38,7 @@ inline uint16_t convertEndian16(uint16_t val) {
 	return ((val >> 8) & 0xFF) | ((val & 0xFF) << 8);
 }
 
-/**Convert an integer (uint32_t) from LSB (little-endian) to
+/** Convert an integer (uint32_t) from LSB (little-endian) to
  * MSB (big-endian) and vice versa
  *
  * @val the value to be converted
@@ -48,7 +52,7 @@ inline uint32_t convertEndian32(uint32_t val) {
 		 | ((val & 0xFF) << 24);
 }
 
-/**Macro that returns the length of an array
+/** Macro that returns the length of an array
  *
  * @a the array whose length should be calculated
  *

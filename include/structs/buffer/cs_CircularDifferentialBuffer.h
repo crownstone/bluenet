@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Mar 16, 2015
@@ -16,8 +16,8 @@
 //
 //#include "drivers/cs_Serial.h"
 
-/**Differential Buffer implementation
- * @T primitive type such as uint8_t
+/** Differential Buffer implementation
+ * @param T primitive type such as uint8_t
  *
  * Elements are added at the back and removed from the front. If the capacity
  * of the buffer is reached, the oldest element will be overwritten.

@@ -13,9 +13,9 @@
 #include <drivers/cs_Timer.h>
 //#include <drivers/cs_Serial.h>
 
-/**Clock frequency of the RTC timer */
+/** Clock frequency of the RTC timer */
 #define RTC_CLOCK_FREQ          32768
-/**Maximum value of the RTC counter. */
+/** Maximum value of the RTC counter. */
 //#define MAX_RTC_COUNTER_VAL     0x0007FFFF //! Where did this come from?
 #define MAX_RTC_COUNTER_VAL     0x00FFFFFF
 

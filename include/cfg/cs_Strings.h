@@ -7,14 +7,14 @@
 
 #pragma once
 
-/**Current conventions:
+/** Current conventions:
  *
  * + American English (-ize, -or, -er, -ction)
  * + Start with object under consideration: "Buffer is locked", not "Locking of buffer"
  * + Use underscores to separate words
  */
 
-/**BLE defines
+/** BLE defines
  *
  * Strings for services and characteristics are read by a developer if he/she interacts on a low-level with a BLE
  * device via e.g. the Nordic BLE app. These strings are stored currently in memory allocated by the SoftDevice.
@@ -43,7 +43,7 @@
 #define BLE_CHAR_NEW_ALERT                       "New Alert"
 #define BLE_CHAR_CURRENT_TIME                    "Current Time"
 
-/**Error messages
+/** Error messages
  *
  * Keep them concise. These shouldn't be part of the heap, only of the stack, and they contribute to code size.
  */

@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Christopher Mason
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
@@ -31,9 +31,11 @@ extern "C" {
 
 
 
-//! TODO: replace std::vector with a fixed, in place array of size capacity.
+// @TODO: replace std::vector with a fixed, in place array of size capacity.
 
-/**General BLE name service
+/**
+ * @namespace BLEpp
+ * General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
@@ -41,7 +43,7 @@ namespace BLEpp {
 
 class Service;
 
-/**BLEStack defines a chip-agnostic Bluetooth Low-Energy stack
+/** BLEStack defines a chip-agnostic Bluetooth Low-Energy stack
  *
  * Currently, this class does not leverage much of the general Bluetooth Low-Energy functionality into
  * chip-agnostic code. However, this might be recommendable in the future.
@@ -64,7 +66,7 @@ public:
 };
 
 
-/**nRF51822 specific implementation of the BLEStack
+/** nRF51822 specific implementation of the BLEStack
  *
  * The Nrf51822BluetoothStack class is a direct descendant from BLEStack. It is implemented as a singleton, such
  * that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt
@@ -319,7 +321,7 @@ public:
 	 * data array with the values of the <IBeacon> object, then starts
 	 * advertising as an iBeacon.
 	 *
-	 * **Note**: An iBeacon requires that the company identifier is
+	 * ** Note** : An iBeacon requires that the company identifier is
 	 *   set to the Apple Company ID, otherwise it's not an iBeacon.
 	 */
 	void startIBeacon(IBeacon* beacon, uint8_t deviceType);

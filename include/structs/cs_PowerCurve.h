@@ -29,7 +29,7 @@ using namespace BLEpp;
 
 typedef uint8_t PC_ERR_CODE;
 
-/**Structure for the Power Curve
+/** Structure for the Power Curve
  *
  * Requires POWER_CURVE_SAMPLES to be set.
  */
@@ -48,7 +48,7 @@ struct __attribute__((__packed__)) power_curve_t {
 	int8_t timeDiffs[POWER_CURVE_MAX_SAMPLES-1];
 };
 
-/**Power Curve
+/** Power Curve
  *
  * Class used to send the current and voltage samples over Bluetooth.
  * In order to save space, only differences of the samples are stored.

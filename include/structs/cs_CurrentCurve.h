@@ -32,7 +32,7 @@ using namespace BLEpp;
 
 typedef uint8_t CC_ERR_CODE;
 
-/**Structure for the Current Curve
+/** Structure for the Current Curve
  *
  * Requires CURRENT_CURVE_MAX_SAMPLES to be set.
  */
@@ -47,7 +47,7 @@ struct __attribute__((__packed__)) current_curve_t {
 	int8_t timeDiffs[CURRENT_CURVE_MAX_SAMPLES-1];
 };
 
-/**Current Curve
+/** Current Curve
  *
  * Class used to send the current samples over Bluetooth.
  * In order to save space, only differences of the samples are stored.

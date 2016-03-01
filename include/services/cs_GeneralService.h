@@ -22,7 +22,7 @@
 
 #define GENERAL_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
-/**General Service for the Crownstone
+/** General Service for the Crownstone
  *
  * There are several characteristics that fit into the general service description. There is a characteristic
  * that measures the temperature, there are several characteristics that defines the crownstone, namely by

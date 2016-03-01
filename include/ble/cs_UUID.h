@@ -13,9 +13,9 @@
 
 namespace BLEpp {
 
-//! TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
+// @TODO Implement in a clean, methodical and understandable way
 
-/**A Universally Unique IDentifier.
+/** A Universally Unique IDentifier for BLE services and characteristics.
  *
  * This is a 128-bit sequence for non-standard profiles, services, characteristics, or descriptors.
  * There are several identifiers predefined at
@@ -60,7 +60,7 @@ public:
 	 *
 	 * Initialize the object with the given uuid.
 	 *
-	 * **Note**: only use this constructor if you have a Bluetooth SIG
+	 * ** Note** : only use this constructor if you have a Bluetooth SIG
 	 * certified UUID (16-bit)
 	 */
 	UUID(uint16_t uuid) :

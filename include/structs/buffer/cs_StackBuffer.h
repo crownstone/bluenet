@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 6 Nov., 2014
@@ -7,15 +7,10 @@
 
 #pragma once
 
-//#include <stdlib.h> //! malloc, free
-//#include <stdint.h> //! uint32_t
-//
-//#include "drivers/cs_Serial.h"
-
-//! can only be used from C++
-
-//! define buffer
-//! TODO: current implementation is crap
+/** StackBuffer is one of the first buffers created.
+ *
+ * Still in use?
+ */
 template <class T>
 struct StackBuffer {
 	T *buffer;

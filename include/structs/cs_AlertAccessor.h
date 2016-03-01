@@ -32,7 +32,7 @@ enum AlertType {
 #define ALERT_TEMP_HIGH_POS 1
 
 
-/**The new alert struct can be casted to/from a uint16_t
+/** The new alert struct can be casted to/from a uint16_t
  *
  */
 struct __attribute__((__packed__)) new_alert_t {
@@ -40,7 +40,7 @@ struct __attribute__((__packed__)) new_alert_t {
 	uint8_t num;
 };
 
-/**The alert notifications control point can be casted to/from a uint16_t
+/** The alert notifications control point can be casted to/from a uint16_t
  *
  */
 struct __attribute__((__packed__)) alert_control_point_t {

@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 6 Nov., 2014
@@ -14,6 +14,12 @@
 
 //#include "common/cs_Types.h"
 
+/** Analog-Digital conversion.
+ *
+ * The ADC is a hardware peripheral that can be initialized for a particular pin. Subsequently, the analog signal
+ * is converted into a digital value. The resolution of the conversion is limited (default 10 bits). The conversion
+ * is used to get the current curve.
+ */
 class ADC {
 
 public:
@@ -24,7 +30,7 @@ public:
 	}
 
 	/** Initialize ADC.
-	 * @pin The pin to use as input (AIN<pin>).
+	 * @param pin The pin to use as input (AIN<pin>).
 	 *
 	 * The init function must called once before operating the AD converter.
 	 * Call it after you start the SoftDevice.

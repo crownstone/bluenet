@@ -15,7 +15,7 @@
 #include <util/cs_BleError.h>
 #include <drivers/cs_Timer.h>
 
-/**General BLE name service
+/** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
@@ -24,7 +24,7 @@ namespace BLEpp {
 class Nrf51822BluetoothStack;
 class CharacteristicBase;
 
-/**Service as defined in the GATT Specification.
+/** Service as defined in the GATT Specification.
  */
 class Service {
 

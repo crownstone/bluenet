@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Jul 15, 2015
@@ -11,8 +11,12 @@
 
 #include <events/cs_EventListener.h>
 
-#define FRIDGE_UPDATE_FREQUENCY 0.2 //! hz
+//! Fridge update frequence for events (Hz)
+#define FRIDGE_UPDATE_FREQUENCY 0.2
 
+/**
+ * Fridge generates an event when its temperature is out of range.
+ */
 class Fridge : EventListener {
 public:
 	Fridge();

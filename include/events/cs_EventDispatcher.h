@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: May 6, 2015
@@ -11,6 +11,9 @@
 
 #define MAX_EVENT_LISTENERS                            10
 
+/**
+ * Event dispatcher.
+ */
 class EventDispatcher {
 
 private:

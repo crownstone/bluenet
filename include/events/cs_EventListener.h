@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 1 Dec., 2014
@@ -10,6 +10,9 @@
 
 #include <events/cs_EventTypes.h>
 
+/**
+ * Event listener.
+ */
 class EventListener {
 
 private:
