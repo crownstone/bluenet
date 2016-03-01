@@ -60,9 +60,9 @@ struct __attribute__((__packed__)) peripheral_device_t {
 /**Structure of the list of peripheral devices which is sent over Bluetooth
  */
 struct peripheral_device_list_t {
-	// number of elements in the list
+	//! number of elements in the list
 	uint8_t size;
-	// list of scanned devices
+	//! list of scanned devices
 	peripheral_device_t list[SR_MAX_NR_DEVICES];
 };
 
@@ -122,7 +122,7 @@ public:
 		return _buffer;
 	}
 
-	//////////// BufferAccessor ////////////////////////////
+	////////////! BufferAccessor ////////////////////////////
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {

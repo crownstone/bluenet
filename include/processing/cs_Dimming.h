@@ -20,18 +20,18 @@ public:
 
 	void configure();
 
-	// We get a dispatch from the ZeroCrossing utility
+	//! We get a dispatch from the ZeroCrossing utility
 	void handleEvent() {
 		zeroCrossing();
 	}
 
-	// Function to be executed on a zero-crossing
+	//! Function to be executed on a zero-crossing
 	void zeroCrossing();
 
 	void turnOn();
 
 	void turnOff();
 private:
-	// Reference to AD converter
+	//! Reference to AD converter
 	ADC *_adc;
 };

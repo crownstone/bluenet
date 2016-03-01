@@ -32,16 +32,16 @@ class Service;
  */
 struct CharacteristicInit {
 	ble_gatts_attr_t          attr_char_value;
-	// pointer to a presentation format structure (p_char_pf)
+	//! pointer to a presentation format structure (p_char_pf)
 	ble_gatts_char_pf_t       presentation_format;
-	// characteristic metadata
+	//! characteristic metadata
 	ble_gatts_char_md_t       char_md;
-	// attribute metadata for client characteristic configuration  (p_cccd_md)
+	//! attribute metadata for client characteristic configuration  (p_cccd_md)
 	ble_gatts_attr_md_t       cccd_md;
-	// attributed metadata for server characteristic configuration (p_sccd_md)
+	//! attributed metadata for server characteristic configuration (p_sccd_md)
 	ble_gatts_attr_md_t       sccd_md;
 	ble_gatts_attr_md_t       attr_md;
-	// attribute metadata for user description (p_user_desc_md)
+	//! attribute metadata for user description (p_user_desc_md)
 	ble_gatts_attr_md_t       user_desc_metadata_md;
 
 	CharacteristicInit() : presentation_format({}), char_md({}), cccd_md({}), attr_md({}) {}
@@ -71,20 +71,20 @@ class CharacteristicBase {
 public:
 
 protected:
-	// Universally Unique Identifier (8 bytes)
+	//! Universally Unique Identifier (8 bytes)
 	UUID                      _uuid;
-	// Name (4 bytes)
+	//! Name (4 bytes)
 	const char *              _name;
-	// Read permission (1 byte)
+	//! Read permission (1 byte)
 	ble_gap_conn_sec_mode_t   _readperm;
-	// Write permission (1 byte)
+	//! Write permission (1 byte)
 	ble_gap_conn_sec_mode_t   _writeperm;
-	// Handles (8 bytes)
+	//! Handles (8 bytes)
 	ble_gatts_char_handles_t  _handles;
-	// Reference to corresponding service (4 bytes)
+	//! Reference to corresponding service (4 bytes)
 	Service*                  _service;
 
-	// Status of CharacteristicBase (basically a bunch of 1-bit flags)
+	//! Status of CharacteristicBase (basically a bunch of 1-bit flags)
 	Status                    _status;
 
 #ifdef BIG_SIZE_REQUIRED
@@ -111,7 +111,7 @@ protected:
 	 */
 	bool                      .indicates;
 #endif
-	// Unit
+	//! Unit
 //	uint16_t                  _unit;
 
 	/** Interval for updates (4 bytes), 0 means don't update
@@ -165,7 +165,7 @@ public:
 	}
 
 	void setNotifyingEnabled(bool enabled) {
-		//        	LOGd("[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
+		//!        	LOGd("[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
 		_status.notifyingEnabled = enabled;
 	}
 
@@ -263,52 +263,52 @@ template<typename T>
 inline uint8_t ble_type() {
 	return BLE_GATT_CPF_FORMAT_STRUCT;
 }
-// A ble_type for strings
+//! A ble_type for strings
 template<>
 inline uint8_t ble_type<std::string>() {
 	return BLE_GATT_CPF_FORMAT_UTF8S;
 }
-// A ble_type for 8-bit unsigned values
+//! A ble_type for 8-bit unsigned values
 template<>
 inline uint8_t ble_type<uint8_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT8;
 }
-// A ble_type for 16-bit unsigned values
+//! A ble_type for 16-bit unsigned values
 template<>
 inline uint8_t ble_type<uint16_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT16;
 }
-// A ble_type for 32-bit unsigned values
+//! A ble_type for 32-bit unsigned values
 template<>
 inline uint8_t ble_type<uint32_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT32;
 }
-// A ble_type for 8-bit signed values
+//! A ble_type for 8-bit signed values
 template<>
 inline uint8_t ble_type<int8_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT8;
 }
-// A ble_type for 16-bit signed values
+//! A ble_type for 16-bit signed values
 template<>
 inline uint8_t ble_type<int16_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT16;
 }
-// A ble_type for 32-bit signed values
+//! A ble_type for 32-bit signed values
 template<>
 inline uint8_t ble_type<int32_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT32;
 }
-// A ble_type for floats (32 bits)
+//! A ble_type for floats (32 bits)
 template<>
 inline uint8_t ble_type<float>() {
 	return BLE_GATT_CPF_FORMAT_FLOAT32;
 }
-// A ble_type for doubles (64 bits)
+//! A ble_type for doubles (64 bits)
 template<>
 inline uint8_t ble_type<double>() {
 	return BLE_GATT_CPF_FORMAT_FLOAT64;
 }
-// A ble_type for booleans (8 bits)
+//! A ble_type for booleans (8 bits)
 template<>
 inline uint8_t ble_type<bool>() {
 	return BLE_GATT_CPF_FORMAT_BOOLEAN;
@@ -328,17 +328,17 @@ class CharacteristicGeneric : public CharacteristicBase {
 	friend class Service;
 
 public:
-	// Format of callback on write (from user)
+	//! Format of callback on write (from user)
 	typedef function<void(const T&)> callback_on_write_t;
-	// Format of read callback
+	//! Format of read callback
 	typedef function<T()> callback_on_read_t;
 
 protected:
-	// The generic type is physically located in this field in this class (by value, not just by reference)
+	//! The generic type is physically located in this field in this class (by value, not just by reference)
 	T                          _value;
-	// The callback to call on a write coming from the softdevice (and originating from the user)
+	//! The callback to call on a write coming from the softdevice (and originating from the user)
 	callback_on_write_t        _callbackOnWrite;
-	// Callback on read
+	//! Callback on read
 	callback_on_read_t         _callbackOnRead;
 
 	/** Flag to indicate if notification is pending to be sent once currently waiting
@@ -349,7 +349,7 @@ protected:
 public:
 	CharacteristicGeneric() : _notificationPending(false) {};
 
-	// Default empty destructor
+	//! Default empty destructor
 	virtual ~CharacteristicGeneric() {};
 
 	T&  __attribute__((optimize("O0"))) getValue() {
@@ -478,10 +478,10 @@ public:
 	 * again during the next callback call
 	 */
 	void onTxComplete(ble_common_evt_t * p_ble_evt) {
-		// if we have a notification pending, try to send it
+		//! if we have a notification pending, try to send it
 		if (_notificationPending) {
-			// this-> is necessary so that the call of notify depends on the template
-			// parameter T
+			//! this-> is necessary so that the call of notify depends on the template
+			//! parameter T
 			uint32_t err_code = this->notify();
 			if (err_code == NRF_SUCCESS) {
 				_notificationPending = false;
@@ -616,10 +616,10 @@ template<>
 class Characteristic<buffer_ptr_t> : public CharacteristicGeneric<buffer_ptr_t> {
 
 private:
-	// maximum length for this characteristic in bytes
+	//! maximum length for this characteristic in bytes
 	uint16_t _maxLength;
 
-	// actual length of data stored in the buffer in bytes
+	//! actual length of data stored in the buffer in bytes
 	uint16_t _dataLength;
 
 public:
@@ -684,7 +684,7 @@ protected:
 
 };
 
-} // end of namespace
+} //! end of namespace
 
 
 

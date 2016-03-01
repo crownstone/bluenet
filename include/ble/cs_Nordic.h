@@ -12,9 +12,9 @@ extern "C"
 {
 #endif
 
-// The header files for the SoftDevice. We're trying really hard to only them only here.
-// The user should not need to include files under a Nordic license.
-// This means that we can distribute our files in the end without the corresponding Nordic header files.
+//! The header files for the SoftDevice. We're trying really hard to only them only here.
+//! The user should not need to include files under a Nordic license.
+//! This means that we can distribute our files in the end without the corresponding Nordic header files.
 #include "ble_gap.h"
 #include "ble.h"
 #include "ble_advdata.h"
@@ -23,7 +23,7 @@ extern "C"
 #include "ble_gatt.h"
 #include "ble_hci.h"
 
-// Refering to files in the Nordic SDK
+//! Refering to files in the Nordic SDK
 #include "nrf.h"
 #include "nrf_gpio.h"
 #include "nrf_gpiote.h"
@@ -33,7 +33,7 @@ extern "C"
 
 #include "app_util.h"
 #include "app_timer.h"
-#undef APP_ERROR_CHECK // undefine again, we want to use our own macro defined in util/cs_BleError.h
+#undef APP_ERROR_CHECK //! undefine again, we want to use our own macro defined in util/cs_BleError.h
 #undef APP_ERROR_HANDLER
 
 #include "softdevice_handler.h"

@@ -201,7 +201,7 @@ public:
 	inline uint16_t length() const { return _buffer->length; }
 
 
-	/////////// Bufferaccessor ////////////////////////////
+	///////////! Bufferaccessor ////////////////////////////
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t size) {

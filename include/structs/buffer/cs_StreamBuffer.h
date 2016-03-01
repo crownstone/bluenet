@@ -36,7 +36,7 @@ typedef uint8_t ERR_CODE;
 template <typename T>
 struct __attribute__((__packed__)) stream_t {
 	uint8_t type;
-	uint8_t reserved; // reserved for byte alignment
+	uint8_t reserved; //! reserved for byte alignment
 	uint16_t length;
 	T payload[(MASTER_BUFFER_SIZE-SB_HEADER_SIZE)/sizeof(T)];
 };
@@ -206,7 +206,7 @@ public:
 		BLEutil::printArray((uint8_t*)_buffer, getDataLength());
 	}
 
-	/////////// Bufferaccessor ////////////////////////////
+	///////////! Bufferaccessor ////////////////////////////
 
 	/** @inherit */
 	uint16_t getDataLength() const {
@@ -219,7 +219,7 @@ public:
 //		return MASTER_BUFFER_SIZE;
 	}
 
-	// TODO: Why do we need this function!?
+	//! TODO: Why do we need this function!?
 	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
 		buffer = (buffer_ptr_t)_buffer;

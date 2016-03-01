@@ -10,7 +10,7 @@
 #include <ble/cs_Characteristic.h>
 #include "structs/cs_AlertAccessor.h"
 
-#define SCHEDULE_SERVICE_UPDATE_FREQUENCY 2 // hz
+#define SCHEDULE_SERVICE_UPDATE_FREQUENCY 2 //! hz
 
 class ScheduleService : public BLEpp::Service {
 public:
@@ -51,7 +51,7 @@ protected:
 
 
 private:
-	// References to characteristics that need to be written from other functions
+	//! References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint32_t> *_currentTimeCharacteristic;
 	uint32_t _rtcTimeStamp;
 };

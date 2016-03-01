@@ -22,7 +22,7 @@
 
 #include "drivers/cs_RTC.h"
 
-// Check the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
+//! Check the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
 uint32_t ADC::init(uint8_t pin) {
 #if(NRF51_USE_SOFTDEVICE == 1)
 	LOGd("Run ADC converter with SoftDevice");
@@ -36,12 +36,12 @@ uint32_t ADC::init(uint8_t pin) {
 	err_code = config(pin);
 	APP_ERROR_CHECK(err_code);
 
-	NRF_ADC->EVENTS_END  = 0;    // Stop any running conversions.
-	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; // Pin will be configured as analog input
+	NRF_ADC->EVENTS_END  = 0;    //! Stop any running conversions.
+	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; //! Pin will be configured as analog input
 
-	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; // Interrupt adc
+	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; //! Interrupt adc
 
-//	// Enable ADC interrupt
+//	//! Enable ADC interrupt
 //#if(NRF51_USE_SOFTDEVICE == 1)
 //	err_code = sd_nvic_ClearPendingIRQ(ADC_IRQn);
 //	APP_ERROR_CHECK(err_code);
@@ -89,7 +89,7 @@ uint32_t ADC::config(uint8_t pin) {
 		NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << (pin+ADC_CONFIG_PSEL_Pos);
 	} else {
 		LOGf("There is no such pin available");
-		return 0xFFFFFFFF; // error
+		return 0xFFFFFFFF; //! error
 	}
 	return 0;
 }
@@ -104,7 +104,7 @@ void ADC::start() {
 }
 
 void ADC::update(uint32_t value) {
-//	// Subsample
+//	//! Subsample
 //	if (_currentCurve != NULL && (_sampleNum++%2)) {
 ////		if (_clock != NULL) {
 //			_currentCurve->add(value, RTC::getCount());
@@ -123,10 +123,10 @@ void ADC::tick() {
 extern "C" void ADC_IRQHandler(void) {
 	uint32_t adc_value;
 
-	// clear data-ready event
+	//! clear data-ready event
 	NRF_ADC->EVENTS_END     = 0;
 
-	// write value to buffer
+	//! write value to buffer
 	adc_value = NRF_ADC->RESULT;
 
 	ADC &adc = ADC::getInstance();
@@ -137,10 +137,10 @@ extern "C" void ADC_IRQHandler(void) {
 //	       	return;
 //	}
 
-	// Use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
+	//! Use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
 	//NRF_ADC->TASKS_STOP = 1;
 
-	// next sample
+	//! next sample
 	NRF_ADC->TASKS_START = 1;
 
 }

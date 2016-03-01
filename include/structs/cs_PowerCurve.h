@@ -15,7 +15,7 @@ using namespace BLEpp;
 
 #define POWER_CURVE_HEADER_SIZE                (sizeof(uint16_t) + 4*sizeof(T) + 2*sizeof(uint32_t))
 
-// Make sure that max_samples is divisible by 2
+//! Make sure that max_samples is divisible by 2
 //#define POWER_CURVE_MAX_SAMPLES                ((MASTER_BUFFER_SIZE - POWER_CURVE_HEADER_SIZE + 3) / 4 * 2)
 #define POWER_CURVE_MAX_BUF_SIZE               (MASTER_BUFFER_SIZE > BLE_GATTS_VAR_ATTR_LEN_MAX ? BLE_GATTS_FIX_ATTR_LEN_MAX : MASTER_BUFFER_SIZE)
 #define POWER_CURVE_MAX_SAMPLES                ((POWER_CURVE_MAX_BUF_SIZE - POWER_CURVE_HEADER_SIZE + 3) / 4 * 2)
@@ -161,7 +161,7 @@ public:
 		}
 
 		if (_buffer->length % 2 == 1) {
-			// TODO: Clear buffer?
+			//! TODO: Clear buffer?
 			return PC_WRONG_SAMPLE_TYPE;
 		}
 
@@ -217,7 +217,7 @@ public:
 		}
 
 		if (_buffer->length % 2 == 0) {
-			// TODO: Clear buffer?
+			//! TODO: Clear buffer?
 			return PC_WRONG_SAMPLE_TYPE;
 		}
 
@@ -277,7 +277,7 @@ public:
 	inline uint16_t length() const { return _buffer->length/2; }
 
 
-	/////////// Bufferaccessor ////////////////////////////
+	///////////! Bufferaccessor ////////////////////////////
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t size) {

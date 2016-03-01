@@ -6,7 +6,7 @@
 
 #include "util/cs_BleError.h"
 
-// Called by BluetoothLE.h classes when exceptions are disabled.
+//! Called by BluetoothLE.h classes when exceptions are disabled.
 void ble_error_handler (const char * msg, uint32_t line_num, const char * p_file_name) {
 	volatile const char* message __attribute__((unused)) = msg;
 	volatile uint16_t line __attribute__((unused)) = line_num;
@@ -15,7 +15,7 @@ void ble_error_handler (const char * msg, uint32_t line_num, const char * p_file
 	while(1) {}
 }
 
-// called by soft device when you pass bad parameters, etc.
+//! called by soft device when you pass bad parameters, etc.
 void app_error_handler (uint32_t error_code, uint32_t line_num, const uint8_t * p_file_name) {
 	volatile uint32_t error __attribute__((unused)) = error_code;
 	volatile uint16_t line __attribute__((unused)) = line_num;

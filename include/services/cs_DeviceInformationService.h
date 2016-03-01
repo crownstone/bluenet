@@ -27,8 +27,8 @@ public:
 	void init();
 
 protected:
-	// The characteristics in this service, based on:
-	// https://developer.bluetooth.org/TechnologyOverview/Pages/DIS.aspx
+	//! The characteristics in this service, based on:
+	//! https://developer.bluetooth.org/TechnologyOverview/Pages/DIS.aspx
 //	void addManufacturerNameCharacteristic();
 //	void addModelNumberCharacteristic();
 //	void addSerialNumberCharacteristic();
@@ -39,7 +39,7 @@ protected:
 //	void addRegulatoryCertificationDataListCharacteristic();
 
 private:
-	// References to characteristics that need to be written from other functions
+	//! References to characteristics that need to be written from other functions
 //	BLEpp::Characteristic<std::string> *_manufacturerNameCharacteristic;
 //	BLEpp::Characteristic<std::string> *_modelNumberCharacteristic;
 //	BLEpp::Characteristic<std::string> *_serialNumberCharacteristic;

@@ -104,9 +104,9 @@ void Sensors::stopTicking() {
  */
 bool Sensors::checkSwitch(uint32_t time, bool &switchOn) {
 	if (time - _lastSwitchCheck > SWITCH_CHECK_INTERVAL) {
-		// check the state of the switch:
-		//   ON when signal is HIGH
-		//   OFF when signal is LOW
+		//! check the state of the switch:
+		//!   ON when signal is HIGH
+		//!   OFF when signal is LOW
 		switchOn = nrf_gpio_pin_read(PIN_GPIO_BUTTON);
 
 		return true;
@@ -125,9 +125,9 @@ bool Sensors::checkSwitch(uint32_t time, bool &switchOn) {
  */
 bool Sensors::checkPushButton(uint32_t time, bool &pushed) {
 	if (time - _lastPushButtonCheck > PUSH_BUTTON_CHECK_INTERVAL) {
-		// check the state of the push button:
-		//   PUSHED when signal is HIGH
-		//   RELEASED when signal is LOW
+		//! check the state of the push button:
+		//!   PUSHED when signal is HIGH
+		//!   RELEASED when signal is LOW
 		pushed = nrf_gpio_pin_read(PIN_GPIO_BUTTON) == 0;
 
 		return true;
@@ -164,7 +164,7 @@ uint16_t Sensors::sampleSensor() {
 
 	CurrentCurve<uint16_t> _currentCurve;
 
-	// Start storing the samples
+	//! Start storing the samples
 	_currentCurve.clear();
 //	ADC::getInstance().setCurrentCurve(&_currentCurve);
 
@@ -179,12 +179,12 @@ uint16_t Sensors::sampleSensor() {
 	}
 
 
-//	// Give some time to sample
+//	//! Give some time to sample
 //	while (!_currentCurve.isFull()) {
 //		nrf_delay_ms(10);
 //	}
 
-	// Stop storing the samples
+	//! Stop storing the samples
 //	ADC::getInstance().setCurrentCurve(NULL);
 
 	uint16_t numSamples = _currentCurve.length();
@@ -208,10 +208,10 @@ uint16_t Sensors::sampleSensor() {
 		//		_log(INFO, "\r\n");
 		average /= numSamples;
 
-		// Measured voltage goes from 0-3.6V, measured as 0-1023(10 bit),
-		// but Input voltage is from 0-3V (for Nordic EK) and 0-3.3 for Crownstone
-		// so we need to rescale the value to have max at 3V (or 3.3V resp)
-		// instead of 3.6V
+		//! Measured voltage goes from 0-3.6V, measured as 0-1023(10 bit),
+		//! but Input voltage is from 0-3V (for Nordic EK) and 0-3.3 for Crownstone
+		//! so we need to rescale the value to have max at 3V (or 3.3V resp)
+		//! instead of 3.6V
 #if(HARDWARE_BOARD==CROWNSTONE)
 		average *= 3.6/3.3;
 #elif(HARDWARE_BOARD==PCA10001)
@@ -221,7 +221,7 @@ uint16_t Sensors::sampleSensor() {
 		result = average;
 	}
 
-	// Unlock the buffer
+	//! Unlock the buffer
 	mb.unlock();
 
 	return result;
@@ -238,7 +238,7 @@ bool Sensors::checkLightSensor(uint32_t time, uint16_t &value) {
 			return false;
 		}
 
-		// convert to percentage
+		//! convert to percentage
 		LOGd("light intensity: %3d%%", (uint16_t)(100.0 * value/MAX_VALUE));
 		_lastLightCheck = time;
 
@@ -259,7 +259,7 @@ uint16_t Sensors::checkThermalSensor(uint32_t time) {
 			return -1;
 		}
 
-		// convert to percentage
+		//! convert to percentage
 		LOGd("thermal intensity: %3d%%", (uint16_t)(100.0 * thermalIntensity/MAX_VALUE));
 		_lastThermalCheck = time;
 
@@ -364,7 +364,7 @@ void Sensors::initSwitch() {
 	nrf_gpio_cfg_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP);
 #endif
 
-	// check initial state of switch
+	//! check initial state of switch
 	if (nrf_gpio_pin_read(PIN_GPIO_BUTTON)) {
 		switchPwmOn();
 	} else {
@@ -422,8 +422,8 @@ void Sensors::initGPIOTE() {
 }
 
 #ifdef SWITCH_INTERRUPT
-// keep track of the switch time. this variable is used to avoid flickering
-// signal for switch
+//! keep track of the switch time. this variable is used to avoid flickering
+//! signal for switch
 #endif
 static uint32_t _interruptTimeout = 0;
 
@@ -437,17 +437,17 @@ extern "C" void GPIOTE_IRQHandler()
 {
 //	LOGd("GPIOTE_IRQHandler");
 
-	// keep track of the GPIO pin states
+	//! keep track of the GPIO pin states
 	uint32_t pins_state = NRF_GPIO->IN;
 
 #ifdef PUSH_BUTTON_INTERRUPT
 	if ((NRF_GPIOTE->EVENTS_IN[0] == 1) &&
 		(NRF_GPIOTE->INTENSET & GPIOTE_INTENSET_IN0_Msk)) {
 
-		// signal seems to flicker some times when releasing the button
-		// to avoid a wrong push registration, ignore such an event
-		// if both pushed and _lastPushed are true, only register push
-		// button event if pushed and _lastPushed are not equal
+		//! signal seems to flicker some times when releasing the button
+		//! to avoid a wrong push registration, ignore such an event
+		//! if both pushed and _lastPushed are true, only register push
+		//! button event if pushed and _lastPushed are not equal
 
 		bool pushed = (pins_state & (1 << PIN_GPIO_BUTTON)) == 0;
 
@@ -464,7 +464,7 @@ extern "C" void GPIOTE_IRQHandler()
 				_lastPushed = pushed;
 
 		//		NRF_GPIOTE->EVENTS_PORT = 0;
-				// clear the event again
+				//! clear the event again
 				NRF_GPIOTE->EVENTS_IN[0] = 0;
 //			}
 			_interruptTimeout = now + 100;
@@ -476,16 +476,16 @@ extern "C" void GPIOTE_IRQHandler()
 
 #ifdef SWITCH_INTERRUPT
 
-	// check if the event is for us
+	//! check if the event is for us
 	if ((NRF_GPIOTE->EVENTS_IN[0] == 1) &&
 		(NRF_GPIOTE->INTENSET & GPIOTE_INTENSET_IN0_Msk)) {
 
 		bool switchON = (pins_state & (1 << PIN_GPIO_BUTTON)) == 0;
 
-		// if switch is moved really slowly, signal flickers on transition
-		// to avoid registering the signal all the time, add a delay
-		// and only register the signal again if no other signal has been
-		// received in the meantime.
+		//! if switch is moved really slowly, signal flickers on transition
+		//! to avoid registering the signal all the time, add a delay
+		//! and only register the signal again if no other signal has been
+		//! received in the meantime.
 		uint32_t now = RTC::now();
 		if (now > _interruptTimeout) {
 			if (switchON) {
@@ -498,7 +498,7 @@ extern "C" void GPIOTE_IRQHandler()
 		}
 		_interruptTimeout = now + 100;
 
-		// clear the event again
+		//! clear the event again
 		NRF_GPIOTE->EVENTS_IN[0] = 0;
 	}
 
@@ -518,10 +518,10 @@ extern "C" void GPIOTE_IRQHandler()
  * Checks current pwm signal, then toggles from ON to OFF and vice versa
  */
 void Sensors::switchPwmSignal() {
-	// check first the current pwm value ...
+	//! check first the current pwm value ...
 	uint32_t pwmValue = PWM::getInstance().getValue(0);
 
-	// if currently off, turn on, otherwise turn off
+	//! if currently off, turn on, otherwise turn off
 	if (pwmValue == 0) {
 		PWM::getInstance().setValue(0, 255);
 	} else {
@@ -533,10 +533,10 @@ void Sensors::switchPwmSignal() {
  * Checks current pwm signal and only changes if it is currently OFF
  */
 void Sensors::switchPwmOn() {
-	// check first the current pwm value ...
+	//! check first the current pwm value ...
 	uint32_t pwmValue = PWM::getInstance().getValue(0);
 
-	// if currently off, turn on, otherwise do nothing
+	//! if currently off, turn on, otherwise do nothing
 	if (pwmValue == 0) {
 		PWM::getInstance().setValue(0, 255);
 	}
@@ -546,10 +546,10 @@ void Sensors::switchPwmOn() {
  * Checks current pwm signal and only changes if it is currently ON
  */
 void Sensors::switchPwmOff() {
-	// check first the current pwm value ...
+	//! check first the current pwm value ...
 	uint32_t pwmValue = PWM::getInstance().getValue(0);
 
-	// if currently on, turn off, otherwise do nothing
+	//! if currently on, turn off, otherwise do nothing
 	if (pwmValue == 255) {
 		PWM::getInstance().setValue(0, 0);
 	}

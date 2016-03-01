@@ -20,7 +20,7 @@
 
 #include <processing/cs_Scanner.h>
 
-#define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10 // hz
+#define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
 /**Struct used by the <IndoorLocalisationService> to store elements
  */

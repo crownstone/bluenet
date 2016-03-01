@@ -14,7 +14,7 @@
  */
 template<typename T> class tuple : public std::vector<T> {
 public:
-	// Default constructor
+	//! Default constructor
 	tuple() {}
 };
 
@@ -24,7 +24,7 @@ public:
  */
 template<typename T, uint8_t capacity> class fixed_tuple : public tuple<T> {
 public:
-	// Constructor reserves capacity in vector
+	//! Constructor reserves capacity in vector
 	fixed_tuple<T, capacity>() : tuple<T>() {this->reserve(capacity);}
 
 };

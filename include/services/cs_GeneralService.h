@@ -20,7 +20,7 @@
 
 #include <structs/cs_MeshCharacteristicMessage.h>
 
-#define GENERAL_SERVICE_UPDATE_FREQUENCY 10 // hz
+#define GENERAL_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
 /**General Service for the Crownstone
  *
@@ -210,7 +210,7 @@ protected:
 
 private:
 
-	// buffer object to read/write configuration characteristics
+	//! buffer object to read/write configuration characteristics
 	StreamBuffer<uint8_t> *_streamBuffer;
 
 	/** Select configuration for subsequent read actions on the get configuration characteristic.

@@ -33,19 +33,19 @@ enum ConfigurationTypes {
 	CONFIG_IBEACON_MINOR                    = 0x07,
 	CONFIG_IBEACON_UUID                     = 0x08,
 	CONFIG_IBEACON_RSSI                     = 0x09,
-	CONFIG_WIFI_SETTINGS                    = 0x0A, // 10
-	CONFIG_TX_POWER                         = 0x0B, // 11
-	CONFIG_ADV_INTERVAL                     = 0x0C, // 12
-	CONFIG_PASSKEY							= 0x0D, // 13
-	CONFIG_MIN_ENV_TEMP                     = 0x0E, // 14
-	CONFIG_MAX_ENV_TEMP                     = 0x0F, // 15
-	CONFIG_SCAN_DURATION                    = 0x10, // 16
-	CONFIG_SCAN_SEND_DELAY                  = 0x11, // 17
-	CONFIG_SCAN_BREAK_DURATION              = 0x12, // 18
-	CONFIG_BOOT_DELAY                       = 0x13, // 19
-	CONFIG_MAX_CHIP_TEMP                    = 0x14, // 20
-	CONFIG_SCAN_FILTER                      = 0x15, // 21
-	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16, // 22
+	CONFIG_WIFI_SETTINGS                    = 0x0A, //! 10
+	CONFIG_TX_POWER                         = 0x0B, //! 11
+	CONFIG_ADV_INTERVAL                     = 0x0C, //! 12
+	CONFIG_PASSKEY							= 0x0D, //! 13
+	CONFIG_MIN_ENV_TEMP                     = 0x0E, //! 14
+	CONFIG_MAX_ENV_TEMP                     = 0x0F, //! 15
+	CONFIG_SCAN_DURATION                    = 0x10, //! 16
+	CONFIG_SCAN_SEND_DELAY                  = 0x11, //! 17
+	CONFIG_SCAN_BREAK_DURATION              = 0x12, //! 18
+	CONFIG_BOOT_DELAY                       = 0x13, //! 19
+	CONFIG_MAX_CHIP_TEMP                    = 0x14, //! 20
+	CONFIG_SCAN_FILTER                      = 0x15, //! 21
+	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16, //! 22
 	CONFIG_TYPES
 };
 
@@ -56,9 +56,9 @@ class Settings {
 private:
 	Settings();
 
-	// This class is singleton, deny implementation
+	//! This class is singleton, deny implementation
 	Settings(Settings const&);
-	// This class is singleton, deny implementation
+	//! This class is singleton, deny implementation
 	void operator=(Settings const &);
 
 public:
@@ -108,13 +108,13 @@ protected:
 	//	pstorage_handle_t _storageHandles[PS_ID_TYPES];
 	//	ps_configuration_t* _storageStructs[PS_ID_TYPES];
 
-	// handle to storage (required to write to and read from FLASH)
+	//! handle to storage (required to write to and read from FLASH)
 	pstorage_handle_t _storageHandle;
 
-	// struct that storage object understands
+	//! struct that storage object understands
 	ps_configuration_t _storageStruct;
 
-	// non-persistent configuration options
+	//! non-persistent configuration options
 	std::string _wifiSettings;
 
 	/*

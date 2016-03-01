@@ -8,7 +8,7 @@ extern int errno;
 
 int _kill(int pid, int sig)
 {
-//    pid = pid; sig = sig;/** avoid warnings */
+//!    pid = pid; sig = sig;/** avoid warnings */
 #define EINVAL          22
     errno = EINVAL;
     return -1;
@@ -16,7 +16,7 @@ int _kill(int pid, int sig)
 
 void _exit(int status)
 {
-//    xprintf("_exit called with parameter %d\n", status);
+//!    xprintf("_exit called with parameter %d\n", status);
      while(1) {;}
 }
 
@@ -27,45 +27,45 @@ int _getpid(void)
 
 int _close(int file)
 {
-//    file = file;/** avoid warning
+//!    file = file;/** avoid warning
     return -1;
 }
 
 int _fstat(int file, void *st)
 {
-//    file = file;/** avoid warning */
+//!    file = file;/** avoid warning */
     return 0;
 }
 
 int _isatty(int file)
 {
-//    file = file;/** avoid warning */
+//!    file = file;/** avoid warning */
     return 1;
 }
 
 int _lseek(int file, int ptr, int dir)
 {
-//    file = file;/** avoid warning
-//    ptr = ptr;/** avoid warning
-//    dir = dir;/** avoid warning
+//!    file = file;/** avoid warning
+//!    ptr = ptr;/** avoid warning
+//!    dir = dir;/** avoid warning
     return 0;
 }
 
 int _read(int file, char *ptr, int len)
 {
-//    file = file;/** avoid warning */
-//    ptr = ptr;/** avoid warning */
-//    len = len;/** avoid warning */
+//!    file = file;/** avoid warning */
+//!    ptr = ptr;/** avoid warning */
+//!    len = len;/** avoid warning */
     return 0;
 }
 
 int _write(int file, char *ptr, int len)
 {
     int todo;
-//    file = file;/** avoid warning */
+//!    file = file;/** avoid warning */
     for (todo = 0; todo < len; todo++)
     {
-//        xputc(*ptr++);
+//!        xputc(*ptr++);
     }
     return len;
 }
@@ -86,17 +86,17 @@ void * _sbrk(int incr)
 {
     static char *heap_end = (char *)&_ebss;
 
-    // get stack pointer
+    //! get stack pointer
     void* sp;
     asm("mov %0, sp" : "=r"(sp) : : );
-    // return (void*)-1 if stackpointer gets below (stack grows downwards) the end of the heap (goes upwards)
+    //! return (void*)-1 if stackpointer gets below (stack grows downwards) the end of the heap (goes upwards)
     if ((char*)sp <= heap_end+incr) {
-	    __asm("BKPT"); // for now stop by force!
+	    __asm("BKPT"); //! for now stop by force!
         return (void*)-1;
     }
 
     char *prev = heap_end;
-    // heap grows upwards
+    //! heap grows upwards
     heap_end += incr;
     return prev;
 }
@@ -114,14 +114,14 @@ void * _sbrk(int incr)
     static char *heap_base = (char *)&_heap_start;
     static char *heap_limit = (char *)&_heap_end;
 
-    // return (void*)-1 if heap goes beyond artificial set limit
+    //! return (void*)-1 if heap goes beyond artificial set limit
     if (heap_base+incr >= heap_limit) {
-	    __asm("BKPT"); // for now stop by force!
+	    __asm("BKPT"); //! for now stop by force!
         return (void*)-1;
     }
 
     char *prev = heap_base;
-    // heap grows upwards
+    //! heap grows upwards
     heap_base += incr;
     return prev;
 }

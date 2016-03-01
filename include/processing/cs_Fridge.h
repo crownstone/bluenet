@@ -11,7 +11,7 @@
 
 #include <events/cs_EventListener.h>
 
-#define FRIDGE_UPDATE_FREQUENCY 0.2 // hz
+#define FRIDGE_UPDATE_FREQUENCY 0.2 //! hz
 
 class Fridge : EventListener {
 public:

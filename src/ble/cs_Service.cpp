@@ -13,7 +13,7 @@
 
 using namespace BLEpp;
 
-/// Service ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///! Service ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const char* Service::defaultServiceName = "unnamed";
 
@@ -68,7 +68,7 @@ void Service::on_ble_event(ble_evt_t * p_ble_evt) {
  * memory only when a user is connected.
  */
 void Service::on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt) {
-	// nothing here yet.
+	//! nothing here yet.
 }
 
 /** On disconnect event for an individual service
@@ -77,7 +77,7 @@ void Service::on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt)
  * is connected.
  */
 void Service::on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& gap_evt) {
-	// nothing here yet.
+	//! nothing here yet.
 }
 
 /** Write incoming value to data structures on the device.
@@ -97,12 +97,12 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) 
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 
 		if (characteristic->getCccdHandle() == write_evt.handle && write_evt.len == 2) {
-			// received write to enable/disable notification
+			//! received write to enable/disable notification
 			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(write_evt.data));
 			found = true;
 
 		} else if (characteristic->getValueHandle() == value_handle) {
-			// TODO: make a map.
+			//! TODO: make a map.
 			found = true;
 
 			if (write_evt.op == BLE_GATTS_OP_WRITE_REQ
@@ -113,7 +113,7 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) 
 
 			} else if (write_evt.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
 
-				// get length of data, header does not contain full length but rather the "step size"
+				//! get length of data, header does not contain full length but rather the "step size"
 				uint16_t length = 0;
 				cs_sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(), &length, NULL);
 
@@ -126,12 +126,12 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) 
 	}
 
 	if (!found) {
-		// tell someone?
+		//! tell someone?
 		LOGe(MSG_BLE_CHAR_CANNOT_FIND);
 	}
 }
 
-// inform all characteristics that transmission was completed in case they have notifications pending
+//! inform all characteristics that transmission was completed in case they have notifications pending
 void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 		characteristic->onTxComplete(p_ble_evt);

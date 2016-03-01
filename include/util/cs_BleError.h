@@ -18,10 +18,10 @@ extern "C"
 #endif
 
 
-// Called by BluetoothLE.h classes when exceptions are disabled.
+//! Called by BluetoothLE.h classes when exceptions are disabled.
 void ble_error_handler (const char * msg, uint32_t line_num, const char * p_file_name);
 
-// called by soft device when you pass bad parameters, etc.
+//! called by soft device when you pass bad parameters, etc.
 //void app_error_handler (uint32_t error_code, uint32_t line_num, const uint8_t * p_file_name);
 
 //called by NRF SDK when it has an internal error.
@@ -70,7 +70,7 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
 		}
 	};
 
-	// A macro to throw an std::exception if the given function does not have the result NRF_SUCCESS
+	//! A macro to throw an std::exception if the given function does not have the result NRF_SUCCESS
 	//#define BLE_CALL(function, args) do { uint32_t result = function args; if (result != NRF_SUCCESS) throw ble_exception(#function, __FILE__, __LINE__); } while(0)
 	#define BLE_CALL(function, args)                                    \
 			do {                                                        \
@@ -113,7 +113,7 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
 
 #ifdef	NDEBUG
 
-// for release version ignore asserts
+//! for release version ignore asserts
 #define assert(expr, message)
 
 #else

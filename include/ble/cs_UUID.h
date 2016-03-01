@@ -13,7 +13,7 @@
 
 namespace BLEpp {
 
-// TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
+//! TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
 
 /**A Universally Unique IDentifier.
  *
@@ -99,7 +99,7 @@ public:
 	 * Initializes this objects with the values given as parameter.
 	 */
 	UUID(const ble_uuid_t& value):
-		_full(NULL), _uuid(value.uuid), _type(value.type) {} // FIXME NRFAPI
+		_full(NULL), _uuid(value.uuid), _type(value.type) {} //! FIXME NRFAPI
 
 	/** Getter for the 16-bit UUID
 	 *

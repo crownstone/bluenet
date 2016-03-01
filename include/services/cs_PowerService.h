@@ -21,7 +21,7 @@
 #include "drivers/cs_LPComp.h"
 //#include "drivers/cs_RTC.h"
 
-#define POWER_SERVICE_UPDATE_FREQUENCY 10 // hz
+#define POWER_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
 /** PowerService controls the relays on the Crownstone.
  *
@@ -73,7 +73,7 @@ public:
 	 */
 	void dim(uint8_t value);
 protected:
-	// The characteristics in this service
+	//! The characteristics in this service
 	void addPWMCharacteristic();
 	void addRelayCharacteristic();
 	void addSampleCurrentCharacteristic();
@@ -107,7 +107,7 @@ protected:
 	 */
 //	void savePersistentStorage();
 private:
-	// References to characteristics that need to be written from other functions
+	//! References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint8_t> *_pwmCharacteristic;
 	BLEpp::Characteristic<uint8_t> *_relayCharacteristic;
 	BLEpp::Characteristic<uint8_t> *_sampleCurrentCharacteristic;

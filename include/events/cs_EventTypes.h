@@ -11,7 +11,7 @@ enum EventType {
 	General_Base       = 0x100
 };
 
-// for Configuration event type see cs_ConfigHelper.h
+//! for Configuration event type see cs_ConfigHelper.h
 
 enum GeneralEventType {
 	EVT_POWER_OFF = General_Base,

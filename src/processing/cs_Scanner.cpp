@@ -46,7 +46,7 @@ Scanner::Scanner(Nrf51822BluetoothStack* stack) :
 }
 
 Scanner::~Scanner() {
-	// TODO Auto-generated destructor stub
+	//! TODO Auto-generated destructor stub
 }
 
 void Scanner::manualStartScan() {
@@ -110,7 +110,7 @@ void Scanner::stop() {
 	_opCode = SCAN_STOP;
 	LOGi("force STOP");
 	manualStopScan();
-	// no need to execute scan on stop is there? we want to stop after all
+	//! no need to execute scan on stop is there? we want to stop after all
 //	executeScan();
 //	_running = false;
 }
@@ -124,13 +124,13 @@ void Scanner::executeScan() {
 	case SCAN_START: {
 		LOGi("START");
 
-		// start scanning
+		//! start scanning
 		manualStartScan();
 		if (_filterSendFraction > 0) {
 			_scanCount = (_scanCount+1) % _filterSendFraction;
 		}
 
-		// set timer to trigger in SCAN_DURATION sec, then stop again
+		//! set timer to trigger in SCAN_DURATION sec, then stop again
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanDuration), this);
 
 		_opCode = SCAN_STOP;
@@ -139,12 +139,12 @@ void Scanner::executeScan() {
 	case SCAN_STOP: {
 		LOGi("STOP");
 
-		// stop scanning
+		//! stop scanning
 		manualStopScan();
 
 		_scanResult->print();
 
-		// Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
+		//! Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanSendDelay), this);
 
 		_opCode = SCAN_SEND_RESULT;
@@ -153,7 +153,7 @@ void Scanner::executeScan() {
 	case SCAN_SEND_RESULT: {
 		sendResults();
 
-		// Wait SCAN_BREAK ms, then start scanning again
+		//! Wait SCAN_BREAK ms, then start scanning again
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
 
 		_opCode = SCAN_START;
@@ -215,7 +215,7 @@ static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_ty
 
 bool Scanner::isFiltered(data_t* p_adv_data) {
 
-	// If we want to send filtered scans once every N times, and now is that time, then just return false
+	//! If we want to send filtered scans once every N times, and now is that time, then just return false
 	if (_filterSendFraction > 0 && _scanCount == 0) {
 		return false;
 	}
@@ -263,17 +263,17 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 
 	if (isScanning()) {
-		// we do active scanning, to avoid handling each device twice, only
-		// check the scan responses (as long as we don't care about the
-		// advertisement data)
+		//! we do active scanning, to avoid handling each device twice, only
+		//! check the scan responses (as long as we don't care about the
+		//! advertisement data)
 		if (p_adv_report->scan_rsp) {
             data_t adv_data;
 
-            // Initialize advertisement report for parsing.
+            //! Initialize advertisement report for parsing.
             adv_data.p_data = (uint8_t *)p_adv_report->data;
             adv_data.data_len = p_adv_report->dlen;
 
-            // check scan response  to determine if device passes the filter
+            //! check scan response  to determine if device passes the filter
 			if (!isFiltered(&adv_data)) {
 				_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 			}

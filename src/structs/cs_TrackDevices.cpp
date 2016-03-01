@@ -15,7 +15,7 @@
  * List of tracked devices
  *********************************************************************************************************************/
 
-// returns the number of elements stored so far
+//! returns the number of elements stored so far
 uint16_t TrackedDeviceList::getSize() const {
 	if (_buffer != NULL) {
 		return _buffer->size;
@@ -58,7 +58,7 @@ void TrackedDeviceList::update(const uint8_t * addrs_ptr, int8_t rssi) {
 }
 
 uint8_t TrackedDeviceList::isNearby() {
-	// special case in which nothing needs to be tracked
+	//! special case in which nothing needs to be tracked
 	if (!getSize()) return TDL_NOT_TRACKING;
 	
 	bool is_nearby = false;
@@ -94,10 +94,10 @@ void TrackedDeviceList::clear() {
 
 bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 	for (int i=0; i<getSize(); ++i) {
-		// check if it is already in the list, then update
+		//! check if it is already in the list, then update
 		if (memcmp(adrs_ptr, _buffer->list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			_buffer->list[i].rssiThreshold = rssi_threshold;
-			//_buffer->counters[i] = TDL_COUNTER_INIT; // Don't update counter
+			//_buffer->counters[i] = TDL_COUNTER_INIT; //! Don't update counter
 			LOGi("Updated [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
 					adrs_ptr[5], adrs_ptr[4], adrs_ptr[3], adrs_ptr[2],
 					adrs_ptr[1], adrs_ptr[0], rssi_threshold);
@@ -105,10 +105,10 @@ bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 		}
 	}
 	if (getSize() >= TRACKDEVICES_MAX_NR_DEVICES) {
-		return false; // List is full
+		return false; //! List is full
 	}
 
-	// get next index, then increase size by one
+	//! get next index, then increase size by one
 	int idx = _buffer->size++;
 
 	memcpy(_buffer->list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
@@ -132,16 +132,16 @@ bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 bool TrackedDeviceList::rem(const uint8_t* adrs_ptr) {
 	for (int i=0; i<getSize(); ++i) {
 		if (memcmp(adrs_ptr, _buffer->list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
-			// Decrease size
+			//! Decrease size
 			_buffer->size--;
-			// Shift array
-			// TODO: Anne: order within the array shouldn't matter isn't it? so just copy the last item on slot i
+			//! Shift array
+			//! TODO: Anne: order within the array shouldn't matter isn't it? so just copy the last item on slot i
 			for (int j=i; j<getSize(); ++j) {
 				memcpy(_buffer->list[j].addr, _buffer->list[j+1].addr, BLE_GAP_ADDR_LEN);
 				_buffer->list[j].rssiThreshold = _buffer->list[j+1].rssiThreshold;
 				_buffer->counters[j] = _buffer->counters[j+1];
 
-				// TODO: does this work too? might be faster..
+				//! TODO: does this work too? might be faster..
 				//memcpy(&(_buffer->list[j]), &(_buffer->list[j+1]), sizeof(tracked_device_t));
 			}
 			LOGi("Removed [%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
@@ -149,7 +149,7 @@ bool TrackedDeviceList::rem(const uint8_t* adrs_ptr) {
 			return true;
 		}
 	}
-	return false; // Address is not in the list
+	return false; //! Address is not in the list
 }
 
 void TrackedDeviceList::setTimeout(uint16_t counts) {
@@ -157,7 +157,7 @@ void TrackedDeviceList::setTimeout(uint16_t counts) {
 		return;
 	}
 
-	// Make sure that devices that are not nearby get the new threshold count
+	//! Make sure that devices that are not nearby get the new threshold count
 	for (int i=0; i<getSize(); ++i) {
 		if (_buffer->counters[i] >= _timeoutCount) {
 			_buffer->counters[i] = counts;

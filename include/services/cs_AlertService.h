@@ -11,7 +11,7 @@
 #include <ble/cs_Characteristic.h>
 #include "structs/cs_AlertAccessor.h"
 
-#define ALERT_SERVICE_UPDATE_FREQUENCY 10 // hz
+#define ALERT_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
 class AlertService : public BLEpp::Service {
 public:
@@ -52,8 +52,8 @@ public:
 	void scheduleNextTick();
 
 protected:
-	// The characteristics in this service, based on:
-	// https://developer.bluetooth.org/TechnologyOverview/Pages/ANS.aspx
+	//! The characteristics in this service, based on:
+	//! https://developer.bluetooth.org/TechnologyOverview/Pages/ANS.aspx
 //	void addSupportedNewAlertCharacteristic();
 	void addNewAlertCharacteristic();
 //	void addSupportedUnreadAlertCharacteristic();
@@ -62,7 +62,7 @@ protected:
 
 
 private:
-	// References to characteristics that need to be written from other functions
+	//! References to characteristics that need to be written from other functions
 //	BLEpp::Characteristic<uint8_t> *_supportedNewAlertCharacteristic;
 	BLEpp::Characteristic<uint16_t> *_newAlertCharacteristic;
 //	BLEpp::Characteristic<uint8_t> *_supportedUnreadAlertCharacteristic;

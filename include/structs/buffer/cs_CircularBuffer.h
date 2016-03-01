@@ -11,8 +11,8 @@
 #include <cstddef>
 //#include <cstdint>
 
-//#include <stdlib.h> // malloc, free
-//#include <stdint.h> // uint32_t
+//#include <stdlib.h> //! malloc, free
+//#include <stdint.h> //! uint32_t
 //
 //#include "drivers/cs_Serial.h"
 
@@ -67,8 +67,8 @@ public:
 		if (!_array) {
 			_array = (T*)calloc(_capacity, sizeof(T));
 		}
-		// also call clear to make sure the head and tail are reset and we
-		// start with a clean buffer
+		//! also call clear to make sure the head and tail are reset and we
+		//! start with a clean buffer
 		clear();
 		return _array != NULL;
 	}

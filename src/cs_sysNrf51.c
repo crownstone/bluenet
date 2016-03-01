@@ -27,10 +27,10 @@ extern int main (void);
 void ADC_IRQHandler(void);
 void ResetHandler(void);
 
-// currently used for PWM
+//! currently used for PWM
 void TIMER2_IRQHandler(void);
 
-// The LP comparator
+//! The LP comparator
 void WUCOMP_COMP_IRQHandler(void);
 
 void RTC1_IRQHandler(void);
@@ -74,11 +74,11 @@ void SWI5_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 __attribute__ ((section(".vectors"), used))
 void (* const gVectors[])(void) =
 {
-	(void (*)(void))((unsigned long)&_estack),	//  0 ARM: Initial Stack Pointer
-	ResetHandler,					//  1 ARM: Initial Program Counter
+	(void (*)(void))((unsigned long)&_estack),	//!  0 ARM: Initial Stack Pointer
+	ResetHandler,					//!  1 ARM: Initial Program Counter
 	NMI_Handler,
 	HardFault_Handler,
-	0,              // reserved
+	0,              //! reserved
 	0,
 	0,
 	0,
@@ -130,20 +130,20 @@ void (* const gVectors[])(void) =
 __attribute__ ((section(".startup")))
 void ResetHandler(void) {
 
-	// Enable all RAM banks.
-	// See PAN_028_v1.6.pdf "16. POWER: RAMON reset value causes problems under certain conditions"
+	//! Enable all RAM banks.
+	//! See PAN_028_v1.6.pdf "16. POWER: RAMON reset value causes problems under certain conditions"
 	NRF_POWER->RAMON |= 0xF;
 
-	// Enable Peripherals.
-	// See PAN_028_v1.6.pdf "25. System: Manual setup is required to enable use of peripherals"
-	// WARNING. This is only true for OLD hardware (check with ./scripts/hardware_version.sh)
-	// For new hardware this DISABLES for example the LPCOMP peripheral
+	//! Enable Peripherals.
+	//! See PAN_028_v1.6.pdf "25. System: Manual setup is required to enable use of peripherals"
+	//! WARNING. This is only true for OLD hardware (check with ./scripts/hardware_version.sh)
+	//! For new hardware this DISABLES for example the LPCOMP peripheral
 #if(HARDWARE_VERSION == 0x001D)
 	*(uint32_t *)0x40000504 = 0xC007FFDF;
 	*(uint32_t *)0x40006C18 = 0x00008000;
 #endif
 
-	// start up crystal LF clock.
+	//! start up crystal LF clock.
 	NRF_CLOCK->EVENTS_LFCLKSTARTED = 0;
 #if LOW_POWER_MODE==0
 	/**
@@ -153,21 +153,21 @@ void ResetHandler(void) {
 	 *
 	 * Clock runs on 32768 Hz and is generated from the 16 MHz system clock
 	 */
-	// start up crystal HF clock.
+	//! start up crystal HF clock.
 	NRF_CLOCK->TASKS_HFCLKSTART = 1;
 	while(!NRF_CLOCK->EVENTS_HFCLKSTARTED)/** wait */;
 
 	NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_Synth;
 #else
-	// Explicitly don't start the HF clock
+	//! Explicitly don't start the HF clock
 	NRF_CLOCK->TASKS_HFCLKSTART = 0;
 
-	// TODO: make dependable on board
+	//! TODO: make dependable on board
 
-	// Best option, but requires a 32kHz crystal on the pcb
+	//! Best option, but requires a 32kHz crystal on the pcb
 //	NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_Xtal << CLOCK_LFCLKSRC_SRC_Pos;
 
-	// Internal oscillator
+	//! Internal oscillator
 	NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_RC << CLOCK_LFCLKSRC_SRC_Pos;
 #endif
 
@@ -182,7 +182,7 @@ void ResetHandler(void) {
 	 * will be kept active when the device is in sleep mode, such as the 16MHz clock.
 	 */
 #if LOW_POWER_MODE==0
-	// enable constant latency mode.
+	//! enable constant latency mode.
 	NRF_POWER->TASKS_CONSTLAT = 1;
 #else
 	NRF_POWER->TASKS_LOWPWR = 1;
@@ -191,14 +191,14 @@ void ResetHandler(void) {
 	uint32_t *src = (uint32_t*)&_etext;
 	uint32_t *dest = (uint32_t*)&_sdata;
 
-	// copy data and clear bss
+	//! copy data and clear bss
 	while (dest < (uint32_t*)&_edata) *dest++ = *src++;
 	while (dest < (uint32_t*)&_sbss) *dest++ = 0xdeadbeef;
 	dest = (uint32_t*)&_sbss;
 	while (dest < (uint32_t*)&_ebss) *dest++ = 0;
 	while (dest < (uint32_t*)&dest) *dest++ = 0xdeadbeef;
 
-	// include libc functionality
+	//! include libc functionality
 	//__libc_init_array();
 
 	main();

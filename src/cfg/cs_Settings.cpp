@@ -77,7 +77,7 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 #endif
 	case CONFIG_WIFI_SETTINGS: {
 		LOGi("Temporarily store wifi settings");
-		// max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
+		//! max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
 		if (length > 88) {
 			LOGe("Wifi settings string too long");
 			break;
@@ -154,7 +154,7 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 	case CONFIG_NAME_UUID: {
 		LOGd("Read name");
 		std::string str = getBLEName();
-		streamBuffer->fromString(str); // TODO: can't we set this on buffer immediately?
+		streamBuffer->fromString(str); //! TODO: can't we set this on buffer immediately?
 		streamBuffer->setType(type);
 
 		LOGd("Name read %s", str.c_str());
@@ -202,7 +202,7 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 #endif
 	case CONFIG_WIFI_SETTINGS: {
 		LOGd("Read wifi settings. Does reset it.");
-		// copy string, because we clear it on read
+		//! copy string, because we clear it on read
 		std::string str;
 		if (_wifiSettings == "") {
 			str = "{}";
@@ -229,7 +229,7 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		uint8_t plen = BLE_GAP_PASSKEY_LEN;
 		uint8_t payload[BLE_GAP_PASSKEY_LEN];
 		Storage::getArray<uint8_t>(_storageStruct.passkey, payload, (uint8_t*)STATIC_PASSKEY, plen);
-		// should we return the passkey? probably not ...
+		//! should we return the passkey? probably not ...
 		//			streamBuffer->setPayload((uint8_t*)payload, plen);
 		//			streamBuffer->setType(type);
 

@@ -71,7 +71,7 @@ class IBeacon {
 		 * @rssi the calibrated rssi value at 1m distance
 		 */
 		IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor, int8_t rssi) {
-			// advertisement indicator for an iBeacon is defined as 0x0215
+			//! advertisement indicator for an iBeacon is defined as 0x0215
 			_adv_indicator = 0x0215;
 			_uuid = uuid;
 			_major = major;
@@ -132,4 +132,4 @@ class IBeacon {
 		inline int8_t getRSSI() { return _rssi; }
 };
 
-} // end namespace
+} //! end namespace

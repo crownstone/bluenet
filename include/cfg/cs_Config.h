@@ -8,7 +8,7 @@
 
 #define DOBOTS_ID                                0x1111
 
-// size of the buffer used for characteristics
+//! size of the buffer used for characteristics
 //#define GENERAL_BUFFER_SIZE                      300
 
 /**maximum length of strings used for characteristic values */
@@ -36,7 +36,7 @@
 /**Maximum number of events in the scheduler queue. */
 #define SCHED_QUEUE_SIZE                         10
 
-// See https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
+//! See https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
 /**Determines scan interval in units of 0.625 millisecond. */
 #define SCAN_INTERVAL                            0x00A0
 /**Determines scan window in units of 0.625 millisecond. */
@@ -44,7 +44,7 @@
 /**Determines scan window in units of 0.625 millisecond. */
 #define SCAN_WINDOW                              0x009E
 
-// bonding / security
+//! bonding / security
 #define SEC_PARAM_TIMEOUT                        30                                          /**< Timeout for Pairing Request or Security Request (in seconds). */
 #define SEC_PARAM_BOND                           1                                           /**< Perform bonding. */
 #define SEC_PARAM_MITM                           1                                           /**< Man In The Middle protection not required. */
@@ -53,10 +53,10 @@
 #define SEC_PARAM_MIN_KEY_SIZE                   7                                           /**< Minimum encryption key size. */
 #define SEC_PARAM_MAX_KEY_SIZE                   16                                          /**< Maximum encryption key size. */
 
-// tx power used for low power mode during bonding
+//! tx power used for low power mode during bonding
 #define LOW_TX_POWER                             -40
 
 #define CLOCK_SOURCE                             NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_8000MS_CALIBRATION
 
-// duration (in ms) how long the relay pins should be set to high
-#define RELAY_HIGH_DURATION                       10 // ms
+//! duration (in ms) how long the relay pins should be set to high
+#define RELAY_HIGH_DURATION                       10 //! ms

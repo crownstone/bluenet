@@ -11,10 +11,10 @@
 #include <stdint.h>
 #include "ble_gap.h"
 
-// Number of addresses in the white list
+//! Number of addresses in the white list
 #define BLACKLIST_LENGTH 46
 
-// Remember that the bluetooth address is reversed!
+//! Remember that the bluetooth address is reversed!
 static const uint8_t BlackList[BLACKLIST_LENGTH * BLE_GAP_ADDR_LEN] = {
 		0xFE, 0xDA, 0x28, 0x73, 0x27, 0xF8,
 		0xCD, 0x03, 0xAC, 0xB8, 0xC1, 0xF1,

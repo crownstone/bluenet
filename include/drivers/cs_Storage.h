@@ -16,7 +16,7 @@
 #include "util/cs_Utils.h"
 
 extern "C" {
-	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
+	//! the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
 	#include "pstorage_platform.h"
 	#include "pstorage.h"
 	#include "ble_types.h"
@@ -63,11 +63,11 @@ struct ps_storage_base_t {
 /**Enumeration used to identify the different storage structures
  */
 enum ps_storage_id {
-	// storage for configuration items
+	//! storage for configuration items
 	PS_ID_CONFIGURATION = 0,
-	// storage for the indoor localisation service
+	//! storage for the indoor localisation service
 	PS_ID_INDOORLOCALISATION_SERVICE = 1,
-	// number of elements
+	//! number of elements
 	PS_ID_TYPES
 };
 
@@ -76,28 +76,28 @@ enum ps_storage_id {
  * This struct is used to define the configuration of the storage
  */
 struct storage_config_t {
-	// enum <ps_storage_id> defines the type of storage structure
+	//! enum <ps_storage_id> defines the type of storage structure
 	ps_storage_id id;
-	// handle to the storage in FLASH
+	//! handle to the storage in FLASH
 	pstorage_handle_t handle;
-	// size of the storage structure
+	//! size of the storage structure
 	pstorage_size_t storage_size;
 };
 
-// Configuration ///////////////////////////////
+//! Configuration ///////////////////////////////
 
 /**Struct used by the Configuration to store elements
  */
 struct ps_configuration_t : ps_storage_base_t {
-	// device name
+	//! device name
 	char device_name[MAX_STRING_SIZE];
-	// room name
+	//! room name
 	char room[MAX_STRING_SIZE];
-	// device type
+	//! device type
 	char device_type[MAX_STRING_SIZE];
-	// floor level
+	//! floor level
 	uint32_t floor;
-	// beacon
+	//! beacon
 	struct __attribute__((__packed__)) ps_beacon_t {
 		uint32_t major;
 		uint32_t minor;
@@ -105,53 +105,53 @@ struct ps_configuration_t : ps_storage_base_t {
 		int32_t rssi;
 	} beacon;
 
-	// current limit value
+	//! current limit value
 	uint32_t current_limit;
 
-	// nearby timeout used for device tracking
+	//! nearby timeout used for device tracking
 	uint32_t nearbyTimeout;
 
-	// Transmission power in dBm, see ble_gap.h
+	//! Transmission power in dBm, see ble_gap.h
 	int32_t txPower;
 
-	// Advertisement interval in units of 0.625 ms
+	//! Advertisement interval in units of 0.625 ms
 	uint32_t advInterval;
 
-	// passkey used for bonding
+	//! passkey used for bonding
 	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
 
-	// Minimum temperature of environment
+	//! Minimum temperature of environment
 	int32_t minEnvTemp;
 
-	// Maximum temperature of environment
+	//! Maximum temperature of environment
 	int32_t maxEnvTemp;
 
-	// Scan duration in ms
+	//! Scan duration in ms
 	uint32_t scanDuration;
 
-	// Time in ms, before sending the scan results over the mesh
+	//! Time in ms, before sending the scan results over the mesh
 	uint32_t scanSendDelay;
 
-	// Time in ms to wait before scanning, after sending the scan results
+	//! Time in ms to wait before scanning, after sending the scan results
 	uint32_t scanBreakDuration;
 
-	// Time (in ms) to wait before booting after reset
+	//! Time (in ms) to wait before booting after reset
 	uint32_t bootDelay;
 
-	// The temperature (in C) at which the PWM and relay are switched off
+	//! The temperature (in C) at which the PWM and relay are switched off
 	int32_t maxChipTemp;
 
-	// current scan filter
+	//! current scan filter
 	uint32_t scanFilter;
 
-	// Filtered out devices are still sent once every N scan intervals
-	// Set to 0 to not send them ever
+	//! Filtered out devices are still sent once every N scan intervals
+	//! Set to 0 to not send them ever
 	uint32_t scanFilterSendFraction;
 
 };
 
-// INDOOR LOCALISATION SERVICE ///////////////////
-// moved to cs_IndoorLocalisationService.h
+//! INDOOR LOCALISATION SERVICE ///////////////////
+//! moved to cs_IndoorLocalisationService.h
 
 
 ///////////////////////////////////////////////////
@@ -219,7 +219,7 @@ public:
 	void writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
 
 	////////////////////////////////////////////////////////////////////////////////////////
-	// helper functions
+	//! helper functions
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	/** Helper function to convert std::string to char array

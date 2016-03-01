@@ -32,10 +32,10 @@ using namespace BLEpp;
 #define MM_MAX_DATA_LENGTH 90
 
 struct __attribute__((__packed__)) mesh_characteristic_message_t {
-	uint8_t channel; // defines the handle or channel on which the data should be sent in the mesh
-//	uint8_t type; // defines the type of message, i.e. defines the data structure
+	uint8_t channel; //! defines the handle or channel on which the data should be sent in the mesh
+//	uint8_t type; //! defines the type of message, i.e. defines the data structure
 	uint8_t reserverd;
-	uint16_t length; // length of data
+	uint16_t length; //! length of data
 	uint8_t data[MM_MAX_DATA_LENGTH];
 };
 
@@ -57,7 +57,7 @@ public:
 		length = _buffer->length;
 	}
 
-	//////////// BufferAccessor ////////////////////////////
+	////////////! BufferAccessor ////////////////////////////
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {

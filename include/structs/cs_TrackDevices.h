@@ -20,12 +20,12 @@
 
 //using namespace BLEpp;
 
-// About 3 minutes
+//! About 3 minutes
 //#define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 2000
-// About 30 seconds
+//! About 30 seconds
 #define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 300
 
-// Initialize counter of tracked devices with this number.
+//! Initialize counter of tracked devices with this number.
 #define TDL_COUNTER_INIT                         -1
 //#define TDL_COUNTER_INIT                         ((uint16_t)-1)
 
@@ -33,14 +33,14 @@
 #define TDL_IS_NEARBY                            2
 #define TDL_NOT_TRACKING                         3
 
-#define TRACKDEVICES_HEADER_SIZE                 1 // 1 BYTE for the header = number of elements in the list
+#define TRACKDEVICES_HEADER_SIZE                 1 //! 1 BYTE for the header = number of elements in the list
 
 #define TRACKDEVICES_MAX_NR_DEVICES              5
 
 struct __attribute__((__packed__)) tracked_device_t {
-	// bluetooth address
+	//! bluetooth address
 	uint8_t addr[BLE_GAP_ADDR_LEN];
-	// rssi threshold
+	//! rssi threshold
 	int8_t rssiThreshold;
 };
 
@@ -118,7 +118,7 @@ public:
 	/** Returns the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
 	uint16_t getTimeout();
 
-	//////////// BufferAccessor ////////////////////////////
+	////////////! BufferAccessor ////////////////////////////
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
@@ -169,7 +169,7 @@ public:
 	
 	const uint8_t* getAddress() const { return _buffer->addr; }
 
-	//////////// BufferAccessor ////////////////////////////
+	////////////! BufferAccessor ////////////////////////////
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
