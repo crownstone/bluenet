@@ -14,8 +14,8 @@
 
 #include <structs/cs_ScanResult.h>
 
-// device messages
-// TODO: should be an enum?
+//! device messages
+//! TODO: should be an enum?
 #define EVENT_MESSAGE 0
 #define POWER_MESSAGE 1
 #define BEACON_MESSAGE 2
@@ -27,7 +27,7 @@ enum CommandTypes {
 	SCAN_START = 1,
 };
 
-// hub messages
+//! hub messages
 #define SCAN_MESSAGE 101
 
 #define BROADCAST_ADDRESS {}
@@ -59,7 +59,7 @@ struct __attribute__((__packed__)) command_mesh_message_t {
 
 struct __attribute__((__packed__)) config_mesh_message_t {
 	uint8_t type;
-	uint8_t reserved; // reserved for byte alignment
+	uint8_t reserved; //! reserved for byte alignment
 	uint16_t length;
 	uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - 4];
 };

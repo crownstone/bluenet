@@ -32,10 +32,10 @@ using namespace BLEpp;
 #define MM_MAX_DATA_LENGTH 90
 
 struct __attribute__((__packed__)) mesh_characteristic_message_t {
-	uint8_t channel; // defines the handle or channel on which the data should be sent in the mesh
-//	uint8_t type; // defines the type of message, i.e. defines the data structure
+	uint8_t channel; //! defines the handle or channel on which the data should be sent in the mesh
+//	uint8_t type; //! defines the type of message, i.e. defines the data structure
 	uint8_t reserverd;
-	uint16_t length; // length of data
+	uint16_t length; //! length of data
 	uint8_t data[MM_MAX_DATA_LENGTH];
 };
 
@@ -57,9 +57,9 @@ public:
 		length = _buffer->length;
 	}
 
-	//////////// BufferAccessor ////////////////////////////
+	////////////! BufferAccessor ////////////////////////////
 
-	/* @inherit */
+	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
 		LOGi("sizeof(mesh_characteristic_message_t): %d, maxLength: %d", sizeof(mesh_characteristic_message_t), maxLength);
 		assert(sizeof(mesh_characteristic_message_t) <= maxLength, "buffer not large enough to hold mesh message!");
@@ -67,17 +67,17 @@ public:
 		return 0;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	inline uint16_t getDataLength() const {
 		return MM_SERIALIZED_SIZE;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	inline uint16_t getMaxLength() const {
 		return MM_SERIALIZED_SIZE;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
 		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();

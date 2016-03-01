@@ -29,17 +29,17 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt);
 class CMesh {
 private:
 
-	// app timer id for tick function
+	//! app timer id for tick function
 	uint32_t				 _appTimerId;
 
-	// constructor is hidden from the user
+	//! constructor is hidden from the user
 	CMesh();
 
-	// destructor is hidden from the user
+	//! destructor is hidden from the user
 	~CMesh();
 	
-	CMesh(CMesh const&); // singleton, deny implementation
-	void operator=(CMesh const &); // singleton, deny implementation
+	CMesh(CMesh const&); //! singleton, deny implementation
+	void operator=(CMesh const &); //! singleton, deny implementation
 
 	void tick();
 	static void staticTick(CMesh* ptr) {
@@ -51,24 +51,24 @@ private:
 	void handleMeshReceive();
 
 public:
-	// use static variant of singleton, no dynamic memory allocation
+	//! use static variant of singleton, no dynamic memory allocation
 	static CMesh& getInstance() {
 		static CMesh instance;
 		return instance;
 	}
 
-	// initialize
+	//! initialize
 	void init();
 
 	void startTicking() { Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this); };
 	void stopTicking() { Timer::getInstance().stop(_appTimerId); };
 
-	// send message
+	//! send message
 //	void send(uint8_t handle, uint32_t value);
 
 	void send(uint8_t channel, void* p_data, uint8_t length);
 
-	// returns last message on channel
+	//! returns last message on channel
 	bool getLastMessage(uint8_t channel, void** p_data, uint16_t& length);
 
 };

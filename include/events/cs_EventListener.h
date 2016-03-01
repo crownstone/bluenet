@@ -24,6 +24,6 @@ public:
 
 	virtual ~EventListener() {};
 
-	// handle events
+	//! handle events
 	virtual void handleEvent(uint16_t evt, void* p_data, uint16_t length) = 0;
 };

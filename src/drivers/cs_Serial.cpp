@@ -27,14 +27,14 @@ static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVI
  */
 void config_uart() {
 #if SERIAL_VERBOSITY<NONE
-	// Enable UART
+	//! Enable UART
 	NRF_UART0->ENABLE = 0x04;
 
-	// Configure UART pins
+	//! Configure UART pins
 	NRF_UART0->PSELRXD = PIN_GPIO_RX;
 	NRF_UART0->PSELTXD = PIN_GPIO_TX;
 
-	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; // do not enable hardware flow control.
+	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; //! do not enable hardware flow control.
 	NRF_UART0->BAUDRATE = m_baudrates[UART_BAUD_38K4];
 	NRF_UART0->TASKS_STARTTX = 1;
 	NRF_UART0->TASKS_STARTRX = 1;
@@ -76,7 +76,7 @@ int write(const char *str, ...) {
 
 	if (len < 0) return len;
 
-	// if strings are small we do not need to allocate by malloc
+	//! if strings are small we do not need to allocate by malloc
 	if (sizeof buffer >= len + 1UL) {
 		va_start(ap, str);
 		len = vsprintf(buffer, str, ap);

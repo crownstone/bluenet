@@ -7,22 +7,22 @@
 
 #pragma once
 
-//#include <stdlib.h> // malloc, free
-//#include <stdint.h> // uint32_t
+//#include <stdlib.h> //! malloc, free
+//#include <stdint.h> //! uint32_t
 //
 //#include "drivers/cs_Serial.h"
 
-// can only be used from C++
+//! can only be used from C++
 
-// define buffer
-// TODO: current implementation is crap
+//! define buffer
+//! TODO: current implementation is crap
 template <class T>
 struct StackBuffer {
 	T *buffer;
 	T *ptr;
 	uint16_t size;
 
-	// pushes till end of buffer
+	//! pushes till end of buffer
 	void push(T value) {
 		if (full()) return;
 		*ptr = value;
@@ -30,12 +30,12 @@ struct StackBuffer {
 		//LOGd("Add #%u", (uint8_t)(ptr-buffer));
 	}
 
-	// pops till beginning... 0xdeafabba is an error code
+	//! pops till beginning... 0xdeafabba is an error code
 	T pop() {
 //		uint32_t value = *ptr;
 //		if (empty()) return 0xdeafabba;
 //		ptr--;
-		if (empty()) return (T)0xdeafabba; // TODO: Assumes uint32_t for T
+		if (empty()) return (T)0xdeafabba; //! TODO: Assumes uint32_t for T
 		T value = *(--ptr);
 		return value;
 	}
@@ -58,7 +58,7 @@ struct StackBuffer {
 	}
 };
 
-// define alias for struct buffer
+//! define alias for struct buffer
 template <class T>
 using buffer_t = StackBuffer<T>;
 //typedef struct buffer buffer_t;

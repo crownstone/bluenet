@@ -35,8 +35,8 @@ class MeshControl : public EventListener {
 private:
 	MeshControl();
 
-	MeshControl(MeshControl const&); // singleton, deny implementation
-	void operator=(MeshControl const &); // singleton, deny implementation
+	MeshControl(MeshControl const&); //! singleton, deny implementation
+	void operator=(MeshControl const &); //! singleton, deny implementation
 
     ble_gap_addr_t _myAddr;
     app_timer_id_t _resetTimerId;
@@ -45,19 +45,19 @@ private:
     	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 
     	if (memcmp(msg->header.targetAddress, _myAddr.addr, BLE_GAP_ADDR_LEN) == 0) {
-    		// target address of package is set to our address
+    		//! target address of package is set to our address
     		return true;
     	} else {
-//    		_log(INFO, "message not for us, target: ");
-//    		BLEutil::printArray(msg->header.targetAddress, BLE_GAP_ADDR_LEN);
+//!    		_log(INFO, "message not for us, target: ");
+//!    		BLEutil::printArray(msg->header.targetAddress, BLE_GAP_ADDR_LEN);
 			return false;
     	}
     }
 
     bool isBroadcast(void* p_data) {
     	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
-//    	uint8_t broadcastAddr[BLE_GAP_ADDR_LEN] = BROADCAST_ADDRESS;
-//    	return memcmp(msg->header.targetAddress, broadcastAddr, BLE_GAP_ADDR_LEN) == 0;
+//!    	uint8_t broadcastAddr[BLE_GAP_ADDR_LEN] = BROADCAST_ADDRESS;
+//!    	return memcmp(msg->header.targetAddress, broadcastAddr, BLE_GAP_ADDR_LEN) == 0;
     	return memcmp(msg->header.targetAddress, new uint8_t[BLE_GAP_ADDR_LEN] BROADCAST_ADDRESS, BLE_GAP_ADDR_LEN) == 0;
     }
 
@@ -66,9 +66,9 @@ private:
 
 		switch (msg->header.messageType) {
 		case COMMAND_MESSAGE: {
-			// command message has an array for parameters which doesn't have to be filled
-			// so we don't know in advance how long it needs to be exactly. can only give
-			// a lower bound.
+			//! command message has an array for parameters which doesn't have to be filled
+			//! so we don't know in advance how long it needs to be exactly. can only give
+			//! a lower bound.
 			return (length > getMessageSize(COMMAND_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - 2));
 		}
 		case CONFIG_MESSAGE: {
@@ -107,7 +107,7 @@ private:
 
 
 public:
-	// use static variant of singelton, no dynamic memory allocation
+	//! use static variant of singelton, no dynamic memory allocation
 	static MeshControl& getInstance() {
 		static MeshControl instance;
 		return instance;

@@ -11,7 +11,7 @@
 
 namespace BLEpp {
 
-/* Battery service
+/** Battery service
  *
  * Defines a single characteristic to read a battery level. This is a predefined UUID, stored at
  * <BLE_UUID_BATTERY_LEVEL_CHAR>. The name is "battery", and the default value is 100.
@@ -19,16 +19,16 @@ namespace BLEpp {
 class BatteryService : public GenericService {
 
 public:
-	// Define func_t as a templated function with an unsigned byte
+	//! Define func_t as a templated function with an unsigned byte
 	typedef function<uint8_t()> func_t;
 
 protected:
-	// A single characteristic with an unsigned 8-bit value
+	//! A single characteristic with an unsigned 8-bit value
 	Characteristic<uint8_t> *_characteristic;
-	// A function for callback, not in use
+	//! A function for callback, not in use
 	func_t _func;
 public:
-	// Constructor sets name, allocate characteristic, sets UUID, and sets default value.
+	//! Constructor sets name, allocate characteristic, sets UUID, and sets default value.
 	BatteryService(): GenericService() {
 		setUUID(UUID(BLE_UUID_BATTERY_SERVICE));
 		setName(BLE_SERVICE_BATTERY);
@@ -41,7 +41,7 @@ public:
 		_characteristic->setDefaultValue(100);
 	}
 
-	/* Set the battery level
+/** Set the battery level
 	 * @batteryLevel level of the battery in percentage
 	 *
 	 * Indicates the level of the battery in a percentage to the user. This is of no use for a device attached to
@@ -51,7 +51,7 @@ public:
 		(*_characteristic) = batteryLevel;
 	}
 
-	/* Set a callback function for a battery level change
+/** Set a callback function for a battery level change
 	 * @func callback function
 	 *
 	 * Not in use
@@ -61,4 +61,4 @@ public:
 	}
 };
 
-} // put in BLEpp namespace
+} //! put in BLEpp namespace

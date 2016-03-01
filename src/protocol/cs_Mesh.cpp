@@ -63,12 +63,12 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 		case RBC_MESH_EVENT_TYPE_NEW_VAL:
 		case RBC_MESH_EVENT_TYPE_UPDATE_VAL: {
 
-//            if (evt->value_handle > 3)
-//                break;
+//!            if (evt->value_handle > 3)
+//!                break;
 
             //if (evt->data[0]) {
-//            LOGi("Got data ch: %i, val: %i, len: %d, orig_addr:", evt->value_handle, evt->data[0], evt->data_len);
-//            BLEutil::printArray(evt->originator_address.addr, 6);
+//!            LOGi("Got data ch: %i, val: %i, len: %d, orig_addr:", evt->value_handle, evt->data[0], evt->data_len);
+//!            BLEutil::printArray(evt->originator_address.addr, 6);
             MeshControl &meshControl = MeshControl::getInstance();
             meshControl.process(evt->value_handle, evt->data, evt->data_len);
             //}
@@ -76,12 +76,12 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
             break;
         }
         default:
-//            LOGi("Default: %i", evt->event_type);
+//!            LOGi("Default: %i", evt->event_type);
             break;
 	}
 }
 
-} // extern "C"
+} //! extern "C"
 
 CMesh::CMesh() : _appTimerId(-1) {
 	MeshControl::getInstance();
@@ -118,7 +118,7 @@ void CMesh::init() {
 
 	LOGi("Call rbc_mesh_init");
 	uint8_t error_code;
-	// checks if softdevice is enabled etc.
+	//! checks if softdevice is enabled etc.
 	error_code = rbc_mesh_init(init_params);
 	APP_ERROR_CHECK(error_code);
 

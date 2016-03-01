@@ -13,7 +13,7 @@
 #include "cfg/cs_WhiteList.h"
 #include "cfg/cs_BlackList.h"
 
-// returns the number of elements stored so far
+//! returns the number of elements stored so far
 uint8_t ScanResult::getSize() const {
 	if (_buffer != NULL) {
 		return _buffer->size;
@@ -41,8 +41,8 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 //			adrs_ptr[0]);
 //	LOGd("addrs: %s", addrs);
 
-//	// Check if the address is in the white list
-//	// If not, return
+//	//! Check if the address is in the white list
+//	//! If not, return
 //	bool whiteListed = false;
 //	for (int i=0; i<WHITELIST_LENGTH; i++) {
 //		if (memcmp(adrs_ptr, WhiteList + i*BLE_GAP_ADDR_LEN, BLE_GAP_ADDR_LEN) == 0) {
@@ -54,8 +54,8 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 //		return;
 //	}
 
-//	// Check if the address is in the black list
-//	// If so, return
+//	//! Check if the address is in the black list
+//	//! If so, return
 //	for (int i=0; i<BLACKLIST_LENGTH; i++) {
 //		if (memcmp(adrs_ptr, BlackList + i*BLE_GAP_ADDR_LEN, BLE_GAP_ADDR_LEN) == 0) {
 //			return;
@@ -76,7 +76,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			_buffer->list[i].rssi = (oldRssi * occ + rssi) / (occ + 1);
 			_buffer->list[i].occurrences++;
 //			found = true;
-			// TODO: Any reason not to break here?
+			//! TODO: Any reason not to break here?
 			return;
 		}
 	}
@@ -84,7 +84,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 		int8_t minRssi = INT8_MAX;
 		int8_t idx  = -1;
 		if (getSize() >= SR_MAX_NR_DEVICES) {
-			// history full, throw out item with lowest rssi
+			//! history full, throw out item with lowest rssi
 			for (int i = 0; i < SR_MAX_NR_DEVICES; ++i) {
 				if (_buffer->list[i].rssi < minRssi && _buffer->list[i].rssi < rssi) {
 					minRssi = _buffer->list[i].rssi;
@@ -97,7 +97,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			idx = _buffer->size++;
 		}
 
-		// If a spot has been found, write it to that position
+		//! If a spot has been found, write it to that position
 		if (idx >= 0) {
 			LOGi("idx: %d, minRssi: %d", idx, minRssi);
 			LOGi("NEW Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", adrs_ptr[5],

@@ -19,7 +19,7 @@
 
 #include <common/cs_Types.h>
 
-/* General BLE name service
+/** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
@@ -28,20 +28,20 @@ namespace BLEpp {
 class Service;
 //class Nrf51822BluetoothStack;
 
-/* CharacteristicInit collects fields required to define a BLE characteristic
+/** CharacteristicInit collects fields required to define a BLE characteristic
  */
 struct CharacteristicInit {
 	ble_gatts_attr_t          attr_char_value;
-	// pointer to a presentation format structure (p_char_pf)
+	//! pointer to a presentation format structure (p_char_pf)
 	ble_gatts_char_pf_t       presentation_format;
-	// characteristic metadata
+	//! characteristic metadata
 	ble_gatts_char_md_t       char_md;
-	// attribute metadata for client characteristic configuration  (p_cccd_md)
+	//! attribute metadata for client characteristic configuration  (p_cccd_md)
 	ble_gatts_attr_md_t       cccd_md;
-	// attributed metadata for server characteristic configuration (p_sccd_md)
+	//! attributed metadata for server characteristic configuration (p_sccd_md)
 	ble_gatts_attr_md_t       sccd_md;
 	ble_gatts_attr_md_t       attr_md;
-	// attribute metadata for user description (p_user_desc_md)
+	//! attribute metadata for user description (p_user_desc_md)
 	ble_gatts_attr_md_t       user_desc_metadata_md;
 
 	CharacteristicInit() : presentation_format({}), char_md({}), cccd_md({}), attr_md({}) {}
@@ -61,7 +61,7 @@ struct Status {
 	boolean_t                                         : 3;
 };
 
-/* Non-template base class for Characteristics.
+/** Non-template base class for Characteristics.
  *
  * A non-templated base class saves on code size. Note that every characteristic however does still
  * contribute to code size.
@@ -71,65 +71,65 @@ class CharacteristicBase {
 public:
 
 protected:
-	// Universally Unique Identifier (8 bytes)
+	//! Universally Unique Identifier (8 bytes)
 	UUID                      _uuid;
-	// Name (4 bytes)
+	//! Name (4 bytes)
 	const char *              _name;
-	// Read permission (1 byte)
+	//! Read permission (1 byte)
 	ble_gap_conn_sec_mode_t   _readperm;
-	// Write permission (1 byte)
+	//! Write permission (1 byte)
 	ble_gap_conn_sec_mode_t   _writeperm;
-	// Handles (8 bytes)
+	//! Handles (8 bytes)
 	ble_gatts_char_handles_t  _handles;
-	// Reference to corresponding service (4 bytes)
+	//! Reference to corresponding service (4 bytes)
 	Service*                  _service;
 
-	// Status of CharacteristicBase (basically a bunch of 1-bit flags)
+	//! Status of CharacteristicBase (basically a bunch of 1-bit flags)
 	Status                    _status;
 
 #ifdef BIG_SIZE_REQUIRED
 	bool                      .inited;
 
-	/* This characteristic can be set to notify at regular intervals.
+	/** This characteristic can be set to notify at regular intervals.
 	 *
 	 * This interval cannot be set from the client side.
 	 */
 	bool                      .notifies;
 
-	/* This characteristic can be written by another device.
+	/** This characteristic can be written by another device.
 	 */
 	bool                      .writable;
 
-	/* If this characteristic can notify a listener (<.notifies>), this field enables it.
+	/** If this characteristic can notify a listener (<.notifies>), this field enables it.
 	 */
 	bool                      .notifyingEnabled;
 
-	/* This characteristic can be set to indicate at regular intervals.
+	/** This characteristic can be set to indicate at regular intervals.
 	 *
 	 * Indication is different from notification, in the sense that it requires ACKs.
 	 * https://devzone.nordicsemi.com/question/310/notificationindication-difference/
 	 */
 	bool                      .indicates;
 #endif
-	// Unit
+	//! Unit
 //	uint16_t                  _unit;
 
-	/* Interval for updates (4 bytes), 0 means don't update
+	/** Interval for updates (4 bytes), 0 means don't update
 	 *
 	 * TODO: Currently, this is not in use.
 	 */
 //	uint32_t                  _updateIntervalMsecs;
 
 public:
-	/* Default constructor for CharacteristicBase
+	/** Default constructor for CharacteristicBase
 	 */
 	CharacteristicBase();
 
-	/* Empty destructor
+	/** Empty destructor
 	 */
 	virtual ~CharacteristicBase() {}
 
-	/* Initialize the characteristic.
+	/** Initialize the characteristic.
 	 * @param svc BLE service this characteristic will belong to.
 	 *
 	 * Defaults:
@@ -143,7 +143,7 @@ public:
 	 */
 	void init(Service* svc);
 
-	/* Set this characteristic to be writable.
+	/** Set this characteristic to be writable.
 	 */
 	CharacteristicBase& setWritable(bool writable) {
 		_status.writable = writable;
@@ -153,7 +153,7 @@ public:
 
 	void setupWritePermissions(CharacteristicInit& ci);
 
-	/* Set this characteristic to be notifiable.
+	/** Set this characteristic to be notifiable.
 	 */
 	CharacteristicBase& setNotifies(bool notifies) {
 		_status.notifies = notifies;
@@ -165,7 +165,7 @@ public:
 	}
 
 	void setNotifyingEnabled(bool enabled) {
-		//        	LOGd("[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
+		//!        	LOGd("[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
 		_status.notifyingEnabled = enabled;
 	}
 
@@ -174,7 +174,7 @@ public:
 		return *this;
 	}
 
-	/* Security Mode 0 Level 0: No access permissions at all (this level is not defined by the Bluetooth Core specification).\n
+	/** Security Mode 0 Level 0: No access permissions at all (this level is not defined by the Bluetooth Core specification).\n
 	 * Security Mode 1 Level 1: No security is needed (aka open link).\n
 	 * Security Mode 1 Level 2: Encrypted link required, MITM protection not necessary.\n
 	 * Security Mode 1 Level 3: MITM protected encrypted link required.\n
@@ -211,14 +211,14 @@ public:
 
 	CharacteristicBase& setUpdateIntervalMSecs(uint32_t msecs);
 
-	/* Return the maximum length of the value */
+	/** Return the maximum length of the value */
 	virtual uint16_t getValueMaxLength() = 0;
-	/* Return the actual length of the value */
+	/** Return the actual length of the value */
 	virtual uint16_t getValueLength() = 0;
-	/* Return the pointer to the memory where the value is stored */
+	/** Return the pointer to the memory where the value is stored */
 	virtual uint8_t* getValuePtr() = 0;
 
-	/* Set the actual length of the data
+	/** Set the actual length of the data
 	 * @length the length of the data to which the value points
 	 *
 	 * This is only necessary for buffer values. When a value is received
@@ -231,7 +231,7 @@ public:
 
 	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
 
-	/* Notify any listening party.
+	/** Notify any listening party.
 	 *
 	 * If this characteristic can notify, and if notification is enabled, and if there is a connection calling
 	 * this function will notify the listening party.
@@ -247,7 +247,7 @@ protected:
 
 	virtual bool configurePresentationFormat(ble_gatts_char_pf_t &) { return false; }
 
-	/* Any error in <notify> evokes onNotifyTxError.
+	/** Any error in <notify> evokes onNotifyTxError.
 	 */
 	virtual void onNotifyTxError();
 
@@ -256,66 +256,66 @@ protected:
 
 };
 
-/* The templated version of ble_type
- * @T The class / primitive to template ble_type with
+/** The templated version of ble_type
+ * @param T The class / primitive to template ble_type with
  */
 template<typename T>
 inline uint8_t ble_type() {
 	return BLE_GATT_CPF_FORMAT_STRUCT;
 }
-// A ble_type for strings
+//! A ble_type for strings
 template<>
 inline uint8_t ble_type<std::string>() {
 	return BLE_GATT_CPF_FORMAT_UTF8S;
 }
-// A ble_type for 8-bit unsigned values
+//! A ble_type for 8-bit unsigned values
 template<>
 inline uint8_t ble_type<uint8_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT8;
 }
-// A ble_type for 16-bit unsigned values
+//! A ble_type for 16-bit unsigned values
 template<>
 inline uint8_t ble_type<uint16_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT16;
 }
-// A ble_type for 32-bit unsigned values
+//! A ble_type for 32-bit unsigned values
 template<>
 inline uint8_t ble_type<uint32_t>() {
 	return BLE_GATT_CPF_FORMAT_UINT32;
 }
-// A ble_type for 8-bit signed values
+//! A ble_type for 8-bit signed values
 template<>
 inline uint8_t ble_type<int8_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT8;
 }
-// A ble_type for 16-bit signed values
+//! A ble_type for 16-bit signed values
 template<>
 inline uint8_t ble_type<int16_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT16;
 }
-// A ble_type for 32-bit signed values
+//! A ble_type for 32-bit signed values
 template<>
 inline uint8_t ble_type<int32_t>() {
 	return BLE_GATT_CPF_FORMAT_SINT32;
 }
-// A ble_type for floats (32 bits)
+//! A ble_type for floats (32 bits)
 template<>
 inline uint8_t ble_type<float>() {
 	return BLE_GATT_CPF_FORMAT_FLOAT32;
 }
-// A ble_type for doubles (64 bits)
+//! A ble_type for doubles (64 bits)
 template<>
 inline uint8_t ble_type<double>() {
 	return BLE_GATT_CPF_FORMAT_FLOAT64;
 }
-// A ble_type for booleans (8 bits)
+//! A ble_type for booleans (8 bits)
 template<>
 inline uint8_t ble_type<bool>() {
 	return BLE_GATT_CPF_FORMAT_BOOLEAN;
 }
 
-/* Characteristic of generic type T
- * @T Generic type T
+/** Characteristic of generic type T
+ * @param T Generic type T
  *
  * A characteristic first of all contains a templated "value" which might be a string, an integer, or a
  * buffer, depending on the need at hand.
@@ -328,20 +328,20 @@ class CharacteristicGeneric : public CharacteristicBase {
 	friend class Service;
 
 public:
-	// Format of callback on write (from user)
+	//! Format of callback on write (from user)
 	typedef function<void(const T&)> callback_on_write_t;
-	// Format of read callback
+	//! Format of read callback
 	typedef function<T()> callback_on_read_t;
 
 protected:
-	// The generic type is physically located in this field in this class (by value, not just by reference)
+	//! The generic type is physically located in this field in this class (by value, not just by reference)
 	T                          _value;
-	// The callback to call on a write coming from the softdevice (and originating from the user)
+	//! The callback to call on a write coming from the softdevice (and originating from the user)
 	callback_on_write_t        _callbackOnWrite;
-	// Callback on read
+	//! Callback on read
 	callback_on_read_t         _callbackOnRead;
 
-	/* Flag to indicate if notification is pending to be sent once currently waiting
+	/** Flag to indicate if notification is pending to be sent once currently waiting
 	 * tx operations are completed
 	 */
 	bool _notificationPending;
@@ -349,7 +349,7 @@ protected:
 public:
 	CharacteristicGeneric() : _notificationPending(false) {};
 
-	// Default empty destructor
+	//! Default empty destructor
 	virtual ~CharacteristicGeneric() {};
 
 	T&  __attribute__((optimize("O0"))) getValue() {
@@ -400,7 +400,7 @@ public:
 		return *this;
 	}
 
-	/* CharacteristicGeneric() returns value object
+	/** CharacteristicGeneric() returns value object
 	 *
 	 * @return value object
 	 */
@@ -456,7 +456,7 @@ public:
 		return *this;
 	}
 
-	/* Callback function if a notify tx error occurs
+	/** Callback function if a notify tx error occurs
 	 *
 	 * This is called when the notify operation fails with a tx error. This
 	 * can occur when too many tx operations are taking place at the same time.
@@ -469,7 +469,7 @@ public:
 		_notificationPending = true;
 	}
 
-	/* Callback function once tx operations complete
+	/** Callback function once tx operations complete
 	 * @p_ble_evt the event object which triggered the onTxComplete callback
 	 *
 	 * This is called whenever tx operations complete. If a notification is pending
@@ -478,10 +478,10 @@ public:
 	 * again during the next callback call
 	 */
 	void onTxComplete(ble_common_evt_t * p_ble_evt) {
-		// if we have a notification pending, try to send it
+		//! if we have a notification pending, try to send it
 		if (_notificationPending) {
-			// this-> is necessary so that the call of notify depends on the template
-			// parameter T
+			//! this-> is necessary so that the call of notify depends on the template
+			//! parameter T
 			uint32_t err_code = this->notify();
 			if (err_code == NRF_SUCCESS) {
 				_notificationPending = false;
@@ -518,9 +518,9 @@ protected:
 private:
 };
 
-/* A default characteristic
- * @T type of the value
- * @E default type (subdefined for example for built-in types)
+/** A default characteristic
+ * @param T type of the value
+ * @param E default type (subdefined for example for built-in types)
  *
  * Comes with an assignment operator, so we can assign characteristics to each other which copies the internal value.
  */
@@ -535,17 +535,18 @@ public:
 	}
 };
 
-// A characteristic for built-in arithmetic types (int, float, etc)
+/** A characteristic for built-in arithmetic types (int, float, etc)
+ */
 template<typename T >
 class Characteristic<T, typename std::enable_if<std::is_arithmetic<T>::value >::type> : public CharacteristicGeneric<T> {
 public:
-	/* @inherit */
+	/** @inherit */
 	Characteristic& operator=(const T& val) {
 		CharacteristicGeneric<T>::operator=(val);
 		return *this;
 	}
 
-	/* Return the actual length of the value
+	/** Return the actual length of the value
 	 *
 	 * The length of a basic data type is the size of the type
 	 */
@@ -553,7 +554,7 @@ public:
 		return sizeof(T);
 	}
 
-	/* Return the maximum length of the value
+	/** Return the maximum length of the value
 	 *
 	 * The maximum length of a basic data type is the size of the type
 	 */
@@ -561,7 +562,7 @@ public:
 		return sizeof(T);
 	}
 
-	/* Return the pointer to the memory where the value is stored
+	/** Return the pointer to the memory where the value is stored
 	 *
 	 * For a basic data type return the address where the first byte
 	 * is stored
@@ -571,17 +572,18 @@ public:
 	}
 };
 
-// A characteristic for strings
+/** A characteristic for strings
+ */
 template<>
 class Characteristic<std::string> : public CharacteristicGeneric<std::string> {
 public:
-	/* @inherit */
+	/** @inherit */
 	Characteristic& operator=(const std::string& val) {
 		CharacteristicGeneric<std::string>::operator=(val);
 		return *this;
 	}
 
-	/* Return the actual length of the value
+	/** Return the actual length of the value
 	 *
 	 * Return the length of the string
 	 */
@@ -589,7 +591,7 @@ public:
 		return getValue().length();
 	}
 
-	/* Return the maximum length of the value
+	/** Return the maximum length of the value
 	 *
 	 * The maximum length of a string is defined as
 	 * <MAX_STRING_LENGTH>
@@ -598,7 +600,7 @@ public:
 		return MAX_STRING_LENGTH;
 	}
 
-	/* Return the pointer to the memory where the value is stored
+	/** Return the pointer to the memory where the value is stored
 	 *
 	 * For a string return pointer to null-terminated content of the
 	 * string
@@ -608,21 +610,21 @@ public:
 	}
 };
 
-/* This template implements the functions specific for a pointer to a buffer.
+/** This template implements the functions specific for a pointer to a buffer.
  */
 template<>
 class Characteristic<buffer_ptr_t> : public CharacteristicGeneric<buffer_ptr_t> {
 
 private:
-	// maximum length for this characteristic in bytes
+	//! maximum length for this characteristic in bytes
 	uint16_t _maxLength;
 
-	// actual length of data stored in the buffer in bytes
+	//! actual length of data stored in the buffer in bytes
 	uint16_t _dataLength;
 
 public:
 
-	/* Set the value for this characteristic
+	/** Set the value for this characteristic
 	 * @value the pointer to the buffer in memory
 	 *
 	 * only valid pointers are allowed, NULL is NOT allowed
@@ -632,7 +634,7 @@ public:
 		_value = value;
 	}
 
-	/* Set the maximum length of the buffer
+	/** Set the maximum length of the buffer
 	 * @length maximum length in bytes
 	 *
 	 * This defines how many bytes were allocated for the buffer
@@ -642,14 +644,14 @@ public:
 		_maxLength = length;
 	}
 
-	/* Set the length of data stored in the buffer
+	/** Set the length of data stored in the buffer
 	 * @length length of data in bytes
 	 */
 	void setDataLength(uint16_t length) {
 		_dataLength = length;
 	}
 
-	/* Return the maximum possible length of the buffer
+	/** Return the maximum possible length of the buffer
 	 *
 	 * Checks the object assigned to this characteristics for the maximum
 	 * possible length
@@ -660,7 +662,7 @@ public:
 		return _maxLength;
 	}
 
-	/* Return the actual length of the value
+	/** Return the actual length of the value
 	 *
 	 * For a buffer, this is the length of data stored in the buffer in bytes
 	 *
@@ -670,7 +672,7 @@ public:
 		return _dataLength;
 	}
 
-	/* Return the pointer to the memory where the value is stored
+	/** Return the pointer to the memory where the value is stored
 	 *
 	 * For a buffer, this is the value itself
 	 */
@@ -682,7 +684,7 @@ protected:
 
 };
 
-} // end of namespace
+} //! end of namespace
 
 
 

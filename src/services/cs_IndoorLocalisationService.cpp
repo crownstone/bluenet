@@ -7,7 +7,7 @@
 
 #include "services/cs_IndoorLocalisationService.h"
 
-//#include <cmath> // try not to use this!
+//#include <cmath> //! try not to use this!
 //#include <cstdio>
 //
 //#include "common/cs_Boards.h"
@@ -44,11 +44,11 @@ IndoorLocalizationService::IndoorLocalizationService() :
 
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 
-	// we have to figure out why this goes wrong
+	//! we have to figure out why this goes wrong
 	setName(BLE_SERVICE_INDOOR_LOCALIZATION);
 	
 	_trackMode = false;
-//	// set timer with compare interrupt every 10ms
+//	//! set timer with compare interrupt every 10ms
 //	timer_config(10);
 
 	Storage::getInstance().getHandle(PS_ID_INDOORLOCALISATION_SERVICE, _storageHandle);
@@ -105,14 +105,14 @@ void IndoorLocalizationService::tick() {
 
 	if (_trackMode) {
 
-		// This function checks the counter for each device
-		// If no device is nearby, turn off the light
+		//! This function checks the counter for each device
+		//! If no device is nearby, turn off the light
 		bool deviceNearby = false;
 		if (_trackedDeviceList != NULL) {
 			deviceNearby = (_trackedDeviceList->isNearby() == TDL_IS_NEARBY);
 		}
 
-		// Change PWM only on change of nearby state
+		//! Change PWM only on change of nearby state
 		if (deviceNearby && !_trackIsNearby) {
 			PWM::getInstance().setValue(0, (uint8_t)-1);
 		} else if (!deviceNearby && _trackIsNearby) {
@@ -142,14 +142,14 @@ void IndoorLocalizationService::addSignalStrengthCharacteristic() {
 	_rssiCharac = new Characteristic<int8_t>();
 	addCharacteristic(_rssiCharac);
 
-	_rssiCharac->setUUID(UUID(getUUID(), RSSI_UUID)); // there is no BLE_UUID for rssi level(?)
+	_rssiCharac->setUUID(UUID(getUUID(), RSSI_UUID)); //! there is no BLE_UUID for rssi level(?)
 	_rssiCharac->setName(BLE_CHAR_RSSI);
 	_rssiCharac->setDefaultValue(1);
 	_rssiCharac->setNotifies(true);
 }
 
 void IndoorLocalizationService::addScanControlCharacteristic() {
-	// set scanning option
+	//! set scanning option
 //	LOGd("create characteristic to stop/start scan");
 	_scanControlCharac = new Characteristic<uint8_t>();
 	addCharacteristic(_scanControlCharac);
@@ -175,7 +175,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 //				}
 				_scanMode = true;
 			} else {
-				// Only stop scanning if we're not also tracking devices
+				//! Only stop scanning if we're not also tracking devices
 				if (!_trackMode) {
 					_scanner->manualStopScan();
 				}
@@ -238,16 +238,16 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 
 	_trackedDeviceList = new TrackedDeviceList();
 
-	// we don't want to use the master buffer for the tracked device list
-	// because it needs to be persistent and not be overwritten by data
-	// received over BT
+	//! we don't want to use the master buffer for the tracked device list
+	//! because it needs to be persistent and not be overwritten by data
+	//! received over BT
 
 	//	MasterBuffer& mb = MasterBuffer::getInstance();
 	//	buffer_ptr_t buffer = NULL;
 	//	uint16_t maxLength = 0;
 	//	mb.getBuffer(buffer, maxLength);
 
-	// so instead allocate a separate buffer that the tracked device list can use
+	//! so instead allocate a separate buffer that the tracked device list can use
 	uint16_t size = sizeof(tracked_device_list_t);
 	buffer_ptr_t buffer = (buffer_ptr_t)calloc(size, sizeof(uint8_t));
 
@@ -266,7 +266,7 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	_trackedDeviceListCharac->setMaxLength(_trackedDeviceList->getMaxLength());
 	_trackedDeviceListCharac->setDataLength(0);
 
-	// Load the nearby timeout
+	//! Load the nearby timeout
 	uint16_t counts;
 	Storage::getUint16(Settings::getInstance().getConfig().nearbyTimeout, counts, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
 	_trackedDeviceList->setTimeout(counts);
@@ -311,7 +311,7 @@ uint16_t IndoorLocalizationService::getNearbyTimeout() {
 
 void IndoorLocalizationService::startTracking() {
 	if (!_trackMode) {
-		// Set to some value initially
+		//! Set to some value initially
 		_trackIsNearby = false;
 	}
 	_trackMode = true;
@@ -359,7 +359,7 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 		LOGi("currently tracking devices:");
 		_trackedDeviceList->print();
 
-		// store in persistent memory
+		//! store in persistent memory
 		writeTrackedDevices();
 		savePersistentStorage();
 
@@ -419,7 +419,7 @@ void IndoorLocalizationService::on_ble_event(ble_evt_t * p_ble_evt) {
 void IndoorLocalizationService::onRSSIChanged(int8_t rssi) {
 
 #ifdef RGB_LED
-	// set LED here
+	//! set LED here
 	int sine_index = (rssi - 170) * 2;
 	if (sine_index < 0) sine_index = 0;
 	if (sine_index > 100) sine_index = 100;
@@ -430,7 +430,7 @@ void IndoorLocalizationService::onRSSIChanged(int8_t rssi) {
 	PWM::getInstance().setValue(2, sin_table[(sine_index + 66) % 100]);
 	//			counter = (counter + 1) % 100;
 
-	// Add a delay to control the speed of the sine wave
+	//! Add a delay to control the speed of the sine wave
 	nrf_delay_us(8000);
 #endif
 
@@ -439,7 +439,7 @@ void IndoorLocalizationService::onRSSIChanged(int8_t rssi) {
 
 void IndoorLocalizationService::setRSSILevel(int8_t RSSILevel) {
 #ifdef MICRO_VIEW
-	// Update rssi at the display
+	//! Update rssi at the display
 	write("2 %i\r\n", RSSILevel);
 #endif
 	if (_rssiCharac) {

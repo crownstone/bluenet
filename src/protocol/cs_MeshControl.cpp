@@ -105,11 +105,11 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 
 		}
 
-		// are we the hub? then process the message
-		// maybe answer on the data channel to the node that sent it that
-		// we received the message ??
-		// but basically we don't need to do anything, the
-		// hub can just read out the mesh characteristic for the hub channel
+		//! are we the hub? then process the message
+		//! maybe answer on the data channel to the node that sent it that
+		//! we received the message ??
+		//! but basically we don't need to do anything, the
+		//! hub can just read out the mesh characteristic for the hub channel
 
 		break;
 	}
@@ -119,11 +119,11 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		}
 
 		if (isBroadcast(p_data) || isMessageForUs(p_data)) {
-			// [01.12.2015] I think this is not necessary anymore with the new ble mesh version
-			// since the receive is not anymore handled in an interrupt handler, but has to be done
-			// manually. so we are already doing it in a timer which is executed by the app scheduler.
-			// so now we handled it by the scheduler, then put it back in the scheduler queue and again
-			// pick it up later
+			//! [01.12.2015] I think this is not necessary anymore with the new ble mesh version
+			//! since the receive is not anymore handled in an interrupt handler, but has to be done
+			//! manually. so we are already doing it in a timer which is executed by the app scheduler.
+			//! so now we handled it by the scheduler, then put it back in the scheduler queue and again
+			//! pick it up later
 			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 		} else {
 			_log(INFO, "Message not for us: ");
@@ -169,7 +169,7 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 			if (start) {
 				LOGi("start scanner");
 				RNG rng;
-				uint16_t delay = rng.getRandom16() / 1; // Delay in ms (about 0-60 seconds)
+				uint16_t delay = rng.getRandom16() / 1; //! Delay in ms (about 0-60 seconds)
 				EventDispatcher::getInstance().dispatch(EVT_SCANNER_START, &delay, 2);
 			} else {
 				LOGi("stop scanner");
@@ -296,17 +296,17 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 		}
 
 		if (isBroadcast(p_data)) {
-			// received broadcast message
+			//! received broadcast message
 			LOGd("received broadcast, send into mesh and handle directly");
 			CMesh::getInstance().send(channel, p_data, length);
 			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 
 		} else if (!isMessageForUs(p_data)) {
-			// message is not for us, send it into mesh
+			//! message is not for us, send it into mesh
 			LOGd("send it into mesh ...");
 			CMesh::getInstance().send(channel, p_data, length);
 		} else {
-			// message is for us, handle directly
+			//! message is for us, handle directly
 			LOGd("message is for us, handle directly");
 			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 		}
@@ -322,8 +322,8 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 //			  just come back to us through the mesh
 //		} else {
 
-		// otherwise, send it into the mesh, so that it is being forwarded
-		// to the hub
+		//! otherwise, send it into the mesh, so that it is being forwarded
+		//! to the hub
 		CMesh::getInstance().send(channel, p_data, length);
 
 //		}
@@ -360,11 +360,11 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
 void MeshControl::reset() {
 //	LOGw("reset due to mesh timeout");
-//	// copy to make sure this is nothing more than one value
+//	//! copy to make sure this is nothing more than one value
 //	uint8_t err_code;
 //	err_code = sd_power_gpregret_clr(0xFF);
 //	APP_ERROR_CHECK(err_code);
-//	err_code = sd_power_gpregret_set(0x01); // Don't go to DFU mode
+//	err_code = sd_power_gpregret_set(0x01); //! Don't go to DFU mode
 //	APP_ERROR_CHECK(err_code);
 //	sd_nvic_SystemReset();
 	LOGi("Zombie node detected!");
