@@ -28,8 +28,8 @@ class MeshControl : public EventListener {
 private:
 	MeshControl();
 
-	MeshControl(MeshControl const&); // singleton, deny implementation
-	void operator=(MeshControl const &); // singleton, deny implementation
+	MeshControl(MeshControl const&); //! singleton, deny implementation
+	void operator=(MeshControl const &); //! singleton, deny implementation
 
     ble_gap_addr_t _myAddr;
     app_timer_id_t _resetTimerId;
@@ -38,7 +38,7 @@ private:
     	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 
     	if (memcmp(msg->header.targetAddress, _myAddr.addr, BLE_GAP_ADDR_LEN) == 0) {
-    		// target address of package is set to our address
+    		//! target address of package is set to our address
     		return true;
     	} else {
 //    		_log(INFO, "message not for us, target: ");
@@ -59,13 +59,13 @@ private:
 
 		switch (msg->header.messageType) {
 		case COMMAND_MESSAGE: {
-			// command message has an array for parameters which doesn't have to be filled
-			// so we don't know in advance how long it needs to be exactly. can only give
-			// a lower  and upper bound.
+			//! command message has an array for parameters which doesn't have to be filled
+			//! so we don't know in advance how long it needs to be exactly. can only give
+			//! a lower and upper bound.
 			return (length > getMessageSize(COMMAND_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - COMMAND_MM_HEADER_SIZE));
 		}
 		case CONFIG_MESSAGE: {
-			// same as command message, does not have a fixed message size
+			//! same as command message, does not have a fixed message size
 			return (length > getMessageSize(CONFIG_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - CONFIG_MM_HEADER_SIZE));
 		}
 		default:{
@@ -105,7 +105,7 @@ private:
 	uint32_t incident[3] = {};
 
 public:
-	// use static variant of singelton, no dynamic memory allocation
+	//! use static variant of singelton, no dynamic memory allocation
 	static MeshControl& getInstance() {
 		static MeshControl instance;
 		return instance;

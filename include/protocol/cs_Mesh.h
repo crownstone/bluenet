@@ -24,12 +24,12 @@ extern "C" {
 
 }
 
-// values are updated MESH_UPDATE_FREQUENCY times per second
+//! values are updated MESH_UPDATE_FREQUENCY times per second
 #define MESH_UPDATE_FREQUENCY 10
-// number of channels used in the mesh
+//! number of channels used in the mesh
 #define MESH_NUM_OF_CHANNELS 2
-// time given for boot up (every first message received on each channel
-// will be ignored during boot up)
+//! time given for boot up (every first message received on each channel
+//! will be ignored during boot up)
 #define BOOT_TIME 1000 // 1 second
 
 #define MESH_ACCESS_ADDR 0xA541A68E
@@ -40,23 +40,25 @@ extern "C" {
 
 
 
+/** Wrapper class around the mesh protocol files.
+ */
 class CMesh {
 private:
 
-	// app timer id for tick function
+	//! app timer id for tick function
 	uint32_t				 _appTimerId;
 
 	bool                     _first[MESH_NUM_OF_CHANNELS];
 	uint32_t                 _mesh_init_time = 0;
 
-	// constructor is hidden from the user
+	//! constructor is hidden from the user
 	CMesh();
 
-	// destructor is hidden from the user
+	//! destructor is hidden from the user
 	~CMesh();
-	
-	CMesh(CMesh const&); // singleton, deny implementation
-	void operator=(CMesh const &); // singleton, deny implementation
+
+	CMesh(CMesh const&); //! singleton, deny implementation
+	void operator=(CMesh const &); //! singleton, deny implementation
 
 	void tick();
 	static void staticTick(CMesh* ptr) {
@@ -69,22 +71,22 @@ private:
 	void handleMeshMessage(rbc_mesh_event_t* evt);
 
 public:
-	// use static variant of singleton, no dynamic memory allocation
+	//! use static variant of singleton, no dynamic memory allocation
 	static CMesh& getInstance() {
 		static CMesh instance;
 		return instance;
 	}
 
-	// initialize
+	//! initialize
 	void init();
 
 	void startTicking() { Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this); };
 	void stopTicking() { Timer::getInstance().stop(_appTimerId); };
 
-	// send message
+	//! send message
 	void send(uint8_t channel, void* p_data, uint8_t length);
 
-	// returns last message on channel
+	//! returns last message on channel
 	bool getLastMessage(uint8_t channel, void** p_data, uint16_t& length);
 
 };

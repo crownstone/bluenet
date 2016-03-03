@@ -8,11 +8,11 @@
 
 #include "util/cs_Error.h"
 
-/// ERROR HANDLING ROUTINES /////////////////////////////////////////////////////////////////////////
+///! ERROR HANDLING ROUTINES /////////////////////////////////////////////////////////////////////////
 
 extern "C" {
 
-// see http://mcuoneclipse.com/2012/11/24/debugging-hard-faults-on-arm-cortex-m/
+//! see http://mcuoneclipse.com/2012/11/24/debugging-hard-faults-on-arm-cortex-m/
 /**
 * HardFaultHandler_C:
 * This is called from the HardFault_HandlerAsm with a pointer the Fault stack
@@ -47,27 +47,27 @@ void HardFault_HandlerC(unsigned long *hardfault_args){
     stacked_pc = ((unsigned long)hardfault_args[6]) ;
     stacked_psr = ((unsigned long)hardfault_args[7]) ;
 
-    // Configurable Fault Status Register
-    // Consists of MMSR, BFSR and UFSR
+    //! Configurable Fault Status Register
+    //! Consists of MMSR, BFSR and UFSR
     _CFSR = (*((volatile unsigned long *)(0xE000ED28))) ;
 
-    // Hard Fault Status Register
+    //! Hard Fault Status Register
     _HFSR = (*((volatile unsigned long *)(0xE000ED2C))) ;
 
-    // Debug Fault Status Register
+    //! Debug Fault Status Register
     _DFSR = (*((volatile unsigned long *)(0xE000ED30))) ;
 
-    // Auxiliary Fault Status Register
+    //! Auxiliary Fault Status Register
     _AFSR = (*((volatile unsigned long *)(0xE000ED3C))) ;
 
-    // Read the Fault Address Registers. These may not contain valid values.
-    // Check BFARVALID/MMARVALID to see if they are valid values
-    // MemManage Fault Address Register
+    //! Read the Fault Address Registers. These may not contain valid values.
+    //! Check BFARVALID/MMARVALID to see if they are valid values
+    //! MemManage Fault Address Register
     _MMAR = (*((volatile unsigned long *)(0xE000ED34))) ;
-    // Bus Fault Address Register
+    //! Bus Fault Address Register
     _BFAR = (*((volatile unsigned long *)(0xE000ED38))) ;
 
-    __asm("BKPT #0\n") ; // Break into the debugger
+    __asm("BKPT #0\n") ; //! Break into the debugger
 
 }
 
@@ -78,7 +78,7 @@ void HardFault_HandlerC(unsigned long *hardfault_args){
 * This code is suitable for Cortex-M3 and Cortex-M0 cores
 */
 
-// Use the 'naked' attribute so that C stacking is not used.
+//! Use the 'naked' attribute so that C stacking is not used.
 __attribute__((naked))
 void HardFault_Handler(void){
 /*
@@ -115,7 +115,7 @@ void abort() {
 }
 
 extern "C" {
-// overriding this built-in reduces the size of the binary by at least 50k (!)
+//! overriding this built-in reduces the size of the binary by at least 50k (!)
 char* __cxa_demangle(const char* mangled_name,
         char* output_buffer, size_t* length,
         int* status) {

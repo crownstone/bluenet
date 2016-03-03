@@ -18,4 +18,4 @@ void DoBotsManufac::parse(uint8_t* array, uint16_t len) {
 
 }
 
-} /* namespace BLEpp */
+}/** namespace BLEpp */

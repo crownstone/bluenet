@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Oct 21, 2014
@@ -6,23 +6,19 @@
  */
 #pragma once
 
-//#include <third/std/function.h>
 #include "structs/cs_ScanResult.h"
 #include "structs/cs_TrackDevices.h"
-//#include "characteristics/cs_UuidConfig.h"
-//#include "ble/cs_BluetoothLE.h"
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
-//
 
-//#include <common/cs_Types.h>
 #include <drivers/cs_Storage.h>
 
 #include <processing/cs_Scanner.h>
 
-#define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10 // hz
+//! The update frequence of the Tick routine in this service
+#define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10
 
-/* Struct used by the <IndoorLocalisationService> to store elements
+/** Struct used by the IndoorLocalisationService to store elements
  */
 struct ps_indoorlocalisation_service_t : ps_storage_base_t {
 	struct {
@@ -30,6 +26,8 @@ struct ps_indoorlocalisation_service_t : ps_storage_base_t {
 	} trackedDevices;
 };
 
+/** The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc.
+ */
 class IndoorLocalizationService : public BLEpp::Service {
 
 public:
@@ -42,7 +40,7 @@ protected:
 	void addTrackedDeviceListCharacteristic();
 	void addTrackedDeviceCharacteristic();
 
-	/* Get a handle to the persistent storage struct and load it from FLASH.
+	/** Get a handle to the persistent storage struct and load it from FLASH.
 	 *
 	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
 	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
@@ -50,7 +48,7 @@ protected:
 	 */
 	void loadPersistentStorage();
 
-	/* Save to FLASH.
+	/** Save to FLASH.
 	*/
 	void savePersistentStorage();
 
@@ -67,7 +65,7 @@ public:
 
 	void scheduleNextTick();
 
-	/* Initialize a IndoorLocalization object
+	/** Initialize a IndoorLocalization object
 	 * @stack Bluetooth Stack to attach this service to
 	 *
 	 * Add all characteristics and initialize them where necessary.
@@ -96,12 +94,12 @@ private:
 	BLEpp::Characteristic<buffer_ptr_t>* _peripheralCharac;
 	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceListCharac;
 	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceCharac;
-	
+
 //	func_t _rssiHandler;
 
 	bool _trackMode;
 	bool _trackIsNearby;
-	
+
 	bool _initialized;
 	bool _scanMode;
 

@@ -1,0 +1,4 @@
+<map id="BLEpp::Characteristic&lt; T, typename std::enable_if&lt; std::is_arithmetic&lt; T &gt;::value &gt;::type &gt;" name="BLEpp::Characteristic&lt; T, typename std::enable_if&lt; std::is_arithmetic&lt; T &gt;::value &gt;::type &gt;">
+<area shape="rect" id="node2" href="$classBLEpp_1_1CharacteristicGeneric.html" title="Characteristic of generic type T. " alt="" coords="5,80,232,107"/>
+<area shape="rect" id="node3" href="$classBLEpp_1_1CharacteristicBase.html" title="Non&#45;template base class for Characteristics. " alt="" coords="29,5,209,32"/>
+</map>

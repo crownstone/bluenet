@@ -57,7 +57,7 @@ void CMesh::init() {
 	init_params.lfclksrc = MESH_CLOCK_SOURCE;
 
 	uint8_t error_code;
-	// checks if softdevice is enabled etc.
+	//! checks if softdevice is enabled etc.
 	error_code = rbc_mesh_init(init_params);
 	APP_ERROR_CHECK(error_code);
 
@@ -93,7 +93,7 @@ bool CMesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
 void CMesh::handleMeshMessage(rbc_mesh_event_t* evt)
 {
 	TICK_PIN(28);
-	//nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
+//	nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
 
 	switch (evt->event_type)
 	{
@@ -132,7 +132,7 @@ void CMesh::handleMeshMessage(rbc_mesh_event_t* evt)
             MeshControl &meshControl = MeshControl::getInstance();
             meshControl.process(evt->value_handle, evt->data, evt->data_len);
 
-            //led_config(evt->value_handle, evt->data[0]);
+//			led_config(evt->value_handle, evt->data[0]);
             break;
         }
         default:
@@ -142,17 +142,17 @@ void CMesh::handleMeshMessage(rbc_mesh_event_t* evt)
 }
 
 void CMesh::checkForMessages() {
-    rbc_mesh_event_t evt;
+	rbc_mesh_event_t evt;
 
-    // check if there are new messages
+	//! check if there are new messages
 	while (rbc_mesh_event_get(&evt) == NRF_SUCCESS) {
 
 		if (_first[evt.value_handle -1]) {
 			_first[evt.value_handle -1] = false;
 
-			// ignore the first message received on each channel if it arrives within a certain
-			// time limit after boot up. This to prevent reading old command messages after a
-			// reboot
+			//! ignore the first message received on each channel if it arrives within a certain
+			//! time limit after boot up. This to prevent reading old command messages after a
+			//! reboot
 			uint32_t ts = RTC::now() - _mesh_init_time;
 			if (ts < BOOT_TIME) {
 				LOGi("t: %d: ch: %d, skipping message within boot-up time!", ts, evt.value_handle);
@@ -163,10 +163,10 @@ void CMesh::checkForMessages() {
 			}
 		}
 
-		// handle the message
+		//! handle the message
 		handleMeshMessage(&evt);
 
-		// then free associated memory
+		//! then free associated memory
 		rbc_mesh_packet_release(evt.data);
 	}
 }

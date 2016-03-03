@@ -6,7 +6,7 @@
  */
 #pragma once
 
-/* Service UUIDs
+/** Service UUIDs
  *
  * Note: The last 4 digits of the first tuple should be 0. They will be used
  *       by the characteristic to set its UUID.
@@ -24,7 +24,7 @@
 #define SCHEDULE_UUID                       "96d20000-4bcf-11e5-885d-feff819cdc9f"
 #define DEVICE_INFORMATION_UUID             "180a"
 
-/* Characteristic UUIDs */
+/** Characteristic UUIDs */
 
 enum PowerCharacteristicsIDs {
 	PWM_UUID                                = 0x1,

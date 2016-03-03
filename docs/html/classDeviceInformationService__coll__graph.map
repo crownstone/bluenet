@@ -1,0 +1,10 @@
+<map id="DeviceInformationService" name="DeviceInformationService">
+<area shape="rect" id="node2" href="$classBLEpp_1_1Service.html" title="Service as defined in the GATT Specification. " alt="" coords="1075,85,1188,112"/>
+<area shape="rect" id="node3" href="$classfixed__tuple.html" title="fixed_tuple\&lt; BLEpp\l::CharacteristicBase\l *, MAX_CHARACTERISTICS \&gt;" alt="" coords="713,5,929,61"/>
+<area shape="rect" id="node4" href="$classtuple.html" title="tuple\&lt; BLEpp::Characteristic\lBase * \&gt;" alt="" coords="413,13,604,54"/>
+<area shape="rect" id="node6" href="$classBLEpp_1_1UUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. " alt="" coords="770,85,873,112"/>
+<area shape="rect" id="node7" href="$classBLEpp_1_1Nrf51822BluetoothStack.html" title="nRF51822 specific implementation of the BLEStack " alt="" coords="733,137,910,178"/>
+<area shape="rect" id="node8" href="$classBLEpp_1_1BLEStack.html" title="BLEStack defines a chip&#45;agnostic Bluetooth Low&#45;Energy stack. " alt="" coords="445,93,573,120"/>
+<area shape="rect" id="node9" href="$classfixed__tuple.html" title="fixed_tuple\&lt; BLEpp\l::Service *, MAX_SERVICE\l_COUNT \&gt;" alt="" coords="415,144,602,200"/>
+<area shape="rect" id="node10" href="$classtuple.html" title="tuple\&lt; BLEpp::Service * \&gt;" alt="" coords="189,159,364,185"/>
+</map>

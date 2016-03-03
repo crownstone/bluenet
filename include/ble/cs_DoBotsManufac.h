@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Sep 23, 2015
@@ -12,6 +12,8 @@
 
 namespace BLEpp {
 
+/** DoBotsManufac defines the different types of developed devices for within the advertisement packets.
+ */
 class DoBotsManufac {
 
 private:
@@ -36,7 +38,7 @@ public:
 		return _deviceType;
 	}
 
-	/* Serializes the object to a byte array
+	/** Serializes the object to a byte array
 	 *
 	 * @array pointer to the preallocated byte array where the
 	 *   data should be copied into. Use <size> to get the required
@@ -48,4 +50,4 @@ public:
 	void parse(uint8_t* array, uint16_t len);
 };
 
-} /* namespace BLEpp */
+} 	/** namespace BLEpp */

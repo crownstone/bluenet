@@ -20,14 +20,14 @@ enum MeshChannels {
 };
 
 enum MeshMessageTypes {
-	// data channel messages
-	EVENT_MESSAGE      = 0, // this one might make more sense on the hub channel
+	//! data channel messages
+	EVENT_MESSAGE      = 0, //! this one might make more sense on the hub channel
 	POWER_MESSAGE      = 1,
 	BEACON_MESSAGE     = 2,
 	COMMAND_MESSAGE    = 3,
 	CONFIG_MESSAGE     = 4,
 
-	// hub channel messages
+	//! hub channel messages
 	SCAN_MESSAGE       = 101,
 };
 
@@ -35,7 +35,7 @@ enum CommandTypes {
 	SCAN_START         = 1,
 };
 
-// broadcast address is defined as 00:00:00:00:00:00
+//! broadcast address is defined as 00:00:00:00:00:00
 #define BROADCAST_ADDRESS {}
 
 #define MAX_MESH_MESSAGE_LEN RBC_MESH_VALUE_MAX_LEN
@@ -47,7 +47,7 @@ struct __attribute__((__packed__)) event_mesh_message_t {
 //	uint8_t data[MAX_EVENT_MESH_MESSAGE_DATA_LENGTH];
 };
 
-// TODO: use command message instead
+//! TODO: use command message instead
 struct __attribute__((__packed__)) power_mesh_message_t {
 	uint8_t pwmValue;
 };
@@ -68,7 +68,7 @@ struct __attribute__((__packed__)) command_mesh_message_t {
 #define CONFIG_MM_HEADER_SIZE 4
 struct __attribute__((__packed__)) config_mesh_message_t {
 	uint8_t type;
-	uint8_t reserved; // reserved for byte alignment
+	uint8_t reserved; //! reserved for byte alignment
 	uint16_t length;
 	uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - CONFIG_MM_HEADER_SIZE];
 };

@@ -37,7 +37,7 @@ extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
 }
 
 /**
- * process incoming mesh messages
+ * Process incoming mesh messages.
  */
 void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //	LOGi("Process incoming mesh message");
@@ -48,11 +48,11 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 	switch(channel) {
 	case HUB_CHANNEL: {
 
-		// are we the hub? then process the message
-		// maybe answer on the data channel to the node that sent it that
-		// we received the message ??
-		// but basically we don't need to do anything, the
-		// hub can just read out the mesh characteristic for the hub channel
+		//! are we the hub? then process the message
+		//! maybe answer on the data channel to the node that sent it that
+		//! we received the message ??
+		//! but basically we don't need to do anything, the
+		//! hub can just read out the mesh characteristic for the hub channel
 
 //		LOGi("ch %d: received hub message:", channel);
 //		BLEutil::printArray((uint8_t*)p_data, length);
@@ -114,11 +114,11 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		}
 
 		if (isBroadcast(p_data) || isMessageForUs(p_data)) {
-			// [01.12.2015] I think this is not necessary anymore with the new ble mesh version
-			// since the receive is not anymore handled in an interrupt handler, but has to be done
-			// manually. so we are already doing it in a timer which is executed by the app scheduler.
-			// so now we handle it by the scheduler, then put it back in the scheduler queue and again
-			// pick it up later
+			//! [01.12.2015] I think this is not necessary anymore with the new ble mesh version
+			//! since the receive is not anymore handled in an interrupt handler, but has to be done
+			//! manually. so we are already doing it in a timer which is executed by the app scheduler.
+			//! so now we handle it by the scheduler, then put it back in the scheduler queue and again
+			//! pick it up later
 //			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 
 			device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
@@ -163,11 +163,11 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 			bool start = (bool) msg->commandMsg.params[0];
 			if (start) {
 				LOGi("start scanner");
-				// need to use a random delay for starting the scanner, otherwise
-				// the devices in the mesh  will start scanning at the same time
-				// resulting in conflicts
+				//! need to use a random delay for starting the scanner, otherwise
+				//! the devices in the mesh  will start scanning at the same time
+				//! resulting in conflicts
 				RNG rng;
-				uint16_t delay = rng.getRandom16() / 1; // Delay in ms (about 0-60 seconds)
+				uint16_t delay = rng.getRandom16() / 1; //! Delay in ms (about 0-60 seconds)
 				EventDispatcher::getInstance().dispatch(EVT_SCANNER_START, &delay, 2);
 			} else {
 				LOGi("stop scanner");
@@ -253,8 +253,8 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 
 }
 
-// handle event triggered by the EventDispatcher, in case we want to send events
-// into the mesh, e.g. for power on/off
+//! handle event triggered by the EventDispatcher, in case we want to send events
+//! into the mesh, e.g. for power on/off
 void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch(evt) {
 //	case EVT_POWER_ON:
@@ -279,7 +279,7 @@ void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 }
 
-// used by the mesh characteristic to send a message into the mesh
+//! used by the mesh characteristic to send a message into the mesh
 void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
 	switch(channel) {
@@ -290,17 +290,17 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 		}
 
 		if (isBroadcast(p_data)) {
-			// received broadcast message
+			//! received broadcast message
 			LOGd("received broadcast, send into mesh and handle directly");
 			CMesh::getInstance().send(channel, p_data, length);
 			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 
 		} else if (!isMessageForUs(p_data)) {
-			// message is not for us, send it into mesh
+			//! message is not for us, send it into mesh
 			LOGd("send it into mesh ...");
 			CMesh::getInstance().send(channel, p_data, length);
 		} else {
-			// message is for us, handle directly, no reason to send it into the mesh!
+			//! message is for us, handle directly, no reason to send it into the mesh!
 			LOGd("message is for us, handle directly");
 			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 		}
@@ -316,8 +316,8 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 //			  just come back to us through the mesh
 //		} else {
 
-		// otherwise, send it into the mesh, so that it is being forwarded
-		// to the hub
+		//! otherwise, send it into the mesh, so that it is being forwarded
+		//! to the hub
 		CMesh::getInstance().send(channel, p_data, length);
 
 //		}
@@ -328,13 +328,13 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
 }
 
-// sends the result of a scan, i.e. a list of scanned devices with rssi values
-// into the mesh on the hub channel so that it can be synced to the cloud
+//! sends the result of a scan, i.e. a list of scanned devices with rssi values
+//! into the mesh on the hub channel so that it can be synced to the cloud
 void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
 	LOGi("sendScanMessage, size: %d", size);
 
-	// if no devices were scanned there is no reason to send a message!
+	//! if no devices were scanned there is no reason to send a message!
 	if (size > 0) {
 		hub_mesh_message_t message;
 		memset(&message, 0, sizeof(message));
@@ -353,11 +353,11 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
 void MeshControl::reset() {
 //	LOGw("reset due to mesh timeout");
-//	// copy to make sure this is nothing more than one value
+//	//! copy to make sure this is nothing more than one value
 //	uint8_t err_code;
 //	err_code = sd_power_gpregret_clr(0xFF);
 //	APP_ERROR_CHECK(err_code);
-//	err_code = sd_power_gpregret_set(0x01); // Don't go to DFU mode
+//	err_code = sd_power_gpregret_set(0x01); //! Don't go to DFU mode
 //	APP_ERROR_CHECK(err_code);
 //	sd_nvic_SystemReset();
 	LOGi("Zombie node detected!");

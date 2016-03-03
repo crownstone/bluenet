@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: May 6, 2015
@@ -6,13 +6,19 @@
  */
 #pragma once
 
+/**
+ * Event types.
+ */
 enum EventType {
 	Configuration_Base = 0x000,
 	General_Base       = 0x100
 };
 
-// for Configuration event type see cs_ConfigHelper.h
+//! for Configuration event type see cs_ConfigHelper.h
 
+/**
+ * General event types.
+ */
 enum GeneralEventType {
 	EVT_POWER_OFF = General_Base,
 	EVT_POWER_ON,

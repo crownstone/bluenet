@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Christopher Mason
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
@@ -31,9 +31,9 @@ extern "C" {
 
 
 
-// TODO: replace std::vector with a fixed, in place array of size capacity.
+// @TODO: replace std::vector with a fixed, in place array of size capacity.
 
-/* General BLE name service
+/** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
@@ -41,7 +41,7 @@ namespace BLEpp {
 
 class Service;
 
-/* BLEStack defines a chip-agnostic Bluetooth Low-Energy stack
+/** BLEStack defines a chip-agnostic Bluetooth Low-Energy stack
  *
  * Currently, this class does not leverage much of the general Bluetooth Low-Energy functionality into
  * chip-agnostic code. However, this might be recommendable in the future.
@@ -50,13 +50,13 @@ class BLEStack {
 public:
 	virtual ~BLEStack() {};
 
-	/* Connected?
+	/** Connected?
 	 *
 	 * @return true if connected, false if not connected
 	 */
 	virtual bool connected() = 0;
 
-	/* Handle to connection
+	/** Handle to connection
 	 *
 	 * @return 16-bit value that unique identifies the connection
 	 */
@@ -64,7 +64,7 @@ public:
 };
 
 
-/* nRF51822 specific implementation of the BLEStack
+/** nRF51822 specific implementation of the BLEStack
  *
  * The Nrf51822BluetoothStack class is a direct descendant from BLEStack. It is implemented as a singleton, such
  * that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt
@@ -72,14 +72,14 @@ public:
  * stack object as an argument w.r.t. this object. This makes dependencies traceable for the user.
  */
 class Nrf51822BluetoothStack : public BLEStack {
-	// Friend for BLE stack event handling
+	//! Friend for BLE stack event handling
 //	friend void SWI2_IRQHandler();
 
-	// Friend for radio notification handling
+	//! Friend for radio notification handling
 //	friend void ::SWI1_IRQHandler();
 
 private:
-	/* Constructor of the BLE stack on the NRF51822
+	/** Constructor of the BLE stack on the NRF51822
 	 *
 	 * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. However,
 	 * the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the init()
@@ -100,53 +100,53 @@ public:
 		static Nrf51822BluetoothStack instance;
 		return instance;
 	}
-	// Format of the callback when a connection has been made
+	//! Format of the callback when a connection has been made
 	typedef function<void(uint16_t conn_handle)>   callback_connected_t;
-	// Format of the callback after a disconnection event
+	//! Format of the callback after a disconnection event
 	typedef function<void(uint16_t conn_handle)>   callback_disconnected_t;
-	// Format of the callback of any radio event
+	//! Format of the callback of any radio event
 	typedef function<void(bool radio_active)>   callback_radio_t;
 
-	// Maximum number of services (currently set to 5)
+	//! Maximum number of services (currently set to 5)
 	static const uint8_t MAX_SERVICE_COUNT = 5;
 
 	//static const uint16_t                  defaultAppearance = BLE_APPEARANCE_UNKNOWN;
 
-	// The default BLE appearance is currently set to a Generic Keyring (576)
+	//! The default BLE appearance is currently set to a Generic Keyring (576)
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_KEYRING;
-	// The low-frequency clock, currently generated from the high frequency clock
+	//! The low-frequency clock, currently generated from the high frequency clock
 	static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
-	// The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.
+	//! The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.
 //	static const uint8_t                   defaultMtu = BLE_L2CAP_MTU_DEF;
-	// Minimum connection interval in 1.25 ms (400*1.25=500ms)
+	//! Minimum connection interval in 1.25 ms (400*1.25=500ms)
 	static const uint16_t                  defaultMinConnectionInterval_1_25_ms = 400;
-	// Maximum connection interval in 1.25 ms (800*1.25=1 sec)
+	//! Maximum connection interval in 1.25 ms (800*1.25=1 sec)
 	static const uint16_t                  defaultMaxConnectionInterval_1_25_ms = 800;
-	// Default slave latency
+	//! Default slave latency
 	static const uint16_t                  defaultSlaveLatencyCount = 0;
-	// Connection timeout in 10ms (400*10=4 sec)
+	//! Connection timeout in 10ms (400*10=4 sec)
 	static const uint16_t                  defaultConnectionSupervisionTimeout_10_ms = 400;
-	// Advertising interval in 0.625 ms (40*0.625=25 ms)
+	//! Advertising interval in 0.625 ms (40*0.625=25 ms)
 	static const uint16_t                  defaultAdvertisingInterval_0_625_ms = 40;
-	// Advertising timeout in seconds (180 sec)
+	//! Advertising timeout in seconds (180 sec)
 	static const uint16_t                  defaultAdvertisingTimeout_seconds = 180;
-	// Default transmission power
+	//! Default transmission power
 	static const int8_t                    defaultTxPowerLevel = -8;
 
 protected:
-	std::string                                 _device_name; // 4
+	std::string                                 _device_name; //! 4
 	uint16_t                                    _appearance;
-	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  // 32
+	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  //! 32
 
 	nrf_clock_lfclksrc_t                        _clock_source; //4
 //	uint8_t                                     _mtu_size;
 	int8_t                                      _tx_power_level;
 	ble_gap_conn_sec_mode_t                     _sec_mode;  //1
 	//ble_gap_sec_params_t                        _sec_params; //6
-	//ble_gap_adv_params_t                        _adv_params; // 20
+	//ble_gap_adv_params_t                        _adv_params; //! 20
 	uint16_t                                    _interval;
 	uint16_t                                    _timeout;
-	ble_gap_conn_params_t                       _gap_conn_params; // 8
+	ble_gap_conn_params_t                       _gap_conn_params; //! 8
 
 	bool                                        _inited;
 	bool                                        _started;
@@ -155,18 +155,18 @@ protected:
 
 	uint16_t                                    _conn_handle;
 
-	callback_connected_t                        _callback_connected;  // 16
-	callback_disconnected_t                     _callback_disconnected;  // 16
-	callback_radio_t                            _callback_radio;  // 16
-	volatile uint8_t                            _radio_notify; // 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
+	callback_connected_t                        _callback_connected;  //! 16
+	callback_disconnected_t                     _callback_disconnected;  //! 16
+	callback_radio_t                            _callback_radio;  //! 16
+	volatile uint8_t                            _radio_notify; //! 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
 
-	ble_user_mem_block_t 						_user_mem_block; // used for user memory (long write)
+	ble_user_mem_block_t 						_user_mem_block; //! used for user memory (long write)
 
 	uint8_t                            			_passkey[BLE_GAP_PASSKEY_LEN];
 	dm_application_instance_t                   _dm_app_handle;
 public:
 
-	/* Initialization of the BLE stack
+	/** Initialization of the BLE stack
 	 *
 	 * Performs a series of tasks:
 	 *   - disables softdevice if it is currently enabled
@@ -182,7 +182,7 @@ public:
 	 */
 	void init();
 
-	/* Start the BLE stack
+	/** Start the BLE stack
 	 *
 	 * Start can only be called once. It starts all services. If one of these services cannot be started, there is
 	 * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in
@@ -200,7 +200,7 @@ public:
 	 */
 	void stopTicking();
 
-	/* Shutdown the BLE stack
+	/** Shutdown the BLE stack
 	 *
 	 * The function shutdown() is the counterpart of start(). It does stop all services. It does not check if these
 	 * services have actually been started.
@@ -226,9 +226,9 @@ public:
 		_clock_source = clockSource;
 	}
 
-	// Advertising interval between 0x0020 and 0x4000 (32 and 16384) in 0.625 ms units (20ms to 10.24s)
+	//! Advertising interval between 0x0020 and 0x4000 (32 and 16384) in 0.625 ms units (20ms to 10.24s)
 	void setAdvertisingInterval(uint16_t advertisingInterval){
-		// TODO: stop advertising?
+		//! TODO: stop advertising?
 		LOGd("Set advertising interval to %d", advertisingInterval);
 		if (advertisingInterval < 0x0020 || advertisingInterval > 0x4000) {
 			return;
@@ -237,13 +237,13 @@ public:
 	}
 
 	void setAdvertisingTimeoutSeconds(uint16_t advertisingTimeoutSeconds) {
-		// TODO: stop advertising?
+		//! TODO: stop advertising?
 		_timeout = advertisingTimeoutSeconds;
 	}
 
 	void updateAppearance(uint16_t appearance);
 
-	/* Update device name
+	/** Update device name
 	 * @deviceName limited string for device name
 	 *
 	 * We want to change the device name halfway. This can be done through a characteristic, which is easy during
@@ -309,7 +309,7 @@ public:
 	Service& getService(std::string name);
 	void addService(Service* svc);
 
-	/* Start advertising as an iBeacon
+	/** Start advertising as an iBeacon
 	 *
 	 * @beacon the object defining the parameters for the
 	 *   advertisement package. See <IBeacon> for an explanation
@@ -319,12 +319,12 @@ public:
 	 * data array with the values of the <IBeacon> object, then starts
 	 * advertising as an iBeacon.
 	 *
-	 * **Note**: An iBeacon requires that the company identifier is
+	 * ** Note** : An iBeacon requires that the company identifier is
 	 *   set to the Apple Company ID, otherwise it's not an iBeacon.
 	 */
 	void startIBeacon(IBeacon* beacon, uint8_t deviceType);
 
-	/* Start sending advertisement packets.
+	/** Start sending advertisement packets.
 	 * This can not be called while scanning, start scanning while advertising is possible though.
 	 */
 	void startAdvertising(uint8_t deviceType);
@@ -333,7 +333,7 @@ public:
 
 	bool isAdvertising();
 
-	/* Start scanning for devices
+	/** Start scanning for devices
 	 *
 	 * Only call the following functions with a S120 or S130 device that can play a central role. The following functions
 	 * are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone
@@ -341,15 +341,15 @@ public:
 	 */
 	void startScanning();
 
-	/* Stop scanning for devices
+	/** Stop scanning for devices
 	 */
 	void stopScanning();
 
-	/* Returns true if currently scanning
+	/** Returns true if currently scanning
 	 */
 	bool isScanning();
 
-	/* Set radion notification interrupts
+	/** Set radion notification interrupts
 	 *
 	 * Function that sets up radio notification interrupts. It sets the IRQ priority, enables it, and sets some
 	 * configuration values related to distance.
@@ -361,11 +361,11 @@ public:
 	virtual bool connected() {
 		return _conn_handle != BLE_CONN_HANDLE_INVALID;
 	}
-	virtual uint16_t getConnectionHandle() {  // TODO are multiple connections supported?
+	virtual uint16_t getConnectionHandle() {  //! TODO are multiple connections supported?
 		return _conn_handle;
 	}
 
-	/* Not time-critical functionality can be done in the tick
+	/** Not time-critical functionality can be done in the tick
 	 *
 	 * Every module on the system gets a tick in which it regularly gets some attention. Of course, everything that is
 	 * important should be done within interrupt handlers.
@@ -375,7 +375,7 @@ public:
 	 */
 //	void tick();
 
-	/* Function that handles BLE events
+	/** Function that handles BLE events
 	 *
 	 * A BLE event is generated, these can be connect or disconnect events. It can also be RSSI values that changed, or
 	 * an authorization request. Not all event structures are exactly the same over the different SoftDevices, so there
@@ -407,7 +407,7 @@ protected:
 	void updateConnParams();
 	void updatePasskey();
 
-	/* Connection request
+	/** Connection request
 	 *
 	 * On a connection request send it to all services.
 	 */
@@ -415,7 +415,7 @@ protected:
 	void on_disconnected(ble_evt_t * p_ble_evt);
 	void on_advertisement(ble_evt_t * p_ble_evt);
 
-	/* Transmission complete event
+	/** Transmission complete event
 	 *
 	 * Inform all services that transmission was completed in case they have notifications pending
 	 */

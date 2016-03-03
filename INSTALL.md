@@ -10,8 +10,8 @@ Rather than going through this page, it is also possible to go through the SDK, 
 
 The installation should not be hard when you have the Nordic SDK. Get this from their website after buying a development kit. You also need a cross-compiler for ARM. You need the JLink utilities from Segger. And you need cmake for the build process.
 
-* [Nordic nRF51822 SDK](https://www.nordicsemi.com/eng/Products/Bluetooth-R-low-energy/nRF51822)
-* [Nordic S110 Softdevice](http://www.nordicsemi.com/eng/Products/S110-SoftDevice-v7.0)
+* [Nordic nRF51822 SDK 8.1](https://developer.nordicsemi.com/nRF5_SDK/nRF51_SDK_v8.x.x/)
+* [Nordic S110 Softdevice 8.0](http://www.nordicsemi.com/eng/Products/S110-SoftDevice-v8.0) or [Nordic S1130 Softdevice 1.0](https://www.nordicsemi.com/eng/Products/S130-SoftDevice)
 * [JLink Software](http://www.segger.com/jlink-software.html), there is a [.deb file](https://www.segger.com/jlink-software.html?step=1&file=JLinkLinuxDEB64_4.96.4)
 * sudo aptitude install cmake
 
@@ -38,10 +38,10 @@ You can now just type `make` in the main directory. Or you can build using the s
 
 ### Bugs
 
-There is a bug in one of the SDK files, namely `nrf_svc.h` (different location depending on the SDK version):
+There is a bug in the following softdevice files, namely `nrf_svc.h`:
 
-    /opt/nrf51_sdk/v6/nrf51822/Include/s110/nrf_svc.h
-    /opt/nrf51_sdk/v4/nrf51822/Include/ble/softdevice/nrf_svc.h
+    /opt/softdevices/s110_nrf51_8.0.0_API/include
+    /opt/softdevices/s130_nrf51_1.0.0_API/include
 
 Change the assembly line:
 
@@ -62,15 +62,15 @@ Fork the code by clicking on:
 
 * Fork [https://github.com/dobots/bluenet/fork](https://github.com/dobots/bluenet/fork).
 * `git clone https://github.com/${YOUR_GITHUB_USERNAME}/bluenet`
-* let us call this directory $BLUENET
+* let us call this directory $BLUENET_DIR
 
 Now you will have to set all fields in the configuration file:
 
 * cp CMakeBuild.config.default CMakeBuild.config
 * adjust the `NRF51822_DIR` to wherever you installed the Nordic SDK (it should have `/Include` and `/Source` subdirectories
-* adjust the `SOFTDEVICE_DIR` to wherever you unzipped the latest SoftDevice from Nordic
+* adjust the `SOFTDEVICE_DIR` to wherever you unzipped the SoftDevice from Nordic
 * adjust the `SOFTDEVICE_SERIES` to for example `110` or `130` (SoftDevice name starts with it, without the `s`)
-* adjust major accordingly `SOFTDEVICE_MAJOR=7`
+* adjust major accordingly `SOFTDEVICE_MAJOR=8`
 * adjust minor accordingly `SOFTDEVICE_MINOR=0`
 * adjust the `SOFTDEVICE_DIR_API` to the directory with the SoftDevice include files
 * set `SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1` if you use one of the earlier s110 softdevices with a separate UICR section
@@ -92,18 +92,18 @@ Now you will have to set all fields in the configuration file:
 
 Let us now install the SoftDevice on the nRF51822:
 
-    cd scripts
+    cd $BLUENET_DIR/scripts
     ./softdevice.sh build
     ./softdevice.sh upload
 
 Now we can build our own software:
 
-    cd $BLUENET
+    cd $BLUENET_DIR
     make
 
 Alternatively, you can build it using our script:
 
-    cd scripts
+    cd $BLUENET_DIR/scripts
     ./firmware.sh build crownstone
 
 There is also an upload and debug script. The first uses `JLink` to upload, the second uses `gdb` to attach itself
@@ -168,8 +168,8 @@ Here the binary `combined.bin` is the softdevice and application combined.
 
 ## Meshing
 
-The meshion functionality is the one we are currently integrating on the moment. So, this is a moving target. Set
-`CHAR_MESHING` to `0` if you don't need it.
+The meshion functionality is the one we are currently integrating on the moment. So, this is a moving target. In addition, the mesh code is relatively memory intensive, so you will need a 32kB version to run it. Set
+`CHAR_MESHING` to `1` if you want to use it.
 
 For the meshing functionality we use https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh written by a
 Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and

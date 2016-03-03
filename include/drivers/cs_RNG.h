@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Alex de Mulder
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 5 Jan., 2015
@@ -19,6 +19,8 @@
 //}
 //#endif
 
+/** Random number generator.
+ */
 class RNG{
 public:
 	uint8_t _randomBytes[4] = {0,0,0,0};

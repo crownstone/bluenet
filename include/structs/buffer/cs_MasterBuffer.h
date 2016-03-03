@@ -13,7 +13,7 @@
 
 #include <cstring>
 
-/* size of the header used for long write */
+/** size of the header used for long write */
 #define DEFAULT_OFFSET 6
 
 class MasterBuffer {
