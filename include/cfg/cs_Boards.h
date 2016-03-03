@@ -23,6 +23,7 @@
 #define CROWNSTONE3          11
 #define CROWNSTONE4          12
 #define NORDIC_BEACON        13
+#define DOBEACON             14
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
@@ -51,8 +52,8 @@
 #if(HARDWARE_BOARD==CROWNSTONE2)
 // v0.86
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    0                   // something unused
-#define PIN_GPIO_RELAY_OFF   5                   // something unused
+#define PIN_GPIO_RELAY_ON    5                   // something unused
+#define PIN_GPIO_RELAY_OFF   0                   // something unused
 //#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -71,8 +72,8 @@
 #if(HARDWARE_BOARD==CROWNSTONE3)
 // v0.90
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    0                   // something unused
-#define PIN_GPIO_RELAY_OFF   5                   // something unused
+#define PIN_GPIO_RELAY_ON    5                   // something unused
+#define PIN_GPIO_RELAY_OFF   0                   // something unused
 //#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -93,8 +94,8 @@
 #if(HARDWARE_BOARD==CROWNSTONE4)
 // v0.92
 #define PIN_GPIO_SWITCH      4                   // this is p0.04 or gpio 4
-#define PIN_GPIO_RELAY_ON    0                   // something unused
-#define PIN_GPIO_RELAY_OFF   5                   // something unused
+#define PIN_GPIO_RELAY_ON    5                   // something unused
+#define PIN_GPIO_RELAY_OFF   0                   // something unused
 //#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
@@ -111,12 +112,37 @@
 #define VOLTAGE_AMPLIFICATION       80
 #endif
 
+#if(HARDWARE_BOARD==DOBEACON)
+// v0.92
+//#define PIN_GPIO_SWITCH      4                   // this is p0.04 or gpio 4
+//#define PIN_GPIO_RELAY_ON    0                   // something unused
+//#define PIN_GPIO_RELAY_OFF   0                   // something unused
+//#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
+//#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
+//#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
+//#define PIN_AIN_CURRENT      0                   // ain2 is p0.01 or gpio 1
+//#define PIN_AIN_VOLTAGE      0                   // ain7 is p0.06 or gpio 6
+#define PIN_GPIO_RX          2                   // this is p0.02 or gpio 2
+#define PIN_GPIO_TX          3                   // this is p0.03 or gpio 3
+
+#define PIN_GPIO_LED_1       6					 // this is p0.07, GREEN
+#define PIN_GPIO_LED_2       7					 // this is p0.07, RED
+#define HAS_LEDS             1
+
+// Switch pin should be low to switch lights on
+//#define SWITCH_INVERSED
+// resistance of the shunt in milli ohm
+//#define SHUNT_VALUE                 1
+// amplification of the voltage over the shunt, to the adc input of the chip
+//#define VOLTAGE_AMPLIFICATION       80
+#endif
+
 
 #if(HARDWARE_BOARD==CROWNSTONE_SENSOR)
 
 #define PIN_GPIO_SWITCH      3                   // this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    0                   // something unused
-#define PIN_GPIO_RELAY_OFF   5                   // something unused
+#define PIN_GPIO_RELAY_ON    5                   // something unused
+#define PIN_GPIO_RELAY_OFF   0                   // something unused
 //#define PIN_AIN_ADC          6                   // ain6 is p0.05 or gpio 5
 //#define PIN_AIN_LPCOMP       5                   // ain5 is p0.04 or gpio 4
 //#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0

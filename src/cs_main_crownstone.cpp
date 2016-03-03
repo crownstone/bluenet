@@ -158,6 +158,15 @@ void Crownstone::configDrivers() {
 #if HARDWARE_BOARD==PCA10001
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 #endif
+
+#if HAS_LEDS==1
+	// Note: DO NOT USE THEM WHILE SCANNING OR MESHING ...
+	nrf_gpio_cfg_output(PIN_GPIO_LED_1);
+	nrf_gpio_cfg_output(PIN_GPIO_LED_2);
+	// setting the pin makes them turn off ....
+	nrf_gpio_pin_set(PIN_GPIO_LED_1);
+	nrf_gpio_pin_set(PIN_GPIO_LED_2);
+#endif
 }
 
 void Crownstone::createServices() {
@@ -396,6 +405,10 @@ void Crownstone::run() {
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();
+#endif
+
+#if POWER_SERVICE==1
+//	_powerService->startStaticSampling();
 #endif
 
 	while(1) {
