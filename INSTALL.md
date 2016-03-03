@@ -15,26 +15,30 @@ Download and install J-Link Segger’s [software](http://www.segger.com/jlink-so
 
 * Download the [.deb file 64bit version 4.96.2](https://www.segger.com/jlink-software.html?step=1&file=JLinkLinuxDEB64_4.96.2)
 * Install it:
+```
+sudo dpkg -i jlink_4.96.2_x86_64.deb
+```
 
-    sudo dpkg -i jlink_4.96.2_x86_64.deb
-
-A cross-compiler for ARM is the `GCC` cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded).
+A cross-compiler for ARM is the GCC cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded).
 
 * Download and extract version [2014-q3](https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2).
 
 * Install some 32bit packages, assuming you have a 64bit systems:
-
-    sudo dpkg --add-architecture i386
-    sudo apt-get update
-    sudo apt-get install libstdc++6:i386 libncurses5:i386
+```
+sudo dpkg --add-architecture i386
+sudo apt-get update
+sudo apt-get install libstdc++6:i386 libncurses5:i386
+```
 
 * If the cross-compiler does not work, make sure you check if all its dependencies are met:
+```
+ldd /opt/gcc-arm-none-eabi-4_8-2014q3/bin/arm-none-eabi-gcc
+```
 
-    ldd /opt/gcc-arm-none-eabi-4_8-2014q3/bin/arm-none-eabi-gcc
-
-Bluenet uses a `cmake` build system, so you will need it:
-
-    sudo apt-get install cmake
+Bluenet uses a cmake build system, so you will need it:
+```
+sudo apt-get install cmake
+```
 
 ### Nordic SDK Bugs
 
@@ -101,7 +105,7 @@ Device dependent configuration:
 * Set `CHAR_MESHING` to `1` if you want to enable meshing functionality.
 * You can adjust `SERIAL_VERBOSITY` if you want to see more or less output over the UART
 * Set `HARDWARE_BOARD` to the correct number for your board. This determines the pin layout.
-* Set `HARDWARE_VERSION` to the correct version of the NRF51 chip you have. Use `bluenet/scripts/hardware_version.sh` to check your version.
+* Set `HARDWARE_VERSION` to the correct version of the NRF51 chip you have. Use `$BLUENET_DIR/scripts/hardware_version.sh` to check your version.
 * Set `IBEACON` to `1`, if you want to advertise like an iBeacon. You will want to set the correct values for the `BEACON_*` configs as well.
 * You can adjust the `MASTER_BUFFER_SIZE` when needed, this buffer is used on several different places.
 * If you run into memory issues, you can play around with `HEAP_SIZE`. Increasing the heap size (dynamic memory), will reduce the stack size (static memory).
