@@ -1,15 +1,41 @@
-# Kickstarter
+# Bluenet
+Bluenet is the code running on the Crownstone and DoBeacon. Each Crownstone or DoBeacon is a node in a network that uses signal strength for indoor localization of smartphones and wearables.
 
-Currently the Crownstone is on Kickstarter! [Pledge](https://www.kickstarter.com/projects/dobots/crownstone) and make open-firmware a thing of the future!
 
-# Indoor Localization with BLE
+### Features
+- Made for indoor localization.
+- Includes a mesh network.
+- Power measuring.
+- iBeacon compliant.
+- Configurable over the air.
 
-This project aims at a wireless network with BLE nodes that use their mutual signal strengths to build up a network with their relative locations. This can be used later by someone carrying a smartphone to establish their location indoors. Everybody say that they can do it, but very few solutions are actually out there. Let's hope we can change that.
+
+# Usage
+To use a device with bluenet code on it, you only need to know the Bluetooth protocol that bluenet uses. You can find the protocol definitions in a seperate [document](PROTOCOL.md).
+
+### Libraries
+We also provide libraries which take care of the protocol:
+
+- [Android](https://github.com/dobots/bluenet-lib-android)
+- [JavaScript](https://github.com/dobots/bluenet-lib-js)
+- [Python](https://github.com/dobots/bluenet-lib-python)
+
+
+# Build
+To build the bluenet code yourself, follow the [installation instructions](INSTALL.md).
+
+### Bootloader
+The Crownstones and DoBeacons come with a bootloader, which enables over the air updates. This bootloader is a small adaptation of the one provided by Nordic. The build instructions are described on the [bootloader repository](https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler).
+
+
+
+
+
+
 
 ## DoBeacon
 
-The DoBeacon is a simplified Crownstone which adheres to the iBeacon specification. If you have bought DoBeacons as a
-developer we would kindly like to refer you to our [DoBots SDK Manual](https://docs.google.com/document/d/17zn5TKdNAjYbNbA6akbSzFV_WQmOnvcjDFT3bwIvGzo/edit#). That document explains how to set a different signal strength, advertisement interval, etc.
+The DoBeacon is a simplified Crownstone which adheres to the iBeacon specification. If you have bought DoBeacons as a developer we would kindly like to refer you to our [DoBots SDK Manual](https://docs.google.com/document/d/17zn5TKdNAjYbNbA6akbSzFV_WQmOnvcjDFT3bwIvGzo/edit#). That document explains how to set a different signal strength, advertisement interval, etc.
 
 # Communication
 
@@ -26,10 +52,6 @@ However, through the Timeslot API, it is possible to run a totally different pro
 Feel free to clone this repos.
 
 The code base comes from [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf). Thanks a lot Christopher!
-
-## Installation
-
-For installation and configuration, see the [installation instructions](https://github.com/dobots/bluenet/blob/master/INSTALL.md).
 
 ## Todo
 
@@ -51,7 +73,7 @@ The different other software tools and online resources have been mentioned abov
 * [Bluenet (this repos)](https://github.com/dobots/bluenet)
 * [Bluenet documentation](http://dobots.github.io/bluenet/)
 * [Bluenet documentation branch](https://github.com/dobots/bluenet/tree/gh-pages)
-* [Bootloader](https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler/tree/s110)
+* [Bootloader](https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler)
 * [DFU upload tool](https://github.com/dobots/nrf51_dfu_linux)
 * [Crownstone website](http://dobots.nl/products/crownstone)
 * [Crownstone Android app](https://play.google.com/store/apps/details?id=nl.dobots.CrownStone)
@@ -66,6 +88,8 @@ some other attention from us developers.
 ## Copyrights
 
 Obviously, the copyrights of the code written by Christopher, belong to him.
+
+For the meshing functionality we use [ble-bcast-mesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh) written by Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and Nordic Semiconductors).
 
 The copyrights (2014-2015) for the rest of the code belongs to the team of Distributed Organisms B.V. and are provided under an noncontagious open-source license:
 
