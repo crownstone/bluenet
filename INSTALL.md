@@ -6,41 +6,13 @@ The installation has been tested on Ubuntu 14.04 and assumes you use the J-Link 
 
 The installation should not be hard when you have the Nordic SDK. Get this from their website after buying a development kit. You also need a cross-compiler for ARM. You need the JLink utilities from Segger. And you need cmake for the build process.
 
+### Nordic SDK
+
 Download Nordic's SDK and unzip:
 
-* [Nordic nRF51822 SDK 8.1](https://developer.nordicsemi.com/nRF5_SDK/nRF51_SDK_v8.x.x/)
-* [Nordic S110 Softdevice 8.0](http://www.nordicsemi.com/eng/nordic/Products/nRF51822/S110-SD-v8/45846) or [Nordic S1130 Softdevice 1.0](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/S130-SD/46579)
+- [Nordic nRF51822 SDK 8.1](https://developer.nordicsemi.com/nRF5_SDK/nRF51_SDK_v8.x.x/)
+- [Nordic S110 Softdevice 8.0](http://www.nordicsemi.com/eng/nordic/Products/nRF51822/S110-SD-v8/45846) or [Nordic S1130 Softdevice 1.0](https://www.nordicsemi.com/eng/nordic/Products/nRF51822/S130-SD/46579)
 
-Download and install J-Link Segger’s [software](http://www.segger.com/jlink-software.html) (4.96.2 works, some other version had issues at the time):
-
-* Download the [.deb file 64bit version 4.96.2](https://www.segger.com/jlink-software.html?step=1&file=JLinkLinuxDEB64_4.96.2)
-* Install it:
-```
-sudo dpkg -i jlink_4.96.2_x86_64.deb
-```
-
-A cross-compiler for ARM is the GCC cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded).
-
-* Download and extract version [2014-q3](https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2).
-
-* Install some 32bit packages, assuming you have a 64bit systems:
-```
-sudo dpkg --add-architecture i386
-sudo apt-get update
-sudo apt-get install libstdc++6:i386 libncurses5:i386
-```
-
-* If the cross-compiler does not work, make sure you check if all its dependencies are met:
-```
-ldd /opt/gcc-arm-none-eabi-4_8-2014q3/bin/arm-none-eabi-gcc
-```
-
-Bluenet uses a cmake build system, so you will need it:
-```
-sudo apt-get install cmake
-```
-
-### Nordic SDK Bugs
 
 There is a bug in Nordics SDK code, search for files named `nrf_svc.h`.
 In those files, replace the assembly line:
@@ -51,7 +23,36 @@ With:
 
     "bx r14" : : "I" ((uint16_t)number) : "r0" \
 
-### Getting the Bluenet code
+### J-Link
+
+Download and install J-Link Segger’s [software](http://www.segger.com/jlink-software.html). We use 4.96.2 the [64bit .deb file version 4.96.2](https://www.segger.com/jlink-software.html?step=1&file=JLinkLinuxDEB64_4.96.2)
+
+Then install it:
+
+    sudo dpkg -i jlink_4.96.2_x86_64.deb
+
+### Cross compiler
+
+A cross-compiler for ARM is the GCC cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded).
+
+Download and extract version [2014-q3](https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2).
+
+Assuming you have a 64bit system, you will have to install some 32bit packages:
+
+    sudo dpkg --add-architecture i386
+    sudo apt-get update
+    sudo apt-get install libstdc++6:i386 libncurses5:i386
+
+If the cross-compiler does not work, make sure you check if all its dependencies are met:
+
+    ldd /opt/gcc-arm-none-eabi-4_8-2014q3/bin/arm-none-eabi-gcc
+
+### Misc.
+
+Bluenet uses a cmake build system, so you will need it:
+    sudo apt-get install cmake
+
+## Getting the Bluenet code
 
 The best way is to first [fork](https://github.com/dobots/bluenet/fork) the bluenet repository.
 Then download the code:
@@ -69,12 +70,12 @@ Make a new dir for your config file(s), for example `~/bluenet-config`
     mkdir ~/bluenet-config
     echo "export BLUENET_CONFIG_DIR=~/bluenet-config" >> ~/.bashrc
 
-Apply the environmental variables:
+Apply the environment variables:
 
     source ~/.bashrc
     
 
-### Configuration
+## Configuration
 
 Start writing your personal config file:
 
@@ -84,31 +85,31 @@ Copy the lines that you want to adjust from the default configuration: `$BLUENET
 
 Installation dependent configurations:
 
-* Set `COMPILER_PATH` to the path where the compiler can be found (it should contain the `/bin` subdir).
-* Set `COMPILER_TYPE` to the correct compiler type
-* Set `JLINK` to the correct JLink Exe file.
-* Set `JLINK_GDB_SERVER` to the correct file.
-* Set `NRF51822_DIR` to wherever you installed the Nordic SDK (it should contain the `/Include` and `/Source` subdirs).
+- Set `COMPILER_PATH` to the path where the compiler can be found (it should contain the `/bin` subdir).
+- Set `COMPILER_TYPE` to the correct compiler type
+- Set `JLINK` to the correct JLink Exe file.
+- Set `JLINK_GDB_SERVER` to the correct file.
+- Set `NRF51822_DIR` to wherever you installed the Nordic SDK (it should contain the `/Include` and `/Source` subdirs).
 
 Softdevice dependent configurations:
 
-* Set `SOFTDEVICE_DIR` to wherever you unzipped the SoftDevice dir from Nordic (it should contain the .hex file).
-* Set `SOFTDEVICE_DIR_API` to the directory with the SoftDevice include dir. This is relative, `${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}/` will be the used path.
-* Set `SOFTDEVICE accordingly` (basename of file without `_softdevice.hex`)
-* Set `SOFTDEVICE_SERIES`, `SOFTDEVICE_MAJOR`, and `SOFTDEVICE_MINOR` accordingly.
+- Set `SOFTDEVICE_DIR` to wherever you unzipped the SoftDevice dir from Nordic (it should contain the .hex file).
+- Set `SOFTDEVICE_DIR_API` to the directory with the SoftDevice include dir. This is relative, `${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}/` will be the used path.
+- Set `SOFTDEVICE accordingly` (basename of file without `_softdevice.hex`)
+- Set `SOFTDEVICE_SERIES`, `SOFTDEVICE_MAJOR`, and `SOFTDEVICE_MINOR` accordingly.
 
 Device dependent configuration:
 
-* Set `BLUETOOTH_NAME` to something you like, but make sure it's short (<10).
-* Set `INDOOR_SERVICE` to `1` if you want to enable it, the same is true for the other services. The indoor service only works for the s130.
-* Set `CHAR_SAMPLE_CURRENT` to `1` if you want to enable the sample current characteristics, the same is true for other characteristics.
-* Set `CHAR_MESHING` to `1` if you want to enable meshing functionality.
-* You can adjust `SERIAL_VERBOSITY` if you want to see more or less output over the UART
-* Set `HARDWARE_BOARD` to the correct number for your board. This determines the pin layout.
-* Set `HARDWARE_VERSION` to the correct version of the NRF51 chip you have. Use `$BLUENET_DIR/scripts/hardware_version.sh` to check your version.
-* Set `IBEACON` to `1`, if you want to advertise like an iBeacon. You will want to set the correct values for the `BEACON_*` configs as well.
-* You can adjust the `MASTER_BUFFER_SIZE` when needed, this buffer is used on several different places.
-* If you run into memory issues, you can play around with `HEAP_SIZE`. Increasing the heap size (dynamic memory), will reduce the stack size (static memory).
+- Set `BLUETOOTH_NAME` to something you like, but make sure it's short (<10).
+- Set `INDOOR_SERVICE` to `1` if you want to enable it, the same is true for the other services. The indoor service only works for the s130.
+- Set `CHAR_SAMPLE_CURRENT` to `1` if you want to enable the sample current characteristics, the same is true for other characteristics.
+- Set `CHAR_MESHING` to `1` if you want to enable meshing functionality. This is relatively memory intensive, so you will need a 32kB version to run it.
+- You can adjust `SERIAL_VERBOSITY` if you want to see more or less output over the UART
+- Set `HARDWARE_BOARD` to the correct number for your board. This determines the pin layout.
+- Set `HARDWARE_VERSION` to the correct version of the NRF51 chip you have. Use `$BLUENET_DIR/scripts/hardware_version.sh` to check your version.
+- Set `IBEACON` to `1`, if you want to advertise like an iBeacon. You will want to set the correct values for the `BEACON_*` configs as well.
+- You can adjust the `MASTER_BUFFER_SIZE` when needed, this buffer is used on several different places.
+- If you run into memory issues, you can play around with `HEAP_SIZE`. Increasing the heap size (dynamic memory), will reduce the stack size (static memory).
 
 
 ## Usage
@@ -197,12 +198,6 @@ And in another console:
     ./flash_openocd.sh upload combined.bin
 
 Here the binary `combined.bin` is the softdevice and application combined.
-
-## Meshing
-
-The mesh code is relatively memory intensive, so you will need a 32kB version to run it. Set `CHAR_MESHING` to `1` if you want to use it.
-
-For the meshing functionality we use https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh written by Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and Nordic Semiconductors).
 
 ## UART
 
