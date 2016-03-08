@@ -74,16 +74,3 @@ The copyrights (2014-2015) for the rest of the code belongs to the team of Distr
 * License: LGPL v3+, Apache, or MIT, your choice
 * Almende B.V., http://www.almende.com and DoBots B.V., http://www.dobots.nl
 * Rotterdam, The Netherlands
-
-Note, that we do not use any header files from Nordic. The header files are rewritten from scratch by Christopher
-especially for that purpose. This means you are not finding a Nordic license text in this repository.
-Of course, this means that you will have to get those files from Nordic via different means (we recommend to buy the
-development kit). We just didn't want to "contaminate" this repository with files that we don't understand the license
-implications of.
-
-The only exception is the code for the meshing functionality that is put online by Nordic itself on
-https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh. This functionality can be found in `src/protocol` and
-`include/protocol/` and falls of course under the Nordic license. You can disable the meshing functionality with
-`CHAR_MESHING=0` if you do want to exclude that code from becoming part of the binary. You can still use the services
-for individual nodes, but they won't be able to communicate with each other in that case.
-

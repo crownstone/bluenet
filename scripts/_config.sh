@@ -4,6 +4,20 @@
 #	echo "ERROR: environment variable 'BLUENET_CONFIG_DIR' should be set."
 #	exit 1
 #fi
+#
+if [ ! -d "${BLUENET_DIR}" ]; then
+	path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	BLUENET_DIR=${path}/..
+	echo "BLUENET_DIR does not exist. Use ${path}/.. as default"
+fi
+
+if [ -e ${BLUENET_DIR}/CMakeBuild.config.default ]; then
+	source ${BLUENET_DIR}/CMakeBuild.config.default
+fi
+
+if [ -e ${BLUENET_DIR}/CMakeBuild.config.local ]; then
+	source ${BLUENET_DIR}/CMakeBuild.config.local
+fi
 
 if [ ! -d "${BLUENET_CONFIG_DIR}" ]; then
 	path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

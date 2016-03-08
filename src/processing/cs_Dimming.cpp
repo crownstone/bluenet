@@ -12,17 +12,17 @@ Dimming::Dimming() {
 
 void Dimming::configure() {
 //	_adc->addListener(this);
-	// configure timer for threshold
+	//! configure timer for threshold
 	
 }
 
 void Dimming::zeroCrossing() {
-	// start timer again
+	//! start timer again
 	
-	// turn on device as quick as possible
+	//! turn on device as quick as possible
 	turnOn();
 
-	// on timer event
+	//! on timer event
 	turnOff();
 }
 

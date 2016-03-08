@@ -7,14 +7,14 @@
 
 #pragma once
 
-/* Current conventions:
+/** Current conventions:
  *
  * + American English (-ize, -or, -er, -ction)
  * + Start with object under consideration: "Buffer is locked", not "Locking of buffer"
  * + Use underscores to separate words
  */
 
-/* BLE defines
+/** BLE defines
  *
  * Strings for services and characteristics are read by a developer if he/she interacts on a low-level with a BLE
  * device via e.g. the Nordic BLE app. These strings are stored currently in memory allocated by the SoftDevice.
@@ -27,6 +27,7 @@
 #define BLE_SERVICE_BATTERY                      "Battery Service"
 #define BLE_SERVICE_ALERT                        "Alert Service"
 #define BLE_SERVICE_SCHEDULE                     "Schedule Service"
+#define BLE_SERVICE_DEVICE_INFORMATION           "Device Information"
 
 #define BLE_CHAR_TEMPERATURE                     "Temperature"
 #define BLE_CHAR_RESET                           "Reset"
@@ -38,10 +39,11 @@
 #define BLE_CHAR_SCAN                            "Scan"
 #define BLE_CHAR_TRACK                           "Track"
 #define BLE_CHAR_PWM                             "PWM"
+#define BLE_CHAR_RELAY                           "Relay"
 #define BLE_CHAR_NEW_ALERT                       "New Alert"
 #define BLE_CHAR_CURRENT_TIME                    "Current Time"
 
-/* Error messages
+/** Error messages
  *
  * Keep them concise. These shouldn't be part of the heap, only of the stack, and they contribute to code size.
  */
@@ -64,7 +66,9 @@
 #define MSG_BLE_SOFTDEVICE_ENABLE                "Softdevice enable"
 #define MSG_BLE_SOFTDEVICE_ENABLE_GAP            "Softdevice enable GAP"
 #define MSG_BLE_ADVERTISING_START                "Advertising start"
+#define MSG_BLE_IBEACON_START                    "Advertising iBeacon start"
 #define MSG_BLE_ADVERTISING_STARTED              "Advertising started"
+#define MSG_BLE_IBEACON_STARTED                  "iBeacon advertising started"
 #define MSG_BLE_NO_CUSTOM_SERVICES               "Services, no custom ones!"
 #define MSG_BLE_ADVERTISEMENT_TOO_BIG            "Advertisement too big"
 #define MSG_BLE_ADVERTISEMENT_CONFIG_INVALID     "Advertisement invalid config"

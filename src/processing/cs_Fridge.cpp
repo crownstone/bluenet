@@ -20,6 +20,7 @@ Fridge::Fridge() : _appTimerId(0)
 	Storage::getInt8(cfg.minEnvTemp, _minTemp, MIN_ENV_TEMP);
 	Storage::getInt8(cfg.maxEnvTemp, _maxTemp, MAX_ENV_TEMP);
 
+	EventDispatcher::getInstance().addListener(this);
 }
 
 void Fridge::startTicking() {
@@ -39,5 +40,22 @@ void Fridge::tick() {
 	}
 	if (temp > _maxTemp) {
 		EventDispatcher::getInstance().dispatch(EVT_ENV_TEMP_HIGH);
+	}
+}
+
+
+void Fridge::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+
+	switch(evt) {
+	case CONFIG_MIN_ENV_TEMP: {
+		_minTemp = *(int32_t*)p_data;
+		LOGd("update min temp to: %d", _minTemp);
+		break;
+	}
+	case CONFIG_MAX_ENV_TEMP: {
+		_maxTemp = *(int32_t*)p_data;
+		LOGd("update max temp to: %d", _maxTemp);
+		break;
+	}
 	}
 }

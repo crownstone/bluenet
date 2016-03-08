@@ -28,7 +28,7 @@ clean:
 # files cannot be found this will lead to an error on the first build. The next builds will be fine. So, the user only
 # needs to build two times in a row.
 build:
-	@echo "++ Create build directory"
+	@echo "++ Create build directory: $(BUILD_DIR)"
 	@mkdir -p $(BUILD_DIR)
 	@mkdir -p $(BUILD_DIR)/CMakeFiles/CMakeTmp
 	@cp CMakeConfig.cmake $(BUILD_DIR)/CMakeFiles/CMakeTmp
@@ -40,6 +40,7 @@ build:
 	@sed -i "s/@APPLICATION_LENGTH@/2000/" conf/nRF51822-softdevice.ld
 	@sed -i "s/@RAM_R1_BASE@/2000/" conf/nRF51822-softdevice.ld
 	@sed -i "s/@RAM_APPLICATION_AMOUNT@/0x4000/" conf/nRF51822-softdevice.ld
+	@sed -i "s/@HEAP_SIZE@/2700/" conf/nRF51822-softdevice.ld
 	#@sed -i $(BUILD_DIR)/CMakeFiles/CMakeTmp/conf/nRF51822-softdevice.ld
 	@cp conf/* $(BUILD_DIR)/CMakeFiles/CMakeTmp/conf
 	@echo $(SOURCE_DIR) && cd $(BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' --debug-trycompile -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake --target analyze $(SOURCE_DIR)

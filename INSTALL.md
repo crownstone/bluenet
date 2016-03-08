@@ -10,8 +10,8 @@ Rather than going through this page, it is also possible to go through the SDK, 
 
 The installation should not be hard when you have the Nordic SDK. Get this from their website after buying a development kit. You also need a cross-compiler for ARM. You need the JLink utilities from Segger. And you need cmake for the build process.
 
-* [Nordic nRF51822 SDK](https://www.nordicsemi.com/eng/Products/Bluetooth-R-low-energy/nRF51822)
-* [Nordic S110 Softdevice](http://www.nordicsemi.com/eng/Products/S110-SoftDevice-v7.0)
+* [Nordic nRF51822 SDK 8.1](https://developer.nordicsemi.com/nRF5_SDK/nRF51_SDK_v8.x.x/)
+* [Nordic S110 Softdevice 8.0](http://www.nordicsemi.com/eng/Products/S110-SoftDevice-v8.0) or [Nordic S1130 Softdevice 1.0](https://www.nordicsemi.com/eng/Products/S130-SoftDevice)
 * [JLink Software](http://www.segger.com/jlink-software.html), there is a [.deb file](https://www.segger.com/jlink-software.html?step=1&file=JLinkLinuxDEB64_4.96.4)
 * sudo aptitude install cmake
 
@@ -38,10 +38,10 @@ You can now just type `make` in the main directory. Or you can build using the s
 
 ### Bugs
 
-There is a bug in one of the SDK files, namely `nrf_svc.h` (different location depending on the SDK version):
+There is a bug in the following softdevice files, namely `nrf_svc.h`:
 
-    /opt/nrf51_sdk/v6/nrf51822/Include/s110/nrf_svc.h
-    /opt/nrf51_sdk/v4/nrf51822/Include/ble/softdevice/nrf_svc.h
+    /opt/softdevices/s110_nrf51_8.0.0_API/include
+    /opt/softdevices/s130_nrf51_1.0.0_API/include
 
 Change the assembly line:
 
@@ -62,15 +62,15 @@ Fork the code by clicking on:
 
 * Fork [https://github.com/dobots/bluenet/fork](https://github.com/dobots/bluenet/fork).
 * `git clone https://github.com/${YOUR_GITHUB_USERNAME}/bluenet`
-* let us call this directory $BLUENET
+* let us call this directory $BLUENET_DIR
 
 Now you will have to set all fields in the configuration file:
 
 * cp CMakeBuild.config.default CMakeBuild.config
 * adjust the `NRF51822_DIR` to wherever you installed the Nordic SDK (it should have `/Include` and `/Source` subdirectories
-* adjust the `SOFTDEVICE_DIR` to wherever you unzipped the latest SoftDevice from Nordic
+* adjust the `SOFTDEVICE_DIR` to wherever you unzipped the SoftDevice from Nordic
 * adjust the `SOFTDEVICE_SERIES` to for example `110` or `130` (SoftDevice name starts with it, without the `s`)
-* adjust major accordingly `SOFTDEVICE_MAJOR=7`
+* adjust major accordingly `SOFTDEVICE_MAJOR=8`
 * adjust minor accordingly `SOFTDEVICE_MINOR=0`
 * adjust the `SOFTDEVICE_DIR_API` to the directory with the SoftDevice include files
 * set `SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1` if you use one of the earlier s110 softdevices with a separate UICR section
@@ -92,18 +92,18 @@ Now you will have to set all fields in the configuration file:
 
 Let us now install the SoftDevice on the nRF51822:
 
-    cd scripts
+    cd $BLUENET_DIR/scripts
     ./softdevice.sh build
     ./softdevice.sh upload
 
 Now we can build our own software:
 
-    cd $BLUENET
+    cd $BLUENET_DIR
     make
 
 Alternatively, you can build it using our script:
 
-    cd scripts
+    cd $BLUENET_DIR/scripts
     ./firmware.sh build crownstone
 
 There is also an upload and debug script. The first uses `JLink` to upload, the second uses `gdb` to attach itself
@@ -168,20 +168,12 @@ Here the binary `combined.bin` is the softdevice and application combined.
 
 ## Meshing
 
-The meshion functionality is the one we are currently integrating on the moment. So, this is a moving target. Set
-`CHAR_MESHING` to `0` if you don't need it.
+The meshion functionality is the one we are currently integrating on the moment. So, this is a moving target. In addition, the mesh code is relatively memory intensive, so you will need a 32kB version to run it. Set
+`CHAR_MESHING` to `1` if you want to use it.
 
 For the meshing functionality we use https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh written by a
 Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and
-Nordic Semiconductors). This code makes use of the Timeslot API which
-is not supported yet in the alpha versions of the `S130`. Hence, if you want to use the meshing functionality, you will
-have to use the `S110`.
-
-This means that if you want to use a bootloader, you will also need the `S110` version of it, and the same is true
-for the upload script:
-
-* https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler/tree/s110
-* https://github.com/dobots/nrf51_dfu_linux
+Nordic Semiconductors).
 
 ## UART
 
@@ -199,43 +191,22 @@ and define the right usb port to use (if you've multiple).
 ## Bootloader
 
 To upload a new program when the Crownstone is embedded in a wall socket is cumbersome. For that reason for deployment
-we recommend to add a bootloader. The default bootloader from Nordic does not work with the `S130` devices. You will
-need our fork:
+we recommend to add a bootloader. We adjusted the Nordic bootloader so that it works with the bluenet code:
 
     git clone https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler
     cd scripts
     ./all.sh
 
-Note, that if you want to use meshing you will need the `S110` version! This can be found in the `s110` tag (see also
-above).
+Make sure to choose the correct branch.
 
-You will have to set some fields such that the bootloader is loaded rather than the application directly. If you use the `J-Link` this is the sequence of commands you will need:
+You will have to set some fields such that the bootloader is loaded rather than the application directly. If you use the `J-Link` this script will install bootloader, softdevice, and application:
 
-    ./softdevice.sh all
-    ./writebyte.sh 0x10001014 0x00034000
-    ./firmware.sh all bootloader 0x00034000
-
-Here we place the bootloader at position `0x00034000`. If the bootloader becomes larger in size, you will need to go
-down and adjust the code in the `dfu_types.h` file in the bootloader code.
+    ./all.sh
 
 And you should be good to upload binaries, for example with the following python script:
 
     git clone https://github.com/dobots/nrf51_dfu_linux
     python dfu.py -f crownstone.hex -a CD:E3:4A:47:1C:E4
-
-Currently the upload script needs to be changed depending on the SoftDevice used, for the `S130`:
-
-    ctrlpt_handle = 0x10
-    ctrlpt_cccd_handle = 0x11
-    data_handle = 0x0E
-
-And for the `S110`:
-
-    ctrlpt_handle = 0x0D
-    ctrlpt_cccd_handle = 0x0E
-    data_handle = 0x0B
-
-Of course, this is too cumbersome. We will soon implement something that figures out the right handles automatically.
 
 ### Debugging bootloader
 
@@ -243,7 +214,7 @@ Make sure the bootloader is actually loaded and the proper address for the appli
 
     mem 0x10001014 4
 
-This should be `0x34000` if you use the bootloader. If it is `0xFFFF` the application will be loaded from the application start address.
+This should be equal to `BOOTLOADER_REGION_START` if you use the bootloader. If it is `0xFFFF` the application will be loaded from the application start address.
 
 If the bootloader does not find a valid app, there might indeed not be an app available, o its configuration field that tells it that the app is correct isn't set properly:
 

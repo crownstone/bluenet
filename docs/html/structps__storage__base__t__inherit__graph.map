@@ -1,0 +1,4 @@
+<map id="ps_storage_base_t" name="ps_storage_base_t">
+<area shape="rect" id="node2" href="$structps__configuration__t.html" title="Struct used by the Configuration to store elements. " alt="" coords="5,87,133,114"/>
+<area shape="rect" id="node3" href="$structps__indoorlocalisation__service__t.html" title="Struct used by the IndoorLocalisationService to store elements. " alt="" coords="158,80,301,121"/>
+</map>

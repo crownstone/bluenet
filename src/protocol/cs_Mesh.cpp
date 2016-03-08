@@ -17,6 +17,13 @@
 #include <util/cs_BleError.h>
 
 #include <util/cs_Utils.h>
+#include <cfg/cs_Config.h>
+
+#define MESH_ACCESS_ADDR 0xA541A68E
+//#define MESH_ACCESS_ADDR 0xA641A69E
+#define MESH_INTERVAL_MIN_MS 100
+#define MESH_CHANNEL 38
+#define MESH_CLOCK_SOURCE (CLOCK_SOURCE)
 
 extern "C" {
 //#include <protocol/led_config.h>
@@ -32,17 +39,22 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 	switch (evt->event_type)
 	{
 	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
-		LOGd("conflicting value");
+		LOGd("ch: %d, conflicting value", evt->value_handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_NEW_VAL:
-		LOGd("new value");
+		LOGd("ch: %d, new value", evt->value_handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_UPDATE_VAL:
-		LOGd("update value");
+//		LOGd("ch: %d, update value", evt->value_handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_INITIALIZED:
-		LOGd("initialized");
+		LOGd("ch: %d, initialized", evt->value_handle);
 		break;
+	}
+
+	if (evt->value_handle != 1 && evt->value_handle != 2) {
+//	if (evt->value_handle == 1 || evt->value_handle > 4) {
+		rbc_mesh_value_disable(evt->value_handle);
 	}
 
 	switch (evt->event_type)
@@ -51,12 +63,12 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
 		case RBC_MESH_EVENT_TYPE_NEW_VAL:
 		case RBC_MESH_EVENT_TYPE_UPDATE_VAL: {
 
-            if (evt->value_handle > 2)
-                break;
+//!            if (evt->value_handle > 3)
+//!                break;
 
             //if (evt->data[0]) {
-            LOGi("Got data ch: %i, val: %i, len: %d, orig_addr:", evt->value_handle, evt->data[0], evt->data_len);
-//            BLEutil::printArray(evt->originator_address.addr, 6);
+//!            LOGi("Got data ch: %i, val: %i, len: %d, orig_addr:", evt->value_handle, evt->data[0], evt->data_len);
+//!            BLEutil::printArray(evt->originator_address.addr, 6);
             MeshControl &meshControl = MeshControl::getInstance();
             meshControl.process(evt->value_handle, evt->data, evt->data_len);
             //}
@@ -64,18 +76,29 @@ void rbc_mesh_event_handler(rbc_mesh_event_t* evt)
             break;
         }
         default:
-            LOGi("Default: %i", evt->event_type);
+//!            LOGi("Default: %i", evt->event_type);
             break;
 	}
 }
 
-}
+} //! extern "C"
 
-CMesh::CMesh() {
+CMesh::CMesh() : _appTimerId(-1) {
 	MeshControl::getInstance();
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)CMesh::staticTick);
 }
 
 CMesh::~CMesh() {
+
+}
+
+void CMesh::tick() {
+	handleMeshReceive();
+	scheduleNextTick();
+}
+
+void CMesh::scheduleNextTick() {
+	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(MESH_UPDATE_FREQUENCY), this);
 }
 
 /**
@@ -84,20 +107,18 @@ CMesh::~CMesh() {
  */
 void CMesh::init() {
 	LOGi("For now we are testing the meshing functionality.");
-	nrf_gpio_pin_clear(PIN_GPIO_LED0);
+//	nrf_gpio_pin_clear(PIN_GPIO_LED0);
 
 	rbc_mesh_init_params_t init_params;
 
-	init_params.access_addr = 0xA541A68F;
-	init_params.adv_int_ms = 100;
-	init_params.channel = 38;
-	init_params.handle_count = 2;
-	init_params.packet_format = RBC_MESH_PACKET_FORMAT_ORIGINAL;
-	init_params.radio_mode = RBC_MESH_RADIO_MODE_BLE_1MBIT;
+	init_params.access_addr = MESH_ACCESS_ADDR;
+	init_params.interval_min_ms = MESH_INTERVAL_MIN_MS;
+	init_params.channel = MESH_CHANNEL;
+	init_params.lfclksrc = MESH_CLOCK_SOURCE;
 
 	LOGi("Call rbc_mesh_init");
 	uint8_t error_code;
-	// checks if softdevice is enabled etc.
+	//! checks if softdevice is enabled etc.
 	error_code = rbc_mesh_init(init_params);
 	APP_ERROR_CHECK(error_code);
 
@@ -106,6 +127,11 @@ void CMesh::init() {
 	APP_ERROR_CHECK(error_code);
 	error_code = rbc_mesh_value_enable(2);
 	APP_ERROR_CHECK(error_code);
+
+//	error_code = rbc_mesh_value_enable(3);
+//	APP_ERROR_CHECK(error_code);
+//	error_code = rbc_mesh_value_enable(4);
+//	APP_ERROR_CHECK(error_code);
 }
 
 //void CMesh::send(uint8_t handle, uint32_t value) {
@@ -115,33 +141,28 @@ void CMesh::init() {
 //	APP_ERROR_CHECK(rbc_mesh_value_set(handle, &val[0], 1));
 //}
 
-// returns last received message
-uint32_t CMesh::receive(uint8_t handle) {
-	uint8_t val[28];
-	uint16_t len;
-	APP_ERROR_CHECK(rbc_mesh_value_get(handle, val, &len, NULL));
-	if (!len) return 0;
-	return (uint32_t)val[0];
-}
-
-// set callback to receive message
-void CMesh::set_callback() {
-}
-
-
 void CMesh::send(uint8_t handle, void* p_data, uint8_t length) {
+//	LOGi("length: %d, MAX_MESH_MESSAGE_LEN: %d", length, MAX_MESH_MESSAGE_LEN);
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
-	//LOGi("send ch: %d, len: %d", handle, length);
+//	LOGd("send ch: %d, len: %d", handle, length);
 	//BLEutil::printArray((uint8_t*)p_data, length);
 	APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
 }
 
-bool CMesh::receive(uint8_t handle, void** p_data, uint16_t& length) {
+bool CMesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
-	APP_ERROR_CHECK(rbc_mesh_value_get(handle, (uint8_t*)*p_data, &length, NULL));
+	APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)*p_data, &length));
 	//LOGi("recv ch: %d, len: %d", handle, length);
 	return length != 0;
+}
+
+void CMesh::handleMeshReceive() {
+    rbc_mesh_event_t evt;
+	if (rbc_mesh_event_get(&evt) == NRF_SUCCESS) {
+		rbc_mesh_event_handler(&evt);
+		rbc_mesh_packet_release(evt.data);
+	}
 }
 

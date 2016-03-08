@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Christopher Mason
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
@@ -19,11 +19,11 @@ extern "C" {
 }
 #endif
 
-#include "sd_common/ble_stack_handler_types.h"
+#include "ble_stack_handler_types.h"
 
 extern "C" {
-#include "app_common/pstorage.h"
-#include "app_common/app_util.h"
+#include "pstorage.h"
+#include "app_util.h"
 }
 
 #include <drivers/cs_Storage.h>
@@ -42,7 +42,7 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0)
 {
-	// setup default values.
+	//! setup default values.
 	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
 
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&_sec_mode);
@@ -57,26 +57,26 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	shutdown();
 }
 
-// called by softdevice handler through ble_evt_dispatch on any event that passes through mesh and is not write
+//! called by softdevice handler through ble_evt_dispatch on any event that passes through mesh and is not write
 extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {
 	Nrf51822BluetoothStack::getInstance().on_ble_evt((ble_evt_t *)p_event_data);
 }
 
-// called by softdevice handler on a ble event
+//! called by softdevice handler on a ble event
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 //	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
 
 #if CHAR_MESHING==1
-	//  pass the incoming BLE event to the mesh framework
-	BLE_CALL(rbc_mesh_ble_evt_handler, (p_ble_evt));
+	//!  pass the incoming BLE event to the mesh framework
+	rbc_mesh_ble_evt_handler(p_ble_evt);
 #endif
 
-	// Only dispatch functions to the scheduler which might take long to execute, such as ble write functions
-	// and handle other ble events directly in the interrupt. Otherwise app scheduler buffer might overflow fast
+	//! Only dispatch functions to the scheduler which might take long to execute, such as ble write functions
+	//! and handle other ble events directly in the interrupt. Otherwise app scheduler buffer might overflow fast
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GATTS_EVT_WRITE:
-		// let the scheduler execute the event handle function
+		//! let the scheduler execute the event handle function
 		BLE_CALL(app_sched_event_put, (p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len, ble_evt_handler));
 		break;
 	default:
@@ -91,7 +91,7 @@ void Nrf51822BluetoothStack::init() {
 	if (_inited)
 		return;
 
-	// Initialise SoftDevice
+	//! Initialise SoftDevice
 	uint8_t enabled;
 	BLE_CALL(sd_softdevice_is_enabled, (&enabled));
 	if (enabled) {
@@ -100,14 +100,14 @@ void Nrf51822BluetoothStack::init() {
 	}
 
 	LOGd(MSG_BLE_SOFTDEVICE_INIT);
-	// Initialize the SoftDevice handler module.
-	// this would call with different clock!
-	SOFTDEVICE_HANDLER_INIT(_clock_source, false);
+	//! Initialize the SoftDevice handler module.
+	//! this would call with different clock!
+	SOFTDEVICE_HANDLER_INIT(_clock_source, NULL);
 
-	// enable the BLE stack
+	//! enable the BLE stack
 	LOGd(MSG_BLE_SOFTDEVICE_ENABLE);
 
-	// assign ble event handler, forwards ble_evt to stack
+	//! assign ble event handler, forwards ble_evt to stack
 	BLE_CALL(softdevice_ble_evt_handler_set, (ble_evt_dispatch));
 
 //#if(SOFTDEVICE_SERIES == 110)
@@ -115,7 +115,7 @@ void Nrf51822BluetoothStack::init() {
 #if ((SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MINOR != 5)) || \
 	(SOFTDEVICE_SERIES == 110)
 #if(NORDIC_SDK_VERSION >= 6)
-	// do not define the service_changed characteristic, of course allow future changes
+	//! do not define the service_changed characteristic, of course allow future changes
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1
 	ble_enable_params_t ble_enable_params;
 	memset(&ble_enable_params, 0, sizeof(ble_enable_params));
@@ -125,18 +125,18 @@ void Nrf51822BluetoothStack::init() {
 #endif
 //#endif
 
-	// according to the migration guide the address needs to be set directly after the sd_ble_enable call
-	// due to "an issue present in the s110_nrf51822_7.0.0 release"
-#if(SOFTDEVICE_SERIES == 110)
-#if(NORDIC_SDK_VERSION >= 7)
-	LOGd(MSG_BLE_SOFTDEVICE_ENABLE_GAP);
-	BLE_CALL(sd_ble_gap_enable, () );
-	ble_gap_addr_t addr;
-	BLE_CALL(sd_ble_gap_address_get, (&addr) );
-	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr) );
-#endif
-#endif
-	// version is not saved or shown yet
+	//! according to the migration guide the address needs to be set directly after the sd_ble_enable call
+	//! due to "an issue present in the s110_nrf51822_7.0.0 release"
+//#if(SOFTDEVICE_SERIES == 110)
+//#if(NORDIC_SDK_VERSION >= 7)
+//	LOGd(MSG_BLE_SOFTDEVICE_ENABLE_GAP);
+//	BLE_CALL(sd_ble_gap_enable, () );
+//	ble_gap_addr_t addr;
+//	BLE_CALL(sd_ble_gap_address_get, (&addr) );
+//	BLE_CALL(sd_ble_gap_address_set, (BLE_GAP_ADDR_CYCLE_MODE_NONE, &addr) );
+//#endif
+//#endif
+	//! version is not saved or shown yet
 	ble_version_t version( { });
 	version.company_id = 12;
 	BLE_CALL(sd_ble_version_get, (&version));
@@ -192,7 +192,7 @@ void Nrf51822BluetoothStack::setPasskey(uint8_t* passkey) {
 }
 
 void Nrf51822BluetoothStack::updatePasskey() {
-#if SOFTDEVICE_SERIES==130
+#if SOFTDEVICE_SERIES==130 || (SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR == 8)
 	ble_opt_t static_pin_option;
 	static_pin_option.gap_opt.passkey.p_passkey = _passkey;
 	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
@@ -244,8 +244,8 @@ void Nrf51822BluetoothStack::addService(Service* svc) {
 	_services.push_back(svc);
 }
 
-// accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm
-// Can be done at any moment (also when advertising)
+//! accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm
+//! Can be done at any moment (also when advertising)
 void Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
 	LOGd("Set tx power to %d", powerLevel);
 	switch (powerLevel) {
@@ -275,18 +275,17 @@ void Nrf51822BluetoothStack::updateConnParams() {
 	BLE_CALL(sd_ble_gap_ppcp_set, (&_gap_conn_params));
 }
 
-void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon) {
+void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	if (_advertising)
 		return;
 
-	LOGi("startIBeacon ...");
+	LOGi(MSG_BLE_IBEACON_START);
 
-	init(); // we should already be.
+	init(); //! we should already be.
 
 	startAdvertisingServices();
 
 	uint32_t err_code __attribute__((unused));
-	ble_advdata_t advdata;
 	uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 	//	uint8_t flags = BLE_GAP_ADV_FLAG_LE_GENERAL_DISC_MODE | BLE_GAP_ADV_FLAG_LE_BR_EDR_CONTROLLER
 	//			| BLE_GAP_ADV_FLAG_LE_BR_EDR_HOST;
@@ -310,30 +309,23 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon) {
 	 * are only 2 bytes left, there is no more space left for additional
 	 * data
 	 */
-	ble_gap_adv_params_t adv_params;
 
-	adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
-	adv_params.p_peer_addr = NULL;                   // Undirected advertisement
-	adv_params.fp = BLE_GAP_ADV_FP_ANY;
-	adv_params.interval = _interval;
-	adv_params.timeout = _timeout;
+	ble_advdata_manuf_data_t manufac_apple;
+	manufac_apple.company_identifier = 0x004C; //! Apple Company ID, if it is not set to apple it's not recognized as an iBeacon
 
-	ble_advdata_manuf_data_t manufac;
-	manufac.company_identifier = 0x004C; // Apple Company ID, if it is not set to apple it's not recognized as an iBeacon
+	uint8_t adv_manuf_data_apple[beacon->size()];
+	memset(adv_manuf_data_apple, 0, sizeof(adv_manuf_data_apple));
+	beacon->toArray(adv_manuf_data_apple);
 
-	uint8_t adv_manuf_data[beacon->size()];
-	memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
-	beacon->toArray(adv_manuf_data);
+	manufac_apple.data.p_data = adv_manuf_data_apple;
+	manufac_apple.data.size = beacon->size();
 
-	manufac.data.p_data = adv_manuf_data;
-	manufac.data.size = beacon->size();
-
-	// Build and set advertising data
+	//! Build and set advertising data
+	ble_advdata_t advdata;
 	memset(&advdata, 0, sizeof(advdata));
 
-	advdata.flags.size = sizeof(flags);
-	advdata.flags.p_data = &flags;
-	advdata.p_manuf_specific_data = &manufac;
+	advdata.flags = flags;
+	advdata.p_manuf_specific_data = &manufac_apple;
 
 	/*
 	 * 31 bytes total payload
@@ -346,48 +338,84 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon) {
 	 * 1 byte for name type
 	 * -> 29 bytes left for name
 	 */
+#define MAXNAMELENGTH 29
+	uint8_t nameLength;
+
 	ble_advdata_t scan_resp;
 	memset(&scan_resp, 0, sizeof(scan_resp));
+	scan_resp.name_type = BLE_ADVDATA_SHORT_NAME;
 
-	//	uint8_t uidCount = _services.size();
-	//	ble_uuid_t adv_uuids[uidCount];
-	//
-	//	uint8_t cnt = 0;
-	//	for(Service* svc : _services ) {
-	//		adv_uuids[cnt++] = svc->getUUID();
-	//	}
-	//
-	//	if (cnt == 0) {
-	//		LOGw("No custom services!");
-	//	}
+	//! since advertisement data already has the manufacturing data
+	//! of Apple for the iBeacon, we set our own manufacturing data
+	//! in the scan response
 
-	scan_resp.name_type = BLE_ADVDATA_FULL_NAME;
-	//	scan_resp.uuids_more_available.uuid_cnt = 1;
-	//	scan_resp.uuids_more_available.p_uuids  = adv_uuids;
+	//! only add manufacturing data if device type is set
+	if (deviceType != DEVICE_UNDEF) {
+
+		ble_advdata_manuf_data_t manufac;
+		//! TODO: made up ID, has to be replaced by official ID
+		manufac.company_identifier = DOBOTS_ID; //! DoBots Company ID
+		manufac.data.size = 0;
+
+		DoBotsManufac dobotsManufac(deviceType);
+
+		uint8_t adv_manuf_data[dobotsManufac.size()];
+		memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
+		dobotsManufac.toArray(adv_manuf_data);
+
+		manufac.data.p_data = adv_manuf_data;
+		manufac.data.size = dobotsManufac.size();
+
+		scan_resp.p_manuf_specific_data = &manufac;
+
+		//! we only have limited space available in the scan response data. so we have to adjust the maximum
+		//! length available for the name, based on the size of the manufacturing data
+		nameLength = MAXNAMELENGTH - sizeof(adv_manuf_data) - sizeof(manufac.company_identifier) - 2 ; //! last 2 comes from one byte for length + 1 byte for type
+	} else {
+		//! if no manufacturing data is set, we can use the maximum available space for the name
+		nameLength = MAXNAMELENGTH;
+	}
+
+	//! NOTE: if anything else is added to the scan response data, the nameLength has to be adjusted
+	//!   similar to the case of manufacturing data
+	//! last, make sure we don't try to use more letters than the name is long or it will attach
+	//! garbage to the name
+	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
+
+	//! and assign the value to the advertisement package
+	scan_resp.short_name_len = nameLength;
 
 	BLE_CALL(ble_advdata_set, (&advdata, &scan_resp));
+
+	//! set advertisement parameters
+
+	ble_gap_adv_params_t adv_params;
+	memset(&adv_params, 0, sizeof(adv_params));
+	adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+	adv_params.p_peer_addr = NULL;                   //! Undirected advertisement
+	adv_params.fp = BLE_GAP_ADV_FP_ANY;
+	adv_params.interval = _interval;
+	adv_params.timeout = _timeout;
 
 	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
 
 	_advertising = true;
 
-	LOGi("... OK");
+	LOGi(MSG_BLE_ADVERTISING_STARTED);
 }
 
-void Nrf51822BluetoothStack::startAdvertising() {
+void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 	if (_advertising)
 		return;
 
 	LOGi(MSG_BLE_ADVERTISING_START);
 
-	init(); // we should already be.
+	init(); //! we should already be.
 
+	//! todo: why start advertising the services ???
 	startAdvertisingServices();
 
-	uint32_t err_code __attribute__((unused));
-	ble_advdata_t advdata;
-	uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-
+	//! check if (and how many) services where enabled
 	uint8_t uidCount = _services.size();
 	LOGi("Number of services: %u", uidCount);
 
@@ -402,23 +430,7 @@ void Nrf51822BluetoothStack::startAdvertising() {
 		LOGw(MSG_BLE_NO_CUSTOM_SERVICES);
 	}
 
-	ble_gap_adv_params_t adv_params;
-
-	adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
-	adv_params.p_peer_addr = NULL;                   // Undirected advertisement
-	adv_params.fp = BLE_GAP_ADV_FP_ANY;
-	adv_params.interval = _interval;
-	adv_params.timeout = _timeout;
-
-	// Build and set advertising data
-	memset(&advdata, 0, sizeof(advdata));
-
-	ble_advdata_manuf_data_t manufac;
-	// TODO: made up ID, has to be replaced by official ID
-	manufac.company_identifier = 0x1111; // DoBots Company ID
-	manufac.data.size = 0;
-
-	//	advdata.name_type               = BLE_ADVDATA_NO_NAME;
+	//! Build and set advertising data
 
 	/*
 	 * 31 bytes total payload
@@ -439,28 +451,35 @@ void Nrf51822BluetoothStack::startAdvertising() {
 	 *   an element, and 1 byte of that is used for the type, so 5 bytes
 	 *   are left for the data
 	 */
+	ble_advdata_t advdata;
+	memset(&advdata, 0, sizeof(advdata));
 
-	// Anne: setting NO_NAME breaks the Android Nordic nRF Master Console app.
+	//! Anne: setting NO_NAME breaks the Android Nordic nRF Master Console app.
+	//! assign tx power level to advertisement data
 	advdata.p_tx_power_level = &_tx_power_level;
-	advdata.flags.size = sizeof(flags);
-	advdata.flags.p_data = &flags;
-	advdata.p_manuf_specific_data = &manufac;
-	// TODO -oDE: It doesn't really make sense to have this function in the library
-	//  because it really depends on the application on how many and what kind
-	//  of services are available and what should be advertised
+
+	//! set flags of advertisement data
+	uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
+	advdata.flags = flags;
+
+	//! add (first) service uuid. there is only space for 1 uuid, since we use
+	//! 128-bit UUDs
+	//! TODO -oDE: It doesn't really make sense to have this function in the library
+	//!  because it really depends on the application on how many and what kind
+	//!  of services are available and what should be advertised
 	//#ifdef YOU_WANT_TO_USE_SPACE
 	if (uidCount > 1) {
 		advdata.uuids_more_available.uuid_cnt = 1;
 		advdata.uuids_more_available.p_uuids = adv_uuids;
-	} else {
+	} else if (uidCount == 1) {
 		advdata.uuids_complete.uuid_cnt = 1;
 		advdata.uuids_complete.p_uuids = adv_uuids;
 	}
 	//#endif
 
-	// Because of the limited amount of space in the advertisement data, additional
-	// data can be supplied in the scan response package. Same space restrictions apply
-	// here:
+	//! Because of the limited amount of space in the advertisement data, additional
+	//! data can be supplied in the scan response package. Same space restrictions apply
+	//! here:
 	/*
 	 * 31 bytes total payload
 	 *
@@ -472,17 +491,71 @@ void Nrf51822BluetoothStack::startAdvertising() {
 	 * 1 byte for name type
 	 * -> 29 bytes left for name
 	 */
+#define MAXNAMELENGTH 29
+	uint8_t nameLength;
+
 	ble_advdata_t scan_resp;
 	memset(&scan_resp, 0, sizeof(scan_resp));
-	scan_resp.name_type = BLE_ADVDATA_FULL_NAME;
+	scan_resp.name_type = BLE_ADVDATA_SHORT_NAME;
 
+	//! add manufacturing data to the scan response instead of
+	//! the advertisement data (more space, and to keep consistent with advertisement
+	//! when set to iBeacon)
+
+	//! only add manufacturing data if device type is set
+	if (deviceType != DEVICE_UNDEF) {
+
+		ble_advdata_manuf_data_t manufac;
+		//! TODO: made up ID, has to be replaced by official ID
+		manufac.company_identifier = DOBOTS_ID; //! DoBots Company ID
+		manufac.data.size = 0;
+
+		DoBotsManufac dobotsManufac(deviceType);
+
+		uint8_t adv_manuf_data[dobotsManufac.size()];
+		memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
+		dobotsManufac.toArray(adv_manuf_data);
+
+		manufac.data.p_data = adv_manuf_data;
+		manufac.data.size = dobotsManufac.size();
+
+		scan_resp.p_manuf_specific_data = &manufac;
+
+		//! we only have limited space available in the scan response data. so we have to adjust the maximum
+		//! length available for the name, based on the size of the manufacturing data
+		nameLength = MAXNAMELENGTH - sizeof(adv_manuf_data) - sizeof(manufac.company_identifier) - 2 ; //! last 2 comes from one byte for length + 1 byte for type
+	} else {
+		//! if no manufacturing data is set, we can use the maximum available space for the name
+		nameLength = MAXNAMELENGTH;
+	}
+
+	//! NOTE: if anything else is added to the scan response data, the nameLength has to be adjusted
+	//!   similar to the case of manufacturing data
+	//! last, make sure we don't try to use more letters than the name is long or it will attach
+	//! garbage to the name
+	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
+
+	//! and assign the value to the advertisement package
+	scan_resp.short_name_len = nameLength;
+
+	uint32_t err_code;
 	err_code = ble_advdata_set(&advdata, &scan_resp);
 	if (err_code == NRF_ERROR_DATA_SIZE) {
 		log(FATAL, MSG_BLE_ADVERTISEMENT_TOO_BIG);
 	}
 	APP_ERROR_CHECK(err_code);
 
-	// segfault when advertisement cannot start, do we want that!?
+	//! set advertisement parameters
+
+	ble_gap_adv_params_t adv_params;
+	memset(&adv_params, 0, sizeof(adv_params));
+	adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+	adv_params.p_peer_addr = NULL;                   //! Undirected advertisement
+	adv_params.fp = BLE_GAP_ADV_FP_ANY;
+	adv_params.interval = _interval;
+	adv_params.timeout = _timeout;
+
+	//! segfault when advertisement cannot start, do we want that!?
 	//BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
 	err_code = sd_ble_gap_adv_start(&adv_params);
 	if (err_code == NRF_ERROR_INVALID_PARAM) {
@@ -515,15 +588,15 @@ void Nrf51822BluetoothStack::startScanning() {
 
 	LOGi("startScanning");
 	ble_gap_scan_params_t p_scan_params;
-	// No devices in whitelist, hence non selective performed.
-	p_scan_params.active = 0;            // Active scanning set.
-	p_scan_params.selective = 0;            // Selective scanning not set.
-	p_scan_params.interval = SCAN_INTERVAL;            // Scan interval.
-	p_scan_params.window = SCAN_WINDOW;  // Scan window.
-	p_scan_params.p_whitelist = NULL;         // No whitelist provided.
-	p_scan_params.timeout = 0x0000;       // No timeout.
+	//! No devices in whitelist, hence non selective performed.
+	p_scan_params.active = 1;            //! Active scanning set.
+	p_scan_params.selective = 0;            //! Selective scanning not set.
+	p_scan_params.interval = SCAN_INTERVAL;            //! Scan interval.
+	p_scan_params.window = SCAN_WINDOW;  //! Scan window.
+	p_scan_params.p_whitelist = NULL;         //! No whitelist provided.
+	p_scan_params.timeout = 0x0000;       //! No timeout.
 
-	// todo: which fields to set here?
+	//! todo: which fields to set here?
 	BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params));
 	_scanning = true;
 #endif
@@ -584,14 +657,14 @@ bool Nrf51822BluetoothStack::isScanning() {
 //}
 
 //extern "C" {
-//	void SWI1_IRQHandler() { // radio notification IRQ handler
+//	void SWI1_IRQHandler() { //! radio notification IRQ handler
 //		uint8_t radio_notify;
 //		Nrf51822BluetoothStack::_stack->_radio_notify = radio_notify = ( Nrf51822BluetoothStack::_stack->_radio_notify + 1) % 2;
 //		Nrf51822BluetoothStack::_stack->_callback_radio(radio_notify == 1);
 //	}
 //
-//	void SWI2_IRQHandler(void) { // sd event IRQ handler
-//		// do nothing.
+//	void SWI2_IRQHandler(void) { //! sd event IRQ handler
+//		//! do nothing.
 //	}
 //}
 
@@ -606,13 +679,13 @@ bool Nrf51822BluetoothStack::isScanning() {
 //#endif
 //	while (1) {
 //
-//		//        uint8_t nested;
-//		//        sd_nvic_critical_region_enter(&nested);
-//		//        uint8_t radio_notify = _radio_notify = (radio_notify + 1) % 4;
-//		//        sd_nvic_critical_region_exit(nested);
-//		//        if ((radio_notify % 2 == 0) && _callback_radio) {
-//		//            _callback_radio(radio_notify == 0);
-//		//        }
+//		//!        uint8_t nested;
+//		//!        sd_nvic_critical_region_enter(&nested);
+//		//!        uint8_t radio_notify = _radio_notify = (radio_notify + 1) % 4;
+//		//!        sd_nvic_critical_region_exit(nested);
+//		//!        if ((radio_notify % 2 == 0) && _callback_radio) {
+//		//!            _callback_radio(radio_notify == 0);
+//		//!        }
 //
 //		uint16_t evt_len = _evt_buffer_size;
 //		uint32_t err_code = sd_ble_evt_get(_evt_buffer, &evt_len);
@@ -627,18 +700,18 @@ bool Nrf51822BluetoothStack::isScanning() {
 //}
 
 
-/**@brief Function for handling the Device Manager events.
+/** Function for handling the Device Manager events.
  *
  * @param[in]   p_evt   Data associated to the device manager event.
  */
 static uint32_t device_manager_evt_handler(dm_handle_t const    * p_handle,
                                            dm_event_t const     * p_event,
-                                           api_result_t           event_result)
+                                           ret_code_t           event_result)
 {
 	return Nrf51822BluetoothStack::getInstance().deviceManagerEvtHandler(p_handle, p_event, event_result);
 }
 
-//#define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /**< Delay after connection until Security Request is sent, if necessary (ticks). */
+//#define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /*< Delay after connection until Security Request is sent, if necessary (ticks). */
 
 void Nrf51822BluetoothStack::lowPowerTimeout(void* p_context) {
 	LOGi("bonding timeout, going back to normal power mode ...");
@@ -658,33 +731,33 @@ void Nrf51822BluetoothStack::changeToNormalPowerMode() {
 
 uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * p_handle,
                                            dm_event_t const     * p_event,
-                                           api_result_t           event_result)
+										   ret_code_t           event_result)
 {
 //	LOGd("deviceManagerEvtHandler: 0x%X", p_event->event_id);
 
     if (event_result != BLE_GAP_SEC_STATUS_SUCCESS) {
     	LOGe("[SECURITY ERROR] bonding failed with code: %d", event_result);
     	sd_ble_gap_disconnect(p_event->event_param.p_gap_param->conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-//    	return NRF_ERROR_INTERNAL;
+//!    	return NRF_ERROR_INTERNAL;
     }
 
     switch (p_event->event_id)
     {
         case DM_EVT_CONNECTION:
         	LOGi("DM_EVT_CONNECTION");
-            // Start Security Request timer.
+            //! Start Security Request timer.
             if (p_handle->device_id != DM_INVALID_ID)
             {
-//            	  LOGi("start sec timer");
-//                err_code = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
-//                APP_ERROR_CHECK(err_code);
+//!            	  LOGi("start sec timer");
+//!                err_code = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
+//!                APP_ERROR_CHECK(err_code);
             }
             break;
         case DM_EVT_SECURITY_SETUP:
         case DM_EVT_SECURITY_SETUP_REFRESH: {
         	LOGi("going into low power mode for bonding ...");
 
-        	// schedule timeout
+        	//! schedule timeout
         	Timer::getInstance().createSingleShot(_lowPowerTimeoutId, lowPowerTimeout);
         	Timer::getInstance().start(_lowPowerTimeoutId, MS_TO_TICKS(60000), this);
 
@@ -694,7 +767,7 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         case DM_EVT_SECURITY_SETUP_COMPLETE: {
         	LOGi("bonding completed, going into normal power mode ...");
 
-        	// clear timeout
+        	//! clear timeout
         	Timer::getInstance().stop(_lowPowerTimeoutId);
 
 			changeToNormalPowerMode();
@@ -712,16 +785,16 @@ void Nrf51822BluetoothStack::device_manager_init()
     dm_init_param_t        init_data;
     dm_application_param_t register_param;
 
-    // Don't clear bonded centrals
-    init_data.clear_persistent_data = 0;//
-//    init_data.clear_persistent_data = 1;//
+    //! Don't clear bonded centrals
+    init_data.clear_persistent_data = 0;
+//!    init_data.clear_persistent_data = 1;//
 
     err_code = dm_init(&init_data);
     APP_ERROR_CHECK(err_code);
 
     memset(&register_param.sec_param, 0, sizeof(ble_gap_sec_params_t));
 
-#if SOFTDEVICE_SERIES==110
+#if SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR!=8
     register_param.sec_param.timeout      = SEC_PARAM_TIMEOUT;
 #endif
     register_param.sec_param.bond         = SEC_PARAM_BOND;
@@ -731,7 +804,7 @@ void Nrf51822BluetoothStack::device_manager_init()
     register_param.evt_handler            = device_manager_evt_handler;
     register_param.service_type           = DM_PROTOCOL_CNTXT_GATT_SRVR_ID;
 
-    // Using static pin:
+    //! Using static pin:
     register_param.sec_param.mitm    = SEC_PARAM_MITM;
     register_param.sec_param.io_caps = SEC_PARAM_IO_CAPABILITIES;
 
@@ -769,7 +842,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	}
 
 	case BLE_EVT_USER_MEM_RELEASE:
-		// nothing to do
+		//! nothing to do
 		break;
 
 	case BLE_GAP_EVT_DISCONNECTED:
@@ -820,7 +893,14 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_SYS_ATTR_MISSING:
+#if (SOFTDEVICE_SERIES == 130)
+#if (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
 		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0));
+#elif (SOFTDEVICE_MAJOR == 1) && (SOFTDEVICE_MINOR == 0)
+		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0,
+                BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS));
+#endif
+#endif
 		break;
 
 	case BLE_GAP_EVT_PASSKEY_DISPLAY: {
@@ -839,6 +919,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_EVT_TX_COMPLETE:
+//		LOGi("BLE_EVT_TX_COMPLETE");
 		onTxComplete(p_ble_evt);
 		break;
 
@@ -850,7 +931,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
-	_advertising = false; // it seems like maybe we automatically stop advertising when we're connected.
+	_advertising = false; //! it seems like maybe we automatically stop advertising when we're connected.
 
 	BLE_CALL(sd_ble_gap_conn_param_update, (p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params));
 

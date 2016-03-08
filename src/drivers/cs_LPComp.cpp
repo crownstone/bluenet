@@ -50,7 +50,7 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 	LOGd("Run LPComp without SoftDevice!!!");
 #endif
 
-	// Enable interrupt on given event
+	//! Enable interrupt on given event
 	switch (event) {
 	case (LPC_CROSS):
 		NRF_LPCOMP->INTENSET = LPCOMP_INTENSET_CROSS_Enabled << LPCOMP_INTENSET_CROSS_Pos;
@@ -63,11 +63,11 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 		break;
 	default:
 		LOGf("Choose an event to listen for: LPC_CROSS, LPC_UP or LPC_DOWN");
-		APP_ERROR_CHECK(0xFFFFFFFF); // error
+		APP_ERROR_CHECK(0xFFFFFFFF); //! error
 		break;
 	}
 
-	// Enable LPComp interrupt
+	//! Enable LPComp interrupt
 	uint32_t err_code;
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_ClearPendingIRQ(LPCOMP_IRQn);
@@ -92,26 +92,26 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 
 	LOGd("Configure LPComp on ain %u, level %u", pin, level);
 	if (level < 7) {
-		NRF_LPCOMP->REFSEL = level; // See LPCOMP_REFSEL_REFSEL_SupplyOneEighthPrescaling
+		NRF_LPCOMP->REFSEL = level; //! See LPCOMP_REFSEL_REFSEL_SupplyOneEighthPrescaling
 	}
 	else {
 		LOGf("There is no such level");
-		APP_ERROR_CHECK(0xFFFFFFFF); // error
+		APP_ERROR_CHECK(0xFFFFFFFF); //! error
 	}
 	if (pin < 8) {
-		NRF_LPCOMP->PSEL = pin; // See LPCOMP_PSEL_PSEL_AnalogInput0
+		NRF_LPCOMP->PSEL = pin; //! See LPCOMP_PSEL_PSEL_AnalogInput0
 	} else {
 		LOGf("There is no such pin available");
-		APP_ERROR_CHECK(0xFFFFFFFF); // error
+		APP_ERROR_CHECK(0xFFFFFFFF); //! error
 	}
 
-//	// TODO: don't know if we need this..
-//	// Wait for the LCOMP config to have effect
+//	//! TODO: don't know if we need this..
+//	//! Wait for the LCOMP config to have effect
 //	nrf_delay_us(100);
 
 
 	NRF_LPCOMP->POWER = LPCOMP_POWER_POWER_Enabled << LPCOMP_POWER_POWER_Pos;
-	NRF_LPCOMP->ENABLE = LPCOMP_ENABLE_ENABLE_Enabled << LPCOMP_ENABLE_ENABLE_Pos; // Pin will be configured as analog input
+	NRF_LPCOMP->ENABLE = LPCOMP_ENABLE_ENABLE_Enabled << LPCOMP_ENABLE_ENABLE_Pos; //! Pin will be configured as analog input
 
 	return 0;
 }
@@ -120,7 +120,7 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
  * Stop the LP comparator.
  */
 void LPComp::stop() {
-	// TODO: should we clear pending interrupts?
+	//! TODO: should we clear pending interrupts?
 #if(NRF51_USE_SOFTDEVICE == 1)
 	APP_ERROR_CHECK(sd_nvic_ClearPendingIRQ(LPCOMP_IRQn));
 #else
@@ -161,25 +161,25 @@ extern "C" void WUCOMP_COMP_IRQHandler(void) {
 		LPComp &lpcomp = LPComp::getInstance();
 		lpcomp.interrupt();
 
-		// Continue
+		//! Continue
 		NRF_LPCOMP->EVENTS_CROSS = 0;
-//		NRF_LPCOMP->TASKS_START = 1; // Do we need this?
+//		NRF_LPCOMP->TASKS_START = 1; //! Do we need this?
 	}
 	else if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_UP_Msk) != 0 && NRF_LPCOMP->EVENTS_UP != 0) {
 		LPComp &lpcomp = LPComp::getInstance();
 		lpcomp.interrupt();
 
-		// Continue
+		//! Continue
 		NRF_LPCOMP->EVENTS_UP = 0;
-//		NRF_LPCOMP->TASKS_START = 1; // Do we need this?
+//		NRF_LPCOMP->TASKS_START = 1; //! Do we need this?
 	}
 	else if ((NRF_LPCOMP->INTENSET & LPCOMP_INTENSET_DOWN_Msk) != 0 && NRF_LPCOMP->EVENTS_DOWN > 0) {
 		LPComp &lpcomp = LPComp::getInstance();
 		lpcomp.interrupt();
 
-		// Continue
+		//! Continue
 		NRF_LPCOMP->EVENTS_DOWN = 0;
-//		NRF_LPCOMP->TASKS_START = 1; // Do we need this?
+//		NRF_LPCOMP->TASKS_START = 1; //! Do we need this?
 	}
 }
 

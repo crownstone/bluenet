@@ -45,7 +45,7 @@ GeneralService::GeneralService() :
 void GeneralService::init() {
 	LOGi(MSG_SERVICE_GENERAL_INIT);
 
-#if CHAR_TEMPERATURE==1
+#if CHAR_TEMPERATURE==1 || DEVICE_TYPE==DEVICE_FRIDGE
 	LOGi(MSG_CHAR_TEMPERATURE_ADD);
 	addTemperatureCharacteristic();
 #else
@@ -63,7 +63,7 @@ void GeneralService::init() {
 	{
 	LOGi(MSG_CHAR_MESH_ADD);
 
-	_meshMessage = new MeshMessage();
+	_meshMessage = new MeshCharacteristicMessage();
 
 	MasterBuffer& mb = MasterBuffer::getInstance();
 	buffer_ptr_t buffer = NULL;
@@ -82,11 +82,11 @@ void GeneralService::init() {
 	LOGi(MSG_CHAR_MESH_SKIP);
 #endif
 
-#if CHAR_CONFIGURATION==1
+#if CHAR_CONFIGURATION==1 || DEVICE_TYPE==DEVICE_FRIDGE
 	{
 	LOGi(MSG_CHAR_CONFIGURATION_ADD);
 
-	// if we use configuration characteristics, set up a buffer
+	//! if we use configuration characteristics, set up a buffer
 	_streamBuffer = new StreamBuffer<uint8_t>();
 	MasterBuffer& mb = MasterBuffer::getInstance();
 	buffer_ptr_t buffer = NULL;
@@ -134,7 +134,7 @@ void GeneralService::tick() {
 		temp = getTemperature();
 		writeToTemperatureCharac(temp);
 #ifdef MICRO_VIEW
-		// Update temperature at the display
+		//! Update temperature at the display
 		write("1 %i\r\n", temp);
 #endif
 	}
@@ -145,7 +145,7 @@ void GeneralService::tick() {
 			if (success) {
 				writeToConfigCharac();
 			}
-			// only write once
+			//! only write once
 			_selectConfiguration = 0xFF;
 		}
 	}
@@ -178,7 +178,7 @@ void GeneralService::addTemperatureCharacteristic() {
 void reset(void* p_context) {
 	uint32_t cmd = *(int32_t*)p_context;
 	LOGi("executing reset: %d", cmd);
-	// copy to make sure this is nothing more than one value
+	//! copy to make sure this is nothing more than one value
 	uint8_t err_code;
 	err_code = sd_power_gpregret_clr(0xFF);
 	APP_ERROR_CHECK(err_code);
@@ -220,14 +220,14 @@ void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_meshCharacteristic);
 
-	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_UUID));
+	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_CONTROL_UUID));
 	_meshCharacteristic->setName(BLE_CHAR_MESH);
 	_meshCharacteristic->setWritable(true);
 	_meshCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 			LOGi(MSG_MESH_MESSAGE_WRITE);
 
 
-			uint8_t handle = _meshMessage->handle();
+			uint8_t handle = _meshMessage->channel();
 
 			uint8_t* p_data;
 			uint16_t length;
@@ -256,6 +256,7 @@ void GeneralService::addSetConfigurationCharacteristic() {
 				MasterBuffer& mb = MasterBuffer::getInstance();
 				if (!mb.isLocked()) {
 					mb.lock();
+					//! TODO: check lenght with actual payload length!
 					uint8_t type = _streamBuffer->type();
 					LOGi("Write configuration type: %i", (int)type);
 					uint8_t *payload = _streamBuffer->payload();

@@ -14,12 +14,16 @@
 //#include "common/cs_Config.h"
 #include <common/cs_Types.h>
 #include "structs/cs_BufferAccessor.h"
+#include "drivers/cs_RTC.h"
 
 using namespace BLEpp;
 
 #define CURRENT_CURVE_HEADER_SIZE                (sizeof(uint16_t) + 2*sizeof(T) + 2*sizeof(uint32_t))
 //#define CURRENT_CURVE_MAX_SAMPLES                (MASTER_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE + 1)
-#define CURRENT_CURVE_MAX_SAMPLES                ((MASTER_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE) / 2 + 1)
+//#define CURRENT_CURVE_MAX_SAMPLES                ((MASTER_BUFFER_SIZE - CURRENT_CURVE_HEADER_SIZE) / 2 + 1)
+#define CURRENT_CURVE_MAX_BUF_SIZE               (MASTER_BUFFER_SIZE > BLE_GATTS_VAR_ATTR_LEN_MAX ? BLE_GATTS_VAR_ATTR_LEN_MAX : MASTER_BUFFER_SIZE)
+//#define CURRENT_CURVE_MAX_SAMPLES                (CURRENT_CURVE_MAX_BUF_SIZE - CURRENT_CURVE_HEADER_SIZE + 1)
+#define CURRENT_CURVE_MAX_SAMPLES                ((CURRENT_CURVE_MAX_BUF_SIZE - CURRENT_CURVE_HEADER_SIZE) / 2 + 1)
 
 #define CC_SUCCESS                               0
 #define CC_BUFFER_NOT_INITIALIZED                1
@@ -28,9 +32,9 @@ using namespace BLEpp;
 
 typedef uint8_t CC_ERR_CODE;
 
-/* Structure for the Current Curve
+/** Structure for the Current Curve
  *
- * Requires CURRENT_CURVE_SAMPLES to be set.
+ * Requires CURRENT_CURVE_MAX_SAMPLES to be set.
  */
 template <typename T>
 struct __attribute__((__packed__)) current_curve_t {
@@ -43,7 +47,7 @@ struct __attribute__((__packed__)) current_curve_t {
 	int8_t timeDiffs[CURRENT_CURVE_MAX_SAMPLES-1];
 };
 
-/* Current Curve
+/** Current Curve
  *
  * Class used to send the current samples over Bluetooth.
  * In order to save space, only differences of the samples are stored.
@@ -58,14 +62,14 @@ private:
 //	const size_t _max_buf_size = CURRENT_CURVE_HEADER_SIZE + CURRENT_CURVE_MAX_SAMPLES-1;
 	const size_t _max_buf_size = CURRENT_CURVE_HEADER_SIZE + 2*CURRENT_CURVE_MAX_SAMPLES-2;
 public:
-	/* Default constructor
+	/** Default constructor
 	 *
 	 * Constructor does not initialize the buffer.
 	 */
 	CurrentCurve(): _buffer(NULL) {
 	};
 
-	/* Release the buffer
+	/** Release the buffer
 	 *
 	 * Sets pointer to zero, does not deallocate memory.
 	 */
@@ -74,7 +78,7 @@ public:
 		_buffer = NULL;
 	}
 
-	/* Check if a buffer is assigned
+	/** Check if a buffer is assigned
 	 *
 	 * @return true if a buffer is assigned
 	 */
@@ -83,7 +87,7 @@ public:
 		return true;
 	}
 
-	/* Check if the buffer is full
+	/** Check if the buffer is full
 	 *
 	 * @return true when you cannot <add> any more samples.
 	 */
@@ -94,7 +98,7 @@ public:
 		return false;
 	}
 
-	/* Get i-th sample.
+	/** Get i-th sample.
 	 * @index Index of the sample you want to get.
 	 * @voltage Value of previous sample (index-1), this value will be set to the i-th sample.
 	 *
@@ -114,19 +118,19 @@ public:
 		return CC_SUCCESS;
 	}
 
-	/* Get the time stamp of the first sample.
+	/** Get the time stamp of the first sample.
 	 */
 	uint32_t getTimeStart() const {
 		return _buffer->firstTimeStamp;
 	}
 
-	/* Get the time stamp of the last sample.
+	/** Get the time stamp of the last sample.
 	 */
 	uint32_t getTimeEnd() const {
 		return _buffer->lastTimeStamp;
 	}
 
-	/* Add a sample to the current curve
+	/** Add a sample to the current curve
 	 * @value the sample to be added
 	 * @timeStamp the time stamp of the sample
 	 *
@@ -153,8 +157,10 @@ public:
 			_buffer->lastTimeStamp = timeStamp;
 		}
 		else {
-			int64_t dt = (int64_t)timeStamp - _buffer->lastTimeStamp;
-			if (dt > 127 || dt < -127) {
+			uint32_t dt = RTC::difference(timeStamp, _buffer->lastTimeStamp);
+//			int64_t dt = (int64_t)timeStamp - _buffer->lastTimeStamp;
+//			if (dt > 127 || dt < -127) {
+			if (dt > 127) {
 				clear();
 				return CC_DIFFERENCE_TOO_LARGE;
 			}
@@ -172,7 +178,7 @@ public:
 		return CC_SUCCESS;
 	}
 
-	/* Clear the buffer
+	/** Clear the buffer
 	 */
 	CC_ERR_CODE clear() {
 		if (!_buffer) {
@@ -188,16 +194,16 @@ public:
 		return CC_SUCCESS;
 	}
 
-	/* Get number of added samples in the buffer
+	/** Get number of added samples in the buffer
 	 *
 	 * @return number of elements stored
 	 */
 	inline uint16_t length() const { return _buffer->length; }
 
 
-	/////////// Bufferaccessor ////////////////////////////
+	///////////! Bufferaccessor ////////////////////////////
 
-	/* @inherit */
+	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t size) {
 		LOGd("assign buff: %p, len: %d", buffer, size);
 		if (_max_buf_size > size) {
@@ -208,19 +214,19 @@ public:
 		return 0;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	uint16_t getDataLength() const {
 //		return CURRENT_CURVE_HEADER_SIZE + _buffer->length-1;
 		return CURRENT_CURVE_HEADER_SIZE + 2*_buffer->length-2;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	uint16_t getMaxLength() const {
 		//return sizeof(uint16_t) + 2*sizeof(T) + CURRENT_CURVE_MAX_SAMPLES-1;
 		return _max_buf_size;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
 		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();

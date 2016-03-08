@@ -45,11 +45,11 @@ void ScheduleService::setTime(uint32_t time) {
 }
 
 void ScheduleService::tick() {
-	// RTC can overflow every 16s
+	//! RTC can overflow every 16s
 	uint32_t tickDiff = RTC::difference(RTC::getCount(), _rtcTimeStamp);
 
-	// If more than 1s elapsed since last rtc timestamp:
-	// add 1s to posix time and substract 1s from tickDiff, by increasing the rtc timestamp 1s
+	//! If more than 1s elapsed since last rtc timestamp:
+	//! add 1s to posix time and substract 1s from tickDiff, by increasing the rtc timestamp 1s
 	if (_currentTimeCharacteristic && *_currentTimeCharacteristic && tickDiff > RTC::msToTicks(1000)) {
 		(*_currentTimeCharacteristic)++;
 		_rtcTimeStamp += RTC::msToTicks(1000);

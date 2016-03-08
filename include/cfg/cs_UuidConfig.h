@@ -6,7 +6,7 @@
  */
 #pragma once
 
-/* Service UUIDs
+/** Service UUIDs
  *
  * Note: The last 4 digits of the first tuple should be 0. They will be used
  *       by the characteristic to set its UUID.
@@ -22,8 +22,9 @@
 #define INDOORLOCALISATION_UUID             "7e170000-429c-41aa-83d7-d91220abeb33"
 #define ALERT_UUID                          "33690000-2a0a-11e5-b345-feff819cdc9f"
 #define SCHEDULE_UUID                       "96d20000-4bcf-11e5-885d-feff819cdc9f"
+#define DEVICE_INFORMATION_UUID             "180a"
 
-/* Characteristic UUIDs */
+/** Characteristic UUIDs */
 
 enum PowerCharacteristicsIDs {
 	PWM_UUID                                = 0x1,
@@ -31,6 +32,7 @@ enum PowerCharacteristicsIDs {
 	CURRENT_CURVE_UUID                      = 0x3,
 	CURRENT_CONSUMPTION_UUID                = 0x4,
 	CURRENT_LIMIT_UUID                      = 0x5,
+	RELAY_UUID                              = 0x6,
 };
 
 enum GeneralCharacteristicsIDs {
@@ -39,7 +41,7 @@ enum GeneralCharacteristicsIDs {
 //	UNUSED                                  = 0x3,
 //	UNUSED                                  = 0x4,
 	RESET_UUID                              = 0x5,
-	MESH_UUID                               = 0x6,
+	MESH_CONTROL_UUID                       = 0x6,
 	SET_CONFIGURATION_UUID                  = 0x7,
 	SELECT_CONFIGURATION_UUID               = 0x8,
 	GET_CONFIGURATION_UUID                  = 0x9,

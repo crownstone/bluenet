@@ -5,5 +5,7 @@ MEMORY
 
 }
 
+HEAP_SIZE = @HEAP_SIZE@;
+
 INCLUDE "nRF51822-common.ld"
 
