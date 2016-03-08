@@ -1,42 +1,39 @@
-/**
+/*
  * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Dec 24, 2014
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 #pragma once
-//
-//#include "ble_gap.h"
-//#include "ble_gatts.h"
-//
-//#include "cs_BluetoothLE.h"
+
 #include "structs/cs_BufferAccessor.h"
-//
-//#include "common/cs_MasterBuffer.h"
 
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
 #include <util/cs_BleError.h>
 
-//using namespace BLEpp;
-
-//! About 3 minutes
-//#define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 2000
-//! About 30 seconds
+/**
+ * The track device timeout stops tracking after a certain number of ticks.
+ * A count of 300 stands for 30 seconds
+ * A count of 2000 stands for 3 minutes.
+ */
 #define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 300
 
 //! Initialize counter of tracked devices with this number.
 #define TDL_COUNTER_INIT                         -1
-//#define TDL_COUNTER_INIT                         ((uint16_t)-1)
 
 #define TDL_NONE_NEARBY                          1
 #define TDL_IS_NEARBY                            2
 #define TDL_NOT_TRACKING                         3
 
-#define TRACKDEVICES_HEADER_SIZE                 1 //! 1 BYTE for the header = number of elements in the list
+//! 1 BYTE for the header = number of elements in the list
+#define TRACKDEVICES_HEADER_SIZE                 1
 
 #define TRACKDEVICES_MAX_NR_DEVICES              5
 
+/**
+ * The tracked_device_t struct contains address and RSSI value (or threshold).
+ */
 struct __attribute__((__packed__)) tracked_device_t {
 	//! bluetooth address
 	uint8_t addr[BLE_GAP_ADDR_LEN];
@@ -46,6 +43,10 @@ struct __attribute__((__packed__)) tracked_device_t {
 
 #define TRACKDEVICES_SERIALIZED_SIZE sizeof(tracked_device_t)
 
+/**
+ * The tracked_device_list_t struct defines the layout of the memory structure in the BufferAccessor object in the
+ * TrackedDeviceList.
+ */
 struct tracked_device_list_t {
 	/** number of elements */
 	uint8_t size;
@@ -56,6 +57,9 @@ struct tracked_device_list_t {
 	uint16_t counters[TRACKDEVICES_MAX_NR_DEVICES];
 };
 
+/**
+ * The TrackedDeviceList is a list of tracked devices and timing information.
+ */
 class TrackedDeviceList : public BufferAccessor {
 
 private:
@@ -146,8 +150,11 @@ public:
 
 };
 
-
-
+/**
+ * The TrackedDevice object has a single tracked_device_t struct as memory object.
+ *
+ * This includes RSSI value and address
+ */
 class TrackedDevice : public BufferAccessor {
 
 private:
@@ -166,10 +173,10 @@ public:
 	void print() const;
 
 	int8_t getRSSI() const { return _buffer->rssiThreshold; }
-	
+
 	const uint8_t* getAddress() const { return _buffer->addr; }
 
-	////////////! BufferAccessor ////////////////////////////
+	//////////// BufferAccessor ////////////////////////////
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {

@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: May 6, 2015
@@ -14,8 +14,8 @@
 
 #include <structs/cs_ScanResult.h>
 
-//! device messages
-//! TODO: should be an enum?
+// device messages
+// TODO: should be an enum?
 #define EVENT_MESSAGE 0
 #define POWER_MESSAGE 1
 #define BEACON_MESSAGE 2
@@ -27,7 +27,7 @@ enum CommandTypes {
 	SCAN_START = 1,
 };
 
-//! hub messages
+// hub messages
 #define SCAN_MESSAGE 101
 
 #define BROADCAST_ADDRESS {}
@@ -36,15 +36,21 @@ enum CommandTypes {
 #define MAX_MESH_MESSAGE_PAYLOAD_LENGTH MAX_MESH_MESSAGE_LEN - BLE_GAP_ADDR_LEN - sizeof(uint16_t)
 
 #define MAX_EVENT_MESH_MESSAGE_DATA_LENGTH MAX_MESH_MESSAGE_PAYLOAD_LENGTH - sizeof(uint16_t)
+/** Event mesh message
+ */
 struct __attribute__((__packed__)) event_mesh_message_t {
 	uint16_t event;
 //	uint8_t data[MAX_EVENT_MESH_MESSAGE_DATA_LENGTH];
 };
 
+/** Power mesh message
+ */
 struct __attribute__((__packed__)) power_mesh_message_t {
 	uint8_t pwmValue;
 };
 
+/** Beacon mesh message
+ */
 struct __attribute__((__packed__)) beacon_mesh_message_t {
 	uint16_t major;
 	uint16_t minor;
@@ -52,11 +58,15 @@ struct __attribute__((__packed__)) beacon_mesh_message_t {
 	int8_t rssi;
 };
 
+/** Command mesh message
+ */
 struct __attribute__((__packed__)) command_mesh_message_t {
 	uint16_t commandType;
 	uint8_t params[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - sizeof(uint16_t)];
 };
 
+/** Config mesh message
+ */
 struct __attribute__((__packed__)) config_mesh_message_t {
 	uint8_t type;
 	uint8_t reserved; //! reserved for byte alignment
@@ -64,11 +74,15 @@ struct __attribute__((__packed__)) config_mesh_message_t {
 	uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - 4];
 };
 
+/** Device mesh header
+ */
 struct __attribute__((__packed__)) device_mesh_header_t {
 	uint8_t targetAddress[BLE_GAP_ADDR_LEN];
 	uint16_t messageType;
 };
 
+/** Device mesh message
+ */
 struct __attribute__((__packed__)) device_mesh_message_t {
 	device_mesh_header_t header;
 	union {
@@ -84,20 +98,29 @@ struct __attribute__((__packed__)) device_mesh_message_t {
 //#define NR_DEVICES_PER_MESSAGE SR_MAX_NR_DEVICES
 //#define NR_DEVICES_PER_MESSAGE 1
 #define NR_DEVICES_PER_MESSAGE 10
+
+/** Scan mesh message
+ */
 struct __attribute__((__packed__)) scan_mesh_message_t {
 	uint8_t numDevices;
 	peripheral_device_t list[NR_DEVICES_PER_MESSAGE];
 };
 
+/** Hub mesh header
+ */
 struct __attribute__((__packed__)) hub_mesh_header_t {
 	uint8_t sourceAddress[BLE_GAP_ADDR_LEN];
 	uint16_t messageType;
 };
 
+/** Test mesh message
+ */
 struct __attribute__((__packed__)) test_mesh_message_t {
 	uint32_t counter;
 };
 
+/** Hub mesh message
+ */
 struct __attribute__((__packed__)) hub_mesh_message_t {
 	hub_mesh_header_t header;
 	union {

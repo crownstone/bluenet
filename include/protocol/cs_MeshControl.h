@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Jan. 30, 2015
@@ -31,6 +31,9 @@
 #define HUB_CHANNEL          1
 #define DATA_CHANNEL         2
 
+/** Wrapper around meshing functionality.
+ *
+ */
 class MeshControl : public EventListener {
 private:
 	MeshControl();

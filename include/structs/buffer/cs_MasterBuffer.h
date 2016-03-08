@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Apr 2, 2015
@@ -16,6 +16,15 @@
 /** size of the header used for long write */
 #define DEFAULT_OFFSET 6
 
+/** MasterBuffer is a byte array with header.
+ *
+ * The MasterBuffer is used to put in all kind of data. This data is unorganized. The MasterBuffer can also be
+ * accessed through more dedicated structures. This allows to read/write from the buffer directly ScanResults or
+ * other types of sophisticated objects.
+ *
+ * The disadvantage is that the data will be overwritten by the different accessors. The advantage is that the data
+ * fits actually in the device RAM.
+ */
 class MasterBuffer {
 
 private:

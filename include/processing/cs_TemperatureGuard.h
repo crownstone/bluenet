@@ -14,8 +14,10 @@
 #include "cfg/cs_Settings.h"
 #include "events/cs_EventListener.h"
 
-#define TEMPERATURE_UPDATE_FREQUENCY 0.2 //! Hz
+#define TEMPERATURE_UPDATE_FREQUENCY 0.2
 
+/** Protection against temperature exceeding certain threshold
+ */
 class TemperatureGuard : EventListener {
 public:
 	TemperatureGuard() :

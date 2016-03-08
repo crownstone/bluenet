@@ -6,15 +6,7 @@
  */
 #pragma once
 
-//#include <common/cs_Types.h>
-
 #include <cstddef>
-//#include <cstdint>
-
-//#include <stdlib.h> //! malloc, free
-//#include <stdint.h> //! uint32_t
-//
-//#include "drivers/cs_Serial.h"
 
 /** Circular Buffer implementation
  * @param T Element type of elements within the buffer.

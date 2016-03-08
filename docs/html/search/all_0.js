@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['_5f_5fattribute_5f_5f',['__attribute__',['../structps__configuration__t.html#a5588d9753d02ed080048278344ebea41',1,'ps_configuration_t']]],
   ['_5fappearance',['_appearance',['../classBLEpp_1_1Nrf51822BluetoothStack.html#a0797f24b0c2dbd2cb32c91d080f9d527',1,'BLEpp::Nrf51822BluetoothStack']]],
   ['_5fapptimerid',['_appTimerId',['../classBLEpp_1_1Service.html#a517ae9ffc6d00e49cc8a6c5e3530b15a',1,'BLEpp::Service']]],
   ['_5fcallback_5fdisconnected',['_callback_disconnected',['../classBLEpp_1_1Nrf51822BluetoothStack.html#a81d52ead2eb111a0770f202aa6994bec',1,'BLEpp::Nrf51822BluetoothStack']]],
