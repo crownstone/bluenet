@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Jul 13, 2015
@@ -10,8 +10,10 @@
 #include <ble/cs_Characteristic.h>
 #include "structs/cs_AlertAccessor.h"
 
-#define SCHEDULE_SERVICE_UPDATE_FREQUENCY 2 //! hz
+#define SCHEDULE_SERVICE_UPDATE_FREQUENCY 2
 
+/** ScheduleService organizes ticks for all components for non-urgent timing.
+ */
 class ScheduleService : public BLEpp::Service {
 public:
 //	typedef function<int8_t()> func_t;

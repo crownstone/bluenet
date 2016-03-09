@@ -1,14 +1,16 @@
 var searchData=
 [
-  ['ble_5ftype',['ble_type',['../namespaceBLEpp.html#a9b2bf6feb38ab3e99e818550afff3785',1,'BLEpp']]],
-  ['ble_5ftype_3c_20bool_20_3e',['ble_type&lt; bool &gt;',['../namespaceBLEpp.html#aebab2027780339c2496d56ec110e9e7e',1,'BLEpp']]],
-  ['ble_5ftype_3c_20double_20_3e',['ble_type&lt; double &gt;',['../namespaceBLEpp.html#a14eb615205adaced0e3f52e74adb81d4',1,'BLEpp']]],
-  ['ble_5ftype_3c_20float_20_3e',['ble_type&lt; float &gt;',['../namespaceBLEpp.html#adaafa24128e52ce5d9903bda371166c4',1,'BLEpp']]],
-  ['ble_5ftype_3c_20int16_5ft_20_3e',['ble_type&lt; int16_t &gt;',['../namespaceBLEpp.html#abfdd2f9c17ea944c6061e8707092c24d',1,'BLEpp']]],
-  ['ble_5ftype_3c_20int32_5ft_20_3e',['ble_type&lt; int32_t &gt;',['../namespaceBLEpp.html#ac4da7a58a60fad5d4b4eacd06b9da18a',1,'BLEpp']]],
-  ['ble_5ftype_3c_20int8_5ft_20_3e',['ble_type&lt; int8_t &gt;',['../namespaceBLEpp.html#a3f2a306d8c2f66147efe88f810db4229',1,'BLEpp']]],
-  ['ble_5ftype_3c_20std_3a_3astring_20_3e',['ble_type&lt; std::string &gt;',['../namespaceBLEpp.html#ac8fab9e1a30f1ac3e79cd637fc109443',1,'BLEpp']]],
-  ['ble_5ftype_3c_20uint16_5ft_20_3e',['ble_type&lt; uint16_t &gt;',['../namespaceBLEpp.html#a5a9ac3f18dd6483ff243fe6aa6857db4',1,'BLEpp']]],
-  ['ble_5ftype_3c_20uint32_5ft_20_3e',['ble_type&lt; uint32_t &gt;',['../namespaceBLEpp.html#ae7527e4d7e68602eb7dfd88381b74804',1,'BLEpp']]],
-  ['ble_5ftype_3c_20uint8_5ft_20_3e',['ble_type&lt; uint8_t &gt;',['../namespaceBLEpp.html#a5ed2fdc725395210bab6234689b1aade',1,'BLEpp']]]
+  ['capacity',['capacity',['../classCircularBuffer.html#a66284651e94f313c0aa25b6958006d00',1,'CircularBuffer::capacity()'],['../classCircularDifferentialBuffer.html#ab3d97a7925808ca55ce9827c6e7f98df',1,'CircularDifferentialBuffer::capacity()']]],
+  ['characteristicbase',['CharacteristicBase',['../classBLEpp_1_1CharacteristicBase.html#a4e0da1e4931467ebdbb269f1cebb15d1',1,'BLEpp::CharacteristicBase']]],
+  ['circularbuffer',['CircularBuffer',['../classCircularBuffer.html#a0d5b1f16c0cf9411648f12213b800c90',1,'CircularBuffer']]],
+  ['circulardifferentialbuffer',['CircularDifferentialBuffer',['../classCircularDifferentialBuffer.html#a4df0403155061d6b86defe628450b7a6',1,'CircularDifferentialBuffer']]],
+  ['clear',['clear',['../classCircularBuffer.html#a26caa4ec94de2f342f32b6558ac697eb',1,'CircularBuffer::clear()'],['../classCircularDifferentialBuffer.html#ac9995367206304245c111bf4d2885c24',1,'CircularDifferentialBuffer::clear()'],['../classStreamBuffer.html#a6374ce4e92a5a7f14285170448c0dcf8',1,'StreamBuffer::clear()'],['../classCurrentCurve.html#a60a84920ef94439e539ded0cc700eca4',1,'CurrentCurve::clear()'],['../classPowerCurve.html#a0186e13b3e5efc8c3609293429e6ff03',1,'PowerCurve::clear()'],['../classScanResult.html#a8df16be6a60fb514ac1e3372f7d9d855',1,'ScanResult::clear()'],['../classTrackedDeviceList.html#a199a33eb3ff55024226206b87411a08b',1,'TrackedDeviceList::clear()']]],
+  ['clearblock',['clearBlock',['../classStorage.html#af9e5498a60c60341e5a36d1fd5a08f15',1,'Storage']]],
+  ['config',['config',['../classADC.html#aefbbd474fac20784b56c074fd0b1d19e',1,'ADC']]],
+  ['connected',['connected',['../classBLEpp_1_1BLEStack.html#aa497b95729bc3b10095016efc6ff6eba',1,'BLEpp::BLEStack::connected()'],['../classBLEpp_1_1Nrf51822BluetoothStack.html#a5d09190c22446785639b09fe95550c5f',1,'BLEpp::Nrf51822BluetoothStack::connected()']]],
+  ['convertendian16',['convertEndian16',['../namespaceBLEutil.html#ae478db6059c6d08c11639a23cab6ad33',1,'BLEutil']]],
+  ['convertendian32',['convertEndian32',['../namespaceBLEutil.html#afca7672b35e9160b842853b4e9b2fe27',1,'BLEutil']]],
+  ['createrepeated',['createRepeated',['../classTimer.html#acccb4236285fa195b5eb73f64125b63e',1,'Timer']]],
+  ['createsingleshot',['createSingleShot',['../classTimer.html#a4e2c7d8592dfc1f1620352985879c0ea',1,'Timer']]],
+  ['currentcurve',['CurrentCurve',['../classCurrentCurve.html#a1d677e805718f898de0cc6107c1e8a3f',1,'CurrentCurve']]]
 ];

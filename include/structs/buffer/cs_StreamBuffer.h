@@ -7,14 +7,6 @@
 
 #pragma once
 
-//#include "ble_gap.h"
-//#include "ble_gatts.h"
-//
-//#include "cs_BluetoothLE.h"
-//#include <string>
-//#include "util/cs_Utils.h"
-//#include "drivers/cs_Serial.h"
-//#include "common/cs_Config.h"
 #include "structs/cs_BufferAccessor.h"
 #include "util/cs_BleError.h"
 #include "util/cs_Utils.h"

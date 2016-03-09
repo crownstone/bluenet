@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 6 Nov., 2014
@@ -13,6 +13,8 @@
 //#include <common/cs_Types.h>
 //#include "cs_PWM.h"
 
+/** Compare voltage level (hardware peripheral)
+ */
 class LPComp {
 	public:
 		//! use static variant of singleton, no dynamic memory allocation

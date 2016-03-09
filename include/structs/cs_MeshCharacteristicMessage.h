@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Jan. 30, 2015
@@ -16,14 +16,6 @@
 #include <protocol/cs_MeshMessageTypes.h>
 
 
-/**
- * This defines the layout of the mesh characteristic. in addition to the mesh messages, defined in
- * cs_MeshMessageTypes.h, the characteristic also expects the channel = handle, on which the
- * mesh message should be sent, as well as the length of the mesh message.
- * the data part of the mesh characteristic message, is the actual mesh message, which can be sent,
- * as is, into the mesh network on the defined channel
- */
-
 using namespace BLEpp;
 
 #define MM_HEADER_SIZE 4
@@ -31,6 +23,14 @@ using namespace BLEpp;
 //#define MM_MAX_DATA_LENGTH MAX_MESH_MESSAGE_LEN - 3
 #define MM_MAX_DATA_LENGTH 90
 
+/** Layout of the mesh characteristic.
+ *
+ * This defines the layout of the mesh characteristic. in addition to the mesh messages, defined in
+ * cs_MeshMessageTypes.h, the characteristic also expects the channel = handle, on which the
+ * mesh message should be sent, as well as the length of the mesh message.
+ * the data part of the mesh characteristic message, is the actual mesh message, which can be sent,
+ * as is, into the mesh network on the defined channel
+ */
 struct __attribute__((__packed__)) mesh_characteristic_message_t {
 	uint8_t channel; //! defines the handle or channel on which the data should be sent in the mesh
 //	uint8_t type; //! defines the type of message, i.e. defines the data structure
@@ -42,6 +42,8 @@ struct __attribute__((__packed__)) mesh_characteristic_message_t {
 
 #define MM_SERIALIZED_SIZE sizeof(mesh_characteristic_message_t)
 
+/** The mesh characteristic message is a wrapped BufferAccessor object.
+ */
 class MeshCharacteristicMessage : public BufferAccessor {
 private:
 	mesh_characteristic_message_t* _buffer;

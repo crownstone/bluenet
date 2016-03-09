@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['passkey',['passkey',['../structps__configuration__t.html#a9078f29f181851cc3b50618848183bad',1,'ps_configuration_t']]],
-  ['presentation_5fformat',['presentation_format',['../structBLEpp_1_1CharacteristicInit.html#ab785cb73d9d56bcaaa00a8bd776c2a93',1,'BLEpp::CharacteristicInit']]]
+  ['occurrences',['occurrences',['../structperipheral__device__t.html#ac1417570e08497ad5d21816d8c79a417',1,'peripheral_device_t']]]
 ];

@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classBLEpp_1_1UUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. " alt="" coords="5,5,108,32"/>
+<area shape="rect" id="node1" href="$classBLEpp_1_1Service.html" title="Service as defined in the GATT Specification. " alt="" coords="5,132,119,159"/>
+<area shape="rect" id="node2" href="$classAlertService.html" title="The AlertService sends alerts on a stage change, for example when the temperature drops below a value..." alt="" coords="206,5,299,32"/>
+<area shape="rect" id="node3" href="$classDeviceInformationService.html" title="The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions..." alt="" coords="167,56,339,83"/>
+<area shape="rect" id="node4" href="$classGeneralService.html" title="General Service for the Crownstone. " alt="" coords="197,107,308,133"/>
+<area shape="rect" id="node5" href="$classIndoorLocalizationService.html" title="The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc. " alt="" coords="167,157,338,184"/>
+<area shape="rect" id="node6" href="$classPowerService.html" title="PowerService controls the relays on the Crownstone. " alt="" coords="201,208,304,235"/>
+<area shape="rect" id="node7" href="$classScheduleService.html" title="ScheduleService organizes ticks for all components for non&#45;urgent timing. " alt="" coords="193,259,313,285"/>
 </map>

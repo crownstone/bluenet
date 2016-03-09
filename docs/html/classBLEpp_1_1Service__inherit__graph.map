@@ -4,5 +4,5 @@
 <area shape="rect" id="node4" href="$classGeneralService.html" title="General Service for the Crownstone. " alt="" coords="197,107,308,133"/>
 <area shape="rect" id="node5" href="$classIndoorLocalizationService.html" title="The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc. " alt="" coords="167,157,338,184"/>
 <area shape="rect" id="node6" href="$classPowerService.html" title="PowerService controls the relays on the Crownstone. " alt="" coords="201,208,304,235"/>
-<area shape="rect" id="node7" href="$classScheduleService.html" title="ScheduleService" alt="" coords="193,259,313,285"/>
+<area shape="rect" id="node7" href="$classScheduleService.html" title="ScheduleService organizes ticks for all components for non&#45;urgent timing. " alt="" coords="193,259,313,285"/>
 </map>

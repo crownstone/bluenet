@@ -24,6 +24,9 @@
 
 #include <structs/cs_ScanResult.h>
 
+/** Wrapper around meshing functionality.
+ *
+ */
 class MeshControl : public EventListener {
 private:
 	MeshControl();

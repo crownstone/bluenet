@@ -1,8 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node2" href="$classtuple.html" title="Author: Dominik Egger Copyright: Distributed Organisms B.V. " alt="" coords="166,9,249,36"/>
-<area shape="rect" id="node4" href="$classtuple.html" title="tuple\&lt; BLEpp::Characteristic\lBase * \&gt;" alt="" coords="112,63,303,105"/>
-<area shape="rect" id="node6" href="$classtuple.html" title="tuple\&lt; BLEpp::Service * \&gt;" alt="" coords="120,140,295,167"/>
-<area shape="rect" id="node3" href="$classfixed__tuple.html" title="A fixed tuple is a vector with a templated type and a reserved capacity. " alt="" coords="371,5,546,32"/>
-<area shape="rect" id="node5" href="$classfixed__tuple.html" title="fixed_tuple\&lt; BLEpp\l::CharacteristicBase\l *, MAX_CHARACTERISTICS \&gt;" alt="" coords="351,56,567,112"/>
-<area shape="rect" id="node7" href="$classfixed__tuple.html" title="fixed_tuple\&lt; BLEpp\l::Service *, MAX_SERVICE\l_COUNT \&gt;" alt="" coords="365,136,552,192"/>
+<area shape="rect" id="node1" href="$structperipheral__device__t.html" title="Structure used to store peripheral devices detected during a scan. " alt="" coords="5,5,140,32"/>
 </map>
