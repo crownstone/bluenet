@@ -9,5 +9,6 @@ var searchData=
   ['isassigned',['isAssigned',['../classCurrentCurve.html#a46275cadbf95e0e468ef8e0941fe5350',1,'CurrentCurve::isAssigned()'],['../classPowerCurve.html#abbcaa25922f887ba1e09dfa39eff6fc2',1,'PowerCurve::isAssigned()']]],
   ['isfull',['isFull',['../classCurrentCurve.html#a5543a62ddced28f41de383dd8139eb90',1,'CurrentCurve::isFull()'],['../classPowerCurve.html#a2b4721e6a933881b4acf102d36ae54b2',1,'PowerCurve::isFull()']]],
   ['isnearby',['isNearby',['../classTrackedDeviceList.html#a494dfc8ba95d36256377b130143a34c2',1,'TrackedDeviceList']]],
-  ['isscanning',['isScanning',['../classBLEpp_1_1Nrf51822BluetoothStack.html#af7a6a9c8aef1bee38a4897c03424816f',1,'BLEpp::Nrf51822BluetoothStack']]]
+  ['isscanning',['isScanning',['../classBLEpp_1_1Nrf51822BluetoothStack.html#af7a6a9c8aef1bee38a4897c03424816f',1,'BLEpp::Nrf51822BluetoothStack']]],
+  ['installation',['Installation',['../md_INSTALL.html',1,'']]]
 ];
