@@ -22,5 +22,8 @@ fi
 echo "The result should be something like:"
 echo "    1000005C = 3C 00 FF FF"
 echo
+echo "This would mean HARDWARE_VERSION=0x003C in the config file"
+echo
 echo "This means version 003C in the document:"
 echo '    "Migrating to the latest nRF51822 chip version" "nWP-018" "White Paper v1.3"'
+

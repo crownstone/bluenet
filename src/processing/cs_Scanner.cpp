@@ -27,11 +27,11 @@ Scanner::Scanner(Nrf51822BluetoothStack* stack) :
 
 	_scanResult = new ScanResult();
 
-//	MasterBuffer& mb = MasterBuffer::getInstance();
-//	buffer_ptr_t buffer = NULL;
-//	uint16_t maxLength = 0;
-//	mb.getBuffer(buffer, maxLength);
-
+	//! [29.01.16] the scan result needs it's own buffer, not the master buffer,
+	//! since it is now decoupled from writing to a characteristic.
+	//! if we used the master buffer we would overwrite the scan results
+	//! if we write / read from a characteristic that uses the master buffer
+	//! during a scan!
 	_scanResult->assign(_scanBuffer, sizeof(_scanBuffer));
 
 	ps_configuration_t cfg = Settings::getInstance().getConfig();
@@ -46,7 +46,7 @@ Scanner::Scanner(Nrf51822BluetoothStack* stack) :
 }
 
 Scanner::~Scanner() {
-	//! TODO Auto-generated destructor stub
+
 }
 
 void Scanner::manualStartScan() {
@@ -84,35 +84,51 @@ void Scanner::staticTick(Scanner* ptr) {
 }
 
 void Scanner::start() {
-	_running = true;
-	_scanCount = 0;
-	_opCode = SCAN_START;
-	executeScan();
+	if (!_running) {
+		_running = true;
+		_scanCount = 0;
+		_opCode = SCAN_START;
+		executeScan();
+	} else {
+		LOGi("already scanning!");
+	}
 }
 
 void Scanner::delayedStart(uint16_t delay) {
-	LOGi("delayed start by %d ms", delay);
-	_running = true;
-	_scanCount = 0;
-	_opCode = SCAN_START;
-	Timer::getInstance().start(_appTimerId, MS_TO_TICKS(delay), this);
+	if (!_running) {
+		LOGi("delayed start by %d ms", delay);
+		_running = true;
+		_scanCount = 0;
+		_opCode = SCAN_START;
+		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(delay), this);
+	} else {
+		LOGi("already scanning!");
+	}
 }
 
 void Scanner::delayedStart() {
-	_running = true;
-	_scanCount = 0;
-	_opCode = SCAN_START;
-	Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
+	if (!_running) {
+		_running = true;
+		_scanCount = 0;
+		_opCode = SCAN_START;
+		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
+	} else {
+		LOGi("already scanning!");
+	}
 }
 
 void Scanner::stop() {
-	_running = false;
-	_opCode = SCAN_STOP;
-	LOGi("force STOP");
-	manualStopScan();
-	//! no need to execute scan on stop is there? we want to stop after all
-//	executeScan();
-//	_running = false;
+	if (_running) {
+		_running = false;
+		_opCode = SCAN_STOP;
+		LOGi("force STOP");
+		manualStopScan();
+		//! no need to execute scan on stop is there? we want to stop after all
+	//	executeScan();
+	//	_running = false;
+	} else {
+		LOGi("already stopped!");
+	}
 }
 
 void Scanner::executeScan() {
@@ -122,7 +138,7 @@ void Scanner::executeScan() {
 	LOGi("executeScan");
 	switch(_opCode) {
 	case SCAN_START: {
-		LOGi("START");
+		LOGd("START");
 
 		//! start scanning
 		manualStartScan();
@@ -137,7 +153,7 @@ void Scanner::executeScan() {
 		break;
 	}
 	case SCAN_STOP: {
-		LOGi("STOP");
+		LOGd("STOP");
 
 		//! stop scanning
 		manualStopScan();
@@ -151,6 +167,8 @@ void Scanner::executeScan() {
 		break;
 	}
 	case SCAN_SEND_RESULT: {
+		LOGd("SCAN_SEND_RESULT");
+
 		sendResults();
 
 		//! Wait SCAN_BREAK ms, then start scanning again
@@ -230,8 +248,11 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 //		_logFirst(INFO, "found manufac data:");
 //		BLEutil::printArray(type_data.p_data, type_data.data_len);
 
-		ble_advdata_manuf_data_t* manufac = (ble_advdata_manuf_data_t*)type_data.p_data;
-		if (manufac->company_identifier == DOBOTS_ID) {
+		//! [28.01.16] can't cast to uint16_t because it's possible that p_data is not
+		//! word aligned!! So have to shift it by hand
+		uint16_t companyIdentifier = type_data.p_data[1] << 8 | type_data.p_data[0];
+		if (type_data.data_len >= 3 &&
+			companyIdentifier == DOBOTS_ID) {
 //			LOGi("is dobots device!");
 
 //			_logFirst(INFO, "parse data");
@@ -273,7 +294,6 @@ void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
             adv_data.p_data = (uint8_t *)p_adv_report->data;
             adv_data.data_len = p_adv_report->dlen;
 
-            //! check scan response  to determine if device passes the filter
 			if (!isFiltered(&adv_data)) {
 				_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 			}

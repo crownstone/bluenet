@@ -207,6 +207,15 @@ NRF51_USE_SOFTDEVICE=1
 #RAM_APPLICATION_AMOUNT=24K
 #HEAP_SIZE=16700
 
+# ## to enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
+# ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x600, so if you
+# ## increase the ATTR_TABLE_SIZE, the RAM_R1_BASE has to be increased by the same value and the RAM_APPLICATION_AMOUNT
+# ## has to be decreased by the same value (and most likely the HEAP_SIZE as well), e.g.
+# # ATTR_TABLE_SIZE=0x900
+# # RAM_R1_BASE=0x20002300
+# # RAM_APPLICATION_AMOUNT=0x5D00
+# ATTR_TABLE_SIZE=0x600
+
 #######################################################################################################################
 # For the S130 SoftDevice version (v0.5) and the SDK version (v6)
 # SoftDevice (from inspection seems to be 110kB) and application 168kB
@@ -237,3 +246,12 @@ HEAP_SIZE=2700;
 # For the 32kB chip:
 #RAM_APPLICATION_AMOUNT=0x5800
 #HEAP_SIZE=16700;
+
+## to enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
+## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x600, so if you
+## increase the ATTR_TABLE_SIZE, the RAM_R1_BASE has to be increased by the same value and the RAM_APPLICATION_AMOUNT
+## has to be decreased by the same value (and most likely the HEAP_SIZE as well), e.g.
+# ATTR_TABLE_SIZE=0x900
+# RAM_R1_BASE=0x20002B00
+# RAM_APPLICATION_AMOUNT=0x5500
+ATTR_TABLE_SIZE=0x600

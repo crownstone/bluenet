@@ -74,7 +74,8 @@ typedef enum {
 	MESH_GATT_EVT_OPCODE_FLAG_REQ = 0x02,
 	MESH_GATT_EVT_OPCODE_CMD_RSP = 0x11,
 	MESH_GATT_EVT_OPCODE_FLAG_RSP = 0x12,
-	MESH_GATT_EVT_OPCODE_DATA_MULTIPART = 0x21,
+	MESH_GATT_EVT_OPCODE_DATA_MULTIPART_START = 0x20,
+	MESH_GATT_EVT_OPCODE_DATA_MULTIPART_MID = 0x21,
 	MESH_GATT_EVT_OPCODE_DATA_MULTIPART_END = 0x22
 } mesh_gatt_evt_opcode_t;
 
@@ -144,7 +145,8 @@ static uint32_t mesh_gatt_evt_push(mesh_gatt_evt_t* p_gatt_evt) {
 	uint16_t hvx_len;
 	switch (p_gatt_evt->opcode) {
 	case MESH_GATT_EVT_OPCODE_DATA:
-	case MESH_GATT_EVT_OPCODE_DATA_MULTIPART:
+	case MESH_GATT_EVT_OPCODE_DATA_MULTIPART_START:
+	case MESH_GATT_EVT_OPCODE_DATA_MULTIPART_MID:
 	case MESH_GATT_EVT_OPCODE_DATA_MULTIPART_END:
 		hvx_len = p_gatt_evt->param.data_update.data_len + 4;
 //		LOGi("data_len: %d", hvx_len);
@@ -478,8 +480,10 @@ uint32_t send_notification(waiting_notification_t* notification) {
 		mesh_gatt_evt_t gatt_evt;
 		uint8_t part_len = 16;
 
-		if (length - offset > part_len) {
-			gatt_evt.opcode = MESH_GATT_EVT_OPCODE_DATA_MULTIPART;
+		if (offset == 0) {
+			gatt_evt.opcode = MESH_GATT_EVT_OPCODE_DATA_MULTIPART_START;
+		} else if (length - offset > part_len) {
+			gatt_evt.opcode = MESH_GATT_EVT_OPCODE_DATA_MULTIPART_MID;
 		} else {
 			gatt_evt.opcode = MESH_GATT_EVT_OPCODE_DATA_MULTIPART_END;
 			part_len = length - offset;
