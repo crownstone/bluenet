@@ -1,9 +1,10 @@
 /**
- * Author: Anne van Rossum
+ * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: 6 Nov., 2014
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * Date: 9 Mar., 2016
+ * License: LGPLv3+, Apache, and/or MIT, your choice
  */
+
 #pragma once
 
 #include <cstdint>
@@ -15,28 +16,11 @@ extern "C" {
 #include "app_pwm.h"
 }
 
-//#define PWM1
-
-///* Pulse Wide Modulation struct
-// */
-//struct pwm_config_t {
-//    uint8_t         num_channels;
-//    uint8_t         gpio_pin[3];
-//    uint8_t         ppi_channel[6];
-//    uint8_t         gpiote_channel[3];
-//    uint8_t         mode;
-//
-//    // default values
-//    pwm_config_t() :
-//    	num_channels   (3),
-//		gpio_pin       {8,9,10},
-//		ppi_channel    {0,1,2,3,4,5},
-//		gpiote_channel {2,3,0},
-//		mode           (PWM_MODE_122)
-//    {}
-//};
-
-//void pwm_ready_callback(uint32_t pwm_id);    // PWM callback function
+// To change the timer used for the PWM library replace the three defines below
+#define PWM_TIMER               NRF_TIMER2
+//#define PWM_IRQHandler          TIMER2_IRQHandler
+#define PWM_IRQn                TIMER2_IRQn
+#define PWM_INSTANCE_INDEX      TIMER2_INSTANCE_INDEX
 
 /* Pulse Wide Modulation class
  *
@@ -55,9 +39,6 @@ public:
 //	static volatile bool _pwmReady;
 
 //	static void pwmReadyCallback(uint32_t pwmId);
-//	static void pwmReadyCallback(uint32_t pwmId) {
-//		_pwmReady = true;
-//	};
 
 	// Initialize the pulse wide modulation settings
 	uint32_t init(app_pwm_config_t config);
@@ -76,22 +57,9 @@ public:
 
 	uint32_t getValue(uint8_t channel);
 	
-	//TODO: make the following private
-
-//	// number of channels
-//	uint8_t _numChannels;
-//	// TODO -oDE: can we make this type consistent with _pwmValue? and uint8_t should be enough?
-//	uint16_t _maxValue;
-//	// TODO -oDE: can we make this type consistent with _pwmValue? and uint8_t should be enough?
-//	uint16_t _nextValue[PWM_MAX_CHANNELS];
-//	uint8_t _gpioteChannel[PWM_MAX_CHANNELS];
-//	uint8_t _gpioPin[PWM_MAX_CHANNELS];
-//	bool _running[PWM_MAX_CHANNELS];
-//	bool _initialized;
-
 private:
 	// Private PWM constructor
-	PWM() {};
+	PWM();
 
 	// Private PWM copy constructor
 	PWM(PWM const&);
@@ -101,9 +69,9 @@ private:
 	app_pwm_config_t _pwmCfg;
 //	app_pwm_t* _pwmInstance;
 	uint32_t _callbackArray[APP_PWM_CB_SIZE];
-	const nrf_drv_timer_t pwmTimer = NRF_DRV_TIMER_INSTANCE(2);
-	app_pwm_t _pwmInstance = {
-		.p_cb = &_callbackArray,
-		.p_timer = &pwmTimer,
-	};
+
+	nrf_drv_timer_t* pwmTimer;
+	app_pwm_t* _pwmInstance;
+
+	bool _initialized;
 };
