@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Nov 4, 2014
@@ -13,7 +13,7 @@
 
 namespace BLEpp {
 
-/* Implementation of the iBeacon specification.
+/** Implementation of the iBeacon specification.
  *
  * The implementation of the iBeacon specification is only about advertising at predefined intervals and
  * casting a payload (the manufacturing data of an advertisement package) in the form of a specific
@@ -31,26 +31,25 @@ namespace BLEpp {
  * Note that you might not be able to use this commercially! Although I would be surprised if it is possible
  * to patent a "struct" or the Apple prefix.
  */
-
 class IBeacon {
 	private:
-		/* Advertisement indicator, defined as 0x0215 for iBeacons
+	/** Advertisement indicator, defined as 0x0215 for iBeacons
 		 */
 		uint16_t _adv_indicator;
 
-		/* proximity UUID, shared for all iBeacons for a given application
+	/** proximity UUID, shared for all iBeacons for a given application
 		 */
 		ble_uuid128_t _uuid;
 
-		/* Major number (group level identifier)
+	/** Major number (group level identifier)
 		 */
 		uint16_t _major;
 
-		/* Minor number (individual nodes)
+	/** Minor number (individual nodes)
 		 */
 		uint16_t _minor;
 
-		/* Known (calibrated) rssi value at 1m distance
+	/** Known (calibrated) rssi value at 1m distance
 		 *
 		 * This value has to be calibrated for each iBeacon so that it represents the
 		 * signal strength of the iBeacon at 1m distance. The value is then used by a
@@ -60,7 +59,7 @@ class IBeacon {
 		int8_t _rssi;
 
 	public:
-		/* Default constructor for the iBeacon class
+	/** Default constructor for the iBeacon class
 		 *
 		 * @uuid the UUID for this application
 		 *
@@ -71,7 +70,7 @@ class IBeacon {
 		 * @rssi the calibrated rssi value at 1m distance
 		 */
 		IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor, int8_t rssi) {
-			// advertisement indicator for an iBeacon is defined as 0x0215
+			//! advertisement indicator for an iBeacon is defined as 0x0215
 			_adv_indicator = 0x0215;
 			_uuid = uuid;
 			_major = major;
@@ -79,7 +78,7 @@ class IBeacon {
 			_rssi = rssi;
 		}
 
-		/* The size of the iBeacon advertisement data
+	/** The size of the iBeacon advertisement data
 		 *
 		 * size is calculated as:
 		 * 		2B		advertisement indicator
@@ -96,7 +95,7 @@ class IBeacon {
 			return 23;
 		}
 
-		/* Serializes the object to a byte array
+	/** Serializes the object to a byte array
 		 *
 		 * @array pointer to the preallocated byte array where the
 		 *   data should be copied into. Use <size> to get the required
@@ -111,25 +110,25 @@ class IBeacon {
 		 */
 		void toArray(uint8_t* array);
 
-		/* Set major value */
+	/** Set major value */
 		inline void setMajor(uint16_t major) { LOGd("setMajor: %d", major); _major = major; }
-		/* Get major value  */
+	/** Get major value  */
 		inline uint16_t getMajor() { return _major; }
 
-		/* Set minor value */
+	/** Set minor value */
 		inline void setMinor(uint16_t minor) { LOGd("setMinor: %d", minor); _minor = minor; }
-		/* Get minor value */
+	/** Get minor value */
 		inline uint16_t getMinor() { return _minor; }
 
-		/* Set UUID */
+	/** Set UUID */
 		inline void setUUID(ble_uuid128_t uuid) { LOGd("setUUID"); _uuid = uuid; }
-		/* Get UUID */
+	/** Get UUID */
 		inline ble_uuid128_t getUUID() { return _uuid; }
 
-		/* Set RSSI value */
+	/** Set RSSI value */
 		inline void setRSSI(int8_t rssi) { LOGd("setRSSI: %d", rssi); _rssi = rssi; }
-		/* Get RSSI value */
+	/** Get RSSI value */
 		inline int8_t getRSSI() { return _rssi; }
 };
 
-} // end namespace
+} //! end namespace

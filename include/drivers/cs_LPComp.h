@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 6 Nov., 2014
@@ -13,9 +13,11 @@
 //#include <common/cs_Types.h>
 //#include "cs_PWM.h"
 
+/** Compare voltage level (hardware peripheral)
+ */
 class LPComp {
 	public:
-		// use static variant of singleton, no dynamic memory allocation
+		//! use static variant of singleton, no dynamic memory allocation
 		static LPComp& getInstance() {
 			static LPComp instance;
 			return instance;
@@ -32,15 +34,15 @@ class LPComp {
 		void start();
 		void stop();
 
-		// function to be called from interrupt, do not do much there!
+		//! function to be called from interrupt, do not do much there!
 		void interrupt();
 
 	protected:
 
 	private:
 		LPComp();
-		LPComp(LPComp const&); // singleton, deny implementation
-		void operator=(LPComp const &); // singleton, deny implementation
+		LPComp(LPComp const&); //! singleton, deny implementation
+		void operator=(LPComp const &); //! singleton, deny implementation
 		~LPComp();
 
 };

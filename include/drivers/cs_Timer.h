@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Anne van Rossum
  * Copyrights: Distributed Organism B.V. (DoBots, http://dobots.nl)
  * Date: 21 Apr., 2015
@@ -18,10 +18,11 @@ extern "C" {
 #define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz, APP_TIMER_PRESCALER)
 #define MS_TO_TICKS(ms) APP_TIMER_TICKS(ms, APP_TIMER_PRESCALER)
 
+/** Timer on top of the timer peripheral.
+ */
 class Timer {
 
 private:
-//	Timer();
 	Timer() {
 		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
@@ -36,7 +37,7 @@ public:
 		return instance;
 	}
 
-	/* Create single shot timer. function will only be called once and after that timer will be
+	/** Create single shot timer. function will only be called once and after that timer will be
 	 * stopped
 	 * @timer_handle            An id or handle to reference the timer, set by this function (actually, just a Uint32_t)
 	 * @func                    The function to be called
@@ -48,7 +49,7 @@ public:
 		BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_SINGLE_SHOT, func));
 	}
 
-	/* Create repeated timer. Timer will continue to trigger and function will be called until the
+	/** Create repeated timer. Timer will continue to trigger and function will be called until the
 	 * timer is stopped
 	 * @timer_handle            An id or handle to reference the timer, set by this function (actually, just a Uint32_t)
 	 * @func                    The function to be called
@@ -60,7 +61,7 @@ public:
 		BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_REPEATED, func));
 	}
 
-	/* Start a previously created timer
+	/** Start a previously created timer
 	 * @timer_handle            Reference to previously created timer
 	 * @ticks                   Number of ticks till timeout (minimum is 5)
 	 * @obj                     Reference to the object on which the function should be executed
@@ -70,7 +71,7 @@ public:
 		BLE_CALL(app_timer_start, (timer_handle, ticks, obj));
 	}
 
-	/* Stop a timer
+	/** Stop a timer
 	 * @timer_handle            Reference to previously created timer
 	 */
 //	void stop(app_timer_id_t & timer_handle);

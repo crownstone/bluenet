@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Dec 2, 2015
@@ -19,13 +19,15 @@ using namespace BLEpp;
 #define SCAN_FILTER_DOBEACON_MSK      (1 << SCAN_FILTER_DOBEACON_BIT)
 #define SCAN_FILTER_DOBOTS_MSK        SCAN_FILTER_CROWNSTONE_MSK | SCAN_FILTER_DOBEACON_MSK
 
-/**@brief Variable length data encapsulation in terms of length and pointer to data */
+/** @brief Variable length data encapsulation in terms of length and pointer to data */
 typedef struct
 {
-    uint8_t     * p_data;                                         /**< Pointer to data. */
-    uint16_t      data_len;                                       /**< Length of data. */
+    uint8_t     * p_data;                                         /** < Pointer to data. */
+    uint16_t      data_len;                                       /** < Length of data. */
 } data_t;
 
+/** Scanner scans for BLE devices.
+ */
 class Scanner : EventListener {
 
 public:
@@ -44,13 +46,13 @@ public:
 
 	static void staticTick(Scanner* ptr);
 
-	// start immediately
+	//! start immediately
 	void start();
-	// delay start by delay ms
+	//! delay start by delay ms
 	void delayedStart(uint16_t delay);
-	// delay start by _scanBreakDuration ms
+	//! delay start by _scanBreakDuration ms
 	void delayedStart();
-	// stop scan immediately (no results will be sent)
+	//! stop scan immediately (no results will be sent)
 	void stop();
 
 //	uint32_t getInterval() { return (uint32_t)_scanDuration + _scanSendDelay + _scanBreakDuration; }
@@ -69,16 +71,16 @@ private:
 
 	bool _scanning;
 	bool _running;
-	// scan for ... ms
+	//! scan for ... ms
 	uint16_t _scanDuration;
-	// wait ... ms before sending the scan result
+	//! wait ... ms before sending the scan result
 	uint16_t _scanSendDelay;
-	// wait ... ms before starting the next scan
+	//! wait ... ms before starting the next scan
 	uint16_t _scanBreakDuration;
-	// filter out devices based on mask
+	//! filter out devices based on mask
 	uint8_t _scanFilter;
-	// Filtered out devices are still sent once every N scan intervals
-	// Set to 0 to not send them ever
+	//! Filtered out devices are still sent once every N scan intervals
+	//! Set to 0 to not send them ever
 	uint16_t _filterSendFraction;
 
 	uint16_t _scanCount;

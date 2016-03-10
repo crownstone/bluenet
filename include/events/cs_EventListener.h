@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 1 Dec., 2014
@@ -10,6 +10,9 @@
 
 #include <events/cs_EventTypes.h>
 
+/**
+ * Event listener.
+ */
 class EventListener {
 
 private:
@@ -24,6 +27,6 @@ public:
 
 	virtual ~EventListener() {};
 
-	// handle events
+	//! handle events
 	virtual void handleEvent(uint16_t evt, void* p_data, uint16_t length) = 0;
 };

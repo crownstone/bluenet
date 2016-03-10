@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Jul 13, 2015
@@ -11,24 +11,26 @@
 
 //#define STRINGIFY(str) #str
 
+/** The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions.
+ */
 class DeviceInformationService : public BLEpp::Service {
 public:
-	/* Constructor for alert notification service object
+	/** Constructor for alert notification service object
 	 *
 	 * Creates persistent storage (FLASH) object which is used internally to store current limit.
 	 * It also initializes all characteristics.
 	 */
 	DeviceInformationService();
 
-	/* Initialize a GeneralService object
+	/** Initialize a GeneralService object
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
 	void init();
 
 protected:
-	// The characteristics in this service, based on:
-	// https://developer.bluetooth.org/TechnologyOverview/Pages/DIS.aspx
+	//! The characteristics in this service, based on:
+	//! https://developer.bluetooth.org/TechnologyOverview/Pages/DIS.aspx
 //	void addManufacturerNameCharacteristic();
 //	void addModelNumberCharacteristic();
 //	void addSerialNumberCharacteristic();
@@ -39,7 +41,7 @@ protected:
 //	void addRegulatoryCertificationDataListCharacteristic();
 
 private:
-	// References to characteristics that need to be written from other functions
+	//! References to characteristics that need to be written from other functions
 //	BLEpp::Characteristic<std::string> *_manufacturerNameCharacteristic;
 //	BLEpp::Characteristic<std::string> *_modelNumberCharacteristic;
 //	BLEpp::Characteristic<std::string> *_serialNumberCharacteristic;

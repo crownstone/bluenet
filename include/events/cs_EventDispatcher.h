@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: May 6, 2015
@@ -11,14 +11,17 @@
 
 #define MAX_EVENT_LISTENERS                            10
 
+/**
+ * Event dispatcher.
+ */
 class EventDispatcher {
 
 private:
 	EventDispatcher() {};
 
-	// This class is singleton, deny implementation
+	//! This class is singleton, deny implementation
 	EventDispatcher(EventDispatcher const&);
-	// This class is singleton, deny implementation
+	//! This class is singleton, deny implementation
 	void operator=(EventDispatcher const &);
 
 	EventListener* _listeners[MAX_EVENT_LISTENERS];
@@ -29,10 +32,10 @@ public:
 		return instance;
 	}
 
-	// add a listener
+	//! add a listener
 	bool addListener(EventListener *listener);
 
-	// remove one
+	//! remove one
 	void removeListener(EventListener *listener);
 
 	void dispatch(uint16_t evt);

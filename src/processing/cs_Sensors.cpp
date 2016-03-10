@@ -1,4 +1,6 @@
 /**
+ * Sensors or peripheral devices
+ *
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Mar 23, 2015
@@ -29,7 +31,7 @@
 //#define PUSH_BUTTON_ENABLED
 //#define SWITCH_ENABLED
 
-/* choose which way the switch should be checked
+/** Choose which way the switch should be checked
  * 1. interrupt: get an interrupt from the GPIO
  *		handler whenever the signal toggles.
  *		BUT: can register a signal change wrongly if
@@ -45,7 +47,7 @@
 #define SWITCH_POLL
 #endif
 
-/* choose which way the push button should be checked,
+/** Choose which way the push button should be checked,
  * see description above for switch
  */
 #ifdef PUSH_BUTTON_ENABLED
@@ -53,19 +55,19 @@
 //#define PUSH_BUTTON_POLL
 #endif
 
-/* compiler flag initializes ADC.
+/** Compiler flag initializes ADC.
  * add additional defined checks if another sensor needs to use
  * the ADC
  */
 #define ADC_USED defined(LIGHT_SENSOR_ENABLED) || defined(THERMAL_SENSOR_ENABLED)
 
-/* compiler flag starts interrupt handler
+/** Compiler flag starts interrupt handler
  * add additional defined checks if interrupt handler should be used
  * for other sensors
  */
 #define INTERRUPT_USED defined(PUSH_BUTTON_INTERRUPT) || defined(SWITCH_INTERRUPT)
 
-/* Update defines for other boards (instead of adding meaningless PIN definitions
+/** Update defines for other boards (instead of adding meaningless PIN definitions
  * to all other boards)
  */
 #if (HARDWARE_BOARD != CROWNSTONE_SENSOR)
@@ -94,7 +96,7 @@ void Sensors::stopTicking() {
 }
 
 #ifdef SWITCH_POLL
-/* Check Switch position
+/** Check Switch position
  *
  * return true if sensor was checked and switchOn variable
  * contains a valid value
@@ -102,9 +104,9 @@ void Sensors::stopTicking() {
  */
 bool Sensors::checkSwitch(uint32_t time, bool &switchOn) {
 	if (time - _lastSwitchCheck > SWITCH_CHECK_INTERVAL) {
-		// check the state of the switch:
-		//   ON when signal is HIGH
-		//   OFF when signal is LOW
+		//! check the state of the switch:
+		//!   ON when signal is HIGH
+		//!   OFF when signal is LOW
 		switchOn = nrf_gpio_pin_read(PIN_GPIO_BUTTON);
 
 		return true;
@@ -115,7 +117,7 @@ bool Sensors::checkSwitch(uint32_t time, bool &switchOn) {
 #endif
 
 #ifdef PUSH_BUTTON_POLL
-/* Check push button state
+/** Check push button state
  *
  * return true if sensor was checked and pushed variable
  * contains a valid value
@@ -123,9 +125,9 @@ bool Sensors::checkSwitch(uint32_t time, bool &switchOn) {
  */
 bool Sensors::checkPushButton(uint32_t time, bool &pushed) {
 	if (time - _lastPushButtonCheck > PUSH_BUTTON_CHECK_INTERVAL) {
-		// check the state of the push button:
-		//   PUSHED when signal is HIGH
-		//   RELEASED when signal is LOW
+		//! check the state of the push button:
+		//!   PUSHED when signal is HIGH
+		//!   RELEASED when signal is LOW
 		pushed = nrf_gpio_pin_read(PIN_GPIO_BUTTON) == 0;
 
 		return true;
@@ -135,7 +137,7 @@ bool Sensors::checkPushButton(uint32_t time, bool &pushed) {
 }
 #endif
 
-/* Initialize ADC for sensor sampling
+/** Initialize ADC for sensor sampling
  */
 void Sensors::initADC() {
 //	ADC::getInstance().init(PIN_AIN_SENSOR);
@@ -144,7 +146,7 @@ void Sensors::initADC() {
 //	ADC::getInstance().start();
 }
 
-/* Read the ADC to get sensor values
+/** Read the ADC to get sensor values
  *
  * returns values 0-1023, where 1023 is max value
  *  0xFFFF for error
@@ -162,7 +164,7 @@ uint16_t Sensors::sampleSensor() {
 
 	CurrentCurve<uint16_t> _currentCurve;
 
-	// Start storing the samples
+	//! Start storing the samples
 	_currentCurve.clear();
 //	ADC::getInstance().setCurrentCurve(&_currentCurve);
 
@@ -177,12 +179,12 @@ uint16_t Sensors::sampleSensor() {
 	}
 
 
-//	// Give some time to sample
+//	//! Give some time to sample
 //	while (!_currentCurve.isFull()) {
 //		nrf_delay_ms(10);
 //	}
 
-	// Stop storing the samples
+	//! Stop storing the samples
 //	ADC::getInstance().setCurrentCurve(NULL);
 
 	uint16_t numSamples = _currentCurve.length();
@@ -206,10 +208,10 @@ uint16_t Sensors::sampleSensor() {
 		//		_log(INFO, "\r\n");
 		average /= numSamples;
 
-		// Measured voltage goes from 0-3.6V, measured as 0-1023(10 bit),
-		// but Input voltage is from 0-3V (for Nordic EK) and 0-3.3 for Crownstone
-		// so we need to rescale the value to have max at 3V (or 3.3V resp)
-		// instead of 3.6V
+		//! Measured voltage goes from 0-3.6V, measured as 0-1023(10 bit),
+		//! but Input voltage is from 0-3V (for Nordic EK) and 0-3.3 for Crownstone
+		//! so we need to rescale the value to have max at 3V (or 3.3V resp)
+		//! instead of 3.6V
 #if(HARDWARE_BOARD==CROWNSTONE)
 		average *= 3.6/3.3;
 #elif(HARDWARE_BOARD==PCA10001)
@@ -219,13 +221,13 @@ uint16_t Sensors::sampleSensor() {
 		result = average;
 	}
 
-	// Unlock the buffer
+	//! Unlock the buffer
 	mb.unlock();
 
 	return result;
 }
 
-/* Check light sensor by sampling ADC values
+/** Check light sensor by sampling ADC values
  */
 bool Sensors::checkLightSensor(uint32_t time, uint16_t &value) {
 	if (time - _lastLightCheck > LIGHT_CHECK_INTERVAL) {
@@ -236,7 +238,7 @@ bool Sensors::checkLightSensor(uint32_t time, uint16_t &value) {
 			return false;
 		}
 
-		// convert to percentage
+		//! convert to percentage
 		LOGd("light intensity: %3d%%", (uint16_t)(100.0 * value/MAX_VALUE));
 		_lastLightCheck = time;
 
@@ -246,7 +248,7 @@ bool Sensors::checkLightSensor(uint32_t time, uint16_t &value) {
 	return false;
 }
 
-/* Check thermistor sensor by sampling ADC values
+/** Check thermistor sensor by sampling ADC values
  */
 uint16_t Sensors::checkThermalSensor(uint32_t time) {
 	if (time - _lastThermalCheck > THERMAL_CHECK_INTERVAL) {
@@ -257,7 +259,7 @@ uint16_t Sensors::checkThermalSensor(uint32_t time) {
 			return -1;
 		}
 
-		// convert to percentage
+		//! convert to percentage
 		LOGd("thermal intensity: %3d%%", (uint16_t)(100.0 * thermalIntensity/MAX_VALUE));
 		_lastThermalCheck = time;
 
@@ -267,7 +269,7 @@ uint16_t Sensors::checkThermalSensor(uint32_t time) {
 	return -1;
 }
 
-/* Initialize enabled sensor(s)
+/** Initialize enabled sensor(s)
  *
  */
 void Sensors::init() {
@@ -287,7 +289,7 @@ void Sensors::init() {
 	_initialized = true;
 }
 
-/* Tick function
+/** Tick function
  * check enabled sensor and update PWM signal
  * also initializes sensors on first run
  */
@@ -347,7 +349,7 @@ void Sensors::tick() {
 }
 
 #ifdef SWITCH_ENABLED
-/* initialize switch sensor based on compiler flags
+/** Initialize switch sensor based on compiler flags
  */
 void Sensors::initSwitch() {
 
@@ -362,7 +364,7 @@ void Sensors::initSwitch() {
 	nrf_gpio_cfg_input(PIN_GPIO_BUTTON, NRF_GPIO_PIN_PULLUP);
 #endif
 
-	// check initial state of switch
+	//! check initial state of switch
 	if (nrf_gpio_pin_read(PIN_GPIO_BUTTON)) {
 		switchPwmOn();
 	} else {
@@ -373,7 +375,7 @@ void Sensors::initSwitch() {
 #endif
 
 #ifdef PUSH_BUTTON_ENABLED
-/* Initialize push button, uses GPIO interrupt event handler
+/** Initialize push button, uses GPIO interrupt event handler
  */
 void Sensors::initPushButton() {
 
@@ -396,12 +398,12 @@ void Sensors::initPushButton() {
 #endif
 
 #if INTERRUPT_USED
-/* Initialize GPIO interrupt event handler
+/** Initialize GPIO interrupt event handler
  */
 void Sensors::initGPIOTE() {
 	uint32_t err_code = 0;
 
-	/* GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it
+/** GPIOTE interrupt handler normally runs in STACK_LOW priority, need to put it
 	in APP_LOW in order to use */
 #if(NRF51_USE_SOFTDEVICE == 1)
 	err_code = sd_nvic_SetPriority(GPIOTE_IRQn, NRF_APP_PRIORITY_LOW);
@@ -420,8 +422,8 @@ void Sensors::initGPIOTE() {
 }
 
 #ifdef SWITCH_INTERRUPT
-// keep track of the switch time. this variable is used to avoid flickering
-// signal for switch
+//! keep track of the switch time. this variable is used to avoid flickering
+//! signal for switch
 #endif
 static uint32_t _interruptTimeout = 0;
 
@@ -429,23 +431,23 @@ static uint32_t _interruptTimeout = 0;
 static bool _lastPushed = false;
 #endif
 
-/* GPIO interrupt event handler
+/** GPIO interrupt event handler
  */
 extern "C" void GPIOTE_IRQHandler()
 {
 //	LOGd("GPIOTE_IRQHandler");
 
-	// keep track of the GPIO pin states
+	//! keep track of the GPIO pin states
 	uint32_t pins_state = NRF_GPIO->IN;
 
 #ifdef PUSH_BUTTON_INTERRUPT
 	if ((NRF_GPIOTE->EVENTS_IN[0] == 1) &&
 		(NRF_GPIOTE->INTENSET & GPIOTE_INTENSET_IN0_Msk)) {
 
-		// signal seems to flicker some times when releasing the button
-		// to avoid a wrong push registration, ignore such an event
-		// if both pushed and _lastPushed are true, only register push
-		// button event if pushed and _lastPushed are not equal
+		//! signal seems to flicker some times when releasing the button
+		//! to avoid a wrong push registration, ignore such an event
+		//! if both pushed and _lastPushed are true, only register push
+		//! button event if pushed and _lastPushed are not equal
 
 		bool pushed = (pins_state & (1 << PIN_GPIO_BUTTON)) == 0;
 
@@ -462,7 +464,7 @@ extern "C" void GPIOTE_IRQHandler()
 				_lastPushed = pushed;
 
 		//		NRF_GPIOTE->EVENTS_PORT = 0;
-				// clear the event again
+				//! clear the event again
 				NRF_GPIOTE->EVENTS_IN[0] = 0;
 //			}
 			_interruptTimeout = now + 100;
@@ -474,16 +476,16 @@ extern "C" void GPIOTE_IRQHandler()
 
 #ifdef SWITCH_INTERRUPT
 
-	// check if the event is for us
+	//! check if the event is for us
 	if ((NRF_GPIOTE->EVENTS_IN[0] == 1) &&
 		(NRF_GPIOTE->INTENSET & GPIOTE_INTENSET_IN0_Msk)) {
 
 		bool switchON = (pins_state & (1 << PIN_GPIO_BUTTON)) == 0;
 
-		// if switch is moved really slowly, signal flickers on transition
-		// to avoid registering the signal all the time, add a delay
-		// and only register the signal again if no other signal has been
-		// received in the meantime.
+		//! if switch is moved really slowly, signal flickers on transition
+		//! to avoid registering the signal all the time, add a delay
+		//! and only register the signal again if no other signal has been
+		//! received in the meantime.
 		uint32_t now = RTC::now();
 		if (now > _interruptTimeout) {
 			if (switchON) {
@@ -496,7 +498,7 @@ extern "C" void GPIOTE_IRQHandler()
 		}
 		_interruptTimeout = now + 100;
 
-		// clear the event again
+		//! clear the event again
 		NRF_GPIOTE->EVENTS_IN[0] = 0;
 	}
 
@@ -512,14 +514,14 @@ extern "C" void GPIOTE_IRQHandler()
 
 #endif
 
-/* Switch PWM signal.
+/** Switch PWM signal.
  * Checks current pwm signal, then toggles from ON to OFF and vice versa
  */
 void Sensors::switchPwmSignal() {
-	// check first the current pwm value ...
+	//! check first the current pwm value ...
 	uint32_t pwmValue = PWM::getInstance().getValue(0);
 
-	// if currently off, turn on, otherwise turn off
+	//! if currently off, turn on, otherwise turn off
 	if (pwmValue == 0) {
 		PWM::getInstance().setValue(0, 255);
 	} else {
@@ -527,27 +529,27 @@ void Sensors::switchPwmSignal() {
 	}
 }
 
-/* Switch PWM signal ON
+/** Switch PWM signal ON
  * Checks current pwm signal and only changes if it is currently OFF
  */
 void Sensors::switchPwmOn() {
-	// check first the current pwm value ...
+	//! check first the current pwm value ...
 	uint32_t pwmValue = PWM::getInstance().getValue(0);
 
-	// if currently off, turn on, otherwise do nothing
+	//! if currently off, turn on, otherwise do nothing
 	if (pwmValue == 0) {
 		PWM::getInstance().setValue(0, 255);
 	}
 }
 
-/* Switch PWM signal OFF
+/** Switch PWM signal OFF
  * Checks current pwm signal and only changes if it is currently ON
  */
 void Sensors::switchPwmOff() {
-	// check first the current pwm value ...
+	//! check first the current pwm value ...
 	uint32_t pwmValue = PWM::getInstance().getValue(0);
 
-	// if currently on, turn off, otherwise do nothing
+	//! if currently on, turn off, otherwise do nothing
 	if (pwmValue == 255) {
 		PWM::getInstance().setValue(0, 0);
 	}

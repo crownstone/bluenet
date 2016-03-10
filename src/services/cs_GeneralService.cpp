@@ -86,7 +86,7 @@ void GeneralService::init() {
 	{
 	LOGi(MSG_CHAR_CONFIGURATION_ADD);
 
-	// if we use configuration characteristics, set up a buffer
+	//! if we use configuration characteristics, set up a buffer
 	_streamBuffer = new StreamBuffer<uint8_t>();
 	MasterBuffer& mb = MasterBuffer::getInstance();
 	buffer_ptr_t buffer = NULL;
@@ -134,7 +134,7 @@ void GeneralService::tick() {
 		temp = getTemperature();
 		writeToTemperatureCharac(temp);
 #ifdef MICRO_VIEW
-		// Update temperature at the display
+		//! Update temperature at the display
 		write("1 %i\r\n", temp);
 #endif
 	}
@@ -145,7 +145,7 @@ void GeneralService::tick() {
 			if (success) {
 				writeToConfigCharac();
 			}
-			// only write once
+			//! only write once
 			_selectConfiguration = 0xFF;
 		}
 	}
@@ -178,7 +178,7 @@ void GeneralService::addTemperatureCharacteristic() {
 void reset(void* p_context) {
 	uint32_t cmd = *(int32_t*)p_context;
 	LOGi("executing reset: %d", cmd);
-	// copy to make sure this is nothing more than one value
+	//! copy to make sure this is nothing more than one value
 	uint8_t err_code;
 	err_code = sd_power_gpregret_clr(0xFF);
 	APP_ERROR_CHECK(err_code);
@@ -256,7 +256,7 @@ void GeneralService::addSetConfigurationCharacteristic() {
 				MasterBuffer& mb = MasterBuffer::getInstance();
 				if (!mb.isLocked()) {
 					mb.lock();
-					// TODO: check lenght with actual payload length!
+					//! TODO: check lenght with actual payload length!
 					uint8_t type = _streamBuffer->type();
 					LOGi("Write configuration type: %i", (int)type);
 					uint8_t *payload = _streamBuffer->payload();

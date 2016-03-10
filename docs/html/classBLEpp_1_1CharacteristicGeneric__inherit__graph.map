@@ -1,0 +1,5 @@
+<map id="BLEpp::CharacteristicGeneric&lt; T &gt;" name="BLEpp::CharacteristicGeneric&lt; T &gt;">
+<area shape="rect" id="node3" href="$classBLEpp_1_1Characteristic.html" title="A default characteristic. " alt="" coords="508,5,691,32"/>
+<area shape="rect" id="node4" href="$classBLEpp_1_1Characteristic_3_01T_00_01typename_01std_1_1enable__if_3_01std_1_1is__arithmetic_30cb09b8151a2f94de83cf82cfc3dbd74.html" title="A characteristic for built&#45;in arithmetic types (int, float, etc) " alt="" coords="512,57,687,127"/>
+<area shape="rect" id="node2" href="$classBLEpp_1_1CharacteristicBase.html" title="Non&#45;template base class for Characteristics. " alt="" coords="5,43,185,69"/>
+</map>

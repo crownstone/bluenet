@@ -7,14 +7,6 @@
 
 #pragma once
 
-//#include "ble_gap.h"
-//#include "ble_gatts.h"
-//
-//#include "cs_BluetoothLE.h"
-//#include <string>
-//#include "util/cs_Utils.h"
-//#include "drivers/cs_Serial.h"
-//#include "common/cs_Config.h"
 #include "structs/cs_BufferAccessor.h"
 #include "util/cs_BleError.h"
 #include "util/cs_Utils.h"
@@ -29,19 +21,19 @@
 
 typedef uint8_t ERR_CODE;
 
-/* Structure for a StreamBuffer
+/** Structure for a StreamBuffer
  *
  * Requires MASTER_BUFFER_SIZE to be set.
  */
 template <typename T>
 struct __attribute__((__packed__)) stream_t {
 	uint8_t type;
-	uint8_t reserved; // reserved for byte alignment
+	uint8_t reserved; //! reserved for byte alignment
 	uint16_t length;
 	T payload[(MASTER_BUFFER_SIZE-SB_HEADER_SIZE)/sizeof(T)];
 };
 
-/* General StreamBuffer with type, length, and payload
+/** General StreamBuffer with type, length, and payload
  *
  * General class that can be used to send arrays of values over Bluetooth, of which the first byte is a type
  * or identifier byte, the second one the length of the payload (so, minus identifier and length byte itself)
@@ -50,7 +42,7 @@ struct __attribute__((__packed__)) stream_t {
 template <typename T>
 class StreamBuffer : public BufferAccessor {
 private:
-	/* Pointer to the data to be sent
+	/** Pointer to the data to be sent
 	 */
 	stream_t<T>* _buffer;
 	uint16_t _maxLength;
@@ -58,14 +50,14 @@ private:
 	const size_t _item_size = sizeof(T);
 	const size_t _max_items = (MASTER_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
 public:
-	/* Default constructor
+	/** Default constructor
 	 *
 	 * Constructor does not initialize the payload.
 	 */
 	StreamBuffer(): _buffer(NULL), _maxLength(0) {
 	};
 
-	/* @inherit */
+	/** @inherit */
 	int assign(uint8_t *buffer, uint16_t size) {
 		LOGd("assign buff: %p, len: %d", buffer, size);
 		assert(SB_HEADER_SIZE + _max_items*_item_size <= size, "Assigned buffer is not large enough");
@@ -74,7 +66,7 @@ public:
 		return 0;
 	}
 
-	/* Release the buffer
+	/** Release the buffer
 	 *
 	 * Sets pointer to zero, does not deallocate memory.
 	 */
@@ -83,7 +75,7 @@ public:
 		_buffer = NULL;
 	}
 
-	/* Create a string from payload.
+	/** Create a string from payload.
 	 *
 	 * This creates a C++ string from the uint8_t payload array. Note that this not always makes sense! It will
 	 * use the length field to establish the length of the array to be used. So, the array does not have to
@@ -98,7 +90,7 @@ public:
 		return SB_SUCCESS;
 	}
 
-	/* Fill the StreamBuffer object from the string
+	/** Fill the StreamBuffer object from the string
 	 *
 	 * @str the string with which the buffer should be filled
 	 *
@@ -114,7 +106,7 @@ public:
 		return SB_SUCCESS;
 	}
 
-	/* Add a value to the stream buffer
+	/** Add a value to the stream buffer
 	 *
 	 * @value the value to be added
 	 *
@@ -138,7 +130,7 @@ public:
 		return SB_SUCCESS;
 	}
 
-	/* Clear the buffer
+	/** Clear the buffer
 	 *
 	 * Reset the payload array and set "length" to 0
 	 */
@@ -152,32 +144,32 @@ public:
 		return SB_SUCCESS;
 	}
 
-	/* Return the type assigned to the SreamBuffer
+	/** Return the type assigned to the SreamBuffer
 	 *
 	 * @return the type, see <ConfigurationTypes>
 	 */
 	inline uint8_t type() const { return _buffer->type; }
 
-	/* Get the length/size of the payload in number of elements
+	/** Get the length/size of the payload in number of elements
 	 *
 	 * @return number of elements stored
 	 */
 	inline uint16_t length() const { return std::min(_buffer->length, _maxLength); }
 
-	/* Get a pointer to the payload array
+	/** Get a pointer to the payload array
 	 *
 	 * @return pointer to the array used to store
 	 *   the elements of the stream buffer
 	 */
 	inline T* payload() const { return _buffer->payload; }
 
-	/* Set the type for this stream buffer
+	/** Set the type for this stream buffer
 	 *
 	 * @type the type, see <ConfigurationTypes>
 	 */
 	inline void setType(uint8_t type) { _buffer->type = type; }
 
-	/* Set payload of the buffer.
+	/** Set payload of the buffer.
 	 *
 	 * @payload pointer to the buffer containing the
 	 *   elements which should be copied to this stream
@@ -206,21 +198,21 @@ public:
 		BLEutil::printArray((uint8_t*)_buffer, getDataLength());
 	}
 
-	/////////// Bufferaccessor ////////////////////////////
+	///////////! Bufferaccessor ////////////////////////////
 
-	/* @inherit */
+	/** @inherit */
 	uint16_t getDataLength() const {
 		return SB_HEADER_SIZE + _buffer->length;
 	}
 
-	/* @inherit */
+	/** @inherit */
 	uint16_t getMaxLength() const {
 		return _maxLength;
 //		return MASTER_BUFFER_SIZE;
 	}
 
-	// TODO: Why do we need this function!?
-	/* @inherit */
+	//! TODO: Why do we need this function!?
+	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
 		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();

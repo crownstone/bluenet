@@ -1,11 +1,11 @@
-/**
+/*
  * Author: Anne van Rossum
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: 24 Nov., 2014
  * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
-/**
+/*
  * For more information see:
  * http://developer.nordicsemi.com/nRF51_SDK/doc/7.0.1/s110/html/a00763.html#ga0a57b964c8945eaca2d267835ef6688c
  */
@@ -30,11 +30,11 @@ extern "C"  {
 
 static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
 		uint32_t data_len) {
-	// we might want to check if things are actually stored, by using this callback	
+	// we might want to check if things are actually stored, by using this callback
 	if (result != NRF_SUCCESS) {
 		LOGd("OPP_CODE: %d, ERR_CODE: %d (0x%X)", op_code, result, result);
 		APP_ERROR_CHECK(result);
-		
+
 		if (op_code == PSTORAGE_LOAD_OP_CODE) {
 			LOGd("Error with loading data");
 		}

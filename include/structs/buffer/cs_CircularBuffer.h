@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Feb 27, 2015
@@ -6,17 +6,10 @@
  */
 #pragma once
 
-//#include <common/cs_Types.h>
-
 #include <cstddef>
-//#include <cstdint>
 
-//#include <stdlib.h> // malloc, free
-//#include <stdint.h> // uint32_t
-//
-//#include "drivers/cs_Serial.h"
-
-/* Circular Buffer implementation
+/** Circular Buffer implementation
+ * @param T Element type of elements within the buffer.
  *
  * Elements are added at the back and removed from the front. If the capacity
  * of the buffer is reached, the oldest element will be overwritten.
@@ -24,7 +17,7 @@
 template <class T>
 class CircularBuffer {
 public:
-	/* Default constructor
+	/** Default constructor
 	 *
 	 * @capacity the size with which the buffer should be initialized. A maximum
 	 *   of capacity elements can be stored in the buffer before the oldest element
@@ -45,7 +38,7 @@ public:
 		}
 	}
 
-	/* Default destructor
+	/** Default destructor
 	 *
 	 * Free memory allocated for the buffer
 	 */
@@ -55,7 +48,7 @@ public:
 		}
 	}
 
-	/* Initializes and allocates memory for the buffer based on the capacity
+	/** Initializes and allocates memory for the buffer based on the capacity
 	 * used with the constructor
 	 *
 	 * If the constructor was called with initialize = false, then this function
@@ -67,13 +60,13 @@ public:
 		if (!_array) {
 			_array = (T*)calloc(_capacity, sizeof(T));
 		}
-		// also call clear to make sure the head and tail are reset and we
-		// start with a clean buffer
+		//! also call clear to make sure the head and tail are reset and we
+		//! start with a clean buffer
 		clear();
 		return _array != NULL;
 	}
 
-	/* Returns the number of elements stored
+	/** Returns the number of elements stored
 	 *
 	 * @return the number of elements stored in the buffer
 	 */
@@ -81,7 +74,7 @@ public:
 		return _contentsSize;
 	}
 
-	/* Returns the capacity of the buffer
+	/** Returns the capacity of the buffer
 	 *
 	 * The capacity is the maximum number of elements that can be stored
 	 * in the buffer
@@ -92,7 +85,7 @@ public:
 		return _capacity;
 	}
 
-	/* Checks if the buffer is empty
+	/** Checks if the buffer is empty
 	 *
 	 * @return true if empty, false otherwise
 	 */
@@ -100,7 +93,7 @@ public:
 		return size() == 0;
 	}
 
-	/* Checks if the buffer is full
+	/** Checks if the buffer is full
 	 *
 	 * @return true if full, false otherwise
 	 */
@@ -108,7 +101,7 @@ public:
 		return size() == capacity();
 	}
 
-	/* Peek at the oldest element without removing it
+	/** Peek at the oldest element without removing it
 	 *
 	 * This returns the value of the oldest element without
 	 * removing the element from the buffer. Use <CircularBuffer>>pop()>
@@ -120,7 +113,7 @@ public:
 		return _array[_head];
 	}
 
-	/* Get the oldest element
+	/** Get the oldest element
 	 *
 	 * This returns the value of the oldest element and
 	 * removes it from the buffer
@@ -133,7 +126,7 @@ public:
 		return res;
 	}
 
-	/* Add an element to the end of the buffer
+	/** Add an element to the end of the buffer
 	 *
 	 * @value the element to be added
 	 *
@@ -149,7 +142,7 @@ public:
 		_array[_tail] = value;
 	}
 
-	/* Clears the buffer
+	/** Clears the buffer
 	 *
 	 * The buffer is cleared by setting head and tail
 	 * to the beginning of the buffer. The array itself
@@ -161,7 +154,7 @@ public:
 		_contentsSize = 0;
 	}
 
-	/* Returns the Nth value, starting from oldest element
+	/** Returns the Nth value, starting from oldest element
 	 *
 	 * Does NOT check if you reached the end, make sure you read no more than size().
 	 */
@@ -170,22 +163,22 @@ public:
 	}
 
 private:
-	/* Pointer to the array storing the elements */
+	/** Pointer to the array storing the elements */
 	T *_array;
 
-	/* The capacity of the buffer (maximum number of elements) */
+	/** The capacity of the buffer (maximum number of elements) */
 	uint16_t _capacity;
 
-	/* Index of the head (next element to be removed) */
+	/** Index of the head (next element to be removed) */
 	uint16_t _head;
 
-	/* Index of the tail (where the next element will be inserted) */
+	/** Index of the tail (where the next element will be inserted) */
 	uint16_t _tail;
 
-	/* Number of elements stored in the buffer */
+	/** Number of elements stored in the buffer */
 	uint16_t _contentsSize;
 
-	/* Increases the tail.
+	/** Increases the tail.
 	 *
 	 * Increases the contentsSize and the index of the tail. It also
 	 * wraps the tail around if the end of the array is reached.
@@ -196,7 +189,7 @@ private:
 		++_contentsSize;
 	}
 
-	/* Increases the head.
+	/** Increases the head.
 	 *
 	 * Decreases the contentsSize and increases the index of the head.
 	 * It also wraps around the head if the end of the array is reached.

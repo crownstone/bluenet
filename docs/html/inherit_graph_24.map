@@ -1,0 +1,8 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classEventListener.html" title="Event listener. " alt="" coords="5,107,108,133"/>
+<area shape="rect" id="node2" href="$classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. " alt="" coords="175,5,267,32"/>
+<area shape="rect" id="node3" href="$classFridge.html" title="Fridge generates an event when its temperature is out of range. " alt="" coords="192,56,251,83"/>
+<area shape="rect" id="node4" href="$classMeshControl.html" title="Wrapper around meshing functionality. " alt="" coords="173,107,269,133"/>
+<area shape="rect" id="node5" href="$classScanner.html" title="Scanner scans for BLE devices. " alt="" coords="186,157,257,184"/>
+<area shape="rect" id="node6" href="$classTemperatureGuard.html" title="Protection against temperature exceeding certain threshold. " alt="" coords="156,208,287,235"/>
+</map>

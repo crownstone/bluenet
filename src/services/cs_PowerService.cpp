@@ -99,8 +99,8 @@ void PowerService::init() {
 void PowerService::tick() {
 	//	LOGi("Tock: %d", RTC::now());
 
-	// Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
-	// TODO: This is not required anymore at later crownstone versions, so this should be done at init().
+	//! Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
+	//! TODO: This is not required anymore at later crownstone versions, so this should be done at init().
 
 #if CHAR_CURRENT_LIMIT==1
 	if(!_currentLimitInitialized) {
@@ -110,7 +110,7 @@ void PowerService::tick() {
 #endif
 
 //	if (!_adcInitialized) {
-//		// Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
+//		//! Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
 //		ADC::getInstance().init(PIN_AIN_ADC);
 //		sampleCurrentInit();
 //		_adcInitialized = true;
@@ -122,7 +122,7 @@ void PowerService::tick() {
 //	}
 
 	//~ LPComp::getInstance().tick();
-	// check if current is not beyond current_limit if the latter is set
+	//! check if current is not beyond current_limit if the latter is set
 	//	if (++tmp_cnt > tick_cnt) {
 	//		if (_currentLimitCharacteristic) {
 	//			getCurrentLimit();
@@ -187,20 +187,20 @@ void PowerService::addRelayCharacteristic() {
 	});
 }
 
-// Do we really want to use the PWM for this, or just set the pin to zero?
-// TODO: turn off normally, but make sure we enable the completely PWM again on request
+//! Do we really want to use the PWM for this, or just set the pin to zero?
+//! TODO: turn off normally, but make sure we enable the completely PWM again on request
 void PowerService::turnOff() {
-	// update pwm characteristic so that the current value can be read from the characteristic
+	//! update pwm characteristic so that the current value can be read from the characteristic
 	if (_pwmCharacteristic != NULL) {
 		(*_pwmCharacteristic) = 0;
 	}
 	PWM::getInstance().setValue(0, 0);
 }
 
-// Do we really want to use the PWM for this, or just set the pin to zero?
-// TODO: turn on normally, but make sure we enable the completely PWM again on request
+//! Do we really want to use the PWM for this, or just set the pin to zero?
+//! TODO: turn on normally, but make sure we enable the completely PWM again on request
 void PowerService::turnOn() {
-	// update pwm characteristic so that the current value can be read from the characteristic
+	//! update pwm characteristic so that the current value can be read from the characteristic
 	if (_pwmCharacteristic != NULL) {
 		(*_pwmCharacteristic) = 255;
 	}
@@ -208,7 +208,7 @@ void PowerService::turnOn() {
 }
 
 void PowerService::dim(uint8_t value) {
-	// update pwm characteristic so that the current value can be read from the characteristic
+	//! update pwm characteristic so that the current value can be read from the characteristic
 	if (_pwmCharacteristic != NULL) {
 		(*_pwmCharacteristic) = value;
 	}
@@ -231,7 +231,7 @@ void PowerService::addSampleCurrentCharacteristic() {
 			return;
 		}
 
-		// Start storing the samples
+		//! Start storing the samples
 //		_currentCurve->clear();
 //		ADC::getInstance().setCurrentCurve(_currentCurve);
 //		_samplingType = value;
@@ -277,7 +277,7 @@ uint8_t PowerService::getCurrentLimit() {
 	return _currentLimitVal;
 }
 
-// TODO: doesn't work for now
+//! TODO: doesn't work for now
 void PowerService::setCurrentLimit(uint8_t value) {
 	LOGi("Set current limit to: %i", value);
 	_currentLimitVal = value;
@@ -299,7 +299,7 @@ void PowerService::setCurrentLimit(uint8_t value) {
  * TODO: Check https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/
  *       Writing to persistent memory should be done between connection/advertisement events...
  */
-// TODO -oDE: make part of configuration characteristic
+//! TODO -oDE: make part of configuration characteristic
 void PowerService::addCurrentLimitCharacteristic() {
 	_currentLimitCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_currentLimitCharacteristic);
@@ -313,8 +313,8 @@ void PowerService::addCurrentLimitCharacteristic() {
 		_currentLimitInitialized = true;
 	});
 
-	// TODO: we have to delay the init, since there is a spike on the AIN pin at startup!
-	// For now: init at onWrite, so we can still test it.
+	//! TODO: we have to delay the init, since there is a spike on the AIN pin at startup!
+	//! For now: init at onWrite, so we can still test it.
 	//	_currentLimit.start(&_currentLimitVal);
 	//	_currentLimit.init();
 }
@@ -326,12 +326,12 @@ void PowerService::sampleCurrentInit() {
 	LOGi("Start ADC");
 	ADC::getInstance().start();
 
-	//	// Wait for the ADC to actually start
+	//	//! Wait for the ADC to actually start
 	//	nrf_delay_ms(5);
 }
 
 void PowerService::sampleCurrent(uint8_t type) {
-	// Start storing the samples
+	//! Start storing the samples
 	_voltagePin = false;
 	_powerCurve->clear();
 //	ADC::getInstance().setPowerCurve(_powerCurve);
@@ -360,7 +360,7 @@ void PowerService::sampleCurrent(uint8_t type) {
 }
 
 void PowerService::sampleCurrentDone(uint8_t type) {
-//	// Stop storing the samples
+//	//! Stop storing the samples
 //	ADC::getInstance().setCurrentCurve(NULL);
 	ADC::getInstance().setPowerCurve(NULL);
 
@@ -426,21 +426,21 @@ void PowerService::sampleCurrentDone(uint8_t type) {
 				minCurrentSample = currentSample;
 			}
 
-			// TODO: do some power = voltage * current, make sure we use timestamps too.
+			//! TODO: do some power = voltage * current, make sure we use timestamps too.
 		}
-		// 1023*1000*1200 = 1.3e9 < 4.3e9 (max uint32)
-		// currentSampleAmplitude is max: 1023*1000*1200/1023/2 = 600000
-		uint32_t currentSampleAmplitude = (maxCurrentSample-minCurrentSample) * 1000 * 1200 / 1023 / 2; // uV
-		// max of currentAmplitude depends on amplification and shunt value
-		uint32_t currentAmplitude = currentSampleAmplitude / VOLTAGE_AMPLIFICATION / SHUNT_VALUE; // mA
-		// currentRms should be max:  16000
-		uint32_t currentRms = currentAmplitude * 1000 / 1414; // mA
+		//! 1023*1000*1200 = 1.3e9 < 4.3e9 (max uint32)
+		//! currentSampleAmplitude is max: 1023*1000*1200/1023/2 = 600000
+		uint32_t currentSampleAmplitude = (maxCurrentSample-minCurrentSample) * 1000 * 1200 / 1023 / 2; //! uV
+		//! max of currentAmplitude depends on amplification and shunt value
+		uint32_t currentAmplitude = currentSampleAmplitude / VOLTAGE_AMPLIFICATION / SHUNT_VALUE; //! mA
+		//! currentRms should be max:  16000
+		uint32_t currentRms = currentAmplitude * 1000 / 1414; //! mA
 		LOGi("currentRms = %i mA", currentRms);
-		uint32_t powerRms = currentRms * 230 / 1000; // Watt
+		uint32_t powerRms = currentRms * 230 / 1000; //! Watt
 		LOGi("powerRms = %i Watt", powerRms);
 		*_powerConsumptionCharacteristic = powerRms;
 	}
 
-	// Unlock the buffer
+	//! Unlock the buffer
 	MasterBuffer::getInstance().unlock();
 }

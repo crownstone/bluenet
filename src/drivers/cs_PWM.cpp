@@ -35,8 +35,6 @@ void pwm_ready_callback(uint32_t pwm_id)    // PWM callback function
 ////	ready_flag = true;
 //};
 
-
-// Set the value of a specific channel
 void PWM::setValue(uint8_t channel, uint32_t value) {
 	if (!_initialized) {
 		LOGe("Can't used PWM without initializing first");
@@ -56,8 +54,6 @@ uint32_t PWM::getValue(uint8_t channel) {
 	return app_pwm_channel_duty_get(_pwmInstance, channel);
 }
 
-// Switch off all channels
-// Also works when not initialized (useful for emergencies)
 void PWM::switchOff() {
 	if (!_initialized) {
 		LOGe("Can't used PWM without initializing first");

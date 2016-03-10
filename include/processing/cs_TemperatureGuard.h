@@ -14,8 +14,10 @@
 #include "cfg/cs_Settings.h"
 #include "events/cs_EventListener.h"
 
-#define TEMPERATURE_UPDATE_FREQUENCY 0.2 // Hz
+#define TEMPERATURE_UPDATE_FREQUENCY 0.2
 
+/** Protection against temperature exceeding certain threshold
+ */
 class TemperatureGuard : EventListener {
 public:
 	TemperatureGuard() :
@@ -34,12 +36,12 @@ public:
 	}
 	void tick() {
 		if (getTemperature() > _maxTemp) {
-			// Make sure pwm can't be set anymore
+			//! Make sure pwm can't be set anymore
 			PWM::getInstance().deinit();
-			// Switch off all channels
+			//! Switch off all channels
 			PWM::getInstance().switchOff();
 		}
-		// TODO: make next time to next tick depend on current temperature
+		//! TODO: make next time to next tick depend on current temperature
 //		scheduleNextTick();
 	}
 

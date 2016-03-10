@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Mar 23, 2015
@@ -10,29 +10,30 @@
 
 //#include <common/cs_Types.h>
 
-#define SENSORS_UPDATE_FREQUENCY 2 // hz
+#define SENSORS_UPDATE_FREQUENCY 2 //! hz
 
 #define MAX_VALUE 1023
 
-// helper function
+//! helper function
 #define freqToInterval(x) 1000 / x
 
-// light sensor
+//! light sensor
 #define LIGHT_THRESHOLD 0.2 * MAX_VALUE
-#define LIGHT_CHECK_INTERVAL freqToInterval(1) // 1 Hz
+#define LIGHT_CHECK_INTERVAL freqToInterval(1) //! 1 Hz
 
-// thermistor
-#define THERMAL_CHECK_INTERVAL freqToInterval(1) // 1 Hz
+//! thermistor
+#define THERMAL_CHECK_INTERVAL freqToInterval(1) //! 1 Hz
 
-// push button
+//! push button
 #define PUSH_BUTTON_THRESHOLD 0.9 * MAX_VALUE
-#define PUSH_BUTTON_CHECK_INTERVAL freqToInterval(20) // 20 Hz
+#define PUSH_BUTTON_CHECK_INTERVAL freqToInterval(20) //! 20 Hz
 
-// switch button
+//! switch button
 #define SWITCH_THRESHOLD 0.9 * MAX_VALUE
-#define SWITCH_CHECK_INTERVAL freqToInterval(20) // 20 Hz
+#define SWITCH_CHECK_INTERVAL freqToInterval(20) //! 20 Hz
 
-
+/** Sensors such as the light sensor or the temperature sensor.
+ */
 class Sensors {
 public:
 	Sensors();
@@ -45,9 +46,9 @@ public:
 	void startTicking();
 	void stopTicking();
 
-	// helper functions, only operate on PWM instance
-	// static so that they can be used by the
-	// GPIO interrupt handler
+	//! helper functions, only operate on PWM instance
+	//! static so that they can be used by the
+	//! GPIO interrupt handler
 	static void switchPwmSignal();
 	static void switchPwmOn();
 	static void switchPwmOff();
