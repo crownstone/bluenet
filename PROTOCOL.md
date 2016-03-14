@@ -18,7 +18,7 @@ The power service has UUID 5b8d0000-6f20-11e4-b116-123b93f75cba.
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
-PWM                | 5b8d0001-6f20-11e4-b116-123b93f75cba | uint 8 | Set PWM value. Value of 0 is completely off, 255 is completely on.
+PWM                | 5b8d0001-6f20-11e4-b116-123b93f75cba | uint 8 | Set PWM value. Value of 0 is completely off, 255 (100 on new devices) is completely on.
 Power sample write | 5b8d0002-6f20-11e4-b116-123b93f75cba | uint 8 | Start sampling current and voltage. Write 1 if you want to read only power consumption, 2 if you want to read power samples, 3 for both.
 Power sample read  | 5b8d0003-6f20-11e4-b116-123b93f75cba | [Power curve](#power_curve_packet) | Last sampled current and voltage.
 Power consumption  | 5b8d0004-6f20-11e4-b116-123b93f75cba | uint 16 | The current power consumption.
