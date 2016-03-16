@@ -40,9 +40,9 @@ public:
 	uint32_t init(app_pwm_config_t config);
 
 	//! Returns configuration values for 1 Channel
-	static app_pwm_config_t config1Ch(uint32_t period, uint32_t pin);
+	static app_pwm_config_t config1Ch(uint32_t period_us, uint32_t pin);
 	//! Returns configuration values for 2 Channels
-	static app_pwm_config_t config2Ch(uint32_t period, uint32_t pin1, uint32_t pin2);
+	static app_pwm_config_t config2Ch(uint32_t period_us, uint32_t pin1, uint32_t pin2);
 
 	//! De-Initialize the PWM instance, i.e. free allocated resources
 	uint32_t deinit();
