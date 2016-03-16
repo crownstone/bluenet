@@ -62,7 +62,7 @@ uint8_t TrackedDeviceList::isNearby() {
 	if (!getSize()) return TDL_NOT_TRACKING;
 	
 	bool is_nearby = false;
-	uint16_t result;
+	uint8_t result;
 //	print();
 	for (int i = 0; i < getSize(); ++i) {
 		if (_buffer->counters[i] >= _timeoutCount) {
@@ -82,7 +82,7 @@ void TrackedDeviceList::print(uint8_t *addr) const {
 
 void TrackedDeviceList::print() const {
 	for (int i = 0; i < getSize(); ++i) {
-		LOGd("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tstate: %d", _buffer->list[i].addr[5],
+		LOGd("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tcount: %d", _buffer->list[i].addr[5],
 				_buffer->list[i].addr[4], _buffer->list[i].addr[3], _buffer->list[i].addr[2], _buffer->list[i].addr[1],
 				_buffer->list[i].addr[0], _buffer->list[i].rssiThreshold, _buffer->counters[i]);
 	}
@@ -153,9 +153,9 @@ bool TrackedDeviceList::rem(const uint8_t* adrs_ptr) {
 }
 
 void TrackedDeviceList::setTimeout(uint16_t counts) {
-	if (counts > TDL_COUNTER_INIT) {
-		return;
-	}
+//	if (counts > TDL_COUNTER_INIT) {
+//		return;
+//	}
 
 	//! Make sure that devices that are not nearby get the new threshold count
 	for (int i=0; i<getSize(); ++i) {
