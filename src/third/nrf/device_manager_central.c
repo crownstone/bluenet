@@ -1003,19 +1003,18 @@ static __INLINE ret_code_t gatts_context_store(pstorage_handle_t const * p_block
 
     DM_LOG("[DM]: --> gatts_context_store\r\n");
 
-#if (SOFTDEVICE_SERIES == 130)
-#if (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
+#if (SOFTDEVICE_SERIES == 130) && \
+    (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
     uint32_t err_code = sd_ble_gatts_sys_attr_get(
         m_connection_table[p_handle->connection_id].conn_handle,
         sys_data,
         &attr_len);
-#elif (SOFTDEVICE_MAJOR == 1) && (SOFTDEVICE_MINOR == 0)
+#else
 	    uint32_t err_code = sd_ble_gatts_sys_attr_get(
 	        m_connection_table[p_handle->connection_id].conn_handle,
 	        sys_data,
 	        &attr_len,
 	        BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS);
-#endif
 #endif
 
     if (err_code == NRF_SUCCESS)
@@ -1271,17 +1270,16 @@ static __INLINE ret_code_t gatts_context_apply(dm_handle_t * p_handle)
         context_len     = m_gatts_table[p_handle->connection_id].size;
     }
 
-#if (SOFTDEVICE_SERIES == 130)
-#if (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
+#if (SOFTDEVICE_SERIES == 130) && \
+    (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
     err_code = sd_ble_gatts_sys_attr_set(m_connection_table[p_handle->connection_id].conn_handle,
                                          p_gatts_context,
                                          context_len);
-#elif (SOFTDEVICE_MAJOR == 1) && (SOFTDEVICE_MINOR == 0)
+#else
 	err_code = sd_ble_gatts_sys_attr_set(m_connection_table[p_handle->connection_id].conn_handle,
 										 p_gatts_context,
 										 context_len,
 										 BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS);
-#endif
 #endif
 
     if (err_code != NRF_SUCCESS)

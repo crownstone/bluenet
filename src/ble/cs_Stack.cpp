@@ -185,27 +185,6 @@ void Nrf51822BluetoothStack::updateAppearance(uint16_t appearance) {
 	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
 }
 
-void Nrf51822BluetoothStack::setPasskey(uint8_t* passkey) {
-	LOGd("setting passkey to: %s", std::string((char*)passkey, BLE_GAP_PASSKEY_LEN).c_str());
-	memcpy(_passkey, passkey, BLE_GAP_PASSKEY_LEN);
-
-	if (_inited) {
-		updatePasskey();
-	}
-}
-
-void Nrf51822BluetoothStack::updatePasskey() {
-#if SOFTDEVICE_SERIES==130 || (SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR == 8)
-	ble_opt_t static_pin_option;
-	static_pin_option.gap_opt.passkey.p_passkey = _passkey;
-	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
-#elif SOFTDEVICE_SERIES==110
-	ble_opt_t static_pin_option;
-	static_pin_option.gap.passkey.p_passkey = _passkey;
-	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
-#endif
-}
-
 void Nrf51822BluetoothStack::startAdvertisingServices() {
 	if (_started)
 		return;
@@ -702,6 +681,26 @@ bool Nrf51822BluetoothStack::isScanning() {
 //	}
 //}
 
+void Nrf51822BluetoothStack::setPasskey(uint8_t* passkey) {
+	LOGd("setting passkey to: %s", std::string((char*)passkey, BLE_GAP_PASSKEY_LEN).c_str());
+	memcpy(_passkey, passkey, BLE_GAP_PASSKEY_LEN);
+
+	if (_inited) {
+		updatePasskey();
+	}
+}
+
+void Nrf51822BluetoothStack::updatePasskey() {
+#if SOFTDEVICE_SERIES==130 || (SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR == 8)
+	ble_opt_t static_pin_option;
+	static_pin_option.gap_opt.passkey.p_passkey = _passkey;
+	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
+#elif SOFTDEVICE_SERIES==110
+	ble_opt_t static_pin_option;
+	static_pin_option.gap.passkey.p_passkey = _passkey;
+	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
+#endif
+}
 
 /** Function for handling the Device Manager events.
  *
@@ -736,25 +735,29 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
                                            dm_event_t const     * p_event,
 										   ret_code_t           event_result)
 {
+//	uint32_t err_code;
 //	LOGd("deviceManagerEvtHandler: 0x%X", p_event->event_id);
 
-    if (event_result != BLE_GAP_SEC_STATUS_SUCCESS) {
-    	LOGe("[SECURITY ERROR] bonding failed with code: %d", event_result);
-    	sd_ble_gap_disconnect(p_event->event_param.p_gap_param->conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-//!    	return NRF_ERROR_INTERNAL;
-    }
+// todo: why was this here?
+//    if (event_result != BLE_GAP_SEC_STATUS_SUCCESS) {
+//    	LOGe("[SECURITY ERROR] bonding failed with code: %d", event_result);
+//    	sd_ble_gap_disconnect(p_event->event_param.p_gap_param->conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+////!    	return NRF_ERROR_INTERNAL;
+//    }
 
     switch (p_event->event_id)
     {
         case DM_EVT_CONNECTION:
         	LOGi("DM_EVT_CONNECTION");
             //! Start Security Request timer.
-            if (p_handle->device_id != DM_INVALID_ID)
-            {
+//            if (p_handle->device_id != DM_INVALID_ID)
+//            {
 //!            	  LOGi("start sec timer");
 //!                err_code = app_timer_start(m_sec_req_timer_id, SECURITY_REQUEST_DELAY, NULL);
 //!                APP_ERROR_CHECK(err_code);
-            }
+//            }
+        	_peerHandle = (*p_handle);
+        	Timer::getInstance().start(_secReqTimerId, MS_TO_TICKS(SECURITY_REQUEST_DELAY), NULL);
             break;
         case DM_EVT_SECURITY_SETUP:
         case DM_EVT_SECURITY_SETUP_REFRESH: {
@@ -782,14 +785,44 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
     return NRF_SUCCESS;
 }
 
-void Nrf51822BluetoothStack::device_manager_init()
+/**@brief Function for handling the security request timer time-out.
+ *
+ * @details This function is called each time the security request timer expires.
+ *
+ * @param[in] p_context  Pointer used for passing context information from the
+ *                       app_start_timer() call to the time-out handler.
+ */
+void Nrf51822BluetoothStack::secReqTimeoutHandler(void * p_context)
+{
+    uint32_t             err_code;
+    dm_security_status_t status;
+
+    if (_conn_handle != BLE_CONN_HANDLE_INVALID)
+    {
+        err_code = dm_security_status_req(&_peerHandle, &status);
+        APP_ERROR_CHECK(err_code);
+
+        // If the link is still not secured by the peer, initiate security procedure.
+        if (status == NOT_ENCRYPTED)
+        {
+            err_code = dm_security_setup_req(&_peerHandle);
+            APP_ERROR_CHECK(err_code);
+        }
+    }
+}
+
+static void sec_req_timeout_handler(void * p_context) {
+	Nrf51822BluetoothStack::getInstance().secReqTimeoutHandler(p_context);
+}
+
+void Nrf51822BluetoothStack::device_manager_init(bool erase_bonds)
 {
     uint32_t               err_code;
     dm_init_param_t        init_data;
     dm_application_param_t register_param;
 
     //! Don't clear bonded centrals
-    init_data.clear_persistent_data = 0;
+    init_data.clear_persistent_data = erase_bonds;
 //!    init_data.clear_persistent_data = 1;//
 
     err_code = dm_init(&init_data);
@@ -813,6 +846,9 @@ void Nrf51822BluetoothStack::device_manager_init()
 
     err_code = dm_register(&_dm_app_handle, &register_param);
     APP_ERROR_CHECK(err_code);
+
+    // create a timer to handle the security request timeout
+    Timer::getInstance().createSingleShot(_secReqTimerId, sec_req_timeout_handler);
 
     LOGi("device_manager_init");
 }
@@ -896,13 +932,12 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-#if (SOFTDEVICE_SERIES == 130)
-#if (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
+#if (SOFTDEVICE_SERIES == 130) && \
+    (SOFTDEVICE_MAJOR == 0) && (SOFTDEVICE_MINOR == 9)
 		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0));
-#elif (SOFTDEVICE_MAJOR == 1) && (SOFTDEVICE_MINOR == 0)
+#else
 		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0,
                 BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS));
-#endif
 #endif
 		break;
 

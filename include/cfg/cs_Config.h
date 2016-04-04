@@ -53,6 +53,8 @@
 #define SEC_PARAM_MIN_KEY_SIZE                   7                                           /** < Minimum encryption key size. */
 #define SEC_PARAM_MAX_KEY_SIZE                   16                                          /** < Maximum encryption key size. */
 
+#define SECURITY_REQUEST_DELAY                   1500                                        /**< Delay after connection until security request is sent, if necessary (ms). */
+
 //! tx power used for low power mode during bonding
 #define LOW_TX_POWER                             -40
 

@@ -164,6 +164,11 @@ protected:
 
 	uint8_t                            			_passkey[BLE_GAP_PASSKEY_LEN];
 	dm_application_instance_t                   _dm_app_handle;
+
+	app_timer_id_t                              _lowPowerTimeoutId;
+	app_timer_id_t                              _secReqTimerId;
+	dm_handle_t                                 _peerHandle;
+
 public:
 
 	/** Initialization of the BLE stack
@@ -393,7 +398,9 @@ public:
 	 * The device manager keeps track of the bonded devices and stores the bond information
 	 * in persistent storage.
 	 */
-	void device_manager_init();
+	void device_manager_init(bool erase_bonds);
+
+	void secReqTimeoutHandler(void * p_context);
 
 	/*
 	 * Callback handler for device manager events
@@ -421,7 +428,6 @@ protected:
 	 */
 	void onTxComplete(ble_evt_t * p_ble_evt);
 
-	uint32_t _lowPowerTimeoutId;
 	static void lowPowerTimeout(void* p_context);
 
 	void changeToLowPowerMode();
