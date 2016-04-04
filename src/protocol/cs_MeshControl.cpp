@@ -61,23 +61,23 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		switch(msg->header.messageType) {
 		case SCAN_MESSAGE: {
 
-			LOGi("Device %02X %02X %02X %02X %02X %02X scanned these devices:", msg->header.sourceAddress[5],
+			LOGw("Device %02X %02X %02X %02X %02X %02X scanned these devices:", msg->header.sourceAddress[5],
 					msg->header.sourceAddress[4], msg->header.sourceAddress[3], msg->header.sourceAddress[2],
 					msg->header.sourceAddress[1], msg->header.sourceAddress[0]);
-			if (msg->scanMsg.numDevices > NR_DEVICES_PER_MESSAGE) {
-				LOGe("Invalid number of devices!");
-			}
-			else {
-				for (int i = 0; i < msg->scanMsg.numDevices; ++i) {
-					peripheral_device_t dev = msg->scanMsg.list[i];
-//					if ((dev.addr[5] == 0xED && dev.addr[4] == 0x01 && dev.addr[3] == 0x53 && dev.addr[2] == 0xB8 && dev.addr[1] == 0x6F && dev.addr[0] == 0xCC) ||
-//						(dev.addr[5] == 0xC1 && dev.addr[4] == 0x1F && dev.addr[3] == 0xDC && dev.addr[2] == 0xF9 && dev.addr[1] == 0xB3 && dev.addr[0] == 0xFC)) {
-						LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
-								dev.addr[4], dev.addr[3], dev.addr[2], dev.addr[1],
-								dev.addr[0], dev.rssi, dev.occurrences);
-//					}
-				}
-			}
+//			if (msg->scanMsg.numDevices > NR_DEVICES_PER_MESSAGE) {
+//				LOGe("Invalid number of devices!");
+//			}
+//			else {
+//				for (int i = 0; i < msg->scanMsg.numDevices; ++i) {
+//					peripheral_device_t dev = msg->scanMsg.list[i];
+////					if ((dev.addr[5] == 0xED && dev.addr[4] == 0x01 && dev.addr[3] == 0x53 && dev.addr[2] == 0xB8 && dev.addr[1] == 0x6F && dev.addr[0] == 0xCC) ||
+////						(dev.addr[5] == 0xC1 && dev.addr[4] == 0x1F && dev.addr[3] == 0xDC && dev.addr[2] == 0xF9 && dev.addr[1] == 0xB3 && dev.addr[0] == 0xFC)) {
+//						LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
+//								dev.addr[4], dev.addr[3], dev.addr[2], dev.addr[1],
+//								dev.addr[0], dev.rssi, dev.occurrences);
+////					}
+//				}
+//			}
 
 			break;
 		}

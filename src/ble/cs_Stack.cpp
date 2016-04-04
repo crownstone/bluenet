@@ -77,6 +77,7 @@ extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GATTS_EVT_WRITE:
 		//! let the scheduler execute the event handle function
+		LOGi("BLE_WRITE");
 		BLE_CALL(app_sched_event_put, (p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len, ble_evt_handler));
 		break;
 	default:

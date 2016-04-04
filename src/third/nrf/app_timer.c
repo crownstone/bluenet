@@ -342,6 +342,7 @@ static void timer_timeouts_check_sched(void)
  */
 static void timer_list_handler_sched(void)
 {
+//    LOGe("--");
     NVIC_SetPendingIRQ(SWI0_IRQn);
 }
 
@@ -476,6 +477,8 @@ static bool list_deletions_handler(void)
 {
     app_timer_id_t timer_id_old_head;
     uint8_t        user_id;
+
+//    LOGe("/");
 
     // Remember the old head, so as to decide if new compare needs to be set.
     timer_id_old_head = m_timer_id_head;
@@ -619,6 +622,7 @@ static bool list_insertions_handler(app_timer_id_t restart_list_head)
             {
                 timer_user_op_t * p_user_op = &p_user->p_user_op_queue[p_user->first];
 
+//                LOGe("\\");
                 p_user->first++;
                 if (p_user->first == p_user->user_op_queue_size)
                 {
@@ -791,6 +795,8 @@ static timer_user_op_t * user_op_alloc(timer_user_t * p_user, app_timer_id_t * p
     timer_user_op_t * p_user_op;
 
     last = p_user->last + 1;
+//    LOGe("l: %d", last);
+//    LOGe("f: %d", p_user->first);
     if (last == p_user->user_op_queue_size)
     {
         // Overflow case.
@@ -827,6 +833,7 @@ static uint32_t timer_start_op_schedule(timer_user_id_t user_id,
 {
     app_timer_id_t last_index;
 
+//    LOGi("timer_start_op_schedule");
     timer_user_op_t * p_user_op = user_op_alloc(&mp_users[user_id], &last_index);
     if (p_user_op == NULL)
     {
@@ -868,6 +875,7 @@ static uint32_t timer_stop_op_schedule(timer_user_id_t user_id, app_timer_id_t t
 {
     app_timer_id_t last_index;
 
+//    LOGi("timer_stop_op_schedule");
     timer_user_op_t * p_user_op = user_op_alloc(&mp_users[user_id], &last_index);
     if (p_user_op == NULL)
     {
@@ -893,6 +901,7 @@ static uint32_t timer_stop_all_op_schedule(timer_user_id_t user_id)
 {
     app_timer_id_t last_index;
 
+    LOGi("timer_stop_all_op_schedule");
     timer_user_op_t * p_user_op = user_op_alloc(&mp_users[user_id], &last_index);
     if (p_user_op == NULL)
     {
@@ -916,6 +925,8 @@ static uint32_t timer_stop_all_op_schedule(timer_user_id_t user_id)
  */
 void RTC1_IRQHandler(void)
 {
+//	LOGe("-");
+
     // Clear all events (also unexpected ones)
     NRF_RTC1->EVENTS_COMPARE[0] = 0;
     NRF_RTC1->EVENTS_COMPARE[1] = 0;
@@ -935,6 +946,8 @@ void RTC1_IRQHandler(void)
  */
 void SWI0_IRQHandler(void)
 {
+//	LOGe(".");
+
 //	rbc_mesh_SWI0_IRQHandler();
     timer_list_handler();
 }

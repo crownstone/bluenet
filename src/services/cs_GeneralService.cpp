@@ -40,6 +40,8 @@ GeneralService::GeneralService() :
 	init();
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)GeneralService::staticTick);
+
+	LOGe("general service timer id: %d", _appTimerId);
 }
 
 void GeneralService::init() {
@@ -154,6 +156,7 @@ void GeneralService::tick() {
 }
 
 void GeneralService::scheduleNextTick() {
+//	LOGi("GeneralService::scheduleNextTick");
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(GENERAL_SERVICE_UPDATE_FREQUENCY), this);
 }
 
@@ -206,7 +209,9 @@ void GeneralService::addResetCharacteristic() {
 				}
 
 				app_timer_id_t resetTimer;
+//				LOGi("_resetCharacteristic->onWrite");
 				Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t)reset);
+				LOGe("reset timer id: %d", _appTimerId);
 				Timer::getInstance().start(resetTimer, MS_TO_TICKS(100), &cmd);
 
 			} else {

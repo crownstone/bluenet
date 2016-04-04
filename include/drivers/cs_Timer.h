@@ -69,7 +69,16 @@ public:
 	 */
 //	void start(app_timer_id_t & timer_handle, uint32_t ticks, void* obj);
 	inline void start(app_timer_id_t & timer_handle, uint32_t ticks, void* obj) {
+//		LOGi("timer start");
+//		LOGe("_");
 		BLE_CALL(app_timer_start, (timer_handle, ticks, obj));
+/*		uint32_t err_code = app_timer_start(timer_handle, ticks, obj);
+		if (err_code != NRF_SUCCESS) {
+			LOGe("UH-OH!!!!!");
+			nrf_delay_ms(100);
+			BLE_CALL(app_timer_start, (timer_handle, ticks, obj));
+		}
+*/
 	}
 
 	/** Stop a timer

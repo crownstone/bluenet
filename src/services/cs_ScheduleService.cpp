@@ -25,6 +25,8 @@ ScheduleService::ScheduleService() :
 	init();
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)ScheduleService::staticTick);
+
+	LOGe("schedule service timer id: %d", _appTimerId);
 }
 
 void ScheduleService::init() {
@@ -59,6 +61,7 @@ void ScheduleService::tick() {
 }
 
 void ScheduleService::scheduleNextTick() {
+//	LOGi(" ScheduleService::scheduleNextTick");
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(SCHEDULE_SERVICE_UPDATE_FREQUENCY), this);
 }
 

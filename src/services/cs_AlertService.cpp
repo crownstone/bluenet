@@ -43,6 +43,7 @@ void AlertService::tick() {
 }
 
 void AlertService::scheduleNextTick() {
+//	LOGi("scheduleNextTick");
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(ALERT_SERVICE_UPDATE_FREQUENCY), this);
 }
 

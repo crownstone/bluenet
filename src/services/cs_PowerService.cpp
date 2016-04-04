@@ -63,7 +63,11 @@ PowerService::PowerService() :
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)PowerService::staticTick);
 
+	LOGe("power service timer id: %d", _appTimerId);
+
 	Timer::getInstance().createSingleShot(_staticSamplingTimer, (app_timer_timeout_handler_t)PowerService::staticSampleCurrent);
+
+	LOGe("sample power timer id: %d", _staticSamplingTimer);
 }
 
 void PowerService::init() {
@@ -147,6 +151,7 @@ void PowerService::tick() {
 }
 
 void PowerService::scheduleNextTick() {
+//	LOGi("PowerService::scheduleNextTick");
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(POWER_SERVICE_UPDATE_FREQUENCY), this);
 }
 
@@ -495,4 +500,7 @@ void PowerService::sampleCurrentDone() {
 
 	//! Unlock the buffer
 	MasterBuffer::getInstance().unlock();
+
+//	uint32_t end = RTC::now();
+//	LOGw("report: %d", end - done);
 }

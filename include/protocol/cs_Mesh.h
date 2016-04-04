@@ -80,7 +80,9 @@ public:
 	//! initialize
 	void init();
 
-	void startTicking() { Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this); };
+	void startTicking() {
+//		LOGi("CMesh::startTicking");
+		Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this); };
 	void stopTicking() { Timer::getInstance().stop(_appTimerId); };
 
 	//! send message

@@ -26,6 +26,7 @@
 CMesh::CMesh() : _appTimerId(-1) {
 	MeshControl::getInstance();
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)CMesh::staticTick);
+	LOGe("mesh timer id: %d", _appTimerId);
 }
 
 CMesh::~CMesh() {
@@ -38,6 +39,7 @@ void CMesh::tick() {
 }
 
 void CMesh::scheduleNextTick() {
+//	LOGi("CMesh::scheduleNextTick");
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(MESH_UPDATE_FREQUENCY), this);
 }
 

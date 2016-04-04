@@ -1,3 +1,4 @@
+
 /**
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
@@ -58,6 +59,8 @@ IndoorLocalizationService::IndoorLocalizationService() :
 	init();
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)IndoorLocalizationService::staticTick);
+
+	LOGe("indoor localization timer id: %d", _appTimerId);
 }
 
 void IndoorLocalizationService::init() {
@@ -90,8 +93,10 @@ void IndoorLocalizationService::tick() {
 //	LOGi("Tack: %d", RTC::now());
 
 	if (!_initialized) {
+//		LOGi("_initialized: %d", RTC::now());
 		_scanner = new Scanner(getStack());
 #if INTERVAL_SCANNER_ENABLED==1
+//		LOGi("INTERVAL_SCANNER_ENABLED: %d", RTC::now());
 		RNG rng;
 		uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
 		_scanner->delayedStart(delay);
@@ -129,6 +134,7 @@ void IndoorLocalizationService::tick() {
 }
 
 void IndoorLocalizationService::scheduleNextTick() {
+//	LOGi("IndoorLocalizationService::scheduleNextTick");
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(LOCALIZATION_SERVICE_UPDATE_FREQUENCY), this);
 }
 
