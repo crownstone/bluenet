@@ -858,7 +858,9 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
 //	}
 
+#if ENCRYPTION==1
 	dm_ble_evt_handler(p_ble_evt);
+#endif
 
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:

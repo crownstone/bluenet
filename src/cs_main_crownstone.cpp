@@ -342,7 +342,9 @@ void Crownstone::setup() {
 
 	createServices();
 
+#if ENCRYPTION==1
 	_stack->device_manager_init(false);
+#endif
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 	_sensors = new Sensors;
