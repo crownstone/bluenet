@@ -31,8 +31,10 @@ public:
 
 		EventDispatcher::getInstance().addListener(this);
 
-		Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
-//		Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
+//		Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
+		Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
+
+		LOGe("temp guard timer id: %d", _appTimerId);
 	}
 	void tick() {
 		if (getTemperature() > _maxTemp) {
@@ -41,11 +43,17 @@ public:
 			//! Switch off all channels
 			PWM::getInstance().switchOff();
 		}
-		//! TODO: make next time to next tick depend on current temperature
-//		scheduleNextTick();
+		// TODO: make next time to next tick depend on current temperature
+		scheduleNextTick();
+	}
+
+	void scheduleNextTick() {
+//		LOGi("TemperatureGuard::scheduleNextTick");
+		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);
 	}
 
 	void startTicking() {
+//		LOGi("TemperatureGuard::startTicking");
 		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);
 	}
 

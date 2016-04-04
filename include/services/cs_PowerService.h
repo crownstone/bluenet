@@ -72,6 +72,14 @@ public:
 	 * a specific duty-cycle after the detection of a zero crossing.
 	 */
 	void dim(uint8_t value);
+
+	static void staticSampleCurrent(PowerService *ptr) {
+		ptr->sampleCurrent();
+	}
+
+	void startSampling(uint8_t type);
+	void stopSampling();
+
 protected:
 	//! The characteristics in this service
 	void addPWMCharacteristic();
@@ -80,15 +88,6 @@ protected:
 	void addCurrentCurveCharacteristic();
 	void addPowerConsumptionCharacteristic();
 	void addCurrentLimitCharacteristic();
-
-	/** Initializes and starts the ADC
-	 */
-	void sampleCurrentInit();
-
-	/** Fill up the current curve and send it out over bluetooth
-	 * @type specifies over which characteristic the current curve should be sent.
-	 */
-	void sampleCurrentDone(uint8_t type);
 
 	/** Get the stored current limit.
 	 */
@@ -117,15 +116,30 @@ private:
 
 	PowerCurve<uint16_t>* _powerCurve;
 
+	uint8_t _sampleBuffer[MASTER_BUFFER_SIZE];
+
 	uint8_t _currentLimitVal;
 
 //	pstorage_handle_t _storageHandle;
 //	ps_power_service_t _storageStruct;
 
+	app_timer_id_t _staticSamplingTimer;
+
 	bool _adcInitialized;
 	bool _currentLimitInitialized;
+	bool _sampling;
 	uint8_t _samplingType;
 	bool _voltagePin;
+	uint16_t _samplingTime, _samplingInterval;
 
-	void sampleCurrent(uint8_t type);
+	void sampleCurrent();
+
+	/** Initializes and starts the ADC
+	 */
+//	void sampleCurrentInit();
+
+	/** Fill up the current curve and send it out over bluetooth
+	 * @type specifies over which characteristic the current curve should be sent.
+	 */
+	void sampleCurrentDone();
 };

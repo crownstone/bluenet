@@ -32,8 +32,10 @@ extern "C"
 #include "nrf_error.h"
 
 #include "app_util.h"
-#include "app_timer.h"
-#undef APP_ERROR_CHECK //! undefine again, we want to use our own macro defined in util/cs_BleError.h
+//#include "app_timer.h"
+#include "app_scheduler.h"
+#include "app_timer_appsh.h"
+#undef APP_ERROR_CHECK // undefine again, we want to use our own macro defined in util/cs_BleError.h
 #undef APP_ERROR_HANDLER
 
 #include "softdevice_handler.h"

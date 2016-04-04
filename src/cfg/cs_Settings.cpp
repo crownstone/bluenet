@@ -144,6 +144,14 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		setUint16(type, payload, length, persistent, _storageStruct.scanFilterSendFraction);
 		break;
 	}
+	case CONFIG_SAMPLING_INTERVAL: {
+		setUint16(type, payload, length, persistent, _storageStruct.samplingInterval);
+		break;
+	}
+	case CONFIG_SAMPLING_TIME: {
+		setUint16(type, payload, length, persistent, _storageStruct.samplingTime);
+		break;
+	}
 	default:
 		LOGw("There is no such configuration type (%u).", type);
 	}
@@ -272,6 +280,14 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
 		LOGd("Read scan filter send fraction");
 		return getUint16(type, streamBuffer, _storageStruct.scanFilterSendFraction, SCAN_FILTER_SEND_FRACTION);
+	}
+	case CONFIG_SAMPLING_INTERVAL: {
+		LOGd("Read sampling interval");
+		return getUint16(type, streamBuffer, _storageStruct.samplingInterval, SAMPLING_INTERVAL);
+	}
+	case CONFIG_SAMPLING_TIME: {
+		LOGd("Read sampling interval");
+		return getUint16(type, streamBuffer, _storageStruct.samplingTime, SAMPLING_TIME);
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);

@@ -84,10 +84,19 @@ Sensors::Sensors() : _appTimerId(0), _initialized(false),
 	_lastLightCheck(0), _lastThermalCheck(0), _lastPushButtonCheck(0), _lastSwitchCheck(0),
 	_lastSwitchOn(false), _lastPushed(false)
 {
-	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Sensors::staticTick);
+//	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Sensors::staticTick);
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Sensors::staticTick);
+
+	LOGe("sensors timer id: %d", _appTimerId);
 }
 
 void Sensors::startTicking() {
+//	LOGi("Sensors::startTicking");
+	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(SENSORS_UPDATE_FREQUENCY), this);
+}
+
+void Sensors::scheduleNextTick() {
+//	LOGi("Sensors::scheduleNextTick");
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(SENSORS_UPDATE_FREQUENCY), this);
 }
 
@@ -346,6 +355,7 @@ void Sensors::tick() {
 	checkThermalSensor(now);
 #endif
 
+	scheduleNextTick();
 }
 
 #ifdef SWITCH_ENABLED

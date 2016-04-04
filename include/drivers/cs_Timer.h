@@ -25,7 +25,8 @@ class Timer {
 private:
 	Timer() {
 		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
+//		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
+		APP_TIMER_APPSH_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, true);
 	}
 
 	Timer(Timer const&);
@@ -57,9 +58,9 @@ public:
 	 * Create a timer for a specific purpose.
 	 */
 //	void createRepeated(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func);
-	inline void createRepeated(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func) {
-		BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_REPEATED, func));
-	}
+//	inline void createRepeated(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func) {
+//		BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_REPEATED, func));
+//	}
 
 	/** Start a previously created timer
 	 * @timer_handle            Reference to previously created timer

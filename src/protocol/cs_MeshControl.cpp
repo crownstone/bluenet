@@ -27,8 +27,8 @@
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
     sd_ble_gap_address_get(&_myAddr);
-    Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t)MeshControl::reset);
-    Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
+//    Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t)MeshControl::reset);
+//    Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
 }
 
 extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
@@ -42,8 +42,8 @@ extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
 void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //	LOGi("Process incoming mesh message");
 
-	Timer::getInstance().stop(_resetTimerId);
-	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
+//	Timer::getInstance().stop(_resetTimerId);
+//	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
 
 	switch(channel) {
 	case HUB_CHANNEL: {

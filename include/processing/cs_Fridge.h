@@ -26,6 +26,7 @@ public:
 	}
 	void startTicking();
 	void stopTicking();
+	void scheduleNextTick();
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 

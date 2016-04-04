@@ -26,6 +26,9 @@
 #include <protocol/cs_MeshControl.h>
 #include <cfg/cs_Settings.h>
 
+// change to #def to enable output of sample current values
+#undef PRINT_SAMPLE_CURRENT
+
 using namespace BLEpp;
 
 PowerService::PowerService() :
@@ -39,7 +42,10 @@ PowerService::PowerService() :
 		_currentLimitVal(0),
 		_adcInitialized(false),
 		_currentLimitInitialized(false),
-		_samplingType(0)
+		_samplingType(0),
+		_sampling(false),
+		_samplingTime(50),
+		_samplingInterval(500)
 {
 
 	setUUID(UUID(POWER_UUID));
@@ -49,10 +55,15 @@ PowerService::PowerService() :
 	Settings::getInstance();
 //	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
 //	loadPersistentStorage();
+	ps_configuration_t cfg = Settings::getInstance().getConfig();
+	Storage::getUint16(cfg.samplingTime, _samplingTime, SAMPLING_TIME);
+	Storage::getUint16(cfg.samplingInterval, _samplingInterval, SAMPLING_INTERVAL);
 
 	init();
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)PowerService::staticTick);
+
+	Timer::getInstance().createSingleShot(_staticSamplingTimer, (app_timer_timeout_handler_t)PowerService::staticSampleCurrent);
 }
 
 void PowerService::init() {
@@ -236,7 +247,12 @@ void PowerService::addSampleCurrentCharacteristic() {
 //		ADC::getInstance().setCurrentCurve(_currentCurve);
 //		_samplingType = value;
 
-		sampleCurrent(value);
+//		sampleCurrent(value);
+		if (value == 0) {
+			stopSampling();
+		} else {
+			startSampling(value);
+		}
 	});
 }
 
@@ -249,10 +265,12 @@ void PowerService::addCurrentCurveCharacteristic() {
 	_currentCurveCharacteristic->setNotifies(true);
 
 	_powerCurve = new PowerCurve<uint16_t>();
-	MasterBuffer& mb = MasterBuffer::getInstance();
-	uint8_t *buffer = NULL;
-	uint16_t size = 0;
-	mb.getBuffer(buffer, size);
+//	MasterBuffer& mb = MasterBuffer::getInstance();
+//	uint8_t *buffer = NULL;
+//	uint16_t size = 0;
+//	mb.getBuffer(buffer, size);
+	uint8_t *buffer = _sampleBuffer;
+	uint16_t size = sizeof(_sampleBuffer);
 	LOGd("Assign buffer of size %i to current curve", size);
 	_powerCurve->assign(buffer, size);
 
@@ -322,16 +340,36 @@ void PowerService::addCurrentLimitCharacteristic() {
 //static int tmp_cnt = 100;
 //static int tick_cnt = 100;
 
-void PowerService::sampleCurrentInit() {
-	LOGi("Start ADC");
-	ADC::getInstance().start();
+//void PowerService::sampleCurrentInit() {
+//	LOGi("Start ADC");
+//	ADC::getInstance().start();
+//
+//	//	// Wait for the ADC to actually start
+//	//	nrf_delay_ms(5);
+//}
 
-	//	//! Wait for the ADC to actually start
-	//	nrf_delay_ms(5);
+void PowerService::startSampling(uint8_t type) {
+	_sampling = true;
+	_samplingType = type;
+	LOGi("start sampling");
+	Timer::getInstance().start(_staticSamplingTimer, MS_TO_TICKS(1), this);
 }
 
-void PowerService::sampleCurrent(uint8_t type) {
-	//! Start storing the samples
+void PowerService::stopSampling() {
+	LOGi("stop sampling");
+	_sampling = false;
+}
+
+void PowerService::sampleCurrent() {
+
+	if (!_sampling) {
+		return;
+	}
+	uint32_t start = RTC::now();
+
+	LOGw("sample current");
+
+	// Start storing the samples
 	_voltagePin = false;
 	_powerCurve->clear();
 //	ADC::getInstance().setPowerCurve(_powerCurve);
@@ -355,23 +393,37 @@ void PowerService::sampleCurrent(uint8_t type) {
 		_voltagePin = !_voltagePin;
 		ADC::getInstance().start();
 	}
-	LOGd("sampleCurrentDone");
-	sampleCurrentDone(type);
+
+//	uint32_t done = RTC::now();
+//	LOGw("sample dt: %d", done- start);
+
+	sampleCurrentDone();
+
+	if (_sampling) {
+		int32_t pause = _samplingInterval - (RTC::now() - start);
+		pause = pause < 1 ? 1 : pause;
+		LOGw("pause: %d", pause);
+		Timer::getInstance().start(_staticSamplingTimer, MS_TO_TICKS(pause), this);
+	}
 }
 
-void PowerService::sampleCurrentDone(uint8_t type) {
+void PowerService::sampleCurrentDone() {
+
+	LOGw("sample current done");
+
+//	uint32_t done = RTC::now();
 //	//! Stop storing the samples
 //	ADC::getInstance().setCurrentCurve(NULL);
 	ADC::getInstance().setPowerCurve(NULL);
 
 	uint16_t numSamples = _powerCurve->length();
 	LOGd("numSamples = %i", numSamples);
-	if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
+	if ((_samplingType & 0x2) && _currentCurveCharacteristic != NULL) {
 		_currentCurveCharacteristic->setDataLength(_powerCurve->getDataLength());
 		_currentCurveCharacteristic->notify();
 	}
 
-#if SERIAL_VERBOSITY==DEBUG
+#ifdef PRINT_SAMPLE_CURRENT
 	if (numSamples>1) {
 		uint16_t currentSample = 0;
 		uint16_t voltageSample = 0;
@@ -408,7 +460,7 @@ void PowerService::sampleCurrentDone(uint8_t type) {
 	}
 #endif
 
-	if (numSamples>1 && (type & 0x1) && _powerConsumptionCharacteristic != NULL) {
+	if (numSamples>1 && (_samplingType & 0x1) && _powerConsumptionCharacteristic != NULL) {
 		uint16_t currentSample = 0;
 		uint16_t voltageSample = 0;
 		uint32_t currentTimestamp = 0;

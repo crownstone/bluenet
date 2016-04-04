@@ -27,7 +27,8 @@ AlertService::AlertService() :
 
 	init();
 
-	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)AlertService::staticTick);
+	// enable again if the tick function needs to do something
+//	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)AlertService::staticTick);
 }
 
 void AlertService::init() {

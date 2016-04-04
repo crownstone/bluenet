@@ -20,6 +20,8 @@
 #include "app_util.h"
 #include "app_util_platform.h"
 
+#include "drivers/cs_Serial.h"
+
 #include "protocol/timeslot_handler.h"
 
 #define RTC1_IRQ_PRI            APP_IRQ_PRIORITY_LOW                        /**< Priority of the RTC1 interrupt (used for checking for timeouts and executing timeout handlers). */
@@ -828,6 +830,14 @@ static uint32_t timer_start_op_schedule(timer_user_id_t user_id,
     timer_user_op_t * p_user_op = user_op_alloc(&mp_users[user_id], &last_index);
     if (p_user_op == NULL)
     {
+    	LOGf("no more mem");
+
+    	timer_user_t * p_user;
+    	p_user = &mp_users[user_id];
+    	for (int i=0; i < 11; i++) {
+    		LOGf("%d: %d", i, p_user->p_user_op_queue[i].timer_id);
+    	}
+
         return NRF_ERROR_NO_MEM;
     }
 
