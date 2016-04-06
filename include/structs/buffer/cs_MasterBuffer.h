@@ -93,9 +93,9 @@ public:
 		}
 	}
 
-	buffer_ptr_t getBuffer() {
-		return _buffer;
-	}
+//	buffer_ptr_t getBuffer() {
+//		return _buffer;
+//	}
 
 	uint16_t size(uint16_t offset = DEFAULT_OFFSET) { return _size - offset; }
 
