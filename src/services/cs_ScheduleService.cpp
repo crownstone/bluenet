@@ -11,6 +11,9 @@
 #include "cfg/cs_UuidConfig.h"
 #include "cfg/cs_Settings.h"
 #include "drivers/cs_RTC.h"
+#include "drivers/cs_PWM.h"
+#include "structs/buffer/cs_MasterBuffer.h"
+//#include <time.h>
 
 using namespace BLEpp;
 
@@ -32,6 +35,12 @@ void ScheduleService::init() {
 
 	LOGi("add current time characteristic");
 	addCurrentTimeCharacteristic();
+
+#if CHAR_SCHEDULE==1
+	LOGi("add schedule characteristic");
+	addWriteScheduleEntryCharacteristic();
+	addListScheduleEntriesCharacteristic();
+#endif
 }
 
 uint32_t ScheduleService::getTime() {
@@ -53,8 +62,26 @@ void ScheduleService::tick() {
 	if (_currentTimeCharacteristic && *_currentTimeCharacteristic && tickDiff > RTC::msToTicks(1000)) {
 		(*_currentTimeCharacteristic)++;
 		_rtcTimeStamp += RTC::msToTicks(1000);
-		LOGd("posix time = %i", (uint32_t)(*_currentTimeCharacteristic));
+//		LOGd("posix time = %i", (uint32_t)(*_currentTimeCharacteristic));
+//		long int timestamp = *_currentTimeCharacteristic;
+//		tm* datetime = gmtime(&timestamp);
+//		LOGd("day of week = %i", datetime->tm_wday);
 	}
+
+#if CHAR_SCHEDULE==1
+	schedule_entry_t* entry = _scheduleList->checkSchedule(*_currentTimeCharacteristic);
+	if (entry != NULL) {
+		switch (ScheduleEntry::getActionType(entry)) {
+		case SCHEDULE_ACTION_TYPE_PWM:
+			PWM::getInstance().setValue(0, entry->pwm.pwm);
+			break;
+		case SCHEDULE_ACTION_TYPE_FADE:
+			//TODO: implement this, make sure that if something else changes pwm during fade, that the fading is halted.
+			break;
+		}
+	}
+#endif
+
 	scheduleNextTick();
 }
 
@@ -73,3 +100,81 @@ void ScheduleService::addCurrentTimeCharacteristic() {
 		setTime(value);
 	});
 }
+
+void ScheduleService::addWriteScheduleEntryCharacteristic() {
+	MasterBuffer& mb = MasterBuffer::getInstance();
+	buffer_ptr_t buffer = NULL;
+	uint16_t maxLength = 0;
+	mb.getBuffer(buffer, maxLength);
+
+	_writeScheduleEntryCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_writeScheduleEntryCharacteristic);
+
+	_writeScheduleEntryCharacteristic->setUUID(UUID(getUUID(), WRITE_SCHEDULE_ENTRY_UUID));
+	_writeScheduleEntryCharacteristic->setName(BLE_CHAR_WRITE_SCHEDULE);
+	_writeScheduleEntryCharacteristic->setWritable(true);
+	_writeScheduleEntryCharacteristic->setNotifies(false);
+
+	_writeScheduleEntryCharacteristic->setValue(buffer);
+	_writeScheduleEntryCharacteristic->setMaxLength(maxLength);
+	_writeScheduleEntryCharacteristic->setDataLength(0);
+	LOGd("serialized size: %u", SCHEDULE_ENTRY_SERIALIZED_SIZE);
+
+	_writeScheduleEntryCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+		ScheduleEntry entry;
+
+		if (entry.assign(_writeScheduleEntryCharacteristic->getValue(), _writeScheduleEntryCharacteristic->getValueLength())) {
+			return;
+		}
+		schedule_entry_t* entryStruct = entry.getStruct();
+		if (!entryStruct->nextTimestamp) {
+			_scheduleList->rem(entryStruct);
+		}
+		else {
+
+			//! Check if entry is correct
+			if (entryStruct->nextTimestamp < *_currentTimeCharacteristic) {
+				return;
+			}
+			switch (ScheduleEntry::getTimeType(entryStruct)) {
+			case SCHEDULE_TIME_TYPE_REPEAT:
+				if (entryStruct->repeat == 0) {
+					return;
+				}
+				break;
+			case SCHEDULE_TIME_TYPE_DAILY:
+				if (entryStruct->daily.nextDayOfWeek > 6) {
+					return;
+				}
+				break;
+			case SCHEDULE_TIME_TYPE_ONCE:
+				break;
+			}
+
+			_scheduleList->add(entryStruct);
+		}
+		_scheduleList->print();
+		_listScheduleEntriesCharacteristic->setDataLength(_scheduleList->getDataLength());
+		_listScheduleEntriesCharacteristic->notify();
+	});
+}
+
+void ScheduleService::addListScheduleEntriesCharacteristic() {
+	_scheduleList = new ScheduleList();
+
+	uint16_t size = sizeof(schedule_list_t);
+	buffer_ptr_t buffer = (buffer_ptr_t)calloc(size, sizeof(uint8_t));
+	_scheduleList->assign(buffer, size);
+
+	_listScheduleEntriesCharacteristic = new Characteristic<uint8_t*>();
+	addCharacteristic(_listScheduleEntriesCharacteristic);
+	_listScheduleEntriesCharacteristic->setUUID(UUID(getUUID(), LIST_SCHEDULE_ENTRIES_UUID));
+	_listScheduleEntriesCharacteristic->setName(BLE_CHAR_LIST_SCHEDULE);
+	_listScheduleEntriesCharacteristic->setWritable(false);
+	_listScheduleEntriesCharacteristic->setNotifies(false);
+
+	_listScheduleEntriesCharacteristic->setValue(buffer);
+	_listScheduleEntriesCharacteristic->setMaxLength(_scheduleList->getMaxLength());
+	_listScheduleEntriesCharacteristic->setDataLength(0);
+}
+

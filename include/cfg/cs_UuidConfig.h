@@ -65,4 +65,6 @@ enum AlertCharacteristicsIDs {
 
 enum ScheduleCharacteristicsIDs {
 	CURRENT_TIME_UUID                       = 0x1,
+	WRITE_SCHEDULE_ENTRY_UUID               = 0x2,
+	LIST_SCHEDULE_ENTRIES_UUID              = 0x3,
 };

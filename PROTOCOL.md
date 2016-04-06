@@ -36,6 +36,16 @@ Scan read             | 7e170004-429c-41aa-83d7-d91220abeb33 | [Scan result list
 Tracked devices write | 7e170002-429c-41aa-83d7-d91220abeb33 | [Tracked device](#tracked_device_packet) | Add or overwrite a tracked device. Set threshold larger than 0 to remove the tracked device from the list.
 Tracked devices read  | 7e170005-429c-41aa-83d7-d91220abeb33 | [Tracked device list](#tracked_device_list_packet) | Read the current list of tracked devices.
 
+## Schedule service
+
+The schedule service has UUID 96d20000-4bcf-11e5-885d-feff819cdc9f.
+
+Characteristic | UUID | Date type | Description
+--- | --- | --- | ---
+Set time        | 96d20001-4bcf-11e5-885d-feff819cdc9f | uint 32 | Sets the time. Timestamp is in seconds since epoch.
+Schedule write  | 96d20002-4bcf-11e5-885d-feff819cdc9f | [Schedule entry] | Add or modify a schedule entry. Set nextTimestamp to 0 to remove the entry from the list.
+Schedule read   | 96d20003-4bcf-11e5-885d-feff819cdc9f | [Schedule list] | Get a list of all schedule entries.
+
 
 # Data structures
 
@@ -132,6 +142,61 @@ Type | Name | Length | Description
 uint 8 | size | 1 | Number of tracked devices in the list.
 [Tracked device packet](#tracked_device_packet) | size * 7 | Array of tracked device packets.
 uint 16 array | Counters | size * 2 | Counter that keeps up how long ago the RSSI of a device was above the threshold (for internal use).
+
+
+
+### <a name="schedule_repeat_packet"></a>Schedule repeat packet
+
+#### Repeat type 0
+Perform action every X minutes.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | repeatTime | 2 | Repeat every `<repeat time>` minutes, 0 is not allowed.
+
+#### Repeat type 1
+Perform action every 24h, but only on certain days these days of the week.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | day of week | 1 | Bitmask, with bits 0-6 for Sunday-Saturday and bit 7 for all days.
+uint 8 | next day of week | 1 | Remember what day of week comes next. 0-6, where 0=Sunday.
+
+#### Repeat type 2
+Perform action only once. Entry gets removed after action was performed. No additional data required for this type.
+
+### <a name="schedule_action_packet"></a>Schedule action packet
+
+#### Action type 0
+Set power switch to a given value.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | pwm | 1 | Power switch value. Range 0-100, where 0 is off and 100 is fully on.
+uint 8 | reserved | 2 | Unused.
+
+#### Action type 1
+Fade from current power switch value to a given power switch value, in X seconds.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | pwm end | 1 | Power switch value after fading.
+uint 16 | fade duration | 2 | Fade duration in seconds.
+
+#### Action type 2
+Toggle the power switch. No additional data required for this type.
+
+
+### <a name="schedule_entry_packet"></a>Schedule entry packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | id | 1 | Unique id of this schedule entry.
+uint 8 | override mask | 1 | Bitmask of states to override. Presence mask = 1.
+uint 8 | type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
+uint 32 | next timestamp | 4 | Timestamp of the next time this entry triggers.
+[schedule repeat packet](#schedule_repeat_packet) | repeat | 2 | Repeat time data, depends on the repeat type.
+[schedule action packet](#schedule_action_packet) | action | 3 | Action data, depends on the action type.
 
 
 ### <a name="mesh_payload_packet"></a>Mesh payload packet

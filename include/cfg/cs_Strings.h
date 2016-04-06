@@ -42,6 +42,8 @@
 #define BLE_CHAR_RELAY                           "Relay"
 #define BLE_CHAR_NEW_ALERT                       "New Alert"
 #define BLE_CHAR_CURRENT_TIME                    "Current Time"
+#define BLE_CHAR_WRITE_SCHEDULE                  "Write schedule"
+#define BLE_CHAR_LIST_SCHEDULE                   "List schedule"
 
 /** Error messages
  *
