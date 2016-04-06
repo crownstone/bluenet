@@ -117,11 +117,11 @@ void ScheduleList::sync(uint32_t currentTime) {
 		}
 		//! Make sure nextTimestamp > currentTime
 		if (_buffer->list[i].nextTimestamp < currentTime) {
-			switch (ScheduleEntry::getTimeType(result)) {
+			switch (ScheduleEntry::getTimeType(&(_buffer->list[i]))) {
 			case SCHEDULE_TIME_TYPE_REPEAT:
 				_buffer->list[i].nextTimestamp += ((currentTime - _buffer->list[i].nextTimestamp) / _buffer->list[i].repeat.repeatTime + 1) * _buffer->list[i].repeat.repeatTime;
 				break;
-			case SCHEDULE_TIME_TYPE_DAILY:
+			case SCHEDULE_TIME_TYPE_DAILY:{
 				uint32_t daysDiff = (currentTime - _buffer->list[i].nextTimestamp) / SECONDS_PER_DAY + 1;
 				_buffer->list[i].nextTimestamp += daysDiff * SECONDS_PER_DAY;
 
@@ -129,6 +129,7 @@ void ScheduleList::sync(uint32_t currentTime) {
 				// TODO: is this correct?
 				_buffer->list[i].daily.nextDayOfWeek = (_buffer->list[i].daily.nextDayOfWeek + daysDiff) % 7;
 				break;
+			}
 			case SCHEDULE_TIME_TYPE_ONCE:
 				// TODO: remove this entry immediately
 				_buffer->list[i].nextTimestamp = 0; // Mark for deletion

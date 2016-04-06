@@ -145,7 +145,7 @@ void ScheduleService::addWriteScheduleEntryCharacteristic() {
 			}
 			switch (ScheduleEntry::getTimeType(entryStruct)) {
 			case SCHEDULE_TIME_TYPE_REPEAT:
-				if (entryStruct->repeat == 0) {
+				if (entryStruct->repeat.repeatTime == 0) {
 					return;
 				}
 				break;
