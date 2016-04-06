@@ -333,8 +333,10 @@ void IndoorLocalizationService::stopTracking() {
 }
 
 void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
-
-	buffer_ptr_t buffer = MasterBuffer::getInstance().getBuffer();
+	MasterBuffer& mb = MasterBuffer::getInstance();
+	buffer_ptr_t buffer = NULL;
+	uint16_t maxLength = 0;
+	mb.getBuffer(buffer, maxLength);
 
 	_trackedDeviceCharac = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_trackedDeviceCharac);
@@ -343,8 +345,14 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 	_trackedDeviceCharac->setName("Add tracked device");
 	_trackedDeviceCharac->setWritable(true);
 	_trackedDeviceCharac->setNotifies(false);
+
+	_trackedDeviceCharac->setValue(buffer);
+	_trackedDeviceCharac->setMaxLength(maxLength);
+	_trackedDeviceCharac->setDataLength(0);
+
 	_trackedDeviceCharac->onWrite([&](const buffer_ptr_t& value) -> void {
 		TrackedDevice dev;
+		//TODO: should we check the result of assign() ?
 		dev.assign(_trackedDeviceCharac->getValue(), _trackedDeviceCharac->getValueLength());
 
 		if (dev.getRSSI() > 0) {
@@ -373,11 +381,6 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 			stopTracking();
 		}
 	});
-
-	_trackedDeviceCharac->setValue(buffer);
-	_trackedDeviceCharac->setMaxLength(TRACKDEVICES_SERIALIZED_SIZE);
-	_trackedDeviceCharac->setDataLength(0);
-
 }
 
 void IndoorLocalizationService::on_ble_event(ble_evt_t * p_ble_evt) {
