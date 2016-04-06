@@ -208,6 +208,9 @@ public:
 	/** Checks the schedule entries with the current time. Returns an entry if its action has to be executed, NULL otherwise. */
 	schedule_entry_t* checkSchedule(uint32_t currentTime);
 
+	/** If there is a time jump, this function makes sure all entries are corrected. */
+	void sync(uint32_t currentTime);
+
 	/** Prints the schedule entry list */
 	void print() const;
 

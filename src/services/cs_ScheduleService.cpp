@@ -51,6 +51,10 @@ void ScheduleService::setTime(uint32_t time) {
 	LOGi("Set time to %i", time);
 	*_currentTimeCharacteristic = time;
 	_rtcTimeStamp = RTC::getCount();
+
+#if CHAR_SCHEDULE==1
+	_scheduleList->sync(time);
+#endif
 }
 
 void ScheduleService::tick() {
@@ -77,6 +81,9 @@ void ScheduleService::tick() {
 			break;
 		case SCHEDULE_ACTION_TYPE_FADE:
 			//TODO: implement this, make sure that if something else changes pwm during fade, that the fading is halted.
+			break;
+		case SCHEDULE_ACTION_TYPE_TOGGLE:
+			//TODO: implement this.
 			break;
 		}
 	}

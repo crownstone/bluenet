@@ -110,6 +110,34 @@ schedule_entry_t* ScheduleList::checkSchedule(uint32_t currentTime) {
 	return result;
 }
 
+void ScheduleList::sync(uint32_t currentTime) {
+	for (uint8_t i=0; i<getSize(); i++) {
+		if (_buffer->list[i].nextTimestamp == 0) {
+			//TODO: remove this entry
+		}
+		//! Make sure nextTimestamp > currentTime
+		if (_buffer->list[i].nextTimestamp < currentTime) {
+			switch (ScheduleEntry::getTimeType(result)) {
+			case SCHEDULE_TIME_TYPE_REPEAT:
+				_buffer->list[i].nextTimestamp += ((currentTime - _buffer->list[i].nextTimestamp) / _buffer->list[i].repeat.repeatTime + 1) * _buffer->list[i].repeat.repeatTime;
+				break;
+			case SCHEDULE_TIME_TYPE_DAILY:
+				uint32_t daysDiff = (currentTime - _buffer->list[i].nextTimestamp) / SECONDS_PER_DAY + 1;
+				_buffer->list[i].nextTimestamp += daysDiff * SECONDS_PER_DAY;
+
+				// Keep up the next day of week
+				// TODO: is this correct?
+				_buffer->list[i].daily.nextDayOfWeek = (_buffer->list[i].daily.nextDayOfWeek + daysDiff) % 7;
+				break;
+			case SCHEDULE_TIME_TYPE_ONCE:
+				// TODO: remove this entry immediately
+				_buffer->list[i].nextTimestamp = 0; // Mark for deletion
+				break;
+			}
+		}
+	}
+}
+
 void ScheduleList::print() const {
 	LOGd("Schedule list size=%u", _buffer->size);
 	for (uint8_t i=0; i<getSize(); i++) {
