@@ -39,7 +39,9 @@ extern "C" {
 		   write("[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
 
 	#define _log(level, fmt, ...) \
-			   write(fmt, ##__VA_ARGS__)
+			   if (level >= SERIAL_VERBOSITY) { \
+				   write(fmt, ##__VA_ARGS__); \
+			   }
 #else
 	#define log(level, fmt, ...)
 
