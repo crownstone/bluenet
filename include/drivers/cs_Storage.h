@@ -13,6 +13,9 @@
 #include "drivers/cs_Serial.h"
 #include "util/cs_Utils.h"
 
+#include "structs/cs_TrackDevices.h"
+#include "structs/cs_ScheduleEntries.h"
+
 extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
 	#include "pstorage_platform.h"
@@ -146,6 +149,18 @@ struct ps_configuration_t : ps_storage_base_t {
 	//! Set to 0 to not send them ever
 	uint32_t scanFilterSendFraction;
 
+};
+
+/** Struct used by the IndoorLocalisationService to store elements
+ */
+struct ps_indoorlocalisation_service_t : ps_storage_base_t {
+	struct {
+		uint8_t list[TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE];
+	} trackedDevices;
+	struct {
+		uint8_t list[sizeof(schedule_list_t)];
+	} scheduleList;
+	uint8_t reserved[3];
 };
 
 /** Class to store items persistently in FLASH

@@ -19,14 +19,6 @@
 #define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10
 //#define PWM_ON_RSSI
 
-/** Struct used by the IndoorLocalisationService to store elements
- */
-struct ps_indoorlocalisation_service_t : ps_storage_base_t {
-	struct {
-		uint8_t list[TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE];
-	} trackedDevices;
-};
-
 /** The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc.
  */
 class IndoorLocalizationService : public BLEpp::Service {

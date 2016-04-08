@@ -6,6 +6,7 @@
  */
 
 #include "structs/cs_ScheduleEntries.h"
+#include <util/cs_BleError.h>
 
 uint8_t ScheduleEntry::getTimeType(const schedule_entry_t* entry) {
 	uint8_t timeType = entry->type & 0x00FF;
@@ -40,13 +41,27 @@ void ScheduleEntry::print(const schedule_entry_t* entry) {
 
 
 
+uint16_t ScheduleList::getSize() const {
+	assert(_buffer != NULL, "buffer is NULL");
+	return _buffer->size;
+}
+
+bool ScheduleList::isEmpty() const {
+	return getSize() == 0;
+}
+
+bool ScheduleList::isFull() const {
+	return getSize() >= MAX_SCHEDULE_ENTRIES;
+}
+
 void ScheduleList::clear() {
+	assert(_buffer != NULL, "buffer is NULL");
 	_buffer->size = 0;
 }
 
 bool ScheduleList::add(const schedule_entry_t* entry) {
 	bool success = false;
-	for (uint8_t i=0; i<_buffer->size; i++) {
+	for (uint16_t i=0; i<getSize(); i++) {
 		if (_buffer->list[i].id == entry->id) {
 			LOGd("update id %u", entry->id);
 			_buffer->list[i] = *entry;
@@ -54,7 +69,7 @@ bool ScheduleList::add(const schedule_entry_t* entry) {
 			break;
 		}
 	}
-	if (!success && getSize() < MAX_SCHEDULE_ENTRIES) {
+	if (!success && !isFull()) {
 		_buffer->list[_buffer->size++] = *entry;
 		LOGd("add id %u", entry->id);
 		success = true;
@@ -64,7 +79,7 @@ bool ScheduleList::add(const schedule_entry_t* entry) {
 
 bool ScheduleList::rem(const schedule_entry_t* entry) {
 	bool success = false;
-	for (uint8_t i=0; i<_buffer->size; i++) {
+	for (uint16_t i=0; i<getSize(); i++) {
 		if (_buffer->list[i].id == entry->id) {
 			LOGd("rem id %u", entry->id);
 			success = true;
@@ -80,7 +95,7 @@ bool ScheduleList::rem(const schedule_entry_t* entry) {
 
 schedule_entry_t* ScheduleList::checkSchedule(uint32_t currentTime) {
 	schedule_entry_t* result = NULL;
-	for (uint8_t i=0; i<getSize(); i++) {
+	for (uint16_t i=0; i<getSize(); i++) {
 		if (_buffer->list[i].nextTimestamp == 0) {
 			//TODO: remove this entry
 		}
@@ -111,7 +126,7 @@ schedule_entry_t* ScheduleList::checkSchedule(uint32_t currentTime) {
 }
 
 void ScheduleList::sync(uint32_t currentTime) {
-	for (uint8_t i=0; i<getSize(); i++) {
+	for (uint16_t i=0; i<getSize(); i++) {
 		if (_buffer->list[i].nextTimestamp == 0) {
 			//TODO: remove this entry
 		}
@@ -119,7 +134,7 @@ void ScheduleList::sync(uint32_t currentTime) {
 		if (_buffer->list[i].nextTimestamp < currentTime) {
 			switch (ScheduleEntry::getTimeType(&(_buffer->list[i]))) {
 			case SCHEDULE_TIME_TYPE_REPEAT:
-				_buffer->list[i].nextTimestamp += ((currentTime - _buffer->list[i].nextTimestamp) / _buffer->list[i].repeat.repeatTime + 1) * _buffer->list[i].repeat.repeatTime;
+				_buffer->list[i].nextTimestamp += ((currentTime - _buffer->list[i].nextTimestamp) / (_buffer->list[i].repeat.repeatTime*60) + 1) * (_buffer->list[i].repeat.repeatTime*60);
 				break;
 			case SCHEDULE_TIME_TYPE_DAILY:{
 				uint32_t daysDiff = (currentTime - _buffer->list[i].nextTimestamp) / SECONDS_PER_DAY + 1;
@@ -140,8 +155,8 @@ void ScheduleList::sync(uint32_t currentTime) {
 }
 
 void ScheduleList::print() const {
-	LOGd("Schedule list size=%u", _buffer->size);
-	for (uint8_t i=0; i<getSize(); i++) {
+	LOGd("Schedule list size=%u", getSize());
+	for (uint16_t i=0; i<getSize(); i++) {
 		ScheduleEntry::print(&(_buffer->list[i]));
 	}
 }
