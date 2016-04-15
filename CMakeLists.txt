@@ -185,6 +185,7 @@ LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/scheduler/app_sc
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/pwm/app_pwm.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer_appsh.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler.c")
+LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler_appsh.c")
 
 
 FOREACH(nordic_file ${NORDIC_SOURCE})

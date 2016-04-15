@@ -38,7 +38,8 @@ extern "C"
 #undef APP_ERROR_CHECK // undefine again, we want to use our own macro defined in util/cs_BleError.h
 #undef APP_ERROR_HANDLER
 
-#include "softdevice_handler.h"
+#include "softdevice_handler_appsh.h"
+//#include "softdevice_handler.h"
 
 #ifdef __cplusplus
 }
