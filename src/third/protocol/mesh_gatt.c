@@ -527,6 +527,11 @@ uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 			return NRF_ERROR_NO_MEM;
 
 		} else {
+			if (notifactionsPending && !m_mesh_service.notification_enabled) {
+				notifactionsPending = false;
+				nb_clear();
+			}
+
 			waiting_notification_t* notification = nb_next();
 
 			notification->offset = 0;
