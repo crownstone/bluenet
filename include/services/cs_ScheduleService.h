@@ -8,7 +8,7 @@
 
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
-#include "structs/cs_AlertAccessor.h"
+#include "structs/cs_ScheduleEntries.h"
 
 #define SCHEDULE_SERVICE_UPDATE_FREQUENCY 2
 
@@ -49,11 +49,16 @@ public:
 
 protected:
 	void addCurrentTimeCharacteristic();
+	void addWriteScheduleEntryCharacteristic();
+	void addListScheduleEntriesCharacteristic();
 
 
 
 private:
 	//! References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint32_t> *_currentTimeCharacteristic;
+	BLEpp::Characteristic<uint8_t*> *_writeScheduleEntryCharacteristic;
+	BLEpp::Characteristic<uint8_t*> *_listScheduleEntriesCharacteristic;
 	uint32_t _rtcTimeStamp;
+	ScheduleList* _scheduleList;
 };

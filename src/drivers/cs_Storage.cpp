@@ -54,8 +54,10 @@ static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_cod
 //   STORAGE WILL GET MESSED UP!! NEW ENTRIES ALWAYS AT THE END
 static storage_config_t config[] {
 	{PS_ID_CONFIGURATION, {}, sizeof(ps_configuration_t)},
-	{PS_ID_INDOORLOCALISATION_SERVICE, {}, sizeof(ps_indoorlocalisation_service_t)}
+	{PS_ID_INDOORLOCALISATION_SERVICE, {}, sizeof(ps_indoorlocalisation_service_t)},
+	{PS_ID_STATE, {}, sizeof(ps_state_vars_t)}
 };
+
 
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
@@ -66,9 +68,10 @@ Storage::Storage() {
 	BLE_CALL(pstorage_init, ());
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
-		initBlocks(config[i].storage_size, config[i].handle);
+		initBlocks(config[i].storage_size, 1, config[i].handle);
 		LOGi("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
 	}
+
 }
 
 storage_config_t* Storage::getStorageConfig(ps_storage_id storageID) {
@@ -96,7 +99,7 @@ bool Storage::getHandle(ps_storage_id storageID, pstorage_handle_t& handle) {
 /**
  * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
  */
-void Storage::initBlocks(pstorage_size_t size, pstorage_handle_t& handle) {
+void Storage::initBlocks(pstorage_size_t size, pstorage_size_t count, pstorage_handle_t& handle) {
 	// set parameter
 	pstorage_module_param_t param;
 	param.block_size = size;
@@ -159,6 +162,75 @@ void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, ui
 //#endif
 
 	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
+
+}
+
+///**
+// * Nordic bug: We have to clear the entire block!
+// */
+//void Storage::clearItem(pstorage_handle_t handle, pstorage_size_t index, ps_storage_id storageID) {
+//
+//	storage_config_t* config;
+//	if (!(config = getStorageConfig(storageID))) {
+//		// if no config was found for the given storage ID return
+//		return;
+//	}
+//
+//	pstorage_handle_t block_handle;
+//	BLE_CALL ( pstorage_block_identifier_get,(&handle, index, &block_handle) );
+//
+//	LOGw("Nordic bug: clear entire block before writing to it");
+//	BLE_CALL (pstorage_clear, (&block_handle, config->storage_size) );
+//}
+
+uint32_t Storage::getOffset(ps_storage_base_t* storage, uint32_t* var) {
+	uint32_t p_storage = (uint32_t)storage;
+	uint32_t p_var = (uint32_t)var;
+	pstorage_size_t offset = p_var - p_storage;
+
+#ifdef PRINT_ITEMS
+	LOGi("p_storage: %p", p_storage);
+	LOGi("var: %p", p_var);
+	LOGi("offset: %d", offset);
+#endif
+
+	return offset;
+}
+
+void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size) {
+	pstorage_handle_t block_handle;
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
+
+	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, size, offset) );
+
+#ifdef PRINT_ITEMS
+	_log(INFO, "get struct: \r\n");
+	BLEutil::printArray((uint8_t*)item, size);
+#endif
+
+}
+
+void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size) {
+	pstorage_handle_t block_handle;
+
+#ifdef PRINT_ITEMS
+	_log(INFO, "set struct: \r\n");
+	BLEutil::printArray((uint8_t*)item, size);
+#endif
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
+
+//		clearBlock(handle);
+
+//#if CHAR_MESHING==1
+//	// we need to pause the mesh, otherwise the softdevice won't get time to
+//	// update the storage
+//	timeslot_handler_pause();
+////	rbc_mesh_pause();
+//#endif
+
+	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, offset) );
 
 }
 
@@ -296,8 +368,8 @@ void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd("use default value");
-		target = default_value;
 #endif
+		target = default_value;
 	} else {
 		target = value;
 #ifdef PRINT_ITEMS

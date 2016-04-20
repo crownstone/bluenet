@@ -130,6 +130,30 @@ void IndoorLocalizationService::tick() {
 
 	}
 
+#if CHAR_RSSI==1
+#ifdef PWM_ON_RSSI
+//	//! Map [-90, -40] to [0, 100]
+//	int16_t pwm = (_averageRssi + 90) * 10 / 5;
+//	if (pwm < 0) {
+//		pwm = 0;
+//	}
+//	if (pwm > 100) {
+//		pwm = 100;
+//	}
+//	PWM::getInstance().setValue(0, pwm);
+
+	if (_averageRssi > -70 && PWM::getInstance().getValue(0) < 1) {
+		PWM::getInstance().setValue(0, 255);
+	}
+
+	if (_averageRssi < -80 && PWM::getInstance().getValue(0) > 0) {
+		PWM::getInstance().setValue(0, 0);
+	}
+#endif
+#endif
+
+
+
 	scheduleNextTick();
 }
 
@@ -155,6 +179,9 @@ void IndoorLocalizationService::addSignalStrengthCharacteristic() {
 	_rssiCharac->setName(BLE_CHAR_RSSI);
 	_rssiCharac->setDefaultValue(1);
 	_rssiCharac->setNotifies(true);
+#ifdef PWM_ON_RSSI
+	_averageRssi = -90; // Start with something..
+#endif
 }
 
 void IndoorLocalizationService::addScanControlCharacteristic() {
@@ -339,8 +366,10 @@ void IndoorLocalizationService::stopTracking() {
 }
 
 void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
-
-	buffer_ptr_t buffer = MasterBuffer::getInstance().getBuffer();
+	MasterBuffer& mb = MasterBuffer::getInstance();
+	buffer_ptr_t buffer = NULL;
+	uint16_t maxLength = 0;
+	mb.getBuffer(buffer, maxLength);
 
 	_trackedDeviceCharac = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_trackedDeviceCharac);
@@ -349,8 +378,14 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 	_trackedDeviceCharac->setName("Add tracked device");
 	_trackedDeviceCharac->setWritable(true);
 	_trackedDeviceCharac->setNotifies(false);
+
+	_trackedDeviceCharac->setValue(buffer);
+	_trackedDeviceCharac->setMaxLength(maxLength);
+	_trackedDeviceCharac->setDataLength(0);
+
 	_trackedDeviceCharac->onWrite([&](const buffer_ptr_t& value) -> void {
 		TrackedDevice dev;
+		//TODO: should we check the result of assign() ?
 		dev.assign(_trackedDeviceCharac->getValue(), _trackedDeviceCharac->getValueLength());
 
 		if (dev.getRSSI() > 0) {
@@ -379,11 +414,6 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 			stopTracking();
 		}
 	});
-
-	_trackedDeviceCharac->setValue(buffer);
-	_trackedDeviceCharac->setMaxLength(TRACKDEVICES_SERIALIZED_SIZE);
-	_trackedDeviceCharac->setDataLength(0);
-
 }
 
 void IndoorLocalizationService::on_ble_event(ble_evt_t * p_ble_evt) {
@@ -453,6 +483,11 @@ void IndoorLocalizationService::setRSSILevel(int8_t RSSILevel) {
 #endif
 	if (_rssiCharac) {
 		*_rssiCharac = RSSILevel;
+#ifdef PWM_ON_RSSI
+		//! avg = 0.4*rssi + (1-0.4)*avg
+		_averageRssi = (RSSILevel*4 + _averageRssi*6) / 10;
+		LOGd("RSSI: %d avg: %d", RSSILevel, _averageRssi);
+#endif
 	}
 }
 

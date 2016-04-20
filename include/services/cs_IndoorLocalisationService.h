@@ -17,6 +17,7 @@
 
 //! The update frequence of the Tick routine in this service
 #define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10
+//#define PWM_ON_RSSI
 
 /** Struct used by the IndoorLocalisationService to store elements
  */
@@ -102,6 +103,10 @@ private:
 
 	bool _initialized;
 	bool _scanMode;
+
+#ifdef PWM_ON_RSSI
+	int16_t _averageRssi;
+#endif
 
 	Scanner* _scanner;
 

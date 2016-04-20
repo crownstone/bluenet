@@ -20,7 +20,7 @@
 #define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 300
 
 //! Initialize counter of tracked devices with this number.
-#define TDL_COUNTER_INIT                         -1
+#define TDL_COUNTER_INIT                         0
 
 #define TDL_NONE_NEARBY                          1
 #define TDL_IS_NEARBY                            2

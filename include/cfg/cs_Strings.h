@@ -42,6 +42,8 @@
 #define BLE_CHAR_RELAY                           "Relay"
 #define BLE_CHAR_NEW_ALERT                       "New Alert"
 #define BLE_CHAR_CURRENT_TIME                    "Current Time"
+#define BLE_CHAR_WRITE_SCHEDULE                  "Write schedule"
+#define BLE_CHAR_LIST_SCHEDULE                   "List schedule"
 
 /** Error messages
  *
@@ -65,8 +67,9 @@
 #define MSG_BLE_SOFTDEVICE_INIT                  "Softdevice init"
 #define MSG_BLE_SOFTDEVICE_ENABLE                "Softdevice enable"
 #define MSG_BLE_SOFTDEVICE_ENABLE_GAP            "Softdevice enable GAP"
-#define MSG_BLE_ADVERTISING_START                "Advertising start"
-#define MSG_BLE_IBEACON_START                    "Advertising iBeacon start"
+#define MSG_BLE_CONFIGURE_BLEDEVICE              "Configuring as BleDevice"
+#define MSG_BLE_CONFIGURE_IBEACON                "Configuring as iBeacon"
+#define MSG_BLE_ADVERTISING_STARTING             "Advertising starting"
 #define MSG_BLE_ADVERTISING_STARTED              "Advertising started"
 #define MSG_BLE_IBEACON_STARTED                  "iBeacon advertising started"
 #define MSG_BLE_NO_CUSTOM_SERVICES               "Services, no custom ones!"

@@ -17,7 +17,7 @@ using namespace BLEpp;
 
 const char* Service::defaultServiceName = "unnamed";
 
-void Service::startAdvertising(Nrf51822BluetoothStack* stack) {
+void Service::configureServices(Nrf51822BluetoothStack* stack) {
 
 	_stack = stack;
 

@@ -143,6 +143,9 @@ void Scanner::executeScan() {
 	case SCAN_START: {
 		LOGd("START");
 
+		// todo: remove again
+		service_data_array[0] += 1;
+
 		//! start scanning
 		manualStartScan();
 		if (_filterSendFraction > 0) {

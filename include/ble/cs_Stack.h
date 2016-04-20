@@ -29,7 +29,7 @@ extern "C" {
 
 /////////////////////////////////////////////////
 
-
+extern uint8_t service_data_array[1];
 
 // @TODO: replace std::vector with a fixed, in place array of size capacity.
 
@@ -169,6 +169,16 @@ protected:
 	app_timer_id_t                              _secReqTimerId;
 	dm_handle_t                                 _peerHandle;
 
+	ble_advdata_t                               _advdata;
+	ble_advdata_t                               _scan_resp;
+	ble_gap_adv_params_t                        _adv_params;
+
+	ble_advdata_manuf_data_t                    _manufac;
+	// todo: make part of DoBotsManufac (see iBeacon)
+	uint8_t*                                    _adv_manuf_data;
+
+	ble_advdata_manuf_data_t 					_manufac_apple;
+	ble_advdata_service_data_t                  _service_data;
 public:
 
 	/** Initialization of the BLE stack
@@ -193,7 +203,7 @@ public:
 	 * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in
 	 * init().
 	 */
-	void startAdvertisingServices();
+	void configureServices();
 
 	/*
 	 *
@@ -327,16 +337,25 @@ public:
 	 * ** Note** : An iBeacon requires that the company identifier is
 	 *   set to the Apple Company ID, otherwise it's not an iBeacon.
 	 */
-	void startIBeacon(IBeacon* beacon, uint8_t deviceType);
+	void configureIBeacon(IBeacon* beacon, uint8_t deviceType);
 
 	/** Start sending advertisement packets.
 	 * This can not be called while scanning, start scanning while advertising is possible though.
 	 */
-	void startAdvertising(uint8_t deviceType);
+	void configureBleDevice(uint8_t deviceType);
 
 	void stopAdvertising();
 
 	bool isAdvertising();
+
+	void updateAdvertisement();
+
+	void startAdvertising();
+
+	void configureAdvertisementParameters();
+	void configureScanResponse(uint8_t deviceType);
+	void configureBleDeviceAdvData();
+	void configureIBeaconAdvData(IBeacon* beacon);
 
 	/** Start scanning for devices
 	 *

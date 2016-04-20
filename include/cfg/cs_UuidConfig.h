@@ -23,6 +23,7 @@
 #define ALERT_UUID                          "33690000-2a0a-11e5-b345-feff819cdc9f"
 #define SCHEDULE_UUID                       "96d20000-4bcf-11e5-885d-feff819cdc9f"
 #define DEVICE_INFORMATION_UUID             "180a"
+#define DUMMY_UUID                          "5432"
 
 /** Characteristic UUIDs */
 
@@ -65,4 +66,6 @@ enum AlertCharacteristicsIDs {
 
 enum ScheduleCharacteristicsIDs {
 	CURRENT_TIME_UUID                       = 0x1,
+	WRITE_SCHEDULE_ENTRY_UUID               = 0x2,
+	LIST_SCHEDULE_ENTRIES_UUID              = 0x3,
 };

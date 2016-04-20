@@ -32,6 +32,7 @@ using namespace BLEpp;
  * as is, into the mesh network on the defined channel
  */
 struct __attribute__((__packed__)) mesh_characteristic_message_t {
+	//! TODO: make this uint16_t ?
 	uint8_t channel; //! defines the handle or channel on which the data should be sent in the mesh
 //	uint8_t type; //! defines the type of message, i.e. defines the data structure
 	uint8_t reserverd;
