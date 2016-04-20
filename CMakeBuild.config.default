@@ -73,6 +73,9 @@ CHAR_RSSI=1
 CHAR_SCAN_DEVICES=1
 CHAR_TRACK_DEVICES=1
 
+## Schedule Service
+CHAR_SCHEDULE=1
+
 # Enable or disable meshing functionality (1 or 0)
 CHAR_MESHING=0
 

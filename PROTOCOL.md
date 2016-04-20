@@ -36,6 +36,16 @@ Scan read             | 7e170004-429c-41aa-83d7-d91220abeb33 | [Scan result list
 Tracked devices write | 7e170002-429c-41aa-83d7-d91220abeb33 | [Tracked device](#tracked_device_packet) | Add or overwrite a tracked device. Set threshold larger than 0 to remove the tracked device from the list.
 Tracked devices read  | 7e170005-429c-41aa-83d7-d91220abeb33 | [Tracked device list](#tracked_device_list_packet) | Read the current list of tracked devices.
 
+## Schedule service
+
+The schedule service has UUID 96d20000-4bcf-11e5-885d-feff819cdc9f.
+
+Characteristic | UUID | Date type | Description
+--- | --- | --- | ---
+Set time        | 96d20001-4bcf-11e5-885d-feff819cdc9f | uint 32 | Sets the time. Timestamp is in seconds since epoch.
+Schedule write  | 96d20002-4bcf-11e5-885d-feff819cdc9f | [Schedule entry](#schedule_entry_packet) | Add or modify a schedule entry. Set nextTimestamp to 0 to remove the entry from the list.
+Schedule read   | 96d20003-4bcf-11e5-885d-feff819cdc9f | [Schedule list](#schedule_list_packet) | Get a list of all schedule entries.
+
 
 # Data structures
 
@@ -45,10 +55,10 @@ Tracked devices read  | 7e170005-429c-41aa-83d7-d91220abeb33 | [Tracked device l
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8  | type | 1 | Type, see table below.
-uint 8  | reserved | 1 | Not used: reserved for alignment.
-uint 16 | length | 2 | Length of the payload in bytes.
-uint 8 | payload | length | Payload data, depends on type.
+uint 8  | Type | 1 | Type, see table below.
+uint 8  | Reserved | 1 | Not used: reserved for alignment.
+uint 16 | Length | 2 | Length of the payload in bytes.
+uint 8 | Payload | Length | Payload data, depends on type.
 
 Available configurations:
 
@@ -63,19 +73,19 @@ Type nr | Type name | Payload type | Payload description
 7 | iBeacon minor | uint 16 | iBeacon minor number.
 8 | iBeacon UUID | 16 bytes | iBeacon UUID.
 9 | iBeacon RSSI | int 8 | iBeacon RSSI at 1 meter.
-10 | wifi settings | char array | Json with the wifi settings: `{ "ssid": "<name here>", "key": "<password here>"}`.
+10 | Wifi settings | char array | Json with the wifi settings: `{ "ssid": "<name here>", "key": "<password here>"}`.
 11 | TX power | int 8 | TX power, can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4.
 12 | Advertisement interval | uint 16 | Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms.
-13 | passkey | char array | Passkey of the device: must be 6 digits.
-14 | min env temp | int 8 | If temperature (in degrees Celcius) goes below this value, send an alert (not implemented yet).
-15 | max env temp | int 8 | If temperature (in degrees Celcius) goes above this value, send an alert (not implemented yet).
-16 | scan duration | uint 16 | Scan duration in ms. *Setting this too high may cause the device to reset during scanning.*
-17 | scan send delay | uint 16 | Time in ms to wait before sending scan results over the mesh. *Setting this too low may cause the device to reset during scanning.*
-18 | scan break duration | uint 16 | Waiting time in ms between sending results and next scan. *Setting this too low may cause the device to reset during scanning.*
-19 | boot delay | uint 16 | Time to wait with radio after boot, **Setting this too low may cause the device to reset on boot.**
-20 | max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off.
-21 | scan filter | uint 8 | Filter out certain types of devices from the scan results (1 for GuideStones, 2 for CrownStones, 3 for both).
-22 | scan filter fraction | uint 16 | If scan filter is set, do *not* filter them out each every X scan results.
+13 | Passkey | char array | Passkey of the device: must be 6 digits.
+14 | Min env temp | int 8 | If temperature (in degrees Celcius) goes below this value, send an alert (not implemented yet).
+15 | Max env temp | int 8 | If temperature (in degrees Celcius) goes above this value, send an alert (not implemented yet).
+16 | Scan duration | uint 16 | Scan duration in ms. *Setting this too high may cause the device to reset during scanning.*
+17 | Scan send delay | uint 16 | Time in ms to wait before sending scan results over the mesh. *Setting this too low may cause the device to reset during scanning.*
+18 | Scan break duration | uint 16 | Waiting time in ms between sending results and next scan. *Setting this too low may cause the device to reset during scanning.*
+19 | Boot delay | uint 16 | Time to wait with radio after boot, **Setting this too low may cause the device to reset on boot.**
+20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off.
+21 | Scan filter | uint 8 | Filter out certain types of devices from the scan results (1 for GuideStones, 2 for CrownStones, 3 for both).
+22 | Scan filter fraction | uint 16 | If scan filter is set, do *not* filter them out each every X scan results.
 
 
 ### <a name="power_curve_packet"></a>Power curve packet
@@ -111,7 +121,7 @@ uint 16 | Occurrences | 2 | Number of times the devices was scanned.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | size | 1 | Number of scanned devices in the list.
-[Scan result packet](#scan_result_packet) | size * 9 | Array of scan result packets.
+[Scan result](#scan_result_packet) | size * 9 | Array of scan result packets.
 
 
 ### <a name="tracked_device_packet"></a>Tracked device packet
@@ -130,8 +140,78 @@ int 8 | RSSI threshold | 1 | If the RSSI to this device is above the threshold, 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | size | 1 | Number of tracked devices in the list.
-[Tracked device packet](#tracked_device_packet) | size * 7 | Array of tracked device packets.
+[Tracked device](#tracked_device_packet) | size * 7 | Array of tracked device packets.
 uint 16 array | Counters | size * 2 | Counter that keeps up how long ago the RSSI of a device was above the threshold (for internal use).
+
+
+
+### <a name="schedule_repeat_packet"></a>Schedule repeat packet
+
+#### Repeat type 0
+Perform action every X minutes.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Repeat time | 2 | Repeat every `<repeat time>` minutes, 0 is not allowed.
+
+#### Repeat type 1
+Perform action every 24h, but only on certain days these days of the week.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Day of week | 1 | Bitmask, with bits 0-6 for Sunday-Saturday and bit 7 for all days.
+uint 8 | Next day of week | 1 | Remember what day of week comes next. 0-6, where 0=Sunday.
+
+#### Repeat type 2
+Perform action only once. Entry gets removed after action was performed.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Reserved | 2 | Unused.
+
+### <a name="schedule_action_packet"></a>Schedule action packet
+
+#### Action type 0
+Set power switch to a given value.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Pwm | 1 | Power switch value. Range 0-100, where 0 is off and 100 is fully on.
+uint 8 | Reserved | 2 | Unused.
+
+#### Action type 1
+Fade from current power switch value to a given power switch value, in X seconds.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Pwm end | 1 | Power switch value after fading.
+uint 16 | Fade duration | 2 | Fade duration in seconds.
+
+#### Action type 2
+Toggle the power switch.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Reserved | 3 | Unused.
+
+### <a name="schedule_entry_packet"></a>Schedule entry packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | ID | 1 | Unique id of this schedule entry.
+uint 8 | Override mask | 1 | Bitmask of states to override. Presence mask = 1.
+uint 8 | Type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
+uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers.
+[schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
+[schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
+
+### <a name="schedule_list_packet"></a>Schedule list packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Size | 1 | Number of entries in the list.
+[schedule entry](#schedule_entry_packet) | Entries | 12 | Schedule entry list.
+
 
 
 ### <a name="mesh_payload_packet"></a>Mesh payload packet
@@ -150,8 +230,8 @@ Type nr | Type name | Payload type | Payload description
 1 | Power | uint 8 | Current power usage.
 2 | Beacon | beacon mesh | Configure the iBeacon settings.
 3 | Command | mesh command | Send a command over the mesh.
-4 | Config | [Configuration packet](#config_packet) | Send a configuration.
-101 | Scan result | [Scan result list packet](#scan_result_list_packet) | List of scanned devices.
+4 | Config | [Configuration](#config_packet) | Send a configuration.
+101 | Scan result | [Scan result list](#scan_result_list_packet) | List of scanned devices.
 
 ### <a name="mesh_characteristic_packet"></a>Mesh characteristic packet
 
