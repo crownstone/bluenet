@@ -31,6 +31,8 @@
  * Main functionality
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
+#define ADVERTISEMENT_UPDATE_FREQUENCY 1 //! hz
+
 using namespace BLEpp;
 
 /**
@@ -54,6 +56,9 @@ private:
 	TemperatureGuard* _temperatureGuard;
 
 	bool _advertisementPaused;
+	bool _beaconAdvertisement;
+
+	app_timer_id_t _advertisementTimer;
 
 	void welcome();
 
@@ -65,7 +70,10 @@ private:
 
 	void configure();
 
-	void startAdvertising();
+//	void startAdvertising();
+
+	void tick();
+	void scheduleNextTick();
 
 public:
 	Crownstone() : _stack(NULL),
@@ -78,6 +86,10 @@ public:
 	void run();
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
+	static void staticTick(Crownstone *ptr) {
+		ptr->tick();
+	}
 
 };
 

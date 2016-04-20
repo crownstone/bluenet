@@ -29,8 +29,13 @@ extern "C" {
 #include <drivers/cs_Storage.h>
 #include <cfg/cs_Settings.h>
 #include "util/cs_Utils.h"
+#include <cfg/cs_UuidConfig.h>
 
 using namespace BLEpp;
+
+// todo: remove and replace with correct array for values which should be published in the advertisement
+//   package
+uint8_t service_data_array[1] {0};
 
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_appearance(defaultAppearance), _clock_source(defaultClockSource),
@@ -40,7 +45,8 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 			  	_gap_conn_params( { }),
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
-				_radio_notify(0)
+				_radio_notify(0),
+				_adv_manuf_data(NULL)
 {
 	//! setup default values.
 	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
@@ -185,12 +191,12 @@ void Nrf51822BluetoothStack::updateAppearance(uint16_t appearance) {
 	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
 }
 
-void Nrf51822BluetoothStack::startAdvertisingServices() {
+void Nrf51822BluetoothStack::configureServices() {
 	if (_started)
 		return;
 
 	for (Service* svc : _services) {
-		svc->startAdvertising(this);
+		svc->configureServices(this);
 	}
 
 	_started = true;
@@ -257,15 +263,7 @@ void Nrf51822BluetoothStack::updateConnParams() {
 	BLE_CALL(sd_ble_gap_ppcp_set, (&_gap_conn_params));
 }
 
-void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon, uint8_t deviceType) {
-	if (_advertising)
-		return;
-
-	LOGi(MSG_BLE_IBEACON_START);
-
-	init(); //! we should already be.
-
-	startAdvertisingServices();
+void Nrf51822BluetoothStack::configureIBeaconAdvData(IBeacon* beacon) {
 
 	uint32_t err_code __attribute__((unused));
 	uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
@@ -292,123 +290,46 @@ void Nrf51822BluetoothStack::startIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	 * data
 	 */
 
-	ble_advdata_manuf_data_t manufac_apple;
-	manufac_apple.company_identifier = 0x004C; //! Apple Company ID, if it is not set to apple it's not recognized as an iBeacon
+//	ble_advdata_manuf_data_t manufac_apple;
+	memset(&_manufac_apple, 0, sizeof(_manufac_apple));
+	_manufac_apple.company_identifier = 0x004C; //! Apple Company ID, if it is not set to apple it's not recognized as an iBeacon
 
-	uint8_t adv_manuf_data_apple[beacon->size()];
-	memset(adv_manuf_data_apple, 0, sizeof(adv_manuf_data_apple));
-	beacon->toArray(adv_manuf_data_apple);
+//	uint8_t adv_manuf_data_apple[beacon->size()];
+//	if (adv_manuf_data_apple != NULL) {
+//		free(adv_manuf_data_apple);
+//	}
 
-	manufac_apple.data.p_data = adv_manuf_data_apple;
-	manufac_apple.data.size = beacon->size();
+//	adv_manuf_data_apple = new uint8_t[beacon->size()];
+//	memset(adv_manuf_data_apple, 0, sizeof(*adv_manuf_data_apple));
+//	beacon->toArray(adv_manuf_data_apple);
+
+//	manufac_apple.data.p_data = adv_manuf_data_apple;
+	_manufac_apple.data.p_data = beacon->getArray();
+	_manufac_apple.data.size = beacon->size();
 
 	//! Build and set advertising data
-	ble_advdata_t advdata;
-	memset(&advdata, 0, sizeof(advdata));
+//	ble_advdata_t advdata;
+	memset(&_advdata, 0, sizeof(_advdata));
 
-	advdata.flags = flags;
-	advdata.p_manuf_specific_data = &manufac_apple;
+	_advdata.flags = flags;
+	_advdata.p_manuf_specific_data = &_manufac_apple;
 
-	/*
-	 * 31 bytes total payload
-	 *
-	 * 1 byte per element for the length of it's data.
-	 * in this case, 1 element -> 1 byte
-	 *
-	 * 30 bytes of available payload
-	 *
-	 * 1 byte for name type
-	 * -> 29 bytes left for name
-	 */
-#define MAXNAMELENGTH 29
-	uint8_t nameLength;
-
-	ble_advdata_t scan_resp;
-	memset(&scan_resp, 0, sizeof(scan_resp));
-	scan_resp.name_type = BLE_ADVDATA_SHORT_NAME;
-
-	//! since advertisement data already has the manufacturing data
-	//! of Apple for the iBeacon, we set our own manufacturing data
-	//! in the scan response
-
-	//! only add manufacturing data if device type is set
-	if (deviceType != DEVICE_UNDEF) {
-
-		ble_advdata_manuf_data_t manufac;
-		//! TODO: made up ID, has to be replaced by official ID
-		manufac.company_identifier = DOBOTS_ID; //! DoBots Company ID
-		manufac.data.size = 0;
-
-		DoBotsManufac dobotsManufac(deviceType);
-
-		uint8_t adv_manuf_data[dobotsManufac.size()];
-		memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
-		dobotsManufac.toArray(adv_manuf_data);
-
-		manufac.data.p_data = adv_manuf_data;
-		manufac.data.size = dobotsManufac.size();
-
-		scan_resp.p_manuf_specific_data = &manufac;
-
-		//! we only have limited space available in the scan response data. so we have to adjust the maximum
-		//! length available for the name, based on the size of the manufacturing data
-		nameLength = MAXNAMELENGTH - sizeof(adv_manuf_data) - sizeof(manufac.company_identifier) - 2 ; //! last 2 comes from one byte for length + 1 byte for type
-	} else {
-		//! if no manufacturing data is set, we can use the maximum available space for the name
-		nameLength = MAXNAMELENGTH;
-	}
-
-	//! NOTE: if anything else is added to the scan response data, the nameLength has to be adjusted
-	//!   similar to the case of manufacturing data
-	//! last, make sure we don't try to use more letters than the name is long or it will attach
-	//! garbage to the name
-	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
-
-	//! and assign the value to the advertisement package
-	scan_resp.short_name_len = nameLength;
-
-	BLE_CALL(ble_advdata_set, (&advdata, &scan_resp));
-
-	//! set advertisement parameters
-
-	ble_gap_adv_params_t adv_params;
-	memset(&adv_params, 0, sizeof(adv_params));
-	adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
-	adv_params.p_peer_addr = NULL;                   //! Undirected advertisement
-	adv_params.fp = BLE_GAP_ADV_FP_ANY;
-	adv_params.interval = _interval;
-	adv_params.timeout = _timeout;
-
-	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
-
-	_advertising = true;
-
-	LOGi(MSG_BLE_ADVERTISING_STARTED);
 }
 
-void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
-	if (_advertising)
-		return;
-
-	LOGi(MSG_BLE_ADVERTISING_START);
-
-	init(); //! we should already be.
-
-	//! todo: why start advertising the services ???
-	startAdvertisingServices();
+void Nrf51822BluetoothStack::configureBleDeviceAdvData() {
 
 	//! check if (and how many) services where enabled
 	uint8_t uidCount = _services.size();
 	LOGi("Number of services: %u", uidCount);
 
-	ble_uuid_t adv_uuids[uidCount];
+//	ble_uuid_t adv_uuids[uidCount];
+//
+//	uint8_t cnt = 0;
+//	for (Service* svc : _services) {
+//		adv_uuids[cnt++] = svc->getUUID();
+//	}
 
-	uint8_t cnt = 0;
-	for (Service* svc : _services) {
-		adv_uuids[cnt++] = svc->getUUID();
-	}
-
-	if (cnt == 0) {
+	if (uidCount == 0) {
 		LOGw(MSG_BLE_NO_CUSTOM_SERVICES);
 	}
 
@@ -433,16 +354,16 @@ void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 	 *   an element, and 1 byte of that is used for the type, so 5 bytes
 	 *   are left for the data
 	 */
-	ble_advdata_t advdata;
-	memset(&advdata, 0, sizeof(advdata));
+//	ble_advdata_t advdata;
+	memset(&_advdata, 0, sizeof(_advdata));
 
 	//! Anne: setting NO_NAME breaks the Android Nordic nRF Master Console app.
 	//! assign tx power level to advertisement data
-	advdata.p_tx_power_level = &_tx_power_level;
+	_advdata.p_tx_power_level = &_tx_power_level;
 
 	//! set flags of advertisement data
 	uint8_t flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-	advdata.flags = flags;
+	_advdata.flags = flags;
 
 	//! add (first) service uuid. there is only space for 1 uuid, since we use
 	//! 128-bit UUDs
@@ -450,14 +371,18 @@ void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 	//!  because it really depends on the application on how many and what kind
 	//!  of services are available and what should be advertised
 	//#ifdef YOU_WANT_TO_USE_SPACE
-	if (uidCount > 1) {
-		advdata.uuids_more_available.uuid_cnt = 1;
-		advdata.uuids_more_available.p_uuids = adv_uuids;
-	} else if (uidCount == 1) {
-		advdata.uuids_complete.uuid_cnt = 1;
-		advdata.uuids_complete.p_uuids = adv_uuids;
-	}
+//	if (uidCount > 1) {
+//		advdata.uuids_more_available.uuid_cnt = 1;
+//		advdata.uuids_more_available.p_uuids = adv_uuids;
+//	} else if (uidCount == 1) {
+//		advdata.uuids_complete.uuid_cnt = 1;
+//		advdata.uuids_complete.p_uuids = adv_uuids;
+//	}
 	//#endif
+
+}
+
+void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 
 	//! Because of the limited amount of space in the advertisement data, additional
 	//! data can be supplied in the scan response package. Same space restrictions apply
@@ -474,42 +399,62 @@ void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 	 * -> 29 bytes left for name
 	 */
 #define MAXNAMELENGTH 29
-	uint8_t nameLength;
+	uint8_t nameLength = MAXNAMELENGTH;
 
-	ble_advdata_t scan_resp;
-	memset(&scan_resp, 0, sizeof(scan_resp));
-	scan_resp.name_type = BLE_ADVDATA_SHORT_NAME;
+//	ble_advdata_t scan_resp;
+	memset(&_scan_resp, 0, sizeof(_scan_resp));
+	_scan_resp.name_type = BLE_ADVDATA_SHORT_NAME;
 
-	//! add manufacturing data to the scan response instead of
-	//! the advertisement data (more space, and to keep consistent with advertisement
-	//! when set to iBeacon)
+//	ble_advdata_service_data_t service_data;
+	memset(&_service_data, 0, sizeof(_service_data));
+	_service_data.service_uuid = 0x5432;
+	_service_data.data.size = 1;
+	_service_data.data.p_data = service_data_array;
+
+	_scan_resp.p_service_data_array = &_service_data;
+	_scan_resp.service_data_count = 1;
+
+	nameLength = nameLength - 2 - sizeof(_service_data.service_uuid) - _service_data.data.size;
+
+	//! since advertisement data already has the manufacturing data
+	//! of Apple for the iBeacon, we set our own manufacturing data
+	//! in the scan response
 
 	//! only add manufacturing data if device type is set
 	if (deviceType != DEVICE_UNDEF) {
 
-		ble_advdata_manuf_data_t manufac;
+//		ble_advdata_manuf_data_t manufac;
+		memset(&_manufac, 0, sizeof(_manufac));
 		//! TODO: made up ID, has to be replaced by official ID
-		manufac.company_identifier = DOBOTS_ID; //! DoBots Company ID
-		manufac.data.size = 0;
+		_manufac.company_identifier = DOBOTS_ID; //! DoBots Company ID
+		_manufac.data.size = 0;
 
 		DoBotsManufac dobotsManufac(deviceType);
 
-		uint8_t adv_manuf_data[dobotsManufac.size()];
-		memset(adv_manuf_data, 0, sizeof(adv_manuf_data));
-		dobotsManufac.toArray(adv_manuf_data);
+//		uint8_t adv_manuf_data[dobotsManufac.size()];
 
-		manufac.data.p_data = adv_manuf_data;
-		manufac.data.size = dobotsManufac.size();
+		if (_adv_manuf_data != NULL) {
+			free(_adv_manuf_data);
+		}
 
-		scan_resp.p_manuf_specific_data = &manufac;
+		_adv_manuf_data = new uint8_t[dobotsManufac.size()];
+		memset(_adv_manuf_data, 0, sizeof(*_adv_manuf_data));
+		dobotsManufac.toArray(_adv_manuf_data);
+
+		_manufac.data.p_data = _adv_manuf_data;
+		_manufac.data.size = dobotsManufac.size();
+
+		_scan_resp.p_manuf_specific_data = &_manufac;
 
 		//! we only have limited space available in the scan response data. so we have to adjust the maximum
 		//! length available for the name, based on the size of the manufacturing data
-		nameLength = MAXNAMELENGTH - sizeof(adv_manuf_data) - sizeof(manufac.company_identifier) - 2 ; //! last 2 comes from one byte for length + 1 byte for type
+		nameLength = nameLength - sizeof(_adv_manuf_data) - sizeof(_manufac.company_identifier) - 2 ; //! last 2 comes from one byte for length + 1 byte for type
 	} else {
 		//! if no manufacturing data is set, we can use the maximum available space for the name
-		nameLength = MAXNAMELENGTH;
+//		nameLength = nameLength;
 	}
+
+	LOGi("maxNameLength: %d", nameLength);
 
 	//! NOTE: if anything else is added to the scan response data, the nameLength has to be adjusted
 	//!   similar to the case of manufacturing data
@@ -518,28 +463,62 @@ void Nrf51822BluetoothStack::startAdvertising(uint8_t deviceType) {
 	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
 
 	//! and assign the value to the advertisement package
-	scan_resp.short_name_len = nameLength;
+	_scan_resp.short_name_len = nameLength;
 
-	uint32_t err_code;
-	err_code = ble_advdata_set(&advdata, &scan_resp);
-	if (err_code == NRF_ERROR_DATA_SIZE) {
-		log(FATAL, MSG_BLE_ADVERTISEMENT_TOO_BIG);
-	}
-	APP_ERROR_CHECK(err_code);
+}
+
+void Nrf51822BluetoothStack::configureIBeacon(IBeacon* beacon, uint8_t deviceType) {
+	LOGi(MSG_BLE_CONFIGURE_IBEACON);
+
+	init(); //! we should already be.
+
+	configureServices();
+
+	configureIBeaconAdvData(beacon);
+
+	configureScanResponse(deviceType);
+
+	updateAdvertisement();
 
 	//! set advertisement parameters
+	configureAdvertisementParameters();
+}
 
-	ble_gap_adv_params_t adv_params;
-	memset(&adv_params, 0, sizeof(adv_params));
-	adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
-	adv_params.p_peer_addr = NULL;                   //! Undirected advertisement
-	adv_params.fp = BLE_GAP_ADV_FP_ANY;
-	adv_params.interval = _interval;
-	adv_params.timeout = _timeout;
+void Nrf51822BluetoothStack::configureBleDevice(uint8_t deviceType) {
+	LOGi(MSG_BLE_CONFIGURE_BLEDEVICE);
 
-	//! segfault when advertisement cannot start, do we want that!?
-	//BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
-	err_code = sd_ble_gap_adv_start(&adv_params);
+	init(); //! we should already be.
+
+	//! todo: why start advertising the services ???
+	configureServices();
+
+	configureBleDeviceAdvData();
+
+	configureScanResponse(deviceType);
+
+	updateAdvertisement();
+
+	//! set advertisement parameters
+	configureAdvertisementParameters();
+}
+
+void Nrf51822BluetoothStack::configureAdvertisementParameters() {
+	memset(&_adv_params, 0, sizeof(_adv_params));
+	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+	_adv_params.p_peer_addr = NULL;                   //! Undirected advertisement
+	_adv_params.fp = BLE_GAP_ADV_FP_ANY;
+	_adv_params.interval = _interval;
+	_adv_params.timeout = _timeout;
+}
+
+void Nrf51822BluetoothStack::startAdvertising() {
+	if (_advertising)
+		return;
+
+	LOGi(MSG_BLE_ADVERTISING_STARTING);
+
+	uint32_t err_code;
+	err_code = sd_ble_gap_adv_start(&_adv_params);
 	if (err_code == NRF_ERROR_INVALID_PARAM) {
 		log(FATAL, MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
 	}
@@ -561,6 +540,15 @@ void Nrf51822BluetoothStack::stopAdvertising() {
 
 bool Nrf51822BluetoothStack::isAdvertising() {
 	return _advertising;
+}
+
+void Nrf51822BluetoothStack::updateAdvertisement() {
+//	if (!_advertising)
+//		return;
+
+//	BLE_CALL(sd_ble_gap_adv_stop, ());
+	BLE_CALL(ble_advdata_set, (&_advdata, &_scan_resp));
+//	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
 }
 
 void Nrf51822BluetoothStack::startScanning() {

@@ -289,6 +289,8 @@ void Crownstone::configure() {
 void Crownstone::setup() {
 	welcome();
 
+	Timer::getInstance().createSingleShot(_advertisementTimer, (app_timer_timeout_handler_t)Crownstone::staticTick);
+
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 
 	EventDispatcher::getInstance().addListener(this);
@@ -343,7 +345,8 @@ void Crownstone::setup() {
 		bool wasScanning = _stack->isScanning();
 		_stack->stopScanning();
 
-		startAdvertising();
+//		startAdvertising();
+		_stack->startAdvertising();
 
 		if (wasScanning)
 			_stack->startScanning();
@@ -387,7 +390,15 @@ void Crownstone::setup() {
 
 	//! Begin sending advertising packets over the air.
 	//! This should be done after initialization of the mesh
-	startAdvertising();
+
+#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
+	_stack->configureIBeacon(_beacon, DEVICE_TYPE);
+#else
+	_stack->configureBleDevice(DEVICE_TYPE);
+#endif
+	_stack->startAdvertising();
+
+//	startAdvertising();
 	BLEutil::print_heap("Heap adv: ");
 	BLEutil::print_stack("Stack adv: ");
 
@@ -409,15 +420,32 @@ void Crownstone::setup() {
 
 //! start advertising. the advertisment package depends on the device type,
 //! and if IBEACON is enabled
-void Crownstone::startAdvertising() {
-#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
-	_stack->startIBeacon(_beacon, DEVICE_TYPE);
-#else
-	_stack->startAdvertising(DEVICE_TYPE);
-#endif
+//void Crownstone::startAdvertising() {
+//#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
+//	_stack->startIBeacon(_beacon, DEVICE_TYPE);
+//#else
+//	_stack->startAdvertising(DEVICE_TYPE);
+//#endif
+//}
+
+void Crownstone::tick() {
+//		LOGi("tick:stop %d", RTC::now());
+	_stack->updateAdvertisement();
+//		LOGi("tick:started %d", RTC::now());
+
+	scheduleNextTick();
+}
+
+void Crownstone::scheduleNextTick() {
+//	LOGi("PowerService::scheduleNextTick");
+	if (ADVERTISEMENT_UPDATE_FREQUENCY > 0) {
+		Timer::getInstance().start(_advertisementTimer, HZ_TO_TICKS(ADVERTISEMENT_UPDATE_FREQUENCY), this);
+	}
 }
 
 void Crownstone::run() {
+
+	scheduleNextTick();
 
 	_stack->startTicking();
 
@@ -450,28 +478,28 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 //	LOGi("handleEvent: %d", evt);
 
-	bool restartAdvertising = false;
+	bool reconfigureBeacon = false;
 	switch(evt) {
 
 #if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	case CONFIG_IBEACON_MAJOR: {
 		_beacon->setMajor(*(uint32_t*)p_data);
-		restartAdvertising = true;
+		reconfigureBeacon = true;
 		break;
 	}
 	case CONFIG_IBEACON_MINOR: {
 		_beacon->setMinor(*(uint32_t*)p_data);
-		restartAdvertising = true;
+		reconfigureBeacon = true;
 		break;
 	}
 	case CONFIG_IBEACON_UUID: {
 		_beacon->setUUID(*(ble_uuid128_t*)p_data);
-		restartAdvertising = true;
+		reconfigureBeacon = true;
 		break;
 	}
 	case CONFIG_IBEACON_RSSI: {
 		_beacon->setRSSI(*(int8_t*)p_data);
-		restartAdvertising = true;
+		reconfigureBeacon = true;
 		break;
 	}
 #endif
@@ -483,7 +511,13 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case CONFIG_ADV_INTERVAL: {
 		_stack->setAdvertisingInterval(*(uint32_t*)p_data);
-		restartAdvertising = true;
+		_stack->configureAdvertisementParameters();
+
+		if (_stack->isAdvertising()) {
+			_stack->stopAdvertising();
+			_stack->startAdvertising();
+		}
+//		restartAdvertising = true;
 		break;
 	}
 	case CONFIG_PASSKEY: {
@@ -518,16 +552,18 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_ADVERTISEMENT_RESUME: {
 		if (_advertisementPaused) {
 			_advertisementPaused = false;
-			startAdvertising();
+			_stack->startAdvertising();
 		}
 		break;
 	}
 
 	}
 
-	if (restartAdvertising && _stack->isAdvertising()) {
-		_stack->stopAdvertising();
-		startAdvertising();
+	if (reconfigureBeacon) {
+//		_stack->configureIBeacon(_beacon, DEVICE_TYPE);
+		_stack->updateAdvertisement();
+//		_stack->stopAdvertising();
+//		startAdvertising();
 	}
 }
 

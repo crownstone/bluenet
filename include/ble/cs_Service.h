@@ -122,7 +122,7 @@ public:
 		}
 	};
 
-	virtual void startAdvertising(Nrf51822BluetoothStack* stack);
+	virtual void configureServices(Nrf51822BluetoothStack* stack);
 	virtual void stopAdvertising() {};
 
 	virtual void on_ble_event(ble_evt_t * p_ble_evt);

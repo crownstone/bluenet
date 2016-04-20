@@ -87,7 +87,6 @@ public:
 	/** Release assigned buffer
 	 */
 	void release() {
-		LOGd("release");
 		_buffer = NULL;
 	}
 
