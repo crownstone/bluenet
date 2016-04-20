@@ -82,11 +82,13 @@ void Crownstone::welcome() {
  */
 void Crownstone::setName() {
 #ifdef CHANGE_NAME_ON_RESET
-	uint16_t minor;
-	ps_configuration_t cfg = Settings::getInstance().getConfig();
-	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
+	uint32_t resetCounter;
+	Settings::getInstance().getStateVar(CONFIG_RESET_COUNTER, resetCounter);
+//	uint16_t minor;
+//	ps_configuration_t cfg = Settings::getInstance().getConfig();
+//	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
 	char devicename[32];
-	sprintf(devicename, "%s_%d", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(minor));
+	sprintf(devicename, "%s_%d", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(resetCounter));
 	std::string device_name = std::string(devicename);
 	//! End test for wouter
 #else
@@ -223,6 +225,14 @@ void Crownstone::configure() {
 	LOGi("Loading configuration");
 
 	ps_configuration_t cfg = Settings::getInstance().getConfig();
+//
+	uint32_t resetCounter;
+	Settings::getInstance().getStateVar(CONFIG_RESET_COUNTER, resetCounter);
+
+	LOGi("reset counter at: %d", ++resetCounter);
+
+	Settings::getInstance().setStateVar(CONFIG_RESET_COUNTER, resetCounter);
+
 
 #if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	//! if enabled, create the iBeacon parameter object which will be used

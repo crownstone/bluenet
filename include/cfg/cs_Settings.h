@@ -46,6 +46,7 @@ enum ConfigurationTypes {
 	CONFIG_MAX_CHIP_TEMP                    = 0x14, //! 20
 	CONFIG_SCAN_FILTER                      = 0x15, //! 21
 	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16, //! 22
+	CONFIG_RESET_COUNTER					= 0x19, //! 25
 	CONFIG_TYPES
 };
 
@@ -77,6 +78,8 @@ public:
 
 	ps_configuration_t& getConfig();
 
+	ps_state_vars_t& getStateVars();
+
 	/** Get a handle to the persistent storage struct and load it from FLASH.
 	 *
 	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
@@ -88,6 +91,9 @@ public:
 	/** Save to FLASH.
 	 */
 	void savePersistentStorage();
+
+	void readStateVars();
+	void writeStateVars();
 
 //	void ConfigHelper::enable(ps_storage_id id, uint16_t size) {
 //		Storage::getInstance().getHandle(id, _storageHandles[id]);
@@ -107,6 +113,8 @@ public:
 	 */
 	void setBLEName(const std::string &name, bool persistent = true);
 
+	bool getStateVar(uint8_t type, uint32_t& target);
+	bool setStateVar(uint8_t type, uint32_t& target);
 protected:
 	//	pstorage_handle_t _storageHandles[PS_ID_TYPES];
 	//	ps_configuration_t* _storageStructs[PS_ID_TYPES];
@@ -114,8 +122,12 @@ protected:
 	//! handle to storage (required to write to and read from FLASH)
 	pstorage_handle_t _storageHandle;
 
+	pstorage_handle_t _stateVarsHandle;
+
 	//! struct that storage object understands
 	ps_configuration_t _storageStruct;
+
+	ps_state_vars_t _stateVars;
 
 	//! non-persistent configuration options
 	std::string _wifiSettings;
@@ -130,6 +142,9 @@ protected:
 	bool setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
 	bool setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, int32_t& target);
 	bool setUint8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
+
+	bool getStateVar(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint32_t defaultValue);
+	bool setStateVar(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
 };
 
 
