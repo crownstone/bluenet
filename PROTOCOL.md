@@ -184,3 +184,28 @@ uint 16 | Version | 2 | Used internally.
 [Mesh Payload](#mesh_payload_packet) | Payload | 99 | Payload data.
 byte array | CRC | 3 | Checksum.
 
+### <a name=“scan_response_packet”></a>Scan Response Packet
+The packet that is sent when a BLE central scans.
+
+![Scan Response packet](docs/diagrams/scan-response-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Name Flag | 1 | 
+uint 8 | Name Length | 1 | 
+uint 8 | Name Bytes | 9 | 
+uint 8 | Service Flag | 1 | 
+uint 8 | Service Length | 1 | 
+uint 16 | Service UUID | 1 | Service UUID
+uint 8 | Service Data | 16 | Data about usage, state and ID. Will be encrypted.
+
+![Scan Response ServiceData](docs/diagrams/scan-response-serviceData.png)
+
+This packet will be encrypted using AES 128.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | PWM / State | 1 | The state of the Crownstone, if it is on, dimmed or off.
+uint 8 | Current Usage | 4 | The current power usage.
+uint 8 | Accumulated Energy | 8 | The accumulated energy.
+uint 8 | Crownstone ID | 3 | ID that identifies the Crownstone.
