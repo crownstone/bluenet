@@ -6,26 +6,59 @@
  */
 
 #include <ble/cs_iBeacon.h>
-#include <util/cs_Utils.h>
 
 using namespace BLEpp;
 
-void IBeacon::toArray(uint8_t* array) {
+IBeacon::IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor,
+		int8_t rssi) {
+	//! advertisement indicator for an iBeacon is defined as 0x0215
+	_params.adv_indicator = BLEutil::convertEndian16(0x0215);
+	setUUID(uuid);
+	setMajor(major);
+	setMinor(minor);
+	setRSSI(rssi);
+}
 
-	*((uint16_t*) array) = BLEutil::convertEndian16(_adv_indicator);
-	array += 2;
+void IBeacon::setMajor(uint16_t major) {
+	LOGd("setMajor: %d", major);
+	_params.major = BLEutil::convertEndian16(major);
+}
 
-//	for (int i = 0; i < 16; ++i) {
-//		*array++ = _uuid.uuid128[15 - i];
-//	}
-	memcpy(array, _uuid.uuid128, 16);
-	array += 16;
+uint16_t IBeacon::getMajor() {
+	return BLEutil::convertEndian16(_params.major);
+}
 
-	*((uint16_t*) array) = BLEutil::convertEndian16(_major);
-	array += 2;
+void IBeacon::setMinor(uint16_t minor) {
+	LOGd("setMinor: %d", minor);
+	_params.minor = BLEutil::convertEndian16(minor);
+}
 
-	*((uint16_t*) array) = BLEutil::convertEndian16(_minor);
-	array += 2;
+uint16_t IBeacon::getMinor() {
+	return BLEutil::convertEndian16(_params.minor);
+}
 
-	*array = _rssi;
+void IBeacon::setUUID(ble_uuid128_t uuid) {
+	_logFirst(INFO, "setUUID: ");
+	for (int i = 0; i < 16; ++i) {
+		_params.uuid.uuid128[i] = uuid.uuid128[16-1-i];
+	}
+	BLEutil::printInlineArray(_params.uuid.uuid128, 16);
+	_log(INFO, CRLN);
+}
+
+ble_uuid128_t IBeacon::getUUID() {
+	ble_uuid128_t uuid;
+	for (int i = 0; i < 16; ++i) {
+		uuid.uuid128[i] = _params.uuid.uuid128[16-1-i];
+	}
+	return _params.uuid;
+}
+
+void IBeacon::setRSSI(int8_t rssi) {
+	LOGd("setRSSI: %d", rssi);
+	_params.rssi = rssi;
+}
+
+int8_t IBeacon::getRSSI() {
+	return _params.rssi;
 }

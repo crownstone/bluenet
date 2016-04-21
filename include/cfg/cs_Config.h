@@ -34,7 +34,7 @@
                                                                 SYS_EVT_MSG_BUF_SIZE),             \
                                                             sizeof(uint32_t))) * sizeof(uint32_t))
 /** Maximum number of events in the scheduler queue. */
-#define SCHED_QUEUE_SIZE                         10
+#define SCHED_QUEUE_SIZE                         30
 
 //! See https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
 /** Determines scan interval in units of 0.625 millisecond. */

@@ -68,6 +68,8 @@ enum ps_storage_id {
 	PS_ID_CONFIGURATION = 0,
 	//! storage for the indoor localisation service
 	PS_ID_INDOORLOCALISATION_SERVICE = 1,
+	//! state variables
+	PS_ID_STATE = 1,
 	//! number of elements
 	PS_ID_TYPES
 };
@@ -163,6 +165,17 @@ struct ps_indoorlocalisation_service_t : ps_storage_base_t {
 	uint8_t reserved[3];
 };
 
+// State variables ///////////////////////////////
+
+/** Struct used to store elements that are changed frequently. each element
+ *  will be stored separately. elements need to be 4 byte sized
+ */
+struct ps_state_vars_t : ps_storage_base_t {
+	// counts resets
+	uint32_t resetCounter;
+};
+
+
 /** Class to store items persistently in FLASH
  *
  * Singleton class, can only exist once.
@@ -224,6 +237,12 @@ public:
 	 * @size size of the structure (usually sizeof(struct))
 	 */
 	void writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
+
+	void readItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size);
+
+	void writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size);
+
+	static uint32_t getOffset(ps_storage_base_t* storage, uint32_t* var);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//! helper functions
@@ -407,7 +426,9 @@ public:
 
 			if (isUnassigned) {
 				if (default_value != NULL) {
+#ifdef PRINT_ITEMS
 					LOGd("use default value");
+#endif
 					memcpy(dest, default_value, length * sizeof(T));
 				}
 			} else {
@@ -431,7 +452,7 @@ private:
 	 * @handle pointer to the handle which points to the persistent memory that
 	 *   was initialized
 	 */
-	void initBlocks(pstorage_size_t size, pstorage_handle_t& handle);
+	void initBlocks(pstorage_size_t size, pstorage_size_t count, pstorage_handle_t& handle);
 
 	/** Helper function to obtain the config for the given storage ID
 	 * @storageID enum which defines the storage struct for which the

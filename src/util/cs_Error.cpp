@@ -7,6 +7,7 @@
 #include <stddef.h>
 
 #include "util/cs_Error.h"
+#include "drivers/cs_Serial.h"
 
 ///! ERROR HANDLING ROUTINES /////////////////////////////////////////////////////////////////////////
 
@@ -66,6 +67,8 @@ void HardFault_HandlerC(unsigned long *hardfault_args){
     _MMAR = (*((volatile unsigned long *)(0xE000ED34))) ;
     //! Bus Fault Address Register
     _BFAR = (*((volatile unsigned long *)(0xE000ED38))) ;
+
+	LOGe("HARDFAULT!");
 
     __asm("BKPT #0\n") ; //! Break into the debugger
 

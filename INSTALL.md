@@ -1,6 +1,6 @@
 # Installation
 
-The installation has been tested on Ubuntu 14.04 and assumes you use the J-Link programmer.
+The installation has been tested on Ubuntu 14.04 and assumes you use the J-Link Lite CortexM-9 programmer.
 
 ## Prerequisites
 

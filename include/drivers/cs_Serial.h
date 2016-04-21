@@ -23,6 +23,7 @@ extern "C" {
 #define FATAL                4
 #define NONE                 5
 
+#define CRLN "\r\n"
 
 #ifndef SERIAL_VERBOSITY
 #error "You have to specify SERIAL_VERBOSITY"
