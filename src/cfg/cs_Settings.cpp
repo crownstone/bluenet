@@ -154,8 +154,6 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 	}
 	case CONFIG_SAMPLING_TIME: {
 		setUint16(type, payload, length, persistent, _storageStruct.samplingTime);
-	case CONFIG_RESET_COUNTER: {
-		setStateVar(type, payload, length, persistent, _stateVars.resetCounter);
 		break;
 	}
 	case CONFIG_RESET_COUNTER: {
@@ -290,10 +288,6 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
 		LOGd("Read scan filter send fraction");
 		return getUint16(type, streamBuffer, _storageStruct.scanFilterSendFraction, SCAN_FILTER_SEND_FRACTION);
-	}
-	case CONFIG_RESET_COUNTER: {
-		LOGd("Read reset counter");
-		return getStateVar(type, streamBuffer, _stateVars.resetCounter, -1);
 	}
 	case CONFIG_RESET_COUNTER: {
 		LOGd("Read reset counter");
