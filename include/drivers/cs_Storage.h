@@ -69,7 +69,7 @@ enum ps_storage_id {
 	//! storage for the indoor localisation service
 	PS_ID_INDOORLOCALISATION_SERVICE = 1,
 	//! state variables
-	PS_ID_STATE = 1,
+	PS_ID_STATE = 2,
 	//! number of elements
 	PS_ID_TYPES
 };
