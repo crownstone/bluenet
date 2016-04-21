@@ -38,11 +38,19 @@ uint16_t IBeacon::getMinor() {
 }
 
 void IBeacon::setUUID(ble_uuid128_t uuid) {
-	LOGd("setUUID");
-	_params.uuid = uuid;
+	_logFirst(INFO, "setUUID: ");
+	for (int i = 0; i < 16; ++i) {
+		_params.uuid.uuid128[i] = uuid.uuid128[16-1-i];
+	}
+	BLEutil::printInlineArray(_params.uuid.uuid128, 16);
+	_log(INFO, CRLN);
 }
 
 ble_uuid128_t IBeacon::getUUID() {
+	ble_uuid128_t uuid;
+	for (int i = 0; i < 16; ++i) {
+		uuid.uuid128[i] = _params.uuid.uuid128[16-1-i];
+	}
 	return _params.uuid;
 }
 
