@@ -6,6 +6,8 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
+#define PRINT_DEBUG
+
 #include "protocol/cs_MeshControl.h"
 
 #include "drivers/cs_PWM.h"
@@ -27,8 +29,8 @@
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
     sd_ble_gap_address_get(&_myAddr);
-    Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t)MeshControl::reset);
-    Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
+//    Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t)MeshControl::reset);
+//    Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
 }
 
 extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
@@ -42,8 +44,8 @@ extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
 void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //	LOGi("Process incoming mesh message");
 
-	Timer::getInstance().stop(_resetTimerId);
-	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
+//	Timer::getInstance().stop(_resetTimerId);
+//	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
 
 	switch(channel) {
 	case HUB_CHANNEL: {
@@ -68,6 +70,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 				LOGe("Invalid number of devices!");
 			}
 			else {
+#ifdef PRINT_DEBUG
 				for (int i = 0; i < msg->scanMsg.numDevices; ++i) {
 					peripheral_device_t dev = msg->scanMsg.list[i];
 //					if ((dev.addr[5] == 0xED && dev.addr[4] == 0x01 && dev.addr[3] == 0x53 && dev.addr[2] == 0xB8 && dev.addr[1] == 0x6F && dev.addr[0] == 0xCC) ||
@@ -77,32 +80,33 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 								dev.addr[0], dev.rssi, dev.occurrences);
 //					}
 				}
+#endif
 			}
 
 			break;
 		}
-		case 102: {
-			if (firstTimeStamp == 0) {
-				firstTimeStamp = RTC::getCount();
-				firstCounter[channel-1] = msg->testMsg.counter;
-			}
-			if (lastCounter[channel-1] != 0 && msg->testMsg.counter != 0 && lastCounter[channel-1] +1 != msg->testMsg.counter) {
-				incident[channel-1] += msg->testMsg.counter - lastCounter[channel-1] - 1;
-				double loss = incident[channel-1] * 100.0 / (msg->testMsg.counter - firstCounter[channel-1]);
-				uint32_t dt = RTC::ticksToMs(RTC::difference(RTC::getCount(), firstTimeStamp));
-				double msgsPerSecond = 0;
-				if (dt != 0) {
-					msgsPerSecond = 1000.0 * (msg->testMsg.counter - firstCounter[channel-1]) / dt;
-				}
-//				LOGe("ch %d: %d missed, last: %d, current: %d, loss: %d %%", channel, incident[channel-1],
-//						lastCounter[channel-1], msg->testMsg.counter, (uint32_t)loss);
-				LOGe("ch %d: %d missed, current: %d, loss: %d %%, msgs/s: %d", channel, incident[channel-1],
-						msg->testMsg.counter, (uint32_t)loss, (uint32_t)msgsPerSecond);
-			}
-			lastCounter[channel-1] = msg->testMsg.counter;
-			LOGi(">> count: %d", msg->testMsg.counter);
-			break;
-		}
+//		case 102: {
+//			if (firstTimeStamp == 0) {
+//				firstTimeStamp = RTC::getCount();
+//				firstCounter[channel-1] = msg->testMsg.counter;
+//			}
+//			if (lastCounter[channel-1] != 0 && msg->testMsg.counter != 0 && lastCounter[channel-1] +1 != msg->testMsg.counter) {
+//				incident[channel-1] += msg->testMsg.counter - lastCounter[channel-1] - 1;
+//				double loss = incident[channel-1] * 100.0 / (msg->testMsg.counter - firstCounter[channel-1]);
+//				uint32_t dt = RTC::ticksToMs(RTC::difference(RTC::getCount(), firstTimeStamp));
+//				double msgsPerSecond = 0;
+//				if (dt != 0) {
+//					msgsPerSecond = 1000.0 * (msg->testMsg.counter - firstCounter[channel-1]) / dt;
+//				}
+////				LOGe("ch %d: %d missed, last: %d, current: %d, loss: %d %%", channel, incident[channel-1],
+////						lastCounter[channel-1], msg->testMsg.counter, (uint32_t)loss);
+//				LOGe("ch %d: %d missed, current: %d, loss: %d %%, msgs/s: %d", channel, incident[channel-1],
+//						msg->testMsg.counter, (uint32_t)loss, (uint32_t)msgsPerSecond);
+//			}
+//			lastCounter[channel-1] = msg->testMsg.counter;
+//			LOGi(">> count: %d", msg->testMsg.counter);
+//			break;
+//		}
 
 		}
 
@@ -351,14 +355,14 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
 }
 
-void MeshControl::reset() {
-//	LOGw("reset due to mesh timeout");
-//	//! copy to make sure this is nothing more than one value
-//	uint8_t err_code;
-//	err_code = sd_power_gpregret_clr(0xFF);
-//	APP_ERROR_CHECK(err_code);
-//	err_code = sd_power_gpregret_set(0x01); //! Don't go to DFU mode
-//	APP_ERROR_CHECK(err_code);
-//	sd_nvic_SystemReset();
-	LOGi("Zombie node detected!");
-}
+//void MeshControl::reset() {
+////	LOGw("reset due to mesh timeout");
+////	//! copy to make sure this is nothing more than one value
+////	uint8_t err_code;
+////	err_code = sd_power_gpregret_clr(0xFF);
+////	APP_ERROR_CHECK(err_code);
+////	err_code = sd_power_gpregret_set(0x01); //! Don't go to DFU mode
+////	APP_ERROR_CHECK(err_code);
+////	sd_nvic_SystemReset();
+//	LOGi("Zombie node detected!");
+//}

@@ -35,7 +35,7 @@ private:
 	void operator=(MeshControl const &); //! singleton, deny implementation
 
     ble_gap_addr_t _myAddr;
-    app_timer_id_t _resetTimerId;
+//    app_timer_id_t _resetTimerId;
 
     bool isMessageForUs(void* p_data) {
     	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
@@ -100,12 +100,12 @@ private:
 		}
 	}
 
-	static void reset();
+//	static void reset();
 
-	uint32_t firstTimeStamp = 0;
-	uint32_t firstCounter[3] = {0};
-	uint32_t lastCounter[3] = {};
-	uint32_t incident[3] = {};
+//	uint32_t firstTimeStamp = 0;
+//	uint32_t firstCounter[3] = {0};
+//	uint32_t lastCounter[3] = {};
+//	uint32_t incident[3] = {};
 
 public:
 	//! use static variant of singelton, no dynamic memory allocation
