@@ -460,9 +460,6 @@ uint32_t rbc_mesh_event_peek(rbc_mesh_event_t* p_evt);
 */
 uint32_t rbc_mesh_packet_release(uint8_t* p_data);
 
-
-void rbc_mesh_sys_evt_handler(uint32_t evt);
-
 /**
  * Pause the mesh code.
  *

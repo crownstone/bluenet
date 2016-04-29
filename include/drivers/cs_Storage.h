@@ -175,6 +175,7 @@ struct ps_state_vars_t : ps_storage_base_t {
 	uint32_t resetCounter;
 };
 
+void storage_sys_evt_handler(uint32_t evt);
 
 /** Class to store items persistently in FLASH
  *

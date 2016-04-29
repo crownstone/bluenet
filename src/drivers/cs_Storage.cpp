@@ -25,6 +25,10 @@ extern "C" {
 #include <third/protocol/timeslot_handler.h>
 }
 
+// todo: make into array of elements to buffer more than one store request
+uint8_t* buffer;
+uint16_t bufferSize;
+pstorage_handle_t bufferHandle;
 
 extern "C"  {
 
@@ -42,13 +46,34 @@ static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_cod
 		LOGi("Opcode %i executed (no error)", op_code);
 	}
 
-//#if CHAR_MESHING==1
-//	timeslot_handler_resume();
-////	rbc_mesh_resume();
-//#endif
+#if CHAR_MESHING==1
+	timeslot_handler_resume();
+	if (buffer) {
+		LOGi("free buffer");
+		free(buffer);
+		buffer = NULL;
+		bufferSize = 0;
+	}
+//	rbc_mesh_resume();
+#endif
 }
 
+
 } // extern "C"
+
+void storage_sys_evt_handler(uint32_t evt) {
+
+#if CHAR_MESHING==1
+	switch(evt) {
+	case NRF_EVT_RADIO_SESSION_CLOSED: {
+		if (buffer) {
+			LOGi("retry pstorage_update");
+			BLE_CALL (pstorage_update, (&bufferHandle, (uint8_t*)buffer, bufferSize, 0) );
+		}
+	}
+	}
+#endif
+}
 
 // NOTE: DO NOT CHANGE ORDER OF THE ELEMENTS OR THE FLASH
 //   STORAGE WILL GET MESSED UP!! NEW ENTRIES ALWAYS AT THE END
@@ -154,14 +179,24 @@ void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, ui
 
 //		clearBlock(handle);
 
-//#if CHAR_MESHING==1
-//	// we need to pause the mesh, otherwise the softdevice won't get time to
-//	// update the storage
-//	timeslot_handler_pause();
-////	rbc_mesh_pause();
-//#endif
+#if CHAR_MESHING==1
 
+	// we need to pause the mesh, otherwise the softdevice won't get time to
+	// update the storage
+	if (timeslot_handler_pause()) {
+		BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
+	} else {
+		LOGi("store buffer");
+		bufferSize = size;
+		buffer = new uint8_t[size];
+		memcpy(buffer, item, size);
+		bufferHandle = handle;
+	}
+//	rbc_mesh_pause();
+#else
 	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
+#endif
+
 
 }
 
@@ -223,12 +258,12 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint32
 
 //		clearBlock(handle);
 
-//#if CHAR_MESHING==1
-//	// we need to pause the mesh, otherwise the softdevice won't get time to
-//	// update the storage
-//	timeslot_handler_pause();
-////	rbc_mesh_pause();
-//#endif
+#if CHAR_MESHING==1
+	// we need to pause the mesh, otherwise the softdevice won't get time to
+	// update the storage
+	timeslot_handler_pause();
+//	rbc_mesh_pause();
+#endif
 
 	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, offset) );
 

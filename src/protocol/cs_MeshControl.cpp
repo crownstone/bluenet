@@ -200,7 +200,7 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 	}
 	case BEACON_MESSAGE: {
 
-#if BEACON==1
+#if IBEACON==1
 		LOGi("Received Beacon Message");
 //		BLEutil::printArray((uint8_t*)msg, sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t));
 

@@ -897,7 +897,12 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 			uint16_t* header = (uint16_t*)buffer;
 
 			for (Service* svc : _services) {
-				svc->on_write(p_ble_evt->evt.gatts_evt.params.write, header[0]);
+				// for a long write, don't have the service handle available to check for the correct
+				// service, so we just go through all the services and characteristics until we find
+				// the correct characteristic, then we return
+				if (svc->on_write(p_ble_evt->evt.gatts_evt.params.write, header[0])) {
+					return;
+				}
 			}
 
 		} else {
