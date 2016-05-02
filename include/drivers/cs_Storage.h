@@ -165,18 +165,6 @@ struct ps_indoorlocalisation_service_t : ps_storage_base_t {
 	uint8_t reserved[3];
 };
 
-// State variables ///////////////////////////////
-
-/** Struct used to store elements that are changed frequently. each element
- *  will be stored separately. elements need to be 4 byte sized
- */
-struct ps_state_vars_t : ps_storage_base_t {
-	// counts resets
-	uint32_t resetCounter;
-};
-
-void storage_sys_evt_handler(uint32_t evt);
-
 /** Class to store items persistently in FLASH
  *
  * Singleton class, can only exist once.
@@ -239,11 +227,12 @@ public:
 	 */
 	void writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
 
+	void readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size);
 	void readItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size);
 
-	void writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size);
+	void writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size);
 
-	static uint32_t getOffset(ps_storage_base_t* storage, uint32_t* var);
+	static uint32_t getOffset(ps_storage_base_t* storage, uint8_t* var);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//! helper functions

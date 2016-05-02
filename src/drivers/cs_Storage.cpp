@@ -18,6 +18,8 @@
 #include "services/cs_GeneralService.h"
 #include "services/cs_PowerService.h"
 
+#include "cfg/cs_StateVars.h"
+
 #include "drivers/cs_Serial.h"
 #include "util/cs_BleError.h"
 
@@ -93,8 +95,8 @@ Storage::Storage() {
 	BLE_CALL(pstorage_init, ());
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
-		initBlocks(config[i].storage_size, 1, config[i].handle);
 		LOGi("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
+		initBlocks(config[i].storage_size, 1, config[i].handle);
 	}
 
 }
@@ -218,7 +220,7 @@ void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, ui
 //	BLE_CALL (pstorage_clear, (&block_handle, config->storage_size) );
 //}
 
-uint32_t Storage::getOffset(ps_storage_base_t* storage, uint32_t* var) {
+uint32_t Storage::getOffset(ps_storage_base_t* storage, uint8_t* var) {
 	uint32_t p_storage = (uint32_t)storage;
 	uint32_t p_var = (uint32_t)var;
 	pstorage_size_t offset = p_var - p_storage;
@@ -232,6 +234,20 @@ uint32_t Storage::getOffset(ps_storage_base_t* storage, uint32_t* var) {
 	return offset;
 }
 
+void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size) {
+	pstorage_handle_t block_handle;
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
+
+	BLE_CALL (pstorage_load, (item, &block_handle, size, offset) );
+
+#ifdef PRINT_ITEMS
+	_log(INFO, "read item: \r\n");
+	BLEutil::printArray(item, size);
+#endif
+
+}
+
 void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size) {
 	pstorage_handle_t block_handle;
 
@@ -240,17 +256,17 @@ void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_
 	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, size, offset) );
 
 #ifdef PRINT_ITEMS
-	_log(INFO, "get struct: \r\n");
+	_log(INFO, "read item: \r\n");
 	BLEutil::printArray((uint8_t*)item, size);
 #endif
 
 }
 
-void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size) {
+void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size) {
 	pstorage_handle_t block_handle;
 
 #ifdef PRINT_ITEMS
-	_log(INFO, "set struct: \r\n");
+	_log(INFO, "write item: \r\n");
 	BLEutil::printArray((uint8_t*)item, size);
 #endif
 
@@ -265,7 +281,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint32
 //	rbc_mesh_pause();
 #endif
 
-	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, offset) );
+	BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
 
 }
 

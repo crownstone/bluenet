@@ -14,10 +14,6 @@ using namespace BLEpp;
 Settings::Settings() {
 	Storage::getInstance().getHandle(PS_ID_CONFIGURATION, _storageHandle);
 	loadPersistentStorage();
-
-	LOGi("load state vars");
-	Storage::getInstance().getHandle(PS_ID_STATE, _stateVarsHandle);
-	readStateVars();
 };
 
 //	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
@@ -146,10 +142,6 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 	}
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:{
 		setUint16(type, payload, length, persistent, _storageStruct.scanFilterSendFraction);
-		break;
-	}
-	case CONFIG_RESET_COUNTER: {
-		setStateVar(type, payload, length, persistent, _stateVars.resetCounter);
 		break;
 	}
 	default:
@@ -281,70 +273,11 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		LOGd("Read scan filter send fraction");
 		return getUint16(type, streamBuffer, _storageStruct.scanFilterSendFraction, SCAN_FILTER_SEND_FRACTION);
 	}
-	case CONFIG_RESET_COUNTER: {
-		LOGd("Read reset counter");
-		return getStateVar(type, streamBuffer, _stateVars.resetCounter, -1);
-	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
 	}
 	}
 	return false;
-}
-
-bool Settings::getStateVar(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint32_t defaultValue) {
-	readStateVars();
-	uint8_t plen = 1;
-	uint32_t payload[plen];
-	Storage::getUint32(value, payload[0], defaultValue);
-	streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint32_t));
-	streamBuffer->setType(type);
-	LOGd("Value set in payload: %u with len %u", payload[0], streamBuffer->length());
-	return true;
-}
-
-bool Settings::getStateVar(uint8_t type, uint32_t& target) {
-	switch(type) {
-	case CONFIG_RESET_COUNTER: {
-		Storage::getUint32(_stateVars.resetCounter, target, -1);
-		break;
-	}
-	}
-//	LOGd("read state var: %u", target);
-	return true;
-}
-
-bool Settings::setStateVar(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target) {
-	if (length != 4) {
-		LOGw("Expected uint32");
-		return false;
-	}
-	uint16_t val = ((uint32_t*)payload)[0];
-	LOGi("Set %u to %u", type, val);
-	Storage::setUint32(val, target);
-	if (persistent) {
-		LOGi("target: %p", &target);
-
-		pstorage_size_t offset = Storage::getOffset(&_stateVars, &target);
-		Storage::getInstance().writeItem(_stateVarsHandle, offset, &target, 4);
-	}
-	EventDispatcher::getInstance().dispatch(type, &target, 4);
-	return true;
-}
-
-bool Settings::setStateVar(uint8_t type, uint32_t& target) {
-	switch(type) {
-	case CONFIG_RESET_COUNTER: {
-		Storage::setUint32(target, _stateVars.resetCounter);
-
-		pstorage_size_t offset = Storage::getOffset(&_stateVars, &_stateVars.resetCounter);
-		Storage::getInstance().writeItem(_stateVarsHandle, offset, &_stateVars.resetCounter, 4);
-
-		break;
-	}
-	}
-//	LOGd("set state var: %u", target);
-	return true;
 }
 
 bool Settings::getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue) {
@@ -429,10 +362,6 @@ ps_configuration_t& Settings::getConfig() {
 	return _storageStruct;
 }
 
-ps_state_vars_t& Settings::getStateVars() {
-	return _stateVars;
-}
-
 /** Get a handle to the persistent storage struct and load it from FLASH.
  *
  * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
@@ -447,18 +376,6 @@ void Settings::loadPersistentStorage() {
  */
 void Settings::savePersistentStorage() {
 	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
-}
-
-void Settings::readStateVars() {
-	Storage::getInstance().readStorage(_stateVarsHandle, &_stateVars, sizeof(_stateVars));
-}
-
-void Settings::writeStateVars() {
-	ps_state_vars_t _oldVars;
-
-	Storage::getInstance().readStorage(_stateVarsHandle, &_oldVars, sizeof(_oldVars));
-
-	// todo: compare flash with working copy and only store changed variables
 }
 
 //	void ConfigHelper::enable(ps_storage_id id, uint16_t size) {

@@ -28,33 +28,34 @@
 /** Characteristic UUIDs */
 
 enum PowerCharacteristicsIDs {
-	PWM_UUID                                = 0x1,
-	SAMPLE_CURRENT_UUID                     = 0x2,
-	CURRENT_CURVE_UUID                      = 0x3,
-	CURRENT_CONSUMPTION_UUID                = 0x4,
-	CURRENT_LIMIT_UUID                      = 0x5,
-	RELAY_UUID                              = 0x6,
+	PWM_UUID                                = 0x1, //cmd
+	SAMPLE_CURRENT_UUID                     = 0x2, // remove?
+	CURRENT_CURVE_UUID                      = 0x3, //state
+	CURRENT_CONSUMPTION_UUID                = 0x4, //state
+	CURRENT_LIMIT_UUID                      = 0x5, //cfg
+
+	RELAY_UUID                              = 0x6, //cmd
 };
 
 enum GeneralCharacteristicsIDs {
-	TEMPERATURE_UUID                        = 0x1,
+	TEMPERATURE_UUID                        = 0x1, //state
 //	UNUSED                                  = 0x2,
 //	UNUSED                                  = 0x3,
 //	UNUSED                                  = 0x4,
-	RESET_UUID                              = 0x5,
-	MESH_CONTROL_UUID                       = 0x6,
-	SET_CONFIGURATION_UUID                  = 0x7,
-	SELECT_CONFIGURATION_UUID               = 0x8,
-	GET_CONFIGURATION_UUID                  = 0x9,
+	RESET_UUID                              = 0x5, //cmd
+	MESH_CONTROL_UUID                       = 0x6, //cmd
+	SET_CONFIGURATION_UUID                  = 0x7, //cfg
+	SELECT_CONFIGURATION_UUID               = 0x8, //cfg
+	GET_CONFIGURATION_UUID                  = 0x9, //cfg
 };
 
 enum IndoorLocalizationCharacteristicsIDs {
-	RSSI_UUID                               = 0x1,
-	TRACKED_DEVICE_UUID                     = 0x2,
-	SCAN_DEVICE_UUID                        = 0x3,
-	LIST_DEVICE_UUID                        = 0x4,
-	TRACKED_DEVICE_LIST_UUID                = 0x5,
-};
+	RSSI_UUID                               = 0x1, //state
+	TRACKED_DEVICE_UUID                     = 0x2, //behav
+	SCAN_DEVICE_UUID                        = 0x3, // remove?
+	LIST_DEVICE_UUID                        = 0x4, // remove?
+	TRACKED_DEVICE_LIST_UUID                = 0x5, //behav
+};//behav
 
 enum AlertCharacteristicsIDs {
 	SUPPORTED_NEW_ALERT_UUID                = 0x1,
@@ -65,7 +66,7 @@ enum AlertCharacteristicsIDs {
 };
 
 enum ScheduleCharacteristicsIDs {
-	CURRENT_TIME_UUID                       = 0x1,
-	WRITE_SCHEDULE_ENTRY_UUID               = 0x2,
-	LIST_SCHEDULE_ENTRIES_UUID              = 0x3,
+	CURRENT_TIME_UUID                       = 0x1, //state
+	WRITE_SCHEDULE_ENTRY_UUID               = 0x2, //behav
+	LIST_SCHEDULE_ENTRIES_UUID              = 0x3, //behav
 };

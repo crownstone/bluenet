@@ -48,6 +48,7 @@
  *********************************************************************************************************************/
 
 #include <cfg/cs_Settings.h>
+#include <cfg/cs_StateVars.h>
 
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventTypes.h>
@@ -88,7 +89,7 @@ void Crownstone::welcome() {
 void Crownstone::setName() {
 #ifdef CHANGE_NAME_ON_RESET
 	uint32_t resetCounter;
-	Settings::getInstance().getStateVar(CONFIG_RESET_COUNTER, resetCounter);
+	StateVars::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
 //	uint16_t minor;
 //	ps_configuration_t cfg = Settings::getInstance().getConfig();
 //	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
@@ -230,11 +231,11 @@ void Crownstone::configure() {
 	ps_configuration_t cfg = Settings::getInstance().getConfig();
 //
 	uint32_t resetCounter;
-	Settings::getInstance().getStateVar(CONFIG_RESET_COUNTER, resetCounter);
+	StateVars::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
 
 	LOGi("reset counter at: %d", ++resetCounter);
 
-	Settings::getInstance().setStateVar(CONFIG_RESET_COUNTER, resetCounter);
+	StateVars::getInstance().setStateVar(SV_RESET_COUNTER, resetCounter);
 
 
 #if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON

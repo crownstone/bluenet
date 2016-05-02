@@ -34,7 +34,7 @@ extern "C" {
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
 	#define log(level, fmt, ...) \
-			   write("[%-30.30s : %-5d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__)
+			   write("[%-30.30s : %-5d] " fmt CRLN, _FILE, __LINE__, ##__VA_ARGS__)
 
 	#define _logFirst(level, fmt, ...) \
 		   write("[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
@@ -45,7 +45,7 @@ extern "C" {
 			   }
 #else
 	#define log(level, fmt, ...)
-
+	#define _logFirst(level, fmt, ...)
 	#define _log(level, fmt, ...)
 #endif
 
