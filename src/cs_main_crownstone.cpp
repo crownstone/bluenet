@@ -75,6 +75,11 @@ void Crownstone::welcome() {
 	LOGi("Welcome at the nRF51822 code for meshing.");
 	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
 	LOGi("Compilation time: %s", __TIME__);
+#ifdef GIT_HASH
+	LOGi("Git hash: %s", GIT_HASH);
+#else
+	LOGi("Firmware version: %s", FIRMWARE_VERSION);
+#endif
 }
 
 /**

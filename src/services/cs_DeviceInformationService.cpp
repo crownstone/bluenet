@@ -41,8 +41,10 @@ void DeviceInformationService::init() {
 	LOGi("add firmware revision characteristic");
 	addFirmwareRevisionCharacteristic();
 
+#ifdef GIT_BRANCH
 	LOGi("add software revision characteristic");
 	addSoftwareRevisionCharacteristic();
+#endif
 }
 
 void DeviceInformationService::addHardwareRevisionCharacteristic() {
@@ -59,8 +61,12 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 	addCharacteristic(_firmwareRevisionCharacteristic);
 	_firmwareRevisionCharacteristic->setUUID(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
 	_firmwareRevisionCharacteristic->setName("Firmware Revision");
-	_firmwareRevisionCharacteristic->setDefaultValue(STRINGIFY(FIRMWARE_VERSION));
 	_firmwareRevisionCharacteristic->setWritable(false);
+#ifdef GIT_HASH
+	_firmwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_HASH));
+#else
+	_firmwareRevisionCharacteristic->setDefaultValue(STRINGIFY(FIRMWARE_VERSION));
+#endif
 }
 
 void DeviceInformationService::addSoftwareRevisionCharacteristic() {
@@ -68,6 +74,10 @@ void DeviceInformationService::addSoftwareRevisionCharacteristic() {
 	addCharacteristic(_softwareRevisionCharacteristic);
 	_softwareRevisionCharacteristic->setUUID(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
 	_softwareRevisionCharacteristic->setName("Software Revision");
-	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(SOFTWARE_REVISION));
+#ifdef GIT_BRANCH
+	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_BRANCH));
+#else
+//	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(SOFTWARE_REVISION));
+#endif
 	_softwareRevisionCharacteristic->setWritable(false);
 }
