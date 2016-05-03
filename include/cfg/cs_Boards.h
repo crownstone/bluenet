@@ -24,6 +24,7 @@
 #define CROWNSTONE4          12
 #define NORDIC_BEACON        13
 #define DOBEACON             14
+#define CROWNSTONE5          15
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
@@ -111,6 +112,26 @@
 //! amplification of the voltage over the shunt, to the adc input of the chip
 #define VOLTAGE_AMPLIFICATION       80
 #endif
+
+
+#if(HARDWARE_BOARD==CROWNSTONE5)
+//! plugin quant
+#define PIN_GPIO_SWITCH      12                  //! p0.12
+#define PIN_GPIO_RELAY_ON    11                  //! p0.11
+#define PIN_GPIO_RELAY_OFF   10                  //! p0.10
+#define PIN_AIN_CURRENT      7                   //! ain7 is p0.06
+#define PIN_AIN_VOLTAGE      6                   //! ain6 is p0.05
+#define PIN_GPIO_RX          15                  //! p0.15
+#define PIN_GPIO_TX          16                  //! p0.16
+
+//! Switch pin should be low to switch lights on
+#define SWITCH_INVERSED
+//! resistance of the shunt in milli ohm
+#define SHUNT_VALUE                 1
+//! amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       80
+#endif
+
 
 #if(HARDWARE_BOARD==DOBEACON)
 // v0.92
