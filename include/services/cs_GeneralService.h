@@ -152,6 +152,9 @@ protected:
 	 */
 	BLEpp::Characteristic<buffer_ptr_t>* _getConfigurationCharacteristic;
 
+	BLEpp::Characteristic<buffer_ptr_t>* _selectStateVarCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _readStateVarCharacteristic;
+
 	/** Enable the temperature characteristic.
  	 */
 	inline void addTemperatureCharacteristic();
@@ -173,6 +176,9 @@ protected:
 	/** Enable the get configuration characteristic.
 	 */
 	inline void addGetConfigurationCharacteristic();
+
+	inline void addSelectStateVarCharacteristic();
+	inline void addReadStateVarCharacteristic();
 
 	/** Enable the reset characteristic.
 	 *

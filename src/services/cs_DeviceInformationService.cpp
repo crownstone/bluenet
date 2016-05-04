@@ -45,6 +45,8 @@ void DeviceInformationService::init() {
 	LOGi("add software revision characteristic");
 	addSoftwareRevisionCharacteristic();
 #endif
+
+	addCharacteristicsDone();
 }
 
 void DeviceInformationService::addHardwareRevisionCharacteristic() {

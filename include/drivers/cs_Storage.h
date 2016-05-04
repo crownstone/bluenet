@@ -16,11 +16,12 @@
 #include "structs/cs_TrackDevices.h"
 #include "structs/cs_ScheduleEntries.h"
 
+#include "structs/buffer/cs_CircularBuffer.h"
+
 extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
-	#include "pstorage_platform.h"
+//	#include "pstorage_platform.h"
 	#include "pstorage.h"
-	#include "ble_types.h"
 }
 
 /** enable additional debug output */
@@ -109,7 +110,7 @@ struct ps_configuration_t : ps_storage_base_t {
 	} beacon;
 
 	//! current limit value
-	uint32_t current_limit;
+	uint32_t currentLimit;
 
 	//! nearby timeout used for device tracking
 	uint32_t nearbyTimeout;
@@ -163,6 +164,23 @@ struct ps_indoorlocalisation_service_t : ps_storage_base_t {
 		uint8_t list[sizeof(schedule_list_t)];
 	} scheduleList;
 	uint8_t reserved[3];
+};
+
+/** Event handler for softdevice events. in particular, listen for
+ *  NRF_EVT_RADIO_SESSION_CLOSED event to resume storage requests
+ */
+void storage_sys_evt_handler(uint32_t evt);
+
+/** Struct holding a storage request. If meshing is enabled, we need
+ *  to pause meshing on a storage request and wait until the radio is
+ *  closed before we can update the storage. so we need to buffer the
+ *  storage requests.
+ */
+struct buffer_element_t {
+	uint8_t* data;
+	uint16_t dataSize;
+	uint16_t storageOffset;
+	pstorage_handle_t storageHandle;
 };
 
 /** Class to store items persistently in FLASH
@@ -227,16 +245,41 @@ public:
 	 */
 	void writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
 
+	/** Read a single item (variable) from persistent memory at the position defined by the handle
+	 * and the offset
+	 * @handle the handle to the persistent memory where the struct is stored.
+	 *   obtain the handle with <getHandle>
+	 * @item pointer to the structure where the data from the persistent memory
+	 *   should be copied into
+	 * @size size of the item (eg. 4 for integer, 1 for a byte, 8 for a byte array of length 8, etc)
+	 * @offset the offset in bytes at which the item should be stored. (the offset is relative to the
+	 *   beginning of the block defined by the handle)
+	 */
 	void readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size);
-	void readItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size);
 
+	/** Write a single item (variable) to persistent memory at the position defined by the handle
+	 * and the offset
+	 * @handle the handle to the persistent memory where the struct is stored.
+	 *   obtain the handle with <getHandle>
+	 * @item pointer to the structure where the data from the persistent memory
+	 *   should be copied into
+	 * @size size of the item (eg. 4 for integer, 1 for a byte, 8 for a byte array of length 8, etc)
+	 * @offset the offset in bytes at which the item should be stored. (the offset is relative to the
+	 *   beginning of the block defined by the handle)
+	 */
 	void writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size);
-
-	static uint32_t getOffset(ps_storage_base_t* storage, uint8_t* var);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//! helper functions
 	////////////////////////////////////////////////////////////////////////////////////////
+
+	/** Helper function to calculate the offset of a variable inside a storage struct
+	 * @storage pointer to the storage struct where the variable is stored. (storage struct is a
+	 * 1 to 1 representation of the FLASH memory)
+	 * @variable pointer to the variable inside the struct
+	 * @return returns the offset in bytes
+	 */
+	static pstorage_size_t getOffset(ps_storage_base_t* storage, uint8_t* variable);
 
 	/** Helper function to convert std::string to char array
 	 * @value the input string
@@ -364,22 +407,22 @@ public:
 	 * uninitialized.
 	 */
 	template<typename T>
-		static void setArray(T* src, T* dest, uint16_t length) {
-			bool isUnassigned = true;
-			uint8_t* ptr = (uint8_t*)src;
-			for (int i = 0; i < length * sizeof(T); ++i) {
-				if (ptr[i] != 0xFF) {
-					isUnassigned = false;
-					break;
-				}
-			}
-
-			if (isUnassigned) {
-				LOGe("cannot write all FF");
-			} else {
-				memcpy(dest, src, length * sizeof(T));
+	static void setArray(T* src, T* dest, uint16_t length) {
+		bool isUnassigned = true;
+		uint8_t* ptr = (uint8_t*)src;
+		for (int i = 0; i < length * sizeof(T); ++i) {
+			if (ptr[i] != 0xFF) {
+				isUnassigned = false;
+				break;
 			}
 		}
+
+		if (isUnassigned) {
+			LOGe("cannot write all FF");
+		} else {
+			memcpy(dest, src, length * sizeof(T));
+		}
+	}
 
 	/** Helper function to read an array from a field of a struct
 	 * @T primitive type, such as uint8_t
@@ -398,36 +441,37 @@ public:
 	 * field will be copied to the destination array
 	 */
 	template<typename T>
-		static void getArray(T* src, T* dest, T* default_value, uint16_t length) {
+	static void getArray(T* src, T* dest, T* default_value, uint16_t length) {
 
 #ifdef PRINT_ITEMS
-			_log(INFO, "raw value: \r\n");
-			BLEutil::printArray((uint8_t*)src, length * sizeof(T));
+		_log(INFO, "raw value: \r\n");
+		BLEutil::printArray((uint8_t*)src, length * sizeof(T));
 #endif
 
-			bool isUnassigned = true;
-			uint8_t* ptr = (uint8_t*)src;
-			for (int i = 0; i < length * sizeof(T); ++i) {
-				if (ptr[i] != 0xFF) {
-					isUnassigned = false;
-					break;
-				}
+		bool isUnassigned = true;
+		uint8_t* ptr = (uint8_t*)src;
+		for (int i = 0; i < length * sizeof(T); ++i) {
+			if (ptr[i] != 0xFF) {
+				isUnassigned = false;
+				break;
 			}
-
-			if (isUnassigned) {
-				if (default_value != NULL) {
-#ifdef PRINT_ITEMS
-					LOGd("use default value");
-#endif
-					memcpy(dest, default_value, length * sizeof(T));
-				}
-			} else {
-				memcpy(dest, src, length * sizeof(T));
-			}
-
 		}
 
+		if (isUnassigned) {
+			if (default_value != NULL) {
+#ifdef PRINT_ITEMS
+				LOGd("use default value");
+#endif
+				memcpy(dest, default_value, length * sizeof(T));
+			}
+		} else {
+			memcpy(dest, src, length * sizeof(T));
+		}
+
+	}
+
 private:
+
 	/** Default constructor
 	 *
 	 * Private because of the singleton class
@@ -452,4 +496,5 @@ private:
 	 *         null otherwise
 	 */
 	storage_config_t* getStorageConfig(ps_storage_id storageID);
+
 };

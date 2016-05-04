@@ -12,6 +12,8 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <ble/cs_DoBotsManufac.h>
 
+#include <events/cs_EventDispatcher.h>
+
 Scanner::Scanner(Nrf51822BluetoothStack* stack) :
 	_opCode(SCAN_START),
 	_scanning(false),

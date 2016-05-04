@@ -8,6 +8,8 @@
 
 #include "cfg/cs_Settings.h"
 
+#include <ble/cs_UUID.h>
+#include <events/cs_EventDispatcher.h>
 
 using namespace BLEpp;
 
@@ -39,7 +41,7 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		LOGi("Set floor to %i", floor);
 		Storage::setUint8(floor, _storageStruct.floor);
 		if (persistent) {
-			savePersistentStorage();
+			savePersistentStorageItem(&_storageStruct.floor);
 		}
 		break;
 	}
@@ -61,10 +63,10 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 			LOGw("Expected 16 bytes for UUID, received: %d", length);
 			return;
 		}
-		_log(INFO, "set uuid to: "); BLEutil::printArray(payload, 16);
+		log(INFO, "set uuid to: "); BLEutil::printArray(payload, 16);
 		Storage::setArray<uint8_t>(payload, _storageStruct.beacon.uuid.uuid128, 16);
 		if (persistent) {
-			savePersistentStorage();
+			savePersistentStorageItem(_storageStruct.beacon.uuid.uuid128, 16);
 		}
 
 		EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.uuid.uuid128, 16);
@@ -102,7 +104,7 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		LOGi("Set passkey to %s", std::string((char*)payload, length).c_str());
 		Storage::setArray(payload, _storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
 		if (persistent) {
-			savePersistentStorage();
+			savePersistentStorageItem(_storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
 		}
 
 		EventDispatcher::getInstance().dispatch(type, &_storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
@@ -142,6 +144,10 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 	}
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:{
 		setUint16(type, payload, length, persistent, _storageStruct.scanFilterSendFraction);
+		break;
+	}
+	case CONFIG_CURRENT_LIMIT: {
+		setUint8(type, payload, length, persistent, _storageStruct.currentLimit);
 		break;
 	}
 	default:
@@ -273,6 +279,10 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		LOGd("Read scan filter send fraction");
 		return getUint16(type, streamBuffer, _storageStruct.scanFilterSendFraction, SCAN_FILTER_SEND_FRACTION);
 	}
+	case CONFIG_CURRENT_LIMIT: {
+		LOGd("Read current limit");
+		return getUint8(type, streamBuffer, _storageStruct.currentLimit, CURRENT_LIMIT);
+	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
 	}
@@ -322,7 +332,7 @@ bool Settings::setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool pe
 	LOGi("Set %u to %u", type, val);
 	Storage::setUint16(val, target);
 	if (persistent) {
-		savePersistentStorage();
+		savePersistentStorageItem(&target);
 	}
 	EventDispatcher::getInstance().dispatch(type, &target, 4);
 	return true;
@@ -337,7 +347,7 @@ bool Settings::setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool pers
 	LOGi("Set %u to %i", type, val);
 	Storage::setInt8(val, target);
 	if (persistent) {
-		savePersistentStorage();
+		savePersistentStorageItem(&target);
 	}
 	EventDispatcher::getInstance().dispatch(type, &target, 4);
 	return true;
@@ -352,7 +362,7 @@ bool Settings::setUint8(uint8_t type, uint8_t* payload, uint8_t length, bool per
 	LOGi("Set %u to %i", type, val);
 	Storage::setUint8(val, target);
 	if (persistent) {
-		savePersistentStorage();
+		savePersistentStorageItem(&target);
 	}
 	EventDispatcher::getInstance().dispatch(type, &val, 1);
 	return true;
@@ -372,7 +382,23 @@ void Settings::loadPersistentStorage() {
 	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
-/** Save to FLASH.
+
+void Settings::savePersistentStorageItem(uint8_t* item, uint8_t size) {
+	uint32_t offset = Storage::getOffset(&_storageStruct, item);
+	Storage::getInstance().writeItem(_storageHandle, offset, item, size);
+}
+
+void Settings::savePersistentStorageItem(int32_t* item) {
+	savePersistentStorageItem((uint8_t*)item, sizeof(int32_t));
+}
+
+void Settings::savePersistentStorageItem(uint32_t* item) {
+	savePersistentStorageItem((uint8_t*)item, sizeof(uint32_t));
+}
+
+/** Save the whole configuration struct to FLASH.
+ *  try to avoid using this function and store each item individually with the
+ *  savePersistentStorageItem functions
  */
 void Settings::savePersistentStorage() {
 	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
@@ -401,12 +427,12 @@ std::string & Settings::getBLEName() {
  */
 void Settings::setBLEName(const std::string &name, bool persistent) {
 	if (name.length() > 31) {
-		log(ERROR, MSG_NAME_TOO_LONG);
+		LOGe(MSG_NAME_TOO_LONG);
 		return;
 	}
 	BLEpp::Nrf51822BluetoothStack::getInstance().updateDeviceName(name);
 	Storage::setString(name, _storageStruct.device_name);
 	if (persistent) {
-		savePersistentStorage();
+		savePersistentStorageItem((uint8_t*)_storageStruct.device_name, sizeof(_storageStruct.device_name));
 	}
 }

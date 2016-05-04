@@ -84,6 +84,7 @@ void IndoorLocalizationService::init() {
 	LOGi("skip Tracked Device characteristics");
 #endif
 
+	addCharacteristicsDone();
 }
 
 void IndoorLocalizationService::tick() {

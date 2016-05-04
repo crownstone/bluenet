@@ -65,3 +65,8 @@
 
 //! Max number of schedule entries in the schedule service.
 #define MAX_SCHEDULE_ENTRIES                     10
+
+//! TODO: make into build configuration value?
+#define CURRENT_LIMIT							 0
+
+#define STORAGE_REQUEST_BUFFER_SIZE              5

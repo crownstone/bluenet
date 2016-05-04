@@ -520,7 +520,7 @@ void Nrf51822BluetoothStack::startAdvertising() {
 	uint32_t err_code;
 	err_code = sd_ble_gap_adv_start(&_adv_params);
 	if (err_code == NRF_ERROR_INVALID_PARAM) {
-		log(FATAL, MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
+		LOGf(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
 	}
 	APP_ERROR_CHECK(err_code);
 
@@ -892,7 +892,10 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 			buffer_ptr_t buffer = NULL;
 			uint16_t size = 0;
-			MasterBuffer::getInstance().getBuffer(buffer, size, 0);
+
+			// we want to have the actual payload word aligned, but header only needs 6 bytes,
+			// so we need to skip the first 2 bytes
+			MasterBuffer::getInstance().getBuffer(buffer, size, 2);
 
 			uint16_t* header = (uint16_t*)buffer;
 

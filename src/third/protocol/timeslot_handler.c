@@ -467,21 +467,13 @@ void timeslot_handler_init(nrf_clock_lfclksrc_t lfclksrc)
 }
 
 bool timeslot_handler_pause() {
-	if (paused) return true;
+	if (paused || !g_framework_initialized) return true;
 
-	if (g_framework_initialized) {
-
-		LOGi("pausing mesh");
-		pausing = true;
-		sd_radio_session_close();
-		g_framework_initialized = false;
-		return false;
-	//	while (!paused) {
-	//		nrf_delay_ms(10);
-	//	}
-	//	pausing = false;
-	}
-	return true;
+	LOGi("pausing mesh");
+	pausing = true;
+	sd_radio_session_close();
+	g_framework_initialized = false;
+	return false;
 }
 
 bool timeslot_handler_resume() {
@@ -489,9 +481,6 @@ bool timeslot_handler_resume() {
 
 	LOGi("resuming mesh");
 	timeslot_handler_init(g_lfclksrc);
-//    uint32_t error;
-//    error = sd_radio_session_open(&radio_signal_callback);
-//    APP_ERROR_CHECK(error);
 	paused = false;
 	return true;
 }

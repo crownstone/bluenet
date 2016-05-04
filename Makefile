@@ -43,6 +43,6 @@ build:
 	@sed -i "s/@HEAP_SIZE@/2700/" conf/nRF51822-softdevice.ld
 	#@sed -i $(BUILD_DIR)/CMakeFiles/CMakeTmp/conf/nRF51822-softdevice.ld
 	@cp conf/* $(BUILD_DIR)/CMakeFiles/CMakeTmp/conf
-	@echo $(SOURCE_DIR) && cd $(BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' --debug-trycompile -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake --target analyze $(SOURCE_DIR)
+	@echo $(SOURCE_DIR) && cd $(BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' --debug-trycompile -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake --target analyze $(SOURCE_DIR)
 
 .PHONY: all build

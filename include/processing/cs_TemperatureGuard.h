@@ -13,8 +13,11 @@
 #include <cstdint>
 #include "cfg/cs_Settings.h"
 #include "events/cs_EventListener.h"
+#include <events/cs_EventDispatcher.h>
 
 #define TEMPERATURE_UPDATE_FREQUENCY 0.2
+
+//todo: move to code to cpp
 
 /** Protection against temperature exceeding certain threshold
  */

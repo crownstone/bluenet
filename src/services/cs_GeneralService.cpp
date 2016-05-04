@@ -21,18 +21,22 @@
 #endif
 
 #include <cfg/cs_Settings.h>
+#include <cfg/cs_StateVars.h>
 
 using namespace BLEpp;
 
 GeneralService::GeneralService() :
 		_temperatureCharacteristic(NULL),
 		_resetCharacteristic(NULL),
-		_selectConfiguration(0xFF) {
+		_selectConfiguration(0xFF),
+		_streamBuffer(NULL)
+{
 
 	setUUID(UUID(GENERAL_UUID));
 	setName(BLE_SERVICE_GENERAL);
 
 	Settings::getInstance();
+	StateVars::getInstance();
 
 //	Storage::getInstance().getHandle(PS_ID_GENERAL_SERVICE, _storageHandle);
 //	loadPersistentStorage();
@@ -113,7 +117,44 @@ void GeneralService::init() {
 #else
 	LOGi(MSG_CHAR_CONFIGURATION_SKIP);
 #endif
+
+#if CHAR_STATE_VARIABLES==1
+	{
+	LOGi(MSG_CHAR_STATEVARIABLES_ADD);
+
+	uint16_t size = 0;
+	buffer_ptr_t buffer = NULL;
+
+	//! if we don't use configuration characteristics, set up a buffer
+	if (_streamBuffer == NULL) {
+		_streamBuffer = new StreamBuffer<uint8_t>();
+
+		LOGd("Assign buffer of size %i to stream buffer", size);
+		_streamBuffer->assign(buffer, size);
+	} else {
+		//! otherwise use the same buffer
+		_streamBuffer->getBuffer(buffer, size);
+		size = _streamBuffer->getMaxLength();
+	}
+
+	addSelectStateVarCharacteristic();
+	addReadStateVarCharacteristic();
+
+	_selectStateVarCharacteristic->setValue(buffer);
+	_selectStateVarCharacteristic->setMaxLength(size);
+	_selectStateVarCharacteristic->setDataLength(size);
+
+	_readStateVarCharacteristic->setValue(buffer);
+	_readStateVarCharacteristic->setMaxLength(size);
+	_readStateVarCharacteristic->setDataLength(size);
+
+	LOGd("Set both set/get charac to buffer at %p", buffer);
+	}
+#else
+	LOGi(MSG_CHAR_STATEVARIABLES_SKIP);
+#endif
 	
+	addCharacteristicsDone();
 }
 
 //void GeneralService::startAdvertising(Nrf51822BluetoothStack* stack) {
@@ -250,12 +291,13 @@ void GeneralService::addSetConfigurationCharacteristic() {
 	_setConfigurationCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
 			if (!value) {
-				log(WARNING, MSG_CHAR_VALUE_UNDEFINED);
+				LOGw(MSG_CHAR_VALUE_UNDEFINED);
 			} else {
-				log(INFO, MSG_CHAR_VALUE_WRITE);
+				LOGi(MSG_CHAR_VALUE_WRITE);
 				MasterBuffer& mb = MasterBuffer::getInstance();
 				if (!mb.isLocked()) {
 					mb.lock();
+
 					//! TODO: check lenght with actual payload length!
 					uint8_t type = _streamBuffer->type();
 					LOGi("Write configuration type: %i", (int)type);
@@ -263,10 +305,12 @@ void GeneralService::addSetConfigurationCharacteristic() {
 					uint8_t length = _streamBuffer->length();
 //					writeToStorage(type, length, payload);
 //					Settings::getInstance().writeToStorage(type, _streamBuffer);
+
 					Settings::getInstance().writeToStorage(type, payload, length);
+
 					mb.unlock();
 				} else {
-					log(ERROR, MSG_BUFFER_IS_LOCKED);
+					LOGe(MSG_BUFFER_IS_LOCKED);
 				}
 			}
 		});
@@ -314,3 +358,55 @@ void GeneralService::addGetConfigurationCharacteristic() {
 void GeneralService::writeToTemperatureCharac(int32_t temperature) {
 	*_temperatureCharacteristic = temperature;
 }
+
+
+void GeneralService::addSelectStateVarCharacteristic() {
+	_selectStateVarCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_selectStateVarCharacteristic);
+
+	_selectStateVarCharacteristic->setUUID(UUID(getUUID(), SELECT_STATEVAR_UUID));
+	_selectStateVarCharacteristic->setName(BLE_CHAR_STATEVAR_SELECT);
+	_selectStateVarCharacteristic->setWritable(true);
+	_selectStateVarCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+			if (!value) {
+				LOGw(MSG_CHAR_VALUE_UNDEFINED);
+			} else {
+				LOGi(MSG_CHAR_VALUE_WRITE);
+				MasterBuffer& mb = MasterBuffer::getInstance();
+				if (!mb.isLocked()) {
+					mb.lock();
+
+					uint8_t type = _streamBuffer->type();
+
+					LOGi("length: %d", _streamBuffer->length());
+					LOGi("value: %p", value);
+
+					if (_streamBuffer->length() == 0) {
+						StateVars::getInstance().readFromStorage(type, _streamBuffer);
+
+						_readStateVarCharacteristic->setDataLength(_streamBuffer->getDataLength());
+						_readStateVarCharacteristic->notify();
+					} else {
+						LOGi("write to storage");
+
+						StateVars::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length());
+					}
+
+					mb.unlock();
+				} else {
+					LOGe(MSG_BUFFER_IS_LOCKED);
+				}
+			}
+		});
+}
+
+void GeneralService::addReadStateVarCharacteristic() {
+	_readStateVarCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_readStateVarCharacteristic);
+
+	_readStateVarCharacteristic->setUUID(UUID(getUUID(), READ_STATEVAR_UUID));
+	_readStateVarCharacteristic->setName(BLE_CHAR_STATEVAR_READ);
+	_readStateVarCharacteristic->setWritable(false);
+	_readStateVarCharacteristic->setNotifies(true);
+}
+

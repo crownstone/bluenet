@@ -19,7 +19,6 @@
  *********************************************************************************************************************/
 
 //! temporary defines
-#define MESHING_PARALLEL 1
 
 //#define MICRO_VIEW 1
 //#define CHANGE_NAME_ON_RESET

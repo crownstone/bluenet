@@ -27,33 +27,35 @@ extern "C" {
 
 #ifndef SERIAL_VERBOSITY
 #error "You have to specify SERIAL_VERBOSITY"
+#define SERIAL_VERBOSITY NONE
 #endif
 
 #if SERIAL_VERBOSITY<NONE
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-	#define log(level, fmt, ...) \
-			   write("[%-30.30s : %-5d] " fmt CRLN, _FILE, __LINE__, ##__VA_ARGS__)
-
-	#define _logFirst(level, fmt, ...) \
-		   write("[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
-
 	#define _log(level, fmt, ...) \
 			   if (level >= SERIAL_VERBOSITY) { \
 				   write(fmt, ##__VA_ARGS__); \
 			   }
+
+	#define logLN(level, fmt, ...) \
+			   _log(level, "[%-30.30s : %-5d] " fmt CRLN, _FILE, __LINE__, ##__VA_ARGS__)
+
+	#define log(level, fmt, ...) \
+		   	   _log(level, "[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
+
 #else
 	#define log(level, fmt, ...)
-	#define _logFirst(level, fmt, ...)
+	#define logLN(level, fmt, ...)
 	#define _log(level, fmt, ...)
 #endif
 
-#define LOGd(fmt, ...) log(DEBUG, fmt, ##__VA_ARGS__)
-#define LOGi(fmt, ...) log(INFO, fmt, ##__VA_ARGS__)
-#define LOGw(fmt, ...) log(WARN, fmt, ##__VA_ARGS__)
-#define LOGe(fmt, ...) log(ERROR, fmt, ##__VA_ARGS__)
-#define LOGf(fmt, ...) log(FATAL, fmt, ##__VA_ARGS__)
+#define LOGd(fmt, ...) logLN(DEBUG, fmt, ##__VA_ARGS__)
+#define LOGi(fmt, ...) logLN(INFO, fmt, ##__VA_ARGS__)
+#define LOGw(fmt, ...) logLN(WARN, fmt, ##__VA_ARGS__)
+#define LOGe(fmt, ...) logLN(ERROR, fmt, ##__VA_ARGS__)
+#define LOGf(fmt, ...) logLN(FATAL, fmt, ##__VA_ARGS__)
 
 #if SERIAL_VERBOSITY>DEBUG
 #undef LOGd

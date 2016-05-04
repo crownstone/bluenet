@@ -45,11 +45,15 @@ protected:
 	//! app timer id for tick function
 	uint32_t				 _appTimerId;
 
+	// per BLE definition, there is no maximum number of characteristics per
+	// service. it is limited by the memory available to the GATT table over
+	// all services/characteristics
 	//! Currently maximum number of characteristics per service
-	static const uint8_t MAX_CHARACTERISTICS = 6;
+//	static const uint8_t MAX_CHARACTERISTICS = 10;
 
 	//! List of characteristics
-	fixed_tuple<CharacteristicBase*, MAX_CHARACTERISTICS> _characteristics;
+//	fixed_tuple<CharacteristicBase*, MAX_CHARACTERISTICS> _characteristics;
+	Characteristics_t _characteristics;
 
 public:
 	Service() :
@@ -147,11 +151,16 @@ public:
 	 * @characteristic Characteristic to add
 	 */
 	virtual Service& addCharacteristic(CharacteristicBase* characteristic) {
-		if (_characteristics.size() == MAX_CHARACTERISTICS) {
-			BLE_THROW(MSG_BLE_CHAR_TOO_MANY);
-		}
+//		if (_characteristics.size() == MAX_CHARACTERISTICS) {
+//			BLE_THROW(MSG_BLE_CHAR_TOO_MANY);
+//		}
 		_characteristics.push_back(characteristic);
 
+		return *this;
+	}
+
+	Service& addCharacteristicsDone() {
+		_characteristics.shrink_to_fit();
 		return *this;
 	}
 };

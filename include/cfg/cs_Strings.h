@@ -44,6 +44,8 @@
 #define BLE_CHAR_CURRENT_TIME                    "Current Time"
 #define BLE_CHAR_WRITE_SCHEDULE                  "Write schedule"
 #define BLE_CHAR_LIST_SCHEDULE                   "List schedule"
+#define BLE_CHAR_STATEVAR_SELECT                 "StateVar Select"
+#define BLE_CHAR_STATEVAR_READ                   "StateVar Read"
 
 /** Error messages
  *
@@ -86,4 +88,6 @@
 #define MSG_CHAR_MESH_SKIP                       "Characteristic Mesh skipped"
 #define MSG_CHAR_CONFIGURATION_ADD               "Characteristic Configuration added"
 #define MSG_CHAR_CONFIGURATION_SKIP              "Characteristic Configuration skipped"
+#define MSG_CHAR_STATEVARIABLES_ADD              "Characteristic StateVariables added"
+#define MSG_CHAR_STATEVARIABLES_SKIP             "Characteristic StateVariables skipped"
 

@@ -48,6 +48,8 @@ void ScheduleService::init() {
 	addWriteScheduleEntryCharacteristic();
 	addListScheduleEntriesCharacteristic();
 #endif
+
+	addCharacteristicsDone();
 }
 
 uint32_t ScheduleService::getTime() {

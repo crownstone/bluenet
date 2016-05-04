@@ -25,6 +25,7 @@
 #include <protocol/cs_Mesh.h>
 #include <protocol/cs_MeshControl.h>
 #include <cfg/cs_Settings.h>
+#include <cfg/cs_StateVars.h>
 
 using namespace BLEpp;
 
@@ -34,7 +35,7 @@ PowerService::PowerService() :
 		_sampleCurrentCharacteristic(NULL),
 		_powerConsumptionCharacteristic(NULL),
 		_currentCurveCharacteristic(NULL),
-		_currentLimitCharacteristic(NULL),
+//		_currentLimitCharacteristic(NULL),
 		_powerCurve(NULL),
 		_currentLimitVal(0),
 		_adcInitialized(false),
@@ -85,12 +86,14 @@ void PowerService::init() {
 	LOGi("skip Current Consumption Characteristic");
 #endif
 
-#if CHAR_CURRENT_LIMIT==1
-	LOGi("add Current Limitation");
-	addCurrentLimitCharacteristic();
-#else
-	LOGi("skip Current Limitation");
-#endif
+//#if CHAR_CURRENT_LIMIT==1
+//	LOGi("add Current Limitation");
+//	addCurrentLimitCharacteristic();
+//#else
+//	LOGi("skip Current Limitation");
+//#endif
+
+	addCharacteristicsDone();
 }
 
 /**
@@ -102,12 +105,12 @@ void PowerService::tick() {
 	//! Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
 	//! TODO: This is not required anymore at later crownstone versions, so this should be done at init().
 
-#if CHAR_CURRENT_LIMIT==1
-	if(!_currentLimitInitialized) {
-		setCurrentLimit(_currentLimitVal);
-		_currentLimitInitialized = true;
-	}
-#endif
+//#if CHAR_CURRENT_LIMIT==1
+//	if(!_currentLimitInitialized) {
+//		setCurrentLimit(_currentLimitVal);
+//		_currentLimitInitialized = true;
+//	}
+//#endif
 
 //	if (!_adcInitialized) {
 //		//! Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
@@ -155,8 +158,14 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setDefaultValue(255);
 	_pwmCharacteristic->setWritable(true);
 	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
-			LOGi("set pwm to %i", value);
-			PWM::getInstance().setValue(0, value);
+			uint32_t current = PWM::getInstance().getValue(0);
+			LOGi("current pwm: %d", current);
+			if (value != current) {
+				LOGi("set pwm to %i", value);
+				PWM::getInstance().setValue(0, value);
+
+				StateVars::getInstance().setStateVar(SV_SWITCH_STATE, value);
+			}
 	});
 }
 
@@ -271,27 +280,27 @@ void PowerService::addPowerConsumptionCharacteristic() {
 	_powerConsumptionCharacteristic->setNotifies(true);
 }
 
-uint8_t PowerService::getCurrentLimit() {
-	Storage::getUint8(Settings::getInstance().getConfig().current_limit, _currentLimitVal, 0);
-	LOGi("Obtained current limit from FLASH: %i", _currentLimitVal);
-	return _currentLimitVal;
-}
+//uint8_t PowerService::getCurrentLimit() {
+//	Storage::getUint8(Settings::getInstance().getConfig().currentLimit, _currentLimitVal, 0);
+//	LOGi("Obtained current limit from FLASH: %i", _currentLimitVal);
+//	return _currentLimitVal;
+//}
 
-//! TODO: doesn't work for now
-void PowerService::setCurrentLimit(uint8_t value) {
-	LOGi("Set current limit to: %i", value);
-	_currentLimitVal = value;
-	//if (!_currentLimitInitialized) {
-	//_currentLimit.init();
-	//_currentLimitInitialized = true;
-	//}
-//	LPComp::getInstance().stop();
-//	LPComp::getInstance().config(PIN_AIN_LPCOMP, _currentLimitVal, LPComp::LPC_UP);
-//	LPComp::getInstance().start();
-	LOGi("Write value to persistent memory");
-	Storage::setUint8(_currentLimitVal, Settings::getInstance().getConfig().current_limit);
-	Settings::getInstance().savePersistentStorage();
-}
+////! TODO: doesn't work for now
+//void PowerService::setCurrentLimit(uint8_t value) {
+//	LOGi("Set current limit to: %i", value);
+//	_currentLimitVal = value;
+//	//if (!_currentLimitInitialized) {
+//	//_currentLimit.init();
+//	//_currentLimitInitialized = true;
+//	//}
+////	LPComp::getInstance().stop();
+////	LPComp::getInstance().config(PIN_AIN_LPCOMP, _currentLimitVal, LPComp::LPC_UP);
+////	LPComp::getInstance().start();
+//	LOGi("Write value to persistent memory");
+//	Storage::setUint8(_currentLimitVal, Settings::getInstance().getConfig().currentLimit);
+//	Settings::getInstance().savePersistentStorage();
+//}
 
 /**
  * The characteristic that writes a current limit to persistent memory.
@@ -300,24 +309,24 @@ void PowerService::setCurrentLimit(uint8_t value) {
  *       Writing to persistent memory should be done between connection/advertisement events...
  */
 //! TODO -oDE: make part of configuration characteristic
-void PowerService::addCurrentLimitCharacteristic() {
-	_currentLimitCharacteristic = new Characteristic<uint8_t>();
-	addCharacteristic(_currentLimitCharacteristic);
-	_currentLimitCharacteristic->setNotifies(true);
-	_currentLimitCharacteristic->setUUID(UUID(getUUID(), CURRENT_LIMIT_UUID));
-	_currentLimitCharacteristic->setName("Current Limit");
-	_currentLimitCharacteristic->setDefaultValue(getCurrentLimit());
-	_currentLimitCharacteristic->setWritable(true);
-	_currentLimitCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		setCurrentLimit(value);
-		_currentLimitInitialized = true;
-	});
-
-	//! TODO: we have to delay the init, since there is a spike on the AIN pin at startup!
-	//! For now: init at onWrite, so we can still test it.
-	//	_currentLimit.start(&_currentLimitVal);
-	//	_currentLimit.init();
-}
+//void PowerService::addCurrentLimitCharacteristic() {
+//	_currentLimitCharacteristic = new Characteristic<uint8_t>();
+//	addCharacteristic(_currentLimitCharacteristic);
+//	_currentLimitCharacteristic->setNotifies(true);
+//	_currentLimitCharacteristic->setUUID(UUID(getUUID(), CURRENT_LIMIT_UUID));
+//	_currentLimitCharacteristic->setName("Current Limit");
+//	_currentLimitCharacteristic->setDefaultValue(getCurrentLimit());
+//	_currentLimitCharacteristic->setWritable(true);
+//	_currentLimitCharacteristic->onWrite([&](const uint8_t& value) -> void {
+//		setCurrentLimit(value);
+//		_currentLimitInitialized = true;
+//	});
+//
+//	//! TODO: we have to delay the init, since there is a spike on the AIN pin at startup!
+//	//! For now: init at onWrite, so we can still test it.
+//	//	_currentLimit.start(&_currentLimitVal);
+//	//	_currentLimit.init();
+//}
 
 //static int tmp_cnt = 100;
 //static int tick_cnt = 100;

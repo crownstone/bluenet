@@ -6,7 +6,7 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
-#define PRINT_DEBUG
+//#define PRINT_DEBUG
 
 #include "protocol/cs_MeshControl.h"
 

@@ -35,6 +35,8 @@ void AlertService::init() {
 
 	LOGi("add new alert characteristic");
 	addNewAlertCharacteristic();
+
+	addCharacteristicsDone();
 }
 
 void AlertService::tick() {

@@ -32,7 +32,7 @@ enum PowerCharacteristicsIDs {
 	SAMPLE_CURRENT_UUID                     = 0x2, // remove?
 	CURRENT_CURVE_UUID                      = 0x3, //state
 	CURRENT_CONSUMPTION_UUID                = 0x4, //state
-	CURRENT_LIMIT_UUID                      = 0x5, //cfg
+//	CURRENT_LIMIT_UUID                      = 0x5, //cfg
 
 	RELAY_UUID                              = 0x6, //cmd
 };
@@ -47,6 +47,8 @@ enum GeneralCharacteristicsIDs {
 	SET_CONFIGURATION_UUID                  = 0x7, //cfg
 	SELECT_CONFIGURATION_UUID               = 0x8, //cfg
 	GET_CONFIGURATION_UUID                  = 0x9, //cfg
+	SELECT_STATEVAR_UUID                    = 0xA,
+	READ_STATEVAR_UUID                      = 0xB
 };
 
 enum IndoorLocalizationCharacteristicsIDs {

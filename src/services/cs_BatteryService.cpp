@@ -39,6 +39,8 @@ public:
 		_characteristic->setUUID(UUID(BLE_UUID_BATTERY_LEVEL_CHAR));
 		_characteristic->setName(BLE_CHAR_BATTERY);
 		_characteristic->setDefaultValue(100);
+
+		addCharacteristicsDone();
 	}
 
 /** Set the battery level
