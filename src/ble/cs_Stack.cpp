@@ -33,10 +33,6 @@ extern "C" {
 
 using namespace BLEpp;
 
-// todo: remove and replace with correct array for values which should be published in the advertisement
-//   package
-uint8_t service_data_array[1] {0};
-
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_appearance(defaultAppearance), _clock_source(defaultClockSource),
 //				_mtu_size(defaultMtu),
@@ -408,8 +404,10 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 //	ble_advdata_service_data_t service_data;
 	memset(&_service_data, 0, sizeof(_service_data));
 	_service_data.service_uuid = 0x5432;
-	_service_data.data.size = 1;
-	_service_data.data.p_data = service_data_array;
+	_service_data.data.p_data = _crownstoneData.getArray();
+	_service_data.data.size = _crownstoneData.getArraySize();
+
+	LOGi("service data size: %d", _service_data.data.size);
 
 	_scan_resp.p_service_data_array = &_service_data;
 	_scan_resp.service_data_count = 1;

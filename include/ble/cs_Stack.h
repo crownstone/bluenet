@@ -18,6 +18,7 @@
 #include <common/cs_Tuple.h>
 #include <third/std/function.h>
 #include <ble/cs_DoBotsManufac.h>
+#include <ble/cs_ServiceData.h>
 
 /////////////////////////////////////////////////
 // test
@@ -179,6 +180,8 @@ protected:
 
 	ble_advdata_manuf_data_t 					_manufac_apple;
 	ble_advdata_service_data_t                  _service_data;
+
+	ServiceData                                 _crownstoneData;
 public:
 
 	/** Initialization of the BLE stack
