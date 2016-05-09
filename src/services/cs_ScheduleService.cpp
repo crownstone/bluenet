@@ -99,6 +99,8 @@ void ScheduleService::tick() {
 			//TODO: implement this, make sure that if something else changes pwm during fade, that the fading is halted.
 			break;
 		}
+		// TODO: i don't think we need this, already done by sync() at setTime
+//		writeScheduleList();
 	}
 #endif
 
