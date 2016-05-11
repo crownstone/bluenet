@@ -54,8 +54,10 @@ Available configurations:
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-1 | Device name | char array | Name of the device.
-2 | Room | uint 8 | Room number.
+
+0 | Device name | char array | Name of the device.
+1 | Device type | char array | **Deprecated.**
+2 | Room | uint 8 | **Deprecated.**
 3 | Floor | uint 8 | Floor number.
 4 | Nearby timeout | uint 16 | Time in ms before switching off when noone is nearby (not implemented yet).
 5 | PWM frequency | uint 8 | Sets PWM frequency (not implemented yet).
