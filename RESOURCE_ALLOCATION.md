@@ -33,7 +33,7 @@ ID | Name               | Used by
 31 | PPI                | ?
 
 ## PPI
-PPI | Used by
+Channel | Used by
 --- | ---
 0  | pwm?
 1  | pwm?
@@ -59,3 +59,11 @@ Group | Used by
 1 | ?
 2 | Softdevice
 3 | Softdevice
+
+## GPIOTE
+Channel | Used by
+--- | ---
+0 | pwm?
+1 | pwm?
+2 | cs_ADC
+3 | ?
