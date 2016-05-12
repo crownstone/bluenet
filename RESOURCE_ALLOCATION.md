@@ -42,7 +42,7 @@ Channel | Used by
 4  | pwm?
 5  | pwm?
 6  | ?
-7  | ?
+7  | cs_ADC?
 8  | mesh
 9  | mesh
 10 | mesh
@@ -65,5 +65,5 @@ Channel | Used by
 --- | ---
 0 | pwm?
 1 | pwm?
-2 | cs_ADC
+2 | ?
 3 | ?
