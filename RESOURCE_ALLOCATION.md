@@ -20,7 +20,7 @@ ID | Name               | Used by
 15 | AAR                | Softdevice
 16 | WDT                | ?
 17 | RTC1               | app_timer (mesh)
-18 | QDEC               | ?
+18 | QDEC               | mesh
 19 | LPCOMP             | cs_LPComp
 20 | SWI0               | ?
 21 | Radio Notification | Softdevice
@@ -43,12 +43,12 @@ PPI | Used by
 5  | pwm?
 6  | ?
 7  | ?
-8  | ?
-9  | ?
-10 | ?
-11 | ?
-12 | ?
-13 | ?
+8  | mesh
+9  | mesh
+10 | mesh
+11 | mesh
+12 | mesh
+13 | mesh?
 14 | Softdevice
 15 | Softdevice
 
