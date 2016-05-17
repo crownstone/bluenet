@@ -17,7 +17,7 @@ To use a device with bluenet code on it, you only need to know the Bluetooth pro
 We also provide libraries which take care of the protocol:
 
 - [Android](https://github.com/dobots/bluenet-lib-android)
-- [JavaScript](https://github.com/dobots/bluenet-lib-js)
+- [~~JavaScript~~](https://github.com/dobots/bluenet-lib-js)
 - [Python](https://github.com/dobots/bluenet-lib-python)
 
 
