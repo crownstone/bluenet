@@ -39,7 +39,7 @@ The different other software tools and online resources have been mentioned abov
 - [Bluenet documentation](http://dobots.github.io/bluenet/)
 - [Bluenet documentation branch](https://github.com/dobots/bluenet/tree/gh-pages)
 - [Android library](https://github.com/dobots/bluenet-lib-android)
-- [JavaScript library](https://github.com/dobots/bluenet-lib-js)
+- [~~JavaScript library~~](https://github.com/dobots/bluenet-lib-js)
 - [Python library](https://github.com/dobots/bluenet-lib-python)
 - [Bootloader](https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler)
 - [Crownstone website](http://crownstone.rocks)
