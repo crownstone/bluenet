@@ -59,7 +59,6 @@ Available configurations:
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-
 0 | Device name | char array | Name of the device.
 1 | Device type | char array | **Deprecated.**
 2 | Room | uint 8 | **Deprecated.**
@@ -218,7 +217,7 @@ uint 8 | Name Length | 1 | Length of the name.
 char array | Name Bytes | 9 | The name of this device.
 uint 8 | Service Flag | 1 | 
 uint 8 | Service Length | 1 | 
-uint 16 | Service UUID | 1 | Service UUID
+uint 16 | Service UUID | 2 | Service UUID
 [Service data](#scan_response_servicedata_packet) | 16 | Service data, state info.
 
 ### <a name="scan_response_servicedata_packet"></a>Scan response service data packet
@@ -228,7 +227,11 @@ This packet contains the state info. It will be encrypted using AES 128.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
+uint 16 | Crownstone state ID | 2 | ID of the Crownstone of which the state is shown.
 uint 8 | Switch state | 1 | The state of the switch, 0 - 100 (where 0 is off, 100 is on, dimmed in between).
-uint 8 | Power usage | 4 | The power usage at this moment.
-uint 8 | Accumulated energy | 8 | The accumulated energy.
-uint 8 | Crownstone ID | 3 | ID that identifies the Crownstone.
+uint 8 | Event bitmask | 1 | Shows if the Crownstone has something new to tell.
+uint 8 | Reserved | 2 | Reserved for future use.
+uint 32 | Power usage | 4 | The power usage at this moment (mW).
+uint 32 | Accumulated energy | 4 | The accumulated energy (kWh).
+
