@@ -1,4 +1,9 @@
+# Advertisements and scan response
+When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
+
 # Services
+When connected, the following services are available.
+
 ## General service
 
 The general service has UUID f5f90000-f5f9-11e4-aa15-123b93f75cba.
@@ -186,7 +191,22 @@ uint 16 | Version | 2 | Used internally.
 [Mesh Payload](#mesh_payload_packet) | Payload | 99 | Payload data.
 byte array | CRC | 3 | Checksum.
 
-### <a name=“scan_response_packet”></a>Scan Response Packet
+
+### <a name="ibeacon_packet"></a>iBeacon packet
+This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
+
+![Advertisement packet](docs/diagrams/advertisement-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | iBeacon prefix | 9 | This is fixed data.
+uint 8 | Proximity UUID | 16 | 
+uint 16 | Major | 2 | 
+uint 16 | Minor | 2 | 
+uint 16 | TX Power | 2 | Received signal strength at 1 meter.
+
+
+### <a name="scan_response_packet"></a>Scan response packet
 The packet that is sent when a BLE central scans.
 
 ![Scan Response packet](docs/diagrams/scan-response-packet.png)
@@ -194,20 +214,21 @@ The packet that is sent when a BLE central scans.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Name Flag | 1 | 
-uint 8 | Name Length | 1 | 
-uint 8 | Name Bytes | 9 | 
+uint 8 | Name Length | 1 | Length of the name.
+char array | Name Bytes | 9 | The name of this device.
 uint 8 | Service Flag | 1 | 
 uint 8 | Service Length | 1 | 
 uint 16 | Service UUID | 1 | Service UUID
-uint 8 | Service Data | 16 | Data about usage, state and ID. Will be encrypted.
+[Service data](#scan_response_servicedata_packet) | 16 | Service data, state info.
+
+### <a name="scan_response_servicedata_packet"></a>Scan response service data packet
+This packet contains the state info. It will be encrypted using AES 128.
 
 ![Scan Response ServiceData](docs/diagrams/scan-response-serviceData.png)
 
-This packet will be encrypted using AES 128.
-
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | PWM / State | 1 | The state of the Crownstone, if it is on, dimmed or off.
-uint 8 | Current Usage | 4 | The current power usage.
-uint 8 | Accumulated Energy | 8 | The accumulated energy.
+uint 8 | Switch state | 1 | The state of the switch, 0 - 100 (where 0 is off, 100 is on, dimmed in between).
+uint 8 | Power usage | 4 | The power usage at this moment.
+uint 8 | Accumulated energy | 8 | The accumulated energy.
 uint 8 | Crownstone ID | 3 | ID that identifies the Crownstone.
