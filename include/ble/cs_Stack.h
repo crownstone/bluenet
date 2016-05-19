@@ -165,6 +165,7 @@ protected:
 
 	uint8_t                            			_passkey[BLE_GAP_PASSKEY_LEN];
 	dm_application_instance_t                   _dm_app_handle;
+	bool                                        _dm_initialized;
 
 	app_timer_id_t                              _lowPowerTimeoutId;
 	app_timer_id_t                              _secReqTimerId;

@@ -49,7 +49,6 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		setUint16(type, payload, length, persistent, _storageStruct.nearbyTimeout);
 		break;
 	}
-#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	case CONFIG_IBEACON_MAJOR: {
 		setUint16(type, payload, length, persistent, (uint32_t&)_storageStruct.beacon.major);
 		break;
@@ -76,7 +75,6 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		setInt8(type, payload, length, persistent, (int32_t&)_storageStruct.beacon.rssi);
 		break;
 	}
-#endif
 	case CONFIG_WIFI_SETTINGS: {
 		LOGi("Temporarily store wifi settings");
 		//! max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
@@ -150,8 +148,111 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		setUint8(type, payload, length, persistent, _storageStruct.currentLimit);
 		break;
 	}
+	case CONFIG_MESH_ENABLED :
+	case CONFIG_ENCRYPTION_ENABLED :
+	case CONFIG_IBEACON_ENABLED :
+	case CONFIG_SCANNER_ENABLED :
+	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
+//		updateFlag(type, payload[0] != 0, persistent);
+		LOGe("Write disabled. Use commands to enable/disable");
+		break;
+	}
 	default:
 		LOGw("There is no such configuration type (%u).", type);
+	}
+}
+
+bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
+
+	switch(type) {
+		case CONFIG_MESH_ENABLED : {
+		_storageStruct.flagsBit.meshDisabled = !value;
+		break;
+	}
+	case CONFIG_ENCRYPTION_ENABLED : {
+		_storageStruct.flagsBit.encryptionDisabled = !value;
+		break;
+	}
+	case CONFIG_IBEACON_ENABLED : {
+		_storageStruct.flagsBit.iBeaconDisabled = !value;
+		break;
+	}
+	case CONFIG_SCANNER_ENABLED : {
+		_storageStruct.flagsBit.scannerDisabled = !value;
+		break;
+	}
+	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
+		_storageStruct.flagsBit.contPowerMeasurementDisabled = !value;
+		break;
+	}
+	default: {
+		return false;
+	}
+	}
+
+	_storageStruct.flagsBit.flagsUninitialized = false;
+	if (persistent) {
+		savePersistentStorageItem(&_storageStruct.flags);
+	}
+	EventDispatcher::getInstance().dispatch(type, &value, 1);
+	return true;
+}
+
+bool Settings::readFlag(uint8_t type, bool& value) {
+
+	bool default_value;
+	switch(type) {
+		case CONFIG_MESH_ENABLED : {
+		value = !_storageStruct.flagsBit.meshDisabled;
+		default_value = MESHING;
+		break;
+	}
+	case CONFIG_ENCRYPTION_ENABLED : {
+		value = !_storageStruct.flagsBit.encryptionDisabled;
+		default_value = ENCRYPTION;
+		break;
+	}
+	case CONFIG_IBEACON_ENABLED : {
+		value = !_storageStruct.flagsBit.iBeaconDisabled;
+		default_value = IBEACON;
+		break;
+	}
+	case CONFIG_SCANNER_ENABLED : {
+		value = !_storageStruct.flagsBit.scannerDisabled;
+		default_value = INTERVAL_SCANNER_ENABLED;
+		break;
+	}
+	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
+		value = !_storageStruct.flagsBit.contPowerMeasurementDisabled;
+		default_value = CONT_POWER_MEASURMENT;
+		break;
+	}
+	default:
+		return false;
+	}
+
+	if (_storageStruct.flagsBit.flagsUninitialized) {
+		value = default_value;
+		return true;
+	}
+
+	return true;
+}
+
+bool Settings::isEnabled(uint8_t type) {
+
+	switch(type) {
+	case CONFIG_MESH_ENABLED :
+	case CONFIG_ENCRYPTION_ENABLED :
+	case CONFIG_IBEACON_ENABLED :
+	case CONFIG_SCANNER_ENABLED :
+	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
+		bool enabled;
+		readFlag(type, enabled);
+		return enabled;
+	}
+	default:
+		return false;
 	}
 }
 
@@ -180,7 +281,6 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 
 		return true;
 	}
-#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	case CONFIG_IBEACON_MAJOR: {
 		LOGd("Read major");
 		return getUint16(type, streamBuffer, _storageStruct.beacon.major, BEACON_MAJOR);
@@ -205,7 +305,6 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		LOGd("Read tx power");
 		return getInt8(type, streamBuffer, _storageStruct.beacon.rssi, BEACON_RSSI);
 	}
-#endif
 	case CONFIG_WIFI_SETTINGS: {
 		LOGd("Read wifi settings. Does reset it.");
 		//! copy string, because we clear it on read
@@ -283,11 +382,49 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		LOGd("Read current limit");
 		return getUint8(type, streamBuffer, _storageStruct.currentLimit, CURRENT_LIMIT);
 	}
+	case CONFIG_MESH_ENABLED :
+	case CONFIG_ENCRYPTION_ENABLED :
+	case CONFIG_IBEACON_ENABLED :
+	case CONFIG_SCANNER_ENABLED :
+	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
+		loadPersistentStorage();
+		bool enabled;
+		readFlag(type, enabled);
+		streamBuffer->setPayload((uint8_t*)&enabled, 1);
+		streamBuffer->setType(type);
+		LOGd("Value set in payload: %d with len %u", enabled, streamBuffer->length());
+		return true;
+	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
 	}
 	}
 	return false;
+}
+
+bool Settings::getUint32(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint32_t defaultValue) {
+	loadPersistentStorage();
+	uint32_t payload[1];
+	Storage::getUint32(value, payload[0], defaultValue);
+	streamBuffer->setPayload((uint8_t*)payload, sizeof(uint32_t));
+	streamBuffer->setType(type);
+	LOGd("Value set in payload: %u with len %u", payload[0], streamBuffer->length());
+	return true;
+}
+
+bool Settings::setUint32(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target) {
+	if (length != 4) {
+		LOGw("Expected uint32");
+		return false;
+	}
+	uint32_t val = ((uint32_t*)payload)[0];
+	LOGi("Set %u to %u", type, val);
+	Storage::setUint32(val, target);
+	if (persistent) {
+		savePersistentStorageItem(&target);
+	}
+	EventDispatcher::getInstance().dispatch(type, &target, 4);
+	return true;
 }
 
 bool Settings::getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue) {
@@ -298,6 +435,21 @@ bool Settings::getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint
 	streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
 	streamBuffer->setType(type);
 	LOGd("Value set in payload: %u with len %u", payload[0], streamBuffer->length());
+	return true;
+}
+
+bool Settings::setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target) {
+	if (length != 2) {
+		LOGw("Expected uint16");
+		return false;
+	}
+	uint16_t val = ((uint16_t*)payload)[0];
+	LOGi("Set %u to %u", type, val);
+	Storage::setUint16(val, target);
+	if (persistent) {
+		savePersistentStorageItem(&target);
+	}
+	EventDispatcher::getInstance().dispatch(type, &target, 4);
 	return true;
 }
 
@@ -320,21 +472,6 @@ bool Settings::getUint8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint3
 	streamBuffer->setPayload((uint8_t*)payload, plen);
 	streamBuffer->setType(type);
 	LOGd("Value set in payload: %i with len %u", payload[0], streamBuffer->length());
-	return true;
-}
-
-bool Settings::setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target) {
-	if (length != 2) {
-		LOGw("Expected uint16");
-		return false;
-	}
-	uint16_t val = ((uint16_t*)payload)[0];
-	LOGi("Set %u to %u", type, val);
-	Storage::setUint16(val, target);
-	if (persistent) {
-		savePersistentStorageItem(&target);
-	}
-	EventDispatcher::getInstance().dispatch(type, &target, 4);
 	return true;
 }
 

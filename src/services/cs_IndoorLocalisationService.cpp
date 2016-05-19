@@ -30,18 +30,20 @@
 
 #include <protocol/cs_MeshControl.h>
 
+#include <processing/cs_CommandHandler.h>
+
 //#include <common/cs_Strings.h>
 
 using namespace BLEpp;
 
-IndoorLocalizationService::IndoorLocalizationService() :
+IndoorLocalizationService::IndoorLocalizationService() : EventListener(),
 		_rssiCharac(NULL), _peripheralCharac(NULL),
 		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL), _trackIsNearby(false),
-		_initialized(false), _scanMode(false),
-		_scanner(NULL),
+		_initialized(false),
 //		_scanResult(NULL),
 		_trackedDeviceList(NULL)
 {
+	EventDispatcher::getInstance().addListener(this);
 
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 
@@ -91,12 +93,11 @@ void IndoorLocalizationService::tick() {
 //	LOGi("Tack: %d", RTC::now());
 
 	if (!_initialized) {
-		_scanner = new Scanner(getStack());
-#if INTERVAL_SCANNER_ENABLED==1
-		RNG rng;
-		uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
-		_scanner->delayedStart(delay);
-#endif
+//#if INTERVAL_SCANNER_ENABLED==1
+//		RNG rng;
+//		uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
+//		_scanner->delayedStart(delay);
+//#endif
 
 		if (_trackedDeviceList != NULL) {
 			readTrackedDevices();
@@ -190,57 +191,59 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 	_scanControlCharac->setDefaultValue(255);
 	_scanControlCharac->setWritable(true);
 	_scanControlCharac->onWrite([&](const uint8_t& value) -> void {
-//			MasterBuffer& mb = MasterBuffer::getInstance();
-			if(value) {
-				_scanner->manualStartScan();
-//				LOGi("Init scan result");
-//				if (!mb.isLocked()) {
-//					mb.lock();
-//					_scanResult->clear();
-//				} else {
-//					LOGe("buffer already locked!");
+		CommandHandler::getInstance().handleCommand(CMD_SCAN_DEVICES, (buffer_ptr_t)&value, 1);
+
+////			MasterBuffer& mb = MasterBuffer::getInstance();
+//			if(value) {
+//				_scanner->manualStartScan();
+////				LOGi("Init scan result");
+////				if (!mb.isLocked()) {
+////					mb.lock();
+////					_scanResult->clear();
+////				} else {
+////					LOGe("buffer already locked!");
+////				}
+////
+////				if (!getStack()->isScanning()) {
+////					getStack()->startScanning();
+////				}
+//				_scanMode = true;
+//			} else {
+//				//! Only stop scanning if we're not also tracking devices
+//				if (!_trackMode) {
+//					_scanner->manualStopScan();
 //				}
+//				_scanMode = false;
 //
-//				if (!getStack()->isScanning()) {
-//					getStack()->startScanning();
+//				ScanResult* results = _scanner->getResults();
+//				results->print();
+//
+//				buffer_ptr_t buffer;
+//				uint16_t dataLength;
+//				results->getBuffer(buffer, dataLength);
+//				_peripheralCharac->setValue(buffer);
+//				_peripheralCharac->setDataLength(dataLength);
+//				_peripheralCharac->notify();
+//
+////				LOGi("Return scan result");
+////				if (mb.isLocked()) {
+////					_scanResult->print();
+////
+////					_peripheralCharac->setDataLength(_scanResult->getDataLength());
+////					_peripheralCharac->notify();
+////
+////
+//				if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+//					MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
 //				}
-				_scanMode = true;
-			} else {
-				//! Only stop scanning if we're not also tracking devices
-				if (!_trackMode) {
-					_scanner->manualStopScan();
-				}
-				_scanMode = false;
-
-				ScanResult* results = _scanner->getResults();
-				results->print();
-
-				buffer_ptr_t buffer;
-				uint16_t dataLength;
-				results->getBuffer(buffer, dataLength);
-				_peripheralCharac->setValue(buffer);
-				_peripheralCharac->setDataLength(dataLength);
-				_peripheralCharac->notify();
-
-//				LOGi("Return scan result");
-//				if (mb.isLocked()) {
-//					_scanResult->print();
-//
-//					_peripheralCharac->setDataLength(_scanResult->getDataLength());
-//					_peripheralCharac->notify();
+////
+////					mb.unlock();
+////				} else {
+////					LOGe("buffer not locked!");
+////				}
 //
 //
-#if CHAR_MESHING==1
-					MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
-#endif
-//
-//					mb.unlock();
-//				} else {
-//					LOGe("buffer not locked!");
-//				}
-
-
-			}
+//			}
 		});
 }
 
@@ -415,7 +418,7 @@ void IndoorLocalizationService::on_ble_event(ble_evt_t * p_ble_evt) {
 
 	Service::on_ble_event(p_ble_evt);
 
-	_scanner->onBleEvent(p_ble_evt);
+//	_scanner->onBleEvent(p_ble_evt);
 
 	switch (p_ble_evt->header.evt_id) {
 #if CHAR_RSSI==1
@@ -504,3 +507,13 @@ void IndoorLocalizationService::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_
 }
 #endif
 
+void IndoorLocalizationService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch(evt) {
+	case EVT_SCANNED_DEVICES: {
+		_peripheralCharac->setValue((buffer_ptr_t)p_data);
+		_peripheralCharac->setDataLength(length);
+		_peripheralCharac->notify();
+		break;
+	}
+	}
+}

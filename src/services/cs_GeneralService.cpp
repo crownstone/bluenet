@@ -23,6 +23,8 @@
 #include <cfg/cs_Settings.h>
 #include <cfg/cs_StateVars.h>
 
+#include <processing/cs_CommandHandler.h>
+
 using namespace BLEpp;
 
 GeneralService::GeneralService() :
@@ -237,22 +239,23 @@ void GeneralService::addResetCharacteristic() {
 	_resetCharacteristic->setDefaultValue(0);
 	_resetCharacteristic->setWritable(true);
 	_resetCharacteristic->onWrite([&](const int32_t& value) -> void {
-			if (value != 0) {
-
-				static uint32_t cmd = value;
-				if (cmd == COMMAND_ENTER_RADIO_BOOTLOADER) {
-					LOGi(MSG_FIRMWARE_UPDATE);
-				} else {
-					LOGi(MSG_RESET);
-				}
-
-				app_timer_id_t resetTimer;
-				Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t)reset);
-				Timer::getInstance().start(resetTimer, MS_TO_TICKS(100), &cmd);
-
-			} else {
-				LOGw("To reset write a nonzero value");
-			}
+		CommandHandler::getInstance().handleCommand(CMD_RESET, (buffer_ptr_t)&value, 4);
+//			if (value != 0) {
+//
+//				static uint32_t cmd = value;
+//				if (cmd == COMMAND_ENTER_RADIO_BOOTLOADER) {
+//					LOGi(MSG_FIRMWARE_UPDATE);
+//				} else {
+//					LOGi(MSG_RESET);
+//				}
+//
+//				app_timer_id_t resetTimer;
+//				Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t)reset);
+//				Timer::getInstance().start(resetTimer, MS_TO_TICKS(100), &cmd);
+//
+//			} else {
+//				LOGw("To reset write a nonzero value");
+//			}
 		});
 }
 
@@ -353,6 +356,7 @@ void GeneralService::addGetConfigurationCharacteristic() {
 	_getConfigurationCharacteristic->setUUID(UUID(getUUID(), GET_CONFIGURATION_UUID));
 	_getConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_GET);
 	_getConfigurationCharacteristic->setWritable(false);
+	_getConfigurationCharacteristic->setNotifies(true);
 }
 
 void GeneralService::writeToTemperatureCharac(int32_t temperature) {

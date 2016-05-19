@@ -31,9 +31,13 @@ typedef struct
 class Scanner : EventListener {
 
 public:
+	//! Gets a static singleton (no dynamic memory allocation)
+	static Scanner& getInstance() {
+		static Scanner instance;
+		return instance;
+	}
 
-	Scanner(Nrf51822BluetoothStack* stack);
-	virtual ~Scanner();
+	void setStack(Nrf51822BluetoothStack* stack);
 
 	void onBleEvent(ble_evt_t * p_ble_evt);
 
@@ -91,6 +95,8 @@ private:
 
 	uint8_t _scanBuffer[sizeof(peripheral_device_list_t)];
 	ScanResult* _scanResult;
+
+	Scanner();
 
 	bool isFiltered(data_t* p_adv_data);
 

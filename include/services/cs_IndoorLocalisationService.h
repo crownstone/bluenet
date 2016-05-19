@@ -21,7 +21,7 @@
 
 /** The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc.
  */
-class IndoorLocalizationService : public BLEpp::Service {
+class IndoorLocalizationService : public BLEpp::Service, EventListener {
 
 public:
 //	typedef function<int8_t()> func_t;
@@ -50,6 +50,8 @@ protected:
 
 	void startTracking();
 	void stopTracking();
+
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 public:
 	IndoorLocalizationService();
@@ -94,13 +96,10 @@ private:
 	bool _trackIsNearby;
 
 	bool _initialized;
-	bool _scanMode;
 
 #ifdef PWM_ON_RSSI
 	int16_t _averageRssi;
 #endif
-
-	Scanner* _scanner;
 
 //	ScanResult* _scanResult;
 	TrackedDeviceList* _trackedDeviceList;

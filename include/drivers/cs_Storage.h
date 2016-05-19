@@ -152,6 +152,19 @@ struct ps_configuration_t : ps_storage_base_t {
 	//! Set to 0 to not send them ever
 	uint32_t scanFilterSendFraction;
 
+	union {
+		struct {
+			bool flagsUninitialized : 1;
+			bool meshDisabled : 1;
+			bool encryptionDisabled : 1;
+			bool iBeaconDisabled : 1;
+			bool scannerDisabled : 1;
+			bool contPowerMeasurementDisabled : 1;
+		} flagsBit;
+		// dummy to force enableFlags struct to be of size uint32_t;
+		uint32_t flags;
+	};
+
 };
 
 /** Struct used by the IndoorLocalisationService to store elements

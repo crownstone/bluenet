@@ -31,6 +31,8 @@ extern "C" {
 #include "util/cs_Utils.h"
 #include <cfg/cs_UuidConfig.h>
 
+//#include <processing/cs_Scanner.h>
+
 using namespace BLEpp;
 
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
@@ -836,6 +838,8 @@ void Nrf51822BluetoothStack::device_manager_init(bool erase_bonds)
     // create a timer to handle the security request timeout
     Timer::getInstance().createSingleShot(_secReqTimerId, sec_req_timeout_handler);
 
+    _dm_initialized = true;
+
     LOGi("device_manager_init");
 }
 
@@ -944,9 +948,10 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 #if(SOFTDEVICE_SERIES != 110)
 	case BLE_GAP_EVT_ADV_REPORT:
-		for (Service* svc : _services) {
-			svc->on_ble_event(p_ble_evt);
-		}
+//		Scanner::getInstance().onBleEvent(p_ble_evt);
+//		for (Service* svc : _services) {
+//			svc->on_ble_event(p_ble_evt);
+//		}
 		break;
 #endif
 	case BLE_GAP_EVT_TIMEOUT:

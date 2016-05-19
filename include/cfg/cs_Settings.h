@@ -39,6 +39,11 @@ enum ConfigurationTypes {
 	CONFIG_SCAN_FILTER                      = 0x15, //! 21
 	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16, //! 22
 	CONFIG_CURRENT_LIMIT                    = 0x19, //! 25
+	CONFIG_MESH_ENABLED                     = 0x20,
+	CONFIG_ENCRYPTION_ENABLED               = 0x21,
+	CONFIG_IBEACON_ENABLED                  = 0x22,
+	CONFIG_SCANNER_ENABLED                  = 0x23,
+	CONFIG_CONT_POWER_MEASURMENT_ENABLED    = 0x24,
 	CONFIG_TYPES
 };
 
@@ -99,6 +104,9 @@ public:
 	 */
 	void setBLEName(const std::string &name, bool persistent = true);
 
+	bool isEnabled(uint8_t type);
+	bool updateFlag(uint8_t type, bool value, bool persistent);
+
 protected:
 
 	//! handle to storage (required to write to and read from FLASH)
@@ -110,18 +118,23 @@ protected:
 	//! non-persistent configuration options
 	std::string _wifiSettings;
 
+	bool readFlag(uint8_t type, bool& value);
+
 	/**
 	 * Helper functions to read value from storage (FLASH) and write to
 	 * streambuffer (to be read from characteristic)
 	 */
+	bool getUint32(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint32_t defaultValue);
 	bool getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue);
 	bool getInt8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, int32_t value, int8_t defaultValue);
 	bool getUint8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint8_t defaultValue);
+
 
 	/**
 	 * Helper functions to read value from buffer and write to working memory.
 	 * If persistent is sent, also write to storage (FLASH)
 	 */
+	bool setUint32(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
 	bool setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
 	bool setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, int32_t& target);
 	bool setUint8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);

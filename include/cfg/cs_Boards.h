@@ -62,6 +62,7 @@
 #define PIN_GPIO_RX          4                   //! this is p0.04 or gpio 4
 #define PIN_GPIO_TX          2                   //! this is p0.02 or gpio 2
 
+#define HAS_RELAY true
 //! resistance of the shunt in milli ohm
 #define SHUNT_VALUE                 20
 //! amplification of the voltage over the shunt, to the adc input of the chip
@@ -82,6 +83,7 @@
 #define PIN_GPIO_RX          2                   //! this is p0.02 or gpio 2
 #define PIN_GPIO_TX          4                   //! this is p0.04 or gpio 4
 
+#define HAS_RELAY true
 //! Switch pin should be low to switch lights on
 #define SWITCH_INVERSED
 //! resistance of the shunt in milli ohm
@@ -104,6 +106,7 @@
 #define PIN_GPIO_RX          2                   //! this is p0.02 or gpio 2
 #define PIN_GPIO_TX          3                   //! this is p0.03 or gpio 3
 
+#define HAS_RELAY true
 //! Switch pin should be low to switch lights on
 #define SWITCH_INVERSED
 //! resistance of the shunt in milli ohm
@@ -280,6 +283,10 @@
 
 #define SWITCH_INVERSED
 
+#endif
+
+#ifndef HAS_RELAY
+#define HAS_RELAY false
 #endif
 
 //! Sanity checks

@@ -32,7 +32,7 @@
  *   - measure power consumption
  *   - set a limit on the maximum current (the relay will be automatically switched off above this threshold)
  */
-class PowerService : public BLEpp::Service {
+class PowerService : public BLEpp::Service, EventListener {
 public:
 //	typedef function<int8_t()> func_t;
 
@@ -72,6 +72,9 @@ public:
 	 * a specific duty-cycle after the detection of a zero crossing.
 	 */
 	void dim(uint8_t value);
+
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
 protected:
 	//! The characteristics in this service
 	void addPWMCharacteristic();
@@ -115,17 +118,13 @@ private:
 	BLEpp::Characteristic<uint8_t*> *_currentCurveCharacteristic;
 //	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
 
-	PowerCurve<uint16_t>* _powerCurve;
 
 	uint8_t _currentLimitVal;
 
 //	pstorage_handle_t _storageHandle;
 //	ps_power_service_t _storageStruct;
 
-	bool _adcInitialized;
 	bool _currentLimitInitialized;
-	uint8_t _samplingType;
-	bool _voltagePin;
 
 	void sampleCurrent(uint8_t type);
 };

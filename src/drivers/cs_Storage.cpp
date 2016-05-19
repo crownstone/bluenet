@@ -60,6 +60,7 @@ extern "C"  {
 } // extern "C"
 
 void resumeRequests() {
+#if CHAR_MESHING==1
 	LOGi("Resume pstorage requests");
 	while (!requestBuffer->empty()) {
 		//! get the next buffered storage request
@@ -70,6 +71,7 @@ void resumeRequests() {
 		//! keep track of how many storage requests are pending, so that we determine when we can resume the mesh
 		++pendingStorageRequests;
 	}
+#endif
 }
 
 void storage_sys_evt_handler(uint32_t evt) {
@@ -103,7 +105,9 @@ Storage::Storage() {
 	// call once before using any other API calls of the persistent storage module
 	BLE_CALL(pstorage_init, ());
 
+#if CHAR_MESHING==1
 	requestBuffer = new CircularBuffer<buffer_element_t>(STORAGE_REQUEST_BUFFER_SIZE, true);
+#endif
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
 		LOGi("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);

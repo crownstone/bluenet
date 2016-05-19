@@ -158,8 +158,7 @@ void Crownstone::configDrivers() {
 //
 //	PWM::getInstance().init(&pwm_config);
 
-	PWM& pwm = PWM::getInstance();
-	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
+	_switch = &Switch::getInstance();
 
 	_temperatureGuard = new TemperatureGuard();
 	_temperatureGuard->startTicking();
@@ -358,6 +357,9 @@ void Crownstone::setup() {
 
 	createServices();
 
+	_scanner = &Scanner::getInstance();
+	_scanner->setStack(_stack);
+
 #if ENCRYPTION==1
 	_stack->device_manager_init(false);
 #endif
@@ -409,11 +411,11 @@ void Crownstone::setup() {
 #if (DEFAULT_ON==1)
 	LOGi("Set power ON by default");
 	nrf_delay_ms(1000);
-	_powerService->turnOn();
+	_switch->turnOn();
 #elif (DEFAULT_ON==0)
 	LOGi("Set power OFF by default");
 	nrf_delay_ms(1000);
-	_powerService->turnOff();
+	_switch->turnOff();
 #endif
 #endif
 

@@ -21,6 +21,9 @@ FIRMWARE_VERSION="0.0.1"
 # DEVICE_FRIDGE      3
 DEVICE_TYPE=DEVICE_UNDEF
 
+MESHING=0
+CONT_POWER_MEASURMENT=0
+
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=0
 

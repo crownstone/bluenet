@@ -24,6 +24,7 @@
 #include <processing/cs_TemperatureGuard.h>
 #include <processing/cs_Sensors.h>
 #include <processing/cs_Fridge.h>
+#include <processing/cs_Switch.h>
 
 #include <events/cs_EventListener.h>
 
@@ -55,6 +56,9 @@ private:
 	Fridge* _fridge;
 	TemperatureGuard* _temperatureGuard;
 
+	Switch* _switch;
+	Scanner* _scanner;
+
 	bool _advertisementPaused;
 
 	app_timer_id_t _advertisementTimer;
@@ -78,7 +82,9 @@ public:
 	Crownstone() : _stack(NULL),
 		_generalService(NULL), _localizationService(NULL), _powerService(NULL),
 		_alertService(NULL), _scheduleService(NULL), _deviceInformationService(NULL),
-		_beacon(NULL), _sensors(NULL), _fridge(NULL), _advertisementPaused(false) {};
+		_beacon(NULL), _sensors(NULL), _fridge(NULL),
+		_switch(NULL), _scanner(NULL),
+		_advertisementPaused(false) {};
 
 	void setup();
 

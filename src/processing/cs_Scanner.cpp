@@ -14,7 +14,7 @@
 
 #include <events/cs_EventDispatcher.h>
 
-Scanner::Scanner(Nrf51822BluetoothStack* stack) :
+Scanner::Scanner() :
 	_opCode(SCAN_START),
 	_scanning(false),
 	_running(false),
@@ -24,7 +24,7 @@ Scanner::Scanner(Nrf51822BluetoothStack* stack) :
 	_scanFilter(SCAN_FILTER),
 	_filterSendFraction(SCAN_FILTER_SEND_FRACTION),
 	_scanCount(0),
-	_stack(stack)
+	_stack(NULL)
 {
 
 	_scanResult = new ScanResult();
@@ -47,11 +47,15 @@ Scanner::Scanner(Nrf51822BluetoothStack* stack) :
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Scanner::staticTick);
 }
 
-Scanner::~Scanner() {
-
+void Scanner::setStack(Nrf51822BluetoothStack* stack) {
+	_stack = stack;
 }
 
 void Scanner::manualStartScan() {
+	if (!_stack) {
+		LOGe("forgot to assign stack!");
+		return;
+	}
 
 	LOGi("Init scan result");
 	_scanResult->clear();
@@ -64,6 +68,10 @@ void Scanner::manualStartScan() {
 }
 
 void Scanner::manualStopScan() {
+	if (!_stack) {
+		LOGe("forgot to assign stack!");
+		return;
+	}
 
 	_scanning = false;
 
@@ -74,6 +82,11 @@ void Scanner::manualStopScan() {
 }
 
 bool Scanner::isScanning() {
+	if (!_stack) {
+		LOGe("forgot to assign stack!");
+		return false;
+	}
+
 	return _scanning && _stack->isScanning();
 }
 
@@ -192,7 +205,7 @@ void Scanner::sendResults() {
 void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
 
 	switch (p_ble_evt->header.evt_id) {
-		case BLE_GAP_EVT_ADV_REPORT:
+	case BLE_GAP_EVT_ADV_REPORT:
 		onAdvertisement(&p_ble_evt->evt.gap_evt.params.adv_report);
 		break;
 	}
