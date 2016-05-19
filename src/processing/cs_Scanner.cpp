@@ -197,9 +197,9 @@ void Scanner::executeScan() {
 }
 
 void Scanner::sendResults() {
-#if CHAR_MESHING==1
-	MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
-#endif
+	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
+	}
 }
 
 void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
@@ -334,13 +334,13 @@ void Scanner::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_filterSendFraction = *(uint32_t*)p_data;
 		break;
 	case EVT_SCANNER_START:
-#if INTERVAL_SCANNER_ENABLED==1
-		if (length == 0) {
-			start();
-		} else {
-			delayedStart(*(uint16_t*)p_data);
+		if (Settings::getInstance().isEnabled(CONFIG_SCANNER_ENABLED)) {
+			if (length == 0) {
+				start();
+			} else {
+				delayedStart(*(uint16_t*)p_data);
+			}
 		}
-#endif
 		break;
 	case EVT_SCANNER_STOP:
 		stop();

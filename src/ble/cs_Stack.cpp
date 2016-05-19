@@ -13,11 +13,9 @@
 
 #include "structs/buffer/cs_MasterBuffer.h"
 
-#if CHAR_MESHING==1
 extern "C" {
-#include <third/protocol/rbc_mesh.h>
+	#include <third/protocol/rbc_mesh.h>
 }
-#endif
 
 #include "ble_stack_handler_types.h"
 
@@ -66,15 +64,16 @@ extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {
 	Nrf51822BluetoothStack::getInstance().on_ble_evt((ble_evt_t *)p_event_data);
 }
 
+
 //! called by softdevice handler on a ble event
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 //	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
 
-#if CHAR_MESHING==1
-	//!  pass the incoming BLE event to the mesh framework
-	rbc_mesh_ble_evt_handler(p_ble_evt);
-#endif
+	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+		//!  pass the incoming BLE event to the mesh framework
+		rbc_mesh_ble_evt_handler(p_ble_evt);
+	}
 
 	//! Only dispatch functions to the scheduler which might take long to execute, such as ble write functions
 	//! and handle other ble events directly in the interrupt. Otherwise app scheduler buffer might overflow fast
@@ -848,9 +847,9 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
 //	}
 
-#if ENCRYPTION==1
-	dm_ble_evt_handler(p_ble_evt);
-#endif
+    if (_dm_initialized && Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
+    	dm_ble_evt_handler(p_ble_evt);
+    }
 
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:

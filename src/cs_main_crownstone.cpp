@@ -37,10 +37,8 @@
 #include "drivers/cs_Timer.h"
 #include "structs/buffer/cs_MasterBuffer.h"
 
-#if CHAR_MESHING==1
 #include <protocol/cs_Mesh.h>
 #include <drivers/cs_RNG.h>
-#endif
 
 /**********************************************************************************************************************
  * Custom includes
@@ -235,8 +233,6 @@ void Crownstone::configure() {
 
 	StateVars::getInstance().setStateVar(SV_RESET_COUNTER, resetCounter);
 
-
-#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	//! if enabled, create the iBeacon parameter object which will be used
 	//! to start advertisement as an iBeacon
 
@@ -258,7 +254,6 @@ void Crownstone::configure() {
 
 	//! create ibeacon object
 	_beacon = new IBeacon(uuid, major, minor, rssi);
-#endif
 
 	//! set advertising parameters such as the device name and appearance.
 	//! Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
@@ -274,11 +269,9 @@ void Crownstone::configure() {
 	Storage::getUint16(cfg.advInterval, advInterval, ADVERTISEMENT_INTERVAL);
 	_stack->setAdvertisingInterval(advInterval);
 
-#if ENCRYPTION==1
 	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
 	Storage::getArray(cfg.passkey, passkey, (uint8_t*)STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
 	_stack->setPasskey(passkey);
-#endif
 
 	LOGi("... done");
 }
@@ -361,7 +354,9 @@ void Crownstone::setup() {
 	_scanner->setStack(_stack);
 
 #if ENCRYPTION==1
-	_stack->device_manager_init(false);
+    if (Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
+    	_stack->device_manager_init(false);
+    }
 #endif
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
@@ -379,25 +374,28 @@ void Crownstone::setup() {
 	BLEutil::print_stack("Stack drivers: ");
 
 #if CHAR_MESHING==1
-//	#if HARDWARE_BOARD==PCA10001
-//!        gpiote_init();
-//!    #endif
+	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
 
-    #if HARDWARE_BOARD == VIRTUALMEMO
-        nrf_gpio_range_cfg_output(7,14);
-    #endif
+		#if HARDWARE_BOARD == VIRTUALMEMO
+			nrf_gpio_range_cfg_output(7,14);
+		#endif
 
- 	CMesh & mesh = CMesh::getInstance();
-	mesh.init();
-	BLEutil::print_heap("Heap mesh: ");
-	BLEutil::print_stack("Stack mesh: ");
+		CMesh & mesh = CMesh::getInstance();
+		mesh.init();
+		BLEutil::print_heap("Heap mesh: ");
+		BLEutil::print_stack("Stack mesh: ");
+	}
 #endif
 
 	//! Begin sending advertising packets over the air.
 	//! This should be done after initialization of the mesh
 
 #if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
-	_stack->configureIBeacon(_beacon, DEVICE_TYPE);
+	if (Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {
+		_stack->configureIBeacon(_beacon, DEVICE_TYPE);
+	} else {
+		_stack->configureBleDevice(DEVICE_TYPE);
+	}
 #else
 	_stack->configureBleDevice(DEVICE_TYPE);
 #endif
@@ -423,16 +421,6 @@ void Crownstone::setup() {
 
 }
 
-//! start advertising. the advertisment package depends on the device type,
-//! and if IBEACON is enabled
-//void Crownstone::startAdvertising() {
-//#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
-//	_stack->startIBeacon(_beacon, DEVICE_TYPE);
-//#else
-//	_stack->startAdvertising(DEVICE_TYPE);
-//#endif
-//}
-
 void Crownstone::tick() {
 //		LOGi("tick:stop %d", RTC::now());
 	_stack->updateAdvertisement();
@@ -454,8 +442,16 @@ void Crownstone::run() {
 
 	_stack->startTicking();
 
+	if (Settings::getInstance().isEnabled(CONFIG_SCANNER_ENABLED)) {
+		RNG rng;
+		uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
+		_scanner->delayedStart(delay);
+	}
+
 #if CHAR_MESHING==1
-	CMesh::getInstance().startTicking();
+	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+		CMesh::getInstance().startTicking();
+	}
 #endif
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
@@ -486,7 +482,6 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	bool reconfigureBeacon = false;
 	switch(evt) {
 
-#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
 	case CONFIG_IBEACON_MAJOR: {
 		_beacon->setMajor(*(uint32_t*)p_data);
 		reconfigureBeacon = true;
@@ -507,7 +502,6 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		reconfigureBeacon = true;
 		break;
 	}
-#endif
 	case CONFIG_TX_POWER: {
 //		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
 		_stack->setTxPowerLevel(*(int8_t*)p_data);
@@ -564,7 +558,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 	}
 
-	if (reconfigureBeacon) {
+	if (reconfigureBeacon && Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {
 //		_stack->configureIBeacon(_beacon, DEVICE_TYPE);
 		_stack->updateAdvertisement();
 //		_stack->stopAdvertising();
@@ -578,30 +572,6 @@ void on_exit(void) {
 
 
 /**********************************************************************************************************************/
-#if CHAR_MESHING==1
-uint32_t appTimerId = -1;
-
-uint32_t count[2] = {};
-//uint8_t idx = -1;
-uint8_t idx = 0;
-
-void sendMesh(void* ptr) {
-//	idx = (idx + 1) % 2;
-
-	LOGi("<< ch: %d", idx * 2 + 1);
-	LOGi("<< count: %d", count[idx]);
-	hub_mesh_message_t message;
-	memset(&message, 0, sizeof(message));
-	message.testMsg.counter = count[idx]++;
-	message.header.messageType = 102;
-
-	LOGi("message data:");
-	BLEutil::printArray(&message, sizeof(message));
-	CMesh::getInstance().send(idx * 2 + 1, &message, sizeof(message));
-
-	Timer::getInstance().start(appTimerId, HZ_TO_TICKS(1), NULL);
-}
-#endif
 
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
@@ -617,11 +587,6 @@ int main() {
 
 	//! setup crownstone ...
 	crownstone.setup();
-
-#if CHAR_MESHING==1
-//	Timer::getInstance().createSingleShot(appTimerId, (app_timer_timeout_handler_t)sendMesh);
-//	Timer::getInstance().start(appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), NULL);
-#endif
 
 	//! run forever ...
 	crownstone.run();

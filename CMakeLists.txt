@@ -135,7 +135,7 @@ ENDIF()
 # should be only when creating iBeacon
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_iBeacon.cpp")
 
-IF(${CHAR_MESHING} STRGREATER "0")
+#IF(${CHAR_MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_MeshControl.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_Mesh.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/event_handler.c")
@@ -151,13 +151,13 @@ IF(${CHAR_MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/trickle.c")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/version_handler.c")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/notification_buffer.c")
-endif()
+#endif()
 
-IF(${CHAR_MESHING} STRGREATER "0")
+#IF(${CHAR_MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_timer.c")
-else()
-	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer.c")
-endif()
+#else()
+#	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer.c")
+#endif()
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/device_manager_peripheral.c")
 

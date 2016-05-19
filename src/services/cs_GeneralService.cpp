@@ -16,9 +16,7 @@
 //#include "common/cs_Strings.h"
 #include "drivers/cs_RTC.h"
 //
-#if CHAR_MESHING==1
 #include <protocol/cs_MeshControl.h>
-#endif
 
 #include <cfg/cs_Settings.h>
 #include <cfg/cs_StateVars.h>
@@ -66,23 +64,25 @@ void GeneralService::init() {
 #endif
 
 #if CHAR_MESHING==1
-	{
-	LOGi(MSG_CHAR_MESH_ADD);
+	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+		LOGi(MSG_CHAR_MESH_ADD);
 
-	_meshMessage = new MeshCharacteristicMessage();
+		_meshMessage = new MeshCharacteristicMessage();
 
-	MasterBuffer& mb = MasterBuffer::getInstance();
-	buffer_ptr_t buffer = NULL;
-	uint16_t size = 0;
-	mb.getBuffer(buffer, size);
+		MasterBuffer& mb = MasterBuffer::getInstance();
+		buffer_ptr_t buffer = NULL;
+		uint16_t size = 0;
+		mb.getBuffer(buffer, size);
 
-	_meshMessage->assign(buffer, size);
+		_meshMessage->assign(buffer, size);
 
-	addMeshCharacteristic();
+		addMeshCharacteristic();
 
-	_meshCharacteristic->setValue(buffer);
-	_meshCharacteristic->setMaxLength(size);
-	_meshCharacteristic->setDataLength(0);
+		_meshCharacteristic->setValue(buffer);
+		_meshCharacteristic->setMaxLength(size);
+		_meshCharacteristic->setDataLength(0);
+	} else {
+		LOGi(MSG_CHAR_MESH_SKIP);
 	}
 #else
 	LOGi(MSG_CHAR_MESH_SKIP);
@@ -259,7 +259,6 @@ void GeneralService::addResetCharacteristic() {
 		});
 }
 
-#if CHAR_MESHING==1
 void GeneralService::addMeshCharacteristic() {
 	_meshCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_meshCharacteristic);
@@ -282,7 +281,6 @@ void GeneralService::addMeshCharacteristic() {
 		});
 
 }
-#endif
 
 void GeneralService::addSetConfigurationCharacteristic() {
 	_setConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();

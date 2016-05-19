@@ -12,6 +12,8 @@
 
 #include <ble/cs_Softdevice.h>
 
+#include <cfg/cs_Settings.h>
+
 using namespace BLEpp;
 
 CharacteristicBase::CharacteristicBase() :
@@ -100,7 +102,11 @@ void CharacteristicBase::init(Service* svc) {
 #if ENCRYPTION==0
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.write_perm);
 #else
-	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.cccd_md.write_perm);
+    if (Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
+    	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.cccd_md.write_perm);
+    } else {
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.write_perm);
+    }
 #endif
 
 	ci.char_md.p_cccd_md = &ci.cccd_md; //! the client characteristic metadata.
@@ -135,8 +141,13 @@ void CharacteristicBase::init(Service* svc) {
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.write_perm);
 #else
-	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.read_perm);
-	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.write_perm);
+    if (Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
+		BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.read_perm);
+		BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.write_perm);
+    } else {
+    	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
+    	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.write_perm);
+    }
 #endif
 	ci.attr_char_value.p_attr_md = &ci.attr_md;
 
@@ -164,7 +175,11 @@ void CharacteristicBase::init(Service* svc) {
 #if ENCRYPTION==0
 		BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
 #else
-		BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.user_desc_metadata_md.read_perm);
+	    if (Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
+	    	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.user_desc_metadata_md.read_perm);
+	    } else {
+			BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
+	    }
 #endif
 
 		BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&ci.user_desc_metadata_md.write_perm); //! required

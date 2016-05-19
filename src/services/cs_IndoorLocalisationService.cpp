@@ -93,11 +93,6 @@ void IndoorLocalizationService::tick() {
 //	LOGi("Tack: %d", RTC::now());
 
 	if (!_initialized) {
-//#if INTERVAL_SCANNER_ENABLED==1
-//		RNG rng;
-//		uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
-//		_scanner->delayedStart(delay);
-//#endif
 
 		if (_trackedDeviceList != NULL) {
 			readTrackedDevices();
