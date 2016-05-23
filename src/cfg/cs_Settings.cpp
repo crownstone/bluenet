@@ -13,10 +13,21 @@
 
 using namespace BLEpp;
 
-Settings::Settings() {
-	Storage::getInstance().getHandle(PS_ID_CONFIGURATION, _storageHandle);
-	loadPersistentStorage();
+Settings::Settings() : _initialized(false), _storage(NULL) {
 };
+
+void Settings::init() {
+	_storage = &Storage::getInstance();
+
+	if (!_storage->isInitialized()) {
+		LOGe("forgot to initialize Storage!");
+		return;
+	}
+
+	_storage->getHandle(PS_ID_CONFIGURATION, _storageHandle);
+	loadPersistentStorage();
+	_initialized = true;
+}
 
 //	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool persistent) {
@@ -516,13 +527,13 @@ ps_configuration_t& Settings::getConfig() {
  * Hence, there is an entire struct that can be filled and flashed at once.
  */
 void Settings::loadPersistentStorage() {
-	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+	_storage->readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 
 void Settings::savePersistentStorageItem(uint8_t* item, uint8_t size) {
 	uint32_t offset = Storage::getOffset(&_storageStruct, item);
-	Storage::getInstance().writeItem(_storageHandle, offset, item, size);
+	_storage->writeItem(_storageHandle, offset, item, size);
 }
 
 void Settings::savePersistentStorageItem(int32_t* item) {
@@ -538,11 +549,11 @@ void Settings::savePersistentStorageItem(uint32_t* item) {
  *  savePersistentStorageItem functions
  */
 void Settings::savePersistentStorage() {
-	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+	_storage->writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 //	void ConfigHelper::enable(ps_storage_id id, uint16_t size) {
-//		Storage::getInstance().getHandle(id, _storageHandles[id]);
+//		_storage->getHandle(id, _storageHandles[id]);
 //		loadPersistentStorage(_storageHandles[id], );
 //	}
 
@@ -572,4 +583,15 @@ void Settings::setBLEName(const std::string &name, bool persistent) {
 	if (persistent) {
 		savePersistentStorageItem((uint8_t*)_storageStruct.device_name, sizeof(_storageStruct.device_name));
 	}
+}
+
+void Settings::factoryReset(uint32_t resetCode) {
+	if (resetCode != FACTORY_RESET_CODE) {
+		LOGe("wrong reset code!");
+		return;
+	}
+
+	_storage->clearStorage(PS_ID_CONFIGURATION);
+	memset(&_storageStruct, 0xFF, sizeof(_storageStruct));
+//	loadPersistentStorage();
 }

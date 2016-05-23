@@ -423,6 +423,8 @@ public:
 	 */
 	void device_manager_init(bool erase_bonds);
 
+	void device_manager_reset();
+
 	void secReqTimeoutHandler(void * p_context);
 
 	/*

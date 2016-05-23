@@ -7,6 +7,9 @@
 #include "ble/cs_Handlers.h"
 #include <drivers/cs_Storage.h>
 
+#include <cfg/cs_Settings.h>
+#include <drivers/cs_Serial.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -14,7 +17,6 @@ extern "C" {
 #include <pstorage.h>
 #include <third/protocol/rbc_mesh.h>
 
-#include <drivers/cs_Serial.h>
 
 /** Function for dispatching a system event (not a BLE event) to all modules with a system event handler. This can also
  * be events related to the radio, for example the NRF_EVT_RADIO_BLOCKED (4) and NRF_EVT_RADIO_SESSION_IDLE (7) events
@@ -30,11 +32,12 @@ void sys_evt_dispatch(uint32_t sys_evt) {
 //	LOGi("Sys evt dispatch: %d", sys_evt);
     pstorage_sys_event_handler(sys_evt);
 
-#if CHAR_MESHING==1
-    rbc_mesh_sd_evt_handler(sys_evt);
-    storage_sys_evt_handler(sys_evt);
+    Settings& settings = Settings::getInstance();
+    if (settings.isInitialized() && settings.isEnabled(CONFIG_MESH_ENABLED)) {
+		rbc_mesh_sd_evt_handler(sys_evt);
+		storage_sys_evt_handler(sys_evt);
 //!    rbc_mesh_sd_evt_handler(sys_evt);
-#endif
+    }
 
 }
 

@@ -52,8 +52,8 @@ public:
 	 * Every component has a "tick" function which is for non-urgent things.
 	 * Urgent matters have to be resolved immediately in interrupt service handlers.
 	 */
-	void tick();
-	void scheduleNextTick();
+//	void tick();
+//	void scheduleNextTick();
 
 protected:
 	//! The characteristics in this service, based on:

@@ -27,7 +27,7 @@ AlertService::AlertService() :
 
 	init();
 
-	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)AlertService::staticTick);
+//	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)AlertService::staticTick);
 }
 
 void AlertService::init() {
@@ -39,13 +39,13 @@ void AlertService::init() {
 	addCharacteristicsDone();
 }
 
-void AlertService::tick() {
-	scheduleNextTick();
-}
+//void AlertService::tick() {
+//	scheduleNextTick();
+//}
 
-void AlertService::scheduleNextTick() {
-	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(ALERT_SERVICE_UPDATE_FREQUENCY), this);
-}
+//void AlertService::scheduleNextTick() {
+//	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(ALERT_SERVICE_UPDATE_FREQUENCY), this);
+//}
 
 new_alert_t AlertService::getAlert() {
 	if (_newAlertCharacteristic != NULL) {

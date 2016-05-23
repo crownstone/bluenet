@@ -25,6 +25,8 @@
 #include <processing/cs_Sensors.h>
 #include <processing/cs_Fridge.h>
 #include <processing/cs_Switch.h>
+#include <processing/cs_Scanner.h>
+#include <processing/cs_Tracker.h>
 
 #include <events/cs_EventListener.h>
 
@@ -58,6 +60,7 @@ private:
 
 	Switch* _switch;
 	Scanner* _scanner;
+	Tracker* _tracker;
 
 	bool _advertisementPaused;
 
@@ -83,7 +86,7 @@ public:
 		_generalService(NULL), _localizationService(NULL), _powerService(NULL),
 		_alertService(NULL), _scheduleService(NULL), _deviceInformationService(NULL),
 		_beacon(NULL), _sensors(NULL), _fridge(NULL),
-		_switch(NULL), _scanner(NULL),
+		_switch(NULL), _scanner(NULL), _tracker(NULL),
 		_advertisementPaused(false) {};
 
 	void setup();

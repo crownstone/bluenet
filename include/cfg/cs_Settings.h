@@ -44,6 +44,7 @@ enum ConfigurationTypes {
 	CONFIG_IBEACON_ENABLED                  = 0x22,
 	CONFIG_SCANNER_ENABLED                  = 0x23,
 	CONFIG_CONT_POWER_MEASURMENT_ENABLED    = 0x24,
+	CONFIG_TRACKER_ENABLED                  = 0x25,
 	CONFIG_TYPES
 };
 
@@ -64,6 +65,12 @@ public:
 	static Settings& getInstance() {
 		static Settings instance;
 		return instance;
+	}
+
+	void init();
+
+	bool isInitialized() {
+		return _initialized;
 	}
 
 	/** Read the configuration from the buffer and store in working memory.
@@ -107,7 +114,11 @@ public:
 	bool isEnabled(uint8_t type);
 	bool updateFlag(uint8_t type, bool value, bool persistent);
 
+	void factoryReset(uint32_t resetCode);
+
 protected:
+
+	bool _initialized;
 
 	//! handle to storage (required to write to and read from FLASH)
 	pstorage_handle_t _storageHandle;
@@ -117,6 +128,8 @@ protected:
 
 	//! non-persistent configuration options
 	std::string _wifiSettings;
+
+	Storage* _storage;
 
 	bool readFlag(uint8_t type, bool& value);
 
@@ -128,7 +141,6 @@ protected:
 	bool getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue);
 	bool getInt8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, int32_t value, int8_t defaultValue);
 	bool getUint8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint8_t defaultValue);
-
 
 	/**
 	 * Helper functions to read value from buffer and write to working memory.

@@ -29,7 +29,9 @@ extern "C" {
 #include "util/cs_Utils.h"
 #include <cfg/cs_UuidConfig.h>
 
-//#include <processing/cs_Scanner.h>
+#include <events/cs_EventDispatcher.h>
+#include <processing/cs_Scanner.h>
+#include <processing/cs_Tracker.h>
 
 using namespace BLEpp;
 
@@ -842,6 +844,10 @@ void Nrf51822BluetoothStack::device_manager_init(bool erase_bonds)
     LOGi("device_manager_init");
 }
 
+void Nrf51822BluetoothStack::device_manager_reset() {
+	dm_device_delete_all(&_dm_app_handle);
+}
+
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
 //		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
@@ -947,10 +953,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 #if(SOFTDEVICE_SERIES != 110)
 	case BLE_GAP_EVT_ADV_REPORT:
-//		Scanner::getInstance().onBleEvent(p_ble_evt);
-//		for (Service* svc : _services) {
-//			svc->on_ble_event(p_ble_evt);
-//		}
+		EventDispatcher::getInstance().dispatch(EVT_BLE_EVENT, p_ble_evt, -1);
 		break;
 #endif
 	case BLE_GAP_EVT_TIMEOUT:

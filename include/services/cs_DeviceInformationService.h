@@ -9,8 +9,6 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 
-//#define STRINGIFY(str) #str
-
 /** The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions.
  */
 class DeviceInformationService : public BLEpp::Service {

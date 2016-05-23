@@ -52,6 +52,8 @@
 
 #include <ble/cs_DoBotsManufac.h>
 
+#include <processing/cs_CommandHandler.h>
+
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -224,6 +226,10 @@ void Crownstone::configure() {
 
 	LOGi("Loading configuration");
 
+	Storage::getInstance().init();
+	Settings::getInstance().init();
+	StateVars::getInstance().init();
+
 	ps_configuration_t cfg = Settings::getInstance().getConfig();
 //
 	uint32_t resetCounter;
@@ -353,11 +359,13 @@ void Crownstone::setup() {
 	_scanner = &Scanner::getInstance();
 	_scanner->setStack(_stack);
 
-#if ENCRYPTION==1
-    if (Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
+	CommandHandler::getInstance().setStack(_stack);
+
+//#if ENCRYPTION==1
+//    if (Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
     	_stack->device_manager_init(false);
-    }
-#endif
+//    }
+//#endif
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 	_sensors = new Sensors;
@@ -418,7 +426,6 @@ void Crownstone::setup() {
 #endif
 
 //	app_sched_event_put(NULL, 0, switchLight);
-
 }
 
 void Crownstone::tick() {
@@ -446,6 +453,10 @@ void Crownstone::run() {
 		RNG rng;
 		uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
 		_scanner->delayedStart(delay);
+	}
+
+	if (Settings::getInstance().isEnabled(CONFIG_TRACKER_ENABLED)) {
+		_tracker->startTracking();
 	}
 
 #if CHAR_MESHING==1
@@ -555,7 +566,21 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		}
 		break;
 	}
-
+	case EVT_ENABLED_IBEACON: {
+		bool enabled = *(bool*)p_data;
+		if (enabled) {
+			_stack->configureIBeaconAdvData(_beacon);
+		} else {
+			_stack->configureBleDeviceAdvData();
+		}
+		_stack->updateAdvertisement();
+		break;
+	}
+	case EVT_CHARACTERISTICS_UPDATED: {
+//		_stack->
+		break;
+	}
+	default: return;
 	}
 
 	if (reconfigureBeacon && Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {

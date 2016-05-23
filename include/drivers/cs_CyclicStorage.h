@@ -26,7 +26,8 @@ public:
 
 	CyclicStorage(pstorage_handle_t handle, pstorage_size_t offset, T defaultValue) :
 		_storage(NULL), _tail(-1), _seqNumber(0),
-		_value(defaultValue), _storageHandle(handle), _storageOffset(offset)
+		_value(defaultValue), _storageHandle(handle), _storageOffset(offset),
+		_defaultValue(defaultValue)
 	{
 		_storage = &Storage::getInstance();
 		loadFromStorage();
@@ -95,6 +96,13 @@ public:
 
 	}
 
+	void reset() {
+		_value = _defaultValue;
+		_seqNumber = 0;
+		// leave the tail where it is, otherwise we lose some information about the wear leveling
+		// _tail = -1;
+	}
+
 private:
 
 	Storage* _storage;
@@ -102,6 +110,7 @@ private:
 	uint16_t _tail;
 	uint32_t _seqNumber;
 	T _value;
+	T _defaultValue;
 
 	pstorage_handle_t _storageHandle;
 	pstorage_size_t _storageOffset;

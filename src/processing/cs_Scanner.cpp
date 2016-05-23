@@ -200,6 +200,12 @@ void Scanner::sendResults() {
 	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
 		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
 	}
+
+	buffer_ptr_t buffer;
+	uint16_t length;
+	_scanResult->getBuffer(buffer, length);
+
+	EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, length);
 }
 
 void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
@@ -318,22 +324,31 @@ void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 
 void Scanner::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
-	case CONFIG_SCAN_DURATION:
+	case EVT_BLE_EVENT: {
+		onBleEvent((ble_evt_t*)p_data);
+		break;
+	}
+	case CONFIG_SCAN_DURATION: {
 		_scanDuration = *(uint32_t*)p_data;
 		break;
-	case CONFIG_SCAN_SEND_DELAY:
+	}
+	case CONFIG_SCAN_SEND_DELAY: {
 		_scanSendDelay = *(uint32_t*)p_data;
 		break;
-	case CONFIG_SCAN_BREAK_DURATION:
+	}
+	case CONFIG_SCAN_BREAK_DURATION: {
 		_scanBreakDuration = *(uint32_t*)p_data;
 		break;
-	case CONFIG_SCAN_FILTER:
+	}
+	case CONFIG_SCAN_FILTER: {
 		_scanFilter = *(uint8_t*)p_data;
 		break;
-	case CONFIG_SCAN_FILTER_SEND_FRACTION:
+	}
+	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
 		_filterSendFraction = *(uint32_t*)p_data;
 		break;
-	case EVT_SCANNER_START:
+	}
+	case EVT_SCANNER_START: {
 		if (Settings::getInstance().isEnabled(CONFIG_SCANNER_ENABLED)) {
 			if (length == 0) {
 				start();
@@ -342,9 +357,11 @@ void Scanner::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			}
 		}
 		break;
-	case EVT_SCANNER_STOP:
+	}
+	case EVT_SCANNER_STOP: {
 		stop();
 		break;
+	}
 	}
 
 }

@@ -68,7 +68,7 @@ enum ps_storage_id {
 	//! storage for configuration items
 	PS_ID_CONFIGURATION = 0,
 	//! storage for the indoor localisation service
-	PS_ID_INDOORLOCALISATION_SERVICE = 1,
+	PS_ID_GENERAL = 1,
 	//! state variables
 	PS_ID_STATE = 2,
 	//! number of elements
@@ -160,23 +160,12 @@ struct ps_configuration_t : ps_storage_base_t {
 			bool iBeaconDisabled : 1;
 			bool scannerDisabled : 1;
 			bool contPowerMeasurementDisabled : 1;
+			bool trackerDisabled : 1;
 		} flagsBit;
 		// dummy to force enableFlags struct to be of size uint32_t;
 		uint32_t flags;
 	};
 
-};
-
-/** Struct used by the IndoorLocalisationService to store elements
- */
-struct ps_indoorlocalisation_service_t : ps_storage_base_t {
-	struct {
-		uint8_t list[TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE];
-	} trackedDevices;
-	struct {
-		uint8_t list[sizeof(schedule_list_t)];
-	} scheduleList;
-	uint8_t reserved[3];
 };
 
 /** Event handler for softdevice events. in particular, listen for
@@ -220,6 +209,12 @@ public:
 		return instance;
 	}
 
+	void init();
+
+	bool isInitialized() {
+		return _initialized;
+	}
+
 	/** Get the handle to the persistent memory for the given storage ID.
 	 * @storageID the enum defining the storage struct which should be
 	 *   accessed
@@ -239,7 +234,7 @@ public:
 	 * @storageID the enum defining the storage struct type, used to
 	 *   get the size of the struct
 	 */
-	void clearBlock(pstorage_handle_t handle, ps_storage_id storageID);
+	void clearStorage(ps_storage_id storageID);
 
 	/** Get the struct stored in persistent memory at the position defined by the handle
 	 * @handle the handle to the persistent memory where the struct is stored.
@@ -509,5 +504,7 @@ private:
 	 *         null otherwise
 	 */
 	storage_config_t* getStorageConfig(ps_storage_id storageID);
+
+	bool _initialized;
 
 };

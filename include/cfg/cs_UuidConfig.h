@@ -39,7 +39,7 @@ enum PowerCharacteristicsIDs {
 
 enum GeneralCharacteristicsIDs {
 	TEMPERATURE_UUID                        = 0x1, //state
-//	UNUSED                                  = 0x2,
+	COMMAND_UUID                            = 0x2,
 //	UNUSED                                  = 0x3,
 //	UNUSED                                  = 0x4,
 	RESET_UUID                              = 0x5, //cmd

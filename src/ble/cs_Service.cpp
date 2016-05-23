@@ -11,6 +11,8 @@
 
 #include <ble/cs_Softdevice.h>
 
+#include <algorithm>
+
 using namespace BLEpp;
 
 ///! Service ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,4 +144,9 @@ void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
 	}
 }
 
-
+Service& Service::removeCharacteristic(CharacteristicBase* characteristic) {
+	Characteristics_t::iterator it;
+	it = std::find(_characteristics.begin(), _characteristics.end(), characteristic);
+	_characteristics.erase(it);
+	return *this;
+}

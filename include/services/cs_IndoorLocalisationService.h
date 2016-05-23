@@ -6,25 +6,18 @@
  */
 #pragma once
 
-#include "structs/cs_ScanResult.h"
-#include "structs/cs_TrackDevices.h"
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
-
-#include <drivers/cs_Storage.h>
-
-#include <processing/cs_Scanner.h>
+#include <events/cs_EventListener.h>
 
 //! The update frequence of the Tick routine in this service
 #define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10
+
 //#define PWM_ON_RSSI
 
 /** The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc.
  */
 class IndoorLocalizationService : public BLEpp::Service, EventListener {
-
-public:
-//	typedef function<int8_t()> func_t;
 
 protected:
 	void addSignalStrengthCharacteristic();
@@ -32,18 +25,6 @@ protected:
 	void addPeripheralListCharacteristic();
 	void addTrackedDeviceListCharacteristic();
 	void addTrackedDeviceCharacteristic();
-
-	/** Get a handle to the persistent storage struct and load it from FLASH.
-	 *
-	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
-	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
-	 * Hence, there is an entire struct that can be filled and flashed at once.
-	 */
-	void loadPersistentStorage();
-
-	/** Save to FLASH.
-	*/
-	void savePersistentStorage();
 
 	void writeTrackedDevices();
 	void readTrackedDevices();
@@ -77,11 +58,6 @@ public:
 
 	void onRSSIChanged(int8_t rssi);
 	void setRSSILevel(int8_t RSSILevel);
-//	void setRSSILevelHandler(func_t func);
-
-#if(SOFTDEVICE_SERIES != 110)
-	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
-#endif
 
 private:
 	BLEpp::Characteristic<int8_t>* _rssiCharac;
@@ -90,20 +66,8 @@ private:
 	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceListCharac;
 	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceCharac;
 
-//	func_t _rssiHandler;
-
-	bool _trackMode;
-	bool _trackIsNearby;
-
-	bool _initialized;
-
 #ifdef PWM_ON_RSSI
 	int16_t _averageRssi;
 #endif
 
-//	ScanResult* _scanResult;
-	TrackedDeviceList* _trackedDeviceList;
-
-	pstorage_handle_t _storageHandle;
-	ps_indoorlocalisation_service_t _storageStruct;
 };

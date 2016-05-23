@@ -70,3 +70,5 @@
 #define CURRENT_LIMIT							 0
 
 #define STORAGE_REQUEST_BUFFER_SIZE              5
+
+#define FACTORY_RESET_CODE                       0xdeadbeef

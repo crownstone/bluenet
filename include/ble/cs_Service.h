@@ -15,6 +15,7 @@
 #include <util/cs_BleError.h>
 #include <drivers/cs_Timer.h>
 
+
 /** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
@@ -158,6 +159,8 @@ public:
 
 		return *this;
 	}
+
+	virtual Service& removeCharacteristic(CharacteristicBase* characteristic);
 
 	Service& addCharacteristicsDone() {
 		_characteristics.shrink_to_fit();
