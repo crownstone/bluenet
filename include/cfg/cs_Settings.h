@@ -84,7 +84,7 @@ public:
 
 	/** Return the struct containing the configuration values in current working memory
 	 */
-	ps_configuration_t& getConfig();
+//	ps_configuration_t& getConfig();
 
 	/** Get a handle to the persistent storage struct and load it from FLASH into working memory.
 	 *
@@ -116,6 +116,9 @@ public:
 
 	void factoryReset(uint32_t resetCode);
 
+	bool get(uint8_t type, void* target, uint16_t size = 0);
+	bool set(uint8_t type, void* target, uint16_t size = 0);
+
 protected:
 
 	bool _initialized;
@@ -131,25 +134,12 @@ protected:
 
 	Storage* _storage;
 
+	bool verify(uint8_t type, uint8_t* payload, uint8_t length);
+
+	uint8_t* getStorageItem(uint8_t type);
+	uint16_t getSettingsItemSize(uint8_t type);
+
 	bool readFlag(uint8_t type, bool& value);
-
-	/**
-	 * Helper functions to read value from storage (FLASH) and write to
-	 * streambuffer (to be read from characteristic)
-	 */
-	bool getUint32(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint32_t defaultValue);
-	bool getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue);
-	bool getInt8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, int32_t value, int8_t defaultValue);
-	bool getUint8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint8_t defaultValue);
-
-	/**
-	 * Helper functions to read value from buffer and write to working memory.
-	 * If persistent is sent, also write to storage (FLASH)
-	 */
-	bool setUint32(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
-	bool setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
-	bool setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, int32_t& target);
-	bool setUint8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
 
 	/**
 	 * Helper functions to write single item from the configuration struct to storage (FLASH).

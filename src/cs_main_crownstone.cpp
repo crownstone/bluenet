@@ -44,15 +44,10 @@
  * Custom includes
  *********************************************************************************************************************/
 
-#include <cfg/cs_Settings.h>
-#include <cfg/cs_StateVars.h>
-
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventTypes.h>
 
 #include <ble/cs_DoBotsManufac.h>
-
-#include <processing/cs_CommandHandler.h>
 
 /**********************************************************************************************************************
  * Main functionality
@@ -103,8 +98,11 @@ void Crownstone::setName() {
 	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
 	//! check config (storage) if another name was stored
 	std::string device_name;
-	//! use default name in case no stored name is found
-	Storage::getString(Settings::getInstance().getConfig().device_name, device_name, std::string(devicename));
+	//! first set default name in case no stored name is found
+	_stack->updateDeviceName(std::string(devicename));
+	//! then get the name from settings. if no name is stored, it will return
+	//! the previously set default name
+	device_name = Settings::getInstance().getBLEName();
 #endif
 	//! assign name
 	LOGi("Set name to %s", device_name.c_str());
@@ -225,18 +223,16 @@ void Crownstone::configure() {
 	_stack->init();
 
 	LOGi("Loading configuration");
+//	ps_configuration_t cfg = Settings::getInstance().getConfig();
 
-	Storage::getInstance().init();
-	Settings::getInstance().init();
-	StateVars::getInstance().init();
+	// initialization of storage and settings has to be done AFTER stack is initialized
+	_storage->init();
+	_settings->init();
+	_stateVars->init();
 
-	ps_configuration_t cfg = Settings::getInstance().getConfig();
-//
 	uint32_t resetCounter;
 	StateVars::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
-
 	LOGi("reset counter at: %d", ++resetCounter);
-
 	StateVars::getInstance().setStateVar(SV_RESET_COUNTER, resetCounter);
 
 	//! if enabled, create the iBeacon parameter object which will be used
@@ -247,15 +243,15 @@ void Crownstone::configure() {
 	uint8_t rssi;
 	ble_uuid128_t uuid;
 
-	Storage::getUint16(cfg.beacon.major, major, BEACON_MAJOR);
-	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
-	Storage::getArray(cfg.beacon.uuid.uuid128, uuid.uuid128, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
-	Storage::getUint8(cfg.beacon.rssi, rssi, BEACON_RSSI);
+	_settings->get(CONFIG_IBEACON_MAJOR, &major);
+	_settings->get(CONFIG_IBEACON_MINOR, &minor);
+	_settings->get(CONFIG_IBEACON_UUID, uuid.uuid128);
+	_settings->get(CONFIG_IBEACON_RSSI, &rssi);
 
 #ifdef CHANGE_MINOR_ON_RESET
 	minor++;
 	LOGi("Increase minor to %d", minor);
-	Settings::getInstance().writeToStorage(CONFIG_IBEACON_MINOR, (uint8_t*)&minor, 2);
+	_settings->set(CONFIG_IBEACON_MINOR, &minor);
 #endif
 
 	//! create ibeacon object
@@ -267,16 +263,16 @@ void Crownstone::configure() {
 
 	//! Set the stored tx power
 	int8_t txPower;
-	Storage::getInt8(cfg.txPower, txPower, TX_POWER);
+	_settings->get(CONFIG_TX_POWER, &txPower);
 	_stack->setTxPowerLevel(txPower);
 
 	//! Set the stored advertisement interval
 	uint16_t advInterval;
-	Storage::getUint16(cfg.advInterval, advInterval, ADVERTISEMENT_INTERVAL);
+	_settings->get(CONFIG_ADV_INTERVAL, &advInterval);
 	_stack->setAdvertisingInterval(advInterval);
 
 	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
-	Storage::getArray(cfg.passkey, passkey, (uint8_t*)STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
+	_settings->get(CONFIG_PASSKEY, passkey);
 	_stack->setPasskey(passkey);
 
 	LOGi("... done");
@@ -290,23 +286,26 @@ void Crownstone::configure() {
 void Crownstone::setup() {
 	welcome();
 
-	Timer::getInstance().createSingleShot(_advertisementTimer, (app_timer_timeout_handler_t)Crownstone::staticTick);
-
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 
 	EventDispatcher::getInstance().addListener(this);
 
-	LOGi("Create Timer");
-	Timer::getInstance();
-
 	//! set up the bluetooth stack that controls the hardware.
 	_stack = &Nrf51822BluetoothStack::getInstance();
+
+	_storage = &Storage::getInstance();
+	_settings = &Settings::getInstance();
+	_stateVars = &StateVars::getInstance();
 
 	//! configuration has to be done after the stack was created!
 	configure();
 
+	LOGi("Create Timer");
+	_timer = &Timer::getInstance();
+	_timer->createSingleShot(_advertisementTimer, (app_timer_timeout_handler_t)Crownstone::staticTick);
+
 	uint16_t bootDelay;
-	Storage::getUint16(Settings::getInstance().getConfig().bootDelay, bootDelay, BOOT_DELAY);
+	_settings->get(CONFIG_BOOT_DELAY, &bootDelay);
 	nrf_delay_ms(bootDelay);
 
 	_stack->onConnect([&](uint16_t conn_handle) {
@@ -359,7 +358,8 @@ void Crownstone::setup() {
 	_scanner = &Scanner::getInstance();
 	_scanner->setStack(_stack);
 
-	CommandHandler::getInstance().setStack(_stack);
+	_commandHandler = &CommandHandler::getInstance();
+	_commandHandler->setStack(_stack);
 
 //#if ENCRYPTION==1
 //    if (Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
@@ -381,7 +381,6 @@ void Crownstone::setup() {
 	BLEutil::print_heap("Heap drivers: ");
 	BLEutil::print_stack("Stack drivers: ");
 
-#if CHAR_MESHING==1
 	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
 
 		#if HARDWARE_BOARD == VIRTUALMEMO
@@ -393,7 +392,6 @@ void Crownstone::setup() {
 		BLEutil::print_heap("Heap mesh: ");
 		BLEutil::print_stack("Stack mesh: ");
 	}
-#endif
 
 	//! Begin sending advertising packets over the air.
 	//! This should be done after initialization of the mesh
@@ -445,6 +443,8 @@ void Crownstone::scheduleNextTick() {
 
 void Crownstone::run() {
 
+	LOGi("---- running ----");
+
 	scheduleNextTick();
 
 	_stack->startTicking();
@@ -459,11 +459,9 @@ void Crownstone::run() {
 		_tracker->startTracking();
 	}
 
-#if CHAR_MESHING==1
 	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
 		CMesh::getInstance().startTicking();
 	}
-#endif
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();

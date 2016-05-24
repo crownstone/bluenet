@@ -36,11 +36,11 @@ Scanner::Scanner() :
 	//! during a scan!
 	_scanResult->assign(_scanBuffer, sizeof(_scanBuffer));
 
-	ps_configuration_t cfg = Settings::getInstance().getConfig();
-	Storage::getUint16(cfg.scanDuration, _scanDuration, SCAN_DURATION);
-	Storage::getUint16(cfg.scanSendDelay, _scanSendDelay, SCAN_SEND_DELAY);
-	Storage::getUint16(cfg.scanBreakDuration, _scanBreakDuration, SCAN_BREAK_DURATION);
-	Storage::getUint8(cfg.scanFilter, _scanFilter, SCAN_FILTER);
+	Settings& settings = Settings::getInstance();
+	settings.get(CONFIG_SCAN_DURATION, &_scanDuration);
+	settings.get(CONFIG_SCAN_SEND_DELAY, &_scanSendDelay);
+	settings.get(CONFIG_SCAN_BREAK_DURATION, &_scanBreakDuration);
+	settings.get(CONFIG_SCAN_FILTER, &_scanFilter);
 
 	EventDispatcher::getInstance().addListener(this);
 

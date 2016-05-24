@@ -29,8 +29,7 @@ public:
 		_maxTemp(MAX_CHIP_TEMP)
 	{
 
-		ps_configuration_t cfg = Settings::getInstance().getConfig();
-		Storage::getInt8(cfg.maxChipTemp, _maxTemp, MAX_CHIP_TEMP);
+		Settings::getInstance().get(CONFIG_MAX_CHIP_TEMP, &_maxTemp);
 
 		EventDispatcher::getInstance().addListener(this);
 

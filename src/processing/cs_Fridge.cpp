@@ -16,9 +16,8 @@ Fridge::Fridge() : _appTimerId(0)
 {
 	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Fridge::staticTick);
 
-	ps_configuration_t cfg = Settings::getInstance().getConfig();
-	Storage::getInt8(cfg.minEnvTemp, _minTemp, MIN_ENV_TEMP);
-	Storage::getInt8(cfg.maxEnvTemp, _maxTemp, MAX_ENV_TEMP);
+	Settings::getInstance().get(CONFIG_MIN_ENV_TEMP, &_minTemp);
+	Settings::getInstance().get(CONFIG_MAX_ENV_TEMP, &_maxTemp);
 
 	EventDispatcher::getInstance().addListener(this);
 }

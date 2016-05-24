@@ -31,60 +31,17 @@ void Settings::init() {
 
 //	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool persistent) {
-	//		uint8_t length = streamBuffer->length();
-	//		uint8_t* payload = streamBuffer->payload();
 
+	/////////////////////////////////////////////////
+	//// SPECIAL CASES
+	/////////////////////////////////////////////////
 	switch(type) {
 	case CONFIG_NAME_UUID: {
 		LOGd("Write name");
 		std::string str = std::string((char*)payload, length);
 		LOGd("Set name to: %s", str.c_str());
 		setBLEName(str);
-		break;
-	}
-	case CONFIG_FLOOR_UUID: {
-		LOGd("Set floor level");
-		if (length != 1) {
-			LOGw("We do not account for buildings of more than 255 floors yet");
-			return;
-		}
-		uint8_t floor = payload[0];
-		LOGi("Set floor to %i", floor);
-		Storage::setUint8(floor, _storageStruct.floor);
-		if (persistent) {
-			savePersistentStorageItem(&_storageStruct.floor);
-		}
-		break;
-	}
-	case CONFIG_NEARBY_TIMEOUT_UUID: {
-		setUint16(type, payload, length, persistent, _storageStruct.nearbyTimeout);
-		break;
-	}
-	case CONFIG_IBEACON_MAJOR: {
-		setUint16(type, payload, length, persistent, (uint32_t&)_storageStruct.beacon.major);
-		break;
-	}
-	case CONFIG_IBEACON_MINOR: {
-		setUint16(type, payload, length, persistent, (uint32_t&)_storageStruct.beacon.minor);
-		break;
-	}
-	case CONFIG_IBEACON_UUID: {
-		if (length != 16) {
-			LOGw("Expected 16 bytes for UUID, received: %d", length);
-			return;
-		}
-		log(INFO, "set uuid to: "); BLEutil::printArray(payload, 16);
-		Storage::setArray<uint8_t>(payload, _storageStruct.beacon.uuid.uuid128, 16);
-		if (persistent) {
-			savePersistentStorageItem(_storageStruct.beacon.uuid.uuid128, 16);
-		}
-
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.uuid.uuid128, 16);
-		break;
-	}
-	case CONFIG_IBEACON_RSSI: {
-		setInt8(type, payload, length, persistent, (int32_t&)_storageStruct.beacon.rssi);
-		break;
+		return;
 	}
 	case CONFIG_WIFI_SETTINGS: {
 		LOGi("Temporarily store wifi settings");
@@ -95,70 +52,152 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		}
 		_wifiSettings = std::string((char*)payload, length);
 		LOGi("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
-		break;
+		return;
 	}
-	case CONFIG_TX_POWER: {
-		setInt8(type, payload, length, persistent, _storageStruct.txPower);
-		break;
 	}
-	case CONFIG_ADV_INTERVAL: {
-		setUint16(type, payload, length, persistent, _storageStruct.advInterval);
-		break;
+
+	/////////////////////////////////////////////////
+	//// DEFAULT
+	/////////////////////////////////////////////////
+	if (verify(type, payload, length)) {
+		set(type, payload);
+		uint8_t* p_item = getStorageItem(type);
+		if (persistent) {
+			// minimum item size is 4
+			if (length < 4) {
+				length = 4;
+			}
+			savePersistentStorageItem(p_item, length);
+		}
+		EventDispatcher::getInstance().dispatch(type, p_item, length);
+	}
+}
+
+bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
+
+	/////////////////////////////////////////////////
+	//// SPECIAL CASES
+	/////////////////////////////////////////////////
+	switch(type) {
+	case CONFIG_NAME_UUID: {
+		LOGd("Read name");
+		std::string str = getBLEName();
+		streamBuffer->fromString(str); //! TODO: can't we set this on buffer immediately?
+		streamBuffer->setType(type);
+		LOGd("Name read %s", str.c_str());
+		return true;
+	}
+	case CONFIG_WIFI_SETTINGS: {
+		LOGd("Read wifi settings. Does reset it.");
+		//! copy string, because we clear it on read
+		std::string str;
+		if (_wifiSettings == "") {
+			str = "{}";
+		} else {
+			str = _wifiSettings;
+		}
+		streamBuffer->fromString(str);
+		streamBuffer->setType(type);
+		_wifiSettings = "";
+		LOGd("Wifi settings read");
+		return true;
+	}
+	}
+
+	/////////////////////////////////////////////////
+	//// DEFAULT
+	/////////////////////////////////////////////////
+	uint16_t plen = getSettingsItemSize(type);
+	if (plen > 0) {
+		// todo: do we really want to reload the current working copy?
+		//  or do we just want to return the value in the current working copy?
+		loadPersistentStorage();
+		uint8_t payload[plen];
+		get(type, payload, plen);
+		streamBuffer->setPayload(payload, plen);
+		streamBuffer->setType(type);
+
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
+	switch(type) {
+	/////////////////////////////////////////////////
+	//// UINT 8
+	/////////////////////////////////////////////////
+	case CONFIG_SCAN_FILTER:
+	case CONFIG_CURRENT_LIMIT:
+	case CONFIG_FLOOR_UUID: {
+		if (length != 1) {
+			LOGw("Expected uint8");
+			return false;
+		}
+		LOGi("Set %u to %u", type, payload[0]);
+		return true;
+	}
+
+	/////////////////////////////////////////////////
+	//// INT 8
+	/////////////////////////////////////////////////
+	case CONFIG_MAX_CHIP_TEMP:
+	case CONFIG_MAX_ENV_TEMP:
+	case CONFIG_MIN_ENV_TEMP:
+	case CONFIG_TX_POWER:
+	case CONFIG_IBEACON_RSSI: {
+		if (length != 1) {
+			LOGw("Expected int8");
+			return false;
+		}
+		LOGi("Set %u to %i", type, (int8_t)payload[0]);
+		return true;
+	}
+
+	/////////////////////////////////////////////////
+	//// UINT 16
+	/////////////////////////////////////////////////
+	case CONFIG_SCAN_FILTER_SEND_FRACTION:
+	case CONFIG_BOOT_DELAY:
+	case CONFIG_SCAN_BREAK_DURATION:
+	case CONFIG_SCAN_DURATION:
+	case CONFIG_SCAN_SEND_DELAY:
+	case CONFIG_ADV_INTERVAL:
+	case CONFIG_IBEACON_MINOR:
+	case CONFIG_IBEACON_MAJOR:
+	case CONFIG_NEARBY_TIMEOUT_UUID: {
+		if (length != 2) {
+			LOGw("Expected uint16");
+			return false;
+		}
+		LOGi("Set %u to %u", type, *(uint16_t*)payload);
+		return true;
+	}
+
+	/////////////////////////////////////////////////
+	//// BYTE ARRAY
+	/////////////////////////////////////////////////
+	case CONFIG_IBEACON_UUID: {
+		if (length != 16) {
+			LOGw("Expected 16 bytes for UUID, received: %d", length);
+			return false;
+		}
+		log(INFO, "set uuid to: "); BLEutil::printArray(payload, 16);
+		return true;
 	}
 	case CONFIG_PASSKEY: {
 		if (length != BLE_GAP_PASSKEY_LEN) {
 			LOGw("Expected length %d for passkey", BLE_GAP_PASSKEY_LEN);
-			return;
+			return false;
 		}
 		LOGi("Set passkey to %s", std::string((char*)payload, length).c_str());
-		Storage::setArray(payload, _storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
-		if (persistent) {
-			savePersistentStorageItem(_storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
-		}
+		return true;
+	}
 
-		EventDispatcher::getInstance().dispatch(type, &_storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
-		break;
-	}
-	case CONFIG_MIN_ENV_TEMP: {
-		setInt8(type, payload, length, persistent, _storageStruct.minEnvTemp);
-		break;
-	}
-	case CONFIG_MAX_ENV_TEMP: {
-		setInt8(type, payload, length, persistent, _storageStruct.maxEnvTemp);
-		break;
-	}
-	case CONFIG_SCAN_DURATION:{
-		setUint16(type, payload, length, persistent, _storageStruct.scanDuration);
-		break;
-	}
-	case CONFIG_SCAN_SEND_DELAY:{
-		setUint16(type, payload, length, persistent, _storageStruct.scanSendDelay);
-		break;
-	}
-	case CONFIG_SCAN_BREAK_DURATION:{
-		setUint16(type, payload, length, persistent, _storageStruct.scanBreakDuration);
-		break;
-	}
-	case CONFIG_BOOT_DELAY:{
-		setUint16(type, payload, length, persistent, _storageStruct.bootDelay);
-		break;
-	}
-	case CONFIG_MAX_CHIP_TEMP:{
-		setInt8(type, payload, length, persistent, _storageStruct.maxChipTemp);
-		break;
-	}
-	case CONFIG_SCAN_FILTER: {
-		setUint8(type, payload, length, persistent, _storageStruct.scanFilter);
-		break;
-	}
-	case CONFIG_SCAN_FILTER_SEND_FRACTION:{
-		setUint16(type, payload, length, persistent, _storageStruct.scanFilterSendFraction);
-		break;
-	}
-	case CONFIG_CURRENT_LIMIT: {
-		setUint8(type, payload, length, persistent, _storageStruct.currentLimit);
-		break;
-	}
+	/////////////////////////////////////////////////
+	//// WRITE DISABLED
+	/////////////////////////////////////////////////
 	case CONFIG_MESH_ENABLED :
 	case CONFIG_ENCRYPTION_ENABLED :
 	case CONFIG_IBEACON_ENABLED :
@@ -166,10 +205,149 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
 //		updateFlag(type, payload[0] != 0, persistent);
 		LOGe("Write disabled. Use commands to enable/disable");
-		break;
+		return false;
+	}
+
+	default: {
+		LOGw("There is no such configuration type (%u).", type);
+		return false;
+	}
+	}
+}
+
+uint8_t* Settings::getStorageItem(uint8_t type) {
+	switch(type) {
+	case CONFIG_NAME_UUID: {
+		return (uint8_t*)&_storageStruct.device_name;
+	}
+	case CONFIG_NEARBY_TIMEOUT_UUID: {
+		return (uint8_t*)&_storageStruct.nearbyTimeout;
+	}
+	case CONFIG_FLOOR_UUID: {
+		return (uint8_t*)&_storageStruct.floor;
+	}
+	case CONFIG_IBEACON_MAJOR: {
+		return (uint8_t*)&_storageStruct.beacon.major;
+	}
+	case CONFIG_IBEACON_MINOR: {
+		return (uint8_t*)&_storageStruct.beacon.minor;
+	}
+	case CONFIG_IBEACON_UUID: {
+		return (uint8_t*)&_storageStruct.beacon.uuid.uuid128;
+	}
+	case CONFIG_IBEACON_RSSI: {
+		return (uint8_t*)&_storageStruct.beacon.rssi;
+	}
+	case CONFIG_WIFI_SETTINGS: {
+		return (uint8_t*)&_wifiSettings;
+	}
+	case CONFIG_TX_POWER: {
+		return (uint8_t*)&_storageStruct.txPower;
+	}
+	case CONFIG_ADV_INTERVAL: {
+		return (uint8_t*)&_storageStruct.advInterval;
+	}
+	case CONFIG_PASSKEY: {
+		return (uint8_t*)&_storageStruct.passkey;
+	}
+	case CONFIG_MIN_ENV_TEMP: {
+		return (uint8_t*)&_storageStruct.minEnvTemp;
+	}
+	case CONFIG_MAX_ENV_TEMP: {
+		return (uint8_t*)&_storageStruct.maxEnvTemp;
+	}
+	case CONFIG_SCAN_DURATION: {
+		return (uint8_t*)&_storageStruct.scanDuration;
+	}
+	case CONFIG_SCAN_SEND_DELAY: {
+		return (uint8_t*)&_storageStruct.scanSendDelay;
+	}
+	case CONFIG_SCAN_BREAK_DURATION: {
+		return (uint8_t*)&_storageStruct.scanBreakDuration;
+	}
+	case CONFIG_BOOT_DELAY: {
+		return (uint8_t*)&_storageStruct.bootDelay;
+	}
+	case CONFIG_MAX_CHIP_TEMP: {
+		return (uint8_t*)&_storageStruct.maxChipTemp;
+	}
+	case CONFIG_SCAN_FILTER: {
+		return (uint8_t*)&_storageStruct.scanFilter;
+	}
+	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
+		return (uint8_t*)&_storageStruct.scanFilterSendFraction;
+	}
+	case CONFIG_CURRENT_LIMIT: {
+		return (uint8_t*)&_storageStruct.currentLimit;
+	}
+	default: {
+		LOGw("There is no such configuration type (%u).", type);
+		return NULL;
+	}
+	}
+}
+
+uint16_t Settings::getSettingsItemSize(uint8_t type) {
+
+	switch(type) {
+	/////////////////////////////////////////////////
+	//// UINT 8
+	/////////////////////////////////////////////////
+	case CONFIG_SCAN_FILTER:
+	case CONFIG_CURRENT_LIMIT:
+	case CONFIG_FLOOR_UUID: {
+		return 1;
+	}
+
+	/////////////////////////////////////////////////
+	//// INT 8
+	/////////////////////////////////////////////////
+	case CONFIG_MAX_CHIP_TEMP:
+	case CONFIG_MAX_ENV_TEMP:
+	case CONFIG_MIN_ENV_TEMP:
+	case CONFIG_TX_POWER:
+	case CONFIG_IBEACON_RSSI: {
+		return 1;
+	}
+
+	/////////////////////////////////////////////////
+	//// UINT 16
+	/////////////////////////////////////////////////
+	case CONFIG_SCAN_FILTER_SEND_FRACTION:
+	case CONFIG_BOOT_DELAY:
+	case CONFIG_SCAN_BREAK_DURATION:
+	case CONFIG_SCAN_DURATION:
+	case CONFIG_SCAN_SEND_DELAY:
+	case CONFIG_ADV_INTERVAL:
+	case CONFIG_IBEACON_MINOR:
+	case CONFIG_IBEACON_MAJOR:
+	case CONFIG_NEARBY_TIMEOUT_UUID: {
+		return 2;
+	}
+
+	/////////////////////////////////////////////////
+	//// BYTE ARRAY
+	/////////////////////////////////////////////////
+	case CONFIG_IBEACON_UUID: {
+		return 16;
+	}
+	case CONFIG_PASSKEY: {
+		return BLE_GAP_PASSKEY_LEN;
+	}
+
+	/////////////////////////////////////////////////
+	//// FLAGS
+	/////////////////////////////////////////////////
+	case CONFIG_MESH_ENABLED :
+	case CONFIG_ENCRYPTION_ENABLED :
+	case CONFIG_IBEACON_ENABLED :
+	case CONFIG_SCANNER_ENABLED :
+	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
+		return 1;
 	}
 	default:
 		LOGw("There is no such configuration type (%u).", type);
+		return 0;
 	}
 }
 
@@ -267,143 +445,133 @@ bool Settings::isEnabled(uint8_t type) {
 	}
 }
 
-bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
+bool Settings::get(uint8_t type, void* target, uint16_t size) {
 	switch(type) {
 	case CONFIG_NAME_UUID: {
-		LOGd("Read name");
-		std::string str = getBLEName();
-		streamBuffer->fromString(str); //! TODO: can't we set this on buffer immediately?
-		streamBuffer->setType(type);
-
-		LOGd("Name read %s", str.c_str());
-
+		std::string* p_str = (std::string*) target;
+		*p_str = getBLEName();
 		return true;
 	}
 	case CONFIG_FLOOR_UUID: {
-		LOGd("Read floor");
-		loadPersistentStorage();
-		uint8_t plen = 1;
-		uint8_t payload[plen];
-		Storage::getUint8(_storageStruct.floor, payload[0], 0);
-		streamBuffer->setPayload(payload, plen);
-		streamBuffer->setType(type);
-
-		LOGd("Floor level set in payload: %i with len %i", streamBuffer->payload()[0], streamBuffer->length());
-
+		uint8_t value;
+		Storage::getUint8(_storageStruct.floor, value, 0);
+		*((uint8_t*)target) = value;
+		return true;
+	}
+	case CONFIG_NEARBY_TIMEOUT_UUID: {
+		uint16_t value;
+		Storage::getUint16(_storageStruct.nearbyTimeout, value, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
+		*((uint16_t*)target) = value;
 		return true;
 	}
 	case CONFIG_IBEACON_MAJOR: {
-		LOGd("Read major");
-		return getUint16(type, streamBuffer, _storageStruct.beacon.major, BEACON_MAJOR);
+		uint16_t value;
+		Storage::getUint16(_storageStruct.beacon.major, value, BEACON_MAJOR);
+		*((uint16_t*)target) = value;
+		return true;
 	}
 	case CONFIG_IBEACON_MINOR: {
-		LOGd("Read minor");
-		return getUint16(type, streamBuffer, _storageStruct.beacon.minor, BEACON_MINOR);
+		uint16_t value;
+		Storage::getUint16(_storageStruct.beacon.minor, value, BEACON_MINOR);
+		*((uint16_t*)target) = value;
+		return true;
 	}
 	case CONFIG_IBEACON_UUID: {
-		LOGd("Read UUID");
-		loadPersistentStorage();
-		uint8_t plen = 16;
-		uint8_t payload[plen];
-		Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, payload, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, plen);
-		streamBuffer->setPayload(payload, plen);
-		streamBuffer->setType(type);
-
-		LOGd("UUID set in payload .. with len %d", streamBuffer->length());
+		uint8_t* p_value = (uint8_t*) target;
+		Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, p_value, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
 		return true;
 	}
 	case CONFIG_IBEACON_RSSI: {
-		LOGd("Read tx power");
-		return getInt8(type, streamBuffer, _storageStruct.beacon.rssi, BEACON_RSSI);
+		int8_t value;
+		Storage::getInt8(_storageStruct.beacon.rssi, value, BEACON_RSSI);
+		*((int8_t*)target) = value;
+		return true;
 	}
 	case CONFIG_WIFI_SETTINGS: {
-		LOGd("Read wifi settings. Does reset it.");
 		//! copy string, because we clear it on read
-		std::string str;
+		std::string* p_str = (std::string*) target;
 		if (_wifiSettings == "") {
-			str = "{}";
+			*p_str = "{}";
 		} else {
-			str = _wifiSettings;
+			*p_str = _wifiSettings;
 		}
-		streamBuffer->fromString(str);
-		streamBuffer->setType(type);
-		_wifiSettings = "";
-		LOGd("Wifi settings read");
 		return true;
 	}
 	case CONFIG_TX_POWER: {
-		LOGd("Read tx power");
-		return getInt8(type, streamBuffer, _storageStruct.txPower, TX_POWER);
+		int8_t value;
+		Storage::getInt8(_storageStruct.txPower, value, TX_POWER);
+		*((int8_t*)target) = value;
+		return true;
 	}
 	case CONFIG_ADV_INTERVAL: {
-		LOGd("Read advertisement interval");
-		return getUint16(type, streamBuffer, _storageStruct.advInterval, ADVERTISEMENT_INTERVAL);
+		uint16_t value;
+		Storage::getUint16(_storageStruct.advInterval, value, ADVERTISEMENT_INTERVAL);
+		*((uint16_t*)target) = value;
+		return true;
 	}
 	case CONFIG_PASSKEY: {
-		LOGd("Reading passkey");
-		loadPersistentStorage();
-		uint8_t plen = BLE_GAP_PASSKEY_LEN;
-		uint8_t payload[BLE_GAP_PASSKEY_LEN];
-		Storage::getArray<uint8_t>(_storageStruct.passkey, payload, (uint8_t*)STATIC_PASSKEY, plen);
-		//! should we return the passkey? probably not ...
-		//			streamBuffer->setPayload((uint8_t*)payload, plen);
-		//			streamBuffer->setType(type);
-
-		LOGd("passkey set in payload: %s", std::string((char*)payload, BLE_GAP_PASSKEY_LEN).c_str());
-		//			return true;
-		return false;
+		uint8_t* p_value = (uint8_t*) target;
+		Storage::getArray<uint8_t>(_storageStruct.passkey, p_value, (uint8_t*)STATIC_PASSKEY, 6);
+		return true;
 	}
 	case CONFIG_MIN_ENV_TEMP: {
-		LOGd("Read min env temp");
-		return getInt8(type, streamBuffer, _storageStruct.minEnvTemp, MIN_ENV_TEMP);
+		int8_t value;
+		Storage::getInt8(_storageStruct.minEnvTemp, value, MIN_ENV_TEMP);
+		*((int8_t*)target) = value;
+		return true;
 	}
 	case CONFIG_MAX_ENV_TEMP: {
-		LOGd("Read max env temp");
-		return getInt8(type, streamBuffer, _storageStruct.maxEnvTemp, MAX_ENV_TEMP);
+		int8_t value;
+		Storage::getInt8(_storageStruct.maxEnvTemp, value, MAX_ENV_TEMP);
+		*((int8_t*)target) = value;
+		return true;
 	}
 	case CONFIG_SCAN_DURATION: {
-		LOGd("Read scan duration");
-		return getUint16(type, streamBuffer, _storageStruct.scanDuration, SCAN_DURATION);
+		uint16_t value;
+		Storage::getUint16(_storageStruct.scanDuration, value, SCAN_DURATION);
+		*((uint16_t*)target) = value;
+		return true;
 	}
 	case CONFIG_SCAN_SEND_DELAY: {
-		LOGd("Read scan send delay");
-		return getUint16(type, streamBuffer, _storageStruct.scanSendDelay, SCAN_SEND_DELAY);
+		uint16_t value;
+		Storage::getUint16(_storageStruct.scanSendDelay, value, SCAN_SEND_DELAY);
+		*((uint16_t*)target) = value;
+		return true;
 	}
 	case CONFIG_SCAN_BREAK_DURATION: {
-		LOGd("Read scan break duration");
-		return getUint16(type, streamBuffer, _storageStruct.scanBreakDuration, SCAN_BREAK_DURATION);
+		uint16_t value;
+		Storage::getUint16(_storageStruct.scanBreakDuration, value, SCAN_BREAK_DURATION);
+		*((uint16_t*)target) = value;
+		return true;
 	}
 	case CONFIG_BOOT_DELAY: {
-		LOGd("Read boot delay");
-		return getUint16(type, streamBuffer, _storageStruct.bootDelay, BOOT_DELAY);
+		uint16_t value;
+		Storage::getUint16(_storageStruct.bootDelay, value, BOOT_DELAY);
+		*((uint16_t*)target) = value;
+		return true;
 	}
 	case CONFIG_MAX_CHIP_TEMP: {
-		LOGd("Read max chip temp");
-		return getInt8(type, streamBuffer, _storageStruct.maxChipTemp, MAX_CHIP_TEMP);
+		int8_t value;
+		Storage::getInt8(_storageStruct.maxChipTemp, value, MAX_CHIP_TEMP);
+		*((int8_t*)target) = value;
+		return true;
 	}
 	case CONFIG_SCAN_FILTER: {
-		LOGd("Read scan filter");
-		return getUint8(type, streamBuffer, _storageStruct.scanFilter, SCAN_FILTER);
+		uint8_t value;
+		Storage::getUint8(_storageStruct.scanFilter, value, SCAN_FILTER);
+		*((uint8_t*)target) = value;
+		return true;
 	}
 	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
-		LOGd("Read scan filter send fraction");
-		return getUint16(type, streamBuffer, _storageStruct.scanFilterSendFraction, SCAN_FILTER_SEND_FRACTION);
+		uint16_t value;
+		Storage::getUint16(_storageStruct.scanFilterSendFraction, value, SCAN_FILTER_SEND_FRACTION);
+		*((uint16_t*)target) = value;
+		return true;
 	}
 	case CONFIG_CURRENT_LIMIT: {
-		LOGd("Read current limit");
-		return getUint8(type, streamBuffer, _storageStruct.currentLimit, CURRENT_LIMIT);
-	}
-	case CONFIG_MESH_ENABLED :
-	case CONFIG_ENCRYPTION_ENABLED :
-	case CONFIG_IBEACON_ENABLED :
-	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
-		loadPersistentStorage();
-		bool enabled;
-		readFlag(type, enabled);
-		streamBuffer->setPayload((uint8_t*)&enabled, 1);
-		streamBuffer->setType(type);
-		LOGd("Value set in payload: %d with len %u", enabled, streamBuffer->length());
+		uint8_t value;
+		Storage::getUint8(_storageStruct.currentLimit, value, CURRENT_LIMIT);
+		*((uint8_t*)target) = value;
 		return true;
 	}
 	default: {
@@ -413,112 +581,105 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 	return false;
 }
 
-bool Settings::getUint32(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint32_t defaultValue) {
-	loadPersistentStorage();
-	uint32_t payload[1];
-	Storage::getUint32(value, payload[0], defaultValue);
-	streamBuffer->setPayload((uint8_t*)payload, sizeof(uint32_t));
-	streamBuffer->setType(type);
-	LOGd("Value set in payload: %u with len %u", payload[0], streamBuffer->length());
-	return true;
+bool Settings::set(uint8_t type, void* target, uint16_t size) {
+	switch(type) {
+//	case CONFIG_NAME_UUID: {
+//		std::string* p_str = (std::string*) target;
+//		*p_str = getBLEName();
+//		return true;
+//	}
+	case CONFIG_NEARBY_TIMEOUT_UUID: {
+		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.nearbyTimeout);
+		return true;
+	}
+	case CONFIG_FLOOR_UUID: {
+		Storage::setUint8(*((uint8_t*)target), _storageStruct.floor);
+		return true;
+	}
+	case CONFIG_IBEACON_MAJOR: {
+		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.beacon.major);
+		return true;
+	}
+	case CONFIG_IBEACON_MINOR: {
+		Storage::setUint16(*((uint16_t*)target),(uint32_t&) _storageStruct.beacon.minor);
+		return true;
+	}
+	case CONFIG_IBEACON_UUID: {
+		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.beacon.uuid.uuid128, 16);
+		return true;
+	}
+	case CONFIG_IBEACON_RSSI: {
+		Storage::setInt8(*((int8_t*)target), (int32_t&)_storageStruct.beacon.rssi);
+		return true;
+	}
+	case CONFIG_WIFI_SETTINGS: {
+		if (size > 0) {
+			_wifiSettings = std::string((char*)target, size);
+		}
+		return true;
+	}
+	case CONFIG_TX_POWER: {
+		Storage::setInt8(*((int8_t*)target), _storageStruct.txPower);
+		return true;
+	}
+	case CONFIG_ADV_INTERVAL: {
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.advInterval);
+		return true;
+	}
+	case CONFIG_PASSKEY: {
+		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
+		return true;
+	}
+	case CONFIG_MIN_ENV_TEMP: {
+		Storage::setInt8(*((int8_t*)target), _storageStruct.minEnvTemp);
+		return true;
+	}
+	case CONFIG_MAX_ENV_TEMP: {
+		Storage::setInt8(*((int8_t*)target), _storageStruct.maxEnvTemp);
+		return true;
+	}
+	case CONFIG_SCAN_DURATION: {
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanDuration);
+		return true;
+	}
+	case CONFIG_SCAN_SEND_DELAY: {
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanSendDelay);
+		return true;
+	}
+	case CONFIG_SCAN_BREAK_DURATION: {
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanBreakDuration);
+		return true;
+	}
+	case CONFIG_BOOT_DELAY: {
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.bootDelay);
+		return true;
+	}
+	case CONFIG_MAX_CHIP_TEMP: {
+		Storage::setInt8(*((int8_t*)target), _storageStruct.maxChipTemp);
+		return true;
+	}
+	case CONFIG_SCAN_FILTER: {
+		Storage::setUint8(*((uint8_t*)target), _storageStruct.scanFilter);
+		return true;
+	}
+	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanFilterSendFraction);
+		return true;
+	}
+	case CONFIG_CURRENT_LIMIT: {
+		Storage::setUint8(*((uint8_t*)target), _storageStruct.currentLimit);
+		return true;
+	}
+	default: {
+		LOGw("There is no such configuration type (%u).", type);
+	}
+	}
+	return false;
 }
 
-bool Settings::setUint32(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target) {
-	if (length != 4) {
-		LOGw("Expected uint32");
-		return false;
-	}
-	uint32_t val = ((uint32_t*)payload)[0];
-	LOGi("Set %u to %u", type, val);
-	Storage::setUint32(val, target);
-	if (persistent) {
-		savePersistentStorageItem(&target);
-	}
-	EventDispatcher::getInstance().dispatch(type, &target, 4);
-	return true;
-}
-
-bool Settings::getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue) {
-	loadPersistentStorage();
-	uint8_t plen = 1;
-	uint16_t payload[plen];
-	Storage::getUint16(value, payload[0], defaultValue);
-	streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint16_t));
-	streamBuffer->setType(type);
-	LOGd("Value set in payload: %u with len %u", payload[0], streamBuffer->length());
-	return true;
-}
-
-bool Settings::setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target) {
-	if (length != 2) {
-		LOGw("Expected uint16");
-		return false;
-	}
-	uint16_t val = ((uint16_t*)payload)[0];
-	LOGi("Set %u to %u", type, val);
-	Storage::setUint16(val, target);
-	if (persistent) {
-		savePersistentStorageItem(&target);
-	}
-	EventDispatcher::getInstance().dispatch(type, &target, 4);
-	return true;
-}
-
-bool Settings::getInt8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, int32_t value, int8_t defaultValue) {
-	loadPersistentStorage();
-	uint8_t plen = 1;
-	int8_t payload[plen];
-	Storage::getInt8(value, payload[0], defaultValue);
-	streamBuffer->setPayload((uint8_t*)payload, plen);
-	streamBuffer->setType(type);
-	LOGd("Value set in payload: %i with len %u", payload[0], streamBuffer->length());
-	return true;
-}
-
-bool Settings::getUint8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint8_t defaultValue) {
-	loadPersistentStorage();
-	uint8_t plen = 1;
-	uint8_t payload[plen];
-	Storage::getUint8(value, payload[0], defaultValue);
-	streamBuffer->setPayload((uint8_t*)payload, plen);
-	streamBuffer->setType(type);
-	LOGd("Value set in payload: %i with len %u", payload[0], streamBuffer->length());
-	return true;
-}
-
-bool Settings::setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, int32_t& target) {
-	if (length != 1) {
-		LOGw("Expected int8");
-		return false;
-	}
-	int8_t val = payload[0];
-	LOGi("Set %u to %i", type, val);
-	Storage::setInt8(val, target);
-	if (persistent) {
-		savePersistentStorageItem(&target);
-	}
-	EventDispatcher::getInstance().dispatch(type, &target, 4);
-	return true;
-}
-
-bool Settings::setUint8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target) {
-	if (length != 1) {
-		LOGw("Expected int8");
-		return false;
-	}
-	uint8_t val = payload[0];
-	LOGi("Set %u to %i", type, val);
-	Storage::setUint8(val, target);
-	if (persistent) {
-		savePersistentStorageItem(&target);
-	}
-	EventDispatcher::getInstance().dispatch(type, &val, 1);
-	return true;
-}
-
-ps_configuration_t& Settings::getConfig() {
-	return _storageStruct;
-}
+//ps_configuration_t& Settings::getConfig() {
+//	return _storageStruct;
+//}
 
 /** Get a handle to the persistent storage struct and load it from FLASH.
  *
@@ -534,6 +695,10 @@ void Settings::loadPersistentStorage() {
 void Settings::savePersistentStorageItem(uint8_t* item, uint8_t size) {
 	uint32_t offset = Storage::getOffset(&_storageStruct, item);
 	_storage->writeItem(_storageHandle, offset, item, size);
+
+	log(INFO, "struct:");
+	BLEutil::printArray((uint8_t*)&_storageStruct, sizeof(_storageStruct));
+	log(INFO, CRLN);
 }
 
 void Settings::savePersistentStorageItem(int32_t* item) {

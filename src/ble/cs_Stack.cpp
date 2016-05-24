@@ -714,9 +714,8 @@ void Nrf51822BluetoothStack::changeToLowPowerMode() {
 }
 
 void Nrf51822BluetoothStack::changeToNormalPowerMode() {
-	ps_configuration_t cfg = Settings::getInstance().getConfig();
 	int8_t txPower;
-	Storage::getInt8(cfg.txPower, txPower, TX_POWER);
+	Settings::getInstance().get(CONFIG_TX_POWER, &txPower);
 	setTxPowerLevel(txPower);
 }
 

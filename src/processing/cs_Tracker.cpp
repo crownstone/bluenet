@@ -27,8 +27,7 @@ Tracker::Tracker() : EventListener(),
 
 	readTrackedDevices();
 
-	Storage::getUint16(Settings::getInstance().getConfig().nearbyTimeout, _timeoutCounts,
-	        TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
+	Settings::getInstance().get(CONFIG_NEARBY_TIMEOUT_UUID, &_timeoutCounts);
 	_trackedDeviceList->setTimeout(_timeoutCounts);
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) Tracker::staticTick);

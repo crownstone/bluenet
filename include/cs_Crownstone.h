@@ -14,6 +14,9 @@
 
 #include <ble/cs_iBeacon.h>
 
+#include <cfg/cs_Settings.h>
+#include <cfg/cs_StateVars.h>
+
 #include <services/cs_IndoorLocalisationService.h>
 #include <services/cs_GeneralService.h>
 #include <services/cs_PowerService.h>
@@ -21,6 +24,7 @@
 #include <services/cs_ScheduleService.h>
 #include <services/cs_DeviceInformationService.h>
 
+#include <processing/cs_CommandHandler.h>
 #include <processing/cs_TemperatureGuard.h>
 #include <processing/cs_Sensors.h>
 #include <processing/cs_Fridge.h>
@@ -46,6 +50,11 @@ class Crownstone : EventListener {
 private:
 	Nrf51822BluetoothStack* _stack;
 
+	Timer* _timer;
+	Storage* _storage;
+	Settings* _settings;
+	StateVars* _stateVars;
+
 	GeneralService* _generalService;
 	IndoorLocalizationService* _localizationService;
 	PowerService* _powerService;
@@ -57,6 +66,8 @@ private:
 	Sensors* _sensors;
 	Fridge* _fridge;
 	TemperatureGuard* _temperatureGuard;
+
+	CommandHandler* _commandHandler;
 
 	Switch* _switch;
 	Scanner* _scanner;
@@ -86,7 +97,7 @@ public:
 		_generalService(NULL), _localizationService(NULL), _powerService(NULL),
 		_alertService(NULL), _scheduleService(NULL), _deviceInformationService(NULL),
 		_beacon(NULL), _sensors(NULL), _fridge(NULL),
-		_switch(NULL), _scanner(NULL), _tracker(NULL),
+		_commandHandler(NULL), _switch(NULL), _scanner(NULL), _tracker(NULL),
 		_advertisementPaused(false) {};
 
 	void setup();
