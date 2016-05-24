@@ -117,8 +117,8 @@
 #if(HARDWARE_BOARD==CROWNSTONE5)
 //! plugin quant
 #define PIN_GPIO_SWITCH      12                  //! p0.12
-#define PIN_GPIO_RELAY_ON    11                  //! p0.11
-#define PIN_GPIO_RELAY_OFF   10                  //! p0.10
+#define PIN_GPIO_RELAY_ON    10                  //! p0.10
+#define PIN_GPIO_RELAY_OFF   11                  //! p0.11
 #define PIN_AIN_CURRENT      7                   //! ain7 is p0.06
 #define PIN_AIN_VOLTAGE      6                   //! ain6 is p0.05
 #define PIN_GPIO_RX          15                  //! p0.15
