@@ -31,7 +31,7 @@ PWM_ENABLE=1
 # define the iBeacon advertisement package parameters
 # the proximity UUID.
 # only applies if IBEACON==1 or DEVICE_TYPE==DEVICE_DOBEACON
-BEACON_UUID="00000000-0000-0000-0000-000000000000"
+BEACON_UUID="a643423e-e175-4af0-a2e4-31e32f729a8a"
 # the major number
 BEACON_MAJOR=0
 # the minor number
@@ -54,13 +54,13 @@ GENERAL_SERVICE=1
 POWER_SERVICE=1
 ALERT_SERVICE=0
 SCHEDULE_SERVICE=0
-DEVICE_INFO_SERVICE=0
 
 # Enable or disable characteristics
 ## General Service
 CHAR_TEMPERATURE=1
 CHAR_RESET=1
 CHAR_CONFIGURATION=1
+CHAR_STATE_VARIABLES=1
 
 ## Power Service
 CHAR_PWM=1

@@ -19,7 +19,6 @@
  *********************************************************************************************************************/
 
 //! temporary defines
-#define MESHING_PARALLEL 1
 
 //#define MICRO_VIEW 1
 //#define CHANGE_NAME_ON_RESET
@@ -48,6 +47,7 @@
  *********************************************************************************************************************/
 
 #include <cfg/cs_Settings.h>
+#include <cfg/cs_StateVars.h>
 
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventTypes.h>
@@ -75,6 +75,11 @@ void Crownstone::welcome() {
 	LOGi("Welcome at the nRF51822 code for meshing.");
 	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
 	LOGi("Compilation time: %s", __TIME__);
+#ifdef GIT_HASH
+	LOGi("Git hash: %s", GIT_HASH);
+#else
+	LOGi("Firmware version: %s", FIRMWARE_VERSION);
+#endif
 }
 
 /**
@@ -83,7 +88,7 @@ void Crownstone::welcome() {
 void Crownstone::setName() {
 #ifdef CHANGE_NAME_ON_RESET
 	uint32_t resetCounter;
-	Settings::getInstance().getStateVar(CONFIG_RESET_COUNTER, resetCounter);
+	StateVars::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
 //	uint16_t minor;
 //	ps_configuration_t cfg = Settings::getInstance().getConfig();
 //	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
@@ -177,11 +182,9 @@ void Crownstone::configDrivers() {
 void Crownstone::createServices() {
 	LOGi("Create all services");
 
-//! should be available always, but for now, only enable if required
-#if DEVICE_INFO_SERVICE==1
+	//! should be available always
 	_deviceInformationService = new DeviceInformationService();
 	_stack->addService(_deviceInformationService);
-#endif
 
 #if GENERAL_SERVICE==1 || DEVICE_TYPE==DEVICE_FRIDGE
 	//! general services, such as internal temperature, setting names, etc.
@@ -227,11 +230,11 @@ void Crownstone::configure() {
 	ps_configuration_t cfg = Settings::getInstance().getConfig();
 //
 	uint32_t resetCounter;
-	Settings::getInstance().getStateVar(CONFIG_RESET_COUNTER, resetCounter);
+	StateVars::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
 
 	LOGi("reset counter at: %d", ++resetCounter);
 
-	Settings::getInstance().setStateVar(CONFIG_RESET_COUNTER, resetCounter);
+	StateVars::getInstance().setStateVar(SV_RESET_COUNTER, resetCounter);
 
 
 #if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON

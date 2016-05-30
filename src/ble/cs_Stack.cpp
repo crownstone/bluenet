@@ -33,10 +33,6 @@ extern "C" {
 
 using namespace BLEpp;
 
-// todo: remove and replace with correct array for values which should be published in the advertisement
-//   package
-uint8_t service_data_array[1] {0};
-
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_appearance(defaultAppearance), _clock_source(defaultClockSource),
 //				_mtu_size(defaultMtu),
@@ -410,8 +406,10 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 //	ble_advdata_service_data_t service_data;
 	memset(&_service_data, 0, sizeof(_service_data));
 	_service_data.service_uuid = 0x5432;
-	_service_data.data.size = 1;
-	_service_data.data.p_data = service_data_array;
+	_service_data.data.p_data = _crownstoneData.getArray();
+	_service_data.data.size = _crownstoneData.getArraySize();
+
+	LOGi("service data size: %d", _service_data.data.size);
 
 	_scan_resp.p_service_data_array = &_service_data;
 	_scan_resp.service_data_count = 1;
@@ -522,7 +520,7 @@ void Nrf51822BluetoothStack::startAdvertising() {
 	uint32_t err_code;
 	err_code = sd_ble_gap_adv_start(&_adv_params);
 	if (err_code == NRF_ERROR_INVALID_PARAM) {
-		log(FATAL, MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
+		LOGf(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
 	}
 	APP_ERROR_CHECK(err_code);
 
@@ -894,12 +892,20 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 			buffer_ptr_t buffer = NULL;
 			uint16_t size = 0;
-			MasterBuffer::getInstance().getBuffer(buffer, size, 0);
+
+			// we want to have the actual payload word aligned, but header only needs 6 bytes,
+			// so we need to skip the first 2 bytes
+			MasterBuffer::getInstance().getBuffer(buffer, size, 2);
 
 			uint16_t* header = (uint16_t*)buffer;
 
 			for (Service* svc : _services) {
-				svc->on_write(p_ble_evt->evt.gatts_evt.params.write, header[0]);
+				// for a long write, don't have the service handle available to check for the correct
+				// service, so we just go through all the services and characteristics until we find
+				// the correct characteristic, then we return
+				if (svc->on_write(p_ble_evt->evt.gatts_evt.params.write, header[0])) {
+					return;
+				}
 			}
 
 		} else {

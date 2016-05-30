@@ -91,7 +91,7 @@ struct __attribute__((__packed__)) schedule_entry_t {
 };
 
 
-//! Size: 2 + 12*MAX_SCHEDULE_ENTRIES
+//! Size: 1 + 12*MAX_SCHEDULE_ENTRIES
 struct __attribute__((__packed__)) schedule_list_t {
 	uint8_t size;
 	schedule_entry_t list[MAX_SCHEDULE_ENTRIES];
@@ -181,7 +181,6 @@ private:
 public:
 	/** Default Constructor */
 	ScheduleList() : _buffer(NULL) {
-		_buffer->size = 0;
 	};
 
 	/** Release the assigned buffer */
@@ -191,10 +190,13 @@ public:
 	}
 
 	/** Returns the current size of the list */
-	uint16_t getSize() const { return _buffer->size; }
+	uint16_t getSize() const;
 
 	/** Returns true if the list is empty. */
-	bool isEmpty() const { return _buffer->size == 0; }
+	bool isEmpty() const;
+
+	/** Returns true if the list is full. */
+	bool isFull() const;
 
 	/** Clears the list. */
 	void clear();

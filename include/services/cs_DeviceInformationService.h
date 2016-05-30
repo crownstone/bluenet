@@ -36,7 +36,7 @@ protected:
 //	void addSerialNumberCharacteristic();
 	void addHardwareRevisionCharacteristic();
 	void addFirmwareRevisionCharacteristic();
-//	void addSoftwareRevisionCharacteristic();
+	void addSoftwareRevisionCharacteristic();
 //	void addSystemIDCharacteristic();
 //	void addRegulatoryCertificationDataListCharacteristic();
 
@@ -45,8 +45,8 @@ private:
 //	BLEpp::Characteristic<std::string> *_manufacturerNameCharacteristic;
 //	BLEpp::Characteristic<std::string> *_modelNumberCharacteristic;
 //	BLEpp::Characteristic<std::string> *_serialNumberCharacteristic;
-	BLEpp::Characteristic<std::string> *_hardwareRevisionCharacteristic;
-	BLEpp::Characteristic<std::string> *_firmwareRevisionCharacteristic;
+//	BLEpp::Characteristic<std::string> *_hardwareRevisionCharacteristic;
+//	BLEpp::Characteristic<std::string> *_firmwareRevisionCharacteristic;
 //	BLEpp::Characteristic<std::string> *_softwareRevisionCharacteristic;
 //	BLEpp::Characteristic<std::string> *_systemIdCharacteristic;
 //	BLEpp::Characteristic<std::string> *_regulatoryCerificationDataListCharacteristic;

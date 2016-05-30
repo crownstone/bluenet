@@ -63,7 +63,7 @@ run() {
 
 clean() {
 	cd ${path}/..
-	make clean
+	make clean BUILD_DIR=$BLUENET_BUILD_DIR
 }
 
 bootloader() {
@@ -79,6 +79,14 @@ bootloader() {
 		# and set to load it
 		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_REGION_START
 	fi
+}
+
+release() {
+	cd ${path}/..
+	make release BUILD_DIR=$BLUENET_BUILD_DIR
+	result=$?
+	cd $path
+	return $result
 }
 
 case "$cmd" in
@@ -105,6 +113,9 @@ case "$cmd" in
 		;;
 	debugbl)
 		debugbl
+		;;
+	release)
+		release
 		;;
 	*)
 		echo $"Usage: $0 {build|upload|debug|clean|run|all}"

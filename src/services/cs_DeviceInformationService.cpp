@@ -23,11 +23,8 @@ inline std::string get_hardware_revision(void) {
 	return std::string(hardware_revision);
 }
 
-DeviceInformationService::DeviceInformationService() :
-		_hardwareRevisionCharacteristic(NULL),
-		_firmwareRevisionCharacteristic(NULL)
+DeviceInformationService::DeviceInformationService()
 {
-
 	setUUID(UUID(BLE_UUID_DEVICE_INFORMATION_SERVICE));
 
 	setName("Device Information");
@@ -43,10 +40,17 @@ void DeviceInformationService::init() {
 
 	LOGi("add firmware revision characteristic");
 	addFirmwareRevisionCharacteristic();
+
+#ifdef GIT_BRANCH
+	LOGi("add software revision characteristic");
+	addSoftwareRevisionCharacteristic();
+#endif
+
+	addCharacteristicsDone();
 }
 
 void DeviceInformationService::addHardwareRevisionCharacteristic() {
-	_hardwareRevisionCharacteristic = new Characteristic<std::string>();
+	BLEpp::Characteristic<std::string>* _hardwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_hardwareRevisionCharacteristic);
 	_hardwareRevisionCharacteristic->setUUID(BLE_UUID_HARDWARE_REVISION_STRING_CHAR);
 	_hardwareRevisionCharacteristic->setName("Hardware Revision");
@@ -55,10 +59,27 @@ void DeviceInformationService::addHardwareRevisionCharacteristic() {
 }
 
 void DeviceInformationService::addFirmwareRevisionCharacteristic() {
-	_firmwareRevisionCharacteristic = new Characteristic<std::string>();
+	BLEpp::Characteristic<std::string>* _firmwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_firmwareRevisionCharacteristic);
 	_firmwareRevisionCharacteristic->setUUID(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
 	_firmwareRevisionCharacteristic->setName("Firmware Revision");
-	_firmwareRevisionCharacteristic->setDefaultValue(STRINGIFY(FIRMWARE_VERSION));
 	_firmwareRevisionCharacteristic->setWritable(false);
+#ifdef GIT_HASH
+	_firmwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_HASH));
+#else
+	_firmwareRevisionCharacteristic->setDefaultValue(STRINGIFY(FIRMWARE_VERSION));
+#endif
+}
+
+void DeviceInformationService::addSoftwareRevisionCharacteristic() {
+	BLEpp::Characteristic<std::string>* _softwareRevisionCharacteristic = new Characteristic<std::string>();
+	addCharacteristic(_softwareRevisionCharacteristic);
+	_softwareRevisionCharacteristic->setUUID(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
+	_softwareRevisionCharacteristic->setName("Software Revision");
+#ifdef GIT_BRANCH
+	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_BRANCH));
+#else
+//	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(SOFTWARE_REVISION));
+#endif
+	_softwareRevisionCharacteristic->setWritable(false);
 }

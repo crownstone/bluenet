@@ -278,12 +278,9 @@ void rbc_mesh_ble_evt_handler(ble_evt_t* p_evt) {
 }
 
 void rbc_mesh_sd_evt_handler(uint32_t sd_evt) {
-	ts_sd_event_handler(sd_evt);
-}
-
-void rbc_mesh_sys_evt_handler(uint32_t evt) {
 	/* call lower layer event handler */
-	ts_sys_evt_handler(evt);
+//	ts_sys_evt_handler(sd_evt);
+	ts_sd_event_handler(sd_evt);
 }
 
 uint32_t rbc_mesh_event_push(rbc_mesh_event_t* p_event) {

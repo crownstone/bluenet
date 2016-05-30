@@ -12,6 +12,8 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <ble/cs_DoBotsManufac.h>
 
+#include <events/cs_EventDispatcher.h>
+
 Scanner::Scanner(Nrf51822BluetoothStack* stack) :
 	_opCode(SCAN_START),
 	_scanning(false),
@@ -142,9 +144,6 @@ void Scanner::executeScan() {
 	switch(_opCode) {
 	case SCAN_START: {
 		LOGd("START");
-
-		// todo: remove again
-		service_data_array[0] += 1;
 
 		//! start scanning
 		manualStartScan();

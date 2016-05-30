@@ -89,6 +89,7 @@ void TrackedDeviceList::print() const {
 }
 
 void TrackedDeviceList::clear() {
+	//TODO: why not just set size to 0 ?
 	memset(_buffer, 0, sizeof(tracked_device_list_t));
 }
 

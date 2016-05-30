@@ -9,6 +9,7 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 #include "structs/cs_ScheduleEntries.h"
+#include <drivers/cs_Storage.h>
 
 #define SCHEDULE_SERVICE_UPDATE_FREQUENCY 2
 
@@ -48,6 +49,11 @@ public:
 	void scheduleNextTick();
 
 protected:
+	void loadPersistentStorage();
+	void savePersistentStorage();
+	void writeScheduleList();
+	void readScheduleList();
+
 	void addCurrentTimeCharacteristic();
 	void addWriteScheduleEntryCharacteristic();
 	void addListScheduleEntriesCharacteristic();
@@ -61,4 +67,8 @@ private:
 	BLEpp::Characteristic<uint8_t*> *_listScheduleEntriesCharacteristic;
 	uint32_t _rtcTimeStamp;
 	ScheduleList* _scheduleList;
+
+	bool _initialized;
+	pstorage_handle_t _storageHandle;
+	ps_indoorlocalisation_service_t _storageStruct;
 };

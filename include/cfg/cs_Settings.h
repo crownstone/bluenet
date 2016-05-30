@@ -6,17 +6,9 @@
  */
 #pragma once
 
-#include <drivers/cs_Serial.h>
-#include <structs/buffer/cs_StreamBuffer.h>
-
-#include <ble/cs_Stack.h>
-#include <util/cs_Utils.h>
-
 #include <events/cs_EventTypes.h>
-#include <events/cs_EventDispatcher.h>
-
-#include <ble/cs_UUID.h>
 #include <drivers/cs_Storage.h>
+#include <structs/buffer/cs_StreamBuffer.h>
 
 /** Configuration types
  *
@@ -48,11 +40,9 @@ enum ConfigurationTypes {
 	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16, //! 22
 	CONFIG_SAMPLING_INTERVAL                = 0x17, //! 23
 	CONFIG_SAMPLING_TIME                    = 0x18, //! 24
-	CONFIG_RESET_COUNTER					= 0x19, //! 25
+	CONFIG_CURRENT_LIMIT                    = 0x19, //! 25
 	CONFIG_TYPES
 };
-
-using namespace BLEpp;
 
 /**
  * Load settings from and save settings to persistent storage.
@@ -73,16 +63,20 @@ public:
 		return instance;
 	}
 
-	//	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
+	/** Read the configuration from the buffer and store in working memory.
+	 *  If persistent is true, also store in FLASH
+	 */
 	void writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool persistent = true);
 
+	/** Read the configuration from storage and write to streambuffer (to be read from characteristic)
+	 */
 	bool readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer);
 
+	/** Return the struct containing the configuration values in current working memory
+	 */
 	ps_configuration_t& getConfig();
 
-	ps_state_vars_t& getStateVars();
-
-	/** Get a handle to the persistent storage struct and load it from FLASH.
+	/** Get a handle to the persistent storage struct and load it from FLASH into working memory.
 	 *
 	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
 	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
@@ -90,17 +84,9 @@ public:
 	 */
 	void loadPersistentStorage();
 
-	/** Save to FLASH.
+	/** Save the whole configuration struct (working memory) to FLASH.
 	 */
 	void savePersistentStorage();
-
-	void readStateVars();
-	void writeStateVars();
-
-//	void ConfigHelper::enable(ps_storage_id id, uint16_t size) {
-//		Storage::getInstance().getHandle(id, _storageHandles[id]);
-//		loadPersistentStorage(_storageHandles[id], );
-//	}
 
 	/** Retrieve the Bluetooth name from the object representing the BLE stack.
 	 *
@@ -115,38 +101,40 @@ public:
 	 */
 	void setBLEName(const std::string &name, bool persistent = true);
 
-	bool getStateVar(uint8_t type, uint32_t& target);
-	bool setStateVar(uint8_t type, uint32_t& target);
 protected:
-	//	pstorage_handle_t _storageHandles[PS_ID_TYPES];
-	//	ps_configuration_t* _storageStructs[PS_ID_TYPES];
 
 	//! handle to storage (required to write to and read from FLASH)
 	pstorage_handle_t _storageHandle;
 
-	pstorage_handle_t _stateVarsHandle;
-
 	//! struct that storage object understands
 	ps_configuration_t _storageStruct;
-
-	ps_state_vars_t _stateVars;
 
 	//! non-persistent configuration options
 	std::string _wifiSettings;
 
-	/*
-	 * Writes value from storage to streambuffer
+	/**
+	 * Helper functions to read value from storage (FLASH) and write to
+	 * streambuffer (to be read from characteristic)
 	 */
 	bool getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue);
 	bool getInt8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, int32_t value, int8_t defaultValue);
 	bool getUint8(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint8_t defaultValue);
 
+	/**
+	 * Helper functions to read value from buffer and write to working memory.
+	 * If persistent is sent, also write to storage (FLASH)
+	 */
 	bool setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
 	bool setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, int32_t& target);
 	bool setUint8(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
 
-	bool getStateVar(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint32_t defaultValue);
-	bool setStateVar(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target);
+	/**
+	 * Helper functions to write single item from the configuration struct to storage (FLASH).
+	 */
+	void savePersistentStorageItem(uint32_t* item);
+	void savePersistentStorageItem(int32_t* item);
+	void savePersistentStorageItem(uint8_t* item, uint8_t size = 1);
+
 };
 
 

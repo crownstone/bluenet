@@ -8,16 +8,14 @@
 
 #include "cfg/cs_Settings.h"
 
+#include <ble/cs_UUID.h>
+#include <events/cs_EventDispatcher.h>
 
 using namespace BLEpp;
 
 Settings::Settings() {
 	Storage::getInstance().getHandle(PS_ID_CONFIGURATION, _storageHandle);
 	loadPersistentStorage();
-
-	LOGi("load state vars");
-	Storage::getInstance().getHandle(PS_ID_STATE, _stateVarsHandle);
-	readStateVars();
 };
 
 //	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
@@ -43,7 +41,7 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		LOGi("Set floor to %i", floor);
 		Storage::setUint8(floor, _storageStruct.floor);
 		if (persistent) {
-			savePersistentStorage();
+			savePersistentStorageItem(&_storageStruct.floor);
 		}
 		break;
 	}
@@ -65,10 +63,10 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 			LOGw("Expected 16 bytes for UUID, received: %d", length);
 			return;
 		}
-		_log(INFO, "set uuid to: "); BLEutil::printArray(payload, 16);
+		log(INFO, "set uuid to: "); BLEutil::printArray(payload, 16);
 		Storage::setArray<uint8_t>(payload, _storageStruct.beacon.uuid.uuid128, 16);
 		if (persistent) {
-			savePersistentStorage();
+			savePersistentStorageItem(_storageStruct.beacon.uuid.uuid128, 16);
 		}
 
 		EventDispatcher::getInstance().dispatch(type, &_storageStruct.beacon.uuid.uuid128, 16);
@@ -106,7 +104,7 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		LOGi("Set passkey to %s", std::string((char*)payload, length).c_str());
 		Storage::setArray(payload, _storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
 		if (persistent) {
-			savePersistentStorage();
+			savePersistentStorageItem(_storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
 		}
 
 		EventDispatcher::getInstance().dispatch(type, &_storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
@@ -156,8 +154,8 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 		setUint16(type, payload, length, persistent, _storageStruct.samplingTime);
 		break;
 	}
-	case CONFIG_RESET_COUNTER: {
-		setStateVar(type, payload, length, persistent, _stateVars.resetCounter);
+	case CONFIG_CURRENT_LIMIT: {
+		setUint8(type, payload, length, persistent, _storageStruct.currentLimit);
 		break;
 	}
 	default:
@@ -289,70 +287,15 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		LOGd("Read scan filter send fraction");
 		return getUint16(type, streamBuffer, _storageStruct.scanFilterSendFraction, SCAN_FILTER_SEND_FRACTION);
 	}
-	case CONFIG_RESET_COUNTER: {
-		LOGd("Read reset counter");
-		return getStateVar(type, streamBuffer, _stateVars.resetCounter, -1);
+	case CONFIG_CURRENT_LIMIT: {
+		LOGd("Read current limit");
+		return getUint8(type, streamBuffer, _storageStruct.currentLimit, CURRENT_LIMIT);
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
 	}
 	}
 	return false;
-}
-
-bool Settings::getStateVar(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint32_t defaultValue) {
-	readStateVars();
-	uint8_t plen = 1;
-	uint32_t payload[plen];
-	Storage::getUint32(value, payload[0], defaultValue);
-	streamBuffer->setPayload((uint8_t*)payload, plen*sizeof(uint32_t));
-	streamBuffer->setType(type);
-	LOGd("Value set in payload: %u with len %u", payload[0], streamBuffer->length());
-	return true;
-}
-
-bool Settings::getStateVar(uint8_t type, uint32_t& target) {
-	switch(type) {
-	case CONFIG_RESET_COUNTER: {
-		Storage::getUint32(_stateVars.resetCounter, target, -1);
-		break;
-	}
-	}
-//	LOGd("read state var: %u", target);
-	return true;
-}
-
-bool Settings::setStateVar(uint8_t type, uint8_t* payload, uint8_t length, bool persistent, uint32_t& target) {
-	if (length != 4) {
-		LOGw("Expected uint32");
-		return false;
-	}
-	uint16_t val = ((uint32_t*)payload)[0];
-	LOGi("Set %u to %u", type, val);
-	Storage::setUint32(val, target);
-	if (persistent) {
-		LOGi("target: %p", &target);
-
-		pstorage_size_t offset = Storage::getOffset(&_stateVars, &target);
-		Storage::getInstance().writeItem(_stateVarsHandle, offset, &target, 4);
-	}
-	EventDispatcher::getInstance().dispatch(type, &target, 4);
-	return true;
-}
-
-bool Settings::setStateVar(uint8_t type, uint32_t& target) {
-	switch(type) {
-	case CONFIG_RESET_COUNTER: {
-		Storage::setUint32(target, _stateVars.resetCounter);
-
-		pstorage_size_t offset = Storage::getOffset(&_stateVars, &_stateVars.resetCounter);
-		Storage::getInstance().writeItem(_stateVarsHandle, offset, &_stateVars.resetCounter, 4);
-
-		break;
-	}
-	}
-//	LOGd("set state var: %u", target);
-	return true;
 }
 
 bool Settings::getUint16(uint8_t type, StreamBuffer<uint8_t>* streamBuffer, uint32_t value, uint16_t defaultValue) {
@@ -397,7 +340,7 @@ bool Settings::setUint16(uint8_t type, uint8_t* payload, uint8_t length, bool pe
 	LOGi("Set %u to %u", type, val);
 	Storage::setUint16(val, target);
 	if (persistent) {
-		savePersistentStorage();
+		savePersistentStorageItem(&target);
 	}
 	EventDispatcher::getInstance().dispatch(type, &target, 4);
 	return true;
@@ -412,7 +355,7 @@ bool Settings::setInt8(uint8_t type, uint8_t* payload, uint8_t length, bool pers
 	LOGi("Set %u to %i", type, val);
 	Storage::setInt8(val, target);
 	if (persistent) {
-		savePersistentStorage();
+		savePersistentStorageItem(&target);
 	}
 	EventDispatcher::getInstance().dispatch(type, &target, 4);
 	return true;
@@ -427,7 +370,7 @@ bool Settings::setUint8(uint8_t type, uint8_t* payload, uint8_t length, bool per
 	LOGi("Set %u to %i", type, val);
 	Storage::setUint8(val, target);
 	if (persistent) {
-		savePersistentStorage();
+		savePersistentStorageItem(&target);
 	}
 	EventDispatcher::getInstance().dispatch(type, &val, 1);
 	return true;
@@ -435,10 +378,6 @@ bool Settings::setUint8(uint8_t type, uint8_t* payload, uint8_t length, bool per
 
 ps_configuration_t& Settings::getConfig() {
 	return _storageStruct;
-}
-
-ps_state_vars_t& Settings::getStateVars() {
-	return _stateVars;
 }
 
 /** Get a handle to the persistent storage struct and load it from FLASH.
@@ -451,22 +390,26 @@ void Settings::loadPersistentStorage() {
 	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
-/** Save to FLASH.
+
+void Settings::savePersistentStorageItem(uint8_t* item, uint8_t size) {
+	uint32_t offset = Storage::getOffset(&_storageStruct, item);
+	Storage::getInstance().writeItem(_storageHandle, offset, item, size);
+}
+
+void Settings::savePersistentStorageItem(int32_t* item) {
+	savePersistentStorageItem((uint8_t*)item, sizeof(int32_t));
+}
+
+void Settings::savePersistentStorageItem(uint32_t* item) {
+	savePersistentStorageItem((uint8_t*)item, sizeof(uint32_t));
+}
+
+/** Save the whole configuration struct to FLASH.
+ *  try to avoid using this function and store each item individually with the
+ *  savePersistentStorageItem functions
  */
 void Settings::savePersistentStorage() {
 	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
-}
-
-void Settings::readStateVars() {
-	Storage::getInstance().readStorage(_stateVarsHandle, &_stateVars, sizeof(_stateVars));
-}
-
-void Settings::writeStateVars() {
-	ps_state_vars_t _oldVars;
-
-	Storage::getInstance().readStorage(_stateVarsHandle, &_oldVars, sizeof(_oldVars));
-
-	// todo: compare flash with working copy and only store changed variables
 }
 
 //	void ConfigHelper::enable(ps_storage_id id, uint16_t size) {
@@ -492,12 +435,12 @@ std::string & Settings::getBLEName() {
  */
 void Settings::setBLEName(const std::string &name, bool persistent) {
 	if (name.length() > 31) {
-		log(ERROR, MSG_NAME_TOO_LONG);
+		LOGe(MSG_NAME_TOO_LONG);
 		return;
 	}
 	BLEpp::Nrf51822BluetoothStack::getInstance().updateDeviceName(name);
 	Storage::setString(name, _storageStruct.device_name);
 	if (persistent) {
-		savePersistentStorage();
+		savePersistentStorageItem((uint8_t*)_storageStruct.device_name, sizeof(_storageStruct.device_name));
 	}
 }

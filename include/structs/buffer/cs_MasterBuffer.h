@@ -14,7 +14,8 @@
 #include <cstring>
 
 /** size of the header used for long write */
-#define DEFAULT_OFFSET 6
+//! has to be a multiple of 4 (word alignment), even though only 6 are needed
+#define DEFAULT_OFFSET 8
 
 /** MasterBuffer is a byte array with header.
  *

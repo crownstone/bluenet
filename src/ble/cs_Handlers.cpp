@@ -5,6 +5,7 @@
  */
 
 #include "ble/cs_Handlers.h"
+#include <drivers/cs_Storage.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,11 +28,11 @@ extern "C" {
 void sys_evt_dispatch(uint32_t sys_evt) {
 
 //	LOGi("Sys evt dispatch: %d", sys_evt);
-
     pstorage_sys_event_handler(sys_evt);
 
 #if CHAR_MESHING==1
-    rbc_mesh_sys_evt_handler(sys_evt);
+    rbc_mesh_sd_evt_handler(sys_evt);
+    storage_sys_evt_handler(sys_evt);
 //!    rbc_mesh_sd_evt_handler(sys_evt);
 #endif
 

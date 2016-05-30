@@ -11,7 +11,8 @@
  */
 enum EventType {
 	Configuration_Base = 0x000,
-	General_Base       = 0x100
+	StateVar_Base      = 0x080,
+	General_Base       = 0x100,
 };
 
 //! for Configuration event type see cs_ConfigHelper.h

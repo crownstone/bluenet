@@ -6,49 +6,89 @@
  */
 
 /*
+ * TODO: Check https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/
+ *       Writing to persistent memory should be done between connection/advertisement events...
+ */
+
+/*
  * For more information see:
  * http://developer.nordicsemi.com/nRF51_SDK/doc/7.0.1/s110/html/a00763.html#ga0a57b964c8945eaca2d267835ef6688c
  */
 #include "drivers/cs_Storage.h"
 
 #include <climits>
-#include <string>
-
-#include "services/cs_IndoorLocalisationService.h"
-#include "services/cs_GeneralService.h"
-#include "services/cs_PowerService.h"
-
-#include "drivers/cs_Serial.h"
-#include "util/cs_BleError.h"
+#include "cfg/cs_StateVars.h"
+#include "cfg/cs_Config.h"
 
 extern "C" {
-#include <third/protocol/timeslot_handler.h>
+	#include <third/protocol/timeslot_handler.h>
 }
 
+#if CHAR_MESHING==1
+static CircularBuffer<buffer_element_t>* requestBuffer;
+static uint8_t pendingStorageRequests = 0;
+#endif
 
 extern "C"  {
 
-static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
-		uint32_t data_len) {
-	// we might want to check if things are actually stored, by using this callback
-	if (result != NRF_SUCCESS) {
-		LOGd("OPP_CODE: %d, ERR_CODE: %d (0x%X)", op_code, result, result);
-		APP_ERROR_CHECK(result);
+	static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
+			uint32_t data_len) {
+		// we might want to check if things are actually stored, by using this callback
+		if (result != NRF_SUCCESS) {
+			LOGd("OPP_CODE: %d, ERR_CODE: %d (0x%X)", op_code, result, result);
+			APP_ERROR_CHECK(result);
 
-		if (op_code == PSTORAGE_LOAD_OP_CODE) {
-			LOGd("Error with loading data");
+			if (op_code == PSTORAGE_LOAD_OP_CODE) {
+				LOGd("Error with loading data");
+			}
+		} else {
+			LOGi("Opcode %i executed (no error)", op_code);
 		}
-	} else {
-		LOGi("Opcode %i executed (no error)", op_code);
+
+#if CHAR_MESHING==1
+		//! if there are pending storage requests
+		if (pendingStorageRequests) {
+			//! decrease by one (we get one event per request)
+			--pendingStorageRequests;
+			//! once no storage requests are pending anymore, resume mesh
+			if (!pendingStorageRequests) {
+				timeslot_handler_resume();
+			}
+		}
+#endif
 	}
 
-//#if CHAR_MESHING==1
-//	timeslot_handler_resume();
-////	rbc_mesh_resume();
-//#endif
+} // extern "C"
+
+void resumeRequests() {
+	LOGi("Resume pstorage requests");
+#if CHAR_MESHING==1
+	while (!requestBuffer->empty()) {
+		//! get the next buffered storage request
+		buffer_element_t elem = requestBuffer->pop();
+
+		BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
+
+		//! keep track of how many storage requests are pending, so that we determine when we can resume the mesh
+		++pendingStorageRequests;
+	}
+#endif
 }
 
-} // extern "C"
+void storage_sys_evt_handler(uint32_t evt) {
+
+#if CHAR_MESHING==1
+	switch(evt) {
+	case NRF_EVT_RADIO_SESSION_CLOSED: {
+		//! if there are storage requests pending resume them now that
+		//  the radio is off.
+		if (!requestBuffer->empty()) {
+			resumeRequests();
+		}
+	}
+	}
+#endif
+}
 
 // NOTE: DO NOT CHANGE ORDER OF THE ELEMENTS OR THE FLASH
 //   STORAGE WILL GET MESSED UP!! NEW ENTRIES ALWAYS AT THE END
@@ -58,7 +98,6 @@ static storage_config_t config[] {
 	{PS_ID_STATE, {}, sizeof(ps_state_vars_t)}
 };
 
-
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
 Storage::Storage() {
@@ -67,9 +106,13 @@ Storage::Storage() {
 	// call once before using any other API calls of the persistent storage module
 	BLE_CALL(pstorage_init, ());
 
+#if CHAR_MESHING==1
+	requestBuffer = new CircularBuffer<buffer_element_t>(STORAGE_REQUEST_BUFFER_SIZE, true);
+#endif
+
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
-		initBlocks(config[i].storage_size, 1, config[i].handle);
 		LOGi("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
+		initBlocks(config[i].storage_size, 1, config[i].handle);
 	}
 
 }
@@ -143,47 +186,62 @@ void Storage::readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uin
 }
 
 void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
+	writeItem(handle, 0, (uint8_t*)item, size);
+}
+
+void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size) {
+	pstorage_handle_t block_handle;
+
+	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
+
+	BLE_CALL (pstorage_load, (item, &block_handle, size, offset) );
+
+#ifdef PRINT_ITEMS
+	_log(INFO, "read item: \r\n");
+	BLEutil::printArray(item, size);
+#endif
+
+}
+
+void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size) {
 	pstorage_handle_t block_handle;
 
 #ifdef PRINT_ITEMS
-	_log(INFO, "set struct: \r\n");
+	_log(INFO, "write item: \r\n");
 	BLEutil::printArray((uint8_t*)item, size);
 #endif
 
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
 
-//		clearBlock(handle);
-
-//#if CHAR_MESHING==1
-//	// we need to pause the mesh, otherwise the softdevice won't get time to
-//	// update the storage
-//	timeslot_handler_pause();
-////	rbc_mesh_pause();
-//#endif
-
-	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, 0) );
+#if CHAR_MESHING==1
+	// we need to pause the mesh, otherwise the softdevice won't get time to
+	// update the storage
+	if (timeslot_handler_pause()) {
+		BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
+	} else {
+		LOGi("store buffer");
+		if (!requestBuffer->full()) {
+			buffer_element_t elem;
+			elem.storageHandle = block_handle;
+			elem.storageOffset = offset;
+			elem.dataSize = size;
+			elem.data = item;
+			requestBuffer->push(elem);
+		} else {
+			LOGe("storage request buffer is full!");
+		}
+	}
+#else
+	BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
+#endif
 
 }
 
-///**
-// * Nordic bug: We have to clear the entire block!
-// */
-//void Storage::clearItem(pstorage_handle_t handle, pstorage_size_t index, ps_storage_id storageID) {
-//
-//	storage_config_t* config;
-//	if (!(config = getStorageConfig(storageID))) {
-//		// if no config was found for the given storage ID return
-//		return;
-//	}
-//
-//	pstorage_handle_t block_handle;
-//	BLE_CALL ( pstorage_block_identifier_get,(&handle, index, &block_handle) );
-//
-//	LOGw("Nordic bug: clear entire block before writing to it");
-//	BLE_CALL (pstorage_clear, (&block_handle, config->storage_size) );
-//}
+////////////////////////////////////////////////////////////////////////////////////////
+//! helper functions
+////////////////////////////////////////////////////////////////////////////////////////
 
-uint32_t Storage::getOffset(ps_storage_base_t* storage, uint32_t* var) {
+pstorage_size_t Storage::getOffset(ps_storage_base_t* storage, uint8_t* var) {
 	uint32_t p_storage = (uint32_t)storage;
 	uint32_t p_var = (uint32_t)var;
 	pstorage_size_t offset = p_var - p_storage;
@@ -195,43 +253,6 @@ uint32_t Storage::getOffset(ps_storage_base_t* storage, uint32_t* var) {
 #endif
 
 	return offset;
-}
-
-void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size) {
-	pstorage_handle_t block_handle;
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
-
-	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, size, offset) );
-
-#ifdef PRINT_ITEMS
-	_log(INFO, "get struct: \r\n");
-	BLEutil::printArray((uint8_t*)item, size);
-#endif
-
-}
-
-void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint32_t* item, uint16_t size) {
-	pstorage_handle_t block_handle;
-
-#ifdef PRINT_ITEMS
-	_log(INFO, "set struct: \r\n");
-	BLEutil::printArray((uint8_t*)item, size);
-#endif
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
-
-//		clearBlock(handle);
-
-//#if CHAR_MESHING==1
-//	// we need to pause the mesh, otherwise the softdevice won't get time to
-//	// update the storage
-//	timeslot_handler_pause();
-////	rbc_mesh_pause();
-//#endif
-
-	BLE_CALL (pstorage_update, (&block_handle, (uint8_t*)item, size, offset) );
-
 }
 
 void Storage::setString(std::string value, char* target) {
@@ -377,48 +398,3 @@ void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value
 #endif
 	}
 }
-
-//template<typename T>
-//void Storage::setArray(T* src, T* dest, uint16_t length) {
-//	bool isUnassigned = true;
-//	for (int i = 0; i < length; ++i) {
-//		if (src[i] != 0xFF) {
-//			isUnassigned = false;
-//			break;
-//		}
-//	}
-//
-//	if (isUnassigned) {
-//		LOGe("cannot write all FF");
-//	} else {
-//		memccpy(dest, src, 0, length * sizeof(T));
-//	}
-//}
-//
-//template<typename T>
-//void Storage::getArray(T* src, T* dest, T* default_value, uint16_t length) {
-//
-//#ifdef PRINT_ITEMS
-//	_log(INFO, "raw value: ");
-//	for (int i = 0; i < length; ++i) {
-//		_log(INFO, "%X", src[i]);
-//	}
-//	_log(INFO, "\r\n");
-//#endif
-//
-//	bool isUnassigned = true;
-//	for (int i = 0; i < length; ++i) {
-//		if (src[i] != 0xFF) {
-//			isUnassigned = false;
-//			break;
-//		}
-//	}
-//
-//	if (isUnassigned) {
-//		LOGd("use default value");
-//		memccpy(dest, default_value, 0, length * sizeof(T));
-//	} else {
-//		memccpy(dest, src, 0, length * sizeof(T));
-//	}
-//
-//}

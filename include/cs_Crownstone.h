@@ -56,7 +56,6 @@ private:
 	TemperatureGuard* _temperatureGuard;
 
 	bool _advertisementPaused;
-	bool _beaconAdvertisement;
 
 	app_timer_id_t _advertisementTimer;
 
@@ -79,7 +78,7 @@ public:
 	Crownstone() : _stack(NULL),
 		_generalService(NULL), _localizationService(NULL), _powerService(NULL),
 		_alertService(NULL), _scheduleService(NULL), _deviceInformationService(NULL),
-		_beacon(NULL), _sensors(NULL), _fridge(NULL) {};
+		_beacon(NULL), _sensors(NULL), _fridge(NULL), _advertisementPaused(false) {};
 
 	void setup();
 

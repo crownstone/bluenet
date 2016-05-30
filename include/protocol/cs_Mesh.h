@@ -30,7 +30,7 @@ extern "C" {
 #define MESH_NUM_OF_CHANNELS 2
 //! time given for boot up (every first message received on each channel
 //! will be ignored during boot up)
-#define BOOT_TIME 1000 // 1 second
+#define BOOT_TIME 2000 // 2 seconds
 
 #define MESH_ACCESS_ADDR 0xA541A68E
 //#define MESH_ACCESS_ADDR 0xA641A69E

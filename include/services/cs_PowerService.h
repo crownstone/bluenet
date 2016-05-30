@@ -91,8 +91,8 @@ protected:
 
 	/** Get the stored current limit.
 	 */
-	uint8_t getCurrentLimit();
-	void setCurrentLimit(uint8_t value);
+//	uint8_t getCurrentLimit();
+//	void setCurrentLimit(uint8_t value);
 
 	/** Get a handle to the persistent storage struct and load it from FLASH.
 	 *
@@ -112,7 +112,7 @@ private:
 	BLEpp::Characteristic<uint8_t> *_sampleCurrentCharacteristic;
 	BLEpp::Characteristic<uint16_t> *_powerConsumptionCharacteristic;
 	BLEpp::Characteristic<uint8_t*> *_currentCurveCharacteristic;
-	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
+//	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
 
 	PowerCurve<uint16_t>* _powerCurve;
 

@@ -18,13 +18,20 @@
 using namespace BLEpp;
 
 ScheduleService::ScheduleService() :
-		_currentTimeCharacteristic(NULL)
+		_currentTimeCharacteristic(NULL),
+		_writeScheduleEntryCharacteristic(NULL),
+		_listScheduleEntriesCharacteristic(NULL),
+		_initialized(false),
+		_rtcTimeStamp(0),
+		_scheduleList(NULL)
 {
 
 	setUUID(UUID(SCHEDULE_UUID));
 
 	setName(BLE_SERVICE_SCHEDULE);
 
+	Storage::getInstance().getHandle(PS_ID_INDOORLOCALISATION_SERVICE, _storageHandle);
+	loadPersistentStorage();
 	init();
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)ScheduleService::staticTick);
@@ -43,6 +50,8 @@ void ScheduleService::init() {
 	addWriteScheduleEntryCharacteristic();
 	addListScheduleEntriesCharacteristic();
 #endif
+
+	addCharacteristicsDone();
 }
 
 uint32_t ScheduleService::getTime() {
@@ -53,13 +62,20 @@ void ScheduleService::setTime(uint32_t time) {
 	LOGi("Set time to %i", time);
 	*_currentTimeCharacteristic = time;
 	_rtcTimeStamp = RTC::getCount();
-
 #if CHAR_SCHEDULE==1
 	_scheduleList->sync(time);
+	_scheduleList->print();
 #endif
 }
 
 void ScheduleService::tick() {
+	if (!_initialized) {
+		if (_scheduleList != NULL) {
+			readScheduleList();
+		}
+		_initialized = true;
+	}
+
 	//! RTC can overflow every 16s
 	uint32_t tickDiff = RTC::difference(RTC::getCount(), _rtcTimeStamp);
 
@@ -84,10 +100,9 @@ void ScheduleService::tick() {
 		case SCHEDULE_ACTION_TYPE_FADE:
 			//TODO: implement this, make sure that if something else changes pwm during fade, that the fading is halted.
 			break;
-		case SCHEDULE_ACTION_TYPE_TOGGLE:
-			//TODO: implement this.
-			break;
 		}
+		// TODO: i don't think we need this, already done by sync() at setTime
+//		writeScheduleList();
 	}
 #endif
 
@@ -98,6 +113,40 @@ void ScheduleService::scheduleNextTick() {
 //	LOGi(" ScheduleService::scheduleNextTick");
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(SCHEDULE_SERVICE_UPDATE_FREQUENCY), this);
 }
+
+void ScheduleService::loadPersistentStorage() {
+	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+}
+
+void ScheduleService::savePersistentStorage() {
+	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+}
+
+void ScheduleService::writeScheduleList() {
+	buffer_ptr_t buffer;
+	uint16_t length;
+	_scheduleList->getBuffer(buffer, length);
+	Storage::setArray(buffer, _storageStruct.scheduleList.list, length);
+	savePersistentStorage();
+}
+
+void ScheduleService::readScheduleList() {
+	buffer_ptr_t buffer;
+	uint16_t length;
+	_scheduleList->getBuffer(buffer, length);
+	length = _scheduleList->getMaxLength();
+
+	Storage::getArray(_storageStruct.scheduleList.list, buffer, (buffer_ptr_t)NULL, length);
+
+	if (!_scheduleList->isEmpty()) {
+		LOGi("restored schedule list (%d):", _scheduleList->getSize());
+		_scheduleList->print();
+
+		_listScheduleEntriesCharacteristic->setDataLength(_scheduleList->getDataLength());
+		_listScheduleEntriesCharacteristic->notify();
+	}
+}
+
 
 void ScheduleService::addCurrentTimeCharacteristic() {
 	_currentTimeCharacteristic = new Characteristic<uint32_t>();
@@ -138,11 +187,16 @@ void ScheduleService::addWriteScheduleEntryCharacteristic() {
 		}
 		schedule_entry_t* entryStruct = entry.getStruct();
 		if (!entryStruct->nextTimestamp) {
-			_scheduleList->rem(entryStruct);
+			if (_scheduleList->rem(entryStruct)) {
+				writeScheduleList();
+				_scheduleList->print();
+				_listScheduleEntriesCharacteristic->setDataLength(_scheduleList->getDataLength());
+				_listScheduleEntriesCharacteristic->notify();
+			}
 		}
 		else {
 
-			//! Check if entry is correct
+			// Check if entry is correct
 			if (entryStruct->nextTimestamp < *_currentTimeCharacteristic) {
 				return;
 			}
@@ -161,11 +215,13 @@ void ScheduleService::addWriteScheduleEntryCharacteristic() {
 				break;
 			}
 
-			_scheduleList->add(entryStruct);
+			if (_scheduleList->add(entryStruct)) {
+				writeScheduleList();
+				_scheduleList->print();
+				_listScheduleEntriesCharacteristic->setDataLength(_scheduleList->getDataLength());
+				_listScheduleEntriesCharacteristic->notify();
+			}
 		}
-		_scheduleList->print();
-		_listScheduleEntriesCharacteristic->setDataLength(_scheduleList->getDataLength());
-		_listScheduleEntriesCharacteristic->notify();
 	});
 }
 
@@ -175,6 +231,8 @@ void ScheduleService::addListScheduleEntriesCharacteristic() {
 	uint16_t size = sizeof(schedule_list_t);
 	buffer_ptr_t buffer = (buffer_ptr_t)calloc(size, sizeof(uint8_t));
 	_scheduleList->assign(buffer, size);
+	_scheduleList->print();
+	// TODO: clear() schedule list
 
 	_listScheduleEntriesCharacteristic = new Characteristic<uint8_t*>();
 	addCharacteristic(_listScheduleEntriesCharacteristic);
