@@ -24,18 +24,20 @@
 class TemperatureGuard : EventListener {
 public:
 	TemperatureGuard() :
-		_appTimerId(0),
 		EventListener(CONFIG_MAX_CHIP_TEMP),
+		_appTimerId(0),
 		_maxTemp(MAX_CHIP_TEMP)
 	{
-
-		Settings::getInstance().get(CONFIG_MAX_CHIP_TEMP, &_maxTemp);
-
 		EventDispatcher::getInstance().addListener(this);
+	}
+
+	void init() {
+		Settings::getInstance().get(CONFIG_MAX_CHIP_TEMP, &_maxTemp);
 
 		Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
 //		Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
 	}
+
 	void tick() {
 		if (getTemperature() > _maxTemp) {
 			//! Switch off all channels

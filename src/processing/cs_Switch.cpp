@@ -16,7 +16,10 @@
 Switch::Switch() :
 		_switchValue(0)
 {
-	LOGi("creating switch");
+	LOGd("creating switch");
+}
+
+void Switch::init() {
 
 	PWM& pwm = PWM::getInstance();
 	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
@@ -28,7 +31,6 @@ Switch::Switch() :
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
 #endif
 }
-;
 
 void Switch::turnOff() {
 	setValue(0);

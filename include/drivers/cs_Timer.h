@@ -23,10 +23,7 @@ extern "C" {
 class Timer {
 
 private:
-	Timer() {
-		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
-	}
+	Timer() {};
 
 	Timer(Timer const&);
 	void operator=(Timer const &);
@@ -35,6 +32,11 @@ public:
 	static Timer& getInstance() {
 		static Timer instance;
 		return instance;
+	}
+
+	inline void init() {
+		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
+		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
 	}
 
 	/** Create single shot timer. function will only be called once and after that timer will be

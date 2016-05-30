@@ -44,7 +44,7 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0),
-				_adv_manuf_data(NULL)
+				_adv_manuf_data(NULL), _crownstoneData(NULL)
 {
 	//! setup default values.
 	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
@@ -404,18 +404,20 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 	memset(&_scan_resp, 0, sizeof(_scan_resp));
 	_scan_resp.name_type = BLE_ADVDATA_SHORT_NAME;
 
-//	ble_advdata_service_data_t service_data;
-	memset(&_service_data, 0, sizeof(_service_data));
-	_service_data.service_uuid = 0x5432;
-	_service_data.data.p_data = _crownstoneData.getArray();
-	_service_data.data.size = _crownstoneData.getArraySize();
+	if (_crownstoneData) {
+	//	ble_advdata_service_data_t service_data;
+		memset(&_service_data, 0, sizeof(_service_data));
+		_service_data.service_uuid = 0x5432;
+		_service_data.data.p_data = _crownstoneData->getArray();
+		_service_data.data.size = _crownstoneData->getArraySize();
 
-	LOGi("service data size: %d", _service_data.data.size);
+		LOGi("service data size: %d", _service_data.data.size);
 
-	_scan_resp.p_service_data_array = &_service_data;
-	_scan_resp.service_data_count = 1;
+		_scan_resp.p_service_data_array = &_service_data;
+		_scan_resp.service_data_count = 1;
 
-	nameLength = nameLength - 2 - sizeof(_service_data.service_uuid) - _service_data.data.size;
+		nameLength = nameLength - 2 - sizeof(_service_data.service_uuid) - _service_data.data.size;
+	}
 
 	//! since advertisement data already has the manufacturing data
 	//! of Apple for the iBeacon, we set our own manufacturing data
@@ -471,9 +473,9 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 void Nrf51822BluetoothStack::configureIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	LOGi(MSG_BLE_CONFIGURE_IBEACON);
 
-	init(); //! we should already be.
+//	init(); //! we should already be.
 
-	configureServices();
+	//	configureServices();
 
 	configureIBeaconAdvData(beacon);
 
@@ -488,10 +490,10 @@ void Nrf51822BluetoothStack::configureIBeacon(IBeacon* beacon, uint8_t deviceTyp
 void Nrf51822BluetoothStack::configureBleDevice(uint8_t deviceType) {
 	LOGi(MSG_BLE_CONFIGURE_BLEDEVICE);
 
-	init(); //! we should already be.
+//	init(); //! we should already be.
 
 	//! todo: why start advertising the services ???
-	configureServices();
+//	configureServices();
 
 	configureBleDeviceAdvData();
 

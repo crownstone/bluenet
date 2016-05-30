@@ -182,7 +182,7 @@ protected:
 	ble_advdata_manuf_data_t 					_manufac_apple;
 	ble_advdata_service_data_t                  _service_data;
 
-	ServiceData                                 _crownstoneData;
+	ServiceData*                                _crownstoneData;
 public:
 
 	/** Initialization of the BLE stack
@@ -432,6 +432,10 @@ public:
 	 */
 	uint32_t deviceManagerEvtHandler(dm_handle_t const    * p_handle, dm_event_t const     * p_event,
 			ret_code_t           event_result);
+
+	void setServiceData(ServiceData* crownstoneServiceData) {
+		_crownstoneData = crownstoneServiceData;
+	}
 
 protected:
 

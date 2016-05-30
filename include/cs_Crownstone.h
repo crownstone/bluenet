@@ -32,6 +32,8 @@
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Tracker.h>
 
+#include <protocol/cs_Mesh.h>
+
 #include <events/cs_EventListener.h>
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
@@ -54,6 +56,7 @@ private:
 	Storage* _storage;
 	Settings* _settings;
 	StateVars* _stateVars;
+	CMesh* _mesh;
 
 	GeneralService* _generalService;
 	IndoorLocalizationService* _localizationService;
@@ -62,6 +65,7 @@ private:
 	ScheduleService* _scheduleService;
 	DeviceInformationService* _deviceInformationService;
 
+	ServiceData* _serviceData;
 	IBeacon* _beacon;
 	Sensors* _sensors;
 	Fridge* _fridge;
@@ -75,12 +79,13 @@ private:
 
 	bool _advertisementPaused;
 
-	app_timer_id_t _advertisementTimer;
+	app_timer_id_t _mainTimer;
 
 	void welcome();
 
 	void setName();
 	void configStack();
+	void configAdvertisement();
 	void configDrivers();
 
 	void createServices();
@@ -93,14 +98,11 @@ private:
 	void scheduleNextTick();
 
 public:
-	Crownstone() : _stack(NULL),
-		_generalService(NULL), _localizationService(NULL), _powerService(NULL),
-		_alertService(NULL), _scheduleService(NULL), _deviceInformationService(NULL),
-		_beacon(NULL), _sensors(NULL), _fridge(NULL),
-		_commandHandler(NULL), _switch(NULL), _scanner(NULL), _tracker(NULL),
-		_advertisementPaused(false) {};
+	Crownstone();
 
 	void setup();
+
+	void startUp();
 
 	void run();
 

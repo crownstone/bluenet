@@ -16,6 +16,8 @@ public:
 		return instance;
 	}
 
+	void init();
+
 	void turnOff();
 
 	void turnOn();

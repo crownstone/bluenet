@@ -30,19 +30,11 @@ static uint8_t pendingStorageRequests = 0;
 
 extern "C"  {
 
-	static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
-			uint32_t data_len) {
-		// we might want to check if things are actually stored, by using this callback
-		if (result != NRF_SUCCESS) {
-			LOGd("OPP_CODE: %d, ERR_CODE: %d (0x%X)", op_code, result, result);
-			APP_ERROR_CHECK(result);
+	static void pstorage_log(void* p_event_data, uint16_t event_size) {
+		LOGi("Opcode %i executed (no error)", *(uint8_t*)p_event_data);
+	}
 
-			if (op_code == PSTORAGE_LOAD_OP_CODE) {
-				LOGd("Error with loading data");
-			}
-		} else {
-			LOGi("Opcode %i executed (no error)", op_code);
-		}
+	static void pstorage_cb_mesh(void* p_event_data, uint16_t event_size) {
 
 	    Settings& settings = Settings::getInstance();
 	    if (settings.isInitialized() && settings.isEnabled(CONFIG_MESH_ENABLED)) {
@@ -56,6 +48,25 @@ extern "C"  {
 				}
 			}
 	    }
+	}
+
+	// is executed in an interrupt handler, so time consuming code should be given to the scheduler, such as
+	// log and mesh resume
+	static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
+			uint32_t data_len) {
+		// we might want to check if things are actually stored, by using this callback
+		if (result != NRF_SUCCESS) {
+			if (op_code == PSTORAGE_LOAD_OP_CODE) {
+				LOGd("Error with loading data");
+			}
+
+			LOGd("OPP_CODE: %d, ERR_CODE: %d (0x%X)", op_code, result, result);
+			APP_ERROR_CHECK(result);
+		} else {
+			BLE_CALL(app_sched_event_put, (&op_code, sizeof (uint8_t), pstorage_log));
+		}
+
+		BLE_CALL(app_sched_event_put, (NULL, 0, pstorage_cb_mesh));
 	}
 
 } // extern "C"
@@ -100,7 +111,7 @@ static storage_config_t config[] {
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
 Storage::Storage() : _initialized(false) {
-	LOGi("Storage create");
+	LOGd("Storage create");
 }
 
 void Storage::init() {

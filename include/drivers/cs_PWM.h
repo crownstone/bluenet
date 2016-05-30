@@ -15,6 +15,8 @@ extern "C" {
 #include "app_pwm.h"
 }
 
+#define ERR_PWM_NOT_ENABLED 1
+
 //! To change the timer used for the PWM library replace the defines below
 #define PWM_TIMER               NRF_TIMER2
 //#define PWM_IRQHandler          TIMER2_IRQHandler
