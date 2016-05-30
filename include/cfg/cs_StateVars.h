@@ -27,6 +27,7 @@ enum StateVarTypes {
 	SV_TRACKED_DEVICES,                // 0x84 - 132
 	SV_SCHEDULE,                       // 0x85 - 133
 	SV_OPERATION_MODE,                 // 0x86 - 134
+	SV_TEMPERATURE,                    // 0x87 - 135
 	STATE_VAR_TYPES
 };
 
@@ -66,12 +67,18 @@ STATIC_ASSERT(sizeof(ps_state_vars_t) <= 1024);
  */
 struct __attribute__ ((aligned (4))) ps_general_vars_t : ps_storage_base_t {
 	uint32_t operationMode;
-	uint8_t trackedDevices[TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE];
+	uint8_t trackedDevices[sizeof(tracked_device_list_t)];
 	uint8_t scheduleList[sizeof(schedule_list_t)];
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
 STATIC_ASSERT(sizeof(ps_general_vars_t) <= 1024);
+
+struct state_vars_notifaction {
+	uint8_t type;
+	uint8_t* data;
+	uint16_t dataLength;
+};
 
 /**
  * Load StateVars from and save StateVars to persistent storage.
@@ -118,11 +125,15 @@ public:
 	/** Get a state variable from storage (to be used in application)
 	 */
 	bool getStateVar(uint8_t type, uint32_t& target);
+	bool getStateVar(uint8_t type, uint8_t& target);
+	bool getStateVar(uint8_t type, int32_t& target);
 	bool getStateVar(uint8_t type, buffer_ptr_t buffer, uint16_t size);
 
 	/** Write a state variable to storage
 	 */
+	bool setStateVar(uint8_t type, uint8_t value);
 	bool setStateVar(uint8_t type, uint32_t value);
+	bool setStateVar(uint8_t type, int32_t value);
 	bool setStateVar(uint8_t type, buffer_ptr_t buffer, uint16_t size);
 
 	/** Factory Resets sets all variables to their default values and clears FLASH storage
@@ -143,7 +154,12 @@ public:
 
 	void savePersistentStorageItem(uint8_t* item, uint16_t size);
 
+	void setNotify(uint8_t type, bool enable);
+	bool isNotifying(uint8_t type);
+
 protected:
+
+	void publishUpdate(uint8_t type, uint8_t* data, uint16_t size);
 
 	bool _initialized;
 
@@ -161,6 +177,11 @@ protected:
 	CyclicStorage<switch_state_t, SWITCH_STATE_REDUNDANCY>* _switchState;
 	//! keeps track of the accumulated power
 	CyclicStorage<accumulated_power_t, ACCUMULATED_POWER_REDUNDANCY>* _accumulatedPower;
+
+	std::vector<uint8_t> _notifyingStateVars;
+
+	//! state variables which do not need to be stored in storage:
+	int32_t _temperature;
 
 };
 

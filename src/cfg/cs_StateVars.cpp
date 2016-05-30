@@ -9,6 +9,8 @@
 #include <cfg/cs_StateVars.h>
 #include <events/cs_EventDispatcher.h>
 
+#include <algorithm>
+
 #ifdef PRINT_DEBUG
 app_timer_id_t _debugTimer;
 
@@ -18,7 +20,9 @@ void debugprint(void * p_context) {
 #endif
 
 StateVars::StateVars() :
-		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedPower(NULL) {
+		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedPower(NULL),
+		_temperature(0) {
+
 }
 
 void StateVars::init() {
@@ -80,17 +84,68 @@ void StateVars::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, b
 	}
 	// variables with write disabled
 	case SV_SWITCH_STATE:
+	case SV_TEMPERATURE:
 	default:
 		LOGw("There is no such state variable (%u), or writing is disabled", type);
 	}
 }
 
 bool StateVars::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
-	uint32_t value;
+
+	uint8_t* p_value;
+	uint16_t size;
 	switch(type) {
-	case SV_RESET_COUNTER:
-	case SV_SWITCH_STATE: {
+	case SV_RESET_COUNTER: {
+		uint32_t value;
 		getStateVar(type, value);
+		p_value = (uint8_t*)&value;
+		size = sizeof(uint32_t);
+		break;
+	}
+	case SV_SWITCH_STATE: {
+		uint8_t value;
+		getStateVar(type, value);
+		p_value = (uint8_t*)&value;
+		size = sizeof(uint32_t);
+		break;
+	}
+	case SV_TEMPERATURE: {
+		int32_t value;
+		getStateVar(type, value);
+		p_value = (uint8_t*)&value;
+		size = sizeof(int32_t);
+		break;
+	}
+	case SV_TRACKED_DEVICES: {
+		size = sizeof(tracked_device_list_t);
+		uint8_t listBuffer[size];
+		//! wrap in an object to get correct size
+		TrackedDeviceList list;
+		list.assign(listBuffer, size);
+		//! clear the list to make sure it is correctly
+		//! initialized
+		list.clear();
+		//! read the list from storage
+		getStateVar(type, listBuffer, size);
+		//! get the size from the list
+		size = list.getDataLength();
+		p_value = listBuffer;
+		break;
+	}
+	case SV_SCHEDULE: {
+		size = sizeof(schedule_list_t);
+		uint8_t listBuffer[size];
+		//! wrap in an object to get correct size
+		ScheduleList list;
+		list.assign(listBuffer, size);
+		//! clear the list to make sure it is correctly
+		//! initialized
+		list.clear();
+		//! read the list from storage
+		getStateVar(type, listBuffer, size);
+		//! get the size from the list
+		size = list.getDataLength();
+		p_value = listBuffer;
 		break;
 	}
 	default: {
@@ -99,8 +154,96 @@ bool StateVars::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 	}
 	}
 
-	streamBuffer->setPayload((uint8_t*) &value, sizeof(uint32_t));
+	streamBuffer->setPayload(p_value, size);
 	streamBuffer->setType(type);
+	return true;
+}
+
+bool StateVars::setStateVar(uint8_t type, int32_t value) {
+	switch(type) {
+	case SV_TEMPERATURE: {
+//		LOGd("Set temperature: %d", value);
+		_temperature = value;
+		break;
+	}
+	default:
+		return false;
+	}
+
+	publishUpdate(type, (uint8_t*)&value, sizeof(int32_t));
+
+	return true;
+}
+
+bool StateVars::getStateVar(uint8_t type, int32_t& target) {
+	switch(type) {
+	case SV_TEMPERATURE: {
+		target = _temperature;
+		LOGd("Read temperature: %d", target);
+		break;
+	}
+	default:
+		return false;
+	}
+	return true;
+}
+
+bool StateVars::setStateVar(uint8_t type, uint8_t value) {
+
+	EventDispatcher& dispatcher = EventDispatcher::getInstance();
+	switch(type) {
+	case SV_SWITCH_STATE: {
+		_switchState->store(value);
+		break;
+	}
+	default:
+		return false;
+	}
+
+	publishUpdate(type, &value, sizeof(uint8_t));
+
+#ifdef PRINT_DEBUG
+	Timer::getInstance().start(_debugTimer, MS_TO_TICKS(100), NULL);
+#endif
+
+	return true;
+}
+
+bool StateVars::getStateVar(uint8_t type, uint8_t& target) {
+	switch(type) {
+	case SV_SWITCH_STATE: {
+		target = _switchState->read();
+		LOGd("Read switch state: %d", target);
+		break;
+	}
+	default:
+		return false;
+	}
+	return true;
+}
+
+bool StateVars::setStateVar(uint8_t type, uint32_t value) {
+
+	switch(type) {
+	case SV_RESET_COUNTER: {
+		_resetCounter->store(value);
+		break;
+	}
+	case SV_OPERATION_MODE: {
+		Storage::setUint32(value, _storageStruct.operationMode);
+		savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));
+		break;
+	}
+	default:
+		return false;
+	}
+
+	publishUpdate(type, (uint8_t*)&value, sizeof(uint32_t));
+
+#ifdef PRINT_DEBUG
+	Timer::getInstance().start(_debugTimer, MS_TO_TICKS(100), NULL);
+#endif
+
 	return true;
 }
 
@@ -127,34 +270,6 @@ bool StateVars::getStateVar(uint8_t type, uint32_t& target) {
 	return true;
 }
 
-bool StateVars::setStateVar(uint8_t type, uint32_t value) {
-//	LOGi("setStateVar %d", type);
-
-	EventDispatcher& dispatcher = EventDispatcher::getInstance();
-	switch(type) {
-	case SV_RESET_COUNTER: {
-		_resetCounter->store(value);
-		break;
-	}
-	case SV_SWITCH_STATE: {
-		_switchState->store(value);
-		dispatcher.dispatch(type, &value, 4);
-		break;
-	}
-	case SV_OPERATION_MODE: {
-		Storage::setUint32(value, _storageStruct.operationMode);
-		savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));
-		break;
-	}
-	}
-
-#ifdef PRINT_DEBUG
-	Timer::getInstance().start(_debugTimer, MS_TO_TICKS(100), NULL);
-#endif
-
-	return true;
-}
-
 bool StateVars::setStateVar(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
 
 	switch(type) {
@@ -172,6 +287,8 @@ bool StateVars::setStateVar(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
 		return false;
 	}
 
+	publishUpdate(type, buffer, size);
+
 	return true;
 
 }
@@ -181,10 +298,14 @@ bool StateVars::getStateVar(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
 	switch(type) {
 	case SV_TRACKED_DEVICES: {
 		Storage::getArray(_storageStruct.trackedDevices, buffer, (buffer_ptr_t) NULL, size);
+		LOGd("Read tracked devices:");
+		BLEutil::printArray(buffer, size);
 		break;
 	}
 	case SV_SCHEDULE: {
 		Storage::getArray(_storageStruct.scheduleList, buffer, (buffer_ptr_t) NULL, size);
+		LOGd("Read schedule list:");
+		BLEutil::printArray(buffer, size);
 		break;
 	}
 	default:
@@ -192,6 +313,19 @@ bool StateVars::getStateVar(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
 	}
 
 	return true;
+}
+
+void StateVars::publishUpdate(uint8_t type, uint8_t* data, uint16_t size) {
+
+	EventDispatcher& dispatcher = EventDispatcher::getInstance();
+
+	dispatcher.dispatch(type, data, size);
+
+	if (isNotifying(type)) {
+		state_vars_notifaction notification = {type, (uint8_t*)data, 4};
+		dispatcher.dispatch(EVT_STATE_VARS_NOTIFICATION, &notification, sizeof(notification));
+	}
+
 }
 
 void StateVars::loadPersistentStorage() {
@@ -205,6 +339,31 @@ void StateVars::savePersistentStorage() {
 void StateVars::savePersistentStorageItem(uint8_t* item, uint16_t size) {
 	uint32_t offset = Storage::getOffset(&_storageStruct, item);
 	_storage->writeItem(_structHandle, offset, item, size);
+}
+
+bool StateVars::isNotifying(uint8_t type) {
+	std::vector<uint8_t>::iterator it = find(_notifyingStateVars.begin(), _notifyingStateVars.end(), type);
+	return it != _notifyingStateVars.end();
+}
+
+void StateVars::setNotify(uint8_t type, bool enable) {
+	if (enable) {
+		if (!isNotifying(type)) {
+			LOGd("enable notifications for %d", type);
+			_notifyingStateVars.push_back(type);
+			_notifyingStateVars.shrink_to_fit();
+			LOGd("size: %d", _notifyingStateVars.size());
+		}
+	} else {
+		std::vector<uint8_t>::iterator it = find(_notifyingStateVars.begin(), _notifyingStateVars.end(), type);
+		if (it != _notifyingStateVars.end()) {
+//		if (isNotifying(type)) {
+			LOGd("disable notifications for %d", type);
+			_notifyingStateVars.erase(it);
+			_notifyingStateVars.shrink_to_fit();
+			LOGd("size: %d", _notifyingStateVars.size());
+		}
+	}
 }
 
 void StateVars::factoryReset(uint32_t resetCode) {

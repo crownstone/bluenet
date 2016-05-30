@@ -32,9 +32,8 @@
 #define BLE_CHAR_TEMPERATURE                     "Temperature"
 #define BLE_CHAR_RESET                           "Reset"
 #define BLE_CHAR_MESH                            "Mesh"
-#define BLE_CHAR_CONFIG_SET                      "Config Set"
-#define BLE_CHAR_CONFIG_SELECT                   "Config Select"
-#define BLE_CHAR_CONFIG_GET                      "Config Get"
+#define BLE_CHAR_CONFIG_WRITE                    "Config Write"
+#define BLE_CHAR_CONFIG_READ                     "Config Read"
 #define BLE_CHAR_RSSI                            "RSSI"
 #define BLE_CHAR_SCAN                            "Scan"
 #define BLE_CHAR_TRACK                           "Track"
@@ -44,7 +43,7 @@
 #define BLE_CHAR_CURRENT_TIME                    "Current Time"
 #define BLE_CHAR_WRITE_SCHEDULE                  "Write schedule"
 #define BLE_CHAR_LIST_SCHEDULE                   "List schedule"
-#define BLE_CHAR_STATEVAR_SELECT                 "StateVar Select"
+#define BLE_CHAR_STATEVAR_WRITE                  "StateVar Write"
 #define BLE_CHAR_STATEVAR_READ                   "StateVar Read"
 
 /** Error messages
@@ -80,6 +79,8 @@
 #define MSG_BLE_STACK_INITIALIZED                "Stack already initialized"
 
 #define MSG_SERVICE_GENERAL_INIT                 "Service General init"
+#define MSG_CHAR_COMMAND_ADD                     "Characteristic Command added"
+#define MSG_CHAR_COMMAND_SKIP                    "Characteristic Command skipped"
 #define MSG_CHAR_TEMPERATURE_ADD                 "Characteristic Temperature added"
 #define MSG_CHAR_TEMPERATURE_SKIP                "Characteristic Temperature skipped"
 #define MSG_CHAR_RESET_ADD                       "Characteristic Reset added"

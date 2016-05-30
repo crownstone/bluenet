@@ -60,6 +60,7 @@ SCHEDULE_SERVICE=0
 
 # Enable or disable characteristics
 ## General Service
+CHAR_COMMAND=1
 CHAR_TEMPERATURE=1
 CHAR_RESET=1
 CHAR_CONFIGURATION=1

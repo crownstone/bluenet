@@ -695,10 +695,6 @@ void Settings::loadPersistentStorage() {
 void Settings::savePersistentStorageItem(uint8_t* item, uint8_t size) {
 	uint32_t offset = Storage::getOffset(&_storageStruct, item);
 	_storage->writeItem(_storageHandle, offset, item, size);
-
-	log(INFO, "struct:");
-	BLEutil::printArray((uint8_t*)&_storageStruct, sizeof(_storageStruct));
-	log(INFO, CRLN);
 }
 
 void Settings::savePersistentStorageItem(int32_t* item) {

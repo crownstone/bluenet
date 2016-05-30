@@ -38,7 +38,7 @@
  * Main functionality
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-#define ADVERTISEMENT_UPDATE_FREQUENCY 1 //! hz
+#define CROWNSTONE_UPDATE_FREQUENCY 1 //! hz
 
 using namespace BLEpp;
 

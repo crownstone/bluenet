@@ -38,17 +38,14 @@ enum PowerCharacteristicsIDs {
 };
 
 enum GeneralCharacteristicsIDs {
-	TEMPERATURE_UUID                        = 0x1, //state
-	COMMAND_UUID                            = 0x2,
-//	UNUSED                                  = 0x3,
-//	UNUSED                                  = 0x4,
-	RESET_UUID                              = 0x5, //cmd
-	MESH_CONTROL_UUID                       = 0x6, //cmd
-	SET_CONFIGURATION_UUID                  = 0x7, //cfg
-	SELECT_CONFIGURATION_UUID               = 0x8, //cfg
-	GET_CONFIGURATION_UUID                  = 0x9, //cfg
-	SELECT_STATEVAR_UUID                    = 0xA,
-	READ_STATEVAR_UUID                      = 0xB
+	COMMAND_UUID                            = 0x1,
+	MESH_CONTROL_UUID                       = 0x2,
+	WRITE_CONFIGURATION_UUID                = 0x7, // 0x03
+	READ_CONFIGURATION_UUID                 = 0x9, // 0x04
+	WRITE_STATEVAR_UUID                     = 0xA, // 0x05
+	READ_STATEVAR_UUID                      = 0xB, // 0x06
+	TEMPERATURE_UUID                        = 0xC, // 0x07
+	RESET_UUID                              = 0x5, // 0x08
 };
 
 enum IndoorLocalizationCharacteristicsIDs {

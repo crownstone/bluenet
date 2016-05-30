@@ -41,14 +41,6 @@ struct __attribute__((__packed__)) stream_t {
  */
 template <typename T>
 class StreamBuffer : public BufferAccessor {
-private:
-	/** Pointer to the data to be sent
-	 */
-	stream_t<T>* _buffer;
-	uint16_t _maxLength;
-
-	const size_t _item_size = sizeof(T);
-	const size_t _max_items = (MASTER_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
 public:
 	/** Default constructor
 	 *
@@ -150,6 +142,12 @@ public:
 	 */
 	inline uint8_t type() const { return _buffer->type; }
 
+	/** Return the opcode assigned to the SreamBuffer
+	 *
+	 * @return the type, see <OpCode>
+	 */
+//	inline uint8_t opCode() const { return _buffer->opCode; }
+
 	/** Get the length/size of the payload in number of elements
 	 *
 	 * @return number of elements stored
@@ -168,6 +166,12 @@ public:
 	 * @type the type, see <ConfigurationTypes>
 	 */
 	inline void setType(uint8_t type) { _buffer->type = type; }
+
+	/** Set the opcode for this stream buffer
+	 *
+	 * @type the type, see <OpCode>
+	 */
+//	inline void setOpCode(uint8_t opCode) { _buffer->opCode = opCode; }
 
 	/** Set payload of the buffer.
 	 *
@@ -217,5 +221,16 @@ public:
 		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();
 	}
+
+protected:
+	/** Pointer to the data to be sent
+	 */
+	stream_t<T>* _buffer;
+
+private:
+	uint16_t _maxLength;
+
+	const size_t _item_size = sizeof(T);
+	const size_t _max_items = (MASTER_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
 
 };

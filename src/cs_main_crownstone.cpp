@@ -411,7 +411,7 @@ void Crownstone::setup() {
 	BLEutil::print_heap("Heap adv: ");
 	BLEutil::print_stack("Stack adv: ");
 
-#if (POWER_SERVICE==1)
+#if (PWM_ENABLE==1)
 #if (DEFAULT_ON==1)
 	LOGi("Set power ON by default");
 	nrf_delay_ms(1000);
@@ -427,18 +427,18 @@ void Crownstone::setup() {
 }
 
 void Crownstone::tick() {
-//		LOGi("tick:stop %d", RTC::now());
+	// update advertisement
 	_stack->updateAdvertisement();
-//		LOGi("tick:started %d", RTC::now());
+
+	// update temperature
+	int32_t temperature = getTemperature();
+	_stateVars->setStateVar(SV_TEMPERATURE, temperature);
 
 	scheduleNextTick();
 }
 
 void Crownstone::scheduleNextTick() {
-//	LOGi("PowerService::scheduleNextTick");
-	if (ADVERTISEMENT_UPDATE_FREQUENCY > 0) {
-		Timer::getInstance().start(_advertisementTimer, HZ_TO_TICKS(ADVERTISEMENT_UPDATE_FREQUENCY), this);
-	}
+	Timer::getInstance().start(_advertisementTimer, HZ_TO_TICKS(CROWNSTONE_UPDATE_FREQUENCY), this);
 }
 
 void Crownstone::run() {

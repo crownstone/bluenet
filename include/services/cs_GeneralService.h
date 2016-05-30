@@ -12,7 +12,7 @@
 #include <ble/cs_Characteristic.h>
 #include <events/cs_EventListener.h>
 #include <structs/cs_MeshCharacteristicMessage.h>
-#include <structs/buffer/cs_StreamBuffer.h>
+#include <structs/buffer/cs_CharacBuffer.h>
 
 #define GENERAL_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
@@ -33,42 +33,28 @@ public:
 	 */
 	 GeneralService();
 
-	/** Update the temperature characteristic.
-	 * @temperature A value in Celcius directly from the chip
-	 *
-	 * This writes a value to the temperature characteristic which can subsequently read out by the user. If we write
-	 * often to this characteristic this value will be updated.
-	 */
-	void writeToTemperatureCharac(int32_t temperature);
-
-	/** Write to the "get configuration" characteristic
-	 *
-	 * Writing is done by setting the data length properly and notifying the characteristic (and hence the softdevice)
-	 * that there is a new value available.
-	 */
-	void writeToConfigCharac();
-
 	/** Perform non urgent functionality every main loop.
 	 *
 	 * Every component has a "tick" function which is for non-urgent things. Urgent matters have to be
 	 * resolved immediately in interrupt service handlers. The temperature for example is updated every
 	 * tick, because timing is not important for this at all.
 	 */
-	void tick();
+//	void tick();
 
-	void scheduleNextTick();
+//	void scheduleNextTick();
 
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
+protected:
 	/** Initialize a GeneralService object
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
 	void init();
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
-
-private:
-
-	inline void addCommandCharacteristic();
+	/** Enable the command characteristic.
+ 	 */
+	inline void addCommandCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the temperature characteristic.
  	 */
@@ -80,20 +66,14 @@ private:
 	 * characteristic.
 	 * See <_setConfigurationCharacteristic>.
 	 */
-	inline void addSetConfigurationCharacteristic();
-
-	/** Enable the set configuration characteristic.
-	 *
-	 * See <_selectConfigurationCharacteristic>.
-	 */
-	inline void addSelectConfigurationCharacteristic();
+	inline void addSetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the get configuration characteristic.
 	 */
-	inline void addGetConfigurationCharacteristic();
+	inline void addGetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
-	inline void addSelectStateVarCharacteristic();
-	inline void addReadStateVarCharacteristic();
+	inline void addSelectStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	inline void addReadStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the reset characteristic.
 	 *
@@ -106,6 +86,12 @@ private:
 	inline void addMeshCharacteristic();
 	inline void removeMeshCharacteristic();
 
+	CharacBuffer<uint8_t>* getCharacBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
+
+private:
+
+	BLEpp::Characteristic<buffer_ptr_t>* _commandCharacteristic;
+
 	/** Temperature characteristic
 	 */
 	BLEpp::Characteristic<int32_t>* _temperatureCharacteristic;
@@ -115,8 +101,6 @@ private:
 	 * Resets device
 	 */
 	BLEpp::Characteristic<int32_t>* _resetCharacteristic;
-
-	BLEpp::Characteristic<buffer_ptr_t>* _commandCharacteristic;
 
 	/** Mesh characteristic
 	 *
@@ -144,7 +128,7 @@ private:
 	 * Just write an identifier to read subsequently from it using <_getConfigurationCharacteristic>. See for the
 	 * possible values <_setConfigurationCharacteristic>.
 	 */
-	BLEpp::Characteristic<uint8_t>* _selectConfigurationCharacteristic;
+//	BLEpp::Characteristic<uint8_t>* _selectConfigurationCharacteristic;
 
 	/** Get configuration characteristic
 	 *
@@ -159,11 +143,8 @@ private:
 	BLEpp::Characteristic<buffer_ptr_t>* _readStateVarCharacteristic;
 
 	//! buffer object to read/write configuration characteristics
-	StreamBuffer<uint8_t> *_streamBuffer;
-
-	/** Select configuration for subsequent read actions on the get configuration characteristic.
-	 */
-//	uint8_t _selectConfiguration;
+	CharacBuffer<uint8_t> *_streamBuffer;
 
 	MeshCharacteristicMessage* _meshMessage;
+
 };

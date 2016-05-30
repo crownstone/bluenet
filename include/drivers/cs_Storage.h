@@ -440,6 +440,7 @@ public:
 	 *   can be NULL pointer
 	 * @length number of elements in the array (all arrays need to have
 	 *   the same length!)
+	 * @return returns true if an array was found in storage, false otherwise
 	 *
 	 * Checks the memory of the source array field. If it is all FF, that means
 	 * the memory is unassigned. If an array is provided as default_value,
@@ -449,7 +450,7 @@ public:
 	 * field will be copied to the destination array
 	 */
 	template<typename T>
-	static void getArray(T* src, T* dest, T* default_value, uint16_t length) {
+	static bool getArray(T* src, T* dest, T* default_value, uint16_t length) {
 
 #ifdef PRINT_ITEMS
 		_log(INFO, "raw value: \r\n");
@@ -476,6 +477,7 @@ public:
 			memcpy(dest, src, length * sizeof(T));
 		}
 
+		return !isUnassigned;
 	}
 
 private:
