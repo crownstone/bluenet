@@ -158,6 +158,8 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
+	case CONFIG_SAMPLING_INTERVAL:
+	case CONFIG_SAMPLING_TIME:
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:
 	case CONFIG_BOOT_DELAY:
 	case CONFIG_SCAN_BREAK_DURATION:
@@ -280,6 +282,12 @@ uint8_t* Settings::getStorageItem(uint8_t type) {
 	case CONFIG_CURRENT_LIMIT: {
 		return (uint8_t*)&_storageStruct.currentLimit;
 	}
+	case CONFIG_SAMPLING_INTERVAL: {
+		return (uint8_t*)&_storageStruct.samplingInterval;
+	}
+	case CONFIG_SAMPLING_TIME: {
+		return (uint8_t*)&_storageStruct.samplingTime;
+	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
 		return NULL;
@@ -313,6 +321,8 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
+	case CONFIG_SAMPLING_INTERVAL:
+	case CONFIG_SAMPLING_TIME:
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:
 	case CONFIG_BOOT_DELAY:
 	case CONFIG_SCAN_BREAK_DURATION:
@@ -574,6 +584,18 @@ bool Settings::get(uint8_t type, void* target, uint16_t size) {
 		*((uint8_t*)target) = value;
 		return true;
 	}
+	case CONFIG_SAMPLING_INTERVAL: {
+		uint16_t value;
+		Storage::getUint16(_storageStruct.samplingInterval, value, SAMPLING_INTERVAL);
+		*((uint16_t*)target) = value;
+		return true;
+	}
+	case CONFIG_SAMPLING_TIME: {
+		uint16_t value;
+		Storage::getUint16(_storageStruct.samplingTime, value, SAMPLING_TIME);
+		*((uint16_t*)target) = value;
+		return true;
+	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
 	}
@@ -669,6 +691,12 @@ bool Settings::set(uint8_t type, void* target, uint16_t size) {
 	case CONFIG_CURRENT_LIMIT: {
 		Storage::setUint8(*((uint8_t*)target), _storageStruct.currentLimit);
 		return true;
+	}
+	case CONFIG_SAMPLING_INTERVAL: {
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.samplingInterval);
+	}
+	case CONFIG_SAMPLING_TIME: {
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.samplingTime);
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);

@@ -111,17 +111,7 @@ void PowerService::addSampleCurrentCharacteristic() {
 	_sampleCurrentCharacteristic->setDefaultValue(0);
 	_sampleCurrentCharacteristic->setWritable(true);
 	_sampleCurrentCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		MasterBuffer& mb = MasterBuffer::getInstance();
-		if (!mb.isLocked()) {
-			mb.lock();
-
-			PowerSampling::getInstance().sampleCurrent(value);
-			mb.unlock();
-		} else {
-			LOGe("Buffer is locked. Cannot be written!");
-			return;
-		}
-
+		CommandHandler::getInstance().handleCommand(CMD_SAMPLE_POWER, (buffer_ptr_t)&value, 1);
 	});
 }
 
@@ -180,4 +170,3 @@ void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	}
 }
-

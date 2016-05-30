@@ -198,7 +198,11 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
 		uint8_t sampleOp = payload->opCode;
 
-		PowerSampling::getInstance().sampleCurrent(sampleOp);
+		if (sampleOp == 0) {
+			PowerSampling::getInstance().stopSampling();
+		} else {
+			PowerSampling::getInstance().startSampling(sampleOp);
+		}
 		break;
 	}
 	case CMD_FACTORY_RESET: {

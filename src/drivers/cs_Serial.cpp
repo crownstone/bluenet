@@ -49,9 +49,9 @@ void config_uart() {
 void write_uart(const char *str) {
 	int16_t len = strlen(str);
 	for(int i = 0; i < len; ++i) {
+		NRF_UART0->EVENTS_TXDRDY = 0;
 		NRF_UART0->TXD = (uint8_t)str[i];
 		while(NRF_UART0->EVENTS_TXDRDY != 1) {}
-		NRF_UART0->EVENTS_TXDRDY = 0;
 	}
 }
 
@@ -82,9 +82,9 @@ int write(const char *str, ...) {
 		len = vsprintf(buffer, str, ap);
 		va_end(ap);
 		for(int i = 0; i < len; ++i) {
+			NRF_UART0->EVENTS_TXDRDY = 0;
 			NRF_UART0->TXD = (uint8_t)buffer[i];
 			while(NRF_UART0->EVENTS_TXDRDY != 1) {}
-			NRF_UART0->EVENTS_TXDRDY = 0;
 		}
 	} else {
 		char *p_buf = (char*)malloc(len + 1);
@@ -93,9 +93,9 @@ int write(const char *str, ...) {
 		len = vsprintf(p_buf, str, ap);
 		va_end(ap);
 		for(int i = 0; i < len; ++i) {
+			NRF_UART0->EVENTS_TXDRDY = 0;
 			NRF_UART0->TXD = (uint8_t)p_buf[i];
 			while(NRF_UART0->EVENTS_TXDRDY != 1) {}
-			NRF_UART0->EVENTS_TXDRDY = 0;
 		}
 		free(p_buf);
 	}

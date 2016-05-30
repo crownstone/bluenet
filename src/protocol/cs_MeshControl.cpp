@@ -63,7 +63,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		switch(msg->header.messageType) {
 		case SCAN_MESSAGE: {
 
-			LOGi("Device %02X %02X %02X %02X %02X %02X scanned these devices:", msg->header.sourceAddress[5],
+			LOGd("Device %02X %02X %02X %02X %02X %02X scanned these devices:", msg->header.sourceAddress[5],
 					msg->header.sourceAddress[4], msg->header.sourceAddress[3], msg->header.sourceAddress[2],
 					msg->header.sourceAddress[1], msg->header.sourceAddress[0]);
 			if (msg->scanMsg.numDevices > NR_DEVICES_PER_MESSAGE) {

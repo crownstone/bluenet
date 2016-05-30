@@ -99,8 +99,8 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 
 		//! If a spot has been found, write it to that position
 		if (idx >= 0) {
-			LOGi("idx: %d, minRssi: %d", idx, minRssi);
-			LOGi("NEW Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", adrs_ptr[5],
+			LOGd("idx: %d, minRssi: %d", idx, minRssi);
+			LOGd("NEW Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", adrs_ptr[5],
 					adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
 					adrs_ptr[0], rssi);
 			memcpy(_buffer->list[idx].addr, adrs_ptr, BLE_GAP_ADDR_LEN);
@@ -121,7 +121,7 @@ void ScanResult::print() const {
 //		sprintf(addrs, "[%02X %02X %02X %02X %02X %02X]", _buffer->list[i].addr[5],
 //				_buffer->list[i].addr[4], _buffer->list[i].addr[3], _buffer->list[i].addr[2], _buffer->list[i].addr[1],
 //				_buffer->list[i].addr[0]);
-		LOGi("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tocc: %d", _buffer->list[i].addr[5],
+		LOGd("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tocc: %d", _buffer->list[i].addr[5],
 				_buffer->list[i].addr[4], _buffer->list[i].addr[3], _buffer->list[i].addr[2], _buffer->list[i].addr[1],
 				_buffer->list[i].addr[0], _buffer->list[i].rssi, _buffer->list[i].occurrences);
 	}

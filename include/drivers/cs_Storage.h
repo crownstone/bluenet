@@ -152,6 +152,12 @@ struct ps_configuration_t : ps_storage_base_t {
 	//! Set to 0 to not send them ever
 	uint32_t scanFilterSendFraction;
 
+	// interval duration between two calls to sample for power
+	uint32_t samplingInterval;
+
+	// how long to sample for power
+	uint32_t samplingTime;
+
 	union {
 		struct {
 			bool flagsUninitialized : 1;

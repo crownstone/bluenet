@@ -423,8 +423,41 @@ uint32_t send_notification(waiting_notification_t* notification) {
 	return NRF_SUCCESS;
 }
 
+void printArray(uint8_t* arr, uint16_t len) {
+	uint8_t* ptr = (uint8_t*)arr;
+	for (int i = 0; i < len; ++i) {
+		_log(DEBUG, " %02X", ptr[i]);
+		if ((i+1) % 30 == 0) {
+			_log(DEBUG, "\r\n");
+		}
+	}
+//	printInlineArray(arr, len);
+	_log(DEBUG, "\r\n");
+}
+
+void value_set_handler(void* p_event_data, uint16_t event_size) {
+
+//	LOGd("value_set_handler");
+
+//	waiting_notification_t* notification = (waiting_notification_t*) p_event_data;
+	waiting_notification_t* notification = nb_peek();
+
+//	printArray(notification, sizeof(waiting_notification_t));
+
+	uint32_t err_code = send_notification(notification);
+	if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
+		LOGd("adding pending notification");
+		notifactionsPending = true;
+	} else {
+//		LOGd("popping notification");
+		nb_pop();
+	}
+
+}
+
 uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 		uint8_t length) {
+
 	if (length > RBC_MESH_VALUE_MAX_LEN) {
 		return NRF_ERROR_INVALID_LENGTH;
 	}
@@ -436,6 +469,13 @@ uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 			return NRF_ERROR_NO_MEM;
 
 		} else {
+			if (notifactionsPending && !m_mesh_service.notification_enabled) {
+				notifactionsPending = false;
+				nb_clear();
+			}
+
+			// todo: continue here: check if we can put on the scheduler
+
 			waiting_notification_t* notification = nb_next();
 
 			notification->offset = 0;
@@ -445,16 +485,10 @@ uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 
 			if (!notifactionsPending) {
 
-				uint32_t err_code = send_notification(notification);
-				if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
-					LOGi("adding pending notification");
-					notifactionsPending = true;
-				} else {
-					nb_pop();
-				}
+//				LOGd("put into scheduler");
+				app_sched_event_put(NULL, 0, value_set_handler);
 
-				return err_code;
-
+//				printArray(notification, sizeof(waiting_notification_t));
 			} else {
 
 				LOGd("notification pending already");

@@ -14,7 +14,8 @@
 
 Fridge::Fridge() : _appTimerId(0)
 {
-	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Fridge::staticTick);
+//	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Fridge::staticTick);
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Fridge::staticTick);
 
 	Settings::getInstance().get(CONFIG_MIN_ENV_TEMP, &_minTemp);
 	Settings::getInstance().get(CONFIG_MAX_ENV_TEMP, &_maxTemp);
@@ -23,6 +24,10 @@ Fridge::Fridge() : _appTimerId(0)
 }
 
 void Fridge::startTicking() {
+	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(FRIDGE_UPDATE_FREQUENCY), this);
+}
+
+void Fridge::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(FRIDGE_UPDATE_FREQUENCY), this);
 }
 
@@ -40,6 +45,8 @@ void Fridge::tick() {
 	if (temp > _maxTemp) {
 		EventDispatcher::getInstance().dispatch(EVT_ENV_TEMP_HIGH);
 	}
+
+	scheduleNextTick();
 }
 
 

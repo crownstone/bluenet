@@ -45,6 +45,7 @@ public:
 
 	void startTicking();
 	void stopTicking();
+	void scheduleNextTick();
 
 	//! helper functions, only operate on PWM instance
 	//! static so that they can be used by the

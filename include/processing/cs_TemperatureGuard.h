@@ -34,8 +34,8 @@ public:
 	void init() {
 		Settings::getInstance().get(CONFIG_MAX_CHIP_TEMP, &_maxTemp);
 
-		Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
-//		Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
+//		Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
+		Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
 	}
 
 	void tick() {
@@ -45,8 +45,12 @@ public:
 			//! Make sure pwm can't be set anymore
 			PWM::getInstance().deinit();
 		}
-		//! TODO: make next time to next tick depend on current temperature
-//		scheduleNextTick();
+		// TODO: make next time to next tick depend on current temperature
+		scheduleNextTick();
+	}
+
+	void scheduleNextTick() {
+		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);
 	}
 
 	void startTicking() {

@@ -38,6 +38,8 @@ enum ConfigurationTypes {
 	CONFIG_MAX_CHIP_TEMP                    = 0x14, //! 20
 	CONFIG_SCAN_FILTER                      = 0x15, //! 21
 	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16, //! 22
+	CONFIG_SAMPLING_INTERVAL                = 0x17, //! 23
+	CONFIG_SAMPLING_TIME                    = 0x18, //! 24
 	CONFIG_CURRENT_LIMIT                    = 0x19, //! 25
 	CONFIG_MESH_ENABLED                     = 0x20,
 	CONFIG_ENCRYPTION_ENABLED               = 0x21,
