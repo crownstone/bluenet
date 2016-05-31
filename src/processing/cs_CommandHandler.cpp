@@ -36,6 +36,10 @@ void reset(void* p_context) {
 	sd_nvic_SystemReset();
 }
 
+void CommandHandler::handleCommand(CommandHandlerTypes type) {
+	handleCommand(type, NULL, 0);
+}
+
 void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size) {
 
 	switch (type) {

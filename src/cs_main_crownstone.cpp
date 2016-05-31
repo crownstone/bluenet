@@ -56,11 +56,12 @@
 using namespace BLEpp;
 
 Crownstone::Crownstone() :
-	_timer(NULL), _mesh(NULL), _generalService(NULL), _localizationService(NULL), _powerService(NULL),
+	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
 	_alertService(NULL), _scheduleService(NULL), _deviceInformationService(NULL),
-	_serviceData(NULL), _beacon(NULL), _sensors(NULL), _fridge(NULL), _temperatureGuard(NULL),
-	_commandHandler(NULL), _switch(NULL), _scanner(NULL), _tracker(NULL),
-	_advertisementPaused(false), _mainTimer(0) {
+	_serviceData(NULL), _beacon(NULL),
+	_mesh(NULL), _sensors(NULL), _fridge(NULL),
+	_commandHandler(NULL), _scanner(NULL), _tracker(NULL),
+	_advertisementPaused(false), _mainTimer(0), _operationMode(0) {
 
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 	EventDispatcher::getInstance().addListener(this);
@@ -324,6 +325,15 @@ void Crownstone::configDrivers() {
 #endif
 }
 
+void Crownstone::createSetupServices() {
+
+	//! should be available always
+	_deviceInformationService = new DeviceInformationService();
+	_stack->addService(_deviceInformationService);
+
+	_stack->configureServices();
+}
+
 void Crownstone::createServices() {
 	LOGi("Create all services");
 
@@ -363,6 +373,8 @@ void Crownstone::createServices() {
 
 void Crownstone::configure() {
 
+	LOGi("---- configure ----");
+
 	LOGi("Configure drivers ...");
 	//! configure drivers
 	configDrivers();
@@ -380,7 +392,7 @@ void Crownstone::configure() {
 
 }
 
-void Crownstone::setup() {
+void Crownstone::init() {
 
 	//! first thing to do, configure uart for debug output
 	config_uart();
@@ -391,53 +403,87 @@ void Crownstone::setup() {
 	//! configure the crownstone
 	configure();
 
-	//! create services
-	createServices();
+}
 
-	BLEutil::print_heap("Heap config: ");
-	BLEutil::print_stack("Stack config: ");
+void Crownstone::setup() {
 
-	LOGi("Create Timer");
-	_timer->createSingleShot(_mainTimer, (app_timer_timeout_handler_t)Crownstone::staticTick);
+	LOGi("---- setup ----");
 
-	//! create scanner object
-	_scanner = &Scanner::getInstance();
-	_scanner->setStack(_stack);
+	// todo: handle different operation modes
+	_operationMode = OPERATION_MODE_NORMAL;
+//	_stateVars->getStateVar(SV_OPERATION_MODE, _operationMode);
 
-	//! create command handler
-	_commandHandler = &CommandHandler::getInstance();
-	_commandHandler->setStack(_stack);
+	switch(_operationMode) {
+	case OPERATION_MODE_SETUP: {
+
+		LOGd("going into setup mode")
+
+		//! create services
+		createSetupServices();
+
+		return;
+	}
+	case OPERATION_MODE_NORMAL: {
+
+		LOGd("going into normal operation mode");
+
+		//! create services
+		createServices();
+
+		BLEutil::print_heap("Heap config: ");
+		BLEutil::print_stack("Stack config: ");
+
+		LOGi("Create Timer");
+		_timer->createSingleShot(_mainTimer, (app_timer_timeout_handler_t)Crownstone::staticTick);
+
+		//! create scanner object
+		_scanner = &Scanner::getInstance();
+		_scanner->setStack(_stack);
+
+		//! create command handler
+		_commandHandler = &CommandHandler::getInstance();
+		_commandHandler->setStack(_stack);
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
-	_sensors = new Sensors();
+		_sensors = new Sensors();
 #endif
 
 #if DEVICE_TYPE==DEVICE_FRIDGE
-	_fridge = new Fridge;
+		_fridge = new Fridge;
 #endif
 
-	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+		if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
 
-		#if HARDWARE_BOARD == VIRTUALMEMO
-			nrf_gpio_range_cfg_output(7,14);
-		#endif
+#if HARDWARE_BOARD == VIRTUALMEMO
+				nrf_gpio_range_cfg_output(7,14);
+#endif
 
-		_mesh = &CMesh::getInstance();
-	}
+			_mesh = &CMesh::getInstance();
+		}
 
 #if RESET_COUNTER==1
-	uint32_t resetCounter;
-	StateVars::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
-	LOGi("reset counter at: %d", ++resetCounter);
-	StateVars::getInstance().setStateVar(SV_RESET_COUNTER, resetCounter);
+		uint32_t resetCounter;
+		StateVars::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
+		LOGi("reset counter at: %d", ++resetCounter);
+		StateVars::getInstance().setStateVar(SV_RESET_COUNTER, resetCounter);
 #endif
 
-	BLEutil::print_heap("Heap setup: ");
-	BLEutil::print_stack("Stack setup: ");
+		BLEutil::print_heap("Heap setup: ");
+		BLEutil::print_stack("Stack setup: ");
+
+		break;
+	}
+	case OPERATION_MODE_DFU: {
+
+		CommandHandler::getInstance().handleCommand(CMD_GOTO_DFU);
+		while(true) {};
+	}
+	}
 
 }
 
 void Crownstone::tick() {
+
 	//! update advertisement
 	_stack->updateAdvertisement();
 
@@ -454,60 +500,76 @@ void Crownstone::scheduleNextTick() {
 
 void Crownstone::startUp() {
 
-	uint16_t bootDelay;
-	_settings->get(CONFIG_BOOT_DELAY, &bootDelay);
-	if (bootDelay) {
-		LOGi("boot delay is set to %d ms", bootDelay);
-		nrf_delay_ms(bootDelay);
+	LOGi("---- startUp ----");
+
+	switch(_operationMode) {
+	case OPERATION_MODE_SETUP: {
+
+		//! start advertising
+		_stack->startAdvertising();
+
+		return;
 	}
+	case OPERATION_MODE_NORMAL: {
+
+		uint16_t bootDelay;
+		_settings->get(CONFIG_BOOT_DELAY, &bootDelay);
+		if (bootDelay) {
+			LOGi("boot delay is set to %d ms", bootDelay);
+			nrf_delay_ms(bootDelay);
+		}
 
 #if (DEFAULT_ON==1)
-	LOGi("Set power ON by default");
-	_switch->turnOn();
+		LOGi("Set power ON by default");
+		_switch->turnOn();
 #elif (DEFAULT_ON==0)
-	LOGi("Set power OFF by default");
-	_switch->turnOff();
+		LOGi("Set power OFF by default");
+		_switch->turnOff();
 #endif
 
-	//! start advertising
-	_stack->startAdvertising();
+		//! start advertising
+		_stack->startAdvertising();
 
-	//! start main tick
-	scheduleNextTick();
-	_stack->startTicking();
+		//! start main tick
+		scheduleNextTick();
+		_stack->startTicking();
 
-	//! start ticking of peripherals
-	_temperatureGuard->startTicking();
+		//! start ticking of peripherals
+		_temperatureGuard->startTicking();
 
-	if (Settings::getInstance().isEnabled(CONFIG_SCANNER_ENABLED)) {
-		RNG rng;
-		uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
-		_scanner->delayedStart(delay);
-	}
+		if (Settings::getInstance().isEnabled(CONFIG_SCANNER_ENABLED)) {
+			RNG rng;
+			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
+			_scanner->delayedStart(delay);
+		}
 
-	if (Settings::getInstance().isEnabled(CONFIG_TRACKER_ENABLED)) {
-		_tracker->startTracking();
-	}
+		if (Settings::getInstance().isEnabled(CONFIG_TRACKER_ENABLED)) {
+			_tracker->startTracking();
+		}
 
-	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
-		_mesh->init();
-		_mesh->startTicking();
-	}
+		if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+			_mesh->init();
+			_mesh->startTicking();
+		}
 
 #if DEVICE_TYPE==DEVICE_FRIDGE
-	_fridge->startTicking();
+		_fridge->startTicking();
 #endif
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
-	_sensors->startTicking();
+		_sensors->startTicking();
 #endif
 
 #if POWER_SERVICE==1
-//	_powerService->startStaticSampling();
+	//	_powerService->startStaticSampling();
 #endif
 
-	BLEutil::print_heap("Heap startup: ");
-	BLEutil::print_stack("Stack startup: ");
+		BLEutil::print_heap("Heap startup: ");
+		BLEutil::print_stack("Stack startup: ");
+
+		return;
+	}
+	}
 
 }
 
@@ -631,10 +693,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 
 	if (reconfigureBeacon && Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {
-//		_stack->configureIBeacon(_beacon, DEVICE_TYPE);
 		_stack->updateAdvertisement();
-//		_stack->stopAdvertising();
-//		startAdvertising();
 	}
 }
 
@@ -657,10 +716,13 @@ int main() {
 
 	Crownstone crownstone;
 
-	//! setup crownstone ...
+	// init base functionality of crownstone (independent of operation mode) ...
+	crownstone.init();
+
+	//! setup crownstone (depends on the operation mode) ...
 	crownstone.setup();
 
-	//! start up phase, start ticking
+	//! start up phase, start ticking (depends on the operation mode) ...
 	crownstone.startUp();
 
 	//! run forever ...

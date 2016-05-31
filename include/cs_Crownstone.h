@@ -52,6 +52,8 @@ class Crownstone : EventListener {
 public:
 	Crownstone();
 
+	void init();
+
 	void setup();
 
 	void startUp();
@@ -72,6 +74,7 @@ protected:
 	void configAdvertisement();
 	void configDrivers();
 
+	void createSetupServices();
 	void createServices();
 
 	void configure();
@@ -115,6 +118,8 @@ private:
 	bool _advertisementPaused;
 
 	app_timer_id_t _mainTimer;
+
+	uint32_t _operationMode;
 
 };
 

@@ -11,6 +11,8 @@
 #include <structs/buffer/cs_StreamBuffer.h>
 
 #define OPERATION_MODE_SETUP 0xFF
+#define OPERATION_MODE_NORMAL 0x10
+#define OPERATION_MODE_DFU 0x01
 
 //! enable to print additional debug
 //#define PRINT_DEBUG

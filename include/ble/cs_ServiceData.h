@@ -9,12 +9,14 @@
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
 
+#include <cstring>
+
 class ServiceData : EventListener {
 
 public:
 	ServiceData() : EventListener(EVT_ALL) {
 		EventDispatcher::getInstance().addListener(this);
-		_params.crownstoneId = 1;
+		memset(_array, 0, sizeof(_array));
 	};
 
 	void updateSwitchState(uint8_t switchState) {

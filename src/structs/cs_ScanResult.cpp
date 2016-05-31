@@ -107,9 +107,11 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			_buffer->list[idx].occurrences = 1;
 			_buffer->list[idx].rssi = rssi;
 		}
-//	}
-//	else {
-////		LOGd("Advertisement from: %s, rssi: %d, occ: %d", addrs, rssi, occ);
+//		else {
+//			LOGd("old Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", adrs_ptr[5],
+//					adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
+//					adrs_ptr[0], rssi);
+//		}
 //	}
 
 //	BLEutil::printArray<uint8_t>((uint8_t*)_buffer, SR_MAX_NR_DEVICES * SR_SERIALIZED_DEVICE_SIZE);
