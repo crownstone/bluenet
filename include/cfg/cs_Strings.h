@@ -70,7 +70,7 @@
 #define MSG_BLE_SOFTDEVICE_ENABLE_GAP            "Softdevice enable GAP"
 #define MSG_BLE_CONFIGURE_BLEDEVICE              "Configuring as BleDevice"
 #define MSG_BLE_CONFIGURE_IBEACON                "Configuring as iBeacon"
-#define MSG_BLE_ADVERTISING_STARTING             "Advertising starting"
+#define MSG_BLE_ADVERTISING_STARTING             "Start advertising"
 #define MSG_BLE_ADVERTISING_STARTED              "Advertising started"
 #define MSG_BLE_IBEACON_STARTED                  "iBeacon advertising started"
 #define MSG_BLE_NO_CUSTOM_SERVICES               "Services, no custom ones!"

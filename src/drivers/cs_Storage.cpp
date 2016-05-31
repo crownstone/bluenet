@@ -21,13 +21,6 @@
 
 #include <cfg/cs_Settings.h>
 
-extern "C" {
-	#include <third/protocol/timeslot_handler.h>
-}
-
-static CircularBuffer<buffer_element_t>* requestBuffer;
-static uint8_t pendingStorageRequests = 0;
-
 extern "C"  {
 
 	static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
@@ -43,51 +36,9 @@ extern "C"  {
 		} else {
 			LOGd("Opcode %i executed (no error)", op_code);
 		}
-
-	    Settings& settings = Settings::getInstance();
-	    if (settings.isInitialized() && settings.isEnabled(CONFIG_MESH_ENABLED)) {
-			//! if there are pending storage requests
-			if (pendingStorageRequests) {
-				//! decrease by one (we get one event per request)
-				--pendingStorageRequests;
-				//! once no storage requests are pending anymore, resume mesh
-				if (!pendingStorageRequests) {
-					timeslot_handler_resume();
-				}
-			}
-	    }
 	}
 
 } // extern "C"
-
-void resumeRequests() {
-	LOGd("Resume pstorage requests");
-	while (!requestBuffer->empty()) {
-		//! get the next buffered storage request
-		buffer_element_t elem = requestBuffer->pop();
-
-		BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
-
-		//! keep track of how many storage requests are pending, so that we determine when we can resume the mesh
-		++pendingStorageRequests;
-	}
-}
-
-void storage_sys_evt_handler(uint32_t evt) {
-
-    Settings& settings = Settings::getInstance();
-    if (settings.isInitialized() && settings.isEnabled(CONFIG_MESH_ENABLED)) {
-		switch(evt) {
-		case NRF_EVT_RADIO_SESSION_CLOSED: {
-			//! if there are storage requests pending resume them now that
-			//  the radio is off.
-			if (!requestBuffer->empty()) {
-				resumeRequests();
-			}
-		}
-		}
-    }
-}
 
 // NOTE: DO NOT CHANGE ORDER OF THE ELEMENTS OR THE FLASH
 //   STORAGE WILL GET MESSED UP!! NEW ENTRIES ALWAYS AT THE END
@@ -99,8 +50,17 @@ static storage_config_t config[] {
 
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
-Storage::Storage() : _initialized(false) {
+Storage::Storage() : EventListener(),
+		_initialized(false), _scanning(false), writeBuffer(STORAGE_REQUEST_BUFFER_SIZE)
+//		, pendingStorageRequests(0)
+{
 	LOGd("Storage create");
+
+	EventDispatcher::getInstance().addListener(this);
+
+	memset(buffer, 0, sizeof(buffer));
+	writeBuffer.assign((uint8_t*)buffer, sizeof(buffer));
+
 }
 
 void Storage::init() {
@@ -108,7 +68,7 @@ void Storage::init() {
 	BLE_CALL(pstorage_init, ());
 
 	// todo: only create it if needed?
-	requestBuffer = new CircularBuffer<buffer_element_t>(STORAGE_REQUEST_BUFFER_SIZE, true);
+//	requestBuffer = new CircularBuffer<buffer_element_t>(STORAGE_REQUEST_BUFFER_SIZE, false);
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
 		LOGi("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
@@ -116,6 +76,53 @@ void Storage::init() {
 	}
 
 	_initialized = true;
+}
+
+void Storage::resumeRequests() {
+	if (!writeBuffer.empty()) {
+		LOGd("Resume pstorage write requests");
+		while (!writeBuffer.empty()) {
+			//! get the next buffered storage request
+			buffer_element_t elem = writeBuffer.pop();
+
+//			LOGi("elem:");
+//			BLEutil::printArray((uint8_t*)&elem, sizeof(elem));
+
+			if (!_scanning) {
+				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
+			} else {
+				// if scanning was started again, push it back on the buffer and try again during the next
+				// scan break
+				writeBuffer.push(elem);
+				LOGe("scan started before all pstorage write requestss were processed!");
+				return;
+			}
+
+//			LOGi("update done");
+		}
+	}
+}
+
+void resume_requests(void* p_data, uint16_t len) {
+	Storage::getInstance().resumeRequests();
+}
+
+void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+
+	switch(evt) {
+	case EVT_SCAN_STARTED: {
+		_scanning = true;
+		break;
+	}
+	case EVT_SCAN_STOPPED: {
+		_scanning = false;
+		if (!writeBuffer.empty()) {
+			app_sched_event_put(NULL, 0, resume_requests);
+		}
+		break;
+	}
+	}
+
 }
 
 storage_config_t* Storage::getStorageConfig(ps_storage_id storageID) {
@@ -213,27 +220,26 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
 
-    if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
-		// we need to pause the mesh, otherwise the softdevice won't get time to
-		// update the storage
-		if (timeslot_handler_pause()) {
-			BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
+	// [31.05.16] it seems it was not (or not anymore) the meshing that is causing issues with pstorage,
+	//    but the scanning. If the device is scanning, then pstorage_updates are queued by the softdevice.
+	//    unfortunately, they are not automatically resumed once the device stops scanning. they are staying
+	//    queued until the first pstorage_update is called while the device is not scanning. to avoid this, we
+	//    queue the write calls ourselves, and only trigger the pstorage_update calls once the device stopped
+	//    scanning
+	if (_scanning) {
+		if (!writeBuffer.full()) {
+			buffer_element_t elem;
+			elem.storageHandle = block_handle;
+			elem.storageOffset = offset;
+			elem.dataSize = size;
+			elem.data = item;
+			writeBuffer.push(elem);
 		} else {
-			LOGi("store buffer");
-			if (!requestBuffer->full()) {
-				buffer_element_t elem;
-				elem.storageHandle = block_handle;
-				elem.storageOffset = offset;
-				elem.dataSize = size;
-				elem.data = item;
-				requestBuffer->push(elem);
-			} else {
-				LOGe("storage request buffer is full!");
-			}
+			LOGe("storage request buffer is full!");
 		}
-    } else {
+	} else {
     	BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
-    }
+	}
 
 }
 

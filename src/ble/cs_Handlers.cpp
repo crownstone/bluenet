@@ -5,10 +5,8 @@
  */
 
 #include "ble/cs_Handlers.h"
-#include <drivers/cs_Storage.h>
 
 #include <cfg/cs_Settings.h>
-#include <drivers/cs_Serial.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,17 +33,10 @@ void sys_evt_dispatch(uint32_t sys_evt) {
     Settings& settings = Settings::getInstance();
     if (settings.isInitialized() && settings.isEnabled(CONFIG_MESH_ENABLED)) {
 		rbc_mesh_sd_evt_handler(sys_evt);
-		storage_sys_evt_handler(sys_evt);
-//!    rbc_mesh_sd_evt_handler(sys_evt);
+//		storage_sys_evt_handler(sys_evt);
     }
 
 }
-
-////! called by softdevice handler on a ble event
-//void ble_evt_handler(ble_evt_t* p_ble_evt) {
-//	Nrf51822BluetoothStack::getInstance().on_ble_evt(p_ble_evt);
-//}
-
 
 #ifdef __cplusplus
 }

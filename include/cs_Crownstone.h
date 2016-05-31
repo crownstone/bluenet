@@ -11,11 +11,12 @@
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
 #include <ble/cs_Stack.h>
-
 #include <ble/cs_iBeacon.h>
 
 #include <cfg/cs_Settings.h>
 #include <cfg/cs_StateVars.h>
+
+#include <events/cs_EventListener.h>
 
 #include <services/cs_IndoorLocalisationService.h>
 #include <services/cs_GeneralService.h>
@@ -34,7 +35,6 @@
 
 #include <protocol/cs_Mesh.h>
 
-#include <events/cs_EventListener.h>
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
@@ -49,38 +49,22 @@ using namespace BLEpp;
  */
 class Crownstone : EventListener {
 
-private:
-	Nrf51822BluetoothStack* _stack;
+public:
+	Crownstone();
 
-	Timer* _timer;
-	Storage* _storage;
-	Settings* _settings;
-	StateVars* _stateVars;
-	CMesh* _mesh;
+	void setup();
 
-	GeneralService* _generalService;
-	IndoorLocalizationService* _localizationService;
-	PowerService* _powerService;
-	AlertService* _alertService;
-	ScheduleService* _scheduleService;
-	DeviceInformationService* _deviceInformationService;
+	void startUp();
 
-	ServiceData* _serviceData;
-	IBeacon* _beacon;
-	Sensors* _sensors;
-	Fridge* _fridge;
-	TemperatureGuard* _temperatureGuard;
+	void run();
 
-	CommandHandler* _commandHandler;
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
-	Switch* _switch;
-	Scanner* _scanner;
-	Tracker* _tracker;
+	static void staticTick(Crownstone *ptr) {
+		ptr->tick();
+	}
 
-	bool _advertisementPaused;
-
-	app_timer_id_t _mainTimer;
-
+protected:
 	void welcome();
 
 	void setName();
@@ -97,20 +81,40 @@ private:
 	void tick();
 	void scheduleNextTick();
 
-public:
-	Crownstone();
+private:
 
-	void setup();
+	// drivers
+	Nrf51822BluetoothStack* _stack;
+	Timer* _timer;
+	Storage* _storage;
+	Settings* _settings;
+	StateVars* _stateVars;
+	Switch* _switch;
+	TemperatureGuard* _temperatureGuard;
 
-	void startUp();
+	// services
+	GeneralService* _generalService;
+	IndoorLocalizationService* _localizationService;
+	PowerService* _powerService;
+	AlertService* _alertService;
+	ScheduleService* _scheduleService;
+	DeviceInformationService* _deviceInformationService;
 
-	void run();
+	// advertise
+	ServiceData* _serviceData;
+	IBeacon* _beacon;
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	// processing
+	CMesh* _mesh;
+	Sensors* _sensors;
+	Fridge* _fridge;
+	CommandHandler* _commandHandler;
+	Scanner* _scanner;
+	Tracker* _tracker;
 
-	static void staticTick(Crownstone *ptr) {
-		ptr->tick();
-	}
+	bool _advertisementPaused;
+
+	app_timer_id_t _mainTimer;
 
 };
 

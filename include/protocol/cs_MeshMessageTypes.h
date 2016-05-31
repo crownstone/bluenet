@@ -22,17 +22,14 @@ enum MeshChannels {
 enum MeshMessageTypes {
 	//! data channel messages
 	EVENT_MESSAGE      = 0, //! this one might make more sense on the hub channel
-	POWER_MESSAGE      = 1,
+							// todo: do we need event messages on the mesh at all?
+//	POWER_MESSAGE      = 1, // use command message instead
 	BEACON_MESSAGE     = 2,
 	COMMAND_MESSAGE    = 3,
 	CONFIG_MESSAGE     = 4,
 
 	//! hub channel messages
 	SCAN_MESSAGE       = 101,
-};
-
-enum CommandTypes {
-	SCAN_START         = 1,
 };
 
 //! broadcast address is defined as 00:00:00:00:00:00
@@ -49,13 +46,6 @@ struct __attribute__((__packed__)) event_mesh_message_t {
 //	uint8_t data[MAX_EVENT_MESH_MESSAGE_DATA_LENGTH];
 };
 
-//! TODO: use command message instead
-/** Power mesh message
- */
-struct __attribute__((__packed__)) power_mesh_message_t {
-	uint8_t pwmValue;
-};
-
 /** Beacon mesh message
  */
 struct __attribute__((__packed__)) beacon_mesh_message_t {
@@ -65,12 +55,14 @@ struct __attribute__((__packed__)) beacon_mesh_message_t {
 	int8_t rssi;
 };
 
-#define COMMAND_MM_HEADER_SIZE 2
+#define COMMAND_MM_HEADER_SIZE 4
 /** Command mesh message
  */
 struct __attribute__((__packed__)) command_mesh_message_t {
-	uint16_t commandType;
-	uint8_t params[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - COMMAND_MM_HEADER_SIZE];
+	uint8_t command;
+	uint8_t reserved; //! reserved for byte alignment
+	uint16_t length;
+	uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - COMMAND_MM_HEADER_SIZE];
 };
 
 #define CONFIG_MM_HEADER_SIZE 4
@@ -78,7 +70,7 @@ struct __attribute__((__packed__)) command_mesh_message_t {
  */
 struct __attribute__((__packed__)) config_mesh_message_t {
 	uint8_t type;
-	uint8_t reserved; //! reserved for byte alignment
+	uint8_t opCode;
 	uint16_t length;
 	uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - CONFIG_MM_HEADER_SIZE];
 };
@@ -97,7 +89,6 @@ struct __attribute__((__packed__)) device_mesh_message_t {
 	union {
 		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
 		event_mesh_message_t evtMsg;
-		power_mesh_message_t powerMsg;
 		beacon_mesh_message_t beaconMsg;
 		command_mesh_message_t commandMsg;
 		config_mesh_message_t configMsg;

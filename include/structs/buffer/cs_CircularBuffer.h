@@ -33,9 +33,9 @@ public:
 	CircularBuffer(uint16_t capacity = 32, bool initialize = false) :
 		_array(NULL), _capacity(capacity), _head(0), _tail(-1), _contentsSize(0)
 	{
-		if (initialize) {
-			init();
-		}
+//		if (initialize) {
+//			init();
+//		}
 	}
 
 	/** Default destructor
@@ -43,9 +43,9 @@ public:
 	 * Free memory allocated for the buffer
 	 */
 	virtual ~CircularBuffer() {
-		if (_array != NULL) {
-			free(_array);
-		}
+//		if (_array != NULL) {
+//			free(_array);
+//		}
 	}
 
 	/** Initializes and allocates memory for the buffer based on the capacity
@@ -56,14 +56,22 @@ public:
 	 *
 	 * @return true if memory allocation was successful, false otherwise
 	 */
-	bool init() {
-		if (!_array) {
-			_array = (T*)calloc(_capacity, sizeof(T));
-		}
-		//! also call clear to make sure the head and tail are reset and we
-		//! start with a clean buffer
-		clear();
-		return _array != NULL;
+//	bool init() {
+//		if (!_array) {
+//			_array = (T*)calloc(_capacity, sizeof(T));
+//		}
+//		//! also call clear to make sure the head and tail are reset and we
+//		//! start with a clean buffer
+//		clear();
+//		return _array != NULL;
+//	}
+
+	/** @inherit */
+	int assign(uint8_t *buffer, uint16_t size) {
+		LOGd("assign buff: %p, len: %d", buffer, size);
+		assert(_capacity * sizeof(T) <= size, "Assigned buffer is not large enough");
+		_array = (T*)buffer;
+		return 0;
 	}
 
 	/** Returns the number of elements stored

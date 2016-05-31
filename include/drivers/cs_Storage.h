@@ -158,6 +158,7 @@ struct ps_configuration_t : ps_storage_base_t {
 	// how long to sample for power
 	uint32_t samplingTime;
 
+	// todo: might need to move this to the state variables for wear leveling
 	union {
 		struct {
 			bool flagsUninitialized : 1;
@@ -203,7 +204,7 @@ struct buffer_element_t {
  * on the Storage itself, just work with the provided parameters. As such
  * they can be used without unnecessarily instantiating the storage instance.
  */
-class Storage {
+class Storage : EventListener {
 
 public:
 	/** Returns the singleton instance of this class
@@ -486,6 +487,10 @@ public:
 		return !isUnassigned;
 	}
 
+	void resumeRequests();
+
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
 private:
 
 	/** Default constructor
@@ -514,5 +519,9 @@ private:
 	storage_config_t* getStorageConfig(ps_storage_id storageID);
 
 	bool _initialized;
+	bool _scanning;
+
+	CircularBuffer<buffer_element_t> writeBuffer;
+	buffer_element_t buffer[STORAGE_REQUEST_BUFFER_SIZE];
 
 };

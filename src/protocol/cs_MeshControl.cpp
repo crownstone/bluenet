@@ -6,25 +6,16 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
+// enable for additional debug output
 //#define PRINT_DEBUG
 
-#include "protocol/cs_MeshControl.h"
-
-#include "drivers/cs_PWM.h"
-
-#include <events/cs_EventDispatcher.h>
-#include <protocol/cs_Mesh.h>
-
-#include <util/cs_BleError.h>
-#include <util/cs_Utils.h>
+#include <protocol/cs_MeshControl.h>
 
 #include <cfg/cs_Settings.h>
-
-#include <drivers/cs_RTC.h>
-
-#include "drivers/cs_Timer.h"
-
-#include "drivers/cs_RNG.h"
+#include <drivers/cs_RNG.h>
+#include <events/cs_EventDispatcher.h>
+#include <processing/cs_CommandHandler.h>
+#include <protocol/cs_Mesh.h>
 
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
@@ -33,16 +24,18 @@ MeshControl::MeshControl() : EventListener(EVT_ALL) {
 //    Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
 }
 
+
+/*
+// [30.05.16] not needed anymore since the softdevice events are now handled directly through the scheduler
+//   we don't need to decouple it ourselves anymore, but can directly handle them
 extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
 	device_mesh_message_t* msg = (device_mesh_message_t*) p_event_data;
 	MeshControl::getInstance().decodeDataMessage(msg);
 }
+*/
 
-/**
- * Process incoming mesh messages.
- */
 void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
-//	LOGi("Process incoming mesh message");
+//	LOGd("Process incoming mesh message");
 
 //	Timer::getInstance().stop(_resetTimerId);
 //	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
@@ -56,7 +49,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		//! but basically we don't need to do anything, the
 		//! hub can just read out the mesh characteristic for the hub channel
 
-//		LOGi("ch %d: received hub message:", channel);
+//		LOGd("ch %d: received hub message:", channel);
 //		BLEutil::printArray((uint8_t*)p_data, length);
 
 		hub_mesh_message_t* msg = (hub_mesh_message_t*)p_data;
@@ -126,7 +119,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 
 			device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
-			MeshControl::getInstance().decodeDataMessage(msg);
+			decodeDataMessage(msg);
 		} else {
 			_log(INFO, "Message not for us: ");
 			BLEutil::printArray(((device_mesh_message_t*)p_data)->header.targetAddress, BLE_GAP_ADDR_LEN);
@@ -139,18 +132,8 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 
 void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 
-//	BLEutil::printArray((uint8_t*)msg, sizeof(msg));
-
 	switch(msg->header.messageType) {
 	case EVENT_MESSAGE: {
-
-//		LOGi("received event for:");
-//		BLEutil::printArray(msg->targetAddress, BLE_GAP_ADDR_LEN);
-		LOGi("type: %s (%d), from ???", msg->evtMsg.event == EVT_POWER_ON ? "EVT_POWER_ON" : "EVT_POWER_OFF", msg->evtMsg.event);
-
-//		EventMeshPackage* msg = (EventMeshPackage*)p_data;
-//		LOGi("received %s (%d) event from ???", msg->evt == EVT_POWER_ON ? "EVT_POWER_ON" : "EVT_POWER_OFF", msg->evt);
-
 		break;
 	}
 	case CONFIG_MESSAGE: {
@@ -161,96 +144,80 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 		break;
 	}
 	case COMMAND_MESSAGE: {
+		CommandHandlerTypes command = (CommandHandlerTypes)msg->commandMsg.command;
+		uint16_t length = msg->configMsg.length;
+		uint8_t* payload = msg->configMsg.payload;
 
-		switch(msg->commandMsg.commandType) {
-		case SCAN_START: {
-			bool start = (bool) msg->commandMsg.params[0];
-			if (start) {
-				LOGi("start scanner");
-				//! need to use a random delay for starting the scanner, otherwise
-				//! the devices in the mesh  will start scanning at the same time
-				//! resulting in conflicts
-				RNG rng;
-				uint16_t delay = rng.getRandom16() / 1; //! Delay in ms (about 0-60 seconds)
-				EventDispatcher::getInstance().dispatch(EVT_SCANNER_START, &delay, 2);
-			} else {
-				LOGi("stop scanner");
-				EventDispatcher::getInstance().dispatch(EVT_SCANNER_STOP);
-			}
+		switch(command) {
+		case CMD_ENABLE_SCANNER: {
+			//! need to use a random delay for starting the scanner, otherwise
+			//! the devices in the mesh will start scanning at the same time
+			//! resulting in lots of conflicts
+			RNG rng;
+			enable_scanner_message_payload_t* pl = (enable_scanner_message_payload_t*)payload;
+			pl->delay = rng.getRandom16() / 1; //! Delay in ms (about 0-60 seconds)
 			break;
 		}
+		default:
+			break;
 		}
 
-		break;
-	}
-	case POWER_MESSAGE: {
-		uint8_t pwmValue = msg->powerMsg.pwmValue;
-
-		uint32_t oldPwmValue = PWM::getInstance().getValue(0);
-		if (pwmValue != oldPwmValue) {
-			PWM::getInstance().setValue(0, pwmValue);
-			if (pwmValue == 0) {
-				LOGi("Turn lamp/device off");
-				EventDispatcher::getInstance().dispatch(EVT_POWER_OFF);
-			} else {
-				LOGi("Turn lamp/device on");
-				EventDispatcher::getInstance().dispatch(EVT_POWER_ON, &pwmValue, sizeof(pwmValue));
-			}
-		} else {
-			LOGi("skip pwm message");
-		}
-
+		CommandHandler::getInstance().handleCommand(command, payload, length);
 		break;
 	}
 	case BEACON_MESSAGE: {
 
-		if (Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {
-			LOGi("Received Beacon Message");
-	//		BLEutil::printArray((uint8_t*)msg, sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t));
+		LOGi("Received Beacon Message");
+		//		BLEutil::printArray((uint8_t*)msg, sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t));
 
-			uint16_t major = msg->beaconMsg.major;
-			uint16_t minor = msg->beaconMsg.minor;
-			ble_uuid128_t& uuid = msg->beaconMsg.uuid;
-			int8_t& rssi = msg->beaconMsg.rssi;
+		uint16_t major = msg->beaconMsg.major;
+		uint16_t minor = msg->beaconMsg.minor;
+		ble_uuid128_t& uuid = msg->beaconMsg.uuid;
+		int8_t& rssi = msg->beaconMsg.rssi;
 
-			EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_PAUSE);
+		Settings& settings = Settings::getInstance();
 
-			bool hasChange = false;
-			Settings& settings = Settings::getInstance();
+		bool hasChange = false;
 
-			uint16_t oldMajor;
-			settings.get(CONFIG_IBEACON_MAJOR, &oldMajor);
-			if (major != 0 && major != oldMajor) {
-				settings.writeToStorage(CONFIG_IBEACON_MAJOR, (uint8_t*)&major, sizeof(major), false);
-				hasChange = true;
-			}
+		uint16_t oldMajor;
+		settings.get(CONFIG_IBEACON_MAJOR, &oldMajor);
+		if (major != 0 && major != oldMajor) {
+			settings.writeToStorage(CONFIG_IBEACON_MAJOR, (uint8_t*)&major, sizeof(major), false);
+			hasChange = true;
+		}
 
-			uint16_t oldMinor;
-			settings.get(CONFIG_IBEACON_MINOR, &oldMinor);
-			if (minor != 0 && minor != oldMinor) {
-				settings.writeToStorage(CONFIG_IBEACON_MINOR, (uint8_t*)&minor, sizeof(minor), false);
-				hasChange = true;
-			}
+		uint16_t oldMinor;
+		settings.get(CONFIG_IBEACON_MINOR, &oldMinor);
+		if (minor != 0 && minor != oldMinor) {
+			settings.writeToStorage(CONFIG_IBEACON_MINOR, (uint8_t*)&minor, sizeof(minor), false);
+			hasChange = true;
+		}
 
-			uint8_t oldUUID[16];
-			settings.get(CONFIG_IBEACON_UUID, oldUUID);
-			if (memcmp(&uuid, new uint8_t[16] {}, 16) && memcmp(&uuid, oldUUID, 16)) {
-				settings.writeToStorage(CONFIG_IBEACON_UUID, (uint8_t*)&uuid, sizeof(uuid), false);
-				hasChange = true;
-			}
+		uint8_t oldUUID[16];
+		settings.get(CONFIG_IBEACON_UUID, oldUUID);
+		if (memcmp(&uuid, new uint8_t[16] {}, 16) && memcmp(&uuid, oldUUID, 16)) {
+			settings.writeToStorage(CONFIG_IBEACON_UUID, (uint8_t*)&uuid, sizeof(uuid), false);
+			hasChange = true;
+		}
 
-			int8_t oldRssi;
-			settings.get(CONFIG_IBEACON_RSSI, &oldRssi);
-			if (rssi != 0 && rssi != oldRssi) {
-				settings.writeToStorage(CONFIG_IBEACON_RSSI, (uint8_t*)&rssi, sizeof(rssi), false);
-				hasChange = true;
-			}
+		int8_t oldRssi;
+		settings.get(CONFIG_IBEACON_RSSI, &oldRssi);
+		if (rssi != 0 && rssi != oldRssi) {
+			settings.writeToStorage(CONFIG_IBEACON_RSSI, (uint8_t*)&rssi, sizeof(rssi), false);
+			hasChange = true;
+		}
 
-			if (hasChange) {
-				settings.savePersistentStorage();
-			}
+		if (hasChange) {
+			//			settings.savePersistentStorage();
+			// instead of saving the whole config, only store the whole iBeacon struct
+			settings.saveIBeaconPersistent();
+		}
 
-			EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_RESUME);
+		// if iBeacon is enabled, trigger event to update the advertisement with the new iBeacon
+		// parameters. This doesn't depend on if it is currently advertising or not but can be done
+		// in either state
+		if (settings.isEnabled(CONFIG_IBEACON_ENABLED)) {
+			EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
 		}
 
 		break;
@@ -298,8 +265,13 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 		if (isBroadcast(p_data)) {
 			//! received broadcast message
 			LOGd("received broadcast, send into mesh and handle directly");
+			log(INFO, "message:");
+			BLEutil::printArray((uint8_t*)p_data, length);
 			CMesh::getInstance().send(channel, p_data, length);
-			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+			// [30.05.16] as long as we don't call this function in an interrupt, we don't need to
+			//   decouple it anymore, because softdevice events are handled already by the scheduler
+			//	 BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+			decodeDataMessage((device_mesh_message_t*)p_data);
 
 		} else if (!isMessageForUs(p_data)) {
 			//! message is not for us, send it into mesh
@@ -308,7 +280,10 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 		} else {
 			//! message is for us, handle directly, no reason to send it into the mesh!
 			LOGd("message is for us, handle directly");
-			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
+			// [30.05.16] as long as we don't handle this in an interrupt, we don't need to
+			//   decouple it anymore, because softdevice events are handled already by the scheduler
+			//	 BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message)););
+			decodeDataMessage((device_mesh_message_t*)p_data);
 		}
 
 		break;

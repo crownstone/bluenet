@@ -9,6 +9,8 @@
 #include <events/cs_EventTypes.h>
 #include <events/cs_EventListener.h>
 
+//#include <vector>
+
 #define MAX_EVENT_LISTENERS                            20
 
 /**
@@ -25,6 +27,7 @@ private:
 	void operator=(EventDispatcher const &);
 
 	EventListener* _listeners[MAX_EVENT_LISTENERS];
+//	std::vector<EventListener*> _listeners;
 
 public:
 	static EventDispatcher& getInstance() {

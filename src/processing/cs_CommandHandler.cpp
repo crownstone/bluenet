@@ -149,12 +149,19 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 	case CMD_ENABLE_SCANNER: {
 		LOGi("handle enable scanner command");
 
-		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+		enable_scanner_message_payload_t* payload = (enable_scanner_message_payload_t*) buffer;
 		bool enable = payload->enable;
+		uint16_t delay = payload->delay;
 
 		LOGi("%s scanner", enable ? "Enabling" : "Disabling");
+		LOGi("delay: %d s", delay);
+		delay = 10000;
 		if (enable) {
-			Scanner::getInstance().start();
+			if (delay) {
+				Scanner::getInstance().delayedStart(delay);
+			} else {
+				Scanner::getInstance().start();
+			}
 		} else {
 			Scanner::getInstance().stop();
 		}

@@ -12,7 +12,6 @@
 
 #include <ble/cs_Stack.h>
 
-
 enum CommandHandlerTypes {
 	CMD_SWITCH,                        // 0
 	CMD_PWM,
@@ -43,6 +42,11 @@ struct __attribute__((__packed__)) opcode_message_payload_t {
 
 struct __attribute__((__packed__)) enable_message_payload_t {
 	bool enable;
+};
+
+struct __attribute__((__packed__)) enable_scanner_message_payload_t {
+	bool enable;
+	uint16_t delay;
 };
 
 struct __attribute__((__packed__)) factory_reset_message_payload_t {

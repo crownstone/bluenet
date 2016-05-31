@@ -26,11 +26,17 @@ void Settings::init() {
 
 	_storage->getHandle(PS_ID_CONFIGURATION, _storageHandle);
 	loadPersistentStorage();
+
+	// need to initialize the flags if they are uninitialized, e.g. first time
+	if (_storageStruct.flagsBit.flagsUninitialized) {
+		initFlags();
+	}
+
 	_initialized = true;
 }
 
 //	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
-void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool persistent) {
+void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent) {
 
 	/////////////////////////////////////////////////
 	//// SPECIAL CASES
@@ -60,16 +66,16 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bo
 	//// DEFAULT
 	/////////////////////////////////////////////////
 	if (verify(type, payload, length)) {
-		set(type, payload);
+		set(type, payload, persistent, length);
 		uint8_t* p_item = getStorageItem(type);
-		if (persistent) {
-			// minimum item size is 4
-			if (length < 4) {
-				length = 4;
-			}
-			savePersistentStorageItem(p_item, length);
-		}
-		EventDispatcher::getInstance().dispatch(type, p_item, length);
+//		if (persistent) {
+//			// minimum item size is 4
+//			if (length < 4) {
+//				length = 4;
+//			}
+//			savePersistentStorageItem(p_item, length);
+//		}
+		EventDispatcher::getInstance().dispatch(type, payload, length);
 	}
 }
 
@@ -361,7 +367,24 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	}
 }
 
+void Settings::initFlags() {
+	// set all flags to their default value
+	_storageStruct.flagsBit.meshDisabled = !MESHING;
+	_storageStruct.flagsBit.encryptionDisabled = !ENCRYPTION;
+	_storageStruct.flagsBit.iBeaconDisabled = !IBEACON;
+	_storageStruct.flagsBit.scannerDisabled = !INTERVAL_SCANNER_ENABLED;
+	_storageStruct.flagsBit.contPowerMeasurementDisabled = !CONT_POWER_MEASURMENT;
+	_storageStruct.flagsBit.flagsUninitialized = false;
+}
+
 bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
+
+	// should not happen, but better to check
+	if (_storageStruct.flagsBit.flagsUninitialized) {
+		// before updating a flag, we need to initialize all flags to their default
+		// value, otherwise they will be wrongly read after the update
+		initFlags();
+	}
 
 	switch(type) {
 		case CONFIG_MESH_ENABLED : {
@@ -389,7 +412,6 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 	}
 	}
 
-	_storageStruct.flagsBit.flagsUninitialized = false;
 	if (persistent) {
 		savePersistentStorageItem(&_storageStruct.flags);
 	}
@@ -603,7 +625,7 @@ bool Settings::get(uint8_t type, void* target, uint16_t size) {
 	return false;
 }
 
-bool Settings::set(uint8_t type, void* target, uint16_t size) {
+bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 	switch(type) {
 //	case CONFIG_NAME_UUID: {
 //		std::string* p_str = (std::string*) target;
@@ -612,97 +634,109 @@ bool Settings::set(uint8_t type, void* target, uint16_t size) {
 //	}
 	case CONFIG_NEARBY_TIMEOUT_UUID: {
 		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.nearbyTimeout);
-		return true;
+		break;
 	}
 	case CONFIG_FLOOR_UUID: {
 		Storage::setUint8(*((uint8_t*)target), _storageStruct.floor);
-		return true;
+		break;
 	}
 	case CONFIG_IBEACON_MAJOR: {
 		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.beacon.major);
-		return true;
+		break;
 	}
 	case CONFIG_IBEACON_MINOR: {
 		Storage::setUint16(*((uint16_t*)target),(uint32_t&) _storageStruct.beacon.minor);
-		return true;
+		break;
 	}
 	case CONFIG_IBEACON_UUID: {
 		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.beacon.uuid.uuid128, 16);
-		return true;
+		break;
 	}
 	case CONFIG_IBEACON_RSSI: {
 		Storage::setInt8(*((int8_t*)target), (int32_t&)_storageStruct.beacon.rssi);
-		return true;
+		break;
 	}
 	case CONFIG_WIFI_SETTINGS: {
 		if (size > 0) {
 			_wifiSettings = std::string((char*)target, size);
 		}
-		return true;
+		break;
 	}
 	case CONFIG_TX_POWER: {
 		Storage::setInt8(*((int8_t*)target), _storageStruct.txPower);
-		return true;
+		break;
 	}
 	case CONFIG_ADV_INTERVAL: {
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.advInterval);
-		return true;
+		break;
 	}
 	case CONFIG_PASSKEY: {
 		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
-		return true;
+		break;
 	}
 	case CONFIG_MIN_ENV_TEMP: {
 		Storage::setInt8(*((int8_t*)target), _storageStruct.minEnvTemp);
-		return true;
+		break;
 	}
 	case CONFIG_MAX_ENV_TEMP: {
 		Storage::setInt8(*((int8_t*)target), _storageStruct.maxEnvTemp);
-		return true;
+		break;
 	}
 	case CONFIG_SCAN_DURATION: {
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanDuration);
-		return true;
+		break;
 	}
 	case CONFIG_SCAN_SEND_DELAY: {
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanSendDelay);
-		return true;
+		break;
 	}
 	case CONFIG_SCAN_BREAK_DURATION: {
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanBreakDuration);
-		return true;
+		break;
 	}
 	case CONFIG_BOOT_DELAY: {
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.bootDelay);
-		return true;
+		break;
 	}
 	case CONFIG_MAX_CHIP_TEMP: {
 		Storage::setInt8(*((int8_t*)target), _storageStruct.maxChipTemp);
-		return true;
+		break;
 	}
 	case CONFIG_SCAN_FILTER: {
 		Storage::setUint8(*((uint8_t*)target), _storageStruct.scanFilter);
-		return true;
+		break;
 	}
 	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanFilterSendFraction);
-		return true;
+		break;
 	}
 	case CONFIG_CURRENT_LIMIT: {
 		Storage::setUint8(*((uint8_t*)target), _storageStruct.currentLimit);
-		return true;
+		break;
 	}
 	case CONFIG_SAMPLING_INTERVAL: {
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.samplingInterval);
+		break;
 	}
 	case CONFIG_SAMPLING_TIME: {
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.samplingTime);
+		break;
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
+		return false;
 	}
 	}
-	return false;
+
+	uint8_t* p_item = getStorageItem(type);
+	if (persistent) {
+		// minimum item size is 4
+		if (size < 4) {
+			size = 4;
+		}
+		savePersistentStorageItem(p_item, size);
+	}
+	return true;
 }
 
 //ps_configuration_t& Settings::getConfig() {
@@ -739,6 +773,10 @@ void Settings::savePersistentStorageItem(uint32_t* item) {
  */
 void Settings::savePersistentStorage() {
 	_storage->writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+}
+
+void Settings::saveIBeaconPersistent() {
+	savePersistentStorageItem((uint8_t*)&_storageStruct.beacon, sizeof(_storageStruct.beacon));
 }
 
 //	void ConfigHelper::enable(ps_storage_id id, uint16_t size) {
@@ -782,5 +820,6 @@ void Settings::factoryReset(uint32_t resetCode) {
 
 	_storage->clearStorage(PS_ID_CONFIGURATION);
 	memset(&_storageStruct, 0xFF, sizeof(_storageStruct));
+	initFlags();
 //	loadPersistentStorage();
 }

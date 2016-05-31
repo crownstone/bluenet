@@ -531,7 +531,7 @@ void Nrf51822BluetoothStack::startAdvertising() {
 
 	_advertising = true;
 
-	LOGi(MSG_BLE_ADVERTISING_STARTED);
+//	LOGi(MSG_BLE_ADVERTISING_STARTED);
 }
 
 void Nrf51822BluetoothStack::stopAdvertising() {
@@ -574,6 +574,8 @@ void Nrf51822BluetoothStack::startScanning() {
 	//! todo: which fields to set here?
 	BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params));
 	_scanning = true;
+
+	EventDispatcher::getInstance().dispatch(EVT_SCAN_STARTED);
 #endif
 }
 
@@ -586,6 +588,8 @@ void Nrf51822BluetoothStack::stopScanning() {
 	LOGi("stopScanning");
 	BLE_CALL(sd_ble_gap_scan_stop, ());
 	_scanning = false;
+
+	EventDispatcher::getInstance().dispatch(EVT_SCAN_STOPPED);
 #endif
 }
 

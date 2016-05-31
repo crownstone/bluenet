@@ -8,35 +8,64 @@
 
 #pragma once
 
-#include <cstdint>
-//#include <stdint.h>
-//#include <common/cs_Types.h>
-
-#include <ble/cs_Nordic.h>
-
-#include "drivers/cs_Serial.h"
-#include "util/cs_Utils.h"
-
-#include <events/cs_EventListener.h>
-#include <events/cs_EventTypes.h>
-
 #include <protocol/cs_MeshMessageTypes.h>
-
-#include <structs/cs_ScanResult.h>
 
 /** Wrapper around meshing functionality.
  *
  */
 class MeshControl : public EventListener {
-private:
-	MeshControl();
 
-	MeshControl(MeshControl const&); //! singleton, deny implementation
-	void operator=(MeshControl const &); //! singleton, deny implementation
+public:
+	//! use static variant of singleton, no dynamic memory allocation
+	static MeshControl& getInstance() {
+		static MeshControl instance;
+		return instance;
+	}
 
-    ble_gap_addr_t _myAddr;
-//    app_timer_id_t _resetTimerId;
+	/** Send a message with the scanned devices over the mesh
+	 *
+	 * @p_list pointer to the list of scanned devices
+	 * @size number of scanned devices
+	 */
+	void sendScanMessage(peripheral_device_t* p_list, uint8_t size);
 
+	/** Send a message into the mesh
+	 *
+	 * @channel the channel number, see <MeshChannels>
+	 * @p_data a pointer to the data which should be sent
+	 * @length number of bytes of data to with p_data points
+	 */
+	void send(uint8_t channel, void* p_data, uint8_t length);
+
+	/**
+	 * Get incoming messages and perform certain actions.
+	 * @channel the channel number, see <MeshChannels>
+	 * @p_data a pointer to the data which was received
+	 * @length number of bytes received
+	 */
+	void process(uint8_t channel, void* p_data, uint16_t length);
+
+protected:
+
+	/** Handle events dispatched through the EventDispatcher
+	 *
+	 * @evt the event type, can be one of <GeneralEventType>, <ConfigurationTypes>, <StateVarTypes>
+	 * @p_data pointer to the data which was sent with the dispatch, can be NULL
+	 * @length number of bytes of data provided
+	 */
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
+	/** Decode a received mesh data message
+	 *
+	 * @msg pointer to the message data
+	 */
+	void decodeDataMessage(device_mesh_message_t* msg);
+
+	/** Check if a message is for us, meaning the current device.
+	 * Checks the target address and returns true if targetAddress == myAddress
+	 *
+	 * @p_data pointer to the mesh message
+	 */
     bool isMessageForUs(void* p_data) {
     	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 
@@ -44,19 +73,28 @@ private:
     		//! target address of package is set to our address
     		return true;
     	} else {
-//    		_log(INFO, "message not for us, target: ");
-//    		BLEutil::printArray(msg->header.targetAddress, BLE_GAP_ADDR_LEN);
+			// _log(INFO, "message not for us, target: ");
+			// BLEutil::printArray(msg->header.targetAddress, BLE_GAP_ADDR_LEN);
 			return false;
     	}
     }
 
+	/** Check if a message is a broadcast
+	 * Checks the target address and returns true if targetAddress == BROADCAST_ADDRESS
+	 *
+	 * @p_data pointer to the mesh message
+	 */
     bool isBroadcast(void* p_data) {
     	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
-//    	uint8_t broadcastAddr[BLE_GAP_ADDR_LEN] = BROADCAST_ADDRESS;
-//    	return memcmp(msg->header.targetAddress, broadcastAddr, BLE_GAP_ADDR_LEN) == 0;
     	return memcmp(msg->header.targetAddress, new uint8_t[BLE_GAP_ADDR_LEN] BROADCAST_ADDRESS, BLE_GAP_ADDR_LEN) == 0;
     }
 
+	/** Check if a message is valid
+	 * Checks the length parameter based on the type of the mesh message
+	 *
+	 * @p_data pointer to the mesh message
+	 * @length number of bytes received
+	 */
 	bool isValidMessage(void* p_data, uint16_t length) {
 		device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 
@@ -83,12 +121,14 @@ private:
 		}
 	}
 
+	/** Returns the number of bytes required for a mesh message of the type
+	 *
+	 * @messageType type of mesh message, see <MeshMessageTypes>
+	 */
 	uint16_t getMessageSize(uint16_t messageType) {
 		switch(messageType) {
 		case EVENT_MESSAGE:
 			return sizeof(device_mesh_header_t) + sizeof(event_mesh_message_t);
-		case POWER_MESSAGE:
-			return sizeof(device_mesh_header_t) + sizeof(power_mesh_message_t);
 		case BEACON_MESSAGE:
 			return sizeof(device_mesh_header_t) + sizeof(beacon_mesh_message_t);
 		case COMMAND_MESSAGE:
@@ -100,37 +140,13 @@ private:
 		}
 	}
 
-//	static void reset();
-
-//	uint32_t firstTimeStamp = 0;
-//	uint32_t firstCounter[3] = {0};
-//	uint32_t lastCounter[3] = {};
-//	uint32_t incident[3] = {};
-
-public:
-	//! use static variant of singelton, no dynamic memory allocation
-	static MeshControl& getInstance() {
-		static MeshControl instance;
-		return instance;
-	}
-
-	/**
-	 * Get incoming messages and perform certain actions.
-	 */
-	void process(uint8_t channel, void* p_data, uint16_t length);
-
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
-
-//	void sendPwmValue(uint8_t* address, uint8_t value);
-//	void sendIBeaconMessage(uint8_t* address, uint16_t major, uint16_t minor, ble_uuid128_t uuid, int8_t rssi);
-
-	void sendScanMessage(peripheral_device_t* p_list, uint8_t size);
-
-	void decodeDataMessage(device_mesh_message_t* msg);
-
-	void send(uint8_t channel, void* p_data, uint8_t length);
-
 private:
+	MeshControl();
 
+	MeshControl(MeshControl const&); //! singleton, deny implementation
+	void operator=(MeshControl const &); //! singleton, deny implementation
+
+	// stores the MAC address of the devices to be used for mesh message handling
+    ble_gap_addr_t _myAddr;
 
 };

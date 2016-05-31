@@ -78,7 +78,7 @@ public:
 	/** Read the configuration from the buffer and store in working memory.
 	 *  If persistent is true, also store in FLASH
 	 */
-	void writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool persistent = true);
+	void writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent = true);
 
 	/** Read the configuration from storage and write to streambuffer (to be read from characteristic)
 	 */
@@ -100,6 +100,10 @@ public:
 	 */
 	void savePersistentStorage();
 
+	/** Save the whole iBeacon struct to FLASH
+	 */
+	void saveIBeaconPersistent();
+
 	/** Retrieve the Bluetooth name from the object representing the BLE stack.
 	 *
 	 * @return name of the device
@@ -119,7 +123,7 @@ public:
 	void factoryReset(uint32_t resetCode);
 
 	bool get(uint8_t type, void* target, uint16_t size = 0);
-	bool set(uint8_t type, void* target, uint16_t size = 0);
+	bool set(uint8_t type, void* target, bool persistent = false, uint16_t size = 0);
 
 protected:
 
@@ -142,6 +146,7 @@ protected:
 	uint16_t getSettingsItemSize(uint8_t type);
 
 	bool readFlag(uint8_t type, bool& value);
+	void initFlags();
 
 	/**
 	 * Helper functions to write single item from the configuration struct to storage (FLASH).

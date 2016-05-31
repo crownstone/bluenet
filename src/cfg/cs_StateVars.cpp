@@ -193,7 +193,9 @@ bool StateVars::setStateVar(uint8_t type, uint8_t value) {
 	EventDispatcher& dispatcher = EventDispatcher::getInstance();
 	switch(type) {
 	case SV_SWITCH_STATE: {
-		_switchState->store(value);
+		if (_switchState->read() != value) {
+			_switchState->store(value);
+		}
 		break;
 	}
 	default:
@@ -226,12 +228,18 @@ bool StateVars::setStateVar(uint8_t type, uint32_t value) {
 
 	switch(type) {
 	case SV_RESET_COUNTER: {
-		_resetCounter->store(value);
+		if (_resetCounter->read() != value) {
+			_resetCounter->store(value);
+		}
 		break;
 	}
 	case SV_OPERATION_MODE: {
-		Storage::setUint32(value, _storageStruct.operationMode);
-		savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));
+		uint32_t opMode;
+		Storage::getUint32(_storageStruct.operationMode, opMode, OPERATION_MODE_SETUP);
+		if (opMode != value) {
+			Storage::setUint32(value, _storageStruct.operationMode);
+			savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));
+		}
 		break;
 	}
 	default:

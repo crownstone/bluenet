@@ -80,8 +80,9 @@ public:
 	//! initialize
 	void init();
 
-	void startTicking() { Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this); };
-	void stopTicking() { Timer::getInstance().stop(_appTimerId); };
+	//! start ticking, i.e. start handling incoming mesh messages
+	void startTicking();
+	void stopTicking();
 
 	//! send message
 	void send(uint8_t channel, void* p_data, uint8_t length);

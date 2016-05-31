@@ -20,6 +20,7 @@
 
 //! temporary defines
 
+//#define RESET_COUNTER
 //#define MICRO_VIEW 1
 //#define CHANGE_NAME_ON_RESET
 //#define CHANGE_MINOR_ON_RESET
@@ -55,9 +56,9 @@
 using namespace BLEpp;
 
 Crownstone::Crownstone() :
-	_timer(NULL), _generalService(NULL), _localizationService(NULL), _powerService(NULL),
+	_timer(NULL), _mesh(NULL), _generalService(NULL), _localizationService(NULL), _powerService(NULL),
 	_alertService(NULL), _scheduleService(NULL), _deviceInformationService(NULL),
-	_beacon(NULL), _sensors(NULL), _fridge(NULL), _temperatureGuard(NULL),
+	_serviceData(NULL), _beacon(NULL), _sensors(NULL), _fridge(NULL), _temperatureGuard(NULL),
 	_commandHandler(NULL), _switch(NULL), _scanner(NULL), _tracker(NULL),
 	_advertisementPaused(false), _mainTimer(0) {
 
@@ -213,14 +214,18 @@ void Crownstone::configStack() {
 		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
 
-		bool wasScanning = _stack->isScanning();
-		_stack->stopScanning();
+		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
+		//   disconnecting from the device. just calling startAdvertising is enough
+		//		bool wasScanning = _stack->isScanning();
+		//		_stack->stopScanning();
 
 		_stack->startAdvertising();
 
-		if (wasScanning) {
-			_stack->startScanning();
-		}
+		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
+		//   disconnecting from the device. just calling startAdvertising is enough
+		//		if (wasScanning) {
+		//			_stack->startScanning();
+		//		}
 
 	});
 
@@ -420,10 +425,12 @@ void Crownstone::setup() {
 		_mesh = &CMesh::getInstance();
 	}
 
+#if RESET_COUNTER==1
 	uint32_t resetCounter;
 	StateVars::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
 	LOGi("reset counter at: %d", ++resetCounter);
 	StateVars::getInstance().setStateVar(SV_RESET_COUNTER, resetCounter);
+#endif
 
 	BLEutil::print_heap("Heap setup: ");
 	BLEutil::print_stack("Stack setup: ");
@@ -454,7 +461,6 @@ void Crownstone::startUp() {
 		nrf_delay_ms(bootDelay);
 	}
 
-//#if (PWM_ENABLE==1)
 #if (DEFAULT_ON==1)
 	LOGi("Set power ON by default");
 	_switch->turnOn();
@@ -462,7 +468,6 @@ void Crownstone::startUp() {
 	LOGi("Set power OFF by default");
 	_switch->turnOff();
 #endif
-//#endif
 
 	//! start advertising
 	_stack->startAdvertising();
@@ -611,6 +616,10 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		} else {
 			_stack->configureBleDeviceAdvData();
 		}
+		_stack->updateAdvertisement();
+		break;
+	}
+	case EVT_ADVERTISEMENT_UPDATED: {
 		_stack->updateAdvertisement();
 		break;
 	}

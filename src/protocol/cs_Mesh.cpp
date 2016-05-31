@@ -41,6 +41,14 @@ void CMesh::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(MESH_UPDATE_FREQUENCY), this);
 }
 
+void CMesh::startTicking() {
+	Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this);
+}
+
+void CMesh::stopTicking() {
+	Timer::getInstance().stop(_appTimerId);
+}
+
 /**
  * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
  * thing.
