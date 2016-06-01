@@ -25,10 +25,10 @@ ScheduleService::ScheduleService() :
 
 	setName(BLE_SERVICE_SCHEDULE);
 
-	init();
+	addCharacteristics();
 }
 
-void ScheduleService::init() {
+void ScheduleService::addCharacteristics() {
 	LOGi("Create schedule service");
 
 	LOGi("add current time characteristic");

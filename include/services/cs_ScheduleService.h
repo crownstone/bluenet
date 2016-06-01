@@ -27,7 +27,7 @@ public:
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void init();
+	void addCharacteristics();
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 

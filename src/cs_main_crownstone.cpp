@@ -61,7 +61,8 @@ Crownstone::Crownstone() :
 	_serviceData(NULL), _beacon(NULL),
 	_mesh(NULL), _sensors(NULL), _fridge(NULL),
 	_commandHandler(NULL), _scanner(NULL), _tracker(NULL),
-	_advertisementPaused(false), _mainTimer(0), _operationMode(0) {
+	_advertisementPaused(false), _mainTimer(0), _operationMode(0)
+{
 
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 	EventDispatcher::getInstance().addListener(this);
@@ -334,7 +335,7 @@ void Crownstone::createSetupServices() {
 	_stack->configureServices();
 }
 
-void Crownstone::createServices() {
+void Crownstone::createCrownstoneServices() {
 	LOGi("Create all services");
 
 	//! should be available always
@@ -428,7 +429,7 @@ void Crownstone::setup() {
 		LOGd("going into normal operation mode");
 
 		//! create services
-		createServices();
+		createCrownstoneServices();
 
 		BLEutil::print_heap("Heap config: ");
 		BLEutil::print_stack("Stack config: ");

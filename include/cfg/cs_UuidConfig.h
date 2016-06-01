@@ -38,7 +38,7 @@ enum PowerCharacteristicsIDs {
 };
 
 enum GeneralCharacteristicsIDs {
-	COMMAND_UUID                            = 0x1,
+	CONTROL_UUID                            = 0x1,
 	MESH_CONTROL_UUID                       = 0x2,
 	WRITE_CONFIGURATION_UUID                = 0x7, // 0x03
 	READ_CONFIGURATION_UUID                 = 0x9, // 0x04

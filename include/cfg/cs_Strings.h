@@ -79,8 +79,8 @@
 #define MSG_BLE_STACK_INITIALIZED                "Stack already initialized"
 
 #define MSG_SERVICE_GENERAL_INIT                 "Service General init"
-#define MSG_CHAR_COMMAND_ADD                     "Characteristic Command added"
-#define MSG_CHAR_COMMAND_SKIP                    "Characteristic Command skipped"
+#define MSG_CHAR_CONTROL_ADD                     "Characteristic Control added"
+#define MSG_CHAR_CONTROL_SKIP                    "Characteristic Control skipped"
 #define MSG_CHAR_TEMPERATURE_ADD                 "Characteristic Temperature added"
 #define MSG_CHAR_TEMPERATURE_SKIP                "Characteristic Temperature skipped"
 #define MSG_CHAR_RESET_ADD                       "Characteristic Reset added"

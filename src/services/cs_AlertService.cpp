@@ -22,15 +22,14 @@ AlertService::AlertService() :
 {
 
 	setUUID(UUID(ALERT_UUID));
-
 	setName(BLE_SERVICE_ALERT);
 
-	init();
+	addCharacteristics();
 
 //	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)AlertService::staticTick);
 }
 
-void AlertService::init() {
+void AlertService::addCharacteristics() {
 	LOGi("Create alert service");
 
 	LOGi("add new alert characteristic");

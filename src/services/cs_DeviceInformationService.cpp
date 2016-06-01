@@ -29,10 +29,10 @@ DeviceInformationService::DeviceInformationService()
 
 	setName("Device Information");
 
-	init();
+	addCharacteristics();
 }
 
-void DeviceInformationService::init() {
+void DeviceInformationService::addCharacteristics() {
 	LOGi("Create device information service");
 
 	LOGi("add hardware revision characteristic");

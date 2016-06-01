@@ -75,7 +75,7 @@ protected:
 	void configDrivers();
 
 	void createSetupServices();
-	void createServices();
+	void createCrownstoneServices();
 
 	void configure();
 

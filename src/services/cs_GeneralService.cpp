@@ -19,7 +19,7 @@
 using namespace BLEpp;
 
 GeneralService::GeneralService() : EventListener(),
-		_commandCharacteristic(NULL), _temperatureCharacteristic(NULL), _resetCharacteristic(NULL),
+		_controlCharacteristic(NULL), _temperatureCharacteristic(NULL), _resetCharacteristic(NULL),
 		_meshCharacteristic(NULL), _setConfigurationCharacteristic(NULL), _getConfigurationCharacteristic(NULL),
 		_selectStateVarCharacteristic(NULL), _readStateVarCharacteristic(NULL),
 		_streamBuffer(NULL), _meshMessage(NULL)
@@ -60,12 +60,12 @@ void GeneralService::init() {
 	buffer_ptr_t buffer = NULL;
 	uint16_t maxLength = 0;
 
-#if CHAR_COMMAND==1
-	LOGi(MSG_CHAR_COMMAND_ADD);
+#if CHAR_CONTROL==1
+	LOGi(MSG_CHAR_CONTROL_ADD);
 	_streamBuffer = getCharacBuffer(buffer, maxLength);
-	addCommandCharacteristic(buffer, maxLength);
+	addControlCharacteristic(buffer, maxLength);
 #else
-	LOGi(MSG_CHAR_COMMAND_SKIP);
+	LOGi(MSG_CHAR_CONTROL_SKIP);
 #endif
 
 #if CHAR_MESHING==1
@@ -198,17 +198,17 @@ void GeneralService::removeMeshCharacteristic() {
 	}
 }
 
-void GeneralService::addCommandCharacteristic(buffer_ptr_t buffer, uint16_t size) {
-	_commandCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_commandCharacteristic);
+void GeneralService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+	_controlCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_controlCharacteristic);
 
-	_commandCharacteristic->setUUID(UUID(getUUID(), COMMAND_UUID));
-	_commandCharacteristic->setName("Command");
-	_commandCharacteristic->setWritable(true);
-	_commandCharacteristic->setValue(buffer);
-	_commandCharacteristic->setMaxLength(size);
-	_commandCharacteristic->setDataLength(size);
-	_commandCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_controlCharacteristic->setUUID(UUID(getUUID(), CONTROL_UUID));
+	_controlCharacteristic->setName("Control");
+	_controlCharacteristic->setWritable(true);
+	_controlCharacteristic->setValue(buffer);
+	_controlCharacteristic->setMaxLength(size);
+	_controlCharacteristic->setDataLength(size);
+	_controlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
 		MasterBuffer& mb = MasterBuffer::getInstance();
 		// at this point it is too late to check if mb was locked, because the softdevice doesn't care

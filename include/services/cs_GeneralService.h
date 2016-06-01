@@ -54,7 +54,7 @@ protected:
 
 	/** Enable the command characteristic.
  	 */
-	inline void addCommandCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	inline void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the temperature characteristic.
  	 */
@@ -90,7 +90,7 @@ protected:
 
 private:
 
-	BLEpp::Characteristic<buffer_ptr_t>* _commandCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _controlCharacteristic;
 
 	/** Temperature characteristic
 	 */
