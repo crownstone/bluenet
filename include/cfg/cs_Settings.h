@@ -38,15 +38,17 @@ enum ConfigurationTypes {
 	CONFIG_MAX_CHIP_TEMP                    = 0x14, //! 20
 	CONFIG_SCAN_FILTER                      = 0x15, //! 21
 	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16, //! 22
-	CONFIG_SAMPLING_INTERVAL                = 0x17, //! 23
-	CONFIG_SAMPLING_TIME                    = 0x18, //! 24
-	CONFIG_CURRENT_LIMIT                    = 0x19, //! 25
-	CONFIG_MESH_ENABLED                     = 0x20,
-	CONFIG_ENCRYPTION_ENABLED               = 0x21,
-	CONFIG_IBEACON_ENABLED                  = 0x22,
-	CONFIG_SCANNER_ENABLED                  = 0x23,
-	CONFIG_CONT_POWER_MEASURMENT_ENABLED    = 0x24,
-	CONFIG_TRACKER_ENABLED                  = 0x25,
+	CONFIG_CURRENT_LIMIT                    = 0x17, //! 23
+	CONFIG_MESH_ENABLED                     = 0x18, //! 24
+	CONFIG_ENCRYPTION_ENABLED               = 0x19, //! 25
+	CONFIG_IBEACON_ENABLED                  = 0x1A, //! 26
+	CONFIG_SCANNER_ENABLED                  = 0x1B, //! 27
+	CONFIG_CONT_POWER_SAMPLER_ENABLED       = 0x1C, //! 28
+	CONFIG_TRACKER_ENABLED                  = 0x1D, //! 29
+	CONFIG_ADC_SAMPLE_RATE                  = 0x1E, //! 30
+	CONFIG_POWER_SAMPLE_BURST_INTERVAL      = 0x1F, //! 31
+	CONFIG_POWER_SAMPLE_CONT_INTERVAL       = 0x20, //! 32
+	CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES    = 0x21, //! 33
 	CONFIG_TYPES
 };
 

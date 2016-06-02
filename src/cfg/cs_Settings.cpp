@@ -164,8 +164,6 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
-	case CONFIG_SAMPLING_INTERVAL:
-	case CONFIG_SAMPLING_TIME:
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:
 	case CONFIG_BOOT_DELAY:
 	case CONFIG_SCAN_BREAK_DURATION:
@@ -210,12 +208,16 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_ENCRYPTION_ENABLED :
 	case CONFIG_IBEACON_ENABLED :
 	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
 //		updateFlag(type, payload[0] != 0, persistent);
 		LOGe("Write disabled. Use commands to enable/disable");
 		return false;
 	}
 
+	case CONFIG_ADC_SAMPLE_RATE:
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
+	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES:
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
 		return false;
@@ -288,11 +290,13 @@ uint8_t* Settings::getStorageItem(uint8_t type) {
 	case CONFIG_CURRENT_LIMIT: {
 		return (uint8_t*)&_storageStruct.currentLimit;
 	}
-	case CONFIG_SAMPLING_INTERVAL: {
-		return (uint8_t*)&_storageStruct.samplingInterval;
+	case CONFIG_ADC_SAMPLE_RATE: {
 	}
-	case CONFIG_SAMPLING_TIME: {
-		return (uint8_t*)&_storageStruct.samplingTime;
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
+	}
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
+	}
+	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES: {
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
@@ -327,8 +331,6 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
-	case CONFIG_SAMPLING_INTERVAL:
-	case CONFIG_SAMPLING_TIME:
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:
 	case CONFIG_BOOT_DELAY:
 	case CONFIG_SCAN_BREAK_DURATION:
@@ -358,9 +360,14 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_ENCRYPTION_ENABLED :
 	case CONFIG_IBEACON_ENABLED :
 	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
 		return 1;
 	}
+
+	case CONFIG_ADC_SAMPLE_RATE:
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
+	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES:
 	default:
 		LOGw("There is no such configuration type (%u).", type);
 		return 0;
@@ -373,7 +380,7 @@ void Settings::initFlags() {
 	_storageStruct.flagsBit.encryptionDisabled = !ENCRYPTION;
 	_storageStruct.flagsBit.iBeaconDisabled = !IBEACON;
 	_storageStruct.flagsBit.scannerDisabled = !INTERVAL_SCANNER_ENABLED;
-	_storageStruct.flagsBit.contPowerMeasurementDisabled = !CONT_POWER_MEASURMENT;
+	_storageStruct.flagsBit.continuousPowerSamplerDisabled = !CONTINUOUS_POWER_SAMPLER;
 	_storageStruct.flagsBit.flagsUninitialized = false;
 }
 
@@ -403,8 +410,8 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 		_storageStruct.flagsBit.scannerDisabled = !value;
 		break;
 	}
-	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
-		_storageStruct.flagsBit.contPowerMeasurementDisabled = !value;
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
+		_storageStruct.flagsBit.continuousPowerSamplerDisabled = !value;
 		break;
 	}
 	default: {
@@ -443,9 +450,9 @@ bool Settings::readFlag(uint8_t type, bool& value) {
 		default_value = INTERVAL_SCANNER_ENABLED;
 		break;
 	}
-	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
-		value = !_storageStruct.flagsBit.contPowerMeasurementDisabled;
-		default_value = CONT_POWER_MEASURMENT;
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
+		value = !_storageStruct.flagsBit.continuousPowerSamplerDisabled;
+		default_value = CONTINUOUS_POWER_SAMPLER;
 		break;
 	}
 	default:
@@ -467,7 +474,7 @@ bool Settings::isEnabled(uint8_t type) {
 	case CONFIG_ENCRYPTION_ENABLED :
 	case CONFIG_IBEACON_ENABLED :
 	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_MEASURMENT_ENABLED : {
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
 		bool enabled;
 		readFlag(type, enabled);
 		return enabled;
@@ -606,17 +613,17 @@ bool Settings::get(uint8_t type, void* target, uint16_t size) {
 		*((uint8_t*)target) = value;
 		return true;
 	}
-	case CONFIG_SAMPLING_INTERVAL: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.samplingInterval, value, SAMPLING_INTERVAL);
-		*((uint16_t*)target) = value;
-		return true;
+	case CONFIG_ADC_SAMPLE_RATE: {
+//		return true;
 	}
-	case CONFIG_SAMPLING_TIME: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.samplingTime, value, SAMPLING_TIME);
-		*((uint16_t*)target) = value;
-		return true;
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
+//		return true;
+	}
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
+//		return true;
+	}
+	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES: {
+//		return true;
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
@@ -714,13 +721,17 @@ bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 		Storage::setUint8(*((uint8_t*)target), _storageStruct.currentLimit);
 		break;
 	}
-	case CONFIG_SAMPLING_INTERVAL: {
-		Storage::setUint16(*((uint16_t*)target), _storageStruct.samplingInterval);
-		break;
+	case CONFIG_ADC_SAMPLE_RATE: {
+//		break;
 	}
-	case CONFIG_SAMPLING_TIME: {
-		Storage::setUint16(*((uint16_t*)target), _storageStruct.samplingTime);
-		break;
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
+//		break;
+	}
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
+//		break;
+	}
+	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES: {
+//		break;
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);

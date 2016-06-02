@@ -6,8 +6,6 @@
  */
 #pragma once
 
-/*
-
 //#include "third/std/function.h"
 //#include <vector>
 
@@ -24,8 +22,6 @@
 #include "structs/buffer/cs_DifferentialBuffer.h"
 #include "structs/cs_PowerSamples.h"
 #include "protocol/cs_MeshMessageTypes.h"
-
-*/
 
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
@@ -91,73 +87,11 @@ protected:
 	void addPowerConsumptionCharacteristic();
 	void addCurrentLimitCharacteristic();
 
-/*
-	/** Initializes the buffer.
-	 */
-	void powerSampleInit();
-
-	/** Initializes and starts the ADC, also starts interval timer.
-	 */
-	void powerSampleFirstStart();
-
-	/** Starts a new power sample burst.
-	 *  Called at a low interval.
-	 */
-	void powerSampleStart();
-	static void staticPowerSampleStart(PowerService *ptr) {
-		ptr->powerSampleStart();
-	}
-
-	/** Called when the sample burst is finished.
-	 *  Calculates the power usage, updates the state.
-	 *  Sends the samples if the central is subscribed for that.
-	 */
-	void powerSampleFinish();
-
-	/** Called at a short interval.
-	 *  Reads out the buffer.
-	 *  Sends the samples via notifications and/or mesh.
-	 */
-	void powerSampleReadBuffer();
-	static void staticPowerSampleRead(PowerService *ptr) {
-		ptr->powerSampleReadBuffer();
-	}
-
-
-
-	/** Fill up the current curve and send it out over bluetooth
-	 * @type specifies over which characteristic the current curve should be sent.
-	 */
-	void sampleCurrentDone(uint8_t type);
-*/
-
 private:
 	//! References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint8_t> *_pwmCharacteristic;
 	BLEpp::Characteristic<uint8_t> *_relayCharacteristic;
 	BLEpp::Characteristic<uint16_t> *_powerConsumptionCharacteristic;
 	BLEpp::Characteristic<uint8_t*> *_powerSamplesCharacteristic;
-
-/*
-	app_timer_id_t _staticPowerSamplingStartTimer;
-	app_timer_id_t _staticPowerSamplingReadTimer;
-
-	buffer_ptr_t _powerSamplesBuffer; //! Buffer that holds the data for burst or continous sampling
-
-//	DifferentialBuffer<uint32_t> _currentSampleTimestamps;
-//	DifferentialBuffer<uint32_t> _voltageSampleTimestamps;
-	CircularBuffer<uint16_t> _currentSampleCircularBuf;
-	CircularBuffer<uint16_t> _voltageSampleCircularBuf;
-#if CHAR_MESHING == 1
-	power_samples_mesh_message_t* _powerSamplesMeshMsg;
-#endif
-	uint16_t _powerSamplesCount;
-//	uint16_t _lastPowerSample;
-
-	PowerSamples _powerSamples;
-	bool _powerSamplesProcessed;
-
-	void sampleCurrent(uint8_t type);
-*/
 
 };

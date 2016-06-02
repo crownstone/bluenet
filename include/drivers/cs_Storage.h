@@ -166,7 +166,7 @@ struct ps_configuration_t : ps_storage_base_t {
 			bool encryptionDisabled : 1;
 			bool iBeaconDisabled : 1;
 			bool scannerDisabled : 1;
-			bool contPowerMeasurementDisabled : 1;
+			bool continuousPowerSamplerDisabled : 1;
 			bool trackerDisabled : 1;
 		} flagsBit;
 		// dummy to force enableFlags struct to be of size uint32_t;
