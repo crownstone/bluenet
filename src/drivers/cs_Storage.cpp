@@ -107,7 +107,8 @@ Storage::Storage() {
 	BLE_CALL(pstorage_init, ());
 
 #if CHAR_MESHING==1
-	requestBuffer = new CircularBuffer<buffer_element_t>(STORAGE_REQUEST_BUFFER_SIZE, true);
+	requestBuffer = new CircularBuffer<buffer_element_t>(STORAGE_REQUEST_BUFFER_SIZE);
+	requestBuffer->init();
 #endif
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {

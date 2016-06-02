@@ -147,6 +147,10 @@ SCAN_FILTER=3
 # Set to 0 to not send them ever
 SCAN_FILTER_SEND_FRACTION=360
 
+# Sample continuously at a low sample rate (100Hz by default).
+# Disables burst sampling.
+CONTINUOUS_POWER_SAMPLER=0
+
 # Some config introduced by anne
 RSSI_ENABLE=1
 
@@ -251,7 +255,7 @@ RAM_R1_BASE=0x20002800
 # HEAP_SIZE=2700;
 # For the 32kB chip:
 RAM_APPLICATION_AMOUNT=0x5800
-HEAP_SIZE=16700;
+HEAP_SIZE=5000;
 
 ## to enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
 ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x600, so if you

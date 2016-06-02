@@ -6,7 +6,9 @@
  */
 #pragma once
 
-#include <cstddef>
+#include <cstdlib>
+#include "common/cs_Types.h"
+#include "drivers/cs_Serial.h"
 
 /** Circular Buffer implementation
  * @param T Element type of elements within the buffer.
@@ -18,52 +20,99 @@ template <class T>
 class CircularBuffer {
 public:
 	/** Default constructor
-	 *
-	 * @capacity the size with which the buffer should be initialized. A maximum
-	 *   of capacity elements can be stored in the buffer before the oldest element
-	 *   will be overwritten
-	 *
-	 * @initialize if true, the array will be directly initialized, otherwise
-	 *   <CircularBuffer::init()> has to be called before accessing the buffer
-	 *
-	 * If <initialize> is set to true, the buffer will be directly initialized. To avoid
-	 * unnecessary allocation of memory, use initialize = false and call
-	 * <CircularBuffer::init()> only once the buffer is used.
 	 */
-	CircularBuffer(uint16_t capacity = 32, bool initialize = false) :
-		_array(NULL), _capacity(capacity), _head(0), _tail(-1), _contentsSize(0)
+	CircularBuffer(uint16_t capacity): _array(NULL), _capacity(capacity), _head(0), _tail(-1), _contentsSize(0), _allocatedSelf(false)
 	{
-		if (initialize) {
-			init();
-		}
 	}
 
 	/** Default destructor
-	 *
-	 * Free memory allocated for the buffer
 	 */
 	virtual ~CircularBuffer() {
-		if (_array != NULL) {
-			free(_array);
-		}
 	}
 
-	/** Initializes and allocates memory for the buffer based on the capacity
-	 * used with the constructor
+	uint16_t getMaxByteSize(uint16_t capacity) { return capacity * sizeof(T); }
+	uint16_t getMaxByteSize() { return getMaxByteSize(_capacity); }
+	uint16_t getMaxSize(uint16_t byteSize) { return byteSize / sizeof(T); }
+
+	/** Initializes and allocates memory for the buffer based on the capacity.
 	 *
-	 * If the constructor was called with initialize = false, then this function
-	 * has to be called before the buffer can be accessed!
+	 * @capacity the number of elements that should be stored in this buffer, before overwriting the oldest element.
 	 *
 	 * @return true if memory allocation was successful, false otherwise
 	 */
 	bool init() {
-		if (!_array) {
-			_array = (T*)calloc(_capacity, sizeof(T));
+		if (_array != NULL) {
+			return false;
 		}
-		//! also call clear to make sure the head and tail are reset and we
-		//! start with a clean buffer
+		//! Allocate memory
+		_array = (T*)calloc(_capacity, sizeof(T));
+		if (_array == NULL) {
+			LOGw("Could not allocate memory");
+			return false;
+		}
+		LOGd("Allocated memory at %u", _array);
+		_allocatedSelf = true;
+		//! Also call clear to make sure we start with a clean buffer
 		clear();
-		return _array != NULL;
+		return true;
+	}
+
+	/**
+	 *
+	 */
+	bool deinit() {
+		if (_array != NULL && _allocatedSelf) {
+			free(_array);
+		}
+		_allocatedSelf = false;
+		_array = NULL;
+		return true;
+	}
+
+	/** Assign the buffer used to store the data, instead of allocating it via init().
+	 * @buffer The buffer to be used.
+	 * @bufferSize Size of the buffer.
+	 *
+	 * @return true on success.
+	 */
+	bool assign(buffer_ptr_t buffer, uint16_t bufferSize) {
+		if (getMaxSize(bufferSize) < _capacity || _allocatedSelf) {
+			LOGd("Could not assign at %u with size %u", buffer, bufferSize);
+			return false;
+		}
+		_array = (T*) buffer;
+		LOGd("assign at %u", buffer);
+		//! Also call clear to make sure we start with a clean buffer
+		clear();
+		return true;
+	}
+
+	/** Release the buffer that was assigned.
+	 *
+	 * @return true on success.
+	 */
+	bool release() {
+		if (_allocatedSelf) {
+			return false;
+		}
+		_array = NULL;
+		return true;
+	}
+
+	T* getBuffer() {
+		return _array;
+	}
+
+	/** Clears the buffer
+	 *
+	 * The buffer is cleared by setting head and tail
+	 * to the beginning of the buffer. The array itself
+	 * doesn't have to be cleared
+	 */
+	void clear() {
+		_head = 0;
+		_tail = -1;
+		_contentsSize = 0;
 	}
 
 	/** Returns the number of elements stored
@@ -101,31 +150,6 @@ public:
 		return size() == capacity();
 	}
 
-	/** Peek at the oldest element without removing it
-	 *
-	 * This returns the value of the oldest element without
-	 * removing the element from the buffer. Use <CircularBuffer>>pop()>
-	 * to get the value and remove it at the same time
-	 *
-	 * @return the value of the oldest element
-	 */
-	T peek() const {
-		return _array[_head];
-	}
-
-	/** Get the oldest element
-	 *
-	 * This returns the value of the oldest element and
-	 * removes it from the buffer
-	 *
-	 * @return the value of the oldest element
-	 */
-	T pop() {
-		T res = peek();
-		incHead();
-		return res;
-	}
-
 	/** Add an element to the end of the buffer
 	 *
 	 * @value the element to be added
@@ -142,16 +166,29 @@ public:
 		_array[_tail] = value;
 	}
 
-	/** Clears the buffer
+	/** Get the oldest element
 	 *
-	 * The buffer is cleared by setting head and tail
-	 * to the beginning of the buffer. The array itself
-	 * doesn't have to be cleared
+	 * This returns the value of the oldest element and
+	 * removes it from the buffer
+	 *
+	 * @return the value of the oldest element
 	 */
-	void clear() {
-		_head = 0;
-		_tail = -1;
-		_contentsSize = 0;
+	T pop() {
+		T res = peek();
+		incHead();
+		return res;
+	}
+
+	/** Peek at the oldest element without removing it
+	 *
+	 * This returns the value of the oldest element without
+	 * removing the element from the buffer. Use <CircularBuffer>>pop()>
+	 * to get the value and remove it at the same time
+	 *
+	 * @return the value of the oldest element
+	 */
+	T peek() const {
+		return _array[_head];
 	}
 
 	/** Returns the Nth value, starting from oldest element
@@ -177,6 +214,9 @@ private:
 
 	/** Number of elements stored in the buffer */
 	uint16_t _contentsSize;
+
+	/** Whether the array was allocated by init() or not */
+	bool _allocatedSelf;
 
 	/** Increases the tail.
 	 *
