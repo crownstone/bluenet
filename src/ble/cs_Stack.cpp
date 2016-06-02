@@ -66,7 +66,6 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 //	Nrf51822BluetoothStack::getInstance().on_ble_evt((ble_evt_t *)p_event_data);
 //}
 
-
 //! called by softdevice handler on a ble event
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 

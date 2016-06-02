@@ -127,6 +127,28 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 
 		break;
 	}
+	case 3:
+	case 4:
+	case 5:
+	case 6:
+	case 7:
+	case 8:
+	case 9:
+	case 10:
+	case 11:
+	case 12:
+	case 13:
+	case 14:
+	case 15:
+	case 16:
+	case 17:
+	case 18:
+	case 19:
+	case 20: {
+		hub_mesh_message_t* msg = (hub_mesh_message_t*) p_data;
+		LOGd("power samples: h=%u addr=%u:%u:%u:%u:%u:%u", channel, msg->header.sourceAddress[0], msg->header.sourceAddress[1], msg->header.sourceAddress[2], msg->header.sourceAddress[3], msg->header.sourceAddress[4], msg->header.sourceAddress[5]);
+		break;
+	}
 	}
 }
 
@@ -330,6 +352,17 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 		CMesh::getInstance().send(HUB_CHANNEL, &message, sizeof(message));
 	}
 
+}
+
+void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples) {
+//	LOGd("sendPowerSamplesMessage");
+	hub_mesh_message_t message;
+	memcpy(&message.header.sourceAddress, &_myAddr.addr, BLE_GAP_ADDR_LEN);
+	message.header.messageType = POWER_SAMPLES_MESSAGE;
+	memcpy(&message.powerSamplesMsg, samples, sizeof(power_samples_mesh_message_t));
+//	uint16_t handle = (message.header.sourceAddress[0] % (MESH_NUM_OF_CHANNELS-2)) + 3;
+	uint16_t handle = (message.header.sourceAddress[0] % (MESH_NUM_OF_CHANNELS-2-1)) + 3;
+	CMesh::getInstance().send(handle, &message, sizeof(message));
 }
 
 //void MeshControl::reset() {

@@ -116,6 +116,7 @@ public:
 	}
 
 	void startTicking() {
+//		LOGi("service startTicking");
 		if (_appTimerId != UINT32_MAX) {
 			Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this);
 		}

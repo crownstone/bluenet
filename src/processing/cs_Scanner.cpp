@@ -45,6 +45,8 @@ Scanner::Scanner() :
 	EventDispatcher::getInstance().addListener(this);
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Scanner::staticTick);
+
+	LOGe("scanner timer id: %d", _appTimerId);
 }
 
 void Scanner::setStack(Nrf51822BluetoothStack* stack) {
@@ -62,7 +64,7 @@ void Scanner::manualStartScan() {
 	_scanning = true;
 
 	if (!_stack->isScanning()) {
-		LOGi("start scanning...");
+		LOGw("start scanning...");
 		_stack->startScanning();
 	}
 }
@@ -76,7 +78,7 @@ void Scanner::manualStopScan() {
 	_scanning = false;
 
 	if (_stack->isScanning()) {
-		LOGi("stop scanning...");
+		LOGw("stop scanning...");
 		_stack->stopScanning();
 	}
 }
@@ -111,7 +113,7 @@ void Scanner::start() {
 
 void Scanner::delayedStart(uint16_t delay) {
 	if (!_running) {
-		LOGi("delayed start by %d ms", delay);
+		LOGw("delayed start by %d ms", delay);
 		_running = true;
 		_scanCount = 0;
 		_opCode = SCAN_START;
@@ -123,6 +125,7 @@ void Scanner::delayedStart(uint16_t delay) {
 
 void Scanner::delayedStart() {
 	if (!_running) {
+		LOGw("delayed start by %d ms", _scanBreakDuration);
 		_running = true;
 		_scanCount = 0;
 		_opCode = SCAN_START;

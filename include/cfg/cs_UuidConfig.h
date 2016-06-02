@@ -31,7 +31,7 @@
 enum PowerCharacteristicsIDs {
 	PWM_UUID                                = 0x1, //cmd
 	SAMPLE_CURRENT_UUID                     = 0x2, // remove?
-	CURRENT_CURVE_UUID                      = 0x3, //state
+	POWER_SAMPLES_UUID                      = 0x3, //state
 	CURRENT_CONSUMPTION_UUID                = 0x4, //state
 //	CURRENT_LIMIT_UUID                      = 0x5, //cfg
 

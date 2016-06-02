@@ -30,6 +30,7 @@ enum MeshMessageTypes {
 
 	//! hub channel messages
 	SCAN_MESSAGE       = 101,
+	POWER_SAMPLES_MESSAGE = 103,
 };
 
 //! broadcast address is defined as 00:00:00:00:00:00
@@ -106,6 +107,20 @@ struct __attribute__((__packed__)) scan_mesh_message_t {
 	peripheral_device_t list[NR_DEVICES_PER_MESSAGE];
 };
 
+#define POWER_SAMPLE_MESH_NUM_SAMPLES 43
+//! 91 bytes in total
+struct __attribute__((__packed__)) power_samples_mesh_message_t {
+	uint32_t timestamp;
+//	uint16_t firstSample;
+//	int8_t sampleDiff[POWER_SAMPLE_MESH_NUM_SAMPLES-1];
+	uint16_t samples[POWER_SAMPLE_MESH_NUM_SAMPLES];
+	uint8_t reserved;
+//	struct __attribute__((__packed__)) {
+//		int8_t dt1 : 4;
+//		int8_t dt2 : 4;
+//	} timeDiffs[POWER_SAMPLE_MESH_NUM_SAMPLES / 2];
+};
+
 /** Hub mesh header
  */
 struct __attribute__((__packed__)) hub_mesh_header_t {
@@ -127,6 +142,7 @@ struct __attribute__((__packed__)) hub_mesh_message_t {
 		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
 		scan_mesh_message_t scanMsg;
 		test_mesh_message_t testMsg;
+		power_samples_mesh_message_t powerSamplesMsg;
 	};
 };
 

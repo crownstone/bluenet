@@ -29,6 +29,8 @@ public:
 	 */
 	void sendScanMessage(peripheral_device_t* p_list, uint8_t size);
 
+	void sendPowerSamplesMessage(power_samples_mesh_message_t* samples);
+
 	/** Send a message into the mesh
 	 *
 	 * @channel the channel number, see <MeshChannels>
