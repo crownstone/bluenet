@@ -21,7 +21,7 @@ public:
 	 */
 	virtual ~BufferAccessor() {};
 
-	/** Assign the buffer used to hold the scanned device list
+	/** Assign the buffer used to hold the data.
 	 * @buffer                the buffer to be used
 	 * @maxLength             size of buffer (maximum number of bytes that can be stored)
 	 *

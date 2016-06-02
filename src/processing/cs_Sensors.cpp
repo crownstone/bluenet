@@ -177,15 +177,16 @@ uint16_t Sensors::sampleSensor() {
 	_currentCurve.clear();
 //	ADC::getInstance().setCurrentCurve(&_currentCurve);
 
-	ADC::getInstance().init(PIN_AIN_SENSOR);
-	ADC::getInstance().start();
-	while (!_currentCurve.isFull()) {
-		while(!NRF_ADC->EVENTS_END) {}
-		//			NRF_ADC->EVENTS_END	= 0;
-		//			LOGd("got sample");
-		_currentCurve.add(NRF_ADC->RESULT, RTC::getCount());
-		ADC::getInstance().start();
-	}
+	// TODO
+//	ADC::getInstance().init(PIN_AIN_SENSOR);
+//	ADC::getInstance().start();
+//	while (!_currentCurve.isFull()) {
+//		while(!NRF_ADC->EVENTS_END) {}
+//		//			NRF_ADC->EVENTS_END	= 0;
+//		//			LOGd("got sample");
+//		_currentCurve.add(NRF_ADC->RESULT, RTC::getCount());
+//		ADC::getInstance().start();
+//	}
 
 
 //	//! Give some time to sample

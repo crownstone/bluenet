@@ -27,7 +27,7 @@ extern "C" {
 //! values are updated MESH_UPDATE_FREQUENCY times per second
 #define MESH_UPDATE_FREQUENCY 10
 //! number of channels used in the mesh
-#define MESH_NUM_OF_CHANNELS 2
+#define MESH_NUM_OF_CHANNELS 20
 //! time given for boot up (every first message received on each channel
 //! will be ignored during boot up)
 #define BOOT_TIME 2000 // 2 seconds

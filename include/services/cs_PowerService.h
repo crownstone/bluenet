@@ -12,14 +12,16 @@
 //#include <common/cs_Types.h>
 
 //#include "characteristics/cs_UuidConfig.h"
-#include "structs/cs_PowerCurve.h"
 #include "drivers/cs_Storage.h"
 //#include "ble/cs_BluetoothLE.h"
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
-//#include "drivers/cs_ADC.h"
 #include "drivers/cs_LPComp.h"
-//#include "drivers/cs_RTC.h"
+#include "structs/buffer/cs_CircularBuffer.h"
+#include "structs/buffer/cs_StackBuffer.h"
+#include "structs/buffer/cs_DifferentialBuffer.h"
+#include "structs/cs_PowerSamples.h"
+#include "protocol/cs_MeshMessageTypes.h"
 
 #define POWER_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
@@ -72,22 +74,51 @@ public:
 	 * a specific duty-cycle after the detection of a zero crossing.
 	 */
 	void dim(uint8_t value);
-
-	static void staticSampleCurrent(PowerService *ptr) {
-		ptr->sampleCurrent();
-	}
-
-	void startSampling(uint8_t type);
-	void stopSampling();
-
 protected:
 	//! The characteristics in this service
 	void addPWMCharacteristic();
 	void addRelayCharacteristic();
-	void addSampleCurrentCharacteristic();
-	void addCurrentCurveCharacteristic();
+	void addPowerSamplesCharacteristic();
 	void addPowerConsumptionCharacteristic();
 	void addCurrentLimitCharacteristic();
+
+	/** Initializes the buffer.
+	 */
+	void powerSampleInit();
+
+	/** Initializes and starts the ADC, also starts interval timer.
+	 */
+	void powerSampleFirstStart();
+
+	/** Starts a new power sample burst.
+	 *  Called at a low interval.
+	 */
+	void powerSampleStart();
+	static void staticPowerSampleStart(PowerService *ptr) {
+		ptr->powerSampleStart();
+	}
+
+	/** Called when the sample burst is finished.
+	 *  Calculates the power usage, updates the state.
+	 *  Sends the samples if the central is subscribed for that.
+	 */
+	void powerSampleFinish();
+
+	/** Called at a short interval.
+	 *  Reads out the buffer.
+	 *  Sends the samples via notifications and/or mesh.
+	 */
+	void powerSampleReadBuffer();
+	static void staticPowerSampleRead(PowerService *ptr) {
+		ptr->powerSampleReadBuffer();
+	}
+
+
+
+	/** Fill up the current curve and send it out over bluetooth
+	 * @type specifies over which characteristic the current curve should be sent.
+	 */
+	void sampleCurrentDone(uint8_t type);
 
 	/** Get the stored current limit.
 	 */
@@ -109,37 +140,34 @@ private:
 	//! References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint8_t> *_pwmCharacteristic;
 	BLEpp::Characteristic<uint8_t> *_relayCharacteristic;
-	BLEpp::Characteristic<uint8_t> *_sampleCurrentCharacteristic;
 	BLEpp::Characteristic<uint16_t> *_powerConsumptionCharacteristic;
-	BLEpp::Characteristic<uint8_t*> *_currentCurveCharacteristic;
+	BLEpp::Characteristic<uint8_t*> *_powerSamplesCharacteristic;
 //	BLEpp::Characteristic<uint8_t> *_currentLimitCharacteristic;
 
-	PowerCurve<uint16_t>* _powerCurve;
+	app_timer_id_t _staticPowerSamplingStartTimer;
+	app_timer_id_t _staticPowerSamplingReadTimer;
 
-	uint8_t _sampleBuffer[MASTER_BUFFER_SIZE];
+	buffer_ptr_t _powerSamplesBuffer; //! Buffer that holds the data for burst or continous sampling
+
+//	DifferentialBuffer<uint32_t> _currentSampleTimestamps;
+//	DifferentialBuffer<uint32_t> _voltageSampleTimestamps;
+	CircularBuffer<uint16_t> _currentSampleCircularBuf;
+	CircularBuffer<uint16_t> _voltageSampleCircularBuf;
+#if CHAR_MESHING == 1
+	power_samples_mesh_message_t* _powerSamplesMeshMsg;
+#endif
+	uint16_t _powerSamplesCount;
+//	uint16_t _lastPowerSample;
+
+	PowerSamples _powerSamples;
+	bool _powerSamplesProcessed;
 
 	uint8_t _currentLimitVal;
 
 //	pstorage_handle_t _storageHandle;
 //	ps_power_service_t _storageStruct;
 
-	app_timer_id_t _staticSamplingTimer;
+//	bool _currentLimitInitialized;
 
-	bool _adcInitialized;
-	bool _currentLimitInitialized;
-	bool _sampling;
-	uint8_t _samplingType;
-	bool _voltagePin;
-	uint16_t _samplingTime, _samplingInterval;
-
-	void sampleCurrent();
-
-	/** Initializes and starts the ADC
-	 */
-//	void sampleCurrentInit();
-
-	/** Fill up the current curve and send it out over bluetooth
-	 * @type specifies over which characteristic the current curve should be sent.
-	 */
-	void sampleCurrentDone();
+	void sampleCurrent(uint8_t type);
 };

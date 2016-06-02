@@ -1,59 +1,139 @@
 /*
- * Author: Anne van Rossum
+ * Author: Bart van Vliet
  * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: 6 Nov., 2014
+ * Date: May 27, 2016
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
 #pragma once
 
-/** StackBuffer is one of the first buffers created.
- *
- * Still in use?
+#include <cstdlib>
+#include "common/cs_Types.h"
+#include "util/cs_BleError.h"
+#include "drivers/cs_Serial.h"
+
+/** Struct with dynamic length, used by StackBuffer class.
  */
-template <class T>
-struct StackBuffer {
-	T *buffer;
-	T *ptr;
-	uint16_t size;
+template <typename T>
+struct __attribute__((__packed__)) stack_buffer_t {
+	uint16_t length;
+	T array[1]; //! Dummy size
+};
 
-	//! pushes till end of buffer
-	void push(T value) {
-		if (full()) return;
-		*ptr = value;
-		ptr++;
-		//LOGd("Add #%u", (uint8_t)(ptr-buffer));
+/** Struct with fixed length, useful when sending as payload.
+ *
+ */
+template <typename T, uint16_t S>
+struct __attribute__((__packed__)) stack_buffer_fixed_t {
+	uint16_t length;
+	T array[S];
+};
+
+template <typename T>
+class StackBuffer {
+public:
+	StackBuffer(uint16_t capacity): _buffer(NULL), _capacity(capacity), _allocatedSelf(false) {
 	}
 
-	//! pops till beginning... 0xdeafabba is an error code
-	T pop() {
-//		uint32_t value = *ptr;
-//		if (empty()) return 0xdeafabba;
-//		ptr--;
-		if (empty()) return (T)0xdeafabba; //! TODO: Assumes uint32_t for T
-		T value = *(--ptr);
-		return value;
+	virtual ~StackBuffer() {
 	}
 
-	bool empty() {
-		return (ptr == buffer);
+	uint16_t getMaxByteSize(uint16_t capacity) { return 2 + capacity * sizeof(T); }
+	uint16_t getMaxByteSize() { return getMaxByteSize(_capacity); }
+	uint16_t getMaxSize(uint16_t byteSize) { return (byteSize-2) / sizeof(T); }
+
+	bool init() {
+		if (_buffer != NULL) {
+			return false;
+		}
+		//! Allocate memory
+		_buffer = (stack_buffer_t<T>*)calloc(getMaxByteSize(), sizeof(uint8_t));
+		if (_buffer == NULL) {
+			LOGw("Could not allocate memory");
+			return false;
+		}
+		LOGd("Allocated memory at %u", _buffer);
+		_allocatedSelf = true;
+		//! Also call clear to make sure we start with a clean buffer
+		clear();
+		return true;
 	}
 
-	bool full() {
-		return ((uint16_t)(ptr - buffer) == size);
+	bool deinit() {
+		if (_buffer != NULL && _allocatedSelf) {
+			free(_buffer);
+		}
+		_allocatedSelf = false;
+		_buffer = NULL;
+		return true;
+	}
+
+	bool assign(buffer_ptr_t buffer, uint16_t bufferSize) {
+		if (getMaxSize(bufferSize) < _capacity || _allocatedSelf) {
+			LOGd("Could not assign at %u", buffer);
+			return false;
+		}
+		_buffer = (stack_buffer_t<T>*) buffer;
+		LOGd("assign at %u array=%u", buffer, _buffer->array);
+		//! Also call clear to make sure we start with a clean buffer
+		clear();
+		return true;
+	}
+
+	bool release() {
+		if (_allocatedSelf) {
+			return false;
+		}
+		_buffer = NULL;
+		return true;
+	}
+
+	stack_buffer_t<T>* getBuffer() {
+		return _buffer;
 	}
 
 	void clear() {
-		ptr = buffer;
+		_buffer->length = 0;
 	}
 
-	uint16_t count() {
-		//LOGd("Current count: %u", ptr-buffer); //seems to wait..
-		return (uint16_t)(ptr - buffer);
+	uint16_t size() const {
+		return _buffer->length;
 	}
+
+	uint16_t capacity() const {
+		return _capacity;
+	}
+
+	bool empty() const {
+		return (_buffer->length == 0);
+	}
+
+	bool full() const {
+		return (size() >= _capacity);
+	}
+
+	bool push(T value) {
+		if (full()) {
+			return false;
+		}
+//		LOGd("push %u at %u buffer=%u array=%u", value, _buffer->length, _buffer, _buffer->array);
+		_buffer->array[_buffer->length++] = value;
+		return true;
+	}
+
+	T pop() {
+		assert(!empty(), "Buffer is empty");
+		return _buffer->array[--(_buffer->length)];
+	}
+
+	T operator[](uint16_t idx) const {
+		assert(idx < size(), "Index too large");
+//		LOGd("get %u buffer=%u array=%u", idx, _buffer, _buffer->array);
+		return _buffer->array[idx];
+	}
+
+private:
+	stack_buffer_t<T>* _buffer;
+	uint16_t _capacity;
+	bool _allocatedSelf;
 };
-
-//! define alias for struct buffer
-template <class T>
-using buffer_t = StackBuffer<T>;
-//typedef struct buffer buffer_t;
