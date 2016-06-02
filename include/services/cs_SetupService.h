@@ -14,7 +14,7 @@
 #include <structs/cs_MeshCharacteristicMessage.h>
 #include <structs/buffer/cs_CharacBuffer.h>
 
-#define GENERAL_SERVICE_UPDATE_FREQUENCY 10 //! hz
+//#define GENERAL_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
 /** General Service for the Crownstone
  *
@@ -24,14 +24,14 @@
  *
  * If meshing is enabled, it is also possible to send a message into the mesh network using a characteristic.
  */
-class GeneralService: public BLEpp::Service, EventListener {
+class SetupService: public BLEpp::Service, EventListener {
 public:
 	/** Constructor for general crownstone service object
 	 *
 	 * Creates persistent storage (FLASH) object which is used internally to store name and other information that is
 	 * set over so-called configuration characteristics. It also initializes all characteristics.
 	 */
-	 GeneralService();
+	SetupService();
 
 	/** Perform non urgent functionality every main loop.
 	 *
@@ -43,7 +43,7 @@ public:
 
 //	void scheduleNextTick();
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length) {};
 
 protected:
 	/** Initialize a GeneralService object
@@ -56,9 +56,9 @@ protected:
  	 */
 	inline void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
-	/** Enable the temperature characteristic.
+	/** Enable the command characteristic.
  	 */
-	inline void addTemperatureCharacteristic();
+	inline void addMacAddressCharacteristic();
 
 	/** Enable the set configuration characteristic.
 	 *
@@ -72,41 +72,28 @@ protected:
 	 */
 	inline void addGetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
-	inline void addSelectStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size);
-	inline void addReadStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size);
-
 	/** Enable the reset characteristic.
 	 *
 	 * The reset characteristic can be used to enter bootloader mode and update the firmware.
 	 */
-	inline void addResetCharacteristic();
-
-	/** Enable the mesh characteristic.
-	 */
-	inline void addMeshCharacteristic();
-	inline void removeMeshCharacteristic();
+//	inline void addResetCharacteristic();
 
 	CharacBuffer<uint8_t>* getCharacBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
 
 private:
 
+	// stores the MAC address of the devices to be used for mesh message handling
+    ble_gap_addr_t _myAddr;
+
 	BLEpp::Characteristic<buffer_ptr_t>* _controlCharacteristic;
 
-	/** Temperature characteristic
-	 */
-	BLEpp::Characteristic<int32_t>* _temperatureCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _macAddressCharacteristic;
 
 	/** Reset characteristic
 	 *
 	 * Resets device
 	 */
 	BLEpp::Characteristic<int32_t>* _resetCharacteristic;
-
-	/** Mesh characteristic
-	 *
-	 * Sends a message over the mesh network
-	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _meshCharacteristic;
 
 	/** Set configuration characteristic
 	 *
@@ -123,13 +110,6 @@ private:
 	 */
 	BLEpp::Characteristic<buffer_ptr_t>* _setConfigurationCharacteristic;
 	
-	/** Select configuration characteristic
-	 *
-	 * Just write an identifier to read subsequently from it using <_getConfigurationCharacteristic>. See for the
-	 * possible values <_setConfigurationCharacteristic>.
-	 */
-//	BLEpp::Characteristic<uint8_t>* _selectConfigurationCharacteristic;
-
 	/** Get configuration characteristic
 	 *
 	 * You will have first to select a configuration before you can read from it. You write the identifiers also
@@ -139,12 +119,7 @@ private:
 	 */
 	BLEpp::Characteristic<buffer_ptr_t>* _getConfigurationCharacteristic;
 
-	BLEpp::Characteristic<buffer_ptr_t>* _selectStateVarCharacteristic;
-	BLEpp::Characteristic<buffer_ptr_t>* _readStateVarCharacteristic;
-
 	//! buffer object to read/write configuration characteristics
 	CharacBuffer<uint8_t> *_streamBuffer;
-
-	MeshCharacteristicMessage* _meshMessage;
 
 };

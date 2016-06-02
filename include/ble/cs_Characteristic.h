@@ -91,6 +91,8 @@ protected:
 	//! Status of CharacteristicBase (basically a bunch of 1-bit flags)
 	Status                    _status;
 
+	bool                      _encrypted;
+
 #ifdef BIG_SIZE_REQUIRED
 	bool                      .inited;
 
@@ -146,6 +148,10 @@ public:
 	 * Side effect: sets member field <_status.inited>.
 	 */
 	void init(Service* svc);
+
+	void setEncrypted(bool encrypted) {
+		_encrypted = encrypted;
+	}
 
 	/** Set this characteristic to be writable.
 	 */

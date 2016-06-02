@@ -19,7 +19,7 @@ using namespace BLEpp;
 
 const char* Service::defaultServiceName = "unnamed";
 
-void Service::configureServices(Nrf51822BluetoothStack* stack) {
+void Service::init(Nrf51822BluetoothStack* stack) {
 
 	_stack = stack;
 
@@ -39,6 +39,13 @@ void Service::configureServices(Nrf51822BluetoothStack* stack) {
 
 	_started = true;
 
+}
+
+void Service::setEncrypted(bool encrypted) {
+	//! set all characteristics to encrypted
+	for (CharacteristicBase* characteristic : getCharacteristics()) {
+		characteristic->setEncrypted(encrypted);
+	}
 }
 
 /**

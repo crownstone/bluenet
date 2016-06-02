@@ -47,7 +47,7 @@ bool EventDispatcher::addListener(EventListener *listener) {
 	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] == NULL) {
 			_listeners[i] = listener;
-			LOGi(">>> addListener: %d", i+1);
+//			LOGi(">>> addListener: %d", i+1);
 			return true;
 		}
 	}

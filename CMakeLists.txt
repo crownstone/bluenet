@@ -120,6 +120,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Dimming.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Scanner.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Scheduler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_DeviceInformationService.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_SetupService.cpp")
 IF(${INDOOR_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_IndoorLocalisationService.cpp")
 ENDIF()
@@ -135,6 +136,8 @@ ENDIF()
 IF(${SCHEDULE_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_ScheduleService.cpp")
 ENDIF()
+
+
 
 
 # should be only when creating iBeacon

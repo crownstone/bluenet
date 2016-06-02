@@ -28,6 +28,8 @@
 #define BLE_SERVICE_ALERT                        "Alert Service"
 #define BLE_SERVICE_SCHEDULE                     "Schedule Service"
 #define BLE_SERVICE_DEVICE_INFORMATION           "Device Information"
+#define BLE_SERVICE_CROWNSTONE                   "Crownstone Service"
+#define BLE_SERVICE_SETUP                        "Setup Service"
 
 #define BLE_CHAR_TEMPERATURE                     "Temperature"
 #define BLE_CHAR_RESET                           "Reset"

@@ -127,7 +127,7 @@ public:
 		}
 	};
 
-	virtual void configureServices(Nrf51822BluetoothStack* stack);
+	virtual void init(Nrf51822BluetoothStack* stack);
 	virtual void stopAdvertising() {};
 
 	virtual void on_ble_event(ble_evt_t * p_ble_evt);
@@ -166,6 +166,8 @@ public:
 		_characteristics.shrink_to_fit();
 		return *this;
 	}
+
+	void setEncrypted(bool encrypted);
 };
 
 }

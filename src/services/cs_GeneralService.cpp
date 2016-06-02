@@ -29,7 +29,7 @@ GeneralService::GeneralService() : EventListener(),
 	setUUID(UUID(GENERAL_UUID));
 	setName(BLE_SERVICE_GENERAL);
 
-	init();
+	addCharacteristics();
 
 //	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) GeneralService::staticTick);
 }
@@ -54,7 +54,7 @@ CharacBuffer<uint8_t>* GeneralService::getCharacBuffer(buffer_ptr_t& buffer, uin
 	return _streamBuffer;
 }
 
-void GeneralService::init() {
+void GeneralService::addCharacteristics() {
 	LOGi(MSG_SERVICE_GENERAL_INIT);
 
 	buffer_ptr_t buffer = NULL;

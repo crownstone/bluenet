@@ -44,7 +44,7 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0),
-				_adv_manuf_data(NULL), _crownstoneData(NULL)
+				_adv_manuf_data(NULL), _crownstoneData(NULL), _encryptionEnabled(false)
 {
 	//! setup default values.
 	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
@@ -192,12 +192,12 @@ void Nrf51822BluetoothStack::updateAppearance(uint16_t appearance) {
 	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
 }
 
-void Nrf51822BluetoothStack::configureServices() {
+void Nrf51822BluetoothStack::initServices() {
 	if (_started)
 		return;
 
 	for (Service* svc : _services) {
-		svc->configureServices(this);
+		svc->init(this);
 	}
 
 	_started = true;
@@ -678,6 +678,18 @@ bool Nrf51822BluetoothStack::isScanning() {
 //	}
 //}
 
+void Nrf51822BluetoothStack::setEncrypted(bool encrypted) {
+	if (encrypted) {
+		//! initialize device manager to handle PIN encryption keys
+		device_manager_init(false);
+	}
+
+	//! set characteristics of all services to encrypted
+	for (Service* svc : _services) {
+		svc->setEncrypted(encrypted);
+	}
+}
+
 void Nrf51822BluetoothStack::setPasskey(uint8_t* passkey) {
 	LOGd("setting passkey to: %s", std::string((char*)passkey, BLE_GAP_PASSKEY_LEN).c_str());
 	memcpy(_passkey, passkey, BLE_GAP_PASSKEY_LEN);
@@ -732,7 +744,7 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
 										   ret_code_t           event_result)
 {
 //	uint32_t err_code;
-//	LOGd("deviceManagerEvtHandler: 0x%X", p_event->event_id);
+//	LOGd("deviceManagerEvtHandler: %p", p_event->event_id);
 
 // todo: why was this here?
 //    if (event_result != BLE_GAP_SEC_STATUS_SUCCESS) {
@@ -740,6 +752,8 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
 //    	sd_ble_gap_disconnect(p_event->event_param.p_gap_param->conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
 ////!    	return NRF_ERROR_INTERNAL;
 //    }
+
+//	LOGi("event_id: %d, event_result: %d", p_event->event_id, event_result);
 
     switch (p_event->event_id)
     {
@@ -767,7 +781,11 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         	break;
         }
         case DM_EVT_SECURITY_SETUP_COMPLETE: {
-        	LOGi("bonding completed, going into normal power mode ...");
+        	if (event_result == NRF_SUCCESS) {
+        		LOGi("bonding completed, going into normal power mode ...");
+        	} else {
+        		LOGe("bonding failed with error: %d (%p)", event_result, event_result);
+        	}
 
         	//! clear timeout
         	Timer::getInstance().stop(_lowPowerTimeoutId);
@@ -860,9 +878,11 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
 //	}
 
-    if (_dm_initialized && Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
+//    if (_dm_initialized && Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
+	if (_dm_initialized) {
     	dm_ble_evt_handler(p_ble_evt);
-    }
+	}
+//    }
 
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:

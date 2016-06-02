@@ -166,6 +166,7 @@ protected:
 	uint8_t                            			_passkey[BLE_GAP_PASSKEY_LEN];
 	dm_application_instance_t                   _dm_app_handle;
 	bool                                        _dm_initialized;
+	bool                                        _encryptionEnabled;
 
 	app_timer_id_t                              _lowPowerTimeoutId;
 	app_timer_id_t                              _secReqTimerId;
@@ -207,7 +208,7 @@ public:
 	 * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in
 	 * init().
 	 */
-	void configureServices();
+	void initServices();
 
 	/*
 	 *
@@ -436,6 +437,8 @@ public:
 	void setServiceData(ServiceData* crownstoneServiceData) {
 		_crownstoneData = crownstoneServiceData;
 	}
+
+	void setEncrypted(bool encrypted);
 
 protected:
 
