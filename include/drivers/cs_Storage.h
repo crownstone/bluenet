@@ -52,10 +52,6 @@ extern "C" {
  *    uint32_t
  */
 
-/** define the maximum size for strings to be stored
- */
-#define MAX_STRING_SIZE 32
-
 /** Base class for storage structures
  */
 struct ps_storage_base_t {
@@ -94,11 +90,11 @@ struct storage_config_t {
  */
 struct ps_configuration_t : ps_storage_base_t {
 	//! device name
-	char device_name[MAX_STRING_SIZE];
+	char device_name[MAX_STRING_STORAGE_SIZE+1];
 	//! room name
-	char room[MAX_STRING_SIZE];
+	char room[MAX_STRING_STORAGE_SIZE+1];
 	//! device type
-	char device_type[MAX_STRING_SIZE];
+	char device_type[MAX_STRING_STORAGE_SIZE+1];
 	//! floor level
 	uint32_t floor;
 	//! beacon
@@ -301,6 +297,7 @@ public:
 	 * @target pointer to the output char array
 	 */
 	static void setString(std::string value, char* target);
+	static void setString(const char* value, uint16_t length, char* target);
 
 	/** Helper function to get std::string from char array in the struct
 	 * @value pointer the input char array
@@ -316,6 +313,7 @@ public:
 	 * value will be returned instead
 	 */
 	static void getString(char* value, std::string& target, std::string default_value);
+	static void getString(char* value, char* target, char* default_value, uint16_t& size);
 
 	/** Helper function to set a byte in the field of a struct
 	 * @value the byte value to be copied to the struct

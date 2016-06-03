@@ -42,13 +42,6 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, b
 	//// SPECIAL CASES
 	/////////////////////////////////////////////////
 	switch(type) {
-	case CONFIG_NAME_UUID: {
-		LOGd("Write name");
-		std::string str = std::string((char*)payload, length);
-		LOGd("Set name to: %s", str.c_str());
-		setBLEName(str);
-		return;
-	}
 	case CONFIG_WIFI_SETTINGS: {
 		LOGi("Temporarily store wifi settings");
 		//! max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
@@ -85,14 +78,6 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 	//// SPECIAL CASES
 	/////////////////////////////////////////////////
 	switch(type) {
-	case CONFIG_NAME_UUID: {
-		LOGd("Read name");
-		std::string str = getBLEName();
-		streamBuffer->fromString(str); //! TODO: can't we set this on buffer immediately?
-		streamBuffer->setType(type);
-		LOGd("Name read %s", str.c_str());
-		return true;
-	}
 	case CONFIG_WIFI_SETTINGS: {
 		LOGd("Read wifi settings. Does reset it.");
 		//! copy string, because we clear it on read
@@ -189,7 +174,7 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 			LOGw("Expected 16 bytes for UUID, received: %d", length);
 			return false;
 		}
-		log(INFO, "set uuid to: "); BLEutil::printArray(payload, 16);
+		log(INFO, "Set uuid to: "); BLEutil::printArray(payload, 16);
 		return true;
 	}
 	case CONFIG_PASSKEY: {
@@ -198,6 +183,14 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 			return false;
 		}
 		LOGi("Set passkey to %s", std::string((char*)payload, length).c_str());
+		return true;
+	}
+	case CONFIG_NAME_UUID: {
+		if (length > MAX_STRING_STORAGE_SIZE) {
+			LOGe(MSG_NAME_TOO_LONG);
+			return false;
+		}
+		LOGi("Set name to: %s", std::string((char*)payload, length).c_str());
 		return true;
 	}
 
@@ -352,6 +345,9 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_PASSKEY: {
 		return BLE_GAP_PASSKEY_LEN;
 	}
+	case CONFIG_NAME_UUID: {
+		return MAX_STRING_STORAGE_SIZE+1;
+	}
 
 	/////////////////////////////////////////////////
 	//// FLAGS
@@ -484,11 +480,18 @@ bool Settings::isEnabled(uint8_t type) {
 	}
 }
 
-bool Settings::get(uint8_t type, void* target, uint16_t size) {
+bool Settings::get(uint8_t type, void* target) {
+	uint16_t size = 0;
+	return get(type, target, size);
+}
+
+bool Settings::get(uint8_t type, void* target, uint16_t& size) {
 	switch(type) {
 	case CONFIG_NAME_UUID: {
-		std::string* p_str = (std::string*) target;
-		*p_str = getBLEName();
+		char default_name[32];
+		sprintf(default_name, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
+		char* p_value = (char*) target;
+		Storage::getString(_storageStruct.device_name, p_value, default_name, size);
 		return true;
 	}
 	case CONFIG_FLOOR_UUID: {
@@ -634,11 +637,10 @@ bool Settings::get(uint8_t type, void* target, uint16_t size) {
 
 bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 	switch(type) {
-//	case CONFIG_NAME_UUID: {
-//		std::string* p_str = (std::string*) target;
-//		*p_str = getBLEName();
-//		return true;
-//	}
+	case CONFIG_NAME_UUID: {
+		Storage::setString(std::string((char*)target, size), _storageStruct.device_name);
+		break;
+	}
 	case CONFIG_NEARBY_TIMEOUT_UUID: {
 		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.nearbyTimeout);
 		break;
@@ -741,10 +743,11 @@ bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 
 	uint8_t* p_item = getStorageItem(type);
 	if (persistent) {
+		size = getSettingsItemSize(type);
 		// minimum item size is 4
-		if (size < 4) {
-			size = 4;
-		}
+//		if (size < 4) {
+//			size = 4;
+//		}
 		savePersistentStorageItem(p_item, size);
 	}
 	return true;
@@ -799,29 +802,29 @@ void Settings::saveIBeaconPersistent() {
  *
  * @return name of the device
  */
-std::string & Settings::getBLEName() {
-	loadPersistentStorage();
-	std::string& _name = BLEpp::Nrf51822BluetoothStack::getInstance().getDeviceName();
-	Storage::getString(_storageStruct.device_name, _name, _name);
-	return _name;
-}
+//std::string & Settings::getBLEName() {
+//	loadPersistentStorage();
+//	std::string& _name = BLEpp::Nrf51822BluetoothStack::getInstance().getDeviceName();
+//	Storage::getString(_storageStruct.device_name, _name, _name);
+//	return _name;
+//}
 
 /** Write the Bluetooth name to the object representing the BLE stack.
  *
  * This updates the Bluetooth name immediately, however, it does not update the name persistently. It
  * has to be written to FLASH in that case.
  */
-void Settings::setBLEName(const std::string &name, bool persistent) {
-	if (name.length() > 31) {
-		LOGe(MSG_NAME_TOO_LONG);
-		return;
-	}
-	BLEpp::Nrf51822BluetoothStack::getInstance().updateDeviceName(name);
-	Storage::setString(name, _storageStruct.device_name);
-	if (persistent) {
-		savePersistentStorageItem((uint8_t*)_storageStruct.device_name, sizeof(_storageStruct.device_name));
-	}
-}
+//void Settings::setBLEName(const std::string &name, bool persistent) {
+//	if (name.length() > 31) {
+//		LOGe(MSG_NAME_TOO_LONG);
+//		return;
+//	}
+//	BLEpp::Nrf51822BluetoothStack::getInstance().updateDeviceName(name);
+//	Storage::setString(name, _storageStruct.device_name);
+//	if (persistent) {
+//		savePersistentStorageItem((uint8_t*)_storageStruct.device_name, sizeof(_storageStruct.device_name));
+//	}
+//}
 
 void Settings::factoryReset(uint32_t resetCode) {
 	if (resetCode != FACTORY_RESET_CODE) {

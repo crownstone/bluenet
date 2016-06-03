@@ -14,6 +14,10 @@
 /** maximum length of strings used for characteristic values */
 #define MAX_STRING_LENGTH                        25
 
+/** define the maximum size for strings to be stored
+ */
+#define MAX_STRING_STORAGE_SIZE                  31
+
 /** Command to enter the bootloader and stay there.
  *
  * This should be the same value as defined in the bootloader.

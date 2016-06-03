@@ -262,9 +262,13 @@ pstorage_size_t Storage::getOffset(ps_storage_base_t* storage, uint8_t* var) {
 }
 
 void Storage::setString(std::string value, char* target) {
-	if (value.length() < MAX_STRING_SIZE) {
-		memset(target, 0, MAX_STRING_SIZE);
-		memcpy(target, value.c_str(), value.length());
+	setString(value.c_str(), value.length(), target);
+}
+
+void Storage::setString(const char* value, uint16_t length, char* target) {
+	if (length <= MAX_STRING_STORAGE_SIZE) {
+		memset(target, 0, MAX_STRING_STORAGE_SIZE+1);
+		memcpy(target, value, length);
 	} else {
 		LOGe("string too long!!");
 	}
@@ -276,14 +280,14 @@ void Storage::getString(char* value, std::string& target, std::string default_va
 
 #ifdef PRINT_ITEMS
 	_log(INFO, "get string (raw): \r\n");
-	BLEutil::printArray((uint8_t*)value, MAX_STRING_SIZE);
+	BLEutil::printArray((uint8_t*)value, MAX_STRING_STORAGE_SIZE+1);
 #endif
 
 	target = std::string(value);
 	// if the last char is equal to FF that means the memory
 	// is new and has not yet been written to, so we use the
 	// default value. same if the stored value is an empty string
-	if (target == "" || value[MAX_STRING_SIZE-1] == 0xFF) {
+	if (target == "" || value[MAX_STRING_STORAGE_SIZE] == 0xFF) {
 #ifdef PRINT_ITEMS
 		LOGd("use default value");
 #endif
@@ -292,6 +296,35 @@ void Storage::getString(char* value, std::string& target, std::string default_va
 #ifdef PRINT_ITEMS
 		LOGd("found stored value: %s", target.c_str());
 #endif
+	}
+}
+
+// helper function to get std::string from char array, or default value
+// if the value read is empty, unassigned (filled with FF) or too long
+void Storage::getString(char* value, char* target, char* default_value, uint16_t& size) {
+
+#ifdef PRINT_ITEMS
+	_log(INFO, "get string (raw): \r\n");
+	BLEutil::printArray((uint8_t*)value, MAX_STRING_STORAGE_SIZE+1);
+#endif
+
+	std::string stringValue(value);
+	// if the last char is equal to FF that means the memory
+	// is new and has not yet been written to, so we use the
+	// default value. same if the stored value is an empty string
+	if (stringValue == "" || value[MAX_STRING_STORAGE_SIZE] == 0xFF) {
+		std::string stringDefault(default_value);
+#ifdef PRINT_ITEMS
+		LOGd("use default value: %s, len: %d", stringDefault.c_str(), stringDefault.length());
+#endif
+		memcpy(target, stringDefault.c_str(), stringDefault.length());
+		size = stringDefault.length();
+	} else {
+#ifdef PRINT_ITEMS
+		LOGd("found stored value: %s, len: %d", stringValue.c_str(), stringValue.length());
+#endif
+		memcpy(target, stringValue.c_str(), stringValue.length());
+		size = stringValue.length();
 	}
 }
 

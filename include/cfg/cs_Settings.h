@@ -124,7 +124,8 @@ public:
 
 	void factoryReset(uint32_t resetCode);
 
-	bool get(uint8_t type, void* target, uint16_t size = 0);
+	bool get(uint8_t type, void* target);
+	bool get(uint8_t type, void* target, uint16_t& size );
 	bool set(uint8_t type, void* target, bool persistent = false, uint16_t size = 0);
 
 protected:

@@ -440,17 +440,11 @@ void Crownstone::setName() {
 	std::string device_name = std::string(devicename);
 	//! End test for wouter
 #else
-
-	//! assemble default name from BLUETOOTH_NAME and COMPILATION_TIME
 	char devicename[32];
-	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
-	//! check config (storage) if another name was stored
-	std::string device_name;
-	//! first set default name in case no stored name is found
-	_stack->updateDeviceName(std::string(devicename));
-	//! then get the name from settings. if no name is stored, it will return
-	//! the previously set default name
-	device_name = Settings::getInstance().getBLEName();
+	uint16_t size;
+	_settings->get(CONFIG_NAME_UUID, devicename, size);
+	LOGd("size: %d", size);
+	std::string device_name(devicename, size);
 #endif
 	//! assign name
 	LOGi("Set name to %s", device_name.c_str());
@@ -612,6 +606,11 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	bool reconfigureBeacon = false;
 	switch(evt) {
 
+	case CONFIG_NAME_UUID: {
+		_stack->updateDeviceName(std::string((char*)p_data, length));
+		_stack->updateAdvertisement();
+		break;
+	}
 	case CONFIG_IBEACON_MAJOR: {
 		_beacon->setMajor(*(uint32_t*)p_data);
 		reconfigureBeacon = true;
