@@ -6,8 +6,6 @@
  */
 #pragma once
 
-//#include <cstdint>
-//#include <cstdio>
 #include <string>
 
 #include <ble/cs_Nordic.h>
@@ -16,7 +14,7 @@
 #include "util/cs_Utils.h"
 
 extern "C" {
-	//! the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
+	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
 	#include "pstorage_platform.h"
 	#include "pstorage.h"
 	#include "ble_types.h"
@@ -149,12 +147,6 @@ struct ps_configuration_t : ps_storage_base_t {
 	uint32_t scanFilterSendFraction;
 
 };
-
-//! INDOOR LOCALISATION SERVICE ///////////////////
-//! moved to cs_IndoorLocalisationService.h
-
-
-///////////////////////////////////////////////////
 
 /** Class to store items persistently in FLASH
  *

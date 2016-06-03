@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['lpcomp',['LPComp',['../classLPComp.html',1,'']]]
+  ['ibeacon',['IBeacon',['../classBLEpp_1_1IBeacon.html',1,'BLEpp']]],
+  ['indoorlocalizationservice',['IndoorLocalizationService',['../classIndoorLocalizationService.html',1,'']]]
 ];

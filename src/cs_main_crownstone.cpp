@@ -142,21 +142,34 @@ void Crownstone::configStack() {
  * This must be called after the SoftDevice has started.
  */
 void Crownstone::configDrivers() {
-#if PWM_ENABLE==1
-	pwm_config_t pwm_config;
-	pwm_config.num_channels = 1;
-	pwm_config.gpio_pin[0] = PIN_GPIO_SWITCH;
-	pwm_config.mode = PWM_MODE_976;
-//	pwm_config.mode = PWM_MODE_122;
+//#if PWM_ENABLE==1
+//	pwm_config_t pwm_config;
+//	pwm_config.num_channels = 1;
+//	pwm_config.gpio_pin[0] = PIN_GPIO_SWITCH;
+//	pwm_config.mode = PWM_MODE_976;
+////	pwm_config.mode = PWM_MODE_122;
+//
+//	PWM::getInstance().init(&pwm_config);
 
-	PWM::getInstance().init(&pwm_config);
+//	PWM& pwm = PWM::getInstance();
+//	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
+//	pwm.setValue(0, 0);
 
 	_temperatureGuard = new TemperatureGuard();
 	_temperatureGuard->startTicking();
-#endif
+//#endif
 
 #if HARDWARE_BOARD==PCA10001
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
+#endif
+
+#if HAS_LEDS==1
+	// Note: DO NOT USE THEM WHILE SCANNING OR MESHING ...
+	nrf_gpio_cfg_output(PIN_GPIO_LED_1);
+	nrf_gpio_cfg_output(PIN_GPIO_LED_2);
+	// setting the pin makes them turn off ....
+	nrf_gpio_pin_set(PIN_GPIO_LED_1);
+	nrf_gpio_pin_set(PIN_GPIO_LED_2);
 #endif
 }
 
@@ -208,6 +221,11 @@ void Crownstone::configure() {
 	//! in particular we need it to set interrupt priorities.
 	_stack->init();
 
+	//! init pwm
+	PWM& pwm = PWM::getInstance();
+	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
+	pwm.setValue(0, 0);
+
 	LOGi("Loading configuration");
 
 	ps_configuration_t cfg = Settings::getInstance().getConfig();
@@ -258,6 +276,11 @@ void Crownstone::configure() {
 
 	LOGi("... done");
 }
+
+//extern "C" void switchLight(void* p_event_data, uint16_t event_size) {
+//	LOGi("    switchLight");
+//	PWM::getInstance().setValue(0, 100);
+//}
 
 void Crownstone::setup() {
 	welcome();
@@ -374,6 +397,8 @@ void Crownstone::setup() {
 #endif
 #endif
 
+//	app_sched_event_put(NULL, 0, switchLight);
+
 }
 
 //! start advertising. the advertisment package depends on the device type,
@@ -396,6 +421,10 @@ void Crownstone::run() {
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();
+#endif
+
+#if POWER_SERVICE==1
+//	_powerService->startStaticSampling();
 #endif
 
 	while(1) {

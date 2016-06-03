@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Dominik Egger
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: May 11, 2015
@@ -51,6 +51,9 @@ enum ConfigurationTypes {
 
 using namespace BLEpp;
 
+/**
+ * Load settings from and save settings to persistent storage.
+ */
 class Settings {
 
 private:

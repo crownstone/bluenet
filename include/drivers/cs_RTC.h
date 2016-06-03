@@ -6,12 +6,7 @@
  */
 #pragma once
 
-//#include <stdint.h>
-//
-//#include <ble/cs_Nordic.h>
-//
 #include <drivers/cs_Timer.h>
-//#include <drivers/cs_Serial.h>
 
 /** Clock frequency of the RTC timer */
 #define RTC_CLOCK_FREQ          32768
@@ -19,8 +14,7 @@
 //#define MAX_RTC_COUNTER_VAL     0x0007FFFF //! Where did this come from?
 #define MAX_RTC_COUNTER_VAL     0x00FFFFFF
 
-/*
- * Wrapper class for RTC functions.
+/** Wrapper class for RTC functions.
  *
  * if NRF51_USE_SOFTDEVICE==1 uses the RTC0 clock
  * managed by the softdevice

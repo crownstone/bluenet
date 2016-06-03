@@ -24,6 +24,9 @@ var searchData=
   ['circularbuffer',['CircularBuffer',['../classCircularBuffer.html',1,'']]],
   ['circulardifferentialbuffer',['CircularDifferentialBuffer',['../classCircularDifferentialBuffer.html',1,'']]],
   ['cmesh',['CMesh',['../classCMesh.html',1,'']]],
+  ['command_5fmesh_5fmessage_5ft',['command_mesh_message_t',['../structcommand__mesh__message__t.html',1,'']]],
+  ['config_5fmesh_5fmessage_5ft',['config_mesh_message_t',['../structconfig__mesh__message__t.html',1,'']]],
   ['crownstone',['Crownstone',['../classCrownstone.html',1,'']]],
+  ['current_5fcurve_5ft',['current_curve_t',['../structcurrent__curve__t.html',1,'']]],
   ['currentcurve',['CurrentCurve',['../classCurrentCurve.html',1,'']]]
 ];

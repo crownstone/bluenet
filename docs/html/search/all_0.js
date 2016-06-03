@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['_5f_5fattribute_5f_5f',['__attribute__',['../structps__configuration__t.html#a5588d9753d02ed080048278344ebea41',1,'ps_configuration_t']]],
   ['_5fappearance',['_appearance',['../classBLEpp_1_1Nrf51822BluetoothStack.html#a0797f24b0c2dbd2cb32c91d080f9d527',1,'BLEpp::Nrf51822BluetoothStack']]],
   ['_5fapptimerid',['_appTimerId',['../classBLEpp_1_1Service.html#a517ae9ffc6d00e49cc8a6c5e3530b15a',1,'BLEpp::Service']]],
   ['_5fcallback_5fdisconnected',['_callback_disconnected',['../classBLEpp_1_1Nrf51822BluetoothStack.html#a81d52ead2eb111a0770f202aa6994bec',1,'BLEpp::Nrf51822BluetoothStack']]],
@@ -13,12 +12,9 @@ var searchData=
   ['_5fgetconfigurationcharacteristic',['_getConfigurationCharacteristic',['../classGeneralService.html#a78cec68613106231027c207741208fe6',1,'GeneralService']]],
   ['_5fhandles',['_handles',['../classBLEpp_1_1CharacteristicBase.html#a122abcf5ffcd0d534c132ff7b5a37ae1',1,'BLEpp::CharacteristicBase']]],
   ['_5finited',['_inited',['../classBLEpp_1_1Nrf51822BluetoothStack.html#a512c4ba264da35e94f200adab730df86',1,'BLEpp::Nrf51822BluetoothStack']]],
-  ['_5fmaxvalue',['_maxValue',['../classPWM.html#a59ddb55cb0f6d07865e475f7d98e9a41',1,'PWM']]],
   ['_5fmeshcharacteristic',['_meshCharacteristic',['../classGeneralService.html#ad297805b7bbbfd1848c4922169a8321c',1,'GeneralService']]],
   ['_5fname',['_name',['../classBLEpp_1_1CharacteristicBase.html#ae9b89ae68846aa6ccca59da5e6ff8d7a',1,'BLEpp::CharacteristicBase']]],
-  ['_5fnextvalue',['_nextValue',['../classPWM.html#ab97c8eabd55402e17f66b7adcd4df995',1,'PWM']]],
   ['_5fnotificationpending',['_notificationPending',['../classBLEpp_1_1CharacteristicGeneric.html#a1d584c15079234cc9e7b2784ac892068',1,'BLEpp::CharacteristicGeneric']]],
-  ['_5fnumchannels',['_numChannels',['../classPWM.html#a0296c0728d839bd7f4e2c42deb08a9a8',1,'PWM']]],
   ['_5fpasskey',['_passkey',['../classBLEpp_1_1Nrf51822BluetoothStack.html#a7cafeea560d154bad2deaf441a56a9df',1,'BLEpp::Nrf51822BluetoothStack']]],
   ['_5fradio_5fnotify',['_radio_notify',['../classBLEpp_1_1Nrf51822BluetoothStack.html#a1c7429a4f1d08a3e982d412264424050',1,'BLEpp::Nrf51822BluetoothStack']]],
   ['_5freadperm',['_readperm',['../classBLEpp_1_1CharacteristicBase.html#ac85527a1c98d7737b2b43f152a100f8c',1,'BLEpp::CharacteristicBase']]],

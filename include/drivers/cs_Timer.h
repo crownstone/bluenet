@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Anne van Rossum
  * Copyrights: Distributed Organism B.V. (DoBots, http://dobots.nl)
  * Date: 21 Apr., 2015
@@ -18,10 +18,11 @@ extern "C" {
 #define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz, APP_TIMER_PRESCALER)
 #define MS_TO_TICKS(ms) APP_TIMER_TICKS(ms, APP_TIMER_PRESCALER)
 
+/** Timer on top of the timer peripheral.
+ */
 class Timer {
 
 private:
-//	Timer();
 	Timer() {
 		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);

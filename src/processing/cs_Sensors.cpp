@@ -28,7 +28,7 @@
  */
 //#define LIGHT_SENSOR_ENABLED
 //#define THERMAL_SENSOR_ENABLED
-#define PUSH_BUTTON_ENABLED
+//#define PUSH_BUTTON_ENABLED
 //#define SWITCH_ENABLED
 
 /** Choose which way the switch should be checked

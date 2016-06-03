@@ -138,7 +138,7 @@ extern "C" void ADC_IRQHandler(void) {
 //	}
 
 	//! Use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
-	//NRF_ADC->TASKS_STOP = 1;
+//	NRF_ADC->TASKS_STOP = 1;
 
 	//! next sample
 	NRF_ADC->TASKS_START = 1;

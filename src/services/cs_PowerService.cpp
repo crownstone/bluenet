@@ -337,11 +337,11 @@ void PowerService::sampleCurrent(uint8_t type) {
 //	ADC::getInstance().setPowerCurve(_powerCurve);
 
 	ADC::getInstance().init(PIN_AIN_CURRENT);
-	ADC::getInstance().start();
 	while (!_powerCurve->isFull()) {
+		ADC::getInstance().start();
 		while(!NRF_ADC->EVENTS_END) {}
-		//			NRF_ADC->EVENTS_END	= 0;
-		//			LOGd("got sample");
+//		NRF_ADC->EVENTS_END	= 0;
+//		LOGd("got sample");
 		if (_voltagePin) {
 			PC_ERR_CODE res = _powerCurve->addVoltage(NRF_ADC->RESULT, RTC::getCount());
 //			LOGd("%i %i voltage: %i", res, _powerCurve->length(), NRF_ADC->RESULT);
@@ -353,8 +353,8 @@ void PowerService::sampleCurrent(uint8_t type) {
 			ADC::getInstance().config(PIN_AIN_VOLTAGE);
 		}
 		_voltagePin = !_voltagePin;
-		ADC::getInstance().start();
 	}
+	ADC::getInstance().stop();
 	LOGd("sampleCurrentDone");
 	sampleCurrentDone(type);
 }
