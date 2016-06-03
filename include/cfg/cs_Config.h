@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#define DOBOTS_ID                                0x1111
+#define CROWNSTONE_COMPANY_ID                    0x038E
 
 //! size of the buffer used for characteristics
 //#define GENERAL_BUFFER_SIZE                      300

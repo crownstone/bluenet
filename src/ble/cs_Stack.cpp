@@ -430,7 +430,7 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 //		ble_advdata_manuf_data_t manufac;
 		memset(&_manufac, 0, sizeof(_manufac));
 		//! TODO: made up ID, has to be replaced by official ID
-		_manufac.company_identifier = DOBOTS_ID; //! DoBots Company ID
+		_manufac.company_identifier = CROWNSTONE_COMPANY_ID; //! DoBots Company ID
 		_manufac.data.size = 0;
 
 		DoBotsManufac dobotsManufac(deviceType);

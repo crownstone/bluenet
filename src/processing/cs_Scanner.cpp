@@ -276,7 +276,7 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 		//! word aligned!! So have to shift it by hand
 		uint16_t companyIdentifier = type_data.p_data[1] << 8 | type_data.p_data[0];
 		if (type_data.data_len >= 3 &&
-			companyIdentifier == DOBOTS_ID) {
+			companyIdentifier == CROWNSTONE_COMPANY_ID) {
 //			LOGi("is dobots device!");
 
 //			_logFirst(INFO, "parse data");
