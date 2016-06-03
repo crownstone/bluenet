@@ -4,7 +4,7 @@
 # Should be 10 characters or less (we need room for compilation date after it)
 BLUETOOTH_NAME="crown"
 
-FIRMWARE_VERSION="0.0.1"
+FIRMWARE_VERSION="0.3.0"
 
 # The device type defines how the device advertises itself, Apps and Bluenet Library
 # will use this to filter for device type.

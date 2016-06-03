@@ -1,3 +1,6 @@
+# Bluenet protocol v0.3.0
+-------------------------
+
 # Advertisements and scan response
 When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
 
