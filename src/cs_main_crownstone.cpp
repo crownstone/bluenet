@@ -479,7 +479,7 @@ void Crownstone::prepareCrownstone() {
 			nrf_gpio_range_cfg_output(7,14);
 #endif
 
-		_mesh = &CMesh::getInstance();
+		_mesh = &Mesh::getInstance();
 	}
 
 #if RESET_COUNTER==1

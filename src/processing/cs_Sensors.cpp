@@ -14,7 +14,6 @@
 #include "drivers/cs_Serial.h"
 #include "drivers/cs_ADC.h"
 #include "drivers/cs_RTC.h"
-#include "structs/cs_CurrentCurve.h"
 
 #include <ble/cs_Nordic.h>
 #include "drivers/cs_PWM.h"
@@ -167,10 +166,11 @@ uint16_t Sensors::sampleSensor() {
 		return result;
 	}
 
-	CurrentCurve<uint16_t> _currentCurve;
+	// TODO
+//	CurrentCurve<uint16_t> _currentCurve;
 
 	//! Start storing the samples
-	_currentCurve.clear();
+//	_currentCurve.clear();
 //	ADC::getInstance().setCurrentCurve(&_currentCurve);
 
 	// TODO
@@ -193,39 +193,39 @@ uint16_t Sensors::sampleSensor() {
 	//! Stop storing the samples
 //	ADC::getInstance().setCurrentCurve(NULL);
 
-	uint16_t numSamples = _currentCurve.length();
-	LOGd("numSamples = %i", numSamples);
-
-	if (numSamples>1) {
-		uint32_t timestamp = 0;
-		uint16_t voltage = 0;
-		uint16_t average = 0;
-
-		for (uint16_t i=0; i<numSamples; ++i) {
-			if (_currentCurve.getValue(i, voltage, timestamp) != CC_SUCCESS) {
-				break;
-			}
-			//			_log(INFO, "%u %u,  ", timestamp, voltage);
-			//			if (!((i+1) % 5)) {
-			//				_log(INFO, "\r\n");
-			//			}
-			average += voltage;
-		}
-		//		_log(INFO, "\r\n");
-		average /= numSamples;
-
-		//! Measured voltage goes from 0-3.6V, measured as 0-1023(10 bit),
-		//! but Input voltage is from 0-3V (for Nordic EK) and 0-3.3 for Crownstone
-		//! so we need to rescale the value to have max at 3V (or 3.3V resp)
-		//! instead of 3.6V
-#if(HARDWARE_BOARD==CROWNSTONE)
-		average *= 3.6/3.3;
-#elif(HARDWARE_BOARD==PCA10001)
-		average *= 3.6/3.0;
-#endif
-
-		result = average;
-	}
+//	uint16_t numSamples = _currentCurve.length();
+//	LOGd("numSamples = %i", numSamples);
+//
+//	if (numSamples>1) {
+//		uint32_t timestamp = 0;
+//		uint16_t voltage = 0;
+//		uint16_t average = 0;
+//
+//		for (uint16_t i=0; i<numSamples; ++i) {
+//			if (_currentCurve.getValue(i, voltage, timestamp) != CC_SUCCESS) {
+//				break;
+//			}
+//			//			_log(INFO, "%u %u,  ", timestamp, voltage);
+//			//			if (!((i+1) % 5)) {
+//			//				_log(INFO, "\r\n");
+//			//			}
+//			average += voltage;
+//		}
+//		//		_log(INFO, "\r\n");
+//		average /= numSamples;
+//
+//		//! Measured voltage goes from 0-3.6V, measured as 0-1023(10 bit),
+//		//! but Input voltage is from 0-3V (for Nordic EK) and 0-3.3 for Crownstone
+//		//! so we need to rescale the value to have max at 3V (or 3.3V resp)
+//		//! instead of 3.6V
+//#if(HARDWARE_BOARD==CROWNSTONE)
+//		average *= 3.6/3.3;
+//#elif(HARDWARE_BOARD==PCA10001)
+//		average *= 3.6/3.0;
+//#endif
+//
+//		result = average;
+//	}
 
 	//! Unlock the buffer
 	mb.unlock();

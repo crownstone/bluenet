@@ -6,7 +6,7 @@
  */
 #include <ble/cs_ServiceData.h>
 
-#include <cfg/cs_StateVars.h>
+#include <storage/cs_StateVars.h>
 
 void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		switch(evt) {

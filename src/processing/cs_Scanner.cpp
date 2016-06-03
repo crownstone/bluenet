@@ -6,8 +6,8 @@
  */
 #include "processing/cs_Scanner.h"
 
-#include <protocol/cs_MeshControl.h>
-#include <cfg/cs_Settings.h>
+#include <mesh/cs_MeshControl.h>
+#include <storage/cs_Settings.h>
 
 #include <cfg/cs_DeviceTypes.h>
 #include <ble/cs_DoBotsManufac.h>

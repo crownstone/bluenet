@@ -25,7 +25,7 @@ extern "C" {
 }
 
 #include <drivers/cs_Storage.h>
-#include <cfg/cs_Settings.h>
+#include <storage/cs_Settings.h>
 #include "util/cs_Utils.h"
 #include <cfg/cs_UuidConfig.h>
 

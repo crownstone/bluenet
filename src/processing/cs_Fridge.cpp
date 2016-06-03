@@ -8,7 +8,7 @@
 #include "processing/cs_Fridge.h"
 //#include "drivers/cs_RTC.h"
 #include "drivers/cs_Timer.h"
-#include <cfg/cs_Settings.h>
+#include <storage/cs_Settings.h>
 #include "drivers/cs_Temperature.h"
 #include <events/cs_EventDispatcher.h>
 

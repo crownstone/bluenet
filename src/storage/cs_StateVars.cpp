@@ -6,7 +6,7 @@
  * License: LGPLv3+
  */
 
-#include <cfg/cs_StateVars.h>
+#include <storage/cs_StateVars.h>
 #include <events/cs_EventDispatcher.h>
 
 #include <algorithm>

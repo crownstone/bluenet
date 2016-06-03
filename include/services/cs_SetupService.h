@@ -12,7 +12,7 @@
 #include <ble/cs_Characteristic.h>
 #include <events/cs_EventListener.h>
 #include <structs/cs_MeshCharacteristicMessage.h>
-#include <structs/buffer/cs_CharacBuffer.h>
+#include <structs/cs_CharacBuffer.h>
 
 //#define GENERAL_SERVICE_UPDATE_FREQUENCY 10 //! hz
 

@@ -13,8 +13,8 @@
 #include <ble/cs_Stack.h>
 #include <ble/cs_iBeacon.h>
 
-#include <cfg/cs_Settings.h>
-#include <cfg/cs_StateVars.h>
+#include <storage/cs_Settings.h>
+#include <storage/cs_StateVars.h>
 
 #include <events/cs_EventListener.h>
 
@@ -35,7 +35,7 @@
 #include <processing/cs_Tracker.h>
 #include <processing/cs_PowerSampling.h>
 
-#include <protocol/cs_Mesh.h>
+#include <mesh/cs_Mesh.h>
 
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
@@ -156,7 +156,7 @@ private:
 	IBeacon* _beacon;
 
 	// processing
-	CMesh* _mesh;
+	Mesh* _mesh;
 	Sensors* _sensors;
 	Fridge* _fridge;
 	CommandHandler* _commandHandler;

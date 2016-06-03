@@ -7,12 +7,8 @@
 
 #include <services/cs_SetupService.h>
 
-#include <cfg/cs_Settings.h>
-//#include <cfg/cs_StateVars.h>
+#include <storage/cs_Settings.h>
 #include <cfg/cs_UuidConfig.h>
-//#include <drivers/cs_Temperature.h>
-//#include <drivers/cs_Timer.h>
-//#include <protocol/cs_MeshControl.h>
 #include <processing/cs_CommandHandler.h>
 #include <structs/buffer/cs_MasterBuffer.h>
 
@@ -20,11 +16,7 @@ using namespace BLEpp;
 
 SetupService::SetupService() :
 		EventListener(),
-//		_commandCharacteristic(NULL), _temperatureCharacteristic(NULL), _resetCharacteristic(NULL),
-//		_meshCharacteristic(NULL), _setConfigurationCharacteristic(NULL), _getConfigurationCharacteristic(NULL),
-//		_selectStateVarCharacteristic(NULL), _readStateVarCharacteristic(NULL),
 		_streamBuffer(NULL)
-//	, _meshMessage(NULL)
 
 {
 //	EventDispatcher::getInstance().addListener(this);
@@ -105,74 +97,6 @@ void SetupService::addCharacteristics() {
 
 //void GeneralService::scheduleNextTick() {
 //	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(GENERAL_SERVICE_UPDATE_FREQUENCY), this);
-//}
-
-//void GeneralService::addTemperatureCharacteristic() {
-//	_temperatureCharacteristic = new Characteristic<int32_t>();
-//	addCharacteristic(_temperatureCharacteristic);
-//
-//	_temperatureCharacteristic->setUUID(UUID(getUUID(), TEMPERATURE_UUID));
-//	_temperatureCharacteristic->setName(BLE_CHAR_TEMPERATURE);
-//	_temperatureCharacteristic->setDefaultValue(0);
-//	_temperatureCharacteristic->setNotifies(true);
-//}
-
-//void GeneralService::addResetCharacteristic() {
-//	_resetCharacteristic = new Characteristic<int32_t>();
-//	addCharacteristic(_resetCharacteristic);
-//
-//	_resetCharacteristic->setUUID(UUID(getUUID(), RESET_UUID));
-//	_resetCharacteristic->setName(BLE_CHAR_RESET);
-//	_resetCharacteristic->setDefaultValue(0);
-//	_resetCharacteristic->setWritable(true);
-//	_resetCharacteristic->onWrite([&](const int32_t& value) -> void {
-//		CommandHandler::getInstance().handleCommand(CMD_RESET, (buffer_ptr_t)&value, 4);
-//	});
-//}
-
-//void GeneralService::addMeshCharacteristic() {
-//
-//	if (_meshCharacteristic) {
-//		LOGe("mesh characteristic already added");
-//		return;
-//	}
-//
-//	_meshMessage = new MeshCharacteristicMessage();
-//
-//	MasterBuffer& mb = MasterBuffer::getInstance();
-//	buffer_ptr_t buffer = NULL;
-//	uint16_t size = 0;
-//	mb.getBuffer(buffer, size);
-//
-//	_meshMessage->assign(buffer, size);
-//
-//	_meshCharacteristic = new Characteristic<buffer_ptr_t>();
-//	addCharacteristic(_meshCharacteristic);
-//
-//	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_CONTROL_UUID));
-//	_meshCharacteristic->setName(BLE_CHAR_MESH);
-//	_meshCharacteristic->setWritable(true);
-//	_meshCharacteristic->setValue(buffer);
-//	_meshCharacteristic->setMaxLength(size);
-//	_meshCharacteristic->setDataLength(0);
-//	_meshCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
-//		LOGi(MSG_MESH_MESSAGE_WRITE);
-//
-//		uint8_t handle = _meshMessage->channel();
-//		uint8_t* p_data;
-//		uint16_t length;
-//		_meshMessage->data(p_data, length);
-//
-//		MeshControl::getInstance().send(handle, p_data, length);
-//	});
-//}
-//
-//void GeneralService::removeMeshCharacteristic() {
-//	if (_meshMessage) free(_meshMessage);
-//	if (_meshCharacteristic) {
-//		removeCharacteristic(_meshCharacteristic);
-//		free(_meshCharacteristic);
-//	}
 //}
 
 void SetupService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
@@ -289,111 +213,3 @@ void SetupService::addGetConfigurationCharacteristic(buffer_ptr_t buffer, uint16
 	_getConfigurationCharacteristic->setMaxLength(size);
 	_getConfigurationCharacteristic->setDataLength(size);
 }
-
-//void GeneralService::addSelectStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size) {
-//	_selectStateVarCharacteristic = new Characteristic<buffer_ptr_t>();
-//	addCharacteristic(_selectStateVarCharacteristic);
-//
-//	_selectStateVarCharacteristic->setUUID(UUID(getUUID(), WRITE_STATEVAR_UUID));
-//	_selectStateVarCharacteristic->setName(BLE_CHAR_STATEVAR_WRITE);
-//	_selectStateVarCharacteristic->setWritable(true);
-//	_selectStateVarCharacteristic->setValue(buffer);
-//	_selectStateVarCharacteristic->setMaxLength(size);
-//	_selectStateVarCharacteristic->setDataLength(size);
-//	_selectStateVarCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
-//		if (!value) {
-//			LOGw(MSG_CHAR_VALUE_UNDEFINED);
-//		} else {
-//			LOGi(MSG_CHAR_VALUE_WRITE);
-//			MasterBuffer& mb = MasterBuffer::getInstance();
-//			// at this point it is too late to check if mb was locked, because the softdevice doesn't care
-//			// if the mb was locked, it writes to the buffer in any case
-//			if (!mb.isLocked()) {
-//				mb.lock();
-//
-//				uint8_t type = _streamBuffer->type();
-//				uint8_t opCode = _streamBuffer->opCode();
-//
-//				if (opCode == READ_VALUE) {
-//					LOGi("Read state var");
-//					bool success = StateVars::getInstance().readFromStorage(type, _streamBuffer);
-//					if (success) {
-//						_streamBuffer->setOpCode(READ_VALUE);
-//						_readStateVarCharacteristic->setDataLength(_streamBuffer->getDataLength());
-//						_readStateVarCharacteristic->notify();
-//					}
-//				} else if (opCode == NOTIFY_VALUE) {
-//					LOGi("State var notification");
-//					if (_streamBuffer->length() == 1) {
-//						bool enable = *((bool*) _streamBuffer->payload());
-//						StateVars::getInstance().setNotify(type, enable);
-//					} else {
-//						LOGe("wrong length received!");
-//					}
-//				} else if (opCode == WRITE_VALUE) {
-//					LOGi("Write state var");
-//					StateVars::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length());
-//				}
-//
-//				mb.unlock();
-//			} else {
-//				LOGe(MSG_BUFFER_IS_LOCKED);
-//			}
-//		}
-//	});
-//}
-//
-//void GeneralService::addReadStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size) {
-//	_readStateVarCharacteristic = new Characteristic<buffer_ptr_t>();
-//	addCharacteristic(_readStateVarCharacteristic);
-//
-//	_readStateVarCharacteristic->setUUID(UUID(getUUID(), READ_STATEVAR_UUID));
-//	_readStateVarCharacteristic->setName(BLE_CHAR_STATEVAR_READ);
-//	_readStateVarCharacteristic->setWritable(false);
-//	_readStateVarCharacteristic->setNotifies(true);
-//	_readStateVarCharacteristic->setValue(buffer);
-//	_readStateVarCharacteristic->setMaxLength(size);
-//	_readStateVarCharacteristic->setDataLength(size);
-//}
-//
-//void GeneralService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-//	switch (evt) {
-//	case EVT_ENABLED_MESH : {
-////		bool enable = *(bool*)p_data;
-////		if (enable) {
-////			addMeshCharacteristic();
-////		} else {
-////			removeMeshCharacteristic();
-////		}
-////		EventDispatcher::getInstance().dispatch(EVT_CHARACTERISTICS_UPDATED);
-//		break;
-//	}
-//	case SV_TEMPERATURE: {
-//		if (_temperatureCharacteristic) {
-//			int32_t temperature = *(int32_t*)p_data;
-////			LOGd("udpate temperature characteristic: %d", temperature);
-//			*_temperatureCharacteristic = temperature;
-//		}
-//#ifdef MICRO_VIEW
-//		//! Update temperature at the display
-//		write("1 %i\r\n", temp);
-//#endif
-//		break;
-//	}
-//	case EVT_STATE_VARS_NOTIFICATION: {
-//		if (_readStateVarCharacteristic) {
-//			state_vars_notifaction notification = *(state_vars_notifaction*)p_data;
-////			log(DEBUG, "send notification for %d, value:", notification.type);
-//			BLEutil::printArray(notification.data, notification.dataLength);
-//
-//			_streamBuffer->setPayload(notification.data, notification.dataLength);
-//			_streamBuffer->setType(notification.type);
-//			_streamBuffer->setOpCode(NOTIFY_VALUE);
-//
-//			_readStateVarCharacteristic->setDataLength(_streamBuffer->getDataLength());
-//			_readStateVarCharacteristic->notify();
-//		}
-//	}
-//	}
-//}
-

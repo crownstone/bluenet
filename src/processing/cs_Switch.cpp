@@ -11,7 +11,7 @@
 #include <cfg/cs_Config.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_PWM.h>
-#include <cfg/cs_StateVars.h>
+#include <storage/cs_StateVars.h>
 
 Switch::Switch() :
 		_switchValue(0)

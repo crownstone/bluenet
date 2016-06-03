@@ -7,8 +7,8 @@
 
 #include <processing/cs_Tracker.h>
 
-#include <cfg/cs_Settings.h>
-#include <cfg/cs_StateVars.h>
+#include <storage/cs_Settings.h>
+#include <storage/cs_StateVars.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_PWM.h>
 

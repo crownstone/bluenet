@@ -8,7 +8,7 @@
 
 #include <events/cs_EventTypes.h>
 #include <drivers/cs_Storage.h>
-#include <structs/buffer/cs_StreamBuffer.h>
+#include <structs/cs_StreamBuffer.h>
 
 /** Configuration types
  *

@@ -12,7 +12,7 @@
 
 #include <ble/cs_Softdevice.h>
 
-#include <cfg/cs_Settings.h>
+#include <storage/cs_Settings.h>
 
 using namespace BLEpp;
 

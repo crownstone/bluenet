@@ -42,7 +42,7 @@ extern "C" {
 
 /** Wrapper class around the mesh protocol files.
  */
-class CMesh {
+class Mesh {
 private:
 
 	//! app timer id for tick function
@@ -52,16 +52,16 @@ private:
 	uint32_t                 _mesh_init_time = 0;
 
 	//! constructor is hidden from the user
-	CMesh();
+	Mesh();
 
 	//! destructor is hidden from the user
-	~CMesh();
+	~Mesh();
 
-	CMesh(CMesh const&); //! singleton, deny implementation
-	void operator=(CMesh const &); //! singleton, deny implementation
+	Mesh(Mesh const&); //! singleton, deny implementation
+	void operator=(Mesh const &); //! singleton, deny implementation
 
 	void tick();
-	static void staticTick(CMesh* ptr) {
+	static void staticTick(Mesh* ptr) {
 		ptr->tick();
 	}
 
@@ -72,8 +72,8 @@ private:
 
 public:
 	//! use static variant of singleton, no dynamic memory allocation
-	static CMesh& getInstance() {
-		static CMesh instance;
+	static Mesh& getInstance() {
+		static Mesh instance;
 		return instance;
 	}
 

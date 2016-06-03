@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "structs/buffer/cs_StreamBuffer.h"
+#include "cs_StreamBuffer.h"
 
 //using namespace BLEpp;
 

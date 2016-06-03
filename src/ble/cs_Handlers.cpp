@@ -6,7 +6,7 @@
 
 #include "ble/cs_Handlers.h"
 
-#include <cfg/cs_Settings.h>
+#include <storage/cs_Settings.h>
 
 #ifdef __cplusplus
 extern "C" {

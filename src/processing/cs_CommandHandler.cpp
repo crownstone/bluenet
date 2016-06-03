@@ -7,14 +7,14 @@
 
 #include <processing/cs_CommandHandler.h>
 
-#include <cfg/cs_Settings.h>
-#include <cfg/cs_StateVars.h>
+#include <storage/cs_Settings.h>
+#include <storage/cs_StateVars.h>
 #include <drivers/cs_Serial.h>
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_Switch.h>
-#include <protocol/cs_MeshControl.h>
+#include <mesh/cs_MeshControl.h>
 
 void reset(void* p_context) {
 

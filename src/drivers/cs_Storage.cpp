@@ -17,9 +17,9 @@
 #include "drivers/cs_Storage.h"
 
 #include <climits>
-#include "cfg/cs_StateVars.h"
 
-#include <cfg/cs_Settings.h>
+#include "storage/cs_StateVars.h"
+#include <storage/cs_Settings.h>
 
 extern "C"  {
 

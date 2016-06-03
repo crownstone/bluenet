@@ -7,7 +7,7 @@
 
 #include <processing/cs_Scheduler.h>
 
-#include <cfg/cs_StateVars.h>
+#include <storage/cs_StateVars.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_PWM.h>
 #include <drivers/cs_RTC.h>

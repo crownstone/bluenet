@@ -6,17 +6,11 @@
  */
 #pragma once
 
-//#include "ble_gap.h"
-//#include "ble_gatts.h"
-//
+#include <ble/cs_Nordic.h>
 #include <common/cs_Types.h>
 #include "structs/cs_BufferAccessor.h"
 #include <util/cs_BleError.h>
 #include "drivers/cs_Serial.h"
-//
-//#include "common/cs_MasterBuffer.h"
-
-//using namespace BLEpp;
 
 /** The size of the header used in the scan list message
  *

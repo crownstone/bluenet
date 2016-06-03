@@ -30,36 +30,41 @@
 
 enum PowerCharacteristicsIDs {
 	PWM_UUID                                = 0x1, //cmd
-	SAMPLE_CURRENT_UUID                     = 0x2, // remove?
+//	UNUSED                                  = 0x2,
 	POWER_SAMPLES_UUID                      = 0x3, //state
 	CURRENT_CONSUMPTION_UUID                = 0x4, //state
-//	CURRENT_LIMIT_UUID                      = 0x5, //cfg
+//	UNUSED                                  = 0x5, //cfg
 
 	RELAY_UUID                              = 0x6, //cmd
 };
 
 enum SetupCharacteristicsIDs {
+//	CONTROL_UUID                            = 0x1,
 	MAC_ADDRESS_UUID                        = 0x2
 };
 
 enum GeneralCharacteristicsIDs {
 	CONTROL_UUID                            = 0x1,
 	MESH_CONTROL_UUID                       = 0x2,
-	WRITE_CONFIGURATION_UUID                = 0x7, // 0x03
-	READ_CONFIGURATION_UUID                 = 0x9, // 0x04
-	WRITE_STATEVAR_UUID                     = 0xA, // 0x05
-	READ_STATEVAR_UUID                      = 0xB, // 0x06
-	TEMPERATURE_UUID                        = 0xC, // 0x07
-	RESET_UUID                              = 0x5, // 0x08
+//	MESH_READ_UUID                          = 0x3,
+//	UNUSED_UUID                             = 0x4,
+	RESET_UUID                              = 0x5, // 0x09
+//	UNUSED_UUID                             = 0x6,
+	WRITE_CONFIGURATION_UUID                = 0x7, // 0x04
+//	UNUSED_UUID                             = 0x8, // 0x08
+	READ_CONFIGURATION_UUID                 = 0x9, // 0x05
+	WRITE_STATEVAR_UUID                     = 0xA, // 0x06
+	READ_STATEVAR_UUID                      = 0xB, // 0x07
+	TEMPERATURE_UUID                        = 0xC, // 0x08
 };
 
 enum IndoorLocalizationCharacteristicsIDs {
 	RSSI_UUID                               = 0x1, //state
-	TRACKED_DEVICE_UUID                     = 0x2, //behav
-	SCAN_DEVICE_UUID                        = 0x3, // remove?
-	LIST_DEVICE_UUID                        = 0x4, // remove?
-	TRACKED_DEVICE_LIST_UUID                = 0x5, //behav
-};//behav
+	TRACKED_DEVICE_UUID                     = 0x2, //behave, cmd?
+	SCAN_DEVICE_UUID                        = 0x3, //cmd
+	LIST_DEVICE_UUID                        = 0x4, //state
+	TRACKED_DEVICE_LIST_UUID                = 0x5, //state
+};
 
 enum AlertCharacteristicsIDs {
 	SUPPORTED_NEW_ALERT_UUID                = 0x1,

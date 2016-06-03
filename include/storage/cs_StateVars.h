@@ -6,9 +6,9 @@
  */
 #pragma once
 
-#include <drivers/cs_CyclicStorage.h>
 #include <events/cs_EventTypes.h>
-#include <structs/buffer/cs_StreamBuffer.h>
+#include <structs/cs_StreamBuffer.h>
+#include <storage/cs_CyclicStorage.h>
 
 #define OPERATION_MODE_SETUP 0xFF
 #define OPERATION_MODE_NORMAL 0x10

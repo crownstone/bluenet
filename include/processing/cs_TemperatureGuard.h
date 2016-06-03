@@ -11,7 +11,7 @@
 #include "drivers/cs_PWM.h"
 #include "drivers/cs_Temperature.h"
 #include <cstdint>
-#include "cfg/cs_Settings.h"
+#include "storage/cs_Settings.h"
 #include "events/cs_EventListener.h"
 #include <events/cs_EventDispatcher.h>
 

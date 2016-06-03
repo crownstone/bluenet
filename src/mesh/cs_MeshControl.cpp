@@ -9,13 +9,13 @@
 // enable for additional debug output
 //#define PRINT_DEBUG
 
-#include <protocol/cs_MeshControl.h>
+#include <mesh/cs_MeshControl.h>
 
-#include <cfg/cs_Settings.h>
+#include <storage/cs_Settings.h>
 #include <drivers/cs_RNG.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>
-#include <protocol/cs_Mesh.h>
+#include <mesh/cs_Mesh.h>
 
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
@@ -289,7 +289,7 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 			LOGd("received broadcast, send into mesh and handle directly");
 			log(INFO, "message:");
 			BLEutil::printArray((uint8_t*)p_data, length);
-			CMesh::getInstance().send(channel, p_data, length);
+			Mesh::getInstance().send(channel, p_data, length);
 			// [30.05.16] as long as we don't call this function in an interrupt, we don't need to
 			//   decouple it anymore, because softdevice events are handled already by the scheduler
 			//	 BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
@@ -298,7 +298,7 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 		} else if (!isMessageForUs(p_data)) {
 			//! message is not for us, send it into mesh
 			LOGd("send it into mesh ...");
-			CMesh::getInstance().send(channel, p_data, length);
+			Mesh::getInstance().send(channel, p_data, length);
 		} else {
 			//! message is for us, handle directly, no reason to send it into the mesh!
 			LOGd("message is for us, handle directly");
@@ -321,7 +321,7 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
 		//! otherwise, send it into the mesh, so that it is being forwarded
 		//! to the hub
-		CMesh::getInstance().send(channel, p_data, length);
+		Mesh::getInstance().send(channel, p_data, length);
 
 //		}
 
@@ -349,7 +349,7 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 		LOGi("message data:");
 		BLEutil::printArray(&message, sizeof(message));
 
-		CMesh::getInstance().send(HUB_CHANNEL, &message, sizeof(message));
+		Mesh::getInstance().send(HUB_CHANNEL, &message, sizeof(message));
 	}
 
 }
@@ -362,7 +362,7 @@ void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples)
 	memcpy(&message.powerSamplesMsg, samples, sizeof(power_samples_mesh_message_t));
 //	uint16_t handle = (message.header.sourceAddress[0] % (MESH_NUM_OF_CHANNELS-2)) + 3;
 	uint16_t handle = (message.header.sourceAddress[0] % (MESH_NUM_OF_CHANNELS-2-1)) + 3;
-	CMesh::getInstance().send(handle, &message, sizeof(message));
+	Mesh::getInstance().send(handle, &message, sizeof(message));
 }
 
 //void MeshControl::reset() {

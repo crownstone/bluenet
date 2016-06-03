@@ -6,7 +6,7 @@
  * License: LGPLv3+, Apache, or MIT, your choice
  */
 
-#include <protocol/cs_Mesh.h>
+#include <mesh/cs_Mesh.h>
 
 #include <protocol/rbc_mesh_common.h>
 #include <protocol/version_handler.h>
@@ -14,7 +14,7 @@
 #include <cfg/cs_Boards.h>
 
 #include <drivers/cs_Serial.h>
-#include <protocol/cs_MeshControl.h>
+#include <mesh/cs_MeshControl.h>
 #include <protocol/cs_MeshMessageTypes.h>
 #include <util/cs_BleError.h>
 
@@ -23,31 +23,31 @@
 
 #include <drivers/cs_RTC.h>
 
-CMesh::CMesh() : _appTimerId(-1) {
+Mesh::Mesh() : _appTimerId(-1) {
 	MeshControl::getInstance();
-	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)CMesh::staticTick);
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Mesh::staticTick);
 	LOGe("mesh timer id: %d", _appTimerId);
 }
 
-CMesh::~CMesh() {
+Mesh::~Mesh() {
 
 }
 
-void CMesh::tick() {
+void Mesh::tick() {
 	checkForMessages();
 	scheduleNextTick();
 }
 
-void CMesh::scheduleNextTick() {
-//	LOGi("CMesh::scheduleNextTick");
+void Mesh::scheduleNextTick() {
+//	LOGi("Mesh::scheduleNextTick");
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(MESH_UPDATE_FREQUENCY), this);
 }
 
-void CMesh::startTicking() {
+void Mesh::startTicking() {
 	Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this);
 }
 
-void CMesh::stopTicking() {
+void Mesh::stopTicking() {
 	Timer::getInstance().stop(_appTimerId);
 }
 
@@ -55,7 +55,7 @@ void CMesh::stopTicking() {
  * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
  * thing.
  */
-void CMesh::init() {
+void Mesh::init() {
 //	nrf_gpio_pin_clear(PIN_GPIO_LED0);
 	LOGi("Initializing mesh");
 
@@ -84,7 +84,7 @@ void CMesh::init() {
 	_mesh_init_time = RTC::now();
 }
 
-void CMesh::send(uint8_t handle, void* p_data, uint8_t length) {
+void Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
 //	LOGd("send ch: %d, len: %d", handle, length);
@@ -92,7 +92,7 @@ void CMesh::send(uint8_t handle, void* p_data, uint8_t length) {
 	APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
 }
 
-bool CMesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
+bool Mesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
 	APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)*p_data, &length));
@@ -100,7 +100,7 @@ bool CMesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
 	return length != 0;
 }
 
-void CMesh::handleMeshMessage(rbc_mesh_event_t* evt)
+void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 {
 	TICK_PIN(28);
 //	nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
@@ -151,7 +151,7 @@ void CMesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	}
 }
 
-void CMesh::checkForMessages() {
+void Mesh::checkForMessages() {
 	rbc_mesh_event_t evt;
 
 	//! check if there are new messages

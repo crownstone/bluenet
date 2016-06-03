@@ -7,12 +7,12 @@
 
 #include <services/cs_GeneralService.h>
 
-#include <cfg/cs_Settings.h>
-#include <cfg/cs_StateVars.h>
+#include <storage/cs_Settings.h>
+#include <storage/cs_StateVars.h>
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
-#include <protocol/cs_MeshControl.h>
+#include <mesh/cs_MeshControl.h>
 #include <processing/cs_CommandHandler.h>
 #include <structs/buffer/cs_MasterBuffer.h>
 
@@ -255,8 +255,8 @@ void GeneralService::addSetConfigurationCharacteristic(buffer_ptr_t buffer, uint
 				uint8_t type = _streamBuffer->type();
 				uint8_t opCode = _streamBuffer->opCode();
 
-				LOGi("opCode: %d", opCode);
-				LOGi("type: %d", type);
+//				LOGi("opCode: %d", opCode);
+//				LOGi("type: %d", type);
 
 				if (opCode == READ_VALUE) {
 					LOGd("Select configuration type: %d", type);

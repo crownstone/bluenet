@@ -8,12 +8,11 @@
 #include <processing/cs_PowerSampling.h>
 
 #include <cfg/cs_Boards.h>
-#include <cfg/cs_Settings.h>
+#include <storage/cs_Settings.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_ADC.h>
-#include <structs/cs_PowerCurve.h>
 
-#include <protocol/cs_MeshControl.h>
+#include <mesh/cs_MeshControl.h>
 extern "C" {
 	#include <protocol/notification_buffer.h>
 }

@@ -5,30 +5,6 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
-//#include <cstdio>
-//
-//#include "services/cs_PowerService.h"
-////
-//#include "cfg/cs_Boards.h"
-//#include "cfg/cs_Config.h"
-//#include "cfg/cs_UuidConfig.h"
-//#include "structs/buffer/cs_MasterBuffer.h"
-//
-//#include "drivers/cs_ADC.h"
-//#include "drivers/cs_PWM.h"
-//#include "drivers/cs_Timer.h"
-//#include "drivers/cs_LPComp.h"
-//
-//#include "protocol/cs_Mesh.h"
-//#include "protocol/cs_MeshControl.h"
-//#include "cfg/cs_Settings.h"
-//#include "cfg/cs_StateVars.h"
-
-// change to #def to enable output of sample current values
-//#undef PRINT_SAMPLE_CURRENT
-
-//#include <cstdio>
-
 #include <services/cs_PowerService.h>
 
 #include <cfg/cs_UuidConfig.h>

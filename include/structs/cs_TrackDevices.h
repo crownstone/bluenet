@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <ble/cs_Nordic.h>
+
 #include "structs/cs_BufferAccessor.h"
 
 #include <common/cs_Types.h>

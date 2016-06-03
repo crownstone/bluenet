@@ -6,10 +6,11 @@
  * License: LGPLv3+
  */
 
-#include "cfg/cs_Settings.h"
+#include "storage/cs_Settings.h"
 
 #include <ble/cs_UUID.h>
 #include <events/cs_EventDispatcher.h>
+#include <util/cs_Utils.h>
 
 using namespace BLEpp;
 

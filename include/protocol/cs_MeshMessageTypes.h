@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include <cstddef>
+//#include <cstddef>
 
 #include <ble_gap.h>
 
@@ -21,16 +21,16 @@ enum MeshChannels {
 
 enum MeshMessageTypes {
 	//! data channel messages
-	EVENT_MESSAGE      = 0, //! this one might make more sense on the hub channel
-							// todo: do we need event messages on the mesh at all?
-//	POWER_MESSAGE      = 1, // use command message instead
+	COMMAND_MESSAGE    = 1,
 	BEACON_MESSAGE     = 2,
-	COMMAND_MESSAGE    = 3,
-	CONFIG_MESSAGE     = 4,
+	CONFIG_MESSAGE     = 3,
+	STATE_VAR_MESSAGE  = 4,
 
 	//! hub channel messages
 	SCAN_MESSAGE       = 101,
+//	UNUSED             = 102,
 	POWER_SAMPLES_MESSAGE = 103,
+	EVENT_MESSAGE      = 104, // todo: do we need event messages on the mesh at all?
 };
 
 //! broadcast address is defined as 00:00:00:00:00:00
