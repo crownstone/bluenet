@@ -204,16 +204,16 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 		break;
 	}
 	case CMD_SAMPLE_POWER: {
-		LOGi("handle sample power command");
+		LOGi("handle sample power command: tbd");
 
-		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
-		uint8_t sampleOp = payload->opCode;
-
-		if (sampleOp == 0) {
-			PowerSampling::getInstance().stopSampling();
-		} else {
-			PowerSampling::getInstance().startSampling(sampleOp);
-		}
+//		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
+//		uint8_t sampleOp = payload->opCode;
+//
+//		if (sampleOp == 0) {
+//			PowerSampling::getInstance().stopSampling();
+//		} else {
+//			PowerSampling::getInstance().startSampling();
+//		}
 		break;
 	}
 	case CMD_FACTORY_RESET: {

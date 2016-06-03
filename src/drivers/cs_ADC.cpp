@@ -106,6 +106,10 @@ bool ADC::setTimestampBuffers(DifferentialBuffer<uint32_t>* buffer, uint8_t pinN
 	return true;
 }
 
+void ADC::setDoneCallback(adc_done_cb_t callback) {
+	_doneCallback = callback;
+}
+
 /** Configure the AD converter.
  *
  *   - set the resolution to 10 bits
@@ -144,13 +148,28 @@ void ADC::start() {
 	CS_ADC_TIMER->TASKS_START = 1;
 }
 
+void adc_done(void * p_event_data, uint16_t event_size) {
+	(*(adc_done_cb_t*)p_event_data)();
+}
+
 void ADC::update(uint32_t value) {
 	if (_circularBuffers[_lastPinNum] != NULL) {
 		_circularBuffers[_lastPinNum]->push(value);
 	}
 	else if (_buffers[_lastPinNum] != NULL) {
-		if (!_buffers[_lastPinNum]->push(value)) {
+//		if (!_buffers[_lastPinNum]->push(value)) {
+		if (!_buffers[_lastPinNum]->push(_buffers[_lastPinNum]->size())) {
 			//! If this buffer is full, stop sampling
+			// todo: can we trigger an event here that the sample is ready instead of
+			//   having a tick function in the PowerSampler that polls if the buffers are full?
+			//   either using a
+			//      - timer
+			//      - app_scheduler_put
+			if (_doneCallback) {
+				// decouple done callback from adc interrupt handler, and put it on app scheduler
+				// instead
+				app_sched_event_put(&_doneCallback, sizeof(_doneCallback), adc_done);
+			}
 			stop();
 			return;
 		}

@@ -10,10 +10,6 @@
 #include <structs/buffer/cs_CircularBuffer.h>
 #include <protocol/cs_MeshMessageTypes.h>
 
-//#define POWER_SAMPLING_AVERAGE_MASK 1 << 0
-//#define POWER_SAMPLING_CURVE_MASK  1 << 1
-//#define POWER_SAMPLING_ONE_SHOT_MASK 1 << 2
-
 class PowerSampling {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
@@ -24,14 +20,11 @@ public:
 
 	void init();
 
+	void stopSampling();
 
-	static void staticTick(PowerSampling *ptr) {
-		ptr->tick();
+	static void staticPowerSampleFinish(PowerSampling *ptr) {
+		ptr->powerSampleFinish();
 	}
-
-	/** Initializes the buffer.
-	 */
-	void powerSampleInit();
 
 	/** Initializes and starts the ADC, also starts interval timer.
 	 */
@@ -40,9 +33,9 @@ public:
 	/** Starts a new power sample burst.
 	 *  Called at a low interval.
 	 */
-	void powerSampleStart();
+	void startSampling();
 	static void staticPowerSampleStart(PowerSampling *ptr) {
-		ptr->powerSampleStart();
+		ptr->startSampling();
 	}
 
 	/** Called when the sample burst is finished.
@@ -60,9 +53,6 @@ public:
 		ptr->powerSampleReadBuffer();
 	}
 
-
-	void scheduleNextTick();
-
 	/** Fill up the current curve and send it out over bluetooth
 	 * @type specifies over which characteristic the current curve should be sent.
 	 */
@@ -70,14 +60,16 @@ public:
 
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& size);
 
+//	void finished() {
+//		Timer::getInstance().start(_powerSamplingFinishTimer, 5, this);
+//	}
+
 private:
 	PowerSampling();
 
-	void tick();
+//	app_timer_id_t _powerSamplingFinishTimer;
 
-	app_timer_id_t _samplingTimer;
-
-//	app_timer_id_t _staticPowerSamplingStartTimer;
+	app_timer_id_t _staticPowerSamplingStartTimer;
 	app_timer_id_t _staticPowerSamplingReadTimer;
 
 	buffer_ptr_t _powerSamplesBuffer; //! Buffer that holds the data for burst or continous sampling
@@ -91,7 +83,5 @@ private:
 //	uint16_t _lastPowerSample;
 
 	PowerSamples _powerSamples;
-	bool _powerSamplesProcessed;
-
 };
 

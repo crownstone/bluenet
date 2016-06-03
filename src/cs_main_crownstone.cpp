@@ -49,6 +49,8 @@
 
 #include <ble/cs_DoBotsManufac.h>
 
+#include <processing/cs_PowerSampling.h>
+
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -84,6 +86,8 @@ Crownstone::Crownstone() :
 	_switch = &Switch::getInstance();
 	//! create temperature guard
 	_temperatureGuard = new TemperatureGuard();
+
+	_powerSampler = &PowerSampling::getInstance();
 
 };
 
@@ -226,6 +230,8 @@ void Crownstone::initDrivers() {
 
 	LOGi("Init temperature guard");
 	_temperatureGuard->init();
+
+	_powerSampler->init();
 
 	// init GPIOs
 #if HARDWARE_BOARD==PCA10001
@@ -527,6 +533,9 @@ void Crownstone::startUp() {
 
 		//! start ticking of peripherals
 		_temperatureGuard->startTicking();
+
+		LOGd("Start power sampling");
+		_powerSampler->startSampling();
 
 		if (Settings::getInstance().isEnabled(CONFIG_SCANNER_ENABLED)) {
 			RNG rng;

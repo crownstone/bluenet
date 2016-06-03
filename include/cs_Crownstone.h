@@ -33,6 +33,7 @@
 #include <processing/cs_Switch.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Tracker.h>
+#include <processing/cs_PowerSampling.h>
 
 #include <protocol/cs_Mesh.h>
 
@@ -139,6 +140,7 @@ private:
 	StateVars* _stateVars;
 	Switch* _switch;
 	TemperatureGuard* _temperatureGuard;
+	PowerSampling* _powerSampler;
 
 	// services
 	GeneralService* _generalService;

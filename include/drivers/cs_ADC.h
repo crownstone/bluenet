@@ -13,6 +13,8 @@
 #include "structs/buffer/cs_DifferentialBuffer.h"
 #include "cfg/cs_Config.h"
 
+typedef void (*adc_done_cb_t) (void);
+
 //#include "common/cs_Types.h"
 
 /** Analog-Digital conversion.
@@ -79,8 +81,11 @@ public:
 	 */
 	bool setTimestampBuffers(DifferentialBuffer<uint32_t>* buffer, uint8_t pinNum);
 
+	void setDoneCallback(adc_done_cb_t callback);
+
 	//! Function to be called from interrupt, do not do much there!
 	void update(uint32_t value);
+
 
 private:
 	/** Constructor
@@ -100,6 +105,8 @@ private:
 	StackBuffer<uint16_t>* _buffers[CS_ADC_MAX_PINS];
 	DifferentialBuffer<uint32_t>* _timeBuffers[CS_ADC_MAX_PINS];
 	CircularBuffer<uint16_t>* _circularBuffers[CS_ADC_MAX_PINS];
+
+	adc_done_cb_t _doneCallback;
 
 	//! Function to set the input pin, this can be done after each sample. Only used internally!
 	uint32_t config(uint8_t pin);

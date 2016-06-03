@@ -76,9 +76,6 @@ void PowerService::addCharacteristics() {
 #endif
 
 #if CHAR_SAMPLE_CURRENT==1
-	PowerSampling::getInstance().powerSampleInit();
-//	LOGi("add Sample Current Characteristic");
-//	addSampleCurrentCharacteristic();
 	LOGi("add Power sample characteristic");
 	addPowerSamplesCharacteristic();
 	LOGi("add Current Consumption Characteristic");
@@ -93,10 +90,6 @@ void PowerService::addCharacteristics() {
 }
 
 //void PowerService::tick() {
-//	if (!_powerSamplesProcessed && _powerSamples.full()) {
-//		powerSampleFinish();
-//	}
-//
 //	scheduleNextTick();
 //}
 
@@ -167,9 +160,9 @@ void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		}
 		break;
 	}
-	case EVT_POWER_CURVE: {
+	case EVT_POWER_SAMPLES: {
 		if (_powerSamplesCharacteristic) {
-			LOGi("power samples update");
+//			LOGd("power samples update");
 			_powerSamplesCharacteristic->setDataLength(length);
 			_powerSamplesCharacteristic->notify();
 		}
