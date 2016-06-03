@@ -12,6 +12,7 @@ var searchData=
   ['defaultminconnectioninterval_5f1_5f25_5fms',['defaultMinConnectionInterval_1_25_ms',['../classBLEpp_1_1Nrf51822BluetoothStack.html#a74338523df7c6c7940444020084f0cd7',1,'BLEpp::Nrf51822BluetoothStack']]],
   ['defaultslavelatencycount',['defaultSlaveLatencyCount',['../classBLEpp_1_1Nrf51822BluetoothStack.html#af84df08d277ce9a0b472d42150d46181',1,'BLEpp::Nrf51822BluetoothStack']]],
   ['defaulttxpowerlevel',['defaultTxPowerLevel',['../classBLEpp_1_1Nrf51822BluetoothStack.html#a380dbd5da4198325e92da529fa386444',1,'BLEpp::Nrf51822BluetoothStack']]],
+  ['deinit',['deinit',['../classPWM.html#a2da4580f7aa0b7e475bdb0a408acbcaf',1,'PWM']]],
   ['delayedstart',['delayedStart',['../classScanner.html#a2df7d23cb7f5343901bfe02cde1e0d64',1,'Scanner::delayedStart(uint16_t delay)'],['../classScanner.html#a03ea3486fae4833c601c3cad6cc56229',1,'Scanner::delayedStart()']]],
   ['device_5fmesh_5fheader_5ft',['device_mesh_header_t',['../structdevice__mesh__header__t.html',1,'']]],
   ['device_5fmesh_5fmessage_5ft',['device_mesh_message_t',['../structdevice__mesh__message__t.html',1,'']]],
