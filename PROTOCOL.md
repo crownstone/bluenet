@@ -41,6 +41,14 @@ Scan read             | 7e170004-429c-41aa-83d7-d91220abeb33 | [Scan result list
 Tracked devices write | 7e170002-429c-41aa-83d7-d91220abeb33 | [Tracked device](#tracked_device_packet) | Add or overwrite a tracked device. Set threshold larger than 0 to remove the tracked device from the list.
 Tracked devices read  | 7e170005-429c-41aa-83d7-d91220abeb33 | [Tracked device list](#tracked_device_list_packet) | Read the current list of tracked devices.
 
+## Mesh Service
+
+The mesh service comes with [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh) and has UUID 2a1e0000-fd51-d882-8ba8-b98c0000cd1e
+
+Characteristic | UUID | Date type | Description
+--- | --- | --- | ---
+Meta data   | 2a1e0004-fd51-d882-8ba8-b98c0000cd1e | | Get mesh configuration.
+Value       | 2a1e0005-fd51-d882-8ba8-b98c0000cd1e | | Characteristic where the mesh values can be read.
 
 # Data structures
 
@@ -190,6 +198,37 @@ uint 16 | Version | 2 | Used internally.
 [Mesh Payload](#mesh_payload_packet) | Payload | 99 | Payload data.
 byte array | CRC | 3 | Checksum.
 
+### <a name="mesh_value_notification_packet"></a>Mesh value notification packet
+This packet is used to get the [mesh messages](#mesh_message_packet) pushed over GATT notifications.
+
+![Mesh value notification packet](docs/diagrams/mesh-value-notification-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Opcode | 1 | 
+byte array | Payload | | 
+
+Opcode | Type name | Payload type | Payload description
+--- | --- | --- | ---
+0 | Data | | Not used.
+1 | FlagSet | | Not used.
+2 | FlagReq | | Not used.
+17 | CmdRsp | | Not used.
+18 | FlagRsp | | Not used.
+32 | MultipartStart | [Multipart notification](#mesh_multipart_notification_packet) | First part of the multi part notification.
+33 | MultipartMid | [Multipart notification](#mesh_multipart_notification_packet) | Middle part of the multi part notification.
+34 | MultipartEnd | [Multipart notification](#mesh_multipart_notification_packet) | Last part of the multi part notification.
+
+### <a name="mesh_multipart_notification_packet"></a>Mesh multipart notification packet
+Each mesh message is notified in multiple pieces, as a notification can only be 20 bytes. The opcode of the [value notification](#mesh_value_notification_packet) tells whether it is the first, last or a middle piece.
+
+![Mesh multipart notification packet](docs/diagrams/mesh-multipart-notification-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Handle | 2 | Handle on which the messages was sent or received.
+uint 8 | Length | 1 | Length of the data of this part.
+byte array | Data | Length | Data of this part of the whole mesh message.
 
 ### <a name="ibeacon_packet"></a>iBeacon packet
 This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
@@ -234,4 +273,7 @@ uint 8 | Event bitmask | 1 | Shows if the Crownstone has something new to tell.
 uint 8 | Reserved | 2 | Reserved for future use.
 uint 32 | Power usage | 4 | The power usage at this moment (mW).
 uint 32 | Accumulated energy | 4 | The accumulated energy (kWh).
+
+
+
 
