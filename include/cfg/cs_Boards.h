@@ -123,6 +123,8 @@
 #define PIN_AIN_VOLTAGE      6                   //! ain6 is p0.05
 #define PIN_GPIO_RX          15                  //! p0.15
 #define PIN_GPIO_TX          16                  //! p0.16
+#define PIN_LED_RED          8
+#define PIN_LED_GREEN        9
 
 //! Switch pin should be low to switch lights on
 #define SWITCH_INVERSED
