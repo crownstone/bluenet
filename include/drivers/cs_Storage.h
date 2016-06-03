@@ -336,7 +336,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getUint8(uint32_t value, uint8_t& target, uint8_t default_value);
+	static void getUint8(uint32_t value, uint8_t* target, uint8_t default_value);
 
 	/** Helper function to set a short (uint16_t) in the field of a struct
 	 * @value the value to be copied to the struct
@@ -359,7 +359,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getUint16(uint32_t value, uint16_t& target, uint16_t default_value);
+	static void getUint16(uint32_t value, uint16_t* target, uint16_t default_value);
 
 	/** Helper function to set an integer (uint32_t) in the field of a struct
 	 * @value the value to be copied to the struct
@@ -405,7 +405,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getInt8(int32_t value, int8_t& target, int8_t default_value);
+	static void getInt8(int32_t value, int8_t* target, int8_t default_value);
 
 	/** Helper function to write/copy an array to the field of a struct
 	 * @T primitive type, such as uint8_t

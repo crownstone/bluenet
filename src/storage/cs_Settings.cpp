@@ -62,13 +62,6 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, b
 	if (verify(type, payload, length)) {
 		set(type, payload, persistent, length);
 		uint8_t* p_item = getStorageItem(type);
-//		if (persistent) {
-//			// minimum item size is 4
-//			if (length < 4) {
-//				length = 4;
-//			}
-//			savePersistentStorageItem(p_item, length);
-//		}
 		EventDispatcher::getInstance().dispatch(type, payload, length);
 	}
 }
@@ -491,43 +484,31 @@ bool Settings::get(uint8_t type, void* target, uint16_t& size) {
 	case CONFIG_NAME_UUID: {
 		char default_name[32];
 		sprintf(default_name, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
-		char* p_value = (char*) target;
-		Storage::getString(_storageStruct.device_name, p_value, default_name, size);
+		Storage::getString(_storageStruct.device_name, (char*) target, default_name, size);
 		return true;
 	}
 	case CONFIG_FLOOR_UUID: {
-		uint8_t value;
-		Storage::getUint8(_storageStruct.floor, value, 0);
-		*((uint8_t*)target) = value;
+		Storage::getUint8(_storageStruct.floor, (uint8_t*)target, 0);
 		return true;
 	}
 	case CONFIG_NEARBY_TIMEOUT_UUID: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.nearbyTimeout, value, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
-		*((uint16_t*)target) = value;
+		Storage::getUint16(_storageStruct.nearbyTimeout, (uint16_t*)target, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
 		return true;
 	}
 	case CONFIG_IBEACON_MAJOR: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.beacon.major, value, BEACON_MAJOR);
-		*((uint16_t*)target) = value;
+		Storage::getUint16(_storageStruct.beacon.major, (uint16_t*)target, BEACON_MAJOR);
 		return true;
 	}
 	case CONFIG_IBEACON_MINOR: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.beacon.minor, value, BEACON_MINOR);
-		*((uint16_t*)target) = value;
+		Storage::getUint16(_storageStruct.beacon.minor, (uint16_t*)target, BEACON_MINOR);
 		return true;
 	}
 	case CONFIG_IBEACON_UUID: {
-		uint8_t* p_value = (uint8_t*) target;
-		Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, p_value, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
+		Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, (uint8_t*) target, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
 		return true;
 	}
 	case CONFIG_IBEACON_RSSI: {
-		int8_t value;
-		Storage::getInt8(_storageStruct.beacon.rssi, value, BEACON_RSSI);
-		*((int8_t*)target) = value;
+		Storage::getInt8(_storageStruct.beacon.rssi, (int8_t*)target, BEACON_RSSI);
 		return true;
 	}
 	case CONFIG_WIFI_SETTINGS: {
@@ -541,80 +522,55 @@ bool Settings::get(uint8_t type, void* target, uint16_t& size) {
 		return true;
 	}
 	case CONFIG_TX_POWER: {
-		int8_t value;
-		Storage::getInt8(_storageStruct.txPower, value, TX_POWER);
-		*((int8_t*)target) = value;
+		Storage::getInt8(_storageStruct.txPower, (int8_t*)target, TX_POWER);
 		return true;
 	}
 	case CONFIG_ADV_INTERVAL: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.advInterval, value, ADVERTISEMENT_INTERVAL);
-		*((uint16_t*)target) = value;
+		Storage::getUint16(_storageStruct.advInterval, (uint16_t*)target, ADVERTISEMENT_INTERVAL);
 		return true;
 	}
 	case CONFIG_PASSKEY: {
-		uint8_t* p_value = (uint8_t*) target;
-		Storage::getArray<uint8_t>(_storageStruct.passkey, p_value, (uint8_t*)STATIC_PASSKEY, 6);
+		Storage::getArray<uint8_t>(_storageStruct.passkey, (uint8_t*) target, (uint8_t*)STATIC_PASSKEY, 6);
 		return true;
 	}
 	case CONFIG_MIN_ENV_TEMP: {
-		int8_t value;
-		Storage::getInt8(_storageStruct.minEnvTemp, value, MIN_ENV_TEMP);
-		*((int8_t*)target) = value;
+		Storage::getInt8(_storageStruct.minEnvTemp, (int8_t*)target, MIN_ENV_TEMP);
 		return true;
 	}
 	case CONFIG_MAX_ENV_TEMP: {
-		int8_t value;
-		Storage::getInt8(_storageStruct.maxEnvTemp, value, MAX_ENV_TEMP);
-		*((int8_t*)target) = value;
+		Storage::getInt8(_storageStruct.maxEnvTemp, (int8_t*)target, MAX_ENV_TEMP);
 		return true;
 	}
 	case CONFIG_SCAN_DURATION: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.scanDuration, value, SCAN_DURATION);
-		*((uint16_t*)target) = value;
+		Storage::getUint16(_storageStruct.scanDuration, (uint16_t*)target, SCAN_DURATION);
 		return true;
 	}
 	case CONFIG_SCAN_SEND_DELAY: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.scanSendDelay, value, SCAN_SEND_DELAY);
-		*((uint16_t*)target) = value;
+		Storage::getUint16(_storageStruct.scanSendDelay, (uint16_t*)target, SCAN_SEND_DELAY);
 		return true;
 	}
 	case CONFIG_SCAN_BREAK_DURATION: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.scanBreakDuration, value, SCAN_BREAK_DURATION);
-		*((uint16_t*)target) = value;
+		Storage::getUint16(_storageStruct.scanBreakDuration, (uint16_t*)target, SCAN_BREAK_DURATION);
 		return true;
 	}
 	case CONFIG_BOOT_DELAY: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.bootDelay, value, BOOT_DELAY);
-		*((uint16_t*)target) = value;
+		Storage::getUint16(_storageStruct.bootDelay, (uint16_t*)target, BOOT_DELAY);
 		return true;
 	}
 	case CONFIG_MAX_CHIP_TEMP: {
-		int8_t value;
-		Storage::getInt8(_storageStruct.maxChipTemp, value, MAX_CHIP_TEMP);
-		*((int8_t*)target) = value;
+		Storage::getInt8(_storageStruct.maxChipTemp, (int8_t*)target, MAX_CHIP_TEMP);
 		return true;
 	}
 	case CONFIG_SCAN_FILTER: {
-		uint8_t value;
-		Storage::getUint8(_storageStruct.scanFilter, value, SCAN_FILTER);
-		*((uint8_t*)target) = value;
+		Storage::getUint8(_storageStruct.scanFilter, (uint8_t*)target, SCAN_FILTER);
 		return true;
 	}
 	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
-		uint16_t value;
-		Storage::getUint16(_storageStruct.scanFilterSendFraction, value, SCAN_FILTER_SEND_FRACTION);
-		*((uint16_t*)target) = value;
+		Storage::getUint16(_storageStruct.scanFilterSendFraction, (uint16_t*)target, SCAN_FILTER_SEND_FRACTION);
 		return true;
 	}
 	case CONFIG_CURRENT_LIMIT: {
-		uint8_t value;
-		Storage::getUint8(_storageStruct.currentLimit, value, CURRENT_LIMIT);
-		*((uint8_t*)target) = value;
+		Storage::getUint8(_storageStruct.currentLimit, (uint8_t*)target, CURRENT_LIMIT);
 		return true;
 	}
 	case CONFIG_ADC_SAMPLE_RATE: {
@@ -745,10 +701,10 @@ bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 	uint8_t* p_item = getStorageItem(type);
 	if (persistent) {
 		size = getSettingsItemSize(type);
-		// minimum item size is 4
-//		if (size < 4) {
-//			size = 4;
-//		}
+		// minimum item size we can store is 4
+		if (size < 4) {
+			size = 4;
+		}
 		savePersistentStorageItem(p_item, size);
 	}
 	return true;
