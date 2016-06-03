@@ -151,8 +151,9 @@ void Crownstone::configDrivers() {
 //
 //	PWM::getInstance().init(&pwm_config);
 
-	PWM& pwm = PWM::getInstance();
-	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
+//	PWM& pwm = PWM::getInstance();
+//	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
+//	pwm.setValue(0, 0);
 
 	_temperatureGuard = new TemperatureGuard();
 	_temperatureGuard->startTicking();
@@ -219,6 +220,11 @@ void Crownstone::configure() {
 	//! start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	//! in particular we need it to set interrupt priorities.
 	_stack->init();
+
+	//! init pwm
+	PWM& pwm = PWM::getInstance();
+	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
+	pwm.setValue(0, 0);
 
 	LOGi("Loading configuration");
 
