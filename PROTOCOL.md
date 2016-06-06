@@ -325,7 +325,7 @@ uint 8 | iBeacon prefix | 9 | This is fixed data.
 uint 8 | Proximity UUID | 16 | 
 uint 16 | Major | 2 | 
 uint 16 | Minor | 2 | 
-uint 16 | TX Power | 2 | Received signal strength at 1 meter.
+int 8 | TX Power | 1 | Received signal strength at 1 meter.
 
 
 ### <a name="scan_response_packet"></a>Scan response packet
@@ -346,7 +346,7 @@ uint 16 | Service UUID | 2 | Service UUID
 ### <a name="scan_response_servicedata_packet"></a>Scan response service data packet
 This packet contains the state info. It will be encrypted using AES 128.
 
-![Scan Response ServiceData](docs/diagrams/scan-response-serviceData.png)
+![Scan Response ServiceData](docs/diagrams/scan-response-service-data.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
