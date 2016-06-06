@@ -1,4 +1,12 @@
+# Bluenet protocol v0.3.0
+-------------------------
+
+# Advertisements and scan response
+When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
+
 # Services
+When connected, the following services are available.
+
 ## General service
 
 The general service has UUID f5f90000-f5f9-11e4-aa15-123b93f75cba.
@@ -46,6 +54,15 @@ Set time        | 96d20001-4bcf-11e5-885d-feff819cdc9f | uint 32 | Sets the time
 Schedule write  | 96d20002-4bcf-11e5-885d-feff819cdc9f | [Schedule entry](#schedule_entry_packet) | Add or modify a schedule entry. Set nextTimestamp to 0 to remove the entry from the list.
 Schedule read   | 96d20003-4bcf-11e5-885d-feff819cdc9f | [Schedule list](#schedule_list_packet) | Get a list of all schedule entries.
 
+## Mesh Service
+
+The mesh service comes with [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh) and has UUID 2a1e0000-fd51-d882-8ba8-b98c0000cd1e
+
+Characteristic | UUID | Date type | Description
+--- | --- | --- | ---
+Meta data   | 2a1e0004-fd51-d882-8ba8-b98c0000cd1e | | Get mesh configuration.
+Value       | 2a1e0005-fd51-d882-8ba8-b98c0000cd1e | | Characteristic where the mesh values can be read.
+
 
 # Data structures
 
@@ -64,8 +81,9 @@ Available configurations:
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-1 | Device name | char array | Name of the device.
-2 | Room | uint 8 | Room number.
+0 | Device name | char array | Name of the device.
+1 | Device type | char array | **Deprecated.**
+2 | Room | uint 8 | **Deprecated.**
 3 | Floor | uint 8 | Floor number.
 4 | Nearby timeout | uint 16 | Time in ms before switching off when noone is nearby (not implemented yet).
 5 | PWM frequency | uint 8 | Sets PWM frequency (not implemented yet).
@@ -263,4 +281,83 @@ uint 16 | Handle | 2 | Handle of this message.
 uint 16 | Version | 2 | Used internally.
 [Mesh Payload](#mesh_payload_packet) | Payload | 99 | Payload data.
 byte array | CRC | 3 | Checksum.
+
+### <a name="mesh_value_notification_packet"></a>Mesh value notification packet
+This packet is used to get the [mesh messages](#mesh_message_packet) pushed over GATT notifications.
+
+![Mesh value notification packet](docs/diagrams/mesh-value-notification-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Opcode | 1 | 
+byte array | Payload | | 
+
+Opcode | Type name | Payload type | Payload description
+--- | --- | --- | ---
+0 | Data | | Not used.
+1 | FlagSet | | Not used.
+2 | FlagReq | | Not used.
+17 | CmdRsp | | Not used.
+18 | FlagRsp | | Not used.
+32 | MultipartStart | [Multipart notification](#mesh_multipart_notification_packet) | First part of the multi part notification.
+33 | MultipartMid | [Multipart notification](#mesh_multipart_notification_packet) | Middle part of the multi part notification.
+34 | MultipartEnd | [Multipart notification](#mesh_multipart_notification_packet) | Last part of the multi part notification.
+
+### <a name="mesh_multipart_notification_packet"></a>Mesh multipart notification packet
+Each mesh message is notified in multiple pieces, as a notification can only be 20 bytes. The opcode of the [value notification](#mesh_value_notification_packet) tells whether it is the first, last or a middle piece.
+
+![Mesh multipart notification packet](docs/diagrams/mesh-multipart-notification-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Handle | 2 | Handle on which the messages was sent or received.
+uint 8 | Length | 1 | Length of the data of this part.
+byte array | Data | Length | Data of this part of the whole mesh message.
+
+### <a name="ibeacon_packet"></a>iBeacon packet
+This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
+
+![Advertisement packet](docs/diagrams/advertisement-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | iBeacon prefix | 9 | This is fixed data.
+uint 8 | Proximity UUID | 16 | 
+uint 16 | Major | 2 | 
+uint 16 | Minor | 2 | 
+uint 16 | TX Power | 2 | Received signal strength at 1 meter.
+
+
+### <a name="scan_response_packet"></a>Scan response packet
+The packet that is sent when a BLE central scans.
+
+![Scan Response packet](docs/diagrams/scan-response-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Name Flag | 1 | 
+uint 8 | Name Length | 1 | Length of the name.
+char array | Name Bytes | 9 | The name of this device.
+uint 8 | Service Flag | 1 | 
+uint 8 | Service Length | 1 | 
+uint 16 | Service UUID | 2 | Service UUID
+[Service data](#scan_response_servicedata_packet) | 16 | Service data, state info.
+
+### <a name="scan_response_servicedata_packet"></a>Scan response service data packet
+This packet contains the state info. It will be encrypted using AES 128.
+
+![Scan Response ServiceData](docs/diagrams/scan-response-serviceData.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
+uint 16 | Crownstone state ID | 2 | ID of the Crownstone of which the state is shown.
+uint 8 | Switch state | 1 | The state of the switch, 0 - 100 (where 0 is off, 100 is on, dimmed in between).
+uint 8 | Event bitmask | 1 | Shows if the Crownstone has something new to tell.
+uint 8 | Reserved | 2 | Reserved for future use.
+uint 32 | Power usage | 4 | The power usage at this moment (mW).
+uint 32 | Accumulated energy | 4 | The accumulated energy (kWh).
+
+
+
 

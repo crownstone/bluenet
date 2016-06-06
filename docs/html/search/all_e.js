@@ -20,6 +20,5 @@ var searchData=
   ['ps_5findoorlocalisation_5fservice_5ft',['ps_indoorlocalisation_service_t',['../structps__indoorlocalisation__service__t.html',1,'']]],
   ['ps_5fstorage_5fbase_5ft',['ps_storage_base_t',['../structps__storage__base__t.html',1,'']]],
   ['push',['push',['../classCircularBuffer.html#aaa3d25987977c270542a525be8db7232',1,'CircularBuffer::push()'],['../classCircularDifferentialBuffer.html#adbf237e9d3e04f50973bbf6bcd01e52c',1,'CircularDifferentialBuffer::push()'],['../structStackBuffer.html#aeccb4a5e71af43dd987ac32f64bb8ddc',1,'StackBuffer::push()']]],
-  ['pwm',['PWM',['../classPWM.html',1,'']]],
-  ['pwm_5fconfig_5ft',['pwm_config_t',['../structpwm__config__t.html',1,'pwm_config_t'],['../structpwm__config__t.html#abb13bc413ee765ccc57753c2a7fcaf41',1,'pwm_config_t::pwm_config_t()']]]
+  ['pwm',['PWM',['../classPWM.html',1,'']]]
 ];

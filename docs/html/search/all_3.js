@@ -38,6 +38,8 @@ var searchData=
   ['cmesh',['CMesh',['../classCMesh.html',1,'']]],
   ['command_5fmesh_5fmessage_5ft',['command_mesh_message_t',['../structcommand__mesh__message__t.html',1,'']]],
   ['config',['config',['../classADC.html#aefbbd474fac20784b56c074fd0b1d19e',1,'ADC']]],
+  ['config1ch',['config1Ch',['../classPWM.html#a6c6163ab984a84c3fa10bf66dcf353a8',1,'PWM']]],
+  ['config2ch',['config2Ch',['../classPWM.html#a2168a628baf211213152ae1334a3399d',1,'PWM']]],
   ['config_5fmesh_5fmessage_5ft',['config_mesh_message_t',['../structconfig__mesh__message__t.html',1,'']]],
   ['connected',['connected',['../classBLEpp_1_1BLEStack.html#aa497b95729bc3b10095016efc6ff6eba',1,'BLEpp::BLEStack::connected()'],['../classBLEpp_1_1Nrf51822BluetoothStack.html#a5d09190c22446785639b09fe95550c5f',1,'BLEpp::Nrf51822BluetoothStack::connected()']]],
   ['convertendian16',['convertEndian16',['../namespaceBLEutil.html#ae478db6059c6d08c11639a23cab6ad33',1,'BLEutil']]],

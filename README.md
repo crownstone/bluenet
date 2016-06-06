@@ -17,7 +17,7 @@ To use a device with bluenet code on it, you only need to know the Bluetooth pro
 We also provide libraries which take care of the protocol:
 
 - [Android](https://github.com/dobots/bluenet-lib-android)
-- [JavaScript](https://github.com/dobots/bluenet-lib-js)
+- [~~JavaScript~~](https://github.com/dobots/bluenet-lib-js)
 - [Python](https://github.com/dobots/bluenet-lib-python)
 
 
@@ -39,7 +39,7 @@ The different other software tools and online resources have been mentioned abov
 - [Bluenet documentation](http://dobots.github.io/bluenet/)
 - [Bluenet documentation branch](https://github.com/dobots/bluenet/tree/gh-pages)
 - [Android library](https://github.com/dobots/bluenet-lib-android)
-- [JavaScript library](https://github.com/dobots/bluenet-lib-js)
+- [~~JavaScript library~~](https://github.com/dobots/bluenet-lib-js)
 - [Python library](https://github.com/dobots/bluenet-lib-python)
 - [Bootloader](https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler)
 - [Crownstone website](http://crownstone.rocks)

@@ -4,7 +4,7 @@
 # Should be 10 characters or less (we need room for compilation date after it)
 BLUETOOTH_NAME="crown"
 
-FIRMWARE_VERSION="0.0.1"
+FIRMWARE_VERSION="0.3.0"
 
 # The device type defines how the device advertises itself, Apps and Bluenet Library
 # will use this to filter for device type.
@@ -19,13 +19,13 @@ FIRMWARE_VERSION="0.0.1"
 # DEVICE_CROWNSTONE  1
 # DEVICE_DOBEACON    2
 # DEVICE_FRIDGE      3
-DEVICE_TYPE=DEVICE_UNDEF
+DEVICE_TYPE=DEVICE_CROWNSTONE
 
 MESHING=0
 CONT_POWER_MEASURMENT=0
 
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
-IBEACON=0
+IBEACON=1
 
 # Options to save energy
 LOW_POWER_MODE=0
@@ -52,7 +52,7 @@ STATIC_PASSKEY="123456"
 DEFAULT_ON=1
 
 # Enable or disable different services (at times required to preserve memory)
-INDOOR_SERVICE=0
+INDOOR_SERVICE=1
 GENERAL_SERVICE=1
 POWER_SERVICE=1
 ALERT_SERVICE=0
@@ -60,11 +60,9 @@ SCHEDULE_SERVICE=0
 
 # Enable or disable characteristics
 ## General Service
-CHAR_CONTROL=1
 CHAR_TEMPERATURE=1
 CHAR_RESET=1
 CHAR_CONFIGURATION=1
-CHAR_STATE_VARIABLES=1
 
 ## Power Service
 CHAR_PWM=1
@@ -76,9 +74,6 @@ CHAR_CURRENT_LIMIT=1
 CHAR_RSSI=1
 CHAR_SCAN_DEVICES=1
 CHAR_TRACK_DEVICES=1
-
-## Schedule Service
-CHAR_SCHEDULE=1
 
 # Enable or disable meshing functionality (1 or 0)
 CHAR_MESHING=0
@@ -133,7 +128,7 @@ BOOT_DELAY=3000
 # SCAN_SEND_DELAY + SCAN_BRAK_DURATION ms, for SCAN_DURATION ms
 # waits for SCAN_SEND_DELAY ms after scan end before sending result
 # into mesh (if CHAR_MESHING enabled)
-INTERVAL_SCANNER_ENABLED=0
+INTERVAL_SCANNER_ENABLED=1
 
 # Durations for the scanner in ms
 SCAN_DURATION=2000
@@ -264,14 +259,15 @@ RAM_R1_BASE=0x20002800
 # RAM_APPLICATION_AMOUNT=0x1800
 # HEAP_SIZE=2700;
 # For the 32kB chip:
-RAM_APPLICATION_AMOUNT=0x5800
-HEAP_SIZE=5000;
+#RAM_APPLICATION_AMOUNT=0x5800
+#HEAP_SIZE=16700;
 
 ## to enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
 ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x600, so if you
 ## increase the ATTR_TABLE_SIZE, the RAM_R1_BASE has to be increased by the same value and the RAM_APPLICATION_AMOUNT
 ## has to be decreased by the same value (and most likely the HEAP_SIZE as well), e.g.
-# ATTR_TABLE_SIZE=0x900
-# RAM_R1_BASE=0x20002B00
-# RAM_APPLICATION_AMOUNT=0x5500
-ATTR_TABLE_SIZE=0x600
+ATTR_TABLE_SIZE=0xA00
+RAM_R1_BASE=0x20002C00
+RAM_APPLICATION_AMOUNT=0x5400
+HEAP_SIZE=6000
+

@@ -12,6 +12,5 @@ var searchData=
   ['ps_5fconfiguration_5ft',['ps_configuration_t',['../structps__configuration__t.html',1,'']]],
   ['ps_5findoorlocalisation_5fservice_5ft',['ps_indoorlocalisation_service_t',['../structps__indoorlocalisation__service__t.html',1,'']]],
   ['ps_5fstorage_5fbase_5ft',['ps_storage_base_t',['../structps__storage__base__t.html',1,'']]],
-  ['pwm',['PWM',['../classPWM.html',1,'']]],
-  ['pwm_5fconfig_5ft',['pwm_config_t',['../structpwm__config__t.html',1,'']]]
+  ['pwm',['PWM',['../classPWM.html',1,'']]]
 ];
