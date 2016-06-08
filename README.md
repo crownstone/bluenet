@@ -56,14 +56,13 @@ hardware development kit for professional use.
 
 
 # Copyrights
-The code base comes from [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf). Obviously, the copyrights of the code written by Christopher, belong to him.
 
-For the meshing functionality we use [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh) written by Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and Nordic Semiconductors).
+The copyrights (2014-2016) belongs to the team of Crownstone B.V. and are provided under an noncontagious open-source license:
 
-The copyrights (2014-2015) for the rest of the code belongs to the team of Distributed Organisms B.V. and are provided under an noncontagious open-source license:
-
-* Authors: Anne van Rossum, Dominik Egger, Bart van Vliet, Marc Hulscher, Peet van Tooren, Christian Haas
+* Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Christian Haas
 * Date: 27 Jan. 2014
-* License: LGPL v3+, Apache, or MIT, your choice
-* Almende B.V., http://www.almende.com and DoBots B.V., http://www.dobots.nl
+* Triple-licensed: LGPL v3+, Apache, MIT
+* Crownstone B.V., http://crownstone.rocks
 * Rotterdam, The Netherlands
+
+This code is built on the shoulders of giants. Our special thanks go to Christopher Mason for the initial C++ code base at [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf) and Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and Nordic Semiconductors) for the meshing functionality ([OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh)).
