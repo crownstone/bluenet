@@ -60,9 +60,11 @@ SCHEDULE_SERVICE=0
 
 # Enable or disable characteristics
 ## General Service
+CHAR_CONTROL=1
 CHAR_TEMPERATURE=1
 CHAR_RESET=1
 CHAR_CONFIGURATION=1
+CHAR_STATE_VARIABLES=1
 
 ## Power Service
 CHAR_PWM=1
@@ -75,8 +77,11 @@ CHAR_RSSI=1
 CHAR_SCAN_DEVICES=1
 CHAR_TRACK_DEVICES=1
 
+## Schedule Service
+CHAR_SCHEDULE=1
+
 # Enable or disable meshing functionality (1 or 0)
-CHAR_MESHING=0
+CHAR_MESHING=1
 
 # Size of the master buffer
 # Currently this should not be larger than BLE_GATTS_VAR_ATTR_LEN_MAX (512)
@@ -103,7 +108,11 @@ SERIAL_VERBOSITY=1
 # CROWNSTONE2          8
 # CROWNSTONE_SENSOR    9
 # PCA10000             10
-HARDWARE_BOARD=CROWNSTONE2
+# CROWNSTONE3          11
+# CROWNSTONE4          12
+# NORDIC_BEACON        13
+# DOBEACON             14
+HARDWARE_BOARD=CROWNSTONE4
 
 # Default transmission power
 # Can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4
@@ -255,12 +264,12 @@ APPLICATION_LENGTH=0x23000
 BOOTLOADER_START_ADDRESS=0x00038000
 # 0x00040000 - BOOTLOADER_START_ADDRESS = 32k
 BOOTLOADER_LENGTH=32k
-RAM_R1_BASE=0x20002800
-# RAM_APPLICATION_AMOUNT=0x1800
-# HEAP_SIZE=2700;
+#RAM_R1_BASE=0x20002800
+#RAM_APPLICATION_AMOUNT=0x1800
+#HEAP_SIZE=2700;
 # For the 32kB chip:
 #RAM_APPLICATION_AMOUNT=0x5800
-#HEAP_SIZE=16700;
+#HEAP_SIZE=5000;
 
 ## to enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
 ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x600, so if you
