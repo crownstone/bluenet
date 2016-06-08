@@ -91,6 +91,6 @@
 #define MSG_CHAR_MESH_SKIP                       "Characteristic Mesh skipped"
 #define MSG_CHAR_CONFIGURATION_ADD               "Characteristic Configuration added"
 #define MSG_CHAR_CONFIGURATION_SKIP              "Characteristic Configuration skipped"
-#define MSG_CHAR_STATEVARIABLES_ADD              "Characteristic StateVariables added"
-#define MSG_CHAR_STATEVARIABLES_SKIP             "Characteristic StateVariables skipped"
+#define MSG_CHAR_STATE_ADD                       "Characteristic State added"
+#define MSG_CHAR_STATE_SKIP                      "Characteristic State skipped"
 

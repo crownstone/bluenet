@@ -70,7 +70,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //						(dev.addr[5] == 0xC1 && dev.addr[4] == 0x1F && dev.addr[3] == 0xDC && dev.addr[2] == 0xF9 && dev.addr[1] == 0xB3 && dev.addr[0] == 0xFC)) {
 						LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
 								dev.addr[4], dev.addr[3], dev.addr[2], dev.addr[1],
-								dev.addr[0], dev.rssi, dev.occurrences);
+								dev.addr[0], dev.txPower, dev.occurrences);
 //					}
 				}
 #endif
@@ -165,8 +165,8 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 		Settings::getInstance().writeToStorage(type, payload, length);
 		break;
 	}
-	case COMMAND_MESSAGE: {
-		CommandHandlerTypes command = (CommandHandlerTypes)msg->commandMsg.command;
+	case CONTROL_MESSAGE: {
+		CommandHandlerTypes command = (CommandHandlerTypes)msg->commandMsg.type;
 		uint16_t length = msg->configMsg.length;
 		uint8_t* payload = msg->configMsg.payload;
 
@@ -195,7 +195,7 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 		uint16_t major = msg->beaconMsg.major;
 		uint16_t minor = msg->beaconMsg.minor;
 		ble_uuid128_t& uuid = msg->beaconMsg.uuid;
-		int8_t& rssi = msg->beaconMsg.rssi;
+		int8_t& rssi = msg->beaconMsg.txPower;
 
 		Settings& settings = Settings::getInstance();
 
@@ -223,9 +223,9 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 		}
 
 		int8_t oldRssi;
-		settings.get(CONFIG_IBEACON_RSSI, &oldRssi);
+		settings.get(CONFIG_IBEACON_TXPOWER, &oldRssi);
 		if (rssi != 0 && rssi != oldRssi) {
-			settings.writeToStorage(CONFIG_IBEACON_RSSI, (uint8_t*)&rssi, sizeof(rssi), false);
+			settings.writeToStorage(CONFIG_IBEACON_TXPOWER, (uint8_t*)&rssi, sizeof(rssi), false);
 			hasChange = true;
 		}
 

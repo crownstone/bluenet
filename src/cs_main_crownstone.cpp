@@ -58,8 +58,9 @@
 using namespace BLEpp;
 
 Crownstone::Crownstone() :
+	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
 	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
-	_alertService(NULL), _scheduleService(NULL), _deviceInformationService(NULL),
+	_alertService(NULL), _scheduleService(NULL),
 	_serviceData(NULL), _beacon(NULL),
 	_mesh(NULL), _sensors(NULL), _fridge(NULL),
 	_commandHandler(NULL), _scanner(NULL), _tracker(NULL),
@@ -80,7 +81,7 @@ Crownstone::Crownstone() :
 	// persistent storage, configuration, state
 	_storage = &Storage::getInstance();
 	_settings = &Settings::getInstance();
-	_stateVars = &StateVars::getInstance();
+	_stateVars = &State::getInstance();
 
 	// switch using PWM or Relay
 	_switch = &Switch::getInstance();
@@ -350,7 +351,7 @@ void Crownstone::configureAdvertisement() {
 	_settings->get(CONFIG_IBEACON_MAJOR, &major);
 	_settings->get(CONFIG_IBEACON_MINOR, &minor);
 	_settings->get(CONFIG_IBEACON_UUID, uuid.uuid128);
-	_settings->get(CONFIG_IBEACON_RSSI, &rssi);
+	_settings->get(CONFIG_IBEACON_TXPOWER, &rssi);
 
 #ifdef CHANGE_MINOR_ON_RESET
 	minor++;
@@ -364,9 +365,14 @@ void Crownstone::configureAdvertisement() {
 	//! create the Service Data  object which will be used
 	//! to advertise certain state variables
 	_serviceData = new ServiceData();
-	// todo: read crownstone id from storage
-	// set it to service data
+
+	// read crownstone id from storage and set it to the service data
+	uint16_t crownstoneId;
+	_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+
 	// assign service data to stack
+	_serviceData->updateCrownstoneId(crownstoneId);
+
 	_stack->setServiceData(_serviceData);
 
 	if (Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {
@@ -395,6 +401,12 @@ void Crownstone::createCrownstoneServices() {
 	//! should be available always
 	_deviceInformationService = new DeviceInformationService();
 	_stack->addService(_deviceInformationService);
+
+//#if CROWNSTONE_SERVICE==1
+	//! should be available always
+	_crownstoneService = new CrownstoneService();
+	_stack->addService(_crownstoneService);
+//#endif
 
 #if GENERAL_SERVICE==1
 	//! general services, such as internal temperature, setting names, etc.
@@ -431,7 +443,7 @@ void Crownstone::createCrownstoneServices() {
 void Crownstone::setName() {
 #ifdef CHANGE_NAME_ON_RESET
 	uint32_t resetCounter;
-	StateVars::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
+	State::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
 //	uint16_t minor;
 //	ps_configuration_t cfg = Settings::getInstance().getConfig();
 //	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
@@ -442,7 +454,7 @@ void Crownstone::setName() {
 #else
 	char devicename[32];
 	uint16_t size;
-	_settings->get(CONFIG_NAME_UUID, devicename, size);
+	_settings->get(CONFIG_NAME, devicename, size);
 	LOGd("size: %d", size);
 	std::string device_name(devicename, size);
 #endif
@@ -484,9 +496,9 @@ void Crownstone::prepareCrownstone() {
 
 #if RESET_COUNTER==1
 	uint32_t resetCounter;
-	StateVars::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
+	State::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
 	LOGi("Reset counter at: %d", ++resetCounter);
-	StateVars::getInstance().setStateVar(SV_RESET_COUNTER, resetCounter);
+	State::getInstance().set(SV_RESET_COUNTER, resetCounter);
 #endif
 
 	BLEutil::print_heap("Heap setup: ");
@@ -572,7 +584,7 @@ void Crownstone::tick() {
 
 	//! update temperature
 	int32_t temperature = getTemperature();
-	_stateVars->setStateVar(SV_TEMPERATURE, temperature);
+	_stateVars->set(STATE_TEMPERATURE, temperature);
 
 	scheduleNextTick();
 }
@@ -606,7 +618,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	bool reconfigureBeacon = false;
 	switch(evt) {
 
-	case CONFIG_NAME_UUID: {
+	case CONFIG_NAME: {
 		_stack->updateDeviceName(std::string((char*)p_data, length));
 		_stack->updateAdvertisement();
 		break;
@@ -626,8 +638,8 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		reconfigureBeacon = true;
 		break;
 	}
-	case CONFIG_IBEACON_RSSI: {
-		_beacon->setRSSI(*(int8_t*)p_data);
+	case CONFIG_IBEACON_TXPOWER: {
+		_beacon->setTxPower(*(int8_t*)p_data);
 		reconfigureBeacon = true;
 		break;
 	}
@@ -650,6 +662,11 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case CONFIG_PASSKEY: {
 		_stack->setPasskey((uint8_t*)p_data);
+		break;
+	}
+	case CONFIG_CROWNSTONE_ID: {
+		_serviceData->updateCrownstoneId(*(uint16_t*)p_data);
+		_stack->updateAdvertisement();
 		break;
 	}
 

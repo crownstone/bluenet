@@ -8,9 +8,9 @@
 #include <processing/cs_Tracker.h>
 
 #include <storage/cs_Settings.h>
-#include <storage/cs_StateVars.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_PWM.h>
+#include <storage/cs_State.h>
 
 Tracker::Tracker() : EventListener(),
 		_timeoutCounts(TRACKDEVICE_DEFAULT_TIMEOUT_COUNT), _tracking(false), _trackIsNearby(false),
@@ -27,7 +27,7 @@ Tracker::Tracker() : EventListener(),
 
 	readTrackedDevices();
 
-	Settings::getInstance().get(CONFIG_NEARBY_TIMEOUT_UUID, &_timeoutCounts);
+	Settings::getInstance().get(CONFIG_NEARBY_TIMEOUT, &_timeoutCounts);
 	_trackedDeviceList->setTimeout(_timeoutCounts);
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) Tracker::staticTick);
@@ -78,7 +78,7 @@ void Tracker::writeTrackedDevices() {
 	buffer_ptr_t buffer;
 	uint16_t length;
 	_trackedDeviceList->getBuffer(buffer, length);
-	StateVars::getInstance().setStateVar(SV_TRACKED_DEVICES, buffer, length);
+	State::getInstance().set(STATE_TRACKED_DEVICES, buffer, length);
 }
 
 void Tracker::readTrackedDevices() {
@@ -86,7 +86,7 @@ void Tracker::readTrackedDevices() {
 	uint16_t length;
 	_trackedDeviceList->getBuffer(buffer, length);
 
-	StateVars::getInstance().getStateVar(SV_TRACKED_DEVICES, buffer, length);
+	State::getInstance().get(STATE_TRACKED_DEVICES, buffer, length);
 
 	if (!_trackedDeviceList->isEmpty()) {
 		LOGi("restored tracked devices (%d):", _trackedDeviceList->getSize());

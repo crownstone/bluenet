@@ -14,8 +14,6 @@
 #include <ble/cs_iBeacon.h>
 
 #include <storage/cs_Settings.h>
-#include <storage/cs_StateVars.h>
-
 #include <events/cs_EventListener.h>
 
 #include <services/cs_IndoorLocalisationService.h>
@@ -25,6 +23,7 @@
 #include <services/cs_ScheduleService.h>
 #include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>
+#include <services/cs_CrownstoneService.h>
 
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_TemperatureGuard.h>
@@ -36,6 +35,7 @@
 #include <processing/cs_PowerSampling.h>
 
 #include <mesh/cs_Mesh.h>
+#include <storage/cs_State.h>
 
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
@@ -137,19 +137,20 @@ private:
 	Timer* _timer;
 	Storage* _storage;
 	Settings* _settings;
-	StateVars* _stateVars;
+	State* _stateVars;
 	Switch* _switch;
 	TemperatureGuard* _temperatureGuard;
 	PowerSampling* _powerSampler;
 
 	// services
+	DeviceInformationService* _deviceInformationService;
+	CrownstoneService* _crownstoneService;
+	SetupService* _setupService;
 	GeneralService* _generalService;
 	IndoorLocalizationService* _localizationService;
 	PowerService* _powerService;
 	AlertService* _alertService;
 	ScheduleService* _scheduleService;
-	DeviceInformationService* _deviceInformationService;
-	SetupService* _setupService;
 
 	// advertise
 	ServiceData* _serviceData;

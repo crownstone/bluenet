@@ -15,16 +15,16 @@
  * Use in the characteristic to read and write configurations in <CommonService>.
  */
 enum ConfigurationTypes {
-	CONFIG_NAME_UUID                        = Configuration_Base,
-	CONFIG_DEVICE_TYPE_UUID                 = 0x01,
-	CONFIG_ROOM_UUID                        = 0x02,
-	CONFIG_FLOOR_UUID                       = 0x03,
-	CONFIG_NEARBY_TIMEOUT_UUID              = 0x04,
-	CONFIG_PWM_FREQ_UUID                    = 0x05,
+	CONFIG_NAME                             = Configuration_Base,
+	CONFIG_DEVICE_TYPE                      = 0x01,
+	CONFIG_ROOM                             = 0x02,
+	CONFIG_FLOOR                            = 0x03,
+	CONFIG_NEARBY_TIMEOUT                   = 0x04,
+	CONFIG_PWM_FREQ                         = 0x05,
 	CONFIG_IBEACON_MAJOR                    = 0x06,
 	CONFIG_IBEACON_MINOR                    = 0x07,
 	CONFIG_IBEACON_UUID                     = 0x08,
-	CONFIG_IBEACON_RSSI                     = 0x09,
+	CONFIG_IBEACON_TXPOWER                  = 0x09,
 	CONFIG_WIFI_SETTINGS                    = 0x0A, //! 10
 	CONFIG_TX_POWER                         = 0x0B, //! 11
 	CONFIG_ADV_INTERVAL                     = 0x0C, //! 12
@@ -49,6 +49,7 @@ enum ConfigurationTypes {
 	CONFIG_POWER_SAMPLE_BURST_INTERVAL      = 0x1F, //! 31
 	CONFIG_POWER_SAMPLE_CONT_INTERVAL       = 0x20, //! 32
 	CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES    = 0x21, //! 33
+	CONFIG_CROWNSTONE_ID                    = 0x22, //! 34
 	CONFIG_TYPES
 };
 

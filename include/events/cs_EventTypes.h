@@ -11,7 +11,7 @@
  */
 enum EventType {
 	Configuration_Base = 0x000,
-	StateVar_Base      = 0x080,
+	State_Base         = 0x080,
 	General_Base       = 0x100,
 };
 

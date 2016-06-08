@@ -408,7 +408,7 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 	if (_crownstoneData) {
 	//	ble_advdata_service_data_t service_data;
 		memset(&_service_data, 0, sizeof(_service_data));
-		_service_data.service_uuid = 0x5432;
+		_service_data.service_uuid = SERVICE_DATA_UUID;
 		_service_data.data.p_data = _crownstoneData->getArray();
 		_service_data.data.size = _crownstoneData->getArraySize();
 

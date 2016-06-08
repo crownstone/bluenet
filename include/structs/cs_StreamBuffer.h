@@ -7,11 +7,10 @@
 
 #pragma once
 
-#include "structs/cs_BufferAccessor.h"
-#include "util/cs_BleError.h"
-#include "util/cs_Utils.h"
-
-//using namespace BLEpp;
+#include <structs/cs_BufferAccessor.h>
+#include <util/cs_BleError.h>
+#include <util/cs_Utils.h>
+#include <common/cs_Types.h>
 
 #define SB_HEADER_SIZE 4
 
@@ -19,27 +18,39 @@
 #define SB_BUFFER_NOT_INITIALIZED                1
 #define SB_BUFFER_NOT_LARGE_ENOUGH               2
 
-typedef uint8_t ERR_CODE;
+enum OpCode {
+	READ_VALUE       = 0,
+	WRITE_VALUE,
+	NOTIFY_VALUE
+};
 
 /** Structure for a StreamBuffer
  *
- * Requires MASTER_BUFFER_SIZE to be set.
+ * typename T defines the type of the payload elements
+ * typename U defines the number of elements in the payload
  */
-template <typename T>
+template <typename T, int U>
 struct __attribute__((__packed__)) stream_t {
 	uint8_t type;
-	uint8_t reserved; //! reserved for byte alignment
+	uint8_t opCode; //! can be used as op code, see <OpCode>
 	uint16_t length;
-	T payload[(MASTER_BUFFER_SIZE-SB_HEADER_SIZE)/sizeof(T)];
+	T payload[U];
 };
 
-/** General StreamBuffer with type, length, and payload
+//! default payload length for a stream buffer. needs <MASTER_BUFFER_SIZE> to be defined
+#define DEFAULT_PAYLOAD_LENGTH ((MASTER_BUFFER_SIZE-SB_HEADER_SIZE)/sizeof(T))
+
+/** General StreamBuffer with type, op code, length, and payload
  *
- * General class that can be used to send arrays of values over Bluetooth, of which the first byte is a type
- * or identifier byte, the second one the length of the payload (so, minus identifier and length byte itself)
- * and the next bytes are the payload itself.
+ * General class that can be used to send arrays of values over Bluetooth. For the structure, see the
+ * <stream_t> struct.
+ *
+ * typename T defines the type of the payload elements
+ * typename U defines the number of elements in the payload. by default, the number of elements is defined
+ *            as (<MASTER_BUFFER_SIZE> - <SB_HEADER_SIZE>) / sizeof(T)
+ *            but it can be overwritten if a smaller payload array should be used.
  */
-template <typename T>
+template <typename T, int U = DEFAULT_PAYLOAD_LENGTH>
 class StreamBuffer : public BufferAccessor {
 public:
 	/** Default constructor
@@ -53,7 +64,7 @@ public:
 	int assign(uint8_t *buffer, uint16_t size) {
 		LOGd("assign buff: %p, len: %d", buffer, size);
 		assert(SB_HEADER_SIZE + _max_items*_item_size <= size, "Assigned buffer is not large enough");
-		_buffer = (stream_t<T>*)buffer;
+		_buffer = (stream_t<T, U>*)buffer;
 		_maxLength = size;
 		return 0;
 	}
@@ -142,12 +153,6 @@ public:
 	 */
 	inline uint8_t type() const { return _buffer->type; }
 
-	/** Return the opcode assigned to the SreamBuffer
-	 *
-	 * @return the type, see <OpCode>
-	 */
-//	inline uint8_t opCode() const { return _buffer->opCode; }
-
 	/** Get the length/size of the payload in number of elements
 	 *
 	 * @return number of elements stored
@@ -167,11 +172,17 @@ public:
 	 */
 	inline void setType(uint8_t type) { _buffer->type = type; }
 
+	/** Return the opcode assigned to the SreamBuffer
+	 *
+	 * @return the type, see <OpCode>
+	 */
+	inline uint8_t opCode() const { return _buffer->opCode; }
+
 	/** Set the opcode for this stream buffer
 	 *
 	 * @type the type, see <OpCode>
 	 */
-//	inline void setOpCode(uint8_t opCode) { _buffer->opCode = opCode; }
+	inline void setOpCode(uint8_t opCode) { _buffer->opCode = opCode; }
 
 	/** Set payload of the buffer.
 	 *
@@ -212,10 +223,8 @@ public:
 	/** @inherit */
 	uint16_t getMaxLength() const {
 		return _maxLength;
-//		return MASTER_BUFFER_SIZE;
 	}
 
-	//! TODO: Why do we need this function!?
 	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
 		buffer = (buffer_ptr_t)_buffer;
@@ -225,12 +234,13 @@ public:
 protected:
 	/** Pointer to the data to be sent
 	 */
-	stream_t<T>* _buffer;
+	stream_t<T, U>* _buffer;
 
 private:
 	uint16_t _maxLength;
 
 	const size_t _item_size = sizeof(T);
-	const size_t _max_items = (MASTER_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
+//	const size_t _max_items = (MASTER_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
+	const size_t _max_items = U;
 
 };

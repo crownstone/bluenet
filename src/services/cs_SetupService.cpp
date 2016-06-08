@@ -29,10 +29,10 @@ SetupService::SetupService() :
 //	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) GeneralService::staticTick);
 }
 
-CharacBuffer<uint8_t>* SetupService::getCharacBuffer(buffer_ptr_t& buffer, uint16_t& maxLength) {
+StreamBuffer<uint8_t>* SetupService::getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength) {
 	//! if it is not created yet, create a new stream buffer and assign the master buffer to it
 	if (_streamBuffer == NULL) {
-		_streamBuffer = new CharacBuffer<uint8_t>();
+		_streamBuffer = new StreamBuffer<uint8_t>();
 
 		MasterBuffer& mb = MasterBuffer::getInstance();
 		uint16_t size = 0;
@@ -56,7 +56,7 @@ void SetupService::addCharacteristics() {
 	uint16_t maxLength = 0;
 
 	LOGi(MSG_CHAR_CONTROL_ADD);
-	_streamBuffer = getCharacBuffer(buffer, maxLength);
+	_streamBuffer = getStreamBuffer(buffer, maxLength);
 	addControlCharacteristic(buffer, maxLength);
 
 	addMacAddressCharacteristic();
@@ -64,7 +64,7 @@ void SetupService::addCharacteristics() {
 #if CHAR_CONFIGURATION==1 || DEVICE_TYPE==DEVICE_FRIDGE
 	{
 		LOGi(MSG_CHAR_CONFIGURATION_ADD);
-		_streamBuffer = getCharacBuffer(buffer, maxLength);
+		_streamBuffer = getStreamBuffer(buffer, maxLength);
 		addSetConfigurationCharacteristic(buffer, maxLength);
 		addGetConfigurationCharacteristic(buffer, maxLength);
 
@@ -149,7 +149,7 @@ void SetupService::addSetConfigurationCharacteristic(buffer_ptr_t buffer, uint16
 	_setConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_setConfigurationCharacteristic);
 
-	_setConfigurationCharacteristic->setUUID(UUID(getUUID(), WRITE_CONFIGURATION_UUID));
+	_setConfigurationCharacteristic->setUUID(UUID(getUUID(), CONFIG_CONTROL_UUID));
 	_setConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_WRITE);
 	_setConfigurationCharacteristic->setWritable(true);
 	_setConfigurationCharacteristic->setValue(buffer);
@@ -205,7 +205,7 @@ void SetupService::addGetConfigurationCharacteristic(buffer_ptr_t buffer, uint16
 	_getConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_getConfigurationCharacteristic);
 
-	_getConfigurationCharacteristic->setUUID(UUID(getUUID(), READ_CONFIGURATION_UUID));
+	_getConfigurationCharacteristic->setUUID(UUID(getUUID(), CONFIG_READ_UUID));
 	_getConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_READ);
 	_getConfigurationCharacteristic->setWritable(false);
 	_getConfigurationCharacteristic->setNotifies(true);

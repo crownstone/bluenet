@@ -115,7 +115,7 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	case CONFIG_SCAN_FILTER:
 	case CONFIG_CURRENT_LIMIT:
-	case CONFIG_FLOOR_UUID: {
+	case CONFIG_FLOOR: {
 		if (length != 1) {
 			LOGw("Expected uint8");
 			return false;
@@ -131,7 +131,7 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_MAX_ENV_TEMP:
 	case CONFIG_MIN_ENV_TEMP:
 	case CONFIG_TX_POWER:
-	case CONFIG_IBEACON_RSSI: {
+	case CONFIG_IBEACON_TXPOWER: {
 		if (length != 1) {
 			LOGw("Expected int8");
 			return false;
@@ -143,6 +143,7 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
+	case CONFIG_CROWNSTONE_ID:
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:
 	case CONFIG_BOOT_DELAY:
 	case CONFIG_SCAN_BREAK_DURATION:
@@ -151,7 +152,7 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_ADV_INTERVAL:
 	case CONFIG_IBEACON_MINOR:
 	case CONFIG_IBEACON_MAJOR:
-	case CONFIG_NEARBY_TIMEOUT_UUID: {
+	case CONFIG_NEARBY_TIMEOUT: {
 		if (length != 2) {
 			LOGw("Expected uint16");
 			return false;
@@ -179,7 +180,7 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 		LOGi("Set passkey to %s", std::string((char*)payload, length).c_str());
 		return true;
 	}
-	case CONFIG_NAME_UUID: {
+	case CONFIG_NAME: {
 		if (length > MAX_STRING_STORAGE_SIZE) {
 			LOGe(MSG_NAME_TOO_LONG);
 			return false;
@@ -214,13 +215,13 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 
 uint8_t* Settings::getStorageItem(uint8_t type) {
 	switch(type) {
-	case CONFIG_NAME_UUID: {
+	case CONFIG_NAME: {
 		return (uint8_t*)&_storageStruct.device_name;
 	}
-	case CONFIG_NEARBY_TIMEOUT_UUID: {
+	case CONFIG_NEARBY_TIMEOUT: {
 		return (uint8_t*)&_storageStruct.nearbyTimeout;
 	}
-	case CONFIG_FLOOR_UUID: {
+	case CONFIG_FLOOR: {
 		return (uint8_t*)&_storageStruct.floor;
 	}
 	case CONFIG_IBEACON_MAJOR: {
@@ -232,8 +233,8 @@ uint8_t* Settings::getStorageItem(uint8_t type) {
 	case CONFIG_IBEACON_UUID: {
 		return (uint8_t*)&_storageStruct.beacon.uuid.uuid128;
 	}
-	case CONFIG_IBEACON_RSSI: {
-		return (uint8_t*)&_storageStruct.beacon.rssi;
+	case CONFIG_IBEACON_TXPOWER: {
+		return (uint8_t*)&_storageStruct.beacon.txPower;
 	}
 	case CONFIG_WIFI_SETTINGS: {
 		return (uint8_t*)&_wifiSettings;
@@ -277,6 +278,9 @@ uint8_t* Settings::getStorageItem(uint8_t type) {
 	case CONFIG_CURRENT_LIMIT: {
 		return (uint8_t*)&_storageStruct.currentLimit;
 	}
+	case CONFIG_CROWNSTONE_ID: {
+		return (uint8_t*)&_storageStruct.crownstoneId;
+	}
 	case CONFIG_ADC_SAMPLE_RATE: {
 	}
 	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
@@ -300,7 +304,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	/////////////////////////////////////////////////
 	case CONFIG_SCAN_FILTER:
 	case CONFIG_CURRENT_LIMIT:
-	case CONFIG_FLOOR_UUID: {
+	case CONFIG_FLOOR: {
 		return 1;
 	}
 
@@ -311,13 +315,14 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_MAX_ENV_TEMP:
 	case CONFIG_MIN_ENV_TEMP:
 	case CONFIG_TX_POWER:
-	case CONFIG_IBEACON_RSSI: {
+	case CONFIG_IBEACON_TXPOWER: {
 		return 1;
 	}
 
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
+	case CONFIG_CROWNSTONE_ID:
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:
 	case CONFIG_BOOT_DELAY:
 	case CONFIG_SCAN_BREAK_DURATION:
@@ -326,7 +331,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_ADV_INTERVAL:
 	case CONFIG_IBEACON_MINOR:
 	case CONFIG_IBEACON_MAJOR:
-	case CONFIG_NEARBY_TIMEOUT_UUID: {
+	case CONFIG_NEARBY_TIMEOUT: {
 		return 2;
 	}
 
@@ -339,7 +344,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_PASSKEY: {
 		return BLE_GAP_PASSKEY_LEN;
 	}
-	case CONFIG_NAME_UUID: {
+	case CONFIG_NAME: {
 		return MAX_STRING_STORAGE_SIZE+1;
 	}
 
@@ -481,17 +486,17 @@ bool Settings::get(uint8_t type, void* target) {
 
 bool Settings::get(uint8_t type, void* target, uint16_t& size) {
 	switch(type) {
-	case CONFIG_NAME_UUID: {
+	case CONFIG_NAME: {
 		char default_name[32];
 		sprintf(default_name, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
 		Storage::getString(_storageStruct.device_name, (char*) target, default_name, size);
 		return true;
 	}
-	case CONFIG_FLOOR_UUID: {
+	case CONFIG_FLOOR: {
 		Storage::getUint8(_storageStruct.floor, (uint8_t*)target, 0);
 		return true;
 	}
-	case CONFIG_NEARBY_TIMEOUT_UUID: {
+	case CONFIG_NEARBY_TIMEOUT: {
 		Storage::getUint16(_storageStruct.nearbyTimeout, (uint16_t*)target, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
 		return true;
 	}
@@ -507,8 +512,8 @@ bool Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, (uint8_t*) target, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
 		return true;
 	}
-	case CONFIG_IBEACON_RSSI: {
-		Storage::getInt8(_storageStruct.beacon.rssi, (int8_t*)target, BEACON_RSSI);
+	case CONFIG_IBEACON_TXPOWER: {
+		Storage::getInt8(_storageStruct.beacon.txPower, (int8_t*)target, BEACON_RSSI);
 		return true;
 	}
 	case CONFIG_WIFI_SETTINGS: {
@@ -573,6 +578,10 @@ bool Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getUint8(_storageStruct.currentLimit, (uint8_t*)target, CURRENT_LIMIT);
 		return true;
 	}
+	case CONFIG_CROWNSTONE_ID: {
+		Storage::getUint16(_storageStruct.crownstoneId, (uint16_t*)target, 0);
+		return true;
+	}
 	case CONFIG_ADC_SAMPLE_RATE: {
 //		return true;
 	}
@@ -594,15 +603,15 @@ bool Settings::get(uint8_t type, void* target, uint16_t& size) {
 
 bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 	switch(type) {
-	case CONFIG_NAME_UUID: {
+	case CONFIG_NAME: {
 		Storage::setString(std::string((char*)target, size), _storageStruct.device_name);
 		break;
 	}
-	case CONFIG_NEARBY_TIMEOUT_UUID: {
+	case CONFIG_NEARBY_TIMEOUT: {
 		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.nearbyTimeout);
 		break;
 	}
-	case CONFIG_FLOOR_UUID: {
+	case CONFIG_FLOOR: {
 		Storage::setUint8(*((uint8_t*)target), _storageStruct.floor);
 		break;
 	}
@@ -618,8 +627,8 @@ bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.beacon.uuid.uuid128, 16);
 		break;
 	}
-	case CONFIG_IBEACON_RSSI: {
-		Storage::setInt8(*((int8_t*)target), (int32_t&)_storageStruct.beacon.rssi);
+	case CONFIG_IBEACON_TXPOWER: {
+		Storage::setInt8(*((int8_t*)target), (int32_t&)_storageStruct.beacon.txPower);
 		break;
 	}
 	case CONFIG_WIFI_SETTINGS: {
@@ -679,6 +688,9 @@ bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 	case CONFIG_CURRENT_LIMIT: {
 		Storage::setUint8(*((uint8_t*)target), _storageStruct.currentLimit);
 		break;
+	}
+	case CONFIG_CROWNSTONE_ID: {
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
 	}
 	case CONFIG_ADC_SAMPLE_RATE: {
 //		break;

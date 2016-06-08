@@ -13,38 +13,47 @@
 #include <third/protocol/rbc_mesh.h>
 
 #include <structs/cs_ScanResult.h>
+#include <structs/cs_StreamBuffer.h>
 
 enum MeshChannels {
-	HUB_CHANNEL        = 1,
-	DATA_CHANNEL       = 2,
+	HUB_CHANNEL     = 1,
+	DATA_CHANNEL    = 2,
 };
 
 enum MeshMessageTypes {
 	//! data channel messages
-	COMMAND_MESSAGE    = 1,
-	BEACON_MESSAGE     = 2,
-	CONFIG_MESSAGE     = 3,
-	STATE_VAR_MESSAGE  = 4,
+	CONTROL_MESSAGE       = 0,
+	BEACON_MESSAGE        = 1,
+	CONFIG_MESSAGE        = 2,
+	STATE_MESSAGE         = 3,
 
 	//! hub channel messages
-	SCAN_MESSAGE       = 101,
-//	UNUSED             = 102,
+	SCAN_MESSAGE          = 101,
+//	UNUSED                = 102,
 	POWER_SAMPLES_MESSAGE = 103,
-	EVENT_MESSAGE      = 104, // todo: do we need event messages on the mesh at all?
+	EVENT_MESSAGE         = 104,    // todo: do we need event messages on the mesh at all?
 };
 
 //! broadcast address is defined as 00:00:00:00:00:00
 #define BROADCAST_ADDRESS {}
 
+//! available number of bytes for a mesh message
 #define MAX_MESH_MESSAGE_LEN RBC_MESH_VALUE_MAX_LEN
-#define MAX_MESH_MESSAGE_PAYLOAD_LENGTH MAX_MESH_MESSAGE_LEN - BLE_GAP_ADDR_LEN - sizeof(uint16_t)
+/** number of bytes used for our mesh message header
+ *   - target MAC address: 6B
+ *   - message type: 2B
+ */
+#define MAX_MESH_MESSAGE_HEADER_LENGTH BLE_GAP_ADDR_LEN - sizeof(uint16_t)
+//! available number of bytes for the mesh message payload. the payload depends on the message type
+#define MAX_MESH_MESSAGE_PAYLOAD_LENGTH MAX_MESH_MESSAGE_LEN - MAX_MESH_MESSAGE_HEADER_LENGTH
+//! available number of bytes for the data of the message, for command and config messages
+#define MAX_MESH_MESSAGE_DATA_LENGTH MAX_MESH_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE
 
-#define MAX_EVENT_MESH_MESSAGE_DATA_LENGTH MAX_MESH_MESSAGE_PAYLOAD_LENGTH - sizeof(uint16_t)
 /** Event mesh message
  */
 struct __attribute__((__packed__)) event_mesh_message_t {
 	uint16_t event;
-//	uint8_t data[MAX_EVENT_MESH_MESSAGE_DATA_LENGTH];
+//	uint8_t data[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
 };
 
 /** Beacon mesh message
@@ -53,28 +62,12 @@ struct __attribute__((__packed__)) beacon_mesh_message_t {
 	uint16_t major;
 	uint16_t minor;
 	ble_uuid128_t uuid;
-	int8_t rssi;
+	int8_t txPower;
 };
 
-#define COMMAND_MM_HEADER_SIZE 4
-/** Command mesh message
- */
-struct __attribute__((__packed__)) command_mesh_message_t {
-	uint8_t command;
-	uint8_t reserved; //! reserved for byte alignment
-	uint16_t length;
-	uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - COMMAND_MM_HEADER_SIZE];
-};
-
-#define CONFIG_MM_HEADER_SIZE 4
-/** Config mesh message
- */
-struct __attribute__((__packed__)) config_mesh_message_t {
-	uint8_t type;
-	uint8_t opCode;
-	uint16_t length;
-	uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH - CONFIG_MM_HEADER_SIZE];
-};
+using control_mesh_message_t = stream_t<uint8_t, MAX_MESH_MESSAGE_DATA_LENGTH>;
+using config_mesh_message_t = stream_t<uint8_t, MAX_MESH_MESSAGE_DATA_LENGTH>;
+using state_mesh_message_t = stream_t<uint8_t, MAX_MESH_MESSAGE_DATA_LENGTH>;
 
 /** Device mesh header
  */
@@ -91,7 +84,7 @@ struct __attribute__((__packed__)) device_mesh_message_t {
 		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
 		event_mesh_message_t evtMsg;
 		beacon_mesh_message_t beaconMsg;
-		command_mesh_message_t commandMsg;
+		control_mesh_message_t commandMsg;
 		config_mesh_message_t configMsg;
 	};
 };

@@ -102,7 +102,7 @@ struct ps_configuration_t : ps_storage_base_t {
 		uint32_t major;
 		uint32_t minor;
 		ble_uuid128_t uuid;
-		int32_t rssi;
+		int32_t txPower;
 	} beacon;
 
 	//! current limit value
@@ -168,6 +168,8 @@ struct ps_configuration_t : ps_storage_base_t {
 		// dummy to force enableFlags struct to be of size uint32_t;
 		uint32_t flags;
 	};
+
+	uint32_t crownstoneId;
 
 };
 

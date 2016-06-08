@@ -16,7 +16,7 @@ IBeacon::IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor,
 	setUUID(uuid);
 	setMajor(major);
 	setMinor(minor);
-	setRSSI(rssi);
+	setTxPower(rssi);
 }
 
 void IBeacon::setMajor(uint16_t major) {
@@ -54,11 +54,11 @@ ble_uuid128_t IBeacon::getUUID() {
 	return uuid;
 }
 
-void IBeacon::setRSSI(int8_t rssi) {
-	LOGd("setRSSI: %d", rssi);
-	_params.rssi = rssi;
+void IBeacon::setTxPower(int8_t txPower) {
+	LOGd("setTxPower: %d", txPower);
+	_params.txPower = txPower;
 }
 
-int8_t IBeacon::getRSSI() {
-	return _params.rssi;
+int8_t IBeacon::getTxPower() {
+	return _params.txPower;
 }

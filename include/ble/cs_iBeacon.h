@@ -68,7 +68,7 @@ private:
 			 * smartphone together with the current rssi reading to calculate the current
 			 * distance from the iBeacon.
 			 */
-			int8_t rssi;
+			int8_t txPower;
 		} _params;
 		uint8_t _buffer[sizeof(_params)];
 	};
@@ -123,8 +123,8 @@ public:
 	ble_uuid128_t getUUID();
 
 	/** Set RSSI value */
-	void setRSSI(int8_t rssi);
+	void setTxPower(int8_t txPower);
 	/** Get RSSI value */
-	int8_t getRSSI();};
+	int8_t getTxPower();};
 
 } //! end namespace

@@ -11,7 +11,7 @@
 #include <cfg/cs_Config.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_PWM.h>
-#include <storage/cs_StateVars.h>
+#include <storage/cs_State.h>
 
 Switch::Switch() :
 		_switchValue(0)
@@ -54,7 +54,7 @@ void Switch::setValue(uint8_t value) {
 		EventDispatcher::getInstance().dispatch(EVT_POWER_OFF, &_switchValue, 1);
 	}
 
-	StateVars::getInstance().setStateVar(SV_SWITCH_STATE, value);
+	State::getInstance().set(STATE_SWITCH_STATE, value);
 }
 
 uint8_t Switch::getValue() {

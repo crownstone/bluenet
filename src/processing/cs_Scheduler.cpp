@@ -7,11 +7,11 @@
 
 #include <processing/cs_Scheduler.h>
 
-#include <storage/cs_StateVars.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_PWM.h>
 #include <drivers/cs_RTC.h>
 #include <events/cs_EventDispatcher.h>
+#include <storage/cs_State.h>
 
 Scheduler::Scheduler() :
 		_rtcTimeStamp(0), _posixTimeStamp(0), _scheduleList(NULL) {
@@ -107,7 +107,7 @@ void Scheduler::writeScheduleList() {
 	buffer_ptr_t buffer;
 	uint16_t length;
 	_scheduleList->getBuffer(buffer, length);
-	StateVars::getInstance().setStateVar(SV_SCHEDULE, buffer, length);
+	State::getInstance().set(STATE_SCHEDULE, buffer, length);
 #endif
 }
 
@@ -118,7 +118,7 @@ void Scheduler::readScheduleList() {
 	_scheduleList->getBuffer(buffer, length);
 	length = _scheduleList->getMaxLength();
 
-	StateVars::getInstance().getStateVar(SV_SCHEDULE, buffer, length);
+	State::getInstance().get(STATE_SCHEDULE, buffer, length);
 
 	if (!_scheduleList->isEmpty()) {
 #ifdef PRINT_DEBUG

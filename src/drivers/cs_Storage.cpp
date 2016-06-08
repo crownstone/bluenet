@@ -18,8 +18,8 @@
 
 #include <climits>
 
-#include "storage/cs_StateVars.h"
 #include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
 
 extern "C"  {
 
@@ -45,7 +45,7 @@ extern "C"  {
 static storage_config_t config[] {
 	{PS_ID_CONFIGURATION, {}, sizeof(ps_configuration_t)},
 	{PS_ID_GENERAL, {}, sizeof(ps_general_vars_t)},
-	{PS_ID_STATE, {}, sizeof(ps_state_vars_t)}
+	{PS_ID_STATE, {}, sizeof(ps_state_t)}
 };
 
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)

@@ -101,15 +101,12 @@ protected:
 		device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 
 		switch (msg->header.messageType) {
-		case COMMAND_MESSAGE: {
-			//! command message has an array for parameters which doesn't have to be filled
+		case CONTROL_MESSAGE:
+		case CONFIG_MESSAGE: {
+			//! command and config message have an array for parameters which don't have to be filled
 			//! so we don't know in advance how long it needs to be exactly. can only give
 			//! a lower and upper bound.
-			return (length > getMessageSize(COMMAND_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - COMMAND_MM_HEADER_SIZE));
-		}
-		case CONFIG_MESSAGE: {
-			//! same as command message, does not have a fixed message size
-			return (length > getMessageSize(CONFIG_MESSAGE) && length <= (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - CONFIG_MM_HEADER_SIZE));
+			return (length > getMessageSize(msg->header.messageType) && length <= MAX_MESH_MESSAGE_DATA_LENGTH);
 		}
 		default:{
 			uint16_t desiredLength = getMessageSize(msg->header.messageType);
@@ -133,10 +130,9 @@ protected:
 			return sizeof(device_mesh_header_t) + sizeof(event_mesh_message_t);
 		case BEACON_MESSAGE:
 			return sizeof(device_mesh_header_t) + sizeof(beacon_mesh_message_t);
-		case COMMAND_MESSAGE:
-			return sizeof(device_mesh_header_t) + COMMAND_MM_HEADER_SIZE;
+		case CONTROL_MESSAGE:
 		case CONFIG_MESSAGE:
-			return sizeof(device_mesh_header_t) + CONFIG_MM_HEADER_SIZE;
+			return sizeof(device_mesh_header_t) + SB_HEADER_SIZE;
 		default:
 			return 0;
 		}
