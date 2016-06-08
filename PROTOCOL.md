@@ -1,11 +1,75 @@
-# Bluenet protocol v0.3.0
+# Bluenet protocol v0.4.0
 -------------------------
 
 # Advertisements and scan response
 When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
 
+### <a name="ibeacon_packet"></a>iBeacon advertisement packet
+This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
+
+![Advertisement packet](docs/diagrams/advertisement-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | AD Length | 1 | Length of the Flags AD Structure (0x02)
+uint 8 | AD Type | 1 | Flags (0x01)
+uint 8 | Flags | 1 |
+uint 8 | AD Length | 1 | Length of the Manufacturer AD Structure  (0x1A)
+uint 8 | AD Type | 1 | Manufacturer Specific Data (0xFF)
+uint 8 | Company Id | 2 | Apple (0x004C)
+uint 8 | iBeacon Type | 1 | IBeacon Type (0x02)
+uint 8 | iBeacon Length | 1 | IBeacon Length (0x15)
+uint 8 | Proximity UUID | 16 | 
+uint 16 | Major | 2 | 
+uint 16 | Minor | 2 | 
+int 8 | TX Power | 1 | Received signal strength at 1 meter.
+
+
+### <a name="scan_response_packet"></a>Scan response packet
+The packet that is sent when a BLE central scans.
+
+![Scan Response packet](docs/diagrams/scan-response-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | AD Length | 1 | Length of the Name AD Structure (0x0A)
+uint 8 | AD Type | 1 | Shortened Local Name (0x08)
+char array | Name Bytes | 9 | The shortened name of this device.
+uint 8 | AD Length | 1 | Length of the Service Data AD Structure (0x13)
+uint 8 | AD Type | 1 | Service Data (0x16)
+uint 16 | Service UUID | 2 | Service UUID
+[Service data](#scan_response_servicedata_packet) | 16 | Service data, state info.
+
+### <a name="scan_response_servicedata_packet"></a>Scan response service data packet
+This packet contains the state info. It will be encrypted using AES 128.
+
+![Scan Response ServiceData](docs/diagrams/scan-response-service-data.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
+uint 16 | Crownstone state ID | 2 | ID of the Crownstone of which the state is shown.
+uint 8 | Switch state | 1 | The state of the switch, 0 - 100 (where 0 is off, 100 is on, dimmed in between).
+uint 8 | Event bitmask | 1 | Shows if the Crownstone has something new to tell.
+uint 8 | Reserved | 2 | Reserved for future use.
+uint 32 | Power usage | 4 | The power usage at this moment (mW).
+uint 32 | Accumulated energy | 4 | The accumulated energy (kWh).
+
 # Services
 When connected, the following services are available.
+
+## Crownstone service
+
+The crownstone service has UUID 24fe0000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following services
+
+Characteristic | UUID | Date type | Description
+--- | --- | --- | ---
+Control        | 24fe0001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the control characheristic
+Mesh Control   | 24fe0002-7d10-4805-bfc1-7663a01c3bff | [Mesh control packet](#mesh_control_packet) | Write a command to the mesh control characheristic to send into the mesh
+Config Control | 24fe0004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Write or select a config setting
+Config Read    | 24fe0005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting
+State Control  | 24fe0006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable 
+State Read     | 24fe0007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable
 
 ## General service
 
@@ -14,11 +78,7 @@ The general service has UUID f5f90000-f5f9-11e4-aa15-123b93f75cba.
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
 Temperature    | f5f90001-f5f9-11e4-aa15-123b93f75cba | int 32 | Chip temperature in Celcius. Notifications are available.
-Reset          | f5f90005-f5f9-11e4-aa15-123b93f75cba | int 32 | Write 1 to reset. Write 66 to go to DFU mode.
-Mesh           | f5f90006-f5f9-11e4-aa15-123b93f75cba | [Mesh packet](#mesh_characteristic_packet) | 
-Config write   | f5f90007-f5f9-11e4-aa15-123b93f75cba | [Config packet](#config_packet) | Write a configuration setting.
-Config select  | f5f90008-f5f9-11e4-aa15-123b93f75cba | uint 8 | Write the type of configuration you want to read from `Config read`.
-Config read    | f5f90009-f5f9-11e4-aa15-123b93f75cba | [Config packet](#config_packet) | Read a configuration setting.
+Reset          | f5f90002-f5f9-11e4-aa15-123b93f75cba | int 32 | Write 1 to reset. Write 66 to go to DFU mode.
 
 ## Power service
 
@@ -27,10 +87,8 @@ The power service has UUID 5b8d0000-6f20-11e4-b116-123b93f75cba.
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
 PWM                | 5b8d0001-6f20-11e4-b116-123b93f75cba | uint 8 | Set PWM value. Value of 0 is completely off, 255 (100 on new devices) is completely on.
-Power sample write | 5b8d0002-6f20-11e4-b116-123b93f75cba | uint 8 | Start sampling current and voltage. Write 1 if you want to read only power consumption, 2 if you want to read power samples, 3 for both.
-Power sample read  | 5b8d0003-6f20-11e4-b116-123b93f75cba | [Power curve](#power_curve_packet) | Last sampled current and voltage.
+Power sample read  | 5b8d0003-6f20-11e4-b116-123b93f75cba | [Power Samples](#power_samples_packet) | List of sampled current and voltage values.
 Power consumption  | 5b8d0004-6f20-11e4-b116-123b93f75cba | uint 16 | The current power consumption.
-Current limit      | 5b8d0005-6f20-11e4-b116-123b93f75cba | uint 8 | Not implemented yet.
 
 ## Indoor localization service
 
@@ -39,9 +97,9 @@ The localization service has UUID 7e170000-429c-41aa-83d7-d91220abeb33.
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
 RSSI                  | 7e170001-429c-41aa-83d7-d91220abeb33 | uint 8 | RSSI to connected device. Notifications are available.
+Tracked devices write | 7e170002-429c-41aa-83d7-d91220abeb33 | [Tracked device](#tracked_device_packet) | Add or overwrite a tracked device. Set threshold larger than 0 to remove the tracked device from the list.
 Scan write            | 7e170003-429c-41aa-83d7-d91220abeb33 | uint 8 | Start or stop scanning. write 0 to stop, 1 to start.
 Scan read             | 7e170004-429c-41aa-83d7-d91220abeb33 | [Scan result list](#scan_result_list_packet) | After stopping the scan, you can read the results here.
-Tracked devices write | 7e170002-429c-41aa-83d7-d91220abeb33 | [Tracked device](#tracked_device_packet) | Add or overwrite a tracked device. Set threshold larger than 0 to remove the tracked device from the list.
 Tracked devices read  | 7e170005-429c-41aa-83d7-d91220abeb33 | [Tracked device list](#tracked_device_list_packet) | Read the current list of tracked devices.
 
 ## Schedule service
@@ -66,31 +124,70 @@ Value       | 2a1e0005-fd51-d882-8ba8-b98c0000cd1e | | Characteristic where the 
 
 # Data structures
 
+### <a name="control_packet"></a>Control packet
+
+![Control packet](docs/diagrams/control-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8  | Type | 1 | Command type, see table below.
+uint 8  | Reserved | 1 | Not used: reserved for alignment.
+uint 16 | Length | 2 | Length of the payload in bytes.
+uint 8 | Payload | Length | Payload data, depends on type.
+
+Available command types:
+
+Type nr | Type name | Payload type | Payload description
+--- | --- | --- | ---
+0 | Switch | uint8_t | Switch relay, 0 = OFF, 1 = ON
+1 | PWM | uint8_t | Set PWM to value, 0 = OFF, 100 = FULL ON
+2 | Set Time | ... | Set time to ..., TBD
+3 | Goto DFU | - | Reset device to DFU mode
+4 | Rest | uint8_t | Reset device
+5 | Factory reset | uint32_t | Reset device to factory setting, needs Code 0xdeadbeef as payload
+6 | Keep alive state | ... | Keep alive with state ..., TBD
+7 | Keep alive | ...  | Keep alive ..., TBD
+8 | Enable mesh | uint8_t | Enable/Disable Mesh, 0 = OFF, other = ON
+9 | Enable encryption | uint8_t | Enable/Disable Encryption, 0 = OFF, other = ON
+10 | Enable iBeacon | uint8_t | Enable/Disable iBeacon, 0 = OFF, other = ON
+11 | Enable continuous power measurement | uint8_t | Enable/Disable continuous power measurement, 0 = OFF, other = ON, TBD
+12 | Enable scanner | [Enable Scanner payload](#cmd_enable_scanner_payload) | Enable/Disable scanner
+13 | Scan for devices | uint8_t | Scan for devices, 0 = OFF, other = ON
+14 | User feedback | ... | User feedback ..., TBD
+15 | Schedule entry | ... | Schedule entry ..., TBD
+
+#### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | enable | 1 | 0 = OFF, other = ON
+uint16_t | delay | 1 | start scanner with delay in ms
+
 ### <a name="config_packet"></a>Configuration packet
 
 ![Configuration packet](docs/diagrams/config-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8  | Type | 1 | Type, see table below.
-uint 8  | Reserved | 1 | Not used: reserved for alignment.
+uint 8  | Type | 1 | Type, see table with configuration types below.
+uint 8  | OpCode | 1 | The op code determines if it's a write or a read operation, see table with op codes below
 uint 16 | Length | 2 | Length of the payload in bytes.
 uint 8 | Payload | Length | Payload data, depends on type.
 
-Available configurations:
+Available configurations types:
 
-Type nr | Type name | Payload type | Payload description
+Type nr | Type name | Payload type | Description
 --- | --- | --- | ---
 0 | Device name | char array | Name of the device.
 1 | Device type | char array | **Deprecated.**
 2 | Room | uint 8 | **Deprecated.**
-3 | Floor | uint 8 | Floor number.
-4 | Nearby timeout | uint 16 | Time in ms before switching off when noone is nearby (not implemented yet).
-5 | PWM frequency | uint 8 | Sets PWM frequency (not implemented yet).
+3 | Floor | uint 8 | Floor number. **Deprecated**
+4 | Nearby timeout | uint 16 | Time in ms before switching off when none is nearby
+5 | PWM frequency | uint 8 | Sets PWM frequency **not implemented**
 6 | iBeacon major | uint 16 | iBeacon major number.
 7 | iBeacon minor | uint 16 | iBeacon minor number.
 8 | iBeacon UUID | 16 bytes | iBeacon UUID.
-9 | iBeacon RSSI | int 8 | iBeacon RSSI at 1 meter.
+9 | iBeacon Tx Power | int 8 | iBeacon signal strength at 1 meter.
 10 | Wifi settings | char array | Json with the wifi settings: `{ "ssid": "<name here>", "key": "<password here>"}`.
 11 | TX power | int 8 | TX power, can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4.
 12 | Advertisement interval | uint 16 | Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms.
@@ -104,9 +201,63 @@ Type nr | Type name | Payload type | Payload description
 20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off.
 21 | Scan filter | uint 8 | Filter out certain types of devices from the scan results (1 for GuideStones, 2 for CrownStones, 3 for both).
 22 | Scan filter fraction | uint 16 | If scan filter is set, do *not* filter them out each every X scan results.
+23 | Current limit | uint 8 | Set current limit to **not implemented**
+24 | Mesh enabled | uint 8 | Stores if mesh is enabled. *read only*
+25 | Encryption enabled | uint 8 | Stores if encryption is enabled. *read only*
+26 | iBeacon enabled | uint 8 | Stores if iBeacon is enabled. *read only*
+27 | Scanner enabled | uint 8 | Stores if device scanning is enabled. *read only*
+28 | Continuous power measurement enabled | uint 8 | Stores if continuous power measurement is enabled. *read only*
+29 | Tracker enabled | uint 8 | Stores if device tracking is enabled. *read only*
+30 | ADC sample rate | ... | TBD
+31 | Power sample burst interval | ... | TBD
+32 | Power sample continuous interval | ... | TBD
+33 | Power sample continuous number samples | ... | TBD
+34 | Crownstone Identifier | uint 16 | Crownstone identifier used in advertisement package
 
+OpCodes:
 
-### <a name="power_curve_packet"></a>Power curve packet
+OpCode | Name | Description
+--- | --- | ---
+0 | Read | Select the configuration setting for reading. will load it from storage, then write it to the Config Read Characteristic. Length and payload of the configuration packet will be ignored
+1 | Write | Write the configuration setting to storage.
+
+Note: On the Config Read Characteristic, the OpCode is set to Read (0), and the length and payload will have actual data depending on the type.
+
+### <a name="state_packet"></a>State packet
+
+![State packet](docs/diagrams/state-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8  | Type | 1 | Type, see table with configuration types below.
+uint 8  | OpCode | 1 | The op code determines if it's a write, read, or notify operation, see table with op codes below
+uint 16 | Length | 2 | Length of the payload in bytes.
+uint 8 | Payload | Length | Payload data, depends on type.
+
+Available state variables:
+
+Type nr | Type name | Payload type | Description | Persistent
+--- | --- | --- | ---
+128 | Reset counter | uint 32 | Counts the number of resets (DEBUG) | x
+129 | Switch state | uint 8 | Current Switch state, 0 = OFF, 100 = FULL ON |
+130 | Accumulated energy | uint 32 | Accumulated energy in ... over time, TBD
+131 | Power usage | uint 32 | Current power usage in ..., TBD
+132 | Tracked devices | [Tracked devices](#tracked_device_list_packet) | List of tracked devices
+133 | Schedule | [Schedule List](#schedule_list_packet) | Schedule, TBD
+134 | Operation Mode | uint 8 | ..., TBD
+135 | Temperature | int 32 | Chip temperature in °C
+
+OpCodes:
+
+OpCode | Name | Description
+--- | --- | ---
+0 | Read | Select the configuration setting for reading. will load it from storage, then write it to the Config Read Characteristic. Length and payload of the configuration packet will be ignored
+1 | Write | Write the state variable **disabled**
+2 | Notify | Enable/Disable notifications for state variable. Every time the state variable is updated, the new value is written to the State Read Characteristic. To use effectively, enable GATT Notifications on the State Read Characteristic. Length has to be 1, and payload is 0 = disable, other = enable
+
+Note: On the State Read Characteristic, the OpCode is also set to distinguish between a one time read, and a continuous notification. In return, the length and payload will have actual data depending on the type.
+
+### <a name="power_curve_packet"></a>Power curve packet, TBD
 
 ![Power curve packet](docs/diagrams/power-packet.png)
 
@@ -128,7 +279,7 @@ int 8   | timeDiffs      | numSamples-1   | Array of differences with previous t
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-byte array | Address | 6 | Bluetooth address of the scanned device.
+uint 8 [] | Address | 6 | Bluetooth address of the scanned device.
 int 8 | RSSI | 1 | Average RSSI to the scanned device.
 uint 16 | Occurrences | 2 | Number of times the devices was scanned.
 
@@ -148,7 +299,7 @@ uint 8 | size | 1 | Number of scanned devices in the list.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-byte array | Address | 6 | Bluetooth address of the tracked device.
+uint 8 [] | Address | 6 | Bluetooth address of the tracked device.
 int 8 | RSSI threshold | 1 | If the RSSI to this device is above the threshold, then switch on the power.
 
 ### <a name="tracked_device_list_packet"></a>Tracked device list packet
@@ -230,30 +381,9 @@ Type | Name | Length | Description
 uint 8 | Size | 1 | Number of entries in the list.
 [schedule entry](#schedule_entry_packet) | Entries | 12 | Schedule entry list.
 
+### <a name="mesh_control_packet"></a>Mesh control packet
 
-
-### <a name="mesh_payload_packet"></a>Mesh payload packet
-
-![Mesh payload packet](docs/diagrams/mesh-payload-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-byte array | Target address | 6 | Bluetooth address of the device at which this message is aimed at, all zero for any device.
-uint 16 | Type | 2 | Type of message, see table below.
-byte array | Payload | 0 to 91 | Payload data, depends on type.
-
-Type nr | Type name | Payload type | Payload description
---- | --- | --- | ---
-0 | Event | uint 16 | Event type that happened.
-1 | Power | uint 8 | Current power usage.
-2 | Beacon | beacon mesh | Configure the iBeacon settings.
-3 | Command | mesh command | Send a command over the mesh.
-4 | Config | [Configuration](#config_packet) | Send a configuration.
-101 | Scan result | [Scan result list](#scan_result_list_packet) | List of scanned devices.
-
-### <a name="mesh_characteristic_packet"></a>Mesh characteristic packet
-
-![Mesh characteristic packet](docs/diagrams/mesh-char-packet.png)
+![Mesh control packet](docs/diagrams/mesh-control-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -262,6 +392,37 @@ uint 8 | Reserved | 1 | Not used: reserved for alignment.
 uint 16 | Length | 2 | Length of the data.
 [Mesh Payload](#mesh_payload_packet) | Payload | Length | Payload data.
 
+### <a name="mesh_payload_packet"></a>Mesh payload packet
+
+![Mesh payload packet](docs/diagrams/mesh-payload-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 [] | Target address | 6 | Bluetooth address of the device at which this message is aimed at, all zero for any device.
+uint 16 | Type | 2 | Type of message, see table below.
+uint 8 [] | Payload | 0 to 91 | Payload data, depends on type.
+
+Type nr | Type name | Payload type | Payload description
+--- | --- | --- | ---
+0 | Command | [Control](#control_packet) | Send a command over the mesh, see control packet
+1 | Beacon | [Beacon data](#beacon_mesh_data_packet) | Configure the iBeacon settings.
+2 | Config | [Configuration](#config_packet) | Send/Request a configuration setting, see configuration packet
+3 | State | [State](#state_packet) | Send/Request a state variable, see state packet
+101 | Scan result | [Scan result list](#scan_result_list_packet) | List of scanned devices.
+103 | Power Samples | [Power samples](#power_samples_packet) | List of power samples.
+104 | Event | uint 16 | Event type that happened.
+
+### <a name="beacon_mesh_data_packet"></a>Beacon mesh data packet
+
+![Beacon data](docs/diagrams/beacon-mesh-message-data-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Major | 1 |
+uint 16 | Minor | 1 |
+uint 8 | Proximity UUID | 16 |
+int 8 | TX Power | 1 | Received signal strength at 1 meter.
+
 ### <a name="mesh_message_packet"></a>Mesh message packet
 This packet is a slightly modified version of the one used in [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh); we simply increased the content size.
 
@@ -269,94 +430,52 @@ This packet is a slightly modified version of the one used in [OpenMesh](https:/
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Preamble | 1 | 
+uint 8 | Preamble | 1 |
 uint 32 | Access address | 4 | Number used to find relevant messages, set by application.
 uint 8 | Type | 1 | 
 uint 8 | Length | 1 | 
-byte array | Source address | 6 | Address of the node that put this message into the mesh.
+uint 8 [] | Source address | 6 | Address of the node that put this message into the mesh.
 uint 8 | AD Length | 1 | Length of data after this field, excluding CRC.
 uint 8 | AD type | 1 | 
 uint 16 | Service UUID | 2 | Mesh service UUID.
 uint 16 | Handle | 2 | Handle of this message.
 uint 16 | Version | 2 | Used internally.
 [Mesh Payload](#mesh_payload_packet) | Payload | 99 | Payload data.
-byte array | CRC | 3 | Checksum.
+uint 8 [] | CRC | 3 | Checksum.
 
-### <a name="mesh_value_notification_packet"></a>Mesh value notification packet
+### <a name="mesh_notification_packet"></a>Mesh notification packet
 This packet is used to get the [mesh messages](#mesh_message_packet) pushed over GATT notifications.
 
-![Mesh value notification packet](docs/diagrams/mesh-value-notification-packet.png)
+![Mesh notification packet](docs/diagrams/mesh-notification-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Opcode | 1 | 
-byte array | Payload | | 
+uint 8 | OpCode | 1 | See available op codes in table below
+uint 8 | Payload | | 
 
 Opcode | Type name | Payload type | Payload description
 --- | --- | --- | ---
-0 | Data | | Not used.
-1 | FlagSet | | Not used.
-2 | FlagReq | | Not used.
-17 | CmdRsp | | Not used.
-18 | FlagRsp | | Not used.
-32 | MultipartStart | [Multipart notification](#mesh_multipart_notification_packet) | First part of the multi part notification.
-33 | MultipartMid | [Multipart notification](#mesh_multipart_notification_packet) | Middle part of the multi part notification.
-34 | MultipartEnd | [Multipart notification](#mesh_multipart_notification_packet) | Last part of the multi part notification.
+0 | Data | [Mesh data update](#mesh_data_update_packet) | Single part notification (if all data fits in one packet).
+1 | Flag Set | | Not used.
+2 | Flag Req | | Not used.
+17 | Cmd Rsp | | Not used.
+18 | Flag Rsp | | Not used.
+32 | MultipartStart | [Mesh data update](#mesh_data_update_packet) | First part of the multi part notification.
+33 | MultipartMid | [Mesh data update](#mesh_data_update_packet) | Middle part of the multi part notification.
+34 | MultipartEnd | [Mesh data update](#mesh_data_update_packet) | Last part of the multi part notification.
 
-### <a name="mesh_multipart_notification_packet"></a>Mesh multipart notification packet
-Each mesh message is notified in multiple pieces, as a notification can only be 20 bytes. The opcode of the [value notification](#mesh_value_notification_packet) tells whether it is the first, last or a middle piece.
+### <a name="mesh_data_update_packet"></a>Mesh data update packet
+Each mesh data message is notified in multiple pieces, as a notification can only be 20 bytes. The op code of the [Mesh notification](#mesh_notification_packet) tells whether it is a single, or the first, last or a middle piece of a multipart message.
 
-![Mesh multipart notification packet](docs/diagrams/mesh-multipart-notification-packet.png)
+![Mesh data notification packet](docs/diagrams/mesh-data-update-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | Handle | 2 | Handle on which the messages was sent or received.
 uint 8 | Length | 1 | Length of the data of this part.
-byte array | Data | Length | Data of this part of the whole mesh message.
-
-### <a name="ibeacon_packet"></a>iBeacon packet
-This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
-
-![Advertisement packet](docs/diagrams/advertisement-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | iBeacon prefix | 9 | This is fixed data.
-uint 8 | Proximity UUID | 16 | 
-uint 16 | Major | 2 | 
-uint 16 | Minor | 2 | 
-int 8 | TX Power | 1 | Received signal strength at 1 meter.
+uint 8 | Data | Length | Data of this part. If OpCode is Data, it is the length of the whole mesh message, otherwise it is the length of the current part.
 
 
-### <a name="scan_response_packet"></a>Scan response packet
-The packet that is sent when a BLE central scans.
-
-![Scan Response packet](docs/diagrams/scan-response-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Name Flag | 1 | 
-uint 8 | Name Length | 1 | Length of the name.
-char array | Name Bytes | 9 | The name of this device.
-uint 8 | Service Flag | 1 | 
-uint 8 | Service Length | 1 | 
-uint 16 | Service UUID | 2 | Service UUID
-[Service data](#scan_response_servicedata_packet) | 16 | Service data, state info.
-
-### <a name="scan_response_servicedata_packet"></a>Scan response service data packet
-This packet contains the state info. It will be encrypted using AES 128.
-
-![Scan Response ServiceData](docs/diagrams/scan-response-service-data.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
-uint 16 | Crownstone state ID | 2 | ID of the Crownstone of which the state is shown.
-uint 8 | Switch state | 1 | The state of the switch, 0 - 100 (where 0 is off, 100 is on, dimmed in between).
-uint 8 | Event bitmask | 1 | Shows if the Crownstone has something new to tell.
-uint 8 | Reserved | 2 | Reserved for future use.
-uint 32 | Power usage | 4 | The power usage at this moment (mW).
-uint 32 | Accumulated energy | 4 | The accumulated energy (kWh).
 
 
 
