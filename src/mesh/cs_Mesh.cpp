@@ -23,14 +23,25 @@
 
 #include <drivers/cs_RTC.h>
 
+#include <storage/cs_Settings.h>
+
 Mesh::Mesh() : _appTimerId(-1) {
 	MeshControl::getInstance();
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Mesh::staticTick);
-	LOGe("mesh timer id: %d", _appTimerId);
 }
 
 Mesh::~Mesh() {
 
+}
+
+void Mesh::start() {
+	startTicking();
+	rbc_mesh_start();
+}
+
+void Mesh::stop() {
+	stopTicking();
+	rbc_mesh_stop();
 }
 
 void Mesh::tick() {
@@ -82,6 +93,14 @@ void Mesh::init() {
 //	APP_ERROR_CHECK(error_code);
 
 	_mesh_init_time = RTC::now();
+
+	// do not automatically start meshing, wait for the start command
+//	rbc_mesh_stop();
+
+	if (!Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+		LOGi("mesh not enabled");
+		rbc_mesh_stop();
+	}
 }
 
 void Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
@@ -89,13 +108,17 @@ void Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 
 //	LOGd("send ch: %d, len: %d", handle, length);
 	//BLEutil::printArray((uint8_t*)p_data, length);
-	APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
+	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+		APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
+	}
 }
 
 bool Mesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
-	APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)*p_data, &length));
+	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+		APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)*p_data, &length));
+	}
 	//LOGi("recv ch: %d, len: %d", handle, length);
 	return length != 0;
 }

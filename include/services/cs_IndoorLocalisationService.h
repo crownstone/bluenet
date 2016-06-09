@@ -20,9 +20,9 @@
 class IndoorLocalizationService : public BLEpp::Service, EventListener {
 
 protected:
-	void addSignalStrengthCharacteristic();
+	void addRssiCharacteristic();
 	void addScanControlCharacteristic();
-	void addPeripheralListCharacteristic();
+	void addScannedDeviceListCharacteristic();
 	void addTrackedDeviceListCharacteristic();
 	void addTrackedDeviceCharacteristic();
 
@@ -62,7 +62,7 @@ public:
 private:
 	BLEpp::Characteristic<int8_t>* _rssiCharac;
 	BLEpp::Characteristic<uint8_t>* _scanControlCharac;
-	BLEpp::Characteristic<buffer_ptr_t>* _peripheralCharac;
+	BLEpp::Characteristic<buffer_ptr_t>* _scannedDeviceListCharac;
 	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceListCharac;
 	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceCharac;
 

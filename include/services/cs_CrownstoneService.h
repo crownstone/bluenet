@@ -73,7 +73,6 @@ protected:
 	/** Enable the mesh characteristic.
 	 */
 	inline void addMeshCharacteristic();
-	inline void removeMeshCharacteristic();
 
 	StreamBuffer<uint8_t>* getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
 
@@ -85,7 +84,7 @@ private:
 	 *
 	 * Sends a message over the mesh network
 	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _meshCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _meshControlCharacteristic;
 
 	/** Set configuration characteristic
 	 *
@@ -100,7 +99,7 @@ private:
 	 * As you see these are similar to current characteristics and will replace them in the future to save space.
 	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
 	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _setConfigurationCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _controlConfigurationCharacteristic;
 
 	/** Get configuration characteristic
 	 *
@@ -111,8 +110,8 @@ private:
 	 */
 	BLEpp::Characteristic<buffer_ptr_t>* _getConfigurationCharacteristic;
 
-	BLEpp::Characteristic<buffer_ptr_t>* _selectStateVarCharacteristic;
-	BLEpp::Characteristic<buffer_ptr_t>* _readStateVarCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _controlStateCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _readStateCharacteristic;
 
 	//! buffer object to read/write configuration characteristics
 	StreamBuffer<uint8_t> *_streamBuffer;

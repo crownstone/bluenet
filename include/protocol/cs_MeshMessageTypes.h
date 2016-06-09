@@ -29,9 +29,8 @@ enum MeshMessageTypes {
 
 	//! hub channel messages
 	SCAN_MESSAGE          = 101,
-//	UNUSED                = 102,
-	POWER_SAMPLES_MESSAGE = 103,
-	EVENT_MESSAGE         = 104,    // todo: do we need event messages on the mesh at all?
+	POWER_SAMPLES_MESSAGE = 102,
+	EVENT_MESSAGE         = 103,    // todo: do we need event messages on the mesh at all?
 };
 
 //! broadcast address is defined as 00:00:00:00:00:00

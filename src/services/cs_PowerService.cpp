@@ -102,7 +102,7 @@ void PowerService::addPowerSamplesCharacteristic() {
 	_powerSamplesCharacteristic = new Characteristic<uint8_t*>();
 	addCharacteristic(_powerSamplesCharacteristic);
 	_powerSamplesCharacteristic->setUUID(UUID(getUUID(), POWER_SAMPLES_UUID));
-	_powerSamplesCharacteristic->setName("Power Curve");
+	_powerSamplesCharacteristic->setName(BLE_CHAR_POWER_SAMPLES);
 	_powerSamplesCharacteristic->setWritable(false);
 	_powerSamplesCharacteristic->setNotifies(true);
 
@@ -119,8 +119,8 @@ void PowerService::addPowerSamplesCharacteristic() {
 void PowerService::addPowerConsumptionCharacteristic() {
 	_powerConsumptionCharacteristic = new Characteristic<uint16_t>();
 	addCharacteristic(_powerConsumptionCharacteristic);
-	_powerConsumptionCharacteristic->setUUID(UUID(getUUID(), CURRENT_CONSUMPTION_UUID));
-	_powerConsumptionCharacteristic->setName("Power Consumption");
+	_powerConsumptionCharacteristic->setUUID(UUID(getUUID(), POWER_CONSUMPTION_UUID));
+	_powerConsumptionCharacteristic->setName(BLE_CHAR_POWER_CONSUMPTION);
 	_powerConsumptionCharacteristic->setDefaultValue(0);
 	_powerConsumptionCharacteristic->setWritable(false);
 	_powerConsumptionCharacteristic->setNotifies(true);
@@ -131,7 +131,7 @@ void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_POWER_OFF:
 	case EVT_POWER_ON: {
 		if (_pwmCharacteristic) {
-			LOGi("pwm update");
+//			LOGi("pwm update");
 			(*_pwmCharacteristic) = *(uint8_t*)p_data;
 		}
 		break;
@@ -146,7 +146,7 @@ void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case EVT_POWER_CONSUMPTION: {
 		if (_powerConsumptionCharacteristic) {
-			LOGi("power consumption update");
+//			LOGi("power consumption update");
 			(*_powerConsumptionCharacteristic) = *(uint32_t*)p_data;
 		}
 	}

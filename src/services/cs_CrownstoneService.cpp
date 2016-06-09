@@ -20,8 +20,8 @@ using namespace BLEpp;
 
 CrownstoneService::CrownstoneService() : EventListener(),
 		_controlCharacteristic(NULL),
-		_meshCharacteristic(NULL), _setConfigurationCharacteristic(NULL), _getConfigurationCharacteristic(NULL),
-		_selectStateVarCharacteristic(NULL), _readStateVarCharacteristic(NULL),
+		_meshControlCharacteristic(NULL), _controlConfigurationCharacteristic(NULL), _getConfigurationCharacteristic(NULL),
+		_controlStateCharacteristic(NULL), _readStateCharacteristic(NULL),
 		_streamBuffer(NULL), _meshCommand(NULL)
 {
 	EventDispatcher::getInstance().addListener(this);
@@ -69,12 +69,12 @@ void CrownstoneService::addCharacteristics() {
 #endif
 
 #if CHAR_MESHING==1
-	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+//	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
 		LOGi(MSG_CHAR_MESH_ADD);
 		addMeshCharacteristic();
-	} else {
-		LOGi(MSG_CHAR_MESH_SKIP);
-	}
+//	} else {
+//		LOGi(MSG_CHAR_MESH_SKIP);
+//	}
 #else
 	LOGi(MSG_CHAR_MESH_SKIP);
 #endif
@@ -92,7 +92,7 @@ void CrownstoneService::addCharacteristics() {
 	LOGi(MSG_CHAR_CONFIGURATION_SKIP);
 #endif
 
-#if CHAR_STATE_VARIABLES==1
+#if CHAR_STATE==1
 	{
 		LOGi(MSG_CHAR_STATE_ADD);
 		_streamBuffer = getStreamBuffer(buffer, maxLength);
@@ -118,11 +118,6 @@ void CrownstoneService::addCharacteristics() {
 
 void CrownstoneService::addMeshCharacteristic() {
 
-	if (_meshCharacteristic) {
-		LOGe("mesh characteristic already added");
-		return;
-	}
-
 	_meshCommand = new MeshCommand();
 //	_meshCommand = new StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>();
 
@@ -133,16 +128,16 @@ void CrownstoneService::addMeshCharacteristic() {
 
 	_meshCommand->assign(buffer, size);
 
-	_meshCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_meshCharacteristic);
+	_meshControlCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_meshControlCharacteristic);
 
-	_meshCharacteristic->setUUID(UUID(getUUID(), MESH_CONTROL_UUID));
-	_meshCharacteristic->setName(BLE_CHAR_MESH);
-	_meshCharacteristic->setWritable(true);
-	_meshCharacteristic->setValue(buffer);
-	_meshCharacteristic->setMaxLength(size);
-	_meshCharacteristic->setDataLength(0);
-	_meshCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_meshControlCharacteristic->setUUID(UUID(getUUID(), MESH_CONTROL_UUID));
+	_meshControlCharacteristic->setName(BLE_CHAR_MESH_CONTROL);
+	_meshControlCharacteristic->setWritable(true);
+	_meshControlCharacteristic->setValue(buffer);
+	_meshControlCharacteristic->setMaxLength(size);
+	_meshControlCharacteristic->setDataLength(0);
+	_meshControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 		LOGi(MSG_MESH_MESSAGE_WRITE);
 
 		uint8_t handle = _meshCommand->type();
@@ -153,20 +148,12 @@ void CrownstoneService::addMeshCharacteristic() {
 	});
 }
 
-void CrownstoneService::removeMeshCharacteristic() {
-	if (_meshCommand) free(_meshCommand);
-	if (_meshCharacteristic) {
-		removeCharacteristic(_meshCharacteristic);
-		free(_meshCharacteristic);
-	}
-}
-
 void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
 	_controlCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_controlCharacteristic);
 
 	_controlCharacteristic->setUUID(UUID(getUUID(), CONTROL_UUID));
-	_controlCharacteristic->setName("Control");
+	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setWritable(true);
 	_controlCharacteristic->setValue(buffer);
 	_controlCharacteristic->setMaxLength(size);
@@ -193,16 +180,16 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 }
 
 void CrownstoneService::addSetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size) {
-	_setConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_setConfigurationCharacteristic);
+	_controlConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_controlConfigurationCharacteristic);
 
-	_setConfigurationCharacteristic->setUUID(UUID(getUUID(), CONFIG_CONTROL_UUID));
-	_setConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_WRITE);
-	_setConfigurationCharacteristic->setWritable(true);
-	_setConfigurationCharacteristic->setValue(buffer);
-	_setConfigurationCharacteristic->setMaxLength(size);
-	_setConfigurationCharacteristic->setDataLength(size);
-	_setConfigurationCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_controlConfigurationCharacteristic->setUUID(UUID(getUUID(), CONFIG_CONTROL_UUID));
+	_controlConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_CONTROL);
+	_controlConfigurationCharacteristic->setWritable(true);
+	_controlConfigurationCharacteristic->setValue(buffer);
+	_controlConfigurationCharacteristic->setMaxLength(size);
+	_controlConfigurationCharacteristic->setDataLength(size);
+	_controlConfigurationCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
 		if (!value) {
 			LOGw(MSG_CHAR_VALUE_UNDEFINED);
@@ -262,16 +249,16 @@ void CrownstoneService::addGetConfigurationCharacteristic(buffer_ptr_t buffer, u
 }
 
 void CrownstoneService::addSelectStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size) {
-	_selectStateVarCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_selectStateVarCharacteristic);
+	_controlStateCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_controlStateCharacteristic);
 
-	_selectStateVarCharacteristic->setUUID(UUID(getUUID(), STATE_CONTROL_UUID));
-	_selectStateVarCharacteristic->setName(BLE_CHAR_STATEVAR_WRITE);
-	_selectStateVarCharacteristic->setWritable(true);
-	_selectStateVarCharacteristic->setValue(buffer);
-	_selectStateVarCharacteristic->setMaxLength(size);
-	_selectStateVarCharacteristic->setDataLength(size);
-	_selectStateVarCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_controlStateCharacteristic->setUUID(UUID(getUUID(), STATE_CONTROL_UUID));
+	_controlStateCharacteristic->setName(BLE_CHAR_STATE_CONTROL);
+	_controlStateCharacteristic->setWritable(true);
+	_controlStateCharacteristic->setValue(buffer);
+	_controlStateCharacteristic->setMaxLength(size);
+	_controlStateCharacteristic->setDataLength(size);
+	_controlStateCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 		if (!value) {
 			LOGw(MSG_CHAR_VALUE_UNDEFINED);
 		} else {
@@ -290,8 +277,8 @@ void CrownstoneService::addSelectStateVarCharacteristic(buffer_ptr_t buffer, uin
 					bool success = State::getInstance().readFromStorage(type, _streamBuffer);
 					if (success) {
 						_streamBuffer->setOpCode(READ_VALUE);
-						_readStateVarCharacteristic->setDataLength(_streamBuffer->getDataLength());
-						_readStateVarCharacteristic->notify();
+						_readStateCharacteristic->setDataLength(_streamBuffer->getDataLength());
+						_readStateCharacteristic->notify();
 					}
 				} else if (opCode == NOTIFY_VALUE) {
 					LOGi("State notification");
@@ -315,32 +302,22 @@ void CrownstoneService::addSelectStateVarCharacteristic(buffer_ptr_t buffer, uin
 }
 
 void CrownstoneService::addReadStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size) {
-	_readStateVarCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_readStateVarCharacteristic);
+	_readStateCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_readStateCharacteristic);
 
-	_readStateVarCharacteristic->setUUID(UUID(getUUID(), STATE_READ_UUID));
-	_readStateVarCharacteristic->setName(BLE_CHAR_STATEVAR_READ);
-	_readStateVarCharacteristic->setWritable(false);
-	_readStateVarCharacteristic->setNotifies(true);
-	_readStateVarCharacteristic->setValue(buffer);
-	_readStateVarCharacteristic->setMaxLength(size);
-	_readStateVarCharacteristic->setDataLength(size);
+	_readStateCharacteristic->setUUID(UUID(getUUID(), STATE_READ_UUID));
+	_readStateCharacteristic->setName(BLE_CHAR_STATE_READ);
+	_readStateCharacteristic->setWritable(false);
+	_readStateCharacteristic->setNotifies(true);
+	_readStateCharacteristic->setValue(buffer);
+	_readStateCharacteristic->setMaxLength(size);
+	_readStateCharacteristic->setDataLength(size);
 }
 
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
-	case EVT_ENABLED_MESH : {
-//		bool enable = *(bool*)p_data;
-//		if (enable) {
-//			addMeshCharacteristic();
-//		} else {
-//			removeMeshCharacteristic();
-//		}
-//		EventDispatcher::getInstance().dispatch(EVT_CHARACTERISTICS_UPDATED);
-		break;
-	}
-	case EVT_STATE_VARS_NOTIFICATION: {
-		if (_readStateVarCharacteristic) {
+	case EVT_STATE_NOTIFICATION: {
+		if (_readStateCharacteristic) {
 			state_vars_notifaction notification = *(state_vars_notifaction*)p_data;
 //			log(DEBUG, "send notification for %d, value:", notification.type);
 			BLEutil::printArray(notification.data, notification.dataLength);
@@ -349,8 +326,8 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 			_streamBuffer->setType(notification.type);
 			_streamBuffer->setOpCode(NOTIFY_VALUE);
 
-			_readStateVarCharacteristic->setDataLength(_streamBuffer->getDataLength());
-			_readStateVarCharacteristic->notify();
+			_readStateCharacteristic->setDataLength(_streamBuffer->getDataLength());
+			_readStateCharacteristic->notify();
 		}
 	}
 	}

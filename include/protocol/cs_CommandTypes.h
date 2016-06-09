@@ -7,23 +7,24 @@
 #pragma once
 
 enum CommandHandlerTypes {
-	CMD_SWITCH,                        // 0
-	CMD_PWM,
-	CMD_SET_TIME,
-	CMD_GOTO_DFU,
-	CMD_RESET,
-	CMD_FACTORY_RESET,
-	CMD_KEEP_ALIVE_STATE,
-	CMD_KEEP_ALIVE,
-	CMD_ENABLE_MESH,
-	CMD_ENABLE_ENCRYPTION,
-	CMD_ENABLE_IBEACON,
-	CMD_ENABLE_CONT_POWER_MEASURE,
-	CMD_ENABLE_SCANNER,
-	CMD_SCAN_DEVICES,
-	CMD_SAMPLE_POWER,
-	CMD_USER_FEEDBACK,
-	CMD_SCHEDULE_ENTRY
+	CMD_SWITCH                      = 0,     //! 0x00
+	CMD_PWM                         = 1,     //! 0x01
+	CMD_SET_TIME                    = 2,     //! 0x02
+	CMD_GOTO_DFU                    = 3,     //! 0x03
+	CMD_RESET                       = 4,     //! 0x04
+	CMD_FACTORY_RESET               = 5,     //! 0x05
+	CMD_KEEP_ALIVE_STATE            = 6,     //! 0x06
+	CMD_KEEP_ALIVE                  = 7,     //! 0x07
+	CMD_ENABLE_MESH                 = 8,     //! 0x08
+	CMD_ENABLE_ENCRYPTION           = 9,     //! 0x09
+	CMD_ENABLE_IBEACON              = 10,    //! 0x0A
+	CMD_ENABLE_CONT_POWER_MEASURE   = 11,    //! 0x0B
+	CMD_ENABLE_SCANNER              = 12,    //! 0x0C
+	CMD_SCAN_DEVICES                = 13,    //! 0x0D
+	CMD_SAMPLE_POWER                = 14,    //! 0x0E
+	CMD_USER_FEEDBACK               = 15,    //! 0x0F
+	CMD_SCHEDULE_ENTRY              = 16,    //! 0x10
+	CMD_TYPES
 };
 
 struct __attribute__((__packed__)) switch_message_payload_t {

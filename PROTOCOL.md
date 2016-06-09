@@ -19,9 +19,9 @@ uint 8 | AD Type | 1 | Manufacturer Specific Data (0xFF)
 uint 8 | Company Id | 2 | Apple (0x004C)
 uint 8 | iBeacon Type | 1 | IBeacon Type (0x02)
 uint 8 | iBeacon Length | 1 | IBeacon Length (0x15)
-uint 8 | Proximity UUID | 16 | 
-uint 16 | Major | 2 | 
-uint 16 | Minor | 2 | 
+uint 8 | Proximity UUID | 16 |
+uint 16 | Major | 2 |
+uint 16 | Minor | 2 |
 int 8 | TX Power | 1 | Received signal strength at 1 meter.
 
 
@@ -64,57 +64,67 @@ The crownstone service has UUID 24fe0000-7d10-4805-bfc1-7663a01c3bff and provide
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
-Control        | 24fe0001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the control characheristic
-Mesh Control   | 24fe0002-7d10-4805-bfc1-7663a01c3bff | [Mesh control packet](#mesh_control_packet) | Write a command to the mesh control characheristic to send into the mesh
-Config Control | 24fe0004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Write or select a config setting
-Config Read    | 24fe0005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting
-State Control  | 24fe0006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable 
-State Read     | 24fe0007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable
+Control        | 24f00001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the control characheristic
+Mesh Control   | 24f00002-7d10-4805-bfc1-7663a01c3bff | [Mesh control packet](#mesh_control_packet) | Write a command to the mesh control characheristic to send into the mesh
+Config Control | 24f00004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Write or select a config setting
+Config Read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting
+State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable
+State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable
+
+## Setup service
+
+The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only available after a factory reset.
+
+Characteristic | UUID | Date type | Description
+--- | --- | --- | ---
+Control        | 24f10001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the control characheristic
+MAC Address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MAC address of the device
 
 ## General service
 
-The general service has UUID f5f90000-f5f9-11e4-aa15-123b93f75cba.
+The general service has UUID 24f20000-7d10-4805-bfc1-7663a01c3bff.
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
-Temperature    | f5f90001-f5f9-11e4-aa15-123b93f75cba | int 32 | Chip temperature in Celcius. Notifications are available.
-Reset          | f5f90002-f5f9-11e4-aa15-123b93f75cba | int 32 | Write 1 to reset. Write 66 to go to DFU mode.
+Temperature    | 24f20001-7d10-4805-bfc1-7663a01c3bff | int 32 | Chip temperature in Celcius. Notifications are available.
+Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | int 32 | Write 1 to reset. Write 66 to go to DFU mode.
 
 ## Power service
 
-The power service has UUID 5b8d0000-6f20-11e4-b116-123b93f75cba.
+The power service has UUID 24f30000-7d10-4805-bfc1-7663a01c3bff.
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
-PWM                | 5b8d0001-6f20-11e4-b116-123b93f75cba | uint 8 | Set PWM value. Value of 0 is completely off, 255 (100 on new devices) is completely on.
-Power sample read  | 5b8d0003-6f20-11e4-b116-123b93f75cba | [Power Samples](#power_samples_packet) | List of sampled current and voltage values.
-Power consumption  | 5b8d0004-6f20-11e4-b116-123b93f75cba | uint 16 | The current power consumption.
+PWM                | 24f30001-7d10-4805-bfc1-7663a01c3bff | uint 8 | Set PWM value. Value of 0 is completely off, 255 (100 on new devices) is completely on.
+Relay              | 24f30002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Switch Relay. Value of 0 is off, other is on.
+Power samples      | 24f30003-7d10-4805-bfc1-7663a01c3bff | [Power Samples](#power_samples_packet) | List of sampled current and voltage values.
+Power consumption  | 24f30004-7d10-4805-bfc1-7663a01c3bff | uint 16 | The current power consumption.
 
 ## Indoor localization service
 
-The localization service has UUID 7e170000-429c-41aa-83d7-d91220abeb33.
+The localization service has UUID 24f40000-7d10-4805-bfc1-7663a01c3bff.
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
-RSSI                  | 7e170001-429c-41aa-83d7-d91220abeb33 | uint 8 | RSSI to connected device. Notifications are available.
-Tracked devices write | 7e170002-429c-41aa-83d7-d91220abeb33 | [Tracked device](#tracked_device_packet) | Add or overwrite a tracked device. Set threshold larger than 0 to remove the tracked device from the list.
-Scan write            | 7e170003-429c-41aa-83d7-d91220abeb33 | uint 8 | Start or stop scanning. write 0 to stop, 1 to start.
-Scan read             | 7e170004-429c-41aa-83d7-d91220abeb33 | [Scan result list](#scan_result_list_packet) | After stopping the scan, you can read the results here.
-Tracked devices read  | 7e170005-429c-41aa-83d7-d91220abeb33 | [Tracked device list](#tracked_device_list_packet) | Read the current list of tracked devices.
+Track control           | 24f40001-7d10-4805-bfc1-7663a01c3bff | [Tracked device](#tracked_device_packet) | Add or overwrite a tracked device. Set threshold larger than 0 to remove the tracked device from the list.
+Tracked devices         | 24f40002-7d10-4805-bfc1-7663a01c3bff | [Tracked device list](#tracked_device_list_packet) | Read the current list of tracked devices.
+Scan control            | 24f40003-7d10-4805-bfc1-7663a01c3bff | uint 8 | Start or stop scanning. write 0 to stop, 1 to start.
+Scanned devices         | 24f40004-7d10-4805-bfc1-7663a01c3bff | [Scan result list](#scan_result_list_packet) | After stopping the scan, you can read the results here.
+RSSI                    | 24f40005-7d10-4805-bfc1-7663a01c3bff | uint 8 | RSSI to connected device. Notifications are available.
 
 ## Schedule service
 
-The schedule service has UUID 96d20000-4bcf-11e5-885d-feff819cdc9f.
+The schedule service has UUID 24f50000-7d10-4805-bfc1-7663a01c3bff.
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
-Set time        | 96d20001-4bcf-11e5-885d-feff819cdc9f | uint 32 | Sets the time. Timestamp is in seconds since epoch.
-Schedule write  | 96d20002-4bcf-11e5-885d-feff819cdc9f | [Schedule entry](#schedule_entry_packet) | Add or modify a schedule entry. Set nextTimestamp to 0 to remove the entry from the list.
-Schedule read   | 96d20003-4bcf-11e5-885d-feff819cdc9f | [Schedule list](#schedule_list_packet) | Get a list of all schedule entries.
+Set time        | 24f50001-7d10-4805-bfc1-7663a01c3bff | uint 32 | Sets the time. Timestamp is in seconds since epoch.
+Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule entry](#schedule_entry_packet) | Add or modify a schedule entry. Set nextTimestamp to 0 to remove the entry from the list.
+Schedule read   | 24f50003-7d10-4805-bfc1-7663a01c3bff | [Schedule list](#schedule_list_packet) | Get a list of all schedule entries.
 
 ## Mesh Service
 
-The mesh service comes with [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh) and has UUID 2a1e0000-fd51-d882-8ba8-b98c0000cd1e
+The mesh service comes with [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh) and has UUID 0000fee4-0000-1000-8000-00805f9b34fb
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
@@ -432,11 +442,11 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Preamble | 1 |
 uint 32 | Access address | 4 | Number used to find relevant messages, set by application.
-uint 8 | Type | 1 | 
-uint 8 | Length | 1 | 
+uint 8 | Type | 1 |
+uint 8 | Length | 1 |
 uint 8 [] | Source address | 6 | Address of the node that put this message into the mesh.
 uint 8 | AD Length | 1 | Length of data after this field, excluding CRC.
-uint 8 | AD type | 1 | 
+uint 8 | AD type | 1 |
 uint 16 | Service UUID | 2 | Mesh service UUID.
 uint 16 | Handle | 2 | Handle of this message.
 uint 16 | Version | 2 | Used internally.
@@ -451,7 +461,7 @@ This packet is used to get the [mesh messages](#mesh_message_packet) pushed over
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | OpCode | 1 | See available op codes in table below
-uint 8 | Payload | | 
+uint 8 | Payload | |
 
 Opcode | Type name | Payload type | Payload description
 --- | --- | --- | ---

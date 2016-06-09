@@ -4,7 +4,7 @@
 # Should be 10 characters or less (we need room for compilation date after it)
 BLUETOOTH_NAME="crown"
 
-FIRMWARE_VERSION="0.3.0"
+FIRMWARE_VERSION="0.4.0"
 
 # The device type defines how the device advertises itself, Apps and Bluenet Library
 # will use this to filter for device type.
@@ -21,7 +21,10 @@ FIRMWARE_VERSION="0.3.0"
 # DEVICE_FRIDGE      3
 DEVICE_TYPE=DEVICE_CROWNSTONE
 
+# Enable or disable meshing (1 or 0)
 MESHING=0
+
+# Enable or disable continuous power measurements (1 or 0)
 CONT_POWER_MEASURMENT=0
 
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
@@ -52,6 +55,7 @@ STATIC_PASSKEY="123456"
 DEFAULT_ON=1
 
 # Enable or disable different services (at times required to preserve memory)
+CROWNSTONE_SERVICE=1
 INDOOR_SERVICE=1
 GENERAL_SERVICE=1
 POWER_SERVICE=1
@@ -59,12 +63,15 @@ ALERT_SERVICE=0
 SCHEDULE_SERVICE=0
 
 # Enable or disable characteristics
-## General Service
+# Crownstone Service
 CHAR_CONTROL=1
+CHAR_MESHING=1
+CHAR_CONFIGURATION=1
+CHAR_STATE=1
+
+## General Service
 CHAR_TEMPERATURE=1
 CHAR_RESET=1
-CHAR_CONFIGURATION=1
-CHAR_STATE_VARIABLES=1
 
 ## Power Service
 CHAR_PWM=1
@@ -79,9 +86,6 @@ CHAR_TRACK_DEVICES=1
 
 ## Schedule Service
 CHAR_SCHEDULE=1
-
-# Enable or disable meshing functionality (1 or 0)
-CHAR_MESHING=1
 
 # Size of the master buffer
 # Currently this should not be larger than BLE_GATTS_VAR_ATTR_LEN_MAX (512)

@@ -9,49 +9,8 @@
 #include <events/cs_EventTypes.h>
 #include <drivers/cs_Storage.h>
 #include <structs/cs_StreamBuffer.h>
+#include <protocol/cs_ConfigTypes.h>
 
-/** Configuration types
- *
- * Use in the characteristic to read and write configurations in <CommonService>.
- */
-enum ConfigurationTypes {
-	CONFIG_NAME                             = Configuration_Base,
-	CONFIG_DEVICE_TYPE                      = 0x01,
-	CONFIG_ROOM                             = 0x02,
-	CONFIG_FLOOR                            = 0x03,
-	CONFIG_NEARBY_TIMEOUT                   = 0x04,
-	CONFIG_PWM_FREQ                         = 0x05,
-	CONFIG_IBEACON_MAJOR                    = 0x06,
-	CONFIG_IBEACON_MINOR                    = 0x07,
-	CONFIG_IBEACON_UUID                     = 0x08,
-	CONFIG_IBEACON_TXPOWER                  = 0x09,
-	CONFIG_WIFI_SETTINGS                    = 0x0A, //! 10
-	CONFIG_TX_POWER                         = 0x0B, //! 11
-	CONFIG_ADV_INTERVAL                     = 0x0C, //! 12
-	CONFIG_PASSKEY							= 0x0D, //! 13
-	CONFIG_MIN_ENV_TEMP                     = 0x0E, //! 14
-	CONFIG_MAX_ENV_TEMP                     = 0x0F, //! 15
-	CONFIG_SCAN_DURATION                    = 0x10, //! 16
-	CONFIG_SCAN_SEND_DELAY                  = 0x11, //! 17
-	CONFIG_SCAN_BREAK_DURATION              = 0x12, //! 18
-	CONFIG_BOOT_DELAY                       = 0x13, //! 19
-	CONFIG_MAX_CHIP_TEMP                    = 0x14, //! 20
-	CONFIG_SCAN_FILTER                      = 0x15, //! 21
-	CONFIG_SCAN_FILTER_SEND_FRACTION        = 0x16, //! 22
-	CONFIG_CURRENT_LIMIT                    = 0x17, //! 23
-	CONFIG_MESH_ENABLED                     = 0x18, //! 24
-	CONFIG_ENCRYPTION_ENABLED               = 0x19, //! 25
-	CONFIG_IBEACON_ENABLED                  = 0x1A, //! 26
-	CONFIG_SCANNER_ENABLED                  = 0x1B, //! 27
-	CONFIG_CONT_POWER_SAMPLER_ENABLED       = 0x1C, //! 28
-	CONFIG_TRACKER_ENABLED                  = 0x1D, //! 29
-	CONFIG_ADC_SAMPLE_RATE                  = 0x1E, //! 30
-	CONFIG_POWER_SAMPLE_BURST_INTERVAL      = 0x1F, //! 31
-	CONFIG_POWER_SAMPLE_CONT_INTERVAL       = 0x20, //! 32
-	CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES    = 0x21, //! 33
-	CONFIG_CROWNSTONE_ID                    = 0x22, //! 34
-	CONFIG_TYPES
-};
 
 /**
  * Load settings from and save settings to persistent storage.

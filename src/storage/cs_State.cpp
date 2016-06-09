@@ -21,7 +21,7 @@ void debugprint(void * p_context) {
 
 State::State() :
 		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedEnergy(NULL),
-		_temperature(0) {
+		_temperature(0), _powerUsage(0) {
 
 }
 
@@ -340,7 +340,7 @@ void State::publishUpdate(uint8_t type, uint8_t* data, uint16_t size) {
 
 	if (isNotifying(type)) {
 		state_vars_notifaction notification = {type, (uint8_t*)data, 4};
-		dispatcher.dispatch(EVT_STATE_VARS_NOTIFICATION, &notification, sizeof(notification));
+		dispatcher.dispatch(EVT_STATE_NOTIFICATION, &notification, sizeof(notification));
 	}
 
 }

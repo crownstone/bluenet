@@ -366,13 +366,15 @@ void Crownstone::configureAdvertisement() {
 	//! to advertise certain state variables
 	_serviceData = new ServiceData();
 
-	// read crownstone id from storage and set it to the service data
+	//! read crownstone id from storage
 	uint16_t crownstoneId;
 	_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+	LOGi("Set crownstone id to %d", crownstoneId);
 
-	// assign service data to stack
+	//! and set it to the service data
 	_serviceData->updateCrownstoneId(crownstoneId);
 
+	//! assign service data to stack
 	_stack->setServiceData(_serviceData);
 
 	if (Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {
@@ -402,11 +404,11 @@ void Crownstone::createCrownstoneServices() {
 	_deviceInformationService = new DeviceInformationService();
 	_stack->addService(_deviceInformationService);
 
-//#if CROWNSTONE_SERVICE==1
+#if CROWNSTONE_SERVICE==1
 	//! should be available always
 	_crownstoneService = new CrownstoneService();
 	_stack->addService(_crownstoneService);
-//#endif
+#endif
 
 #if GENERAL_SERVICE==1
 	//! general services, such as internal temperature, setting names, etc.
@@ -485,14 +487,15 @@ void Crownstone::prepareCrownstone() {
 	_fridge = new Fridge;
 #endif
 
-	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+//	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
 
 #if HARDWARE_BOARD == VIRTUALMEMO
 			nrf_gpio_range_cfg_output(7,14);
 #endif
 
 		_mesh = &Mesh::getInstance();
-	}
+//		_mesh->init();
+//	}
 
 #if RESET_COUNTER==1
 	uint32_t resetCounter;
@@ -553,9 +556,9 @@ void Crownstone::startUp() {
 			_tracker->startTracking();
 		}
 
+		_mesh->init();
 		if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
-			_mesh->init();
-			_mesh->startTicking();
+			_mesh->start();
 		}
 
 #if DEVICE_TYPE==DEVICE_FRIDGE
@@ -662,11 +665,6 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case CONFIG_PASSKEY: {
 		_stack->setPasskey((uint8_t*)p_data);
-		break;
-	}
-	case CONFIG_CROWNSTONE_ID: {
-		_serviceData->updateCrownstoneId(*(uint16_t*)p_data);
-		_stack->updateAdvertisement();
 		break;
 	}
 

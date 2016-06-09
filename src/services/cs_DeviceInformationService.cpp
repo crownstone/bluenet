@@ -26,8 +26,7 @@ inline std::string get_hardware_revision(void) {
 DeviceInformationService::DeviceInformationService()
 {
 	setUUID(UUID(BLE_UUID_DEVICE_INFORMATION_SERVICE));
-
-	setName("Device Information");
+	setName(BLE_SERVICE_DEVICE_INFORMATION);
 
 	addCharacteristics();
 }
@@ -53,7 +52,7 @@ void DeviceInformationService::addHardwareRevisionCharacteristic() {
 	BLEpp::Characteristic<std::string>* _hardwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_hardwareRevisionCharacteristic);
 	_hardwareRevisionCharacteristic->setUUID(BLE_UUID_HARDWARE_REVISION_STRING_CHAR);
-	_hardwareRevisionCharacteristic->setName("Hardware Revision");
+	_hardwareRevisionCharacteristic->setName(BLE_CHAR_HARDWARE_REVISION);
 	_hardwareRevisionCharacteristic->setDefaultValue(get_hardware_revision());
 	_hardwareRevisionCharacteristic->setWritable(false);
 }
@@ -62,7 +61,7 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 	BLEpp::Characteristic<std::string>* _firmwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_firmwareRevisionCharacteristic);
 	_firmwareRevisionCharacteristic->setUUID(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
-	_firmwareRevisionCharacteristic->setName("Firmware Revision");
+	_firmwareRevisionCharacteristic->setName(BLE_CHAR_FIRMWARE_REVISION);
 	_firmwareRevisionCharacteristic->setWritable(false);
 #ifdef GIT_HASH
 	_firmwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_HASH));
@@ -75,7 +74,7 @@ void DeviceInformationService::addSoftwareRevisionCharacteristic() {
 	BLEpp::Characteristic<std::string>* _softwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_softwareRevisionCharacteristic);
 	_softwareRevisionCharacteristic->setUUID(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
-	_softwareRevisionCharacteristic->setName("Software Revision");
+	_softwareRevisionCharacteristic->setName(BLE_CHAR_SOFTWARE_REVISION);
 #ifdef GIT_BRANCH
 	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_BRANCH));
 #else

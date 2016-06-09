@@ -44,19 +44,6 @@
 //! UUID used for the Service Data in the Scan Response packet
 #define SERVICE_DATA_UUID                   0xC001
 
-/** Characteristic UUIDs */
-enum PowerCharacteristicsIDs {
-	PWM_UUID                                = 0x1, //cmd
-	RELAY_UUID                              = 0x2, //cmd
-	POWER_SAMPLES_UUID                      = 0x3, //state
-	CURRENT_CONSUMPTION_UUID                = 0x4, //state
-};
-
-enum SetupCharacteristicsIDs {
-//	CONTROL_UUID                            = 0x1,
-	MAC_ADDRESS_UUID                        = 0x2
-};
-
 enum CrownstoneCharacteristicsIDs {
 	CONTROL_UUID                            = 0x1,
 	MESH_CONTROL_UUID                       = 0x2,
@@ -67,17 +54,36 @@ enum CrownstoneCharacteristicsIDs {
 	STATE_READ_UUID                         = 0x7,
 };
 
+enum SetupCharacteristicsIDs {
+//	CONTROL_UUID                            = 0x1,
+	MAC_ADDRESS_UUID                        = 0x2
+};
+
 enum GeneralCharacteristicsIDs {
 	TEMPERATURE_UUID                        = 0x1,
 	RESET_UUID                              = 0x2,
 };
 
+/** Characteristic UUIDs */
+enum PowerCharacteristicsIDs {
+	PWM_UUID                                = 0x1, //cmd
+	RELAY_UUID                              = 0x2, //cmd
+	POWER_SAMPLES_UUID                      = 0x3, //state
+	POWER_CONSUMPTION_UUID                = 0x4, //state
+};
+
 enum IndoorLocalizationCharacteristicsIDs {
 	TRACKED_DEVICE_UUID                     = 0x1, //behave, cmd?
 	TRACKED_DEVICE_LIST_UUID                = 0x2, //state
-	SCAN_DEVICE_UUID                        = 0x3, //cmd
+	SCAN_CONTROL_UUID                        = 0x3, //cmd
 	LIST_DEVICE_UUID                        = 0x4, //state
 	RSSI_UUID                               = 0x5, //state
+};
+
+enum ScheduleCharacteristicsIDs {
+	CURRENT_TIME_UUID                       = 0x1, //state
+	WRITE_SCHEDULE_ENTRY_UUID               = 0x2, //behav
+	LIST_SCHEDULE_ENTRIES_UUID              = 0x3, //behav
 };
 
 enum AlertCharacteristicsIDs {
@@ -86,10 +92,4 @@ enum AlertCharacteristicsIDs {
 	SUPPORTED_UNREAD_ALERT_UUID             = 0x3,
 	UNREAD_ALERT_UUID                       = 0x4,
 	ALERT_CONTROL_POINT_UUID                = 0x5,
-};
-
-enum ScheduleCharacteristicsIDs {
-	CURRENT_TIME_UUID                       = 0x1, //state
-	WRITE_SCHEDULE_ENTRY_UUID               = 0x2, //behav
-	LIST_SCHEDULE_ENTRIES_UUID              = 0x3, //behav
 };

@@ -691,6 +691,7 @@ bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 	}
 	case CONFIG_CROWNSTONE_ID: {
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
+		break;
 	}
 	case CONFIG_ADC_SAMPLE_RATE: {
 //		break;

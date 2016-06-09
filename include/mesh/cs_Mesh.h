@@ -27,7 +27,7 @@ extern "C" {
 //! values are updated MESH_UPDATE_FREQUENCY times per second
 #define MESH_UPDATE_FREQUENCY 10
 //! number of channels used in the mesh
-#define MESH_NUM_OF_CHANNELS 20
+#define MESH_NUM_OF_CHANNELS 2
 //! time given for boot up (every first message received on each channel
 //! will be ignored during boot up)
 #define BOOT_TIME 2000 // 2 seconds
@@ -65,10 +65,13 @@ private:
 		ptr->tick();
 	}
 
+	void startTicking();
+	void stopTicking();
 	void scheduleNextTick();
 
 	void checkForMessages();
 	void handleMeshMessage(rbc_mesh_event_t* evt);
+
 
 public:
 	//! use static variant of singleton, no dynamic memory allocation
@@ -80,9 +83,10 @@ public:
 	//! initialize
 	void init();
 
-	//! start ticking, i.e. start handling incoming mesh messages
-	void startTicking();
-	void stopTicking();
+	//! start the mesh, i.e. start mesh radio and handle incoming messages
+	void start();
+	//! stop the mesh
+	void stop();
 
 	//! send message
 	void send(uint8_t channel, void* p_data, uint8_t length);

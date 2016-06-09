@@ -16,7 +16,7 @@
 using namespace BLEpp;
 
 IndoorLocalizationService::IndoorLocalizationService() : EventListener(),
-		_rssiCharac(NULL), _peripheralCharac(NULL),
+		_rssiCharac(NULL), _scannedDeviceListCharac(NULL),
 		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL)
 {
 	EventDispatcher::getInstance().addListener(this);
@@ -34,14 +34,14 @@ void IndoorLocalizationService::addCharacteristics() {
 
 #if CHAR_RSSI==1
 	LOGi("add Signal Strength characteristics");
-	addSignalStrengthCharacteristic();
+	addRssiCharacteristic();
 #else
 	LOGi("skip Signal Strength characteristics");
 #endif
 #if CHAR_SCAN_DEVICES==1
 	LOGi("add Scan Devices characteristics");
 	addScanControlCharacteristic();
-	addPeripheralListCharacteristic();
+	addScannedDeviceListCharacteristic();
 #else
 	LOGi("skip Scan/Devices characteristics");
 #endif
@@ -88,7 +88,7 @@ void IndoorLocalizationService::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(LOCALIZATION_SERVICE_UPDATE_FREQUENCY), this);
 }
 
-void IndoorLocalizationService::addSignalStrengthCharacteristic() {
+void IndoorLocalizationService::addRssiCharacteristic() {
 	_rssiCharac = new Characteristic<int8_t>();
 	addCharacteristic(_rssiCharac);
 
@@ -105,8 +105,8 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 	_scanControlCharac = new Characteristic<uint8_t>();
 	addCharacteristic(_scanControlCharac);
 
-	_scanControlCharac->setUUID(UUID(getUUID(), SCAN_DEVICE_UUID));
-	_scanControlCharac->setName(BLE_CHAR_SCAN);
+	_scanControlCharac->setUUID(UUID(getUUID(), SCAN_CONTROL_UUID));
+	_scanControlCharac->setName(BLE_CHAR_SCAN_CONTROL);
 	_scanControlCharac->setDefaultValue(255);
 	_scanControlCharac->setWritable(true);
 	_scanControlCharac->onWrite([&](const uint8_t& value) -> void {
@@ -114,23 +114,23 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 	});
 }
 
-void IndoorLocalizationService::addPeripheralListCharacteristic() {
+void IndoorLocalizationService::addScannedDeviceListCharacteristic() {
 
 	MasterBuffer& mb = MasterBuffer::getInstance();
 	buffer_ptr_t buffer = NULL;
 	uint16_t maxLength = 0;
 	mb.getBuffer(buffer, maxLength);
 
-	_peripheralCharac = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_peripheralCharac);
+	_scannedDeviceListCharac = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_scannedDeviceListCharac);
 
-	_peripheralCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
-	_peripheralCharac->setName("Devices");
-	_peripheralCharac->setWritable(false);
-	_peripheralCharac->setNotifies(true);
-	_peripheralCharac->setValue(buffer);
-	_peripheralCharac->setMaxLength(maxLength);
-	_peripheralCharac->setDataLength(0);
+	_scannedDeviceListCharac->setUUID(UUID(getUUID(), LIST_DEVICE_UUID));
+	_scannedDeviceListCharac->setName(BLE_CHAR_SCAN_LIST);
+	_scannedDeviceListCharac->setWritable(false);
+	_scannedDeviceListCharac->setNotifies(true);
+	_scannedDeviceListCharac->setValue(buffer);
+	_scannedDeviceListCharac->setMaxLength(maxLength);
+	_scannedDeviceListCharac->setDataLength(0);
 }
 
 void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
@@ -144,7 +144,7 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	addCharacteristic(_trackedDeviceListCharac);
 
 	_trackedDeviceListCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_LIST_UUID));
-	_trackedDeviceListCharac->setName(BLE_CHAR_TRACK);
+	_trackedDeviceListCharac->setName(BLE_CHAR_TRACK_LIST);
 	_trackedDeviceListCharac->setWritable(false);
 	_trackedDeviceListCharac->setNotifies(false);
 	_trackedDeviceListCharac->setValue(buffer);
@@ -163,7 +163,7 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 	addCharacteristic(_trackedDeviceCharac);
 
 	_trackedDeviceCharac->setUUID(UUID(getUUID(), TRACKED_DEVICE_UUID));
-	_trackedDeviceCharac->setName("Add tracked device");
+	_trackedDeviceCharac->setName(BLE_CHAR_TRACK);
 	_trackedDeviceCharac->setWritable(true);
 	_trackedDeviceCharac->setNotifies(false);
 
@@ -247,9 +247,9 @@ void IndoorLocalizationService::setRSSILevel(int8_t RSSILevel) {
 void IndoorLocalizationService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch(evt) {
 	case EVT_SCANNED_DEVICES: {
-		_peripheralCharac->setValue((buffer_ptr_t)p_data);
-		_peripheralCharac->setDataLength(length);
-		_peripheralCharac->notify();
+		_scannedDeviceListCharac->setValue((buffer_ptr_t)p_data);
+		_scannedDeviceListCharac->setDataLength(length);
+		_scannedDeviceListCharac->notify();
 		break;
 	}
 	case EVT_TRACKED_DEVICES: {

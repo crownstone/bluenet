@@ -14,6 +14,7 @@
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_Switch.h>
 #include <mesh/cs_MeshControl.h>
+#include <mesh/cs_Mesh.h>
 #include <storage/cs_State.h>
 
 void reset(void* p_context) {
@@ -36,6 +37,11 @@ void reset(void* p_context) {
 	sd_nvic_SystemReset();
 }
 
+void stop_mesh(void* p_context) {
+	Mesh::getInstance().stop();
+}
+
+
 void CommandHandler::handleCommand(CommandHandlerTypes type) {
 	handleCommand(type, NULL, 0);
 }
@@ -46,11 +52,16 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 	case CMD_PWM: {
 		LOGi("handle PWM command");
 
+		if (size != sizeof(switch_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return;
+		}
+
 		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
 		uint8_t value = payload->switchState;
 
 		uint8_t current = Switch::getInstance().getValue();
-		LOGi("current pwm: %d", current);
+//		LOGi("current pwm: %d", current);
 		if (value != current) {
 			LOGi("update pwm to %i", value);
 			Switch::getInstance().setValue(value);
@@ -59,6 +70,11 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 	}
 	case CMD_SWITCH: {
 		LOGi("handle switch command");
+
+		if (size != sizeof(switch_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return;
+		}
 
 		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
 		uint8_t value = payload->switchState;
@@ -84,6 +100,11 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 	case CMD_RESET: {
 		LOGi("handle reset command");
 
+		if (size != sizeof(opcode_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return;
+		}
+
 		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
 		static uint32_t resetOp = payload->opCode;
 
@@ -98,22 +119,38 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 		break;
 	}
 	case CMD_ENABLE_MESH: {
-		LOGi("handle enable mesh command: tbd");
+		LOGi("handle enable mesh command");
+
+		if (size != sizeof(enable_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return;
+		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 		bool enable = payload->enable;
 
 		LOGi("%s mesh", enable ? "Enabling" : "Disabling");
 		Settings::getInstance().updateFlag(CONFIG_MESH_ENABLED, enable, true);
-		// todo: stack/service/characteristics need to be refactored if we also want to add/remove characteristics
-		// on the fly
-		// for now, this only takes effect on next reset
-//			EventDispatcher::getInstance().dispatch(EVT_ENABLED_MESH, &enable, 1);
+
+		if (enable) {
+			Mesh::getInstance().start();
+		} else {
+			//! breaks if it is called directly...
+//			Mesh::getInstance().stop();
+			app_timer_id_t meshStopTimer;
+			Timer::getInstance().createSingleShot(meshStopTimer, (app_timer_timeout_handler_t) stop_mesh);
+			Timer::getInstance().start(meshStopTimer, MS_TO_TICKS(100), NULL);
+		}
 
 		break;
 	}
 	case CMD_ENABLE_ENCRYPTION: {
 		LOGi("handle enable encryption command: tbd");
+
+		if (size != sizeof(enable_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return;
+		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 		bool enable = payload->enable;
@@ -130,6 +167,11 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 	case CMD_ENABLE_IBEACON: {
 		LOGi("handle enable ibeacon command");
 
+		if (size != sizeof(enable_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return;
+		}
+
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 		bool enable = payload->enable;
 
@@ -141,6 +183,11 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 	}
 	case CMD_ENABLE_CONT_POWER_MEASURE: {
 		LOGi("handle enable cont power measure command: tbd");
+
+		if (size != sizeof(enable_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return;
+		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 		bool enable = payload->enable;
@@ -157,10 +204,18 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 		bool enable = payload->enable;
 		uint16_t delay = payload->delay;
 
+		if (size != sizeof(enable_scanner_message_payload_t)) {
+			//! if we want tod isable, we don't really need the delay, so
+			// we can accept the command as long as size is 1
+			if (size != 1 || enable) {
+				LOGe("wrong payload length received: %d", size);
+				return;
+			}
+		}
+
 		LOGi("%s scanner", enable ? "Enabling" : "Disabling");
-		LOGi("delay: %d s", delay);
-		delay = 10000;
 		if (enable) {
+			LOGi("delay: %d ms", delay);
 			if (delay) {
 				Scanner::getInstance().delayedStart(delay);
 			} else {
@@ -176,6 +231,11 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 	}
 	case CMD_SCAN_DEVICES: {
 		LOGi("handle scan devices command");
+
+		if (size != sizeof(enable_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return;
+		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 		bool start = payload->enable;

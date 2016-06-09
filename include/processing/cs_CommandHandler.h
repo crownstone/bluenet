@@ -13,6 +13,10 @@
 
 #include <ble/cs_Stack.h>
 
+extern "C" {
+	#include <third/protocol/rbc_mesh.h>
+}
+
 using namespace BLEpp;
 
 class CommandHandler {

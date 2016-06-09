@@ -9,6 +9,7 @@
 #include <events/cs_EventTypes.h>
 #include <structs/cs_StreamBuffer.h>
 #include <storage/cs_CyclicStorage.h>
+#include <protocol/cs_StateTypes.h>
 
 #define OPERATION_MODE_SETUP 0xFF
 #define OPERATION_MODE_NORMAL 0x10
@@ -16,22 +17,6 @@
 
 //! enable to print additional debug
 //#define PRINT_DEBUG
-
-/** State variable types
- *
- * Use in the characteristic to read and write state variables in <CommonService>.
- */
-enum StateTypes {
-	STATE_RESET_COUNTER = State_Base,     // 0x80 - 128
-	STATE_SWITCH_STATE,                   // 0x81 - 129
-	STATE_ACCUMULATED_ENERGY,             // 0x82 - 130
-	STATE_POWER_USAGE,		              // 0x83 - 131
-	STATE_TRACKED_DEVICES,                // 0x84 - 132
-	STATE_SCHEDULE,                       // 0x85 - 133
-	STATE_OPERATION_MODE,                 // 0x86 - 134
-	STATE_TEMPERATURE,                    // 0x87 - 135
-	STATE_TYPES
-};
 
 typedef uint32_t seq_number_t;
 

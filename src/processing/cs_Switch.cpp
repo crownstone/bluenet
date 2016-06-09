@@ -62,8 +62,8 @@ uint8_t Switch::getValue() {
 }
 
 void Switch::relayOn() {
-#if HAS_RELAY
 	LOGi("trigger relay on pin for %d ms", RELAY_HIGH_DURATION);
+#if HAS_RELAY
 	nrf_gpio_pin_set(PIN_GPIO_RELAY_ON);
 	nrf_delay_ms(RELAY_HIGH_DURATION);
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
@@ -73,8 +73,8 @@ void Switch::relayOn() {
 }
 
 void Switch::relayOff() {
-#if HAS_RELAY
 	LOGi("trigger relay off pin for %d ms", RELAY_HIGH_DURATION);
+#if HAS_RELAY
 	nrf_gpio_pin_set(PIN_GPIO_RELAY_OFF);
 	nrf_delay_ms(RELAY_HIGH_DURATION);
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);

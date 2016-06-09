@@ -14,25 +14,38 @@
 class ServiceData : EventListener {
 
 public:
-	ServiceData() : EventListener(EVT_ALL) {
-		EventDispatcher::getInstance().addListener(this);
-		memset(_array, 0, sizeof(_array));
-	};
+	ServiceData();
+
+//	void updatePowerUsage(uint32_t powerUsage) {
+//		_params.powerUsage = powerUsage;
+//	}
+
+//	void updateAccumulatedEnergy(uint32_t accumulatedEnergy) {
+//		_params.accumulatedEnergy = accumulatedEnergy;
+//	}
+
+	void updateCrownstoneId(uint16_t crownstoneId) {
+		_params.crownstoneId = crownstoneId;
+	}
+
+	void updateCrownstoneStateId(uint16_t crownstoneStateId) {
+		_params.crownstoneStateId = crownstoneStateId;
+	}
 
 	void updateSwitchState(uint8_t switchState) {
 		_params.switchState = switchState;
 	}
 
-	void updateCurrentUsage(uint32_t powerConsumption) {
-		_params.powerConsumption = powerConsumption;
+	void updateEventBitmask(uint8_t bitmask) {
+		_params.eventBitmask = bitmask;
 	}
 
-//	void updateAccumulatedPower(uint64_t accumulatedPower) {
-//		_params.accumulatedPower = accumulatedPower;
-//	}
-
-	void updateCrownstoneId(uint32_t crownstoneId) {
-		_params.crownstoneId = crownstoneId;
+	void updateEventBitmask(uint8_t bit, bool set) {
+		if (set) {
+			_params.eventBitmask |= 1 < bit;
+		} else {
+			_params.eventBitmask &= 0 < bit;
+		}
 	}
 
 	uint8_t* getArray() {
@@ -47,10 +60,13 @@ private:
 
 	union {
 		struct __attribute__((packed)) {
-			uint8_t switchState : 8;
-			uint32_t powerConsumption : 32;
-//			uint64_t accumulatedPower : 64;
-			uint32_t crownstoneId : 24;
+			uint16_t crownstoneId;
+			uint16_t crownstoneStateId;
+			uint8_t switchState;
+			uint8_t eventBitmask;
+			uint16_t reserved;
+//			uint32_t powerUsage;
+//			uint32_t accumulatedEnergy;
 		} _params;
 		uint8_t _array[sizeof(_params)] = {};
 	};

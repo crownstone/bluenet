@@ -104,7 +104,7 @@ void SetupService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size) 
 	addCharacteristic(_controlCharacteristic);
 
 	_controlCharacteristic->setUUID(UUID(getUUID(), CONTROL_UUID));
-	_controlCharacteristic->setName("Command");
+	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setWritable(true);
 	_controlCharacteristic->setValue(buffer);
 	_controlCharacteristic->setMaxLength(size);
@@ -137,7 +137,7 @@ void SetupService::addMacAddressCharacteristic() {
 	addCharacteristic(_macAddressCharacteristic);
 
 	_macAddressCharacteristic->setUUID(UUID(getUUID(), MAC_ADDRESS_UUID));
-	_macAddressCharacteristic->setName("MAC Address");
+	_macAddressCharacteristic->setName(BLE_CHAR_MAC_ADDRES);
 	_macAddressCharacteristic->setWritable(false);
 	_macAddressCharacteristic->setValue(_myAddr.addr);
 	_macAddressCharacteristic->setMaxLength(BLE_GAP_ADDR_LEN);
@@ -150,7 +150,7 @@ void SetupService::addSetConfigurationCharacteristic(buffer_ptr_t buffer, uint16
 	addCharacteristic(_setConfigurationCharacteristic);
 
 	_setConfigurationCharacteristic->setUUID(UUID(getUUID(), CONFIG_CONTROL_UUID));
-	_setConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_WRITE);
+	_setConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_CONTROL);
 	_setConfigurationCharacteristic->setWritable(true);
 	_setConfigurationCharacteristic->setValue(buffer);
 	_setConfigurationCharacteristic->setMaxLength(size);
