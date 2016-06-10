@@ -247,15 +247,15 @@ uint 8 | Payload | Length | Payload data, depends on type.
 Available state variables:
 
 Type nr | Type name | Payload type | Description | Persistent
---- | --- | --- | ---
+--- | --- | --- | --- | :---:
 128 | Reset counter | uint 32 | Counts the number of resets (DEBUG) | x
 129 | Switch state | uint 8 | Current Switch state, 0 = OFF, 100 = FULL ON |
-130 | Accumulated energy | uint 32 | Accumulated energy in ... over time, TBD
-131 | Power usage | uint 32 | Current power usage in ..., TBD
-132 | Tracked devices | [Tracked devices](#tracked_device_list_packet) | List of tracked devices
-133 | Schedule | [Schedule List](#schedule_list_packet) | Schedule, TBD
-134 | Operation Mode | uint 8 | ..., TBD
-135 | Temperature | int 32 | Chip temperature in °C
+130 | Accumulated energy | uint 32 | Accumulated energy in ... over time, TBD | x
+131 | Power usage | uint 32 | Current power usage in ..., TBD |
+132 | Tracked devices | [Tracked devices](#tracked_device_list_packet) | List of tracked devices | x
+133 | Schedule | [Schedule List](#schedule_list_packet) | Schedule, TBD | x
+134 | Operation Mode | uint 8 | ..., TBD | x
+135 | Temperature | int 32 | Chip temperature in °C |
 
 OpCodes:
 
