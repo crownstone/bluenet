@@ -13,7 +13,8 @@
 #include <cstdint>
 #include "storage/cs_Settings.h"
 #include "events/cs_EventListener.h"
-#include <events/cs_EventDispatcher.h>
+#include "events/cs_EventDispatcher.h"
+#include "processing/cs_Switch.h"
 
 #define TEMPERATURE_UPDATE_FREQUENCY 0.2
 

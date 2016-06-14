@@ -71,7 +71,7 @@ void Switch::relayOn() {
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
 
 	// todo: update switch state?
-	State::getInstance().set(STATE_SWITCH_STATE, 255);
+	State::getInstance().set(STATE_SWITCH_STATE, (uint8_t)255);
 #endif
 }
 
@@ -83,7 +83,7 @@ void Switch::relayOff() {
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
 
 	// todo: update switch state?
-	State::getInstance().set(STATE_SWITCH_STATE, 0);
+	State::getInstance().set(STATE_SWITCH_STATE, (uint8_t)0);
 #endif
 }
 
