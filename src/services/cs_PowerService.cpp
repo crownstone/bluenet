@@ -82,7 +82,7 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setDefaultValue(255);
 	_pwmCharacteristic->setWritable(true);
 	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&value, 4);
+		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&value, 1);
 	});
 }
 
@@ -95,7 +95,7 @@ void PowerService::addRelayCharacteristic() {
 	_relayCharacteristic->setDefaultValue(255);
 	_relayCharacteristic->setWritable(true);
 	_relayCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		CommandHandler::getInstance().handleCommand(CMD_SWITCH, (buffer_ptr_t)&value, 4);
+		CommandHandler::getInstance().handleCommand(CMD_SWITCH, (buffer_ptr_t)&value, 1);
 	});
 }
 
