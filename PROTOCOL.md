@@ -7,7 +7,7 @@ When no device is connected, [advertisements](#ibeacon_packet) will be sent at a
 ### <a name="ibeacon_packet"></a>iBeacon advertisement packet
 This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
 
-![Advertisement packet](docs/diagrams/advertisement-packet.png)
+![Advertisement packet](docs/diagrams/adv-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
