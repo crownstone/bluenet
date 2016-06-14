@@ -48,5 +48,8 @@ enum ConfigurationTypes {
 	CONFIG_POWER_SAMPLE_CONT_INTERVAL       = 32,     //! 0x20
 	CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES    = 33,     //! 0x21
 	CONFIG_CROWNSTONE_ID                    = 34,     //! 0x22
+	CONFIG_KEY_OWNER                        = 35,     //! 0x23
+	CONFIG_KEY_MEMBER                       = 36,     //! 0x24
+	CONFIG_KEY_GUEST                        = 37,     //! 0x25
 	CONFIG_TYPES
 };

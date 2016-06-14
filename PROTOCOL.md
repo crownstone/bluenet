@@ -1,4 +1,4 @@
-# Bluenet protocol v0.4.0
+# Bluenet protocol v0.4.1
 -------------------------
 
 # Advertisements and scan response
@@ -34,7 +34,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | AD Length | 1 | Length of the Name AD Structure (0x0A)
 uint 8 | AD Type | 1 | Shortened Local Name (0x08)
-char array | Name Bytes | 9 | The shortened name of this device.
+char []] | Name Bytes | 9 | The shortened name of this device.
 uint 8 | AD Length | 1 | Length of the Service Data AD Structure (0x13)
 uint 8 | AD Type | 1 | Service Data (0x16)
 uint 16 | Service UUID | 2 | Service UUID
@@ -149,20 +149,20 @@ Available command types:
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-0 | Switch | uint8_t | Switch relay, 0 = OFF, 1 = ON
-1 | PWM | uint8_t | Set PWM to value, 0 = OFF, 100 = FULL ON
+0 | Switch | uint 8 | Switch relay, 0 = OFF, 1 = ON
+1 | PWM | uint 8 | Set PWM to value, 0 = OFF, 100 = FULL ON
 2 | Set Time | ... | Set time to ..., TBD
 3 | Goto DFU | - | Reset device to DFU mode
-4 | Rest | uint8_t | Reset device
-5 | Factory reset | uint32_t | Reset device to factory setting, needs Code 0xdeadbeef as payload
+4 | Rest | uint 8 | Reset device
+5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload
 6 | Keep alive state | ... | Keep alive with state ..., TBD
 7 | Keep alive | ...  | Keep alive ..., TBD
-8 | Enable mesh | uint8_t | Enable/Disable Mesh, 0 = OFF, other = ON
-9 | Enable encryption | uint8_t | Enable/Disable Encryption, 0 = OFF, other = ON
-10 | Enable iBeacon | uint8_t | Enable/Disable iBeacon, 0 = OFF, other = ON
-11 | Enable continuous power measurement | uint8_t | Enable/Disable continuous power measurement, 0 = OFF, other = ON, TBD
+8 | Enable mesh | uint 8 | Enable/Disable Mesh, 0 = OFF, other = ON
+9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON
+10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON
+11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON, TBD
 12 | Enable scanner | [Enable Scanner payload](#cmd_enable_scanner_payload) | Enable/Disable scanner
-13 | Scan for devices | uint8_t | Scan for devices, 0 = OFF, other = ON
+13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON
 14 | User feedback | ... | User feedback ..., TBD
 15 | Schedule entry | ... | Schedule entry ..., TBD
 
@@ -170,8 +170,8 @@ Type nr | Type name | Payload type | Payload description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | enable | 1 | 0 = OFF, other = ON
-uint16_t | delay | 1 | start scanner with delay in ms
+uint 8 | enable | 1 | 0 = OFF, other = ON
+uint 16 | delay | 1 | start scanner with delay in ms
 
 ### <a name="config_packet"></a>Configuration packet
 
@@ -188,20 +188,20 @@ Available configurations types:
 
 Type nr | Type name | Payload type | Description
 --- | --- | --- | ---
-0 | Device name | char array | Name of the device.
-1 | Device type | char array | **Deprecated.**
+0 | Device name | char [] | Name of the device.
+1 | Device type | char [] | **Deprecated.**
 2 | Room | uint 8 | **Deprecated.**
 3 | Floor | uint 8 | Floor number. **Deprecated**
 4 | Nearby timeout | uint 16 | Time in ms before switching off when none is nearby
 5 | PWM frequency | uint 8 | Sets PWM frequency **not implemented**
 6 | iBeacon major | uint 16 | iBeacon major number.
 7 | iBeacon minor | uint 16 | iBeacon minor number.
-8 | iBeacon UUID | 16 bytes | iBeacon UUID.
+8 | iBeacon UUID | uint 8 [16] | iBeacon UUID.
 9 | iBeacon Tx Power | int 8 | iBeacon signal strength at 1 meter.
-10 | Wifi settings | char array | Json with the wifi settings: `{ "ssid": "<name here>", "key": "<password here>"}`.
+10 | Wifi settings | char [] | Json with the wifi settings: `{ "ssid": "<name here>", "key": "<password here>"}`.
 11 | TX power | int 8 | TX power, can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4.
 12 | Advertisement interval | uint 16 | Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms.
-13 | Passkey | char array | Passkey of the device: must be 6 digits.
+13 | Passkey | uint 8 [6] | Passkey of the device: must be 6 digits.
 14 | Min env temp | int 8 | If temperature (in degrees Celcius) goes below this value, send an alert (not implemented yet).
 15 | Max env temp | int 8 | If temperature (in degrees Celcius) goes above this value, send an alert (not implemented yet).
 16 | Scan duration | uint 16 | Scan duration in ms. *Setting this too high may cause the device to reset during scanning.*
@@ -223,6 +223,9 @@ Type nr | Type name | Payload type | Description
 32 | Power sample continuous interval | ... | TBD
 33 | Power sample continuous number samples | ... | TBD
 34 | Crownstone Identifier | uint 16 | Crownstone identifier used in advertisement package
+35 | Owner encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions
+36 | Member encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions
+37 | Guest encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt guest access functions
 
 OpCodes:
 
@@ -280,9 +283,9 @@ uint 16 | firstVoltage   | 2              | First voltage sample.
 uint 16 | lastVoltage    | 2              | Last voltage sample.
 uint 32 | firstTimeStamp | 4              | Timestamp of first current sample.
 uint 32 | lastTimeStamp  | 4              | Timestamp of last sample.
-int 8   | currentDiffs   | numSamples/2-1 | Array of differences with previous current sample.
-int 8   | voltageDiffs   | numSamples/2-1 | Array of differences with previous voltage sample.
-int 8   | timeDiffs      | numSamples-1   | Array of differences with previous timestamp.
+int 8 []| currentDiffs   | numSamples/2-1 | Array of differences with previous current sample.
+int 8 []| voltageDiffs   | numSamples/2-1 | Array of differences with previous voltage sample.
+int 8 []| timeDiffs      | numSamples-1   | Array of differences with previous timestamp.
 
 
 ### <a name="scan_result_packet"></a>Scan result packet
@@ -320,7 +323,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | size | 1 | Number of tracked devices in the list.
 [Tracked device](#tracked_device_packet) | size * 7 | Array of tracked device packets.
-uint 16 array | Counters | size * 2 | Counter that keeps up how long ago the RSSI of a device was above the threshold (for internal use).
+uint 16 [] | Counters | size * 2 | Counter that keeps up how long ago the RSSI of a device was above the threshold (for internal use).
 
 
 

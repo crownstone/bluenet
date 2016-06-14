@@ -171,6 +171,13 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	uint32_t crownstoneId;
 
+	// storing keys used for encryption
+	struct {
+		uint8_t owner[ENCYRPTION_KEY_LENGTH];
+		uint8_t member[ENCYRPTION_KEY_LENGTH];
+		uint8_t guest[ENCYRPTION_KEY_LENGTH];
+	} encryptionKeys;
+
 };
 
 /** Event handler for softdevice events. in particular, listen for
@@ -479,6 +486,8 @@ public:
 				LOGd("use default value");
 #endif
 				memcpy(dest, default_value, length * sizeof(T));
+			} else {
+				memset(dest, 0, length * sizeof(T));
 			}
 		} else {
 			memcpy(dest, src, length * sizeof(T));

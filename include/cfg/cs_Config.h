@@ -92,3 +92,5 @@
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 
 #define FACTORY_RESET_CODE                       0xdeadbeef
+
+#define ENCYRPTION_KEY_LENGTH                    16 //! 16 byte length

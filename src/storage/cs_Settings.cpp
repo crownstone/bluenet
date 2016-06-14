@@ -174,7 +174,7 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	}
 	case CONFIG_PASSKEY: {
 		if (length != BLE_GAP_PASSKEY_LEN) {
-			LOGw("Expected length %d for passkey", BLE_GAP_PASSKEY_LEN);
+			LOGw("Expected length %d for passkey, received: %d", BLE_GAP_PASSKEY_LEN, length);
 			return false;
 		}
 		LOGi("Set passkey to %s", std::string((char*)payload, length).c_str());
@@ -186,6 +186,18 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 			return false;
 		}
 		LOGi("Set name to: %s", std::string((char*)payload, length).c_str());
+		return true;
+	}
+	case CONFIG_KEY_OWNER :
+	case CONFIG_KEY_MEMBER :
+	case CONFIG_KEY_GUEST : {
+		if (length != ENCYRPTION_KEY_LENGTH) {
+			LOGe("Expected encryption key length: %d, received: %d", ENCYRPTION_KEY_LENGTH, length);
+			return false;
+		}
+		log(DEBUG, "Set encyrption key %d to:", type);
+		BLEutil::printArray((uint8_t*)payload, length);
+
 		return true;
 	}
 
@@ -281,6 +293,15 @@ uint8_t* Settings::getStorageItem(uint8_t type) {
 	case CONFIG_CROWNSTONE_ID: {
 		return (uint8_t*)&_storageStruct.crownstoneId;
 	}
+	case CONFIG_KEY_OWNER : {
+		return (uint8_t*)&_storageStruct.encryptionKeys.owner;
+	}
+	case CONFIG_KEY_MEMBER : {
+		return (uint8_t*)&_storageStruct.encryptionKeys.member;
+	}
+	case CONFIG_KEY_GUEST :{
+		return (uint8_t*)&_storageStruct.encryptionKeys.guest;
+	}
 	case CONFIG_ADC_SAMPLE_RATE: {
 	}
 	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
@@ -346,6 +367,11 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	}
 	case CONFIG_NAME: {
 		return MAX_STRING_STORAGE_SIZE+1;
+	}
+	case CONFIG_KEY_OWNER :
+	case CONFIG_KEY_MEMBER :
+	case CONFIG_KEY_GUEST : {
+		return ENCYRPTION_KEY_LENGTH;
 	}
 
 	/////////////////////////////////////////////////
@@ -582,6 +608,18 @@ bool Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getUint16(_storageStruct.crownstoneId, (uint16_t*)target, 0);
 		return true;
 	}
+	case CONFIG_KEY_OWNER : {
+		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.owner, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
+		return true;
+	}
+	case CONFIG_KEY_MEMBER : {
+		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.member, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
+		return true;
+	}
+	case CONFIG_KEY_GUEST : {
+		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.guest, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
+		return true;
+	}
 	case CONFIG_ADC_SAMPLE_RATE: {
 //		return true;
 	}
@@ -691,6 +729,18 @@ bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 	}
 	case CONFIG_CROWNSTONE_ID: {
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
+		break;
+	}
+	case CONFIG_KEY_OWNER : {
+		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.owner, ENCYRPTION_KEY_LENGTH);
+		break;
+	}
+	case CONFIG_KEY_MEMBER : {
+		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.member, ENCYRPTION_KEY_LENGTH);
+		break;
+	}
+	case CONFIG_KEY_GUEST : {
+		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.member, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
 	case CONFIG_ADC_SAMPLE_RATE: {
