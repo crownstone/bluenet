@@ -41,9 +41,11 @@ public:
 	void tick() {
 		if (getTemperature() > _maxTemp) {
 			//! Switch off all channels
-			PWM::getInstance().switchOff();
-			//! Make sure pwm can't be set anymore
-			PWM::getInstance().deinit();
+			Switch::getInstance().pwmOff();
+			Switch::getInstance().turnOff();
+//			PWM::getInstance().switchOff();
+//			//! Make sure pwm can't be set anymore
+//			PWM::getInstance().deinit();
 		}
 		// TODO: make next time to next tick depend on current temperature
 		scheduleNextTick();
