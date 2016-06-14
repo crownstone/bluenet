@@ -94,9 +94,6 @@ Crownstone::Crownstone() :
 
 void Crownstone::init() {
 
-	//! first thing to do, configure uart for debug output
-	config_uart();
-
 	//! be nice and say hello
 	welcome();
 
@@ -741,6 +738,9 @@ void on_exit(void) {
 
 int main() {
 	atexit(on_exit);
+
+	//! first thing to do, configure uart for debug output
+	config_uart();
 
 	Crownstone crownstone;
 

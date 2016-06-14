@@ -8,5 +8,5 @@
 
 #define DEVICE_UNDEF       0
 #define DEVICE_CROWNSTONE  1
-#define DEVICE_DOBEACON    2
+#define DEVICE_GUIDESTONE  2
 #define DEVICE_FRIDGE      3

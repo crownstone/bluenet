@@ -106,7 +106,7 @@ bool State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 		uint8_t value;
 		get(type, value);
 		p_value = (uint8_t*)&value;
-		size = sizeof(uint32_t);
+		size = sizeof(uint8_t);
 		break;
 	}
 	case STATE_TEMPERATURE: {
@@ -339,7 +339,7 @@ void State::publishUpdate(uint8_t type, uint8_t* data, uint16_t size) {
 	dispatcher.dispatch(type, data, size);
 
 	if (isNotifying(type)) {
-		state_vars_notifaction notification = {type, (uint8_t*)data, 4};
+		state_vars_notifaction notification = {type, (uint8_t*)data, size};
 		dispatcher.dispatch(EVT_STATE_NOTIFICATION, &notification, sizeof(notification));
 	}
 

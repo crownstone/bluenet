@@ -32,7 +32,7 @@ typedef uint32_t switch_state_t;
 
 #define ACCUMULATED_ENERGY_REDUNDANCY 72
 #define ACCUMULATED_ENERGY_DEFAULT 0
-typedef uint64_t accumulated_energy_t;
+typedef int64_t accumulated_energy_t;
 
 /** Struct used to store elements that are changed frequently. each element
  *  will be stored separately. elements need to be 4 byte sized
@@ -170,7 +170,7 @@ protected:
 	//! state variables which do not need to be stored in storage:
 	int32_t _temperature;
 
-	uint32_t _powerUsage;
+	int32_t _powerUsage;
 
 };
 

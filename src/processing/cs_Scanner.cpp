@@ -284,9 +284,9 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 			dobotsManufac.parse(type_data.p_data+2, type_data.data_len-2);
 
 			switch (dobotsManufac.getDeviceType()) {
-			case DEVICE_DOBEACON: {
-//				LOGi("found dobeacon");
-				return _scanFilter & SCAN_FILTER_DOBEACON_MSK;
+			case DEVICE_GUIDESTONE: {
+//				LOGi("found guidestone");
+				return _scanFilter & SCAN_FILTER_GUIDESTONE_MSK;
 			}
 			case DEVICE_CROWNSTONE: {
 //				LOGi("found crownstone");

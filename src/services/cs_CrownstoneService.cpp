@@ -272,7 +272,7 @@ void CrownstoneService::addSelectStateVarCharacteristic(buffer_ptr_t buffer, uin
 				uint8_t type = _streamBuffer->type();
 				uint8_t opCode = _streamBuffer->opCode();
 
-				if (opCode == READ_VALUE) {
+				if (opCode == READ_VALUE || opCode == NOTIFY_VALUE) {
 					LOGi("Read state");
 					bool success = State::getInstance().readFromStorage(type, _streamBuffer);
 					if (success) {
@@ -280,13 +280,15 @@ void CrownstoneService::addSelectStateVarCharacteristic(buffer_ptr_t buffer, uin
 						_readStateCharacteristic->setDataLength(_streamBuffer->getDataLength());
 						_readStateCharacteristic->notify();
 					}
-				} else if (opCode == NOTIFY_VALUE) {
-					LOGi("State notification");
-					if (_streamBuffer->length() == 1) {
-						bool enable = *((bool*) _streamBuffer->payload());
-						State::getInstance().setNotify(type, enable);
-					} else {
-						LOGe("wrong length received!");
+
+					if (opCode == NOTIFY_VALUE) {
+						LOGi("State notification");
+						if (_streamBuffer->length() == 1) {
+							bool enable = *((bool*) _streamBuffer->payload());
+							State::getInstance().setNotify(type, enable);
+						} else {
+							LOGe("wrong length received!");
+						}
 					}
 				} else if (opCode == WRITE_VALUE) {
 					LOGi("Write state");
@@ -319,7 +321,7 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 	case EVT_STATE_NOTIFICATION: {
 		if (_readStateCharacteristic) {
 			state_vars_notifaction notification = *(state_vars_notifaction*)p_data;
-//			log(DEBUG, "send notification for %d, value:", notification.type);
+			log(DEBUG, "send notification for %d, value:", notification.type);
 			BLEutil::printArray(notification.data, notification.dataLength);
 
 			_streamBuffer->setPayload(notification.data, notification.dataLength);

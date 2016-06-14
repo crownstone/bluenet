@@ -44,7 +44,7 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0),
-				_adv_manuf_data(NULL), _crownstoneData(NULL), _encryptionEnabled(false)
+				_adv_manuf_data(NULL), _encryptionEnabled(false), _serviceData(NULL)
 {
 	//! setup default values.
 	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
@@ -405,12 +405,18 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 	memset(&_scan_resp, 0, sizeof(_scan_resp));
 	_scan_resp.name_type = BLE_ADVDATA_SHORT_NAME;
 
-	if (_crownstoneData) {
+	if (_serviceData && deviceType != DEVICE_UNDEF) {
 	//	ble_advdata_service_data_t service_data;
 		memset(&_service_data, 0, sizeof(_service_data));
-		_service_data.service_uuid = SERVICE_DATA_UUID;
-		_service_data.data.p_data = _crownstoneData->getArray();
-		_service_data.data.size = _crownstoneData->getArraySize();
+
+		if (deviceType == DEVICE_GUIDESTONE) {
+			_service_data.service_uuid = GUIDESTONE_SERVICE_DATA_UUID;
+		} else { // if deviceType == DEVICE_CROWNSTONE
+			_service_data.service_uuid = CROWNSTONE_SERVICE_DATA_UUID;
+		}
+
+		_service_data.data.p_data = _serviceData->getArray();
+		_service_data.data.size = _serviceData->getArraySize();
 
 		LOGi("service data size: %d", _service_data.data.size);
 
@@ -425,38 +431,38 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 	//! in the scan response
 
 	//! only add manufacturing data if device type is set
-	if (deviceType != DEVICE_UNDEF) {
-
-//		ble_advdata_manuf_data_t manufac;
-		memset(&_manufac, 0, sizeof(_manufac));
-		//! TODO: made up ID, has to be replaced by official ID
-		_manufac.company_identifier = CROWNSTONE_COMPANY_ID; //! DoBots Company ID
-		_manufac.data.size = 0;
-
-		DoBotsManufac dobotsManufac(deviceType);
-
-//		uint8_t adv_manuf_data[dobotsManufac.size()];
-
-		if (_adv_manuf_data != NULL) {
-			free(_adv_manuf_data);
-		}
-
-		_adv_manuf_data = new uint8_t[dobotsManufac.size()];
-		memset(_adv_manuf_data, 0, sizeof(*_adv_manuf_data));
-		dobotsManufac.toArray(_adv_manuf_data);
-
-		_manufac.data.p_data = _adv_manuf_data;
-		_manufac.data.size = dobotsManufac.size();
-
-		_scan_resp.p_manuf_specific_data = &_manufac;
-
-		//! we only have limited space available in the scan response data. so we have to adjust the maximum
-		//! length available for the name, based on the size of the manufacturing data
-		nameLength = nameLength - sizeof(_adv_manuf_data) - sizeof(_manufac.company_identifier) - 2 ; //! last 2 comes from one byte for length + 1 byte for type
-	} else {
-		//! if no manufacturing data is set, we can use the maximum available space for the name
-//		nameLength = nameLength;
-	}
+//	if (deviceType != DEVICE_UNDEF) {
+//
+////		ble_advdata_manuf_data_t manufac;
+//		memset(&_manufac, 0, sizeof(_manufac));
+//		//! TODO: made up ID, has to be replaced by official ID
+//		_manufac.company_identifier = CROWNSTONE_COMPANY_ID; //! DoBots Company ID
+//		_manufac.data.size = 0;
+//
+//		DoBotsManufac dobotsManufac(deviceType);
+//
+////		uint8_t adv_manuf_data[dobotsManufac.size()];
+//
+//		if (_adv_manuf_data != NULL) {
+//			free(_adv_manuf_data);
+//		}
+//
+//		_adv_manuf_data = new uint8_t[dobotsManufac.size()];
+//		memset(_adv_manuf_data, 0, sizeof(*_adv_manuf_data));
+//		dobotsManufac.toArray(_adv_manuf_data);
+//
+//		_manufac.data.p_data = _adv_manuf_data;
+//		_manufac.data.size = dobotsManufac.size();
+//
+//		_scan_resp.p_manuf_specific_data = &_manufac;
+//
+//		//! we only have limited space available in the scan response data. so we have to adjust the maximum
+//		//! length available for the name, based on the size of the manufacturing data
+//		nameLength = nameLength - sizeof(_adv_manuf_data) - sizeof(_manufac.company_identifier) - 2 ; //! last 2 comes from one byte for length + 1 byte for type
+//	} else {
+//		//! if no manufacturing data is set, we can use the maximum available space for the name
+////		nameLength = nameLength;
+//	}
 
 	LOGi("maxNameLength: %d", nameLength);
 
