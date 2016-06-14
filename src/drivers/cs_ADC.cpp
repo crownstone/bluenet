@@ -122,6 +122,7 @@ uint32_t ADC::config(uint8_t pinNum) {
 	NRF_ADC->CONFIG     =
 			(ADC_CONFIG_RES_10bit                            << ADC_CONFIG_RES_Pos)     |
 #if(HARDWARE_BOARD==CROWNSTONE)
+//#if(HARDWARE_BOARD==CROWNSTONE || HARDWARE_BOARD==CROWNSTONE4 || HARDWARE_BOARD==CROWNSTONE5)
 			(ADC_CONFIG_INPSEL_AnalogInputNoPrescaling       << ADC_CONFIG_INPSEL_Pos)  |
 #else
 			(ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos)  |
@@ -157,8 +158,8 @@ void ADC::update(uint32_t value) {
 		_circularBuffers[_lastPinNum]->push(value);
 	}
 	else if (_buffers[_lastPinNum] != NULL) {
-//		if (!_buffers[_lastPinNum]->push(value)) {
-		if (!_buffers[_lastPinNum]->push(_buffers[_lastPinNum]->size())) {
+		if (!_buffers[_lastPinNum]->push(value)) {
+//		if (!_buffers[_lastPinNum]->push(_buffers[_lastPinNum]->size())) {
 			//! If this buffer is full, stop sampling
 			// todo: can we trigger an event here that the sample is ready instead of
 			//   having a tick function in the PowerSampler that polls if the buffers are full?

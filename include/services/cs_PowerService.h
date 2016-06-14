@@ -91,7 +91,7 @@ private:
 	//! References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint8_t> *_pwmCharacteristic;
 	BLEpp::Characteristic<uint8_t> *_relayCharacteristic;
-	BLEpp::Characteristic<uint16_t> *_powerConsumptionCharacteristic;
+	BLEpp::Characteristic<int32_t> *_powerConsumptionCharacteristic;
 	BLEpp::Characteristic<uint8_t*> *_powerSamplesCharacteristic;
 
 };
