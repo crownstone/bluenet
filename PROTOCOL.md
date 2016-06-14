@@ -52,8 +52,8 @@ uint 16 | Crownstone state ID | 2 | ID of the Crownstone of which the state is s
 uint 8 | Switch state | 1 | The state of the switch, 0 - 100 (where 0 is off, 100 is on, dimmed in between).
 uint 8 | Event bitmask | 1 | Shows if the Crownstone has something new to tell.
 uint 8 | Reserved | 2 | Reserved for future use.
-uint 32 | Power usage | 4 | The power usage at this moment (mW).
-uint 32 | Accumulated energy | 4 | The accumulated energy (kWh).
+int 32 | Power usage | 4 | The power usage at this moment (mW).
+int 32 | Accumulated energy | 4 | The accumulated energy (kWh).
 
 # Services
 When connected, the following services are available.
