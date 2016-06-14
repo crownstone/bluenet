@@ -60,7 +60,7 @@ When connected, the following services are available.
 
 ## Crownstone service
 
-The crownstone service has UUID 24fe0000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following services
+The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following services
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
