@@ -11,6 +11,8 @@
 #include <storage/cs_Settings.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_ADC.h>
+#include <drivers/cs_RTC.h>
+#include <protocol/cs_StateTypes.h>
 
 #include <mesh/cs_MeshControl.h>
 extern "C" {
@@ -97,6 +99,7 @@ void PowerSampling::startSampling() {
 //	_voltageSampleTimestamps.clear();
 	Timer::getInstance().start(_staticPowerSamplingReadTimer, MS_TO_TICKS(POWER_SAMPLE_CONT_INTERVAL), this);
 #else
+	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
 	_powerSamples.clear();
 #endif
 	ADC::getInstance().start();
@@ -169,12 +172,15 @@ void PowerSampling::powerSampleFinish() {
 	//! TODO: check if current and voltage samples are of equal length.
 	//! If not, one may have been cleared at some point due to too large timestamp difference.
 
-	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES, _powerSamplesBuffer, _powerSamples.getDataLength());
+	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
+
+	uint32_t currentTimestamp = 0;
+	uint32_t voltageTimestamp = 0;
 
 //#ifdef PRINT_SAMPLE_CURRENT
 //	//! Print samples
-//	uint32_t currentTimestamp = 0;
-//	uint32_t voltageTimestamp = 0;
+//	currentTimestamp = 0;
+//	voltageTimestamp = 0;
 //	_log(DEBUG, "samples:\r\n");
 //	for (int i=0; i<_powerSamples.size(); i++) {
 //		_powerSamples.getCurrentTimestampsBuffer()->getValue(currentTimestamp, i);
@@ -188,7 +194,7 @@ void PowerSampling::powerSampleFinish() {
 //#endif
 
 #ifdef PRINT_SAMPLE_CURRENT
-	uint32_t currentTimestamp = 0;
+	currentTimestamp = 0;
 	_log(DEBUG, "current samples:\r\n");
 	for (int i=0; i<_powerSamples.size(); i++) {
 		_powerSamples.getCurrentTimestampsBuffer()->getValue(currentTimestamp, i);
@@ -197,7 +203,7 @@ void PowerSampling::powerSampleFinish() {
 			_log(DEBUG, "\r\n");
 		}
 	}
-	uint32_t voltageTimestamp = 0;
+	voltageTimestamp = 0;
 	_log(DEBUG, "\r\nvoltage samples:\r\n");
 	for (int i=0; i<_powerSamples.size(); i++) {
 		_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, i);
@@ -208,6 +214,95 @@ void PowerSampling::powerSampleFinish() {
 	}
 	_log(DEBUG, "\r\n");
 #endif
+
+
+
+	//! Calculate average power consumption in Watt
+
+	currentTimestamp = 0;
+	voltageTimestamp = 0;
+
+#define V_ZERO            169
+#define I_ZERO            168.5
+//#define V_MULTIPLICATION  2.357
+#define V_MULTIPLICATION  2.374
+#define I_MULTIPLICATION  0.044
+#define P_ZERO            9.0
+
+	uint16_t vMin = UINT16_MAX;
+	uint16_t vMax = 0;
+
+
+	uint16_t v;
+	_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, 0);
+	uint32_t prevTime = voltageTimestamp;
+	uint32_t endTime = prevTime + RTC::msToTicks(20);
+	uint16_t vPrev = (*_powerSamples.getVoltageSamplesBuffer())[0];
+	int zeroCrossings = 0;
+	uint32_t prevZeroCrossingTime;
+
+	double tSum = 0.0;
+	double pSum = 0.0;
+	for (int i=1; i<_powerSamples.size(); i++) {
+		v = (*_powerSamples.getVoltageSamplesBuffer())[i];
+		_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, i);
+
+//		LOGd("%u %u %u %u", vPrev, v, prevTime, voltageTimestamp);
+
+//		//! Check for zero crossing
+//		if ((vPrev < V_ZERO && v > V_ZERO) || (vPrev > V_ZERO && v < V_ZERO)) {
+//			//! Only one crossing can happen in 5ms
+//			LOGd("zero at %u", voltageTimestamp);
+//			if (zeroCrossings == 0) {
+//				zeroCrossings++;
+//				prevZeroCrossingTime = voltageTimestamp;
+//			}
+//			else if (zeroCrossings > 0 && RTC::difference(voltageTimestamp, prevZeroCrossingTime) > RTC::msToTicks(5)) {
+//				zeroCrossings++;
+//				prevZeroCrossingTime = voltageTimestamp;
+//			}
+//		}
+//
+//		//! Integrate between two zero crossings
+//		if (0 < zeroCrossings && zeroCrossings <= 1) {
+//			uint32_t dt = RTC::difference(voltageTimestamp, prevTime);
+//			double dts = dt / (double)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1); //! seconds
+//
+//			double voltage = V_MULTIPLICATION * (v - V_ZERO);
+//			double current = I_MULTIPLICATION * ((*_powerSamples.getCurrentSamplesBuffer())[i] - I_ZERO);
+//			LOGd("%f %f %f", voltage, current, dts);
+//			pSum += voltage * current * dts;
+//			tSum += dts;
+//		}
+
+		//! Integrate whole period, based on 50Hz (20ms)
+		if (voltageTimestamp <= endTime) {
+			uint32_t dt = RTC::difference(voltageTimestamp, prevTime);
+			double dts = dt / (double)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1); //! seconds
+
+			double voltage = V_MULTIPLICATION * (v - V_ZERO);
+			double current = I_MULTIPLICATION * ((*_powerSamples.getCurrentSamplesBuffer())[i] - I_ZERO);
+//			LOGd("%f %f %f", voltage, current, dts);
+			pSum += voltage * current * dts;
+			tSum += dts;
+		}
+
+
+		prevTime = voltageTimestamp;
+		vPrev = v;
+	}
+//	LOGd("pSum=%f", pSum);
+	pSum /= tSum;
+	pSum -= P_ZERO;
+	int32_t avgPower = pSum;
+	LOGd("pSum=%f, tSum=%f, avgPower=%i", pSum, tSum, avgPower);
+
+	//! Only send valid updates
+//	if (zeroCrossings > 1) {
+	if (tSum > 0.0) {
+		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &avgPower, 4);
+	}
+
 
 	//! Start new sample after some time
 	Timer::getInstance().start(_staticPowerSamplingStartTimer, MS_TO_TICKS(POWER_SAMPLE_BURST_INTERVAL), this);

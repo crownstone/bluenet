@@ -16,11 +16,11 @@ class ServiceData : EventListener {
 public:
 	ServiceData();
 
-//	void updatePowerUsage(uint32_t powerUsage) {
-//		_params.powerUsage = powerUsage;
-//	}
+	void updatePowerUsage(int32_t powerUsage) {
+		_params.powerUsage = powerUsage;
+	}
 
-//	void updateAccumulatedEnergy(uint32_t accumulatedEnergy) {
+//	void updateAccumulatedEnergy(int32_t accumulatedEnergy) {
 //		_params.accumulatedEnergy = accumulatedEnergy;
 //	}
 
@@ -65,8 +65,8 @@ private:
 			uint8_t switchState;
 			uint8_t eventBitmask;
 			uint16_t reserved;
-//			uint32_t powerUsage;
-//			uint32_t accumulatedEnergy;
+			int32_t powerUsage;
+			int32_t accumulatedEnergy;
 		} _params;
 		uint8_t _array[sizeof(_params)] = {};
 	};

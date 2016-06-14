@@ -13,6 +13,7 @@
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_PowerSampling.h>
 #include <structs/buffer/cs_MasterBuffer.h>
+#include <protocol/cs_StateTypes.h>
 
 using namespace BLEpp;
 
@@ -81,7 +82,7 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setDefaultValue(255);
 	_pwmCharacteristic->setWritable(true);
 	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&value, 4);
+		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&value, 1);
 	});
 }
 
@@ -94,7 +95,7 @@ void PowerService::addRelayCharacteristic() {
 	_relayCharacteristic->setDefaultValue(255);
 	_relayCharacteristic->setWritable(true);
 	_relayCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		CommandHandler::getInstance().handleCommand(CMD_SWITCH, (buffer_ptr_t)&value, 4);
+		CommandHandler::getInstance().handleCommand(CMD_SWITCH, (buffer_ptr_t)&value, 1);
 	});
 }
 
@@ -113,11 +114,11 @@ void PowerService::addPowerSamplesCharacteristic() {
 
 	_powerSamplesCharacteristic->setValue(buffer);
 	_powerSamplesCharacteristic->setMaxLength(size);
-	_powerSamplesCharacteristic->setDataLength(size);
+	_powerSamplesCharacteristic->setDataLength(0); //! Initialize with 0 length, to indicate it's invalid data.
 }
 
 void PowerService::addPowerConsumptionCharacteristic() {
-	_powerConsumptionCharacteristic = new Characteristic<uint16_t>();
+	_powerConsumptionCharacteristic = new Characteristic<int32_t>();
 	addCharacteristic(_powerConsumptionCharacteristic);
 	_powerConsumptionCharacteristic->setUUID(UUID(getUUID(), POWER_CONSUMPTION_UUID));
 	_powerConsumptionCharacteristic->setName(BLE_CHAR_POWER_CONSUMPTION);
@@ -136,7 +137,15 @@ void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		}
 		break;
 	}
-	case EVT_POWER_SAMPLES: {
+	case EVT_POWER_SAMPLES_START: {
+		if (_powerSamplesCharacteristic) {
+//			LOGd("power samples update");
+			_powerSamplesCharacteristic->setDataLength(0);
+			_powerSamplesCharacteristic->notify();
+		}
+		break;
+	}
+	case EVT_POWER_SAMPLES_END: {
 		if (_powerSamplesCharacteristic) {
 //			LOGd("power samples update");
 			_powerSamplesCharacteristic->setDataLength(length);
@@ -144,10 +153,10 @@ void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		}
 		break;
 	}
-	case EVT_POWER_CONSUMPTION: {
+	case STATE_POWER_USAGE: {
 		if (_powerConsumptionCharacteristic) {
 //			LOGi("power consumption update");
-			(*_powerConsumptionCharacteristic) = *(uint32_t*)p_data;
+			(*_powerConsumptionCharacteristic) = *(int32_t*)p_data;
 		}
 	}
 	}

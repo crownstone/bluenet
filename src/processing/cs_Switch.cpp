@@ -24,6 +24,8 @@ void Switch::init() {
 	PWM& pwm = PWM::getInstance();
 	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
 
+	setValue(0);
+
 #if HAS_RELAY
 	nrf_gpio_cfg_output(PIN_GPIO_RELAY_OFF);
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
@@ -32,11 +34,11 @@ void Switch::init() {
 #endif
 }
 
-void Switch::turnOff() {
+void Switch::pwmOff() {
 	setValue(0);
 }
 
-void Switch::turnOn() {
+void Switch::pwmOn() {
 	setValue(255);
 }
 
@@ -69,6 +71,7 @@ void Switch::relayOn() {
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
 
 	// todo: update switch state?
+	State::getInstance().set(STATE_SWITCH_STATE, (uint8_t)255);
 #endif
 }
 
@@ -80,5 +83,22 @@ void Switch::relayOff() {
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
 
 	// todo: update switch state?
+	State::getInstance().set(STATE_SWITCH_STATE, (uint8_t)0);
+#endif
+}
+
+void Switch::turnOn() {
+#if HAS_RELAY
+	relayOn();
+#else
+	pwmOn();
+#endif
+}
+
+void Switch::turnOff() {
+#if HAS_RELAY
+	relayOff();
+#else
+	pwmOff();
 #endif
 }

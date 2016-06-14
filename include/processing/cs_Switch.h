@@ -18,9 +18,13 @@ public:
 
 	void init();
 
-	void turnOff();
+	void pwmOff();
+
+	void pwmOn();
 
 	void turnOn();
+
+	void turnOff();
 
 	void dim(uint8_t value);
 

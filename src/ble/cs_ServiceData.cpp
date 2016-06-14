@@ -8,6 +8,7 @@
 
 #include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ConfigTypes.h>
+#include <drivers/cs_Serial.h>
 
 ServiceData::ServiceData() : EventListener(EVT_ALL)
 {
@@ -26,12 +27,12 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			break;
 		}
 //		case STATE_ACCUMULATED_ENERGY: {
-//			updateAccumulatedEnergy(*(uint32_t*)p_data);
+//			updateAccumulatedEnergy(*(int32_t*)p_data);
 //			break;
 //		}
-//		case STATE_POWER_USAGE: {
-//			updatePowerUsage(*(uint32_t*)p_data);
-//			break;
-//		}
+		case STATE_POWER_USAGE: {
+			updatePowerUsage(*(int32_t*)p_data);
+			break;
+		}
 		}
 	}

@@ -13,7 +13,8 @@
 #include <cstdint>
 #include "storage/cs_Settings.h"
 #include "events/cs_EventListener.h"
-#include <events/cs_EventDispatcher.h>
+#include "events/cs_EventDispatcher.h"
+#include "processing/cs_Switch.h"
 
 #define TEMPERATURE_UPDATE_FREQUENCY 0.2
 
@@ -41,9 +42,11 @@ public:
 	void tick() {
 		if (getTemperature() > _maxTemp) {
 			//! Switch off all channels
-			PWM::getInstance().switchOff();
-			//! Make sure pwm can't be set anymore
-			PWM::getInstance().deinit();
+			Switch::getInstance().pwmOff();
+			Switch::getInstance().turnOff();
+//			PWM::getInstance().switchOff();
+//			//! Make sure pwm can't be set anymore
+//			PWM::getInstance().deinit();
 		}
 		// TODO: make next time to next tick depend on current temperature
 		scheduleNextTick();
