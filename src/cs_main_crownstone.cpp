@@ -94,8 +94,6 @@ Crownstone::Crownstone() :
 
 void Crownstone::init() {
 
-	//! be nice and say hello
-	welcome();
 
 	LOGi("---- init ----");
 
@@ -151,26 +149,6 @@ void Crownstone::init() {
 	LOGi("---- init services ----");
 
 	_stack->initServices();
-}
-
-/**
- * If UART is enabled this will be the message printed out over a serial connection. Connectors are expensive, so UART
- * is not available in the final product.
- */
-void Crownstone::welcome() {
-	_log(INFO, "\r\n");
-	BLEutil::print_heap("Heap init");
-	BLEutil::print_stack("Stack init");
-	//! To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)
-	//! For (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes)
-	LOGi("Welcome at the nRF51822 code for meshing.");
-	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
-	LOGi("Compilation time: %s", __TIME__);
-#ifdef GIT_HASH
-	LOGi("Git hash: %s", GIT_HASH);
-#else
-	LOGi("Firmware version: %s", FIRMWARE_VERSION);
-#endif
 }
 
 void Crownstone::configure() {
@@ -519,6 +497,8 @@ void Crownstone::startUp() {
 
 	//! start advertising
 	_stack->startAdvertising();
+	//! have to give the stack a moment of pause to start advertising, otherwise we get into race conditions
+	nrf_delay_ms(50);
 
 	//! the rest we only execute if we are in normal operation
 	//! during setup mode, most of the crownstone's functionality is
@@ -726,6 +706,27 @@ void on_exit(void) {
 	LOGf("PROGRAM TERMINATED");
 }
 
+/**
+ * If UART is enabled this will be the message printed out over a serial connection. Connectors are expensive, so UART
+ * is not available in the final product.
+ */
+void welcome() {
+	config_uart();
+
+	_log(INFO, "\r\n");
+	BLEutil::print_heap("Heap init");
+	BLEutil::print_stack("Stack init");
+	//! To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)
+	//! For (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes)
+	LOGi("Welcome Crownstone");
+	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
+	LOGi("Compilation time: %s", __TIME__);
+#ifdef GIT_HASH
+	LOGi("Git hash: %s", GIT_HASH);
+#else
+	LOGi("Firmware version: %s", FIRMWARE_VERSION);
+#endif
+}
 
 /**********************************************************************************************************************/
 
@@ -737,10 +738,11 @@ void on_exit(void) {
  *********************************************************************************************************************/
 
 int main() {
+
 	atexit(on_exit);
 
-	//! first thing to do, configure uart for debug output
-	config_uart();
+	//! int uart, be nice and say hello
+	welcome();
 
 	Crownstone crownstone;
 

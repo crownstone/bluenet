@@ -88,9 +88,6 @@ public:
 	}
 
 protected:
-	/** be nice and say hello
-	 */
-	void welcome();
 
 	/** initialize drivers (timer, storage, pwm, etc)
 	 */

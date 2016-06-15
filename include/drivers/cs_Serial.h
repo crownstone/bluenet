@@ -77,6 +77,11 @@ extern "C" {
 #define LOGe(fmt, ...)
 #endif
 
+#if SERIAL_VERBOSITY>FATAL
+#undef LOGf
+#define LOGf(fmt, ...)
+#endif
+
 /** Available Baud rates for UART. */
 typedef enum
 {

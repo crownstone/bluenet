@@ -26,9 +26,10 @@ static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVI
  * Configure the UART. Currently we set it on 38400 baud.
  */
 void config_uart() {
+
 #if SERIAL_VERBOSITY<NONE
 	//! Enable UART
-	NRF_UART0->ENABLE = 0x04;
+	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
 
 	//! Configure UART pins
 	NRF_UART0->PSELRXD = PIN_GPIO_RX;
@@ -40,20 +41,26 @@ void config_uart() {
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
 	NRF_UART0->EVENTS_TXDRDY = 0;
+#else
+	//! Disable UART
+	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
+
+	NRF_UART0->TASKS_STOPRX = 1;
+	NRF_UART0->TASKS_STOPTX = 1;
 #endif
 }
 
 /**
  * Write an individual character to UART.
  */
-void write_uart(const char *str) {
-	int16_t len = strlen(str);
-	for(int i = 0; i < len; ++i) {
-		NRF_UART0->EVENTS_TXDRDY = 0;
-		NRF_UART0->TXD = (uint8_t)str[i];
-		while(NRF_UART0->EVENTS_TXDRDY != 1) {}
-	}
-}
+//void write_uart(const char *str) {
+//	int16_t len = strlen(str);
+//	for(int i = 0; i < len; ++i) {
+//		NRF_UART0->EVENTS_TXDRDY = 0;
+//		NRF_UART0->TXD = (uint8_t)str[i];
+//		while(NRF_UART0->EVENTS_TXDRDY != 1) {}
+//	}
+//}
 
 /**
  * Read an individual character from UART.
