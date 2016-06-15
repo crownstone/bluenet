@@ -20,6 +20,7 @@ extern "C" {
 }
 
 //#define PRINT_SAMPLE_CURRENT
+//#define PRINT_DEBUG
 
 PowerSampling::PowerSampling() :
 		_staticPowerSamplingStartTimer(0),
@@ -59,7 +60,7 @@ void PowerSampling::init() {
 	buffer += _currentSampleCircularBuf.getMaxByteSize();
 	_voltageSampleCircularBuf.assign(buffer, _voltageSampleCircularBuf.getMaxByteSize());
 	buffer += _voltageSampleCircularBuf.getMaxByteSize();
-#if CHAR_MESHING == 1
+#if MESHING == 1
 	_powerSamplesMeshMsg = (power_samples_mesh_message_t*) buffer;
 	buffer += sizeof(power_samples_mesh_message_t);
 #endif
@@ -128,7 +129,7 @@ void PowerSampling::powerSampleReadBuffer() {
 			current = _currentSampleCircularBuf.pop();
 			voltage = _voltageSampleCircularBuf.pop();
 			power = current*voltage;
-#if CHAR_MESHING == 1
+#if MESHING == 1
 			_powerSamplesMeshMsg->samples[_powerSamplesCount] = power;
 #endif
 //			_lastPowerSample = power;
@@ -139,7 +140,7 @@ void PowerSampling::powerSampleReadBuffer() {
 			current = _currentSampleCircularBuf.pop();
 			voltage = _voltageSampleCircularBuf.pop();
 			power = current*voltage;
-#if CHAR_MESHING == 1
+#if MESHING == 1
 			_powerSamplesMeshMsg->samples[_powerSamplesCount] = power;
 #endif
 
@@ -150,7 +151,7 @@ void PowerSampling::powerSampleReadBuffer() {
 		}
 
 		if (_powerSamplesCount >= POWER_SAMPLE_MESH_NUM_SAMPLES) {
-#if CHAR_MESHING == 1
+#if MESHING == 1
 			if (!nb_full()) {
 				MeshControl::getInstance().sendPowerSamplesMessage(_powerSamplesMeshMsg);
 				_powerSamplesCount = 0;
@@ -222,6 +223,7 @@ void PowerSampling::powerSampleFinish() {
 	currentTimestamp = 0;
 	voltageTimestamp = 0;
 
+	// todo -> defines in header
 #define V_ZERO            169
 #define I_ZERO            168.5
 //#define V_MULTIPLICATION  2.357
@@ -295,7 +297,10 @@ void PowerSampling::powerSampleFinish() {
 	pSum /= tSum;
 	pSum -= P_ZERO;
 	int32_t avgPower = pSum;
+
+#ifdef PRINT_DEBUG
 	LOGd("pSum=%f, tSum=%f, avgPower=%i", pSum, tSum, avgPower);
+#endif
 
 	//! Only send valid updates
 //	if (zeroCrossings > 1) {
@@ -310,7 +315,7 @@ void PowerSampling::powerSampleFinish() {
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
 #if CONTINUOUS_POWER_SAMPLER == 1
-#if CHAR_MESHING == 1
+#if MESHING == 1
 	buffer = (buffer_ptr_t) _powerSamplesMeshMsg;
 	size = sizeof(_powerSamplesMeshMsg);
 #else
