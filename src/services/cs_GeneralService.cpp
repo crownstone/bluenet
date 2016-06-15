@@ -70,15 +70,15 @@ void GeneralService::addTemperatureCharacteristic() {
 }
 
 void GeneralService::addResetCharacteristic() {
-	_resetCharacteristic = new Characteristic<int32_t>();
+	_resetCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_resetCharacteristic);
 
 	_resetCharacteristic->setUUID(UUID(getUUID(), RESET_UUID));
 	_resetCharacteristic->setName(BLE_CHAR_RESET);
 	_resetCharacteristic->setDefaultValue(0);
 	_resetCharacteristic->setWritable(true);
-	_resetCharacteristic->onWrite([&](const int32_t& value) -> void {
-		CommandHandler::getInstance().handleCommand(CMD_RESET, (buffer_ptr_t)&value, 4);
+	_resetCharacteristic->onWrite([&](const uint8_t& value) -> void {
+		CommandHandler::getInstance().handleCommand(CMD_RESET, (buffer_ptr_t)&value, 1);
 	});
 }
 

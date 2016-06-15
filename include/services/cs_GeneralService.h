@@ -70,5 +70,5 @@ private:
 	 *
 	 * Resets device
 	 */
-	BLEpp::Characteristic<int32_t>* _resetCharacteristic;
+	BLEpp::Characteristic<uint8_t>* _resetCharacteristic;
 };

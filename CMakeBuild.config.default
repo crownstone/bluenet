@@ -43,7 +43,7 @@ BEACON_MAJOR=0
 # the minor number
 BEACON_MINOR=0
 # the rssi
-BEACON_RSSI=0x0
+BEACON_RSSI=0xC4
 
 # Set to 1 to enable encryption of BLE Link (reading and writing to characteristics
 # needs bonding first)

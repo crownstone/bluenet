@@ -469,7 +469,7 @@ void Crownstone::prepareCrownstone() {
 #endif
 
 		_mesh = &Mesh::getInstance();
-//		_mesh->init();
+		_mesh->init();
 //	}
 
 #if RESET_COUNTER==1
@@ -533,7 +533,7 @@ void Crownstone::startUp() {
 			_tracker->startTracking();
 		}
 
-		_mesh->init();
+//		_mesh->init();
 		if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
 			_mesh->start();
 		}

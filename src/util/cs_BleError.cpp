@@ -13,7 +13,7 @@ void ble_error_handler (const char * msg, uint32_t line_num, const char * p_file
 	volatile uint16_t line __attribute__((unused)) = line_num;
 	volatile const char* file __attribute__((unused)) = p_file_name;
 
-	LOGe("FATAL ERROR %s, at %s:%d", message, file, line);
+	LOGf("FATAL ERROR %s, at %s:%d", message, file, line);
 
 	__asm("BKPT");
 	while(1) {}
@@ -25,7 +25,7 @@ void app_error_handler (uint32_t error_code, uint32_t line_num, const uint8_t * 
 	volatile uint16_t line __attribute__((unused)) = line_num;
 	volatile const uint8_t* file __attribute__((unused)) = p_file_name;
 
-	LOGe("FATAL ERROR %d, at %s:%d", error, file, line);
+	LOGf("FATAL ERROR %d, at %s:%d", error, file, line);
 
 	__asm("BKPT");
 	while(1) {}
@@ -36,7 +36,7 @@ void assert_nrf_callback (uint16_t line_num, const uint8_t *file_name) {
 	volatile uint16_t line __attribute__((unused)) = line_num;
 	volatile const uint8_t* file __attribute__((unused)) = file_name;
 
-	LOGe("FATAL ERROR at %s:%d", file, line);
+	LOGf("FATAL ERROR at %s:%d", file, line);
 
 	__asm("BKPT");
 	while(1) {}

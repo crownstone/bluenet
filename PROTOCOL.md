@@ -87,7 +87,7 @@ The general service has UUID 24f20000-7d10-4805-bfc1-7663a01c3bff.
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
 Temperature    | 24f20001-7d10-4805-bfc1-7663a01c3bff | int 32 | Chip temperature in Celcius. Notifications are available.
-Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | int 32 | Write 1 to reset. Write 66 to go to DFU mode.
+Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 1 to reset. Write 66 to go to DFU mode.
 
 ## Power service
 
