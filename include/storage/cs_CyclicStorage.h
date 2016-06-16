@@ -12,7 +12,7 @@
 //#include <structs/buffer/cs_CircularBuffer.h>
 //#include <cstdint>
 
-//#define PRINT_DEBUG
+#define PRINT_DEBUG_CYCLIC_STORAGE
 
 template <class T, int U>
 class CyclicStorage {
@@ -39,14 +39,14 @@ public:
 		element.seqNumber = ++_seqNumber;
 		element.value = value;
 
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_CYCLIC_STORAGE
 		LOGd("element:");
 		BLEutil::printArray(&element, sizeof(element));
 #endif
 
 		pstorage_size_t offset = _storageOffset + (_tail * sizeof(storage_element_t));
 
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_CYCLIC_STORAGE
 		LOGd("offset: %d", offset);
 #endif
 
@@ -75,7 +75,7 @@ public:
 //		LOGd("_value: %d", _value);
 //		LOGd("_seqNumber: %d", _seqNumber);
 
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_CYCLIC_STORAGE
 		LOGd("init cyclic storage:");
 		BLEutil::printArray(buffer, sizeof(buffer));
 #endif
@@ -88,7 +88,7 @@ public:
 			}
 		}
 
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_CYCLIC_STORAGE
 		LOGd("tail: %d", _tail);
 		LOGd("_value: %d", _value);
 		LOGd("_seqNumber: %d", _seqNumber);

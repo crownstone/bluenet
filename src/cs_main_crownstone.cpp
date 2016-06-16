@@ -20,7 +20,7 @@
 
 //! temporary defines
 
-//#define RESET_COUNTER
+#define RESET_COUNTER
 //#define MICRO_VIEW 1
 //#define CHANGE_NAME_ON_RESET
 //#define CHANGE_MINOR_ON_RESET
@@ -50,6 +50,7 @@
 #include <ble/cs_DoBotsManufac.h>
 
 #include <processing/cs_PowerSampling.h>
+#include <storage/cs_State.h>
 
 /**********************************************************************************************************************
  * Main functionality
@@ -472,11 +473,13 @@ void Crownstone::prepareCrownstone() {
 		_mesh->init();
 //	}
 
-#if RESET_COUNTER==1
+	app_sched_execute();
+
+#ifdef RESET_COUNTER
 	uint32_t resetCounter;
-	State::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
+	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
 	LOGi("Reset counter at: %d", ++resetCounter);
-	State::getInstance().set(SV_RESET_COUNTER, resetCounter);
+	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
 #endif
 
 	BLEutil::print_heap("Heap setup: ");
