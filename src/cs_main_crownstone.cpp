@@ -471,9 +471,8 @@ void Crownstone::prepareCrownstone() {
 
 		_mesh = &Mesh::getInstance();
 		_mesh->init();
-//	}
 
-	app_sched_execute();
+//	}
 
 #ifdef RESET_COUNTER
 	uint32_t resetCounter;

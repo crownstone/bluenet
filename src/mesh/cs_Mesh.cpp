@@ -100,7 +100,11 @@ void Mesh::init() {
 	if (!Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
 		LOGi("mesh not enabled");
 		rbc_mesh_stop();
+		// [16.06.16] need to execute app scheduler, otherwise pstorage
+		// events will get lost ... maybe need to check why that actually happens??
+		app_sched_execute();
 	}
+
 }
 
 void Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
