@@ -600,6 +600,8 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 	case CONFIG_NAME: {
 		_stack->updateDeviceName(std::string((char*)p_data, length));
+		// need to reconfigure scan response package for updated name
+		_stack->configureScanResponse(DEVICE_TYPE);
 		_stack->updateAdvertisement();
 		break;
 	}
