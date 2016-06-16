@@ -150,6 +150,10 @@ void Crownstone::init() {
 	LOGi("---- init services ----");
 
 	_stack->initServices();
+
+	// [16.06.16] need to execute app scheduler, otherwise pstorage
+	// events will get lost ... maybe need to check why that actually happens??
+	app_sched_execute();
 }
 
 void Crownstone::configure() {
@@ -477,7 +481,8 @@ void Crownstone::prepareCrownstone() {
 #ifdef RESET_COUNTER
 	uint32_t resetCounter;
 	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
-	LOGi("Reset counter at: %d", ++resetCounter);
+	++resetCounter;
+	LOGf("Reset counter at: %d", resetCounter);
 	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
 #endif
 
