@@ -129,6 +129,7 @@
 #define PIN_LED_RED          8
 #define PIN_LED_GREEN        9
 
+#define HAS_RELAY true
 //! Switch pin should be low to switch lights on
 #define SWITCH_INVERSED
 //! resistance of the shunt in milli ohm
