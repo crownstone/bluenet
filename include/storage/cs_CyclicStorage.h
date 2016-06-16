@@ -12,7 +12,7 @@
 //#include <structs/buffer/cs_CircularBuffer.h>
 //#include <cstdint>
 
-#define PRINT_DEBUG_CYCLIC_STORAGE
+//#define PRINT_DEBUG_CYCLIC_STORAGE
 
 template <class T, int U>
 class CyclicStorage {
