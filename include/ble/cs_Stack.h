@@ -202,6 +202,8 @@ public:
 	 */
 	void init();
 
+	void createCharacteristics();
+
 	/** Start the BLE stack
 	 *
 	 * Start can only be called once. It starts all services. If one of these services cannot be started, there is

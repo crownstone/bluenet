@@ -83,7 +83,7 @@ bool ADC::setBuffers(StackBuffer<uint16_t>* buffer, uint8_t pinNum) {
 	if (pinNum >= _numPins) {
 		return false;
 	}
-	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
+//	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
 	_buffers[pinNum] = buffer;
 	return true;
 }
@@ -92,7 +92,7 @@ bool ADC::setBuffers(CircularBuffer<uint16_t>* buffer, uint8_t pinNum) {
 	if (pinNum >= _numPins) {
 		return false;
 	}
-	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
+//	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
 	_circularBuffers[pinNum] = buffer;
 	return true;
 }
@@ -101,7 +101,7 @@ bool ADC::setTimestampBuffers(DifferentialBuffer<uint32_t>* buffer, uint8_t pinN
 	if (pinNum >= _numPins) {
 		return false;
 	}
-	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
+//	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
 	_timeBuffers[pinNum] = buffer;
 	return true;
 }

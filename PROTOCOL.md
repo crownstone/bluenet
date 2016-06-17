@@ -149,9 +149,9 @@ Available command types:
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-0 | Switch | uint 8 | Switch relay, 0 = OFF, 1 = ON
+0 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON
 1 | PWM | uint 8 | Set PWM to value, 0 = OFF, 100 = FULL ON
-2 | Set Time | ... | Set time to ..., TBD
+2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 UTC
 3 | Goto DFU | - | Reset device to DFU mode
 4 | Rest | uint 8 | Reset device
 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload
@@ -165,6 +165,7 @@ Type nr | Type name | Payload type | Payload description
 13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON
 14 | User feedback | ... | User feedback ..., TBD
 15 | Schedule entry | ... | Schedule entry ..., TBD
+16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 

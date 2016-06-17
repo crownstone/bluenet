@@ -41,20 +41,31 @@ void stop_mesh(void* p_context) {
 	Mesh::getInstance().stop();
 }
 
-
-void CommandHandler::handleCommand(CommandHandlerTypes type) {
-	handleCommand(type, NULL, 0);
+void reset_delayed(uint8_t opCode) {
+	static uint8_t restOpCode = opCode;
+	app_timer_id_t resetTimer;
+	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
+	Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &restOpCode);
 }
 
-void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size) {
+ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type) {
+	return handleCommand(type, NULL, 0);
+}
+
+ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size) {
 
 	switch (type) {
+	case CMD_SWITCH: {
+		LOGi("handle switch command");
+		// for now, same as pwm, but switch command should decide itself if relay or
+		// pwm is used
+	}
 	case CMD_PWM: {
 		LOGi("handle PWM command");
 
 		if (size != sizeof(switch_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
@@ -68,12 +79,12 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 		}
 		break;
 	}
-	case CMD_SWITCH: {
-		LOGi("handle switch command");
+	case CMD_RELAY: {
+		LOGi("handle relay command");
 
 		if (size != sizeof(switch_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
@@ -89,12 +100,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 	}
 	case CMD_GOTO_DFU: {
 		LOGi("handle goto dfu command");
-
-		static uint32_t resetOp = COMMAND_ENTER_RADIO_BOOTLOADER;
-
-		app_timer_id_t resetTimer;
-		Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
-		Timer::getInstance().start(resetTimer, MS_TO_TICKS(100), &resetOp);
+		reset_delayed(COMMAND_ENTER_RADIO_BOOTLOADER);
 		break;
 	}
 	case CMD_RESET: {
@@ -102,16 +108,14 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		if (size != sizeof(opcode_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
 		static uint32_t resetOp = payload->opCode;
 
 //			if (resetOp) {
-		app_timer_id_t resetTimer;
-		Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
-		Timer::getInstance().start(resetTimer, MS_TO_TICKS(100), &resetOp);
+		reset_delayed(resetOp);
 //			} else {
 		//todo: why nonzero?
 //				LOGw("To reset write a nonzero value: %d", payload->resetOp);
@@ -123,7 +127,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		if (size != sizeof(enable_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
@@ -146,10 +150,11 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 	}
 	case CMD_ENABLE_ENCRYPTION: {
 		LOGi("handle enable encryption command: tbd");
+		return ERR_NOT_IMPLEMENTED;
 
 		if (size != sizeof(enable_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
@@ -169,7 +174,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		if (size != sizeof(enable_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
@@ -177,16 +182,17 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		LOGi("%s ibeacon", enable ? "Enabling" : "Disabling");
 		Settings::getInstance().updateFlag(CONFIG_IBEACON_ENABLED, enable, true);
-		EventDispatcher::getInstance().dispatch(EVT_ENABLED_IBEACON, &enable, 1);
+//		EventDispatcher::getInstance().dispatch(EVT_ENABLED_IBEACON, &enable, sizeof(enable));
 
 		break;
 	}
 	case CMD_ENABLE_CONT_POWER_MEASURE: {
 		LOGi("handle enable cont power measure command: tbd");
+		return ERR_NOT_IMPLEMENTED;
 
 		if (size != sizeof(enable_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
@@ -209,7 +215,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 			// we can accept the command as long as size is 1
 			if (size != 1 || enable) {
 				LOGe("wrong payload length received: %d", size);
-				return;
+				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 		}
 
@@ -234,7 +240,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		if (size != sizeof(enable_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
@@ -263,25 +269,12 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		break;
 	}
-	case CMD_SAMPLE_POWER: {
-		LOGi("handle sample power command: tbd");
-
-//		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
-//		uint8_t sampleOp = payload->opCode;
-//
-//		if (sampleOp == 0) {
-//			PowerSampling::getInstance().stopSampling();
-//		} else {
-//			PowerSampling::getInstance().startSampling();
-//		}
-		break;
-	}
 	case CMD_FACTORY_RESET: {
 		LOGi("handle factory reset command");
 
 		if (size != sizeof(FACTORY_RESET_CODE)) {
 			LOGe("expected reset code of length %d", sizeof(FACTORY_RESET_CODE));
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		factory_reset_message_payload_t* payload = (factory_reset_message_payload_t*) buffer;
@@ -299,16 +292,27 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 			LOGi("factory reset done, rebooting device in 2s ...");
 
-			static uint32_t resetOp = 1;
-
-			app_timer_id_t resetTimer;
-			Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
-			Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &resetOp);
+			reset_delayed(1);
 
 		} else {
 			LOGi("wrong code received: %p", resetCode);
 			LOGi("factory reset code is: %p", FACTORY_RESET_CODE);
+			return ERR_WRONG_PARAMETER;
 		}
+
+		break;
+	}
+	case CMD_SET_TIME: {
+		LOGi("handle set time command:");
+
+		if (size != sizeof(uint32_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		uint32_t value = *(uint32_t*)buffer;
+
+		Scheduler::getInstance().setTime(value);
 
 		break;
 	}
@@ -321,7 +325,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 		ScheduleEntry entry;
 
 		if (entry.assign(buffer, size)) {
-			return;
+			return -1;
 		}
 		schedule_entry_t* entryStruct = entry.getStruct();
 		if (!entryStruct->nextTimestamp) {
@@ -331,17 +335,17 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 			// Check if entry is correct
 			if (entryStruct->nextTimestamp < scheduler.getTime()) {
-				return;
+				return -1;
 			}
 			switch (ScheduleEntry::getTimeType(entryStruct)) {
 			case SCHEDULE_TIME_TYPE_REPEAT:
 				if (entryStruct->repeat.repeatTime == 0) {
-					return;
+					return -1;
 				}
 				break;
 			case SCHEDULE_TIME_TYPE_DAILY:
 				if (entryStruct->daily.nextDayOfWeek > 6) {
-					return;
+					return -1;
 				}
 				break;
 			case SCHEDULE_TIME_TYPE_ONCE:
@@ -354,33 +358,104 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		break;
 	}
+	case CMD_VALIDATE_SETUP: {
+		LOGi("handle validate setup");
+
+		uint8_t opMode;
+		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+		if (opMode == OPERATION_MODE_SETUP) {
+
+			Settings& settings = Settings::getInstance();
+
+			uint8_t key[ENCYRPTION_KEY_LENGTH];
+			uint8_t blankKey[ENCYRPTION_KEY_LENGTH] = {};
+
+			// validate encryption keys are not 0
+			settings.get(CONFIG_KEY_OWNER, key);
+			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+				LOGw("owner key is not set!");
+				return ERR_SETUP_INCOMPLETE;
+			}
+
+			settings.get(CONFIG_KEY_MEMBER, key);
+			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+				LOGw("member key is not set!");
+				return ERR_SETUP_INCOMPLETE;
+			}
+
+			settings.get(CONFIG_KEY_GUEST, key);
+			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+				LOGw("guest key is not set!");
+				return ERR_SETUP_INCOMPLETE;
+			}
+
+			// validate crownstone id is not 0
+			uint16_t crownstoneId;
+			settings.get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+
+			if (crownstoneId == 0) {
+				LOGw("crownstone id has to be set during setup mode");
+				return ERR_SETUP_INCOMPLETE;
+			}
+
+			// validate major and minor
+			uint16_t major;
+			settings.get(CONFIG_IBEACON_MAJOR, &major);
+
+			if (major == 0) {
+				LOGw("ibeacn major is not set!");
+				return ERR_SETUP_INCOMPLETE;
+			}
+
+			uint16_t minor;
+			settings.get(CONFIG_IBEACON_MINOR, &minor);
+
+			if (minor == 0) {
+				LOGw("ibeacn minor is not set!");
+				return ERR_SETUP_INCOMPLETE;
+			}
+
+			LOGi("Setup completed, resetting to normal mode");
+
+			//! if validation ok, set opMode to normal mode
+			State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
+
+			//! then reset device
+			reset_delayed(1);
+		} else {
+			LOGw("validate setup only available in setup mode");
+			return ERR_NOT_AVAILABLE;
+		}
+
+		break;
+	}
 
 	case CMD_USER_FEEDBACK: {
 		LOGi("handle user feedback command: tbd");
-
-		// todo: tbd
-		break;
-	}
-	case CMD_SET_TIME: {
-		LOGi("handle set time command: tbd");
+		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd
 		break;
 	}
 	case CMD_KEEP_ALIVE_STATE: {
 		LOGi("handle keep alive command: tbd");
+		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd
 		break;
 	}
 	case CMD_KEEP_ALIVE: {
 		LOGi("handle keep alive command: tbd");
+		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd
 		break;
 	}
 	default: {
 		LOGe("command type not found!!");
+		return ERR_COMMAND_NOT_FOUND;
 	}
 	}
+
+	return ERR_SUCCESS;
 }

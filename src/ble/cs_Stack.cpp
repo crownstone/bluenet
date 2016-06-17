@@ -191,6 +191,12 @@ void Nrf51822BluetoothStack::updateAppearance(uint16_t appearance) {
 	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
 }
 
+void Nrf51822BluetoothStack::createCharacteristics() {
+	for (Service* svc: _services) {
+		svc->createCharacteristics();
+	}
+}
+
 void Nrf51822BluetoothStack::initServices() {
 	if (_started)
 		return;

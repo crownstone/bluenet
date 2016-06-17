@@ -12,6 +12,7 @@
 #include <ble/cs_Characteristic.h>
 #include <events/cs_EventListener.h>
 #include <structs/cs_MeshCommand.h>
+#include <services/cs_CrownstoneService.h>
 
 //#define GENERAL_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
@@ -23,7 +24,7 @@
  *
  * If meshing is enabled, it is also possible to send a message into the mesh network using a characteristic.
  */
-class SetupService: public BLEpp::Service, EventListener {
+class SetupService: public CrownstoneService {
 public:
 	/** Constructor for general crownstone service object
 	 *
@@ -42,18 +43,19 @@ public:
 
 //	void scheduleNextTick();
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length) {};
+//	void handleEvent(uint16_t evt, void* p_data, uint16_t length) {};
 
-protected:
 	/** Initialize a GeneralService object
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void addCharacteristics();
+	void createCharacteristics();
+
+protected:
 
 	/** Enable the command characteristic.
  	 */
-	inline void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
+//	inline void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the command characteristic.
  	 */
@@ -65,11 +67,11 @@ protected:
 	 * characteristic.
 	 * See <_setConfigurationCharacteristic>.
 	 */
-	inline void addSetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size);
+//	inline void addSetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the get configuration characteristic.
 	 */
-	inline void addGetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size);
+//	inline void addGetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the reset characteristic.
 	 *
@@ -77,14 +79,14 @@ protected:
 	 */
 //	inline void addResetCharacteristic();
 
-	StreamBuffer<uint8_t>* getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
+//	StreamBuffer<uint8_t>* getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
 
 private:
 
 	// stores the MAC address of the devices to be used for mesh message handling
     ble_gap_addr_t _myAddr;
 
-	BLEpp::Characteristic<buffer_ptr_t>* _controlCharacteristic;
+//	BLEpp::Characteristic<buffer_ptr_t>* _controlCharacteristic;
 
 	BLEpp::Characteristic<buffer_ptr_t>* _macAddressCharacteristic;
 
@@ -92,7 +94,7 @@ private:
 	 *
 	 * Resets device
 	 */
-	BLEpp::Characteristic<int32_t>* _resetCharacteristic;
+//	BLEpp::Characteristic<int32_t>* _resetCharacteristic;
 
 	/** Set configuration characteristic
 	 *
@@ -107,7 +109,7 @@ private:
 	 * As you see these are similar to current characteristics and will replace them in the future to save space.
 	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
 	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _setConfigurationCharacteristic;
+//	BLEpp::Characteristic<buffer_ptr_t>* _setConfigurationCharacteristic;
 	
 	/** Get configuration characteristic
 	 *
@@ -116,9 +118,9 @@ private:
 	 *
 	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
 	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _getConfigurationCharacteristic;
+//	BLEpp::Characteristic<buffer_ptr_t>* _getConfigurationCharacteristic;
 
 	//! buffer object to read/write configuration characteristics
-	StreamBuffer<uint8_t> *_streamBuffer;
+//	StreamBuffer<uint8_t> *_streamBuffer;
 
 };

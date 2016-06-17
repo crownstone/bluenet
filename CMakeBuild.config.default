@@ -91,6 +91,11 @@ CHAR_SCHEDULE=1
 # Currently this should not be larger than BLE_GATTS_VAR_ATTR_LEN_MAX (512)
 MASTER_BUFFER_SIZE=300
 
+# set default operation mode at first start, for release, this will need to be
+# set to OPERATION_MODE_SETUP so that it first starts into setup mode, but as long ase
+# we are developing, leave it on normal mode
+DEFAULT_OPERATION_MODE=OPERATION_MODE_NORMAL
+
 # Verbosity of the UART
 # Debug     0
 # Info      1

@@ -31,9 +31,9 @@ public:
 		_stack = stack;
 	}
 
-	void handleCommand(CommandHandlerTypes type);
+	ERR_CODE handleCommand(CommandHandlerTypes type);
 
-	void handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size);
+	ERR_CODE handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size);
 
 private:
 

@@ -109,14 +109,14 @@ void Crownstone::init() {
 	LOGi("---- setup ----");
 
 	// todo: handle different operation modes
-//	_stateVars->getStateVar(SV_OPERATION_MODE, _operationMode);
-	_operationMode = OPERATION_MODE_NORMAL;
+	_stateVars->get(STATE_OPERATION_MODE, _operationMode);
+//	_operationMode = OPERATION_MODE_NORMAL;
 //	_operationMode = OPERATION_MODE_SETUP;
 
 	switch(_operationMode) {
 	case OPERATION_MODE_SETUP: {
 
-		LOGd("Configure setup mode")
+		LOGd("Configure setup mode");
 
 		//! create services
 		createSetupServices();
@@ -146,6 +146,9 @@ void Crownstone::init() {
 		while(true) {}; // loop until reset triggers
 	}
 	}
+
+	//! loop through all services added to the stack and create the characteristics
+	_stack->createCharacteristics();
 
 	LOGi("---- init services ----");
 
@@ -437,7 +440,6 @@ void Crownstone::setName() {
 	char devicename[32];
 	uint16_t size;
 	_settings->get(CONFIG_NAME, devicename, size);
-	LOGd("size: %d", size);
 	std::string device_name(devicename, size);
 #endif
 	//! assign name
@@ -458,6 +460,9 @@ void Crownstone::prepareCrownstone() {
 	//! create command handler
 	_commandHandler = &CommandHandler::getInstance();
 	_commandHandler->setStack(_stack);
+
+	//! create scheduler
+	_scheduler = &Scheduler::getInstance();
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 	_sensors = new Sensors();
@@ -529,6 +534,8 @@ void Crownstone::startUp() {
 
 		LOGd("Start power sampling");
 		_powerSampler->startSampling();
+
+		_scheduler->start();
 
 		if (Settings::getInstance().isEnabled(CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
@@ -685,7 +692,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		}
 		break;
 	}
-	case EVT_ENABLED_IBEACON: {
+	case CONFIG_IBEACON_ENABLED: {
 		bool enabled = *(bool*)p_data;
 		if (enabled) {
 			_stack->configureIBeaconAdvData(_beacon);

@@ -11,6 +11,7 @@
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_Scheduler.h>
 #include <structs/buffer/cs_MasterBuffer.h>
+#include <protocol/cs_StateTypes.h>
 
 using namespace BLEpp;
 
@@ -25,10 +26,10 @@ ScheduleService::ScheduleService() :
 
 	setName(BLE_SERVICE_SCHEDULE);
 
-	addCharacteristics();
+	createCharacteristics();
 }
 
-void ScheduleService::addCharacteristics() {
+void ScheduleService::createCharacteristics() {
 	LOGi("Create schedule service");
 
 	LOGi("add current time characteristic");
@@ -51,7 +52,7 @@ void ScheduleService::addCurrentTimeCharacteristic() {
 	_currentTimeCharacteristic->setDefaultValue(0);
 	_currentTimeCharacteristic->setWritable(true);
 	_currentTimeCharacteristic->onWrite([&](const uint32_t& value) -> void {
-		Scheduler::getInstance().setTime(value);
+		CommandHandler::getInstance().handleCommand(CMD_SET_TIME, (buffer_ptr_t)&value, sizeof(value));
 	});
 }
 
@@ -101,7 +102,7 @@ void ScheduleService::addListScheduleEntriesCharacteristic() {
 
 void ScheduleService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch(evt) {
-	case EVT_TIME_UPDATED: {
+	case STATE_TIME: {
 		if (_currentTimeCharacteristic) {
 			*_currentTimeCharacteristic = *(uint32_t*)p_data;
 		}

@@ -43,13 +43,13 @@ public:
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
-protected:
 	/** Initialize a GeneralService object
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void addCharacteristics();
+	void createCharacteristics();
 
+protected:
 	/** Enable the temperature characteristic.
  	 */
 	inline void addTemperatureCharacteristic();

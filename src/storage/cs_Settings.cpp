@@ -37,7 +37,7 @@ void Settings::init() {
 }
 
 //	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
-void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent) {
+bool Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent) {
 
 	/////////////////////////////////////////////////
 	//// SPECIAL CASES
@@ -52,8 +52,23 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, b
 		}
 		_wifiSettings = std::string((char*)payload, length);
 		LOGi("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
-		return;
+		return true;
 	}
+
+	// todo: if we want to disable write access for encryption keys outside the setup mode
+//	/////////////////////////////////////////////////
+//	//// WRITE DISABLED
+//	/////////////////////////////////////////////////
+//	case CONFIG_KEY_OWNER :
+//	case CONFIG_KEY_MEMBER :
+//	case CONFIG_KEY_GUEST : {
+//		uint8_t opMode;
+//		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+//		if (opMode != OPERATION_MODE_SETUP) {
+//			LOGw("Reading encryption keys only available in setup mode!");
+//			return false;
+//		}
+//	}
 	}
 
 	/////////////////////////////////////////////////
@@ -61,9 +76,10 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, b
 	/////////////////////////////////////////////////
 	if (verify(type, payload, length)) {
 		set(type, payload, persistent, length);
-		uint8_t* p_item = getStorageItem(type);
 		EventDispatcher::getInstance().dispatch(type, payload, length);
+		return true;
 	}
+	return false;
 }
 
 bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
@@ -87,6 +103,22 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		LOGd("Wifi settings read");
 		return true;
 	}
+
+	// todo: if we want to disable read access for encryption keys outside the setup mode
+//	/////////////////////////////////////////////////
+//	//// READ DISABLED
+//	/////////////////////////////////////////////////
+//	case CONFIG_KEY_OWNER :
+//	case CONFIG_KEY_MEMBER :
+//	case CONFIG_KEY_GUEST : {
+//		uint8_t opMode;
+//		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+//		if (opMode != OPERATION_MODE_SETUP) {
+//			LOGw("Reading encryption keys only avilable in setup mode!");
+//			return false;
+//		}
+//	}
+
 	}
 
 	/////////////////////////////////////////////////
@@ -443,7 +475,7 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 	if (persistent) {
 		savePersistentStorageItem(&_storageStruct.flags);
 	}
-	EventDispatcher::getInstance().dispatch(type, &value, 1);
+	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
 	return true;
 }
 
@@ -740,7 +772,7 @@ bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 		break;
 	}
 	case CONFIG_KEY_GUEST : {
-		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.member, ENCYRPTION_KEY_LENGTH);
+		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.guest, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
 	case CONFIG_ADC_SAMPLE_RATE: {

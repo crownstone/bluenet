@@ -52,7 +52,7 @@ public:
 			LOGw("Could not allocate memory");
 			return false;
 		}
-		LOGd("Allocated memory at %u", _buffer);
+//		LOGd("Allocated memory at %u", _buffer);
 		_allocatedSelf = true;
 		//! Also call clear to make sure we start with a clean buffer
 		clear();
@@ -74,7 +74,7 @@ public:
 			return false;
 		}
 		_buffer = (stack_buffer_t<T>*) buffer;
-		LOGd("assign at %u array=%u", buffer, _buffer->array);
+//		LOGd("assign at %u array=%u", buffer, _buffer->array);
 		//! Also call clear to make sure we start with a clean buffer
 		clear();
 		return true;

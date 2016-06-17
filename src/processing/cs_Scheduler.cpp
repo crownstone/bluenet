@@ -29,12 +29,13 @@ Scheduler::Scheduler() :
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) Scheduler::staticTick);
 }
 
+
+// todo: move time / set time to separate class
 /** Returns the current time as posix time
  * returns 0 when no time was set yet
  */
 void Scheduler::setTime(uint32_t time) {
 	LOGi("Set time to %i", time);
-	Scheduler::getInstance().setTime(time);
 	_posixTimeStamp = time;
 	_rtcTimeStamp = RTC::getCount();
 #if SCHEDULER_ENABLED==1
@@ -78,7 +79,8 @@ void Scheduler::tick() {
 		_posixTimeStamp++;
 		_rtcTimeStamp += RTC::msToTicks(1000);
 
-		EventDispatcher::getInstance().dispatch(EVT_TIME_UPDATED, &_posixTimeStamp, sizeof(_posixTimeStamp));
+		State::getInstance().set(STATE_TIME, _posixTimeStamp);
+//		EventDispatcher::getInstance().dispatch(EVT_TIME_UPDATED, &_posixTimeStamp, sizeof(_posixTimeStamp));
 		//		LOGd("posix time = %i", (uint32_t)(*_currentTimeCharacteristic));
 		//		long int timestamp = *_currentTimeCharacteristic;
 		//		tm* datetime = gmtime(&timestamp);

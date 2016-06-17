@@ -40,7 +40,7 @@ public:
 	/** Read the configuration from the buffer and store in working memory.
 	 *  If persistent is true, also store in FLASH
 	 */
-	void writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent = true);
+	bool writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent = true);
 
 	/** Read the configuration from storage and write to streambuffer (to be read from characteristic)
 	 */

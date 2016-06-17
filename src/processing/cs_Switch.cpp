@@ -50,11 +50,11 @@ void Switch::setValue(uint8_t value) {
 	_switchValue = value;
 	PWM::getInstance().setValue(0, value);
 
-	if (value) {
-		EventDispatcher::getInstance().dispatch(EVT_POWER_ON, &_switchValue, 1);
-	} else {
-		EventDispatcher::getInstance().dispatch(EVT_POWER_OFF, &_switchValue, 1);
-	}
+//	if (value) {
+//		EventDispatcher::getInstance().dispatch(EVT_POWER_ON, &_switchValue, 1);
+//	} else {
+//		EventDispatcher::getInstance().dispatch(EVT_POWER_OFF, &_switchValue, 1);
+//	}
 
 	State::getInstance().set(STATE_SWITCH_STATE, value);
 }

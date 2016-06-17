@@ -28,10 +28,9 @@ DeviceInformationService::DeviceInformationService()
 	setUUID(UUID(BLE_UUID_DEVICE_INFORMATION_SERVICE));
 	setName(BLE_SERVICE_DEVICE_INFORMATION);
 
-	addCharacteristics();
 }
 
-void DeviceInformationService::addCharacteristics() {
+void DeviceInformationService::createCharacteristics() {
 	LOGi("Create device information service");
 
 	LOGi("add hardware revision characteristic");

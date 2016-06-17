@@ -116,6 +116,13 @@ bool State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 		size = sizeof(int32_t);
 		break;
 	}
+	case STATE_TIME: {
+		uint32_t value;
+		get(type, value);
+		p_value = (uint8_t*)&value;
+		size = sizeof(uint32_t);
+		break;
+	}
 	case STATE_TRACKED_DEVICES: {
 		size = sizeof(tracked_device_list_t);
 		uint8_t listBuffer[size];
@@ -198,6 +205,15 @@ bool State::set(uint8_t type, uint8_t value) {
 		}
 		break;
 	}
+	case STATE_OPERATION_MODE: {
+		uint32_t opMode;
+		Storage::getUint32(_storageStruct.operationMode, opMode, OPERATION_MODE_SETUP);
+		if (opMode != value) {
+			Storage::setUint32(value, _storageStruct.operationMode);
+			savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));
+		}
+		break;
+	}
 	default:
 		return false;
 	}
@@ -218,6 +234,11 @@ bool State::get(uint8_t type, uint8_t& target) {
 		LOGd("Read switch state: %d", target);
 		break;
 	}
+	case STATE_OPERATION_MODE: {
+		Storage::getUint8(_storageStruct.operationMode, &target, DEFAULT_OPERATION_MODE);
+		LOGd("Read operation mode: %d", target);
+		break;
+	}
 	default:
 		return false;
 	}
@@ -233,17 +254,13 @@ bool State::set(uint8_t type, uint32_t value) {
 		}
 		break;
 	}
-	case STATE_OPERATION_MODE: {
-		uint32_t opMode;
-		Storage::getUint32(_storageStruct.operationMode, opMode, OPERATION_MODE_SETUP);
-		if (opMode != value) {
-			Storage::setUint32(value, _storageStruct.operationMode);
-			savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));
-		}
-		break;
-	}
 	case STATE_POWER_USAGE: {
 		_powerUsage = value;
+		break;
+	}
+	case STATE_TIME: {
+		_time = value;
+		LOGd("set time: %d", _time);
 		break;
 	}
 	default:
@@ -271,14 +288,14 @@ bool State::get(uint8_t type, uint32_t& target) {
 		LOGd("Read switch state: %d", target);
 		break;
 	}
-	case STATE_OPERATION_MODE: {
-		Storage::getUint32(_storageStruct.operationMode, target, OPERATION_MODE_SETUP);
-		LOGd("Read operation mode: %d", target);
-		break;
-	}
 	case STATE_POWER_USAGE: {
 		target = _powerUsage;
 		LOGd("Read power usage: %d", target);
+		break;
+	}
+	case STATE_TIME: {
+		target = _time;
+		LOGd("Read time: %d", target);
 		break;
 	}
 	default:
@@ -315,14 +332,18 @@ bool State::get(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
 	switch(type) {
 	case STATE_TRACKED_DEVICES: {
 		Storage::getArray(_storageStruct.trackedDevices, buffer, (buffer_ptr_t) NULL, size);
+#ifdef PRINT_DEBUG
 		LOGd("Read tracked devices:");
 		BLEutil::printArray(buffer, size);
+#endif
 		break;
 	}
 	case STATE_SCHEDULE: {
 		Storage::getArray(_storageStruct.scheduleList, buffer, (buffer_ptr_t) NULL, size);
+#ifdef PRINT_DEBUG
 		LOGd("Read schedule list:");
 		BLEutil::printArray(buffer, size);
+#endif
 		break;
 	}
 	default:

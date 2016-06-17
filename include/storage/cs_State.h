@@ -11,7 +11,7 @@
 #include <storage/cs_CyclicStorage.h>
 #include <protocol/cs_StateTypes.h>
 
-#define OPERATION_MODE_SETUP 0xFF
+#define OPERATION_MODE_SETUP 0x00
 #define OPERATION_MODE_NORMAL 0x10
 #define OPERATION_MODE_DFU 0x01
 
@@ -169,8 +169,8 @@ protected:
 
 	//! state variables which do not need to be stored in storage:
 	int32_t _temperature;
-
 	int32_t _powerUsage;
+	uint32_t _time;
 
 };
 
