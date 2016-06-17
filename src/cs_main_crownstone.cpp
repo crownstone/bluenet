@@ -121,8 +121,10 @@ void Crownstone::init() {
 		//! create services
 		createSetupServices();
 
-		LOGi("Enable PIN encryption");
+		//! set it by default into low tx mode
+		_stack->setTxPowerLevel(-40);
 
+		LOGi("Enable PIN encryption");
 		//! use PIN encryption for setup mode
 		_stack->setEncrypted(true);
 
