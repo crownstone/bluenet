@@ -10,6 +10,7 @@
 #include <structs/cs_StreamBuffer.h>
 #include <storage/cs_CyclicStorage.h>
 #include <protocol/cs_StateTypes.h>
+#include <protocol/cs_ErrorCodes.h>
 
 #define OPERATION_MODE_SETUP 0x00
 #define OPERATION_MODE_NORMAL 0x10
@@ -103,25 +104,25 @@ public:
 
 	/** Write a state variable to storage (if received via stream buffer from characteristic)
 	 */
-	void writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool persistent = true);
+	ERR_CODE writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool persistent = true);
 
 	/** Read a state variable from storage and return as a stream buffer (to be read in characteristic)
 	 */
-	bool readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer);
+	ERR_CODE readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer);
 
 	/** Get a state variable from storage (to be used in application)
 	 */
-	bool get(uint8_t type, uint32_t& target);
-	bool get(uint8_t type, uint8_t& target);
-	bool get(uint8_t type, int32_t& target);
-	bool get(uint8_t type, buffer_ptr_t buffer, uint16_t size);
+	ERR_CODE get(uint8_t type, uint32_t& target);
+	ERR_CODE get(uint8_t type, uint8_t& target);
+	ERR_CODE get(uint8_t type, int32_t& target);
+	ERR_CODE get(uint8_t type, buffer_ptr_t buffer, uint16_t size);
 
 	/** Write a state variable to storage
 	 */
-	bool set(uint8_t type, uint8_t value);
-	bool set(uint8_t type, uint32_t value);
-	bool set(uint8_t type, int32_t value);
-	bool set(uint8_t type, buffer_ptr_t buffer, uint16_t size);
+	ERR_CODE set(uint8_t type, uint8_t value);
+	ERR_CODE set(uint8_t type, uint32_t value);
+	ERR_CODE set(uint8_t type, int32_t value);
+	ERR_CODE set(uint8_t type, buffer_ptr_t buffer, uint16_t size);
 
 	/** Factory Resets sets all variables to their default values and clears FLASH storage
 	 */

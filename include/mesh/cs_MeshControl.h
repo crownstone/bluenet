@@ -37,7 +37,7 @@ public:
 	 * @p_data a pointer to the data which should be sent
 	 * @length number of bytes of data to with p_data points
 	 */
-	void send(uint8_t channel, void* p_data, uint8_t length);
+	ERR_CODE send(uint8_t channel, void* p_data, uint8_t length);
 
 	/**
 	 * Get incoming messages and perform certain actions.

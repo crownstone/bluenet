@@ -28,16 +28,6 @@ enum CommandHandlerTypes {
 	CMD_TYPES
 };
 
-enum CommandErrorCodes {
-	ERR_SUCCESS = 0,
-	ERR_WRONG_PAYLOAD_LENGTH,
-	ERR_COMMAND_NOT_FOUND,
-	ERR_NOT_AVAILABLE,
-	ERR_WRONG_PARAMETER,
-	ERR_SETUP_INCOMPLETE,
-	ERR_NOT_IMPLEMENTED,
-};
-
 struct __attribute__((__packed__)) switch_message_payload_t {
 	uint8_t switchState;
 };

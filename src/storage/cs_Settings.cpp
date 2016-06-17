@@ -37,7 +37,7 @@ void Settings::init() {
 }
 
 //	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
-bool Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent) {
+ERR_CODE Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent) {
 
 	/////////////////////////////////////////////////
 	//// SPECIAL CASES
@@ -48,11 +48,11 @@ bool Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, b
 		//! max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
 		if (length > 88) {
 			LOGe("Wifi settings string too long");
-			break;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		_wifiSettings = std::string((char*)payload, length);
 		LOGi("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
-		return true;
+		return ERR_SUCCESS;
 	}
 
 	// todo: if we want to disable write access for encryption keys outside the setup mode
@@ -74,15 +74,16 @@ bool Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, b
 	/////////////////////////////////////////////////
 	//// DEFAULT
 	/////////////////////////////////////////////////
-	if (verify(type, payload, length)) {
-		set(type, payload, persistent, length);
+	ERR_CODE error_code;
+	error_code = verify(type, payload, length);
+	if (SUCCESS(error_code)) {
+		error_code = set(type, payload, persistent, length);
 		EventDispatcher::getInstance().dispatch(type, payload, length);
-		return true;
 	}
-	return false;
+	return error_code;
 }
 
-bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
+ERR_CODE Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 
 	/////////////////////////////////////////////////
 	//// SPECIAL CASES
@@ -101,7 +102,7 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		streamBuffer->setType(type);
 		_wifiSettings = "";
 		LOGd("Wifi settings read");
-		return true;
+		return ERR_SUCCESS;
 	}
 
 	// todo: if we want to disable read access for encryption keys outside the setup mode
@@ -124,23 +125,25 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 	/////////////////////////////////////////////////
 	//// DEFAULT
 	/////////////////////////////////////////////////
+	ERR_CODE error_code;
 	uint16_t plen = getSettingsItemSize(type);
 	if (plen > 0) {
 		// todo: do we really want to reload the current working copy?
 		//  or do we just want to return the value in the current working copy?
 		loadPersistentStorage();
 		uint8_t payload[plen];
-		get(type, payload, plen);
-		streamBuffer->setPayload(payload, plen);
-		streamBuffer->setType(type);
-
-		return true;
+		error_code = get(type, payload, plen);
+		if (SUCCESS(error_code)) {
+			streamBuffer->setPayload(payload, plen);
+			streamBuffer->setType(type);
+		}
+		return error_code;
 	} else {
-		return false;
+		return ERR_CONFIG_NOT_FOUND;
 	}
 }
 
-bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
+ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	switch(type) {
 	/////////////////////////////////////////////////
 	//// UINT 8
@@ -150,10 +153,10 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_FLOOR: {
 		if (length != 1) {
 			LOGw("Expected uint8");
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi("Set %u to %u", type, payload[0]);
-		return true;
+		return ERR_SUCCESS;
 	}
 
 	/////////////////////////////////////////////////
@@ -166,10 +169,10 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_IBEACON_TXPOWER: {
 		if (length != 1) {
 			LOGw("Expected int8");
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi("Set %u to %i", type, (int8_t)payload[0]);
-		return true;
+		return ERR_SUCCESS;
 	}
 
 	/////////////////////////////////////////////////
@@ -187,10 +190,10 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_NEARBY_TIMEOUT: {
 		if (length != 2) {
 			LOGw("Expected uint16");
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi("Set %u to %u", type, *(uint16_t*)payload);
-		return true;
+		return ERR_SUCCESS;
 	}
 
 	/////////////////////////////////////////////////
@@ -199,38 +202,37 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_IBEACON_UUID: {
 		if (length != 16) {
 			LOGw("Expected 16 bytes for UUID, received: %d", length);
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		log(INFO, "Set uuid to: "); BLEutil::printArray(payload, 16);
-		return true;
+		return ERR_SUCCESS;
 	}
 	case CONFIG_PASSKEY: {
 		if (length != BLE_GAP_PASSKEY_LEN) {
 			LOGw("Expected length %d for passkey, received: %d", BLE_GAP_PASSKEY_LEN, length);
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi("Set passkey to %s", std::string((char*)payload, length).c_str());
-		return true;
+		return ERR_SUCCESS;
 	}
 	case CONFIG_NAME: {
 		if (length > MAX_STRING_STORAGE_SIZE) {
 			LOGe(MSG_NAME_TOO_LONG);
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi("Set name to: %s", std::string((char*)payload, length).c_str());
-		return true;
+		return ERR_SUCCESS;
 	}
 	case CONFIG_KEY_OWNER :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		if (length != ENCYRPTION_KEY_LENGTH) {
 			LOGe("Expected encryption key length: %d, received: %d", ENCYRPTION_KEY_LENGTH, length);
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		log(DEBUG, "Set encyrption key %d to:", type);
 		BLEutil::printArray((uint8_t*)payload, length);
-
-		return true;
+		return ERR_SUCCESS;
 	}
 
 	/////////////////////////////////////////////////
@@ -243,7 +245,7 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
 //		updateFlag(type, payload[0] != 0, persistent);
 		LOGe("Write disabled. Use commands to enable/disable");
-		return false;
+		return ERR_WRITE_CONFIG_DISABLED;
 	}
 
 	case CONFIG_ADC_SAMPLE_RATE:
@@ -252,7 +254,7 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES:
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
-		return false;
+		return ERR_CONFIG_NOT_FOUND;
 	}
 	}
 }
@@ -537,42 +539,42 @@ bool Settings::isEnabled(uint8_t type) {
 	}
 }
 
-bool Settings::get(uint8_t type, void* target) {
+ERR_CODE Settings::get(uint8_t type, void* target) {
 	uint16_t size = 0;
 	return get(type, target, size);
 }
 
-bool Settings::get(uint8_t type, void* target, uint16_t& size) {
+ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 	switch(type) {
 	case CONFIG_NAME: {
 		char default_name[32];
 		sprintf(default_name, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
 		Storage::getString(_storageStruct.device_name, (char*) target, default_name, size);
-		return true;
+		break;
 	}
 	case CONFIG_FLOOR: {
 		Storage::getUint8(_storageStruct.floor, (uint8_t*)target, 0);
-		return true;
+		break;
 	}
 	case CONFIG_NEARBY_TIMEOUT: {
 		Storage::getUint16(_storageStruct.nearbyTimeout, (uint16_t*)target, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
-		return true;
+		break;
 	}
 	case CONFIG_IBEACON_MAJOR: {
 		Storage::getUint16(_storageStruct.beacon.major, (uint16_t*)target, BEACON_MAJOR);
-		return true;
+		break;
 	}
 	case CONFIG_IBEACON_MINOR: {
 		Storage::getUint16(_storageStruct.beacon.minor, (uint16_t*)target, BEACON_MINOR);
-		return true;
+		break;
 	}
 	case CONFIG_IBEACON_UUID: {
 		Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, (uint8_t*) target, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
-		return true;
+		break;
 	}
 	case CONFIG_IBEACON_TXPOWER: {
 		Storage::getInt8(_storageStruct.beacon.txPower, (int8_t*)target, BEACON_RSSI);
-		return true;
+		break;
 	}
 	case CONFIG_WIFI_SETTINGS: {
 		//! copy string, because we clear it on read
@@ -582,96 +584,97 @@ bool Settings::get(uint8_t type, void* target, uint16_t& size) {
 		} else {
 			*p_str = _wifiSettings;
 		}
-		return true;
+		break;
 	}
 	case CONFIG_TX_POWER: {
 		Storage::getInt8(_storageStruct.txPower, (int8_t*)target, TX_POWER);
-		return true;
+		break;
 	}
 	case CONFIG_ADV_INTERVAL: {
 		Storage::getUint16(_storageStruct.advInterval, (uint16_t*)target, ADVERTISEMENT_INTERVAL);
-		return true;
+		break;
 	}
 	case CONFIG_PASSKEY: {
 		Storage::getArray<uint8_t>(_storageStruct.passkey, (uint8_t*) target, (uint8_t*)STATIC_PASSKEY, 6);
-		return true;
+		break;
 	}
 	case CONFIG_MIN_ENV_TEMP: {
 		Storage::getInt8(_storageStruct.minEnvTemp, (int8_t*)target, MIN_ENV_TEMP);
-		return true;
+		break;
 	}
 	case CONFIG_MAX_ENV_TEMP: {
 		Storage::getInt8(_storageStruct.maxEnvTemp, (int8_t*)target, MAX_ENV_TEMP);
-		return true;
+		break;
 	}
 	case CONFIG_SCAN_DURATION: {
 		Storage::getUint16(_storageStruct.scanDuration, (uint16_t*)target, SCAN_DURATION);
-		return true;
+		break;
 	}
 	case CONFIG_SCAN_SEND_DELAY: {
 		Storage::getUint16(_storageStruct.scanSendDelay, (uint16_t*)target, SCAN_SEND_DELAY);
-		return true;
+		break;
 	}
 	case CONFIG_SCAN_BREAK_DURATION: {
 		Storage::getUint16(_storageStruct.scanBreakDuration, (uint16_t*)target, SCAN_BREAK_DURATION);
-		return true;
+		break;
 	}
 	case CONFIG_BOOT_DELAY: {
 		Storage::getUint16(_storageStruct.bootDelay, (uint16_t*)target, BOOT_DELAY);
-		return true;
+		break;
 	}
 	case CONFIG_MAX_CHIP_TEMP: {
 		Storage::getInt8(_storageStruct.maxChipTemp, (int8_t*)target, MAX_CHIP_TEMP);
-		return true;
+		break;
 	}
 	case CONFIG_SCAN_FILTER: {
 		Storage::getUint8(_storageStruct.scanFilter, (uint8_t*)target, SCAN_FILTER);
-		return true;
+		break;
 	}
 	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
 		Storage::getUint16(_storageStruct.scanFilterSendFraction, (uint16_t*)target, SCAN_FILTER_SEND_FRACTION);
-		return true;
+		break;
 	}
 	case CONFIG_CURRENT_LIMIT: {
 		Storage::getUint8(_storageStruct.currentLimit, (uint8_t*)target, CURRENT_LIMIT);
-		return true;
+		break;
 	}
 	case CONFIG_CROWNSTONE_ID: {
 		Storage::getUint16(_storageStruct.crownstoneId, (uint16_t*)target, 0);
-		return true;
+		break;
 	}
 	case CONFIG_KEY_OWNER : {
 		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.owner, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
-		return true;
+		break;
 	}
 	case CONFIG_KEY_MEMBER : {
 		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.member, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
-		return true;
+		break;
 	}
 	case CONFIG_KEY_GUEST : {
 		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.guest, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
-		return true;
+		break;
 	}
 	case CONFIG_ADC_SAMPLE_RATE: {
-//		return true;
+//		break;
 	}
 	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
-//		return true;
+//		break;
 	}
 	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
-//		return true;
+//		break;
 	}
 	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES: {
-//		return true;
+//		break;
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
+		return ERR_CONFIG_NOT_FOUND;
 	}
 	}
-	return false;
+	return ERR_SUCCESS;
 }
 
-bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
+ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 	switch(type) {
 	case CONFIG_NAME: {
 		Storage::setString(std::string((char*)target, size), _storageStruct.device_name);
@@ -789,7 +792,7 @@ bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
-		return false;
+		return ERR_CONFIG_NOT_FOUND;
 	}
 	}
 
@@ -802,7 +805,7 @@ bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
 		}
 		savePersistentStorageItem(p_item, size);
 	}
-	return true;
+	return ERR_SUCCESS;
 }
 
 //ps_configuration_t& Settings::getConfig() {

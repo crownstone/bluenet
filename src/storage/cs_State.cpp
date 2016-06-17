@@ -67,7 +67,7 @@ void State::print() {
 	_accumulatedEnergy->print();
 }
 
-void State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool persistent) {
+ERR_CODE State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool persistent) {
 	switch(type) {
 	// uint32_t variables
 	case STATE_RESET_COUNTER: {
@@ -75,10 +75,11 @@ void State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool 
 			LOGd("payload: %p", payload);
 			uint32_t value = ((uint32_t*) payload)[0];
 			if (value == 0) {
-				set(type, value);
+				return set(type, value);
 			}
 		} else {
 			LOGe("wrong length");
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		break;
 	}
@@ -87,10 +88,13 @@ void State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, bool 
 	case STATE_TEMPERATURE:
 	default:
 		LOGw("There is no such state variable (%u), or writing is disabled", type);
+		return ERR_NOT_AVAILABLE;
 	}
+
+	return ERR_STATE_WRITE_FAILED;
 }
 
-bool State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
+ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 
 	uint8_t* p_value;
 	uint16_t size;
@@ -157,16 +161,16 @@ bool State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 	}
 	default: {
 		LOGw("There is no such state variable (%u).", type);
-		return false;
+		return ERR_STATE_NOT_FOUND;
 	}
 	}
 
 	streamBuffer->setPayload(p_value, size);
 	streamBuffer->setType(type);
-	return true;
+	return ERR_SUCCESS;
 }
 
-bool State::set(uint8_t type, int32_t value) {
+ERR_CODE State::set(uint8_t type, int32_t value) {
 	switch(type) {
 	case STATE_TEMPERATURE: {
 //		LOGd("Set temperature: %d", value);
@@ -174,15 +178,15 @@ bool State::set(uint8_t type, int32_t value) {
 		break;
 	}
 	default:
-		return false;
+		return ERR_STATE_NOT_FOUND;
 	}
 
 	publishUpdate(type, (uint8_t*)&value, sizeof(int32_t));
 
-	return true;
+	return ERR_SUCCESS;
 }
 
-bool State::get(uint8_t type, int32_t& target) {
+ERR_CODE State::get(uint8_t type, int32_t& target) {
 	switch(type) {
 	case STATE_TEMPERATURE: {
 		target = _temperature;
@@ -190,14 +194,13 @@ bool State::get(uint8_t type, int32_t& target) {
 		break;
 	}
 	default:
-		return false;
+		return ERR_STATE_NOT_FOUND;
 	}
-	return true;
+	return ERR_SUCCESS;
 }
 
-bool State::set(uint8_t type, uint8_t value) {
+ERR_CODE State::set(uint8_t type, uint8_t value) {
 
-	EventDispatcher& dispatcher = EventDispatcher::getInstance();
 	switch(type) {
 	case STATE_SWITCH_STATE: {
 		if (_switchState->read() != value) {
@@ -215,7 +218,7 @@ bool State::set(uint8_t type, uint8_t value) {
 		break;
 	}
 	default:
-		return false;
+		return ERR_STATE_NOT_FOUND;
 	}
 
 	publishUpdate(type, &value, sizeof(uint8_t));
@@ -224,10 +227,10 @@ bool State::set(uint8_t type, uint8_t value) {
 	Timer::getInstance().start(_debugTimer, MS_TO_TICKS(100), NULL);
 #endif
 
-	return true;
+	return ERR_SUCCESS;
 }
 
-bool State::get(uint8_t type, uint8_t& target) {
+ERR_CODE State::get(uint8_t type, uint8_t& target) {
 	switch(type) {
 	case STATE_SWITCH_STATE: {
 		target = _switchState->read();
@@ -240,12 +243,13 @@ bool State::get(uint8_t type, uint8_t& target) {
 		break;
 	}
 	default:
-		return false;
+		return ERR_STATE_NOT_FOUND;
 	}
-	return true;
+
+	return ERR_SUCCESS;
 }
 
-bool State::set(uint8_t type, uint32_t value) {
+ERR_CODE State::set(uint8_t type, uint32_t value) {
 
 	switch(type) {
 	case STATE_RESET_COUNTER: {
@@ -264,7 +268,7 @@ bool State::set(uint8_t type, uint32_t value) {
 		break;
 	}
 	default:
-		return false;
+		return ERR_STATE_NOT_FOUND;
 	}
 
 	publishUpdate(type, (uint8_t*)&value, sizeof(uint32_t));
@@ -273,10 +277,10 @@ bool State::set(uint8_t type, uint32_t value) {
 	Timer::getInstance().start(_debugTimer, MS_TO_TICKS(100), NULL);
 #endif
 
-	return true;
+	return ERR_SUCCESS;
 }
 
-bool State::get(uint8_t type, uint32_t& target) {
+ERR_CODE State::get(uint8_t type, uint32_t& target) {
 	switch(type) {
 	case STATE_RESET_COUNTER: {
 		target = _resetCounter->read();
@@ -299,12 +303,12 @@ bool State::get(uint8_t type, uint32_t& target) {
 		break;
 	}
 	default:
-		return false;
+		return ERR_STATE_NOT_FOUND;
 	}
-	return true;
+	return ERR_SUCCESS;
 }
 
-bool State::set(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
+ERR_CODE State::set(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
 
 	switch(type) {
 	case STATE_TRACKED_DEVICES: {
@@ -318,16 +322,16 @@ bool State::set(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
 		break;
 	}
 	default:
-		return false;
+		return ERR_STATE_NOT_FOUND;
 	}
 
 	publishUpdate(type, buffer, size);
 
-	return true;
+	return ERR_SUCCESS;
 
 }
 
-bool State::get(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
+ERR_CODE State::get(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
 
 	switch(type) {
 	case STATE_TRACKED_DEVICES: {
@@ -347,10 +351,10 @@ bool State::get(uint8_t type, buffer_ptr_t buffer, uint16_t size) {
 		break;
 	}
 	default:
-		return false;
+		return ERR_STATE_NOT_FOUND;
 	}
 
-	return true;
+	return ERR_SUCCESS;
 }
 
 void State::publishUpdate(uint8_t type, uint8_t* data, uint16_t size) {

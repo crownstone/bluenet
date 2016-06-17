@@ -275,13 +275,13 @@ void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 }
 
 //! used by the mesh characteristic to send a message into the mesh
-void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
+ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
 	switch(channel) {
 	case DATA_CHANNEL: {
 
 		if (!isValidMessage(p_data, length)) {
-			return;
+			return ERR_INVALID_MESSAGE;
 		}
 
 		if (isBroadcast(p_data)) {
@@ -328,6 +328,8 @@ void MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 		break;
 	}
 	}
+
+	return ERR_SUCCESS;
 
 }
 

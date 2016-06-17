@@ -15,6 +15,7 @@
 #include <processing/cs_CommandHandler.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>
+#include <protocol/cs_ErrorCodes.h>
 
 using namespace BLEpp;
 
@@ -142,7 +143,13 @@ void CrownstoneService::addMeshCharacteristic() {
 		uint8_t* p_data = _meshCommand->payload();
 		uint16_t length = _meshCommand->length();
 
-		MeshControl::getInstance().send(handle, p_data, length);
+		ERR_CODE error_code = MeshControl::getInstance().send(handle, p_data, length);
+
+		LOGi("err error_code: %d", error_code);
+		memcpy(value, &error_code, sizeof(error_code));
+		_meshControlCharacteristic->setDataLength(sizeof(error_code));
+		_meshControlCharacteristic->notify();
+
 	});
 }
 
@@ -158,6 +165,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	_controlCharacteristic->setDataLength(0);
 	_controlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
+		ERR_CODE error_code;
 		MasterBuffer& mb = MasterBuffer::getInstance();
 		// at this point it is too late to check if mb was locked, because the softdevice doesn't care
 		// if the mb was locked, it writes to the buffer in any case
@@ -167,17 +175,18 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 			uint8_t *payload = _streamBuffer->payload();
 			uint8_t length = _streamBuffer->length();
 
-			ERR_CODE code = CommandHandler::getInstance().handleCommand(type, payload, length);
-
-			LOGi("err code: %d", code);
-			memcpy(value, &code, sizeof(code));
-			_controlCharacteristic->setDataLength(sizeof(code));
-			_controlCharacteristic->notify();
+			error_code = CommandHandler::getInstance().handleCommand(type, payload, length);
 
 			mb.unlock();
 		} else {
 			LOGe(MSG_BUFFER_IS_LOCKED);
+			error_code = ERR_BUFFER_LOCKED;
 		}
+
+		LOGi("err error_code: %d", error_code);
+		memcpy(value, &error_code, sizeof(error_code));
+		_controlCharacteristic->setDataLength(sizeof(error_code));
+		_controlCharacteristic->notify();
 	});
 
 }
@@ -194,8 +203,10 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	_configurationControlCharacteristic->setDataLength(0);
 	_configurationControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
+		ERR_CODE error_code;
 		if (!value) {
 			LOGw(MSG_CHAR_VALUE_UNDEFINED);
+			error_code = ERR_VALUE_UNDEFINED;
 		} else {
 			LOGi(MSG_CHAR_VALUE_WRITE);
 			MasterBuffer& mb = MasterBuffer::getInstance();
@@ -214,8 +225,8 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 				if (opCode == READ_VALUE) {
 					LOGd("Select configuration type: %d", type);
 
-					bool success = Settings::getInstance().readFromStorage(type, _streamBuffer);
-					if (success) {
+					error_code = Settings::getInstance().readFromStorage(type, _streamBuffer);
+					if (SUCCESS(error_code)) {
 						_streamBuffer->setOpCode(READ_VALUE);
 						_configurationReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
 						_configurationReadCharacteristic->notify();
@@ -228,13 +239,20 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 					uint8_t *payload = _streamBuffer->payload();
 					uint8_t length = _streamBuffer->length();
 
-					Settings::getInstance().writeToStorage(type, payload, length);
+					error_code = Settings::getInstance().writeToStorage(type, payload, length);
 				}
+				error_code = ERR_UNKNOWN_OP_CODE;
 				mb.unlock();
 			} else {
 				LOGe(MSG_BUFFER_IS_LOCKED);
+				error_code = ERR_BUFFER_LOCKED;
 			}
 		}
+
+		LOGi("err error_code: %d", error_code);
+		memcpy(value, &error_code, sizeof(error_code));
+		_configurationControlCharacteristic->setDataLength(sizeof(error_code));
+		_configurationControlCharacteristic->notify();
 	});
 }
 
@@ -262,8 +280,11 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 	_stateControlCharacteristic->setMaxLength(size);
 	_stateControlCharacteristic->setDataLength(0);
 	_stateControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+
+		ERR_CODE error_code;
 		if (!value) {
 			LOGw(MSG_CHAR_VALUE_UNDEFINED);
+			error_code = ERR_VALUE_UNDEFINED;
 		} else {
 			LOGi(MSG_CHAR_VALUE_WRITE);
 			MasterBuffer& mb = MasterBuffer::getInstance();
@@ -277,8 +298,8 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 
 				if (opCode == READ_VALUE || opCode == NOTIFY_VALUE) {
 					LOGi("Read state");
-					bool success = State::getInstance().readFromStorage(type, _streamBuffer);
-					if (success) {
+					error_code = State::getInstance().readFromStorage(type, _streamBuffer);
+					if (SUCCESS(error_code)) {
 						_streamBuffer->setOpCode(READ_VALUE);
 						_stateReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
 						_stateReadCharacteristic->notify();
@@ -289,20 +310,29 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 						if (_streamBuffer->length() == 1) {
 							bool enable = *((bool*) _streamBuffer->payload());
 							State::getInstance().setNotify(type, enable);
+							error_code = ERR_SUCCESS;
 						} else {
 							LOGe("wrong length received!");
+							error_code = ERR_WRONG_PAYLOAD_LENGTH;
 						}
 					}
 				} else if (opCode == WRITE_VALUE) {
 					LOGi("Write state");
-					State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length());
+					error_code = State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length());
 				}
 
+				error_code = ERR_UNKNOWN_OP_CODE;
 				mb.unlock();
 			} else {
 				LOGe(MSG_BUFFER_IS_LOCKED);
+				error_code = ERR_BUFFER_LOCKED;
 			}
 		}
+
+		LOGi("err error_code: %d", error_code);
+		memcpy(value, &error_code, sizeof(error_code));
+		_stateControlCharacteristic->setDataLength(sizeof(error_code));
+		_stateControlCharacteristic->notify();
 	});
 }
 
