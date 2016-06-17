@@ -259,98 +259,6 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	}
 }
 
-uint8_t* Settings::getStorageItem(uint8_t type) {
-	switch(type) {
-	case CONFIG_NAME: {
-		return (uint8_t*)&_storageStruct.device_name;
-	}
-	case CONFIG_NEARBY_TIMEOUT: {
-		return (uint8_t*)&_storageStruct.nearbyTimeout;
-	}
-	case CONFIG_FLOOR: {
-		return (uint8_t*)&_storageStruct.floor;
-	}
-	case CONFIG_IBEACON_MAJOR: {
-		return (uint8_t*)&_storageStruct.beacon.major;
-	}
-	case CONFIG_IBEACON_MINOR: {
-		return (uint8_t*)&_storageStruct.beacon.minor;
-	}
-	case CONFIG_IBEACON_UUID: {
-		return (uint8_t*)&_storageStruct.beacon.uuid.uuid128;
-	}
-	case CONFIG_IBEACON_TXPOWER: {
-		return (uint8_t*)&_storageStruct.beacon.txPower;
-	}
-	case CONFIG_WIFI_SETTINGS: {
-		return (uint8_t*)&_wifiSettings;
-	}
-	case CONFIG_TX_POWER: {
-		return (uint8_t*)&_storageStruct.txPower;
-	}
-	case CONFIG_ADV_INTERVAL: {
-		return (uint8_t*)&_storageStruct.advInterval;
-	}
-	case CONFIG_PASSKEY: {
-		return (uint8_t*)&_storageStruct.passkey;
-	}
-	case CONFIG_MIN_ENV_TEMP: {
-		return (uint8_t*)&_storageStruct.minEnvTemp;
-	}
-	case CONFIG_MAX_ENV_TEMP: {
-		return (uint8_t*)&_storageStruct.maxEnvTemp;
-	}
-	case CONFIG_SCAN_DURATION: {
-		return (uint8_t*)&_storageStruct.scanDuration;
-	}
-	case CONFIG_SCAN_SEND_DELAY: {
-		return (uint8_t*)&_storageStruct.scanSendDelay;
-	}
-	case CONFIG_SCAN_BREAK_DURATION: {
-		return (uint8_t*)&_storageStruct.scanBreakDuration;
-	}
-	case CONFIG_BOOT_DELAY: {
-		return (uint8_t*)&_storageStruct.bootDelay;
-	}
-	case CONFIG_MAX_CHIP_TEMP: {
-		return (uint8_t*)&_storageStruct.maxChipTemp;
-	}
-	case CONFIG_SCAN_FILTER: {
-		return (uint8_t*)&_storageStruct.scanFilter;
-	}
-	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
-		return (uint8_t*)&_storageStruct.scanFilterSendFraction;
-	}
-	case CONFIG_CURRENT_LIMIT: {
-		return (uint8_t*)&_storageStruct.currentLimit;
-	}
-	case CONFIG_CROWNSTONE_ID: {
-		return (uint8_t*)&_storageStruct.crownstoneId;
-	}
-	case CONFIG_KEY_OWNER : {
-		return (uint8_t*)&_storageStruct.encryptionKeys.owner;
-	}
-	case CONFIG_KEY_MEMBER : {
-		return (uint8_t*)&_storageStruct.encryptionKeys.member;
-	}
-	case CONFIG_KEY_GUEST :{
-		return (uint8_t*)&_storageStruct.encryptionKeys.guest;
-	}
-	case CONFIG_ADC_SAMPLE_RATE: {
-	}
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
-	}
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
-	}
-	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES: {
-	}
-	default: {
-		LOGw("There is no such configuration type (%u).", type);
-		return NULL;
-	}
-	}
-}
-
 uint16_t Settings::getSettingsItemSize(uint8_t type) {
 
 	switch(type) {
@@ -675,106 +583,134 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 }
 
 ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
+
+	uint8_t* p_item;
+
 	switch(type) {
 	case CONFIG_NAME: {
+		p_item = (uint8_t*)&_storageStruct.device_name;
 		Storage::setString(std::string((char*)target, size), _storageStruct.device_name);
 		break;
 	}
 	case CONFIG_NEARBY_TIMEOUT: {
+		p_item = (uint8_t*)&_storageStruct.nearbyTimeout;
 		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.nearbyTimeout);
 		break;
 	}
 	case CONFIG_FLOOR: {
+		p_item = (uint8_t*)&_storageStruct.floor;
 		Storage::setUint8(*((uint8_t*)target), _storageStruct.floor);
 		break;
 	}
 	case CONFIG_IBEACON_MAJOR: {
+		p_item = (uint8_t*)&_storageStruct.beacon.major;
 		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.beacon.major);
 		break;
 	}
 	case CONFIG_IBEACON_MINOR: {
+		p_item = (uint8_t*)&_storageStruct.beacon.minor;
 		Storage::setUint16(*((uint16_t*)target),(uint32_t&) _storageStruct.beacon.minor);
 		break;
 	}
 	case CONFIG_IBEACON_UUID: {
+		p_item = (uint8_t*)&_storageStruct.beacon.uuid.uuid128;
 		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.beacon.uuid.uuid128, 16);
 		break;
 	}
 	case CONFIG_IBEACON_TXPOWER: {
+		p_item = (uint8_t*)&_storageStruct.beacon.txPower;
 		Storage::setInt8(*((int8_t*)target), (int32_t&)_storageStruct.beacon.txPower);
 		break;
 	}
 	case CONFIG_WIFI_SETTINGS: {
+		p_item = (uint8_t*)&_wifiSettings;
 		if (size > 0) {
 			_wifiSettings = std::string((char*)target, size);
 		}
 		break;
 	}
 	case CONFIG_TX_POWER: {
+		p_item = (uint8_t*)&_storageStruct.txPower;
 		Storage::setInt8(*((int8_t*)target), _storageStruct.txPower);
 		break;
 	}
 	case CONFIG_ADV_INTERVAL: {
+		p_item = (uint8_t*)&_storageStruct.advInterval;
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.advInterval);
 		break;
 	}
 	case CONFIG_PASSKEY: {
+		p_item = (uint8_t*)&_storageStruct.passkey;
 		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
 		break;
 	}
 	case CONFIG_MIN_ENV_TEMP: {
+		p_item = (uint8_t*)&_storageStruct.minEnvTemp;
 		Storage::setInt8(*((int8_t*)target), _storageStruct.minEnvTemp);
 		break;
 	}
 	case CONFIG_MAX_ENV_TEMP: {
+		p_item = (uint8_t*)&_storageStruct.maxEnvTemp;
 		Storage::setInt8(*((int8_t*)target), _storageStruct.maxEnvTemp);
 		break;
 	}
 	case CONFIG_SCAN_DURATION: {
+		p_item = (uint8_t*)&_storageStruct.scanDuration;
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanDuration);
 		break;
 	}
 	case CONFIG_SCAN_SEND_DELAY: {
+		p_item = (uint8_t*)&_storageStruct.scanSendDelay;
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanSendDelay);
 		break;
 	}
 	case CONFIG_SCAN_BREAK_DURATION: {
+		p_item = (uint8_t*)&_storageStruct.scanBreakDuration;
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanBreakDuration);
 		break;
 	}
 	case CONFIG_BOOT_DELAY: {
+		p_item = (uint8_t*)&_storageStruct.bootDelay;
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.bootDelay);
 		break;
 	}
 	case CONFIG_MAX_CHIP_TEMP: {
+		p_item = (uint8_t*)&_storageStruct.maxChipTemp;
 		Storage::setInt8(*((int8_t*)target), _storageStruct.maxChipTemp);
 		break;
 	}
 	case CONFIG_SCAN_FILTER: {
+		p_item = (uint8_t*)&_storageStruct.scanFilter;
 		Storage::setUint8(*((uint8_t*)target), _storageStruct.scanFilter);
 		break;
 	}
 	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
+		p_item = (uint8_t*)&_storageStruct.scanFilterSendFraction;
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanFilterSendFraction);
 		break;
 	}
 	case CONFIG_CURRENT_LIMIT: {
+		p_item = (uint8_t*)&_storageStruct.currentLimit;
 		Storage::setUint8(*((uint8_t*)target), _storageStruct.currentLimit);
 		break;
 	}
 	case CONFIG_CROWNSTONE_ID: {
+		p_item = (uint8_t*)&_storageStruct.crownstoneId;
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
 		break;
 	}
 	case CONFIG_KEY_OWNER : {
+		p_item = (uint8_t*)&_storageStruct.encryptionKeys.owner;
 		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.owner, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
 	case CONFIG_KEY_MEMBER : {
+		p_item = (uint8_t*)&_storageStruct.encryptionKeys.member;
 		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.member, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
 	case CONFIG_KEY_GUEST : {
+		p_item = (uint8_t*)&_storageStruct.encryptionKeys.guest;
 		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.guest, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
@@ -796,7 +732,6 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	}
 	}
 
-	uint8_t* p_item = getStorageItem(type);
 	if (persistent) {
 		size = getSettingsItemSize(type);
 		// minimum item size we can store is 4

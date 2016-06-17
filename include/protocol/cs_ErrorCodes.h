@@ -7,18 +7,18 @@
 #pragma once
 
 enum ErrorCodesGeneral {
-	ERR_SUCCESS          = 0x00,
-	ERR_BUFFER_LOCKED    = 0x01,
-	ERR_VALUE_UNDEFINED  = 0x02,
-	ERR_WRONG_PAYLOAD_LENGTH = 0x03,
-	ERR_UNKNOWN_OP_CODE = 0x04,
+	ERR_SUCCESS                     = 0x00,
+	ERR_VALUE_UNDEFINED             = 0x01,
+	ERR_WRONG_PAYLOAD_LENGTH        = 0x02,
+	ERR_UNKNOWN_OP_CODE             = 0x03,
+	ERR_BUFFER_LOCKED               = 0x04,
 };
 
 enum CommandErrorCodes {
 	ERR_COMMAND_NOT_FOUND = 0x100,
 	ERR_NOT_AVAILABLE,
 	ERR_WRONG_PARAMETER,
-	ERR_SETUP_INCOMPLETE,
+	ERR_COMMAND_FAILED,
 	ERR_NOT_IMPLEMENTED,
 };
 
@@ -34,7 +34,7 @@ enum ConfigErrorCodes {
 
 enum StateErrorCodes {
 	ERR_STATE_NOT_FOUND = 0x400,
-	ERR_STATE_WRITE_FAILED = 0x401,
+	STATE_WRITE_DISABLED = 0x401,
 };
 
 #define SUCCESS(code) code == ERR_SUCCESS

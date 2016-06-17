@@ -374,19 +374,19 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			settings.get(CONFIG_KEY_OWNER, key);
 			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
 				LOGw("owner key is not set!");
-				return ERR_SETUP_INCOMPLETE;
+				return ERR_COMMAND_FAILED;
 			}
 
 			settings.get(CONFIG_KEY_MEMBER, key);
 			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
 				LOGw("member key is not set!");
-				return ERR_SETUP_INCOMPLETE;
+				return ERR_COMMAND_FAILED;
 			}
 
 			settings.get(CONFIG_KEY_GUEST, key);
 			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
 				LOGw("guest key is not set!");
-				return ERR_SETUP_INCOMPLETE;
+				return ERR_COMMAND_FAILED;
 			}
 
 			// validate crownstone id is not 0
@@ -395,7 +395,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			if (crownstoneId == 0) {
 				LOGw("crownstone id has to be set during setup mode");
-				return ERR_SETUP_INCOMPLETE;
+				return ERR_COMMAND_FAILED;
 			}
 
 			// validate major and minor
@@ -404,7 +404,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			if (major == 0) {
 				LOGw("ibeacn major is not set!");
-				return ERR_SETUP_INCOMPLETE;
+				return ERR_COMMAND_FAILED;
 			}
 
 			uint16_t minor;
@@ -412,7 +412,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			if (minor == 0) {
 				LOGw("ibeacn minor is not set!");
-				return ERR_SETUP_INCOMPLETE;
+				return ERR_COMMAND_FAILED;
 			}
 
 			LOGi("Setup completed, resetting to normal mode");

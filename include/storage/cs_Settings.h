@@ -106,7 +106,6 @@ protected:
 
 	ERR_CODE verify(uint8_t type, uint8_t* payload, uint8_t length);
 
-	uint8_t* getStorageItem(uint8_t type);
 	uint16_t getSettingsItemSize(uint8_t type);
 
 	bool readFlag(uint8_t type, bool& value);

@@ -112,17 +112,33 @@ public:
 
 	/** Get a state variable from storage (to be used in application)
 	 */
-	ERR_CODE get(uint8_t type, uint32_t& target);
-	ERR_CODE get(uint8_t type, uint8_t& target);
-	ERR_CODE get(uint8_t type, int32_t& target);
-	ERR_CODE get(uint8_t type, buffer_ptr_t buffer, uint16_t size);
+	ERR_CODE get(uint8_t type, uint32_t& target) {
+		return get(type, &target, sizeof(uint32_t));
+	}
+	ERR_CODE get(uint8_t type, uint8_t& target) {
+		return get(type, &target, sizeof(uint8_t));
+	}
+	ERR_CODE get(uint8_t type, int32_t& target) {
+		return get(type, &target, sizeof(int32_t));
+	}
+//	ERR_CODE get(uint8_t type, buffer_ptr_t buffer, uint16_t size);
 
 	/** Write a state variable to storage
 	 */
-	ERR_CODE set(uint8_t type, uint8_t value);
-	ERR_CODE set(uint8_t type, uint32_t value);
-	ERR_CODE set(uint8_t type, int32_t value);
-	ERR_CODE set(uint8_t type, buffer_ptr_t buffer, uint16_t size);
+	ERR_CODE set(uint8_t type, uint8_t value) {
+		return set(type, &value, sizeof(uint8_t));
+	}
+	ERR_CODE set(uint8_t type, uint32_t value) {
+		return set(type, &value, sizeof(uint32_t));
+	}
+	ERR_CODE set(uint8_t type, int32_t value) {
+		return set(type, &value, sizeof(value));
+	}
+//	ERR_CODE set(uint8_t type, buffer_ptr_t buffer, uint16_t size);
+
+	ERR_CODE verify(uint8_t type, uint16_t size);
+	ERR_CODE set(uint8_t type, void* target, uint16_t size);
+	ERR_CODE get(uint8_t type, void* target, uint16_t size);
 
 	/** Factory Resets sets all variables to their default values and clears FLASH storage
 	 */
