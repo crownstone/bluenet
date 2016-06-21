@@ -296,6 +296,9 @@ void Crownstone::configureStack() {
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
 
+//		LOGd("clear gpregret on connect ...");
+		sd_power_gpregret_clr(0xFF);
+
 	});
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
@@ -501,6 +504,10 @@ void Crownstone::prepareCrownstone() {
 void Crownstone::startUp() {
 
 	LOGi("---- startUp ----");
+
+	uint32_t gpregret;
+	sd_power_gpregret_get(&gpregret);
+	LOGi("Soft reset counter: %d", gpregret);
 
 	uint16_t bootDelay;
 	_settings->get(CONFIG_BOOT_DELAY, &bootDelay);

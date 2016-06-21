@@ -112,7 +112,9 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		}
 
 		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
-		static uint32_t resetOp = payload->opCode;
+		static uint8_t resetOp = payload->opCode;
+
+//		LOGi("resetOp: %d", resetOp);
 
 //			if (resetOp) {
 		reset_delayed(resetOp);
@@ -292,7 +294,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			LOGi("factory reset done, rebooting device in 2s ...");
 
-			reset_delayed(1);
+			reset_delayed(COMMAND_SOFT_RESET);
 
 		} else {
 			LOGi("wrong code received: %p", resetCode);
@@ -421,7 +423,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
 
 			//! then reset device
-			reset_delayed(1);
+			reset_delayed(COMMAND_SOFT_RESET);
 		} else {
 			LOGw("validate setup only available in setup mode");
 			return ERR_NOT_AVAILABLE;
