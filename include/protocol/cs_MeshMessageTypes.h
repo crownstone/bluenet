@@ -22,15 +22,16 @@ enum MeshChannels {
 
 enum MeshMessageTypes {
 	//! data channel messages
-	CONTROL_MESSAGE       = 0,
-	BEACON_MESSAGE        = 1,
-	CONFIG_MESSAGE        = 2,
-	STATE_MESSAGE         = 3,
+	CONTROL_MESSAGE          = 0,
+	BEACON_MESSAGE           = 1,
+	CONFIG_MESSAGE           = 2,
+	STATE_MESSAGE            = 3,
 
 	//! hub channel messages
 	SCAN_MESSAGE          = 101,
 	POWER_SAMPLES_MESSAGE = 102,
 	EVENT_MESSAGE         = 103,    // todo: do we need event messages on the mesh at all?
+	SERVICE_DATA_MESSAGE  = 104,
 };
 
 //! broadcast address is defined as 00:00:00:00:00:00
@@ -126,6 +127,15 @@ struct __attribute__((__packed__)) test_mesh_message_t {
 	uint32_t counter;
 };
 
+struct __attribute__((__packed__)) service_data_mesh_message_t {
+	uint16_t crownstoneId;
+	uint8_t switchState;
+	uint8_t eventBitmask;
+	int32_t powerUsage;
+	int32_t accumulatedEnergy;
+	int32_t temperature;
+};
+
 /** Hub mesh message
  */
 struct __attribute__((__packed__)) hub_mesh_message_t {
@@ -135,6 +145,7 @@ struct __attribute__((__packed__)) hub_mesh_message_t {
 		scan_mesh_message_t scanMsg;
 		test_mesh_message_t testMsg;
 		power_samples_mesh_message_t powerSamplesMsg;
+		service_data_mesh_message_t serviceDataMsg;
 	};
 };
 

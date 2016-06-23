@@ -80,7 +80,7 @@ public:
 	 */
 	void setBLEName(const std::string &name, bool persistent = true);
 
-	bool isEnabled(uint8_t type);
+	bool isSet(uint8_t type);
 	bool updateFlag(uint8_t type, bool value, bool persistent);
 
 	void factoryReset(uint32_t resetCode);

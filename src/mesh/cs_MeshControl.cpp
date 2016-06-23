@@ -78,6 +78,21 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 
 			break;
 		}
+		case SERVICE_DATA_MESSAGE: {
+			LOGd("received service data from: %02X:%02X:%02X:%02X:%02X:%02X", msg->header.sourceAddress[5],
+					msg->header.sourceAddress[4], msg->header.sourceAddress[3], msg->header.sourceAddress[2],
+					msg->header.sourceAddress[1], msg->header.sourceAddress[0]);
+
+			service_data_mesh_message_t& sd = msg->serviceDataMsg;
+			LOGd("> crownstone id: %d", sd.crownstoneId);
+			LOGd("> switch state: %d", sd.switchState);
+			LOGd("> event bitmask: %s", BLEutil::toBinaryString(sd.eventBitmask).c_str());
+			LOGd("> power usage: %d", sd.powerUsage);
+			LOGd("> accumulated energy: %d", sd.accumulatedEnergy);
+			LOGd("> temperature: %d", sd.temperature);
+
+			break;
+		}
 //		case 102: {
 //			if (firstTimeStamp == 0) {
 //				firstTimeStamp = RTC::getCount();
@@ -167,8 +182,8 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 	}
 	case CONTROL_MESSAGE: {
 		CommandHandlerTypes command = (CommandHandlerTypes)msg->commandMsg.type;
-		uint16_t length = msg->configMsg.length;
-		uint8_t* payload = msg->configMsg.payload;
+		uint16_t length = msg->commandMsg.length;
+		uint8_t* payload = msg->commandMsg.payload;
 
 		switch(command) {
 		case CMD_ENABLE_SCANNER: {
@@ -178,6 +193,8 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 			RNG rng;
 			enable_scanner_message_payload_t* pl = (enable_scanner_message_payload_t*)payload;
 			pl->delay = rng.getRandom16() / 1; //! Delay in ms (about 0-60 seconds)
+
+			length = 3;
 			break;
 		}
 		default:
@@ -238,7 +255,7 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 		// if iBeacon is enabled, trigger event to update the advertisement with the new iBeacon
 		// parameters. This doesn't depend on if it is currently advertising or not but can be done
 		// in either state
-		if (settings.isEnabled(CONFIG_IBEACON_ENABLED)) {
+		if (settings.isSet(CONFIG_IBEACON_ENABLED)) {
 			EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
 		}
 
@@ -365,6 +382,21 @@ void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples)
 //	uint16_t handle = (message.header.sourceAddress[0] % (MESH_NUM_OF_CHANNELS-2)) + 3;
 	uint16_t handle = (message.header.sourceAddress[0] % (MESH_NUM_OF_CHANNELS-2-1)) + 3;
 	Mesh::getInstance().send(handle, &message, sizeof(message));
+}
+
+void MeshControl::sendServiceDataMessage(service_data_mesh_message_t* serviceData) {
+	LOGd("send service data");
+
+	hub_mesh_message_t message;
+	memset(&message, 0, sizeof(message));
+	memcpy(&message.header.sourceAddress, &_myAddr.addr, BLE_GAP_ADDR_LEN);
+	message.header.messageType = SERVICE_DATA_MESSAGE;
+	memcpy(&message.serviceDataMsg, serviceData, sizeof(service_data_mesh_message_t));
+
+	LOGi("message data:");
+	BLEutil::printArray(&message, sizeof(message));
+
+	Mesh::getInstance().send(HUB_CHANNEL, &message, sizeof(message));
 }
 
 //void MeshControl::reset() {

@@ -198,7 +198,7 @@ void Scanner::executeScan() {
 }
 
 void Scanner::sendResults() {
-	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
 	}
 

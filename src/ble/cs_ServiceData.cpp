@@ -26,10 +26,10 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			updateSwitchState(*(uint8_t*)p_data);
 			break;
 		}
-//		case STATE_ACCUMULATED_ENERGY: {
-//			updateAccumulatedEnergy(*(int32_t*)p_data);
-//			break;
-//		}
+		case STATE_ACCUMULATED_ENERGY: {
+			updateAccumulatedEnergy(*(int32_t*)p_data);
+			break;
+		}
 		case STATE_POWER_USAGE: {
 			updatePowerUsage(*(int32_t*)p_data);
 			break;

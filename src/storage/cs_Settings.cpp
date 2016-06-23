@@ -162,6 +162,7 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	//// INT 8
 	/////////////////////////////////////////////////
+	case CONFIG_LOW_TX_POWER:
 	case CONFIG_MAX_CHIP_TEMP:
 	case CONFIG_MAX_ENV_TEMP:
 	case CONFIG_MIN_ENV_TEMP:
@@ -178,6 +179,13 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
+	case CONFIG_ADC_BURST_SAMPLE_RATE:
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
+	case CONFIG_ADC_CONT_SAMPLE_RATE:
+	case CONFIG_SCAN_INTERVAL:
+	case CONFIG_SCAN_WINDOW:
+	case CONFIG_RELAY_HIGH_DURATION:
 	case CONFIG_CROWNSTONE_ID:
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:
 	case CONFIG_BOOT_DELAY:
@@ -248,10 +256,6 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 		return ERR_WRITE_CONFIG_DISABLED;
 	}
 
-	case CONFIG_ADC_SAMPLE_RATE:
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
-	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES:
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
 		return ERR_CONFIG_NOT_FOUND;
@@ -274,6 +278,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	/////////////////////////////////////////////////
 	//// INT 8
 	/////////////////////////////////////////////////
+	case CONFIG_LOW_TX_POWER:
 	case CONFIG_MAX_CHIP_TEMP:
 	case CONFIG_MAX_ENV_TEMP:
 	case CONFIG_MIN_ENV_TEMP:
@@ -285,6 +290,13 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
+	case CONFIG_ADC_BURST_SAMPLE_RATE:
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
+	case CONFIG_ADC_CONT_SAMPLE_RATE:
+	case CONFIG_SCAN_INTERVAL:
+	case CONFIG_SCAN_WINDOW:
+	case CONFIG_RELAY_HIGH_DURATION:
 	case CONFIG_CROWNSTONE_ID:
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:
 	case CONFIG_BOOT_DELAY:
@@ -327,123 +339,9 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 		return 1;
 	}
 
-	case CONFIG_ADC_SAMPLE_RATE:
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
-	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES:
 	default:
 		LOGw("There is no such configuration type (%u).", type);
 		return 0;
-	}
-}
-
-void Settings::initFlags() {
-	// set all flags to their default value
-	_storageStruct.flagsBit.meshDisabled = !MESHING;
-	_storageStruct.flagsBit.encryptionDisabled = !ENCRYPTION;
-	_storageStruct.flagsBit.iBeaconDisabled = !IBEACON;
-	_storageStruct.flagsBit.scannerDisabled = !INTERVAL_SCANNER_ENABLED;
-	_storageStruct.flagsBit.continuousPowerSamplerDisabled = !CONTINUOUS_POWER_SAMPLER;
-	_storageStruct.flagsBit.flagsUninitialized = false;
-}
-
-bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
-
-	// should not happen, but better to check
-	if (_storageStruct.flagsBit.flagsUninitialized) {
-		// before updating a flag, we need to initialize all flags to their default
-		// value, otherwise they will be wrongly read after the update
-		initFlags();
-	}
-
-	switch(type) {
-		case CONFIG_MESH_ENABLED : {
-		_storageStruct.flagsBit.meshDisabled = !value;
-		break;
-	}
-	case CONFIG_ENCRYPTION_ENABLED : {
-		_storageStruct.flagsBit.encryptionDisabled = !value;
-		break;
-	}
-	case CONFIG_IBEACON_ENABLED : {
-		_storageStruct.flagsBit.iBeaconDisabled = !value;
-		break;
-	}
-	case CONFIG_SCANNER_ENABLED : {
-		_storageStruct.flagsBit.scannerDisabled = !value;
-		break;
-	}
-	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
-		_storageStruct.flagsBit.continuousPowerSamplerDisabled = !value;
-		break;
-	}
-	default: {
-		return false;
-	}
-	}
-
-	if (persistent) {
-		savePersistentStorageItem(&_storageStruct.flags);
-	}
-	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
-	return true;
-}
-
-bool Settings::readFlag(uint8_t type, bool& value) {
-
-	bool default_value;
-	switch(type) {
-		case CONFIG_MESH_ENABLED : {
-		value = !_storageStruct.flagsBit.meshDisabled;
-		default_value = MESHING;
-		break;
-	}
-	case CONFIG_ENCRYPTION_ENABLED : {
-		value = !_storageStruct.flagsBit.encryptionDisabled;
-		default_value = ENCRYPTION;
-		break;
-	}
-	case CONFIG_IBEACON_ENABLED : {
-		value = !_storageStruct.flagsBit.iBeaconDisabled;
-		default_value = IBEACON;
-		break;
-	}
-	case CONFIG_SCANNER_ENABLED : {
-		value = !_storageStruct.flagsBit.scannerDisabled;
-		default_value = INTERVAL_SCANNER_ENABLED;
-		break;
-	}
-	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
-		value = !_storageStruct.flagsBit.continuousPowerSamplerDisabled;
-		default_value = CONTINUOUS_POWER_SAMPLER;
-		break;
-	}
-	default:
-		return false;
-	}
-
-	if (_storageStruct.flagsBit.flagsUninitialized) {
-		value = default_value;
-		return true;
-	}
-
-	return true;
-}
-
-bool Settings::isEnabled(uint8_t type) {
-
-	switch(type) {
-	case CONFIG_MESH_ENABLED :
-	case CONFIG_ENCRYPTION_ENABLED :
-	case CONFIG_IBEACON_ENABLED :
-	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
-		bool enabled;
-		readFlag(type, enabled);
-		return enabled;
-	}
-	default:
-		return false;
 	}
 }
 
@@ -562,17 +460,37 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.guest, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
-	case CONFIG_ADC_SAMPLE_RATE: {
-//		break;
+	case CONFIG_ADC_BURST_SAMPLE_RATE: {
+		Storage::getUint16(_storageStruct.adcBurstSampleRate, (uint16_t*)target, CS_ADC_SAMPLE_RATE);
+		break;
 	}
 	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
-//		break;
+		Storage::getUint16(_storageStruct.powerSampleBurstInterval, (uint16_t*)target, POWER_SAMPLE_BURST_INTERVAL);
+		break;
 	}
 	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
-//		break;
+		Storage::getUint16(_storageStruct.powerSampleContInterval, (uint16_t*)target, POWER_SAMPLE_CONT_INTERVAL);
+		break;
 	}
-	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES: {
-//		break;
+	case CONFIG_ADC_CONT_SAMPLE_RATE: {
+		Storage::getUint16(_storageStruct.adcContSampleRate, (uint16_t*)target, CS_ADC_SAMPLE_RATE);
+		break;
+	}
+	case CONFIG_SCAN_INTERVAL: {
+		Storage::getUint16(_storageStruct.scanInterval, (uint16_t*)target, SCAN_INTERVAL);
+		break;
+	}
+	case CONFIG_SCAN_WINDOW: {
+		Storage::getUint16(_storageStruct.scanWindow, (uint16_t*)target, SCAN_WINDOW);
+		break;
+	}
+	case CONFIG_RELAY_HIGH_DURATION: {
+		Storage::getUint16(_storageStruct.relayHighDuration, (uint16_t*)target, RELAY_HIGH_DURATION);
+		break;
+	}
+	case CONFIG_LOW_TX_POWER: {
+		Storage::getInt8(_storageStruct.lowTxPower, (int8_t*)target, LOW_TX_POWER);
+		break;
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
@@ -714,17 +632,45 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.guest, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
-	case CONFIG_ADC_SAMPLE_RATE: {
-//		break;
+	case CONFIG_ADC_BURST_SAMPLE_RATE: {
+		p_item = (uint8_t*)&_storageStruct.adcBurstSampleRate;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.adcBurstSampleRate);
+		break;
 	}
 	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
-//		break;
+		p_item = (uint8_t*)&_storageStruct.powerSampleBurstInterval;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.powerSampleBurstInterval);
+		break;
 	}
 	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
-//		break;
+		p_item = (uint8_t*)&_storageStruct.powerSampleContInterval;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.powerSampleContInterval);
+		break;
 	}
-	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES: {
-//		break;
+	case CONFIG_ADC_CONT_SAMPLE_RATE: {
+		p_item = (uint8_t*)&_storageStruct.adcContSampleRate;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.adcContSampleRate);
+		break;
+	}
+	case CONFIG_SCAN_INTERVAL: {
+		p_item = (uint8_t*)&_storageStruct.scanInterval;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanInterval);
+		break;
+	}
+	case CONFIG_SCAN_WINDOW: {
+		p_item = (uint8_t*)&_storageStruct.scanWindow;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanWindow);
+		break;
+	}
+	case CONFIG_RELAY_HIGH_DURATION: {
+		p_item = (uint8_t*)&_storageStruct.relayHighDuration;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.relayHighDuration);
+		break;
+	}
+	case CONFIG_LOW_TX_POWER: {
+		p_item = (uint8_t*)&_storageStruct.lowTxPower;
+		Storage::setInt8(*((int8_t*)target), _storageStruct.lowTxPower);
+		break;
 	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
@@ -741,6 +687,127 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		savePersistentStorageItem(p_item, size);
 	}
 	return ERR_SUCCESS;
+}
+
+void Settings::initFlags() {
+	// set all flags to their default value
+	_storageStruct.flagsBit.meshDisabled = !MESHING;
+	_storageStruct.flagsBit.encryptionDisabled = !ENCRYPTION;
+	_storageStruct.flagsBit.iBeaconDisabled = !IBEACON;
+	_storageStruct.flagsBit.scannerDisabled = !INTERVAL_SCANNER_ENABLED;
+	_storageStruct.flagsBit.continuousPowerSamplerDisabled = !CONTINUOUS_POWER_SAMPLER;
+	_storageStruct.flagsBit.defaultOff = !DEFAULT_ON;
+	_storageStruct.flagsBit.flagsUninitialized = false;
+}
+
+bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
+
+	// should not happen, but better to check
+	if (_storageStruct.flagsBit.flagsUninitialized) {
+		// before updating a flag, we need to initialize all flags to their default
+		// value, otherwise they will be wrongly read after the update
+		initFlags();
+	}
+
+	switch(type) {
+		case CONFIG_MESH_ENABLED : {
+		_storageStruct.flagsBit.meshDisabled = !value;
+		break;
+	}
+	case CONFIG_ENCRYPTION_ENABLED : {
+		_storageStruct.flagsBit.encryptionDisabled = !value;
+		break;
+	}
+	case CONFIG_IBEACON_ENABLED : {
+		_storageStruct.flagsBit.iBeaconDisabled = !value;
+		break;
+	}
+	case CONFIG_SCANNER_ENABLED : {
+		_storageStruct.flagsBit.scannerDisabled = !value;
+		break;
+	}
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
+		_storageStruct.flagsBit.continuousPowerSamplerDisabled = !value;
+		break;
+	}
+	case CONFIG_DEFAULT_ON: {
+		_storageStruct.flagsBit.defaultOff = !value;
+		break;
+	}
+	default: {
+		return false;
+	}
+	}
+
+	if (persistent) {
+		savePersistentStorageItem(&_storageStruct.flags);
+	}
+	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
+	return true;
+}
+
+bool Settings::readFlag(uint8_t type, bool& value) {
+
+	bool default_value;
+	switch(type) {
+	case CONFIG_MESH_ENABLED: {
+		value = !_storageStruct.flagsBit.meshDisabled;
+		default_value = MESHING;
+		break;
+	}
+	case CONFIG_ENCRYPTION_ENABLED: {
+		value = !_storageStruct.flagsBit.encryptionDisabled;
+		default_value = ENCRYPTION;
+		break;
+	}
+	case CONFIG_IBEACON_ENABLED: {
+		value = !_storageStruct.flagsBit.iBeaconDisabled;
+		default_value = IBEACON;
+		break;
+	}
+	case CONFIG_SCANNER_ENABLED: {
+		value = !_storageStruct.flagsBit.scannerDisabled;
+		default_value = INTERVAL_SCANNER_ENABLED;
+		break;
+	}
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED: {
+		value = !_storageStruct.flagsBit.continuousPowerSamplerDisabled;
+		default_value = CONTINUOUS_POWER_SAMPLER;
+		break;
+	}
+	case CONFIG_DEFAULT_ON: {
+		value = !_storageStruct.flagsBit.defaultOff;
+		default_value = DEFAULT_ON;
+		break;
+	}
+	default:
+		return false;
+	}
+
+	if (_storageStruct.flagsBit.flagsUninitialized) {
+		value = default_value;
+		return true;
+	}
+
+	return true;
+}
+
+bool Settings::isSet(uint8_t type) {
+
+	switch(type) {
+	case CONFIG_DEFAULT_ON:
+	case CONFIG_MESH_ENABLED :
+	case CONFIG_ENCRYPTION_ENABLED :
+	case CONFIG_IBEACON_ENABLED :
+	case CONFIG_SCANNER_ENABLED :
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
+		bool enabled;
+		readFlag(type, enabled);
+		return enabled;
+	}
+	default:
+		return false;
+	}
 }
 
 //ps_configuration_t& Settings::getConfig() {

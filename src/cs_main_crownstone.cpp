@@ -314,7 +314,13 @@ void Crownstone::configureStack() {
 		//		bool wasScanning = _stack->isScanning();
 		//		_stack->stopScanning();
 
+		_stateVars->disableNotifications();
+
 		_stack->startAdvertising();
+
+		// [23.06.16] need to restart the mesh on disconnect, otherwise we have ~10s delay until the device starts
+		// advertising
+		_mesh->restart();
 
 		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
 		//   disconnecting from the device. just calling startAdvertising is enough
@@ -365,7 +371,7 @@ void Crownstone::configureAdvertisement() {
 	//! assign service data to stack
 	_stack->setServiceData(_serviceData);
 
-	if (Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {
+	if (_settings->isSet(CONFIG_IBEACON_ENABLED)) {
 		_stack->configureIBeacon(_beacon, DEVICE_TYPE);
 	} else {
 		_stack->configureBleDevice(DEVICE_TYPE);
@@ -477,7 +483,7 @@ void Crownstone::prepareCrownstone() {
 	_fridge = new Fridge;
 #endif
 
-//	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+//	if (_settings->isEnabled(CONFIG_MESH_ENABLED)) {
 
 #if HARDWARE_BOARD == VIRTUALMEMO
 			nrf_gpio_range_cfg_output(7,14);
@@ -526,13 +532,16 @@ void Crownstone::startUp() {
 	//! disabled
 	if (_operationMode == OPERATION_MODE_NORMAL) {
 
-#if (DEFAULT_ON==1)
-		LOGi("Set power ON by default");
-		_switch->turnOn();
-#elif (DEFAULT_ON==0)
-		LOGi("Set power OFF by default");
-		_switch->turnOff();
-#endif
+//#if (DEFAULT_ON==1)
+//		LOGi("Set power ON by default");
+//		_switch->turnOn();
+//#elif (DEFAULT_ON==0)
+//		LOGi("Set power OFF by default");
+//		_switch->turnOff();
+//#endif
+		uint8_t switchState;
+		_stateVars->get(STATE_SWITCH_STATE, switchState);
+		_switch->setValue(switchState);
 
 		//! start main tick
 		scheduleNextTick();
@@ -546,18 +555,18 @@ void Crownstone::startUp() {
 
 		_scheduler->start();
 
-		if (Settings::getInstance().isEnabled(CONFIG_SCANNER_ENABLED)) {
+		if (_settings->isSet(CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
 			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
 			_scanner->delayedStart(delay);
 		}
 
-		if (Settings::getInstance().isEnabled(CONFIG_TRACKER_ENABLED)) {
+		if (_settings->isSet(CONFIG_TRACKER_ENABLED)) {
 			_tracker->startTracking();
 		}
 
 //		_mesh->init();
-		if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
 			_mesh->start();
 		}
 
@@ -722,7 +731,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	default: return;
 	}
 
-	if (reconfigureBeacon && Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {
+	if (reconfigureBeacon && _settings->isSet(CONFIG_IBEACON_ENABLED)) {
 		_stack->updateAdvertisement();
 	}
 }

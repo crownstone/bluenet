@@ -37,7 +37,7 @@ public:
 
 private:
 
-	CommandHandler() : _stack(NULL) {}
+	CommandHandler();
 
 	Nrf51822BluetoothStack* _stack;
 

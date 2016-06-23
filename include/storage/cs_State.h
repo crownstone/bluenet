@@ -12,6 +12,8 @@
 #include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 
+#define SWITCH_STATE_PERSISTENT
+
 #define OPERATION_MODE_SETUP 0x00
 #define OPERATION_MODE_NORMAL 0x10
 #define OPERATION_MODE_DFU 0x01
@@ -28,12 +30,11 @@ typedef uint32_t seq_number_t;
 typedef uint32_t reset_counter_t;
 
 #define SWITCH_STATE_REDUNDANCY 10
-#define SWITCH_STATE_DEFAULT 0
 typedef uint32_t switch_state_t;
 
 #define ACCUMULATED_ENERGY_REDUNDANCY 72
 #define ACCUMULATED_ENERGY_DEFAULT 0
-typedef int64_t accumulated_energy_t;
+typedef int32_t accumulated_energy_t;
 
 /** Struct used to store elements that are changed frequently. each element
  *  will be stored separately. elements need to be 4 byte sized
@@ -160,6 +161,7 @@ public:
 
 	void setNotify(uint8_t type, bool enable);
 	bool isNotifying(uint8_t type);
+	void disableNotifications();
 
 protected:
 
@@ -178,7 +180,11 @@ protected:
 	//! counts application resets (only for debug purposes?)
 	CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY>* _resetCounter;
 	//! keeps track of the switch state, i.e. current PWM value
+#ifdef SWITCH_STATE_PERSISTENT
 	CyclicStorage<switch_state_t, SWITCH_STATE_REDUNDANCY>* _switchState;
+#else
+	uint8_t _switchState;
+#endif
 	//! keeps track of the accumulated power
 	CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY>* _accumulatedEnergy;
 

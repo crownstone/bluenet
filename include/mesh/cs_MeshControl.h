@@ -31,6 +31,8 @@ public:
 
 	void sendPowerSamplesMessage(power_samples_mesh_message_t* samples);
 
+	void sendServiceDataMessage(service_data_mesh_message_t* serviceData);
+
 	/** Send a message into the mesh
 	 *
 	 * @channel the channel number, see <MeshChannels>

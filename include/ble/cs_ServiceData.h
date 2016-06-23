@@ -20,9 +20,9 @@ public:
 		_params.powerUsage = powerUsage;
 	}
 
-//	void updateAccumulatedEnergy(int32_t accumulatedEnergy) {
-//		_params.accumulatedEnergy = accumulatedEnergy;
-//	}
+	void updateAccumulatedEnergy(int32_t accumulatedEnergy) {
+		_params.accumulatedEnergy = accumulatedEnergy;
+	}
 
 	void updateCrownstoneId(uint16_t crownstoneId) {
 		_params.crownstoneId = crownstoneId;

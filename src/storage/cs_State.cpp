@@ -8,6 +8,7 @@
 
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
+#include <storage/cs_Settings.h>
 
 #include <algorithm>
 
@@ -21,7 +22,7 @@ void debugprint(void * p_context) {
 
 State::State() :
 		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedEnergy(NULL),
-		_temperature(0), _powerUsage(0) {
+		_temperature(0), _powerUsage(0), _time(0) {
 
 }
 
@@ -42,8 +43,15 @@ void State::init() {
 	// stateVars struct!!
 	ps_state_t state;
 
+	bool defaultOn = Settings::getInstance().isSet(CONFIG_DEFAULT_ON);
+	switch_state_t defaultSwitchState = defaultOn ? 255 : 0;
+
+#ifdef SWITCH_STATE_PERSISTENT
 	_switchState = new CyclicStorage<switch_state_t, SWITCH_STATE_REDUNDANCY>(_stateHandle,
-	        Storage::getOffset(&state, state.switchState), SWITCH_STATE_DEFAULT);
+	        Storage::getOffset(&state, state.switchState), defaultSwitchState);
+#else
+	_switchState = defaultSwitchState;
+#endif
 	_resetCounter = new CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY>(_stateHandle,
 	        Storage::getOffset(&state, state.resetCounter), RESET_COUNTER_DEFAULT);
 	_accumulatedEnergy = new CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY>(_stateHandle,
@@ -61,7 +69,9 @@ void State::init() {
 void State::print() {
 #ifdef PRINT_DEBUG
 	LOGd("switch state:");
+#ifdef SWITCH_STATE_PERSISTENT
 	_switchState->print();
+#endif
 	LOGd("reset counter:");
 	_resetCounter->print();
 	LOGd("accumulated power:");
@@ -233,17 +243,21 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 	if (SUCCESS(error_code)) {
 		switch(type) {
 		case STATE_TEMPERATURE: {
-#ifdef PRINT_DEBUG
-			LOGd("Set temperature: %d", value);
-#endif
 			_temperature = *(int32_t*)target;
+//#ifdef PRINT_DEBUG
+//			LOGd("Set temperature: %d", _temperature);
+//#endif
 			break;
 		}
 		case STATE_SWITCH_STATE: {
 			uint8_t value = *(uint8_t*)target;
+#ifdef SWITCH_STATE_PERSISTENT
 			if (_switchState->read() != value) {
 				_switchState->store(value);
 			}
+#else
+			_switchState = value;
+#endif
 			break;
 		}
 		case STATE_OPERATION_MODE: {
@@ -264,14 +278,14 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_POWER_USAGE: {
-			_powerUsage = *(uint32_t*)target;
+			_powerUsage = *(int32_t*)target;
 			break;
 		}
 		case STATE_TIME: {
 			_time = *(uint32_t*)target;
-#ifdef PRINT_DEBUG
-			LOGd("set time: %d", _time);
-#endif
+//#ifdef PRINT_DEBUG
+//			LOGd("set time: %d", _time);
+//#endif
 			break;
 		}
 		case STATE_TRACKED_DEVICES: {
@@ -327,16 +341,20 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_SWITCH_STATE: {
+#ifdef SWITCH_STATE_PERSISTENT
 			*(uint8_t*)target = _switchState->read();
+#else
+			*(uint8_t*)target = _switchState;
+#endif
 #ifdef PRINT_DEBUG
 			LOGd("Read switch state: %d", *(uint8_t*)target);
 #endif
 			break;
 		}
 		case STATE_POWER_USAGE: {
-			*(uint32_t*)target = _powerUsage;
+			*(int32_t*)target = _powerUsage;
 #ifdef PRINT_DEBUG
-			LOGd("Read power usage: %d", *(uint32_t*)target);
+			LOGd("Read power usage: %d", *(int32_t*)target);
 #endif
 			break;
 		}
@@ -351,7 +369,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			Storage::getArray(_storageStruct.trackedDevices, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
 #ifdef PRINT_DEBUG
 			LOGd("Read tracked devices:");
-			BLEutil::printArray(buffer, size);
+			BLEutil::printArray((buffer_ptr_t)target, size);
 #endif
 			break;
 		}
@@ -359,7 +377,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			Storage::getArray(_storageStruct.scheduleList, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
 #ifdef PRINT_DEBUG
 			LOGd("Read schedule list:");
-			BLEutil::printArray(buffer, size);
+			BLEutil::printArray((buffer_ptr_t)target, size);
 #endif
 			break;
 		}
@@ -433,6 +451,10 @@ void State::setNotify(uint8_t type, bool enable) {
 	}
 }
 
+void State::disableNotifications() {
+	_notifyingStates.clear();
+}
+
 void State::factoryReset(uint32_t resetCode) {
 	if (resetCode != FACTORY_RESET_CODE) {
 		LOGe("wrong reset code!");
@@ -450,7 +472,9 @@ void State::factoryReset(uint32_t resetCode) {
 //	loadPersistentStorage();
 
 	// reset the cyclic storage objects
+#ifdef SWITCH_STATE_PERSISTENT
 	_switchState->reset();
+#endif
 	_resetCounter->reset();
 	_accumulatedEnergy->reset();
 }

@@ -25,7 +25,18 @@
 
 #include <storage/cs_Settings.h>
 
-Mesh::Mesh() : _appTimerId(-1) {
+void start_stop_mesh(void * p_event_data, uint16_t event_size) {
+	if (*(bool*)p_event_data) {
+		LOGi("mesh start");
+		rbc_mesh_start();
+	} else {
+		LOGi("mesh stop");
+		rbc_mesh_stop();
+	}
+}
+
+
+Mesh::Mesh() : _appTimerId(-1), started(false) {
 	MeshControl::getInstance();
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Mesh::staticTick);
 }
@@ -35,13 +46,19 @@ Mesh::~Mesh() {
 }
 
 void Mesh::start() {
+	started = true;
 	startTicking();
-	rbc_mesh_start();
+	app_sched_event_put(&started, sizeof(started), start_stop_mesh);
 }
 
 void Mesh::stop() {
+	started = false;
 	stopTicking();
-	rbc_mesh_stop();
+	app_sched_event_put(&started, sizeof(started), start_stop_mesh);
+}
+
+void Mesh::restart() {
+	rbc_mesh_restart();
 }
 
 void Mesh::tick() {
@@ -97,7 +114,7 @@ void Mesh::init() {
 	// do not automatically start meshing, wait for the start command
 //	rbc_mesh_stop();
 
-	if (!Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+	if (!Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		LOGi("mesh not enabled");
 		rbc_mesh_stop();
 		// [16.06.16] need to execute app scheduler, otherwise pstorage
@@ -112,7 +129,7 @@ void Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 
 //	LOGd("send ch: %d, len: %d", handle, length);
 	//BLEutil::printArray((uint8_t*)p_data, length);
-	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
 	}
 }
@@ -120,7 +137,7 @@ void Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 bool Mesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
 	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
 
-	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)*p_data, &length));
 	}
 	//LOGi("recv ch: %d, len: %d", handle, length);

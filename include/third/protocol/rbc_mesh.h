@@ -210,6 +210,8 @@ uint32_t rbc_mesh_start(void);
 */
 uint32_t rbc_mesh_stop(void);
 
+uint32_t rbc_mesh_restart(void);
+
 /**
 * @brief Set the contents of the data array pointed to by the provided handle
 * 

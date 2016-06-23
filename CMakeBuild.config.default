@@ -153,12 +153,6 @@ SCAN_DURATION=2000
 SCAN_SEND_DELAY=1000
 SCAN_BREAK_DURATION=7000
 
-# Defines time interval in ms between two calls to sample power,
-# i.e., 500 ms between each sample
-SAMPLING_INTERVAL=500
-# Define how long one sample should be in ms
-SAMPLING_TIME=50
-
 # Default scan filter (do not report these devices in scan result)
 # Using a bit mask, set corresponding bits to 1 to filter device OUT
 # CROWNSTONE    0

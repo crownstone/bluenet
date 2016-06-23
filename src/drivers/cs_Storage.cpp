@@ -21,6 +21,8 @@
 #include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
 
+#include <mesh/cs_Mesh.h>
+
 extern "C"  {
 
 	static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
@@ -35,6 +37,9 @@ extern "C"  {
 			APP_ERROR_CHECK(result);
 		} else {
 			LOGd("Opcode %i executed (no error)", op_code);
+			if (op_code == PSTORAGE_UPDATE_OP_CODE) {
+				Storage::getInstance().onUpdateDone();
+			}
 		}
 	}
 
@@ -78,9 +83,41 @@ void Storage::init() {
 	_initialized = true;
 }
 
+void Storage::onUpdateDone() {
+	// track how many update requests are still pending
+	_pending--;
+	// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
+	if (!_pending && Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+		Mesh::getInstance().start();
+	}
+}
+
+void resume_requests(void* p_data, uint16_t len) {
+	Storage::getInstance().resumeRequests();
+}
+
+void storage_sys_evt_handler(uint32_t evt) {
+	switch(evt) {
+	case NRF_EVT_RADIO_SESSION_IDLE: {
+		// once mesh is stopped, the softdevice will trigger the NRF_EVT_RADIO_SESSION_IDLE,
+		// now we can try to update the pstorage
+		LOGi("NRF_EVT_RADIO_SESSION_IDLE");
+		app_sched_event_put(NULL, 0, resume_requests);
+		break;
+	}
+//	case NRF_EVT_RADIO_SESSION_CLOSED: {
+//		LOGi("NRF_EVT_RADIO_SESSION_CLOSED");
+////			Storage::getInstance().resumeRequests();
+//		app_sched_event_put(NULL, 0, resume_requests);
+//		break;
+//	}
+	}
+}
+
 void Storage::resumeRequests() {
 	if (!writeBuffer.empty()) {
 		LOGd("Resume pstorage write requests");
+
 		while (!writeBuffer.empty()) {
 			//! get the next buffered storage request
 			buffer_element_t elem = writeBuffer.pop();
@@ -89,12 +126,15 @@ void Storage::resumeRequests() {
 //			BLEutil::printArray((uint8_t*)&elem, sizeof(elem));
 
 			if (!_scanning) {
+				LOGi("pstorage_update");
+				// count number of pending updates to decide when mesh can be resumed (if needed)
+				_pending++;
 				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
 			} else {
 				// if scanning was started again, push it back on the buffer and try again during the next
 				// scan break
 				writeBuffer.push(elem);
-				LOGe("scan started before all pstorage write requestss were processed!");
+				LOGe("scan started before all pstorage write requests were processed!");
 				return;
 			}
 
@@ -103,21 +143,27 @@ void Storage::resumeRequests() {
 	}
 }
 
-void resume_requests(void* p_data, uint16_t len) {
-	Storage::getInstance().resumeRequests();
-}
-
 void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 	switch(evt) {
 	case EVT_SCAN_STARTED: {
+		LOGi("EVT_SCAN_STARTED");
 		_scanning = true;
 		break;
 	}
 	case EVT_SCAN_STOPPED: {
+		LOGi("EVT_SCAN_STOPPED");
 		_scanning = false;
+
+		// if there are pstorage update requests buffered
 		if (!writeBuffer.empty()) {
-			app_sched_event_put(NULL, 0, resume_requests);
+			// if meshing, need to stop the mesh first before updating pstorage
+			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED))	{
+				Mesh::getInstance().stop();
+			} else {
+				// otherwise, resume buffered pstorage update requests
+				app_sched_event_put(NULL, 0, resume_requests);
+			}
 		}
 		break;
 	}
@@ -220,13 +266,18 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
 
-	// [31.05.16] it seems it was not (or not anymore) the meshing that is causing issues with pstorage,
-	//    but the scanning. If the device is scanning, then pstorage_updates are queued by the softdevice.
-	//    unfortunately, they are not automatically resumed once the device stops scanning. they are staying
-	//    queued until the first pstorage_update is called while the device is not scanning. to avoid this, we
-	//    queue the write calls ourselves, and only trigger the pstorage_update calls once the device stopped
-	//    scanning
-	if (_scanning) {
+	// [23.06.16] If the device is scanning or meshing, then pstorage_updates are queued by the softdevice.
+	//    unfortunately, they are not automatically resumed once the softdevice has time to process them. they
+	//    are staying queued until the first pstorage_update is called while the device is not scanning. to
+	//    avoid this, we queue the write calls ourselves, and only trigger the pstorage_update calls once the
+	//    device stopped scanning and meshing
+
+	bool meshEnabled = Settings::getInstance().isSet(CONFIG_MESH_ENABLED);
+
+	// if scanning or meshing, we need to buffer the storage update requests until the softdevice has time to process
+	// the pstorage. this is only possible if not scanning and mesh is stopped.
+	if (_scanning || meshEnabled) {
+		LOGi("buffer storage request")
 		if (!writeBuffer.full()) {
 			buffer_element_t elem;
 			elem.storageHandle = block_handle;
@@ -237,8 +288,15 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 		} else {
 			LOGe("storage request buffer is full!");
 		}
+
+		// if not scanning, stop the mesh and wait for the NRF_EVT_RADIO_SESSION_IDLE to arrive to access pstorage
+		// if scannig, wait for the EVT_SCAN_STOPPED
+		if (meshEnabled && !_scanning) {
+			Mesh::getInstance().stop();
+		}
 	} else {
-    	BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
+		// if neither scanning nor meshing, call the update directly
+		BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
 	}
 
 }

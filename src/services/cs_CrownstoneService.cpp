@@ -230,6 +230,10 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 						_streamBuffer->setOpCode(READ_VALUE);
 						_configurationReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
 						_configurationReadCharacteristic->notify();
+						LOGi("success");
+						mb.unlock();
+						return; // need to return here to avoid writing error_code, which would overwrite
+								// the read value on the read characteristic !!
 					} else {
 						LOGe("Failed to read from storage");
 					}
@@ -240,8 +244,10 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 					uint8_t length = _streamBuffer->length();
 
 					error_code = Settings::getInstance().writeToStorage(type, payload, length);
+				} else {
+					error_code = ERR_UNKNOWN_OP_CODE;
 				}
-				error_code = ERR_UNKNOWN_OP_CODE;
+
 				mb.unlock();
 			} else {
 				LOGe(MSG_BUFFER_IS_LOCKED);
@@ -297,16 +303,8 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 				uint8_t opCode = _streamBuffer->opCode();
 
 				if (opCode == READ_VALUE || opCode == NOTIFY_VALUE) {
-					LOGi("Read state");
-					error_code = State::getInstance().readFromStorage(type, _streamBuffer);
-					if (SUCCESS(error_code)) {
-						_streamBuffer->setOpCode(READ_VALUE);
-						_stateReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
-						_stateReadCharacteristic->notify();
-					}
-
 					if (opCode == NOTIFY_VALUE) {
-						LOGi("State notification");
+						LOGi("State notification, len: %d", _streamBuffer->length());
 						if (_streamBuffer->length() == 1) {
 							bool enable = *((bool*) _streamBuffer->payload());
 							State::getInstance().setNotify(type, enable);
@@ -316,12 +314,25 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 							error_code = ERR_WRONG_PAYLOAD_LENGTH;
 						}
 					}
+
+					LOGi("Read state");
+					error_code = State::getInstance().readFromStorage(type, _streamBuffer);
+					if (SUCCESS(error_code)) {
+						_streamBuffer->setOpCode(READ_VALUE);
+						_stateReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
+						_stateReadCharacteristic->notify();
+						LOGi("success");
+						mb.unlock();
+						return; // need to return here to avoid writing error_code, which would overwrite
+								// the read value on the read characteristic !!
+					}
 				} else if (opCode == WRITE_VALUE) {
 					LOGi("Write state");
 					error_code = State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length());
+				} else {
+					error_code = ERR_UNKNOWN_OP_CODE;
 				}
 
-				error_code = ERR_UNKNOWN_OP_CODE;
 				mb.unlock();
 			} else {
 				LOGe(MSG_BUFFER_IS_LOCKED);

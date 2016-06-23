@@ -31,9 +31,9 @@ void sys_evt_dispatch(uint32_t sys_evt) {
     pstorage_sys_event_handler(sys_evt);
 
     Settings& settings = Settings::getInstance();
-    if (settings.isInitialized() && settings.isEnabled(CONFIG_MESH_ENABLED)) {
+    if (settings.isInitialized() && settings.isSet(CONFIG_MESH_ENABLED)) {
 		rbc_mesh_sd_evt_handler(sys_evt);
-//		storage_sys_evt_handler(sys_evt);
+		storage_sys_evt_handler(sys_evt);
     }
 
 }

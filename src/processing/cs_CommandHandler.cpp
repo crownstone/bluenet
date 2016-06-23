@@ -37,15 +37,14 @@ void reset(void* p_context) {
 	sd_nvic_SystemReset();
 }
 
-void stop_mesh(void* p_context) {
-	Mesh::getInstance().stop();
-}
-
 void reset_delayed(uint8_t opCode) {
 	static uint8_t restOpCode = opCode;
 	app_timer_id_t resetTimer;
 	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
 	Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &restOpCode);
+}
+
+CommandHandler::CommandHandler() : _stack(NULL) {
 }
 
 ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type) {
@@ -141,11 +140,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		if (enable) {
 			Mesh::getInstance().start();
 		} else {
-			//! breaks if it is called directly...
-//			Mesh::getInstance().stop();
-			app_timer_id_t meshStopTimer;
-			Timer::getInstance().createSingleShot(meshStopTimer, (app_timer_timeout_handler_t) stop_mesh);
-			Timer::getInstance().start(meshStopTimer, MS_TO_TICKS(100), NULL);
+			Mesh::getInstance().stop();
 		}
 
 		break;
@@ -264,10 +259,32 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, dataLength);
 
-			if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 				MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
 			}
 		}
+
+		break;
+	}
+	case CMD_REQUEST_SERVICE_DATA: {
+		LOGi("handle request service data");
+
+		service_data_mesh_message_t serviceData;
+		memset(&serviceData, 0, sizeof(serviceData));
+
+		State& state = State::getInstance();
+		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &serviceData.crownstoneId);
+
+		state.get(STATE_SWITCH_STATE, serviceData.switchState);
+
+		// todo get event bitmask
+		serviceData.eventBitmask = 9;
+
+		state.get(STATE_POWER_USAGE, (int32_t&)serviceData.powerUsage);
+		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)serviceData.accumulatedEnergy);
+		state.get(STATE_TEMPERATURE, (int32_t&)serviceData.temperature);
+
+		MeshControl::getInstance().sendServiceDataMessage(&serviceData);
 
 		break;
 	}

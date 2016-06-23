@@ -71,7 +71,7 @@ extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 //	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
 
-	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		//!  pass the incoming BLE event to the mesh framework
 		rbc_mesh_ble_evt_handler(p_ble_evt);
 	}
@@ -577,10 +577,11 @@ void Nrf51822BluetoothStack::startScanning() {
 	//! No devices in whitelist, hence non selective performed.
 	p_scan_params.active = 1;            //! Active scanning set.
 	p_scan_params.selective = 0;            //! Selective scanning not set.
-	p_scan_params.interval = SCAN_INTERVAL;            //! Scan interval.
-	p_scan_params.window = SCAN_WINDOW;  //! Scan window.
 	p_scan_params.p_whitelist = NULL;         //! No whitelist provided.
 	p_scan_params.timeout = 0x0000;       //! No timeout.
+
+	Settings::getInstance().get(CONFIG_SCAN_INTERVAL, &p_scan_params.interval);
+	Settings::getInstance().get(CONFIG_SCAN_WINDOW, &p_scan_params.window);
 
 	//! todo: which fields to set here?
 	BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params));
@@ -741,7 +742,9 @@ void Nrf51822BluetoothStack::lowPowerTimeout(void* p_context) {
 }
 
 void Nrf51822BluetoothStack::changeToLowPowerMode() {
-	setTxPowerLevel(LOW_TX_POWER);
+	int8_t lowTxPower;
+	Settings::getInstance().get(CONFIG_LOW_TX_POWER, &lowTxPower);
+	setTxPowerLevel(lowTxPower);
 }
 
 void Nrf51822BluetoothStack::changeToNormalPowerMode() {
