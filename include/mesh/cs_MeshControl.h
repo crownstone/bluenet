@@ -9,6 +9,7 @@
 #pragma once
 
 #include <protocol/cs_MeshMessageTypes.h>
+#include <storage/cs_Settings.h>
 
 /** Wrapper around meshing functionality.
  *
@@ -63,13 +64,24 @@ protected:
 	 *
 	 * @msg pointer to the message data
 	 */
-	void decodeDataMessage(device_mesh_message_t* msg);
+	void decodeDataMessage(uint16_t type, uint8_t* payload);
 
 	/** Check if a message is for us, meaning the current device.
 	 * Checks the target address and returns true if targetAddress == myAddress
 	 *
 	 * @p_data pointer to the mesh message
 	 */
+
+#ifdef VERSION_V2
+    bool isMessageForUs(void* p_data) {
+    	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
+
+    	uint16_t crownstoneId;
+    	Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+
+    	return msg->header.targetCrownstoneId == crownstoneId;
+    }
+#else
     bool isMessageForUs(void* p_data) {
     	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 
@@ -82,16 +94,27 @@ protected:
 			return false;
     	}
     }
+#endif
+
 
 	/** Check if a message is a broadcast
 	 * Checks the target address and returns true if targetAddress == BROADCAST_ADDRESS
 	 *
 	 * @p_data pointer to the mesh message
 	 */
+
+#ifdef VERSION_V2
+    bool isBroadcast(void* p_data) {
+    	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
+    	return msg->header.targetCrownstoneId == 0;
+    }
+#else
     bool isBroadcast(void* p_data) {
     	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
     	return memcmp(msg->header.targetAddress, new uint8_t[BLE_GAP_ADDR_LEN] BROADCAST_ADDRESS, BLE_GAP_ADDR_LEN) == 0;
     }
+#endif
+
 
 	/** Check if a message is valid
 	 * Checks the length parameter based on the type of the mesh message
@@ -99,6 +122,7 @@ protected:
 	 * @p_data pointer to the mesh message
 	 * @length number of bytes received
 	 */
+
 	bool isValidMessage(void* p_data, uint16_t length) {
 		device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 
@@ -139,6 +163,55 @@ protected:
 			return 0;
 		}
 	}
+
+#ifdef VERSION_V2
+	hub_mesh_message_t* createHubMessage(uint16_t messageType) {
+		hub_mesh_message_t* message = new hub_mesh_message_t();
+		memset(message, 0, sizeof(hub_mesh_message_t));
+    	Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &message->header.sourceCrownstoneId);
+		message->header.messageType = messageType;
+		return message;
+	}
+#else
+	hub_mesh_message_t* createHubMessage(uint16_t messageType) {
+		hub_mesh_message_t* message = new hub_mesh_message_t();
+		memset(message, 0, sizeof(hub_mesh_message_t));
+		memcpy(&message->header.sourceAddress, &_myAddr.addr, BLE_GAP_ADDR_LEN);
+		return message;
+	}
+#endif
+
+#ifdef VERSION_V2
+	std::string getTargetAddress(device_mesh_message_t* msg) {
+		char buffer[32];
+		sprintf(buffer, "%d", msg->header.targetCrownstoneId);
+		return std::string(buffer);
+	}
+#else
+	std::string getTargetAddress(device_mesh_message_t* msg) {
+		char buffer[32];
+		sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X", msg->header.targetAddress[5],
+					msg->header.targetAddress[4], msg->header.targetAddress[3], msg->header.targetAddress[2],
+					msg->header.targetAddress[1], msg->header.targetAddress[0]);
+		return std::string(buffer);
+	}
+#endif
+
+#ifdef VERSION_V2
+	std::string getSourceAddress(hub_mesh_message_t* msg) {
+		char buffer[32];
+		sprintf(buffer, "%d", msg->header.sourceCrownstoneId);
+		return std::string(buffer);
+	}
+#else
+	std::string getSourceAddress(hub_mesh_message_t* msg) {
+		char buffer[32];
+		sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X", msg->header.sourceAddress[5],
+					msg->header.sourceAddress[4], msg->header.sourceAddress[3], msg->header.sourceAddress[2],
+					msg->header.sourceAddress[1], msg->header.sourceAddress[0]);
+		return std::string(buffer);
+	}
+#endif
 
 private:
 	MeshControl();

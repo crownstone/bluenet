@@ -56,9 +56,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		switch(msg->header.messageType) {
 		case SCAN_MESSAGE: {
 
-			LOGd("Device %02X %02X %02X %02X %02X %02X scanned these devices:", msg->header.sourceAddress[5],
-					msg->header.sourceAddress[4], msg->header.sourceAddress[3], msg->header.sourceAddress[2],
-					msg->header.sourceAddress[1], msg->header.sourceAddress[0]);
+			LOGd("Crownstone %s scanned these devices:", getSourceAddress(msg).c_str());
 			if (msg->scanMsg.numDevices > NR_DEVICES_PER_MESSAGE) {
 				LOGe("Invalid number of devices!");
 			}
@@ -79,9 +77,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 			break;
 		}
 		case SERVICE_DATA_MESSAGE: {
-			LOGd("received service data from: %02X:%02X:%02X:%02X:%02X:%02X", msg->header.sourceAddress[5],
-					msg->header.sourceAddress[4], msg->header.sourceAddress[3], msg->header.sourceAddress[2],
-					msg->header.sourceAddress[1], msg->header.sourceAddress[0]);
+			LOGd("received service data from crownstone %s", getSourceAddress(msg).c_str());
 
 			service_data_mesh_message_t& sd = msg->serviceDataMsg;
 			LOGd("> crownstone id: %d", sd.crownstoneId);
@@ -134,10 +130,9 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
 
 			device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
-			decodeDataMessage(msg);
+			decodeDataMessage(msg->header.messageType, msg->payload);
 		} else {
-			_log(INFO, "Message not for us: ");
-			BLEutil::printArray(((device_mesh_message_t*)p_data)->header.targetAddress, BLE_GAP_ADDR_LEN);
+			LOGi("Message not for us: %s", getTargetAddress((device_mesh_message_t*)p_data).c_str());
 		}
 
 		break;
@@ -161,29 +156,32 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 	case 19:
 	case 20: {
 		hub_mesh_message_t* msg = (hub_mesh_message_t*) p_data;
-		LOGd("power samples: h=%u addr=%u:%u:%u:%u:%u:%u", channel, msg->header.sourceAddress[0], msg->header.sourceAddress[1], msg->header.sourceAddress[2], msg->header.sourceAddress[3], msg->header.sourceAddress[4], msg->header.sourceAddress[5]);
+		LOGd("power samples: h=%u src id=%s", channel, getSourceAddress(msg).c_str());
 		break;
 	}
 	}
 }
 
-void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 
-	switch(msg->header.messageType) {
+void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
+
+	switch(type) {
 	case EVENT_MESSAGE: {
 		break;
 	}
 	case CONFIG_MESSAGE: {
-		uint8_t type = msg->configMsg.type;
-		uint16_t length = msg->configMsg.length;
-		uint8_t* payload = msg->configMsg.payload;
+		config_mesh_message_t* msg = (config_mesh_message_t*)payload;
+		uint8_t type = msg->type;
+		uint16_t length = msg->length;
+		uint8_t* payload = msg->payload;
 		Settings::getInstance().writeToStorage(type, payload, length);
 		break;
 	}
 	case CONTROL_MESSAGE: {
-		CommandHandlerTypes command = (CommandHandlerTypes)msg->commandMsg.type;
-		uint16_t length = msg->commandMsg.length;
-		uint8_t* payload = msg->commandMsg.payload;
+		control_mesh_message_t* msg = (control_mesh_message_t*)payload;
+		CommandHandlerTypes command = (CommandHandlerTypes)msg->type;
+		uint16_t length = msg->length;
+		uint8_t* msgPayload = msg->payload;
 
 		switch(command) {
 		case CMD_ENABLE_SCANNER: {
@@ -191,28 +189,32 @@ void MeshControl::decodeDataMessage(device_mesh_message_t* msg) {
 			//! the devices in the mesh will start scanning at the same time
 			//! resulting in lots of conflicts
 			RNG rng;
-			enable_scanner_message_payload_t* pl = (enable_scanner_message_payload_t*)payload;
-			pl->delay = rng.getRandom16() / 1; //! Delay in ms (about 0-60 seconds)
+			enable_scanner_message_payload_t* pl = (enable_scanner_message_payload_t*)msgPayload;
+			// todo: can't edit the delay on the original payload, otherwise the mesh goes crazy with
+			//   conflicting values. so for now we make a local copy
+			enable_scanner_message_payload_t scannerPayload = *pl;
+			scannerPayload.delay = rng.getRandom16() / 1; //! Delay in ms (about 0-60 seconds)
 
-			length = 3;
+			CommandHandler::getInstance().handleCommand(command, (uint8_t*)&scannerPayload, 3);
 			break;
 		}
 		default:
 			break;
 		}
 
-		CommandHandler::getInstance().handleCommand(command, payload, length);
+		CommandHandler::getInstance().handleCommand(command, msgPayload, length);
 		break;
 	}
 	case BEACON_MESSAGE: {
 
 		LOGi("Received Beacon Message");
+		beacon_mesh_message_t* msg = (beacon_mesh_message_t*)payload;
 		//		BLEutil::printArray((uint8_t*)msg, sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t));
 
-		uint16_t major = msg->beaconMsg.major;
-		uint16_t minor = msg->beaconMsg.minor;
-		ble_uuid128_t& uuid = msg->beaconMsg.uuid;
-		int8_t& rssi = msg->beaconMsg.txPower;
+		uint16_t major = msg->major;
+		uint16_t minor = msg->minor;
+		ble_uuid128_t& uuid = msg->uuid;
+		int8_t& rssi = msg->txPower;
 
 		Settings& settings = Settings::getInstance();
 
@@ -310,7 +312,8 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 			// [30.05.16] as long as we don't call this function in an interrupt, we don't need to
 			//   decouple it anymore, because softdevice events are handled already by the scheduler
 			//	 BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
-			decodeDataMessage((device_mesh_message_t*)p_data);
+			device_mesh_message_t* msg = (device_mesh_message_t*)p_data;
+			decodeDataMessage(msg->header.messageType, msg->payload);
 
 		} else if (!isMessageForUs(p_data)) {
 			//! message is not for us, send it into mesh
@@ -322,7 +325,8 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 			// [30.05.16] as long as we don't handle this in an interrupt, we don't need to
 			//   decouple it anymore, because softdevice events are handled already by the scheduler
 			//	 BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message)););
-			decodeDataMessage((device_mesh_message_t*)p_data);
+			device_mesh_message_t* msg = (device_mesh_message_t*)p_data;
+			decodeDataMessage(msg->header.messageType, msg->payload);
 		}
 
 		break;
@@ -358,21 +362,30 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
 	//! if no devices were scanned there is no reason to send a message!
 	if (size > 0) {
-		hub_mesh_message_t message;
-		memset(&message, 0, sizeof(message));
-		memcpy(&message.header.sourceAddress, &_myAddr.addr, BLE_GAP_ADDR_LEN);
-		message.header.messageType = SCAN_MESSAGE;
-		message.scanMsg.numDevices = size;
-		memcpy(&message.scanMsg.list, p_list, size * sizeof(peripheral_device_t));
+		hub_mesh_message_t* message = createHubMessage(SCAN_MESSAGE);
+		message->scanMsg.numDevices = size;
+		memcpy(&message->scanMsg.list, p_list, size * sizeof(peripheral_device_t));
 
 		LOGi("message data:");
-		BLEutil::printArray(&message, sizeof(message));
+		BLEutil::printArray(message, sizeof(hub_mesh_message_t));
 
-		Mesh::getInstance().send(HUB_CHANNEL, &message, sizeof(message));
+		Mesh::getInstance().send(HUB_CHANNEL, message, sizeof(hub_mesh_message_t));
+		free(message);
 	}
 
 }
 
+#ifdef VERSION_V2
+void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples) {
+//	LOGd("sendPowerSamplesMessage");
+	hub_mesh_message_t* message = createHubMessage(POWER_SAMPLES_MESSAGE);
+	memcpy(&message->powerSamplesMsg, samples, sizeof(power_samples_mesh_message_t));
+//	uint16_t handle = (message.header.sourceAddress[0] % (MESH_NUM_OF_CHANNELS-2)) + 3;
+	uint16_t handle = (message->header.sourceCrownstoneId % (MESH_NUM_OF_CHANNELS-2-1)) + 3;
+	Mesh::getInstance().send(handle, message, sizeof(hub_mesh_message_t));
+	free(message);
+}
+#else
 void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples) {
 //	LOGd("sendPowerSamplesMessage");
 	hub_mesh_message_t message;
@@ -383,21 +396,21 @@ void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples)
 	uint16_t handle = (message.header.sourceAddress[0] % (MESH_NUM_OF_CHANNELS-2-1)) + 3;
 	Mesh::getInstance().send(handle, &message, sizeof(message));
 }
+#endif
 
 void MeshControl::sendServiceDataMessage(service_data_mesh_message_t* serviceData) {
 	LOGd("send service data");
 
-	hub_mesh_message_t message;
-	memset(&message, 0, sizeof(message));
-	memcpy(&message.header.sourceAddress, &_myAddr.addr, BLE_GAP_ADDR_LEN);
-	message.header.messageType = SERVICE_DATA_MESSAGE;
-	memcpy(&message.serviceDataMsg, serviceData, sizeof(service_data_mesh_message_t));
+	hub_mesh_message_t* message = createHubMessage(SERVICE_DATA_MESSAGE);
+	memcpy(&message->serviceDataMsg, serviceData, sizeof(service_data_mesh_message_t));
 
 	LOGi("message data:");
-	BLEutil::printArray(&message, sizeof(message));
+	BLEutil::printArray(message, sizeof(hub_mesh_message_t));
 
-	Mesh::getInstance().send(HUB_CHANNEL, &message, sizeof(message));
+	Mesh::getInstance().send(HUB_CHANNEL, message, sizeof(hub_mesh_message_t));
+	free(message);
 }
+
 
 //void MeshControl::reset() {
 ////	LOGw("reset due to mesh timeout");
