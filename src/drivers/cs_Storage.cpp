@@ -76,7 +76,7 @@ void Storage::init() {
 //	requestBuffer = new CircularBuffer<buffer_element_t>(STORAGE_REQUEST_BUFFER_SIZE, false);
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
-		LOGi("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
+		LOGd("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
 		initBlocks(config[i].storage_size, 1, config[i].handle);
 	}
 
@@ -88,6 +88,7 @@ void Storage::onUpdateDone() {
 	_pending--;
 	// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
 	if (!_pending && Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+		LOGd("update done, resume mesh");
 		Mesh::getInstance().start();
 	}
 }
@@ -101,12 +102,12 @@ void storage_sys_evt_handler(uint32_t evt) {
 	case NRF_EVT_RADIO_SESSION_IDLE: {
 		// once mesh is stopped, the softdevice will trigger the NRF_EVT_RADIO_SESSION_IDLE,
 		// now we can try to update the pstorage
-		LOGi("NRF_EVT_RADIO_SESSION_IDLE");
+		LOGd("NRF_EVT_RADIO_SESSION_IDLE");
 		app_sched_event_put(NULL, 0, resume_requests);
 		break;
 	}
 //	case NRF_EVT_RADIO_SESSION_CLOSED: {
-//		LOGi("NRF_EVT_RADIO_SESSION_CLOSED");
+//		LOGd("NRF_EVT_RADIO_SESSION_CLOSED");
 ////			Storage::getInstance().resumeRequests();
 //		app_sched_event_put(NULL, 0, resume_requests);
 //		break;
@@ -122,11 +123,11 @@ void Storage::resumeRequests() {
 			//! get the next buffered storage request
 			buffer_element_t elem = writeBuffer.pop();
 
-//			LOGi("elem:");
+//			LOGd("elem:");
 //			BLEutil::printArray((uint8_t*)&elem, sizeof(elem));
 
 			if (!_scanning) {
-				LOGi("pstorage_update");
+				LOGd("pstorage_update");
 				// count number of pending updates to decide when mesh can be resumed (if needed)
 				_pending++;
 				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
@@ -138,7 +139,7 @@ void Storage::resumeRequests() {
 				return;
 			}
 
-//			LOGi("update done");
+//			LOGd("update done");
 		}
 	}
 }
@@ -147,18 +148,19 @@ void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 	switch(evt) {
 	case EVT_SCAN_STARTED: {
-		LOGi("EVT_SCAN_STARTED");
+		LOGd("EVT_SCAN_STARTED");
 		_scanning = true;
 		break;
 	}
 	case EVT_SCAN_STOPPED: {
-		LOGi("EVT_SCAN_STOPPED");
+		LOGd("EVT_SCAN_STOPPED");
 		_scanning = false;
 
 		// if there are pstorage update requests buffered
 		if (!writeBuffer.empty()) {
 			// if meshing, need to stop the mesh first before updating pstorage
 			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED))	{
+				LOGd("stop mesh on scan stop");
 				Mesh::getInstance().stop();
 			} else {
 				// otherwise, resume buffered pstorage update requests
@@ -277,7 +279,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 	// if scanning or meshing, we need to buffer the storage update requests until the softdevice has time to process
 	// the pstorage. this is only possible if not scanning and mesh is stopped.
 	if (_scanning || meshEnabled) {
-		LOGi("buffer storage request")
+		LOGd("buffer storage request")
 		if (!writeBuffer.full()) {
 			buffer_element_t elem;
 			elem.storageHandle = block_handle;
@@ -292,6 +294,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 		// if not scanning, stop the mesh and wait for the NRF_EVT_RADIO_SESSION_IDLE to arrive to access pstorage
 		// if scannig, wait for the EVT_SCAN_STOPPED
 		if (meshEnabled && !_scanning) {
+			LOGd("stop mesh on pstorage update");
 			Mesh::getInstance().stop();
 		}
 	} else {
@@ -311,9 +314,9 @@ pstorage_size_t Storage::getOffset(ps_storage_base_t* storage, uint8_t* var) {
 	pstorage_size_t offset = p_var - p_storage;
 
 #ifdef PRINT_ITEMS
-	LOGi("p_storage: %p", p_storage);
-	LOGi("var: %p", p_var);
-	LOGi("offset: %d", offset);
+	LOGd("p_storage: %p", p_storage);
+	LOGd("var: %p", p_var);
+	LOGd("offset: %d", offset);
 #endif
 
 	return offset;
@@ -394,7 +397,7 @@ void Storage::getUint8(uint32_t value, uint8_t* target, uint8_t default_value) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
 	// check if last byte is FF which means that memory is unnassigned
@@ -421,7 +424,7 @@ void Storage::getInt8(int32_t value, int8_t* target, int8_t default_value) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
 	// check if last byte is FF which means that memory is unnassigned
@@ -447,7 +450,7 @@ void Storage::getUint16(uint32_t value, uint16_t* target, uint16_t default_value
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
 	// check if last byte is FF which means that memory is unnassigned
@@ -478,7 +481,7 @@ void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
 	// check if value is equal to INT_MAX (FFFFFFFF) which means that memory is

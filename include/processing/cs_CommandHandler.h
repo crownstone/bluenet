@@ -19,6 +19,12 @@ extern "C" {
 
 using namespace BLEpp;
 
+struct delayed_command_t {
+	CommandHandlerTypes type;
+	uint16_t size;
+	buffer_ptr_t buffer;
+};
+
 class CommandHandler {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
@@ -35,11 +41,17 @@ public:
 
 	ERR_CODE handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size);
 
+	ERR_CODE handleCommandDelayed(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, uint32_t delay);
+
 private:
 
 	CommandHandler();
 
+	void resetDelayed(uint8_t opCode);
+
 	Nrf51822BluetoothStack* _stack;
+
+	app_timer_id_t _delayTimer;
 
 };
 

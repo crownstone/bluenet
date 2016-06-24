@@ -113,20 +113,38 @@ struct __attribute__((__packed__)) service_data_mesh_message_t {
 };
 
 
-#ifdef VERSION_V2
-/** Device mesh header
+//#ifdef VERSION_V2
+
+/** mesh header
  */
-struct __attribute__((__packed__)) device_mesh_header_t {
-	uint16_t targetCrownstoneId;
+struct __attribute__((__packed__)) mesh_header_v2_t {
+	uint16_t crownstoneId;
 	uint16_t reason;
 	uint16_t userId;
 	uint16_t messageType;
 };
 
+//#else
+
+/** mesh header
+ */
+struct __attribute__((__packed__)) mesh_header_t {
+	uint8_t address[BLE_GAP_ADDR_LEN];
+	uint16_t messageType;
+};
+
+//#endif
+
+
+struct __attribute__((__packed__)) mesh_message_t {
+	mesh_header_t header;
+	uint8_t payload[1]; // dynamic size
+};
+
 /** Device mesh message
  */
 struct __attribute__((__packed__)) device_mesh_message_t {
-	device_mesh_header_t header;
+	mesh_header_t header;
 	union {
 		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
 		event_mesh_message_t evtMsg;
@@ -136,13 +154,13 @@ struct __attribute__((__packed__)) device_mesh_message_t {
 	};
 };
 
-struct __attribute__((__packed__)) hub_mesh_header_t {
-	uint16_t sourceCrownstoneId;
-	uint16_t messageType;
-};
+//struct __attribute__((__packed__)) hub_mesh_header_t {
+//	uint16_t sourceCrownstoneId;
+//	uint16_t messageType;
+//};
 
 struct __attribute__((__packed__)) hub_mesh_message_t {
-	hub_mesh_header_t header;
+	mesh_header_t header;
 	union {
 		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
 		scan_mesh_message_t scanMsg;
@@ -151,46 +169,3 @@ struct __attribute__((__packed__)) hub_mesh_message_t {
 		service_data_mesh_message_t serviceDataMsg;
 	};
 };
-
-#else
-/** Device mesh header
- */
-struct __attribute__((__packed__)) device_mesh_header_t {
-	uint8_t targetAddress[BLE_GAP_ADDR_LEN];
-	uint16_t messageType;
-};
-
-/** Device mesh message
- */
-struct __attribute__((__packed__)) device_mesh_message_t {
-	device_mesh_header_t header;
-	union {
-		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
-		event_mesh_message_t evtMsg;
-		beacon_mesh_message_t beaconMsg;
-		control_mesh_message_t commandMsg;
-		config_mesh_message_t configMsg;
-	};
-};
-
-/** Hub mesh header
- */
-struct __attribute__((__packed__)) hub_mesh_header_t {
-	uint8_t sourceAddress[BLE_GAP_ADDR_LEN];
-	uint16_t messageType;
-};
-
-/** Hub mesh message
- */
-struct __attribute__((__packed__)) hub_mesh_message_t {
-	hub_mesh_header_t header;
-	union {
-		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
-		scan_mesh_message_t scanMsg;
-		test_mesh_message_t testMsg;
-		power_samples_mesh_message_t powerSamplesMsg;
-		service_data_mesh_message_t serviceDataMsg;
-	};
-};
-
-#endif

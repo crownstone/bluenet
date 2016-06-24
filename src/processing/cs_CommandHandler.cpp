@@ -37,14 +37,33 @@ void reset(void* p_context) {
 	sd_nvic_SystemReset();
 }
 
-void reset_delayed(uint8_t opCode) {
+void execute_delayed(void * p_context) {
+	delayed_command_t* buf = (delayed_command_t*)p_context;
+	CommandHandler::getInstance().handleCommand(buf->type, buf->buffer, buf->size);
+	free(buf->buffer);
+	free(buf);
+}
+
+CommandHandler::CommandHandler() : _stack(NULL) {
+	Timer::getInstance().createSingleShot(_delayTimer, execute_delayed);
+}
+
+void CommandHandler::resetDelayed(uint8_t opCode) {
 	static uint8_t restOpCode = opCode;
 	app_timer_id_t resetTimer;
 	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
 	Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &restOpCode);
 }
 
-CommandHandler::CommandHandler() : _stack(NULL) {
+ERR_CODE CommandHandler::handleCommandDelayed(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, uint32_t delay) {
+	delayed_command_t* buf = new delayed_command_t();
+	buf->type = type;
+	buf->buffer = new uint8_t[size];
+	memcpy(buf->buffer, buffer, size);
+	buf->size = size;
+	Timer::getInstance().start(_delayTimer, MS_TO_TICKS(delay), buf);
+	LOGi("execute with delay %d", delay);
+	return NRF_SUCCESS;
 }
 
 ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type) {
@@ -99,7 +118,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 	}
 	case CMD_GOTO_DFU: {
 		LOGi("handle goto dfu command");
-		reset_delayed(COMMAND_ENTER_RADIO_BOOTLOADER);
+		resetDelayed(COMMAND_ENTER_RADIO_BOOTLOADER);
 		break;
 	}
 	case CMD_RESET: {
@@ -116,7 +135,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 //		LOGi("resetOp: %d", resetOp);
 
 //			if (resetOp) {
-		reset_delayed(resetOp);
+		resetDelayed(resetOp);
 //			} else {
 		//todo: why nonzero?
 //				LOGw("To reset write a nonzero value: %d", payload->resetOp);
@@ -311,7 +330,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			LOGi("factory reset done, rebooting device in 2s ...");
 
-			reset_delayed(COMMAND_SOFT_RESET);
+			resetDelayed(COMMAND_SOFT_RESET);
 
 		} else {
 			LOGi("wrong code received: %p", resetCode);
@@ -440,7 +459,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
 
 			//! then reset device
-			reset_delayed(COMMAND_SOFT_RESET);
+			resetDelayed(COMMAND_SOFT_RESET);
 		} else {
 			LOGw("validate setup only available in setup mode");
 			return ERR_NOT_AVAILABLE;

@@ -28,10 +28,16 @@
 void start_stop_mesh(void * p_event_data, uint16_t event_size) {
 	if (*(bool*)p_event_data) {
 		LOGi("mesh start");
-		rbc_mesh_start();
+		uint32_t err_code = rbc_mesh_start();
+		if (err_code != NRF_SUCCESS) {
+			LOGe("failed to start mesh: %d", err_code);
+		}
 	} else {
 		LOGi("mesh stop");
-		rbc_mesh_stop();
+		uint32_t err_code = rbc_mesh_stop();
+		if (err_code != NRF_SUCCESS) {
+			LOGe("failed to stop mesh: %d", err_code);
+		}
 	}
 }
 
@@ -58,7 +64,10 @@ void Mesh::stop() {
 }
 
 void Mesh::restart() {
-	rbc_mesh_restart();
+	uint32_t err_code = rbc_mesh_restart();
+	if (err_code != NRF_SUCCESS) {
+		LOGe("failed to restart mesh");
+	}
 }
 
 void Mesh::tick() {
