@@ -34,5 +34,9 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			updatePowerUsage(*(int32_t*)p_data);
 			break;
 		}
+		case STATE_TEMPERATURE: {
+			updateTemperature(*(int8_t*)p_data);
+			break;
+		}
 		}
 	}
