@@ -21,7 +21,7 @@ void reset(void* p_context) {
 
 	uint32_t cmd = *(int32_t*) p_context;
 
-	if (cmd == COMMAND_ENTER_RADIO_BOOTLOADER) {
+	if (cmd == GPREGRET_DFU_RESET) {
 		LOGi(MSG_FIRMWARE_UPDATE);
 	} else {
 		LOGi(MSG_RESET);
@@ -73,52 +73,9 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type) {
 ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size) {
 
 	switch (type) {
-	case CMD_SWITCH: {
-		LOGi("handle switch command");
-		// for now, same as pwm, but switch command should decide itself if relay or
-		// pwm is used
-	}
-	case CMD_PWM: {
-		LOGi("handle PWM command");
-
-		if (size != sizeof(switch_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-
-		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-		uint8_t value = payload->switchState;
-
-		uint8_t current = Switch::getInstance().getValue();
-//		LOGi("current pwm: %d", current);
-		if (value != current) {
-			LOGi("update pwm to %i", value);
-			Switch::getInstance().setValue(value);
-		}
-		break;
-	}
-	case CMD_RELAY: {
-		LOGi("handle relay command");
-
-		if (size != sizeof(switch_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-
-		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-		uint8_t value = payload->switchState;
-
-		if (value == 0) {
-			Switch::getInstance().relayOff();
-		} else {
-			Switch::getInstance().relayOn();
-		}
-
-		break;
-	}
 	case CMD_GOTO_DFU: {
 		LOGi("handle goto dfu command");
-		resetDelayed(COMMAND_ENTER_RADIO_BOOTLOADER);
+		resetDelayed(GPREGRET_DFU_RESET);
 		break;
 	}
 	case CMD_RESET: {
@@ -200,23 +157,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		Settings::getInstance().updateFlag(CONFIG_IBEACON_ENABLED, enable, true);
 //		EventDispatcher::getInstance().dispatch(EVT_ENABLED_IBEACON, &enable, sizeof(enable));
 
-		break;
-	}
-	case CMD_ENABLE_CONT_POWER_MEASURE: {
-		LOGi("handle enable cont power measure command: tbd");
-		return ERR_NOT_IMPLEMENTED;
-
-		if (size != sizeof(enable_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-
-		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-		bool enable = payload->enable;
-
-		LOGi("%s continues power measurements", enable ? "Enabling" : "Disabling");
-
-		// todo: tbd
 		break;
 	}
 	case CMD_ENABLE_SCANNER: {
@@ -330,7 +270,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			LOGi("factory reset done, rebooting device in 2s ...");
 
-			resetDelayed(COMMAND_SOFT_RESET);
+			resetDelayed(GPREGRET_SOFT_RESET);
 
 		} else {
 			LOGi("wrong code received: %p", resetCode);
@@ -459,7 +399,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
 
 			//! then reset device
-			resetDelayed(COMMAND_SOFT_RESET);
+			resetDelayed(GPREGRET_SOFT_RESET);
 		} else {
 			LOGw("validate setup only available in setup mode");
 			return ERR_NOT_AVAILABLE;
@@ -489,6 +429,80 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		// todo: tbd
 		break;
 	}
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+	// Crownstone specific commands are only available if device type is set to Crownstone.
+	// E.g. GuideStone does not support power measure or switching commands
+	case CMD_SWITCH: {
+		LOGi("handle switch command");
+		// for now, same as pwm, but switch command should decide itself if relay or
+		// pwm is used
+	}
+	case CMD_PWM: {
+		LOGi("handle PWM command");
+
+		if (size != sizeof(switch_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
+		uint8_t value = payload->switchState;
+
+		uint8_t current = Switch::getInstance().getValue();
+//		LOGi("current pwm: %d", current);
+		if (value != current) {
+			LOGi("update pwm to %i", value);
+			Switch::getInstance().setValue(value);
+		}
+		break;
+	}
+	case CMD_RELAY: {
+		LOGi("handle relay command");
+
+		if (size != sizeof(switch_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
+		uint8_t value = payload->switchState;
+
+		if (value == 0) {
+			Switch::getInstance().relayOff();
+		} else {
+			Switch::getInstance().relayOn();
+		}
+
+		break;
+	}
+	case CMD_ENABLE_CONT_POWER_MEASURE: {
+		LOGi("handle enable cont power measure command: tbd");
+		return ERR_NOT_IMPLEMENTED;
+
+		if (size != sizeof(enable_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+		bool enable = payload->enable;
+
+		LOGi("%s continues power measurements", enable ? "Enabling" : "Disabling");
+
+		// todo: tbd
+		break;
+	}
+#else
+	// Crownstone specific commands are only available if device type is set to Crownstone.
+	// E.g. GuideStone does not support power measure or switching commands
+	case CMD_SWITCH:
+	case CMD_PWM:
+	case CMD_RELAY:
+	case CMD_ENABLE_CONT_POWER_MEASURE: {
+		LOGe("Commands not available for device type %d", DEVICE_TYPE);
+		return ERR_NOT_AVAILABLE;
+	}
+#endif
 	default: {
 		LOGe("command type not found!!");
 		return ERR_COMMAND_NOT_FOUND;

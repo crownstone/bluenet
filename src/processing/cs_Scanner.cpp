@@ -142,6 +142,8 @@ void Scanner::stop() {
 		//! no need to execute scan on stop is there? we want to stop after all
 	//	executeScan();
 	//	_running = false;
+	} else if (_scanning) {
+		manualStopScan();
 	} else {
 		LOGi("already stopped!");
 	}

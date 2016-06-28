@@ -410,7 +410,7 @@ void Storage::getUint8(uint32_t value, uint8_t* target, uint8_t default_value) {
 	} else {
 		*target = value;
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", target);
+		LOGd("found stored value: %d", *target);
 #endif
 	}
 }
@@ -437,7 +437,7 @@ void Storage::getInt8(int32_t value, int8_t* target, int8_t default_value) {
 	} else {
 		*target = value;
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", target);
+		LOGd("found stored value: %d", *target);
 #endif
 	}
 }
@@ -464,7 +464,7 @@ void Storage::getUint16(uint32_t value, uint16_t* target, uint16_t default_value
 		*target = value;
 
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", target);
+		LOGd("found stored value: %d", *target);
 #endif
 	}
 }
@@ -477,7 +477,7 @@ void Storage::setUint32(uint32_t value, uint32_t& target) {
 	}
 }
 
-void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value) {
+void Storage::getUint32(uint32_t value, uint32_t* target, uint32_t default_value) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
@@ -490,11 +490,11 @@ void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value
 #ifdef PRINT_ITEMS
 		LOGd("use default value");
 #endif
-		target = default_value;
+		*target = default_value;
 	} else {
-		target = value;
+		*target = value;
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", target);
+		LOGd("found stored value: %d", *target);
 #endif
 	}
 }

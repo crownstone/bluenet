@@ -167,6 +167,14 @@ void Crownstone::configure() {
 	//! configure parameters for the Bluetooth stack
 	configureStack();
 
+#ifdef RESET_COUNTER
+	uint32_t resetCounter;
+	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
+	++resetCounter;
+	LOGf("Reset counter at: %d", resetCounter);
+	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
+#endif
+
 	//! set advertising parameters such as the device name and appearance.
 	//! Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
 	setName();
@@ -210,6 +218,7 @@ void Crownstone::initDrivers() {
 	_settings->init();
 	_stateVars->init();
 
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch / PWM init
 	LOGi("Init switch / PWM");
 	_switch->init();
@@ -218,6 +227,7 @@ void Crownstone::initDrivers() {
 	_temperatureGuard->init();
 
 	_powerSampler->init();
+#endif
 
 	// init GPIOs
 #if HARDWARE_BOARD==PCA10001
@@ -417,8 +427,12 @@ void Crownstone::createCrownstoneServices() {
 #endif
 
 #if POWER_SERVICE==1
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
 	_powerService = new PowerService;
 	_stack->addService(_powerService);
+#else
+	LOGe("PowerService only available for device type Crownstone!!");
+#endif
 #endif
 
 #if ALERT_SERVICE==1
@@ -439,7 +453,7 @@ void Crownstone::createCrownstoneServices() {
 void Crownstone::setName() {
 #ifdef CHANGE_NAME_ON_RESET
 	uint32_t resetCounter;
-	State::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
+	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
 //	uint16_t minor;
 //	ps_configuration_t cfg = Settings::getInstance().getConfig();
 //	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
@@ -494,14 +508,6 @@ void Crownstone::prepareCrownstone() {
 
 //	}
 
-#ifdef RESET_COUNTER
-	uint32_t resetCounter;
-	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
-	++resetCounter;
-	LOGf("Reset counter at: %d", resetCounter);
-	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
-#endif
-
 	BLEutil::print_heap("Heap setup: ");
 	BLEutil::print_stack("Stack setup: ");
 
@@ -539,19 +545,22 @@ void Crownstone::startUp() {
 //		LOGi("Set power OFF by default");
 //		_switch->turnOff();
 //#endif
-		uint8_t switchState;
-		_stateVars->get(STATE_SWITCH_STATE, switchState);
-		_switch->setValue(switchState);
 
 		//! start main tick
 		scheduleNextTick();
 		_stack->startTicking();
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+		uint8_t switchState;
+		_stateVars->get(STATE_SWITCH_STATE, switchState);
+		_switch->setValue(switchState);
 
 		//! start ticking of peripherals
 		_temperatureGuard->startTicking();
 
 		LOGd("Start power sampling");
 		_powerSampler->startSampling();
+#endif
 
 		_scheduler->start();
 
@@ -576,10 +585,6 @@ void Crownstone::startUp() {
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();
-#endif
-
-#if POWER_SERVICE==1
-	//	_powerService->startStaticSampling();
 #endif
 
 		BLEutil::print_heap("Heap startup: ");
@@ -724,8 +729,26 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_stack->updateAdvertisement();
 		break;
 	}
-	case EVT_CHARACTERISTICS_UPDATED: {
-//		_stack->
+	case EVT_BROWNOUT_IMPENDING: {
+		// turn everything off that consumes power
+		LOGe("brownout impending!! force shutdown ...")
+
+		rbc_mesh_stop();
+    	_scanner->stop();
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+    	_switch->pwmOff();
+    	_switch->relayOff();
+    	_powerSampler->stopSampling();
+#endif
+
+    	// now reset with brownout reset mask set.
+    	// NOTE: do not clear the gpregret register, this way
+    	//   we can count the number of brownouts in the bootloader
+    	sd_power_gpregret_set(GPREGRET_BROWNOUT_RESET);
+    	// soft reset, because brownout can't be distinguished from
+    	// hard reset otherwise
+    	sd_nvic_SystemReset();
 		break;
 	}
 	default: return;

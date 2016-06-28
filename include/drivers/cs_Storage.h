@@ -410,7 +410,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getUint32(uint32_t value, uint32_t& target, uint32_t default_value);
+	static void getUint32(uint32_t value, uint32_t* target, uint32_t default_value);
 
 	/** Helper function to set a signed byte in the field of a struct
 	 * @value the byte value to be copied to the struct

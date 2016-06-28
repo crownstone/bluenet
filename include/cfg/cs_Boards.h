@@ -25,6 +25,7 @@
 #define NORDIC_BEACON        13
 #define DOBEACON             14
 #define CROWNSTONE5          15
+#define DOBEACON2            16
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
@@ -116,7 +117,6 @@
 #define VOLTAGE_AMPLIFICATION       80
 #endif
 
-
 #if(HARDWARE_BOARD==CROWNSTONE5)
 //! plugin quant
 #define PIN_GPIO_SWITCH      12                  //! p0.12
@@ -138,8 +138,29 @@
 #define VOLTAGE_AMPLIFICATION       80
 #endif
 
-
 #if(HARDWARE_BOARD==DOBEACON)
+//! doBeacon v0.7
+#define PIN_GPIO_SWITCH      4                   //! this is p0.04 or gpio 4
+#define PIN_GPIO_RELAY_ON    5                   //! something unused
+#define PIN_GPIO_RELAY_OFF   0                   //! something unused
+//#define PIN_AIN_ADC          2                   //! ain2 is p0.01 or gpio 1
+//#define PIN_AIN_LPCOMP       2                   //! ain2 is p0.01 or gpio 1
+//#define PIN_AIN_LPCOMP_REF   0                   //! ref0 is p0.00 or gpio 0
+#define PIN_AIN_CURRENT      2                   //! ain2 is p0.01 or gpio 1
+#define PIN_AIN_VOLTAGE      7                   //! ain7 is p0.06 or gpio 6
+#define PIN_GPIO_RX          2                   //! this is p0.02 or gpio 2
+#define PIN_GPIO_TX          3                   //! this is p0.03 or gpio 3
+
+#define HAS_RELAY true
+//! Switch pin should be low to switch lights on
+#define SWITCH_INVERSED
+//! resistance of the shunt in milli ohm
+#define SHUNT_VALUE                 1
+//! amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       80
+#endif
+
+#if(HARDWARE_BOARD==DOBEACON2)
 // v0.92
 //#define PIN_GPIO_SWITCH      4                   // this is p0.04 or gpio 4
 //#define PIN_GPIO_RELAY_ON    0                   // something unused

@@ -23,7 +23,6 @@ void debugprint(void * p_context) {
 State::State() :
 		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedEnergy(NULL),
 		_temperature(0), _powerUsage(0), _time(0) {
-
 }
 
 void State::init() {
@@ -263,7 +262,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 		case STATE_OPERATION_MODE: {
 			uint8_t value = *(uint8_t*)target;
 			uint32_t opMode;
-			Storage::getUint32(_storageStruct.operationMode, opMode, OPERATION_MODE_SETUP);
+			Storage::getUint32(_storageStruct.operationMode, &opMode, OPERATION_MODE_SETUP);
 			if (opMode != value) {
 				Storage::setUint32(value, _storageStruct.operationMode);
 				savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));

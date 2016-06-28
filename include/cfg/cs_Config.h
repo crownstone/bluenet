@@ -22,8 +22,9 @@
  *
  * This should be the same value as defined in the bootloader.
  */
-#define COMMAND_ENTER_RADIO_BOOTLOADER           66
-#define COMMAND_SOFT_RESET                       0
+#define GPREGRET_DFU_RESET                       66
+#define GPREGRET_BROWNOUT_RESET                  96
+#define GPREGRET_SOFT_RESET                      0
 
 /*
  */

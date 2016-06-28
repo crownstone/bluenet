@@ -52,15 +52,19 @@ Mesh::~Mesh() {
 }
 
 void Mesh::start() {
-	started = true;
-	startTicking();
-	app_sched_event_put(&started, sizeof(started), start_stop_mesh);
+	if (!started) {
+		started = true;
+		startTicking();
+		app_sched_event_put(&started, sizeof(started), start_stop_mesh);
+	}
 }
 
 void Mesh::stop() {
-	started = false;
-	stopTicking();
-	app_sched_event_put(&started, sizeof(started), start_stop_mesh);
+	if (started) {
+		started = false;
+		stopTicking();
+		app_sched_event_put(&started, sizeof(started), start_stop_mesh);
+	}
 }
 
 void Mesh::restart() {
@@ -123,13 +127,13 @@ void Mesh::init() {
 	// do not automatically start meshing, wait for the start command
 //	rbc_mesh_stop();
 
-	if (!Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-		LOGi("mesh not enabled");
+//	if (!Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+//		LOGi("mesh not enabled");
 		rbc_mesh_stop();
 		// [16.06.16] need to execute app scheduler, otherwise pstorage
 		// events will get lost ... maybe need to check why that actually happens??
 		app_sched_execute();
-	}
+//	}
 
 }
 
