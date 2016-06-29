@@ -83,5 +83,11 @@ private:
 //	uint16_t _lastPowerSample;
 
 	PowerSamples _powerSamples;
+
+	float _voltageMultiplier;
+	float _currentMultiplier;
+	float _voltageZero;
+	float _currentZero;
+	float _powerZero;
 };
 

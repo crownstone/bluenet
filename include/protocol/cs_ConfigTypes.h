@@ -56,6 +56,11 @@ enum ConfigurationTypes {
 	CONFIG_SCAN_WINDOW                      = 40,
 	CONFIG_RELAY_HIGH_DURATION              = 41,
 	CONFIG_LOW_TX_POWER                     = 42,
+	CONFIG_VOLTAGE_MULTIPLIER               = 43,
+	CONFIG_CURRENT_MULTIPLIER               = 44,
+	CONFIG_VOLTAGE_ZERO					    = 45,
+	CONFIG_CURRENT_ZERO                     = 46,
+	CONFIG_POWER_ZERO                       = 47,
 
 	CONFIG_TYPES
 };

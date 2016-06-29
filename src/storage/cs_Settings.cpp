@@ -205,6 +205,23 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	}
 
 	/////////////////////////////////////////////////
+	//// FLOAT
+	/////////////////////////////////////////////////
+	case CONFIG_VOLTAGE_MULTIPLIER:
+	case CONFIG_CURRENT_MULTIPLIER:
+	case CONFIG_VOLTAGE_ZERO:
+	case CONFIG_CURRENT_ZERO:
+	case CONFIG_POWER_ZERO: {
+		if (length != 4) {
+			LOGw("Expected float");
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		LOGi("Set %d to %f", type, *(float*)payload);
+		return ERR_SUCCESS;
+	}
+
+
+	/////////////////////////////////////////////////
 	//// BYTE ARRAY
 	/////////////////////////////////////////////////
 	case CONFIG_IBEACON_UUID: {
@@ -308,6 +325,17 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_IBEACON_MAJOR:
 	case CONFIG_NEARBY_TIMEOUT: {
 		return 2;
+	}
+
+	/////////////////////////////////////////////////
+	//// FLOAT
+	/////////////////////////////////////////////////
+	case CONFIG_VOLTAGE_MULTIPLIER:
+	case CONFIG_CURRENT_MULTIPLIER:
+	case CONFIG_VOLTAGE_ZERO:
+	case CONFIG_CURRENT_ZERO:
+	case CONFIG_POWER_ZERO: {
+		return 4;
 	}
 
 	/////////////////////////////////////////////////
@@ -492,6 +520,26 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getInt8(_storageStruct.lowTxPower, (int8_t*)target, LOW_TX_POWER);
 		break;
 	}
+	case CONFIG_VOLTAGE_MULTIPLIER: {
+		Storage::getFloat(_storageStruct.voltageMultiplier, (float*)target, VOLTAGE_MULTIPLIER);
+		break;
+	}
+	case CONFIG_CURRENT_MULTIPLIER: {
+		Storage::getFloat(_storageStruct.currentMultiplier, (float*)target, CURRENT_MULTIPLIER);
+		break;
+	}
+	case CONFIG_VOLTAGE_ZERO: {
+		Storage::getFloat(_storageStruct.voltageZero, (float*)target, VOLTAGE_ZERO);
+		break;
+	}
+	case CONFIG_CURRENT_ZERO: {
+		Storage::getFloat(_storageStruct.currentZero, (float*)target, CURRENT_ZERO);
+		break;
+	}
+	case CONFIG_POWER_ZERO: {
+		Storage::getFloat(_storageStruct.powerZero, (float*)target, POWER_ZERO);
+		break;
+	}
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
 		return ERR_CONFIG_NOT_FOUND;
@@ -670,6 +718,31 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	case CONFIG_LOW_TX_POWER: {
 		p_item = (uint8_t*)&_storageStruct.lowTxPower;
 		Storage::setInt8(*((int8_t*)target), _storageStruct.lowTxPower);
+		break;
+	}
+	case CONFIG_VOLTAGE_MULTIPLIER: {
+		p_item = (uint8_t*)&_storageStruct.voltageMultiplier;
+		Storage::setFloat(*((float*)target), _storageStruct.voltageMultiplier);
+		break;
+	}
+	case CONFIG_CURRENT_MULTIPLIER: {
+		p_item = (uint8_t*)&_storageStruct.currentMultiplier;
+		Storage::setFloat(*((float*)target), _storageStruct.currentMultiplier);
+		break;
+	}
+	case CONFIG_VOLTAGE_ZERO: {
+		p_item = (uint8_t*)&_storageStruct.voltageZero;
+		Storage::setFloat(*((float*)target), _storageStruct.voltageZero);
+		break;
+	}
+	case CONFIG_CURRENT_ZERO: {
+		p_item = (uint8_t*)&_storageStruct.currentZero;
+		Storage::setFloat(*((float*)target), _storageStruct.currentZero);
+		break;
+	}
+	case CONFIG_POWER_ZERO: {
+		p_item = (uint8_t*)&_storageStruct.powerZero;
+		Storage::setFloat(*((float*)target), _storageStruct.powerZero);
 		break;
 	}
 	default: {

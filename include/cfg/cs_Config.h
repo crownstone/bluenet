@@ -95,3 +95,11 @@
 #define FACTORY_RESET_CODE                       0xdeadbeef
 
 #define ENCYRPTION_KEY_LENGTH                    16 //! 16 byte length
+
+#define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V21
+
+#define VOLTAGE_MULTIPLIER                       2.374f
+#define CURRENT_MULTIPLIER                       0.044f
+#define VOLTAGE_ZERO                             169.0f
+#define CURRENT_ZERO                             168.5f
+#define POWER_ZERO                               9.0f

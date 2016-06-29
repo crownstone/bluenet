@@ -194,6 +194,12 @@ struct ps_configuration_t : ps_storage_base_t {
 	uint32_t relayHighDuration;
 
 	int32_t lowTxPower;
+
+	float voltageMultiplier;
+	float currentMultiplier;
+	float voltageZero;
+	float currentZero;
+	float powerZero;
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
@@ -434,6 +440,14 @@ public:
 	 * If the field is unassigned, the default value will be returned instead
 	 */
 	static void getInt8(int32_t value, int8_t* target, int8_t default_value);
+
+//	static void setDouble(double value, double& target);
+
+//	static void getDouble(double value, double* target, double default_value);
+
+	static void setFloat(float value, float& target);
+
+	static void getFloat(float value, float* target, float default_value);
 
 	/** Helper function to write/copy an array to the field of a struct
 	 * @T primitive type, such as uint8_t

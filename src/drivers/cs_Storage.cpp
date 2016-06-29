@@ -17,6 +17,7 @@
 #include "drivers/cs_Storage.h"
 
 #include <climits>
+#include <float.h>
 
 #include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
@@ -400,7 +401,7 @@ void Storage::getUint8(uint32_t value, uint8_t* target, uint8_t default_value) {
 	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
-	// check if last byte is FF which means that memory is unnassigned
+	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
@@ -427,7 +428,7 @@ void Storage::getInt8(int32_t value, int8_t* target, int8_t default_value) {
 	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
-	// check if last byte is FF which means that memory is unnassigned
+	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
@@ -453,7 +454,7 @@ void Storage::getUint16(uint32_t value, uint16_t* target, uint16_t default_value
 	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
-	// check if last byte is FF which means that memory is unnassigned
+	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
@@ -485,7 +486,7 @@ void Storage::getUint32(uint32_t value, uint32_t* target, uint32_t default_value
 #endif
 
 	// check if value is equal to INT_MAX (FFFFFFFF) which means that memory is
-	// unnassigned and value has to be ignored
+	// unassigned and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd("use default value");
@@ -495,6 +496,69 @@ void Storage::getUint32(uint32_t value, uint32_t* target, uint32_t default_value
 		*target = value;
 #ifdef PRINT_ITEMS
 		LOGd("found stored value: %d", *target);
+#endif
+	}
+}
+
+//void Storage::setDouble(double value, double& target) {
+//	if (value == DBL_MAX) {
+//		LOGe("value %d too big", value);
+//	} else {
+//		target = value;
+//	}
+//}
+//
+//void Storage::getDouble(double value, double* target, double default_value) {
+//
+//#ifdef PRINT_ITEMS
+//	uint8_t* tmp = (uint8_t*)&value;
+//	log(DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
+//	BLEutil::printArray(tmp, sizeof(double));
+//#endif
+//
+//	// check if value is equal to DBL_MAX (FFFFFFFF) which means that memory is
+//	// unassigned and value has to be ignored
+//	if (value == DBL_MAX) {
+//#ifdef PRINT_ITEMS
+//		LOGd("use default value");
+//#endif
+//		*target = default_value;
+//	} else {
+//		*target = value;
+//#ifdef PRINT_ITEMS
+//		LOGd("found stored value: %f", *target);
+//#endif
+//	}
+//}
+
+
+void Storage::setFloat(float value, float& target) {
+	if (value == FLT_MAX) {
+		LOGe("value %d too big", value);
+	} else {
+		target = value;
+	}
+}
+
+void Storage::getFloat(float value, float* target, float default_value) {
+
+#ifdef PRINT_ITEMS
+	uint8_t* tmp = (uint8_t*)&value;
+	log(DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
+	BLEutil::printArray(tmp, sizeof(float));
+#endif
+
+	// check if value is equal to DBL_MAX (FFFFFFFF) which means that memory is
+	// unassigned and value has to be ignored
+	if (*(uint32_t*)&value == UINT32_MAX) {
+#ifdef PRINT_ITEMS
+		LOGd("use default value");
+#endif
+		*target = default_value;
+	} else {
+		*target = value;
+#ifdef PRINT_ITEMS
+		LOGd("found stored value: %f", *target);
 #endif
 	}
 }
