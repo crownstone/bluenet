@@ -46,7 +46,7 @@ public:
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void addCharacteristics();
+	void createCharacteristics();
 
 	/** Sets the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
 	void setNearbyTimeout(uint16_t counts);

@@ -71,6 +71,27 @@ Config Read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_
 State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable
 State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable
 
+The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint 16 code on execution of the command. The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command was received before calling the next (either by polling or subscribing). The possible values of the return values are listed in the table below
+
+Value | Name | Description
+--- | --- | ---
+0 | SUCCESS | completed successfully
+1 | VALUE_UNDEFINED | no value provided
+2 | WRONG_PAYLOAD_LENGTH | wrong payload lenght provided
+3 | UNKNOWN_OP_CODE | unknown operation code, e.g. notify for config read
+5 | BUFFER_LOCKED | buffer is locked, failed queue command
+256 | COMMAND_NOT_FOUND | command type not found
+257 | NOT_AVAILABLE | command not available in this mode
+258 | WRONG_PARAMETER | wrong parameter provided
+259 | COMMAND_FAILED | other failure
+260 | NOT_IMPLEMENTED | command not implemented (only debug version)
+512 | INVALID_MESSAGE | invalid mesh message provided
+768 | READ_CONFIG_FAILED | read configuration failed
+769 | WRITE_CONFIG_DISABLED | write configuration disalbed for this type
+770 | CONFIG_NOT_FOUND |  config type not found
+1024 | STATE_NOT_FOUND | state type not found
+1025 | STATE_WRITE_DISABLED | writing to state disabled
+
 ## Setup service
 
 The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only available after a factory reset.
@@ -79,6 +100,11 @@ Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
 Control        | 24f10001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the control characheristic
 MAC Address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MAC address of the device
+Config Control | 24f10004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Write or select a config setting
+Config Read    | 24f10005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting
+
+The control characteristics (Control, and Config Control) of the Setup Service return a uint 16 code on execution of the command. The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command was received before calling the next (either by polling or subscribing). The possible values are the same as for the Crownstone Service, see above.
+
 
 ## General service
 
@@ -149,9 +175,9 @@ Available command types:
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-0 | Switch | uint 8 | Switch relay, 0 = OFF, 1 = ON
+0 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON
 1 | PWM | uint 8 | Set PWM to value, 0 = OFF, 100 = FULL ON
-2 | Set Time | ... | Set time to ..., TBD
+2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 UTC
 3 | Goto DFU | - | Reset device to DFU mode
 4 | Rest | uint 8 | Reset device
 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload
@@ -165,6 +191,7 @@ Type nr | Type name | Payload type | Payload description
 13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON
 14 | User feedback | ... | User feedback ..., TBD
 15 | Schedule entry | ... | Schedule entry ..., TBD
+16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 

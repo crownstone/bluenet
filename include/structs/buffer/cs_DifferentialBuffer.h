@@ -78,7 +78,7 @@ public:
 			LOGw("Could not allocate memory");
 			return false;
 		}
-		LOGd("Allocated memory at %u", _buffer);
+//		LOGd("Allocated memory at %u", _buffer);
 		_allocatedSelf = true;
 		//! Also call clear to make sure we start with a clean buffer
 		clear();
@@ -100,7 +100,7 @@ public:
 			LOGd("%u < %u", getMaxSize(bufferSize), _capacity);
 			return false;
 		}
-		LOGd("assign at %u", buffer);
+//		LOGd("assign at %u", buffer);
 		_buffer = (differential_buffer_t<T>*) buffer;
 		//! Also call clear to make sure we start with a clean buffer
 		clear();

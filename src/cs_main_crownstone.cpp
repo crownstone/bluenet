@@ -109,20 +109,22 @@ void Crownstone::init() {
 	LOGi("---- setup ----");
 
 	// todo: handle different operation modes
-//	_stateVars->getStateVar(SV_OPERATION_MODE, _operationMode);
-	_operationMode = OPERATION_MODE_NORMAL;
+	_stateVars->get(STATE_OPERATION_MODE, _operationMode);
+//	_operationMode = OPERATION_MODE_NORMAL;
 //	_operationMode = OPERATION_MODE_SETUP;
 
 	switch(_operationMode) {
 	case OPERATION_MODE_SETUP: {
 
-		LOGd("Configure setup mode")
+		LOGd("Configure setup mode");
 
 		//! create services
 		createSetupServices();
 
-		LOGi("Enable PIN encryption");
+		//! set it by default into low tx mode
+		_stack->setTxPowerLevel(-40);
 
+		LOGi("Enable PIN encryption");
 		//! use PIN encryption for setup mode
 		_stack->setEncrypted(true);
 
@@ -147,6 +149,9 @@ void Crownstone::init() {
 	}
 	}
 
+	//! loop through all services added to the stack and create the characteristics
+	_stack->createCharacteristics();
+
 	LOGi("---- init services ----");
 
 	_stack->initServices();
@@ -161,6 +166,14 @@ void Crownstone::configure() {
 	LOGi("> stack ...");
 	//! configure parameters for the Bluetooth stack
 	configureStack();
+
+#ifdef RESET_COUNTER
+	uint32_t resetCounter;
+	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
+	++resetCounter;
+	LOGf("Reset counter at: %d", resetCounter);
+	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
+#endif
 
 	//! set advertising parameters such as the device name and appearance.
 	//! Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
@@ -205,6 +218,7 @@ void Crownstone::initDrivers() {
 	_settings->init();
 	_stateVars->init();
 
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch / PWM init
 	LOGi("Init switch / PWM");
 	_switch->init();
@@ -213,6 +227,7 @@ void Crownstone::initDrivers() {
 	_temperatureGuard->init();
 
 	_powerSampler->init();
+#endif
 
 	// init GPIOs
 #if HARDWARE_BOARD==PCA10001
@@ -291,6 +306,9 @@ void Crownstone::configureStack() {
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
 
+//		LOGd("clear gpregret on connect ...");
+		sd_power_gpregret_clr(0xFF);
+
 	});
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
@@ -306,7 +324,13 @@ void Crownstone::configureStack() {
 		//		bool wasScanning = _stack->isScanning();
 		//		_stack->stopScanning();
 
+		_stateVars->disableNotifications();
+
 		_stack->startAdvertising();
+
+		// [23.06.16] need to restart the mesh on disconnect, otherwise we have ~10s delay until the device starts
+		// advertising
+		_mesh->restart();
 
 		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
 		//   disconnecting from the device. just calling startAdvertising is enough
@@ -357,7 +381,7 @@ void Crownstone::configureAdvertisement() {
 	//! assign service data to stack
 	_stack->setServiceData(_serviceData);
 
-	if (Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {
+	if (_settings->isSet(CONFIG_IBEACON_ENABLED)) {
 		_stack->configureIBeacon(_beacon, DEVICE_TYPE);
 	} else {
 		_stack->configureBleDevice(DEVICE_TYPE);
@@ -403,8 +427,12 @@ void Crownstone::createCrownstoneServices() {
 #endif
 
 #if POWER_SERVICE==1
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
 	_powerService = new PowerService;
 	_stack->addService(_powerService);
+#else
+	LOGe("PowerService only available for device type Crownstone!!");
+#endif
 #endif
 
 #if ALERT_SERVICE==1
@@ -425,7 +453,7 @@ void Crownstone::createCrownstoneServices() {
 void Crownstone::setName() {
 #ifdef CHANGE_NAME_ON_RESET
 	uint32_t resetCounter;
-	State::getInstance().getStateVar(SV_RESET_COUNTER, resetCounter);
+	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
 //	uint16_t minor;
 //	ps_configuration_t cfg = Settings::getInstance().getConfig();
 //	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
@@ -437,7 +465,6 @@ void Crownstone::setName() {
 	char devicename[32];
 	uint16_t size;
 	_settings->get(CONFIG_NAME, devicename, size);
-	LOGd("size: %d", size);
 	std::string device_name(devicename, size);
 #endif
 	//! assign name
@@ -459,6 +486,9 @@ void Crownstone::prepareCrownstone() {
 	_commandHandler = &CommandHandler::getInstance();
 	_commandHandler->setStack(_stack);
 
+	//! create scheduler
+	_scheduler = &Scheduler::getInstance();
+
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 	_sensors = new Sensors();
 #endif
@@ -467,7 +497,7 @@ void Crownstone::prepareCrownstone() {
 	_fridge = new Fridge;
 #endif
 
-//	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+//	if (_settings->isEnabled(CONFIG_MESH_ENABLED)) {
 
 #if HARDWARE_BOARD == VIRTUALMEMO
 			nrf_gpio_range_cfg_output(7,14);
@@ -478,14 +508,6 @@ void Crownstone::prepareCrownstone() {
 
 //	}
 
-#ifdef RESET_COUNTER
-	uint32_t resetCounter;
-	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
-	++resetCounter;
-	LOGf("Reset counter at: %d", resetCounter);
-	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
-#endif
-
 	BLEutil::print_heap("Heap setup: ");
 	BLEutil::print_stack("Stack setup: ");
 
@@ -494,6 +516,10 @@ void Crownstone::prepareCrownstone() {
 void Crownstone::startUp() {
 
 	LOGi("---- startUp ----");
+
+	uint32_t gpregret;
+	sd_power_gpregret_get(&gpregret);
+	LOGi("Soft reset counter: %d", gpregret);
 
 	uint16_t bootDelay;
 	_settings->get(CONFIG_BOOT_DELAY, &bootDelay);
@@ -512,36 +538,44 @@ void Crownstone::startUp() {
 	//! disabled
 	if (_operationMode == OPERATION_MODE_NORMAL) {
 
-#if (DEFAULT_ON==1)
+//#if (DEFAULT_ON==1)
 //		LOGi("Set power ON by default");
 //		_switch->turnOn();
-#elif (DEFAULT_ON==0)
+//#elif (DEFAULT_ON==0)
 //		LOGi("Set power OFF by default");
 //		_switch->turnOff();
-#endif
+//#endif
 
 		//! start main tick
 		scheduleNextTick();
 		_stack->startTicking();
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+		uint8_t switchState;
+		_stateVars->get(STATE_SWITCH_STATE, switchState);
+		_switch->setValue(switchState);
 
 		//! start ticking of peripherals
 		_temperatureGuard->startTicking();
 
 		LOGd("Start power sampling");
 		_powerSampler->startSampling();
+#endif
 
-		if (Settings::getInstance().isEnabled(CONFIG_SCANNER_ENABLED)) {
+		_scheduler->start();
+
+		if (_settings->isSet(CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
 			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
 			_scanner->delayedStart(delay);
 		}
 
-		if (Settings::getInstance().isEnabled(CONFIG_TRACKER_ENABLED)) {
+		if (_settings->isSet(CONFIG_TRACKER_ENABLED)) {
 			_tracker->startTracking();
 		}
 
 //		_mesh->init();
-		if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
 			_mesh->start();
 		}
 
@@ -551,10 +585,6 @@ void Crownstone::startUp() {
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();
-#endif
-
-#if POWER_SERVICE==1
-	//	_powerService->startStaticSampling();
 #endif
 
 		BLEutil::print_heap("Heap startup: ");
@@ -685,7 +715,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		}
 		break;
 	}
-	case EVT_ENABLED_IBEACON: {
+	case CONFIG_IBEACON_ENABLED: {
 		bool enabled = *(bool*)p_data;
 		if (enabled) {
 			_stack->configureIBeaconAdvData(_beacon);
@@ -699,14 +729,32 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_stack->updateAdvertisement();
 		break;
 	}
-	case EVT_CHARACTERISTICS_UPDATED: {
-//		_stack->
+	case EVT_BROWNOUT_IMPENDING: {
+		// turn everything off that consumes power
+		LOGe("brownout impending!! force shutdown ...")
+
+		rbc_mesh_stop();
+    	_scanner->stop();
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+    	_switch->pwmOff();
+    	_switch->relayOff();
+    	_powerSampler->stopSampling();
+#endif
+
+    	// now reset with brownout reset mask set.
+    	// NOTE: do not clear the gpregret register, this way
+    	//   we can count the number of brownouts in the bootloader
+    	sd_power_gpregret_set(GPREGRET_BROWNOUT_RESET);
+    	// soft reset, because brownout can't be distinguished from
+    	// hard reset otherwise
+    	sd_nvic_SystemReset();
 		break;
 	}
 	default: return;
 	}
 
-	if (reconfigureBeacon && Settings::getInstance().isEnabled(CONFIG_IBEACON_ENABLED)) {
+	if (reconfigureBeacon && _settings->isSet(CONFIG_IBEACON_ENABLED)) {
 		_stack->updateAdvertisement();
 	}
 }

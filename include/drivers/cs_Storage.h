@@ -164,6 +164,7 @@ struct ps_configuration_t : ps_storage_base_t {
 			bool scannerDisabled : 1;
 			bool continuousPowerSamplerDisabled : 1;
 			bool trackerDisabled : 1;
+			bool defaultOff: 1;
 		} flagsBit;
 		// dummy to force enableFlags struct to be of size uint32_t;
 		uint32_t flags;
@@ -178,7 +179,31 @@ struct ps_configuration_t : ps_storage_base_t {
 		uint8_t guest[ENCYRPTION_KEY_LENGTH];
 	} encryptionKeys;
 
+	uint32_t adcBurstSampleRate;
+
+	uint32_t powerSampleBurstInterval;
+
+	uint32_t powerSampleContInterval;
+
+	uint32_t adcContSampleRate;
+
+	uint32_t scanInterval;
+
+	uint32_t scanWindow;
+
+	uint32_t relayHighDuration;
+
+	int32_t lowTxPower;
+
+	float voltageMultiplier;
+	float currentMultiplier;
+	float voltageZero;
+	float currentZero;
+	float powerZero;
 };
+
+//! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
+STATIC_ASSERT(sizeof(ps_configuration_t) <= 1024);
 
 /** Event handler for softdevice events. in particular, listen for
  *  NRF_EVT_RADIO_SESSION_CLOSED event to resume storage requests
@@ -391,7 +416,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getUint32(uint32_t value, uint32_t& target, uint32_t default_value);
+	static void getUint32(uint32_t value, uint32_t* target, uint32_t default_value);
 
 	/** Helper function to set a signed byte in the field of a struct
 	 * @value the byte value to be copied to the struct
@@ -415,6 +440,14 @@ public:
 	 * If the field is unassigned, the default value will be returned instead
 	 */
 	static void getInt8(int32_t value, int8_t* target, int8_t default_value);
+
+//	static void setDouble(double value, double& target);
+
+//	static void getDouble(double value, double* target, double default_value);
+
+	static void setFloat(float value, float& target);
+
+	static void getFloat(float value, float* target, float default_value);
 
 	/** Helper function to write/copy an array to the field of a struct
 	 * @T primitive type, such as uint8_t
@@ -500,6 +533,8 @@ public:
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
+	void onUpdateDone();
+
 private:
 
 	/** Default constructor
@@ -532,5 +567,7 @@ private:
 
 	CircularBuffer<buffer_element_t> writeBuffer;
 	buffer_element_t buffer[STORAGE_REQUEST_BUFFER_SIZE];
+
+	uint8_t _pending;
 
 };

@@ -110,6 +110,8 @@ public:
 
 	//! internal:
 
+	virtual void createCharacteristics() = 0;
+
 	virtual void tick() {};
 	static void staticTick(Service* ptr) {
 		ptr->tick();

@@ -21,9 +21,11 @@ enum CommandHandlerTypes {
 	CMD_ENABLE_CONT_POWER_MEASURE   = 11,    //! 0x0B
 	CMD_ENABLE_SCANNER              = 12,    //! 0x0C
 	CMD_SCAN_DEVICES                = 13,    //! 0x0D
-	CMD_SAMPLE_POWER                = 14,    //! 0x0E
-	CMD_USER_FEEDBACK               = 15,    //! 0x0F
-	CMD_SCHEDULE_ENTRY              = 16,    //! 0x10
+	CMD_USER_FEEDBACK               = 14,    //! 0x0E
+	CMD_SCHEDULE_ENTRY              = 15,    //! 0x0F
+	CMD_RELAY                       = 16,    //! 0x10
+	CMD_VALIDATE_SETUP              = 17,    //! 0x11
+	CMD_REQUEST_SERVICE_DATA        = 18,    //! 0x12
 	CMD_TYPES
 };
 

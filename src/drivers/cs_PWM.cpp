@@ -34,7 +34,7 @@ void pwm_ready_callback(uint32_t pwm_id) {   // PWM callback function
 
 void PWM::setValue(uint8_t channel, uint32_t value) {
 	if (!_initialized) {
-		LOGe("Can't used PWM without initializing first");
+		LOGe("Can't use PWM without initializing first");
 		return;
 	}
 	if (value > 100) {
@@ -46,7 +46,7 @@ void PWM::setValue(uint8_t channel, uint32_t value) {
 
 uint32_t PWM::getValue(uint8_t channel) {
 	if (!_initialized) {
-		LOGe("Can't used PWM without initializing first");
+		LOGe("Can't use PWM without initializing first");
 		return 0;
 	}
 	return app_pwm_channel_duty_get(_pwmInstance, channel);
@@ -54,7 +54,7 @@ uint32_t PWM::getValue(uint8_t channel) {
 
 void PWM::switchOff() {
 	if (!_initialized) {
-		LOGe("Can't used PWM without initializing first");
+		LOGe("Can't use PWM without initializing first");
 		return;
 	}
 	for (uint32_t i = 0; i < _pwmCfg.num_of_channels; ++i) {

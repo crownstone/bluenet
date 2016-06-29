@@ -20,9 +20,9 @@ public:
 		_params.powerUsage = powerUsage;
 	}
 
-//	void updateAccumulatedEnergy(int32_t accumulatedEnergy) {
-//		_params.accumulatedEnergy = accumulatedEnergy;
-//	}
+	void updateAccumulatedEnergy(int32_t accumulatedEnergy) {
+		_params.accumulatedEnergy = accumulatedEnergy;
+	}
 
 	void updateCrownstoneId(uint16_t crownstoneId) {
 		_params.crownstoneId = crownstoneId;
@@ -38,6 +38,10 @@ public:
 
 	void updateEventBitmask(uint8_t bitmask) {
 		_params.eventBitmask = bitmask;
+	}
+
+	void updateTemperature(int8_t temperature) {
+		_params.temperature = temperature;
 	}
 
 	void updateEventBitmask(uint8_t bit, bool set) {
@@ -64,7 +68,9 @@ private:
 			uint16_t crownstoneStateId;
 			uint8_t switchState;
 			uint8_t eventBitmask;
-			uint16_t reserved;
+//			uint16_t reserved;
+			int8_t temperature;
+			int8_t reserved;
 			int32_t powerUsage;
 			int32_t accumulatedEnergy;
 		} _params;

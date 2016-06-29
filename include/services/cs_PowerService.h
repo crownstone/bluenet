@@ -51,7 +51,7 @@ public:
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void addCharacteristics();
+	void createCharacteristics();
 
 	/** Perform non urgent functionality every main loop.
 	 *

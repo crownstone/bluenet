@@ -9,6 +9,7 @@
 #pragma once
 
 #include <protocol/cs_MeshMessageTypes.h>
+#include <storage/cs_Settings.h>
 
 /** Wrapper around meshing functionality.
  *
@@ -31,13 +32,15 @@ public:
 
 	void sendPowerSamplesMessage(power_samples_mesh_message_t* samples);
 
+	void sendServiceDataMessage(service_data_mesh_message_t* serviceData);
+
 	/** Send a message into the mesh
 	 *
 	 * @channel the channel number, see <MeshChannels>
 	 * @p_data a pointer to the data which should be sent
 	 * @length number of bytes of data to with p_data points
 	 */
-	void send(uint8_t channel, void* p_data, uint8_t length);
+	ERR_CODE send(uint8_t channel, void* p_data, uint8_t length);
 
 	/**
 	 * Get incoming messages and perform certain actions.
@@ -61,34 +64,42 @@ protected:
 	 *
 	 * @msg pointer to the message data
 	 */
-	void decodeDataMessage(device_mesh_message_t* msg);
+	void decodeDataMessage(uint16_t type, uint8_t* payload);
 
 	/** Check if a message is for us, meaning the current device.
-	 * Checks the target address and returns true if targetAddress == myAddress
+	 * Checks the target address and returns true if address == myAddress
 	 *
 	 * @p_data pointer to the mesh message
 	 */
-    bool isMessageForUs(void* p_data) {
-    	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
 
-    	if (memcmp(msg->header.targetAddress, _myAddr.addr, BLE_GAP_ADDR_LEN) == 0) {
-    		//! target address of package is set to our address
-    		return true;
-    	} else {
-			// _log(INFO, "message not for us, target: ");
-			// BLEutil::printArray(msg->header.targetAddress, BLE_GAP_ADDR_LEN);
-			return false;
-    	}
+    bool isMessageForUs(mesh_message_t* msg) {
+		if (isNewVersion(msg)) {
+			mesh_header_v2_t* header = (mesh_header_v2_t*)&msg->header;
+
+			uint16_t crownstoneId;
+			Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+
+			return header->crownstoneId == crownstoneId;
+		} else {
+			mesh_header_t* header = &msg->header;
+			return memcmp(header->address, _myAddr.addr, BLE_GAP_ADDR_LEN) == 0;
+		}
     }
 
+
 	/** Check if a message is a broadcast
-	 * Checks the target address and returns true if targetAddress == BROADCAST_ADDRESS
+	 * Checks the target address and returns true if address == BROADCAST_ADDRESS
 	 *
 	 * @p_data pointer to the mesh message
 	 */
-    bool isBroadcast(void* p_data) {
-    	device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
-    	return memcmp(msg->header.targetAddress, new uint8_t[BLE_GAP_ADDR_LEN] BROADCAST_ADDRESS, BLE_GAP_ADDR_LEN) == 0;
+    bool isBroadcast(mesh_message_t* msg) {
+		if (isNewVersion(msg)) {
+			mesh_header_v2_t* header = (mesh_header_v2_t*)&msg->header;
+			return header->crownstoneId == 0;
+		} else {
+			mesh_header_t* header = &msg->header;
+			return memcmp(header->address, new uint8_t[BLE_GAP_ADDR_LEN] BROADCAST_ADDRESS, BLE_GAP_ADDR_LEN) == 0;
+		}
     }
 
 	/** Check if a message is valid
@@ -97,8 +108,8 @@ protected:
 	 * @p_data pointer to the mesh message
 	 * @length number of bytes received
 	 */
-	bool isValidMessage(void* p_data, uint16_t length) {
-		device_mesh_message_t* msg = (device_mesh_message_t*) p_data;
+
+	bool isValidMessage(mesh_message_t* msg, uint16_t length) {
 
 		switch (msg->header.messageType) {
 		case CONTROL_MESSAGE:
@@ -106,7 +117,12 @@ protected:
 			//! command and config message have an array for parameters which don't have to be filled
 			//! so we don't know in advance how long it needs to be exactly. can only give
 			//! a lower and upper bound.
-			return (length > getMessageSize(msg->header.messageType) && length <= MAX_MESH_MESSAGE_DATA_LENGTH);
+			uint16_t desiredLength = getMessageSize(msg->header.messageType);
+			bool valid = length >= desiredLength && length <= MAX_MESH_MESSAGE_DATA_LENGTH;
+			if (!valid) {
+				LOGd("invalid message, length: %d <= %d", length, desiredLength);
+			}
+			return valid;
 		}
 		default:{
 			uint16_t desiredLength = getMessageSize(msg->header.messageType);
@@ -127,15 +143,58 @@ protected:
 	uint16_t getMessageSize(uint16_t messageType) {
 		switch(messageType) {
 		case EVENT_MESSAGE:
-			return sizeof(device_mesh_header_t) + sizeof(event_mesh_message_t);
+			return sizeof(mesh_header_t) + sizeof(event_mesh_message_t);
 		case BEACON_MESSAGE:
-			return sizeof(device_mesh_header_t) + sizeof(beacon_mesh_message_t);
+			return sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t);
 		case CONTROL_MESSAGE:
 		case CONFIG_MESSAGE:
-			return sizeof(device_mesh_header_t) + SB_HEADER_SIZE;
+			return sizeof(mesh_header_t) + SB_HEADER_SIZE;
 		default:
 			return 0;
 		}
+	}
+
+//#ifdef VERSION_V2
+//	hub_mesh_message_t* createHubMessage(uint16_t messageType) {
+//		hub_mesh_message_t* message = new hub_mesh_message_t();
+//		memset(message, 0, sizeof(hub_mesh_message_t));
+//    	Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &message->header.crownstoneId);
+//		message->header.messageType = messageType;
+//		return message;
+//	}
+//#else
+	hub_mesh_message_t* createHubMessage(uint16_t messageType) {
+		hub_mesh_message_t* message = new hub_mesh_message_t();
+		memset(message, 0, sizeof(hub_mesh_message_t));
+		memcpy(&message->header.address, &_myAddr.addr, BLE_GAP_ADDR_LEN);
+		message->header.messageType = messageType;
+		return message;
+	}
+//#endif
+
+	std::string getAddress(mesh_message_t* msg) {
+		if (isNewVersion(msg)) {
+			mesh_header_v2_t* header = (mesh_header_v2_t*)&msg->header;
+			char buffer[32];
+			sprintf(buffer, "%d", header->crownstoneId);
+			return std::string(buffer);
+		} else {
+			mesh_header_t* header = &msg->header;
+			char buffer[32];
+			sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X", header->address[5],
+						header->address[4], header->address[3], header->address[2],
+						header->address[1], header->address[0]);
+			return std::string(buffer);
+		}
+	}
+
+	// todo for the time being, as long as we don't user reason or userId, we can
+	// continue with both versions to target crownstones. but this needs to be removed
+	// in the final version for only one of the two cases, either crownstoneId or
+	// mac address!
+	bool isNewVersion(mesh_message_t* msg) {
+		mesh_header_v2_t* header = (mesh_header_v2_t*)&msg->header;
+		return (header->reason | header->userId) == 0;
 	}
 
 private:

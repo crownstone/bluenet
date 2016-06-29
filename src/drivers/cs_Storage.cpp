@@ -17,9 +17,12 @@
 #include "drivers/cs_Storage.h"
 
 #include <climits>
+#include <float.h>
 
 #include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
+
+#include <mesh/cs_Mesh.h>
 
 extern "C"  {
 
@@ -35,6 +38,9 @@ extern "C"  {
 			APP_ERROR_CHECK(result);
 		} else {
 			LOGd("Opcode %i executed (no error)", op_code);
+			if (op_code == PSTORAGE_UPDATE_OP_CODE) {
+				Storage::getInstance().onUpdateDone();
+			}
 		}
 	}
 
@@ -71,35 +77,20 @@ void Storage::init() {
 //	requestBuffer = new CircularBuffer<buffer_element_t>(STORAGE_REQUEST_BUFFER_SIZE, false);
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
-		LOGi("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
+		LOGd("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
 		initBlocks(config[i].storage_size, 1, config[i].handle);
 	}
 
 	_initialized = true;
 }
 
-void Storage::resumeRequests() {
-	if (!writeBuffer.empty()) {
-		LOGd("Resume pstorage write requests");
-		while (!writeBuffer.empty()) {
-			//! get the next buffered storage request
-			buffer_element_t elem = writeBuffer.pop();
-
-//			LOGi("elem:");
-//			BLEutil::printArray((uint8_t*)&elem, sizeof(elem));
-
-			if (!_scanning) {
-				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
-			} else {
-				// if scanning was started again, push it back on the buffer and try again during the next
-				// scan break
-				writeBuffer.push(elem);
-				LOGe("scan started before all pstorage write requestss were processed!");
-				return;
-			}
-
-//			LOGi("update done");
-		}
+void Storage::onUpdateDone() {
+	// track how many update requests are still pending
+	_pending--;
+	// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
+	if (!_pending && Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+		LOGd("update done, resume mesh");
+		Mesh::getInstance().start();
 	}
 }
 
@@ -107,17 +98,75 @@ void resume_requests(void* p_data, uint16_t len) {
 	Storage::getInstance().resumeRequests();
 }
 
+void storage_sys_evt_handler(uint32_t evt) {
+	switch(evt) {
+	case NRF_EVT_RADIO_SESSION_IDLE: {
+		// once mesh is stopped, the softdevice will trigger the NRF_EVT_RADIO_SESSION_IDLE,
+		// now we can try to update the pstorage
+		LOGd("NRF_EVT_RADIO_SESSION_IDLE");
+		app_sched_event_put(NULL, 0, resume_requests);
+		break;
+	}
+//	case NRF_EVT_RADIO_SESSION_CLOSED: {
+//		LOGd("NRF_EVT_RADIO_SESSION_CLOSED");
+////			Storage::getInstance().resumeRequests();
+//		app_sched_event_put(NULL, 0, resume_requests);
+//		break;
+//	}
+	}
+}
+
+void Storage::resumeRequests() {
+	if (!writeBuffer.empty()) {
+		LOGd("Resume pstorage write requests");
+
+		while (!writeBuffer.empty()) {
+			//! get the next buffered storage request
+			buffer_element_t elem = writeBuffer.pop();
+
+//			LOGd("elem:");
+//			BLEutil::printArray((uint8_t*)&elem, sizeof(elem));
+
+			if (!_scanning) {
+				LOGd("pstorage_update");
+				// count number of pending updates to decide when mesh can be resumed (if needed)
+				_pending++;
+				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
+			} else {
+				// if scanning was started again, push it back on the buffer and try again during the next
+				// scan break
+				writeBuffer.push(elem);
+				LOGe("scan started before all pstorage write requests were processed!");
+				return;
+			}
+
+//			LOGd("update done");
+		}
+	}
+}
+
 void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 	switch(evt) {
 	case EVT_SCAN_STARTED: {
+		LOGd("EVT_SCAN_STARTED");
 		_scanning = true;
 		break;
 	}
 	case EVT_SCAN_STOPPED: {
+		LOGd("EVT_SCAN_STOPPED");
 		_scanning = false;
+
+		// if there are pstorage update requests buffered
 		if (!writeBuffer.empty()) {
-			app_sched_event_put(NULL, 0, resume_requests);
+			// if meshing, need to stop the mesh first before updating pstorage
+			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED))	{
+				LOGd("stop mesh on scan stop");
+				Mesh::getInstance().stop();
+			} else {
+				// otherwise, resume buffered pstorage update requests
+				app_sched_event_put(NULL, 0, resume_requests);
+			}
 		}
 		break;
 	}
@@ -220,13 +269,18 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 
 	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
 
-	// [31.05.16] it seems it was not (or not anymore) the meshing that is causing issues with pstorage,
-	//    but the scanning. If the device is scanning, then pstorage_updates are queued by the softdevice.
-	//    unfortunately, they are not automatically resumed once the device stops scanning. they are staying
-	//    queued until the first pstorage_update is called while the device is not scanning. to avoid this, we
-	//    queue the write calls ourselves, and only trigger the pstorage_update calls once the device stopped
-	//    scanning
-	if (_scanning) {
+	// [23.06.16] If the device is scanning or meshing, then pstorage_updates are queued by the softdevice.
+	//    unfortunately, they are not automatically resumed once the softdevice has time to process them. they
+	//    are staying queued until the first pstorage_update is called while the device is not scanning. to
+	//    avoid this, we queue the write calls ourselves, and only trigger the pstorage_update calls once the
+	//    device stopped scanning and meshing
+
+	bool meshEnabled = Settings::getInstance().isSet(CONFIG_MESH_ENABLED);
+
+	// if scanning or meshing, we need to buffer the storage update requests until the softdevice has time to process
+	// the pstorage. this is only possible if not scanning and mesh is stopped.
+	if (_scanning || meshEnabled) {
+		LOGd("buffer storage request")
 		if (!writeBuffer.full()) {
 			buffer_element_t elem;
 			elem.storageHandle = block_handle;
@@ -237,8 +291,16 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 		} else {
 			LOGe("storage request buffer is full!");
 		}
+
+		// if not scanning, stop the mesh and wait for the NRF_EVT_RADIO_SESSION_IDLE to arrive to access pstorage
+		// if scannig, wait for the EVT_SCAN_STOPPED
+		if (meshEnabled && !_scanning) {
+			LOGd("stop mesh on pstorage update");
+			Mesh::getInstance().stop();
+		}
 	} else {
-    	BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
+		// if neither scanning nor meshing, call the update directly
+		BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
 	}
 
 }
@@ -253,9 +315,9 @@ pstorage_size_t Storage::getOffset(ps_storage_base_t* storage, uint8_t* var) {
 	pstorage_size_t offset = p_var - p_storage;
 
 #ifdef PRINT_ITEMS
-	LOGi("p_storage: %p", p_storage);
-	LOGi("var: %p", p_var);
-	LOGi("offset: %d", offset);
+	LOGd("p_storage: %p", p_storage);
+	LOGd("var: %p", p_var);
+	LOGd("offset: %d", offset);
 #endif
 
 	return offset;
@@ -336,10 +398,10 @@ void Storage::getUint8(uint32_t value, uint8_t* target, uint8_t default_value) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
-	// check if last byte is FF which means that memory is unnassigned
+	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
@@ -349,7 +411,7 @@ void Storage::getUint8(uint32_t value, uint8_t* target, uint8_t default_value) {
 	} else {
 		*target = value;
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", target);
+		LOGd("found stored value: %d", *target);
 #endif
 	}
 }
@@ -363,10 +425,10 @@ void Storage::getInt8(int32_t value, int8_t* target, int8_t default_value) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
-	// check if last byte is FF which means that memory is unnassigned
+	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
@@ -376,7 +438,7 @@ void Storage::getInt8(int32_t value, int8_t* target, int8_t default_value) {
 	} else {
 		*target = value;
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", target);
+		LOGd("found stored value: %d", *target);
 #endif
 	}
 }
@@ -389,10 +451,10 @@ void Storage::getUint16(uint32_t value, uint16_t* target, uint16_t default_value
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
-	// check if last byte is FF which means that memory is unnassigned
+	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
@@ -403,7 +465,7 @@ void Storage::getUint16(uint32_t value, uint16_t* target, uint16_t default_value
 		*target = value;
 
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", target);
+		LOGd("found stored value: %d", *target);
 #endif
 	}
 }
@@ -416,24 +478,87 @@ void Storage::setUint32(uint32_t value, uint32_t& target) {
 	}
 }
 
-void Storage::getUint32(uint32_t value, uint32_t& target, uint32_t default_value) {
+void Storage::getUint32(uint32_t value, uint32_t* target, uint32_t default_value) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGi("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
 	// check if value is equal to INT_MAX (FFFFFFFF) which means that memory is
-	// unnassigned and value has to be ignored
+	// unassigned and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd("use default value");
 #endif
-		target = default_value;
+		*target = default_value;
+	} else {
+		*target = value;
+#ifdef PRINT_ITEMS
+		LOGd("found stored value: %d", *target);
+#endif
+	}
+}
+
+//void Storage::setDouble(double value, double& target) {
+//	if (value == DBL_MAX) {
+//		LOGe("value %d too big", value);
+//	} else {
+//		target = value;
+//	}
+//}
+//
+//void Storage::getDouble(double value, double* target, double default_value) {
+//
+//#ifdef PRINT_ITEMS
+//	uint8_t* tmp = (uint8_t*)&value;
+//	log(DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
+//	BLEutil::printArray(tmp, sizeof(double));
+//#endif
+//
+//	// check if value is equal to DBL_MAX (FFFFFFFF) which means that memory is
+//	// unassigned and value has to be ignored
+//	if (value == DBL_MAX) {
+//#ifdef PRINT_ITEMS
+//		LOGd("use default value");
+//#endif
+//		*target = default_value;
+//	} else {
+//		*target = value;
+//#ifdef PRINT_ITEMS
+//		LOGd("found stored value: %f", *target);
+//#endif
+//	}
+//}
+
+
+void Storage::setFloat(float value, float& target) {
+	if (value == FLT_MAX) {
+		LOGe("value %d too big", value);
 	} else {
 		target = value;
+	}
+}
+
+void Storage::getFloat(float value, float* target, float default_value) {
+
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", target);
+	uint8_t* tmp = (uint8_t*)&value;
+	log(DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
+	BLEutil::printArray(tmp, sizeof(float));
+#endif
+
+	// check if value is equal to DBL_MAX (FFFFFFFF) which means that memory is
+	// unassigned and value has to be ignored
+	if (*(uint32_t*)&value == UINT32_MAX) {
+#ifdef PRINT_ITEMS
+		LOGd("use default value");
+#endif
+		*target = default_value;
+	} else {
+		*target = value;
+#ifdef PRINT_ITEMS
+		LOGd("found stored value: %f", *target);
 #endif
 	}
 }

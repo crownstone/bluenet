@@ -21,7 +21,7 @@ void reset(void* p_context) {
 
 	uint32_t cmd = *(int32_t*) p_context;
 
-	if (cmd == COMMAND_ENTER_RADIO_BOOTLOADER) {
+	if (cmd == GPREGRET_DFU_RESET) {
 		LOGi(MSG_FIRMWARE_UPDATE);
 	} else {
 		LOGi(MSG_RESET);
@@ -37,64 +37,45 @@ void reset(void* p_context) {
 	sd_nvic_SystemReset();
 }
 
-void stop_mesh(void* p_context) {
-	Mesh::getInstance().stop();
+void execute_delayed(void * p_context) {
+	delayed_command_t* buf = (delayed_command_t*)p_context;
+	CommandHandler::getInstance().handleCommand(buf->type, buf->buffer, buf->size);
+	free(buf->buffer);
+	free(buf);
 }
 
-
-void CommandHandler::handleCommand(CommandHandlerTypes type) {
-	handleCommand(type, NULL, 0);
+CommandHandler::CommandHandler() : _stack(NULL) {
+	Timer::getInstance().createSingleShot(_delayTimer, execute_delayed);
 }
 
-void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size) {
+void CommandHandler::resetDelayed(uint8_t opCode) {
+	static uint8_t restOpCode = opCode;
+	app_timer_id_t resetTimer;
+	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
+	Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &restOpCode);
+}
+
+ERR_CODE CommandHandler::handleCommandDelayed(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, uint32_t delay) {
+	delayed_command_t* buf = new delayed_command_t();
+	buf->type = type;
+	buf->buffer = new uint8_t[size];
+	memcpy(buf->buffer, buffer, size);
+	buf->size = size;
+	Timer::getInstance().start(_delayTimer, MS_TO_TICKS(delay), buf);
+	LOGi("execute with delay %d", delay);
+	return NRF_SUCCESS;
+}
+
+ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type) {
+	return handleCommand(type, NULL, 0);
+}
+
+ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size) {
 
 	switch (type) {
-	case CMD_PWM: {
-		LOGi("handle PWM command");
-
-		if (size != sizeof(switch_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
-			return;
-		}
-
-		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-		uint8_t value = payload->switchState;
-
-		uint8_t current = Switch::getInstance().getValue();
-//		LOGi("current pwm: %d", current);
-		if (value != current) {
-			LOGi("update pwm to %i", value);
-			Switch::getInstance().setValue(value);
-		}
-		break;
-	}
-	case CMD_SWITCH: {
-		LOGi("handle switch command");
-
-		if (size != sizeof(switch_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
-			return;
-		}
-
-		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-		uint8_t value = payload->switchState;
-
-		if (value == 0) {
-			Switch::getInstance().relayOff();
-		} else {
-			Switch::getInstance().relayOn();
-		}
-
-		break;
-	}
 	case CMD_GOTO_DFU: {
 		LOGi("handle goto dfu command");
-
-		static uint32_t resetOp = COMMAND_ENTER_RADIO_BOOTLOADER;
-
-		app_timer_id_t resetTimer;
-		Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
-		Timer::getInstance().start(resetTimer, MS_TO_TICKS(100), &resetOp);
+		resetDelayed(GPREGRET_DFU_RESET);
 		break;
 	}
 	case CMD_RESET: {
@@ -102,16 +83,16 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		if (size != sizeof(opcode_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
-		static uint32_t resetOp = payload->opCode;
+		static uint8_t resetOp = payload->opCode;
+
+//		LOGi("resetOp: %d", resetOp);
 
 //			if (resetOp) {
-		app_timer_id_t resetTimer;
-		Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
-		Timer::getInstance().start(resetTimer, MS_TO_TICKS(100), &resetOp);
+		resetDelayed(resetOp);
 //			} else {
 		//todo: why nonzero?
 //				LOGw("To reset write a nonzero value: %d", payload->resetOp);
@@ -123,7 +104,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		if (size != sizeof(enable_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
@@ -135,21 +116,18 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 		if (enable) {
 			Mesh::getInstance().start();
 		} else {
-			//! breaks if it is called directly...
-//			Mesh::getInstance().stop();
-			app_timer_id_t meshStopTimer;
-			Timer::getInstance().createSingleShot(meshStopTimer, (app_timer_timeout_handler_t) stop_mesh);
-			Timer::getInstance().start(meshStopTimer, MS_TO_TICKS(100), NULL);
+			Mesh::getInstance().stop();
 		}
 
 		break;
 	}
 	case CMD_ENABLE_ENCRYPTION: {
 		LOGi("handle enable encryption command: tbd");
+		return ERR_NOT_IMPLEMENTED;
 
 		if (size != sizeof(enable_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
@@ -169,7 +147,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		if (size != sizeof(enable_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
@@ -177,24 +155,8 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		LOGi("%s ibeacon", enable ? "Enabling" : "Disabling");
 		Settings::getInstance().updateFlag(CONFIG_IBEACON_ENABLED, enable, true);
-		EventDispatcher::getInstance().dispatch(EVT_ENABLED_IBEACON, &enable, 1);
+//		EventDispatcher::getInstance().dispatch(EVT_ENABLED_IBEACON, &enable, sizeof(enable));
 
-		break;
-	}
-	case CMD_ENABLE_CONT_POWER_MEASURE: {
-		LOGi("handle enable cont power measure command: tbd");
-
-		if (size != sizeof(enable_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
-			return;
-		}
-
-		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-		bool enable = payload->enable;
-
-		LOGi("%s continues power measurements", enable ? "Enabling" : "Disabling");
-
-		// todo: tbd
 		break;
 	}
 	case CMD_ENABLE_SCANNER: {
@@ -209,7 +171,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 			// we can accept the command as long as size is 1
 			if (size != 1 || enable) {
 				LOGe("wrong payload length received: %d", size);
-				return;
+				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 		}
 
@@ -234,7 +196,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		if (size != sizeof(enable_message_payload_t)) {
 			LOGe("wrong payload length received: %d", size);
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
@@ -256,24 +218,33 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 			EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, dataLength);
 
-			if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 				MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
 			}
 		}
 
 		break;
 	}
-	case CMD_SAMPLE_POWER: {
-		LOGi("handle sample power command: tbd");
+	case CMD_REQUEST_SERVICE_DATA: {
+		LOGi("handle request service data");
 
-//		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
-//		uint8_t sampleOp = payload->opCode;
-//
-//		if (sampleOp == 0) {
-//			PowerSampling::getInstance().stopSampling();
-//		} else {
-//			PowerSampling::getInstance().startSampling();
-//		}
+		service_data_mesh_message_t serviceData;
+		memset(&serviceData, 0, sizeof(serviceData));
+
+		State& state = State::getInstance();
+		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &serviceData.crownstoneId);
+
+		state.get(STATE_SWITCH_STATE, serviceData.switchState);
+
+		// todo get event bitmask
+		serviceData.eventBitmask = 9;
+
+		state.get(STATE_POWER_USAGE, (int32_t&)serviceData.powerUsage);
+		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)serviceData.accumulatedEnergy);
+		state.get(STATE_TEMPERATURE, (int32_t&)serviceData.temperature);
+
+		MeshControl::getInstance().sendServiceDataMessage(&serviceData);
+
 		break;
 	}
 	case CMD_FACTORY_RESET: {
@@ -281,7 +252,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		if (size != sizeof(FACTORY_RESET_CODE)) {
 			LOGe("expected reset code of length %d", sizeof(FACTORY_RESET_CODE));
-			return;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		factory_reset_message_payload_t* payload = (factory_reset_message_payload_t*) buffer;
@@ -299,16 +270,27 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 			LOGi("factory reset done, rebooting device in 2s ...");
 
-			static uint32_t resetOp = 1;
-
-			app_timer_id_t resetTimer;
-			Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
-			Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &resetOp);
+			resetDelayed(GPREGRET_SOFT_RESET);
 
 		} else {
 			LOGi("wrong code received: %p", resetCode);
 			LOGi("factory reset code is: %p", FACTORY_RESET_CODE);
+			return ERR_WRONG_PARAMETER;
 		}
+
+		break;
+	}
+	case CMD_SET_TIME: {
+		LOGi("handle set time command:");
+
+		if (size != sizeof(uint32_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		uint32_t value = *(uint32_t*)buffer;
+
+		Scheduler::getInstance().setTime(value);
 
 		break;
 	}
@@ -321,7 +303,7 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 		ScheduleEntry entry;
 
 		if (entry.assign(buffer, size)) {
-			return;
+			return -1;
 		}
 		schedule_entry_t* entryStruct = entry.getStruct();
 		if (!entryStruct->nextTimestamp) {
@@ -331,17 +313,17 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 			// Check if entry is correct
 			if (entryStruct->nextTimestamp < scheduler.getTime()) {
-				return;
+				return -1;
 			}
 			switch (ScheduleEntry::getTimeType(entryStruct)) {
 			case SCHEDULE_TIME_TYPE_REPEAT:
 				if (entryStruct->repeat.repeatTime == 0) {
-					return;
+					return -1;
 				}
 				break;
 			case SCHEDULE_TIME_TYPE_DAILY:
 				if (entryStruct->daily.nextDayOfWeek > 6) {
-					return;
+					return -1;
 				}
 				break;
 			case SCHEDULE_TIME_TYPE_ONCE:
@@ -354,33 +336,178 @@ void CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer
 
 		break;
 	}
+	case CMD_VALIDATE_SETUP: {
+		LOGi("handle validate setup");
+
+		uint8_t opMode;
+		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+		if (opMode == OPERATION_MODE_SETUP) {
+
+			Settings& settings = Settings::getInstance();
+
+			uint8_t key[ENCYRPTION_KEY_LENGTH];
+			uint8_t blankKey[ENCYRPTION_KEY_LENGTH] = {};
+
+			// validate encryption keys are not 0
+			settings.get(CONFIG_KEY_OWNER, key);
+			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+				LOGw("owner key is not set!");
+				return ERR_COMMAND_FAILED;
+			}
+
+			settings.get(CONFIG_KEY_MEMBER, key);
+			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+				LOGw("member key is not set!");
+				return ERR_COMMAND_FAILED;
+			}
+
+			settings.get(CONFIG_KEY_GUEST, key);
+			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+				LOGw("guest key is not set!");
+				return ERR_COMMAND_FAILED;
+			}
+
+			// validate crownstone id is not 0
+			uint16_t crownstoneId;
+			settings.get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+
+			if (crownstoneId == 0) {
+				LOGw("crownstone id has to be set during setup mode");
+				return ERR_COMMAND_FAILED;
+			}
+
+			// validate major and minor
+			uint16_t major;
+			settings.get(CONFIG_IBEACON_MAJOR, &major);
+
+			if (major == 0) {
+				LOGw("ibeacn major is not set!");
+				return ERR_COMMAND_FAILED;
+			}
+
+			uint16_t minor;
+			settings.get(CONFIG_IBEACON_MINOR, &minor);
+
+			if (minor == 0) {
+				LOGw("ibeacn minor is not set!");
+				return ERR_COMMAND_FAILED;
+			}
+
+			LOGi("Setup completed, resetting to normal mode");
+
+			//! if validation ok, set opMode to normal mode
+			State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
+
+			//! then reset device
+			resetDelayed(GPREGRET_SOFT_RESET);
+		} else {
+			LOGw("validate setup only available in setup mode");
+			return ERR_NOT_AVAILABLE;
+		}
+
+		break;
+	}
 
 	case CMD_USER_FEEDBACK: {
 		LOGi("handle user feedback command: tbd");
-
-		// todo: tbd
-		break;
-	}
-	case CMD_SET_TIME: {
-		LOGi("handle set time command: tbd");
+		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd
 		break;
 	}
 	case CMD_KEEP_ALIVE_STATE: {
 		LOGi("handle keep alive command: tbd");
+		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd
 		break;
 	}
 	case CMD_KEEP_ALIVE: {
 		LOGi("handle keep alive command: tbd");
+		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd
 		break;
 	}
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+	// Crownstone specific commands are only available if device type is set to Crownstone.
+	// E.g. GuideStone does not support power measure or switching commands
+	case CMD_SWITCH: {
+		LOGi("handle switch command");
+		// for now, same as pwm, but switch command should decide itself if relay or
+		// pwm is used
+	}
+	case CMD_PWM: {
+		LOGi("handle PWM command");
+
+		if (size != sizeof(switch_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
+		uint8_t value = payload->switchState;
+
+		uint8_t current = Switch::getInstance().getValue();
+//		LOGi("current pwm: %d", current);
+		if (value != current) {
+			LOGi("update pwm to %i", value);
+			Switch::getInstance().setValue(value);
+		}
+		break;
+	}
+	case CMD_RELAY: {
+		LOGi("handle relay command");
+
+		if (size != sizeof(switch_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
+		uint8_t value = payload->switchState;
+
+		if (value == 0) {
+			Switch::getInstance().relayOff();
+		} else {
+			Switch::getInstance().relayOn();
+		}
+
+		break;
+	}
+	case CMD_ENABLE_CONT_POWER_MEASURE: {
+		LOGi("handle enable cont power measure command: tbd");
+		return ERR_NOT_IMPLEMENTED;
+
+		if (size != sizeof(enable_message_payload_t)) {
+			LOGe("wrong payload length received: %d", size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+		bool enable = payload->enable;
+
+		LOGi("%s continues power measurements", enable ? "Enabling" : "Disabling");
+
+		// todo: tbd
+		break;
+	}
+#else
+	// Crownstone specific commands are only available if device type is set to Crownstone.
+	// E.g. GuideStone does not support power measure or switching commands
+	case CMD_SWITCH:
+	case CMD_PWM:
+	case CMD_RELAY:
+	case CMD_ENABLE_CONT_POWER_MEASURE: {
+		LOGe("Commands not available for device type %d", DEVICE_TYPE);
+		return ERR_NOT_AVAILABLE;
+	}
+#endif
 	default: {
 		LOGe("command type not found!!");
+		return ERR_COMMAND_NOT_FOUND;
 	}
 	}
+
+	return ERR_SUCCESS;
 }

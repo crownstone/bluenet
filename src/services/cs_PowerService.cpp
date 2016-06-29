@@ -29,13 +29,11 @@ PowerService::PowerService() : EventListener(),
 
 	setName(BLE_SERVICE_POWER);
 
-	addCharacteristics();
-
 	// todo: enable again if tick is needed
 //	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)PowerService::staticTick);
 }
 
-void PowerService::addCharacteristics() {
+void PowerService::createCharacteristics() {
 	LOGi("Create power service");
 
 #if CHAR_PWM==1

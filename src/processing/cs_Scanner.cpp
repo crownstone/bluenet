@@ -142,6 +142,8 @@ void Scanner::stop() {
 		//! no need to execute scan on stop is there? we want to stop after all
 	//	executeScan();
 	//	_running = false;
+	} else if (_scanning) {
+		manualStopScan();
 	} else {
 		LOGi("already stopped!");
 	}
@@ -198,7 +200,7 @@ void Scanner::executeScan() {
 }
 
 void Scanner::sendResults() {
-	if (Settings::getInstance().isEnabled(CONFIG_MESH_ENABLED)) {
+	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
 	}
 

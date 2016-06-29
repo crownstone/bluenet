@@ -43,13 +43,24 @@ enum ConfigurationTypes {
 	CONFIG_SCANNER_ENABLED                  = 27,     //! 0x1B
 	CONFIG_CONT_POWER_SAMPLER_ENABLED       = 28,     //! 0x1C
 	CONFIG_TRACKER_ENABLED                  = 29,     //! 0x1D
-	CONFIG_ADC_SAMPLE_RATE                  = 30,     //! 0x1E
+	CONFIG_ADC_BURST_SAMPLE_RATE            = 30,     //! 0x1E
 	CONFIG_POWER_SAMPLE_BURST_INTERVAL      = 31,     //! 0x1F
 	CONFIG_POWER_SAMPLE_CONT_INTERVAL       = 32,     //! 0x20
-	CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES    = 33,     //! 0x21
+	CONFIG_ADC_CONT_SAMPLE_RATE             = 33,     //! 0x1E
 	CONFIG_CROWNSTONE_ID                    = 34,     //! 0x22
 	CONFIG_KEY_OWNER                        = 35,     //! 0x23
 	CONFIG_KEY_MEMBER                       = 36,     //! 0x24
 	CONFIG_KEY_GUEST                        = 37,     //! 0x25
+	CONFIG_DEFAULT_ON                       = 38,
+	CONFIG_SCAN_INTERVAL                    = 39,
+	CONFIG_SCAN_WINDOW                      = 40,
+	CONFIG_RELAY_HIGH_DURATION              = 41,
+	CONFIG_LOW_TX_POWER                     = 42,
+	CONFIG_VOLTAGE_MULTIPLIER               = 43,
+	CONFIG_CURRENT_MULTIPLIER               = 44,
+	CONFIG_VOLTAGE_ZERO					    = 45,
+	CONFIG_CURRENT_ZERO                     = 46,
+	CONFIG_POWER_ZERO                       = 47,
+
 	CONFIG_TYPES
 };

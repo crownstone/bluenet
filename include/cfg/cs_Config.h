@@ -22,7 +22,9 @@
  *
  * This should be the same value as defined in the bootloader.
  */
-#define COMMAND_ENTER_RADIO_BOOTLOADER           66
+#define GPREGRET_DFU_RESET                       66
+#define GPREGRET_BROWNOUT_RESET                  96
+#define GPREGRET_SOFT_RESET                      0
 
 /*
  */
@@ -70,7 +72,6 @@
 //! Max number of schedule entries in the schedule service.
 #define MAX_SCHEDULE_ENTRIES                     10
 
-//! TODO: make into build configuration value?
 #define CURRENT_LIMIT							 0
 
 #define CS_ADC_MAX_PINS                          2
@@ -82,7 +83,7 @@
 #if CONTINUOUS_POWER_SAMPLER == 1
 #define CS_ADC_SAMPLE_RATE                       100
 #else
-#define CS_ADC_SAMPLE_RATE                       4000 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
+#define CS_ADC_SAMPLE_RATE                       3000 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
 #endif
 
 #define POWER_SAMPLE_BURST_INTERVAL              3000 //! Time to next burst sampling (ms)
@@ -96,3 +97,11 @@
 #define FACTORY_RESET_CODE                       0xdeadbeef
 
 #define ENCYRPTION_KEY_LENGTH                    16 //! 16 byte length
+
+#define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V21
+
+#define VOLTAGE_MULTIPLIER                       2.374f
+#define CURRENT_MULTIPLIER                       0.044f
+#define VOLTAGE_ZERO                             169.0f
+#define CURRENT_ZERO                             168.5f
+#define POWER_ZERO                               9.0f

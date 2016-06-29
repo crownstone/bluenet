@@ -32,7 +32,7 @@ public:
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void addCharacteristics();
+	void createCharacteristics();
 
 	new_alert_t getAlert();
 

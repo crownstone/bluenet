@@ -10,6 +10,7 @@
 #include <drivers/cs_Storage.h>
 #include <structs/cs_StreamBuffer.h>
 #include <protocol/cs_ConfigTypes.h>
+#include <protocol/cs_ErrorCodes.h>
 
 
 /**
@@ -40,11 +41,11 @@ public:
 	/** Read the configuration from the buffer and store in working memory.
 	 *  If persistent is true, also store in FLASH
 	 */
-	void writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent = true);
+	ERR_CODE writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent = true);
 
 	/** Read the configuration from storage and write to streambuffer (to be read from characteristic)
 	 */
-	bool readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer);
+	ERR_CODE readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer);
 
 	/** Return the struct containing the configuration values in current working memory
 	 */
@@ -79,14 +80,14 @@ public:
 	 */
 	void setBLEName(const std::string &name, bool persistent = true);
 
-	bool isEnabled(uint8_t type);
+	bool isSet(uint8_t type);
 	bool updateFlag(uint8_t type, bool value, bool persistent);
 
 	void factoryReset(uint32_t resetCode);
 
-	bool get(uint8_t type, void* target);
-	bool get(uint8_t type, void* target, uint16_t& size );
-	bool set(uint8_t type, void* target, bool persistent = false, uint16_t size = 0);
+	ERR_CODE get(uint8_t type, void* target);
+	ERR_CODE get(uint8_t type, void* target, uint16_t& size );
+	ERR_CODE set(uint8_t type, void* target, bool persistent = false, uint16_t size = 0);
 
 protected:
 
@@ -103,9 +104,8 @@ protected:
 
 	Storage* _storage;
 
-	bool verify(uint8_t type, uint8_t* payload, uint8_t length);
+	ERR_CODE verify(uint8_t type, uint8_t* payload, uint8_t length);
 
-	uint8_t* getStorageItem(uint8_t type);
 	uint16_t getSettingsItemSize(uint8_t type);
 
 	bool readFlag(uint8_t type, bool& value);

@@ -99,7 +99,8 @@ private:
 	//! This class is singleton, deny implementation
 	void operator=(ADC const &);
 
-	bool useContinousTimer() { return !(CS_ADC_SAMPLE_RATE > (_numPins*200)); }
+//	bool useContinousTimer() { return !(CS_ADC_SAMPLE_RATE > (_numPins*200)); }
+	bool useContinousTimer() { return true; }
 
 	uint8_t _pins[CS_ADC_MAX_PINS];
 	uint8_t _numPins;

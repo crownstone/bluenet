@@ -33,10 +33,15 @@ public:
 		return _posixTimeStamp;
 	}
 
+	// todo: move time / set time to separate class
 	/** Returns the current time as posix time
 	 * returns 0 when no time was set yet
 	 */
 	void setTime(uint32_t time);
+
+	void start() {
+		scheduleNextTick();
+	}
 
 	void addScheduleEntry(schedule_entry_t* entry);
 

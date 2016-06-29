@@ -33,6 +33,7 @@
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Tracker.h>
 #include <processing/cs_PowerSampling.h>
+#include <processing/cs_Scheduler.h>
 
 #include <mesh/cs_Mesh.h>
 #include <storage/cs_State.h>
@@ -160,12 +161,13 @@ private:
 	CommandHandler* _commandHandler;
 	Scanner* _scanner;
 	Tracker* _tracker;
+	Scheduler* _scheduler;
 
 	bool _advertisementPaused;
 
 	app_timer_id_t _mainTimer;
 
-	uint32_t _operationMode;
+	uint8_t _operationMode;
 
 };
 

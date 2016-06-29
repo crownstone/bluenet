@@ -37,7 +37,7 @@ void Settings::init() {
 }
 
 //	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
-void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent) {
+ERR_CODE Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent) {
 
 	/////////////////////////////////////////////////
 	//// SPECIAL CASES
@@ -48,25 +48,42 @@ void Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, b
 		//! max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
 		if (length > 88) {
 			LOGe("Wifi settings string too long");
-			break;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		_wifiSettings = std::string((char*)payload, length);
 		LOGi("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
-		return;
+		return ERR_SUCCESS;
 	}
+
+	// todo: if we want to disable write access for encryption keys outside the setup mode
+//	/////////////////////////////////////////////////
+//	//// WRITE DISABLED
+//	/////////////////////////////////////////////////
+//	case CONFIG_KEY_OWNER :
+//	case CONFIG_KEY_MEMBER :
+//	case CONFIG_KEY_GUEST : {
+//		uint8_t opMode;
+//		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+//		if (opMode != OPERATION_MODE_SETUP) {
+//			LOGw("Reading encryption keys only available in setup mode!");
+//			return false;
+//		}
+//	}
 	}
 
 	/////////////////////////////////////////////////
 	//// DEFAULT
 	/////////////////////////////////////////////////
-	if (verify(type, payload, length)) {
-		set(type, payload, persistent, length);
-		uint8_t* p_item = getStorageItem(type);
+	ERR_CODE error_code;
+	error_code = verify(type, payload, length);
+	if (SUCCESS(error_code)) {
+		error_code = set(type, payload, persistent, length);
 		EventDispatcher::getInstance().dispatch(type, payload, length);
 	}
+	return error_code;
 }
 
-bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
+ERR_CODE Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 
 	/////////////////////////////////////////////////
 	//// SPECIAL CASES
@@ -85,30 +102,48 @@ bool Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer
 		streamBuffer->setType(type);
 		_wifiSettings = "";
 		LOGd("Wifi settings read");
-		return true;
+		return ERR_SUCCESS;
 	}
+
+	// todo: if we want to disable read access for encryption keys outside the setup mode
+//	/////////////////////////////////////////////////
+//	//// READ DISABLED
+//	/////////////////////////////////////////////////
+//	case CONFIG_KEY_OWNER :
+//	case CONFIG_KEY_MEMBER :
+//	case CONFIG_KEY_GUEST : {
+//		uint8_t opMode;
+//		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+//		if (opMode != OPERATION_MODE_SETUP) {
+//			LOGw("Reading encryption keys only avilable in setup mode!");
+//			return false;
+//		}
+//	}
+
 	}
 
 	/////////////////////////////////////////////////
 	//// DEFAULT
 	/////////////////////////////////////////////////
+	ERR_CODE error_code;
 	uint16_t plen = getSettingsItemSize(type);
 	if (plen > 0) {
 		// todo: do we really want to reload the current working copy?
 		//  or do we just want to return the value in the current working copy?
 		loadPersistentStorage();
 		uint8_t payload[plen];
-		get(type, payload, plen);
-		streamBuffer->setPayload(payload, plen);
-		streamBuffer->setType(type);
-
-		return true;
+		error_code = get(type, payload, plen);
+		if (SUCCESS(error_code)) {
+			streamBuffer->setPayload(payload, plen);
+			streamBuffer->setType(type);
+		}
+		return error_code;
 	} else {
-		return false;
+		return ERR_CONFIG_NOT_FOUND;
 	}
 }
 
-bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
+ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	switch(type) {
 	/////////////////////////////////////////////////
 	//// UINT 8
@@ -118,15 +153,16 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_FLOOR: {
 		if (length != 1) {
 			LOGw("Expected uint8");
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi("Set %u to %u", type, payload[0]);
-		return true;
+		return ERR_SUCCESS;
 	}
 
 	/////////////////////////////////////////////////
 	//// INT 8
 	/////////////////////////////////////////////////
+	case CONFIG_LOW_TX_POWER:
 	case CONFIG_MAX_CHIP_TEMP:
 	case CONFIG_MAX_ENV_TEMP:
 	case CONFIG_MIN_ENV_TEMP:
@@ -134,15 +170,22 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_IBEACON_TXPOWER: {
 		if (length != 1) {
 			LOGw("Expected int8");
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi("Set %u to %i", type, (int8_t)payload[0]);
-		return true;
+		return ERR_SUCCESS;
 	}
 
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
+	case CONFIG_ADC_BURST_SAMPLE_RATE:
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
+	case CONFIG_ADC_CONT_SAMPLE_RATE:
+	case CONFIG_SCAN_INTERVAL:
+	case CONFIG_SCAN_WINDOW:
+	case CONFIG_RELAY_HIGH_DURATION:
 	case CONFIG_CROWNSTONE_ID:
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:
 	case CONFIG_BOOT_DELAY:
@@ -155,11 +198,28 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_NEARBY_TIMEOUT: {
 		if (length != 2) {
 			LOGw("Expected uint16");
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi("Set %u to %u", type, *(uint16_t*)payload);
-		return true;
+		return ERR_SUCCESS;
 	}
+
+	/////////////////////////////////////////////////
+	//// FLOAT
+	/////////////////////////////////////////////////
+	case CONFIG_VOLTAGE_MULTIPLIER:
+	case CONFIG_CURRENT_MULTIPLIER:
+	case CONFIG_VOLTAGE_ZERO:
+	case CONFIG_CURRENT_ZERO:
+	case CONFIG_POWER_ZERO: {
+		if (length != 4) {
+			LOGw("Expected float");
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		LOGi("Set %d to %f", type, *(float*)payload);
+		return ERR_SUCCESS;
+	}
+
 
 	/////////////////////////////////////////////////
 	//// BYTE ARRAY
@@ -167,38 +227,37 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_IBEACON_UUID: {
 		if (length != 16) {
 			LOGw("Expected 16 bytes for UUID, received: %d", length);
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		log(INFO, "Set uuid to: "); BLEutil::printArray(payload, 16);
-		return true;
+		return ERR_SUCCESS;
 	}
 	case CONFIG_PASSKEY: {
 		if (length != BLE_GAP_PASSKEY_LEN) {
 			LOGw("Expected length %d for passkey, received: %d", BLE_GAP_PASSKEY_LEN, length);
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi("Set passkey to %s", std::string((char*)payload, length).c_str());
-		return true;
+		return ERR_SUCCESS;
 	}
 	case CONFIG_NAME: {
 		if (length > MAX_STRING_STORAGE_SIZE) {
 			LOGe(MSG_NAME_TOO_LONG);
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi("Set name to: %s", std::string((char*)payload, length).c_str());
-		return true;
+		return ERR_SUCCESS;
 	}
 	case CONFIG_KEY_OWNER :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		if (length != ENCYRPTION_KEY_LENGTH) {
 			LOGe("Expected encryption key length: %d, received: %d", ENCYRPTION_KEY_LENGTH, length);
-			return false;
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		log(DEBUG, "Set encyrption key %d to:", type);
 		BLEutil::printArray((uint8_t*)payload, length);
-
-		return true;
+		return ERR_SUCCESS;
 	}
 
 	/////////////////////////////////////////////////
@@ -211,108 +270,12 @@ bool Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
 //		updateFlag(type, payload[0] != 0, persistent);
 		LOGe("Write disabled. Use commands to enable/disable");
-		return false;
+		return ERR_WRITE_CONFIG_DISABLED;
 	}
 
-	case CONFIG_ADC_SAMPLE_RATE:
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
-	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES:
 	default: {
 		LOGw("There is no such configuration type (%u).", type);
-		return false;
-	}
-	}
-}
-
-uint8_t* Settings::getStorageItem(uint8_t type) {
-	switch(type) {
-	case CONFIG_NAME: {
-		return (uint8_t*)&_storageStruct.device_name;
-	}
-	case CONFIG_NEARBY_TIMEOUT: {
-		return (uint8_t*)&_storageStruct.nearbyTimeout;
-	}
-	case CONFIG_FLOOR: {
-		return (uint8_t*)&_storageStruct.floor;
-	}
-	case CONFIG_IBEACON_MAJOR: {
-		return (uint8_t*)&_storageStruct.beacon.major;
-	}
-	case CONFIG_IBEACON_MINOR: {
-		return (uint8_t*)&_storageStruct.beacon.minor;
-	}
-	case CONFIG_IBEACON_UUID: {
-		return (uint8_t*)&_storageStruct.beacon.uuid.uuid128;
-	}
-	case CONFIG_IBEACON_TXPOWER: {
-		return (uint8_t*)&_storageStruct.beacon.txPower;
-	}
-	case CONFIG_WIFI_SETTINGS: {
-		return (uint8_t*)&_wifiSettings;
-	}
-	case CONFIG_TX_POWER: {
-		return (uint8_t*)&_storageStruct.txPower;
-	}
-	case CONFIG_ADV_INTERVAL: {
-		return (uint8_t*)&_storageStruct.advInterval;
-	}
-	case CONFIG_PASSKEY: {
-		return (uint8_t*)&_storageStruct.passkey;
-	}
-	case CONFIG_MIN_ENV_TEMP: {
-		return (uint8_t*)&_storageStruct.minEnvTemp;
-	}
-	case CONFIG_MAX_ENV_TEMP: {
-		return (uint8_t*)&_storageStruct.maxEnvTemp;
-	}
-	case CONFIG_SCAN_DURATION: {
-		return (uint8_t*)&_storageStruct.scanDuration;
-	}
-	case CONFIG_SCAN_SEND_DELAY: {
-		return (uint8_t*)&_storageStruct.scanSendDelay;
-	}
-	case CONFIG_SCAN_BREAK_DURATION: {
-		return (uint8_t*)&_storageStruct.scanBreakDuration;
-	}
-	case CONFIG_BOOT_DELAY: {
-		return (uint8_t*)&_storageStruct.bootDelay;
-	}
-	case CONFIG_MAX_CHIP_TEMP: {
-		return (uint8_t*)&_storageStruct.maxChipTemp;
-	}
-	case CONFIG_SCAN_FILTER: {
-		return (uint8_t*)&_storageStruct.scanFilter;
-	}
-	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
-		return (uint8_t*)&_storageStruct.scanFilterSendFraction;
-	}
-	case CONFIG_CURRENT_LIMIT: {
-		return (uint8_t*)&_storageStruct.currentLimit;
-	}
-	case CONFIG_CROWNSTONE_ID: {
-		return (uint8_t*)&_storageStruct.crownstoneId;
-	}
-	case CONFIG_KEY_OWNER : {
-		return (uint8_t*)&_storageStruct.encryptionKeys.owner;
-	}
-	case CONFIG_KEY_MEMBER : {
-		return (uint8_t*)&_storageStruct.encryptionKeys.member;
-	}
-	case CONFIG_KEY_GUEST :{
-		return (uint8_t*)&_storageStruct.encryptionKeys.guest;
-	}
-	case CONFIG_ADC_SAMPLE_RATE: {
-	}
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
-	}
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
-	}
-	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES: {
-	}
-	default: {
-		LOGw("There is no such configuration type (%u).", type);
-		return NULL;
+		return ERR_CONFIG_NOT_FOUND;
 	}
 	}
 }
@@ -332,6 +295,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	/////////////////////////////////////////////////
 	//// INT 8
 	/////////////////////////////////////////////////
+	case CONFIG_LOW_TX_POWER:
 	case CONFIG_MAX_CHIP_TEMP:
 	case CONFIG_MAX_ENV_TEMP:
 	case CONFIG_MIN_ENV_TEMP:
@@ -343,6 +307,13 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
+	case CONFIG_ADC_BURST_SAMPLE_RATE:
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
+	case CONFIG_ADC_CONT_SAMPLE_RATE:
+	case CONFIG_SCAN_INTERVAL:
+	case CONFIG_SCAN_WINDOW:
+	case CONFIG_RELAY_HIGH_DURATION:
 	case CONFIG_CROWNSTONE_ID:
 	case CONFIG_SCAN_FILTER_SEND_FRACTION:
 	case CONFIG_BOOT_DELAY:
@@ -354,6 +325,17 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_IBEACON_MAJOR:
 	case CONFIG_NEARBY_TIMEOUT: {
 		return 2;
+	}
+
+	/////////////////////////////////////////////////
+	//// FLOAT
+	/////////////////////////////////////////////////
+	case CONFIG_VOLTAGE_MULTIPLIER:
+	case CONFIG_CURRENT_MULTIPLIER:
+	case CONFIG_VOLTAGE_ZERO:
+	case CONFIG_CURRENT_ZERO:
+	case CONFIG_POWER_ZERO: {
+		return 4;
 	}
 
 	/////////////////////////////////////////////////
@@ -385,14 +367,399 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 		return 1;
 	}
 
-	case CONFIG_ADC_SAMPLE_RATE:
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
-	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES:
 	default:
 		LOGw("There is no such configuration type (%u).", type);
 		return 0;
 	}
+}
+
+ERR_CODE Settings::get(uint8_t type, void* target) {
+	uint16_t size = 0;
+	return get(type, target, size);
+}
+
+ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
+	switch(type) {
+	case CONFIG_NAME: {
+		char default_name[32];
+		sprintf(default_name, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
+		Storage::getString(_storageStruct.device_name, (char*) target, default_name, size);
+		break;
+	}
+	case CONFIG_FLOOR: {
+		Storage::getUint8(_storageStruct.floor, (uint8_t*)target, 0);
+		break;
+	}
+	case CONFIG_NEARBY_TIMEOUT: {
+		Storage::getUint16(_storageStruct.nearbyTimeout, (uint16_t*)target, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
+		break;
+	}
+	case CONFIG_IBEACON_MAJOR: {
+		Storage::getUint16(_storageStruct.beacon.major, (uint16_t*)target, BEACON_MAJOR);
+		break;
+	}
+	case CONFIG_IBEACON_MINOR: {
+		Storage::getUint16(_storageStruct.beacon.minor, (uint16_t*)target, BEACON_MINOR);
+		break;
+	}
+	case CONFIG_IBEACON_UUID: {
+		Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, (uint8_t*) target, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
+		break;
+	}
+	case CONFIG_IBEACON_TXPOWER: {
+		Storage::getInt8(_storageStruct.beacon.txPower, (int8_t*)target, BEACON_RSSI);
+		break;
+	}
+	case CONFIG_WIFI_SETTINGS: {
+		//! copy string, because we clear it on read
+		std::string* p_str = (std::string*) target;
+		if (_wifiSettings == "") {
+			*p_str = "{}";
+		} else {
+			*p_str = _wifiSettings;
+		}
+		break;
+	}
+	case CONFIG_TX_POWER: {
+		Storage::getInt8(_storageStruct.txPower, (int8_t*)target, TX_POWER);
+		break;
+	}
+	case CONFIG_ADV_INTERVAL: {
+		Storage::getUint16(_storageStruct.advInterval, (uint16_t*)target, ADVERTISEMENT_INTERVAL);
+		break;
+	}
+	case CONFIG_PASSKEY: {
+		Storage::getArray<uint8_t>(_storageStruct.passkey, (uint8_t*) target, (uint8_t*)STATIC_PASSKEY, 6);
+		break;
+	}
+	case CONFIG_MIN_ENV_TEMP: {
+		Storage::getInt8(_storageStruct.minEnvTemp, (int8_t*)target, MIN_ENV_TEMP);
+		break;
+	}
+	case CONFIG_MAX_ENV_TEMP: {
+		Storage::getInt8(_storageStruct.maxEnvTemp, (int8_t*)target, MAX_ENV_TEMP);
+		break;
+	}
+	case CONFIG_SCAN_DURATION: {
+		Storage::getUint16(_storageStruct.scanDuration, (uint16_t*)target, SCAN_DURATION);
+		break;
+	}
+	case CONFIG_SCAN_SEND_DELAY: {
+		Storage::getUint16(_storageStruct.scanSendDelay, (uint16_t*)target, SCAN_SEND_DELAY);
+		break;
+	}
+	case CONFIG_SCAN_BREAK_DURATION: {
+		Storage::getUint16(_storageStruct.scanBreakDuration, (uint16_t*)target, SCAN_BREAK_DURATION);
+		break;
+	}
+	case CONFIG_BOOT_DELAY: {
+		Storage::getUint16(_storageStruct.bootDelay, (uint16_t*)target, BOOT_DELAY);
+		break;
+	}
+	case CONFIG_MAX_CHIP_TEMP: {
+		Storage::getInt8(_storageStruct.maxChipTemp, (int8_t*)target, MAX_CHIP_TEMP);
+		break;
+	}
+	case CONFIG_SCAN_FILTER: {
+		Storage::getUint8(_storageStruct.scanFilter, (uint8_t*)target, SCAN_FILTER);
+		break;
+	}
+	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
+		Storage::getUint16(_storageStruct.scanFilterSendFraction, (uint16_t*)target, SCAN_FILTER_SEND_FRACTION);
+		break;
+	}
+	case CONFIG_CURRENT_LIMIT: {
+		Storage::getUint8(_storageStruct.currentLimit, (uint8_t*)target, CURRENT_LIMIT);
+		break;
+	}
+	case CONFIG_CROWNSTONE_ID: {
+		Storage::getUint16(_storageStruct.crownstoneId, (uint16_t*)target, 0);
+		break;
+	}
+	case CONFIG_KEY_OWNER : {
+		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.owner, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
+		break;
+	}
+	case CONFIG_KEY_MEMBER : {
+		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.member, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
+		break;
+	}
+	case CONFIG_KEY_GUEST : {
+		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.guest, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
+		break;
+	}
+	case CONFIG_ADC_BURST_SAMPLE_RATE: {
+		Storage::getUint16(_storageStruct.adcBurstSampleRate, (uint16_t*)target, CS_ADC_SAMPLE_RATE);
+		break;
+	}
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
+		Storage::getUint16(_storageStruct.powerSampleBurstInterval, (uint16_t*)target, POWER_SAMPLE_BURST_INTERVAL);
+		break;
+	}
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
+		Storage::getUint16(_storageStruct.powerSampleContInterval, (uint16_t*)target, POWER_SAMPLE_CONT_INTERVAL);
+		break;
+	}
+	case CONFIG_ADC_CONT_SAMPLE_RATE: {
+		Storage::getUint16(_storageStruct.adcContSampleRate, (uint16_t*)target, CS_ADC_SAMPLE_RATE);
+		break;
+	}
+	case CONFIG_SCAN_INTERVAL: {
+		Storage::getUint16(_storageStruct.scanInterval, (uint16_t*)target, SCAN_INTERVAL);
+		break;
+	}
+	case CONFIG_SCAN_WINDOW: {
+		Storage::getUint16(_storageStruct.scanWindow, (uint16_t*)target, SCAN_WINDOW);
+		break;
+	}
+	case CONFIG_RELAY_HIGH_DURATION: {
+		Storage::getUint16(_storageStruct.relayHighDuration, (uint16_t*)target, RELAY_HIGH_DURATION);
+		break;
+	}
+	case CONFIG_LOW_TX_POWER: {
+		Storage::getInt8(_storageStruct.lowTxPower, (int8_t*)target, LOW_TX_POWER);
+		break;
+	}
+	case CONFIG_VOLTAGE_MULTIPLIER: {
+		Storage::getFloat(_storageStruct.voltageMultiplier, (float*)target, VOLTAGE_MULTIPLIER);
+		break;
+	}
+	case CONFIG_CURRENT_MULTIPLIER: {
+		Storage::getFloat(_storageStruct.currentMultiplier, (float*)target, CURRENT_MULTIPLIER);
+		break;
+	}
+	case CONFIG_VOLTAGE_ZERO: {
+		Storage::getFloat(_storageStruct.voltageZero, (float*)target, VOLTAGE_ZERO);
+		break;
+	}
+	case CONFIG_CURRENT_ZERO: {
+		Storage::getFloat(_storageStruct.currentZero, (float*)target, CURRENT_ZERO);
+		break;
+	}
+	case CONFIG_POWER_ZERO: {
+		Storage::getFloat(_storageStruct.powerZero, (float*)target, POWER_ZERO);
+		break;
+	}
+	default: {
+		LOGw("There is no such configuration type (%u).", type);
+		return ERR_CONFIG_NOT_FOUND;
+	}
+	}
+	return ERR_SUCCESS;
+}
+
+ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
+
+	uint8_t* p_item;
+
+	switch(type) {
+	case CONFIG_NAME: {
+		p_item = (uint8_t*)&_storageStruct.device_name;
+		Storage::setString(std::string((char*)target, size), _storageStruct.device_name);
+		break;
+	}
+	case CONFIG_NEARBY_TIMEOUT: {
+		p_item = (uint8_t*)&_storageStruct.nearbyTimeout;
+		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.nearbyTimeout);
+		break;
+	}
+	case CONFIG_FLOOR: {
+		p_item = (uint8_t*)&_storageStruct.floor;
+		Storage::setUint8(*((uint8_t*)target), _storageStruct.floor);
+		break;
+	}
+	case CONFIG_IBEACON_MAJOR: {
+		p_item = (uint8_t*)&_storageStruct.beacon.major;
+		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.beacon.major);
+		break;
+	}
+	case CONFIG_IBEACON_MINOR: {
+		p_item = (uint8_t*)&_storageStruct.beacon.minor;
+		Storage::setUint16(*((uint16_t*)target),(uint32_t&) _storageStruct.beacon.minor);
+		break;
+	}
+	case CONFIG_IBEACON_UUID: {
+		p_item = (uint8_t*)&_storageStruct.beacon.uuid.uuid128;
+		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.beacon.uuid.uuid128, 16);
+		break;
+	}
+	case CONFIG_IBEACON_TXPOWER: {
+		p_item = (uint8_t*)&_storageStruct.beacon.txPower;
+		Storage::setInt8(*((int8_t*)target), (int32_t&)_storageStruct.beacon.txPower);
+		break;
+	}
+	case CONFIG_WIFI_SETTINGS: {
+		p_item = (uint8_t*)&_wifiSettings;
+		if (size > 0) {
+			_wifiSettings = std::string((char*)target, size);
+		}
+		break;
+	}
+	case CONFIG_TX_POWER: {
+		p_item = (uint8_t*)&_storageStruct.txPower;
+		Storage::setInt8(*((int8_t*)target), _storageStruct.txPower);
+		break;
+	}
+	case CONFIG_ADV_INTERVAL: {
+		p_item = (uint8_t*)&_storageStruct.advInterval;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.advInterval);
+		break;
+	}
+	case CONFIG_PASSKEY: {
+		p_item = (uint8_t*)&_storageStruct.passkey;
+		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
+		break;
+	}
+	case CONFIG_MIN_ENV_TEMP: {
+		p_item = (uint8_t*)&_storageStruct.minEnvTemp;
+		Storage::setInt8(*((int8_t*)target), _storageStruct.minEnvTemp);
+		break;
+	}
+	case CONFIG_MAX_ENV_TEMP: {
+		p_item = (uint8_t*)&_storageStruct.maxEnvTemp;
+		Storage::setInt8(*((int8_t*)target), _storageStruct.maxEnvTemp);
+		break;
+	}
+	case CONFIG_SCAN_DURATION: {
+		p_item = (uint8_t*)&_storageStruct.scanDuration;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanDuration);
+		break;
+	}
+	case CONFIG_SCAN_SEND_DELAY: {
+		p_item = (uint8_t*)&_storageStruct.scanSendDelay;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanSendDelay);
+		break;
+	}
+	case CONFIG_SCAN_BREAK_DURATION: {
+		p_item = (uint8_t*)&_storageStruct.scanBreakDuration;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanBreakDuration);
+		break;
+	}
+	case CONFIG_BOOT_DELAY: {
+		p_item = (uint8_t*)&_storageStruct.bootDelay;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.bootDelay);
+		break;
+	}
+	case CONFIG_MAX_CHIP_TEMP: {
+		p_item = (uint8_t*)&_storageStruct.maxChipTemp;
+		Storage::setInt8(*((int8_t*)target), _storageStruct.maxChipTemp);
+		break;
+	}
+	case CONFIG_SCAN_FILTER: {
+		p_item = (uint8_t*)&_storageStruct.scanFilter;
+		Storage::setUint8(*((uint8_t*)target), _storageStruct.scanFilter);
+		break;
+	}
+	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
+		p_item = (uint8_t*)&_storageStruct.scanFilterSendFraction;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanFilterSendFraction);
+		break;
+	}
+	case CONFIG_CURRENT_LIMIT: {
+		p_item = (uint8_t*)&_storageStruct.currentLimit;
+		Storage::setUint8(*((uint8_t*)target), _storageStruct.currentLimit);
+		break;
+	}
+	case CONFIG_CROWNSTONE_ID: {
+		p_item = (uint8_t*)&_storageStruct.crownstoneId;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
+		break;
+	}
+	case CONFIG_KEY_OWNER : {
+		p_item = (uint8_t*)&_storageStruct.encryptionKeys.owner;
+		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.owner, ENCYRPTION_KEY_LENGTH);
+		break;
+	}
+	case CONFIG_KEY_MEMBER : {
+		p_item = (uint8_t*)&_storageStruct.encryptionKeys.member;
+		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.member, ENCYRPTION_KEY_LENGTH);
+		break;
+	}
+	case CONFIG_KEY_GUEST : {
+		p_item = (uint8_t*)&_storageStruct.encryptionKeys.guest;
+		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.guest, ENCYRPTION_KEY_LENGTH);
+		break;
+	}
+	case CONFIG_ADC_BURST_SAMPLE_RATE: {
+		p_item = (uint8_t*)&_storageStruct.adcBurstSampleRate;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.adcBurstSampleRate);
+		break;
+	}
+	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
+		p_item = (uint8_t*)&_storageStruct.powerSampleBurstInterval;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.powerSampleBurstInterval);
+		break;
+	}
+	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
+		p_item = (uint8_t*)&_storageStruct.powerSampleContInterval;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.powerSampleContInterval);
+		break;
+	}
+	case CONFIG_ADC_CONT_SAMPLE_RATE: {
+		p_item = (uint8_t*)&_storageStruct.adcContSampleRate;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.adcContSampleRate);
+		break;
+	}
+	case CONFIG_SCAN_INTERVAL: {
+		p_item = (uint8_t*)&_storageStruct.scanInterval;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanInterval);
+		break;
+	}
+	case CONFIG_SCAN_WINDOW: {
+		p_item = (uint8_t*)&_storageStruct.scanWindow;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanWindow);
+		break;
+	}
+	case CONFIG_RELAY_HIGH_DURATION: {
+		p_item = (uint8_t*)&_storageStruct.relayHighDuration;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.relayHighDuration);
+		break;
+	}
+	case CONFIG_LOW_TX_POWER: {
+		p_item = (uint8_t*)&_storageStruct.lowTxPower;
+		Storage::setInt8(*((int8_t*)target), _storageStruct.lowTxPower);
+		break;
+	}
+	case CONFIG_VOLTAGE_MULTIPLIER: {
+		p_item = (uint8_t*)&_storageStruct.voltageMultiplier;
+		Storage::setFloat(*((float*)target), _storageStruct.voltageMultiplier);
+		break;
+	}
+	case CONFIG_CURRENT_MULTIPLIER: {
+		p_item = (uint8_t*)&_storageStruct.currentMultiplier;
+		Storage::setFloat(*((float*)target), _storageStruct.currentMultiplier);
+		break;
+	}
+	case CONFIG_VOLTAGE_ZERO: {
+		p_item = (uint8_t*)&_storageStruct.voltageZero;
+		Storage::setFloat(*((float*)target), _storageStruct.voltageZero);
+		break;
+	}
+	case CONFIG_CURRENT_ZERO: {
+		p_item = (uint8_t*)&_storageStruct.currentZero;
+		Storage::setFloat(*((float*)target), _storageStruct.currentZero);
+		break;
+	}
+	case CONFIG_POWER_ZERO: {
+		p_item = (uint8_t*)&_storageStruct.powerZero;
+		Storage::setFloat(*((float*)target), _storageStruct.powerZero);
+		break;
+	}
+	default: {
+		LOGw("There is no such configuration type (%u).", type);
+		return ERR_CONFIG_NOT_FOUND;
+	}
+	}
+
+	if (persistent) {
+		size = getSettingsItemSize(type);
+		// minimum item size we can store is 4
+		if (size < 4) {
+			size = 4;
+		}
+		savePersistentStorageItem(p_item, size);
+	}
+	return ERR_SUCCESS;
 }
 
 void Settings::initFlags() {
@@ -402,6 +769,7 @@ void Settings::initFlags() {
 	_storageStruct.flagsBit.iBeaconDisabled = !IBEACON;
 	_storageStruct.flagsBit.scannerDisabled = !INTERVAL_SCANNER_ENABLED;
 	_storageStruct.flagsBit.continuousPowerSamplerDisabled = !CONTINUOUS_POWER_SAMPLER;
+	_storageStruct.flagsBit.defaultOff = !DEFAULT_ON;
 	_storageStruct.flagsBit.flagsUninitialized = false;
 }
 
@@ -435,6 +803,10 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 		_storageStruct.flagsBit.continuousPowerSamplerDisabled = !value;
 		break;
 	}
+	case CONFIG_DEFAULT_ON: {
+		_storageStruct.flagsBit.defaultOff = !value;
+		break;
+	}
 	default: {
 		return false;
 	}
@@ -443,7 +815,7 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 	if (persistent) {
 		savePersistentStorageItem(&_storageStruct.flags);
 	}
-	EventDispatcher::getInstance().dispatch(type, &value, 1);
+	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
 	return true;
 }
 
@@ -451,29 +823,34 @@ bool Settings::readFlag(uint8_t type, bool& value) {
 
 	bool default_value;
 	switch(type) {
-		case CONFIG_MESH_ENABLED : {
+	case CONFIG_MESH_ENABLED: {
 		value = !_storageStruct.flagsBit.meshDisabled;
 		default_value = MESHING;
 		break;
 	}
-	case CONFIG_ENCRYPTION_ENABLED : {
+	case CONFIG_ENCRYPTION_ENABLED: {
 		value = !_storageStruct.flagsBit.encryptionDisabled;
 		default_value = ENCRYPTION;
 		break;
 	}
-	case CONFIG_IBEACON_ENABLED : {
+	case CONFIG_IBEACON_ENABLED: {
 		value = !_storageStruct.flagsBit.iBeaconDisabled;
 		default_value = IBEACON;
 		break;
 	}
-	case CONFIG_SCANNER_ENABLED : {
+	case CONFIG_SCANNER_ENABLED: {
 		value = !_storageStruct.flagsBit.scannerDisabled;
 		default_value = INTERVAL_SCANNER_ENABLED;
 		break;
 	}
-	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED: {
 		value = !_storageStruct.flagsBit.continuousPowerSamplerDisabled;
 		default_value = CONTINUOUS_POWER_SAMPLER;
+		break;
+	}
+	case CONFIG_DEFAULT_ON: {
+		value = !_storageStruct.flagsBit.defaultOff;
+		default_value = DEFAULT_ON;
 		break;
 	}
 	default:
@@ -488,9 +865,10 @@ bool Settings::readFlag(uint8_t type, bool& value) {
 	return true;
 }
 
-bool Settings::isEnabled(uint8_t type) {
+bool Settings::isSet(uint8_t type) {
 
 	switch(type) {
+	case CONFIG_DEFAULT_ON:
 	case CONFIG_MESH_ENABLED :
 	case CONFIG_ENCRYPTION_ENABLED :
 	case CONFIG_IBEACON_ENABLED :
@@ -503,274 +881,6 @@ bool Settings::isEnabled(uint8_t type) {
 	default:
 		return false;
 	}
-}
-
-bool Settings::get(uint8_t type, void* target) {
-	uint16_t size = 0;
-	return get(type, target, size);
-}
-
-bool Settings::get(uint8_t type, void* target, uint16_t& size) {
-	switch(type) {
-	case CONFIG_NAME: {
-		char default_name[32];
-		sprintf(default_name, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
-		Storage::getString(_storageStruct.device_name, (char*) target, default_name, size);
-		return true;
-	}
-	case CONFIG_FLOOR: {
-		Storage::getUint8(_storageStruct.floor, (uint8_t*)target, 0);
-		return true;
-	}
-	case CONFIG_NEARBY_TIMEOUT: {
-		Storage::getUint16(_storageStruct.nearbyTimeout, (uint16_t*)target, TRACKDEVICE_DEFAULT_TIMEOUT_COUNT);
-		return true;
-	}
-	case CONFIG_IBEACON_MAJOR: {
-		Storage::getUint16(_storageStruct.beacon.major, (uint16_t*)target, BEACON_MAJOR);
-		return true;
-	}
-	case CONFIG_IBEACON_MINOR: {
-		Storage::getUint16(_storageStruct.beacon.minor, (uint16_t*)target, BEACON_MINOR);
-		return true;
-	}
-	case CONFIG_IBEACON_UUID: {
-		Storage::getArray<uint8_t>(_storageStruct.beacon.uuid.uuid128, (uint8_t*) target, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
-		return true;
-	}
-	case CONFIG_IBEACON_TXPOWER: {
-		Storage::getInt8(_storageStruct.beacon.txPower, (int8_t*)target, BEACON_RSSI);
-		return true;
-	}
-	case CONFIG_WIFI_SETTINGS: {
-		//! copy string, because we clear it on read
-		std::string* p_str = (std::string*) target;
-		if (_wifiSettings == "") {
-			*p_str = "{}";
-		} else {
-			*p_str = _wifiSettings;
-		}
-		return true;
-	}
-	case CONFIG_TX_POWER: {
-		Storage::getInt8(_storageStruct.txPower, (int8_t*)target, TX_POWER);
-		return true;
-	}
-	case CONFIG_ADV_INTERVAL: {
-		Storage::getUint16(_storageStruct.advInterval, (uint16_t*)target, ADVERTISEMENT_INTERVAL);
-		return true;
-	}
-	case CONFIG_PASSKEY: {
-		Storage::getArray<uint8_t>(_storageStruct.passkey, (uint8_t*) target, (uint8_t*)STATIC_PASSKEY, 6);
-		return true;
-	}
-	case CONFIG_MIN_ENV_TEMP: {
-		Storage::getInt8(_storageStruct.minEnvTemp, (int8_t*)target, MIN_ENV_TEMP);
-		return true;
-	}
-	case CONFIG_MAX_ENV_TEMP: {
-		Storage::getInt8(_storageStruct.maxEnvTemp, (int8_t*)target, MAX_ENV_TEMP);
-		return true;
-	}
-	case CONFIG_SCAN_DURATION: {
-		Storage::getUint16(_storageStruct.scanDuration, (uint16_t*)target, SCAN_DURATION);
-		return true;
-	}
-	case CONFIG_SCAN_SEND_DELAY: {
-		Storage::getUint16(_storageStruct.scanSendDelay, (uint16_t*)target, SCAN_SEND_DELAY);
-		return true;
-	}
-	case CONFIG_SCAN_BREAK_DURATION: {
-		Storage::getUint16(_storageStruct.scanBreakDuration, (uint16_t*)target, SCAN_BREAK_DURATION);
-		return true;
-	}
-	case CONFIG_BOOT_DELAY: {
-		Storage::getUint16(_storageStruct.bootDelay, (uint16_t*)target, BOOT_DELAY);
-		return true;
-	}
-	case CONFIG_MAX_CHIP_TEMP: {
-		Storage::getInt8(_storageStruct.maxChipTemp, (int8_t*)target, MAX_CHIP_TEMP);
-		return true;
-	}
-	case CONFIG_SCAN_FILTER: {
-		Storage::getUint8(_storageStruct.scanFilter, (uint8_t*)target, SCAN_FILTER);
-		return true;
-	}
-	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
-		Storage::getUint16(_storageStruct.scanFilterSendFraction, (uint16_t*)target, SCAN_FILTER_SEND_FRACTION);
-		return true;
-	}
-	case CONFIG_CURRENT_LIMIT: {
-		Storage::getUint8(_storageStruct.currentLimit, (uint8_t*)target, CURRENT_LIMIT);
-		return true;
-	}
-	case CONFIG_CROWNSTONE_ID: {
-		Storage::getUint16(_storageStruct.crownstoneId, (uint16_t*)target, 0);
-		return true;
-	}
-	case CONFIG_KEY_OWNER : {
-		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.owner, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
-		return true;
-	}
-	case CONFIG_KEY_MEMBER : {
-		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.member, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
-		return true;
-	}
-	case CONFIG_KEY_GUEST : {
-		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.guest, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
-		return true;
-	}
-	case CONFIG_ADC_SAMPLE_RATE: {
-//		return true;
-	}
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
-//		return true;
-	}
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
-//		return true;
-	}
-	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES: {
-//		return true;
-	}
-	default: {
-		LOGw("There is no such configuration type (%u).", type);
-	}
-	}
-	return false;
-}
-
-bool Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
-	switch(type) {
-	case CONFIG_NAME: {
-		Storage::setString(std::string((char*)target, size), _storageStruct.device_name);
-		break;
-	}
-	case CONFIG_NEARBY_TIMEOUT: {
-		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.nearbyTimeout);
-		break;
-	}
-	case CONFIG_FLOOR: {
-		Storage::setUint8(*((uint8_t*)target), _storageStruct.floor);
-		break;
-	}
-	case CONFIG_IBEACON_MAJOR: {
-		Storage::setUint16(*((uint16_t*)target), (uint32_t&)_storageStruct.beacon.major);
-		break;
-	}
-	case CONFIG_IBEACON_MINOR: {
-		Storage::setUint16(*((uint16_t*)target),(uint32_t&) _storageStruct.beacon.minor);
-		break;
-	}
-	case CONFIG_IBEACON_UUID: {
-		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.beacon.uuid.uuid128, 16);
-		break;
-	}
-	case CONFIG_IBEACON_TXPOWER: {
-		Storage::setInt8(*((int8_t*)target), (int32_t&)_storageStruct.beacon.txPower);
-		break;
-	}
-	case CONFIG_WIFI_SETTINGS: {
-		if (size > 0) {
-			_wifiSettings = std::string((char*)target, size);
-		}
-		break;
-	}
-	case CONFIG_TX_POWER: {
-		Storage::setInt8(*((int8_t*)target), _storageStruct.txPower);
-		break;
-	}
-	case CONFIG_ADV_INTERVAL: {
-		Storage::setUint16(*((uint16_t*)target), _storageStruct.advInterval);
-		break;
-	}
-	case CONFIG_PASSKEY: {
-		Storage::setArray<uint8_t>((uint8_t*) target, _storageStruct.passkey, BLE_GAP_PASSKEY_LEN);
-		break;
-	}
-	case CONFIG_MIN_ENV_TEMP: {
-		Storage::setInt8(*((int8_t*)target), _storageStruct.minEnvTemp);
-		break;
-	}
-	case CONFIG_MAX_ENV_TEMP: {
-		Storage::setInt8(*((int8_t*)target), _storageStruct.maxEnvTemp);
-		break;
-	}
-	case CONFIG_SCAN_DURATION: {
-		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanDuration);
-		break;
-	}
-	case CONFIG_SCAN_SEND_DELAY: {
-		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanSendDelay);
-		break;
-	}
-	case CONFIG_SCAN_BREAK_DURATION: {
-		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanBreakDuration);
-		break;
-	}
-	case CONFIG_BOOT_DELAY: {
-		Storage::setUint16(*((uint16_t*)target), _storageStruct.bootDelay);
-		break;
-	}
-	case CONFIG_MAX_CHIP_TEMP: {
-		Storage::setInt8(*((int8_t*)target), _storageStruct.maxChipTemp);
-		break;
-	}
-	case CONFIG_SCAN_FILTER: {
-		Storage::setUint8(*((uint8_t*)target), _storageStruct.scanFilter);
-		break;
-	}
-	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
-		Storage::setUint16(*((uint16_t*)target), _storageStruct.scanFilterSendFraction);
-		break;
-	}
-	case CONFIG_CURRENT_LIMIT: {
-		Storage::setUint8(*((uint8_t*)target), _storageStruct.currentLimit);
-		break;
-	}
-	case CONFIG_CROWNSTONE_ID: {
-		Storage::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
-		break;
-	}
-	case CONFIG_KEY_OWNER : {
-		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.owner, ENCYRPTION_KEY_LENGTH);
-		break;
-	}
-	case CONFIG_KEY_MEMBER : {
-		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.member, ENCYRPTION_KEY_LENGTH);
-		break;
-	}
-	case CONFIG_KEY_GUEST : {
-		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.member, ENCYRPTION_KEY_LENGTH);
-		break;
-	}
-	case CONFIG_ADC_SAMPLE_RATE: {
-//		break;
-	}
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
-//		break;
-	}
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
-//		break;
-	}
-	case CONFIG_POWER_SAMPLE_CONT_NUM_SAMPLES: {
-//		break;
-	}
-	default: {
-		LOGw("There is no such configuration type (%u).", type);
-		return false;
-	}
-	}
-
-	uint8_t* p_item = getStorageItem(type);
-	if (persistent) {
-		size = getSettingsItemSize(type);
-		// minimum item size we can store is 4
-		if (size < 4) {
-			size = 4;
-		}
-		savePersistentStorageItem(p_item, size);
-	}
-	return true;
 }
 
 //ps_configuration_t& Settings::getConfig() {

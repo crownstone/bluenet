@@ -21,6 +21,7 @@ enum StateTypes {
 	STATE_SCHEDULE,                       // 0x85 - 133
 	STATE_OPERATION_MODE,                 // 0x86 - 134
 	STATE_TEMPERATURE,                    // 0x87 - 135
+	STATE_TIME,                           // 0x88 - 136
 	STATE_TYPES
 };
 

@@ -12,6 +12,7 @@
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_PWM.h>
 #include <storage/cs_State.h>
+#include <storage/cs_Settings.h>
 
 Switch::Switch() :
 		_switchValue(0)
@@ -24,7 +25,8 @@ void Switch::init() {
 	PWM& pwm = PWM::getInstance();
 	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
 
-	setValue(0);
+	// [23.06.16] overwrites stored value, so we can't restore old switch state
+	//	setValue(0);
 
 #if HAS_RELAY
 	nrf_gpio_cfg_output(PIN_GPIO_RELAY_OFF);
@@ -50,12 +52,6 @@ void Switch::setValue(uint8_t value) {
 	_switchValue = value;
 	PWM::getInstance().setValue(0, value);
 
-	if (value) {
-		EventDispatcher::getInstance().dispatch(EVT_POWER_ON, &_switchValue, 1);
-	} else {
-		EventDispatcher::getInstance().dispatch(EVT_POWER_OFF, &_switchValue, 1);
-	}
-
 	State::getInstance().set(STATE_SWITCH_STATE, value);
 }
 
@@ -64,25 +60,27 @@ uint8_t Switch::getValue() {
 }
 
 void Switch::relayOn() {
-	LOGi("trigger relay on pin for %d ms", RELAY_HIGH_DURATION);
+	uint16_t relayHighDuration;
+	Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &relayHighDuration);
+	LOGi("trigger relay on pin for %d ms", relayHighDuration);
 #if HAS_RELAY
 	nrf_gpio_pin_set(PIN_GPIO_RELAY_ON);
-	nrf_delay_ms(RELAY_HIGH_DURATION);
+	nrf_delay_ms(relayHighDuration);
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
 
-	// todo: update switch state?
 	State::getInstance().set(STATE_SWITCH_STATE, (uint8_t)255);
 #endif
 }
 
 void Switch::relayOff() {
-	LOGi("trigger relay off pin for %d ms", RELAY_HIGH_DURATION);
+	uint16_t relayHighDuration;
+	Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &relayHighDuration);
+	LOGi("trigger relay off pin for %d ms", relayHighDuration);
 #if HAS_RELAY
 	nrf_gpio_pin_set(PIN_GPIO_RELAY_OFF);
-	nrf_delay_ms(RELAY_HIGH_DURATION);
+	nrf_delay_ms(relayHighDuration);
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
 
-	// todo: update switch state?
 	State::getInstance().set(STATE_SWITCH_STATE, (uint8_t)0);
 #endif
 }

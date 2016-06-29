@@ -15,21 +15,20 @@
 #include <processing/cs_CommandHandler.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>
+#include <protocol/cs_ErrorCodes.h>
 
 using namespace BLEpp;
 
 CrownstoneService::CrownstoneService() : EventListener(),
 		_controlCharacteristic(NULL),
-		_meshControlCharacteristic(NULL), _controlConfigurationCharacteristic(NULL), _getConfigurationCharacteristic(NULL),
-		_controlStateCharacteristic(NULL), _readStateCharacteristic(NULL),
+		_meshControlCharacteristic(NULL), _configurationControlCharacteristic(NULL), _configurationReadCharacteristic(NULL),
+		_stateControlCharacteristic(NULL), _stateReadCharacteristic(NULL),
 		_streamBuffer(NULL), _meshCommand(NULL)
 {
 	EventDispatcher::getInstance().addListener(this);
 
 	setUUID(UUID(CROWNSTONE_UUID));
 	setName(BLE_SERVICE_CROWNSTONE);
-
-	addCharacteristics();
 
 //	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) CrownstoneService::staticTick);
 }
@@ -54,7 +53,7 @@ StreamBuffer<uint8_t>* CrownstoneService::getStreamBuffer(buffer_ptr_t& buffer, 
 	return _streamBuffer;
 }
 
-void CrownstoneService::addCharacteristics() {
+void CrownstoneService::createCharacteristics() {
 	LOGi("Service Crownstone init");
 
 	buffer_ptr_t buffer = NULL;
@@ -83,8 +82,8 @@ void CrownstoneService::addCharacteristics() {
 	{
 		LOGi(MSG_CHAR_CONFIGURATION_ADD);
 		_streamBuffer = getStreamBuffer(buffer, maxLength);
-		addSetConfigurationCharacteristic(buffer, maxLength);
-		addGetConfigurationCharacteristic(buffer, maxLength);
+		addConfigurationControlCharacteristic(buffer, maxLength);
+		addConfigurationReadCharacteristic(buffer, maxLength);
 
 		LOGd("Set both set/get charac to buffer at %p", buffer);
 	}
@@ -96,8 +95,8 @@ void CrownstoneService::addCharacteristics() {
 	{
 		LOGi(MSG_CHAR_STATE_ADD);
 		_streamBuffer = getStreamBuffer(buffer, maxLength);
-		addSelectStateVarCharacteristic(buffer, maxLength);
-		addReadStateVarCharacteristic(buffer, maxLength);
+		addStateControlCharacteristic(buffer, maxLength);
+		addStateReadCharacteristic(buffer, maxLength);
 
 		LOGd("Set both set/get charac to buffer at %p", buffer);
 	}
@@ -144,7 +143,13 @@ void CrownstoneService::addMeshCharacteristic() {
 		uint8_t* p_data = _meshCommand->payload();
 		uint16_t length = _meshCommand->length();
 
-		MeshControl::getInstance().send(handle, p_data, length);
+		ERR_CODE error_code = MeshControl::getInstance().send(handle, p_data, length);
+
+		LOGi("err error_code: %d", error_code);
+		memcpy(value, &error_code, sizeof(error_code));
+		_meshControlCharacteristic->setDataLength(sizeof(error_code));
+		_meshControlCharacteristic->notify();
+
 	});
 }
 
@@ -157,9 +162,10 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	_controlCharacteristic->setWritable(true);
 	_controlCharacteristic->setValue(buffer);
 	_controlCharacteristic->setMaxLength(size);
-	_controlCharacteristic->setDataLength(size);
+	_controlCharacteristic->setDataLength(0);
 	_controlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
+		ERR_CODE error_code;
 		MasterBuffer& mb = MasterBuffer::getInstance();
 		// at this point it is too late to check if mb was locked, because the softdevice doesn't care
 		// if the mb was locked, it writes to the buffer in any case
@@ -169,30 +175,38 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 			uint8_t *payload = _streamBuffer->payload();
 			uint8_t length = _streamBuffer->length();
 
-			CommandHandler::getInstance().handleCommand(type, payload, length);
+			error_code = CommandHandler::getInstance().handleCommand(type, payload, length);
 
 			mb.unlock();
 		} else {
 			LOGe(MSG_BUFFER_IS_LOCKED);
+			error_code = ERR_BUFFER_LOCKED;
 		}
+
+		LOGi("err error_code: %d", error_code);
+		memcpy(value, &error_code, sizeof(error_code));
+		_controlCharacteristic->setDataLength(sizeof(error_code));
+		_controlCharacteristic->notify();
 	});
 
 }
 
-void CrownstoneService::addSetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size) {
-	_controlConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_controlConfigurationCharacteristic);
+void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+	_configurationControlCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_configurationControlCharacteristic);
 
-	_controlConfigurationCharacteristic->setUUID(UUID(getUUID(), CONFIG_CONTROL_UUID));
-	_controlConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_CONTROL);
-	_controlConfigurationCharacteristic->setWritable(true);
-	_controlConfigurationCharacteristic->setValue(buffer);
-	_controlConfigurationCharacteristic->setMaxLength(size);
-	_controlConfigurationCharacteristic->setDataLength(size);
-	_controlConfigurationCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_configurationControlCharacteristic->setUUID(UUID(getUUID(), CONFIG_CONTROL_UUID));
+	_configurationControlCharacteristic->setName(BLE_CHAR_CONFIG_CONTROL);
+	_configurationControlCharacteristic->setWritable(true);
+	_configurationControlCharacteristic->setValue(buffer);
+	_configurationControlCharacteristic->setMaxLength(size);
+	_configurationControlCharacteristic->setDataLength(0);
+	_configurationControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 
+		ERR_CODE error_code;
 		if (!value) {
 			LOGw(MSG_CHAR_VALUE_UNDEFINED);
+			error_code = ERR_VALUE_UNDEFINED;
 		} else {
 			LOGi(MSG_CHAR_VALUE_WRITE);
 			MasterBuffer& mb = MasterBuffer::getInstance();
@@ -211,11 +225,15 @@ void CrownstoneService::addSetConfigurationCharacteristic(buffer_ptr_t buffer, u
 				if (opCode == READ_VALUE) {
 					LOGd("Select configuration type: %d", type);
 
-					bool success = Settings::getInstance().readFromStorage(type, _streamBuffer);
-					if (success) {
+					error_code = Settings::getInstance().readFromStorage(type, _streamBuffer);
+					if (SUCCESS(error_code)) {
 						_streamBuffer->setOpCode(READ_VALUE);
-						_getConfigurationCharacteristic->setDataLength(_streamBuffer->getDataLength());
-						_getConfigurationCharacteristic->notify();
+						_configurationReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
+						_configurationReadCharacteristic->notify();
+						LOGi("success");
+						mb.unlock();
+						return; // need to return here to avoid writing error_code, which would overwrite
+								// the read value on the read characteristic !!
 					} else {
 						LOGe("Failed to read from storage");
 					}
@@ -225,42 +243,54 @@ void CrownstoneService::addSetConfigurationCharacteristic(buffer_ptr_t buffer, u
 					uint8_t *payload = _streamBuffer->payload();
 					uint8_t length = _streamBuffer->length();
 
-					Settings::getInstance().writeToStorage(type, payload, length);
+					error_code = Settings::getInstance().writeToStorage(type, payload, length);
+				} else {
+					error_code = ERR_UNKNOWN_OP_CODE;
 				}
+
 				mb.unlock();
 			} else {
 				LOGe(MSG_BUFFER_IS_LOCKED);
+				error_code = ERR_BUFFER_LOCKED;
 			}
 		}
+
+		LOGi("err error_code: %d", error_code);
+		memcpy(value, &error_code, sizeof(error_code));
+		_configurationControlCharacteristic->setDataLength(sizeof(error_code));
+		_configurationControlCharacteristic->notify();
 	});
 }
 
-void CrownstoneService::addGetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size) {
-	_getConfigurationCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_getConfigurationCharacteristic);
+void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+	_configurationReadCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_configurationReadCharacteristic);
 
-	_getConfigurationCharacteristic->setUUID(UUID(getUUID(), CONFIG_READ_UUID));
-	_getConfigurationCharacteristic->setName(BLE_CHAR_CONFIG_READ);
-	_getConfigurationCharacteristic->setWritable(false);
-	_getConfigurationCharacteristic->setNotifies(true);
-	_getConfigurationCharacteristic->setValue(buffer);
-	_getConfigurationCharacteristic->setMaxLength(size);
-	_getConfigurationCharacteristic->setDataLength(size);
+	_configurationReadCharacteristic->setUUID(UUID(getUUID(), CONFIG_READ_UUID));
+	_configurationReadCharacteristic->setName(BLE_CHAR_CONFIG_READ);
+	_configurationReadCharacteristic->setWritable(false);
+	_configurationReadCharacteristic->setNotifies(true);
+	_configurationReadCharacteristic->setValue(buffer);
+	_configurationReadCharacteristic->setMaxLength(size);
+	_configurationReadCharacteristic->setDataLength(0);
 }
 
-void CrownstoneService::addSelectStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size) {
-	_controlStateCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_controlStateCharacteristic);
+void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+	_stateControlCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_stateControlCharacteristic);
 
-	_controlStateCharacteristic->setUUID(UUID(getUUID(), STATE_CONTROL_UUID));
-	_controlStateCharacteristic->setName(BLE_CHAR_STATE_CONTROL);
-	_controlStateCharacteristic->setWritable(true);
-	_controlStateCharacteristic->setValue(buffer);
-	_controlStateCharacteristic->setMaxLength(size);
-	_controlStateCharacteristic->setDataLength(size);
-	_controlStateCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_stateControlCharacteristic->setUUID(UUID(getUUID(), STATE_CONTROL_UUID));
+	_stateControlCharacteristic->setName(BLE_CHAR_STATE_CONTROL);
+	_stateControlCharacteristic->setWritable(true);
+	_stateControlCharacteristic->setValue(buffer);
+	_stateControlCharacteristic->setMaxLength(size);
+	_stateControlCharacteristic->setDataLength(0);
+	_stateControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+
+		ERR_CODE error_code;
 		if (!value) {
 			LOGw(MSG_CHAR_VALUE_UNDEFINED);
+			error_code = ERR_VALUE_UNDEFINED;
 		} else {
 			LOGi(MSG_CHAR_VALUE_WRITE);
 			MasterBuffer& mb = MasterBuffer::getInstance();
@@ -273,53 +303,67 @@ void CrownstoneService::addSelectStateVarCharacteristic(buffer_ptr_t buffer, uin
 				uint8_t opCode = _streamBuffer->opCode();
 
 				if (opCode == READ_VALUE || opCode == NOTIFY_VALUE) {
-					LOGi("Read state");
-					bool success = State::getInstance().readFromStorage(type, _streamBuffer);
-					if (success) {
-						_streamBuffer->setOpCode(READ_VALUE);
-						_readStateCharacteristic->setDataLength(_streamBuffer->getDataLength());
-						_readStateCharacteristic->notify();
-					}
-
 					if (opCode == NOTIFY_VALUE) {
-						LOGi("State notification");
+						LOGi("State notification, len: %d", _streamBuffer->length());
 						if (_streamBuffer->length() == 1) {
 							bool enable = *((bool*) _streamBuffer->payload());
 							State::getInstance().setNotify(type, enable);
+							error_code = ERR_SUCCESS;
 						} else {
 							LOGe("wrong length received!");
+							error_code = ERR_WRONG_PAYLOAD_LENGTH;
 						}
+					}
+
+					LOGi("Read state");
+					error_code = State::getInstance().readFromStorage(type, _streamBuffer);
+					if (SUCCESS(error_code)) {
+						_streamBuffer->setOpCode(READ_VALUE);
+						_stateReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
+						_stateReadCharacteristic->notify();
+						LOGi("success");
+						mb.unlock();
+						return; // need to return here to avoid writing error_code, which would overwrite
+								// the read value on the read characteristic !!
 					}
 				} else if (opCode == WRITE_VALUE) {
 					LOGi("Write state");
-					State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length());
+					error_code = State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length());
+				} else {
+					error_code = ERR_UNKNOWN_OP_CODE;
 				}
 
 				mb.unlock();
 			} else {
 				LOGe(MSG_BUFFER_IS_LOCKED);
+				error_code = ERR_BUFFER_LOCKED;
 			}
 		}
+
+		LOGi("err error_code: %d", error_code);
+		memcpy(value, &error_code, sizeof(error_code));
+		_stateControlCharacteristic->setDataLength(sizeof(error_code));
+		_stateControlCharacteristic->notify();
 	});
 }
 
-void CrownstoneService::addReadStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size) {
-	_readStateCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_readStateCharacteristic);
+void CrownstoneService::addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+	_stateReadCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_stateReadCharacteristic);
 
-	_readStateCharacteristic->setUUID(UUID(getUUID(), STATE_READ_UUID));
-	_readStateCharacteristic->setName(BLE_CHAR_STATE_READ);
-	_readStateCharacteristic->setWritable(false);
-	_readStateCharacteristic->setNotifies(true);
-	_readStateCharacteristic->setValue(buffer);
-	_readStateCharacteristic->setMaxLength(size);
-	_readStateCharacteristic->setDataLength(size);
+	_stateReadCharacteristic->setUUID(UUID(getUUID(), STATE_READ_UUID));
+	_stateReadCharacteristic->setName(BLE_CHAR_STATE_READ);
+	_stateReadCharacteristic->setWritable(false);
+	_stateReadCharacteristic->setNotifies(true);
+	_stateReadCharacteristic->setValue(buffer);
+	_stateReadCharacteristic->setMaxLength(size);
+	_stateReadCharacteristic->setDataLength(0);
 }
 
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_STATE_NOTIFICATION: {
-		if (_readStateCharacteristic) {
+		if (_stateReadCharacteristic) {
 			state_vars_notifaction notification = *(state_vars_notifaction*)p_data;
 			log(DEBUG, "send notification for %d, value:", notification.type);
 			BLEutil::printArray(notification.data, notification.dataLength);
@@ -328,8 +372,8 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 			_streamBuffer->setType(notification.type);
 			_streamBuffer->setOpCode(NOTIFY_VALUE);
 
-			_readStateCharacteristic->setDataLength(_streamBuffer->getDataLength());
-			_readStateCharacteristic->notify();
+			_stateReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
+			_stateReadCharacteristic->notify();
 		}
 	}
 	}

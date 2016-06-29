@@ -44,6 +44,13 @@ void PowerSampling::init() {
 	Timer::getInstance().createSingleShot(_staticPowerSamplingStartTimer, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleStart);
 	Timer::getInstance().createSingleShot(_staticPowerSamplingReadTimer, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
 
+	Settings& settings = Settings::getInstance();
+	settings.get(CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier);
+	settings.get(CONFIG_CURRENT_MULTIPLIER, &_currentMultiplier);
+	settings.get(CONFIG_VOLTAGE_ZERO, &_voltageZero);
+	settings.get(CONFIG_CURRENT_ZERO, &_currentZero);
+	settings.get(CONFIG_POWER_ZERO, &_powerZero);
+
 	LOGi("Init buffers");
 	uint16_t contSize = _currentSampleCircularBuf.getMaxByteSize() + _voltageSampleCircularBuf.getMaxByteSize();
 	contSize += sizeof(power_samples_mesh_message_t);
@@ -228,12 +235,6 @@ void PowerSampling::powerSampleFinish() {
 
 	// todo -> defines in header
 #define ZERO_AVG_WINDOW   100
-//#define V_ZERO            169
-//#define I_ZERO            168.5
-//#define V_MULTIPLICATION  2.357
-#define V_MULTIPLICATION  2.374
-#define I_MULTIPLICATION  0.044
-#define P_ZERO            9.0
 
 	uint16_t vMin = UINT16_MAX;
 	uint16_t vMax = 0;
@@ -261,8 +262,9 @@ void PowerSampling::powerSampleFinish() {
 		_burstCount++;
 	}
 #ifdef PRINT_DEBUG
-	LOGd("burstCount=%u vMin=%u vMax=%u vZero=%f avg=%f", _burstCount, vMin, vMax, vZero, _voltageZero);
+	LOGi("burstCount=%u vMin=%u vMax=%u vZero=%i avg=%i", _burstCount, vMin, vMax, (int)vZero, (int)_voltageZero);
 #endif
+	_currentZero = _voltageZero;
 
 	_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, 0);
 	uint32_t prevTime = voltageTimestamp;
@@ -280,7 +282,7 @@ void PowerSampling::powerSampleFinish() {
 //		LOGd("%u %u %u %u", vPrev, v, prevTime, voltageTimestamp);
 
 //		//! Check for zero crossing
-//		if ((vPrev < V_ZERO && v > V_ZERO) || (vPrev > V_ZERO && v < V_ZERO)) {
+//		if ((vPrev < _voltageZero && v > _voltageZero) || (vPrev > _voltageZero && v < _voltageZero)) {
 //			//! Only one crossing can happen in 5ms
 //			LOGd("zero at %u", voltageTimestamp);
 //			if (zeroCrossings == 0) {
@@ -298,8 +300,8 @@ void PowerSampling::powerSampleFinish() {
 //			uint32_t dt = RTC::difference(voltageTimestamp, prevTime);
 //			double dts = dt / (double)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1); //! seconds
 //
-//			double voltage = V_MULTIPLICATION * (v - V_ZERO);
-//			double current = I_MULTIPLICATION * ((*_powerSamples.getCurrentSamplesBuffer())[i] - I_ZERO);
+//			double voltage = _voltageMultiplier * (v - _voltageZero);
+//			double current = _currentMultiplier * ((*_powerSamples.getCurrentSamplesBuffer())[i] - _currentZero);
 //			LOGd("%f %f %f", voltage, current, dts);
 //			pSum += voltage * current * dts;
 //			tSum += dts;
@@ -310,8 +312,8 @@ void PowerSampling::powerSampleFinish() {
 			uint32_t dt = RTC::difference(voltageTimestamp, prevTime);
 			double dts = dt / (double)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1); //! seconds
 
-			double voltage = V_MULTIPLICATION * (v - _voltageZero);
-			double current = I_MULTIPLICATION * ((*_powerSamples.getCurrentSamplesBuffer())[i] - _voltageZero);
+			double voltage = _voltageMultiplier * (v - _voltageZero);
+			double current = _currentMultiplier * ((*_powerSamples.getCurrentSamplesBuffer())[i] - _currentZero);
 //			LOGd("%f %f %f", voltage, current, dts);
 			pSum += voltage * current * dts;
 			tSum += dts;
@@ -323,11 +325,11 @@ void PowerSampling::powerSampleFinish() {
 	}
 //	LOGd("pSum=%f", pSum);
 	pSum /= tSum;
-	pSum -= P_ZERO;
+	pSum -= _powerZero;
 	int32_t avgPower = pSum;
 
 #ifdef PRINT_DEBUG
-	LOGd("pSum=%f, tSum=%f, avgPower=%i", pSum, tSum, avgPower);
+	LOGi("pSum*1000=%i, tSum*1000=%i, avgPower=%i", (int)(pSum*1000), (int)(tSum*1000), avgPower);
 #endif
 
 	//! Only send valid updates

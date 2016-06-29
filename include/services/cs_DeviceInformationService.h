@@ -24,7 +24,7 @@ public:
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void addCharacteristics();
+	void createCharacteristics();
 
 protected:
 	//! The characteristics in this service, based on:

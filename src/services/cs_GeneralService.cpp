@@ -26,12 +26,10 @@ GeneralService::GeneralService() : EventListener(),
 	setUUID(UUID(GENERAL_UUID));
 	setName(BLE_SERVICE_GENERAL);
 
-	addCharacteristics();
-
 //	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) GeneralService::staticTick);
 }
 
-void GeneralService::addCharacteristics() {
+void GeneralService::createCharacteristics() {
 	LOGi(MSG_SERVICE_GENERAL_INIT);
 
 #if CHAR_TEMPERATURE==1 || DEVICE_TYPE==DEVICE_FRIDGE

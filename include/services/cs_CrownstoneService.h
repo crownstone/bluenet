@@ -49,11 +49,11 @@ protected:
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void addCharacteristics();
+	virtual void createCharacteristics();
 
 	/** Enable the command characteristic.
  	 */
-	inline void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the set configuration characteristic.
 	 *
@@ -61,14 +61,14 @@ protected:
 	 * characteristic.
 	 * See <_setConfigurationCharacteristic>.
 	 */
-	inline void addSetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	void addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the get configuration characteristic.
 	 */
-	inline void addGetConfigurationCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	void addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
-	inline void addSelectStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size);
-	inline void addReadStateVarCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	inline void addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the mesh characteristic.
 	 */
@@ -76,15 +76,8 @@ protected:
 
 	StreamBuffer<uint8_t>* getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
 
-private:
-
+protected:
 	BLEpp::Characteristic<buffer_ptr_t>* _controlCharacteristic;
-
-	/** Mesh characteristic
-	 *
-	 * Sends a message over the mesh network
-	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _meshControlCharacteristic;
 
 	/** Set configuration characteristic
 	 *
@@ -99,7 +92,7 @@ private:
 	 * As you see these are similar to current characteristics and will replace them in the future to save space.
 	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
 	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _controlConfigurationCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _configurationControlCharacteristic;
 
 	/** Get configuration characteristic
 	 *
@@ -108,13 +101,22 @@ private:
 	 *
 	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
 	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _getConfigurationCharacteristic;
-
-	BLEpp::Characteristic<buffer_ptr_t>* _controlStateCharacteristic;
-	BLEpp::Characteristic<buffer_ptr_t>* _readStateCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _configurationReadCharacteristic;
 
 	//! buffer object to read/write configuration characteristics
 	StreamBuffer<uint8_t> *_streamBuffer;
+
+private:
+
+	/** Mesh characteristic
+	 *
+	 * Sends a message over the mesh network
+	 */
+	BLEpp::Characteristic<buffer_ptr_t>* _meshControlCharacteristic;
+
+	BLEpp::Characteristic<buffer_ptr_t>* _stateControlCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _stateReadCharacteristic;
+
 
 	MeshCommand* _meshCommand;
 //	StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>* _meshCommand;

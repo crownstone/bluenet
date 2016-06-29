@@ -81,10 +81,14 @@ private:
 	power_samples_mesh_message_t* _powerSamplesMeshMsg;
 	uint16_t _powerSamplesCount;
 //	uint16_t _lastPowerSample;
-	double _voltageZero;
 	uint16_t _burstCount;
-//	double _CurrentZero;
 
 	PowerSamples _powerSamples;
+
+	float _voltageMultiplier;
+	float _currentMultiplier;
+	float _voltageZero;
+	float _currentZero;
+	float _powerZero;
 };
 

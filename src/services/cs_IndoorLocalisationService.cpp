@@ -24,12 +24,10 @@ IndoorLocalizationService::IndoorLocalizationService() : EventListener(),
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 	setName(BLE_SERVICE_INDOOR_LOCALIZATION);
 	
-	addCharacteristics();
-
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)IndoorLocalizationService::staticTick);
 }
 
-void IndoorLocalizationService::addCharacteristics() {
+void IndoorLocalizationService::createCharacteristics() {
 	LOGi("Create indoor localization service");
 
 #if CHAR_RSSI==1

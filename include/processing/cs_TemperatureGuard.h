@@ -29,10 +29,11 @@ public:
 		_appTimerId(0),
 		_maxTemp(MAX_CHIP_TEMP)
 	{
-		EventDispatcher::getInstance().addListener(this);
 	}
 
 	void init() {
+		EventDispatcher::getInstance().addListener(this);
+
 		Settings::getInstance().get(CONFIG_MAX_CHIP_TEMP, &_maxTemp);
 
 //		Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);

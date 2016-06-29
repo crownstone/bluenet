@@ -64,6 +64,7 @@ static uint32_t g_interval_min_ms;
 static fifo_t g_rbc_event_fifo;
 static rbc_mesh_event_t g_rbc_event_buffer[RBC_MESH_APP_EVENT_QUEUE_LENGTH];
 
+static bool g_restart_pending = false;
 /*****************************************************************************
  * Static Functions
  *****************************************************************************/
@@ -156,6 +157,11 @@ uint32_t rbc_mesh_stop(void) {
 	g_mesh_state = MESH_STATE_STOPPED;
 
 	return NRF_SUCCESS;
+}
+
+uint32_t rbc_mesh_restart(void) {
+	g_restart_pending = true;
+	return rbc_mesh_stop();
 }
 
 uint32_t rbc_mesh_value_enable(rbc_mesh_value_handle_t handle) {
@@ -281,6 +287,11 @@ void rbc_mesh_sd_evt_handler(uint32_t sd_evt) {
 	/* call lower layer event handler */
 //	ts_sys_evt_handler(sd_evt);
 	ts_sd_event_handler(sd_evt);
+
+	if (g_restart_pending && sd_evt == NRF_EVT_RADIO_SESSION_IDLE) {
+		g_restart_pending = false;
+		rbc_mesh_start();
+	}
 }
 
 uint32_t rbc_mesh_event_push(rbc_mesh_event_t* p_event) {
