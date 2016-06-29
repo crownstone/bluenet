@@ -53,6 +53,7 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
 	NVIC_EnableIRQ(ADC_IRQn);
 #endif
 
+
 	//! Configure timer
 	CS_ADC_TIMER->TASKS_CLEAR = 1;
 	CS_ADC_TIMER->BITMODE =    (TIMER_BITMODE_BITMODE_16Bit << TIMER_BITMODE_BITMODE_Pos); //! Counter is 16bit
@@ -62,18 +63,43 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
 	//! Configure timer events
 	CS_ADC_TIMER->CC[0] = 1000*1000/CS_ADC_SAMPLE_RATE;
 
-	//! Shortcut clear timer at compare0 event
-	CS_ADC_TIMER->SHORTS = (TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos);
+	//! If the sample rate is above 200, we can't just start adc by a continuous timer,
+	//! as the adc sample might not be done yet before the next is started.
+	if (!useContinousTimer()) {
+		//! Don't clear timer at compare0 event
+		CS_ADC_TIMER->SHORTS = (TIMER_SHORTS_COMPARE0_CLEAR_Disabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos);
 
-	//! Configure ADC start task via PPI
+		//! Enable timer interrupt
 #if(NRF51_USE_SOFTDEVICE == 1)
-	sd_ppi_channel_assign(CS_ADC_PPI_CHANNEL, &CS_ADC_TIMER->EVENTS_COMPARE[0], &NRF_ADC->TASKS_START);
-	sd_ppi_channel_enable_set(1UL << CS_ADC_PPI_CHANNEL);
+		err_code = sd_nvic_ClearPendingIRQ(CS_ADC_TIMER_IRQn);
+		APP_ERROR_CHECK(err_code);
+		err_code = sd_nvic_SetPriority(CS_ADC_TIMER_IRQn, NRF_APP_PRIORITY_LOW);
+		APP_ERROR_CHECK(err_code);
+		err_code = sd_nvic_EnableIRQ(CS_ADC_TIMER_IRQn);
+		APP_ERROR_CHECK(err_code);
 #else
-	NRF_PPI->CH[CS_ADC_PPI_CHANNEL].EEP = (uint32_t)&CS_ADC_TIMER->EVENTS_COMPARE[0];
-	NRF_PPI->CH[CS_ADC_PPI_CHANNEL].TEP = (uint32_t)&NRF_ADC->TASKS_START;
-	NRF_PPI->CHENSET = (1UL << CS_ADC_PPI_CHANNEL);
+		NVIC_ClearPendingIRQ(CS_ADC_TIMER_IRQn);
+		NVIC_SetPriority(CS_ADC_TIMER_IRQn, NRF_APP_PRIORITY_LOW);
+		NVIC_EnableIRQ(CS_ADC_TIMER_IRQn);
 #endif
+
+		//! Enable interrupt at compare0
+		CS_ADC_TIMER->INTENSET = (TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos);
+	}
+	else {
+		//! Shortcut clear timer at compare0 event
+		CS_ADC_TIMER->SHORTS = (TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos);
+
+		//! Configure ADC start task via PPI
+#if(NRF51_USE_SOFTDEVICE == 1)
+		sd_ppi_channel_assign(CS_ADC_PPI_CHANNEL, &CS_ADC_TIMER->EVENTS_COMPARE[0], &NRF_ADC->TASKS_START);
+		sd_ppi_channel_enable_set(1UL << CS_ADC_PPI_CHANNEL);
+#else
+		NRF_PPI->CH[CS_ADC_PPI_CHANNEL].EEP = (uint32_t)&CS_ADC_TIMER->EVENTS_COMPARE[0];
+		NRF_PPI->CH[CS_ADC_PPI_CHANNEL].TEP = (uint32_t)&NRF_ADC->TASKS_START;
+		NRF_PPI->CHENSET = (1UL << CS_ADC_PPI_CHANNEL);
+#endif
+	}
 
 //	_sampleNum = 0;
 	return 0;
@@ -187,6 +213,17 @@ void ADC::update(uint32_t value) {
 	if (_lastPinNum == 0) {
 		//! Sampled last pin of the list, use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
 		NRF_ADC->TASKS_STOP = 1;
+
+		if (!useContinousTimer()) {
+			uint32_t periodTime = 1000*1000/CS_ADC_SAMPLE_RATE;
+			uint32_t lastSampleTime = ROUNDED_DIV(1000*(RTC::getCount()-_lastStartTime), (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
+			uint32_t delayTime = 1;
+			if (lastSampleTime < periodTime) {
+				delayTime = periodTime - lastSampleTime;
+			}
+			CS_ADC_TIMER->CC[0] = delayTime;
+			CS_ADC_TIMER->TASKS_START = 1;
+		}
 	}
 	else {
 		//! Sample next pin
@@ -213,6 +250,13 @@ extern "C" void ADC_IRQHandler(void) {
 //	//! next sample
 //	NRF_ADC->TASKS_START = 1;
 
+}
+
+extern "C" void TIMER1_IRQHandler(void) {
+	CS_ADC_TIMER->EVENTS_COMPARE[0] = 0; // Clear compare match register
+	CS_ADC_TIMER->TASKS_CLEAR = 1; // Reset timer
+	NRF_ADC->TASKS_START = 1;
+	ADC::getInstance()._lastStartTime = RTC::getCount();
 }
 
 

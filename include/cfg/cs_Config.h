@@ -75,6 +75,8 @@
 
 #define CS_ADC_MAX_PINS                          2
 #define CS_ADC_TIMER                             NRF_TIMER1
+//#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
+#define CS_ADC_TIMER_IRQn                        TIMER1_IRQn
 #define CS_ADC_PPI_CHANNEL                       7
 
 #if CONTINUOUS_POWER_SAMPLER == 1
