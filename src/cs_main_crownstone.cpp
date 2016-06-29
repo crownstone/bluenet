@@ -513,11 +513,11 @@ void Crownstone::startUp() {
 	if (_operationMode == OPERATION_MODE_NORMAL) {
 
 #if (DEFAULT_ON==1)
-		LOGi("Set power ON by default");
-		_switch->turnOn();
+//		LOGi("Set power ON by default");
+//		_switch->turnOn();
 #elif (DEFAULT_ON==0)
-		LOGi("Set power OFF by default");
-		_switch->turnOff();
+//		LOGi("Set power OFF by default");
+//		_switch->turnOff();
 #endif
 
 		//! start main tick
