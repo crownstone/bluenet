@@ -65,7 +65,7 @@
 #define CLOCK_SOURCE                             NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_8000MS_CALIBRATION
 
 //! duration (in ms) how long the relay pins should be set to high
-#define RELAY_HIGH_DURATION                      10 //! ms
+#define RELAY_HIGH_DURATION                      20 //! ms
 
 //! Max number of schedule entries in the schedule service.
 #define MAX_SCHEDULE_ENTRIES                     10
