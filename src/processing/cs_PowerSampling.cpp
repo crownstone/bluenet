@@ -50,6 +50,9 @@ void PowerSampling::init() {
 
 	uint16_t burstSize = _powerSamples.getMaxLength();
 
+	_burstCount = 0;
+	_voltageZero = 0.0;
+
 	size_t size = (burstSize > contSize) ? burstSize : contSize;
 	_powerSamplesBuffer = (buffer_ptr_t) calloc(size, sizeof(uint8_t));
 	LOGd("power sample buffer=%u size=%u", _powerSamplesBuffer, size);
@@ -224,8 +227,9 @@ void PowerSampling::powerSampleFinish() {
 	voltageTimestamp = 0;
 
 	// todo -> defines in header
-#define V_ZERO            169
-#define I_ZERO            168.5
+#define ZERO_AVG_WINDOW   100
+//#define V_ZERO            169
+//#define I_ZERO            168.5
 //#define V_MULTIPLICATION  2.357
 #define V_MULTIPLICATION  2.374
 #define I_MULTIPLICATION  0.044
@@ -233,9 +237,33 @@ void PowerSampling::powerSampleFinish() {
 
 	uint16_t vMin = UINT16_MAX;
 	uint16_t vMax = 0;
-
-
 	uint16_t v;
+
+	// Calculate zero
+	for (int i=0; i<_powerSamples.size(); i++) {
+		v = (*_powerSamples.getVoltageSamplesBuffer())[i];
+		if (v > vMax) {
+			vMax = v;
+		}
+		if (v < vMin) {
+			vMin = v;
+		}
+	}
+	double vZero = (vMax + vMin) / 2.0;
+	if (_burstCount) {
+		_voltageZero = (_voltageZero * _burstCount + vZero) / (_burstCount + 1);
+		if (_burstCount < ZERO_AVG_WINDOW) {
+			_burstCount++;
+		}
+	}
+	else {
+		_voltageZero = vZero;
+		_burstCount++;
+	}
+#ifdef PRINT_DEBUG
+	LOGd("burstCount=%u vMin=%u vMax=%u vZero=%f avg=%f", _burstCount, vMin, vMax, vZero, _voltageZero);
+#endif
+
 	_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, 0);
 	uint32_t prevTime = voltageTimestamp;
 	uint32_t endTime = prevTime + RTC::msToTicks(20);
@@ -282,8 +310,8 @@ void PowerSampling::powerSampleFinish() {
 			uint32_t dt = RTC::difference(voltageTimestamp, prevTime);
 			double dts = dt / (double)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1); //! seconds
 
-			double voltage = V_MULTIPLICATION * (v - V_ZERO);
-			double current = I_MULTIPLICATION * ((*_powerSamples.getCurrentSamplesBuffer())[i] - I_ZERO);
+			double voltage = V_MULTIPLICATION * (v - _voltageZero);
+			double current = I_MULTIPLICATION * ((*_powerSamples.getCurrentSamplesBuffer())[i] - _voltageZero);
 //			LOGd("%f %f %f", voltage, current, dts);
 			pSum += voltage * current * dts;
 			tSum += dts;
@@ -307,7 +335,6 @@ void PowerSampling::powerSampleFinish() {
 	if (tSum > 0.0) {
 		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &avgPower, 4);
 	}
-
 
 	//! Start new sample after some time
 	Timer::getInstance().start(_staticPowerSamplingStartTimer, MS_TO_TICKS(POWER_SAMPLE_BURST_INTERVAL), this);
