@@ -67,7 +67,7 @@
 #define CLOCK_SOURCE                             NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_8000MS_CALIBRATION
 
 //! duration (in ms) how long the relay pins should be set to high
-#define RELAY_HIGH_DURATION                      10 //! ms
+#define RELAY_HIGH_DURATION                      20 //! ms
 
 //! Max number of schedule entries in the schedule service.
 #define MAX_SCHEDULE_ENTRIES                     10
@@ -76,12 +76,14 @@
 
 #define CS_ADC_MAX_PINS                          2
 #define CS_ADC_TIMER                             NRF_TIMER1
+//#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
+#define CS_ADC_TIMER_IRQn                        TIMER1_IRQn
 #define CS_ADC_PPI_CHANNEL                       7
 
 #if CONTINUOUS_POWER_SAMPLER == 1
 #define CS_ADC_SAMPLE_RATE                       100
 #else
-#define CS_ADC_SAMPLE_RATE                       4000 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
+#define CS_ADC_SAMPLE_RATE                       3000 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
 #endif
 
 #define POWER_SAMPLE_BURST_INTERVAL              3000 //! Time to next burst sampling (ms)
