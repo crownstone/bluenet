@@ -57,6 +57,9 @@ void PowerSampling::init() {
 
 	uint16_t burstSize = _powerSamples.getMaxLength();
 
+	_burstCount = 0;
+	_voltageZero = 0.0;
+
 	size_t size = (burstSize > contSize) ? burstSize : contSize;
 	_powerSamplesBuffer = (buffer_ptr_t) calloc(size, sizeof(uint8_t));
 #ifdef PRINT_VERBOSE
@@ -234,16 +237,45 @@ void PowerSampling::powerSampleFinish() {
 
 	uint32_t voltageTimestamp = 0;
 
-//	uint16_t vMin = UINT16_MAX;
-//	uint16_t vMax = 0;
+	// todo -> defines in header
+#define ZERO_AVG_WINDOW   100
 
+	uint16_t vMin = UINT16_MAX;
+	uint16_t vMax = 0;
 	uint16_t v;
+
+	// Calculate zero
+	for (int i=0; i<_powerSamples.size(); i++) {
+		v = (*_powerSamples.getVoltageSamplesBuffer())[i];
+		if (v > vMax) {
+			vMax = v;
+		}
+		if (v < vMin) {
+			vMin = v;
+		}
+	}
+	double vZero = (vMax + vMin) / 2.0;
+	if (_burstCount) {
+		_voltageZero = (_voltageZero * _burstCount + vZero) / (_burstCount + 1);
+		if (_burstCount < ZERO_AVG_WINDOW) {
+			_burstCount++;
+		}
+	}
+	else {
+		_voltageZero = vZero;
+		_burstCount++;
+	}
+#ifdef PRINT_DEBUG
+	LOGi("burstCount=%u vMin=%u vMax=%u vZero=%i avg=%i", _burstCount, vMin, vMax, (int)vZero, (int)_voltageZero);
+#endif
+	_currentZero = _voltageZero;
+
 	_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, 0);
 	uint32_t prevTime = voltageTimestamp;
 	uint32_t endTime = prevTime + RTC::msToTicks(20);
-//	uint16_t vPrev = (*_powerSamples.getVoltageSamplesBuffer())[0];
-//	int zeroCrossings = 0;
-//	uint32_t prevZeroCrossingTime;
+	uint16_t vPrev = (*_powerSamples.getVoltageSamplesBuffer())[0];
+	int zeroCrossings = 0;
+	uint32_t prevZeroCrossingTime;
 
 	double tSum = 0.0;
 	double pSum = 0.0;
@@ -293,7 +325,7 @@ void PowerSampling::powerSampleFinish() {
 
 
 		prevTime = voltageTimestamp;
-//		vPrev = v;
+		vPrev = v;
 	}
 //	LOGd("pSum=%f", pSum);
 	pSum /= tSum;
@@ -309,7 +341,6 @@ void PowerSampling::powerSampleFinish() {
 	if (tSum > 0.0) {
 		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &avgPower, 4);
 	}
-
 
 	//! Start new sample after some time
 	Timer::getInstance().start(_staticPowerSamplingStartTimer, MS_TO_TICKS(POWER_SAMPLE_BURST_INTERVAL), this);

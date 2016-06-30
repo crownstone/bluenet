@@ -86,6 +86,7 @@ public:
 	//! Function to be called from interrupt, do not do much there!
 	void update(uint32_t value);
 
+	uint32_t _lastStartTime;
 
 private:
 	/** Constructor
@@ -98,10 +99,14 @@ private:
 	//! This class is singleton, deny implementation
 	void operator=(ADC const &);
 
+//	bool useContinousTimer() { return !(CS_ADC_SAMPLE_RATE > (_numPins*200)); }
+	bool useContinousTimer() { return true; }
+
 	uint8_t _pins[CS_ADC_MAX_PINS];
 	uint8_t _numPins;
 	uint8_t _lastPinNum;
 //	uint16_t _sampleNum;
+
 	StackBuffer<uint16_t>* _buffers[CS_ADC_MAX_PINS];
 	DifferentialBuffer<uint32_t>* _timeBuffers[CS_ADC_MAX_PINS];
 	CircularBuffer<uint16_t>* _circularBuffers[CS_ADC_MAX_PINS];
