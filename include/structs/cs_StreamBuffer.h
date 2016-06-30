@@ -13,7 +13,7 @@
 #include <common/cs_Types.h>
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_SB_VERBOSE
+//#define PRINT_STREAMBUFFER_VERBOSE
 
 #define SB_HEADER_SIZE 4
 
@@ -67,7 +67,7 @@ public:
 	int assign(uint8_t *buffer, uint16_t size) {
 		assert(SB_HEADER_SIZE + _max_items*_item_size <= size, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 
-#ifdef PRINT_SB_VERBOSE
+#ifdef PRINT_STREAMBUFFER_VERBOSE
 		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, size);
 #endif
 
@@ -81,7 +81,7 @@ public:
 //	 * Sets pointer to zero, does not deallocate memory.
 //	 */
 //	void release() {
-//#ifdef PRINT_SB_VERBOSE
+//#ifdef PRINT_STREAMBUFFER_VERBOSE
 //		LOGw("Release stream buffer. This will screw up SoftDevice if characteristic is not deleted.");
 //#endif
 //		_buffer = NULL;

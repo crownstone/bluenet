@@ -10,7 +10,7 @@
 
 using namespace BLEpp;
 
-//#define PRINT_VERBOSE
+//#define PRINT_IBEACON_VERBOSE
 
 IBeacon::IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor,
 		int8_t rssi) {
@@ -23,7 +23,7 @@ IBeacon::IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor,
 }
 
 void IBeacon::setMajor(uint16_t major) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_IBEACON_VERBOSE
 	LOGd(FMT_SET_INT_VAL, "major", major);
 #endif
 
@@ -35,7 +35,7 @@ uint16_t IBeacon::getMajor() {
 }
 
 void IBeacon::setMinor(uint16_t minor) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_IBEACON_VERBOSE
 	LOGd(FMT_SET_INT_VAL, "minor", minor);
 #endif
 
@@ -51,7 +51,7 @@ void IBeacon::setUUID(ble_uuid128_t uuid) {
 		_params.uuid.uuid128[i] = uuid.uuid128[16-1-i];
 	}
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_IBEACON_VERBOSE
 	log(DEBUG, FMT_SET_STR_VAL "UUID", "");
 	BLEutil::printInlineArray(_params.uuid.uuid128, 16);
 	_log(DEBUG, CRLN);
@@ -67,7 +67,7 @@ ble_uuid128_t IBeacon::getUUID() {
 }
 
 void IBeacon::setTxPower(int8_t txPower) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_IBEACON_VERBOSE
 	LOGd(FMT_SET_INT_VAL, "tx power", txPower);
 #endif
 

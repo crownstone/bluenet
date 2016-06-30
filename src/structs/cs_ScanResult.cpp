@@ -9,7 +9,7 @@
 #include <cfg/cs_WhiteList.h>
 #include <cfg/cs_BlackList.h>
 
-//#define PRINT_VERBOSE
+//#define PRINT_SCANRESULT_VERBOSE
 //#define PRINT_DEBUG
 
 //! returns the number of elements stored so far
@@ -99,7 +99,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			}
 		}
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SCANRESULT_VERBOSE
 		LOGd("replacing item at idx: %d", idx);
 #endif
 	}
@@ -110,7 +110,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 	//! If a spot has been found, write it to that position
 	if (idx >= 0) {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SCANRESULT_VERBOSE
 		LOGd("NEW Advertisement from: [%02X %02X %02X %02X %02X %02X], rssi: %d", adrs_ptr[5],
 				adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
 				adrs_ptr[0], rssi);

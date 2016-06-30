@@ -11,7 +11,7 @@
 #include "drivers/cs_Serial.h"
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_CB_VERBOSE
+//#define PRINT_CIRCULARBUFFER_VERBOSE
 
 /** Circular Buffer implementation
  * @param T Element type of elements within the buffer.
@@ -54,7 +54,7 @@ public:
 			return false;
 		}
 
-#ifdef PRINT_CB_VERBOSE
+#ifdef PRINT_CIRCULARBUFFER_VERBOSE
 		LOGd(FMT_ALLOCATE_MEMORY, _array);
 #endif
 
@@ -89,8 +89,8 @@ public:
 		}
 		_array = (T*) buffer;
 
-#ifdef PRINT_CB_VERBOSE
-		LOGd(FMT_ASSIGN_BUFFER, buffer);
+#ifdef PRINT_CIRCULARBUFFER_VERBOSE
+		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, bufferSize);
 #endif
 
 		//! Also call clear to make sure we start with a clean buffer

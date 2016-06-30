@@ -16,7 +16,7 @@
 
 using namespace BLEpp;
 
-#define PRINT_VERBOSE
+//#define PRINT_CHARACTERISTIC_VERBOSE
 
 CharacteristicBase::CharacteristicBase() :
 				_name(NULL),
@@ -125,7 +125,7 @@ void CharacteristicBase::init(Service* svc) {
 	ci.attr_char_value.max_len = getValueMaxLength();
 	ci.attr_char_value.p_value = getValuePtr();
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_CHARACTERISTIC_VERBOSE
 	LOGd("%s init with buffer[%i] with %p", _name, getValueLength(), getValuePtr());
 #endif
 

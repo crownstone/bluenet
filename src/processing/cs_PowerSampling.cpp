@@ -20,7 +20,7 @@ extern "C" {
 }
 
 //#define PRINT_SAMPLE_CURRENT
-//#define PRINT_VERBOSE
+//#define PRINT_POWERSAMPLING_VERBOSE
 
 PowerSampling::PowerSampling() :
 		_staticPowerSamplingStartTimer(0),
@@ -62,7 +62,7 @@ void PowerSampling::init() {
 
 	size_t size = (burstSize > contSize) ? burstSize : contSize;
 	_powerSamplesBuffer = (buffer_ptr_t) calloc(size, sizeof(uint8_t));
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_POWERSAMPLING_VERBOSE
 	LOGd("power sample buffer=%u size=%u", _powerSamplesBuffer, size);
 #endif
 
@@ -102,7 +102,7 @@ void PowerSampling::init() {
 }
 
 void PowerSampling::startSampling() {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_POWERSAMPLING_VERBOSE
 	LOGd(FMT_START, "power sample");
 #endif
 
@@ -172,7 +172,7 @@ void PowerSampling::powerSampleReadBuffer() {
 			}
 #else
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_POWERSAMPLING_VERBOSE
 			LOGd("Send message of %u samples", _powerSamplesCount);
 #endif
 			_powerSamplesCount = 0;
@@ -335,7 +335,7 @@ void PowerSampling::powerSampleFinish() {
 	pSum -= _powerZero;
 	int32_t avgPower = pSum;
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_POWERSAMPLING_VERBOSE
 	LOGd("pSum=%f, tSum=%f, avgPower=%i", pSum, tSum, avgPower);
 #endif
 

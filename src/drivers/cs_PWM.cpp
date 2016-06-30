@@ -10,7 +10,7 @@
 #include <drivers/cs_Serial.h>
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_VERBOSE
+//#define PRINT_PWM_VERBOSE
 
 PWM::PWM() :
 		pwmTimer(NULL), _pwmInstance(NULL), _initialized(false) {
@@ -44,7 +44,7 @@ void PWM::setValue(uint8_t channel, uint32_t value) {
 		value = 100;
 	}
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_PWM_VERBOSE
 	LOGd("Set PWM channel %d to %d", channel, value);
 #endif
 	while (app_pwm_channel_duty_set(_pwmInstance, channel, value) == NRF_ERROR_BUSY) {
@@ -74,7 +74,7 @@ uint32_t PWM::init(app_pwm_config_t config) {
 #if PWM_ENABLE==1
 	_pwmCfg = config;
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_PWM_VERBOSE
 	LOGd(FMT_INIT, "PWM");
 #endif
 
@@ -94,7 +94,7 @@ uint32_t PWM::deinit() {
 
 #if PWM_ENABLE==1
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_PWM_VERBOSE
 	LOGd("DeInit PWM");
 #endif
 

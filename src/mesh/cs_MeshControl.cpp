@@ -16,7 +16,7 @@
 
 // enable for additional debug output
 //#define PRINT_DEBUG
-#define PRINT_VERBOSE
+//#define PRINT_MESHCONTROL_VERBOSE
 
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
@@ -58,7 +58,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		switch(msg->header.messageType) {
 		case SCAN_MESSAGE: {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESHCONTROL_VERBOSE
 			LOGf("Crownstone %s scanned these devices:", getAddress((mesh_message_t*)p_data).c_str());
 #endif
 			if (msg->scanMsg.numDevices > NR_DEVICES_PER_MESSAGE) {
@@ -81,7 +81,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 			break;
 		}
 		case SERVICE_DATA_MESSAGE: {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESHCONTROL_VERBOSE
 			LOGd("received service data from crownstone %s", getAddress((mesh_message_t*)p_data).c_str());
 #endif
 
@@ -141,7 +141,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 
 			decodeDataMessage(msg->header.messageType, msg->payload);
 		} else {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESHCONTROL_VERBOSE
 			LOGi("Message not for us: %s", getAddress(msg).c_str());
 #endif
 		}
@@ -167,7 +167,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 	case 19:
 	case 20: {
 		mesh_message_t* msg = (mesh_message_t*) p_data;
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESHCONTROL_VERBOSE
 		LOGd("power samples: h=%u src id=%s", channel, getAddress(msg).c_str());
 #endif
 		break;
@@ -244,7 +244,7 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 	}
 	case BEACON_MESSAGE: {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESHCONTROL_VERBOSE
 		LOGi("Received Beacon Message");
 #endif
 		beacon_mesh_message_t* msg = (beacon_mesh_message_t*)payload;
@@ -398,7 +398,7 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 //! into the mesh on the hub channel so that it can be synced to the cloud
 void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESHCONTROL_VERBOSE
 	LOGi("Send ScanMessage, size: %d", size);
 #endif
 
@@ -430,7 +430,7 @@ void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples)
 }
 
 void MeshControl::sendServiceDataMessage(service_data_mesh_message_t* serviceData) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESHCONTROL_VERBOSE
 	LOGd("send service data");
 #endif
 

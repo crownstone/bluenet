@@ -15,7 +15,7 @@
 #include <storage/cs_Settings.h>
 #include <cfg/cs_Strings.h>
 
-#define PRINT_VERBOSE
+//#define PRINT_SWITCH_VERBOSE
 
 Switch::Switch() :
 		_switchValue(0)
@@ -41,7 +41,7 @@ void Switch::init() {
 
 void Switch::pwmOff() {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SWITCH_VERBOSE
 	LOGd("PWM OFF");
 #endif
 
@@ -50,7 +50,7 @@ void Switch::pwmOff() {
 
 void Switch::pwmOn() {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SWITCH_VERBOSE
 	LOGd("PWM ON");
 #endif
 
@@ -59,7 +59,7 @@ void Switch::pwmOn() {
 
 void Switch::dim(uint8_t value) {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SWITCH_VERBOSE
 	LOGd("PWM %d", value);
 #endif
 
@@ -75,7 +75,7 @@ void Switch::setValue(uint8_t value) {
 
 uint8_t Switch::getValue() {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SWITCH_VERBOSE
 	LOGd(FMT_GET_INT_VAL, "Switch state", _switchValue);
 #endif
 
@@ -86,7 +86,7 @@ void Switch::relayOn() {
 	uint16_t relayHighDuration;
 	Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &relayHighDuration);
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SWITCH_VERBOSE
 	LOGd("trigger relay on pin for %d ms", relayHighDuration);
 #endif
 
@@ -103,7 +103,7 @@ void Switch::relayOff() {
 	uint16_t relayHighDuration;
 	Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &relayHighDuration);
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SWITCH_VERBOSE
 	LOGi("trigger relay off pin for %d ms", relayHighDuration);
 #endif
 
@@ -118,7 +118,7 @@ void Switch::relayOff() {
 
 void Switch::turnOn() {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SWITCH_VERBOSE
 	LOGd("Turn ON");
 #endif
 
@@ -131,7 +131,7 @@ void Switch::turnOn() {
 
 void Switch::turnOff() {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SWITCH_VERBOSE
 	LOGd("Turn OFF");
 #endif
 

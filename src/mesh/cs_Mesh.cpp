@@ -26,7 +26,7 @@
 #include <storage/cs_Settings.h>
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_VERBOSE
+//#define PRINT_MESH_VERBOSE
 
 void start_stop_mesh(void * p_event_data, uint16_t event_size) {
 	if (*(bool*)p_event_data) {
@@ -165,7 +165,7 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	TICK_PIN(28);
 //	nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESH_VERBOSE
 	switch (evt->event_type)
 	{
 	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
@@ -227,13 +227,13 @@ void Mesh::checkForMessages() {
 			//! reboot
 			uint32_t ts = RTC::now() - _mesh_init_time;
 			if (ts < BOOT_TIME) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESH_VERBOSE
 				LOGi("t: %d: ch: %d, skipping message within boot-up time!", ts, evt.value_handle);
 #endif
 				rbc_mesh_packet_release(evt.data);
 				continue;
 			} else {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESH_VERBOSE
 				LOGi("first received at: %d", ts);
 #endif
 			}

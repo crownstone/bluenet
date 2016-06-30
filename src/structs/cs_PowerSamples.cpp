@@ -9,7 +9,7 @@
 #include "structs/cs_PowerSamples.h"
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_VERBOSE
+//#define PRINT_POWERSAMPLES_VERBOSE
 
 PowerSamples::PowerSamples():
 	_buffer(NULL),
@@ -32,7 +32,7 @@ bool PowerSamples::init() {
 		return false;
 	}
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_POWERSAMPLES_VERBOSE
 	LOGd(FMT_ALLOCATE_MEMORY, _buffer);
 #endif
 
@@ -94,7 +94,7 @@ int PowerSamples::assign(buffer_ptr_t buffer, uint16_t size) {
 		return 1;
 	}
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_POWERSAMPLES_VERBOSE
 	LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, size);
 #endif
 

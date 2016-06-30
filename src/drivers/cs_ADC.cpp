@@ -24,7 +24,7 @@
 
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_VERBOSE
+//#define PRINT_ADC_VERBOSE
 
 //! Check the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
 uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
@@ -36,7 +36,7 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
 	_numPins = numPins;
 
 	LOGi(FMT_INIT, "ADC");
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_ADC_VERBOSE
 	LOGd("Configure ADC with %u pins, starting on pin %u", numPins, pins[0]);
 #endif
 
@@ -117,7 +117,7 @@ bool ADC::setBuffers(StackBuffer<uint16_t>* buffer, uint8_t pinNum) {
 	if (pinNum >= _numPins) {
 		return false;
 	}
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_ADC_VERBOSE
 	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
 #endif
 	_buffers[pinNum] = buffer;
@@ -128,7 +128,7 @@ bool ADC::setBuffers(CircularBuffer<uint16_t>* buffer, uint8_t pinNum) {
 	if (pinNum >= _numPins) {
 		return false;
 	}
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_ADC_VERBOSE
 	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
 #endif
 	_circularBuffers[pinNum] = buffer;
@@ -139,7 +139,7 @@ bool ADC::setTimestampBuffers(DifferentialBuffer<uint32_t>* buffer, uint8_t pinN
 	if (pinNum >= _numPins) {
 		return false;
 	}
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_ADC_VERBOSE
 	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
 #endif
 	_timeBuffers[pinNum] = buffer;

@@ -51,7 +51,7 @@
 #include <cfg/cs_Strings.h>
 #include "app_scheduler.h"
 
-//#define PRINT_VERBOSE
+//#define PRINT_MESH_VERBOSE
 
 extern uint32_t rbc_mesh_event_push(rbc_mesh_event_t* p_event);
 
@@ -451,7 +451,7 @@ void value_set_handler(void* p_event_data, uint16_t event_size) {
 	uint32_t err_code = send_notification(notification);
 	if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESH_VERBOSE
 		LOGd("adding pending notification");
 #endif
 
@@ -499,7 +499,7 @@ uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 //				printArray(notification, sizeof(waiting_notification_t));
 			} else {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESH_VERBOSE
 				LOGd("notification pending already");
 #endif
 
@@ -518,7 +518,7 @@ void resume_notifications() {
 
 	if (send_notification(notification) == NRF_SUCCESS) {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESH_VERBOSE
 		LOGd("notification done");
 #endif
 
@@ -527,13 +527,13 @@ void resume_notifications() {
 		if (nb_empty()) {
 			notifactionsPending = false;
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESH_VERBOSE
 			LOGd("no more notifications pending");
 #endif
 
 		} else {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_MESH_VERBOSE
 			LOGd("continue with next pending notification");
 #endif
 

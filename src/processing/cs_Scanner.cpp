@@ -14,7 +14,7 @@
 
 #include <events/cs_EventDispatcher.h>
 
-#define PRINT_VERBOSE
+//#define PRINT_SCANNER_VERBOSE
 //#define PRINT_DEBUG
 
 Scanner::Scanner() :
@@ -114,13 +114,13 @@ void Scanner::start() {
 
 void Scanner::delayedStart(uint16_t delay) {
 	if (!_running) {
-		LOGw("delayed start by %d ms", delay);
+		LOGi("delayed start by %d ms", delay);
 		_running = true;
 		_scanCount = 0;
 		_opCode = SCAN_START;
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(delay), this);
 	} else {
-		LOGi(FMT_ALREADY, "scanning");
+		LOGd(FMT_ALREADY, "scanning");
 	}
 }
 
@@ -148,8 +148,8 @@ void Scanner::executeScan() {
 
 	if (!_running) return;
 
-#ifdef PRINT_VERBOSE
-	LOGi("Execute Scan");
+#ifdef PRINT_SCANNER_VERBOSE
+	LOGd("Execute Scan");
 #endif
 
 	switch(_opCode) {
@@ -198,7 +198,7 @@ void Scanner::executeScan() {
 
 void Scanner::notifyResults() {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_SCANNER_VERBOSE
 	LOGd("Notify scan results");
 #endif
 

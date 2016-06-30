@@ -15,7 +15,7 @@
 #include <util/cs_BleError.h>
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_TD_VERBOSE
+//#define PRINT_TRACKEDDEVICES_VERBOSE
 
 /**
  * The track device timeout stops tracking after a certain number of ticks.
@@ -80,7 +80,7 @@ public:
 	/** Release the assigned buffer */
 	void release() {
 
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 		LOGd("release");
 #endif
 
@@ -136,7 +136,7 @@ public:
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
 		assert(sizeof(tracked_device_list_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, maxLength);
 #endif
 
@@ -179,7 +179,7 @@ public:
 	/** Release the assigned buffer */
 	void release() {
 
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 		LOGd("release");
 #endif
 
@@ -198,7 +198,7 @@ public:
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
 		assert(sizeof(tracked_device_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, maxLength);
 #endif
 
@@ -219,7 +219,7 @@ public:
 	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
 
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 		LOGd("getBuffer: %p", this);
 #endif
 

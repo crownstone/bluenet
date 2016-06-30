@@ -12,7 +12,7 @@
 #include <util/cs_BleError.h>
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_SE_VERBOSE
+//#define PRINT_SCHEDULEENTRIES_VERBOSE
 
 #define SECONDS_PER_DAY         86400
 
@@ -127,7 +127,7 @@ public:
 	/** Release the assigned buffer */
 	void release() {
 
-#ifdef PRINT_SE_VERBOSE
+#ifdef PRINT_SCHEDULEENTRIES_VERBOSE
 		LOGd("release");
 #endif
 
@@ -147,7 +147,7 @@ public:
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
 		assert(sizeof(schedule_entry_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 
-#ifdef PRINT_SE_VERBOSE
+#ifdef PRINT_SCHEDULEENTRIES_VERBOSE
 		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, maxLength);
 #endif
 
@@ -171,7 +171,7 @@ public:
 	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
 
-#ifdef PRINT_SE_VERBOSE
+#ifdef PRINT_SCHEDULEENTRIES_VERBOSE
 		LOGd("getBuffer: %p", this);
 #endif
 
@@ -199,7 +199,7 @@ public:
 	/** Release the assigned buffer */
 	void release() {
 
-#ifdef PRINT_SE_VERBOSE
+#ifdef PRINT_SCHEDULEENTRIES_VERBOSE
 		LOGd("release");
 #endif
 
@@ -239,7 +239,7 @@ public:
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
 		assert(sizeof(schedule_list_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 
-#ifdef PRINT_SE_VERBOSE
+#ifdef PRINT_SCHEDULEENTRIES_VERBOSE
 		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, maxLength);
 #endif
 

@@ -13,14 +13,14 @@
 
 //#include <algorithm>
 
-//#define PRINT_VERBOSE
+//#define PRINT_EVENTDISPATCHER_VERBOSE
 
 void EventDispatcher::dispatch(uint16_t evt) {
 	dispatch(evt, NULL, 0);
 }
 
 void EventDispatcher::dispatch(uint16_t evt, void* p_data, uint16_t length) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_EVENTDISPATCHER_VERBOSE
 	LOGi("dispatch event: %d", evt);
 #endif
 
@@ -51,7 +51,7 @@ bool EventDispatcher::addListener(EventListener *listener) {
 	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] == NULL) {
 			_listeners[i] = listener;
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_EVENTDISPATCHER_VERBOSE
 			LOGi("add listener: %d", i+1);
 #endif
 			return true;
@@ -72,7 +72,7 @@ void EventDispatcher::removeListener(EventListener *listener) {
 	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] == listener) {
 			_listeners[i] = NULL;
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_EVENTDISPATCHER_VERBOSE
 			LOGi("remove listener: %d", i+1);
 #endif
 		}

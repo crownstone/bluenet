@@ -35,7 +35,7 @@ extern "C" {
 
 using namespace BLEpp;
 
-#define PRINT_VERBOSE
+//#define PRINT_STACK_VERBOSE
 
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_appearance(defaultAppearance), _clock_source(defaultClockSource),
@@ -106,14 +106,14 @@ void Nrf51822BluetoothStack::init() {
 		BLE_CALL(sd_softdevice_disable, ());
 	}
 
-	LOGd(MSG_BLE_SOFTDEVICE_INIT);
+	LOGi(MSG_BLE_SOFTDEVICE_INIT);
 	//! Initialize the SoftDevice handler module.
 	//! this would call with different clock!
 //	SOFTDEVICE_HANDLER_INIT(_clock_source, NULL);
 	SOFTDEVICE_HANDLER_APPSH_INIT(_clock_source, true);
 
 	//! enable the BLE stack
-	LOGd(MSG_BLE_SOFTDEVICE_ENABLE);
+	LOGi(MSG_BLE_SOFTDEVICE_ENABLE);
 
 	//! assign ble event handler, forwards ble_evt to stack
 	BLE_CALL(softdevice_ble_evt_handler_set, (ble_evt_dispatch));
@@ -249,7 +249,7 @@ void Nrf51822BluetoothStack::addService(Service* svc) {
 //! accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm
 //! Can be done at any moment (also when advertising)
 void Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_STACK_VERBOSE
 	LOGd(FMT_SET_INT_VAL, "tx power", powerLevel);
 #endif
 
@@ -338,7 +338,7 @@ void Nrf51822BluetoothStack::configureBleDeviceAdvData() {
 	//! check if (and how many) services where enabled
 	uint8_t uidCount = _services.size();
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_STACK_VERBOSE
 	LOGd("Number of services: %u", uidCount);
 #endif
 
@@ -718,7 +718,7 @@ void Nrf51822BluetoothStack::setEncrypted(bool encrypted) {
 }
 
 void Nrf51822BluetoothStack::setPasskey(uint8_t* passkey) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_STACK_VERBOSE
 	LOGd(FMT_SET_STR_VAL, "passkey", std::string((char*)passkey, BLE_GAP_PASSKEY_LEN).c_str());
 #endif
 
@@ -1006,7 +1006,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GAP_EVT_PASSKEY_DISPLAY: {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_STACK_VERBOSE
 		LOGd("PASSKEY: %.6s", p_ble_evt->evt.gap_evt.params.passkey_display.passkey);
 #endif
 		break;

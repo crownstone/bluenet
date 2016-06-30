@@ -24,7 +24,7 @@
 
 #include <mesh/cs_Mesh.h>
 
-//#define PRINT_VERBOSE
+//#define PRINT_STORAGE_VERBOSE
 
 extern "C"  {
 
@@ -122,7 +122,7 @@ void storage_sys_evt_handler(uint32_t evt) {
 
 void Storage::resumeRequests() {
 	if (!writeBuffer.empty()) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_STORAGE_VERBOSE
 		LOGd("Resume pstorage write requests");
 #endif
 
@@ -134,7 +134,7 @@ void Storage::resumeRequests() {
 //			BLEutil::printArray((uint8_t*)&elem, sizeof(elem));
 
 			if (!_scanning) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_STORAGE_VERBOSE
 				LOGd("pstorage_update");
 #endif
 				// count number of pending updates to decide when mesh can be resumed (if needed)
@@ -148,7 +148,7 @@ void Storage::resumeRequests() {
 				return;
 			}
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_STORAGE_VERBOSE
 			LOGd("resume done");
 #endif
 		}
@@ -171,7 +171,7 @@ void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		if (!writeBuffer.empty()) {
 			// if meshing, need to stop the mesh first before updating pstorage
 			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED))	{
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_STORAGE_VERBOSE
 				LOGd("stop mesh on scan stop");
 #endif
 				Mesh::getInstance().stop();
@@ -307,7 +307,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 		// if not scanning, stop the mesh and wait for the NRF_EVT_RADIO_SESSION_IDLE to arrive to access pstorage
 		// if scannig, wait for the EVT_SCAN_STOPPED
 		if (meshEnabled && !_scanning) {
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_STORAGE_VERBOSE
 			LOGd("stop mesh on pstorage update");
 #endif
 			Mesh::getInstance().stop();

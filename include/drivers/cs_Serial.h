@@ -10,6 +10,8 @@
 extern "C" {
 #endif
 
+#include <cfg/cs_Debug.h>
+
 /*
  * Commonly LOG functionality is provided with as first parameter the level of severity of the message. Subsequently
  * the message follows, eventually succeeded by content if the string contains format specifiers. This means that this

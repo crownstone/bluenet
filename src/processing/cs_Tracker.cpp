@@ -12,7 +12,7 @@
 #include <drivers/cs_PWM.h>
 #include <storage/cs_State.h>
 
-//#define PRINT_VERBOSE
+//#define PRINT_TRACKER_VERBOSE
 //#define PRINT_DEBUG
 
 Tracker::Tracker() : EventListener(),
@@ -204,7 +204,7 @@ void Tracker::handleTrackedDeviceCommand(buffer_ptr_t buffer, uint16_t size) {
 
 	if (dev.getRSSI() > 0) {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_TRACKER_VERBOSE
 		LOGi("Remove tracked device");
 #endif
 
@@ -215,7 +215,7 @@ void Tracker::handleTrackedDeviceCommand(buffer_ptr_t buffer, uint16_t size) {
 		Tracker::getInstance().removeTrackedDevice(dev);
 	} else {
 
-#ifdef PRINT_VERBOSE
+#ifdef PRINT_TRACKER_VERBOSE
 		LOGi("Add tracked device");
 #endif
 
