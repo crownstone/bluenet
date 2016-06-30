@@ -84,12 +84,14 @@ Crownstone::Crownstone() :
 	_settings = &Settings::getInstance();
 	_stateVars = &State::getInstance();
 
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch using PWM or Relay
 	_switch = &Switch::getInstance();
 	//! create temperature guard
 	_temperatureGuard = new TemperatureGuard();
 
 	_powerSampler = &PowerSampling::getInstance();
+#endif
 
 };
 

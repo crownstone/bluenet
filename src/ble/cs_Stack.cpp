@@ -173,10 +173,10 @@ void Nrf51822BluetoothStack::init() {
 	BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
 
 	// enable power-fail comparator
-//	sd_power_pof_enable(true);
+	sd_power_pof_enable(true);
 	// set threshold value, if power falls below threshold,
 	// an NRF_EVT_POWER_FAILURE_WARNING will be triggered
-//	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
+	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
 
 	_inited = true;
 

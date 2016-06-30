@@ -338,7 +338,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_VOLTAGE_ZERO:
 	case CONFIG_CURRENT_ZERO:
 	case CONFIG_POWER_ZERO: {
-		return 8;
+		return 4;
 	}
 
 	/////////////////////////////////////////////////
@@ -783,6 +783,10 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 		// before updating a flag, we need to initialize all flags to their default
 		// value, otherwise they will be wrongly read after the update
 		initFlags();
+	}
+
+	if (value == isSet(type)) {
+		return true;
 	}
 
 	switch(type) {
