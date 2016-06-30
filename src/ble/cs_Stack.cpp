@@ -35,6 +35,8 @@ extern "C" {
 
 using namespace BLEpp;
 
+#define PRINT_VERBOSE
+
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_appearance(defaultAppearance), _clock_source(defaultClockSource),
 //				_mtu_size(defaultMtu),
@@ -171,10 +173,10 @@ void Nrf51822BluetoothStack::init() {
 	BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
 
 	// enable power-fail comparator
-	sd_power_pof_enable(true);
+//	sd_power_pof_enable(true);
 	// set threshold value, if power falls below threshold,
 	// an NRF_EVT_POWER_FAILURE_WARNING will be triggered
-	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
+//	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
 
 	_inited = true;
 
@@ -215,14 +217,14 @@ void Nrf51822BluetoothStack::initServices() {
 }
 
 void Nrf51822BluetoothStack::startTicking() {
-	LOGi("Start ticking ...");
+	LOGi(FMT_START, "ticking");
 	for (Service* svc : _services) {
 		svc->startTicking();
 	}
 }
 
 void Nrf51822BluetoothStack::stopTicking() {
-	LOGi("Stop ticking ...");
+	LOGi(FMT_STOP, "ticking");
 	for (Service* svc : _services) {
 		svc->stopTicking();
 	}
@@ -247,7 +249,10 @@ void Nrf51822BluetoothStack::addService(Service* svc) {
 //! accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm
 //! Can be done at any moment (also when advertising)
 void Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
-	LOGd("Set tx power to %d", powerLevel);
+#ifdef PRINT_VERBOSE
+	LOGd(FMT_SET_INT_VAL, "tx power", powerLevel);
+#endif
+
 	switch (powerLevel) {
 	case -40: break;
 	case -30: break;
@@ -332,7 +337,11 @@ void Nrf51822BluetoothStack::configureBleDeviceAdvData() {
 
 	//! check if (and how many) services where enabled
 	uint8_t uidCount = _services.size();
-	LOGi("Number of services: %u", uidCount);
+
+#ifdef PRINT_VERBOSE
+	LOGd("Number of services: %u", uidCount);
+#endif
+
 
 //	ble_uuid_t adv_uuids[uidCount];
 //
@@ -430,7 +439,7 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 		_service_data.data.p_data = _serviceData->getArray();
 		_service_data.data.size = _serviceData->getArraySize();
 
-		LOGi("service data size: %d", _service_data.data.size);
+//		LOGd("service data size: %d", _service_data.data.size);
 
 		_scan_resp.p_service_data_array = &_service_data;
 		_scan_resp.service_data_count = 1;
@@ -476,7 +485,7 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 ////		nameLength = nameLength;
 //	}
 
-	LOGi("maxNameLength: %d", nameLength);
+//	LOGd("maxNameLength: %d", nameLength);
 
 	//! NOTE: if anything else is added to the scan response data, the nameLength has to be adjusted
 	//!   similar to the case of manufacturing data
@@ -490,7 +499,7 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 }
 
 void Nrf51822BluetoothStack::configureIBeacon(IBeacon* beacon, uint8_t deviceType) {
-	LOGi(MSG_BLE_CONFIGURE_IBEACON);
+	LOGi(FMT_BLE_CONFIGURE_AS, "iBeacon");
 
 //	init(); //! we should already be.
 
@@ -507,7 +516,7 @@ void Nrf51822BluetoothStack::configureIBeacon(IBeacon* beacon, uint8_t deviceTyp
 }
 
 void Nrf51822BluetoothStack::configureBleDevice(uint8_t deviceType) {
-	LOGi(MSG_BLE_CONFIGURE_BLEDEVICE);
+	LOGi(FMT_BLE_CONFIGURE_AS, "BleDevice");
 
 //	init(); //! we should already be.
 
@@ -578,7 +587,7 @@ void Nrf51822BluetoothStack::startScanning() {
 	if (_scanning)
 		return;
 
-	LOGi("startScanning");
+	LOGi(FMT_START, "scanning");
 	ble_gap_scan_params_t p_scan_params;
 	//! No devices in whitelist, hence non selective performed.
 	p_scan_params.active = 1;            //! Active scanning set.
@@ -603,7 +612,7 @@ void Nrf51822BluetoothStack::stopScanning() {
 	if (!_scanning)
 		return;
 
-	LOGi("stopScanning");
+	LOGi(FMT_STOP, "scanning");
 	BLE_CALL(sd_ble_gap_scan_stop, ());
 	_scanning = false;
 
@@ -709,7 +718,10 @@ void Nrf51822BluetoothStack::setEncrypted(bool encrypted) {
 }
 
 void Nrf51822BluetoothStack::setPasskey(uint8_t* passkey) {
-	LOGd("setting passkey to: %s", std::string((char*)passkey, BLE_GAP_PASSKEY_LEN).c_str());
+#ifdef PRINT_VERBOSE
+	LOGd(FMT_SET_STR_VAL, "passkey", std::string((char*)passkey, BLE_GAP_PASSKEY_LEN).c_str());
+#endif
+
 	memcpy(_passkey, passkey, BLE_GAP_PASSKEY_LEN);
 
 	if (_inited) {
@@ -743,7 +755,7 @@ static uint32_t device_manager_evt_handler(dm_handle_t const    * p_handle,
 //#define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /*< Delay after connection until Security Request is sent, if necessary (ticks). */
 
 void Nrf51822BluetoothStack::lowPowerTimeout(void* p_context) {
-	LOGi("bonding timeout, going back to normal power mode ...");
+	LOGw("bonding timeout!");
 	((Nrf51822BluetoothStack*)p_context)->changeToNormalPowerMode();
 }
 
@@ -778,7 +790,7 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
     switch (p_event->event_id)
     {
         case DM_EVT_CONNECTION:
-        	LOGi("DM_EVT_CONNECTION");
+//        	LOGi("DM_EVT_CONNECTION");
             //! Start Security Request timer.
 //            if (p_handle->device_id != DM_INVALID_ID)
 //            {
@@ -802,7 +814,7 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         }
         case DM_EVT_SECURITY_SETUP_COMPLETE: {
         	if (event_result == NRF_SUCCESS) {
-        		LOGi("bonding completed, going into normal power mode ...");
+        		LOGi("bonding completed");
         	} else {
         		LOGe("bonding failed with error: %d (%p)", event_result, event_result);
         	}
@@ -886,7 +898,7 @@ void Nrf51822BluetoothStack::device_manager_init(bool erase_bonds)
 
     _dm_initialized = true;
 
-    LOGi("device_manager_init");
+//    LOGi("device_manager_init");
 }
 
 void Nrf51822BluetoothStack::device_manager_reset() {
@@ -994,7 +1006,9 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GAP_EVT_PASSKEY_DISPLAY: {
-		LOGi("PASSKEY: %.6s", p_ble_evt->evt.gap_evt.params.passkey_display.passkey);
+#ifdef PRINT_VERBOSE
+		LOGd("PASSKEY: %.6s", p_ble_evt->evt.gap_evt.params.passkey_display.passkey);
+#endif
 		break;
 	}
 

@@ -12,6 +12,9 @@
 
 #include <algorithm>
 
+//! enable to print additional debug
+//#define PRINT_DEBUG
+
 #ifdef PRINT_DEBUG
 app_timer_id_t _debugTimer;
 
@@ -29,11 +32,11 @@ void State::init() {
 	_storage = &Storage::getInstance();
 
 	if (!_storage->isInitialized()) {
-		LOGe("forgot to initialize Storage!");
+		LOGe(FMT_NOT_INITIALIZED, "Storage");
 		return;
 	}
 
-	LOGd("loading state variables");
+//	LOGd("loading state variables");
 	_storage->getHandle(PS_ID_STATE, _stateHandle);
 
 	// this is just a "place holder" to calculate the offsets. state variables do not reside in a struct,
@@ -60,7 +63,7 @@ void State::init() {
 	Timer::getInstance().createSingleShot(_debugTimer, debugprint);
 #endif
 
-	LOGd("loading general struct")
+//	LOGd("loading general struct")
 	_storage->getHandle(PS_ID_GENERAL, _structHandle);
 	loadPersistentStorage();
 }
@@ -88,7 +91,7 @@ ERR_CODE State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, b
 				return set(type, payload, length);
 			}
 		} else {
-			LOGe("wrong length");
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		break;
@@ -97,7 +100,7 @@ ERR_CODE State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, b
 	case STATE_SWITCH_STATE:
 	case STATE_TEMPERATURE:
 	default:
-		LOGw("There is no such state variable (%u), or writing is disabled", type);
+		LOGw(FMT_STATE_NOT_FOUND, type);
 	}
 
 	return STATE_WRITE_DISABLED;
@@ -166,7 +169,7 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 		return error_code;
 	}
 	default: {
-		LOGe("There is no such state variable (%u).", type);
+		LOGw(FMT_STATE_NOT_FOUND, type);
 		return ERR_STATE_NOT_FOUND;
 	}
 	}
@@ -221,7 +224,7 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 		break;
 	}
 	default: {
-		LOGe("there is no such state variable (%d)", type);
+		LOGw(FMT_STATE_NOT_FOUND, type);
 		return ERR_STATE_NOT_FOUND;
 	}
 	}
@@ -229,7 +232,7 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 	if (success) {
 		return ERR_SUCCESS;
 	} else {
-		LOGw("<<--->> verification failed");
+		LOGw(FMT_VERIFICATION_FAILED);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 }
@@ -321,21 +324,21 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 		case STATE_TEMPERATURE: {
 			*(int32_t*)target = _temperature;
 #ifdef PRINT_DEBUG
-			LOGd("Read temperature: %d", *(int32_t*)target);
+			LOGd(FMT_GET_INT_VAL, "temperature", *(int32_t*)target);
 #endif
 			break;
 		}
 		case STATE_OPERATION_MODE: {
 			Storage::getUint8(_storageStruct.operationMode, (uint8_t*)target, DEFAULT_OPERATION_MODE);
 #ifdef PRINT_DEBUG
-			LOGd("Read operation mode: %d", *(uint8_t*)target);
+			LOGd(FMT_GET_INT_VAL, "operation mode", *(uint8_t*)target);
 #endif
 			break;
 		}
 		case STATE_RESET_COUNTER: {
 			*(uint32_t*)target = _resetCounter->read();
 #ifdef PRINT_DEBUG
-			LOGd("Read reset counter: %d", *(uint32_t*)target);
+			LOGd(FMT_GET_INT_VAL, "reset counter", *(uint32_t*)target);
 #endif
 			break;
 		}
@@ -346,28 +349,28 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			*(uint8_t*)target = _switchState;
 #endif
 #ifdef PRINT_DEBUG
-			LOGd("Read switch state: %d", *(uint8_t*)target);
+			LOGd(FMT_GET_INT_VAL, "switch state", *(uint8_t*)target);
 #endif
 			break;
 		}
 		case STATE_POWER_USAGE: {
 			*(int32_t*)target = _powerUsage;
 #ifdef PRINT_DEBUG
-			LOGd("Read power usage: %d", *(int32_t*)target);
+			LOGd(FMT_GET_INT_VAL, "power usage", *(int32_t*)target);
 #endif
 			break;
 		}
 		case STATE_TIME: {
 			*(uint32_t*)target = _time;
 #ifdef PRINT_DEBUG
-			LOGd("Read time: %d", *(uint32_t*)target);
+			LOGd(FMT_GET_INT_VAL, "time", *(uint32_t*)target);
 #endif
 			break;
 		}
 		case STATE_TRACKED_DEVICES: {
 			Storage::getArray(_storageStruct.trackedDevices, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
 #ifdef PRINT_DEBUG
-			LOGd("Read tracked devices:");
+			LOGd(FMT_GET_STR_VAL, "tracked devices", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
 #endif
 			break;
@@ -375,7 +378,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 		case STATE_SCHEDULE: {
 			Storage::getArray(_storageStruct.scheduleList, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
 #ifdef PRINT_DEBUG
-			LOGd("Read schedule list:");
+			LOGd(FMT_GET_STR_VAL, "schedule list", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
 #endif
 			break;

@@ -46,27 +46,28 @@ SetupService::SetupService() {
 //}
 
 void SetupService::createCharacteristics() {
-	LOGi("Create setup service");
+	LOGi(FMT_SERVICE_INIT, "Setup");
 
 	buffer_ptr_t buffer = NULL;
 	uint16_t maxLength = 0;
 
-	LOGi(MSG_CHAR_CONTROL_ADD);
+	LOGi(FMT_CHAR_ADD, STR_CHAR_CONTROL);
 	_streamBuffer = getStreamBuffer(buffer, maxLength);
 	addControlCharacteristic(buffer, maxLength);
 
+	LOGi(FMT_CHAR_ADD, STR_CHAR_MAC_ADDRESS);
 	addMacAddressCharacteristic();
 
-	LOGi(MSG_CHAR_CONFIGURATION_ADD);
+	LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
 	_streamBuffer = getStreamBuffer(buffer, maxLength);
 	addConfigurationControlCharacteristic(buffer, maxLength);
 	addConfigurationReadCharacteristic(buffer, maxLength);
 
-	LOGd("Set both set/get charac to buffer at %p", buffer);
+//	LOGd("Set both set/get charac to buffer at %p", buffer);
 
 //#if CHAR_STATE_VARIABLES==1
 //	{
-//		LOGi(MSG_CHAR_STATEVARIABLES_ADD);
+//		LOGi(FMT_CHAR_STATEVARIABLES_ADD);
 //		_streamBuffer = getCharacBuffer(buffer, maxLength);
 //		addSelectStateVarCharacteristic(buffer, maxLength);
 //		addReadStateVarCharacteristic(buffer, maxLength);
@@ -74,7 +75,7 @@ void SetupService::createCharacteristics() {
 //		LOGd("Set both set/get charac to buffer at %p", buffer);
 //	}
 //#else
-//	LOGi(MSG_CHAR_STATEVARIABLES_SKIP);
+//	LOGi(FMT_CHAR_STATEVARIABLES_SKIP);
 //#endif
 //
 
@@ -105,7 +106,7 @@ void SetupService::createCharacteristics() {
 //		// at this point it is too late to check if mb was locked, because the softdevice doesn't care
 //		// if the mb was locked, it writes to the buffer in any case
 //		if (!mb.isLocked()) {
-//			LOGi(MSG_CHAR_VALUE_WRITE);
+//			LOGi(FMT_CHAR_VALUE_WRITE);
 //			CommandHandlerTypes type = (CommandHandlerTypes) _streamBuffer->type();
 //			uint8_t *payload = _streamBuffer->payload();
 //			uint8_t length = _streamBuffer->length();
@@ -148,9 +149,9 @@ void SetupService::addMacAddressCharacteristic() {
 //	_setConfigurationCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
 //
 //		if (!value) {
-//			LOGw(MSG_CHAR_VALUE_UNDEFINED);
+//			LOGw(FMT_CHAR_VALUE_UNDEFINED);
 //		} else {
-//			LOGi(MSG_CHAR_VALUE_WRITE);
+//			LOGi(FMT_CHAR_VALUE_WRITE);
 //			MasterBuffer& mb = MasterBuffer::getInstance();
 //			// at this point it is too late to check if mb was locked, because the softdevice doesn't care
 //			// if the mb was locked, it writes to the buffer in any case

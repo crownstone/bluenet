@@ -113,12 +113,12 @@ private:
 	 * Sends a message over the mesh network
 	 */
 	BLEpp::Characteristic<buffer_ptr_t>* _meshControlCharacteristic;
+	MeshCommand* _meshCommand;
 
 	BLEpp::Characteristic<buffer_ptr_t>* _stateControlCharacteristic;
 	BLEpp::Characteristic<buffer_ptr_t>* _stateReadCharacteristic;
 
 
-	MeshCommand* _meshCommand;
 //	StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>* _meshCommand;
 
 };

@@ -16,6 +16,9 @@
 #include <mesh/cs_MeshControl.h>
 #include <mesh/cs_Mesh.h>
 #include <storage/cs_State.h>
+#include <cfg/cs_Strings.h>
+
+//#define PRINT_DEBUG
 
 void reset(void* p_context) {
 
@@ -74,43 +77,36 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 	switch (type) {
 	case CMD_GOTO_DFU: {
-		LOGi("handle goto dfu command");
+		LOGi(STR_HANDLE_COMMAND, "goto dfu");
 		resetDelayed(GPREGRET_DFU_RESET);
 		break;
 	}
 	case CMD_RESET: {
-		LOGi("handle reset command");
+		LOGi(STR_HANDLE_COMMAND, "reset");
 
 		if (size != sizeof(opcode_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
 		static uint8_t resetOp = payload->opCode;
 
-//		LOGi("resetOp: %d", resetOp);
-
-//			if (resetOp) {
 		resetDelayed(resetOp);
-//			} else {
-		//todo: why nonzero?
-//				LOGw("To reset write a nonzero value: %d", payload->resetOp);
-//			}
 		break;
 	}
 	case CMD_ENABLE_MESH: {
-		LOGi("handle enable mesh command");
+		LOGi(STR_HANDLE_COMMAND, "enable mesh");
 
 		if (size != sizeof(enable_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 		bool enable = payload->enable;
 
-		LOGi("%s mesh", enable ? "Enabling" : "Disabling");
+		LOGi("%s mesh", enable ? STR_ENABLE : STR_DISABLE);
 		Settings::getInstance().updateFlag(CONFIG_MESH_ENABLED, enable, true);
 
 		if (enable) {
@@ -122,18 +118,18 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_ENCRYPTION: {
-		LOGi("handle enable encryption command: tbd");
+		LOGi(STR_HANDLE_COMMAND, "enable encryption");
 		return ERR_NOT_IMPLEMENTED;
 
 		if (size != sizeof(enable_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 		bool enable = payload->enable;
 
-		LOGi("%s encryption", enable ? "Enabling" : "Disabling");
+		LOGi("%s encryption", enable ? STR_ENABLE : STR_DISABLE);
 		Settings::getInstance().updateFlag(CONFIG_ENCRYPTION_ENABLED, enable, true);
 		// todo: stack/service/characteristics need to be refactored if we also want to update characteristics
 		// on the fly
@@ -143,24 +139,24 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_IBEACON: {
-		LOGi("handle enable ibeacon command");
+		LOGi(STR_HANDLE_COMMAND, "enable ibeacon");
 
 		if (size != sizeof(enable_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 		bool enable = payload->enable;
 
-		LOGi("%s ibeacon", enable ? "Enabling" : "Disabling");
+		LOGi("%s ibeacon", enable ? STR_ENABLE : STR_DISABLE);
 		Settings::getInstance().updateFlag(CONFIG_IBEACON_ENABLED, enable, true);
 //		EventDispatcher::getInstance().dispatch(EVT_ENABLED_IBEACON, &enable, sizeof(enable));
 
 		break;
 	}
 	case CMD_ENABLE_SCANNER: {
-		LOGi("handle enable scanner command");
+		LOGi(STR_HANDLE_COMMAND, "enable scanner");
 
 		enable_scanner_message_payload_t* payload = (enable_scanner_message_payload_t*) buffer;
 		bool enable = payload->enable;
@@ -170,12 +166,12 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			//! if we want tod isable, we don't really need the delay, so
 			// we can accept the command as long as size is 1
 			if (size != 1 || enable) {
-				LOGe("wrong payload length received: %d", size);
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 		}
 
-		LOGi("%s scanner", enable ? "Enabling" : "Disabling");
+		LOGi("%s scanner", enable ? STR_ENABLE : STR_DISABLE);
 		if (enable) {
 			LOGi("delay: %d ms", delay);
 			if (delay) {
@@ -192,10 +188,10 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SCAN_DEVICES: {
-		LOGi("handle scan devices command");
+		LOGi(STR_HANDLE_COMMAND, "scan devices");
 
 		if (size != sizeof(enable_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
@@ -210,7 +206,10 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			Scanner::getInstance().manualStopScan();
 
 			ScanResult* results = Scanner::getInstance().getResults();
+
+#ifdef PRINT_DEBUG
 			results->print();
+#endif
 
 			buffer_ptr_t buffer;
 			uint16_t dataLength;
@@ -226,7 +225,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_REQUEST_SERVICE_DATA: {
-		LOGi("handle request service data");
+		LOGi(STR_HANDLE_COMMAND, "request service");
 
 		service_data_mesh_message_t serviceData;
 		memset(&serviceData, 0, sizeof(serviceData));
@@ -248,10 +247,10 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_FACTORY_RESET: {
-		LOGi("handle factory reset command");
+		LOGi(STR_HANDLE_COMMAND, "factory reset");
 
 		if (size != sizeof(FACTORY_RESET_CODE)) {
-			LOGe("expected reset code of length %d", sizeof(FACTORY_RESET_CODE));
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, sizeof(FACTORY_RESET_CODE));
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
@@ -259,7 +258,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		uint32_t resetCode = payload->resetCode;
 
 		if (resetCode == FACTORY_RESET_CODE) {
-			LOGf("factory reset");
+//			LOGf("factory reset");
 
 			Settings::getInstance().factoryReset(resetCode);
 			State::getInstance().factoryReset(resetCode);
@@ -274,17 +273,17 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		} else {
 			LOGi("wrong code received: %p", resetCode);
-			LOGi("factory reset code is: %p", FACTORY_RESET_CODE);
+//			LOGi("factory reset code is: %p", FACTORY_RESET_CODE);
 			return ERR_WRONG_PARAMETER;
 		}
 
 		break;
 	}
 	case CMD_SET_TIME: {
-		LOGi("handle set time command:");
+		LOGi(STR_HANDLE_COMMAND, "set time:");
 
 		if (size != sizeof(uint32_t)) {
-			LOGe("wrong payload length received: %d", size);
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
@@ -295,7 +294,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SCHEDULE_ENTRY: {
-		LOGi("handle schedule entry command");
+		LOGi(STR_HANDLE_COMMAND, "schedule entry");
 
 #if SCHEDULER_ENABLED==1
 		Scheduler& scheduler = Scheduler::getInstance();
@@ -337,7 +336,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_VALIDATE_SETUP: {
-		LOGi("handle validate setup");
+		LOGi(STR_HANDLE_COMMAND, "validate setup");
 
 		uint8_t opMode;
 		State::getInstance().get(STATE_OPERATION_MODE, opMode);
@@ -351,19 +350,19 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			// validate encryption keys are not 0
 			settings.get(CONFIG_KEY_OWNER, key);
 			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-				LOGw("owner key is not set!");
+//				LOGw("owner key is not set!");
 				return ERR_COMMAND_FAILED;
 			}
 
 			settings.get(CONFIG_KEY_MEMBER, key);
 			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-				LOGw("member key is not set!");
+//				LOGw("member key is not set!");
 				return ERR_COMMAND_FAILED;
 			}
 
 			settings.get(CONFIG_KEY_GUEST, key);
 			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-				LOGw("guest key is not set!");
+//				LOGw("guest key is not set!");
 				return ERR_COMMAND_FAILED;
 			}
 
@@ -372,7 +371,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			settings.get(CONFIG_CROWNSTONE_ID, &crownstoneId);
 
 			if (crownstoneId == 0) {
-				LOGw("crownstone id has to be set during setup mode");
+//				LOGw("crownstone id has to be set during setup mode");
 				return ERR_COMMAND_FAILED;
 			}
 
@@ -381,7 +380,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			settings.get(CONFIG_IBEACON_MAJOR, &major);
 
 			if (major == 0) {
-				LOGw("ibeacn major is not set!");
+//				LOGw("ibeacon major is not set!");
 				return ERR_COMMAND_FAILED;
 			}
 
@@ -389,7 +388,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			settings.get(CONFIG_IBEACON_MINOR, &minor);
 
 			if (minor == 0) {
-				LOGw("ibeacn minor is not set!");
+//				LOGw("ibeacon minor is not set!");
 				return ERR_COMMAND_FAILED;
 			}
 
@@ -409,21 +408,21 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 	}
 
 	case CMD_USER_FEEDBACK: {
-		LOGi("handle user feedback command: tbd");
+		LOGi(STR_HANDLE_COMMAND, "user feedback");
 		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd
 		break;
 	}
 	case CMD_KEEP_ALIVE_STATE: {
-		LOGi("handle keep alive command: tbd");
+		LOGi(STR_HANDLE_COMMAND, "keep alive");
 		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd
 		break;
 	}
 	case CMD_KEEP_ALIVE: {
-		LOGi("handle keep alive command: tbd");
+		LOGi(STR_HANDLE_COMMAND, "keep alive");
 		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd
@@ -433,15 +432,15 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 	// Crownstone specific commands are only available if device type is set to Crownstone.
 	// E.g. GuideStone does not support power measure or switching commands
 	case CMD_SWITCH: {
-		LOGi("handle switch command");
+		LOGi(STR_HANDLE_COMMAND, "switch");
 		// for now, same as pwm, but switch command should decide itself if relay or
 		// pwm is used
 	}
 	case CMD_PWM: {
-		LOGi("handle PWM command");
+		LOGi(STR_HANDLE_COMMAND, "PWM");
 
 		if (size != sizeof(switch_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
@@ -451,16 +450,15 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		uint8_t current = Switch::getInstance().getValue();
 //		LOGi("current pwm: %d", current);
 		if (value != current) {
-			LOGi("update pwm to %i", value);
 			Switch::getInstance().setValue(value);
 		}
 		break;
 	}
 	case CMD_RELAY: {
-		LOGi("handle relay command");
+		LOGi(STR_HANDLE_COMMAND, "relay");
 
 		if (size != sizeof(switch_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
@@ -476,18 +474,18 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_CONT_POWER_MEASURE: {
-		LOGi("handle enable cont power measure command: tbd");
+		LOGi(STR_HANDLE_COMMAND, "enable cont power measure");
 		return ERR_NOT_IMPLEMENTED;
 
 		if (size != sizeof(enable_message_payload_t)) {
-			LOGe("wrong payload length received: %d", size);
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 		bool enable = payload->enable;
 
-		LOGi("%s continues power measurements", enable ? "Enabling" : "Disabling");
+		LOGi("%s continuous power measurements", enable ? STR_ENABLE : STR_DISABLE);
 
 		// todo: tbd
 		break;
@@ -504,7 +502,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 	}
 #endif
 	default: {
-		LOGe("command type not found!!");
+		LOGe("Command type not found!!");
 		return ERR_COMMAND_NOT_FOUND;
 	}
 	}

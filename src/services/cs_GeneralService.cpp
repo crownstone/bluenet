@@ -30,20 +30,20 @@ GeneralService::GeneralService() : EventListener(),
 }
 
 void GeneralService::createCharacteristics() {
-	LOGi(MSG_SERVICE_GENERAL_INIT);
+	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_GENERAL);
 
 #if CHAR_TEMPERATURE==1 || DEVICE_TYPE==DEVICE_FRIDGE
-	LOGi(MSG_CHAR_TEMPERATURE_ADD);
+	LOGi(FMT_CHAR_ADD, STR_CHAR_TEMPERATURE);
 	addTemperatureCharacteristic();
 #else
-	LOGi(MSG_CHAR_TEMPERATURE_SKIP);
+	LOGi(FMT_CHAR_SKIP, CHAR_TEMPERATURE);
 #endif
 
 #if CHAR_RESET==1
-	LOGi(MSG_CHAR_RESET_ADD);
+	LOGi(FMT_CHAR_ADD, STR_CHAR_RESET);
 	addResetCharacteristic();
 #else
-	LOGi(MSG_CHAR_RESET_SKIP);
+	LOGi(FMT_CHAR_SKIP, CHAR_RESET);
 #endif
 
 	addCharacteristicsDone();

@@ -9,6 +9,9 @@
 #include <cstdlib>
 #include "common/cs_Types.h"
 #include "drivers/cs_Serial.h"
+#include <cfg/cs_Strings.h>
+
+//#define PRINT_CB_VERBOSE
 
 /** Circular Buffer implementation
  * @param T Element type of elements within the buffer.
@@ -47,10 +50,14 @@ public:
 		//! Allocate memory
 		_array = (T*)calloc(_capacity, sizeof(T));
 		if (_array == NULL) {
-			LOGw("Could not allocate memory");
+			LOGw(STR_ERR_ALLOCATE_MEMORY);
 			return false;
 		}
-		LOGd("Allocated memory at %u", _array);
+
+#ifdef PRINT_CB_VERBOSE
+		LOGd(FMT_ALLOCATE_MEMORY, _array);
+#endif
+
 		_allocatedSelf = true;
 		//! Also call clear to make sure we start with a clean buffer
 		clear();
@@ -77,11 +84,15 @@ public:
 	 */
 	bool assign(buffer_ptr_t buffer, uint16_t bufferSize) {
 		if (getMaxSize(bufferSize) < _capacity || _allocatedSelf) {
-			LOGd("Could not assign at %u with size %u", buffer, bufferSize);
+			LOGd(FMT_ERR_ASSIGN_BUFFER, buffer, bufferSize);
 			return false;
 		}
 		_array = (T*) buffer;
-		LOGd("assign at %u", buffer);
+
+#ifdef PRINT_CB_VERBOSE
+		LOGd(FMT_ASSIGN_BUFFER, buffer);
+#endif
+
 		//! Also call clear to make sure we start with a clean buffer
 		clear();
 		return true;

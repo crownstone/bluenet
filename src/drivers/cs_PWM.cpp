@@ -8,6 +8,9 @@
 #include <drivers/cs_PWM.h>
 #include <util/cs_BleError.h>
 #include <drivers/cs_Serial.h>
+#include <cfg/cs_Strings.h>
+
+//#define PRINT_VERBOSE
 
 PWM::PWM() :
 		pwmTimer(NULL), _pwmInstance(NULL), _initialized(false) {
@@ -34,19 +37,23 @@ void pwm_ready_callback(uint32_t pwm_id) {   // PWM callback function
 
 void PWM::setValue(uint8_t channel, uint32_t value) {
 	if (!_initialized) {
-		LOGe("Can't use PWM without initializing first");
+		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
 	}
 	if (value > 100) {
 		value = 100;
 	}
+
+#ifdef PRINT_VERBOSE
+	LOGd("Set PWM channel %d to %d", channel, value);
+#endif
 	while (app_pwm_channel_duty_set(_pwmInstance, channel, value) == NRF_ERROR_BUSY) {
 	};
 }
 
 uint32_t PWM::getValue(uint8_t channel) {
 	if (!_initialized) {
-		LOGe("Can't use PWM without initializing first");
+		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return 0;
 	}
 	return app_pwm_channel_duty_get(_pwmInstance, channel);
@@ -54,7 +61,7 @@ uint32_t PWM::getValue(uint8_t channel) {
 
 void PWM::switchOff() {
 	if (!_initialized) {
-		LOGe("Can't use PWM without initializing first");
+		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
 	}
 	for (uint32_t i = 0; i < _pwmCfg.num_of_channels; ++i) {
@@ -66,6 +73,10 @@ uint32_t PWM::init(app_pwm_config_t config) {
 
 #if PWM_ENABLE==1
 	_pwmCfg = config;
+
+#ifdef PRINT_VERBOSE
+	LOGd(FMT_INIT, "PWM");
+#endif
 
 	BLE_CALL(app_pwm_init, (_pwmInstance, &_pwmCfg, pwm_ready_callback));
 	app_pwm_enable(_pwmInstance);
@@ -82,6 +93,11 @@ uint32_t PWM::init(app_pwm_config_t config) {
 uint32_t PWM::deinit() {
 
 #if PWM_ENABLE==1
+
+#ifdef PRINT_VERBOSE
+	LOGd("DeInit PWM");
+#endif
+
 	app_pwm_disable(_pwmInstance);
 	BLE_CALL(app_pwm_uninit, (_pwmInstance));
 	_initialized = false;

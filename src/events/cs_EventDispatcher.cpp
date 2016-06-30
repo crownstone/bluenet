@@ -13,12 +13,16 @@
 
 //#include <algorithm>
 
+//#define PRINT_VERBOSE
+
 void EventDispatcher::dispatch(uint16_t evt) {
 	dispatch(evt, NULL, 0);
 }
 
 void EventDispatcher::dispatch(uint16_t evt, void* p_data, uint16_t length) {
-//	LOGi("dispatch event: %d", evt);
+#ifdef PRINT_VERBOSE
+	LOGi("dispatch event: %d", evt);
+#endif
 
 //	std::vector<EventListener*>::iterator it = _listeners.begin();
 //	for (std::vector<EventListener*>::iterator it = _listeners.begin(); it != _listeners.end(); ++it) {
@@ -47,7 +51,9 @@ bool EventDispatcher::addListener(EventListener *listener) {
 	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] == NULL) {
 			_listeners[i] = listener;
-//			LOGi(">>> addListener: %d", i+1);
+#ifdef PRINT_VERBOSE
+			LOGi("add listener: %d", i+1);
+#endif
 			return true;
 		}
 	}
@@ -56,7 +62,6 @@ bool EventDispatcher::addListener(EventListener *listener) {
 }
 
 void EventDispatcher::removeListener(EventListener *listener) {
-//	LOGi("remove listener");
 
 //	std::vector<EventListener*>::iterator it = find(_listeners.begin(), _listeners.end(), listener);
 //	if (it != _listeners.end()) {
@@ -67,6 +72,9 @@ void EventDispatcher::removeListener(EventListener *listener) {
 	for (int i = 0; i < MAX_EVENT_LISTENERS; i++) {
 		if (_listeners[i] == listener) {
 			_listeners[i] = NULL;
+#ifdef PRINT_VERBOSE
+			LOGi("remove listener: %d", i+1);
+#endif
 		}
 	}
 }

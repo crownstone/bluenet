@@ -30,6 +30,8 @@ extern "C" {
 #define SERIAL_VERBOSITY NONE
 #endif
 
+//#define INCLUDE_TIMESTAMPS
+
 #if SERIAL_VERBOSITY<NONE
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
@@ -39,16 +41,28 @@ extern "C" {
 				   write(fmt, ##__VA_ARGS__); \
 			   }
 
-	#define logLN(level, fmt, ...) \
-			   _log(level, "[%-30.30s : %-5d] " fmt CRLN, _FILE, __LINE__, ##__VA_ARGS__)
+#ifdef INCLUDE_TIMESTAMPS
 
 	#define log(level, fmt, ...) \
-		   	   _log(level, "[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
+		_log(level, "[%-20.20s : %-5d](%d) " fmt, _FILE, __LINE__, now(), ##__VA_ARGS__)
+
+	#define logLN(level, fmt, ...) \
+		_log(level, "[%-20.20s : %-5d](%d) " fmt CRLN, _FILE, __LINE__, now(), ##__VA_ARGS__)
 
 #else
+
+	#define log(level, fmt, ...) \
+		_log(level, "[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
+
+	#define logLN(level, fmt, ...) \
+		_log(level, "[%-30.30s : %-5d] " fmt CRLN, _FILE, __LINE__, ##__VA_ARGS__)
+
+#endif
+
+#else
+	#define _log(level, fmt, ...)
 	#define log(level, fmt, ...)
 	#define logLN(level, fmt, ...)
-	#define _log(level, fmt, ...)
 #endif
 
 #define LOGd(fmt, ...) logLN(DEBUG, fmt, ##__VA_ARGS__)
@@ -124,6 +138,10 @@ void config_uart();
  * Write a string with printf functionality.
  */
 int write(const char *str, ...);
+
+#ifdef INCLUDE_TIMESTAMPS
+int now();
+#endif
 
 #ifdef __cplusplus
 }

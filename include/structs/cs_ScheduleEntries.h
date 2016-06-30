@@ -10,8 +10,9 @@
 #include "structs/cs_BufferAccessor.h"
 #include <drivers/cs_Serial.h>
 #include <util/cs_BleError.h>
+#include <cfg/cs_Strings.h>
 
-//#include <time.h>
+//#define PRINT_SE_VERBOSE
 
 #define SECONDS_PER_DAY         86400
 
@@ -125,7 +126,11 @@ public:
 
 	/** Release the assigned buffer */
 	void release() {
+
+#ifdef PRINT_SE_VERBOSE
 		LOGd("release");
+#endif
+
 		_buffer = NULL;
 	}
 
@@ -140,8 +145,12 @@ public:
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
-		LOGd("assign buff: %p, len: %d", buffer, maxLength);
-		assert(sizeof(schedule_entry_t) <= maxLength, "buffer not large enough to hold schedule entry!");
+		assert(sizeof(schedule_entry_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+
+#ifdef PRINT_SE_VERBOSE
+		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, maxLength);
+#endif
+
 		if (sizeof(schedule_entry_t) > maxLength) {
 			return 1;
 		}
@@ -161,7 +170,11 @@ public:
 
 	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
+
+#ifdef PRINT_SE_VERBOSE
 		LOGd("getBuffer: %p", this);
+#endif
+
 		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();
 	}
@@ -185,7 +198,11 @@ public:
 
 	/** Release the assigned buffer */
 	void release() {
+
+#ifdef PRINT_SE_VERBOSE
 		LOGd("release");
+#endif
+
 		_buffer = NULL;
 	}
 
@@ -220,8 +237,12 @@ public:
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
-		LOGd("assign buff: %p, len: %d", buffer, maxLength);
-		assert(sizeof(schedule_list_t) <= maxLength, "buffer not large enough to hold schedule entries list!");
+		assert(sizeof(schedule_list_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+
+#ifdef PRINT_SE_VERBOSE
+		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, maxLength);
+#endif
+
 		_buffer = (schedule_list_t*)buffer;
 		return 0;
 	}

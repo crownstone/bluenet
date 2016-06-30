@@ -20,7 +20,7 @@ extern "C" {
 }
 
 //#define PRINT_SAMPLE_CURRENT
-//#define PRINT_DEBUG
+//#define PRINT_VERBOSE
 
 PowerSampling::PowerSampling() :
 		_staticPowerSamplingStartTimer(0),
@@ -51,7 +51,7 @@ void PowerSampling::init() {
 	settings.get(CONFIG_CURRENT_ZERO, &_currentZero);
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
 
-	LOGi("Init buffers");
+	LOGi(FMT_INIT, "buffers");
 	uint16_t contSize = _currentSampleCircularBuf.getMaxByteSize() + _voltageSampleCircularBuf.getMaxByteSize();
 	contSize += sizeof(power_samples_mesh_message_t);
 
@@ -59,7 +59,9 @@ void PowerSampling::init() {
 
 	size_t size = (burstSize > contSize) ? burstSize : contSize;
 	_powerSamplesBuffer = (buffer_ptr_t) calloc(size, sizeof(uint8_t));
+#ifdef PRINT_VERBOSE
 	LOGd("power sample buffer=%u size=%u", _powerSamplesBuffer, size);
+#endif
 
 #if CONTINUOUS_POWER_SAMPLER == 1
 	buffer_ptr_t buffer = _powerSamplesBuffer;
@@ -78,7 +80,6 @@ void PowerSampling::init() {
 	_powerSamples.assign(_powerSamplesBuffer, size);
 #endif
 
-	LOGi("Init ADC");
 	uint8_t pins[] = {PIN_AIN_CURRENT, PIN_AIN_VOLTAGE};
 	ADC::getInstance().init(pins, 2);
 
@@ -98,7 +99,10 @@ void PowerSampling::init() {
 }
 
 void PowerSampling::startSampling() {
-//	LOGd("Start power sample");
+#ifdef PRINT_VERBOSE
+	LOGd(FMT_START, "power sample");
+#endif
+
 #if CONTINUOUS_POWER_SAMPLER == 1
 	_currentSampleCircularBuf.clear();
 	_voltageSampleCircularBuf.clear();
@@ -131,7 +135,7 @@ void PowerSampling::powerSampleReadBuffer() {
 		uint16_t power;
 		uint16_t current;
 		uint16_t voltage;
-		int32_t diff;
+//		int32_t diff;
 		if (_powerSamplesCount == 0) {
 			current = _currentSampleCircularBuf.pop();
 			voltage = _voltageSampleCircularBuf.pop();
@@ -164,7 +168,10 @@ void PowerSampling::powerSampleReadBuffer() {
 				_powerSamplesCount = 0;
 			}
 #else
+
+#ifdef PRINT_VERBOSE
 			LOGd("Send message of %u samples", _powerSamplesCount);
+#endif
 			_powerSamplesCount = 0;
 #endif
 		}
@@ -182,8 +189,6 @@ void PowerSampling::powerSampleFinish() {
 
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
 
-	uint32_t currentTimestamp = 0;
-	uint32_t voltageTimestamp = 0;
 
 //#ifdef PRINT_SAMPLE_CURRENT
 //	//! Print samples
@@ -202,7 +207,7 @@ void PowerSampling::powerSampleFinish() {
 //#endif
 
 #ifdef PRINT_SAMPLE_CURRENT
-	currentTimestamp = 0;
+	uint32_t currentTimestamp = 0;
 	_log(DEBUG, "current samples:\r\n");
 	for (int i=0; i<_powerSamples.size(); i++) {
 		_powerSamples.getCurrentTimestampsBuffer()->getValue(currentTimestamp, i);
@@ -227,20 +232,18 @@ void PowerSampling::powerSampleFinish() {
 
 	//! Calculate average power consumption in Watt
 
-	currentTimestamp = 0;
-	voltageTimestamp = 0;
+	uint32_t voltageTimestamp = 0;
 
-	uint16_t vMin = UINT16_MAX;
-	uint16_t vMax = 0;
-
+//	uint16_t vMin = UINT16_MAX;
+//	uint16_t vMax = 0;
 
 	uint16_t v;
 	_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, 0);
 	uint32_t prevTime = voltageTimestamp;
 	uint32_t endTime = prevTime + RTC::msToTicks(20);
-	uint16_t vPrev = (*_powerSamples.getVoltageSamplesBuffer())[0];
-	int zeroCrossings = 0;
-	uint32_t prevZeroCrossingTime;
+//	uint16_t vPrev = (*_powerSamples.getVoltageSamplesBuffer())[0];
+//	int zeroCrossings = 0;
+//	uint32_t prevZeroCrossingTime;
 
 	double tSum = 0.0;
 	double pSum = 0.0;
@@ -290,14 +293,14 @@ void PowerSampling::powerSampleFinish() {
 
 
 		prevTime = voltageTimestamp;
-		vPrev = v;
+//		vPrev = v;
 	}
 //	LOGd("pSum=%f", pSum);
 	pSum /= tSum;
 	pSum -= _powerZero;
 	int32_t avgPower = pSum;
 
-#ifdef PRINT_DEBUG
+#ifdef PRINT_VERBOSE
 	LOGd("pSum=%f, tSum=%f, avgPower=%i", pSum, tSum, avgPower);
 #endif
 

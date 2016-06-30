@@ -24,20 +24,22 @@
 
 #include <mesh/cs_Mesh.h>
 
+//#define PRINT_VERBOSE
+
 extern "C"  {
 
 	static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
 			uint32_t data_len) {
 		// we might want to check if things are actually stored, by using this callback
 		if (result != NRF_SUCCESS) {
-			if (op_code == PSTORAGE_LOAD_OP_CODE) {
-				LOGe("Error with loading data");
-			}
+//			if (op_code == PSTORAGE_LOAD_OP_CODE) {
+//				LOGe("Error with loading data");
+//			}
 
-			LOGe("OPP_CODE: %d, ERR_CODE: %d (0x%X)", op_code, result, result);
+			LOGe("Opcode: %d, ERR_CODE: %d (%p)", op_code, result, result);
 			APP_ERROR_CHECK(result);
 		} else {
-			LOGd("Opcode %i executed (no error)", op_code);
+			LOGi("Opcode %d executed (no error)", op_code);
 			if (op_code == PSTORAGE_UPDATE_OP_CODE) {
 				Storage::getInstance().onUpdateDone();
 			}
@@ -60,7 +62,7 @@ Storage::Storage() : EventListener(),
 		_initialized(false), _scanning(false), writeBuffer(STORAGE_REQUEST_BUFFER_SIZE)
 //		, pendingStorageRequests(0)
 {
-	LOGd("Storage create");
+	LOGd(FMT_CREATE, "Storage");
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -88,9 +90,11 @@ void Storage::onUpdateDone() {
 	// track how many update requests are still pending
 	_pending--;
 	// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
-	if (!_pending && Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-		LOGd("update done, resume mesh");
-		Mesh::getInstance().start();
+	if (!_pending) {
+		LOGi("pstorage update done");
+		if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+			Mesh::getInstance().start();
+		}
 	}
 }
 
@@ -103,7 +107,7 @@ void storage_sys_evt_handler(uint32_t evt) {
 	case NRF_EVT_RADIO_SESSION_IDLE: {
 		// once mesh is stopped, the softdevice will trigger the NRF_EVT_RADIO_SESSION_IDLE,
 		// now we can try to update the pstorage
-		LOGd("NRF_EVT_RADIO_SESSION_IDLE");
+//		LOGd("NRF_EVT_RADIO_SESSION_IDLE");
 		app_sched_event_put(NULL, 0, resume_requests);
 		break;
 	}
@@ -118,7 +122,9 @@ void storage_sys_evt_handler(uint32_t evt) {
 
 void Storage::resumeRequests() {
 	if (!writeBuffer.empty()) {
+#ifdef PRINT_VERBOSE
 		LOGd("Resume pstorage write requests");
+#endif
 
 		while (!writeBuffer.empty()) {
 			//! get the next buffered storage request
@@ -128,7 +134,9 @@ void Storage::resumeRequests() {
 //			BLEutil::printArray((uint8_t*)&elem, sizeof(elem));
 
 			if (!_scanning) {
+#ifdef PRINT_VERBOSE
 				LOGd("pstorage_update");
+#endif
 				// count number of pending updates to decide when mesh can be resumed (if needed)
 				_pending++;
 				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
@@ -136,11 +144,13 @@ void Storage::resumeRequests() {
 				// if scanning was started again, push it back on the buffer and try again during the next
 				// scan break
 				writeBuffer.push(elem);
-				LOGe("scan started before all pstorage write requests were processed!");
+//				LOGe("scan started before all pstorage write requests were processed!");
 				return;
 			}
 
-//			LOGd("update done");
+#ifdef PRINT_VERBOSE
+			LOGd("resume done");
+#endif
 		}
 	}
 }
@@ -149,19 +159,21 @@ void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 	switch(evt) {
 	case EVT_SCAN_STARTED: {
-		LOGd("EVT_SCAN_STARTED");
+//		LOGd("EVT_SCAN_STARTED");
 		_scanning = true;
 		break;
 	}
 	case EVT_SCAN_STOPPED: {
-		LOGd("EVT_SCAN_STOPPED");
+//		LOGd("EVT_SCAN_STOPPED");
 		_scanning = false;
 
 		// if there are pstorage update requests buffered
 		if (!writeBuffer.empty()) {
 			// if meshing, need to stop the mesh first before updating pstorage
 			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED))	{
+#ifdef PRINT_VERBOSE
 				LOGd("stop mesh on scan stop");
+#endif
 				Mesh::getInstance().stop();
 			} else {
 				// otherwise, resume buffered pstorage update requests
@@ -295,7 +307,9 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 		// if not scanning, stop the mesh and wait for the NRF_EVT_RADIO_SESSION_IDLE to arrive to access pstorage
 		// if scannig, wait for the EVT_SCAN_STOPPED
 		if (meshEnabled && !_scanning) {
+#ifdef PRINT_VERBOSE
 			LOGd("stop mesh on pstorage update");
+#endif
 			Mesh::getInstance().stop();
 		}
 	} else {
@@ -336,30 +350,30 @@ void Storage::setString(const char* value, uint16_t length, char* target) {
 	}
 }
 
-// helper function to get std::string from char array, or default value
-// if the value read is empty, unassigned (filled with FF) or too long
-void Storage::getString(char* value, std::string& target, std::string default_value) {
-
-#ifdef PRINT_ITEMS
-	_log(INFO, "get string (raw): \r\n");
-	BLEutil::printArray((uint8_t*)value, MAX_STRING_STORAGE_SIZE+1);
-#endif
-
-	target = std::string(value);
-	// if the last char is equal to FF that means the memory
-	// is new and has not yet been written to, so we use the
-	// default value. same if the stored value is an empty string
-	if (target == "" || value[MAX_STRING_STORAGE_SIZE] == 0xFF) {
-#ifdef PRINT_ITEMS
-		LOGd("use default value");
-#endif
-		target = default_value;
-	} else {
-#ifdef PRINT_ITEMS
-		LOGd("found stored value: %s", target.c_str());
-#endif
-	}
-}
+//// helper function to get std::string from char array, or default value
+//// if the value read is empty, unassigned (filled with FF) or too long
+//void Storage::getString(char* value, std::string& target, std::string default_value) {
+//
+//#ifdef PRINT_ITEMS
+//	_log(INFO, "get string (raw): \r\n");
+//	BLEutil::printArray((uint8_t*)value, MAX_STRING_STORAGE_SIZE+1);
+//#endif
+//
+//	target = std::string(value);
+//	// if the last char is equal to FF that means the memory
+//	// is new and has not yet been written to, so we use the
+//	// default value. same if the stored value is an empty string
+//	if (target == "" || value[MAX_STRING_STORAGE_SIZE] == 0xFF) {
+//#ifdef PRINT_ITEMS
+//		LOGd(FMT_USE_DEFAULT_VALUE);
+//#endif
+//		target = default_value;
+//	} else {
+//#ifdef PRINT_ITEMS
+//		LOGd("found stored value: %s", target.c_str());
+//#endif
+//	}
+//}
 
 // helper function to get std::string from char array, or default value
 // if the value read is empty, unassigned (filled with FF) or too long
@@ -398,20 +412,20 @@ void Storage::getUint8(uint32_t value, uint8_t* target, uint8_t default_value) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd(FMT_RAW_VALUE, tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
 	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
-		LOGd("use default value");
+		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
 		*target = default_value;
 	} else {
 		*target = value;
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", *target);
+		LOGd(FMT_FOUND_STORED_VALUE, *target);
 #endif
 	}
 }
@@ -425,20 +439,20 @@ void Storage::getInt8(int32_t value, int8_t* target, int8_t default_value) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd(FMT_RAW_VALUE, tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
 	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
-		LOGd("use default value");
+		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
 		*target = default_value;
 	} else {
 		*target = value;
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", *target);
+		LOGd(FMT_FOUND_STORED_VALUE, *target);
 #endif
 	}
 }
@@ -451,21 +465,21 @@ void Storage::getUint16(uint32_t value, uint16_t* target, uint16_t default_value
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd(FMT_RAW_VALUE, tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
 	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
-		LOGd("use default value");
+		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
 		*target = default_value;
 	} else {
 		*target = value;
 
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", *target);
+		LOGd(FMT_FOUND_STORED_VALUE, *target);
 #endif
 	}
 }
@@ -482,20 +496,20 @@ void Storage::getUint32(uint32_t value, uint32_t* target, uint32_t default_value
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	LOGd("raw value: %02X %02X %02X %02X", tmp[3], tmp[2], tmp[1], tmp[0]);
+	LOGd(FMT_RAW_VALUE, tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
 	// check if value is equal to INT_MAX (FFFFFFFF) which means that memory is
 	// unassigned and value has to be ignored
 	if (value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
-		LOGd("use default value");
+		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
 		*target = default_value;
 	} else {
 		*target = value;
 #ifdef PRINT_ITEMS
-		LOGd("found stored value: %d", *target);
+		LOGd(FMT_FOUND_STORED_VALUE, *target);
 #endif
 	}
 }
@@ -520,7 +534,7 @@ void Storage::getUint32(uint32_t value, uint32_t* target, uint32_t default_value
 //	// unassigned and value has to be ignored
 //	if (value == DBL_MAX) {
 //#ifdef PRINT_ITEMS
-//		LOGd("use default value");
+//		LOGd(FMT_USE_DEFAULT_VALUE);
 //#endif
 //		*target = default_value;
 //	} else {
@@ -552,7 +566,7 @@ void Storage::getFloat(float value, float* target, float default_value) {
 	// unassigned and value has to be ignored
 	if (*(uint32_t*)&value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
-		LOGd("use default value");
+		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
 		*target = default_value;
 	} else {

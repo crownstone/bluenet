@@ -346,7 +346,7 @@ public:
 	 * If the value read from the char array is empty or unassigned the default
 	 * value will be returned instead
 	 */
-	static void getString(char* value, std::string& target, std::string default_value);
+//	static void getString(char* value, std::string& target, std::string default_value);
 	static void getString(char* value, char* target, char* default_value, uint16_t& size);
 
 	/** Helper function to set a byte in the field of a struct

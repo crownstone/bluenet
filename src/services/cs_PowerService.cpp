@@ -34,31 +34,30 @@ PowerService::PowerService() : EventListener(),
 }
 
 void PowerService::createCharacteristics() {
-	LOGi("Create power service");
+	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_POWER);
 
 #if CHAR_PWM==1
-	LOGi("add PWM Characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_PWM);
 	addPWMCharacteristic();
 #else
-	LOGi("skip PWM Characteristic");
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_PWM);
 #endif
 
 #if CHAR_RELAY==1
-	LOGi("add Relay Characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_RELAY);
 	addRelayCharacteristic();
 #else
-	LOGi("skip Relay Characteristic");
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_RELAY);
 #endif
 
 #if CHAR_SAMPLE_CURRENT==1
-	LOGi("add Power sample characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_POWER_SAMPLE);
 	addPowerSamplesCharacteristic();
-	LOGi("add Current Consumption Characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_CURRENT_CONSUMPTION);
 	addPowerConsumptionCharacteristic();
 #else
-	LOGi("skip Sample Current Characteristic");
-	LOGi("skip Current Curve Characteristic");
-	LOGi("skip Current Consumption Characteristic");
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_PWM);
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_CURRENT_CONSUMPTION);
 #endif
 
 	addCharacteristicsDone();

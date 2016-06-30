@@ -26,6 +26,7 @@
 //#include "cs_nRF51822.h"
 
 #include "nrf_delay.h"
+#include <cfg/cs_Strings.h>
 	
 
 LPComp::LPComp() {
@@ -90,7 +91,9 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 	NVIC_EnableIRQ(LPCOMP_IRQn);
 #endif
 
+#ifdef PRINT_VERBOSE
 	LOGd("Configure LPComp on ain %u, level %u", pin, level);
+#endif
 	if (level < 7) {
 		NRF_LPCOMP->REFSEL = level; //! See LPCOMP_REFSEL_REFSEL_SupplyOneEighthPrescaling
 	}
@@ -134,7 +137,7 @@ void LPComp::stop() {
  * Start the LP comparator.
  */
 void LPComp::start() {
-	LOGd("Starting LPComp");
+	LOGd(FMT_START, "LPComp");
 	NRF_LPCOMP->EVENTS_UP = 0;
 	NRF_LPCOMP->EVENTS_DOWN = 0;
 	NRF_LPCOMP->EVENTS_CROSS = 0;
@@ -143,7 +146,7 @@ void LPComp::start() {
 
 
 void LPComp::interrupt() {
-	LOGi("interrupt!");
+	LOGw("interrupt!");
 	PWM::getInstance().setValue(0, 0);
 }
 

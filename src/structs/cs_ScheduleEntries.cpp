@@ -8,6 +8,8 @@
 #include "structs/cs_ScheduleEntries.h"
 #include <util/cs_BleError.h>
 
+//#define PRINT_DEBUG
+
 uint8_t ScheduleEntry::getTimeType(const schedule_entry_t* entry) {
 	uint8_t timeType = entry->type & 0x00FF;
 	return timeType;
@@ -19,7 +21,9 @@ uint8_t ScheduleEntry::getActionType(const schedule_entry_t* entry) {
 }
 
 void ScheduleEntry::print(const schedule_entry_t* entry) {
+
 	LOGd("id=%03u type=%02X override=%02X nextTimestamp=%u", entry->id, entry->type, entry->overrideMask, entry->nextTimestamp);
+
 	switch (getTimeType(entry)) {
 	case SCHEDULE_TIME_TYPE_REPEAT:
 		LOGd("repeatTime=%u", entry->repeat.repeatTime);
@@ -42,7 +46,7 @@ void ScheduleEntry::print(const schedule_entry_t* entry) {
 
 
 uint16_t ScheduleList::getSize() const {
-	assert(_buffer != NULL, "buffer is NULL");
+	assert(_buffer != NULL, FMT_BUFFER_NOT_ASSIGNED);
 	return _buffer->size;
 }
 
@@ -55,7 +59,7 @@ bool ScheduleList::isFull() const {
 }
 
 void ScheduleList::clear() {
-	assert(_buffer != NULL, "buffer is NULL");
+	assert(_buffer != NULL, FMT_BUFFER_NOT_ASSIGNED);
 	_buffer->size = 0;
 }
 
@@ -63,7 +67,9 @@ bool ScheduleList::add(const schedule_entry_t* entry) {
 	bool success = false;
 	for (uint16_t i=0; i<getSize(); i++) {
 		if (_buffer->list[i].id == entry->id) {
+#ifdef PRINT_SE_VERBOSE
 			LOGd("update id %u", entry->id);
+#endif
 			_buffer->list[i] = *entry;
 			success = true;
 			break;
@@ -71,7 +77,9 @@ bool ScheduleList::add(const schedule_entry_t* entry) {
 	}
 	if (!success && !isFull()) {
 		_buffer->list[_buffer->size++] = *entry;
+#ifdef PRINT_SE_VERBOSE
 		LOGd("add id %u", entry->id);
+#endif
 		success = true;
 	}
 	return success;
@@ -81,7 +89,9 @@ bool ScheduleList::rem(const schedule_entry_t* entry) {
 	bool success = false;
 	for (uint16_t i=0; i<getSize(); i++) {
 		if (_buffer->list[i].id == entry->id) {
+#ifdef PRINT_SE_VERBOSE
 			LOGd("rem id %u", entry->id);
+#endif
 			success = true;
 			for (;i<_buffer->size-1; i++) {
 				_buffer->list[i] = _buffer->list[i+1];

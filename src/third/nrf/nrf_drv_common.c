@@ -10,11 +10,9 @@
  *
  */
 
-#include "nrf_drv_common.h"
+//#include "nrf_drv_common.h"
 #include "nrf_assert.h"
 #include "nrf_error.h"
-
-#include <drivers/cs_Serial.h>
 
 #ifdef SOFTDEVICE_PRESENT
 #include "nrf_soc.h"
@@ -23,12 +21,9 @@
 void nrf_drv_common_irq_enable(IRQn_Type IRQn, uint8_t priority)
 {
 
-//	LOGi(">>> enable: %d", IRQn);
-
 #ifdef SOFTDEVICE_PRESENT
 	ASSERT((priority == NRF_APP_PRIORITY_LOW) || (priority == NRF_APP_PRIORITY_HIGH));
 
-//	LOGi(">>> SOFTDEVICE_PRESENT: %d", IRQn);
 	sd_nvic_SetPriority(IRQn, priority);
 	sd_nvic_ClearPendingIRQ(IRQn);
 	sd_nvic_EnableIRQ(IRQn);
