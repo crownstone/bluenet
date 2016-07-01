@@ -92,7 +92,7 @@ void PowerService::addRelayCharacteristic() {
 	_relayCharacteristic->setDefaultValue(255);
 	_relayCharacteristic->setWritable(true);
 	_relayCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		CommandHandler::getInstance().handleCommand(CMD_SWITCH, (buffer_ptr_t)&value, 1);
+		CommandHandler::getInstance().handleCommand(CMD_RELAY, (buffer_ptr_t)&value, 1);
 	});
 }
 
