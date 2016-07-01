@@ -234,13 +234,20 @@ INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/toolchain/gcc")
 
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/headers")
 
-INCLUDE_DIRECTORIES("${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}/include")
+IF(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_API)
+	INCLUDE_DIRECTORIES("${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}")
+ENDIF()
 
 # Show which directories are actually included to the user
 GET_PROPERTY(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 FOREACH(dir ${dirs})
 	MESSAGE(STATUS "Add to the include directories: '${dir}'")
 ENDFOREACH()
+
+IF(NOT (DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
+set(${SOFTDEVICE_DIR}, "${NRF51822_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
+set(${SOFTDEVICE_DIR_HEX}, "hex")
+ENDIF()
 
 # Set up our main executable.
 IF(FOLDER_SOURCE STREQUAL "")
@@ -264,8 +271,8 @@ ELSE()
 		COMMAND echo
 		COMMAND echo "*** Use srec_cat to create one combined softdevice+app file"
 		COMMAND echo
-		COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
-		COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
+		COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
+		COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
 		DEPENDS ${PROJECT_NAME}.tmp
 		COMMENT "Combine as one hex file"
 		)

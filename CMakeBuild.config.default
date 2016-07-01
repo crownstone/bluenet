@@ -8,13 +8,9 @@ FIRMWARE_VERSION="0.4.0"
 
 # The device type defines how the device advertises itself, Apps and Bluenet Library
 # will use this to filter for device type.
-# It can be also be used to automatically enable and disable services and characteristics
-# based on the type
-# Ex 1: setting DEVICE_TYPE==DEVICE_DOBEACON will advertise device as an iBeacon,
-# and overrule the setting of the IBEACON flag.
-# Ex 2: setting DEVICE_TYPE==DEVICE_FRIDGE will enable General Service and
-# Alert Service and start with temperature measurements
-# The possible values are:
+# It is also used to enable/disable device type specific functionality.
+# e.g. power related functionality (switch, power sampling, etc) is only
+# available for device type crownstone.
 # DEVICE_UNDEF       0
 # DEVICE_CROWNSTONE  1
 # DEVICE_GUIDESTONE  2
@@ -121,6 +117,8 @@ SERIAL_VERBOSITY=1
 # CROWNSTONE4          12
 # NORDIC_BEACON        13
 # DOBEACON             14
+# CROWNSTONE5          15
+# DOBEACON2            16
 HARDWARE_BOARD=CROWNSTONE4
 
 # Default transmission power
@@ -181,11 +179,8 @@ APP_DATA_RESERVED=0x1000
 # Version of the nrf51 chip, use script/hardware_version.sh to check your version
 HARDWARE_VERSION=0x001D
 
-# SOFTDEVICE_DIR - the directory where the .hex SoftDevice can be found
-SOFTDEVICE_DIR=/opt/softdevices
-
 # This is the directory where the cross-compiler resides
-COMPILER_PATH=/opt/compiler/gcc-arm-none-eabi-4_8-2014q3
+COMPILER_PATH=
 
 # The compiler type
 COMPILER_TYPE=arm-none-eabi
@@ -199,11 +194,31 @@ JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
 # Use SoftDevice (setting to 0 is untested)
 NRF51_USE_SOFTDEVICE=1
 
-# NRF51822_DIR                         - the directory with /Source and /Include subdirectories from the Nordic SDK
+# the directory with /Source and /Include subdirectories from the Nordic SDK
+NRF51822_DIR=
+# the nordic sdk version
+NORDIC_SDK_VERSION=8
+
+# starting with SoftDevice S110 v7 there is no separate UICR section
+SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
+
+BOOTLOADER_START_ADDRESS=0x00038000
+# 0x00040000 - BOOTLOADER_START_ADDRESS = 32k
+BOOTLOADER_LENGTH=32k
+
+# The directory where the softdevice can be found
+# change if you want to use a different softdevice than the ones provided in the SDK
+# leave undefined for default
+# SOFTDEVICE_DIR=
+# The name of the directory where the include files resides of the Softdevice, relative to
+# the SOFTDEVICE_DIR, leave undefined for default
+# SOFTDEVICE_DIR_API=
+# The name of the directory where the hex files resides of the Softdevice, relative to
+# the SOFTDEVICE_DIR, leave undefined for default
+# SOFTDEVICE_DIR_HEX=
+
 # SOFTDEVICE                           - the name of the SoftDevice (without _softdevice.hex)
 # SOFTDEVICE_SERIES                    - the series of the SoftDevice (s110 vs s130 e.g.), used in the code
-# SOFTDEVICE_DIR_API                   - the name of the directory where the include files resides of the Softdevice
-# SOFTDEVICE_NO_SEPARATE_UICR_SECTION  - starting with SoftDevice S110 v7 there is no separate UICR section
 #
 # For the following examples, suppose the SoftDevice takes 80kB and the application 176kB
 # APPLICATION_START_ADDRESS            - 80kB corresponds with 0x00014000 hex
@@ -213,22 +228,15 @@ NRF51_USE_SOFTDEVICE=1
 # RAM_APPLICATION_AMOUNT               - size of softdevice in RAM
 
 #######################################################################################################################
-# For the S110 SoftDevice version (v7) and SDK version (v6)
+# For the S110 SoftDevice version (v8)
 # SoftDevice takes 88kB and application 168kB
 #######################################################################################################################
-#NRF51822_DIR=/opt/nrf51_sdk/v8.1
-#NORDIC_SDK_VERSION=8
 #SOFTDEVICE_MAJOR=8
 #SOFTDEVICE_MINOR=0
 #SOFTDEVICE_SERIES=110
-#SOFTDEVICE=s110_nrf51_8.0.0
-#SOFTDEVICE_DIR_API=s110_nrf51_8.0.0_API
-#SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
+#SOFTDEVICE=s110
 #APPLICATION_START_ADDRESS=0x00018000
 #APPLICATION_LENGTH=0x28000
-#BOOTLOADER_START_ADDRESS=0x00038000
-## 0x00040000 - BOOTLOADER_START_ADDRESS = 32k
-#BOOTLOADER_LENGTH=32k
 #RAM_R1_BASE=0x20002000
 ## RAM_APPLICATION_AMOUNT=8K
 ## HEAP_SIZE=2700
@@ -246,7 +254,7 @@ NRF51_USE_SOFTDEVICE=1
 # ATTR_TABLE_SIZE=0x600
 
 #######################################################################################################################
-# For the S130 SoftDevice version (v0.5) and the SDK version (v6)
+# For the S130 SoftDevice version (v1.0)
 # SoftDevice (from inspection seems to be 110kB) and application 168kB
 # bonus, vim shorthand
 #   :echo printf("%x", 110*1024)
@@ -254,19 +262,12 @@ NRF51_USE_SOFTDEVICE=1
 # Wrong... It was right in the beginning. It is at 0x0001c000 just after the softdevice
 # The spec is also wrong, about the amount of RAM, it is 0x1800 (6kB), not 10kB
 #######################################################################################################################
-NRF51822_DIR=/opt/nrf51_sdk/v8.1
-NORDIC_SDK_VERSION=8
 SOFTDEVICE_MAJOR=1
 SOFTDEVICE_MINOR=0
 SOFTDEVICE_SERIES=130
-SOFTDEVICE=s130_nrf51_1.0.0
-SOFTDEVICE_DIR_API=s130_nrf51_1.0.0_API
-SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
+SOFTDEVICE=s130
 APPLICATION_START_ADDRESS=0x0001c000
 APPLICATION_LENGTH=0x23000
-BOOTLOADER_START_ADDRESS=0x00038000
-# 0x00040000 - BOOTLOADER_START_ADDRESS = 32k
-BOOTLOADER_LENGTH=32k
 #RAM_R1_BASE=0x20002800
 #RAM_APPLICATION_AMOUNT=0x1800
 #HEAP_SIZE=2700;
@@ -282,4 +283,6 @@ ATTR_TABLE_SIZE=0xA00
 RAM_R1_BASE=0x20002C00
 RAM_APPLICATION_AMOUNT=0x5400
 HEAP_SIZE=6000
+
+
 
