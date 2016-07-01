@@ -45,6 +45,8 @@ void PowerSampling::init() {
 	Timer::getInstance().createSingleShot(_staticPowerSamplingReadTimer, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
 
 	Settings& settings = Settings::getInstance();
+	settings.get(CONFIG_POWER_SAMPLE_BURST_INTERVAL, &_burstSamplingInterval);
+	settings.get(CONFIG_POWER_SAMPLE_CONT_INTERVAL, &_contSamplingInterval);
 	settings.get(CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier);
 	settings.get(CONFIG_CURRENT_MULTIPLIER, &_currentMultiplier);
 	settings.get(CONFIG_VOLTAGE_ZERO, &_voltageZero);
@@ -97,7 +99,7 @@ void PowerSampling::init() {
 	ADC::getInstance().setTimestampBuffers(_powerSamples.getCurrentTimestampsBuffer(), 0);
 	ADC::getInstance().setTimestampBuffers(_powerSamples.getVoltageTimestampsBuffer(), 1);
 	ADC::getInstance().setDoneCallback(adc_done_callback);
-//	Timer::getInstance().start(_staticPowerSamplingStartTimer, MS_TO_TICKS(POWER_SAMPLE_BURST_INTERVAL), this);
+//	Timer::getInstance().start(_staticPowerSamplingStartTimer, MS_TO_TICKS(_burstSamplingInterval), this);
 #endif
 }
 
@@ -112,7 +114,7 @@ void PowerSampling::startSampling() {
 	_powerSamplesCount = 0;
 //	_currentSampleTimestamps.clear();
 //	_voltageSampleTimestamps.clear();
-	Timer::getInstance().start(_staticPowerSamplingReadTimer, MS_TO_TICKS(POWER_SAMPLE_CONT_INTERVAL), this);
+	Timer::getInstance().start(_staticPowerSamplingReadTimer, MS_TO_TICKS(_contSamplingInterval), this);
 #else
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
 	_powerSamples.clear();
@@ -181,7 +183,7 @@ void PowerSampling::powerSampleReadBuffer() {
 
 	}
 
-	Timer::getInstance().start(_staticPowerSamplingReadTimer, MS_TO_TICKS(POWER_SAMPLE_CONT_INTERVAL), this);
+	Timer::getInstance().start(_staticPowerSamplingReadTimer, MS_TO_TICKS(_contSamplingInterval), this);
 }
 
 
@@ -346,7 +348,7 @@ void PowerSampling::powerSampleFinish() {
 	}
 
 	//! Start new sample after some time
-	Timer::getInstance().start(_staticPowerSamplingStartTimer, MS_TO_TICKS(POWER_SAMPLE_BURST_INTERVAL), this);
+	Timer::getInstance().start(_staticPowerSamplingStartTimer, MS_TO_TICKS(_burstSamplingInterval), this);
 }
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {

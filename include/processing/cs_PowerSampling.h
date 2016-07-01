@@ -85,6 +85,8 @@ private:
 
 	PowerSamples _powerSamples;
 
+	uint16_t _burstSamplingInterval;
+	uint16_t _contSamplingInterval;
 	float _voltageMultiplier;
 	float _currentMultiplier;
 	float _voltageZero;
