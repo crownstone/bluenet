@@ -1,0 +1,37 @@
+########################################################################################################################
+# Configuration options, used by build systems and scripts.
+########################################################################################################################
+
+# The name that is advertised.
+# Should be 10 characters or less (we need room for compilation date after it)
+BLUETOOTH_NAME=
+
+# The hardware board where you want to upload the firmware
+HARDWARE_BOARD=
+
+# Version of the nrf51 chip, use script/hardware_version.sh to check your version
+HARDWARE_VERSION=0x001D
+
+# By default, the values from the CmakeBuild.config.default
+# are used
+# Copy any value over from the $BLUENET_DIR/CMakeBuild.config.default that you want to change.
+
+
+########################################################################################################################
+# Build System Configuration
+########################################################################################################################
+
+# This is the directory where the cross-compiler resides
+# COMPILER_PATH=
+
+# The compiler type
+# COMPILER_TYPE=arm-none-eabi
+
+# The JLink utility (when using the Segger to flash the nRF)
+# JLINK=
+
+# The JLink utilty that can be used with gdb
+# JLINK_GDB_SERVER=
+
+# Location of the Nordic Software Development Kit
+# NRF51822_DIR=

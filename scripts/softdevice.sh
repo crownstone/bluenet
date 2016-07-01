@@ -19,8 +19,8 @@ SD_BINDIR=${BLUENET_CONFIG_DIR}/build
 build() {
 	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"
 	echo "However, we still need to extract the binary and the config blob"
-	echo "  from $SOFTDEVICE_DIR/$SOFTDEVICE"
-	$path/_softdevice_objcopy.sh $SOFTDEVICE_DIR $SD_BINDIR $SOFTDEVICE $COMPILER_PATH $COMPILER_TYPE $SOFTDEVICE_NO_SEPARATE_UICR_SECTION
+	echo "  from $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX"
+	$path/_softdevice_objcopy.sh $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX $SD_BINDIR $SOFTDEVICE $COMPILER_PATH $COMPILER_TYPE $SOFTDEVICE_NO_SEPARATE_UICR_SECTION
 }
 
 upload() {
