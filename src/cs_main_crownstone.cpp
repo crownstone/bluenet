@@ -22,7 +22,7 @@
 
 #define RESET_COUNTER
 //#define MICRO_VIEW 1
-//#define CHANGE_NAME_ON_RESET
+#define CHANGE_NAME_ON_RESET
 //#define CHANGE_MINOR_ON_RESET
 
 /**********************************************************************************************************************
@@ -84,29 +84,31 @@ Crownstone::Crownstone() :
 	_settings = &Settings::getInstance();
 	_stateVars = &State::getInstance();
 
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch using PWM or Relay
 	_switch = &Switch::getInstance();
 	//! create temperature guard
 	_temperatureGuard = new TemperatureGuard();
 
 	_powerSampler = &PowerSampling::getInstance();
+#endif
 
 };
 
 void Crownstone::init() {
 
 
-	LOGi("---- init ----");
+	LOGi(FMT_HEADER, "init");
 
 	//! initialize drivers
 	initDrivers();
 
-	LOGi("---- configure ----");
+	LOGi(FMT_HEADER, "configure");
 
 	//! configure the crownstone
 	configure();
 
-	LOGi("---- setup ----");
+	LOGi(FMT_HEADER, "setup");
 
 	// todo: handle different operation modes
 	_stateVars->get(STATE_OPERATION_MODE, _operationMode);
@@ -152,7 +154,7 @@ void Crownstone::init() {
 	//! loop through all services added to the stack and create the characteristics
 	_stack->createCharacteristics();
 
-	LOGi("---- init services ----");
+	LOGi(FMT_HEADER, "init services");
 
 	_stack->initServices();
 
@@ -183,8 +185,8 @@ void Crownstone::configure() {
 	//! configure advertising parameters
 	configureAdvertisement();
 
-	BLEutil::print_heap("Heap config: ");
-	BLEutil::print_stack("Stack config: ");
+//	BLEutil::print_heap("Heap config: ");
+//	BLEutil::print_stack("Stack config: ");
 }
 
 /**
@@ -192,7 +194,7 @@ void Crownstone::configure() {
  */
 void Crownstone::initDrivers() {
 
-	LOGd("Init stack");
+	LOGd(FMT_INIT, "stack");
 
 	// things that need to be configured on the stack **BEFORE** init is called
 #if LOW_POWER_MODE==0
@@ -207,10 +209,10 @@ void Crownstone::initDrivers() {
 	//! in particular we need it to set interrupt priorities.
 	_stack->init();
 
-	LOGd("Init timers");
+	LOGd(FMT_INIT, "timers");
 	_timer->init();
 
-	LOGd("Init pstorage");
+	LOGd(FMT_INIT, "pstorage");
 	// initialization of storage and settings has to be done **AFTER** stack is initialized
 	_storage->init();
 
@@ -220,10 +222,10 @@ void Crownstone::initDrivers() {
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch / PWM init
-	LOGi("Init switch / PWM");
+	LOGd(FMT_INIT, "switch / PWM");
 	_switch->init();
 
-	LOGi("Init temperature guard");
+	LOGd(FMT_INIT, "temperature guard");
 	_temperatureGuard->init();
 
 	_powerSampler->init();
@@ -329,8 +331,10 @@ void Crownstone::configureStack() {
 		_stack->startAdvertising();
 
 		// [23.06.16] need to restart the mesh on disconnect, otherwise we have ~10s delay until the device starts
-		// advertising
-		_mesh->restart();
+		// advertising.
+		// [29.06.16] this happened on the pca10000, but doesn't seem to happen on the dobeacon v0.7 need to check
+		// on other versions. On the contrary, the reset seems to crash the dobeacon v0.7
+//		_mesh->restart();
 
 		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
 		//   disconnecting from the device. just calling startAdvertising is enough
@@ -390,7 +394,7 @@ void Crownstone::configureAdvertisement() {
 }
 
 void Crownstone::createSetupServices() {
-	LOGi("Create all services");
+	LOGi(STR_CREATE_ALL_SERVICES);
 
 	//! should be available always
 	_deviceInformationService = new DeviceInformationService();
@@ -402,7 +406,7 @@ void Crownstone::createSetupServices() {
 }
 
 void Crownstone::createCrownstoneServices() {
-	LOGi("Create all services");
+	LOGi(STR_CREATE_ALL_SERVICES);
 
 	//! should be available always
 	_deviceInformationService = new DeviceInformationService();
@@ -468,14 +472,14 @@ void Crownstone::setName() {
 	std::string device_name(devicename, size);
 #endif
 	//! assign name
-	LOGi("Set name to %s", device_name.c_str());
+	LOGi(FMT_SET_STR_VAL, "name", device_name.c_str());
 	_stack->updateDeviceName(device_name); //! max len = ble_gap_devname_max_len (31)
 	_stack->updateAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
 void Crownstone::prepareCrownstone() {
 
-	LOGi("Create Timer");
+	LOGi(FMT_CREATE, "Timer");
 	_timer->createSingleShot(_mainTimer, (app_timer_timeout_handler_t)Crownstone::staticTick);
 
 	//! create scanner object
@@ -508,23 +512,23 @@ void Crownstone::prepareCrownstone() {
 
 //	}
 
-	BLEutil::print_heap("Heap setup: ");
-	BLEutil::print_stack("Stack setup: ");
+//	BLEutil::print_heap("Heap setup: ");
+//	BLEutil::print_stack("Stack setup: ");
 
 }
 
 void Crownstone::startUp() {
 
-	LOGi("---- startUp ----");
+	LOGi(FMT_HEADER, "startup");
 
 	uint32_t gpregret;
 	sd_power_gpregret_get(&gpregret);
-	LOGi("Soft reset counter: %d", gpregret);
+	LOGi("Soft reset count: %d", gpregret);
 
 	uint16_t bootDelay;
 	_settings->get(CONFIG_BOOT_DELAY, &bootDelay);
 	if (bootDelay) {
-		LOGi("Boot delay is set to %d ms", bootDelay);
+		LOGi("Boot delay: %d ms", bootDelay);
 		nrf_delay_ms(bootDelay);
 	}
 
@@ -558,7 +562,7 @@ void Crownstone::startUp() {
 		//! start ticking of peripherals
 		_temperatureGuard->startTicking();
 
-		LOGd("Start power sampling");
+		LOGd(FMT_START, "power sampling");
 		_powerSampler->startSampling();
 #endif
 
@@ -587,8 +591,8 @@ void Crownstone::startUp() {
 		_sensors->startTicking();
 #endif
 
-		BLEutil::print_heap("Heap startup: ");
-		BLEutil::print_stack("Stack startup: ");
+//		BLEutil::print_heap("Heap startup: ");
+//		BLEutil::print_stack("Stack startup: ");
 
 	}
 
@@ -612,7 +616,7 @@ void Crownstone::scheduleNextTick() {
 
 void Crownstone::run() {
 
-	LOGi("---- running ----");
+	LOGi(FMT_HEADER, "running");
 
 	//! forever, run scheduler, wait for events and handle them
 	while(1) {
@@ -731,7 +735,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case EVT_BROWNOUT_IMPENDING: {
 		// turn everything off that consumes power
-		LOGe("brownout impending!! force shutdown ...")
+		LOGf("brownout impending!! force shutdown ...")
 
 		rbc_mesh_stop();
     	_scanner->stop();
@@ -770,9 +774,9 @@ void on_exit(void) {
 void welcome() {
 	config_uart();
 
-	_log(INFO, "\r\n");
-	BLEutil::print_heap("Heap init");
-	BLEutil::print_stack("Stack init");
+	_log(INFO, CRLN);
+//	BLEutil::print_heap("Heap init");
+//	BLEutil::print_stack("Stack init");
 	//! To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)
 	//! For (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes)
 	LOGi("Welcome Crownstone");

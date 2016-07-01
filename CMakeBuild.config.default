@@ -22,7 +22,7 @@ FIRMWARE_VERSION="0.4.0"
 DEVICE_TYPE=DEVICE_CROWNSTONE
 
 # Enable or disable meshing (1 or 0)
-MESHING=0
+MESHING=1
 
 # Enable or disable continuous power measurements (1 or 0)
 CONT_POWER_MEASURMENT=0

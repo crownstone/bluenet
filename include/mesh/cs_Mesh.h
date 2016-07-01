@@ -32,8 +32,8 @@ extern "C" {
 //! will be ignored during boot up)
 #define BOOT_TIME 2000 // 2 seconds
 
-#define MESH_ACCESS_ADDR 0xA541A68E
-//#define MESH_ACCESS_ADDR 0xA641A69E
+//#define MESH_ACCESS_ADDR 0xA541A68E
+#define MESH_ACCESS_ADDR 0xA641A69E
 #define MESH_INTERVAL_MIN_MS 100
 #define MESH_CHANNEL 38
 #define MESH_CLOCK_SOURCE (CLOCK_SOURCE)

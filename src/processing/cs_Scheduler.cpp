@@ -13,6 +13,8 @@
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
 
+//#define PRINT_DEBUG
+
 Scheduler::Scheduler() :
 		_rtcTimeStamp(0), _posixTimeStamp(0), _scheduleList(NULL) {
 
@@ -35,12 +37,16 @@ Scheduler::Scheduler() :
  * returns 0 when no time was set yet
  */
 void Scheduler::setTime(uint32_t time) {
+#ifdef PRINT_DEBUG
 	LOGi("Set time to %i", time);
+#endif
 	_posixTimeStamp = time;
 	_rtcTimeStamp = RTC::getCount();
 #if SCHEDULER_ENABLED==1
 	_scheduleList->sync(time);
+#ifdef PRINT_DEBUG
 	_scheduleList->print();
+#endif
 #endif
 }
 

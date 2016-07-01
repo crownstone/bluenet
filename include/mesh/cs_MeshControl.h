@@ -120,7 +120,7 @@ protected:
 			uint16_t desiredLength = getMessageSize(msg->header.messageType);
 			bool valid = length >= desiredLength && length <= MAX_MESH_MESSAGE_DATA_LENGTH;
 			if (!valid) {
-				LOGd("invalid message, length: %d <= %d", length, desiredLength);
+				LOGe("invalid message, length: %d <= %d", length, desiredLength);
 			}
 			return valid;
 		}
@@ -129,7 +129,7 @@ protected:
 			bool valid = length == desiredLength;
 
 			if (!valid) {
-				LOGd("invalid message, length: %d != %d", length, desiredLength);
+				LOGe("invalid message, length: %d != %d", length, desiredLength);
 			}
 			return valid;
 		}

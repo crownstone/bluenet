@@ -24,19 +24,22 @@
 #include <drivers/cs_RTC.h>
 
 #include <storage/cs_Settings.h>
+#include <cfg/cs_Strings.h>
+
+//#define PRINT_MESH_VERBOSE
 
 void start_stop_mesh(void * p_event_data, uint16_t event_size) {
 	if (*(bool*)p_event_data) {
-		LOGi("mesh start");
+		LOGi(FMT_START, "Mesh");
 		uint32_t err_code = rbc_mesh_start();
 		if (err_code != NRF_SUCCESS) {
-			LOGe("failed to start mesh: %d", err_code);
+			LOGe(FMT_FAILED_TO, "start mesh", err_code);
 		}
 	} else {
-		LOGi("mesh stop");
+		LOGi(FMT_STOP, "Mesh");
 		uint32_t err_code = rbc_mesh_stop();
 		if (err_code != NRF_SUCCESS) {
-			LOGe("failed to stop mesh: %d", err_code);
+			LOGe(FMT_FAILED_TO, "stop mesh", err_code);
 		}
 	}
 }
@@ -70,7 +73,7 @@ void Mesh::stop() {
 void Mesh::restart() {
 	uint32_t err_code = rbc_mesh_restart();
 	if (err_code != NRF_SUCCESS) {
-		LOGe("failed to restart mesh");
+		LOGe(FMT_FAILED_TO, "restart mesh", err_code);
 	}
 }
 
@@ -98,7 +101,7 @@ void Mesh::stopTicking() {
  */
 void Mesh::init() {
 //	nrf_gpio_pin_clear(PIN_GPIO_LED0);
-	LOGi("Initializing mesh");
+	LOGi(FMT_INIT, "Mesh");
 
 	rbc_mesh_init_params_t init_params;
 
@@ -138,7 +141,7 @@ void Mesh::init() {
 }
 
 void Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
-	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
+	assert(length <= MAX_MESH_MESSAGE_LEN, STR_ERR_VALUE_TOO_LONG);
 
 //	LOGd("send ch: %d, len: %d", handle, length);
 	//BLEutil::printArray((uint8_t*)p_data, length);
@@ -148,7 +151,7 @@ void Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 }
 
 bool Mesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
-	assert(length <= MAX_MESH_MESSAGE_LEN, "value too long to send");
+	assert(length <= MAX_MESH_MESSAGE_LEN, STR_ERR_VALUE_TOO_LONG);
 
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)*p_data, &length));
@@ -162,6 +165,7 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	TICK_PIN(28);
 //	nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
 
+#ifdef PRINT_MESH_VERBOSE
 	switch (evt->event_type)
 	{
 	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
@@ -180,6 +184,7 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 		LOGd("ch: %d, transmitted", evt->value_handle);
 		break;
 	}
+#endif
 
 	if (evt->value_handle > MESH_NUM_OF_CHANNELS) {
 //	if (evt->value_handle != 1 && evt->value_handle != 2) {
@@ -222,11 +227,15 @@ void Mesh::checkForMessages() {
 			//! reboot
 			uint32_t ts = RTC::now() - _mesh_init_time;
 			if (ts < BOOT_TIME) {
+#ifdef PRINT_MESH_VERBOSE
 				LOGi("t: %d: ch: %d, skipping message within boot-up time!", ts, evt.value_handle);
+#endif
 				rbc_mesh_packet_release(evt.data);
 				continue;
 			} else {
+#ifdef PRINT_MESH_VERBOSE
 				LOGi("first received at: %d", ts);
+#endif
 			}
 		}
 

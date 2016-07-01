@@ -23,7 +23,7 @@ enum ConfigurationTypes {
 	CONFIG_IBEACON_MINOR                    = 7,      //! 0x07
 	CONFIG_IBEACON_UUID                     = 8,      //! 0x08
 	CONFIG_IBEACON_TXPOWER                  = 9,      //! 0x09
-	CONFIG_WIFI_SETTINGS                    = 10,     //! 0x0A
+//	CONFIG_WIFI_SETTINGS                    = 10,     //! 0x0A
 	CONFIG_TX_POWER                         = 11,     //! 0x0B
 	CONFIG_ADV_INTERVAL                     = 12,     //! 0x0C
 	CONFIG_PASSKEY							= 13,     //! 0x0D

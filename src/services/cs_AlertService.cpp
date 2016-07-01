@@ -28,9 +28,9 @@ AlertService::AlertService() :
 }
 
 void AlertService::createCharacteristics() {
-	LOGi("Create alert service");
+	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_ALERT);
 
-	LOGi("add new alert characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_NEW_ALERT);
 	addNewAlertCharacteristic();
 
 	addCharacteristicsDone();

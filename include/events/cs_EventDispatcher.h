@@ -11,7 +11,7 @@
 
 //#include <vector>
 
-#define MAX_EVENT_LISTENERS                            20
+#define MAX_EVENT_LISTENERS                            15
 
 /**
  * Event dispatcher.

@@ -21,7 +21,7 @@ void Settings::init() {
 	_storage = &Storage::getInstance();
 
 	if (!_storage->isInitialized()) {
-		LOGe("forgot to initialize Storage!");
+		LOGe(FMT_NOT_INITIALIZED, "Storage");
 		return;
 	}
 
@@ -43,17 +43,17 @@ ERR_CODE Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t lengt
 	//// SPECIAL CASES
 	/////////////////////////////////////////////////
 	switch(type) {
-	case CONFIG_WIFI_SETTINGS: {
-		LOGi("Temporarily store wifi settings");
-		//! max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
-		if (length > 88) {
-			LOGe("Wifi settings string too long");
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		_wifiSettings = std::string((char*)payload, length);
-		LOGi("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
-		return ERR_SUCCESS;
-	}
+//	case CONFIG_WIFI_SETTINGS: {
+//		LOGi("Temporarily store wifi settings");
+//		//! max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
+//		if (length > 88) {
+//			LOGe("Wifi settings string too long");
+//			return ERR_WRONG_PAYLOAD_LENGTH;
+//		}
+//		_wifiSettings = std::string((char*)payload, length);
+//		LOGi("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
+//		return ERR_SUCCESS;
+//	}
 
 	// todo: if we want to disable write access for encryption keys outside the setup mode
 //	/////////////////////////////////////////////////
@@ -89,21 +89,21 @@ ERR_CODE Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBu
 	//// SPECIAL CASES
 	/////////////////////////////////////////////////
 	switch(type) {
-	case CONFIG_WIFI_SETTINGS: {
-		LOGd("Read wifi settings. Does reset it.");
-		//! copy string, because we clear it on read
-		std::string str;
-		if (_wifiSettings == "") {
-			str = "{}";
-		} else {
-			str = _wifiSettings;
-		}
-		streamBuffer->fromString(str);
-		streamBuffer->setType(type);
-		_wifiSettings = "";
-		LOGd("Wifi settings read");
-		return ERR_SUCCESS;
-	}
+//	case CONFIG_WIFI_SETTINGS: {
+//		LOGd("Read wifi settings. Does reset it.");
+//		//! copy string, because we clear it on read
+//		std::string str;
+//		if (_wifiSettings == "") {
+//			str = "{}";
+//		} else {
+//			str = _wifiSettings;
+//		}
+//		streamBuffer->fromString(str);
+//		streamBuffer->setType(type);
+//		_wifiSettings = "";
+//		LOGd("Wifi settings read");
+//		return ERR_SUCCESS;
+//	}
 
 	// todo: if we want to disable read access for encryption keys outside the setup mode
 //	/////////////////////////////////////////////////
@@ -139,6 +139,7 @@ ERR_CODE Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBu
 		}
 		return error_code;
 	} else {
+		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_CONFIG_NOT_FOUND;
 	}
 }
@@ -152,10 +153,10 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_CURRENT_LIMIT:
 	case CONFIG_FLOOR: {
 		if (length != 1) {
-			LOGw("Expected uint8");
+			LOGw(FMT_ERR_EXPECTED, "uint8");
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		LOGi("Set %u to %u", type, payload[0]);
+		LOGi(FMT_SET_INT_TYPE_VAL, type, payload[0]);
 		return ERR_SUCCESS;
 	}
 
@@ -169,10 +170,10 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_TX_POWER:
 	case CONFIG_IBEACON_TXPOWER: {
 		if (length != 1) {
-			LOGw("Expected int8");
+			LOGw(FMT_ERR_EXPECTED, "int8");
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		LOGi("Set %u to %i", type, (int8_t)payload[0]);
+		LOGi(FMT_SET_INT_TYPE_VAL, type, (int8_t)payload[0]);
 		return ERR_SUCCESS;
 	}
 
@@ -197,10 +198,10 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_IBEACON_MAJOR:
 	case CONFIG_NEARBY_TIMEOUT: {
 		if (length != 2) {
-			LOGw("Expected uint16");
+			LOGw(FMT_ERR_EXPECTED, "uint16");
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		LOGi("Set %u to %u", type, *(uint16_t*)payload);
+		LOGi(FMT_SET_INT_TYPE_VAL, type, *(uint16_t*)payload);
 		return ERR_SUCCESS;
 	}
 
@@ -213,10 +214,10 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_CURRENT_ZERO:
 	case CONFIG_POWER_ZERO: {
 		if (length != 4) {
-			LOGw("Expected float");
+			LOGw(FMT_ERR_EXPECTED, "float");
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		LOGi("Set %d to %f", type, *(float*)payload);
+		LOGi(FMT_SET_FLOAT_TYPE_VAL, type, *(float*)payload);
 		return ERR_SUCCESS;
 	}
 
@@ -226,18 +227,20 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	case CONFIG_IBEACON_UUID: {
 		if (length != 16) {
-			LOGw("Expected 16 bytes for UUID, received: %d", length);
+			LOGw(FMT_ERR_EXPECTED, "16 bytes");
+//			LOGw("Expected 16 bytes for UUID, received: %d", length);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
+		log(INFO, FMT_SET_STR_TYPE_VAL, type, "");
 		log(INFO, "Set uuid to: "); BLEutil::printArray(payload, 16);
 		return ERR_SUCCESS;
 	}
 	case CONFIG_PASSKEY: {
 		if (length != BLE_GAP_PASSKEY_LEN) {
-			LOGw("Expected length %d for passkey, received: %d", BLE_GAP_PASSKEY_LEN, length);
+			LOGw(FMT_ERR_EXPECTED_RECEIVED, BLE_GAP_PASSKEY_LEN, length);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		LOGi("Set passkey to %s", std::string((char*)payload, length).c_str());
+		LOGi(FMT_SET_STR_TYPE_VAL, type, std::string((char*)payload, length).c_str());
 		return ERR_SUCCESS;
 	}
 	case CONFIG_NAME: {
@@ -245,17 +248,17 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 			LOGe(MSG_NAME_TOO_LONG);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		LOGi("Set name to: %s", std::string((char*)payload, length).c_str());
+		LOGi(FMT_SET_STR_TYPE_VAL, type, std::string((char*)payload, length).c_str());
 		return ERR_SUCCESS;
 	}
 	case CONFIG_KEY_OWNER :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		if (length != ENCYRPTION_KEY_LENGTH) {
-			LOGe("Expected encryption key length: %d, received: %d", ENCYRPTION_KEY_LENGTH, length);
+			LOGe(FMT_ERR_EXPECTED_RECEIVED, ENCYRPTION_KEY_LENGTH, length);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		log(DEBUG, "Set encyrption key %d to:", type);
+		log(INFO, FMT_SET_STR_TYPE_VAL, type, "");
 		BLEutil::printArray((uint8_t*)payload, length);
 		return ERR_SUCCESS;
 	}
@@ -274,7 +277,7 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	}
 
 	default: {
-		LOGw("There is no such configuration type (%u).", type);
+		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_CONFIG_NOT_FOUND;
 	}
 	}
@@ -328,7 +331,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	}
 
 	/////////////////////////////////////////////////
-	//// FLOAT
+	//// DOUBLE
 	/////////////////////////////////////////////////
 	case CONFIG_VOLTAGE_MULTIPLIER:
 	case CONFIG_CURRENT_MULTIPLIER:
@@ -368,7 +371,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	}
 
 	default:
-		LOGw("There is no such configuration type (%u).", type);
+		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return 0;
 	}
 }
@@ -410,16 +413,16 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getInt8(_storageStruct.beacon.txPower, (int8_t*)target, BEACON_RSSI);
 		break;
 	}
-	case CONFIG_WIFI_SETTINGS: {
-		//! copy string, because we clear it on read
-		std::string* p_str = (std::string*) target;
-		if (_wifiSettings == "") {
-			*p_str = "{}";
-		} else {
-			*p_str = _wifiSettings;
-		}
-		break;
-	}
+//	case CONFIG_WIFI_SETTINGS: {
+//		//! copy string, because we clear it on read
+//		std::string* p_str = (std::string*) target;
+//		if (_wifiSettings == "") {
+//			*p_str = "{}";
+//		} else {
+//			*p_str = _wifiSettings;
+//		}
+//		break;
+//	}
 	case CONFIG_TX_POWER: {
 		Storage::getInt8(_storageStruct.txPower, (int8_t*)target, TX_POWER);
 		break;
@@ -541,7 +544,7 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		break;
 	}
 	default: {
-		LOGw("There is no such configuration type (%u).", type);
+		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_CONFIG_NOT_FOUND;
 	}
 	}
@@ -588,13 +591,13 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		Storage::setInt8(*((int8_t*)target), (int32_t&)_storageStruct.beacon.txPower);
 		break;
 	}
-	case CONFIG_WIFI_SETTINGS: {
-		p_item = (uint8_t*)&_wifiSettings;
-		if (size > 0) {
-			_wifiSettings = std::string((char*)target, size);
-		}
-		break;
-	}
+//	case CONFIG_WIFI_SETTINGS: {
+//		p_item = (uint8_t*)&_wifiSettings;
+//		if (size > 0) {
+//			_wifiSettings = std::string((char*)target, size);
+//		}
+//		break;
+//	}
 	case CONFIG_TX_POWER: {
 		p_item = (uint8_t*)&_storageStruct.txPower;
 		Storage::setInt8(*((int8_t*)target), _storageStruct.txPower);
@@ -722,31 +725,31 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	}
 	case CONFIG_VOLTAGE_MULTIPLIER: {
 		p_item = (uint8_t*)&_storageStruct.voltageMultiplier;
-		Storage::setFloat(*((float*)target), _storageStruct.voltageMultiplier);
+		Storage::setFloat(*((double*)target), _storageStruct.voltageMultiplier);
 		break;
 	}
 	case CONFIG_CURRENT_MULTIPLIER: {
 		p_item = (uint8_t*)&_storageStruct.currentMultiplier;
-		Storage::setFloat(*((float*)target), _storageStruct.currentMultiplier);
+		Storage::setFloat(*((double*)target), _storageStruct.currentMultiplier);
 		break;
 	}
 	case CONFIG_VOLTAGE_ZERO: {
 		p_item = (uint8_t*)&_storageStruct.voltageZero;
-		Storage::setFloat(*((float*)target), _storageStruct.voltageZero);
+		Storage::setFloat(*((double*)target), _storageStruct.voltageZero);
 		break;
 	}
 	case CONFIG_CURRENT_ZERO: {
 		p_item = (uint8_t*)&_storageStruct.currentZero;
-		Storage::setFloat(*((float*)target), _storageStruct.currentZero);
+		Storage::setFloat(*((double*)target), _storageStruct.currentZero);
 		break;
 	}
 	case CONFIG_POWER_ZERO: {
 		p_item = (uint8_t*)&_storageStruct.powerZero;
-		Storage::setFloat(*((float*)target), _storageStruct.powerZero);
+		Storage::setFloat(*((double*)target), _storageStruct.powerZero);
 		break;
 	}
 	default: {
-		LOGw("There is no such configuration type (%u).", type);
+		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_CONFIG_NOT_FOUND;
 	}
 	}
@@ -780,6 +783,10 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 		// before updating a flag, we need to initialize all flags to their default
 		// value, otherwise they will be wrongly read after the update
 		initFlags();
+	}
+
+	if (value == isSet(type)) {
+		return true;
 	}
 
 	switch(type) {

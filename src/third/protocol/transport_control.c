@@ -162,7 +162,6 @@ static void radio_idle_callback(void)
 
 static void mesh_app_packet_handle(mesh_adv_data_t* p_mesh_adv_data, uint64_t timestamp)
 {
-//    LOGi("_1");
     int16_t delta = vh_get_version_delta(p_mesh_adv_data->handle, p_mesh_adv_data->version);
     vh_data_status_t data_status = vh_rx_register(p_mesh_adv_data, timestamp);
    
@@ -274,29 +273,14 @@ uint32_t tc_tx(mesh_packet_t* p_packet)
     return NRF_SUCCESS;
 }
 
-//void printArray(uint8_t* arr, uint16_t len) {
-//	uint8_t* ptr = (uint8_t*)arr;
-//	for (int i = 0; i < len; ++i) {
-//		_log(DEBUG, " %02X", ptr[i]);
-//		if ((i+1) % 30 == 0) {
-//			_log(DEBUG, "\r\n");
-//		}
-//	}
-////	printInlineArray(arr, len);
-//	_log(DEBUG, "\r\n");
-//}
-
 /* packet processing, executed in APP_LOW */
 void tc_packet_handler(uint8_t* data, uint32_t crc, uint64_t timestamp)
 {
-//	LOGi("_6");
     SET_PIN(PIN_RX);
     mesh_packet_t* p_packet = (mesh_packet_t*) data;
-//	printArray(p_packet, sizeof(mesh_packet_t));
 
     if (p_packet->header.length > MESH_PACKET_OVERHEAD + RBC_MESH_VALUE_MAX_LEN)
     {
-//    	LOGi("_2");
         /* invalid packet, ignore */
         CLEAR_PIN(PIN_RX);
         mesh_packet_ref_count_dec(p_packet); /* from rx_cb */
@@ -312,11 +296,9 @@ void tc_packet_handler(uint8_t* data, uint32_t crc, uint64_t timestamp)
     
     if (p_mesh_adv_data != NULL)
     {
-//    	LOGi("_3");
         /* filter mesh packets on handle range */
         if (p_mesh_adv_data->handle <= RBC_MESH_APP_MAX_HANDLE)
         {
-//        	LOGi("_4");
             mesh_app_packet_handle(p_mesh_adv_data, timestamp);
         }
     }
@@ -326,7 +308,6 @@ void tc_packet_handler(uint8_t* data, uint32_t crc, uint64_t timestamp)
 
     if (g_state.queue_saturation)
     {
-//    	LOGi("_5");
         order_search();
         g_state.queue_saturation = false;
     }

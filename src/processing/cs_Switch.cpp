@@ -13,11 +13,14 @@
 #include <drivers/cs_PWM.h>
 #include <storage/cs_State.h>
 #include <storage/cs_Settings.h>
+#include <cfg/cs_Strings.h>
+
+//#define PRINT_SWITCH_VERBOSE
 
 Switch::Switch() :
 		_switchValue(0)
 {
-	LOGd("creating switch");
+	LOGd(FMT_CREATE, "Switch");
 }
 
 void Switch::init() {
@@ -37,14 +40,29 @@ void Switch::init() {
 }
 
 void Switch::pwmOff() {
+
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGd("PWM OFF");
+#endif
+
 	setValue(0);
 }
 
 void Switch::pwmOn() {
+
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGd("PWM ON");
+#endif
+
 	setValue(255);
 }
 
 void Switch::dim(uint8_t value) {
+
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGd("PWM %d", value);
+#endif
+
 	setValue(value);
 }
 
@@ -56,13 +74,22 @@ void Switch::setValue(uint8_t value) {
 }
 
 uint8_t Switch::getValue() {
+
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGd(FMT_GET_INT_VAL, "Switch state", _switchValue);
+#endif
+
 	return _switchValue;
 }
 
 void Switch::relayOn() {
 	uint16_t relayHighDuration;
 	Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &relayHighDuration);
-	LOGi("trigger relay on pin for %d ms", relayHighDuration);
+
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGd("trigger relay on pin for %d ms", relayHighDuration);
+#endif
+
 #if HAS_RELAY
 	nrf_gpio_pin_set(PIN_GPIO_RELAY_ON);
 	nrf_delay_ms(relayHighDuration);
@@ -75,7 +102,11 @@ void Switch::relayOn() {
 void Switch::relayOff() {
 	uint16_t relayHighDuration;
 	Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &relayHighDuration);
+
+#ifdef PRINT_SWITCH_VERBOSE
 	LOGi("trigger relay off pin for %d ms", relayHighDuration);
+#endif
+
 #if HAS_RELAY
 	nrf_gpio_pin_set(PIN_GPIO_RELAY_OFF);
 	nrf_delay_ms(relayHighDuration);
@@ -86,6 +117,11 @@ void Switch::relayOff() {
 }
 
 void Switch::turnOn() {
+
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGd("Turn ON");
+#endif
+
 #if HAS_RELAY
 	relayOn();
 #else
@@ -94,6 +130,11 @@ void Switch::turnOn() {
 }
 
 void Switch::turnOff() {
+
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGd("Turn OFF");
+#endif
+
 #if HAS_RELAY
 	relayOff();
 #else

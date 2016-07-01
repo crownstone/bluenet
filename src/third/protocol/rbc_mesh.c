@@ -48,8 +48,6 @@
 
 #include "ble_gatts.h"
 
-#include <drivers/cs_Serial.h>
-
 #include <string.h>
 
 /*****************************************************************************
@@ -101,10 +99,10 @@ uint32_t rbc_mesh_init(rbc_mesh_init_params_t init_params) {
 		return error_code;
 	}
 
-	ble_enable_params_t ble_enable;
-	ble_enable.gatts_enable_params.attr_tab_size =
-			BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
-	ble_enable.gatts_enable_params.service_changed = 0;
+//	ble_enable_params_t ble_enable;
+//	ble_enable.gatts_enable_params.attr_tab_size =
+//			BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
+//	ble_enable.gatts_enable_params.service_changed = 0;
 	// Should be removed according to integration doc
 	// https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh/blob/master/docs/integrating_w_SD_apps.adoc#step-6-initialization
 //	error_code = sd_ble_enable(&ble_enable);
@@ -141,6 +139,18 @@ uint32_t rbc_mesh_start(void) {
 	}
 
 	timeslot_order_earliest(10000, true);
+
+	g_mesh_state = MESH_STATE_RUNNING;
+
+	return NRF_SUCCESS;
+}
+
+uint32_t rbc_mesh_start_earliest(void) {
+	if (g_mesh_state != MESH_STATE_STOPPED) {
+		return NRF_ERROR_INVALID_STATE;
+	}
+
+	timeslot_order_earliest(10000, false);
 
 	g_mesh_state = MESH_STATE_RUNNING;
 

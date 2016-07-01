@@ -11,6 +11,9 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 #include <common/cs_Types.h>
+#include <cfg/cs_Strings.h>
+
+//#define PRINT_STREAMBUFFER_VERBOSE
 
 #define SB_HEADER_SIZE 4
 
@@ -62,21 +65,27 @@ public:
 
 	/** @inherit */
 	int assign(uint8_t *buffer, uint16_t size) {
-		LOGd("assign buff: %p, len: %d", buffer, size);
-		assert(SB_HEADER_SIZE + _max_items*_item_size <= size, "Assigned buffer is not large enough");
+		assert(SB_HEADER_SIZE + _max_items*_item_size <= size, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+
+#ifdef PRINT_STREAMBUFFER_VERBOSE
+		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, size);
+#endif
+
 		_buffer = (stream_t<T, U>*)buffer;
 		_maxLength = size;
 		return 0;
 	}
 
-	/** Release the buffer
-	 *
-	 * Sets pointer to zero, does not deallocate memory.
-	 */
-	void release() {
-		LOGd("Release stream buffer. This will screw up SoftDevice if characteristic is not deleted.");
-		_buffer = NULL;
-	}
+//	/** Release the buffer
+//	 *
+//	 * Sets pointer to zero, does not deallocate memory.
+//	 */
+//	void release() {
+//#ifdef PRINT_STREAMBUFFER_VERBOSE
+//		LOGw("Release stream buffer. This will screw up SoftDevice if characteristic is not deleted.");
+//#endif
+//		_buffer = NULL;
+//	}
 
 	/** Create a string from payload.
 	 *
@@ -86,7 +95,7 @@ public:
 	 */
 	ERR_CODE toString(std::string &str) {
 		if (!_buffer) {
-			LOGe("Buffer not initialized!");
+			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
 		str = std::string((char*)_buffer->payload, length());
@@ -101,7 +110,7 @@ public:
 	 */
 	ERR_CODE fromString(std::string& str) {
 		if (str.length() > (_max_items * _item_size)) {
-			LOGe("Buffer is not large enough");
+			LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}
 		memcpy(_buffer->payload, str.c_str(), str.length());
@@ -122,11 +131,11 @@ public:
 	 */
 	ERR_CODE add(T value) {
 		if (!_buffer) {
-			LOGe("Buffer not initialized!");
+			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
 		if (_buffer->length >= _max_items) {
-			LOGe("Buffer is not large enough");
+			LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}
 		_buffer->payload[_buffer->length++] = value;
@@ -139,7 +148,7 @@ public:
 	 */
 	ERR_CODE clear() {
 		if (!_buffer) {
-			LOGe("Buffer not initialized!");
+			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
 		memset(_buffer->payload, 0, _max_items * _item_size);
@@ -196,11 +205,11 @@ public:
 	 */
 	ERR_CODE setPayload(T *payload, uint16_t length) {
 		if (!_buffer->payload) {
-			LOGe("Buffer not initialized!");
+			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
 		if (length > _max_items) {
-			LOGe("Buffer is not large enough");
+			LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}
 		_buffer->length = length;

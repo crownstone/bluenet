@@ -31,16 +31,16 @@ DeviceInformationService::DeviceInformationService()
 }
 
 void DeviceInformationService::createCharacteristics() {
-	LOGi("Create device information service");
+	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_DEVICE_INFORMATION);
 
-	LOGi("add hardware revision characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_HARDWARE_REVISION);
 	addHardwareRevisionCharacteristic();
 
-	LOGi("add firmware revision characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_FIRMWARE_REVISION);
 	addFirmwareRevisionCharacteristic();
 
 #ifdef GIT_BRANCH
-	LOGi("add software revision characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_SOFTWARE_REVISION);
 	addSoftwareRevisionCharacteristic();
 #endif
 

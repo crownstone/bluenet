@@ -10,8 +10,6 @@
 
 #include <structs/cs_ScheduleEntries.h>
 
-//#define PRINT_DEBUG
-
 //todo: just remove it totally if it's not necessary to disable it
 #define SCHEDULER_ENABLED 1
 

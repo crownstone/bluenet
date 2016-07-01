@@ -12,9 +12,15 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "app_util.h"
+#include "nrf51.h"
+
 #include <ble/cs_Nordic.h>
 #include "cfg/cs_Boards.h"
-//#include "ble/cs_nRF51822.h"
+
+#ifdef INCLUDE_TIMESTAMPS
+#include <drivers/cs_RTC.h>
+#endif
 
 #define NRF_UART_1200_BAUD  0x0004F000UL
 #define NRF_UART_9600_BAUD  0x00275000UL
@@ -66,15 +72,19 @@ void config_uart() {
  * Read an individual character from UART.
  */
 uint8_t read_uart() {
+#if SERIAL_VERBOSITY<NONE
 	while(NRF_UART0->EVENTS_RXDRDY != 1) {}
 	NRF_UART0->EVENTS_RXDRDY = 0;
 	return (uint8_t)NRF_UART0->RXD;
+#endif
+	return -1;
 }
 
 /**
  * A write function with a format specifier.
  */
 int write(const char *str, ...) {
+#if SERIAL_VERBOSITY<NONE
 	char buffer[128];
 	va_list ap;
 	va_start(ap, str);
@@ -107,5 +117,16 @@ int write(const char *str, ...) {
 		free(p_buf);
 	}
 	return len;
+#endif
+	return 0;
 }
+
+#ifdef INCLUDE_TIMESTAMPS
+
+int now() {
+	return RTC::now();
+}
+
+#endif
+
 

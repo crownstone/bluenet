@@ -14,6 +14,9 @@
 
 #include <events/cs_EventDispatcher.h>
 
+//#define PRINT_SCANNER_VERBOSE
+//#define PRINT_DEBUG
+
 Scanner::Scanner() :
 	_opCode(SCAN_START),
 	_scanning(false),
@@ -53,37 +56,37 @@ void Scanner::setStack(Nrf51822BluetoothStack* stack) {
 
 void Scanner::manualStartScan() {
 	if (!_stack) {
-		LOGe("forgot to assign stack!");
+		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
 		return;
 	}
 
-	LOGi("Init scan result");
+//	LOGi(FMT_INIT, "scan result");
 	_scanResult->clear();
 	_scanning = true;
 
 	if (!_stack->isScanning()) {
-		LOGw("start scanning...");
+		LOGi(FMT_START, "Scanner");
 		_stack->startScanning();
 	}
 }
 
 void Scanner::manualStopScan() {
 	if (!_stack) {
-		LOGe("forgot to assign stack!");
+		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
 		return;
 	}
 
 	_scanning = false;
 
 	if (_stack->isScanning()) {
-		LOGw("stop scanning...");
+		LOGi(FMT_STOP, "Scanner");
 		_stack->stopScanning();
 	}
 }
 
 bool Scanner::isScanning() {
 	if (!_stack) {
-		LOGe("forgot to assign stack!");
+		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
 		return false;
 	}
 
@@ -105,39 +108,31 @@ void Scanner::start() {
 		_opCode = SCAN_START;
 		executeScan();
 	} else {
-		LOGi("already scanning!");
+		LOGi(FMT_ALREADY, "scanning");
 	}
 }
 
 void Scanner::delayedStart(uint16_t delay) {
 	if (!_running) {
-		LOGw("delayed start by %d ms", delay);
+		LOGi("delayed start by %d ms", delay);
 		_running = true;
 		_scanCount = 0;
 		_opCode = SCAN_START;
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(delay), this);
 	} else {
-		LOGi("already scanning!");
+		LOGd(FMT_ALREADY, "scanning");
 	}
 }
 
 void Scanner::delayedStart() {
-	if (!_running) {
-		LOGw("delayed start by %d ms", _scanBreakDuration);
-		_running = true;
-		_scanCount = 0;
-		_opCode = SCAN_START;
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
-	} else {
-		LOGi("already scanning!");
-	}
+	delayedStart(_scanBreakDuration);
 }
 
 void Scanner::stop() {
 	if (_running) {
 		_running = false;
 		_opCode = SCAN_STOP;
-		LOGi("force STOP");
+		LOGi("Force STOP");
 		manualStopScan();
 		//! no need to execute scan on stop is there? we want to stop after all
 	//	executeScan();
@@ -145,7 +140,7 @@ void Scanner::stop() {
 	} else if (_scanning) {
 		manualStopScan();
 	} else {
-		LOGi("already stopped!");
+		LOGi(STR_ERR_ALREADY_STOPPED);
 	}
 }
 
@@ -153,10 +148,12 @@ void Scanner::executeScan() {
 
 	if (!_running) return;
 
-	LOGi("executeScan");
+#ifdef PRINT_SCANNER_VERBOSE
+	LOGd("Execute Scan");
+#endif
+
 	switch(_opCode) {
 	case SCAN_START: {
-		LOGd("START");
 
 		//! start scanning
 		manualStartScan();
@@ -171,12 +168,13 @@ void Scanner::executeScan() {
 		break;
 	}
 	case SCAN_STOP: {
-		LOGd("STOP");
 
 		//! stop scanning
 		manualStopScan();
 
+#ifdef PRINT_DEBUG
 		_scanResult->print();
+#endif
 
 		//! Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanSendDelay), this);
@@ -185,9 +183,8 @@ void Scanner::executeScan() {
 		break;
 	}
 	case SCAN_SEND_RESULT: {
-		LOGd("SCAN_SEND_RESULT");
 
-		sendResults();
+		notifyResults();
 
 		//! Wait SCAN_BREAK ms, then start scanning again
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
@@ -199,7 +196,12 @@ void Scanner::executeScan() {
 
 }
 
-void Scanner::sendResults() {
+void Scanner::notifyResults() {
+
+#ifdef PRINT_SCANNER_VERBOSE
+	LOGd("Notify scan results");
+#endif
+
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
 	}

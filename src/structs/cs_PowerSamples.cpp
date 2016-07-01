@@ -7,6 +7,9 @@
 
 #include <cstdlib>
 #include "structs/cs_PowerSamples.h"
+#include <cfg/cs_Strings.h>
+
+//#define PRINT_POWERSAMPLES_VERBOSE
 
 PowerSamples::PowerSamples():
 	_buffer(NULL),
@@ -25,10 +28,14 @@ bool PowerSamples::init() {
 	//! Allocate memory
 	_buffer = (power_samples_t*)calloc(1, sizeof(power_samples_t));
 	if (_buffer == NULL) {
-		LOGw("Could not allocate memory");
+		LOGw(STR_ERR_ALLOCATE_MEMORY);
 		return false;
 	}
-	LOGd("Allocated memory at %u", _buffer);
+
+#ifdef PRINT_POWERSAMPLES_VERBOSE
+	LOGd(FMT_ALLOCATE_MEMORY, _buffer);
+#endif
+
 	_allocatedSelf = true;
 
 	_currentBuffer.assign((buffer_ptr_t)&_buffer->_currentSamples, sizeof(_buffer->_currentSamples));
@@ -82,11 +89,15 @@ bool PowerSamples::full() {
 ///////////! Bufferaccessor ////////////////////////////
 /** @inherit */
 int PowerSamples::assign(buffer_ptr_t buffer, uint16_t size) {
-	LOGd("assign buff: %p, len: %d", buffer, size);
 	if (getMaxLength() > size) {
-		LOGe("Assigned buffer is not large enough");
+		LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 		return 1;
 	}
+
+#ifdef PRINT_POWERSAMPLES_VERBOSE
+	LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, size);
+#endif
+
 	_buffer = (power_samples_t*)buffer;
 
 	_currentBuffer.assign((buffer_ptr_t)&_buffer->_currentSamples, sizeof(_buffer->_currentSamples));

@@ -12,6 +12,8 @@
 #include "drivers/cs_Temperature.h"
 #include <events/cs_EventDispatcher.h>
 
+//#define PRINT_FRIDGE_VERBOSE
+
 Fridge::Fridge() : _appTimerId(0)
 {
 //	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Fridge::staticTick);
@@ -38,7 +40,9 @@ void Fridge::stopTicking() {
 void Fridge::tick() {
 	int32_t temp;
 	temp = getTemperature();
-//	LOGd("temp = %d", temp);
+#ifdef PRINT_FRIDGE_VERBOSE
+	LOGd("temp = %d", temp);
+#endif
 	if (temp < _minTemp) {
 		EventDispatcher::getInstance().dispatch(EVT_ENV_TEMP_LOW);
 	}
@@ -55,12 +59,16 @@ void Fridge::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch(evt) {
 	case CONFIG_MIN_ENV_TEMP: {
 		_minTemp = *(int32_t*)p_data;
-		LOGd("update min temp to: %d", _minTemp);
+#ifdef PRINT_FRIDGE_VERBOSE
+		LOGd(FMT_SET_INT_VAL, "min temp", _minTemp);
+#endif
 		break;
 	}
 	case CONFIG_MAX_ENV_TEMP: {
 		_maxTemp = *(int32_t*)p_data;
-		LOGd("update max temp to: %d", _maxTemp);
+#ifdef PRINT_FRIDGE_VERBOSE
+		LOGd(FMT_SET_INT_VAL, "max temp", _maxTemp);
+#endif
 		break;
 	}
 	}

@@ -12,6 +12,9 @@
 #include <drivers/cs_PWM.h>
 #include <storage/cs_State.h>
 
+//#define PRINT_TRACKER_VERBOSE
+//#define PRINT_DEBUG
+
 Tracker::Tracker() : EventListener(),
 		_timeoutCounts(TRACKDEVICE_DEFAULT_TIMEOUT_COUNT), _tracking(false), _trackIsNearby(false),
 		_trackedDeviceList(NULL), _stack(NULL)
@@ -89,8 +92,11 @@ void Tracker::readTrackedDevices() {
 	State::getInstance().get(STATE_TRACKED_DEVICES, buffer, length);
 
 	if (!_trackedDeviceList->isEmpty()) {
+
+#ifdef PRINT_DEBUG
 		LOGi("restored tracked devices (%d):", _trackedDeviceList->getSize());
 		_trackedDeviceList->print();
+#endif
 
 		// inform listeners (like the indoor localisation service, i.e. trackedDeviceListCharacteristic)
 		EventDispatcher::getInstance().dispatch(EVT_TRACKED_DEVICES, buffer, length);
@@ -112,7 +118,7 @@ uint16_t Tracker::getNearbyTimeout() {
 
 void Tracker::startTracking() {
 	if (!_stack) {
-		LOGe("forgot to assign stack!");
+		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
 		return;
 	}
 
@@ -122,26 +128,28 @@ void Tracker::startTracking() {
 		_tracking = true;
 
 		if (!_stack->isScanning()) {
-			LOGi("Start tracking");
+			LOGi(FMT_START, "tracking");
 			_stack->startScanning();
 		}
 
 		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TRACKER_UPATE_FREQUENCY), this);
 	} else {
-		LOGi("already tracking");
+		LOGi(FMT_ALREADY, "tracking");
 	}
 }
 
 void Tracker::stopTracking() {
 	if (!_stack) {
-		LOGe("forgot to assign stack!");
+		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
 		return;
 	}
 
 	_tracking = false;
 	if (_stack->isScanning()) {
-		LOGi("Stop tracking");
+		LOGi(FMT_STOP, "tracking");
 		_stack->stopScanning();
+	} else {
+		LOGi(STR_ERR_ALREADY_STOPPED);
 	}
 }
 
@@ -172,7 +180,7 @@ void Tracker::onBleEvent(ble_evt_t * p_ble_evt) {
 
 bool Tracker::isTracking() {
 	if (!_stack) {
-		LOGe("forgot to assign stack!");
+		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
 		return false;
 	}
 
@@ -195,18 +203,34 @@ void Tracker::handleTrackedDeviceCommand(buffer_ptr_t buffer, uint16_t size) {
 	dev.assign(buffer, size);
 
 	if (dev.getRSSI() > 0) {
+
+#ifdef PRINT_TRACKER_VERBOSE
 		LOGi("Remove tracked device");
+#endif
+
+#ifdef PRINT_DEBUG
 		dev.print();
+#endif
+
 		Tracker::getInstance().removeTrackedDevice(dev);
 	} else {
+
+#ifdef PRINT_TRACKER_VERBOSE
 		LOGi("Add tracked device");
+#endif
+
+#ifdef PRINT_DEBUG
 		dev.print();
+#endif
+
 		Tracker::getInstance().addTrackedDevice(dev);
 	}
 	TrackedDeviceList* trackedDeviceList = Tracker::getInstance().getTrackedDevices();
 
+#ifdef PRINT_DEBUG
 	LOGi("currently tracking devices:");
 	trackedDeviceList->print();
+#endif
 
 	if (trackedDeviceList->getSize() > 0) {
 		Tracker::getInstance().startTracking();

@@ -7,10 +7,11 @@
 #pragma once
 
 #include <ble/cs_Nordic.h>
+#include <cfg/cs_Strings.h>
 #include <common/cs_Types.h>
-#include "structs/cs_BufferAccessor.h"
+#include <drivers/cs_Serial.h>
+#include <structs/cs_BufferAccessor.h>
 #include <util/cs_BleError.h>
-#include "drivers/cs_Serial.h"
 
 /** The size of the header used in the scan list message
  *
@@ -110,6 +111,8 @@ public:
 	*/
 	void clear();
 
+	/** Return the list of peripheral devices
+	 */
 	peripheral_device_list_t* getList() {
 		return _buffer;
 	}
@@ -118,7 +121,7 @@ public:
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
-		assert(sizeof(peripheral_device_list_t) <= maxLength, "buffer not large enough to hold scan device list!");
+		assert(sizeof(peripheral_device_list_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 		_buffer = (peripheral_device_list_t*)buffer;
 		return 0;
 	}

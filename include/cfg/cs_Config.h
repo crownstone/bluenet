@@ -98,7 +98,7 @@
 
 #define ENCYRPTION_KEY_LENGTH                    16 //! 16 byte length
 
-#define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V21
+#define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
 
 #define VOLTAGE_MULTIPLIER                       2.374f
 #define CURRENT_MULTIPLIER                       0.044f

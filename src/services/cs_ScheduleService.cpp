@@ -30,15 +30,17 @@ ScheduleService::ScheduleService() :
 }
 
 void ScheduleService::createCharacteristics() {
-	LOGi("Create schedule service");
+	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_SCHEDULE);
 
-	LOGi("add current time characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_CURRENT_TIME);
 	addCurrentTimeCharacteristic();
 
 #if CHAR_SCHEDULE==1
-	LOGi("add schedule characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_SCHEDULE);
 	addWriteScheduleEntryCharacteristic();
 	addListScheduleEntriesCharacteristic();
+#else
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_SCHEDULE);
 #endif
 
 	addCharacteristicsDone();

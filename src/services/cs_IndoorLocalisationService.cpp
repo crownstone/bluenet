@@ -28,27 +28,27 @@ IndoorLocalizationService::IndoorLocalizationService() : EventListener(),
 }
 
 void IndoorLocalizationService::createCharacteristics() {
-	LOGi("Create indoor localization service");
+	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_INDOOR_LOCALIZATION);
 
 #if CHAR_RSSI==1
-	LOGi("add Signal Strength characteristics");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_RSSI);
 	addRssiCharacteristic();
 #else
-	LOGi("skip Signal Strength characteristics");
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_RSSI);
 #endif
 #if CHAR_SCAN_DEVICES==1
-	LOGi("add Scan Devices characteristics");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_SCAN_DEVICES);
 	addScanControlCharacteristic();
 	addScannedDeviceListCharacteristic();
 #else
-	LOGi("skip Scan/Devices characteristics");
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_SCAN_DEVICES);
 #endif
 #if CHAR_TRACK_DEVICES==1
-	LOGi("add Tracked Device characteristics");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_TRACKED_DEVICE);
 	addTrackedDeviceListCharacteristic();
 	addTrackedDeviceCharacteristic();
 #else
-	LOGi("skip Tracked Device characteristics");
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_TRACKED_DEVICE);
 #endif
 
 	addCharacteristicsDone();

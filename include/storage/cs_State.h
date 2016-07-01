@@ -18,9 +18,6 @@
 #define OPERATION_MODE_NORMAL 0x10
 #define OPERATION_MODE_DFU 0x01
 
-//! enable to print additional debug
-//#define PRINT_DEBUG
-
 typedef uint32_t seq_number_t;
 
 #define ELEM_SIZE(e) (sizeof(e) + sizeof(seq_number_t))

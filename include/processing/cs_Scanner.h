@@ -101,7 +101,7 @@ private:
 	bool isFiltered(data_t* p_adv_data);
 
 	void executeScan();
-	void sendResults();
+	void notifyResults();
 
 	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
 };

@@ -6,9 +6,6 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
-// enable for additional debug output
-//#define PRINT_DEBUG
-
 #include <mesh/cs_MeshControl.h>
 
 #include <storage/cs_Settings.h>
@@ -16,6 +13,10 @@
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>
 #include <mesh/cs_Mesh.h>
+
+// enable for additional debug output
+//#define PRINT_DEBUG
+//#define PRINT_MESHCONTROL_VERBOSE
 
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
@@ -57,7 +58,9 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		switch(msg->header.messageType) {
 		case SCAN_MESSAGE: {
 
-			LOGd("Crownstone %s scanned these devices:", getAddress((mesh_message_t*)p_data).c_str());
+#ifdef PRINT_MESHCONTROL_VERBOSE
+			LOGf("Crownstone %s scanned these devices:", getAddress((mesh_message_t*)p_data).c_str());
+#endif
 			if (msg->scanMsg.numDevices > NR_DEVICES_PER_MESSAGE) {
 				LOGe("Invalid number of devices!");
 			}
@@ -78,15 +81,19 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 			break;
 		}
 		case SERVICE_DATA_MESSAGE: {
+#ifdef PRINT_MESHCONTROL_VERBOSE
 			LOGd("received service data from crownstone %s", getAddress((mesh_message_t*)p_data).c_str());
+#endif
 
 			service_data_mesh_message_t& sd = msg->serviceDataMsg;
+#ifdef PRINT_DEBUG
 			LOGd("> crownstone id: %d", sd.crownstoneId);
 			LOGd("> switch state: %d", sd.switchState);
 			LOGd("> event bitmask: %s", BLEutil::toBinaryString(sd.eventBitmask).c_str());
 			LOGd("> power usage: %d", sd.powerUsage);
 			LOGd("> accumulated energy: %d", sd.accumulatedEnergy);
 			LOGd("> temperature: %d", sd.temperature);
+#endif
 
 			break;
 		}
@@ -134,7 +141,9 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 
 			decodeDataMessage(msg->header.messageType, msg->payload);
 		} else {
+#ifdef PRINT_MESHCONTROL_VERBOSE
 			LOGi("Message not for us: %s", getAddress(msg).c_str());
+#endif
 		}
 
 		break;
@@ -158,7 +167,9 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 	case 19:
 	case 20: {
 		mesh_message_t* msg = (mesh_message_t*) p_data;
+#ifdef PRINT_MESHCONTROL_VERBOSE
 		LOGd("power samples: h=%u src id=%s", channel, getAddress(msg).c_str());
+#endif
 		break;
 	}
 	}
@@ -233,7 +244,9 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 	}
 	case BEACON_MESSAGE: {
 
+#ifdef PRINT_MESHCONTROL_VERBOSE
 		LOGi("Received Beacon Message");
+#endif
 		beacon_mesh_message_t* msg = (beacon_mesh_message_t*)payload;
 		//		BLEutil::printArray((uint8_t*)msg, sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t));
 
@@ -332,9 +345,9 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
 		if (isBroadcast(msg)) {
 			//! received broadcast message
-			LOGd("received broadcast, send into mesh and handle directly");
-			log(INFO, "message:");
-			BLEutil::printArray((uint8_t*)p_data, length);
+			LOGd("Received broadcast");
+//			log(INFO, "message:");
+//			BLEutil::printArray((uint8_t*)p_data, length);
 			Mesh::getInstance().send(channel, p_data, length);
 			// [30.05.16] as long as we don't call this function in an interrupt, we don't need to
 			//   decouple it anymore, because softdevice events are handled already by the scheduler
@@ -344,11 +357,11 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
 		} else if (!isMessageForUs(msg)) {
 			//! message is not for us, send it into mesh
-			LOGd("send it into mesh ...");
+			LOGd("Message not for us, send into mesh ...");
 			Mesh::getInstance().send(channel, p_data, length);
 		} else {
 			//! message is for us, handle directly, no reason to send it into the mesh!
-			LOGd("message is for us, handle directly");
+			LOGd("Message is for us");
 			// [30.05.16] as long as we don't handle this in an interrupt, we don't need to
 			//   decouple it anymore, because softdevice events are handled already by the scheduler
 			//	 BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message)););
@@ -385,7 +398,9 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 //! into the mesh on the hub channel so that it can be synced to the cloud
 void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
-	LOGi("sendScanMessage, size: %d", size);
+#ifdef PRINT_MESHCONTROL_VERBOSE
+	LOGi("Send ScanMessage, size: %d", size);
+#endif
 
 	//! if no devices were scanned there is no reason to send a message!
 	if (size > 0) {
@@ -393,8 +408,10 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 		message->scanMsg.numDevices = size;
 		memcpy(&message->scanMsg.list, p_list, size * sizeof(peripheral_device_t));
 
+#ifdef PRINT_DEBUG
 		LOGi("message data:");
 		BLEutil::printArray(message, sizeof(hub_mesh_message_t));
+#endif
 
 		Mesh::getInstance().send(HUB_CHANNEL, message, sizeof(hub_mesh_message_t));
 		free(message);
@@ -413,27 +430,18 @@ void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples)
 }
 
 void MeshControl::sendServiceDataMessage(service_data_mesh_message_t* serviceData) {
+#ifdef PRINT_MESHCONTROL_VERBOSE
 	LOGd("send service data");
+#endif
 
 	hub_mesh_message_t* message = createHubMessage(SERVICE_DATA_MESSAGE);
 	memcpy(&message->serviceDataMsg, serviceData, sizeof(service_data_mesh_message_t));
 
+#ifdef PRINT_DEBUG
 	LOGi("message data:");
 	BLEutil::printArray(message, sizeof(hub_mesh_message_t));
+#endif
 
 	Mesh::getInstance().send(HUB_CHANNEL, message, sizeof(hub_mesh_message_t));
 	free(message);
 }
-
-
-//void MeshControl::reset() {
-////	LOGw("reset due to mesh timeout");
-////	//! copy to make sure this is nothing more than one value
-////	uint8_t err_code;
-////	err_code = sd_power_gpregret_clr(0xFF);
-////	APP_ERROR_CHECK(err_code);
-////	err_code = sd_power_gpregret_set(0x01); //! Don't go to DFU mode
-////	APP_ERROR_CHECK(err_code);
-////	sd_nvic_SystemReset();
-//	LOGi("Zombie node detected!");
-//}

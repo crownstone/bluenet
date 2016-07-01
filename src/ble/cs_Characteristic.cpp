@@ -16,6 +16,8 @@
 
 using namespace BLEpp;
 
+//#define PRINT_CHARACTERISTIC_VERBOSE
+
 CharacteristicBase::CharacteristicBase() :
 				_name(NULL),
 				_handles( { }), _service(0), _encrypted(false)
@@ -123,7 +125,9 @@ void CharacteristicBase::init(Service* svc) {
 	ci.attr_char_value.max_len = getValueMaxLength();
 	ci.attr_char_value.p_value = getValuePtr();
 
+#ifdef PRINT_CHARACTERISTIC_VERBOSE
 	LOGd("%s init with buffer[%i] with %p", _name, getValueLength(), getValuePtr());
+#endif
 
 	////////////////////////
 	//! attribute metadata //
@@ -266,7 +270,7 @@ uint32_t CharacteristicBase::notify() {
 			//!   ignore
 
 			//! this is not a serious error, but better to at least write it to the log
-			LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
+			LOGe("ERR_CODE: %d (0x%X)", err_code, err_code);
 		} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
 			//! Anne: do not complain for now... (meshing)
 		} else {

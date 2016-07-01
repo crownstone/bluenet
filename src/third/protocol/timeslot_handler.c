@@ -161,18 +161,18 @@ void ts_sd_event_handler(uint32_t evt)
         case NRF_EVT_RADIO_SESSION_IDLE:
             /* the idle event is usually triggered when rbc_mesh_stop is called, 
                 but if this isn't the case, we have to restart the TS */
-            if (g_timeslot_forced_command != TS_FORCED_COMMAND_STOP)
-            {
-                timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
-            }
+//            if (g_timeslot_forced_command != TS_FORCED_COMMAND_STOP)
+//            {
+//                timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
+//            }
             break;
 
         case NRF_EVT_RADIO_SESSION_CLOSED:
 //            LOGe("NRF_EVT_RADIO_SESSION_CLOSED");
-        	if (pausing) {
-        		paused = true;
-        		pausing = false;
-        	}
+//        	if (pausing) {
+//        		paused = true;
+//        		pausing = false;
+//        	}
 //            APP_ERROR_CHECK(NRF_ERROR_INVALID_DATA);
             break;
 
@@ -464,25 +464,6 @@ void timeslot_handler_init(nrf_clock_lfclksrc_t lfclksrc)
     g_start_time_ref = NRF_RTC0->COUNTER;
     g_timeslot_length = TIMESLOT_SLOT_LENGTH;
     timeslot_order_earliest(g_timeslot_length, true);
-}
-
-bool timeslot_handler_pause() {
-	if (paused || !g_framework_initialized) return true;
-
-	LOGi("pausing mesh");
-	pausing = true;
-	sd_radio_session_close();
-	g_framework_initialized = false;
-	return false;
-}
-
-bool timeslot_handler_resume() {
-	if (!paused) return true;
-
-	LOGi("resuming mesh");
-	timeslot_handler_init(g_lfclksrc);
-	paused = false;
-	return true;
 }
 
 void timeslot_order_earliest(uint32_t length_us, bool immediately)

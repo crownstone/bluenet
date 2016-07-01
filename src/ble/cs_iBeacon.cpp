@@ -6,8 +6,11 @@
  */
 
 #include <ble/cs_iBeacon.h>
+#include <cfg/cs_Strings.h>
 
 using namespace BLEpp;
+
+//#define PRINT_IBEACON_VERBOSE
 
 IBeacon::IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor,
 		int8_t rssi) {
@@ -20,7 +23,10 @@ IBeacon::IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor,
 }
 
 void IBeacon::setMajor(uint16_t major) {
-	LOGd("setMajor: %d", major);
+#ifdef PRINT_IBEACON_VERBOSE
+	LOGd(FMT_SET_INT_VAL, "major", major);
+#endif
+
 	_params.major = BLEutil::convertEndian16(major);
 }
 
@@ -29,7 +35,10 @@ uint16_t IBeacon::getMajor() {
 }
 
 void IBeacon::setMinor(uint16_t minor) {
-	LOGd("setMinor: %d", minor);
+#ifdef PRINT_IBEACON_VERBOSE
+	LOGd(FMT_SET_INT_VAL, "minor", minor);
+#endif
+
 	_params.minor = BLEutil::convertEndian16(minor);
 }
 
@@ -38,12 +47,15 @@ uint16_t IBeacon::getMinor() {
 }
 
 void IBeacon::setUUID(ble_uuid128_t uuid) {
-	log(DEBUG, "setUUID: ");
 	for (int i = 0; i < 16; ++i) {
 		_params.uuid.uuid128[i] = uuid.uuid128[16-1-i];
 	}
+
+#ifdef PRINT_IBEACON_VERBOSE
+	log(DEBUG, FMT_SET_STR_VAL "UUID", "");
 	BLEutil::printInlineArray(_params.uuid.uuid128, 16);
 	_log(DEBUG, CRLN);
+#endif
 }
 
 ble_uuid128_t IBeacon::getUUID() {
@@ -55,7 +67,10 @@ ble_uuid128_t IBeacon::getUUID() {
 }
 
 void IBeacon::setTxPower(int8_t txPower) {
-	LOGd("setTxPower: %d", txPower);
+#ifdef PRINT_IBEACON_VERBOSE
+	LOGd(FMT_SET_INT_VAL, "tx power", txPower);
+#endif
+
 	_params.txPower = txPower;
 }
 
