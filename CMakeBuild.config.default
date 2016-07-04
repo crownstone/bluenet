@@ -93,13 +93,13 @@ MASTER_BUFFER_SIZE=300
 DEFAULT_OPERATION_MODE=OPERATION_MODE_NORMAL
 
 # Verbosity of the UART
-# Debug     0
-# Info      1
-# Warning   2
-# Error     3
-# Fatal     4
-# None      5
-SERIAL_VERBOSITY=1
+# DEBUG     0
+# INFO      1
+# WARNING   2
+# ERROR     3
+# FATAL     4
+# NONE      5
+SERIAL_VERBOSITY=INFO
 
 # The different boards that can be used:
 # PCA10001             0
