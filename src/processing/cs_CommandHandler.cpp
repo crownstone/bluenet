@@ -236,7 +236,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		state.get(STATE_SWITCH_STATE, serviceData.switchState);
 
 		// todo get event bitmask
-		serviceData.eventBitmask = 9;
 
 		state.get(STATE_POWER_USAGE, (int32_t&)serviceData.powerUsage);
 		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)serviceData.accumulatedEnergy);

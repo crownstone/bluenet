@@ -214,7 +214,6 @@ void PowerSampling::powerSampleFinish() {
 //#endif
 
 #ifdef PRINT_SAMPLE_CURRENT
-	uint32_t currentTimestamp = 0;
 	_log(DEBUG, "current samples:\r\n");
 	for (int i=0; i<_powerSamples.size(); i++) {
 		_powerSamples.getCurrentTimestampsBuffer()->getValue(currentTimestamp, i);

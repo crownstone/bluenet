@@ -107,7 +107,7 @@ void PowerService::addPowerSamplesCharacteristic() {
 	buffer_ptr_t buffer = NULL;
 	uint16_t size = 0;
 	PowerSampling::getInstance().getBuffer(buffer, size);
-	LOGd("buffer=%u", buffer);
+//	LOGd("buffer=%u", buffer);
 
 	_powerSamplesCharacteristic->setValue(buffer);
 	_powerSamplesCharacteristic->setMaxLength(size);

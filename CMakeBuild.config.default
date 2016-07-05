@@ -20,9 +20,6 @@ DEVICE_TYPE=DEVICE_CROWNSTONE
 # Enable or disable meshing (1 or 0)
 MESHING=1
 
-# Enable or disable continuous power measurements (1 or 0)
-CONT_POWER_MEASURMENT=0
-
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=1
 
@@ -112,7 +109,7 @@ SERIAL_VERBOSITY=INFO
 # VIRTUALMEMO          7
 # CROWNSTONE2          8
 # CROWNSTONE_SENSOR    9
-# PCA10000             10
+# PCA10000/PCA10031    10
 # CROWNSTONE3          11
 # CROWNSTONE4          12
 # NORDIC_BEACON        13

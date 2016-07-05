@@ -20,6 +20,7 @@
 #define CROWNSTONE2          8
 #define CROWNSTONE_SENSOR    9
 #define PCA10000             10
+#define PCA10031             10 // same layout as PCA10000, just with 32k chip
 #define CROWNSTONE3          11
 #define CROWNSTONE4          12
 #define NORDIC_BEACON        13
@@ -266,7 +267,7 @@
 #endif
 
 
-#if(HARDWARE_BOARD==PCA10000)
+#if(HARDWARE_BOARD==PCA10000) || (HARDWARE_BOARD==PCA10031)
 
 #define LED_RGB_RED          21
 #define LED_RGB_GREEN        22

@@ -31,6 +31,16 @@ HARDWARE_VERSION=
 #   SERIAL_VERBOSITY=DEBUG
 
 ########################################################################################################################
+# Softdevice
+# By default we are using the Softdevice s130 v1.0 from the Nordic SDK. If you want to use the
+# Softdevice s110 instead, copy over and uncomment the block Softdevice s110 from the
+# $BLUENET_DIR/CMakeBuild.config.default
+# If you download a different version of the softdevice, you also need to adjust the variables
+# SOFTDEVICE_DIR, SOFTDEVICE_DIR_API and SOFTDEVICE_DIR_HEX
+########################################################################################################################
+
+
+########################################################################################################################
 # Build System Configuration. This variables need to be adjusted to your build system paths.
 # Note: They can be left as is if you use the install.sh script at crownstone-sdk
 ########################################################################################################################

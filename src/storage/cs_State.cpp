@@ -391,7 +391,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			return ERR_STATE_NOT_FOUND;
 		}
 
-		publishUpdate(type, (uint8_t*)target, size);
+//		publishUpdate(type, (uint8_t*)target, size);
 		return ERR_SUCCESS;
 	}
 

@@ -29,7 +29,11 @@ extern "C" {
 void sys_evt_dispatch(uint32_t sys_evt) {
 
 //	LOGi("Sys evt dispatch: %d", sys_evt);
-    pstorage_sys_event_handler(sys_evt);
+
+    if ((sys_evt == NRF_EVT_FLASH_OPERATION_SUCCESS) ||
+            (sys_evt == NRF_EVT_FLASH_OPERATION_ERROR)) {
+    	pstorage_sys_event_handler(sys_evt);
+    }
 
     Settings& settings = Settings::getInstance();
     if (settings.isInitialized() && settings.isSet(CONFIG_MESH_ENABLED)) {

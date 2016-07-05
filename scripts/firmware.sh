@@ -29,7 +29,7 @@ build() {
 
 upload() {
 	${path}/_upload.sh $BLUENET_CONFIG_DIR/build/$target.hex $address $serial_num
-	if [ $? -eq 0 ]; then
+	if [ $? -ne 0 ]; then
 		echo "Error with uploading"
 		exit 1
 	fi
