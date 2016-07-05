@@ -331,7 +331,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	}
 
 	/////////////////////////////////////////////////
-	//// DOUBLE
+	//// FLOAT
 	/////////////////////////////////////////////////
 	case CONFIG_VOLTAGE_MULTIPLIER:
 	case CONFIG_CURRENT_MULTIPLIER:
@@ -725,27 +725,27 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	}
 	case CONFIG_VOLTAGE_MULTIPLIER: {
 		p_item = (uint8_t*)&_storageStruct.voltageMultiplier;
-		Storage::setFloat(*((double*)target), _storageStruct.voltageMultiplier);
+		Storage::setFloat(*((float*)target), _storageStruct.voltageMultiplier);
 		break;
 	}
 	case CONFIG_CURRENT_MULTIPLIER: {
 		p_item = (uint8_t*)&_storageStruct.currentMultiplier;
-		Storage::setFloat(*((double*)target), _storageStruct.currentMultiplier);
+		Storage::setFloat(*((float*)target), _storageStruct.currentMultiplier);
 		break;
 	}
 	case CONFIG_VOLTAGE_ZERO: {
 		p_item = (uint8_t*)&_storageStruct.voltageZero;
-		Storage::setFloat(*((double*)target), _storageStruct.voltageZero);
+		Storage::setFloat(*((float*)target), _storageStruct.voltageZero);
 		break;
 	}
 	case CONFIG_CURRENT_ZERO: {
 		p_item = (uint8_t*)&_storageStruct.currentZero;
-		Storage::setFloat(*((double*)target), _storageStruct.currentZero);
+		Storage::setFloat(*((float*)target), _storageStruct.currentZero);
 		break;
 	}
 	case CONFIG_POWER_ZERO: {
 		p_item = (uint8_t*)&_storageStruct.powerZero;
-		Storage::setFloat(*((double*)target), _storageStruct.powerZero);
+		Storage::setFloat(*((float*)target), _storageStruct.powerZero);
 		break;
 	}
 	default: {

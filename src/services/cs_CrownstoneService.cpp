@@ -72,7 +72,7 @@ void CrownstoneService::createCharacteristics() {
 	LOGi(FMT_CHAR_ADD, STR_CHAR_MESH);
 	addMeshCharacteristic();
 #else
-	LOGi(FMT_CHAR_SIP, STR_CHAR_MESH);
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_MESH);
 #endif
 
 #if CHAR_CONFIGURATION==1 || DEVICE_TYPE==DEVICE_FRIDGE
@@ -85,7 +85,7 @@ void CrownstoneService::createCharacteristics() {
 //		LOGd("Set both set/get charac to buffer at %p", buffer);
 	}
 #else
-	LOGi(FMT_CHAR_SIP, STR_CHAR_CONFIGURATION);
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_CONFIGURATION);
 #endif
 
 #if CHAR_STATE==1
@@ -98,7 +98,7 @@ void CrownstoneService::createCharacteristics() {
 //		LOGd("Set both set/get charac to buffer at %p", buffer);
 	}
 #else
-	LOGi(FMT_CHAR_SIP, STR_CHAR_STATE);
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_STATE);
 #endif
 
 	addCharacteristicsDone();
