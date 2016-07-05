@@ -455,25 +455,28 @@ void Crownstone::createCrownstoneServices() {
  * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
  */
 void Crownstone::setName() {
+	char device_name[32];
+	uint16_t size;
+	_settings->get(CONFIG_NAME, device_name, size);
+
 #ifdef CHANGE_NAME_ON_RESET
+	//! get reset counter
 	uint32_t resetCounter;
 	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
 //	uint16_t minor;
 //	ps_configuration_t cfg = Settings::getInstance().getConfig();
 //	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
-	char devicename[32];
-	sprintf(devicename, "%s_%d", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(resetCounter));
-	std::string device_name = std::string(devicename);
-	//! End test for wouter
+	char devicename_resetCounter[32];
+	//! clip name to 5 chars and add reset counter at the end
+	sprintf(devicename_resetCounter, "%.*s_%d", MIN(size, 5), device_name, STRINGIFY(resetCounter));
+	std::string deviceName = std::string(devicename_resetCounter);
 #else
-	char devicename[32];
-	uint16_t size;
-	_settings->get(CONFIG_NAME, devicename, size);
-	std::string device_name(devicename, size);
+	std::string deviceName(devicename, size);
 #endif
+
 	//! assign name
-	LOGi(FMT_SET_STR_VAL, "name", device_name.c_str());
-	_stack->updateDeviceName(device_name); //! max len = ble_gap_devname_max_len (31)
+	LOGi(FMT_SET_STR_VAL, "name", deviceName.c_str());
+	_stack->updateDeviceName(deviceName); //! max len = ble_gap_devname_max_len (31)
 	_stack->updateAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
