@@ -438,7 +438,9 @@ uint 16 | Length | 2 | Length of the data.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 [] | Target address | 6 | Bluetooth address of the device at which this message is aimed at, all zero for any device.
+uint 16 | Target Crownstone ID | 2 | Crownstone Identifier of the device at which this message is aimed at, all 0 for any device.
+uint 16 | Reason | 2 | ...
+uint 16 | User ID | 2 | ...
 uint 16 | Type | 2 | Type of message, see table below.
 uint 8 [] | Payload | 0 to 91 | Payload data, depends on type.
 
