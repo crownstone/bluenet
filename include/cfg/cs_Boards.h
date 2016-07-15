@@ -27,6 +27,7 @@
 #define DOBEACON             14
 #define CROWNSTONE5          15
 #define DOBEACON2            16
+#define PCA10036             17
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
@@ -291,6 +292,31 @@
 #define SHUNT_VALUE                 1
 //! amplification of the voltage over the shunt, to the adc input of the chip
 #define VOLTAGE_AMPLIFICATION       1
+#endif
+
+
+#if(HARDWARE_BOARD==PCA10036)
+#define LED_1                17
+#define LED_2                18
+#define LED_3                19
+#define LED_4                20
+
+#define PIN_GPIO_SWITCH      LED_1               //! show switch as LED
+#define PIN_GPIO_RELAY_ON    11                  //! something unused
+#define PIN_GPIO_RELAY_OFF   12                  //! something unused
+#define PIN_AIN_CURRENT      0                   //! something unused - gpio 2
+#define PIN_AIN_VOLTAGE      1                   //! something unused - gpio 3
+#define PIN_GPIO_RX          8                   //! gpio 8
+//#define PIN_GPIO_TX          6                   //! gpio 6
+#define PIN_GPIO_TX          31                   //! gpio 31
+
+//! Switch pin should be low to switch lights on
+#define SWITCH_INVERSED
+//! resistance of the shunt in milli ohm
+#define SHUNT_VALUE                 1
+//! amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       1
+
 #endif
 
 

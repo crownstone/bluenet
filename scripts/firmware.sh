@@ -77,7 +77,8 @@ bootloader() {
 	if [ $? -eq 0 ]; then
 		sleep 1
 		# and set to load it
-		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_REGION_START
+#		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_REGION_START
+		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_START_ADDRESS
 	fi
 }
 

@@ -7,7 +7,8 @@ SCRIPT_DIR=$path/jlink
 TEMP_DIR=$path/tmp
 mkdir -p $TEMP_DIR
 
-DEVICE=nrf51822
+#DEVICE=nrf51822
+DEVICE=nRF52832_xxAA
 
 SOFTDEVICE_DIR=${1:? "$0 requires \"softdevice bin directory\" as first argument"}
 

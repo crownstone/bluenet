@@ -12,7 +12,8 @@ cp gdb/gdbinit $GDB_SCRIPT
 
 
 GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}-gdb
-DEVICE=nrf51822
+#DEVICE=nrf51822
+DEVICE=nRF52832_xxAA
 
 TARGET=${1:? "$0 requires \"target\" as first argument"}
 

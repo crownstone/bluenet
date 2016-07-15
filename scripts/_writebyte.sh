@@ -9,7 +9,8 @@ mkdir -p $TEMP_DIR
 
 ADDRESS=${1:? "Requires address as argument"}
 VALUE=$2
-DEVICE=nrf51822
+#DEVICE=nrf51822
+DEVICE=nRF52832_xxAA
 
 sed "s|@ADDRESS@|$ADDRESS|" $SCRIPT_DIR/writebyte.script > $TEMP_DIR/writebyte.script.1
 sed "s|@VALUE@|$VALUE|" $TEMP_DIR/writebyte.script.1 > $TEMP_DIR/writebyte.script
