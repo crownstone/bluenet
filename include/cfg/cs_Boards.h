@@ -28,6 +28,7 @@
 #define CROWNSTONE5          15
 #define DOBEACON2            16
 #define PCA10036             17
+#define PCA10040             18
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
@@ -295,7 +296,7 @@
 #endif
 
 
-#if(HARDWARE_BOARD==PCA10036)
+#if(HARDWARE_BOARD==PCA10036 || HARDWARE_BOARD==PCA10040)
 #define LED_1                17
 #define LED_2                18
 #define LED_3                19
@@ -307,8 +308,8 @@
 #define PIN_AIN_CURRENT      0                   //! something unused - gpio 2
 #define PIN_AIN_VOLTAGE      1                   //! something unused - gpio 3
 #define PIN_GPIO_RX          8                   //! gpio 8
-//#define PIN_GPIO_TX          6                   //! gpio 6
-#define PIN_GPIO_TX          31                   //! gpio 31
+#define PIN_GPIO_TX          6                   //! gpio 6
+//#define PIN_GPIO_TX          31                   //! gpio 31
 
 //! Switch pin should be low to switch lights on
 #define SWITCH_INVERSED
