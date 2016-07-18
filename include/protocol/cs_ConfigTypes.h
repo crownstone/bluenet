@@ -51,16 +51,16 @@ enum ConfigurationTypes {
 	CONFIG_KEY_OWNER                        = 35,     //! 0x23
 	CONFIG_KEY_MEMBER                       = 36,     //! 0x24
 	CONFIG_KEY_GUEST                        = 37,     //! 0x25
-	CONFIG_DEFAULT_ON                       = 38,
-	CONFIG_SCAN_INTERVAL                    = 39,
-	CONFIG_SCAN_WINDOW                      = 40,
-	CONFIG_RELAY_HIGH_DURATION              = 41,
-	CONFIG_LOW_TX_POWER                     = 42,
-	CONFIG_VOLTAGE_MULTIPLIER               = 43,
-	CONFIG_CURRENT_MULTIPLIER               = 44,
-	CONFIG_VOLTAGE_ZERO					    = 45,
-	CONFIG_CURRENT_ZERO                     = 46,
-	CONFIG_POWER_ZERO                       = 47,
+	CONFIG_DEFAULT_ON                       = 38,     //! 0x26
+	CONFIG_SCAN_INTERVAL                    = 39,     //! 0x27
+	CONFIG_SCAN_WINDOW                      = 40,     //! 0x28
+	CONFIG_RELAY_HIGH_DURATION              = 41,     //! 0x29
+	CONFIG_LOW_TX_POWER                     = 42,     //! 0x2A
+	CONFIG_VOLTAGE_MULTIPLIER               = 43,     //! 0x2B
+	CONFIG_CURRENT_MULTIPLIER               = 44,     //! 0x2C
+	CONFIG_VOLTAGE_ZERO					    = 45,     //! 0x2D
+	CONFIG_CURRENT_ZERO                     = 46,     //! 0x2E
+	CONFIG_POWER_ZERO                       = 47,     //! 0x2F
 
 	CONFIG_TYPES
 };

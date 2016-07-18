@@ -1,4 +1,4 @@
-# Bluenet protocol v0.4.1
+# Bluenet protocol v0.4.2
 -------------------------
 
 # Advertisements and scan response
@@ -192,6 +192,8 @@ Type nr | Type name | Payload type | Payload description
 14 | User feedback | ... | User feedback ..., TBD
 15 | Schedule entry | ... | Schedule entry ..., TBD
 16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON
+17 | Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode
+18 | Request Service Data | - | Causes the crownstone to send it's service data over the mesh
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 
@@ -253,6 +255,16 @@ Type nr | Type name | Payload type | Description
 35 | Owner encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions
 36 | Member encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions
 37 | Guest encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt guest access functions
+38 | Default ON | uint 8 | Set's the default switch state to 255 if true, or to 0 if false. Value is 0 for false, or any other for true
+39 | Scan Interval | uint 16 | Set the scan interval to ...
+40 | Scan Window | uint 16 | Set the scan window to ...
+41 | Relay High Duration | uint 16 | Set the time/duration that the relay is set to high
+42 | Low Tx Power | int 8 | Set the tx power used when in low transmission power for bonding
+43 | Voltage Multiplier | float | Set the voltage multiplier (for power measurement)
+44 | Current Multiplier | float | Set the current multiplier (for power measurement)
+45 | Voltage Zero | float | Set the voltage zero level (for power measurement)
+46 | Current Zero | float | Set the current zero level (for power measurement)
+47 | Power Zero | float | Set the power zero level (for power measurement)
 
 OpCodes:
 
@@ -286,6 +298,7 @@ Type nr | Type name | Payload type | Description | Persistent
 133 | Schedule | [Schedule List](#schedule_list_packet) | Schedule, TBD | x
 134 | Operation Mode | uint 8 | ..., TBD | x
 135 | Temperature | int 32 | Chip temperature in °C |
+136 | Time | uint 32 | Get the current time
 
 OpCodes:
 
