@@ -334,7 +334,11 @@ void Crownstone::configureStack() {
 		// advertising.
 		// [29.06.16] this happened on the pca10000, but doesn't seem to happen on the dobeacon v0.7 need to check
 		// on other versions. On the contrary, the reset seems to crash the dobeacon v0.7
-//		_mesh->restart();
+#if HARDWARE_BOARD==PCA10031
+		if (_mesh->isRunning()) {
+			_mesh->restart();
+		}
+#endif
 
 		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
 		//   disconnecting from the device. just calling startAdvertising is enough
@@ -374,6 +378,8 @@ void Crownstone::configureAdvertisement() {
 	//! to advertise certain state variables
 	_serviceData = new ServiceData();
 
+	// initialize service data
+
 	//! read crownstone id from storage
 	uint16_t crownstoneId;
 	_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
@@ -381,6 +387,17 @@ void Crownstone::configureAdvertisement() {
 
 	//! and set it to the service data
 	_serviceData->updateCrownstoneId(crownstoneId);
+
+	// fill service data with initial data
+	uint8_t switchState;
+	_stateVars->get(STATE_SWITCH_STATE, switchState);
+	_serviceData->updateSwitchState(switchState);
+
+	_serviceData->updateTemperature(getTemperature());
+
+	int32_t powerUsage;
+	_stateVars->get(STATE_POWER_USAGE, powerUsage);
+	_serviceData->updatePowerUsage(powerUsage);
 
 	//! assign service data to stack
 	_stack->setServiceData(_serviceData);
@@ -583,7 +600,6 @@ void Crownstone::startUp() {
 			_tracker->startTracking();
 		}
 
-//		_mesh->init();
 		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
 			_mesh->start();
 		}

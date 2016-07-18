@@ -51,7 +51,7 @@ private:
 	bool started;
 
 	bool                     _first[MESH_NUM_OF_CHANNELS];
-	uint32_t                 _mesh_init_time = 0;
+	uint32_t                 _mesh_start_time = 0;
 
 	//! constructor is hidden from the user
 	Mesh();
@@ -91,6 +91,8 @@ public:
 	void stop();
 	//! restart the mesh, i.e. on disconnect to start advertising
 	void restart();
+
+	inline bool isRunning() { return started; }
 
 	//! send message
 	void send(uint8_t channel, void* p_data, uint8_t length);

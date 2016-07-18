@@ -29,9 +29,9 @@ void Settings::init() {
 	loadPersistentStorage();
 
 	// need to initialize the flags if they are uninitialized, e.g. first time
-	if (_storageStruct.flagsBit.flagsUninitialized) {
-		initFlags();
-	}
+//	if (_storageStruct.flagsBit.flagsUninitialized) {
+//		initFlags();
+//	}
 
 	_initialized = true;
 }
@@ -765,53 +765,74 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	return ERR_SUCCESS;
 }
 
-void Settings::initFlags() {
-	// set all flags to their default value
-	_storageStruct.flagsBit.meshDisabled = !MESHING;
-	_storageStruct.flagsBit.encryptionDisabled = !ENCRYPTION;
-	_storageStruct.flagsBit.iBeaconDisabled = !IBEACON;
-	_storageStruct.flagsBit.scannerDisabled = !INTERVAL_SCANNER_ENABLED;
-	_storageStruct.flagsBit.continuousPowerSamplerDisabled = !CONTINUOUS_POWER_SAMPLER;
-	_storageStruct.flagsBit.defaultOff = !DEFAULT_ON;
-	_storageStruct.flagsBit.flagsUninitialized = false;
-}
+//void Settings::initFlags() {
+//	// set all flags to their default value
+//	_storageStruct.flagsBit.meshDisabled = !MESHING;
+//	_storageStruct.flagsBit.encryptionDisabled = !ENCRYPTION;
+//	_storageStruct.flagsBit.iBeaconDisabled = !IBEACON;
+//	_storageStruct.flagsBit.scannerDisabled = !INTERVAL_SCANNER_ENABLED;
+//	_storageStruct.flagsBit.continuousPowerSamplerDisabled = !CONTINUOUS_POWER_SAMPLER;
+//	_storageStruct.flagsBit.defaultOff = !DEFAULT_ON;
+//	_storageStruct.flagsBit.flagsUninitialized = false;
+//}
 
 bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 
 	// should not happen, but better to check
-	if (_storageStruct.flagsBit.flagsUninitialized) {
-		// before updating a flag, we need to initialize all flags to their default
-		// value, otherwise they will be wrongly read after the update
-		initFlags();
-	}
+//	if (_storageStruct.flagsBit.flagsUninitialized) {
+//		// before updating a flag, we need to initialize all flags to their default
+//		// value, otherwise they will be wrongly read after the update
+//		initFlags();
+//	}
+
+#if PERSISTENT_FLAGS_DISABLED==1
+	LOGw("persistent storage for flags disabled!!");
+	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
+	return false;
+#endif
 
 	if (value == isSet(type)) {
+		LOGi("flag is already set");
 		return true;
 	}
 
+	uint8_t* p_item;
+
 	switch(type) {
-		case CONFIG_MESH_ENABLED : {
-		_storageStruct.flagsBit.meshDisabled = !value;
+	case CONFIG_MESH_ENABLED : {
+		p_item = (uint8_t*)&_storageStruct.meshEnabled;
+		Storage::setUint8(value, _storageStruct.meshEnabled);
+//		_storageStruct.flagsBit.meshDisabled = !value;
 		break;
 	}
 	case CONFIG_ENCRYPTION_ENABLED : {
-		_storageStruct.flagsBit.encryptionDisabled = !value;
+		p_item = (uint8_t*)&_storageStruct.encryptionEnabled;
+		Storage::setUint8(value, _storageStruct.encryptionEnabled);
+//		_storageStruct.flagsBit.encryptionDisabled = !value;
 		break;
 	}
 	case CONFIG_IBEACON_ENABLED : {
-		_storageStruct.flagsBit.iBeaconDisabled = !value;
+		p_item = (uint8_t*)&_storageStruct.iBeaconEnabled;
+		Storage::setUint8(value, _storageStruct.iBeaconEnabled);
+//		_storageStruct.flagsBit.iBeaconDisabled = !value;
 		break;
 	}
 	case CONFIG_SCANNER_ENABLED : {
-		_storageStruct.flagsBit.scannerDisabled = !value;
+		p_item = (uint8_t*)&_storageStruct.scannerEnabled;
+		Storage::setUint8(value, _storageStruct.scannerEnabled);
+//		_storageStruct.flagsBit.scannerDisabled = !value;
 		break;
 	}
 	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
-		_storageStruct.flagsBit.continuousPowerSamplerDisabled = !value;
+		p_item = (uint8_t*)&_storageStruct.continuousPowerSamplerEnabled;
+		Storage::setUint8(value, _storageStruct.continuousPowerSamplerEnabled);
+//		_storageStruct.flagsBit.continuousPowerSamplerDisabled = !value;
 		break;
 	}
 	case CONFIG_DEFAULT_ON: {
-		_storageStruct.flagsBit.defaultOff = !value;
+		p_item = (uint8_t*)&_storageStruct.defaultOff;
+		Storage::setUint8(value, _storageStruct.defaultOff);
+//		_storageStruct.flagsBit.defaultOff = !value;
 		break;
 	}
 	default: {
@@ -820,7 +841,8 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 	}
 
 	if (persistent) {
-		savePersistentStorageItem(&_storageStruct.flags);
+		savePersistentStorageItem(p_item, 4);
+//		savePersistentStorageItem(&_storageStruct.flags);
 	}
 	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
 	return true;
@@ -828,46 +850,53 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 
 bool Settings::readFlag(uint8_t type, bool& value) {
 
-	bool default_value;
+//	bool default_value;
+
 	switch(type) {
 	case CONFIG_MESH_ENABLED: {
-		value = !_storageStruct.flagsBit.meshDisabled;
-		default_value = MESHING;
+		Storage::getUint8(_storageStruct.meshEnabled, (uint8_t*)&value, MESHING);
+//		value = !_storageStruct.flagsBit.meshDisabled;
+//		default_value = MESHING;
 		break;
 	}
 	case CONFIG_ENCRYPTION_ENABLED: {
-		value = !_storageStruct.flagsBit.encryptionDisabled;
-		default_value = ENCRYPTION;
+		Storage::getUint8(_storageStruct.encryptionEnabled, (uint8_t*)&value, ENCRYPTION);
+//		value = !_storageStruct.flagsBit.encryptionDisabled;
+//		default_value = ENCRYPTION;
 		break;
 	}
 	case CONFIG_IBEACON_ENABLED: {
-		value = !_storageStruct.flagsBit.iBeaconDisabled;
-		default_value = IBEACON;
+		Storage::getUint8(_storageStruct.iBeaconEnabled, (uint8_t*)&value, IBEACON);
+//		value = !_storageStruct.flagsBit.iBeaconDisabled;
+//		default_value = IBEACON;
 		break;
 	}
 	case CONFIG_SCANNER_ENABLED: {
-		value = !_storageStruct.flagsBit.scannerDisabled;
-		default_value = INTERVAL_SCANNER_ENABLED;
+		Storage::getUint8(_storageStruct.scannerEnabled, (uint8_t*)&value, INTERVAL_SCANNER_ENABLED);
+//		value = !_storageStruct.flagsBit.scannerDisabled;
+//		default_value = INTERVAL_SCANNER_ENABLED;
 		break;
 	}
 	case CONFIG_CONT_POWER_SAMPLER_ENABLED: {
-		value = !_storageStruct.flagsBit.continuousPowerSamplerDisabled;
-		default_value = CONTINUOUS_POWER_SAMPLER;
+		Storage::getUint8(_storageStruct.continuousPowerSamplerEnabled, (uint8_t*)&value, CONTINUOUS_POWER_SAMPLER);
+//		value = !_storageStruct.flagsBit.continuousPowerSamplerDisabled;
+//		default_value = CONTINUOUS_POWER_SAMPLER;
 		break;
 	}
 	case CONFIG_DEFAULT_ON: {
-		value = !_storageStruct.flagsBit.defaultOff;
-		default_value = DEFAULT_ON;
+		Storage::getUint8(_storageStruct.defaultOff, (uint8_t*)&value, DEFAULT_ON);
+//		value = !_storageStruct.flagsBit.defaultOff;
+//		default_value = DEFAULT_ON;
 		break;
 	}
 	default:
 		return false;
 	}
 
-	if (_storageStruct.flagsBit.flagsUninitialized) {
-		value = default_value;
-		return true;
-	}
+//	if (_storageStruct.flagsBit.flagsUninitialized) {
+//		value = default_value;
+//		return true;
+//	}
 
 	return true;
 }
@@ -971,6 +1000,6 @@ void Settings::factoryReset(uint32_t resetCode) {
 
 	_storage->clearStorage(PS_ID_CONFIGURATION);
 	memset(&_storageStruct, 0xFF, sizeof(_storageStruct));
-	initFlags();
+//	initFlags();
 //	loadPersistentStorage();
 }

@@ -72,7 +72,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //						(dev.addr[5] == 0xC1 && dev.addr[4] == 0x1F && dev.addr[3] == 0xDC && dev.addr[2] == 0xF9 && dev.addr[1] == 0xB3 && dev.addr[0] == 0xFC)) {
 						LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
 								dev.addr[4], dev.addr[3], dev.addr[2], dev.addr[1],
-								dev.addr[0], dev.txPower, dev.occurrences);
+								dev.addr[0], dev.rssi, dev.occurrences);
 //					}
 				}
 #endif

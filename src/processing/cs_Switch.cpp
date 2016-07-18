@@ -17,8 +17,8 @@
 
 //#define PRINT_SWITCH_VERBOSE
 
+// [18.07.16] added for first version of plugins to disable the use of the igbt
 //#define PWM_DISABLE
-#define HAS_RELAY true
 
 Switch::Switch()
 {

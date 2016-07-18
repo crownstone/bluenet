@@ -38,5 +38,8 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			updateTemperature(*(int8_t*)p_data);
 			break;
 		}
+		default:
+			return;
 		}
+		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
 	}

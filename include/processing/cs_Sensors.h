@@ -47,13 +47,6 @@ public:
 	void stopTicking();
 	void scheduleNextTick();
 
-	//! helper functions, only operate on PWM instance
-	//! static so that they can be used by the
-	//! GPIO interrupt handler
-	static void switchPwmSignal();
-	static void switchPwmOn();
-	static void switchPwmOff();
-
 private:
 	uint32_t _appTimerId;
 	bool _initialized;

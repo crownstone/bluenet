@@ -151,7 +151,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		LOGi("%s ibeacon", enable ? STR_ENABLE : STR_DISABLE);
 		Settings::getInstance().updateFlag(CONFIG_IBEACON_ENABLED, enable, true);
-//		EventDispatcher::getInstance().dispatch(EVT_ENABLED_IBEACON, &enable, sizeof(enable));
 
 		break;
 	}
