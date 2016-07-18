@@ -46,10 +46,10 @@ void State::init() {
 	ps_state_t state;
 
 	bool defaultOn = Settings::getInstance().isSet(CONFIG_DEFAULT_ON);
-	switch_state_t defaultSwitchState = defaultOn ? 255 : 0;
+	switch_state_storage_t defaultSwitchState = defaultOn ? 255 : 0;
 
 #ifdef SWITCH_STATE_PERSISTENT
-	_switchState = new CyclicStorage<switch_state_t, SWITCH_STATE_REDUNDANCY>(_stateHandle,
+	_switchState = new CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY>(_stateHandle,
 	        Storage::getOffset(&state, state.switchState), defaultSwitchState);
 #else
 	_switchState = defaultSwitchState;

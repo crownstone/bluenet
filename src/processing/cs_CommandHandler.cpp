@@ -446,10 +446,10 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
 		uint8_t value = payload->switchState;
 
-		uint8_t current = Switch::getInstance().getValue();
+		uint8_t current = Switch::getInstance().getPwm();
 //		LOGi("current pwm: %d", current);
 		if (value != current) {
-			Switch::getInstance().setValue(value);
+			Switch::getInstance().setPwm(value);
 		}
 		break;
 	}

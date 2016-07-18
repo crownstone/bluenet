@@ -27,7 +27,7 @@ typedef uint32_t seq_number_t;
 typedef uint32_t reset_counter_t;
 
 #define SWITCH_STATE_REDUNDANCY 10
-typedef uint32_t switch_state_t;
+typedef uint32_t switch_state_storage_t;
 
 #define ACCUMULATED_ENERGY_REDUNDANCY 72
 #define ACCUMULATED_ENERGY_DEFAULT 0
@@ -38,7 +38,7 @@ typedef int32_t accumulated_energy_t;
  */
 struct ps_state_t : ps_storage_base_t {
 	// switch state
-	uint8_t switchState[SWITCH_STATE_REDUNDANCY * ELEM_SIZE(switch_state_t)];
+	uint8_t switchState[SWITCH_STATE_REDUNDANCY * ELEM_SIZE(switch_state_storage_t)];
 	// counts resets
 	uint8_t resetCounter[RESET_COUNTER_REDUNDANCY * ELEM_SIZE(reset_counter_t)];
 	// accumulated power
@@ -178,7 +178,7 @@ protected:
 	CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY>* _resetCounter;
 	//! keeps track of the switch state, i.e. current PWM value
 #ifdef SWITCH_STATE_PERSISTENT
-	CyclicStorage<switch_state_t, SWITCH_STATE_REDUNDANCY>* _switchState;
+	CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY>* _switchState;
 #else
 	uint8_t _switchState;
 #endif

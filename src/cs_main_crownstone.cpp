@@ -558,9 +558,11 @@ void Crownstone::startUp() {
 		_stack->startTicking();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
-		uint8_t switchState;
-		_stateVars->get(STATE_SWITCH_STATE, switchState);
-		_switch->setValue(switchState);
+		// restore the last value. the switch reads the last state from the storage, but does
+		// not automatically update the pwm/relay values. so we read out the last value
+		// and set it again to update the pwm
+		uint8_t pwm = _switch->getPwm();
+		_switch->setPwm(pwm);
 
 		//! start ticking of peripherals
 		_temperatureGuard->startTicking();
