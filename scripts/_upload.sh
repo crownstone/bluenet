@@ -45,7 +45,7 @@ echo "Program application starting from $ADDRESS"
 sed -i "s|@START_ADDRESS@|$ADDRESS|" $TEMP_DIR/upload.script
 
 if [ -z $3 ]; then
-	$JLINK -Device $DEVICE -If SWD $TEMP_DIR/upload.script
+	$JLINK -Device $DEVICE -speed 100 -If SWD $TEMP_DIR/upload.script
 else
-	$JLINK -Device $DEVICE -SelectEmuBySN $3 -If SWD $TEMP_DIR/upload.script
+	$JLINK -Device $DEVICE -speed 100 -SelectEmuBySN $3 -If SWD $TEMP_DIR/upload.script
 fi

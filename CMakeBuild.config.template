@@ -1,0 +1,61 @@
+########################################################################################################################
+# Configuration options, used by build systems and scripts. Please fill in the following variables.
+########################################################################################################################
+
+# The name that is advertised.
+# Should be 9 characters or less. You can use up to 25, but the name in the advertisement package will be
+# truncated to 9 characters.
+BLUETOOTH_NAME=
+
+# The hardware board where you want to upload the firmware
+# By default, if you use a dev board, use
+#   HARDWARE_BOARD=CROWNSTONE4
+# or if you use a PCA10000, then set
+#   HARDWARE_BOARD=PCA10000
+# For the complete overview of the hardware boards, see $BLUENET_DIR/CMakeBuild.config.default
+HARDWARE_BOARD=
+
+# Version of the nrf51 chip, use script/hardware_version.sh to check your version
+HARDWARE_VERSION=
+
+# By default, the values from the CmakeBuild.config.default
+# are used
+# Copy any value over from the $BLUENET_DIR/CMakeBuild.config.default that you want to change. E.g.
+# enable meshing by setting
+#   MESHING=1
+# or enable device scanner by setting
+#   INTERVAL_SCANNER_ENABLED=1
+# or enable the power service by setting
+#   POWER_SERVICE=1
+# or set serial verbosity to debug by setting
+#   SERIAL_VERBOSITY=DEBUG
+
+########################################################################################################################
+# Softdevice
+# By default we are using the Softdevice s130 v1.0 from the Nordic SDK. If you want to use the
+# Softdevice s110 instead, copy over and uncomment the block Softdevice s110 from the
+# $BLUENET_DIR/CMakeBuild.config.default
+# If you download a different version of the softdevice, you also need to adjust the variables
+# SOFTDEVICE_DIR, SOFTDEVICE_DIR_API and SOFTDEVICE_DIR_HEX
+########################################################################################################################
+
+
+########################################################################################################################
+# Build System Configuration. This variables need to be adjusted to your build system paths.
+# Note: They can be left as is if you use the install.sh script at crownstone-sdk
+########################################################################################################################
+
+# This is the directory where the cross-compiler resides
+# COMPILER_PATH=
+
+# The compiler type
+# COMPILER_TYPE=arm-none-eabi
+
+# The JLink utility (when using the Segger to flash the nRF)
+# JLINK=
+
+# The JLink utilty that can be used with gdb
+# JLINK_GDB_SERVER=
+
+# Location of the Nordic Software Development Kit
+# NRF51822_DIR=

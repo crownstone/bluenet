@@ -84,6 +84,15 @@ void printArray(T* arr, uint16_t len) {
 	_log(DEBUG, "\r\n");
 }
 
+template<typename T>
+std::string toBinaryString(T& value) {
+	std::string result("");
+	for (int i = sizeof(T) * 8 - 1; i >= 0; --i) {
+		result += value & (1 << i) ? "1" : "0";
+	}
+	return result;
+}
+
 inline void print_heap(const std::string & msg) {
 	uint8_t *p = (uint8_t*)malloc(1);
 	LOGd("%s %p", msg.c_str(), p);

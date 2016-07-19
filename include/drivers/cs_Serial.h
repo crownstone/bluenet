@@ -10,6 +10,8 @@
 extern "C" {
 #endif
 
+#include <cfg/cs_Debug.h>
+
 /*
  * Commonly LOG functionality is provided with as first parameter the level of severity of the message. Subsequently
  * the message follows, eventually succeeded by content if the string contains format specifiers. This means that this
@@ -23,34 +25,53 @@ extern "C" {
 #define FATAL                4
 #define NONE                 5
 
+#define CRLN "\r\n"
 
 #ifndef SERIAL_VERBOSITY
 #error "You have to specify SERIAL_VERBOSITY"
+#define SERIAL_VERBOSITY NONE
 #endif
+
+//#define INCLUDE_TIMESTAMPS
 
 #if SERIAL_VERBOSITY<NONE
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-	#define log(level, fmt, ...) \
-			   write("[%-30.30s : %-5d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__)
-
-	#define _logFirst(level, fmt, ...) \
-		   write("[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
-
 	#define _log(level, fmt, ...) \
-			   write(fmt, ##__VA_ARGS__)
-#else
-	#define log(level, fmt, ...)
+			   if (level >= SERIAL_VERBOSITY) { \
+				   write(fmt, ##__VA_ARGS__); \
+			   }
 
-	#define _log(level, fmt, ...)
+#ifdef INCLUDE_TIMESTAMPS
+
+	#define log(level, fmt, ...) \
+		_log(level, "[%-20.20s : %-5d](%d) " fmt, _FILE, __LINE__, now(), ##__VA_ARGS__)
+
+	#define logLN(level, fmt, ...) \
+		_log(level, "[%-20.20s : %-5d](%d) " fmt CRLN, _FILE, __LINE__, now(), ##__VA_ARGS__)
+
+#else
+
+	#define log(level, fmt, ...) \
+		_log(level, "[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
+
+	#define logLN(level, fmt, ...) \
+		_log(level, "[%-30.30s : %-5d] " fmt CRLN, _FILE, __LINE__, ##__VA_ARGS__)
+
 #endif
 
-#define LOGd(fmt, ...) log(DEBUG, fmt, ##__VA_ARGS__)
-#define LOGi(fmt, ...) log(INFO, fmt, ##__VA_ARGS__)
-#define LOGw(fmt, ...) log(WARN, fmt, ##__VA_ARGS__)
-#define LOGe(fmt, ...) log(ERROR, fmt, ##__VA_ARGS__)
-#define LOGf(fmt, ...) log(FATAL, fmt, ##__VA_ARGS__)
+#else
+	#define _log(level, fmt, ...)
+	#define log(level, fmt, ...)
+	#define logLN(level, fmt, ...)
+#endif
+
+#define LOGd(fmt, ...) logLN(DEBUG, fmt, ##__VA_ARGS__)
+#define LOGi(fmt, ...) logLN(INFO, fmt, ##__VA_ARGS__)
+#define LOGw(fmt, ...) logLN(WARN, fmt, ##__VA_ARGS__)
+#define LOGe(fmt, ...) logLN(ERROR, fmt, ##__VA_ARGS__)
+#define LOGf(fmt, ...) logLN(FATAL, fmt, ##__VA_ARGS__)
 
 #if SERIAL_VERBOSITY>DEBUG
 #undef LOGd
@@ -70,6 +91,11 @@ extern "C" {
 #if SERIAL_VERBOSITY>ERROR
 #undef LOGe
 #define LOGe(fmt, ...)
+#endif
+
+#if SERIAL_VERBOSITY>FATAL
+#undef LOGf
+#define LOGf(fmt, ...)
 #endif
 
 /** Available Baud rates for UART. */
@@ -114,6 +140,10 @@ void config_uart();
  * Write a string with printf functionality.
  */
 int write(const char *str, ...);
+
+#ifdef INCLUDE_TIMESTAMPS
+int now();
+#endif
 
 #ifdef __cplusplus
 }

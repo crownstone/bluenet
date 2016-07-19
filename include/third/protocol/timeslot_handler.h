@@ -54,8 +54,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * @param[in] sys event from softdevice
  */
-void ts_sys_evt_handler(uint32_t evt);
-
 void ts_sd_event_handler(uint32_t evt);
 
 /** @brief initialize timeslot handler. Only called once */
@@ -101,7 +99,7 @@ uint64_t timeslot_get_end_time(void);
 
 bool timeslot_is_in_ts(void);
 
-void timeslot_handler_pause();
-void timeslot_handler_resume();
+bool timeslot_handler_pause();
+bool timeslot_handler_resume();
 
 #endif /* _TIMESLOT_HANDLER_H__ */

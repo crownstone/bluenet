@@ -8,13 +8,11 @@
 
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
-#include "structs/cs_AlertAccessor.h"
-
-#define SCHEDULE_SERVICE_UPDATE_FREQUENCY 2
+#include <events/cs_EventListener.h>
 
 /** ScheduleService organizes ticks for all components for non-urgent timing.
  */
-class ScheduleService : public BLEpp::Service {
+class ScheduleService : public BLEpp::Service, EventListener {
 public:
 //	typedef function<int8_t()> func_t;
 
@@ -29,31 +27,20 @@ public:
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void init();
+	void createCharacteristics();
 
-	/** Returns the current time as posix time
-	 * returns 0 when no time was set yet
-	 */
-	uint32_t getTime();
-
-	/** Set current posix time */
-	void setTime(uint32_t time);
-
-	/** Perform non urgent functionality every main loop.
-	 *
-	 * Every component has a "tick" function which is for non-urgent things.
-	 * Urgent matters have to be resolved immediately in interrupt service handlers.
-	 */
-	void tick();
-	void scheduleNextTick();
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 protected:
+
 	void addCurrentTimeCharacteristic();
-
-
+	void addWriteScheduleEntryCharacteristic();
+	void addListScheduleEntriesCharacteristic();
 
 private:
 	//! References to characteristics that need to be written from other functions
 	BLEpp::Characteristic<uint32_t> *_currentTimeCharacteristic;
-	uint32_t _rtcTimeStamp;
+	BLEpp::Characteristic<uint8_t*> *_writeScheduleEntryCharacteristic;
+	BLEpp::Characteristic<uint8_t*> *_listScheduleEntriesCharacteristic;
+
 };

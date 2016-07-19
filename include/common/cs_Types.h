@@ -9,4 +9,6 @@
 #include <cstdint>
 
 typedef uint8_t* buffer_ptr_t;
+typedef uint16_t buffer_size_t;
 
+typedef uint16_t ERR_CODE;

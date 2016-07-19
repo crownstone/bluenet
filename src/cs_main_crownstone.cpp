@@ -19,10 +19,10 @@
  *********************************************************************************************************************/
 
 //! temporary defines
-#define MESHING_PARALLEL 1
 
+#define RESET_COUNTER
 //#define MICRO_VIEW 1
-//#define CHANGE_NAME_ON_RESET
+#define CHANGE_NAME_ON_RESET
 //#define CHANGE_MINOR_ON_RESET
 
 /**********************************************************************************************************************
@@ -38,21 +38,19 @@
 #include "drivers/cs_Timer.h"
 #include "structs/buffer/cs_MasterBuffer.h"
 
-#if CHAR_MESHING==1
-#include <protocol/cs_Mesh.h>
 #include <drivers/cs_RNG.h>
-#endif
 
 /**********************************************************************************************************************
  * Custom includes
  *********************************************************************************************************************/
 
-#include <cfg/cs_Settings.h>
-
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventTypes.h>
 
 #include <ble/cs_DoBotsManufac.h>
+
+#include <processing/cs_PowerSampling.h>
+#include <storage/cs_State.h>
 
 /**********************************************************************************************************************
  * Main functionality
@@ -60,49 +58,198 @@
 
 using namespace BLEpp;
 
+Crownstone::Crownstone() :
+	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL),
+	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
+	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
+	_scheduleService(NULL),
+	_serviceData(NULL), _beacon(NULL),
+	_mesh(NULL), _sensors(NULL), _fridge(NULL),
+	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL),
+	_advertisementPaused(false), _mainTimer(0), _operationMode(0)
+{
 
-/**
- * If UART is enabled this will be the message printed out over a serial connection. Connectors are expensive, so UART
- * is not available in the final product.
- */
-void Crownstone::welcome() {
-	config_uart();
-	_log(INFO, "\r\n");
-	BLEutil::print_heap("Heap init");
-	BLEutil::print_stack("Stack init");
-	//! To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)
-	//! For (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes)
-	LOGi("Welcome at the nRF51822 code for meshing.");
-	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
-	LOGi("Compilation time: %s", __TIME__);
+	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
+	EventDispatcher::getInstance().addListener(this);
+
+	//! set up the bluetooth stack that controls the hardware.
+	_stack = &Nrf51822BluetoothStack::getInstance();
+
+	// create all the objects that are needed for execution, but make sure they
+	// don't execute any softdevice related code. do that in an init function
+	// and call it in the setup/configure phase
+	_timer = &Timer::getInstance();
+
+	// persistent storage, configuration, state
+	_storage = &Storage::getInstance();
+	_settings = &Settings::getInstance();
+	_stateVars = &State::getInstance();
+
+	//! create command handler
+	_commandHandler = &CommandHandler::getInstance();
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+	// switch using PWM or Relay
+	_switch = &Switch::getInstance();
+	//! create temperature guard
+	_temperatureGuard = new TemperatureGuard();
+
+	_powerSampler = &PowerSampling::getInstance();
+#endif
+
+};
+
+void Crownstone::init() {
+
+
+	LOGi(FMT_HEADER, "init");
+
+	//! initialize drivers
+	initDrivers();
+
+	LOGi(FMT_HEADER, "configure");
+
+	//! configure the crownstone
+	configure();
+
+	LOGi(FMT_HEADER, "setup");
+
+	_stateVars->get(STATE_OPERATION_MODE, _operationMode);
+//	_operationMode = OPERATION_MODE_NORMAL;
+//	_operationMode = OPERATION_MODE_SETUP;
+
+	switch(_operationMode) {
+	case OPERATION_MODE_SETUP: {
+
+		LOGd("Configure setup mode");
+
+		//! create services
+		createSetupServices();
+
+		//! set it by default into low tx mode
+		_stack->setTxPowerLevel(LOW_TX_POWER);
+
+		LOGi("Enable PIN encryption");
+		//! use PIN encryption for setup mode
+		_stack->setEncrypted(true);
+
+		break;
+	}
+	case OPERATION_MODE_NORMAL: {
+
+		LOGd("Configure normal operation mode");
+
+		//! setup normal operation mode
+		prepareCrownstone();
+
+		//! create services
+		createCrownstoneServices();
+
+		break;
+	}
+	case OPERATION_MODE_DFU: {
+
+		CommandHandler::getInstance().handleCommand(CMD_GOTO_DFU);
+		while(true) {}; // loop until reset triggers
+	}
+	}
+
+	//! loop through all services added to the stack and create the characteristics
+	_stack->createCharacteristics();
+
+	LOGi(FMT_HEADER, "init services");
+
+	_stack->initServices();
+
+	// [16.06.16] need to execute app scheduler, otherwise pstorage
+	// events will get lost ... maybe need to check why that actually happens??
+	app_sched_execute();
+}
+
+void Crownstone::configure() {
+
+	LOGi("> stack ...");
+	//! configure parameters for the Bluetooth stack
+	configureStack();
+
+#ifdef RESET_COUNTER
+	uint32_t resetCounter;
+	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
+	++resetCounter;
+	LOGf("Reset counter at: %d", resetCounter);
+	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
+#endif
+
+	//! set advertising parameters such as the device name and appearance.
+	//! Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
+	setName();
+
+	LOGi("> advertisement ...");
+	//! configure advertising parameters
+	configureAdvertisement();
+
+//	BLEutil::print_heap("Heap config: ");
+//	BLEutil::print_stack("Stack config: ");
 }
 
 /**
- * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
+ * This must be called after the SoftDevice has started.
  */
-void Crownstone::setName() {
-#ifdef CHANGE_NAME_ON_RESET
-	uint16_t minor;
-	ps_configuration_t cfg = Settings::getInstance().getConfig();
-	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
-	char devicename[32];
-	sprintf(devicename, "%s_%d", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(minor));
-	std::string device_name = std::string(devicename);
-	//! End test for wouter
-#else
+void Crownstone::initDrivers() {
 
-	//! assemble default name from BLUETOOTH_NAME and COMPILATION_TIME
-	char devicename[32];
-	sprintf(devicename, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
-	//! check config (storage) if another name was stored
-	std::string device_name;
-	//! use default name in case no stored name is found
-	Storage::getString(Settings::getInstance().getConfig().device_name, device_name, std::string(devicename));
+	LOGd(FMT_INIT, "stack");
+
+	// things that need to be configured on the stack **BEFORE** init is called
+#if LOW_POWER_MODE==0
+	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM);
+#else
+	//! TODO: depends on board!
+//	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_XTAL_50_PPM);
+	_stack->setClockSource(CLOCK_SOURCE);
 #endif
-	//! assign name
-	LOGi("Set name to %s", device_name.c_str());
-	_stack->updateDeviceName(device_name); //! max len = ble_gap_devname_max_len (31)
-	_stack->updateAppearance(BLE_APPEARANCE_GENERIC_TAG);
+
+	//! start up the softdevice early because we need it's functions to configure devices it ultimately controls.
+	//! in particular we need it to set interrupt priorities.
+	_stack->init();
+
+	LOGd(FMT_INIT, "timers");
+	_timer->init();
+
+	LOGd(FMT_INIT, "pstorage");
+	// initialization of storage and settings has to be done **AFTER** stack is initialized
+	_storage->init();
+
+	LOGi("Loading configuration");
+	_settings->init();
+	_stateVars->init();
+
+	LOGd(FMT_INIT, "command handler");
+	_commandHandler->init();
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+	// switch / PWM init
+	LOGd(FMT_INIT, "switch / PWM");
+	_switch->init();
+
+	LOGd(FMT_INIT, "temperature guard");
+	_temperatureGuard->init();
+
+	_powerSampler->init();
+#endif
+
+	// init GPIOs
+#if HARDWARE_BOARD==PCA10001
+	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
+#endif
+
+#if HAS_LEDS==1
+	// Note: DO NOT USE THEM WHILE SCANNING OR MESHING ...
+	nrf_gpio_cfg_output(PIN_GPIO_LED_1);
+	nrf_gpio_cfg_output(PIN_GPIO_LED_2);
+	// setting the pin makes them turn off ....
+	nrf_gpio_pin_set(PIN_GPIO_LED_1);
+	nrf_gpio_pin_set(PIN_GPIO_LED_2);
+#endif
 }
 
 /** Sets default parameters of the Bluetooth connection.
@@ -120,14 +267,7 @@ void Crownstone::setName() {
  *
  * There is no whitelist defined, nor peer addresses.
  */
-void Crownstone::configStack() {
-#if LOW_POWER_MODE==0
-	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM);
-#else
-	//! TODO: depends on board!
-//	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_XTAL_50_PPM);
-	_stack->setClockSource(CLOCK_SOURCE);
-#endif
+void Crownstone::configureStack() {
 
 	_stack->setTxPowerLevel(TX_POWER);
 	_stack->setMinConnectionInterval(16);
@@ -136,176 +276,26 @@ void Crownstone::configStack() {
 	_stack->setSlaveLatency(10);
 	_stack->setAdvertisingInterval(ADVERTISEMENT_INTERVAL);
 	_stack->setAdvertisingTimeoutSeconds(0);
-}
-
-/**
- * This must be called after the SoftDevice has started.
- */
-void Crownstone::configDrivers() {
-//#if PWM_ENABLE==1
-//	pwm_config_t pwm_config;
-//	pwm_config.num_channels = 1;
-//	pwm_config.gpio_pin[0] = PIN_GPIO_SWITCH;
-//	pwm_config.mode = PWM_MODE_976;
-////	pwm_config.mode = PWM_MODE_122;
-//
-//	PWM::getInstance().init(&pwm_config);
-
-//	PWM& pwm = PWM::getInstance();
-//	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
-//	pwm.setValue(0, 0);
-
-	_temperatureGuard = new TemperatureGuard();
-	_temperatureGuard->startTicking();
-//#endif
-
-#if HARDWARE_BOARD==PCA10001
-	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
-#endif
-
-#if HAS_LEDS==1
-	// Note: DO NOT USE THEM WHILE SCANNING OR MESHING ...
-	nrf_gpio_cfg_output(PIN_GPIO_LED_1);
-	nrf_gpio_cfg_output(PIN_GPIO_LED_2);
-	// setting the pin makes them turn off ....
-	nrf_gpio_pin_set(PIN_GPIO_LED_1);
-	nrf_gpio_pin_set(PIN_GPIO_LED_2);
-#endif
-}
-
-void Crownstone::createServices() {
-	LOGi("Create all services");
-
-//! should be available always, but for now, only enable if required
-#if DEVICE_INFO_SERVICE==1
-	_deviceInformationService = new DeviceInformationService();
-	_stack->addService(_deviceInformationService);
-#endif
-
-#if GENERAL_SERVICE==1 || DEVICE_TYPE==DEVICE_FRIDGE
-	//! general services, such as internal temperature, setting names, etc.
-	_generalService = new GeneralService;
-	_stack->addService(_generalService);
-#endif
-
-#if INDOOR_SERVICE==1
-	//! now, build up the services and characteristics.
-	_localizationService = new IndoorLocalizationService;
-	_stack->addService(_localizationService);
-#endif
-
-#if POWER_SERVICE==1
-	_powerService = new PowerService;
-	_stack->addService(_powerService);
-#endif
-
-#if ALERT_SERVICE==1 || DEVICE_TYPE==DEVICE_FRIDGE
-	_alertService = new AlertService;
-	_stack->addService(_alertService);
-#endif
-
-#if SCHEDULE_SERVICE==1
-	_scheduleService = new ScheduleService;
-	_stack->addService(_scheduleService);
-#endif
-}
-
-void Crownstone::configure() {
-
-	LOGi("Configure stack ...");
-
-	//! configure parameters for the Bluetooth stack
-	configStack();
-
-	//! start up the softdevice early because we need it's functions to configure devices it ultimately controls.
-	//! in particular we need it to set interrupt priorities.
-	_stack->init();
-
-	//! init pwm
-	PWM& pwm = PWM::getInstance();
-	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
-	pwm.setValue(0, 0);
-
-	LOGi("Loading configuration");
-
-	ps_configuration_t cfg = Settings::getInstance().getConfig();
-
-#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
-	//! if enabled, create the iBeacon parameter object which will be used
-	//! to start advertisement as an iBeacon
-
-	//! get values from config
-	uint16_t major, minor;
-	uint8_t rssi;
-	ble_uuid128_t uuid;
-
-	Storage::getUint16(cfg.beacon.major, major, BEACON_MAJOR);
-	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
-	Storage::getArray(cfg.beacon.uuid.uuid128, uuid.uuid128, ((ble_uuid128_t)UUID(BEACON_UUID)).uuid128, 16);
-	Storage::getUint8(cfg.beacon.rssi, rssi, BEACON_RSSI);
-
-#ifdef CHANGE_MINOR_ON_RESET
-	minor++;
-	LOGi("Increase minor to %d", minor);
-	Settings::getInstance().writeToStorage(CONFIG_IBEACON_MINOR, (uint8_t*)&minor, 2);
-#endif
-
-	//! create ibeacon object
-	_beacon = new IBeacon(uuid, major, minor, rssi);
-#endif
-
-	//! set advertising parameters such as the device name and appearance.
-	//! Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
-	setName();
 
 	//! Set the stored tx power
 	int8_t txPower;
-	Storage::getInt8(cfg.txPower, txPower, TX_POWER);
+	_settings->get(CONFIG_TX_POWER, &txPower);
 	_stack->setTxPowerLevel(txPower);
 
 	//! Set the stored advertisement interval
 	uint16_t advInterval;
-	Storage::getUint16(cfg.advInterval, advInterval, ADVERTISEMENT_INTERVAL);
+	_settings->get(CONFIG_ADV_INTERVAL, &advInterval);
 	_stack->setAdvertisingInterval(advInterval);
 
-#if ENCRYPTION==1
+	//! Retrieve and Set the PASSKEY for pairing
 	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
-	Storage::getArray(cfg.passkey, passkey, (uint8_t*)STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
+	_settings->get(CONFIG_PASSKEY, passkey);
 	_stack->setPasskey(passkey);
-#endif
-
-	LOGi("... done");
-}
-
-//extern "C" void switchLight(void* p_event_data, uint16_t event_size) {
-//	LOGi("    switchLight");
-//	PWM::getInstance().setValue(0, 100);
-//}
-
-void Crownstone::setup() {
-	welcome();
-
-	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
-
-	EventDispatcher::getInstance().addListener(this);
-
-	LOGi("Create Timer");
-	Timer::getInstance();
-
-	//! set up the bluetooth stack that controls the hardware.
-	_stack = &Nrf51822BluetoothStack::getInstance();
-
-	//! configuration has to be done after the stack was created!
-	configure();
-
-	uint16_t bootDelay;
-	Storage::getUint16(Settings::getInstance().getConfig().bootDelay, bootDelay, BOOT_DELAY);
-	nrf_delay_ms(bootDelay);
 
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
 		//! todo this signature needs to change
-		//NRF51_GPIO_OUTSET = 1 << PIN_LED;
+
 		//! first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
 		//! be neater about it... we do not need to stop, only after a disconnect we do...
 #if RSSI_ENABLE==1
@@ -324,11 +314,12 @@ void Crownstone::setup() {
 		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
 #endif
 
+//		LOGd("clear gpregret on connect ...");
+		sd_power_gpregret_clr(0xFF);
+
 	});
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
-		//NRF51_GPIO_OUTCLR = 1 << PIN_LED;
-
 		//! of course this is not nice, but dirty! we immediately start advertising automatically after being
 		//! disconnected. but for now this will be the default behaviour.
 
@@ -336,97 +327,316 @@ void Crownstone::setup() {
 		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
 #endif
 
-		bool wasScanning = _stack->isScanning();
-		_stack->stopScanning();
+		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
+		//   disconnecting from the device. just calling startAdvertising is enough
+		//		bool wasScanning = _stack->isScanning();
+		//		_stack->stopScanning();
 
-		startAdvertising();
+		_stateVars->disableNotifications();
 
-		if (wasScanning)
-			_stack->startScanning();
+		_stack->startAdvertising();
+
+		// [23.06.16] need to restart the mesh on disconnect, otherwise we have ~10s delay until the device starts
+		// advertising.
+		// [29.06.16] this happened on the pca10000, but doesn't seem to happen on the dobeacon v0.7 need to check
+		// on other versions. On the contrary, the reset seems to crash the dobeacon v0.7
+#if HARDWARE_BOARD==PCA10031
+		if (_mesh->isRunning()) {
+			_mesh->restart();
+		}
+#endif
+
+		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
+		//   disconnecting from the device. just calling startAdvertising is enough
+		//		if (wasScanning) {
+		//			_stack->startScanning();
+		//		}
 
 	});
 
-	createServices();
+}
 
-	_stack->device_manager_init();
+void Crownstone::configureAdvertisement() {
+
+	//! create the iBeacon parameter object which will be used
+	//! to configure advertisement as an iBeacon
+
+	//! get values from config
+	uint16_t major, minor;
+	uint8_t rssi;
+	ble_uuid128_t uuid;
+
+	_settings->get(CONFIG_IBEACON_MAJOR, &major);
+	_settings->get(CONFIG_IBEACON_MINOR, &minor);
+	_settings->get(CONFIG_IBEACON_UUID, uuid.uuid128);
+	_settings->get(CONFIG_IBEACON_TXPOWER, &rssi);
+
+#ifdef CHANGE_MINOR_ON_RESET
+	minor++;
+	LOGi("Increase minor to %d", minor);
+	_settings->set(CONFIG_IBEACON_MINOR, &minor);
+#endif
+
+	//! create ibeacon object
+	_beacon = new IBeacon(uuid, major, minor, rssi);
+
+	//! create the Service Data  object which will be used
+	//! to advertise certain state variables
+	_serviceData = new ServiceData();
+
+	// initialize service data
+
+	//! read crownstone id from storage
+	uint16_t crownstoneId;
+	_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+	LOGi("Set crownstone id to %d", crownstoneId);
+
+	//! and set it to the service data
+	_serviceData->updateCrownstoneId(crownstoneId);
+
+	// fill service data with initial data
+	uint8_t switchState;
+	_stateVars->get(STATE_SWITCH_STATE, switchState);
+	_serviceData->updateSwitchState(switchState);
+
+	_serviceData->updateTemperature(getTemperature());
+
+	int32_t powerUsage;
+	_stateVars->get(STATE_POWER_USAGE, powerUsage);
+	_serviceData->updatePowerUsage(powerUsage);
+
+	//! assign service data to stack
+	_stack->setServiceData(_serviceData);
+
+	if (_settings->isSet(CONFIG_IBEACON_ENABLED)) {
+		_stack->configureIBeacon(_beacon, DEVICE_TYPE);
+	} else {
+		_stack->configureBleDevice(DEVICE_TYPE);
+	}
+
+}
+
+void Crownstone::createSetupServices() {
+	LOGi(STR_CREATE_ALL_SERVICES);
+
+	//! should be available always
+	_deviceInformationService = new DeviceInformationService();
+	_stack->addService(_deviceInformationService);
+
+	_setupService = new SetupService();
+	_stack->addService(_setupService);
+
+}
+
+void Crownstone::createCrownstoneServices() {
+	LOGi(STR_CREATE_ALL_SERVICES);
+
+	//! should be available always
+	_deviceInformationService = new DeviceInformationService();
+	_stack->addService(_deviceInformationService);
+
+#if CROWNSTONE_SERVICE==1
+	//! should be available always
+	_crownstoneService = new CrownstoneService();
+	_stack->addService(_crownstoneService);
+#endif
+
+#if GENERAL_SERVICE==1
+	//! general services, such as internal temperature, setting names, etc.
+	_generalService = new GeneralService;
+	_stack->addService(_generalService);
+#endif
+
+#if INDOOR_SERVICE==1
+	//! now, build up the services and characteristics.
+	_localizationService = new IndoorLocalizationService;
+	_stack->addService(_localizationService);
+#endif
+
+#if POWER_SERVICE==1
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+	_powerService = new PowerService;
+	_stack->addService(_powerService);
+#else
+	LOGe("PowerService only available for device type Crownstone!!");
+#endif
+#endif
+
+#if SCHEDULE_SERVICE==1
+	_scheduleService = new ScheduleService;
+	_stack->addService(_scheduleService);
+#endif
+
+}
+
+/**
+ * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
+ */
+void Crownstone::setName() {
+	char device_name[32];
+	uint16_t size;
+	_settings->get(CONFIG_NAME, device_name, size);
+
+#ifdef CHANGE_NAME_ON_RESET
+	//! get reset counter
+	uint32_t resetCounter;
+	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
+//	uint16_t minor;
+//	ps_configuration_t cfg = Settings::getInstance().getConfig();
+//	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
+	char devicename_resetCounter[32];
+	//! clip name to 5 chars and add reset counter at the end
+	sprintf(devicename_resetCounter, "%.*s_%d", MIN(size, 5), device_name, STRINGIFY(resetCounter));
+	std::string deviceName = std::string(devicename_resetCounter);
+#else
+	std::string deviceName(devicename, size);
+#endif
+
+	//! assign name
+	LOGi(FMT_SET_STR_VAL, "name", deviceName.c_str());
+	_stack->updateDeviceName(deviceName); //! max len = ble_gap_devname_max_len (31)
+	_stack->updateAppearance(BLE_APPEARANCE_GENERIC_TAG);
+}
+
+void Crownstone::prepareCrownstone() {
+
+	LOGi(FMT_CREATE, "Timer");
+	_timer->createSingleShot(_mainTimer, (app_timer_timeout_handler_t)Crownstone::staticTick);
+
+	//! create scanner object
+	_scanner = &Scanner::getInstance();
+	_scanner->setStack(_stack);
+
+	//! create scheduler
+	_scheduler = &Scheduler::getInstance();
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
-	_sensors = new Sensors;
+	_sensors = new Sensors();
 #endif
 
 #if DEVICE_TYPE==DEVICE_FRIDGE
 	_fridge = new Fridge;
-	_fridge->startTicking();
 #endif
 
-	//! configure drivers
-	configDrivers();
-	BLEutil::print_heap("Heap drivers: ");
-	BLEutil::print_stack("Stack drivers: ");
+//	if (_settings->isEnabled(CONFIG_MESH_ENABLED)) {
 
-#if CHAR_MESHING==1
-//	#if HARDWARE_BOARD==PCA10001
-//!        gpiote_init();
-//!    #endif
-
-    #if HARDWARE_BOARD == VIRTUALMEMO
-        nrf_gpio_range_cfg_output(7,14);
-    #endif
-
- 	CMesh & mesh = CMesh::getInstance();
-	mesh.init();
-	BLEutil::print_heap("Heap mesh: ");
-	BLEutil::print_stack("Stack mesh: ");
+#if HARDWARE_BOARD == VIRTUALMEMO
+			nrf_gpio_range_cfg_output(7,14);
 #endif
 
-	//! Begin sending advertising packets over the air.
-	//! This should be done after initialization of the mesh
-	startAdvertising();
-	BLEutil::print_heap("Heap adv: ");
-	BLEutil::print_stack("Stack adv: ");
+		_mesh = &Mesh::getInstance();
+		_mesh->init();
 
-#if (POWER_SERVICE==1)
-#if (DEFAULT_ON==1)
-	LOGi("Set power ON by default");
-	nrf_delay_ms(1000);
-	_powerService->turnOn();
-#elif (DEFAULT_ON==0)
-	LOGi("Set power OFF by default");
-	nrf_delay_ms(1000);
-	_powerService->turnOff();
-#endif
-#endif
+//	}
 
-//	app_sched_event_put(NULL, 0, switchLight);
+//	BLEutil::print_heap("Heap setup: ");
+//	BLEutil::print_stack("Stack setup: ");
 
 }
 
-//! start advertising. the advertisment package depends on the device type,
-//! and if IBEACON is enabled
-void Crownstone::startAdvertising() {
-#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
-	_stack->startIBeacon(_beacon, DEVICE_TYPE);
-#else
-	_stack->startAdvertising(DEVICE_TYPE);
+void Crownstone::startUp() {
+
+	LOGi(FMT_HEADER, "startup");
+
+	uint32_t gpregret;
+	sd_power_gpregret_get(&gpregret);
+	LOGi("Soft reset count: %d", gpregret);
+
+	uint16_t bootDelay;
+	_settings->get(CONFIG_BOOT_DELAY, &bootDelay);
+	if (bootDelay) {
+		LOGi("Boot delay: %d ms", bootDelay);
+		nrf_delay_ms(bootDelay);
+	}
+
+	//! start advertising
+	_stack->startAdvertising();
+	//! have to give the stack a moment of pause to start advertising, otherwise we get into race conditions
+	nrf_delay_ms(50);
+
+	//! the rest we only execute if we are in normal operation
+	//! during setup mode, most of the crownstone's functionality is
+	//! disabled
+	if (_operationMode == OPERATION_MODE_NORMAL) {
+
+//#if (DEFAULT_ON==1)
+//		LOGi("Set power ON by default");
+//		_switch->turnOn();
+//#elif (DEFAULT_ON==0)
+//		LOGi("Set power OFF by default");
+//		_switch->turnOff();
+//#endif
+
+		//! start main tick
+		scheduleNextTick();
+		_stack->startTicking();
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+		// restore the last value. the switch reads the last state from the storage, but does
+		// not automatically update the pwm/relay values. so we read out the last value
+		// and set it again to update the pwm
+		uint8_t pwm = _switch->getPwm();
+		_switch->setPwm(pwm);
+
+		//! start ticking of peripherals
+		_temperatureGuard->startTicking();
+
+		LOGd(FMT_START, "power sampling");
+		_powerSampler->startSampling();
 #endif
-}
 
-void Crownstone::run() {
+		_scheduler->start();
 
-	_stack->startTicking();
+		if (_settings->isSet(CONFIG_SCANNER_ENABLED)) {
+			RNG rng;
+			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
+			_scanner->delayedStart(delay);
+		}
 
-#if CHAR_MESHING==1
-	CMesh::getInstance().startTicking();
+		if (_settings->isSet(CONFIG_TRACKER_ENABLED)) {
+			_tracker->startTracking();
+		}
+
+		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
+			_mesh->start();
+		}
+
+#if DEVICE_TYPE==DEVICE_FRIDGE
+		_fridge->startTicking();
 #endif
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 		_sensors->startTicking();
 #endif
 
-#if POWER_SERVICE==1
-//	_powerService->startStaticSampling();
-#endif
+//		BLEutil::print_heap("Heap startup: ");
+//		BLEutil::print_stack("Stack startup: ");
 
+	}
+
+}
+
+void Crownstone::tick() {
+
+	//! update advertisement
+	_stack->updateAdvertisement();
+
+	//! update temperature
+	int32_t temperature = getTemperature();
+	_stateVars->set(STATE_TEMPERATURE, temperature);
+
+	scheduleNextTick();
+}
+
+void Crownstone::scheduleNextTick() {
+	Timer::getInstance().start(_mainTimer, HZ_TO_TICKS(CROWNSTONE_UPDATE_FREQUENCY), this);
+}
+
+void Crownstone::run() {
+
+	LOGi(FMT_HEADER, "running");
+
+	//! forever, run scheduler, wait for events and handle them
 	while(1) {
 
 		app_sched_execute();
@@ -444,31 +654,36 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 //	LOGi("handleEvent: %d", evt);
 
-	bool restartAdvertising = false;
+	bool reconfigureBeacon = false;
 	switch(evt) {
 
-#if IBEACON==1 || DEVICE_TYPE==DEVICE_DOBEACON
+	case CONFIG_NAME: {
+		_stack->updateDeviceName(std::string((char*)p_data, length));
+		// need to reconfigure scan response package for updated name
+		_stack->configureScanResponse(DEVICE_TYPE);
+		_stack->updateAdvertisement();
+		break;
+	}
 	case CONFIG_IBEACON_MAJOR: {
 		_beacon->setMajor(*(uint32_t*)p_data);
-		restartAdvertising = true;
+		reconfigureBeacon = true;
 		break;
 	}
 	case CONFIG_IBEACON_MINOR: {
 		_beacon->setMinor(*(uint32_t*)p_data);
-		restartAdvertising = true;
+		reconfigureBeacon = true;
 		break;
 	}
 	case CONFIG_IBEACON_UUID: {
 		_beacon->setUUID(*(ble_uuid128_t*)p_data);
-		restartAdvertising = true;
+		reconfigureBeacon = true;
 		break;
 	}
-	case CONFIG_IBEACON_RSSI: {
-		_beacon->setRSSI(*(int8_t*)p_data);
-		restartAdvertising = true;
+	case CONFIG_IBEACON_TXPOWER: {
+		_beacon->setTxPower(*(int8_t*)p_data);
+		reconfigureBeacon = true;
 		break;
 	}
-#endif
 	case CONFIG_TX_POWER: {
 //		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
 		_stack->setTxPowerLevel(*(int8_t*)p_data);
@@ -477,30 +692,19 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case CONFIG_ADV_INTERVAL: {
 		_stack->setAdvertisingInterval(*(uint32_t*)p_data);
-		restartAdvertising = true;
+		_stack->configureAdvertisementParameters();
+
+		if (_stack->isAdvertising()) {
+			_stack->stopAdvertising();
+			_stack->startAdvertising();
+		}
+//		restartAdvertising = true;
 		break;
 	}
 	case CONFIG_PASSKEY: {
 		_stack->setPasskey((uint8_t*)p_data);
 		break;
 	}
-
-#if ALERT_SERVICE==1
-	case EVT_ENV_TEMP_LOW: {
-		if (_alertService != NULL) {
-			_alertService->addAlert(ALERT_TEMP_LOW_POS);
-//			_alertService->alert(ALERT_TEMP_LOW);
-		}
-		break;
-	}
-	case EVT_ENV_TEMP_HIGH: {
-		if (_alertService != NULL) {
-			_alertService->addAlert(ALERT_TEMP_HIGH_POS);
-//			_alertService->alert(ALERT_TEMP_HIGH);
-		}
-		break;
-	}
-#endif
 
 	case EVT_ADVERTISEMENT_PAUSE: {
 		if (_stack->isAdvertising()) {
@@ -512,16 +716,51 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_ADVERTISEMENT_RESUME: {
 		if (_advertisementPaused) {
 			_advertisementPaused = false;
-			startAdvertising();
+			_stack->startAdvertising();
 		}
 		break;
 	}
+	case CONFIG_IBEACON_ENABLED: {
+		bool enabled = *(bool*)p_data;
+		if (enabled) {
+			_stack->configureIBeaconAdvData(_beacon);
+		} else {
+			_stack->configureBleDeviceAdvData();
+		}
+		_stack->updateAdvertisement();
+		break;
+	}
+	case EVT_ADVERTISEMENT_UPDATED: {
+		_stack->updateAdvertisement();
+		break;
+	}
+	case EVT_BROWNOUT_IMPENDING: {
+		// turn everything off that consumes power
+		LOGf("brownout impending!! force shutdown ...")
 
+		rbc_mesh_stop();
+    	_scanner->stop();
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+    	_switch->pwmOff();
+    	_switch->relayOff();
+    	_powerSampler->stopSampling();
+#endif
+
+    	// now reset with brownout reset mask set.
+    	// NOTE: do not clear the gpregret register, this way
+    	//   we can count the number of brownouts in the bootloader
+    	sd_power_gpregret_set(GPREGRET_BROWNOUT_RESET);
+    	// soft reset, because brownout can't be distinguished from
+    	// hard reset otherwise
+    	sd_nvic_SystemReset();
+		break;
+	}
+	default: return;
 	}
 
-	if (restartAdvertising && _stack->isAdvertising()) {
-		_stack->stopAdvertising();
-		startAdvertising();
+	if (reconfigureBeacon && _settings->isSet(CONFIG_IBEACON_ENABLED)) {
+		_stack->updateAdvertisement();
 	}
 }
 
@@ -529,32 +768,29 @@ void on_exit(void) {
 	LOGf("PROGRAM TERMINATED");
 }
 
+/**
+ * If UART is enabled this will be the message printed out over a serial connection. Connectors are expensive, so UART
+ * is not available in the final product.
+ */
+void welcome() {
+	config_uart();
+
+	_log(INFO, CRLN);
+//	BLEutil::print_heap("Heap init");
+//	BLEutil::print_stack("Stack init");
+	//! To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)
+	//! For (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes)
+	LOGi("Welcome Crownstone");
+	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
+	LOGi("Compilation time: %s", __TIME__);
+#ifdef GIT_HASH
+	LOGi("Git hash: %s", GIT_HASH);
+#else
+	LOGi("Firmware version: %s", FIRMWARE_VERSION);
+#endif
+}
 
 /**********************************************************************************************************************/
-#if CHAR_MESHING==1
-uint32_t appTimerId = -1;
-
-uint32_t count[2] = {};
-//uint8_t idx = -1;
-uint8_t idx = 0;
-
-void sendMesh(void* ptr) {
-//	idx = (idx + 1) % 2;
-
-	LOGi("<< ch: %d", idx * 2 + 1);
-	LOGi("<< count: %d", count[idx]);
-	hub_mesh_message_t message;
-	memset(&message, 0, sizeof(message));
-	message.testMsg.counter = count[idx]++;
-	message.header.messageType = 102;
-
-	LOGi("message data:");
-	BLEutil::printArray(&message, sizeof(message));
-	CMesh::getInstance().send(idx * 2 + 1, &message, sizeof(message));
-
-	Timer::getInstance().start(appTimerId, HZ_TO_TICKS(1), NULL);
-}
-#endif
 
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
@@ -564,17 +800,19 @@ void sendMesh(void* ptr) {
  *********************************************************************************************************************/
 
 int main() {
+
 	atexit(on_exit);
+
+	//! int uart, be nice and say hello
+	welcome();
 
 	Crownstone crownstone;
 
-	//! setup crownstone ...
-	crownstone.setup();
+	// initialize crownstone (depends on the operation mode) ...
+	crownstone.init();
 
-#if CHAR_MESHING==1
-//	Timer::getInstance().createSingleShot(appTimerId, (app_timer_timeout_handler_t)sendMesh);
-//	Timer::getInstance().start(appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), NULL);
-#endif
+	//! start up phase, start ticking (depends on the operation mode) ...
+	crownstone.startUp();
 
 	//! run forever ...
 	crownstone.run();

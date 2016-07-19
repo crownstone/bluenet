@@ -12,11 +12,15 @@
 
 #include <ble/cs_Softdevice.h>
 
+#include <storage/cs_Settings.h>
+
 using namespace BLEpp;
+
+//#define PRINT_CHARACTERISTIC_VERBOSE
 
 CharacteristicBase::CharacteristicBase() :
 				_name(NULL),
-				_handles( { }), _service(0)
+				_handles( { }), _service(0), _encrypted(false)
 				/*nited(false), _notifies(false), _writable(false), */
 				/*_unit(0), */ /*_updateIntervalMsecs(0),*/ /* _notifyingEnabled(false), _indicates(false) */
 {
@@ -97,11 +101,11 @@ void CharacteristicBase::init(Service* svc) {
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.read_perm); //! required
 
-#if ENCRYPTION==0
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.write_perm);
-#else
-	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.cccd_md.write_perm);
-#endif
+    if (_encrypted) {
+    	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.cccd_md.write_perm);
+    } else {
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.write_perm);
+    }
 
 	ci.char_md.p_cccd_md = &ci.cccd_md; //! the client characteristic metadata.
 
@@ -121,7 +125,9 @@ void CharacteristicBase::init(Service* svc) {
 	ci.attr_char_value.max_len = getValueMaxLength();
 	ci.attr_char_value.p_value = getValuePtr();
 
+#ifdef PRINT_CHARACTERISTIC_VERBOSE
 	LOGd("%s init with buffer[%i] with %p", _name, getValueLength(), getValuePtr());
+#endif
 
 	////////////////////////
 	//! attribute metadata //
@@ -131,13 +137,13 @@ void CharacteristicBase::init(Service* svc) {
 	ci.attr_md.vloc = BLE_GATTS_VLOC_USER;
 	ci.attr_md.vlen = 1;
 
-#if ENCRYPTION==0
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.write_perm);
-#else
-	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.read_perm);
-	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.write_perm);
-#endif
+    if (_encrypted) {
+		BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.read_perm);
+		BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.write_perm);
+    } else {
+    	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
+    	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.write_perm);
+    }
 	ci.attr_char_value.p_attr_md = &ci.attr_md;
 
 	/////////////////////////////////////
@@ -161,11 +167,11 @@ void CharacteristicBase::init(Service* svc) {
 		ci.user_desc_metadata_md.vloc = BLE_GATTS_VLOC_STACK;
 		ci.user_desc_metadata_md.vlen = 1;
 
-#if ENCRYPTION==0
-		BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
-#else
-		BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.user_desc_metadata_md.read_perm);
-#endif
+	    if (_encrypted) {
+	    	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.user_desc_metadata_md.read_perm);
+	    } else {
+			BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
+	    }
 
 		BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&ci.user_desc_metadata_md.write_perm); //! required
 
@@ -264,7 +270,7 @@ uint32_t CharacteristicBase::notify() {
 			//!   ignore
 
 			//! this is not a serious error, but better to at least write it to the log
-			LOGd("ERR_CODE: %d (0x%X)", err_code, err_code);
+			LOGe("ERR_CODE: %d (0x%X)", err_code, err_code);
 		} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
 			//! Anne: do not complain for now... (meshing)
 		} else {

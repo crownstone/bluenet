@@ -6,7 +6,6 @@
  * Date: Mar 23, 2015
  * License: LGPLv3+
  */
-//#include "cs_BluetoothLE.h"
 #include "processing/cs_Sensors.h"
 //
 #include "cfg/cs_Boards.h"
@@ -14,10 +13,13 @@
 #include "drivers/cs_Serial.h"
 #include "drivers/cs_ADC.h"
 #include "drivers/cs_RTC.h"
-#include "structs/cs_CurrentCurve.h"
 
 #include <ble/cs_Nordic.h>
 #include "drivers/cs_PWM.h"
+
+////////////////////////////////////////////////////////////
+/// OUTDATED !!!!!
+////////////////////////////////////////////////////////////
 
 /* NOTE: only use with HARDWARE_BOARD = CROWNSTONE_SENSOR */
 
@@ -84,10 +86,15 @@ Sensors::Sensors() : _appTimerId(0), _initialized(false),
 	_lastLightCheck(0), _lastThermalCheck(0), _lastPushButtonCheck(0), _lastSwitchCheck(0),
 	_lastSwitchOn(false), _lastPushed(false)
 {
-	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Sensors::staticTick);
+//	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Sensors::staticTick);
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Sensors::staticTick);
 }
 
 void Sensors::startTicking() {
+	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(SENSORS_UPDATE_FREQUENCY), this);
+}
+
+void Sensors::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(SENSORS_UPDATE_FREQUENCY), this);
 }
 
@@ -162,21 +169,23 @@ uint16_t Sensors::sampleSensor() {
 		return result;
 	}
 
-	CurrentCurve<uint16_t> _currentCurve;
+	// TODO
+//	CurrentCurve<uint16_t> _currentCurve;
 
 	//! Start storing the samples
-	_currentCurve.clear();
+//	_currentCurve.clear();
 //	ADC::getInstance().setCurrentCurve(&_currentCurve);
 
-	ADC::getInstance().init(PIN_AIN_SENSOR);
-	ADC::getInstance().start();
-	while (!_currentCurve.isFull()) {
-		while(!NRF_ADC->EVENTS_END) {}
-		//			NRF_ADC->EVENTS_END	= 0;
-		//			LOGd("got sample");
-		_currentCurve.add(NRF_ADC->RESULT, RTC::getCount());
-		ADC::getInstance().start();
-	}
+	// TODO
+//	ADC::getInstance().init(PIN_AIN_SENSOR);
+//	ADC::getInstance().start();
+//	while (!_currentCurve.isFull()) {
+//		while(!NRF_ADC->EVENTS_END) {}
+//		//			NRF_ADC->EVENTS_END	= 0;
+//		//			LOGd("got sample");
+//		_currentCurve.add(NRF_ADC->RESULT, RTC::getCount());
+//		ADC::getInstance().start();
+//	}
 
 
 //	//! Give some time to sample
@@ -187,39 +196,39 @@ uint16_t Sensors::sampleSensor() {
 	//! Stop storing the samples
 //	ADC::getInstance().setCurrentCurve(NULL);
 
-	uint16_t numSamples = _currentCurve.length();
-	LOGd("numSamples = %i", numSamples);
-
-	if (numSamples>1) {
-		uint32_t timestamp = 0;
-		uint16_t voltage = 0;
-		uint16_t average = 0;
-
-		for (uint16_t i=0; i<numSamples; ++i) {
-			if (_currentCurve.getValue(i, voltage, timestamp) != CC_SUCCESS) {
-				break;
-			}
-			//			_log(INFO, "%u %u,  ", timestamp, voltage);
-			//			if (!((i+1) % 5)) {
-			//				_log(INFO, "\r\n");
-			//			}
-			average += voltage;
-		}
-		//		_log(INFO, "\r\n");
-		average /= numSamples;
-
-		//! Measured voltage goes from 0-3.6V, measured as 0-1023(10 bit),
-		//! but Input voltage is from 0-3V (for Nordic EK) and 0-3.3 for Crownstone
-		//! so we need to rescale the value to have max at 3V (or 3.3V resp)
-		//! instead of 3.6V
-#if(HARDWARE_BOARD==CROWNSTONE)
-		average *= 3.6/3.3;
-#elif(HARDWARE_BOARD==PCA10001)
-		average *= 3.6/3.0;
-#endif
-
-		result = average;
-	}
+//	uint16_t numSamples = _currentCurve.length();
+//	LOGd("numSamples = %i", numSamples);
+//
+//	if (numSamples>1) {
+//		uint32_t timestamp = 0;
+//		uint16_t voltage = 0;
+//		uint16_t average = 0;
+//
+//		for (uint16_t i=0; i<numSamples; ++i) {
+//			if (_currentCurve.getValue(i, voltage, timestamp) != CC_SUCCESS) {
+//				break;
+//			}
+//			//			_log(INFO, "%u %u,  ", timestamp, voltage);
+//			//			if (!((i+1) % 5)) {
+//			//				_log(INFO, "\r\n");
+//			//			}
+//			average += voltage;
+//		}
+//		//		_log(INFO, "\r\n");
+//		average /= numSamples;
+//
+//		//! Measured voltage goes from 0-3.6V, measured as 0-1023(10 bit),
+//		//! but Input voltage is from 0-3V (for Nordic EK) and 0-3.3 for Crownstone
+//		//! so we need to rescale the value to have max at 3V (or 3.3V resp)
+//		//! instead of 3.6V
+//#if(HARDWARE_BOARD==CROWNSTONE)
+//		average *= 3.6/3.3;
+//#elif(HARDWARE_BOARD==PCA10001)
+//		average *= 3.6/3.0;
+//#endif
+//
+//		result = average;
+//	}
 
 	//! Unlock the buffer
 	mb.unlock();
@@ -346,6 +355,7 @@ void Sensors::tick() {
 	checkThermalSensor(now);
 #endif
 
+	scheduleNextTick();
 }
 
 #ifdef SWITCH_ENABLED
@@ -513,44 +523,3 @@ extern "C" void GPIOTE_IRQHandler()
 }
 
 #endif
-
-/** Switch PWM signal.
- * Checks current pwm signal, then toggles from ON to OFF and vice versa
- */
-void Sensors::switchPwmSignal() {
-	//! check first the current pwm value ...
-	uint32_t pwmValue = PWM::getInstance().getValue(0);
-
-	//! if currently off, turn on, otherwise turn off
-	if (pwmValue == 0) {
-		PWM::getInstance().setValue(0, 255);
-	} else {
-		PWM::getInstance().setValue(0, 0);
-	}
-}
-
-/** Switch PWM signal ON
- * Checks current pwm signal and only changes if it is currently OFF
- */
-void Sensors::switchPwmOn() {
-	//! check first the current pwm value ...
-	uint32_t pwmValue = PWM::getInstance().getValue(0);
-
-	//! if currently off, turn on, otherwise do nothing
-	if (pwmValue == 0) {
-		PWM::getInstance().setValue(0, 255);
-	}
-}
-
-/** Switch PWM signal OFF
- * Checks current pwm signal and only changes if it is currently ON
- */
-void Sensors::switchPwmOff() {
-	//! check first the current pwm value ...
-	uint32_t pwmValue = PWM::getInstance().getValue(0);
-
-	//! if currently on, turn off, otherwise do nothing
-	if (pwmValue == 255) {
-		PWM::getInstance().setValue(0, 0);
-	}
-}

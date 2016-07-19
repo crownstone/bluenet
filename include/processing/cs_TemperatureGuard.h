@@ -11,38 +11,50 @@
 #include "drivers/cs_PWM.h"
 #include "drivers/cs_Temperature.h"
 #include <cstdint>
-#include "cfg/cs_Settings.h"
+#include "storage/cs_Settings.h"
 #include "events/cs_EventListener.h"
+#include "events/cs_EventDispatcher.h"
+#include "processing/cs_Switch.h"
 
 #define TEMPERATURE_UPDATE_FREQUENCY 0.2
+
+//todo: move to code to cpp
 
 /** Protection against temperature exceeding certain threshold
  */
 class TemperatureGuard : EventListener {
 public:
 	TemperatureGuard() :
-		_appTimerId(0),
 		EventListener(CONFIG_MAX_CHIP_TEMP),
+		_appTimerId(0),
 		_maxTemp(MAX_CHIP_TEMP)
 	{
+	}
 
-		ps_configuration_t cfg = Settings::getInstance().getConfig();
-		Storage::getInt8(cfg.maxChipTemp, _maxTemp, MAX_CHIP_TEMP);
-
+	void init() {
 		EventDispatcher::getInstance().addListener(this);
 
-		Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
-//		Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
+		Settings::getInstance().get(CONFIG_MAX_CHIP_TEMP, &_maxTemp);
+
+//		Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
+		Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
 	}
+
 	void tick() {
 		if (getTemperature() > _maxTemp) {
-			//! Make sure pwm can't be set anymore
-			PWM::getInstance().deinit();
 			//! Switch off all channels
-			PWM::getInstance().switchOff();
+			Switch::getInstance().pwmOff();
+			Switch::getInstance().turnOff();
+//			PWM::getInstance().switchOff();
+//			//! Make sure pwm can't be set anymore
+//			PWM::getInstance().deinit();
 		}
-		//! TODO: make next time to next tick depend on current temperature
-//		scheduleNextTick();
+		// TODO: make next time to next tick depend on current temperature
+		scheduleNextTick();
+	}
+
+	void scheduleNextTick() {
+		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);
 	}
 
 	void startTicking() {

@@ -9,8 +9,6 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 
-//#define STRINGIFY(str) #str
-
 /** The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions.
  */
 class DeviceInformationService : public BLEpp::Service {
@@ -26,7 +24,7 @@ public:
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void init();
+	void createCharacteristics();
 
 protected:
 	//! The characteristics in this service, based on:
@@ -36,7 +34,7 @@ protected:
 //	void addSerialNumberCharacteristic();
 	void addHardwareRevisionCharacteristic();
 	void addFirmwareRevisionCharacteristic();
-//	void addSoftwareRevisionCharacteristic();
+	void addSoftwareRevisionCharacteristic();
 //	void addSystemIDCharacteristic();
 //	void addRegulatoryCertificationDataListCharacteristic();
 
@@ -45,8 +43,8 @@ private:
 //	BLEpp::Characteristic<std::string> *_manufacturerNameCharacteristic;
 //	BLEpp::Characteristic<std::string> *_modelNumberCharacteristic;
 //	BLEpp::Characteristic<std::string> *_serialNumberCharacteristic;
-	BLEpp::Characteristic<std::string> *_hardwareRevisionCharacteristic;
-	BLEpp::Characteristic<std::string> *_firmwareRevisionCharacteristic;
+//	BLEpp::Characteristic<std::string> *_hardwareRevisionCharacteristic;
+//	BLEpp::Characteristic<std::string> *_firmwareRevisionCharacteristic;
 //	BLEpp::Characteristic<std::string> *_softwareRevisionCharacteristic;
 //	BLEpp::Characteristic<std::string> *_systemIdCharacteristic;
 //	BLEpp::Characteristic<std::string> *_regulatoryCerificationDataListCharacteristic;

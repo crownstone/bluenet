@@ -56,6 +56,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "nrf_delay.h"
 
+#include <drivers/cs_Serial.h>
+
 #define TIMESLOT_END_SAFETY_MARGIN_US   (1000)
 #define TIMESLOT_SLOT_LENGTH            (10000) /* !!! MUST BE LARGER THAN TIMESLOT_END_SAFETY_MARGIN_US */
 #define TIMESLOT_SLOT_EXTEND_LENGTH     (500000)
@@ -159,15 +161,19 @@ void ts_sd_event_handler(uint32_t evt)
         case NRF_EVT_RADIO_SESSION_IDLE:
             /* the idle event is usually triggered when rbc_mesh_stop is called, 
                 but if this isn't the case, we have to restart the TS */
-            if (g_timeslot_forced_command != TS_FORCED_COMMAND_STOP)
-            {
-                timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
-            }
+//            if (g_timeslot_forced_command != TS_FORCED_COMMAND_STOP)
+//            {
+//                timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
+//            }
             break;
 
         case NRF_EVT_RADIO_SESSION_CLOSED:
-            APP_ERROR_CHECK(NRF_ERROR_INVALID_DATA);
-
+//            LOGe("NRF_EVT_RADIO_SESSION_CLOSED");
+//        	if (pausing) {
+//        		paused = true;
+//        		pausing = false;
+//        	}
+//            APP_ERROR_CHECK(NRF_ERROR_INVALID_DATA);
             break;
 
         case NRF_EVT_RADIO_BLOCKED:
@@ -178,50 +184,21 @@ void ts_sd_event_handler(uint32_t evt)
             break;
 
         case NRF_EVT_RADIO_SIGNAL_CALLBACK_INVALID_RETURN:
-            APP_ERROR_CHECK(NRF_ERROR_INVALID_DATA);
+//            LOGe("Invalid data: %d", evt);
+//            APP_ERROR_CHECK(NRF_ERROR_INVALID_DATA);
             break;
 
         case NRF_EVT_RADIO_CANCELED:
             timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
             break;
+
         default:
-                LOGe("An unanticipated event. Will lead to invalid state!");
-            APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
+//            LOGe("Invalid state!: %d", evt);
+//            APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
+        	break;
     }
     CLEAR_PIN(PIN_SD_EVT_HANDLER);
 }
-/**
-* @brief Timeslot related events callback
-*   Called whenever the softdevice tries to change the original course of actions
-*   related to the timeslots
-*/
-void ts_sys_evt_handler(uint32_t evt)
-{
-    switch (evt)
-    {
-        case NRF_EVT_RADIO_SESSION_IDLE:
-            timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
-            break;
-
-        case NRF_EVT_RADIO_BLOCKED:
-            timeslot_order_earliest(TIMESLOT_SLOT_EMERGENCY_LENGTH, true);
-            break;
-
-        case NRF_EVT_RADIO_CANCELED:
-            timeslot_order_earliest(TIMESLOT_SLOT_LENGTH, true);
-            break;
-
-        case NRF_EVT_RADIO_SESSION_CLOSED:
-        	if (pausing) {
-        		paused = true;
-        	}
-        	break;
-
-        default:
-            break;
-    }
-}
-
 
 /**
 * @brief Timeslot end guard timer callback. Attempts to extend the timeslot.
@@ -487,26 +464,6 @@ void timeslot_handler_init(nrf_clock_lfclksrc_t lfclksrc)
     g_start_time_ref = NRF_RTC0->COUNTER;
     g_timeslot_length = TIMESLOT_SLOT_LENGTH;
     timeslot_order_earliest(g_timeslot_length, true);
-}
-
-void timeslot_handler_pause() {
-	if (paused) return;
-
-	LOGi("pausing mesh");
-	pausing = true;
-	sd_radio_session_close();
-	while (!paused) {
-		nrf_delay_ms(10);
-	}
-	pausing = false;
-}
-
-void timeslot_handler_resume() {
-	if (!paused) return;
-
-	LOGi("resuming mesh");
-	timeslot_handler_init(g_lfclksrc);
-	paused = false;
 }
 
 void timeslot_order_earliest(uint32_t length_us, bool immediately)

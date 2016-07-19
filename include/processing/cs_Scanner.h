@@ -13,11 +13,11 @@
 using namespace BLEpp;
 
 #define SCAN_FILTER_CROWNSTONE_BIT    0
-#define SCAN_FILTER_DOBEACON_BIT      1
+#define SCAN_FILTER_GUIDESTONE_BIT    1
 
 #define SCAN_FILTER_CROWNSTONE_MSK    (1 << SCAN_FILTER_CROWNSTONE_BIT)
-#define SCAN_FILTER_DOBEACON_MSK      (1 << SCAN_FILTER_DOBEACON_BIT)
-#define SCAN_FILTER_DOBOTS_MSK        SCAN_FILTER_CROWNSTONE_MSK | SCAN_FILTER_DOBEACON_MSK
+#define SCAN_FILTER_GUIDESTONE_MSK    (1 << SCAN_FILTER_GUIDESTONE_BIT)
+#define SCAN_FILTER_DOBOTS_MSK        SCAN_FILTER_CROWNSTONE_MSK | SCAN_FILTER_GUIDESTONE_MSK
 
 /** @brief Variable length data encapsulation in terms of length and pointer to data */
 typedef struct
@@ -31,9 +31,13 @@ typedef struct
 class Scanner : EventListener {
 
 public:
+	//! Gets a static singleton (no dynamic memory allocation)
+	static Scanner& getInstance() {
+		static Scanner instance;
+		return instance;
+	}
 
-	Scanner(Nrf51822BluetoothStack* stack);
-	virtual ~Scanner();
+	void setStack(Nrf51822BluetoothStack* stack);
 
 	void onBleEvent(ble_evt_t * p_ble_evt);
 
@@ -92,10 +96,12 @@ private:
 	uint8_t _scanBuffer[sizeof(peripheral_device_list_t)];
 	ScanResult* _scanResult;
 
+	Scanner();
+
 	bool isFiltered(data_t* p_adv_data);
 
 	void executeScan();
-	void sendResults();
+	void notifyResults();
 
 	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
 };

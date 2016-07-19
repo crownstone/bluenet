@@ -6,57 +6,33 @@
  */
 #pragma once
 
-#include "structs/cs_ScanResult.h"
-#include "structs/cs_TrackDevices.h"
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
-
-#include <drivers/cs_Storage.h>
-
-#include <processing/cs_Scanner.h>
+#include <events/cs_EventListener.h>
 
 //! The update frequence of the Tick routine in this service
 #define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10
 
-/** Struct used by the IndoorLocalisationService to store elements
- */
-struct ps_indoorlocalisation_service_t : ps_storage_base_t {
-	struct {
-		uint8_t list[TRACKDEVICES_HEADER_SIZE + TRACKDEVICES_MAX_NR_DEVICES * TRACKDEVICES_SERIALIZED_SIZE];
-	} trackedDevices;
-};
+//#define PWM_ON_RSSI
 
 /** The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc.
  */
-class IndoorLocalizationService : public BLEpp::Service {
-
-public:
-//	typedef function<int8_t()> func_t;
+class IndoorLocalizationService : public BLEpp::Service, EventListener {
 
 protected:
-	void addSignalStrengthCharacteristic();
+	void addRssiCharacteristic();
 	void addScanControlCharacteristic();
-	void addPeripheralListCharacteristic();
+	void addScannedDeviceListCharacteristic();
 	void addTrackedDeviceListCharacteristic();
 	void addTrackedDeviceCharacteristic();
-
-	/** Get a handle to the persistent storage struct and load it from FLASH.
-	 *
-	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
-	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
-	 * Hence, there is an entire struct that can be filled and flashed at once.
-	 */
-	void loadPersistentStorage();
-
-	/** Save to FLASH.
-	*/
-	void savePersistentStorage();
 
 	void writeTrackedDevices();
 	void readTrackedDevices();
 
 	void startTracking();
 	void stopTracking();
+
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 public:
 	IndoorLocalizationService();
@@ -70,7 +46,7 @@ public:
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	void init();
+	void createCharacteristics();
 
 	/** Sets the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
 	void setNearbyTimeout(uint16_t counts);
@@ -82,32 +58,16 @@ public:
 
 	void onRSSIChanged(int8_t rssi);
 	void setRSSILevel(int8_t RSSILevel);
-//	void setRSSILevelHandler(func_t func);
-
-#if(SOFTDEVICE_SERIES != 110)
-	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
-#endif
 
 private:
 	BLEpp::Characteristic<int8_t>* _rssiCharac;
 	BLEpp::Characteristic<uint8_t>* _scanControlCharac;
-	BLEpp::Characteristic<buffer_ptr_t>* _peripheralCharac;
+	BLEpp::Characteristic<buffer_ptr_t>* _scannedDeviceListCharac;
 	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceListCharac;
 	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceCharac;
 
-//	func_t _rssiHandler;
+#ifdef PWM_ON_RSSI
+	int16_t _averageRssi;
+#endif
 
-	bool _trackMode;
-	bool _trackIsNearby;
-
-	bool _initialized;
-	bool _scanMode;
-
-	Scanner* _scanner;
-
-//	ScanResult* _scanResult;
-	TrackedDeviceList* _trackedDeviceList;
-
-	pstorage_handle_t _storageHandle;
-	ps_indoorlocalisation_service_t _storageStruct;
 };

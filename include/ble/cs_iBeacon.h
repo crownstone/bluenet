@@ -10,6 +10,7 @@
 #include <ble/cs_UUID.h>
 
 #include <drivers/cs_Serial.h>
+#include <util/cs_Utils.h>
 
 namespace BLEpp {
 
@@ -32,103 +33,98 @@ namespace BLEpp {
  * to patent a "struct" or the Apple prefix.
  */
 class IBeacon {
-	private:
-	/** Advertisement indicator, defined as 0x0215 for iBeacons
-		 */
-		uint16_t _adv_indicator;
+private:
+	/**
+	 * Union so that we can directly use the array for the advertisment's manufacturing data.
+	 * Because the advertisement package has to be in big-endian, and nordic's chip is using
+	 * little-endian, the values are converted in the setter/getter functions, so that the array
+	 * is correct and doesn't need to be converted anymore to be used in the advertisement data.
+	 * As a result, changes to the IBeacn values, such as major, minor, etc, will directly reflect
+	 * in the advertisement data once they are changed here.
+	 */
+	union {
+		struct {
 
-	/** proximity UUID, shared for all iBeacons for a given application
-		 */
-		ble_uuid128_t _uuid;
+			/** Advertisement indicator, defined as 0x0215 for iBeacons
+			 */
+			uint16_t adv_indicator;
 
-	/** Major number (group level identifier)
-		 */
-		uint16_t _major;
+			/** proximity UUID, shared for all iBeacons for a given application
+			 */
+			ble_uuid128_t uuid;
 
-	/** Minor number (individual nodes)
-		 */
-		uint16_t _minor;
+			/** Major number (group level identifier)
+			 */
+			uint16_t major;
 
-	/** Known (calibrated) rssi value at 1m distance
-		 *
-		 * This value has to be calibrated for each iBeacon so that it represents the
-		 * signal strength of the iBeacon at 1m distance. The value is then used by a
-		 * smartphone together with the current rssi reading to calculate the current
-		 * distance from the iBeacon.
-		 */
-		int8_t _rssi;
+			/** Minor number (individual nodes)
+			 */
+			uint16_t minor;
 
-	public:
+			/** Known (calibrated) rssi value at 1m distance
+			 *
+			 * This value has to be calibrated for each iBeacon so that it represents the
+			 * signal strength of the iBeacon at 1m distance. The value is then used by a
+			 * smartphone together with the current rssi reading to calculate the current
+			 * distance from the iBeacon.
+			 */
+			int8_t txPower;
+		} _params;
+		uint8_t _buffer[sizeof(_params)];
+	};
+
+public:
 	/** Default constructor for the iBeacon class
-		 *
-		 * @uuid the UUID for this application
-		 *
-		 * @major the major value for this iBeacon (group level identifier)
-		 *
-		 * @minor the minor value for this iBeacon (individual node)
-		 *
-		 * @rssi the calibrated rssi value at 1m distance
-		 */
-		IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor, int8_t rssi) {
-			//! advertisement indicator for an iBeacon is defined as 0x0215
-			_adv_indicator = 0x0215;
-			_uuid = uuid;
-			_major = major;
-			_minor = minor;
-			_rssi = rssi;
-		}
+	 *
+	 * @uuid the UUID for this application
+	 *
+	 * @major the major value for this iBeacon (group level identifier)
+	 *
+	 * @minor the minor value for this iBeacon (individual node)
+	 *
+	 * @rssi the calibrated rssi value at 1m distance
+	 */
+	IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor, int8_t rssi);
 
 	/** The size of the iBeacon advertisement data
-		 *
-		 * size is calculated as:
-		 * 		2B		advertisement indicator
-		 * 		16B		uuid (as byte array)
-		 * 		2B		major
-		 * 		2B		minor
-		 * 		1B		rssi
-		 * 	--------------------------------------
-		 * 		23B		total
-		 *
-		 * @return the size of the advertisement data
-		 */
-		uint8_t size() {
-			return 23;
-		}
+	 *
+	 * size is calculated as:
+	 * 		2B		advertisement indicator
+	 * 		16B		uuid (as byte array)
+	 * 		2B		major
+	 * 		2B		minor
+	 * 		1B		rssi
+	 * 	--------------------------------------
+	 * 		23B		total
+	 *
+	 * @return the size of the advertisement data
+	 */
+	uint8_t size() {
+		return 23;
+	}
 
-	/** Serializes the object to a byte array
-		 *
-		 * @array pointer to the preallocated byte array where the
-		 *   data should be copied into. Use <size> to get the required
-		 *   length of the array
-		 *
-		 * The format of the array is:
-		 *   ADVERTISEMENT_INDICATOR, UUID, MAJOR, MINOR, RSSI
-		 *
-		 * The function also converts the values from little-endian (used by
-		 * nordic) to the big-endian format, required for the iBeacon
-		 * advertisement package
-		 */
-		void toArray(uint8_t* array);
+	uint8_t* getArray() {
+		return _buffer;
+	}
 
 	/** Set major value */
-		inline void setMajor(uint16_t major) { LOGd("setMajor: %d", major); _major = major; }
+	void setMajor(uint16_t major);
 	/** Get major value  */
-		inline uint16_t getMajor() { return _major; }
+	uint16_t getMajor();
 
 	/** Set minor value */
-		inline void setMinor(uint16_t minor) { LOGd("setMinor: %d", minor); _minor = minor; }
+	void setMinor(uint16_t minor);
 	/** Get minor value */
-		inline uint16_t getMinor() { return _minor; }
+	uint16_t getMinor();
 
 	/** Set UUID */
-		inline void setUUID(ble_uuid128_t uuid) { LOGd("setUUID"); _uuid = uuid; }
+	void setUUID(ble_uuid128_t uuid);
 	/** Get UUID */
-		inline ble_uuid128_t getUUID() { return _uuid; }
+	ble_uuid128_t getUUID();
 
 	/** Set RSSI value */
-		inline void setRSSI(int8_t rssi) { LOGd("setRSSI: %d", rssi); _rssi = rssi; }
+	void setTxPower(int8_t txPower);
 	/** Get RSSI value */
-		inline int8_t getRSSI() { return _rssi; }
-};
+	int8_t getTxPower();};
 
 } //! end namespace

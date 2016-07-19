@@ -6,11 +6,16 @@
  */
 #pragma once
 
+#include <ble/cs_Nordic.h>
+
 #include "structs/cs_BufferAccessor.h"
 
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
 #include <util/cs_BleError.h>
+#include <cfg/cs_Strings.h>
+
+//#define PRINT_TRACKEDDEVICES_VERBOSE
 
 /**
  * The track device timeout stops tracking after a certain number of ticks.
@@ -20,7 +25,7 @@
 #define TRACKDEVICE_DEFAULT_TIMEOUT_COUNT 300
 
 //! Initialize counter of tracked devices with this number.
-#define TDL_COUNTER_INIT                         -1
+#define TDL_COUNTER_INIT                         0
 
 #define TDL_NONE_NEARBY                          1
 #define TDL_IS_NEARBY                            2
@@ -74,7 +79,11 @@ public:
 
 	/** Release the assigned buffer */
 	void release() {
+
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 		LOGd("release");
+#endif
+
 		_buffer = NULL;
 	}
 
@@ -86,9 +95,8 @@ public:
 		if (_buffer) {
 			memset(_buffer->counters, TDL_COUNTER_INIT, sizeof(_buffer->counters));
 		} else {
-			LOGe("Failed to init, buffer not assigned!");
+			LOGe(FMT_BUFFER_NOT_ASSIGNED, "Buffer");
 		}
-		print();
 	}
 
 	/** Returns TDL_IS_NEARBY if a tracked device is nearby, also increases counters */
@@ -126,8 +134,12 @@ public:
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
-		LOGd("assign buff: %p, len: %d", buffer, maxLength);
-		assert(sizeof(tracked_device_list_t) <= maxLength, "buffer not large enough to hold tracked device list!");
+		assert(sizeof(tracked_device_list_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
+		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, maxLength);
+#endif
+
 		_buffer = (tracked_device_list_t*)buffer;
 		return 0;
 	}
@@ -166,7 +178,11 @@ public:
 
 	/** Release the assigned buffer */
 	void release() {
+
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 		LOGd("release");
+#endif
+
 		_buffer = NULL;
 	}
 
@@ -180,8 +196,12 @@ public:
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
-		LOGd("assign buff: %p, len: %d", buffer, maxLength);
-		assert(sizeof(tracked_device_t) <= maxLength, "buffer not large enough to hold tracked device!");
+		assert(sizeof(tracked_device_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
+		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, maxLength);
+#endif
+
 		_buffer = (tracked_device_t*)buffer;
 		return 0;
 	}
@@ -198,7 +218,11 @@ public:
 
 	/** @inherit */
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
+
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 		LOGd("getBuffer: %p", this);
+#endif
+
 		buffer = (buffer_ptr_t)_buffer;
 		dataLength = getDataLength();
 	}

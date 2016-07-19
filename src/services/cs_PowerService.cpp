@@ -5,146 +5,70 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
-//#include <cstdio>
-//
-#include "services/cs_PowerService.h"
-//
-#include "cfg/cs_Boards.h"
-//#include "common/cs_Config.h"
-//#include "common/cs_Strings.h"
-//#include "cs_nRF51822.h"
-#include "drivers/cs_RTC.h"
-#include "structs/buffer/cs_MasterBuffer.h"
-#include "cfg/cs_UuidConfig.h"
+#include <services/cs_PowerService.h>
 
-#include "drivers/cs_ADC.h"
-#include "drivers/cs_PWM.h"
+#include <cfg/cs_UuidConfig.h>
+#include <drivers/cs_Serial.h>
 #include <drivers/cs_Timer.h>
-#include <drivers/cs_LPComp.h>
-
-#include <protocol/cs_Mesh.h>
-#include <protocol/cs_MeshControl.h>
-#include <cfg/cs_Settings.h>
+#include <processing/cs_CommandHandler.h>
+#include <processing/cs_PowerSampling.h>
+#include <structs/buffer/cs_MasterBuffer.h>
+#include <protocol/cs_StateTypes.h>
 
 using namespace BLEpp;
 
-PowerService::PowerService() :
+PowerService::PowerService() : EventListener(),
 		_pwmCharacteristic(NULL),
 		_relayCharacteristic(NULL),
-		_sampleCurrentCharacteristic(NULL),
 		_powerConsumptionCharacteristic(NULL),
-		_currentCurveCharacteristic(NULL),
-		_currentLimitCharacteristic(NULL),
-		_powerCurve(NULL),
-		_currentLimitVal(0),
-		_adcInitialized(false),
-		_currentLimitInitialized(false),
-		_samplingType(0)
+		_powerSamplesCharacteristic(NULL)
 {
+	EventDispatcher::getInstance().addListener(this);
 
 	setUUID(UUID(POWER_UUID));
 
 	setName(BLE_SERVICE_POWER);
 
-	Settings::getInstance();
-//	Storage::getInstance().getHandle(PS_ID_POWER_SERVICE, _storageHandle);
-//	loadPersistentStorage();
-
-	init();
-
-	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)PowerService::staticTick);
+	// todo: enable again if tick is needed
+//	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)PowerService::staticTick);
 }
 
-void PowerService::init() {
-	LOGi("Create power service");
+void PowerService::createCharacteristics() {
+	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_POWER);
 
 #if CHAR_PWM==1
-	LOGi("add PWM Characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_PWM);
 	addPWMCharacteristic();
 #else
-	LOGi("skip PWM Characteristic");
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_PWM);
 #endif
 
 #if CHAR_RELAY==1
-	LOGi("add Relay Characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_RELAY);
 	addRelayCharacteristic();
 #else
-	LOGi("skip Relay Characteristic");
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_RELAY);
 #endif
 
 #if CHAR_SAMPLE_CURRENT==1
-	LOGi("add Sample Current Characteristic");
-	addSampleCurrentCharacteristic();
-	LOGi("add Current Curve Characteristic");
-	addCurrentCurveCharacteristic();
-	LOGi("add Current Consumption Characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_POWER_SAMPLE);
+	addPowerSamplesCharacteristic();
+	LOGi(FMT_CHAR_ADD, STR_CHAR_CURRENT_CONSUMPTION);
 	addPowerConsumptionCharacteristic();
 #else
-	LOGi("skip Sample Current Characteristic");
-	LOGi("skip Current Curve Characteristic");
-	LOGi("skip Current Consumption Characteristic");
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_PWM);
+	LOGi(FMT_CHAR_SKIP, STR_CHAR_CURRENT_CONSUMPTION);
 #endif
 
-#if CHAR_CURRENT_LIMIT==1
-	LOGi("add Current Limitation");
-	addCurrentLimitCharacteristic();
-#else
-	LOGi("skip Current Limitation");
-#endif
+	addCharacteristicsDone();
 }
 
-/**
- * TODO: We should only need to do this once on startup.
- */
-void PowerService::tick() {
-	//	LOGi("Tock: %d", RTC::now());
-
-	//! Initialize at first tick, to delay it a bit, prevents voltage peak going into the AIN pin.
-	//! TODO: This is not required anymore at later crownstone versions, so this should be done at init().
-
-#if CHAR_CURRENT_LIMIT==1
-	if(!_currentLimitInitialized) {
-		setCurrentLimit(_currentLimitVal);
-		_currentLimitInitialized = true;
-	}
-#endif
-
-//	if (!_adcInitialized) {
-//		//! Init only when you sample, so that the the pin is only configured as AIN after the big spike at startup.
-//		ADC::getInstance().init(PIN_AIN_ADC);
-//		sampleCurrentInit();
-//		_adcInitialized = true;
-//	}
-
-//	if (_samplingType && _currentCurve->isFull()) {
-//		sampleCurrentDone(_samplingType);
-//		_samplingType = 0;
-//	}
-
-	//~ LPComp::getInstance().tick();
-	//! check if current is not beyond current_limit if the latter is set
-	//	if (++tmp_cnt > tick_cnt) {
-	//		if (_currentLimitCharacteristic) {
-	//			getCurrentLimit();
-	//			LOGi("Set default current limit value to %i", _current_limit_val);
-	//			*_currentLimitCharacteristic = _current_limit_val;
-	//		}
-	//		tmp_cnt = 0;
-	//	}
-
-	scheduleNextTick();
-}
-
-void PowerService::scheduleNextTick() {
-	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(POWER_SERVICE_UPDATE_FREQUENCY), this);
-}
-
-//void PowerService::loadPersistentStorage() {
-//	Storage::getInstance().readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+//void PowerService::tick() {
+//	scheduleNextTick();
 //}
 
-//void PowerService::savePersistentStorage() {
-//	Storage::getInstance().writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+//void PowerService::scheduleNextTick() {
+//	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(POWER_SERVICE_UPDATE_FREQUENCY), this);
 //}
 
 void PowerService::addPWMCharacteristic() {
@@ -155,16 +79,11 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setDefaultValue(255);
 	_pwmCharacteristic->setWritable(true);
 	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
-			LOGi("set pwm to %i", value);
-			PWM::getInstance().setValue(0, value);
+		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&value, 1);
 	});
 }
 
 void PowerService::addRelayCharacteristic() {
-	nrf_gpio_cfg_output(PIN_GPIO_RELAY_OFF);
-	nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
-	nrf_gpio_cfg_output(PIN_GPIO_RELAY_ON);
-	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
 
 	_relayCharacteristic = new Characteristic<uint8_t>();
 	addCharacteristic(_relayCharacteristic);
@@ -173,274 +92,71 @@ void PowerService::addRelayCharacteristic() {
 	_relayCharacteristic->setDefaultValue(255);
 	_relayCharacteristic->setWritable(true);
 	_relayCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		if (value == 0) {
-			LOGi("trigger relay off pin for %d ms", RELAY_HIGH_DURATION);
-			nrf_gpio_pin_set(PIN_GPIO_RELAY_OFF);
-			nrf_delay_ms(RELAY_HIGH_DURATION);
-			nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
-		} else {
-			LOGi("trigger relay on pin for %d ms", RELAY_HIGH_DURATION);
-			nrf_gpio_pin_set(PIN_GPIO_RELAY_ON);
-			nrf_delay_ms(RELAY_HIGH_DURATION);
-			nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
-		}
+		CommandHandler::getInstance().handleCommand(CMD_RELAY, (buffer_ptr_t)&value, 1);
 	});
 }
 
-//! Do we really want to use the PWM for this, or just set the pin to zero?
-//! TODO: turn off normally, but make sure we enable the completely PWM again on request
-void PowerService::turnOff() {
-	//! update pwm characteristic so that the current value can be read from the characteristic
-	if (_pwmCharacteristic != NULL) {
-		(*_pwmCharacteristic) = 0;
-	}
-	PWM::getInstance().setValue(0, 0);
-}
+void PowerService::addPowerSamplesCharacteristic() {
+	_powerSamplesCharacteristic = new Characteristic<uint8_t*>();
+	addCharacteristic(_powerSamplesCharacteristic);
+	_powerSamplesCharacteristic->setUUID(UUID(getUUID(), POWER_SAMPLES_UUID));
+	_powerSamplesCharacteristic->setName(BLE_CHAR_POWER_SAMPLES);
+	_powerSamplesCharacteristic->setWritable(false);
+	_powerSamplesCharacteristic->setNotifies(true);
 
-//! Do we really want to use the PWM for this, or just set the pin to zero?
-//! TODO: turn on normally, but make sure we enable the completely PWM again on request
-void PowerService::turnOn() {
-	//! update pwm characteristic so that the current value can be read from the characteristic
-	if (_pwmCharacteristic != NULL) {
-		(*_pwmCharacteristic) = 255;
-	}
-	PWM::getInstance().setValue(0, 255);
-}
-
-void PowerService::dim(uint8_t value) {
-	//! update pwm characteristic so that the current value can be read from the characteristic
-	if (_pwmCharacteristic != NULL) {
-		(*_pwmCharacteristic) = value;
-	}
-	PWM::getInstance().setValue(0, value);
-}
-
-void PowerService::addSampleCurrentCharacteristic() {
-	_sampleCurrentCharacteristic = new Characteristic<uint8_t>();
-	addCharacteristic(_sampleCurrentCharacteristic);
-	_sampleCurrentCharacteristic->setUUID(UUID(getUUID(), SAMPLE_CURRENT_UUID));
-	_sampleCurrentCharacteristic->setName("Sample Current");
-	_sampleCurrentCharacteristic->setDefaultValue(0);
-	_sampleCurrentCharacteristic->setWritable(true);
-	_sampleCurrentCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		MasterBuffer& mb = MasterBuffer::getInstance();
-		if (!mb.isLocked()) {
-			mb.lock();
-		} else {
-			LOGe("Buffer is locked. Cannot be written!");
-			return;
-		}
-
-		//! Start storing the samples
-//		_currentCurve->clear();
-//		ADC::getInstance().setCurrentCurve(_currentCurve);
-//		_samplingType = value;
-
-		sampleCurrent(value);
-	});
-}
-
-void PowerService::addCurrentCurveCharacteristic() {
-	_currentCurveCharacteristic = new Characteristic<uint8_t*>();
-	addCharacteristic(_currentCurveCharacteristic);
-	_currentCurveCharacteristic->setUUID(UUID(getUUID(), CURRENT_CURVE_UUID));
-	_currentCurveCharacteristic->setName("Current Curve");
-	_currentCurveCharacteristic->setWritable(false);
-	_currentCurveCharacteristic->setNotifies(true);
-
-	_powerCurve = new PowerCurve<uint16_t>();
-	MasterBuffer& mb = MasterBuffer::getInstance();
-	uint8_t *buffer = NULL;
+	buffer_ptr_t buffer = NULL;
 	uint16_t size = 0;
-	mb.getBuffer(buffer, size);
-	LOGd("Assign buffer of size %i to current curve", size);
-	_powerCurve->assign(buffer, size);
+	PowerSampling::getInstance().getBuffer(buffer, size);
+//	LOGd("buffer=%u", buffer);
 
-	_currentCurveCharacteristic->setValue(buffer);
-	_currentCurveCharacteristic->setMaxLength(size);
-	_currentCurveCharacteristic->setDataLength(size);
+	_powerSamplesCharacteristic->setValue(buffer);
+	_powerSamplesCharacteristic->setMaxLength(size);
+	_powerSamplesCharacteristic->setDataLength(0); //! Initialize with 0 length, to indicate it's invalid data.
 }
 
 void PowerService::addPowerConsumptionCharacteristic() {
-	_powerConsumptionCharacteristic = new Characteristic<uint16_t>();
+	_powerConsumptionCharacteristic = new Characteristic<int32_t>();
 	addCharacteristic(_powerConsumptionCharacteristic);
-	_powerConsumptionCharacteristic->setUUID(UUID(getUUID(), CURRENT_CONSUMPTION_UUID));
-	_powerConsumptionCharacteristic->setName("Power Consumption");
+	_powerConsumptionCharacteristic->setUUID(UUID(getUUID(), POWER_CONSUMPTION_UUID));
+	_powerConsumptionCharacteristic->setName(BLE_CHAR_POWER_CONSUMPTION);
 	_powerConsumptionCharacteristic->setDefaultValue(0);
 	_powerConsumptionCharacteristic->setWritable(false);
 	_powerConsumptionCharacteristic->setNotifies(true);
 }
 
-uint8_t PowerService::getCurrentLimit() {
-	Storage::getUint8(Settings::getInstance().getConfig().current_limit, _currentLimitVal, 0);
-	LOGi("Obtained current limit from FLASH: %i", _currentLimitVal);
-	return _currentLimitVal;
-}
-
-//! TODO: doesn't work for now
-void PowerService::setCurrentLimit(uint8_t value) {
-	LOGi("Set current limit to: %i", value);
-	_currentLimitVal = value;
-	//if (!_currentLimitInitialized) {
-	//_currentLimit.init();
-	//_currentLimitInitialized = true;
-	//}
-//	LPComp::getInstance().stop();
-//	LPComp::getInstance().config(PIN_AIN_LPCOMP, _currentLimitVal, LPComp::LPC_UP);
-//	LPComp::getInstance().start();
-	LOGi("Write value to persistent memory");
-	Storage::setUint8(_currentLimitVal, Settings::getInstance().getConfig().current_limit);
-	Settings::getInstance().savePersistentStorage();
-}
-
-/**
- * The characteristic that writes a current limit to persistent memory.
- *
- * TODO: Check https://devzone.nordicsemi.com/question/1745/how-to-handle-flashwrit-in-an-safe-way/
- *       Writing to persistent memory should be done between connection/advertisement events...
- */
-//! TODO -oDE: make part of configuration characteristic
-void PowerService::addCurrentLimitCharacteristic() {
-	_currentLimitCharacteristic = new Characteristic<uint8_t>();
-	addCharacteristic(_currentLimitCharacteristic);
-	_currentLimitCharacteristic->setNotifies(true);
-	_currentLimitCharacteristic->setUUID(UUID(getUUID(), CURRENT_LIMIT_UUID));
-	_currentLimitCharacteristic->setName("Current Limit");
-	_currentLimitCharacteristic->setDefaultValue(getCurrentLimit());
-	_currentLimitCharacteristic->setWritable(true);
-	_currentLimitCharacteristic->onWrite([&](const uint8_t& value) -> void {
-		setCurrentLimit(value);
-		_currentLimitInitialized = true;
-	});
-
-	//! TODO: we have to delay the init, since there is a spike on the AIN pin at startup!
-	//! For now: init at onWrite, so we can still test it.
-	//	_currentLimit.start(&_currentLimitVal);
-	//	_currentLimit.init();
-}
-
-//static int tmp_cnt = 100;
-//static int tick_cnt = 100;
-
-void PowerService::sampleCurrentInit() {
-	LOGi("Start ADC");
-	ADC::getInstance().start();
-
-	//	//! Wait for the ADC to actually start
-	//	nrf_delay_ms(5);
-}
-
-void PowerService::sampleCurrent(uint8_t type) {
-	//! Start storing the samples
-	_voltagePin = false;
-	_powerCurve->clear();
-//	ADC::getInstance().setPowerCurve(_powerCurve);
-
-	ADC::getInstance().init(PIN_AIN_CURRENT);
-	while (!_powerCurve->isFull()) {
-		ADC::getInstance().start();
-		while(!NRF_ADC->EVENTS_END) {}
-//		NRF_ADC->EVENTS_END	= 0;
-//		LOGd("got sample");
-		if (_voltagePin) {
-			PC_ERR_CODE res = _powerCurve->addVoltage(NRF_ADC->RESULT, RTC::getCount());
-//			LOGd("%i %i voltage: %i", res, _powerCurve->length(), NRF_ADC->RESULT);
-			ADC::getInstance().config(PIN_AIN_CURRENT);
+void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch(evt) {
+	case EVT_POWER_OFF:
+	case EVT_POWER_ON: {
+		if (_pwmCharacteristic) {
+//			LOGi("pwm update");
+			(*_pwmCharacteristic) = *(uint8_t*)p_data;
 		}
-		else {
-			PC_ERR_CODE res = _powerCurve->addCurrent(NRF_ADC->RESULT, RTC::getCount());
-//			LOGd("%i %i current: %i", res, _powerCurve->length(), NRF_ADC->RESULT);
-			ADC::getInstance().config(PIN_AIN_VOLTAGE);
+		break;
+	}
+	case EVT_POWER_SAMPLES_START: {
+		if (_powerSamplesCharacteristic) {
+//			LOGd("power samples update");
+			_powerSamplesCharacteristic->setDataLength(0);
+			_powerSamplesCharacteristic->notify();
 		}
-		_voltagePin = !_voltagePin;
+		break;
 	}
-	ADC::getInstance().stop();
-	LOGd("sampleCurrentDone");
-	sampleCurrentDone(type);
-}
-
-void PowerService::sampleCurrentDone(uint8_t type) {
-//	//! Stop storing the samples
-//	ADC::getInstance().setCurrentCurve(NULL);
-	ADC::getInstance().setPowerCurve(NULL);
-
-	uint16_t numSamples = _powerCurve->length();
-	LOGd("numSamples = %i", numSamples);
-	if ((type & 0x2) && _currentCurveCharacteristic != NULL) {
-		_currentCurveCharacteristic->setDataLength(_powerCurve->getDataLength());
-		_currentCurveCharacteristic->notify();
-	}
-
-#if SERIAL_VERBOSITY==DEBUG
-	if (numSamples>1) {
-		uint16_t currentSample = 0;
-		uint16_t voltageSample = 0;
-		uint32_t currentTimestamp = 0;
-		uint32_t voltageTimestamp = 0;
-		LOGd("Samples:");
-		for (uint16_t i=0; i<numSamples; ++i) {
-			if (_powerCurve->getValue(i, currentSample, voltageSample, currentTimestamp, voltageTimestamp) != PC_SUCCESS) {
-				break;
-			}
-			_log(DEBUG, "%u %u %u %u,  ", currentTimestamp, currentSample, voltageTimestamp, voltageSample);
-			if (!((i+1) % 3)) {
-				_log(DEBUG, "\r\n");
-			}
+	case EVT_POWER_SAMPLES_END: {
+		if (_powerSamplesCharacteristic) {
+//			LOGd("power samples update");
+			_powerSamplesCharacteristic->setDataLength(length);
+			_powerSamplesCharacteristic->notify();
 		}
-		_log(DEBUG, "\r\n");
+		break;
 	}
-#endif
-
-#ifdef MIRCO_VIEW
-	if (numSamples>1) {
-		uint16_t currentSample = 0;
-		uint16_t voltageSample = 0;
-		uint32_t currentTimestamp = 0;
-		uint32_t voltageTimestamp = 0;
-		write("3 [");
-		for (uint16_t i=0; i<numSamples; ++i) {
-			if (_powerCurve->getValue(i, currentSample, voltageSample, currentTimestamp, voltageTimestamp) != PC_SUCCESS) {
-				break;
-			}
-			write("%u %u ", currentTimestamp, currentSample);
-//			write("%u %u %u %u ", currentTimestamp, currentSample, voltageTimestamp, voltageSample);
+	case STATE_POWER_USAGE: {
+		if (_powerConsumptionCharacteristic) {
+//			LOGi("power consumption update");
+			(*_powerConsumptionCharacteristic) = *(int32_t*)p_data;
 		}
 	}
-#endif
-
-	if (numSamples>1 && (type & 0x1) && _powerConsumptionCharacteristic != NULL) {
-		uint16_t currentSample = 0;
-		uint16_t voltageSample = 0;
-		uint32_t currentTimestamp = 0;
-		uint32_t voltageTimestamp = 0;
-		uint32_t minCurrentSample = 1024;
-		uint32_t maxCurrentSample = 0;
-		for (uint16_t i=0; i<numSamples; ++i) {
-			if (_powerCurve->getValue(i, currentSample, voltageSample, currentTimestamp, voltageTimestamp) != PC_SUCCESS) {
-				break;
-			}
-			if (currentSample > maxCurrentSample) {
-				maxCurrentSample = currentSample;
-			}
-			if (currentSample < minCurrentSample) {
-				minCurrentSample = currentSample;
-			}
-
-			//! TODO: do some power = voltage * current, make sure we use timestamps too.
-		}
-		//! 1023*1000*1200 = 1.3e9 < 4.3e9 (max uint32)
-		//! currentSampleAmplitude is max: 1023*1000*1200/1023/2 = 600000
-		uint32_t currentSampleAmplitude = (maxCurrentSample-minCurrentSample) * 1000 * 1200 / 1023 / 2; //! uV
-		//! max of currentAmplitude depends on amplification and shunt value
-		uint32_t currentAmplitude = currentSampleAmplitude / VOLTAGE_AMPLIFICATION / SHUNT_VALUE; //! mA
-		//! currentRms should be max:  16000
-		uint32_t currentRms = currentAmplitude * 1000 / 1414; //! mA
-		LOGi("currentRms = %i mA", currentRms);
-		uint32_t powerRms = currentRms * 230 / 1000; //! Watt
-		LOGi("powerRms = %i Watt", powerRms);
-		*_powerConsumptionCharacteristic = powerRms;
 	}
-
-	//! Unlock the buffer
-	MasterBuffer::getInstance().unlock();
 }
+
+

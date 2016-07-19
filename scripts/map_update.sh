@@ -3,7 +3,7 @@
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_config.sh
 
-cd $path/../build
+cd $path/../build/$1
 
 cp prog.map prog.tmp.map
 ex -c '%g/\.text\S*[\s]*$/j' -c "wq" prog.map

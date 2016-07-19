@@ -5,11 +5,7 @@
  * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
-//#include <string.h>
-//#include <stdio.h>
-//
 #include "structs/cs_TrackDevices.h"
-//#include "drivers/cs_Serial.h"
 
 /**********************************************************************************************************************
  * List of tracked devices
@@ -30,16 +26,22 @@ bool TrackedDeviceList::isEmpty() const {
 
 void TrackedDeviceList::update(const uint8_t * addrs_ptr, int8_t rssi) {
 	//bool found = false;
-//	LOGd("scanned: [%02X %02X %02X %02X %02X %02X], rssi: %d",
-//			addrs_ptr[5], addrs_ptr[4], addrs_ptr[3], addrs_ptr[2],
-//			addrs_ptr[1], addrs_ptr[0], rssi);
+#ifdef PRINT_TD_VERBOSE
+	LOGd("scanned: [%02X %02X %02X %02X %02X %02X], rssi: %d",
+			addrs_ptr[5], addrs_ptr[4], addrs_ptr[3], addrs_ptr[2],
+			addrs_ptr[1], addrs_ptr[0], rssi);
+#endif
 	for (int i = 0; i < getSize(); ++i) {
 		if (memcmp(addrs_ptr, _buffer->list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			if (rssi >= _buffer->list[i].rssiThreshold) {
 				_buffer->counters[i] = 0;
+#ifdef PRINT_TD_VERBOSE
 				LOGd("Tracked device present nearby (%i >= %i)", rssi, _buffer->list[i].rssiThreshold);
+#endif
 			} else {
-//				LOGd("Tracked device found, but not nearby (%i < %i)", rssi, _buffer->list[i].rssiThreshold);
+#ifdef PRINT_TD_VERBOSE
+				LOGd("Tracked device found, but not nearby (%i < %i)", rssi, _buffer->list[i].rssiThreshold);
+#endif
 			}
 			//found = true;
 			break;
@@ -62,7 +64,7 @@ uint8_t TrackedDeviceList::isNearby() {
 	if (!getSize()) return TDL_NOT_TRACKING;
 	
 	bool is_nearby = false;
-	uint16_t result;
+	uint8_t result;
 //	print();
 	for (int i = 0; i < getSize(); ++i) {
 		if (_buffer->counters[i] >= _timeoutCount) {
@@ -82,13 +84,14 @@ void TrackedDeviceList::print(uint8_t *addr) const {
 
 void TrackedDeviceList::print() const {
 	for (int i = 0; i < getSize(); ++i) {
-		LOGd("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tstate: %d", _buffer->list[i].addr[5],
+		LOGd("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tcount: %d", _buffer->list[i].addr[5],
 				_buffer->list[i].addr[4], _buffer->list[i].addr[3], _buffer->list[i].addr[2], _buffer->list[i].addr[1],
 				_buffer->list[i].addr[0], _buffer->list[i].rssiThreshold, _buffer->counters[i]);
 	}
 }
 
 void TrackedDeviceList::clear() {
+	//TODO: why not just set size to 0 ?
 	memset(_buffer, 0, sizeof(tracked_device_list_t));
 }
 
@@ -98,9 +101,11 @@ bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 		if (memcmp(adrs_ptr, _buffer->list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			_buffer->list[i].rssiThreshold = rssi_threshold;
 			//_buffer->counters[i] = TDL_COUNTER_INIT; //! Don't update counter
+#ifdef PRINT_TD_VERBOSE
 			LOGi("Updated [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
 					adrs_ptr[5], adrs_ptr[4], adrs_ptr[3], adrs_ptr[2],
 					adrs_ptr[1], adrs_ptr[0], rssi_threshold);
+#endif
 			return true;
 		}
 	}
@@ -117,12 +122,14 @@ bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 //	LOGi("Added [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
 //			_buffer->list[_freeIdx].addr[5], _buffer->list[_freeIdx].addr[4], _buffer->list[_freeIdx].addr[3], _buffer->list[_freeIdx].addr[2],
 //			_buffer->list[_freeIdx].addr[1], _buffer->list[_freeIdx].addr[0], rssi_threshold);
+#ifdef PRINT_TD_VERBOSE
 	LOGi("Added [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
 			adrs_ptr[5], adrs_ptr[4], adrs_ptr[3], adrs_ptr[2],
 			adrs_ptr[1], adrs_ptr[0], rssi_threshold);
+#endif
 
 	if (memcmp(adrs_ptr, _buffer->list[idx].addr, BLE_GAP_ADDR_LEN)) {
-		LOGi("Adding the address did not work, very likely due to memory issues!");
+		LOGe("Failed to add address");
 		return false;
 	}
 
@@ -144,8 +151,10 @@ bool TrackedDeviceList::rem(const uint8_t* adrs_ptr) {
 				//! TODO: does this work too? might be faster..
 				//memcpy(&(_buffer->list[j]), &(_buffer->list[j+1]), sizeof(tracked_device_t));
 			}
+#ifdef PRINT_TD_VERBOSE
 			LOGi("Removed [%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
 					adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1], adrs_ptr[0]);
+#endif
 			return true;
 		}
 	}
@@ -153,9 +162,9 @@ bool TrackedDeviceList::rem(const uint8_t* adrs_ptr) {
 }
 
 void TrackedDeviceList::setTimeout(uint16_t counts) {
-	if (counts > TDL_COUNTER_INIT) {
-		return;
-	}
+//	if (counts > TDL_COUNTER_INIT) {
+//		return;
+//	}
 
 	//! Make sure that devices that are not nearby get the new threshold count
 	for (int i=0; i<getSize(); ++i) {
@@ -165,7 +174,10 @@ void TrackedDeviceList::setTimeout(uint16_t counts) {
 	}
 
 	_timeoutCount = counts;
+
+#ifdef PRINT_TD_VERBOSE
 	LOGi("Set timeout count to %i", counts);
+#endif
 }
 
 uint16_t TrackedDeviceList::getTimeout() {

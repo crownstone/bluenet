@@ -23,10 +23,7 @@ extern "C" {
 class Timer {
 
 private:
-	Timer() {
-		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
-	}
+	Timer() {};
 
 	Timer(Timer const&);
 	void operator=(Timer const &);
@@ -35,6 +32,12 @@ public:
 	static Timer& getInstance() {
 		static Timer instance;
 		return instance;
+	}
+
+	inline void init() {
+		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
+//		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
+		APP_TIMER_APPSH_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, true);
 	}
 
 	/** Create single shot timer. function will only be called once and after that timer will be
@@ -56,10 +59,11 @@ public:
 	 *
 	 * Create a timer for a specific purpose.
 	 */
+	// Note: timer will be readded even if it is not processed in the mean time, thus might cause the list to overflow
 //	void createRepeated(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func);
-	inline void createRepeated(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func) {
-		BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_REPEATED, func));
-	}
+//	inline void createRepeated(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func) {
+//		BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_REPEATED, func));
+//	}
 
 	/** Start a previously created timer
 	 * @timer_handle            Reference to previously created timer

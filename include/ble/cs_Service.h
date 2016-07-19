@@ -15,6 +15,7 @@
 #include <util/cs_BleError.h>
 #include <drivers/cs_Timer.h>
 
+
 /** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
@@ -45,11 +46,15 @@ protected:
 	//! app timer id for tick function
 	uint32_t				 _appTimerId;
 
+	// per BLE definition, there is no maximum number of characteristics per
+	// service. it is limited by the memory available to the GATT table over
+	// all services/characteristics
 	//! Currently maximum number of characteristics per service
-	static const uint8_t MAX_CHARACTERISTICS = 6;
+//	static const uint8_t MAX_CHARACTERISTICS = 10;
 
 	//! List of characteristics
-	fixed_tuple<CharacteristicBase*, MAX_CHARACTERISTICS> _characteristics;
+//	fixed_tuple<CharacteristicBase*, MAX_CHARACTERISTICS> _characteristics;
+	Characteristics_t _characteristics;
 
 public:
 	Service() :
@@ -105,12 +110,15 @@ public:
 
 	//! internal:
 
+	virtual void createCharacteristics() = 0;
+
 	virtual void tick() {};
 	static void staticTick(Service* ptr) {
 		ptr->tick();
 	}
 
 	void startTicking() {
+//		LOGi("service startTicking");
 		if (_appTimerId != UINT32_MAX) {
 			Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this);
 		}
@@ -122,7 +130,7 @@ public:
 		}
 	};
 
-	virtual void startAdvertising(Nrf51822BluetoothStack* stack);
+	virtual void init(Nrf51822BluetoothStack* stack);
 	virtual void stopAdvertising() {};
 
 	virtual void on_ble_event(ble_evt_t * p_ble_evt);
@@ -131,7 +139,7 @@ public:
 
 	virtual void on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& gap_evt);  //! FIXME NRFAPI
 
-	virtual void on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle);  //! FIXME NRFAPI
+	virtual bool on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle);  //! FIXME NRFAPI
 
 	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
 
@@ -147,13 +155,22 @@ public:
 	 * @characteristic Characteristic to add
 	 */
 	virtual Service& addCharacteristic(CharacteristicBase* characteristic) {
-		if (_characteristics.size() == MAX_CHARACTERISTICS) {
-			BLE_THROW(MSG_BLE_CHAR_TOO_MANY);
-		}
+//		if (_characteristics.size() == MAX_CHARACTERISTICS) {
+//			BLE_THROW(MSG_BLE_CHAR_TOO_MANY);
+//		}
 		_characteristics.push_back(characteristic);
 
 		return *this;
 	}
+
+	virtual Service& removeCharacteristic(CharacteristicBase* characteristic);
+
+	Service& addCharacteristicsDone() {
+		_characteristics.shrink_to_fit();
+		return *this;
+	}
+
+	void setEncrypted(bool encrypted);
 };
 
 }

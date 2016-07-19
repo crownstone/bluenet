@@ -48,8 +48,6 @@
 
 #include "ble_gatts.h"
 
-#include <drivers/cs_Serial.h>
-
 #include <string.h>
 
 /*****************************************************************************
@@ -64,6 +62,7 @@ static uint32_t g_interval_min_ms;
 static fifo_t g_rbc_event_fifo;
 static rbc_mesh_event_t g_rbc_event_buffer[RBC_MESH_APP_EVENT_QUEUE_LENGTH];
 
+static bool g_restart_pending = false;
 /*****************************************************************************
  * Static Functions
  *****************************************************************************/
@@ -100,10 +99,10 @@ uint32_t rbc_mesh_init(rbc_mesh_init_params_t init_params) {
 		return error_code;
 	}
 
-	ble_enable_params_t ble_enable;
-	ble_enable.gatts_enable_params.attr_tab_size =
-			BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
-	ble_enable.gatts_enable_params.service_changed = 0;
+//	ble_enable_params_t ble_enable;
+//	ble_enable.gatts_enable_params.attr_tab_size =
+//			BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
+//	ble_enable.gatts_enable_params.service_changed = 0;
 	// Should be removed according to integration doc
 	// https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh/blob/master/docs/integrating_w_SD_apps.adoc#step-6-initialization
 //	error_code = sd_ble_enable(&ble_enable);
@@ -146,6 +145,18 @@ uint32_t rbc_mesh_start(void) {
 	return NRF_SUCCESS;
 }
 
+uint32_t rbc_mesh_start_earliest(void) {
+	if (g_mesh_state != MESH_STATE_STOPPED) {
+		return NRF_ERROR_INVALID_STATE;
+	}
+
+	timeslot_order_earliest(10000, false);
+
+	g_mesh_state = MESH_STATE_RUNNING;
+
+	return NRF_SUCCESS;
+}
+
 uint32_t rbc_mesh_stop(void) {
 	if (g_mesh_state != MESH_STATE_RUNNING) {
 		return NRF_ERROR_INVALID_STATE;
@@ -156,6 +167,11 @@ uint32_t rbc_mesh_stop(void) {
 	g_mesh_state = MESH_STATE_STOPPED;
 
 	return NRF_SUCCESS;
+}
+
+uint32_t rbc_mesh_restart(void) {
+	g_restart_pending = true;
+	return rbc_mesh_stop();
 }
 
 uint32_t rbc_mesh_value_enable(rbc_mesh_value_handle_t handle) {
@@ -278,12 +294,14 @@ void rbc_mesh_ble_evt_handler(ble_evt_t* p_evt) {
 }
 
 void rbc_mesh_sd_evt_handler(uint32_t sd_evt) {
-	ts_sd_event_handler(sd_evt);
-}
-
-void rbc_mesh_sys_evt_handler(uint32_t evt) {
 	/* call lower layer event handler */
-	ts_sys_evt_handler(evt);
+//	ts_sys_evt_handler(sd_evt);
+	ts_sd_event_handler(sd_evt);
+
+	if (g_restart_pending && sd_evt == NRF_EVT_RADIO_SESSION_IDLE) {
+		g_restart_pending = false;
+		rbc_mesh_start();
+	}
 }
 
 uint32_t rbc_mesh_event_push(rbc_mesh_event_t* p_event) {

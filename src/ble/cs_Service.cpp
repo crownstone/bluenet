@@ -11,13 +11,15 @@
 
 #include <ble/cs_Softdevice.h>
 
+#include <algorithm>
+
 using namespace BLEpp;
 
 ///! Service ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const char* Service::defaultServiceName = "unnamed";
 
-void Service::startAdvertising(Nrf51822BluetoothStack* stack) {
+void Service::init(Nrf51822BluetoothStack* stack) {
 
 	_stack = stack;
 
@@ -37,6 +39,13 @@ void Service::startAdvertising(Nrf51822BluetoothStack* stack) {
 
 	_started = true;
 
+}
+
+void Service::setEncrypted(bool encrypted) {
+	//! set all characteristics to encrypted
+	for (CharacteristicBase* characteristic : getCharacteristics()) {
+		characteristic->setEncrypted(encrypted);
+	}
 }
 
 /**
@@ -91,19 +100,20 @@ void Service::on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& ga
  * write_evt.handle is compared instead of write_evt.context.value_handle. Of course, the corresponding handle in
  * the characteristic object is also different.
  */
-void Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) {
-	bool found = false;
+bool Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) {
+//	bool found = false;
 
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 
 		if (characteristic->getCccdHandle() == write_evt.handle && write_evt.len == 2) {
 			//! received write to enable/disable notification
 			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(write_evt.data));
-			found = true;
+//			found = true;
+			return true;
 
 		} else if (characteristic->getValueHandle() == value_handle) {
 			//! TODO: make a map.
-			found = true;
+//			found = true;
 
 			if (write_evt.op == BLE_GATTS_OP_WRITE_REQ
 					|| write_evt.op == BLE_GATTS_OP_WRITE_CMD
@@ -122,13 +132,16 @@ void Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) 
 //			} else {
 //				found = false;
 			}
+
+			return true;
 		}
 	}
 
-	if (!found) {
+//	if (!found) {
 		//! tell someone?
 		LOGe(MSG_BLE_CHAR_CANNOT_FIND);
-	}
+		return false;
+//	}
 }
 
 //! inform all characteristics that transmission was completed in case they have notifications pending
@@ -138,4 +151,9 @@ void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
 	}
 }
 
-
+Service& Service::removeCharacteristic(CharacteristicBase* characteristic) {
+	Characteristics_t::iterator it;
+	it = std::find(_characteristics.begin(), _characteristics.end(), characteristic);
+	_characteristics.erase(it);
+	return *this;
+}

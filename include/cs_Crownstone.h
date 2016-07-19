@@ -11,25 +11,38 @@
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
 #include <ble/cs_Stack.h>
-
 #include <ble/cs_iBeacon.h>
+
+#include <storage/cs_Settings.h>
+#include <events/cs_EventListener.h>
 
 #include <services/cs_IndoorLocalisationService.h>
 #include <services/cs_GeneralService.h>
 #include <services/cs_PowerService.h>
-#include <services/cs_AlertService.h>
 #include <services/cs_ScheduleService.h>
 #include <services/cs_DeviceInformationService.h>
+#include <services/cs_SetupService.h>
+#include <services/cs_CrownstoneService.h>
 
+#include <processing/cs_CommandHandler.h>
 #include <processing/cs_TemperatureGuard.h>
 #include <processing/cs_Sensors.h>
 #include <processing/cs_Fridge.h>
+#include <processing/cs_Switch.h>
+#include <processing/cs_Scanner.h>
+#include <processing/cs_Tracker.h>
+#include <processing/cs_PowerSampling.h>
+#include <processing/cs_Scheduler.h>
 
-#include <events/cs_EventListener.h>
+#include <mesh/cs_Mesh.h>
+#include <storage/cs_State.h>
+
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+
+#define CROWNSTONE_UPDATE_FREQUENCY 1 //! hz
 
 using namespace BLEpp;
 
@@ -38,46 +51,121 @@ using namespace BLEpp;
  */
 class Crownstone : EventListener {
 
-private:
-	Nrf51822BluetoothStack* _stack;
+public:
+	Crownstone();
 
+	/** initialize the crownstone:
+	 *    1. start UART
+	 *    2. configure (drivers, stack, advertisement)
+	 *    3. check operation mode
+	 *    		3a. for setup mode, create setup services
+	 *    		3b. for normal operation mode, create crownstone services
+	 *    			and prepare Crownstone for operation
+	 *    4. initialize services
+	 */
+	void init();
+
+	/** startup the crownstone:
+	 * 	  1. start advertising
+	 * 	  2. start processing (mesh, scanner, tracker, tempGuard, etc)
+	 */
+	void startUp();
+
+	/** run main
+	 *    1. execute app scheduler
+	 *    2. wait for ble events
+	 */
+	void run();
+
+	/** handle (crownstone) events
+	 */
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
+	/** tick function called by app timer
+	 */
+	static void staticTick(Crownstone *ptr) {
+		ptr->tick();
+	}
+
+protected:
+
+	/** initialize drivers (timer, storage, pwm, etc)
+	 */
+	void initDrivers();
+
+	/** configure the crownstone. this will call the other configureXXX functions in turn
+	 *    1. configure ble stack
+	 *    2. set ble name
+	 *    3. configure advertisement
+	 *
+	 */
+	void configure();
+	void configureStack();
+	void configureAdvertisement();
+	void setName();
+
+	/** create services available in setup mode
+	 */
+	void createSetupServices();
+	/** create services available in normal operation mode
+	 */
+	void createCrownstoneServices();
+
+	/** prepare crownstone for normal operation mode, this includes:
+	 *    - prepare mesh
+	 *    - prepare scanner
+	 *    - prepare tracker
+	 *    - ...
+	 */
+	void prepareCrownstone();
+
+	/** tick function for crownstone to update/execute periodically
+	 */
+	void tick();
+
+	/** schedule next execution of tick function
+	 */
+	void scheduleNextTick();
+
+private:
+
+	// drivers
+	Nrf51822BluetoothStack* _stack;
+	Timer* _timer;
+	Storage* _storage;
+	Settings* _settings;
+	State* _stateVars;
+	Switch* _switch;
+	TemperatureGuard* _temperatureGuard;
+	PowerSampling* _powerSampler;
+
+	// services
+	DeviceInformationService* _deviceInformationService;
+	CrownstoneService* _crownstoneService;
+	SetupService* _setupService;
 	GeneralService* _generalService;
 	IndoorLocalizationService* _localizationService;
 	PowerService* _powerService;
-	AlertService* _alertService;
 	ScheduleService* _scheduleService;
-	DeviceInformationService* _deviceInformationService;
 
+	// advertise
+	ServiceData* _serviceData;
 	IBeacon* _beacon;
+
+	// processing
+	Mesh* _mesh;
 	Sensors* _sensors;
 	Fridge* _fridge;
-	TemperatureGuard* _temperatureGuard;
+	CommandHandler* _commandHandler;
+	Scanner* _scanner;
+	Tracker* _tracker;
+	Scheduler* _scheduler;
 
 	bool _advertisementPaused;
 
-	void welcome();
+	app_timer_id_t _mainTimer;
 
-	void setName();
-	void configStack();
-	void configDrivers();
-
-	void createServices();
-
-	void configure();
-
-	void startAdvertising();
-
-public:
-	Crownstone() : _stack(NULL),
-		_generalService(NULL), _localizationService(NULL), _powerService(NULL),
-		_alertService(NULL), _scheduleService(NULL), _deviceInformationService(NULL),
-		_beacon(NULL), _sensors(NULL), _fridge(NULL) {};
-
-	void setup();
-
-	void run();
-
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	uint8_t _operationMode;
 
 };
 

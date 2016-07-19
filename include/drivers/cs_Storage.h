@@ -13,11 +13,15 @@
 #include "drivers/cs_Serial.h"
 #include "util/cs_Utils.h"
 
+#include "structs/cs_TrackDevices.h"
+#include "structs/cs_ScheduleEntries.h"
+
+#include "structs/buffer/cs_CircularBuffer.h"
+
 extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
-	#include "pstorage_platform.h"
+//	#include "pstorage_platform.h"
 	#include "pstorage.h"
-	#include "ble_types.h"
 }
 
 /** enable additional debug output */
@@ -48,10 +52,6 @@ extern "C" {
  *    uint32_t
  */
 
-/** define the maximum size for strings to be stored
- */
-#define MAX_STRING_SIZE 32
-
 /** Base class for storage structures
  */
 struct ps_storage_base_t {
@@ -64,7 +64,9 @@ enum ps_storage_id {
 	//! storage for configuration items
 	PS_ID_CONFIGURATION = 0,
 	//! storage for the indoor localisation service
-	PS_ID_INDOORLOCALISATION_SERVICE = 1,
+	PS_ID_GENERAL = 1,
+	//! state variables
+	PS_ID_STATE = 2,
 	//! number of elements
 	PS_ID_TYPES
 };
@@ -88,11 +90,11 @@ struct storage_config_t {
  */
 struct ps_configuration_t : ps_storage_base_t {
 	//! device name
-	char device_name[MAX_STRING_SIZE];
+	char device_name[MAX_STRING_STORAGE_SIZE+1];
 	//! room name
-	char room[MAX_STRING_SIZE];
+	char room[MAX_STRING_STORAGE_SIZE+1];
 	//! device type
-	char device_type[MAX_STRING_SIZE];
+	char device_type[MAX_STRING_STORAGE_SIZE+1];
 	//! floor level
 	uint32_t floor;
 	//! beacon
@@ -100,11 +102,11 @@ struct ps_configuration_t : ps_storage_base_t {
 		uint32_t major;
 		uint32_t minor;
 		ble_uuid128_t uuid;
-		int32_t rssi;
+		int32_t txPower;
 	} beacon;
 
 	//! current limit value
-	uint32_t current_limit;
+	uint32_t currentLimit;
 
 	//! nearby timeout used for device tracking
 	uint32_t nearbyTimeout;
@@ -146,6 +148,96 @@ struct ps_configuration_t : ps_storage_base_t {
 	//! Set to 0 to not send them ever
 	uint32_t scanFilterSendFraction;
 
+	// interval duration between two calls to sample for power
+	uint32_t samplingInterval;
+
+	// how long to sample for power
+	uint32_t samplingTime;
+
+	// [18.07.16] enabling and disabling functionality at run time will mess
+	// up with enabling/disabling through compiler flags. i.e. if one flag was
+	// set through the command at run time, all flags are initialized with the
+	// current compiler flags. if next run, the compiler flags are changed, the
+	// change will not take any effect. to reduce this during development, use
+	// instead separate variables for each flag. this will be a waste of space
+	// but it lead to less confusion.
+	// nevertheless, if a flag is set at runtime through the command, changing the
+	// compiler flag afterwards will have no influence anymore
+	// todo: might need to move this to the state variables for wear leveling
+	union {
+		struct {
+			bool flagsUninitialized : 1;
+			bool meshDisabled : 1;
+			bool encryptionDisabled : 1;
+			bool iBeaconDisabled : 1;
+			bool scannerDisabled : 1;
+			bool continuousPowerSamplerDisabled : 1;
+			bool trackerDisabled : 1;
+			bool defaultOff: 1;
+		} flagsBit;
+		// dummy to force enableFlags struct to be of size uint32_t;
+		uint32_t flags;
+	};
+
+	uint32_t crownstoneId;
+
+	// storing keys used for encryption
+	struct {
+		uint8_t owner[ENCYRPTION_KEY_LENGTH];
+		uint8_t member[ENCYRPTION_KEY_LENGTH];
+		uint8_t guest[ENCYRPTION_KEY_LENGTH];
+	} encryptionKeys;
+
+	uint32_t adcBurstSampleRate;
+
+	uint32_t powerSampleBurstInterval;
+
+	uint32_t powerSampleContInterval;
+
+	uint32_t adcContSampleRate;
+
+	uint32_t scanInterval;
+
+	uint32_t scanWindow;
+
+	uint32_t relayHighDuration;
+
+	int32_t lowTxPower;
+
+	float voltageMultiplier;
+	float currentMultiplier;
+	float voltageZero;
+	float currentZero;
+	float powerZero;
+
+	// see comment at struct for flags above
+	uint32_t meshEnabled;
+	uint32_t encryptionEnabled;
+	uint32_t iBeaconEnabled;
+	uint32_t scannerEnabled;
+	uint32_t continuousPowerSamplerEnabled;
+	uint32_t trackerEnabled;
+	uint32_t defaultOff;
+};
+
+//! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
+STATIC_ASSERT(sizeof(ps_configuration_t) <= 1024);
+
+/** Event handler for softdevice events. in particular, listen for
+ *  NRF_EVT_RADIO_SESSION_CLOSED event to resume storage requests
+ */
+void storage_sys_evt_handler(uint32_t evt);
+
+/** Struct holding a storage request. If meshing is enabled, we need
+ *  to pause meshing on a storage request and wait until the radio is
+ *  closed before we can update the storage. so we need to buffer the
+ *  storage requests.
+ */
+struct buffer_element_t {
+	uint8_t* data;
+	uint16_t dataSize;
+	uint16_t storageOffset;
+	pstorage_handle_t storageHandle;
 };
 
 /** Class to store items persistently in FLASH
@@ -160,7 +252,7 @@ struct ps_configuration_t : ps_storage_base_t {
  * on the Storage itself, just work with the provided parameters. As such
  * they can be used without unnecessarily instantiating the storage instance.
  */
-class Storage {
+class Storage : EventListener {
 
 public:
 	/** Returns the singleton instance of this class
@@ -170,6 +262,12 @@ public:
 	static Storage& getInstance() {
 		static Storage instance;
 		return instance;
+	}
+
+	void init();
+
+	bool isInitialized() {
+		return _initialized;
 	}
 
 	/** Get the handle to the persistent memory for the given storage ID.
@@ -191,7 +289,7 @@ public:
 	 * @storageID the enum defining the storage struct type, used to
 	 *   get the size of the struct
 	 */
-	void clearBlock(pstorage_handle_t handle, ps_storage_id storageID);
+	void clearStorage(ps_storage_id storageID);
 
 	/** Get the struct stored in persistent memory at the position defined by the handle
 	 * @handle the handle to the persistent memory where the struct is stored.
@@ -210,15 +308,48 @@ public:
 	 */
 	void writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
 
+	/** Read a single item (variable) from persistent memory at the position defined by the handle
+	 * and the offset
+	 * @handle the handle to the persistent memory where the struct is stored.
+	 *   obtain the handle with <getHandle>
+	 * @item pointer to the structure where the data from the persistent memory
+	 *   should be copied into
+	 * @size size of the item (eg. 4 for integer, 1 for a byte, 8 for a byte array of length 8, etc)
+	 * @offset the offset in bytes at which the item should be stored. (the offset is relative to the
+	 *   beginning of the block defined by the handle)
+	 */
+	void readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size);
+
+	/** Write a single item (variable) to persistent memory at the position defined by the handle
+	 * and the offset
+	 * @handle the handle to the persistent memory where the struct is stored.
+	 *   obtain the handle with <getHandle>
+	 * @item pointer to the structure where the data from the persistent memory
+	 *   should be copied into
+	 * @size size of the item (eg. 4 for integer, 1 for a byte, 8 for a byte array of length 8, etc)
+	 * @offset the offset in bytes at which the item should be stored. (the offset is relative to the
+	 *   beginning of the block defined by the handle)
+	 */
+	void writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size);
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	//! helper functions
 	////////////////////////////////////////////////////////////////////////////////////////
+
+	/** Helper function to calculate the offset of a variable inside a storage struct
+	 * @storage pointer to the storage struct where the variable is stored. (storage struct is a
+	 * 1 to 1 representation of the FLASH memory)
+	 * @variable pointer to the variable inside the struct
+	 * @return returns the offset in bytes
+	 */
+	static pstorage_size_t getOffset(ps_storage_base_t* storage, uint8_t* variable);
 
 	/** Helper function to convert std::string to char array
 	 * @value the input string
 	 * @target pointer to the output char array
 	 */
 	static void setString(std::string value, char* target);
+	static void setString(const char* value, uint16_t length, char* target);
 
 	/** Helper function to get std::string from char array in the struct
 	 * @value pointer the input char array
@@ -233,7 +364,8 @@ public:
 	 * If the value read from the char array is empty or unassigned the default
 	 * value will be returned instead
 	 */
-	static void getString(char* value, std::string& target, std::string default_value);
+//	static void getString(char* value, std::string& target, std::string default_value);
+	static void getString(char* value, char* target, char* default_value, uint16_t& size);
 
 	/** Helper function to set a byte in the field of a struct
 	 * @value the byte value to be copied to the struct
@@ -256,7 +388,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getUint8(uint32_t value, uint8_t& target, uint8_t default_value);
+	static void getUint8(uint32_t value, uint8_t* target, uint8_t default_value);
 
 	/** Helper function to set a short (uint16_t) in the field of a struct
 	 * @value the value to be copied to the struct
@@ -279,7 +411,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getUint16(uint32_t value, uint16_t& target, uint16_t default_value);
+	static void getUint16(uint32_t value, uint16_t* target, uint16_t default_value);
 
 	/** Helper function to set an integer (uint32_t) in the field of a struct
 	 * @value the value to be copied to the struct
@@ -302,7 +434,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getUint32(uint32_t value, uint32_t& target, uint32_t default_value);
+	static void getUint32(uint32_t value, uint32_t* target, uint32_t default_value);
 
 	/** Helper function to set a signed byte in the field of a struct
 	 * @value the byte value to be copied to the struct
@@ -325,7 +457,15 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getInt8(int32_t value, int8_t& target, int8_t default_value);
+	static void getInt8(int32_t value, int8_t* target, int8_t default_value);
+
+//	static void setDouble(double value, double& target);
+
+//	static void getDouble(double value, double* target, double default_value);
+
+	static void setFloat(float value, float& target);
+
+	static void getFloat(float value, float* target, float default_value);
 
 	/** Helper function to write/copy an array to the field of a struct
 	 * @T primitive type, such as uint8_t
@@ -340,22 +480,22 @@ public:
 	 * uninitialized.
 	 */
 	template<typename T>
-		static void setArray(T* src, T* dest, uint16_t length) {
-			bool isUnassigned = true;
-			uint8_t* ptr = (uint8_t*)src;
-			for (int i = 0; i < length * sizeof(T); ++i) {
-				if (ptr[i] != 0xFF) {
-					isUnassigned = false;
-					break;
-				}
-			}
-
-			if (isUnassigned) {
-				LOGe("cannot write all FF");
-			} else {
-				memcpy(dest, src, length * sizeof(T));
+	static void setArray(T* src, T* dest, uint16_t length) {
+		bool isUnassigned = true;
+		uint8_t* ptr = (uint8_t*)src;
+		for (int i = 0; i < length * sizeof(T); ++i) {
+			if (ptr[i] != 0xFF) {
+				isUnassigned = false;
+				break;
 			}
 		}
+
+		if (isUnassigned) {
+			LOGe("cannot write all FF");
+		} else {
+			memcpy(dest, src, length * sizeof(T));
+		}
+	}
 
 	/** Helper function to read an array from a field of a struct
 	 * @T primitive type, such as uint8_t
@@ -365,6 +505,7 @@ public:
 	 *   can be NULL pointer
 	 * @length number of elements in the array (all arrays need to have
 	 *   the same length!)
+	 * @return returns true if an array was found in storage, false otherwise
 	 *
 	 * Checks the memory of the source array field. If it is all FF, that means
 	 * the memory is unassigned. If an array is provided as default_value,
@@ -374,34 +515,46 @@ public:
 	 * field will be copied to the destination array
 	 */
 	template<typename T>
-		static void getArray(T* src, T* dest, T* default_value, uint16_t length) {
+	static bool getArray(T* src, T* dest, T* default_value, uint16_t length) {
 
 #ifdef PRINT_ITEMS
-			_log(INFO, "raw value: \r\n");
-			BLEutil::printArray((uint8_t*)src, length * sizeof(T));
+		_log(INFO, "raw value: \r\n");
+		BLEutil::printArray((uint8_t*)src, length * sizeof(T));
 #endif
 
-			bool isUnassigned = true;
-			uint8_t* ptr = (uint8_t*)src;
-			for (int i = 0; i < length * sizeof(T); ++i) {
-				if (ptr[i] != 0xFF) {
-					isUnassigned = false;
-					break;
-				}
+		bool isUnassigned = true;
+		uint8_t* ptr = (uint8_t*)src;
+		for (int i = 0; i < length * sizeof(T); ++i) {
+			if (ptr[i] != 0xFF) {
+				isUnassigned = false;
+				break;
 			}
-
-			if (isUnassigned) {
-				if (default_value != NULL) {
-					LOGd("use default value");
-					memcpy(dest, default_value, length * sizeof(T));
-				}
-			} else {
-				memcpy(dest, src, length * sizeof(T));
-			}
-
 		}
 
+		if (isUnassigned) {
+			if (default_value != NULL) {
+#ifdef PRINT_ITEMS
+				LOGd("use default value");
+#endif
+				memcpy(dest, default_value, length * sizeof(T));
+			} else {
+				memset(dest, 0, length * sizeof(T));
+			}
+		} else {
+			memcpy(dest, src, length * sizeof(T));
+		}
+
+		return !isUnassigned;
+	}
+
+	void resumeRequests();
+
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
+	void onUpdateDone();
+
 private:
+
 	/** Default constructor
 	 *
 	 * Private because of the singleton class
@@ -416,7 +569,7 @@ private:
 	 * @handle pointer to the handle which points to the persistent memory that
 	 *   was initialized
 	 */
-	void initBlocks(pstorage_size_t size, pstorage_handle_t& handle);
+	void initBlocks(pstorage_size_t size, pstorage_size_t count, pstorage_handle_t& handle);
 
 	/** Helper function to obtain the config for the given storage ID
 	 * @storageID enum which defines the storage struct for which the
@@ -426,4 +579,13 @@ private:
 	 *         null otherwise
 	 */
 	storage_config_t* getStorageConfig(ps_storage_id storageID);
+
+	bool _initialized;
+	bool _scanning;
+
+	CircularBuffer<buffer_element_t> writeBuffer;
+	buffer_element_t buffer[STORAGE_REQUEST_BUFFER_SIZE];
+
+	uint8_t _pending;
+
 };

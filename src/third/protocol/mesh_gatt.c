@@ -48,6 +48,10 @@
 
 #include <drivers/cs_Serial.h>
 #include <notification_buffer.h>
+#include <cfg/cs_Strings.h>
+#include "app_scheduler.h"
+
+//#define PRINT_MESH_VERBOSE
 
 extern uint32_t rbc_mesh_event_push(rbc_mesh_event_t* p_event);
 
@@ -149,7 +153,7 @@ static uint32_t mesh_gatt_evt_push(mesh_gatt_evt_t* p_gatt_evt) {
 	case MESH_GATT_EVT_OPCODE_DATA_MULTIPART_MID:
 	case MESH_GATT_EVT_OPCODE_DATA_MULTIPART_END:
 		hvx_len = p_gatt_evt->param.data_update.data_len + 4;
-//		LOGi("data_len: %d", hvx_len);
+//		LOGd("data_len: %d", hvx_len);
 		break;
 	case MESH_GATT_EVT_OPCODE_FLAG_SET:
 	case MESH_GATT_EVT_OPCODE_FLAG_REQ:
@@ -170,7 +174,7 @@ static uint32_t mesh_gatt_evt_push(mesh_gatt_evt_t* p_gatt_evt) {
 
 //    return sd_ble_gatts_hvx(m_active_conn_handle, &hvx_params);
 	uint32_t err_code = sd_ble_gatts_hvx(m_active_conn_handle, &hvx_params);
-//	LOGi("hvx_len: %d", *hvx_params.p_len);
+//	LOGd("hvx_len: %d", *hvx_params.p_len);
 	return err_code;
 }
 
@@ -376,97 +380,6 @@ uint32_t mesh_gatt_init(uint32_t access_address, uint8_t channel,
 
 bool notifactionsPending = false;
 
-//uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
-//		uint8_t length) {
-//	if (length > RBC_MESH_VALUE_MAX_LEN) {
-//		return NRF_ERROR_INVALID_LENGTH;
-//	}
-//	if (m_active_conn_handle != CONN_HANDLE_INVALID) {
-//		if (notifactionsPending) {
-//
-//			if (nb_full()) {
-//
-//				LOGi("notification buffer full!");
-//				return NRF_ERROR_NO_MEM;
-//
-//			} else {
-//				LOGi("notification pending already");
-//
-//				waiting_notification_t* notification = nb_next();
-//
-//				notification->offset = 0;
-//				memcpy(notification->data, data, length);
-//				notification->length = length;
-//				notification->handle = handle;
-//
-////				nb_push(notification);
-//
-//				return BLE_ERROR_NO_TX_BUFFERS;
-//			}
-//		} else {
-//
-//			if (length <= 16) {
-//				mesh_gatt_evt_t gatt_evt;
-//				gatt_evt.opcode = MESH_GATT_EVT_OPCODE_DATA;
-//				gatt_evt.param.data_update.handle = handle;
-//				gatt_evt.param.data_update.data_len = length;
-//				memcpy(gatt_evt.param.data_update.data, data, length);
-//
-//				return mesh_gatt_evt_push(&gatt_evt);
-//			} else {
-//				uint8_t offset = 0;
-//				uint32_t err_code;
-//
-//				while (offset < length) {
-//					mesh_gatt_evt_t gatt_evt;
-//					uint8_t part_len = 16;
-//
-//					if (length - offset > part_len) {
-//						gatt_evt.opcode = MESH_GATT_EVT_OPCODE_DATA_MULTIPART;
-//					} else {
-//						gatt_evt.opcode = MESH_GATT_EVT_OPCODE_DATA_MULTIPART_END;
-//						part_len = length - offset;
-//					}
-//
-//
-//					gatt_evt.param.data_update.handle = handle;
-//					gatt_evt.param.data_update.data_len = part_len;
-//					memcpy(gatt_evt.param.data_update.data, data + offset,
-//							part_len);
-//
-//					err_code = mesh_gatt_evt_push(&gatt_evt);
-//					if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
-////						LOGi("out of tx buffers");
-//
-//						LOGi("adding pending notification");
-//
-//						notifactionsPending = true;
-//
-//						waiting_notification_t* notification = nb_next();
-//
-//						notification->offset = offset;
-//						memcpy(notification->data, data, length);
-//						notification->length = length;
-//						notification->handle = handle;
-//
-//						return BLE_ERROR_NO_TX_BUFFERS;
-//
-//					} else if (err_code != NRF_SUCCESS && err_code != BLE_ERROR_NOT_ENABLED) {
-//						LOGi("err_code: %d", err_code);
-//						return err_code;
-//					}
-//
-//					offset += part_len;
-//				}
-//
-//				return NRF_SUCCESS;
-//			}
-//		}
-//	} else {
-//		return BLE_ERROR_INVALID_CONN_HANDLE;
-//	}
-//}
-
 uint32_t send_notification(waiting_notification_t* notification) {
 
 	uint32_t err_code;
@@ -496,7 +409,7 @@ uint32_t send_notification(waiting_notification_t* notification) {
 
 		err_code = mesh_gatt_evt_push(&gatt_evt);
 		if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
-//			LOGi("out of tx buffers");
+//			LOGe("out of tx buffers");
 
 //			notifactionsPending = true;
 			notification->offset = offset;
@@ -504,7 +417,7 @@ uint32_t send_notification(waiting_notification_t* notification) {
 			return BLE_ERROR_NO_TX_BUFFERS;
 
 		} else if (err_code != NRF_SUCCESS) {
-//			LOGi("err_code: %d", err_code);
+//			LOGe("err_code: %d", err_code);
 			return err_code;
 		}
 
@@ -514,8 +427,45 @@ uint32_t send_notification(waiting_notification_t* notification) {
 	return NRF_SUCCESS;
 }
 
+void printArray(uint8_t* arr, uint16_t len) {
+	uint8_t* ptr = (uint8_t*)arr;
+	for (int i = 0; i < len; ++i) {
+		_log(DEBUG, " %02X", ptr[i]);
+		if ((i+1) % 30 == 0) {
+			_log(DEBUG, "\r\n");
+		}
+	}
+//	printInlineArray(arr, len);
+	_log(DEBUG, "\r\n");
+}
+
+void value_set_handler(void* p_event_data, uint16_t event_size) {
+
+//	LOGd("value_set_handler");
+
+//	waiting_notification_t* notification = (waiting_notification_t*) p_event_data;
+	waiting_notification_t* notification = nb_peek();
+
+//	printArray(notification, sizeof(waiting_notification_t));
+
+	uint32_t err_code = send_notification(notification);
+	if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
+
+#ifdef PRINT_MESH_VERBOSE
+		LOGd("adding pending notification");
+#endif
+
+		notifactionsPending = true;
+	} else {
+//		LOGd("popping notification");
+		nb_pop();
+	}
+
+}
+
 uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 		uint8_t length) {
+
 	if (length > RBC_MESH_VALUE_MAX_LEN) {
 		return NRF_ERROR_INVALID_LENGTH;
 	}
@@ -523,10 +473,17 @@ uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 
 		if (nb_full()) {
 
-			LOGi("notification buffer full!");
+			LOGw(FMT_BUFFER_FULL, "Notification");
 			return NRF_ERROR_NO_MEM;
 
 		} else {
+			if (notifactionsPending && !m_mesh_service.notification_enabled) {
+				notifactionsPending = false;
+				nb_clear();
+			}
+
+			// todo: continue here: check if we can put on the scheduler
+
 			waiting_notification_t* notification = nb_next();
 
 			notification->offset = 0;
@@ -536,19 +493,16 @@ uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 
 			if (!notifactionsPending) {
 
-				uint32_t err_code = send_notification(notification);
-				if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
-					LOGi("adding pending notification");
-					notifactionsPending = true;
-				} else {
-					nb_pop();
-				}
+//				LOGd("put into scheduler");
+				app_sched_event_put(NULL, 0, value_set_handler);
 
-				return err_code;
-
+//				printArray(notification, sizeof(waiting_notification_t));
 			} else {
 
-				LOGi("notification pending already");
+#ifdef PRINT_MESH_VERBOSE
+				LOGd("notification pending already");
+#endif
+
 				return BLE_ERROR_NO_TX_BUFFERS;
 
 			}
@@ -564,75 +518,31 @@ void resume_notifications() {
 
 	if (send_notification(notification) == NRF_SUCCESS) {
 
-		LOGi("notification done");
+#ifdef PRINT_MESH_VERBOSE
+		LOGd("notification done");
+#endif
 
 		nb_pop();
 
 		if (nb_empty()) {
 			notifactionsPending = false;
-			LOGi("no more notifications pending");
+
+#ifdef PRINT_MESH_VERBOSE
+			LOGd("no more notifications pending");
+#endif
+
 		} else {
-			LOGi("continue with next pending notification");
+
+#ifdef PRINT_MESH_VERBOSE
+			LOGd("continue with next pending notification");
+#endif
+
 			resume_notifications();
 		}
 
 	}
 
 }
-
-//void resume_notifications() {
-//
-//	waiting_notification_t* notification = nb_peek();
-//
-//	uint8_t* data = notification->data;
-//	uint8_t length = notification->length;
-//	uint8_t offset = notification->offset;
-//	rbc_mesh_value_handle_t handle = notification->handle;
-//
-//	uint32_t err_code;
-//
-//	while (offset < length) {
-//		mesh_gatt_evt_t gatt_evt;
-//		uint8_t part_len = 16;
-//
-//		if (length - offset > part_len) {
-//			gatt_evt.opcode = MESH_GATT_EVT_OPCODE_DATA_MULTIPART;
-//		} else {
-//			gatt_evt.opcode = MESH_GATT_EVT_OPCODE_DATA_MULTIPART_END;
-//			part_len = length - offset;
-//		}
-//
-//		gatt_evt.param.data_update.handle = handle;
-//		gatt_evt.param.data_update.data_len = part_len;
-//		memcpy(gatt_evt.param.data_update.data, data + offset,
-//				part_len);
-//
-//		err_code = mesh_gatt_evt_push(&gatt_evt);
-//		if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
-////			LOGi("out of tx buffers");
-//
-//			notification->offset = offset;
-//
-//			return;
-//
-//		} else if (err_code != NRF_SUCCESS) {
-//			LOGi("err_code: %d", err_code);
-//			return;
-//		}
-//
-//		offset += part_len;
-//	}
-//
-//	LOGi("notification done");
-//
-//	nb_pop();
-//
-//	if (nb_empty()) {
-//		notifactionsPending = false;
-//		LOGi("no more notifications pending");
-//	}
-//
-//}
 
 void mesh_gatt_sd_ble_event_handle(ble_evt_t* p_ble_evt) {
 	switch (p_ble_evt->header.evt_id) {

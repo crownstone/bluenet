@@ -23,42 +23,61 @@ inline std::string get_hardware_revision(void) {
 	return std::string(hardware_revision);
 }
 
-DeviceInformationService::DeviceInformationService() :
-		_hardwareRevisionCharacteristic(NULL),
-		_firmwareRevisionCharacteristic(NULL)
+DeviceInformationService::DeviceInformationService()
 {
-
 	setUUID(UUID(BLE_UUID_DEVICE_INFORMATION_SERVICE));
+	setName(BLE_SERVICE_DEVICE_INFORMATION);
 
-	setName("Device Information");
-
-	init();
 }
 
-void DeviceInformationService::init() {
-	LOGi("Create device information service");
+void DeviceInformationService::createCharacteristics() {
+	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_DEVICE_INFORMATION);
 
-	LOGi("add hardware revision characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_HARDWARE_REVISION);
 	addHardwareRevisionCharacteristic();
 
-	LOGi("add firmware revision characteristic");
+	LOGi(FMT_CHAR_ADD, STR_CHAR_FIRMWARE_REVISION);
 	addFirmwareRevisionCharacteristic();
+
+#ifdef GIT_BRANCH
+	LOGi(FMT_CHAR_ADD, STR_CHAR_SOFTWARE_REVISION);
+	addSoftwareRevisionCharacteristic();
+#endif
+
+	addCharacteristicsDone();
 }
 
 void DeviceInformationService::addHardwareRevisionCharacteristic() {
-	_hardwareRevisionCharacteristic = new Characteristic<std::string>();
+	BLEpp::Characteristic<std::string>* _hardwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_hardwareRevisionCharacteristic);
 	_hardwareRevisionCharacteristic->setUUID(BLE_UUID_HARDWARE_REVISION_STRING_CHAR);
-	_hardwareRevisionCharacteristic->setName("Hardware Revision");
+	_hardwareRevisionCharacteristic->setName(BLE_CHAR_HARDWARE_REVISION);
 	_hardwareRevisionCharacteristic->setDefaultValue(get_hardware_revision());
 	_hardwareRevisionCharacteristic->setWritable(false);
 }
 
 void DeviceInformationService::addFirmwareRevisionCharacteristic() {
-	_firmwareRevisionCharacteristic = new Characteristic<std::string>();
+	BLEpp::Characteristic<std::string>* _firmwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_firmwareRevisionCharacteristic);
 	_firmwareRevisionCharacteristic->setUUID(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
-	_firmwareRevisionCharacteristic->setName("Firmware Revision");
-	_firmwareRevisionCharacteristic->setDefaultValue(STRINGIFY(FIRMWARE_VERSION));
+	_firmwareRevisionCharacteristic->setName(BLE_CHAR_FIRMWARE_REVISION);
 	_firmwareRevisionCharacteristic->setWritable(false);
+#ifdef GIT_HASH
+	_firmwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_HASH));
+#else
+	_firmwareRevisionCharacteristic->setDefaultValue(STRINGIFY(FIRMWARE_VERSION));
+#endif
+}
+
+void DeviceInformationService::addSoftwareRevisionCharacteristic() {
+	BLEpp::Characteristic<std::string>* _softwareRevisionCharacteristic = new Characteristic<std::string>();
+	addCharacteristic(_softwareRevisionCharacteristic);
+	_softwareRevisionCharacteristic->setUUID(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
+	_softwareRevisionCharacteristic->setName(BLE_CHAR_SOFTWARE_REVISION);
+#ifdef GIT_BRANCH
+	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_BRANCH));
+#else
+//	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(SOFTWARE_REVISION));
+#endif
+	_softwareRevisionCharacteristic->setWritable(false);
 }

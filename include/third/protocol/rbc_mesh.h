@@ -66,12 +66,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @brief Default value for the number of handle cache entries */
 #ifndef RBC_MESH_HANDLE_CACHE_ENTRIES    
-    #define RBC_MESH_HANDLE_CACHE_ENTRIES           (100)
+    #define RBC_MESH_HANDLE_CACHE_ENTRIES           (10)
 #endif
 
 /** @brief Default value for the number of data cache entries */
 #ifndef RBC_MESH_DATA_CACHE_ENTRIES
-    #define RBC_MESH_DATA_CACHE_ENTRIES             (20)
+    #define RBC_MESH_DATA_CACHE_ENTRIES             (10)
 #endif
 
 /** @brief Length of app-event FIFO. Must be power of two. */
@@ -209,6 +209,8 @@ uint32_t rbc_mesh_start(void);
 *   the mesh operation is already stopped.
 */
 uint32_t rbc_mesh_stop(void);
+
+uint32_t rbc_mesh_restart(void);
 
 /**
 * @brief Set the contents of the data array pointed to by the provided handle
@@ -459,9 +461,6 @@ uint32_t rbc_mesh_event_peek(rbc_mesh_event_t* p_evt);
 * @return NRF_ERROR_INVALID_STATE the framework has not been initialized.
 */
 uint32_t rbc_mesh_packet_release(uint8_t* p_data);
-
-
-void rbc_mesh_sys_evt_handler(uint32_t evt);
 
 /**
  * Pause the mesh code.

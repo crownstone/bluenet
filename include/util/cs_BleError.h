@@ -114,7 +114,10 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
 #ifdef	NDEBUG
 
 //! for release version ignore asserts
-#define assert(expr, message)
+#define assert(expr, message) \
+	if (!(expr)) { \
+		LOGe("%s", message); \
+	}
 
 #else
 

@@ -18,6 +18,7 @@
 #include <common/cs_Tuple.h>
 #include <third/std/function.h>
 #include <ble/cs_DoBotsManufac.h>
+#include <ble/cs_ServiceData.h>
 
 /////////////////////////////////////////////////
 // test
@@ -29,7 +30,7 @@ extern "C" {
 
 /////////////////////////////////////////////////
 
-
+extern uint8_t service_data_array[1];
 
 // @TODO: replace std::vector with a fixed, in place array of size capacity.
 
@@ -164,6 +165,25 @@ protected:
 
 	uint8_t                            			_passkey[BLE_GAP_PASSKEY_LEN];
 	dm_application_instance_t                   _dm_app_handle;
+	bool                                        _dm_initialized;
+	bool                                        _encryptionEnabled;
+
+	app_timer_id_t                              _lowPowerTimeoutId;
+	app_timer_id_t                              _secReqTimerId;
+	dm_handle_t                                 _peerHandle;
+
+	ble_advdata_t                               _advdata;
+	ble_advdata_t                               _scan_resp;
+	ble_gap_adv_params_t                        _adv_params;
+
+	ble_advdata_manuf_data_t                    _manufac;
+	// todo: make part of DoBotsManufac (see iBeacon)
+	uint8_t*                                    _adv_manuf_data;
+
+ble_advdata_manuf_data_t 					_manufac_apple;
+	ble_advdata_service_data_t                  _service_data;
+
+	ServiceData*                                _serviceData;
 public:
 
 	/** Initialization of the BLE stack
@@ -182,13 +202,15 @@ public:
 	 */
 	void init();
 
+	void createCharacteristics();
+
 	/** Start the BLE stack
 	 *
 	 * Start can only be called once. It starts all services. If one of these services cannot be started, there is
 	 * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in
 	 * init().
 	 */
-	void startAdvertisingServices();
+	void initServices();
 
 	/*
 	 *
@@ -229,7 +251,7 @@ public:
 	//! Advertising interval between 0x0020 and 0x4000 (32 and 16384) in 0.625 ms units (20ms to 10.24s)
 	void setAdvertisingInterval(uint16_t advertisingInterval){
 		//! TODO: stop advertising?
-		LOGd("Set advertising interval to %d", advertisingInterval);
+		LOGd(FMT_SET_INT_VAL, "advertising interval", advertisingInterval);
 		if (advertisingInterval < 0x0020 || advertisingInterval > 0x4000) {
 			return;
 		}
@@ -322,16 +344,25 @@ public:
 	 * ** Note** : An iBeacon requires that the company identifier is
 	 *   set to the Apple Company ID, otherwise it's not an iBeacon.
 	 */
-	void startIBeacon(IBeacon* beacon, uint8_t deviceType);
+	void configureIBeacon(IBeacon* beacon, uint8_t deviceType);
 
 	/** Start sending advertisement packets.
 	 * This can not be called while scanning, start scanning while advertising is possible though.
 	 */
-	void startAdvertising(uint8_t deviceType);
+	void configureBleDevice(uint8_t deviceType);
 
 	void stopAdvertising();
 
 	bool isAdvertising();
+
+	void updateAdvertisement();
+
+	void startAdvertising();
+
+	void configureAdvertisementParameters();
+	void configureScanResponse(uint8_t deviceType);
+	void configureBleDeviceAdvData();
+	void configureIBeaconAdvData(IBeacon* beacon);
 
 	/** Start scanning for devices
 	 *
@@ -393,13 +424,23 @@ public:
 	 * The device manager keeps track of the bonded devices and stores the bond information
 	 * in persistent storage.
 	 */
-	void device_manager_init();
+	void device_manager_init(bool erase_bonds);
+
+	void device_manager_reset();
+
+	void secReqTimeoutHandler(void * p_context);
 
 	/*
 	 * Callback handler for device manager events
 	 */
 	uint32_t deviceManagerEvtHandler(dm_handle_t const    * p_handle, dm_event_t const     * p_event,
 			ret_code_t           event_result);
+
+	void setServiceData(ServiceData* serviceData) {
+		_serviceData = serviceData;
+	}
+
+	void setEncrypted(bool encrypted);
 
 protected:
 
@@ -421,7 +462,6 @@ protected:
 	 */
 	void onTxComplete(ble_evt_t * p_ble_evt);
 
-	uint32_t _lowPowerTimeoutId;
 	static void lowPowerTimeout(void* p_context);
 
 	void changeToLowPowerMode();

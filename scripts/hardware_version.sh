@@ -14,9 +14,10 @@ cp $SCRIPT_DIR/hardware_version.script $TEMP_DIR/hardware_version.script
 echo "$JLINK -Device $DEVICE -If SWD $TEMP_DIR/hardware_version.script"
 
 if [ -z $1 ]; then
-	$JLINK -Device $DEVICE -If SWD $TEMP_DIR/hardware_version.script
+	$JLINK -Device $DEVICE -speed 100 -If SWD $TEMP_DIR/hardware_version.script
 else
-	$JLINK -Device $DEVICE -SelectEmuBySN $1 -If SWD $TEMP_DIR/hardware_version.script
+	. ${path}/_check_targets.sh
+	$JLINK -Device $DEVICE -speed 100 -SelectEmuBySN $serial_num -If SWD $TEMP_DIR/hardware_version.script
 fi
 
 echo "The result should be something like:"

@@ -17,15 +17,20 @@ namespace BLEpp {
 class DoBotsManufac {
 
 private:
-	uint8_t _deviceType;
+	union {
+		struct {
+			uint8_t deviceType;
+		} _params;
+		uint8_t _buffer[sizeof(_params)];
+	};
 
 public:
 	DoBotsManufac() {
-		_deviceType = DEVICE_UNDEF;
+		_params.deviceType = DEVICE_UNDEF;
 	};
 
 	DoBotsManufac(uint8_t deviceType) {
-		_deviceType = deviceType;
+		_params.deviceType = deviceType;
 	};
 
 	virtual ~DoBotsManufac() {};
@@ -34,8 +39,12 @@ public:
 		return 1;
 	}
 
+	uint8_t* getArray() {
+		return _buffer;
+	}
+
 	uint8_t getDeviceType() {
-		return _deviceType;
+		return _params.deviceType;
 	}
 
 	/** Serializes the object to a byte array

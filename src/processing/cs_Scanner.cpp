@@ -6,13 +6,18 @@
  */
 #include "processing/cs_Scanner.h"
 
-#include <protocol/cs_MeshControl.h>
-#include <cfg/cs_Settings.h>
+#include <mesh/cs_MeshControl.h>
+#include <storage/cs_Settings.h>
 
 #include <cfg/cs_DeviceTypes.h>
 #include <ble/cs_DoBotsManufac.h>
 
-Scanner::Scanner(Nrf51822BluetoothStack* stack) :
+#include <events/cs_EventDispatcher.h>
+
+//#define PRINT_SCANNER_VERBOSE
+//#define PRINT_DEBUG
+
+Scanner::Scanner() :
 	_opCode(SCAN_START),
 	_scanning(false),
 	_running(false),
@@ -22,7 +27,7 @@ Scanner::Scanner(Nrf51822BluetoothStack* stack) :
 	_scanFilter(SCAN_FILTER),
 	_filterSendFraction(SCAN_FILTER_SEND_FRACTION),
 	_scanCount(0),
-	_stack(stack)
+	_stack(NULL)
 {
 
 	_scanResult = new ScanResult();
@@ -34,44 +39,57 @@ Scanner::Scanner(Nrf51822BluetoothStack* stack) :
 	//! during a scan!
 	_scanResult->assign(_scanBuffer, sizeof(_scanBuffer));
 
-	ps_configuration_t cfg = Settings::getInstance().getConfig();
-	Storage::getUint16(cfg.scanDuration, _scanDuration, SCAN_DURATION);
-	Storage::getUint16(cfg.scanSendDelay, _scanSendDelay, SCAN_SEND_DELAY);
-	Storage::getUint16(cfg.scanBreakDuration, _scanBreakDuration, SCAN_BREAK_DURATION);
-	Storage::getUint8(cfg.scanFilter, _scanFilter, SCAN_FILTER);
+	Settings& settings = Settings::getInstance();
+	settings.get(CONFIG_SCAN_DURATION, &_scanDuration);
+	settings.get(CONFIG_SCAN_SEND_DELAY, &_scanSendDelay);
+	settings.get(CONFIG_SCAN_BREAK_DURATION, &_scanBreakDuration);
+	settings.get(CONFIG_SCAN_FILTER, &_scanFilter);
 
 	EventDispatcher::getInstance().addListener(this);
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Scanner::staticTick);
 }
 
-Scanner::~Scanner() {
-
+void Scanner::setStack(Nrf51822BluetoothStack* stack) {
+	_stack = stack;
 }
 
 void Scanner::manualStartScan() {
+	if (!_stack) {
+		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
+		return;
+	}
 
-	LOGi("Init scan result");
+//	LOGi(FMT_INIT, "scan result");
 	_scanResult->clear();
 	_scanning = true;
 
 	if (!_stack->isScanning()) {
-		LOGi("start scanning...");
+		LOGi(FMT_START, "Scanner");
 		_stack->startScanning();
 	}
 }
 
 void Scanner::manualStopScan() {
+	if (!_stack) {
+		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
+		return;
+	}
 
 	_scanning = false;
 
 	if (_stack->isScanning()) {
-		LOGi("stop scanning...");
+		LOGi(FMT_STOP, "Scanner");
 		_stack->stopScanning();
 	}
 }
 
 bool Scanner::isScanning() {
+	if (!_stack) {
+		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
+		return false;
+	}
+
 	return _scanning && _stack->isScanning();
 }
 
@@ -90,7 +108,7 @@ void Scanner::start() {
 		_opCode = SCAN_START;
 		executeScan();
 	} else {
-		LOGi("already scanning!");
+		LOGi(FMT_ALREADY, "scanning");
 	}
 }
 
@@ -102,32 +120,27 @@ void Scanner::delayedStart(uint16_t delay) {
 		_opCode = SCAN_START;
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(delay), this);
 	} else {
-		LOGi("already scanning!");
+		LOGd(FMT_ALREADY, "scanning");
 	}
 }
 
 void Scanner::delayedStart() {
-	if (!_running) {
-		_running = true;
-		_scanCount = 0;
-		_opCode = SCAN_START;
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
-	} else {
-		LOGi("already scanning!");
-	}
+	delayedStart(_scanBreakDuration);
 }
 
 void Scanner::stop() {
 	if (_running) {
 		_running = false;
 		_opCode = SCAN_STOP;
-		LOGi("force STOP");
+		LOGi("Force STOP");
 		manualStopScan();
 		//! no need to execute scan on stop is there? we want to stop after all
 	//	executeScan();
 	//	_running = false;
+	} else if (_scanning) {
+		manualStopScan();
 	} else {
-		LOGi("already stopped!");
+		LOGi(STR_ERR_ALREADY_STOPPED);
 	}
 }
 
@@ -135,10 +148,12 @@ void Scanner::executeScan() {
 
 	if (!_running) return;
 
-	LOGi("executeScan");
+#ifdef PRINT_SCANNER_VERBOSE
+	LOGd("Execute Scan");
+#endif
+
 	switch(_opCode) {
 	case SCAN_START: {
-		LOGd("START");
 
 		//! start scanning
 		manualStartScan();
@@ -153,12 +168,13 @@ void Scanner::executeScan() {
 		break;
 	}
 	case SCAN_STOP: {
-		LOGd("STOP");
 
 		//! stop scanning
 		manualStopScan();
 
+#ifdef PRINT_DEBUG
 		_scanResult->print();
+#endif
 
 		//! Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanSendDelay), this);
@@ -167,9 +183,8 @@ void Scanner::executeScan() {
 		break;
 	}
 	case SCAN_SEND_RESULT: {
-		LOGd("SCAN_SEND_RESULT");
 
-		sendResults();
+		notifyResults();
 
 		//! Wait SCAN_BREAK ms, then start scanning again
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
@@ -181,16 +196,27 @@ void Scanner::executeScan() {
 
 }
 
-void Scanner::sendResults() {
-#if CHAR_MESHING==1
-	MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
+void Scanner::notifyResults() {
+
+#ifdef PRINT_SCANNER_VERBOSE
+	LOGd("Notify scan results");
 #endif
+
+	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
+	}
+
+	buffer_ptr_t buffer;
+	uint16_t length;
+	_scanResult->getBuffer(buffer, length);
+
+	EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, length);
 }
 
 void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
 
 	switch (p_ble_evt->header.evt_id) {
-		case BLE_GAP_EVT_ADV_REPORT:
+	case BLE_GAP_EVT_ADV_REPORT:
 		onAdvertisement(&p_ble_evt->evt.gap_evt.params.adv_report);
 		break;
 	}
@@ -252,7 +278,7 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 		//! word aligned!! So have to shift it by hand
 		uint16_t companyIdentifier = type_data.p_data[1] << 8 | type_data.p_data[0];
 		if (type_data.data_len >= 3 &&
-			companyIdentifier == DOBOTS_ID) {
+			companyIdentifier == CROWNSTONE_COMPANY_ID) {
 //			LOGi("is dobots device!");
 
 //			_logFirst(INFO, "parse data");
@@ -262,9 +288,9 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 			dobotsManufac.parse(type_data.p_data+2, type_data.data_len-2);
 
 			switch (dobotsManufac.getDeviceType()) {
-			case DEVICE_DOBEACON: {
-//				LOGi("found dobeacon");
-				return _scanFilter & SCAN_FILTER_DOBEACON_MSK;
+			case DEVICE_GUIDESTONE: {
+//				LOGi("found guidestone");
+				return _scanFilter & SCAN_FILTER_GUIDESTONE_MSK;
 			}
 			case DEVICE_CROWNSTONE: {
 //				LOGi("found crownstone");
@@ -303,33 +329,30 @@ void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 
 void Scanner::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
-	case CONFIG_SCAN_DURATION:
+	case EVT_BLE_EVENT: {
+		onBleEvent((ble_evt_t*)p_data);
+		break;
+	}
+	case CONFIG_SCAN_DURATION: {
 		_scanDuration = *(uint32_t*)p_data;
 		break;
-	case CONFIG_SCAN_SEND_DELAY:
+	}
+	case CONFIG_SCAN_SEND_DELAY: {
 		_scanSendDelay = *(uint32_t*)p_data;
 		break;
-	case CONFIG_SCAN_BREAK_DURATION:
+	}
+	case CONFIG_SCAN_BREAK_DURATION: {
 		_scanBreakDuration = *(uint32_t*)p_data;
 		break;
-	case CONFIG_SCAN_FILTER:
+	}
+	case CONFIG_SCAN_FILTER: {
 		_scanFilter = *(uint8_t*)p_data;
 		break;
-	case CONFIG_SCAN_FILTER_SEND_FRACTION:
+	}
+	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
 		_filterSendFraction = *(uint32_t*)p_data;
 		break;
-	case EVT_SCANNER_START:
-#if INTERVAL_SCANNER_ENABLED==1
-		if (length == 0) {
-			start();
-		} else {
-			delayedStart(*(uint16_t*)p_data);
-		}
-#endif
-		break;
-	case EVT_SCANNER_STOP:
-		stop();
-		break;
+	}
 	}
 
 }

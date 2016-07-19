@@ -8,9 +8,12 @@
 
 //#include <stdint.h>
 //
-//#include "cs_RTC.h"
-//#include "structs/cs_CurrentCurve.h"
-#include "structs/cs_PowerCurve.h"
+#include "structs/buffer/cs_CircularBuffer.h"
+#include "structs/buffer/cs_StackBuffer.h"
+#include "structs/buffer/cs_DifferentialBuffer.h"
+#include "cfg/cs_Config.h"
+
+typedef void (*adc_done_cb_t) (void);
 
 //#include "common/cs_Types.h"
 
@@ -30,16 +33,15 @@ public:
 	}
 
 	/** Initialize ADC.
-	 * @param pin The pin to use as input (AIN<pin>).
+	 * @param pins Array of pins to use as input (AIN<pin>). ADC will alternate between these pins.
+	 * @param size Size of the array.
 	 *
 	 * The init function must called once before operating the AD converter.
 	 * Call it after you start the SoftDevice.
 	 */
-	uint32_t init(uint8_t pin);
+	uint32_t init(uint8_t pins[], uint8_t numPins);
 
 	/** Start the ADC sampling
-	 *
-	 * Will add samples to the current curve if it's assigned.
 	 */
 	void start();
 
@@ -47,39 +49,70 @@ public:
 	 */
 	void stop();
 
-	//! Each tick we have time to dispatch events e.g.
-	void tick();
+	/** Set the buffers for the sample values.
+	 * To be used in case of burst sampling.
+	 * For now, these are expected to be of equal size.
+	 *
+	 * @param buffer Buffer to use.
+	 * @param pinNum Nth pin of the pin array supplied in init().
+	 *
+	 * @return true on success.
+	 */
+	bool setBuffers(StackBuffer<uint16_t>* buffer, uint8_t pinNum);
 
-//	void setCurrentCurve(CurrentCurve<uint16_t>* curve) { _currentCurve = curve; }
-	void setPowerCurve(PowerCurve<uint16_t>* curve) { _powerCurve = curve; }
+	/** Set the buffers for the sample values.
+	 * These are used in case of continuous sampling.
+	 *
+	 * @param buffer Buffer to use.
+	 * @param pinNum Nth pin of the pin array supplied in init().
+	 *
+	 * @return true on success.
+	 */
+	bool setBuffers(CircularBuffer<uint16_t>* buffer, uint8_t pinNum);
 
+	/** Set the buffers for the timestamps.
+	 * To be used in case of burst sampling.
+	 * For now, these are expected to be of equal size as the sample value buffers.
+	 *
+	 * @param buffer Buffer to use.
+	 * @param pinNum Nth pin of the pin array supplied in init().
+	 *
+	 * @return true on success.
+	 */
+	bool setTimestampBuffers(DifferentialBuffer<uint32_t>* buffer, uint8_t pinNum);
 
-//	/** Set threshold to start writing samples to buffer.
-//	 *
-//	 * Default threshold is DEFAULT_RECORDING_THRESHOLD
-//	 */
-//	inline void setThreshold(uint8_t threshold) { _threshold = threshold; }
+	void setDoneCallback(adc_done_cb_t callback);
 
 	//! Function to be called from interrupt, do not do much there!
 	void update(uint32_t value);
 
-	//! Function to set the input pin, this can be done after each sample
-	uint32_t config(uint8_t pin);
+	uint32_t _lastStartTime;
 
 private:
 	/** Constructor
 	 */
-//	ADC(): _currentCurve(NULL) {}
-	ADC(): _powerCurve(NULL) {}
+//	ADC(): _buffers(NULL), _timeBuffers(NULL), _circularBuffers(NULL) {}
+	ADC() {}
 
 	//! This class is singleton, deny implementation
 	ADC(ADC const&);
 	//! This class is singleton, deny implementation
 	void operator=(ADC const &);
 
+//	bool useContinousTimer() { return !(CS_ADC_SAMPLE_RATE > (_numPins*200)); }
+	bool useContinousTimer() { return true; }
+
+	uint8_t _pins[CS_ADC_MAX_PINS];
+	uint8_t _numPins;
+	uint8_t _lastPinNum;
 //	uint16_t _sampleNum;
-//	uint16_t _lastResult;
-//	uint8_t _threshold;
-//	CurrentCurve<uint16_t>* _currentCurve;
-	PowerCurve<uint16_t>* _powerCurve;
+
+	StackBuffer<uint16_t>* _buffers[CS_ADC_MAX_PINS];
+	DifferentialBuffer<uint32_t>* _timeBuffers[CS_ADC_MAX_PINS];
+	CircularBuffer<uint16_t>* _circularBuffers[CS_ADC_MAX_PINS];
+
+	adc_done_cb_t _doneCallback;
+
+	//! Function to set the input pin, this can be done after each sample. Only used internally!
+	uint32_t config(uint8_t pin);
 };
