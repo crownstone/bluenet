@@ -785,16 +785,14 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 //		initFlags();
 //	}
 
-#if PERSISTENT_FLAGS_DISABLED==1
-	LOGw("persistent storage for flags disabled!!");
-	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
-	return false;
-#endif
-
+	// as long as persistent flag storage is disabled, do not do any checks, but still
+	// update the struct so that other functions can check if the flag is set or not
+#if PERSISTENT_FLAGS_DISABLED==0
 	if (value == isSet(type)) {
 		LOGi("flag is already set");
 		return true;
 	}
+#endif
 
 	uint8_t* p_item;
 
@@ -840,11 +838,16 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 	}
 	}
 
+	// if persistent storage is disable for flags, do not update pstorage
+#if PERSISTENT_FLAGS_DISABLED==0
 	if (persistent) {
 		savePersistentStorageItem(p_item, 4);
 //		savePersistentStorageItem(&_storageStruct.flags);
 	}
-	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
+#else
+	LOGw("persistent storage for flags disabled!!");
+#endif
+
 	return true;
 }
 
