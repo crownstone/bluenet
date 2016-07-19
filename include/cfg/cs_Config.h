@@ -105,3 +105,4 @@
 #define VOLTAGE_ZERO                             169.0f
 #define CURRENT_ZERO                             168.5f
 #define POWER_ZERO                               9.0f
+#define POWER_ZERO_AVG_WINDOW                    100

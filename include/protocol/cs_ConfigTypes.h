@@ -61,6 +61,7 @@ enum ConfigurationTypes {
 	CONFIG_VOLTAGE_ZERO					    = 45,     //! 0x2D
 	CONFIG_CURRENT_ZERO                     = 46,     //! 0x2E
 	CONFIG_POWER_ZERO                       = 47,     //! 0x2F
+	CONFIG_POWER_ZERO_AVG_WINDOW            = 48,     //! 0x30
 
 	CONFIG_TYPES
 };
