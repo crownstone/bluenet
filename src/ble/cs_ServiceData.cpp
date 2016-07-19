@@ -14,6 +14,7 @@ ServiceData::ServiceData() : EventListener(EVT_ALL)
 {
 	EventDispatcher::getInstance().addListener(this);
 	memset(_array, 0, sizeof(_array));
+	_params.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
 };
 
 void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {

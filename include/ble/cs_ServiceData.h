@@ -11,6 +11,8 @@
 
 #include <cstring>
 
+#define SERVICE_DATA_PROTOCOL_VERSION 1
+
 class ServiceData : EventListener {
 
 public:
@@ -64,13 +66,13 @@ private:
 
 	union {
 		struct __attribute__((packed)) {
+			uint8_t protocolVersion;
 			uint16_t crownstoneId;
 			uint16_t crownstoneStateId;
 			uint8_t switchState;
 			uint8_t eventBitmask;
-//			uint16_t reserved;
+//			uint8_t reserved;
 			int8_t temperature;
-			int8_t reserved;
 			int32_t powerUsage;
 			int32_t accumulatedEnergy;
 		} _params;
