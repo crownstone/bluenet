@@ -33,9 +33,7 @@ public:
 		return instance;
 	}
 
-	void setStack(Nrf51822BluetoothStack* stack) {
-		_stack = stack;
-	}
+	void init();
 
 	ERR_CODE handleCommand(CommandHandlerTypes type);
 
@@ -48,8 +46,6 @@ private:
 	CommandHandler();
 
 	void resetDelayed(uint8_t opCode);
-
-	Nrf51822BluetoothStack* _stack;
 
 	app_timer_id_t _delayTimer;
 

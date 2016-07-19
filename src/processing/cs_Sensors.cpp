@@ -6,7 +6,6 @@
  * Date: Mar 23, 2015
  * License: LGPLv3+
  */
-//#include "cs_BluetoothLE.h"
 #include "processing/cs_Sensors.h"
 //
 #include "cfg/cs_Boards.h"

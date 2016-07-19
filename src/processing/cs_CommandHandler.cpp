@@ -47,7 +47,10 @@ void execute_delayed(void * p_context) {
 	free(buf);
 }
 
-CommandHandler::CommandHandler() : _stack(NULL) {
+CommandHandler::CommandHandler() : _delayTimer(0) {
+}
+
+void CommandHandler::init() {
 	Timer::getInstance().createSingleShot(_delayTimer, execute_delayed);
 }
 
@@ -263,7 +266,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			// todo: might not be neccessary if we only use dm in setup mode we can handle it specifically
 			//   there. maybe with a mode factory reset
 			// todo: remove stack again from CommandHandler if we don't need it here
-			_stack->device_manager_reset();
+			Nrf51822BluetoothStack::getInstance().device_manager_reset();
 
 			LOGi("factory reset done, rebooting device in 2s ...");
 
