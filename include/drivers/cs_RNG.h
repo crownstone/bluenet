@@ -8,6 +8,18 @@
 
 #include <cstdint>
 
+//! convert uint8_t to uint32_t
+typedef union {
+	uint8_t a[4];
+	uint32_t b;
+} conv8_32;
+
+//! convert from uint8_t to uint16_t and back
+typedef union {
+	uint8_t a[2];
+	uint16_t b;
+} conv8_16;
+
 /**
  * Random number generator using softdevice called peripheral.
  */

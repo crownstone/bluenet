@@ -96,7 +96,7 @@
 
 #define FACTORY_RESET_CODE                       0xdeadbeef
 
-#define ENCYRPTION_KEY_LENGTH                    16 //! 16 byte length
+#define ENCYRPTION_KEY_LENGTH                    SOC_ECB_KEY_LENGTH //! 16 byte length
 
 #define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
 

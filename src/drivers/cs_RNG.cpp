@@ -10,19 +10,6 @@
 #include <ble/cs_Nordic.h>
 #include <util/cs_BleError.h>
 
-//! convert uint8_t to uint32_t
-typedef union {
-	uint8_t a[4];
-	uint32_t b;
-} conv8_32;
-
-//! convert from uint8_t to uint16_t and back
-typedef union {
-	uint8_t a[2];
-	uint16_t b;
-} conv8_16;
-
-
 RNG::RNG() {};
 
 void RNG::fillBuffer(uint8_t* buffer, uint8_t length) {
@@ -45,16 +32,16 @@ uint32_t RNG::getRandom32() {
 	}
 
 
-   err_code = sd_rand_application_vector_get(_randomBytes, 4);
-   APP_ERROR_CHECK(err_code);
+	err_code = sd_rand_application_vector_get(_randomBytes, 4);
+	APP_ERROR_CHECK(err_code);
 
-   conv8_32 converter;
-   converter.a[0] = _randomBytes[0];
-   converter.a[1] = _randomBytes[1];
-   converter.a[2] = _randomBytes[2];
-   converter.a[3] = _randomBytes[3];
+	conv8_32 converter;
+	converter.a[0] = _randomBytes[0];
+	converter.a[1] = _randomBytes[1];
+	converter.a[2] = _randomBytes[2];
+	converter.a[3] = _randomBytes[3];
 
-   return converter.b;
+	return converter.b;
 };
 
 uint16_t RNG::getRandom16() {
@@ -66,15 +53,15 @@ uint16_t RNG::getRandom16() {
 	}
 
 
-   err_code = sd_rand_application_vector_get(_randomBytes, 2);
-   APP_ERROR_CHECK(err_code);
+	err_code = sd_rand_application_vector_get(_randomBytes, 2);
+	APP_ERROR_CHECK(err_code);
 
-   conv8_16 converter;
+	conv8_16 converter;
 
-   converter.a[0] = _randomBytes[0];
-   converter.a[1] = _randomBytes[1];
+	converter.a[0] = _randomBytes[0];
+	converter.a[1] = _randomBytes[1];
 
-   return converter.b;
+	return converter.b;
 };
 
 uint8_t RNG::getRandom8() {
@@ -86,7 +73,7 @@ uint8_t RNG::getRandom8() {
 	}
 
 
-   err_code = sd_rand_application_vector_get(_randomBytes, 1);
-   APP_ERROR_CHECK(err_code);
-   return _randomBytes[0];
+	err_code = sd_rand_application_vector_get(_randomBytes, 1);
+	APP_ERROR_CHECK(err_code);
+	return _randomBytes[0];
 };
