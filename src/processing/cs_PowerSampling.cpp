@@ -53,6 +53,7 @@ void PowerSampling::init() {
 	settings.get(CONFIG_VOLTAGE_ZERO, &_voltageZero);
 	settings.get(CONFIG_CURRENT_ZERO, &_currentZero);
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
+	settings.get(CONFIG_POWER_ZERO_AVG_WINDOW, &_zeroAvgWindow);
 
 	LOGi(FMT_INIT, "buffers");
 	uint16_t contSize = _currentSampleCircularBuf.getMaxByteSize() + _voltageSampleCircularBuf.getMaxByteSize();
@@ -242,9 +243,6 @@ void PowerSampling::powerSampleFinish() {
 	currentTimestamp = 0;
 	voltageTimestamp = 0;
 
-	// todo -> defines in header
-#define ZERO_AVG_WINDOW   100
-
 	uint16_t vMin = UINT16_MAX;
 	uint16_t vMax = 0;
 	uint16_t v;
@@ -262,7 +260,7 @@ void PowerSampling::powerSampleFinish() {
 	double vZero = (vMax + vMin) / 2.0;
 	if (_burstCount) {
 		_voltageZero = (_voltageZero * _burstCount + vZero) / (_burstCount + 1);
-		if (_burstCount < ZERO_AVG_WINDOW) {
+		if (_burstCount < _zeroAvgWindow) {
 			_burstCount++;
 		}
 	}

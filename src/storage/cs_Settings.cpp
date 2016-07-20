@@ -196,7 +196,8 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_ADV_INTERVAL:
 	case CONFIG_IBEACON_MINOR:
 	case CONFIG_IBEACON_MAJOR:
-	case CONFIG_NEARBY_TIMEOUT: {
+	case CONFIG_NEARBY_TIMEOUT:
+	case CONFIG_POWER_ZERO_AVG_WINDOW: {
 		if (length != 2) {
 			LOGw(FMT_ERR_EXPECTED, "uint16");
 			return ERR_WRONG_PAYLOAD_LENGTH;
@@ -326,7 +327,8 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_ADV_INTERVAL:
 	case CONFIG_IBEACON_MINOR:
 	case CONFIG_IBEACON_MAJOR:
-	case CONFIG_NEARBY_TIMEOUT: {
+	case CONFIG_NEARBY_TIMEOUT:
+	case CONFIG_POWER_ZERO_AVG_WINDOW: {
 		return 2;
 	}
 
@@ -543,6 +545,10 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getFloat(_storageStruct.powerZero, (float*)target, POWER_ZERO);
 		break;
 	}
+	case CONFIG_POWER_ZERO_AVG_WINDOW: {
+		Storage::getUint16(_storageStruct.powerZeroAvgWindow, (uint16_t*)target, POWER_ZERO_AVG_WINDOW);
+		break;
+	}
 	default: {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_CONFIG_NOT_FOUND;
@@ -748,6 +754,11 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		Storage::setFloat(*((float*)target), _storageStruct.powerZero);
 		break;
 	}
+	case CONFIG_POWER_ZERO_AVG_WINDOW:{
+		p_item = (uint8_t*)&_storageStruct.powerZeroAvgWindow;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.powerZeroAvgWindow);
+		break;
+	}
 	default: {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_CONFIG_NOT_FOUND;
@@ -785,16 +796,14 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 //		initFlags();
 //	}
 
-#if PERSISTENT_FLAGS_DISABLED==1
-	LOGw("persistent storage for flags disabled!!");
-	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
-	return false;
-#endif
-
+	// as long as persistent flag storage is disabled, do not do any checks, but still
+	// update the struct so that other functions can check if the flag is set or not
+#if PERSISTENT_FLAGS_DISABLED==0
 	if (value == isSet(type)) {
 		LOGi("flag is already set");
 		return true;
 	}
+#endif
 
 	uint8_t* p_item;
 
@@ -840,11 +849,16 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 	}
 	}
 
+	// if persistent storage is disable for flags, do not update pstorage
+#if PERSISTENT_FLAGS_DISABLED==0
 	if (persistent) {
 		savePersistentStorageItem(p_item, 4);
 //		savePersistentStorageItem(&_storageStruct.flags);
 	}
-	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
+#else
+	LOGw("persistent storage for flags disabled!!");
+#endif
+
 	return true;
 }
 

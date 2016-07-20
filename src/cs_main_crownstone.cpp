@@ -59,12 +59,13 @@
 using namespace BLEpp;
 
 Crownstone::Crownstone() :
+	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL),
 	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
 	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
-	_alertService(NULL), _scheduleService(NULL),
+	_scheduleService(NULL),
 	_serviceData(NULL), _beacon(NULL),
 	_mesh(NULL), _sensors(NULL), _fridge(NULL),
-	_commandHandler(NULL), _scanner(NULL), _tracker(NULL),
+	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL),
 	_advertisementPaused(false), _mainTimer(0), _operationMode(0)
 {
 
@@ -83,6 +84,9 @@ Crownstone::Crownstone() :
 	_storage = &Storage::getInstance();
 	_settings = &Settings::getInstance();
 	_stateVars = &State::getInstance();
+
+	//! create command handler
+	_commandHandler = &CommandHandler::getInstance();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch using PWM or Relay
@@ -110,7 +114,6 @@ void Crownstone::init() {
 
 	LOGi(FMT_HEADER, "setup");
 
-	// todo: handle different operation modes
 	_stateVars->get(STATE_OPERATION_MODE, _operationMode);
 //	_operationMode = OPERATION_MODE_NORMAL;
 //	_operationMode = OPERATION_MODE_SETUP;
@@ -124,7 +127,7 @@ void Crownstone::init() {
 		createSetupServices();
 
 		//! set it by default into low tx mode
-		_stack->setTxPowerLevel(-40);
+		_stack->setTxPowerLevel(LOW_TX_POWER);
 
 		LOGi("Enable PIN encryption");
 		//! use PIN encryption for setup mode
@@ -219,6 +222,9 @@ void Crownstone::initDrivers() {
 	LOGi("Loading configuration");
 	_settings->init();
 	_stateVars->init();
+
+	LOGd(FMT_INIT, "command handler");
+	_commandHandler->init();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch / PWM init
@@ -456,11 +462,6 @@ void Crownstone::createCrownstoneServices() {
 #endif
 #endif
 
-#if ALERT_SERVICE==1
-	_alertService = new AlertService;
-	_stack->addService(_alertService);
-#endif
-
 #if SCHEDULE_SERVICE==1
 	_scheduleService = new ScheduleService;
 	_stack->addService(_scheduleService);
@@ -505,10 +506,6 @@ void Crownstone::prepareCrownstone() {
 	//! create scanner object
 	_scanner = &Scanner::getInstance();
 	_scanner->setStack(_stack);
-
-	//! create command handler
-	_commandHandler = &CommandHandler::getInstance();
-	_commandHandler->setStack(_stack);
 
 	//! create scheduler
 	_scheduler = &Scheduler::getInstance();
@@ -708,23 +705,6 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_stack->setPasskey((uint8_t*)p_data);
 		break;
 	}
-
-#if ALERT_SERVICE==1
-	case EVT_ENV_TEMP_LOW: {
-		if (_alertService != NULL) {
-			_alertService->addAlert(ALERT_TEMP_LOW_POS);
-//			_alertService->alert(ALERT_TEMP_LOW);
-		}
-		break;
-	}
-	case EVT_ENV_TEMP_HIGH: {
-		if (_alertService != NULL) {
-			_alertService->addAlert(ALERT_TEMP_HIGH_POS);
-//			_alertService->alert(ALERT_TEMP_HIGH);
-		}
-		break;
-	}
-#endif
 
 	case EVT_ADVERTISEMENT_PAUSE: {
 		if (_stack->isAdvertising()) {

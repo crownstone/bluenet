@@ -85,8 +85,8 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 			LOGd("received service data from crownstone %s", getAddress((mesh_message_t*)p_data).c_str());
 #endif
 
-			service_data_mesh_message_t& sd = msg->serviceDataMsg;
 #ifdef PRINT_DEBUG
+			service_data_mesh_message_t& sd = msg->serviceDataMsg;
 			LOGd("> crownstone id: %d", sd.crownstoneId);
 			LOGd("> switch state: %d", sd.switchState);
 			LOGd("> event bitmask: %s", BLEutil::toBinaryString(sd.eventBitmask).c_str());
