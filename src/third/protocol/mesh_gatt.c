@@ -507,9 +507,10 @@ uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 
 			}
 		}
-	} else {
-		return BLE_ERROR_INVALID_CONN_HANDLE;
 	}
+//	else {
+	return BLE_ERROR_INVALID_CONN_HANDLE;
+//	}
 }
 
 void resume_notifications() {

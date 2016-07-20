@@ -486,7 +486,7 @@ void Crownstone::setName() {
 //	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
 	char devicename_resetCounter[32];
 	//! clip name to 5 chars and add reset counter at the end
-	sprintf(devicename_resetCounter, "%.*s_%d", MIN(size, 5), device_name, STRINGIFY(resetCounter));
+	sprintf(devicename_resetCounter, "%.*s_%lu", MIN(size, 5), device_name, resetCounter);
 	std::string deviceName = std::string(devicename_resetCounter);
 #else
 	std::string deviceName(devicename, size);

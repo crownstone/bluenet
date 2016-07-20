@@ -45,8 +45,8 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 			  	_gap_conn_params( { }),
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
-				_radio_notify(0),
-				_adv_manuf_data(NULL), _encryptionEnabled(false), _serviceData(NULL)
+				_radio_notify(0), _encryptionEnabled(false),
+				_adv_manuf_data(NULL), _serviceData(NULL)
 {
 	//! setup default values.
 	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
