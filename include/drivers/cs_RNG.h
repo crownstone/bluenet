@@ -8,24 +8,15 @@
 
 #include <cstdint>
 
-//#include "nrf_soc.h"
-//#include "nrf_sdm.h"
-
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
-//	#include "app_error.h"
-//#ifdef __cplusplus
-//}
-//#endif
-
-/** Random number generator.
+/**
+ * Random number generator using softdevice called peripheral.
  */
 class RNG{
 public:
 	uint8_t _randomBytes[4] = {0,0,0,0};
 
 	RNG();
+	static void fillBuffer(uint8_t* buffer, uint8_t length);
 	uint32_t getRandom32();
 	uint16_t getRandom16();
 	uint8_t  getRandom8();

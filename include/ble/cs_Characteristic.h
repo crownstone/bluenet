@@ -19,6 +19,8 @@
 
 #include <common/cs_Types.h>
 
+#include <storage/cs_Settings.h>
+
 /** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.

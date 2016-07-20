@@ -21,7 +21,7 @@
 
 #include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
-
+#include <events/cs_EventDispatcher.h>
 #include <mesh/cs_Mesh.h>
 
 //#define PRINT_STORAGE_VERBOSE

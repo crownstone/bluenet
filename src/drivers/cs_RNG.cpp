@@ -10,18 +10,6 @@
 #include <ble/cs_Nordic.h>
 #include <util/cs_BleError.h>
 
-//#include "nrf_soc.h"
-//#include "nrf_sdm.h"
-//
-//
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
-//	#include "app_error.h"
-//#ifdef __cplusplus
-//}
-//#endif
-
 //! convert uint8_t to uint32_t
 typedef union {
 	uint8_t a[4];
@@ -36,6 +24,17 @@ typedef union {
 
 
 RNG::RNG() {};
+
+void RNG::fillBuffer(uint8_t* buffer, uint8_t length) {
+	uint8_t bytes_available = 0;
+	uint32_t err_code;
+	while (bytes_available < length) {
+		err_code = sd_rand_application_bytes_available_get(&bytes_available);
+		APP_ERROR_CHECK(err_code);
+	}
+	err_code = sd_rand_application_vector_get(buffer, length);
+	APP_ERROR_CHECK(err_code);
+};
 
 uint32_t RNG::getRandom32() {
 	uint8_t bytes_available = 0;

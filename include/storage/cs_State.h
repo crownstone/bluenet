@@ -11,6 +11,7 @@
 #include <storage/cs_CyclicStorage.h>
 #include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <vector>
 
 #define SWITCH_STATE_PERSISTENT
 
