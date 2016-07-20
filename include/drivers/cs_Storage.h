@@ -17,6 +17,7 @@
 #include "structs/cs_ScheduleEntries.h"
 
 #include "structs/buffer/cs_CircularBuffer.h"
+#include <events/cs_EventListener.h>
 
 extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers

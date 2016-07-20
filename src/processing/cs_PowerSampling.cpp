@@ -13,6 +13,7 @@
 #include <drivers/cs_ADC.h>
 #include <drivers/cs_RTC.h>
 #include <protocol/cs_StateTypes.h>
+#include <events/cs_EventDispatcher.h>
 
 #include <mesh/cs_MeshControl.h>
 extern "C" {
