@@ -73,7 +73,7 @@ uint 8 | Nonce | 8 | Nonce used in the encryption of this message.
 uint 8 | User Level | 1 | 0: Admin, 1: User, 2: Guest
 Encrypted Payload | Encrypted Payload | n * 16 | The encrypted payload
 
-##### Encrypted payload when writing
+##### Encrypted payload
 
 < BART WILL CREATE IMAGE HERE FOR ENCRYPTION >
 
@@ -88,15 +88,12 @@ Original Packet | Original Packet |  | Whatever data would have been sent if enc
 
 #### Reading from characteristics
 
-An encrypted packet from the characteristics looks very similar to the packet that you write except there is no session key. The Encrypted Payload for a value you read from a characteristic is only:
+An encrypted packet from the characteristics has the same structure as the packet above. The only difference is that the session key is used as a decryption check.
+If the data you expect to read is only one byte, the first byte of the decrypted packet is your relevant data, the rest will be zeros.
 
-##### Encrypted payload when reading
+######If you decrypt, check if the session key matches 0xCAFEBABE to ensure it was successful
+0xCAFEBABE in decimal is 3405691582
 
-Type | Name | Length | Description
---- | --- | --- | ---
-Original Packet | Original Packet |  | Whatever data would have been read if encryption was disabled. Length is a multiple of 16, possibly zero padded.
-
-######If the data you expect to read is only one byte, the first byte of the decrypted packet is your relevant data, the rest will be zeros.
 
 # Advertisements and scan response
 When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
