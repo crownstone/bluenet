@@ -54,10 +54,9 @@ When you want to write to a characteristic you first need to request a [session 
 
 We use the AES 128 CTR method to encrypt everything that is written to- and read from characteristics. For this you need to generate an 8 byte random number called a **Nonce**. You can then start encrypting your package.
 
-Information on how to encrypt according to AES 128 CTR is found here:
-https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29
+[Information on how to encrypt according to AES 128 CTR is found here](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29).
 
-If your data is a different size than a block (16 Bytes), add zeros after your data to fill up the block.
+If your data is a different size than an N number of blocks (16 Bytes per block), make sure you apply padding according to [PKCS7](https://en.wikipedia.org/wiki/Padding_(cryptography)).
 
 ##### Encrypted Packet
 
@@ -71,7 +70,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Nonce | 8 | Nonce used in the encryption of this message.
 uint 8 | User Level | 1 | 0: Admin, 1: User, 2: Guest
-Encrypted Payload | Encrypted Payload | n * 16 | The encrypted payload
+Encrypted Payload | Encrypted Payload | N * 16 | The encrypted payload
 
 ##### Encrypted payload
 
@@ -89,7 +88,7 @@ Original Packet | Original Packet |  | Whatever data would have been sent if enc
 #### Reading from characteristics
 
 An encrypted packet from the characteristics has the same structure as the packet above. The only difference is that the session key is used as a decryption check.
-If the data you expect to read is only one byte, the first byte of the decrypted packet is your relevant data, the rest will be zeros.
+If the data you expect to read is only one byte, the first byte of the decrypted packet is your relevant data, the rest will be padded according to [PKCS7](https://en.wikipedia.org/wiki/Padding_(cryptography)).
 
 ######If you decrypt, check if the session key matches 0xCAFEBABE to ensure it was successful
 0xCAFEBABE in decimal is 3405691582
@@ -172,7 +171,9 @@ State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_pa
 State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable | x | x |
 <a name="session_key"></a>Session Key | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 32 | Retrieve the session key | .. | .. | ..
 
-The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command. The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command was received before calling the next (either by polling or subscribing). The possible values of the return values are listed in the table below
+The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
+The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command
+was received before calling the next (either by polling or subscribing). The possible values of the return values are listed in the table below
 
 Value | Name | Description
 --- | --- | --- | --- | --- | ---
