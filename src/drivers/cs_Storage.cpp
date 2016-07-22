@@ -85,13 +85,15 @@ void Storage::init() {
 }
 
 void Storage::onUpdateDone() {
-	// track how many update requests are still pending
-	_pending--;
-	// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
-	if (!_pending) {
-		LOGi("pstorage update done");
-		if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-			Mesh::getInstance().start();
+	if (_pending) {
+		// track how many update requests are still pending
+		_pending--;
+		// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
+		if (!_pending) {
+			LOGi("pstorage update done");
+			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+				Mesh::getInstance().start();
+			}
 		}
 	}
 }
