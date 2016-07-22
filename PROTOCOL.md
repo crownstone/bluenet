@@ -50,11 +50,21 @@ Type | Name | Length | Description
 uint 8 | Protocol Version | 1 | Service data protocol version
 uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
 uint 16 | Crownstone state ID | 2 | ID of the Crownstone of which the state is shown.
-uint 8 | Switch state | 1 | The state of the switch, 0 - 100 (where 0 is off, 100 is on, dimmed in between).
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | Event bitmask | 1 | Shows if the Crownstone has something new to tell.
 int 8 | Temperature | 1 | Chip temperature (°C)
 int 32 | Power usage | 4 | The power usage at this moment (mW).
 int 32 | Accumulated energy | 4 | The accumulated energy (kWh).
+
+#### <a name="switch_state_packet"></a>Switch State Packet
+
+To be able to distinguish between switching with relay and switching with PWM, the switch state is a bit struct with
+the following layout
+
+![Switch State Packet](docs/diagrams/switch_state_packet.png)
+
+Bit 7 is used for the Relay Flag, where 0 = OFF, 1 = ON
+Bits 6-0 are used for PWM, where 100 is full ON, 0 is OFF, dimmed in between
 
 # Services
 When connected, the following services are available.
