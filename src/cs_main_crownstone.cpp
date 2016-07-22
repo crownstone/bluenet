@@ -37,6 +37,7 @@
 #include "util/cs_Utils.h"
 #include "drivers/cs_Timer.h"
 #include "structs/buffer/cs_MasterBuffer.h"
+#include "structs/buffer/cs_EncryptionBuffer.h"
 
 #include <drivers/cs_RNG.h>
 
@@ -70,6 +71,8 @@ Crownstone::Crownstone() :
 {
 
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
+	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
+
 	EventDispatcher::getInstance().addListener(this);
 
 	//! set up the bluetooth stack that controls the hardware.
@@ -126,12 +129,15 @@ void Crownstone::init() {
 		//! create services
 		createSetupServices();
 
+		//! loop through all services added to the stack and create the characteristics
+		_stack->createCharacteristics();
+
 		//! set it by default into low tx mode
 		_stack->setTxPowerLevel(LOW_TX_POWER);
 
-		LOGi("Enable PIN encryption");
+		LOGi(FMT_ENABLE, "PIN encryption");
 		//! use PIN encryption for setup mode
-		_stack->setEncrypted(true);
+		_stack->setPinEncrypted(true);
 
 		break;
 	}
@@ -145,6 +151,15 @@ void Crownstone::init() {
 		//! create services
 		createCrownstoneServices();
 
+		//! loop through all services added to the stack and create the characteristics
+		_stack->createCharacteristics();
+
+		//! use aes encryption for normal mode (if enabled)
+		if (_settings->isSet(CONFIG_ENCRYPTION_ENABLED)) {
+			LOGi(FMT_ENABLE, "AES encryption");
+			_stack->setAesEncrypted(true);
+		}
+
 		break;
 	}
 	case OPERATION_MODE_DFU: {
@@ -153,9 +168,6 @@ void Crownstone::init() {
 		while(true) {}; // loop until reset triggers
 	}
 	}
-
-	//! loop through all services added to the stack and create the characteristics
-	_stack->createCharacteristics();
 
 	LOGi(FMT_HEADER, "init services");
 

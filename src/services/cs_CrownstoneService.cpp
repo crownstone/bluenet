@@ -131,9 +131,9 @@ void CrownstoneService::addMeshCharacteristic() {
 	_meshControlCharacteristic->setName(BLE_CHAR_MESH_CONTROL);
 	_meshControlCharacteristic->setWritable(true);
 	_meshControlCharacteristic->setValue(buffer);
-	_meshControlCharacteristic->setMaxLength(size);
-	_meshControlCharacteristic->setDataLength(0);
-	_meshControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_meshControlCharacteristic->setMaxGattValueLength(size);
+	_meshControlCharacteristic->setValueLength(0);
+	_meshControlCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
 		LOGi(MSG_MESH_MESSAGE_WRITE);
 
 		uint8_t handle = _meshCommand->type();
@@ -144,8 +144,8 @@ void CrownstoneService::addMeshCharacteristic() {
 
 //		LOGi("err error_code: %d", error_code);
 		memcpy(value, &error_code, sizeof(error_code));
-		_meshControlCharacteristic->setDataLength(sizeof(error_code));
-		_meshControlCharacteristic->notify();
+		_meshControlCharacteristic->setValueLength(sizeof(error_code));
+		_meshControlCharacteristic->updateValue();
 
 	});
 }
@@ -158,9 +158,9 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setWritable(true);
 	_controlCharacteristic->setValue(buffer);
-	_controlCharacteristic->setMaxLength(size);
-	_controlCharacteristic->setDataLength(0);
-	_controlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_controlCharacteristic->setMaxGattValueLength(size);
+	_controlCharacteristic->setValueLength(0);
+	_controlCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
 
 		ERR_CODE error_code;
 		MasterBuffer& mb = MasterBuffer::getInstance();
@@ -182,8 +182,8 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 
 //		LOGi("err error_code: %d", error_code);
 		memcpy(value, &error_code, sizeof(error_code));
-		_controlCharacteristic->setDataLength(sizeof(error_code));
-		_controlCharacteristic->notify();
+		_controlCharacteristic->setValueLength(sizeof(error_code));
+		_controlCharacteristic->updateValue();
 	});
 
 }
@@ -196,9 +196,9 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	_configurationControlCharacteristic->setName(BLE_CHAR_CONFIG_CONTROL);
 	_configurationControlCharacteristic->setWritable(true);
 	_configurationControlCharacteristic->setValue(buffer);
-	_configurationControlCharacteristic->setMaxLength(size);
-	_configurationControlCharacteristic->setDataLength(0);
-	_configurationControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_configurationControlCharacteristic->setMaxGattValueLength(size);
+	_configurationControlCharacteristic->setValueLength(0);
+	_configurationControlCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
 
 		ERR_CODE error_code;
 		if (!value) {
@@ -225,8 +225,8 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 					error_code = Settings::getInstance().readFromStorage(type, _streamBuffer);
 					if (SUCCESS(error_code)) {
 						_streamBuffer->setOpCode(READ_VALUE);
-						_configurationReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
-						_configurationReadCharacteristic->notify();
+						_configurationReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
+						_configurationReadCharacteristic->updateValue();
 //						LOGi("success");
 						mb.unlock();
 						return; // need to return here to avoid writing error_code, which would overwrite
@@ -254,8 +254,8 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 
 //		LOGi("err error_code: %d", error_code);
 		memcpy(value, &error_code, sizeof(error_code));
-		_configurationControlCharacteristic->setDataLength(sizeof(error_code));
-		_configurationControlCharacteristic->notify();
+		_configurationControlCharacteristic->setValueLength(sizeof(error_code));
+		_configurationControlCharacteristic->updateValue();
 	});
 }
 
@@ -268,8 +268,8 @@ void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, 
 	_configurationReadCharacteristic->setWritable(false);
 	_configurationReadCharacteristic->setNotifies(true);
 	_configurationReadCharacteristic->setValue(buffer);
-	_configurationReadCharacteristic->setMaxLength(size);
-	_configurationReadCharacteristic->setDataLength(0);
+	_configurationReadCharacteristic->setMaxGattValueLength(size);
+	_configurationReadCharacteristic->setValueLength(0);
 }
 
 void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
@@ -280,9 +280,9 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 	_stateControlCharacteristic->setName(BLE_CHAR_STATE_CONTROL);
 	_stateControlCharacteristic->setWritable(true);
 	_stateControlCharacteristic->setValue(buffer);
-	_stateControlCharacteristic->setMaxLength(size);
-	_stateControlCharacteristic->setDataLength(0);
-	_stateControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_stateControlCharacteristic->setMaxGattValueLength(size);
+	_stateControlCharacteristic->setValueLength(0);
+	_stateControlCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
 
 		ERR_CODE error_code;
 		if (!value) {
@@ -316,8 +316,8 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 					LOGd(FMT_SELECT_TYPE, STR_CHAR_STATE, type);
 					if (SUCCESS(error_code)) {
 						_streamBuffer->setOpCode(READ_VALUE);
-						_stateReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
-						_stateReadCharacteristic->notify();
+						_stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
+						_stateReadCharacteristic->updateValue();
 //						LOGi("success");
 						mb.unlock();
 						return; // need to return here to avoid writing error_code, which would overwrite
@@ -339,8 +339,8 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 
 //		LOGi("err error_code: %d", error_code);
 		memcpy(value, &error_code, sizeof(error_code));
-		_stateControlCharacteristic->setDataLength(sizeof(error_code));
-		_stateControlCharacteristic->notify();
+		_stateControlCharacteristic->setValueLength(sizeof(error_code));
+		_stateControlCharacteristic->updateValue();
 	});
 }
 
@@ -353,8 +353,8 @@ void CrownstoneService::addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t
 	_stateReadCharacteristic->setWritable(false);
 	_stateReadCharacteristic->setNotifies(true);
 	_stateReadCharacteristic->setValue(buffer);
-	_stateReadCharacteristic->setMaxLength(size);
-	_stateReadCharacteristic->setDataLength(0);
+	_stateReadCharacteristic->setMaxGattValueLength(size);
+	_stateReadCharacteristic->setValueLength(0);
 }
 
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
@@ -369,8 +369,8 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 			_streamBuffer->setType(notification.type);
 			_streamBuffer->setOpCode(NOTIFY_VALUE);
 
-			_stateReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
-			_stateReadCharacteristic->notify();
+			_stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
+			_stateReadCharacteristic->updateValue();
 		}
 	}
 	}

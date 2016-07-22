@@ -107,7 +107,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 	_scanControlCharac->setName(BLE_CHAR_SCAN_CONTROL);
 	_scanControlCharac->setDefaultValue(255);
 	_scanControlCharac->setWritable(true);
-	_scanControlCharac->onWrite([&](const uint8_t& value) -> void {
+	_scanControlCharac->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_SCAN_DEVICES, (buffer_ptr_t)&value, 1);
 	});
 }
@@ -127,8 +127,8 @@ void IndoorLocalizationService::addScannedDeviceListCharacteristic() {
 	_scannedDeviceListCharac->setWritable(false);
 	_scannedDeviceListCharac->setNotifies(true);
 	_scannedDeviceListCharac->setValue(buffer);
-	_scannedDeviceListCharac->setMaxLength(maxLength);
-	_scannedDeviceListCharac->setDataLength(0);
+	_scannedDeviceListCharac->setMaxGattValueLength(maxLength);
+	_scannedDeviceListCharac->setValueLength(0);
 }
 
 void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
@@ -146,8 +146,8 @@ void IndoorLocalizationService::addTrackedDeviceListCharacteristic() {
 	_trackedDeviceListCharac->setWritable(false);
 	_trackedDeviceListCharac->setNotifies(false);
 	_trackedDeviceListCharac->setValue(buffer);
-	_trackedDeviceListCharac->setMaxLength(maxLength);
-	_trackedDeviceListCharac->setDataLength(0);
+	_trackedDeviceListCharac->setMaxGattValueLength(maxLength);
+	_trackedDeviceListCharac->setValueLength(0);
 }
 
 void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
@@ -166,10 +166,10 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 	_trackedDeviceCharac->setNotifies(false);
 
 	_trackedDeviceCharac->setValue(buffer);
-	_trackedDeviceCharac->setMaxLength(maxLength);
-	_trackedDeviceCharac->setDataLength(0);
+	_trackedDeviceCharac->setMaxGattValueLength(maxLength);
+	_trackedDeviceCharac->setValueLength(0);
 
-	_trackedDeviceCharac->onWrite([&](const buffer_ptr_t& value) -> void {
+	_trackedDeviceCharac->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
 		Tracker::getInstance().handleTrackedDeviceCommand(_trackedDeviceCharac->getValue(),
 				_trackedDeviceCharac->getValueLength());
 	});
@@ -246,14 +246,14 @@ void IndoorLocalizationService::handleEvent(uint16_t evt, void* p_data, uint16_t
 	switch(evt) {
 	case EVT_SCANNED_DEVICES: {
 		_scannedDeviceListCharac->setValue((buffer_ptr_t)p_data);
-		_scannedDeviceListCharac->setDataLength(length);
-		_scannedDeviceListCharac->notify();
+		_scannedDeviceListCharac->setValueLength(length);
+		_scannedDeviceListCharac->updateValue();
 		break;
 	}
 	case EVT_TRACKED_DEVICES: {
 		_trackedDeviceListCharac->setValue((buffer_ptr_t)p_data);
-		_trackedDeviceListCharac->setDataLength(length);
-		_trackedDeviceListCharac->notify();
+		_trackedDeviceListCharac->setValueLength(length);
+		_trackedDeviceListCharac->updateValue();
 		break;
 	}
 	}

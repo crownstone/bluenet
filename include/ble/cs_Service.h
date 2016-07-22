@@ -32,6 +32,8 @@ class Service {
 public:
 	static const char* defaultServiceName; //! "Generic Service"
 
+	// might want to change this to a linked list or something that
+	// we can loop over but doesn't allocate more space than needed
 	typedef tuple<CharacteristicBase*> Characteristics_t;
 
 protected:
@@ -170,7 +172,9 @@ public:
 		return *this;
 	}
 
-	void setEncrypted(bool encrypted);
+	void setPinEncrypted(bool encrypted);
+	void setAesEncrypted(bool encrypted);
+
 };
 
 }

@@ -100,7 +100,7 @@ void SetupService::createCharacteristics() {
 //	_controlCharacteristic->setValue(buffer);
 //	_controlCharacteristic->setMaxLength(size);
 //	_controlCharacteristic->setDataLength(size);
-//	_controlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+//	_controlCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
 //
 //		MasterBuffer& mb = MasterBuffer::getInstance();
 //		// at this point it is too late to check if mb was locked, because the softdevice doesn't care
@@ -131,8 +131,8 @@ void SetupService::addMacAddressCharacteristic() {
 	_macAddressCharacteristic->setName(BLE_CHAR_MAC_ADDRES);
 	_macAddressCharacteristic->setWritable(false);
 	_macAddressCharacteristic->setValue(_myAddr.addr);
-	_macAddressCharacteristic->setMaxLength(BLE_GAP_ADDR_LEN);
-	_macAddressCharacteristic->setDataLength(BLE_GAP_ADDR_LEN);
+	_macAddressCharacteristic->setMaxGattValueLength(BLE_GAP_ADDR_LEN);
+	_macAddressCharacteristic->setValueLength(BLE_GAP_ADDR_LEN);
 
 }
 
@@ -146,7 +146,7 @@ void SetupService::addMacAddressCharacteristic() {
 //	_setConfigurationCharacteristic->setValue(buffer);
 //	_setConfigurationCharacteristic->setMaxLength(size);
 //	_setConfigurationCharacteristic->setDataLength(size);
-//	_setConfigurationCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+//	_setConfigurationCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
 //
 //		if (!value) {
 //			LOGw(FMT_CHAR_VALUE_UNDEFINED);

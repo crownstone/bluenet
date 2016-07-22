@@ -16,6 +16,7 @@
 #include <cfg/cs_Strings.h>
 #include <util/cs_BleError.h>
 #include <common/cs_Tuple.h>
+#include <common/cs_Types.h>
 #include <third/std/function.h>
 #include <ble/cs_DoBotsManufac.h>
 #include <ble/cs_ServiceData.h>
@@ -137,6 +138,9 @@ public:
 protected:
 	std::string                                 _device_name; //! 4
 	uint16_t                                    _appearance;
+
+	// might want to change this to a linked list or something that
+	// we can loop over but doesn't allocate more space than needed
 	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  //! 32
 
 	nrf_clock_lfclksrc_t                        _clock_source; //4
@@ -166,7 +170,6 @@ protected:
 	uint8_t                            			_passkey[BLE_GAP_PASSKEY_LEN];
 	dm_application_instance_t                   _dm_app_handle;
 	bool                                        _dm_initialized;
-	bool                                        _encryptionEnabled;
 
 	app_timer_id_t                              _lowPowerTimeoutId;
 	app_timer_id_t                              _secReqTimerId;
@@ -180,10 +183,11 @@ protected:
 	// todo: make part of DoBotsManufac (see iBeacon)
 	uint8_t*                                    _adv_manuf_data;
 
-ble_advdata_manuf_data_t 					_manufac_apple;
+	ble_advdata_manuf_data_t 					_manufac_apple;
 	ble_advdata_service_data_t                  _service_data;
 
 	ServiceData*                                _serviceData;
+
 public:
 
 	/** Initialization of the BLE stack
@@ -440,7 +444,8 @@ public:
 		_serviceData = serviceData;
 	}
 
-	void setEncrypted(bool encrypted);
+	void setPinEncrypted(bool encrypted);
+	void setAesEncrypted(bool encrypted);
 
 protected:
 

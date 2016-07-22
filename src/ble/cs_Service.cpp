@@ -41,12 +41,26 @@ void Service::init(Nrf51822BluetoothStack* stack) {
 
 }
 
-void Service::setEncrypted(bool encrypted) {
+void Service::setPinEncrypted(bool encrypted) {
 	//! set all characteristics to encrypted
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
-		characteristic->setEncrypted(encrypted);
+		characteristic->setPinEncrypted(encrypted);
 	}
 }
+
+void Service::setAesEncrypted(bool encrypted) {
+	//! set all characteristics to encrypted
+	for (CharacteristicBase* characteristic : getCharacteristics()) {
+		characteristic->setAesEncrypted(encrypted);
+	}
+}
+
+//void Service::setEncryptionBuffer(buffer_ptr_t buffer, buffer_size_t size) {
+//	//! set all characteristics to encrypted
+//	for (CharacteristicBase* characteristic : getCharacteristics()) {
+//		characteristic->setEncryptionBuffer(buffer, size);
+//	}
+//}
 
 /**
  * A service can receive a BLE event. Currently we pass the connection events through as well as the write event.

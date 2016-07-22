@@ -20,17 +20,16 @@ using namespace BLEpp;
 
 CharacteristicBase::CharacteristicBase() :
 				_name(NULL),
-				_handles( { }), _service(0), _encrypted(false)
+				_handles( { }), _service(0), _status({}), _encryptionBuffer(NULL)
 				/*nited(false), _notifies(false), _writable(false), */
 				/*_unit(0), */ /*_updateIntervalMsecs(0),*/ /* _notifyingEnabled(false), _indicates(false) */
 {
 }
 
-CharacteristicBase& CharacteristicBase::setName(const char * const name) {
+void CharacteristicBase::setName(const char * const name) {
 	if (_status.inited) BLE_THROW(MSG_BLE_CHAR_INITIALIZED);
 	_name = name;
 
-	return *this;
 }
 
 /** Set the default attributes of every characteristic
@@ -46,43 +45,6 @@ CharacteristicBase& CharacteristicBase::setName(const char * const name) {
  * The same is true if this buffer is reused across characteristics. If it is meant as data for one characteristic
  * and is read through another, this will resolve to nonsense to the user.
  */
-//void CharacteristicBase::setAttrMdReadOnly(ble_gatts_attr_md_t& md, char vloc) {
-////	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&md.read_perm);
-////	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&md.write_perm);
-//	md.vloc = vloc;
-//	md.rd_auth = 0; //! don't request read access every time a read is attempted.
-//	md.wr_auth = 0;  //! ditto for write.
-//	md.vlen = 1;  //! variable length.
-//}
-
-//void CharacteristicBase::setAttrMdReadWrite(ble_gatts_attr_md_t& md, char vloc) {
-//	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.read_perm);
-//	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&md.write_perm);
-//	md.vloc = vloc;
-//	md.rd_auth = 0; //! don't request read access every time a read is attempted.
-//	md.wr_auth = 0;  //! ditto for write.
-//	md.vlen = 1;  //! variable length.
-//}
-
-/*
-CharacteristicBase& CharacteristicBase::setUnit(uint16_t unit) {
-	_unit = unit;
-	return *this;
-} */
-
-//CharacteristicBase& CharacteristicBase::setUpdateIntervalMSecs(uint32_t msecs) {
-//!    if (_updateIntervalMsecs != msecs) {
-//!        _updateIntervalMsecs = msecs;
-//!        //! TODO schedule task.
-//!        app_timer_create(&_timer, APP_TIMER_MODE_REPEATED, [](void* context){
-//!            CharacteristicBase* characteristic = (CharacteristicBase*)context;
-//!            characteristic->read();
-//!        });
-//!        app_timer_start(_timer, (uint32_t)(_updateIntervalMsecs / 1000. * (32768 / NRF51_RTC1_PRESCALER +1)), this);
-//!    }
-//!    return *this;
-//}
-
 void CharacteristicBase::init(Service* svc) {
 	_service = svc;
 
@@ -101,7 +63,7 @@ void CharacteristicBase::init(Service* svc) {
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.read_perm); //! required
 
-    if (_encrypted) {
+    if (_status.pinEncrypted) {
     	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.cccd_md.write_perm);
     } else {
         BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.write_perm);
@@ -121,12 +83,12 @@ void CharacteristicBase::init(Service* svc) {
 	ci.attr_char_value.p_uuid = &uuid;
 
 	ci.attr_char_value.init_offs = 0;
-	ci.attr_char_value.init_len = getValueLength();
-	ci.attr_char_value.max_len = getValueMaxLength();
-	ci.attr_char_value.p_value = getValuePtr();
+	ci.attr_char_value.init_len = getGattValueLength();
+	ci.attr_char_value.max_len = getGattValueMaxLength();
+	ci.attr_char_value.p_value = getGattValuePtr();
 
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
-	LOGd("%s init with buffer[%i] with %p", _name, getValueLength(), getValuePtr());
+	LOGd("%s init with buffer[%i] with %p", _name, getGattValueMaxLength(), getGattValuePtr());
 #endif
 
 	////////////////////////
@@ -137,7 +99,7 @@ void CharacteristicBase::init(Service* svc) {
 	ci.attr_md.vloc = BLE_GATTS_VLOC_USER;
 	ci.attr_md.vlen = 1;
 
-    if (_encrypted) {
+    if (_status.pinEncrypted) {
 		BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.read_perm);
 		BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.attr_md.write_perm);
     } else {
@@ -167,7 +129,7 @@ void CharacteristicBase::init(Service* svc) {
 		ci.user_desc_metadata_md.vloc = BLE_GATTS_VLOC_STACK;
 		ci.user_desc_metadata_md.vlen = 1;
 
-	    if (_encrypted) {
+	    if (_status.pinEncrypted) {
 	    	BLE_GAP_CONN_SEC_MODE_SET_ENC_WITH_MITM(&ci.user_desc_metadata_md.read_perm);
 	    } else {
 			BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
@@ -200,7 +162,7 @@ void CharacteristicBase::init(Service* svc) {
 	//BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle, &ci.char_md, &ci.attr_char_value, &_handles));
 
 	//! set initial value (default value)
-	notify();
+	updateValue();
 //	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
 //			_handles.value_handle, &ci.attr_char_value.init_len, ci.attr_char_value.p_value));
 
@@ -231,10 +193,19 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	ci.attr_md.write_perm = _writeperm;
 }
 
-uint32_t CharacteristicBase::notify() {
+uint32_t CharacteristicBase::updateValue() {
 
-	uint16_t valueLength = getValueLength();
-	uint8_t* valueAddress = getValuePtr();
+	uint16_t valueLength = getGattValueLength();
+	uint8_t* valueAddress = getGattValuePtr();
+
+	// ENCRYPTION HERE
+	if (_status.aesEncrypted) {
+//		LOGi("encrypt ...")
+		uint16_t dataLength = getValueLength();
+		memcpy(valueAddress, getValuePtr(), dataLength);
+		valueLength = dataLength;
+		setGattValueLength(valueLength);
+	}
 
 	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
 			_handles.value_handle, &valueLength, valueAddress));
@@ -242,7 +213,20 @@ uint32_t CharacteristicBase::notify() {
 	//! stop here if we are not in notifying state
 	if ((!_status.notifies) || (!_service->getStack()->connected()) || !_status.notifyingEnabled) {
 		return NRF_SUCCESS;
+	} else {
+		return notify();
 	}
+}
+
+
+uint32_t CharacteristicBase::notify() {
+
+	if (!_status.notifies || !_service->getStack()->connected() || !_status.notifyingEnabled) {
+		return NRF_ERROR_INVALID_STATE;
+	}
+
+	uint16_t valueLength = getGattValueLength();
+	uint8_t* valueAddress = getGattValuePtr();
 
 	ble_gatts_hvx_params_t hvx_params;
 	uint16_t len = valueLength;
@@ -281,16 +265,16 @@ uint32_t CharacteristicBase::notify() {
 	return err_code;
 }
 
-void CharacteristicBase::onNotifyTxError() {
-	//! in most cases we can just ignore the error, because the characteristic is updated frequently
-	//! so the next update will probably be done as soon as the tx buffers are ready anyway, but in
-	//! case there are characteristics that only get updated really infrequently, the notification
-	//! should be buffered and sent again once the tx buffers are ready
-	//	LOGd("[%s] no tx buffers, notification skipped!", _name.c_str());
-}
-
-void CharacteristicBase::onTxComplete(ble_common_evt_t * p_ble_evt) {
-	//! if a characteristic buffers notification when it runs out of tx buffers it can use
-	//! this callback to resend the buffered notification
-}
+//void CharacteristicBase::onNotifyTxError() {
+//	//! in most cases we can just ignore the error, because the characteristic is updated frequently
+//	//! so the next update will probably be done as soon as the tx buffers are ready anyway, but in
+//	//! case there are characteristics that only get updated really infrequently, the notification
+//	//! should be buffered and sent again once the tx buffers are ready
+//	//	LOGd("[%s] no tx buffers, notification skipped!", _name.c_str());
+//}
+//
+//void CharacteristicBase::onTxComplete(ble_common_evt_t * p_ble_evt) {
+//	//! if a characteristic buffers notification when it runs out of tx buffers it can use
+//	//! this callback to resend the buffered notification
+//}
 

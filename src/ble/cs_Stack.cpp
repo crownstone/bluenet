@@ -45,7 +45,7 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 			  	_gap_conn_params( { }),
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
-				_radio_notify(0), _encryptionEnabled(false),
+				_radio_notify(0),
 				_adv_manuf_data(NULL), _serviceData(NULL)
 {
 	//! setup default values.
@@ -705,7 +705,7 @@ bool Nrf51822BluetoothStack::isScanning() {
 //	}
 //}
 
-void Nrf51822BluetoothStack::setEncrypted(bool encrypted) {
+void Nrf51822BluetoothStack::setPinEncrypted(bool encrypted) {
 	if (encrypted) {
 		//! initialize device manager to handle PIN encryption keys
 		device_manager_init(false);
@@ -713,7 +713,15 @@ void Nrf51822BluetoothStack::setEncrypted(bool encrypted) {
 
 	//! set characteristics of all services to encrypted
 	for (Service* svc : _services) {
-		svc->setEncrypted(encrypted);
+		svc->setPinEncrypted(encrypted);
+	}
+}
+
+void Nrf51822BluetoothStack::setAesEncrypted(bool encrypted) {
+
+	//! set characteristics of all services to encrypted
+	for (Service* svc : _services) {
+		svc->setAesEncrypted(encrypted);
 	}
 }
 
