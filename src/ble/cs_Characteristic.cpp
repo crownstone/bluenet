@@ -195,20 +195,27 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 
 uint32_t CharacteristicBase::updateValue() {
 
-	uint16_t valueLength = getGattValueLength();
-	uint8_t* valueAddress = getGattValuePtr();
+	//! get the data length of the value (unencrypted)
+	uint16_t valueLength = getValueLength();
+	/* get the address where the value should be stored so that the
+	 * gatt server can access it
+	 */
+	uint8_t* valueGattAddress = getGattValuePtr();
 
 	// ENCRYPTION HERE
 	if (_status.aesEncrypted) {
-//		LOGi("encrypt ...")
-		uint16_t dataLength = getValueLength();
-		memcpy(valueAddress, getValuePtr(), dataLength);
-		valueLength = dataLength;
-		setGattValueLength(valueLength);
+		LOGi("encrypt ...")
+		memcpy(valueGattAddress, getValuePtr(), valueLength);
 	}
 
+	//! set the data length of the gatt value (encrypted)
+	setGattValueLength(valueLength);
+
+//	LOGi("[%s] valueLength: %d", _name, valueLength);
+//	LOGi("[%s] valueAddress: %p", _name, valueAddress);
+
 	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
-			_handles.value_handle, &valueLength, valueAddress));
+			_handles.value_handle, &valueLength, valueGattAddress));
 
 	//! stop here if we are not in notifying state
 	if ((!_status.notifies) || (!_service->getStack()->connected()) || !_status.notifyingEnabled) {
@@ -225,8 +232,9 @@ uint32_t CharacteristicBase::notify() {
 		return NRF_ERROR_INVALID_STATE;
 	}
 
+	//! get the data length of the value (encrypted)
 	uint16_t valueLength = getGattValueLength();
-	uint8_t* valueAddress = getGattValuePtr();
+	uint8_t* valueGattAddress = getGattValuePtr();
 
 	ble_gatts_hvx_params_t hvx_params;
 	uint16_t len = valueLength;
@@ -235,7 +243,7 @@ uint32_t CharacteristicBase::notify() {
 	hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
 	hvx_params.offset = 0;
 	hvx_params.p_len = &len;
-	hvx_params.p_data = valueAddress;
+	hvx_params.p_data = valueGattAddress;
 
 	//	BLE_CALL(sd_ble_gatts_hvx, (_service->getStack()->getConnectionHandle(), &hvx_params));
 	uint32_t err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
