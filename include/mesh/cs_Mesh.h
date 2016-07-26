@@ -26,16 +26,6 @@ extern "C" {
 
 //! values are updated MESH_UPDATE_FREQUENCY times per second
 #define MESH_UPDATE_FREQUENCY 10
-//! number of channels used in the mesh
-#define MESH_NUM_OF_CHANNELS 2
-//! time given for boot up (every first message received on each channel
-//! will be ignored during boot up)
-#define BOOT_TIME 2000 // 2 seconds
-
-//#define MESH_ACCESS_ADDR 0xA541A68E
-#define MESH_ACCESS_ADDR 0xA641A69E
-#define MESH_INTERVAL_MIN_MS 100
-#define MESH_CHANNEL 38
 #define MESH_CLOCK_SOURCE (CLOCK_SOURCE)
 
 
@@ -50,7 +40,7 @@ private:
 
 	bool started;
 
-	bool                     _first[MESH_NUM_OF_CHANNELS];
+	bool                     _first[MESH_NUM_HANDLES];
 	uint32_t                 _mesh_start_time = 0;
 
 	//! constructor is hidden from the user

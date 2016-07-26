@@ -118,7 +118,7 @@ void Mesh::init() {
 	error_code = rbc_mesh_init(init_params);
 	APP_ERROR_CHECK(error_code);
 
-	for (int i = 0; i < MESH_NUM_OF_CHANNELS; ++i) {
+	for (int i = 0; i < MESH_NUM_HANDLES; ++i) {
 		error_code = rbc_mesh_value_enable(i+1);
 		APP_ERROR_CHECK(error_code);
 		_first[i] = true;
@@ -189,7 +189,7 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	}
 #endif
 
-	if (evt->value_handle > MESH_NUM_OF_CHANNELS) {
+	if (evt->value_handle > MESH_NUM_HANDLES) {
 //	if (evt->value_handle != 1 && evt->value_handle != 2) {
 //	if (evt->value_handle == 1 || evt->value_handle > 4) {
 		rbc_mesh_value_disable(evt->value_handle);
@@ -229,7 +229,7 @@ void Mesh::checkForMessages() {
 			//! time limit after boot up. This to prevent reading old command messages after a
 			//! reboot
 			uint32_t ts = RTC::now() - _mesh_start_time;
-			if (ts < BOOT_TIME) {
+			if (ts < MESH_BOOT_TIME) {
 #ifdef PRINT_MESH_VERBOSE
 				LOGi("t: %d: ch: %d, skipping message within boot-up time!", ts, evt.value_handle);
 #endif
