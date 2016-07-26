@@ -929,6 +929,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //		_log(INFO, "address: " );
 //		BLEutil::printArray(p_ble_evt->evt.gap_evt.params.connected.peer_addr.addr, BLE_GAP_ADDR_LEN);
 		on_connected(p_ble_evt);
+		EventDispatcher::getInstance().dispatch(EVT_BLE_CONNECT);
 		break;
 
 	case BLE_EVT_USER_MEM_REQUEST: {
@@ -950,6 +951,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	case BLE_GAP_EVT_DISCONNECTED:
 		on_disconnected(p_ble_evt);
+		EventDispatcher::getInstance().dispatch(EVT_BLE_DISCONNECT);
 		break;
 
 	case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:

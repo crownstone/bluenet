@@ -49,11 +49,12 @@ When encryption is enabled the following changes:
 
 #### Writing to characteristics
 
-After connecting, you first have to read the [session key](#session_nonce). This session key is used to authenticate any commands that are written and is only valid during this connection.
+After connecting, you first have to read the [session nonce](#session_nonce). This session nonce has two purposes. It is used to authenticate any commands that are written (as a checksum of sorts) and secondly it forms part of the Nonce used for encryption.
+The session nonce is only valid during the connection.
+
+The session nonce is [ECB encrypted](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) with the Guest key. To verify you have read and decrypted succesfully, check if the validation key is equal to **0xcafebabe**.
 
 We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29) method to encrypt everything that is written to- and read from characteristics. For this you need to generate an 8 byte number called a **nonce**. The first 3 bytes of the nonce are sent with each packet, we call this the packet nonce. The last 5 bytes of the nonce are called the [session nonce](#session_nonce), which should be read after connecting.
-
-The Session key in the encrypted payload is used to verify that the message has been decrypted successfully.
 
 ##### Encrypted Packet
 
@@ -71,11 +72,14 @@ Encrypted Payload | Encrypted Payload | N*16 | The encrypted payload of N blocks
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Session Key | 4 | First 4 bytes of session nonce, obtained [here](#session_key). Used for verify of the decrypted content.
+uint 8 | Validation Key | 4 | Used for verify of the decrypted content. When using CTR encrypted
 byte array | payload |  | Whatever data would have been sent if encryption was disabled.
 byte array | padding |  | Zero-padding so that the whole packet is of size N*16 bytes
 
+#### Receiving scan response packages
 
+The [scan response service data](#scan_response_servicedata_packet) packet will be encrypted using the [ECB method](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
+To verify you have decrypted the message successfully, compare the Crownstone ID against the one you know it should have.
 
 # Advertisements and scan response
 When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
@@ -152,7 +156,7 @@ Config Control | 24f00004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_
 Config Read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting | x |
 State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable | x | x |
 State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable | x | x |
-<a name="session_key"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. | .. | .. | ..
+<a name="session_nonce"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. |  |  | x
 
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
 The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command

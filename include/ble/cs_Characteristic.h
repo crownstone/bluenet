@@ -497,10 +497,11 @@ protected:
 
 		uint8_t accessLevel = 0;
 
-		// todo ENCRYPTION: decrypt here. getValuePtr points to the memory address
+		// todo ENCRYPTION: decrypt here. getGattValuePtr points to the memory address
 		//   where the encrypted value is
 		//   then write the decrypted value to "another" memory address and return
 		//   that with getValue()
+		// getValuePtr is the size of the value, like an int or string. A Buffer is needed for decryption.
 		if (_status.aesEncrypted) {
 			LOGi("decrypt ...");
 			memcpy(getValuePtr(), getGattValuePtr(), len);

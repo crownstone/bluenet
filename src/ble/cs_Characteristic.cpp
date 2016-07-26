@@ -204,7 +204,9 @@ uint32_t CharacteristicBase::updateValue() {
 
 	// ENCRYPTION HERE
 	if (_status.aesEncrypted) {
-		LOGi("encrypt ...")
+		LOGi("encrypt ..."); // GATT is public facing, getValue is internal
+		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
+		// the valueGattAddress can be used as buffer for encryption
 		memcpy(valueGattAddress, getValuePtr(), valueLength);
 	}
 

@@ -10,7 +10,8 @@
 #include <structs/cs_EncryptedPackage.h>
 #include <storage/cs_Settings.h>
 #include <drivers/cs_RNG.h>
-
+#include <drivers/cs_Serial.h>
+#include <events/cs_EventDispatcher.h>
 
 
 /**
@@ -26,7 +27,30 @@ EncryptedPackage::~EncryptedPackage() {
  */
 void EncryptedPackage::init() {
 	_block = new nrf_ecb_hal_data_t __aligned(4);
+	_sessionNonce = new uint8_t[5];
+	_initialized = true;
+	EventDispatcher::getInstance().addListener(this);
 }
+
+/**
+ * make sure we create a new nonce for each connection
+ */
+void EncryptedPackage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch (evt) {
+	case EVT_BLE_CONNECT:
+		_generateSessionNonce();
+		break;
+	}
+}
+
+/**
+ * Allow characteristics to get the sessionNonce. Length of the sessionNonce is 5 bytes.
+ */
+uint8_t* EncryptedPackage::getSessionNonce() {
+	return _sessionNonce;
+}
+
+
 
 /**
  * This method does not use the AES CTR method but straight ECB.
@@ -35,7 +59,7 @@ void EncryptedPackage::init() {
 void EncryptedPackage::encryptAdvertisement(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength) {
 	// must be 1 block.
 	if (dataLength != SOC_ECB_CLEARTEXT_LENGTH || targetLength != SOC_ECB_CIPHERTEXT_LENGTH) {
-		// throw error?
+		LOGe("The length of the data and/or target buffers is not 16 bytes. Cannot encrypt advertisement.");
 		return;
 	}
 
@@ -54,7 +78,7 @@ void EncryptedPackage::encryptAdvertisement(uint8_t* data, uint8_t dataLength, u
 		memcpy(target, _block->ciphertext, SOC_ECB_CIPHERTEXT_LENGTH);
 	}
 	else {
-		// throw error?
+		LOGe("Guest key is not set. Cannot encrypt advertisement.");
 	}
 
 }
@@ -70,16 +94,12 @@ void EncryptedPackage::encrypt(uint8_t* data, uint16_t dataLength, encrypted_pac
 		return;
 
 	// generate the nonce and copy it into the class block
-	_generateNonce(target.nonce);
+	_generateNewNonce(target.nonce);
 
-	// Set the nonce to zero to ensure it is consistent.
-	// Since we only have 1 uint8_t as counter doing this once is enough.
-	memset(_block->cleartext, 0x00, SOC_ECB_CLEARTEXT_LENGTH);
-	// half the text is nonce, the other half is a counter
-	memcpy(_block->cleartext, target.nonce, SOC_ECB_CLEARTEXT_LENGTH / 2);
+	_createIV(_block->cleartext, target.nonce);
 
 	if (_performAES128CTR(data, dataLength, target.buffer, target.bufferLength) == false) {
-		// throw error?
+		LOGe("Error while encrypting");
 	}
 }
 
@@ -89,15 +109,13 @@ void EncryptedPackage::decrypt(encrypted_package_t& data, uint8_t* target, uint1
 		return;
 
 	if (data.bufferLength == targetLength) {
-		// Set the nonce to zero to ensure it is consistent.
-		// Since we only have 1 uint8_t as counter doing this once is enough.
-		memset(_block->cleartext, 0x00, SOC_ECB_CLEARTEXT_LENGTH);
-		// half the text is nonce, the other half is a counter
-		memcpy(_block->cleartext, data.nonce, SOC_ECB_CLEARTEXT_LENGTH / 2);
+		_createIV(_block->cleartext, data.nonce);
 
 		if (_performAES128CTR(data.buffer, data.bufferLength, target, targetLength) == false) {
-			// throw error?
+			LOGe("Error while decrypting.");
 		}
+
+		//TODO: validate
 	}
 }
 
@@ -154,10 +172,14 @@ bool EncryptedPackage::_performAES128CTR(uint8_t* input, uint16_t inputLength, u
 	return true;
 }
 
+
+/**
+ * Check if the key that we need is set in the memory and if so, set it into the encryption block
+ */
 bool EncryptedPackage::_checkAndSetKey(uint8_t userLevel) {
 	// check if the userLevel is set.
 	if (userLevel == NOT_SET) {
-		// throw error/log
+		LOGe("The userLevel is not set in the struct.");
 		return false;
 	}
 
@@ -173,7 +195,7 @@ bool EncryptedPackage::_checkAndSetKey(uint8_t userLevel) {
 		keyConfigType = CONFIG_KEY_GUEST;
 		break;
 	default:
-		// throw error/log
+		LOGe("Provided userLevel does not exist (level is not admin, user or guest)");
 		return false;
 	}
 
@@ -182,14 +204,45 @@ bool EncryptedPackage::_checkAndSetKey(uint8_t userLevel) {
 	return true;
 }
 
-void EncryptedPackage::_generateNonce(uint8_t* target) {
-	RNG::fillBuffer(target, SOC_ECB_CLEARTEXT_LENGTH / 2);
+/**
+ * This method will fill the buffer with 3 random bytes. These are included in the message
+ */
+void EncryptedPackage::_generateNewNonce(uint8_t* target) {
+	RNG::fillBuffer(target, PACKET_NONCE_LENGTH);
+}
+
+/**
+ * This method will fill the buffer with 5 random bytes. This is done on connect and is only valid once.
+ */
+void EncryptedPackage::_generateSessionNonce() {
+	if (_initialized) {
+		RNG::fillBuffer(_sessionNonce, SESSION_NONCE_LENGTH);
+	}
+}
+
+/**
+ * The Nonce of the CTR method is made up of 8 random bytes:
+ * 	- 3 from the packet nonce
+ * 	- 5 from the session nonce
+ * We use the term IV (initialization vector) for this because we have enough Nonce terms floating around.
+ */
+void EncryptedPackage::_createIV(uint8_t* target, uint8_t* nonce) {
+	// Set the nonce to zero to ensure it is consistent.
+	// Since we only have 1 uint8_t as counter doing this once is enough.
+	memset(target, 0x00, SOC_ECB_CLEARTEXT_LENGTH);
+	// half the text is nonce, the other half is a counter
+	memcpy(target, nonce, PACKET_NONCE_LENGTH);
+	// copy the session nonce over into the target
+	memcpy(target + PACKET_NONCE_LENGTH, _sessionNonce, SESSION_NONCE_LENGTH);
 }
 
 
+/**
+ * Verify if the block lengh is correct
+ */
 bool EncryptedPackage::_validateBlockLength(uint16_t length) {
 	if (length % SOC_ECB_CLEARTEXT_LENGTH != 0 || length == 0) {
-		// throw or print error?
+		LOGe("Length of block does not match the expected length (16 Bytes).");
 		return false;
 	}
 	return true;
