@@ -81,7 +81,7 @@
 #define CS_ADC_PPI_CHANNEL                       7
 
 #if CONTINUOUS_POWER_SAMPLER == 1
-#define CS_ADC_SAMPLE_RATE                       100
+#define CS_ADC_SAMPLE_RATE                       101
 #else
 #define CS_ADC_SAMPLE_RATE                       3000 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
 #endif

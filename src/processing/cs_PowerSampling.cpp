@@ -133,6 +133,8 @@ void PowerSampling::powerSampleReadBuffer() {
 	//! If one of the buffers is full, this means they're not aligned anymore: clear all.
 	if (_currentSampleCircularBuf.full() || _voltageSampleCircularBuf.full()) {
 		startSampling();
+		Timer::getInstance().start(_staticPowerSamplingReadTimer, MS_TO_TICKS(_contSamplingInterval), this);
+		return;
 	}
 
 	uint16_t numCurentSamples = _currentSampleCircularBuf.size();
@@ -166,21 +168,21 @@ void PowerSampling::powerSampleReadBuffer() {
 //			_lastPowerSample = power;
 			_powerSamplesCount++;
 
-		}
 
-		if (_powerSamplesCount >= POWER_SAMPLE_MESH_NUM_SAMPLES) {
+			if (_powerSamplesCount >= POWER_SAMPLE_MESH_NUM_SAMPLES) {
 #if MESHING == 1
-			if (!nb_full()) {
-				MeshControl::getInstance().sendPowerSamplesMessage(_powerSamplesMeshMsg);
-				_powerSamplesCount = 0;
-			}
+				if (!nb_full()) {
+					MeshControl::getInstance().sendPowerSamplesMessage(_powerSamplesMeshMsg);
+					_powerSamplesCount = 0;
+				}
 #else
 
 #ifdef PRINT_POWERSAMPLING_VERBOSE
-			LOGd("Send message of %u samples", _powerSamplesCount);
+				LOGd("Send message of %u samples", _powerSamplesCount);
 #endif
-			_powerSamplesCount = 0;
+				_powerSamplesCount = 0;
 #endif
+			}
 		}
 
 	}
