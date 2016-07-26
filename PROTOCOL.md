@@ -1,4 +1,4 @@
-# Bluenet protocol v0.4.2
+# Bluenet protocol v0.5.0-alpha
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -17,8 +17,6 @@ Bluetooth bonding in Bluetooth V4 creates a secure link between user and device.
 
 This is on the roadmap for future releases and will work with the currently available Crownstones but at the moment Apple Homekit is not supported on Android.
 
-In order to be able to quickly allow other people access to your Crownstones
-
 #### Setup mode
 When a Crownstone is new or factory reset, it will go into setup mode.
 
@@ -35,6 +33,7 @@ The protocol here is as follows:
     - Phone gives Crownstone [the Admin key](#admin_key)
     - Phone gives Crownstone [the User key](#user_key)
     - Phone gives Crownstone [the Guest key](#guest_key)
+    - Phone gives Crownstone [the Mesh Access Address](#mesh_access_address)
     - Phone gives Crownstone [its iBeacon UUID](#ibeacon_uuid)
     - Phone gives Crownstone [its iBeacon Major](#ibeacon_major)
     - Phone gives Crownstone [its iBeacon Minor](#ibeacon_minor)
@@ -52,7 +51,9 @@ When encryption is enabled the following changes:
 
 After connecting, you first have to read the [session key](#session_nonce). This session key is used to authenticate any commands that are written and is only valid during this connection.
 
-We use the AES 128 [CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29) method to encrypt everything that is written to- and read from characteristics. For this you need to generate an 8 byte number called a **nonce**. The first 3 bytes of the nonce are sent with each packet, we call this the packet nonce. The last 5 bytes of the nonce are called the [session nonce](#session_nonce), which should be read after connecting.
+We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29) method to encrypt everything that is written to- and read from characteristics. For this you need to generate an 8 byte number called a **nonce**. The first 3 bytes of the nonce are sent with each packet, we call this the packet nonce. The last 5 bytes of the nonce are called the [session nonce](#session_nonce), which should be read after connecting.
+
+The Session key in the encrypted payload is used to verify that the message has been decrypted successfully.
 
 ##### Encrypted Packet
 
@@ -70,9 +71,9 @@ Encrypted Payload | Encrypted Payload | N*16 | The encrypted payload of N blocks
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Session Key | 4 | First 4 bytes of session nonce, obtained [here](#session_key).
+uint 8 | Session Key | 4 | First 4 bytes of session nonce, obtained [here](#session_key). Used for verify of the decrypted content.
 byte array | payload |  | Whatever data would have been sent if encryption was disabled.
-byte array | padding |  | Padding so that the whole packet is of size N*16 bytes, according to [PKCS7](https://en.wikipedia.org/wiki/Padding_(cryptography)).
+byte array | padding |  | Zero-padding so that the whole packet is of size N*16 bytes
 
 
 
@@ -151,7 +152,7 @@ Config Control | 24f00004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_
 Config Read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting | x |
 State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable | x | x |
 State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable | x | x |
-<a name="session_nonce"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. | .. | .. | ..
+<a name="session_key"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. | .. | .. | ..
 
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
 The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command
@@ -348,6 +349,7 @@ Type nr | Type name | Payload type | Description
 32 | Power sample continuous interval | ... | TBD
 33 | Power sample continuous number samples | ... | TBD
 34 | <a name="crownstone_identifier"></a>Crownstone Identifier | uint 16 | Crownstone identifier used in advertisement package
+35 | <a name="mesh_access_address"></a>Mesh access address | uint 32 | Access address for messages sent over the mesh
 35 | <a name="admin_key"></a>Admin encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions
 36 | <a name="user_key"></a>Member encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions
 37 | <a name="guest_key"></a>Guest encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt guest access functions
