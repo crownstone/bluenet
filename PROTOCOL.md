@@ -31,13 +31,13 @@ The protocol here is as follows:
 - Phone is close and bonds with the Crownstone
 - Phone reads the Crownstone [MAC address](#setup_service) (required for iOS)
 - Phone starts setting up the Crownstone using the [Config Control](#setup_service) Characteristic
-    - Phone gives Crownstone [it's identifier](#crownstone_identifier)
+    - Phone gives Crownstone [its identifier](#crownstone_identifier)
     - Phone gives Crownstone [the Admin key](#admin_key)
     - Phone gives Crownstone [the User key](#user_key)
     - Phone gives Crownstone [the Guest key](#guest_key)
-    - Phone gives Crownstone [it's iBeacon UUID](#ibeacon_uuid)
-    - Phone gives Crownstone [it's iBeacon Major](#ibeacon_major)
-    - Phone gives Crownstone [it's iBeacon Minor](#ibeacon_minor)
+    - Phone gives Crownstone [its iBeacon UUID](#ibeacon_uuid)
+    - Phone gives Crownstone [its iBeacon Major](#ibeacon_major)
+    - Phone gives Crownstone [its iBeacon Minor](#ibeacon_minor)
 - Phone commands Crownstone [to leave setup mode](#validate_setup)
 
 ### Using Encryption
@@ -50,48 +50,30 @@ When encryption is enabled the following changes:
 
 #### Writing to characteristics
 
-When you want to write to a characteristic you first need to request a [session key](#session_key). This session key is used to authenticate any commands that are written and is only valid during this connection.
+After connecting, you first have to read the [session key](#session_nonce). This session key is used to authenticate any commands that are written and is only valid during this connection.
 
-We use the AES 128 CTR method to encrypt everything that is written to- and read from characteristics. For this you need to generate an 8 byte random number called a **Nonce**. You can then start encrypting your package.
-
-[Information on how to encrypt according to AES 128 CTR is found here](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29).
-
-If your data is a different size than an N number of blocks (16 Bytes per block), make sure you apply padding according to [PKCS7](https://en.wikipedia.org/wiki/Padding_(cryptography)).
+We use the AES 128 [CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29) method to encrypt everything that is written to- and read from characteristics. For this you need to generate an 8 byte number called a **nonce**. The first 3 bytes of the nonce are sent with each packet, we call this the packet nonce. The last 5 bytes of the nonce are called the [session nonce](#session_nonce), which should be read after connecting.
 
 ##### Encrypted Packet
 
-< BART WILL CREATE IMAGE HERE FOR ENCRYPTION >
-
-| Nonce - uint8 x 8 | userLevel - uint8 | Encrypted Write Payload - nBlocks * 16 |
-
-</ BART WILL CREATE IMAGE HERE FOR ENCRYPTION >
+![Encrypted packet](docs/diagrams/encrypted-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Nonce | 8 | Nonce used in the encryption of this message.
-uint 8 | User Level | 1 | 0: Admin, 1: User, 2: Guest
-Encrypted Payload | Encrypted Payload | N * 16 | The encrypted payload
+uint 8 | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of this message.
+uint 8 | User level | 1 | 0: Admin, 1: User, 2: Guest
+Encrypted Payload | Encrypted Payload | N*16 | The encrypted payload of N blocks.
 
 ##### Encrypted payload
 
-< BART WILL CREATE IMAGE HERE FOR ENCRYPTION >
-
-| <encr> SessionKey - uint32 | original packet </encr> |
-
-</ BART WILL CREATE IMAGE HERE FOR ENCRYPTION >
+![Encrypted payload](docs/diagrams/encrypted-payload.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 32 | Session Key | 1 | Key obtained from [here](#session_key) to authenticate the session
-Original Packet | Original Packet |  | Whatever data would have been sent if encryption was disabled.
+uint 8 | Session Key | 4 | First 4 bytes of session nonce, obtained [here](#session_key).
+byte array | payload |  | Whatever data would have been sent if encryption was disabled.
+byte array | padding |  | Padding so that the whole packet is of size N*16 bytes, according to [PKCS7](https://en.wikipedia.org/wiki/Padding_(cryptography)).
 
-#### Reading from characteristics
-
-An encrypted packet from the characteristics has the same structure as the packet above. The only difference is that the session key is used as a decryption check.
-If the data you expect to read is only one byte, the first byte of the decrypted packet is your relevant data, the rest will be padded according to [PKCS7](https://en.wikipedia.org/wiki/Padding_(cryptography)).
-
-######If you decrypt, check if the session key matches 0xCAFEBABE to ensure it was successful
-0xCAFEBABE in decimal is 3405691582
 
 
 # Advertisements and scan response
@@ -169,7 +151,7 @@ Config Control | 24f00004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_
 Config Read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting | x |
 State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable | x | x |
 State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable | x | x |
-<a name="session_key"></a>Session Key | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 32 | Retrieve the session key | .. | .. | ..
+<a name="session_nonce"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. | .. | .. | ..
 
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
 The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command
@@ -423,6 +405,7 @@ OpCode | Name | Description
 2 | Notify | Enable/Disable notifications for state variable. Every time the state variable is updated, the new value is written to the State Read Characteristic. To use effectively, enable GATT Notifications on the State Read Characteristic. Length has to be 1, and payload is 0 = disable, other = enable
 
 Note: On the State Read Characteristic, the OpCode is also set to distinguish between a one time read, and a continuous notification. In return, the length and payload will have actual data depending on the type.
+
 
 ### <a name="power_curve_packet"></a>Power curve packet, TBD
 
