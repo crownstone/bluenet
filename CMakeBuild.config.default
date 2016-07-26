@@ -160,7 +160,7 @@ MAX_ENV_TEMP=10
 MAX_CHIP_TEMP=80
 
 # Time (ms) to wait with during booting
-BOOT_DELAY=3000
+BOOT_DELAY=400
 
 # Durations for the scanner in ms
 SCAN_DURATION=2000
