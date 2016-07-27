@@ -1,4 +1,4 @@
-# Bluenet protocol v0.4.2
+# Bluenet protocol v0.5.0-alpha
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -17,8 +17,6 @@ Bluetooth bonding in Bluetooth V4 creates a secure link between user and device.
 
 This is on the roadmap for future releases and will work with the currently available Crownstones but at the moment Apple Homekit is not supported on Android.
 
-In order to be able to quickly allow other people access to your Crownstones
-
 #### Setup mode
 When a Crownstone is new or factory reset, it will go into setup mode.
 
@@ -31,13 +29,14 @@ The protocol here is as follows:
 - Phone is close and bonds with the Crownstone
 - Phone reads the Crownstone [MAC address](#setup_service) (required for iOS)
 - Phone starts setting up the Crownstone using the [Config Control](#setup_service) Characteristic
-    - Phone gives Crownstone [it's identifier](#crownstone_identifier)
+    - Phone gives Crownstone [its identifier](#crownstone_identifier)
     - Phone gives Crownstone [the Admin key](#admin_key)
     - Phone gives Crownstone [the User key](#user_key)
     - Phone gives Crownstone [the Guest key](#guest_key)
-    - Phone gives Crownstone [it's iBeacon UUID](#ibeacon_uuid)
-    - Phone gives Crownstone [it's iBeacon Major](#ibeacon_major)
-    - Phone gives Crownstone [it's iBeacon Minor](#ibeacon_minor)
+    - Phone gives Crownstone [the Mesh Access Address](#mesh_access_address)
+    - Phone gives Crownstone [its iBeacon UUID](#ibeacon_uuid)
+    - Phone gives Crownstone [its iBeacon Major](#ibeacon_major)
+    - Phone gives Crownstone [its iBeacon Minor](#ibeacon_minor)
 - Phone commands Crownstone [to leave setup mode](#validate_setup)
 
 ### Using Encryption
@@ -50,49 +49,37 @@ When encryption is enabled the following changes:
 
 #### Writing to characteristics
 
-When you want to write to a characteristic you first need to request a [session key](#session_key). This session key is used to authenticate any commands that are written and is only valid during this connection.
+After connecting, you first have to read the [session nonce](#session_nonce). This session nonce has two purposes. It is used to authenticate any commands that are written (as a checksum of sorts) and secondly it forms part of the Nonce used for encryption.
+The session nonce is only valid during the connection.
 
-We use the AES 128 CTR method to encrypt everything that is written to- and read from characteristics. For this you need to generate an 8 byte random number called a **Nonce**. You can then start encrypting your package.
+The session nonce is [ECB encrypted](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) with the Guest key. To verify you have read and decrypted succesfully, check if the validation key is equal to **0xcafebabe**.
 
-[Information on how to encrypt according to AES 128 CTR is found here](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29).
-
-If your data is a different size than an N number of blocks (16 Bytes per block), make sure you apply padding according to [PKCS7](https://en.wikipedia.org/wiki/Padding_(cryptography)).
+We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29) method to encrypt everything that is written to- and read from characteristics. For this you need to generate an 8 byte number called a **nonce**. The first 3 bytes of the nonce are sent with each packet, we call this the packet nonce. The last 5 bytes of the nonce are called the [session nonce](#session_nonce), which should be read after connecting.
 
 ##### Encrypted Packet
 
-< BART WILL CREATE IMAGE HERE FOR ENCRYPTION >
-
-| Nonce - uint8 x 8 | userLevel - uint8 | Encrypted Write Payload - nBlocks * 16 |
-
-</ BART WILL CREATE IMAGE HERE FOR ENCRYPTION >
+![Encrypted packet](docs/diagrams/encrypted-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Nonce | 8 | Nonce used in the encryption of this message.
-uint 8 | User Level | 1 | 0: Admin, 1: User, 2: Guest
-Encrypted Payload | Encrypted Payload | N * 16 | The encrypted payload
+uint 8 | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of this message.
+uint 8 | User level | 1 | 0: Admin, 1: User, 2: Guest
+Encrypted Payload | Encrypted Payload | N*16 | The encrypted payload of N blocks.
 
 ##### Encrypted payload
 
-< BART WILL CREATE IMAGE HERE FOR ENCRYPTION >
-
-| <encr> SessionKey - uint32 | original packet </encr> |
-
-</ BART WILL CREATE IMAGE HERE FOR ENCRYPTION >
+![Encrypted payload](docs/diagrams/encrypted-payload.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 32 | Session Key | 1 | Key obtained from [here](#session_key) to authenticate the session
-Original Packet | Original Packet |  | Whatever data would have been sent if encryption was disabled.
+uint 8 | Validation Key | 4 | Used for verify of the decrypted content. When using CTR encrypted
+byte array | payload |  | Whatever data would have been sent if encryption was disabled.
+byte array | padding |  | Zero-padding so that the whole packet is of size N*16 bytes
 
-#### Reading from characteristics
+#### Receiving scan response packages
 
-An encrypted packet from the characteristics has the same structure as the packet above. The only difference is that the session key is used as a decryption check.
-If the data you expect to read is only one byte, the first byte of the decrypted packet is your relevant data, the rest will be padded according to [PKCS7](https://en.wikipedia.org/wiki/Padding_(cryptography)).
-
-######If you decrypt, check if the session key matches 0xCAFEBABE to ensure it was successful
-0xCAFEBABE in decimal is 3405691582
-
+The [scan response service data](#scan_response_servicedata_packet) packet will be encrypted using the [ECB method](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
+To verify you have decrypted the message successfully, compare the Crownstone ID against the one you know it should have.
 
 # Advertisements and scan response
 When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
@@ -169,7 +156,7 @@ Config Control | 24f00004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_
 Config Read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting | x |
 State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable | x | x |
 State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable | x | x |
-<a name="session_key"></a>Session Key | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 32 | Retrieve the session key | .. | .. | ..
+<a name="session_nonce"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. |  |  | x
 
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
 The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command
@@ -366,6 +353,7 @@ Type nr | Type name | Payload type | Description
 32 | Power sample continuous interval | ... | TBD
 33 | Power sample continuous number samples | ... | TBD
 34 | <a name="crownstone_identifier"></a>Crownstone Identifier | uint 16 | Crownstone identifier used in advertisement package
+35 | <a name="mesh_access_address"></a>Mesh access address | uint 32 | Access address for messages sent over the mesh
 35 | <a name="admin_key"></a>Admin encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions
 36 | <a name="user_key"></a>Member encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions
 37 | <a name="guest_key"></a>Guest encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt guest access functions
@@ -423,6 +411,7 @@ OpCode | Name | Description
 2 | Notify | Enable/Disable notifications for state variable. Every time the state variable is updated, the new value is written to the State Read Characteristic. To use effectively, enable GATT Notifications on the State Read Characteristic. Length has to be 1, and payload is 0 = disable, other = enable
 
 Note: On the State Read Characteristic, the OpCode is also set to distinguish between a one time read, and a continuous notification. In return, the length and payload will have actual data depending on the type.
+
 
 ### <a name="power_curve_packet"></a>Power curve packet, TBD
 

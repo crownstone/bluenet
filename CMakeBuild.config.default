@@ -141,6 +141,17 @@ TX_POWER=4
 # When meshing: must be >= timeslot period used by rbc_mesh (atm 100ms)
 ADVERTISEMENT_INTERVAL=160
 
+## Mesh settings ##
+MESH_NUM_HANDLES=10
+# Don't process first mesh messages after boot for some time (ms)
+MESH_BOOT_TIME=2000
+# Number to filter out messages that are not meant for the mesh
+MESH_ACCESS_ADDR=0xA641A69E
+# Minimum interval in ms for broadcasting values of handles (has to be smaller or equal to advertisement interval)
+MESH_INTERVAL_MIN_MS=100
+# Bluetooth channel to use for the mesh (37, 38, 39)
+MESH_CHANNEL=38
+
 # Minimal and maximal environment temperatures in degrees celsius
 MIN_ENV_TEMP=2
 MAX_ENV_TEMP=10
@@ -149,7 +160,7 @@ MAX_ENV_TEMP=10
 MAX_CHIP_TEMP=80
 
 # Time (ms) to wait with during booting
-BOOT_DELAY=3000
+BOOT_DELAY=400
 
 # Durations for the scanner in ms
 SCAN_DURATION=2000
@@ -285,7 +296,7 @@ APPLICATION_LENGTH=0x23000
 ATTR_TABLE_SIZE=0xA00
 RAM_R1_BASE=0x20002C00
 RAM_APPLICATION_AMOUNT=0x5400
-HEAP_SIZE=6000
+HEAP_SIZE=5900
 
 
 
