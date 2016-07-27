@@ -71,7 +71,6 @@ bool EncryptionHandler::encryptAdvertisement(uint8_t* data, uint8_t dataLength, 
 	return true;
 }
 
-
 /**
  * The mesh only uses cafebabe as a validation and the admin key to encrypt. Other than that, its the same.
  */
@@ -122,7 +121,7 @@ bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* tar
  * This method decrypts the package and places the decrypted blocks, in full, in the buffer. After this
  * the result will be validated and the target will be populated.
  */
-bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, bool useSessionNonce) {
+bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionUserLevel& levelOfPackage, bool useSessionNonce) {
 	// check if the size of the encrypted data packet makes sense: min 1 block and overhead
 	if (encryptedDataPacketLength < SOC_ECB_CIPHERTEXT_LENGTH + _overhead) {
 		LOGe("Encryted data packet is smaller than the minimum possible size of a block and overhead (20 bytes).");
@@ -132,6 +131,16 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
 	// check if the userLevel has is correct
 	if (_checkAndSetKey(encryptedDataPacket[PACKET_NONCE_LENGTH]) == false)
 		return false;
+
+	// tell the reference the access level of the packet
+	switch (encryptedDataPacket[PACKET_NONCE_LENGTH]) {
+		case 0:
+			levelOfPackage = ADMIN; break;
+		case 1:
+			levelOfPackage = USER; break;
+		case 2:
+			levelOfPackage = GUEST; break;
+	}
 
 	// the actual encrypted part is after the overhead
 	uint16_t sourceNetLength = encryptedDataPacketLength - _overhead;

@@ -208,10 +208,19 @@ uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 		LOGi("encrypt ..."); // GATT is public facing, getValue is internal
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
-		EncryptionHandler::getInstance().encrypt(getValuePtr(), valueLength, valueGattAddress, getGattValueLength(), _minAccessLevel, useSessionNonce);
+		bool success = EncryptionHandler::getInstance().encrypt(
+			getValuePtr(),
+			valueLength,
+			valueGattAddress,
+			getGattValueLength(),
+			_minAccessLevel,
+			useSessionNonce
+		);
 
-
-		//memcpy(valueGattAddress, getValuePtr(), valueLength);
+		if (!success) {
+			_service->getStack()->disconnectActive();
+			return NRF_SUCCESS;
+		}
 	}
 	else {
 		//! set the data length of the gatt value (encrypted)

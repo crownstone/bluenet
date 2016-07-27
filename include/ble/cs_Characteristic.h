@@ -32,7 +32,6 @@
 namespace BLEpp {
 
 class Service;
-//class Nrf51822BluetoothStack;
 
 /** CharacteristicInit collects fields required to define a BLE characteristic
  */
@@ -508,28 +507,27 @@ protected:
 
 		setGattValueLength(len);
 
-		uint8_t accessLevel = 0;
+		EncryptionUserLevel accessLevel = NOT_SET;
 
-		// todo ENCRYPTION: decrypt here. getGattValuePtr points to the memory address
-		//   where the encrypted value is
-		//   then write the decrypted value to "another" memory address and return
-		//   that with getValue()
-		// getValuePtr is the size of the value, like an int or string. A Buffer is needed for decryption.
+		// when using encryption, the packet needs to be decrypted
 		if (_status.aesEncrypted) {
 			LOGi("decrypt ...");
 
-
-			EncryptionHandler::getInstance().decrypt(
+			bool success = EncryptionHandler::getInstance().decrypt(
 				getGattValuePtr(),
 				getGattValueLength(),
 				getValuePtr(),
-				getValueLength()
+				getValueLength(),
+				accessLevel
 			);
 
-			//memcpy(getValuePtr(), getGattValuePtr(), len);
+			// disconnect on failure
+			if (!success) {
+				//TODO: disconnect
+				return;
+			}
 		}
 		else {
-			// todo ENCRYPTION: set data length of the decrypted value
 			setValueLength(len);
 		}
 
@@ -539,6 +537,7 @@ protected:
 
 		_callbackOnWrite(accessLevel, getValue());
 	}
+
 
 	/** @inherit */
 	virtual bool configurePresentationFormat(ble_gatts_char_pf_t& presentation_format) {

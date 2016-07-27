@@ -446,6 +446,7 @@ public:
 
 	void setPinEncrypted(bool encrypted);
 	void setAesEncrypted(bool encrypted);
+	void disconnectActive();
 
 protected:
 
