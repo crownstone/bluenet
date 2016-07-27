@@ -131,6 +131,7 @@ void CrownstoneService::addMeshCharacteristic() {
 	_meshControlCharacteristic->setName(BLE_CHAR_MESH_CONTROL);
 	_meshControlCharacteristic->setWritable(true);
 	_meshControlCharacteristic->setValue(buffer);
+	_meshControlCharacteristic->setMinAccessLevel(ADMIN);
 	_meshControlCharacteristic->setMaxGattValueLength(size);
 	_meshControlCharacteristic->setValueLength(0);
 	_meshControlCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
@@ -158,6 +159,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setWritable(true);
 	_controlCharacteristic->setValue(buffer);
+	_controlCharacteristic->setMinAccessLevel(GUEST);
 	_controlCharacteristic->setMaxGattValueLength(size);
 	_controlCharacteristic->setValueLength(0);
 	_controlCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
@@ -196,6 +198,7 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	_configurationControlCharacteristic->setName(BLE_CHAR_CONFIG_CONTROL);
 	_configurationControlCharacteristic->setWritable(true);
 	_configurationControlCharacteristic->setValue(buffer);
+	_configurationControlCharacteristic->setMinAccessLevel(ADMIN);
 	_configurationControlCharacteristic->setMaxGattValueLength(size);
 	_configurationControlCharacteristic->setValueLength(0);
 	_configurationControlCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
@@ -268,6 +271,7 @@ void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, 
 	_configurationReadCharacteristic->setWritable(false);
 	_configurationReadCharacteristic->setNotifies(true);
 	_configurationReadCharacteristic->setValue(buffer);
+	_configurationReadCharacteristic->setMinAccessLevel(ADMIN);
 	_configurationReadCharacteristic->setMaxGattValueLength(size);
 	_configurationReadCharacteristic->setValueLength(0);
 }
@@ -280,6 +284,7 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 	_stateControlCharacteristic->setName(BLE_CHAR_STATE_CONTROL);
 	_stateControlCharacteristic->setWritable(true);
 	_stateControlCharacteristic->setValue(buffer);
+	_stateControlCharacteristic->setMinAccessLevel(USER);
 	_stateControlCharacteristic->setMaxGattValueLength(size);
 	_stateControlCharacteristic->setValueLength(0);
 	_stateControlCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
@@ -353,6 +358,7 @@ void CrownstoneService::addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t
 	_stateReadCharacteristic->setWritable(false);
 	_stateReadCharacteristic->setNotifies(true);
 	_stateReadCharacteristic->setValue(buffer);
+	_stateReadCharacteristic->setMinAccessLevel(USER);
 	_stateReadCharacteristic->setMaxGattValueLength(size);
 	_stateReadCharacteristic->setValueLength(0);
 }

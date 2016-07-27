@@ -23,6 +23,7 @@
 #include <util/cs_Utils.h>
 
 #include <structs/buffer/cs_EncryptionBuffer.h>
+#include <processing/cs_EncryptionHandler.h>
 
 /** General BLE name service
  *
@@ -100,6 +101,11 @@ protected:
 	Status                    _status;
 
 	buffer_ptr_t              _encryptionBuffer;
+
+	/** used for encryption. If the characteristic is being read, it will encrypt itself with the lowest
+	 * allowed userlevel key.
+	 */
+	EncryptionUserLevel _minAccessLevel = NOT_SET;
 
 	//! Unit
 //	uint16_t                  _unit;
@@ -275,7 +281,7 @@ public:
 	 *  If somebody is also listening to notifications for the characteristic
 	 *  notifications will be sent.
 	 */
-	uint32_t updateValue();
+	uint32_t updateValue(bool useSessionNonce = true);
 
 	/** Notify any listening party.
 	 *
@@ -338,6 +344,13 @@ public:
 	bool isAesEnabled() {
 		return _status.aesEncrypted;
 	}
+
+
+
+	void setMinAccessLevel(EncryptionUserLevel level) {
+		_minAccessLevel = level;
+	}
+
 
 	/** get the buffer used for encryption */
 	buffer_ptr_t& getEncryptionBuffer() {
@@ -504,11 +517,23 @@ protected:
 		// getValuePtr is the size of the value, like an int or string. A Buffer is needed for decryption.
 		if (_status.aesEncrypted) {
 			LOGi("decrypt ...");
-			memcpy(getValuePtr(), getGattValuePtr(), len);
+
+
+			EncryptionHandler::getInstance().decrypt(
+				getGattValuePtr(),
+				getGattValueLength(),
+				getValuePtr(),
+				getValueLength()
+			);
+
+			//memcpy(getValuePtr(), getGattValuePtr(), len);
+		}
+		else {
+			// todo ENCRYPTION: set data length of the decrypted value
+			setValueLength(len);
 		}
 
-		// todo ENCRYPTION: set data length of the decrypted value
-		setValueLength(len);
+
 
 		LOGd("%s: onWrite()", _name);
 
@@ -669,7 +694,6 @@ template<>
 class Characteristic<buffer_ptr_t> : public CharacteristicGeneric<buffer_ptr_t> {
 
 private:
-
 	/** maximum length for this characteristic in bytes
 	 *  In the case of aes encryption, this is the maximum number of bytes of the encrypted value
 	 */

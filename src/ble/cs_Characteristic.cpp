@@ -9,10 +9,9 @@
  */
 
 #include "ble/cs_Characteristic.h"
-
 #include <ble/cs_Softdevice.h>
-
 #include <storage/cs_Settings.h>
+
 
 using namespace BLEpp;
 
@@ -193,7 +192,7 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	ci.attr_md.write_perm = _writeperm;
 }
 
-uint32_t CharacteristicBase::updateValue() {
+uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 
 	//! get the data length of the value (unencrypted)
 	uint16_t valueLength = getValueLength();
@@ -202,16 +201,22 @@ uint32_t CharacteristicBase::updateValue() {
 	 */
 	uint8_t* valueGattAddress = getGattValuePtr();
 
+
+	//getGattValueLength();
 	// ENCRYPTION HERE
 	if (_status.aesEncrypted) {
 		LOGi("encrypt ..."); // GATT is public facing, getValue is internal
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
-		memcpy(valueGattAddress, getValuePtr(), valueLength);
-	}
+		EncryptionHandler::getInstance().encrypt(getValuePtr(), valueLength, valueGattAddress, getGattValueLength(), _minAccessLevel, useSessionNonce);
 
-	//! set the data length of the gatt value (encrypted)
-	setGattValueLength(valueLength);
+
+		//memcpy(valueGattAddress, getValuePtr(), valueLength);
+	}
+	else {
+		//! set the data length of the gatt value (encrypted)
+		setGattValueLength(valueLength);
+	}
 
 //	LOGi("[%s] valueLength: %d", _name, valueLength);
 //	LOGi("[%s] valueAddress: %p", _name, valueAddress);
