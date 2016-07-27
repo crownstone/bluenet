@@ -613,7 +613,7 @@ public:
 	/** @inherit */
 	uint16_t getGattValueLength() {
 		if (this->isAesEnabled()) {
-			return (1 + ((sizeof(T) - 1) / 16)) * 16 + 9; // ceil( sizeof(T) / 16 ) * 16 + 9
+			return (1 + ((sizeof(T) + 4 - 1) / 16)) * 16 + 4; // ceil( sizeof(T) + 4 / 16 ) * 16 + 4
 		} else {
 			return getValueLength();
 		}
@@ -649,7 +649,7 @@ public:
 	/** @inherit */
 	uint16_t getGattValueLength() {
 		if (this->isAesEnabled()) {
-			return (1 + ((MAX_STRING_LENGTH - 1) / 16)) * 16 + 9; // ceil( MAX_STRING_LENGTH / 16 ) * 16 + 9
+			return (1 + ((MAX_STRING_LENGTH + 4 - 1) / 16)) * 16 + 4; // ceil( MAX_STRING_LENGTH + 4 / 16 ) * 16 + 4
 		} else {
 			return getValueLength();
 		}
