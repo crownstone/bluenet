@@ -1067,9 +1067,9 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 	}
 }
 
-void Nrf51822BluetoothStack::disconnectActive() {
+void Nrf51822BluetoothStack::closeConnection(uint8_t hci_status_code) {
 	LOGi("Forcibly disconnecting from device");
-	uint32_t err_code = sd_ble_gap_disconnect(getConnectionHandle(), BLE_HCI_AUTHENTICATION_FAILURE);
+	uint32_t err_code = sd_ble_gap_disconnect(getConnectionHandle(), hci_status_code);
 	APP_ERROR_CHECK(err_code);
 }
 

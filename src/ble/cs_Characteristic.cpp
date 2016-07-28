@@ -202,10 +202,9 @@ uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 	uint8_t* valueGattAddress = getGattValuePtr();
 
 
-	//getGattValueLength();
-	// ENCRYPTION HERE
 	if (_status.aesEncrypted) {
-		LOGi("encrypt ..."); // GATT is public facing, getValue is internal
+		LOGi("encrypt ...");
+		// GATT is public facing, getValue is internal
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
 		bool success = EncryptionHandler::getInstance().encrypt(
@@ -218,8 +217,13 @@ uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 		);
 
 		if (!success) {
-			_service->getStack()->disconnectActive();
-			return NRF_SUCCESS;
+			// clear the partially encrypted buffer.
+			memset(valueGattAddress, 0x00, getGattValueLength());
+
+			// disconnect from the device.
+			EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
+			LOGe("error encrypting data.");
+			return NRF_ERROR_INTERNAL;
 		}
 	}
 	else {

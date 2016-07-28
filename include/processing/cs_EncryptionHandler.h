@@ -20,14 +20,14 @@
 #define DEFAULT_SESSION_KEY 	0xcafebabe
 
 
-enum EncryptionUserLevel {
-	ADMIN 	= 0,
-	USER 	= 1,
-	GUEST 	= 2,
-	NOT_SET = 250,
-	NOT_AUTHENTICATED = 255
+enum EncryptionAccessLevel {
+	ADMIN 				= 0,
+	USER 				= 1,
+	GUEST 				= 2,
+	ANY				  	= 200,
+	NOT_SET 		  	= 201,
+	ENCRYPTION_DISABLED = 255
 };
-
 
 class EncryptionHandler : EventListener {
 private:
@@ -48,12 +48,15 @@ public:
 
 	void init();
 
-	bool encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionUserLevel userLevel, bool useSessionNonce = true);
+	bool encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel accessLevel, bool useSessionNonce = true);
 	bool encryptAdvertisement(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength);
 	bool encryptMesh(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength);
-	bool decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionUserLevel& levelOfPackage, bool useSessionNonce = true);
-	uint8_t* getSessionNonce();
+	bool decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel& accessLevelInPackage, bool useSessionNonce = true);
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	uint8_t* getSessionNonce();
+
+	void closeConnectionAuthenticationFailure();
+	bool allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided);
 
 private:
 	bool _encryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength, bool useSessionNonce = true);

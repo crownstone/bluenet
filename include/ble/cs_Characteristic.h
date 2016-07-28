@@ -104,7 +104,7 @@ protected:
 	/** used for encryption. If the characteristic is being read, it will encrypt itself with the lowest
 	 * allowed userlevel key.
 	 */
-	EncryptionUserLevel _minAccessLevel = NOT_SET;
+	EncryptionAccessLevel _minAccessLevel = NOT_SET;
 
 	//! Unit
 //	uint16_t                  _unit;
@@ -346,7 +346,7 @@ public:
 
 
 
-	void setMinAccessLevel(EncryptionUserLevel level) {
+	void setMinAccessLevel(EncryptionAccessLevel level) {
 		_minAccessLevel = level;
 	}
 
@@ -442,7 +442,7 @@ class CharacteristicGeneric : public CharacteristicBase {
 
 public:
 	//! Format of callback on write (from user)
-	typedef function<void(const uint8_t, const T&)> callback_on_write_t;
+	typedef function<void(const EncryptionAccessLevel, const T&)> callback_on_write_t;
 
 protected:
 	/** The generic type is physically located in this field in this class (by value, not just by reference)
@@ -507,7 +507,7 @@ protected:
 
 		setGattValueLength(len);
 
-		EncryptionUserLevel accessLevel = NOT_SET;
+		EncryptionAccessLevel accessLevel = NOT_SET;
 
 		// when using encryption, the packet needs to be decrypted
 		if (_status.aesEncrypted) {
@@ -521,13 +521,14 @@ protected:
 				accessLevel
 			);
 
-			// disconnect on failure
-			if (!success) {
-				//TODO: disconnect
+			// disconnect on failure or if the user is not authenticated
+			if (!success || !EncryptionHandler::getInstance().allowAccess(_minAccessLevel , accessLevel)) {
+				EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
 				return;
 			}
 		}
 		else {
+			accessLevel = ENCRYPTION_DISABLED;
 			setValueLength(len);
 		}
 

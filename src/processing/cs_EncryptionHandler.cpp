@@ -8,7 +8,10 @@
 #include <processing/cs_EncryptionHandler.h>
 #include <storage/cs_Settings.h>
 #include <drivers/cs_Serial.h>
+#include <ble/cs_Stack.h>
 #include <events/cs_EventDispatcher.h>
+
+#define TEST_ENCRYPTION true
 
 /**
  * Allocate memory for all required fields
@@ -36,6 +39,12 @@ uint8_t* EncryptionHandler::getSessionNonce() {
 	return _sessionNonce;
 }
 
+/**
+ * Break the connection if there is an error in the encryption or decryption
+ */
+void EncryptionHandler::closeConnectionAuthenticationFailure() {
+	BLEpp::Nrf51822BluetoothStack::getInstance().closeConnection(BLE_HCI_AUTHENTICATION_FAILURE);
+}
 
 
 /**
@@ -86,7 +95,7 @@ bool EncryptionHandler::encryptMesh(uint8_t* data, uint8_t dataLength, uint8_t* 
  *
  * data can be any number of bytes.
  */
-bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionUserLevel userLevel, bool useSessionNonce) {
+bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, bool useSessionNonce) {
 	// check if the userLevel has been set
 	if (_checkAndSetKey(userLevel) == false)
 		return false;
@@ -121,7 +130,7 @@ bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* tar
  * This method decrypts the package and places the decrypted blocks, in full, in the buffer. After this
  * the result will be validated and the target will be populated.
  */
-bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionUserLevel& levelOfPackage, bool useSessionNonce) {
+bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel& levelOfPackage, bool useSessionNonce) {
 	// check if the size of the encrypted data packet makes sense: min 1 block and overhead
 	if (encryptedDataPacketLength < SOC_ECB_CIPHERTEXT_LENGTH + _overhead) {
 		LOGe("Encryted data packet is smaller than the minimum possible size of a block and overhead (20 bytes).");
@@ -212,7 +221,7 @@ bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 
 			// the first iteration we can only write 12 relevant bytes to the target because the first 4 are the nonce.
 			maxIterationWriteAmount = SOC_ECB_CIPHERTEXT_LENGTH - VALIDATION_NONCE_LENGTH;
-			if (targetLengthLeftToWrite > maxIterationWriteAmount)
+			if (targetLengthLeftToWrite < maxIterationWriteAmount)
 				maxIterationWriteAmount = targetLengthLeftToWrite;
 
 			// we offset the pointer of the cipher text by the length of the validation length
@@ -222,7 +231,7 @@ bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 		else {
 			// after the first iteration, we can write the full 16 bytes.
 			maxIterationWriteAmount = SOC_ECB_CIPHERTEXT_LENGTH;
-			if (targetLengthLeftToWrite > maxIterationWriteAmount)
+			if (targetLengthLeftToWrite < maxIterationWriteAmount)
 				maxIterationWriteAmount = targetLengthLeftToWrite;
 
 			memcpy(target + writtenToTarget, _block.ciphertext, maxIterationWriteAmount);
@@ -234,7 +243,7 @@ bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 	}
 
 	if (targetLengthLeftToWrite != 0) {
-		LOGe("Not all decrypted data has been written to the target!");
+		LOGe("Not all decrypted data has been written to the target! %d", targetLengthLeftToWrite);
 		return false;
 	}
 
@@ -416,3 +425,18 @@ bool EncryptionHandler::_validateBlockLength(uint16_t length) {
 	return true;
 }
 
+
+/**
+ * Verify if the access level provided is sufficient
+ */
+bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided) {
+	if (provided != ENCRYPTION_DISABLED) {
+		// 0 is the highest possible value: ADMIN. If the provided is larger than the minumum, it is not allowed.
+		if (provided > minimum) {
+			LOGi("Insufficient accessLevel provided to use the characteristic.");
+			return false;
+		}
+	}
+
+	return true;
+}
