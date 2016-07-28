@@ -389,6 +389,7 @@ void EncryptionHandler::_generateNonceInTarget(uint8_t* target) {
  */
 void EncryptionHandler::_generateSessionNonce() {
 	RNG::fillBuffer(_sessionNonce, SESSION_NONCE_LENGTH);
+	EventDispatcher::getInstance().dispatch(EVT_SESSION_NONCE_SET, _sessionNonce, SESSION_NONCE_LENGTH);
 }
 
 /**

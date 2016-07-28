@@ -69,6 +69,7 @@ protected:
 
 	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 	inline void addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	inline void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	/** Enable the mesh characteristic.
 	 */
@@ -117,6 +118,7 @@ private:
 
 	BLEpp::Characteristic<buffer_ptr_t>* _stateControlCharacteristic;
 	BLEpp::Characteristic<buffer_ptr_t>* _stateReadCharacteristic;
+	BLEpp::Characteristic<buffer_ptr_t>* _sessionNonceCharacteristic;
 
 
 //	StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>* _meshCommand;

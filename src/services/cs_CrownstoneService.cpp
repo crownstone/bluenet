@@ -94,6 +94,7 @@ void CrownstoneService::createCharacteristics() {
 		_streamBuffer = getStreamBuffer(buffer, maxLength);
 		addStateControlCharacteristic(buffer, maxLength);
 		addStateReadCharacteristic(buffer, maxLength);
+		addSessionNonceCharacteristic(buffer, maxLength);
 
 //		LOGd("Set both set/get charac to buffer at %p", buffer);
 	}
@@ -375,8 +376,34 @@ void CrownstoneService::addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t
 	_stateReadCharacteristic->setValueLength(0);
 }
 
+
+void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+	_sessionNonceCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_sessionNonceCharacteristic);
+
+	_sessionNonceCharacteristic->setUUID(UUID(getUUID(), SESSION_NONCE_UUID));
+	_sessionNonceCharacteristic->setName(BLE_CHAR_SESSION_NONCE);
+	_sessionNonceCharacteristic->setWritable(false);
+	_sessionNonceCharacteristic->setNotifies(false);
+	_sessionNonceCharacteristic->setValue(buffer);
+	_sessionNonceCharacteristic->setMinAccessLevel(GUEST);
+	_sessionNonceCharacteristic->setMaxGattValueLength(size);
+	_sessionNonceCharacteristic->setValueLength(0);
+}
+
+
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
+	case EVT_SESSION_NONCE_SET: {
+		_sessionNonceCharacteristic->setValueLength(SESSION_NONCE_LENGTH);
+		_sessionNonceCharacteristic->setValue((uint8_t*)p_data);
+		_sessionNonceCharacteristic->updateValue(false);
+		break;
+	}
+	case EVT_BLE_DISCONNECT: {
+		_sessionNonceCharacteristic->setValueLength(0);
+		break;
+	}
 	case EVT_STATE_NOTIFICATION: {
 		if (_stateReadCharacteristic) {
 			state_vars_notifaction notification = *(state_vars_notifaction*)p_data;
