@@ -13,8 +13,6 @@
 #include <structs/cs_TrackDevices.h>
 #include <processing/cs_Tracker.h>
 
-using namespace BLEpp;
-
 IndoorLocalizationService::IndoorLocalizationService() : EventListener(),
 		_rssiCharac(NULL), _scannedDeviceListCharac(NULL),
 		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL)

@@ -6,8 +6,6 @@
  */
 #include <ble/cs_DoBotsManufac.h>
 
-namespace BLEpp {
-
 void DoBotsManufac::toArray(uint8_t* array) {
 	*array = _params.deviceType;
 }
@@ -17,5 +15,3 @@ void DoBotsManufac::parse(uint8_t* array, uint16_t len) {
 	_params.deviceType = *array;
 
 }
-
-}/** namespace BLEpp */

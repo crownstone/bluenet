@@ -17,8 +17,6 @@ extern "C" {
 	#include <third/protocol/rbc_mesh.h>
 }
 
-using namespace BLEpp;
-
 struct delayed_command_t {
 	CommandHandlerTypes type;
 	uint16_t size;

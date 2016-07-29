@@ -12,8 +12,6 @@
 
 #define TRACKER_UPATE_FREQUENCY 10
 
-using namespace BLEpp;
-
 class Tracker : EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)

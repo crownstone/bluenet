@@ -20,8 +20,6 @@
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
-namespace BLEpp {
-
 class Nrf51822BluetoothStack;
 class CharacteristicBase;
 
@@ -176,5 +174,3 @@ public:
 	void setAesEncrypted(bool encrypted);
 
 };
-
-}

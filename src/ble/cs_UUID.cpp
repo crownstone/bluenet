@@ -10,8 +10,6 @@
 
 #include "util/cs_BleError.h"
 
-namespace BLEpp {
-
 //! TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
 
 ///! UUID //////////////////////////////////////////////////////////////////////////////////////////
@@ -91,6 +89,4 @@ UUID::operator ble_uuid128_t() {
 	}
 
 	return res;
-}
-
 }

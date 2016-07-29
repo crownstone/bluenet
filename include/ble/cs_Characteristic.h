@@ -28,8 +28,6 @@
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
-namespace BLEpp {
-
 class Service;
 //class Nrf51822BluetoothStack;
 
@@ -287,7 +285,7 @@ public:
 	 *
 	 * @return err_code (which should be NRF_SUCCESS if no error occurred)
 	 */
-	uint32_t notify();
+	virtual uint32_t notify();
 
 	/** Callback function if a notify tx error occurs
 	 *
@@ -310,17 +308,7 @@ public:
 	 * is cleared if the call eas successful. If not successful, it will be tried
 	 * again during the next callback call
 	 */
-	void onTxComplete(ble_common_evt_t * p_ble_evt) {
-		//! if we have a notification pending, try to send it
-		if (_status.notificationPending) {
-			//! this-> is necessary so that the call of notify depends on the template
-			//! parameter T
-			uint32_t err_code = this->updateValue();
-			if (err_code == NRF_SUCCESS) {
-				_status.notificationPending = false;
-			}
-		}
-	}
+	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
 
 	/** Enable / Disable aes encryption. If enabled, a buffer is created to hold the encrypted
 	 *  value. If disabled, the buffer is freed again.
@@ -342,6 +330,10 @@ public:
 	/** get the buffer used for encryption */
 	buffer_ptr_t& getEncryptionBuffer() {
 		return _encryptionBuffer;
+	}
+
+	Service* getService() {
+		return _service;
 	}
 
 protected:
@@ -644,13 +636,13 @@ public:
 
 	/** @inherit */
 	uint16_t getValueLength() {
-		return MAX_STRING_LENGTH;
+		return MAX_CHAR_VALUE_STRING_LENGTH;
 	}
 
 	/** @inherit */
 	uint16_t getGattValueLength() {
 		if (this->isAesEnabled()) {
-			return (1 + ((MAX_STRING_LENGTH + 4 - 1) / 16)) * 16 + 4; // ceil( MAX_STRING_LENGTH + 4 / 16 ) * 16 + 4
+			return (1 + ((MAX_CHAR_VALUE_STRING_LENGTH + 4 - 1) / 16)) * 16 + 4; // ceil( MAX_STRING_LENGTH + 4 / 16 ) * 16 + 4
 		} else {
 			return getValueLength();
 		}
@@ -682,7 +674,13 @@ private:
 
 	uint16_t _gattValueLength;
 
+	uint16_t _notificationPendingOffset;
+
 public:
+
+	uint32_t notify();
+
+	void onTxComplete(ble_common_evt_t * p_ble_evt);
 
 	/** Set the value for this characteristic
 	 * @value the pointer to the buffer in memory
@@ -757,8 +755,4 @@ public:
 protected:
 
 };
-
-} //! end of namespace
-
-
 

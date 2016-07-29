@@ -12,8 +12,6 @@
 #include <processing/cs_CommandHandler.h>
 #include <structs/buffer/cs_MasterBuffer.h>
 
-using namespace BLEpp;
-
 SetupService::SetupService() {
 //	EventDispatcher::getInstance().addListener(this);
 

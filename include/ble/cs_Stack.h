@@ -31,40 +31,13 @@ extern "C" {
 
 /////////////////////////////////////////////////
 
-extern uint8_t service_data_array[1];
-
 // @TODO: replace std::vector with a fixed, in place array of size capacity.
 
 /** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
-namespace BLEpp {
-
 class Service;
-
-/** BLEStack defines a chip-agnostic Bluetooth Low-Energy stack
- *
- * Currently, this class does not leverage much of the general Bluetooth Low-Energy functionality into
- * chip-agnostic code. However, this might be recommendable in the future.
- */
-class BLEStack {
-public:
-	virtual ~BLEStack() {};
-
-	/** Connected?
-	 *
-	 * @return true if connected, false if not connected
-	 */
-	virtual bool connected() = 0;
-
-	/** Handle to connection
-	 *
-	 * @return 16-bit value that unique identifies the connection
-	 */
-	virtual uint16_t getConnectionHandle() = 0;
-};
-
 
 /** nRF51822 specific implementation of the BLEStack
  *
@@ -73,7 +46,7 @@ public:
  * handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this
  * stack object as an argument w.r.t. this object. This makes dependencies traceable for the user.
  */
-class Nrf51822BluetoothStack : public BLEStack {
+class Nrf51822BluetoothStack {
 	//! Friend for BLE stack event handling
 //	friend void SWI2_IRQHandler();
 
@@ -96,7 +69,7 @@ private:
 	 *
 	 * TODO: The SoftDevice should be disabled as well.
 	 */
-	virtual ~Nrf51822BluetoothStack();
+	~Nrf51822BluetoothStack();
 public:
 	static Nrf51822BluetoothStack& getInstance() {
 		static Nrf51822BluetoothStack instance;
@@ -393,10 +366,10 @@ public:
 	 */
 //	Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 
-	virtual bool connected() {
+	bool connected() {
 		return _conn_handle != BLE_CONN_HANDLE_INVALID;
 	}
-	virtual uint16_t getConnectionHandle() {  //! TODO are multiple connections supported?
+	uint16_t getConnectionHandle() {  //! TODO are multiple connections supported?
 		return _conn_handle;
 	}
 
@@ -474,4 +447,3 @@ protected:
 
 };
 
-}

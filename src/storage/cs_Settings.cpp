@@ -12,8 +12,6 @@
 #include <events/cs_EventDispatcher.h>
 #include <util/cs_Utils.h>
 
-using namespace BLEpp;
-
 Settings::Settings() : _initialized(false), _storage(NULL) {
 };
 
@@ -984,7 +982,7 @@ void Settings::saveIBeaconPersistent() {
  */
 //std::string & Settings::getBLEName() {
 //	loadPersistentStorage();
-//	std::string& _name = BLEpp::Nrf51822BluetoothStack::getInstance().getDeviceName();
+//	std::string& _name = Nrf51822BluetoothStack::getInstance().getDeviceName();
 //	Storage::getString(_storageStruct.device_name, _name, _name);
 //	return _name;
 //}
@@ -999,7 +997,7 @@ void Settings::saveIBeaconPersistent() {
 //		LOGe(MSG_NAME_TOO_LONG);
 //		return;
 //	}
-//	BLEpp::Nrf51822BluetoothStack::getInstance().updateDeviceName(name);
+//	Nrf51822BluetoothStack::getInstance().updateDeviceName(name);
 //	Storage::setString(name, _storageStruct.device_name);
 //	if (persistent) {
 //		savePersistentStorageItem((uint8_t*)_storageStruct.device_name, sizeof(_storageStruct.device_name));

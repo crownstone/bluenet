@@ -10,8 +10,6 @@
 
 #include <cfg/cs_DeviceTypes.h>
 
-namespace BLEpp {
-
 /** DoBotsManufac defines the different types of developed devices for within the advertisement packets.
  */
 class DoBotsManufac {
@@ -59,4 +57,3 @@ public:
 	void parse(uint8_t* array, uint16_t len);
 };
 
-} 	/** namespace BLEpp */

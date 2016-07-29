@@ -16,8 +16,6 @@
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>
 
-using namespace BLEpp;
-
 GeneralService::GeneralService() : EventListener(),
 		_temperatureCharacteristic(NULL), _resetCharacteristic(NULL)
 {

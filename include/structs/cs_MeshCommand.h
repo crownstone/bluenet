@@ -11,8 +11,6 @@
 
 #include <protocol/cs_MeshMessageTypes.h>
 
-using namespace BLEpp;
-
 using MeshCommand = StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>;
 
 /** The mesh characteristic message is a wrapped StreamBuffer object.
