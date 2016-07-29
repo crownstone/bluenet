@@ -631,7 +631,8 @@ public:
 	/** @inherit */
 	uint16_t getGattValueLength() {
 		if (this->isAesEnabled()) {
-			return (1 + ((sizeof(T) + 4 - 1) / 16)) * 16 + 4; // ceil( sizeof(T) + 4 / 16 ) * 16 + 4
+			return EncryptionHandler::calculateEncryptionBufferLength(sizeof(T));
+			//return (1 + ((sizeof(T) + 4 - 1) / 16)) * 16 + 4; // ceil( sizeof(T) + 4 / 16 ) * 16 + 4
 		} else {
 			return getValueLength();
 		}
@@ -667,7 +668,8 @@ public:
 	/** @inherit */
 	uint16_t getGattValueLength() {
 		if (this->isAesEnabled()) {
-			return (1 + ((MAX_CHAR_VALUE_STRING_LENGTH + 4 - 1) / 16)) * 16 + 4; // ceil( MAX_STRING_LENGTH + 4 / 16 ) * 16 + 4
+			return EncryptionHandler::calculateEncryptionBufferLength(MAX_CHAR_VALUE_STRING_LENGTH);
+			// (1 + ((MAX_CHAR_VALUE_STRING_LENGTH + 4 - 1) / 16)) * 16 + 4; // ceil( (MAX_STRING_LENGTH + 4) / 16 ) * 16 + 4
 		} else {
 			return getValueLength();
 		}

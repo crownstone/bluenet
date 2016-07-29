@@ -206,18 +206,24 @@ uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 		// GATT is public facing, getValue is internal
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
+
+		// we calculate what size buffer we need
+		uint16_t encryptionBufferLength = EncryptionHandler::calculateEncryptionBufferLength(valueLength);
 		bool success = EncryptionHandler::getInstance().encrypt(
 			getValuePtr(),
 			valueLength,
 			valueGattAddress,
-			getGattValueLength(),
+			encryptionBufferLength,
 			_minAccessLevel,
 			useSessionNonce
 		);
 
 		if (!success) {
 			// clear the partially encrypted buffer.
-			memset(valueGattAddress, 0x00, getGattValueLength());
+			memset(valueGattAddress, 0x00, encryptionBufferLength);
+
+			// make sure nothing will be read
+			setGattValueLength(0);
 
 			// disconnect from the device.
 			EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
@@ -225,9 +231,10 @@ uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 			return NRF_ERROR_INTERNAL;
 		}
 
-		// todo: shouldn't you update the gatt value length here too?
+		// on success, set the readable buffer length to the encryption package.
+		setGattValueLength(encryptionBufferLength);
 	} else {
-		//! set the data length of the gatt value (encrypted)
+		//! set the data length of the gatt value (when not using encryption)
 		setGattValueLength(valueLength);
 	}
 

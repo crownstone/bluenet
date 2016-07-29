@@ -21,6 +21,23 @@ void EncryptionHandler::init() {
 	EventDispatcher::getInstance().addListener(this);
 }
 
+
+/**
+ * Determine the required size of the encryption buffer based on what you want to encrypt.
+ */
+uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength) {
+	// add the validation padding length to the raw data length
+	uint16_t requiredLength = inputLength + VALIDATION_NONCE_LENGTH;
+
+	// check if we need an extra block
+	requiredLength += requiredLength % SOC_ECB_CLEARTEXT_LENGTH > 0 ? SOC_ECB_CLEARTEXT_LENGTH : 0;
+
+	// add overhead
+	requiredLength += PACKET_NONCE_LENGTH + USER_LEVEL_LENGTH;
+
+	return requiredLength;
+}
+
 /**
  * make sure we create a new nonce for each connection
  */
@@ -183,11 +200,9 @@ bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 	uint32_t err_code;
 
 	// amount of blocks to loop over
-	uint16_t rest = (targetLength + VALIDATION_NONCE_LENGTH) %  SOC_ECB_CIPHERTEXT_LENGTH;
+	uint8_t blockOverflow = (targetLength + VALIDATION_NONCE_LENGTH) %  SOC_ECB_CIPHERTEXT_LENGTH;
 	uint16_t blockCount = (targetLength + VALIDATION_NONCE_LENGTH) / SOC_ECB_CIPHERTEXT_LENGTH;
-	if (rest > 0) {
-		blockCount += 1;
-	}
+	blockCount += (blockOverflow > 0) ? 1 : 0;
 
 	// variables to keep track of where data is written
 	uint16_t inputReadIndex = 0;

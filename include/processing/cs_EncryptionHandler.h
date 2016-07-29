@@ -38,7 +38,7 @@ private:
 	nrf_ecb_hal_data_t _block __attribute__ ((aligned (4)));
 
 	conv8_32 _defaultValidationKey;
-	uint8_t _overhead = PACKET_NONCE_LENGTH + USER_LEVEL_LENGTH;
+	 uint8_t _overhead = PACKET_NONCE_LENGTH + USER_LEVEL_LENGTH;
 
 public:
 	static EncryptionHandler& getInstance() {
@@ -57,6 +57,8 @@ public:
 
 	void closeConnectionAuthenticationFailure();
 	bool allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided);
+
+	static uint16_t calculateEncryptionBufferLength(uint16_t inputLength);
 
 private:
 	bool _encryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength, bool useSessionNonce = true);
