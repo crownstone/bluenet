@@ -23,13 +23,13 @@
 #include <util/cs_Utils.h>
 
 #include <structs/buffer/cs_EncryptionBuffer.h>
+#include <processing/cs_EncryptionHandler.h>
 
 /** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
 class Service;
-//class Nrf51822BluetoothStack;
 
 /** CharacteristicInit collects fields required to define a BLE characteristic
  */
@@ -98,6 +98,11 @@ protected:
 	Status                    _status;
 
 	buffer_ptr_t              _encryptionBuffer;
+
+	/** used for encryption. If the characteristic is being read, it will encrypt itself with the lowest
+	 * allowed userlevel key.
+	 */
+	EncryptionAccessLevel _minAccessLevel = NOT_SET;
 
 	//! Unit
 //	uint16_t                  _unit;
@@ -273,7 +278,7 @@ public:
 	 *  If somebody is also listening to notifications for the characteristic
 	 *  notifications will be sent.
 	 */
-	uint32_t updateValue();
+	uint32_t updateValue(bool useSessionNonce = true);
 
 	/** Notify any listening party.
 	 *
@@ -326,6 +331,13 @@ public:
 	bool isAesEnabled() {
 		return _status.aesEncrypted;
 	}
+
+
+
+	void setMinAccessLevel(EncryptionAccessLevel level) {
+		_minAccessLevel = level;
+	}
+
 
 	/** get the buffer used for encryption */
 	buffer_ptr_t& getEncryptionBuffer() {
@@ -422,7 +434,7 @@ class CharacteristicGeneric : public CharacteristicBase {
 
 public:
 	//! Format of callback on write (from user)
-	typedef function<void(const uint8_t, const T&)> callback_on_write_t;
+	typedef function<void(const EncryptionAccessLevel, const T&)> callback_on_write_t;
 
 protected:
 	/** The generic type is physically located in this field in this class (by value, not just by reference)
@@ -487,25 +499,38 @@ protected:
 
 		setGattValueLength(len);
 
-		uint8_t accessLevel = 0;
+		EncryptionAccessLevel accessLevel = NOT_SET;
 
-		// todo ENCRYPTION: decrypt here. getGattValuePtr points to the memory address
-		//   where the encrypted value is
-		//   then write the decrypted value to "another" memory address and return
-		//   that with getValue()
-		// getValuePtr is the size of the value, like an int or string. A Buffer is needed for decryption.
+		// when using encryption, the packet needs to be decrypted
 		if (_status.aesEncrypted) {
 			LOGi("decrypt ...");
-			memcpy(getValuePtr(), getGattValuePtr(), len);
+
+			bool success = EncryptionHandler::getInstance().decrypt(
+				getGattValuePtr(),
+				getGattValueLength(),
+				getValuePtr(),
+				getValueLength(),
+				accessLevel
+			);
+
+			// disconnect on failure or if the user is not authenticated
+			if (!success || !EncryptionHandler::getInstance().allowAccess(_minAccessLevel , accessLevel)) {
+				EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
+				return;
+			}
+		}
+		else {
+			accessLevel = ENCRYPTION_DISABLED;
+			setValueLength(len);
 		}
 
-		// todo ENCRYPTION: set data length of the decrypted value
-		setValueLength(len);
+
 
 		LOGd("%s: onWrite()", _name);
 
 		_callbackOnWrite(accessLevel, getValue());
 	}
+
 
 	/** @inherit */
 	virtual bool configurePresentationFormat(ble_gatts_char_pf_t& presentation_format) {
@@ -661,7 +686,6 @@ template<>
 class Characteristic<buffer_ptr_t> : public CharacteristicGeneric<buffer_ptr_t> {
 
 private:
-
 	/** maximum length for this characteristic in bytes
 	 *  In the case of aes encryption, this is the maximum number of bytes of the encrypted value
 	 */

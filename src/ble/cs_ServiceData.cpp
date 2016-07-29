@@ -6,6 +6,8 @@
  */
 #include <ble/cs_ServiceData.h>
 
+#include <processing/cs_EncryptionHandler.h>
+
 #include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ConfigTypes.h>
 #include <drivers/cs_Serial.h>
@@ -41,5 +43,11 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		default:
 			return;
 		}
+
+		// encrypt the array using the guest key ECB if encryption is enabled.
+		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
+			EncryptionHandler::getInstance().encryptAdvertisement(_array, sizeof(_array), _encryptedArray, sizeof(_encryptedArray));
+		}
+
 		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
 	}

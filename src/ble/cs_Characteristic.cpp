@@ -9,9 +9,7 @@
  */
 
 #include "ble/cs_Characteristic.h"
-
 #include <ble/cs_Softdevice.h>
-
 #include <storage/cs_Settings.h>
 
 //#define PRINT_CHARACTERISTIC_VERBOSE
@@ -191,7 +189,7 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	ci.attr_md.write_perm = _writeperm;
 }
 
-uint32_t CharacteristicBase::updateValue() {
+uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 
 //	LOGi("[%s] update Value", _name);
 
@@ -202,16 +200,36 @@ uint32_t CharacteristicBase::updateValue() {
 	 */
 	uint8_t* valueGattAddress = getGattValuePtr();
 
-	// ENCRYPTION HERE
+
 	if (_status.aesEncrypted) {
-		LOGi("encrypt ..."); // GATT is public facing, getValue is internal
+		LOGi("encrypt ...");
+		// GATT is public facing, getValue is internal
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
-		memcpy(valueGattAddress, getValuePtr(), valueLength);
-	}
+		bool success = EncryptionHandler::getInstance().encrypt(
+			getValuePtr(),
+			valueLength,
+			valueGattAddress,
+			getGattValueLength(),
+			_minAccessLevel,
+			useSessionNonce
+		);
 
-	//! set the data length of the gatt value (encrypted)
-	setGattValueLength(valueLength);
+		if (!success) {
+			// clear the partially encrypted buffer.
+			memset(valueGattAddress, 0x00, getGattValueLength());
+
+			// disconnect from the device.
+			EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
+			LOGe("error encrypting data.");
+			return NRF_ERROR_INTERNAL;
+		}
+
+		// todo: shouldn't you update the gatt value length here too?
+	} else {
+		//! set the data length of the gatt value (encrypted)
+		setGattValueLength(valueLength);
+	}
 
 //	LOGi("[%s] valueLength: %d", _name, valueLength);
 //	LOGi("[%s] valueAddress: %p", _name, valueAddress);
@@ -226,6 +244,7 @@ uint32_t CharacteristicBase::updateValue() {
 		return notify();
 	}
 }
+
 
 uint32_t CharacteristicBase::notify() {
 

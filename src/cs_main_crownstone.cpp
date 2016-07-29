@@ -36,6 +36,7 @@
 #include "drivers/cs_PWM.h"
 #include "util/cs_Utils.h"
 #include "drivers/cs_Timer.h"
+#include <processing/cs_EncryptionHandler.h>
 #include "structs/buffer/cs_MasterBuffer.h"
 #include "structs/buffer/cs_EncryptionBuffer.h"
 
@@ -89,6 +90,7 @@ Crownstone::Crownstone() :
 	//! create command handler
 	_commandHandler = &CommandHandler::getInstance();
 
+
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch using PWM or Relay
 	_switch = &Switch::getInstance();
@@ -112,6 +114,9 @@ void Crownstone::init() {
 
 	//! configure the crownstone
 	configure();
+
+	LOGi(FMT_HEADER, "allocating buffer for encryption");
+	EncryptionHandler::getInstance().init();
 
 	LOGi(FMT_HEADER, "setup");
 

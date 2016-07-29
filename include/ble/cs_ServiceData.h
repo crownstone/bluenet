@@ -8,6 +8,7 @@
 
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
+#include <storage/cs_Settings.h>
 
 #include <cstring>
 
@@ -53,7 +54,13 @@ public:
 	}
 
 	uint8_t* getArray() {
-		return _array;
+		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
+			return _encryptedArray;
+		}
+		else {
+			return _array;
+		}
+
 	}
 
 	uint16_t getArraySize() {
@@ -76,6 +83,8 @@ private:
 		} _params;
 		uint8_t _array[sizeof(_params)] = {};
 	};
+
+	uint8_t _encryptedArray[sizeof(_params)];
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 

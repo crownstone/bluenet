@@ -76,15 +76,18 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type) {
 	return handleCommand(type, NULL, 0);
 }
 
-ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size) {
+
+ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel accessLevel) {
 
 	switch (type) {
 	case CMD_GOTO_DFU: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "goto dfu");
 		resetDelayed(GPREGRET_DFU_RESET);
 		break;
 	}
 	case CMD_RESET: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "reset");
 
 		if (size != sizeof(opcode_message_payload_t)) {
@@ -99,6 +102,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_MESH: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable mesh");
 
 		if (size != sizeof(enable_message_payload_t)) {
@@ -121,6 +125,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_ENCRYPTION: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable encryption, tbd");
 		return ERR_NOT_IMPLEMENTED;
 
@@ -142,6 +147,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_IBEACON: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable ibeacon");
 
 		if (size != sizeof(enable_message_payload_t)) {
@@ -158,6 +164,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_SCANNER: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable scanner");
 
 		enable_scanner_message_payload_t* payload = (enable_scanner_message_payload_t*) buffer;
@@ -190,6 +197,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SCAN_DEVICES: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "scan devices");
 
 		if (size != sizeof(enable_message_payload_t)) {
@@ -227,6 +235,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_REQUEST_SERVICE_DATA: {
+		if (!EncryptionHandler::getInstance().allowAccess(USER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "request service");
 
 		service_data_mesh_message_t serviceData;
@@ -248,6 +257,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_FACTORY_RESET: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "factory reset");
 
 		if (size != sizeof(FACTORY_RESET_CODE)) {
@@ -281,6 +291,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SET_TIME: {
+		if (!EncryptionHandler::getInstance().allowAccess(USER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "set time:");
 
 		if (size != sizeof(uint32_t)) {
@@ -295,6 +306,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SCHEDULE_ENTRY: {
+		if (!EncryptionHandler::getInstance().allowAccess(USER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "schedule entry");
 
 #if SCHEDULER_ENABLED==1
@@ -337,6 +349,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_VALIDATE_SETUP: {
+		// we do not need to check for the setup validation since this is not encrypted
 		LOGi(STR_HANDLE_COMMAND, "validate setup");
 
 		uint8_t opMode;
@@ -411,6 +424,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 	}
 
 	case CMD_USER_FEEDBACK: {
+		if (!EncryptionHandler::getInstance().allowAccess(USER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "user feedback");
 		return ERR_NOT_IMPLEMENTED;
 
@@ -418,6 +432,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_KEEP_ALIVE_STATE: {
+		if (!EncryptionHandler::getInstance().allowAccess(USER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "keep alive");
 		return ERR_NOT_IMPLEMENTED;
 
@@ -425,6 +440,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_KEEP_ALIVE: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "keep alive");
 		return ERR_NOT_IMPLEMENTED;
 
@@ -435,11 +451,13 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 	// Crownstone specific commands are only available if device type is set to Crownstone.
 	// E.g. GuideStone does not support power measure or switching commands
 	case CMD_SWITCH: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "switch");
 		// for now, same as pwm, but switch command should decide itself if relay or
 		// pwm is used
 	}
 	case CMD_PWM: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "PWM");
 
 		if (size != sizeof(switch_message_payload_t)) {
@@ -458,6 +476,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_RELAY: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "relay");
 
 		if (size != sizeof(switch_message_payload_t)) {
@@ -477,6 +496,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_CONT_POWER_MEASURE: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable cont power measure");
 		return ERR_NOT_IMPLEMENTED;
 

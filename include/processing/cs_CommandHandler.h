@@ -35,7 +35,7 @@ public:
 
 	ERR_CODE handleCommand(CommandHandlerTypes type);
 
-	ERR_CODE handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size);
+	ERR_CODE handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel accessLevel = ADMIN);
 
 	ERR_CODE handleCommandDelayed(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, uint32_t delay);
 
