@@ -108,7 +108,8 @@ void Mesh::init() {
 
 	rbc_mesh_init_params_t init_params;
 
-	init_params.access_addr = MESH_ACCESS_ADDR;
+	// the access address is a configurable parameter so we get it from the settings.
+	Settings::getInstance().get(CONFIG_MESH_ACCESS_ADDRESS, &init_params.access_addr);
 	init_params.interval_min_ms = MESH_INTERVAL_MIN_MS;
 	init_params.channel = MESH_CHANNEL;
 	init_params.lfclksrc = MESH_CLOCK_SOURCE;

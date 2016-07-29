@@ -106,3 +106,4 @@
 #define CURRENT_ZERO                             168.5f
 #define POWER_ZERO                               9.0f
 #define POWER_ZERO_AVG_WINDOW                    100
+#define MESH_ACCESS_ADDRESS                      0xA641A69E

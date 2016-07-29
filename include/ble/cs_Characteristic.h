@@ -510,7 +510,7 @@ protected:
 		EncryptionAccessLevel accessLevel = NOT_SET;
 
 		// when using encryption, the packet needs to be decrypted
-		if (_status.aesEncrypted) {
+		if (_status.aesEncrypted && _minAccessLevel < ENCRYPTION_DISABLED) {
 			LOGi("decrypt ...");
 
 			bool success = EncryptionHandler::getInstance().decrypt(

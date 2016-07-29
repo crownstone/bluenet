@@ -202,7 +202,7 @@ uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 	uint8_t* valueGattAddress = getGattValuePtr();
 
 
-	if (_status.aesEncrypted) {
+	if (_status.aesEncrypted && _minAccessLevel < ENCRYPTION_DISABLED) {
 		LOGi("encrypt ...");
 		// GATT is public facing, getValue is internal
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.

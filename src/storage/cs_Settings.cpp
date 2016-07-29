@@ -207,6 +207,18 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	}
 
 	/////////////////////////////////////////////////
+	//// UINT 32
+	/////////////////////////////////////////////////
+	case CONFIG_MESH_ACCESS_ADDRESS: {
+	if (length != 4) {
+			LOGw(FMT_ERR_EXPECTED, "uint32");
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		LOGi(FMT_SET_INT_TYPE_VAL, type, *(uint32_t*)payload);
+		return ERR_SUCCESS;
+	}
+
+	/////////////////////////////////////////////////
 	//// FLOAT
 	/////////////////////////////////////////////////
 	case CONFIG_VOLTAGE_MULTIPLIER:
@@ -252,7 +264,7 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 		LOGi(FMT_SET_STR_TYPE_VAL, type, std::string((char*)payload, length).c_str());
 		return ERR_SUCCESS;
 	}
-	case CONFIG_KEY_OWNER :
+	case CONFIG_KEY_AMIN :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		if (length != ENCYRPTION_KEY_LENGTH) {
@@ -333,6 +345,12 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	}
 
 	/////////////////////////////////////////////////
+	//// UINT 32
+	/////////////////////////////////////////////////
+	case CONFIG_MESH_ACCESS_ADDRESS:
+		return 4;
+
+	/////////////////////////////////////////////////
 	//// FLOAT
 	/////////////////////////////////////////////////
 	case CONFIG_VOLTAGE_MULTIPLIER:
@@ -355,7 +373,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_NAME: {
 		return MAX_STRING_STORAGE_SIZE+1;
 	}
-	case CONFIG_KEY_OWNER :
+	case CONFIG_KEY_AMIN :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		return ENCYRPTION_KEY_LENGTH;
@@ -481,7 +499,7 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getUint16(_storageStruct.crownstoneId, (uint16_t*)target, 0);
 		break;
 	}
-	case CONFIG_KEY_OWNER : {
+	case CONFIG_KEY_AMIN : {
 		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.owner, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
@@ -547,6 +565,10 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 	}
 	case CONFIG_POWER_ZERO_AVG_WINDOW: {
 		Storage::getUint16(_storageStruct.powerZeroAvgWindow, (uint16_t*)target, POWER_ZERO_AVG_WINDOW);
+		break;
+	}
+	case CONFIG_MESH_ACCESS_ADDRESS: {
+		Storage::getUint32(_storageStruct.meshAccessAddress, (uint32_t*)target, MESH_ACCESS_ADDRESS);
 		break;
 	}
 	default: {
@@ -674,7 +696,7 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
 		break;
 	}
-	case CONFIG_KEY_OWNER : {
+	case CONFIG_KEY_AMIN : {
 		p_item = (uint8_t*)&_storageStruct.encryptionKeys.owner;
 		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.owner, ENCYRPTION_KEY_LENGTH);
 		break;
@@ -757,6 +779,11 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	case CONFIG_POWER_ZERO_AVG_WINDOW:{
 		p_item = (uint8_t*)&_storageStruct.powerZeroAvgWindow;
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.powerZeroAvgWindow);
+		break;
+	}
+	case CONFIG_MESH_ACCESS_ADDRESS:{
+		p_item = (uint8_t*)&_storageStruct.meshAccessAddress;
+		Storage::setUint32(*((uint32_t*)target), _storageStruct.meshAccessAddress);
 		break;
 	}
 	default: {
