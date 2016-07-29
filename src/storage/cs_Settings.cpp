@@ -998,39 +998,6 @@ void Settings::saveIBeaconPersistent() {
 	savePersistentStorageItem((uint8_t*)&_storageStruct.beacon, sizeof(_storageStruct.beacon));
 }
 
-//	void ConfigHelper::enable(ps_storage_id id, uint16_t size) {
-//		_storage->getHandle(id, _storageHandles[id]);
-//		loadPersistentStorage(_storageHandles[id], );
-//	}
-
-/** Retrieve the Bluetooth name from the object representing the BLE stack.
- *
- * @return name of the device
- */
-//std::string & Settings::getBLEName() {
-//	loadPersistentStorage();
-//	std::string& _name = Nrf51822BluetoothStack::getInstance().getDeviceName();
-//	Storage::getString(_storageStruct.device_name, _name, _name);
-//	return _name;
-//}
-
-/** Write the Bluetooth name to the object representing the BLE stack.
- *
- * This updates the Bluetooth name immediately, however, it does not update the name persistently. It
- * has to be written to FLASH in that case.
- */
-//void Settings::setBLEName(const std::string &name, bool persistent) {
-//	if (name.length() > 31) {
-//		LOGe(MSG_NAME_TOO_LONG);
-//		return;
-//	}
-//	Nrf51822BluetoothStack::getInstance().updateDeviceName(name);
-//	Storage::setString(name, _storageStruct.device_name);
-//	if (persistent) {
-//		savePersistentStorageItem((uint8_t*)_storageStruct.device_name, sizeof(_storageStruct.device_name));
-//	}
-//}
-
 void Settings::factoryReset(uint32_t resetCode) {
 	if (resetCode != FACTORY_RESET_CODE) {
 		LOGe("wrong reset code!");

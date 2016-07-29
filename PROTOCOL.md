@@ -1,4 +1,4 @@
-# Bluenet protocol v0.5.0-alpha
+# Bluenet protocol v0.5.0
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -127,13 +127,24 @@ This packet contains the state info. If encryption is enabled, it will be encryp
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint 8 | Protocol Version | 1 | Service data protocol version
 uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
 uint 16 | Crownstone state ID | 2 | ID of the Crownstone of which the state is shown.
-uint 8 | Switch state | 1 | The state of the switch, 0 - 100 (where 0 is off, 100 is on, dimmed in between).
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | Event bitmask | 1 | Shows if the Crownstone has something new to tell.
-uint 8 | Reserved | 2 | Reserved for future use.
+int 8 | Temperature | 1 | Chip temperature (°C)
 int 32 | Power usage | 4 | The power usage at this moment (mW).
 int 32 | Accumulated energy | 4 | The accumulated energy (kWh).
+
+#### <a name="switch_state_packet"></a>Switch State Packet
+
+To be able to distinguish between switching with relay and switching with PWM, the switch state is a bit struct with
+the following layout
+
+![Switch State Packet](docs/diagrams/switch_state_packet.png)
+
+Bit 7 is used for the Relay Flag, where 0 = OFF, 1 = ON
+Bits 6-0 are used for PWM, where 100 is full ON, 0 is OFF, dimmed in between
 
 # Services
 When connected, the following services are available.
@@ -163,7 +174,7 @@ The code determines success or failure of the command. If commands have to be ex
 was received before calling the next (either by polling or subscribing). The possible values of the return values are listed in the table below
 
 Value | Name | Description
---- | --- | --- | --- | --- | ---
+--- | --- | ---
 0 | SUCCESS | completed successfully
 1 | VALUE_UNDEFINED | no value provided
 2 | WRONG_PAYLOAD_LENGTH | wrong payload lenght provided
@@ -187,7 +198,7 @@ Value | Name | Description
 The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only available after a factory reset. This service is not encrypted.
 
 Characteristic | UUID | Date type | Description
---- | --- | --- | --- | --- | --- | ---
+--- | --- | --- | ---
 Control        | 24f10001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the control characteristic
 MAC Address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MAC address of the device
 Config Control | 24f10004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Write or select a config setting
@@ -562,7 +573,7 @@ uint 16 | User ID | 2 | ...
 uint 16 | Type | 2 | Type of message, see table below.
 uint 8 [] | Payload | 0 to 91 | Payload data, depends on type.
 
-Type nr | Type name | Payload type | Payload Description
+Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
 0 | Command | [Control](#control_packet) | Send a command over the mesh, see control packet
 1 | Beacon | [Beacon data](#beacon_mesh_data_packet) | Configure the iBeacon settings.
