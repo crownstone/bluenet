@@ -11,7 +11,7 @@
 #include <ble/cs_Stack.h>
 #include <events/cs_EventDispatcher.h>
 
-#define TEST_ENCRYPTION true
+//#define TESTING_ENCRYPTION true
 
 /**
  * Allocate memory for all required fields
@@ -29,8 +29,10 @@ uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength
 	// add the validation padding length to the raw data length
 	uint16_t requiredLength = inputLength + VALIDATION_NONCE_LENGTH;
 
+	uint16_t blockOverflow = requiredLength % SOC_ECB_CLEARTEXT_LENGTH;
+
 	// check if we need an extra block
-	requiredLength += requiredLength % SOC_ECB_CLEARTEXT_LENGTH > 0 ? SOC_ECB_CLEARTEXT_LENGTH : 0;
+	requiredLength += blockOverflow > 0 ? SOC_ECB_CLEARTEXT_LENGTH - blockOverflow : 0;
 
 	// add overhead
 	requiredLength += PACKET_NONCE_LENGTH + USER_LEVEL_LENGTH;
@@ -317,11 +319,22 @@ bool EncryptionHandler::_encryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 
 	uint32_t inputReadIndex = 0;
 
+#ifdef TESTING_ENCRYPTION
+	for (uint8_t i = 0; i < SOC_ECB_KEY_LENGTH; i++) {
+		LOGi("key: %d", _block.key[i]);
+	}
+#endif
+
 	// encrypt all blocks using AES 128 CTR block mode.
 	for (uint8_t counter = 0; counter < blockCount; counter++) {
 		// prepare the nonce for the next step by concatenating the nonce with the counter
 		_block.cleartext[SOC_ECB_CLEARTEXT_LENGTH-1] = counter;
 
+#ifdef TESTING_ENCRYPTION
+	for (uint8_t i = 0; i < SOC_ECB_CLEARTEXT_LENGTH; i++) {
+		LOGi("IV: %d", _block.cleartext[i]);
+	}
+#endif
 		// encrypts the cleartext and puts it in ciphertext
 		err_code = sd_ecb_block_encrypt(&_block);
 		APP_ERROR_CHECK(err_code);
@@ -396,14 +409,23 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
  * This method will fill the buffer with 3 random bytes. These are included in the message
  */
 void EncryptionHandler::_generateNonceInTarget(uint8_t* target) {
+#ifdef TESTING_ENCRYPTION
+	memset(target, 128 ,PACKET_NONCE_LENGTH);
+#else
 	RNG::fillBuffer(target, PACKET_NONCE_LENGTH);
+#endif
 }
 
 /**
  * This method will fill the buffer with 5 random bytes. This is done on connect and is only valid once.
  */
 void EncryptionHandler::_generateSessionNonce() {
+#ifdef TESTING_ENCRYPTION
+	memset(_sessionNonce, 64 ,SESSION_NONCE_LENGTH);
+#else
 	RNG::fillBuffer(_sessionNonce, SESSION_NONCE_LENGTH);
+#endif
+
 	EventDispatcher::getInstance().dispatch(EVT_SESSION_NONCE_SET, _sessionNonce, SESSION_NONCE_LENGTH);
 }
 
