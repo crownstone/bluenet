@@ -58,8 +58,6 @@
  * Main functionality
  *********************************************************************************************************************/
 
-using namespace BLEpp;
-
 Crownstone::Crownstone() :
 	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL),
 	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
@@ -287,12 +285,12 @@ void Crownstone::initDrivers() {
 void Crownstone::configureStack() {
 
 	_stack->setTxPowerLevel(TX_POWER);
-	_stack->setMinConnectionInterval(16);
-	_stack->setMaxConnectionInterval(32);
-	_stack->setConnectionSupervisionTimeout(400);
-	_stack->setSlaveLatency(10);
+	_stack->setMinConnectionInterval(MIN_CONNECTION_INTERVAL);
+	_stack->setMaxConnectionInterval(MAX_CONNECTION_INTERVAL);
+	_stack->setConnectionSupervisionTimeout(CONNECTION_SUPERVISION_TIMEOUT);
+	_stack->setSlaveLatency(SLAVE_LATENCY);
 	_stack->setAdvertisingInterval(ADVERTISEMENT_INTERVAL);
-	_stack->setAdvertisingTimeoutSeconds(0);
+	_stack->setAdvertisingTimeoutSeconds(ADVERTISING_TIMEOUT);
 
 	//! Set the stored tx power
 	int8_t txPower;

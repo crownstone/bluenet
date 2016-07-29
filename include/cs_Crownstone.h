@@ -44,8 +44,6 @@
 
 #define CROWNSTONE_UPDATE_FREQUENCY 1 //! hz
 
-using namespace BLEpp;
-
 /**
  * Crownstone encapsulates all functionality, stack, services, and configuration.
  */

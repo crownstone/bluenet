@@ -23,7 +23,7 @@
  *
  * If meshing is enabled, it is also possible to send a message into the mesh network using a characteristic.
  */
-class CrownstoneService: public BLEpp::Service, EventListener {
+class CrownstoneService: public Service, EventListener {
 public:
 	/** Constructor for general crownstone service object
 	 *
@@ -78,7 +78,7 @@ protected:
 	StreamBuffer<uint8_t>* getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
 
 protected:
-	BLEpp::Characteristic<buffer_ptr_t>* _controlCharacteristic;
+	Characteristic<buffer_ptr_t>* _controlCharacteristic;
 
 	/** Set configuration characteristic
 	 *
@@ -93,7 +93,7 @@ protected:
 	 * As you see these are similar to current characteristics and will replace them in the future to save space.
 	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
 	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _configurationControlCharacteristic;
+	Characteristic<buffer_ptr_t>* _configurationControlCharacteristic;
 
 	/** Get configuration characteristic
 	 *
@@ -102,7 +102,7 @@ protected:
 	 *
 	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
 	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _configurationReadCharacteristic;
+	Characteristic<buffer_ptr_t>* _configurationReadCharacteristic;
 
 	//! buffer object to read/write configuration characteristics
 	StreamBuffer<uint8_t> *_streamBuffer;
@@ -113,12 +113,12 @@ private:
 	 *
 	 * Sends a message over the mesh network
 	 */
-	BLEpp::Characteristic<buffer_ptr_t>* _meshControlCharacteristic;
+	Characteristic<buffer_ptr_t>* _meshControlCharacteristic;
 	MeshCommand* _meshCommand;
 
-	BLEpp::Characteristic<buffer_ptr_t>* _stateControlCharacteristic;
-	BLEpp::Characteristic<buffer_ptr_t>* _stateReadCharacteristic;
-	BLEpp::Characteristic<buffer_ptr_t>* _sessionNonceCharacteristic;
+	Characteristic<buffer_ptr_t>* _stateControlCharacteristic;
+	Characteristic<buffer_ptr_t>* _stateReadCharacteristic;
+	Characteristic<buffer_ptr_t>* _sessionNonceCharacteristic;
 
 
 //	StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>* _meshCommand;

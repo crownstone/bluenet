@@ -82,7 +82,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		}
 		case SERVICE_DATA_MESSAGE: {
 #ifdef PRINT_MESHCONTROL_VERBOSE
-			LOGd("received service data from crownstone %s", getAddress((mesh_message_t*)p_data).c_str());
+			LOGd("Received service data from crownstone %s", getAddress((mesh_message_t*)p_data).c_str());
 #endif
 
 #ifdef PRINT_DEBUG
@@ -420,7 +420,11 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 }
 
 void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples) {
-//	LOGd("sendPowerSamplesMessage");
+
+#ifdef PRINT_MESHCONTROL_VERBOSE
+	LOGd("Send PowerSamplesMessage");
+#endif
+
 	hub_mesh_message_t* message = createHubMessage(POWER_SAMPLES_MESSAGE);
 	memcpy(&message->powerSamplesMsg, samples, sizeof(power_samples_mesh_message_t));
 	uint16_t handle = (message->header.address[0] % (MESH_NUM_HANDLES-2-1)) + 3;
@@ -429,8 +433,9 @@ void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples)
 }
 
 void MeshControl::sendServiceDataMessage(service_data_mesh_message_t* serviceData) {
+
 #ifdef PRINT_MESHCONTROL_VERBOSE
-	LOGd("send service data");
+	LOGd("Send service data");
 #endif
 
 	hub_mesh_message_t* message = createHubMessage(SERVICE_DATA_MESSAGE);

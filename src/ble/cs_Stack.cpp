@@ -33,8 +33,6 @@ extern "C" {
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Tracker.h>
 
-using namespace BLEpp;
-
 //#define PRINT_STACK_VERBOSE
 
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :

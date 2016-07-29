@@ -12,9 +12,6 @@
 #include <ble/cs_Softdevice.h>
 #include <storage/cs_Settings.h>
 
-
-using namespace BLEpp;
-
 //#define PRINT_CHARACTERISTIC_VERBOSE
 
 CharacteristicBase::CharacteristicBase() :
@@ -194,6 +191,8 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 
 uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 
+//	LOGi("[%s] update Value", _name);
+
 	//! get the data length of the value (unencrypted)
 	uint16_t valueLength = getValueLength();
 	/* get the address where the value should be stored so that the
@@ -225,8 +224,9 @@ uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 			LOGe("error encrypting data.");
 			return NRF_ERROR_INTERNAL;
 		}
-	}
-	else {
+
+		// todo: shouldn't you update the gatt value length here too?
+	} else {
 		//! set the data length of the gatt value (encrypted)
 		setGattValueLength(valueLength);
 	}
@@ -252,21 +252,30 @@ uint32_t CharacteristicBase::notify() {
 		return NRF_ERROR_INVALID_STATE;
 	}
 
+	uint32_t err_code;
+
 	//! get the data length of the value (encrypted)
 	uint16_t valueLength = getGattValueLength();
-	uint8_t* valueGattAddress = getGattValuePtr();
+//	uint8_t* valueGattAddress = getGattValuePtr();
 
 	ble_gatts_hvx_params_t hvx_params;
-	uint16_t len = valueLength;
 
 	hvx_params.handle = _handles.value_handle;
 	hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
 	hvx_params.offset = 0;
-	hvx_params.p_len = &len;
-	hvx_params.p_data = valueGattAddress;
+	hvx_params.p_len = &valueLength;
+	hvx_params.p_data = NULL;
+
+//		BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
+//				_handles.value_handle, &packageLen, p_data));
 
 	//	BLE_CALL(sd_ble_gatts_hvx, (_service->getStack()->getConnectionHandle(), &hvx_params));
-	uint32_t err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
+	err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
+
+//		nrf_delay_ms(500);
+
+//		LOGi("p_len: %d ", *hvx_params.p_len);
+
 	if (err_code != NRF_SUCCESS) {
 
 		if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
@@ -275,6 +284,7 @@ uint32_t CharacteristicBase::notify() {
 			//!   notifications faster than being able to send them out from the stack results
 			//!   in this error.
 			onNotifyTxError();
+			return err_code;
 		} else if (err_code == NRF_ERROR_INVALID_STATE) {
 			//! Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
 			//!   it can happen that it tries to update it's value although notification was disabled in
@@ -283,6 +293,10 @@ uint32_t CharacteristicBase::notify() {
 
 			//! this is not a serious error, but better to at least write it to the log
 			LOGe("ERR_CODE: %d (0x%X)", err_code, err_code);
+
+			// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
+			_status.notificationPending = false;
+			return err_code;
 		} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
 			//! Anne: do not complain for now... (meshing)
 		} else {
@@ -291,6 +305,143 @@ uint32_t CharacteristicBase::notify() {
 	}
 
 	return err_code;
+}
+
+
+#define MAX_NOTIFICATION_LEN 19
+
+struct __attribute__((__packed__)) notification_t {
+	uint8_t partNr;
+	uint8_t data[MAX_NOTIFICATION_LEN];
+};
+
+uint32_t Characteristic<buffer_ptr_t>::notify() {
+
+	if (!CharacteristicBase::_status.notifies || !_service->getStack()->connected() || !_status.notifyingEnabled) {
+		return NRF_ERROR_INVALID_STATE;
+	}
+
+	uint32_t err_code = NRF_SUCCESS;
+
+	//! get the data length of the value (encrypted)
+	uint16_t valueLength = getGattValueLength();
+	uint8_t* valueGattAddress = getGattValuePtr();
+
+	ble_gatts_hvx_params_t hvx_params;
+
+	uint16_t offset;
+	if (_status.notificationPending) {
+		offset = _notificationPendingOffset;
+	} else {
+		offset = 0;
+	}
+
+	while (offset < valueLength) {
+
+		uint16_t dataLen;
+		dataLen = MIN(valueLength - offset, MAX_NOTIFICATION_LEN);
+//
+		notification_t notification = {};
+
+		uint8_t oldVal[sizeof(notification_t)];
+
+		if (valueLength - offset > MAX_NOTIFICATION_LEN) {
+			notification.partNr = offset / MAX_NOTIFICATION_LEN;
+		} else {
+			notification.partNr = 0xFF;
+		}
+
+//		LOGi("dataLen: %d ", dataLen);
+//		BLEutil::printArray(valueGattAddress, valueLength);
+
+		memcpy(&notification.data, valueGattAddress + offset, dataLen);
+
+		uint16_t packageLen = dataLen + sizeof(notification.partNr);
+		uint8_t* p_data = (uint8_t*)&notification;
+
+//		LOGi("address: %p", valueGattAddress + offset);
+//		LOGi("offset: %d", offset);
+//		BLEutil::printArray((uint8_t*)valueGattAddress + offset, dataLen);
+//		BLEutil::printArray((uint8_t*)&notification, packageLen);
+
+		memcpy(oldVal, valueGattAddress + offset, packageLen);
+
+//		packageLen = 1;
+
+		hvx_params.handle = _handles.value_handle;
+		hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
+		hvx_params.offset = 0;
+		hvx_params.p_len = &packageLen;
+		hvx_params.p_data = p_data;
+
+		//	BLE_CALL(sd_ble_gatts_hvx, (_service->getStack()->getConnectionHandle(), &hvx_params));
+		err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
+
+		if (err_code != NRF_SUCCESS) {
+
+			if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
+				//! Dominik: this happens if several characteristics want to send a notification,
+				//!   but the system only has a limited number of tx buffers available. so queueing up
+				//!   notifications faster than being able to send them out from the stack results
+				//!   in this error.
+				onNotifyTxError();
+				_notificationPendingOffset = offset;
+				return err_code;
+//				return NRF_SUCCESS;
+			} else if (err_code == NRF_ERROR_INVALID_STATE) {
+				//! Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
+				//!   it can happen that it tries to update it's value although notification was disabled in
+				//!   in the meantime, in which case an invalid state error is returned. but this case we can
+				//!   ignore
+
+				//! this is not a serious error, but better to at least write it to the log
+				LOGe("ERR_CODE: %d (0x%X)", err_code, err_code);
+
+				// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
+				_notificationPendingOffset = 0;
+				_status.notificationPending = false;
+				return err_code;
+			} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
+				//! Anne: do not complain for now... (meshing)
+			} else {
+				APP_ERROR_CHECK(err_code);
+			}
+		}
+
+		memcpy(valueGattAddress + offset, oldVal, packageLen);
+
+		offset += dataLen;
+
+	}
+
+	return err_code;
+}
+
+void CharacteristicBase::onTxComplete(ble_common_evt_t * p_ble_evt) {
+	//! if we have a notification pending, try to send it
+	if (_status.notificationPending) {
+		//! this-> is necessary so that the call of notify depends on the template
+		//! parameter T
+		uint32_t err_code = this->notify();
+		if (err_code == NRF_SUCCESS) {
+//				LOGi("ontx success");
+			_status.notificationPending = false;
+		}
+	}
+}
+
+void Characteristic<buffer_ptr_t>::onTxComplete(ble_common_evt_t * p_ble_evt) {
+	//! if we have a notification pending, try to send it
+	if (_status.notificationPending) {
+		//! this-> is necessary so that the call of notify depends on the template
+		//! parameter T
+		uint32_t err_code = this->notify();
+		if (err_code == NRF_SUCCESS) {
+//				LOGi("ontx success");
+			_status.notificationPending = false;
+			_notificationPendingOffset = 0;
+		}
+	}
 }
 
 //void CharacteristicBase::onNotifyTxError() {

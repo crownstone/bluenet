@@ -12,7 +12,7 @@
 //#define GENERAL_BUFFER_SIZE                      300
 
 /** maximum length of strings used for characteristic values */
-#define MAX_STRING_LENGTH                        25
+#define MAX_CHAR_VALUE_STRING_LENGTH             12
 
 /** define the maximum size for strings to be stored
  */
@@ -107,3 +107,13 @@
 #define POWER_ZERO                               9.0f
 #define POWER_ZERO_AVG_WINDOW                    100
 #define MESH_ACCESS_ADDRESS                      0xA641A69E
+
+// stack config values
+//#define MIN_CONNECTION_INTERVAL                  16
+#define MIN_CONNECTION_INTERVAL                  6
+//#define MAX_CONNECTION_INTERVAL                  32
+#define MAX_CONNECTION_INTERVAL                  16
+#define CONNECTION_SUPERVISION_TIMEOUT           400
+#define SLAVE_LATENCY                            10
+#define ADVERTISING_TIMEOUT                      0
+

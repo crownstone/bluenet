@@ -13,8 +13,6 @@
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <protocol/cs_StateTypes.h>
 
-using namespace BLEpp;
-
 ScheduleService::ScheduleService() :
 		_currentTimeCharacteristic(NULL),
 		_writeScheduleEntryCharacteristic(NULL),

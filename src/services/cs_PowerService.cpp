@@ -15,8 +15,6 @@
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <protocol/cs_StateTypes.h>
 
-using namespace BLEpp;
-
 PowerService::PowerService() : EventListener(),
 		_pwmCharacteristic(NULL),
 		_relayCharacteristic(NULL),

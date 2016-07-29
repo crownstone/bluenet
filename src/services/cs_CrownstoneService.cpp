@@ -17,8 +17,6 @@
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <protocol/cs_ErrorCodes.h>
 
-using namespace BLEpp;
-
 CrownstoneService::CrownstoneService() : EventListener(),
 		_controlCharacteristic(NULL),
 		_configurationControlCharacteristic(NULL), _configurationReadCharacteristic(NULL),
