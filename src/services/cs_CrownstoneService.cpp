@@ -77,8 +77,8 @@ void CrownstoneService::createCharacteristics() {
 	{
 		LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
 		_streamBuffer = getStreamBuffer(buffer, maxLength);
-		addConfigurationControlCharacteristic(buffer, maxLength);
-		addConfigurationReadCharacteristic(buffer, maxLength);
+		addConfigurationControlCharacteristic(buffer, maxLength, ADMIN);
+		addConfigurationReadCharacteristic(buffer, maxLength, ADMIN);
 
 //		LOGd("Set both set/get charac to buffer at %p", buffer);
 	}
@@ -195,7 +195,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 
 }
 
-void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_configurationControlCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_configurationControlCharacteristic);
 
@@ -203,7 +203,7 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	_configurationControlCharacteristic->setName(BLE_CHAR_CONFIG_CONTROL);
 	_configurationControlCharacteristic->setWritable(true);
 	_configurationControlCharacteristic->setValue(buffer);
-	_configurationControlCharacteristic->setMinAccessLevel(ADMIN);
+	_configurationControlCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_configurationControlCharacteristic->setMaxGattValueLength(size);
 	_configurationControlCharacteristic->setValueLength(0);
 	_configurationControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
@@ -270,7 +270,7 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	});
 }
 
-void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_configurationReadCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_configurationReadCharacteristic);
 
@@ -279,7 +279,7 @@ void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, 
 	_configurationReadCharacteristic->setWritable(false);
 	_configurationReadCharacteristic->setNotifies(true);
 	_configurationReadCharacteristic->setValue(buffer);
-	_configurationReadCharacteristic->setMinAccessLevel(ADMIN);
+	_configurationReadCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_configurationReadCharacteristic->setMaxGattValueLength(size);
 	_configurationReadCharacteristic->setValueLength(0);
 }

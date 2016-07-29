@@ -221,6 +221,9 @@ struct ps_configuration_t : ps_storage_base_t {
 	uint32_t defaultOff;
 
 	uint32_t powerZeroAvgWindow;
+
+	uint32_t meshAccessAddress;
+
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct

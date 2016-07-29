@@ -58,8 +58,8 @@ void SetupService::createCharacteristics() {
 
 	LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
 	_streamBuffer = getStreamBuffer(buffer, maxLength);
-	addConfigurationControlCharacteristic(buffer, maxLength);
-	addConfigurationReadCharacteristic(buffer, maxLength);
+	addConfigurationControlCharacteristic(buffer, maxLength, ENCRYPTION_DISABLED);
+	addConfigurationReadCharacteristic(buffer, maxLength, ENCRYPTION_DISABLED);
 
 //	LOGd("Set both set/get charac to buffer at %p", buffer);
 

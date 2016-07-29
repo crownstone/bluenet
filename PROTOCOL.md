@@ -79,7 +79,7 @@ byte array | padding |  | Zero-padding so that the whole packet is of size N*16 
 #### Receiving scan response packages
 
 The [scan response service data](#scan_response_servicedata_packet) packet will be encrypted using the [ECB method](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
-To verify you have decrypted the message successfully, compare the Crownstone ID against the one you know it should have.
+You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
 
 # Advertisements and scan response
 When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
@@ -378,6 +378,8 @@ Type nr | Type name | Payload type | Description
 45 | Voltage Zero | float | Set the voltage zero level (for power measurement)
 46 | Current Zero | float | Set the current zero level (for power measurement)
 47 | Power Zero | float | Set the power zero level (for power measurement)
+48 | Power Average Window | uint16 | The window over which the zero line of the voltage is determined
+49 | <a name="mesh_access_address"></a>Mesh Access Address | uint32 | The access address of the mesh messages. This ensures that mesh messages of other groups will not interfere with your group. 
 
 OpCodes:
 

@@ -43,7 +43,7 @@ uint8_t* EncryptionHandler::getSessionNonce() {
  * Break the connection if there is an error in the encryption or decryption
  */
 void EncryptionHandler::closeConnectionAuthenticationFailure() {
-	BLEpp::Nrf51822BluetoothStack::getInstance().closeConnection(BLE_HCI_AUTHENTICATION_FAILURE);
+	Nrf51822BluetoothStack::getInstance().closeConnection(BLE_HCI_AUTHENTICATION_FAILURE);
 }
 
 
@@ -359,7 +359,7 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 	ConfigurationTypes keyConfigType;
 	switch (userLevel) {
 	case ADMIN:
-		keyConfigType = CONFIG_KEY_OWNER;
+		keyConfigType = CONFIG_KEY_AMIN;
 		break;
 	case USER:
 		keyConfigType = CONFIG_KEY_MEMBER;

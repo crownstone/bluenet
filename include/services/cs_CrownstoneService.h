@@ -61,11 +61,11 @@ protected:
 	 * characteristic.
 	 * See <_setConfigurationCharacteristic>.
 	 */
-	void addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	void addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel = ADMIN);
 
 	/** Enable the get configuration characteristic.
 	 */
-	void addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	void addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel = ADMIN);
 
 	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 	inline void addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size);

@@ -535,10 +535,6 @@ void Crownstone::prepareCrownstone() {
 
 //	if (_settings->isEnabled(CONFIG_MESH_ENABLED)) {
 
-#if HARDWARE_BOARD == VIRTUALMEMO
-			nrf_gpio_range_cfg_output(7,14);
-#endif
-
 		_mesh = &Mesh::getInstance();
 		_mesh->init();
 
