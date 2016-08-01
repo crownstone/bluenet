@@ -23,7 +23,7 @@ CharacteristicBase::CharacteristicBase() :
 }
 
 void CharacteristicBase::setName(const char * const name) {
-	if (_status.inited) BLE_THROW(MSG_BLE_CHAR_INITIALIZED);
+	if (_status.initialized) BLE_THROW(MSG_BLE_CHAR_INITIALIZED);
 	_name = name;
 
 }
@@ -162,7 +162,7 @@ void CharacteristicBase::init(Service* svc) {
 //	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
 //			_handles.value_handle, &ci.attr_char_value.init_len, ci.attr_char_value.p_value));
 
-	_status.inited = true;
+	_status.initialized = true;
 }
 
 /** Setup default write permissions.

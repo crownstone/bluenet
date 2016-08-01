@@ -57,7 +57,7 @@ struct CharacteristicInit {
  * The status can be initialized, with notifications, writable, etc.
  */
 struct Status {
-	boolean_t inited                                  : 1;
+	boolean_t initialized                             : 1;
 	boolean_t notifies                                : 1; //! Whether this characteristic has notifications
 	boolean_t writable                                : 1;
 	boolean_t notifyingEnabled                        : 1; //! Whether server registered for notifications
@@ -175,7 +175,7 @@ public:
 	}
 
 	void setUUID(const UUID& uuid) {
-		if (_status.inited) BLE_THROW("Already inited.");
+		if (_status.initialized) BLE_THROW("Already inited.");
 		_uuid = uuid;
 	}
 
@@ -485,7 +485,7 @@ public:
 
 	/** Set the default value */
 	void setDefaultValue(const T& t) {
-		if (_status.inited) BLE_THROW("Already inited.");
+		if (_status.initialized) BLE_THROW("Already inited.");
 		_value = t;
 	}
 
