@@ -447,6 +447,12 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		// todo: tbd
 		break;
 	}
+	case CMD_DISCONNECT: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "disconnect");
+		Nrf51822BluetoothStack::getInstance().disconnect();
+		break;
+	}
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// Crownstone specific commands are only available if device type is set to Crownstone.
 	// E.g. GuideStone does not support power measure or switching commands
