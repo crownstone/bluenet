@@ -102,7 +102,7 @@ protected:
 	/** used for encryption. If the characteristic is being read, it will encrypt itself with the lowest
 	 * allowed userlevel key.
 	 */
-	EncryptionAccessLevel _minAccessLevel = NOT_SET;
+	EncryptionAccessLevel _minAccessLevel = ADMIN;
 
 	//! Unit
 //	uint16_t                  _unit;
