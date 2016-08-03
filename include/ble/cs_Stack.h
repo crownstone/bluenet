@@ -419,7 +419,7 @@ public:
 
 	void setPinEncrypted(bool encrypted);
 	void setAesEncrypted(bool encrypted);
-	void closeConnection(uint8_t hci_status_code);
+	void disconnect();
 
 protected:
 

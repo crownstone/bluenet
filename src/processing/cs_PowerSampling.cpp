@@ -76,10 +76,8 @@ void PowerSampling::init() {
 	buffer += _currentSampleCircularBuf.getMaxByteSize();
 	_voltageSampleCircularBuf.assign(buffer, _voltageSampleCircularBuf.getMaxByteSize());
 	buffer += _voltageSampleCircularBuf.getMaxByteSize();
-#if MESHING == 1
 	_powerSamplesMeshMsg = (power_samples_mesh_message_t*) buffer;
 	buffer += sizeof(power_samples_mesh_message_t);
-#endif
 //	_currentSampleTimestamps.assign();
 //	_voltageSampleTimestamps.assign();
 
@@ -149,9 +147,7 @@ void PowerSampling::powerSampleReadBuffer() {
 			current = _currentSampleCircularBuf.pop();
 			voltage = _voltageSampleCircularBuf.pop();
 			power = current*voltage;
-#if MESHING == 1
 			_powerSamplesMeshMsg->samples[_powerSamplesCount] = power;
-#endif
 //			_lastPowerSample = power;
 			numSamples--;
 			_powerSamplesCount++;
@@ -160,9 +156,7 @@ void PowerSampling::powerSampleReadBuffer() {
 			current = _currentSampleCircularBuf.pop();
 			voltage = _voltageSampleCircularBuf.pop();
 			power = current*voltage;
-#if MESHING == 1
 			_powerSamplesMeshMsg->samples[_powerSamplesCount] = power;
-#endif
 
 //			diff = _lastPowerSample - power;
 //			_lastPowerSample = power;
@@ -170,6 +164,8 @@ void PowerSampling::powerSampleReadBuffer() {
 
 
 			if (_powerSamplesCount >= POWER_SAMPLE_MESH_NUM_SAMPLES) {
+				EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesMeshMsg, sizeof(power_samples_mesh_message_t));
+
 #if MESHING == 1
 				if (!nb_full()) {
 					MeshControl::getInstance().sendPowerSamplesMessage(_powerSamplesMeshMsg);
@@ -353,14 +349,8 @@ void PowerSampling::powerSampleFinish() {
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
 #if CONTINUOUS_POWER_SAMPLER == 1
-#if MESHING == 1
 	buffer = (buffer_ptr_t) _powerSamplesMeshMsg;
-	size = sizeof(_powerSamplesMeshMsg);
-#else
-	//! Something silly for now
-	buffer = (buffer_ptr_t) _currentSampleCircularBuf.getBuffer();
-	size = 0;
-#endif
+	size = sizeof(power_samples_mesh_message_t);
 #else
 	_powerSamples.getBuffer(buffer, size);
 #endif

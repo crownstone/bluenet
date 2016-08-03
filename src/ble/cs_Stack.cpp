@@ -1065,10 +1065,10 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 	}
 }
 
-void Nrf51822BluetoothStack::closeConnection(uint8_t hci_status_code) {
+void Nrf51822BluetoothStack::disconnect() {
 	LOGi("Forcibly disconnecting from device");
-	uint32_t err_code = sd_ble_gap_disconnect(getConnectionHandle(), hci_status_code);
-	APP_ERROR_CHECK(err_code);
+	//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
+	BLE_CALL(sd_ble_gap_disconnect, (_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
 }
 
 void Nrf51822BluetoothStack::onTxComplete(ble_evt_t * p_ble_evt) {

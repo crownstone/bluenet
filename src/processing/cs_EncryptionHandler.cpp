@@ -70,7 +70,7 @@ uint8_t* EncryptionHandler::getSessionNonce() {
  * Break the connection if there is an error in the encryption or decryption
  */
 void EncryptionHandler::closeConnectionAuthenticationFailure() {
-	Nrf51822BluetoothStack::getInstance().closeConnection(BLE_HCI_AUTHENTICATION_FAILURE);
+	Nrf51822BluetoothStack::getInstance().disconnect();
 }
 
 

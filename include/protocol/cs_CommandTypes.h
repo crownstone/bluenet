@@ -26,6 +26,7 @@ enum CommandHandlerTypes {
 	CMD_RELAY                       = 16,    //! 0x10
 	CMD_VALIDATE_SETUP              = 17,    //! 0x11
 	CMD_REQUEST_SERVICE_DATA        = 18,    //! 0x12
+	CMD_DISCONNECT                  = 19,    //! 0x13
 	CMD_TYPES
 };
 
