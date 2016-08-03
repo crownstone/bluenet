@@ -59,6 +59,7 @@ public:
 	bool allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided);
 
 	static uint16_t calculateEncryptionBufferLength(uint16_t inputLength);
+	static uint16_t calculateDecryptionBufferLength(uint16_t encryptedPacketLength);
 
 private:
 	bool _encryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength, bool useSessionNonce = true);

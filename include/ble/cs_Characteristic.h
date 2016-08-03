@@ -505,6 +505,14 @@ protected:
 		if (_status.aesEncrypted && _minAccessLevel < ENCRYPTION_DISABLED) {
 			LOGi("decrypt ...");
 
+			// the arithmetic type- and the string type characteristics have their hardcoded length in the valueLength
+			// the getValueLength() for those two types will always be the same and the setValueLength does nothing there.
+			// In the case of a characteristic with a dynamic buffer length we need to set the length ourselves.
+			// To do this we assume the length of the data is the same as the encrypted buffer minus the overhead for the encryption.
+			// The result can be zero padded but generally the payload has it's own length indication.
+			uint16_t decryptionBufferLength = EncryptionHandler::calculateDecryptionBufferLength(getGattValueLength());
+			setValueLength(decryptionBufferLength);
+
 			bool success = EncryptionHandler::getInstance().decrypt(
 				getGattValuePtr(),
 				getGattValueLength(),
