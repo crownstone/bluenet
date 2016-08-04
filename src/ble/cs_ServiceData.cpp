@@ -38,6 +38,7 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			break;
 		}
 		case STATE_TEMPERATURE: {
+			// TODO: isn't the temperature an int32_t ?
 			updateTemperature(*(int8_t*)p_data);
 			break;
 		}
@@ -46,7 +47,9 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		}
 
 		// encrypt the array using the guest key ECB if encryption is enabled.
-		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
+		uint8_t opMode;
+		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && !(opMode == OPERATION_MODE_SETUP)) {
 			EncryptionHandler::getInstance().encryptAdvertisement(_array, sizeof(_array), _encryptedArray, sizeof(_encryptedArray));
 		}
 

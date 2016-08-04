@@ -9,6 +9,7 @@
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
 
 #include <cstring>
 
@@ -56,7 +57,9 @@ public:
 	}
 
 	uint8_t* getArray() {
-		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
+		uint8_t opMode;
+		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && !(opMode == OPERATION_MODE_SETUP)) {
 			return _encryptedArray;
 		}
 		else {
