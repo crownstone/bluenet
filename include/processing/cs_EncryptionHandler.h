@@ -22,7 +22,7 @@
 
 enum EncryptionAccessLevel {
 	ADMIN 				= 0,
-	USER 				= 1,
+	MEMBER 				= 1,
 	GUEST 				= 2,
 	ANY				  	= 200,
 	NOT_SET 		  	= 201,

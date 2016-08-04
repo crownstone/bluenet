@@ -165,7 +165,7 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
 		case 0:
 			levelOfPackage = ADMIN; break;
 		case 1:
-			levelOfPackage = USER; break;
+			levelOfPackage = MEMBER; break;
 		case 2:
 			levelOfPackage = GUEST; break;
 	}
@@ -389,14 +389,14 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 	case ADMIN:
 		keyConfigType = CONFIG_KEY_AMIN;
 		break;
-	case USER:
+	case MEMBER:
 		keyConfigType = CONFIG_KEY_MEMBER;
 		break;
 	case GUEST:
 		keyConfigType = CONFIG_KEY_GUEST;
 		break;
 	default:
-		LOGe("Provided userLevel does not exist (level is not admin, user or guest)");
+		LOGe("Provided userLevel does not exist (level is not admin, member or guest)");
 		return false;
 	}
 

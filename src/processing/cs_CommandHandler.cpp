@@ -237,7 +237,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_REQUEST_SERVICE_DATA: {
-		if (!EncryptionHandler::getInstance().allowAccess(USER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "request service");
 
 		service_data_mesh_message_t serviceData;
@@ -297,7 +297,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SET_TIME: {
-		if (!EncryptionHandler::getInstance().allowAccess(USER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "set time:");
 
 		if (size != sizeof(uint32_t)) {
@@ -312,7 +312,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SCHEDULE_ENTRY: {
-		if (!EncryptionHandler::getInstance().allowAccess(USER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "schedule entry");
 
 #if SCHEDULER_ENABLED==1
@@ -430,7 +430,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 	}
 
 	case CMD_USER_FEEDBACK: {
-		if (!EncryptionHandler::getInstance().allowAccess(USER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "user feedback");
 		return ERR_NOT_IMPLEMENTED;
 
@@ -438,7 +438,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_KEEP_ALIVE_STATE: {
-		if (!EncryptionHandler::getInstance().allowAccess(USER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "keep alive");
 		return ERR_NOT_IMPLEMENTED;
 
