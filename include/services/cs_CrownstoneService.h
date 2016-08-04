@@ -70,6 +70,7 @@ protected:
 	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 	inline void addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
 	inline void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	inline void addFactoryResetCharacteristic();
 
 	/** Enable the mesh characteristic.
 	 */
@@ -119,6 +120,7 @@ private:
 	Characteristic<buffer_ptr_t>* _stateControlCharacteristic;
 	Characteristic<buffer_ptr_t>* _stateReadCharacteristic;
 	Characteristic<buffer_ptr_t>* _sessionNonceCharacteristic;
+	Characteristic<uint32_t>*     _factoryResetCharacteristic;
 
 
 //	StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>* _meshCommand;

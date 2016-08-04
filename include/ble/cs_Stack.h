@@ -420,6 +420,9 @@ public:
 	void setPinEncrypted(bool encrypted);
 	void setAesEncrypted(bool encrypted);
 	void disconnect();
+	void changeToLowTxPowerMode();
+	void changeToNormalTxPowerMode();
+
 
 protected:
 
@@ -442,9 +445,6 @@ protected:
 	void onTxComplete(ble_evt_t * p_ble_evt);
 
 	static void lowPowerTimeout(void* p_context);
-
-	void changeToLowPowerMode();
-	void changeToNormalPowerMode();
 
 };
 

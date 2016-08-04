@@ -13,6 +13,7 @@
 #include <drivers/cs_Timer.h>
 #include <mesh/cs_MeshControl.h>
 #include <processing/cs_CommandHandler.h>
+#include <processing/cs_FactoryReset.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <protocol/cs_ErrorCodes.h>
@@ -22,7 +23,8 @@ CrownstoneService::CrownstoneService() : EventListener(),
 		_configurationControlCharacteristic(NULL), _configurationReadCharacteristic(NULL),
 		_streamBuffer(NULL),
 		_meshControlCharacteristic(NULL), _meshCommand(NULL),
-		_stateControlCharacteristic(NULL), _stateReadCharacteristic(NULL)
+		_stateControlCharacteristic(NULL), _stateReadCharacteristic(NULL),
+		_sessionNonceCharacteristic(NULL), _factoryResetCharacteristic(NULL)
 {
 	EventDispatcher::getInstance().addListener(this);
 
@@ -92,13 +94,18 @@ void CrownstoneService::createCharacteristics() {
 		_streamBuffer = getStreamBuffer(buffer, maxLength);
 		addStateControlCharacteristic(buffer, maxLength);
 		addStateReadCharacteristic(buffer, maxLength);
-		addSessionNonceCharacteristic(buffer, maxLength);
 
 //		LOGd("Set both set/get charac to buffer at %p", buffer);
 	}
 #else
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_STATE);
 #endif
+
+	LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_NONCE);
+	addSessionNonceCharacteristic(buffer, maxLength);
+
+	LOGi(FMT_CHAR_ADD, STR_CHAR_FACTORY_RESET);
+	addFactoryResetCharacteristic();
 
 	addCharacteristicsDone();
 }
@@ -387,6 +394,21 @@ void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint1
 	_sessionNonceCharacteristic->setMinAccessLevel(GUEST);
 	_sessionNonceCharacteristic->setMaxGattValueLength(size);
 	_sessionNonceCharacteristic->setValueLength(0);
+}
+
+void CrownstoneService::addFactoryResetCharacteristic() {
+	_factoryResetCharacteristic = new Characteristic<uint32_t>();
+	addCharacteristic(_factoryResetCharacteristic);
+
+	_factoryResetCharacteristic->setUUID(UUID(getUUID(), FACTORY_RESET_UUID));
+	_factoryResetCharacteristic->setName(BLE_CHAR_FACTORY_RESET);
+	_factoryResetCharacteristic->setWritable(true);
+	_factoryResetCharacteristic->setNotifies(false);
+	_factoryResetCharacteristic->setDefaultValue(0);
+	_factoryResetCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
+	_factoryResetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value) -> void {
+		FactoryReset::getInstance().recover(value);
+	});
 }
 
 

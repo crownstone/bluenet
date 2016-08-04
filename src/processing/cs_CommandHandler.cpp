@@ -13,6 +13,7 @@
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_Switch.h>
+#include <processing/cs_FactoryReset.h>
 #include <mesh/cs_MeshControl.h>
 #include <mesh/cs_Mesh.h>
 #include <storage/cs_State.h>
@@ -139,6 +140,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		LOGi("%s encryption", enable ? STR_ENABLE : STR_DISABLE);
 		Settings::getInstance().updateFlag(CONFIG_ENCRYPTION_ENABLED, enable, true);
+		// TODO: Clear keys on disable? Check if keys are set on enable?
 		// todo: stack/service/characteristics need to be refactored if we also want to update characteristics
 		// on the fly
 		// for now, this only takes effect on next reset
@@ -268,25 +270,29 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		factory_reset_message_payload_t* payload = (factory_reset_message_payload_t*) buffer;
 		uint32_t resetCode = payload->resetCode;
 
-		if (resetCode == FACTORY_RESET_CODE) {
-//			LOGf("factory reset");
-
-			Settings::getInstance().factoryReset(resetCode);
-			State::getInstance().factoryReset(resetCode);
-			// todo: might not be neccessary if we only use dm in setup mode we can handle it specifically
-			//   there. maybe with a mode factory reset
-			// todo: remove stack again from CommandHandler if we don't need it here
-			Nrf51822BluetoothStack::getInstance().device_manager_reset();
-
-			LOGi("factory reset done, rebooting device in 2s ...");
-
-			resetDelayed(GPREGRET_SOFT_RESET);
-
-		} else {
-			LOGi("wrong code received: %p", resetCode);
-//			LOGi("factory reset code is: %p", FACTORY_RESET_CODE);
+		if (!FactoryReset::getInstance().factoryReset(resetCode)) {
 			return ERR_WRONG_PARAMETER;
 		}
+
+//		if (resetCode == FACTORY_RESET_CODE) {
+////			LOGf("factory reset");
+//
+//			Settings::getInstance().factoryReset(resetCode);
+//			State::getInstance().factoryReset(resetCode);
+//			// todo: might not be neccessary if we only use dm in setup mode we can handle it specifically
+//			//   there. maybe with a mode factory reset
+//			// todo: remove stack again from CommandHandler if we don't need it here
+//			Nrf51822BluetoothStack::getInstance().device_manager_reset();
+//
+//			LOGi("factory reset done, rebooting device in 2s ...");
+//
+//			resetDelayed(GPREGRET_SOFT_RESET);
+//
+//		} else {
+//			LOGi("wrong code received: %p", resetCode);
+////			LOGi("factory reset code is: %p", FACTORY_RESET_CODE);
+//			return ERR_WRONG_PARAMETER;
+//		}
 
 		break;
 	}

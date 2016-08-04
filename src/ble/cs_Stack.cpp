@@ -762,16 +762,16 @@ static uint32_t device_manager_evt_handler(dm_handle_t const    * p_handle,
 
 void Nrf51822BluetoothStack::lowPowerTimeout(void* p_context) {
 	LOGw("bonding timeout!");
-	((Nrf51822BluetoothStack*)p_context)->changeToNormalPowerMode();
+	((Nrf51822BluetoothStack*)p_context)->changeToNormalTxPowerMode();
 }
 
-void Nrf51822BluetoothStack::changeToLowPowerMode() {
+void Nrf51822BluetoothStack::changeToLowTxPowerMode() {
 	int8_t lowTxPower;
 	Settings::getInstance().get(CONFIG_LOW_TX_POWER, &lowTxPower);
 	setTxPowerLevel(lowTxPower);
 }
 
-void Nrf51822BluetoothStack::changeToNormalPowerMode() {
+void Nrf51822BluetoothStack::changeToNormalTxPowerMode() {
 	int8_t txPower;
 	Settings::getInstance().get(CONFIG_TX_POWER, &txPower);
 	setTxPowerLevel(txPower);
@@ -815,7 +815,7 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         	Timer::getInstance().createSingleShot(_lowPowerTimeoutId, lowPowerTimeout);
         	Timer::getInstance().start(_lowPowerTimeoutId, MS_TO_TICKS(60000), this);
 
-        	changeToLowPowerMode();
+        	changeToLowTxPowerMode();
         	break;
         }
         case DM_EVT_SECURITY_SETUP_COMPLETE: {
@@ -828,7 +828,7 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         	//! clear timeout
         	Timer::getInstance().stop(_lowPowerTimeoutId);
 
-			changeToNormalPowerMode();
+			changeToNormalTxPowerMode();
         	break;
         }
         default:

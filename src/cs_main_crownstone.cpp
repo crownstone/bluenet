@@ -51,7 +51,6 @@
 
 #include <ble/cs_DoBotsManufac.h>
 
-#include <processing/cs_PowerSampling.h>
 #include <storage/cs_State.h>
 
 /**********************************************************************************************************************
@@ -65,7 +64,7 @@ Crownstone::Crownstone() :
 	_scheduleService(NULL),
 	_serviceData(NULL), _beacon(NULL),
 	_mesh(NULL), _sensors(NULL), _fridge(NULL),
-	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL),
+	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
 	_advertisementPaused(false), _mainTimer(0), _operationMode(0)
 {
 
@@ -89,6 +88,7 @@ Crownstone::Crownstone() :
 
 	//! create command handler
 	_commandHandler = &CommandHandler::getInstance();
+	_factoryReset = &FactoryReset::getInstance();
 
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
@@ -240,6 +240,7 @@ void Crownstone::initDrivers() {
 
 	LOGd(FMT_INIT, "command handler");
 	_commandHandler->init();
+	_factoryReset->init();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch / PWM init

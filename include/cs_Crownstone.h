@@ -33,6 +33,7 @@
 #include <processing/cs_Tracker.h>
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scheduler.h>
+#include <processing/cs_FactoryReset.h>
 
 #include <mesh/cs_Mesh.h>
 #include <storage/cs_State.h>
@@ -158,6 +159,7 @@ private:
 	Scanner* _scanner;
 	Tracker* _tracker;
 	Scheduler* _scheduler;
+	FactoryReset* _factoryReset;
 
 	bool _advertisementPaused;
 

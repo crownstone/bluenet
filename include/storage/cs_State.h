@@ -15,9 +15,9 @@
 
 #define SWITCH_STATE_PERSISTENT
 
-#define OPERATION_MODE_SETUP 0x00
-#define OPERATION_MODE_NORMAL 0x10
-#define OPERATION_MODE_DFU 0x01
+#define OPERATION_MODE_SETUP                       0x00
+#define OPERATION_MODE_NORMAL                      0x10
+#define OPERATION_MODE_DFU                         0x01
 
 typedef uint32_t seq_number_t;
 
@@ -66,6 +66,11 @@ struct state_vars_notifaction {
 	uint8_t* data;
 	uint16_t dataLength;
 };
+
+
+#define FACTORY_RESET_STATE_NORMAL 0
+#define FACTORY_RESET_STATE_LOWTX  1
+#define FACTORY_RESET_STATE_RESET  2
 
 /**
  * Load StateVars from and save StateVars to persistent storage.
@@ -192,6 +197,7 @@ protected:
 	int32_t _temperature;
 	int32_t _powerUsage;
 	uint32_t _time;
+	uint8_t _factoryResetState;
 
 };
 
