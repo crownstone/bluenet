@@ -41,6 +41,14 @@ uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength
 }
 
 /**
+ * Determine the required size of the decryption buffer based on how long the encrypted packet is.
+ * The encrypted packet is the total size of what was written to the characteristic.
+ */
+uint16_t EncryptionHandler::calculateDecryptionBufferLength(uint16_t encryptedPacketLength) {
+	return encryptedPacketLength - VALIDATION_NONCE_LENGTH - PACKET_NONCE_LENGTH + USER_LEVEL_LENGTH;
+}
+
+/**
  * make sure we create a new nonce for each connection
  */
 void EncryptionHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
