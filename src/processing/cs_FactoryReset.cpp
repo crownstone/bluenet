@@ -33,6 +33,7 @@ void FactoryReset::timeout() {
 	if (resetState == FACTORY_RESET_STATE_LOWTX) {
 		Nrf51822BluetoothStack::getInstance().changeToNormalTxPowerMode();
 	}
+	State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_NORMAL);
 }
 
 void FactoryReset::enableRecovery(bool enable) {
