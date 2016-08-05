@@ -425,8 +425,25 @@ OpCode | Name | Description
 
 Note: On the State Read Characteristic, the OpCode is also set to distinguish between a one time read, and a continuous notification. In return, the length and payload will have actual data depending on the type.
 
+### <a name="power_samples_packet"></a>Power samples packet, TBD
 
-### <a name="power_curve_packet"></a>Power curve packet, TBD
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16   | numCurrentSamples     | 2                      | Number of current samples.
+uint 16 []| currentSamples        | numCurrentSamples * 2  | Array of current samples.
+uint 16   | numVoltageSamples     | 2                      | Number of voltage samples.
+uint 16 []| voltageSamples        | numVoltageSamples * 2  | Array of voltage samples.
+uint 16   | numCurrentTimeStamps  | 2                      | Number of current timestamps.
+uint 32   | firstCurrentTimeStamp | 4                      | Timestamp of first current sample.
+uint 32   | lastCurrentTimeStamp  | 4                      | Timestamp of last current sample.
+int 8 []  | currentTimeDiffs      | numCurrentTimeStamps-1 | Array of differences with previous timestamp.
+uint 16   | numVoltageTimeStamps  | 2                      | Number of voltage timestamps.
+uint 32   | firstVoltageTimeStamp | 4                      | Timestamp of first voltage sample.
+uint 32   | lastVoltageTimeStamp  | 4                      | Timestamp of last voltage sample.
+int 8 []  | voltageTimeDiffs      | numVoltageTimeStamps-1 | Array of differences with previous timestamp.
+
+
+### <a name="power_curve_packet"></a>Power curve packet, Deprecated
 
 ![Power curve packet](docs/diagrams/power-packet.png)
 
