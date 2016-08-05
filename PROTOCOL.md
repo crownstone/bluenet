@@ -425,7 +425,7 @@ OpCode | Name | Description
 
 Note: On the State Read Characteristic, the OpCode is also set to distinguish between a one time read, and a continuous notification. In return, the length and payload will have actual data depending on the type.
 
-### <a name="power_samples_packet"></a>Power samples packet, TBD
+### <a name="power_samples_packet"></a>Power samples packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
