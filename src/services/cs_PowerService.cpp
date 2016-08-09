@@ -148,11 +148,11 @@ void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 	case EVT_POWER_SAMPLES_START: {
-		if (_powerSamplesCharacteristic) {
-//			LOGd("power samples update");
-			_powerSamplesCharacteristic->setValueLength(0);
-			_powerSamplesCharacteristic->updateValue();
-		}
+//		if (_powerSamplesCharacteristic) {
+////			LOGd("power samples update");
+//			_powerSamplesCharacteristic->setValueLength(0);
+//			_powerSamplesCharacteristic->updateValue();
+//		}
 		break;
 	}
 	case EVT_POWER_SAMPLES_END: {
