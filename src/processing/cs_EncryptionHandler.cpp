@@ -78,10 +78,10 @@ void EncryptionHandler::closeConnectionAuthenticationFailure() {
  * This method does not use the AES CTR method but straight ECB.
  * It encrypts the block with the GUEST key.
  */
-bool EncryptionHandler::encryptAdvertisement(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength) {
+bool EncryptionHandler::encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength) {
 	// must be 1 block.
 	if (dataLength != SOC_ECB_CLEARTEXT_LENGTH || targetLength != SOC_ECB_CIPHERTEXT_LENGTH) {
-		LOGe("The length of the data and/or target buffers is not 16 bytes. Cannot encrypt advertisement.");
+		LOGe("Invalid buffer length");
 		return false;
 	}
 
@@ -100,7 +100,7 @@ bool EncryptionHandler::encryptAdvertisement(uint8_t* data, uint8_t dataLength, 
 		memcpy(target, _block.ciphertext, SOC_ECB_CIPHERTEXT_LENGTH);
 	}
 	else {
-		LOGe("Guest key is not set. Cannot encrypt advertisement.");
+		LOGe("Guest key is not set");
 		return false;
 	}
 
@@ -131,7 +131,8 @@ bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* tar
 
 	// check if the input would still fit if the nonce is added.
 	if (dataLength + VALIDATION_NONCE_LENGTH > targetNetLength) {
-		LOGe("Length of input block would be larger than the output block if we add the validation nonce.");
+		LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+//		LOGe("Length of input block would be larger than the output block if we add the validation nonce.");
 		return false;
 	}
 
@@ -160,7 +161,8 @@ bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* tar
 bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel& levelOfPackage, bool useSessionNonce) {
 	// check if the size of the encrypted data packet makes sense: min 1 block and overhead
 	if (encryptedDataPacketLength < SOC_ECB_CIPHERTEXT_LENGTH + _overhead) {
-		LOGe("Encryted data packet is smaller than the minimum possible size of a block and overhead (20 bytes).");
+		LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+//		LOGe("Encryted data packet is smaller than the minimum possible size of a block and overhead (20 bytes).");
 		return false;
 	}
 
@@ -185,7 +187,7 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
 	_createIV(_block.cleartext, encryptedDataPacket, useSessionNonce); // the first 3 bytes should be the packet nonce
 
 	if (_decryptCTR(encryptedDataPacket + _overhead, sourceNetLength, target, targetLength, useSessionNonce) == false) {
-		LOGe("Error while decrypting.");
+		LOGe("Error while decrypting");
 		return false;
 	}
 
@@ -203,7 +205,8 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
  */
 bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength, bool useSessionNonce) {
 	if (_validateBlockLength(inputLength) == false) {
-		LOGe("Length of input block does not match the expected length (N*16 Bytes).");
+		LOGe(STR_ERR_MULTIPLE_OF_16);
+//		LOGe("Length of input block does not match the expected length (N*16 Bytes).");
 		return false;
 	}
 
@@ -235,7 +238,7 @@ bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 			if (inputReadIndex < inputLength)
 				_block.ciphertext[i] ^= input[inputReadIndex];
 			else
-				LOGe("Decryption error: length mismatch");
+				LOGe("Length mismatch");
 		}
 
 
@@ -268,7 +271,7 @@ bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 	}
 
 	if (targetLengthLeftToWrite != 0) {
-		LOGe("Not all decrypted data has been written to the target! %d", targetLengthLeftToWrite);
+		LOGe("Not all decrypted data has been written! %d", targetLengthLeftToWrite);
 		return false;
 	}
 
@@ -283,13 +286,15 @@ bool EncryptionHandler::_validateDecryption(uint8_t* buffer, bool useSessionNonc
 	for (uint8_t i = 0; i < VALIDATION_NONCE_LENGTH; i++) {
 		if (useSessionNonce) {
 			if (buffer[i] != _sessionNonce[i]) {
-				LOGe("Crownstone session nonce does not match session nonce in packet. Can not decrypt.");
+				LOGe("Nonce mismatch");
+//				LOGe("Crownstone session nonce does not match session nonce in packet. Can not decrypt.");
 				return false;
 			}
 		}
 		else {
 			if (buffer[i] != _defaultValidationKey.a[i]) {
-				LOGe("Crownstone session nonce does not match 0xcafebabe in packet. Can not decrypt.");
+				LOGe("Nonce mismatch");
+//				LOGe("Crownstone session nonce does not match 0xcafebabe in packet. Can not decrypt.");
 				return false;
 			}
 		}
@@ -313,7 +318,8 @@ bool EncryptionHandler::_validateDecryption(uint8_t* buffer, bool useSessionNonc
  */
 bool EncryptionHandler::_encryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength, bool useSessionNonce) {
 	if (_validateBlockLength(outputLength) == false) {
-		LOGe("Length of output block does not match the expected length (N*16 Bytes).");
+		LOGe(STR_ERR_MULTIPLE_OF_16);
+//		LOGe("Length of output block does not match the expected length (N*16 Bytes).");
 		return false;
 	}
 
@@ -388,7 +394,7 @@ bool EncryptionHandler::_encryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 	// check if the userLevel is set.
 	if (userLevel == NOT_SET) {
-		LOGe("The userLevel is not set.");
+		LOGe("User level is not set.");
 		return false;
 	}
 
@@ -404,7 +410,8 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 		keyConfigType = CONFIG_KEY_GUEST;
 		break;
 	default:
-		LOGe("Provided userLevel does not exist (level is not admin, member or guest)");
+		LOGe("Invalid user level");
+//		LOGe("Provided userLevel does not exist (level is not admin, member or guest)");
 		return false;
 	}
 
@@ -479,7 +486,8 @@ bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAcc
 	if (provided != ENCRYPTION_DISABLED) {
 		// 0 is the highest possible value: ADMIN. If the provided is larger than the minumum, it is not allowed.
 		if (provided > minimum) {
-			LOGi("Insufficient accessLevel provided to use the characteristic.");
+//			LOGi("Insufficient accessLevel provided to use the characteristic.");
+			LOGi("Insufficient access.");
 			return false;
 		}
 	}

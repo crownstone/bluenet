@@ -91,11 +91,12 @@
 
 #define STR_CREATE_ALL_SERVICES                  "Create all services"
 
-#define STR_ERR_BUFFER_NOT_LARGE_ENOUGH          "Assigned buffer is not large enough!"
+#define STR_ERR_BUFFER_NOT_LARGE_ENOUGH          "Buffer not large enough!"
 #define STR_ERR_ALLOCATE_MEMORY                  "Could not allocate memory!"
 #define STR_ERR_VALUE_TOO_LONG                   "Value too long!"
 #define STR_ERR_FORGOT_TO_ASSIGN_STACK           "Forgot to assign stack!"
 #define STR_ERR_ALREADY_STOPPED                  "Already stopped!"
+#define STR_ERR_MULTIPLE_OF_16                   "Data must be multiple of 16B"
 
 /** Error messages
  *

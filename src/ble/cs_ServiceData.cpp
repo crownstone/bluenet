@@ -50,7 +50,7 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		uint8_t opMode;
 		State::getInstance().get(STATE_OPERATION_MODE, opMode);
 		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && !(opMode == OPERATION_MODE_SETUP)) {
-			EncryptionHandler::getInstance().encryptAdvertisement(_array, sizeof(_array), _encryptedArray, sizeof(_encryptedArray));
+			EncryptionHandler::getInstance().encryptECB(_array+1, sizeof(_array)-1, _encryptedArray+1, sizeof(_encryptedArray)-1);
 		}
 
 		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);

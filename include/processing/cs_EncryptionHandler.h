@@ -49,7 +49,7 @@ public:
 	void init();
 
 	bool encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel accessLevel, bool useSessionNonce = true);
-	bool encryptAdvertisement(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength);
+	bool encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength);
 	bool encryptMesh(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength);
 	bool decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel& accessLevelInPackage, bool useSessionNonce = true);
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);

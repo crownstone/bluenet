@@ -33,7 +33,7 @@ public:
 	}
 
 	void updateCrownstoneStateId(uint16_t crownstoneStateId) {
-		_params.crownstoneStateId = crownstoneStateId;
+//		_params.crownstoneStateId = crownstoneStateId;
 	}
 
 	void updateSwitchState(uint8_t switchState) {
@@ -78,13 +78,13 @@ private:
 		struct __attribute__((packed)) {
 			uint8_t protocolVersion;
 			uint16_t crownstoneId;
-			uint16_t crownstoneStateId;
 			uint8_t switchState;
 			uint8_t eventBitmask;
 //			uint8_t reserved;
 			int8_t temperature;
 			int32_t powerUsage;
 			int32_t accumulatedEnergy;
+			uint8_t rand[3];
 		} _params;
 		uint8_t _array[sizeof(_params)] = {};
 	};
