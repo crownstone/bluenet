@@ -1,4 +1,4 @@
-# Bluenet protocol v0.5.0
+# Bluenet protocol v0.5.1
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -64,9 +64,9 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of this message.
 uint 8 | User level | 1 | 0: Admin, 1: User, 2: Guest
-Encrypted Payload | Encrypted Payload | N*16 | The encrypted payload of N blocks.
+[Encrypted Payload](#encrypted_payload) | Encrypted Payload | N*16 | The encrypted payload of N blocks.
 
-##### Encrypted payload
+##### <a name="encrypted_payload"></a>Encrypted payload
 
 ![Encrypted payload](docs/diagrams/encrypted-payload.png)
 
@@ -114,14 +114,14 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | AD Length | 1 | Length of the Name AD Structure (0x0A)
 uint 8 | AD Type | 1 | Shortened Local Name (0x08)
-char []] | Name Bytes | 9 | The shortened name of this device.
+char [] | Name Bytes | 8 | The shortened name of this device.
 uint 8 | AD Length | 1 | Length of the Service Data AD Structure (0x13)
 uint 8 | AD Type | 1 | Service Data (0x16)
 uint 16 | Service UUID | 2 | Service UUID
-[Service data](#scan_response_servicedata_packet) | Service Data | 16 | Service data, state info.
+[Service data](#scan_response_servicedata_packet) | Service Data | 17 | Service data, state info.
 
 ### <a name="scan_response_servicedata_packet"></a>Scan response service data packet
-This packet contains the state info. If encryption is enabled, it will be encrypted using AES 128 ECB using the Guest key.
+This packet contains the state info. If encryption is enabled, the last 16 bytes will be encrypted using AES 128 ECB using the Guest key.
 
 ![Scan Response ServiceData](docs/diagrams/scan-response-service-data.png)
 
@@ -129,12 +129,12 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Protocol Version | 1 | Service data protocol version
 uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
-uint 16 | Crownstone state ID | 2 | ID of the Crownstone of which the state is shown.
 uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | Event bitmask | 1 | Shows if the Crownstone has something new to tell.
 int 8 | Temperature | 1 | Chip temperature (°C)
 int 32 | Power usage | 4 | The power usage at this moment (mW).
 int 32 | Accumulated energy | 4 | The accumulated energy (kWh).
+uint 8[] | Rand | 3 | Random bytes.
 
 #### <a name="switch_state_packet"></a>Switch State Packet
 
@@ -143,8 +143,8 @@ the following layout
 
 ![Switch State Packet](docs/diagrams/switch_state_packet.png)
 
-Bit 7 is used for the Relay Flag, where 0 = OFF, 1 = ON
-Bits 6-0 are used for PWM, where 100 is full ON, 0 is OFF, dimmed in between
+Bit 7 is used for the relay flag, where 0 = OFF, 1 = ON.
+Bits 6-0 are used for PWM, where 100 is fully ON, 0 is OFF, dimmed in between.
 
 # Services
 When connected, the following services are available.
@@ -427,6 +427,8 @@ Note: On the State Read Characteristic, the OpCode is also set to distinguish be
 
 ### <a name="power_samples_packet"></a>Power samples packet
 
+![Power samples packet](docs/diagrams/power-samples-packet.png)
+
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16   | numCurrentSamples     | 2                      | Number of current samples.
@@ -443,9 +445,9 @@ uint 32   | lastVoltageTimeStamp  | 4                      | Timestamp of last v
 int 8 []  | voltageTimeDiffs      | numVoltageTimeStamps-1 | Array of differences with previous timestamp.
 
 
-### <a name="power_curve_packet"></a>Power curve packet, Deprecated
+### <a name="power_curve_packet"></a>Power curve packet, deprecated
 
-![Power curve packet](docs/diagrams/power-packet.png)
+![Power curve packet](docs/diagrams/power-curve-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
