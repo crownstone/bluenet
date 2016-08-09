@@ -21,10 +21,8 @@
 
 #include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
-
+#include <events/cs_EventDispatcher.h>
 #include <mesh/cs_Mesh.h>
-
-//#define PRINT_STORAGE_VERBOSE
 
 extern "C"  {
 
@@ -87,13 +85,15 @@ void Storage::init() {
 }
 
 void Storage::onUpdateDone() {
-	// track how many update requests are still pending
-	_pending--;
-	// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
-	if (!_pending) {
-		LOGi("pstorage update done");
-		if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-			Mesh::getInstance().start();
+	if (_pending) {
+		// track how many update requests are still pending
+		_pending--;
+		// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
+		if (!_pending) {
+			LOGi("pstorage update done");
+			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+				Mesh::getInstance().start();
+			}
 		}
 	}
 }
@@ -547,8 +547,9 @@ void Storage::getUint32(uint32_t value, uint32_t* target, uint32_t default_value
 
 
 void Storage::setFloat(float value, float& target) {
-	if (value == FLT_MAX) {
-		LOGe("value %d too big", value);
+	uint8_t* byteP = (uint8_t*)&value;
+	if (byteP[0] == 0xFF && byteP[1] == 0xFF && byteP[2] == 0xFF && byteP[3] == 0xFF) {
+		LOGe("Invalid value");
 	} else {
 		target = value;
 	}
@@ -564,7 +565,9 @@ void Storage::getFloat(float value, float* target, float default_value) {
 
 	// check if value is equal to DBL_MAX (FFFFFFFF) which means that memory is
 	// unassigned and value has to be ignored
-	if (*(uint32_t*)&value == UINT32_MAX) {
+//	if (*(uint32_t*)&value == UINT32_MAX) {
+	uint8_t* byteP = (uint8_t*)&value;
+	if (byteP[0] == 0xFF && byteP[1] == 0xFF && byteP[2] == 0xFF && byteP[3] == 0xFF) {
 #ifdef PRINT_ITEMS
 		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif

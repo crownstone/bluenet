@@ -16,8 +16,6 @@
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>
 
-using namespace BLEpp;
-
 GeneralService::GeneralService() : EventListener(),
 		_temperatureCharacteristic(NULL), _resetCharacteristic(NULL)
 {
@@ -75,7 +73,7 @@ void GeneralService::addResetCharacteristic() {
 	_resetCharacteristic->setName(BLE_CHAR_RESET);
 	_resetCharacteristic->setDefaultValue(0);
 	_resetCharacteristic->setWritable(true);
-	_resetCharacteristic->onWrite([&](const uint8_t& value) -> void {
+	_resetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_RESET, (buffer_ptr_t)&value, 1);
 	});
 }

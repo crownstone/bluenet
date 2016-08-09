@@ -92,5 +92,6 @@ private:
 	float _voltageZero;
 	float _currentZero;
 	float _powerZero;
+	uint16_t _zeroAvgWindow;
 };
 

@@ -72,7 +72,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //						(dev.addr[5] == 0xC1 && dev.addr[4] == 0x1F && dev.addr[3] == 0xDC && dev.addr[2] == 0xF9 && dev.addr[1] == 0xB3 && dev.addr[0] == 0xFC)) {
 						LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
 								dev.addr[4], dev.addr[3], dev.addr[2], dev.addr[1],
-								dev.addr[0], dev.txPower, dev.occurrences);
+								dev.addr[0], dev.rssi, dev.occurrences);
 //					}
 				}
 #endif
@@ -82,11 +82,11 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 		}
 		case SERVICE_DATA_MESSAGE: {
 #ifdef PRINT_MESHCONTROL_VERBOSE
-			LOGd("received service data from crownstone %s", getAddress((mesh_message_t*)p_data).c_str());
+			LOGd("Received service data from crownstone %s", getAddress((mesh_message_t*)p_data).c_str());
 #endif
 
-			service_data_mesh_message_t& sd = msg->serviceDataMsg;
 #ifdef PRINT_DEBUG
+			service_data_mesh_message_t& sd = msg->serviceDataMsg;
 			LOGd("> crownstone id: %d", sd.crownstoneId);
 			LOGd("> switch state: %d", sd.switchState);
 			LOGd("> event bitmask: %s", BLEutil::toBinaryString(sd.eventBitmask).c_str());
@@ -420,18 +420,22 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 }
 
 void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples) {
-//	LOGd("sendPowerSamplesMessage");
-	hub_mesh_message_t* message = createHubMessage(POWER_SAMPLES_MESSAGE);
 
+#ifdef PRINT_MESHCONTROL_VERBOSE
+	LOGd("Send PowerSamplesMessage");
+#endif
+
+	hub_mesh_message_t* message = createHubMessage(POWER_SAMPLES_MESSAGE);
 	memcpy(&message->powerSamplesMsg, samples, sizeof(power_samples_mesh_message_t));
-//	uint16_t handle = (message->header.address[0] % (MESH_NUM_OF_CHANNELS-2)) + 3;
-	uint16_t handle = (message->header.address[0] % (MESH_NUM_OF_CHANNELS-2-1)) + 3;
-	Mesh::getInstance().send(handle, &message, sizeof(message));
+	uint16_t handle = (message->header.address[0] % (MESH_NUM_HANDLES-2-1)) + 3;
+	Mesh::getInstance().send(handle, message, sizeof(hub_mesh_message_t));
+	free(message);
 }
 
 void MeshControl::sendServiceDataMessage(service_data_mesh_message_t* serviceData) {
+
 #ifdef PRINT_MESHCONTROL_VERBOSE
-	LOGd("send service data");
+	LOGd("Send service data");
 #endif
 
 	hub_mesh_message_t* message = createHubMessage(SERVICE_DATA_MESSAGE);

@@ -19,14 +19,17 @@
 
 #include <common/cs_Types.h>
 
+#include <drivers/cs_Serial.h>
+#include <util/cs_Utils.h>
+
+#include <structs/buffer/cs_EncryptionBuffer.h>
+#include <processing/cs_EncryptionHandler.h>
+
 /** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
-namespace BLEpp {
-
 class Service;
-//class Nrf51822BluetoothStack;
 
 /** CharacteristicInit collects fields required to define a BLE characteristic
  */
@@ -47,9 +50,6 @@ struct CharacteristicInit {
 	CharacteristicInit() : presentation_format({}), char_md({}), cccd_md({}), attr_md({}) {}
 };
 
-
-typedef uint8_t boolean_t;
-
 #define STATUS_INITED
 
 /** Status of a Characteristic.
@@ -57,12 +57,18 @@ typedef uint8_t boolean_t;
  * The status can be initialized, with notifications, writable, etc.
  */
 struct Status {
-	boolean_t inited                                  : 1;
-	boolean_t notifies                                : 1;
+	boolean_t initialized                             : 1;
+	boolean_t notifies                                : 1; //! Whether this characteristic has notifications
 	boolean_t writable                                : 1;
-	boolean_t notifyingEnabled                        : 1;
+	boolean_t notifyingEnabled                        : 1; //! Whether server registered for notifications
 	boolean_t indicates                               : 1;
-	boolean_t                                         : 3;
+	boolean_t pinEncrypted                            : 1;
+	boolean_t aesEncrypted                            : 1;
+
+	/** Flag to indicate if notification is pending to be sent once currently waiting
+	 * tx operations are completed
+	 */
+	boolean_t notificationPending                     : 1;
 };
 
 /** Non-template base class for Characteristics.
@@ -91,40 +97,15 @@ protected:
 	//! Status of CharacteristicBase (basically a bunch of 1-bit flags)
 	Status                    _status;
 
-	bool                      _encrypted;
+	buffer_ptr_t              _encryptionBuffer;
 
-#ifdef BIG_SIZE_REQUIRED
-	bool                      .inited;
-
-	/** This characteristic can be set to notify at regular intervals.
-	 *
-	 * This interval cannot be set from the client side.
+	/** used for encryption. If the characteristic is being read, it will encrypt itself with the lowest
+	 * allowed userlevel key.
 	 */
-	bool                      .notifies;
+	EncryptionAccessLevel _minAccessLevel = ADMIN;
 
-	/** This characteristic can be written by another device.
-	 */
-	bool                      .writable;
-
-	/** If this characteristic can notify a listener (<.notifies>), this field enables it.
-	 */
-	bool                      .notifyingEnabled;
-
-	/** This characteristic can be set to indicate at regular intervals.
-	 *
-	 * Indication is different from notification, in the sense that it requires ACKs.
-	 * https://devzone.nordicsemi.com/question/310/notificationindication-difference/
-	 */
-	bool                      .indicates;
-#endif
 	//! Unit
 //	uint16_t                  _unit;
-
-	/** Interval for updates (4 bytes), 0 means don't update
-	 *
-	 * TODO: Currently, this is not in use.
-	 */
-//	uint32_t                  _updateIntervalMsecs;
 
 public:
 	/** Default constructor for CharacteristicBase
@@ -149,25 +130,23 @@ public:
 	 */
 	void init(Service* svc);
 
-	void setEncrypted(bool encrypted) {
-		_encrypted = encrypted;
+	void setPinEncrypted(bool encrypted) {
+		_status.pinEncrypted = encrypted;
 	}
 
 	/** Set this characteristic to be writable.
 	 */
-	CharacteristicBase& setWritable(bool writable) {
+	void setWritable(bool writable) {
 		_status.writable = writable;
 		setWritePermission(1, 1);
-		return *this;
 	}
 
 	void setupWritePermissions(CharacteristicInit& ci);
 
 	/** Set this characteristic to be notifiable.
 	 */
-	CharacteristicBase& setNotifies(bool notifies) {
+	void setNotifies(bool notifies) {
 		_status.notifies = notifies;
-		return *this;
 	}
 
 	bool isNotifyingEnabled() {
@@ -179,9 +158,8 @@ public:
 		_status.notifyingEnabled = enabled;
 	}
 
-	CharacteristicBase& setIndicates(bool indicates) {
+	void setIndicates(bool indicates) {
 		_status.indicates = indicates;
-		return *this;
 	}
 
 	/** Security Mode 0 Level 0: No access permissions at all (this level is not defined by the Bluetooth Core specification).\n
@@ -191,21 +169,17 @@ public:
 	 * Security Mode 2 Level 1: Signing or encryption required, MITM protection not necessary.\n
 	 * Security Mode 2 Level 2: MITM protected signing required, unless link is MITM protected encrypted.\n
 	 */
-	CharacteristicBase& setWritePermission(uint8_t securityMode, uint8_t securityLevel) {
+	void setWritePermission(uint8_t securityMode, uint8_t securityLevel) {
 		_writeperm.sm = securityMode;
 		_writeperm.lv = securityLevel;
-		return *this;
 	}
 
-	CharacteristicBase& setUUID(const UUID& uuid) {
-		if (_status.inited) BLE_THROW("Already inited.");
+	void setUUID(const UUID& uuid) {
+		if (_status.initialized) BLE_THROW("Already inited.");
 		_uuid = uuid;
-		return *this;
 	}
 
-	CharacteristicBase& setName(const char * const name);
-
-	CharacteristicBase& setUnit(uint16_t unit);
+	void setName(const char * const name);
 
 	const UUID & getUUID() {
 		return _uuid;
@@ -219,27 +193,92 @@ public:
 		return _handles.cccd_handle;
 	}
 
-	CharacteristicBase& setUpdateIntervalMSecs(uint32_t msecs);
+	/** Return the maximum length of the value used by the gatt server
+	 *  In the case of aes encryption, this is the maximum length that
+	 *  the value can be when encrypted. for normal types (arithmetic
+	 *  types and strings) this is a fixed value, for dynamic types, the
+	 *  max length has to be set at construction
+	 *  In the case of no encryption, for normal types, this is the same
+	 *  as the value length
+	  */
+	virtual uint16_t getGattValueMaxLength() = 0;
 
-	/** Return the maximum length of the value */
-	virtual uint16_t getValueMaxLength() = 0;
-	/** Return the actual length of the value */
-	virtual uint16_t getValueLength() = 0;
-	/** Return the pointer to the memory where the value is stored */
+	/** Set the length of the value used by the gatt server
+	 *  In the case of aes encryption, this is the length of the encrypted
+	 *  value
+	 *  otherwise it's the same as the value length which is a fixed value
+	 *  for normal types (arithmetic types and strings) but has to be set
+	 *  for buffer values because they have dynamic length
+	 *
+	 *  This is only necessary for buffer values because they have a
+	 *  dynamic length. When a value is received over BT we need to update
+	 *  the length of the data
+	 */
+	virtual void setGattValueLength(uint16_t length) {}
+
+	/** Return the actual length of the value used by the gatt server
+	 *  In the case of aes encryption, this is the length of the encrypted
+	 *  value
+	 *  otherwise it's the same as the value length
+	 */
+	virtual uint16_t getGattValueLength() = 0;
+
+	/** Return the pointer to the memory where the value is accessed by the gatt server
+	 *
+	 *  In the case of aes encryption, this is the pointer to the memory with the encrypted
+	 *  value
+	 *  Otherwise, this will return the value of getValuePtr
+	 *
+	 *  For a basic data type return the address where the first byte
+	 *  is stored
+	 */
+	uint8_t* getGattValuePtr() {
+		if (this->isAesEnabled()) {
+			return this->getEncryptionBuffer();
+		} else {
+			return getValuePtr();
+		}
+	}
+
+	/** Return the pointer to the memory where the value is stored
+	 *  In the case of aes encryption, this is the pointer to the unencrypted
+	 *  value
+	 */
 	virtual uint8_t* getValuePtr() = 0;
 
 	/** Set the actual length of the data
-	 * @length the length of the data to which the value points
+	 *  @length the length of the data to which the value points
 	 *
-	 * This is only necessary for buffer values. When a value is received
-	 * over BT we need to update the length of the data
+	 *  In the case of aes encryption, this is the length of the unencrypted
+	 *  data which is a fixed value for normal types, but dynamic for buffer
+	 *  types. so it has to be set when writing/updating the characteristic.
+	 *
+	 *  This is only necessary for buffer values because they have a
+	 *  dynamic length. When a value is received over BT we need to update
+	 *  the length of the data. same if we update a value to be read, the
+	 *  length of the available data has to be set.
 	 */
-	virtual void setDataLength(uint16_t length) {};
+	virtual void setValueLength(uint16_t length) {};
 
-	virtual void read() = 0;
+	/** Return the actual length of the value
+	 *  In the case of aes encryption, this is the length of the unencrypted
+	 *  data.
+	 *  For normal types (arithmetic and strings) this is a fixed value. For
+	 *  buffer types it is dynamic
+	 */
+	virtual uint16_t getValueLength() = 0;
+
+	/** Helper function which is called when a characteristic is written over
+	 *  BLE.
+	 *  @len the number of bytes that were written
+	 */
 	virtual void written(uint16_t len) = 0;
 
-	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
+	/** Update the value in the gatt server so that the value can be read over BLE
+	 *  If somebody is also listening to notifications for the characteristic
+	 *  notifications will be sent.
+	 */
+	uint32_t updateValue(bool useSessionNonce = true);
 
 	/** Notify any listening party.
 	 *
@@ -251,18 +290,74 @@ public:
 	 *
 	 * @return err_code (which should be NRF_SUCCESS if no error occurred)
 	 */
-	uint32_t notify();
+	virtual uint32_t notify();
+
+	/** Callback function if a notify tx error occurs
+	 *
+	 * This is called when the notify operation fails with a tx error. This
+	 * can occur when too many tx operations are taking place at the same time.
+	 *
+	 * A <BLEpp::CharacteristicGenericBase::notify> is called when the master device
+	 * connected to the Crownstone requests automatic notifications whenever
+	 * the value changes.
+	 */
+	void onNotifyTxError() {
+		_status.notificationPending = true;
+	}
+
+	/** Callback function once tx operations complete
+	 * @p_ble_evt the event object which triggered the onTxComplete callback
+	 *
+	 * This is called whenever tx operations complete. If a notification is pending
+	 * <BLEpp::CharacteristicGenericBase::notify> is called again and the notification
+	 * is cleared if the call eas successful. If not successful, it will be tried
+	 * again during the next callback call
+	 */
+	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
+
+	/** Enable / Disable aes encryption. If enabled, a buffer is created to hold the encrypted
+	 *  value. If disabled, the buffer is freed again.
+	 */
+	void setAesEncrypted(bool encrypted) {
+		_status.aesEncrypted = encrypted;
+		if (encrypted) {
+			initEncryptionBuffer();
+		} else {
+			freeEncryptionBuffer();
+		}
+	}
+
+	/** Check if aes encryption is enabled */
+	bool isAesEnabled() {
+		return _status.aesEncrypted;
+	}
+
+
+
+	void setMinAccessLevel(EncryptionAccessLevel level) {
+		_minAccessLevel = level;
+	}
+
+
+	/** get the buffer used for encryption */
+	buffer_ptr_t& getEncryptionBuffer() {
+		return _encryptionBuffer;
+	}
+
+	Service* getService() {
+		return _service;
+	}
 
 protected:
 
+	/** Initialize the encryption buffer to hold the encrypted value. */
+	virtual void initEncryptionBuffer() = 0;
+
+	/** Free / release the encryption buffer */
+	virtual void freeEncryptionBuffer() = 0;
+
+	/** Configure the characteristic value format (ble specific) */
 	virtual bool configurePresentationFormat(ble_gatts_char_pf_t &) { return false; }
-
-	/** Any error in <notify> evokes onNotifyTxError.
-	 */
-	virtual void onNotifyTxError();
-
-	void setAttrMdReadOnly(ble_gatts_attr_md_t& md, char vloc);
-	void setAttrMdReadWrite(ble_gatts_attr_md_t& md, char vloc);
 
 };
 
@@ -339,190 +434,134 @@ class CharacteristicGeneric : public CharacteristicBase {
 
 public:
 	//! Format of callback on write (from user)
-	typedef function<void(const T&)> callback_on_write_t;
-	//! Format of read callback
-	typedef function<T()> callback_on_read_t;
+	typedef function<void(const EncryptionAccessLevel, const T&)> callback_on_write_t;
 
 protected:
-	//! The generic type is physically located in this field in this class (by value, not just by reference)
+	/** The generic type is physically located in this field in this class (by value, not just by reference)
+	 *  In the case of aes encryption, this is the unencrypted value
+	 */
 	T                          _value;
+
 	//! The callback to call on a write coming from the softdevice (and originating from the user)
 	callback_on_write_t        _callbackOnWrite;
-	//! Callback on read
-	callback_on_read_t         _callbackOnRead;
-
-	/** Flag to indicate if notification is pending to be sent once currently waiting
-	 * tx operations are completed
-	 */
-	bool _notificationPending;
 
 public:
-	CharacteristicGeneric() : _notificationPending(false) {};
+	CharacteristicGeneric() {};
 
 	//! Default empty destructor
 	virtual ~CharacteristicGeneric() {};
 
+	// todo ENCRYPTION: return unencrypted value
+	/** Return the value
+	 *  In the case of aes encryption, this is the unencrypted value
+	 */
 	T&  __attribute__((optimize("O0"))) getValue() {
 		return _value;
 	}
 
-	void setValue(const T& value) {
-		_value = value;
-	}
-
-	CharacteristicGeneric<T>& setUUID(const UUID& uuid) {
-		CharacteristicBase::setUUID(uuid);
-		return *this;
-	}
-
-	CharacteristicGeneric<T>& setName(const char * const name) {
-		CharacteristicBase::setName(name);
-		return *this;
-	}
-
-	CharacteristicGeneric<T>& setUnit(uint16_t unit) {
-		CharacteristicBase::setUnit(unit);
-		return *this;
-	}
-
-	CharacteristicGeneric<T>& setWritable(bool writable) {
-		CharacteristicBase::setWritable(writable);
-		return *this;
-	}
-
-	CharacteristicGeneric<T>& setNotifies(bool notifies) {
-		CharacteristicBase::setNotifies(notifies);
-		return *this;
-	}
-
-	CharacteristicGeneric<T>& onWrite(const callback_on_write_t& closure) {
+	/** Register an on write callback which will be triggered when a characteristic
+	 *  is written over ble
+	 */
+	void onWrite(const callback_on_write_t& closure) {
 		_callbackOnWrite = closure;
-		return *this;
-	}
-
-	CharacteristicGeneric<T>& onRead(const callback_on_read_t& closure) {
-		_callbackOnRead = closure;
-		return *this;
-	}
-
-	CharacteristicGeneric<T>& setUpdateIntervalMSecs(uint32_t msecs) {
-		CharacteristicBase::setUpdateIntervalMSecs(msecs);
-		return *this;
 	}
 
 	/** CharacteristicGeneric() returns value object
-	 *
+	 *  In the case of aes encryption, this is the unencrypted value
 	 * @return value object
 	 */
 	operator T&() {
 		return _value;
 	}
 
-	CharacteristicGeneric<T>& operator=(const T& val) {
+	/** Assign a new value to the characteristic so that it can be read over ble.
+	 *  In the case of aes encryption, pass the unencrypted value, which will then be encrypted
+	 *  and updated at the gatt server
+	 */
+	void operator=(const T& val) {
 		_value = val;
-
-		notify();
-
-		return *this;
+		updateValue();
 	}
 
-#ifdef ADVANCED_OPERATORS
-	CharacteristicGeneric<T>& operator+=(const T& val) {
-		_value += val;
-
-		notify();
-
-		return *this;
-	}
-
-	CharacteristicGeneric<T>& operator-=(const T& val) {
-		_value -= val;
-
-		notify();
-
-		return *this;
-	}
-
-	CharacteristicGeneric<T>& operator*=(const T& val) {
-		_value *= val;
-
-		notify();
-
-		return *this;
-	}
-
-	CharacteristicGeneric<T>& operator/=(const T& val) {
-		_value /= val;
-
-		notify();
-
-		return *this;
-	}
-#endif
-
-	CharacteristicGeneric<T>& setDefaultValue(const T& t) {
-		if (_status.inited) BLE_THROW("Already inited.");
+	/** Set the default value */
+	void setDefaultValue(const T& t) {
+		if (_status.initialized) BLE_THROW("Already inited.");
 		_value = t;
-		return *this;
-	}
-
-	/** Callback function if a notify tx error occurs
-	 *
-	 * This is called when the notify operation fails with a tx error. This
-	 * can occur when too many tx operations are taking place at the same time.
-	 *
-	 * A <BLEpp::CharacteristicGenericBase::notify> is called when the master device
-	 * connected to the Crownstone requests automatic notifications whenever
-	 * the value changes.
-	 */
-	void onNotifyTxError() {
-		_notificationPending = true;
-	}
-
-	/** Callback function once tx operations complete
-	 * @p_ble_evt the event object which triggered the onTxComplete callback
-	 *
-	 * This is called whenever tx operations complete. If a notification is pending
-	 * <BLEpp::CharacteristicGenericBase::notify> is called again and the notification
-	 * is cleared if the call eas successful. If not successful, it will be tried
-	 * again during the next callback call
-	 */
-	void onTxComplete(ble_common_evt_t * p_ble_evt) {
-		//! if we have a notification pending, try to send it
-		if (_notificationPending) {
-			//! this-> is necessary so that the call of notify depends on the template
-			//! parameter T
-			uint32_t err_code = this->notify();
-			if (err_code == NRF_SUCCESS) {
-				_notificationPending = false;
-			}
-		}
 	}
 
 protected:
 
+	/** Helper function if a characteristic is written over ble.
+	 *  updates the length values for dynamic length types, decrypts the value if
+	 *  aes encryption enabled. then calls the on write callback.
+	 */
 	void written(uint16_t len) {
-		setDataLength(len);
+
+		setGattValueLength(len);
+
+		EncryptionAccessLevel accessLevel = NOT_SET;
+
+		// when using encryption, the packet needs to be decrypted
+		if (_status.aesEncrypted && _minAccessLevel < ENCRYPTION_DISABLED) {
+			LOGi("decrypt ...");
+
+			// the arithmetic type- and the string type characteristics have their hardcoded length in the valueLength
+			// the getValueLength() for those two types will always be the same and the setValueLength does nothing there.
+			// In the case of a characteristic with a dynamic buffer length we need to set the length ourselves.
+			// To do this we assume the length of the data is the same as the encrypted buffer minus the overhead for the encryption.
+			// The result can be zero padded but generally the payload has it's own length indication.
+			uint16_t decryptionBufferLength = EncryptionHandler::calculateDecryptionBufferLength(getGattValueLength());
+			setValueLength(decryptionBufferLength);
+
+			bool success = EncryptionHandler::getInstance().decrypt(
+				getGattValuePtr(),
+				getGattValueLength(),
+				getValuePtr(),
+				getValueLength(),
+				accessLevel
+			);
+
+			// disconnect on failure or if the user is not authenticated
+			if (!success || !EncryptionHandler::getInstance().allowAccess(_minAccessLevel , accessLevel)) {
+				EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
+				return;
+			}
+		}
+		else {
+			accessLevel = ENCRYPTION_DISABLED;
+			setValueLength(len);
+		}
+
+
 
 		LOGd("%s: onWrite()", _name);
-		_callbackOnWrite(getValue());
-	}
 
-	void read() {
-		LOGd("%s: onRead()", _name);
-		T newValue = _callbackOnRead();
-		if (newValue != _value) {
-			operator=(newValue);
-		}
+		_callbackOnWrite(accessLevel, getValue());
 	}
 
 
+	/** @inherit */
 	virtual bool configurePresentationFormat(ble_gatts_char_pf_t& presentation_format) {
 		presentation_format.format = ble_type<T>();
 		presentation_format.name_space = BLE_GATT_CPF_NAMESPACE_BTSIG;
 		presentation_format.desc = BLE_GATT_CPF_NAMESPACE_DESCRIPTION_UNKNOWN;
 		presentation_format.exponent = 1;
 		return true;
+	}
+
+	/** Initialize / allocate a buffer for encryption */
+	void initEncryptionBuffer() {
+		if (_encryptionBuffer == NULL) {
+			CharacteristicBase::_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));
+		}
+	}
+
+	/** Free / release the encryption buffer */
+	void freeEncryptionBuffer() {
+		if (CharacteristicBase::_encryptionBuffer != NULL) {
+			free(CharacteristicBase::_encryptionBuffer);
+			CharacteristicBase::_encryptionBuffer = NULL;
+		}
 	}
 
 private:
@@ -537,12 +576,14 @@ private:
 template<typename T, typename E = void>
 class Characteristic : public CharacteristicGeneric<T> {
 public:
+	/** @inherit */
 	Characteristic() : CharacteristicGeneric<T>() {}
 
-	Characteristic& operator=(const T& val) {
+	/** @inherit */
+	void operator=(const T& val) {
 		CharacteristicGeneric<T>::operator=(val);
-		return *this;
 	}
+
 };
 
 /** A characteristic for built-in arithmetic types (int, float, etc)
@@ -551,35 +592,65 @@ template<typename T >
 class Characteristic<T, typename std::enable_if<std::is_arithmetic<T>::value >::type> : public CharacteristicGeneric<T> {
 public:
 	/** @inherit */
-	Characteristic& operator=(const T& val) {
+	void operator=(const T& val) {
 		CharacteristicGeneric<T>::operator=(val);
-		return *this;
 	}
 
-	/** Return the actual length of the value
-	 *
-	 * The length of a basic data type is the size of the type
-	 */
+#ifdef ADVANCED_OPERATORS
+	void operator+=(const T& val) {
+		_value += val;
+
+		updateValue();
+
+	}
+
+	void operator-=(const T& val) {
+		_value -= val;
+
+		updateValue();
+
+	}
+
+	void operator*=(const T& val) {
+		_value *= val;
+
+		updateValue();
+
+	}
+
+	void operator/=(const T& val) {
+		_value /= val;
+
+		updateValue();
+
+	}
+#endif
+
+	/** @inherit */
+	uint8_t* getValuePtr() {
+		return (uint8_t*)&this->getValue();
+	}
+
+	/** @inherit */
 	uint16_t getValueLength() {
 		return sizeof(T);
 	}
 
-	/** Return the maximum length of the value
-	 *
-	 * The maximum length of a basic data type is the size of the type
-	 */
-	uint16_t getValueMaxLength() {
-		return sizeof(T);
+	/** @inherit */
+	uint16_t getGattValueLength() {
+		if (this->isAesEnabled()) {
+			return EncryptionHandler::calculateEncryptionBufferLength(sizeof(T));
+			//return (1 + ((sizeof(T) + 4 - 1) / 16)) * 16 + 4; // ceil( sizeof(T) + 4 / 16 ) * 16 + 4
+		} else {
+			return getValueLength();
+		}
 	}
 
-	/** Return the pointer to the memory where the value is stored
-	 *
-	 * For a basic data type return the address where the first byte
-	 * is stored
-	 */
-	uint8_t* getValuePtr() {
-		return (uint8_t*)&this->getValue();
+	/** @inherit */
+	uint16_t getGattValueMaxLength() {
+		return getGattValueLength();
 	}
+
 };
 
 /** A characteristic for strings
@@ -588,36 +659,35 @@ template<>
 class Characteristic<std::string> : public CharacteristicGeneric<std::string> {
 public:
 	/** @inherit */
-	Characteristic& operator=(const std::string& val) {
+	void operator=(const std::string& val) {
 		CharacteristicGeneric<std::string>::operator=(val);
-		return *this;
 	}
 
-	/** Return the actual length of the value
-	 *
-	 * Return the length of the string
-	 */
-	uint16_t getValueLength() {
-		return getValue().length();
-	}
-
-	/** Return the maximum length of the value
-	 *
-	 * The maximum length of a string is defined as
-	 * <MAX_STRING_LENGTH>
-	 */
-	uint16_t getValueMaxLength() {
-		return MAX_STRING_LENGTH;
-	}
-
-	/** Return the pointer to the memory where the value is stored
-	 *
-	 * For a string return pointer to null-terminated content of the
-	 * string
-	 */
+	/** @inherit */
 	uint8_t* getValuePtr() {
 		return (uint8_t*)getValue().c_str();
 	}
+
+	/** @inherit */
+	uint16_t getValueLength() {
+		return MAX_CHAR_VALUE_STRING_LENGTH;
+	}
+
+	/** @inherit */
+	uint16_t getGattValueLength() {
+		if (this->isAesEnabled()) {
+			return EncryptionHandler::calculateEncryptionBufferLength(MAX_CHAR_VALUE_STRING_LENGTH);
+			// (1 + ((MAX_CHAR_VALUE_STRING_LENGTH + 4 - 1) / 16)) * 16 + 4; // ceil( (MAX_STRING_LENGTH + 4) / 16 ) * 16 + 4
+		} else {
+			return getValueLength();
+		}
+	}
+
+	/** @inherit */
+	uint16_t getGattValueMaxLength() {
+		return getGattValueLength();
+	}
+
 };
 
 /** This template implements the functions specific for a pointer to a buffer.
@@ -626,13 +696,25 @@ template<>
 class Characteristic<buffer_ptr_t> : public CharacteristicGeneric<buffer_ptr_t> {
 
 private:
-	//! maximum length for this characteristic in bytes
-	uint16_t _maxLength;
+	/** maximum length for this characteristic in bytes
+	 *  In the case of aes encryption, this is the maximum number of bytes of the encrypted value
+	 */
+	uint16_t _maxGattValueLength;
 
-	//! actual length of data stored in the buffer in bytes
-	uint16_t _dataLength;
+	/** actual length of data stored in the buffer in bytes
+	 *  In the case of aes encryption, this is the number of bytes of the unencrypted value
+	 */
+	uint16_t _valueLength;
+
+	uint16_t _gattValueLength;
+
+	uint16_t _notificationPendingOffset;
 
 public:
+
+	uint32_t notify();
+
+	void onTxComplete(ble_common_evt_t * p_ble_evt);
 
 	/** Set the value for this characteristic
 	 * @value the pointer to the buffer in memory
@@ -644,21 +726,32 @@ public:
 		_value = value;
 	}
 
+	/** Set the length of data stored in the buffer
+	 * @length length of data in bytes
+	 */
+	void setValueLength(uint16_t length) {
+		_valueLength = length;
+	}
+
+	uint8_t* getValuePtr() {
+		return getValue();
+	}
+
+	uint16_t getValueLength() {
+		return _valueLength;
+	}
+
 	/** Set the maximum length of the buffer
 	 * @length maximum length in bytes
 	 *
 	 * This defines how many bytes were allocated for the buffer
 	 * so how many bytes can max be stored in the buffer
 	 */
-	void setMaxLength(uint16_t length) {
-		_maxLength = length;
-	}
-
-	/** Set the length of data stored in the buffer
-	 * @length length of data in bytes
-	 */
-	void setDataLength(uint16_t length) {
-		_dataLength = length;
+	// todo ENCRYPTION: if aes encryption is enabled, maxGattValue length needs to be updated
+	// could be automatically done based on the getValueLength and the overhead required for
+	// encryption, or even a fixed value.
+	void setMaxGattValueLength(uint16_t length) {
+		_maxGattValueLength = length;
 	}
 
 	/** Return the maximum possible length of the buffer
@@ -668,33 +761,32 @@ public:
 	 *
 	 * @return the maximum possible length
 	 */
-	uint16_t getValueMaxLength() {
-		return _maxLength;
+	// todo ENCRYPTION: max length of encrypted data
+	uint16_t getGattValueMaxLength() {
+		return _maxGattValueLength;
 	}
 
-	/** Return the actual length of the value
-	 *
-	 * For a buffer, this is the length of data stored in the buffer in bytes
-	 *
-	 * @return number of bytes
-	 */
-	uint16_t getValueLength() {
-		return _dataLength;
+	/** @inherit */
+	virtual void setGattValueLength(uint16_t length) {
+		_gattValueLength = length;
 	}
 
-	/** Return the pointer to the memory where the value is stored
-	 *
-	 * For a buffer, this is the value itself
-	 */
-	uint8_t* getValuePtr() {
-		return getValue();
+	/** @inherit */
+	virtual uint16_t getGattValueLength() {
+		return _gattValueLength;
+	}
+
+	void initEncryptionBuffer() {
+		uint16_t size;
+		EncryptionBuffer::getInstance().getBuffer(CharacteristicBase::_encryptionBuffer, size);
+		assert(CharacteristicBase::_encryptionBuffer != NULL, "need to initialize encryption buffer for aes encryption");
+	}
+
+	void freeEncryptionBuffer() {
+		CharacteristicBase::_encryptionBuffer = NULL;
 	}
 
 protected:
 
 };
-
-} //! end of namespace
-
-
 

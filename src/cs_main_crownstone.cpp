@@ -36,7 +36,9 @@
 #include "drivers/cs_PWM.h"
 #include "util/cs_Utils.h"
 #include "drivers/cs_Timer.h"
+#include <processing/cs_EncryptionHandler.h>
 #include "structs/buffer/cs_MasterBuffer.h"
+#include "structs/buffer/cs_EncryptionBuffer.h"
 
 #include <drivers/cs_RNG.h>
 
@@ -49,26 +51,26 @@
 
 #include <ble/cs_DoBotsManufac.h>
 
-#include <processing/cs_PowerSampling.h>
 #include <storage/cs_State.h>
 
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
 
-using namespace BLEpp;
-
 Crownstone::Crownstone() :
+	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL),
 	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
 	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
-	_alertService(NULL), _scheduleService(NULL),
+	_scheduleService(NULL),
 	_serviceData(NULL), _beacon(NULL),
 	_mesh(NULL), _sensors(NULL), _fridge(NULL),
-	_commandHandler(NULL), _scanner(NULL), _tracker(NULL),
+	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
 	_advertisementPaused(false), _mainTimer(0), _operationMode(0)
 {
 
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
+	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
+
 	EventDispatcher::getInstance().addListener(this);
 
 	//! set up the bluetooth stack that controls the hardware.
@@ -83,6 +85,11 @@ Crownstone::Crownstone() :
 	_storage = &Storage::getInstance();
 	_settings = &Settings::getInstance();
 	_stateVars = &State::getInstance();
+
+	//! create command handler
+	_commandHandler = &CommandHandler::getInstance();
+	_factoryReset = &FactoryReset::getInstance();
+
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch using PWM or Relay
@@ -108,9 +115,11 @@ void Crownstone::init() {
 	//! configure the crownstone
 	configure();
 
+	LOGi(FMT_INIT, "encryption handler");
+	EncryptionHandler::getInstance().init();
+
 	LOGi(FMT_HEADER, "setup");
 
-	// todo: handle different operation modes
 	_stateVars->get(STATE_OPERATION_MODE, _operationMode);
 //	_operationMode = OPERATION_MODE_NORMAL;
 //	_operationMode = OPERATION_MODE_SETUP;
@@ -123,12 +132,16 @@ void Crownstone::init() {
 		//! create services
 		createSetupServices();
 
-		//! set it by default into low tx mode
-		_stack->setTxPowerLevel(-40);
+		//! loop through all services added to the stack and create the characteristics
+		_stack->createCharacteristics();
 
-		LOGi("Enable PIN encryption");
+		//! set it by default into low tx mode
+		//_stack->setTxPowerLevel(LOW_TX_POWER);
+		_stack->changeToLowTxPowerMode();
+
+		LOGi(FMT_ENABLE, "PIN encryption");
 		//! use PIN encryption for setup mode
-		_stack->setEncrypted(true);
+		_stack->setPinEncrypted(true);
 
 		break;
 	}
@@ -142,17 +155,30 @@ void Crownstone::init() {
 		//! create services
 		createCrownstoneServices();
 
+		//! loop through all services added to the stack and create the characteristics
+		_stack->createCharacteristics();
+
+		//! use aes encryption for normal mode (if enabled)
+		if (_settings->isSet(CONFIG_ENCRYPTION_ENABLED)) {
+			LOGi(FMT_ENABLE, "AES encryption");
+			_stack->setAesEncrypted(true);
+		}
+
+		break;
+	}
+	case OPERATION_MODE_FACTORY_RESET: {
+
+		LOGd("Configure factory reset mode");
+
+		FactoryReset::getInstance().finishFactoryReset();
 		break;
 	}
 	case OPERATION_MODE_DFU: {
 
 		CommandHandler::getInstance().handleCommand(CMD_GOTO_DFU);
-		while(true) {}; // loop until reset triggers
+		break;
 	}
 	}
-
-	//! loop through all services added to the stack and create the characteristics
-	_stack->createCharacteristics();
 
 	LOGi(FMT_HEADER, "init services");
 
@@ -220,6 +246,12 @@ void Crownstone::initDrivers() {
 	_settings->init();
 	_stateVars->init();
 
+	LOGd(FMT_INIT, "command handler");
+	_commandHandler->init();
+
+	LOGd(FMT_INIT, "factory reset");
+	_factoryReset->init();
+
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch / PWM init
 	LOGd(FMT_INIT, "switch / PWM");
@@ -228,6 +260,7 @@ void Crownstone::initDrivers() {
 	LOGd(FMT_INIT, "temperature guard");
 	_temperatureGuard->init();
 
+	LOGd(FMT_INIT, "power sampler");
 	_powerSampler->init();
 #endif
 
@@ -264,12 +297,12 @@ void Crownstone::initDrivers() {
 void Crownstone::configureStack() {
 
 	_stack->setTxPowerLevel(TX_POWER);
-	_stack->setMinConnectionInterval(16);
-	_stack->setMaxConnectionInterval(32);
-	_stack->setConnectionSupervisionTimeout(400);
-	_stack->setSlaveLatency(10);
+	_stack->setMinConnectionInterval(MIN_CONNECTION_INTERVAL);
+	_stack->setMaxConnectionInterval(MAX_CONNECTION_INTERVAL);
+	_stack->setConnectionSupervisionTimeout(CONNECTION_SUPERVISION_TIMEOUT);
+	_stack->setSlaveLatency(SLAVE_LATENCY);
 	_stack->setAdvertisingInterval(ADVERTISEMENT_INTERVAL);
-	_stack->setAdvertisingTimeoutSeconds(0);
+	_stack->setAdvertisingTimeoutSeconds(ADVERTISING_TIMEOUT);
 
 	//! Set the stored tx power
 	int8_t txPower;
@@ -334,7 +367,11 @@ void Crownstone::configureStack() {
 		// advertising.
 		// [29.06.16] this happened on the pca10000, but doesn't seem to happen on the dobeacon v0.7 need to check
 		// on other versions. On the contrary, the reset seems to crash the dobeacon v0.7
-//		_mesh->restart();
+#if HARDWARE_BOARD==PCA10031
+		if (_mesh->isRunning()) {
+			_mesh->restart();
+		}
+#endif
 
 		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
 		//   disconnecting from the device. just calling startAdvertising is enough
@@ -374,6 +411,8 @@ void Crownstone::configureAdvertisement() {
 	//! to advertise certain state variables
 	_serviceData = new ServiceData();
 
+	// initialize service data
+
 	//! read crownstone id from storage
 	uint16_t crownstoneId;
 	_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
@@ -381,6 +420,17 @@ void Crownstone::configureAdvertisement() {
 
 	//! and set it to the service data
 	_serviceData->updateCrownstoneId(crownstoneId);
+
+	// fill service data with initial data
+	uint8_t switchState;
+	_stateVars->get(STATE_SWITCH_STATE, switchState);
+	_serviceData->updateSwitchState(switchState);
+
+	_serviceData->updateTemperature(getTemperature());
+
+	int32_t powerUsage;
+	_stateVars->get(STATE_POWER_USAGE, powerUsage);
+	_serviceData->updatePowerUsage(powerUsage);
 
 	//! assign service data to stack
 	_stack->setServiceData(_serviceData);
@@ -435,13 +485,8 @@ void Crownstone::createCrownstoneServices() {
 	_powerService = new PowerService;
 	_stack->addService(_powerService);
 #else
-	LOGe("PowerService only available for device type Crownstone!!");
+	LOGe("Power service not available");
 #endif
-#endif
-
-#if ALERT_SERVICE==1
-	_alertService = new AlertService;
-	_stack->addService(_alertService);
 #endif
 
 #if SCHEDULE_SERVICE==1
@@ -468,7 +513,7 @@ void Crownstone::setName() {
 //	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
 	char devicename_resetCounter[32];
 	//! clip name to 5 chars and add reset counter at the end
-	sprintf(devicename_resetCounter, "%.*s_%d", MIN(size, 5), device_name, STRINGIFY(resetCounter));
+	sprintf(devicename_resetCounter, "%.*s_%lu", MIN(size, 5), device_name, resetCounter);
 	std::string deviceName = std::string(devicename_resetCounter);
 #else
 	std::string deviceName(devicename, size);
@@ -489,10 +534,6 @@ void Crownstone::prepareCrownstone() {
 	_scanner = &Scanner::getInstance();
 	_scanner->setStack(_stack);
 
-	//! create command handler
-	_commandHandler = &CommandHandler::getInstance();
-	_commandHandler->setStack(_stack);
-
 	//! create scheduler
 	_scheduler = &Scheduler::getInstance();
 
@@ -505,10 +546,6 @@ void Crownstone::prepareCrownstone() {
 #endif
 
 //	if (_settings->isEnabled(CONFIG_MESH_ENABLED)) {
-
-#if HARDWARE_BOARD == VIRTUALMEMO
-			nrf_gpio_range_cfg_output(7,14);
-#endif
 
 		_mesh = &Mesh::getInstance();
 		_mesh->init();
@@ -558,9 +595,11 @@ void Crownstone::startUp() {
 		_stack->startTicking();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
-		uint8_t switchState;
-		_stateVars->get(STATE_SWITCH_STATE, switchState);
-		_switch->setValue(switchState);
+		// restore the last value. the switch reads the last state from the storage, but does
+		// not automatically update the pwm/relay values. so we read out the last value
+		// and set it again to update the pwm
+		uint8_t pwm = _switch->getPwm();
+		_switch->setPwm(pwm);
 
 		//! start ticking of peripherals
 		_temperatureGuard->startTicking();
@@ -581,7 +620,6 @@ void Crownstone::startUp() {
 			_tracker->startTracking();
 		}
 
-//		_mesh->init();
 		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
 			_mesh->start();
 		}
@@ -691,23 +729,6 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 
-#if ALERT_SERVICE==1
-	case EVT_ENV_TEMP_LOW: {
-		if (_alertService != NULL) {
-			_alertService->addAlert(ALERT_TEMP_LOW_POS);
-//			_alertService->alert(ALERT_TEMP_LOW);
-		}
-		break;
-	}
-	case EVT_ENV_TEMP_HIGH: {
-		if (_alertService != NULL) {
-			_alertService->addAlert(ALERT_TEMP_HIGH_POS);
-//			_alertService->alert(ALERT_TEMP_HIGH);
-		}
-		break;
-	}
-#endif
-
 	case EVT_ADVERTISEMENT_PAUSE: {
 		if (_stack->isAdvertising()) {
 			_advertisementPaused = true;
@@ -741,21 +762,21 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		LOGf("brownout impending!! force shutdown ...")
 
 		rbc_mesh_stop();
-    	_scanner->stop();
+		_scanner->stop();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
-    	_switch->pwmOff();
-    	_switch->relayOff();
-    	_powerSampler->stopSampling();
+		_switch->pwmOff();
+		_switch->relayOff();
+		_powerSampler->stopSampling();
 #endif
 
-    	// now reset with brownout reset mask set.
-    	// NOTE: do not clear the gpregret register, this way
-    	//   we can count the number of brownouts in the bootloader
-    	sd_power_gpregret_set(GPREGRET_BROWNOUT_RESET);
-    	// soft reset, because brownout can't be distinguished from
-    	// hard reset otherwise
-    	sd_nvic_SystemReset();
+		// now reset with brownout reset mask set.
+		// NOTE: do not clear the gpregret register, this way
+		//   we can count the number of brownouts in the bootloader
+		sd_power_gpregret_set(GPREGRET_BROWNOUT_RESET);
+		// soft reset, because brownout can't be distinguished from
+		// hard reset otherwise
+		sd_nvic_SystemReset();
 		break;
 	}
 	default: return;

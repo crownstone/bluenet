@@ -59,6 +59,7 @@ public:
 	 *
 	 * Create a timer for a specific purpose.
 	 */
+	// Note: timer will be readded even if it is not processed in the mean time, thus might cause the list to overflow
 //	void createRepeated(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func);
 //	inline void createRepeated(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func) {
 //		BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_REPEATED, func));

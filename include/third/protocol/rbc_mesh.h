@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "nrf51.h"
 #include "nrf_sdm.h"
 #include "ble.h"
+#include "nordic_common.h"
 
 #define RBC_MESH_ACCESS_ADDRESS_BLE_ADV  (0x8E89BED6) /**< BLE spec defined access address. */
 #define RBC_MESH_INTERVAL_MIN_MIN_MS     (5) /**< Lowest min-interval allowed. */
@@ -66,12 +67,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @brief Default value for the number of handle cache entries */
 #ifndef RBC_MESH_HANDLE_CACHE_ENTRIES    
-    #define RBC_MESH_HANDLE_CACHE_ENTRIES           (10)
+    #define RBC_MESH_HANDLE_CACHE_ENTRIES           (2 * MESH_NUM_HANDLES)
 #endif
 
 /** @brief Default value for the number of data cache entries */
 #ifndef RBC_MESH_DATA_CACHE_ENTRIES
-    #define RBC_MESH_DATA_CACHE_ENTRIES             (10)
+    #define RBC_MESH_DATA_CACHE_ENTRIES             (MIN(MESH_NUM_HANDLES, 10))
 #endif
 
 /** @brief Length of app-event FIFO. Must be power of two. */

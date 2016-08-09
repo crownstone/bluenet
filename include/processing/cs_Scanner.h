@@ -10,8 +10,6 @@
 #include <structs/cs_ScanResult.h>
 #include <events/cs_EventListener.h>
 
-using namespace BLEpp;
-
 #define SCAN_FILTER_CROWNSTONE_BIT    0
 #define SCAN_FILTER_GUIDESTONE_BIT    1
 

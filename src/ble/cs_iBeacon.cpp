@@ -8,8 +8,6 @@
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Strings.h>
 
-using namespace BLEpp;
-
 //#define PRINT_IBEACON_VERBOSE
 
 IBeacon::IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor,

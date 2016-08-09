@@ -13,6 +13,7 @@
 #include <drivers/cs_ADC.h>
 #include <drivers/cs_RTC.h>
 #include <protocol/cs_StateTypes.h>
+#include <events/cs_EventDispatcher.h>
 
 #include <mesh/cs_MeshControl.h>
 extern "C" {
@@ -52,6 +53,7 @@ void PowerSampling::init() {
 	settings.get(CONFIG_VOLTAGE_ZERO, &_voltageZero);
 	settings.get(CONFIG_CURRENT_ZERO, &_currentZero);
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
+	settings.get(CONFIG_POWER_ZERO_AVG_WINDOW, &_zeroAvgWindow);
 
 	LOGi(FMT_INIT, "buffers");
 	uint16_t contSize = _currentSampleCircularBuf.getMaxByteSize() + _voltageSampleCircularBuf.getMaxByteSize();
@@ -74,10 +76,8 @@ void PowerSampling::init() {
 	buffer += _currentSampleCircularBuf.getMaxByteSize();
 	_voltageSampleCircularBuf.assign(buffer, _voltageSampleCircularBuf.getMaxByteSize());
 	buffer += _voltageSampleCircularBuf.getMaxByteSize();
-#if MESHING == 1
 	_powerSamplesMeshMsg = (power_samples_mesh_message_t*) buffer;
 	buffer += sizeof(power_samples_mesh_message_t);
-#endif
 //	_currentSampleTimestamps.assign();
 //	_voltageSampleTimestamps.assign();
 
@@ -131,6 +131,8 @@ void PowerSampling::powerSampleReadBuffer() {
 	//! If one of the buffers is full, this means they're not aligned anymore: clear all.
 	if (_currentSampleCircularBuf.full() || _voltageSampleCircularBuf.full()) {
 		startSampling();
+		Timer::getInstance().start(_staticPowerSamplingReadTimer, MS_TO_TICKS(_contSamplingInterval), this);
+		return;
 	}
 
 	uint16_t numCurentSamples = _currentSampleCircularBuf.size();
@@ -145,9 +147,7 @@ void PowerSampling::powerSampleReadBuffer() {
 			current = _currentSampleCircularBuf.pop();
 			voltage = _voltageSampleCircularBuf.pop();
 			power = current*voltage;
-#if MESHING == 1
 			_powerSamplesMeshMsg->samples[_powerSamplesCount] = power;
-#endif
 //			_lastPowerSample = power;
 			numSamples--;
 			_powerSamplesCount++;
@@ -156,29 +156,29 @@ void PowerSampling::powerSampleReadBuffer() {
 			current = _currentSampleCircularBuf.pop();
 			voltage = _voltageSampleCircularBuf.pop();
 			power = current*voltage;
-#if MESHING == 1
 			_powerSamplesMeshMsg->samples[_powerSamplesCount] = power;
-#endif
 
 //			diff = _lastPowerSample - power;
 //			_lastPowerSample = power;
 			_powerSamplesCount++;
 
-		}
 
-		if (_powerSamplesCount >= POWER_SAMPLE_MESH_NUM_SAMPLES) {
+			if (_powerSamplesCount >= POWER_SAMPLE_MESH_NUM_SAMPLES) {
+				EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesMeshMsg, sizeof(power_samples_mesh_message_t));
+
 #if MESHING == 1
-			if (!nb_full()) {
-				MeshControl::getInstance().sendPowerSamplesMessage(_powerSamplesMeshMsg);
-				_powerSamplesCount = 0;
-			}
+				if (!nb_full()) {
+					MeshControl::getInstance().sendPowerSamplesMessage(_powerSamplesMeshMsg);
+					_powerSamplesCount = 0;
+				}
 #else
 
 #ifdef PRINT_POWERSAMPLING_VERBOSE
-			LOGd("Send message of %u samples", _powerSamplesCount);
+				LOGd("Send message of %u samples", _powerSamplesCount);
 #endif
-			_powerSamplesCount = 0;
+				_powerSamplesCount = 0;
 #endif
+			}
 		}
 
 	}
@@ -241,9 +241,6 @@ void PowerSampling::powerSampleFinish() {
 	currentTimestamp = 0;
 	voltageTimestamp = 0;
 
-	// todo -> defines in header
-#define ZERO_AVG_WINDOW   100
-
 	uint16_t vMin = UINT16_MAX;
 	uint16_t vMax = 0;
 	uint16_t v;
@@ -261,7 +258,7 @@ void PowerSampling::powerSampleFinish() {
 	double vZero = (vMax + vMin) / 2.0;
 	if (_burstCount) {
 		_voltageZero = (_voltageZero * _burstCount + vZero) / (_burstCount + 1);
-		if (_burstCount < ZERO_AVG_WINDOW) {
+		if (_burstCount < _zeroAvgWindow) {
 			_burstCount++;
 		}
 	}
@@ -334,7 +331,7 @@ void PowerSampling::powerSampleFinish() {
 //	LOGd("pSum=%f", pSum);
 	pSum /= tSum;
 	pSum -= _powerZero;
-	int32_t avgPower = pSum;
+	int32_t avgPower = pSum * 1000; //! in mW
 
 #ifdef PRINT_POWERSAMPLING_VERBOSE
 	LOGd("pSum=%f, tSum=%f, avgPower=%i", pSum, tSum, avgPower);
@@ -352,14 +349,8 @@ void PowerSampling::powerSampleFinish() {
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
 #if CONTINUOUS_POWER_SAMPLER == 1
-#if MESHING == 1
 	buffer = (buffer_ptr_t) _powerSamplesMeshMsg;
-	size = sizeof(_powerSamplesMeshMsg);
-#else
-	//! Something silly for now
-	buffer = (buffer_ptr_t) _currentSampleCircularBuf.getBuffer();
-	size = 0;
-#endif
+	size = sizeof(power_samples_mesh_message_t);
 #else
 	_powerSamples.getBuffer(buffer, size);
 #endif

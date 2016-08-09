@@ -11,12 +11,14 @@
 #include <storage/cs_CyclicStorage.h>
 #include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <vector>
 
 #define SWITCH_STATE_PERSISTENT
 
-#define OPERATION_MODE_SETUP 0x00
-#define OPERATION_MODE_NORMAL 0x10
-#define OPERATION_MODE_DFU 0x01
+#define OPERATION_MODE_SETUP                       0x00
+#define OPERATION_MODE_DFU                         0x01
+#define OPERATION_MODE_FACTORY_RESET               0x02
+#define OPERATION_MODE_NORMAL                      0x10
 
 typedef uint32_t seq_number_t;
 
@@ -27,7 +29,7 @@ typedef uint32_t seq_number_t;
 typedef uint32_t reset_counter_t;
 
 #define SWITCH_STATE_REDUNDANCY 10
-typedef uint32_t switch_state_t;
+typedef uint32_t switch_state_storage_t;
 
 #define ACCUMULATED_ENERGY_REDUNDANCY 72
 #define ACCUMULATED_ENERGY_DEFAULT 0
@@ -38,7 +40,7 @@ typedef int32_t accumulated_energy_t;
  */
 struct ps_state_t : ps_storage_base_t {
 	// switch state
-	uint8_t switchState[SWITCH_STATE_REDUNDANCY * ELEM_SIZE(switch_state_t)];
+	uint8_t switchState[SWITCH_STATE_REDUNDANCY * ELEM_SIZE(switch_state_storage_t)];
 	// counts resets
 	uint8_t resetCounter[RESET_COUNTER_REDUNDANCY * ELEM_SIZE(reset_counter_t)];
 	// accumulated power
@@ -65,6 +67,11 @@ struct state_vars_notifaction {
 	uint8_t* data;
 	uint16_t dataLength;
 };
+
+
+#define FACTORY_RESET_STATE_NORMAL 0
+#define FACTORY_RESET_STATE_LOWTX  1
+#define FACTORY_RESET_STATE_RESET  2
 
 /**
  * Load StateVars from and save StateVars to persistent storage.
@@ -178,7 +185,7 @@ protected:
 	CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY>* _resetCounter;
 	//! keeps track of the switch state, i.e. current PWM value
 #ifdef SWITCH_STATE_PERSISTENT
-	CyclicStorage<switch_state_t, SWITCH_STATE_REDUNDANCY>* _switchState;
+	CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY>* _switchState;
 #else
 	uint8_t _switchState;
 #endif
@@ -191,6 +198,7 @@ protected:
 	int32_t _temperature;
 	int32_t _powerUsage;
 	uint32_t _time;
+	uint8_t _factoryResetState;
 
 };
 

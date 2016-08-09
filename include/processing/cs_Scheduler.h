@@ -7,7 +7,7 @@
 #pragma once
 
 #include <ble/cs_Nordic.h>
-
+#include <drivers/cs_Timer.h>
 #include <structs/cs_ScheduleEntries.h>
 
 //todo: just remove it totally if it's not necessary to disable it

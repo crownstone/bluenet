@@ -11,7 +11,7 @@
 
 /** The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions.
  */
-class DeviceInformationService : public BLEpp::Service {
+class DeviceInformationService : public Service {
 public:
 	/** Constructor for alert notification service object
 	 *
@@ -40,12 +40,12 @@ protected:
 
 private:
 	//! References to characteristics that need to be written from other functions
-//	BLEpp::Characteristic<std::string> *_manufacturerNameCharacteristic;
-//	BLEpp::Characteristic<std::string> *_modelNumberCharacteristic;
-//	BLEpp::Characteristic<std::string> *_serialNumberCharacteristic;
-//	BLEpp::Characteristic<std::string> *_hardwareRevisionCharacteristic;
-//	BLEpp::Characteristic<std::string> *_firmwareRevisionCharacteristic;
-//	BLEpp::Characteristic<std::string> *_softwareRevisionCharacteristic;
-//	BLEpp::Characteristic<std::string> *_systemIdCharacteristic;
-//	BLEpp::Characteristic<std::string> *_regulatoryCerificationDataListCharacteristic;
+//	Characteristic<std::string> *_manufacturerNameCharacteristic;
+//	Characteristic<std::string> *_modelNumberCharacteristic;
+//	Characteristic<std::string> *_serialNumberCharacteristic;
+//	Characteristic<std::string> *_hardwareRevisionCharacteristic;
+//	Characteristic<std::string> *_firmwareRevisionCharacteristic;
+//	Characteristic<std::string> *_softwareRevisionCharacteristic;
+//	Characteristic<std::string> *_systemIdCharacteristic;
+//	Characteristic<std::string> *_regulatoryCerificationDataListCharacteristic;
 };

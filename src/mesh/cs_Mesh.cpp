@@ -55,6 +55,7 @@ Mesh::~Mesh() {
 }
 
 void Mesh::start() {
+	_mesh_start_time = RTC::now();
 	if (!started) {
 		started = true;
 		startTicking();
@@ -71,9 +72,11 @@ void Mesh::stop() {
 }
 
 void Mesh::restart() {
-	uint32_t err_code = rbc_mesh_restart();
-	if (err_code != NRF_SUCCESS) {
-		LOGe(FMT_FAILED_TO, "restart mesh", err_code);
+	if (started) {
+		uint32_t err_code = rbc_mesh_restart();
+		if (err_code != NRF_SUCCESS) {
+			LOGe(FMT_FAILED_TO, "restart mesh", err_code);
+		}
 	}
 }
 
@@ -105,7 +108,8 @@ void Mesh::init() {
 
 	rbc_mesh_init_params_t init_params;
 
-	init_params.access_addr = MESH_ACCESS_ADDR;
+	// the access address is a configurable parameter so we get it from the settings.
+	Settings::getInstance().get(CONFIG_MESH_ACCESS_ADDRESS, &init_params.access_addr);
 	init_params.interval_min_ms = MESH_INTERVAL_MIN_MS;
 	init_params.channel = MESH_CHANNEL;
 	init_params.lfclksrc = MESH_CLOCK_SOURCE;
@@ -115,7 +119,7 @@ void Mesh::init() {
 	error_code = rbc_mesh_init(init_params);
 	APP_ERROR_CHECK(error_code);
 
-	for (int i = 0; i < MESH_NUM_OF_CHANNELS; ++i) {
+	for (int i = 0; i < MESH_NUM_HANDLES; ++i) {
 		error_code = rbc_mesh_value_enable(i+1);
 		APP_ERROR_CHECK(error_code);
 		_first[i] = true;
@@ -125,7 +129,7 @@ void Mesh::init() {
 //	error_code = rbc_mesh_value_enable(2);
 //	APP_ERROR_CHECK(error_code);
 
-	_mesh_init_time = RTC::now();
+	_mesh_start_time = RTC::now();
 
 	// do not automatically start meshing, wait for the start command
 //	rbc_mesh_stop();
@@ -186,7 +190,7 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	}
 #endif
 
-	if (evt->value_handle > MESH_NUM_OF_CHANNELS) {
+	if (evt->value_handle > MESH_NUM_HANDLES) {
 //	if (evt->value_handle != 1 && evt->value_handle != 2) {
 //	if (evt->value_handle == 1 || evt->value_handle > 4) {
 		rbc_mesh_value_disable(evt->value_handle);
@@ -225,8 +229,8 @@ void Mesh::checkForMessages() {
 			//! ignore the first message received on each channel if it arrives within a certain
 			//! time limit after boot up. This to prevent reading old command messages after a
 			//! reboot
-			uint32_t ts = RTC::now() - _mesh_init_time;
-			if (ts < BOOT_TIME) {
+			uint32_t ts = RTC::now() - _mesh_start_time;
+			if (ts < MESH_BOOT_TIME) {
 #ifdef PRINT_MESH_VERBOSE
 				LOGi("t: %d: ch: %d, skipping message within boot-up time!", ts, evt.value_handle);
 #endif

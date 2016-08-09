@@ -17,7 +17,7 @@
 
 /** The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc.
  */
-class IndoorLocalizationService : public BLEpp::Service, EventListener {
+class IndoorLocalizationService : public Service, EventListener {
 
 protected:
 	void addRssiCharacteristic();
@@ -60,11 +60,11 @@ public:
 	void setRSSILevel(int8_t RSSILevel);
 
 private:
-	BLEpp::Characteristic<int8_t>* _rssiCharac;
-	BLEpp::Characteristic<uint8_t>* _scanControlCharac;
-	BLEpp::Characteristic<buffer_ptr_t>* _scannedDeviceListCharac;
-	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceListCharac;
-	BLEpp::Characteristic<buffer_ptr_t>* _trackedDeviceCharac;
+	Characteristic<int8_t>* _rssiCharac;
+	Characteristic<uint8_t>* _scanControlCharac;
+	Characteristic<buffer_ptr_t>* _scannedDeviceListCharac;
+	Characteristic<buffer_ptr_t>* _trackedDeviceListCharac;
+	Characteristic<buffer_ptr_t>* _trackedDeviceCharac;
 
 #ifdef PWM_ON_RSSI
 	int16_t _averageRssi;

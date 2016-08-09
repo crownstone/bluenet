@@ -17,11 +17,29 @@ FIRMWARE_VERSION="0.4.0"
 # DEVICE_FRIDGE      3
 DEVICE_TYPE=DEVICE_CROWNSTONE
 
+# To avoid confusion when trying to enable functionality through compiler flags, the
+# persistent storage for flags is disabled by default, set to 0 if enabling disabling functionality through
+# the characteristics / command should be persistently stored!
+PERSISTENT_FLAGS_DISABLED=1
+
 # Enable or disable meshing (1 or 0)
 MESHING=1
 
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=1
+
+# Set if crownstone should set power on by default when turning on
+DEFAULT_ON=1
+
+# Sample continuously at a low sample rate (100Hz by default).
+# Disables burst sampling.
+CONTINUOUS_POWER_SAMPLER=0
+
+# Enable or disable interval scanner, will scann every
+# SCAN_SEND_DELAY + SCAN_BRAK_DURATION ms, for SCAN_DURATION ms
+# waits for SCAN_SEND_DELAY ms after scan end before sending result
+# into mesh (if MESHING enabled)
+INTERVAL_SCANNER_ENABLED=1
 
 # Options to save energy
 LOW_POWER_MODE=0
@@ -44,15 +62,11 @@ ENCRYPTION=0
 # the default passkey used for bonding. can be changed with configuration charac
 STATIC_PASSKEY="123456"
 
-# Set if crownstone should set power on by default when turning on
-DEFAULT_ON=1
-
 # Enable or disable different services (at times required to preserve memory)
 CROWNSTONE_SERVICE=1
 INDOOR_SERVICE=1
 GENERAL_SERVICE=1
 POWER_SERVICE=1
-ALERT_SERVICE=0
 SCHEDULE_SERVICE=0
 
 # Enable or disable characteristics
@@ -127,6 +141,17 @@ TX_POWER=4
 # When meshing: must be >= timeslot period used by rbc_mesh (atm 100ms)
 ADVERTISEMENT_INTERVAL=160
 
+## Mesh settings ##
+MESH_NUM_HANDLES=10
+# Don't process first mesh messages after boot for some time (ms)
+MESH_BOOT_TIME=2000
+# Number to filter out messages that are not meant for the mesh
+MESH_ACCESS_ADDR=0xA641A69E
+# Minimum interval in ms for broadcasting values of handles (has to be smaller or equal to advertisement interval)
+MESH_INTERVAL_MIN_MS=100
+# Bluetooth channel to use for the mesh (37, 38, 39)
+MESH_CHANNEL=38
+
 # Minimal and maximal environment temperatures in degrees celsius
 MIN_ENV_TEMP=2
 MAX_ENV_TEMP=10
@@ -135,13 +160,7 @@ MAX_ENV_TEMP=10
 MAX_CHIP_TEMP=80
 
 # Time (ms) to wait with during booting
-BOOT_DELAY=3000
-
-# Enable or disable interval scanner, will scann every
-# SCAN_SEND_DELAY + SCAN_BRAK_DURATION ms, for SCAN_DURATION ms
-# waits for SCAN_SEND_DELAY ms after scan end before sending result
-# into mesh (if CHAR_MESHING enabled)
-INTERVAL_SCANNER_ENABLED=1
+BOOT_DELAY=400
 
 # Durations for the scanner in ms
 SCAN_DURATION=2000
@@ -158,10 +177,6 @@ SCAN_FILTER=3
 # Filtered out devices are still sent once every N scan intervals
 # Set to 0 to not send them ever
 SCAN_FILTER_SEND_FRACTION=360
-
-# Sample continuously at a low sample rate (100Hz by default).
-# Disables burst sampling.
-CONTINUOUS_POWER_SAMPLER=0
 
 # Some config introduced by anne
 RSSI_ENABLE=1
@@ -189,6 +204,8 @@ JLINK=/usr/bin/JLinkExe
 JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
 
 # Use SoftDevice (setting to 0 is untested)
+# [18.07.16] do we really want this flag still? Most of our code depends on the
+# softdevice being present. disabling this flag won't work without major code changes!!
 NRF51_USE_SOFTDEVICE=1
 
 # the directory with /Source and /Include subdirectories from the Nordic SDK
@@ -279,7 +296,7 @@ APPLICATION_LENGTH=0x23000
 ATTR_TABLE_SIZE=0xA00
 RAM_R1_BASE=0x20002C00
 RAM_APPLICATION_AMOUNT=0x5400
-HEAP_SIZE=6000
+HEAP_SIZE=5700
 
 
 

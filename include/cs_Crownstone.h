@@ -19,7 +19,6 @@
 #include <services/cs_IndoorLocalisationService.h>
 #include <services/cs_GeneralService.h>
 #include <services/cs_PowerService.h>
-#include <services/cs_AlertService.h>
 #include <services/cs_ScheduleService.h>
 #include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>
@@ -34,6 +33,7 @@
 #include <processing/cs_Tracker.h>
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scheduler.h>
+#include <processing/cs_FactoryReset.h>
 
 #include <mesh/cs_Mesh.h>
 #include <storage/cs_State.h>
@@ -44,8 +44,6 @@
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
 #define CROWNSTONE_UPDATE_FREQUENCY 1 //! hz
-
-using namespace BLEpp;
 
 /**
  * Crownstone encapsulates all functionality, stack, services, and configuration.
@@ -147,7 +145,6 @@ private:
 	GeneralService* _generalService;
 	IndoorLocalizationService* _localizationService;
 	PowerService* _powerService;
-	AlertService* _alertService;
 	ScheduleService* _scheduleService;
 
 	// advertise
@@ -162,6 +159,7 @@ private:
 	Scanner* _scanner;
 	Tracker* _tracker;
 	Scheduler* _scheduler;
+	FactoryReset* _factoryReset;
 
 	bool _advertisementPaused;
 

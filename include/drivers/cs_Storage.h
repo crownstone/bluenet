@@ -17,6 +17,7 @@
 #include "structs/cs_ScheduleEntries.h"
 
 #include "structs/buffer/cs_CircularBuffer.h"
+#include <events/cs_EventListener.h>
 
 extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
@@ -154,6 +155,15 @@ struct ps_configuration_t : ps_storage_base_t {
 	// how long to sample for power
 	uint32_t samplingTime;
 
+	// [18.07.16] enabling and disabling functionality at run time will mess
+	// up with enabling/disabling through compiler flags. i.e. if one flag was
+	// set through the command at run time, all flags are initialized with the
+	// current compiler flags. if next run, the compiler flags are changed, the
+	// change will not take any effect. to reduce this during development, use
+	// instead separate variables for each flag. this will be a waste of space
+	// but it lead to less confusion.
+	// nevertheless, if a flag is set at runtime through the command, changing the
+	// compiler flag afterwards will have no influence anymore
 	// todo: might need to move this to the state variables for wear leveling
 	union {
 		struct {
@@ -200,6 +210,20 @@ struct ps_configuration_t : ps_storage_base_t {
 	float voltageZero;
 	float currentZero;
 	float powerZero;
+
+	// see comment at struct for flags above
+	uint32_t meshEnabled;
+	uint32_t encryptionEnabled;
+	uint32_t iBeaconEnabled;
+	uint32_t scannerEnabled;
+	uint32_t continuousPowerSamplerEnabled;
+	uint32_t trackerEnabled;
+	uint32_t defaultOff;
+
+	uint32_t powerZeroAvgWindow;
+
+	uint32_t meshAccessAddress;
+
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct

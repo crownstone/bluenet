@@ -11,8 +11,6 @@
 
 #include <ble/cs_Nordic.h>
 
-namespace BLEpp {
-
 // @TODO Implement in a clean, methodical and understandable way
 
 /** A Universally Unique IDentifier for BLE services and characteristics.
@@ -145,5 +143,3 @@ public:
 	 */
 	operator ble_uuid128_t();
 };
-
-}

@@ -12,8 +12,6 @@
 #include <drivers/cs_Serial.h>
 #include <util/cs_Utils.h>
 
-namespace BLEpp {
-
 /** Implementation of the iBeacon specification.
  *
  * The implementation of the iBeacon specification is only about advertising at predefined intervals and
@@ -125,6 +123,6 @@ public:
 	/** Set RSSI value */
 	void setTxPower(int8_t txPower);
 	/** Get RSSI value */
-	int8_t getTxPower();};
+	int8_t getTxPower();
 
-} //! end namespace
+};

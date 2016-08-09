@@ -12,8 +12,6 @@
 #include <events/cs_EventDispatcher.h>
 #include <util/cs_Utils.h>
 
-using namespace BLEpp;
-
 Settings::Settings() : _initialized(false), _storage(NULL) {
 };
 
@@ -29,9 +27,9 @@ void Settings::init() {
 	loadPersistentStorage();
 
 	// need to initialize the flags if they are uninitialized, e.g. first time
-	if (_storageStruct.flagsBit.flagsUninitialized) {
-		initFlags();
-	}
+//	if (_storageStruct.flagsBit.flagsUninitialized) {
+//		initFlags();
+//	}
 
 	_initialized = true;
 }
@@ -196,12 +194,25 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_ADV_INTERVAL:
 	case CONFIG_IBEACON_MINOR:
 	case CONFIG_IBEACON_MAJOR:
-	case CONFIG_NEARBY_TIMEOUT: {
+	case CONFIG_NEARBY_TIMEOUT:
+	case CONFIG_POWER_ZERO_AVG_WINDOW: {
 		if (length != 2) {
 			LOGw(FMT_ERR_EXPECTED, "uint16");
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi(FMT_SET_INT_TYPE_VAL, type, *(uint16_t*)payload);
+		return ERR_SUCCESS;
+	}
+
+	/////////////////////////////////////////////////
+	//// UINT 32
+	/////////////////////////////////////////////////
+	case CONFIG_MESH_ACCESS_ADDRESS: {
+	if (length != 4) {
+			LOGw(FMT_ERR_EXPECTED, "uint32");
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		LOGi(FMT_SET_INT_TYPE_VAL, type, *(uint32_t*)payload);
 		return ERR_SUCCESS;
 	}
 
@@ -251,7 +262,7 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 		LOGi(FMT_SET_STR_TYPE_VAL, type, std::string((char*)payload, length).c_str());
 		return ERR_SUCCESS;
 	}
-	case CONFIG_KEY_OWNER :
+	case CONFIG_KEY_AMIN :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		if (length != ENCYRPTION_KEY_LENGTH) {
@@ -326,9 +337,16 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_ADV_INTERVAL:
 	case CONFIG_IBEACON_MINOR:
 	case CONFIG_IBEACON_MAJOR:
-	case CONFIG_NEARBY_TIMEOUT: {
+	case CONFIG_NEARBY_TIMEOUT:
+	case CONFIG_POWER_ZERO_AVG_WINDOW: {
 		return 2;
 	}
+
+	/////////////////////////////////////////////////
+	//// UINT 32
+	/////////////////////////////////////////////////
+	case CONFIG_MESH_ACCESS_ADDRESS:
+		return 4;
 
 	/////////////////////////////////////////////////
 	//// FLOAT
@@ -353,7 +371,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_NAME: {
 		return MAX_STRING_STORAGE_SIZE+1;
 	}
-	case CONFIG_KEY_OWNER :
+	case CONFIG_KEY_AMIN :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		return ENCYRPTION_KEY_LENGTH;
@@ -479,7 +497,7 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getUint16(_storageStruct.crownstoneId, (uint16_t*)target, 0);
 		break;
 	}
-	case CONFIG_KEY_OWNER : {
+	case CONFIG_KEY_AMIN : {
 		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.owner, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
@@ -541,6 +559,14 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 	}
 	case CONFIG_POWER_ZERO: {
 		Storage::getFloat(_storageStruct.powerZero, (float*)target, POWER_ZERO);
+		break;
+	}
+	case CONFIG_POWER_ZERO_AVG_WINDOW: {
+		Storage::getUint16(_storageStruct.powerZeroAvgWindow, (uint16_t*)target, POWER_ZERO_AVG_WINDOW);
+		break;
+	}
+	case CONFIG_MESH_ACCESS_ADDRESS: {
+		Storage::getUint32(_storageStruct.meshAccessAddress, (uint32_t*)target, MESH_ACCESS_ADDRESS);
 		break;
 	}
 	default: {
@@ -668,7 +694,7 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
 		break;
 	}
-	case CONFIG_KEY_OWNER : {
+	case CONFIG_KEY_AMIN : {
 		p_item = (uint8_t*)&_storageStruct.encryptionKeys.owner;
 		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.owner, ENCYRPTION_KEY_LENGTH);
 		break;
@@ -748,6 +774,16 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		Storage::setFloat(*((float*)target), _storageStruct.powerZero);
 		break;
 	}
+	case CONFIG_POWER_ZERO_AVG_WINDOW:{
+		p_item = (uint8_t*)&_storageStruct.powerZeroAvgWindow;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.powerZeroAvgWindow);
+		break;
+	}
+	case CONFIG_MESH_ACCESS_ADDRESS:{
+		p_item = (uint8_t*)&_storageStruct.meshAccessAddress;
+		Storage::setUint32(*((uint32_t*)target), _storageStruct.meshAccessAddress);
+		break;
+	}
 	default: {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_CONFIG_NOT_FOUND;
@@ -765,53 +801,72 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	return ERR_SUCCESS;
 }
 
-void Settings::initFlags() {
-	// set all flags to their default value
-	_storageStruct.flagsBit.meshDisabled = !MESHING;
-	_storageStruct.flagsBit.encryptionDisabled = !ENCRYPTION;
-	_storageStruct.flagsBit.iBeaconDisabled = !IBEACON;
-	_storageStruct.flagsBit.scannerDisabled = !INTERVAL_SCANNER_ENABLED;
-	_storageStruct.flagsBit.continuousPowerSamplerDisabled = !CONTINUOUS_POWER_SAMPLER;
-	_storageStruct.flagsBit.defaultOff = !DEFAULT_ON;
-	_storageStruct.flagsBit.flagsUninitialized = false;
-}
+//void Settings::initFlags() {
+//	// set all flags to their default value
+//	_storageStruct.flagsBit.meshDisabled = !MESHING;
+//	_storageStruct.flagsBit.encryptionDisabled = !ENCRYPTION;
+//	_storageStruct.flagsBit.iBeaconDisabled = !IBEACON;
+//	_storageStruct.flagsBit.scannerDisabled = !INTERVAL_SCANNER_ENABLED;
+//	_storageStruct.flagsBit.continuousPowerSamplerDisabled = !CONTINUOUS_POWER_SAMPLER;
+//	_storageStruct.flagsBit.defaultOff = !DEFAULT_ON;
+//	_storageStruct.flagsBit.flagsUninitialized = false;
+//}
 
 bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 
 	// should not happen, but better to check
-	if (_storageStruct.flagsBit.flagsUninitialized) {
-		// before updating a flag, we need to initialize all flags to their default
-		// value, otherwise they will be wrongly read after the update
-		initFlags();
-	}
+//	if (_storageStruct.flagsBit.flagsUninitialized) {
+//		// before updating a flag, we need to initialize all flags to their default
+//		// value, otherwise they will be wrongly read after the update
+//		initFlags();
+//	}
 
+	// as long as persistent flag storage is disabled, do not do any checks, but still
+	// update the struct so that other functions can check if the flag is set or not
+#if PERSISTENT_FLAGS_DISABLED==0
 	if (value == isSet(type)) {
+		LOGi("flag is already set");
 		return true;
 	}
+#endif
+
+	uint8_t* p_item;
 
 	switch(type) {
-		case CONFIG_MESH_ENABLED : {
-		_storageStruct.flagsBit.meshDisabled = !value;
+	case CONFIG_MESH_ENABLED : {
+		p_item = (uint8_t*)&_storageStruct.meshEnabled;
+		Storage::setUint8(value, _storageStruct.meshEnabled);
+//		_storageStruct.flagsBit.meshDisabled = !value;
 		break;
 	}
 	case CONFIG_ENCRYPTION_ENABLED : {
-		_storageStruct.flagsBit.encryptionDisabled = !value;
+		p_item = (uint8_t*)&_storageStruct.encryptionEnabled;
+		Storage::setUint8(value, _storageStruct.encryptionEnabled);
+//		_storageStruct.flagsBit.encryptionDisabled = !value;
 		break;
 	}
 	case CONFIG_IBEACON_ENABLED : {
-		_storageStruct.flagsBit.iBeaconDisabled = !value;
+		p_item = (uint8_t*)&_storageStruct.iBeaconEnabled;
+		Storage::setUint8(value, _storageStruct.iBeaconEnabled);
+//		_storageStruct.flagsBit.iBeaconDisabled = !value;
 		break;
 	}
 	case CONFIG_SCANNER_ENABLED : {
-		_storageStruct.flagsBit.scannerDisabled = !value;
+		p_item = (uint8_t*)&_storageStruct.scannerEnabled;
+		Storage::setUint8(value, _storageStruct.scannerEnabled);
+//		_storageStruct.flagsBit.scannerDisabled = !value;
 		break;
 	}
 	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
-		_storageStruct.flagsBit.continuousPowerSamplerDisabled = !value;
+		p_item = (uint8_t*)&_storageStruct.continuousPowerSamplerEnabled;
+		Storage::setUint8(value, _storageStruct.continuousPowerSamplerEnabled);
+//		_storageStruct.flagsBit.continuousPowerSamplerDisabled = !value;
 		break;
 	}
 	case CONFIG_DEFAULT_ON: {
-		_storageStruct.flagsBit.defaultOff = !value;
+		p_item = (uint8_t*)&_storageStruct.defaultOff;
+		Storage::setUint8(value, _storageStruct.defaultOff);
+//		_storageStruct.flagsBit.defaultOff = !value;
 		break;
 	}
 	default: {
@@ -819,55 +874,68 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 	}
 	}
 
+	// if persistent storage is disable for flags, do not update pstorage
+#if PERSISTENT_FLAGS_DISABLED==0
 	if (persistent) {
-		savePersistentStorageItem(&_storageStruct.flags);
+		savePersistentStorageItem(p_item, 4);
+//		savePersistentStorageItem(&_storageStruct.flags);
 	}
-	EventDispatcher::getInstance().dispatch(type, &value, sizeof(value));
+#else
+	LOGw("persistent storage for flags disabled!!");
+#endif
+
 	return true;
 }
 
 bool Settings::readFlag(uint8_t type, bool& value) {
 
-	bool default_value;
+//	bool default_value;
+
 	switch(type) {
 	case CONFIG_MESH_ENABLED: {
-		value = !_storageStruct.flagsBit.meshDisabled;
-		default_value = MESHING;
+		Storage::getUint8(_storageStruct.meshEnabled, (uint8_t*)&value, MESHING);
+//		value = !_storageStruct.flagsBit.meshDisabled;
+//		default_value = MESHING;
 		break;
 	}
 	case CONFIG_ENCRYPTION_ENABLED: {
-		value = !_storageStruct.flagsBit.encryptionDisabled;
-		default_value = ENCRYPTION;
+		Storage::getUint8(_storageStruct.encryptionEnabled, (uint8_t*)&value, ENCRYPTION);
+//		value = !_storageStruct.flagsBit.encryptionDisabled;
+//		default_value = ENCRYPTION;
 		break;
 	}
 	case CONFIG_IBEACON_ENABLED: {
-		value = !_storageStruct.flagsBit.iBeaconDisabled;
-		default_value = IBEACON;
+		Storage::getUint8(_storageStruct.iBeaconEnabled, (uint8_t*)&value, IBEACON);
+//		value = !_storageStruct.flagsBit.iBeaconDisabled;
+//		default_value = IBEACON;
 		break;
 	}
 	case CONFIG_SCANNER_ENABLED: {
-		value = !_storageStruct.flagsBit.scannerDisabled;
-		default_value = INTERVAL_SCANNER_ENABLED;
+		Storage::getUint8(_storageStruct.scannerEnabled, (uint8_t*)&value, INTERVAL_SCANNER_ENABLED);
+//		value = !_storageStruct.flagsBit.scannerDisabled;
+//		default_value = INTERVAL_SCANNER_ENABLED;
 		break;
 	}
 	case CONFIG_CONT_POWER_SAMPLER_ENABLED: {
-		value = !_storageStruct.flagsBit.continuousPowerSamplerDisabled;
-		default_value = CONTINUOUS_POWER_SAMPLER;
+		Storage::getUint8(_storageStruct.continuousPowerSamplerEnabled, (uint8_t*)&value, CONTINUOUS_POWER_SAMPLER);
+//		value = !_storageStruct.flagsBit.continuousPowerSamplerDisabled;
+//		default_value = CONTINUOUS_POWER_SAMPLER;
 		break;
 	}
 	case CONFIG_DEFAULT_ON: {
-		value = !_storageStruct.flagsBit.defaultOff;
-		default_value = DEFAULT_ON;
+		Storage::getUint8(_storageStruct.defaultOff, (uint8_t*)&value, DEFAULT_ON);
+//		value = !_storageStruct.flagsBit.defaultOff;
+//		default_value = DEFAULT_ON;
 		break;
 	}
 	default:
 		return false;
 	}
 
-	if (_storageStruct.flagsBit.flagsUninitialized) {
-		value = default_value;
-		return true;
-	}
+//	if (_storageStruct.flagsBit.flagsUninitialized) {
+//		value = default_value;
+//		return true;
+//	}
 
 	return true;
 }
@@ -930,39 +998,6 @@ void Settings::saveIBeaconPersistent() {
 	savePersistentStorageItem((uint8_t*)&_storageStruct.beacon, sizeof(_storageStruct.beacon));
 }
 
-//	void ConfigHelper::enable(ps_storage_id id, uint16_t size) {
-//		_storage->getHandle(id, _storageHandles[id]);
-//		loadPersistentStorage(_storageHandles[id], );
-//	}
-
-/** Retrieve the Bluetooth name from the object representing the BLE stack.
- *
- * @return name of the device
- */
-//std::string & Settings::getBLEName() {
-//	loadPersistentStorage();
-//	std::string& _name = BLEpp::Nrf51822BluetoothStack::getInstance().getDeviceName();
-//	Storage::getString(_storageStruct.device_name, _name, _name);
-//	return _name;
-//}
-
-/** Write the Bluetooth name to the object representing the BLE stack.
- *
- * This updates the Bluetooth name immediately, however, it does not update the name persistently. It
- * has to be written to FLASH in that case.
- */
-//void Settings::setBLEName(const std::string &name, bool persistent) {
-//	if (name.length() > 31) {
-//		LOGe(MSG_NAME_TOO_LONG);
-//		return;
-//	}
-//	BLEpp::Nrf51822BluetoothStack::getInstance().updateDeviceName(name);
-//	Storage::setString(name, _storageStruct.device_name);
-//	if (persistent) {
-//		savePersistentStorageItem((uint8_t*)_storageStruct.device_name, sizeof(_storageStruct.device_name));
-//	}
-//}
-
 void Settings::factoryReset(uint32_t resetCode) {
 	if (resetCode != FACTORY_RESET_CODE) {
 		LOGe("wrong reset code!");
@@ -971,6 +1006,6 @@ void Settings::factoryReset(uint32_t resetCode) {
 
 	_storage->clearStorage(PS_ID_CONFIGURATION);
 	memset(&_storageStruct, 0xFF, sizeof(_storageStruct));
-	initFlags();
+//	initFlags();
 //	loadPersistentStorage();
 }

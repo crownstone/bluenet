@@ -109,7 +109,7 @@ protected:
 	uint16_t getSettingsItemSize(uint8_t type);
 
 	bool readFlag(uint8_t type, bool& value);
-	void initFlags();
+//	void initFlags();
 
 	/**
 	 * Helper functions to write single item from the configuration struct to storage (FLASH).

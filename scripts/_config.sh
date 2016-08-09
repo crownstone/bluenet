@@ -35,7 +35,7 @@ source ${BLUENET_CONFIG_DIR}/CMakeBuild.config
 
 ## Use by default the softdevice folders from the SDK, if not otherwise specified
 if [[ -z $SOFTDEVICE_DIR ]]; then
-	SOFTDEVICE_DIR=$NRF51822_DIR/components/softdevice/$SOFTDEVICE
+	SOFTDEVICE_DIR=$NRF51822_DIR/components/softdevice/s$SOFTDEVICE_SERIES
 fi
 
 if [[ -z $SOFTDEVICE_DIR_API ]]; then

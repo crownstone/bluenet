@@ -12,7 +12,7 @@
 
 /** ScheduleService organizes ticks for all components for non-urgent timing.
  */
-class ScheduleService : public BLEpp::Service, EventListener {
+class ScheduleService : public Service, EventListener {
 public:
 //	typedef function<int8_t()> func_t;
 
@@ -39,8 +39,8 @@ protected:
 
 private:
 	//! References to characteristics that need to be written from other functions
-	BLEpp::Characteristic<uint32_t> *_currentTimeCharacteristic;
-	BLEpp::Characteristic<uint8_t*> *_writeScheduleEntryCharacteristic;
-	BLEpp::Characteristic<uint8_t*> *_listScheduleEntriesCharacteristic;
+	Characteristic<uint32_t> *_currentTimeCharacteristic;
+	Characteristic<uint8_t*> *_writeScheduleEntryCharacteristic;
+	Characteristic<uint8_t*> *_listScheduleEntriesCharacteristic;
 
 };

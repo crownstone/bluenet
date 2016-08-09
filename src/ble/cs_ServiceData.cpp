@@ -6,6 +6,8 @@
  */
 #include <ble/cs_ServiceData.h>
 
+#include <processing/cs_EncryptionHandler.h>
+
 #include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ConfigTypes.h>
 #include <drivers/cs_Serial.h>
@@ -14,6 +16,7 @@ ServiceData::ServiceData() : EventListener(EVT_ALL)
 {
 	EventDispatcher::getInstance().addListener(this);
 	memset(_array, 0, sizeof(_array));
+	_params.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
 };
 
 void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
@@ -35,8 +38,20 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			break;
 		}
 		case STATE_TEMPERATURE: {
+			// TODO: isn't the temperature an int32_t ?
 			updateTemperature(*(int8_t*)p_data);
 			break;
 		}
+		default:
+			return;
 		}
+
+		// encrypt the array using the guest key ECB if encryption is enabled.
+		uint8_t opMode;
+		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && !(opMode == OPERATION_MODE_SETUP)) {
+			EncryptionHandler::getInstance().encryptECB(_array+1, sizeof(_array)-1, _encryptedArray+1, sizeof(_encryptedArray)-1);
+		}
+
+		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
 	}

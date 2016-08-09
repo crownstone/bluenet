@@ -15,8 +15,6 @@
 #include <drivers/cs_Serial.h>
 #include <util/cs_Utils.h>
 
-using namespace BLEpp;
-
 inline std::string get_hardware_revision(void) {
 	char hardware_revision[32]; \
 	sprintf(hardware_revision, "%X-%X", HARDWARE_BOARD, HARDWARE_VERSION);
@@ -48,7 +46,7 @@ void DeviceInformationService::createCharacteristics() {
 }
 
 void DeviceInformationService::addHardwareRevisionCharacteristic() {
-	BLEpp::Characteristic<std::string>* _hardwareRevisionCharacteristic = new Characteristic<std::string>();
+	Characteristic<std::string>* _hardwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_hardwareRevisionCharacteristic);
 	_hardwareRevisionCharacteristic->setUUID(BLE_UUID_HARDWARE_REVISION_STRING_CHAR);
 	_hardwareRevisionCharacteristic->setName(BLE_CHAR_HARDWARE_REVISION);
@@ -57,7 +55,7 @@ void DeviceInformationService::addHardwareRevisionCharacteristic() {
 }
 
 void DeviceInformationService::addFirmwareRevisionCharacteristic() {
-	BLEpp::Characteristic<std::string>* _firmwareRevisionCharacteristic = new Characteristic<std::string>();
+	Characteristic<std::string>* _firmwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_firmwareRevisionCharacteristic);
 	_firmwareRevisionCharacteristic->setUUID(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
 	_firmwareRevisionCharacteristic->setName(BLE_CHAR_FIRMWARE_REVISION);
@@ -70,7 +68,7 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 }
 
 void DeviceInformationService::addSoftwareRevisionCharacteristic() {
-	BLEpp::Characteristic<std::string>* _softwareRevisionCharacteristic = new Characteristic<std::string>();
+	Characteristic<std::string>* _softwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_softwareRevisionCharacteristic);
 	_softwareRevisionCharacteristic->setUUID(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
 	_softwareRevisionCharacteristic->setName(BLE_CHAR_SOFTWARE_REVISION);
