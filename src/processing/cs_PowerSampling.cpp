@@ -331,7 +331,7 @@ void PowerSampling::powerSampleFinish() {
 //	LOGd("pSum=%f", pSum);
 	pSum /= tSum;
 	pSum -= _powerZero;
-	int32_t avgPower = pSum;
+	int32_t avgPower = pSum * 1000; //! in mW
 
 #ifdef PRINT_POWERSAMPLING_VERBOSE
 	LOGd("pSum=%f, tSum=%f, avgPower=%i", pSum, tSum, avgPower);
