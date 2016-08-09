@@ -762,21 +762,21 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		LOGf("brownout impending!! force shutdown ...")
 
 		rbc_mesh_stop();
-    	_scanner->stop();
+		_scanner->stop();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
-    	_switch->pwmOff();
-    	_switch->relayOff();
-    	_powerSampler->stopSampling();
+		_switch->pwmOff();
+		_switch->relayOff();
+		_powerSampler->stopSampling();
 #endif
 
-    	// now reset with brownout reset mask set.
-    	// NOTE: do not clear the gpregret register, this way
-    	//   we can count the number of brownouts in the bootloader
-    	sd_power_gpregret_set(GPREGRET_BROWNOUT_RESET);
-    	// soft reset, because brownout can't be distinguished from
-    	// hard reset otherwise
-    	sd_nvic_SystemReset();
+		// now reset with brownout reset mask set.
+		// NOTE: do not clear the gpregret register, this way
+		//   we can count the number of brownouts in the bootloader
+		sd_power_gpregret_set(GPREGRET_BROWNOUT_RESET);
+		// soft reset, because brownout can't be distinguished from
+		// hard reset otherwise
+		sd_nvic_SystemReset();
 		break;
 	}
 	default: return;
