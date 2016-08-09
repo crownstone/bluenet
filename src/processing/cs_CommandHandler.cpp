@@ -56,10 +56,12 @@ void CommandHandler::init() {
 }
 
 void CommandHandler::resetDelayed(uint8_t opCode) {
-	static uint8_t restOpCode = opCode;
+	static uint8_t resetOpCode = opCode;
 	app_timer_id_t resetTimer;
 	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
-	Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &restOpCode);
+	Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &resetOpCode);
+//	//! Loop until reset trigger
+//	while(true) {}; //! TODO: this doesn't seem to work
 }
 
 ERR_CODE CommandHandler::handleCommandDelayed(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, uint32_t delay) {
@@ -97,7 +99,8 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		}
 
 		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
-		static uint8_t resetOp = payload->opCode;
+//		static uint8_t resetOp = payload->opCode;
+		uint8_t resetOp = payload->opCode;
 
 		resetDelayed(resetOp);
 		break;
@@ -413,6 +416,8 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 //				LOGw("ibeacon minor is not set!");
 				return ERR_COMMAND_FAILED;
 			}
+
+			// TODO: check mesh access address
 
 			LOGi("Setup completed, resetting to normal mode");
 

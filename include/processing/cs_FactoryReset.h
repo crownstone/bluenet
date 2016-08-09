@@ -19,10 +19,21 @@ public:
 	}
 
 	void init();
+
+	/* Function to recover: no need to be admin to call this */
 	bool recover(uint32_t resetCode);
+
+	/* Function to go into factory reset mode */
 	bool factoryReset(uint32_t resetCode);
+
+	/* Function to actually wipe the memory */
+	bool finishFactoryReset();
+
+	/* Enable/disable ability to recover */
 	void enableRecovery(bool enable);
-	static void staticDisableRecovery(FactoryReset *ptr) {
+
+	/* Static function for the timeout */
+	static void staticTimeout(FactoryReset *ptr) {
 		ptr->timeout();
 	}
 

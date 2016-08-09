@@ -16,8 +16,9 @@
 #define SWITCH_STATE_PERSISTENT
 
 #define OPERATION_MODE_SETUP                       0x00
-#define OPERATION_MODE_NORMAL                      0x10
 #define OPERATION_MODE_DFU                         0x01
+#define OPERATION_MODE_FACTORY_RESET               0x02
+#define OPERATION_MODE_NORMAL                      0x10
 
 typedef uint32_t seq_number_t;
 

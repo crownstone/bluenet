@@ -10,13 +10,14 @@
 #include "storage/cs_State.h"
 #include "drivers/cs_RTC.h"
 #include "ble/cs_Stack.h"
+#include "processing/cs_CommandHandler.h"
 
 FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0), _recoveryDisableTimer(0) {
 
 }
 
 void FactoryReset::init() {
-	Timer::getInstance().createSingleShot(_recoveryDisableTimer, (app_timer_timeout_handler_t)FactoryReset::staticDisableRecovery);
+	Timer::getInstance().createSingleShot(_recoveryDisableTimer, (app_timer_timeout_handler_t)FactoryReset::staticTimeout);
 	resetTimeout();
 }
 
@@ -80,17 +81,34 @@ bool FactoryReset::factoryReset(uint32_t resetCode) {
 
 bool FactoryReset::factoryReset() {
 	LOGf("factory reset");
-	//
-	//			Settings::getInstance().factoryReset(resetCode);
-	//			State::getInstance().factoryReset(resetCode);
-	//			// todo: might not be neccessary if we only use dm in setup mode we can handle it specifically
-	//			//   there. maybe with a mode factory reset
-	//			// todo: remove stack again from CommandHandler if we don't need it here
-	//			Nrf51822BluetoothStack::getInstance().device_manager_reset();
-	//
-	//			LOGi("factory reset done, rebooting device in 2s ...");
-	//
-	//			resetDelayed(GPREGRET_SOFT_RESET);
 
+	//! Go into factory reset mode after next reset.
+	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_FACTORY_RESET);
+
+	LOGi("Going into factory reset mode, rebooting device in 2s ...");
+	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
+
+	return true;
+}
+
+bool FactoryReset::finishFactoryReset() {
+	//! First clear sensitive data: keys
+	Settings::getInstance().factoryReset(FACTORY_RESET_CODE);
+
+	// Clear other data
+	//! TODO: this also set operation mode to setup
+	State::getInstance().factoryReset(FACTORY_RESET_CODE);
+
+	//! Remove bonded devices
+	// todo: might not be neccessary if we only use dm in setup mode we can handle it specifically
+	//   there. maybe with a mode factory reset
+	// todo: remove stack again from if we don't need it here
+	Nrf51822BluetoothStack::getInstance().device_manager_reset();
+
+	//! Lastly, go into setup mode after next reset
+	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_SETUP);
+
+	LOGi("Factory reset done, rebooting device in 2s ...");
+	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
 	return true;
 }

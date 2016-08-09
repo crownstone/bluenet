@@ -115,7 +115,7 @@ void Crownstone::init() {
 	//! configure the crownstone
 	configure();
 
-	LOGi(FMT_HEADER, "allocating buffer for encryption");
+	LOGi(FMT_INIT, "encryption handler");
 	EncryptionHandler::getInstance().init();
 
 	LOGi(FMT_HEADER, "setup");
@@ -136,7 +136,8 @@ void Crownstone::init() {
 		_stack->createCharacteristics();
 
 		//! set it by default into low tx mode
-		_stack->setTxPowerLevel(LOW_TX_POWER);
+		//_stack->setTxPowerLevel(LOW_TX_POWER);
+		_stack->changeToLowTxPowerMode();
 
 		LOGi(FMT_ENABLE, "PIN encryption");
 		//! use PIN encryption for setup mode
@@ -165,10 +166,17 @@ void Crownstone::init() {
 
 		break;
 	}
+	case OPERATION_MODE_FACTORY_RESET: {
+
+		LOGd("Configure factory reset mode");
+
+		FactoryReset::getInstance().finishFactoryReset();
+		break;
+	}
 	case OPERATION_MODE_DFU: {
 
 		CommandHandler::getInstance().handleCommand(CMD_GOTO_DFU);
-		while(true) {}; // loop until reset triggers
+		break;
 	}
 	}
 
@@ -240,6 +248,8 @@ void Crownstone::initDrivers() {
 
 	LOGd(FMT_INIT, "command handler");
 	_commandHandler->init();
+
+	LOGd(FMT_INIT, "factory reset");
 	_factoryReset->init();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
@@ -250,6 +260,7 @@ void Crownstone::initDrivers() {
 	LOGd(FMT_INIT, "temperature guard");
 	_temperatureGuard->init();
 
+	LOGd(FMT_INIT, "power sampler");
 	_powerSampler->init();
 #endif
 
@@ -474,7 +485,7 @@ void Crownstone::createCrownstoneServices() {
 	_powerService = new PowerService;
 	_stack->addService(_powerService);
 #else
-	LOGe("PowerService only available for device type Crownstone!!");
+	LOGe("Power service not available");
 #endif
 #endif
 

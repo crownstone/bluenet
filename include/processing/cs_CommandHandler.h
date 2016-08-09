@@ -39,11 +39,11 @@ public:
 
 	ERR_CODE handleCommandDelayed(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, uint32_t delay);
 
+	void resetDelayed(uint8_t opCode);
+
 private:
 
 	CommandHandler();
-
-	void resetDelayed(uint8_t opCode);
 
 	app_timer_id_t _delayTimer;
 
