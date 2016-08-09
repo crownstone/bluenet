@@ -26,8 +26,8 @@ public:
 
 	CyclicStorage(pstorage_handle_t handle, pstorage_size_t offset, T defaultValue) :
 		_storage(NULL), _tail(-1), _seqNumber(0),
-		_value(defaultValue), _storageHandle(handle), _storageOffset(offset),
-		_defaultValue(defaultValue)
+		_value(defaultValue), _defaultValue(defaultValue),
+		_storageHandle(handle), _storageOffset(offset)
 	{
 		_storage = &Storage::getInstance();
 		loadFromStorage();

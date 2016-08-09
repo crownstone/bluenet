@@ -17,8 +17,6 @@ extern "C" {
 	#include <third/protocol/rbc_mesh.h>
 }
 
-using namespace BLEpp;
-
 struct delayed_command_t {
 	CommandHandlerTypes type;
 	uint16_t size;
@@ -37,15 +35,15 @@ public:
 
 	ERR_CODE handleCommand(CommandHandlerTypes type);
 
-	ERR_CODE handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size);
+	ERR_CODE handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel accessLevel = ADMIN);
 
 	ERR_CODE handleCommandDelayed(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, uint32_t delay);
+
+	void resetDelayed(uint8_t opCode);
 
 private:
 
 	CommandHandler();
-
-	void resetDelayed(uint8_t opCode);
 
 	app_timer_id_t _delayTimer;
 

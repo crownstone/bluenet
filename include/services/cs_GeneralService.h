@@ -22,7 +22,7 @@
  *
  * If meshing is enabled, it is also possible to send a message into the mesh network using a characteristic.
  */
-class GeneralService: public BLEpp::Service, EventListener {
+class GeneralService: public Service, EventListener {
 public:
 	/** Constructor for general crownstone service object
 	 *
@@ -64,11 +64,11 @@ private:
 
 	/** Temperature characteristic
 	 */
-	BLEpp::Characteristic<int32_t>* _temperatureCharacteristic;
+	Characteristic<int32_t>* _temperatureCharacteristic;
 
 	/** Reset characteristic
 	 *
 	 * Resets device
 	 */
-	BLEpp::Characteristic<uint8_t>* _resetCharacteristic;
+	Characteristic<uint8_t>* _resetCharacteristic;
 };

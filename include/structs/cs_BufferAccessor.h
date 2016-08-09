@@ -6,7 +6,6 @@
  */
 #pragma once
 
-#include <ble/cs_Characteristic.h>
 #include <common/cs_Types.h>
 
 /** Base class for a buffer accessor object

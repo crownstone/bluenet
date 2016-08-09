@@ -25,7 +25,7 @@ void debugprint(void * p_context) {
 
 State::State() :
 		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedEnergy(NULL),
-		_temperature(0), _powerUsage(0), _time(0) {
+		_temperature(0), _powerUsage(0), _time(0), _factoryResetState(FACTORY_RESET_STATE_NORMAL) {
 }
 
 void State::init() {
@@ -46,7 +46,7 @@ void State::init() {
 	ps_state_t state;
 
 	bool defaultOn = Settings::getInstance().isSet(CONFIG_DEFAULT_ON);
-	switch_state_storage_t defaultSwitchState = defaultOn ? 255 : 0;
+	switch_state_storage_t defaultSwitchState = defaultOn ? 100 : 0; // 100 for pwm
 
 #ifdef SWITCH_STATE_PERSISTENT
 	_switchState = new CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY>(_stateHandle,
@@ -99,6 +99,7 @@ ERR_CODE State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, b
 	// variables with write disabled
 	case STATE_SWITCH_STATE:
 	case STATE_TEMPERATURE:
+	case STATE_FACTORY_RESET:
 	default:
 		LOGw(FMT_STATE_NOT_FOUND, type);
 	}
@@ -122,6 +123,10 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 	}
 	case STATE_TEMPERATURE: {
 		size = sizeof(int32_t);
+		break;
+	}
+	case STATE_FACTORY_RESET: {
+		size = sizeof(uint8_t);
 		break;
 	}
 	case STATE_TIME: {
@@ -219,6 +224,10 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 		success = size == sizeof(_temperature);
 		break;
 	}
+	case STATE_FACTORY_RESET: {
+		success = size == sizeof(_factoryResetState);
+		break;
+	}
 	case STATE_TIME: {
 		success = size == sizeof(_time);
 		break;
@@ -249,6 +258,10 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 //#ifdef PRINT_DEBUG
 //			LOGd("Set temperature: %d", _temperature);
 //#endif
+			break;
+		}
+		case STATE_FACTORY_RESET: {
+			_factoryResetState = *(uint8_t*)target;
 			break;
 		}
 		case STATE_SWITCH_STATE: {
@@ -325,6 +338,13 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			*(int32_t*)target = _temperature;
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_INT_VAL, "temperature", *(int32_t*)target);
+#endif
+			break;
+		}
+		case STATE_FACTORY_RESET: {
+			*(uint8_t*)target = _factoryResetState;
+#ifdef PRINT_DEBUG
+			LOGd(FMT_GET_INT_VAL, "factory reset", *(uint8_t*)target);
 #endif
 			break;
 		}

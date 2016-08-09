@@ -33,8 +33,6 @@ extern "C" {
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Tracker.h>
 
-using namespace BLEpp;
-
 //#define PRINT_STACK_VERBOSE
 
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
@@ -46,7 +44,7 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0),
-				_adv_manuf_data(NULL), _encryptionEnabled(false), _serviceData(NULL)
+				_adv_manuf_data(NULL), _serviceData(NULL)
 {
 	//! setup default values.
 	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
@@ -705,7 +703,7 @@ bool Nrf51822BluetoothStack::isScanning() {
 //	}
 //}
 
-void Nrf51822BluetoothStack::setEncrypted(bool encrypted) {
+void Nrf51822BluetoothStack::setPinEncrypted(bool encrypted) {
 	if (encrypted) {
 		//! initialize device manager to handle PIN encryption keys
 		device_manager_init(false);
@@ -713,7 +711,15 @@ void Nrf51822BluetoothStack::setEncrypted(bool encrypted) {
 
 	//! set characteristics of all services to encrypted
 	for (Service* svc : _services) {
-		svc->setEncrypted(encrypted);
+		svc->setPinEncrypted(encrypted);
+	}
+}
+
+void Nrf51822BluetoothStack::setAesEncrypted(bool encrypted) {
+
+	//! set characteristics of all services to encrypted
+	for (Service* svc : _services) {
+		svc->setAesEncrypted(encrypted);
 	}
 }
 
@@ -756,16 +762,16 @@ static uint32_t device_manager_evt_handler(dm_handle_t const    * p_handle,
 
 void Nrf51822BluetoothStack::lowPowerTimeout(void* p_context) {
 	LOGw("bonding timeout!");
-	((Nrf51822BluetoothStack*)p_context)->changeToNormalPowerMode();
+	((Nrf51822BluetoothStack*)p_context)->changeToNormalTxPowerMode();
 }
 
-void Nrf51822BluetoothStack::changeToLowPowerMode() {
+void Nrf51822BluetoothStack::changeToLowTxPowerMode() {
 	int8_t lowTxPower;
 	Settings::getInstance().get(CONFIG_LOW_TX_POWER, &lowTxPower);
 	setTxPowerLevel(lowTxPower);
 }
 
-void Nrf51822BluetoothStack::changeToNormalPowerMode() {
+void Nrf51822BluetoothStack::changeToNormalTxPowerMode() {
 	int8_t txPower;
 	Settings::getInstance().get(CONFIG_TX_POWER, &txPower);
 	setTxPowerLevel(txPower);
@@ -809,7 +815,7 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         	Timer::getInstance().createSingleShot(_lowPowerTimeoutId, lowPowerTimeout);
         	Timer::getInstance().start(_lowPowerTimeoutId, MS_TO_TICKS(60000), this);
 
-        	changeToLowPowerMode();
+        	changeToLowTxPowerMode();
         	break;
         }
         case DM_EVT_SECURITY_SETUP_COMPLETE: {
@@ -822,7 +828,7 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         	//! clear timeout
         	Timer::getInstance().stop(_lowPowerTimeoutId);
 
-			changeToNormalPowerMode();
+			changeToNormalTxPowerMode();
         	break;
         }
         default:
@@ -921,6 +927,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //		_log(INFO, "address: " );
 //		BLEutil::printArray(p_ble_evt->evt.gap_evt.params.connected.peer_addr.addr, BLE_GAP_ADDR_LEN);
 		on_connected(p_ble_evt);
+		EventDispatcher::getInstance().dispatch(EVT_BLE_CONNECT);
 		break;
 
 	case BLE_EVT_USER_MEM_REQUEST: {
@@ -942,6 +949,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	case BLE_GAP_EVT_DISCONNECTED:
 		on_disconnected(p_ble_evt);
+		EventDispatcher::getInstance().dispatch(EVT_BLE_DISCONNECT);
 		break;
 
 	case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
@@ -1055,6 +1063,12 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 	for (Service* svc : _services) {
 		svc->on_ble_event(p_ble_evt);
 	}
+}
+
+void Nrf51822BluetoothStack::disconnect() {
+	LOGi("Forcibly disconnecting from device");
+	//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
+	BLE_CALL(sd_ble_gap_disconnect, (_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
 }
 
 void Nrf51822BluetoothStack::onTxComplete(ble_evt_t * p_ble_evt) {

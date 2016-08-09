@@ -12,7 +12,7 @@
 //#define GENERAL_BUFFER_SIZE                      300
 
 /** maximum length of strings used for characteristic values */
-#define MAX_STRING_LENGTH                        25
+#define MAX_CHAR_VALUE_STRING_LENGTH             12
 
 /** define the maximum size for strings to be stored
  */
@@ -81,7 +81,7 @@
 #define CS_ADC_PPI_CHANNEL                       7
 
 #if CONTINUOUS_POWER_SAMPLER == 1
-#define CS_ADC_SAMPLE_RATE                       100
+#define CS_ADC_SAMPLE_RATE                       101
 #else
 #define CS_ADC_SAMPLE_RATE                       3000 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
 #endif
@@ -95,8 +95,9 @@
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 
 #define FACTORY_RESET_CODE                       0xdeadbeef
+#define FACTORY_RESET_TIMEOUT                    60000 //! Timeout before recovery becomes unavailable after reset (ms)
 
-#define ENCYRPTION_KEY_LENGTH                    16 //! 16 byte length
+#define ENCYRPTION_KEY_LENGTH                    SOC_ECB_KEY_LENGTH //! 16 byte length
 
 #define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
 
@@ -105,3 +106,15 @@
 #define VOLTAGE_ZERO                             169.0f
 #define CURRENT_ZERO                             168.5f
 #define POWER_ZERO                               9.0f
+#define POWER_ZERO_AVG_WINDOW                    100
+#define MESH_ACCESS_ADDRESS                      0xA641A69E
+
+// stack config values
+//#define MIN_CONNECTION_INTERVAL                  16
+#define MIN_CONNECTION_INTERVAL                  6
+//#define MAX_CONNECTION_INTERVAL                  32
+#define MAX_CONNECTION_INTERVAL                  16
+#define CONNECTION_SUPERVISION_TIMEOUT           400
+#define SLAVE_LATENCY                            10
+#define ADVERTISING_TIMEOUT                      0
+

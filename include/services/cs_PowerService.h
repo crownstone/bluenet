@@ -37,7 +37,7 @@
  *   - measure power consumption
  *   - set a limit on the maximum current (the relay will be automatically switched off above this threshold)
  */
-class PowerService : public BLEpp::Service, EventListener {
+class PowerService : public Service, EventListener {
 public:
 	/** Constructor for power service object
 	 *
@@ -88,9 +88,9 @@ protected:
 
 private:
 	//! References to characteristics that need to be written from other functions
-	BLEpp::Characteristic<uint8_t> *_pwmCharacteristic;
-	BLEpp::Characteristic<uint8_t> *_relayCharacteristic;
-	BLEpp::Characteristic<int32_t> *_powerConsumptionCharacteristic;
-	BLEpp::Characteristic<uint8_t*> *_powerSamplesCharacteristic;
+	Characteristic<uint8_t> *_pwmCharacteristic;
+	Characteristic<uint8_t> *_relayCharacteristic;
+	Characteristic<int32_t> *_powerConsumptionCharacteristic;
+	Characteristic<uint8_t*> *_powerSamplesCharacteristic;
 
 };

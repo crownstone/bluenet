@@ -13,18 +13,18 @@
 #include <drivers/cs_Timer.h>
 #include <mesh/cs_MeshControl.h>
 #include <processing/cs_CommandHandler.h>
+#include <processing/cs_FactoryReset.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <protocol/cs_ErrorCodes.h>
-
-using namespace BLEpp;
 
 CrownstoneService::CrownstoneService() : EventListener(),
 		_controlCharacteristic(NULL),
 		_configurationControlCharacteristic(NULL), _configurationReadCharacteristic(NULL),
 		_streamBuffer(NULL),
 		_meshControlCharacteristic(NULL), _meshCommand(NULL),
-		_stateControlCharacteristic(NULL), _stateReadCharacteristic(NULL)
+		_stateControlCharacteristic(NULL), _stateReadCharacteristic(NULL),
+		_sessionNonceCharacteristic(NULL), _factoryResetCharacteristic(NULL)
 {
 	EventDispatcher::getInstance().addListener(this);
 
@@ -79,8 +79,8 @@ void CrownstoneService::createCharacteristics() {
 	{
 		LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
 		_streamBuffer = getStreamBuffer(buffer, maxLength);
-		addConfigurationControlCharacteristic(buffer, maxLength);
-		addConfigurationReadCharacteristic(buffer, maxLength);
+		addConfigurationControlCharacteristic(buffer, maxLength, ADMIN);
+		addConfigurationReadCharacteristic(buffer, maxLength, ADMIN);
 
 //		LOGd("Set both set/get charac to buffer at %p", buffer);
 	}
@@ -100,6 +100,12 @@ void CrownstoneService::createCharacteristics() {
 #else
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_STATE);
 #endif
+
+	LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_NONCE);
+	addSessionNonceCharacteristic(buffer, maxLength);
+
+	LOGi(FMT_CHAR_ADD, STR_CHAR_FACTORY_RESET);
+	addFactoryResetCharacteristic();
 
 	addCharacteristicsDone();
 }
@@ -131,9 +137,14 @@ void CrownstoneService::addMeshCharacteristic() {
 	_meshControlCharacteristic->setName(BLE_CHAR_MESH_CONTROL);
 	_meshControlCharacteristic->setWritable(true);
 	_meshControlCharacteristic->setValue(buffer);
-	_meshControlCharacteristic->setMaxLength(size);
-	_meshControlCharacteristic->setDataLength(0);
-	_meshControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_meshControlCharacteristic->setMinAccessLevel(MEMBER);
+	_meshControlCharacteristic->setMaxGattValueLength(size);
+	_meshControlCharacteristic->setValueLength(0);
+	_meshControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
+		// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
+		// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
+		// If the user writes to this characteristic with insufficient rights, this method is not called
+
 		LOGi(MSG_MESH_MESSAGE_WRITE);
 
 		uint8_t handle = _meshCommand->type();
@@ -144,8 +155,8 @@ void CrownstoneService::addMeshCharacteristic() {
 
 //		LOGi("err error_code: %d", error_code);
 		memcpy(value, &error_code, sizeof(error_code));
-		_meshControlCharacteristic->setDataLength(sizeof(error_code));
-		_meshControlCharacteristic->notify();
+		_meshControlCharacteristic->setValueLength(sizeof(error_code));
+		_meshControlCharacteristic->updateValue();
 
 	});
 }
@@ -158,9 +169,12 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setWritable(true);
 	_controlCharacteristic->setValue(buffer);
-	_controlCharacteristic->setMaxLength(size);
-	_controlCharacteristic->setDataLength(0);
-	_controlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_controlCharacteristic->setMinAccessLevel(GUEST);
+	_controlCharacteristic->setMaxGattValueLength(size);
+	_controlCharacteristic->setValueLength(0);
+	_controlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
+		// encryption in the write stage verifies if the key is at least GUEST, command specific permissions are
+		// handled in the commandHandler
 
 		ERR_CODE error_code;
 		MasterBuffer& mb = MasterBuffer::getInstance();
@@ -172,7 +186,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 			uint8_t *payload = _streamBuffer->payload();
 			uint8_t length = _streamBuffer->length();
 
-			error_code = CommandHandler::getInstance().handleCommand(type, payload, length);
+			error_code = CommandHandler::getInstance().handleCommand(type, payload, length, accessLevel);
 
 			mb.unlock();
 		} else {
@@ -182,13 +196,13 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 
 //		LOGi("err error_code: %d", error_code);
 		memcpy(value, &error_code, sizeof(error_code));
-		_controlCharacteristic->setDataLength(sizeof(error_code));
-		_controlCharacteristic->notify();
+		_controlCharacteristic->setValueLength(sizeof(error_code));
+		_controlCharacteristic->updateValue();
 	});
 
 }
 
-void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_configurationControlCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_configurationControlCharacteristic);
 
@@ -196,9 +210,13 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	_configurationControlCharacteristic->setName(BLE_CHAR_CONFIG_CONTROL);
 	_configurationControlCharacteristic->setWritable(true);
 	_configurationControlCharacteristic->setValue(buffer);
-	_configurationControlCharacteristic->setMaxLength(size);
-	_configurationControlCharacteristic->setDataLength(0);
-	_configurationControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_configurationControlCharacteristic->setMinAccessLevel(minimumAccessLevel);
+	_configurationControlCharacteristic->setMaxGattValueLength(size);
+	_configurationControlCharacteristic->setValueLength(0);
+	_configurationControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
+		// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
+		// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
+		// If the user writes to this characteristic with insufficient rights, this method is not called
 
 		ERR_CODE error_code;
 		if (!value) {
@@ -225,8 +243,8 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 					error_code = Settings::getInstance().readFromStorage(type, _streamBuffer);
 					if (SUCCESS(error_code)) {
 						_streamBuffer->setOpCode(READ_VALUE);
-						_configurationReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
-						_configurationReadCharacteristic->notify();
+						_configurationReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
+						_configurationReadCharacteristic->updateValue();
 //						LOGi("success");
 						mb.unlock();
 						return; // need to return here to avoid writing error_code, which would overwrite
@@ -254,12 +272,12 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 
 //		LOGi("err error_code: %d", error_code);
 		memcpy(value, &error_code, sizeof(error_code));
-		_configurationControlCharacteristic->setDataLength(sizeof(error_code));
-		_configurationControlCharacteristic->notify();
+		_configurationControlCharacteristic->setValueLength(sizeof(error_code));
+		_configurationControlCharacteristic->updateValue();
 	});
 }
 
-void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_configurationReadCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_configurationReadCharacteristic);
 
@@ -268,8 +286,9 @@ void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, 
 	_configurationReadCharacteristic->setWritable(false);
 	_configurationReadCharacteristic->setNotifies(true);
 	_configurationReadCharacteristic->setValue(buffer);
-	_configurationReadCharacteristic->setMaxLength(size);
-	_configurationReadCharacteristic->setDataLength(0);
+	_configurationReadCharacteristic->setMinAccessLevel(minimumAccessLevel);
+	_configurationReadCharacteristic->setMaxGattValueLength(size);
+	_configurationReadCharacteristic->setValueLength(0);
 }
 
 void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
@@ -280,9 +299,13 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 	_stateControlCharacteristic->setName(BLE_CHAR_STATE_CONTROL);
 	_stateControlCharacteristic->setWritable(true);
 	_stateControlCharacteristic->setValue(buffer);
-	_stateControlCharacteristic->setMaxLength(size);
-	_stateControlCharacteristic->setDataLength(0);
-	_stateControlCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_stateControlCharacteristic->setMinAccessLevel(MEMBER);
+	_stateControlCharacteristic->setMaxGattValueLength(size);
+	_stateControlCharacteristic->setValueLength(0);
+	_stateControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
+		// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
+		// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
+		// If the user writes to this characteristic with insufficient rights, this method is not called
 
 		ERR_CODE error_code;
 		if (!value) {
@@ -316,8 +339,8 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 					LOGd(FMT_SELECT_TYPE, STR_CHAR_STATE, type);
 					if (SUCCESS(error_code)) {
 						_streamBuffer->setOpCode(READ_VALUE);
-						_stateReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
-						_stateReadCharacteristic->notify();
+						_stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
+						_stateReadCharacteristic->updateValue();
 //						LOGi("success");
 						mb.unlock();
 						return; // need to return here to avoid writing error_code, which would overwrite
@@ -339,8 +362,8 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 
 //		LOGi("err error_code: %d", error_code);
 		memcpy(value, &error_code, sizeof(error_code));
-		_stateControlCharacteristic->setDataLength(sizeof(error_code));
-		_stateControlCharacteristic->notify();
+		_stateControlCharacteristic->setValueLength(sizeof(error_code));
+		_stateControlCharacteristic->updateValue();
 	});
 }
 
@@ -353,12 +376,54 @@ void CrownstoneService::addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t
 	_stateReadCharacteristic->setWritable(false);
 	_stateReadCharacteristic->setNotifies(true);
 	_stateReadCharacteristic->setValue(buffer);
-	_stateReadCharacteristic->setMaxLength(size);
-	_stateReadCharacteristic->setDataLength(0);
+	_stateReadCharacteristic->setMinAccessLevel(MEMBER);
+	_stateReadCharacteristic->setMaxGattValueLength(size);
+	_stateReadCharacteristic->setValueLength(0);
 }
+
+
+void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+	_sessionNonceCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_sessionNonceCharacteristic);
+
+	_sessionNonceCharacteristic->setUUID(UUID(getUUID(), SESSION_NONCE_UUID));
+	_sessionNonceCharacteristic->setName(BLE_CHAR_SESSION_NONCE);
+	_sessionNonceCharacteristic->setWritable(false);
+	_sessionNonceCharacteristic->setNotifies(false);
+	_sessionNonceCharacteristic->setValue(buffer);
+	_sessionNonceCharacteristic->setMinAccessLevel(GUEST);
+	_sessionNonceCharacteristic->setMaxGattValueLength(size);
+	_sessionNonceCharacteristic->setValueLength(0);
+}
+
+void CrownstoneService::addFactoryResetCharacteristic() {
+	_factoryResetCharacteristic = new Characteristic<uint32_t>();
+	addCharacteristic(_factoryResetCharacteristic);
+
+	_factoryResetCharacteristic->setUUID(UUID(getUUID(), FACTORY_RESET_UUID));
+	_factoryResetCharacteristic->setName(BLE_CHAR_FACTORY_RESET);
+	_factoryResetCharacteristic->setWritable(true);
+	_factoryResetCharacteristic->setNotifies(false);
+	_factoryResetCharacteristic->setDefaultValue(0);
+	_factoryResetCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
+	_factoryResetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value) -> void {
+		FactoryReset::getInstance().recover(value);
+	});
+}
+
 
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
+	case EVT_SESSION_NONCE_SET: {
+		_sessionNonceCharacteristic->setValueLength(SESSION_NONCE_LENGTH);
+		_sessionNonceCharacteristic->setValue((uint8_t*)p_data);
+		_sessionNonceCharacteristic->updateValue(false);
+		break;
+	}
+	case EVT_BLE_DISCONNECT: {
+		_sessionNonceCharacteristic->setValueLength(0);
+		break;
+	}
 	case EVT_STATE_NOTIFICATION: {
 		if (_stateReadCharacteristic) {
 			state_vars_notifaction notification = *(state_vars_notifaction*)p_data;
@@ -369,8 +434,8 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 			_streamBuffer->setType(notification.type);
 			_streamBuffer->setOpCode(NOTIFY_VALUE);
 
-			_stateReadCharacteristic->setDataLength(_streamBuffer->getDataLength());
-			_stateReadCharacteristic->notify();
+			_stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
+			_stateReadCharacteristic->updateValue();
 		}
 	}
 	}

@@ -15,8 +15,6 @@
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <protocol/cs_StateTypes.h>
 
-using namespace BLEpp;
-
 PowerService::PowerService() : EventListener(),
 		_pwmCharacteristic(NULL),
 		_relayCharacteristic(NULL),
@@ -78,7 +76,7 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setName(BLE_CHAR_PWM);
 	_pwmCharacteristic->setDefaultValue(255);
 	_pwmCharacteristic->setWritable(true);
-	_pwmCharacteristic->onWrite([&](const uint8_t& value) -> void {
+	_pwmCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&value, 1);
 	});
 }
@@ -91,7 +89,7 @@ void PowerService::addRelayCharacteristic() {
 	_relayCharacteristic->setName(BLE_CHAR_RELAY);
 	_relayCharacteristic->setDefaultValue(255);
 	_relayCharacteristic->setWritable(true);
-	_relayCharacteristic->onWrite([&](const uint8_t& value) -> void {
+	_relayCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_RELAY, (buffer_ptr_t)&value, 1);
 	});
 }
@@ -110,8 +108,8 @@ void PowerService::addPowerSamplesCharacteristic() {
 //	LOGd("buffer=%u", buffer);
 
 	_powerSamplesCharacteristic->setValue(buffer);
-	_powerSamplesCharacteristic->setMaxLength(size);
-	_powerSamplesCharacteristic->setDataLength(0); //! Initialize with 0 length, to indicate it's invalid data.
+	_powerSamplesCharacteristic->setMaxGattValueLength(size);
+	_powerSamplesCharacteristic->setValueLength(0); //! Initialize with 0 length, to indicate it's invalid data.
 }
 
 void PowerService::addPowerConsumptionCharacteristic() {
@@ -134,19 +132,35 @@ void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		}
 		break;
 	}
-	case EVT_POWER_SAMPLES_START: {
-		if (_powerSamplesCharacteristic) {
-//			LOGd("power samples update");
-			_powerSamplesCharacteristic->setDataLength(0);
-			_powerSamplesCharacteristic->notify();
+	case STATE_SWITCH_STATE: {
+#ifdef EXTENDED_SWITCH_STATE
+		if (_pwmCharacteristic) {
+			(*_pwmCharacteristic) = ((switch_state_t*)p_data)->pwm_state;
 		}
+		if (_relayCharacteristic) {
+			(*_relayCharacteristic) = ((switch_state_t*)p_data)->relay_state;
+		}
+#else
+		if (_pwmCharacteristic) {
+			(*_pwmCharacteristic) = *(uint8_t*)p_data;
+		}
+#endif
+		break;
+	}
+	case EVT_POWER_SAMPLES_START: {
+//		if (_powerSamplesCharacteristic) {
+////			LOGd("power samples update");
+//			_powerSamplesCharacteristic->setValueLength(0);
+//			_powerSamplesCharacteristic->updateValue();
+//		}
 		break;
 	}
 	case EVT_POWER_SAMPLES_END: {
 		if (_powerSamplesCharacteristic) {
 //			LOGd("power samples update");
-			_powerSamplesCharacteristic->setDataLength(length);
-			_powerSamplesCharacteristic->notify();
+//			LOGi("set power samples %d", length);
+			_powerSamplesCharacteristic->setValueLength(length);
+			_powerSamplesCharacteristic->updateValue();
 		}
 		break;
 	}

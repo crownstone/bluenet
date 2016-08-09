@@ -16,6 +16,7 @@
 #include <cfg/cs_Strings.h>
 #include <util/cs_BleError.h>
 #include <common/cs_Tuple.h>
+#include <common/cs_Types.h>
 #include <third/std/function.h>
 #include <ble/cs_DoBotsManufac.h>
 #include <ble/cs_ServiceData.h>
@@ -30,40 +31,13 @@ extern "C" {
 
 /////////////////////////////////////////////////
 
-extern uint8_t service_data_array[1];
-
 // @TODO: replace std::vector with a fixed, in place array of size capacity.
 
 /** General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
-namespace BLEpp {
-
 class Service;
-
-/** BLEStack defines a chip-agnostic Bluetooth Low-Energy stack
- *
- * Currently, this class does not leverage much of the general Bluetooth Low-Energy functionality into
- * chip-agnostic code. However, this might be recommendable in the future.
- */
-class BLEStack {
-public:
-	virtual ~BLEStack() {};
-
-	/** Connected?
-	 *
-	 * @return true if connected, false if not connected
-	 */
-	virtual bool connected() = 0;
-
-	/** Handle to connection
-	 *
-	 * @return 16-bit value that unique identifies the connection
-	 */
-	virtual uint16_t getConnectionHandle() = 0;
-};
-
 
 /** nRF51822 specific implementation of the BLEStack
  *
@@ -72,7 +46,7 @@ public:
  * handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this
  * stack object as an argument w.r.t. this object. This makes dependencies traceable for the user.
  */
-class Nrf51822BluetoothStack : public BLEStack {
+class Nrf51822BluetoothStack {
 	//! Friend for BLE stack event handling
 //	friend void SWI2_IRQHandler();
 
@@ -95,7 +69,7 @@ private:
 	 *
 	 * TODO: The SoftDevice should be disabled as well.
 	 */
-	virtual ~Nrf51822BluetoothStack();
+	~Nrf51822BluetoothStack();
 public:
 	static Nrf51822BluetoothStack& getInstance() {
 		static Nrf51822BluetoothStack instance;
@@ -137,6 +111,9 @@ public:
 protected:
 	std::string                                 _device_name; //! 4
 	uint16_t                                    _appearance;
+
+	// might want to change this to a linked list or something that
+	// we can loop over but doesn't allocate more space than needed
 	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  //! 32
 
 	nrf_clock_lfclksrc_t                        _clock_source; //4
@@ -166,7 +143,6 @@ protected:
 	uint8_t                            			_passkey[BLE_GAP_PASSKEY_LEN];
 	dm_application_instance_t                   _dm_app_handle;
 	bool                                        _dm_initialized;
-	bool                                        _encryptionEnabled;
 
 	app_timer_id_t                              _lowPowerTimeoutId;
 	app_timer_id_t                              _secReqTimerId;
@@ -180,10 +156,11 @@ protected:
 	// todo: make part of DoBotsManufac (see iBeacon)
 	uint8_t*                                    _adv_manuf_data;
 
-ble_advdata_manuf_data_t 					_manufac_apple;
+	ble_advdata_manuf_data_t 					_manufac_apple;
 	ble_advdata_service_data_t                  _service_data;
 
 	ServiceData*                                _serviceData;
+
 public:
 
 	/** Initialization of the BLE stack
@@ -389,10 +366,10 @@ public:
 	 */
 //	Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 
-	virtual bool connected() {
+	bool connected() {
 		return _conn_handle != BLE_CONN_HANDLE_INVALID;
 	}
-	virtual uint16_t getConnectionHandle() {  //! TODO are multiple connections supported?
+	uint16_t getConnectionHandle() {  //! TODO are multiple connections supported?
 		return _conn_handle;
 	}
 
@@ -440,7 +417,12 @@ public:
 		_serviceData = serviceData;
 	}
 
-	void setEncrypted(bool encrypted);
+	void setPinEncrypted(bool encrypted);
+	void setAesEncrypted(bool encrypted);
+	void disconnect();
+	void changeToLowTxPowerMode();
+	void changeToNormalTxPowerMode();
+
 
 protected:
 
@@ -464,9 +446,5 @@ protected:
 
 	static void lowPowerTimeout(void* p_context);
 
-	void changeToLowPowerMode();
-	void changeToNormalPowerMode();
-
 };
 
-}

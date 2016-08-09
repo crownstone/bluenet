@@ -17,6 +17,7 @@
 #include "structs/cs_ScheduleEntries.h"
 
 #include "structs/buffer/cs_CircularBuffer.h"
+#include <events/cs_EventListener.h>
 
 extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
@@ -218,6 +219,11 @@ struct ps_configuration_t : ps_storage_base_t {
 	uint32_t continuousPowerSamplerEnabled;
 	uint32_t trackerEnabled;
 	uint32_t defaultOff;
+
+	uint32_t powerZeroAvgWindow;
+
+	uint32_t meshAccessAddress;
+
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct

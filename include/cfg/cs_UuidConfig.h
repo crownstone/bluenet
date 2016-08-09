@@ -53,6 +53,8 @@ enum CrownstoneCharacteristicsIDs {
 	CONFIG_READ_UUID                        = 0x5,
 	STATE_CONTROL_UUID                      = 0x6,
 	STATE_READ_UUID                         = 0x7,
+	SESSION_NONCE_UUID                      = 0x8,
+	FACTORY_RESET_UUID                      = 0x9,
 };
 
 enum SetupCharacteristicsIDs {

@@ -39,6 +39,8 @@
 #define BLE_CHAR_CONFIG_READ                     "Config Read"
 #define BLE_CHAR_STATE_CONTROL                   "State Control"
 #define BLE_CHAR_STATE_READ                      "State Read"
+#define BLE_CHAR_SESSION_NONCE                   "Session Nonce"
+#define BLE_CHAR_FACTORY_RESET                   "Factory Reset"
 #define BLE_CHAR_RSSI                            "RSSI"
 #define BLE_CHAR_SCAN_CONTROL                    "Scan Control"
 #define BLE_CHAR_SCAN_LIST                       "Scanned Devices"
@@ -67,6 +69,8 @@
 #define STR_CHAR_MESH                            "Mesh"
 #define STR_CHAR_CONFIGURATION                   "Configuration"
 #define STR_CHAR_STATE                           "State"
+#define STR_CHAR_SESSION_NONCE                   "Nonce"
+#define STR_CHAR_FACTORY_RESET                   "Recovery"
 
 #define STR_CHAR_NEW_ALERT                       "New Alert"
 #define STR_CHAR_HARDWARE_REVISION               "Hardware Revision"
@@ -87,11 +91,12 @@
 
 #define STR_CREATE_ALL_SERVICES                  "Create all services"
 
-#define STR_ERR_BUFFER_NOT_LARGE_ENOUGH          "Assigned buffer is not large enough!"
+#define STR_ERR_BUFFER_NOT_LARGE_ENOUGH          "Buffer not large enough!"
 #define STR_ERR_ALLOCATE_MEMORY                  "Could not allocate memory!"
 #define STR_ERR_VALUE_TOO_LONG                   "Value too long!"
 #define STR_ERR_FORGOT_TO_ASSIGN_STACK           "Forgot to assign stack!"
 #define STR_ERR_ALREADY_STOPPED                  "Already stopped!"
+#define STR_ERR_MULTIPLE_OF_16                   "Data must be multiple of 16B"
 
 /** Error messages
  *
@@ -167,3 +172,4 @@
 #define FMT_ERR_ASSIGN_BUFFER                    "Could not assign buffer at %p with size %d"
 #define FMT_ASSIGN_BUFFER_LEN                    "Assign buffer at %u, len: %d"
 
+#define FMT_ENABLE                               "Enable %s"

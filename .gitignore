@@ -6,3 +6,4 @@ tags
 build/
 *~
 .idea/
+.settings/

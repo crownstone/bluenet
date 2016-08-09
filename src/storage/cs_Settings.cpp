@@ -12,8 +12,6 @@
 #include <events/cs_EventDispatcher.h>
 #include <util/cs_Utils.h>
 
-using namespace BLEpp;
-
 Settings::Settings() : _initialized(false), _storage(NULL) {
 };
 
@@ -196,12 +194,25 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_ADV_INTERVAL:
 	case CONFIG_IBEACON_MINOR:
 	case CONFIG_IBEACON_MAJOR:
-	case CONFIG_NEARBY_TIMEOUT: {
+	case CONFIG_NEARBY_TIMEOUT:
+	case CONFIG_POWER_ZERO_AVG_WINDOW: {
 		if (length != 2) {
 			LOGw(FMT_ERR_EXPECTED, "uint16");
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		LOGi(FMT_SET_INT_TYPE_VAL, type, *(uint16_t*)payload);
+		return ERR_SUCCESS;
+	}
+
+	/////////////////////////////////////////////////
+	//// UINT 32
+	/////////////////////////////////////////////////
+	case CONFIG_MESH_ACCESS_ADDRESS: {
+	if (length != 4) {
+			LOGw(FMT_ERR_EXPECTED, "uint32");
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		LOGi(FMT_SET_INT_TYPE_VAL, type, *(uint32_t*)payload);
 		return ERR_SUCCESS;
 	}
 
@@ -251,7 +262,7 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 		LOGi(FMT_SET_STR_TYPE_VAL, type, std::string((char*)payload, length).c_str());
 		return ERR_SUCCESS;
 	}
-	case CONFIG_KEY_OWNER :
+	case CONFIG_KEY_AMIN :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		if (length != ENCYRPTION_KEY_LENGTH) {
@@ -326,9 +337,16 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_ADV_INTERVAL:
 	case CONFIG_IBEACON_MINOR:
 	case CONFIG_IBEACON_MAJOR:
-	case CONFIG_NEARBY_TIMEOUT: {
+	case CONFIG_NEARBY_TIMEOUT:
+	case CONFIG_POWER_ZERO_AVG_WINDOW: {
 		return 2;
 	}
+
+	/////////////////////////////////////////////////
+	//// UINT 32
+	/////////////////////////////////////////////////
+	case CONFIG_MESH_ACCESS_ADDRESS:
+		return 4;
 
 	/////////////////////////////////////////////////
 	//// FLOAT
@@ -353,7 +371,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_NAME: {
 		return MAX_STRING_STORAGE_SIZE+1;
 	}
-	case CONFIG_KEY_OWNER :
+	case CONFIG_KEY_AMIN :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		return ENCYRPTION_KEY_LENGTH;
@@ -479,7 +497,7 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getUint16(_storageStruct.crownstoneId, (uint16_t*)target, 0);
 		break;
 	}
-	case CONFIG_KEY_OWNER : {
+	case CONFIG_KEY_AMIN : {
 		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.owner, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
@@ -541,6 +559,14 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 	}
 	case CONFIG_POWER_ZERO: {
 		Storage::getFloat(_storageStruct.powerZero, (float*)target, POWER_ZERO);
+		break;
+	}
+	case CONFIG_POWER_ZERO_AVG_WINDOW: {
+		Storage::getUint16(_storageStruct.powerZeroAvgWindow, (uint16_t*)target, POWER_ZERO_AVG_WINDOW);
+		break;
+	}
+	case CONFIG_MESH_ACCESS_ADDRESS: {
+		Storage::getUint32(_storageStruct.meshAccessAddress, (uint32_t*)target, MESH_ACCESS_ADDRESS);
 		break;
 	}
 	default: {
@@ -668,7 +694,7 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
 		break;
 	}
-	case CONFIG_KEY_OWNER : {
+	case CONFIG_KEY_AMIN : {
 		p_item = (uint8_t*)&_storageStruct.encryptionKeys.owner;
 		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.owner, ENCYRPTION_KEY_LENGTH);
 		break;
@@ -746,6 +772,16 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	case CONFIG_POWER_ZERO: {
 		p_item = (uint8_t*)&_storageStruct.powerZero;
 		Storage::setFloat(*((float*)target), _storageStruct.powerZero);
+		break;
+	}
+	case CONFIG_POWER_ZERO_AVG_WINDOW:{
+		p_item = (uint8_t*)&_storageStruct.powerZeroAvgWindow;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.powerZeroAvgWindow);
+		break;
+	}
+	case CONFIG_MESH_ACCESS_ADDRESS:{
+		p_item = (uint8_t*)&_storageStruct.meshAccessAddress;
+		Storage::setUint32(*((uint32_t*)target), _storageStruct.meshAccessAddress);
 		break;
 	}
 	default: {
@@ -961,39 +997,6 @@ void Settings::savePersistentStorage() {
 void Settings::saveIBeaconPersistent() {
 	savePersistentStorageItem((uint8_t*)&_storageStruct.beacon, sizeof(_storageStruct.beacon));
 }
-
-//	void ConfigHelper::enable(ps_storage_id id, uint16_t size) {
-//		_storage->getHandle(id, _storageHandles[id]);
-//		loadPersistentStorage(_storageHandles[id], );
-//	}
-
-/** Retrieve the Bluetooth name from the object representing the BLE stack.
- *
- * @return name of the device
- */
-//std::string & Settings::getBLEName() {
-//	loadPersistentStorage();
-//	std::string& _name = BLEpp::Nrf51822BluetoothStack::getInstance().getDeviceName();
-//	Storage::getString(_storageStruct.device_name, _name, _name);
-//	return _name;
-//}
-
-/** Write the Bluetooth name to the object representing the BLE stack.
- *
- * This updates the Bluetooth name immediately, however, it does not update the name persistently. It
- * has to be written to FLASH in that case.
- */
-//void Settings::setBLEName(const std::string &name, bool persistent) {
-//	if (name.length() > 31) {
-//		LOGe(MSG_NAME_TOO_LONG);
-//		return;
-//	}
-//	BLEpp::Nrf51822BluetoothStack::getInstance().updateDeviceName(name);
-//	Storage::setString(name, _storageStruct.device_name);
-//	if (persistent) {
-//		savePersistentStorageItem((uint8_t*)_storageStruct.device_name, sizeof(_storageStruct.device_name));
-//	}
-//}
 
 void Settings::factoryReset(uint32_t resetCode) {
 	if (resetCode != FACTORY_RESET_CODE) {

@@ -13,8 +13,6 @@
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <protocol/cs_StateTypes.h>
 
-using namespace BLEpp;
-
 ScheduleService::ScheduleService() :
 		_currentTimeCharacteristic(NULL),
 		_writeScheduleEntryCharacteristic(NULL),
@@ -53,7 +51,7 @@ void ScheduleService::addCurrentTimeCharacteristic() {
 	_currentTimeCharacteristic->setName(BLE_CHAR_CURRENT_TIME);
 	_currentTimeCharacteristic->setDefaultValue(0);
 	_currentTimeCharacteristic->setWritable(true);
-	_currentTimeCharacteristic->onWrite([&](const uint32_t& value) -> void {
+	_currentTimeCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_SET_TIME, (buffer_ptr_t)&value, sizeof(value));
 	});
 }
@@ -73,10 +71,10 @@ void ScheduleService::addWriteScheduleEntryCharacteristic() {
 	_writeScheduleEntryCharacteristic->setNotifies(false);
 
 	_writeScheduleEntryCharacteristic->setValue(buffer);
-	_writeScheduleEntryCharacteristic->setMaxLength(maxLength);
-	_writeScheduleEntryCharacteristic->setDataLength(0);
+	_writeScheduleEntryCharacteristic->setMaxGattValueLength(maxLength);
+	_writeScheduleEntryCharacteristic->setValueLength(0);
 
-	_writeScheduleEntryCharacteristic->onWrite([&](const buffer_ptr_t& value) -> void {
+	_writeScheduleEntryCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_SCHEDULE_ENTRY, _writeScheduleEntryCharacteristic->getValue(),
 				_writeScheduleEntryCharacteristic->getValueLength());
 	});
@@ -97,8 +95,8 @@ void ScheduleService::addListScheduleEntriesCharacteristic() {
 	maxLength = list->getMaxLength();
 
 	_listScheduleEntriesCharacteristic->setValue(buffer);
-	_listScheduleEntriesCharacteristic->setMaxLength(maxLength);
-	_listScheduleEntriesCharacteristic->setDataLength(0);
+	_listScheduleEntriesCharacteristic->setMaxGattValueLength(maxLength);
+	_listScheduleEntriesCharacteristic->setValueLength(0);
 }
 
 
@@ -113,7 +111,7 @@ void ScheduleService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_SCHEDULE_ENTRIES_UPDATED: {
 		if (_listScheduleEntriesCharacteristic) {
 			_listScheduleEntriesCharacteristic->setValue((buffer_ptr_t)p_data);
-			_listScheduleEntriesCharacteristic->setDataLength(length);
+			_listScheduleEntriesCharacteristic->setValueLength(length);
 			_listScheduleEntriesCharacteristic->notify();
 		}
 	}

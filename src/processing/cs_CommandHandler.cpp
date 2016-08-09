@@ -13,6 +13,7 @@
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_Switch.h>
+#include <processing/cs_FactoryReset.h>
 #include <mesh/cs_MeshControl.h>
 #include <mesh/cs_Mesh.h>
 #include <storage/cs_State.h>
@@ -55,10 +56,12 @@ void CommandHandler::init() {
 }
 
 void CommandHandler::resetDelayed(uint8_t opCode) {
-	static uint8_t restOpCode = opCode;
+	static uint8_t resetOpCode = opCode;
 	app_timer_id_t resetTimer;
 	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
-	Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &restOpCode);
+	Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &resetOpCode);
+//	//! Loop until reset trigger
+//	while(true) {}; //! TODO: this doesn't seem to work
 }
 
 ERR_CODE CommandHandler::handleCommandDelayed(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, uint32_t delay) {
@@ -76,15 +79,18 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type) {
 	return handleCommand(type, NULL, 0);
 }
 
-ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size) {
+
+ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel accessLevel) {
 
 	switch (type) {
 	case CMD_GOTO_DFU: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "goto dfu");
 		resetDelayed(GPREGRET_DFU_RESET);
 		break;
 	}
 	case CMD_RESET: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "reset");
 
 		if (size != sizeof(opcode_message_payload_t)) {
@@ -93,12 +99,14 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		}
 
 		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
-		static uint8_t resetOp = payload->opCode;
+//		static uint8_t resetOp = payload->opCode;
+		uint8_t resetOp = payload->opCode;
 
 		resetDelayed(resetOp);
 		break;
 	}
 	case CMD_ENABLE_MESH: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable mesh");
 
 		if (size != sizeof(enable_message_payload_t)) {
@@ -121,7 +129,8 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_ENCRYPTION: {
-		LOGi(STR_HANDLE_COMMAND, "enable encryption");
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "enable encryption, tbd");
 		return ERR_NOT_IMPLEMENTED;
 
 		if (size != sizeof(enable_message_payload_t)) {
@@ -134,6 +143,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		LOGi("%s encryption", enable ? STR_ENABLE : STR_DISABLE);
 		Settings::getInstance().updateFlag(CONFIG_ENCRYPTION_ENABLED, enable, true);
+		// TODO: Clear keys on disable? Check if keys are set on enable?
 		// todo: stack/service/characteristics need to be refactored if we also want to update characteristics
 		// on the fly
 		// for now, this only takes effect on next reset
@@ -142,6 +152,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_IBEACON: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable ibeacon");
 
 		if (size != sizeof(enable_message_payload_t)) {
@@ -158,6 +169,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_SCANNER: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable scanner");
 
 		enable_scanner_message_payload_t* payload = (enable_scanner_message_payload_t*) buffer;
@@ -190,6 +202,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SCAN_DEVICES: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "scan devices");
 
 		if (size != sizeof(enable_message_payload_t)) {
@@ -227,6 +240,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_REQUEST_SERVICE_DATA: {
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "request service");
 
 		service_data_mesh_message_t serviceData;
@@ -248,6 +262,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_FACTORY_RESET: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "factory reset");
 
 		if (size != sizeof(FACTORY_RESET_CODE)) {
@@ -258,29 +273,34 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		factory_reset_message_payload_t* payload = (factory_reset_message_payload_t*) buffer;
 		uint32_t resetCode = payload->resetCode;
 
-		if (resetCode == FACTORY_RESET_CODE) {
-//			LOGf("factory reset");
-
-			Settings::getInstance().factoryReset(resetCode);
-			State::getInstance().factoryReset(resetCode);
-			// todo: might not be neccessary if we only use dm in setup mode we can handle it specifically
-			//   there. maybe with a mode factory reset
-			// todo: remove stack again from CommandHandler if we don't need it here
-			Nrf51822BluetoothStack::getInstance().device_manager_reset();
-
-			LOGi("factory reset done, rebooting device in 2s ...");
-
-			resetDelayed(GPREGRET_SOFT_RESET);
-
-		} else {
-			LOGi("wrong code received: %p", resetCode);
-//			LOGi("factory reset code is: %p", FACTORY_RESET_CODE);
+		if (!FactoryReset::getInstance().factoryReset(resetCode)) {
 			return ERR_WRONG_PARAMETER;
 		}
+
+//		if (resetCode == FACTORY_RESET_CODE) {
+////			LOGf("factory reset");
+//
+//			Settings::getInstance().factoryReset(resetCode);
+//			State::getInstance().factoryReset(resetCode);
+//			// todo: might not be neccessary if we only use dm in setup mode we can handle it specifically
+//			//   there. maybe with a mode factory reset
+//			// todo: remove stack again from CommandHandler if we don't need it here
+//			Nrf51822BluetoothStack::getInstance().device_manager_reset();
+//
+//			LOGi("factory reset done, rebooting device in 2s ...");
+//
+//			resetDelayed(GPREGRET_SOFT_RESET);
+//
+//		} else {
+//			LOGi("wrong code received: %p", resetCode);
+////			LOGi("factory reset code is: %p", FACTORY_RESET_CODE);
+//			return ERR_WRONG_PARAMETER;
+//		}
 
 		break;
 	}
 	case CMD_SET_TIME: {
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "set time:");
 
 		if (size != sizeof(uint32_t)) {
@@ -295,6 +315,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SCHEDULE_ENTRY: {
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "schedule entry");
 
 #if SCHEDULER_ENABLED==1
@@ -337,6 +358,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_VALIDATE_SETUP: {
+		// we do not need to check for the setup validation since this is not encrypted
 		LOGi(STR_HANDLE_COMMAND, "validate setup");
 
 		uint8_t opMode;
@@ -348,23 +370,25 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			uint8_t key[ENCYRPTION_KEY_LENGTH];
 			uint8_t blankKey[ENCYRPTION_KEY_LENGTH] = {};
 
-			// validate encryption keys are not 0
-			settings.get(CONFIG_KEY_OWNER, key);
-			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-//				LOGw("owner key is not set!");
-				return ERR_COMMAND_FAILED;
-			}
+			if (settings.isSet(CONFIG_ENCRYPTION_ENABLED)) {
+				// validate encryption keys are not 0
+				settings.get(CONFIG_KEY_AMIN, key);
+				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+	//				LOGw("owner key is not set!");
+					return ERR_COMMAND_FAILED;
+				}
 
-			settings.get(CONFIG_KEY_MEMBER, key);
-			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-//				LOGw("member key is not set!");
-				return ERR_COMMAND_FAILED;
-			}
+				settings.get(CONFIG_KEY_MEMBER, key);
+				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+	//				LOGw("member key is not set!");
+					return ERR_COMMAND_FAILED;
+				}
 
-			settings.get(CONFIG_KEY_GUEST, key);
-			if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-//				LOGw("guest key is not set!");
-				return ERR_COMMAND_FAILED;
+				settings.get(CONFIG_KEY_GUEST, key);
+				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+	//				LOGw("guest key is not set!");
+					return ERR_COMMAND_FAILED;
+				}
 			}
 
 			// validate crownstone id is not 0
@@ -393,6 +417,8 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 				return ERR_COMMAND_FAILED;
 			}
 
+			// TODO: check mesh access address
+
 			LOGi("Setup completed, resetting to normal mode");
 
 			//! if validation ok, set opMode to normal mode
@@ -409,6 +435,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 	}
 
 	case CMD_USER_FEEDBACK: {
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "user feedback");
 		return ERR_NOT_IMPLEMENTED;
 
@@ -416,6 +443,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_KEEP_ALIVE_STATE: {
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "keep alive");
 		return ERR_NOT_IMPLEMENTED;
 
@@ -423,21 +451,30 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_KEEP_ALIVE: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "keep alive");
 		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd
 		break;
 	}
+	case CMD_DISCONNECT: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "disconnect");
+		Nrf51822BluetoothStack::getInstance().disconnect();
+		break;
+	}
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// Crownstone specific commands are only available if device type is set to Crownstone.
 	// E.g. GuideStone does not support power measure or switching commands
 	case CMD_SWITCH: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "switch");
 		// for now, same as pwm, but switch command should decide itself if relay or
 		// pwm is used
 	}
 	case CMD_PWM: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "PWM");
 
 		if (size != sizeof(switch_message_payload_t)) {
@@ -456,6 +493,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_RELAY: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "relay");
 
 		if (size != sizeof(switch_message_payload_t)) {
@@ -475,6 +513,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_CONT_POWER_MEASURE: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable cont power measure");
 		return ERR_NOT_IMPLEMENTED;
 

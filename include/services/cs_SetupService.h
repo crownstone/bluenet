@@ -86,15 +86,15 @@ private:
 	// stores the MAC address of the devices to be used for mesh message handling
     ble_gap_addr_t _myAddr;
 
-//	BLEpp::Characteristic<buffer_ptr_t>* _controlCharacteristic;
+//	Characteristic<buffer_ptr_t>* _controlCharacteristic;
 
-	BLEpp::Characteristic<buffer_ptr_t>* _macAddressCharacteristic;
+	Characteristic<buffer_ptr_t>* _macAddressCharacteristic;
 
 	/** Reset characteristic
 	 *
 	 * Resets device
 	 */
-//	BLEpp::Characteristic<int32_t>* _resetCharacteristic;
+//	Characteristic<int32_t>* _resetCharacteristic;
 
 	/** Set configuration characteristic
 	 *
@@ -109,7 +109,7 @@ private:
 	 * As you see these are similar to current characteristics and will replace them in the future to save space.
 	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
 	 */
-//	BLEpp::Characteristic<buffer_ptr_t>* _setConfigurationCharacteristic;
+//	Characteristic<buffer_ptr_t>* _setConfigurationCharacteristic;
 	
 	/** Get configuration characteristic
 	 *
@@ -118,7 +118,7 @@ private:
 	 *
 	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
 	 */
-//	BLEpp::Characteristic<buffer_ptr_t>* _getConfigurationCharacteristic;
+//	Characteristic<buffer_ptr_t>* _getConfigurationCharacteristic;
 
 	//! buffer object to read/write configuration characteristics
 //	StreamBuffer<uint8_t> *_streamBuffer;

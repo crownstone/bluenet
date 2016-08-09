@@ -132,8 +132,8 @@ static uint32_t g_lfclk_ppm;
 static volatile uint32_t ts_count = 0;
 
 static nrf_clock_lfclksrc_t g_lfclksrc;
-static bool paused = false;
-static bool pausing = false;
+//static bool paused = false;
+//static bool pausing = false;
 
 /*****************************************************************************
 * Static Functions
