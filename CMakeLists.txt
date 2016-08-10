@@ -139,7 +139,7 @@ ENDIF()
 # should be only when creating iBeacon
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_iBeacon.cpp")
 
-IF(${MESHING} STRGREATER "0")
+IF(${BUILD_MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshControl.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_Mesh.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/event_handler.c")
@@ -157,7 +157,7 @@ IF(${MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/notification_buffer.c")
 endif()
 
-IF(${CHAR_MESHING} STRGREATER "0")
+IF(${BUILD_MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_timer.c")
 else()
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer.c")
@@ -225,8 +225,10 @@ INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/timer/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/scheduler/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/trace/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/softdevice/common/softdevice_handler/")
+INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/softdevice/s132/headers/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/toolchain/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/toolchain/gcc")
+INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/toolchain/CMSIS/Include")
 
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/headers")
 

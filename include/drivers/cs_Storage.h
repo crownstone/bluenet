@@ -524,7 +524,7 @@ public:
 	static bool getArray(T* src, T* dest, T* default_value, uint16_t length) {
 
 #ifdef PRINT_ITEMS
-		_log(INFO, "raw value: \r\n");
+		_log(SERIAL_INFO, "raw value: \r\n");
 		BLEutil::printArray((uint8_t*)src, length * sizeof(T));
 #endif
 

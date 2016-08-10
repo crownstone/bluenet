@@ -20,7 +20,7 @@
 #include "structs/buffer/cs_StackBuffer.h"
 #include "structs/buffer/cs_DifferentialBuffer.h"
 #include "structs/cs_PowerSamples.h"
-#include "protocol/cs_MeshMessageTypes.h"
+//#include "protocol/cs_MeshMessageTypes.h"
 
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>

@@ -16,15 +16,30 @@ PWM::PWM() :
 		pwmTimer(NULL), _pwmInstance(NULL), _initialized(false) {
 
 #if PWM_ENABLE==1
+
+	//! See APP_PWM_INSTANCE(name, num)
+#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
+	pwmTimer = new nrf_drv_timer_t();
+	pwmTimer->p_reg = PWM_TIMER; // Or use CONCAT_2(NRF_TIMER, PWM_TIMER_ID)
+	pwmTimer->instance_id = PWM_INSTANCE_INDEX; // Or use CONCAT_3(TIMER, id, _INSTANCE_INDEX)
+	pwmTimer->cc_channel_count = NRF_TIMER_CC_CHANNEL_COUNT(PWM_TIMER_ID);
+
+	_pwmInstance = new (app_pwm_t) {
+		.p_cb = &_controlBlock,
+		.p_timer = pwmTimer,
+	};
+#else
 	pwmTimer = new nrf_drv_timer_t();
 	pwmTimer->p_reg = PWM_TIMER;
 	pwmTimer->irq = PWM_IRQn;
 	pwmTimer->instance_id = PWM_INSTANCE_INDEX;
 
 	_pwmInstance = new (app_pwm_t) {
-		.p_cb = &_callbackArray,
+		.p_cb = &_controlBlock,
 		.p_timer = pwmTimer,
 	};
+#endif
+
 #endif
 
 }

@@ -8,7 +8,6 @@
 
 #include <structs/cs_PowerSamples.h>
 #include <structs/buffer/cs_CircularBuffer.h>
-#include <protocol/cs_MeshMessageTypes.h>
 
 class PowerSampling {
 public:
@@ -78,7 +77,7 @@ private:
 //	DifferentialBuffer<uint32_t> _voltageSampleTimestamps;
 	CircularBuffer<uint16_t> _currentSampleCircularBuf;
 	CircularBuffer<uint16_t> _voltageSampleCircularBuf;
-	power_samples_mesh_message_t* _powerSamplesMeshMsg;
+	power_samples_cont_message_t* _powerSamplesContMsg;
 	uint16_t _powerSamplesCount;
 //	uint16_t _lastPowerSample;
 	uint16_t _burstCount;

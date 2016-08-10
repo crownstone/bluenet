@@ -11,7 +11,6 @@
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
-#include <mesh/cs_MeshControl.h>
 #include <processing/cs_CommandHandler.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>

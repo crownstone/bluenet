@@ -13,7 +13,6 @@
 #include "app_timer.h"
 #include <stdlib.h>
 #include "nrf.h"
-//#include "nrf51_bitfields.h"
 #include "nrf_soc.h"
 //#include "app_error.h"
 #include "nrf_delay.h"

@@ -15,7 +15,9 @@
 #include <protocol/cs_StateTypes.h>
 #include <events/cs_EventDispatcher.h>
 
+#if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
+#endif
 extern "C" {
 	#include <protocol/notification_buffer.h>
 }
@@ -29,7 +31,7 @@ PowerSampling::PowerSampling() :
 		_powerSamplesBuffer(NULL),
 		_currentSampleCircularBuf(POWER_SAMPLE_CONT_NUM_SAMPLES),
 		_voltageSampleCircularBuf(POWER_SAMPLE_CONT_NUM_SAMPLES),
-		_powerSamplesMeshMsg(NULL),
+		_powerSamplesContMsg(NULL),
 		_powerSamplesCount(0)
 {
 
@@ -57,7 +59,7 @@ void PowerSampling::init() {
 
 	LOGi(FMT_INIT, "buffers");
 	uint16_t contSize = _currentSampleCircularBuf.getMaxByteSize() + _voltageSampleCircularBuf.getMaxByteSize();
-	contSize += sizeof(power_samples_mesh_message_t);
+	contSize += sizeof(power_samples_cont_message_t);
 
 	uint16_t burstSize = _powerSamples.getMaxLength();
 
@@ -76,8 +78,8 @@ void PowerSampling::init() {
 	buffer += _currentSampleCircularBuf.getMaxByteSize();
 	_voltageSampleCircularBuf.assign(buffer, _voltageSampleCircularBuf.getMaxByteSize());
 	buffer += _voltageSampleCircularBuf.getMaxByteSize();
-	_powerSamplesMeshMsg = (power_samples_mesh_message_t*) buffer;
-	buffer += sizeof(power_samples_mesh_message_t);
+	_powerSamplesContMsg = (power_samples_cont_message_t*) buffer;
+	buffer += sizeof(power_samples_cont_message_t);
 //	_currentSampleTimestamps.assign();
 //	_voltageSampleTimestamps.assign();
 
@@ -147,7 +149,7 @@ void PowerSampling::powerSampleReadBuffer() {
 			current = _currentSampleCircularBuf.pop();
 			voltage = _voltageSampleCircularBuf.pop();
 			power = current*voltage;
-			_powerSamplesMeshMsg->samples[_powerSamplesCount] = power;
+			_powerSamplesContMsg->samples[_powerSamplesCount] = power;
 //			_lastPowerSample = power;
 			numSamples--;
 			_powerSamplesCount++;
@@ -156,19 +158,19 @@ void PowerSampling::powerSampleReadBuffer() {
 			current = _currentSampleCircularBuf.pop();
 			voltage = _voltageSampleCircularBuf.pop();
 			power = current*voltage;
-			_powerSamplesMeshMsg->samples[_powerSamplesCount] = power;
+			_powerSamplesContMsg->samples[_powerSamplesCount] = power;
 
 //			diff = _lastPowerSample - power;
 //			_lastPowerSample = power;
 			_powerSamplesCount++;
 
 
-			if (_powerSamplesCount >= POWER_SAMPLE_MESH_NUM_SAMPLES) {
-				EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesMeshMsg, sizeof(power_samples_mesh_message_t));
+			if (_powerSamplesCount >= POWER_SAMPLE_CONT_NUM_SAMPLES_MSG) {
+				EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesContMsg, sizeof(power_samples_cont_message_t));
 
 #if MESHING == 1
 				if (!nb_full()) {
-					MeshControl::getInstance().sendPowerSamplesMessage(_powerSamplesMeshMsg);
+					MeshControl::getInstance().sendPowerSamplesMessage(_powerSamplesContMsg);
 					_powerSamplesCount = 0;
 				}
 #else
@@ -201,37 +203,37 @@ void PowerSampling::powerSampleFinish() {
 //	//! Print samples
 //	currentTimestamp = 0;
 //	voltageTimestamp = 0;
-//	_log(DEBUG, "samples:\r\n");
+//	_log(SERIAL_DEBUG, "samples:\r\n");
 //	for (int i=0; i<_powerSamples.size(); i++) {
 //		_powerSamples.getCurrentTimestampsBuffer()->getValue(currentTimestamp, i);
 //		_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, i);
-//		_log(DEBUG, "%u %u %u %u,  ", currentTimestamp, (*_powerSamples.getCurrentSamplesBuffer())[i], voltageTimestamp, (*_powerSamples.getVoltageSamplesBuffer())[i]);
+//		_log(SERIAL_DEBUG, "%u %u %u %u,  ", currentTimestamp, (*_powerSamples.getCurrentSamplesBuffer())[i], voltageTimestamp, (*_powerSamples.getVoltageSamplesBuffer())[i]);
 //		if (!((i+1) % 3)) {
-//			_log(DEBUG, "\r\n");
+//			_log(SERIAL_DEBUG, "\r\n");
 //		}
 //	}
-//	_log(DEBUG, "\r\n");
+//	_log(SERIAL_DEBUG, "\r\n");
 //#endif
 
 #ifdef PRINT_SAMPLE_CURRENT
-	_log(DEBUG, "current samples:\r\n");
+	_log(SERIAL_DEBUG, "current samples:\r\n");
 	for (int i=0; i<_powerSamples.size(); i++) {
 		_powerSamples.getCurrentTimestampsBuffer()->getValue(currentTimestamp, i);
-		_log(DEBUG, "%u %u,  ", currentTimestamp, (*_powerSamples.getCurrentSamplesBuffer())[i]);
+		_log(SERIAL_DEBUG, "%u %u,  ", currentTimestamp, (*_powerSamples.getCurrentSamplesBuffer())[i]);
 		if (!((i+1) % 6)) {
-			_log(DEBUG, "\r\n");
+			_log(SERIAL_DEBUG, SERIAL_CRLN);
 		}
 	}
 	voltageTimestamp = 0;
-	_log(DEBUG, "\r\nvoltage samples:\r\n");
+	_log(SERIAL_DEBUG, "\r\nvoltage samples:\r\n");
 	for (int i=0; i<_powerSamples.size(); i++) {
 		_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, i);
-		_log(DEBUG, "%u %u,  ", voltageTimestamp, (*_powerSamples.getVoltageSamplesBuffer())[i]);
+		_log(SERIAL_DEBUG, "%u %u,  ", voltageTimestamp, (*_powerSamples.getVoltageSamplesBuffer())[i]);
 		if (!((i+1) % 6)) {
-			_log(DEBUG, "\r\n");
+			_log(SERIAL_DEBUG, SERIAL_CRLN);
 		}
 	}
-	_log(DEBUG, "\r\n");
+	_log(SERIAL_DEBUG, SERIAL_CRLN);
 #endif
 
 
@@ -349,8 +351,8 @@ void PowerSampling::powerSampleFinish() {
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
 #if CONTINUOUS_POWER_SAMPLER == 1
-	buffer = (buffer_ptr_t) _powerSamplesMeshMsg;
-	size = sizeof(power_samples_mesh_message_t);
+	buffer = (buffer_ptr_t) _powerSamplesContMsg;
+	size = sizeof(power_samples_cont_message_t);
 #else
 	_powerSamples.getBuffer(buffer, size);
 #endif

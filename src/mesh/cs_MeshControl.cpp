@@ -346,7 +346,7 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 		if (isBroadcast(msg)) {
 			//! received broadcast message
 			LOGd("Received broadcast");
-//			log(INFO, "message:");
+//			log(SERIAL_INFO, "message:");
 //			BLEutil::printArray((uint8_t*)p_data, length);
 			Mesh::getInstance().send(channel, p_data, length);
 			// [30.05.16] as long as we don't call this function in an interrupt, we don't need to

@@ -22,7 +22,9 @@
 #include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
 #include <events/cs_EventDispatcher.h>
+#if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
+#endif
 
 extern "C"  {
 
@@ -91,9 +93,11 @@ void Storage::onUpdateDone() {
 		// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
 		if (!_pending) {
 			LOGi("pstorage update done");
+#if BUILD_MESHING == 1
 			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 				Mesh::getInstance().start();
 			}
+#endif
 		}
 	}
 }
@@ -171,10 +175,12 @@ void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		if (!writeBuffer.empty()) {
 			// if meshing, need to stop the mesh first before updating pstorage
 			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED))	{
+#if BUILD_MESHING == 1
 #ifdef PRINT_STORAGE_VERBOSE
 				LOGd("stop mesh on scan stop");
 #endif
 				Mesh::getInstance().stop();
+#endif
 			} else {
 				// otherwise, resume buffered pstorage update requests
 				app_sched_event_put(NULL, 0, resume_requests);
@@ -247,7 +253,7 @@ void Storage::readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uin
 	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, size, 0) );
 
 #ifdef PRINT_ITEMS
-	_log(INFO, "get struct: \r\n");
+	_log(SERIAL_INFO, "get struct: \r\n");
 	BLEutil::printArray((uint8_t*)item, size);
 #endif
 
@@ -265,7 +271,7 @@ void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t
 	BLE_CALL (pstorage_load, (item, &block_handle, size, offset) );
 
 #ifdef PRINT_ITEMS
-	_log(INFO, "read item: \r\n");
+	_log(SERIAL_INFO, "read item: \r\n");
 	BLEutil::printArray(item, size);
 #endif
 
@@ -275,7 +281,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 	pstorage_handle_t block_handle;
 
 #ifdef PRINT_ITEMS
-	_log(INFO, "write item: \r\n");
+	_log(SERIAL_INFO, "write item: \r\n");
 	BLEutil::printArray((uint8_t*)item, size);
 #endif
 
@@ -307,10 +313,12 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 		// if not scanning, stop the mesh and wait for the NRF_EVT_RADIO_SESSION_IDLE to arrive to access pstorage
 		// if scannig, wait for the EVT_SCAN_STOPPED
 		if (meshEnabled && !_scanning) {
+#if BUILD_MESHING == 1
 #ifdef PRINT_STORAGE_VERBOSE
 			LOGd("stop mesh on pstorage update");
 #endif
 			Mesh::getInstance().stop();
+#endif
 		}
 	} else {
 		// if neither scanning nor meshing, call the update directly
@@ -355,7 +363,7 @@ void Storage::setString(const char* value, uint16_t length, char* target) {
 //void Storage::getString(char* value, std::string& target, std::string default_value) {
 //
 //#ifdef PRINT_ITEMS
-//	_log(INFO, "get string (raw): \r\n");
+//	_log(SERIAL_INFO, "get string (raw): \r\n");
 //	BLEutil::printArray((uint8_t*)value, MAX_STRING_STORAGE_SIZE+1);
 //#endif
 //
@@ -380,7 +388,7 @@ void Storage::setString(const char* value, uint16_t length, char* target) {
 void Storage::getString(char* value, char* target, char* default_value, uint16_t& size) {
 
 #ifdef PRINT_ITEMS
-	_log(INFO, "get string (raw): \r\n");
+	_log(SERIAL_INFO, "get string (raw): \r\n");
 	BLEutil::printArray((uint8_t*)value, MAX_STRING_STORAGE_SIZE+1);
 #endif
 
@@ -526,7 +534,7 @@ void Storage::getUint32(uint32_t value, uint32_t* target, uint32_t default_value
 //
 //#ifdef PRINT_ITEMS
 //	uint8_t* tmp = (uint8_t*)&value;
-//	log(DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
+//	log(SERIAL_DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
 //	BLEutil::printArray(tmp, sizeof(double));
 //#endif
 //
@@ -559,7 +567,7 @@ void Storage::getFloat(float value, float* target, float default_value) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	log(DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
+	log(SERIAL_DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
 	BLEutil::printArray(tmp, sizeof(float));
 #endif
 

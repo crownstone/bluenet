@@ -13,10 +13,6 @@
 
 #include <ble/cs_Stack.h>
 
-extern "C" {
-	#include <third/protocol/rbc_mesh.h>
-}
-
 struct delayed_command_t {
 	CommandHandlerTypes type;
 	uint16_t size;

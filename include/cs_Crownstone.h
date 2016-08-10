@@ -35,7 +35,9 @@
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
 
+#if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
+#endif
 #include <storage/cs_State.h>
 
 
@@ -152,7 +154,9 @@ private:
 	IBeacon* _beacon;
 
 	// processing
+#if BUILD_MESHING == 1
 	Mesh* _mesh;
+#endif
 	Sensors* _sensors;
 	Fridge* _fridge;
 	CommandHandler* _commandHandler;

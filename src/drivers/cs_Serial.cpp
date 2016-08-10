@@ -33,7 +33,7 @@ static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVI
  */
 void config_uart() {
 
-#if SERIAL_VERBOSITY<NONE
+#if SERIAL_VERBOSITY<SERIAL_NONE
 	//! Enable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
 
@@ -72,7 +72,7 @@ void config_uart() {
  * Read an individual character from UART.
  */
 uint8_t read_uart() {
-#if SERIAL_VERBOSITY<NONE
+#if SERIAL_VERBOSITY<SERIAL_NONE
 	while(NRF_UART0->EVENTS_RXDRDY != 1) {}
 	NRF_UART0->EVENTS_RXDRDY = 0;
 	return (uint8_t)NRF_UART0->RXD;
@@ -84,7 +84,7 @@ uint8_t read_uart() {
  * A write function with a format specifier.
  */
 int write(const char *str, ...) {
-#if SERIAL_VERBOSITY<NONE
+#if SERIAL_VERBOSITY<SERIAL_NONE
 	char buffer[128];
 	va_list ap;
 	va_start(ap, str);

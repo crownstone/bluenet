@@ -11,7 +11,9 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 #include <events/cs_EventListener.h>
+#if BUILD_MESHING == 1
 #include <structs/cs_MeshCommand.h>
+#endif
 
 #define CROWNSTONE_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
@@ -114,8 +116,10 @@ private:
 	 *
 	 * Sends a message over the mesh network
 	 */
+#if BUILD_MESHING == 1
 	Characteristic<buffer_ptr_t>* _meshControlCharacteristic;
 	MeshCommand* _meshCommand;
+#endif
 
 	Characteristic<buffer_ptr_t>* _stateControlCharacteristic;
 	Characteristic<buffer_ptr_t>* _stateReadCharacteristic;

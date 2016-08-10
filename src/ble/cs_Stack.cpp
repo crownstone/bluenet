@@ -13,9 +13,11 @@
 
 #include "structs/buffer/cs_MasterBuffer.h"
 
+#if BUILD_MESHING == 1
 extern "C" {
 	#include <third/protocol/rbc_mesh.h>
 }
+#endif
 
 #include "ble_stack_handler_types.h"
 
@@ -71,10 +73,12 @@ extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 //	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
 
+#if BUILD_MESHING == 1
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		//!  pass the incoming BLE event to the mesh framework
 		rbc_mesh_ble_evt_handler(p_ble_evt);
 	}
+#endif
 
 	//! Only dispatch functions to the scheduler which might take long to execute, such as ble write functions
 	//! and handle other ble events directly in the interrupt. Otherwise app scheduler buffer might overflow fast
@@ -924,7 +928,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
-//		_log(INFO, "address: " );
+//		_log(SERIAL_INFO, "address: " );
 //		BLEutil::printArray(p_ble_evt->evt.gap_evt.params.connected.peer_addr.addr, BLE_GAP_ADDR_LEN);
 		on_connected(p_ble_evt);
 		EventDispatcher::getInstance().dispatch(EVT_BLE_CONNECT);

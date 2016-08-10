@@ -11,7 +11,9 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 #include <events/cs_EventListener.h>
-#include <structs/cs_MeshCommand.h>
+//#if BUILD_MESHING == 1
+//#include <structs/cs_MeshCommand.h>
+//#endif
 #include <services/cs_CrownstoneService.h>
 
 //#define GENERAL_SERVICE_UPDATE_FREQUENCY 10 //! hz

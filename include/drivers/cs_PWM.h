@@ -22,6 +22,7 @@ extern "C" {
 //#define PWM_IRQHandler          TIMER2_IRQHandler
 #define PWM_IRQn                TIMER2_IRQn
 #define PWM_INSTANCE_INDEX      TIMER2_INSTANCE_INDEX
+#define PWM_TIMER_ID            2
 
 /** Pulse Wide Modulation class
  *
@@ -70,7 +71,11 @@ private:
 	//! PWM configuration
 	app_pwm_config_t _pwmCfg;
 	//! Array holding ready callbacks for the PWM instance
-	uint32_t _callbackArray[APP_PWM_CB_SIZE];
+#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
+	app_pwm_cb_t _controlBlock;
+#else
+	uint32_t _controlBlock[APP_PWM_CB_SIZE];
+#endif
 
 	//! Timer handling PWM
 	nrf_drv_timer_t* pwmTimer;

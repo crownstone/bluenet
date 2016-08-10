@@ -208,13 +208,13 @@ uint16_t Sensors::sampleSensor() {
 //			if (_currentCurve.getValue(i, voltage, timestamp) != CC_SUCCESS) {
 //				break;
 //			}
-//			//			_log(INFO, "%u %u,  ", timestamp, voltage);
+//			//			_log(SERIAL_INFO, "%u %u,  ", timestamp, voltage);
 //			//			if (!((i+1) % 5)) {
-//			//				_log(INFO, "\r\n");
+//			//				_log(SERIAL_INFO, SERIAL_CRLN);
 //			//			}
 //			average += voltage;
 //		}
-//		//		_log(INFO, "\r\n");
+//		//		_log(SERIAL_INFO, SERIAL_CRLN);
 //		average /= numSamples;
 //
 //		//! Measured voltage goes from 0-3.6V, measured as 0-1023(10 bit),
@@ -515,10 +515,10 @@ extern "C" void GPIOTE_IRQHandler()
 #endif
 
 //	for (int i = 31; i >= 0; --i) {
-//		_log(DEBUG, "%d", (pins_state & (1 << i)) != 0 ? 1 : 0);
-//		_log(DEBUG, "%s", i%4 == 0 ? " " : "");
+//		_log(SERIAL_DEBUG, "%d", (pins_state & (1 << i)) != 0 ? 1 : 0);
+//		_log(SERIAL_DEBUG, "%s", i%4 == 0 ? " " : "");
 //	}
-//	_log(DEBUG, "\r\n");
+//	_log(SERIAL_DEBUG, SERIAL_CRLN);
 
 }
 

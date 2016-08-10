@@ -63,7 +63,10 @@ Crownstone::Crownstone() :
 	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
 	_scheduleService(NULL),
 	_serviceData(NULL), _beacon(NULL),
-	_mesh(NULL), _sensors(NULL), _fridge(NULL),
+#if BUILD_MESHING == 1
+	_mesh(NULL),
+#endif
+	_sensors(NULL), _fridge(NULL),
 	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
 	_advertisementPaused(false), _mainTimer(0), _operationMode(0)
 {
@@ -223,6 +226,7 @@ void Crownstone::initDrivers() {
 	LOGd(FMT_INIT, "stack");
 
 	// things that need to be configured on the stack **BEFORE** init is called
+/*
 #if LOW_POWER_MODE==0
 	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM);
 #else
@@ -230,7 +234,7 @@ void Crownstone::initDrivers() {
 //	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_XTAL_50_PPM);
 	_stack->setClockSource(CLOCK_SOURCE);
 #endif
-
+*/
 	//! start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	//! in particular we need it to set interrupt priorities.
 	_stack->init();
@@ -368,9 +372,11 @@ void Crownstone::configureStack() {
 		// [29.06.16] this happened on the pca10000, but doesn't seem to happen on the dobeacon v0.7 need to check
 		// on other versions. On the contrary, the reset seems to crash the dobeacon v0.7
 #if HARDWARE_BOARD==PCA10031
+#if BUILD_MESHING == 1
 		if (_mesh->isRunning()) {
 			_mesh->restart();
 		}
+#endif
 #endif
 
 		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
@@ -545,12 +551,12 @@ void Crownstone::prepareCrownstone() {
 	_fridge = new Fridge;
 #endif
 
+#if BUILD_MESHING == 1
 //	if (_settings->isEnabled(CONFIG_MESH_ENABLED)) {
-
 		_mesh = &Mesh::getInstance();
 		_mesh->init();
-
 //	}
+#endif
 
 //	BLEutil::print_heap("Heap setup: ");
 //	BLEutil::print_stack("Stack setup: ");
@@ -621,7 +627,9 @@ void Crownstone::startUp() {
 		}
 
 		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
+#if BUILD_MESHING == 1
 			_mesh->start();
+#endif
 		}
 
 #if DEVICE_TYPE==DEVICE_FRIDGE
@@ -761,7 +769,9 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		// turn everything off that consumes power
 		LOGf("brownout impending!! force shutdown ...")
 
+#if BUILD_MESHING == 1
 		rbc_mesh_stop();
+#endif
 		_scanner->stop();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
@@ -798,7 +808,7 @@ void on_exit(void) {
 void welcome() {
 	config_uart();
 
-	_log(INFO, CRLN);
+	_log(SERIAL_INFO, SERIAL_CRLN);
 //	BLEutil::print_heap("Heap init");
 //	BLEutil::print_stack("Stack init");
 	//! To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)

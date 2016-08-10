@@ -16,7 +16,7 @@ FIRMWARE_VERSION="0.5.1"
 # DEVICE_GUIDESTONE  2
 # DEVICE_FRIDGE      3
 DEVICE_TYPE=DEVICE_CROWNSTONE
-DEVICE_TYPE=DEVICE_GUIDESTONE
+#DEVICE_TYPE=DEVICE_GUIDESTONE
 
 # To avoid confusion when trying to enable functionality through compiler flags, the
 # persistent storage for flags is disabled by default, set to 0 if enabling disabling functionality through
@@ -25,6 +25,7 @@ PERSISTENT_FLAGS_DISABLED=1
 
 # Enable or disable meshing (1 or 0)
 MESHING=0
+BUILD_MESHING=0
 
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=1
@@ -105,13 +106,13 @@ MASTER_BUFFER_SIZE=300
 DEFAULT_OPERATION_MODE=OPERATION_MODE_NORMAL
 
 # Verbosity of the UART
-# DEBUG     0
-# INFO      1
-# WARNING   2
-# ERROR     3
-# FATAL     4
-# NONE      5
-SERIAL_VERBOSITY=INFO
+# SERIAL_DEBUG     0
+# SERIAL_INFO      1
+# SERIAL_WARNING   2
+# SERIAL_ERROR     3
+# SERIAL_FATAL     4
+# SERIAL_NONE      5
+SERIAL_VERBOSITY=SERIAL_INFO
 
 # The different boards that can be used:
 # PCA10001             0

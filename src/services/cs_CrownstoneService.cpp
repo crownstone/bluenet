@@ -11,7 +11,9 @@
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
+#endif
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
 #include <storage/cs_State.h>
@@ -22,7 +24,9 @@ CrownstoneService::CrownstoneService() : EventListener(),
 		_controlCharacteristic(NULL),
 		_configurationControlCharacteristic(NULL), _configurationReadCharacteristic(NULL),
 		_streamBuffer(NULL),
+#if BUILD_MESHING == 1
 		_meshControlCharacteristic(NULL), _meshCommand(NULL),
+#endif
 		_stateControlCharacteristic(NULL), _stateReadCharacteristic(NULL),
 		_sessionNonceCharacteristic(NULL), _factoryResetCharacteristic(NULL)
 {
@@ -119,7 +123,7 @@ void CrownstoneService::createCharacteristics() {
 //}
 
 void CrownstoneService::addMeshCharacteristic() {
-
+#if BUILD_MESHING == 1
 	_meshCommand = new MeshCommand();
 //	_meshCommand = new StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>();
 
@@ -159,6 +163,7 @@ void CrownstoneService::addMeshCharacteristic() {
 		_meshControlCharacteristic->updateValue();
 
 	});
+#endif
 }
 
 void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
@@ -427,7 +432,7 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 	case EVT_STATE_NOTIFICATION: {
 		if (_stateReadCharacteristic) {
 			state_vars_notifaction notification = *(state_vars_notifaction*)p_data;
-//			log(DEBUG, "send notification for %d, value:", notification.type);
+//			log(SERIAL_DEBUG, "send notification for %d, value:", notification.type);
 //			BLEutil::printArray(notification.data, notification.dataLength);
 
 			_streamBuffer->setPayload(notification.data, notification.dataLength);

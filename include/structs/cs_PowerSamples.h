@@ -13,6 +13,20 @@
 #include "structs/buffer/cs_DifferentialBuffer.h"
 #include "structs/cs_BufferAccessor.h"
 
+#define POWER_SAMPLE_CONT_NUM_SAMPLES_MSG 43
+//! 91 bytes in total
+struct __attribute__((__packed__)) power_samples_cont_message_t {
+	uint32_t timestamp;
+//	uint16_t firstSample;
+//	int8_t sampleDiff[POWER_SAMPLE_CONT_NUM_SAMPLES_MSG-1];
+	uint16_t samples[POWER_SAMPLE_CONT_NUM_SAMPLES_MSG];
+	uint8_t reserved;
+//	struct __attribute__((__packed__)) {
+//		int8_t dt1 : 4;
+//		int8_t dt2 : 4;
+//	} timeDiffs[POWER_SAMPLE_CONT_NUM_SAMPLES_MSG / 2];
+};
+
 struct __attribute__((__packed__)) power_samples_t {
 	stack_buffer_fixed_t<uint16_t, POWER_SAMPLE_BURST_NUM_SAMPLES> _currentSamples;
 	stack_buffer_fixed_t<uint16_t, POWER_SAMPLE_BURST_NUM_SAMPLES> _voltageSamples;

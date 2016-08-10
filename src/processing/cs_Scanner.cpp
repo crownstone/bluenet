@@ -6,7 +6,9 @@
  */
 #include "processing/cs_Scanner.h"
 
+#if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
+#endif
 #include <storage/cs_Settings.h>
 
 #include <cfg/cs_DeviceTypes.h>
@@ -202,9 +204,11 @@ void Scanner::notifyResults() {
 	LOGd("Notify scan results");
 #endif
 
+#if BUILD_MESHING == 1
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
 	}
+#endif
 
 	buffer_ptr_t buffer;
 	uint16_t length;
@@ -271,7 +275,7 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 										 &type_data);
 
 	if (err_code == NRF_SUCCESS) {
-//		_logFirst(INFO, "found manufac data:");
+//		_logFirst(SERIAL_INFO, "found manufac data:");
 //		BLEutil::printArray(type_data.p_data, type_data.data_len);
 
 		//! [28.01.16] can't cast to uint16_t because it's possible that p_data is not
@@ -281,7 +285,7 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 			companyIdentifier == CROWNSTONE_COMPANY_ID) {
 //			LOGi("is dobots device!");
 
-//			_logFirst(INFO, "parse data");
+//			_logFirst(SERIAL_INFO, "parse data");
 //			BLEutil::printArray(type_data.p_data+2, type_data.data_len-2);
 //
 			DoBotsManufac dobotsManufac;

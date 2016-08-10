@@ -430,13 +430,13 @@ uint32_t send_notification(waiting_notification_t* notification) {
 void printArray(uint8_t* arr, uint16_t len) {
 	uint8_t* ptr = (uint8_t*)arr;
 	for (int i = 0; i < len; ++i) {
-		_log(DEBUG, " %02X", ptr[i]);
+		_log(SERIAL_DEBUG, " %02X", ptr[i]);
 		if ((i+1) % 30 == 0) {
-			_log(DEBUG, "\r\n");
+			_log(SERIAL_DEBUG, SERIAL_CRLN);
 		}
 	}
 //	printInlineArray(arr, len);
-	_log(DEBUG, "\r\n");
+	_log(SERIAL_DEBUG, SERIAL_CRLN);
 }
 
 void value_set_handler(void* p_event_data, uint16_t event_size) {

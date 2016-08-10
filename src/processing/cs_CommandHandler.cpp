@@ -14,10 +14,18 @@
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_Switch.h>
 #include <processing/cs_FactoryReset.h>
+#if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
 #include <mesh/cs_Mesh.h>
+#endif
 #include <storage/cs_State.h>
 #include <cfg/cs_Strings.h>
+
+#if BUILD_MESHING == 1
+extern "C" {
+	#include <third/protocol/rbc_mesh.h>
+}
+#endif
 
 //#define PRINT_DEBUG
 
@@ -120,11 +128,13 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		LOGi("%s mesh", enable ? STR_ENABLE : STR_DISABLE);
 		Settings::getInstance().updateFlag(CONFIG_MESH_ENABLED, enable, true);
 
+#if BUILD_MESHING == 1
 		if (enable) {
 			Mesh::getInstance().start();
 		} else {
 			Mesh::getInstance().stop();
 		}
+#endif
 
 		break;
 	}
@@ -232,9 +242,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, dataLength);
 
+#if BUILD_MESHING == 1
 			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 				MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
 			}
+#endif
 		}
 
 		break;
@@ -243,6 +255,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "request service");
 
+#if BUILD_MESHING == 1
 		service_data_mesh_message_t serviceData;
 		memset(&serviceData, 0, sizeof(serviceData));
 
@@ -258,6 +271,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		state.get(STATE_TEMPERATURE, (int32_t&)serviceData.temperature);
 
 		MeshControl::getInstance().sendServiceDataMessage(&serviceData);
+#endif
 
 		break;
 	}

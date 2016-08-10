@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "app_error.h"
 
 #include "nrf_soc.h"
-#include "nrf51_bitfields.h"
+#include "nrf.h"
 #include <string.h>
 #include "util/cs_BleError.h"
 
