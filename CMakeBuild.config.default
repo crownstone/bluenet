@@ -16,6 +16,7 @@ FIRMWARE_VERSION="0.5.1"
 # DEVICE_GUIDESTONE  2
 # DEVICE_FRIDGE      3
 DEVICE_TYPE=DEVICE_CROWNSTONE
+DEVICE_TYPE=DEVICE_GUIDESTONE
 
 # To avoid confusion when trying to enable functionality through compiler flags, the
 # persistent storage for flags is disabled by default, set to 0 if enabling disabling functionality through
@@ -23,7 +24,7 @@ DEVICE_TYPE=DEVICE_CROWNSTONE
 PERSISTENT_FLAGS_DISABLED=1
 
 # Enable or disable meshing (1 or 0)
-MESHING=1
+MESHING=0
 
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=1
@@ -72,7 +73,7 @@ SCHEDULE_SERVICE=0
 # Enable or disable characteristics
 # Crownstone Service
 CHAR_CONTROL=1
-CHAR_MESHING=1
+CHAR_MESHING=0
 CHAR_CONFIGURATION=1
 CHAR_STATE=1
 
@@ -211,14 +212,16 @@ NRF51_USE_SOFTDEVICE=1
 # the directory with /Source and /Include subdirectories from the Nordic SDK
 NRF51822_DIR=
 # the nordic sdk version
-NORDIC_SDK_VERSION=8
+NORDIC_SDK_VERSION=11
 
 # starting with SoftDevice S110 v7 there is no separate UICR section
 SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
 
-BOOTLOADER_START_ADDRESS=0x00038000
-# 0x00040000 - BOOTLOADER_START_ADDRESS = 32k
-BOOTLOADER_LENGTH=32k
+BOOTLOADER_START_ADDRESS=0x00079000
+# 0x00080000 - BOOTLOADER_START_ADDRESS - 1000 - 1000 = 5000
+# Used in: gcc_nrf51_bootloader_xxaa.ld.in and dfu_types.h
+# nrf52: length = 0x00080000 - bootloader_start_address - size(bootloader_settings)=0x1000 - size(mbr_params_page)=0x1000
+BOOTLOADER_LENGTH=0x5000
 
 # The directory where the softdevice can be found
 # change if you want to use a different softdevice than the ones provided in the SDK
@@ -276,17 +279,15 @@ BOOTLOADER_LENGTH=32k
 # Wrong... It was right in the beginning. It is at 0x0001c000 just after the softdevice
 # The spec is also wrong, about the amount of RAM, it is 0x1800 (6kB), not 10kB
 #######################################################################################################################
-SOFTDEVICE_MAJOR=1
+SOFTDEVICE_MAJOR=2
 SOFTDEVICE_MINOR=0
-SOFTDEVICE_SERIES=130
-SOFTDEVICE=s130
-APPLICATION_START_ADDRESS=0x0001c000
+SOFTDEVICE_SERIES=132
+SOFTDEVICE=s132
+APPLICATION_START_ADDRESS=0x0001C000
 APPLICATION_LENGTH=0x23000
-#RAM_R1_BASE=0x20002800
-#RAM_APPLICATION_AMOUNT=0x1800
-#HEAP_SIZE=2700;
-# For the 32kB chip:
-#RAM_APPLICATION_AMOUNT=0x5800
+#RAM_R1_BASE=0x20002C00
+# For the 64kB chip:
+#RAM_APPLICATION_AMOUNT=0xD400
 #HEAP_SIZE=5000;
 
 ## to enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
@@ -294,8 +295,8 @@ APPLICATION_LENGTH=0x23000
 ## increase the ATTR_TABLE_SIZE, the RAM_R1_BASE has to be increased by the same value and the RAM_APPLICATION_AMOUNT
 ## has to be decreased by the same value (and most likely the HEAP_SIZE as well), e.g.
 ATTR_TABLE_SIZE=0xA00
-RAM_R1_BASE=0x20002C00
-RAM_APPLICATION_AMOUNT=0x5400
+RAM_R1_BASE=0x20003000
+RAM_APPLICATION_AMOUNT=0xD000
 HEAP_SIZE=5700
 
 

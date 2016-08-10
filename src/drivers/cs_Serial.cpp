@@ -13,7 +13,7 @@
 #include <cstdlib>
 
 #include "app_util.h"
-#include "nrf51.h"
+#include "nrf.h"
 
 #include <ble/cs_Nordic.h>
 #include "cfg/cs_Boards.h"
