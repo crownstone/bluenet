@@ -19,8 +19,8 @@
 #define PSTORAGE_FLASH_EMPTY_MASK    0xFFFFFFFF                          /**< Bit mask that defines an empty address in flash. */
 
 #define PSTORAGE_FLASH_PAGE_END                                      \
-	((NRF_UICR->BOOTLOADERADDR != PSTORAGE_FLASH_EMPTY_MASK)     \
-	 ? (NRF_UICR->BOOTLOADERADDR / PSTORAGE_FLASH_PAGE_SIZE)     \
+	((NRF_UICR->NRFFW[0] != PSTORAGE_FLASH_EMPTY_MASK)     \
+	 ? (NRF_UICR->NRFFW[0] / PSTORAGE_FLASH_PAGE_SIZE)     \
 	 : NRF_FICR->CODESIZE)
 
 // Each application uses CODE_PAGE_SIZE memory, which is (currently) 0x400 bytes, even if only 1 byte
@@ -28,12 +28,14 @@
 // NOTE 1: increasing this will reduce the memory available for DFU upload, increasing it too much will
 // make it impossible to upload the softdevice over DFU.
 // NOTE 2: don't forget to adjust the APP_DATA_RESERVED in the CMakeBuild.config.default
-#define PSTORAGE_MAX_APPLICATIONS   4                                                          /**< Maximum number of applications that can be registered with the module, configurable based on system requirements. */
+#define PSTORAGE_NUM_OF_PAGES   4                                                          /**< Maximum number of applications that can be registered with the module, configurable based on system requirements. */
 // minimum block size is 4 bytes, even if PSTORAGE_MIN_BLOCK_SIZE is set to lower than 0x4
 #define PSTORAGE_MIN_BLOCK_SIZE     0x0004                                                      /**< Minimum size of block that can be registered with the module. Should be configured based on system requirements, recommendation is not have this value to be at least size of word. */
 
-#define PSTORAGE_DATA_START_ADDR    ((PSTORAGE_FLASH_PAGE_END - PSTORAGE_MAX_APPLICATIONS - 1) \
-		* PSTORAGE_FLASH_PAGE_SIZE)                                 /**< Start address for persistent data, configurable according to system requirements. */
+//#define PSTORAGE_DATA_START_ADDR    ((PSTORAGE_FLASH_PAGE_END - PSTORAGE_MAX_APPLICATIONS - 1) \
+//		* PSTORAGE_FLASH_PAGE_SIZE)                                 /**< Start address for persistent data, configurable according to system requirements. */
+#define PSTORAGE_DATA_START_ADDR    ((PSTORAGE_FLASH_PAGE_END - PSTORAGE_NUM_OF_PAGES - 1) \
+		* PSTORAGE_FLASH_PAGE_SIZE)
 #define PSTORAGE_DATA_END_ADDR      ((PSTORAGE_FLASH_PAGE_END - 1) * PSTORAGE_FLASH_PAGE_SIZE)  /**< End address for persistent data, configurable according to system requirements. */
 #define PSTORAGE_SWAP_ADDR          PSTORAGE_DATA_END_ADDR                                      /**< Top-most page is used as swap area for clear and update. */
 

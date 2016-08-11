@@ -10,9 +10,12 @@
  *
  */
 
+#include <stddef.h>
 //#include "nrf_drv_common.h"
 #include "nrf_assert.h"
-#include "nrf_error.h"
+//#include "nrf_error.h"
+#include "app_util_platform.h"
+//#include "nrf_nvic.h"
 
 #ifdef SOFTDEVICE_PRESENT
 #include "nrf_soc.h"

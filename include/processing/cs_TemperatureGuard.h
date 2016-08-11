@@ -26,9 +26,17 @@ class TemperatureGuard : EventListener {
 public:
 	TemperatureGuard() :
 		EventListener(CONFIG_MAX_CHIP_TEMP),
-		_appTimerId(0),
+#if (NORDIC_SDK_VERSION >= 11)
+		_appTimerId(NULL),
+#else
+		_appTimerId(UINT32_MAX),
+#endif
 		_maxTemp(MAX_CHIP_TEMP)
 	{
+#if (NORDIC_SDK_VERSION >= 11)
+		_appTimerData = { {0} };
+		_appTimerId = &_appTimerData;
+#endif
 	}
 
 	void init() {
@@ -77,7 +85,12 @@ public:
 		}
 	}
 private:
-	uint32_t _appTimerId;
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _appTimerData;
+	app_timer_id_t           _appTimerId;
+#else
+	uint32_t                 _appTimerId;
+#endif
 	int8_t _maxTemp;
 
 //	void scheduleNextTick() {
