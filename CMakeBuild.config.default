@@ -68,9 +68,8 @@ GENERAL_SERVICE=1
 POWER_SERVICE=1
 SCHEDULE_SERVICE=0
 
-# In order for everything to fit on the Crownstone, we disable the indoor service.
+# We disable the indoor service so the code fits on the NRF51822
 INDOOR_SERVICE=0
-
 
 # Enable or disable characteristics
 # Crownstone Service
