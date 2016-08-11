@@ -226,7 +226,7 @@ void Crownstone::initDrivers() {
 	LOGd(FMT_INIT, "stack");
 
 	// things that need to be configured on the stack **BEFORE** init is called
-/*
+#if (NORDIC_SDK_VERSION < 11)
 #if LOW_POWER_MODE==0
 	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM);
 #else
@@ -234,7 +234,7 @@ void Crownstone::initDrivers() {
 //	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_XTAL_50_PPM);
 	_stack->setClockSource(CLOCK_SOURCE);
 #endif
-*/
+#endif
 	//! start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	//! in particular we need it to set interrupt priorities.
 	_stack->init();

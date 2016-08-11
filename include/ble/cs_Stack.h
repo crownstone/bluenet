@@ -91,11 +91,14 @@ public:
 	//! The default BLE appearance is currently set to a Generic Keyring (576)
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_KEYRING;
 	//! The low-frequency clock, currently generated from the high frequency clock
-//	static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
+#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
 	static const nrf_clock_lf_cfg_t        defaultClockConfig = {.source        = NRF_CLOCK_LF_SRC_RC,   \
 	                                                             .rc_ctiv       = 16,                    \
 	                                                             .rc_temp_ctiv  = 2,                     \
 	                                                             .xtal_accuracy = 0};
+#else
+	static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
+#endif
 	//! The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.
 //	static const uint8_t                   defaultMtu = BLE_L2CAP_MTU_DEF;
 	//! Minimum connection interval in 1.25 ms (400*1.25=500ms)
@@ -121,8 +124,11 @@ protected:
 	// we can loop over but doesn't allocate more space than needed
 	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  //! 32
 
-//	nrf_clock_lfclksrc_t                        _clock_source; //4
+#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
 	nrf_clock_lf_cfg_t                          _clock_config;
+#else
+	nrf_clock_lfclksrc_t                        _clock_source; //4
+#endif
 //	uint8_t                                     _mtu_size;
 	int8_t                                      _tx_power_level;
 	ble_gap_conn_sec_mode_t                     _sec_mode;  //1
@@ -226,10 +232,17 @@ public:
 		_device_name = deviceName;
 	}
 
+#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
 	void setClockSource(nrf_clock_lf_cfg_t clockConfig) {
 		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
-		_clock_source = clockConfig;
+		_clock_config = clockConfig;
 	}
+#else
+	void setClockSource(nrf_clock_lfclksrc_t clockSource) {
+		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
+		_clock_source = clockSource;
+	}
+#endif
 
 	//! Advertising interval between 0x0020 and 0x4000 (32 and 16384) in 0.625 ms units (20ms to 10.24s)
 	void setAdvertisingInterval(uint16_t advertisingInterval){
