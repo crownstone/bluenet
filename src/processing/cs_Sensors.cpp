@@ -86,6 +86,10 @@ Sensors::Sensors() : _appTimerId(0), _initialized(false),
 	_lastLightCheck(0), _lastThermalCheck(0), _lastPushButtonCheck(0), _lastSwitchCheck(0),
 	_lastSwitchOn(false), _lastPushed(false)
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerData = { {0} };
+	_appTimerId = &_appTimerData;
+#endif
 //	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Sensors::staticTick);
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Sensors::staticTick);
 }

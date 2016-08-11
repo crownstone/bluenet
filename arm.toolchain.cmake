@@ -121,6 +121,7 @@ ADD_DEFINITIONS("-DMESH_BOOT_TIME=${MESH_BOOT_TIME}")
 ADD_DEFINITIONS("-DMESH_ACCESS_ADDR=${MESH_ACCESS_ADDR}")
 ADD_DEFINITIONS("-DMESH_INTERVAL_MIN_MS=${MESH_INTERVAL_MIN_MS}")
 ADD_DEFINITIONS("-DMESH_CHANNEL=${MESH_CHANNEL}")
+ADD_DEFINITIONS("-DNRF_SERIES=${NRF_SERIES}")
 
 # Set Attribute table size
 ADD_DEFINITIONS("-DATTR_TABLE_SIZE=${ATTR_TABLE_SIZE}")
@@ -188,11 +189,15 @@ FOREACH(definition ${DirDefs})
 ENDFOREACH()
 
 # Set the compiler flags
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=cortex-m0 -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=cortex-m0 -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
+IF(NRF_SERIES MATCHES NRF52)
+	SET(CPU_TYPE "cortex-m4")
+ENDIF()
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=${CPU_TYPE} -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=${CPU_TYPE} -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
 # Set the compiler flags (print float support)
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=cortex-m0 -mthumb -u _printf_float -ffunction-sections -fdata-sections ${DEFINES}")
-#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=cortex-m0 -mthumb -u _printf_float -ffunction-sections -fdata-sections ${DEFINES}")
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=${CPU_TYPE} -mthumb -u _printf_float -ffunction-sections -fdata-sections ${DEFINES}")
+#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=${CPU_TYPE} -mthumb -u _printf_float -ffunction-sections -fdata-sections ${DEFINES}")
 
 # Tell the linker that we use a special memory layout
 SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")

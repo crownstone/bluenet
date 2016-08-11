@@ -44,7 +44,12 @@ protected:
 	bool                     _started;
 
 	//! app timer id for tick function
-	uint32_t				 _appTimerId;
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _appTimerData;
+	app_timer_id_t           _appTimerId;
+#else
+	uint32_t                 _appTimerId;
+#endif
 
 	// per BLE definition, there is no maximum number of characteristics per
 	// service. it is limited by the memory available to the GATT table over
@@ -63,9 +68,16 @@ public:
 		_primary(true),
 		_service_handle(BLE_CONN_HANDLE_INVALID),
 		_started(false),
+#if (NORDIC_SDK_VERSION >= 11)
+		_appTimerId(NULL)
+#else
 		_appTimerId(UINT32_MAX)
+#endif
 {
-
+#if (NORDIC_SDK_VERSION >= 11)
+		_appTimerData = { {0} };
+		_appTimerId = &_appTimerData;
+#endif
 }
 
 	/** Default empty destructor
@@ -119,13 +131,21 @@ public:
 
 	void startTicking() {
 //		LOGi("service startTicking");
+#if (NORDIC_SDK_VERSION >= 11)
+		if (_appTimerId != NULL) {
+#else
 		if (_appTimerId != UINT32_MAX) {
+#endif
 			Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this);
 		}
 	};
 
 	void stopTicking() {
+#if (NORDIC_SDK_VERSION >= 11)
+		if (_appTimerId != NULL) {
+#else
 		if (_appTimerId != UINT32_MAX) {
+#endif
 			Timer::getInstance().stop(_appTimerId);
 		}
 	};

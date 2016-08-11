@@ -17,10 +17,10 @@
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
-#endif
 extern "C" {
 	#include <protocol/notification_buffer.h>
 }
+#endif
 
 //#define PRINT_SAMPLE_CURRENT
 //#define PRINT_POWERSAMPLING_VERBOSE

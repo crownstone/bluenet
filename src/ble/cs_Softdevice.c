@@ -10,7 +10,7 @@
 uint32_t cs_sd_ble_gatts_value_get(uint16_t conn_handle, uint16_t handle, uint16_t * p_len, uint8_t* const p_data) {
 	uint32_t error_code;
 
-#if (SOFTDEVICE_SERIES == 130) || (SOFTDEVICE_SERIES == 110 && SOFTDEVICE_MAJOR == 8)
+#if (NORDIC_SDK_VERSION >= 11) || (SOFTDEVICE_SERIES == 130) || (SOFTDEVICE_SERIES == 110 && SOFTDEVICE_MAJOR == 8)
 	ble_gatts_value_t p_value;
 	p_value.len = *p_len;
 	p_value.offset = 0;
@@ -27,7 +27,7 @@ uint32_t cs_sd_ble_gatts_value_get(uint16_t conn_handle, uint16_t handle, uint16
 uint32_t cs_sd_ble_gatts_value_set(uint16_t conn_handle, uint16_t handle, uint16_t* p_len, uint8_t * const p_data) {
 	uint32_t error_code;
 
-#if (SOFTDEVICE_SERIES == 130) || (SOFTDEVICE_SERIES == 110 && SOFTDEVICE_MAJOR == 8)
+#if (NORDIC_SDK_VERSION >= 11) || (SOFTDEVICE_SERIES == 130) || (SOFTDEVICE_SERIES == 110 && SOFTDEVICE_MAJOR == 8)
 	ble_gatts_value_t p_value;
 	p_value.len = *p_len;
 	p_value.offset = 0;

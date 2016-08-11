@@ -63,6 +63,13 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	shutdown();
 }
 
+#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
+const nrf_clock_lf_cfg_t Nrf51822BluetoothStack::defaultClockSource = {.source        = NRF_CLOCK_LF_SRC_RC,   \
+                                                                       .rc_ctiv       = 16,                    \
+                                                                       .rc_temp_ctiv  = 2,                     \
+                                                                       .xtal_accuracy = 0};
+#endif
+
 //! called by softdevice handler through ble_evt_dispatch on any event that passes through mesh and is not write
 //extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {
 //	Nrf51822BluetoothStack::getInstance().on_ble_evt((ble_evt_t *)p_event_data);
@@ -72,6 +79,10 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 //	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
+
+//! Example of how you can get the connection handle and role
+// conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+// role        = ble_conn_state_role(conn_handle);
 
 #if BUILD_MESHING == 1
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
@@ -111,8 +122,11 @@ void Nrf51822BluetoothStack::init() {
 	LOGi(MSG_BLE_SOFTDEVICE_INIT);
 	//! Initialize the SoftDevice handler module.
 	//! this would call with different clock!
-//	SOFTDEVICE_HANDLER_INIT(_clock_source, NULL);
+#if (NORDIC_SDK_VERSION >= 11)
+	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
+#else
 	SOFTDEVICE_HANDLER_APPSH_INIT(_clock_source, true);
+#endif
 
 	//! enable the BLE stack
 	LOGi(MSG_BLE_SOFTDEVICE_ENABLE);
@@ -120,8 +134,24 @@ void Nrf51822BluetoothStack::init() {
 	//! assign ble event handler, forwards ble_evt to stack
 	BLE_CALL(softdevice_ble_evt_handler_set, (ble_evt_dispatch));
 
-//#if(SOFTDEVICE_SERIES == 110)
+#if (NORDIC_SDK_VERSION >= 11)
 
+#define CENTRAL_LINK_COUNT 1
+#define PERIPHERAL_LINK_COUNT 1
+
+	ret_code_t err_code;
+	ble_enable_params_t ble_enable_params;
+	err_code = softdevice_enable_get_default_config(CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT, &ble_enable_params);
+	APP_ERROR_CHECK(err_code);
+
+	//! Check the ram settings against the used number of links
+	CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT);
+
+	//! Enable BLE stack.
+	err_code = softdevice_enable(&ble_enable_params);
+	APP_ERROR_CHECK(err_code);
+
+#else
 #if ((SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MINOR != 5)) || \
 	(SOFTDEVICE_SERIES == 110)
 #if(NORDIC_SDK_VERSION >= 6)
@@ -134,9 +164,9 @@ void Nrf51822BluetoothStack::init() {
 #endif
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
 	BLE_CALL(sd_ble_enable, (&ble_enable_params) );
-#endif
-#endif
-//#endif
+#endif // SDK 6
+#endif // S110 or S130.5
+#endif // SDK 11
 
 	//! according to the migration guide the address needs to be set directly after the sd_ble_enable call
 	//! due to "an issue present in the s110_nrf51822_7.0.0 release"
@@ -154,7 +184,9 @@ void Nrf51822BluetoothStack::init() {
 	version.company_id = 12;
 	BLE_CALL(sd_ble_version_get, (&version));
 
+#if (NORDIC_SDK_VERSION < 11)
 	sd_nvic_EnableIRQ(SWI2_IRQn);
+#endif
 
 	if (!_device_name.empty()) {
 		BLE_CALL(sd_ble_gap_device_name_set,
@@ -988,7 +1020,12 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 		} else {
 			for (Service* svc : _services) {
+#if (NORDIC_SDK_VERSION >= 11)
+				// TODO: this check is probably wrong
+				if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.handle) {
+#else
 				if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
+#endif
 					svc->on_write(p_ble_evt->evt.gatts_evt.params.write, p_ble_evt->evt.gatts_evt.params.write.handle);
 					return;
 				}
@@ -1000,7 +1037,12 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	case BLE_GATTS_EVT_HVC:
 		for (Service* svc : _services) {
+#if (NORDIC_SDK_VERSION >= 11)
+			// TODO: this check is probably be wrong
+			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.handle) {
+#else
 			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
+#endif
 				svc->on_ble_event(p_ble_evt);
 				return;
 			}

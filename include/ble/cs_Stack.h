@@ -92,10 +92,7 @@ public:
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_KEYRING;
 	//! The low-frequency clock, currently generated from the high frequency clock
 #if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
-	static const nrf_clock_lf_cfg_t        defaultClockConfig = {.source        = NRF_CLOCK_LF_SRC_RC,   \
-	                                                             .rc_ctiv       = 16,                    \
-	                                                             .rc_temp_ctiv  = 2,                     \
-	                                                             .xtal_accuracy = 0};
+	static const nrf_clock_lf_cfg_t        defaultClockSource;
 #else
 	static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
 #endif
@@ -125,7 +122,7 @@ protected:
 	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  //! 32
 
 #if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
-	nrf_clock_lf_cfg_t                          _clock_config;
+	nrf_clock_lf_cfg_t                          _clock_source;
 #else
 	nrf_clock_lfclksrc_t                        _clock_source; //4
 #endif
@@ -233,9 +230,9 @@ public:
 	}
 
 #if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
-	void setClockSource(nrf_clock_lf_cfg_t clockConfig) {
+	void setClockSource(nrf_clock_lf_cfg_t clockSource) {
 		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
-		_clock_config = clockConfig;
+		_clock_source = clockSource;
 	}
 #else
 	void setClockSource(nrf_clock_lfclksrc_t clockSource) {

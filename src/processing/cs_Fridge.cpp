@@ -14,8 +14,17 @@
 
 //#define PRINT_FRIDGE_VERBOSE
 
-Fridge::Fridge() : _appTimerId(0)
+Fridge::Fridge() :
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerId(NULL)
+#else
+	_appTimerId(UINT32_MAX)
+#endif
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerData = { {0} };
+	_appTimerId = &_appTimerData;
+#endif
 //	Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)Fridge::staticTick);
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Fridge::staticTick);
 

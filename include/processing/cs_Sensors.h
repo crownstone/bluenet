@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cstdint>
+#include <drivers/cs_Timer.h>
 
 //#include <common/cs_Types.h>
 
@@ -48,7 +49,12 @@ public:
 	void scheduleNextTick();
 
 private:
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _appTimerData;
+	app_timer_id_t           _appTimerId;
+#else
 	uint32_t _appTimerId;
+#endif
 	bool _initialized;
 	uint32_t _lastLightCheck, _lastThermalCheck;
 	uint32_t _lastPushButtonCheck, _lastSwitchCheck;
