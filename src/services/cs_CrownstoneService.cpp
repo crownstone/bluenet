@@ -415,13 +415,23 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_SESSION_NONCE_SET: {
-		_sessionNonceCharacteristic->setValueLength(SESSION_NONCE_LENGTH);
-		_sessionNonceCharacteristic->setValue((uint8_t*)p_data);
-		_sessionNonceCharacteristic->updateValue(false);
+		// check if we are in normal mode, if we're not, this char does not exist and we get a hard fault.
+		uint8_t operationMode;
+		State::getInstance().get(STATE_OPERATION_MODE, operationMode);
+		if (operationMode == OPERATION_MODE_NORMAL && Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
+			_sessionNonceCharacteristic->setValueLength(SESSION_NONCE_LENGTH);
+			_sessionNonceCharacteristic->setValue((uint8_t*)p_data);
+			_sessionNonceCharacteristic->updateValue(false);
+		}
 		break;
 	}
 	case EVT_BLE_DISCONNECT: {
-		_sessionNonceCharacteristic->setValueLength(0);
+		// check if we are in normal mode, if we're not, this char does not exist and we get a hard fault.
+		uint8_t operationMode;
+		State::getInstance().get(STATE_OPERATION_MODE, operationMode);
+		if (operationMode == OPERATION_MODE_NORMAL && Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
+			_sessionNonceCharacteristic->setValueLength(0);
+		}
 		break;
 	}
 	case EVT_STATE_NOTIFICATION: {

@@ -54,7 +54,8 @@ uint16_t EncryptionHandler::calculateDecryptionBufferLength(uint16_t encryptedPa
 void EncryptionHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_BLE_CONNECT:
-		_generateSessionNonce();
+		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED))
+			_generateSessionNonce();
 		break;
 	}
 }
