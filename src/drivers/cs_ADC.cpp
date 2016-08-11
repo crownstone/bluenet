@@ -43,6 +43,7 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
 	err_code = config(0);
 	APP_ERROR_CHECK(err_code);
 
+#if (NORDIC_SDK_VERSION < 11)
 	NRF_ADC->EVENTS_END = 0;    //! Stop any running conversions.
 	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; //! Pin will be configured as analog input
 	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; //! Interrupt adc
@@ -108,6 +109,7 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
 		NRF_PPI->CHENSET = (1UL << CS_ADC_PPI_CHANNEL);
 #endif
 	}
+#endif
 
 //	_sampleNum = 0;
 	return 0;
@@ -159,6 +161,7 @@ void ADC::setDoneCallback(adc_done_cb_t callback) {
  * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
  */
 uint32_t ADC::config(uint8_t pinNum) {
+#if (NORDIC_SDK_VERSION < 11)
 	NRF_ADC->CONFIG     =
 			(ADC_CONFIG_RES_10bit                            << ADC_CONFIG_RES_Pos)     |
 #if(HARDWARE_BOARD==CROWNSTONE)
@@ -172,21 +175,26 @@ uint32_t ADC::config(uint8_t pinNum) {
 	assert(_pins[pinNum] < 8, "No such pin");
 	NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << (_pins[pinNum] + ADC_CONFIG_PSEL_Pos);
 	_lastPinNum = pinNum;
+#endif
 	return 0;
 }
 
 void ADC::stop() {
+#if (NORDIC_SDK_VERSION < 11)
 	CS_ADC_TIMER->TASKS_STOP = 1;
 	NRF_ADC->TASKS_STOP = 1;
 //	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Disabled;
+#endif
 }
 
 void ADC::start() {
+#if (NORDIC_SDK_VERSION < 11)
 //	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled;
 	config(0);
 	NRF_ADC->EVENTS_END  = 0;
 //	NRF_ADC->TASKS_START = 1;
 	CS_ADC_TIMER->TASKS_START = 1;
+#endif
 }
 
 void adc_done(void * p_event_data, uint16_t event_size) {
@@ -225,9 +233,11 @@ void ADC::update(uint32_t value) {
 	//! Next pin
 	config((_lastPinNum+1) % _numPins);
 	if (_lastPinNum == 0) {
-		//! Sampled last pin of the list, use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
+		//! Sampled last pin of the list
+#if (NORDIC_SDK_VERSION < 11)
+		//! use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
 		NRF_ADC->TASKS_STOP = 1;
-
+#endif
 		if (!useContinousTimer()) {
 			uint32_t periodTime = 1000*1000/CS_ADC_SAMPLE_RATE;
 			uint32_t lastSampleTime = ROUNDED_DIV(1000*(RTC::getCount()-_lastStartTime), (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
@@ -235,19 +245,24 @@ void ADC::update(uint32_t value) {
 			if (lastSampleTime < periodTime) {
 				delayTime = periodTime - lastSampleTime;
 			}
+#if (NORDIC_SDK_VERSION < 11)
 			CS_ADC_TIMER->CC[0] = delayTime;
 			CS_ADC_TIMER->TASKS_START = 1;
+#endif
 		}
 	}
 	else {
 		//! Sample next pin
+#if (NORDIC_SDK_VERSION < 11)
 		NRF_ADC->TASKS_START = 1;
+#endif
 	}
 }
 
 /** The interrupt handler for an ADC data ready event.
  */
 extern "C" void ADC_IRQHandler(void) {
+#if (NORDIC_SDK_VERSION < 11)
 	uint32_t adc_value;
 
 	//! Clear data-ready event
@@ -263,14 +278,16 @@ extern "C" void ADC_IRQHandler(void) {
 
 //	//! next sample
 //	NRF_ADC->TASKS_START = 1;
-
+#endif
 }
 
 extern "C" void TIMER1_IRQHandler(void) {
+#if (NORDIC_SDK_VERSION < 11)
 	CS_ADC_TIMER->EVENTS_COMPARE[0] = 0; // Clear compare match register
 	CS_ADC_TIMER->TASKS_CLEAR = 1; // Reset timer
 	NRF_ADC->TASKS_START = 1;
 	ADC::getInstance()._lastStartTime = RTC::getCount();
+#endif
 }
 
 
