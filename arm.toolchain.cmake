@@ -190,14 +190,15 @@ ENDFOREACH()
 
 # Set the compiler flags
 IF(NRF_SERIES MATCHES NRF52)
-	SET(CPU_TYPE "cortex-m4")
+	SET(CPU_FLAGS "-mcpu=cortex-m4")
+	SET(FLOAT_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs")
 ENDIF()
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=${CPU_TYPE} -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=${CPU_TYPE} -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} ${CPU_FLAGS} ${FLOAT_FLAGS} -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} ${CPU_FLAGS} ${FLOAT_FLAGS} -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
 # Set the compiler flags (print float support)
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=${CPU_TYPE} -mthumb -u _printf_float -ffunction-sections -fdata-sections ${DEFINES}")
-#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} -mcpu=${CPU_TYPE} -mthumb -u _printf_float -ffunction-sections -fdata-sections ${DEFINES}")
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} ${CPU_FLAGS} ${FLOAT_FLAGS} -mthumb -u _printf_float -ffunction-sections -fdata-sections ${DEFINES}")
+#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} ${CPU_FLAGS} ${FLOAT_FLAGS} -mthumb -u _printf_float -ffunction-sections -fdata-sections ${DEFINES}")
 
 # Tell the linker that we use a special memory layout
 SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")

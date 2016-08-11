@@ -65,7 +65,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE
 #SET(LIBRARY_MATH "-lm")
 #SET(LIBRARY_RUNTIME "-lsupc++")
 
-SET(LIBS "-lstdc++_s ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lc_s")
+#SET(LIBS "-lstdc++_s ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lc_s")
+SET(LIBS "-lstdc++ ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lc")
 
 # Some debug information
 MESSAGE(STATUS "\"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
