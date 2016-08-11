@@ -364,7 +364,6 @@ Type nr | Type name | Payload type | Description
 32 | Power sample continuous interval | ... | TBD
 33 | Power sample continuous number samples | ... | TBD
 34 | <a name="crownstone_identifier"></a>Crownstone Identifier | uint 16 | Crownstone identifier used in advertisement package
-35 | <a name="mesh_access_address"></a>Mesh access address | uint 32 | Access address for messages sent over the mesh
 35 | <a name="admin_key"></a>Admin encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions
 36 | <a name="user_key"></a>Member encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions
 37 | <a name="guest_key"></a>Guest encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt guest access functions
