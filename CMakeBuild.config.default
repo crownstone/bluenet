@@ -64,10 +64,13 @@ STATIC_PASSKEY="123456"
 
 # Enable or disable different services (at times required to preserve memory)
 CROWNSTONE_SERVICE=1
-INDOOR_SERVICE=1
 GENERAL_SERVICE=1
 POWER_SERVICE=1
 SCHEDULE_SERVICE=0
+
+# In order for everything to fit on the Crownstone, we disable the indoor service.
+INDOOR_SERVICE=0
+
 
 # Enable or disable characteristics
 # Crownstone Service
