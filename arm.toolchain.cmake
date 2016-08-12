@@ -191,7 +191,8 @@ ENDFOREACH()
 # Set the compiler flags
 IF(NRF_SERIES MATCHES NRF52)
 	SET(CPU_FLAGS "-mcpu=cortex-m4")
-	SET(FLOAT_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs")
+#	SET(FLOAT_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs")
+	SET(FLOAT_FLAGS "")
 ENDIF()
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} ${CPU_FLAGS} ${FLOAT_FLAGS} -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
