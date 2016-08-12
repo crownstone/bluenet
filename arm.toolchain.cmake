@@ -208,7 +208,8 @@ SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
 # CMake does send the compiler flags also to the linker
 
 SET(FLAG_WRITE_MAP_FILE "-Wl,-Map,prog.map")
-SET(FLAG_REMOVE_UNWINDING_CODE "-Wl,--wrap,__aeabi_unwind_cpp_pr0")
+#SET(FLAG_REMOVE_UNWINDING_CODE "-Wl,--wrap,__aeabi_unwind_cpp_pr0")
+SET(FLAG_REMOVE_UNWINDING_CODE "")
 
 # do not define above as multiple linker flags, or else you will get redefines of MEMORY etc.
 SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} -Wl,--gc-sections ${CMAKE_EXE_LINKER_FLAGS} ${FLAG_WRITE_MAP_FILE} ${FLAG_REMOVE_UNWINDING_CODE}")
