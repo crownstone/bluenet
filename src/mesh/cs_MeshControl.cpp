@@ -20,26 +20,13 @@
 
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
-    sd_ble_gap_address_get(&_myAddr);
-//    Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t)MeshControl::reset);
-//    Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
+	uint32_t err_code;
+	err_code = sd_ble_gap_address_get(&_myAddr);
+	APP_ERROR_CHECK(err_code);
 }
-
-
-/*
-// [30.05.16] not needed anymore since the softdevice events are now handled directly through the scheduler
-//   we don't need to decouple it ourselves anymore, but can directly handle them
-extern "C" void decode_data_message(void* p_event_data, uint16_t event_size) {
-	device_mesh_message_t* msg = (device_mesh_message_t*) p_event_data;
-	MeshControl::getInstance().decodeDataMessage(msg->header.messageType, msg->payload);
-}
-*/
 
 void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 //	LOGd("Process incoming mesh message");
-
-//	Timer::getInstance().stop(_resetTimerId);
-//	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(20000), NULL);
 
 	switch(channel) {
 	case HUB_CHANNEL: {

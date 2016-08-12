@@ -26,8 +26,6 @@
 
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_TemperatureGuard.h>
-#include <processing/cs_Sensors.h>
-#include <processing/cs_Fridge.h>
 #include <processing/cs_Switch.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Tracker.h>
@@ -116,7 +114,7 @@ protected:
 	 *    - prepare tracker
 	 *    - ...
 	 */
-	void prepareCrownstone();
+	void prepareNormalOperationMode();
 
 	/** tick function for crownstone to update/execute periodically
 	 */
@@ -153,8 +151,6 @@ private:
 
 	// processing
 	Mesh* _mesh;
-	Sensors* _sensors;
-	Fridge* _fridge;
 	CommandHandler* _commandHandler;
 	Scanner* _scanner;
 	Tracker* _tracker;

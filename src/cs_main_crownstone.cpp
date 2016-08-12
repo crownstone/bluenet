@@ -61,10 +61,8 @@ Crownstone::Crownstone() :
 	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL),
 	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
 	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
-	_scheduleService(NULL),
-	_serviceData(NULL), _beacon(NULL),
-	_mesh(NULL), _sensors(NULL), _fridge(NULL),
-	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
+	_scheduleService(NULL),	_serviceData(NULL), _beacon(NULL),
+	_mesh(NULL), _commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
 	_advertisementPaused(false), _mainTimer(0), _operationMode(0)
 {
 
@@ -90,6 +88,10 @@ Crownstone::Crownstone() :
 	_commandHandler = &CommandHandler::getInstance();
 	_factoryReset = &FactoryReset::getInstance();
 
+	//! create instances for the scanner and mesh
+	//! actual initialization is done in their respective init methods
+	_scanner = &Scanner::getInstance();
+	_mesh = &Mesh::getInstance();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch using PWM or Relay
@@ -114,9 +116,6 @@ void Crownstone::init() {
 
 	//! configure the crownstone
 	configure();
-
-	LOGi(FMT_INIT, "encryption handler");
-	EncryptionHandler::getInstance().init();
 
 	LOGi(FMT_HEADER, "setup");
 
@@ -150,7 +149,7 @@ void Crownstone::init() {
 		LOGd("Configure normal operation mode");
 
 		//! setup normal operation mode
-		prepareCrownstone();
+		prepareNormalOperationMode();
 
 		//! create services
 		createCrownstoneServices();
@@ -251,6 +250,10 @@ void Crownstone::initDrivers() {
 
 	LOGd(FMT_INIT, "factory reset");
 	_factoryReset->init();
+
+	LOGi(FMT_INIT, "encryption handler");
+	EncryptionHandler::getInstance().init();
+
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch / PWM init
@@ -525,32 +528,20 @@ void Crownstone::setName() {
 	_stack->updateAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
-void Crownstone::prepareCrownstone() {
+void Crownstone::prepareNormalOperationMode() {
 
 	LOGi(FMT_CREATE, "Timer");
 	_timer->createSingleShot(_mainTimer, (app_timer_timeout_handler_t)Crownstone::staticTick);
 
 	//! create scanner object
-	_scanner = &Scanner::getInstance();
+	_scanner->init();
 	_scanner->setStack(_stack);
 
 	//! create scheduler
 	_scheduler = &Scheduler::getInstance();
 
-#if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
-	_sensors = new Sensors();
-#endif
-
-#if DEVICE_TYPE==DEVICE_FRIDGE
-	_fridge = new Fridge;
-#endif
-
-//	if (_settings->isEnabled(CONFIG_MESH_ENABLED)) {
-
-		_mesh = &Mesh::getInstance();
-		_mesh->init();
-
-//	}
+	// initialize the mesh
+	_mesh->init();
 
 //	BLEutil::print_heap("Heap setup: ");
 //	BLEutil::print_stack("Stack setup: ");
@@ -623,18 +614,8 @@ void Crownstone::startUp() {
 		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
 			_mesh->start();
 		}
-
-#if DEVICE_TYPE==DEVICE_FRIDGE
-		_fridge->startTicking();
-#endif
-
-#if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
-		_sensors->startTicking();
-#endif
-
 //		BLEutil::print_heap("Heap startup: ");
 //		BLEutil::print_stack("Stack startup: ");
-
 	}
 
 }

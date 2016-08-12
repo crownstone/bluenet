@@ -45,9 +45,8 @@ void start_stop_mesh(void * p_event_data, uint16_t event_size) {
 }
 
 
-Mesh::Mesh() : _appTimerId(-1), started(false) {
-	MeshControl::getInstance();
-	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Mesh::staticTick);
+Mesh::Mesh() : _appTimerId(-1), _started(false) {
+
 }
 
 Mesh::~Mesh() {
@@ -56,23 +55,29 @@ Mesh::~Mesh() {
 
 void Mesh::start() {
 	_mesh_start_time = RTC::now();
-	if (!started) {
-		started = true;
+	if (!_started) {
+		_started = true;
+#ifdef PRINT_MESH_VERBOSE
+		LOGi("start mesh");
+#endif
 		startTicking();
-		app_sched_event_put(&started, sizeof(started), start_stop_mesh);
+		app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
 	}
 }
 
 void Mesh::stop() {
-	if (started) {
-		started = false;
+	if (_started) {
+		_started = false;
+#ifdef PRINT_MESH_VERBOSE
+		LOGi("stop mesh");
+#endif
 		stopTicking();
-		app_sched_event_put(&started, sizeof(started), start_stop_mesh);
+		app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
 	}
 }
 
 void Mesh::restart() {
-	if (started) {
+	if (_started) {
 		uint32_t err_code = rbc_mesh_restart();
 		if (err_code != NRF_SUCCESS) {
 			LOGe(FMT_FAILED_TO, "restart mesh", err_code);
@@ -103,8 +108,13 @@ void Mesh::stopTicking() {
  * thing.
  */
 void Mesh::init() {
-//	nrf_gpio_pin_clear(PIN_GPIO_LED0);
+	MeshControl::getInstance();
+
+	//nrf_gpio_pin_clear(PIN_GPIO_LED0);
 	LOGi(FMT_INIT, "Mesh");
+
+	// setup the timer
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Mesh::staticTick);
 
 	rbc_mesh_init_params_t init_params;
 

@@ -27,7 +27,8 @@ Scanner::Scanner() :
 	_scanFilter(SCAN_FILTER),
 	_filterSendFraction(SCAN_FILTER_SEND_FRACTION),
 	_scanCount(0),
-	_stack(NULL)
+	_stack(NULL),
+	_appTimerId(-1)
 {
 
 	_scanResult = new ScanResult();
@@ -38,7 +39,9 @@ Scanner::Scanner() :
 	//! if we write / read from a characteristic that uses the master buffer
 	//! during a scan!
 	_scanResult->assign(_scanBuffer, sizeof(_scanBuffer));
+}
 
+void Scanner::init() {
 	Settings& settings = Settings::getInstance();
 	settings.get(CONFIG_SCAN_DURATION, &_scanDuration);
 	settings.get(CONFIG_SCAN_SEND_DELAY, &_scanSendDelay);
@@ -46,7 +49,6 @@ Scanner::Scanner() :
 	settings.get(CONFIG_SCAN_FILTER, &_scanFilter);
 
 	EventDispatcher::getInstance().addListener(this);
-
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Scanner::staticTick);
 }
 
