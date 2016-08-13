@@ -69,7 +69,12 @@ private:
 
 	Nrf51822BluetoothStack* _stack;
 
-	app_timer_id_t _appTimerId;
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _appTimerData;
+	app_timer_id_t           _appTimerId;
+#else
+	uint32_t                 _appTimerId;
+#endif
 
 	uint8_t _trackBuffer[sizeof(tracked_device_list_t)];
 

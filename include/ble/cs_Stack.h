@@ -153,8 +153,15 @@ protected:
 	dm_application_instance_t                   _dm_app_handle;
 	bool                                        _dm_initialized;
 
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t                                 _lowPowerTimeoutData;
 	app_timer_id_t                              _lowPowerTimeoutId;
+	app_timer_t                                 _secReqTimerData;
 	app_timer_id_t                              _secReqTimerId;
+#else
+	uint32_t                                    _lowPowerTimeoutId;
+	uint32_t                                    _secReqTimerId;
+#endif
 	dm_handle_t                                 _peerHandle;
 
 	ble_advdata_t                               _advdata;

@@ -68,8 +68,18 @@ Crownstone::Crownstone() :
 #endif
 	_sensors(NULL), _fridge(NULL),
 	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
-	_advertisementPaused(false), _mainTimer(0), _operationMode(0)
+	_advertisementPaused(false),
+#if (NORDIC_SDK_VERSION >= 11)
+	_mainTimerId(NULL),
+#else
+	_mainTimerId(UINT32_MAX),
+#endif
+	_operationMode(0)
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_mainTimerData = { {0} };
+	_mainTimerId = &_mainTimerData;
+#endif
 
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
@@ -535,7 +545,7 @@ void Crownstone::setName() {
 void Crownstone::prepareCrownstone() {
 
 	LOGi(FMT_CREATE, "Timer");
-	_timer->createSingleShot(_mainTimer, (app_timer_timeout_handler_t)Crownstone::staticTick);
+	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
 
 	//! create scanner object
 	_scanner = &Scanner::getInstance();
@@ -661,7 +671,7 @@ void Crownstone::tick() {
 }
 
 void Crownstone::scheduleNextTick() {
-	Timer::getInstance().start(_mainTimer, HZ_TO_TICKS(CROWNSTONE_UPDATE_FREQUENCY), this);
+	Timer::getInstance().start(_mainTimerId, HZ_TO_TICKS(CROWNSTONE_UPDATE_FREQUENCY), this);
 }
 
 void Crownstone::run() {

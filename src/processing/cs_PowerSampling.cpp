@@ -26,14 +26,25 @@ extern "C" {
 //#define PRINT_POWERSAMPLING_VERBOSE
 
 PowerSampling::PowerSampling() :
-		_staticPowerSamplingStartTimer(0),
-		_staticPowerSamplingReadTimer(0),
+#if (NORDIC_SDK_VERSION >= 11)
+		_powerSamplingStartTimerId(NULL),
+		_powerSamplingReadTimerId(NULL),
+#else
+		_powerSamplingStartTimerId(UINT32_MAX),
+		_powerSamplingReadTimerId(UINT32_MAX),
+#endif
 		_powerSamplesBuffer(NULL),
 		_currentSampleCircularBuf(POWER_SAMPLE_CONT_NUM_SAMPLES),
 		_voltageSampleCircularBuf(POWER_SAMPLE_CONT_NUM_SAMPLES),
 		_powerSamplesContMsg(NULL),
 		_powerSamplesCount(0)
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_powerSamplingStartTimerData = { {0} };
+	_powerSamplingStartTimerId = &_powerSamplingStartTimerData;
+	_powerSamplingReadTimerData = { {0} };
+	_powerSamplingReadTimerId = &_powerSamplingReadTimerData;
+#endif
 
 }
 
@@ -44,8 +55,8 @@ void adc_done_callback() {
 
 void PowerSampling::init() {
 
-	Timer::getInstance().createSingleShot(_staticPowerSamplingStartTimer, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleStart);
-	Timer::getInstance().createSingleShot(_staticPowerSamplingReadTimer, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
+	Timer::getInstance().createSingleShot(_powerSamplingStartTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleStart);
+	Timer::getInstance().createSingleShot(_powerSamplingReadTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
 
 	Settings& settings = Settings::getInstance();
 	settings.get(CONFIG_POWER_SAMPLE_BURST_INTERVAL, &_burstSamplingInterval);
@@ -116,7 +127,7 @@ void PowerSampling::startSampling() {
 	_powerSamplesCount = 0;
 //	_currentSampleTimestamps.clear();
 //	_voltageSampleTimestamps.clear();
-	Timer::getInstance().start(_staticPowerSamplingReadTimer, MS_TO_TICKS(_contSamplingInterval), this);
+	Timer::getInstance().start(_powerSamplingReadTimerId, MS_TO_TICKS(_contSamplingInterval), this);
 #else
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
 	_powerSamples.clear();
@@ -133,7 +144,7 @@ void PowerSampling::powerSampleReadBuffer() {
 	//! If one of the buffers is full, this means they're not aligned anymore: clear all.
 	if (_currentSampleCircularBuf.full() || _voltageSampleCircularBuf.full()) {
 		startSampling();
-		Timer::getInstance().start(_staticPowerSamplingReadTimer, MS_TO_TICKS(_contSamplingInterval), this);
+		Timer::getInstance().start(_powerSamplingReadTimerId, MS_TO_TICKS(_contSamplingInterval), this);
 		return;
 	}
 
@@ -185,7 +196,7 @@ void PowerSampling::powerSampleReadBuffer() {
 
 	}
 
-	Timer::getInstance().start(_staticPowerSamplingReadTimer, MS_TO_TICKS(_contSamplingInterval), this);
+	Timer::getInstance().start(_powerSamplingReadTimerId, MS_TO_TICKS(_contSamplingInterval), this);
 }
 
 
@@ -346,7 +357,7 @@ void PowerSampling::powerSampleFinish() {
 	}
 
 	//! Start new sample after some time
-	Timer::getInstance().start(_staticPowerSamplingStartTimer, MS_TO_TICKS(_burstSamplingInterval), this);
+	Timer::getInstance().start(_powerSamplingStartTimerId, MS_TO_TICKS(_burstSamplingInterval), this);
 }
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {

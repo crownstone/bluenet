@@ -12,19 +12,28 @@
 #include "ble/cs_Stack.h"
 #include "processing/cs_CommandHandler.h"
 
-FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0), _recoveryDisableTimer(0) {
-
+FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
+#if (NORDIC_SDK_VERSION >= 11)
+		_recoveryDisableTimerId(NULL)
+#else
+		_recoveryDisableTimerId(UINT32_MAX)
+#endif
+{
+#if (NORDIC_SDK_VERSION >= 11)
+	_recoveryDisableTimerData = { {0} };
+	_recoveryDisableTimerId = &_recoveryDisableTimerData;
+#endif
 }
 
 void FactoryReset::init() {
-	Timer::getInstance().createSingleShot(_recoveryDisableTimer, (app_timer_timeout_handler_t)FactoryReset::staticTimeout);
+	Timer::getInstance().createSingleShot(_recoveryDisableTimerId, (app_timer_timeout_handler_t)FactoryReset::staticTimeout);
 	resetTimeout();
 }
 
 void FactoryReset::resetTimeout() {
 	_recoveryEnabled = true;
 	_rtcStartTime = RTC::getCount();
-	Timer::getInstance().start(_recoveryDisableTimer, MS_TO_TICKS(FACTORY_RESET_TIMEOUT), this);
+	Timer::getInstance().start(_recoveryDisableTimerId, MS_TO_TICKS(FACTORY_RESET_TIMEOUT), this);
 }
 
 void FactoryReset::timeout() {

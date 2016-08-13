@@ -46,8 +46,20 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0),
-				_adv_manuf_data(NULL), _serviceData(NULL)
+				_adv_manuf_data(NULL), _serviceData(NULL),
+#if (NORDIC_SDK_VERSION >= 11)
+				_lowPowerTimeoutId(NULL), _secReqTimerId(NULL)
+#else
+				_lowPowerTimeoutId(UINT32_MAX), _secReqTimerId(UINT32_MAX)
+#endif
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_lowPowerTimeoutData = { {0} };
+	_lowPowerTimeoutId = &_lowPowerTimeoutData;
+	_secReqTimerData = { {0} };
+	_secReqTimerId = &_secReqTimerData;
+#endif
+
 	//! setup default values.
 	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
 

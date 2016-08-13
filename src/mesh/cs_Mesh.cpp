@@ -45,7 +45,17 @@ void start_stop_mesh(void * p_event_data, uint16_t event_size) {
 }
 
 
-Mesh::Mesh() : _appTimerId(-1), started(false) {
+Mesh::Mesh() : _appTimerId(-1), started(false),
+#if (NORDIC_SDK_VERSION >= 11)
+		_appTimerId(NULL)
+#else
+		_appTimerId(UINT32_MAX)
+#endif
+{
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerData = { {0} };
+	_appTimerId = &_appTimerData;
+#endif
 	MeshControl::getInstance();
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Mesh::staticTick);
 }

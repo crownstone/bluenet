@@ -41,7 +41,12 @@ private:
 
 	CommandHandler();
 
-	app_timer_id_t _delayTimer;
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _delayTimerData;
+	app_timer_id_t           _delayTimerId;
+#else
+	uint32_t                 _delayTimerId;
+#endif
 
 };
 

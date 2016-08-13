@@ -167,7 +167,12 @@ private:
 
 	bool _advertisementPaused;
 
-	app_timer_id_t _mainTimer;
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _mainTimerData;
+	app_timer_id_t           _mainTimerId;
+#else
+	uint32_t                 _mainTimerId;
+#endif
 
 	uint8_t _operationMode;
 

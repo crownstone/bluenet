@@ -16,8 +16,12 @@
 //#define PRINT_DEBUG
 
 #ifdef PRINT_DEBUG
+#if (NORDIC_SDK_VERSION >= 11)
+app_timer_t _debugTimerData = { {0} };
+app_timer_id_t _debugTimer = &_debugTimerData;
+#else
 app_timer_id_t _debugTimer;
-
+#endif
 void debugprint(void * p_context) {
 	State::getInstance().print();
 }

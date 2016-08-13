@@ -29,8 +29,17 @@ Scanner::Scanner() :
 	_scanFilter(SCAN_FILTER),
 	_filterSendFraction(SCAN_FILTER_SEND_FRACTION),
 	_scanCount(0),
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerId(NULL),
+#else
+	_appTimerId(UINT32_MAX),
+#endif
 	_stack(NULL)
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerData = { {0} };
+	_appTimerId = &_appTimerData;
+#endif
 
 	_scanResult = new ScanResult();
 

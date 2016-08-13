@@ -17,8 +17,17 @@
 
 Tracker::Tracker() : EventListener(),
 		_timeoutCounts(TRACKDEVICE_DEFAULT_TIMEOUT_COUNT), _tracking(false), _trackIsNearby(false),
-		_trackedDeviceList(NULL), _stack(NULL)
+		_trackedDeviceList(NULL), _stack(NULL),
+#if (NORDIC_SDK_VERSION >= 11)
+		_appTimerId(NULL)
+#else
+		_appTimerId(UINT32_MAX)
+#endif
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerData = { {0} };
+	_appTimerId = &_appTimerData;
+#endif
 	EventDispatcher::getInstance().addListener(this);
 
 	_trackedDeviceList = new TrackedDeviceList();

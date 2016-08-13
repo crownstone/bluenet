@@ -56,11 +56,21 @@ void execute_delayed(void * p_context) {
 	free(buf);
 }
 
-CommandHandler::CommandHandler() : _delayTimer(0) {
+CommandHandler::CommandHandler() :
+#if (NORDIC_SDK_VERSION >= 11)
+		_delayTimerId(NULL)
+#else
+		_delayTimerId(UINT32_MAX)
+#endif
+{
+#if (NORDIC_SDK_VERSION >= 11)
+		_delayTimerData = { {0} };
+		_delayTimerId = &_delayTimerData;
+#endif
 }
 
 void CommandHandler::init() {
-	Timer::getInstance().createSingleShot(_delayTimer, execute_delayed);
+	Timer::getInstance().createSingleShot(_delayTimerId, execute_delayed);
 }
 
 void CommandHandler::resetDelayed(uint8_t opCode) {
@@ -78,7 +88,7 @@ ERR_CODE CommandHandler::handleCommandDelayed(CommandHandlerTypes type, buffer_p
 	buf->buffer = new uint8_t[size];
 	memcpy(buf->buffer, buffer, size);
 	buf->size = size;
-	Timer::getInstance().start(_delayTimer, MS_TO_TICKS(delay), buf);
+	Timer::getInstance().start(_delayTimerId, MS_TO_TICKS(delay), buf);
 	LOGi("execute with delay %d", delay);
 	return NRF_SUCCESS;
 }

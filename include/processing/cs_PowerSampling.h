@@ -66,10 +66,15 @@ public:
 private:
 	PowerSampling();
 
-//	app_timer_id_t _powerSamplingFinishTimer;
-
-	app_timer_id_t _staticPowerSamplingStartTimer;
-	app_timer_id_t _staticPowerSamplingReadTimer;
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _powerSamplingStartTimerData;
+	app_timer_id_t           _powerSamplingStartTimerId;
+	app_timer_t              _powerSamplingReadTimerData;
+	app_timer_id_t           _powerSamplingReadTimerId;
+#else
+	uint32_t _powerSamplingStartTimerId;
+	uint32_t _powerSamplingReadTimerId;
+#endif
 
 	buffer_ptr_t _powerSamplesBuffer; //! Buffer that holds the data for burst or continous sampling
 

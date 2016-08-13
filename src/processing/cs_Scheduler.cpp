@@ -16,7 +16,17 @@
 //#define PRINT_DEBUG
 
 Scheduler::Scheduler() :
-		_rtcTimeStamp(0), _posixTimeStamp(0), _scheduleList(NULL) {
+#if (NORDIC_SDK_VERSION >= 11)
+		_appTimerId(NULL),
+#else
+		_appTimerId(UINT32_MAX),
+#endif
+		_rtcTimeStamp(0), _posixTimeStamp(0), _scheduleList(NULL)
+{
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerData = { {0} };
+	_appTimerId = &_appTimerData;
+#endif
 
 #if SCHEDULER_ENABLED==1
 	_scheduleList = new ScheduleList();
