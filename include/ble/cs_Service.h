@@ -74,10 +74,11 @@ public:
 		_appTimerId(UINT32_MAX)
 #endif
 {
-#if (NORDIC_SDK_VERSION >= 11)
-		_appTimerData = { {0} };
-		_appTimerId = &_appTimerData;
-#endif
+		//! Should be done in the service, if it wants a timer
+//#if (NORDIC_SDK_VERSION >= 11)
+//		_appTimerData = { {0} };
+//		_appTimerId = &_appTimerData;
+//#endif
 }
 
 	/** Default empty destructor
