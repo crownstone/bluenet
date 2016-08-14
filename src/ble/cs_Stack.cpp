@@ -156,23 +156,22 @@ void Nrf51822BluetoothStack::init() {
 
 	ret_code_t err_code;
 	ble_enable_params_t ble_enable_params;
-
 	memset(&ble_enable_params, 0, sizeof(ble_enable_params));
+	BLE_CALL(softdevice_enable_get_default_config, (CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT, &ble_enable_params) );
 	ble_enable_params.gatts_enable_params.attr_tab_size = ATTR_TABLE_SIZE;
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
 
-	BLE_CALL(softdevice_enable_get_default_config, (CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT, &ble_enable_params) );
-
-	//! Check the ram settings against the used number of links
-	CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT);
+//	//! Check the ram settings against the used number of links
+//	CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT);
 
 	//! Enable BLE stack.
 //	BLE_CALL(softdevice_enable, (&ble_enable_params) );
 
 	uint32_t ramBase = RAM_R1_BASE;
-//	ramBase = 0; // While developing, this will set ramBase to the minimal value
+	// While developing this will set ramBase to the minimal value
+	// Print "ramBase" in gdb
+//	ramBase = 0;
 	BLE_CALL(sd_ble_enable, (&ble_enable_params, &ramBase) );
-	LOGd("app ram base: %u", ramBase);
 
 #else
 #if ((SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MINOR != 5)) || \

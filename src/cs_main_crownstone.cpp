@@ -122,14 +122,21 @@ void Crownstone::init() {
 
 	//! initialize drivers
 	initDrivers();
+	BLEutil::print_heap("Heap initDrivers: ");
+	BLEutil::print_stack("Stack initDrivers: ");
+
 
 	LOGi(FMT_HEADER, "configure");
 
 	//! configure the crownstone
 	configure();
+	BLEutil::print_heap("Heap configure: ");
+	BLEutil::print_stack("Stack configure: ");
 
 	LOGi(FMT_INIT, "encryption handler");
 	EncryptionHandler::getInstance().init();
+	BLEutil::print_heap("Heap encryption: ");
+	BLEutil::print_stack("Stack encryption: ");
 
 	LOGi(FMT_HEADER, "setup");
 
@@ -223,9 +230,6 @@ void Crownstone::configure() {
 	LOGi("> advertisement ...");
 	//! configure advertising parameters
 	configureAdvertisement();
-
-//	BLEutil::print_heap("Heap config: ");
-//	BLEutil::print_stack("Stack config: ");
 }
 
 /**
@@ -479,22 +483,31 @@ void Crownstone::createCrownstoneServices() {
 	_deviceInformationService = new DeviceInformationService();
 	_stack->addService(_deviceInformationService);
 
+	BLEutil::print_heap("Heap DeviceInformationService: ");
+	BLEutil::print_stack("Stack DeviceInformationService: ");
+
 #if CROWNSTONE_SERVICE==1
 	//! should be available always
 	_crownstoneService = new CrownstoneService();
 	_stack->addService(_crownstoneService);
+	BLEutil::print_heap("Heap CrownstoneService: ");
+	BLEutil::print_stack("Stack CrownstoneService: ");
 #endif
 
 #if GENERAL_SERVICE==1
 	//! general services, such as internal temperature, setting names, etc.
 	_generalService = new GeneralService;
 	_stack->addService(_generalService);
+	BLEutil::print_heap("Heap GeneralService: ");
+	BLEutil::print_stack("Stack GeneralService: ");
 #endif
 
 #if INDOOR_SERVICE==1
 	//! now, build up the services and characteristics.
 	_localizationService = new IndoorLocalizationService;
 	_stack->addService(_localizationService);
+	BLEutil::print_heap("Heap IndoorLocalizationService: ");
+	BLEutil::print_stack("Stack IndoorLocalizationService: ");
 #endif
 
 #if POWER_SERVICE==1
@@ -550,9 +563,13 @@ void Crownstone::prepareCrownstone() {
 	//! create scanner object
 	_scanner = &Scanner::getInstance();
 	_scanner->setStack(_stack);
+	BLEutil::print_heap("Heap scanner: ");
+	BLEutil::print_stack("Stack scanner: ");
 
 	//! create scheduler
 	_scheduler = &Scheduler::getInstance();
+	BLEutil::print_heap("Heap scheduler: ");
+	BLEutil::print_stack("Stack scheduler: ");
 
 #if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
 	_sensors = new Sensors();
@@ -568,10 +585,6 @@ void Crownstone::prepareCrownstone() {
 		_mesh->init();
 //	}
 #endif
-
-//	BLEutil::print_heap("Heap setup: ");
-//	BLEutil::print_stack("Stack setup: ");
-
 }
 
 void Crownstone::startUp() {
@@ -850,10 +863,19 @@ int main() {
 	//! int uart, be nice and say hello
 	welcome();
 
+	BLEutil::print_heap("Heap welcome: ");
+	BLEutil::print_stack("Stack welcome: ");
+
 	Crownstone crownstone;
+
+	BLEutil::print_heap("Heap crownstone construct: ");
+	BLEutil::print_stack("Stack crownstone construct: ");
 
 	// initialize crownstone (depends on the operation mode) ...
 	crownstone.init();
+
+	BLEutil::print_heap("Heap crownstone init: ");
+	BLEutil::print_stack("Stack crownstone init: ");
 
 	//! start up phase, start ticking (depends on the operation mode) ...
 	crownstone.startUp();
