@@ -66,9 +66,9 @@ STATIC_PASSKEY="123456"
 
 # Enable or disable different services (at times required to preserve memory)
 CROWNSTONE_SERVICE=1
-INDOOR_SERVICE=1
-GENERAL_SERVICE=1
-POWER_SERVICE=1
+INDOOR_SERVICE=0
+GENERAL_SERVICE=0
+POWER_SERVICE=0
 SCHEDULE_SERVICE=0
 
 # Enable or disable characteristics
@@ -132,7 +132,9 @@ SERIAL_VERBOSITY=SERIAL_INFO
 # DOBEACON             14
 # CROWNSTONE5          15
 # DOBEACON2            16
-HARDWARE_BOARD=CROWNSTONE4
+HARDWARE_BOARD=PCA10040
+
+NRF_SERIES=NRF52
 
 # Default transmission power
 # Can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4
@@ -238,6 +240,7 @@ BOOTLOADER_LENGTH=0x5000
 # SOFTDEVICE                           - the name of the SoftDevice (without _softdevice.hex)
 # SOFTDEVICE_SERIES                    - the series of the SoftDevice (s110 vs s130 e.g.), used in the code
 #
+# -- TODO: update the text below --
 # For the following examples, suppose the SoftDevice takes 80kB and the application 176kB
 # APPLICATION_START_ADDRESS            - 80kB corresponds with 0x00014000 hex
 # Check https://devzone.nordicsemi.com/question/15994/nrf51822-iram-and-irom-settings-for-v05-s130-sd/
@@ -246,39 +249,7 @@ BOOTLOADER_LENGTH=0x5000
 # RAM_APPLICATION_AMOUNT               - size of softdevice in RAM
 
 #######################################################################################################################
-# For the S110 SoftDevice version (v8)
-# SoftDevice takes 88kB and application 168kB
-#######################################################################################################################
-#SOFTDEVICE_MAJOR=8
-#SOFTDEVICE_MINOR=0
-#SOFTDEVICE_SERIES=110
-#SOFTDEVICE=s110
-#APPLICATION_START_ADDRESS=0x00018000
-#APPLICATION_LENGTH=0x28000
-#RAM_R1_BASE=0x20002000
-## RAM_APPLICATION_AMOUNT=8K
-## HEAP_SIZE=2700
-## For the 32kB chip:
-#RAM_APPLICATION_AMOUNT=24K
-#HEAP_SIZE=16700
-
-# ## to enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
-# ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x600, so if you
-# ## increase the ATTR_TABLE_SIZE, the RAM_R1_BASE has to be increased by the same value and the RAM_APPLICATION_AMOUNT
-# ## has to be decreased by the same value (and most likely the HEAP_SIZE as well), e.g.
-# # ATTR_TABLE_SIZE=0x900
-# # RAM_R1_BASE=0x20002300
-# # RAM_APPLICATION_AMOUNT=0x5D00
-# ATTR_TABLE_SIZE=0x600
-
-#######################################################################################################################
-# For the S130 SoftDevice version (v1.0)
-# SoftDevice (from inspection seems to be 110kB) and application 168kB
-# bonus, vim shorthand
-#   :echo printf("%x", 110*1024)
-# checking S130 SoftDevice Specification, space for it should be 128kB
-# Wrong... It was right in the beginning. It is at 0x0001c000 just after the softdevice
-# The spec is also wrong, about the amount of RAM, it is 0x1800 (6kB), not 10kB
+# S132 2.0
 #######################################################################################################################
 SOFTDEVICE_MAJOR=2
 SOFTDEVICE_MINOR=0
@@ -291,16 +262,16 @@ APPLICATION_LENGTH=0x23000
 #RAM_APPLICATION_AMOUNT=0xD400
 #HEAP_SIZE=5000;
 
-## to enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
-## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x600, so if you
+## To enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
+## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x580, so if you
 ## increase the ATTR_TABLE_SIZE, the RAM_R1_BASE has to be increased by the same value and the RAM_APPLICATION_AMOUNT
 ## has to be decreased by the same value (and most likely the HEAP_SIZE as well), e.g.
 ATTR_TABLE_SIZE=0xA00
-RAM_R1_BASE=0x20003000
-RAM_APPLICATION_AMOUNT=0xD000
-HEAP_SIZE=5700
+RAM_R1_BASE=0x20002468
+RAM_APPLICATION_AMOUNT=0xDB98
+HEAP_SIZE=20000
 
-NRF_SERIES=NRF52
+
 
 
 
