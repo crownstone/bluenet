@@ -1042,12 +1042,14 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 			for (Service* svc : _services) {
 #if (NORDIC_SDK_VERSION >= 11)
 				// TODO: this check is probably wrong
-				if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.handle) {
+//				if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.handle) {
+				//! TODO: better way of selection?
+				if (true) { //! Just let every service check for now...
 #else
 				if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
 #endif
 					svc->on_write(p_ble_evt->evt.gatts_evt.params.write, p_ble_evt->evt.gatts_evt.params.write.handle);
-					return;
+//					return;
 				}
 			}
 		}
