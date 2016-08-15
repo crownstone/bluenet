@@ -104,7 +104,14 @@ private:
 		uint8_t _array[sizeof(_params)] = {};
 	};
 
-	uint8_t _encryptedArray[sizeof(_params)];
+	union {
+		struct __attribute__((packed)) {
+			uint8_t  protocolVersion;
+			uint8_t  payload[16];
+		} _encryptedParams;
+		uint8_t _encryptedArray[sizeof(_params)] = {};
+	};
+
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 

@@ -21,6 +21,7 @@ ServiceData::ServiceData() : EventListener(EVT_ALL)
 	EventDispatcher::getInstance().addListener(this);
 	memset(_array, 0, sizeof(_array));
 	_params.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
+	_encryptedParams.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION; // this part will not be written over
 
 	// in case the operation mode is setup, we have a different advertisement package.
 	if (_operationMode == OPERATION_MODE_SETUP) {
@@ -74,7 +75,10 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			RNG::fillBuffer(_params.rand, 3);
 
 			// encrypt the block.
-			EncryptionHandler::getInstance().encryptECB(_array+1, sizeof(_array)-1, _encryptedArray+1, sizeof(_encryptedArray)-1);
+			EncryptionHandler::getInstance().encryptECB(_array+1, sizeof(_array)-1, _encryptedParams.payload, sizeof(_encryptedParams.payload));
+
+			// move the firmware version over to the unencrypted part of the encrypted buffer'
+
 		}
 
 		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
