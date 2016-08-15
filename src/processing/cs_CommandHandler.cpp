@@ -459,7 +459,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_DISCONNECT: {
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "disconnect");
 		Nrf51822BluetoothStack::getInstance().disconnect();
 		break;

@@ -138,8 +138,9 @@ void Crownstone::init() {
 		//_stack->setTxPowerLevel(LOW_TX_POWER);
 		_stack->changeToLowTxPowerMode();
 
+
 		LOGi(FMT_ENABLE, "PIN encryption");
-		//! use PIN encryption for setup mode
+//		//! use PIN encryption for setup mode
 		_stack->setPinEncrypted(true);
 
 		break;
@@ -415,25 +416,30 @@ void Crownstone::configureAdvertisement() {
 	_serviceData = new ServiceData();
 
 	// initialize service data
+	uint8_t opMode;
+	State::getInstance().get(STATE_OPERATION_MODE, opMode);
 
-	//! read crownstone id from storage
-	uint16_t crownstoneId;
-	_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
-	LOGi("Set crownstone id to %d", crownstoneId);
+	// if we're in setup mode, do not alter the advertisement
+	if (opMode != OPERATION_MODE_SETUP) {
+		//! read crownstone id from storage
+		uint16_t crownstoneId;
+		_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+		LOGi("Set crownstone id to %d", crownstoneId);
 
-	//! and set it to the service data
-	_serviceData->updateCrownstoneId(crownstoneId);
+		//! and set it to the service data
+		_serviceData->updateCrownstoneId(crownstoneId);
 
-	// fill service data with initial data
-	uint8_t switchState;
-	_stateVars->get(STATE_SWITCH_STATE, switchState);
-	_serviceData->updateSwitchState(switchState);
+		// fill service data with initial data
+		uint8_t switchState;
+		_stateVars->get(STATE_SWITCH_STATE, switchState);
+		_serviceData->updateSwitchState(switchState);
 
-	_serviceData->updateTemperature(getTemperature());
+		_serviceData->updateTemperature(getTemperature());
 
-	int32_t powerUsage;
-	_stateVars->get(STATE_POWER_USAGE, powerUsage);
-	_serviceData->updatePowerUsage(powerUsage);
+		int32_t powerUsage;
+		_stateVars->get(STATE_POWER_USAGE, powerUsage);
+		_serviceData->updatePowerUsage(powerUsage);
+	}
 
 	//! assign service data to stack
 	_stack->setServiceData(_serviceData);

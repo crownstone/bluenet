@@ -123,4 +123,5 @@ private:
 	//! buffer object to read/write configuration characteristics
 //	StreamBuffer<uint8_t> *_streamBuffer;
 
+
 };

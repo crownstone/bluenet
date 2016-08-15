@@ -15,6 +15,26 @@
 
 #define SERVICE_DATA_PROTOCOL_VERSION 1
 
+//! bitmask map (if bit is true, then):
+//! [0] New Data Available
+//! [1] ID shown is from external Crownstone
+//! [2] ....
+//! [3] ....
+//! [4] ....
+//! [5] ....
+//! [6] ....
+//! [7] operation mode setup
+enum ServiceBitmask {
+	NEW_DATA_AVAILABLE    = 0,
+	SHOWING_EXTERNAL_DATA = 1,
+	RESERVED1             = 2,
+	RESERVED2             = 3,
+	RESERVED3             = 4,
+	RESERVED4             = 5,
+	RESERVED5             = 6,
+	SETUP_MODE_ENABLED    = 7
+};
+
 class ServiceData : EventListener {
 
 public:
@@ -30,10 +50,6 @@ public:
 
 	void updateCrownstoneId(uint16_t crownstoneId) {
 		_params.crownstoneId = crownstoneId;
-	}
-
-	void updateCrownstoneStateId(uint16_t crownstoneStateId) {
-//		_params.crownstoneStateId = crownstoneStateId;
 	}
 
 	void updateSwitchState(uint8_t switchState) {
@@ -57,9 +73,7 @@ public:
 	}
 
 	uint8_t* getArray() {
-		uint8_t opMode;
-		State::getInstance().get(STATE_OPERATION_MODE, opMode);
-		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && !(opMode == OPERATION_MODE_SETUP)) {
+		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
 			return _encryptedArray;
 		}
 		else {
@@ -74,17 +88,18 @@ public:
 
 private:
 
+	uint8_t _operationMode;
+
 	union {
 		struct __attribute__((packed)) {
-			uint8_t protocolVersion;
+			uint8_t  protocolVersion;
 			uint16_t crownstoneId;
-			uint8_t switchState;
-			uint8_t eventBitmask;
-//			uint8_t reserved;
-			int8_t temperature;
-			int32_t powerUsage;
-			int32_t accumulatedEnergy;
-			uint8_t rand[3];
+			uint8_t  switchState;
+			uint8_t  eventBitmask;
+			int8_t   temperature;
+			int32_t  powerUsage;
+			int32_t  accumulatedEnergy;
+			uint8_t  rand[3];
 		} _params;
 		uint8_t _array[sizeof(_params)] = {};
 	};

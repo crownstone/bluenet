@@ -821,14 +821,19 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         case DM_EVT_SECURITY_SETUP_COMPLETE: {
         	if (event_result == NRF_SUCCESS) {
         		LOGi("bonding completed");
+
+
         	} else {
         		LOGe("bonding failed with error: %d (%p)", event_result, event_result);
+        		disconnect();
         	}
+
+        	// [15.8.2016] ALEX: we are in low tx for a reason. A single shot security
+        	// pass should not remove this. On disconnect it will remain high TX
+        	// changeToNormalTxPowerMode();
 
         	//! clear timeout
         	Timer::getInstance().stop(_lowPowerTimeoutId);
-
-			changeToNormalTxPowerMode();
         	break;
         }
         default:

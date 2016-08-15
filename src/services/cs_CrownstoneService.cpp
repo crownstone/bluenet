@@ -161,7 +161,7 @@ void CrownstoneService::addMeshCharacteristic() {
 	});
 }
 
-void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_controlCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_controlCharacteristic);
 
@@ -169,7 +169,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setWritable(true);
 	_controlCharacteristic->setValue(buffer);
-	_controlCharacteristic->setMinAccessLevel(GUEST);
+	_controlCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_controlCharacteristic->setMaxGattValueLength(size);
 	_controlCharacteristic->setValueLength(0);
 	_controlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {

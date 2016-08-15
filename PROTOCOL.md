@@ -130,11 +130,25 @@ Type | Name | Length | Description
 uint 8 | Protocol Version | 1 | Service data protocol version
 uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
 uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
-uint 8 | Event bitmask | 1 | Shows if the Crownstone has something new to tell.
+uint 8 | [Event bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C)
 int 32 | Power usage | 4 | The power usage at this moment (mW).
 int 32 | Accumulated energy | 4 | The accumulated energy (kWh).
 uint 8[] | Rand | 3 | Random bytes.
+
+
+#### <a name="event_bitmask"></a>Event Bitmask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | New data available | If you request something from the Crownstone and the result is available, this will be 1.
+1 | Showing external data |  If this is 1, the shown ID and data is from another Crownstone.
+2 | Reserved |  Reserved for future use.
+3 | Reserved  |  Reserved for future use.
+4 | Reserved |  Reserved for future use.
+5 | Reserved  |  Reserved for future use.
+6 | Reserved |  Reserved for future use.
+7 | Setup mode active |  If this is 1, the Crownstone is in setup mode.
 
 #### <a name="switch_state_packet"></a>Switch State Packet
 
@@ -304,6 +318,7 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
 17 | <a name="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | ..
 18 | Request Service Data | - | Causes the crownstone to send it's service data over the mesh | x | x |
+19 | Disconnect | - | Causes the crownstone to send it's service data over the mesh | .. | .. | .. 
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 

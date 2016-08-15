@@ -19,7 +19,6 @@
 #define SESSION_NONCE_LENGTH 	5
 #define DEFAULT_SESSION_KEY 	0xcafebabe
 
-
 enum EncryptionAccessLevel {
 	ADMIN 				= 0,
 	MEMBER 				= 1,

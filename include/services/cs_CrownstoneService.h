@@ -53,7 +53,7 @@ protected:
 
 	/** Enable the command characteristic.
  	 */
-	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel = GUEST);
 
 	/** Enable the set configuration characteristic.
 	 *
