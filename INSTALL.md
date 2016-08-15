@@ -37,7 +37,7 @@ from the root folder of the Nordic SDK to do it for you.
 
 ### J-Link
 
-Download and install J-Link Segger’s [software](https://www.segger.com/jlink-Software.html). The current version is 5.12.8 [64bit .deb file version 5.12.8](https://www.segger.com/downloads/jlink/jlink_5.12.8_x86_64.deb)
+Download and install J-Link Segger’s [software](https://www.segger.com/downloads/jlink). The current version is 6.0.6 [64bit .deb file version 6.0.6](https://www.segger.com/downloads/jlink/jlink_6.0.6_x86_64.deb) and can be found at the "J-Link Software and Documentation Pack" section. 
 
 Then install it:
 
