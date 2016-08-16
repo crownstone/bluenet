@@ -46,12 +46,15 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0),
-				_adv_manuf_data(NULL), _serviceData(NULL),
 #if (NORDIC_SDK_VERSION >= 11)
-				_lowPowerTimeoutId(NULL), _secReqTimerId(NULL)
+				_lowPowerTimeoutId(NULL), 
+                _secReqTimerId(NULL),
 #else
-				_lowPowerTimeoutId(UINT32_MAX), _secReqTimerId(UINT32_MAX)
+				_lowPowerTimeoutId(UINT32_MAX), 
+                _secReqTimerId(UINT32_MAX),
 #endif
+				_adv_manuf_data(NULL), 
+                _serviceData(NULL)
 {
 #if (NORDIC_SDK_VERSION >= 11)
 	_lowPowerTimeoutData = { {0} };
@@ -154,7 +157,7 @@ void Nrf51822BluetoothStack::init() {
 #define CENTRAL_LINK_COUNT 0
 #define PERIPHERAL_LINK_COUNT 1
 
-	ret_code_t err_code;
+	__attribute__((unused)) ret_code_t err_code;
 	ble_enable_params_t ble_enable_params;
 	memset(&ble_enable_params, 0, sizeof(ble_enable_params));
 	BLE_CALL(softdevice_enable_get_default_config, (CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT, &ble_enable_params) );

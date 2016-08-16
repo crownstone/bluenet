@@ -207,7 +207,7 @@ void PowerSampling::powerSampleFinish() {
 
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
 
-	uint32_t currentTimestamp = 0;
+	__attribute__((unused)) uint32_t currentTimestamp = 0;
 	uint32_t voltageTimestamp = 0;
 
 //#ifdef PRINT_SAMPLE_CURRENT
@@ -287,9 +287,9 @@ void PowerSampling::powerSampleFinish() {
 	_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, 0);
 	uint32_t prevTime = voltageTimestamp;
 	uint32_t endTime = prevTime + RTC::msToTicks(20);
-	uint16_t vPrev = (*_powerSamples.getVoltageSamplesBuffer())[0];
-	int zeroCrossings = 0;
-	uint32_t prevZeroCrossingTime;
+	__attribute__((unused)) uint16_t vPrev = (*_powerSamples.getVoltageSamplesBuffer())[0];
+	__attribute__((unused)) int zeroCrossings = 0;
+	__attribute__((unused)) uint32_t prevZeroCrossingTime;
 
 	double tSum = 0.0;
 	double pSum = 0.0;

@@ -312,7 +312,7 @@ void Sensors::tick() {
 		init();
 	}
 
-	uint32_t now = RTC::now();
+	__attribute__((unused)) uint32_t now = RTC::now();
 
 #ifdef PUSH_BUTTON_POLL
 	bool pushed = false;
