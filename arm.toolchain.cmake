@@ -52,17 +52,17 @@ SET(CMAKE_OBJCOPY_OVERLOAD                       ${COMPILER_PATH}/bin/${COMPILER
 
 SET(CMAKE_CXX_FLAGS                              "-std=c++11 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions"                    CACHE STRING "c++ flags")
 SET(CMAKE_C_FLAGS                                "-std=gnu99"                                    CACHE STRING "c flags")
+SET(CMAKE_C_AND_CXX_FLAGS                        "-mthumb -ffunction-sections -fdata-sections -g3 -Wall"   CACHE STRING "C++ and C flags")
 SET(CMAKE_SHARED_LINKER_FLAGS                    ""                                              CACHE STRING "shared linker flags")
 SET(CMAKE_MODULE_LINKER_FLAGS                    ""                                              CACHE STRING "module linker flags")
 SET(CMAKE_EXE_LINKER_FLAGS                       "-Wl,-z,nocopyreloc"                            CACHE STRING "executable linker flags")
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS            "")
 SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "")
 
-# Collect flags that have to do with optimization, optimize for size for now
-#SET(FLAG_MATH "-ffast-math")
-#SET(FLAG_LINK_TIME_OPTIMIZATION "-flto")
-SET(OPTIMIZE "-Os -fomit-frame-pointer ${FLAG_MATH} ${FLAG_LINK_TIME_OPTIMIZATION}")
-#SET(OPTIMIZE "-O3 -fomit-frame-pointer ${FLAG_MATH} ${FLAG_LINK_TIME_OPTIMIZATION}")
+# Collect flags that have to do with optimization
+# We are optimizing for SIZE for now. If size turns out to be abundant, enable -O3 optimization.
+# Interesting options: -ffast-math, -flto (link time optimization)
+SET(CMAKE_C_AND_CXX_FLAGS "${CMAKE_C_AND_CXX_FLAGS} -Os -fomit-frame-pointer")
 
 # Collect flags that are used in the code, as macros
 #ADD_DEFINITIONS("-MMD -DNRF52 -DEPD_ENABLE_EXTRA_RAM -DARDUINO=100 -DE_STICKY_v1 -DNRF51_USE_SOFTDEVICE=${NRF51_USE_SOFTDEVICE} -DUSE_RENDER_CONTEXT -DSYSCALLS -DUSING_FUNC")
@@ -189,19 +189,24 @@ FOREACH(definition ${DirDefs})
 	ENDIF()
 ENDFOREACH()
 
-# Set the compiler flags
+# Set compiler flags
+
+# Only from nRF52 onwards we have a coprocessor for floating point operations
 IF(NRF_SERIES MATCHES NRF52)
-	SET(CPU_FLAGS "-mcpu=cortex-m4")
-    SET(FLOAT_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16")
-    #SET(FLOAT_FLAGS "-mfloat-abi=hard")
-    #	SET(FLOAT_FLAGS "")
+	SET(CMAKE_C_AND_CXX_FLAGS "${CMAKE_C_AND_CXX_FLAGS} -mcpu=cortex-m4")
+	SET(CMAKE_C_AND_CXX_FLAGS "${CMAKE_C_AND_CXX_FLAGS} -mfloat-abi=hard -mfpu=fpv4-sp-d16")
 ENDIF()
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} ${CPU_FLAGS} ${FLOAT_FLAGS} -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} ${CPU_FLAGS} ${FLOAT_FLAGS} -mthumb -ffunction-sections -fdata-sections ${DEFINES}")
-# Set the compiler flags (print float support)
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall ${OPTIMIZE} ${CPU_FLAGS} ${FLOAT_FLAGS} -mthumb -u _printf_float -ffunction-sections -fdata-sections ${DEFINES}")
-#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -Wall ${OPTIMIZE} ${CPU_FLAGS} ${FLOAT_FLAGS} -mthumb -u _printf_float -ffunction-sections -fdata-sections ${DEFINES}")
+IF(PRINT_FLOATS)
+	SET(CMAKE_C_AND_CXX_FLAGS "${CMAKE_C_AND_CXX_FLAGS} -u _printf_float")
+ENDIF()
+
+# Final collection of C/C++ compiler flags
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
+
+# Set linker flags
 
 # Tell the linker that we use a special memory layout
 SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
