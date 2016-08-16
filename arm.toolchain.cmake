@@ -52,7 +52,7 @@ SET(CMAKE_OBJCOPY_OVERLOAD                       ${COMPILER_PATH}/bin/${COMPILER
 
 SET(CMAKE_CXX_FLAGS                              "-std=c++11 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions"                    CACHE STRING "c++ flags")
 SET(CMAKE_C_FLAGS                                "-std=gnu99"                                    CACHE STRING "c flags")
-SET(CMAKE_C_AND_CXX_FLAGS                        "-mthumb -ffunction-sections -fdata-sections -g3 -Wall"   CACHE STRING "C++ and C flags")
+SET(CMAKE_C_AND_CXX_FLAGS                        "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror"   CACHE STRING "C and C++ flags")
 SET(CMAKE_SHARED_LINKER_FLAGS                    ""                                              CACHE STRING "shared linker flags")
 SET(CMAKE_MODULE_LINKER_FLAGS                    ""                                              CACHE STRING "module linker flags")
 SET(CMAKE_EXE_LINKER_FLAGS                       "-Wl,-z,nocopyreloc"                            CACHE STRING "executable linker flags")
