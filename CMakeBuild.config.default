@@ -66,10 +66,10 @@ STATIC_PASSKEY="123456"
 
 # Enable or disable different services (at times required to preserve memory)
 CROWNSTONE_SERVICE=1
-INDOOR_SERVICE=0
-GENERAL_SERVICE=0
-POWER_SERVICE=0
-SCHEDULE_SERVICE=0
+INDOOR_SERVICE=1
+GENERAL_SERVICE=1
+POWER_SERVICE=1
+SCHEDULE_SERVICE=1
 
 # Enable or disable characteristics
 # Crownstone Service
@@ -256,11 +256,9 @@ SOFTDEVICE_MINOR=0
 SOFTDEVICE_SERIES=132
 SOFTDEVICE=s132
 
-# Is this actually correct? Size is 1C000, so 114688, so 112kB?
 APPLICATION_START_ADDRESS=0x0001C000
 
-# This (0x23000) doesn't seem to correct at all.
-# This should be a chip with 256kB, so 0x80000 - 0x1C000 = 0x64000
+# This should be a chip with 512kB, so 0x80000 - 0x1C000 = 0x64000
 #
 APPLICATION_LENGTH=0x64000
 #RAM_R1_BASE=0x20002C00
@@ -272,9 +270,14 @@ APPLICATION_LENGTH=0x64000
 ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x580, so if you
 ## increase the ATTR_TABLE_SIZE, the RAM_R1_BASE has to be increased by the same value and the RAM_APPLICATION_AMOUNT
 ## has to be decreased by the same value (and most likely the HEAP_SIZE as well), e.g.
-ATTR_TABLE_SIZE=0xA00
-RAM_R1_BASE=0x20002468
-RAM_APPLICATION_AMOUNT=0xDB98
+
+# Minimum for the bootloader
+RAM_R1_BASE=0x200025E0
+
+ATTR_TABLE_SIZE=0xC00
+RAM_R1_BASE=0x200026A8
+RAM_APPLICATION_AMOUNT=0xD958
+
 HEAP_SIZE=20000
 
 
