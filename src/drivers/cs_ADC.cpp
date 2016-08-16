@@ -241,7 +241,7 @@ void ADC::update(uint32_t value) {
 		if (!useContinousTimer()) {
 			uint32_t periodTime = 1000*1000/CS_ADC_SAMPLE_RATE;
 			uint32_t lastSampleTime = ROUNDED_DIV(1000*(RTC::getCount()-_lastStartTime), (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
-			uint32_t delayTime = 1;
+			 __attribute__((__unused__)) uint32_t delayTime = 1;
 			if (lastSampleTime < periodTime) {
 				delayTime = periodTime - lastSampleTime;
 			}
