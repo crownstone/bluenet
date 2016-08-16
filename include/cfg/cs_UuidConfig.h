@@ -33,6 +33,7 @@
 /**
  * Custom Service UUIDs
  */
+//                                 byte nr:  15141312 1110  9 8  7 6  5 4 3 2 1 0
 #define CROWNSTONE_UUID                     "24f00000-7d10-4805-bfc1-7663a01c3bff"
 #define SETUP_UUID                          "24f10000-7d10-4805-bfc1-7663a01c3bff"
 #define GENERAL_UUID                        "24f20000-7d10-4805-bfc1-7663a01c3bff"

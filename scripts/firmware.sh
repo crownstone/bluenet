@@ -74,6 +74,9 @@ bootloader() {
 	# so perhaps first flash the binary and then the bootloader
 	${path}/_upload.sh $BLUENET_CONFIG_DIR/build/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
 
+	# Mark current app as valid app
+	${path}/_writebyte.sh 0x0007F000 1
+
 	if [ $? -eq 0 ]; then
 		sleep 1
 		# and set to load it

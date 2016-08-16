@@ -58,26 +58,32 @@ void execute_delayed(void * p_context) {
 
 CommandHandler::CommandHandler() :
 #if (NORDIC_SDK_VERSION >= 11)
-		_delayTimerId(NULL)
+		_delayTimerId(NULL),
+		_resetTimerId(NULL)
 #else
-		_delayTimerId(UINT32_MAX)
+		_delayTimerId(UINT32_MAX),
+		_resetTimerId(UINT32_MAX)
 #endif
 {
 #if (NORDIC_SDK_VERSION >= 11)
 		_delayTimerData = { {0} };
 		_delayTimerId = &_delayTimerData;
+		_resetTimerData = { {0} };
+		_resetTimerId = &_resetTimerData;
 #endif
 }
 
 void CommandHandler::init() {
 	Timer::getInstance().createSingleShot(_delayTimerId, execute_delayed);
+	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t) reset);
 }
 
 void CommandHandler::resetDelayed(uint8_t opCode) {
 	static uint8_t resetOpCode = opCode;
-	app_timer_id_t resetTimer;
-	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
-	Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &resetOpCode);
+	//! TODO: do we really have to make a new timer here every time?
+//	app_timer_id_t resetTimer;
+//	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
+	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(2000), &resetOpCode);
 //	//! Loop until reset trigger
 //	while(true) {}; //! TODO: this doesn't seem to work
 }

@@ -160,6 +160,7 @@ void Nrf51822BluetoothStack::init() {
 	BLE_CALL(softdevice_enable_get_default_config, (CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT, &ble_enable_params) );
 	ble_enable_params.gatts_enable_params.attr_tab_size = ATTR_TABLE_SIZE;
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
+	ble_enable_params.common_enable_params.vs_uuid_count = 5; //TODO: put in config
 
 //	//! Check the ram settings against the used number of links
 //	CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT);

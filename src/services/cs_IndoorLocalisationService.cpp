@@ -17,6 +17,10 @@ IndoorLocalizationService::IndoorLocalizationService() : EventListener(),
 		_rssiCharac(NULL), _scannedDeviceListCharac(NULL),
 		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL)
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerData = { {0} };
+	_appTimerId = &_appTimerData;
+#endif
 	EventDispatcher::getInstance().addListener(this);
 
 	setUUID(UUID(INDOORLOCALISATION_UUID));
