@@ -450,7 +450,7 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		break;
 	}
 	case CONFIG_PASSKEY: {
-		Storage::getArray<uint8_t>(_storageStruct.passkey, (uint8_t*) target, (uint8_t*)STATIC_PASSKEY, 6);
+		Storage::getArray<uint8_t>(_storageStruct.passkey, (uint8_t*) target, (uint8_t*)STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
 		break;
 	}
 	case CONFIG_MIN_ENV_TEMP: {

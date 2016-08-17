@@ -150,8 +150,8 @@ bool Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) 
 	}
 
 //	if (!found) {
-		//! tell someone?
-		LOGw(MSG_BLE_CHAR_CANNOT_FIND);
+		//! tell someone
+		LOGe("TODO: fix the check on service");
 		return false;
 //	}
 }

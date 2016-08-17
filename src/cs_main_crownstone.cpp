@@ -66,7 +66,6 @@ Crownstone::Crownstone() :
 #if BUILD_MESHING == 1
 	_mesh(NULL),
 #endif
-	_sensors(NULL), _fridge(NULL),
 	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
 	_advertisementPaused(false),
 #if (NORDIC_SDK_VERSION >= 11)
@@ -103,6 +102,10 @@ Crownstone::Crownstone() :
 	_commandHandler = &CommandHandler::getInstance();
 	_factoryReset = &FactoryReset::getInstance();
 
+	//! create instances for the scanner and mesh
+	//! actual initialization is done in their respective init methods
+	_scanner = &Scanner::getInstance();
+	_mesh = &Mesh::getInstance();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch using PWM or Relay
@@ -156,12 +159,18 @@ void Crownstone::init() {
 		_stack->createCharacteristics();
 
 		//! set it by default into low tx mode
-		//_stack->setTxPowerLevel(LOW_TX_POWER);
 		_stack->changeToLowTxPowerMode();
 
-		LOGi(FMT_ENABLE, "PIN encryption");
-		//! use PIN encryption for setup mode
-		_stack->setPinEncrypted(true);
+		//! Because iPhones cannot programmatically clear their cache of paired devices, the phone that
+		//! did the setup is at risk of not being able to connect to the crownstone if the cs clears the device
+		//! manager. We use our own encryption scheme to counteract this.
+		if (_settings->isSet(CONFIG_ENCRYPTION_ENABLED)) {
+			LOGi(FMT_ENABLE, "AES encryption");
+			_stack->setAesEncrypted(true);
+		}
+//		LOGi(FMT_ENABLE, "PIN encryption");
+//		//! use PIN encryption for setup mode
+//		_stack->setPinEncrypted(true);
 
 		break;
 	}
@@ -170,7 +179,7 @@ void Crownstone::init() {
 		LOGd("Configure normal operation mode");
 
 		//! setup normal operation mode
-		prepareCrownstone();
+		prepareNormalOperationMode();
 
 		//! create services
 		createCrownstoneServices();
@@ -269,6 +278,10 @@ void Crownstone::initDrivers() {
 
 	LOGd(FMT_INIT, "factory reset");
 	_factoryReset->init();
+
+	LOGi(FMT_INIT, "encryption handler");
+	EncryptionHandler::getInstance().init();
+
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch / PWM init
@@ -433,25 +446,30 @@ void Crownstone::configureAdvertisement() {
 	_serviceData = new ServiceData();
 
 	// initialize service data
+	uint8_t opMode;
+	State::getInstance().get(STATE_OPERATION_MODE, opMode);
 
-	//! read crownstone id from storage
-	uint16_t crownstoneId;
-	_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
-	LOGi("Set crownstone id to %d", crownstoneId);
+	// if we're in setup mode, do not alter the advertisement
+	if (opMode != OPERATION_MODE_SETUP) {
+		//! read crownstone id from storage
+		uint16_t crownstoneId;
+		_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+		LOGi("Set crownstone id to %d", crownstoneId);
 
-	//! and set it to the service data
-	_serviceData->updateCrownstoneId(crownstoneId);
+		//! and set it to the service data
+		_serviceData->updateCrownstoneId(crownstoneId);
 
-	// fill service data with initial data
-	uint8_t switchState;
-	_stateVars->get(STATE_SWITCH_STATE, switchState);
-	_serviceData->updateSwitchState(switchState);
+		// fill service data with initial data
+		uint8_t switchState;
+		_stateVars->get(STATE_SWITCH_STATE, switchState);
+		_serviceData->updateSwitchState(switchState);
 
-	_serviceData->updateTemperature(getTemperature());
+		_serviceData->updateTemperature(getTemperature());
 
-	int32_t powerUsage;
-	_stateVars->get(STATE_POWER_USAGE, powerUsage);
-	_serviceData->updatePowerUsage(powerUsage);
+		int32_t powerUsage;
+		_stateVars->get(STATE_POWER_USAGE, powerUsage);
+		_serviceData->updatePowerUsage(powerUsage);
+	}
 
 	//! assign service data to stack
 	_stack->setServiceData(_serviceData);
@@ -555,13 +573,13 @@ void Crownstone::setName() {
 	_stack->updateAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
-void Crownstone::prepareCrownstone() {
+void Crownstone::prepareNormalOperationMode() {
 
 	LOGi(FMT_CREATE, "Timer");
 	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
 
 	//! create scanner object
-	_scanner = &Scanner::getInstance();
+	_scanner->init();
 	_scanner->setStack(_stack);
 	BLEutil::print_heap("Heap scanner: ");
 	BLEutil::print_stack("Stack scanner: ");
@@ -571,13 +589,6 @@ void Crownstone::prepareCrownstone() {
 	BLEutil::print_heap("Heap scheduler: ");
 	BLEutil::print_stack("Stack scheduler: ");
 
-#if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
-	_sensors = new Sensors();
-#endif
-
-#if DEVICE_TYPE==DEVICE_FRIDGE
-	_fridge = new Fridge;
-#endif
 
 #if BUILD_MESHING == 1
 //	if (_settings->isEnabled(CONFIG_MESH_ENABLED)) {
@@ -655,18 +666,8 @@ void Crownstone::startUp() {
 			_mesh->start();
 #endif
 		}
-
-#if DEVICE_TYPE==DEVICE_FRIDGE
-		_fridge->startTicking();
-#endif
-
-#if (HARDWARE_BOARD==CROWNSTONE_SENSOR || HARDWARE_BOARD==NORDIC_BEACON)
-		_sensors->startTicking();
-#endif
-
 //		BLEutil::print_heap("Heap startup: ");
 //		BLEutil::print_stack("Stack startup: ");
-
 	}
 
 }

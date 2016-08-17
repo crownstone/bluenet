@@ -60,7 +60,8 @@ enum CrownstoneCharacteristicsIDs {
 
 enum SetupCharacteristicsIDs {
 	SETUP_CONTROL_UUID                      = 0x1,
-	MAC_ADDRESS_UUID                        = 0x2
+	MAC_ADDRESS_UUID                        = 0x2,
+	SETUP_KEY_UUID							= 0x3,
 };
 
 enum GeneralCharacteristicsIDs {

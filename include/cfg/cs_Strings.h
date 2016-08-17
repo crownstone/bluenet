@@ -58,6 +58,7 @@
 #define BLE_CHAR_FIRMWARE_REVISION               "Firmware Revision"
 #define BLE_CHAR_SOFTWARE_REVISION               "Software Revision"
 #define BLE_CHAR_MAC_ADDRES                      "MAC Address"
+#define BLE_CHAR_SETUP_KEY                       "Setup Encryption Key"
 
 #define STR_HANDLE_COMMAND                       "handle %s command"
 #define STR_ENABLE                               "Enable"
@@ -88,6 +89,7 @@
 #define STR_CHAR_CURRENT_TIME                    "Current Time"
 #define STR_CHAR_SCHEDULE                        "Schedule"
 #define STR_CHAR_MAC_ADDRESS                     "MAC Address"
+#define STR_CHAR_SETUP_KEY                       "Setup Encryption Key"
 
 #define STR_CREATE_ALL_SERVICES                  "Create all services"
 

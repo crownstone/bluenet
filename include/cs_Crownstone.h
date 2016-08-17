@@ -26,8 +26,6 @@
 
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_TemperatureGuard.h>
-#include <processing/cs_Sensors.h>
-#include <processing/cs_Fridge.h>
 #include <processing/cs_Switch.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Tracker.h>
@@ -118,7 +116,7 @@ protected:
 	 *    - prepare tracker
 	 *    - ...
 	 */
-	void prepareCrownstone();
+	void prepareNormalOperationMode();
 
 	/** tick function for crownstone to update/execute periodically
 	 */
@@ -156,10 +154,8 @@ private:
 	// processing
 #if BUILD_MESHING == 1
 	Mesh* _mesh;
-#endif
-	Sensors* _sensors;
-	Fridge* _fridge;
-	CommandHandler* _commandHandler;
+#endi
+    CommandHandler* _commandHandler;
 	Scanner* _scanner;
 	Tracker* _tracker;
 	Scheduler* _scheduler;
