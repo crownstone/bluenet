@@ -1,4 +1,4 @@
-# Bluenet protocol v0.5.1
+# Bluenet protocol v0.6.0
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -26,8 +26,10 @@ is to configure the Crownstone so only you, or people in your group, can communi
 The protocol here is as follows:
 
 1. Crownstone is in setup mode (low TX, [Setup Service active](#setup_service))
-- Phone is close and bonds with the Crownstone
-- Phone reads the Crownstone [MAC address](#setup_service) (required for iOS)
+- Phone is close and connects to the Crownstone
+- Phone reads the Crownstone [MAC address](#setup_service) (required for iOS). This characteristic is not encrypted.
+- Phone reads the [Session Key](#setup_session_key) and [Session Nonce](#setup_session_nonce). These characteristics are not encrypted.
+The values are only valid for this connection session. The Session key and the Session Nonce will be used to encrypt the rest of the setup phase using AES 128 CTR.
 - Phone starts setting up the Crownstone using the [Config Control](#setup_service) Characteristic
     - Phone gives Crownstone [its identifier](#crownstone_identifier)
     - Phone gives Crownstone [the Admin key](#admin_key)
@@ -49,10 +51,19 @@ When encryption is enabled the following changes:
 
 #### Writing to characteristics
 
-After connecting, you first have to read the [session nonce](#session_nonce). This session nonce has two purposes. It is used to authenticate any commands that are written (as a checksum of sorts) and secondly it forms part of the Nonce used for encryption.
+After connecting, you first have to read the [session nonce](#session_nonce). This session nonce has two purposes:
+- It is used to authenticate any commands that are written. We call this the Validation Key. These are the first 4 bytes of the Session Nonce.
+- it forms part of the Nonce used for encryption. The first 3 bytes of the Nonce are the Packet Nonce, the last 5 are the Session Nonce.
 The session nonce is only valid during the connection.
 
 The session nonce is [ECB encrypted](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) with the Guest key. To verify you have read and decrypted succesfully, check if the validation key is equal to **0xcafebabe**.
+
+##### Session Nonce Packet after ECB decryption
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Validation Key | 4 | 0xcafebabe as validation
+uint 8 | Session Nonce | 5 | The Session Nonce for this session.
+
 
 We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29) method to encrypt everything that is written to- and read from characteristics. For this you need to generate an 8 byte number called a **nonce**. The first 3 bytes of the nonce are sent with each packet, we call this the packet nonce. The last 5 bytes of the nonce are called the [session nonce](#session_nonce), which should be read after connecting.
 
@@ -181,7 +192,7 @@ Config Control | 24f00004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_
 Config Read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting | x |
 State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable | x | x |
 State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable | x | x |
-<a name="session_nonce"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. |  |  | x
+<a name="session_nonce"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. |  |  | ECB
 
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
 The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command
@@ -209,14 +220,16 @@ Value | Name | Description
 ## <a name="setup_service"></a>Setup service
 
 
-The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only available after a factory reset. This service is not encrypted.
+The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only available after a factory reset. When encryption is enabled, the control and both config characteristics are encrypted with AES CTR.
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
 Control        | 24f10001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the control characteristic
 MAC Address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MAC address of the device
+<a name="setup_session_key"></a>Session Key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be used to encrypt the control and config characteristics.
 Config Control | 24f10004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Write or select a config setting
 Config Read    | 24f10005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting
+<a name="setup_session_nonce"></a>Session Nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key.
 
 The control characteristics (Control, and Config Control) of the Setup Service return a uint 16 code on execution of the command. The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command was received before calling the next (either by polling or subscribing). The possible values are the same as for the Crownstone Service, see above.
 
@@ -232,13 +245,13 @@ Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 1 to rese
 
 ## Power service
 
-The power service has UUID 24f30000-7d10-4805-bfc1-7663a01c3bff.
+The power service has UUID 24f30000-7d10-4805-bfc1-7663a01c3bff. **Should be encrypted but it is not at the moment due to implementation.**
 
 Characteristic | UUID | Date type | Description | A | U | G 
 --- | --- | --- | --- | :---: | :---: | :---:
 PWM                | 24f30001-7d10-4805-bfc1-7663a01c3bff | uint 8 | Set PWM value. Value of 0 is completely off, 255 (100 on new devices) is completely on. | x
 Relay              | 24f30002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Switch Relay. Value of 0 is off, other is on. | x
-Power samples      | 24f30003-7d10-4805-bfc1-7663a01c3bff | [Power Samples](#power_samples_packet) | List of sampled current and voltage values. | x
+Power samples      | 24f30003-7d10-4805-bfc1-7663a01c3bff | [Power Samples](#power_samples_packet) | List of sampled current and voltage values. | ...
 Power consumption  | 24f30004-7d10-4805-bfc1-7663a01c3bff | uint 16 | The current power consumption. | x
 
 ## Indoor localization service

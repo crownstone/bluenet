@@ -93,16 +93,15 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "reset");
 
-		if (size != sizeof(opcode_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
+//		if (size != sizeof(opcode_message_payload_t)) {
+//			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+//			return ERR_WRONG_PAYLOAD_LENGTH;
+//		}
+//
+//		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
+//		uint8_t resetOp = payload->opCode;
 
-		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
-//		static uint8_t resetOp = payload->opCode;
-		uint8_t resetOp = payload->opCode;
-
-		resetDelayed(resetOp);
+		resetDelayed(GPREGRET_SOFT_RESET);
 		break;
 	}
 	case CMD_ENABLE_MESH: {
@@ -374,19 +373,19 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 				// validate encryption keys are not 0
 				settings.get(CONFIG_KEY_AMIN, key);
 				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-	//				LOGw("owner key is not set!");
+					LOGw("owner key is not set!");
 					return ERR_COMMAND_FAILED;
 				}
 
 				settings.get(CONFIG_KEY_MEMBER, key);
 				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-	//				LOGw("member key is not set!");
+					LOGw("member key is not set!");
 					return ERR_COMMAND_FAILED;
 				}
 
 				settings.get(CONFIG_KEY_GUEST, key);
 				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-	//				LOGw("guest key is not set!");
+					LOGw("guest key is not set!");
 					return ERR_COMMAND_FAILED;
 				}
 			}
@@ -396,7 +395,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			settings.get(CONFIG_CROWNSTONE_ID, &crownstoneId);
 
 			if (crownstoneId == 0) {
-//				LOGw("crownstone id has to be set during setup mode");
+				LOGw("crownstone id has to be set during setup mode");
 				return ERR_COMMAND_FAILED;
 			}
 
@@ -405,7 +404,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			settings.get(CONFIG_IBEACON_MAJOR, &major);
 
 			if (major == 0) {
-//				LOGw("ibeacon major is not set!");
+				LOGw("ibeacon major is not set!");
 				return ERR_COMMAND_FAILED;
 			}
 
@@ -413,7 +412,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			settings.get(CONFIG_IBEACON_MINOR, &minor);
 
 			if (minor == 0) {
-//				LOGw("ibeacon minor is not set!");
+				LOGw("ibeacon minor is not set!");
 				return ERR_COMMAND_FAILED;
 			}
 

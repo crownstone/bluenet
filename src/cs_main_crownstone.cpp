@@ -135,13 +135,18 @@ void Crownstone::init() {
 		_stack->createCharacteristics();
 
 		//! set it by default into low tx mode
-		//_stack->setTxPowerLevel(LOW_TX_POWER);
 		_stack->changeToLowTxPowerMode();
 
-
-		LOGi(FMT_ENABLE, "PIN encryption");
+		//! Because iPhones cannot programmatically clear their cache of paired devices, the phone that
+		//! did the setup is at risk of not being able to connect to the crownstone if the cs clears the device
+		//! manager. We use our own encryption scheme to counteract this.
+		if (_settings->isSet(CONFIG_ENCRYPTION_ENABLED)) {
+			LOGi(FMT_ENABLE, "AES encryption");
+			_stack->setAesEncrypted(true);
+		}
+//		LOGi(FMT_ENABLE, "PIN encryption");
 //		//! use PIN encryption for setup mode
-		_stack->setPinEncrypted(true);
+//		_stack->setPinEncrypted(true);
 
 		break;
 	}

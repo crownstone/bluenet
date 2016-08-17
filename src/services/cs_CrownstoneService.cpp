@@ -75,7 +75,7 @@ void CrownstoneService::createCharacteristics() {
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_MESH);
 #endif
 
-#if CHAR_CONFIGURATION==1 || DEVICE_TYPE==DEVICE_FRIDGE
+#if CHAR_CONFIGURATION==1
 	{
 		LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
 		_streamBuffer = getStreamBuffer(buffer, maxLength);
@@ -382,7 +382,7 @@ void CrownstoneService::addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t
 }
 
 
-void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_sessionNonceCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_sessionNonceCharacteristic);
 
@@ -391,7 +391,7 @@ void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint1
 	_sessionNonceCharacteristic->setWritable(false);
 	_sessionNonceCharacteristic->setNotifies(false);
 	_sessionNonceCharacteristic->setValue(buffer);
-	_sessionNonceCharacteristic->setMinAccessLevel(GUEST);
+	_sessionNonceCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_sessionNonceCharacteristic->setMaxGattValueLength(size);
 	_sessionNonceCharacteristic->setValueLength(0);
 }
@@ -415,21 +415,17 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_SESSION_NONCE_SET: {
-		// check if we are in normal mode, if we're not, this char does not exist and we get a hard fault.
-		uint8_t operationMode;
-		State::getInstance().get(STATE_OPERATION_MODE, operationMode);
-		if (operationMode == OPERATION_MODE_NORMAL && Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
-			_sessionNonceCharacteristic->setValueLength(SESSION_NONCE_LENGTH);
+		// Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_sessionNonceCharacteristic != NULL) {
+			_sessionNonceCharacteristic->setValueLength(length);
 			_sessionNonceCharacteristic->setValue((uint8_t*)p_data);
-			_sessionNonceCharacteristic->updateValue(false);
+			_sessionNonceCharacteristic->updateValue(ECB_GUEST_CAFEBABE);
 		}
 		break;
 	}
 	case EVT_BLE_DISCONNECT: {
-		// check if we are in normal mode, if we're not, this char does not exist and we get a hard fault.
-		uint8_t operationMode;
-		State::getInstance().get(STATE_OPERATION_MODE, operationMode);
-		if (operationMode == OPERATION_MODE_NORMAL && Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
+		// Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_sessionNonceCharacteristic != NULL) {
 			_sessionNonceCharacteristic->setValueLength(0);
 		}
 		break;

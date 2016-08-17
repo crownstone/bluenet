@@ -42,7 +42,7 @@ public:
 
 //	void scheduleNextTick();
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	virtual void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 protected:
 	/** Initialize a CrownstoneService object
@@ -69,8 +69,9 @@ protected:
 
 	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 	inline void addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
-	inline void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size);
 	inline void addFactoryResetCharacteristic();
+
+	void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel = GUEST);
 
 	/** Enable the mesh characteristic.
 	 */
