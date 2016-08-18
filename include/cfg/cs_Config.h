@@ -75,6 +75,13 @@
 #define CURRENT_LIMIT							 0
 
 #define CS_ADC_MAX_PINS                          2
+//! ----- TIMERS -----
+#define PWM_TIMER                                NRF_TIMER2
+//#define PWM_IRQHandler                           TIMER2_IRQHandler
+#define PWM_IRQn                                 TIMER2_IRQn
+#define PWM_INSTANCE_INDEX                       TIMER2_INSTANCE_INDEX
+#define PWM_TIMER_ID                             2
+
 #define CS_ADC_TIMER                             NRF_TIMER1
 //#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
 #define CS_ADC_TIMER_IRQn                        TIMER1_IRQn
