@@ -89,10 +89,6 @@ public:
 private:
 
 	uint8_t _operationMode;
-	union {
-		uint8_t bytes[2];
-		uint16_t value;
-	} _counter;
 
 	union {
 		struct __attribute__((packed)) {
@@ -103,7 +99,8 @@ private:
 			int8_t   temperature;
 			int32_t  powerUsage;
 			int32_t  accumulatedEnergy;
-			uint8_t  rand[3];
+			uint8_t  rand;
+			uint16_t counter;
 		} _params;
 		uint8_t _array[sizeof(_params)] = {};
 	};

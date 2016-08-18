@@ -61,22 +61,69 @@ public:
 	 */
 	void init();
 
+	/**
+	 * This method encrypts the data and places the result into the target struct.
+	 * It is IMPORTANT that the target HAS a bufferLength that is dividable by 16 and not 0.
+	 * The buffer of the target NEEDS to be allocated for the bufferLength.
+	 *
+	 * data can be any number of bytes.
+	 */
 	bool encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType = CTR);
+
+	/**
+	 * The mesh only uses cafebabe as a validation and the admin key to encrypt. Other than that, its the same.
+	 */
 	bool encryptMesh(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength);
+
+	/**
+	 * This method decrypts the package and places the decrypted blocks, in full, in the buffer. After this
+	 * the result will be validated and the target will be populated.
+	 */
 	bool decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel& userLevelInPackage, EncryptionType encryptionType = CTR);
+
+	/**
+	 * make sure we create a new nonce for each connection
+	 */
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
+	/**
+	 * Allow characteristics to get the sessionNonce. Length of the sessionNonce is 5 bytes.
+	 */
 	uint8_t* getSessionNonce();
 
+	/**
+	 * Break the connection if there is an error in the encryption or decryption
+	 */
 	void closeConnectionAuthenticationFailure();
+
+	/**
+	 * Verify if the access level provided is sufficient
+	 */
 	bool allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided);
 
+	/**
+	 * Determine the required size of the encryption buffer based on what you want to encrypt.
+	 */
 	static uint16_t calculateEncryptionBufferLength(uint16_t inputLength, EncryptionType encryptionType = CTR);
+
+	/**
+	 * Determine the required size of the decryption buffer based on how long the encrypted packet is.
+	 * The encrypted packet is the total size of what was written to the characteristic.
+	 */
 	static uint16_t calculateDecryptionBufferLength(uint16_t encryptedPacketLength);
 
+	/**
+	 * Generate a 16 byte key to be used during the setup phase.
+	 */
 	uint8_t* generateNewSetupKey();
+
+	/**
+	 * After the setup phase, invalidate the key. Is usually called on disconnect.
+	 */
 	void invalidateSetupKey();
 
 private:
+
 	inline bool _encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);
 	inline bool _prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);
 	inline bool _encryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength, EncryptionType encryptionType);

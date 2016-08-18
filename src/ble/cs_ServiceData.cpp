@@ -20,7 +20,6 @@ ServiceData::ServiceData() : EventListener(EVT_ALL)
 
 	EventDispatcher::getInstance().addListener(this);
 	memset(_array, 0, sizeof(_array));
-	_counter.value = 0;
 	_params.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
 	_encryptedParams.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION; // this part will not be written over
 
@@ -73,10 +72,9 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		//! encrypt the array using the guest key ECB if encryption is enabled.
 		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
 			//! populate the random field. We use one random number and a uint16 couter value for the last 2 bytes. Counter is cheaper than random.
-			RNG::fillBuffer(_params.rand, 1);
-			memcpy(_params.rand+1, _counter.bytes, 2);
+			RNG::fillBuffer(&_params.rand, 1);
+			_params.counter += 1;
 
-			_counter.value += 1;
 			//! encrypt the block.
 			EncryptionHandler::getInstance().encrypt(_array+1, sizeof(_array)-1, _encryptedParams.payload, sizeof(_encryptedParams.payload), GUEST, ECB_GUEST);
 		}

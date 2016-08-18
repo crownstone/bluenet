@@ -20,10 +20,6 @@ void EncryptionHandler::init() {
 	Settings::getInstance().get(STATE_OPERATION_MODE, &_operationMode);
 }
 
-
-/**
- * Determine the required size of the encryption buffer based on what you want to encrypt.
- */
 uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength, EncryptionType encryptionType) {
 	if (encryptionType == CTR || encryptionType == CTR_CAFEBABE) {
 		// add the validation padding length to the raw data length
@@ -44,17 +40,11 @@ uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength
 	}
 }
 
-/**
- * Determine the required size of the decryption buffer based on how long the encrypted packet is.
- * The encrypted packet is the total size of what was written to the characteristic.
- */
+
 uint16_t EncryptionHandler::calculateDecryptionBufferLength(uint16_t encryptedPacketLength) {
 	return encryptedPacketLength - VALIDATION_NONCE_LENGTH - PACKET_NONCE_LENGTH - USER_LEVEL_LENGTH;
 }
 
-/**
- * make sure we create a new nonce for each connection
- */
 void EncryptionHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_BLE_CONNECT:
@@ -64,16 +54,12 @@ void EncryptionHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 	}
 }
 
-/**
- * Allow characteristics to get the sessionNonce. Length of the sessionNonce is 5 bytes.
- */
+
 uint8_t* EncryptionHandler::getSessionNonce() {
 	return _sessionNonce;
 }
 
-/**
- * Break the connection if there is an error in the encryption or decryption
- */
+
 void EncryptionHandler::closeConnectionAuthenticationFailure() {
 	Nrf51822BluetoothStack::getInstance().disconnect();
 }
@@ -127,20 +113,12 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 	return true;
 }
 
-/**
- * The mesh only uses cafebabe as a validation and the admin key to encrypt. Other than that, its the same.
- */
+
 bool EncryptionHandler::encryptMesh(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength) {
 	return encrypt(data, dataLength, target, targetLength, ADMIN, CTR_CAFEBABE);
 }
 
-/**
- * This method encrypts the data and places the result into the target struct.
- * It is IMPORTANT that the target HAS a bufferLength that is dividable by 16 and not 0.
- * The buffer of the target NEEDS to be allocated for the bufferLength.
- *
- * data can be any number of bytes.
- */
+
 bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
 	if (encryptionType == CTR || encryptionType == CTR_CAFEBABE) {
 		return _prepareEncryptCTR(data,dataLength,target,targetLength,userLevel,encryptionType);
@@ -182,10 +160,7 @@ bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, u
 }
 
 
-/**
- * This method decrypts the package and places the decrypted blocks, in full, in the buffer. After this
- * the result will be validated and the target will be populated.
- */
+
 bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel& levelOfPackage, EncryptionType encryptionType) {
 	if (!(encryptionType == CTR || encryptionType == CTR_CAFEBABE)) {
 		LOGe("Cannot decrypt ECB");
@@ -523,9 +498,7 @@ bool EncryptionHandler::_validateBlockLength(uint16_t length) {
 }
 
 
-/**
- * Verify if the access level provided is sufficient
- */
+
 bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided) {
 	if (minimum != ENCRYPTION_DISABLED) {
 		if (_operationMode == OPERATION_MODE_SETUP && provided == SETUP && _setupKeyValid) {
