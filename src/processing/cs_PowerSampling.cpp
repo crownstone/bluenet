@@ -232,7 +232,7 @@ void PowerSampling::powerSampleFinish() {
 		_powerSamples.getCurrentTimestampsBuffer()->getValue(currentTimestamp, i);
 		_log(SERIAL_DEBUG, "%u %u,  ", currentTimestamp, (*_powerSamples.getCurrentSamplesBuffer())[i]);
 		if (!((i+1) % 6)) {
-			_log(SERIAL_DEBUG, SERIAL_CRLN);
+			_log(SERIAL_DEBUG, SERIAL_CRLF);
 		}
 	}
 	voltageTimestamp = 0;
@@ -241,10 +241,10 @@ void PowerSampling::powerSampleFinish() {
 		_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, i);
 		_log(SERIAL_DEBUG, "%u %u,  ", voltageTimestamp, (*_powerSamples.getVoltageSamplesBuffer())[i]);
 		if (!((i+1) % 6)) {
-			_log(SERIAL_DEBUG, SERIAL_CRLN);
+			_log(SERIAL_DEBUG, SERIAL_CRLF);
 		}
 	}
-	_log(SERIAL_DEBUG, SERIAL_CRLN);
+	_log(SERIAL_DEBUG, SERIAL_CRLF);
 #endif
 
 
