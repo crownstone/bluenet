@@ -6,8 +6,12 @@
  */
 #pragma once
 
-//#include <stdint.h>
-//
+extern "C" {
+#include <nrf_drv_saadc.h>
+#include <nrf_drv_timer.h>
+#include <nrf_drv_ppi.h>
+}
+
 #include "structs/buffer/cs_CircularBuffer.h"
 #include "structs/buffer/cs_StackBuffer.h"
 #include "structs/buffer/cs_DifferentialBuffer.h"
@@ -86,33 +90,43 @@ public:
 	//! Function to be called from interrupt, do not do much there!
 	void update(uint32_t value);
 
+	void update(nrf_saadc_value_t* buf);
+
+	static void staticTimerHandler(nrf_timer_event_t event_type, void* ptr) {
+//		_log(SERIAL_DEBUG, "t\r\n");
+	}
+
 	uint32_t _lastStartTime;
 
 private:
 	/** Constructor
 	 */
 //	ADC(): _buffers(NULL), _timeBuffers(NULL), _circularBuffers(NULL) {}
-	ADC() {}
+	ADC();
 
 	//! This class is singleton, deny implementation
 	ADC(ADC const&);
 	//! This class is singleton, deny implementation
 	void operator=(ADC const &);
 
-//	bool useContinousTimer() { return !(CS_ADC_SAMPLE_RATE > (_numPins*200)); }
-	bool useContinousTimer() { return true; }
-
 	uint8_t _pins[CS_ADC_MAX_PINS];
 	uint8_t _numPins;
-	uint8_t _lastPinNum;
+	nrf_drv_timer_t* _timer;
+	nrf_ppi_channel_t _ppiChannel;
+	nrf_saadc_value_t* _bufferPointers[CS_ADC_NUM_BUFFERS];
+
+//	uint8_t _lastPinNum;
 //	uint16_t _sampleNum;
 
-	StackBuffer<uint16_t>* _buffers[CS_ADC_MAX_PINS];
+	StackBuffer<uint16_t>* _stackBuffers[CS_ADC_MAX_PINS];
 	DifferentialBuffer<uint32_t>* _timeBuffers[CS_ADC_MAX_PINS];
 	CircularBuffer<uint16_t>* _circularBuffers[CS_ADC_MAX_PINS];
 
 	adc_done_cb_t _doneCallback;
 
+//	bool useContinousTimer() { return !(CS_ADC_SAMPLE_RATE > (_numPins*200)); }
+	bool useContinousTimer() { return true; }
+
 	//! Function to set the input pin, this can be done after each sample. Only used internally!
-	uint32_t config(uint8_t pin);
+	uint32_t configPin(uint8_t pin);
 };

@@ -7,111 +7,137 @@
 
 #include "drivers/cs_ADC.h"
 
-//#include "nrf.h"
-//
-//
-//#if(NRF51_USE_SOFTDEVICE == 1)
-//#include "nrf_sdm.h"
-//#endif
-//
+#include <nrf.h>
+#include <app_util_platform.h>
+
 #include "cfg/cs_Boards.h"
 #include "drivers/cs_Serial.h"
 #include "util/cs_BleError.h"
-//
-//#include "cs_nRF51822.h"
-
 #include "drivers/cs_RTC.h"
-
-#include <cfg/cs_Strings.h>
+#include "cfg/cs_Strings.h"
+#include "cfg/cs_Config.h"
 
 //#define PRINT_ADC_VERBOSE
+extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
 
-//! Check the section 31 "Analog to Digital Converter (ADC)" in the nRF51 Series Reference Manual.
+ADC::ADC(): _timer(NULL)
+{
+	_timer = new nrf_drv_timer_t();
+	_timer->p_reg = CS_ADC_TIMER; // Or use CONCAT_2(NRF_TIMER, CS_ADC_TIMER_ID)
+	_timer->instance_id = CS_ADC_INSTANCE_INDEX; // Or use CONCAT_3(TIMER, CS_ADC_TIMER_ID, _INSTANCE_INDEX)
+	_timer->cc_channel_count = NRF_TIMER_CC_CHANNEL_COUNT(CS_ADC_TIMER_ID);
+
+	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
+		_bufferPointers[i] = NULL;
+	}
+	for (int i=0; i<CS_ADC_MAX_PINS; i++) {
+		_stackBuffers[i] = NULL;
+		_timeBuffers[i] = NULL;
+		_circularBuffers[i] = NULL;
+	}
+
+}
+
 uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
-	uint32_t err_code;
-	assert(numPins <= CS_ADC_MAX_PINS && numPins > 0, "Too many or few pins");
+	ret_code_t err_code;
+
 	for (uint8_t i=0; i<numPins; i++) {
 		_pins[i] = pins[i];
 	}
 	_numPins = numPins;
 
-	LOGi(FMT_INIT, "ADC");
-#ifdef PRINT_ADC_VERBOSE
-	LOGd("Configure ADC with %u pins, starting on pin %u", numPins, pins[0]);
-#endif
-
-	err_code = config(0);
-	APP_ERROR_CHECK(err_code);
-
-#if (NORDIC_SDK_VERSION < 11)
-	NRF_ADC->EVENTS_END = 0;    //! Stop any running conversions.
-	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled; //! Pin will be configured as analog input
-	NRF_ADC->INTENSET   = ADC_INTENSET_END_Msk; //! Interrupt adc
-
-	//! Enable ADC interrupt
-#if(NRF51_USE_SOFTDEVICE == 1)
-	err_code = sd_nvic_ClearPendingIRQ(ADC_IRQn);
-	APP_ERROR_CHECK(err_code);
-	err_code = sd_nvic_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
-	APP_ERROR_CHECK(err_code);
-	err_code = sd_nvic_EnableIRQ(ADC_IRQn);
-	APP_ERROR_CHECK(err_code);
-#else
-	NVIC_ClearPendingIRQ(ADC_IRQn);
-	NVIC_SetPriority(ADC_IRQn, NRF_APP_PRIORITY_LOW);
-	NVIC_EnableIRQ(ADC_IRQn);
-#endif
-
-
-	//! Configure timer
-	CS_ADC_TIMER->TASKS_CLEAR = 1;
-	CS_ADC_TIMER->BITMODE =    (TIMER_BITMODE_BITMODE_16Bit << TIMER_BITMODE_BITMODE_Pos); //! Counter is 16bit
-	CS_ADC_TIMER->MODE =       (TIMER_MODE_MODE_Timer << TIMER_MODE_MODE_Pos);
-	CS_ADC_TIMER->PRESCALER =  (4 << TIMER_PRESCALER_PRESCALER_Pos); //! 16MHz / 2^4 = 1Mhz, 1us period
-
-	//! Configure timer events
-	CS_ADC_TIMER->CC[0] = 1000*1000/CS_ADC_SAMPLE_RATE;
-
-	//! If the sample rate is above 200, we can't just start adc by a continuous timer,
-	//! as the adc sample might not be done yet before the next is started.
-	if (!useContinousTimer()) {
-		//! Don't clear timer at compare0 event
-		CS_ADC_TIMER->SHORTS = (TIMER_SHORTS_COMPARE0_CLEAR_Disabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos);
-
-		//! Enable timer interrupt
-#if(NRF51_USE_SOFTDEVICE == 1)
-		err_code = sd_nvic_ClearPendingIRQ(CS_ADC_TIMER_IRQn);
+	err_code = nrf_drv_ppi_init();
+	if (err_code != MODULE_ALREADY_INITIALIZED) {
 		APP_ERROR_CHECK(err_code);
-		err_code = sd_nvic_SetPriority(CS_ADC_TIMER_IRQn, NRF_APP_PRIORITY_LOW);
-		APP_ERROR_CHECK(err_code);
-		err_code = sd_nvic_EnableIRQ(CS_ADC_TIMER_IRQn);
-		APP_ERROR_CHECK(err_code);
-#else
-		NVIC_ClearPendingIRQ(CS_ADC_TIMER_IRQn);
-		NVIC_SetPriority(CS_ADC_TIMER_IRQn, NRF_APP_PRIORITY_LOW);
-		NVIC_EnableIRQ(CS_ADC_TIMER_IRQn);
-#endif
-
-		//! Enable interrupt at compare0
-		CS_ADC_TIMER->INTENSET = (TIMER_INTENSET_COMPARE0_Enabled << TIMER_INTENSET_COMPARE0_Pos);
 	}
-	else {
-		//! Shortcut clear timer at compare0 event
-		CS_ADC_TIMER->SHORTS = (TIMER_SHORTS_COMPARE0_CLEAR_Enabled << TIMER_SHORTS_COMPARE0_CLEAR_Pos);
 
-		//! Configure ADC start task via PPI
-#if(NRF51_USE_SOFTDEVICE == 1)
-		sd_ppi_channel_assign(CS_ADC_PPI_CHANNEL, &CS_ADC_TIMER->EVENTS_COMPARE[0], &NRF_ADC->TASKS_START);
-		sd_ppi_channel_enable_set(1UL << CS_ADC_PPI_CHANNEL);
-#else
-		NRF_PPI->CH[CS_ADC_PPI_CHANNEL].EEP = (uint32_t)&CS_ADC_TIMER->EVENTS_COMPARE[0];
-		NRF_PPI->CH[CS_ADC_PPI_CHANNEL].TEP = (uint32_t)&NRF_ADC->TASKS_START;
-		NRF_PPI->CHENSET = (1UL << CS_ADC_PPI_CHANNEL);
-#endif
+	nrf_drv_timer_config_t timerConfig = {
+		.frequency          = NRF_TIMER_FREQ_16MHz,
+		.mode               = (nrf_timer_mode_t)TIMER_MODE_MODE_Timer,
+		.bit_width          = (nrf_timer_bit_width_t)TIMER_BITMODE_BITMODE_32Bit,
+		.interrupt_priority = APP_IRQ_PRIORITY_LOW,
+		.p_context          = NULL
+	};
+
+	err_code = nrf_drv_timer_init(_timer, &timerConfig, staticTimerHandler);
+	APP_ERROR_CHECK(err_code);
+
+	//! Setup timer for compare event every 100ms
+//	uint32_t ticks = nrf_drv_timer_ms_to_ticks(_timer, 100);
+	//! Setup timer for compare event every 100us
+	uint32_t ticks = nrf_drv_timer_us_to_ticks(_timer, 500);
+//	LOGd("adc timer ticks: %u", ticks);
+	nrf_drv_timer_extended_compare(_timer, NRF_TIMER_CC_CHANNEL0, ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, false);
+//	nrf_drv_timer_extended_compare(_timer, NRF_TIMER_CC_CHANNEL0, ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
+//	nrf_drv_timer_enable(_timer);
+
+	uint32_t timer_compare_event_addr = nrf_drv_timer_compare_event_address_get(_timer, NRF_TIMER_CC_CHANNEL0);
+	uint32_t saadc_sample_event_addr = nrf_drv_saadc_sample_task_get();
+
+	//! Setup ppi channel so that timer compare event is triggering sample task in SAADC
+	err_code = nrf_drv_ppi_channel_alloc(&_ppiChannel);
+	APP_ERROR_CHECK(err_code);
+
+	err_code = nrf_drv_ppi_channel_assign(_ppiChannel, timer_compare_event_addr, saadc_sample_event_addr);
+	APP_ERROR_CHECK(err_code);
+
+	err_code = nrf_drv_ppi_channel_enable(_ppiChannel);
+	APP_ERROR_CHECK(err_code);
+
+	//! Config adc
+	nrf_drv_saadc_config_t adcConfig = {
+		.resolution         = NRF_SAADC_RESOLUTION_12BIT, //! 14 bit can only be achieved with oversampling
+		.oversample         = NRF_SAADC_OVERSAMPLE_DISABLED, //! Oversampling can only be used when sampling 1 channel
+		.interrupt_priority = APP_IRQ_PRIORITY_LOW
+	};
+
+	err_code = nrf_drv_saadc_init(&adcConfig, saadc_callback);
+	APP_ERROR_CHECK(err_code);
+
+	for (int i=0; i<numPins; i++) {
+		configPin(pins[i]);
 	}
-#endif
 
-//	_sampleNum = 0;
+	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
+		_bufferPointers[i] = new nrf_saadc_value_t[CS_ADC_BUF_SIZE];
+		err_code = nrf_drv_saadc_buffer_convert(_bufferPointers[i], CS_ADC_BUF_SIZE);
+		APP_ERROR_CHECK(err_code);
+	}
+
+	return 0;
+}
+
+#define CS_ADC_PIN_P(pinNum) CONCAT_2(NRF_SAADC_INPUT_AIN, pinNum)
+
+/** Configure the AD converter.
+ *
+ *   - set the resolution to 10 bits
+ *   - set the prescaler for the input voltage (the input, not the input supply)
+ *   - use the internal VGB reference (not the external one, so no need to use its multiplexer either)
+ *   - do not set the prescaler for the reference voltage, this means voltage is expected between 0 and 1.2V (VGB)
+ * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
+ */
+uint32_t ADC::configPin(uint8_t pinNum) {
+
+	ret_code_t err_code;
+
+	nrf_saadc_channel_config_t channelConfig = {
+		.resistor_p = NRF_SAADC_RESISTOR_DISABLED,
+		.resistor_n = NRF_SAADC_RESISTOR_DISABLED,
+//		.gain       = NRF_SAADC_GAIN1_2, //! gain is 0.5, maps [0, 1.2] to [0, 0.6]
+		.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
+		.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
+		.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
+		.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
+		.pin_p      = (nrf_saadc_input_t)(pinNum+1),
+//		.pin_p      = CONCAT_2(NRF_SAADC_INPUT_AIN, pinNum),
+//		.pin_p      = nrf_drv_saadc_gpio_to_ain(_pins(pinNum)),
+		.pin_n      = NRF_SAADC_INPUT_DISABLED
+	};
+
+	err_code = nrf_drv_saadc_channel_init(pinNum, &channelConfig);
+	APP_ERROR_CHECK(err_code);
+
 	return 0;
 }
 
@@ -122,7 +148,7 @@ bool ADC::setBuffers(StackBuffer<uint16_t>* buffer, uint8_t pinNum) {
 #ifdef PRINT_ADC_VERBOSE
 	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
 #endif
-	_buffers[pinNum] = buffer;
+	_stackBuffers[pinNum] = buffer;
 	return true;
 }
 
@@ -152,49 +178,12 @@ void ADC::setDoneCallback(adc_done_cb_t callback) {
 	_doneCallback = callback;
 }
 
-/** Configure the AD converter.
- *
- *   - set the resolution to 10 bits
- *   - set the prescaler for the input voltage (the input, not the input supply)
- *   - use the internal VGB reference (not the external one, so no need to use its multiplexer either)
- *   - do not set the prescaler for the reference voltage, this means voltage is expected between 0 and 1.2V (VGB)
- * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
- */
-uint32_t ADC::config(uint8_t pinNum) {
-#if (NORDIC_SDK_VERSION < 11)
-	NRF_ADC->CONFIG     =
-			(ADC_CONFIG_RES_10bit                            << ADC_CONFIG_RES_Pos)     |
-#if(HARDWARE_BOARD==CROWNSTONE)
-//#if(HARDWARE_BOARD==CROWNSTONE || HARDWARE_BOARD==CROWNSTONE4 || HARDWARE_BOARD==CROWNSTONE5)
-			(ADC_CONFIG_INPSEL_AnalogInputNoPrescaling       << ADC_CONFIG_INPSEL_Pos)  |
-#else
-			(ADC_CONFIG_INPSEL_AnalogInputOneThirdPrescaling << ADC_CONFIG_INPSEL_Pos)  |
-#endif
-			(ADC_CONFIG_REFSEL_VBG                           << ADC_CONFIG_REFSEL_Pos)  |
-			(ADC_CONFIG_EXTREFSEL_None                       << ADC_CONFIG_EXTREFSEL_Pos);
-	assert(_pins[pinNum] < 8, "No such pin");
-	NRF_ADC->CONFIG |= ADC_CONFIG_PSEL_AnalogInput0 << (_pins[pinNum] + ADC_CONFIG_PSEL_Pos);
-	_lastPinNum = pinNum;
-#endif
-	return 0;
-}
-
 void ADC::stop() {
-#if (NORDIC_SDK_VERSION < 11)
-	CS_ADC_TIMER->TASKS_STOP = 1;
-	NRF_ADC->TASKS_STOP = 1;
-//	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Disabled;
-#endif
+	nrf_drv_timer_disable(_timer);
 }
 
 void ADC::start() {
-#if (NORDIC_SDK_VERSION < 11)
-//	NRF_ADC->ENABLE     = ADC_ENABLE_ENABLE_Enabled;
-	config(0);
-	NRF_ADC->EVENTS_END  = 0;
-//	NRF_ADC->TASKS_START = 1;
-	CS_ADC_TIMER->TASKS_START = 1;
-#endif
+	nrf_drv_timer_enable(_timer);
 }
 
 void adc_done(void * p_event_data, uint16_t event_size) {
@@ -202,92 +191,99 @@ void adc_done(void * p_event_data, uint16_t event_size) {
 }
 
 void ADC::update(uint32_t value) {
-	if (_circularBuffers[_lastPinNum] != NULL) {
-		_circularBuffers[_lastPinNum]->push(value);
-	}
-	else if (_buffers[_lastPinNum] != NULL) {
-		if (!_buffers[_lastPinNum]->push(value)) {
-//		if (!_buffers[_lastPinNum]->push(_buffers[_lastPinNum]->size())) {
-			//! If this buffer is full, stop sampling
-			// todo: can we trigger an event here that the sample is ready instead of
-			//   having a tick function in the PowerSampler that polls if the buffers are full?
-			//   either using a
-			//      - timer
-			//      - app_scheduler_put
-			if (_doneCallback) {
-				// decouple done callback from adc interrupt handler, and put it on app scheduler
-				// instead
-				app_sched_event_put(&_doneCallback, sizeof(_doneCallback), adc_done);
-			}
-			stop();
-			return;
-		}
-		if (_timeBuffers[_lastPinNum] != NULL) {
-			if (!_timeBuffers[_lastPinNum]->push(RTC::getCount())) {
-				//! Difference was too large: clear all buffers of this pin nr?
-				_buffers[_lastPinNum]->clear();
-			}
-		}
-	}
+	//! nrf51 code goes here
+}
 
-	//! Next pin
-	config((_lastPinNum+1) % _numPins);
-	if (_lastPinNum == 0) {
-		//! Sampled last pin of the list
-#if (NORDIC_SDK_VERSION < 11)
-		//! use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
-		NRF_ADC->TASKS_STOP = 1;
-#endif
-		if (!useContinousTimer()) {
-			uint32_t periodTime = 1000*1000/CS_ADC_SAMPLE_RATE;
-			uint32_t lastSampleTime = ROUNDED_DIV(1000*(RTC::getCount()-_lastStartTime), (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
-			uint32_t delayTime = 1;
-			if (lastSampleTime < periodTime) {
-				delayTime = periodTime - lastSampleTime;
-			}
-#if (NORDIC_SDK_VERSION < 11)
-			CS_ADC_TIMER->CC[0] = delayTime;
-			CS_ADC_TIMER->TASKS_START = 1;
-#endif
+void ADC::update(nrf_saadc_value_t* buf) {
+	//! TODO: this is just to merge the new adc with the old code, should be optimized!
+
+	uint32_t startTime = RTC::getCount(); //! Not really the start time
+	uint32_t dT = 500 * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000 / 1000;
+//	LOGd("startTime=%d dT=%d", startTime, dT);
+	for (int i=0; i<CS_ADC_BUF_SIZE; i++) {
+		uint8_t pinNum = i%_numPins;
+		if (_circularBuffers[pinNum] != NULL) {
+			_circularBuffers[pinNum]->push(buf[i]);
 		}
-	}
-	else {
-		//! Sample next pin
-#if (NORDIC_SDK_VERSION < 11)
-		NRF_ADC->TASKS_START = 1;
-#endif
+		else if (_stackBuffers[pinNum] != NULL) {
+			if (_stackBuffers[pinNum]->full()) {
+				if (_doneCallback) {
+//					LOGd("doneCB");
+					//! Decouple done callback from adc interrupt handler, and put it on app scheduler instead
+					app_sched_event_put(&_doneCallback, sizeof(_doneCallback), adc_done);
+				}
+				stop();
+				return;
+			}
+			_stackBuffers[pinNum]->push(buf[i]);
+//			LOGd("%d %d", _stackBuffers[0]->size(), _stackBuffers[1]->size());
+			if (_timeBuffers[pinNum] != NULL) {
+				if (!_timeBuffers[pinNum]->push(startTime + (i/_numPins) * dT)) {
+					_stackBuffers[pinNum]->clear();
+				}
+			}
+		}
 	}
 }
 
 /** The interrupt handler for an ADC data ready event.
  */
-extern "C" void ADC_IRQHandler(void) {
-#if (NORDIC_SDK_VERSION < 11)
-	uint32_t adc_value;
+//extern "C" void ADC_IRQHandler(void) {
+//#if (NORDIC_SDK_VERSION < 11)
+//	uint32_t adc_value;
+//
+//	//! Clear data-ready event
+//	NRF_ADC->EVENTS_END = 0;
+//
+//	//! Get value
+//	adc_value = NRF_ADC->RESULT;
+//	ADC &adc = ADC::getInstance();
+//	adc.update(adc_value);
+//
+////	//! Use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
+////	NRF_ADC->TASKS_STOP = 1;
+//
+////	//! next sample
+////	NRF_ADC->TASKS_START = 1;
+//#endif
+//}
 
-	//! Clear data-ready event
-	NRF_ADC->EVENTS_END = 0;
-
-	//! Get value
-	adc_value = NRF_ADC->RESULT;
-	ADC &adc = ADC::getInstance();
-	adc.update(adc_value);
-
-//	//! Use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
-//	NRF_ADC->TASKS_STOP = 1;
-
-//	//! next sample
+//extern "C" void TIMER1_IRQHandler(void) {
+//#if (NORDIC_SDK_VERSION < 11)
+//	CS_ADC_TIMER->EVENTS_COMPARE[0] = 0; // Clear compare match register
+//	CS_ADC_TIMER->TASKS_CLEAR = 1; // Reset timer
 //	NRF_ADC->TASKS_START = 1;
-#endif
-}
+//	ADC::getInstance()._lastStartTime = RTC::getCount();
+//#endif
+//}
 
-extern "C" void TIMER1_IRQHandler(void) {
-#if (NORDIC_SDK_VERSION < 11)
-	CS_ADC_TIMER->EVENTS_COMPARE[0] = 0; // Clear compare match register
-	CS_ADC_TIMER->TASKS_CLEAR = 1; // Reset timer
-	NRF_ADC->TASKS_START = 1;
-	ADC::getInstance()._lastStartTime = RTC::getCount();
-#endif
+extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
+	if (p_event->type == NRF_DRV_SAADC_EVT_DONE) {
+		ret_code_t err_code;
+
+		//! Put this buffer in queue again
+		err_code = nrf_drv_saadc_buffer_convert(p_event->data.done.p_buffer, CS_ADC_BUF_SIZE);
+		APP_ERROR_CHECK(err_code);
+
+//		LOGd("samples: ");
+//		for (int i=0; i<CS_ADC_BUF_SIZE; i++) {
+//			_log(SERIAL_DEBUG, "%i ", p_event->data.done.p_buffer[i]);
+//			if ((i+1) % 10 == 0) {
+//				_log(SERIAL_DEBUG, SERIAL_CRLF);
+//			}
+//		}
+//		_log(SERIAL_DEBUG, SERIAL_CRLF);
+
+		ADC::getInstance().update(p_event->data.done.p_buffer);
+
+//		int i;
+//		printf("ADC event number: %d\r\n",(int)m_adc_evt_counter);
+//		for (i = 0; i < SAMPLES_IN_BUFFER; i++)
+//		{
+//			printf("%d\r\n", p_event->data.done.p_buffer[i]);
+//		}
+//		m_adc_evt_counter++;
+	}
 }
 
 

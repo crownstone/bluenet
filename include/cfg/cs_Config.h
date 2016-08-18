@@ -74,7 +74,6 @@
 
 #define CURRENT_LIMIT							 0
 
-#define CS_ADC_MAX_PINS                          2
 //! ----- TIMERS -----
 #define PWM_TIMER                                NRF_TIMER2
 //#define PWM_IRQHandler                           TIMER2_IRQHandler
@@ -85,7 +84,18 @@
 #define CS_ADC_TIMER                             NRF_TIMER1
 //#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
 #define CS_ADC_TIMER_IRQn                        TIMER1_IRQn
-#define CS_ADC_PPI_CHANNEL                       7
+#define CS_ADC_INSTANCE_INDEX                    TIMER1_INSTANCE_INDEX
+#define CS_ADC_TIMER_ID                          1
+
+//! ----- PPI -----
+//! Get auto assigned
+//#define CS_ADC_PPI_CHANNEL                       7
+
+
+
+#define CS_ADC_MAX_PINS                          2
+#define CS_ADC_NUM_BUFFERS                       2 //! Not sure if we can have more than 2
+#define CS_ADC_BUF_SIZE                          160
 
 #if CONTINUOUS_POWER_SAMPLER == 1
 #define CS_ADC_SAMPLE_RATE                       101
