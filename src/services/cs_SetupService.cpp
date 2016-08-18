@@ -56,10 +56,6 @@ void SetupService::createCharacteristics() {
 void SetupService::addMacAddressCharacteristic() {
     sd_ble_gap_address_get(&_myAddr);
 
-    for (uint8_t i = 0; i < 6; i++) {
-		LOGi("mac [%d] %d",i ,_myAddr.addr[i]);
-	}
-
 	_macAddressCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_macAddressCharacteristic);
 
