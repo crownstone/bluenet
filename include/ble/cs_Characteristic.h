@@ -495,6 +495,12 @@ protected:
 	 *  aes encryption enabled. then calls the on write callback.
 	 */
 	void written(uint16_t len) {
+		//! We can flood the chip with writes and a potential forced disconnect will be delayed and could crash the chip.
+		//TODO: have this from the stack directly.
+		if (EncryptionHandler::getInstance().allowedToWrite()) {
+			LOGi("Not allowed to write, disconnect in progress")
+			return;
+		}
 
 		setGattValueLength(len);
 

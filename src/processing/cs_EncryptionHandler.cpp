@@ -65,6 +65,11 @@ void EncryptionHandler::closeConnectionAuthenticationFailure() {
 }
 
 
+bool EncryptionHandler::allowedToWrite() {
+	return Nrf51822BluetoothStack::getInstance().isDisconnecting();
+}
+
+
 /**
  * This method does not use the AES CTR method but straight ECB.
  * It encrypts the block with the GUEST key.

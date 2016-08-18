@@ -1118,7 +1118,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
 	_advertising = false; //! it seems like maybe we automatically stop advertising when we're connected.
-
+	_disconnectingInProgress = false;
 	BLE_CALL(sd_ble_gap_conn_param_update, (p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params));
 
 	if (_callback_connected) {
@@ -1143,12 +1143,17 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 
 void Nrf51822BluetoothStack::disconnect() {
 	//! Only disconnect when we are actually connected to something
-	if (_conn_handle != BLE_CONN_HANDLE_INVALID) {
+	if (_conn_handle != BLE_CONN_HANDLE_INVALID && _disconnectingInProgress == false) {
 		LOGi("Forcibly disconnecting from device");
+		_disconnectingInProgress = true;
 		//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
 		BLE_CALL(sd_ble_gap_disconnect, (_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
 	}
 }
+
+bool Nrf51822BluetoothStack::isDisconnecting() {
+		return _disconnectingInProgress;
+};
 
 void Nrf51822BluetoothStack::onTxComplete(ble_evt_t * p_ble_evt) {
 	for (Service* svc: _services) {

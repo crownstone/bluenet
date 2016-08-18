@@ -52,9 +52,15 @@ void FactoryReset::enableRecovery(bool enable) {
 }
 
 bool FactoryReset::recover(uint32_t resetCode) {
+	//! we check the RTC in case the Timer is busy.
 	if (!_recoveryEnabled || RTC::difference(RTC::getCount(), _rtcStartTime) > RTC::msToTicks(FACTORY_RESET_TIMEOUT)) {
 		return false;
 	}
+
+	if (!validateResetCode(resetCode)) {
+		return false;
+	}
+
 	uint8_t resetState;
 	State::getInstance().get(STATE_FACTORY_RESET, resetState);
 	switch (resetState) {
@@ -70,7 +76,7 @@ bool FactoryReset::recover(uint32_t resetCode) {
 		State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_RESET);
 		LOGd("recovery: factory reset");
 
-		return factoryReset();
+		return performFactoryReset();
 //		break;
 	case FACTORY_RESET_STATE_RESET:
 		// What to do here?
@@ -81,14 +87,18 @@ bool FactoryReset::recover(uint32_t resetCode) {
 	return false;
 }
 
-bool FactoryReset::factoryReset(uint32_t resetCode) {
-	if (resetCode != FACTORY_RESET_CODE) {
-		return false;
-	}
-	return factoryReset();
+bool FactoryReset::validateResetCode(uint32_t resetCode) {
+	return resetCode != FACTORY_RESET_CODE;
 }
 
-bool FactoryReset::factoryReset() {
+bool FactoryReset::factoryReset(uint32_t resetCode) {
+	if (validateResetCode(resetCode)) {
+		return performFactoryReset();
+	}
+	return false;
+}
+
+bool FactoryReset::performFactoryReset() {
 	LOGf("factory reset");
 
 	//! Go into factory reset mode after next reset.

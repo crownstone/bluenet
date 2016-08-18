@@ -122,6 +122,8 @@ public:
 	 */
 	void invalidateSetupKey();
 
+
+	bool allowedToWrite();
 private:
 
 	inline bool _encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);

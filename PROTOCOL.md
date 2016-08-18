@@ -193,10 +193,21 @@ Config Read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_
 State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable | x | x |
 State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable | x | x |
 <a name="session_nonce"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. |  |  | ECB
+Factory Reset  | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for factory reset. Explanation below. |
 
+
+##### Factory reset
+If you lose your encryption keys you can use this characteristic to factory reset the Crownstone.
+This method is only available for 10 seconds after the Crownstone powers on.
+You need to write **0xdeadbeef** to it. After this, the Crownstone disconnects and goes into Low TX mode so you'll
+have to be close to continue the factory reset. After this, you reconnect
+and write **0xdeadbeef** again to this characteristic to factory reset the Crownstone.
+
+##### Return values
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
 The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command
 was received before calling the next (either by polling or subscribing). The possible values of the return values are listed in the table below
+
 
 Value | Name | Description
 --- | --- | ---
@@ -220,7 +231,9 @@ Value | Name | Description
 ## <a name="setup_service"></a>Setup service
 
 
-The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only available after a factory reset. When encryption is enabled, the control and both config characteristics are encrypted with AES CTR.
+The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only available after a factory reset or when you first power on the Crownstone.
+ When encryption is enabled, the control and both config characteristics are encrypted with AES CTR. The key and session Nonce for this are gotten from their
+ characteristics.
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---

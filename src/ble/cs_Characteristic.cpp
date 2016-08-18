@@ -104,9 +104,9 @@ void CharacteristicBase::init(Service* svc) {
     }
 	ci.attr_char_value.p_attr_md = &ci.attr_md;
 
-	/////////////////////////////////////
+	//////////////////////////////////////
 	//! Characteristic User Description //
-	/////////////////////////////////////
+	//////////////////////////////////////
 
 	//! these characteristic descriptors are optional, and I gather, not really used by anything.
 	//! we fill them in if the user specifies any of the data (eg name).
