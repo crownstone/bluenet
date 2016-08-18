@@ -154,7 +154,7 @@ private:
 	// processing
 #if BUILD_MESHING == 1
 	Mesh* _mesh;
-#endi
+#endif
     CommandHandler* _commandHandler;
 	Scanner* _scanner;
 	Tracker* _tracker;

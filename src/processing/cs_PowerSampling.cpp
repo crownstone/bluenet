@@ -68,7 +68,7 @@ void PowerSampling::init() {
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
 	settings.get(CONFIG_POWER_ZERO_AVG_WINDOW, &_zeroAvgWindow);
 
-	LOGi(FMT_INIT, "buffers");
+	//LOGi(FMT_INIT, "buffers");
 	uint16_t contSize = _currentSampleCircularBuf.getMaxByteSize() + _voltageSampleCircularBuf.getMaxByteSize();
 	contSize += sizeof(power_samples_cont_message_t);
 

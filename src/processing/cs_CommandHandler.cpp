@@ -551,7 +551,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-		bool enable = payload->enable;
+		__attribute__((unused)) bool enable = payload->enable;
 
 		LOGi("%s continuous power measurements", enable ? STR_ENABLE : STR_DISABLE);
 

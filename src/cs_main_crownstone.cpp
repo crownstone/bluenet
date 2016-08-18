@@ -105,7 +105,10 @@ Crownstone::Crownstone() :
 	//! create instances for the scanner and mesh
 	//! actual initialization is done in their respective init methods
 	_scanner = &Scanner::getInstance();
+
+#if BUILD_MESHING == 1
 	_mesh = &Mesh::getInstance();
+#endif
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch using PWM or Relay
