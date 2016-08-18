@@ -13,9 +13,7 @@
 
 //#define TESTING_ENCRYPTION true
 
-/**
- * Allocate memory for all required fields
- */
+
 void EncryptionHandler::init() {
 	_defaultValidationKey.b = DEFAULT_SESSION_KEY;
 	EventDispatcher::getInstance().addListener(this);
@@ -134,14 +132,6 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
  */
 bool EncryptionHandler::encryptMesh(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength) {
 	return encrypt(data, dataLength, target, targetLength, ADMIN, CTR_CAFEBABE);
-}
-
-
-bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionType encryptionType) {
-	if (encryptionType == ECB_GUEST || encryptionType == ECB_GUEST_CAFEBABE) {
-		return encrypt(data,dataLength,target,targetLength, GUEST, encryptionType);
-	}
-	return false;
 }
 
 /**

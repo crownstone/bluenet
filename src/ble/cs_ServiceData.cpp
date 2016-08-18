@@ -75,7 +75,7 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			RNG::fillBuffer(_params.rand, 3);
 
 			//! encrypt the block.
-			EncryptionHandler::getInstance().encrypt(_array+1, sizeof(_array)-1, _encryptedParams.payload, sizeof(_encryptedParams.payload), ECB_GUEST);
+			EncryptionHandler::getInstance().encrypt(_array+1, sizeof(_array)-1, _encryptedParams.payload, sizeof(_encryptedParams.payload), GUEST, ECB_GUEST);
 		}
 
 		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);

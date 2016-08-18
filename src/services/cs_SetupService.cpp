@@ -28,7 +28,6 @@ void SetupService::createCharacteristics() {
 	buffer_ptr_t buffer = NULL;
 	uint16_t maxLength = 0;
 
-
 	_streamBuffer = getStreamBuffer(buffer, maxLength);
 	addControlCharacteristic(buffer, maxLength);
 	LOGi(FMT_CHAR_ADD, STR_CHAR_CONTROL);
@@ -47,7 +46,6 @@ void SetupService::createCharacteristics() {
 
 	_nonceBuffer = new uint8_t[SESSION_NONCE_LENGTH];
 	addSessionNonceCharacteristic(_nonceBuffer, SESSION_NONCE_LENGTH, ENCRYPTION_DISABLED);
-
 
 	addCharacteristicsDone();
 }
