@@ -41,7 +41,7 @@ CONTINUOUS_POWER_SAMPLER=0
 # SCAN_SEND_DELAY + SCAN_BRAK_DURATION ms, for SCAN_DURATION ms
 # waits for SCAN_SEND_DELAY ms after scan end before sending result
 # into mesh (if MESHING enabled)
-INTERVAL_SCANNER_ENABLED=0
+INTERVAL_SCANNER_ENABLED=1
 
 # Options to save energy
 LOW_POWER_MODE=0
@@ -66,12 +66,13 @@ STATIC_PASSKEY="123456"
 
 # Enable or disable different services (at times required to preserve memory)
 CROWNSTONE_SERVICE=1
+INDOOR_SERVICE=1
 GENERAL_SERVICE=1
 POWER_SERVICE=1
 SCHEDULE_SERVICE=1
 
-# We disable the indoor service so the code fits on the NRF51822
-INDOOR_SERVICE=0
+# Maximum number of vendor specific services
+MAX_NUM_VS_SERVICES=5
 
 # Enable or disable characteristics
 # Crownstone Service

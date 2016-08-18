@@ -74,11 +74,24 @@
 
 #define CURRENT_LIMIT							 0
 
-#define CS_ADC_MAX_PINS                          2
+//! ----- TIMERS -----
+#define PWM_TIMER                                NRF_TIMER2
+//#define PWM_IRQHandler                           TIMER2_IRQHandler
+#define PWM_IRQn                                 TIMER2_IRQn
+#define PWM_INSTANCE_INDEX                       TIMER2_INSTANCE_INDEX
+#define PWM_TIMER_ID                             2
+
 #define CS_ADC_TIMER                             NRF_TIMER1
 //#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
 #define CS_ADC_TIMER_IRQn                        TIMER1_IRQn
-#define CS_ADC_PPI_CHANNEL                       7
+#define CS_ADC_INSTANCE_INDEX                    TIMER1_INSTANCE_INDEX
+#define CS_ADC_TIMER_ID                          1
+
+//! ----- PPI -----
+//! Get auto assigned
+//#define CS_ADC_PPI_CHANNEL                       7
+
+
 
 #if CONTINUOUS_POWER_SAMPLER == 1
 #define CS_ADC_SAMPLE_RATE                       101
@@ -91,6 +104,10 @@
 
 #define POWER_SAMPLE_CONT_INTERVAL               50 //! Time to next buffer read and attempt to send msg (ms)
 #define POWER_SAMPLE_CONT_NUM_SAMPLES            80 //! Number of voltage and current samples in the buffer, written by ADC, read by power service
+
+#define CS_ADC_MAX_PINS                          2
+#define CS_ADC_NUM_BUFFERS                       2 //! Not sure if we can have more than 2
+#define CS_ADC_BUF_SIZE                          (2*POWER_SAMPLE_BURST_NUM_SAMPLES)
 
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 

@@ -420,7 +420,7 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_SESSION_NONCE_SET: {
-		// Check if this characteristic exists first. In case of setup mode it does not for instance.
+		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
 		if (_sessionNonceCharacteristic != NULL) {
 			_sessionNonceCharacteristic->setValueLength(length);
 			_sessionNonceCharacteristic->setValue((uint8_t*)p_data);
@@ -429,7 +429,7 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 		break;
 	}
 	case EVT_BLE_DISCONNECT: {
-		// Check if this characteristic exists first. In case of setup mode it does not for instance.
+		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
 		if (_sessionNonceCharacteristic != NULL) {
 			_sessionNonceCharacteristic->setValueLength(0);
 		}

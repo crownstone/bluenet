@@ -451,7 +451,6 @@ public:
 	//! Default empty destructor
 	virtual ~CharacteristicGeneric() {};
 
-	//
 	/** Return the value
 	 *  In the case of aes encryption, this is the unencrypted value
 	 */
@@ -550,7 +549,6 @@ protected:
 
 	/** Initialize / allocate a buffer for encryption */
 	void initEncryptionBuffer() {
-		//LOGi("calloc buffer @ %s of size %d", _name, getGattValueMaxLength())
 		if (_encryptionBuffer == NULL) {
 			CharacteristicBase::_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));
 		}
@@ -779,7 +777,6 @@ public:
 	void initEncryptionBuffer() {
 		uint16_t size;
 		EncryptionBuffer::getInstance().getBuffer(CharacteristicBase::_encryptionBuffer, size);
-		//LOGi("from encry buffer @ %s of size %d", _name, size)
 		assert(CharacteristicBase::_encryptionBuffer != NULL, "need to initialize encryption buffer for aes encryption");
 	}
 

@@ -163,7 +163,7 @@ void Nrf51822BluetoothStack::init() {
 	BLE_CALL(softdevice_enable_get_default_config, (CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT, &ble_enable_params) );
 	ble_enable_params.gatts_enable_params.attr_tab_size = ATTR_TABLE_SIZE;
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
-	ble_enable_params.common_enable_params.vs_uuid_count = 5; //TODO: put in config
+	ble_enable_params.common_enable_params.vs_uuid_count = MAX_NUM_VS_SERVICES;
 
 //	//! Check the ram settings against the used number of links
 //	CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT);
@@ -878,14 +878,12 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
 //        	Timer::getInstance().start(_lowPowerTimeoutId, MS_TO_TICKS(60000), this);
 
 
-        	// changeToLowTxPowerMode();
+//        	changeToLowTxPowerMode();
         	break;
         }
         case DM_EVT_SECURITY_SETUP_COMPLETE: {
         	if (event_result == NRF_SUCCESS) {
         		LOGi("bonding completed");
-
-
         	} else {
         		LOGe("bonding failed with error: %d (%p)", event_result, event_result);
         		disconnect();
@@ -893,10 +891,10 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
 
         	// [15.8.2016] ALEX: we are in low tx for a reason. A single shot security
         	// pass should not remove this. On disconnect it will remain high TX
-        	// changeToNormalTxPowerMode();
+//        	changeToNormalTxPowerMode();
 
         	//! clear timeout
-        	Timer::getInstance().stop(_lowPowerTimeoutId);
+ //       	Timer::getInstance().stop(_lowPowerTimeoutId);
         	break;
         }
         default:
@@ -990,6 +988,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
+//		_log(SERIAL_INFO, "address: ");
 //		BLEutil::printArray(p_ble_evt->evt.gap_evt.params.connected.peer_addr.addr, BLE_GAP_ADDR_LEN);
 		on_connected(p_ble_evt);
 		EventDispatcher::getInstance().dispatch(EVT_BLE_CONNECT);
@@ -1143,7 +1142,7 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 }
 
 void Nrf51822BluetoothStack::disconnect() {
-	// only disconnect when we are actually connected to something
+	//! Only disconnect when we are actually connected to something
 	if (_conn_handle != BLE_CONN_HANDLE_INVALID) {
 		LOGi("Forcibly disconnecting from device");
 		//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.

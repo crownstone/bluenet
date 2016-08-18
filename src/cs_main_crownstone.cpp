@@ -836,7 +836,7 @@ void on_exit(void) {
 void welcome() {
 	config_uart();
 
-	_log(SERIAL_INFO, SERIAL_CRLN);
+	_log(SERIAL_INFO, SERIAL_CRLF);
 //	BLEutil::print_heap("Heap init");
 //	BLEutil::print_stack("Stack init");
 	//! To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)

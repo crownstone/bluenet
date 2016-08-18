@@ -489,7 +489,7 @@ public:
 	static void setArray(T* src, T* dest, uint16_t length) {
 		bool isUnassigned = true;
 		uint8_t* ptr = (uint8_t*)src;
-		for (uint8_t i = 0; i < length * sizeof(T); ++i) {
+		for (uint32_t i = 0; i < length * sizeof(T); ++i) {
 			if (ptr[i] != 0xFF) {
 				isUnassigned = false;
 				break;
@@ -530,7 +530,7 @@ public:
 
 		bool isUnassigned = true;
 		uint8_t* ptr = (uint8_t*)src;
-		for (uint8_t i = 0; i < length * sizeof(T); ++i) {
+		for (uint32_t i = 0; i < length * sizeof(T); ++i) {
 			if (ptr[i] != 0xFF) {
 				isUnassigned = false;
 				break;

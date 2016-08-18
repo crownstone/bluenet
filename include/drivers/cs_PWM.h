@@ -17,13 +17,6 @@ extern "C" {
 
 #define ERR_PWM_NOT_ENABLED 1
 
-//! To change the timer used for the PWM library replace the defines below
-#define PWM_TIMER               NRF_TIMER2
-//#define PWM_IRQHandler          TIMER2_IRQHandler
-#define PWM_IRQn                TIMER2_IRQn
-#define PWM_INSTANCE_INDEX      TIMER2_INSTANCE_INDEX
-#define PWM_TIMER_ID            2
-
 /** Pulse Wide Modulation class
  *
  * To turn on/off the power, as well as all intermediate stages, for example with dimming, the PWM class is used.

@@ -15,7 +15,7 @@
 
 ServiceData::ServiceData() : EventListener(EVT_ALL)
 {
-	// get the OP mode from state
+	//! get the OP mode from state
 	State::getInstance().get(STATE_OPERATION_MODE, _operationMode);
 
 	EventDispatcher::getInstance().addListener(this);
@@ -23,18 +23,18 @@ ServiceData::ServiceData() : EventListener(EVT_ALL)
 	_params.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
 	_encryptedParams.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION; // this part will not be written over
 
-	// in case the operation mode is setup, we have a different advertisement package.
+	//! in case the operation mode is setup, we have a different advertisement package.
 	if (_operationMode == OPERATION_MODE_SETUP) {
 		updateEventBitmask(SETUP_MODE_ENABLED, true);
 	}
 	else {
-		// set bitmask to NOT SETUP MODE
+		//! set bitmask to NOT SETUP MODE
 		updateEventBitmask(SETUP_MODE_ENABLED,false);
 	}
 };
 
 void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	// in case the operation mode is setup, we have a different advertisement package.
+	//! in case the operation mode is setup, we have a different advertisement package.
 	if (_operationMode == OPERATION_MODE_SETUP) {
 		return;
 	}
@@ -61,29 +61,23 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			updateTemperature(*(int8_t*)p_data);
 			break;
 		}
-		//TODO: add bitmask events
+		//! TODO: add bitmask events
 		default:
 			return;
 		}
 
-		// set bitmask to NOT SETUP MODE
+		//! set bitmask to NOT SETUP MODE
 		updateEventBitmask(7,false);
 
-		// encrypt the array using the guest key ECB if encryption is enabled.
+		//! encrypt the array using the guest key ECB if encryption is enabled.
 		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
-			// generate 3 random numbers to shuffle the advertisement package
+			//! generate 3 random numbers to shuffle the advertisement package
 			RNG::fillBuffer(_params.rand, 3);
 
-			// encrypt the block.
+			//! encrypt the block.
 			EncryptionHandler::getInstance().encrypt(_array+1, sizeof(_array)-1, _encryptedParams.payload, sizeof(_encryptedParams.payload), ECB_GUEST);
-
-			// move the firmware version over to the unencrypted part of the encrypted buffer'
-
 		}
 
 		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
 	}
-
-
-
 }

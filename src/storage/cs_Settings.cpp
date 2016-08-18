@@ -830,7 +830,7 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 	}
 #endif
 
-	uint8_t* p_item;
+	__attribute__((unused)) uint8_t* p_item;
 
 	switch(type) {
 	case CONFIG_MESH_ENABLED : {
@@ -875,14 +875,14 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 	}
 
 	// if persistent storage is disable for flags, do not update pstorage
-//#if PERSISTENT_FLAGS_DISABLED==0
+#if PERSISTENT_FLAGS_DISABLED==0
 	if (persistent) {
 		savePersistentStorageItem(p_item, 4);
 //		savePersistentStorageItem(&_storageStruct.flags);
 	}
-//#else
-//	LOGw("persistent storage for flags disabled!!");
-//#endif
+#else
+	LOGw("persistent storage for flags disabled!!");
+#endif
 
 	return true;
 }
