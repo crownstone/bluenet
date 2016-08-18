@@ -71,6 +71,9 @@ GENERAL_SERVICE=1
 POWER_SERVICE=1
 SCHEDULE_SERVICE=1
 
+# Maximum number of vendor specific services
+MAX_NUM_VS_SERVICES=5
+
 # Enable or disable characteristics
 # Crownstone Service
 CHAR_CONTROL=1
