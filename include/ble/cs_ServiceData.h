@@ -89,6 +89,10 @@ public:
 private:
 
 	uint8_t _operationMode;
+	union {
+		uint8_t bytes[2];
+		uint16_t value;
+	} _counter;
 
 	union {
 		struct __attribute__((packed)) {
