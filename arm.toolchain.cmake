@@ -178,6 +178,32 @@ ELSE()
 	MESSAGE(FATAL_ERROR "We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. \"Crown\" (with quotes)")
 ENDIF()
 
+# Publish all options as CMake options as well 
+
+SET(CROWNSTONE_SERVICE                 "${CROWNSTONE_SERVICE}"                 CACHE STRING "Enable machine-centric service")
+SET(INDOOR_SERVICE                     "${INDOOR_SERVICE}"                     CACHE STRING "Enable human-centric indoor localization service")
+SET(GENERAL_SERVICE                    "${GENERAL_SERVICE}"                    CACHE STRING "Enable human-centric general service")
+SET(POWER_SERVICE                      "${POWER_SERVICE}"                      CACHE STRING "Enable human-centric power service")
+SET(SCHEDULE_SERVICE                   "${SCHEDULE_SERVICE}"                   CACHE STRING "Enable human-centric schedule service")
+
+SET(CHAR_CONTROL                       "${CHAR_CONTROL}"                       CACHE STRING "Enable control characteristic")
+SET(CHAR_MESHING                       "${CHAR_MESHING}"                       CACHE STRING "Enable meshing characteristic")
+SET(CHAR_TEMPERATURE                   "${CHAR_TEMPERATURE}"                   CACHE STRING "Enable temperature characteristic")
+SET(CHAR_RESET                         "${CHAR_RESET}"                         CACHE STRING "Enable reset characteristic")
+SET(CHAR_CONFIGURATION                 "${CHAR_CONFIGURATION}"                 CACHE STRING "Enable configuration characteristic")
+SET(CHAR_STATE                         "${CHAR_STATE}"                         CACHE STRING "Enable state characteristic")
+SET(CHAR_PWM                           "${CHAR_PWM}"                           CACHE STRING "Enable PWM characteristic")
+SET(CHAR_SAMPLE_CURRENT                "${CHAR_SAMPLE_CURRENT}"                CACHE STRING "Enable sample current characteristic")
+SET(CHAR_CURRENT_LIMIT                 "${CHAR_CURRENT_LIMIT}"                 CACHE STRING "Enable current limit characteristic")
+SET(CHAR_RSSI                          "${CHAR_RSSI}"                          CACHE STRING "Enable RSSI characteristic")
+SET(CHAR_SCAN_DEVICES                  "${CHAR_SCAN_DEVICES}"                  CACHE STRING "Enable scan devices characteristic")
+SET(CHAR_TRACK_DEVICES                 "${CHAR_TRACK_DEVICES}"                 CACHE STRING "Enable track devices characteristic")
+SET(CHAR_RELAY                         "${CHAR_RELAY}"                         CACHE STRING "Enable relay characteristic")
+SET(CHAR_SCHEDULE                      "${CHAR_SCHEDULE}"                      CACHE STRING "Enable schedule characteristic")
+
+SET(BLUETOOTH_NAME                     "${BLUETOOTH_NAME}"                     CACHE STRING "Name of Bluetooth device")
+
+
 GET_DIRECTORY_PROPERTY( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS )
 
 FOREACH(definition ${DirDefs})
