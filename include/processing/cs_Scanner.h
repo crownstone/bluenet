@@ -48,6 +48,7 @@ public:
 
 	static void staticTick(Scanner* ptr);
 
+	void init();
 	//! start immediately
 	void start();
 	//! delay start by delay ms

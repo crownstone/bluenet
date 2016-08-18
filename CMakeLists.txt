@@ -38,23 +38,6 @@ MESSAGE(STATUS "Search for FindX files in ${CMAKE_SOURCE_DIR}/cmake")
 # Include your own FindX cmake files and options in the following file!
 #######################################################################################################################
 
-SET(CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/CMakeConfig.cmake")
-#SET(CONFIG_FILE "CMakeBuild.config")
-IF(EXISTS ${CONFIG_FILE})
-	file(STRINGS ${CONFIG_FILE} ConfigContents)
-	foreach(NameAndValue ${ConfigContents})
-		# Strip leading spaces
-		string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
-		# Find variable name
-		string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
-		# Find the value
-		string(REPLACE "${Name}=" "" Value ${NameAndValue})
-		# Set the variable
-		set(${Name} "${Value}")
-	endforeach()
-else()
-	MESSAGE(FATAL_ERROR "Could not find file ${CONFIG_FILE}, copy from ${CONFIG_FILE}.default and adjust!")
-endif()
 
 #######################################################################################################################
 
@@ -109,8 +92,6 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Softdevice.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_DoBotsManufac.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_ServiceData.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_EncryptionHandler.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Sensors.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Fridge.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_CommandHandler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_PowerSampling.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Switch.cpp")

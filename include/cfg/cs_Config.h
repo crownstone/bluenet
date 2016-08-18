@@ -93,10 +93,6 @@
 
 
 
-#define CS_ADC_MAX_PINS                          2
-#define CS_ADC_NUM_BUFFERS                       2 //! Not sure if we can have more than 2
-#define CS_ADC_BUF_SIZE                          160
-
 #if CONTINUOUS_POWER_SAMPLER == 1
 #define CS_ADC_SAMPLE_RATE                       101
 #else
@@ -104,10 +100,14 @@
 #endif
 
 #define POWER_SAMPLE_BURST_INTERVAL              3000 //! Time to next burst sampling (ms)
-#define POWER_SAMPLE_BURST_NUM_SAMPLES           80 //! Number of voltage and current samples per burst
+#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 //! Number of voltage and current samples per burst
 
 #define POWER_SAMPLE_CONT_INTERVAL               50 //! Time to next buffer read and attempt to send msg (ms)
 #define POWER_SAMPLE_CONT_NUM_SAMPLES            80 //! Number of voltage and current samples in the buffer, written by ADC, read by power service
+
+#define CS_ADC_MAX_PINS                          2
+#define CS_ADC_NUM_BUFFERS                       2 //! Not sure if we can have more than 2
+#define CS_ADC_BUF_SIZE                          (2*POWER_SAMPLE_BURST_NUM_SAMPLES)
 
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 

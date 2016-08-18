@@ -79,7 +79,7 @@ void CrownstoneService::createCharacteristics() {
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_MESH);
 #endif
 
-#if CHAR_CONFIGURATION==1 || DEVICE_TYPE==DEVICE_FRIDGE
+#if CHAR_CONFIGURATION==1
 	{
 		LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
 		_streamBuffer = getStreamBuffer(buffer, maxLength);
@@ -166,7 +166,7 @@ void CrownstoneService::addMeshCharacteristic() {
 #endif
 }
 
-void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_controlCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_controlCharacteristic);
 
@@ -174,7 +174,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setWritable(true);
 	_controlCharacteristic->setValue(buffer);
-	_controlCharacteristic->setMinAccessLevel(GUEST);
+	_controlCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_controlCharacteristic->setMaxGattValueLength(size);
 	_controlCharacteristic->setValueLength(0);
 	_controlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
@@ -387,7 +387,7 @@ void CrownstoneService::addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t
 }
 
 
-void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_sessionNonceCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_sessionNonceCharacteristic);
 
@@ -396,7 +396,7 @@ void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint1
 	_sessionNonceCharacteristic->setWritable(false);
 	_sessionNonceCharacteristic->setNotifies(false);
 	_sessionNonceCharacteristic->setValue(buffer);
-	_sessionNonceCharacteristic->setMinAccessLevel(GUEST);
+	_sessionNonceCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_sessionNonceCharacteristic->setMaxGattValueLength(size);
 	_sessionNonceCharacteristic->setValueLength(0);
 }
@@ -420,13 +420,19 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_SESSION_NONCE_SET: {
-		_sessionNonceCharacteristic->setValueLength(SESSION_NONCE_LENGTH);
-		_sessionNonceCharacteristic->setValue((uint8_t*)p_data);
-		_sessionNonceCharacteristic->updateValue(false);
+		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_sessionNonceCharacteristic != NULL) {
+			_sessionNonceCharacteristic->setValueLength(length);
+			_sessionNonceCharacteristic->setValue((uint8_t*)p_data);
+			_sessionNonceCharacteristic->updateValue(ECB_GUEST_CAFEBABE);
+		}
 		break;
 	}
 	case EVT_BLE_DISCONNECT: {
-		_sessionNonceCharacteristic->setValueLength(0);
+		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_sessionNonceCharacteristic != NULL) {
+			_sessionNonceCharacteristic->setValueLength(0);
+		}
 		break;
 	}
 	case EVT_STATE_NOTIFICATION: {

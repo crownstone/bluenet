@@ -233,7 +233,7 @@ public:
 	 *  is stored
 	 */
 	uint8_t* getGattValuePtr() {
-		if (this->isAesEnabled()) {
+		if (this->isAesEnabled() && _minAccessLevel < ENCRYPTION_DISABLED) {
 			return this->getEncryptionBuffer();
 		} else {
 			return getValuePtr();
@@ -278,7 +278,7 @@ public:
 	 *  If somebody is also listening to notifications for the characteristic
 	 *  notifications will be sent.
 	 */
-	uint32_t updateValue(bool useSessionNonce = true);
+	uint32_t updateValue(EncryptionType encryptionType = CTR);
 
 	/** Notify any listening party.
 	 *
@@ -451,7 +451,6 @@ public:
 	//! Default empty destructor
 	virtual ~CharacteristicGeneric() {};
 
-	// todo ENCRYPTION: return unencrypted value
 	/** Return the value
 	 *  In the case of aes encryption, this is the unencrypted value
 	 */
@@ -500,10 +499,8 @@ protected:
 		setGattValueLength(len);
 
 		EncryptionAccessLevel accessLevel = NOT_SET;
-
 		// when using encryption, the packet needs to be decrypted
 		if (_status.aesEncrypted && _minAccessLevel < ENCRYPTION_DISABLED) {
-			LOGi("decrypt ...");
 
 			// the arithmetic type- and the string type characteristics have their hardcoded length in the valueLength
 			// the getValueLength() for those two types will always be the same and the setValueLength does nothing there.
@@ -523,6 +520,7 @@ protected:
 
 			// disconnect on failure or if the user is not authenticated
 			if (!success || !EncryptionHandler::getInstance().allowAccess(_minAccessLevel , accessLevel)) {
+				LOGi("insufficient access")
 				EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
 				return;
 			}

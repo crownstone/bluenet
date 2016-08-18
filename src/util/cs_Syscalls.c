@@ -113,7 +113,6 @@ void * _sbrk(int incr)
 {
     static char *heap_base = (char *)&_heap_start;
     static char *heap_limit = (char *)&_heap_end;
-    volatile int pincr = incr;
     //! return (void*)-1 if heap goes beyond artificial set limit
     if (heap_base+incr >= heap_limit) {
 	    __asm("BKPT"); //! for now stop by force!
