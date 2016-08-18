@@ -124,8 +124,8 @@ uint32_t ADC::configPin(uint8_t pinNum) {
 	nrf_saadc_channel_config_t channelConfig = {
 		.resistor_p = NRF_SAADC_RESISTOR_DISABLED,
 		.resistor_n = NRF_SAADC_RESISTOR_DISABLED,
-//		.gain       = NRF_SAADC_GAIN1_2, //! gain is 0.5, maps [0, 1.2] to [0, 0.6]
-		.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
+		.gain       = NRF_SAADC_GAIN1_2, //! gain is 0.5, maps [0, 1.2] to [0, 0.6]
+//		.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
 		.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
 		.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
 		.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
@@ -275,14 +275,6 @@ extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
 //		_log(SERIAL_DEBUG, SERIAL_CRLF);
 
 		ADC::getInstance().update(p_event->data.done.p_buffer);
-
-//		int i;
-//		printf("ADC event number: %d\r\n",(int)m_adc_evt_counter);
-//		for (i = 0; i < SAMPLES_IN_BUFFER; i++)
-//		{
-//			printf("%d\r\n", p_event->data.done.p_buffer[i]);
-//		}
-//		m_adc_evt_counter++;
 	}
 }
 
