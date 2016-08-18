@@ -18,15 +18,22 @@
 #define VALIDATION_NONCE_LENGTH 4
 #define SESSION_NONCE_LENGTH 	5
 #define DEFAULT_SESSION_KEY 	0xcafebabe
-
+#define DEFAULT_SESSION_KEY_LENGTH 4
 
 enum EncryptionAccessLevel {
-	ADMIN 				= 0,
-	MEMBER 				= 1,
-	GUEST 				= 2,
-	ANY				  	= 200,
-	NOT_SET 		  	= 201,
+	ADMIN               = 0,
+	MEMBER              = 1,
+	GUEST               = 2,
+	SETUP               = 100,
+	NOT_SET             = 201,
 	ENCRYPTION_DISABLED = 255
+};
+
+enum EncryptionType {
+	CTR,
+	CTR_CAFEBABE,
+	ECB_GUEST,
+	ECB_GUEST_CAFEBABE
 };
 
 class EncryptionHandler : EventListener {
@@ -34,11 +41,14 @@ private:
 	EncryptionHandler()  {}
 	~EncryptionHandler() {}
 
+	uint8_t _operationMode;
 	uint8_t _sessionNonce[SESSION_NONCE_LENGTH];
 	nrf_ecb_hal_data_t _block __attribute__ ((aligned (4)));
+	uint8_t _setupKey[SOC_ECB_KEY_LENGTH];
+	bool _setupKeyValid = false;
 
 	conv8_32 _defaultValidationKey;
-	 uint8_t _overhead = PACKET_NONCE_LENGTH + USER_LEVEL_LENGTH;
+	uint8_t _overhead = PACKET_NONCE_LENGTH + USER_LEVEL_LENGTH;
 
 public:
 	static EncryptionHandler& getInstance() {
@@ -48,28 +58,33 @@ public:
 
 	void init();
 
-	bool encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel accessLevel, bool useSessionNonce = true);
-	bool encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength);
+	bool encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionType encryptionType);
+	bool encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType = CTR);
 	bool encryptMesh(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength);
-	bool decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel& accessLevelInPackage, bool useSessionNonce = true);
+	bool decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel& userLevelInPackage, EncryptionType encryptionType = CTR);
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 	uint8_t* getSessionNonce();
 
 	void closeConnectionAuthenticationFailure();
 	bool allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided);
 
-	static uint16_t calculateEncryptionBufferLength(uint16_t inputLength);
+	static uint16_t calculateEncryptionBufferLength(uint16_t inputLength, EncryptionType encryptionType = CTR);
 	static uint16_t calculateDecryptionBufferLength(uint16_t encryptedPacketLength);
 
+	uint8_t* generateNewSetupKey();
+	void invalidateSetupKey();
+
 private:
-	bool _encryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength, bool useSessionNonce = true);
-	bool _decryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength, bool useSessionNonce = true);
+	inline bool _encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);
+	inline bool _prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);
+	inline bool _encryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength, EncryptionType encryptionType);
+	inline bool _decryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength, EncryptionType encryptionType);
 	bool _checkAndSetKey(uint8_t userLevel);
 	bool _validateBlockLength(uint16_t length);
-	bool _validateDecryption(uint8_t* buffer, bool useSessionNonce);
+	bool _validateDecryption(uint8_t* buffer, EncryptionType encryptionType);
 	void _generateSessionNonce();
 	void _generateNonceInTarget(uint8_t* target);
-	void _createIV(uint8_t* target, uint8_t* nonce, bool useSessionNonce);
+	void _createIV(uint8_t* target, uint8_t* nonce, EncryptionType encryptionType);
 
 };
 

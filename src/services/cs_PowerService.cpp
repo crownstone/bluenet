@@ -75,6 +75,7 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setUUID(UUID(getUUID(), PWM_UUID));
 	_pwmCharacteristic->setName(BLE_CHAR_PWM);
 	_pwmCharacteristic->setDefaultValue(255);
+	_pwmCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_pwmCharacteristic->setWritable(true);
 	_pwmCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&value, 1);
@@ -88,6 +89,7 @@ void PowerService::addRelayCharacteristic() {
 	_relayCharacteristic->setUUID(UUID(getUUID(), RELAY_UUID));
 	_relayCharacteristic->setName(BLE_CHAR_RELAY);
 	_relayCharacteristic->setDefaultValue(255);
+	_relayCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_relayCharacteristic->setWritable(true);
 	_relayCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_RELAY, (buffer_ptr_t)&value, 1);
@@ -99,6 +101,7 @@ void PowerService::addPowerSamplesCharacteristic() {
 	addCharacteristic(_powerSamplesCharacteristic);
 	_powerSamplesCharacteristic->setUUID(UUID(getUUID(), POWER_SAMPLES_UUID));
 	_powerSamplesCharacteristic->setName(BLE_CHAR_POWER_SAMPLES);
+	_powerSamplesCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_powerSamplesCharacteristic->setWritable(false);
 	_powerSamplesCharacteristic->setNotifies(true);
 
@@ -118,6 +121,7 @@ void PowerService::addPowerConsumptionCharacteristic() {
 	_powerConsumptionCharacteristic->setUUID(UUID(getUUID(), POWER_CONSUMPTION_UUID));
 	_powerConsumptionCharacteristic->setName(BLE_CHAR_POWER_CONSUMPTION);
 	_powerConsumptionCharacteristic->setDefaultValue(0);
+	_powerConsumptionCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_powerConsumptionCharacteristic->setWritable(false);
 	_powerConsumptionCharacteristic->setNotifies(true);
 }
