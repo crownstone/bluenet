@@ -25,7 +25,7 @@ PERSISTENT_FLAGS_DISABLED=1
 
 # Enable or disable meshing (1 or 0)
 MESHING=0
-BUILD_MESHING=1
+BUILD_MESHING=0
 
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=1
@@ -134,7 +134,7 @@ SERIAL_VERBOSITY=SERIAL_DEBUG
 # DOBEACON             14
 # CROWNSTONE5          15
 # DOBEACON2            16
-HARDWARE_BOARD=PCA10001
+HARDWARE_BOARD=PCA10040
 
 NRF_SERIES=NRF52
 
