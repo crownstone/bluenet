@@ -29,7 +29,8 @@ void Switch::init() {
 
 #ifndef PWM_DISABLE
 	PWM& pwm = PWM::getInstance();
-	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
+//	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH)); //! 625 Hz
+	pwm.init(PWM::config1Ch(20000L, PIN_GPIO_SWITCH)); //! 50 Hz
 #else
 	nrf_gpio_cfg_output(PIN_GPIO_SWITCH);
 #ifdef SWITCH_INVERSED
