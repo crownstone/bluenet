@@ -42,7 +42,8 @@
 /** Maximum number of events in the scheduler queue. */
 #define SCHED_QUEUE_SIZE                         30
 
-//! See https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
+//! See https://devzone.nordicsemi.com/question/84767/s132-scan-intervalwindow-adv-interval/
+//! Old https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
 /** Determines scan interval in units of 0.625 millisecond. */
 #define SCAN_INTERVAL                            0x00A0
 /** Determines scan window in units of 0.625 millisecond. */
