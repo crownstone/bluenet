@@ -198,7 +198,7 @@ Factory Reset  | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for factor
 
 ##### Factory reset
 If you lose your encryption keys you can use this characteristic to factory reset the Crownstone.
-This method is only available for 10 seconds after the Crownstone powers on.
+This method is only available for 20 seconds after the Crownstone powers on.
 You need to write **0xdeadbeef** to it. After this, the Crownstone disconnects and goes into Low TX mode so you'll
 have to be close to continue the factory reset. After this, you reconnect
 and write **0xdeadbeef** again to this characteristic to factory reset the Crownstone.
