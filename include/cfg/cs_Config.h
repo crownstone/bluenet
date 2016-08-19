@@ -69,6 +69,8 @@
 
 //! duration (in ms) how long the relay pins should be set to high
 #define RELAY_HIGH_DURATION                      20 //! ms
+//! duration (in ms) how long to retry switching the relay if there was not enough power to switch.
+#define RELAY_DELAY                              50 //! ms
 
 //! Max number of schedule entries in the schedule service.
 #define MAX_SCHEDULE_ENTRIES                     10
