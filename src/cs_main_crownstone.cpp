@@ -122,8 +122,6 @@ Crownstone::Crownstone() :
 };
 
 void Crownstone::init() {
-
-
 	LOGi(FMT_HEADER, "init");
 
 	//! initialize drivers
@@ -140,7 +138,6 @@ void Crownstone::init() {
 	BLEutil::print_stack("Stack configure: ");
 
 	LOGi(FMT_INIT, "encryption handler");
-	EncryptionHandler::getInstance().init();
 	BLEutil::print_heap("Heap encryption: ");
 	BLEutil::print_stack("Stack encryption: ");
 
