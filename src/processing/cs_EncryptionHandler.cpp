@@ -17,7 +17,7 @@
 void EncryptionHandler::init() {
 	_defaultValidationKey.b = DEFAULT_SESSION_KEY;
 	EventDispatcher::getInstance().addListener(this);
-	Settings::getInstance().get(STATE_OPERATION_MODE, &_operationMode);
+	State::getInstance().get(STATE_OPERATION_MODE, _operationMode);
 }
 
 uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength, EncryptionType encryptionType) {
