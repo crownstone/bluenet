@@ -94,7 +94,7 @@ CHAR_CURRENT_LIMIT=1
 ## Indoor Localization Service
 CHAR_RSSI=1
 CHAR_SCAN_DEVICES=1
-CHAR_TRACK_DEVICES=1
+CHAR_TRACK_DEVICES=0
 
 ## Schedule Service
 CHAR_SCHEDULE=1
@@ -104,7 +104,7 @@ CHAR_SCHEDULE=1
 MASTER_BUFFER_SIZE=300
 
 # set default operation mode (OPERATION_MODE_NORMAL) at first start, for release, this will need to be
-# set to OPERATION_MODE_SETUP so that it first starts into setup mode, but as long ase
+# set to OPERATION_MODE_SETUP so that it first starts into setup mode, but as long as
 # we are developing, leave it on normal mode
 DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP
 
