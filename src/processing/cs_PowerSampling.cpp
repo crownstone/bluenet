@@ -148,9 +148,9 @@ void PowerSampling::powerSampleReadBuffer() {
 		return;
 	}
 
-	uint16_t numCurentSamples = _currentSampleCircularBuf.size();
+	uint16_t numCurrentSamples = _currentSampleCircularBuf.size();
 	uint16_t numVoltageSamples = _voltageSampleCircularBuf.size();
-	uint16_t numSamples = (numCurentSamples > numVoltageSamples) ? numVoltageSamples : numCurentSamples;
+	uint16_t numSamples = (numCurrentSamples > numVoltageSamples) ? numVoltageSamples : numCurrentSamples;
 	if (numSamples > 0) {
 		uint16_t power;
 		uint16_t current;

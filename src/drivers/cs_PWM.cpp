@@ -124,8 +124,7 @@ uint32_t PWM::deinit() {
 }
 
 app_pwm_config_t PWM::config1Ch(uint32_t period, uint32_t pin) {
-	app_pwm_config_t
-	cfg = APP_PWM_DEFAULT_CONFIG_1CH(period, pin);
+	app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_1CH(period, pin);
 
 #ifdef SWITCH_INVERSED
 	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
@@ -135,8 +134,7 @@ app_pwm_config_t PWM::config1Ch(uint32_t period, uint32_t pin) {
 }
 
 app_pwm_config_t PWM::config2Ch(uint32_t period, uint32_t pin1, uint32_t pin2) {
-	app_pwm_config_t
-	cfg = APP_PWM_DEFAULT_CONFIG_2CH(period, pin1, pin2);
+	app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_2CH(period, pin1, pin2);
 
 #ifdef SWITCH_INVERSED
 	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;

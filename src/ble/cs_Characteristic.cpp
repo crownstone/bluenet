@@ -352,7 +352,8 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 		dataLen = MIN(valueLength - offset, MAX_NOTIFICATION_LEN);
 //
 		notification_t notification = {};
-
+		
+		// TODO: [Alex 22.08] verify if the oldVal is required. I do not think we use this.
 		uint8_t oldVal[sizeof(notification_t)];
 
 		if (valueLength - offset > MAX_NOTIFICATION_LEN) {
