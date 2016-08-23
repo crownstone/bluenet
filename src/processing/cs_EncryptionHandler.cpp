@@ -505,6 +505,11 @@ bool EncryptionHandler::_validateBlockLength(uint16_t length) {
 
 
 bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided) {
+	// always allow access when encryption is disabled.
+	if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) == false) {
+		return true;
+	}
+
 	if (minimum != ENCRYPTION_DISABLED) {
 		if (_operationMode == OPERATION_MODE_SETUP && provided == SETUP && _setupKeyValid) {
 			return true;
