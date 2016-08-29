@@ -135,11 +135,19 @@ static uint32_t mesh_gatt_evt_push(mesh_gatt_evt_t* p_gatt_evt) {
 	}
 
 	uint8_t count;
+#if (NORDIC_SDK_VERSION >= 11) 
+	if (sd_ble_tx_packet_count_get(m_active_conn_handle, &count) != NRF_SUCCESS) {
+#else
 	if (sd_ble_tx_buffer_count_get(&count) != NRF_SUCCESS) {
+#endif
 		return NRF_ERROR_BUSY;
 	}
 	if (count == 0) {
+#if (NORDIC_SDK_VERSION >= 11) 
+		return BLE_ERROR_NO_TX_PACKETS;
+#else
 		return BLE_ERROR_NO_TX_BUFFERS;
+#endif
 	}
 
 	ble_gatts_hvx_params_t hvx_params;
@@ -408,13 +416,21 @@ uint32_t send_notification(waiting_notification_t* notification) {
 				part_len);
 
 		err_code = mesh_gatt_evt_push(&gatt_evt);
+#if (NORDIC_SDK_VERSION >= 11) 
+		if (err_code == BLE_ERROR_NO_TX_PACKETS) {
+#else
 		if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
+#endif
 //			LOGe("out of tx buffers");
 
 //			notifactionsPending = true;
 			notification->offset = offset;
 
+#if (NORDIC_SDK_VERSION >= 11) 
+			return BLE_ERROR_NO_TX_PACKETS;
+#else
 			return BLE_ERROR_NO_TX_BUFFERS;
+#endif
 
 		} else if (err_code != NRF_SUCCESS) {
 //			LOGe("err_code: %d", err_code);
@@ -449,7 +465,11 @@ void value_set_handler(void* p_event_data, uint16_t event_size) {
 //	printArray(notification, sizeof(waiting_notification_t));
 
 	uint32_t err_code = send_notification(notification);
+#if (NORDIC_SDK_VERSION >= 11) 
+	if (err_code == BLE_ERROR_NO_TX_PACKETS) {
+#else
 	if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
+#endif
 
 #ifdef PRINT_MESH_VERBOSE
 		LOGd("adding pending notification");
@@ -503,7 +523,11 @@ uint32_t mesh_gatt_value_set(rbc_mesh_value_handle_t handle, uint8_t* data,
 				LOGd("notification pending already");
 #endif
 
+#if (NORDIC_SDK_VERSION >= 11) 
+				return BLE_ERROR_NO_TX_PACKETS;
+#else
 				return BLE_ERROR_NO_TX_BUFFERS;
+#endif
 
 			}
 		}

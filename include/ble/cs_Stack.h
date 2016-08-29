@@ -91,7 +91,7 @@ public:
 	//! The default BLE appearance is currently set to a Generic Keyring (576)
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_KEYRING;
 	//! The low-frequency clock, currently generated from the high frequency clock
-#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
+#if (NORDIC_SDK_VERSION >= 11) 
 	static const nrf_clock_lf_cfg_t        defaultClockSource;
 #else
 	static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
