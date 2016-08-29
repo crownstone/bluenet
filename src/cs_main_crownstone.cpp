@@ -664,6 +664,9 @@ void Crownstone::startUp() {
 		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
 #if BUILD_MESHING == 1
 			_mesh->start();
+
+			std::string mesh_init_msg = "Mesh online";
+			_mesh->send(0, (void*)mesh_init_msg.c_str(), 11);
 #endif
 		}
 //		BLEutil::print_heap("Heap startup: ");

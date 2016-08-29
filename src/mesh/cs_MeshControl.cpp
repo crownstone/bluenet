@@ -15,7 +15,7 @@
 #include <mesh/cs_Mesh.h>
 
 // enable for additional debug output
-//#define PRINT_DEBUG
+#define PRINT_DEBUG
 //#define PRINT_MESHCONTROL_VERBOSE
 
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
