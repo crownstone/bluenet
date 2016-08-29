@@ -15,11 +15,11 @@ SOURCE_DIR=$(shell pwd)
 
 all: build
 	@cd $(BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j4
-	@if [ ! -z "${BLUENET_CONFIG_DIR}" ]; then echo "Copy binaries to ${BLUENET_CONFIG_DIR}/build"; mkdir -p ${BLUENET_CONFIG_DIR}/build; mkdir -p $(BUILD_DIR)/result; cp $(BUILD_DIR)/*.hex $(BUILD_DIR)/*.bin $(BUILD_DIR)/*.elf $(BUILD_DIR)/result; cp $(BUILD_DIR)/result/* ${BLUENET_CONFIG_DIR}/build; fi
+	@if [ ! -z "${BLUENET_DIR}" ]; then echo "Copy binaries to ${BLUENET_DIR}/build"; mkdir -p ${BLUENET_DIR}/build; mkdir -p $(BUILD_DIR)/result; cp $(BUILD_DIR)/*.hex $(BUILD_DIR)/*.bin $(BUILD_DIR)/*.elf $(BUILD_DIR)/result; cp $(BUILD_DIR)/result/* ${BLUENET_DIR}/build; fi
 
 release: build
 	@cd $(BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel $(SOURCE_DIR) && make -j4
-	@if [ ! -z "${BLUENET_CONFIG_DIR}" ]; then echo "Copy binaries to ${BLUENET_CONFIG_DIR}/build"; mkdir -p ${BLUENET_CONFIG_DIR}/build; mkdir -p $(BUILD_DIR)/result; cp $(BUILD_DIR)/*.hex $(BUILD_DIR)/*.bin $(BUILD_DIR)/*.elf $(BUILD_DIR)/result; cp $(BUILD_DIR)/result/* ${BLUENET_CONFIG_DIR}/build; fi
+	@if [ ! -z "${BLUENET_DIR}" ]; then echo "Copy binaries to ${BLUENET_DIR}/build"; mkdir -p ${BLUENET_DIR}/build; mkdir -p $(BUILD_DIR)/result; cp $(BUILD_DIR)/*.hex $(BUILD_DIR)/*.bin $(BUILD_DIR)/*.elf $(BUILD_DIR)/result; cp $(BUILD_DIR)/result/* ${BLUENET_DIR}/build; fi
 
 clean:
 	@cd $(BUILD_DIR) && make clean
