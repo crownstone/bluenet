@@ -292,12 +292,14 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 	//    are staying queued until the first pstorage_update is called while the device is not scanning. to
 	//    avoid this, we queue the write calls ourselves, and only trigger the pstorage_update calls once the
 	//    device stopped scanning and meshing
-
-	bool meshEnabled = Settings::getInstance().isSet(CONFIG_MESH_ENABLED);
-
+#if BUILD_MESHING == 1
+	bool meshRunning = Mesh::getInstance().isRunning();
+#else
+	bool meshRunning = false;
+#endif
 	// if scanning or meshing, we need to buffer the storage update requests until the softdevice has time to process
 	// the pstorage. this is only possible if not scanning and mesh is stopped.
-	if (_scanning || meshEnabled) {
+	if (_scanning || meshRunning) {
 		LOGd("buffer storage request")
 		if (!writeBuffer.full()) {
 			buffer_element_t elem;
@@ -312,7 +314,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 
 		// if not scanning, stop the mesh and wait for the NRF_EVT_RADIO_SESSION_IDLE to arrive to access pstorage
 		// if scannig, wait for the EVT_SCAN_STOPPED
-		if (meshEnabled && !_scanning) {
+		if (meshRunning && !_scanning) {
 #if BUILD_MESHING == 1
 #ifdef PRINT_STORAGE_VERBOSE
 			LOGd("stop mesh on pstorage update");

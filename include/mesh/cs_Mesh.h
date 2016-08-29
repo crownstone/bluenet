@@ -43,7 +43,7 @@ private:
 	uint32_t                 _appTimerId;
 #endif
 
-	bool started;
+	bool _started;
 
 	bool                     _first[MESH_NUM_HANDLES];
 	uint32_t                 _mesh_start_time = 0;
@@ -87,7 +87,7 @@ public:
 	//! restart the mesh, i.e. on disconnect to start advertising
 	void restart();
 
-	inline bool isRunning() { return started; }
+	inline bool isRunning() { return _started; }
 
 	//! send message
 	void send(uint8_t channel, void* p_data, uint8_t length);

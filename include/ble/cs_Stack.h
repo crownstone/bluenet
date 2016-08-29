@@ -116,6 +116,7 @@ public:
 protected:
 	std::string                                 _device_name; //! 4
 	uint16_t                                    _appearance;
+	bool                                        _disconnectingInProgress = false;
 
 	// might want to change this to a linked list or something that
 	// we can loop over but doesn't allocate more space than needed
@@ -214,6 +215,11 @@ public:
 	 *
 	 */
 	void stopTicking();
+
+	/**
+	 * In case a disconnect has been called, we cannot allow another write or we'll get an Fatal Error 8
+	 */
+	bool isDisconnecting();
 
 	/** Shutdown the BLE stack
 	 *
@@ -387,7 +393,7 @@ public:
 	 *
 	 * Currently not used.
 	 */
-//	Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
+	Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 
 	bool connected() {
 		return _conn_handle != BLE_CONN_HANDLE_INVALID;

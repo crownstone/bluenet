@@ -62,11 +62,11 @@ inline uint32_t convertEndian32(uint32_t val) {
 
 template<typename T>
 void printInlineArray(T* arr, uint16_t len) {
-	uint8_t* ptr = (uint8_t*)arr;
+	__attribute__((unused)) uint8_t* ptr = (uint8_t*)arr;
 	for (int i = 0; i < len; ++i) {
 		_log(SERIAL_DEBUG, " %02X", ptr[i]);
 		if ((i+1) % 30 == 0) {
-			_log(SERIAL_DEBUG, SERIAL_CRLN);
+			_log(SERIAL_DEBUG, SERIAL_CRLF);
 		}
 	}
 }
@@ -81,7 +81,7 @@ void printArray(T* arr, uint16_t len) {
 //		}
 //	}
 	printInlineArray(arr, len);
-	_log(SERIAL_DEBUG, SERIAL_CRLN);
+	_log(SERIAL_DEBUG, SERIAL_CRLF);
 }
 
 template<typename T>

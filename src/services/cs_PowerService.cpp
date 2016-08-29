@@ -99,6 +99,7 @@ void PowerService::addPowerSamplesCharacteristic() {
 	addCharacteristic(_powerSamplesCharacteristic);
 	_powerSamplesCharacteristic->setUUID(UUID(getUUID(), POWER_SAMPLES_UUID));
 	_powerSamplesCharacteristic->setName(BLE_CHAR_POWER_SAMPLES);
+	_powerSamplesCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_powerSamplesCharacteristic->setWritable(false);
 	_powerSamplesCharacteristic->setNotifies(true);
 

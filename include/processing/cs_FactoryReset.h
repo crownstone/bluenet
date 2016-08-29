@@ -39,7 +39,9 @@ public:
 
 private:
 	FactoryReset();
-	bool factoryReset();
+
+	inline bool validateResetCode(uint32_t resetCode);
+	bool performFactoryReset();
 	void resetTimeout();
 	void timeout();
 

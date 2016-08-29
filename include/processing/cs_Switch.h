@@ -7,6 +7,7 @@
 #pragma once
 
 #include <ble/cs_Nordic.h>
+#include <drivers/cs_Timer.h>
 
 #define EXTENDED_SWITCH_STATE
 
@@ -18,6 +19,12 @@ struct switch_state_t {
 #else
 typedef uint8_t switch_state_t;
 #endif
+
+enum {
+	SWITCH_NEXT_RELAY_VAL_NONE,
+	SWITCH_NEXT_RELAY_VAL_ON,
+	SWITCH_NEXT_RELAY_VAL_OFF,
+};
 
 class Switch {
 public:
@@ -51,12 +58,24 @@ public:
 
 	void relayOff();
 
+	static void staticTimedSetRelay(Switch* ptr) { ptr->timedSetRelay(); }
+
 private:
 	Switch();
 
 	void updateSwitchState();
 
+	void timedSetRelay();
+
 	switch_state_t _switchValue;
 
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _relayTimerData;
+	app_timer_id_t           _relayTimerId;
+#else
+	uint32_t                 _relayTimerId;
+#endif
+
+	uint8_t _nextRelayVal;
 };
 

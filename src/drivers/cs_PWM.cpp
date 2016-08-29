@@ -9,6 +9,7 @@
 #include <util/cs_BleError.h>
 #include <drivers/cs_Serial.h>
 #include <cfg/cs_Strings.h>
+#include <cfg/cs_Config.h>
 
 //#define PRINT_PWM_VERBOSE
 
@@ -21,7 +22,7 @@ PWM::PWM() :
 #if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
 	pwmTimer = new nrf_drv_timer_t();
 	pwmTimer->p_reg = PWM_TIMER; // Or use CONCAT_2(NRF_TIMER, PWM_TIMER_ID)
-	pwmTimer->instance_id = PWM_INSTANCE_INDEX; // Or use CONCAT_3(TIMER, id, _INSTANCE_INDEX)
+	pwmTimer->instance_id = PWM_INSTANCE_INDEX; // Or use CONCAT_3(TIMER, PWM_TIMER_ID, _INSTANCE_INDEX)
 	pwmTimer->cc_channel_count = NRF_TIMER_CC_CHANNEL_COUNT(PWM_TIMER_ID);
 
 	_pwmInstance = new (app_pwm_t) {
@@ -123,8 +124,7 @@ uint32_t PWM::deinit() {
 }
 
 app_pwm_config_t PWM::config1Ch(uint32_t period, uint32_t pin) {
-	app_pwm_config_t
-	cfg = APP_PWM_DEFAULT_CONFIG_1CH(period, pin);
+	app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_1CH(period, pin);
 
 #ifdef SWITCH_INVERSED
 	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
@@ -134,8 +134,7 @@ app_pwm_config_t PWM::config1Ch(uint32_t period, uint32_t pin) {
 }
 
 app_pwm_config_t PWM::config2Ch(uint32_t period, uint32_t pin1, uint32_t pin2) {
-	app_pwm_config_t
-	cfg = APP_PWM_DEFAULT_CONFIG_2CH(period, pin1, pin2);
+	app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_2CH(period, pin1, pin2);
 
 #ifdef SWITCH_INVERSED
 	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;

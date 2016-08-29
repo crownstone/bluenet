@@ -14,22 +14,35 @@
 #include <storage/cs_State.h>
 #include <storage/cs_Settings.h>
 #include <cfg/cs_Strings.h>
+#include <ble/cs_Stack.h>
+#include <processing/cs_Scanner.h>
 
 //#define PRINT_SWITCH_VERBOSE
 
 // [18.07.16] added for first version of plugins to disable the use of the igbt
 //#define PWM_DISABLE
 
-Switch::Switch()
+Switch::Switch():
+#if (NORDIC_SDK_VERSION >= 11)
+	_relayTimerId(NULL),
+#else
+	_relayTimerId(UINT32_MAX),
+#endif
+	_nextRelayVal(SWITCH_NEXT_RELAY_VAL_NONE)
 {
 	LOGd(FMT_CREATE, "Switch");
+#if (NORDIC_SDK_VERSION >= 11)
+	_relayTimerData = { {0} };
+	_relayTimerId = &_relayTimerData;
+#endif
 }
 
 void Switch::init() {
 
 #ifndef PWM_DISABLE
 	PWM& pwm = PWM::getInstance();
-	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH));
+//	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH)); //! 625 Hz
+	pwm.init(PWM::config1Ch(20000L, PIN_GPIO_SWITCH)); //! 50 Hz
 #else
 	nrf_gpio_cfg_output(PIN_GPIO_SWITCH);
 #ifdef SWITCH_INVERSED
@@ -50,6 +63,8 @@ void Switch::init() {
 	nrf_gpio_cfg_output(PIN_GPIO_RELAY_ON);
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
 #endif
+
+	Timer::getInstance().createSingleShot(_relayTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSetRelay);
 }
 
 void Switch::pwmOff() {
@@ -125,6 +140,21 @@ bool Switch::getRelayState() {
 }
 
 void Switch::relayOn() {
+	LOGd("relayOn %u", _nextRelayVal);
+	if (Nrf51822BluetoothStack::getInstance().isScanning()) {
+		if (_nextRelayVal != SWITCH_NEXT_RELAY_VAL_NONE) {
+			_nextRelayVal = SWITCH_NEXT_RELAY_VAL_ON;
+			return;
+		}
+		//! Try again later
+		LOGd("Currently scanning, try again later");
+		_nextRelayVal = SWITCH_NEXT_RELAY_VAL_ON;
+		Timer::getInstance().start(_relayTimerId, MS_TO_TICKS(RELAY_DELAY), this);
+		Scanner::getInstance().manualStopScan(); // TODO: stop scanning via stack, let stack send out an event?
+		return;
+	}
+	_nextRelayVal = SWITCH_NEXT_RELAY_VAL_NONE;
+
 	uint16_t relayHighDuration;
 	Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &relayHighDuration);
 
@@ -147,6 +177,21 @@ void Switch::relayOn() {
 }
 
 void Switch::relayOff() {
+	LOGd("relayOff %u", _nextRelayVal);
+	if (Nrf51822BluetoothStack::getInstance().isScanning()) {
+		if (_nextRelayVal != SWITCH_NEXT_RELAY_VAL_NONE) {
+			_nextRelayVal = SWITCH_NEXT_RELAY_VAL_OFF;
+			return;
+		}
+		//! Try again later
+		LOGd("Currently scanning, try again later");
+		_nextRelayVal = SWITCH_NEXT_RELAY_VAL_OFF;
+		Timer::getInstance().start(_relayTimerId, MS_TO_TICKS(RELAY_DELAY), this);
+		Scanner::getInstance().manualStopScan(); // TODO: stop scanning via stack, let stack send out an event?
+		return;
+	}
+	_nextRelayVal = SWITCH_NEXT_RELAY_VAL_NONE;
+
 	uint16_t relayHighDuration;
 	Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &relayHighDuration);
 
@@ -166,6 +211,19 @@ void Switch::relayOff() {
 #endif
 	updateSwitchState();
 #endif
+}
+
+void Switch::timedSetRelay() {
+	switch (_nextRelayVal) {
+	case SWITCH_NEXT_RELAY_VAL_NONE:
+		break;
+	case SWITCH_NEXT_RELAY_VAL_ON:
+		relayOn();
+		break;
+	case SWITCH_NEXT_RELAY_VAL_OFF:
+		relayOff();
+		break;
+	}
 }
 
 void Switch::turnOn() {

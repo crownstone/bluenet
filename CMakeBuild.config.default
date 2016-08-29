@@ -4,7 +4,7 @@
 # Should be 10 characters or less (we need room for compilation date after it)
 BLUETOOTH_NAME="crown"
 
-FIRMWARE_VERSION="0.5.1"
+FIRMWARE_VERSION="0.6.0"
 
 # The device type defines how the device advertises itself, Apps and Bluenet Library
 # will use this to filter for device type.
@@ -71,6 +71,9 @@ GENERAL_SERVICE=1
 POWER_SERVICE=1
 SCHEDULE_SERVICE=1
 
+# Maximum number of vendor specific services
+MAX_NUM_VS_SERVICES=5
+
 # Enable or disable characteristics
 # Crownstone Service
 CHAR_CONTROL=1
@@ -91,7 +94,7 @@ CHAR_CURRENT_LIMIT=1
 ## Indoor Localization Service
 CHAR_RSSI=1
 CHAR_SCAN_DEVICES=1
-CHAR_TRACK_DEVICES=1
+CHAR_TRACK_DEVICES=0
 
 ## Schedule Service
 CHAR_SCHEDULE=1
@@ -100,10 +103,10 @@ CHAR_SCHEDULE=1
 # Currently this should not be larger than BLE_GATTS_VAR_ATTR_LEN_MAX (512)
 MASTER_BUFFER_SIZE=300
 
-# set default operation mode at first start, for release, this will need to be
-# set to OPERATION_MODE_SETUP so that it first starts into setup mode, but as long ase
+# set default operation mode (OPERATION_MODE_NORMAL) at first start, for release, this will need to be
+# set to OPERATION_MODE_SETUP so that it first starts into setup mode, but as long as
 # we are developing, leave it on normal mode
-DEFAULT_OPERATION_MODE=OPERATION_MODE_NORMAL
+DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP
 
 # Verbosity of the UART
 # SERIAL_DEBUG     0

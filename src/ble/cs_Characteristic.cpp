@@ -104,9 +104,9 @@ void CharacteristicBase::init(Service* svc) {
     }
 	ci.attr_char_value.p_attr_md = &ci.attr_md;
 
-	/////////////////////////////////////
+	//////////////////////////////////////
 	//! Characteristic User Description //
-	/////////////////////////////////////
+	//////////////////////////////////////
 
 	//! these characteristic descriptors are optional, and I gather, not really used by anything.
 	//! we fill them in if the user specifies any of the data (eg name).
@@ -189,7 +189,7 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	ci.attr_md.write_perm = _writeperm;
 }
 
-uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
+uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 
 //	LOGi("[%s] update Value", _name);
 
@@ -200,22 +200,20 @@ uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 	 */
 	uint8_t* valueGattAddress = getGattValuePtr();
 
-
 	if (_status.aesEncrypted && _minAccessLevel < ENCRYPTION_DISABLED) {
-		LOGi("encrypt ...");
 		// GATT is public facing, getValue is internal
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
 
 		// we calculate what size buffer we need
-		uint16_t encryptionBufferLength = EncryptionHandler::calculateEncryptionBufferLength(valueLength);
+		uint16_t encryptionBufferLength = EncryptionHandler::calculateEncryptionBufferLength(valueLength, encryptionType);
 		bool success = EncryptionHandler::getInstance().encrypt(
 			getValuePtr(),
 			valueLength,
 			valueGattAddress,
 			encryptionBufferLength,
 			_minAccessLevel,
-			useSessionNonce
+			encryptionType
 		);
 
 		if (!success) {
@@ -238,11 +236,11 @@ uint32_t CharacteristicBase::updateValue(bool useSessionNonce) {
 		setGattValueLength(valueLength);
 	}
 
-//	LOGi("[%s] valueLength: %d", _name, valueLength);
-//	LOGi("[%s] valueAddress: %p", _name, valueAddress);
 
+	uint16_t gattValueLength = getGattValueLength();
+//	LOGi("gattValueLength %d", gattValueLength)
 	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
-			_handles.value_handle, &valueLength, valueGattAddress));
+			_handles.value_handle, &gattValueLength, valueGattAddress));
 
 	//! stop here if we are not in notifying state
 	if ((!_status.notifies) || (!_service->getStack()->connected()) || !_status.notifyingEnabled) {
@@ -354,7 +352,8 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 		dataLen = MIN(valueLength - offset, MAX_NOTIFICATION_LEN);
 //
 		notification_t notification = {};
-
+		
+		// TODO: [Alex 22.08] verify if the oldVal is required. I do not think we use this.
 		uint8_t oldVal[sizeof(notification_t)];
 
 		if (valueLength - offset > MAX_NOTIFICATION_LEN) {

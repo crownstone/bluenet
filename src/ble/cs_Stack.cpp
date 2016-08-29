@@ -47,13 +47,13 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0),
 #if (NORDIC_SDK_VERSION >= 11)
-				_lowPowerTimeoutId(NULL), 
+				_lowPowerTimeoutId(NULL),
                 _secReqTimerId(NULL),
 #else
-				_lowPowerTimeoutId(UINT32_MAX), 
+				_lowPowerTimeoutId(UINT32_MAX),
                 _secReqTimerId(UINT32_MAX),
 #endif
-				_adv_manuf_data(NULL), 
+				_adv_manuf_data(NULL),
                 _serviceData(NULL)
 {
 #if (NORDIC_SDK_VERSION >= 11)
@@ -163,7 +163,7 @@ void Nrf51822BluetoothStack::init() {
 	BLE_CALL(softdevice_enable_get_default_config, (CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT, &ble_enable_params) );
 	ble_enable_params.gatts_enable_params.attr_tab_size = ATTR_TABLE_SIZE;
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
-	ble_enable_params.common_enable_params.vs_uuid_count = 5; //TODO: put in config
+	ble_enable_params.common_enable_params.vs_uuid_count = MAX_NUM_VS_SERVICES;
 
 //	//! Check the ram settings against the used number of links
 //	CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT);
@@ -869,13 +869,16 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
             break;
         case DM_EVT_SECURITY_SETUP:
         case DM_EVT_SECURITY_SETUP_REFRESH: {
-        	LOGi("going into low power mode for bonding ...");
+        	// [15.8.2016] ALEX: low tx will be set on boot not per default.
+
+//        	LOGi("going into low power mode for bonding ...");
 
         	//! schedule timeout
-        	Timer::getInstance().createSingleShot(_lowPowerTimeoutId, lowPowerTimeout);
-        	Timer::getInstance().start(_lowPowerTimeoutId, MS_TO_TICKS(60000), this);
+//        	Timer::getInstance().createSingleShot(_lowPowerTimeoutId, lowPowerTimeout);
+//        	Timer::getInstance().start(_lowPowerTimeoutId, MS_TO_TICKS(60000), this);
 
-        	changeToLowTxPowerMode();
+
+//        	changeToLowTxPowerMode();
         	break;
         }
         case DM_EVT_SECURITY_SETUP_COMPLETE: {
@@ -883,12 +886,15 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         		LOGi("bonding completed");
         	} else {
         		LOGe("bonding failed with error: %d (%p)", event_result, event_result);
+        		disconnect();
         	}
 
-        	//! clear timeout
-        	Timer::getInstance().stop(_lowPowerTimeoutId);
+        	// [15.8.2016] ALEX: we are in low tx for a reason. A single shot security
+        	// pass should not remove this. On disconnect it will remain high TX
+//        	changeToNormalTxPowerMode();
 
-			changeToNormalTxPowerMode();
+        	//! clear timeout
+ //       	Timer::getInstance().stop(_lowPowerTimeoutId);
         	break;
         }
         default:
@@ -935,16 +941,12 @@ void Nrf51822BluetoothStack::device_manager_init(bool erase_bonds)
 
     //! Don't clear bonded centrals
     init_data.clear_persistent_data = erase_bonds;
-//!    init_data.clear_persistent_data = 1;//
 
     err_code = dm_init(&init_data);
     APP_ERROR_CHECK(err_code);
 
     memset(&register_param.sec_param, 0, sizeof(ble_gap_sec_params_t));
 
-#if SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR!=8
-    register_param.sec_param.timeout      = SEC_PARAM_TIMEOUT;
-#endif
     register_param.sec_param.bond         = SEC_PARAM_BOND;
     register_param.sec_param.oob          = SEC_PARAM_OOB;
     register_param.sec_param.min_key_size = SEC_PARAM_MIN_KEY_SIZE;
@@ -968,7 +970,9 @@ void Nrf51822BluetoothStack::device_manager_init(bool erase_bonds)
 }
 
 void Nrf51822BluetoothStack::device_manager_reset() {
-	dm_device_delete_all(&_dm_app_handle);
+	uint32_t err_code;
+	err_code = dm_device_delete_all(&_dm_app_handle);
+	APP_ERROR_CHECK(err_code);
 }
 
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
@@ -984,7 +988,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
-//		_log(SERIAL_INFO, "address: " );
+//		_log(SERIAL_INFO, "address: ");
 //		BLEutil::printArray(p_ble_evt->evt.gap_evt.params.connected.peer_addr.addr, BLE_GAP_ADDR_LEN);
 		on_connected(p_ble_evt);
 		EventDispatcher::getInstance().dispatch(EVT_BLE_CONNECT);
@@ -1114,7 +1118,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
 	_advertising = false; //! it seems like maybe we automatically stop advertising when we're connected.
-
+	_disconnectingInProgress = false;
 	BLE_CALL(sd_ble_gap_conn_param_update, (p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params));
 
 	if (_callback_connected) {
@@ -1138,10 +1142,18 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 }
 
 void Nrf51822BluetoothStack::disconnect() {
-	LOGi("Forcibly disconnecting from device");
-	//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
-	BLE_CALL(sd_ble_gap_disconnect, (_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
+	//! Only disconnect when we are actually connected to something
+	if (_conn_handle != BLE_CONN_HANDLE_INVALID && _disconnectingInProgress == false) {
+		LOGi("Forcibly disconnecting from device");
+		_disconnectingInProgress = true;
+		//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
+		BLE_CALL(sd_ble_gap_disconnect, (_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
+	}
 }
+
+bool Nrf51822BluetoothStack::isDisconnecting() {
+		return _disconnectingInProgress;
+};
 
 void Nrf51822BluetoothStack::onTxComplete(ble_evt_t * p_ble_evt) {
 	for (Service* svc: _services) {

@@ -42,7 +42,8 @@
 /** Maximum number of events in the scheduler queue. */
 #define SCHED_QUEUE_SIZE                         30
 
-//! See https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
+//! See https://devzone.nordicsemi.com/question/84767/s132-scan-intervalwindow-adv-interval/
+//! Old https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
 /** Determines scan interval in units of 0.625 millisecond. */
 #define SCAN_INTERVAL                            0x00A0
 /** Determines scan window in units of 0.625 millisecond. */
@@ -68,17 +69,32 @@
 
 //! duration (in ms) how long the relay pins should be set to high
 #define RELAY_HIGH_DURATION                      20 //! ms
+//! duration (in ms) how long to retry switching the relay if there was not enough power to switch.
+#define RELAY_DELAY                              50 //! ms
 
 //! Max number of schedule entries in the schedule service.
 #define MAX_SCHEDULE_ENTRIES                     10
 
 #define CURRENT_LIMIT							 0
 
-#define CS_ADC_MAX_PINS                          2
+//! ----- TIMERS -----
+#define PWM_TIMER                                NRF_TIMER2
+//#define PWM_IRQHandler                           TIMER2_IRQHandler
+#define PWM_IRQn                                 TIMER2_IRQn
+#define PWM_INSTANCE_INDEX                       TIMER2_INSTANCE_INDEX
+#define PWM_TIMER_ID                             2
+
 #define CS_ADC_TIMER                             NRF_TIMER1
 //#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
 #define CS_ADC_TIMER_IRQn                        TIMER1_IRQn
-#define CS_ADC_PPI_CHANNEL                       7
+#define CS_ADC_INSTANCE_INDEX                    TIMER1_INSTANCE_INDEX
+#define CS_ADC_TIMER_ID                          1
+
+//! ----- PPI -----
+//! Get auto assigned
+//#define CS_ADC_PPI_CHANNEL                       7
+
+
 
 #if CONTINUOUS_POWER_SAMPLER == 1
 #define CS_ADC_SAMPLE_RATE                       101
@@ -87,15 +103,19 @@
 #endif
 
 #define POWER_SAMPLE_BURST_INTERVAL              3000 //! Time to next burst sampling (ms)
-#define POWER_SAMPLE_BURST_NUM_SAMPLES           80 //! Number of voltage and current samples per burst
+#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 //! Number of voltage and current samples per burst
 
 #define POWER_SAMPLE_CONT_INTERVAL               50 //! Time to next buffer read and attempt to send msg (ms)
 #define POWER_SAMPLE_CONT_NUM_SAMPLES            80 //! Number of voltage and current samples in the buffer, written by ADC, read by power service
 
+#define CS_ADC_MAX_PINS                          2
+#define CS_ADC_NUM_BUFFERS                       2 //! Not sure if we can have more than 2
+#define CS_ADC_BUF_SIZE                          (2*POWER_SAMPLE_BURST_NUM_SAMPLES)
+
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 
 #define FACTORY_RESET_CODE                       0xdeadbeef
-#define FACTORY_RESET_TIMEOUT                    60000 //! Timeout before recovery becomes unavailable after reset (ms)
+#define FACTORY_RESET_TIMEOUT                    20000 //! Timeout before recovery becomes unavailable after reset (ms)
 
 #define ENCYRPTION_KEY_LENGTH                    SOC_ECB_KEY_LENGTH //! 16 byte length
 

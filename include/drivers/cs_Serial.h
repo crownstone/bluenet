@@ -25,7 +25,7 @@ extern "C" {
 #define SERIAL_FATAL                4
 #define SERIAL_NONE                 5
 
-#define SERIAL_CRLN "\r\n"
+#define SERIAL_CRLF "\r\n"
 
 #ifndef SERIAL_VERBOSITY
 #error "You have to specify SERIAL_VERBOSITY"
@@ -49,7 +49,7 @@ extern "C" {
 		_log(level, "[%-20.20s : %-5d](%d) " fmt, _FILE, __LINE__, now(), ##__VA_ARGS__)
 
 	#define logLN(level, fmt, ...) \
-		_log(level, "[%-20.20s : %-5d](%d) " fmt SERIAL_CRLN, _FILE, __LINE__, now(), ##__VA_ARGS__)
+		_log(level, "[%-20.20s : %-5d](%d) " fmt SERIAL_CRLF, _FILE, __LINE__, now(), ##__VA_ARGS__)
 
 #else
 
@@ -57,7 +57,7 @@ extern "C" {
 		_log(level, "[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
 
 	#define logLN(level, fmt, ...) \
-		_log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLN, _FILE, __LINE__, ##__VA_ARGS__)
+		_log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 
 #endif
 
