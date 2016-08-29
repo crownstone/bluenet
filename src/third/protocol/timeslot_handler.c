@@ -92,7 +92,7 @@ static nrf_radio_request_t radio_request_normal =
                     .request_type = NRF_RADIO_REQ_TYPE_NORMAL,
                     .params.normal =
                     {
-                        .hfclk = NRF_RADIO_HFCLK_CFG_DEFAULT,
+                        .hfclk = NRF_RADIO_HFCLK_CFG_NO_GUARANTEE,
                         .priority = NRF_RADIO_PRIORITY_NORMAL,
                         .distance_us = TIMESLOT_DISTANCE_DEFAULT,
                         .length_us = TIMESLOT_SLOT_LENGTH
@@ -104,7 +104,7 @@ static nrf_radio_request_t radio_request_earliest =
                     .request_type = NRF_RADIO_REQ_TYPE_EARLIEST,
                     .params.earliest =
                     {
-                        .hfclk = NRF_RADIO_HFCLK_CFG_DEFAULT,
+                        .hfclk = NRF_RADIO_HFCLK_CFG_NO_GUARANTEE,
                         .priority = NRF_RADIO_PRIORITY_NORMAL,
                         .length_us = TIMESLOT_SLOT_LENGTH,
                         .timeout_us = TIMESLOT_TIMEOUT_DEFAULT
