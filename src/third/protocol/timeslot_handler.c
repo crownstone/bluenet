@@ -414,7 +414,11 @@ static nrf_radio_signal_callback_return_param_t* radio_signal_callback(uint8_t s
 * Interface Functions
 *****************************************************************************/
 
+#if (NORDIC_SDK_VERSION >= 11) 
+void timeslot_handler_init(nrf_clock_lf_cfg_t lfclksrc)
+#else
 void timeslot_handler_init(nrf_clock_lfclksrc_t lfclksrc)
+#endif
 {
     if (g_framework_initialized)
     {
@@ -423,7 +427,37 @@ void timeslot_handler_init(nrf_clock_lfclksrc_t lfclksrc)
     }
     uint32_t error;
     
-    
+#if (NORDIC_SDK_VERSION >= 11) 
+    switch (lfclksrc.xtal_accuracy)
+    {
+        case NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM:
+            g_lfclk_ppm = 20;
+            break;
+        case NRF_CLOCK_LF_XTAL_ACCURACY_30_PPM:
+            g_lfclk_ppm = 30;
+            break;
+        case NRF_CLOCK_LF_XTAL_ACCURACY_50_PPM:
+            g_lfclk_ppm = 50;
+            break;
+        case NRF_CLOCK_LF_XTAL_ACCURACY_75_PPM:
+            g_lfclk_ppm = 75;
+            break;
+        case NRF_CLOCK_LF_XTAL_ACCURACY_100_PPM:
+            g_lfclk_ppm = 100;
+            break;
+        case NRF_CLOCK_LF_XTAL_ACCURACY_150_PPM:
+            g_lfclk_ppm = 150;
+            break;
+        case NRF_CLOCK_LF_XTAL_ACCURACY_250_PPM:
+            g_lfclk_ppm = 250;
+            break;
+        case NRF_CLOCK_LF_XTAL_ACCURACY_500_PPM:
+            g_lfclk_ppm = 500;
+            break;
+        default:
+            g_lfclk_ppm = 250;
+    }
+#else
     switch (lfclksrc)
     {
         case NRF_CLOCK_LFCLKSRC_XTAL_100_PPM:
@@ -453,7 +487,7 @@ void timeslot_handler_init(nrf_clock_lfclksrc_t lfclksrc)
         default:
             g_lfclk_ppm = 250;
     }
-    
+#endif
     g_lfclksrc = lfclksrc;
 
     g_is_in_callback = false;

@@ -45,12 +45,15 @@ void start_stop_mesh(void * p_event_data, uint16_t event_size) {
 }
 
 
-Mesh::Mesh() : _appTimerId(-1), started(false),
+Mesh::Mesh() :
 #if (NORDIC_SDK_VERSION >= 11)
-		_appTimerId(NULL)
+		_appTimerData({ {0}}),
+		_appTimerId(NULL),
 #else
-		_appTimerId(UINT32_MAX)
+		_appTimerId(UINT32_MAX),
 #endif
+	_started(false)
+
 {
 #if (NORDIC_SDK_VERSION >= 11)
 	_appTimerData = { {0} };
@@ -112,6 +115,14 @@ void Mesh::stopTicking() {
 	Timer::getInstance().stop(_appTimerId);
 }
 
+
+#if (NORDIC_SDK_VERSION >= 11) 
+const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_LF_SRC_RC,   \
+                                                    .rc_ctiv       = 16,                    \
+                                                    .rc_temp_ctiv  = 2,                     \
+                                                    .xtal_accuracy = 0};
+#endif
+
 /**
  * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
  * thing.
@@ -131,7 +142,11 @@ void Mesh::init() {
 	Settings::getInstance().get(CONFIG_MESH_ACCESS_ADDRESS, &init_params.access_addr);
 	init_params.interval_min_ms = MESH_INTERVAL_MIN_MS;
 	init_params.channel = MESH_CHANNEL;
+#if (NORDIC_SDK_VERSION >= 11) 
+	init_params.lfclksrc = meshClockSource;
+#else
 	init_params.lfclksrc = MESH_CLOCK_SOURCE;
+#endif
 
 	uint8_t error_code;
 	//! checks if softdevice is enabled etc.

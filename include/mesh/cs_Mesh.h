@@ -26,7 +26,7 @@ extern "C" {
 
 //! values are updated MESH_UPDATE_FREQUENCY times per second
 #define MESH_UPDATE_FREQUENCY 10
-#define MESH_CLOCK_SOURCE (CLOCK_SOURCE)
+//#define MESH_CLOCK_SOURCE (CLOCK_SOURCE)
 
 
 
@@ -43,10 +43,14 @@ private:
 	uint32_t                 _appTimerId;
 #endif
 
-	bool _started;
+	bool                     _started;
 
 	bool                     _first[MESH_NUM_HANDLES];
 	uint32_t                 _mesh_start_time = 0;
+
+#if (NORDIC_SDK_VERSION >= 11) 
+	static const nrf_clock_lf_cfg_t  meshClockSource;
+#endif
 
 	//! constructor is hidden from the user
 	Mesh();
