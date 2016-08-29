@@ -493,8 +493,12 @@ void timeslot_handler_init(nrf_clock_lfclksrc_t lfclksrc)
     g_is_in_callback = false;
     g_framework_initialized = true;
     
+#if (NORDIC_SDK_VERSION >= 11) 
+	// nothing to enable?
+#else
     error = sd_nvic_EnableIRQ(SD_EVT_IRQn);
     APP_ERROR_CHECK(error);
+#endif
 
     error = sd_radio_session_open(&radio_signal_callback);
     APP_ERROR_CHECK(error);
