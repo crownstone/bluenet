@@ -77,7 +77,7 @@ void printArray(T* arr, uint16_t len) {
 //	for (int i = 0; i < len; ++i) {
 //		_log(SERIAL_DEBUG, " %02X", ptr[i]);
 //		if ((i+1) % 30 == 0) {
-//			_log(SERIAL_DEBUG, SERIAL_CRLN);
+//			_log(SERIAL_DEBUG, SERIAL_CRLF);
 //		}
 //	}
 	printInlineArray(arr, len);

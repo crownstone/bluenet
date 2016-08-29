@@ -432,11 +432,11 @@ void printArray(uint8_t* arr, uint16_t len) {
 	for (int i = 0; i < len; ++i) {
 		_log(SERIAL_DEBUG, " %02X", ptr[i]);
 		if ((i+1) % 30 == 0) {
-			_log(SERIAL_DEBUG, SERIAL_CRLN);
+			_log(SERIAL_DEBUG, SERIAL_CRLF);
 		}
 	}
 //	printInlineArray(arr, len);
-	_log(SERIAL_DEBUG, SERIAL_CRLN);
+	_log(SERIAL_DEBUG, SERIAL_CRLF);
 }
 
 void value_set_handler(void* p_event_data, uint16_t event_size) {
