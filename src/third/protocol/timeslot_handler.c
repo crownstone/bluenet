@@ -131,7 +131,12 @@ static uint32_t g_lfclk_ppm;
 
 static volatile uint32_t ts_count = 0;
 
-static nrf_clock_lfclksrc_t g_lfclksrc;
+#if (NORDIC_SDK_VERSION >= 11) 
+	static nrf_clock_lf_cfg_t g_lfclksrc;
+#else
+	static nrf_clock_lfclksrc_t g_lfclksrc;
+#endif
+
 //static bool paused = false;
 //static bool pausing = false;
 

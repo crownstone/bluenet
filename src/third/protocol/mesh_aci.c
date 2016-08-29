@@ -49,7 +49,12 @@ extern uint32_t rbc_mesh_event_push(rbc_mesh_event_t* p_evt);
 * Static globals
 *****************************************************************************/
 
-
+#if (NORDIC_SDK_VERSION >= 11) 
+const nrf_clock_lf_cfg_t defaultClockSource = {.source        = NRF_CLOCK_LF_SRC_RC,   \
+                                               .rc_ctiv       = 16,                    \
+                                               .rc_temp_ctiv  = 2,                     \
+                                               .xtal_accuracy = 0};
+#endif
 
 /*****************************************************************************
 * Static functions
@@ -117,8 +122,11 @@ static void serial_command_handler(serial_cmd_t* serial_cmd)
             init_params.access_addr = serial_cmd->params.init.access_addr;
             init_params.channel = serial_cmd->params.init.channel;
             init_params.interval_min_ms = serial_cmd->params.init.interval_min;
+#if (NORDIC_SDK_VERSION >= 11)
+			init_params.lfclksrc = defaultClockSource;
+#else
             init_params.lfclksrc = NRF_CLOCK_LFCLKSRC_XTAL_500_PPM; /* choose worst clock, just to be safe */
-
+#endif
             error_code = rbc_mesh_init(init_params);
             
             serial_evt.params.cmd_rsp.status = error_code_translate(error_code);

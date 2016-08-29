@@ -57,7 +57,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void ts_sd_event_handler(uint32_t evt);
 
 /** @brief initialize timeslot handler. Only called once */
+#if (NORDIC_SDK_VERSION >= 11)
+void timeslot_handler_init(nrf_clock_lf_cfg_t lfclksrc);
+#else
 void timeslot_handler_init(nrf_clock_lfclksrc_t lfclksrc);
+#endif
 
 /** 
 * @brief order a timeslot as soon as possible.

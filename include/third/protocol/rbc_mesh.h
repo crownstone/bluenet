@@ -159,7 +159,11 @@ typedef struct
     uint32_t access_addr;
     uint8_t channel;
     uint32_t interval_min_ms;
-    nrf_clock_lfclksrc_t lfclksrc;
+#if (NORDIC_SDK_VERSION >= 11)
+    nrf_clock_lf_cfg_t lfclksrc;
+#else
+	nrf_clock_lfclksrc_t lfclksrc;
+#endif
 } rbc_mesh_init_params_t;
 
 /*****************************************************************************

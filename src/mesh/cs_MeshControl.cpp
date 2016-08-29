@@ -153,8 +153,8 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 	case 18:
 	case 19:
 	case 20: {
-		mesh_message_t* msg = (mesh_message_t*) p_data;
 #ifdef PRINT_MESHCONTROL_VERBOSE
+		mesh_message_t* msg = (mesh_message_t*) p_data;
 		LOGd("power samples: h=%u src id=%s", channel, getAddress(msg).c_str());
 #endif
 		break;
