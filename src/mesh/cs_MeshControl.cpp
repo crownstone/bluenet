@@ -289,6 +289,12 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 
 		break;
 	}
+	case STATE_MESSAGE: {
+		mesh_message_t* _msg = (mesh_message_t*)payload;
+		// should have single value
+		LOGi("Decode message: value %i", _msg->payload[0]);
+		break;
+	}
 	default: {
 		LOGi("Unknown message type. Don't know how to decode...");
 	}
@@ -336,8 +342,8 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 		}
 
 		if (isBroadcast(msg)) {
-			//! send/receive broadcast message
-			LOGd("Send/receive broadcast");
+			//! send broadcast message
+			LOGd("Send broadcast");
 			log(SERIAL_INFO, "message:");
 			BLEutil::printArray((uint8_t*)p_data, length);
 			Mesh::getInstance().send(channel, p_data, length);
