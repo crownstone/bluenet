@@ -1,7 +1,7 @@
 /**
  * @author Christopher Mason
  * @author Anne van Rossum
- * License: TODO
+ * License: LGPL v3+, Apache, MIT
  */
 
 #include <stdint.h>
@@ -24,55 +24,78 @@ extern unsigned const long _estack;
 //extern void __init_array_end(void);
 extern int main (void);
 
-void ADC_IRQHandler(void);
-void ResetHandler(void);
-
-//! currently used for PWM
-void TIMER2_IRQHandler(void);
-
-//! currently used for ADC
-void TIMER1_IRQHandler(void);
-
-//! The LP comparator
-void WUCOMP_COMP_IRQHandler(void);
-
-void RTC1_IRQHandler(void);
-
-void unused_isr(void)
-{
+void unused_isr(void) {
 }
 
+/**
+ * Reset handler, sets clock frequency, handles product anomalies, initializes memory.
+ */
+void ResetHandler(void);
 
 void NMI_Handler(void)	__attribute__ ((weak, alias("unused_isr")));
 void HardFault_Handler(void)	__attribute__ ((weak, alias("unused_isr")));
+void MemoryManagement_Handler(void)	__attribute__ ((weak, alias("unused_isr")));
+void BusFault_Handler(void)	__attribute__ ((weak, alias("unused_isr")));
+void UsageFault_Handler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SVC_Handler(void)	__attribute__ ((weak, alias("unused_isr")));
+void DebugMonitor_Handler(void) __attribute__ ((weak, alias("unused_isr")));
 void PendSV_Handler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SysTick_Handler(void)	__attribute__ ((weak, alias("unused_isr")));
+
+
 void POWER_CLOCK_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void RADIO_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void UART0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SPI0_TWI0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SPI1_TWI1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+void NFCT_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void GPIOTE_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-//void ADC_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+
+/**
+ * AD converter should be implemented.
+ */
+void ADC_IRQHandler(void);
+
 void TIMER0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-//void TIMER1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-//void TIMER2_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+
+//! currently used for ADC
+void TIMER1_IRQHandler(void);
+
+//! currently used for PWM
+void TIMER2_IRQHandler(void);
+
 void RTC0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void TEMP_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void RNG_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void ECB_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void CCM_AAR_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void WDT_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-//void RTC1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+
+//! Real-time clock
+void RTC1_IRQHandler(void);
+
 void QDEC_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-//void WUCOMP_COMP_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+
+//! The LP comparator
+void WUCOMP_COMP_IRQHandler(void);
+
 void SWI0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI2_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI3_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI4_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI5_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+void TIMER3_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+void TIMER4_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+void PWM0_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+void PDM_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+void MWU_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+void PWM1_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+void PWM2_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+void SPIM2_SPIS2_SPI2_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+void RTC2_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+void I2S_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+void FPU_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 
 __attribute__ ((section(".vectors"), used))
 void (* const gVectors[])(void) =
@@ -81,15 +104,15 @@ void (* const gVectors[])(void) =
 	ResetHandler,					//!  1 ARM: Initial Program Counter
 	NMI_Handler,
 	HardFault_Handler,
-	0,              //! reserved
-	0,
-	0,
-	0,
+	MemoryManagement_Handler,
+	BusFault_Handler,
+	UsageFault_Handler,
+	0,								//! reserved
 	0,
 	0,
 	0,
 	SVC_Handler,
-	0,
+	DebugMonitor_Handler,
 	0,
 	PendSV_Handler,
 	SysTick_Handler,
@@ -100,7 +123,7 @@ void (* const gVectors[])(void) =
 	UART0_IRQHandler,
 	SPI0_TWI0_IRQHandler,
 	SPI1_TWI1_IRQHandler,
-	0,
+	NFCT_IRQHandler,
 	GPIOTE_IRQHandler,
 	ADC_IRQHandler,
 	TIMER0_IRQHandler,
@@ -121,13 +144,17 @@ void (* const gVectors[])(void) =
 	SWI3_IRQHandler,
 	SWI4_IRQHandler,
 	SWI5_IRQHandler,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-
+	TIMER3_IRQHandler,
+	TIMER4_IRQHandler,
+	PWM0_IRQHandler,
+	PDM_IRQHandler,
+	MWU_IRQHandler,
+	PWM1_IRQHandler,
+	PWM2_IRQHandler,
+	SPIM2_SPIS2_SPI2_IRQHandler,
+	RTC2_IRQHandler,
+	I2S_IRQHandler,
+	FPU_IRQHandler
 };
 
 __attribute__ ((section(".startup")))
