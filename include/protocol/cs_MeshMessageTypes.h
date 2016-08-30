@@ -13,7 +13,7 @@
 #include <ble_gap.h>
 
 extern "C" {
-#include <third/protocol/rbc_mesh.h>
+#include <rbc_mesh.h>
 }
 
 #include <structs/cs_ScanResult.h>

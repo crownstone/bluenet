@@ -27,6 +27,10 @@ PERSISTENT_FLAGS_DISABLED=1
 MESHING=0
 BUILD_MESHING=0
 
+# Use separate github repository https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh/
+USE_MESH_REPOSITORY=1
+MESH_DIR=/opt/nordic/nRF51-ble-bcast-mesh/nRF51/rbc_mesh
+
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=1
 

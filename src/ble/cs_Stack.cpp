@@ -15,7 +15,7 @@
 
 #if BUILD_MESHING == 1
 extern "C" {
-	#include <third/protocol/rbc_mesh.h>
+	#include <rbc_mesh.h>
 }
 #endif
 

@@ -18,7 +18,7 @@
 
 extern "C" {
 
-#include <protocol/rbc_mesh.h>
+#include <rbc_mesh.h>
 //#include <protocol/rbc_mesh_common.h>
 //#include <protocol/led_config.h>
 

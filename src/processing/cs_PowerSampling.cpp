@@ -18,7 +18,7 @@
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
 extern "C" {
-	#include <protocol/notification_buffer.h>
+	#include <mesh/notification_buffer.h>
 }
 #endif
 

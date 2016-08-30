@@ -665,6 +665,7 @@ void Crownstone::startUp() {
 #if BUILD_MESHING == 1
 			_mesh->start();
 
+			LOGd("Sending first mesh message");
 			std::string mesh_init_msg = "Mesh online";
 			_mesh->send(0, (void*)mesh_init_msg.c_str(), 11);
 #endif

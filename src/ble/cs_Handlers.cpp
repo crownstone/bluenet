@@ -16,7 +16,7 @@ extern "C" {
 
 #include <pstorage.h>
 #if BUILD_MESHING == 1
-#include <third/protocol/rbc_mesh.h>
+#include <rbc_mesh.h>
 #endif
 
 /** Function for dispatching a system event (not a BLE event) to all modules with a system event handler. This can also

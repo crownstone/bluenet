@@ -12,13 +12,14 @@
 
 BUILD_DIR=build
 SOURCE_DIR=$(shell pwd)
+COMPILE_WITH_J_PROCESSORS=4
 
 all: build
-	@cd $(BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j4
+	@cd $(BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 	@if [ ! -z "${BLUENET_DIR}" ]; then echo "Copy binaries to ${BLUENET_DIR}/build"; mkdir -p ${BLUENET_DIR}/build; mkdir -p $(BUILD_DIR)/result; cp $(BUILD_DIR)/*.hex $(BUILD_DIR)/*.bin $(BUILD_DIR)/*.elf $(BUILD_DIR)/result; cp $(BUILD_DIR)/result/* ${BLUENET_DIR}/build; fi
 
 release: build
-	@cd $(BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel $(SOURCE_DIR) && make -j4
+	@cd $(BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 	@if [ ! -z "${BLUENET_DIR}" ]; then echo "Copy binaries to ${BLUENET_DIR}/build"; mkdir -p ${BLUENET_DIR}/build; mkdir -p $(BUILD_DIR)/result; cp $(BUILD_DIR)/*.hex $(BUILD_DIR)/*.bin $(BUILD_DIR)/*.elf $(BUILD_DIR)/result; cp $(BUILD_DIR)/result/* ${BLUENET_DIR}/build; fi
 
 clean:
