@@ -290,9 +290,10 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 		break;
 	}
 	case STATE_MESSAGE: {
-		mesh_message_t* _msg = (mesh_message_t*)payload;
 		// should have single value
-		LOGi("Decode message: value %i", _msg->payload[0]);
+		LOGi("Decode message: value %i", payload[0]);
+		log(SERIAL_INFO, "Decode message:");
+		BLEutil::printArray((uint8_t*)payload, 1);
 		break;
 	}
 	default: {
