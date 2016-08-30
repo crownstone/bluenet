@@ -16,7 +16,7 @@
 
 // enable for additional debug output
 #define PRINT_DEBUG
-//#define PRINT_MESHCONTROL_VERBOSE
+#define PRINT_MESHCONTROL_VERBOSE
 
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
@@ -26,7 +26,7 @@ MeshControl::MeshControl() : EventListener(EVT_ALL) {
 }
 
 void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
-//	LOGd("Process incoming mesh message");
+	LOGd("Process incoming mesh message");
 
 	switch(channel) {
 	case HUB_CHANNEL: {
@@ -331,10 +331,10 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 		}
 
 		if (isBroadcast(msg)) {
-			//! received broadcast message
-			LOGd("Received broadcast");
-//			log(SERIAL_INFO, "message:");
-//			BLEutil::printArray((uint8_t*)p_data, length);
+			//! send/receive broadcast message
+			LOGd("Send/receive broadcast");
+			log(SERIAL_INFO, "message:");
+			BLEutil::printArray((uint8_t*)p_data, length);
 			Mesh::getInstance().send(channel, p_data, length);
 			// [30.05.16] as long as we don't call this function in an interrupt, we don't need to
 			//   decouple it anymore, because softdevice events are handled already by the scheduler
