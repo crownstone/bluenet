@@ -722,12 +722,12 @@ void Crownstone::run() {
 			test_msg.header.messageType = STATE_MESSAGE;
 			test_msg.payload[0] = 24;
 
-			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, 1);
+			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, sizeof(mesh_message_t));
 
 			LOGi("Send second message into mesh");
 			memset(test_msg.header.address, 0, BLE_GAP_ADDR_LEN);
 //			test_msg.header.address[0] = ~test_msg.header.address[0]; // invert bits of first address byte to send message to random entity
-			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, sizeof(test_msg));
+			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, sizeof(mesh_message_t));
 
 		}
 	}

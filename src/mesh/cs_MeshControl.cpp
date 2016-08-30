@@ -330,6 +330,7 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 	case DATA_CHANNEL: {
 
 		mesh_message_t* msg = (mesh_message_t*)p_data;
+		LOGi("Struct mesh_message_t is of size %i, length is %i", sizeof(mesh_message_t), length);
 		if (!isValidMessage(msg, length)) {
 			return ERR_INVALID_MESSAGE;
 		}
