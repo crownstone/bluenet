@@ -289,6 +289,10 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 
 		break;
 	}
+	default: {
+		LOGi("Unknown message type. Don't know how to decode...");
+	}
+
 	}
 
 }

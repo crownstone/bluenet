@@ -150,7 +150,7 @@ protected:
 		case CONFIG_MESSAGE:
 			return sizeof(mesh_header_t) + SB_HEADER_SIZE;
 		case STATE_MESSAGE:
-			return 1;
+			return sizeof(mesh_header_t) + 1;
 		default:
 			return 0;
 		}
