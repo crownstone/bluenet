@@ -31,6 +31,9 @@ BUILD_MESHING=0
 USE_MESH_REPOSITORY=1
 MESH_DIR=/opt/nordic/nRF51-ble-bcast-mesh/nRF51/rbc_mesh
 
+# Build result
+BLUENET_BUILD_DIR=$HOME/workspace/bluenet-build
+
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=1
 

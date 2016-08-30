@@ -4,8 +4,6 @@ cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-BLUENET_BUILD_DIR=build
-
 if [[ $cmd != "help" ]]; then
 	# adjust targets and sets serial_num
 	# call it with the . so that it get's the same arguments as the call to this script
@@ -21,14 +19,14 @@ address=${3:-$APPLICATION_START_ADDRESS}
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
-	make all BUILD_DIR=$BLUENET_BUILD_DIR
+	make all BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR
 	result=$?
 	cd $path
 	return $result
 }
 
 upload() {
-	${path}/_upload.sh $BLUENET_CONFIG_DIR/build/$target.hex $address $serial_num
+	${path}/_upload.sh $BLUENET_BUILD_DIR/$target.hex $address $serial_num
 	if [ $? -ne 0 ]; then
 		echo "Error with uploading"
 		exit 1
@@ -36,11 +34,11 @@ upload() {
 }
 
 debug() {
-	${path}/_debug.sh $BLUENET_CONFIG_DIR/build/$target.elf $serial_num $gdb_port
+	${path}/_debug.sh $BLUENET_BUILD_DIR/$target.elf $serial_num $gdb_port
 }
 
 debugbl() {
-	${path}/_debug.sh $BLUENET_CONFIG_DIR/build/bootloader.elf $serial_num $gdb_port
+	${path}/_debug.sh $BLUENET_BUILD_DIR/bootloader.elf $serial_num $gdb_port
 }
 
 all() {
@@ -63,7 +61,7 @@ run() {
 
 clean() {
 	cd ${path}/..
-	make clean BUILD_DIR=$BLUENET_BUILD_DIR
+	make clean BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR
 }
 
 bootloader() {
@@ -72,7 +70,7 @@ bootloader() {
 
 	# note that within the bootloader the JLINK doesn't work anymore...
 	# so perhaps first flash the binary and then the bootloader
-	${path}/_upload.sh $BLUENET_CONFIG_DIR/build/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
+	${path}/_upload.sh $BLUENET_BUILD_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
 
 	# Mark current app as valid app
 	${path}/_writebyte.sh 0x0007F000 1
@@ -87,7 +85,7 @@ bootloader() {
 
 release() {
 	cd ${path}/..
-	make release BUILD_DIR=$BLUENET_BUILD_DIR
+	make release BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR
 	result=$?
 	cd $path
 	return $result
