@@ -664,11 +664,9 @@ void Crownstone::startUp() {
 		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
 #if BUILD_MESHING == 1
 			_mesh->start();
-
-			LOGd("Sending first mesh message");
-			std::string mesh_init_msg = "Mesh online";
-			_mesh->send(0, (void*)mesh_init_msg.c_str(), 11);
 #endif
+		} else {
+			LOGi("Mesh not enabled");
 		}
 //		BLEutil::print_heap("Heap startup: ");
 //		BLEutil::print_stack("Stack startup: ");
@@ -697,6 +695,7 @@ void Crownstone::run() {
 	LOGi(FMT_HEADER, "running");
 
 	//! forever, run scheduler, wait for events and handle them
+	int i = 0;
 	while(1) {
 
 		app_sched_execute();
@@ -707,6 +706,30 @@ void Crownstone::run() {
 		BLE_CALL(sd_app_event_wait, () );
 #endif
 
+		if (++i == 100) {
+			LOGi("Nothing to do at t=100");
+		}
+		if (++i == 200) {
+			LOGi("Send first message to ourselves");
+			
+			uint32_t err_code;
+			ble_gap_addr_t address;
+			err_code = sd_ble_gap_address_get(&address);
+			APP_ERROR_CHECK(err_code);
+
+			mesh_message_t test_msg;
+			memcpy(test_msg.header.address, address.addr, BLE_GAP_ADDR_LEN);
+			test_msg.header.messageType = STATE_MESSAGE;
+			test_msg.payload[0] = 24;
+
+			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, sizeof(mesh_message_t));
+
+			LOGi("Send second message into mesh");
+			memset(test_msg.header.address, 0, BLE_GAP_ADDR_LEN);
+//			test_msg.header.address[0] = ~test_msg.header.address[0]; // invert bits of first address byte to send message to random entity
+			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, sizeof(mesh_message_t));
+
+		}
 	}
 }
 

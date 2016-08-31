@@ -35,6 +35,7 @@
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
+#include <mesh/cs_MeshControl.h>
 #endif
 #include <storage/cs_State.h>
 

@@ -16,7 +16,7 @@
 
 // enable for additional debug output
 #define PRINT_DEBUG
-//#define PRINT_MESHCONTROL_VERBOSE
+#define PRINT_MESHCONTROL_VERBOSE
 
 MeshControl::MeshControl() : EventListener(EVT_ALL) {
 	EventDispatcher::getInstance().addListener(this);
@@ -26,7 +26,7 @@ MeshControl::MeshControl() : EventListener(EVT_ALL) {
 }
 
 void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
-//	LOGd("Process incoming mesh message");
+	LOGd("Process incoming mesh message");
 
 	switch(channel) {
 	case HUB_CHANNEL: {
@@ -289,6 +289,17 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 
 		break;
 	}
+	case STATE_MESSAGE: {
+		// should have single value
+		LOGi("Decode message: value %i", payload[0]);
+		log(SERIAL_INFO, "Decode message:");
+		BLEutil::printArray((uint8_t*)payload, 1);
+		break;
+	}
+	default: {
+		LOGi("Unknown message type. Don't know how to decode...");
+	}
+
 	}
 
 }
@@ -326,15 +337,16 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 	case DATA_CHANNEL: {
 
 		mesh_message_t* msg = (mesh_message_t*)p_data;
+		LOGi("Struct mesh_message_t is of size %i, length is %i", sizeof(mesh_message_t), length);
 		if (!isValidMessage(msg, length)) {
 			return ERR_INVALID_MESSAGE;
 		}
 
 		if (isBroadcast(msg)) {
-			//! received broadcast message
-			LOGd("Received broadcast");
-//			log(SERIAL_INFO, "message:");
-//			BLEutil::printArray((uint8_t*)p_data, length);
+			//! send broadcast message
+			LOGd("Send broadcast");
+			log(SERIAL_INFO, "message:");
+			BLEutil::printArray((uint8_t*)p_data, length);
 			Mesh::getInstance().send(channel, p_data, length);
 			// [30.05.16] as long as we don't call this function in an interrupt, we don't need to
 			//   decouple it anymore, because softdevice events are handled already by the scheduler
