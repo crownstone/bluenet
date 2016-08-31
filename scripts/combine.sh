@@ -15,7 +15,7 @@
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_config.sh
 
-cd ${BLUENET_CONFIG_DIR}/build && rm -f combined*
+cd ${BLUENET_BUILD_DIR} && rm -f combined*
 
 add_bootloader=false
 add_softdevice=true
@@ -55,6 +55,6 @@ fi
 #echo "Now run:"
 #echo "./flash_openocd.sh combined"
 #echo "this will place the binary at location 0 of FLASH memory of the target device"
-echo "Combined binary is: ${BLUENET_CONFIG_DIR}/build/combined.hex"
+echo "Combined binary is: ${BLUENET_BUILD_DIR}/combined.hex"
 echo "Done!"
 
