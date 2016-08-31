@@ -128,6 +128,23 @@ IF(${BUILD_MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/notification_buffer.c")
 
 	IF(${USE_MESH_REPOSITORY} STRGREATER "0")
+		IF(IS_DIRECTORY "${MESH_DIR}")
+			MESSAGE(STATUS "Use directory ${MESH_DIR} for the mesh")
+		ELSE()
+			MESSAGE(FATAL_ERROR "Directory \"${MESH_DIR}\" does not exist! Clone https://github.com/mrquincle/nRF51-ble-bcast-mesh and switch to nrf52 branch.")
+		ENDIF()
+		EXECUTE_PROCESS( 
+			COMMAND git rev-parse --abbrev-ref HEAD
+			WORKING_DIRECTORY ${MESH_DIR}
+			OUTPUT_VARIABLE MESH_BRANCH
+			OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+		IF(MESH_BRANCH STREQUAL "nrf52")
+			MESSAGE(STATUS "Using nrf52 branch for the Mesh")
+		ELSE()
+			MESSAGE(FATAL_ERROR "Switch ${MESH_DIR} to nrf52 branch. The master branch is not nrf52-compatible yet.")
+		ENDIF()
+
 		SET(INCLUDE_DIR "${INCLUDE_DIR}" "${MESH_DIR}" "${MESH_DIR}/include")
 		MESSAGE(STATUS "Include dirs: " ${INCLUDE_DIR})
 		
@@ -146,7 +163,6 @@ IF(${BUILD_MESHING} STRGREATER "0")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/rand.c")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/version_handler.c")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/handle_storage.c")
-
 
 	ELSEIF(${USE_MESH_REPOSITORY} STREQUAL "nRF52-branch")
 		
