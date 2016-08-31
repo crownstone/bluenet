@@ -695,7 +695,9 @@ void Crownstone::run() {
 	LOGi(FMT_HEADER, "running");
 
 	//! forever, run scheduler, wait for events and handle them
+#ifdef DEBUGGING_MESHING
 	int i = 0;
+#endif
 	while(1) {
 
 		app_sched_execute();
@@ -706,10 +708,11 @@ void Crownstone::run() {
 		BLE_CALL(sd_app_event_wait, () );
 #endif
 
-		if (++i == 100) {
+#ifdef DEBUGGING_MESHING
+		if (i == 100) {
 			LOGi("Nothing to do at t=100");
 		}
-		if (++i == 200) {
+		if (i == 200) {
 			LOGi("Send first message to ourselves");
 			
 			uint32_t err_code;
@@ -720,16 +723,20 @@ void Crownstone::run() {
 			mesh_message_t test_msg;
 			memcpy(test_msg.header.address, address.addr, BLE_GAP_ADDR_LEN);
 			test_msg.header.messageType = STATE_MESSAGE;
-			test_msg.payload[0] = 24;
+			test_msg.payload[0] = 66;
 
 			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, sizeof(mesh_message_t));
-
-			LOGi("Send second message into mesh");
-			memset(test_msg.header.address, 0, BLE_GAP_ADDR_LEN);
-//			test_msg.header.address[0] = ~test_msg.header.address[0]; // invert bits of first address byte to send message to random entity
-			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, sizeof(mesh_message_t));
-
 		}
+		if ((i % 400000) == 0) {
+			LOGi("Send next message into mesh");
+			mesh_message_t test_msg;
+			test_msg.payload[0] = i / 400000;
+			memset(test_msg.header.address, 0, BLE_GAP_ADDR_LEN);
+			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, sizeof(mesh_message_t));
+		}
+
+		++i;
+#endif
 	}
 }
 

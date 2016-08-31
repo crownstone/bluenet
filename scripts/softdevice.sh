@@ -14,7 +14,7 @@ fi
 
 source $path/_config.sh
 
-SD_BINDIR=${BLUENET_CONFIG_DIR}/build
+SD_BINDIR=${BLUENET_BUILD_DIR}
 
 build() {
 	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"
