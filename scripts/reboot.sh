@@ -10,7 +10,7 @@ mkdir -p $TEMP_DIR
 GDB_SCRIPT=gdbreset
 
 GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}-gdb
-DEVICE=nrf51822
+#DEVICE=nrf51822
 
 # Run JLink gdb server
 $JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 400 &

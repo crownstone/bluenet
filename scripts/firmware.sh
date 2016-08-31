@@ -83,6 +83,24 @@ bootloader() {
 	fi
 }
 
+bootloader-only() {
+	# perhaps do this separate anyway
+	# ${path}/softdevice.sh all
+
+	# note that within the bootloader the JLINK doesn't work anymore...
+	# so perhaps first flash the binary and then the bootloader
+	${path}/_upload.sh $BLUENET_BUILD_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
+
+	# Mark current app as valid app
+	${path}/_writebyte.sh 0x0007F000 0
+
+	if [ $? -eq 0 ]; then
+		sleep 1
+		# and set to load it
+#		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_REGION_START
+		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_START_ADDRESS
+	fi
+}
 release() {
 	cd ${path}/..
 	make release BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR
@@ -110,6 +128,9 @@ case "$cmd" in
 	clean)
 		clean
 		;;
+	bootloader-only)
+		bootloader-only
+		;;
 	bootloader)
 		bootloader
 		;;
@@ -120,7 +141,7 @@ case "$cmd" in
 		release
 		;;
 	*)
-		echo $"Usage: $0 {build|upload|debug|clean|run|all}"
+		echo $"Usage: $0 {build|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release}"
 		exit 1
 esac
 

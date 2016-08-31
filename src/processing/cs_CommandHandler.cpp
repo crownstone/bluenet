@@ -39,7 +39,7 @@ void reset(void* p_context) {
 		LOGi(MSG_RESET);
 	}
 
-	LOGi("executing reset: %d", cmd);
+	LOGi("Executing reset: %d", cmd);
 	//! copy to make sure this is nothing more than one value
 	uint8_t err_code;
 	err_code = sd_power_gpregret_clr(0xFF);
