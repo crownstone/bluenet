@@ -290,8 +290,8 @@ RAM_APPLICATION_AMOUNT=0xD958
 
 HEAP_SIZE=20000
 
+# Eddystone is the iBeacon variant of Google, but meant for other purposes, such as Physical Web
+EDDYSTONE=0
 
-
-
-
+# The device can be nRF51822 or nRF52832_xxAA
 DEVICE=nRF52832_xxAA
