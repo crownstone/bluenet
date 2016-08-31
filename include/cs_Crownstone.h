@@ -12,6 +12,9 @@
 
 #include <ble/cs_Stack.h>
 #include <ble/cs_iBeacon.h>
+#if EDDYSTONE==1
+#include <ble/cs_Eddystone.h>
+#endif
 
 #include <storage/cs_Settings.h>
 #include <events/cs_EventListener.h>
@@ -151,6 +154,9 @@ private:
 	// advertise
 	ServiceData* _serviceData;
 	IBeacon* _beacon;
+#if EDDYSTONE==1
+	Eddystone* _eddystone;
+#endif
 
 	// processing
 #if BUILD_MESHING == 1

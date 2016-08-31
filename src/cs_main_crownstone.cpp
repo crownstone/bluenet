@@ -377,6 +377,12 @@ void Crownstone::configureStack() {
 		sd_power_gpregret_clr(0xFF);
 
 	});
+
+#if EDDYSTONE==1
+	_eddystone = new Eddystone();
+	_eddystone->advertising_init();
+#endif
+
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
 		//! of course this is not nice, but dirty! we immediately start advertising automatically after being
@@ -617,6 +623,10 @@ void Crownstone::startUp() {
 	_stack->startAdvertising();
 	//! have to give the stack a moment of pause to start advertising, otherwise we get into race conditions
 	nrf_delay_ms(50);
+
+#if EDDYSTONE==1
+	_eddystone->advertising_start();
+#endif
 
 	//! the rest we only execute if we are in normal operation
 	//! during setup mode, most of the crownstone's functionality is

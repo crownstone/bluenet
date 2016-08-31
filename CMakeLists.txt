@@ -115,11 +115,14 @@ IF(${SCHEDULE_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_ScheduleService.cpp")
 ENDIF()
 
-
-
-
 # should be only when creating iBeacon
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_iBeacon.cpp")
+	
+IF(${EDDYSTONE} STRGREATER "0")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Eddystone.cpp")
+ELSE()
+	MESSAGE(FATAL_ERROR "tmp")
+ENDIF()
 
 IF(${BUILD_MESHING} STRGREATER "0")
 	
