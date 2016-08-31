@@ -73,7 +73,7 @@ void GeneralService::addResetCharacteristic() {
 	_resetCharacteristic->setDefaultValue(0);
 	_resetCharacteristic->setWritable(true);
 	_resetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
-		CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
+		CommandHandler::getInstance().resetDelayed(value);
 	});
 }
 
