@@ -33,22 +33,22 @@ static uint8_t pdu_count = 0;
  */
 void Eddystone::advertising_init(void) {
 	LOGi("Initialize advertising Eddystone...");
-    init_uid_frame_buffer();
-    init_url_frame_buffer();
-    init_tlm_frame_buffer();
+	init_uid_frame_buffer();
+	init_url_frame_buffer();
+	init_tlm_frame_buffer();
 
-    // Write the advertisement data to the softdevice
+	// Write the advertisement data to the softdevice
 	// It seems we have to choose
-    eddystone_set_adv_data(EDDYSTONE_URL);
+	eddystone_set_adv_data(EDDYSTONE_URL);
 
-    // Initialize advertising parameters (used when starting advertising).
-    memset(&m_adv_params, 0, sizeof(m_adv_params));
+	// Initialize advertising parameters (used when starting advertising).
+	memset(&m_adv_params, 0, sizeof(m_adv_params));
 
-    m_adv_params.type = BLE_GAP_ADV_TYPE_ADV_NONCONN_IND;
-    m_adv_params.p_peer_addr = NULL;                             // Undirected advertisement.
-    m_adv_params.fp = BLE_GAP_ADV_FP_ANY;
-    m_adv_params.interval = NON_CONNECTABLE_ADV_INTERVAL;
-    m_adv_params.timeout = APP_CFG_NON_CONN_ADV_TIMEOUT;
+	m_adv_params.type = BLE_GAP_ADV_TYPE_ADV_NONCONN_IND;
+	m_adv_params.p_peer_addr = NULL;                             // Undirected advertisement.
+	m_adv_params.fp = BLE_GAP_ADV_FP_ANY;
+	m_adv_params.interval = NON_CONNECTABLE_ADV_INTERVAL;
+	m_adv_params.timeout = APP_CFG_NON_CONN_ADV_TIMEOUT;
 }
 
 /**
@@ -59,154 +59,154 @@ void Eddystone::advertising_init(void) {
  */
 void Eddystone::advertising_start(void) {
 	LOGi("Start advertising Eddystone...");
-    uint32_t err_code;
+	uint32_t err_code;
 
-    err_code = sd_ble_gap_adv_start(&m_adv_params);
-    APP_ERROR_CHECK(err_code);
+	err_code = sd_ble_gap_adv_start(&m_adv_params);
+	APP_ERROR_CHECK(err_code);
 
-//  if there is a button that can be used to support the bonding
-//    err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
-//    APP_ERROR_CHECK(err_code);
+	//  if there is a button that can be used to support the bonding
+	//    err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
+	//    APP_ERROR_CHECK(err_code);
 }
 
 void Eddystone::init_url_frame_buffer() {
-    uint8_t *encoded_advdata = edstn_frames[EDDYSTONE_URL].adv_frame;
-    uint8_t *len_advdata = &edstn_frames[EDDYSTONE_URL].adv_len;
+	uint8_t *encoded_advdata = edstn_frames[EDDYSTONE_URL].adv_frame;
+	uint8_t *len_advdata = &edstn_frames[EDDYSTONE_URL].adv_len;
 
-    eddystone_head_encode(encoded_advdata, 0x10, len_advdata);
+	eddystone_head_encode(encoded_advdata, 0x10, len_advdata);
 
-    encoded_advdata[(*len_advdata)++] = APP_MEASURED_RSSI;
-    encoded_advdata[(*len_advdata)++] = 0x03; //< prefix: https://
-    encoded_advdata[(*len_advdata)++] = 'c';
-    encoded_advdata[(*len_advdata)++] = 'r';
-    encoded_advdata[(*len_advdata)++] = 'o';
-    encoded_advdata[(*len_advdata)++] = 'w';
-    encoded_advdata[(*len_advdata)++] = 'n';
-    encoded_advdata[(*len_advdata)++] = 's';
-    encoded_advdata[(*len_advdata)++] = 't';
-    encoded_advdata[(*len_advdata)++] = 'o';
-    encoded_advdata[(*len_advdata)++] = 'n';
-    encoded_advdata[(*len_advdata)++] = 'e';
-    encoded_advdata[(*len_advdata)++] = '.';
-    encoded_advdata[(*len_advdata)++] = 'r';
-    encoded_advdata[(*len_advdata)++] = 'o';
-    encoded_advdata[(*len_advdata)++] = 'c';
-    encoded_advdata[(*len_advdata)++] = 'k';
-    encoded_advdata[(*len_advdata)++] = 's';
+	encoded_advdata[(*len_advdata)++] = APP_MEASURED_RSSI;
+	encoded_advdata[(*len_advdata)++] = 0x03; //< prefix: https://
+	encoded_advdata[(*len_advdata)++] = 'c';
+	encoded_advdata[(*len_advdata)++] = 'r';
+	encoded_advdata[(*len_advdata)++] = 'o';
+	encoded_advdata[(*len_advdata)++] = 'w';
+	encoded_advdata[(*len_advdata)++] = 'n';
+	encoded_advdata[(*len_advdata)++] = 's';
+	encoded_advdata[(*len_advdata)++] = 't';
+	encoded_advdata[(*len_advdata)++] = 'o';
+	encoded_advdata[(*len_advdata)++] = 'n';
+	encoded_advdata[(*len_advdata)++] = 'e';
+	encoded_advdata[(*len_advdata)++] = '.';
+	encoded_advdata[(*len_advdata)++] = 'r';
+	encoded_advdata[(*len_advdata)++] = 'o';
+	encoded_advdata[(*len_advdata)++] = 'c';
+	encoded_advdata[(*len_advdata)++] = 'k';
+	encoded_advdata[(*len_advdata)++] = 's';
 
-    encoded_advdata[0x07] = (*len_advdata) - 8; // Length	Service Data. Ibid. § 1.11
+	encoded_advdata[0x07] = (*len_advdata) - 8; // Length	Service Data. Ibid. § 1.11
 }
 
 void Eddystone::init_tlm_frame_buffer() {
-    uint8_t *encoded_advdata = edstn_frames[EDDYSTONE_TLM].adv_frame;
-    uint8_t *len_advdata = &edstn_frames[EDDYSTONE_TLM].adv_len;
+	uint8_t *encoded_advdata = edstn_frames[EDDYSTONE_TLM].adv_frame;
+	uint8_t *len_advdata = &edstn_frames[EDDYSTONE_TLM].adv_len;
 
-    eddystone_head_encode(encoded_advdata, 0x20, len_advdata);
-    encoded_advdata[(*len_advdata)++] = 0x00; // Version
+	eddystone_head_encode(encoded_advdata, 0x20, len_advdata);
+	encoded_advdata[(*len_advdata)++] = 0x00; // Version
 
-//    uint8_t battery_data = battery_level_get();
-    encoded_advdata[(*len_advdata)++] = 0x00; // Battery voltage, 1 mV/bit
-    encoded_advdata[(*len_advdata)++] = 0x00;
+	//    uint8_t battery_data = battery_level_get();
+	encoded_advdata[(*len_advdata)++] = 0x00; // Battery voltage, 1 mV/bit
+	encoded_advdata[(*len_advdata)++] = 0x00;
 
-    // Beacon temperature
-    uint8_t temperature = 30; // temporary
-    eddystone_uint16(encoded_advdata, len_advdata, temperature);
+	// Beacon temperature
+	uint8_t temperature = 30; // temporary
+	eddystone_uint16(encoded_advdata, len_advdata, temperature);
 
-    // Advertising PDU count
-    eddystone_uint32(encoded_advdata, len_advdata, pdu_count);
+	// Advertising PDU count
+	eddystone_uint32(encoded_advdata, len_advdata, pdu_count);
 
-    // Time since power-on or reboot
- //   *len_advdata += big32cpy(encoded_advdata + *len_advdata, pdu_count);
+	// Time since power-on or reboot
+	//   *len_advdata += big32cpy(encoded_advdata + *len_advdata, pdu_count);
 
-    encoded_advdata[0x07] = (*len_advdata) - 8; // Length	Service Data. Ibid. § 1.11
+	encoded_advdata[0x07] = (*len_advdata) - 8; // Length	Service Data. Ibid. § 1.11
 }
 
 void Eddystone::init_uid_frame_buffer() {
-    uint8_t *encoded_advdata = edstn_frames[EDDYSTONE_UID].adv_frame;
-    uint8_t *len_advdata = &edstn_frames[EDDYSTONE_UID].adv_len;
+	uint8_t *encoded_advdata = edstn_frames[EDDYSTONE_UID].adv_frame;
+	uint8_t *len_advdata = &edstn_frames[EDDYSTONE_UID].adv_len;
 
-    eddystone_head_encode(encoded_advdata, 0x00, len_advdata);
+	eddystone_head_encode(encoded_advdata, 0x00, len_advdata);
 
-    encoded_advdata[(*len_advdata)++] = APP_MEASURED_RSSI;
-    encoded_advdata[(*len_advdata)++] = 0x00;
-    encoded_advdata[(*len_advdata)++] = 0x01;
-    encoded_advdata[(*len_advdata)++] = 0x02;
-    encoded_advdata[(*len_advdata)++] = 0x03;
-    encoded_advdata[(*len_advdata)++] = 0x04;
-    encoded_advdata[(*len_advdata)++] = 0x05;
-    encoded_advdata[(*len_advdata)++] = 0x06;
-    encoded_advdata[(*len_advdata)++] = 0x07;
-    encoded_advdata[(*len_advdata)++] = 0x08;
-    encoded_advdata[(*len_advdata)++] = 0x09;
+	encoded_advdata[(*len_advdata)++] = APP_MEASURED_RSSI;
+	encoded_advdata[(*len_advdata)++] = 0x00;
+	encoded_advdata[(*len_advdata)++] = 0x01;
+	encoded_advdata[(*len_advdata)++] = 0x02;
+	encoded_advdata[(*len_advdata)++] = 0x03;
+	encoded_advdata[(*len_advdata)++] = 0x04;
+	encoded_advdata[(*len_advdata)++] = 0x05;
+	encoded_advdata[(*len_advdata)++] = 0x06;
+	encoded_advdata[(*len_advdata)++] = 0x07;
+	encoded_advdata[(*len_advdata)++] = 0x08;
+	encoded_advdata[(*len_advdata)++] = 0x09;
 
-    encoded_advdata[(*len_advdata)++] = 0x00;
-    encoded_advdata[(*len_advdata)++] = 0x01;
-    encoded_advdata[(*len_advdata)++] = 0x02;
-    encoded_advdata[(*len_advdata)++] = 0x03;
-    encoded_advdata[(*len_advdata)++] = 0x04;
-    encoded_advdata[(*len_advdata)++] = 0x05;
-    encoded_advdata[(*len_advdata)++] = 0x06;
+	encoded_advdata[(*len_advdata)++] = 0x00;
+	encoded_advdata[(*len_advdata)++] = 0x01;
+	encoded_advdata[(*len_advdata)++] = 0x02;
+	encoded_advdata[(*len_advdata)++] = 0x03;
+	encoded_advdata[(*len_advdata)++] = 0x04;
+	encoded_advdata[(*len_advdata)++] = 0x05;
+	encoded_advdata[(*len_advdata)++] = 0x06;
 
-    encoded_advdata[0x07] = (*len_advdata) - 8; // Length	Service Data. Ibid. § 1.11
+	encoded_advdata[0x07] = (*len_advdata) - 8; // Length	Service Data. Ibid. § 1.11
 }
 
 
 uint32_t Eddystone::eddystone_set_adv_data(uint32_t frame_index) {
-    uint8_t *p_encoded_advdata = edstn_frames[frame_index].adv_frame;
-    return sd_ble_gap_adv_data_set(p_encoded_advdata, edstn_frames[frame_index].adv_len, NULL, 0);
+	uint8_t *p_encoded_advdata = edstn_frames[frame_index].adv_frame;
+	return sd_ble_gap_adv_data_set(p_encoded_advdata, edstn_frames[frame_index].adv_len, NULL, 0);
 }
 
 uint32_t Eddystone::eddystone_head_encode(uint8_t *p_encoded_data,
-                               uint8_t frame_type,
-                               uint8_t *p_len) {
-    // Check for buffer overflow.
-    if ((*p_len) + 12 > BLE_GAP_ADV_MAX_SIZE) {
-        return NRF_ERROR_DATA_SIZE;
-    }
+		uint8_t frame_type,
+		uint8_t *p_len) {
+	// Check for buffer overflow.
+	if ((*p_len) + 12 > BLE_GAP_ADV_MAX_SIZE) {
+		return NRF_ERROR_DATA_SIZE;
+	}
 
-    (*p_len) = 0;
-    p_encoded_data[(*p_len)++] = 0x02; // Length	Flags. CSS v5, Part A, § 1.3
-    p_encoded_data[(*p_len)++] = 0x01; // Flags data type value
-    p_encoded_data[(*p_len)++] = 0x06; // Flags data
-    p_encoded_data[(*p_len)++] = 0x03; // Length	Complete list of 16-bit Service UUIDs. Ibid. § 1.1
-    p_encoded_data[(*p_len)++] = 0x03; // Complete list of 16-bit Service UUIDs data type value
-    p_encoded_data[(*p_len)++] = 0xAA; // 16-bit Eddystone UUID
-    p_encoded_data[(*p_len)++] = 0xFE;
-    p_encoded_data[(*p_len)++] = 0x03; // Length	Service Data. Ibid. § 1.11
-    p_encoded_data[(*p_len)++] = 0x16; // Service Data data type value
-    p_encoded_data[(*p_len)++] = 0xAA; // 16-bit Eddystone UUID
-    p_encoded_data[(*p_len)++] = 0xFE;
-    p_encoded_data[(*p_len)++] = frame_type;
+	(*p_len) = 0;
+	p_encoded_data[(*p_len)++] = 0x02; // Length	Flags. CSS v5, Part A, § 1.3
+	p_encoded_data[(*p_len)++] = 0x01; // Flags data type value
+	p_encoded_data[(*p_len)++] = 0x06; // Flags data
+	p_encoded_data[(*p_len)++] = 0x03; // Length	Complete list of 16-bit Service UUIDs. Ibid. § 1.1
+	p_encoded_data[(*p_len)++] = 0x03; // Complete list of 16-bit Service UUIDs data type value
+	p_encoded_data[(*p_len)++] = 0xAA; // 16-bit Eddystone UUID
+	p_encoded_data[(*p_len)++] = 0xFE;
+	p_encoded_data[(*p_len)++] = 0x03; // Length	Service Data. Ibid. § 1.11
+	p_encoded_data[(*p_len)++] = 0x16; // Service Data data type value
+	p_encoded_data[(*p_len)++] = 0xAA; // 16-bit Eddystone UUID
+	p_encoded_data[(*p_len)++] = 0xFE;
+	p_encoded_data[(*p_len)++] = frame_type;
 
-    return NRF_SUCCESS;
+	return NRF_SUCCESS;
 }
 
 uint32_t Eddystone::eddystone_uint32(uint8_t *p_encoded_data,
-                          uint8_t *p_len,
-                          uint32_t val) {
-    if ((*p_len) + 4 > BLE_GAP_ADV_MAX_SIZE) {
-        return NRF_ERROR_DATA_SIZE;
-    }
+		uint8_t *p_len,
+		uint32_t val) {
+	if ((*p_len) + 4 > BLE_GAP_ADV_MAX_SIZE) {
+		return NRF_ERROR_DATA_SIZE;
+	}
 
-    p_encoded_data[(*p_len)++] = (uint8_t) (val >> 24u);
-    p_encoded_data[(*p_len)++] = (uint8_t) (val >> 16u);
-    p_encoded_data[(*p_len)++] = (uint8_t) (val >> 8u);
-    p_encoded_data[(*p_len)++] = (uint8_t) (val >> 0u);
+	p_encoded_data[(*p_len)++] = (uint8_t) (val >> 24u);
+	p_encoded_data[(*p_len)++] = (uint8_t) (val >> 16u);
+	p_encoded_data[(*p_len)++] = (uint8_t) (val >> 8u);
+	p_encoded_data[(*p_len)++] = (uint8_t) (val >> 0u);
 
-    return NRF_SUCCESS;
+	return NRF_SUCCESS;
 }
 
 uint32_t Eddystone::eddystone_uint16(uint8_t *p_encoded_data,
-                          uint8_t *p_len,
-                          uint16_t val) {
-    if ((*p_len) + 2 > BLE_GAP_ADV_MAX_SIZE) {
-        return NRF_ERROR_DATA_SIZE;
-    }
+		uint8_t *p_len,
+		uint16_t val) {
+	if ((*p_len) + 2 > BLE_GAP_ADV_MAX_SIZE) {
+		return NRF_ERROR_DATA_SIZE;
+	}
 
-    p_encoded_data[(*p_len)++] = (uint8_t) (val >> 8u);
-    p_encoded_data[(*p_len)++] = (uint8_t) (val >> 0u);
+	p_encoded_data[(*p_len)++] = (uint8_t) (val >> 8u);
+	p_encoded_data[(*p_len)++] = (uint8_t) (val >> 0u);
 
-    return NRF_SUCCESS;
+	return NRF_SUCCESS;
 }
 
 

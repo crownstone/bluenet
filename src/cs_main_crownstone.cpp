@@ -619,13 +619,13 @@ void Crownstone::startUp() {
 		nrf_delay_ms(bootDelay);
 	}
 
+#if EDDYSTONE==1
+	_eddystone->advertising_start();
+#else
 	//! start advertising
 	_stack->startAdvertising();
 	//! have to give the stack a moment of pause to start advertising, otherwise we get into race conditions
 	nrf_delay_ms(50);
-
-#if EDDYSTONE==1
-	_eddystone->advertising_start();
 #endif
 
 	//! the rest we only execute if we are in normal operation
@@ -680,7 +680,16 @@ void Crownstone::startUp() {
 		}
 //		BLEutil::print_heap("Heap startup: ");
 //		BLEutil::print_stack("Stack startup: ");
+
 	}
+
+	uint32_t err_code;
+	ble_gap_addr_t address;
+	err_code = sd_ble_gap_address_get(&address);
+	APP_ERROR_CHECK(err_code);
+
+	log(SERIAL_INFO, "BLE Address: ");	
+	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN);
 
 }
 
