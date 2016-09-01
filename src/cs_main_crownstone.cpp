@@ -237,14 +237,13 @@ void Crownstone::configure() {
 	setName();
 
 	LOGi("> advertisement ...");
+	//! configure advertising parameters
 #if EDDYSTONE==1
 	_eddystone = new Eddystone();
 	_eddystone->advertising_init();
 #else
-	//! configure advertising parameters
 	configureAdvertisement();
 #endif
-
 }
 
 /**

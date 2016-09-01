@@ -632,12 +632,23 @@ bool Nrf51822BluetoothStack::isAdvertising() {
 }
 
 void Nrf51822BluetoothStack::updateAdvertisement() {
+//      Why disabled?
 //	if (!_advertising)
 //		return;
 
-//	BLE_CALL(sd_ble_gap_adv_stop, ());
-	BLE_CALL(ble_advdata_set, (&_advdata, &_scan_resp));
-//	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
+	uint32_t err;
+	err = ble_advdata_set(&_advdata, &_scan_resp);
+
+	switch(err) {
+	//case NRF_ERROR_INVALID_PARAMETER:
+	case 0x07:
+		LOGi("Invalid advertisement configuration");
+		break;
+	default:
+	//	BLE_CALL(sd_ble_gap_adv_stop, ());
+		BLE_CALL(ble_advdata_set, (&_advdata, &_scan_resp));
+	//	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
+	}
 }
 
 void Nrf51822BluetoothStack::startScanning() {
