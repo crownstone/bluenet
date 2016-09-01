@@ -29,11 +29,15 @@ static ble_gap_adv_params_t m_adv_params;
 
 static uint8_t pdu_count = 0;
 
+/**
+ * If you choose a http or http_www url scheme prefix, make sure that the website resolves to an https site.
+ * You can use a shortener like  
+ */
 enum UrlSchemePrefix {
-	http_www  = 0x00,
-	https_www = 0x01,
+	http_www  = 0x00,   // make sure http redirects to an https site, or it won't visualize on 
+	https_www = 0x01, 
 	http      = 0x02,
-	https     = 0x03
+	https     = 0x03    // only https works on Android
 };
 
 /**
@@ -73,10 +77,6 @@ void Eddystone::advertising_start(void) {
 
 	err_code = sd_ble_gap_adv_start(&m_adv_params);
 	APP_ERROR_CHECK(err_code);
-
-	//  if there is a button that can be used to support the bonding
-	//    err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
-	//    APP_ERROR_CHECK(err_code);
 }
 
 void Eddystone::init_url_frame_buffer() {
@@ -86,25 +86,18 @@ void Eddystone::init_url_frame_buffer() {
 	eddystone_head_encode(encoded_advdata, 0x10, len_advdata);
 
 	encoded_advdata[(*len_advdata)++] = APP_MEASURED_RSSI;
-	encoded_advdata[(*len_advdata)++] = http;
 
-	encoded_advdata[(*len_advdata)++] = 'c';
-	encoded_advdata[(*len_advdata)++] = 'r';
-	encoded_advdata[(*len_advdata)++] = 'o';
-	encoded_advdata[(*len_advdata)++] = 'w';
-	encoded_advdata[(*len_advdata)++] = 'n';
-	encoded_advdata[(*len_advdata)++] = 's';
-	encoded_advdata[(*len_advdata)++] = 't';
-	encoded_advdata[(*len_advdata)++] = 'o';
-	encoded_advdata[(*len_advdata)++] = 'n';
-	encoded_advdata[(*len_advdata)++] = 'e';
-	encoded_advdata[(*len_advdata)++] = '.';
-	encoded_advdata[(*len_advdata)++] = 'r';
-	encoded_advdata[(*len_advdata)++] = 'o';
-	encoded_advdata[(*len_advdata)++] = 'c';
-	encoded_advdata[(*len_advdata)++] = 'k';
-	encoded_advdata[(*len_advdata)++] = 's';
-
+#ifdef USE_BITDO
+	encoded_advdata[(*len_advdata)++] = http; 
+	const std::string website = "bit.do/crownstone";
+#else
+	encoded_advdata[(*len_advdata)++] = https; 
+	const std::string website = "goo.gl/EzjCO3";	
+#endif
+	LOGi("Broadcast URL: %s", website.c_str());
+	memcpy(&encoded_advdata[*len_advdata], website.c_str(), website.length());
+	(*len_advdata) += website.length();
+	
 	encoded_advdata[0x07] = (*len_advdata) - 8; // Length	Service Data. Ibid. § 1.11
 }
 
