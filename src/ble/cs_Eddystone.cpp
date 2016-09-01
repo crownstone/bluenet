@@ -27,6 +27,13 @@ static ble_gap_adv_params_t m_adv_params;
 
 static uint8_t pdu_count = 0;
 
+enum UrlSchemePrefix {
+	http_www  = 0x00,
+	https_www = 0x01,
+	http      = 0x02,
+	https     = 0x03
+};
+
 /**
  * Initialization advertising as an Eddystone beacon. 
  * There are three frames, the UID, URL, and TML frames.
@@ -76,7 +83,8 @@ void Eddystone::init_url_frame_buffer() {
 	eddystone_head_encode(encoded_advdata, 0x10, len_advdata);
 
 	encoded_advdata[(*len_advdata)++] = APP_MEASURED_RSSI;
-	encoded_advdata[(*len_advdata)++] = 0x03; //< prefix: https://
+	encoded_advdata[(*len_advdata)++] = http;
+
 	encoded_advdata[(*len_advdata)++] = 'c';
 	encoded_advdata[(*len_advdata)++] = 'r';
 	encoded_advdata[(*len_advdata)++] = 'o';
