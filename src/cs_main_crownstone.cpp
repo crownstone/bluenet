@@ -237,8 +237,14 @@ void Crownstone::configure() {
 	setName();
 
 	LOGi("> advertisement ...");
+#if EDDYSTONE==1
+	_eddystone = new Eddystone();
+	_eddystone->advertising_init();
+#else
 	//! configure advertising parameters
 	configureAdvertisement();
+#endif
+
 }
 
 /**
@@ -377,11 +383,6 @@ void Crownstone::configureStack() {
 		sd_power_gpregret_clr(0xFF);
 
 	});
-
-#if EDDYSTONE==1
-	_eddystone = new Eddystone();
-	_eddystone->advertising_init();
-#endif
 
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
