@@ -344,6 +344,7 @@ void Crownstone::configureStack() {
 	//! Set the stored tx power
 	int8_t txPower;
 	_settings->get(CONFIG_TX_POWER, &txPower);
+	LOGi("Set TX power to %i", txPower);
 	_stack->setTxPowerLevel(txPower);
 
 	//! Set the stored advertisement interval

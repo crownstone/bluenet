@@ -21,8 +21,6 @@
 
 #define APP_MEASURED_RSSI               0xC3                              /**< The Beacon's measured RSSI at 1 meter distance in dBm. */
 
-#define EDDYSTONE_TX_POWER_LEVEL        4 /**< TX power level for Eddystone */
-
 static edstn_frame_t edstn_frames[3];
 
 static ble_gap_adv_params_t m_adv_params; 
@@ -62,7 +60,6 @@ void Eddystone::advertising_init(void) {
 	m_adv_params.fp = BLE_GAP_ADV_FP_ANY;
 	m_adv_params.interval = NON_CONNECTABLE_ADV_INTERVAL;
 	m_adv_params.timeout = APP_CFG_NON_CONN_ADV_TIMEOUT;
-	m_adv_params.tx_power_level = EDDYSTONE_TX_POWER_LEVEL;
 }
 
 /**

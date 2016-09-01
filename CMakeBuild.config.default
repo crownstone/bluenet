@@ -67,7 +67,7 @@ BEACON_RSSI=0xC4
 
 # Set to 1 to enable encryption of BLE Link (reading and writing to characteristics
 # needs bonding first)
-ENCRYPTION=0
+ENCRYPTION=1
 # the default passkey used for bonding. can be changed with configuration charac
 STATIC_PASSKEY="123456"
 
