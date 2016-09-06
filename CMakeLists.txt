@@ -311,6 +311,16 @@ ELSE()
 		DEPENDS ${PROJECT_NAME}
 		COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
 
+	ADD_CUSTOM_TARGET(generate-dat
+		COMMAND echo
+		COMMAND echo "*** Use srec_cat to create the INIT .dat file for the DFU"
+		COMMAND echo
+		COMMAND echo "srec_cat ${PROJECT_NAME}.hex -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o ${PROJECT_NAME}.dat -intel"
+		COMMAND srec_cat ${PROJECT_NAME}.hex -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o ${PROJECT_NAME}.dat -intel
+		DEPENDS ${PROJECT_NAME}.tmp
+		COMMENT "Generate the INIT .dat file for the DFU"
+		)
+
 	ADD_CUSTOM_TARGET(combine
 		COMMAND echo
 		COMMAND echo "*** Use srec_cat to create one combined softdevice+app file"
