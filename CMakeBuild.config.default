@@ -16,7 +16,6 @@ FIRMWARE_VERSION="0.6.0"
 # DEVICE_GUIDESTONE  2
 # DEVICE_FRIDGE      3
 DEVICE_TYPE=DEVICE_CROWNSTONE
-#DEVICE_TYPE=DEVICE_GUIDESTONE
 
 # To avoid confusion when trying to enable functionality through compiler flags, the
 # persistent storage for flags is disabled by default, set to 0 if enabling disabling functionality through
@@ -24,8 +23,8 @@ DEVICE_TYPE=DEVICE_CROWNSTONE
 PERSISTENT_FLAGS_DISABLED=1
 
 # Enable or disable meshing (1 or 0)
-MESHING=0
-BUILD_MESHING=0
+MESHING=1
+BUILD_MESHING=1
 
 # Use separate github repository https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh/
 USE_MESH_REPOSITORY=1

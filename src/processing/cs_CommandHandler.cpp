@@ -306,26 +306,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			return ERR_WRONG_PARAMETER;
 		}
 
-//		if (resetCode == FACTORY_RESET_CODE) {
-////			LOGf("factory reset");
-//
-//			Settings::getInstance().factoryReset(resetCode);
-//			State::getInstance().factoryReset(resetCode);
-//			// todo: might not be neccessary if we only use dm in setup mode we can handle it specifically
-//			//   there. maybe with a mode factory reset
-//			// todo: remove stack again from CommandHandler if we don't need it here
-//			Nrf51822BluetoothStack::getInstance().device_manager_reset();
-//
-//			LOGi("factory reset done, rebooting device in 2s ...");
-//
-//			resetDelayed(GPREGRET_SOFT_RESET);
-//
-//		} else {
-//			LOGi("wrong code received: %p", resetCode);
-////			LOGi("factory reset code is: %p", FACTORY_RESET_CODE);
-//			return ERR_WRONG_PARAMETER;
-//		}
-
 		break;
 	}
 	case CMD_SET_TIME: {

@@ -93,7 +93,7 @@ bool FactoryReset::recover(uint32_t resetCode) {
 }
 
 bool FactoryReset::validateResetCode(uint32_t resetCode) {
-	return resetCode != FACTORY_RESET_CODE;
+	return resetCode == FACTORY_RESET_CODE;
 }
 
 bool FactoryReset::factoryReset(uint32_t resetCode) {
