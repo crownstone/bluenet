@@ -475,12 +475,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// Crownstone specific commands are only available if device type is set to Crownstone.
 	// E.g. GuideStone does not support power measure or switching commands
-	case CMD_SWITCH: {
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "switch");
-		// for now, same as pwm, but switch command should decide itself if relay or
-		// pwm is used
-	}
 	case CMD_PWM: {
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "PWM");
@@ -499,6 +493,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			Switch::getInstance().setPwm(value);
 		}
 		break;
+	}
+	case CMD_SWITCH: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "switch");
+		// For now, same as relay, but switch command should decide itself if relay or pwm is used
 	}
 	case CMD_RELAY: {
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
