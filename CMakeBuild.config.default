@@ -20,7 +20,7 @@ DEVICE_TYPE=DEVICE_CROWNSTONE
 # To avoid confusion when trying to enable functionality through compiler flags, the
 # persistent storage for flags is disabled by default, set to 0 if enabling disabling functionality through
 # the characteristics / command should be persistently stored!
-PERSISTENT_FLAGS_DISABLED=1
+PERSISTENT_FLAGS_DISABLED=0
 
 # Enable or disable meshing (1 or 0)
 MESHING=1
