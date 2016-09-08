@@ -9,6 +9,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
 #include <storage/cs_Settings.h>
+#include "drivers/cs_Timer.h"
 
 #include <algorithm>
 
@@ -50,6 +51,7 @@ void State::init() {
 	ps_state_t state;
 
 	bool defaultOn = Settings::getInstance().isSet(CONFIG_DEFAULT_ON);
+	// TODO: why use pwm for this?
 	switch_state_storage_t defaultSwitchState = defaultOn ? 100 : 0; // 100 for pwm
 
 #ifdef SWITCH_STATE_PERSISTENT

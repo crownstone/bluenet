@@ -37,7 +37,8 @@ BLUENET_BUILD_DIR=$HOME/workspace/bluenet-build
 IBEACON=1
 
 # Set if crownstone should set power on by default when turning on
-DEFAULT_ON=1
+# TODO: remove this?
+DEFAULT_ON=0
 
 # Sample continuously at a low sample rate (100Hz by default).
 # Disables burst sampling.

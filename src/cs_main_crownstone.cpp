@@ -647,6 +647,8 @@ void Crownstone::startUp() {
 		_stack->startTicking();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
+		_switch->start();
+
 		// restore the last value. the switch reads the last state from the storage, but does
 		// not automatically update the pwm/relay values. so we read out the last value
 		// and set it again to update the pwm

@@ -36,6 +36,8 @@ public:
 
 	void init();
 
+	void start();
+
 	void pwmOff();
 
 	void pwmOn();
