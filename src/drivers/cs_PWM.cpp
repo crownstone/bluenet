@@ -10,6 +10,7 @@
 #include <drivers/cs_Serial.h>
 #include <cfg/cs_Strings.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_Boards.h>
 
 //#define PRINT_PWM_VERBOSE
 
@@ -128,6 +129,8 @@ app_pwm_config_t PWM::config1Ch(uint32_t period, uint32_t pin) {
 
 #ifdef SWITCH_INVERSED
 	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
+#else
+	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
 #endif
 
 	return cfg;
@@ -139,6 +142,9 @@ app_pwm_config_t PWM::config2Ch(uint32_t period, uint32_t pin1, uint32_t pin2) {
 #ifdef SWITCH_INVERSED
 	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
 	cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_HIGH;
+#else
+	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
+	cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_LOW;
 #endif
 
 	return cfg;
