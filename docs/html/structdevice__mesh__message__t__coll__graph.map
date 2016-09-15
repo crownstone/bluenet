@@ -1,0 +1,8 @@
+<map id="device_mesh_message_t" name="device_mesh_message_t">
+<area shape="rect" id="node2" href="$structconfig__mesh__message__t.html" title="Config mesh message. " alt="" coords="17,5,183,32"/>
+<area shape="rect" id="node3" href="$structbeacon__mesh__message__t.html" title="Beacon mesh message. " alt="" coords="13,56,187,83"/>
+<area shape="rect" id="node4" href="$structpower__mesh__message__t.html" title="TODO: use command message instead. " alt="" coords="17,107,183,133"/>
+<area shape="rect" id="node5" href="$structcommand__mesh__message__t.html" title="Command mesh message. " alt="" coords="5,157,195,184"/>
+<area shape="rect" id="node6" href="$structdevice__mesh__header__t.html" title="Device mesh header. " alt="" coords="22,208,178,235"/>
+<area shape="rect" id="node7" href="$structevent__mesh__message__t.html" title="Event mesh message. " alt="" coords="18,259,182,285"/>
+</map>

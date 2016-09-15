@@ -1,0 +1,424 @@
+// See: http://www.ffnn.nl/pages/articles/media/uml-diagrams-using-graphviz-dot.php
+// Also see: http://stackoverflow.com/questions/6171344/graphviz-record-node-with-a-bold-title
+
+digraph G {
+	label = "UML";
+	labelloc = "t";
+	nodesep = 1.0;
+//	splines = "ortho";
+//	splines = "curved";
+//	splines = "polyline";
+	splines = "spline";
+
+
+	node [
+		fontname = "Monospace"
+		fontsize = 10
+		shape = "Mrecord"
+	]
+
+	edge [
+		dir = "back"
+	]
+
+/*
+	Test [label="{ b |{c|<here> d|e}| f}", shape="record"];
+
+	TestService [
+		label="{TestService\
+|{int\lfloat | bla\lfoor}\
+}",
+	];
+*/
+
+
+// ----------------------------------------------
+// GeneralService
+// ----------------------------------------------
+	GeneralService [
+		label="{GeneralService\n\n\
+|<Characteristic>Characteristic&lt;int32_t&gt;*                    _temperatureCharacteristic\l\
+|<Characteristic>Characteristic&lt;string&gt;*                       _nameCharacteristic\l\
+|Characteristic&lt;string&gt;*                                       _deviceTypeCharacteristic\l\
+|Characteristic&lt;string&gt;*                                       _roomCharacteristic\l\
+|Characteristic&lt;int32_t&gt;*                                      _firmwareCharacteristic\l\
+|<MeshMessage>Characteristic&lt;MeshMessage&gt;*                     _meshCharacteristic\l\
+|<StreamBuffer>Characteristic&lt;StreamBuffer&lt;uint8_t&gt;&gt;*    _setConfigurationCharacteristic\l\
+|Characteristic&lt;int32_t&gt;*                                      _selectConfigurationCharacteristic\l\
+|<StreamBuffer>Characteristic&lt;StreamBuffer&lt;uint8_t&gt;&gt;*    _getConfigurationCharacteristic\l\
+|<pstorage_handle_t>pstorage_handle_t                                _storageHandle\l\
+|<ps_general_service_t>ps_general_service_t                          _storageStruct\l\
+}",
+	];
+
+// ----------------------------------------------
+// PowerService
+// ----------------------------------------------
+	PowerService [
+		label="{PowerService\n\n\
+|<Characteristic>Characeristic&lt;uint8_t&gt;*         _currentLimitCharacteristic\l\
+|Characteristic&lt;uint16_t&gt;*                       _currentConsumptionCharacteristic\l\
+|<CurrentCurve>Characteristic&lt;CurrentCurve&gt;*     _currentCurveCharacteristic\l\
+|Characteristic&lt;uint8_t&gt;*                        _pwmCharacteristic\l\
+|<CurrentLimit>CurrentLimit                            _currentLimit\l\
+|<CurrentCurve>CurrentCurve                            _currentCurve\l\
+|<pstorage_handle_t>pstorage_handle_t                  _storageHandle\l\
+|<ps_power_service_t>ps_power_service_t                _storageStruct\l\
+}",
+	];
+
+// ----------------------------------------------
+// IndoorLocalizationService
+// ----------------------------------------------
+	IndoorLocalizationService [
+		label="{IndoorLocalizationService\n\n\
+|<Characteristic>Characteristic&lt;int8_t&gt;*                     _rssiCharac\l\
+|<ScanResult>Characteristic&lt;ScanResult&gt;*                       _peripheralCharac\l\
+|<TrackedDeviceList>Characteristic&lt;TrackedDeviceList&gt;*         _trackedDeviceListCharac\l\
+|<TrackedDevice>Characteristic&lt;TrackedDevice&gt;*                 _trackedDeviceCharac\l\
+|<ScanResult>ScanResult*                                             _scanResult\l\
+|<TrackedDeviceList>TrackedDeviceList*                               _trackedDeviceList\l\
+|<pstorage_handle_t>pstorage_handle_t                                _storageHandle\l\
+|<ps_indoorlocalisation_service_t>ps_indoorlocalisation_service_t    _storageStruct\l\
+}",
+	];
+
+
+// ----------------------------------------------
+// Service
+// ----------------------------------------------
+	Service [
+		label="{Service\n\n\
+|const char*             defaultServiceName\l\
+|BLEStack*               _stack\l\
+|<UUID>UUID              _uuid\l\
+|string                  _name\l\
+|bool                    _primary\l\
+|uint16_t                _service_handle\l\
+|bool                    _started\l\
+}"
+	];
+
+// ----------------------------------------------
+// GenericService
+// ----------------------------------------------
+	GenericService [
+		label="{GenericService\n\n\
+|<CharacteristicBase>fixed_tuple&lt;CharacteristicBase*, MAX_CHARACTERISTICS&gt;         _characteristics\l\
+|<CharacteristicStatus>vector&lt;CharacteristicStatus&gt;                                characStatus\l\
+}"
+	];
+
+// ----------------------------------------------
+// CharacteristicStatus
+// ----------------------------------------------
+	CharacteristicStatus [
+		label="{CharacteristicStatus\n\n\
+|string        name\l\
+|uint8_t       UUID\l\
+|bool          enabled\l\
+}"
+	];
+
+// ----------------------------------------------
+// CharacteristicBase
+// ----------------------------------------------
+	CharacteristicBase [
+		label="{CharacteristicBase\n\n\
+|<UUID>UUID                                                _uuid\l\
+|string                                                    _name\l\
+|<ble_gap_conn_sec_mode_t>ble_gap_conn_sec_mode_t          _readperm\l\
+|<ble_gap_conn_sec_mode_t>ble_gap_conn_sec_mode_t          _writeperm\l\
+|<ble_gatts_char_handles_t>ble_gatts_char_handles_t        _handles\l\
+|<Service>Service*                                         _service\l\
+|bool                                                      _inited\l\
+|bool                                                      _notifies\l\
+|bool                                                      _writable\l\
+|uint16_t                                                  _unit\l\
+|uint32_t                                                  _updateIntervalMsecs\l\
+|bool                                                      _notifyingEnabled\l\
+|bool                                                      _indicates\l\
+}"
+	];
+
+
+// ----------------------------------------------
+// CharacteristicValue
+// ----------------------------------------------
+	CharacteristicValue [
+		label="{CharacteristicValue&lt;T&gt;\n\n\
+|uint16_t                   length\l\
+|uint8_t*                   data\l\
+|bool                       freeOnDestroy\l\
+}"
+	];
+
+// ----------------------------------------------
+// Characteristic
+// ----------------------------------------------
+	Characteristic [
+		label="{Characteristic&lt;T&gt;\n\n\
+|T                          _value\l\
+|callback_on_write_t        _callbackOnWrite\l\
+|callback_on_read_t         _callbackOnRead\l\
+}"
+	];
+
+
+// ----------------------------------------------
+// Characteristic
+// ----------------------------------------------
+	Characteristic [
+		label="{Characteristic&lt;T, E&gt;\n\n\
+|<CharacteristicValue>CharacteristicValue                  getCharacteristicValue()\l\
+|void                                                      setCharacteristicValue(const CharacteristicValue& value)\l\
+}"
+	];
+
+/*
+// ----------------------------------------------
+// Characteristic_Serializable
+// ----------------------------------------------
+	Characteristic_Serializable [
+		label="{Characteristic&lt;T, Serializable&gt;\n\n\
+|uint8_t*              _buffer\l\
+|bool                  _notificationPending\l\
+}"
+	];
+*/
+
+// ----------------------------------------------
+// Serializable
+// ----------------------------------------------
+	Serializable [
+		label="{Serializable\n\n\
+|uint16_t                    getSerializedLength()\l\
+|uint16_t                    getMaxLength()\l\
+|void                        serialize(uint8_t* buffer, uint16_t length)\l\
+|void                        deserialize(uint8_t* buffer, uint16_t length)\l\
+}"
+	];
+
+// ----------------------------------------------
+// MeshMessage
+// ----------------------------------------------
+	MeshMessage
+
+// ----------------------------------------------
+// peripheral_device_t
+// ----------------------------------------------
+	peripheral_device_t [
+		label="{peripheral_device_t\n\n\
+|uint8_t*                               addr[BLE_GAP_ADDR_LEN]\l\
+|uint16_t*                              occurrences\l\
+|uint8_t*                               rssi\l\
+}",
+	];
+
+// ----------------------------------------------
+// ScanResult
+// ----------------------------------------------
+	ScanResult [
+		label="{ScanResult\n\n\
+|<peripheral_device_t>+peripheral_device_t*       _list\l\
+}",
+	];
+
+// ----------------------------------------------
+// StreamBuffer
+// ----------------------------------------------
+	StreamBuffer
+
+// ----------------------------------------------
+// TrackedDeviceList
+// ----------------------------------------------
+	TrackedDeviceList
+	TrackedDeviceList [
+		label="{TrackedDeviceList\n\n\
+|<tracked_device_t>tracked_device_t*             _list\l\
+}",
+	];
+
+// ----------------------------------------------
+// TrackedDevice
+// ----------------------------------------------
+	TrackedDevice [
+		label="{TrackedDevice\n\n\
+|<tracked_device_t>tracked_device_t              _trackedDevice\l\
+}",
+	];
+
+// ----------------------------------------------
+// tracked_device_t
+// ----------------------------------------------
+	tracked_device_t [
+		label="{tracked_device_t\n\n\
+|uint8_t*                                        addr[BLE_GAP_ADDR_LEN]\l\
+|int8_t*                                         rssiThreshold\l\
+|uint16_t*                                       counter\l\
+}",
+	];
+
+// ----------------------------------------------
+// CurrentCurve
+// ----------------------------------------------
+	CurrentCurve [
+		label="{CurrentCurve\n\n\
+|uint16_t                                        _plength\l\
+|uint8_t*                                        _payload\l\
+}",
+	];
+
+// ----------------------------------------------
+// Dispatcher
+// ----------------------------------------------
+	Dispatcher
+
+// ----------------------------------------------
+// RealTimeClock
+// ----------------------------------------------
+	RealTimeClock
+
+// ----------------------------------------------
+// ADC
+// ----------------------------------------------
+	ADC [
+		label="{ADC\n\n\
+|<AdcSamples>AdcSamples*                         adcSamples\l\
+|<RealTimeClock>RealTimeClock*                   _clock\l\
+}",
+	];
+
+// ----------------------------------------------
+// LPComp
+// ----------------------------------------------
+	LPComp
+
+// ----------------------------------------------
+// AdcSamples
+// ----------------------------------------------
+	AdcSamples [
+		label="{AdcSamples\n\n\
+|<DifferentialBuffer>DifferentialBuffer&lt;uint16_t&gt;*               _voltageBuf\l\
+|DifferentialBuffer&lt;uint32_t&gt;*                                    _timestampBuf\l\
+}",
+	];
+
+// ----------------------------------------------
+// DifferentialBuffer
+// ----------------------------------------------
+	DifferentialBuffer [
+		label="{DifferentialBuffer&lt;T&gt;\n\n\
+|uint8_t*                                        _array\l\
+|T                                               _firstVal\l\
+|T                                               _lastVal\l\
+|uint16_t                                        _capacity\l\
+|uint16_t                                        _...\l\
+}",
+	];
+
+
+// ----------------------------------------------
+// CircularBuffer
+// ----------------------------------------------
+	CircularBuffer [
+		label="{CircularBuffer&lt;T&gt;\n\n\
+|T*                                              _array\l\
+|uint16_t                                        _capacity\l\
+|uint16_t                                        _...\l\
+}",
+	];
+
+// ----------------------------------------------
+// CurrentLimit
+// ----------------------------------------------
+	CurrentLimit
+
+// ----------------------------------------------
+// Listener
+// ----------------------------------------------
+	Listener
+
+
+	// ********************************
+	// Inheritance connections
+	// ********************************
+	Service -> GenericService
+	GenericService -> GeneralService
+	GenericService -> PowerService
+	GenericService -> IndoorLocalizationService
+	GenericService -> BatteryService
+	Dispatcher -> RealTimeClock
+	Dispatcher -> ADC
+	Dispatcher -> LPComp
+	Serializable -> ScanResult
+	Serializable -> StreamBuffer
+	Serializable -> TrackedDeviceList
+	Serializable -> TrackedDevice
+	Serializable -> CurrentCurve
+	CharacteristicBase -> Characteristic
+	Characteristic -> Characteristic
+	Listener -> CurrentLimit
+
+
+	// ********************************
+	// Specialized versions of Characteristic
+	// ********************************
+	Characteristic -> MeshMessage [arrowtail="dot"]
+//	Characteristic -> Characteristic_Serializable [arrowtail="dot"]
+	Characteristic -> Serializable [arrowtail="dot"]
+
+
+	// ********************************
+	// Connections of member variables to class nodes
+	// ********************************
+	CharacteristicBase -> GenericService:CharacteristicBase [style="dashed" arrowtail="dot"]
+	CharacteristicStatus -> GenericService:CharacteristicStatus [style="dashed" arrowtail="dot"]
+
+//	Characteristic -> GeneralService:Characteristic [style="dashed" arrowtail="dot"]
+//	Characteristic -> GeneralService:Characteristic [style="dashed" arrowtail="dot"]
+	MeshMessage -> GeneralService:MeshMessage [style="dashed" arrowtail="dot"]
+	StreamBuffer -> GeneralService:StreamBuffer [style="dashed" arrowtail="dot"]
+
+//	Characteristic -> PowerService:Characteristic [style="dashed" arrowtail="dot"]
+	CurrentCurve -> PowerService:CurrentCurve [style="dashed" arrowtail="dot"]
+	CurrentLimit -> PowerService:CurrentLimit [style="dashed" arrowtail="dot"]
+
+//	Characteristic -> IndoorLocalizationService:Characteristic [style="dashed" arrowtail="dot"]
+//	Characteristic -> IndoorLocalizationService:Characteristic [style="dashed" arrowtail="dot"]
+	ScanResult -> IndoorLocalizationService:ScanResult [style="dashed" arrowtail="dot"]
+	TrackedDeviceList -> IndoorLocalizationService:TrackedDeviceList [style="dashed" arrowtail="dot"]
+	TrackedDevice -> IndoorLocalizationService:TrackedDevice [style="dashed" arrowtail="dot"]
+
+	DifferentialBuffer -> AdcSamples:DifferentialBuffer [style="dashed" arrowtail="dot"]
+	AdcSamples -> ADC:AdcSamples [style="dashed" arrowtail="dot"]
+	RealTimeClock -> ADC:RealTimeClock [style="dashed" arrowtail="dot"]
+	peripheral_device_t -> ScanResult:peripheral_device_t [style="dashed" arrowtail="dot"]
+	tracked_device_t -> TrackedDevice:tracked_device_t [style="dashed" arrowtail="dot"]
+	tracked_device_t -> TrackedDeviceList:tracked_device_t [style="dashed" arrowtail="dot"]
+
+	CharacteristicValue -> Characteristic:CharacteristicValue [style="dashed" arrowtail="dot"]
+
+/*
+	AllocatedBuffer
+	CurrentLimit-> Listener
+//	Characteristic<T, typename std::enable_if<std::is_base_of<Serializable, T>::value >::type> -> Characteristic<T>
+	Characteristic -> Characteristic
+	Dimming-> Listener
+	BLEStack
+	BLEStack
+	Nrf51822BluetoothStack -> BLEStack
+	Listener
+	Dispatcher
+	IBeacon
+	Storage
+	PWM
+	RNG
+	UUID
+	ble_exception -> std_exception
+	function
+//	function<Result (Arguments...)>
+	CMesh
+	MeshControl
+*/
+}
