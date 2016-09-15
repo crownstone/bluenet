@@ -1,8 +1,0 @@
-<map id="hub_mesh_message_t" name="hub_mesh_message_t">
-<area shape="rect" id="node2" href="$structtest__mesh__message__t.html" title="Test mesh message. " alt="" coords="235,5,390,32"/>
-<area shape="rect" id="node3" href="$structmesh__header__t.html" title="mesh header " alt="" coords="257,56,368,83"/>
-<area shape="rect" id="node4" href="$structpower__samples__cont__message__t.html" title="91 bytes in total " alt="" coords="240,107,385,149"/>
-<area shape="rect" id="node5" href="$structservice__data__mesh__message__t.html" title="service_data_mesh_message_t" alt="" coords="209,173,416,200"/>
-<area shape="rect" id="node6" href="$structscan__mesh__message__t.html" title="Scan mesh message. " alt="" coords="233,224,393,251"/>
-<area shape="rect" id="node7" href="$structperipheral__device__t.html" title="Structure used to store peripheral devices detected during a scan. " alt="" coords="5,224,140,251"/>
-</map>

@@ -1,0 +1,6 @@
+<map id="hub_mesh_message_t" name="hub_mesh_message_t">
+<area shape="rect" id="node2" href="$structtest__mesh__message__t.html" title="Test mesh message. " alt="" coords="4,96,157,123"/>
+<area shape="rect" id="node3" href="$structhub__mesh__header__t.html" title="Hub mesh header. " alt="" coords="183,96,321,123"/>
+<area shape="rect" id="node4" href="$structscan__mesh__message__t.html" title="Scan mesh message. " alt="" coords="345,96,504,123"/>
+<area shape="rect" id="node5" href="$structperipheral__device__t.html" title="Structure used to store peripheral devices detected during a scan. " alt="" coords="358,5,492,32"/>
+</map>

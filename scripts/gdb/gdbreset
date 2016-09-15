@@ -1,5 +1,0 @@
-target remote localhost:2331
-set remote memory-write-packet-size 1024
-monitor reset
-monitor go
-q

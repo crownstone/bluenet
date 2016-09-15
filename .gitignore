@@ -1,9 +1,0 @@
-CMakeBuild.config
-CMakeBuild.config.s*
-tags
-.cproject
-.project
-build/
-*~
-.idea/
-.settings/
