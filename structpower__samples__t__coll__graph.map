@@ -1,0 +1,4 @@
+<map id="power_samples_t" name="power_samples_t">
+<area shape="rect" id="node2" href="$structstack__buffer__fixed__t.html" title="stack_buffer_fixed\l_t\&lt; uint16_t, POWER\l_SAMPLE_BURST_NUM_SAMPLES \&gt;" alt="" coords="5,5,261,61"/>
+<area shape="rect" id="node3" href="$structdifferential__buffer__fixed__t.html" title="differential_buffer\l_fixed_t\&lt; uint32_t,\l POWER_SAMPLE_BURST_NUM\l_SAMPLES \&gt;" alt="" coords="19,86,248,157"/>
+</map>

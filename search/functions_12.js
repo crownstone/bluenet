@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['writestorage',['writeStorage',['../classStorage.html#a558e1d24209771635f98d5516e0cca0a',1,'Storage']]],
-  ['writetoconfigcharac',['writeToConfigCharac',['../classGeneralService.html#aa142a9e9556c8c24f986312ec7bfd7b4',1,'GeneralService']]],
-  ['writetotemperaturecharac',['writeToTemperatureCharac',['../classGeneralService.html#a130f9ad33a2689eaa5c87061696629b9',1,'GeneralService']]]
+  ['_7ebufferaccessor',['~BufferAccessor',['../classBufferAccessor.html#a012a181514aae89ffaf810ed394523b3',1,'BufferAccessor']]],
+  ['_7echaracteristicbase',['~CharacteristicBase',['../classCharacteristicBase.html#a8fe8ea90a4ebff6056992ffb0a67153b',1,'CharacteristicBase']]],
+  ['_7echaracteristicgeneric',['~CharacteristicGeneric',['../classCharacteristicGeneric.html#a9cb7b4f243a1579eb2bc16b43fa61467',1,'CharacteristicGeneric']]],
+  ['_7ecircularbuffer',['~CircularBuffer',['../classCircularBuffer.html#a01861c6bbf055b5bff4055c425b5036a',1,'CircularBuffer']]],
+  ['_7ecirculardifferentialbuffer',['~CircularDifferentialBuffer',['../classCircularDifferentialBuffer.html#afe3becdfd984646f3b7535a9440a83ba',1,'CircularDifferentialBuffer']]],
+  ['_7eservice',['~Service',['../classService.html#aa173db92a095e3198256fcd6b9b47d9d',1,'Service']]]
 ];

@@ -1,4 +1,4 @@
 <map id="ps_configuration_t" name="ps_configuration_t">
-<area shape="rect" id="node2" href="$structps__storage__base__t.html" title="Base class for storage structures. " alt="" coords="5,13,136,40"/>
-<area shape="rect" id="node3" href="$structps__configuration__t_1_1ps__beacon__t.html" title="beacon " alt="" coords="161,6,289,47"/>
+<area shape="rect" id="node2" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="5,13,137,39"/>
+<area shape="rect" id="node3" href="$structps__configuration__t_1_1ps__beacon__t.html" title="beacon " alt="" coords="162,5,290,47"/>
 </map>

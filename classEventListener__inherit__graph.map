@@ -1,7 +1,16 @@
 <map id="EventListener" name="EventListener">
-<area shape="rect" id="node2" href="$classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. " alt="" coords="5,80,96,107"/>
-<area shape="rect" id="node3" href="$classFridge.html" title="Fridge generates an event when its temperature is out of range. " alt="" coords="121,80,179,107"/>
-<area shape="rect" id="node4" href="$classMeshControl.html" title="Author: Dominik Egger Author: Anne van Rossum Copyright: Distributed Organisms B.V. " alt="" coords="204,80,300,107"/>
-<area shape="rect" id="node5" href="$classScanner.html" title="Scanner scans for BLE devices. " alt="" coords="325,80,395,107"/>
-<area shape="rect" id="node6" href="$classTemperatureGuard.html" title="Protection against temperature exceeding certain threshold. " alt="" coords="419,80,548,107"/>
+<area shape="rect" id="node2" href="$classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. " alt="" coords="195,5,287,32"/>
+<area shape="rect" id="node3" href="$classCrownstoneService.html" title="General Service for the Crownstone. " alt="" coords="173,56,309,83"/>
+<area shape="rect" id="node5" href="$classEncryptionHandler.html" title="EncryptionHandler" alt="" coords="177,107,306,133"/>
+<area shape="rect" id="node6" href="$classGeneralService.html" title="General Service for the Crownstone. " alt="" coords="186,157,297,184"/>
+<area shape="rect" id="node7" href="$classIndoorLocalizationService.html" title="The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc. " alt="" coords="156,208,327,235"/>
+<area shape="rect" id="node8" href="$classMeshControl.html" title="Author: Dominik Egger Author: Anne van Rossum Copyright: Distributed Organisms B.V. " alt="" coords="193,259,289,285"/>
+<area shape="rect" id="node9" href="$classPowerService.html" title="PowerService controls the relays on the Crownstone. " alt="" coords="190,309,293,336"/>
+<area shape="rect" id="node10" href="$classScanner.html" title="Scanner scans for BLE devices. " alt="" coords="206,360,277,387"/>
+<area shape="rect" id="node11" href="$classScheduleService.html" title="ScheduleService organizes ticks for all components for non&#45;urgent timing. " alt="" coords="181,411,301,437"/>
+<area shape="rect" id="node12" href="$classServiceData.html" title="ServiceData" alt="" coords="194,461,289,488"/>
+<area shape="rect" id="node13" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="208,512,275,539"/>
+<area shape="rect" id="node14" href="$classTemperatureGuard.html" title="Protection against temperature exceeding certain threshold. " alt="" coords="176,563,307,589"/>
+<area shape="rect" id="node15" href="$classTracker.html" title="Tracker" alt="" coords="208,613,275,640"/>
+<area shape="rect" id="node4" href="$classSetupService.html" title="Author: Dominik Egger Copyright: Distributed Organisms B.V. " alt="" coords="375,56,475,83"/>
 </map>

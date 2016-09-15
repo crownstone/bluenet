@@ -1,18 +1,10 @@
 <map id="GeneralService" name="GeneralService">
-<area shape="rect" id="node2" href="$classBLEpp_1_1Service.html" title="Service as defined in the GATT Specification. " alt="" coords="1083,173,1197,200"/>
-<area shape="rect" id="node14" href="$classBLEpp_1_1CharacteristicBase.html" title="Non&#45;template base class for Characteristics. " alt="" coords="1299,92,1479,119"/>
-<area shape="rect" id="node3" href="$classfixed__tuple.html" title="fixed_tuple\&lt; BLEpp\l::CharacteristicBase\l *, MAX_CHARACTERISTICS \&gt;" alt="" coords="720,225,936,281"/>
-<area shape="rect" id="node4" href="$classtuple.html" title="tuple\&lt; BLEpp::Characteristic\lBase * \&gt;" alt="" coords="419,233,610,274"/>
-<area shape="rect" id="node6" href="$classBLEpp_1_1UUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. " alt="" coords="777,99,879,125"/>
-<area shape="rect" id="node7" href="$classBLEpp_1_1Nrf51822BluetoothStack.html" title="nRF51822 specific implementation of the BLEStack " alt="" coords="739,161,917,202"/>
-<area shape="rect" id="node8" href="$classBLEpp_1_1BLEStack.html" title="BLEStack defines a chip&#45;agnostic Bluetooth Low&#45;Energy stack. " alt="" coords="451,175,579,201"/>
-<area shape="rect" id="node9" href="$classfixed__tuple.html" title="fixed_tuple\&lt; BLEpp\l::Service *, MAX_SERVICE\l_COUNT \&gt;" alt="" coords="421,95,608,151"/>
-<area shape="rect" id="node10" href="$classtuple.html" title="tuple\&lt; BLEpp::Service * \&gt;" alt="" coords="193,109,367,136"/>
-<area shape="rect" id="node12" href="$classBLEpp_1_1Characteristic_3_01buffer__ptr__t_01_4.html" title="This template implements the functions specific for a pointer to a buffer. " alt="" coords="1777,74,1927,115"/>
-<area shape="rect" id="node13" href="$classBLEpp_1_1CharacteristicGeneric.html" title="BLEpp::CharacteristicGeneric\l\&lt; buffer_ptr_t \&gt;" alt="" coords="1531,74,1725,115"/>
-<area shape="rect" id="node17" href="$classBLEpp_1_1CharacteristicGeneric.html" title="BLEpp::CharacteristicGeneric\l\&lt; int32_t \&gt;" alt="" coords="1531,139,1725,181"/>
-<area shape="rect" id="node19" href="$classBLEpp_1_1CharacteristicGeneric.html" title="BLEpp::CharacteristicGeneric\l\&lt; uint8_t \&gt;" alt="" coords="1531,9,1725,50"/>
-<area shape="rect" id="node15" href="$structBLEpp_1_1Status.html" title="Status of a Characteristic. " alt="" coords="1087,41,1193,68"/>
-<area shape="rect" id="node16" href="$classBLEpp_1_1Characteristic.html" title="BLEpp::Characteristic\l\&lt; int32_t \&gt;" alt="" coords="1777,139,1927,181"/>
-<area shape="rect" id="node18" href="$classBLEpp_1_1Characteristic.html" title="BLEpp::Characteristic\l\&lt; uint8_t \&gt;" alt="" coords="1777,7,1927,49"/>
+<area shape="rect" id="node2" href="$classService.html" title="Service as defined in the GATT Specification. " alt="" coords="1064,80,1131,107"/>
+<area shape="rect" id="node3" href="$classtuple.html" title="tuple\&lt; CharacteristicBase * \&gt;" alt="" coords="724,160,919,187"/>
+<area shape="rect" id="node5" href="$classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. " alt="" coords="793,99,849,125"/>
+<area shape="rect" id="node6" href="$classNrf51822BluetoothStack.html" title="nRF51822 specific implementation of the BLEStack " alt="" coords="739,48,903,75"/>
+<area shape="rect" id="node7" href="$classServiceData.html" title="ServiceData" alt="" coords="446,43,541,69"/>
+<area shape="rect" id="node8" href="$classEventListener.html" title="Event listener. " alt="" coords="228,9,331,36"/>
+<area shape="rect" id="node9" href="$classfixed__tuple.html" title="fixed_tuple\&lt; Service\l *, MAX_SERVICE_COUNT \&gt;" alt="" coords="392,94,595,135"/>
+<area shape="rect" id="node10" href="$classtuple.html" title="tuple\&lt; Service * \&gt;" alt="" coords="216,101,343,128"/>
 </map>
