@@ -52,7 +52,8 @@ void Switch::init() {
 #endif
 #endif
 
-	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
+	// TODO: this could be too early! Maybe pstorage is not ready yet?
+//	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
 
 	// [23.06.16] overwrites stored value, so we can't restore old switch state
 	//	setValue(0);
@@ -65,6 +66,11 @@ void Switch::init() {
 #endif
 
 	Timer::getInstance().createSingleShot(_relayTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSetRelay);
+}
+
+void Switch::start() {
+	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
+	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
 }
 
 void Switch::pwmOff() {

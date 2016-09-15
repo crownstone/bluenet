@@ -29,6 +29,8 @@
 #define DOBEACON2            16
 #define PCA10036             17
 #define PCA10040             18
+#define BUILTIN_ACR01B1A     19
+#define PLUGIN_FLEXPRINT_01  20
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
@@ -311,13 +313,12 @@
 #define PIN_GPIO_TX          6                   //! gpio 6
 //#define PIN_GPIO_TX          31                   //! gpio 31
 
-//! Switch pin should be low to switch lights on
-#define SWITCH_INVERSED
 //! resistance of the shunt in milli ohm
 #define SHUNT_VALUE                 1
 //! amplification of the voltage over the shunt, to the adc input of the chip
 #define VOLTAGE_AMPLIFICATION       1
 
+#define HAS_RELAY true
 #endif
 
 
@@ -355,6 +356,59 @@
 #define PIN_GPIO_BUTTON      20                  //! this is p0.20 or gpio 20
 
 #define SWITCH_INVERSED
+
+#endif
+
+#if(HARDWARE_BOARD==BUILTIN_ACR01B1A)
+
+#define RED_LED 			10					//! this is p0.10 or gpio 10
+#define GREEN_LED 			9					//! this is p0.09 or gpio 9
+
+#define PIN_GPIO_RX         20                  //! this is p0.20 or gpio 20
+#define PIN_GPIO_TX         19                  //! this is p0.19 or gpio 19
+
+#define PIN_GPIO_SWITCH      8	        		//! this is p0.08 or gpio 8
+//#define PIN_GPIO_SWITCH      RED_LED	        //! show switch as LED
+
+#define PIN_GPIO_RELAY_ON    6          		//! this is p0.06 or gpio 6
+#define PIN_GPIO_RELAY_OFF   7          		//! this is p0.07 or gpio 7
+//#define PIN_GPIO_RELAY_ON    RED_LED            //! something unused
+//#define PIN_GPIO_RELAY_OFF   GREEN_LED          //! something unused
+
+#define PIN_AIN_CURRENT      2                   //! ain2 is p0.04 or gpio 4
+#define PIN_AIN_VOLTAGE      1                   //! ain1 is p0.03 or gpio 3
+
+#define SWITCH_INVERSED
+
+#define HAS_RELAY true
+//! resistance of the shunt in milli ohm
+#define SHUNT_VALUE			 1
+//! amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       80
+
+#endif
+
+#if(HARDWARE_BOARD==PLUGIN_FLEXPRINT_01)
+
+#define PIN_GPIO_RX          6                  //! something unused
+#define PIN_GPIO_TX          7                  //! something unused
+
+#define PIN_GPIO_SWITCH      15					//! this is p0.15 or gpio 15
+
+#define PIN_GPIO_RELAY_ON    16					//! this is p0.16 or gpio 16
+#define PIN_GPIO_RELAY_OFF   17					//! this is p0.17 or gpio 17
+
+#define PIN_AIN_CURRENT      3					//! ain3 is p0.05 or gpio 5
+#define PIN_AIN_VOLTAGE      2                  //! ain2 is p0.04 or gpio 4
+#define PIN_AIN_TEMP	 	 1					//! ain1 is p0.03 or gpio 3
+
+#define SWITCH_INVERSED
+
+#define HAS_RELAY true
+//! resistance of the shunt in milli ohm
+#define SHUNT_VALUE			 1
+//! amplification of the voltage over the shunt, to the adc input of the chip
+#define VOLTAGE_AMPLIFICATION       80
 
 #endif
 

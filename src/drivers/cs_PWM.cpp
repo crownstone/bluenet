@@ -10,6 +10,7 @@
 #include <drivers/cs_Serial.h>
 #include <cfg/cs_Strings.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_Boards.h>
 
 //#define PRINT_PWM_VERBOSE
 
@@ -62,7 +63,11 @@ void PWM::setValue(uint8_t channel, uint32_t value) {
 
 #ifdef PRINT_PWM_VERBOSE
 	LOGd("Set PWM channel %d to %d", channel, value);
+#ifdef SWITCH_INVERSED
+	LOGd("Switch inversed");
 #endif
+#endif
+
 	while (app_pwm_channel_duty_set(_pwmInstance, channel, value) == NRF_ERROR_BUSY) {
 	};
 }
@@ -127,6 +132,8 @@ app_pwm_config_t PWM::config1Ch(uint32_t period, uint32_t pin) {
 	app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_1CH(period, pin);
 
 #ifdef SWITCH_INVERSED
+	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
+#else
 	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
 #endif
 
@@ -137,6 +144,9 @@ app_pwm_config_t PWM::config2Ch(uint32_t period, uint32_t pin1, uint32_t pin2) {
 	app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_2CH(period, pin1, pin2);
 
 #ifdef SWITCH_INVERSED
+	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
+	cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_LOW;
+#else
 	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
 	cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_HIGH;
 #endif
