@@ -1,3 +1,5 @@
+# Clion
+
 To set the environment up in JetBrains Clion, add these options to cmake in preferences/settings -> build, execution, deployment -> Cmake
 
 ```
