@@ -1,0 +1,10 @@
+<map id="GeneralService" name="GeneralService">
+<area shape="rect" id="node2" href="$classService.html" title="Service as defined in the GATT Specification. " alt="" coords="1064,80,1131,107"/>
+<area shape="rect" id="node3" href="$classtuple.html" title="tuple\&lt; CharacteristicBase * \&gt;" alt="" coords="724,160,919,187"/>
+<area shape="rect" id="node5" href="$classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. " alt="" coords="793,99,849,125"/>
+<area shape="rect" id="node6" href="$classNrf51822BluetoothStack.html" title="nRF51822 specific implementation of the BLEStack " alt="" coords="739,48,903,75"/>
+<area shape="rect" id="node7" href="$classServiceData.html" title="ServiceData" alt="" coords="446,43,541,69"/>
+<area shape="rect" id="node8" href="$classEventListener.html" title="Event listener. " alt="" coords="228,9,331,36"/>
+<area shape="rect" id="node9" href="$classfixed__tuple.html" title="fixed_tuple\&lt; Service\l *, MAX_SERVICE_COUNT \&gt;" alt="" coords="392,94,595,135"/>
+<area shape="rect" id="node10" href="$classtuple.html" title="tuple\&lt; Service * \&gt;" alt="" coords="216,101,343,128"/>
+</map>

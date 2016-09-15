@@ -1,0 +1,18 @@
+<map id="SetupService" name="SetupService">
+<area shape="rect" id="node2" href="$classCrownstoneService.html" title="General Service for the Crownstone. " alt="" coords="2155,230,2291,257"/>
+<area shape="rect" id="node3" href="$classService.html" title="Service as defined in the GATT Specification. " alt="" coords="1064,69,1131,95"/>
+<area shape="rect" id="node18" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics. " alt="" coords="1232,161,1365,187"/>
+<area shape="rect" id="node4" href="$classtuple.html" title="tuple\&lt; CharacteristicBase * \&gt;" alt="" coords="724,13,919,39"/>
+<area shape="rect" id="node6" href="$classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. " alt="" coords="793,138,849,165"/>
+<area shape="rect" id="node7" href="$classNrf51822BluetoothStack.html" title="nRF51822 specific implementation of the BLEStack " alt="" coords="739,83,903,110"/>
+<area shape="rect" id="node8" href="$classServiceData.html" title="ServiceData" alt="" coords="446,175,541,202"/>
+<area shape="rect" id="node9" href="$classEventListener.html" title="Event listener. " alt="" coords="228,230,331,257"/>
+<area shape="rect" id="node10" href="$classfixed__tuple.html" title="fixed_tuple\&lt; Service\l *, MAX_SERVICE_COUNT \&gt;" alt="" coords="392,76,595,117"/>
+<area shape="rect" id="node11" href="$classtuple.html" title="tuple\&lt; Service * \&gt;" alt="" coords="216,83,343,110"/>
+<area shape="rect" id="node13" href="$classStreamBuffer.html" title="StreamBuffer\&lt; uint8_t \&gt;" alt="" coords="1739,318,1901,345"/>
+<area shape="rect" id="node14" href="$classBufferAccessor.html" title="Base class for a buffer accessor object. " alt="" coords="1474,377,1586,403"/>
+<area shape="rect" id="node15" href="$structstream__t.html" title="stream_t\&lt; uint8_t,\l DEFAULT_PAYLOAD_LENGTH \&gt;" alt="" coords="1415,311,1645,352"/>
+<area shape="rect" id="node16" href="$classCharacteristic_3_01buffer__ptr__t_01_4.html" title="This template implements the functions specific for a pointer to a buffer. " alt="" coords="1746,191,1894,232"/>
+<area shape="rect" id="node17" href="$classCharacteristicGeneric.html" title="CharacteristicGeneric\l\&lt; buffer_ptr_t \&gt;" alt="" coords="1456,157,1604,199"/>
+<area shape="rect" id="node19" href="$structStatus.html" title="Status of a Characteristic. " alt="" coords="1067,209,1127,235"/>
+</map>

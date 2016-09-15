@@ -1,0 +1,7 @@
+<map id="Settings" name="Settings">
+<area shape="rect" id="node2" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="34,109,101,136"/>
+<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener. " alt="" coords="5,13,108,39"/>
+<area shape="rect" id="node4" href="$structps__configuration__t.html" title="Struct used by the Configuration to store elements. " alt="" coords="134,109,262,136"/>
+<area shape="rect" id="node5" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="132,13,264,39"/>
+<area shape="rect" id="node6" href="$structps__configuration__t_1_1ps__beacon__t.html" title="beacon " alt="" coords="289,5,417,47"/>
+</map>
