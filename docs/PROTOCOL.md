@@ -69,7 +69,7 @@ We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_oper
 
 ##### Encrypted Packet
 
-![Encrypted packet](docs/diagrams/encrypted-packet.png)
+![Encrypted packet](../docs/diagrams/encrypted-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -79,7 +79,7 @@ uint 8 | User level | 1 | 0: Admin, 1: User, 2: Guest
 
 ##### <a name="encrypted_payload"></a>Encrypted payload
 
-![Encrypted payload](docs/diagrams/encrypted-payload.png)
+![Encrypted payload](../docs/diagrams/encrypted-payload.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -98,7 +98,7 @@ When no device is connected, [advertisements](#ibeacon_packet) will be sent at a
 ### <a name="ibeacon_packet"></a>iBeacon advertisement packet
 This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
 
-![Advertisement packet](docs/diagrams/adv-packet.png)
+![Advertisement packet](../docs/diagrams/adv-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -119,7 +119,7 @@ int 8 | TX Power | 1 | Received signal strength at 1 meter.
 ### <a name="scan_response_packet"></a>Scan response packet
 The packet that is sent when a BLE central scans.
 
-![Scan Response packet](docs/diagrams/scan-response-packet.png)
+![Scan Response packet](../docs/diagrams/scan-response-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -134,7 +134,7 @@ uint 16 | Service UUID | 2 | Service UUID
 ### <a name="scan_response_servicedata_packet"></a>Scan response service data packet
 This packet contains the state info. If encryption is enabled, the last 16 bytes will be encrypted using AES 128 ECB using the Guest key.
 
-![Scan Response ServiceData](docs/diagrams/scan-response-service-data.png)
+![Scan Response ServiceData](../docs/diagrams/scan-response-service-data.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -166,7 +166,7 @@ Bit | Name |  Description
 To be able to distinguish between switching with relay and switching with PWM, the switch state is a bit struct with
 the following layout
 
-![Switch State Packet](docs/diagrams/switch_state_packet.png)
+![Switch State Packet](../docs/diagrams/switch_state_packet.png)
 
 Bit 7 is used for the relay flag, where 0 = OFF, 1 = ON.
 Bits 6-0 are used for PWM, where 100 is fully ON, 0 is OFF, dimmed in between.
@@ -303,7 +303,7 @@ Value       | 2a1e0005-fd51-d882-8ba8-b98c0000cd1e | | Characteristic where the 
 
 ### <a name="control_packet"></a>Control packet
 
-![Control packet](docs/diagrams/control-packet.png)
+![Control packet](../docs/diagrams/control-packet.png)
 
 #####If encryption is enabled, this packet must be encrypted using any of the keys where the box is checked.
 In the case of the setup mode, only the Validate Setup command is available unencrypted.
@@ -355,7 +355,7 @@ uint 16 | delay | 1 | start scanner with delay in ms
 
 ### <a name="config_packet"></a>Configuration packet
 
-![Configuration packet](docs/diagrams/config-packet.png)
+![Configuration packet](../docs/diagrams/config-packet.png)
 
 #####If encryption is enabled, this packet must be encrypted using the admin key.
 
@@ -431,7 +431,7 @@ Note: On the Config Read Characteristic, the OpCode is set to Read (0), and the 
 
 ### <a name="state_packet"></a>State packet
 
-![State packet](docs/diagrams/state-packet.png)
+![State packet](../docs/diagrams/state-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -466,7 +466,7 @@ Note: On the State Read Characteristic, the OpCode is also set to distinguish be
 
 ### <a name="power_samples_packet"></a>Power samples packet
 
-![Power samples packet](docs/diagrams/power-samples-packet.png)
+![Power samples packet](../docs/diagrams/power-samples-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -486,7 +486,7 @@ int 8 []  | voltageTimeDiffs      | numVoltageTimeStamps-1 | Array of difference
 
 ### <a name="power_curve_packet"></a>Power curve packet, deprecated
 
-![Power curve packet](docs/diagrams/power-curve-packet.png)
+![Power curve packet](../docs/diagrams/power-curve-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -512,7 +512,7 @@ uint 16 | Occurrences | 2 | Number of times the devices was scanned.
 
 ### <a name="scan_result_list_packet"></a>Scan result list packet
 
-![Scan result list packet](docs/diagrams/scan-result-list-packet.png)
+![Scan result list packet](../docs/diagrams/scan-result-list-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -522,7 +522,7 @@ uint 8 | size | 1 | Number of scanned devices in the list.
 
 ### <a name="tracked_device_packet"></a>Tracked device packet
 
-![Tracked device packet](docs/diagrams/tracked-device-packet.png)
+![Tracked device packet](../docs/diagrams/tracked-device-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -531,7 +531,7 @@ int 8 | RSSI threshold | 1 | If the RSSI to this device is above the threshold, 
 
 ### <a name="tracked_device_list_packet"></a>Tracked device list packet
 
-![Tracked device list packet](docs/diagrams/tracked-device-list-packet.png)
+![Tracked device list packet](../docs/diagrams/tracked-device-list-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -610,7 +610,7 @@ uint 8 | Size | 1 | Number of entries in the list.
 
 ### <a name="mesh_control_packet"></a>Mesh control packet
 
-![Mesh control packet](docs/diagrams/mesh-control-packet.png)
+![Mesh control packet](../docs/diagrams/mesh-control-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -621,7 +621,7 @@ uint 16 | Length | 2 | Length of the data.
 
 ### <a name="mesh_payload_packet"></a>Mesh payload packet
 
-![Mesh payload packet](docs/diagrams/mesh-payload-packet.png)
+![Mesh payload packet](../docs/diagrams/mesh-payload-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -643,7 +643,7 @@ Type nr | Type name | Payload type | Payload description
 
 ### <a name="beacon_mesh_data_packet"></a>Beacon mesh data packet
 
-![Beacon data](docs/diagrams/beacon-mesh-message-data-packet.png)
+![Beacon data](../docs/diagrams/beacon-mesh-message-data-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -655,7 +655,7 @@ int 8 | TX Power | 1 | Received signal strength at 1 meter.
 ### <a name="mesh_message_packet"></a>Mesh message packet
 This packet is a slightly modified version of the one used in [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh); we simply increased the content size.
 
-![Mesh packet](docs/diagrams/mesh-packet.png)
+![Mesh packet](../docs/diagrams/mesh-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -675,7 +675,7 @@ uint 8 [] | CRC | 3 | Checksum.
 ### <a name="mesh_notification_packet"></a>Mesh notification packet
 This packet is used to get the [mesh messages](#mesh_message_packet) pushed over GATT notifications.
 
-![Mesh notification packet](docs/diagrams/mesh-notification-packet.png)
+![Mesh notification packet](../docs/diagrams/mesh-notification-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -696,7 +696,7 @@ Opcode | Type name | Payload type | Payload Description
 ### <a name="mesh_data_update_packet"></a>Mesh data update packet
 Each mesh data message is notified in multiple pieces, as a notification can only be 20 bytes. The op code of the [Mesh notification](#mesh_notification_packet) tells whether it is a single, or the first, last or a middle piece of a multipart message.
 
-![Mesh data notification packet](docs/diagrams/mesh-data-update-packet.png)
+![Mesh data notification packet](../docs/diagrams/mesh-data-update-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
