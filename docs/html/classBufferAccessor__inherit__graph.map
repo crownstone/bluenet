@@ -1,11 +1,10 @@
 <map id="BufferAccessor" name="BufferAccessor">
-<area shape="rect" id="node2" href="$classCurrentCurve.html" title="Current Curve. " alt="" coords="194,5,326,32"/>
-<area shape="rect" id="node3" href="$classMeshCharacteristicMessage.html" title="The mesh characteristic message is a wrapped BufferAccessor object. " alt="" coords="166,56,354,83"/>
-<area shape="rect" id="node4" href="$classPowerCurve.html" title="Power Curve. " alt="" coords="197,107,323,133"/>
-<area shape="rect" id="node5" href="$classPowerCurve.html" title="PowerCurve\&lt; uint16_t \&gt;" alt="" coords="178,157,342,184"/>
-<area shape="rect" id="node6" href="$classScanResult.html" title="Result of a scan device operation. " alt="" coords="215,208,305,235"/>
-<area shape="rect" id="node7" href="$classStreamBuffer.html" title="General StreamBuffer with type, length, and payload. " alt="" coords="195,259,325,285"/>
-<area shape="rect" id="node8" href="$classStreamBuffer.html" title="StreamBuffer\&lt; uint8_t \&gt;" alt="" coords="179,309,341,336"/>
-<area shape="rect" id="node9" href="$classTrackedDevice.html" title="The TrackedDevice object has a single tracked_device_t struct as memory object. " alt="" coords="205,360,315,387"/>
-<area shape="rect" id="node10" href="$classTrackedDeviceList.html" title="The TrackedDeviceList is a list of tracked devices and timing information. " alt="" coords="195,411,325,437"/>
+<area shape="rect" id="node2" href="$classPowerSamples.html" title="PowerSamples" alt="" coords="191,5,302,32"/>
+<area shape="rect" id="node3" href="$classScanResult.html" title="Result of a scan device operation. " alt="" coords="201,56,292,83"/>
+<area shape="rect" id="node4" href="$classScheduleEntry.html" title="The ScheduleEntry object has a single schedule_entry_t struct as memory object. " alt="" coords="193,107,300,133"/>
+<area shape="rect" id="node5" href="$classScheduleList.html" title="The ScheduleList object is a list of schedule entries. " alt="" coords="198,157,295,184"/>
+<area shape="rect" id="node6" href="$classStreamBuffer.html" title="General StreamBuffer with type, op code, length, and payload. " alt="" coords="172,208,321,235"/>
+<area shape="rect" id="node7" href="$classStreamBuffer.html" title="StreamBuffer\&lt; uint8_t \&gt;" alt="" coords="165,259,328,285"/>
+<area shape="rect" id="node8" href="$classTrackedDevice.html" title="The TrackedDevice object has a single tracked_device_t struct as memory object. " alt="" coords="191,309,302,336"/>
+<area shape="rect" id="node9" href="$classTrackedDeviceList.html" title="The TrackedDeviceList is a list of tracked devices and timing information. " alt="" coords="181,360,312,387"/>
 </map>

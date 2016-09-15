@@ -1,8 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node2" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor. " alt="" coords="167,9,249,36"/>
-<area shape="rect" id="node4" href="$classtuple.html" title="tuple\&lt; BLEpp::Characteristic\lBase * \&gt;" alt="" coords="113,63,303,105"/>
-<area shape="rect" id="node6" href="$classtuple.html" title="tuple\&lt; BLEpp::Service * \&gt;" alt="" coords="121,140,295,167"/>
-<area shape="rect" id="node3" href="$classfixed__tuple.html" title="A fixed tuple is a vector with a templated type and a reserved capacity. " alt="" coords="373,5,547,32"/>
-<area shape="rect" id="node5" href="$classfixed__tuple.html" title="fixed_tuple\&lt; BLEpp\l::CharacteristicBase\l *, MAX_CHARACTERISTICS \&gt;" alt="" coords="352,56,568,112"/>
-<area shape="rect" id="node7" href="$classfixed__tuple.html" title="fixed_tuple\&lt; BLEpp\l::Service *, MAX_SERVICE\l_COUNT \&gt;" alt="" coords="367,136,553,192"/>
+<area shape="rect" id="node1" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="5,56,137,83"/>
+<area shape="rect" id="node2" href="$structps__configuration__t.html" title="Struct used by the Configuration to store elements. " alt="" coords="185,5,313,32"/>
+<area shape="rect" id="node3" href="$structps__general__vars__t.html" title="Struct used to ... " alt="" coords="185,56,313,83"/>
+<area shape="rect" id="node4" href="$structps__state__t.html" title="Struct used to store elements that are changed frequently. " alt="" coords="208,107,291,133"/>
 </map>

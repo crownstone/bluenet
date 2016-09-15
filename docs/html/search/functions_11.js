@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['update',['update',['../classADC.html#ad64663b38d1eff6981e9166b046ddc20',1,'ADC::update()'],['../classScanResult.html#a6ff76ed6d3973219c559120498bd14ae',1,'ScanResult::update()']]],
-  ['updatedevicename',['updateDeviceName',['../classBLEpp_1_1Nrf51822BluetoothStack.html#a7994f3eb1562a74d62d7d14658636724',1,'BLEpp::Nrf51822BluetoothStack']]],
-  ['uuid',['UUID',['../classBLEpp_1_1UUID.html#a8cef83e21c152932383dedc644ea5fbc',1,'BLEpp::UUID::UUID()'],['../classBLEpp_1_1UUID.html#a88417c0efb897efd37c807de0dac28fa',1,'BLEpp::UUID::UUID(const char *fullUid)'],['../classBLEpp_1_1UUID.html#ae2146419a66cfb5abf3ed40a0f4dcf27',1,'BLEpp::UUID::UUID(uint16_t uuid)'],['../classBLEpp_1_1UUID.html#a1c1da7ecd600b552815ea7bc34325c65',1,'BLEpp::UUID::UUID(UUID &amp;parent, uint16_t uidValue)'],['../classBLEpp_1_1UUID.html#afba14e801e3a2b8eb4222a287fa364cd',1,'BLEpp::UUID::UUID(const UUID &amp;rhs)'],['../classBLEpp_1_1UUID.html#a9386095c598301e8821968ab893c3724',1,'BLEpp::UUID::UUID(const ble_uuid_t &amp;value)']]]
+  ['writeitem',['writeItem',['../classStorage.html#a789e97ddd3dd01d3cbf6681ae6759df6',1,'Storage']]],
+  ['writestorage',['writeStorage',['../classStorage.html#a558e1d24209771635f98d5516e0cca0a',1,'Storage']]],
+  ['writetostorage',['writeToStorage',['../classSettings.html#adf231d318d35ee1e2b450a3f0e6b43ed',1,'Settings::writeToStorage()'],['../classState.html#a0ee13e0d4eb036895a2c37e2485057a9',1,'State::writeToStorage()']]],
+  ['written',['written',['../classCharacteristicBase.html#af2ecdba998f4740e622bd9b9773eb0eb',1,'CharacteristicBase::written()'],['../classCharacteristicGeneric.html#a34efc7a85618895826b6748b69cde090',1,'CharacteristicGeneric::written()']]]
 ];
