@@ -33,12 +33,13 @@ public:
 //	static void pwmReadyCallback(uint32_t pwmId);
 
 	//! Initialize the pulse wide modulation settings
-	uint32_t init(app_pwm_config_t config);
+	uint32_t init(app_pwm_config_t & config);
 
 	//! Returns configuration values for 1 Channel
-	static app_pwm_config_t config1Ch(uint32_t period_us, uint32_t pin);
+	app_pwm_config_t & config1Ch(uint32_t period_us, uint32_t pin);
+
 	//! Returns configuration values for 2 Channels
-	static app_pwm_config_t config2Ch(uint32_t period_us, uint32_t pin1, uint32_t pin2);
+	app_pwm_config_t & config2Ch(uint32_t period_us, uint32_t pin1, uint32_t pin2);
 
 	//! De-Initialize the PWM instance, i.e. free allocated resources
 	uint32_t deinit();
@@ -50,6 +51,7 @@ public:
 	//! Also works when not initialized (useful for emergencies)
 	void switchOff();
 
+	//! Get current value from unit
 	uint32_t getValue(uint8_t channel);
 	
 private:
@@ -63,6 +65,7 @@ private:
 
 	//! PWM configuration
 	app_pwm_config_t _pwmCfg;
+
 	//! Array holding ready callbacks for the PWM instance
 #if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
 	app_pwm_cb_t _controlBlock;
@@ -75,5 +78,9 @@ private:
 	//! PWM instance
 	app_pwm_t* _pwmInstance;
 
+	//! Flag to indicate that the init function has been successfully performed
 	bool _initialized;
+
+	//! Invert switch mode
+	bool _inverted;
 };

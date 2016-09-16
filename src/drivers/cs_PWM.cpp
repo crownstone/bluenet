@@ -12,10 +12,25 @@
 #include <cfg/cs_Config.h>
 #include <cfg/cs_Boards.h>
 
-//#define PRINT_PWM_VERBOSE
+/**********************************************************************************************************************
+ * MACROS used in pulse width modulation class
+ *********************************************************************************************************************/
+
+// For increasing the level selectively for PWM, locally increase the log level via this macro.
+#define SERIAL_INCREASE_LOG_LEVEL 0
+
+// The PWM_ENABLE macro can be used to disable functionality at precompilation time.
+// #define PWM_ENABLE
+
+/**********************************************************************************************************************
+ * Pulse Width Modulation class
+ *********************************************************************************************************************/
 
 PWM::PWM() :
-		pwmTimer(NULL), _pwmInstance(NULL), _initialized(false) {
+		pwmTimer(NULL), 
+		_pwmInstance(NULL), 
+		_initialized(false),
+		_inverted(false) {
 
 #if PWM_ENABLE==1
 
@@ -44,11 +59,18 @@ PWM::PWM() :
 
 #endif
 
+#ifdef SWITCH_INVERSED
+	_inverted = true;
+#else
+	_inverted = false;
+#endif
 }
 
-static volatile bool ready_flag;            // A flag indicating PWM status.
+//! Flag indicating PWM status
+static volatile bool ready_flag;
 
-void pwm_ready_callback(uint32_t pwm_id) {   // PWM callback function
+//! PWM callback function
+void pwm_ready_callback(uint32_t pwm_id) {   
 	ready_flag = true;
 }
 
@@ -61,9 +83,14 @@ void PWM::setValue(uint8_t channel, uint32_t value) {
 		value = 100;
 	}
 
-#ifdef PRINT_PWM_VERBOSE
-	LOGd("Set PWM channel %d to %d", channel, value);
-#endif
+	log(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Set PWM channel %d to %d", channel, value);
+
+	if (_inverted) {
+		log(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Switch inversed");
+	} else {
+		log(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Switch not inversed");
+	}
+
 	while (app_pwm_channel_duty_set(_pwmInstance, channel, value) == NRF_ERROR_BUSY) {
 	};
 }
@@ -86,14 +113,12 @@ void PWM::switchOff() {
 	}
 }
 
-uint32_t PWM::init(app_pwm_config_t config) {
+uint32_t PWM::init(app_pwm_config_t & config) {
 
 #if PWM_ENABLE==1
 	_pwmCfg = config;
 
-#ifdef PRINT_PWM_VERBOSE
-	LOGd(FMT_INIT, "PWM");
-#endif
+	logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, FMT_INIT, "PWM");
 
 	BLE_CALL(app_pwm_init, (_pwmInstance, &_pwmCfg, pwm_ready_callback));
 	app_pwm_enable(_pwmInstance);
@@ -111,9 +136,7 @@ uint32_t PWM::deinit() {
 
 #if PWM_ENABLE==1
 
-#ifdef PRINT_PWM_VERBOSE
-	LOGd("DeInit PWM");
-#endif
+	log(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "DeInit PWM");
 
 	app_pwm_disable(_pwmInstance);
 	BLE_CALL(app_pwm_uninit, (_pwmInstance));
@@ -124,28 +147,28 @@ uint32_t PWM::deinit() {
 	return ERR_PWM_NOT_ENABLED;
 }
 
-app_pwm_config_t PWM::config1Ch(uint32_t period, uint32_t pin) {
-	app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_1CH(period, pin);
+app_pwm_config_t & PWM::config1Ch(uint32_t period, uint32_t pin) {
+	static app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_1CH(period, pin);
 
-#ifdef SWITCH_INVERSED
-	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
-#else
-	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
-#endif
+	if (_inverted) {
+		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
+	} else { 
+		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
+	}
 
 	return cfg;
 }
 
-app_pwm_config_t PWM::config2Ch(uint32_t period, uint32_t pin1, uint32_t pin2) {
-	app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_2CH(period, pin1, pin2);
+app_pwm_config_t & PWM::config2Ch(uint32_t period, uint32_t pin1, uint32_t pin2) {
+	static app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_2CH(period, pin1, pin2);
 
-#ifdef SWITCH_INVERSED
-	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
-	cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_HIGH;
-#else
-	cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
-	cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_LOW;
-#endif
+	if (_inverted) {
+		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
+		cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_LOW;
+	} else {
+		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
+		cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_HIGH;
+	}
 
 	return cfg;
 }
