@@ -35,8 +35,8 @@ CrownstoneService::CrownstoneService() : EventListener(),
 	setUUID(UUID(CROWNSTONE_UUID));
 	setName(BLE_SERVICE_CROWNSTONE);
 
-//	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) CrownstoneService::staticTick);
 }
+
 
 StreamBuffer<uint8_t>* CrownstoneService::getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength) {
 	//! if it is not created yet, create a new stream buffer and assign the master buffer to it
@@ -114,13 +114,6 @@ void CrownstoneService::createCharacteristics() {
 	addCharacteristicsDone();
 }
 
-//void CrownstoneService::tick() {
-//	scheduleNextTick();
-//}
-
-//void CrownstoneService::scheduleNextTick() {
-//	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(GENERAL_SERVICE_UPDATE_FREQUENCY), this);
-//}
 
 void CrownstoneService::addMeshCharacteristic() {
 #if BUILD_MESHING == 1
@@ -165,6 +158,7 @@ void CrownstoneService::addMeshCharacteristic() {
 	});
 #endif
 }
+
 
 void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_controlCharacteristic = new Characteristic<buffer_ptr_t>();
@@ -282,6 +276,7 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	});
 }
 
+
 void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_configurationReadCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_configurationReadCharacteristic);
@@ -295,6 +290,7 @@ void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, 
 	_configurationReadCharacteristic->setMaxGattValueLength(size);
 	_configurationReadCharacteristic->setValueLength(0);
 }
+
 
 void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
 	_stateControlCharacteristic = new Characteristic<buffer_ptr_t>();
@@ -401,6 +397,7 @@ void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint1
 	_sessionNonceCharacteristic->setValueLength(0);
 }
 
+
 void CrownstoneService::addFactoryResetCharacteristic() {
 	_factoryResetCharacteristic = new Characteristic<uint32_t>();
 	addCharacteristic(_factoryResetCharacteristic);
@@ -412,7 +409,12 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	_factoryResetCharacteristic->setDefaultValue(0);
 	_factoryResetCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_factoryResetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value) -> void {
-		FactoryReset::getInstance().recover(value);
+		bool success = FactoryReset::getInstance().recover(value);
+		uint32_t val = 0;
+		if (success) {
+			val = 1;
+		}
+		_factoryResetCharacteristic->operator=(val);
 	});
 }
 
@@ -423,8 +425,15 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
 		if (_sessionNonceCharacteristic != NULL) {
 			_sessionNonceCharacteristic->setValueLength(length);
-			_sessionNonceCharacteristic->setValue((uint8_t*)p_data);
+			_sessionNonceCharacteristic->setValue((uint8_t *) p_data);
 			_sessionNonceCharacteristic->updateValue(ECB_GUEST_CAFEBABE);
+		}
+		break;
+	}
+	case EVT_BLE_CONNECT: {
+		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_factoryResetCharacteristic != NULL) {
+			_factoryResetCharacteristic->operator=(0);
 		}
 		break;
 	}

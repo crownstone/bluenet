@@ -476,6 +476,8 @@ public:
 	/** Assign a new value to the characteristic so that it can be read over ble.
 	 *  In the case of aes encryption, pass the unencrypted value, which will then be encrypted
 	 *  and updated at the gatt server
+	 *
+	 *  TODO: Alex - why don't we just use setValue for consistency??
 	 */
 	void operator=(const T& val) {
 		_value = val;
