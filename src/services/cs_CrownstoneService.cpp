@@ -409,6 +409,7 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	_factoryResetCharacteristic->setDefaultValue(0);
 	_factoryResetCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_factoryResetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value) -> void {
+		// TODO if settings --> factory reset disabled, we set the value to 2 to indicate reset is not possible.
 		bool success = FactoryReset::getInstance().recover(value);
 		uint32_t val = 0;
 		if (success) {
