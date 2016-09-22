@@ -40,6 +40,7 @@ void FactoryReset::resetTimeout() {
 
 void FactoryReset::timeout() {
 	_recoveryEnabled = false;
+	LOGi("recovery period expired.")
 	uint8_t resetState;
 	State::getInstance().get(STATE_FACTORY_RESET, resetState);
 	if (resetState == FACTORY_RESET_STATE_LOWTX) {
