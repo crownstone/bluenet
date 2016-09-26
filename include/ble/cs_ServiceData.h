@@ -10,6 +10,8 @@
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
+#include "drivers/cs_Timer.h"
+#include "cfg/cs_Config.h"
 
 #include <cstring>
 
@@ -64,6 +66,8 @@ public:
 		_params.temperature = temperature;
 	}
 
+	void updateAdvertisement();
+
 	void updateEventBitmask(uint8_t bit, bool set) {
 		if (set) {
 			_params.eventBitmask |= 1 < bit;
@@ -88,7 +92,15 @@ public:
 
 private:
 
+	app_timer_t    _updateTimerData;
+	app_timer_id_t _updateTimerId;
 	uint8_t _operationMode;
+	bool _connected;
+
+	/* Static function for the timeout */
+	static void staticTimeout(ServiceData *ptr) {
+		ptr->updateAdvertisement();
+	}
 
 	union {
 		struct __attribute__((packed)) {
