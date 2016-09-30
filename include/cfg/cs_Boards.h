@@ -378,7 +378,7 @@
 #define PIN_AIN_CURRENT      2                   //! ain2 is p0.04 or gpio 4
 #define PIN_AIN_VOLTAGE      1                   //! ain1 is p0.03 or gpio 3
 
-#define SWITCH_INVERSED
+//#define SWITCH_INVERSED
 
 #define HAS_RELAY true
 //! resistance of the shunt in milli ohm
