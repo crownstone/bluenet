@@ -224,6 +224,8 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	uint32_t meshAccessAddress;
 
+	uint32_t pwmInterval;
+
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct

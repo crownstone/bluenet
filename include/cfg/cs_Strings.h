@@ -40,7 +40,7 @@
 #define BLE_CHAR_STATE_CONTROL                   "State Control"
 #define BLE_CHAR_STATE_READ                      "State Read"
 #define BLE_CHAR_SESSION_NONCE                   "Session Nonce"
-#define BLE_CHAR_FACTORY_RESET                   "Factory Reset"
+#define BLE_CHAR_FACTORY_RESET                   "Recovery"
 #define BLE_CHAR_RSSI                            "RSSI"
 #define BLE_CHAR_SCAN_CONTROL                    "Scan Control"
 #define BLE_CHAR_SCAN_LIST                       "Scanned Devices"
