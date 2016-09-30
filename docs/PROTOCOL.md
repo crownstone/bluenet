@@ -193,15 +193,13 @@ Config Read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_
 State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable | x | x |
 State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable | x | x |
 <a name="session_nonce"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. |  |  | ECB
-Factory Reset  | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for factory reset. Explanation below. |
+Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for recovery, see explanation below. |
 
 
-##### Factory reset
+##### Recovery
 If you lose your encryption keys you can use this characteristic to factory reset the Crownstone.
 This method is only available for 20 seconds after the Crownstone powers on.
-You need to write **0xdeadbeef** to it. After this, the Crownstone disconnects and goes into Low TX mode so you'll
-have to be close to continue the factory reset. After this, you reconnect
-and write **0xdeadbeef** again to this characteristic to factory reset the Crownstone.
+You need to write **0xDEADBEEF** to it. After this, the Crownstone disconnects and goes into Low TX mode so you'll have to be close to continue the factory reset. After this, you reconnect and write **0xDEADBEEF** again to this characteristic to factory reset the Crownstone.
 
 ##### Return values
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
@@ -375,7 +373,7 @@ Type nr | Type name | Payload type | Description
 2 | Room | uint 8 | **Deprecated.**
 3 | Floor | uint 8 | Floor number. **Deprecated**
 4 | Nearby timeout | uint 16 | Time in ms before switching off when none is nearby
-5 | PWM frequency | uint 8 | Sets PWM frequency **not implemented**
+5 | PWM period | uint 32 | Sets PWM period in μs. **Setting this to a wrong value may cause damage.**
 6 | <a name="ibeacon_major"></a>iBeacon major | uint 16 | iBeacon major number.
 7 | <a name="ibeacon_minor"></a>iBeacon minor | uint 16 | iBeacon minor number.
 8 | <a name="ibeacon_uuid"></a>iBeacon UUID | uint 8 [16] | iBeacon UUID.
