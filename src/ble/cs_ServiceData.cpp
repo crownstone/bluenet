@@ -37,6 +37,8 @@ ServiceData::ServiceData() : EventListener(EVT_ALL), _updateTimerId(NULL), _conn
 };
 
 void ServiceData::updateAdvertisement() {
+	Timer::getInstance().stop(_updateTimerId);
+
 	//! if we are connected, we do not need to update the packet.
 	if (_connected == false) {
 
@@ -59,7 +61,13 @@ void ServiceData::updateAdvertisement() {
 	}
 
 	//! start the timer again.
-	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
+	if (_operationMode == OPERATION_MODE_SETUP) {
+		Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD_SETUP), this);
+	}
+	else {
+		Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
+	}
+
 }
 
 void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
