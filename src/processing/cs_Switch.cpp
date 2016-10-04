@@ -74,6 +74,7 @@ void Switch::init() {
 void Switch::start() {
 	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
 	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
+	setPwm(_switchValue.pwm_state);
 }
 
 void Switch::pwmOff() {
