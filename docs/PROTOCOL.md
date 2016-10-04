@@ -4,20 +4,8 @@
 # <a name="encryption"></a>Encryption
 By default, Crownstones have encryption enabled as a security and privacy measure.
 
-#### Why don't you use the Bluetooth Bonding?
 
-Bluetooth bonding in Bluetooth V4 creates a secure link between user and device. There are a few downsides of this method which we will explain here:
-- Before Bluetooth 4.2 (which introduces Elliptical Curve Hellman-Diffie) the initial exchange of the keys is not secure.
-- Bluetooth 4.2 is not supported on the majority of phones at the time of writing.
-- Every user needs to bond with each Crownstone.
-- Every Crownstone stores a key for each user with whom it has bonded, thereby limiting the total amount of possible users.
-- The secure bonding does not secure the scan response advertisements.
-
-#### Why not use Apple Homekit?
-
-This is on the roadmap for future releases and will work with the currently available Crownstones but at the moment Apple Homekit is not supported on Android.
-
-#### Setup mode
+### Setup mode
 When a Crownstone is new or factory reset, it will go into setup mode.
 
 Setup mode turns down the power of the antenna (low TX) so you can only communicate with it when you're close by. The purpose of this mode
@@ -28,9 +16,9 @@ The protocol here is as follows:
 1. Crownstone is in setup mode (low TX, [Setup Service active](#setup_service))
 - Phone is close and connects to the Crownstone
 - Phone reads the Crownstone [MAC address](#setup_service) (required for iOS). This characteristic is not encrypted.
-- Phone reads the [Session Key](#setup_session_key) and [Session Nonce](#setup_session_nonce). These characteristics are not encrypted.
-The values are only valid for this connection session. The Session key and the Session Nonce will be used to encrypt the rest of the setup phase using AES 128 CTR.
-- Phone starts setting up the Crownstone using the [Config Control](#setup_service) Characteristic
+- Phone reads the session key and session nonce from the [setup service](#setup_service). These characteristics are not encrypted.
+The values are only valid for this connection session. The session key and the session nonce will be used to encrypt the rest of the setup phase using AES 128 CTR as explained [here](#encrypted_write_read).
+- Phone starts setting up the Crownstone using the [config control](#setup_service) characteristic
     - Phone gives Crownstone [its identifier](#crownstone_identifier)
     - Phone gives Crownstone [the Admin key](#admin_key)
     - Phone gives Crownstone [the User key](#user_key)
@@ -41,7 +29,8 @@ The values are only valid for this connection session. The Session key and the S
     - Phone gives Crownstone [its iBeacon Minor](#ibeacon_minor)
 - Phone commands Crownstone [to leave setup mode](#validate_setup)
 
-### Using Encryption
+
+### Using encryption after setup (normal mode)
 
 When encryption is enabled the following changes:
 
@@ -49,31 +38,34 @@ When encryption is enabled the following changes:
 - Values that are **read from** the characteristics will be encrypted
 - Values that are **written to** the characteristics will have to be encrypted
 
-#### Writing to characteristics
+#### <a name="session_nonce"></a>Session nonce
 
-After connecting, you first have to read the [session nonce](#session_nonce). This session nonce has two purposes:
-- It is used to authenticate any commands that are written. We call this the Validation Key. These are the first 4 bytes of the Session Nonce.
-- it forms part of the Nonce used for encryption. The first 3 bytes of the Nonce are the Packet Nonce, the last 5 are the Session Nonce.
-The session nonce is only valid during the connection.
+After connecting, you first have to read the session nonce from the [Crownstone service](#crownstone_service). The session nonce is [ECB encrypted](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) with the guest key. After decryption, you should verify whether you have read and decrypted succesfully by checking if the validation key in the [data](#encrypted_session_nonce) is equal to **0xCAFEBABE**. If so, you now have the correct session nonce.
 
-The session nonce is [ECB encrypted](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) with the Guest key. To verify you have read and decrypted succesfully, check if the validation key is equal to **0xcafebabe**.
+The session nonce has two purposes:
+- Validation: the first 4 bytes of the session nonce is what we call the validation key, it is used for any [encrypted packet](#encrypted_packet).
+- Encryption: the whole 5 bytes are used for the nonce, which is used for CTR encryption. The first 3 bytes of the nonce are the packet nonce (which should be randomly generated each time you write to a characteristic), the last 5 are the session nonce.
+The session nonce and validation key are only valid during the connection.
 
-##### Session Nonce Packet after ECB decryption
+##### <a name="encrypted_session_nonce"></a>Session nonce after ECB decryption
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Validation Key | 4 | 0xcafebabe as validation
-uint 8 | Session Nonce | 5 | The Session Nonce for this session.
+byte array | Validation key | 4 | 0xCAFEBABE as validation.
+byte array | Session nonce | 5 | The session nonce for this session.
+byte array | Padding | 7 | Zero-padding so that the whole packet is 16 bytes.
 
 
-We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29) method to encrypt everything that is written to- and read from characteristics. For this you need to generate an 8 byte number called a **nonce**. The first 3 bytes of the nonce are sent with each packet, we call this the packet nonce. The last 5 bytes of the nonce are called the [session nonce](#session_nonce), which should be read after connecting.
+### <a name="encrypted_write_read"></a>Reading and writing characteristics
 
-##### Encrypted Packet
+We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29) method to encrypt everything that is written to- and read from characteristics. For this you need an 8 byte number called a **nonce**. The first 3 bytes of the nonce are sent with each packet, we call this the packet nonce. When writing to a characteristic, you should generate a new random packet nonce each time. The last 5 bytes of the nonce are called the session nonce, which should be read after connecting. When reading a characteristic, you should check if the (decrypted) validation key is equal to the validation key that was read [after connecting](#session_nonce).
+
+##### <a name="encrypted_packet"></a>Encrypted Packet
 
 ![Encrypted packet](../docs/diagrams/encrypted-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of this message.
+byte array | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of this message.
 uint 8 | User level | 1 | 0: Admin, 1: User, 2: Guest
 [Encrypted Payload](#encrypted_payload) | Encrypted Payload | N*16 | The encrypted payload of N blocks.
 
@@ -83,17 +75,15 @@ uint 8 | User level | 1 | 0: Admin, 1: User, 2: Guest
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Validation Key | 4 | Used for verify of the decrypted content. When using CTR encrypted
-byte array | payload |  | Whatever data would have been sent if encryption was disabled.
-byte array | padding |  | Zero-padding so that the whole packet is of size N*16 bytes
+byte array | Validation key | 4 | Used to verify that the correct key was used for decryption/encryption.
+byte array | Payload |  | Whatever data would have been sent if encryption was disabled.
+byte array | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes.
 
-#### Receiving scan response packages
 
-The [scan response service data](#scan_response_servicedata_packet) packet will be encrypted using the [ECB method](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
-You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
 
 # Advertisements and scan response
 When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
+
 
 ### <a name="ibeacon_packet"></a>iBeacon advertisement packet
 This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
@@ -131,8 +121,10 @@ uint 8 | AD Type | 1 | Service Data (0x16)
 uint 16 | Service UUID | 2 | Service UUID
 [Service data](#scan_response_servicedata_packet) | Service Data | 17 | Service data, state info.
 
+
 ### <a name="scan_response_servicedata_packet"></a>Scan response service data packet
-This packet contains the state info. If encryption is enabled, the last 16 bytes will be encrypted using AES 128 ECB using the Guest key.
+This packet contains the state info. If encryption is enabled, the last 16 bytes will be encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
+You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
 
 ![Scan Response ServiceData](../docs/diagrams/scan-response-service-data.png)
 
@@ -171,6 +163,8 @@ the following layout
 Bit 7 is used for the relay flag, where 0 = OFF, 1 = ON.
 Bits 6-0 are used for PWM, where 100 is fully ON, 0 is OFF, dimmed in between.
 
+
+
 # Services
 When connected, the following services are available.
 
@@ -180,7 +174,8 @@ The AUG columns indicate which users can use these characteristics if encryption
 - U = User
 - G = Guest
 
-## Crownstone service
+
+## <a name="crownstone_service"></a>Crownstone service
 
 The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following services
 
@@ -192,11 +187,11 @@ Config Control | 24f00004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_
 Config Read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting | x |
 State Control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable | x | x |
 State Read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or Notify on a previously selected state variable | x | x |
-<a name="session_nonce"></a>Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key. |  |  | ECB
-Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for recovery, see explanation below. |
+Session nonce  | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the [session nonce](#session_nonce). First 4 bytes are also used as session key. |  |  | ECB
+Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
 
 
-##### Recovery
+##### <a name="recovery"></a>Recovery
 If you lose your encryption keys you can use this characteristic to factory reset the Crownstone.
 This method is only available for 20 seconds after the Crownstone powers on.
 You need to write **0xDEADBEEF** to it. After this, the Crownstone disconnects and goes into Low TX mode so you'll have to be close to continue the factory reset. After this, you reconnect and write **0xDEADBEEF** again to this characteristic to factory reset the Crownstone.
@@ -205,7 +200,6 @@ You need to write **0xDEADBEEF** to it. After this, the Crownstone disconnects a
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
 The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command
 was received before calling the next (either by polling or subscribing). The possible values of the return values are listed in the table below
-
 
 Value | Name | Description
 --- | --- | ---
@@ -226,8 +220,8 @@ Value | Name | Description
 1024 | STATE_NOT_FOUND | state type not found
 1025 | STATE_WRITE_DISABLED | writing to state disabled
 
-## <a name="setup_service"></a>Setup service
 
+## <a name="setup_service"></a>Setup service
 
 The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only available after a factory reset or when you first power on the Crownstone.
  When encryption is enabled, the control and both config characteristics are encrypted with AES CTR. The key and session Nonce for this are gotten from their
@@ -237,10 +231,10 @@ Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
 Control        | 24f10001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the control characteristic
 MAC Address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MAC address of the device
-<a name="setup_session_key"></a>Session Key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be used to encrypt the control and config characteristics.
+Session Key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be used to encrypt the control and config characteristics.
 Config Control | 24f10004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Write or select a config setting
 Config Read    | 24f10005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting
-<a name="setup_session_nonce"></a>Session Nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as session key.
+Session Packet | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint8[5] | Read the session nonce. First 4 bytes are also used as validation key.
 
 The control characteristics (Control, and Config Control) of the Setup Service return a uint 16 code on execution of the command. The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command was received before calling the next (either by polling or subscribing). The possible values are the same as for the Crownstone Service, see above.
 
@@ -254,6 +248,7 @@ Characteristic | UUID | Date type | Description | A | U | G
 Temperature    | 24f20001-7d10-4805-bfc1-7663a01c3bff | int 32 | Chip temperature in Celcius. Notifications are available. | x
 Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 1 to reset. Write 66 to go to DFU mode. | x
 
+
 ## Power service
 
 The power service has UUID 24f30000-7d10-4805-bfc1-7663a01c3bff. **Should be encrypted but it is not at the moment due to implementation.**
@@ -264,6 +259,7 @@ PWM                | 24f30001-7d10-4805-bfc1-7663a01c3bff | uint 8 | Set PWM val
 Relay              | 24f30002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Switch Relay. Value of 0 is off, other is on. | x
 Power samples      | 24f30003-7d10-4805-bfc1-7663a01c3bff | [Power Samples](#power_samples_packet) | List of sampled current and voltage values. | ...
 Power consumption  | 24f30004-7d10-4805-bfc1-7663a01c3bff | uint 16 | The current power consumption. | x
+
 
 ## Indoor localization service
 
@@ -277,6 +273,7 @@ Scan control            | 24f40003-7d10-4805-bfc1-7663a01c3bff | uint 8 | Start 
 Scanned devices         | 24f40004-7d10-4805-bfc1-7663a01c3bff | [Scan result list](#scan_result_list_packet) | After stopping the scan, you can read the results here. | x
 RSSI                    | 24f40005-7d10-4805-bfc1-7663a01c3bff | uint 8 | RSSI to connected device. Notifications are available. | x
 
+
 ## Schedule service
 
 The schedule service has UUID 24f50000-7d10-4805-bfc1-7663a01c3bff.
@@ -286,6 +283,7 @@ Characteristic | UUID | Date type | Description | A | U | G
 Set time        | 24f50001-7d10-4805-bfc1-7663a01c3bff | uint 32 | Sets the time. Timestamp is in seconds since epoch. | x
 Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule entry](#schedule_entry_packet) | Add or modify a schedule entry. Set nextTimestamp to 0 to remove the entry from the list. | x
 Schedule read   | 24f50003-7d10-4805-bfc1-7663a01c3bff | [Schedule list](#schedule_list_packet) | Get a list of all schedule entries. | x
+
 
 ## Mesh Service
 
@@ -297,7 +295,9 @@ Meta data   | 2a1e0004-fd51-d882-8ba8-b98c0000cd1e | | Get mesh configuration. |
 Value       | 2a1e0005-fd51-d882-8ba8-b98c0000cd1e | | Characteristic where the mesh values can be read. | x
 
 
+
 # Data structures
+
 
 ### <a name="control_packet"></a>Control packet
 
@@ -350,6 +350,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | enable | 1 | 0 = OFF, other = ON
 uint 16 | delay | 1 | start scanner with delay in ms
+
 
 ### <a name="config_packet"></a>Configuration packet
 
@@ -427,6 +428,7 @@ OpCode | Name | Description
 
 Note: On the Config Read Characteristic, the OpCode is set to Read (0), and the length and payload will have actual data depending on the type.
 
+
 ### <a name="state_packet"></a>State packet
 
 ![State packet](../docs/diagrams/state-packet.png)
@@ -461,6 +463,7 @@ OpCode | Name | Description
 2 | Notify | Enable/Disable notifications for state variable. Every time the state variable is updated, the new value is written to the State Read Characteristic. To use effectively, enable GATT Notifications on the State Read Characteristic. Length has to be 1, and payload is 0 = disable, other = enable
 
 Note: On the State Read Characteristic, the OpCode is also set to distinguish between a one time read, and a continuous notification. In return, the length and payload will have actual data depending on the type.
+
 
 ### <a name="power_samples_packet"></a>Power samples packet
 
@@ -508,6 +511,7 @@ uint 8 [] | Address | 6 | Bluetooth address of the scanned device.
 int 8 | RSSI | 1 | Average RSSI to the scanned device.
 uint 16 | Occurrences | 2 | Number of times the devices was scanned.
 
+
 ### <a name="scan_result_list_packet"></a>Scan result list packet
 
 ![Scan result list packet](../docs/diagrams/scan-result-list-packet.png)
@@ -527,6 +531,7 @@ Type | Name | Length | Description
 uint 8 [] | Address | 6 | Bluetooth address of the tracked device.
 int 8 | RSSI threshold | 1 | If the RSSI to this device is above the threshold, then switch on the power.
 
+
 ### <a name="tracked_device_list_packet"></a>Tracked device list packet
 
 ![Tracked device list packet](../docs/diagrams/tracked-device-list-packet.png)
@@ -536,7 +541,6 @@ Type | Name | Length | Description
 uint 8 | size | 1 | Number of tracked devices in the list.
 [Tracked device](#tracked_device_packet) | size * 7 | Array of tracked device packets.
 uint 16 [] | Counters | size * 2 | Counter that keeps up how long ago the RSSI of a device was above the threshold (for internal use).
-
 
 
 ### <a name="schedule_repeat_packet"></a>Schedule repeat packet
@@ -563,6 +567,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Reserved | 2 | Unused.
 
+
 ### <a name="schedule_action_packet"></a>Schedule action packet
 
 #### Action type 0
@@ -588,6 +593,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Reserved | 3 | Unused.
 
+
 ### <a name="schedule_entry_packet"></a>Schedule entry packet
 
 Type | Name | Length | Description
@@ -599,12 +605,14 @@ uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers.
 [schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
 [schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
 
+
 ### <a name="schedule_list_packet"></a>Schedule list packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Size | 1 | Number of entries in the list.
 [schedule entry](#schedule_entry_packet) | Entries | 12 | Schedule entry list.
+
 
 ### <a name="mesh_control_packet"></a>Mesh control packet
 
@@ -616,6 +624,7 @@ uint 8 | Handle | 1 | Handle on which to send the message.
 uint 8 | Reserved | 1 | Not used: reserved for alignment.
 uint 16 | Length | 2 | Length of the data.
 [Mesh Payload](#mesh_payload_packet) | Payload | Length | Payload data.
+
 
 ### <a name="mesh_payload_packet"></a>Mesh payload packet
 
@@ -639,6 +648,7 @@ Type nr | Type name | Payload type | Payload description
 103 | Power Samples | [Power samples](#power_samples_packet) | List of power samples.
 104 | Event | uint 16 | Event type that happened.
 
+
 ### <a name="beacon_mesh_data_packet"></a>Beacon mesh data packet
 
 ![Beacon data](../docs/diagrams/beacon-mesh-message-data-packet.png)
@@ -649,6 +659,7 @@ uint 16 | Major | 1 |
 uint 16 | Minor | 1 |
 uint 8 | Proximity UUID | 16 |
 int 8 | TX Power | 1 | Received signal strength at 1 meter.
+
 
 ### <a name="mesh_message_packet"></a>Mesh message packet
 This packet is a slightly modified version of the one used in [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh); we simply increased the content size.
@@ -670,6 +681,7 @@ uint 16 | Version | 2 | Used internally.
 [Mesh Payload](#mesh_payload_packet) | Payload | 99 | Payload data.
 uint 8 [] | CRC | 3 | Checksum.
 
+
 ### <a name="mesh_notification_packet"></a>Mesh notification packet
 This packet is used to get the [mesh messages](#mesh_message_packet) pushed over GATT notifications.
 
@@ -690,6 +702,7 @@ Opcode | Type name | Payload type | Payload Description
 32 | MultipartStart | [Mesh data update](#mesh_data_update_packet) | First part of the multi part notification.
 33 | MultipartMid | [Mesh data update](#mesh_data_update_packet) | Middle part of the multi part notification.
 34 | MultipartEnd | [Mesh data update](#mesh_data_update_packet) | Last part of the multi part notification.
+
 
 ### <a name="mesh_data_update_packet"></a>Mesh data update packet
 Each mesh data message is notified in multiple pieces, as a notification can only be 20 bytes. The op code of the [Mesh notification](#mesh_notification_packet) tells whether it is a single, or the first, last or a middle piece of a multipart message.
