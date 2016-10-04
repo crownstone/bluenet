@@ -42,7 +42,12 @@ uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength
 
 
 uint16_t EncryptionHandler::calculateDecryptionBufferLength(uint16_t encryptedPacketLength) {
-	return encryptedPacketLength - VALIDATION_NONCE_LENGTH - PACKET_NONCE_LENGTH - USER_LEVEL_LENGTH;
+	uint16_t overhead = VALIDATION_NONCE_LENGTH + PACKET_NONCE_LENGTH + USER_LEVEL_LENGTH;
+	// catch case where the length can be smaller than the overhead and the int overflows.
+	if (encryptedPacketLength <= overhead) {
+		return 0;
+	}
+	return encryptedPacketLength - overhead;
 }
 
 void EncryptionHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {

@@ -18,7 +18,7 @@ enum ConfigurationTypes {
 	CONFIG_ROOM                             = 2,      //! 0x02
 	CONFIG_FLOOR                            = 3,      //! 0x03
 	CONFIG_NEARBY_TIMEOUT                   = 4,      //! 0x04
-	CONFIG_PWM_FREQ                         = 5,      //! 0x05
+	CONFIG_PWM_PERIOD                         = 5,      //! 0x05
 	CONFIG_IBEACON_MAJOR                    = 6,      //! 0x06
 	CONFIG_IBEACON_MINOR                    = 7,      //! 0x07
 	CONFIG_IBEACON_UUID                     = 8,      //! 0x08

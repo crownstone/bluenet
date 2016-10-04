@@ -127,7 +127,10 @@
 #define CURRENT_ZERO                             168.5f
 #define POWER_ZERO                               9.0f
 #define POWER_ZERO_AVG_WINDOW                    100
+
 #define MESH_ACCESS_ADDRESS                      0xA641A69E
+
+#define PWM_PERIOD                               20000L //! Interval in us: 1/20000e-6 = 50 Hz
 
 // stack config values
 //#define MIN_CONNECTION_INTERVAL                  16

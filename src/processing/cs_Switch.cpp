@@ -42,7 +42,10 @@ void Switch::init() {
 #ifndef PWM_DISABLE
 	PWM& pwm = PWM::getInstance();
 //	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH)); //! 625 Hz
-	pwm.init(pwm.config1Ch(20000L, PIN_GPIO_SWITCH)); //! 50 Hz
+//	pwm.init(pwm.config1Ch(20000L, PIN_GPIO_SWITCH)); //! 50 Hz
+	uint32_t pwmPeriod;
+	Settings::getInstance().get(CONFIG_PWM_PERIOD, &pwmPeriod);
+	pwm.init(pwm.config1Ch(pwmPeriod, PIN_GPIO_SWITCH)); //! 50 Hz
 #else
 	nrf_gpio_cfg_output(PIN_GPIO_SWITCH);
 #ifdef SWITCH_INVERSED
@@ -71,6 +74,7 @@ void Switch::init() {
 void Switch::start() {
 	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
 	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
+	setPwm(_switchValue.pwm_state);
 }
 
 void Switch::pwmOff() {

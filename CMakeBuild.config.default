@@ -23,8 +23,8 @@ DEVICE_TYPE=DEVICE_CROWNSTONE
 PERSISTENT_FLAGS_DISABLED=0
 
 # Enable or disable meshing (1 or 0)
-MESHING=1
-BUILD_MESHING=1
+MESHING=0
+BUILD_MESHING=0
 
 # Use separate github repository https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh/
 USE_MESH_REPOSITORY=1

@@ -207,6 +207,7 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	//// UINT 32
 	/////////////////////////////////////////////////
+	case CONFIG_PWM_PERIOD:
 	case CONFIG_MESH_ACCESS_ADDRESS: {
 	if (length != 4) {
 			LOGw(FMT_ERR_EXPECTED, "uint32");
@@ -215,6 +216,7 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 		LOGi(FMT_SET_INT_TYPE_VAL, type, *(uint32_t*)payload);
 		return ERR_SUCCESS;
 	}
+
 
 	/////////////////////////////////////////////////
 	//// FLOAT
@@ -345,6 +347,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	/////////////////////////////////////////////////
 	//// UINT 32
 	/////////////////////////////////////////////////
+	case CONFIG_PWM_PERIOD:
 	case CONFIG_MESH_ACCESS_ADDRESS:
 		return 4;
 
@@ -569,6 +572,10 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getUint32(_storageStruct.meshAccessAddress, (uint32_t*)target, MESH_ACCESS_ADDRESS);
 		break;
 	}
+	case CONFIG_PWM_PERIOD: {
+		Storage::getUint32(_storageStruct.pwmInterval, (uint32_t*)target, PWM_PERIOD);
+		break;
+	}
 	default: {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_CONFIG_NOT_FOUND;
@@ -782,6 +789,11 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	case CONFIG_MESH_ACCESS_ADDRESS:{
 		p_item = (uint8_t*)&_storageStruct.meshAccessAddress;
 		Storage::setUint32(*((uint32_t*)target), _storageStruct.meshAccessAddress);
+		break;
+	}
+	case CONFIG_PWM_PERIOD:{
+		p_item = (uint8_t*)&_storageStruct.pwmInterval;
+		Storage::setUint32(*((uint32_t*)target), _storageStruct.pwmInterval);
 		break;
 	}
 	default: {

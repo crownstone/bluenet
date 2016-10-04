@@ -433,6 +433,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			//! if validation ok, set opMode to normal mode
 			State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
 
+			//! Switch relay on
+			switch_message_payload_t switchPayload;
+			switchPayload.switchState = 1;
+			handleCommand(CMD_SWITCH, (uint8_t*)&switchPayload, 1, ENCRYPTION_DISABLED);
+
 			//! then reset device
 			resetDelayed(GPREGRET_SOFT_RESET);
 		} else {
@@ -498,6 +503,28 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "switch");
 		// For now, same as relay, but switch command should decide itself if relay or pwm is used
+
+		if (size != sizeof(switch_message_payload_t)) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
+		uint8_t value = payload->switchState;
+
+		//! Switch off pwm, as we're using the relay
+		uint8_t currentPwm = Switch::getInstance().getPwm();
+		if (currentPwm != 0) {
+			Switch::getInstance().setPwm(0);
+		}
+
+		if (value == 0) {
+			Switch::getInstance().relayOff();
+		} else {
+			Switch::getInstance().relayOn();
+		}
+
+		break;
 	}
 	case CMD_RELAY: {
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
