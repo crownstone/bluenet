@@ -11,7 +11,7 @@ Bluenet is the code running on the [Crownstone](http://crownstone.rocks) and Gui
 
 
 # Usage
-To use a device with bluenet code on it, you only need to know the Bluetooth protocol that bluenet uses. You can find the protocol definitions in the [protocol document](PROTOCOL.md).
+To use a device with bluenet code on it, you only need to know the Bluetooth protocol that bluenet uses. You can find the protocol definitions in the [protocol document](docs/PROTOCOL.md).
 
 ### Libraries
 We also provide libraries which take care of the protocol:
@@ -22,7 +22,7 @@ We also provide libraries which take care of the protocol:
 
 
 # Build
-To build the bluenet code yourself, follow the [installation instructions](INSTALL.md).
+To build the bluenet code yourself, follow the [installation instructions](docs/INSTALL.md).
 
 ### Bootloader
 The Crownstones and GuideStones come with a bootloader, which enables over the air updates. This bootloader is a small adaptation of the one provided by Nordic. The build instructions are described on the [bootloader repository](https://github.com/dobots/nrf51-dfu-bootloader-for-gcc-compiler).
