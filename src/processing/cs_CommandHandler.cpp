@@ -433,6 +433,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			//! if validation ok, set opMode to normal mode
 			State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
 
+			//! Switch relay on
+			switch_message_payload_t switchPayload;
+			switchPayload.switchState = 1;
+			handleCommand(CMD_SWITCH, (uint8_t*)&switchPayload, 1, ENCRYPTION_DISABLED);
+
 			//! then reset device
 			resetDelayed(GPREGRET_SOFT_RESET);
 		} else {
