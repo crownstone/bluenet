@@ -11,7 +11,7 @@ if [[ $cmd != "help" ]]; then
 	# assign serial_num from target
 	source $path/_config.sh
 
-	SD_BINDIR=${BLUENET_BUILD_DIR}
+	SD_BINDIR=${BLUENET_BIN_DIR}
 fi
 
 build() {
