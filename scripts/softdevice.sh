@@ -6,15 +6,13 @@ cmd=${1:? "$0 requires \"cmd\" as first argument"}
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [[ $cmd != "help" ]]; then
-	# adjust targets and sets serial_num
-	# call it with the . so that it get's the same arguments as the call to this script
-	# and so that the variables assigned in the script will be persistent afterwards
-	. ${path}/_check_targets.sh
+
+	# configure environment variables, load configuration files, check targets and
+	# assign serial_num from target
+	source $path/_config.sh
+
+	SD_BINDIR=${BLUENET_BUILD_DIR}
 fi
-
-source $path/_config.sh
-
-SD_BINDIR=${BLUENET_BUILD_DIR}
 
 build() {
 	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"

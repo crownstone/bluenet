@@ -1,7 +1,6 @@
 #!/bin/bash
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/_config.sh
 
 SCRIPT_DIR=$path/jlink
 TEMP_DIR=$path/tmp
@@ -16,7 +15,9 @@ echo "$JLINK -Device $DEVICE -If SWD $TEMP_DIR/hardware_version.script"
 if [ -z $1 ]; then
 	$JLINK -Device $DEVICE -speed 100 -If SWD $TEMP_DIR/hardware_version.script
 else
-	. ${path}/_check_targets.sh
+	# configure environment variables, load configuration files, check targets and
+	# assign serial_num from target
+	source $path/_config.sh
 	$JLINK -Device $DEVICE -speed 100 -SelectEmuBySN $serial_num -If SWD $TEMP_DIR/hardware_version.script
 fi
 
