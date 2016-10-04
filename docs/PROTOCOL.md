@@ -50,7 +50,7 @@ The session nonce and validation key are only valid during the connection.
 ##### <a name="encrypted_session_nonce"></a>Session nonce after ECB decryption
 Type | Name | Length | Description
 --- | --- | --- | ---
-byte array | Validation key | 4 | 0xCAFEBABE as validation.
+uint 32 | Validation key | 4 | 0xCAFEBABE as validation.
 byte array | Session nonce | 5 | The session nonce for this session.
 byte array | Padding | 7 | Zero-padding so that the whole packet is 16 bytes.
 
@@ -75,7 +75,7 @@ uint 8 | User level | 1 | 0: Admin, 1: User, 2: Guest
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-byte array | Validation key | 4 | Used to verify that the correct key was used for decryption/encryption.
+uint 32 | Validation key | 4 | Used to verify that the correct key was used for decryption/encryption.
 byte array | Payload |  | Whatever data would have been sent if encryption was disabled.
 byte array | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes.
 
