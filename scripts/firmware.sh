@@ -7,6 +7,14 @@ path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BLUENET_DIR=${path}/..
 
 if [[ $cmd != "help" ]]; then
+
+	config_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+	# adjust targets and sets serial_num
+	# call it with the . so that it get's the same arguments as the call to this script
+	# and so that the variables assigned in the script will be persistent afterwards
+	. ${config_path}/_check_targets.sh
+
 	# configure environment variables, load configuration files, check targets and
 	# assign serial_num from target
 	source $path/_config.sh

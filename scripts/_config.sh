@@ -36,13 +36,6 @@ if [ -e ${BLUENET_DIR}/CMakeBuild.config.local ]; then
 	source ${BLUENET_DIR}/CMakeBuild.config.local
 fi
 
-config_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-# adjust targets and sets serial_num
-# call it with the . so that it get's the same arguments as the call to this script
-# and so that the variables assigned in the script will be persistent afterwards
-. ${config_path}/_check_targets.sh
-
 if [ ! -e ${BLUENET_CONFIG_DIR}/CMakeBuild.config ]; then
 	echo "ERROR: could not find ${BLUENET_CONFIG_DIR}/CMakeBuild.config"
 	echo "Don't forget to copy \"CMakeBuild.config.default\" to \"${BLUENET_CONFIG_DIR}/CMakeBuild.config\" and adjust the settings."
