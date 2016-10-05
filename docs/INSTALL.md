@@ -73,29 +73,35 @@ The best way is to first [fork](https://github.com/dobots/bluenet/fork) the blue
 
     mkdir ~/bluenet-workspace
 
-Then set the environment variable `BLUENET_WORKSPACE_DIR` to that directory
-
-    cd ~/bluenet-workspace
-    echo "export BLUENET_WORKSPACE_DIR=$PWD" >> ~/.bashrc
-
-Now you can download the code (We recommend to download the code into the workspace, but you can place it anywhere you want):
+and download the code (We recommend to download the code into the workspace, but you can place it anywhere you want):
 
     cd ~/bluenet-workspace
     git clone https://github.com/YOUR_GITHUB_USERNAME/bluenet
 
-and set the correct upstream and assign the `BLUENET_DIR` variable to the bluenet source folder:
+and set the correct upstream:
 
     cd bluenet
     git remote add upstream git@github.com:crownstone/bluenet.git
-    echo "export BLUENET_DIR=$PWD" >> ~/.bashrc
 
 Next make a dir for your config file(s), by default, this should be called `config` and be placed inside the workspace.
 
     mkdir ~/bluenet-workspace/config
 
-If you want to rename or move the folder, you have to define the environment variable `BLUENET_CONFIG_DIR` to point to the correct location.
+Now we need to set up the environment variables to keep track of the different folders required to build bluenet
 
-    echo "export BLUENET_DIR=<PATH/TO/YOUR/CONFIG>" >> ~/.bashrc
+    cd ~/bluenet_workspace/bluenet
+    cp env.config.template env.config
+
+Open the file then uncomment and assign the variable `BLUENET_WORKSPACE_DIR` to your workspace path, e.g.
+
+    BLUENET_WORKSPACE_DIR=~/bluenet_workspace
+
+If you placed the bluenet source code at a different place than `$BLUENET_WORKSPACE_DIR/bluenet`, then you can also uncomment and assign the `BLUENET_DIR` variable to the correct location.
+Same for the config directory, if you choose a different location than `$BLUENET_WORKSPACE_DIR/config`, assign the `BLUENET_CONFIG_DIR` to point to the correct location.
+
+Last we want to load the environments by default for every terminal session with the following command:
+
+    echo "source ~/bluenet_workspace/bluenet/scripts/env.sh" >> ~/.bashrc
 
 Apply the environment variables:
 
@@ -105,11 +111,11 @@ Apply the environment variables:
 
 Copy the template config file to your config directory:
 
-    cp $BLUENET_DIR/CMakeBuild.config.template $BLUENET_WORKSPACE_DIR/config/CMakeBuild.config
+    cp $BLUENET_DIR/CMakeBuild.config.template $BLUENET_CONFIG_DIR/CMakeBuild.config
 
 then open it to customize
 
-    gedit $BLUENET_WORKSPACE_DIR/config/CMakeBuild.config &
+    gedit $BLUENET_CONFIG_DIR/CMakeBuild.config &
 
 The following variables have to be set before you can build the code:
 
@@ -176,7 +182,7 @@ Now we can build our own software:
     cd $BLUENET_DIR/scripts
     ./firmware.sh build
 
-By default, the code is built inside the `$BLUENET_WORKSPACE_DIR/build` folder and if successful, the compiled binaries (*.hex, *.elf, *.bin) are copied to `$BLUENET_WORKSPACE_DIR/bin`. If you want to change either folder, you can use the following environment variables
+By default, the code is built inside the `$BLUENET_WORKSPACE_DIR/build` folder and if successful, the compiled binaries (*.hex, *.elf, *.bin) are copied to `$BLUENET_WORKSPACE_DIR/bin`. If you want to change either folder, you can uncomment and assign the following environment variables in `$BLUENET_DIR/env.config`
 
     - `BLUENET_BUILD_DIR`. Set this variable to the path where the build files should be stored.
     - `BLUENET_BIN_DIR`. Set this variable to the path where the compiled binaries should be stored

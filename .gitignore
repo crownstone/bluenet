@@ -8,3 +8,5 @@ build/
 .idea/
 .settings/
 .DS_Store
+CMakeBuild.config.local
+env.config

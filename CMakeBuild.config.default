@@ -30,33 +30,6 @@ BUILD_MESHING=0
 USE_MESH_REPOSITORY=1
 MESH_DIR=/opt/nordic/nRF51-ble-bcast-mesh/nRF51/rbc_mesh
 
-# bluenet directory paths
-# the workspace directory can be used as a root directory to contain all other directories
-#  used to build the bluenet project
-# the structure of the workspace will be
-# ${BLUENET_WORKSPACE_DIR}/
-#   |- bluenet
-#   |   the bluenet source code
-#   |- build
-#   |   the build files created when compiling
-#   |- bin
-#   |   the compiled binaries (*.bin, *.elf, *.hex)
-#   |- config
-#   |   the config files
-#   |- release
-#       the release files (binaries, CMakeBuild.config, docs, etc)
-# BLUENET_WORKSPACE_DIR=
-
-# optionally overwrite the different directories. use absolute paths!
-# the BLUENET_BUILD_DIR defines the location where the code is built
-#BLUENET_BUILD_DIR=
-# the BLUENET_BIN_DIR defines the location where the compiled binaries are copied to
-#BLUENET_BIN_DIR=
-# the BLUENET_CONFIG_DIR defines the location where the config files can be found
-#BLUENET_CONFIG_DIR=
-# the BLUENET_RELEASE_DIR defines the location where the release files should be copied to
-#BLUENET_RELEASE_DIR=
-
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=1
 
