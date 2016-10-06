@@ -302,6 +302,7 @@ void Crownstone::initDrivers() {
 
 	// init GPIOs
 #if HARDWARE_BOARD==PCA10001
+	LOGd("Configure LEDs");
 	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
 #endif
 

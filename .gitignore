@@ -10,3 +10,4 @@ build/
 .DS_Store
 CMakeBuild.config.local
 env.config
+node_modules
