@@ -8,12 +8,10 @@ export BLUENET_DIR=${path}/..
 
 if [[ $cmd != "help" ]]; then
 
-	config_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 	# adjust targets and sets serial_num
 	# call it with the . so that it get's the same arguments as the call to this script
 	# and so that the variables assigned in the script will be persistent afterwards
-	. ${config_path}/_check_targets.sh
+	. ${path}/_check_targets.sh
 
 	# configure environment variables, load configuration files, check targets and
 	# assign serial_num from target
@@ -26,14 +24,14 @@ address=${3:-$APPLICATION_START_ADDRESS}
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
-	make all BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR
+	make all
 	result=$?
 	cd $path
 	return $result
 }
 
 upload() {
-	${path}/_upload.sh $BLUENET_BUILD_DIR/$target.hex $address $serial_num
+	${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
 	if [ $? -ne 0 ]; then
 		echo "Error with uploading"
 		exit 1
@@ -41,11 +39,11 @@ upload() {
 }
 
 debug() {
-	${path}/_debug.sh $BLUENET_BUILD_DIR/$target.elf $serial_num $gdb_port
+	${path}/_debug.sh $BLUENET_BIN_DIR/$target.elf $serial_num $gdb_port
 }
 
 debugbl() {
-	${path}/_debug.sh $BLUENET_BUILD_DIR/bootloader.elf $serial_num $gdb_port
+	${path}/_debug.sh $BLUENET_BIN_DIR/bootloader.elf $serial_num $gdb_port
 }
 
 all() {
@@ -68,7 +66,7 @@ run() {
 
 clean() {
 	cd ${path}/..
-	make clean BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR
+	make clean
 }
 
 bootloader() {
@@ -77,7 +75,7 @@ bootloader() {
 
 	# note that within the bootloader the JLINK doesn't work anymore...
 	# so perhaps first flash the binary and then the bootloader
-	${path}/_upload.sh $BLUENET_BUILD_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
+	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
 
 	# Mark current app as valid app
 	${path}/_writebyte.sh 0x0007F000 1
@@ -96,7 +94,7 @@ bootloader-only() {
 
 	# note that within the bootloader the JLINK doesn't work anymore...
 	# so perhaps first flash the binary and then the bootloader
-	${path}/_upload.sh $BLUENET_BUILD_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
+	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
 
 	# Mark current app as valid app
 	${path}/_writebyte.sh 0x0007F000 0
@@ -110,7 +108,7 @@ bootloader-only() {
 }
 release() {
 	cd ${path}/..
-	make release BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR
+	make release
 	result=$?
 	cd $path
 	return $result

@@ -20,11 +20,13 @@ echo "BLUENET_RELEASE_DIR is ${BLUENET_RELEASE_DIR}"
 
 if [ ! -d "${BLUENET_DIR}" ] || [ ! -d "${BLUENET_CONFIG_DIR}" ] || [ -z "${BLUENET_BUILD_DIR}" ] || [ -z "${BLUENET_BIN_DIR}" ]; then
 	echo "ERROR: missing environment variables, or wrongly set!!"
-	echo " make sure to source the \$BLUENET_DIR/scripts/env.sh"
+	echo " make sure to source the PATH/TO/YOUR/BLUENET_DIR/scripts/env.sh"
 	echo " in your bashrc file with"
-	echo "    echo \"source \$BLUENET_DIR/scripts/env.sh\" >> ~/.bashrc"
-	echo " and to define the environment variables correctly in"
-	echo " \$BLUENET_DIR/env.config"
+	echo "    echo \"source PATH/TO/YOUR/BLUENET_DIR/scripts/env.sh\" >> ~/.bashrc"
+	echo " create a copy of the env.config"
+	echo "    cp PATH/TO/YOUR/BLUENET_DIR/env.config.template PATH/TO/YOUR/BLUENET_DIR/env.config"
+	echo " and define the environment variables correctly in"
+	echo " PATH/TO/YOUR/BLUENET_DIR/env.config"
 	exit 1
 fi
 
