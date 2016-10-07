@@ -436,7 +436,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			//! Switch relay on
 			switch_message_payload_t switchPayload;
 			switchPayload.switchState = 1;
-			handleCommand(CMD_SWITCH, (uint8_t*)&switchPayload, 1, ENCRYPTION_DISABLED);
+			handleCommand(CMD_SWITCH, (uint8_t*)&switchPayload, 1, ADMIN);
 
 			//! then reset device
 			resetDelayed(GPREGRET_SOFT_RESET);
