@@ -37,6 +37,11 @@ public:
 		ptr->timeout();
 	}
 
+	/* Static function for the timeout */
+	static void staticProcess(FactoryReset *ptr) {
+		ptr->process();
+	}
+
 private:
 	FactoryReset();
 
@@ -44,6 +49,7 @@ private:
 	bool performFactoryReset();
 	void resetTimeout();
 	void timeout();
+	void process();
 
 	bool _recoveryEnabled;
 	uint32_t _rtcStartTime;
@@ -51,6 +57,9 @@ private:
 #if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _recoveryDisableTimerData;
 	app_timer_id_t           _recoveryDisableTimerId;
+
+	app_timer_t              _recoveryProcessTimerData;
+	app_timer_id_t           _recoveryProcessTimerId;
 #else
 	uint32_t                 _recoveryDisableTimerId;
 #endif

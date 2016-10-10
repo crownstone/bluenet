@@ -14,7 +14,8 @@
 
 FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
 #if (NORDIC_SDK_VERSION >= 11)
-		_recoveryDisableTimerId(NULL)
+		_recoveryDisableTimerId(NULL),
+		_recoveryProcessTimerId(NULL)
 #else
 		_recoveryDisableTimerId(UINT32_MAX)
 #endif
@@ -22,11 +23,15 @@ FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
 #if (NORDIC_SDK_VERSION >= 11)
 	_recoveryDisableTimerData = { {0} };
 	_recoveryDisableTimerId = &_recoveryDisableTimerData;
+
+	_recoveryProcessTimerData = { {0} };
+	_recoveryProcessTimerId = &_recoveryProcessTimerData;
 #endif
 }
 
 void FactoryReset::init() {
 	Timer::getInstance().createSingleShot(_recoveryDisableTimerId, (app_timer_timeout_handler_t)FactoryReset::staticTimeout);
+	Timer::getInstance().createSingleShot(_recoveryProcessTimerId, (app_timer_timeout_handler_t)FactoryReset::staticProcess);
 	resetTimeout();
 }
 
@@ -50,6 +55,22 @@ void FactoryReset::timeout() {
 	State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_NORMAL);
 }
 
+/**
+ * This has been put in a timer because we need to read the result after writing to see if the process is successful.
+ * Without the timer (and without logging) the disconenct is too fast for us to read the result.
+ */
+void FactoryReset::process() {
+	uint8_t resetState;
+	State::getInstance().get(STATE_FACTORY_RESET, resetState);
+	if (resetState == FACTORY_RESET_STATE_NORMAL) {
+		State::getInstance().set(STATE_FACTORY_RESET, (uint8_t) FACTORY_RESET_STATE_LOWTX);
+		LOGd("recovery: go to low tx");
+		Nrf51822BluetoothStack::getInstance().changeToLowTxPowerMode();
+		Nrf51822BluetoothStack::getInstance().disconnect();
+		resetTimeout();
+	}
+}
+
 void FactoryReset::enableRecovery(bool enable) {
 	LOGd("recovery: %i", enable);
 	_recoveryEnabled = enable;
@@ -71,17 +92,16 @@ bool FactoryReset::recover(uint32_t resetCode) {
 	State::getInstance().get(STATE_FACTORY_RESET, resetState);
 	switch (resetState) {
 	case FACTORY_RESET_STATE_NORMAL:
-		State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_LOWTX);
-		LOGd("recovery: go to low tx");
-		Nrf51822BluetoothStack::getInstance().changeToLowTxPowerMode();
-		Nrf51822BluetoothStack::getInstance().disconnect();
-		resetTimeout();
+		//! just in case, we stop the timer so we cannot flood this mechanism.
+		Timer::getInstance().stop(_recoveryProcessTimerId);
+		Timer::getInstance().start(_recoveryProcessTimerId, MS_TO_TICKS(FACTORY_PROCESS_TIMEOUT), this);
 		return true;
 //		break;
 	case FACTORY_RESET_STATE_LOWTX:
 		State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_RESET);
 		LOGd("recovery: factory reset");
 
+		// the reset delayed in here should be sufficient
 		return performFactoryReset();
 //		break;
 	case FACTORY_RESET_STATE_RESET:
