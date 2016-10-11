@@ -29,4 +29,7 @@ if [ ! -z "${BLUENET_WORKSPACE_DIR}" ]; then
 	if [ -z "${BLUENET_RELEASE_DIR}" ]; then
 		export BLUENET_RELEASE_DIR=${BLUENET_WORKSPACE_DIR}/release
 	fi
+	if [ -z "${BLUENET_BOOTLOADER_DIR}" ]; then
+		export BLUENET_BOOTLOADER_DIR=${BLUENET_WORKSPACE_DIR}/bootloader
+	fi
 fi

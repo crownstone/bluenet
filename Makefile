@@ -19,11 +19,11 @@ all: build
 	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then echo "Copy binaries to ${BLUENET_BIN_DIR}"; mkdir -p ${BLUENET_BIN_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_BIN_DIR); fi
 
 release: build
-	@cd $(BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
+	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then echo "Copy binaries to ${BLUENET_RELEASE_DIR}"; mkdir -p ${BLUENET_RELEASE_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_RELEASE_DIR); fi
 
 clean:
-	@cd $(BUILD_DIR) && make clean
+	@cd $(BLUENET_BUILD_DIR) && make clean
 
 # The build target is only executed when there is no build directory! So if there is a build directory, but the test
 # files cannot be found this will lead to an error on the first build. The next builds will be fine. So, the user only

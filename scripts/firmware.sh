@@ -4,7 +4,7 @@ cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
 
 # use the current path as the bluenet directory
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export BLUENET_DIR=${path}/..
+export BLUENET_DIR=$(readlink -m ${path}/..)
 
 if [[ $cmd != "help" ]]; then
 

@@ -16,6 +16,6 @@ ADDRESS=F8:86:A5:56:42:51
 cd /opt/nrf51_dfu_linux
 cd $HOME/workspace/ble-automator
 
-file=${BLUENET_BUILD_DIR}/$PROGRAM
+file=${BLUENET_BIN_DIR}/$PROGRAM
 echo python dfu.py -f $file -a $ADDRESS
 python dfu.py -f $file -a $ADDRESS
