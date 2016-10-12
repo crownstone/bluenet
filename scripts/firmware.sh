@@ -2,6 +2,14 @@
 
 cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
 
+# optional target, use crownstone as default
+target=${2:-crownstone}
+
+# optional address, use $APPLICATION_START_ADDRESS as default
+address=${3:-$APPLICATION_START_ADDRESS}
+
+source _utils.sh
+
 # use the current path as the bluenet directory
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BLUENET_DIR=$(readlink -m ${path}/..)
@@ -11,39 +19,36 @@ if [[ $cmd != "help" ]]; then
 	# adjust targets and sets serial_num
 	# call it with the . so that it get's the same arguments as the call to this script
 	# and so that the variables assigned in the script will be persistent afterwards
-	. ${path}/_check_targets.sh
+	source ${path}/_check_targets.sh $target
 
 	# configure environment variables, load configuration files, check targets and
 	# assign serial_num from target
 	source $path/_config.sh
 fi
 
-# optional address, use $APPLICATION_START_ADDRESS as default
-address=${3:-$APPLICATION_START_ADDRESS}
-
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
 	make all
-	result=$?
+	# result=$?
+	checkError "Error building firmware"
 	cd $path
-	return $result
+	# return $result
 }
 
 upload() {
 	${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
-	if [ $? -ne 0 ]; then
-		echo "Error with uploading"
-		exit 1
-	fi
+	checkError "Error with uploading firmware"
 }
 
 debug() {
 	${path}/_debug.sh $BLUENET_BIN_DIR/$target.elf $serial_num $gdb_port
+	checkError "Error debugging firmware"
 }
 
 debugbl() {
 	${path}/_debug.sh $BLUENET_BIN_DIR/bootloader.elf $serial_num $gdb_port
+	checkError "Error debugging bootloader"
 }
 
 all() {
@@ -51,8 +56,10 @@ all() {
 	if [ $? -eq 0 ]; then
 		sleep 1
 		upload
-		sleep 1
-		debug
+		if [ $? -eq 0 ]; then
+			sleep 1
+			debug
+		fi
 	fi
 }
 
@@ -67,6 +74,7 @@ run() {
 clean() {
 	cd ${path}/..
 	make clean
+	checkError "Error cleaning up"
 }
 
 bootloader() {
@@ -77,15 +85,21 @@ bootloader() {
 	# so perhaps first flash the binary and then the bootloader
 	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
 
+	checkError "Error uploading bootloader"
+
 	# Mark current app as valid app
 	${path}/_writebyte.sh 0x0007F000 1
 
-	if [ $? -eq 0 ]; then
-		sleep 1
-		# and set to load it
-#		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_REGION_START
-		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_START_ADDRESS
-	fi
+	checkError "Error marking app valid"
+
+	# DE [12.10.16] is this still necessary? the bootloader is started automatically after
+	#   uploading, and the app is started after marking as valid
+# 	if [ $? -eq 0 ]; then
+# 		sleep 1
+# 		# and set to load it
+# #		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_REGION_START
+# 		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_START_ADDRESS
+# 	fi
 }
 
 bootloader-only() {
@@ -96,22 +110,30 @@ bootloader-only() {
 	# so perhaps first flash the binary and then the bootloader
 	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
 
-	# Mark current app as valid app
+	checkError "Error uploading bootloader"
+
+	# Mark current app as invalid app
 	${path}/_writebyte.sh 0x0007F000 0
 
-	if [ $? -eq 0 ]; then
-		sleep 1
-		# and set to load it
-#		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_REGION_START
-		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_START_ADDRESS
-	fi
+	checkError "Error marking app invalid"
+
+	# DE [12.10.16] is this still necessary? the bootloader is started automatically after
+	#   uploading
+# 	if [ $? -eq 0 ]; then
+# 		sleep 1
+# 		# and set to load it
+# #		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_REGION_START
+# 		${path}/_writebyte.sh 0x10001014 $BOOTLOADER_START_ADDRESS
+# 	fi
 }
+
 release() {
 	cd ${path}/..
 	make release
-	result=$?
+	checkError "Failed to build release"
+	# result=$?
 	cd $path
-	return $result
+	# return $result
 }
 
 case "$cmd" in
@@ -146,7 +168,7 @@ case "$cmd" in
 		release
 		;;
 	*)
-		echo $"Usage: $0 {build|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release}"
+		info $"Usage: $0 {build|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release}"
 		exit 1
 esac
 

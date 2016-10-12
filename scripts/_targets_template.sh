@@ -23,6 +23,8 @@
 #       J-Link[1]: Connection: USB, Serial number: 480110849, ProductName: J-Link-OB-SAM3U128
 # 3. copy and rename this file to $BLUENET_CONFIG_DIR/_targets.sh
 # 4. add the targets and serial numbers further below where it says ENTER NEW TARGETS HERE
+# 5. Optionally, define one of the devices as your default and add the serial number after the *) this device will be
+#    used whenever a target is used that was not assigned to a serial number
 #
 # Now you can call the scripts mentioned earlier together with the target name at the end, e.g.
 #
@@ -30,24 +32,24 @@
 # ./softdevice.sh all capella
 # ./all.sh sirius
 #
-# the compiled files will then be copied to the folder $BLUENET_CONFIG_DIR/<target name>/build/
+# The build folder will be automatically adjusted to $BLUENET_BUILD_DIR/<target name> and the compiled files will
+# be copied to the folder $BLUENET_BIN_DIR/<target name>
 #
 # Note: You can still use the scripts without a target supplied, in which case it will use the CMakeBuild.config in
-#       $BLUENET_CONFIG_DIR and compile to $BLUENET_CONFIG_DIR/build. But you won't be able to program them while
-#       having more than one connected!
+#       $BLUENET_CONFIG_DIR, compile in $BLUENET_BUILD_DIR/default and copy the compiled files to
+#       $BLUENET_BUILD_DIR/default. But you won't be able to program them while having more than one connected!
 
-target=$1
+target=${1:-crownstone}
 
 if [[ $target != "crownstone" ]]; then
-	BLUENET_ORIG_CONFIG_DIR=$BLUENET_CONFIG_DIR
-	BLUENET_CONFIG_DIR=$BLUENET_CONFIG_DIR${target:+/$target}
-	BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR${target:+/$target}
-	BLUENET_BIN_DIR=$BLUENET_BIN_DIR${target:+/$target}
-	BLUENET_RELEASE_DIR=$BLUENET_RELEASE_DIR${target:+/$target}
+	BLUENET_CONFIG_DIR=${BLUENET_CONFIG_DIR:+$BLUENET_CONFIG_DIR/$target}
+	BLUENET_BUILD_DIR=${BLUENET_BUILD_DIR:+$BLUENET_BUILD_DIR/$target}
+	BLUENET_BIN_DIR=${BLUENET_BIN_DIR:+$BLUENET_BIN_DIR/$target}
+	BLUENET_RELEASE_DIR=${BLUENET_RELEASE_DIR:+$BLUENET_RELEASE_DIR/$target}
 else
-	BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR/default
-	BLUENET_BIN_DIR=$BLUENET_BIN_DIR/default
-	BLUENET_RELEASE_DIR=$BLUENET_RELEASE_DIR/default
+	BLUENET_BUILD_DIR=${BLUENET_BUILD_DIR:+$BLUENET_BUILD_DIR/default}
+	BLUENET_BIN_DIR=${BLUENET_BIN_DIR:+$BLUENET_BIN_DIR/default}
+	BLUENET_RELEASE_DIR=${BLUENET_RELEASE_DIR:+$BLUENET_RELEASE_DIR/default}
 fi
 
 case "$target" in

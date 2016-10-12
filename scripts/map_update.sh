@@ -1,9 +1,15 @@
 #!/bin/bash
 
+# optional target, use crownstone as default
+target=${1:-crownstone}
+
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source $path/_check_targets.sh $target
 source $path/_config.sh
 
-cd $path/../build/$1
+# cd $path/../build/$1
+cd $BLUENET_BUILD_DIR
 
 cp prog.map prog.tmp.map
 ex -c '%g/\.text\S*[\s]*$/j' -c "wq" prog.map

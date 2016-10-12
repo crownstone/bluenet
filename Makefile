@@ -10,6 +10,16 @@
 
 #!/bin/make -f
 
+ifndef BLUENET_BUILD_DIR
+$(error BLUENET_BUILD_DIR not defined!)
+endif
+ifndef BLUENET_BIN_DIR
+$(error BLUENET_BIN_DIR not defined!)
+endif
+ifndef BLUENET_CONFIG_DIR
+$(error BLUENET_CONFIG_DIR not defined!)
+endif
+
 # BUILD_DIR=build
 SOURCE_DIR=$(shell pwd)
 COMPILE_WITH_J_PROCESSORS=4
@@ -20,6 +30,7 @@ all: build
 
 release: build
 	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
+	@if [ -z "${BLUENET_RELEASE_DIR}" ]; then $(error BLUENET_RELEASE_DIR not defined!); exit 1; fi
 	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then echo "Copy binaries to ${BLUENET_RELEASE_DIR}"; mkdir -p ${BLUENET_RELEASE_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_RELEASE_DIR); fi
 
 clean:
