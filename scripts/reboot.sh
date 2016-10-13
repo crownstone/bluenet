@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source _utils.sh
+
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_config.sh
 
@@ -22,6 +24,6 @@ cleanup() {
 }
 trap "cleanup" INT QUIT TERM EXIT
 
-echo "$GDB -x ${path}/gdb/$GDB_SCRIPT"
+log "$GDB -x ${path}/gdb/$GDB_SCRIPT"
 $GDB -x $path/gdb/$GDB_SCRIPT
 

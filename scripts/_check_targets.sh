@@ -12,14 +12,16 @@
 #target if provided, otherwise default "crownstone"
 target=${1:-crownstone}
 
+source _utils.sh
+
 if [[ -e "$BLUENET_CONFIG_DIR/_targets.sh" ]]; then
 	#adjusts target and sets serial_num
 	source $BLUENET_CONFIG_DIR/_targets.sh $target
 else
 	if [[ $target != "crownstone" ]]; then
-		echo "To use different targets, copy _targets_template.sh to $BLUENET_CONFIG_DIR and rename to _targets.sh"
+		log "To use different targets, copy _targets_template.sh to $BLUENET_CONFIG_DIR and rename to _targets.sh"
 		exit 1
 	else
-		echo "NOTE: this is the old way of calling the scripts, you might want to check _targets_template.sh or the README"
+		log "NOTE: this is the old way of calling the scripts, you might want to check _targets_template.sh or the README"
 	fi
 fi

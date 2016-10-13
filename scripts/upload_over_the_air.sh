@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source _utils.sh
+
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_config.sh
 
@@ -17,5 +19,5 @@ cd /opt/nrf51_dfu_linux
 cd $HOME/workspace/ble-automator
 
 file=${BLUENET_BIN_DIR}/$PROGRAM
-echo python dfu.py -f $file -a $ADDRESS
+log "python dfu.py -f $file -a $ADDRESS"
 python dfu.py -f $file -a $ADDRESS

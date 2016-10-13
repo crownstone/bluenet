@@ -2,6 +2,8 @@
 
 cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
 
+source _utils.sh
+
 if [[ $cmd != "help" && $cmd != "init" && $cmd != "combined" && $cmd != "connect" ]]; then
 	target=${2:? "Usage: $0 \"cmd\", \"target\""}
 fi
@@ -37,7 +39,7 @@ debug() {
 }
 
 help() {
-	echo $"Usage: $0 {init|connect|upload|combined|debug}"
+	log "Usage: $0 {init|connect|upload|combined|debug}"
 }
 
 case "$cmd" in
@@ -60,7 +62,7 @@ case "$cmd" in
 		help
 		;;
 	*)
-		echo $"Usage: $0 {init|connect|upload|combined|debug}"
+		log "Usage: $0 {init|connect|upload|combined|debug}"
 		exit 1
 esac
 

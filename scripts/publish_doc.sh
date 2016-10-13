@@ -1,5 +1,7 @@
 #!/bin/sh
 
+source _utils.sh
+
 ./gen_doc.sh
 
 cd ..
@@ -10,4 +12,4 @@ git commit
 
 git subtree push --prefix docs/html origin gh-pages
 
-echo "Go to https://dobots.github.com/bluenet"
+log "Go to https://dobots.github.com/bluenet"

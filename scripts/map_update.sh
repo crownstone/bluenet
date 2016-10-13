@@ -3,6 +3,8 @@
 # optional target, use crownstone as default
 target=${1:-crownstone}
 
+source _utils.sh
+
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source $path/_check_targets.sh $target
@@ -23,6 +25,6 @@ sed -i 's/\.bss\S*/.bss/g' prog.map
 
 cd $path/../util/memory
 
-echo "Load now file prog.map from build directory in your browser"
+log "Load now file prog.map from build directory in your browser"
 gnome-open index.html
 

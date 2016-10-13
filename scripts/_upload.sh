@@ -22,15 +22,15 @@ if [ ! -e ${FILE} ]; then
 fi
 
 if [ -z "${ADDRESS}" ]; then
-	echo "No address as parameter so overwrite with config value"
+	log "No address as parameter so overwrite with config value"
 	ADDRESS=$APPLICATION_START_ADDRESS
 fi
-echo "Write to address: $ADDRESS"
+log "Write to address: $ADDRESS"
 
 #check_mime=$(mimetype $FILE)
 #if [ $check_mime != "application/octet-stream" ]; then
-#	echo "Error: ${FILE} has mime-type $check_mime instead of application/octet-stream"
-#	echo "Are you perhaps trying to upload the .elf file?"
+#	log "Error: ${FILE} has mime-type $check_mime instead of application/octet-stream"
+#	log "Are you perhaps trying to upload the .elf file?"
 #	exit
 #fi
 
@@ -43,14 +43,14 @@ fi
 
 sed "s|@BIN@|$FILE|" $SCRIPT_DIR/upload.script > $TEMP_DIR/upload.script
 
-echo "Program application starting from $ADDRESS"
+log "Program application starting from $ADDRESS"
 
 sed -i "s|@START_ADDRESS@|$ADDRESS|" $TEMP_DIR/upload.script
 
 if [ -z $SERIAL_NUM ]; then
-	echo "$JLINK -Device $DEVICE -speed 4000 -If SWD $TEMP_DIR/upload.script -ExitonError 1"
+	log "$JLINK -Device $DEVICE -speed 4000 -If SWD $TEMP_DIR/upload.script -ExitonError 1"
 	$JLINK -Device $DEVICE -speed 4000 -If SWD $TEMP_DIR/upload.script -ExitonError 1
 else
-	echo "$JLINK -Device $DEVICE -speed 4000 -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/upload.script -ExitonError 1"
+	log "$JLINK -Device $DEVICE -speed 4000 -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/upload.script -ExitonError 1"
 	$JLINK -Device $DEVICE -speed 4000 -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/upload.script -ExitonError 1
 fi

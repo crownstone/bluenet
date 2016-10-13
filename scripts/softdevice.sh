@@ -24,9 +24,9 @@ if [[ $cmd != "help" ]]; then
 fi
 
 build() {
-	echo "There is no real building step. Nordic provides a binary blob as SoftDevice"
-	echo "However, we still need to extract the binary and the config blob"
-	echo "  from $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX"
+	log "There is no real building step. Nordic provides a binary blob as SoftDevice"
+	log "However, we still need to extract the binary and the config blob"
+	log "  from $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX"
 	$path/_softdevice_objcopy.sh $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX $SD_BINDIR $SOFTDEVICE $COMPILER_PATH $COMPILER_TYPE $SOFTDEVICE_NO_SEPARATE_UICR_SECTION
 	checkError "Error with building softdevice"
 }
@@ -55,6 +55,6 @@ case "$cmd" in
 		all
 		;;
 	*)
-		info $"Usage: $0 {build|upload|all}"
+		info "Usage: $0 {build|upload|all}"
 		exit 1
 esac

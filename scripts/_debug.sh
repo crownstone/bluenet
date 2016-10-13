@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source _utils.sh
+
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_config.sh
 
@@ -29,10 +31,10 @@ sed -i "s/@gdb_port@/${GDB_PORT}/" $GDB_SCRIPT
 
 # Run JLink gdb server
 if [ -z $SN ]; then
-	echo "1: $JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 400 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
+	log "$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 400 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
 	$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
 else
-	echo "2: $JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 400 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
+	log "$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 400 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
 	$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
 fi
 
@@ -43,5 +45,5 @@ cleanup() {
 }
 trap "cleanup" INT QUIT TERM EXIT
 
-echo "$GDB -x $GDB_SCRIPT $TARGET"
+log "$GDB -x $GDB_SCRIPT $TARGET"
 $GDB -x $GDB_SCRIPT $TARGET

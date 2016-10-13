@@ -24,20 +24,20 @@ mkdir -p $TEMP_DIR
 cp $SCRIPT_DIR/hardware_version.script $TEMP_DIR/hardware_version.script
 
 if [ -z $serial_num ]; then
-	echo "$JLINK -Device $DEVICE -If SWD $TEMP_DIR/hardware_version.script -ExitonError 1"
+	log "$JLINK -Device $DEVICE -If SWD $TEMP_DIR/hardware_version.script -ExitonError 1"
 	$JLINK -Device $DEVICE -speed 100 -If SWD $TEMP_DIR/hardware_version.script -ExitonError 1
 else
-	echo "$JLINK -Device $DEVICE -SelectEmuBySN $serial_num -If SWD $TEMP_DIR/hardware_version.script -ExitonError 1"
+	log "$JLINK -Device $DEVICE -SelectEmuBySN $serial_num -If SWD $TEMP_DIR/hardware_version.script -ExitonError 1"
 	$JLINK -Device $DEVICE -speed 100 -SelectEmuBySN $serial_num -If SWD $TEMP_DIR/hardware_version.script -ExitonError 1
 fi
 
 checkError "Failed to get hardware version"
 
-echo "The result should be something like:"
-echo "    1000005C = 3C 00 FF FF"
-echo
-echo "This would mean HARDWARE_VERSION=0x003C in the config file"
-echo
-echo "This means version 003C in the document:"
-echo '    "Migrating to the latest nRF51822 chip version" "nWP-018" "White Paper v1.3"'
+log "The result should be something like:"
+log "    1000005C = 3C 00 FF FF"
+log
+log "This would mean HARDWARE_VERSION=0x003C in the config file"
+log
+log "This means version 003C in the document:"
+log '    "Migrating to the latest nRF51822 chip version" "nWP-018" "White Paper v1.3"'
 
