@@ -1,8 +1,9 @@
 #!/bin/sh
 
-source _utils.sh
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
 
-./gen_doc.sh
+$path/gen_doc.sh
 
 cd ..
 

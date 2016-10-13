@@ -12,7 +12,8 @@
 #target if provided, otherwise default "crownstone"
 target=${1:-crownstone}
 
-source _utils.sh
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
 
 if [[ -e "$BLUENET_CONFIG_DIR/_targets.sh" ]]; then
 	#adjusts target and sets serial_num

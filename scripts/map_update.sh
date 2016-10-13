@@ -3,10 +3,8 @@
 # optional target, use crownstone as default
 target=${1:-crownstone}
 
-source _utils.sh
-
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
+source $path/_utils.sh
 source $path/_check_targets.sh $target
 source $path/_config.sh
 

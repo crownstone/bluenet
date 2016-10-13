@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source _utils.sh
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
 
 if [ $# -ne 6 ]; then
 	err "Error: Usage $0 \"softdevice dir\" \"softdevice bin dir\" \"softdevice\" \"compiler dir\" \"compiler type\" \"no separate section\""

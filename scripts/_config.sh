@@ -11,7 +11,7 @@
 	# log "BLUENET_DIR does not exist. Use ${config_path}/.. as default"
 # fi
 
-source _utils.sh
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/_utils.sh"
 
 log "BLUENET_WORKSPACE_DIR is ${BLUENET_WORKSPACE_DIR}"
 log "BLUENET_DIR is ${BLUENET_DIR}"

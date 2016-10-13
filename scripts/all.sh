@@ -4,7 +4,8 @@
 
 target=$1
 
-source _utils.sh
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
 
 ###################
 ### Softdevice
@@ -12,7 +13,7 @@ source _utils.sh
 
 info "Build and upload softdevice ..."
 
-./softdevice.sh all $target
+$path/softdevice.sh all $target
 
 checkError
 succ "Softdevice DONE"
@@ -23,14 +24,14 @@ succ "Softdevice DONE"
 
 info "Build firmware ..."
 
-./firmware.sh build $target
+$path/firmware.sh build $target
 
 checkError
 succ "Build DONE"
 
 info "Upload firmware ..."
 
-./firmware.sh upload $target
+$path/firmware.sh upload $target
 
 checkError
 succ "Upload DONE"
@@ -51,7 +52,7 @@ fi
 
 info "Upload bootloader"
 
-./firmware.sh bootloader $target
+$path/firmware.sh bootloader $target
 
 checkError
 

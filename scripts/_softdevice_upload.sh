@@ -4,9 +4,8 @@ SOFTDEVICE_DIR=${1:? "$0 requires \"softdevice bin directory\" as first argument
 
 SERIAL_NUM=$2
 
-source _utils.sh
-
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
 source $path/_config.sh
 
 SCRIPT_DIR=$path/jlink

@@ -12,9 +12,8 @@
 #   Date: Feb. 3, 2014
 #######################################################################################################################
 
-source _utils.sh
-
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
 source $path/_config.sh
 
 cd ${BLUENET_BIN_DIR} && rm -f combined*

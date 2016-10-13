@@ -5,10 +5,9 @@ cmd=${1:? "$0 requires \"cmd\" as first argument"}
 # optional target, use crownstone as default
 target=${2:-crownstone}
 
-source _utils.sh
-
 # get working path in absolute sense
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
 
 if [[ $cmd != "help" ]]; then
 

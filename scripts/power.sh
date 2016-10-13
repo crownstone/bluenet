@@ -5,8 +5,6 @@ source $path/_config.sh
 
 SCRIPT_DIR=jlink
 
-source _config.sh
-
 #DEVICE=nrf51822
 
 SCRIPT=power.script

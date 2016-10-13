@@ -4,9 +4,8 @@ ADDRESS=${1:? "Requires address as argument"}
 VALUE=$2
 SERIAL_NUM=$3
 
-source _utils.sh
-
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
 source $path/_config.sh
 
 SCRIPT_DIR=$path/jlink

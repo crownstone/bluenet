@@ -3,9 +3,8 @@
 # optional target, use crownstone as default
 target=${1:-crownstone}
 
-source _utils.sh
-
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
 
 # adjust targets and sets serial_num
 # call it with source so that it get's the same arguments as the call to this script

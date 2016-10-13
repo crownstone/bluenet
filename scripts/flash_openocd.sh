@@ -2,13 +2,12 @@
 
 cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
 
-source _utils.sh
-
 if [[ $cmd != "help" && $cmd != "init" && $cmd != "combined" && $cmd != "connect" ]]; then
 	target=${2:? "Usage: $0 \"cmd\", \"target\""}
 fi
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
 source $path/_config.sh
 
 debug_target=$target.elf

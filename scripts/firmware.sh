@@ -8,10 +8,10 @@ target=${2:-crownstone}
 # optional address, use $APPLICATION_START_ADDRESS as default
 address=${3:-$APPLICATION_START_ADDRESS}
 
-source _utils.sh
-
 # use the current path as the bluenet directory
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
+
 export BLUENET_DIR=$(readlink -m ${path}/..)
 
 if [[ $cmd != "help" ]]; then
