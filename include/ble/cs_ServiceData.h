@@ -70,9 +70,9 @@ public:
 
 	void updateEventBitmask(uint8_t bit, bool set) {
 		if (set) {
-			_params.eventBitmask |= 1 < bit;
+			_params.eventBitmask |= 1 << bit;
 		} else {
-			_params.eventBitmask &= 0 < bit;
+			_params.eventBitmask &= ~(1 << bit);
 		}
 	}
 
