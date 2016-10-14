@@ -25,8 +25,11 @@ SOURCE_DIR=$(shell pwd)
 COMPILE_WITH_J_PROCESSORS=4
 
 all: build
-	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
-	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then echo "Copy binaries to ${BLUENET_BIN_DIR}"; mkdir -p ${BLUENET_BIN_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_BIN_DIR); fi
+	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then printf "++ Copy binaries to ${BLUENET_BIN_DIR}\n"; mkdir -p ${BLUENET_BIN_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_BIN_DIR); fi
+
+
+#	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
+#	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then echo "Copy binaries to ${BLUENET_BIN_DIR}"; mkdir -p ${BLUENET_BIN_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_BIN_DIR); fi
 
 release: build
 	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
@@ -40,7 +43,7 @@ clean:
 # files cannot be found this will lead to an error on the first build. The next builds will be fine. So, the user only
 # needs to build two times in a row.
 build:
-	@echo "++ Create build directory: $(BLUENET_BUILD_DIR)"
+	@printf "++ Create build directory: $(BLUENET_BUILD_DIR)\n"
 	@mkdir -p $(BLUENET_BUILD_DIR)
 	@mkdir -p $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp
 	@cp CMakeConfig.cmake $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp
@@ -55,6 +58,13 @@ build:
 	@sed -i "s/@HEAP_SIZE@/2700/" conf/nRF51822-softdevice.ld
 	#@sed -i $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp/conf/nRF51822-softdevice.ld
 	@cp conf/* $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp/conf
-	@echo $(SOURCE_DIR) && cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' --debug-trycompile -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake --target analyze $(SOURCE_DIR)
+	printf "Following should exist ${BLUENET_BUILD_DIR}/CMakeFiles/CMakeTmp/CMakeConfig.cmake\n"
+	if [ -e "${BLUENET_BUILD_DIR}/Makefile" ]; then \
+		printf "++ Skip try-compile step\n"; \
+	else \
+		printf "++ Add a try-compile step\n"; \
+		cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' --debug-trycompile -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug --target analyze $(SOURCE_DIR); \
+	fi
+	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 
-.PHONY: all build
+.PHONY: all build release clean

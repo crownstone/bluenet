@@ -298,7 +298,9 @@ SET(CHAR_SCHEDULE                               "${CHAR_SCHEDULE}"              
 GET_DIRECTORY_PROPERTY( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS )
 
 FOREACH(definition ${DirDefs})
-	MESSAGE(STATUS "Definition: " ${definition})
+	IF(VERBOSITY GREATER 4)
+		MESSAGE(STATUS "Definition: " ${definition})
+	ENDIF()
 	IF(${definition} MATCHES "=$")
 		IF(NOT ${definition} MATCHES "COMPILATION_TIME")
 			MESSAGE(FATAL_ERROR "Definition ${definition} is not defined" )

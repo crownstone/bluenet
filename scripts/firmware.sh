@@ -26,10 +26,19 @@ if [[ $cmd != "help" ]]; then
 	source $path/_config.sh
 fi
 
+printf "${blue}\n"
+printf " _|_|_|    _|                                            _|     \n"
+printf " _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| \n"
+printf " _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     \n"
+printf " _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     \n"
+printf " _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \n"
+printf "${normal}\n"
+                                                                 
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
-	make all
+	info "Execute make (which will execute cmake)"
+	make -s all
 	# result=$?
 	checkError "Error building firmware"
 	cd $path
@@ -73,7 +82,7 @@ run() {
 
 clean() {
 	cd ${path}/..
-	make clean
+	make -s clean
 	checkError "Error cleaning up"
 }
 

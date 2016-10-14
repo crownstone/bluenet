@@ -34,6 +34,8 @@ PROJECT(${PROJECT_NAME} ${TEST_COMPILERS})
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 MESSAGE(STATUS "Search for FindX files in ${CMAKE_SOURCE_DIR}/cmake")
 
+SET(VERBOSITY                                "${VERBOSITY}"                   CACHE STRING "4" FORCE)
+
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
 #######################################################################################################################
@@ -52,8 +54,10 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE
 SET(LIBS "-lstdc++ ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lc")
 
 # Some debug information
-MESSAGE(STATUS "\"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
-MESSAGE(STATUS "Linked libraries: ${LIBS}")
+IF(VERBOSITY GREATER 4)
+	MESSAGE(STATUS "\"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
+	MESSAGE(STATUS "Linked libraries: ${LIBS}")
+ENDIF()
 
 # Source directory
 SET(SOURCE_DIR "src")
@@ -210,9 +214,11 @@ LIST(APPEND NORDIC_SOURCE "${SOURCE_DIR}/third/nrf/nrf_drv_common.c")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
-FOREACH(crownstone_file ${FOLDER_SOURCE})
-	MESSAGE(STATUS "Include Crownstone file: " ${crownstone_file})
-ENDFOREACH()
+IF(VERBOSITY GREATER 4)
+	FOREACH(crownstone_file ${FOLDER_SOURCE})
+		MESSAGE(STATUS "Include Crownstone file: " ${crownstone_file})
+	ENDFOREACH()
+ENDIF()
 
 # Add all header files without exception
 #FILE(GLOB FOLDER_HEADER ${INCLUDE_DIR}/*.h ${INCLUDE_DIR}/*.hh ${INCLUDE_DIR}/*.hpp)
@@ -240,9 +246,11 @@ LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/softdevi
 
 
 
-FOREACH(nordic_file ${NORDIC_SOURCE})
-	MESSAGE(STATUS "Include Nordic file: " ${nordic_file})
-ENDFOREACH()
+IF(VERBOSITY GREATER 4)
+	FOREACH(nordic_file ${NORDIC_SOURCE})
+		MESSAGE(STATUS "Include Nordic file: " ${nordic_file})
+	ENDFOREACH()
+ENDIF()
 
 LIST(APPEND FOLDER_SOURCE ${NORDIC_SOURCE})
 
@@ -284,13 +292,15 @@ ENDIF()
 
 # Show which directories are actually included to the user
 GET_PROPERTY(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-FOREACH(dir ${dirs})
-	MESSAGE(STATUS "Add to the include directories: '${dir}'")
-ENDFOREACH()
+IF(VERBOSITY GREATER 4)
+	FOREACH(dir ${dirs})
+		MESSAGE(STATUS "Add to the include directories: '${dir}'")
+	ENDFOREACH()
+ENDIF()
 
 IF(NOT (DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
-set(${SOFTDEVICE_DIR}, "${NRF51822_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
-set(${SOFTDEVICE_DIR_HEX}, "hex")
+	SET(${SOFTDEVICE_DIR}, "${NRF51822_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
+	SET(${SOFTDEVICE_DIR_HEX}, "hex")
 ENDIF()
 
 # Set up our main executable.
