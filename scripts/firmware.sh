@@ -26,21 +26,49 @@ if [[ $cmd != "help" ]]; then
 	source $path/_config.sh
 fi
 
+git-pull() {
+	printf "oo Pull from github\n"
+	cd ${path}/.. && git pull
+}
+
 printf "${blue}\n"
-printf " _|_|_|    _|                                            _|     \n"
-printf " _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| \n"
-printf " _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     \n"
-printf " _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     \n"
-printf " _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \n"
+printf "oo  _|_|_|    _|                                            _|     \n"
+printf "oo  _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| \n"
+printf "oo  _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     \n"
+printf "oo  _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     \n"
+printf "oo  _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \n"
+
+# Use hidden .build file to store variables 
+BUILD_PROCESS_FILE="$BLUENET_BUILD_DIR/.build"
+
+if ! [ -e "$BUILD_PROCESS_FILE" ]; then
+	BUILD_CYCLE=0
+	echo "BUILD_CYCLE=$BUILD_CYCLE" >> "$BUILD_PROCESS_FILE"
+fi
+	
+source "$BUILD_PROCESS_FILE"
+BUILD_CYCLE=$((BUILD_CYCLE + 1))
+sed -i "s/\(BUILD_CYCLE *= *\).*/\1$BUILD_CYCLE/" "$BUILD_PROCESS_FILE"
+if ! (($BUILD_CYCLE % 100)); then
+	printf "\n"
+	printf "oo Would you like to check for updates? [Y/n]: " 
+	read update_response
+	if [ "$update_response" == "n" ]; then
+		git_version=$(git rev-parse --short=25 HEAD)
+		printf "oo Git version: $git_version\n"
+	else
+		git-pull
+	fi
+fi
 printf "${normal}\n"
                                                                  
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
-	info "Execute make (which will execute cmake)"
+	info "oo Execute make (which will execute cmake)"
 	make -s all
 	# result=$?
-	checkError "Error building firmware"
+	checkError "oo Error building firmware"
 	cd $path
 	# return $result
 }
