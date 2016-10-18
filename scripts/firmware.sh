@@ -5,8 +5,8 @@ cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
 # optional target, use crownstone as default
 target=${2:-crownstone}
 
-# optional address, use $APPLICATION_START_ADDRESS as default
-address=${3:-$APPLICATION_START_ADDRESS}
+# optional address
+address=$3
 
 # use the current path as the bluenet directory
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -25,6 +25,9 @@ if [[ $cmd != "help" ]]; then
 	# assign serial_num from target
 	source $path/_config.sh
 fi
+
+# use $APPLICATION_START_ADDRESS as default if no address defined
+${address:=$APPLICATION_START_ADDRESS}
 
 git-pull() {
 	printf "oo Pull from github\n"
