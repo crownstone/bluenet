@@ -133,6 +133,8 @@
 
 #define PWM_PERIOD                               20000L //! Interval in us: 1/20000e-6 = 50 Hz
 
+#define KEEP_ALIVE_INTERVAL                      (2 * 60) // 2 minutes, in seconds
+
 // stack config values
 //#define MIN_CONNECTION_INTERVAL                  16
 #define MIN_CONNECTION_INTERVAL                  6

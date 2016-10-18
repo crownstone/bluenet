@@ -83,12 +83,12 @@ void PWM::setValue(uint8_t channel, uint32_t value) {
 		value = 100;
 	}
 
-	log(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Set PWM channel %d to %d", channel, value);
+	logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Set PWM channel %d to %d", channel, value);
 
 	if (_inverted) {
-		log(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Switch inversed");
+		logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Switch inversed");
 	} else {
-		log(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Switch not inversed");
+		logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Switch not inversed");
 	}
 
 	while (app_pwm_channel_duty_set(_pwmInstance, channel, value) == NRF_ERROR_BUSY) {
@@ -136,7 +136,7 @@ uint32_t PWM::deinit() {
 
 #if PWM_ENABLE==1
 
-	log(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "DeInit PWM");
+	logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "DeInit PWM");
 
 	app_pwm_disable(_pwmInstance);
 	BLE_CALL(app_pwm_uninit, (_pwmInstance));

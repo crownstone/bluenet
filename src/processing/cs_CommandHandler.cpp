@@ -62,7 +62,8 @@ CommandHandler::CommandHandler() :
 		_resetTimerId(NULL)
 #else
 		_delayTimerId(UINT32_MAX),
-		_resetTimerId(UINT32_MAX)
+		_resetTimerId(UINT32_MAX),
+		_keepAliveTimerId(UINT32_MAX)
 #endif
 {
 #if (NORDIC_SDK_VERSION >= 11)
@@ -447,26 +448,47 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		break;
 	}
+	case CMD_KEEP_ALIVE: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "keep alive");
 
-	case CMD_USER_FEEDBACK: {
-		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "user feedback");
-		return ERR_NOT_IMPLEMENTED;
+		EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE);
 
-		// todo: tbd
+//		Timer::getInstance().reset(_keepAliveTimerId, )
+
+		// no params
+
 		break;
 	}
 	case CMD_KEEP_ALIVE_STATE: {
 		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "keep alive");
-		return ERR_NOT_IMPLEMENTED;
+		LOGi(STR_HANDLE_COMMAND, "keep alive state");
 
-		// todo: tbd
+		if (size != sizeof(keep_alive_state_message_payload_t)) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		keep_alive_state_message_payload_t state = *(keep_alive_state_message_payload_t*)buffer;
+		LOGi("switch: %d", state.switchState.switchState);
+		LOGi("timeout: %d s", state.timeout);
+
+		EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, buffer, size);
+
+		// state as param: pwm or on/off (switch state) as param
+		// timeout as param
+		//   + 1/2 interval
+
+		// in config
+
+		// 1 keepalive per 2 minutes
+
 		break;
 	}
-	case CMD_KEEP_ALIVE: {
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "keep alive");
+
+	case CMD_USER_FEEDBACK: {
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "user feedback");
 		return ERR_NOT_IMPLEMENTED;
 
 		// todo: tbd

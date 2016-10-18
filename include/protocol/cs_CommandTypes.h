@@ -51,4 +51,7 @@ struct __attribute__((__packed__)) factory_reset_message_payload_t {
 	uint32_t resetCode;
 };
 
-
+struct __attribute__((__packed__)) keep_alive_state_message_payload_t {
+	switch_message_payload_t switchState;
+	uint16_t timeout; // timeout in seconds
+};

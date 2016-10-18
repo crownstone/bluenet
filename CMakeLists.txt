@@ -103,6 +103,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Tracker.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Scanner.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Scheduler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_FactoryReset.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Watchdog.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_DeviceInformationService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_CrownstoneService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_SetupService.cpp")
@@ -121,13 +122,13 @@ ENDIF()
 
 # should be only when creating iBeacon
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_iBeacon.cpp")
-	
+
 IF(${EDDYSTONE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Eddystone.cpp")
 ENDIF()
 
 IF(${BUILD_MESHING} STRGREATER "0")
-	
+
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshControl.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_Mesh.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/notification_buffer.c")
@@ -138,7 +139,7 @@ IF(${BUILD_MESHING} STRGREATER "0")
 		ELSE()
 			MESSAGE(FATAL_ERROR "Directory \"${MESH_DIR}\" does not exist! Clone https://github.com/mrquincle/nRF51-ble-bcast-mesh and switch to nrf52 branch.")
 		ENDIF()
-		EXECUTE_PROCESS( 
+		EXECUTE_PROCESS(
 			COMMAND git rev-parse --abbrev-ref HEAD
 			WORKING_DIRECTORY ${MESH_DIR}
 			OUTPUT_VARIABLE MESH_BRANCH
@@ -152,7 +153,7 @@ IF(${BUILD_MESHING} STRGREATER "0")
 
 		SET(INCLUDE_DIR "${INCLUDE_DIR}" "${MESH_DIR}" "${MESH_DIR}/include")
 		MESSAGE(STATUS "Include dirs: " ${INCLUDE_DIR})
-		
+
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/event_handler.c")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/fifo.c")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_aci.c")
@@ -170,7 +171,7 @@ IF(${BUILD_MESHING} STRGREATER "0")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/handle_storage.c")
 
 	ELSEIF(${USE_MESH_REPOSITORY} STREQUAL "nRF52-branch")
-		
+
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/event_handler.c")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/fifo.c")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_aci.c")
@@ -183,7 +184,7 @@ IF(${BUILD_MESHING} STRGREATER "0")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/transport_control.c")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/trickle.c")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/version_handler.c")
-		
+
 	ELSE()
 		SET(INCLUDE_DIR "${INCLUDE_DIR}" "include/third/protocol")
 

@@ -66,7 +66,7 @@ Crownstone::Crownstone() :
 #if BUILD_MESHING == 1
 	_mesh(NULL),
 #endif
-	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
+	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL), _watchdog(NULL),
 	_advertisementPaused(false),
 #if (NORDIC_SDK_VERSION >= 11)
 	_mainTimerId(NULL),
@@ -118,6 +118,8 @@ Crownstone::Crownstone() :
 
 	_powerSampler = &PowerSampling::getInstance();
 #endif
+
+	_watchdog = &Watchdog::getInstance();
 
 };
 
@@ -287,6 +289,8 @@ void Crownstone::initDrivers() {
 	LOGi(FMT_INIT, "encryption handler");
 	EncryptionHandler::getInstance().init();
 
+	LOGi(FMT_INIT, "watchdog");
+	_watchdog->init();
 
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch / PWM init

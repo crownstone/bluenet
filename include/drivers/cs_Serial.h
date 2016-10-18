@@ -29,7 +29,7 @@ extern "C" {
 
 #ifndef SERIAL_VERBOSITY
 #error "You have to specify SERIAL_VERBOSITY"
-#define SERIAL_VERBOSITY NONE
+#define SERIAL_VERBOSITY SERIAL_NONE
 #endif
 
 //#define INCLUDE_TIMESTAMPS

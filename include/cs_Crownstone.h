@@ -35,6 +35,7 @@
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
+#include <processing/cs_Watchdog.h>
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
@@ -167,6 +168,7 @@ private:
 	Tracker* _tracker;
 	Scheduler* _scheduler;
 	FactoryReset* _factoryReset;
+	Watchdog* _watchdog;
 
 	bool _advertisementPaused;
 

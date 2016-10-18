@@ -46,7 +46,7 @@ public:
 	 *
 	 * Create a timer for a specific purpose.
 	 */
-	inline void createSingleShot(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func) {
+	inline void createSingleShot(app_timer_id_t& timer_handle, app_timer_timeout_handler_t func) {
 		BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_SINGLE_SHOT, func));
 	}
 
@@ -56,15 +56,25 @@ public:
 	 * @ticks                   Number of ticks till timeout (minimum is 5)
 	 * @obj                     Reference to the object on which the function should be executed
 	 */
-	inline void start(app_timer_id_t & timer_handle, uint32_t ticks, void* obj) {
+	inline void start(app_timer_id_t& timer_handle, uint32_t ticks, void* obj) {
 		BLE_CALL(app_timer_start, (timer_handle, ticks, obj));
 	}
 
 	/** Stop a timer
 	 * @timer_handle            Reference to previously created timer
 	 */
-	inline void stop(app_timer_id_t & timer_handle) {
+	inline void stop(app_timer_id_t& timer_handle) {
 		BLE_CALL(app_timer_stop, (timer_handle));
+	}
+
+	/** Resets a timer (if already active) to the new ticks
+	 * @timer_handle            Reference to previously created timer
+	 * @ticks                   Number of ticks till timeout (minimum is 5)
+	 * @obj                     Reference to the object on which the function should be executed
+	 */
+	inline void reset(app_timer_id_t& timer_handle, uint32_t ticks, void* obj) {
+		BLE_CALL(app_timer_stop, (timer_handle));
+		BLE_CALL(app_timer_start, (timer_handle, ticks, obj));
 	}
 
 };

@@ -641,6 +641,8 @@ void Nrf51822BluetoothStack::updateAdvertisement() {
 
 	switch(err) {
 	//case NRF_ERROR_INVALID_PARAMETER:
+	case NRF_SUCCESS:
+		break;
 	case 0x07:
 		LOGi("Invalid advertisement configuration");
 		break;

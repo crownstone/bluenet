@@ -1,4 +1,4 @@
-# Bluenet protocol v0.6.0
+# Bluenet protocol v0.6.1
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -243,7 +243,7 @@ The control characteristics (Control, and Config Control) of the Setup Service r
 
 The general service has UUID 24f20000-7d10-4805-bfc1-7663a01c3bff.
 
-Characteristic | UUID | Date type | Description | A | U | G 
+Characteristic | UUID | Date type | Description | A | U | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Temperature    | 24f20001-7d10-4805-bfc1-7663a01c3bff | int 32 | Chip temperature in Celcius. Notifications are available. | x
 Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 1 to reset. Write 66 to go to DFU mode. | x
@@ -253,7 +253,7 @@ Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 1 to rese
 
 The power service has UUID 24f30000-7d10-4805-bfc1-7663a01c3bff. **Should be encrypted but it is not at the moment due to implementation.**
 
-Characteristic | UUID | Date type | Description | A | U | G 
+Characteristic | UUID | Date type | Description | A | U | G
 --- | --- | --- | --- | :---: | :---: | :---:
 PWM                | 24f30001-7d10-4805-bfc1-7663a01c3bff | uint 8 | Set PWM value. Value of 0 is completely off, 255 (100 on new devices) is completely on. | x
 Relay              | 24f30002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Switch Relay. Value of 0 is off, other is on. | x
@@ -265,7 +265,7 @@ Power consumption  | 24f30004-7d10-4805-bfc1-7663a01c3bff | uint 16 | The curren
 
 The localization service has UUID 24f40000-7d10-4805-bfc1-7663a01c3bff.
 
-Characteristic | UUID | Date type | Description | A | U | G 
+Characteristic | UUID | Date type | Description | A | U | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Track control           | 24f40001-7d10-4805-bfc1-7663a01c3bff | [Tracked device](#tracked_device_packet) | Add or overwrite a tracked device. Set threshold larger than 0 to remove the tracked device from the list. | x
 Tracked devices         | 24f40002-7d10-4805-bfc1-7663a01c3bff | [Tracked device list](#tracked_device_list_packet) | Read the current list of tracked devices. | x
@@ -278,7 +278,7 @@ RSSI                    | 24f40005-7d10-4805-bfc1-7663a01c3bff | uint 8 | RSSI t
 
 The schedule service has UUID 24f50000-7d10-4805-bfc1-7663a01c3bff.
 
-Characteristic | UUID | Date type | Description | A | U | G 
+Characteristic | UUID | Date type | Description | A | U | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Set time        | 24f50001-7d10-4805-bfc1-7663a01c3bff | uint 32 | Sets the time. Timestamp is in seconds since epoch. | x
 Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule entry](#schedule_entry_packet) | Add or modify a schedule entry. Set nextTimestamp to 0 to remove the entry from the list. | x
@@ -289,7 +289,7 @@ Schedule read   | 24f50003-7d10-4805-bfc1-7663a01c3bff | [Schedule list](#schedu
 
 The mesh service comes with [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh) and has UUID 0000fee4-0000-1000-8000-00805f9b34fb
 
-Characteristic | UUID | Date type | Description | A | U | G 
+Characteristic | UUID | Date type | Description | A | U | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Meta data   | 2a1e0004-fd51-d882-8ba8-b98c0000cd1e | | Get mesh configuration. | x
 Value       | 2a1e0005-fd51-d882-8ba8-b98c0000cd1e | | Characteristic where the mesh values can be read. | x
@@ -329,8 +329,8 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 3 | Goto DFU | - | Reset device to DFU mode | x
 4 | Reset | uint 8 | Reset device | x
 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x
-6 | Keep alive state | ... | Keep alive with state ..., TBD | x | x |
-7 | Keep alive | ...  | Keep alive ..., TBD | x | x | x
+6 | Keep alive state | [Keep alive payload](#cmd_keep_alive_payload) | Keep alive with state | x | x |
+7 | Keep alive | - | Keep alive without state, uses last state transmitted with Keep alive state command | x | x | x
 8 | Enable mesh | uint 8 | Enable/Disable Mesh, 0 = OFF, other = ON | x
 9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON | x
 10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON | x
@@ -342,15 +342,21 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
 17 | <a name="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | ..
 18 | Request Service Data | - | Causes the crownstone to send it's service data over the mesh | x | x |
-19 | Disconnect | - | Causes the crownstone to send it's service data over the mesh | .. | .. | .. 
+19 | Disconnect | - | Causes the crownstone to send it's service data over the mesh | .. | .. | ..
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | enable | 1 | 0 = OFF, other = ON
-uint 16 | delay | 1 | start scanner with delay in ms
+Type | Name | Description
+--- | --- | ---
+uint 8 | enable | 0 = OFF, other = ON
+uint 16 | delay | start scanner with delay in ms
 
+#### <a name="cmd_keep_alive_payload"></a>Keep alive payload
+
+Type | Name | Description
+--- | --- | ---
+uint 8 | Switch | Switch power, 0 = OFF, 100 = FULL ON
+uint 16 | Timeout | Timeout in seconds after which the Switch should be adjusted to the Switch value
 
 ### <a name="config_packet"></a>Configuration packet
 
@@ -417,7 +423,7 @@ Type nr | Type name | Payload type | Description
 46 | Current Zero | float | Set the current zero level (for power measurement)
 47 | Power Zero | float | Set the power zero level (for power measurement)
 48 | Power Average Window | uint16 | The window over which the zero line of the voltage is determined
-49 | <a name="mesh_access_address"></a>Mesh Access Address | uint32 | The access address of the mesh messages. This ensures that mesh messages of other groups will not interfere with your group. 
+49 | <a name="mesh_access_address"></a>Mesh Access Address | uint32 | The access address of the mesh messages. This ensures that mesh messages of other groups will not interfere with your group.
 
 OpCodes:
 

@@ -178,6 +178,7 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
+	case CONFIG_KEEP_ALIVE_INTERVAL:
 	case CONFIG_ADC_BURST_SAMPLE_RATE:
 	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
 	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
@@ -323,6 +324,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
+	case CONFIG_KEEP_ALIVE_INTERVAL:
 	case CONFIG_ADC_BURST_SAMPLE_RATE:
 	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
 	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
@@ -576,6 +578,10 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getUint32(_storageStruct.pwmInterval, (uint32_t*)target, PWM_PERIOD);
 		break;
 	}
+	case CONFIG_KEEP_ALIVE_INTERVAL: {
+		Storage::getUint16(_storageStruct.keepAliveInterval, (uint16_t*)target, KEEP_ALIVE_INTERVAL);
+		break;
+	}
 	default: {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_CONFIG_NOT_FOUND;
@@ -794,6 +800,11 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	case CONFIG_PWM_PERIOD:{
 		p_item = (uint8_t*)&_storageStruct.pwmInterval;
 		Storage::setUint32(*((uint32_t*)target), _storageStruct.pwmInterval);
+		break;
+	}
+	case CONFIG_KEEP_ALIVE_INTERVAL: {
+		p_item = (uint8_t*)&_storageStruct.keepAliveInterval;
+		Storage::setUint16(*((uint16_t*)target), _storageStruct.keepAliveInterval);
 		break;
 	}
 	default: {
