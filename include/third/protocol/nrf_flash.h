@@ -27,39 +27,27 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
+#ifndef NRF_FLASH_H__
+#define NRF_FLASH_H__
 
-#ifndef _TOOLCHAIN_H__
-#define _TOOLCHAIN_H__
-
-#ifdef NRF51
-#include "nrf51.h"
-#else
+#include <stdint.h>
 #include "nrf.h"
-#endif
 
-#if defined(__CC_ARM)
+#define NRF_FLASH_PAGE_SIZE    ((uint16_t)NRF_FICR->CODEPAGESIZE)                          /**< Size of one flash page. */
 
-/* ARMCC and GCC have different ordering for packed typedefs, must separate macros */
-    #define __packed_gcc
-    #define __packed_armcc __packed
+/** @brief Function for erasing a page in flash.
+ *
+ * @param page_address Address of the first word in the page to be erased.
+ */
+void nrf_flash_erase(uint32_t * page_address, uint32_t size);
 
-    #define _DISABLE_IRQS(_was_masked) _was_masked = __disable_irq()
-    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
+/** @brief Function for filling a page in flash with a value.
+ *
+ * @param[in] address Address of the first word in the page to be filled.
+ * @param[in] value Value to be written to flash.
+ */
+void nrf_flash_store(uint32_t * p_dest, uint8_t * p_src, uint32_t size, uint32_t offset);
 
-#elif defined(__GNUC__)
+#endif //NRF_FLASH_H__
 
-    #define __packed_armcc
-    #define __packed_gcc __attribute__((packed))
-
-    #define _DISABLE_IRQS(_was_masked) do{ \
-        __ASM volatile ("MRS %0, primask" : "=r" (_was_masked) );\
-        __ASM volatile ("cpsid i" : : : "memory");\
-    } while(0)
-
-    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
-
-#else
-    #warning "Unsupported toolchain"
-#endif
-
-#endif /* _TOOLCHAIN_H__ */
+/** @} */

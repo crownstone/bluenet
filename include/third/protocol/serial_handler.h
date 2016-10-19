@@ -16,11 +16,6 @@ are permitted provided that the following conditions are met:
   contributors to this software may be used to endorse or promote products
   derived from this software without specific prior written permission.
 
-  4. This software must only be used in a processor manufactured by Nordic
-  Semiconductor ASA, or in a processor manufactured by a third party that
-  is used in combination with a processor manufactured by Nordic Semiconductor.
-
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -43,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef __packed_armcc struct 
+typedef __packed_armcc struct
 {
   uint8_t status_byte;
   uint8_t buffer[SERIAL_DATA_MAX_LEN + 2];
@@ -51,6 +46,10 @@ typedef __packed_armcc struct
 
 
 void serial_handler_init(void);
+
+uint32_t serial_handler_credit_available(void);
+
+void serial_wait_for_completion(void);
 
 bool serial_handler_event_send(serial_evt_t* evt);
 

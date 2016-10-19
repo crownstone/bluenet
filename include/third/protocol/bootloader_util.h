@@ -28,38 +28,28 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
 
-#ifndef _TOOLCHAIN_H__
-#define _TOOLCHAIN_H__
+ /**@file
+ *
+ * @defgroup nrf_bootloader_util Bootloader util API.
+ * @{
+ *
+ * @brief Bootloader util module interface.
+ */
 
-#ifdef NRF51
-#include "nrf51.h"
-#else
-#include "nrf.h"
-#endif
+#ifndef BOOTLOADER_UTIL_H__
+#define BOOTLOADER_UTIL_H__
 
-#if defined(__CC_ARM)
+#include <stdint.h>
 
-/* ARMCC and GCC have different ordering for packed typedefs, must separate macros */
-    #define __packed_gcc
-    #define __packed_armcc __packed
+/**@brief Function for starting the application (or bootloader) at the provided address.
+ *
+ * @param[in]  start_addr             Start address.
+ *
+ * @note This function will never retrun. Instead it will reset into the application of the
+ *       provided address.
+ */
+void bootloader_util_app_start(uint32_t start_addr);
 
-    #define _DISABLE_IRQS(_was_masked) _was_masked = __disable_irq()
-    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
+#endif // BOOTLOADER_UTIL_H__
 
-#elif defined(__GNUC__)
-
-    #define __packed_armcc
-    #define __packed_gcc __attribute__((packed))
-
-    #define _DISABLE_IRQS(_was_masked) do{ \
-        __ASM volatile ("MRS %0, primask" : "=r" (_was_masked) );\
-        __ASM volatile ("cpsid i" : : : "memory");\
-    } while(0)
-
-    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
-
-#else
-    #warning "Unsupported toolchain"
-#endif
-
-#endif /* _TOOLCHAIN_H__ */
+/**@} */

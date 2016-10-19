@@ -16,11 +16,6 @@ are permitted provided that the following conditions are met:
   contributors to this software may be used to endorse or promote products
   derived from this software without specific prior written permission.
 
-  4. This software must only be used in a processor manufactured by Nordic
-  Semiconductor ASA, or in a processor manufactured by a third party that
-  is used in combination with a processor manufactured by Nordic Semiconductor.
-
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -41,29 +36,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <stdbool.h>
 
-#define MAX_VALUE_COUNT                 (155) /* The highest possible number of values stored in the mesh. */
-
-typedef enum
-{
-    VH_DATA_STATUS_NEW,
-    VH_DATA_STATUS_UPDATED,
-    VH_DATA_STATUS_OLD,
-    VH_DATA_STATUS_SAME,
-    VH_DATA_STATUS_CONFLICTING,
-    VH_DATA_STATUS_UNKNOWN
-} vh_data_status_t;
-
-uint32_t vh_init(uint32_t min_interval_us);
+uint32_t vh_init(uint32_t min_interval_us,
+                 uint32_t access_address,
+                 uint8_t channel,
+                 rbc_mesh_txpower_t tx_power);
 
 uint32_t vh_min_interval_set(uint32_t min_interval_us);
 
-vh_data_status_t vh_rx_register(mesh_adv_data_t* p_adv_data, uint64_t timestamp);
+void vh_tx_power_set(rbc_mesh_txpower_t tx_power);
 
-vh_data_status_t vh_local_update(rbc_mesh_value_handle_t handle, uint8_t* data, uint8_t length);
+uint32_t vh_rx(mesh_packet_t* p_packet, uint32_t timestamp, uint8_t rssi);
+
+uint32_t vh_local_update(rbc_mesh_value_handle_t handle, uint8_t* data, uint8_t length);
 
 uint32_t vh_on_timeslot_begin(void);
 
-uint32_t vh_order_update(uint64_t time_now);
+uint32_t vh_order_update(uint32_t time_now);
 
 /** @brief: Make copy of payload for given handle. */
 uint32_t vh_value_get(rbc_mesh_value_handle_t handle, uint8_t* data, uint16_t* length);
@@ -71,8 +59,6 @@ uint32_t vh_value_get(rbc_mesh_value_handle_t handle, uint8_t* data, uint16_t* l
 uint32_t vh_tx_event_set(rbc_mesh_value_handle_t handle, bool do_tx_event);
 
 uint32_t vh_tx_event_flag_get(rbc_mesh_value_handle_t handle, bool* is_doing_tx_event);
-
-int16_t vh_get_version_delta(uint16_t old_version, uint16_t new_version);
 
 uint32_t vh_value_enable(rbc_mesh_value_handle_t handle);
 

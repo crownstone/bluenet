@@ -27,39 +27,27 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
+#ifndef MESH_FLASH_H__
+#define MESH_FLASH_H__
 
-#ifndef _TOOLCHAIN_H__
-#define _TOOLCHAIN_H__
+#include <stdint.h>
+#include <stdbool.h>
+#include "timer.h"
+#include "bl_if.h"
 
-#ifdef NRF51
-#include "nrf51.h"
-#else
-#include "nrf.h"
-#endif
+typedef void(*mesh_flash_op_cb_t)(flash_op_type_t type, void* p_location);
 
-#if defined(__CC_ARM)
+void mesh_flash_init(mesh_flash_op_cb_t cb);
+uint32_t mesh_flash_op_push(flash_op_type_t type, const flash_op_t* p_op);
+uint32_t mesh_flash_op_available_slots(void);
+bool mesh_flash_in_progress(void);
+void mesh_flash_op_execute(timestamp_t available_time);
 
-/* ARMCC and GCC have different ordering for packed typedefs, must separate macros */
-    #define __packed_gcc
-    #define __packed_armcc __packed
+/**
+ * Suspend or unsuspend flash operations. Safe for multiple users.
+ *
+ * @param[in] suspend Whether to suspend the flash operations.
+ */
+void mesh_flash_set_suspended(bool suspend);
 
-    #define _DISABLE_IRQS(_was_masked) _was_masked = __disable_irq()
-    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
-
-#elif defined(__GNUC__)
-
-    #define __packed_armcc
-    #define __packed_gcc __attribute__((packed))
-
-    #define _DISABLE_IRQS(_was_masked) do{ \
-        __ASM volatile ("MRS %0, primask" : "=r" (_was_masked) );\
-        __ASM volatile ("cpsid i" : : : "memory");\
-    } while(0)
-
-    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
-
-#else
-    #warning "Unsupported toolchain"
-#endif
-
-#endif /* _TOOLCHAIN_H__ */
+#endif /* MESH_FLASH_H__ */

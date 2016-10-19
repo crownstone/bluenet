@@ -212,7 +212,7 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 //	nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
 
 #ifdef PRINT_MESH_VERBOSE
-	switch (evt->event_type)
+	switch (evt->type)
 	{
 	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
 		LOGd("ch: %d, conflicting value", evt->params.tx.value_handle);
@@ -229,6 +229,8 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	case RBC_MESH_EVENT_TYPE_TX:
 		LOGd("ch: %d, transmitted", evt->params.tx.value_handle);
 		break;
+	default:
+		LOGd("ch: %d, evt: %d", evt->params.tx.value_handle, evt->type);
 	}
 #endif
 
@@ -277,7 +279,9 @@ void Mesh::checkForMessages() {
 				LOGi("t: %d: ch: %d, skipping message within boot-up time!", ts, evt.params.tx.value_handle);
 #endif
 				// Anne: Check this, is evt big?
-//				rbc_mesh_event_release(evt);
+				// Dominik: No but the mesh keeps track of who is using the messages, and without releasing
+				//   the event the message associated with it cannot be reused
+				rbc_mesh_event_release(&evt);
 				continue;
 			} else {
 #ifdef PRINT_MESH_VERBOSE
@@ -290,7 +294,7 @@ void Mesh::checkForMessages() {
 		handleMeshMessage(&evt);
 
 		//! then free associated memory
-//		rbc_mesh_event_release(evt);
+		rbc_mesh_event_release(&evt);
 	}
 }
 

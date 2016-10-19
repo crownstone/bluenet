@@ -16,11 +16,6 @@ are permitted provided that the following conditions are met:
   contributors to this software may be used to endorse or promote products
   derived from this software without specific prior written permission.
 
-  4. This software must only be used in a processor manufactured by Nordic
-  Semiconductor ASA, or in a processor manufactured by a third party that
-  is used in combination with a processor manufactured by Nordic Semiconductor.
-
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -84,10 +79,15 @@ static serial_data_t tx_buffer;
 static serial_state_t serial_state;
 static bool has_pending_tx = false;
 static bool doing_tx = false;
+static bool suspend = false;
 
 /*****************************************************************************
 * Static functions
 *****************************************************************************/
+static void mesh_aci_command_check_cb(void* p_context)
+{
+    mesh_aci_command_check();
+}
 
 static void enable_pin_listener(bool enable)
 {
@@ -159,11 +159,11 @@ static void gpiote_init(void)
                                | (GPIO_PIN_CNF_PULL_Pulldown    << GPIO_PIN_CNF_PULL_Pos)
                                | (GPIO_PIN_CNF_INPUT_Connect    << GPIO_PIN_CNF_INPUT_Pos)
                                | (GPIO_PIN_CNF_DIR_Input        << GPIO_PIN_CNF_DIR_Pos);
-    
+
     NRF_GPIOTE->CONFIG[SERIAL_REQN_GPIOTE_CH] = (PIN_CSN << GPIOTE_CONFIG_PSEL_Pos)
                                               | (GPIOTE_CONFIG_POLARITY_HiToLo << GPIOTE_CONFIG_POLARITY_Pos)
                                               | (GPIOTE_CONFIG_MODE_Event << GPIOTE_CONFIG_MODE_Pos);
-                                              
+
 
     NRF_GPIOTE->INTENSET = GPIOTE_INTENSET_IN0_Msk;
     NVIC_SetPriority(GPIOTE_IRQn, APP_IRQ_PRIORITY_LOW);
@@ -233,7 +233,8 @@ void spi_event_handler(spi_slave_evt_t evt)
 
                     /* notify ACI handler */
                     async_event_t async_evt;
-                    async_evt.callback.generic = mesh_aci_command_check;
+                    memset(&async_evt, 0, sizeof(async_event_t));
+                    async_evt.callback.generic.cb = mesh_aci_command_check_cb;
                     async_evt.type = EVENT_TYPE_GENERIC;
                     event_handler_push(&async_evt);
                 }
@@ -242,7 +243,10 @@ void spi_event_handler(spi_slave_evt_t evt)
                     APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
                 }
             }
-
+            if (suspend)
+            {
+                return;
+            }
             if (fifo_is_empty(&tx_fifo))
             {
                 serial_state = SERIAL_STATE_IDLE;
@@ -304,25 +308,28 @@ void serial_handler_init(void)
     APP_ERROR_CHECK(spi_slave_evt_handler_register(spi_event_handler));
 
     gpiote_init();
+}
 
-    /* set initial buffers, dummy in tx */
-    //prepare_rx();
-#if 1 
-    /* notify application controller of the restart */ 
-    serial_evt_t started_event;
-    started_event.length = 4;
-    started_event.opcode = SERIAL_EVT_OPCODE_DEVICE_STARTED;
-    started_event.params.device_started.operating_mode = OPERATING_MODE_STANDBY;
-    uint32_t reset_reason;
-    sd_power_reset_reason_get(&reset_reason);
-    started_event.params.device_started.hw_error = !!(reset_reason & (1 << 3));
-    started_event.params.device_started.data_credit_available = SERIAL_QUEUE_SIZE;
-    
-    if (!serial_handler_event_send(&started_event))
+uint32_t serial_handler_credit_available(void)
+{
+    return fifo_get_len(&rx_fifo);
+}
+
+void serial_wait_for_completion(void)
+{
+    uint32_t was_masked;
+    _DISABLE_IRQS(was_masked);
+    suspend = true;
+
+    extern void SPI1_TWI1_IRQHandler(void);
+
+    while (serial_state != SERIAL_STATE_IDLE)
     {
-        APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
+        SPI1_TWI1_IRQHandler();
     }
-#endif
+
+    suspend = false;
+    _ENABLE_IRQS(was_masked);
 }
 
 bool serial_handler_event_send(serial_evt_t* evt)

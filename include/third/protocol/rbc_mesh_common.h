@@ -1,4 +1,4 @@
-/* copyright
+/***********************************************************************************
 Copyright (c) Nordic Semiconductor ASA
 All rights reserved.
 
@@ -16,11 +16,6 @@ are permitted provided that the following conditions are met:
   contributors to this software may be used to endorse or promote products
   derived from this software without specific prior written permission.
 
-  4. This software must only be used in a processor manufactured by Nordic
-  Semiconductor ASA, or in a processor manufactured by a third party that
-  is used in combination with a processor manufactured by Nordic Semiconductor.
-
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,22 +26,27 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+************************************************************************************/
 
 #ifndef _RBC_MESH_COMMON_H__
 #define _RBC_MESH_COMMON_H__
 #include "toolchain.h"
 #include <stdint.h>
+#include "app_error.h"
+#if DEBUG_LOG_RTT
+#include "SEGGER_RTT.h"
+#endif
 
-#define RBC_MESH_DEBUG  (0)
-
+#ifndef RBC_MESH_DEBUG
+#define RBC_MESH_DEBUG  (1)
+#endif
 /******************************************************************************
 * Debug related defines
 ******************************************************************************/
-#if HARDWARE_BOARD==PCA10000
-    #define TICK_PIN(x) 
-    #define SET_PIN(x) 
-    #define CLEAR_PIN(x) 
+#ifdef BOARD_PCA10000
+    #define TICK_PIN(x)
+    #define SET_PIN(x)
+    #define CLEAR_PIN(x)
 #else
     #if RBC_MESH_DEBUG
       #define TICK_PIN(x) NRF_GPIO->OUTSET = (1 << (x)); \
@@ -57,9 +57,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       #define SET_PIN(x) NRF_GPIO->OUTSET = (1 << (x))
       #define CLEAR_PIN(x) NRF_GPIO->OUTCLR = (1 << (x))
     #else
-      #define TICK_PIN(x) 
-      #define SET_PIN(x) 
-      #define CLEAR_PIN(x) 
+      #define TICK_PIN(x)
+      #define SET_PIN(x)
+      #define CLEAR_PIN(x)
     #endif
 #endif
 
@@ -108,10 +108,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if RBC_MESH_DEBUG
     #define PIN_OUT(val,bitcount)      for (uint8_t i = 0; i < (bitcount); ++i){ if (((val) >> ((bitcount) - 1 - i) & 0x01)) { TICK_PIN(PIN_BIT_H); } else { TICK_PIN(PIN_BIT_L); } }
 #else
-    #define PIN_OUT(val,bitcount)   
+    #define PIN_OUT(val,bitcount)
 #endif
 
-        
 #define CHECK_FP(fp) if ((uint32_t)fp < 0x18000UL || (uint32_t)fp > 0x20000000UL){APP_ERROR_CHECK(NRF_ERROR_INVALID_ADDR);}
-        
+
 #endif /* _RBC_MESH_COMMON_H__ */

@@ -16,11 +16,6 @@ are permitted provided that the following conditions are met:
   contributors to this software may be used to endorse or promote products
   derived from this software without specific prior written permission.
 
-  4. This software must only be used in a processor manufactured by Nordic
-  Semiconductor ASA, or in a processor manufactured by a third party that
-  is used in combination with a processor manufactured by Nordic Semiconductor.
-
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,12 +30,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "event_handler.h"
 #include "rbc_mesh_common.h"
 #include "app_error.h"
-#include "timeslot_handler.h"
+#include "timeslot.h"
 #include "transport_control.h"
 #include "mesh_packet.h"
 #include "fifo.h"
 #include "nrf_soc.h"
 #include "toolchain.h"
+#include "handle_storage.h"
 #include <string.h>
 
 #define EVENT_HANDLER_IRQ       (QDEC_IRQn)
@@ -57,23 +53,35 @@ static uint32_t g_critical = 0;
 /**
 * @brief execute asynchronous event, based on type
 */
-static void async_event_execute(async_event_t* evt)
+static void async_event_execute(async_event_t* p_evt)
 {
 
-    switch (evt->type)
+    switch (p_evt->type)
     {
         case EVENT_TYPE_TIMER:
-            CHECK_FP(evt->callback.timer.cb);
-            (*evt->callback.timer.cb)(evt->callback.timer.timestamp);
+            CHECK_FP(p_evt->callback.timer.cb);
+            p_evt->callback.timer.cb(p_evt->callback.timer.timestamp);
             break;
         case EVENT_TYPE_GENERIC:
-            CHECK_FP(evt->callback.generic);
-            (*evt->callback.generic)();
+            CHECK_FP(p_evt->callback.generic.cb);
+            p_evt->callback.generic.cb(p_evt->callback.generic.p_context);
             break;
         case EVENT_TYPE_PACKET:
-            tc_packet_handler(evt->callback.packet.payload,
-                                evt->callback.packet.crc,
-                                evt->callback.packet.timestamp);
+            tc_packet_handler(p_evt->callback.packet.payload,
+                              p_evt->callback.packet.crc,
+                              p_evt->callback.packet.timestamp,
+                              p_evt->callback.packet.rssi);
+            break;
+        case EVENT_TYPE_SET_FLAG:
+            handle_storage_flag_set(p_evt->callback.set_flag.handle,
+                                    (handle_flag_t) p_evt->callback.set_flag.flag,
+                                    p_evt->callback.set_flag.value);
+            break;
+        case EVENT_TYPE_TIMER_SCH:
+            CHECK_FP(p_evt->callback.timer_sch.cb);
+            p_evt->callback.timer_sch.cb(p_evt->callback.timer_sch.timestamp,
+                                         p_evt->callback.timer_sch.p_context);
+            break;
         default:
             break;
     }
@@ -105,7 +113,7 @@ void QDEC_IRQHandler(void)
 
         got_evt |= event_fifo_pop(&g_async_evt_fifo);
 
-        if (timeslot_get_end_time() > 0) /* in timeslot */
+        if (timeslot_is_in_ts()) /* in timeslot */
         {
             got_evt |= event_fifo_pop(&g_async_evt_fifo_ts);
         }
@@ -138,25 +146,37 @@ void event_handler_init(void)
     fifo_init(&g_async_evt_fifo_ts);
 
     NVIC_EnableIRQ(EVENT_HANDLER_IRQ);
+#ifdef NRF51
     NVIC_SetPriority(EVENT_HANDLER_IRQ, 3);
+#else
+    NVIC_SetPriority(EVENT_HANDLER_IRQ, 6);
+#endif
     g_is_initialized = true;
 }
 
 
-uint32_t event_handler_push(async_event_t* evt)
+uint32_t event_handler_push(async_event_t* p_evt)
 {
+    if (p_evt == NULL)
+    {
+        return NRF_ERROR_NULL;
+    }
     fifo_t* p_fifo = NULL;
-    switch (evt->type)
+    switch (p_evt->type)
     {
     case EVENT_TYPE_GENERIC:
     case EVENT_TYPE_PACKET:
+    case EVENT_TYPE_SET_FLAG:
+    case EVENT_TYPE_TIMER_SCH:
         p_fifo = &g_async_evt_fifo;
         break;
-    default:
+    case EVENT_TYPE_TIMER:
         p_fifo = &g_async_evt_fifo_ts;
         break;
+    default:
+        return NRF_ERROR_INVALID_PARAM;
     }
-    uint32_t result = fifo_push(p_fifo, evt);
+    uint32_t result = fifo_push(p_fifo, p_evt);
     if (result != NRF_SUCCESS)
     {
         return result;

@@ -1,19 +1,21 @@
 /***********************************************************************************
 Copyright (c) Nordic Semiconductor ASA
 All rights reserved.
+
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
+
   1. Redistributions of source code must retain the above copyright notice, this
   list of conditions and the following disclaimer.
+
   2. Redistributions in binary form must reproduce the above copyright notice, this
   list of conditions and the following disclaimer in the documentation and/or
   other materials provided with the distribution.
+
   3. Neither the name of Nordic Semiconductor ASA nor the names of other
   contributors to this software may be used to endorse or promote products
   derived from this software without specific prior written permission.
-  4. This software must only be used in a processor manufactured by Nordic
-  Semiconductor ASA, or in a processor manufactured by a third party that
-  is used in combination with a processor manufactured by Nordic Semiconductor.
+
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,8 +29,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
 
 #include "radio_control.h"
-#include "timeslot_handler.h"
 #include "rbc_mesh_common.h"
+#include "timeslot.h"
 #include "trickle.h"
 #include "fifo.h"
 #include "nrf.h"
@@ -36,9 +38,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "app_error.h"
 #include "toolchain.h"
 #include "rbc_mesh.h"
+#include "mesh_packet.h"
 
 #include <stdbool.h>
 #include <string.h>
+
+/** The default access address the radio operates on. Represented as logical address 0. */
+#define RADIO_DEFAULT_ADDRESS           (0x8E89BED6)
 
 #define LIGHTWEIGHT_RADIO               (1)
 
@@ -66,39 +72,40 @@ typedef enum
     RADIO_STATE_NEVER_USED
 } radio_state_t;
 
-
-
 /*****************************************************************************
 * Static globals
 *****************************************************************************/
 
-/**
-* Global radio state
-*/
-static radio_state_t radio_state = RADIO_STATE_NEVER_USED;
+/** Global radio state */
+static radio_state_t    m_radio_state = RADIO_STATE_NEVER_USED;
 
-static fifo_t radio_fifo;
-static radio_event_t radio_fifo_queue[RBC_MESH_RADIO_QUEUE_LENGTH];
-static radio_idle_cb g_idle_cb;
-
+static fifo_t           m_radio_fifo;
+static radio_event_t    m_radio_fifo_queue[RBC_MESH_RADIO_QUEUE_LENGTH];
+static radio_idle_cb_t  m_idle_cb;
+static radio_rx_cb_t    m_rx_cb;
+static radio_tx_cb_t    m_tx_cb;
+static uint32_t         m_alt_aa = RADIO_DEFAULT_ADDRESS;
 /*****************************************************************************
 * Static functions
 *****************************************************************************/
 static void purge_preemptable(void)
 {
-    uint32_t events_in_queue = fifo_get_len(&radio_fifo);
+    uint32_t events_in_queue = fifo_get_len(&m_radio_fifo);
     while (events_in_queue > 1)
     {
         radio_event_t current_evt;
-        if (fifo_peek(&radio_fifo, &current_evt) == NRF_SUCCESS &&
+        if (fifo_peek(&m_radio_fifo, &current_evt) == NRF_SUCCESS &&
             current_evt.event_type == RADIO_EVENT_TYPE_RX_PREEMPTABLE)
         {
             /* event is preemptable, stop it */
-            fifo_pop(&radio_fifo, &current_evt);
+            fifo_pop(&m_radio_fifo, NULL);
+
+            radio_disable();
+            while (NRF_RADIO->STATE != RADIO_STATE_STATE_Disabled);
+            NRF_RADIO->EVENTS_END = 0;
 
             /* propagate failed rx event */
-            current_evt.callback.rx(current_evt.packet_ptr, false, 0xFFFFFFFF);
-            radio_disable();
+            m_rx_cb(current_evt.packet_ptr, false, 0xFFFFFFFF, 100);
             --events_in_queue;
         }
         else
@@ -130,24 +137,36 @@ static void radio_channel_set(uint8_t ch)
 
 static void setup_event(radio_event_t* p_evt)
 {
-    NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Msk | RADIO_SHORTS_END_DISABLE_Msk;
+    NRF_RADIO->SHORTS = RADIO_SHORTS_READY_START_Msk | RADIO_SHORTS_END_DISABLE_Msk | RADIO_SHORTS_ADDRESS_RSSISTART_Msk;
     radio_channel_set(p_evt->channel);
     NRF_RADIO->PACKETPTR = (uint32_t) p_evt->packet_ptr;
     NRF_RADIO->INTENSET = RADIO_INTENSET_END_Msk;
+    NRF_RADIO->EVENTS_END = 0;
+    NRF_RADIO->PREFIX1	= ((m_alt_aa >> 24) & 0x000000FF);
+    NRF_RADIO->BASE1    = ((m_alt_aa <<  8) & 0xFFFFFF00);
 
     if (p_evt->event_type == RADIO_EVENT_TYPE_TX)
     {
         DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_TX);
-        NRF_RADIO->TXADDRESS = 0;
+        NRF_RADIO->TXADDRESS = p_evt->access_address;
         NRF_RADIO->TASKS_TXEN = 1;
-        radio_state = RADIO_STATE_TX;
+        m_radio_state = RADIO_STATE_TX;
+        NRF_RADIO->TXPOWER  = p_evt->tx_power;
     }
     else
     {
         DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_RX);
-        NRF_RADIO->RXADDRESSES = 1;
+        if (m_alt_aa != RADIO_DEFAULT_ADDRESS)
+        {
+            /* only enable alt-addr if it's different */
+            NRF_RADIO->RXADDRESSES = 0x03;
+        }
+        else
+        {
+            NRF_RADIO->RXADDRESSES = 0x01;
+        }
         NRF_RADIO->TASKS_RXEN = 1;
-        radio_state = RADIO_STATE_RX;
+        m_radio_state = RADIO_STATE_RX;
     }
 }
 
@@ -155,9 +174,11 @@ static void setup_event(radio_event_t* p_evt)
 * Interface functions
 *****************************************************************************/
 
-void radio_init(uint32_t access_address, radio_idle_cb idle_cb)
+void radio_init(radio_idle_cb_t idle_cb,
+                radio_rx_cb_t   rx_cb,
+                radio_tx_cb_t   tx_cb)
 {
-	/* Reset all states in the radio peripheral */
+    /* Reset all states in the radio peripheral */
     NRF_RADIO->POWER            = ((RADIO_POWER_POWER_Disabled << RADIO_POWER_POWER_Pos) & RADIO_POWER_POWER_Msk);
     NRF_RADIO->POWER            = ((RADIO_POWER_POWER_Enabled  << RADIO_POWER_POWER_Pos) & RADIO_POWER_POWER_Msk);
 
@@ -170,8 +191,10 @@ void radio_init(uint32_t access_address, radio_idle_cb idle_cb)
 
 
     /* Configure Access Address  */
-    NRF_RADIO->PREFIX0	    = ((access_address >> 24) & 0x000000FF);
-    NRF_RADIO->BASE0 		= ((access_address << 8) & 0xFFFFFF00);
+    NRF_RADIO->PREFIX0	= ((RADIO_DEFAULT_ADDRESS >> 24) & 0x000000FF);
+    NRF_RADIO->BASE0    = ((RADIO_DEFAULT_ADDRESS <<  8) & 0xFFFFFF00);
+    NRF_RADIO->PREFIX1	= ((m_alt_aa >> 24) & 0x000000FF);
+    NRF_RADIO->BASE1    = ((m_alt_aa <<  8) & 0xFFFFFF00);
     NRF_RADIO->TXADDRESS    = 0x00;			    // Use logical address 0 (prefix0 + base0) = 0x8E89BED6 when transmitting
     NRF_RADIO->RXADDRESSES  = 0x01;				// Enable reception on logical address 0 (PREFIX0 + BASE0)
 
@@ -194,7 +217,7 @@ void radio_init(uint32_t access_address, radio_idle_cb idle_cb)
                         | (((RADIO_PCNF1_WHITEEN_Enabled)   << RADIO_PCNF1_WHITEEN_Pos) & RADIO_PCNF1_WHITEEN_Msk)	// enable packet whitening
                       );
 
-	/* CRC config */
+    /* CRC config */
     NRF_RADIO->CRCPOLY = ((0x00065B << RADIO_CRCPOLY_CRCPOLY_Pos) & RADIO_CRCPOLY_CRCPOLY_Msk);    // CRC polynomial function
     NRF_RADIO->CRCCNF = (((RADIO_CRCCNF_SKIPADDR_Skip) << RADIO_CRCCNF_SKIPADDR_Pos) & RADIO_CRCCNF_SKIPADDR_Msk)
                       | (((RADIO_CRCCNF_LEN_Three)      << RADIO_CRCCNF_LEN_Pos)       & RADIO_CRCCNF_LEN_Msk);
@@ -204,28 +227,31 @@ void radio_init(uint32_t access_address, radio_idle_cb idle_cb)
     NRF_RADIO->TIFS = 148;
 
     /* init radio packet fifo */
-    if (radio_state == RADIO_STATE_NEVER_USED)
+    if (m_radio_state == RADIO_STATE_NEVER_USED)
     {
         /* this flushes the queue */
-        radio_fifo.array_len = RBC_MESH_RADIO_QUEUE_LENGTH;
-        radio_fifo.elem_array = radio_fifo_queue;
-        radio_fifo.elem_size = sizeof(radio_event_t);
-        radio_fifo.memcpy_fptr = NULL;
-        fifo_init(&radio_fifo);
+        m_radio_fifo.array_len = RBC_MESH_RADIO_QUEUE_LENGTH;
+        m_radio_fifo.elem_array = m_radio_fifo_queue;
+        m_radio_fifo.elem_size = sizeof(radio_event_t);
+        m_radio_fifo.memcpy_fptr = NULL;
+        fifo_init(&m_radio_fifo);
     }
-    
-    radio_state = RADIO_STATE_DISABLED;
+
+    m_radio_state = RADIO_STATE_DISABLED;
+    NRF_RADIO->EVENTS_END = 0;
 
     NVIC_ClearPendingIRQ(RADIO_IRQn);
     NVIC_EnableIRQ(RADIO_IRQn);
-    g_idle_cb = idle_cb;
+    m_idle_cb = idle_cb;
+    m_rx_cb = rx_cb;
+    m_tx_cb = tx_cb;
 
     DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_RX);
     DEBUG_RADIO_CLEAR_PIN(PIN_RADIO_STATE_TX);
 
-    if (fifo_is_empty(&radio_fifo))
+    if (fifo_is_empty(&m_radio_fifo))
     {
-        g_idle_cb();
+        m_idle_cb();
     }
     else
     {
@@ -236,40 +262,47 @@ void radio_init(uint32_t access_address, radio_idle_cb idle_cb)
     }
 }
 
-bool radio_order(radio_event_t* radio_event)
+void radio_alt_aa_set(uint32_t access_address)
 {
-    if (radio_event->callback.tx == NULL)
+    m_alt_aa = access_address;
+}
+
+uint32_t radio_order(radio_event_t* p_radio_event)
+{
+    if (p_radio_event == NULL)
     {
-        return false;
+        return NRF_ERROR_NULL;
     }
-    /* trigger radio callback */
+
+    if (p_radio_event->event_type == RADIO_EVENT_TYPE_TX &&
+        p_radio_event->access_address > 1)
+    {
+        return NRF_ERROR_INVALID_ADDR;
+    }
+
+    if (fifo_push(&m_radio_fifo, p_radio_event) != NRF_SUCCESS)
+    {
+        return NRF_ERROR_NO_MEM;
+    }
+
     uint32_t was_masked;
     _DISABLE_IRQS(was_masked);
-
-    if (fifo_push(&radio_fifo, radio_event) != NRF_SUCCESS)
-    {
-        _ENABLE_IRQS(was_masked);
-        return false;
-    }
-
     if (timeslot_is_in_ts())
     {
         NVIC_SetPendingIRQ(RADIO_IRQn);
     }
 
     _ENABLE_IRQS(was_masked);
-    return true;
+    return NRF_SUCCESS;
 }
-
-
 
 void radio_disable(void)
 {
-    DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_IDLE);
     NRF_RADIO->SHORTS = 0;
     NRF_RADIO->INTENCLR = 0xFFFFFFFF;
     NRF_RADIO->TASKS_DISABLE = 1;
-    radio_state = RADIO_STATE_DISABLED;
+    m_radio_state = RADIO_STATE_DISABLED;
+    DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_IDLE);
 }
 
 /**
@@ -277,48 +310,56 @@ void radio_disable(void)
 */
 void radio_event_handler(void)
 {
-    bool crc_status = NRF_RADIO->CRCSTATUS;
-    uint32_t crc = NRF_RADIO->RXCRC;
-    bool end_event = NRF_RADIO->EVENTS_END;
-    NRF_RADIO->EVENTS_END = 0;
-
-    radio_event_t prev_evt;
-    if (end_event)
+    if (NRF_RADIO->EVENTS_END)
     {
+        bool crc_status = NRF_RADIO->CRCSTATUS;
+        uint32_t crc = NRF_RADIO->RXCRC;
+        uint8_t rssi = 100;
+
+        if (NRF_RADIO->EVENTS_RSSIEND)
+        {
+            NRF_RADIO->EVENTS_RSSIEND = 0;
+            rssi = NRF_RADIO->RSSISAMPLE;
+        }
+
+        radio_event_t prev_evt;
+        NRF_RADIO->EVENTS_END = 0;
+
         /* pop the event that just finished */
-        uint32_t error_code = fifo_pop(&radio_fifo, &prev_evt);
+        uint32_t error_code = fifo_pop(&m_radio_fifo, &prev_evt);
         APP_ERROR_CHECK(error_code);
-    }
 
-
-    radio_event_t evt;
-    purge_preemptable();
-    if (fifo_peek(&radio_fifo, &evt) == NRF_SUCCESS)
-    {
-        setup_event(&evt);
-    }
-    else
-    {
-        DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_IDLE);
-        radio_state = RADIO_STATE_DISABLED;
-    }
-
-    if (end_event)
-    {
         /* send to super space */
         if (prev_evt.event_type == RADIO_EVENT_TYPE_RX ||
             prev_evt.event_type == RADIO_EVENT_TYPE_RX_PREEMPTABLE)
         {
-            prev_evt.callback.rx(prev_evt.packet_ptr, crc_status, crc);
+            m_rx_cb(prev_evt.packet_ptr, crc_status, crc, rssi);
         }
         else
         {
-            prev_evt.callback.tx(prev_evt.packet_ptr);
+            m_tx_cb(prev_evt.packet_ptr);
         }
+
+        DEBUG_RADIO_SET_STATE(PIN_RADIO_STATE_IDLE);
+        m_radio_state = RADIO_STATE_DISABLED;
+    }
+    else
+    {
+        purge_preemptable();
     }
 
-    if (radio_state == RADIO_STATE_DISABLED)
+    if (m_radio_state == RADIO_STATE_DISABLED ||
+        m_radio_state == RADIO_STATE_NEVER_USED)
     {
-        g_idle_cb();
+        radio_event_t evt;
+        if (fifo_peek(&m_radio_fifo, &evt) == NRF_SUCCESS)
+        {
+            setup_event(&evt);
+        }
+        else
+        {
+            m_idle_cb();
+        }
     }
 }
+

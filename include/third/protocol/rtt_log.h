@@ -28,38 +28,26 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
 
-#ifndef _TOOLCHAIN_H__
-#define _TOOLCHAIN_H__
+#ifndef RTT_LOG_H__
+#define RTT_LOG_H__
 
-#ifdef NRF51
-#include "nrf51.h"
-#else
-#include "nrf.h"
+#include <stdarg.h>
+
+#ifdef RTT_LOG
+#include "SEGGER_RTT.h"
+
+#ifndef __MODULE__
+/** ARMCC defines __MODULE__ as __FILE__ without the path. GCC does not. */
+#define __MODULE__ __FILE__
 #endif
 
-#if defined(__CC_ARM)
+#define __LOG(str, ...) SEGGER_RTT_printf(0, RTT_CTRL_RESET str, ##__VA_ARGS__)
 
-/* ARMCC and GCC have different ordering for packed typedefs, must separate macros */
-    #define __packed_gcc
-    #define __packed_armcc __packed
+#else /* RTT_LOG */
 
-    #define _DISABLE_IRQS(_was_masked) _was_masked = __disable_irq()
-    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
+#define __LOG(str, ...)
 
-#elif defined(__GNUC__)
+#endif /* RTT_LOG */
 
-    #define __packed_armcc
-    #define __packed_gcc __attribute__((packed))
+#endif /* RTT_LOG_H__ */
 
-    #define _DISABLE_IRQS(_was_masked) do{ \
-        __ASM volatile ("MRS %0, primask" : "=r" (_was_masked) );\
-        __ASM volatile ("cpsid i" : : : "memory");\
-    } while(0)
-
-    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
-
-#else
-    #warning "Unsupported toolchain"
-#endif
-
-#endif /* _TOOLCHAIN_H__ */

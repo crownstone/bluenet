@@ -16,11 +16,6 @@ are permitted provided that the following conditions are met:
   contributors to this software may be used to endorse or promote products
   derived from this software without specific prior written permission.
 
-  4. This software must only be used in a processor manufactured by Nordic
-  Semiconductor ASA, or in a processor manufactured by a third party that
-  is used in combination with a processor manufactured by Nordic Semiconductor.
-
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -67,10 +62,13 @@ typedef __packed_armcc enum
 /** @brief Initialize serial handler */
 void mesh_aci_init(void);
 
+/** @brief Start the serial. */
+uint32_t mesh_aci_start(void);
+
 /** @brief asynchronous command handler */
 void mesh_aci_command_check(void);
 
 /** @brief rbc_mesh event handler */
-void mesh_aci_rbc_event_handler(rbc_mesh_event_t* evt);
+void mesh_aci_rbc_event_handler(rbc_mesh_event_t* p_evt);
 
 #endif /* _MESH_ACI_H__ */

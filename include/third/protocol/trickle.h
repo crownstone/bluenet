@@ -16,11 +16,6 @@ are permitted provided that the following conditions are met:
   contributors to this software may be used to endorse or promote products
   derived from this software without specific prior written permission.
 
-  4. This software must only be used in a processor manufactured by Nordic
-  Semiconductor ASA, or in a processor manufactured by a third party that
-  is used in combination with a processor manufactured by Nordic Semiconductor.
-
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +30,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef _TRICKLE_H__
 #define _TRICKLE_H__
+#ifdef NRF51
+#include "nrf51.h"
+#else
 #include "nrf.h"
+#endif
 #include "toolchain.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -52,8 +51,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 typedef __packed_armcc struct
 {
-    uint64_t        t;              /* Absolute value of t. Equals g_trickle_time (at set time) + t_relative */
-    uint64_t        i;              /* Absolute value of i. Equals g_trickle_time (at set time) + i_relative */
+    uint32_t        t;              /* Absolute value of t. Equals g_trickle_time (at set time) + t_relative */
+    uint32_t        i;              /* Absolute value of i. Equals g_trickle_time (at set time) + i_relative */
     uint32_t        i_relative;     /* Relative value of i. Represents the actual i value in IETF RFC6206 */
     uint8_t         c;              /* Consistent messages counter */
 } __packed_gcc trickle_t;
@@ -69,23 +68,23 @@ void trickle_setup(uint32_t i_min, uint32_t i_max, uint8_t k);
 * @brief Register a consistent RX on the given trickle algorithm instance.
 *   Increments the instance's C value.
 */
-void trickle_rx_consistent(trickle_t* id, uint64_t time_now);
+void trickle_rx_consistent(trickle_t* id, uint32_t time_now);
 
 /**
 * @brief register an inconsistent RX on the given trickle algorithm instance.
 *   Resets interval time.
 */
-void trickle_rx_inconsistent(trickle_t* id, uint64_t time_now);
+void trickle_rx_inconsistent(trickle_t* id, uint32_t time_now);
 
 /**
 * @brief reset interval timer for the given trickle algorithm instance.
 */
-void trickle_timer_reset(trickle_t* trickle, uint64_t time_now);
+void trickle_timer_reset(trickle_t* trickle, uint32_t time_now);
 
 /**
 * @brief register a successful TX on the given trickle algorithm instance.
 */
-void trickle_tx_register(trickle_t* trickle);
+void trickle_tx_register(trickle_t* trickle, uint32_t time_now);
 
 /**
 * @brief Check timeouts and check whether a TX on the trickle instance is 
@@ -94,7 +93,7 @@ void trickle_tx_register(trickle_t* trickle);
 * @param[in] trickle pointer to trickle algorithm instance object.
 * @param[out] out_do_tx returns whether the trickle instance is due for a TX
 */
-void trickle_tx_timeout(trickle_t* trickle, bool* out_do_tx, uint64_t time_now);
+void trickle_tx_timeout(trickle_t* trickle, bool* out_do_tx, uint32_t time_now);
 
 /**
 * @brief Disable the given trickle instance. It will always report that it is 

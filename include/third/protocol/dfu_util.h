@@ -28,38 +28,39 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ************************************************************************************/
 
-#ifndef _TOOLCHAIN_H__
-#define _TOOLCHAIN_H__
+#ifndef DFU_UTIL_H__
+#define DFU_UTIL_H__
 
-#ifdef NRF51
-#include "nrf51.h"
-#else
-#include "nrf.h"
-#endif
+#include <stdint.h>
+#include "dfu_types_mesh.h"
 
-#if defined(__CC_ARM)
+#define IS_PAGE_ALIGNED(p) (((uint32_t)(p) & (PAGE_SIZE - 1)) == 0)
+#define IS_WORD_ALIGNED(p) (((uint32_t)(p) & (0x03)) == 0)
 
-/* ARMCC and GCC have different ordering for packed typedefs, must separate macros */
-    #define __packed_gcc
-    #define __packed_armcc __packed
+void fwid_union_cpy(fwid_union_t* p_dst, fwid_union_t* p_src, dfu_type_t dfu_type);
 
-    #define _DISABLE_IRQS(_was_masked) _was_masked = __disable_irq()
-    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
+/** Returns true if the two fwids are equal. */
+bool fwid_union_cmp(fwid_union_t* p_a, fwid_union_t* p_b, dfu_type_t dfu_type);
 
-#elif defined(__GNUC__)
+bool ready_packet_is_upgrade(dfu_packet_t* p_packet);
 
-    #define __packed_armcc
-    #define __packed_gcc __attribute__((packed))
+bool ready_packet_matches_our_req(dfu_packet_t* p_packet, dfu_type_t dfu_type_req, fwid_union_t* p_fwid_req);
 
-    #define _DISABLE_IRQS(_was_masked) do{ \
-        __ASM volatile ("MRS %0, primask" : "=r" (_was_masked) );\
-        __ASM volatile ("cpsid i" : : : "memory");\
-    } while(0)
+uint32_t* addr_from_seg(uint16_t segment, uint32_t* p_start_addr);
 
-    #define _ENABLE_IRQS(_was_masked) if (!_was_masked) { __enable_irq(); }
+bool app_is_newer(app_id_t* p_app_id);
 
-#else
-    #warning "Unsupported toolchain"
-#endif
+bool bootloader_is_newer(bl_id_t bl_id);
 
-#endif /* _TOOLCHAIN_H__ */
+bool fw_is_verified(void);
+
+void tid_cache_entry_put(uint32_t tid);
+
+bool tid_cache_has_entry(uint32_t tid);
+
+bool packet_in_cache(dfu_packet_t* p_packet);
+
+void packet_cache_put(dfu_packet_t* p_packet);
+
+#endif /* DFU_UTIL_H__ */
+

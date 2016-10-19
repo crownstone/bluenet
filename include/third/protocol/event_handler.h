@@ -16,11 +16,6 @@ are permitted provided that the following conditions are met:
   contributors to this software may be used to endorse or promote products
   derived from this software without specific prior written permission.
 
-  4. This software must only be used in a processor manufactured by Nordic
-  Semiconductor ASA, or in a processor manufactured by a third party that
-  is used in combination with a processor manufactured by Nordic Semiconductor.
-
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -35,7 +30,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _EVENT_HANDLER_H__
 #define _EVENT_HANDLER_H__
 #include "radio_control.h"
-#include "timer_control.h"
+#include "timer.h"
+#include "timer_scheduler.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -45,15 +41,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef enum
 {
     EVENT_TYPE_TIMER,
+    EVENT_TYPE_TIMER_SCH,
     EVENT_TYPE_GENERIC,
-    EVENT_TYPE_PACKET
+    EVENT_TYPE_PACKET,
+    EVENT_TYPE_SET_FLAG
 } event_type_t;
 
 /** @brief callback type for generic asynchronous events */
-typedef void(*generic_cb)(void);
+typedef void(*generic_cb_t)(void* p_context);
 
 /**
-* @brief Asynchronous event type. 
+* @brief Asynchronous event type.
 */
 typedef struct
 {
@@ -65,13 +63,30 @@ typedef struct
             uint8_t* payload; /* packet to be processed */
             uint32_t crc;
             uint32_t timestamp;
+            uint8_t rssi;
         } packet;
-        struct 
+        struct
         {
-            timer_callback cb;/*void return */
-            uint32_t timestamp;
+            timer_callback_t cb;/*void return */
+            timestamp_t timestamp;
         } timer;
-        generic_cb generic; /*void return */
+        struct
+        {
+            timer_sch_callback_t cb;
+            timestamp_t timestamp;
+            void* p_context;
+        } timer_sch;
+        struct
+        {
+            generic_cb_t cb;
+            void* p_context;
+        } generic; /*void return */
+        struct
+        {
+            uint16_t handle;
+            uint8_t flag;
+            bool value;
+        } set_flag;
     } callback;
 } async_event_t;
 
