@@ -115,12 +115,12 @@ void storage_sys_evt_handler(uint32_t evt) {
 		app_sched_event_put(NULL, 0, resume_requests);
 		break;
 	}
-//	case NRF_EVT_RADIO_SESSION_CLOSED: {
-//		LOGd("NRF_EVT_RADIO_SESSION_CLOSED");
-////			Storage::getInstance().resumeRequests();
-//		app_sched_event_put(NULL, 0, resume_requests);
-//		break;
-//	}
+	case NRF_EVT_RADIO_SESSION_CLOSED: {
+		LOGd("NRF_EVT_RADIO_SESSION_CLOSED");
+//			Storage::getInstance().resumeRequests();
+		app_sched_event_put(NULL, 0, resume_requests);
+		break;
+	}
 	}
 }
 

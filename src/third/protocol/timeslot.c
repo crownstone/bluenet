@@ -176,6 +176,18 @@ static void timeslot_end(void)
     m_end_timer_triggered = false;
     CLEAR_PIN(PIN_IN_TS);
     CLEAR_PIN(PIN_IN_CB);
+
+#ifdef NRF52
+	NRF_TIMER0->TASKS_STOP = 0;
+	NRF_TIMER0->TASKS_SHUTDOWN = 1;
+	for (uint32_t i = 0; i < 6; i++)
+	{
+		NRF_TIMER0->EVENTS_COMPARE[i] = 0;
+		NRF_TIMER0->CC[i] = 0;
+	}
+	NRF_TIMER0->INTENCLR = 0xFFFFFFFF;
+	NVIC_ClearPendingIRQ(TIMER0_IRQn);
+#endif
 }
 
 /*****************************************************************************

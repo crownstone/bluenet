@@ -17,9 +17,9 @@
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
-extern "C" {
-	#include <mesh/notification_buffer.h>
-}
+//extern "C" {
+//	#include <notification_buffer.h>
+//}
 #endif
 
 //#define PRINT_SAMPLE_CURRENT
@@ -180,10 +180,10 @@ void PowerSampling::powerSampleReadBuffer() {
 				EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesContMsg, sizeof(power_samples_cont_message_t));
 
 #if MESHING == 1
-				if (!nb_full()) {
+//				if (!nb_full()) {
 					MeshControl::getInstance().sendPowerSamplesMessage(_powerSamplesContMsg);
 					_powerSamplesCount = 0;
-				}
+//				}
 #else
 
 #ifdef PRINT_POWERSAMPLING_VERBOSE

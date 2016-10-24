@@ -131,7 +131,6 @@ IF(${BUILD_MESHING} STRGREATER "0")
 
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshControl.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_Mesh.cpp")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/notification_buffer.c")
 
 	IF(${USE_MESH_REPOSITORY} STRGREATER "0")
 		IF(IS_DIRECTORY "${MESH_DIR}")
@@ -145,10 +144,10 @@ IF(${BUILD_MESHING} STRGREATER "0")
 			OUTPUT_VARIABLE MESH_BRANCH
 			OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-		IF(MESH_BRANCH STREQUAL "nrf52")
-			MESSAGE(STATUS "Using nrf52 branch for the Mesh")
+		IF(MESH_BRANCH STREQUAL "bluenet")
+			MESSAGE(STATUS "Using bluenet branch for the Mesh")
 		ELSE()
-			MESSAGE(FATAL_ERROR "Switch ${MESH_DIR} to nrf52 branch. The master branch is not nrf52-compatible yet.")
+			MESSAGE(FATAL_ERROR "Switch ${MESH_DIR} to bluenet branch. The master branch is not bluenet-compatible yet.")
 		ENDIF()
 
 		SET(INCLUDE_DIR "${INCLUDE_DIR}" "${MESH_DIR}" "${MESH_DIR}/include")
@@ -169,6 +168,7 @@ IF(${BUILD_MESHING} STRGREATER "0")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/rand.c")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/version_handler.c")
 		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/handle_storage.c")
+		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/notification_buffer.c")
 
 	ELSEIF(${USE_MESH_REPOSITORY} STREQUAL "nRF52-branch")
 
@@ -204,6 +204,7 @@ IF(${BUILD_MESHING} STRGREATER "0")
 		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/handle_storage.c")
 		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/timer_scheduler.c")
 		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/rand.c")
+		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/notification_buffer.c")
 	ENDIF()
 ENDIF()
 

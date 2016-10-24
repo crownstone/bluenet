@@ -7,10 +7,10 @@
 
 #include <notification_buffer.h>
 
-/* Index of the head (next element to be removed) */
+/* Index of the head (next element to be removed, oldest element) */
 uint16_t _head;
 
-/* Index of the tail (where the next element will be inserted) */
+/* Index of the tail (first free element) */
 uint16_t _tail;
 
 /* Number of elements stored in the buffer */
@@ -23,7 +23,7 @@ waiting_notification_t _array[MAX_PENDING_NOTIFICATIONS];
  * Increases the contentsSize and the index of the tail. It also
  * wraps the tail around if the end of the array is reached.
  */
-void inc_tail() {
+void nb_inc_tail() {
 	++_tail;
 	_tail %= MAX_PENDING_NOTIFICATIONS;
 	++_contentsSize;
@@ -34,7 +34,7 @@ void inc_tail() {
  * Decreases the contentsSize and increases the index of the head.
  * It also wraps around the head if the end of the array is reached.
  */
-void inc_head() {
+void nb_inc_head() {
 	++_head;
 	_head %= MAX_PENDING_NOTIFICATIONS;
 	--_contentsSize;
@@ -73,9 +73,9 @@ bool nb_full() {
  *
  */
 waiting_notification_t* nb_next() {
-	inc_tail();
+	nb_inc_tail();
 	if (_contentsSize > MAX_PENDING_NOTIFICATIONS) {
-		inc_head();
+		nb_inc_head();
 	}
 	return &_array[_tail];
 }
@@ -101,25 +101,9 @@ waiting_notification_t* nb_peek() {
  */
 waiting_notification_t nb_pop() {
 	waiting_notification_t res = *nb_peek();
-	inc_head();
+	nb_inc_head();
 	return res;
 }
-
-/* Add an element to the end of the buffer
- *
- * @value the element to be added
- *
- * Elements are added at the end of the buffer and
- * removed from the beginning. If the buffer is full
- * the oldest element will be overwritten.
- */
-//void nb_push(waiting_notification_t value) {
-//	inc_tail();
-//	if (_contentsSize > _capacity) {
-//		inc_head();
-//	}
-//	_array[_tail] = value;
-//}
 
 /* Clears the buffer
  *
@@ -132,12 +116,4 @@ void nb_clear() {
 	_tail = -1;
 	_contentsSize = 0;
 }
-
-///* Returns the Nth value, starting from oldest element
-// *
-// * Does NOT check if you reached the end, make sure you read no more than size().
-// */
-//T operator[](uint16_t idx) const {
-//	return _array[(_head+idx)%_capacity];
-//}
 

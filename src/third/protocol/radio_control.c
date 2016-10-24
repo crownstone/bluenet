@@ -61,6 +61,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     DEBUG_RADIO_SET_PIN(state);\
     }while (0)
 
+
+#ifndef RADIO_PCNF1_MAXLEN
+	#define RADIO_PCNF1_MAXLEN 37UL
+#endif
+
+#ifndef RADIO_PCNF1_STATLEN
+	#define RADIO_PCNF1_STATLEN 0UL
+#endif
+
+#ifndef RADIO_PCNF1_BALEN
+	#define RADIO_PCNF1_BALEN 3UL
+#endif
+
+#ifndef RADIO_PCNF0_S0LEN
+	#define RADIO_PCNF0_S0LEN 1UL
+#endif
+
+#ifndef RADIO_PCNF0_S1LEN
+	#define RADIO_PCNF0_S1LEN 2UL
+#endif
+
+#ifndef RADIO_PCNF0_LFLEN
+	#define RADIO_PCNF0_LFLEN 6UL
+#endif
+
 /**
 * Internal enum denoting radio state.
 */
@@ -200,19 +225,16 @@ void radio_init(radio_idle_cb_t idle_cb,
 
     /* PCNF-> Packet Configuration. Now we need to configure the sizes S0, S1 and length field to match the datapacket format of the advertisement packets. */
     NRF_RADIO->PCNF0 =  (
-                          (((1UL) << RADIO_PCNF0_S0LEN_Pos) & RADIO_PCNF0_S0LEN_Msk)    // length of S0 field in bytes 0-1.
-//                        | (((2UL) << RADIO_PCNF0_S1LEN_Pos) & RADIO_PCNF0_S1LEN_Msk)    // length of S1 field in bits 0-8.
-//                        | (((6UL) << RADIO_PCNF0_LFLEN_Pos) & RADIO_PCNF0_LFLEN_Msk)    // length of length field in bits 0-8.
-                        | (((1UL) << RADIO_PCNF0_S1LEN_Pos) & RADIO_PCNF0_S1LEN_Msk)    // length of S1 field in bits 0-8.
-                        | (((7UL) << RADIO_PCNF0_LFLEN_Pos) & RADIO_PCNF0_LFLEN_Msk)    // length of length field in bits 0-8.
+                          (((RADIO_PCNF0_S0LEN) << RADIO_PCNF0_S0LEN_Pos) & RADIO_PCNF0_S0LEN_Msk)    // length of S0 field in bytes 0-1.
+                        | (((RADIO_PCNF0_S1LEN) << RADIO_PCNF0_S1LEN_Pos) & RADIO_PCNF0_S1LEN_Msk)    // length of S1 field in bits 0-8.
+                        | (((RADIO_PCNF0_LFLEN) << RADIO_PCNF0_LFLEN_Pos) & RADIO_PCNF0_LFLEN_Msk)    // length of length field in bits 0-8.
                       );
 
     /* Packet configuration */
     NRF_RADIO->PCNF1 =  (
-//                          (((37UL)                          << RADIO_PCNF1_MAXLEN_Pos)  & RADIO_PCNF1_MAXLEN_Msk)   // maximum length of payload in bytes [0-255]
-                          (((113UL)                         << RADIO_PCNF1_MAXLEN_Pos)  & RADIO_PCNF1_MAXLEN_Msk)   // BLE_ADV_PACKET_PAYLOAD_MAX_LENGTH + 6
-                        | (((0UL)                           << RADIO_PCNF1_STATLEN_Pos) & RADIO_PCNF1_STATLEN_Msk)	// expand the payload with N bytes in addition to LENGTH [0-255]
-                        | (((3UL)                           << RADIO_PCNF1_BALEN_Pos)   & RADIO_PCNF1_BALEN_Msk)    // base address length in number of bytes.
+                          (((RADIO_PCNF1_MAXLEN)            << RADIO_PCNF1_MAXLEN_Pos)  & RADIO_PCNF1_MAXLEN_Msk)   // maximum length of payload in bytes [0-255]
+                        | (((RADIO_PCNF1_STATLEN)           << RADIO_PCNF1_STATLEN_Pos) & RADIO_PCNF1_STATLEN_Msk)	// expand the payload with N bytes in addition to LENGTH [0-255]
+                        | (((RADIO_PCNF1_BALEN)             << RADIO_PCNF1_BALEN_Pos)   & RADIO_PCNF1_BALEN_Msk)    // base address length in number of bytes.
                         | (((RADIO_PCNF1_ENDIAN_Little)     << RADIO_PCNF1_ENDIAN_Pos)  & RADIO_PCNF1_ENDIAN_Msk)   // endianess of the S0, LENGTH, S1 and PAYLOAD fields.
                         | (((RADIO_PCNF1_WHITEEN_Enabled)   << RADIO_PCNF1_WHITEEN_Pos) & RADIO_PCNF1_WHITEEN_Msk)	// enable packet whitening
                       );

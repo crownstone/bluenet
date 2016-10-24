@@ -40,13 +40,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "nrf_sdm.h"
 #include "ble.h"
 #include "dfu_types_mesh.h"
-#include "nordic_common.h"
 
 #define RBC_MESH_ACCESS_ADDRESS_BLE_ADV             (0x8E89BED6) /**< BLE spec defined access address. */
 #define RBC_MESH_INTERVAL_MIN_MIN_MS                (5) /**< Lowest min-interval allowed. */
 #define RBC_MESH_INTERVAL_MIN_MAX_MS                (60000) /**< Highest min-interval allowed. */
-//#define RBC_MESH_VALUE_MAX_LEN                    (23) /**< Longest legal payload. */
-#define RBC_MESH_VALUE_MAX_LEN                      (99) /**< Longest legal payload. */
+#ifndef RBC_MESH_VALUE_MAX_LEN
+    #define RBC_MESH_VALUE_MAX_LEN                  (23) /**< Longest legal payload. */
+#endif
 #define RBC_MESH_INVALID_HANDLE                     (0xFFFF) /**< Designated "invalid" handle, may never be used */
 #define RBC_MESH_APP_MAX_HANDLE                     (0xFFEF) /**< Upper limit to application defined handles. The last 16 handles are reserved for mesh-maintenance. */
 
@@ -62,25 +62,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    to the handle are new or old.
 */
 
-//#define RBC_MESH_HANDLE_CACHE_ENTRIES           (2) // Min: 2
-//#define RBC_MESH_DATA_CACHE_ENTRIES             (1) // Min: 1
-//#define RBC_MESH_APP_EVENT_QUEUE_LENGTH         (1) // Min: 1
-//#define RBC_MESH_RADIO_QUEUE_LENGTH             (2) // Min: 2
-//#define RBC_MESH_INTERNAL_EVENT_QUEUE_LENGTH    (1) // Min: 1
-
 /** @brief Default value for the number of handle cache entries */
-#ifndef RBC_MESH_HANDLE_CACHE_ENTRIES    
-    #define RBC_MESH_HANDLE_CACHE_ENTRIES           (2 * MESH_NUM_HANDLES)
+#ifndef RBC_MESH_HANDLE_CACHE_ENTRIES
+    #define RBC_MESH_HANDLE_CACHE_ENTRIES           (10)
 #endif
 
 /** @brief Default value for the number of data cache entries */
 #ifndef RBC_MESH_DATA_CACHE_ENTRIES
-    #define RBC_MESH_DATA_CACHE_ENTRIES             (MIN(MESH_NUM_HANDLES, 10))
+    #define RBC_MESH_DATA_CACHE_ENTRIES             (10)
 #endif
 
 /** @brief Length of app-event FIFO. Must be power of two. */
-#ifndef RBC_MESH_APP_EVENT_QUEUE_LENGTH     
-    #define RBC_MESH_APP_EVENT_QUEUE_LENGTH         (16)
+#ifndef RBC_MESH_APP_EVENT_QUEUE_LENGTH
+    #define RBC_MESH_APP_EVENT_QUEUE_LENGTH         (8)
 #endif
 
 /** @brief Length of low level radio event FIFO. Must be power of two. */
@@ -89,7 +83,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 /** @brief Length of internal async-event FIFO. Must be power of two. */
-#ifndef RBC_MESH_INTERNAL_EVENT_QUEUE_LENGTH    
+#ifndef RBC_MESH_INTERNAL_EVENT_QUEUE_LENGTH
     #define RBC_MESH_INTERNAL_EVENT_QUEUE_LENGTH    (8)
 #endif
 
@@ -334,8 +328,6 @@ uint32_t rbc_mesh_start(void);
 *   the mesh operation is already stopped.
 */
 uint32_t rbc_mesh_stop(void);
-
-uint32_t rbc_mesh_restart(void);
 
 /**
 * @brief Set the contents of the data array pointed to by the provided handle

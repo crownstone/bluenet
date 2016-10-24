@@ -6,22 +6,6 @@
  */
 #pragma once
 
-//#include <common/cs_Types.h>
-
-//#include <cstddef>
-//#include <cstdint>
-
-//#include <stdlib.h> // malloc, free
-//#include <stdint.h> // uint32_t
-//
-//#include "drivers/cs_Serial.h"
-
-/* Circular Buffer implementation
- *
- * Elements are added at the back and removed from the front. If the capacity
- * of the buffer is reached, the oldest element will be overwritten.
- */
-
 #include <rbc_mesh.h>
 
 typedef struct {
@@ -51,6 +35,13 @@ bool nb_empty();
  */
 bool nb_full();
 
+/* Get pointer to the next element in the list
+ *
+ * This returns the pointer to the next element to write to. If the
+ * buffer is full it will overwrite the oldest element
+ *
+ * @return the pointer to the next element
+ */
 waiting_notification_t* nb_next();
 
 /* Peek at the oldest element without removing it
@@ -72,16 +63,6 @@ waiting_notification_t* nb_peek();
  */
 waiting_notification_t nb_pop();
 
-/* Add an element to the end of the buffer
- *
- * @value the element to be added
- *
- * Elements are added at the end of the buffer and
- * removed from the beginning. If the buffer is full
- * the oldest element will be overwritten.
- */
-//void nb_push(waiting_notification_t value);
-
 /* Clears the buffer
  *
  * The buffer is cleared by setting head and tail
@@ -89,15 +70,3 @@ waiting_notification_t nb_pop();
  * doesn't have to be cleared
  */
 void nb_clear();
-
-//	/* Returns the Nth value, starting from oldest element
-//	 *
-//	 * Does NOT check if you reached the end, make sure you read no more than size().
-//	 */
-//	T operator[](uint16_t idx) const {
-//		return _array[(_head+idx)%_capacity];
-//	}
-
-
-
-

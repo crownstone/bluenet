@@ -411,13 +411,13 @@ void Crownstone::configureStack() {
 		// advertising.
 		// [29.06.16] this happened on the pca10000, but doesn't seem to happen on the dobeacon v0.7 need to check
 		// on other versions. On the contrary, the reset seems to crash the dobeacon v0.7
-#if HARDWARE_BOARD==PCA10031
-#if BUILD_MESHING == 1
-		if (_mesh->isRunning()) {
-			_mesh->restart();
-		}
-#endif
-#endif
+//#if HARDWARE_BOARD==PCA10031
+//#if BUILD_MESHING == 1
+//		if (_mesh->isRunning()) {
+//			_mesh->restart();
+//		}
+//#endif
+//#endif
 
 		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
 		//   disconnecting from the device. just calling startAdvertising is enough

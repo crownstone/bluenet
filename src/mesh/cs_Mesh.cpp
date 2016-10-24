@@ -93,17 +93,18 @@ void Mesh::stop() {
 	}
 }
 
-void Mesh::restart() {
-	if (_started) {
-		uint8_t err_code = 0;
-		LOGe(FMT_FAILED_TO, "restart function is disabled", err_code);
-		
+//void Mesh::restart() {
+//	LOGi(">>>> restart");
+//	if (_started) {
+////		uint8_t err_code = 0;
+////		LOGe(FMT_FAILED_TO, "restart function is disabled", err_code);
+//
 //		uint32_t err_code = rbc_mesh_restart();
 //		if (err_code != NRF_SUCCESS) {
 //			LOGe(FMT_FAILED_TO, "restart mesh", err_code);
 //		}
-	}
-}
+//	}
+//}
 
 void Mesh::tick() {
 	checkForMessages();

@@ -55,7 +55,6 @@ static uint32_t         m_interval_min_ms;
 static fifo_t           m_rbc_event_fifo;
 static rbc_mesh_event_t m_rbc_event_buffer[RBC_MESH_APP_EVENT_QUEUE_LENGTH];
 
-static bool g_restart_pending = false;
 /*****************************************************************************
 * Static Functions
 *****************************************************************************/
@@ -175,11 +174,6 @@ uint32_t rbc_mesh_stop(void)
     m_mesh_state = MESH_STATE_STOPPED;
 
     return NRF_SUCCESS;
-}
-
-uint32_t rbc_mesh_restart(void) {
-	g_restart_pending = true;
-	return rbc_mesh_stop();
 }
 
 uint32_t rbc_mesh_value_enable(rbc_mesh_value_handle_t handle)
@@ -329,11 +323,6 @@ void rbc_mesh_ble_evt_handler(ble_evt_t* p_evt)
 void rbc_mesh_sd_evt_handler(uint32_t sd_evt)
 {
     timeslot_sd_event_handler(sd_evt);
-
-    if (g_restart_pending && sd_evt == NRF_EVT_RADIO_SESSION_IDLE) {
-        g_restart_pending = false;
-        rbc_mesh_start();
-    }
 }
 
 /** Internal only function to push mesh events to application queue. */
@@ -406,14 +395,6 @@ uint32_t rbc_mesh_event_peek(rbc_mesh_event_t* p_evt)
 
     return NRF_SUCCESS;
 }
-
-//void rbc_mesh_pause() {
-//	timeslot_handler_pause();
-//}
-//
-//void rbc_mesh_resume() {
-//	timeslot_handler_resume();
-//}
 
 void rbc_mesh_event_release(rbc_mesh_event_t* p_evt)
 {
