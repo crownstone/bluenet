@@ -27,7 +27,7 @@ if [[ $cmd != "help" ]]; then
 fi
 
 # use $APPLICATION_START_ADDRESS as default if no address defined
-${address:=$APPLICATION_START_ADDRESS}
+address=${address:-$APPLICATION_START_ADDRESS}
 
 git-pull() {
 	printf "oo Pull from github\n"
@@ -128,7 +128,7 @@ bootloader() {
 	checkError "Error uploading bootloader"
 
 	# Mark current app as valid app
-	${path}/_writebyte.sh 0x0007F000 1
+	${path}/_writebyte.sh 0x0007F000 1 $serial_num
 
 	checkError "Error marking app valid"
 
@@ -153,7 +153,7 @@ bootloader-only() {
 	checkError "Error uploading bootloader"
 
 	# Mark current app as invalid app
-	${path}/_writebyte.sh 0x0007F000 0
+	${path}/_writebyte.sh 0x0007F000 0 $serial_num
 
 	checkError "Error marking app invalid"
 
