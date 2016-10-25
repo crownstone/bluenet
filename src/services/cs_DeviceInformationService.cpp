@@ -10,14 +10,15 @@
 //
 #include <ble/cs_Nordic.h>
 #include "cfg/cs_Boards.h"
+#include "cfg/cs_HardwareVersions.h"
 #include "cfg/cs_UuidConfig.h"
 
 #include <drivers/cs_Serial.h>
 #include <util/cs_Utils.h>
 
 inline std::string get_hardware_revision(void) {
-	char hardware_revision[32]; \
-	sprintf(hardware_revision, "%X-%X", HARDWARE_BOARD, HARDWARE_VERSION);
+	char hardware_revision[32];
+	sprintf(hardware_revision, "%s-%04X", HARDWARE_VERSION_STRING, HARDWARE_VERSION);
 	return std::string(hardware_revision);
 }
 

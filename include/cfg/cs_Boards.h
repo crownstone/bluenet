@@ -20,7 +20,6 @@
 #define CROWNSTONE2          8
 #define CROWNSTONE_SENSOR    9
 #define PCA10000             10
-#define PCA10031             10 // same layout as PCA10000, just with 32k chip
 #define CROWNSTONE3          11
 #define CROWNSTONE4          12
 #define NORDIC_BEACON        13
@@ -31,12 +30,51 @@
 #define PCA10040             18
 #define BUILTIN_ACR01B1A     19
 #define PLUGIN_FLEXPRINT_01  20
+#define PCA10031             21 // same layout as PCA10000, just with 32k chip
+
+////////////////////////////////////////////
+/// CROWNSTONES
+////////////////////////////////////////////
+
+/*
+ * 10102009200
+ * |           - Product Line: Crownstone Family = 1
+ *  ||         - Market: EU = 01, US = 02
+ *    ||       - Product: DevBoard = 01, Plugin = 02, Builtin = 04, Guidestone = 08
+ *      ||     - Major Version number
+ *        ||   - Minor Version number
+ *          || - Bugfix Version number
+ */
+
+// PLUGIN
+#define CS_EU_PLUG_0              10102000000
+#define CS_EU_PLUG_0_86_0         10102008600
+#define CS_EU_PLUG_0_90_0         10102009000
+#define CS_EU_PLUG_0_92_0         10102009200
+#define CS_EU_PLUG_QUANT          10102012345
+#define CS_EU_PLUG_FLEXPRINT_01   10102012345
+
+// BUILTIN
+#define CS_EU_BUILT_ACR01B1A      10104012456
+
+// DEV
+#define CS_EU_DEV_0_93_2          10101009302
+
+////////////////////////////////////////////
+/// GUIDESTONES
+////////////////////////////////////////////
+
+#define GS_EU_PLUG_0_07_0         10108000700
+#define GS_EU_PLUG_0_92_0         10108009200
+#define GS_EU_CHINA_1_0_0         10108010000
+
+//string = dfs + _"001D"
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
 #endif
 
-#if(HARDWARE_BOARD==CROWNSTONE)
+#if(HARDWARE_BOARD==CROWNSTONE) || (HARDWARE_BOARD==CS_EU_PLUG_0)
 
 #define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
 #define PIN_GPIO_RELAY_ON    0                   //! something unused
@@ -56,7 +94,7 @@
 #endif
 
 
-#if(HARDWARE_BOARD==CROWNSTONE2)
+#if(HARDWARE_BOARD==CROWNSTONE2) || (HARDWARE_BOARD==CS_EU_PLUG_0_86_0)
 //! v0.86
 #define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
 #define PIN_GPIO_RELAY_ON    5                   //! something unused
@@ -77,7 +115,7 @@
 #endif
 
 
-#if(HARDWARE_BOARD==CROWNSTONE3)
+#if(HARDWARE_BOARD==CROWNSTONE3) || (HARDWARE_BOARD==CS_EU_PLUG_0_90_0)
 //! v0.90
 #define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
 #define PIN_GPIO_RELAY_ON    5                   //! something unused
@@ -100,7 +138,7 @@
 #endif
 
 
-#if(HARDWARE_BOARD==CROWNSTONE4)
+#if(HARDWARE_BOARD==CROWNSTONE4) || (HARDWARE_BOARD==CS_EU_PLUG_0_92_0)
 //! v0.92
 #define PIN_GPIO_SWITCH      4                   //! this is p0.04 or gpio 4
 #define PIN_GPIO_RELAY_ON    5                   //! something unused
@@ -122,7 +160,7 @@
 #define VOLTAGE_AMPLIFICATION       80
 #endif
 
-#if(HARDWARE_BOARD==CROWNSTONE5)
+#if(HARDWARE_BOARD==CROWNSTONE5) || (HARDWARE_BOARD==CS_EU_PLUG_QUANT)
 //! plugin quant
 #define PIN_GPIO_SWITCH      12                  //! p0.12
 #define PIN_GPIO_RELAY_ON    10                  //! p0.10
@@ -143,7 +181,7 @@
 #define VOLTAGE_AMPLIFICATION       80
 #endif
 
-#if(HARDWARE_BOARD==DOBEACON)
+#if(HARDWARE_BOARD==DOBEACON) || (HARDWARE_BOARD==GS_EU_PLUG_0_07_0)
 //! doBeacon v0.7
 #define PIN_GPIO_SWITCH      4                   //! this is p0.04 or gpio 4
 #define PIN_GPIO_RELAY_ON    5                   //! something unused
@@ -165,7 +203,7 @@
 #define VOLTAGE_AMPLIFICATION       80
 #endif
 
-#if(HARDWARE_BOARD==DOBEACON2)
+#if(HARDWARE_BOARD==DOBEACON2) || (HARDWARE_BOARD==GS_EU_PLUG_0_92_0)
 // v0.92
 //#define PIN_GPIO_SWITCH      4                   // this is p0.04 or gpio 4
 //#define PIN_GPIO_RELAY_ON    0                   // something unused
@@ -414,18 +452,32 @@
 
 #endif
 
+#if(HARDWARE_BOARD==GS_EU_CHINA_1_0_0)
+// doesn't have anything !!!
+// not even SERIAL!!!
+#define HAS_SERIAL false
+//#define PIN_GPIO_RX          8                   //! gpio 8
+//#define PIN_GPIO_TX          6                   //! gpio 6
+#endif
+
 #ifndef HAS_RELAY
 #define HAS_RELAY false
 #endif
 
+#ifndef HAS_SERIAL
+#define HAS_SERIAL true
+#endif
+
 //! Sanity checks
 
+#if(HAS_SERIAL)
 #ifndef PIN_GPIO_RX
 #error "For UART, PIN_RX must be defined"
 #endif
 
 #ifndef PIN_GPIO_TX
 #error "For UART, PIN_TX must be defined"
+#endif
 #endif
 
 #ifndef HARDWARE_VERSION
