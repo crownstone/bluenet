@@ -41,6 +41,7 @@
 #include "structs/buffer/cs_EncryptionBuffer.h"
 
 #include <drivers/cs_RNG.h>
+#include <drivers/cs_Temperature.h>
 
 /**********************************************************************************************************************
  * Custom includes
@@ -58,7 +59,9 @@
  *********************************************************************************************************************/
 
 Crownstone::Crownstone() :
-	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL),
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL), _watchdog(NULL),
+#endif
 	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
 	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
 	_scheduleService(NULL),
@@ -66,7 +69,7 @@ Crownstone::Crownstone() :
 #if BUILD_MESHING == 1
 	_mesh(NULL),
 #endif
-	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL), _watchdog(NULL),
+	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
 	_advertisementPaused(false),
 #if (NORDIC_SDK_VERSION >= 11)
 	_mainTimerId(NULL),
@@ -117,9 +120,9 @@ Crownstone::Crownstone() :
 	_temperatureGuard = new TemperatureGuard();
 
 	_powerSampler = &PowerSampling::getInstance();
-#endif
 
 	_watchdog = &Watchdog::getInstance();
+#endif
 
 };
 
@@ -289,9 +292,6 @@ void Crownstone::initDrivers() {
 	LOGi(FMT_INIT, "encryption handler");
 	EncryptionHandler::getInstance().init();
 
-	LOGi(FMT_INIT, "watchdog");
-	_watchdog->init();
-
 #if DEVICE_TYPE==DEVICE_CROWNSTONE
 	// switch / PWM init
 	LOGd(FMT_INIT, "switch / PWM");
@@ -302,6 +302,9 @@ void Crownstone::initDrivers() {
 
 	LOGd(FMT_INIT, "power sampler");
 	_powerSampler->init();
+
+	LOGi(FMT_INIT, "watchdog");
+	_watchdog->init();
 #endif
 
 	// init GPIOs

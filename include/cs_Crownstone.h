@@ -28,14 +28,17 @@
 #include <services/cs_CrownstoneService.h>
 
 #include <processing/cs_CommandHandler.h>
-#include <processing/cs_TemperatureGuard.h>
-#include <processing/cs_Switch.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Tracker.h>
-#include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#include <processing/cs_Switch.h>
+#include <processing/cs_TemperatureGuard.h>
+#include <processing/cs_PowerSampling.h>
 #include <processing/cs_Watchdog.h>
+#endif
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
@@ -139,9 +142,13 @@ private:
 	Storage* _storage;
 	Settings* _settings;
 	State* _stateVars;
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
 	Switch* _switch;
 	TemperatureGuard* _temperatureGuard;
 	PowerSampling* _powerSampler;
+	Watchdog* _watchdog;
+#endif
 
 	// services
 	DeviceInformationService* _deviceInformationService;
@@ -168,7 +175,6 @@ private:
 	Tracker* _tracker;
 	Scheduler* _scheduler;
 	FactoryReset* _factoryReset;
-	Watchdog* _watchdog;
 
 	bool _advertisementPaused;
 

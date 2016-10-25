@@ -9,15 +9,20 @@
 
 #include <storage/cs_Settings.h>
 #include <drivers/cs_Serial.h>
-#include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
-#include <processing/cs_Switch.h>
 #include <processing/cs_FactoryReset.h>
+
+#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#include <processing/cs_Switch.h>
+#include <processing/cs_TemperatureGuard.h>
+#endif
+
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
 #include <mesh/cs_Mesh.h>
 #endif
+
 #include <storage/cs_State.h>
 #include <cfg/cs_Strings.h>
 
@@ -469,9 +474,9 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
-		keep_alive_state_message_payload_t state = *(keep_alive_state_message_payload_t*)buffer;
-		LOGi("switch: %d", state.switchState.switchState);
-		LOGi("timeout: %d s", state.timeout);
+//		keep_alive_state_message_payload_t state = *(keep_alive_state_message_payload_t*)buffer;
+//		LOGi("switch: %d", state.switchState.switchState);
+//		LOGi("timeout: %d s", state.timeout);
 
 		EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, buffer, size);
 
