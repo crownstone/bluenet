@@ -809,7 +809,7 @@ void Nrf51822BluetoothStack::setPasskey(uint8_t* passkey) {
 }
 
 void Nrf51822BluetoothStack::updatePasskey() {
-#if SOFTDEVICE_SERIES==130 || (SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR == 8)
+#if SOFTDEVICE_SERIES==130 || SOFTDEVICE_SERIES==132 || (SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR == 8)
 	ble_opt_t static_pin_option;
 	static_pin_option.gap_opt.passkey.p_passkey = _passkey;
 	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
