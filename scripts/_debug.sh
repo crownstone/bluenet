@@ -30,10 +30,10 @@ sed -i "s/@gdb_port@/${GDB_PORT}/" $GDB_SCRIPT
 
 # Run JLink gdb server
 if [ -z $SN ]; then
-	log "$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 400 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
+	log "$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
 	$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
 else
-	log "$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 400 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
+	log "$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
 	$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
 fi
 
