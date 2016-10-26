@@ -48,11 +48,11 @@ enum MeshMessageTypes {
  *   - target MAC address: 6B
  *   - message type: 2B
  */
-#define MAX_MESH_MESSAGE_HEADER_LENGTH BLE_GAP_ADDR_LEN - sizeof(uint16_t)
+#define MAX_MESH_MESSAGE_HEADER_LENGTH (BLE_GAP_ADDR_LEN + sizeof(uint16_t))
 //! available number of bytes for the mesh message payload. the payload depends on the message type
-#define MAX_MESH_MESSAGE_PAYLOAD_LENGTH MAX_MESH_MESSAGE_LEN - MAX_MESH_MESSAGE_HEADER_LENGTH
+#define MAX_MESH_MESSAGE_PAYLOAD_LENGTH (MAX_MESH_MESSAGE_LEN - MAX_MESH_MESSAGE_HEADER_LENGTH)
 //! available number of bytes for the data of the message, for command and config messages
-#define MAX_MESH_MESSAGE_DATA_LENGTH MAX_MESH_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE
+#define MAX_MESH_MESSAGE_DATA_LENGTH (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)
 
 /** Event mesh message
  */
