@@ -16,6 +16,8 @@
 
 #include <events/cs_EventDispatcher.h>
 
+#include <cfg/cs_UuidConfig.h>
+
 //#define PRINT_SCANNER_VERBOSE
 //#define PRINT_DEBUG
 
@@ -272,7 +274,6 @@ static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_ty
 }
 
 bool Scanner::isFiltered(data_t* p_adv_data) {
-
 	//! If we want to send filtered scans once every N times, and now is that time, then just return false
 	if (_filterSendFraction > 0 && _scanCount == 0) {
 		return false;
@@ -283,7 +284,6 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 	uint32_t err_code = adv_report_parse(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
 										 p_adv_data,
 										 &type_data);
-
 	if (err_code == NRF_SUCCESS) {
 //		_logFirst(SERIAL_INFO, "found manufac data:");
 //		BLEutil::printArray(type_data.p_data, type_data.data_len);
@@ -315,7 +315,28 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 			}
 
 		}
+	}
 
+	err_code = adv_report_parse(BLE_GAP_AD_TYPE_SERVICE_DATA,
+										 p_adv_data,
+										 &type_data);
+	if (err_code == NRF_SUCCESS) {
+		if (type_data.data_len == 19) {
+			uint16_t companyIdentifier = type_data.p_data[1] << 8 | type_data.p_data[0];
+			switch (companyIdentifier) {
+			case GUIDESTONE_SERVICE_DATA_UUID: {
+//				LOGi("found guidestone");
+				return _scanFilter & SCAN_FILTER_GUIDESTONE_MSK;
+			}
+			case CROWNSTONE_PLUG_SERVICE_DATA_UUID:
+			case CROWNSTONE_BUILT_SERVICE_DATA_UUID: {
+//				LOGi("found crownstone");
+				return _scanFilter & SCAN_FILTER_CROWNSTONE_MSK;
+			}
+			default:
+				return false;
+			}
+		}
 	}
 
 	return false;
