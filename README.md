@@ -1,4 +1,9 @@
 # Bluenet
+
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](http://www.gnu.org/licenses/lgpl-3.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 Bluenet is the code running on the [Crownstone](http://crownstone.rocks) and GuideStone. Each Crownstone or GuideStone is a node in a network that uses signal strength for indoor localization of smartphones and wearables.
 
 
