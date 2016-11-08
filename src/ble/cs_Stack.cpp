@@ -172,10 +172,17 @@ void Nrf51822BluetoothStack::init() {
 //	BLE_CALL(softdevice_enable, (&ble_enable_params) );
 
 	uint32_t ramBase = RAM_R1_BASE;
-	// While developing this will set ramBase to the minimal value
-	// Print "ramBase" in gdb
+	//! While developing this will set ramBase to the minimal value
+	//! Print "ramBase" in gdb
 //	ramBase = 0;
-	BLE_CALL(sd_ble_enable, (&ble_enable_params, &ramBase) );
+//	BLE_CALL(sd_ble_enable, (&ble_enable_params, &ramBase) );
+	err_code = sd_ble_enable(&ble_enable_params, &ramBase);
+	if (err_code == NRF_ERROR_NO_MEM) {
+		ramBase = 0;
+		sd_ble_enable(&ble_enable_params, &ramBase);
+		LOGe("RAM_R1_BASE should be: %p", ramBase);
+		APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
+	}
 
 #else
 #if ((SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MINOR != 5)) || \
@@ -491,7 +498,9 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 		if (deviceType == DEVICE_GUIDESTONE) {
 			_service_data.service_uuid = GUIDESTONE_SERVICE_DATA_UUID;
 		} else { // if deviceType == DEVICE_CROWNSTONE
-			_service_data.service_uuid = CROWNSTONE_SERVICE_DATA_UUID;
+			_service_data.service_uuid = CROWNSTONE_PLUG_SERVICE_DATA_UUID;
+//		} else { // if deviceType == DEVICE_CROWNSTONE
+//			_service_data.service_uuid = CROWNSTONE_BUILT_SERVICE_DATA_UUID;
 		}
 
 		_service_data.data.p_data = _serviceData->getArray();

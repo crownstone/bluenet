@@ -43,8 +43,9 @@
 #define ALERT_UUID                          "24f60000-7d10-4805-bfc1-7663a01c3bff"
 
 //! UUID used for the Service Data in the Scan Response packet
-#define CROWNSTONE_SERVICE_DATA_UUID        0xC001
-#define GUIDESTONE_SERVICE_DATA_UUID        0xC002
+#define CROWNSTONE_PLUG_SERVICE_DATA_UUID   0xC001
+#define CROWNSTONE_BUILT_SERVICE_DATA_UUID  0xC002
+#define GUIDESTONE_SERVICE_DATA_UUID        0xC003
 
 enum CrownstoneCharacteristicsIDs {
 	CONTROL_UUID                            = 0x1,

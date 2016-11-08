@@ -54,7 +54,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 			else {
 #ifdef PRINT_DEBUG
 				for (int i = 0; i < msg->scanMsg.numDevices; ++i) {
-					peripheral_device_t dev = msg->scanMsg.list[i];
+					peripheral_device_t __attribute__((unused)) dev = msg->scanMsg.list[i];
 //					if ((dev.addr[5] == 0xED && dev.addr[4] == 0x01 && dev.addr[3] == 0x53 && dev.addr[2] == 0xB8 && dev.addr[1] == 0x6F && dev.addr[0] == 0xCC) ||
 //						(dev.addr[5] == 0xC1 && dev.addr[4] == 0x1F && dev.addr[3] == 0xDC && dev.addr[2] == 0xF9 && dev.addr[1] == 0xB3 && dev.addr[0] == 0xFC)) {
 						LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
@@ -73,7 +73,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 #endif
 
 #ifdef PRINT_DEBUG
-			service_data_mesh_message_t& sd = msg->serviceDataMsg;
+			service_data_mesh_message_t& __attribute__((unused)) sd = msg->serviceDataMsg;
 			LOGd("> crownstone id: %d", sd.crownstoneId);
 			LOGd("> switch state: %d", sd.switchState);
 			LOGd("> event bitmask: %s", BLEutil::toBinaryString(sd.eventBitmask).c_str());
@@ -154,7 +154,7 @@ void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 	case 19:
 	case 20: {
 #ifdef PRINT_MESHCONTROL_VERBOSE
-		mesh_message_t* msg = (mesh_message_t*) p_data;
+		mesh_message_t* __attribute__((unused)) msg = (mesh_message_t*) p_data;
 		LOGd("power samples: h=%u src id=%s", channel, getAddress(msg).c_str());
 #endif
 		break;

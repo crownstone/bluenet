@@ -76,6 +76,8 @@ POWER_SERVICE=1
 SCHEDULE_SERVICE=1
 
 # Maximum number of vendor specific services
+# NOTE: increasing this will also need to increase the RAM_R1_BASE (increasing services by one causes an increase
+#  in RAM_R1_BASE by 16 bytes)
 MAX_NUM_VS_SERVICES=6
 
 # Enable or disable characteristics
@@ -290,8 +292,8 @@ APPLICATION_LENGTH=0x64000
 RAM_R1_BASE=0x200025E0
 
 ATTR_TABLE_SIZE=0xC00
-RAM_R1_BASE=0x200026A8
-RAM_APPLICATION_AMOUNT=0xD958
+RAM_R1_BASE=0x200026B8
+RAM_APPLICATION_AMOUNT=0xD948
 
 HEAP_SIZE=20000
 
