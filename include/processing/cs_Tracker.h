@@ -20,6 +20,8 @@ public:
 		return instance;
 	}
 
+	void init();
+
 	void setStack(Nrf51822BluetoothStack* stack);
 
 	static void staticTick(Tracker* ptr);

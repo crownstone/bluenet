@@ -16,6 +16,7 @@
 #include <cfg/cs_Strings.h>
 #include <ble/cs_Stack.h>
 #include <processing/cs_Scanner.h>
+#include <events/cs_EventDispatcher.h>
 
 //#define PRINT_SWITCH_VERBOSE
 
@@ -68,6 +69,7 @@ void Switch::init() {
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
 #endif
 
+	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_relayTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSetRelay);
 }
 
@@ -260,4 +262,17 @@ void Switch::turnOff() {
 #else
 	pwmOff();
 #endif
+}
+
+void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch (evt) {
+	case EVT_TRACKED_DEVICE_IS_NEARBY: {
+		turnOn();
+		break;
+	}
+	case EVT_TRACKED_DEVICE_NOT_NEARBY: {
+		turnOff();
+		break;
+	}
+	}
 }

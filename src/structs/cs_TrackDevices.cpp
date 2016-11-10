@@ -26,20 +26,20 @@ bool TrackedDeviceList::isEmpty() const {
 
 void TrackedDeviceList::update(const uint8_t * addrs_ptr, int8_t rssi) {
 	//bool found = false;
-#ifdef PRINT_TD_VERBOSE
-	LOGd("scanned: [%02X %02X %02X %02X %02X %02X], rssi: %d",
-			addrs_ptr[5], addrs_ptr[4], addrs_ptr[3], addrs_ptr[2],
-			addrs_ptr[1], addrs_ptr[0], rssi);
-#endif
+//#ifdef PRINT_TRACKEDDEVICES_VERBOSE
+//	LOGd("scanned: [%02X %02X %02X %02X %02X %02X], rssi: %d",
+//			addrs_ptr[5], addrs_ptr[4], addrs_ptr[3], addrs_ptr[2],
+//			addrs_ptr[1], addrs_ptr[0], rssi);
+//#endif
 	for (int i = 0; i < getSize(); ++i) {
 		if (memcmp(addrs_ptr, _buffer->list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			if (rssi >= _buffer->list[i].rssiThreshold) {
 				_buffer->counters[i] = 0;
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 				LOGd("Tracked device present nearby (%i >= %i)", rssi, _buffer->list[i].rssiThreshold);
 #endif
 			} else {
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 				LOGd("Tracked device found, but not nearby (%i < %i)", rssi, _buffer->list[i].rssiThreshold);
 #endif
 			}
@@ -101,7 +101,7 @@ bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 		if (memcmp(adrs_ptr, _buffer->list[i].addr, BLE_GAP_ADDR_LEN) == 0) {
 			_buffer->list[i].rssiThreshold = rssi_threshold;
 			//_buffer->counters[i] = TDL_COUNTER_INIT; //! Don't update counter
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 			LOGi("Updated [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
 					adrs_ptr[5], adrs_ptr[4], adrs_ptr[3], adrs_ptr[2],
 					adrs_ptr[1], adrs_ptr[0], rssi_threshold);
@@ -122,7 +122,7 @@ bool TrackedDeviceList::add(const uint8_t* adrs_ptr, int8_t rssi_threshold) {
 //	LOGi("Added [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
 //			_buffer->list[_freeIdx].addr[5], _buffer->list[_freeIdx].addr[4], _buffer->list[_freeIdx].addr[3], _buffer->list[_freeIdx].addr[2],
 //			_buffer->list[_freeIdx].addr[1], _buffer->list[_freeIdx].addr[0], rssi_threshold);
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 	LOGi("Added [%02X %02X %02X %02X %02X %02X], rssi threshold: %d",
 			adrs_ptr[5], adrs_ptr[4], adrs_ptr[3], adrs_ptr[2],
 			adrs_ptr[1], adrs_ptr[0], rssi_threshold);
@@ -151,7 +151,7 @@ bool TrackedDeviceList::rem(const uint8_t* adrs_ptr) {
 				//! TODO: does this work too? might be faster..
 				//memcpy(&(_buffer->list[j]), &(_buffer->list[j+1]), sizeof(tracked_device_t));
 			}
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 			LOGi("Removed [%02X %02X %02X %02X %02X %02X]", adrs_ptr[5],
 					adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1], adrs_ptr[0]);
 #endif
@@ -175,13 +175,19 @@ void TrackedDeviceList::setTimeout(uint16_t counts) {
 
 	_timeoutCount = counts;
 
-#ifdef PRINT_TD_VERBOSE
+#ifdef PRINT_TRACKEDDEVICES_VERBOSE
 	LOGi("Set timeout count to %i", counts);
 #endif
 }
 
 uint16_t TrackedDeviceList::getTimeout() {
 	return _timeoutCount;
+}
+
+void TrackedDeviceList::resetTimeoutCounters() {
+	for (int i=0; i<getSize(); ++i) {
+			_buffer->counters[i] = _timeoutCount;
+	}
 }
 
 

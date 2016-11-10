@@ -8,6 +8,7 @@
 
 #include <ble/cs_Nordic.h>
 #include <drivers/cs_Timer.h>
+#include <events/cs_EventListener.h>
 
 #define EXTENDED_SWITCH_STATE
 
@@ -26,7 +27,7 @@ enum {
 	SWITCH_NEXT_RELAY_VAL_OFF,
 };
 
-class Switch {
+class Switch : EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static Switch& getInstance() {
@@ -61,6 +62,8 @@ public:
 	void relayOff();
 
 	static void staticTimedSetRelay(Switch* ptr) { ptr->timedSetRelay(); }
+
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 private:
 	Switch();

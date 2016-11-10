@@ -130,6 +130,9 @@ public:
 	/** Returns the number of ticks the rssi of a device is not above threshold before a device is considered not nearby. */
 	uint16_t getTimeout();
 
+	/** Resets the timeout counters **/
+	void resetTimeoutCounters();
+
 	////////////! BufferAccessor ////////////////////////////
 
 	/** @inherit */

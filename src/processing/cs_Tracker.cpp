@@ -9,7 +9,6 @@
 
 #include <storage/cs_Settings.h>
 #include <drivers/cs_Serial.h>
-#include <drivers/cs_PWM.h>
 #include <storage/cs_State.h>
 
 //#define PRINT_TRACKER_VERBOSE
@@ -28,7 +27,6 @@ Tracker::Tracker() : EventListener(),
 	_appTimerData = { {0} };
 	_appTimerId = &_appTimerData;
 #endif
-	EventDispatcher::getInstance().addListener(this);
 
 	_trackedDeviceList = new TrackedDeviceList();
 
@@ -37,21 +35,25 @@ Tracker::Tracker() : EventListener(),
 	//! received over BT
 	_trackedDeviceList->assign(_trackBuffer, sizeof(_trackBuffer));
 
+}
+
+void Tracker::init() {
 	readTrackedDevices();
 
 	Settings::getInstance().get(CONFIG_NEARBY_TIMEOUT, &_timeoutCounts);
 	_trackedDeviceList->setTimeout(_timeoutCounts);
 
+
+	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) Tracker::staticTick);
 }
-;
 
 void Tracker::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
-	if (isTracking()) {
-		if (_tracking && _trackedDeviceList != NULL) {
+//	if (isTracking()) {
+		if (isTracking() && _trackedDeviceList != NULL) {
 			_trackedDeviceList->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 		}
-	}
+//	}
 }
 
 void Tracker::setStack(Nrf51822BluetoothStack* stack) {
@@ -69,11 +71,13 @@ void Tracker::tick() {
 			deviceNearby = (_trackedDeviceList->isNearby() == TDL_IS_NEARBY);
 		}
 
-		//! Change PWM only on change of nearby state
+		//! Only send event on change of nearby state
 		if (deviceNearby && !_trackIsNearby) {
-			PWM::getInstance().setValue(0, (uint8_t) -1);
+			LOGd("send event: is nearby");
+			EventDispatcher::getInstance().dispatch(EVT_TRACKED_DEVICE_IS_NEARBY);
 		} else if (!deviceNearby && _trackIsNearby) {
-			PWM::getInstance().setValue(0, 0);
+			LOGd("send event: is not nearby");
+			EventDispatcher::getInstance().dispatch(EVT_TRACKED_DEVICE_NOT_NEARBY);
 		}
 		_trackIsNearby = deviceNearby;
 
@@ -90,7 +94,7 @@ void Tracker::writeTrackedDevices() {
 	buffer_ptr_t buffer;
 	uint16_t length;
 	_trackedDeviceList->getBuffer(buffer, length);
-	State::getInstance().set(STATE_TRACKED_DEVICES, buffer, length);
+	State::getInstance().set(STATE_TRACKED_DEVICES, buffer, _trackedDeviceList->getMaxLength());
 }
 
 void Tracker::readTrackedDevices() {
@@ -98,15 +102,14 @@ void Tracker::readTrackedDevices() {
 	uint16_t length;
 	_trackedDeviceList->getBuffer(buffer, length);
 
-	State::getInstance().get(STATE_TRACKED_DEVICES, buffer, length);
+	State::getInstance().get(STATE_TRACKED_DEVICES, buffer, _trackedDeviceList->getMaxLength());
+	_trackedDeviceList->resetTimeoutCounters();
 
 	if (!_trackedDeviceList->isEmpty()) {
-
 #ifdef PRINT_DEBUG
 		LOGi("restored tracked devices (%d):", _trackedDeviceList->getSize());
 		_trackedDeviceList->print();
 #endif
-
 		// inform listeners (like the indoor localisation service, i.e. trackedDeviceListCharacteristic)
 		EventDispatcher::getInstance().dispatch(EVT_TRACKED_DEVICES, buffer, length);
 	}
@@ -126,20 +129,22 @@ uint16_t Tracker::getNearbyTimeout() {
 }
 
 void Tracker::startTracking() {
-	if (!_stack) {
-		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
-		return;
-	}
+//	if (!_stack) {
+//		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
+//		return;
+//	}
 
 	if (!_tracking) {
 		//! Set to some value initially
 		_trackIsNearby = false;
+		//! Reset the counters
+		_trackedDeviceList->setTimeout(_timeoutCounts);
 		_tracking = true;
 
-		if (!_stack->isScanning()) {
-			LOGi(FMT_START, "tracking");
-			_stack->startScanning();
-		}
+//		if (!_stack->isScanning()) {
+//			LOGi(FMT_START, "tracking");
+//			_stack->startScanning();
+//		}
 
 		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TRACKER_UPATE_FREQUENCY), this);
 	} else {
@@ -148,18 +153,18 @@ void Tracker::startTracking() {
 }
 
 void Tracker::stopTracking() {
-	if (!_stack) {
-		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
-		return;
-	}
+//	if (!_stack) {
+//		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
+//		return;
+//	}
 
 	_tracking = false;
-	if (_stack->isScanning()) {
-		LOGi(FMT_STOP, "tracking");
-		_stack->stopScanning();
-	} else {
-		LOGi(STR_ERR_ALREADY_STOPPED);
-	}
+//	if (_stack->isScanning()) {
+//		LOGi(FMT_STOP, "tracking");
+//		_stack->stopScanning();
+//	} else {
+//		LOGi(STR_ERR_ALREADY_STOPPED);
+//	}
 }
 
 void Tracker::removeTrackedDevice(TrackedDevice device) {
@@ -188,12 +193,13 @@ void Tracker::onBleEvent(ble_evt_t * p_ble_evt) {
 }
 
 bool Tracker::isTracking() {
-	if (!_stack) {
-		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
-		return false;
-	}
+//	if (!_stack) {
+//		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
+//		return false;
+//	}
 
-	return _tracking && _stack->isScanning();
+//	return _tracking && _stack->isScanning();
+	return _tracking;
 }
 
 void Tracker::publishTrackedDevices() {

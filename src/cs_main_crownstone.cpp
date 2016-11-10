@@ -108,6 +108,9 @@ Crownstone::Crownstone() :
 	//! create instances for the scanner and mesh
 	//! actual initialization is done in their respective init methods
 	_scanner = &Scanner::getInstance();
+#if CHAR_TRACK_DEVICES == 1
+	_tracker = &Tracker::getInstance();
+#endif
 
 #if BUILD_MESHING == 1
 	_mesh = &Mesh::getInstance();
@@ -598,6 +601,13 @@ void Crownstone::prepareNormalOperationMode() {
 	_scanner->setStack(_stack);
 	BLEutil::print_heap("Heap scanner: ");
 	BLEutil::print_stack("Stack scanner: ");
+//	if (_settings->isSet(CONFIG_TRACKER_ENABLED)) {
+#if CHAR_TRACK_DEVICES == 1
+	_tracker->init();
+	BLEutil::print_heap("Heap tracker: ");
+	BLEutil::print_stack("Stack tracker: ");
+#endif
+//	}
 
 	//! create scheduler
 	_scheduler = &Scheduler::getInstance();
@@ -678,9 +688,11 @@ void Crownstone::startUp() {
 			_scanner->delayedStart(delay);
 		}
 
-		if (_settings->isSet(CONFIG_TRACKER_ENABLED)) {
+//		if (_settings->isSet(CONFIG_TRACKER_ENABLED)) {
+#if CHAR_TRACK_DEVICES == 1
 			_tracker->startTracking();
-		}
+#endif
+//		}
 
 		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
 #if BUILD_MESHING == 1
