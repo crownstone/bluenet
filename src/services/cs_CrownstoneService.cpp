@@ -106,7 +106,7 @@ void CrownstoneService::createCharacteristics() {
 #endif
 
 	LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_NONCE);
-	addSessionNonceCharacteristic(buffer, maxLength);
+	addSessionNonceCharacteristic(_nonceBuffer, maxLength);
 
 	LOGi(FMT_CHAR_ADD, STR_CHAR_FACTORY_RESET);
 	addFactoryResetCharacteristic();
@@ -390,8 +390,9 @@ void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint1
 	_sessionNonceCharacteristic->setUUID(UUID(getUUID(), SESSION_NONCE_UUID));
 	_sessionNonceCharacteristic->setName(BLE_CHAR_SESSION_NONCE);
 	_sessionNonceCharacteristic->setWritable(false);
-	_sessionNonceCharacteristic->setNotifies(false);
+	_sessionNonceCharacteristic->setNotifies(true);
 	_sessionNonceCharacteristic->setValue(buffer);
+	_sessionNonceCharacteristic->setSharedEncryptionBuffer(false);
 	_sessionNonceCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_sessionNonceCharacteristic->setMaxGattValueLength(size);
 	_sessionNonceCharacteristic->setValueLength(0);

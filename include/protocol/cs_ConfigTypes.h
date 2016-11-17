@@ -48,7 +48,7 @@ enum ConfigurationTypes {
 	CONFIG_POWER_SAMPLE_CONT_INTERVAL       = 32,     //! 0x20
 	CONFIG_ADC_CONT_SAMPLE_RATE             = 33,     //! 0x1E
 	CONFIG_CROWNSTONE_ID                    = 34,     //! 0x22
-	CONFIG_KEY_AMIN                         = 35,     //! 0x23
+	CONFIG_KEY_ADMIN                        = 35,     //! 0x23
 	CONFIG_KEY_MEMBER                       = 36,     //! 0x24
 	CONFIG_KEY_GUEST                        = 37,     //! 0x25
 	CONFIG_DEFAULT_ON                       = 38,     //! 0x26

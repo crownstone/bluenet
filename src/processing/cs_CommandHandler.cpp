@@ -387,7 +387,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			if (settings.isSet(CONFIG_ENCRYPTION_ENABLED)) {
 				// validate encryption keys are not 0
-				settings.get(CONFIG_KEY_AMIN, key);
+				settings.get(CONFIG_KEY_ADMIN, key);
 				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
 					LOGw("owner key is not set!");
 					return ERR_COMMAND_FAILED;
