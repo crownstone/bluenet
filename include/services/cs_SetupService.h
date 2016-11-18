@@ -34,7 +34,6 @@ public:
 	 * set over so-called configuration characteristics. It also initializes all characteristics.
 	 */
 	SetupService();
-	~SetupService();
 
 	/** Initialize a GeneralService object
 	 *
@@ -56,9 +55,9 @@ private:
 
 	// stores the MAC address of the devices to be used for mesh message handling
     ble_gap_addr_t _myAddr;
-    uint8_t* _keyBuffer;
-	uint8_t* _nonceBuffer;
 
+	uint8_t _keyBuffer[SOC_ECB_KEY_LENGTH];
+	uint8_t _nonceBuffer[SESSION_NONCE_LENGTH];
 
 	Characteristic<buffer_ptr_t>* _macAddressCharacteristic;
 	Characteristic<buffer_ptr_t>* _setupKeyCharacteristic;

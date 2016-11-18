@@ -13,13 +13,9 @@
 #include <structs/buffer/cs_MasterBuffer.h>
 #include "nrf_soc.h"
 
-SetupService::SetupService() : _keyBuffer(NULL), _nonceBuffer(NULL), _macAddressCharacteristic(NULL), _setupKeyCharacteristic(NULL) {
+SetupService::SetupService() : _macAddressCharacteristic(NULL), _setupKeyCharacteristic(NULL) {
 	setUUID(UUID(SETUP_UUID));
 	setName(BLE_SERVICE_SETUP);
-}
-SetupService::~SetupService() {
-	delete _keyBuffer;
-	delete _nonceBuffer;
 }
 
 void SetupService::createCharacteristics() {
@@ -35,7 +31,6 @@ void SetupService::createCharacteristics() {
 	addMacAddressCharacteristic();
 	LOGi(FMT_CHAR_ADD, STR_CHAR_MAC_ADDRESS);
 
-	_keyBuffer = new uint8_t[SOC_ECB_KEY_LENGTH];
 	addSetupKeyCharacteristic(_keyBuffer, SOC_ECB_KEY_LENGTH);
 	LOGi(FMT_CHAR_ADD, STR_CHAR_SETUP_KEY);
 
@@ -48,7 +43,6 @@ void SetupService::createCharacteristics() {
 	addGoToDfuCharacteristic();
 
 	LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_NONCE);
-	_nonceBuffer = new uint8_t[SESSION_NONCE_LENGTH];
 	addSessionNonceCharacteristic(_nonceBuffer, SESSION_NONCE_LENGTH, ENCRYPTION_DISABLED);
 
 	addCharacteristicsDone();

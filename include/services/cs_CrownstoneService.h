@@ -122,6 +122,8 @@ private:
 	MeshCommand* _meshCommand;
 #endif
 
+	uint8_t _nonceBuffer[SESSION_NONCE_LENGTH];
+
 	Characteristic<buffer_ptr_t>* _stateControlCharacteristic;
 	Characteristic<buffer_ptr_t>* _stateReadCharacteristic;
 	Characteristic<buffer_ptr_t>* _sessionNonceCharacteristic;

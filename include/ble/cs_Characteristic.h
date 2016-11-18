@@ -69,6 +69,9 @@ struct Status {
 	 * tx operations are completed
 	 */
 	boolean_t notificationPending                     : 1;
+	//! shared encryption buffer, if false, a buffer is allocated for the characteristic, if true,
+	//! the global EncryptionBuffer is used. In particular, big characteristics should use the global EncryptionBuffer
+	boolean_t sharedEncryptionBuffer                  : 1;
 };
 
 /** Non-template base class for Characteristics.
@@ -191,6 +194,10 @@ public:
 
 	uint16_t getCccdHandle() {
 		return _handles.cccd_handle;
+	}
+
+	void setSharedEncryptionBuffer(bool val) {
+		_status.sharedEncryptionBuffer = val;
 	}
 
 	/** Return the maximum length of the value used by the gatt server
@@ -558,15 +565,25 @@ protected:
 	/** Initialize / allocate a buffer for encryption */
 	void initEncryptionBuffer() {
 		if (_encryptionBuffer == NULL) {
-			CharacteristicBase::_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));
+			if (_status.sharedEncryptionBuffer) {
+				uint16_t size;
+				EncryptionBuffer::getInstance().getBuffer(_encryptionBuffer, size);
+				assert(_encryptionBuffer != NULL, "need to initialize encryption buffer for aes encryption");
+			} else {
+				_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));
+			}
 		}
 	}
 
 	/** Free / release the encryption buffer */
 	void freeEncryptionBuffer() {
-		if (CharacteristicBase::_encryptionBuffer != NULL) {
-			free(CharacteristicBase::_encryptionBuffer);
-			CharacteristicBase::_encryptionBuffer = NULL;
+		if (_encryptionBuffer != NULL) {
+			if (_status.sharedEncryptionBuffer) {
+				_encryptionBuffer = NULL;
+			} else {
+				free(_encryptionBuffer);
+				_encryptionBuffer = NULL;
+			}
 		}
 	}
 
@@ -718,6 +735,11 @@ private:
 
 public:
 
+	Characteristic<buffer_ptr_t>() : _maxGattValueLength(0), _valueLength(0), _gattValueLength(0),
+		_notificationPendingOffset(0) {
+		setSharedEncryptionBuffer(true);
+	}
+
 	uint32_t notify();
 
 	void onTxComplete(ble_common_evt_t * p_ble_evt);
@@ -781,16 +803,20 @@ public:
 	virtual uint16_t getGattValueLength() {
 		return _gattValueLength;
 	}
-
-	void initEncryptionBuffer() {
-		uint16_t size;
-		EncryptionBuffer::getInstance().getBuffer(CharacteristicBase::_encryptionBuffer, size);
-		assert(CharacteristicBase::_encryptionBuffer != NULL, "need to initialize encryption buffer for aes encryption");
-	}
-
-	void freeEncryptionBuffer() {
-		CharacteristicBase::_encryptionBuffer = NULL;
-	}
+//
+//	void initEncryptionBuffer() {
+//		if (_encryptionBufferUsed) {
+//
+//		} else {
+//			uint16_t size;
+//			EncryptionBuffer::getInstance().getBuffer(CharacteristicBase::_encryptionBuffer, size);
+//			assert(CharacteristicBase::_encryptionBuffer != NULL, "need to initialize encryption buffer for aes encryption");
+//		}
+//	}
+//
+//	void freeEncryptionBuffer() {
+//		CharacteristicBase::_encryptionBuffer = NULL;
+//	}
 
 protected:
 

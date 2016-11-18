@@ -423,7 +423,7 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 	ConfigurationTypes keyConfigType;
 	switch (userLevel) {
 	case ADMIN:
-		keyConfigType = CONFIG_KEY_AMIN;
+		keyConfigType = CONFIG_KEY_ADMIN;
 		break;
 	case MEMBER:
 		keyConfigType = CONFIG_KEY_MEMBER;

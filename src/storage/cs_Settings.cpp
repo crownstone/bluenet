@@ -265,7 +265,7 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 		LOGi(FMT_SET_STR_TYPE_VAL, type, std::string((char*)payload, length).c_str());
 		return ERR_SUCCESS;
 	}
-	case CONFIG_KEY_AMIN :
+	case CONFIG_KEY_ADMIN :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		if (length != ENCYRPTION_KEY_LENGTH) {
@@ -376,7 +376,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_NAME: {
 		return MAX_STRING_STORAGE_SIZE+1;
 	}
-	case CONFIG_KEY_AMIN :
+	case CONFIG_KEY_ADMIN :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
 		return ENCYRPTION_KEY_LENGTH;
@@ -502,7 +502,7 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		Storage::getUint16(_storageStruct.crownstoneId, (uint16_t*)target, 0);
 		break;
 	}
-	case CONFIG_KEY_AMIN : {
+	case CONFIG_KEY_ADMIN : {
 		Storage::getArray<uint8_t>(_storageStruct.encryptionKeys.owner, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
@@ -707,7 +707,7 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		Storage::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
 		break;
 	}
-	case CONFIG_KEY_AMIN : {
+	case CONFIG_KEY_ADMIN : {
 		p_item = (uint8_t*)&_storageStruct.encryptionKeys.owner;
 		Storage::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.owner, ENCYRPTION_KEY_LENGTH);
 		break;
