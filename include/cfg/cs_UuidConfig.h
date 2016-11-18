@@ -62,7 +62,11 @@ enum CrownstoneCharacteristicsIDs {
 enum SetupCharacteristicsIDs {
 	SETUP_CONTROL_UUID                      = 0x1,
 	MAC_ADDRESS_UUID                        = 0x2,
-	SETUP_KEY_UUID							= 0x3,
+	SETUP_KEY_UUID                          = 0x3,
+//	CONFIG_CONTROL_UUID                     = 0x4, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
+//	CONFIG_READ_UUID                        = 0x5, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
+	GOTO_DFU_UUID                           = 0x6,
+//	SESSION_NONCE_UUID                      = 0x8, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
 };
 
 enum GeneralCharacteristicsIDs {
@@ -75,13 +79,13 @@ enum PowerCharacteristicsIDs {
 	PWM_UUID                                = 0x1, //cmd
 	RELAY_UUID                              = 0x2, //cmd
 	POWER_SAMPLES_UUID                      = 0x3, //state
-	POWER_CONSUMPTION_UUID                = 0x4, //state
+	POWER_CONSUMPTION_UUID                  = 0x4, //state
 };
 
 enum IndoorLocalizationCharacteristicsIDs {
 	TRACKED_DEVICE_UUID                     = 0x1, //behave, cmd?
 	TRACKED_DEVICE_LIST_UUID                = 0x2, //state
-	SCAN_CONTROL_UUID                        = 0x3, //cmd
+	SCAN_CONTROL_UUID                       = 0x3, //cmd
 	LIST_DEVICE_UUID                        = 0x4, //state
 	RSSI_UUID                               = 0x5, //state
 };

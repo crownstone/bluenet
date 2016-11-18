@@ -59,6 +59,7 @@
 #define BLE_CHAR_SOFTWARE_REVISION               "Software Revision"
 #define BLE_CHAR_MAC_ADDRES                      "MAC Address"
 #define BLE_CHAR_SETUP_KEY                       "Setup Encryption Key"
+#define BLE_CHAR_GOTO_DFU                        "GoTo DFU"
 
 #define STR_HANDLE_COMMAND                       "handle %s command"
 #define STR_ENABLE                               "Enable"
