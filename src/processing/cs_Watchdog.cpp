@@ -60,7 +60,7 @@ void Watchdog::init() {
 
 void Watchdog::keepAlive() {
 	if (_hasKeepAliveState) {
-//		LOGi("Reset keep alive");
+		LOGi("Reset keep alive");
 //		_lastKeepAliveTimestamp = RTC::now();
 		uint32_t timeout = (_lastKeepAlive.timeout + _keepAliveInterval / 2) * 1000;
 //		LOGi("timeout in %d ms", timeout);
@@ -75,8 +75,8 @@ void Watchdog::keepAliveTimeout() {
 
 	if (_hasKeepAliveState) {
 //			Switch::getInstance().switch(_lastKeepAlive.switchState);
-//		CommandHandler::getInstance().handleCommand(CMD_SWITCH, (buffer_ptr_t)&_lastKeepAlive.switchState, sizeof(_lastKeepAlive.switchState), ADMIN);
-		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&_lastKeepAlive.switchState, sizeof(_lastKeepAlive.switchState), ADMIN);
+		CommandHandler::getInstance().handleCommand(CMD_SWITCH, (buffer_ptr_t)&_lastKeepAlive.switchState, sizeof(_lastKeepAlive.switchState), ADMIN);
+//		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&_lastKeepAlive.switchState, sizeof(_lastKeepAlive.switchState), ADMIN);
 	} else {
 		LOGw("No keep alive state found!!");
 	}
