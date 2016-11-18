@@ -77,6 +77,24 @@ void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size)
 	_setupKeyCharacteristic->setValueLength(0);
 }
 
+void SetupService::addGoToDfuCharacteristic() {
+	_gotoDfuCharacteristic = new Characteristic<uint8_t>();
+	addCharacteristic(_gotoDfuCharacteristic);
+
+	_gotoDfuCharacteristic->setUUID(UUID(getUUID(), GOTO_DFU_UUID));
+	_gotoDfuCharacteristic->setName(BLE_CHAR_GOTO_DFU);
+	_gotoDfuCharacteristic->setWritable(true);
+	_gotoDfuCharacteristic->setDefaultValue(0);
+	_gotoDfuCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
+	_gotoDfuCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
+		if (value == GPREGRET_DFU_RESET) {
+			LOGi("goto dfu");
+			CommandHandler::getInstance().resetDelayed(value);
+		} else {
+			LOGe("goto dfu failed, wrong value: %d", value);
+		}
+	});
+}
 
 void SetupService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	// make sure the session nonce is poplated.
