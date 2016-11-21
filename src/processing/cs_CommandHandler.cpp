@@ -13,7 +13,7 @@
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
 
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#if IS_CROWNSTONE(DEVICE_TYPE)
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
 #endif
@@ -504,7 +504,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		Nrf51822BluetoothStack::getInstance().disconnect();
 		break;
 	}
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#if IS_CROWNSTONE(DEVICE_TYPE)
 	// Crownstone specific commands are only available if device type is set to Crownstone.
 	// E.g. GuideStone does not support power measure or switching commands
 	case CMD_PWM: {

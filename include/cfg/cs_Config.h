@@ -129,8 +129,6 @@
 #define POWER_ZERO                               9.0f
 #define POWER_ZERO_AVG_WINDOW                    100
 
-#define MESH_ACCESS_ADDRESS                      0xA641A69E
-
 #define PWM_PERIOD                               20000L //! Interval in us: 1/20000e-6 = 50 Hz
 
 #define KEEP_ALIVE_INTERVAL                      (2 * 60) // 2 minutes, in seconds

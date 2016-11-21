@@ -495,12 +495,19 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 	//	ble_advdata_service_data_t service_data;
 		memset(&_service_data, 0, sizeof(_service_data));
 
-		if (deviceType == DEVICE_GUIDESTONE) {
-			_service_data.service_uuid = GUIDESTONE_SERVICE_DATA_UUID;
-		} else { // if deviceType == DEVICE_CROWNSTONE
-			_service_data.service_uuid = CROWNSTONE_PLUG_SERVICE_DATA_UUID;
-//		} else { // if deviceType == DEVICE_CROWNSTONE
-//			_service_data.service_uuid = CROWNSTONE_BUILT_SERVICE_DATA_UUID;
+		switch(deviceType) {
+			case DEVICE_CROWNSTONE_PLUG: {
+				_service_data.service_uuid = CROWNSTONE_PLUG_SERVICE_DATA_UUID;
+				break;
+			}
+			case DEVICE_CROWNSTONE_BUILTIN: {
+				_service_data.service_uuid = CROWNSTONE_BUILT_SERVICE_DATA_UUID;
+				break;
+			}
+			case DEVICE_GUIDESTONE: {
+				_service_data.service_uuid = GUIDESTONE_SERVICE_DATA_UUID;
+				break;
+			}
 		}
 
 		_service_data.data.p_data = _serviceData->getArray();

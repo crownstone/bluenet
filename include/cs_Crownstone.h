@@ -33,7 +33,7 @@
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
 
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#if IS_CROWNSTONE(DEVICE_TYPE)
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
 #include <processing/cs_PowerSampling.h>
@@ -143,7 +143,7 @@ private:
 	Settings* _settings;
 	State* _stateVars;
 
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#if IS_CROWNSTONE(DEVICE_TYPE)
 	Switch* _switch;
 	TemperatureGuard* _temperatureGuard;
 	PowerSampling* _powerSampler;
