@@ -59,7 +59,7 @@
  *********************************************************************************************************************/
 
 Crownstone::Crownstone() :
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#if IS_CROWNSTONE(DEVICE_TYPE)
 	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL), _watchdog(NULL),
 #endif
 	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
@@ -116,7 +116,7 @@ Crownstone::Crownstone() :
 	_mesh = &Mesh::getInstance();
 #endif
 
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#if IS_CROWNSTONE(DEVICE_TYPE)
 	// switch using PWM or Relay
 	_switch = &Switch::getInstance();
 	//! create temperature guard
@@ -295,7 +295,7 @@ void Crownstone::initDrivers() {
 	LOGi(FMT_INIT, "encryption handler");
 	EncryptionHandler::getInstance().init();
 
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#if IS_CROWNSTONE(DEVICE_TYPE)
 	// switch / PWM init
 	LOGd(FMT_INIT, "switch / PWM");
 	_switch->init();
@@ -547,7 +547,7 @@ void Crownstone::createCrownstoneServices() {
 #endif
 
 #if POWER_SERVICE==1
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#if IS_CROWNSTONE(DEVICE_TYPE)
 	_powerService = new PowerService;
 	_stack->addService(_powerService);
 #else
@@ -664,7 +664,7 @@ void Crownstone::startUp() {
 		scheduleNextTick();
 		_stack->startTicking();
 
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#if IS_CROWNSTONE(DEVICE_TYPE)
 		_switch->start();
 
 		// restore the last value. the switch reads the last state from the storage, but does
@@ -875,7 +875,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 #endif
 		_scanner->stop();
 
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+#if IS_CROWNSTONE(DEVICE_TYPE)
 		_switch->pwmOff();
 		_switch->relayOff();
 		_powerSampler->stopSampling();

@@ -306,7 +306,7 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 //				LOGi("found guidestone");
 				return _scanFilter & SCAN_FILTER_GUIDESTONE_MSK;
 			}
-			case DEVICE_CROWNSTONE: {
+			case DEVICE_CROWNSTONE_PLUG: {
 //				LOGi("found crownstone");
 				return _scanFilter & SCAN_FILTER_CROWNSTONE_MSK;
 			}

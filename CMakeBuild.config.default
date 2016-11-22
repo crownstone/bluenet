@@ -11,11 +11,11 @@ FIRMWARE_VERSION="0.6.0"
 # It is also used to enable/disable device type specific functionality.
 # e.g. power related functionality (switch, power sampling, etc) is only
 # available for device type crownstone.
-# DEVICE_UNDEF       0
-# DEVICE_CROWNSTONE  1
-# DEVICE_GUIDESTONE  2
-# DEVICE_FRIDGE      3
-DEVICE_TYPE=DEVICE_CROWNSTONE
+# DEVICE_UNDEF                0
+# DEVICE_CROWNSTONE_PLUG      1
+# DEVICE_GUIDESTONE           2
+# DEVICE_CROWNSTONE_BUILTIN   3
+DEVICE_TYPE=DEVICE_CROWNSTONE_PLUG
 
 # To avoid confusion when trying to enable functionality through compiler flags, the
 # persistent storage for flags is disabled by default, set to 0 if enabling disabling functionality through
@@ -159,7 +159,7 @@ MESH_NUM_HANDLES=10
 # Don't process first mesh messages after boot for some time (ms)
 MESH_BOOT_TIME=2000
 # Number to filter out messages that are not meant for the mesh
-MESH_ACCESS_ADDR=0xA641A69E
+MESH_ACCESS_ADDRESS=0xA641A69E
 # Minimum interval in ms for broadcasting values of handles (has to be smaller or equal to advertisement interval)
 MESH_INTERVAL_MIN_MS=100
 # Bluetooth channel to use for the mesh (37, 38, 39)

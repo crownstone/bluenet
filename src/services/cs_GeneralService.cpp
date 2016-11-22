@@ -29,7 +29,7 @@ GeneralService::GeneralService() : EventListener(),
 void GeneralService::createCharacteristics() {
 	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_GENERAL);
 
-#if CHAR_TEMPERATURE==1 || DEVICE_TYPE==DEVICE_FRIDGE
+#if CHAR_TEMPERATURE==1
 	LOGi(FMT_CHAR_ADD, STR_CHAR_TEMPERATURE);
 	addTemperatureCharacteristic();
 #else
