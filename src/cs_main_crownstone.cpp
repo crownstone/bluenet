@@ -22,7 +22,7 @@
 
 #define RESET_COUNTER
 //#define MICRO_VIEW 1
-#define CHANGE_NAME_ON_RESET
+//#define CHANGE_NAME_ON_RESET
 //#define CHANGE_MINOR_ON_RESET
 
 /**********************************************************************************************************************
@@ -582,7 +582,7 @@ void Crownstone::setName() {
 	sprintf(devicename_resetCounter, "%.*s_%lu", MIN(size, 5), device_name, resetCounter);
 	std::string deviceName = std::string(devicename_resetCounter);
 #else
-	std::string deviceName(devicename, size);
+	std::string deviceName(device_name, size);
 #endif
 
 	//! assign name

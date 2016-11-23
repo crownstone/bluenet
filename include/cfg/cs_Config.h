@@ -12,7 +12,7 @@
 //#define GENERAL_BUFFER_SIZE                      300
 
 /** maximum length of strings used for characteristic values */
-#define MAX_CHAR_VALUE_STRING_LENGTH             25
+#define DEFAULT_CHAR_VALUE_STRING_LENGTH             25
 
 /** define the maximum size for strings to be stored
  */

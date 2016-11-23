@@ -408,7 +408,7 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 	switch(type) {
 	case CONFIG_NAME: {
 		char default_name[32];
-		sprintf(default_name, "%s_%s", STRINGIFY(BLUETOOTH_NAME), STRINGIFY(COMPILATION_TIME));
+		sprintf(default_name, "%s", STRINGIFY(BLUETOOTH_NAME));
 		Storage::getString(_storageStruct.device_name, (char*) target, default_name, size);
 		break;
 	}

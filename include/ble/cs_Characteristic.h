@@ -661,7 +661,7 @@ public:
 
 	/** @inherit */
 	uint16_t getGattValueLength() {
-		if (this->isAesEnabled()) {
+		if (this->isAesEnabled() && CharacteristicBase::_minAccessLevel != ENCRYPTION_DISABLED) {
 			return EncryptionHandler::calculateEncryptionBufferLength(sizeof(T));
 			//return (1 + ((sizeof(T) + 4 - 1) / 16)) * 16 + 4; // ceil( sizeof(T) + 4 / 16 ) * 16 + 4
 		} else {
@@ -680,7 +680,17 @@ public:
  */
 template<>
 class Characteristic<std::string> : public CharacteristicGeneric<std::string> {
+private:
+
+	uint16_t _maxStringLength;
+
 public:
+
+	Characteristic<std::string>() : _maxStringLength(DEFAULT_CHAR_VALUE_STRING_LENGTH) {
+
+	}
+
+
 	/** @inherit */
 	void operator=(const std::string& val) {
 		CharacteristicGeneric<std::string>::operator=(val);
@@ -693,13 +703,17 @@ public:
 
 	/** @inherit */
 	uint16_t getValueLength() {
-		return MAX_CHAR_VALUE_STRING_LENGTH;
+		return _maxStringLength;
+	}
+
+	void setMaxStringLength(uint16_t length) {
+		_maxStringLength = length;
 	}
 
 	/** @inherit */
 	uint16_t getGattValueLength() {
-		if (this->isAesEnabled()) {
-			return EncryptionHandler::calculateEncryptionBufferLength(MAX_CHAR_VALUE_STRING_LENGTH);
+		if (this->isAesEnabled() && CharacteristicBase::_minAccessLevel != ENCRYPTION_DISABLED) {
+			return EncryptionHandler::calculateEncryptionBufferLength(_maxStringLength);
 			// (1 + ((MAX_CHAR_VALUE_STRING_LENGTH + 4 - 1) / 16)) * 16 + 4; // ceil( (MAX_STRING_LENGTH + 4) / 16 ) * 16 + 4
 		} else {
 			return getValueLength();

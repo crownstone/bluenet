@@ -2,7 +2,7 @@
 
 # The name that is advertised.
 # Should be 10 characters or less (we need room for compilation date after it)
-BLUETOOTH_NAME="crown"
+BLUETOOTH_NAME="Crown"
 
 FIRMWARE_VERSION="0.6.0"
 
@@ -141,7 +141,7 @@ SERIAL_VERBOSITY=SERIAL_DEBUG
 # DOBEACON             14
 # CROWNSTONE5          15
 # DOBEACON2            16
-HARDWARE_BOARD=PCA10040
+HARDWARE_BOARD=ACR01B2C
 
 NRF_SERIES=NRF52
 
