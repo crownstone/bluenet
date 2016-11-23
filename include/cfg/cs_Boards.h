@@ -15,66 +15,41 @@
 
 #define PCA10001             0
 #define NRF6310              1
-#define CROWNSTONE           5
-#define VIRTUALMEMO          7
-#define CROWNSTONE2          8
-#define CROWNSTONE_SENSOR    9
-#define PCA10000             10
-#define CROWNSTONE3          11
-#define CROWNSTONE4          12
-#define NORDIC_BEACON        13
-#define DOBEACON             14
-#define CROWNSTONE5          15
-#define DOBEACON2            16
-#define PCA10036             17
-#define PCA10040             18
-#define BUILTIN_ACR01B1A     19
-#define PLUGIN_FLEXPRINT_01  20
-#define PCA10031             21 // same layout as PCA10000, just with 32k chip
+#define VIRTUALMEMO          2
+#define CROWNSTONE           3
+#define CROWNSTONE2          4
+#define CROWNSTONE3          5
+#define CROWNSTONE4          6
+#define CROWNSTONE5          7
+#define NORDIC_BEACON        8
+#define DOBEACON             9
+#define DOBEACON2            10
+#define PLUGIN_FLEXPRINT_01  11
+#define GUIDESTONE           12
 
-////////////////////////////////////////////
-/// CROWNSTONES
-////////////////////////////////////////////
+// NORDIC DEV BOARDS
+#define PCA10000             30
+#define PCA10031             31
 
-/*
- * 10102009200
- * |           - Product Line: Crownstone Family = 1
- *  ||         - Market: EU = 01, US = 02
- *    ||       - Product: DevBoard = 01, Plugin = 02, Builtin = 04, Guidestone = 08
- *      ||     - Major Version number
- *        ||   - Minor Version number
- *          || - Bugfix Version number
- */
+#define PCA10036             40
+#define PCA10040             41
 
-// PLUGIN
-#define CS_EU_PLUG_0              10102000000
-#define CS_EU_PLUG_0_86_0         10102008600
-#define CS_EU_PLUG_0_90_0         10102009000
-#define CS_EU_PLUG_0_92_0         10102009200
-#define CS_EU_PLUG_QUANT          10102012345
-#define CS_EU_PLUG_FLEXPRINT_01   10102012345
+// CROWNSTONE PLUGS
+#define ACR01B1A             1000
+#define ACR01B1B             1001
+#define ACR01B1C             1002
+#define ACR01B1D             1003
 
-// BUILTIN
-#define CS_EU_BUILT_ACR01B1A      10104012456
-
-// DEV
-#define CS_EU_DEV_0_93_2          10101009302
-
-////////////////////////////////////////////
-/// GUIDESTONES
-////////////////////////////////////////////
-
-#define GS_EU_PLUG_0_07_0         10108000700
-#define GS_EU_PLUG_0_92_0         10108009200
-#define GS_EU_CHINA_1_0_0         10108010000
-
-//string = dfs + _"001D"
+// CROWNSTONE BUILTINS
+#define ACR01B2A             1500
+#define ACR01B2B             1501
+#define ACR01B2C             1502
 
 #ifndef HARDWARE_BOARD
 #error "Add HARDWARE_BOARD=... to CMakeBuild.config"
 #endif
 
-#if(HARDWARE_BOARD==CROWNSTONE) || (HARDWARE_BOARD==CS_EU_PLUG_0)
+#if(HARDWARE_BOARD==CROWNSTONE)
 
 #define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
 #define PIN_GPIO_RELAY_ON    0                   //! something unused
@@ -94,7 +69,7 @@
 #endif
 
 
-#if(HARDWARE_BOARD==CROWNSTONE2) || (HARDWARE_BOARD==CS_EU_PLUG_0_86_0)
+#if(HARDWARE_BOARD==CROWNSTONE2)
 //! v0.86
 #define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
 #define PIN_GPIO_RELAY_ON    5                   //! something unused
@@ -115,7 +90,7 @@
 #endif
 
 
-#if(HARDWARE_BOARD==CROWNSTONE3) || (HARDWARE_BOARD==CS_EU_PLUG_0_90_0)
+#if(HARDWARE_BOARD==CROWNSTONE3)
 //! v0.90
 #define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
 #define PIN_GPIO_RELAY_ON    5                   //! something unused
@@ -138,7 +113,7 @@
 #endif
 
 
-#if(HARDWARE_BOARD==CROWNSTONE4) || (HARDWARE_BOARD==CS_EU_PLUG_0_92_0)
+#if(HARDWARE_BOARD==CROWNSTONE4)
 //! v0.92
 #define PIN_GPIO_SWITCH      4                   //! this is p0.04 or gpio 4
 #define PIN_GPIO_RELAY_ON    5                   //! something unused
@@ -160,7 +135,7 @@
 #define VOLTAGE_AMPLIFICATION       80
 #endif
 
-#if(HARDWARE_BOARD==CROWNSTONE5) || (HARDWARE_BOARD==CS_EU_PLUG_QUANT)
+#if(HARDWARE_BOARD==CROWNSTONE5)
 //! plugin quant
 #define PIN_GPIO_SWITCH      12                  //! p0.12
 #define PIN_GPIO_RELAY_ON    10                  //! p0.10
@@ -181,7 +156,7 @@
 #define VOLTAGE_AMPLIFICATION       80
 #endif
 
-#if(HARDWARE_BOARD==DOBEACON) || (HARDWARE_BOARD==GS_EU_PLUG_0_07_0)
+#if(HARDWARE_BOARD==DOBEACON)
 //! doBeacon v0.7
 #define PIN_GPIO_SWITCH      4                   //! this is p0.04 or gpio 4
 #define PIN_GPIO_RELAY_ON    5                   //! something unused
@@ -203,7 +178,7 @@
 #define VOLTAGE_AMPLIFICATION       80
 #endif
 
-#if(HARDWARE_BOARD==DOBEACON2) || (HARDWARE_BOARD==GS_EU_PLUG_0_92_0)
+#if(HARDWARE_BOARD==DOBEACON2)
 // v0.92
 //#define PIN_GPIO_SWITCH      4                   // this is p0.04 or gpio 4
 //#define PIN_GPIO_RELAY_ON    0                   // something unused
@@ -226,29 +201,6 @@
 //#define SHUNT_VALUE                 1
 // amplification of the voltage over the shunt, to the adc input of the chip
 //#define VOLTAGE_AMPLIFICATION       80
-#endif
-
-
-#if(HARDWARE_BOARD==CROWNSTONE_SENSOR)
-
-#define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    5                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-//#define PIN_AIN_ADC          6                   //! ain6 is p0.05 or gpio 5
-//#define PIN_AIN_LPCOMP       5                   //! ain5 is p0.04 or gpio 4
-//#define PIN_AIN_LPCOMP_REF   0                   //! ref0 is p0.00 or gpio 0
-#define PIN_AIN_CURRENT      6                   //! ain6 is p0.05 or gpio 5
-#define PIN_AIN_VOLTAGE      5                   //! ain5 is p0.04 or gpio 4
-#define PIN_GPIO_RX          6                   //! this is p0.06 or gpio 6
-#define PIN_GPIO_TX          1                   //! this is p0.01 or gpio 1
-
-#define PIN_AIN_SENSOR       3                   //! ain3 is p0.02 or gpio 2
-#define PIN_GPIO_BUTTON      2
-
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 120
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       1
 #endif
 
 
@@ -399,7 +351,7 @@
 
 #endif
 
-#if(HARDWARE_BOARD==BUILTIN_ACR01B1A)
+#if (HARDWARE_BOARD >= 1000) && (HARDWARE_BOARD <= 2000)
 
 #define RED_LED 			10					//! this is p0.10 or gpio 10
 #define GREEN_LED 			9					//! this is p0.09 or gpio 9
@@ -452,7 +404,7 @@
 
 #endif
 
-#if(HARDWARE_BOARD==GS_EU_CHINA_1_0_0)
+#if(HARDWARE_BOARD==GUIDESTONE)
 // doesn't have anything !!!
 // not even SERIAL!!!
 #define HAS_SERIAL false
