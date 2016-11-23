@@ -1,0 +1,283 @@
+#!/bin/bash
+
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source $BLUENET_DIR/scripts/_utils.sh
+
+############################
+### Pre Script Verification
+############################
+
+if [ -z $BLUENET_RELEASE_DIR ]; then
+	err "BLUENET_RELEASE_DIR is not defined!"
+	exit 1
+fi
+if [ -z $BLUENET_BOOTLOADER_DIR ]; then
+	err "BLUENET_BOOTLOADER_DIR is not defined!"
+	exit 1
+fi
+
+# pushd $BLUENET_DIR
+
+# # check for modifications in bluenet code
+# modifications=$(git ls-files -m | wc -l)
+
+# if [[ $modifications != 0 ]]; then
+# 	err "There are modified files in your bluenet code"
+# 	err "Commit the files or stash them first!!"
+# 	exit 1
+# fi
+
+# # check for untracked files
+# untracked=$(git ls-files --others --exclude-standard | wc -l)
+
+# if [[ $untracked != 0 ]]; then
+# 	err "The following untracked files were found in the blunet code"
+# 	err "Make sure you didn't forget to add anything important!"
+# 	git ls-files --others --exclude-standard
+# 	info "Do you want to continue? [Y/n]"
+# 	read untracked_response
+# 	if [[ $untracked_response == "n" ]]; then
+# 		exit 1
+# 	fi
+# fi
+
+# popd
+
+############################
+### Prepare
+############################
+
+# check version number
+# enter version number?
+
+valid=0
+existing=0
+
+if [ -f $BLUENET_DIR/VERSION ]; then
+	version_str=`cat $BLUENET_DIR/VERSION`
+	version_list=(`echo $version_str | tr '.' ' '`)
+	v_major=${version_list[0]}
+	v_minor=${version_list[1]}
+	v_patch=${version_list[2]}
+	log "Current version: $version_str"
+	v_minor=$((v_minor + 1))
+	v_patch=0
+	suggested_version="$v_major.$v_minor.$v_patch"
+else
+	suggested_version="1.0.0"
+fi
+
+while [[ $valid == 0 ]]; do
+	info "Enter a version number [$suggested_version]:"
+	read -e version
+	if [[ $version == "" ]]; then
+		version=$suggested_version
+	fi
+
+	if [[ $version =~ ^[0-9]{1,2}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+
+		info "Select model:"
+		options=("Crownstone" "Guidestone")
+		select opt in "${options[@]}"
+		do
+		    case $opt in
+		        "Crownstone")
+					model="crownstone"
+					break
+		            ;;
+		        "Guidestone")
+					model="guidestone"
+					break
+		            ;;
+		        *) echo invalid option;;
+		    esac
+		done
+
+		directory=$model"_"$version
+
+		if [ -d $directory ]; then
+			err "Version already exists, are you sure? [y/N]: "
+			read version_response
+			if [[ $version_response == "y" ]]; then
+				existing=1
+				valid=1
+			fi
+		else
+			valid=1
+		fi
+	else
+		err "Version does not match pattern"
+	fi
+done
+
+if [[ $existing == 0 ]]; then
+	log "Creating new directory: "$directory
+	mkdir $model"_"$version &> /dev/null
+
+	cp $BLUENET_DIR/CMakeBuild.config.default $path/$directory/CMakeBuild.config
+
+	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $path/$directory/CMakeBuild.config
+
+	sed -i "s/NRF51822_DIR=/#NRF51822_DIR=/" $path/$directory/CMakeBuild.config
+	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $path/$directory/CMakeBuild.config
+
+	sed -i "s/CROWNSTONE_SERVICE=.*/CROWNSTONE_SERVICE=1/" $path/$directory/CMakeBuild.config
+	sed -i "s/INDOOR_SERVICE=.*/INDOOR_SERVICE=0/" $path/$directory/CMakeBuild.config
+	sed -i "s/GENERAL_SERVICE=.*/GENERAL_SERVICE=0/" $path/$directory/CMakeBuild.config
+	sed -i "s/POWER_SERVICE=.*/POWER_SERVICE=0/" $path/$directory/CMakeBuild.config
+	sed -i "s/SCHEDULE_SERVICE=.*/SCHEDULE_SERVICE=0/" $path/$directory/CMakeBuild.config
+
+	sed -i "s/PERSISTENT_FLAGS_DISABLED=.*/PERSISTENT_FLAGS_DISABLED=0/" $path/$directory/CMakeBuild.config
+	sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Crown\"/" $path/$directory/CMakeBuild.config
+	sed -i "s/SERIAL_VERBOSITY=.*/SERIAL_VERBOSITY=SERIAL_NONE/" $path/$directory/CMakeBuild.config
+	sed -i "s/DEFAULT_OPERATION_MODE=.*/DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP/" $path/$directory/CMakeBuild.config
+
+	xdg-open $path/$directory/CMakeBuild.config &> /dev/null
+
+	if [[ $? != 0 ]]; then
+		info "Open $directory/CMakeBuild.config in to edit the config"
+	fi
+
+	log "After editing the config file, press [ENTER] to continue"
+	read
+else
+	err "Warn: Using existing configuration"
+fi
+
+# create directory in bluenet with new config file. copy from default and open to edit
+
+# modify paths
+export BLUENET_CONFIG_DIR=$path/$directory
+export BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR/$directory
+export BLUENET_RELEASE_DIR=$BLUENET_RELEASE_DIR/$directory
+export BLUENET_BIN_DIR=$BLUENET_RELEASE_DIR/bin
+
+############################
+### Run
+############################
+
+# build doc and copy to release directory
+
+###################
+### Config File
+###################
+
+mkdir -p $BLUENET_RELEASE_DIR/config
+
+info "Copy configuration to release dir ..."
+cp $BLUENET_CONFIG_DIR/CMakeBuild.config $BLUENET_RELEASE_DIR/config
+
+checkError
+succ "Copy DONE"
+
+###################
+### Softdevice
+###################
+
+# goto bluenet scripts dir
+pushd $BLUENET_DIR/scripts
+
+info "Build softdevice ..."
+./softdevice.sh build
+
+checkError
+succ "Softdevice DONE"
+
+###################
+### Firmware
+###################
+
+info "Build firmware ..."
+./firmware.sh release
+
+checkError
+succ "Build DONE"
+popd
+
+###################
+### Bootloader
+###################
+
+# goto bootloader scripts dir
+pushd $BLUENET_BOOTLOADER_DIR/scripts
+
+info "Build bootloader ..."
+./all.sh
+
+checkError
+succ "Build DONE"
+
+popd
+
+# build doc and copy to release directory
+
+###################
+### Documentation
+###################
+
+# goto bluenet scripts dir
+pushd $BLUENET_DIR/scripts
+
+info "Build docs ..."
+./gen_doc.sh
+
+checkError
+succ "Build DONE"
+
+info "Copy docs to relase dir ..."
+cp -r $BLUENET_DIR/docs $BLUENET_RELEASE_DIR/docs
+
+checkError
+succ "Copy DONE"
+
+popd
+
+###################
+### GIT release tag
+###################
+
+pushd $BLUENET_DIR
+
+info "Create git tag for release"
+
+if [[ $version_str ]]; then
+	echo $version > VERSION
+
+	log "Updating changes overview"
+	echo "Version $version:" > tmpfile
+	git log --pretty=format:" - %s" "v$version_str"...HEAD >> tmpfile
+	echo "" >> tmpfile
+	echo "" >> tmpfile
+	cat CHANGES >> tmpfile
+	mv tmpfile CHANGES
+
+	log "Add to git"
+	# git add CHANGES VERSION
+	# git commit -m "Version bump to $version"
+
+	log "Create tag"
+	# git tag -a -m "Tagging version $version" "v$version"
+
+	log "Push tag"
+	# git push origin --tags
+else
+	echo $version > VERSION
+
+	log "Creating changes overview"
+    git log --pretty=format:" - %s" >> CHANGES
+    echo "" >> CHANGES
+    echo "" >> CHANGES
+
+	log "Add to git"
+    # git add VERSION CHANGES
+    # git commit -m "Added VERSION and CHANGES files, Version bump to $version"
+
+	log "Create tag"
+    # git tag -a -m "Tagging version $version" "v$version"
+
+	log "Push tag"
+    # git push origin --tags
+fi
+
+popd
