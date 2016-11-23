@@ -1,16 +1,8 @@
 var searchData=
 [
-  ['major',['major',['../classIBeacon.html#a615e08bf44b4d0d946d1245cbf4339f0',1,'IBeacon']]],
-  ['masterbuffer',['MasterBuffer',['../classMasterBuffer.html',1,'']]],
-  ['max_5fservice_5fcount',['MAX_SERVICE_COUNT',['../classNrf51822BluetoothStack.html#a60f868858ff45fd4f866e3e8ecdd6552',1,'Nrf51822BluetoothStack']]],
-  ['maxchiptemp',['maxChipTemp',['../structps__configuration__t.html#a3149cbc7649fde274f6d95e6262dc782',1,'ps_configuration_t']]],
-  ['maxenvtemp',['maxEnvTemp',['../structps__configuration__t.html#ac578d5f4a3aebcf01019d74e813a7495',1,'ps_configuration_t']]],
-  ['mesh',['Mesh',['../classMesh.html',1,'']]],
-  ['mesh_5fheader_5ft',['mesh_header_t',['../structmesh__header__t.html',1,'']]],
-  ['mesh_5fheader_5fv2_5ft',['mesh_header_v2_t',['../structmesh__header__v2__t.html',1,'']]],
-  ['mesh_5fmessage_5ft',['mesh_message_t',['../structmesh__message__t.html',1,'']]],
-  ['meshcontrol',['MeshControl',['../classMeshControl.html',1,'']]],
-  ['minenvtemp',['minEnvTemp',['../structps__configuration__t.html#aeccdbcac318278a34dd5213ed840ed34',1,'ps_configuration_t']]],
-  ['minor',['minor',['../classIBeacon.html#aa5f782308bd7fe44ed58c97c7ae3652a',1,'IBeacon']]],
-  ['mstoticks',['msToTicks',['../classRTC.html#acfadc7aec118a7c886cc721bc7bf01bf',1,'RTC']]]
+  ['lastval',['lastVal',['../structdifferential__buffer__t.html#adba68b3162618b6cd00416be8b8d210b',1,'differential_buffer_t::lastVal()'],['../structdifferential__buffer__fixed__t.html#a76f698aace8607ea6527dddf06b2f3ea',1,'differential_buffer_fixed_t::lastVal()']]],
+  ['length',['length',['../structdifferential__buffer__t.html#a751e3acd7bae6de2e256af973bb18861',1,'differential_buffer_t::length()'],['../structdifferential__buffer__fixed__t.html#a831b0fb6c63a044590e71b42167d7c54',1,'differential_buffer_fixed_t::length()'],['../structstream__t.html#ac52f17f6f8b05065b969f99bb65e9980',1,'stream_t::length()'],['../classStreamBuffer.html#ab84068145aa70beef7310be002d27070',1,'StreamBuffer::length()']]],
+  ['list',['list',['../structperipheral__device__list__t.html#ac5f8c82dacdd246cd724eee190f3bcef',1,'peripheral_device_list_t::list()'],['../structtracked__device__list__t.html#a78b7900d539268f0e55d8d2aabb11dc8',1,'tracked_device_list_t::list()']]],
+  ['loadpersistentstorage',['loadPersistentStorage',['../classSettings.html#a87b3f14990545273cf3a8458fb7cbe84',1,'Settings::loadPersistentStorage()'],['../classState.html#a71ef06ecb647542c64598308c5fc1fc5',1,'State::loadPersistentStorage()']]],
+  ['lpcomp',['LPComp',['../classLPComp.html',1,'']]]
 ];
