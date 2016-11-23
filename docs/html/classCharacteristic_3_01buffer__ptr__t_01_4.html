@@ -160,13 +160,6 @@ uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href=
 virtual uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic_3_01buffer__ptr__t_01_4.html#a43ead9626902c2cf8d6bd6e3081f82d0">getGattValueLength</a> ()</td></tr>
 <tr class="memdesc:a43ead9626902c2cf8d6bd6e3081f82d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the actual length of the value used by the gatt server In the case of aes encryption, this is the length of the encrypted value otherwise it's the same as the value length. <br /></td></tr>
 <tr class="separator:a43ead9626902c2cf8d6bd6e3081f82d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22402ac063e98b61ca67f6d952771c1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic_3_01buffer__ptr__t_01_4.html#a22402ac063e98b61ca67f6d952771c1f">initEncryptionBuffer</a> ()</td></tr>
-<tr class="memdesc:a22402ac063e98b61ca67f6d952771c1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the encryption buffer to hold the encrypted value.  <a href="#a22402ac063e98b61ca67f6d952771c1f">More...</a><br /></td></tr>
-<tr class="separator:a22402ac063e98b61ca67f6d952771c1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0697ebfeaa56e0a95a68dbc099ff580d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0697ebfeaa56e0a95a68dbc099ff580d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic_3_01buffer__ptr__t_01_4.html#a0697ebfeaa56e0a95a68dbc099ff580d">freeEncryptionBuffer</a> ()</td></tr>
-<tr class="memdesc:a0697ebfeaa56e0a95a68dbc099ff580d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free / release the encryption buffer. <br /></td></tr>
-<tr class="separator:a0697ebfeaa56e0a95a68dbc099ff580d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classCharacteristicGeneric"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classCharacteristicGeneric')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classCharacteristicGeneric.html">CharacteristicGeneric&lt; buffer_ptr_t &gt;</a></td></tr>
 <tr class="memitem:a9cb7b4f243a1579eb2bc16b43fa61467 inherit pub_methods_classCharacteristicGeneric"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9cb7b4f243a1579eb2bc16b43fa61467"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristicGeneric.html#a9cb7b4f243a1579eb2bc16b43fa61467">~CharacteristicGeneric</a> ()</td></tr>
@@ -241,6 +234,9 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getValueHandle</b
 <tr class="memitem:a71717e809ee94da5c19f52962447092f inherit pub_methods_classCharacteristicBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a71717e809ee94da5c19f52962447092f"></a>
 uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getCccdHandle</b> ()</td></tr>
 <tr class="separator:a71717e809ee94da5c19f52962447092f inherit pub_methods_classCharacteristicBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5830659bf6cfafafff58b6130c4119d inherit pub_methods_classCharacteristicBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab5830659bf6cfafafff58b6130c4119d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setSharedEncryptionBuffer</b> (bool val)</td></tr>
+<tr class="separator:ab5830659bf6cfafafff58b6130c4119d inherit pub_methods_classCharacteristicBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a96a9c5745e8c113b35ac9c40887524d5 inherit pub_methods_classCharacteristicBase"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristicBase.html#a96a9c5745e8c113b35ac9c40887524d5">getGattValuePtr</a> ()</td></tr>
 <tr class="memdesc:a96a9c5745e8c113b35ac9c40887524d5 inherit pub_methods_classCharacteristicBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the pointer to the memory where the value is accessed by the gatt server.  <a href="#a96a9c5745e8c113b35ac9c40887524d5">More...</a><br /></td></tr>
 <tr class="separator:a96a9c5745e8c113b35ac9c40887524d5 inherit pub_methods_classCharacteristicBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -397,33 +393,6 @@ class Characteristic&lt; buffer_ptr_t &gt;</h3>
 <p>For normal types (arithmetic and strings) this is a fixed value. For buffer types it is dynamic </p>
 
 <p>Implements <a class="el" href="classCharacteristicBase.html#a6a77e8bc5d1ce1080657e89126cdea16">CharacteristicBase</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a22402ac063e98b61ca67f6d952771c1f"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classCharacteristic.html">Characteristic</a>&lt; buffer_ptr_t &gt;::initEncryptionBuffer </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Initialize the encryption buffer to hold the encrypted value. </p>
-
-<p>Implements <a class="el" href="classCharacteristicBase.html#a2c42c735d18f8c7835d50296b70391cd">CharacteristicBase</a>.</p>
 
 </div>
 </div>

@@ -137,6 +137,9 @@ uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href=
 <tr class="memitem:ab8b6f2c520e82d941b473ffa7f9225b1"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic_3_01std_1_1string_01_4.html#ab8b6f2c520e82d941b473ffa7f9225b1">getValueLength</a> ()</td></tr>
 <tr class="memdesc:ab8b6f2c520e82d941b473ffa7f9225b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the actual length of the value In the case of aes encryption, this is the length of the unencrypted data.  <a href="#ab8b6f2c520e82d941b473ffa7f9225b1">More...</a><br /></td></tr>
 <tr class="separator:ab8b6f2c520e82d941b473ffa7f9225b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7cf4524119b7ccd5714b5d77e82adbb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac7cf4524119b7ccd5714b5d77e82adbb"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setMaxStringLength</b> (uint16_t length)</td></tr>
+<tr class="separator:ac7cf4524119b7ccd5714b5d77e82adbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03d9c932a2f2f11c2920651cf85fcefb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a03d9c932a2f2f11c2920651cf85fcefb"></a>
 uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic_3_01std_1_1string_01_4.html#a03d9c932a2f2f11c2920651cf85fcefb">getGattValueLength</a> ()</td></tr>
 <tr class="memdesc:a03d9c932a2f2f11c2920651cf85fcefb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the actual length of the value used by the gatt server In the case of aes encryption, this is the length of the encrypted value otherwise it's the same as the value length. <br /></td></tr>
@@ -218,6 +221,9 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getValueHandle</b
 <tr class="memitem:a71717e809ee94da5c19f52962447092f inherit pub_methods_classCharacteristicBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a71717e809ee94da5c19f52962447092f"></a>
 uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getCccdHandle</b> ()</td></tr>
 <tr class="separator:a71717e809ee94da5c19f52962447092f inherit pub_methods_classCharacteristicBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5830659bf6cfafafff58b6130c4119d inherit pub_methods_classCharacteristicBase"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab5830659bf6cfafafff58b6130c4119d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setSharedEncryptionBuffer</b> (bool val)</td></tr>
+<tr class="separator:ab5830659bf6cfafafff58b6130c4119d inherit pub_methods_classCharacteristicBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefbcb2db53ddea44dbadbc168de5465e inherit pub_methods_classCharacteristicBase"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristicBase.html#aefbcb2db53ddea44dbadbc168de5465e">setGattValueLength</a> (uint16_t length)</td></tr>
 <tr class="memdesc:aefbcb2db53ddea44dbadbc168de5465e inherit pub_methods_classCharacteristicBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the length of the value used by the gatt server In the case of aes encryption, this is the length of the encrypted value otherwise it's the same as the value length which is a fixed value for normal types (arithmetic types and strings) but has to be set for buffer values because they have dynamic length.  <a href="#aefbcb2db53ddea44dbadbc168de5465e">More...</a><br /></td></tr>
 <tr class="separator:aefbcb2db53ddea44dbadbc168de5465e inherit pub_methods_classCharacteristicBase"><td class="memSeparator" colspan="2">&#160;</td></tr>

@@ -127,11 +127,30 @@ boolean_t&#160;</td><td class="memItemRight" valign="bottom"><b>aesEncrypted</b>
 boolean_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structStatus.html#a907e936c11674ababea599c28e2a5b00">notificationPending</a>: 1</td></tr>
 <tr class="memdesc:a907e936c11674ababea599c28e2a5b00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to indicate if notification is pending to be sent once currently waiting tx operations are completed. <br /></td></tr>
 <tr class="separator:a907e936c11674ababea599c28e2a5b00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe6a72b725981f542f7477c38aa3db15"><td class="memItemLeft" align="right" valign="top">boolean_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structStatus.html#afe6a72b725981f542f7477c38aa3db15">sharedEncryptionBuffer</a>: 1</td></tr>
+<tr class="memdesc:afe6a72b725981f542f7477c38aa3db15"><td class="mdescLeft">&#160;</td><td class="mdescRight">shared encryption buffer, if false, a buffer is allocated for the characteristic, if true, the global <a class="el" href="classEncryptionBuffer.html" title="EncryptionBuffer is a byte array with header. ">EncryptionBuffer</a> is used.  <a href="#afe6a72b725981f542f7477c38aa3db15">More...</a><br /></td></tr>
+<tr class="separator:afe6a72b725981f542f7477c38aa3db15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="structStatus.html" title="Status of a Characteristic. ">Status</a> of a <a class="el" href="classCharacteristic.html" title="A default characteristic. ">Characteristic</a>. </p>
 <p>The status can be initialized, with notifications, writable, etc. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a class="anchor" id="afe6a72b725981f542f7477c38aa3db15"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">boolean_t Status::sharedEncryptionBuffer</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>shared encryption buffer, if false, a buffer is allocated for the characteristic, if true, the global <a class="el" href="classEncryptionBuffer.html" title="EncryptionBuffer is a byte array with header. ">EncryptionBuffer</a> is used. </p>
+<p>In particular, big characteristics should use the global <a class="el" href="classEncryptionBuffer.html" title="EncryptionBuffer is a byte array with header. ">EncryptionBuffer</a> </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>include/ble/<a class="el" href="cs__Characteristic_8h_source.html">cs_Characteristic.h</a></li>
 </ul>
 </div><!-- contents -->
