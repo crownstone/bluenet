@@ -1,4 +1,4 @@
-CMakeBuild.config
+/CMakeBuild.config
 CMakeBuild.config.s*
 tags
 .cproject
