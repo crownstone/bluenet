@@ -302,3 +302,6 @@ EDDYSTONE=0
 
 # The device can be nRF51822 or nRF52832_xxAA
 DEVICE=nRF52832_xxAA
+
+# Add reset counter at end of name
+CHANGE_NAME_ON_RESET=0

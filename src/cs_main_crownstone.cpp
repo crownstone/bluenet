@@ -570,7 +570,7 @@ void Crownstone::setName() {
 	uint16_t size;
 	_settings->get(CONFIG_NAME, device_name, size);
 
-#ifdef CHANGE_NAME_ON_RESET
+#if CHANGE_NAME_ON_RESET==1
 	//! get reset counter
 	uint32_t resetCounter;
 	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
