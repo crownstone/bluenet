@@ -17,32 +17,46 @@ if [ -z $BLUENET_BOOTLOADER_DIR ]; then
 	exit 1
 fi
 
-# pushd $BLUENET_DIR
+pushd $BLUENET_DIR
 
-# # check for modifications in bluenet code
-# modifications=$(git ls-files -m | wc -l)
+# check for modifications in bluenet code
+modifications=$(git ls-files -m | wc -l)
 
-# if [[ $modifications != 0 ]]; then
-# 	err "There are modified files in your bluenet code"
-# 	err "Commit the files or stash them first!!"
-# 	exit 1
-# fi
+if [[ $modifications != 0 ]]; then
+	err "There are modified files in your bluenet code"
+	err "Commit the files or stash them first!!"
+	exit 1
+fi
 
-# # check for untracked files
-# untracked=$(git ls-files --others --exclude-standard | wc -l)
+# check for untracked files
+untracked=$(git ls-files --others --exclude-standard | wc -l)
 
-# if [[ $untracked != 0 ]]; then
-# 	err "The following untracked files were found in the blunet code"
-# 	err "Make sure you didn't forget to add anything important!"
-# 	git ls-files --others --exclude-standard
-# 	info "Do you want to continue? [Y/n]"
-# 	read untracked_response
-# 	if [[ $untracked_response == "n" ]]; then
-# 		exit 1
-# 	fi
-# fi
+if [[ $untracked != 0 ]]; then
+	err "The following untracked files were found in the blunet code"
+	err "Make sure you didn't forget to add anything important!"
+	git ls-files --others --exclude-standard
+	info "Do you want to continue? [Y/n]"
+	read untracked_response
+	if [[ $untracked_response == "n" ]]; then
+		exit 1
+	fi
+fi
 
-# popd
+# check for remote updates
+git remote update
+
+# if true then there are remote updates that need to be pulled first
+if [ ! $(git rev-parse HEAD) = $(git ls-remote $(git rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1) ]; then
+	err "There are remote updates that were not yet pulled"
+	err "Are you sure you want to continue? [y/N]"
+	read update_response
+	if [[ ! $update_response == "y" ]]; then
+		info "abort"
+		exit 1
+	fi
+fi
+
+popd
 
 ############################
 ### Prepare
@@ -54,6 +68,7 @@ fi
 valid=0
 existing=0
 
+# Get old version number
 if [ -f $BLUENET_DIR/VERSION ]; then
 	version_str=`cat $BLUENET_DIR/VERSION`
 	version_list=(`echo $version_str | tr '.' ' '`)
@@ -68,6 +83,7 @@ else
 	suggested_version="1.0.0"
 fi
 
+# Ask for new version number
 while [[ $valid == 0 ]]; do
 	info "Enter a version number [$suggested_version]:"
 	read -e version
@@ -111,11 +127,21 @@ while [[ $valid == 0 ]]; do
 	fi
 done
 
+#####################################
+### Create Config file and directory
+#####################################
+
+# create directory in bluenet with new config file. copy from default and open to edit
+
 if [[ $existing == 0 ]]; then
 	log "Creating new directory: "$directory
 	mkdir $model"_"$version &> /dev/null
 
 	cp $BLUENET_DIR/CMakeBuild.config.default $path/$directory/CMakeBuild.config
+
+###############################
+### Fill Default Config Values
+###############################
 
 	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $path/$directory/CMakeBuild.config
 
@@ -145,7 +171,6 @@ else
 	err "Warn: Using existing configuration"
 fi
 
-# create directory in bluenet with new config file. copy from default and open to edit
 
 # modify paths
 export BLUENET_CONFIG_DIR=$path/$directory
@@ -157,12 +182,11 @@ export BLUENET_BIN_DIR=$BLUENET_RELEASE_DIR/bin
 ### Run
 ############################
 
-# build doc and copy to release directory
-
 ###################
 ### Config File
 ###################
 
+#create new config directory in release directory
 mkdir -p $BLUENET_RELEASE_DIR/config
 
 info "Copy configuration to release dir ..."
@@ -233,14 +257,20 @@ succ "Copy DONE"
 
 popd
 
-###################
+####################
 ### GIT release tag
-###################
+####################
 
 pushd $BLUENET_DIR
 
+info "Add release config"
+
+# add new generated config to git
+git add $path/$directory
+
 info "Create git tag for release"
 
+# if old version existed
 if [[ $version_str ]]; then
 	echo $version > VERSION
 
@@ -253,15 +283,16 @@ if [[ $version_str ]]; then
 	mv tmpfile CHANGES
 
 	log "Add to git"
-	# git add CHANGES VERSION
-	# git commit -m "Version bump to $version"
+	git add CHANGES VERSION
+	git commit -m "Version bump to $version"
 
 	log "Create tag"
-	# git tag -a -m "Tagging version $version" "v$version"
+	git tag -a -m "Tagging version $version" "v$version"
 
-	log "Push tag"
+	# log "Push tag"
 	# git push origin --tags
 else
+	# setup first time
 	echo $version > VERSION
 
 	log "Creating changes overview"
@@ -270,13 +301,13 @@ else
     echo "" >> CHANGES
 
 	log "Add to git"
-    # git add VERSION CHANGES
-    # git commit -m "Added VERSION and CHANGES files, Version bump to $version"
+    git add VERSION CHANGES
+    git commit -m "Added VERSION and CHANGES files, Version bump to $version"
 
 	log "Create tag"
-    # git tag -a -m "Tagging version $version" "v$version"
+    git tag -a -m "Tagging version $version" "v$version"
 
-	log "Push tag"
+	# log "Push tag"
     # git push origin --tags
 fi
 
