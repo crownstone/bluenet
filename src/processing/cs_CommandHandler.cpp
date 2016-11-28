@@ -13,6 +13,11 @@
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
 
+#include <cfg/cs_Boards.h>
+//#if HAS_LEDS==1
+//#include <ble/cs_Nordic.h>
+//#endif
+
 #if IS_CROWNSTONE(DEVICE_TYPE)
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
@@ -502,6 +507,36 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 	case CMD_DISCONNECT: {
 		LOGi(STR_HANDLE_COMMAND, "disconnect");
 		Nrf51822BluetoothStack::getInstance().disconnect();
+		break;
+	}
+	case CMD_SET_LED: {
+		LOGi(STR_HANDLE_COMMAND, "set led");
+
+#if HAS_LEDS==1
+		if (size != sizeof(led_message_payload_t)) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		led_message_payload_t* payload = (led_message_payload_t*) buffer;
+		uint8_t led = payload->led;
+		bool enable = payload->enable;
+
+		LOGi("set led %d %s", led, enable ? "ON" : "OFF");
+
+		uint8_t ledPin = led == 1 ? GREEN_LED : RED_LED;
+//		switch_state_t switchState = {};
+		if (enable) {
+//			switchState.pwm_state = 100;
+			nrf_gpio_pin_clear(ledPin);
+		} else {
+//			switchState.pwm_state = 10;
+			nrf_gpio_pin_set(ledPin);
+		}
+//		EventDispatcher::getInstance().dispatch(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
+#else
+		LOGe("No LEDs on this board!");
+#endif
 		break;
 	}
 #if IS_CROWNSTONE(DEVICE_TYPE)

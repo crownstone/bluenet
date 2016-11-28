@@ -27,6 +27,7 @@ enum CommandHandlerTypes {
 	CMD_VALIDATE_SETUP              = 17,    //! 0x11
 	CMD_REQUEST_SERVICE_DATA        = 18,    //! 0x12
 	CMD_DISCONNECT                  = 19,    //! 0x13
+	CMD_SET_LED                     = 20,    //! 0x14
 	CMD_TYPES
 };
 
@@ -55,3 +56,9 @@ struct __attribute__((__packed__)) keep_alive_state_message_payload_t {
 	switch_message_payload_t switchState;
 	uint16_t timeout; // timeout in seconds
 };
+
+struct __attribute__((__packed__)) led_message_payload_t {
+	uint8_t led;
+	bool enable;
+};
+

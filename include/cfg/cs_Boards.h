@@ -289,12 +289,15 @@
 
 
 #if(HARDWARE_BOARD==PCA10036 || HARDWARE_BOARD==PCA10040)
-#define LED_1                17
-#define LED_2                18
-#define LED_3                19
-#define LED_4                20
+#define PIN_GPIO_LED_1       17
+#define PIN_GPIO_LED_2       18
+#define PIN_GPIO_LED_3       19
+#define PIN_GPIO_LED_4       20
 
-#define PIN_GPIO_SWITCH      LED_1               //! show switch as LED
+#define RED_LED 			 PIN_GPIO_LED_3		//! this is p0.10 or gpio 10
+#define GREEN_LED 			 PIN_GPIO_LED_4		//! this is p0.09 or gpio 9
+
+#define PIN_GPIO_SWITCH      PIN_GPIO_LED_1      //! show switch as LED
 #define PIN_GPIO_RELAY_ON    11                  //! something unused
 #define PIN_GPIO_RELAY_OFF   12                  //! something unused
 #define PIN_AIN_CURRENT      0                   //! something unused - gpio 2
@@ -311,6 +314,8 @@
 #define VOLTAGE_AMPLIFICATION       1
 
 #define HAS_RELAY true
+
+#define HAS_LEDS 1
 #endif
 
 
@@ -353,8 +358,11 @@
 
 #if (HARDWARE_BOARD >= 1000) && (HARDWARE_BOARD <= 2000)
 
-#define RED_LED 			10					//! this is p0.10 or gpio 10
-#define GREEN_LED 			9					//! this is p0.09 or gpio 9
+#define PIN_GPIO_LED_1       9					//
+#define PIN_GPIO_LED_2      10					//
+#define RED_LED 			PIN_GPIO_LED_2		//! this is p0.10 or gpio 10
+#define GREEN_LED 			PIN_GPIO_LED_1		//! this is p0.09 or gpio 9
+#define HAS_LEDS             1
 
 #define PIN_GPIO_RX         20                  //! this is p0.20 or gpio 20
 #define PIN_GPIO_TX         19                  //! this is p0.19 or gpio 19

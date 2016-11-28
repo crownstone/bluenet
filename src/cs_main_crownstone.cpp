@@ -317,12 +317,13 @@ void Crownstone::initDrivers() {
 #endif
 
 #if HAS_LEDS==1
+	LOGd("Configure LEDs");
 	// Note: DO NOT USE THEM WHILE SCANNING OR MESHING ...
-	nrf_gpio_cfg_output(PIN_GPIO_LED_1);
-	nrf_gpio_cfg_output(PIN_GPIO_LED_2);
+	nrf_gpio_cfg_output(RED_LED);
+	nrf_gpio_cfg_output(GREEN_LED);
 	// setting the pin makes them turn off ....
-	nrf_gpio_pin_set(PIN_GPIO_LED_1);
-	nrf_gpio_pin_set(PIN_GPIO_LED_2);
+	nrf_gpio_pin_set(RED_LED);
+	nrf_gpio_pin_set(GREEN_LED);
 #endif
 }
 
