@@ -45,13 +45,16 @@ void ServiceData::updateAdvertisement() {
 		//! in case the operation mode is setup, we have a different advertisement package.
 		updateEventBitmask(SETUP_MODE_ENABLED, _operationMode == OPERATION_MODE_SETUP);
 
-		//! populate the random field. We use one random number and a uint16 couter value for the last 2 bytes.
+		//! We use one random number (only if encrypted) and a uint16 counter value for the last 2 bytes.
 		//! Counter is cheaper than random.
-		RNG::fillBuffer(&_params.rand, 1);
 		_params.counter += 1;
 
 		//! encrypt the array using the guest key ECB if encryption is enabled.
 		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
+
+			//! populate the random field.
+			RNG::fillBuffer(&_params.rand, 1);
+
 			//! encrypt the block.
 			EncryptionHandler::getInstance().encrypt(_array + 1, sizeof(_array) - 1, _encryptedParams.payload,
 			                                         sizeof(_encryptedParams.payload), GUEST, ECB_GUEST);
