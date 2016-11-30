@@ -607,9 +607,20 @@ void Nrf51822BluetoothStack::configureBleDevice(uint8_t deviceType) {
 	configureAdvertisementParameters();
 }
 
-void Nrf51822BluetoothStack::configureAdvertisementParameters() {
+void Nrf51822BluetoothStack::configureAdvertisementParameters(bool resetCounter) {
+
+	if (resetCounter) {
+		_advParamsCounter = 0;
+	}
+
 	memset(&_adv_params, 0, sizeof(_adv_params));
-	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+
+	if (++_advParamsCounter %2) {
+		_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+	} else {
+		_adv_params.type = BLE_GAP_ADV_TYPE_ADV_NONCONN_IND;
+	}
+
 	_adv_params.p_peer_addr = NULL;                   //! Undirected advertisement
 	_adv_params.fp = BLE_GAP_ADV_FP_ANY;
 	_adv_params.interval = _interval;
@@ -640,7 +651,42 @@ void Nrf51822BluetoothStack::stopAdvertising() {
 
 	BLE_CALL(sd_ble_gap_adv_stop, ());
 
+	LOGi(MSG_BLE_ADVERTISING_STOPPED);
+
 	_advertising = false;
+}
+
+void Nrf51822BluetoothStack::updateAdvertisementParameters(bool toggle) {
+	if (!_advertising)
+		//! only update if actually advertising
+		return;
+
+	if (isConnected() || isScanning()) {
+		//! skip as long as we are connected or it will interfere with connection
+		//! also skip while scanning or we will get invalid state results when stopping/starting advertisement
+		return;
+	} else {
+//		LOGi("UPDATE advertisement");
+
+		uint32_t err_code;
+		err_code = sd_ble_gap_adv_stop();
+		if (err_code == NRF_ERROR_INVALID_STATE && isScanning()) {
+			// skip update while scanning
+			LOGw("can't update while scanning");
+			return;
+		}
+		APP_ERROR_CHECK(err_code);
+
+		//! if toggle is false, advertisement should be always connectable, so reset the counter
+		//! every time
+		configureAdvertisementParameters(!toggle);
+
+		err_code = sd_ble_gap_adv_start(&_adv_params);
+		if (err_code == NRF_ERROR_INVALID_PARAM) {
+			LOGf(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
+		}
+		APP_ERROR_CHECK(err_code);
+	}
 }
 
 bool Nrf51822BluetoothStack::isAdvertising() {
@@ -1183,6 +1229,10 @@ void Nrf51822BluetoothStack::disconnect() {
 bool Nrf51822BluetoothStack::isDisconnecting() {
 		return _disconnectingInProgress;
 };
+
+bool Nrf51822BluetoothStack::isConnected() {
+	return _conn_handle != BLE_CONN_HANDLE_INVALID;
+}
 
 void Nrf51822BluetoothStack::onTxComplete(ble_evt_t * p_ble_evt) {
 	for (Service* svc: _services) {

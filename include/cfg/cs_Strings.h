@@ -125,6 +125,7 @@
 #define MSG_BLE_SOFTDEVICE_ENABLE_GAP            "Softdevice enable GAP"
 #define MSG_BLE_ADVERTISING_STARTING             "Start advertising"
 #define MSG_BLE_ADVERTISING_STARTED              "Advertising started"
+#define MSG_BLE_ADVERTISING_STOPPED              "Advertising stopped"
 #define MSG_BLE_NO_CUSTOM_SERVICES               "Services, no custom ones!"
 #define MSG_BLE_ADVERTISEMENT_TOO_BIG            "Advertisement too big"
 #define MSG_BLE_ADVERTISEMENT_CONFIG_INVALID     "Advertisement invalid config"

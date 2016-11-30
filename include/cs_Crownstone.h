@@ -51,7 +51,7 @@
  * Main functionality
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-#define CROWNSTONE_UPDATE_FREQUENCY 1 //! hz
+#define CROWNSTONE_UPDATE_FREQUENCY 2 //! hz
 
 /**
  * Crownstone encapsulates all functionality, stack, services, and configuration.

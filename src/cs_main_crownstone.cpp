@@ -719,8 +719,11 @@ void Crownstone::startUp() {
 
 void Crownstone::tick() {
 
-	//! update advertisement
+	//! update advertisement (to update service data)
 	_stack->updateAdvertisement();
+
+	//! update advertisement parameters (to improve scanning on (some) android phones)
+	_stack->updateAdvertisementParameters();
 
 	//! update temperature
 	int32_t temperature = getTemperature();

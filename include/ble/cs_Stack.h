@@ -168,6 +168,7 @@ protected:
 	ble_advdata_t                               _advdata;
 	ble_advdata_t                               _scan_resp;
 	ble_gap_adv_params_t                        _adv_params;
+	uint8_t										_advParamsCounter;
 
 	ble_advdata_manuf_data_t                    _manufac;
 	// todo: make part of DoBotsManufac (see iBeacon)
@@ -220,6 +221,8 @@ public:
 	 * In case a disconnect has been called, we cannot allow another write or we'll get an Fatal Error 8
 	 */
 	bool isDisconnecting();
+
+	bool isConnected();
 
 	/** Shutdown the BLE stack
 	 *
@@ -365,7 +368,23 @@ public:
 
 	void startAdvertising();
 
-	void configureAdvertisementParameters();
+	/**
+	 * Updates the advertisement parameters while advertising. I.e. it stops advertising, configures the parameters
+	 * and starts scanning again.
+	 *
+	 * if toggle is set to true, every time the updateAdvertisementParameters function is called, the advertisement
+	 * toggles between connectable and non-connectable
+	 * if toggle is set to false, every advertisement will be set to connectable
+	 */
+	void updateAdvertisementParameters(bool toggle = true);
+
+	/**
+	 * Configures the advertisement parameters. every time the configureAdvertisementParameters function is called,
+	 * the advertisement toggles between connectable and non-connectable.
+	 *
+	 * if resetCounter is set to true, the counter is reset and the advertisement will be set to connectable
+	 */
+	void configureAdvertisementParameters(bool resetCounter = false);
 	void configureScanResponse(uint8_t deviceType);
 	void configureBleDeviceAdvData();
 	void configureIBeaconAdvData(IBeacon* beacon);
