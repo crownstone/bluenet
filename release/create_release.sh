@@ -94,12 +94,16 @@ while [[ $valid == 0 ]]; do
 	if [[ $version =~ ^[0-9]{1,2}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
 
 		info "Select model:"
-		options=("Crownstone" "Guidestone")
+		options=("Crownstone Plug" "Crownstone Builtin" "Guidestone")
 		select opt in "${options[@]}"
 		do
 		    case $opt in
-		        "Crownstone")
-					model="crownstone"
+		        "Crownstone Plug")
+					model="crownstone_plug"
+					break
+		            ;;
+		        "Crownstone Builtin")
+					model="crownstone_builtin"
 					break
 		            ;;
 		        "Guidestone")
