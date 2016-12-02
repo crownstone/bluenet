@@ -305,3 +305,6 @@ DEVICE=nRF52832_xxAA
 
 # Add reset counter at end of name
 CHANGE_NAME_ON_RESET=0
+
+# Switches between connectable and non-connectable advertisement to improve scanning on android
+ADVERTISEMENT_IMPROVEMENT=1
