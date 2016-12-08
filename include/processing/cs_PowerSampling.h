@@ -6,6 +6,9 @@
  */
 #pragma once
 
+extern "C" {
+#include <nrf_drv_saadc.h>
+}
 #include <structs/cs_PowerSamples.h>
 #include <structs/buffer/cs_CircularBuffer.h>
 
@@ -22,7 +25,7 @@ public:
 	void stopSampling();
 
 	static void staticPowerSampleFinish(PowerSampling *ptr) {
-		ptr->powerSampleFinish();
+//		ptr->powerSampleFinish();
 	}
 
 	/** Initializes and starts the ADC, also starts interval timer.
@@ -41,7 +44,7 @@ public:
 	 *  Calculates the power usage, updates the state.
 	 *  Sends the samples if the central is subscribed for that.
 	 */
-	void powerSampleFinish();
+	void powerSampleFinish(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum);
 
 	/** Called at a short interval.
 	 *  Reads out the buffer.
@@ -62,6 +65,18 @@ public:
 //	void finished() {
 //		Timer::getInstance().start(_powerSamplingFinishTimer, 5, this);
 //	}
+
+
+	float _avgPowerDiscount;
+	float _avgZeroDiscount;
+	nrf_saadc_value_t _avgZeroVoltage;
+	nrf_saadc_value_t _avgZeroCurrent;
+	bool _avgZeroInitialized;
+	bool _avgPowerInitialized;
+	int32_t _avgPowerMiliWatt;
+	void calculateZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
+	void calculatePower(nrf_saadc_value_t* buf, size_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs);
+
 
 private:
 	PowerSampling();

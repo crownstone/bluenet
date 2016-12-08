@@ -22,8 +22,7 @@
 //}
 #endif
 
-//#define PRINT_SAMPLE_CURRENT
-//#define PRINT_POWERSAMPLING_VERBOSE
+#define PRINT_POWERSAMPLING_VERBOSE
 
 PowerSampling::PowerSampling() :
 #if (NORDIC_SDK_VERSION >= 11)
@@ -49,11 +48,17 @@ PowerSampling::PowerSampling() :
 }
 
 // adc done callback is already decoupled from adc interrupt
-void adc_done_callback() {
-	PowerSampling::getInstance().powerSampleFinish();
+void adc_done_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
+	PowerSampling::getInstance().powerSampleFinish(buf, size, bufNum);
 }
 
 void PowerSampling::init() {
+#if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_cfg_output(PIN_GPIO_LED_3);
+	nrf_gpio_cfg_output(PIN_GPIO_LED_4);
+	nrf_gpio_pin_set(PIN_GPIO_LED_3);
+	nrf_gpio_pin_set(PIN_GPIO_LED_4);
+#endif
 
 	Timer::getInstance().createSingleShot(_powerSamplingStartTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleStart);
 	Timer::getInstance().createSingleShot(_powerSamplingReadTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
@@ -67,6 +72,12 @@ void PowerSampling::init() {
 	settings.get(CONFIG_CURRENT_ZERO, &_currentZero);
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
 	settings.get(CONFIG_POWER_ZERO_AVG_WINDOW, &_zeroAvgWindow);
+	// Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
+	_avgZeroDiscount = 0.02; //! 99% of the value is influenced by the last 228 values
+	_avgPowerDiscount = 0.05; //! 99% of the value is influenced by the last 90 values
+	_avgZeroInitialized = false;
+	_avgPowerInitialized = false;
+
 
 	LOGi(FMT_INIT, "buffers");
 	uint16_t contSize = _currentSampleCircularBuf.getMaxByteSize() + _voltageSampleCircularBuf.getMaxByteSize();
@@ -200,164 +211,33 @@ void PowerSampling::powerSampleReadBuffer() {
 }
 
 
-void PowerSampling::powerSampleFinish() {
 
+
+void PowerSampling::powerSampleFinish(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
 	//! TODO: check if current and voltage samples are of equal length.
 	//! If not, one may have been cleared at some point due to too large timestamp difference.
 
-	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
+//	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
 
-	__attribute__((unused)) uint32_t currentTimestamp = 0;
-	uint32_t voltageTimestamp = 0;
-
-//#ifdef PRINT_SAMPLE_CURRENT
-//	//! Print samples
-//	currentTimestamp = 0;
-//	voltageTimestamp = 0;
-//	_log(SERIAL_DEBUG, "samples:\r\n");
-//	for (int i=0; i<_powerSamples.size(); i++) {
-//		_powerSamples.getCurrentTimestampsBuffer()->getValue(currentTimestamp, i);
-//		_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, i);
-//		_log(SERIAL_DEBUG, "%u %u %u %u,  ", currentTimestamp, (*_powerSamples.getCurrentSamplesBuffer())[i], voltageTimestamp, (*_powerSamples.getVoltageSamplesBuffer())[i]);
-//		if (!((i+1) % 3)) {
-//			_log(SERIAL_DEBUG, "\r\n");
-//		}
-//	}
-//	_log(SERIAL_DEBUG, "\r\n");
-//#endif
-
-#ifdef PRINT_SAMPLE_CURRENT
-	_log(SERIAL_DEBUG, "current samples:\r\n");
-	for (int i=0; i<_powerSamples.size(); i++) {
-		_powerSamples.getCurrentTimestampsBuffer()->getValue(currentTimestamp, i);
-		_log(SERIAL_DEBUG, "%u %u,  ", currentTimestamp, (*_powerSamples.getCurrentSamplesBuffer())[i]);
-		if (!((i+1) % 6)) {
-			_log(SERIAL_DEBUG, SERIAL_CRLF);
-		}
-	}
-	voltageTimestamp = 0;
-	_log(SERIAL_DEBUG, "\r\nvoltage samples:\r\n");
-	for (int i=0; i<_powerSamples.size(); i++) {
-		_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, i);
-		_log(SERIAL_DEBUG, "%u %u,  ", voltageTimestamp, (*_powerSamples.getVoltageSamplesBuffer())[i]);
-		if (!((i+1) % 6)) {
-			_log(SERIAL_DEBUG, SERIAL_CRLF);
-		}
-	}
-	_log(SERIAL_DEBUG, SERIAL_CRLF);
+#if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_pin_clear(PIN_GPIO_LED_3);
+#endif
+	calculateZero(buf, size, 2, 0, 1); // Takes 16 us
+#if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_pin_set(PIN_GPIO_LED_3);
+	nrf_gpio_pin_clear(PIN_GPIO_LED_4);
+#endif
+	calculatePower(buf, size, 2, 0, 1, 400, 20000); // Takes 18 us
+#if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_pin_set(PIN_GPIO_LED_4);
 #endif
 
 
+	EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMiliWatt, 4);
 
-	//! Calculate average power consumption in Watt
-
-	currentTimestamp = 0;
-	voltageTimestamp = 0;
-
-	uint16_t vMin = UINT16_MAX;
-	uint16_t vMax = 0;
-	uint16_t v;
-
-	// Calculate zero
-	for (int i=0; i<_powerSamples.size(); i++) {
-		v = (*_powerSamples.getVoltageSamplesBuffer())[i];
-		if (v > vMax) {
-			vMax = v;
-		}
-		if (v < vMin) {
-			vMin = v;
-		}
-	}
-	double vZero = (vMax + vMin) / 2.0;
-	if (_burstCount) {
-		_voltageZero = (_voltageZero * _burstCount + vZero) / (_burstCount + 1);
-		if (_burstCount < _zeroAvgWindow) {
-			_burstCount++;
-		}
-	}
-	else {
-		_voltageZero = vZero;
-		_burstCount++;
-	}
-#ifdef PRINT_DEBUG
-	LOGi("burstCount=%u vMin=%u vMax=%u vZero=%i avg=%i", _burstCount, vMin, vMax, (int)vZero, (int)_voltageZero);
-#endif
-	_currentZero = _voltageZero;
-
-	_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, 0);
-	uint32_t prevTime = voltageTimestamp;
-	uint32_t endTime = prevTime + RTC::msToTicks(20);
-	__attribute__((unused)) uint16_t vPrev = (*_powerSamples.getVoltageSamplesBuffer())[0];
-	__attribute__((unused)) int zeroCrossings = 0;
-	__attribute__((unused)) uint32_t prevZeroCrossingTime;
-
-	double tSum = 0.0;
-	double pSum = 0.0;
-	for (int i=1; i<_powerSamples.size(); i++) {
-		v = (*_powerSamples.getVoltageSamplesBuffer())[i];
-		_powerSamples.getVoltageTimestampsBuffer()->getValue(voltageTimestamp, i);
-
-//		LOGd("%u %u %u %u", vPrev, v, prevTime, voltageTimestamp);
-
-//		//! Check for zero crossing
-//		if ((vPrev < _voltageZero && v > _voltageZero) || (vPrev > _voltageZero && v < _voltageZero)) {
-//			//! Only one crossing can happen in 5ms
-//			LOGd("zero at %u", voltageTimestamp);
-//			if (zeroCrossings == 0) {
-//				zeroCrossings++;
-//				prevZeroCrossingTime = voltageTimestamp;
-//			}
-//			else if (zeroCrossings > 0 && RTC::difference(voltageTimestamp, prevZeroCrossingTime) > RTC::msToTicks(5)) {
-//				zeroCrossings++;
-//				prevZeroCrossingTime = voltageTimestamp;
-//			}
-//		}
-//
-//		//! Integrate between two zero crossings
-//		if (0 < zeroCrossings && zeroCrossings <= 1) {
-//			uint32_t dt = RTC::difference(voltageTimestamp, prevTime);
-//			double dts = dt / (double)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1); //! seconds
-//
-//			double voltage = _voltageMultiplier * (v - _voltageZero);
-//			double current = _currentMultiplier * ((*_powerSamples.getCurrentSamplesBuffer())[i] - _currentZero);
-//			LOGd("%f %f %f", voltage, current, dts);
-//			pSum += voltage * current * dts;
-//			tSum += dts;
-//		}
-
-		//! Integrate whole period, based on 50Hz (20ms)
-		if (voltageTimestamp <= endTime) {
-			uint32_t dt = RTC::difference(voltageTimestamp, prevTime);
-			double dts = dt / (double)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1); //! seconds
-
-			double voltage = _voltageMultiplier * (v - _voltageZero);
-			double current = _currentMultiplier * ((*_powerSamples.getCurrentSamplesBuffer())[i] - _currentZero);
-//			LOGd("%f %f %f", voltage, current, dts);
-			pSum += voltage * current * dts;
-			tSum += dts;
-		}
-
-
-		prevTime = voltageTimestamp;
-		vPrev = v;
-	}
-//	LOGd("pSum=%f", pSum);
-	pSum /= tSum;
-	pSum -= _powerZero;
-	int32_t avgPower = pSum * 1000; //! in mW
-
-#ifdef PRINT_POWERSAMPLING_VERBOSE
-	LOGd("pSum=%f, tSum=%f, avgPower=%i", pSum, tSum, avgPower);
-#endif
-
-	//! Only send valid updates
-//	if (zeroCrossings > 1) {
-	if (tSum > 0.0) {
-		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &avgPower, 4);
-	}
-
-	//! Start new sample after some time
-	Timer::getInstance().start(_powerSamplingStartTimerId, MS_TO_TICKS(_burstSamplingInterval), this);
+	ADC::getInstance().releaseBuffer(bufNum);
+//	//! Start new sample after some time
+//	Timer::getInstance().start(_powerSamplingStartTimerId, MS_TO_TICKS(_burstSamplingInterval), this);
 }
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
@@ -368,3 +248,73 @@ void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
 	_powerSamples.getBuffer(buffer, size);
 #endif
 }
+
+
+
+
+
+void PowerSampling::calculateZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex) {
+	nrf_saadc_value_t vMin = INT16_MAX;
+	nrf_saadc_value_t vMax = INT16_MIN;
+	nrf_saadc_value_t v;
+	for (int i=voltageIndex; i<bufSize; i+=numChannels) {
+		v = buf[i];
+		if (v > vMax) {
+			vMax = v;
+		}
+		if (v < vMin) {
+			vMin = v;
+		}
+	}
+	nrf_saadc_value_t vZero = (vMax - vMin) / 2;
+
+	//! Exponential moving average
+	if (_avgZeroInitialized) {
+		_avgZeroVoltage = (1.0 - _avgZeroDiscount) * _avgZeroVoltage + _avgZeroDiscount * vZero;
+	}
+	else {
+		_avgZeroVoltage = vZero;
+		_avgZeroInitialized = true;
+	}
+	_avgZeroCurrent = _avgZeroVoltage;
+}
+
+
+void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs) {
+	uint16_t startIndex;
+	uint16_t diffIndex;
+	if (voltageIndex < currentIndex) {
+		startIndex = voltageIndex;
+		diffIndex = currentIndex - voltageIndex;
+	}
+	else {
+		startIndex = currentIndex;
+		diffIndex = voltageIndex - currentIndex;
+	}
+
+	int64_t pSum = 0;
+	uint32_t intervalUs = sampleIntervalUs;
+	uint16_t numSamples = acPeriodUs / intervalUs; //! 20 ms
+	if (bufSize < numSamples*numChannels) {
+		//! Should have at least a whole period in a buffer!
+		return;
+	}
+	//! Power = sum(voltage * current * dt) = sum(voltage*current) * dt, since dt doesn't change
+	//! Voltage = voltageMeasured * voltageMultiplier
+	//! Current = currentMeasured * currentMultiplier
+	//! dt = sampleIntervalUs / 1000 / 1000
+	//! Power in mW = Power * 1000
+	for (int i=startIndex; i<numSamples*numChannels; i+=numChannels) {
+		pSum += buf[i] * buf[i+diffIndex]; //! 2^31 / (2^12 * 2^12) = 128 samples before it could overflow
+	}
+	int32_t powerMiliWatt = pSum * _currentMultiplier * _voltageMultiplier * intervalUs / 1000 - _powerZero;
+	if (_avgPowerInitialized) {
+		_avgPowerMiliWatt = (1.0 - _avgPowerDiscount) * _avgPowerMiliWatt + _avgPowerDiscount * powerMiliWatt;
+	}
+	else {
+		_avgPowerMiliWatt = powerMiliWatt;
+		_avgPowerInitialized = true;
+	}
+}
+
+
