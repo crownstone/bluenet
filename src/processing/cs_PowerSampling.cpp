@@ -26,42 +26,44 @@
 
 PowerSampling::PowerSampling() :
 #if (NORDIC_SDK_VERSION >= 11)
-		_powerSamplingStartTimerId(NULL),
-		_powerSamplingReadTimerId(NULL),
+//		_powerSamplingStartTimerId(NULL),
+		_powerSamplingSentDoneTimerId(NULL),
 #else
-		_powerSamplingStartTimerId(UINT32_MAX),
-		_powerSamplingReadTimerId(UINT32_MAX),
+//		_powerSamplingStartTimerId(UINT32_MAX),
+		_powerSamplingSentDoneTimerId(UINT32_MAX),
 #endif
 		_powerSamplesBuffer(NULL),
-		_currentSampleCircularBuf(POWER_SAMPLE_CONT_NUM_SAMPLES),
-		_voltageSampleCircularBuf(POWER_SAMPLE_CONT_NUM_SAMPLES),
-		_powerSamplesContMsg(NULL),
-		_powerSamplesCount(0)
+//		_currentSampleCircularBuf(POWER_SAMPLE_CONT_NUM_SAMPLES),
+//		_voltageSampleCircularBuf(POWER_SAMPLE_CONT_NUM_SAMPLES),
+		_powerSamplesContMsg(NULL)
+//		_powerSamplesCount(0)
 {
 #if (NORDIC_SDK_VERSION >= 11)
-	_powerSamplingStartTimerData = { {0} };
-	_powerSamplingStartTimerId = &_powerSamplingStartTimerData;
+//	_powerSamplingStartTimerData = { {0} };
+//	_powerSamplingStartTimerId = &_powerSamplingStartTimerData;
 	_powerSamplingReadTimerData = { {0} };
-	_powerSamplingReadTimerId = &_powerSamplingReadTimerData;
+	_powerSamplingSentDoneTimerId = &_powerSamplingReadTimerData;
 #endif
 
 }
 
 // adc done callback is already decoupled from adc interrupt
 void adc_done_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
-	PowerSampling::getInstance().powerSampleFinish(buf, size, bufNum);
+	PowerSampling::getInstance().powerSampleAdcDone(buf, size, bufNum);
 }
 
 void PowerSampling::init() {
 #if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_cfg_output(PIN_GPIO_LED_2);
 	nrf_gpio_cfg_output(PIN_GPIO_LED_3);
 	nrf_gpio_cfg_output(PIN_GPIO_LED_4);
+	nrf_gpio_pin_set(PIN_GPIO_LED_2);
 	nrf_gpio_pin_set(PIN_GPIO_LED_3);
 	nrf_gpio_pin_set(PIN_GPIO_LED_4);
 #endif
 
-	Timer::getInstance().createSingleShot(_powerSamplingStartTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleStart);
-	Timer::getInstance().createSingleShot(_powerSamplingReadTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
+//	Timer::getInstance().createSingleShot(_powerSamplingStartTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleStart);
+	Timer::getInstance().createSingleShot(_powerSamplingSentDoneTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
 
 	Settings& settings = Settings::getInstance();
 	settings.get(CONFIG_POWER_SAMPLE_BURST_INTERVAL, &_burstSamplingInterval);
@@ -73,20 +75,23 @@ void PowerSampling::init() {
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
 	settings.get(CONFIG_POWER_ZERO_AVG_WINDOW, &_zeroAvgWindow);
 	// Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
-	_avgZeroDiscount = 0.02; //! 99% of the value is influenced by the last 228 values
-	_avgPowerDiscount = 0.05; //! 99% of the value is influenced by the last 90 values
+	_avgZeroMilliDiscount = 20; //! 99% of the average is influenced by the last 228 values
+	_avgPowerMilliDiscount = 50; //! 99% of the average is influenced by the last 90 values
 	_avgZeroInitialized = false;
 	_avgPowerInitialized = false;
+	_sendingSamples = false;
 
 
 	LOGi(FMT_INIT, "buffers");
-	uint16_t contSize = _currentSampleCircularBuf.getMaxByteSize() + _voltageSampleCircularBuf.getMaxByteSize();
-	contSize += sizeof(power_samples_cont_message_t);
+//	uint16_t contSize = _currentSampleCircularBuf.getMaxByteSize() + _voltageSampleCircularBuf.getMaxByteSize();
+//	contSize += sizeof(power_samples_cont_message_t);
+	uint16_t contSize = sizeof(power_samples_cont_message_t);
 
 	uint16_t burstSize = _powerSamples.getMaxLength();
 
-	_burstCount = 0;
+//	_burstCount = 0;
 	_voltageZero = 0.0;
+	_currentZero = 0.0;
 
 	size_t size = (burstSize > contSize) ? burstSize : contSize;
 	_powerSamplesBuffer = (buffer_ptr_t) calloc(size, sizeof(uint8_t));
@@ -96,10 +101,10 @@ void PowerSampling::init() {
 
 #if CONTINUOUS_POWER_SAMPLER == 1
 	buffer_ptr_t buffer = _powerSamplesBuffer;
-	_currentSampleCircularBuf.assign(buffer, _currentSampleCircularBuf.getMaxByteSize());
-	buffer += _currentSampleCircularBuf.getMaxByteSize();
-	_voltageSampleCircularBuf.assign(buffer, _voltageSampleCircularBuf.getMaxByteSize());
-	buffer += _voltageSampleCircularBuf.getMaxByteSize();
+//	_currentSampleCircularBuf.assign(buffer, _currentSampleCircularBuf.getMaxByteSize());
+//	buffer += _currentSampleCircularBuf.getMaxByteSize();
+//	_voltageSampleCircularBuf.assign(buffer, _voltageSampleCircularBuf.getMaxByteSize());
+//	buffer += _voltageSampleCircularBuf.getMaxByteSize();
 	_powerSamplesContMsg = (power_samples_cont_message_t*) buffer;
 	buffer += sizeof(power_samples_cont_message_t);
 //	_currentSampleTimestamps.assign();
@@ -113,15 +118,15 @@ void PowerSampling::init() {
 	ADC::getInstance().init(pins, 2);
 
 #if CONTINUOUS_POWER_SAMPLER == 1
-	ADC::getInstance().setBuffers(&_currentSampleCircularBuf, 0);
-	ADC::getInstance().setBuffers(&_voltageSampleCircularBuf, 1);
+//	ADC::getInstance().setBuffers(&_currentSampleCircularBuf, 0);
+//	ADC::getInstance().setBuffers(&_voltageSampleCircularBuf, 1);
 //	ADC::getInstance().setTimestampBuffers(&_currentSampleTimestamps, 0);
 //	ADC::getInstance().setTimestampBuffers(&_voltageSampleTimestamps, 1);
 #else
-	ADC::getInstance().setBuffers(_powerSamples.getCurrentSamplesBuffer(), 0);
-	ADC::getInstance().setBuffers(_powerSamples.getVoltageSamplesBuffer(), 1);
-	ADC::getInstance().setTimestampBuffers(_powerSamples.getCurrentTimestampsBuffer(), 0);
-	ADC::getInstance().setTimestampBuffers(_powerSamples.getVoltageTimestampsBuffer(), 1);
+//	ADC::getInstance().setBuffers(_powerSamples.getCurrentSamplesBuffer(), 0);
+//	ADC::getInstance().setBuffers(_powerSamples.getVoltageSamplesBuffer(), 1);
+//	ADC::getInstance().setTimestampBuffers(_powerSamples.getCurrentTimestampsBuffer(), 0);
+//	ADC::getInstance().setTimestampBuffers(_powerSamples.getVoltageTimestampsBuffer(), 1);
 	ADC::getInstance().setDoneCallback(adc_done_callback);
 //	Timer::getInstance().start(_staticPowerSamplingStartTimer, MS_TO_TICKS(_burstSamplingInterval), this);
 #endif
@@ -133,12 +138,12 @@ void PowerSampling::startSampling() {
 #endif
 
 #if CONTINUOUS_POWER_SAMPLER == 1
-	_currentSampleCircularBuf.clear();
-	_voltageSampleCircularBuf.clear();
-	_powerSamplesCount = 0;
+//	_currentSampleCircularBuf.clear();
+//	_voltageSampleCircularBuf.clear();
+//	_powerSamplesCount = 0;
 //	_currentSampleTimestamps.clear();
 //	_voltageSampleTimestamps.clear();
-	Timer::getInstance().start(_powerSamplingReadTimerId, MS_TO_TICKS(_contSamplingInterval), this);
+//	Timer::getInstance().start(_powerSamplingReadTimerId, MS_TO_TICKS(_contSamplingInterval), this);
 #else
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
 	_powerSamples.clear();
@@ -150,94 +155,38 @@ void PowerSampling::stopSampling() {
 	// todo:
 }
 
-void PowerSampling::powerSampleReadBuffer() {
-
-	//! If one of the buffers is full, this means they're not aligned anymore: clear all.
-	if (_currentSampleCircularBuf.full() || _voltageSampleCircularBuf.full()) {
-		startSampling();
-		Timer::getInstance().start(_powerSamplingReadTimerId, MS_TO_TICKS(_contSamplingInterval), this);
-		return;
-	}
-
-	uint16_t numCurrentSamples = _currentSampleCircularBuf.size();
-	uint16_t numVoltageSamples = _voltageSampleCircularBuf.size();
-	uint16_t numSamples = (numCurrentSamples > numVoltageSamples) ? numVoltageSamples : numCurrentSamples;
-	if (numSamples > 0) {
-		uint16_t power;
-		uint16_t current;
-		uint16_t voltage;
-//		int32_t diff;
-		if (_powerSamplesCount == 0) {
-			current = _currentSampleCircularBuf.pop();
-			voltage = _voltageSampleCircularBuf.pop();
-			power = current*voltage;
-			_powerSamplesContMsg->samples[_powerSamplesCount] = power;
-//			_lastPowerSample = power;
-			numSamples--;
-			_powerSamplesCount++;
-		}
-		for (int i=0; i<numSamples; i++) {
-			current = _currentSampleCircularBuf.pop();
-			voltage = _voltageSampleCircularBuf.pop();
-			power = current*voltage;
-			_powerSamplesContMsg->samples[_powerSamplesCount] = power;
-
-//			diff = _lastPowerSample - power;
-//			_lastPowerSample = power;
-			_powerSamplesCount++;
-
-
-			if (_powerSamplesCount >= POWER_SAMPLE_CONT_NUM_SAMPLES_MSG) {
-				EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesContMsg, sizeof(power_samples_cont_message_t));
-
-#if MESHING == 1
-//				if (!nb_full()) {
-					MeshControl::getInstance().sendPowerSamplesMessage(_powerSamplesContMsg);
-					_powerSamplesCount = 0;
-//				}
-#else
-
-#ifdef PRINT_POWERSAMPLING_VERBOSE
-				LOGd("Send message of %u samples", _powerSamplesCount);
-#endif
-				_powerSamplesCount = 0;
-#endif
-			}
-		}
-
-	}
-
-	Timer::getInstance().start(_powerSamplingReadTimerId, MS_TO_TICKS(_contSamplingInterval), this);
+void PowerSampling::sentDone() {
+	_sendingSamples = false;
 }
 
 
 
 
-void PowerSampling::powerSampleFinish(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
-	//! TODO: check if current and voltage samples are of equal length.
-	//! If not, one may have been cleared at some point due to too large timestamp difference.
-
-//	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
-
+void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
 #if (HARDWARE_BOARD==PCA10040)
-	nrf_gpio_pin_clear(PIN_GPIO_LED_3);
+	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
-	calculateZero(buf, size, 2, 0, 1); // Takes 16 us
+	calculateZero(buf, size, 2, 1, 0); // Takes 23 us
 #if (HARDWARE_BOARD==PCA10040)
-	nrf_gpio_pin_set(PIN_GPIO_LED_3);
-	nrf_gpio_pin_clear(PIN_GPIO_LED_4);
+	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
-	calculatePower(buf, size, 2, 0, 1, 400, 20000); // Takes 18 us
+	calculatePower(buf, size, 2, 1, 0, CS_ADC_SAMPLE_INTERVAL_US, 20000); // Takes 17 us
 #if (HARDWARE_BOARD==PCA10040)
-	nrf_gpio_pin_set(PIN_GPIO_LED_4);
+	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
 
+	if (!_sendingSamples) {
+		copyBufferToPowerSamples(buf, size, 2, 1, 0); // Takes 2 us
+#if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
+#endif
+	}
 
-	EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMiliWatt, 4);
-
+	EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, 4);
+#if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
+#endif
 	ADC::getInstance().releaseBuffer(bufNum);
-//	//! Start new sample after some time
-//	Timer::getInstance().start(_powerSamplingStartTimerId, MS_TO_TICKS(_burstSamplingInterval), this);
 }
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
@@ -251,6 +200,54 @@ void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
 
 
 
+
+void PowerSampling::copyBufferToPowerSamples(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex) {
+#if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_pin_toggle(PIN_GPIO_LED_4);
+#endif
+	// First clear the old samples
+	// Dispatch event that samples are will be cleared
+	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
+	_powerSamples.clear();
+#if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_pin_toggle(PIN_GPIO_LED_4);
+#endif
+	// Use dummy timestamps for now, for backward compatibility
+	uint32_t startTime = RTC::getCount(); // Not really the start time
+	uint32_t dT = CS_ADC_SAMPLE_INTERVAL_US * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000 / 1000;
+
+	for (int i=0; i<bufSize; i+=numChannels) {
+		if (_powerSamples.getCurrentSamplesBuffer()->full() || _powerSamples.getVoltageSamplesBuffer()->full()) {
+			readyToSendPowerSamples();
+			return;
+		}
+		_powerSamples.getCurrentSamplesBuffer()->push(buf[i+currentIndex]);
+		_powerSamples.getVoltageSamplesBuffer()->push(buf[i+voltageIndex]);
+		if (!_powerSamples.getCurrentTimestampsBuffer()->push(startTime + (i/numChannels) * dT) || !_powerSamples.getVoltageTimestampsBuffer()->push(startTime + (i/numChannels) * dT)) {
+			_powerSamples.getCurrentSamplesBuffer()->clear();
+			_powerSamples.getVoltageSamplesBuffer()->clear();
+			return;
+		}
+	}
+#if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_pin_toggle(PIN_GPIO_LED_4);
+#endif
+	//! TODO: are we actually ready here?
+	readyToSendPowerSamples();
+#if (HARDWARE_BOARD==PCA10040)
+	nrf_gpio_pin_toggle(PIN_GPIO_LED_4);
+#endif
+}
+
+
+void PowerSampling::readyToSendPowerSamples() {
+	//! Mark that the power samples are being sent now
+	_sendingSamples = true;
+	//! Dispatch event that samples are now filled and ready to be sent
+	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
+	//! Simply use an amount of time for sending, should be event based or polling based
+	Timer::getInstance().start(_powerSamplingSentDoneTimerId, MS_TO_TICKS(_burstSamplingInterval), this);
+}
 
 
 void PowerSampling::calculateZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex) {
@@ -266,32 +263,21 @@ void PowerSampling::calculateZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint
 			vMin = v;
 		}
 	}
-	nrf_saadc_value_t vZero = (vMax - vMin) / 2;
+	nrf_saadc_value_t vZero = (vMax - vMin) / 2 + vMin;
 
 	//! Exponential moving average
 	if (_avgZeroInitialized) {
-		_avgZeroVoltage = (1.0 - _avgZeroDiscount) * _avgZeroVoltage + _avgZeroDiscount * vZero;
+		_avgZeroMilliVoltage = ((1000 - _avgZeroMilliDiscount) * _avgZeroMilliVoltage + _avgZeroMilliDiscount * vZero * 1000) / 1000;
 	}
 	else {
-		_avgZeroVoltage = vZero;
+		_avgZeroMilliVoltage = vZero*1000;
 		_avgZeroInitialized = true;
 	}
-	_avgZeroCurrent = _avgZeroVoltage;
+	_avgZeroMilliCurrent = _avgZeroMilliVoltage;
 }
 
 
 void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs) {
-	uint16_t startIndex;
-	uint16_t diffIndex;
-	if (voltageIndex < currentIndex) {
-		startIndex = voltageIndex;
-		diffIndex = currentIndex - voltageIndex;
-	}
-	else {
-		startIndex = currentIndex;
-		diffIndex = voltageIndex - currentIndex;
-	}
-
 	int64_t pSum = 0;
 	uint32_t intervalUs = sampleIntervalUs;
 	uint16_t numSamples = acPeriodUs / intervalUs; //! 20 ms
@@ -304,17 +290,18 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 	//! Current = currentMeasured * currentMultiplier
 	//! dt = sampleIntervalUs / 1000 / 1000
 	//! Power in mW = Power * 1000
-	for (int i=startIndex; i<numSamples*numChannels; i+=numChannels) {
-		pSum += buf[i] * buf[i+diffIndex]; //! 2^31 / (2^12 * 2^12) = 128 samples before it could overflow
+	for (int i=0; i<numSamples*numChannels; i+=numChannels) {
+		pSum += (buf[i+currentIndex] - _avgZeroMilliCurrent) * (buf[i+voltageIndex] - _avgZeroMilliVoltage); //! 2^63 / (2^12 * 2^12) = many many samples before it could overflow
 	}
 	int32_t powerMiliWatt = pSum * _currentMultiplier * _voltageMultiplier * intervalUs / 1000 - _powerZero;
 	if (_avgPowerInitialized) {
-		_avgPowerMiliWatt = (1.0 - _avgPowerDiscount) * _avgPowerMiliWatt + _avgPowerDiscount * powerMiliWatt;
+		_avgPowerMilliWatt = (1.0 - _avgPowerMilliDiscount) * _avgPowerMilliWatt + _avgPowerMilliDiscount * powerMiliWatt;
 	}
 	else {
-		_avgPowerMiliWatt = powerMiliWatt;
+		_avgPowerMilliWatt = powerMiliWatt;
 		_avgPowerInitialized = true;
 	}
+	_avgPowerMilliWatt = _avgZeroMilliVoltage;
 }
 
 

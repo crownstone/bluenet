@@ -61,46 +61,16 @@ public:
 	void stop();
 
 
+	/** Release a buffer, so it can be used again by the ADC.
+	 *
+	 * @param bufNum The buffer num as received in the done callback.
+	 *
+	 * @return true on success.
+	 */
 	bool releaseBuffer(uint8_t bufNum);
 
-
-	/** Set the buffers for the sample values.
-	 * To be used in case of burst sampling.
-	 * For now, these are expected to be of equal size.
-	 *
-	 * @param buffer Buffer to use.
-	 * @param pinNum Nth pin of the pin array supplied in init().
-	 *
-	 * @return true on success.
+	/** Set the callback which is called when a buffer is filled
 	 */
-	bool setBuffers(StackBuffer<uint16_t>* buffer, uint8_t pinNum);
-
-	/** Set the buffers for the sample values.
-	 * These are used in case of continuous sampling.
-	 *
-	 * @param buffer Buffer to use.
-	 * @param pinNum Nth pin of the pin array supplied in init().
-	 *
-	 * @return true on success.
-	 */
-	bool setBuffers(CircularBuffer<uint16_t>* buffer, uint8_t pinNum);
-
-//	uint16_t getLastFilledBuffer(nrf_saadc_value_t* buf) {
-//		buf = _lastFilledBuffer;
-//		return CS_ADC_BUF_SIZE;
-//	}
-
-	/** Set the buffers for the timestamps.
-	 * To be used in case of burst sampling.
-	 * For now, these are expected to be of equal size as the sample value buffers.
-	 *
-	 * @param buffer Buffer to use.
-	 * @param pinNum Nth pin of the pin array supplied in init().
-	 *
-	 * @return true on success.
-	 */
-	bool setTimestampBuffers(DifferentialBuffer<uint32_t>* buffer, uint8_t pinNum);
-
 	void setDoneCallback(adc_done_cb_t callback);
 
 	//! Function to be called from interrupt, do not do much there!
@@ -137,18 +107,8 @@ private:
 	uint8_t _currentBufInd;
 
 
-
-//	uint8_t _lastPinNum;
-//	uint16_t _sampleNum;
-
-	StackBuffer<uint16_t>* _stackBuffers[CS_ADC_MAX_PINS];
-	DifferentialBuffer<uint32_t>* _timeBuffers[CS_ADC_MAX_PINS];
-	CircularBuffer<uint16_t>* _circularBuffers[CS_ADC_MAX_PINS];
-
-//	adc_done_cb_t _doneCallback;
-
 	adc_done_cb_data_t _doneCallbackData;
 
 	//! Function to set the input pin, this can be done after each sample. Only used internally!
-	uint32_t configPin(uint8_t pin);
+	uint32_t configPin(uint8_t channal, uint8_t pin);
 };

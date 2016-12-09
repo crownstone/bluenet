@@ -30,11 +30,6 @@ ADC::ADC(): _timer(NULL)
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
 		_bufferPointers[i] = NULL;
 	}
-	for (int i=0; i<CS_ADC_MAX_PINS; i++) {
-		_stackBuffers[i] = NULL;
-		_timeBuffers[i] = NULL;
-		_circularBuffers[i] = NULL;
-	}
 	_doneCallbackData.callback = NULL;
 	_doneCallbackData.buffer = NULL;
 	_doneCallbackData.bufSize = 0;
@@ -71,7 +66,7 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
 	//! Setup timer for compare event every 100ms
 //	uint32_t ticks = nrf_drv_timer_ms_to_ticks(_timer, 100);
 	//! Setup timer for compare event every 400us
-	uint32_t ticks = nrf_drv_timer_us_to_ticks(_timer, 400);
+	uint32_t ticks = nrf_drv_timer_us_to_ticks(_timer, CS_ADC_SAMPLE_INTERVAL_US);
 //	LOGd("adc timer ticks: %u", ticks);
 	nrf_drv_timer_extended_compare(_timer, NRF_TIMER_CC_CHANNEL0, ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, false);
 //	nrf_drv_timer_extended_compare(_timer, NRF_TIMER_CC_CHANNEL0, ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
@@ -100,8 +95,8 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
 	err_code = nrf_drv_saadc_init(&adcConfig, saadc_callback);
 	APP_ERROR_CHECK(err_code);
 
-	for (int i=0; i<numPins; i++) {
-		configPin(pins[i]);
+	for (int i=0; i<_numPins; i++) {
+		configPin(i, _pins[i]);
 	}
 
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
@@ -125,8 +120,8 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
  *   - do not set the prescaler for the reference voltage, this means voltage is expected between 0 and 1.2V (VGB)
  * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
  */
-uint32_t ADC::configPin(uint8_t pinNum) {
-
+uint32_t ADC::configPin(uint8_t channelNum, uint8_t pinNum) {
+	LOGd("Configuring pin %i", pinNum);
 	ret_code_t err_code;
 
 	nrf_saadc_channel_config_t channelConfig = {
@@ -146,43 +141,10 @@ uint32_t ADC::configPin(uint8_t pinNum) {
 		.pin_n      = NRF_SAADC_INPUT_DISABLED
 	};
 
-	err_code = nrf_drv_saadc_channel_init(pinNum, &channelConfig);
+	err_code = nrf_drv_saadc_channel_init(channelNum, &channelConfig);
 	APP_ERROR_CHECK(err_code);
 
 	return 0;
-}
-
-bool ADC::setBuffers(StackBuffer<uint16_t>* buffer, uint8_t pinNum) {
-	if (pinNum >= _numPins) {
-		return false;
-	}
-#ifdef PRINT_ADC_VERBOSE
-	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
-#endif
-	_stackBuffers[pinNum] = buffer;
-	return true;
-}
-
-bool ADC::setBuffers(CircularBuffer<uint16_t>* buffer, uint8_t pinNum) {
-	if (pinNum >= _numPins) {
-		return false;
-	}
-#ifdef PRINT_ADC_VERBOSE
-	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
-#endif
-	_circularBuffers[pinNum] = buffer;
-	return true;
-}
-
-bool ADC::setTimestampBuffers(DifferentialBuffer<uint32_t>* buffer, uint8_t pinNum) {
-	if (pinNum >= _numPins) {
-		return false;
-	}
-#ifdef PRINT_ADC_VERBOSE
-	LOGd("Set buffer of pin %u at %u", pinNum, buffer);
-#endif
-	_timeBuffers[pinNum] = buffer;
-	return true;
 }
 
 void ADC::setDoneCallback(adc_done_cb_t callback) {

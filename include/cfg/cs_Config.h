@@ -108,6 +108,8 @@
 #define POWER_SAMPLE_CONT_INTERVAL               50 //! Time to next buffer read and attempt to send msg (ms)
 #define POWER_SAMPLE_CONT_NUM_SAMPLES            80 //! Number of voltage and current samples in the buffer, written by ADC, read by power service
 
+#define CS_ADC_SAMPLE_INTERVAL_US                400
+
 #define CS_ADC_MAX_PINS                          2
 #define CS_ADC_NUM_BUFFERS                       2 //! Not sure if we can have more than 2
 #define CS_ADC_BUF_SIZE                          (2*POWER_SAMPLE_BURST_NUM_SAMPLES)
