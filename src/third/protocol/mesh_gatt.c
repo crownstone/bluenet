@@ -489,6 +489,8 @@ void mesh_gatt_send_notifications()
 			// if notification sent successfully, or error other than no tx is returned
 			// remove the notification from the buffer
 			nb_pop();
+
+			m_mesh_service.notifications_pending = false;
 		}
 	}
 }
