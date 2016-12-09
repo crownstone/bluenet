@@ -99,7 +99,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 			}
 		}
 
-#ifdef PRINT_SCANRESULT_VERBOSE
+#ifdef PRINT_DEBUG
 		LOGd("replacing item at idx: %d", idx);
 #endif
 	}

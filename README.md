@@ -64,7 +64,7 @@ hardware development kit for professional use.
 
 The copyrights (2014-2016) belongs to the team of Crownstone B.V. and are provided under an noncontagious open-source license:
 
-* Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Christian Haas
+* Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas
 * Date: 27 Jan. 2014
 * Triple-licensed: LGPL v3+, Apache, MIT
 * Crownstone B.V., http://crownstone.rocks

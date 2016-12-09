@@ -47,6 +47,8 @@ public:
 
 	void turnOff();
 
+	void toggle();
+
 	void dim(uint8_t value);
 
 	void setPwm(uint8_t value);

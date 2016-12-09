@@ -38,6 +38,7 @@
 #include <processing/cs_TemperatureGuard.h>
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Watchdog.h>
+#include <processing/cs_EnOceanHandler.h>
 #endif
 
 #if BUILD_MESHING == 1
@@ -148,6 +149,7 @@ private:
 	TemperatureGuard* _temperatureGuard;
 	PowerSampling* _powerSampler;
 	Watchdog* _watchdog;
+	EnOceanHandler* _enOceanHandler;
 #endif
 
 	// services

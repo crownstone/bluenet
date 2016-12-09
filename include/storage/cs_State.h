@@ -11,6 +11,7 @@
 #include <storage/cs_CyclicStorage.h>
 #include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <processing/cs_EnOceanHandler.h>
 #include <vector>
 
 #define SWITCH_STATE_PERSISTENT
@@ -55,8 +56,9 @@ STATIC_ASSERT(sizeof(ps_state_t) <= 1024);
  */
 struct __attribute__ ((aligned (4))) ps_general_vars_t : ps_storage_base_t {
 	uint32_t operationMode;
-	uint8_t trackedDevices[sizeof(tracked_device_list_t)];
-	uint8_t scheduleList[sizeof(schedule_list_t)];
+	uint8_t trackedDevices[sizeof(tracked_device_list_t)] __attribute__ ((aligned (4)));
+	uint8_t scheduleList[sizeof(schedule_list_t)] __attribute__ ((aligned (4)));
+	uint8_t learnedSwitches[MAX_SWITCHES * sizeof(learned_enocean_t)] __attribute__ ((aligned (4)));
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct

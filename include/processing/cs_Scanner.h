@@ -17,13 +17,6 @@
 #define SCAN_FILTER_GUIDESTONE_MSK    (1 << SCAN_FILTER_GUIDESTONE_BIT)
 #define SCAN_FILTER_DOBOTS_MSK        SCAN_FILTER_CROWNSTONE_MSK | SCAN_FILTER_GUIDESTONE_MSK
 
-/** @brief Variable length data encapsulation in terms of length and pointer to data */
-typedef struct
-{
-    uint8_t     * p_data;                                         /** < Pointer to data. */
-    uint16_t      data_len;                                       /** < Length of data. */
-} data_t;
-
 /** Scanner scans for BLE devices.
  */
 class Scanner : EventListener {

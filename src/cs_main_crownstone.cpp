@@ -60,7 +60,7 @@
 
 Crownstone::Crownstone() :
 #if IS_CROWNSTONE(DEVICE_TYPE)
-	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL), _watchdog(NULL),
+	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL), _watchdog(NULL), _enOceanHandler(NULL),
 #endif
 	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
 	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
@@ -125,6 +125,8 @@ Crownstone::Crownstone() :
 	_powerSampler = &PowerSampling::getInstance();
 
 	_watchdog = &Watchdog::getInstance();
+
+	_enOceanHandler = &EnOceanHandler::getInstance();
 #endif
 
 };
@@ -308,6 +310,8 @@ void Crownstone::initDrivers() {
 
 	LOGi(FMT_INIT, "watchdog");
 	_watchdog->init();
+
+	_enOceanHandler->init();
 #endif
 
 	// init GPIOs

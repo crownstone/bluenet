@@ -23,6 +23,7 @@ enum StateTypes {
 	STATE_TEMPERATURE,                    // 0x87 - 135
 	STATE_TIME,                           // 0x88 - 136
 	STATE_FACTORY_RESET,                  // 0x89 - 137
+	STATE_LEARNED_SWITCHES,               // 0x8A - 138
 	STATE_TYPES
 };
 

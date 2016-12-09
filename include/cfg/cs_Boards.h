@@ -313,7 +313,7 @@
 //! amplification of the voltage over the shunt, to the adc input of the chip
 #define VOLTAGE_AMPLIFICATION       1
 
-#define HAS_RELAY true
+#define HAS_RELAY false
 
 #define HAS_LEDS 1
 #endif

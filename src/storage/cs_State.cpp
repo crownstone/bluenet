@@ -179,6 +179,7 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 		}
 		return error_code;
 	}
+	case STATE_LEARNED_SWITCHES:
 	default: {
 		LOGw(FMT_STATE_NOT_FOUND, type);
 		return ERR_STATE_NOT_FOUND;
@@ -236,6 +237,10 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 	}
 	case STATE_TIME: {
 		success = size == sizeof(_time);
+		break;
+	}
+	case STATE_LEARNED_SWITCHES: {
+		success = size <= MAX_SWITCHES * sizeof(learned_enocean_t);
 		break;
 	}
 	default: {
@@ -317,6 +322,11 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 		case STATE_SCHEDULE: {
 			Storage::setArray((buffer_ptr_t)target, _storageStruct.scheduleList, size);
 			savePersistentStorageItem(_storageStruct.scheduleList, size);
+			break;
+		}
+		case STATE_LEARNED_SWITCHES: {
+			Storage::setArray((buffer_ptr_t)target, _storageStruct.learnedSwitches, size);
+			savePersistentStorageItem(_storageStruct.learnedSwitches, size);
 			break;
 		}
 		case STATE_ACCUMULATED_ENERGY: {
@@ -405,6 +415,14 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			Storage::getArray(_storageStruct.scheduleList, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_STR_VAL, "schedule list", "");
+			BLEutil::printArray((buffer_ptr_t)target, size);
+#endif
+			break;
+		}
+		case STATE_LEARNED_SWITCHES: {
+			Storage::getArray(_storageStruct.learnedSwitches, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
+#ifdef PRINT_DEBUG
+			LOGd(FMT_GET_STR_VAL, "learned switches", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
 #endif
 			break;

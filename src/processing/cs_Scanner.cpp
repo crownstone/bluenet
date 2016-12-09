@@ -79,7 +79,9 @@ void Scanner::manualStartScan() {
 	_scanning = true;
 
 	if (!_stack->isScanning()) {
+#ifdef PRINT_SCANNER_VERBOSE
 		LOGi(FMT_START, "Scanner");
+#endif
 		_stack->startScanning();
 	}
 }
@@ -93,7 +95,9 @@ void Scanner::manualStopScan() {
 	_scanning = false;
 
 	if (_stack->isScanning()) {
+#ifdef PRINT_SCANNER_VERBOSE
 		LOGi(FMT_STOP, "Scanner");
+#endif
 		_stack->stopScanning();
 	}
 }
@@ -238,41 +242,6 @@ void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
 	}
 }
 
-/**
- * @brief Parses advertisement data, providing length and location of the field in case
- *        matching data is found.
- *
- * @param[in]  Type of data to be looked for in advertisement data.
- * @param[in]  Advertisement report length and pointer to report.
- * @param[out] If data type requested is found in the data report, type data length and
- *             pointer to data will be populated here.
- *
- * @retval NRF_SUCCESS if the data type is found in the report.
- * @retval NRF_ERROR_NOT_FOUND if the data type could not be found.
- */
-static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata)
-{
-    uint32_t index = 0;
-    uint8_t * p_data;
-
-    p_data = p_advdata->p_data;
-
-    while (index < p_advdata->data_len)
-    {
-        uint8_t field_length = p_data[index];
-        uint8_t field_type = p_data[index+1];
-
-        if (field_type == type)
-        {
-            p_typedata->p_data = &p_data[index+2];
-            p_typedata->data_len = field_length-1;
-            return NRF_SUCCESS;
-        }
-        index += field_length+1;
-    }
-    return NRF_ERROR_NOT_FOUND;
-}
-
 bool Scanner::isFiltered(data_t* p_adv_data) {
 	//! If we want to send filtered scans once every N times, and now is that time, then just return false
 	if (_filterSendFraction > 0 && _scanCount == 0) {
@@ -281,7 +250,7 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 
 	data_t type_data;
 
-	uint32_t err_code = adv_report_parse(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
+	uint32_t err_code = BLEutil::adv_report_parse(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
 										 p_adv_data,
 										 &type_data);
 	if (err_code == NRF_SUCCESS) {
@@ -317,7 +286,7 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 		}
 	}
 
-	err_code = adv_report_parse(BLE_GAP_AD_TYPE_SERVICE_DATA,
+	err_code = BLEutil::adv_report_parse(BLE_GAP_AD_TYPE_SERVICE_DATA,
 										 p_adv_data,
 										 &type_data);
 	if (err_code == NRF_SUCCESS) {
@@ -345,6 +314,8 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 
 	if (isScanning()) {
+
+		EventDispatcher::getInstance().dispatch(EVT_DEVICE_SCANNED, p_adv_report, sizeof(ble_gap_evt_adv_report_t));
 		//! we do active scanning, to avoid handling each device twice, only
 		//! check the scan responses (as long as we don't care about the
 		//! advertisement data)
