@@ -153,18 +153,18 @@ bool Switch::getRelayState() {
 
 void Switch::relayOn() {
 	LOGd("relayOn %u", _nextRelayVal);
-	if (Nrf51822BluetoothStack::getInstance().isScanning()) {
-		if (_nextRelayVal != SWITCH_NEXT_RELAY_VAL_NONE) {
-			_nextRelayVal = SWITCH_NEXT_RELAY_VAL_ON;
-			return;
-		}
-		//! Try again later
-		LOGd("Currently scanning, try again later");
-		_nextRelayVal = SWITCH_NEXT_RELAY_VAL_ON;
-		Timer::getInstance().start(_relayTimerId, MS_TO_TICKS(RELAY_DELAY), this);
-		Scanner::getInstance().manualStopScan(); // TODO: stop scanning via stack, let stack send out an event?
-		return;
-	}
+//	if (Nrf51822BluetoothStack::getInstance().isScanning()) {
+//		if (_nextRelayVal != SWITCH_NEXT_RELAY_VAL_NONE) {
+//			_nextRelayVal = SWITCH_NEXT_RELAY_VAL_ON;
+//			return;
+//		}
+//		//! Try again later
+//		LOGd("Currently scanning, try again later");
+//		_nextRelayVal = SWITCH_NEXT_RELAY_VAL_ON;
+//		Timer::getInstance().start(_relayTimerId, MS_TO_TICKS(RELAY_DELAY), this);
+//		Scanner::getInstance().manualStopScan(); // TODO: stop scanning via stack, let stack send out an event?
+//		return;
+//	}
 	_nextRelayVal = SWITCH_NEXT_RELAY_VAL_NONE;
 
 	uint16_t relayHighDuration;
@@ -190,18 +190,18 @@ void Switch::relayOn() {
 
 void Switch::relayOff() {
 	LOGd("relayOff %u", _nextRelayVal);
-	if (Nrf51822BluetoothStack::getInstance().isScanning()) {
-		if (_nextRelayVal != SWITCH_NEXT_RELAY_VAL_NONE) {
-			_nextRelayVal = SWITCH_NEXT_RELAY_VAL_OFF;
-			return;
-		}
-		//! Try again later
-		LOGd("Currently scanning, try again later");
-		_nextRelayVal = SWITCH_NEXT_RELAY_VAL_OFF;
-		Timer::getInstance().start(_relayTimerId, MS_TO_TICKS(RELAY_DELAY), this);
-		Scanner::getInstance().manualStopScan(); // TODO: stop scanning via stack, let stack send out an event?
-		return;
-	}
+//	if (Nrf51822BluetoothStack::getInstance().isScanning()) {
+//		if (_nextRelayVal != SWITCH_NEXT_RELAY_VAL_NONE) {
+//			_nextRelayVal = SWITCH_NEXT_RELAY_VAL_OFF;
+//			return;
+//		}
+//		//! Try again later
+//		LOGd("Currently scanning, try again later");
+//		_nextRelayVal = SWITCH_NEXT_RELAY_VAL_OFF;
+//		Timer::getInstance().start(_relayTimerId, MS_TO_TICKS(RELAY_DELAY), this);
+////		Scanner::getInstance().manualStopScan(); // TODO: stop scanning via stack, let stack send out an event?
+//		return;
+//	}
 	_nextRelayVal = SWITCH_NEXT_RELAY_VAL_NONE;
 
 	uint16_t relayHighDuration;
@@ -264,12 +264,27 @@ void Switch::turnOff() {
 #endif
 }
 
+void Switch::toggle() {
+#if HAS_RELAY
+	if (getRelayState())
+#else
+	if (getPwm())
+#endif
+	{
+		turnOff();
+	} else {
+		turnOn();
+	}
+}
+
 void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
+	case EVT_POWER_ON:
 	case EVT_TRACKED_DEVICE_IS_NEARBY: {
 		turnOn();
 		break;
 	}
+	case EVT_POWER_OFF:
 	case EVT_TRACKED_DEVICE_NOT_NEARBY: {
 		turnOff();
 		break;
