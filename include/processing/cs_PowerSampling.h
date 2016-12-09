@@ -93,7 +93,7 @@ private:
 	uint32_t _avgPowerMilliDiscount;
 	uint32_t _avgZeroMilliDiscount;
 	int32_t _avgZeroMilliVoltage;
-	nrf_saadc_value_t _avgZeroMilliCurrent;
+	int32_t _avgZeroMilliCurrent;
 	bool _avgZeroInitialized;
 	bool _avgPowerInitialized;
 	int32_t _avgPowerMilliWatt;

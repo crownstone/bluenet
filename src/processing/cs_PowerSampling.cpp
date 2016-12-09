@@ -291,17 +291,17 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 	//! dt = sampleIntervalUs / 1000 / 1000
 	//! Power in mW = Power * 1000
 	for (int i=0; i<numSamples*numChannels; i+=numChannels) {
-		pSum += (buf[i+currentIndex] - _avgZeroMilliCurrent) * (buf[i+voltageIndex] - _avgZeroMilliVoltage); //! 2^63 / (2^12 * 2^12) = many many samples before it could overflow
+		pSum += (buf[i+currentIndex] - _avgZeroMilliCurrent/1000) * (buf[i+voltageIndex] - _avgZeroMilliVoltage/1000); //! 2^63 / (2^12 * 2^12) = many many samples before it could overflow
 	}
 	int32_t powerMiliWatt = pSum * _currentMultiplier * _voltageMultiplier * intervalUs / 1000 - _powerZero;
 	if (_avgPowerInitialized) {
-		_avgPowerMilliWatt = (1.0 - _avgPowerMilliDiscount) * _avgPowerMilliWatt + _avgPowerMilliDiscount * powerMiliWatt;
+		_avgPowerMilliWatt = ((1000 - _avgPowerMilliDiscount) * _avgPowerMilliWatt + _avgPowerMilliDiscount * powerMiliWatt) / 1000;
 	}
 	else {
 		_avgPowerMilliWatt = powerMiliWatt;
 		_avgPowerInitialized = true;
 	}
-	_avgPowerMilliWatt = _avgZeroMilliVoltage;
+//	_avgPowerMilliWatt = _avgZeroMilliVoltage;
 }
 
 
