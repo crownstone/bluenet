@@ -122,11 +122,11 @@
 
 #define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
 
-#define VOLTAGE_MULTIPLIER                       2.374f
-#define CURRENT_MULTIPLIER                       0.044f
+#define VOLTAGE_MULTIPLIER                       0.20f
+#define CURRENT_MULTIPLIER                       0.0045f
 #define VOLTAGE_ZERO                             169.0f
 #define CURRENT_ZERO                             168.5f
-#define POWER_ZERO                               9.0f
+#define POWER_ZERO                               0.0f
 #define POWER_ZERO_AVG_WINDOW                    100
 
 #define PWM_PERIOD                               20000L //! Interval in us: 1/20000e-6 = 50 Hz
