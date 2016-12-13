@@ -121,7 +121,7 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
  * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
  */
 uint32_t ADC::configPin(uint8_t channelNum, uint8_t pinNum) {
-	LOGd("Configuring pin %i", pinNum);
+	LOGd("Configuring channel %i, pin %i", channelNum, pinNum);
 	ret_code_t err_code;
 
 	nrf_saadc_channel_config_t channelConfig = {

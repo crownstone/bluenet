@@ -111,8 +111,9 @@
 #define CS_ADC_SAMPLE_INTERVAL_US                400
 
 #define CS_ADC_MAX_PINS                          2
-#define CS_ADC_NUM_BUFFERS                       2 //! Not sure if we can have more than 2
+#define CS_ADC_NUM_BUFFERS                       2 //! ADC code is currently written for (max) 2
 #define CS_ADC_BUF_SIZE                          (2*POWER_SAMPLE_BURST_NUM_SAMPLES)
+//#define CS_ADC_BUF_SIZE                          (2*20000/CS_ADC_SAMPLE_INTERVAL_US)
 
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 
@@ -126,10 +127,18 @@
 
 #define VOLTAGE_MULTIPLIER                       0.20f
 #define CURRENT_MULTIPLIER                       0.0045f
-#define VOLTAGE_ZERO                             169.0f
-#define CURRENT_ZERO                             168.5f
-#define POWER_ZERO                               0.0f //! mW
+//#define VOLTAGE_ZERO                             169.0f
+#define VOLTAGE_ZERO                             2003
+//#define CURRENT_ZERO                             168.5f
+#define CURRENT_ZERO                             1997
+//#define POWER_ZERO                               0.0f
+#define POWER_ZERO                               1500 //! mW
 #define POWER_ZERO_AVG_WINDOW                    100
+// Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
+#define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            20  // Is divided by 1000, so 20 is a discount of 0.02. //! 99% of the average is influenced by the last 228 values
+#define CURRENT_ZERO_EXP_AVG_DISCOUNT            100 // Is divided by 1000, so 100 is a discount of 0.1. //! 99% of the average is influenced by the last 44 values
+#define POWER_EXP_AVG_DISCOUNT                   50  // Is divided by 1000, so 50 is a discount of 0.05. //! 99% of the average is influenced by the last 90 values
+
 
 #define PWM_PERIOD                               20000L //! Interval in us: 1/20000e-6 = 50 Hz
 

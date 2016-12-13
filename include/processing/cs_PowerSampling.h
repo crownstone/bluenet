@@ -83,24 +83,29 @@ private:
 	uint16_t _contSamplingInterval;
 	float _voltageMultiplier;
 	float _currentMultiplier;
-	float _voltageZero;
-	float _currentZero;
-	float _powerZero;
+	int32_t _voltageZero;
+	int32_t _currentZero;
+	int32_t _powerZero;
 	uint16_t _zeroAvgWindow;
 
 	bool _sendingSamples;
 
-	uint32_t _avgPowerMilliDiscount;
-	uint32_t _avgZeroMilliDiscount;
-	int32_t _avgZeroMilliVoltage;
-	int32_t _avgZeroMilliCurrent;
-	bool _avgZeroInitialized;
+	uint16_t _avgPowerDiscount;
+	uint16_t _avgZeroVoltageDiscount;
+	uint16_t _avgZeroCurrentDiscount;
 	bool _avgPowerInitialized;
-	int32_t _avgPowerMilliWatt;
+	bool _avgZeroVoltageInitialized;
+	bool _avgZeroCurrentInitialized;
+//	int64_t _avgPower; //! Used for storing and calculating the average power
+	double _avgPower; //! Used for storing and calculating the average power
+	int32_t _avgZeroCurrent;
+	int32_t _avgZeroVoltage;
+	int32_t _avgPowerMilliWatt; //! Used to send out the average power
 
 	void copyBufferToPowerSamples(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
 	void readyToSendPowerSamples();
 	void calculateZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
+	void calculateCurrentZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
 	void calculatePower(nrf_saadc_value_t* buf, size_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs);
 };
 

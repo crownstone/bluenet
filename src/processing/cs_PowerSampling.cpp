@@ -74,10 +74,12 @@ void PowerSampling::init() {
 	settings.get(CONFIG_CURRENT_ZERO, &_currentZero);
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
 	settings.get(CONFIG_POWER_ZERO_AVG_WINDOW, &_zeroAvgWindow);
-	// Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
-	_avgZeroMilliDiscount = 20; //! 99% of the average is influenced by the last 228 values
-	_avgPowerMilliDiscount = 50; //! 99% of the average is influenced by the last 90 values
-	_avgZeroInitialized = false;
+
+	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
+	_avgZeroCurrentDiscount = CURRENT_ZERO_EXP_AVG_DISCOUNT;
+	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
+	_avgZeroVoltageInitialized = false;
+	_avgZeroCurrentInitialized = false;
 	_avgPowerInitialized = false;
 	_sendingSamples = false;
 
@@ -90,8 +92,6 @@ void PowerSampling::init() {
 	uint16_t burstSize = _powerSamples.getMaxLength();
 
 //	_burstCount = 0;
-	_voltageZero = 0.0;
-	_currentZero = 0.0;
 
 	size_t size = (burstSize > contSize) ? burstSize : contSize;
 	_powerSamplesBuffer = (buffer_ptr_t) calloc(size, sizeof(uint8_t));
@@ -167,6 +167,7 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
 	calculateZero(buf, size, 2, 1, 0); // Takes 23 us
+//	calculateCurrentZero(buf, size, 2, 1, 0);
 #if (HARDWARE_BOARD==PCA10040)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
@@ -263,17 +264,36 @@ void PowerSampling::calculateZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint
 			vMin = v;
 		}
 	}
-	nrf_saadc_value_t vZero = (vMax - vMin) / 2 + vMin;
+	int32_t vZero = (vMax - vMin) / 2 + vMin;
 
 	//! Exponential moving average
-	if (_avgZeroInitialized) {
-		_avgZeroMilliVoltage = ((1000 - _avgZeroMilliDiscount) * _avgZeroMilliVoltage + _avgZeroMilliDiscount * vZero * 1000) / 1000;
+	if (_avgZeroVoltageInitialized) {
+		_avgZeroVoltage = ((1000 - _avgZeroVoltageDiscount) * _avgZeroVoltage + _avgZeroVoltageDiscount * vZero * 1000) / 1000;
 	}
 	else {
-		_avgZeroMilliVoltage = vZero*1000;
-		_avgZeroInitialized = true;
+		_avgZeroVoltage = vZero*1000;
+		_avgZeroVoltageInitialized = true;
 	}
-	_avgZeroMilliCurrent = _avgZeroMilliVoltage;
+//	_avgZeroCurrent = _avgZeroVoltage;
+	_avgZeroCurrent = _currentZero * 1000;
+}
+
+
+void PowerSampling::calculateCurrentZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex) {
+	int64_t sum = 0;
+	for (int i=currentIndex; i<bufSize; i+=numChannels) {
+		sum += buf[i];
+	}
+	int32_t cZero = sum / (bufSize / numChannels);
+
+	//! Exponential moving average
+	if (_avgZeroCurrentInitialized) {
+		_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * cZero * 1000) / 1000;
+	}
+	else {
+		_avgZeroCurrent = cZero*1000;
+		_avgZeroCurrentInitialized = true;
+	}
 }
 
 
@@ -282,26 +302,36 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 	uint32_t intervalUs = sampleIntervalUs;
 	uint16_t numSamples = acPeriodUs / intervalUs; //! 20 ms
 	if (bufSize < numSamples*numChannels) {
+		LOGe("Should have at least a whole period in a buffer!");
 		//! Should have at least a whole period in a buffer!
 		return;
 	}
-	//! Power = sum(voltage * current * dt) = sum(voltage*current) * dt, since dt doesn't change
-	//! Voltage = voltageMeasured * voltageMultiplier
-	//! Current = currentMeasured * currentMultiplier
+	//! Power = sum(voltage * current) / numSamples
+	//! Voltage = (voltageMeasured - voltageZero) * voltageMultiplier
+	//! Current = (currentMeasured - currentZero) * currentMultiplier
 	//! dt = sampleIntervalUs / 1000 / 1000
 	//! Power in mW = Power * 1000
 	for (int i=0; i<numSamples*numChannels; i+=numChannels) {
-		pSum += (buf[i+currentIndex] - _avgZeroMilliCurrent/1000) * (buf[i+voltageIndex] - _avgZeroMilliVoltage/1000); //! 2^63 / (2^12 * 2^12) = many many samples before it could overflow
+		pSum += (buf[i+currentIndex] - _avgZeroCurrent/1000) * (buf[i+voltageIndex] - _avgZeroVoltage/1000); // 2^63 / (2^12 * 2^12) = many many samples before it could overflow
 	}
-	int32_t powerMiliWatt = pSum * _currentMultiplier * _voltageMultiplier * intervalUs / 1000 - _powerZero;
+	int64_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
 	if (_avgPowerInitialized) {
-		_avgPowerMilliWatt = ((1000 - _avgPowerMilliDiscount) * _avgPowerMilliWatt + _avgPowerMilliDiscount * powerMiliWatt) / 1000;
+		//! TODO: should maybe make this an integer calculation, but that wasn't working when i tried.
+		double discount = _avgPowerDiscount / 1000.0;
+//		_avgPower = ROUNDED_DIV((100 - _avgPowerMilliDiscount) * _avgPower + _avgPowerMilliDiscount * powerMilliWatt * 1, 100); // Must be done in int64, or else it can overflow for 4000W
+//		_avgPower = ((100 - _avgPowerMilliDiscount) * _avgPower + _avgPowerMilliDiscount * powerMilliWatt * 1) / 100.0; // Must be done in int64, or else it can overflow for 4000W
+		_avgPower = ((1.0 - discount) * _avgPower + discount * powerMilliWatt * 1);
 	}
 	else {
-		_avgPowerMilliWatt = powerMiliWatt;
+		_avgPower = powerMilliWatt * 1;
 		_avgPowerInitialized = true;
 	}
-//	_avgPowerMilliWatt = _avgZeroMilliVoltage;
+//	_avgPowerMilliWatt = _avgZeroVoltage;
+//	_avgPowerMilliWatt = _avgZeroCurrent;
+//	_avgPowerMilliWatt = pSum;
+//	_avgPowerMilliWatt = powerMilliWatt;
+	_avgPowerMilliWatt = _avgPower / 1;
+//	LOGd("avgPowerMilliWatt=%i", _avgPowerMilliWatt);
 }
 
 
