@@ -442,7 +442,7 @@ void Storage::getUint8(uint32_t value, uint8_t* target, uint8_t default_value) {
 
 void Storage::setInt8(int8_t value, int32_t& target) {
 	target = value;
-	target &= 0x000000FF;
+//	target &= 0x000000FF;
 }
 
 void Storage::getInt8(int32_t value, int8_t* target, int8_t default_value) {
@@ -494,6 +494,33 @@ void Storage::getUint16(uint32_t value, uint16_t* target, uint16_t default_value
 	}
 }
 
+
+
+void Storage::setInt16(int16_t value, int32_t& target) {
+	target = value;
+}
+
+void Storage::getInt16(int32_t value, int16_t* target, int16_t default_value) {
+
+#ifdef PRINT_ITEMS
+	uint8_t* tmp = (uint8_t*)&value;
+	LOGd(FMT_RAW_VALUE, tmp[3], tmp[2], tmp[1], tmp[0]);
+#endif
+
+	if ((uint32_t)value == UINT32_MAX) {
+#ifdef PRINT_ITEMS
+		LOGd(FMT_USE_DEFAULT_VALUE);
+#endif
+		*target = default_value;
+	} else {
+		*target = value;
+
+#ifdef PRINT_ITEMS
+		LOGd(FMT_FOUND_STORED_VALUE, *target);
+#endif
+	}
+}
+
 void Storage::setUint32(uint32_t value, uint32_t& target) {
 	if (value == UINT32_MAX) {
 		LOGe("value %d too big, can only write max %d", value, INT_MAX-1);
@@ -518,6 +545,36 @@ void Storage::getUint32(uint32_t value, uint32_t* target, uint32_t default_value
 		*target = default_value;
 	} else {
 		*target = value;
+#ifdef PRINT_ITEMS
+		LOGd(FMT_FOUND_STORED_VALUE, *target);
+#endif
+	}
+}
+
+
+void Storage::setInt32(int32_t value, int32_t& target) {
+	if ((uint32_t)value == UINT32_MAX) {
+		LOGe("value %d too big, can only write max %d", value, INT_MAX-1);
+	} else {
+		target = value;
+	}
+}
+
+void Storage::getInt32(int32_t value, int32_t* target, int32_t default_value) {
+
+#ifdef PRINT_ITEMS
+	uint8_t* tmp = (uint8_t*)&value;
+	LOGd(FMT_RAW_VALUE, tmp[3], tmp[2], tmp[1], tmp[0]);
+#endif
+
+	if ((uint32_t)value == UINT32_MAX) {
+#ifdef PRINT_ITEMS
+		LOGd(FMT_USE_DEFAULT_VALUE);
+#endif
+		*target = default_value;
+	} else {
+		*target = value;
+
 #ifdef PRINT_ITEMS
 		LOGd(FMT_FOUND_STORED_VALUE, *target);
 #endif
@@ -573,11 +630,12 @@ void Storage::getFloat(float value, float* target, float default_value) {
 	BLEutil::printArray(tmp, sizeof(float));
 #endif
 
-	// check if value is equal to DBL_MAX (FFFFFFFF) which means that memory is
+	// check if value is equal to (0xFFFFFFFF) which means that memory is
 	// unassigned and value has to be ignored
 //	if (*(uint32_t*)&value == UINT32_MAX) {
 	uint8_t* byteP = (uint8_t*)&value;
 	if (byteP[0] == 0xFF && byteP[1] == 0xFF && byteP[2] == 0xFF && byteP[3] == 0xFF) {
+//	if ((uint32_t)value == UINT32_MAX) { // This does not work!
 #ifdef PRINT_ITEMS
 		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
