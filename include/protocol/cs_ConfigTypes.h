@@ -63,7 +63,6 @@ enum ConfigurationTypes {
 	CONFIG_POWER_ZERO                       = 47,     //! 0x2F
 	CONFIG_POWER_ZERO_AVG_WINDOW            = 48,     //! 0x30
 	CONFIG_MESH_ACCESS_ADDRESS				= 49,	  //! 0x31
-	CONFIG_KEEP_ALIVE_INTERVAL              = 50,     //! 0x32
 
 	CONFIG_TYPES
 };

@@ -356,6 +356,7 @@ uint 16 | delay | start scanner with delay in ms
 
 Type | Name | Description
 --- | --- | ---
+uint 8 | Action | Action, 0 = No Change, 1 = Change
 uint 8 | Switch | Switch power, 0 = OFF, 100 = FULL ON
 uint 16 | Timeout | Timeout in seconds after which the Switch should be adjusted to the Switch value
 
