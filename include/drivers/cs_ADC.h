@@ -111,4 +111,7 @@ private:
 
 	//! Function to set the input pin, this can be done after each sample. Only used internally!
 	uint32_t configPin(uint8_t channal, uint8_t pin);
+
+	//! Function that returns the adc pin number, given the AIN number
+	nrf_saadc_input_t getAdcPin(uint8_t pinNum);
 };

@@ -110,7 +110,7 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
 	return 0;
 }
 
-#define CS_ADC_PIN_P(pinNum) CONCAT_2(NRF_SAADC_INPUT_AIN, pinNum)
+//#define CS_ADC_PIN_P(pinNum) CONCAT_2(NRF_SAADC_INPUT_AIN, pinNum)
 
 /** Configure the AD converter.
  *
@@ -135,9 +135,8 @@ uint32_t ADC::configPin(uint8_t channelNum, uint8_t pinNum) {
 		.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
 		.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
 		.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
-		.pin_p      = (nrf_saadc_input_t)(pinNum+1),
-//		.pin_p      = CONCAT_2(NRF_SAADC_INPUT_AIN, pinNum),
-//		.pin_p      = nrf_drv_saadc_gpio_to_ain(_pins(pinNum)),
+//		.pin_p      = (nrf_saadc_input_t)(pinNum+1),
+		.pin_p      = getAdcPin(pinNum),
 		.pin_n      = NRF_SAADC_INPUT_DISABLED
 	};
 
@@ -145,6 +144,29 @@ uint32_t ADC::configPin(uint8_t channelNum, uint8_t pinNum) {
 	APP_ERROR_CHECK(err_code);
 
 	return 0;
+}
+
+nrf_saadc_input_t ADC::getAdcPin(uint8_t pinNum) {
+	switch (pinNum) {
+	case 0:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput0;
+	case 1:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput1;
+	case 2:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput2;
+	case 3:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput3;
+	case 4:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput4;
+	case 5:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput5;
+	case 6:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput6;
+	case 7:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput7;
+	default:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_NC;
+	}
 }
 
 void ADC::setDoneCallback(adc_done_cb_t callback) {
