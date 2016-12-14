@@ -17,7 +17,14 @@ extern "C" {
 #include "structs/buffer/cs_DifferentialBuffer.h"
 #include "cfg/cs_Config.h"
 
-typedef void (*adc_done_cb_t) (void);
+typedef void (*adc_done_cb_t) (nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum);
+
+struct adc_done_cb_data_t {
+	adc_done_cb_t callback;
+	nrf_saadc_value_t* buffer;
+	uint16_t bufSize;
+	uint8_t bufNum;
+};
 
 //#include "common/cs_Types.h"
 
@@ -53,38 +60,17 @@ public:
 	 */
 	void stop();
 
-	/** Set the buffers for the sample values.
-	 * To be used in case of burst sampling.
-	 * For now, these are expected to be of equal size.
+
+	/** Release a buffer, so it can be used again by the ADC.
 	 *
-	 * @param buffer Buffer to use.
-	 * @param pinNum Nth pin of the pin array supplied in init().
+	 * @param bufNum The buffer num as received in the done callback.
 	 *
 	 * @return true on success.
 	 */
-	bool setBuffers(StackBuffer<uint16_t>* buffer, uint8_t pinNum);
+	bool releaseBuffer(uint8_t bufNum);
 
-	/** Set the buffers for the sample values.
-	 * These are used in case of continuous sampling.
-	 *
-	 * @param buffer Buffer to use.
-	 * @param pinNum Nth pin of the pin array supplied in init().
-	 *
-	 * @return true on success.
+	/** Set the callback which is called when a buffer is filled
 	 */
-	bool setBuffers(CircularBuffer<uint16_t>* buffer, uint8_t pinNum);
-
-	/** Set the buffers for the timestamps.
-	 * To be used in case of burst sampling.
-	 * For now, these are expected to be of equal size as the sample value buffers.
-	 *
-	 * @param buffer Buffer to use.
-	 * @param pinNum Nth pin of the pin array supplied in init().
-	 *
-	 * @return true on success.
-	 */
-	bool setTimestampBuffers(DifferentialBuffer<uint32_t>* buffer, uint8_t pinNum);
-
 	void setDoneCallback(adc_done_cb_t callback);
 
 	//! Function to be called from interrupt, do not do much there!
@@ -115,18 +101,17 @@ private:
 	nrf_ppi_channel_t _ppiChannel;
 	nrf_saadc_value_t* _bufferPointers[CS_ADC_NUM_BUFFERS];
 
-//	uint8_t _lastPinNum;
-//	uint16_t _sampleNum;
+	nrf_saadc_value_t* _bufferForCallback;
+	uint8_t _lastFilledBufInd;
+	uint8_t _queuedBufInd;
+	uint8_t _currentBufInd;
 
-	StackBuffer<uint16_t>* _stackBuffers[CS_ADC_MAX_PINS];
-	DifferentialBuffer<uint32_t>* _timeBuffers[CS_ADC_MAX_PINS];
-	CircularBuffer<uint16_t>* _circularBuffers[CS_ADC_MAX_PINS];
 
-	adc_done_cb_t _doneCallback;
-
-//	bool useContinousTimer() { return !(CS_ADC_SAMPLE_RATE > (_numPins*200)); }
-	bool useContinousTimer() { return true; }
+	adc_done_cb_data_t _doneCallbackData;
 
 	//! Function to set the input pin, this can be done after each sample. Only used internally!
-	uint32_t configPin(uint8_t pin);
+	uint32_t configPin(uint8_t channal, uint8_t pin);
+
+	//! Function that returns the adc pin number, given the AIN number
+	nrf_saadc_input_t getAdcPin(uint8_t pinNum);
 };

@@ -421,10 +421,10 @@ Type nr | Type name | Payload type | Description
 42 | Low Tx Power | int 8 | Set the tx power used when in low transmission power for bonding
 43 | Voltage Multiplier | float | Set the voltage multiplier (for power measurement)
 44 | Current Multiplier | float | Set the current multiplier (for power measurement)
-45 | Voltage Zero | float | Set the voltage zero level (for power measurement)
-46 | Current Zero | float | Set the current zero level (for power measurement)
-47 | Power Zero | float | Set the power zero level (for power measurement)
-48 | Power Average Window | uint16 | The window over which the zero line of the voltage is determined
+45 | Voltage Zero | int 32 | Set the voltage zero level (for power measurement)
+46 | Current Zero | int 32 | Set the current zero level (for power measurement)
+47 | Power Zero | int 32 | Set the power zero level in mW (for power measurement)
+48 | Power Average Window | uint16 | Deprecated
 49 | <a name="mesh_access_address"></a>Mesh Access Address | uint32 | The access address of the mesh messages. This ensures that mesh messages of other groups will not interfere with your group.
 
 OpCodes:

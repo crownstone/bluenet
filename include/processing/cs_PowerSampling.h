@@ -6,6 +6,9 @@
  */
 #pragma once
 
+extern "C" {
+#include <nrf_drv_saadc.h>
+}
 #include <structs/cs_PowerSamples.h>
 #include <structs/buffer/cs_CircularBuffer.h>
 
@@ -21,10 +24,6 @@ public:
 
 	void stopSampling();
 
-	static void staticPowerSampleFinish(PowerSampling *ptr) {
-		ptr->powerSampleFinish();
-	}
-
 	/** Initializes and starts the ADC, also starts interval timer.
 	 */
 	void powerSampleFirstStart();
@@ -33,23 +32,20 @@ public:
 	 *  Called at a low interval.
 	 */
 	void startSampling();
-	static void staticPowerSampleStart(PowerSampling *ptr) {
-		ptr->startSampling();
-	}
 
 	/** Called when the sample burst is finished.
 	 *  Calculates the power usage, updates the state.
 	 *  Sends the samples if the central is subscribed for that.
 	 */
-	void powerSampleFinish();
+	void powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum);
 
 	/** Called at a short interval.
 	 *  Reads out the buffer.
 	 *  Sends the samples via notifications and/or mesh.
 	 */
-	void powerSampleReadBuffer();
+	void sentDone();
 	static void staticPowerSampleRead(PowerSampling *ptr) {
-		ptr->powerSampleReadBuffer();
+		ptr->sentDone();
 	}
 
 	/** Fill up the current curve and send it out over bluetooth
@@ -59,33 +55,27 @@ public:
 
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& size);
 
-//	void finished() {
-//		Timer::getInstance().start(_powerSamplingFinishTimer, 5, this);
-//	}
-
 private:
 	PowerSampling();
 
 #if (NORDIC_SDK_VERSION >= 11)
-	app_timer_t              _powerSamplingStartTimerData;
-	app_timer_id_t           _powerSamplingStartTimerId;
+//	app_timer_t              _powerSamplingStartTimerData;
+//	app_timer_id_t           _powerSamplingStartTimerId;
 	app_timer_t              _powerSamplingReadTimerData;
-	app_timer_id_t           _powerSamplingReadTimerId;
+	app_timer_id_t           _powerSamplingSentDoneTimerId;
 #else
-	uint32_t _powerSamplingStartTimerId;
-	uint32_t _powerSamplingReadTimerId;
+//	uint32_t _powerSamplingStartTimerId;
+	uint32_t _powerSamplingSentDoneTimerId;
 #endif
 
-	buffer_ptr_t _powerSamplesBuffer; //! Buffer that holds the data for burst or continous sampling
+	buffer_ptr_t _powerSamplesBuffer; //! Buffer that holds the data for burst or continuous sampling
 
-//	DifferentialBuffer<uint32_t> _currentSampleTimestamps;
-//	DifferentialBuffer<uint32_t> _voltageSampleTimestamps;
-	CircularBuffer<uint16_t> _currentSampleCircularBuf;
-	CircularBuffer<uint16_t> _voltageSampleCircularBuf;
+//	CircularBuffer<uint16_t> _currentSampleCircularBuf;
+//	CircularBuffer<uint16_t> _voltageSampleCircularBuf;
 	power_samples_cont_message_t* _powerSamplesContMsg;
-	uint16_t _powerSamplesCount;
+//	uint16_t _powerSamplesCount;
 //	uint16_t _lastPowerSample;
-	uint16_t _burstCount;
+//	uint16_t _burstCount;
 
 	PowerSamples _powerSamples;
 
@@ -93,9 +83,44 @@ private:
 	uint16_t _contSamplingInterval;
 	float _voltageMultiplier;
 	float _currentMultiplier;
-	float _voltageZero;
-	float _currentZero;
-	float _powerZero;
-	uint16_t _zeroAvgWindow;
+	int32_t _voltageZero;
+	int32_t _currentZero;
+	int32_t _powerZero;
+//	uint16_t _zeroAvgWindow; // No longer used
+
+	bool _sendingSamples;
+
+	uint16_t _avgZeroVoltageDiscount;
+	uint16_t _avgZeroCurrentDiscount;
+	uint16_t _avgPowerDiscount;
+	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value
+	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value
+//	int64_t _avgPower; //! Used for storing and calculating the average power
+	double _avgPower; //! Used for storing and calculating the average power
+	int32_t _avgPowerMilliWatt; //! Used to send out the average power
+
+	/** Copies the adc samples to the power samples struct, to be sent over bluetooth
+	 */
+	void copyBufferToPowerSamples(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
+
+	/** Function to be called when the power samples struct is ready to be sent over bluetooth
+	 */
+	void readyToSendPowerSamples();
+
+	/** Initialize the moving averages
+	 */
+	void initAverages();
+
+	/** Calculate the value of the zero line of the voltage samples
+	 */
+	void calculateVoltageZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
+
+	/** Calculate the value of the zero line of the current samples
+	 */
+	void calculateCurrentZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
+
+	/** Calculate the average power usage
+	 */
+	void calculatePower(nrf_saadc_value_t* buf, size_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs);
 };
 

@@ -217,15 +217,25 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 		return ERR_SUCCESS;
 	}
 
+	/////////////////////////////////////////////////
+	//// INT 32
+	/////////////////////////////////////////////////
+	case CONFIG_VOLTAGE_ZERO:
+	case CONFIG_CURRENT_ZERO:
+	case CONFIG_POWER_ZERO: {
+		if (length != 4) {
+			LOGw(FMT_ERR_EXPECTED, "int32");
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		LOGi(FMT_SET_INT_TYPE_VAL, type, *(int32_t*)payload);
+		return ERR_SUCCESS;
+	}
 
 	/////////////////////////////////////////////////
 	//// FLOAT
 	/////////////////////////////////////////////////
 	case CONFIG_VOLTAGE_MULTIPLIER:
-	case CONFIG_CURRENT_MULTIPLIER:
-	case CONFIG_VOLTAGE_ZERO:
-	case CONFIG_CURRENT_ZERO:
-	case CONFIG_POWER_ZERO: {
+	case CONFIG_CURRENT_MULTIPLIER: {
 		if (length != 4) {
 			LOGw(FMT_ERR_EXPECTED, "float");
 			return ERR_WRONG_PAYLOAD_LENGTH;
@@ -233,7 +243,6 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 		LOGi(FMT_SET_FLOAT_TYPE_VAL, type, *(float*)payload);
 		return ERR_SUCCESS;
 	}
-
 
 	/////////////////////////////////////////////////
 	//// BYTE ARRAY
@@ -348,17 +357,24 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	//// UINT 32
 	/////////////////////////////////////////////////
 	case CONFIG_PWM_PERIOD:
-	case CONFIG_MESH_ACCESS_ADDRESS:
+	case CONFIG_MESH_ACCESS_ADDRESS: {
 		return 4;
+	}
+
+	/////////////////////////////////////////////////
+	//// INT 32
+	/////////////////////////////////////////////////
+	case CONFIG_VOLTAGE_ZERO:
+	case CONFIG_CURRENT_ZERO:
+	case CONFIG_POWER_ZERO: {
+		return 4;
+	}
 
 	/////////////////////////////////////////////////
 	//// FLOAT
 	/////////////////////////////////////////////////
 	case CONFIG_VOLTAGE_MULTIPLIER:
-	case CONFIG_CURRENT_MULTIPLIER:
-	case CONFIG_VOLTAGE_ZERO:
-	case CONFIG_CURRENT_ZERO:
-	case CONFIG_POWER_ZERO: {
+	case CONFIG_CURRENT_MULTIPLIER: {
 		return 4;
 	}
 
@@ -553,15 +569,15 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		break;
 	}
 	case CONFIG_VOLTAGE_ZERO: {
-		Storage::getFloat(_storageStruct.voltageZero, (float*)target, VOLTAGE_ZERO);
+		Storage::getInt32(_storageStruct.voltageZero, (int32_t*)target, VOLTAGE_ZERO);
 		break;
 	}
 	case CONFIG_CURRENT_ZERO: {
-		Storage::getFloat(_storageStruct.currentZero, (float*)target, CURRENT_ZERO);
+		Storage::getInt32(_storageStruct.currentZero, (int32_t*)target, CURRENT_ZERO);
 		break;
 	}
 	case CONFIG_POWER_ZERO: {
-		Storage::getFloat(_storageStruct.powerZero, (float*)target, POWER_ZERO);
+		Storage::getInt32(_storageStruct.powerZero, (int32_t*)target, POWER_ZERO);
 		break;
 	}
 	case CONFIG_POWER_ZERO_AVG_WINDOW: {
@@ -768,17 +784,17 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	}
 	case CONFIG_VOLTAGE_ZERO: {
 		p_item = (uint8_t*)&_storageStruct.voltageZero;
-		Storage::setFloat(*((float*)target), _storageStruct.voltageZero);
+		Storage::setInt32(*((int32_t*)target), _storageStruct.voltageZero);
 		break;
 	}
 	case CONFIG_CURRENT_ZERO: {
 		p_item = (uint8_t*)&_storageStruct.currentZero;
-		Storage::setFloat(*((float*)target), _storageStruct.currentZero);
+		Storage::setInt32(*((int32_t*)target), _storageStruct.currentZero);
 		break;
 	}
 	case CONFIG_POWER_ZERO: {
 		p_item = (uint8_t*)&_storageStruct.powerZero;
-		Storage::setFloat(*((float*)target), _storageStruct.powerZero);
+		Storage::setInt32(*((int32_t*)target), _storageStruct.powerZero);
 		break;
 	}
 	case CONFIG_POWER_ZERO_AVG_WINDOW:{

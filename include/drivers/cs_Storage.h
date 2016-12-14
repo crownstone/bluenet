@@ -207,9 +207,9 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	float voltageMultiplier;
 	float currentMultiplier;
-	float voltageZero;
-	float currentZero;
-	float powerZero;
+	int32_t voltageZero;
+	int32_t currentZero;
+	int32_t powerZero;
 
 	// see comment at struct for flags above
 	uint32_t meshEnabled;
@@ -409,7 +409,7 @@ public:
 
 	/** Helper function to read a short (uint16_t) from the field of a struct
 	 * @value the field of the struct which should be read
-	 * @target pointer the uint16_t varaible where the value is returned
+	 * @target pointer the uint16_t variable where the value is returned
 	 * @default_value the default value if the field of the struct is empty
 	 *
 	 * In order to show that the field of the struct is empty (or unassigned)
@@ -420,6 +420,30 @@ public:
 	 * If the field is unassigned, the default value will be returned instead
 	 */
 	static void getUint16(uint32_t value, uint16_t* target, uint16_t default_value);
+
+	/** Helper function to set a signed short (int16_t) in the field of a struct
+	 * @value the value to be copied to the struct
+	 * @target pointer the field in the struct where the value should be set
+	 *
+	 * To show that a valid value was set, the last 2 bytes of the field
+	 * are set to 0
+	 */
+	static void setInt16(int16_t value, int32_t& target);
+
+	/** Helper function to read a signed short (int16_t) from the field of a struct
+	 * @value the field of the struct which should be read
+	 * @target pointer to the int16_t variable where the value is returned
+	 * @default_value the default value if the field of the struct is empty
+	 *
+	 * In order to show that the field of the struct is empty (or unassigned)
+	 * we use the fact that the last byte of the uint32_t field is set to FF.
+	 * If a value is stored, that byte will be set to 0 to show that the field
+	 * is assigned and that a valid value can be read.
+	 *
+	 * If the field is unassigned, the default value will be returned instead
+	 */
+	static void getInt16(int32_t value, int16_t* target, int16_t default_value);
+
 
 	/** Helper function to set an integer (uint32_t) in the field of a struct
 	 * @value the value to be copied to the struct
@@ -433,7 +457,7 @@ public:
 
 	/** Helper function to read an integer (uint32_t) from the field of a struct
 	 * @value the field of the struct which should be read
-	 * @target pointer the uint16_t varaible where the value is returned
+	 * @target pointer the uint32_t varaible where the value is returned
 	 * @default_value the default value if the field of the struct is empty
 	 *
 	 * To show that a valid value was set, only values up to 2^32-2 (INT_MAX -1)
@@ -443,6 +467,29 @@ public:
 	 * If the field is unassigned, the default value will be returned instead
 	 */
 	static void getUint32(uint32_t value, uint32_t* target, uint32_t default_value);
+
+	/** Helper function to set an integer (int32_t) in the field of a struct
+	 * @value the value to be copied to the struct
+	 * @target pointer to the field in the struct where the value should be set
+	 *
+	 * To show that a valid value was set, only values up to 2^32-2 (INT_MAX -1)
+	 * can be stored, while the value 2^32-1 (INT_MAX) will be used to show that
+	 * it is unassigned
+	 */
+	static void setInt32(int32_t value, int32_t& target);
+
+	/** Helper function to read an integer (int32_t) from the field of a struct
+	 * @value the field of the struct which should be read
+	 * @target pointer the int32_t variable where the value is returned
+	 * @default_value the default value if the field of the struct is empty
+	 *
+	 * To show that a valid value was set, only values up to 2^32-2 (INT_MAX -1)
+	 * can be stored, while the value 2^32-1 (INT_MAX) will be used to show that
+	 * it is unassigned
+	 *
+	 * If the field is unassigned, the default value will be returned instead
+	 */
+	static void getInt32(int32_t value, int32_t* target, int32_t default_value);
 
 	/** Helper function to set a signed byte in the field of a struct
 	 * @value the byte value to be copied to the struct
