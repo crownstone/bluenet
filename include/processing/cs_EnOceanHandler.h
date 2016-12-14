@@ -59,6 +59,8 @@ private:
 
 	uint32_t _learningStartTime;
 
+	uint32_t _lastSequenceCounter;
+
 public:
 	static EnOceanHandler& getInstance() {
 		static EnOceanHandler instance;
