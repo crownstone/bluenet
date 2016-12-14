@@ -22,6 +22,7 @@
 //}
 #endif
 
+//#define USE_LED_DEBUG
 #define PRINT_POWERSAMPLING_VERBOSE
 
 PowerSampling::PowerSampling() :
@@ -161,28 +162,28 @@ void PowerSampling::sentDone() {
 
 
 void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
-#if (HARDWARE_BOARD==PCA10040)
+#if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
 	calculateVoltageZero(buf, size, 2, 1, 0); // Takes 23 us
 //	calculateCurrentZero(buf, size, 2, 1, 0);
-#if (HARDWARE_BOARD==PCA10040)
+#if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
 	calculatePower(buf, size, 2, 1, 0, CS_ADC_SAMPLE_INTERVAL_US, 20000); // Takes 17 us
-#if (HARDWARE_BOARD==PCA10040)
+#if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
 
 	if (!_sendingSamples) {
 		copyBufferToPowerSamples(buf, size, 2, 1, 0); // Takes 2 us
-#if (HARDWARE_BOARD==PCA10040)
+#if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
 	}
 
 	EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, 4);
-#if (HARDWARE_BOARD==PCA10040)
+#if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
 	ADC::getInstance().releaseBuffer(bufNum);
@@ -201,14 +202,14 @@ void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
 
 
 void PowerSampling::copyBufferToPowerSamples(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex) {
-#if (HARDWARE_BOARD==PCA10040)
+#if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_4);
 #endif
 	// First clear the old samples
 	// Dispatch event that samples are will be cleared
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
 	_powerSamples.clear();
-#if (HARDWARE_BOARD==PCA10040)
+#if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_4);
 #endif
 	// Use dummy timestamps for now, for backward compatibility
@@ -228,12 +229,12 @@ void PowerSampling::copyBufferToPowerSamples(nrf_saadc_value_t* buf, uint16_t bu
 			return;
 		}
 	}
-#if (HARDWARE_BOARD==PCA10040)
+#if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_4);
 #endif
 	//! TODO: are we actually ready here?
 	readyToSendPowerSamples();
-#if (HARDWARE_BOARD==PCA10040)
+#if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_4);
 #endif
 }
