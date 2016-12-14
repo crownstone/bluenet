@@ -73,14 +73,12 @@ void PowerSampling::init() {
 	settings.get(CONFIG_VOLTAGE_ZERO, &_voltageZero);
 	settings.get(CONFIG_CURRENT_ZERO, &_currentZero);
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
-	settings.get(CONFIG_POWER_ZERO_AVG_WINDOW, &_zeroAvgWindow);
+//	settings.get(CONFIG_POWER_ZERO_AVG_WINDOW, &_zeroAvgWindow); // No longer used
 
+	initAverages();
 	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
 	_avgZeroCurrentDiscount = CURRENT_ZERO_EXP_AVG_DISCOUNT;
 	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
-	_avgZeroVoltageInitialized = false;
-	_avgZeroCurrentInitialized = false;
-	_avgPowerInitialized = false;
 	_sendingSamples = false;
 
 
@@ -166,7 +164,7 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 #if (HARDWARE_BOARD==PCA10040)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
-	calculateZero(buf, size, 2, 1, 0); // Takes 23 us
+	calculateVoltageZero(buf, size, 2, 1, 0); // Takes 23 us
 //	calculateCurrentZero(buf, size, 2, 1, 0);
 #if (HARDWARE_BOARD==PCA10040)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
@@ -250,8 +248,14 @@ void PowerSampling::readyToSendPowerSamples() {
 	Timer::getInstance().start(_powerSamplingSentDoneTimerId, MS_TO_TICKS(_burstSamplingInterval), this);
 }
 
+void PowerSampling::initAverages() {
+	_avgZeroVoltage = _voltageZero * 1000;
+	_avgZeroCurrent = _currentZero * 1000;
+	_avgPower = 0.0;
+}
 
-void PowerSampling::calculateZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex) {
+
+void PowerSampling::calculateVoltageZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex) {
 	nrf_saadc_value_t vMin = INT16_MAX;
 	nrf_saadc_value_t vMax = INT16_MIN;
 	nrf_saadc_value_t v;
@@ -267,15 +271,7 @@ void PowerSampling::calculateZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint
 	int32_t vZero = (vMax - vMin) / 2 + vMin;
 
 	//! Exponential moving average
-	if (_avgZeroVoltageInitialized) {
-		_avgZeroVoltage = ((1000 - _avgZeroVoltageDiscount) * _avgZeroVoltage + _avgZeroVoltageDiscount * vZero * 1000) / 1000;
-	}
-	else {
-		_avgZeroVoltage = vZero*1000;
-		_avgZeroVoltageInitialized = true;
-	}
-//	_avgZeroCurrent = _avgZeroVoltage;
-	_avgZeroCurrent = _currentZero * 1000;
+	_avgZeroVoltage = ((1000 - _avgZeroVoltageDiscount) * _avgZeroVoltage + _avgZeroVoltageDiscount * vZero * 1000) / 1000;
 }
 
 
@@ -287,13 +283,7 @@ void PowerSampling::calculateCurrentZero(nrf_saadc_value_t* buf, uint16_t bufSiz
 	int32_t cZero = sum / (bufSize / numChannels);
 
 	//! Exponential moving average
-	if (_avgZeroCurrentInitialized) {
-		_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * cZero * 1000) / 1000;
-	}
-	else {
-		_avgZeroCurrent = cZero*1000;
-		_avgZeroCurrentInitialized = true;
-	}
+	_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * cZero * 1000) / 1000;
 }
 
 
@@ -315,23 +305,19 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 		pSum += (buf[i+currentIndex] - _avgZeroCurrent/1000) * (buf[i+voltageIndex] - _avgZeroVoltage/1000); // 2^63 / (2^12 * 2^12) = many many samples before it could overflow
 	}
 	int64_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
-	if (_avgPowerInitialized) {
-		//! TODO: should maybe make this an integer calculation, but that wasn't working when i tried.
-		double discount = _avgPowerDiscount / 1000.0;
-//		_avgPower = ROUNDED_DIV((100 - _avgPowerMilliDiscount) * _avgPower + _avgPowerMilliDiscount * powerMilliWatt * 1, 100); // Must be done in int64, or else it can overflow for 4000W
-//		_avgPower = ((100 - _avgPowerMilliDiscount) * _avgPower + _avgPowerMilliDiscount * powerMilliWatt * 1) / 100.0; // Must be done in int64, or else it can overflow for 4000W
-		_avgPower = ((1.0 - discount) * _avgPower + discount * powerMilliWatt * 1);
-	}
-	else {
-		_avgPower = powerMilliWatt * 1;
-		_avgPowerInitialized = true;
-	}
+
+	//! Exponential moving average
+	//! TODO: should maybe make this an integer calculation, but that wasn't working when i tried.
+	double discount = _avgPowerDiscount / 1000.0;
+//	_avgPower = ROUNDED_DIV((100 - _avgPowerMilliDiscount) * _avgPower + _avgPowerMilliDiscount * powerMilliWatt * 1, 100); // Must be done in int64, or else it can overflow for 4000W
+//	_avgPower = ((100 - _avgPowerMilliDiscount) * _avgPower + _avgPowerMilliDiscount * powerMilliWatt * 1) / 100.0; // Must be done in int64, or else it can overflow for 4000W
+	_avgPower = ((1.0 - discount) * _avgPower + discount * powerMilliWatt * 1);
+
 //	_avgPowerMilliWatt = _avgZeroVoltage;
 //	_avgPowerMilliWatt = _avgZeroCurrent;
 //	_avgPowerMilliWatt = pSum;
 //	_avgPowerMilliWatt = powerMilliWatt;
 	_avgPowerMilliWatt = _avgPower / 1;
-//	LOGd("avgPowerMilliWatt=%i", _avgPowerMilliWatt);
 }
 
 

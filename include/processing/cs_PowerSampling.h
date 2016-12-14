@@ -68,7 +68,7 @@ private:
 	uint32_t _powerSamplingSentDoneTimerId;
 #endif
 
-	buffer_ptr_t _powerSamplesBuffer; //! Buffer that holds the data for burst or continous sampling
+	buffer_ptr_t _powerSamplesBuffer; //! Buffer that holds the data for burst or continuous sampling
 
 //	CircularBuffer<uint16_t> _currentSampleCircularBuf;
 //	CircularBuffer<uint16_t> _voltageSampleCircularBuf;
@@ -86,26 +86,41 @@ private:
 	int32_t _voltageZero;
 	int32_t _currentZero;
 	int32_t _powerZero;
-	uint16_t _zeroAvgWindow;
+//	uint16_t _zeroAvgWindow; // No longer used
 
 	bool _sendingSamples;
 
-	uint16_t _avgPowerDiscount;
 	uint16_t _avgZeroVoltageDiscount;
 	uint16_t _avgZeroCurrentDiscount;
-	bool _avgPowerInitialized;
-	bool _avgZeroVoltageInitialized;
-	bool _avgZeroCurrentInitialized;
+	uint16_t _avgPowerDiscount;
+	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value
+	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value
 //	int64_t _avgPower; //! Used for storing and calculating the average power
 	double _avgPower; //! Used for storing and calculating the average power
-	int32_t _avgZeroCurrent;
-	int32_t _avgZeroVoltage;
 	int32_t _avgPowerMilliWatt; //! Used to send out the average power
 
+	/** Copies the adc samples to the power samples struct, to be sent over bluetooth
+	 */
 	void copyBufferToPowerSamples(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
+
+	/** Function to be called when the power samples struct is ready to be sent over bluetooth
+	 */
 	void readyToSendPowerSamples();
-	void calculateZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
+
+	/** Initialize the moving averages
+	 */
+	void initAverages();
+
+	/** Calculate the value of the zero line of the voltage samples
+	 */
+	void calculateVoltageZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
+
+	/** Calculate the value of the zero line of the current samples
+	 */
 	void calculateCurrentZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
+
+	/** Calculate the average power usage
+	 */
 	void calculatePower(nrf_saadc_value_t* buf, size_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs);
 };
 
