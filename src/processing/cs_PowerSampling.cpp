@@ -164,8 +164,8 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 #if (HARDWARE_BOARD==PCA10040)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
-	calculateVoltageZero(buf, size, 2, 1, 0); // Takes 23 us
-//	calculateCurrentZero(buf, size, 2, 1, 0);
+	calculateVoltageZero(buf, size, 2, 1, 0, CS_ADC_SAMPLE_INTERVAL_US, 20000); // Takes 23 us
+	calculateCurrentZero(buf, size, 2, 1, 0, CS_ADC_SAMPLE_INTERVAL_US, 20000);
 #if (HARDWARE_BOARD==PCA10040)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
@@ -255,32 +255,58 @@ void PowerSampling::initAverages() {
 }
 
 
-void PowerSampling::calculateVoltageZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex) {
-	nrf_saadc_value_t vMin = INT16_MAX;
-	nrf_saadc_value_t vMax = INT16_MIN;
-	nrf_saadc_value_t v;
-	for (int i=voltageIndex; i<bufSize; i+=numChannels) {
-		v = buf[i];
-		if (v > vMax) {
-			vMax = v;
-		}
-		if (v < vMin) {
-			vMin = v;
-		}
+void PowerSampling::calculateVoltageZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs) {
+	//! Assume zero line is the average of all samples
+	uint16_t numSamples = acPeriodUs / sampleIntervalUs; //! 20 one AC period
+	int64_t sum = 0;
+	for (int i=voltageIndex; i<numSamples*numChannels; i+=numChannels) {
+		sum += buf[i];
 	}
-	int32_t vZero = (vMax - vMin) / 2 + vMin;
+	int32_t vZero = sum / numSamples;
+
+//	//! Assume zero line is in between the min and max values
+//	nrf_saadc_value_t vMin = INT16_MAX;
+//	nrf_saadc_value_t vMax = INT16_MIN;
+//	nrf_saadc_value_t v;
+//	for (int i=voltageIndex; i<bufSize; i+=numChannels) {
+//		v = buf[i];
+//		if (v > vMax) {
+//			vMax = v;
+//		}
+//		if (v < vMin) {
+//			vMin = v;
+//		}
+//	}
+//	int32_t vZero = (vMax - vMin) / 2 + vMin;
 
 	//! Exponential moving average
 	_avgZeroVoltage = ((1000 - _avgZeroVoltageDiscount) * _avgZeroVoltage + _avgZeroVoltageDiscount * vZero * 1000) / 1000;
 }
 
 
-void PowerSampling::calculateCurrentZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex) {
+void PowerSampling::calculateCurrentZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs) {
+	//! Assume zero line is the average of all samples
+	uint16_t numSamples = acPeriodUs / sampleIntervalUs; //! 20 one AC period
 	int64_t sum = 0;
-	for (int i=currentIndex; i<bufSize; i+=numChannels) {
+	for (int i=currentIndex; i<numSamples*numChannels; i+=numChannels) {
 		sum += buf[i];
 	}
-	int32_t cZero = sum / (bufSize / numChannels);
+	int32_t cZero = sum / numSamples;
+
+//	//! Assume zero line is in between the min and max values
+//	nrf_saadc_value_t cMin = INT16_MAX;
+//	nrf_saadc_value_t cMax = INT16_MIN;
+//	nrf_saadc_value_t c;
+//	for (int i=currentIndex; i<bufSize; i+=numChannels) {
+//		c = buf[i];
+//		if (c > cMax) {
+//			cMax = c;
+//		}
+//		if (c < cMin) {
+//			cMin = c;
+//		}
+//	}
+//	int32_t cZero = (cMax - cMin) / 2 + cMin;
 
 	//! Exponential moving average
 	_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * cZero * 1000) / 1000;
@@ -290,7 +316,7 @@ void PowerSampling::calculateCurrentZero(nrf_saadc_value_t* buf, uint16_t bufSiz
 void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs) {
 	int64_t pSum = 0;
 	uint32_t intervalUs = sampleIntervalUs;
-	uint16_t numSamples = acPeriodUs / intervalUs; //! 20 ms
+	uint16_t numSamples = acPeriodUs / intervalUs; //! one AC period
 	if (bufSize < numSamples*numChannels) {
 		LOGe("Should have at least a whole period in a buffer!");
 		//! Should have at least a whole period in a buffer!
