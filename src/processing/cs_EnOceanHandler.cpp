@@ -15,7 +15,7 @@
 
 #define TOGGLES 4
 #define DEBOUNCE_TIMEOUT 5000 // 5 seconds
-#define LEARNING_RSSI_THRESHOLD -60
+#define LEARNING_RSSI_THRESHOLD -50
 
 #if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _appTimerData = { {0} };
@@ -37,7 +37,7 @@ void toggle_power(void * p_context) {
 }
 
 EnOceanHandler::EnOceanHandler() :
-		_learnedSwitches({}), _learningStartTime(0)
+		_learnedSwitches({}), _learningStartTime(0), _lastSequenceCounter(0)
 {
 	EventDispatcher::getInstance().addListener(this);
 }
@@ -268,72 +268,55 @@ bool EnOceanHandler::learnEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 		return false;
 	}
 
-	_learningStartTime = RTC::now();
-
 	commissioning_telegram_t* telegram = (commissioning_telegram_t*) p_data->p_data;
+	if (telegram->seqCounter > _lastSequenceCounter) {
 
-	learned_enocean_t* enOcean = findEnOcean(adrs_ptr);
-//	if (enOcean != NULL) {
-//		LOGi("found existing, overwrite...");
-//
-//		if (memcmp(enOcean->securityKey, telegram->securityKey, 16) != 0) {
-//			memcpy(enOcean->securityKey, telegram->securityKey, 16);
-//			save();
-//		}
-//
-//#ifdef ENOCEAN_VERBOSE
-//		_log(SERIAL_INFO, "security key: ");
-//		BLEutil::printArray(telegram->securityKey, 16);
-//#endif
-//
-//		return true;
-//	}
-	if (enOcean != NULL) {
-		LOGi("found existing, unlearn...");
+		_lastSequenceCounter = telegram->seqCounter;
+		_learningStartTime = RTC::now();
 
-		memset(enOcean, 0, sizeof(learned_enocean_t));
-		save();
+		learned_enocean_t* enOcean = findEnOcean(adrs_ptr);
 
-		uint8_t count = TOGGLES;
-		toggle_power(&count);
+		if (enOcean != NULL) {
+			LOGi("found existing, unlearn...");
+
+			memset(enOcean, 0, sizeof(learned_enocean_t));
+			save();
+
+			uint8_t count = TOGGLES;
+			toggle_power(&count);
+
+		} else {
+			enOcean = newEnOcean();
+			if (enOcean != NULL) {
+
+				LOGi("add new...");
+				memcpy(enOcean->addr, adrs_ptr, BLE_GAP_ADDR_LEN);
+				memcpy(enOcean->securityKey, telegram->securityKey, 16);
+				save();
 
 #ifdef ENOCEAN_VERBOSE
-		_log(SERIAL_INFO, "security key: ");
-		BLEutil::printArray(telegram->securityKey, 16);
+				_log(SERIAL_INFO, "security key: ");
+				BLEutil::printArray(telegram->securityKey, 16);
 #endif
+
+				uint8_t count = 0;
+				toggle_power(&count);
+
+			} else {
+				LOGe("no more space...");
+
+				return false;
+			}
+		}
 
 		return true;
+
+	} else {
+		LOGw("Ignore! old seqCounter: %d", telegram->seqCounter);
 	}
-
-	enOcean = newEnOcean();
-	if (enOcean != NULL) {
-
-		LOGi("add new...");
-		memcpy(enOcean->addr, adrs_ptr, BLE_GAP_ADDR_LEN);
-		memcpy(enOcean->securityKey, telegram->securityKey, 16);
-		save();
-
-#ifdef ENOCEAN_VERBOSE
-		_log(SERIAL_INFO, "security key: ");
-		BLEutil::printArray(telegram->securityKey, 16);
-#endif
-
-		uint8_t count = 0;
-		toggle_power(&count);
-
-		return true;
-	}
-
-#ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "security key: ");
-	BLEutil::printArray(telegram->securityKey, 16);
-#endif
-
-	LOGe("no more space...");
 
 	return false;
 }
-
 
 bool EnOceanHandler::triggerEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 
@@ -342,45 +325,66 @@ bool EnOceanHandler::triggerEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 //		return false;
 //	}
 
+	bool success = false;
+
 	data_telegram_t* telegram = (data_telegram_t*) p_data->p_data;
 
-	// authenticate
-	bool success = authenticate(adrs_ptr, telegram);
+//	LOGi("telegram->seqCounter: %d", telegram->seqCounter);
 
-	if (success) {
-		LOGi("telegram->switchState: %d", telegram->switchState);
+	if (telegram->seqCounter > _lastSequenceCounter) {
 
-		bool buttonA = BLEutil::isBitSet(telegram->switchState, PIN_A0);
-		bool buttonB = BLEutil::isBitSet(telegram->switchState, PIN_A1);
-		bool buttonC = BLEutil::isBitSet(telegram->switchState, PIN_B0);
-		bool buttonD = BLEutil::isBitSet(telegram->switchState, PIN_B1);
+		// authenticate
+		bool success = authenticate(adrs_ptr, telegram);
+//		bool success = true;
 
-		LOGi("%s", BLEutil::isBitSet(telegram->switchState, PIN_ACTION_TYPE) ? "pressed" : "released");
-		if (buttonA) {
-			LOGi("  Button A");
-		}
-		if (buttonB) {
-			LOGi("  Button B");
-		}
-		if (buttonC) {
-			LOGi("  Button C");
-		}
-		if (buttonD) {
-			LOGi("  Button D");
+		if (success) {
+//			LOGi("telegram->switchState: %d", telegram->switchState);
+
+			bool pressed = BLEutil::isBitSet(telegram->switchState, PIN_ACTION_TYPE);
+			bool buttonA = BLEutil::isBitSet(telegram->switchState, PIN_A0);
+			bool buttonB = BLEutil::isBitSet(telegram->switchState, PIN_A1);
+			bool buttonC = BLEutil::isBitSet(telegram->switchState, PIN_B0);
+			bool buttonD = BLEutil::isBitSet(telegram->switchState, PIN_B1);
+
+			LOGi("%s", pressed ? "pressed" : "released");
+			if (buttonA) {
+				LOGi("  Button A");
+			}
+			if (buttonB) {
+				LOGi("  Button B");
+			}
+			if (buttonC) {
+				LOGi("  Button C");
+			}
+			if (buttonD) {
+				LOGi("  Button D");
+			}
+
+			if (!pressed && (telegram->seqCounter == _lastSequenceCounter + 1)) {
+				// if the current is a release button event and we already handled
+				// the last message, we can ignore this one
+				LOGi("Ignore! Press already handled");
+
+			} else {
+
+				if ((buttonA || buttonC)) {
+		//			EventDispatcher::getInstance().dispatch(EVT_POWER_ON);
+					Switch::getInstance().turnOn();
+				} else if ((buttonB || buttonD)) {
+		//			EventDispatcher::getInstance().dispatch(EVT_POWER_OFF);
+					Switch::getInstance().turnOff();
+				}
+			}
+
 		}
 
-		if (buttonA || buttonC) {
-//			EventDispatcher::getInstance().dispatch(EVT_POWER_ON);
-			Switch::getInstance().turnOn();
-		} else if (buttonB || buttonD) {
-//			EventDispatcher::getInstance().dispatch(EVT_POWER_OFF);
-			Switch::getInstance().turnOff();
-		}
+		_lastSequenceCounter = telegram->seqCounter;
 
-		return true;
 	} else {
-		return false;
+		LOGw("Ignore! old seqCounter: %d", telegram->seqCounter);
 	}
+
+	return success;
 }
 
 bool EnOceanHandler::parseAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
@@ -401,7 +405,7 @@ bool EnOceanHandler::parseAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) 
 		if (companyIdentifier == ENOCEAN_COMPANY_ID)
 		{
 			LOGi("rssi: %d", p_adv_report->rssi);
-			LOGi("type_data.data_len: %d", type_data.data_len);
+//			LOGi("type_data.data_len: %d", type_data.data_len);
 			if (type_data.data_len == 22 && p_adv_report->rssi > LEARNING_RSSI_THRESHOLD) {
 				// learn
 				learnEnOcean(p_adv_report->peer_addr.addr, &type_data);

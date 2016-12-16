@@ -34,13 +34,13 @@
 #define PCA10036             40
 #define PCA10040             41
 
-// CROWNSTONE PLUGS
+// CROWNSTONE BUILTINS
 #define ACR01B1A             1000
 #define ACR01B1B             1001
 #define ACR01B1C             1002
 #define ACR01B1D             1003
 
-// CROWNSTONE BUILTINS
+// CROWNSTONE PLUGS
 #define ACR01B2A             1500
 #define ACR01B2B             1501
 #define ACR01B2C             1502

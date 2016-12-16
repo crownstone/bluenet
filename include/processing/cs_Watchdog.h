@@ -32,8 +32,6 @@ private:
 
 	void keepAlive();
 
-	uint16_t                           _keepAliveInterval;
-
 	bool                               _hasKeepAliveState;
 	keep_alive_state_message_payload_t _lastKeepAlive;
 //	uint32_t                           _lastKeepAliveTimestamp;

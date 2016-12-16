@@ -42,7 +42,6 @@ void keep_alive_timeout(void* p_context) {
 }
 
 Watchdog::Watchdog() :
-	_keepAliveInterval(0),
 	_hasKeepAliveState(false),
 //	_lastKeepAliveTimestamp(0),
 	_keepAliveTimerId(NULL)
@@ -55,14 +54,13 @@ Watchdog::Watchdog() :
 
 void Watchdog::init() {
 	Timer::getInstance().createSingleShot(_keepAliveTimerId, keep_alive_timeout);
-	Settings::getInstance().get(CONFIG_KEEP_ALIVE_INTERVAL, &_keepAliveInterval);
 }
 
 void Watchdog::keepAlive() {
 	if (_hasKeepAliveState) {
 		LOGi("Reset keep alive");
 //		_lastKeepAliveTimestamp = RTC::now();
-		uint32_t timeout = (_lastKeepAlive.timeout + _keepAliveInterval / 2) * 1000;
+		uint32_t timeout = _lastKeepAlive.timeout * 1000;
 //		LOGi("timeout in %d ms", timeout);
 		Timer::getInstance().reset(_keepAliveTimerId, MS_TO_TICKS(timeout), NULL);
 	} else {
@@ -74,9 +72,13 @@ void Watchdog::keepAliveTimeout() {
 	LOGi("Keep alive timeout");
 
 	if (_hasKeepAliveState) {
-//			Switch::getInstance().switch(_lastKeepAlive.switchState);
-		CommandHandler::getInstance().handleCommand(CMD_SWITCH, (buffer_ptr_t)&_lastKeepAlive.switchState, sizeof(_lastKeepAlive.switchState), ADMIN);
-//		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&_lastKeepAlive.switchState, sizeof(_lastKeepAlive.switchState), ADMIN);
+		if (_lastKeepAlive.action != NO_CHANGE) {
+	//			Switch::getInstance().switch(_lastKeepAlive.switchState);
+			CommandHandler::getInstance().handleCommand(CMD_SWITCH, (buffer_ptr_t)&_lastKeepAlive.switchState, sizeof(_lastKeepAlive.switchState), ADMIN);
+	//		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&_lastKeepAlive.switchState, sizeof(_lastKeepAlive.switchState), ADMIN);
+		} else {
+			LOGi("No change");
+		}
 	} else {
 		LOGw("No keep alive state found!!");
 	}
@@ -90,10 +92,6 @@ void Watchdog::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			_hasKeepAliveState = true;
 		}
 		keepAlive();
-		break;
-	}
-	case CONFIG_KEEP_ALIVE_INTERVAL: {
-		_keepAliveInterval = *(uint16_t*)p_data;
 		break;
 	}
 	}
