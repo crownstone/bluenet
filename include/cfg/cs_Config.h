@@ -108,12 +108,12 @@
 #define POWER_SAMPLE_CONT_INTERVAL               50 //! Time to next buffer read and attempt to send msg (ms)
 #define POWER_SAMPLE_CONT_NUM_SAMPLES            80 //! Number of voltage and current samples in the buffer, written by ADC, read by power service
 
-#define CS_ADC_SAMPLE_INTERVAL_US                400
+#define CS_ADC_SAMPLE_INTERVAL_US                200
 
 #define CS_ADC_MAX_PINS                          2
 #define CS_ADC_NUM_BUFFERS                       2 //! ADC code is currently written for (max) 2
-#define CS_ADC_BUF_SIZE                          (2*POWER_SAMPLE_BURST_NUM_SAMPLES)
-//#define CS_ADC_BUF_SIZE                          (2*20000/CS_ADC_SAMPLE_INTERVAL_US)
+//#define CS_ADC_BUF_SIZE                          (2*POWER_SAMPLE_BURST_NUM_SAMPLES)
+#define CS_ADC_BUF_SIZE                          (2*20000/CS_ADC_SAMPLE_INTERVAL_US)
 
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 
@@ -128,9 +128,9 @@
 #define VOLTAGE_MULTIPLIER                       0.20f
 #define CURRENT_MULTIPLIER                       0.0045f
 //#define VOLTAGE_ZERO                             169.0f
-#define VOLTAGE_ZERO                             2003
+#define VOLTAGE_ZERO                             2003 // 2037
 //#define CURRENT_ZERO                             168.5f
-#define CURRENT_ZERO                             1997
+#define CURRENT_ZERO                             1997 // 2022
 //#define POWER_ZERO                               0.0f
 #define POWER_ZERO                               1500 //! mW
 #define POWER_ZERO_AVG_WINDOW                    100
