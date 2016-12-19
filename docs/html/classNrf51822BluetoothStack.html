@@ -151,6 +151,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>stopTicking</b> ()</t
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNrf51822BluetoothStack.html#ab131f8a2d0016c2978f9b23feef5476c">isDisconnecting</a> ()</td></tr>
 <tr class="memdesc:ab131f8a2d0016c2978f9b23feef5476c"><td class="mdescLeft">&#160;</td><td class="mdescRight">In case a disconnect has been called, we cannot allow another write or we'll get an Fatal Error 8. <br /></td></tr>
 <tr class="separator:ab131f8a2d0016c2978f9b23feef5476c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a962cb93a2653837bb29777bc8000d239"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a962cb93a2653837bb29777bc8000d239"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isConnected</b> ()</td></tr>
+<tr class="separator:a962cb93a2653837bb29777bc8000d239"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a187c6452434dfb044cc2e3cc93305605"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNrf51822BluetoothStack.html#a187c6452434dfb044cc2e3cc93305605">shutdown</a> ()</td></tr>
 <tr class="memdesc:a187c6452434dfb044cc2e3cc93305605"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shutdown the BLE stack.  <a href="#a187c6452434dfb044cc2e3cc93305605">More...</a><br /></td></tr>
 <tr class="separator:a187c6452434dfb044cc2e3cc93305605"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -229,9 +232,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>updateAdvertisement</
 <tr class="memitem:a8334d86949224b298f1aff8784a48e8b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8334d86949224b298f1aff8784a48e8b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>startAdvertising</b> ()</td></tr>
 <tr class="separator:a8334d86949224b298f1aff8784a48e8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae4e387d176cade746816a6139547c2fa"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae4e387d176cade746816a6139547c2fa"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>configureAdvertisementParameters</b> ()</td></tr>
-<tr class="separator:ae4e387d176cade746816a6139547c2fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9cf62ba4df7a0b565e636965773b3eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNrf51822BluetoothStack.html#ae9cf62ba4df7a0b565e636965773b3eb">updateAdvertisementParameters</a> (bool toggle=true)</td></tr>
+<tr class="memdesc:ae9cf62ba4df7a0b565e636965773b3eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the advertisement parameters while advertising.  <a href="#ae9cf62ba4df7a0b565e636965773b3eb">More...</a><br /></td></tr>
+<tr class="separator:ae9cf62ba4df7a0b565e636965773b3eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acda9be99b716b88b31b178e2afd66265"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNrf51822BluetoothStack.html#acda9be99b716b88b31b178e2afd66265">configureAdvertisementParameters</a> (bool resetCounter=false)</td></tr>
+<tr class="memdesc:acda9be99b716b88b31b178e2afd66265"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configures the advertisement parameters.  <a href="#acda9be99b716b88b31b178e2afd66265">More...</a><br /></td></tr>
+<tr class="separator:acda9be99b716b88b31b178e2afd66265"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3f8d07700b07aa2c35470b78dfad58f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad3f8d07700b07aa2c35470b78dfad58f"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>configureScanResponse</b> (uint8_t deviceType)</td></tr>
 <tr class="separator:ad3f8d07700b07aa2c35470b78dfad58f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -468,6 +474,9 @@ ble_advdata_t&#160;</td><td class="memItemRight" valign="bottom"><b>_scan_resp</
 <tr class="memitem:a458a38e507783f00a750cddb252b8517"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a458a38e507783f00a750cddb252b8517"></a>
 ble_gap_adv_params_t&#160;</td><td class="memItemRight" valign="bottom"><b>_adv_params</b></td></tr>
 <tr class="separator:a458a38e507783f00a750cddb252b8517"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:accd2407906a11488ece71bd80303711f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="accd2407906a11488ece71bd80303711f"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>_advParamsCounter</b></td></tr>
+<tr class="separator:accd2407906a11488ece71bd80303711f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c4d4bdde3cc9c307ceebe0f819fd8aa"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0c4d4bdde3cc9c307ceebe0f819fd8aa"></a>
 ble_advdata_manuf_data_t&#160;</td><td class="memItemRight" valign="bottom"><b>_manufac</b></td></tr>
 <tr class="separator:a0c4d4bdde3cc9c307ceebe0f819fd8aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -488,6 +497,26 @@ ble_advdata_service_data_t&#160;</td><td class="memItemRight" valign="bottom"><b
 <div class="textblock"><p>nRF51822 specific implementation of the BLEStack </p>
 <p>The <a class="el" href="classNrf51822BluetoothStack.html" title="nRF51822 specific implementation of the BLEStack ">Nrf51822BluetoothStack</a> class is a direct descendant from BLEStack. It is implemented as a singleton, such that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this stack object as an argument w.r.t. this object. This makes dependencies traceable for the user. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="acda9be99b716b88b31b178e2afd66265"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Nrf51822BluetoothStack::configureAdvertisementParameters </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>resetCounter</em> = <code>false</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Configures the advertisement parameters. </p>
+<p>every time the configureAdvertisementParameters function is called, the advertisement toggles between connectable and non-connectable.</p>
+<p>if resetCounter is set to true, the counter is reset and the advertisement will be set to connectable </p>
+
+</div>
+</div>
 <a class="anchor" id="a10b5777915de1758c4c68fd48447dedb"></a>
 <div class="memitem">
 <div class="memproto">
@@ -924,6 +953,26 @@ ble_advdata_service_data_t&#160;</td><td class="memItemRight" valign="bottom"><b
 
 <p>Start scanning for devices. </p>
 <p>Only call the following functions with a S120 or S130 device that can play a central role. The following functions are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone developer. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae9cf62ba4df7a0b565e636965773b3eb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Nrf51822BluetoothStack::updateAdvertisementParameters </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>toggle</em> = <code>true</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Updates the advertisement parameters while advertising. </p>
+<p>I.e. it stops advertising, configures the parameters and starts scanning again.</p>
+<p>if toggle is set to true, every time the updateAdvertisementParameters function is called, the advertisement toggles between connectable and non-connectable if toggle is set to false, every advertisement will be set to connectable </p>
 
 </div>
 </div>
