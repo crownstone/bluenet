@@ -1,6 +1,7 @@
 var searchData=
 [
   ['update',['update',['../classADC.html#ad64663b38d1eff6981e9166b046ddc20',1,'ADC::update()'],['../classScanResult.html#a6ff76ed6d3973219c559120498bd14ae',1,'ScanResult::update()']]],
+  ['updateadvertisementparameters',['updateAdvertisementParameters',['../classNrf51822BluetoothStack.html#ae9cf62ba4df7a0b565e636965773b3eb',1,'Nrf51822BluetoothStack']]],
   ['updatedevicename',['updateDeviceName',['../classNrf51822BluetoothStack.html#aafc1669beef91b1722417b98d847ca1c',1,'Nrf51822BluetoothStack']]],
   ['updatevalue',['updateValue',['../classCharacteristicBase.html#a93dfce87563f7c8113df69b0ee95013b',1,'CharacteristicBase']]],
   ['user_5fdesc_5fmetadata_5fmd',['user_desc_metadata_md',['../structCharacteristicInit.html#a63e28a7e0cfba2f9fdff2725053e2990',1,'CharacteristicInit']]],

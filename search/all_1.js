@@ -1,6 +1,7 @@
 var searchData=
 [
   ['adc',['ADC',['../classADC.html',1,'']]],
+  ['adc_5fdone_5fcb_5fdata_5ft',['adc_done_cb_data_t',['../structadc__done__cb__data__t.html',1,'']]],
   ['add',['add',['../classScheduleList.html#aaec34c4918028d8e0f9e9b57d8dddac8',1,'ScheduleList::add()'],['../classStreamBuffer.html#a9f86cd69fdedcf5893796af31482c2d2',1,'StreamBuffer::add()'],['../classTrackedDeviceList.html#aacb5658c77b9bbc09464eab701869ade',1,'TrackedDeviceList::add()']]],
   ['addcharacteristic',['addCharacteristic',['../classService.html#a69281e49b9a84d5ec36c8b2a42f525e0',1,'Service']]],
   ['addconfigurationcontrolcharacteristic',['addConfigurationControlCharacteristic',['../classCrownstoneService.html#a90d2fe42df74882005129944e97198d9',1,'CrownstoneService']]],
@@ -14,6 +15,7 @@ var searchData=
   ['addresetcharacteristic',['addResetCharacteristic',['../classGeneralService.html#aa29f93eaf86c8ddfe79865cf2aa88929',1,'GeneralService']]],
   ['addtemperaturecharacteristic',['addTemperatureCharacteristic',['../classGeneralService.html#ab71a2038bcaa70d0efd4db95c05f0085',1,'GeneralService']]],
   ['adv_5findicator',['adv_indicator',['../classIBeacon.html#a1e891c83fb2dacef1d496094c098dbc8',1,'IBeacon']]],
+  ['adv_5freport_5fparse',['adv_report_parse',['../namespaceBLEutil.html#a4f644a1e77cc7657616c1117b7bee44e',1,'BLEutil']]],
   ['advinterval',['advInterval',['../structps__configuration__t.html#a014996077647e60bc06dc002cf5eb266',1,'ps_configuration_t']]],
   ['allowaccess',['allowAccess',['../classEncryptionHandler.html#a327c62414a92de1cbe4c5ace64faddaa',1,'EncryptionHandler']]],
   ['array',['array',['../structdifferential__buffer__t.html#a8d8b3877a1c262902a2549955d974444',1,'differential_buffer_t::array()'],['../structdifferential__buffer__fixed__t.html#abe9f92365b23ff6f486c5130fc66b959',1,'differential_buffer_fixed_t::array()']]],

@@ -123,11 +123,75 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>print_heap</b> (const
 <tr class="memitem:a81628badcc0450c97114129ef543deba"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a81628badcc0450c97114129ef543deba"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>print_stack</b> (const std::string &amp;msg)</td></tr>
 <tr class="separator:a81628badcc0450c97114129ef543deba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef047c48d1bf37a1abd7c2b873260d2e"><td class="memTemplParams" colspan="2"><a class="anchor" id="aef047c48d1bf37a1abd7c2b873260d2e"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aef047c48d1bf37a1abd7c2b873260d2e"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>isBitSet</b> (const T value, uint8_t bit)</td></tr>
+<tr class="separator:aef047c48d1bf37a1abd7c2b873260d2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f644a1e77cc7657616c1117b7bee44e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBLEutil.html#a4f644a1e77cc7657616c1117b7bee44e">adv_report_parse</a> (uint8_t type, <a class="el" href="structdata__t.html">data_t</a> *p_advdata, <a class="el" href="structdata__t.html">data_t</a> *p_typedata)</td></tr>
+<tr class="memdesc:a4f644a1e77cc7657616c1117b7bee44e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses advertisement data, providing length and location of the field in case matching data is found.  <a href="#a4f644a1e77cc7657616c1117b7bee44e">More...</a><br /></td></tr>
+<tr class="separator:a4f644a1e77cc7657616c1117b7bee44e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Utilities, e.g. </p>
 <p>for printing over UART. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="a4f644a1e77cc7657616c1117b7bee44e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t BLEutil::adv_report_parse </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structdata__t.html">data_t</a> *&#160;</td>
+          <td class="paramname"><em>p_advdata</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structdata__t.html">data_t</a> *&#160;</td>
+          <td class="paramname"><em>p_typedata</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Parses advertisement data, providing length and location of the field in case matching data is found. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">Type</td><td>of data to be looked for in advertisement data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">Advertisement</td><td>report length and pointer to report. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">If</td><td>data type requested is found in the data report, type data length and pointer to data will be populated here.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">NRF_SUCCESS</td><td>if the data type is found in the report. </td></tr>
+    <tr><td class="paramname">NRF_ERROR_NOT_FOUND</td><td>if the data type could not be found. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="ae478db6059c6d08c11639a23cab6ad33"></a>
 <div class="memitem">
 <div class="memproto">

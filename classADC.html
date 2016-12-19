@@ -113,17 +113,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#af92b34ed7a2ed66b1da7858a58faf140">stop</a> ()</td></tr>
 <tr class="memdesc:af92b34ed7a2ed66b1da7858a58faf140"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> sampling. <br /></td></tr>
 <tr class="separator:af92b34ed7a2ed66b1da7858a58faf140"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2aff8afca376d33cdc94e3632a092608"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a2aff8afca376d33cdc94e3632a092608">setBuffers</a> (<a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; uint16_t &gt; *buffer, uint8_t pinNum)</td></tr>
-<tr class="memdesc:a2aff8afca376d33cdc94e3632a092608"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the buffers for the sample values.  <a href="#a2aff8afca376d33cdc94e3632a092608">More...</a><br /></td></tr>
-<tr class="separator:a2aff8afca376d33cdc94e3632a092608"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55645c7e552875957597462fcb8d3d6f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a55645c7e552875957597462fcb8d3d6f">setBuffers</a> (<a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt; uint16_t &gt; *buffer, uint8_t pinNum)</td></tr>
-<tr class="memdesc:a55645c7e552875957597462fcb8d3d6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the buffers for the sample values.  <a href="#a55645c7e552875957597462fcb8d3d6f">More...</a><br /></td></tr>
-<tr class="separator:a55645c7e552875957597462fcb8d3d6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c0d998a15e3f4d540da5548f5fa9526"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a0c0d998a15e3f4d540da5548f5fa9526">setTimestampBuffers</a> (<a class="el" href="classDifferentialBuffer.html">DifferentialBuffer</a>&lt; uint32_t &gt; *buffer, uint8_t pinNum)</td></tr>
-<tr class="memdesc:a0c0d998a15e3f4d540da5548f5fa9526"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the buffers for the timestamps.  <a href="#a0c0d998a15e3f4d540da5548f5fa9526">More...</a><br /></td></tr>
-<tr class="separator:a0c0d998a15e3f4d540da5548f5fa9526"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2daf86b62e5fbc96806258a91598262a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a2daf86b62e5fbc96806258a91598262a">releaseBuffer</a> (uint8_t bufNum)</td></tr>
+<tr class="memdesc:a2daf86b62e5fbc96806258a91598262a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Release a buffer, so it can be used again by the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>.  <a href="#a2daf86b62e5fbc96806258a91598262a">More...</a><br /></td></tr>
+<tr class="separator:a2daf86b62e5fbc96806258a91598262a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7f2a9a7bd30cc52ae89857573ebd8be0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setDoneCallback</b> (adc_done_cb_t callback)</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a7f2a9a7bd30cc52ae89857573ebd8be0">setDoneCallback</a> (adc_done_cb_t callback)</td></tr>
+<tr class="memdesc:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback which is called when a buffer is filled. <br /></td></tr>
 <tr class="separator:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad64663b38d1eff6981e9166b046ddc20"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad64663b38d1eff6981e9166b046ddc20"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ad64663b38d1eff6981e9166b046ddc20">update</a> (uint32_t value)</td></tr>
@@ -189,110 +184,24 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>_lastStartTime</b
 
 </div>
 </div>
-<a class="anchor" id="a2aff8afca376d33cdc94e3632a092608"></a>
+<a class="anchor" id="a2daf86b62e5fbc96806258a91598262a"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool ADC::setBuffers </td>
+          <td class="memname">bool ADC::releaseBuffer </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; uint16_t &gt; *&#160;</td>
-          <td class="paramname"><em>buffer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>pinNum</em>&#160;</td>
-        </tr>
-        <tr>
+          <td class="paramname"><em>bufNum</em></td><td>)</td>
           <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Set the buffers for the sample values. </p>
-<p>To be used in case of burst sampling. For now, these are expected to be of equal size.</p>
+<p>Release a buffer, so it can be used again by the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">buffer</td><td>Buffer to use. </td></tr>
-    <tr><td class="paramname">pinNum</td><td>Nth pin of the pin array supplied in <a class="el" href="classADC.html#af12750cb15bdda3776cdd5d70b71c579" title="Initialize ADC. ">init()</a>.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>true on success. </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a55645c7e552875957597462fcb8d3d6f"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ADC::setBuffers </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt; uint16_t &gt; *&#160;</td>
-          <td class="paramname"><em>buffer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>pinNum</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Set the buffers for the sample values. </p>
-<p>These are used in case of continuous sampling.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">buffer</td><td>Buffer to use. </td></tr>
-    <tr><td class="paramname">pinNum</td><td>Nth pin of the pin array supplied in <a class="el" href="classADC.html#af12750cb15bdda3776cdd5d70b71c579" title="Initialize ADC. ">init()</a>.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>true on success. </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a0c0d998a15e3f4d540da5548f5fa9526"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ADC::setTimestampBuffers </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classDifferentialBuffer.html">DifferentialBuffer</a>&lt; uint32_t &gt; *&#160;</td>
-          <td class="paramname"><em>buffer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>pinNum</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Set the buffers for the timestamps. </p>
-<p>To be used in case of burst sampling. For now, these are expected to be of equal size as the sample value buffers.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">buffer</td><td>Buffer to use. </td></tr>
-    <tr><td class="paramname">pinNum</td><td>Nth pin of the pin array supplied in <a class="el" href="classADC.html#af12750cb15bdda3776cdd5d70b71c579" title="Initialize ADC. ">init()</a>.</td></tr>
+    <tr><td class="paramname">bufNum</td><td>The buffer num as received in the done callback.</td></tr>
   </table>
   </dd>
 </dl>

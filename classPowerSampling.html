@@ -114,12 +114,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:ae0cefadbcb5886af4466b80d824ea0ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ae0cefadbcb5886af4466b80d824ea0ae">startSampling</a> ()</td></tr>
 <tr class="memdesc:ae0cefadbcb5886af4466b80d824ea0ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starts a new power sample burst.  <a href="#ae0cefadbcb5886af4466b80d824ea0ae">More...</a><br /></td></tr>
 <tr class="separator:ae0cefadbcb5886af4466b80d824ea0ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af9e8c24224bc3b555066afb9f4948e05"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#af9e8c24224bc3b555066afb9f4948e05">powerSampleFinish</a> ()</td></tr>
-<tr class="memdesc:af9e8c24224bc3b555066afb9f4948e05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when the sample burst is finished.  <a href="#af9e8c24224bc3b555066afb9f4948e05">More...</a><br /></td></tr>
-<tr class="separator:af9e8c24224bc3b555066afb9f4948e05"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2cc71078fae3354d68936f5d5603e79a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a2cc71078fae3354d68936f5d5603e79a">powerSampleReadBuffer</a> ()</td></tr>
-<tr class="memdesc:a2cc71078fae3354d68936f5d5603e79a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called at a short interval.  <a href="#a2cc71078fae3354d68936f5d5603e79a">More...</a><br /></td></tr>
-<tr class="separator:a2cc71078fae3354d68936f5d5603e79a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0eab4314d0b6f14333b8982bc317194"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ad0eab4314d0b6f14333b8982bc317194">powerSampleAdcDone</a> (nrf_saadc_value_t *buf, uint16_t size, uint8_t bufNum)</td></tr>
+<tr class="memdesc:ad0eab4314d0b6f14333b8982bc317194"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when the sample burst is finished.  <a href="#ad0eab4314d0b6f14333b8982bc317194">More...</a><br /></td></tr>
+<tr class="separator:ad0eab4314d0b6f14333b8982bc317194"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae67d914eb0344a67f78e5c7787a79139"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ae67d914eb0344a67f78e5c7787a79139">sentDone</a> ()</td></tr>
+<tr class="memdesc:ae67d914eb0344a67f78e5c7787a79139"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called at a short interval.  <a href="#ae67d914eb0344a67f78e5c7787a79139">More...</a><br /></td></tr>
+<tr class="separator:ae67d914eb0344a67f78e5c7787a79139"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af101aa83b21642ccec52957f3e13fda0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af101aa83b21642ccec52957f3e13fda0"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#af101aa83b21642ccec52957f3e13fda0">sampleCurrentDone</a> (uint8_t type)</td></tr>
 <tr class="memdesc:af101aa83b21642ccec52957f3e13fda0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill up the current curve and send it out over bluetooth  specifies over which characteristic the current curve should be sent. <br /></td></tr>
@@ -134,12 +134,6 @@ Static Public Member Functions</h2></td></tr>
 static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ac5280b0a7326909b3d6d08808da27237">getInstance</a> ()</td></tr>
 <tr class="memdesc:ac5280b0a7326909b3d6d08808da27237"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation) <br /></td></tr>
 <tr class="separator:ac5280b0a7326909b3d6d08808da27237"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d17f68f5ca403e6af59138c66756b0c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4d17f68f5ca403e6af59138c66756b0c"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticPowerSampleFinish</b> (<a class="el" href="classPowerSampling.html">PowerSampling</a> *ptr)</td></tr>
-<tr class="separator:a4d17f68f5ca403e6af59138c66756b0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac78d7569d2ecdc13f8944b1d3f0cec94"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac78d7569d2ecdc13f8944b1d3f0cec94"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticPowerSampleStart</b> (<a class="el" href="classPowerSampling.html">PowerSampling</a> *ptr)</td></tr>
-<tr class="separator:ac78d7569d2ecdc13f8944b1d3f0cec94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad188232c7cabb0bccce162c901cc48f5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad188232c7cabb0bccce162c901cc48f5"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticPowerSampleRead</b> (<a class="el" href="classPowerSampling.html">PowerSampling</a> *ptr)</td></tr>
 <tr class="separator:ad188232c7cabb0bccce162c901cc48f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,15 +142,32 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticPowerSam
 <div class="textblock"><p>Author: Dominik Egger Copyright: Distributed Organisms B.V. </p>
 <p>(DoBots) Date: May 19, 2016 License: LGPLv3+ </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="af9e8c24224bc3b555066afb9f4948e05"></a>
+<a class="anchor" id="ad0eab4314d0b6f14333b8982bc317194"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void PowerSampling::powerSampleFinish </td>
+          <td class="memname">void PowerSampling::powerSampleAdcDone </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">nrf_saadc_value_t *&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>bufNum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -166,12 +177,12 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticPowerSam
 
 </div>
 </div>
-<a class="anchor" id="a2cc71078fae3354d68936f5d5603e79a"></a>
+<a class="anchor" id="ae67d914eb0344a67f78e5c7787a79139"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void PowerSampling::powerSampleReadBuffer </td>
+          <td class="memname">void PowerSampling::sentDone </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
