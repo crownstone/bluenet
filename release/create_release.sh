@@ -277,6 +277,9 @@ cp -r $BLUENET_DIR/docs $BLUENET_RELEASE_DIR/docs
 checkError
 succ "Copy DONE"
 
+info "Update docs in git ..."
+git add $BLUENET_DIR/docs
+
 popd
 
 ####################
