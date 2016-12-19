@@ -8,69 +8,69 @@ source $BLUENET_DIR/scripts/_utils.sh
 ### Pre Script Verification
 ############################
 
-if [ -z $BLUENET_RELEASE_DIR ]; then
-	err "BLUENET_RELEASE_DIR is not defined!"
-	exit 1
-fi
-if [ -z $BLUENET_BOOTLOADER_DIR ]; then
-	err "BLUENET_BOOTLOADER_DIR is not defined!"
-	exit 1
-fi
+# if [ -z $BLUENET_RELEASE_DIR ]; then
+# 	err "BLUENET_RELEASE_DIR is not defined!"
+# 	exit 1
+# fi
+# if [ -z $BLUENET_BOOTLOADER_DIR ]; then
+# 	err "BLUENET_BOOTLOADER_DIR is not defined!"
+# 	exit 1
+# fi
 
-pushd $BLUENET_DIR
+# pushd $BLUENET_DIR
 
-# check current branch, releases should be made from master branch
-branch=$(git symbolic-ref --short -q HEAD)
+# # check current branch, releases should be made from master branch
+# branch=$(git symbolic-ref --short -q HEAD)
 
-if [[ $branch != "master" ]]; then
-	err "You are currently on branch '"$branch"'"
-	err "Releases should be made from master branch"
-	err "Are you sure you want to continue? [y/N]"
-	read branch_response
-	if [[ ! $branch_response == "y" ]]; then
-		info "abort"
-		exit 1
-	fi
-fi
+# if [[ $branch != "master" ]]; then
+# 	err "You are currently on branch '"$branch"'"
+# 	err "Releases should be made from master branch"
+# 	err "Are you sure you want to continue? [y/N]"
+# 	read branch_response
+# 	if [[ ! $branch_response == "y" ]]; then
+# 		info "abort"
+# 		exit 1
+# 	fi
+# fi
 
-# check for modifications in bluenet code
-modifications=$(git ls-files -m | wc -l)
+# # check for modifications in bluenet code
+# modifications=$(git ls-files -m | wc -l)
 
-if [[ $modifications != 0 ]]; then
-	err "There are modified files in your bluenet code"
-	err "Commit the files or stash them first!!"
-	exit 1
-fi
+# if [[ $modifications != 0 ]]; then
+# 	err "There are modified files in your bluenet code"
+# 	err "Commit the files or stash them first!!"
+# 	exit 1
+# fi
 
-# check for untracked files
-untracked=$(git ls-files --others --exclude-standard | wc -l)
+# # check for untracked files
+# untracked=$(git ls-files --others --exclude-standard | wc -l)
 
-if [[ $untracked != 0 ]]; then
-	err "The following untracked files were found in the blunet code"
-	err "Make sure you didn't forget to add anything important!"
-	git ls-files --others --exclude-standard
-	info "Do you want to continue? [Y/n]"
-	read untracked_response
-	if [[ $untracked_response == "n" ]]; then
-		exit 1
-	fi
-fi
+# if [[ $untracked != 0 ]]; then
+# 	err "The following untracked files were found in the blunet code"
+# 	err "Make sure you didn't forget to add anything important!"
+# 	git ls-files --others --exclude-standard
+# 	info "Do you want to continue? [Y/n]"
+# 	read untracked_response
+# 	if [[ $untracked_response == "n" ]]; then
+# 		exit 1
+# 	fi
+# fi
 
-# check for remote updates
-git remote update
+# # check for remote updates
+# git remote update
 
-# if true then there are remote updates that need to be pulled first
-if [ ! $(git rev-parse HEAD) = $(git ls-remote $(git rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1) ]; then
-	err "There are remote updates that were not yet pulled"
-	err "Are you sure you want to continue? [y/N]"
-	read update_response
-	if [[ ! $update_response == "y" ]]; then
-		info "abort"
-		exit 1
-	fi
-fi
+# # if true then there are remote updates that need to be pulled first
+# if [ ! $(git rev-parse HEAD) = $(git ls-remote $(git rev-parse --abbrev-ref @{u} | sed 's/\// /g') | cut -f1) ]; then
+# 	err "There are remote updates that were not yet pulled"
+# 	err "Are you sure you want to continue? [y/N]"
+# 	read update_response
+# 	if [[ ! $update_response == "y" ]]; then
+# 		info "abort"
+# 		exit 1
+# 	fi
+# fi
 
-popd
+# popd
 
 ############################
 ### Prepare
@@ -165,7 +165,7 @@ if [[ $existing == 0 ]]; then
 ###############################
 
 	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $path/$directory/CMakeBuild.config
-	sed -i "s/DEVICE_TYPE=\".*\"/DEVICE_TYPE=\"$device_type\"/" $path/$directory/CMakeBuild.config
+	sed -i "s/DEVICE_TYPE=.*/DEVICE_TYPE=$device_type/" $path/$directory/CMakeBuild.config
 
 	sed -i "s/NRF51822_DIR=/#NRF51822_DIR=/" $path/$directory/CMakeBuild.config
 	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $path/$directory/CMakeBuild.config
@@ -256,86 +256,86 @@ succ "Build DONE"
 
 popd
 
-# build doc and copy to release directory
+# # build doc and copy to release directory
 
-###################
-### Documentation
-###################
+# ###################
+# ### Documentation
+# ###################
 
-# goto bluenet scripts dir
-pushd $BLUENET_DIR/scripts
+# # goto bluenet scripts dir
+# pushd $BLUENET_DIR/scripts
 
-info "Build docs ..."
-./gen_doc.sh
+# info "Build docs ..."
+# ./gen_doc.sh
 
-checkError
-succ "Build DONE"
+# checkError
+# succ "Build DONE"
 
-info "Copy docs to relase dir ..."
-cp -r $BLUENET_DIR/docs $BLUENET_RELEASE_DIR/docs
+# info "Copy docs to relase dir ..."
+# cp -r $BLUENET_DIR/docs $BLUENET_RELEASE_DIR/docs
 
-checkError
-succ "Copy DONE"
+# checkError
+# succ "Copy DONE"
 
-info "Update docs in git ..."
-git add $BLUENET_DIR/docs
-git commit -m "Update docs"
+# info "Update docs in git ..."
+# git add $BLUENET_DIR/docs
+# git commit -m "Update docs"
 
-popd
+# popd
 
-####################
-### GIT release tag
-####################
+# ####################
+# ### GIT release tag
+# ####################
 
-pushd $BLUENET_DIR
+# pushd $BLUENET_DIR
 
-info "Add release config"
+# info "Add release config"
 
-# add new generated config to git
-git add $path/$directory
-git commit -m "Add release config for "$model"_"$version
+# # add new generated config to git
+# git add $path/$directory
+# git commit -m "Add release config for "$model"_"$version
 
-info "Create git tag for release"
+# info "Create git tag for release"
 
-# if old version existed
-if [[ $version_str ]]; then
-	echo $version > VERSION
+# # if old version existed
+# if [[ $version_str ]]; then
+# 	echo $version > VERSION
 
-	log "Updating changes overview"
-	echo "Version $version:" > tmpfile
-	git log --pretty=format:" - %s" "v$version_str"...HEAD >> tmpfile
-	echo "" >> tmpfile
-	echo "" >> tmpfile
-	cat CHANGES >> tmpfile
-	mv tmpfile CHANGES
+# 	log "Updating changes overview"
+# 	echo "Version $version:" > tmpfile
+# 	git log --pretty=format:" - %s" "v$version_str"...HEAD >> tmpfile
+# 	echo "" >> tmpfile
+# 	echo "" >> tmpfile
+# 	cat CHANGES >> tmpfile
+# 	mv tmpfile CHANGES
 
-	log "Add to git"
-	git add CHANGES VERSION
-	git commit -m "Version bump to $version"
+# 	log "Add to git"
+# 	git add CHANGES VERSION
+# 	git commit -m "Version bump to $version"
 
-	log "Create tag"
-	git tag -a -m "Tagging version $version" "v$version"
+# 	log "Create tag"
+# 	git tag -a -m "Tagging version $version" "v$version"
 
-	# log "Push tag"
-	# git push origin --tags
-else
-	# setup first time
-	echo $version > VERSION
+# 	# log "Push tag"
+# 	# git push origin --tags
+# else
+# 	# setup first time
+# 	echo $version > VERSION
 
-	log "Creating changes overview"
-    git log --pretty=format:" - %s" >> CHANGES
-    echo "" >> CHANGES
-    echo "" >> CHANGES
+# 	log "Creating changes overview"
+#     git log --pretty=format:" - %s" >> CHANGES
+#     echo "" >> CHANGES
+#     echo "" >> CHANGES
 
-	log "Add to git"
-    git add VERSION CHANGES
-    git commit -m "Added VERSION and CHANGES files, Version bump to $version"
+# 	log "Add to git"
+#     git add VERSION CHANGES
+#     git commit -m "Added VERSION and CHANGES files, Version bump to $version"
 
-	log "Create tag"
-    git tag -a -m "Tagging version $version" "v$version"
+# 	log "Create tag"
+#     git tag -a -m "Tagging version $version" "v$version"
 
-	# log "Push tag"
-    # git push origin --tags
-fi
+# 	# log "Push tag"
+#     # git push origin --tags
+# fi
 
-popd
+# popd

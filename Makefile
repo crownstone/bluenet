@@ -31,7 +31,7 @@ all: build
 #	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 #	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then echo "Copy binaries to ${BLUENET_BIN_DIR}"; mkdir -p ${BLUENET_BIN_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_BIN_DIR); fi
 
-release: build
+release: prepare
 	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then echo "Copy binaries to ${BLUENET_BIN_DIR}"; mkdir -p ${BLUENET_BIN_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_BIN_DIR); fi
 
@@ -55,17 +55,17 @@ prepare:
 	#@sed -i $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp/conf/nRF51822-softdevice.ld
 	@cp conf/* $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp/conf
 	printf "Following should exist ${BLUENET_BUILD_DIR}/CMakeFiles/CMakeTmp/CMakeConfig.cmake\n"
-
-# The build target is only executed when there is no build directory! So if there is a build directory, but the test
-# files cannot be found this will lead to an error on the first build. The next builds will be fine. So, the user only
-# needs to build two times in a row.
-build: prepare
 	if [ -e "${BLUENET_BUILD_DIR}/Makefile" ]; then \
 		printf "++ Skip try-compile step\n"; \
 	else \
 		printf "++ Add a try-compile step\n"; \
 		cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' --debug-trycompile -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug --target analyze $(SOURCE_DIR); \
 	fi
+
+# The build target is only executed when there is no build directory! So if there is a build directory, but the test
+# files cannot be found this will lead to an error on the first build. The next builds will be fine. So, the user only
+# needs to build two times in a row.
+build: prepare
 	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DVERBOSITY='$(VERBOSITY)' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 
 .PHONY: all build release clean prepare
