@@ -1,0 +1,87 @@
+AllocatedBuffer {
+ScanResult : public Serializable {
+StreamBuffer : public Serializable {
+CurrentLimit: public Listener {
+Serializable {
+CharacteristicT<T, typename std::enable_if<std::is_base_of<Serializable, T>::value >::type> : public Characteristic<T> {
+Dimming: public Listener {
+TrackedDeviceList : public Serializable {
+TrackedDevice : public Serializable {
+MeshMessage {
+CurrentCurve: public Serializable {
+Service;
+BLEStack;
+CharacteristicBase {
+Characteristic : public CharacteristicBase {
+CharacteristicT : public Characteristic<T> {
+Service {
+GenericService;
+GenericService : public Service {
+BatteryService : public GenericService {
+BLEStack {
+Nrf51822BluetoothStack : public BLEStack {
+Listener {
+Dispatcher {
+IBeacon {
+DifferentialBuffer {
+CircularBuffer {
+Storage {
+RealTimeClock: public Dispatcher {
+AdcSamples {
+ADC: public Dispatcher {
+PWM {
+LPComp: public Dispatcher {
+RNG{
+UUID {
+ble_exception : public std::exception {
+function;
+function<Result (Arguments...)>
+PowerService : public BLEpp::GenericService {
+GeneralService: public BLEpp::GenericService {
+IndoorLocalizationService : public BLEpp::GenericService {
+CMesh {
+MeshControl {
+
+
+
+
+struct __attribute__((__packed__)) peripheral_device_t {
+struct __attribute__((__packed__)) tracked_device_t {
+struct CharacteristicValue {
+struct CharacteristicInit {
+struct CharacteristicStatus {
+struct AllocatedBuffer {
+struct ISerializable {
+struct StackBuffer {
+struct ps_storage_base_t {
+struct storage_config_t {
+struct ps_power_service_t : ps_storage_base_t {
+struct ps_general_service_t : ps_storage_base_t {
+struct bad_function_call : std::exception
+struct force_function_heap_allocation
+struct manager_storage_type;
+struct function_manager;
+struct functor_padding
+struct empty_struct
+struct is_inplace_allocated
+struct functor_type
+struct is_valid_function_argument
+struct is_valid_function_argument<function<Result (Arguments...)>, Result (Arguments...)>
+struct is_valid_function_argument<T, Result (Arguments...)>
+struct manager_storage_type
+struct function_manager_inplace_specialization
+struct function_manager_inplace_specialization<T, Allocator, typename std::enable_if<!is_inplace_allocated<T, Allocator>::value>::type>
+struct function_manager
+struct typedeffer
+struct typedeffer<Result, Argument>
+struct typedeffer<Result, First_Argument, Second_Argument>
+struct uses_allocator<func::function<Result (Arguments...)>, Allocator>
+struct vec2 {
+struct vec3 {
+struct vec4 {
+struct mat2  {
+struct mat3 {
+struct mat4 {
+struct quat {
+struct ps_indoorlocalisation_service_t : ps_storage_base_t {
+struct {

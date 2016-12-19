@@ -1,5 +1,5 @@
 <map id="schedule_list_t" name="schedule_list_t">
-<area shape="rect" id="node2" href="$structschedule__entry__t.html" title="schedule_entry_t" alt="" coords="257,81,379,108"/>
+<area shape="rect" id="node2" href="$structschedule__entry__t.html" title="schedule_entry_t" alt="" coords="259,81,381,108"/>
 <area shape="rect" id="node3" href="$structschedule__action__pwm__t.html" title="schedule_action_pwm_t" alt="" coords="5,5,168,32"/>
 <area shape="rect" id="node4" href="$structschedule__time__daily__t.html" title="schedule_time_daily_t" alt="" coords="11,56,162,83"/>
 <area shape="rect" id="node5" href="$structschedule__action__fade__t.html" title="schedule_action_fade_t" alt="" coords="7,107,166,133"/>
