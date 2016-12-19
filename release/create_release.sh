@@ -19,6 +19,20 @@ fi
 
 pushd $BLUENET_DIR
 
+# check current branch, releases should be made from master branch
+branch=$(git symbolic-ref --short -q HEAD)
+
+if [[ $branch != "master" ]]; then
+	err "You are currently on branch '"$branch"'"
+	err "Releases should be made from master branch"
+	err "Are you sure you want to continue? [y/N]"
+	read branch_response
+	if [[ ! $branch_response == "y" ]]; then
+		info "abort"
+		exit 1
+	fi
+fi
+
 # check for modifications in bluenet code
 modifications=$(git ls-files -m | wc -l)
 
@@ -100,14 +114,17 @@ while [[ $valid == 0 ]]; do
 		    case $opt in
 		        "Crownstone Plug")
 					model="crownstone_plug"
+					device_type="DEVICE_CROWNSTONE_PLUG"
 					break
 		            ;;
 		        "Crownstone Builtin")
 					model="crownstone_builtin"
+					device_type="DEVICE_CROWNSTONE_BUILTIN"
 					break
 		            ;;
 		        "Guidestone")
 					model="guidestone"
+					device_type="DEVICE_GUIDESTONE"
 					break
 		            ;;
 		        *) echo invalid option;;
@@ -148,6 +165,7 @@ if [[ $existing == 0 ]]; then
 ###############################
 
 	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $path/$directory/CMakeBuild.config
+	sed -i "s/DEVICE_TYPE=\".*\"/DEVICE_TYPE=\"$device_type\"/" $path/$directory/CMakeBuild.config
 
 	sed -i "s/NRF51822_DIR=/#NRF51822_DIR=/" $path/$directory/CMakeBuild.config
 	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $path/$directory/CMakeBuild.config
