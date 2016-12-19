@@ -277,6 +277,10 @@ cp -r $BLUENET_DIR/docs $BLUENET_RELEASE_DIR/docs
 checkError
 succ "Copy DONE"
 
+info "Update docs in git ..."
+git add $BLUENET_DIR/docs
+git commit -m "Update docs"
+
 popd
 
 ####################
@@ -289,6 +293,7 @@ info "Add release config"
 
 # add new generated config to git
 git add $path/$directory
+git commit -m "Add release config for "$model"_"$version
 
 info "Create git tag for release"
 
