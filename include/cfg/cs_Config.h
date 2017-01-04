@@ -118,7 +118,7 @@
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 
 #define FACTORY_RESET_CODE                       0xdeadbeef
-#define FACTORY_RESET_TIMEOUT                    20000 //! Timeout before recovery becomes unavailable after reset (ms)
+#define FACTORY_RESET_TIMEOUT                    60000 //! Timeout before recovery becomes unavailable after reset (ms)
 #define FACTORY_PROCESS_TIMEOUT                  200 //! Timeout before recovery process step is executed (ms)
 
 #define ENCYRPTION_KEY_LENGTH                    SOC_ECB_KEY_LENGTH //! 16 byte length
