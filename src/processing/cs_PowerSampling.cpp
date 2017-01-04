@@ -24,6 +24,7 @@
 
 //#define USE_LED_DEBUG
 #define PRINT_POWERSAMPLING_VERBOSE
+//#define POWERSAMPLING_ABOVE_ZERO_ONLY
 
 PowerSampling::PowerSampling() :
 #if (NORDIC_SDK_VERSION >= 11)
@@ -162,21 +163,33 @@ void PowerSampling::sentDone() {
 
 
 void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
+
+	uint16_t voltageIndex = 1;
+	uint16_t currentIndex = 0;
+	uint16_t numChannels = 2;
+
+#ifdef POWERSAMPLING_ABOVE_ZERO_ONLY
+	currentIndex = determineCurrentIndex(buf, size, numChannels, voltageIndex, currentIndex, CS_ADC_SAMPLE_INTERVAL_US, 20000);
+	if (currentIndex == 1) {
+		voltageIndex = 0;
+	}
+#endif
+
 #if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
-	calculateVoltageZero(buf, size, 2, 1, 0, CS_ADC_SAMPLE_INTERVAL_US, 20000); // Takes 23 us
-	calculateCurrentZero(buf, size, 2, 1, 0, CS_ADC_SAMPLE_INTERVAL_US, 20000);
+	calculateVoltageZero(buf, size, numChannels, voltageIndex, currentIndex, CS_ADC_SAMPLE_INTERVAL_US, 20000); // Takes 23 us
+	calculateCurrentZero(buf, size, numChannels, voltageIndex, currentIndex, CS_ADC_SAMPLE_INTERVAL_US, 20000);
 #if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
-	calculatePower(buf, size, 2, 1, 0, CS_ADC_SAMPLE_INTERVAL_US, 20000); // Takes 17 us
+	calculatePower(buf, size, numChannels, voltageIndex, currentIndex, CS_ADC_SAMPLE_INTERVAL_US, 20000); // Takes 17 us
 #if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
 
 	if (!_sendingSamples) {
-		copyBufferToPowerSamples(buf, size, 2, 1, 0); // Takes 2 us
+		copyBufferToPowerSamples(buf, size, numChannels, voltageIndex, currentIndex); // Takes 2 us
 #if (HARDWARE_BOARD==PCA10040) && defined(USE_LED_DEBUG)
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
@@ -255,6 +268,23 @@ void PowerSampling::initAverages() {
 	_avgPower = 0.0;
 }
 
+uint16_t PowerSampling::determineCurrentIndex(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs) {
+	uint16_t actualCurrentIndex = currentIndex;
+#ifdef POWERSAMPLING_ABOVE_ZERO_ONLY
+	uint16_t numSamples = acPeriodUs / sampleIntervalUs; //! one AC period
+	for (int i=0; i<numSamples*numChannels; i+=numChannels) {
+		if (buf[i+currentIndex] > 2023) {
+			actualCurrentIndex = currentIndex;
+			break;
+		}
+		if (buf[i+voltageIndex] > 2023) {
+			actualCurrentIndex = voltageIndex;
+			break;
+		}
+	}
+#endif
+	return actualCurrentIndex;
+}
 
 void PowerSampling::calculateVoltageZero(nrf_saadc_value_t* buf, uint16_t bufSize, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs) {
 	//! Assume zero line is the average of all samples
@@ -280,8 +310,12 @@ void PowerSampling::calculateVoltageZero(nrf_saadc_value_t* buf, uint16_t bufSiz
 //	}
 //	int32_t vZero = (vMax - vMin) / 2 + vMin;
 
+#ifdef POWERSAMPLING_ABOVE_ZERO_ONLY
+	_avgZeroVoltage = vZero * 1000;
+#else
 	//! Exponential moving average
 	_avgZeroVoltage = ((1000 - _avgZeroVoltageDiscount) * _avgZeroVoltage + _avgZeroVoltageDiscount * vZero * 1000) / 1000;
+#endif
 }
 
 
@@ -309,8 +343,12 @@ void PowerSampling::calculateCurrentZero(nrf_saadc_value_t* buf, uint16_t bufSiz
 //	}
 //	int32_t cZero = (cMax - cMin) / 2 + cMin;
 
+#ifdef POWERSAMPLING_ABOVE_ZERO_ONLY
+	_avgZeroCurrent = cZero * 1000;
+#else
 	//! Exponential moving average
 	_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * cZero * 1000) / 1000;
+#endif
 }
 
 
@@ -329,9 +367,19 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 	//! dt = sampleIntervalUs / 1000 / 1000
 	//! Power in mW = Power * 1000
 	for (int i=0; i<numSamples*numChannels; i+=numChannels) {
+#ifdef POWERSAMPLING_ABOVE_ZERO_ONLY
+		if (buf[i+currentIndex] > _avgZeroCurrent/1000) {
+			pSum += (buf[i+currentIndex] - _avgZeroCurrent/1000) * (buf[i+voltageIndex] - _avgZeroVoltage/1000); // 2^63 / (2^12 * 2^12) = many many samples before it could overflow
+		}
+#else
 		pSum += (buf[i+currentIndex] - _avgZeroCurrent/1000) * (buf[i+voltageIndex] - _avgZeroVoltage/1000); // 2^63 / (2^12 * 2^12) = many many samples before it could overflow
+#endif
 	}
+#ifdef POWERSAMPLING_ABOVE_ZERO_ONLY
+	int64_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples * 2 - _powerZero;
+#else
 	int64_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
+#endif
 
 	//! Exponential moving average
 	//! TODO: should maybe make this an integer calculation, but that wasn't working when i tried.
