@@ -10,6 +10,7 @@
 #include <storage/cs_State.h>
 #include <storage/cs_Settings.h>
 #include "drivers/cs_Timer.h"
+#include <storage/cs_StorageHelper.h>
 
 #include <algorithm>
 
@@ -56,14 +57,14 @@ void State::init() {
 
 #ifdef SWITCH_STATE_PERSISTENT
 	_switchState = new CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY>(_stateHandle,
-	        Storage::getOffset(&state, state.switchState), defaultSwitchState);
+	        StorageHelper::getOffset(&state, state.switchState), defaultSwitchState);
 #else
 	_switchState = defaultSwitchState;
 #endif
 	_resetCounter = new CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY>(_stateHandle,
-	        Storage::getOffset(&state, state.resetCounter), RESET_COUNTER_DEFAULT);
+	        StorageHelper::getOffset(&state, state.resetCounter), RESET_COUNTER_DEFAULT);
 	_accumulatedEnergy = new CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY>(_stateHandle,
-	        Storage::getOffset(&state, state.accumulatedEnergy), ACCUMULATED_ENERGY_DEFAULT);
+	        StorageHelper::getOffset(&state, state.accumulatedEnergy), ACCUMULATED_ENERGY_DEFAULT);
 
 #ifdef PRINT_DEBUG
 	Timer::getInstance().createSingleShot(_debugTimer, debugprint);
@@ -289,9 +290,9 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 		case STATE_OPERATION_MODE: {
 			uint8_t value = *(uint8_t*)target;
 			uint32_t opMode;
-			Storage::getUint32(_storageStruct.operationMode, &opMode, OPERATION_MODE_SETUP);
+			StorageHelper::getUint32(_storageStruct.operationMode, &opMode, OPERATION_MODE_SETUP);
 			if (opMode != value) {
-				Storage::setUint32(value, _storageStruct.operationMode);
+				StorageHelper::setUint32(value, _storageStruct.operationMode);
 				savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));
 			}
 			break;
@@ -315,17 +316,17 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_TRACKED_DEVICES: {
-			Storage::setArray((buffer_ptr_t)target, _storageStruct.trackedDevices, size);
+			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.trackedDevices, size);
 			savePersistentStorageItem(_storageStruct.trackedDevices, size);
 			break;
 		}
 		case STATE_SCHEDULE: {
-			Storage::setArray((buffer_ptr_t)target, _storageStruct.scheduleList, size);
+			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.scheduleList, size);
 			savePersistentStorageItem(_storageStruct.scheduleList, size);
 			break;
 		}
 		case STATE_LEARNED_SWITCHES: {
-			Storage::setArray((buffer_ptr_t)target, _storageStruct.learnedSwitches, size);
+			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.learnedSwitches, size);
 			savePersistentStorageItem(_storageStruct.learnedSwitches, size);
 			break;
 		}
@@ -365,7 +366,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_OPERATION_MODE: {
-			Storage::getUint8(_storageStruct.operationMode, (uint8_t*)target, DEFAULT_OPERATION_MODE);
+			StorageHelper::getUint8(_storageStruct.operationMode, (uint8_t*)target, DEFAULT_OPERATION_MODE);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_INT_VAL, "operation mode", *(uint8_t*)target);
 #endif
@@ -404,7 +405,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_TRACKED_DEVICES: {
-			Storage::getArray(_storageStruct.trackedDevices, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
+			StorageHelper::getArray(_storageStruct.trackedDevices, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_STR_VAL, "tracked devices", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
@@ -412,7 +413,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_SCHEDULE: {
-			Storage::getArray(_storageStruct.scheduleList, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
+			StorageHelper::getArray(_storageStruct.scheduleList, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_STR_VAL, "schedule list", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
@@ -420,7 +421,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_LEARNED_SWITCHES: {
-			Storage::getArray(_storageStruct.learnedSwitches, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
+			StorageHelper::getArray(_storageStruct.learnedSwitches, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_STR_VAL, "learned switches", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
@@ -464,7 +465,7 @@ void State::savePersistentStorage() {
 }
 
 void State::savePersistentStorageItem(uint8_t* item, uint16_t size) {
-	uint32_t offset = Storage::getOffset(&_storageStruct, item);
+	uint32_t offset = StorageHelper::getOffset(&_storageStruct, item);
 	_storage->writeItem(_structHandle, offset, item, size);
 }
 
