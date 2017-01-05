@@ -17,6 +17,9 @@
 #define DEBOUNCE_TIMEOUT 5000 // 5 seconds
 #define LEARNING_RSSI_THRESHOLD -50
 
+//#define ENOCEAN_VERBOSE
+//#define ENOCEAN_DEBUG
+
 #if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _appTimerData = { {0} };
 	app_timer_id_t           _appTimerId = &_appTimerData;
@@ -28,7 +31,9 @@ void toggle_power(void * p_context) {
 	static uint8_t count;
 	count = *(uint8_t*)p_context;
 
+#ifdef ENOCEAN_VERBOSE
 	LOGi("count: %d", count);
+#endif
 	if (count < TOGGLES * 2) {
 		count++;
 		Switch::getInstance().toggle();
@@ -45,8 +50,10 @@ EnOceanHandler::EnOceanHandler() :
 void EnOceanHandler::init() {
 	State::getInstance().get(STATE_LEARNED_SWITCHES, _learnedSwitches, MAX_SWITCHES * sizeof(learned_enocean_t));
 
+#ifdef ENOCEAN_VERBOSE
 	_log(SERIAL_INFO, "learned switches:");
 	BLEutil::printArray(_learnedSwitches, sizeof(_learnedSwitches));
+#endif
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) toggle_power);
 }
@@ -247,17 +254,17 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	//////////////////////////////////
 
 	if (memcmp(U, &p_data->securitySignature, 4) == 0) {
-		LOGi("hurray")
 		return true;
 	} else {
-		LOGe("darn");
 		return false;
 	}
 }
 
 void EnOceanHandler::save() {
+#ifdef ENOCEAN_VERBOSE
 	_log(SERIAL_INFO, "learned switches:");
 	BLEutil::printArray(_learnedSwitches, sizeof(_learnedSwitches));
+#endif
 
 	State::getInstance().set(STATE_LEARNED_SWITCHES, _learnedSwitches, MAX_SWITCHES * sizeof(learned_enocean_t));
 }
@@ -277,7 +284,9 @@ bool EnOceanHandler::learnEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 		learned_enocean_t* enOcean = findEnOcean(adrs_ptr);
 
 		if (enOcean != NULL) {
+#ifdef ENOCEAN_DEBUG
 			LOGi("found existing, unlearn...");
+#endif
 
 			memset(enOcean, 0, sizeof(learned_enocean_t));
 			save();
@@ -303,7 +312,9 @@ bool EnOceanHandler::learnEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 				toggle_power(&count);
 
 			} else {
+#ifdef ENOCEAN_DEBUG
 				LOGe("no more space...");
+#endif
 
 				return false;
 			}
@@ -312,7 +323,9 @@ bool EnOceanHandler::learnEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 		return true;
 
 	} else {
+#ifdef ENOCEAN_DEBUG
 		LOGw("Ignore! old seqCounter: %d", telegram->seqCounter);
+#endif
 	}
 
 	return false;
@@ -346,6 +359,7 @@ bool EnOceanHandler::triggerEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 			bool buttonC = BLEutil::isBitSet(telegram->switchState, PIN_B0);
 			bool buttonD = BLEutil::isBitSet(telegram->switchState, PIN_B1);
 
+#ifdef ENOCEAN_DEBUG
 			LOGi("%s", pressed ? "pressed" : "released");
 			if (buttonA) {
 				LOGi("  Button A");
@@ -359,12 +373,15 @@ bool EnOceanHandler::triggerEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 			if (buttonD) {
 				LOGi("  Button D");
 			}
+#endif
 
 			if (!pressed && (telegram->seqCounter == _lastSequenceCounter + 1)) {
 				// if the current is a release button event and we already handled
 				// the last message, we can ignore this one
-				LOGi("Ignore! Press already handled");
 
+#ifdef ENOCEAN_DEBUG
+				LOGi("Ignore! Press already handled");
+#endif
 			} else {
 
 				if ((buttonA || buttonC)) {
@@ -381,7 +398,10 @@ bool EnOceanHandler::triggerEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 		_lastSequenceCounter = telegram->seqCounter;
 
 	} else {
+#ifdef ENOCEAN_DEBUG
+//			LOGi("rssi: %d", p_adv_report->rssi);
 		LOGw("Ignore! old seqCounter: %d", telegram->seqCounter);
+#endif
 	}
 
 	return success;
@@ -404,7 +424,9 @@ bool EnOceanHandler::parseAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) 
 		uint16_t companyIdentifier = type_data.p_data[1] << 8 | type_data.p_data[0];
 		if (companyIdentifier == ENOCEAN_COMPANY_ID)
 		{
+#ifdef ENOCEAN_DEBUG
 			LOGi("rssi: %d", p_adv_report->rssi);
+#endif
 //			LOGi("type_data.data_len: %d", type_data.data_len);
 			if (type_data.data_len == 22 && p_adv_report->rssi > LEARNING_RSSI_THRESHOLD) {
 				// learn
