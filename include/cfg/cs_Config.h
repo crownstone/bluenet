@@ -118,7 +118,7 @@
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 
 #define FACTORY_RESET_CODE                       0xdeadbeef
-#define FACTORY_RESET_TIMEOUT                    20000 //! Timeout before recovery becomes unavailable after reset (ms)
+#define FACTORY_RESET_TIMEOUT                    60000 //! Timeout before recovery becomes unavailable after reset (ms)
 #define FACTORY_PROCESS_TIMEOUT                  200 //! Timeout before recovery process step is executed (ms)
 
 #define ENCYRPTION_KEY_LENGTH                    SOC_ECB_KEY_LENGTH //! 16 byte length
@@ -126,13 +126,12 @@
 #define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
 
 #define VOLTAGE_MULTIPLIER                       0.20f
+//#define VOLTAGE_MULTIPLIER                       0.40f // For 1_4 gain
 #define CURRENT_MULTIPLIER                       0.0045f
-//#define VOLTAGE_ZERO                             169.0f
-#define VOLTAGE_ZERO                             2003 // 2037
-//#define CURRENT_ZERO                             168.5f
-#define CURRENT_ZERO                             1997 // 2022
-//#define POWER_ZERO                               0.0f
-#define POWER_ZERO                               1500 //! mW
+//#define CURRENT_MULTIPLIER                       0.0110f // For 1_4 gain
+#define VOLTAGE_ZERO                             2003
+#define CURRENT_ZERO                             1997
+#define POWER_ZERO                               1500
 #define POWER_ZERO_AVG_WINDOW                    100
 // Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
 #define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            20  // Is divided by 1000, so 20 is a discount of 0.02. //! 99% of the average is influenced by the last 228 values

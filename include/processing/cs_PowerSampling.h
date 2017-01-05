@@ -111,6 +111,10 @@ private:
 	 */
 	void initAverages();
 
+	/** Determine which index is actually the current index, this should not be necessary!
+	 */
+	uint16_t determineCurrentIndex(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs);
+
 	/** Calculate the value of the zero line of the voltage samples
 	 */
 	void calculateVoltageZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs);
