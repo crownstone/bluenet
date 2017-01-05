@@ -151,7 +151,7 @@ bool Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) 
 
 //	if (!found) {
 		//! tell someone
-		LOGe("TODO: fix the check on service");
+//		LOGe("TODO: fix the check on service");
 		return false;
 //	}
 }
