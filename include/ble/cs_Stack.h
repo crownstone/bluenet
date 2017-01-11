@@ -364,9 +364,14 @@ public:
 
 	bool isAdvertising();
 
-	void updateAdvertisement();
+	void setAdvertisementData();
 
+	void restartAdvertising();
 	void startAdvertising();
+
+	void setConnectable();
+
+	void setNonConnectable();
 
 	/**
 	 * Updates the advertisement parameters while advertising. I.e. it stops advertising, configures the parameters
@@ -376,7 +381,7 @@ public:
 	 * toggles between connectable and non-connectable
 	 * if toggle is set to false, every advertisement will be set to connectable
 	 */
-	void updateAdvertisementParameters(bool toggle = true);
+	void updateAdvertisement(bool toggle = true);
 
 	/**
 	 * Configures the advertisement parameters. every time the configureAdvertisementParameters function is called,
@@ -384,7 +389,7 @@ public:
 	 *
 	 * if resetCounter is set to true, the counter is reset and the advertisement will be set to connectable
 	 */
-	void configureAdvertisementParameters(bool resetCounter = false);
+	void configureAdvertisementParameters();
 	void configureScanResponse(uint8_t deviceType);
 	void configureBleDeviceAdvData();
 	void configureIBeaconAdvData(IBeacon* beacon);

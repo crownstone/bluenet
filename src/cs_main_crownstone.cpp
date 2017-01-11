@@ -398,6 +398,10 @@ void Crownstone::configureStack() {
 //		LOGd("clear gpregret on connect ...");
 		sd_power_gpregret_clr(0xFF);
 
+
+		_stack->setNonConnectable();
+		_stack->restartAdvertising();
+
 	});
 
 	_stack->onDisconnect([&](uint16_t conn_handle) {
@@ -416,7 +420,9 @@ void Crownstone::configureStack() {
 
 		_stateVars->disableNotifications();
 
-		_stack->startAdvertising();
+		_stack->setConnectable();
+		_stack->restartAdvertising();
+//		_stack->startAdvertising();
 
 		// [23.06.16] need to restart the mesh on disconnect, otherwise we have ~10s delay until the device starts
 		// advertising.
@@ -723,13 +729,13 @@ void Crownstone::startUp() {
 
 void Crownstone::tick() {
 
-	//! update advertisement (to update service data)
-	_stack->updateAdvertisement();
-
 #if ADVERTISEMENT_IMPROVEMENT==1
 	//! update advertisement parameters (to improve scanning on (some) android phones)
-	_stack->updateAdvertisementParameters();
+	_stack->updateAdvertisement();
 #endif
+
+	//! update advertisement (to update service data)
+	_stack->setAdvertisementData();
 
 	//! update temperature
 	int32_t temperature = getTemperature();
@@ -803,7 +809,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_stack->updateDeviceName(std::string((char*)p_data, length));
 		// need to reconfigure scan response package for updated name
 		_stack->configureScanResponse(DEVICE_TYPE);
-		_stack->updateAdvertisement();
+		_stack->setAdvertisementData();
 		break;
 	}
 	case CONFIG_IBEACON_MAJOR: {
@@ -869,11 +875,11 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		} else {
 			_stack->configureBleDeviceAdvData();
 		}
-		_stack->updateAdvertisement();
+		_stack->setAdvertisementData();
 		break;
 	}
 	case EVT_ADVERTISEMENT_UPDATED: {
-		_stack->updateAdvertisement();
+		_stack->setAdvertisementData();
 		break;
 	}
 	case EVT_BROWNOUT_IMPENDING: {
@@ -904,7 +910,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 
 	if (reconfigureBeacon && _settings->isSet(CONFIG_IBEACON_ENABLED)) {
-		_stack->updateAdvertisement();
+		_stack->setAdvertisementData();
 	}
 }
 

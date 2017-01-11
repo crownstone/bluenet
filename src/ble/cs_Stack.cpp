@@ -182,6 +182,9 @@ void Nrf51822BluetoothStack::init() {
 		sd_ble_enable(&ble_enable_params, &ramBase);
 		LOGe("RAM_R1_BASE should be: %p", ramBase);
 		APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
+	} else if (err_code != NRF_SUCCESS) {
+		LOGe("Error: %d (%p)", err_code, err_code);
+
 	}
 
 #else
@@ -583,7 +586,7 @@ void Nrf51822BluetoothStack::configureIBeacon(IBeacon* beacon, uint8_t deviceTyp
 
 	configureScanResponse(deviceType);
 
-	updateAdvertisement();
+	setAdvertisementData();
 
 	//! set advertisement parameters
 	configureAdvertisementParameters();
@@ -601,30 +604,45 @@ void Nrf51822BluetoothStack::configureBleDevice(uint8_t deviceType) {
 
 	configureScanResponse(deviceType);
 
-	updateAdvertisement();
+	setAdvertisementData();
 
 	//! set advertisement parameters
 	configureAdvertisementParameters();
 }
 
-void Nrf51822BluetoothStack::configureAdvertisementParameters(bool resetCounter) {
-
-	if (resetCounter) {
-		_advParamsCounter = 0;
-	}
-
-	memset(&_adv_params, 0, sizeof(_adv_params));
-
-	if (++_advParamsCounter %2) {
-		_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
-	} else {
-		_adv_params.type = BLE_GAP_ADV_TYPE_ADV_NONCONN_IND;
-	}
-
+void Nrf51822BluetoothStack::configureAdvertisementParameters() {
+	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
 	_adv_params.p_peer_addr = NULL;                   //! Undirected advertisement
 	_adv_params.fp = BLE_GAP_ADV_FP_ANY;
 	_adv_params.interval = _interval;
 	_adv_params.timeout = _timeout;
+}
+
+void Nrf51822BluetoothStack::setConnectable() {
+	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+}
+
+void Nrf51822BluetoothStack::setNonConnectable() {
+	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_NONCONN_IND;
+}
+
+void Nrf51822BluetoothStack::restartAdvertising() {
+
+	uint32_t err_code;
+
+	if (_advertising) {
+		err_code = sd_ble_gap_adv_stop();
+		APP_ERROR_CHECK(err_code);
+	}
+
+	err_code = sd_ble_gap_adv_start(&_adv_params);
+	if (err_code == NRF_ERROR_INVALID_PARAM) {
+		LOGf(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
+	}
+	APP_ERROR_CHECK(err_code);
+
+	_advertising = true;
+
 }
 
 void Nrf51822BluetoothStack::startAdvertising() {
@@ -656,7 +674,7 @@ void Nrf51822BluetoothStack::stopAdvertising() {
 	_advertising = false;
 }
 
-void Nrf51822BluetoothStack::updateAdvertisementParameters(bool toggle) {
+void Nrf51822BluetoothStack::updateAdvertisement(bool toggle) {
 	if (!_advertising)
 		//! only update if actually advertising
 		return;
@@ -668,24 +686,29 @@ void Nrf51822BluetoothStack::updateAdvertisementParameters(bool toggle) {
 	} else {
 //		LOGi("UPDATE advertisement");
 
-		uint32_t err_code;
-		err_code = sd_ble_gap_adv_stop();
-		if (err_code == NRF_ERROR_INVALID_STATE && isScanning()) {
-			// skip update while scanning
-			LOGw("can't update while scanning");
-			return;
-		}
-		APP_ERROR_CHECK(err_code);
+//		uint32_t err_code;
+//		err_code = sd_ble_gap_adv_stop();
+//		APP_ERROR_CHECK(err_code);
 
-		//! if toggle is false, advertisement should be always connectable, so reset the counter
-		//! every time
-		configureAdvertisementParameters(!toggle);
-
-		err_code = sd_ble_gap_adv_start(&_adv_params);
-		if (err_code == NRF_ERROR_INVALID_PARAM) {
-			LOGf(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
+		//! if toggle is false, advertisement should be always connectable, otherwise, toggle between
+		//! connectable and non connectable
+		if (toggle) {
+			if (++_advParamsCounter %2) {
+				setConnectable();
+			} else {
+				setNonConnectable();
+			}
+		} else {
+			setConnectable();
 		}
-		APP_ERROR_CHECK(err_code);
+
+		restartAdvertising();
+
+//		err_code = sd_ble_gap_adv_start(&_adv_params);
+//		if (err_code == NRF_ERROR_INVALID_PARAM) {
+//			LOGf(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
+//		}
+//		APP_ERROR_CHECK(err_code);
 	}
 }
 
@@ -693,7 +716,7 @@ bool Nrf51822BluetoothStack::isAdvertising() {
 	return _advertising;
 }
 
-void Nrf51822BluetoothStack::updateAdvertisement() {
+void Nrf51822BluetoothStack::setAdvertisementData() {
 //      Why disabled?
 //	if (!_advertising)
 //		return;
