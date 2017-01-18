@@ -10,15 +10,21 @@
 
 #include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ConfigTypes.h>
+#include <protocol/cs_MeshMessageTypes.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_RNG.h>
+#include <mesh/cs_MeshControl.h>
 
-ServiceData::ServiceData() : EventListener(EVT_ALL), _updateTimerId(NULL), _connected(false)
+ServiceData::ServiceData() : EventListener(EVT_ALL), _updateTimerId(NULL), _connected(false), _lastStateChangeMessage({})
 {
 	//! we want to update the advertisement packet every 1 second.
 	_updateTimerData = { {0} };
 	_updateTimerId = &_updateTimerData;
 	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
+
+	_meshStateTimerData = { {0} };
+	_meshStateTimerId = &_meshStateTimerData;
+	Timer::getInstance().createSingleShot(_meshStateTimerId, (app_timer_timeout_handler_t)ServiceData::meshStateTick);
 
 	//! get the OP mode from state
 	State::getInstance().get(STATE_OPERATION_MODE, _operationMode);
@@ -28,9 +34,13 @@ ServiceData::ServiceData() : EventListener(EVT_ALL), _updateTimerId(NULL), _conn
 	_params.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
 	_encryptedParams.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION; // this part will not be written over
 
-
 	//! start the update timer
 	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
+
+	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
+		//! start the mesh state timer
+		Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(MESH_STATE_REFRESH_PERIOD), this);
+	}
 
 	//! set the initial advertisement.
 	updateAdvertisement();
@@ -73,6 +83,23 @@ void ServiceData::updateAdvertisement() {
 
 }
 
+void ServiceData::sendMeshState(bool event) {
+	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+
+		state_item_t stateItem = {};
+		stateItem.id = _params.crownstoneId;
+		stateItem.switchState = _params.switchState;
+		stateItem.powerUsage = _params.powerUsage;
+		stateItem.accumulatedEnergy = _params.accumulatedEnergy;
+
+		MeshControl::getInstance().sendServiceDataMessage(stateItem, event);
+
+		if (!event) {
+			Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(MESH_STATE_REFRESH_PERIOD), this);
+		}
+	}
+}
+
 void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	//! keep track of the BLE connection status. If we are connected we do not need to update the packet.
 	switch(evt) {
@@ -102,6 +129,7 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		}
 		case STATE_SWITCH_STATE: {
 			updateSwitchState(*(uint8_t*)p_data);
+			sendMeshState(true);
 			break;
 		}
 		case STATE_ACCUMULATED_ENERGY: {

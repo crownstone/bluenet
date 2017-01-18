@@ -20,7 +20,6 @@ extern "C" {
 #include <cfg/cs_Boards.h>
 
 #include <drivers/cs_Serial.h>
-#include <mesh/cs_MeshControl.h>
 #include <util/cs_BleError.h>
 
 #include <util/cs_Utils.h>
@@ -57,13 +56,15 @@ Mesh::Mesh() :
 #else
 		_appTimerId(UINT32_MAX),
 #endif
-	_started(false)
+	_started(false), _running(true), _messageCounter(), _meshControl(MeshControl::getInstance())
 
 {
 #if (NORDIC_SDK_VERSION >= 11)
 	_appTimerData = { {0} };
 	_appTimerId = &_appTimerData;
 #endif
+
+//	_meshControl = MeshControl::getInstance();
 }
 
 Mesh::~Mesh() {
@@ -106,6 +107,28 @@ void Mesh::stop() {
 //	}
 //}
 
+void Mesh::resume() {
+	if (!_running) {
+		_running = true;
+#ifdef PRINT_MESH_VERBOSE
+		LOGi("resume mesh");
+#endif
+		startTicking();
+		app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
+	}
+}
+
+void Mesh::pause() {
+	if (_running) {
+		_running = false;
+#ifdef PRINT_MESH_VERBOSE
+		LOGi("pause mesh");
+#endif
+		stopTicking();
+		app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
+	}
+}
+
 void Mesh::tick() {
 	checkForMessages();
 	scheduleNextTick();
@@ -137,7 +160,7 @@ const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_L
  * thing.
  */
 void Mesh::init() {
-	MeshControl::getInstance();
+	_meshControl.init();
 
 	//nrf_gpio_pin_clear(PIN_GPIO_LED0);
 	LOGi(FMT_INIT, "Mesh");
@@ -168,6 +191,7 @@ void Mesh::init() {
 		APP_ERROR_CHECK(error_code);
 		_first[i] = true;
 	}
+
 //	error_code = rbc_mesh_value_enable(1);
 //	APP_ERROR_CHECK(error_code);
 //	error_code = rbc_mesh_value_enable(2);
@@ -188,24 +212,269 @@ void Mesh::init() {
 
 }
 
-void Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
-	assert(length <= MAX_MESH_MESSAGE_LEN, STR_ERR_VALUE_TOO_LONG);
+uint32_t Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
+	assert(length <= MAX_MESH_MESSAGE_LENGTH, STR_ERR_VALUE_TOO_LONG);
 
-//	LOGd("send ch: %d, len: %d", handle, length);
-	//BLEutil::printArray((uint8_t*)p_data, length);
-	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-		APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
+	if (!_started || !Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+		return 0;
+	}
+
+	mesh_message_t message = {};
+//	memset(&message, 0, sizeof(mesh_message_t));
+
+	message.messageCounter = ++_messageCounter[handle];
+	memcpy(&message.payload, p_data, length);
+
+//	LOGd("message:");
+//	BLEutil::printArray((uint8_t*)&message, sizeof(mesh_message_t));
+
+	uint16_t messageLen = length + PAYLOAD_HEADER_SIZE;
+
+	encrypted_mesh_message_t encryptedMessage = {};
+	uint16_t encryptedLength;
+//	memset(&encryptedMessage, 0, sizeof(encrypted_mesh_message_t));
+
+	encodeMessage(&message, messageLen, &encryptedMessage, encryptedLength);
+
+//	LOGd("encrypted:");
+//	BLEutil::printArray((uint8_t*)&encryptedMessage, sizeof(encrypted_mesh_message_t));
+
+//	LOGd("send ch: %d, len: %d", handle, sizeof(encrypted_mesh_message_t));
+//	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+		APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)&encryptedMessage, encryptedLength));
+//		APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
+//	}
+
+	return message.messageCounter;
+}
+
+bool Mesh::getLastMessage(uint8_t channel, void* p_data, uint16_t& length) {
+//	assert(length <= MAX_MESH_MESSAGE_LENGTH, STR_ERR_VALUE_TOO_LONG);
+
+	if (!_started || !Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+		LOGi("started: %s", _started ? "true" : "false");
+		return false;
+	}
+
+//	LOGd("getLastMessage, ch: %d", channel);
+
+	encrypted_mesh_message_t encryptedMessage = {};
+	uint16_t encryptedLength = sizeof(encrypted_mesh_message_t);
+
+//	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+		APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)&encryptedMessage, &encryptedLength));
+//	}
+
+	if (encryptedLength != 0) {
+
+//		LOGd("encrypted message:");
+//		BLEutil::printArray(&encryptedMessage, length);
+
+		mesh_message_t message = {};
+
+		decodeMessage(&encryptedMessage, encryptedLength, &message, length);
+
+//		LOGd("message:");
+//		BLEutil::printArray(&message, length);
+
+		length = sizeof(message.payload);
+		memcpy((uint8_t*)p_data, message.payload, length);
+
+		//LOGi("recv ch: %d, len: %d", handle, length);
+		return true;
+
+	} else {
+		return false;
 	}
 }
 
-bool Mesh::getLastMessage(uint8_t channel, void** p_data, uint16_t& length) {
-	assert(length <= MAX_MESH_MESSAGE_LEN, STR_ERR_VALUE_TOO_LONG);
+void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,
+		encrypted_mesh_message_t* p_new, uint16_t length_new)
+{
 
-	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-		APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)*p_data, &length));
+	mesh_message_t messageOld, messageNew;
+
+//	LOGd("old data:");
+//	BLEutil::printArray(p_old, length_old);
+//	LOGd("new data:");
+//	BLEutil::printArray(p_new, length_new);
+
+	uint16_t lengthOld;
+	decodeMessage(p_old, length_old, &messageOld, lengthOld);
+	uint16_t lengthNew;
+	decodeMessage(p_new, length_new, &messageNew, lengthNew);
+
+	switch(handle) {
+	case COMMAND_REPLY_CHANNEL: {
+
+		reply_message_t *replyMessageOld, *replyMessageNew;
+
+		replyMessageOld = (reply_message_t*)messageOld.payload;
+
+//		LOGi("replyMessageOld:");
+//		BLEutil::printArray(replyMessageOld, sizeof(reply_message_t));
+
+		replyMessageNew = (reply_message_t*)messageNew.payload;
+
+//		LOGi("replyMessageNew:");
+//		BLEutil::printArray(replyMessageNew, sizeof(reply_message_t));
+
+		if (replyMessageNew->messageCounter > replyMessageOld->messageCounter) {
+
+			LOGi("new is newer command reply");
+
+			// update message counter
+			_messageCounter[handle] = messageNew.messageCounter;
+
+			// send resolved message into mesh
+			send(handle, replyMessageNew, sizeof(reply_message_t));
+
+			// and process
+	//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
+			_meshControl.process(handle, &messageNew, lengthNew);
+		} else if (replyMessageOld->messageCounter > replyMessageNew->messageCounter) {
+
+			LOGi("old is newer command reply");
+
+			// update message counter
+			_messageCounter[handle] = messageOld.messageCounter;
+
+			// send resolved message into mesh
+			send(handle, replyMessageOld, sizeof(reply_message_t));
+
+			// and process
+	//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
+			_meshControl.process(handle, &messageOld, lengthOld);
+		} else {
+
+//			LOGi("merge ...");
+
+			if (replyMessageNew->messageType != replyMessageOld->messageType) {
+				LOGe("ohoh, different message types");
+				return;
+			}
+
+			if (replyMessageNew->messageType == STATUS_REPLY) {
+
+
+				status_reply_item_t* srcItem;
+				for (int i = 0; i < replyMessageNew->numOfReplys; ++i) {
+
+					srcItem = &replyMessageNew->statusList[i];
+
+					status_reply_item_t* destItem;
+					bool found = false;
+					for (int j = 0; j < replyMessageOld->numOfReplys; ++j) {
+						destItem = &replyMessageOld->statusList[j];
+
+						if (destItem->id == srcItem->id) {
+//							LOGi("index %d found at %d", i, j);
+//							BLEutil::printArray(srcItem, sizeof(status_reply_item_t));
+
+							found = true;
+							break;
+						}
+					}
+
+					if (!found) {
+//						LOGi("index %d not found, push back:", i);
+//						BLEutil::printArray(srcItem, sizeof(status_reply_item_t));
+
+						push_status_reply_item(replyMessageOld, srcItem);
+					}
+
+				}
+
+//				LOGi("update final");
+//				BLEutil::printArray(replyMessageOld, sizeof(reply_message_t));
+
+
+				// update message counter
+				_messageCounter[handle] = messageNew.messageCounter;
+
+				// send resolved message into mesh
+				send(handle, replyMessageOld, sizeof(reply_message_t));
+
+				// and process
+		//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
+				_meshControl.process(handle, &messageOld, lengthOld);
+
+			}
+		}
+
+
+		break;
 	}
-	//LOGi("recv ch: %d, len: %d", handle, length);
-	return length != 0;
+	case STATE_BROADCAST_CHANNEL:
+	case STATE_CHANGE_CHANNEL: {
+
+		state_message_t *stateMessageOld, *stateMessageNew;
+
+		stateMessageOld = (state_message_t*)messageOld.payload;
+
+//		LOGi("stateMessageOld:");
+//		BLEutil::printArray(stateMessageOld, sizeof(state_message_t));
+
+		stateMessageNew = (state_message_t*)messageNew.payload;
+
+//		LOGi("stateMessageNew:");
+//		BLEutil::printArray(stateMessageNew, sizeof(state_message_t));
+
+		if (stateMessageOld->head > stateMessageNew->head) {
+//			LOGi("update new head");
+			stateMessageNew->head = stateMessageOld->head;
+		} else if (stateMessageNew->head > stateMessageOld->head) {
+			stateMessageOld->head = stateMessageNew->head;
+//			LOGi("update old head");
+		}
+
+//			LOGi("merge ...");
+
+		int16_t srcIndex = -1;
+		state_item_t* srcItem;
+		while (peek_next_state_item(stateMessageNew, &srcItem, srcIndex)) {
+
+			bool found = false;
+
+			int16_t destIndex = -1;
+			state_item_t* destItem;
+			while (peek_next_state_item(stateMessageOld, &destItem, destIndex)) {
+
+				if (memcmp(destItem, srcItem, sizeof(state_item_t)) == 0) {
+
+//						LOGi("index %d found already:", srcIndex);
+//						BLEutil::printArray(srcItem, sizeof(state_item_t));
+
+					found = true;
+					break;
+				}
+
+			}
+
+			if (!found) {
+				push_state_item(stateMessageOld, srcItem);
+
+//					LOGi("index %d not found, push back:", srcIndex);
+//					BLEutil::printArray(srcItem, sizeof(state_item_t));
+			}
+		}
+
+//		LOGi("update final");
+//		BLEutil::printArray(stateMessageOld, sizeof(state_message_t));
+
+		// update message counter
+		_messageCounter[handle] = messageNew.messageCounter;
+
+		// send resolved message into mesh
+		send(handle, stateMessageOld, sizeof(state_message_t));
+
+		// and process
+//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
+		_meshControl.process(handle, &messageOld, sizeof(messageOld));
+
+		break;
+	}
+	}
 }
 
 void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
@@ -216,9 +485,10 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 #ifdef PRINT_MESH_VERBOSE
 	switch (evt->type)
 	{
-	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
+	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL: {
 		LOGd("ch: %d, conflicting value", evt->params.tx.value_handle);
 		break;
+	}
 	case RBC_MESH_EVENT_TYPE_NEW_VAL:
 		LOGd("ch: %d, new value", evt->params.tx.value_handle);
 		break;
@@ -244,23 +514,81 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 
 	switch (evt->type)
 	{
-//		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL:
+		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL: {
+//			if (evt->params.tx.value_handle == STATE_BROADCAST_CHANNEL) return;
+
+			encrypted_mesh_message_t* received = (encrypted_mesh_message_t*)evt->params.rx.p_data;
+			encrypted_mesh_message_t stored;
+			uint16_t length = sizeof(encrypted_mesh_message_t);
+			APP_ERROR_CHECK(rbc_mesh_value_get(evt->params.tx.value_handle, (uint8_t*)&stored, &length));
+
+//			if (received->messageCounter >= _messageCounter[evt->params.tx.value_handle]) {
+			if (received->messageCounter >= stored.messageCounter) {
+
+//				LOGd("received data:");
+//				BLEutil::printArray(received, evt->params.rx.data_len);
+//				LOGd("stored data:");
+//				BLEutil::printArray(&stored, length);
+
+				if (stored.messageCounter > received->messageCounter) {
+					resolveConflict(evt->params.tx.value_handle, received, evt->params.rx.data_len, &stored, length);
+				} else {
+					resolveConflict(evt->params.tx.value_handle, &stored, length, received, evt->params.rx.data_len);
+				}
+			}
+			break;
+		}
 		case RBC_MESH_EVENT_TYPE_NEW_VAL:
 		case RBC_MESH_EVENT_TYPE_UPDATE_VAL: {
 
-//            LOGi("Got data ch: %i, val: %i, len: %d, orig_addr:", evt->params.tx.value_handle, evt->data[0], evt->data_len);
-//            BLEutil::printArray(evt->originator_address.addr, 6);
+//			LOGd("MESH RECEIVE");
 
-            MeshControl &meshControl = MeshControl::getInstance();
-            meshControl.process(evt->params.tx.value_handle, evt->params.rx.p_data, evt->params.rx.data_len);
+			encrypted_mesh_message_t* encrypted_message = (encrypted_mesh_message_t*)evt->params.rx.p_data;
+			uint16_t length;
+			mesh_message_t message;
 
-//			led_config(evt->value_handle, evt->data[0]);
+//            LOGi("Got data ch: %d, len: %d", evt->params.tx.value_handle, length);
+//            BLEutil::printArray(encrypted_message, length);
+
+			if (decodeMessage(encrypted_message, evt->params.rx.data_len, &message, length)) {
+
+				_messageCounter[evt->params.tx.value_handle] = message.messageCounter;
+
+	//            LOGi("message:");
+	//            BLEutil::printArray(&message, sizeof(mesh_message_t));
+
+	//            meshControl.process(evt->params.tx.value_handle, evt->params.rx.p_data, evt->params.rx.data_len);
+//				_meshControl.process(evt->params.tx.value_handle, message.payload, length - PAYLOAD_HEADER_SIZE);
+				_meshControl.process(evt->params.tx.value_handle, &message, length);
+
+	//			led_config(evt->value_handle, evt->data[0]);
+			}
             break;
         }
         default:
 //            LOGi("Default: %i", evt->event_type);
             break;
 	}
+}
+
+bool Mesh::decodeMessage(encrypted_mesh_message_t* encoded, uint16_t encodedLength, mesh_message_t* decoded, uint16_t& decodedLength) {
+	decodedLength = encodedLength - ENCRYPTED_HEADER_SIZE;
+//	if (encrypted) {
+//
+//	} else {
+		memcpy(decoded, encoded->encrypted_payload, decodedLength);
+//	}
+	return encoded->messageCounter == decoded->messageCounter;
+}
+
+void Mesh::encodeMessage(mesh_message_t* decoded, uint16_t decodedLength, encrypted_mesh_message_t* encoded, uint16_t& encodedLength) {
+//	if (encrypted) {
+//
+//	} else {
+		encoded->messageCounter = decoded->messageCounter;
+		memcpy(encoded->encrypted_payload, decoded, decodedLength);
+//	}
+	encodedLength = decodedLength + ENCRYPTED_HEADER_SIZE;
 }
 
 void Mesh::checkForMessages() {

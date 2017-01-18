@@ -12,6 +12,7 @@
 #include <storage/cs_State.h>
 #include "drivers/cs_Timer.h"
 #include "cfg/cs_Config.h"
+#include <protocol/cs_MeshMessageTypes.h>
 
 #include <cstring>
 
@@ -90,16 +91,27 @@ public:
 		return sizeof(_params);
 	}
 
+	void sendMeshState(bool event);
+
 private:
 
 	app_timer_t    _updateTimerData;
 	app_timer_id_t _updateTimerId;
+
+	app_timer_t    _meshStateTimerData;
+	app_timer_id_t _meshStateTimerId;
+
 	uint8_t _operationMode;
 	bool _connected;
 
 	/* Static function for the timeout */
 	static void staticTimeout(ServiceData *ptr) {
 		ptr->updateAdvertisement();
+	}
+
+	/* Static function for the timeout */
+	static void meshStateTick(ServiceData *ptr) {
+		ptr->sendMeshState(false);
 	}
 
 	union {
@@ -125,6 +137,7 @@ private:
 		uint8_t _encryptedArray[sizeof(_params)] = {};
 	};
 
+	state_item_t _lastStateChangeMessage;
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 

@@ -13,169 +13,285 @@
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>
 #include <mesh/cs_Mesh.h>
+#include <common/cs_Types.h>
 
 // enable for additional debug output
 #define PRINT_DEBUG
 #define PRINT_MESHCONTROL_VERBOSE
 
-MeshControl::MeshControl() : EventListener(EVT_ALL) {
+//#define PRINT_VERBOSE_KEEPALIVE
+//#define PRINT_VERBOSE_STATE_BROADCAST
+//#define PRINT_VERBOSE_STATE_CHANGE
+//#define PRINT_VERBOSE_SCAN_RESULT
+//#define PRINT_VERBOSE_COMMAND
+//#define PRINT_VERBOSE_COMMAND_REPLY
+
+MeshControl::MeshControl() : EventListener(EVT_ALL), _myCrownstoneId(0) {
 	EventDispatcher::getInstance().addListener(this);
+}
+
+void MeshControl::init() {
 	uint32_t err_code;
 	err_code = sd_ble_gap_address_get(&_myAddr);
 	APP_ERROR_CHECK(err_code);
+	Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &_myCrownstoneId);
 }
 
-void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
-	LOGd("Process incoming mesh message");
+//KEEP_ALIVE_CHANNEL
+//STATE_BROADCAST_CHANNEL
+//STATE_CHANGE_CHANNEL
+//COMMAND_CHANNEL
+//COMMAND_REPLY_CHANNEL
+//SCAN_RESULT_CHANNEL
+//BIG_DATA_CHANNEL
+
+//void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
+void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t messageLength) {
+//	LOGd("Process incoming mesh message");
+
+	mesh_message_t* meshMessage = (mesh_message_t*)p_meshMessage;
+	uint8_t* p_data = meshMessage->payload;
+	uint16_t length = messageLength - PAYLOAD_HEADER_SIZE;
 
 	switch(channel) {
-	case HUB_CHANNEL: {
+	case KEEP_ALIVE_CHANNEL: {
+		LOGi("received keep alive");
 
-		//! are we the hub? then process the message
-		//! maybe answer on the data channel to the node that sent it that
-		//! we received the message ??
-		//! but basically we don't need to do anything, the
-		//! hub can just read out the mesh characteristic for the hub channel
+		keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
+		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
+		uint16_t timeout = msg->timeout;
 
-//		LOGd("ch %d: received hub message:", channel);
-//		BLEutil::printArray((uint8_t*)p_data, length);
-
-		hub_mesh_message_t* msg = (hub_mesh_message_t*)p_data;
-//		LOGd("message type: %d", msg->header.messageType);
-		switch(msg->header.messageType) {
-		case SCAN_MESSAGE: {
-
-#ifdef PRINT_MESHCONTROL_VERBOSE
-			LOGf("Crownstone %s scanned these devices:", getAddress((mesh_message_t*)p_data).c_str());
-#endif
-			if (msg->scanMsg.numDevices > NR_DEVICES_PER_MESSAGE) {
-				LOGe("Invalid number of devices!");
-			}
-			else {
-#ifdef PRINT_DEBUG
-				for (int i = 0; i < msg->scanMsg.numDevices; ++i) {
-					peripheral_device_t __attribute__((unused)) dev = msg->scanMsg.list[i];
-//					if ((dev.addr[5] == 0xED && dev.addr[4] == 0x01 && dev.addr[3] == 0x53 && dev.addr[2] == 0xB8 && dev.addr[1] == 0x6F && dev.addr[0] == 0xCC) ||
-//						(dev.addr[5] == 0xC1 && dev.addr[4] == 0x1F && dev.addr[3] == 0xDC && dev.addr[2] == 0xF9 && dev.addr[1] == 0xB3 && dev.addr[0] == 0xFC)) {
-						LOGi("%d: [%02X %02X %02X %02X %02X %02X]   rssi: %4d    occ: %3d", i, dev.addr[5],
-								dev.addr[4], dev.addr[3], dev.addr[2], dev.addr[1],
-								dev.addr[0], dev.rssi, dev.occurrences);
-//					}
-				}
-#endif
-			}
-
-			break;
-		}
-		case SERVICE_DATA_MESSAGE: {
-#ifdef PRINT_MESHCONTROL_VERBOSE
-			LOGd("Received service data from crownstone %s", getAddress((mesh_message_t*)p_data).c_str());
-#endif
-
-#ifdef PRINT_DEBUG
-			service_data_mesh_message_t& __attribute__((unused)) sd = msg->serviceDataMsg;
-			LOGd("> crownstone id: %d", sd.crownstoneId);
-			LOGd("> switch state: %d", sd.switchState);
-			LOGd("> event bitmask: %s", BLEutil::toBinaryString(sd.eventBitmask).c_str());
-			LOGd("> power usage: %d", sd.powerUsage);
-			LOGd("> accumulated energy: %d", sd.accumulatedEnergy);
-			LOGd("> temperature: %d", sd.temperature);
-#endif
-
-			break;
-		}
-//		case 102: {
-//			if (firstTimeStamp == 0) {
-//				firstTimeStamp = RTC::getCount();
-//				firstCounter[channel-1] = msg->testMsg.counter;
-//			}
-//			if (lastCounter[channel-1] != 0 && msg->testMsg.counter != 0 && lastCounter[channel-1] +1 != msg->testMsg.counter) {
-//				incident[channel-1] += msg->testMsg.counter - lastCounter[channel-1] - 1;
-//				double loss = incident[channel-1] * 100.0 / (msg->testMsg.counter - firstCounter[channel-1]);
-//				uint32_t dt = RTC::ticksToMs(RTC::difference(RTC::getCount(), firstTimeStamp));
-//				double msgsPerSecond = 0;
-//				if (dt != 0) {
-//					msgsPerSecond = 1000.0 * (msg->testMsg.counter - firstCounter[channel-1]) / dt;
-//				}
-////				LOGe("ch %d: %d missed, last: %d, current: %d, loss: %d %%", channel, incident[channel-1],
-////						lastCounter[channel-1], msg->testMsg.counter, (uint32_t)loss);
-//				LOGe("ch %d: %d missed, current: %d, loss: %d %%, msgs/s: %d", channel, incident[channel-1],
-//						msg->testMsg.counter, (uint32_t)loss, (uint32_t)msgsPerSecond);
-//			}
-//			lastCounter[channel-1] = msg->testMsg.counter;
-//			LOGi(">> count: %d", msg->testMsg.counter);
-//			break;
-//		}
-
-		}
-
-		break;
-	}
-	case DATA_CHANNEL: {
-		mesh_message_t* msg = (mesh_message_t*)p_data;
-
-		if (!isValidMessage(msg, length)) {
+		if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
+			LOGe("invalid message, length too small")
+			BLEutil::printArray(p_data, length);
 			return;
 		}
 
-		if (isBroadcast(msg) || isMessageForUs(msg)) {
-			//! [01.12.2015] I think this is not necessary anymore with the new ble mesh version
-			//! since the receive is not anymore handled in an interrupt handler, but has to be done
-			//! manually. so we are already doing it in a timer which is executed by the app scheduler.
-			//! so now we handle it by the scheduler, then put it back in the scheduler queue and again
-			//! pick it up later
-//			BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
-
-			decodeDataMessage(msg->header.messageType, msg->payload);
-		} else {
-#ifdef PRINT_MESHCONTROL_VERBOSE
-			LOGi("Message not for us: %s", getAddress(msg).c_str());
-#endif
+		for (int i = 0; i < msg->size; ++i) {
+			if (p_item->id == _myCrownstoneId) {
+				handleKeepAlive(p_item, timeout);
+				return;
+			}
+			++p_item;
 		}
+
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
+		LOGi("keep alive, not for us");
+		BLEutil::printArray(p_data, length);
+#endif
 
 		break;
 	}
-	case 3:
-	case 4:
-	case 5:
-	case 6:
-	case 7:
-	case 8:
-	case 9:
-	case 10:
-	case 11:
-	case 12:
-	case 13:
-	case 14:
-	case 15:
-	case 16:
-	case 17:
-	case 18:
-	case 19:
-	case 20: {
-#ifdef PRINT_MESHCONTROL_VERBOSE
-		mesh_message_t* __attribute__((unused)) msg = (mesh_message_t*) p_data;
-		LOGd("power samples: h=%u src id=%s", channel, getAddress(msg).c_str());
+	case COMMAND_CHANNEL: {
+		LOGi("received command");
+
+		command_message_t* msg = (command_message_t*)p_data;
+
+		// only check the "header" part, so message type, and ids, the payload length
+		// will be checked in the handleCommand
+		if (length < MIN_COMMAND_HEADER_SIZE + msg->numOfIds * sizeof(id_type_t) + SB_HEADER_SIZE) {
+			LOGe("invalid message, length too small")
+			BLEutil::printArray(p_data, length);
+			return;
+		}
+
+		uint8_t* payload;
+		uint16_t payloadLength;
+
+		if (is_command_for_us(msg, _myCrownstoneId)) {
+
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
+			LOGi("is for us: ");
+			BLEutil::printArray(msg, length);
 #endif
+
+			get_payload(msg, length, &payload, payloadLength);
+
+			ERR_CODE errCode;
+			errCode = handleCommand(msg->messageType, payload, payloadLength);
+
+			sendStatusReplyMessage(meshMessage->messageCounter, errCode);
+		} else {
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
+			LOGi("not for us: ");
+			BLEutil::printArray(msg, length);
+#endif
+		}
+
+//		uint8_t* ptr;
+//		uint16_t payloadLength = length - MIN_COMMAND_HEADER_SIZE;
+//		bool handle = false;
+//		if (msg->numOfIds == 0) {
+//			// broadcast
+//			handle = true;
+//			ptr = (uint8_t*)&msg->data.ids;
+//		} else {
+//			id_type_t* p_id;
+//			p_id = msg->data.ids;
+//			for (int i = 0; i < msg->numOfIds; ++i) {
+//				if (*p_id == _myCrownstoneId) {
+//					handle = true;
+////					break;
+//				}
+//				++p_id;
+//				payloadLength -= sizeof(id_type_t);
+//			}
+//			ptr = (uint8_t*)p_id;
+//		}
+//
+//		if (handle) {
+//			LOGi("received command: ");
+//			BLEutil::printArray(msg, length);
+//
+//			handleCommand(msg->messageType, ptr, payloadLength);
+//		} else {
+//			LOGi("command not for us: ");
+//			BLEutil::printArray(msg, length);
+//		}
+
+		break;
+	}
+
+	case STATE_BROADCAST_CHANNEL:
+	case STATE_CHANGE_CHANNEL: {
+		LOGd("received state %s", channel == STATE_CHANGE_CHANNEL ? "change" : "broadcast");
+
+#if defined(PRINT_DEBUG)
+
+#if defined(PRINT_VERBOSE_STATE_BROADCAST) && defined(PRINT_VERBOSE_STATE_CHANGE)
+		// ok
+#elif defined(PRINT_VERBOSE_STATE_BROADCAST)
+		if (channel == STATE_CHANGE_CHANNEL) {
+			break;
+		}
+#elif defined(PRINT_VERBOSE_STATE_CHANGE)
+		if (channel == STATE_BROADCAST_CHANNEL) {
+			break;
+		}
+#else
+		break;
+#endif
+
+		state_message_t* msg = (state_message_t*)p_data;
+		BLEutil::printArray(msg, length);
+
+		int16_t idx = -1;
+		state_item_t* p_stateItem;
+		while (peek_next_state_item(msg, &p_stateItem, idx)) {
+			LOGi("idx: %d", idx);
+			LOGi("Crownstone Id %d", p_stateItem->id);
+			LOGi("  switch state: %d", p_stateItem->switchState);
+			LOGi("  power usage: %d", p_stateItem->powerUsage);
+			LOGi("  accumulated energy: %d", p_stateItem->accumulatedEnergy);
+		}
+
+#endif
+		break;
+	}
+	case COMMAND_REPLY_CHANNEL: {
+		LOGi("received command reply");
+
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND_REPLY)
+		reply_message_t* msg = (reply_message_t*)p_data;
+
+		BLEutil::printArray(p_data, length);
+
+		LOGi("Received Reply for Message: %d", msg->messageCounter);
+		switch(msg->messageType) {
+		case STATUS_REPLY: {
+
+			for (int i = 0; i < msg->numOfReplys; ++i) {
+				LOGi("  ID %d: %d", msg->list[i].id, msg->list[i].status);
+			}
+			break;
+		}
+		}
+
+#endif
+
+		break;
+	}
+	case SCAN_RESULT_CHANNEL: {
+		LOGi("Received scan results");
+
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_SCAN_RESULT)
+		scan_result_message_t* msg = (scan_result_message_t*)p_data;
+
+		BLEutil::printArray(p_data, length);
+
+		int lastId = 0;
+		for (int i = 0; i < msg->numOfResults; ++i) {
+			scan_result_item_t scanResultItem = msg->list[i];
+			if (scanResultItem.id != lastId) {
+				lastId = scanResultItem.id;
+				LOGi("Crownstone ID %d scanned:", scanResultItem.id);
+			}
+
+			LOGi("   [%02X %02X %02X %02X %02X %02X]   rssi: %4d", scanResultItem.address[5],
+					scanResultItem.address[4], scanResultItem.address[3], scanResultItem.address[2],
+					scanResultItem.address[1], scanResultItem.address[0], scanResultItem.rssi);
+		}
+#endif
+
+		break;
+	}
+	case BIG_DATA_CHANNEL: {
 		break;
 	}
 	}
 }
 
+void MeshControl::handleKeepAlive(keep_alive_item_t* p_item, uint16_t timeout) {
 
-void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
+	LOGi("received keep alive over mesh:");
+	BLEutil::printArray(p_item, sizeof(keep_alive_item_t));
+#endif
 
-	switch(type) {
-	case EVENT_MESSAGE: {
+	keep_alive_state_message_payload_t keepAlive;
+
+	switch (p_item->actionSwitchState) {
+	case 255: {
+		keepAlive.action = 0;
 		break;
 	}
+	default: {
+		keepAlive.action = 1;
+		keepAlive.switchState.switchState = p_item->actionSwitchState;
+		break;
+	}
+	}
+
+	keepAlive.timeout = timeout;
+
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
+	LOGi("KeepAlive, action: %d, switchState: %d, timeout: %d",
+			keepAlive.action, keepAlive.switchState.switchState, keepAlive.timeout);
+#endif
+
+	EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, &keepAlive, sizeof(keepAlive));
+}
+
+ERR_CODE MeshControl::handleCommand(uint16_t type, uint8_t* payload, uint16_t length) {
+
+	switch(type) {
+//	case EVENT_MESSAGE: {
+//		break;
+//	}
 	case CONFIG_MESSAGE: {
+		if (length != sizeof(config_mesh_message_t)) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+			BLEutil::printArray(payload, length);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
 		config_mesh_message_t* msg = (config_mesh_message_t*)payload;
 		uint8_t type = msg->type;
 		uint16_t length = msg->length;
 		uint8_t* payload = msg->payload;
 		Settings::getInstance().writeToStorage(type, payload, length);
-		break;
+
+		return ERR_SUCCESS;
 	}
 	case CONTROL_MESSAGE: {
 		control_mesh_message_t* msg = (control_mesh_message_t*)payload;
@@ -185,6 +301,12 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 
 		switch(command) {
 		case CMD_ENABLE_SCANNER: {
+			if (length != sizeof(enable_scanner_message_payload_t)) {
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+				BLEutil::printArray(msgPayload, length);
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+
 			//! need to use a random delay for starting the scanner, otherwise
 			//! the devices in the mesh will start scanning at the same time
 			//! resulting in lots of conflicts
@@ -204,7 +326,8 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 			}
 
 			CommandHandler::getInstance().handleCommand(command, (uint8_t*)&scannerPayload, 3);
-			return;
+
+			return ERR_SUCCESS;
 		}
 		case CMD_REQUEST_SERVICE_DATA: {
 			//! need to delay the sending of the service data or all devices will write their
@@ -220,20 +343,27 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 				delay = rng.getRandom16() / 6; //! Delay in ms (about 0-60 seconds)
 			}
 			CommandHandler::getInstance().handleCommandDelayed(command, msgPayload, length, delay);
-			return;
+
+			return ERR_SUCCESS;
 		}
 		default:
 			break;
 		}
 
-		CommandHandler::getInstance().handleCommand(command, msgPayload, length);
-		break;
+		return CommandHandler::getInstance().handleCommand(command, msgPayload, length);
+
 	}
 	case BEACON_MESSAGE: {
-
 #ifdef PRINT_MESHCONTROL_VERBOSE
 		LOGi("Received Beacon Message");
 #endif
+
+		if (length != sizeof(beacon_mesh_message_t)) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+			BLEutil::printArray(payload, length);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
 		beacon_mesh_message_t* msg = (beacon_mesh_message_t*)payload;
 		//		BLEutil::printArray((uint8_t*)msg, sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t));
 
@@ -287,17 +417,18 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 			EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
 		}
 
-		break;
+		return ERR_SUCCESS;
 	}
-	case STATE_MESSAGE: {
-		// should have single value
-		LOGi("Decode message: value %i", payload[0]);
-		log(SERIAL_INFO, "Decode message:");
-		BLEutil::printArray((uint8_t*)payload, 1);
-		break;
-	}
+//	case STATE_MESSAGE: {
+//		// should have single value
+//		LOGi("Decode message: value %i", payload[0]);
+//		log(SERIAL_INFO, "Decode message:");
+//		BLEutil::printArray((uint8_t*)payload, 1);
+//		break;
+//	}
 	default: {
-		LOGi("Unknown message type. Don't know how to decode...");
+		LOGi("Unknown message type %d. Don't know how to decode...", type);
+		return ERR_UNKNOWN_MESSAGE_TYPE;
 	}
 
 	}
@@ -308,23 +439,10 @@ void MeshControl::decodeDataMessage(uint16_t type, uint8_t* payload) {
 //! into the mesh, e.g. for power on/off
 void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch(evt) {
-//	case EVT_POWER_ON:
-//	case EVT_POWER_OFF: {
-//		assert(length < MAX_EVENT_MESH_MESSAGE_DATA_LENGTH, "event data is too long");
-//
-//		LOGi("send event %s", evt == EVT_POWER_ON ? "EVT_POWER_ON" : "EVT_POWER_OFF");
-//
-//		device_mesh_message_t msg;
-//		uint8_t targetAddress[BLE_GAP_ADDR_LEN] = BROADCAST_ADDRESS;
-//		memcpy(msg.header.targetAddress, &targetAddress, BLE_GAP_ADDR_LEN);
-//		msg.evtMsg.event = evt;
-////		memset(msg.evtMsg.data, 0, sizeof(msg.evtMsg.data));
-////		memcpy(msg.evtMsg.data, p_data, length);
-//
-//		CMesh::getInstance().send(DATA_CHANNEL, (uint8_t*)&msg, 7 + 2 + length);
-//
-//		break;
-//	}
+	case CONFIG_CROWNSTONE_ID: {
+		_myCrownstoneId = *(uint16_t*)p_data;
+		break;
+	}
 	default:
 		break;
 	}
@@ -334,43 +452,100 @@ void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
 	switch(channel) {
-	case DATA_CHANNEL: {
+	case COMMAND_CHANNEL: {
 
-		mesh_message_t* msg = (mesh_message_t*)p_data;
-		LOGi("Struct mesh_message_t is of size %i, length is %i", sizeof(mesh_message_t), length);
-		if (!isValidMessage(msg, length)) {
+		command_message_t* message = (command_message_t*)p_data;
+
+//		if (!isValidMessage(msg, length)) {
+//			return ERR_INVALID_MESSAGE;
+//		}
+
+		// only check the "header" part, so message type, ids, and the command header. the payload length
+		// will be checked in the handleCommand
+		if (length < MIN_COMMAND_HEADER_SIZE + message->numOfIds * sizeof(id_type_t) + SB_HEADER_SIZE) {
+			LOGe("invalid message, length too small")
+			BLEutil::printArray(p_data, length);
 			return ERR_INVALID_MESSAGE;
 		}
 
-		if (isBroadcast(msg)) {
-			//! send broadcast message
-			LOGd("Send broadcast");
-			log(SERIAL_INFO, "message:");
-			BLEutil::printArray((uint8_t*)p_data, length);
-			Mesh::getInstance().send(channel, p_data, length);
-			// [30.05.16] as long as we don't call this function in an interrupt, we don't need to
-			//   decouple it anymore, because softdevice events are handled already by the scheduler
-			//	 BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message));
-			device_mesh_message_t* msg = (device_mesh_message_t*)p_data;
-			decodeDataMessage(msg->header.messageType, msg->payload);
-
-		} else if (!isMessageForUs(msg)) {
-			//! message is not for us, send it into mesh
-			LOGd("Message not for us, send into mesh ...");
-			Mesh::getInstance().send(channel, p_data, length);
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
+		{
+		id_type_t* id = message->data.ids;
+		if (message->numOfIds == 1 && *id == _myCrownstoneId) {
+			LOGd("Message is only for us");
+		} else if (is_broadcast_command(message)) {
+			LOGd("Send broadcast and process");
+		} else if (is_command_for_us(message, _myCrownstoneId)) {
+			LOGd("Multicast message, send into mesh and process");
 		} else {
-			//! message is for us, handle directly, no reason to send it into the mesh!
-			LOGd("Message is for us");
-			// [30.05.16] as long as we don't handle this in an interrupt, we don't need to
-			//   decouple it anymore, because softdevice events are handled already by the scheduler
-			//	 BLE_CALL(app_sched_event_put, (p_data, length, decode_data_message)););
-			device_mesh_message_t* msg = (device_mesh_message_t*)p_data;
-			decodeDataMessage(msg->header.messageType, msg->payload);
+			LOGd("Message not for us, send into mesh");
+		}
+		LOGi("message:");
+		BLEutil::printArray((uint8_t*)p_data, length);
+		}
+#endif
+
+		bool handleSelf = false;
+		bool sendOverMesh = false;
+
+		id_type_t* id = message->data.ids;
+		if (message->numOfIds == 1 && *id == _myCrownstoneId) {
+
+			// message is only for us, no need to send it into the mesh
+			handleSelf = true;
+			sendOverMesh = false;
+
+		} else {
+			// send over mesh
+			sendOverMesh = true;
+			// and check if we should handle it ourselves too
+			handleSelf = is_command_for_us(message, _myCrownstoneId);
+		}
+
+		ERR_CODE errCode;
+		if (handleSelf) {
+			uint8_t* payload;
+			uint16_t payloadLength;
+
+			get_payload(message, length, &payload, payloadLength);
+			errCode = handleCommand(message->messageType, payload, payloadLength);
+		}
+
+		if (sendOverMesh) {
+			uint32_t messageCounter = Mesh::getInstance().send(channel, p_data, length);
+
+			if (handleSelf) {
+				sendStatusReplyMessage(messageCounter, errCode);
+			}
 		}
 
 		break;
 	}
-	case HUB_CHANNEL: {
+	case KEEP_ALIVE_CHANNEL: {
+
+		keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
+		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
+		uint16_t timeout = msg->timeout;
+
+		if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
+			LOGe("invalid message, length too small")
+			BLEutil::printArray(p_data, length);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		for (int i = 0; i < msg->size; ++i) {
+			if (p_item->id == _myCrownstoneId) {
+				handleKeepAlive(p_item, timeout);
+				break;
+			}
+			++p_item;
+		}
+
+		Mesh::getInstance().send(channel, p_data, length);
+
+		break;
+	}
+	default: {
 
 //		if (are we connected to a hub, or are we the hub??) {
 //			then store the message
@@ -393,58 +568,172 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 
 }
 
+void MeshControl::sendStatusReplyMessage(uint32_t messageCounter, ERR_CODE status) {
+
+#if defined(PRINT_MESHCONTROL_VERBOSE) && defined(PRINT_VERBOSE_COMMAND_REPLY)
+	LOGd("MESH SEND");
+	LOGi("Send StatusReply for message %d, status: %d", messageCounter, status);
+#endif
+
+	reply_message_t message = {};
+	uint16_t messageSize;
+
+	status_reply_item_t replyItem;
+	replyItem.id = _myCrownstoneId;
+	replyItem.status = status;
+
+	Mesh::getInstance().getLastMessage(COMMAND_REPLY_CHANNEL, &message, messageSize);
+
+	if (message.messageCounter != messageCounter) {
+		memset(&message, 0, sizeof(message));
+		message.messageCounter = messageCounter;
+	}
+
+	push_status_reply_item(&message, &replyItem);
+
+#if defined(PRINT_DEBUG) &&  defined(PRINT_VERBOSE_COMMAND_REPLY)
+		LOGi("message data:");
+		BLEutil::printArray(&message, sizeof(reply_message_t));
+#endif
+
+	Mesh::getInstance().send(COMMAND_REPLY_CHANNEL, &message, sizeof(reply_message_t));
+}
+
 //! sends the result of a scan, i.e. a list of scanned devices with rssi values
 //! into the mesh on the hub channel so that it can be synced to the cloud
 void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
-#ifdef PRINT_MESHCONTROL_VERBOSE
+#if defined(PRINT_MESHCONTROL_VERBOSE) && defined(PRINT_VERBOSE_SCAN_RESULT)
+	LOGd("MESH SEND");
 	LOGi("Send ScanMessage, size: %d", size);
 #endif
 
 	//! if no devices were scanned there is no reason to send a message!
 	if (size > 0) {
-		hub_mesh_message_t* message = createHubMessage(SCAN_MESSAGE);
-		message->scanMsg.numDevices = size;
-		memcpy(&message->scanMsg.list, p_list, size * sizeof(peripheral_device_t));
 
-#ifdef PRINT_DEBUG
+		scan_result_message_t message;
+		message.numOfResults = size;
+
+		scan_result_item_t* p_item;
+		p_item = message.list;
+		for (int i = 0; i < size; ++i) {
+			p_item->id = _myCrownstoneId;
+			memcpy(&p_item->address, p_list[i].addr, BLE_GAP_ADDR_LEN);
+			p_item->rssi = p_list[i].rssi;
+			++p_item;
+		}
+
+		int messageSize = SCAN_RESULT_HEADER_SIZE + size * sizeof(scan_result_item_t);
+
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_SCAN_RESULT)
 		LOGi("message data:");
-		BLEutil::printArray(message, sizeof(hub_mesh_message_t));
+		BLEutil::printArray(&message, messageSize);
 #endif
 
-		Mesh::getInstance().send(HUB_CHANNEL, message, sizeof(hub_mesh_message_t));
-		free(message);
+		Mesh::getInstance().send(SCAN_RESULT_CHANNEL, &message, messageSize);
 	}
 
 }
 
-void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples) {
+//void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples) {
+//
+//#ifdef PRINT_MESHCONTROL_VERBOSE
+//	LOGd("Send PowerSamplesMessage");
+//#endif
+//
+//	hub_mesh_message_t* message = createHubMessage(POWER_SAMPLES_MESSAGE);
+//	memcpy(&message.powerSamplesMsg, samples, sizeof(power_samples_mesh_message_t));
+//	uint16_t handle = (message.header.address[0] % (MESH_NUM_HANDLES-2-1)) + 3;
+//	Mesh::getInstance().send(handle, message, sizeof(hub_mesh_message_t));
+//	free(message);
+//}
 
-#ifdef PRINT_MESHCONTROL_VERBOSE
-	LOGd("Send PowerSamplesMessage");
+void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
+
+//#define UPDATE_EXISTING
+	bool debug = false;
+
+#if defined(PRINT_DEBUG)
+#if defined(PRINT_VERBOSE_STATE_BROADCAST) && defined(PRINT_VERBOSE_STATE_CHANGE)
+	debug = true;
+#elif defined(PRINT_VERBOSE_STATE_BROADCAST)
+	debug = !event;
+#elif defined(PRINT_VERBOSE_STATE_CHANGE)
+	debug = event;
 #endif
 
-	hub_mesh_message_t* message = createHubMessage(POWER_SAMPLES_MESSAGE);
-	memcpy(&message->powerSamplesMsg, samples, sizeof(power_samples_mesh_message_t));
-	uint16_t handle = (message->header.address[0] % (MESH_NUM_HANDLES-2-1)) + 3;
-	Mesh::getInstance().send(handle, message, sizeof(hub_mesh_message_t));
-	free(message);
-}
+	if (debug) {
+		LOGd("MESH SEND");
+		LOGd("Send state %s", event ? "change" : "broadcast");
 
-void MeshControl::sendServiceDataMessage(service_data_mesh_message_t* serviceData) {
-
-#ifdef PRINT_MESHCONTROL_VERBOSE
-	LOGd("Send service data");
+		LOGi("Crownstone Id %d", stateItem.id);
+		LOGi("  switch state: %d", stateItem.switchState);
+		LOGi("  power usage: %d", stateItem.powerUsage);
+		LOGi("  accumulated energy: %d", stateItem.accumulatedEnergy);
+	}
 #endif
 
-	hub_mesh_message_t* message = createHubMessage(SERVICE_DATA_MESSAGE);
-	memcpy(&message->serviceDataMsg, serviceData, sizeof(service_data_mesh_message_t));
+	uint16_t messageSize = 0;
+	state_message_t message = {};
+	uint8_t channel;
 
-#ifdef PRINT_DEBUG
-	LOGi("message data:");
-	BLEutil::printArray(message, sizeof(hub_mesh_message_t));
+	if (event) {
+		channel = STATE_CHANGE_CHANNEL;
+	} else {
+		channel = STATE_BROADCAST_CHANNEL;
+	}
+
+#ifdef UPDATE_EXISTING
+	int index = 0;
+	if (!Mesh::getInstance().getLastMessage(channel, &message, messageSize)) {
+		message.tail = 0;
+		message.head = 0;
+	} else {
+		bool found = false;
+		for (uint8_t i = 0; i < MAX_STATE_ITEMS; ++i) {
+			index = (message.head + i) % MAX_STATE_ITEMS;
+
+			if (message.list[index].id == _myCrownstoneId) {
+#if defined(PRINT_DEBUG)
+				if (debug) {
+					LOGi("found at index %d", index);
+				}
+#endif
+				found = true;
+				break;
+			}
+
+			if (index == message.tail) break;
+		}
+
+		if (!found) {
+			message.tail = (message.tail + 1) % MAX_STATE_ITEMS;
+			index = message.tail;
+#if defined(PRINT_DEBUG)
+			if (debug) {
+				LOGd("not found, add at %d", message.tail);
+			}
+#endif
+			if (message.tail == message.head) {
+				message.head = (message.head + 1) % MAX_STATE_ITEMS;
+			}
+		}
+	}
+
+	memcpy(&message.list[index], &stateItem, sizeof(state_item_t));
+#else
+
+	Mesh::getInstance().getLastMessage(channel, &message, messageSize);
+	push_state_item(&message, &stateItem);
+
 #endif
 
-	Mesh::getInstance().send(HUB_CHANNEL, message, sizeof(hub_mesh_message_t));
-	free(message);
+#if defined(PRINT_DEBUG)
+	if (debug) {
+		LOGi("message data:");
+		BLEutil::printArray(&message, sizeof(state_message_t));
+	}
+#endif
+
+	Mesh::getInstance().send(channel, &message, sizeof(state_message_t));
 }

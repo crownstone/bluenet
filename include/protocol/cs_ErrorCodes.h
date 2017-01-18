@@ -25,6 +25,7 @@ enum CommandErrorCodes {
 
 enum MeshErrorCodes {
 	ERR_INVALID_MESSAGE = 0x200,
+	ERR_UNKNOWN_MESSAGE_TYPE = 0x201,
 };
 
 enum ConfigErrorCodes {
