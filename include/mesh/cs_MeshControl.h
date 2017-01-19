@@ -175,8 +175,6 @@ private:
 	MeshControl(MeshControl const&); //! singleton, deny implementation
 	void operator=(MeshControl const &); //! singleton, deny implementation
 
-	// stores the MAC address of the devices to be used for mesh message handling
-    ble_gap_addr_t _myAddr;
     id_type_t _myCrownstoneId;
 
 };

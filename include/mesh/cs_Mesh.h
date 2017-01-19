@@ -62,9 +62,6 @@ private:
 	//! constructor is hidden from the user
 	Mesh();
 
-	//! destructor is hidden from the user
-	~Mesh();
-
 	Mesh(Mesh const&); //! singleton, deny implementation
 	void operator=(Mesh const &); //! singleton, deny implementation
 

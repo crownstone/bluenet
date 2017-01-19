@@ -30,23 +30,6 @@ extern "C" {
 #include <storage/cs_Settings.h>
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_MESH_VERBOSE
-
-void start_stop_mesh(void * p_event_data, uint16_t event_size) {
-	if (*(bool*)p_event_data) {
-		LOGi(FMT_START, "Mesh");
-		uint32_t err_code = rbc_mesh_start();
-		if (err_code != NRF_SUCCESS) {
-			LOGe(FMT_FAILED_TO, "start mesh", err_code);
-		}
-	} else {
-		LOGi(FMT_STOP, "Mesh");
-		uint32_t err_code = rbc_mesh_stop();
-		if (err_code != NRF_SUCCESS) {
-			LOGe(FMT_FAILED_TO, "stop mesh", err_code);
-		}
-	}
-}
 
 
 Mesh::Mesh() :
@@ -64,11 +47,86 @@ Mesh::Mesh() :
 	_appTimerId = &_appTimerData;
 #endif
 
-//	_meshControl = MeshControl::getInstance();
 }
 
-Mesh::~Mesh() {
+#if (NORDIC_SDK_VERSION >= 11)
+const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_LF_SRC_RC,   \
+                                                    .rc_ctiv       = 16,                    \
+                                                    .rc_temp_ctiv  = 2,                     \
+                                                    .xtal_accuracy = 0};
+#endif
 
+/**
+ * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
+ * thing.
+ */
+void Mesh::init() {
+	_meshControl.init();
+
+	//nrf_gpio_pin_clear(PIN_GPIO_LED0);
+	LOGi(FMT_INIT, "Mesh");
+
+	// setup the timer
+	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Mesh::staticTick);
+
+	rbc_mesh_init_params_t init_params;
+
+	// the access address is a configurable parameter so we get it from the settings.
+	Settings::getInstance().get(CONFIG_MESH_ACCESS_ADDRESS, &init_params.access_addr);
+	LOGd("Mesh access address %p", init_params.access_addr);
+	init_params.interval_min_ms = MESH_INTERVAL_MIN_MS;
+	init_params.channel = MESH_CHANNEL;
+#if (NORDIC_SDK_VERSION >= 11)
+	init_params.lfclksrc = meshClockSource;
+#else
+	init_params.lfclksrc = MESH_CLOCK_SOURCE;
+#endif
+
+	uint8_t error_code;
+	//! checks if softdevice is enabled etc.
+	error_code = rbc_mesh_init(init_params);
+	APP_ERROR_CHECK(error_code);
+
+	for (int i = 0; i < MESH_NUM_HANDLES; ++i) {
+		error_code = rbc_mesh_value_enable(i+1);
+		APP_ERROR_CHECK(error_code);
+		_first[i] = true;
+	}
+
+//	error_code = rbc_mesh_value_enable(1);
+//	APP_ERROR_CHECK(error_code);
+//	error_code = rbc_mesh_value_enable(2);
+//	APP_ERROR_CHECK(error_code);
+
+	_mesh_start_time = RTC::now();
+
+	// do not automatically start meshing, wait for the start command
+//	rbc_mesh_stop();
+
+//	if (!Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+//		LOGi("mesh not enabled");
+		rbc_mesh_stop();
+		// [16.06.16] need to execute app scheduler, otherwise pstorage
+		// events will get lost ... maybe need to check why that actually happens??
+		app_sched_execute();
+//	}
+
+}
+
+void start_stop_mesh(void * p_event_data, uint16_t event_size) {
+	if (*(bool*)p_event_data) {
+		LOGi(FMT_START, "Mesh");
+		uint32_t err_code = rbc_mesh_start();
+		if (err_code != NRF_SUCCESS) {
+			LOGe(FMT_FAILED_TO, "start mesh", err_code);
+		}
+	} else {
+		LOGi(FMT_STOP, "Mesh");
+		uint32_t err_code = rbc_mesh_stop();
+		if (err_code != NRF_SUCCESS) {
+			LOGe(FMT_FAILED_TO, "stop mesh", err_code);
+		}
+	}
 }
 
 void Mesh::start() {
@@ -93,19 +151,6 @@ void Mesh::stop() {
 		app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
 	}
 }
-
-//void Mesh::restart() {
-//	LOGi(">>>> restart");
-//	if (_started) {
-////		uint8_t err_code = 0;
-////		LOGe(FMT_FAILED_TO, "restart function is disabled", err_code);
-//
-//		uint32_t err_code = rbc_mesh_restart();
-//		if (err_code != NRF_SUCCESS) {
-//			LOGe(FMT_FAILED_TO, "restart mesh", err_code);
-//		}
-//	}
-//}
 
 void Mesh::resume() {
 	if (!_running) {
@@ -147,70 +192,6 @@ void Mesh::stopTicking() {
 	Timer::getInstance().stop(_appTimerId);
 }
 
-
-#if (NORDIC_SDK_VERSION >= 11) 
-const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_LF_SRC_RC,   \
-                                                    .rc_ctiv       = 16,                    \
-                                                    .rc_temp_ctiv  = 2,                     \
-                                                    .xtal_accuracy = 0};
-#endif
-
-/**
- * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
- * thing.
- */
-void Mesh::init() {
-	_meshControl.init();
-
-	//nrf_gpio_pin_clear(PIN_GPIO_LED0);
-	LOGi(FMT_INIT, "Mesh");
-
-	// setup the timer
-	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Mesh::staticTick);
-
-	rbc_mesh_init_params_t init_params;
-
-	// the access address is a configurable parameter so we get it from the settings.
-	Settings::getInstance().get(CONFIG_MESH_ACCESS_ADDRESS, &init_params.access_addr);
-	LOGd("Mesh access address %p", init_params.access_addr);
-	init_params.interval_min_ms = MESH_INTERVAL_MIN_MS;
-	init_params.channel = MESH_CHANNEL;
-#if (NORDIC_SDK_VERSION >= 11) 
-	init_params.lfclksrc = meshClockSource;
-#else
-	init_params.lfclksrc = MESH_CLOCK_SOURCE;
-#endif
-
-	uint8_t error_code;
-	//! checks if softdevice is enabled etc.
-	error_code = rbc_mesh_init(init_params);
-	APP_ERROR_CHECK(error_code);
-
-	for (int i = 0; i < MESH_NUM_HANDLES; ++i) {
-		error_code = rbc_mesh_value_enable(i+1);
-		APP_ERROR_CHECK(error_code);
-		_first[i] = true;
-	}
-
-//	error_code = rbc_mesh_value_enable(1);
-//	APP_ERROR_CHECK(error_code);
-//	error_code = rbc_mesh_value_enable(2);
-//	APP_ERROR_CHECK(error_code);
-
-	_mesh_start_time = RTC::now();
-
-	// do not automatically start meshing, wait for the start command
-//	rbc_mesh_stop();
-
-//	if (!Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-//		LOGi("mesh not enabled");
-		rbc_mesh_stop();
-		// [16.06.16] need to execute app scheduler, otherwise pstorage
-		// events will get lost ... maybe need to check why that actually happens??
-		app_sched_execute();
-//	}
-
-}
 
 uint32_t Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 	assert(length <= MAX_MESH_MESSAGE_LENGTH, STR_ERR_VALUE_TOO_LONG);

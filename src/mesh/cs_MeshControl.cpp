@@ -31,9 +31,6 @@ MeshControl::MeshControl() : EventListener(EVT_ALL), _myCrownstoneId(0) {
 }
 
 void MeshControl::init() {
-	uint32_t err_code;
-	err_code = sd_ble_gap_address_get(&_myAddr);
-	APP_ERROR_CHECK(err_code);
 	Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &_myCrownstoneId);
 }
 
@@ -55,14 +52,16 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 
 	switch(channel) {
 	case KEEP_ALIVE_CHANNEL: {
+#if defined(PRINT_DEBUG)
 		LOGi("received keep alive");
+#endif
 
 		keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
 		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
 		uint16_t timeout = msg->timeout;
 
 		if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
-			LOGe("invalid message, length too small")
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 			BLEutil::printArray(p_data, length);
 			return;
 		}
@@ -83,15 +82,17 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		break;
 	}
 	case COMMAND_CHANNEL: {
+#if defined(PRINT_DEBUG)
 		LOGi("received command");
+#endif
 
 		command_message_t* msg = (command_message_t*)p_data;
 
 		// only check the "header" part, so message type, and ids, the payload length
 		// will be checked in the handleCommand
 		if (length < MIN_COMMAND_HEADER_SIZE + msg->numOfIds * sizeof(id_type_t) + SB_HEADER_SIZE) {
-			LOGe("invalid message, length too small")
-			BLEutil::printArray(p_data, length);
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+			sendStatusReplyMessage(meshMessage->messageCounter, ERR_WRONG_PAYLOAD_LENGTH);
 			return;
 		}
 
@@ -152,11 +153,11 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		break;
 	}
 
+#if defined(PRINT_DEBUG)
 	case STATE_BROADCAST_CHANNEL:
 	case STATE_CHANGE_CHANNEL: {
-		LOGd("received state %s", channel == STATE_CHANGE_CHANNEL ? "change" : "broadcast");
 
-#if defined(PRINT_DEBUG)
+		LOGd("received state %s", channel == STATE_CHANGE_CHANNEL ? "change" : "broadcast");
 
 #if defined(PRINT_VERBOSE_STATE_BROADCAST) && defined(PRINT_VERBOSE_STATE_CHANGE)
 		// ok
@@ -170,7 +171,6 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		}
 #else
 		break;
-#endif
 
 		state_message_t* msg = (state_message_t*)p_data;
 		BLEutil::printArray(msg, length);
@@ -189,9 +189,10 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		break;
 	}
 	case COMMAND_REPLY_CHANNEL: {
+
 		LOGi("received command reply");
 
-#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND_REPLY)
+#if defined(PRINT_VERBOSE_COMMAND_REPLY)
 		reply_message_t* msg = (reply_message_t*)p_data;
 
 		BLEutil::printArray(p_data, length);
@@ -212,9 +213,11 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		break;
 	}
 	case SCAN_RESULT_CHANNEL: {
+
 		LOGi("Received scan results");
 
-#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_SCAN_RESULT)
+#if defined(PRINT_VERBOSE_SCAN_RESULT)
+
 		scan_result_message_t* msg = (scan_result_message_t*)p_data;
 
 		BLEutil::printArray(p_data, length);
@@ -238,6 +241,8 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 	case BIG_DATA_CHANNEL: {
 		break;
 	}
+
+#endif
 	}
 }
 
@@ -463,7 +468,7 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 		// only check the "header" part, so message type, ids, and the command header. the payload length
 		// will be checked in the handleCommand
 		if (length < MIN_COMMAND_HEADER_SIZE + message->numOfIds * sizeof(id_type_t) + SB_HEADER_SIZE) {
-			LOGe("invalid message, length too small")
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 			BLEutil::printArray(p_data, length);
 			return ERR_INVALID_MESSAGE;
 		}
@@ -524,22 +529,27 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 	case KEEP_ALIVE_CHANNEL: {
 
 		keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
-		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
+//		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
 		uint16_t timeout = msg->timeout;
 
 		if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
-			LOGe("invalid message, length too small")
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 			BLEutil::printArray(p_data, length);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 
-		for (int i = 0; i < msg->size; ++i) {
-			if (p_item->id == _myCrownstoneId) {
-				handleKeepAlive(p_item, timeout);
-				break;
-			}
-			++p_item;
+		keep_alive_item_t* p_item;
+		if (has_keep_alive_item(msg, _myCrownstoneId, &p_item)) {
+			handleKeepAlive(p_item, timeout);
 		}
+
+//		for (int i = 0; i < msg->size; ++i) {
+//			if (p_item->id == _myCrownstoneId) {
+//				handleKeepAlive(p_item, timeout);
+//				break;
+//			}
+//			++p_item;
+//		}
 
 		Mesh::getInstance().send(channel, p_data, length);
 
@@ -651,9 +661,9 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 
 //#define UPDATE_EXISTING
-	bool debug = false;
 
 #if defined(PRINT_DEBUG)
+	bool debug = false;
 #if defined(PRINT_VERBOSE_STATE_BROADCAST) && defined(PRINT_VERBOSE_STATE_CHANGE)
 	debug = true;
 #elif defined(PRINT_VERBOSE_STATE_BROADCAST)

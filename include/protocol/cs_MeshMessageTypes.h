@@ -104,6 +104,19 @@ struct __attribute__((__packed__)) keep_alive_message_t {
 	keep_alive_item_t list[MAX_KEEP_ALIVE_ITEMS];
 };
 
+inline bool has_keep_alive_item(keep_alive_message_t* message, id_type_t id, keep_alive_item_t** item) {
+
+	*item = message->list;
+	for (int i = 0; i < message->size; ++i) {
+		if ((*item)->id == id) {
+			return true;
+		}
+		++(*item);
+	}
+
+	return false;
+}
+
 /********************************************************************
  * STATE
  ********************************************************************/
