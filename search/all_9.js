@@ -18,5 +18,7 @@ var searchData=
   ['ismessageforus',['isMessageForUs',['../classMeshControl.html#a4877591268756241210840b519ef20be',1,'MeshControl']]],
   ['isnearby',['isNearby',['../classTrackedDeviceList.html#a494dfc8ba95d36256377b130143a34c2',1,'TrackedDeviceList']]],
   ['isscanning',['isScanning',['../classNrf51822BluetoothStack.html#a1dfd19faaf0480877cdf957262a9c5f0',1,'Nrf51822BluetoothStack']]],
-  ['isvalidmessage',['isValidMessage',['../classMeshControl.html#a02ff94b281307fb3fb08810a5c7b89b6',1,'MeshControl']]]
+  ['isvalidmessage',['isValidMessage',['../classMeshControl.html#a02ff94b281307fb3fb08810a5c7b89b6',1,'MeshControl']]],
+  ['installation',['Installation',['../md_docs_INSTALL.html',1,'']]],
+  ['indoor_20localization',['Indoor Localization',['../md_docs_LOCALIZATION.html',1,'']]]
 ];

@@ -1,9 +1,9 @@
 <map id="Service" name="Service">
-<area shape="rect" id="node2" href="$classCrownstoneService.html" title="General Service for the Crownstone. " alt="" coords="139,5,275,32"/>
-<area shape="rect" id="node4" href="$classDeviceInformationService.html" title="The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions..." alt="" coords="121,56,293,83"/>
-<area shape="rect" id="node5" href="$classGeneralService.html" title="General Service for the Crownstone. " alt="" coords="151,107,262,133"/>
-<area shape="rect" id="node6" href="$classIndoorLocalizationService.html" title="The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc. " alt="" coords="121,157,292,184"/>
-<area shape="rect" id="node7" href="$classPowerService.html" title="PowerService controls the relays on the Crownstone. " alt="" coords="155,208,258,235"/>
-<area shape="rect" id="node8" href="$classScheduleService.html" title="ScheduleService organizes ticks for all components for non&#45;urgent timing. " alt="" coords="147,259,267,285"/>
-<area shape="rect" id="node3" href="$classSetupService.html" title="Author: Dominik Egger Copyright: Distributed Organisms B.V. " alt="" coords="342,5,442,32"/>
+<area shape="rect" id="node2" href="$classCrownstoneService.html" title="General Service for the Crownstone. " alt="" coords="138,5,274,32"/>
+<area shape="rect" id="node4" href="$classDeviceInformationService.html" title="The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions..." alt="" coords="120,56,292,83"/>
+<area shape="rect" id="node5" href="$classGeneralService.html" title="General Service for the Crownstone. " alt="" coords="151,107,261,133"/>
+<area shape="rect" id="node6" href="$classIndoorLocalizationService.html" title="The IndoorLocalizationService handles scanning, signal strengths, tracked devices, etc. " alt="" coords="121,157,291,184"/>
+<area shape="rect" id="node7" href="$classPowerService.html" title="PowerService controls the relays on the Crownstone. " alt="" coords="155,208,257,235"/>
+<area shape="rect" id="node8" href="$classScheduleService.html" title="ScheduleService organizes ticks for all components for non&#45;urgent timing. " alt="" coords="146,259,266,285"/>
+<area shape="rect" id="node3" href="$classSetupService.html" title="Author: Dominik Egger Copyright: Distributed Organisms B.V. " alt="" coords="340,5,440,32"/>
 </map>
