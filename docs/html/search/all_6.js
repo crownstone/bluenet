@@ -8,5 +8,6 @@ var searchData=
   ['floor',['floor',['../structps__configuration__t.html#a43c75dd894593aee22f7b1dd794a616e',1,'ps_configuration_t']]],
   ['freeencryptionbuffer',['freeEncryptionBuffer',['../classCharacteristicBase.html#a7bf7fa638a16f89d2fbff36687b35e51',1,'CharacteristicBase::freeEncryptionBuffer()'],['../classCharacteristicGeneric.html#a25b46187e5f52c66f97369586ddd27dc',1,'CharacteristicGeneric::freeEncryptionBuffer()']]],
   ['fromstring',['fromString',['../classStreamBuffer.html#a7aa00623321048f17cf8a3eec1f2c5b9',1,'StreamBuffer']]],
-  ['full',['full',['../classCircularBuffer.html#a7464d067cde259b85efd69aee1ccc883',1,'CircularBuffer::full()'],['../classCircularDifferentialBuffer.html#a62b0441e9099d61e32fcaea662faa326',1,'CircularDifferentialBuffer::full()']]]
+  ['full',['full',['../classCircularBuffer.html#a7464d067cde259b85efd69aee1ccc883',1,'CircularBuffer::full()'],['../classCircularDifferentialBuffer.html#a62b0441e9099d61e32fcaea662faa326',1,'CircularDifferentialBuffer::full()']]],
+  ['faq',['FAQ',['../md_docs_FAQ.html',1,'']]]
 ];

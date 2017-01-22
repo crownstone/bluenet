@@ -13,7 +13,7 @@ var searchData=
   ['config1ch',['config1Ch',['../classPWM.html#a33a6ba43d0d6e4c5b6ebe4f9fcde5835',1,'PWM']]],
   ['config2ch',['config2Ch',['../classPWM.html#a646e0df9822a5fcd21b047ce49892710',1,'PWM']]],
   ['configure',['configure',['../classCrownstone.html#a4d204186745780f10b0ed4af8cea9763',1,'Crownstone']]],
-  ['configureadvertisementparameters',['configureAdvertisementParameters',['../classNrf51822BluetoothStack.html#acda9be99b716b88b31b178e2afd66265',1,'Nrf51822BluetoothStack']]],
+  ['configureadvertisementparameters',['configureAdvertisementParameters',['../classNrf51822BluetoothStack.html#ae4e387d176cade746816a6139547c2fa',1,'Nrf51822BluetoothStack']]],
   ['configurebledevice',['configureBleDevice',['../classNrf51822BluetoothStack.html#a10b5777915de1758c4c68fd48447dedb',1,'Nrf51822BluetoothStack']]],
   ['configureibeacon',['configureIBeacon',['../classNrf51822BluetoothStack.html#a36a537191da931c8c61f41a90cf6cdde',1,'Nrf51822BluetoothStack']]],
   ['configurepresentationformat',['configurePresentationFormat',['../classCharacteristicBase.html#a5fefeaf2235f9b455fbf8dc1827e6648',1,'CharacteristicBase::configurePresentationFormat()'],['../classCharacteristicGeneric.html#ac53d8af6e4096096dcb91ada110da18f',1,'CharacteristicGeneric::configurePresentationFormat()']]],

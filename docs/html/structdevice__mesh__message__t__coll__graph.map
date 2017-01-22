@@ -1,6 +1,6 @@
 <map id="device_mesh_message_t" name="device_mesh_message_t">
-<area shape="rect" id="node2" href="$structstream__t.html" title="stream_t\&lt; uint8_t,\l MAX_MESH_MESSAGE_DATA\l_LENGTH \&gt;" alt="" coords="6,5,223,61"/>
-<area shape="rect" id="node3" href="$structbeacon__mesh__message__t.html" title="Beacon mesh message. " alt="" coords="27,85,202,112"/>
-<area shape="rect" id="node4" href="$structmesh__header__t.html" title="mesh header " alt="" coords="59,136,170,163"/>
-<area shape="rect" id="node5" href="$structevent__mesh__message__t.html" title="Event mesh message. " alt="" coords="33,187,197,213"/>
+<area shape="rect" id="node2" href="$structstream__t.html" title="stream_t\&lt; uint8_t,\l MAX_MESH_MESSAGE_DATA\l_LENGTH \&gt;" alt="" coords="5,5,223,61"/>
+<area shape="rect" id="node3" href="$structbeacon__mesh__message__t.html" title="Beacon mesh message. " alt="" coords="27,85,201,112"/>
+<area shape="rect" id="node4" href="$structmesh__header__t.html" title="mesh header " alt="" coords="59,136,169,163"/>
+<area shape="rect" id="node5" href="$structevent__mesh__message__t.html" title="Event mesh message. " alt="" coords="32,187,196,213"/>
 </map>

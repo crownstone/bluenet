@@ -39,6 +39,12 @@ ADC::ADC(): _timer(NULL)
 	_queuedBufInd = 1;
 }
 
+/**
+ * The initialization function for ADC has to configure the ADC channels, but
+ * also a timer that dictates when to sample.
+ *
+ * @caller src/processing/cs_PowerSampling.cpp
+ */
 uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
 	ret_code_t err_code;
 
@@ -101,6 +107,7 @@ uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
 
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
 		_bufferPointers[i] = new nrf_saadc_value_t[CS_ADC_BUF_SIZE];
+		/* Start conversion in non-blocking mode. Sampling is not triggered yet. */
 		if (i < 2) {
 			err_code = nrf_drv_saadc_buffer_convert(_bufferPointers[i], CS_ADC_BUF_SIZE);
 			APP_ERROR_CHECK(err_code);
@@ -135,7 +142,6 @@ uint32_t ADC::configPin(uint8_t channelNum, uint8_t pinNum) {
 		.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
 		.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
 		.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
-//		.pin_p      = (nrf_saadc_input_t)(pinNum+1),
 		.pin_p      = getAdcPin(pinNum),
 		.pin_n      = NRF_SAADC_INPUT_DISABLED
 	};
@@ -146,6 +152,10 @@ uint32_t ADC::configPin(uint8_t channelNum, uint8_t pinNum) {
 	return 0;
 }
 
+/**
+ * The NC field disables the ADC and is actually set to value 0. 
+ * SAADC_CH_PSELP_PSELP_AnalogInput0 has value 1.
+ */
 nrf_saadc_input_t ADC::getAdcPin(uint8_t pinNum) {
 	switch (pinNum) {
 	case 0:

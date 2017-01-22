@@ -30,6 +30,7 @@ var searchData=
   ['storage',['Storage',['../classStorage.html',1,'']]],
   ['storage_5fconfig_5ft',['storage_config_t',['../structstorage__config__t.html',1,'']]],
   ['storage_5felement_5ft',['storage_element_t',['../structCyclicStorage_1_1storage__element__t.html',1,'CyclicStorage']]],
+  ['storagehelper',['StorageHelper',['../classStorageHelper.html',1,'']]],
   ['stream_5ft',['stream_t',['../structstream__t.html',1,'']]],
   ['stream_5ft_3c_20uint8_5ft_2c_20default_5fpayload_5flength_20_3e',['stream_t&lt; uint8_t, DEFAULT_PAYLOAD_LENGTH &gt;',['../structstream__t.html',1,'']]],
   ['stream_5ft_3c_20uint8_5ft_2c_20max_5fmesh_5fmessage_5fdata_5flength_20_3e',['stream_t&lt; uint8_t, MAX_MESH_MESSAGE_DATA_LENGTH &gt;',['../structstream__t.html',1,'']]],
