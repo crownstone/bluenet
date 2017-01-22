@@ -13,4 +13,4 @@ git commit
 
 git subtree push --prefix docs/html origin gh-pages
 
-log "Go to https://dobots.github.com/bluenet"
+log "Go to https://crownstone.github.com/bluenet"
