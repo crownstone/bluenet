@@ -39,7 +39,8 @@ Mesh::Mesh() :
 #else
 		_appTimerId(UINT32_MAX),
 #endif
-	_started(false), _running(true), _messageCounter(), _meshControl(MeshControl::getInstance())
+	_started(false), _running(true), _messageCounter(), _meshControl(MeshControl::getInstance()),
+	_encryptionEnabled(false)
 
 {
 #if (NORDIC_SDK_VERSION >= 11)
@@ -194,7 +195,12 @@ void Mesh::stopTicking() {
 
 
 uint32_t Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
-	assert(length <= MAX_MESH_MESSAGE_LENGTH, STR_ERR_VALUE_TOO_LONG);
+//	LOGe("length: %d, max: %d", length, MAX_MESH_MESSAGE_LENGTH);
+//	assert(length <= MAX_MESH_MESSAGE_LENGTH, STR_ERR_VALUE_TOO_LONG);
+	if (length > MAX_MESH_MESSAGE_LENGTH) {
+		LOGe(STR_ERR_VALUE_TOO_LONG);
+		return 0;
+	}
 
 	if (!_started || !Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		return 0;
@@ -212,7 +218,7 @@ uint32_t Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 	uint16_t messageLen = length + PAYLOAD_HEADER_SIZE;
 
 	encrypted_mesh_message_t encryptedMessage = {};
-	uint16_t encryptedLength;
+	uint16_t encryptedLength = sizeof(encrypted_mesh_message_t);
 //	memset(&encryptedMessage, 0, sizeof(encrypted_mesh_message_t));
 
 	encodeMessage(&message, messageLen, &encryptedMessage, encryptedLength);
@@ -253,7 +259,7 @@ bool Mesh::getLastMessage(uint8_t channel, void* p_data, uint16_t& length) {
 
 		mesh_message_t message = {};
 
-		decodeMessage(&encryptedMessage, encryptedLength, &message, length);
+		decodeMessage(&encryptedMessage, encryptedLength, &message, sizeof(mesh_message_t));
 
 //		LOGd("message:");
 //		BLEutil::printArray(&message, length);
@@ -280,10 +286,8 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 //	LOGd("new data:");
 //	BLEutil::printArray(p_new, length_new);
 
-	uint16_t lengthOld;
-	decodeMessage(p_old, length_old, &messageOld, lengthOld);
-	uint16_t lengthNew;
-	decodeMessage(p_new, length_new, &messageNew, lengthNew);
+	decodeMessage(p_old, length_old, &messageOld, sizeof(mesh_message_t));
+	decodeMessage(p_new, length_new, &messageNew, sizeof(mesh_message_t));
 
 	switch(handle) {
 	case COMMAND_REPLY_CHANNEL: {
@@ -312,7 +316,7 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 
 			// and process
 	//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
-			_meshControl.process(handle, &messageNew, lengthNew);
+			_meshControl.process(handle, &messageNew, sizeof(mesh_message_t));
 		} else if (replyMessageOld->messageCounter > replyMessageNew->messageCounter) {
 
 			LOGi("old is newer command reply");
@@ -325,7 +329,7 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 
 			// and process
 	//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
-			_meshControl.process(handle, &messageOld, lengthOld);
+			_meshControl.process(handle, &messageOld, sizeof(mesh_message_t));
 		} else {
 
 //			LOGi("merge ...");
@@ -378,7 +382,7 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 
 				// and process
 		//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
-				_meshControl.process(handle, &messageOld, lengthOld);
+				_meshControl.process(handle, &messageOld, sizeof(mesh_message_t));
 
 			}
 		}
@@ -525,13 +529,12 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 //			LOGd("MESH RECEIVE");
 
 			encrypted_mesh_message_t* encrypted_message = (encrypted_mesh_message_t*)evt->params.rx.p_data;
-			uint16_t length;
 			mesh_message_t message;
 
 //            LOGi("Got data ch: %d, len: %d", evt->params.tx.value_handle, length);
 //            BLEutil::printArray(encrypted_message, length);
 
-			if (decodeMessage(encrypted_message, evt->params.rx.data_len, &message, length)) {
+			if (decodeMessage(encrypted_message, evt->params.rx.data_len, &message, sizeof(mesh_message_t))) {
 
 				_messageCounter[evt->params.tx.value_handle] = message.messageCounter;
 
@@ -540,7 +543,7 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 
 	//            meshControl.process(evt->params.tx.value_handle, evt->params.rx.p_data, evt->params.rx.data_len);
 //				_meshControl.process(evt->params.tx.value_handle, message.payload, length - PAYLOAD_HEADER_SIZE);
-				_meshControl.process(evt->params.tx.value_handle, &message, length);
+				_meshControl.process(evt->params.tx.value_handle, &message, sizeof(mesh_message_t));
 
 	//			led_config(evt->value_handle, evt->data[0]);
 			}
@@ -552,24 +555,24 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	}
 }
 
-bool Mesh::decodeMessage(encrypted_mesh_message_t* encoded, uint16_t encodedLength, mesh_message_t* decoded, uint16_t& decodedLength) {
-	decodedLength = encodedLength - ENCRYPTED_HEADER_SIZE;
-//	if (encrypted) {
-//
-//	} else {
+bool Mesh::decodeMessage(encrypted_mesh_message_t* encoded, uint16_t encodedLength, mesh_message_t* decoded, uint16_t decodedLength) {
+
+	if (_encryptionEnabled) {
+		// TODO: encrypt message decoded and store in encoded->encrypted_payload
+	} else {
 		memcpy(decoded, encoded->encrypted_payload, decodedLength);
-//	}
+	}
 	return encoded->messageCounter == decoded->messageCounter;
 }
 
-void Mesh::encodeMessage(mesh_message_t* decoded, uint16_t decodedLength, encrypted_mesh_message_t* encoded, uint16_t& encodedLength) {
-//	if (encrypted) {
-//
-//	} else {
+void Mesh::encodeMessage(mesh_message_t* decoded, uint16_t decodedLength, encrypted_mesh_message_t* encoded, uint16_t encodedLength) {
+
+	if (_encryptionEnabled) {
+		// TODO: decrypt encoded->encrypted_payload and store in message decoded
+	} else {
 		encoded->messageCounter = decoded->messageCounter;
 		memcpy(encoded->encrypted_payload, decoded, decodedLength);
-//	}
-	encodedLength = decodedLength + ENCRYPTED_HEADER_SIZE;
+	}
 }
 
 void Mesh::checkForMessages() {

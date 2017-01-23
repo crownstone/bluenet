@@ -35,6 +35,8 @@ public:
 	void sendServiceDataMessage(state_item_t& stateItem, bool event);
 
 	void sendStatusReplyMessage(uint32_t messageCounter, ERR_CODE status);
+	void sendConfigReplyMessage(uint32_t messageCounter, config_reply_item_t* configReply);
+	void sendStateReplyMessage(uint32_t messageCounter, state_reply_item_t* configReply);
 
 	/** Send a message into the mesh
 	 *
@@ -68,7 +70,7 @@ protected:
 	 *
 	 * @msg pointer to the message data
 	 */
-	ERR_CODE handleCommand(uint16_t type, uint8_t* payload, uint16_t length);
+	void handleCommand(uint16_t type, uint32_t messageCounter, uint8_t* payload, uint16_t length);
 
 	void handleKeepAlive(keep_alive_item_t* p_item, uint16_t timeout);
 

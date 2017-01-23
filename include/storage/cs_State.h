@@ -147,6 +147,8 @@ public:
 	ERR_CODE set(uint8_t type, void* target, uint16_t size);
 	ERR_CODE get(uint8_t type, void* target, uint16_t size);
 
+	uint16_t getStateItemSize(uint8_t type);
+
 	/** Factory Resets sets all variables to their default values and clears FLASH storage
 	 */
 	void factoryReset(uint32_t resetCode);

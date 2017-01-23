@@ -28,30 +28,20 @@ enum MeshChannels {
 	COMMAND_REPLY_CHANNEL    = 5,
 	SCAN_RESULT_CHANNEL      = 6,
 	BIG_DATA_CHANNEL         = 7,
-
-//	HUB_CHANNEL = 100,
-//	DATA_CHANNEL = 200,
 };
 
 enum MeshCommandTypes {
-	//! data channel messages
 	CONTROL_MESSAGE          = 0,
 	BEACON_MESSAGE           = 1,
 	CONFIG_MESSAGE           = 2,
-//	STATE_MESSAGE            = 3,
-
-	//! hub channel messages
-//	SCAN_MESSAGE          = 101,
-//	POWER_SAMPLES_MESSAGE = 102,
-//	EVENT_MESSAGE         = 103,    // todo: do we need event messages on the mesh at all?
-//	SERVICE_DATA_MESSAGE  = 104,
+	STATE_MESSAGE            = 3,
 };
 
 enum MeshReplyTypes {
-	STATUS_REPLY             = 0
+	STATUS_REPLY             = 0,
+	CONFIG_REPLY             = 1,
+	STATE_REPLY              = 2,
 };
-
-#define BROADCAST_ADDRESS {}
 
 //! available number of bytes for a mesh message
 //#define MAX_MESH_MESSAGE_LEN RBC_MESH_VALUE_MAX_LEN
@@ -185,11 +175,11 @@ inline bool pop_state_item(state_message_t* message, state_item_t* item) {
  ********************************************************************/
 
 #define MIN_COMMAND_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint8_t))
-#define MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH (MAX_MESH_MESSAGE_LENGTH - MIN_COMMAND_HEADER_SIZE)
+#define MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH (MAX_MESH_MESSAGE_LENGTH - MIN_COMMAND_HEADER_SIZE - SB_HEADER_SIZE)
 
 using control_mesh_message_t = stream_t<uint8_t, MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH>;
 using config_mesh_message_t = stream_t<uint8_t, MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH>;
-//using state_mesh_message_t = stream_t<uint8_t, MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH>;
+using state_mesh_message_t = stream_t<uint8_t, MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH>;
 
 /** Beacon mesh message
  */
@@ -213,7 +203,7 @@ struct __attribute__((__packed__)) command_message_t {
 				config_mesh_message_t configMsg;
 			};
 		} data;
-		uint8_t raw[MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH];
+		uint8_t raw[MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH]; // dummy item, makes the reply_message_t a fixed size (for allocation)
 	};
 };
 
@@ -248,34 +238,55 @@ inline void get_payload(command_message_t* message, uint16_t messageLength, uint
  * REPLY
  ********************************************************************/
 
-struct __attribute__((__packed__)) reply_item_t {
-	id_type_t id;
-	union {
-		uint8_t data[];
-		uint8_t status;
-	};
-};
+#define REPLY_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint32_t) + sizeof(uint8_t))
+
+//struct __attribute__((__packed__)) reply_item_t {
+//	id_type_t id;
+//	union {
+//		uint8_t data[];
+//		uint8_t status;
+//	};
+//};
+
+#define MAX_REPLY_LIST_SIZE (MAX_MESH_MESSAGE_LENGTH - REPLY_HEADER_SIZE)
 
 struct __attribute__((__packed__)) status_reply_item_t {
 	id_type_t id;
-	uint8_t status;
+	uint16_t status;
 };
 
-#define REPLY_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint32_t) + sizeof(uint8_t))
-#define MAX_REPLY_LIST_SIZE (MAX_MESH_MESSAGE_LENGTH - REPLY_HEADER_SIZE)
 #define MAX_STATUS_REPLY_ITEMS ((MAX_MESH_MESSAGE_LENGTH - REPLY_HEADER_SIZE) / sizeof(status_reply_item_t))
+
+
+#define MAX_CONFIG_REPLY_DATA_LENGTH (MAX_MESH_MESSAGE_LENGTH - REPLY_HEADER_SIZE - sizeof(id_type_t) - SB_HEADER_SIZE)
+#define MAX_CONFIG_REPLY_ITEMS 1 // the safe is to request config one by one, but depending on the length of the config
+
+struct __attribute__((__packed__)) config_reply_item_t {
+	id_type_t id;
+	stream_t<uint8_t, MAX_CONFIG_REPLY_DATA_LENGTH> data;
+};
+
+#define MAX_STATE_REPLY_DATA_LENGTH (MAX_MESH_MESSAGE_LENGTH - REPLY_HEADER_SIZE - sizeof(id_type_t) - SB_HEADER_SIZE)
+#define MAX_STATE_REPLY_ITEMS 1 // the safe is to request state one by one, but depending on the length of the state
+                                // data that is requested, several states might fit in one mesh message
+
+struct __attribute__((__packed__)) state_reply_item_t {
+	id_type_t id;
+	stream_t<uint8_t, MAX_STATE_REPLY_DATA_LENGTH> data;
+};
 
 struct __attribute__((__packed__)) reply_message_t {
 	uint16_t messageType;
 	uint32_t messageCounter;
 	uint8_t numOfReplys;
 	union {
-		reply_item_t list[];
+//		reply_item_t list[];
 		status_reply_item_t statusList[MAX_STATUS_REPLY_ITEMS];
-		uint8_t rawList[MAX_REPLY_LIST_SIZE];
+		config_reply_item_t configList[1];
+		state_reply_item_t stateList[1];
+		uint8_t rawList[MAX_REPLY_LIST_SIZE]; // dummy item, makes the reply_message_t a fixed size (for allocation)
 	};
 };
-
 
 inline bool push_status_reply_item(reply_message_t* message, status_reply_item_t* item) {
 	if (message->numOfReplys == MAX_STATUS_REPLY_ITEMS) {

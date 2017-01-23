@@ -13,6 +13,7 @@ enum ErrorCodesGeneral {
 	ERR_UNKNOWN_OP_CODE             = 0x03,
 	ERR_BUFFER_LOCKED               = 0x04,
 	ERR_ACCESS_NOT_ALLOWED          = 0x05,
+	ERR_BUFFER_TOO_SMALL            = 0x06,
 };
 
 enum CommandErrorCodes {

@@ -107,11 +107,9 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 #endif
 
 			get_payload(msg, length, &payload, payloadLength);
+			handleCommand(msg->messageType, meshMessage->messageCounter, payload, payloadLength);
 
-			ERR_CODE errCode;
-			errCode = handleCommand(msg->messageType, payload, payloadLength);
-
-			sendStatusReplyMessage(meshMessage->messageCounter, errCode);
+//			sendStatusReplyMessage(meshMessage->messageCounter, errCode);
 		} else {
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
 			LOGi("not for us: ");
@@ -197,14 +195,34 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 
 		BLEutil::printArray(p_data, length);
 
-		LOGi("Received Reply for Message: %d", msg->messageCounter);
 		switch(msg->messageType) {
 		case STATUS_REPLY: {
+			LOGi("Received Status Reply for Message: %d", msg->messageCounter);
 
 			for (int i = 0; i < msg->numOfReplys; ++i) {
-				LOGi("  ID %d: %d", msg->list[i].id, msg->list[i].status);
+				LOGi("  ID %d: %d", msg->statusList[i].id, msg->statusList[i].status);
 			}
 			break;
+		case CONFIG_REPLY: {
+			LOGi("Received Config Reply for Message: %d", msg->messageCounter);
+
+			for (int i = 0; i < msg->numOfReplys; ++i) {
+				config_reply_item_t* item = &msg->configList[i];
+				log(SERIAL_INFO, "  ID %d: Type: %d, Data: 0x", item->id, item->data.type);
+				BLEutil::printArray(item->data.payload, item->data.length);
+			}
+			break;
+		}
+		case STATE_REPLY: {
+			LOGi("Received State Reply for Message: %d", msg->messageCounter);
+
+			for (int i = 0; i < msg->numOfReplys; ++i) {
+				state_reply_item_t* item = &msg->stateList[i];
+				log(SERIAL_INFO, "  ID %d: Type: %d, Data: 0x", item->id, item->data.type);
+				BLEutil::printArray(item->data.payload, item->data.length);
+			}
+			break;
+		}
 		}
 		}
 
@@ -277,26 +295,101 @@ void MeshControl::handleKeepAlive(keep_alive_item_t* p_item, uint16_t timeout) {
 	EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, &keepAlive, sizeof(keepAlive));
 }
 
-ERR_CODE MeshControl::handleCommand(uint16_t type, uint8_t* payload, uint16_t length) {
+void MeshControl::handleCommand(uint16_t type, uint32_t messageCounter, uint8_t* payload, uint16_t length) {
+
+	ERR_CODE statusResult;
 
 	switch(type) {
-//	case EVENT_MESSAGE: {
-//		break;
-//	}
 	case CONFIG_MESSAGE: {
-		if (length != sizeof(config_mesh_message_t)) {
+		if (length < MIN_COMMAND_HEADER_SIZE + SB_HEADER_SIZE) {
 			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 			BLEutil::printArray(payload, length);
-			return ERR_WRONG_PAYLOAD_LENGTH;
+			statusResult = ERR_WRONG_PAYLOAD_LENGTH;
+			break;
 		}
 
 		config_mesh_message_t* msg = (config_mesh_message_t*)payload;
+
 		uint8_t type = msg->type;
 		uint16_t length = msg->length;
 		uint8_t* payload = msg->payload;
-		Settings::getInstance().writeToStorage(type, payload, length);
 
-		return ERR_SUCCESS;
+		switch (msg->opCode) {
+		case READ_VALUE: {
+			config_reply_item_t configReply = {};
+			configReply.id = _myCrownstoneId;
+			configReply.data.opCode = READ_VALUE;
+			configReply.data.type = type;
+			configReply.data.length = Settings::getInstance().getSettingsItemSize(type);
+
+			if (configReply.data.length > sizeof(configReply.data.payload)) {
+				statusResult = ERR_BUFFER_TOO_SMALL;
+			} else {
+				statusResult = Settings::getInstance().get(type, configReply.data.payload);
+				if (statusResult == ERR_SUCCESS) {
+
+					sendConfigReplyMessage(messageCounter, &configReply);
+					// call return to skip sending status reply (since we send the config reply)
+					return;
+				}
+			}
+			break;
+		}
+		case WRITE_VALUE: {
+			Settings::getInstance().writeToStorage(type, payload, length);
+			statusResult = ERR_SUCCESS;
+			break;
+		}
+		default: {
+			statusResult = ERR_WRONG_PARAMETER;
+			break;
+		}
+		}
+
+		break;
+	}
+	case STATE_MESSAGE: {
+		if (length < MIN_COMMAND_HEADER_SIZE + SB_HEADER_SIZE) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+			BLEutil::printArray(payload, length);
+			statusResult = ERR_WRONG_PAYLOAD_LENGTH;
+			break;
+		}
+
+		state_mesh_message_t* msg = (state_mesh_message_t*)payload;
+
+		uint8_t type = msg->type;
+//		uint16_t length = msg->length;
+//		uint8_t* payload = msg->payload;
+
+		switch (msg->opCode) {
+		case READ_VALUE: {
+			state_reply_item_t stateReply = {};
+			stateReply.id = _myCrownstoneId;
+			stateReply.data.opCode = READ_VALUE;
+			stateReply.data.type = type;
+			stateReply.data.length = State::getInstance().getStateItemSize(type);
+
+			if (stateReply.data.length > sizeof(stateReply.data.payload)) {
+				statusResult = ERR_BUFFER_TOO_SMALL;
+			} else {
+				statusResult = State::getInstance().get(type, stateReply.data.payload, stateReply.data.length);
+				if (statusResult == ERR_SUCCESS) {
+
+					sendStateReplyMessage(messageCounter, &stateReply);
+					// call return to skip sending status reply (since we send the config reply)
+					return;
+				}
+			}
+			break;
+		}
+		default: {
+			statusResult = ERR_WRONG_PARAMETER;
+			break;
+		}
+		}
+
+		break;
 	}
 	case CONTROL_MESSAGE: {
 		control_mesh_message_t* msg = (control_mesh_message_t*)payload;
@@ -309,7 +402,8 @@ ERR_CODE MeshControl::handleCommand(uint16_t type, uint8_t* payload, uint16_t le
 			if (length != sizeof(enable_scanner_message_payload_t)) {
 				LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 				BLEutil::printArray(msgPayload, length);
-				return ERR_WRONG_PAYLOAD_LENGTH;
+				statusResult = ERR_WRONG_PAYLOAD_LENGTH;
+				break;
 			}
 
 			//! need to use a random delay for starting the scanner, otherwise
@@ -332,7 +426,8 @@ ERR_CODE MeshControl::handleCommand(uint16_t type, uint8_t* payload, uint16_t le
 
 			CommandHandler::getInstance().handleCommand(command, (uint8_t*)&scannerPayload, 3);
 
-			return ERR_SUCCESS;
+			statusResult = ERR_SUCCESS;
+			break;
 		}
 		case CMD_REQUEST_SERVICE_DATA: {
 			//! need to delay the sending of the service data or all devices will write their
@@ -349,13 +444,15 @@ ERR_CODE MeshControl::handleCommand(uint16_t type, uint8_t* payload, uint16_t le
 			}
 			CommandHandler::getInstance().handleCommandDelayed(command, msgPayload, length, delay);
 
-			return ERR_SUCCESS;
-		}
-		default:
+			statusResult = ERR_SUCCESS;
 			break;
 		}
+		default:
+			CommandHandler::getInstance().handleCommand(command, msgPayload, length);
 
-		return CommandHandler::getInstance().handleCommand(command, msgPayload, length);
+			statusResult = ERR_SUCCESS;
+			break;
+		}
 
 	}
 	case BEACON_MESSAGE: {
@@ -366,7 +463,8 @@ ERR_CODE MeshControl::handleCommand(uint16_t type, uint8_t* payload, uint16_t le
 		if (length != sizeof(beacon_mesh_message_t)) {
 			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 			BLEutil::printArray(payload, length);
-			return ERR_WRONG_PAYLOAD_LENGTH;
+			statusResult = ERR_WRONG_PAYLOAD_LENGTH;
+			break;
 		}
 
 		beacon_mesh_message_t* msg = (beacon_mesh_message_t*)payload;
@@ -422,21 +520,18 @@ ERR_CODE MeshControl::handleCommand(uint16_t type, uint8_t* payload, uint16_t le
 			EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
 		}
 
-		return ERR_SUCCESS;
+		statusResult = ERR_WRONG_PAYLOAD_LENGTH;
+		break;
 	}
-//	case STATE_MESSAGE: {
-//		// should have single value
-//		LOGi("Decode message: value %i", payload[0]);
-//		log(SERIAL_INFO, "Decode message:");
-//		BLEutil::printArray((uint8_t*)payload, 1);
-//		break;
-//	}
 	default: {
 		LOGi("Unknown message type %d. Don't know how to decode...", type);
-		return ERR_UNKNOWN_MESSAGE_TYPE;
+		statusResult = ERR_UNKNOWN_MESSAGE_TYPE;
+		break;
 	}
 
 	}
+
+	sendStatusReplyMessage(messageCounter, statusResult);
 
 }
 
@@ -507,21 +602,18 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 			handleSelf = is_command_for_us(message, _myCrownstoneId);
 		}
 
-		ERR_CODE errCode;
+		uint32_t messageCounter = 0;
+
+		if (sendOverMesh) {
+			messageCounter = Mesh::getInstance().send(channel, p_data, length);
+		}
+
 		if (handleSelf) {
 			uint8_t* payload;
 			uint16_t payloadLength;
 
 			get_payload(message, length, &payload, payloadLength);
-			errCode = handleCommand(message->messageType, payload, payloadLength);
-		}
-
-		if (sendOverMesh) {
-			uint32_t messageCounter = Mesh::getInstance().send(channel, p_data, length);
-
-			if (handleSelf) {
-				sendStatusReplyMessage(messageCounter, errCode);
-			}
+			handleCommand(message->messageType, messageCounter, payload, payloadLength);
 		}
 
 		break;
@@ -585,8 +677,9 @@ void MeshControl::sendStatusReplyMessage(uint32_t messageCounter, ERR_CODE statu
 	LOGi("Send StatusReply for message %d, status: %d", messageCounter, status);
 #endif
 
-	reply_message_t message = {};
 	uint16_t messageSize;
+	reply_message_t message = {};
+	message.messageType = STATUS_REPLY;
 
 	status_reply_item_t replyItem;
 	replyItem.id = _myCrownstoneId;
@@ -594,12 +687,76 @@ void MeshControl::sendStatusReplyMessage(uint32_t messageCounter, ERR_CODE statu
 
 	Mesh::getInstance().getLastMessage(COMMAND_REPLY_CHANNEL, &message, messageSize);
 
-	if (message.messageCounter != messageCounter) {
+	if (message.messageCounter != messageCounter || message.messageType != STATUS_REPLY) {
 		memset(&message, 0, sizeof(message));
 		message.messageCounter = messageCounter;
+		message.messageType = STATUS_REPLY;
 	}
 
 	push_status_reply_item(&message, &replyItem);
+
+#if defined(PRINT_DEBUG) &&  defined(PRINT_VERBOSE_COMMAND_REPLY)
+		LOGi("message data:");
+		BLEutil::printArray(&message, sizeof(reply_message_t));
+#endif
+
+	Mesh::getInstance().send(COMMAND_REPLY_CHANNEL, &message, sizeof(reply_message_t));
+}
+
+void MeshControl::sendConfigReplyMessage(uint32_t messageCounter, config_reply_item_t* configReply) {
+
+#if defined(PRINT_MESHCONTROL_VERBOSE) && defined(PRINT_VERBOSE_COMMAND_REPLY)
+	LOGd("MESH SEND");
+//	LOGi("Send StatusReply for message %d, status: %d", messageCounter, status);
+#endif
+
+	reply_message_t message = {};
+	message.messageType = CONFIG_REPLY;
+
+//	Mesh::getInstance().getLastMessage(COMMAND_REPLY_CHANNEL, &message, messageSize);
+//
+//	if (message.messageCounter != messageCounter) {
+//		memset(&message, 0, sizeof(message));
+//		message.messageCounter = messageCounter;
+//	}
+//
+//	push_status_reply_item(&message, &replyItem);
+
+	message.messageCounter = messageCounter;
+	message.numOfReplys = 1;
+	memcpy(&message.configList[0], configReply, sizeof(config_reply_item_t));
+
+#if defined(PRINT_DEBUG) &&  defined(PRINT_VERBOSE_COMMAND_REPLY)
+		LOGi("message data:");
+		BLEutil::printArray(&message, sizeof(reply_message_t));
+#endif
+
+	Mesh::getInstance().send(COMMAND_REPLY_CHANNEL, &message, sizeof(reply_message_t));
+}
+
+
+void MeshControl::sendStateReplyMessage(uint32_t messageCounter, state_reply_item_t* stateReply) {
+
+#if defined(PRINT_MESHCONTROL_VERBOSE) && defined(PRINT_VERBOSE_COMMAND_REPLY)
+	LOGd("MESH SEND");
+//	LOGi("Send StatusReply for message %d, status: %d", messageCounter, status);
+#endif
+
+	reply_message_t message = {};
+	message.messageType = STATE_REPLY;
+
+//	Mesh::getInstance().getLastMessage(COMMAND_REPLY_CHANNEL, &message, messageSize);
+//
+//	if (message.messageCounter != messageCounter) {
+//		memset(&message, 0, sizeof(message));
+//		message.messageCounter = messageCounter;
+//	}
+//
+//	push_status_reply_item(&message, &replyItem);
+
+	message.messageCounter = messageCounter;
+	message.numOfReplys = 1;
+	memcpy(&message.stateList[0], stateReply, sizeof(state_reply_item_t));
 
 #if defined(PRINT_DEBUG) &&  defined(PRINT_VERBOSE_COMMAND_REPLY)
 		LOGi("message data:");

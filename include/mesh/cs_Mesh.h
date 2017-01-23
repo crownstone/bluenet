@@ -59,6 +59,8 @@ private:
 
 	MeshControl&             _meshControl;
 
+	bool                     _encryptionEnabled;
+
 	//! constructor is hidden from the user
 	Mesh();
 
@@ -78,9 +80,9 @@ private:
 	void handleMeshMessage(rbc_mesh_event_t* evt);
 
 	bool decodeMessage(encrypted_mesh_message_t* encoded, uint16_t encodedLength,
-			mesh_message_t* decoded, uint16_t& decodedLength);
+			mesh_message_t* decoded, uint16_t decodedLength);
 	void encodeMessage(mesh_message_t* decoded, uint16_t decodedLength,
-			encrypted_mesh_message_t* encoded, uint16_t& encodedLength);
+			encrypted_mesh_message_t* encoded, uint16_t encodedLength);
 
 	void resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,
 			encrypted_mesh_message_t* p_new, uint16_t length_new);
