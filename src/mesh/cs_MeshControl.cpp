@@ -447,13 +447,15 @@ void MeshControl::handleCommand(uint16_t type, uint32_t messageCounter, uint8_t*
 			statusResult = ERR_SUCCESS;
 			break;
 		}
-		default:
+		default: {
 			CommandHandler::getInstance().handleCommand(command, msgPayload, length);
 
 			statusResult = ERR_SUCCESS;
 			break;
 		}
+		}
 
+		break;
 	}
 	case BEACON_MESSAGE: {
 #ifdef PRINT_MESHCONTROL_VERBOSE
