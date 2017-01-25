@@ -61,17 +61,18 @@ typedef uint16_t id_type_t;
  *
  ********************************************************************/
 
-#define ENCRYPTED_HEADER_SIZE (sizeof(uint32_t))
+#define ENCRYPTED_HEADER_SIZE (sizeof(uint32_t) + sizeof(uint32_t))
 #define MAX_ENCRYPTED_PAYLOAD_LENGTH (RBC_MESH_VALUE_MAX_LEN - ENCRYPTED_HEADER_SIZE)
 #define PAYLOAD_HEADER_SIZE (sizeof(uint32_t))
 #define MAX_MESH_MESSAGE_LENGTH (MAX_ENCRYPTED_PAYLOAD_LENGTH - PAYLOAD_HEADER_SIZE)
 
-struct __attribute__((__packed__)) encrypted_mesh_message_t {
+struct encrypted_mesh_message_t {
 	uint32_t messageCounter;
+	uint32_t random;
 	uint8_t encrypted_payload[MAX_ENCRYPTED_PAYLOAD_LENGTH];
 };
 
-struct __attribute__((__packed__)) mesh_message_t {
+struct mesh_message_t {
 	uint32_t messageCounter;
 	uint8_t payload[MAX_MESH_MESSAGE_LENGTH];
 };

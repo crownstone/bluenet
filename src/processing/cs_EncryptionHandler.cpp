@@ -124,16 +124,75 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 }
 
 
-bool EncryptionHandler::encryptMesh(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength) {
-	return encrypt(data, dataLength, target, targetLength, ADMIN, CTR_CAFEBABE);
+bool EncryptionHandler::encryptMesh(mesh_nonce_t nonce, uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength) {
+
+	Settings::getInstance().get(CONFIG_KEY_ADMIN, _block.key);
+
+	// first MESH_OVERHEAD bytes of the target are overhead, which is a random number + nonce (message number)
+	uint16_t targetNetLength = targetLength - MESH_OVERHEAD;
+
+	// check if the input would still fit if the nonce is added.
+	if (dataLength + VALIDATION_NONCE_LENGTH > targetNetLength) {
+		LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		return false;
+	}
+
+	// put the nonce
+	memcpy(target, &nonce, MESH_SESSION_NONCE_LENGTH);
+
+	// fill the random number
+	RNG::fillBuffer(target + MESH_SESSION_NONCE_LENGTH, MESH_RANDOM_LENGTH);
+
+	// Set the nonce to zero to ensure it is consistent.
+	// Since we only have 1 uint8_t as counter doing this once is enough.
+	memset(_block.cleartext, 0x00, SOC_ECB_CLEARTEXT_LENGTH);
+	// use the mesh overhead as IV (first nonce, second part random)
+	memcpy(_block.cleartext, target, MESH_OVERHEAD);
+
+	if (_encryptCTR((uint8_t*)&nonce, data, dataLength, target + MESH_OVERHEAD, targetNetLength) == false) {
+		LOGe("Error while encrypting");
+		return false;
+	}
+
+	return true;
+}
+
+bool EncryptionHandler::decryptMesh(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, mesh_nonce_t* nonce, uint8_t* target, uint16_t targetLength) {
+
+	// check if the size of the encrypted data packet makes sense: min 1 block and overhead
+	if (encryptedDataPacketLength < SOC_ECB_CIPHERTEXT_LENGTH + MESH_OVERHEAD) {
+		LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+//		LOGe("Encryted data packet is smaller than the minimum possible size of a block and overhead (20 bytes).");
+		return false;
+	}
+
+	Settings::getInstance().get(CONFIG_KEY_ADMIN, _block.key);
+
+	// the actual encrypted part is after the overhead
+	uint16_t sourceNetLength = encryptedDataPacketLength - MESH_OVERHEAD;
+
+	// get the nonce
+	memcpy(nonce, encryptedDataPacket, MESH_SESSION_NONCE_LENGTH);
+
+	// Set the nonce to zero to ensure it is consistent.
+	// Since we only have 1 uint8_t as counter doing this once is enough.
+	memset(_block.cleartext, 0x00, SOC_ECB_CLEARTEXT_LENGTH);
+	// copy the mesh overhead of the encrypted data packet to be used as IV (first nonce, second part random)
+	memcpy(_block.cleartext, encryptedDataPacket, MESH_OVERHEAD);
+
+	if (_decryptCTR((uint8_t*)nonce, encryptedDataPacket + MESH_OVERHEAD, sourceNetLength, target, targetLength) == false) {
+		LOGe("Error while decrypting");
+		return false;
+	}
+
+	return true;
 }
 
 
 bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
 	if (encryptionType == CTR || encryptionType == CTR_CAFEBABE) {
 		return _prepareEncryptCTR(data,dataLength,target,targetLength,userLevel,encryptionType);
-	}
-	else {
+	} else {
 		return _encryptECB(data,dataLength,target,targetLength,userLevel,encryptionType);
 	}
 }
@@ -155,13 +214,23 @@ bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, u
 	// generate a Nonce for this session and write it to the first 3 bytes of the target.
 	_generateNonceInTarget(target);
 
-	// write the userLevel to the target
+//	 write the userLevel to the target
 	target[PACKET_NONCE_LENGTH] = uint8_t(userLevel);
 
 	// create the IV
 	_createIV(_block.cleartext, target, encryptionType);
 
-	if (_encryptCTR(data, dataLength, target+_overhead, targetNetLength, encryptionType) == false) {
+	uint8_t* validationNonce;
+	if (encryptionType == CTR_CAFEBABE) {
+		// in case we need a checksum but not a session, we use 0xcafebabe
+		validationNonce = _defaultValidationKey.a;
+	}
+	else {
+		// this will make sure the first 4 bytes of the payload are the validation nonce
+		validationNonce = _sessionNonce;
+	}
+
+	if (_encryptCTR(validationNonce, data, dataLength, target+_overhead, targetNetLength) == false) {
 		LOGe("Error while encrypting");
 		return false;
 	}
@@ -206,7 +275,15 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
 	// setup the IV
 	_createIV(_block.cleartext, encryptedDataPacket, encryptionType);
 
-	if (_decryptCTR(encryptedDataPacket + _overhead, sourceNetLength, target, targetLength, encryptionType) == false) {
+	uint8_t* validationNonce;
+	if (encryptionType == CTR_CAFEBABE) {
+		validationNonce = _defaultValidationKey.a;
+	}
+	else {
+		validationNonce = _sessionNonce;
+	}
+
+	if (_decryptCTR(validationNonce, encryptedDataPacket + _overhead, sourceNetLength, target, targetLength) == false) {
 		LOGe("Error while decrypting");
 		return false;
 	}
@@ -223,7 +300,7 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
  * It is possible that the target is smaller than the input, in this case the remainder is discarded.
  *
  */
-bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength, EncryptionType encryptionType) {
+bool EncryptionHandler::_decryptCTR(uint8_t* validationNonce, uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength) {
 	if (_validateBlockLength(inputLength) == false) {
 		LOGe(STR_ERR_MULTIPLE_OF_16);
 //		LOGe("Length of input block does not match the expected length (N*16 Bytes).");
@@ -257,7 +334,7 @@ bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 			if (inputReadIndex < inputLength)
 				_block.ciphertext[i] ^= input[inputReadIndex];
 			else {
-				LOGe("Length mismatch %d", inputReadIndex);
+				LOGe("Length mismatch %d, counter: %d, i: %d", inputReadIndex, counter, i);
 				return false;
 			}
 		}
@@ -265,7 +342,7 @@ bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 
 		// check the validation nonce
 		if (counter == 0) {
-			if (_validateDecryption(_block.ciphertext, encryptionType) == false)
+			if (_validateDecryption(_block.ciphertext, validationNonce) == false)
 				return false;
 
 			// the first iteration we can only write 12 relevant bytes to the target because the first 4 are the nonce.
@@ -303,24 +380,13 @@ bool EncryptionHandler::_decryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 /**
  * Checks if the first 4 bytes of the decrypted buffer match the session nonce or the cafebabe if useSessionNonce is false.
  */
-bool EncryptionHandler::_validateDecryption(uint8_t* buffer, EncryptionType encryptionType) {
+bool EncryptionHandler::_validateDecryption(uint8_t* buffer, uint8_t* validationNonce) {
 	for (uint8_t i = 0; i < VALIDATION_NONCE_LENGTH; i++) {
-		if (encryptionType == CTR_CAFEBABE) {
-			if (buffer[i] != _defaultValidationKey.a[i]) {
-				LOGe("Nonce mismatch");
-//				LOGe("Crownstone session nonce does not match 0xcafebabe in packet. Can not decrypt.");
-				return false;
-			}
-		}
-		else {
-			if (buffer[i] != _sessionNonce[i]) {
-				LOGe("Nonce mismatch");
-//				LOGe("Crownstone session nonce does not match session nonce in packet. Can not decrypt.");
-				return false;
-			}
+		if (buffer[i] != *(validationNonce + i)) {
+			LOGe("Nonce mismatch");
+			return false;
 		}
 	}
-
 	return true;
 }
 
@@ -337,7 +403,7 @@ bool EncryptionHandler::_validateDecryption(uint8_t* buffer, EncryptionType encr
  *
  * The validation nonce is automatically added to the input.
  */
-bool EncryptionHandler::_encryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength, EncryptionType encryptionType) {
+bool EncryptionHandler::_encryptCTR(uint8_t* validationNonce, uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength) {
 	if (_validateBlockLength(outputLength) == false) {
 		LOGe(STR_ERR_MULTIPLE_OF_16);
 //		LOGe("Length of output block does not match the expected length (N*16 Bytes).");
@@ -381,23 +447,15 @@ bool EncryptionHandler::_encryptCTR(uint8_t* input, uint16_t inputLength, uint8_
 		for (uint8_t i = 0; i < SOC_ECB_CIPHERTEXT_LENGTH; i++) {
 			// if we are at the first block, we will add the validation nonce (VN) to the first 4 bytes
 			if (shift == 0 && i < VALIDATION_NONCE_LENGTH) {
-				if (encryptionType == CTR_CAFEBABE) {
-					// in case we need a checksum but not a session, we use 0xcafebabe
-					_block.ciphertext[i] ^= _defaultValidationKey.a[i];
+				_block.ciphertext[i] ^= *(validationNonce + i);
+			} else {
+				inputReadIndex = i + shift - VALIDATION_NONCE_LENGTH;
 
-				}
-				else {
-					// this will make sure the first 4 bytes of the payload are the validation nonce
-					_block.ciphertext[i] ^= _sessionNonce[i];
-				}
-				continue; // continue to next iteration to short circuit the loop
+				if (inputReadIndex < inputLength)
+					_block.ciphertext[i] ^= input[inputReadIndex];
+				else
+					_block.ciphertext[i] ^= 0; // zero padding the data to fit in the block.
 			}
-			inputReadIndex = i + shift - VALIDATION_NONCE_LENGTH;
-
-			if (inputReadIndex < inputLength)
-				_block.ciphertext[i] ^= input[inputReadIndex];
-			else
-				_block.ciphertext[i] ^= 0; // zero padding the data to fit in the block.
 		}
 
 

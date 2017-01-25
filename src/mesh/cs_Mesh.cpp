@@ -30,7 +30,9 @@ extern "C" {
 #include <storage/cs_Settings.h>
 #include <cfg/cs_Strings.h>
 
+#include <processing/cs_EncryptionHandler.h>
 
+//#define PRINT_MESH_VERBOSE
 
 Mesh::Mesh() :
 #if (NORDIC_SDK_VERSION >= 11)
@@ -91,15 +93,12 @@ void Mesh::init() {
 	for (int i = 0; i < MESH_NUM_HANDLES; ++i) {
 		error_code = rbc_mesh_value_enable(i+1);
 		APP_ERROR_CHECK(error_code);
-		_first[i] = true;
 	}
 
 //	error_code = rbc_mesh_value_enable(1);
 //	APP_ERROR_CHECK(error_code);
 //	error_code = rbc_mesh_value_enable(2);
 //	APP_ERROR_CHECK(error_code);
-
-	_mesh_start_time = RTC::now();
 
 	// do not automatically start meshing, wait for the start command
 //	rbc_mesh_stop();
@@ -131,7 +130,6 @@ void start_stop_mesh(void * p_event_data, uint16_t event_size) {
 }
 
 void Mesh::start() {
-	_mesh_start_time = RTC::now();
 	if (!_started) {
 		_started = true;
 #ifdef PRINT_MESH_VERBOSE
@@ -212,8 +210,10 @@ uint32_t Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 	message.messageCounter = ++_messageCounter[handle];
 	memcpy(&message.payload, p_data, length);
 
-//	LOGd("message:");
-//	BLEutil::printArray((uint8_t*)&message, sizeof(mesh_message_t));
+#ifdef PRINT_MESH_VERBOSE
+	LOGd("message:");
+	BLEutil::printArray((uint8_t*)&message, sizeof(mesh_message_t));
+#endif
 
 	uint16_t messageLen = length + PAYLOAD_HEADER_SIZE;
 
@@ -223,8 +223,10 @@ uint32_t Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 
 	encodeMessage(&message, messageLen, &encryptedMessage, encryptedLength);
 
-//	LOGd("encrypted:");
-//	BLEutil::printArray((uint8_t*)&encryptedMessage, sizeof(encrypted_mesh_message_t));
+#ifdef PRINT_MESH_VERBOSE
+	LOGd("encrypted:");
+	BLEutil::printArray((uint8_t*)&encryptedMessage, sizeof(encrypted_mesh_message_t));
+#endif
 
 //	LOGd("send ch: %d, len: %d", handle, sizeof(encrypted_mesh_message_t));
 //	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
@@ -373,14 +375,13 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 //				LOGi("update final");
 //				BLEutil::printArray(replyMessageOld, sizeof(reply_message_t));
 
-
-				// update message counter
+				//! update message counter
 				_messageCounter[handle] = messageNew.messageCounter;
 
-				// send resolved message into mesh
+				//! send resolved message into mesh
 				send(handle, replyMessageOld, sizeof(reply_message_t));
 
-				// and process
+				//! and process
 		//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
 				_meshControl.process(handle, &messageOld, sizeof(mesh_message_t));
 
@@ -447,14 +448,13 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 //		LOGi("update final");
 //		BLEutil::printArray(stateMessageOld, sizeof(state_message_t));
 
-		// update message counter
+		//! update message counter
 		_messageCounter[handle] = messageNew.messageCounter;
 
-		// send resolved message into mesh
+		//! send resolved message into mesh
 		send(handle, stateMessageOld, sizeof(state_message_t));
 
-		// and process
-//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
+		//! and process
 		_meshControl.process(handle, &messageOld, sizeof(messageOld));
 
 		break;
@@ -464,61 +464,65 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 
 void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 {
+	rbc_mesh_value_handle_t handle;
+	encrypted_mesh_message_t* received;
+	uint16_t receivedLength;
+
 	TICK_PIN(28);
 //	nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
+
+	handle = evt->params.rx.value_handle;
+	received = (encrypted_mesh_message_t*)evt->params.rx.p_data;
+	receivedLength = evt->params.rx.data_len;
 
 #ifdef PRINT_MESH_VERBOSE
 	switch (evt->type)
 	{
 	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL: {
-		LOGd("ch: %d, conflicting value", evt->params.tx.value_handle);
+		LOGd("ch: %d, conflicting value", handle);
 		break;
 	}
 	case RBC_MESH_EVENT_TYPE_NEW_VAL:
-		LOGd("ch: %d, new value", evt->params.tx.value_handle);
+		LOGd("ch: %d, new value", handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_UPDATE_VAL:
-//		LOGd("ch: %d, update value", evt->params.tx.value_handle);
+//		LOGd("ch: %d, update value", handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_INITIALIZED:
-		LOGd("ch: %d, initialized", evt->params.tx.value_handle);
+		LOGd("ch: %d, initialized", handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_TX:
-		LOGd("ch: %d, transmitted", evt->params.tx.value_handle);
+		LOGd("ch: %d, transmitted", handle);
 		break;
 	default:
-		LOGd("ch: %d, evt: %d", evt->params.tx.value_handle, evt->type);
+		LOGd("ch: %d, evt: %d", handle, evt->type);
 	}
 #endif
 
-	if (evt->params.tx.value_handle > MESH_NUM_HANDLES) {
-//	if (evt->params.tx.value_handle != 1 && evt->params.tx.value_handle != 2) {
-//	if (evt->value_handle == 1 || evt->value_handle > 4) {
-		rbc_mesh_value_disable(evt->params.tx.value_handle);
+	if (handle > MESH_NUM_HANDLES) {
+		rbc_mesh_value_disable(handle);
+		return;
 	}
 
 	switch (evt->type)
 	{
 		case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL: {
-//			if (evt->params.tx.value_handle == STATE_BROADCAST_CHANNEL) return;
 
-			encrypted_mesh_message_t* received = (encrypted_mesh_message_t*)evt->params.rx.p_data;
 			encrypted_mesh_message_t stored;
-			uint16_t length = sizeof(encrypted_mesh_message_t);
-			APP_ERROR_CHECK(rbc_mesh_value_get(evt->params.tx.value_handle, (uint8_t*)&stored, &length));
+			uint16_t storedLength = sizeof(encrypted_mesh_message_t);
+			APP_ERROR_CHECK(rbc_mesh_value_get(handle, (uint8_t*)&stored, &storedLength));
 
-//			if (received->messageCounter >= _messageCounter[evt->params.tx.value_handle]) {
 			if (received->messageCounter >= stored.messageCounter) {
 
 //				LOGd("received data:");
-//				BLEutil::printArray(received, evt->params.rx.data_len);
+//				BLEutil::printArray(received, receivedLength);
 //				LOGd("stored data:");
-//				BLEutil::printArray(&stored, length);
+//				BLEutil::printArray(&stored, storedLength);
 
 				if (stored.messageCounter > received->messageCounter) {
-					resolveConflict(evt->params.tx.value_handle, received, evt->params.rx.data_len, &stored, length);
+					resolveConflict(handle, received, receivedLength, &stored, storedLength);
 				} else {
-					resolveConflict(evt->params.tx.value_handle, &stored, length, received, evt->params.rx.data_len);
+					resolveConflict(handle, &stored, storedLength, received, receivedLength);
 				}
 			}
 			break;
@@ -528,29 +532,31 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 
 //			LOGd("MESH RECEIVE");
 
-			encrypted_mesh_message_t* encrypted_message = (encrypted_mesh_message_t*)evt->params.rx.p_data;
 			mesh_message_t message;
 
-//            LOGi("Got data ch: %d, len: %d", evt->params.tx.value_handle, length);
-//            BLEutil::printArray(encrypted_message, length);
+#ifdef PRINT_MESH_VERBOSE
+            LOGi("Got data handle: %d, len: %d", handle, receivedLength);
+            BLEutil::printArray(received, receivedLength);
+#endif
 
-			if (decodeMessage(encrypted_message, evt->params.rx.data_len, &message, sizeof(mesh_message_t))) {
+			if (decodeMessage(received, receivedLength, &message, sizeof(mesh_message_t))) {
 
-				_messageCounter[evt->params.tx.value_handle] = message.messageCounter;
+//				if (message.messageCounter > _messageCounter[handle]) {
 
-	//            LOGi("message:");
-	//            BLEutil::printArray(&message, sizeof(mesh_message_t));
+					_messageCounter[handle] = message.messageCounter;
 
-	//            meshControl.process(evt->params.tx.value_handle, evt->params.rx.p_data, evt->params.rx.data_len);
-//				_meshControl.process(evt->params.tx.value_handle, message.payload, length - PAYLOAD_HEADER_SIZE);
-				_meshControl.process(evt->params.tx.value_handle, &message, sizeof(mesh_message_t));
+#ifdef PRINT_MESH_VERBOSE
+					LOGi("message:");
+					BLEutil::printArray(&message, sizeof(mesh_message_t));
+#endif
 
-	//			led_config(evt->value_handle, evt->data[0]);
+					_meshControl.process(handle, &message, sizeof(mesh_message_t));
+
+//				}
 			}
             break;
         }
         default:
-//            LOGi("Default: %i", evt->event_type);
             break;
 	}
 }
@@ -558,20 +564,23 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 bool Mesh::decodeMessage(encrypted_mesh_message_t* encoded, uint16_t encodedLength, mesh_message_t* decoded, uint16_t decodedLength) {
 
 	if (_encryptionEnabled) {
-		// TODO: encrypt message decoded and store in encoded->encrypted_payload
+		return EncryptionHandler::getInstance().decryptMesh((uint8_t*)encoded, sizeof(encrypted_mesh_message_t),
+				&decoded->messageCounter, decoded->payload, sizeof(decoded->payload));
 	} else {
 		memcpy(decoded, encoded->encrypted_payload, decodedLength);
+		return encoded->messageCounter == decoded->messageCounter;
 	}
-	return encoded->messageCounter == decoded->messageCounter;
+	return true;
 }
 
-void Mesh::encodeMessage(mesh_message_t* decoded, uint16_t decodedLength, encrypted_mesh_message_t* encoded, uint16_t encodedLength) {
+bool Mesh::encodeMessage(mesh_message_t* decoded, uint16_t decodedLength, encrypted_mesh_message_t* encoded, uint16_t encodedLength) {
 
 	if (_encryptionEnabled) {
-		// TODO: decrypt encoded->encrypted_payload and store in message decoded
+		return EncryptionHandler::getInstance().encryptMesh(decoded->messageCounter, decoded->payload, sizeof(decoded->payload),
+				(uint8_t*)encoded, sizeof(encrypted_mesh_message_t));
 	} else {
-		encoded->messageCounter = decoded->messageCounter;
 		memcpy(encoded->encrypted_payload, decoded, decodedLength);
+		return true;
 	}
 }
 
@@ -581,27 +590,24 @@ void Mesh::checkForMessages() {
 	//! check if there are new messages
 	while (rbc_mesh_event_get(&evt) == NRF_SUCCESS) {
 
-		if (_first[evt.params.tx.value_handle -1]) {
-			_first[evt.params.tx.value_handle -1] = false;
+		uint8_t handle = evt.params.tx.value_handle;
+		if (_messageCounter[handle] == 0) {
+			encrypted_mesh_message_t* received = (encrypted_mesh_message_t*)evt.params.rx.p_data;
 
-			//! ignore the first message received on each channel if it arrives within a certain
-			//! time limit after boot up. This to prevent reading old command messages after a
-			//! reboot
-			uint32_t ts = RTC::now() - _mesh_start_time;
-			if (ts < MESH_BOOT_TIME) {
-#ifdef PRINT_MESH_VERBOSE
-				LOGi("t: %d: ch: %d, skipping message within boot-up time!", ts, evt.params.tx.value_handle);
-#endif
-				// Anne: Check this, is evt big?
-				// Dominik: No but the mesh keeps track of who is using the messages, and without releasing
-				//   the event the message associated with it cannot be reused
-				rbc_mesh_event_release(&evt);
-				continue;
+#ifdef NDEBUG
+			_messageCounter[handle] = received->messageCounter;
+			LOGi("skip message %d on handle %d", received->messageCounter, handle);
+			continue;
+#else
+			if (received->messageCounter == 1) {
+				//! ok
 			} else {
-#ifdef PRINT_MESH_VERBOSE
-				LOGi("first received at: %d", ts);
-#endif
+				//! skip the first message after a boot up but take over the message counter
+				_messageCounter[handle] = received->messageCounter;
+				LOGi("skip message %d on handle %d", received->messageCounter, handle);
+				continue;
 			}
+#endif
 		}
 
 		//! handle the message

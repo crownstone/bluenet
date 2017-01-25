@@ -48,9 +48,6 @@ private:
 	bool                     _started;
 	bool                     _running;
 
-	bool                     _first[MESH_NUM_HANDLES];
-	uint32_t                 _mesh_start_time = 0;
-
 	uint32_t                 _messageCounter[MESH_NUM_HANDLES];
 
 #if (NORDIC_SDK_VERSION >= 11) 
@@ -81,7 +78,7 @@ private:
 
 	bool decodeMessage(encrypted_mesh_message_t* encoded, uint16_t encodedLength,
 			mesh_message_t* decoded, uint16_t decodedLength);
-	void encodeMessage(mesh_message_t* decoded, uint16_t decodedLength,
+	bool encodeMessage(mesh_message_t* decoded, uint16_t decodedLength,
 			encrypted_mesh_message_t* encoded, uint16_t encodedLength);
 
 	void resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,

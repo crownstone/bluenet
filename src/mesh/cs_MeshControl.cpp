@@ -34,25 +34,20 @@ void MeshControl::init() {
 	Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &_myCrownstoneId);
 }
 
-//KEEP_ALIVE_CHANNEL
-//STATE_BROADCAST_CHANNEL
-//STATE_CHANGE_CHANNEL
-//COMMAND_CHANNEL
-//COMMAND_REPLY_CHANNEL
-//SCAN_RESULT_CHANNEL
-//BIG_DATA_CHANNEL
-
 //void MeshControl::process(uint8_t channel, void* p_data, uint16_t length) {
 void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t messageLength) {
-//	LOGd("Process incoming mesh message");
 
 	mesh_message_t* meshMessage = (mesh_message_t*)p_meshMessage;
 	uint8_t* p_data = meshMessage->payload;
 	uint16_t length = messageLength - PAYLOAD_HEADER_SIZE;
 
+#if defined(PRINT_MESHCONTROL_VERBOSE)
+	LOGd("Process incoming mesh message %d", meshMessage->messageCounter);
+#endif
+
 	switch(channel) {
 	case KEEP_ALIVE_CHANNEL: {
-#if defined(PRINT_DEBUG)
+#if defined(PRINT_MESHCONTROL_VERBOSE)
 		LOGi("received keep alive");
 #endif
 
@@ -82,7 +77,7 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		break;
 	}
 	case COMMAND_CHANNEL: {
-#if defined(PRINT_DEBUG)
+#if defined(PRINT_MESHCONTROL_VERBOSE)
 		LOGi("received command");
 #endif
 
@@ -151,12 +146,13 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		break;
 	}
 
-#if defined(PRINT_DEBUG)
+#if defined(PRINT_MESHCONTROL_VERBOSE)
 	case STATE_BROADCAST_CHANNEL:
 	case STATE_CHANGE_CHANNEL: {
 
 		LOGd("received state %s", channel == STATE_CHANGE_CHANNEL ? "change" : "broadcast");
 
+#ifdef PRINT_DEBUG
 #if defined(PRINT_VERBOSE_STATE_BROADCAST) && defined(PRINT_VERBOSE_STATE_CHANGE)
 		// ok
 #elif defined(PRINT_VERBOSE_STATE_BROADCAST)
@@ -167,8 +163,7 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		if (channel == STATE_BROADCAST_CHANNEL) {
 			break;
 		}
-#else
-		break;
+#endif
 
 		state_message_t* msg = (state_message_t*)p_data;
 		BLEutil::printArray(msg, length);
@@ -190,7 +185,6 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 
 		LOGi("received command reply");
 
-#if defined(PRINT_VERBOSE_COMMAND_REPLY)
 		reply_message_t* msg = (reply_message_t*)p_data;
 
 		BLEutil::printArray(p_data, length);
@@ -199,34 +193,38 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		case STATUS_REPLY: {
 			LOGi("Received Status Reply for Message: %d", msg->messageCounter);
 
+#if defined(PRINT_DEBUG) and defined(PRINT_VERBOSE_COMMAND_REPLY)
 			for (int i = 0; i < msg->numOfReplys; ++i) {
 				LOGi("  ID %d: %d", msg->statusList[i].id, msg->statusList[i].status);
 			}
+#endif
 			break;
+		}
 		case CONFIG_REPLY: {
 			LOGi("Received Config Reply for Message: %d", msg->messageCounter);
 
+#if defined(PRINT_DEBUG) and defined(PRINT_VERBOSE_COMMAND_REPLY)
 			for (int i = 0; i < msg->numOfReplys; ++i) {
 				config_reply_item_t* item = &msg->configList[i];
 				log(SERIAL_INFO, "  ID %d: Type: %d, Data: 0x", item->id, item->data.type);
 				BLEutil::printArray(item->data.payload, item->data.length);
 			}
+#endif
 			break;
 		}
 		case STATE_REPLY: {
 			LOGi("Received State Reply for Message: %d", msg->messageCounter);
 
+#if defined(PRINT_DEBUG) and defined(PRINT_VERBOSE_COMMAND_REPLY)
 			for (int i = 0; i < msg->numOfReplys; ++i) {
 				state_reply_item_t* item = &msg->stateList[i];
 				log(SERIAL_INFO, "  ID %d: Type: %d, Data: 0x", item->id, item->data.type);
 				BLEutil::printArray(item->data.payload, item->data.length);
 			}
+#endif
 			break;
 		}
 		}
-		}
-
-#endif
 
 		break;
 	}
@@ -234,7 +232,7 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 
 		LOGi("Received scan results");
 
-#if defined(PRINT_VERBOSE_SCAN_RESULT)
+#if defined(PRINT_DEBUG) and defined(PRINT_VERBOSE_SCAN_RESULT)
 
 		scan_result_message_t* msg = (scan_result_message_t*)p_data;
 
