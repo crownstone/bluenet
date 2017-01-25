@@ -639,7 +639,7 @@ uint 8 | AD type | 1 |
 uint 16 | Service UUID | 2 | Mesh service UUID.
 uint 16 | Handle | 2 | Handle of this message.
 uint 16 | Version | 2 | Used internally.
-[Encrypted mesh packet](#encrypted_mesh_packet) | Payload | 100 | The encrypted mesh message.
+[Encrypted mesh packet](#encrypted_mesh_packet) | Payload | 104 | The encrypted mesh message.
 uint 8 [] | CRC | 3 | Checksum.
 
 ### <a name="encrypted_mesh_packet"></a>Encrypted mesh packet
@@ -651,6 +651,7 @@ This packet is sent over the mesh as payload in the mesh message.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 32 | Message counter | 4 | The message counter used to identify the message. Counter values are kept up seperately per handle. Note: This value is in plain text (unencrypted)
+uint 32 | Random number | 4 | The random number used for encryption/decryption, is sent itself unencrypted
 [Mesh packet](#mesh-packet) | Encrypted payload | 96 | The encrypted mesh packet.
 
 ### <a name="mesh-packet"></a>Mesh packet
