@@ -20,6 +20,14 @@
 #define DEFAULT_SESSION_KEY 	0xcafebabe
 #define DEFAULT_SESSION_KEY_LENGTH 4
 
+typedef uint32_t mesh_random_t;
+typedef uint32_t mesh_nonce_t;
+
+#define MESH_RANDOM_LENGTH          sizeof(mesh_random_t)
+#define MESH_SESSION_NONCE_LENGTH   sizeof(mesh_nonce_t)
+
+#define MESH_OVERHEAD (MESH_RANDOM_LENGTH + MESH_SESSION_NONCE_LENGTH)
+
 enum EncryptionAccessLevel {
 	ADMIN               = 0,
 	MEMBER              = 1,
@@ -73,7 +81,9 @@ public:
 	/**
 	 * The mesh only uses cafebabe as a validation and the admin key to encrypt. Other than that, its the same.
 	 */
-	bool encryptMesh(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength);
+	bool encryptMesh(mesh_nonce_t nonce, uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength);
+
+	bool decryptMesh(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, mesh_nonce_t* nonce, uint8_t* target, uint16_t targetLength);
 
 	/**
 	 * This method decrypts the package and places the decrypted blocks, in full, in the buffer. After this
@@ -128,11 +138,11 @@ private:
 
 	inline bool _encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);
 	inline bool _prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);
-	inline bool _encryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength, EncryptionType encryptionType);
-	inline bool _decryptCTR(uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength, EncryptionType encryptionType);
+	inline bool _encryptCTR(uint8_t* validationNonce, uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength);
+	inline bool _decryptCTR(uint8_t* validationNonce, uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength);
 	bool _checkAndSetKey(uint8_t userLevel);
 	bool _validateBlockLength(uint16_t length);
-	bool _validateDecryption(uint8_t* buffer, EncryptionType encryptionType);
+	bool _validateDecryption(uint8_t* buffer, uint8_t* validationNonce);
 	void _generateSessionNonce();
 	void _generateNonceInTarget(uint8_t* target);
 	void _createIV(uint8_t* target, uint8_t* nonce, EncryptionType encryptionType);

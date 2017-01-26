@@ -182,7 +182,7 @@ The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provide
 Characteristic | UUID | Date type | Description | A | U | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Control        | 24f00001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the control characteristic | x | x | x
-Mesh control   | 24f00002-7d10-4805-bfc1-7663a01c3bff | [Mesh control packet](#mesh_control_packet) | Write a command to the mesh control characteristic to send into the mesh | x | x |
+<a name="mesh_control_characteristic"></a>Mesh control   | 24f00002-7d10-4805-bfc1-7663a01c3bff | [Mesh control packet](#mesh_control_packet) | Write a command to the mesh control characteristic to send into the mesh | x | x |
 Config control | 24f00004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Write or select a config setting | x |
 Config read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting | x |
 State control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable | x | x |
@@ -196,7 +196,7 @@ If you lose your encryption keys you can use this characteristic to factory rese
 This method is only available for 20 seconds after the Crownstone powers on.
 You need to write **0xDEADBEEF** to it. After this, the Crownstone disconnects and goes into Low TX mode so you'll have to be close to continue the factory reset. After this, you reconnect and write **0xDEADBEEF** again to this characteristic to factory reset the Crownstone.
 
-##### Return values
+##### <a name="return_values"></a>Return values
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
 The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command
 was received before calling the next (either by polling or subscribing). The possible values of the return values are listed in the table below
@@ -208,6 +208,7 @@ Value | Name | Description
 2 | WRONG_PAYLOAD_LENGTH | wrong payload lenght provided
 3 | UNKNOWN_OP_CODE | unknown operation code, e.g. notify for config read
 5 | BUFFER_LOCKED | buffer is locked, failed queue command
+6 | BUFFER_TOO_SMALL | buffer is too small to execute command
 256 | COMMAND_NOT_FOUND | command type not found
 257 | NOT_AVAILABLE | command not available in this mode
 258 | WRONG_PARAMETER | wrong parameter provided
@@ -621,58 +622,10 @@ Type | Name | Length | Description
 uint 8 | Size | 1 | Number of entries in the list.
 [schedule entry](#schedule_entry_packet) | Entries | 12 | Schedule entry list.
 
-
-### <a name="mesh_control_packet"></a>Mesh control packet
-
-![Mesh control packet](../docs/diagrams/mesh-control-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Handle | 1 | Handle on which to send the message.
-uint 8 | Reserved | 1 | Not used: reserved for alignment.
-uint 16 | Length | 2 | Length of the data.
-[Mesh Payload](#mesh_payload_packet) | Payload | Length | Payload data.
-
-
-### <a name="mesh_payload_packet"></a>Mesh payload packet
-
-![Mesh payload packet](../docs/diagrams/mesh-payload-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | Target Crownstone ID | 2 | Crownstone Identifier of the device at which this message is aimed at, all 0 for any device.
-uint 16 | Reason | 2 | ...
-uint 16 | User ID | 2 | ...
-uint 16 | Type | 2 | Type of message, see table below.
-uint 8 [] | Payload | 0 to 91 | Payload data, depends on type.
-
-Type nr | Type name | Payload type | Payload description
---- | --- | --- | ---
-0 | Command | [Control](#control_packet) | Send a command over the mesh, see control packet
-1 | Beacon | [Beacon data](#beacon_mesh_data_packet) | Configure the iBeacon settings.
-2 | Config | [Configuration](#config_packet) | Send/Request a configuration setting, see configuration packet
-3 | State | [State](#state_packet) | Send/Request a state variable, see state packet
-101 | Scan result | [Scan result list](#scan_result_list_packet) | List of scanned devices.
-103 | Power Samples | [Power samples](#power_samples_packet) | List of power samples.
-104 | Event | uint 16 | Event type that happened.
-
-
-### <a name="beacon_mesh_data_packet"></a>Beacon mesh data packet
-
-![Beacon data](../docs/diagrams/beacon-mesh-message-data-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | Major | 1 |
-uint 16 | Minor | 1 |
-uint 8 | Proximity UUID | 16 |
-int 8 | TX Power | 1 | Received signal strength at 1 meter.
-
-
-### <a name="mesh_message_packet"></a>Mesh message packet
+### <a name="mesh_message_packet"></a>Mesh message
 This packet is a slightly modified version of the one used in [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh); we simply increased the content size.
 
-![Mesh packet](../docs/diagrams/mesh-packet.png)
+![Mesh packet](../docs/diagrams/openmesh-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -686,9 +639,203 @@ uint 8 | AD type | 1 |
 uint 16 | Service UUID | 2 | Mesh service UUID.
 uint 16 | Handle | 2 | Handle of this message.
 uint 16 | Version | 2 | Used internally.
-[Mesh Payload](#mesh_payload_packet) | Payload | 99 | Payload data.
+[Encrypted mesh packet](#encrypted_mesh_packet) | Payload | 104 | The encrypted mesh message.
 uint 8 [] | CRC | 3 | Checksum.
 
+### <a name="encrypted_mesh_packet"></a>Encrypted mesh packet
+
+This packet is sent over the mesh as payload in the mesh message.
+
+![Encrypted mesh message](../docs/diagrams/encrypted-mesh-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 32 | Message counter | 4 | The message counter used to identify the message. Counter values are kept up seperately per handle. Note: This value is in plain text (unencrypted)
+uint 32 | Random number | 4 | The random number used for encryption/decryption, is sent itself unencrypted
+[Mesh packet](#mesh-packet) | Encrypted payload | 96 | The encrypted mesh packet.
+
+### <a name="mesh-packet"></a>Mesh packet
+
+This packet is encrypted and sent as payload in the encrypted mesh packet.
+
+![Mesh message](../docs/diagrams/mesh-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 32 | Message counter | 4 | The message counter used to identify the message. Counter values are kept up seperately per handle. Note: This value will be compared after decryption to the message counter of the encrypted mesh message to make sure the message was not tampered with.
+[Mesh payload](#mesh_payload_packet) | Payload | 92 | Payload data
+
+### <a name="mesh_control_packet"></a>Mesh control packet
+
+This packet is sent to the [Mesh control characteristic](#mesh_control_characteristic)
+
+![Mesh control packet](../docs/diagrams/mesh-control-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Handle | 1 | Handle on which to send the message.
+uint 8 | Reserved | 1 | Not used: reserved for alignment.
+uint 16 | Length | 2 | Length of the data.
+[Mesh payload](#mesh_payload_packet) | Payload | 0 - 92 | Payload data, max 92 bytes, but actual length is determined by the handle
+
+### <a name="mesh_payload_packet"></a>Mesh payload packet
+
+The mesh payload packet is defined by the handle. We have the following handles
+
+Handle | Name | Type | Description
+--- | --- | --- | ---
+1 | Keep alive channel | [Keep alive](#keep_alive_mesh_packet) | Channel on which the keep alive messages are sent. A message consists of a global timeout and a number of keep alive items (on per stone which is addressed)
+2 | State broadcast channel | [State](#state_mesh_packet) | Each stone sends it's state periodically over the mesh. The message is designed as a circular buffer and a new item is added at the end (throwing out the oldest if full)
+3 | State change channel | [State](#state_mesh_packet) | Each stone sends its' state on this channel if the state changes significantly, e.g. switch state changes.
+4 | Command channel | [Command](#command_mesh_packet) | Commands can be sent to one, multiple or all stones sharing the mesh network. Once a stone receives a command it will send a reply on the reply channel
+5 | Command reply channel | [Command reply](#command_reply_packet) | Every stone that was targeted with a command adds its reply to the reply message.
+6 | Scan result channel | [Scan result](#scan_result_packet) | If a stone is scanning for devices it adds it's scanned devices periodically to this list to be sent over the mesh
+7 | Big data channel | - | This channel is for the case when a stone needs to send big data, such as the history of eneregy usage, etc.
+
+#### <a name="keep_alive_mesh_packet"></a>Keep alive packet
+
+![Keep Alive packet](../docs/diagrams/keep-alive-mesh-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Timeout | 2 | Timeout (in seconds), applies to all stones present in the list
+uint 8 | Size | 1 | Number of keep alive items in the list
+[Keep alive item](#keep_alive_mesh_item) [] | List | N | The keep alive items are defined as Crownstone identifier and a combined action + switch state
+
+##### <a name="keep_alive_mesh_item"></a>Keep alive Item
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | The identifier of the crownstone to which this keep alive item is targeted
+[Action + switch state](#action_switch_state_keep_alive) | Action + switch state | 1 | A combined element for action and switch state, which should be executed by the targeted crownstone when the keep alive times out
+
+##### <a name="action_switch_state_keep_alive"></a>Action + switch state
+
+Value | Name
+--- | ---
+255 | No action
+... | ...
+default | see [Switch state](#switch_state_packet)
+
+#### <a name="state_mesh_packet"></a>Crownstone state packet
+
+![Crownstone State packet](../docs/diagrams/state-mesh-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Head | 1 | Keeps the index of the oldest element in the list (read pointer)
+uint 8 | Tail | 1 | Keeps the index where the next element can be inserted in the list (write pointer)
+uint 8 | Size | 1 | Number of elements in the list
+[Crownstone state item](#state_mesh_item) [] | List | 8 | Circular list with Crownstone state items
+
+##### <a name="state_mesh_item"></a>Crownstone state item
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | The identifier of the crownstone which has this state
+uint 8 | Switch state | 1 | The current [Switch State](#switch_state_packet) of the crownstone
+int 32 | Power usage | 4 | The current power usage of the crownstone (mW)
+int 32 | Accumulated energy | 4 | The accumulated energy since setup (Wh)
+
+#### <a name="command_mesh_packet"></a>Command packet
+
+![Command packet](../docs/diagrams/command-mesh-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | [Command type](#mesh_command_types) | 2 | Type of command, see table below.
+uint 8 | Number of IDs | 1 | The number of IDs provided as targets, 0 for broadcast
+uint16 [] | List of target IDs | Number of IDs | Crownstone Identifiers of the devices at which this message is aimed, for broadcast, no IDs are provided and the command follows directly after the Number of IDs element
+uint 8 | Command payload | N | The command payload data, which depends on the message type
+
+##### <a name="mesh_command_types"></a>Command types
+
+Type nr | Type name | Payload type | Payload description
+--- | --- | --- | ---
+0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet
+1 | Beacon | [Beacon Config](#beacon_mesh_data_packet) | Configure the iBeacon settings.
+2 | Config | [Configuration](#config_packet) | Send/Request a configuration setting, see configuration packet
+3 | State | [State](#state_packet) | Send/Request a state variable, see state packet
+
+##### <a name="beacon_mesh_data_packet"></a>Beacon config packet
+
+![Beacon data](../docs/diagrams/beacon-config-command-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Major | 1 | iBeacon major number
+uint 16 | Minor | 1 | iBeacon minor number
+uint 8 | Proximity UUID | 16 | iBeacon UUID
+int 8 | TX power | 1 | iBeacon signal strength at 1 meter.
+
+#### <a name="command_reply_mesh_packet"></a>Command reply packet
+
+![Command Reply packet](../docs/diagrams/command-reply-mesh-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | [Reply type](#mesh_reply_types) | 2 | Type of reply, see table below
+uint 32 | Message counter | 4 | The message number of the command to which this reply belongs
+uint 8 | Number of replies | 1 | Number of reply items in the list
+uint 8 | List of replies | 85 | List of replies, the format is defined by the type of reply
+
+##### <a name="mesh_reply_types"></a>Reply types
+
+Type nr | Type name | Payload type | Payload description
+--- | --- | --- | ---
+0 | Status reply | [Status reply item](#mesh_status_reply) | Send a status code back, used to report errors. And to report success for control and config write commands.
+1 | Config reply | [Config reply item](#mesh_config_reply) | Return the requested config.
+2 | State reply | [State reply item](#mesh_state_reply) | Return the requested state variable.
+
+###### <a name="mesh_status_reply"></a>Status reply item
+
+![Status reply item](../docs/diagrams/mesh-status-reply-item.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | The identifier of the crownstone which sent the status reply
+uint 16 | Status | 2 | The status code of the reply, see [Return Values](#return_values)
+
+###### <a name="mesh_config_reply"></a>Config reply item
+
+![Config reply item](../docs/diagrams/mesh-config-reply-item.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | The identifier of the crownstone which sent the status reply
+uint 8 | Type | 1 | see [Configuration Packet](#config_packet)
+uint 8 | OpCode | 1 | see [Configuration Packet](#config_packet)
+uint 16 | Length | 2 | see [Configuration Packet](#config_packet)
+uint 8 | Payload | Length | see [Configuration Packet](#config_packet)
+
+###### <a name="mesh_state_reply"></a>State reply item
+
+![State Reply packet](../docs/diagrams/mesh-state-reply-item.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | The identifier of the crownstone which sent the status reply
+uint 8 | Type | 1 | see [State Packet](#state_packet)
+uint 8 | OpCode | 1 | see [State Packet](#state_packet)
+uint 16 | Length | 2 | see [State Packet](#state_packet)
+uint 8 | Payload | Length | see [State Packet](#state_packet)
+
+#### <a name="scan_result_mesh_packet"></a>Scan result packet
+
+![Scan Result packet](../docs/diagrams/scan-result-mesh-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Number of results | 1 | Number of scan results in the list
+[Scan Result item](#scan_result_item) [] | List | Number of results | A list of scanned devices with the ID of the crownstone that scanned the device
+
+##### <a name="mesh_scan_result_item"></a>Scan result item
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | The identifier of the Crownstone which scanned the device
+uint 8 [6] | Scanned device address | 6 | The MAC address of the scanned device
+int 8 | RSSI | 1 | The averaged RSSI value of the scanned device
 
 ### <a name="mesh_notification_packet"></a>Mesh notification packet
 This packet is used to get the [mesh messages](#mesh_message_packet) pushed over GATT notifications.
@@ -710,7 +857,6 @@ Opcode | Type name | Payload type | Payload Description
 32 | MultipartStart | [Mesh data update](#mesh_data_update_packet) | First part of the multi part notification.
 33 | MultipartMid | [Mesh data update](#mesh_data_update_packet) | Middle part of the multi part notification.
 34 | MultipartEnd | [Mesh data update](#mesh_data_update_packet) | Last part of the multi part notification.
-
 
 ### <a name="mesh_data_update_packet"></a>Mesh data update packet
 Each mesh data message is notified in multiple pieces, as a notification can only be 20 bytes. The op code of the [Mesh notification](#mesh_notification_packet) tells whether it is a single, or the first, last or a middle piece of a multipart message.

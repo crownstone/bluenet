@@ -11,7 +11,7 @@
 
 #include <protocol/cs_MeshMessageTypes.h>
 
-using MeshCommand = StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>;
+using MeshCommand = StreamBuffer<uint8_t, MAX_MESH_MESSAGE_LENGTH>;
 
 /** The mesh characteristic message is a wrapped StreamBuffer object.
  *  it uses the type of the StreamBuffer as handle and uses a smaller payload size

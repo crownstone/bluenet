@@ -15,6 +15,10 @@
 
 #include <cstring>
 
+#if BUILD_MESHING == 1
+#include <protocol/cs_MeshMessageTypes.h>
+#endif
+
 #define SERVICE_DATA_PROTOCOL_VERSION 1
 
 //! bitmask map (if bit is true, then):
@@ -90,10 +94,13 @@ public:
 		return sizeof(_params);
 	}
 
+	void sendMeshState(bool event);
+
 private:
 
 	app_timer_t    _updateTimerData;
 	app_timer_id_t _updateTimerId;
+
 	uint8_t _operationMode;
 	bool _connected;
 
@@ -125,9 +132,19 @@ private:
 		uint8_t _encryptedArray[sizeof(_params)] = {};
 	};
 
-
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
+#if BUILD_MESHING == 1
+	app_timer_t    _meshStateTimerData;
+	app_timer_id_t _meshStateTimerId;
+
+	/* Static function for the timeout */
+	static void meshStateTick(ServiceData *ptr) {
+		ptr->sendMeshState(false);
+	}
+
+	state_item_t _lastStateChangeMessage;
+#endif
 
 };
 

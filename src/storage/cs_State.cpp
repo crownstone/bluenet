@@ -196,52 +196,77 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 	return error_code;
 }
 
+uint16_t State::getStateItemSize(uint8_t type) {
+
+	switch(type) {
+	case STATE_RESET_COUNTER: {
+		return sizeof(reset_counter_t);
+	}
+	case STATE_SWITCH_STATE: {
+		return sizeof(uint8_t);
+	}
+	case STATE_ACCUMULATED_ENERGY: {
+		return sizeof(accumulated_energy_t);
+		break;
+	}
+	case STATE_POWER_USAGE: {
+		return sizeof(_powerUsage);
+		break;
+	}
+	case STATE_TRACKED_DEVICES: {
+		return sizeof(tracked_device_list_t);
+		break;
+	}
+	case STATE_SCHEDULE: {
+		return sizeof(schedule_list_t);
+		break;
+	}
+	case STATE_OPERATION_MODE: {
+		return sizeof(uint8_t);
+		break;
+	}
+	case STATE_TEMPERATURE: {
+		return sizeof(_temperature);
+		break;
+	}
+	case STATE_FACTORY_RESET: {
+		return sizeof(_factoryResetState);
+		break;
+	}
+	case STATE_TIME: {
+		return sizeof(_time);
+		break;
+	}
+	case STATE_LEARNED_SWITCHES: {
+		return MAX_SWITCHES * sizeof(learned_enocean_t);
+		break;
+	}
+	default: {
+		LOGw(FMT_STATE_NOT_FOUND, type);
+		return 0;
+	}
+	}
+}
+
 ERR_CODE State::verify(uint8_t type, uint16_t size) {
 
 	bool success;
 	switch(type) {
-	case STATE_RESET_COUNTER: {
-		success = size == sizeof(reset_counter_t);
-		break;
-	}
-	case STATE_SWITCH_STATE: {
-		success = size == sizeof(uint8_t);
-		break;
-	}
-	case STATE_ACCUMULATED_ENERGY: {
-		success = size == sizeof(accumulated_energy_t);
-		break;
-	}
-	case STATE_POWER_USAGE: {
-		success = size == sizeof(_powerUsage);
-		break;
-	}
-	case STATE_TRACKED_DEVICES: {
-		success = size <= sizeof(tracked_device_list_t);
-		break;
-	}
-	case STATE_SCHEDULE: {
-		success = size <= sizeof(schedule_list_t);
-		break;
-	}
-	case STATE_OPERATION_MODE: {
-		success = size == sizeof(uint8_t);
-		break;
-	}
-	case STATE_TEMPERATURE: {
-		success = size == sizeof(_temperature);
-		break;
-	}
-	case STATE_FACTORY_RESET: {
-		success = size == sizeof(_factoryResetState);
-		break;
-	}
+	case STATE_RESET_COUNTER:
+	case STATE_SWITCH_STATE:
+	case STATE_ACCUMULATED_ENERGY:
+	case STATE_POWER_USAGE:
+	case STATE_OPERATION_MODE:
+	case STATE_TEMPERATURE:
+	case STATE_FACTORY_RESET:
 	case STATE_TIME: {
-		success = size == sizeof(_time);
+		success = size == getStateItemSize(type);
 		break;
 	}
+	case STATE_TRACKED_DEVICES:
+	case STATE_SCHEDULE:
 	case STATE_LEARNED_SWITCHES: {
-		success = size <= MAX_SWITCHES * sizeof(learned_enocean_t);
+		success = size <= getStateItemSize(type);
 		break;
 	}
 	default: {

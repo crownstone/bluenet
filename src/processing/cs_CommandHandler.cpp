@@ -282,21 +282,21 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		LOGi(STR_HANDLE_COMMAND, "request service");
 
 #if BUILD_MESHING == 1
-		service_data_mesh_message_t serviceData;
-		memset(&serviceData, 0, sizeof(serviceData));
+		state_item_t stateItem;
+		memset(&stateItem, 0, sizeof(stateItem));
 
 		State& state = State::getInstance();
-		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &serviceData.crownstoneId);
+		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &stateItem.id);
 
-		state.get(STATE_SWITCH_STATE, serviceData.switchState);
+		state.get(STATE_SWITCH_STATE, stateItem.switchState);
 
 		// todo get event bitmask
 
-		state.get(STATE_POWER_USAGE, (int32_t&)serviceData.powerUsage);
-		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)serviceData.accumulatedEnergy);
-		state.get(STATE_TEMPERATURE, (int32_t&)serviceData.temperature);
+		state.get(STATE_POWER_USAGE, (int32_t&)stateItem.powerUsage);
+		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)stateItem.accumulatedEnergy);
+//		state.get(STATE_TEMPERATURE, (int32_t&)serviceData.temperature);
 
-		MeshControl::getInstance().sendServiceDataMessage(&serviceData);
+		MeshControl::getInstance().sendServiceDataMessage(stateItem, true);
 #endif
 
 		break;

@@ -96,7 +96,7 @@ void Storage::onUpdateDone() {
 			LOGi("pstorage update done");
 #if BUILD_MESHING == 1
 			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-				Mesh::getInstance().start();
+				Mesh::getInstance().resume();
 			}
 #endif
 		}
@@ -117,7 +117,7 @@ void storage_sys_evt_handler(uint32_t evt) {
 		break;
 	}
 	case NRF_EVT_RADIO_SESSION_CLOSED: {
-		LOGd("NRF_EVT_RADIO_SESSION_CLOSED");
+//		LOGd("NRF_EVT_RADIO_SESSION_CLOSED");
 //			Storage::getInstance().resumeRequests();
 		app_sched_event_put(NULL, 0, resume_requests);
 		break;
@@ -178,9 +178,9 @@ void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED))	{
 #if BUILD_MESHING == 1
 #ifdef PRINT_STORAGE_VERBOSE
-				LOGd("stop mesh on scan stop");
+				LOGd("pause mesh on scan stop");
 #endif
-				Mesh::getInstance().stop();
+				Mesh::getInstance().resume();
 #endif
 			} else {
 				// otherwise, resume buffered pstorage update requests
@@ -318,9 +318,9 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 		if (meshRunning && !_scanning) {
 #if BUILD_MESHING == 1
 #ifdef PRINT_STORAGE_VERBOSE
-			LOGd("stop mesh on pstorage update");
+			LOGd("pause mesh on pstorage update");
 #endif
-			Mesh::getInstance().stop();
+			Mesh::getInstance().pause();
 #endif
 		}
 	} else {

@@ -12,7 +12,7 @@
 //#define GENERAL_BUFFER_SIZE                      300
 
 /** maximum length of strings used for characteristic values */
-#define DEFAULT_CHAR_VALUE_STRING_LENGTH             25
+#define DEFAULT_CHAR_VALUE_STRING_LENGTH         25
 
 /** define the maximum size for strings to be stored
  */
@@ -154,3 +154,4 @@
 #define ADVERTISING_REFRESH_PERIOD               1000 //! Push the changes in the advertisement packet to the stack every x milliseconds
 #define ADVERTISING_REFRESH_PERIOD_SETUP         100 //! Push the changes in the advertisement packet to the stack every x milliseconds
 
+#define MESH_STATE_REFRESH_PERIOD                10000 // 1 Minute

@@ -89,6 +89,8 @@ public:
 	ERR_CODE get(uint8_t type, void* target, uint16_t& size );
 	ERR_CODE set(uint8_t type, void* target, bool persistent = false, uint16_t size = 0);
 
+	uint16_t getSettingsItemSize(uint8_t type);
+
 protected:
 
 	bool _initialized;
@@ -105,8 +107,6 @@ protected:
 	Storage* _storage;
 
 	ERR_CODE verify(uint8_t type, uint8_t* payload, uint8_t length);
-
-	uint16_t getSettingsItemSize(uint8_t type);
 
 	bool readFlag(uint8_t type, bool& value);
 //	void initFlags();

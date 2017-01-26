@@ -178,6 +178,7 @@ void Switch::relayOn() {
 	nrf_gpio_pin_set(PIN_GPIO_RELAY_ON);
 	nrf_delay_ms(relayHighDuration);
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
+#endif
 
 #ifdef EXTENDED_SWITCH_STATE
 	_switchValue.relay_state = 1;
@@ -185,7 +186,6 @@ void Switch::relayOn() {
 	_switchValue = 255;
 #endif
 	updateSwitchState();
-#endif
 }
 
 void Switch::relayOff() {
@@ -215,6 +215,7 @@ void Switch::relayOff() {
 	nrf_gpio_pin_set(PIN_GPIO_RELAY_OFF);
 	nrf_delay_ms(relayHighDuration);
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
+#endif
 
 #ifdef EXTENDED_SWITCH_STATE
 	_switchValue.relay_state = 0;
@@ -222,7 +223,6 @@ void Switch::relayOff() {
 	_switchValue = 0;
 #endif
 	updateSwitchState();
-#endif
 }
 
 void Switch::timedSetRelay() {
