@@ -1,4 +1,4 @@
-# Bluenet protocol v0.7.0
+# Bluenet protocol v0.8.0
 -------------------------
 
 # <a name="encryption"></a>Encryption
