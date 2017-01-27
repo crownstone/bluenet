@@ -16,6 +16,10 @@
 #include <drivers/cs_Serial.h>
 #include <util/cs_Utils.h>
 
+extern "C" {
+#include "nrf52.h"
+}
+
 inline std::string get_hardware_revision(void) {
 
 	// get Production run
@@ -40,7 +44,7 @@ inline std::string get_hardware_revision(void) {
 	}
 
 	char hardware_revision[33];
-	sprintf(hardware_revision, "%11.11s%.4s%.4s%.8s%.6s", HARDWARE_VERSION_STRING, production_run.c_str(), housing_id.c_str(), reserved.c_str(), nordic_chip_version);
+	sprintf(hardware_revision, "%11.11s%.4s%.4s%.8s%.6s", get_hardware_version(), production_run.c_str(), housing_id.c_str(), reserved.c_str(), nordic_chip_version);
 	return std::string(hardware_revision);
 }
 
