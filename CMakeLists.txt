@@ -70,6 +70,8 @@ SET(BOOTLOADER "_bootloader_.hex")
 # essential, code doesn't run without this file !!!
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_sysNrf51.c")
 
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cfg/cs_Boards.c")
+
 # Add a single
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Error.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")
@@ -119,11 +121,12 @@ IF(${SCHEDULE_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_ScheduleService.cpp")
 ENDIF()
 
-IF(${DEVICE_TYPE} STREQUAL DEVICE_CROWNSTONE_PLUG OR ${DEVICE_TYPE} STREQUAL DEVICE_CROWNSTONE_BUILTIN)
+
+# IF(${DEVICE_TYPE} STREQUAL DEVICE_CROWNSTONE_PLUG OR ${DEVICE_TYPE} STREQUAL DEVICE_CROWNSTONE_BUILTIN)
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_PowerSampling.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Switch.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Watchdog.cpp")
-ENDIF()
+# ENDIF()
 
 # should be only when creating iBeacon
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_iBeacon.cpp")

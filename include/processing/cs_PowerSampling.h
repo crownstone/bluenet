@@ -20,7 +20,7 @@ public:
 		return instance;
 	}
 
-	void init();
+	void init(uint8_t pinAinCurrent, uint8_t pinAinVoltage);
 
 	void stopSampling();
 

@@ -72,7 +72,7 @@ void CrownstoneService::createCharacteristics() {
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_CONTROL);
 #endif
 
-#if CHAR_MESHING==1
+#if (BUILD_MESHING == 1) && (CHAR_MESHING == 1)
 	LOGi(FMT_CHAR_ADD, STR_CHAR_MESH);
 	addMeshCharacteristic();
 #else

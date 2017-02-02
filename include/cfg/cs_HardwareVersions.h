@@ -42,19 +42,19 @@ inline const char* get_hardware_version() {
 		hardwareBoard = ACR01B2C;
 	}
 
-	LOGi("UICR");
-	BLEutil::printArray((uint8_t*)NRF_UICR->CUSTOMER, 128);
+//	LOGi("UICR");
+//	BLEutil::printArray((uint8_t*)NRF_UICR->CUSTOMER, 128);
+
+	// CROWNSTONE PLUGS
+	if (hardwareBoard == ACR01B2A) return "10102000100";
+	if (hardwareBoard == ACR01B2B) return "10102000200";
+	if (hardwareBoard == ACR01B2C) return "10102010000";
 
 	// CROWNSTONE BUILTINS
 	if (hardwareBoard == ACR01B1A) return "10103000100";
 	if (hardwareBoard == ACR01B1B) return "10103000200";
 	if (hardwareBoard == ACR01B1C) return "10103000300";
 	if (hardwareBoard == ACR01B1D) return "10103000400";
-
-	// CROWNSTONE PLUGS
-	if (hardwareBoard == ACR01B2A) return "10102000100";
-	if (hardwareBoard == ACR01B2B) return "10102000200";
-	if (hardwareBoard == ACR01B2C) return "10102010000";
 
 	// GUIDESTONE
 	if (hardwareBoard == GUIDESTONE) return "10104010000";
@@ -63,22 +63,10 @@ inline const char* get_hardware_version() {
 	//// Old and Third Party Boards
 	/////////////////////////////////////////////////////////////////
 
-	if (hardwareBoard == VIRTUALMEMO) return "VIRTUALMEMO";
-	if (hardwareBoard == CROWNSTONE)  return "crownstone";
-	if (hardwareBoard == CROWNSTONE2) return "crownstone_v0.86";
-	if (hardwareBoard == CROWNSTONE3) return "crownstone_v0.90";
-	if (hardwareBoard == CROWNSTONE4) return "crownstone_v0.92";
 	if (hardwareBoard == CROWNSTONE5) return "plugin_quant";
 	if (hardwareBoard == PLUGIN_FLEXPRINT_01) return "plugin_flexprint_01";
-	if (hardwareBoard == DOBEACON) return "dobeacon_v0.7";
-	if (hardwareBoard == DOBEACON2) return "dobeacon_v?";
 
 	// Nordic Boards
-	if (hardwareBoard == PCA10001) return "PCA10001";
-	if (hardwareBoard == NRF6310) return "NRF6310";
-	if (hardwareBoard == PCA10000) return "PCA10000";
-	if (hardwareBoard == PCA10031) return "PCA10031";
-	if (hardwareBoard == NORDIC_BEACON) return "NORDIC_BEACON";
 	if (hardwareBoard == PCA10036) return "PCA10036";
 	if (hardwareBoard == PCA10040) return "PCA10040";
 
