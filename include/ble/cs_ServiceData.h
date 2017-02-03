@@ -33,7 +33,7 @@
 enum ServiceBitmask {
 	NEW_DATA_AVAILABLE    = 0,
 	SHOWING_EXTERNAL_DATA = 1,
-	RESERVED1             = 2,
+	SERVICE_BITMASK_ERROR = 2,
 	RESERVED2             = 3,
 	RESERVED3             = 4,
 	RESERVED4             = 5,
