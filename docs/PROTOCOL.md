@@ -344,7 +344,7 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
 17 | <a name="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | ..
 18 | Request Service Data | - | Causes the crownstone to send it's service data over the mesh | x | x |
-19 | Disconnect | - | Causes the crownstone to send it's service data over the mesh | .. | .. | ..
+19 | Disconnect | - | Causes the crownstone to disconnect | .. | .. | ..
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 
@@ -763,8 +763,8 @@ Type nr | Type name | Payload type | Payload description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Major | 1 | iBeacon major number
-uint 16 | Minor | 1 | iBeacon minor number
+uint 16 | Major | 2 | iBeacon major number
+uint 16 | Minor | 2 | iBeacon minor number
 uint 8 | Proximity UUID | 16 | iBeacon UUID
 int 8 | TX power | 1 | iBeacon signal strength at 1 meter.
 

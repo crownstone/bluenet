@@ -620,30 +620,48 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 	}
 	case KEEP_ALIVE_CHANNEL: {
 
-		keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
-//		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
-		uint16_t timeout = msg->timeout;
+		// special case, if no data is provided with the keep alive, repeat the keep alive message
+		// currently in the keep alive channel
+		if (length == 0) {
 
-		if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
-			BLEutil::printArray(p_data, length);
-			return ERR_WRONG_PAYLOAD_LENGTH;
+			keep_alive_message_t msg = {};
+			uint16_t length;
+			if (Mesh::getInstance().getLastMessage(KEEP_ALIVE_CHANNEL, &msg, length)) {
+				Mesh::getInstance().send(channel, &msg, length);
+
+				keep_alive_item_t* p_item;
+				if (has_keep_alive_item(&msg, _myCrownstoneId, &p_item)) {
+					handleKeepAlive(p_item, msg.timeout);
+				}
+			}
+
+		} else {
+
+			keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
+	//		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
+			uint16_t timeout = msg->timeout;
+
+			if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+				BLEutil::printArray(p_data, length);
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+
+			keep_alive_item_t* p_item;
+			if (has_keep_alive_item(msg, _myCrownstoneId, &p_item)) {
+				handleKeepAlive(p_item, timeout);
+			}
+
+	//		for (int i = 0; i < msg->size; ++i) {
+	//			if (p_item->id == _myCrownstoneId) {
+	//				handleKeepAlive(p_item, timeout);
+	//				break;
+	//			}
+	//			++p_item;
+	//		}
+
+			Mesh::getInstance().send(channel, p_data, length);
 		}
-
-		keep_alive_item_t* p_item;
-		if (has_keep_alive_item(msg, _myCrownstoneId, &p_item)) {
-			handleKeepAlive(p_item, timeout);
-		}
-
-//		for (int i = 0; i < msg->size; ++i) {
-//			if (p_item->id == _myCrownstoneId) {
-//				handleKeepAlive(p_item, timeout);
-//				break;
-//			}
-//			++p_item;
-//		}
-
-		Mesh::getInstance().send(channel, p_data, length);
 
 		break;
 	}
