@@ -74,6 +74,9 @@ private:
 
 	void timedSetRelay();
 
+	void forcePwmOff();
+	void forceSwitchOff();
+
 	switch_state_t _switchValue;
 
 #if (NORDIC_SDK_VERSION >= 11)

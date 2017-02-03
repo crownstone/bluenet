@@ -658,6 +658,18 @@ void Crownstone::startUp() {
 	nrf_delay_ms(50);
 #endif
 
+#if IS_CROWNSTONE(DEVICE_TYPE)
+	//! Start switch, so it can be used.
+	_switch->start();
+
+	//! Start temperature guard regardless of operation mode
+	_temperatureGuard->startTicking();
+
+	//! Start power sampler regardless of operation mode (as it is used for the current based soft fuse)
+	LOGd(FMT_START, "power sampling");
+	_powerSampler->startSampling();
+#endif
+
 	//! the rest we only execute if we are in normal operation
 	//! during setup mode, most of the crownstone's functionality is
 	//! disabled
@@ -676,19 +688,12 @@ void Crownstone::startUp() {
 		_stack->startTicking();
 
 #if IS_CROWNSTONE(DEVICE_TYPE)
-		_switch->start();
 
 		// restore the last value. the switch reads the last state from the storage, but does
 		// not automatically update the pwm/relay values. so we read out the last value
 		// and set it again to update the pwm
 		uint8_t pwm = _switch->getPwm();
 		_switch->setPwm(pwm);
-
-		//! start ticking of peripherals
-		_temperatureGuard->startTicking();
-
-		LOGd(FMT_START, "power sampling");
-		_powerSampler->startSampling();
 #endif
 
 		_scheduler->start();
@@ -728,6 +733,8 @@ void Crownstone::startUp() {
 }
 
 void Crownstone::tick() {
+	//! Right now, this function is only called in normal operation
+
 
 #if ADVERTISEMENT_IMPROVEMENT==1
 	//! update advertisement parameters (to improve scanning on (some) android phones)

@@ -69,14 +69,15 @@ void Switch::init() {
 	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
 #endif
 
+	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
+	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
+
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_relayTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSetRelay);
 }
 
 void Switch::start() {
-	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
-	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
-	setPwm(_switchValue.pwm_state);
+
 }
 
 void Switch::pwmOff() {
@@ -277,6 +278,17 @@ void Switch::toggle() {
 	}
 }
 
+void Switch::forcePwmOff() {
+	pwmOff();
+	EventDispatcher::getInstance().dispatch(EVT_PWM_FORCED_OFF);
+}
+
+void Switch::forceSwitchOff() {
+	pwmOff();
+	relayOff();
+	EventDispatcher::getInstance().dispatch(EVT_SWITCH_FORCED_OFF);
+}
+
 void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_POWER_ON:
@@ -287,6 +299,14 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_POWER_OFF:
 	case EVT_TRACKED_DEVICE_NOT_NEARBY: {
 		turnOff();
+		break;
+	}
+	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM: {
+		forcePwmOff();
+		break;
+	}
+	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD: {
+		forceSwitchOff();
 		break;
 	}
 	}
