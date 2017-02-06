@@ -138,6 +138,8 @@
 #define CURRENT_ZERO_EXP_AVG_DISCOUNT            100 // Is divided by 1000, so 100 is a discount of 0.1. //! 99% of the average is influenced by the last 44 values
 #define POWER_EXP_AVG_DISCOUNT                   50  // Is divided by 1000, so 50 is a discount of 0.05. //! 99% of the average is influenced by the last 90 values
 
+#define CURRENT_USAGE_THRESHOLD                  (16000) // Power usage threshold in mA at which the switch should be turned off.
+#define CURRENT_USAGE_THRESHOLD_PWM              (1000)  // Power usage threshold in mA at which the PWM should be turned off.
 
 #define PWM_PERIOD                               20000L //! Interval in us: 1/20000e-6 = 50 Hz
 

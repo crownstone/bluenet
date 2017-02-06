@@ -123,8 +123,8 @@ void asPca10036(boards_config_t* p_config) {
 	p_config->flags.hasSerial      = true;
 	p_config->flags.hasLed         = true;
 
-	p_config->voltageMultiplier   = 1; // something
-	p_config->currentMultiplier   = 1; // something
+	p_config->voltageMultiplier   = 0; // set to 0 to disable sampling checks
+	p_config->currentMultiplier   = 0; // set to 0 to disable sampling checks
 	p_config->voltageZero         = 0; // something
 	p_config->currentZero         = 0; // something
 	p_config->powerZero           = 0; // something

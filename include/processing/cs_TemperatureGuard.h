@@ -52,7 +52,7 @@ public:
 		if (getTemperature() > _maxTemp) {
 			//! Switch off all channels
 			Switch::getInstance().pwmOff();
-			Switch::getInstance().turnOff();
+			Switch::getInstance().relayOff();
 //			PWM::getInstance().switchOff();
 //			//! Make sure pwm can't be set anymore
 //			PWM::getInstance().deinit();

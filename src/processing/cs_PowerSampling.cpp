@@ -14,6 +14,7 @@
 #include <drivers/cs_RTC.h>
 #include <protocol/cs_StateTypes.h>
 #include <events/cs_EventDispatcher.h>
+#include <storage/cs_State.h>
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
@@ -143,6 +144,8 @@ void PowerSampling::startSampling() {
 #ifdef PRINT_POWERSAMPLING_VERBOSE
 	LOGd(FMT_START, "power sample");
 #endif
+	// Get operation mode
+	State::getInstance().get(STATE_OPERATION_MODE, _operationMode);
 
 #if CONTINUOUS_POWER_SAMPLER == 1
 //	_currentSampleCircularBuf.clear();
@@ -195,14 +198,16 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
 
-	if (!_sendingSamples) {
+	if (!_sendingSamples && _operationMode == OPERATION_MODE_NORMAL) {
 		copyBufferToPowerSamples(buf, size, numChannels, voltageIndex, currentIndex); // Takes 2 us
 #ifdef USE_LED_DEBUG
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
 	}
 
-	EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, 4);
+	if (_operationMode == OPERATION_MODE_NORMAL) {
+		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, 4);
+	}
 #ifdef USE_LED_DEBUG
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
@@ -387,6 +392,14 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 #else
 	int64_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
 #endif
+
+	// TODO: don't use hardcoded 220V here
+	if (powerMilliWatt > CURRENT_USAGE_THRESHOLD * 220) {
+		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
+	}
+	else if (powerMilliWatt > CURRENT_USAGE_THRESHOLD_PWM  * 220) {
+		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
+	}
 
 	//! Exponential moving average
 	//! TODO: should maybe make this an integer calculation, but that wasn't working when i tried.

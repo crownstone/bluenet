@@ -284,6 +284,7 @@ void Nrf51822BluetoothStack::initServices() {
 	_started = true;
 }
 
+// TODO: remove this function
 void Nrf51822BluetoothStack::startTicking() {
 	LOGi(FMT_START, "ticking");
 	for (Service* svc : _services) {
