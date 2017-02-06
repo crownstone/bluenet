@@ -29,7 +29,8 @@ Switch::Switch():
 #else
 	_relayTimerId(UINT32_MAX),
 #endif
-	_nextRelayVal(SWITCH_NEXT_RELAY_VAL_NONE)
+	_nextRelayVal(SWITCH_NEXT_RELAY_VAL_NONE),
+	_hasRelay(false), _pinRelayOn(0), _pinRelayOff(0)
 {
 	LOGd(FMT_CREATE, "Switch");
 #if (NORDIC_SDK_VERSION >= 11)
@@ -38,22 +39,22 @@ Switch::Switch():
 #endif
 }
 
-void Switch::init() {
+void Switch::init(boards_config_t* board) {
 
 #ifndef PWM_DISABLE
 	PWM& pwm = PWM::getInstance();
-//	pwm.init(PWM::config1Ch(1600L, PIN_GPIO_SWITCH)); //! 625 Hz
-//	pwm.init(pwm.config1Ch(20000L, PIN_GPIO_SWITCH)); //! 50 Hz
+//	pwm.init(PWM::config1Ch(1600L, board->pinGpioPwm)); //! 625 Hz
+//	pwm.init(pwm.config1Ch(20000L, board->pinGpioPwm)); //! 50 Hz
 	uint32_t pwmPeriod;
 	Settings::getInstance().get(CONFIG_PWM_PERIOD, &pwmPeriod);
-	pwm.init(pwm.config1Ch(pwmPeriod, PIN_GPIO_SWITCH)); //! 50 Hz
+	pwm.init(pwm.config1Ch(pwmPeriod, board->pinGpioPwm, board->flags.pwmInverted), board->flags.pwmInverted); //! 50 Hz
 #else
-	nrf_gpio_cfg_output(PIN_GPIO_SWITCH);
-#ifdef SWITCH_INVERSED
-	nrf_gpio_pin_set(PIN_GPIO_SWITCH);
-#else
-	nrf_gpio_pin_clear(PIN_GPIO_SWITCH);
-#endif
+	nrf_gpio_cfg_output(board->pinGpioPwm);
+	if (board->flags.pwmInverted) {
+		nrf_gpio_pin_set(board->pinGpioPwm);
+	} else {
+		nrf_gpio_pin_clear(board->pinGpioPwm);
+	}
 #endif
 
 	// TODO: this could be too early! Maybe pstorage is not ready yet?
@@ -62,21 +63,26 @@ void Switch::init() {
 	// [23.06.16] overwrites stored value, so we can't restore old switch state
 	//	setValue(0);
 
-#if HAS_RELAY
-	nrf_gpio_cfg_output(PIN_GPIO_RELAY_OFF);
-	nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
-	nrf_gpio_cfg_output(PIN_GPIO_RELAY_ON);
-	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
-#endif
+	_hasRelay = board->flags.hasRelay;
+	if (_hasRelay) {
+		_pinRelayOff = board->pinGpioRelayOff;
+		_pinRelayOn = board->pinGpioRelayOn;
+
+		nrf_gpio_cfg_output(_pinRelayOff);
+		nrf_gpio_pin_clear(_pinRelayOff);
+		nrf_gpio_cfg_output(_pinRelayOn);
+		nrf_gpio_pin_clear(_pinRelayOn);
+	}
+
+	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
+	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_relayTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSetRelay);
 }
 
 void Switch::start() {
-	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
-	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
-	setPwm(_switchValue.pwm_state);
+
 }
 
 void Switch::pwmOff() {
@@ -174,11 +180,11 @@ void Switch::relayOn() {
 	LOGd("trigger relay on pin for %d ms", relayHighDuration);
 #endif
 
-#if HAS_RELAY
-	nrf_gpio_pin_set(PIN_GPIO_RELAY_ON);
-	nrf_delay_ms(relayHighDuration);
-	nrf_gpio_pin_clear(PIN_GPIO_RELAY_ON);
-#endif
+	if (_hasRelay) {
+		nrf_gpio_pin_set(_pinRelayOn);
+		nrf_delay_ms(relayHighDuration);
+		nrf_gpio_pin_clear(_pinRelayOn);
+	}
 
 #ifdef EXTENDED_SWITCH_STATE
 	_switchValue.relay_state = 1;
@@ -211,11 +217,11 @@ void Switch::relayOff() {
 	LOGi("trigger relay off pin for %d ms", relayHighDuration);
 #endif
 
-#if HAS_RELAY
-	nrf_gpio_pin_set(PIN_GPIO_RELAY_OFF);
-	nrf_delay_ms(relayHighDuration);
-	nrf_gpio_pin_clear(PIN_GPIO_RELAY_OFF);
-#endif
+	if (_hasRelay) {
+		nrf_gpio_pin_set(_pinRelayOff);
+		nrf_delay_ms(relayHighDuration);
+		nrf_gpio_pin_clear(_pinRelayOff);
+	}
 
 #ifdef EXTENDED_SWITCH_STATE
 	_switchValue.relay_state = 0;
@@ -244,11 +250,11 @@ void Switch::turnOn() {
 	LOGd("Turn ON");
 #endif
 
-#if HAS_RELAY
-	relayOn();
-#else
-	pwmOn();
-#endif
+	if (_hasRelay) {
+		relayOn();
+	} else {
+		pwmOn();
+	}
 }
 
 void Switch::turnOff() {
@@ -257,24 +263,31 @@ void Switch::turnOff() {
 	LOGd("Turn OFF");
 #endif
 
-#if HAS_RELAY
-	relayOff();
-#else
-	pwmOff();
-#endif
+	if (_hasRelay) {
+		relayOff();
+	} else {
+		pwmOff();
+	}
 }
 
 void Switch::toggle() {
-#if HAS_RELAY
-	if (getRelayState())
-#else
-	if (getPwm())
-#endif
-	{
+
+	if ((_hasRelay && getRelayState()) || (!_hasRelay && getPwm())) {
 		turnOff();
 	} else {
 		turnOn();
 	}
+}
+
+void Switch::forcePwmOff() {
+	pwmOff();
+	EventDispatcher::getInstance().dispatch(EVT_PWM_FORCED_OFF);
+}
+
+void Switch::forceSwitchOff() {
+	pwmOff();
+	relayOff();
+	EventDispatcher::getInstance().dispatch(EVT_SWITCH_FORCED_OFF);
 }
 
 void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
@@ -287,6 +300,14 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_POWER_OFF:
 	case EVT_TRACKED_DEVICE_NOT_NEARBY: {
 		turnOff();
+		break;
+	}
+	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM: {
+		forcePwmOff();
+		break;
+	}
+	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD: {
+		forceSwitchOff();
 		break;
 	}
 	}

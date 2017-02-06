@@ -13,11 +13,12 @@
 #include <util/cs_Utils.h>
 #include <storage/cs_StorageHelper.h>
 
-Settings::Settings() : _initialized(false), _storage(NULL) {
+Settings::Settings() : _initialized(false), _storage(NULL), _boardsConfig(NULL) {
 };
 
-void Settings::init() {
+void Settings::init(boards_config_t* boardsConfig) {
 	_storage = &Storage::getInstance();
+	_boardsConfig = boardsConfig;
 
 	if (!_storage->isInitialized()) {
 		LOGe(FMT_NOT_INITIALIZED, "Storage");
@@ -562,29 +563,29 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		break;
 	}
 	case CONFIG_VOLTAGE_MULTIPLIER: {
-		StorageHelper::getFloat(_storageStruct.voltageMultiplier, (float*)target, VOLTAGE_MULTIPLIER);
+		StorageHelper::getFloat(_storageStruct.voltageMultiplier, (float*)target, _boardsConfig->voltageMultiplier);
 		break;
 	}
 	case CONFIG_CURRENT_MULTIPLIER: {
-		StorageHelper::getFloat(_storageStruct.currentMultiplier, (float*)target, CURRENT_MULTIPLIER);
+		StorageHelper::getFloat(_storageStruct.currentMultiplier, (float*)target, _boardsConfig->currentMultiplier);
 		break;
 	}
 	case CONFIG_VOLTAGE_ZERO: {
-		StorageHelper::getInt32(_storageStruct.voltageZero, (int32_t*)target, VOLTAGE_ZERO);
+		StorageHelper::getInt32(_storageStruct.voltageZero, (int32_t*)target, _boardsConfig->voltageZero);
 		break;
 	}
 	case CONFIG_CURRENT_ZERO: {
-		StorageHelper::getInt32(_storageStruct.currentZero, (int32_t*)target, CURRENT_ZERO);
+		StorageHelper::getInt32(_storageStruct.currentZero, (int32_t*)target, _boardsConfig->currentZero);
 		break;
 	}
 	case CONFIG_POWER_ZERO: {
-		StorageHelper::getInt32(_storageStruct.powerZero, (int32_t*)target, POWER_ZERO);
+		StorageHelper::getInt32(_storageStruct.powerZero, (int32_t*)target, _boardsConfig->powerZero);
 		break;
 	}
-	case CONFIG_POWER_ZERO_AVG_WINDOW: {
-		StorageHelper::getUint16(_storageStruct.powerZeroAvgWindow, (uint16_t*)target, POWER_ZERO_AVG_WINDOW);
-		break;
-	}
+//	case CONFIG_POWER_ZERO_AVG_WINDOW: {
+//		StorageHelper::getUint16(_storageStruct.powerZeroAvgWindow, (uint16_t*)target, POWER_ZERO_AVG_WINDOW);
+//		break;
+//	}
 	case CONFIG_MESH_ACCESS_ADDRESS: {
 		StorageHelper::getUint32(_storageStruct.meshAccessAddress, (uint32_t*)target, MESH_ACCESS_ADDRESS);
 		break;

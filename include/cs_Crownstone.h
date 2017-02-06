@@ -33,13 +33,11 @@
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
 
-#if IS_CROWNSTONE(DEVICE_TYPE)
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Watchdog.h>
 #include <processing/cs_EnOceanHandler.h>
-#endif
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
@@ -47,6 +45,9 @@
 #endif
 #include <storage/cs_State.h>
 
+extern "C" {
+#include <cfg/cs_Boards.h>
+}
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
@@ -60,7 +61,7 @@
 class Crownstone : EventListener {
 
 public:
-	Crownstone();
+	Crownstone(boards_config_t& board);
 
 	/** initialize the crownstone:
 	 *    1. start UART
@@ -137,6 +138,8 @@ protected:
 
 private:
 
+	boards_config_t _boardsConfig;
+
 	// drivers
 	Nrf51822BluetoothStack* _stack;
 	Timer* _timer;
@@ -144,13 +147,11 @@ private:
 	Settings* _settings;
 	State* _stateVars;
 
-#if IS_CROWNSTONE(DEVICE_TYPE)
 	Switch* _switch;
 	TemperatureGuard* _temperatureGuard;
 	PowerSampling* _powerSampler;
 	Watchdog* _watchdog;
 	EnOceanHandler* _enOceanHandler;
-#endif
 
 	// services
 	DeviceInformationService* _deviceInformationService;

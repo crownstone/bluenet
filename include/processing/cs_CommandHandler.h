@@ -27,7 +27,7 @@ public:
 		return instance;
 	}
 
-	void init();
+	void init(boards_config_t* board);
 
 	ERR_CODE handleCommand(CommandHandlerTypes type);
 
@@ -51,5 +51,6 @@ private:
 	uint32_t                 _resetTimerId;
 #endif
 
+	boards_config_t* _boardConfig;
 };
 

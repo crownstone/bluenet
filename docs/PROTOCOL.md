@@ -146,7 +146,7 @@ Bit | Name |  Description
 --- | --- | ---
 0 | New data available | If you request something from the Crownstone and the result is available, this will be 1.
 1 | Showing external data |  If this is 1, the shown ID and data is from another Crownstone.
-2 | Reserved |  Reserved for future use.
+2 | Error |  If this is 1, the Crownstone has an error, you should check what error it is.
 3 | Reserved  |  Reserved for future use.
 4 | Reserved |  Reserved for future use.
 5 | Reserved  |  Reserved for future use.

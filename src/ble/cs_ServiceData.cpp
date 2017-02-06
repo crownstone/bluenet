@@ -120,6 +120,10 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			updateAdvertisement();
 			break;
 		}
+		case EVT_PWM_FORCED_OFF:
+		case EVT_SWITCH_FORCED_OFF:
+			updateEventBitmask(SERVICE_BITMASK_ERROR, true);
+			break;
 		default: {
 			//! continue with the rest of the method.
 		}

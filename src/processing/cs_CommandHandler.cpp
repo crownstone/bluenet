@@ -14,14 +14,9 @@
 #include <processing/cs_FactoryReset.h>
 
 #include <cfg/cs_Boards.h>
-//#if HAS_LEDS==1
-//#include <ble/cs_Nordic.h>
-//#endif
 
-#if IS_CROWNSTONE(DEVICE_TYPE)
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
-#endif
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
@@ -69,12 +64,13 @@ void execute_delayed(void * p_context) {
 CommandHandler::CommandHandler() :
 #if (NORDIC_SDK_VERSION >= 11)
 		_delayTimerId(NULL),
-		_resetTimerId(NULL)
+		_resetTimerId(NULL),
 #else
 		_delayTimerId(UINT32_MAX),
 		_resetTimerId(UINT32_MAX),
-		_keepAliveTimerId(UINT32_MAX)
+		_keepAliveTimerId(UINT32_MAX),
 #endif
+		_boardConfig(NULL)
 {
 #if (NORDIC_SDK_VERSION >= 11)
 		_delayTimerData = { {0} };
@@ -84,7 +80,8 @@ CommandHandler::CommandHandler() :
 #endif
 }
 
-void CommandHandler::init() {
+void CommandHandler::init(boards_config_t* board) {
+	_boardConfig = board;
 	Timer::getInstance().createSingleShot(_delayTimerId, execute_delayed);
 	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t) reset);
 }
@@ -512,37 +509,42 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 	case CMD_SET_LED: {
 		LOGi(STR_HANDLE_COMMAND, "set led");
 
-#if HAS_LEDS==1
-		if (size != sizeof(led_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
+		if (_boardConfig->flags.hasLed) {
+			if (size != sizeof(led_message_payload_t)) {
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
 
-		led_message_payload_t* payload = (led_message_payload_t*) buffer;
-		uint8_t led = payload->led;
-		bool enable = payload->enable;
+			led_message_payload_t* payload = (led_message_payload_t*) buffer;
+			uint8_t led = payload->led;
+			bool enable = payload->enable;
 
-		LOGi("set led %d %s", led, enable ? "ON" : "OFF");
+			LOGi("set led %d %s", led, enable ? "ON" : "OFF");
 
-		uint8_t ledPin = led == 1 ? GREEN_LED : RED_LED;
-//		switch_state_t switchState = {};
-		if (enable) {
-//			switchState.pwm_state = 100;
-			nrf_gpio_pin_clear(ledPin);
+			uint8_t ledPin = led == 1 ? _boardConfig->pinLedGreen : _boardConfig->pinLedRed;
+	//		switch_state_t switchState = {};
+			if (enable) {
+	//			switchState.pwm_state = 100;
+				nrf_gpio_pin_clear(ledPin);
+			} else {
+	//			switchState.pwm_state = 10;
+				nrf_gpio_pin_set(ledPin);
+			}
+	//		EventDispatcher::getInstance().dispatch(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
 		} else {
-//			switchState.pwm_state = 10;
-			nrf_gpio_pin_set(ledPin);
+			LOGe("No LEDs on this board!");
 		}
-//		EventDispatcher::getInstance().dispatch(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
-#else
-		LOGe("No LEDs on this board!");
-#endif
 		break;
 	}
-#if IS_CROWNSTONE(DEVICE_TYPE)
+
 	// Crownstone specific commands are only available if device type is set to Crownstone.
 	// E.g. GuideStone does not support power measure or switching commands
 	case CMD_PWM: {
+		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+			return ERR_NOT_AVAILABLE;
+		}
+
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "PWM");
 
@@ -562,6 +564,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SWITCH: {
+		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+			return ERR_NOT_AVAILABLE;
+		}
+
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "switch");
 		// For now, same as relay, but switch command should decide itself if relay or pwm is used
@@ -589,6 +596,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_RELAY: {
+		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+			return ERR_NOT_AVAILABLE;
+		}
+
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "relay");
 
@@ -609,6 +621,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_CONT_POWER_MEASURE: {
+		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+			return ERR_NOT_AVAILABLE;
+		}
+
 		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable cont power measure");
 		return ERR_NOT_IMPLEMENTED;
@@ -626,17 +643,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		// todo: tbd
 		break;
 	}
-#else
-	// Crownstone specific commands are only available if device type is set to Crownstone.
-	// E.g. GuideStone does not support power measure or switching commands
-	case CMD_SWITCH:
-	case CMD_PWM:
-	case CMD_RELAY:
-	case CMD_ENABLE_CONT_POWER_MEASURE: {
-		LOGe("Commands not available for device type %d", DEVICE_TYPE);
-		return ERR_NOT_AVAILABLE;
-	}
-#endif
 	default: {
 		LOGe("Command type not found!!");
 		return ERR_COMMAND_NOT_FOUND;

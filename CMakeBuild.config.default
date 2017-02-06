@@ -15,12 +15,23 @@ FIRMWARE_VERSION="0.6.0"
 # DEVICE_CROWNSTONE_PLUG      1
 # DEVICE_GUIDESTONE           2
 # DEVICE_CROWNSTONE_BUILTIN   3
-DEVICE_TYPE=DEVICE_CROWNSTONE_PLUG
+# !! NOTE: the device type is now optional and can be used to overwrite the default
+#          defined by the board, see cfg/cs_Boards.c
+# DEVICE_TYPE=DEVICE_CROWNSTONE_PLUG
 
 # To avoid confusion when trying to enable functionality through compiler flags, the
 # persistent storage for flags is disabled by default, set to 0 if enabling disabling functionality through
 # the characteristics / command should be persistently stored!
 PERSISTENT_FLAGS_DISABLED=0
+
+# Eddystone is the iBeacon variant of Google, but meant for other purposes, such as Physical Web
+EDDYSTONE=0
+
+# Add reset counter at end of name
+CHANGE_NAME_ON_RESET=0
+
+# Switches between connectable and non-connectable advertisement to improve scanning on android
+ADVERTISEMENT_IMPROVEMENT=1
 
 # Enable or disable meshing (1 or 0)
 MESHING=0
@@ -53,7 +64,7 @@ PWM_ENABLE=1
 
 # define the iBeacon advertisement package parameters
 # the proximity UUID.
-# only applies if IBEACON==1 or DEVICE_TYPE==DEVICE_DOBEACON
+# only applies if IBEACON==1
 BEACON_UUID="a643423e-e175-4af0-a2e4-31e32f729a8a"
 # the major number
 BEACON_MAJOR=0
@@ -83,7 +94,7 @@ MAX_NUM_VS_SERVICES=6
 # Enable or disable characteristics
 # Crownstone Service
 CHAR_CONTROL=1
-CHAR_MESHING=0
+CHAR_MESHING=1
 CHAR_CONFIGURATION=1
 CHAR_STATE=1
 
@@ -124,23 +135,23 @@ DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP
 SERIAL_VERBOSITY=SERIAL_DEBUG
 
 # The different boards that can be used:
-# PCA10001             0
-# NRF6310              1
-# NRF51822_DONGLE      2
-# NRF51822_EVKIT       3
-# RFDUINO              4
-# CROWNSTONE           5
-# NRF51422             6
-# VIRTUALMEMO          7
-# CROWNSTONE2          8
-# CROWNSTONE_SENSOR    9
-# PCA10000/PCA10031    10
-# CROWNSTONE3          11
-# CROWNSTONE4          12
-# NORDIC_BEACON        13
-# DOBEACON             14
-# CROWNSTONE5          15
-# DOBEACON2            16
+# ## old crownstones
+# CROWNSTONE5          0
+# PLUGIN_FLEXPRINT_01  1
+# ## nordic boards
+# PCA10036             40
+# PCA10040             41
+# ## square guidestone
+# GUIDESTONE           100
+# ## crownstone builtin
+# ACR01B1A             1000
+# ACR01B1B             1001
+# ACR01B1C             1002
+# ACR01B1D             1003
+# ## crownstone plug
+# ACR01B2A             1500
+# ACR01B2B             1501
+# ACR01B2C             1502
 HARDWARE_BOARD=ACR01B2C
 
 NRF_SERIES=NRF52
@@ -227,6 +238,9 @@ JLINK=/usr/bin/JLinkExe
 # The JLink utilty that can be used with gdb
 JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
 
+# The device can be nRF51822 or nRF52832_xxAA
+DEVICE=nRF52832_xxAA
+
 # Use SoftDevice (setting to 0 is untested)
 # [18.07.16] do we really want this flag still? Most of our code depends on the
 # softdevice being present. disabling this flag won't work without major code changes!!
@@ -299,15 +313,3 @@ RAM_R1_BASE=0x200026B8
 RAM_APPLICATION_AMOUNT=0xD948
 
 HEAP_SIZE=20000
-
-# Eddystone is the iBeacon variant of Google, but meant for other purposes, such as Physical Web
-EDDYSTONE=0
-
-# The device can be nRF51822 or nRF52832_xxAA
-DEVICE=nRF52832_xxAA
-
-# Add reset counter at end of name
-CHANGE_NAME_ON_RESET=0
-
-# Switches between connectable and non-connectable advertisement to improve scanning on android
-ADVERTISEMENT_IMPROVEMENT=1
