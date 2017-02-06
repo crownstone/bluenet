@@ -37,7 +37,7 @@ extern "C" {
 
 inline const char* get_hardware_version() {
 
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[0];
+	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (hardwareBoard == 0xFFFFFFFF) {
 		hardwareBoard = ACR01B2C;
 	}
@@ -55,6 +55,7 @@ inline const char* get_hardware_version() {
 	if (hardwareBoard == ACR01B1B) return "10103000200";
 	if (hardwareBoard == ACR01B1C) return "10103000300";
 	if (hardwareBoard == ACR01B1D) return "10103000400";
+	if (hardwareBoard == ACR01B1E) return "10103010000";
 
 	// GUIDESTONE
 	if (hardwareBoard == GUIDESTONE) return "10104010000";

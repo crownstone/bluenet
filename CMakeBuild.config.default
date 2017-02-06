@@ -6,6 +6,27 @@ BLUETOOTH_NAME="Crown"
 
 FIRMWARE_VERSION="0.6.0"
 
+# The different boards that can be used:
+# ## old crownstones
+# CROWNSTONE5          0
+# PLUGIN_FLEXPRINT_01  1
+# ## nordic boards
+# PCA10036             40
+# PCA10040             41
+# ## square guidestone
+# GUIDESTONE           100
+# ## crownstone builtin
+# ACR01B1A             1000
+# ACR01B1B             1001
+# ACR01B1C             1002
+# ACR01B1D             1003
+# ACR01B1E             1004
+# ## crownstone plug
+# ACR01B2A             1500
+# ACR01B2B             1501
+# ACR01B2C             1502
+HARDWARE_BOARD=ACR01B2C
+
 # The device type defines how the device advertises itself, Apps and Bluenet Library
 # will use this to filter for device type.
 # It is also used to enable/disable device type specific functionality.
@@ -133,26 +154,6 @@ DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP
 # SERIAL_FATAL     4
 # SERIAL_NONE      5
 SERIAL_VERBOSITY=SERIAL_DEBUG
-
-# The different boards that can be used:
-# ## old crownstones
-# CROWNSTONE5          0
-# PLUGIN_FLEXPRINT_01  1
-# ## nordic boards
-# PCA10036             40
-# PCA10040             41
-# ## square guidestone
-# GUIDESTONE           100
-# ## crownstone builtin
-# ACR01B1A             1000
-# ACR01B1B             1001
-# ACR01B1C             1002
-# ACR01B1D             1003
-# ## crownstone plug
-# ACR01B2A             1500
-# ACR01B2B             1501
-# ACR01B2C             1502
-HARDWARE_BOARD=ACR01B2C
 
 NRF_SERIES=NRF52
 

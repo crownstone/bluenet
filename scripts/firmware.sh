@@ -41,20 +41,20 @@ printf "oo  _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     \n"
 printf "oo  _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     \n"
 printf "oo  _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \n"
 
-# Use hidden .build file to store variables 
+# Use hidden .build file to store variables
 BUILD_PROCESS_FILE="$BLUENET_BUILD_DIR/.build"
 
 if ! [ -e "$BUILD_PROCESS_FILE" ]; then
 	BUILD_CYCLE=0
 	echo "BUILD_CYCLE=$BUILD_CYCLE" >> "$BUILD_PROCESS_FILE"
 fi
-	
+
 source "$BUILD_PROCESS_FILE"
 BUILD_CYCLE=$((BUILD_CYCLE + 1))
 sed -i "s/\(BUILD_CYCLE *= *\).*/\1$BUILD_CYCLE/" "$BUILD_PROCESS_FILE"
 if ! (($BUILD_CYCLE % 100)); then
 	printf "\n"
-	printf "oo Would you like to check for updates? [Y/n]: " 
+	printf "oo Would you like to check for updates? [Y/n]: "
 	read update_response
 	if [ "$update_response" == "n" ]; then
 		git_version=$(git rev-parse --short=25 HEAD)
@@ -64,7 +64,7 @@ if ! (($BUILD_CYCLE % 100)); then
 	fi
 fi
 printf "${normal}\n"
-                                                                 
+
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
@@ -81,7 +81,7 @@ writeHardwareVersion() {
 	HARDWARE_BOARD_INT=`cat $BLUENET_DIR/include/cfg/cs_Boards.h | grep -o "#define.*\b$HARDWARE_BOARD\b.*" | grep -w "$HARDWARE_BOARD" | awk 'NF>1{print $NF}'`
 	if [ $? -eq 0 ] && [ -n "$HARDWARE_BOARD_INT" ]; then
 			# info "HARDWARE_BOARD_INT=$HARDWARE_BOARD_INT"
-			${path}/_writebyte.sh 0x10001080 `printf "%x" $HARDWARE_BOARD_INT` $serial_num
+			${path}/_writebyte.sh 0x10001084 `printf "%x" $HARDWARE_BOARD_INT` $serial_num
 			checkError "Error writing hardware version"
 	else
 		err "Failed to extract HARDWARE_BOARD=$HARDWARE_BOARD from $BLUENET_DIR/include/cfg/cs_Boards.h"

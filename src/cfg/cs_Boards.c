@@ -9,6 +9,33 @@
 #define ASSIGN_DEVICE_TYPE(type) type
 #endif
 
+/** TEMPLATE
+void as(boards_config_t* p_config) {
+	p_config->pinGpioPwm           = ;
+	p_config->pinGpioRelayOn       = ;
+	p_config->pinGpioRelayOff      = ;
+	p_config->pinAinCurrent        = ;
+	p_config->pinAinVoltage        = ;
+	p_config->pinGpioRx            = ;
+	p_config->pinGpioTx            = ;
+	p_config->pinLedRed            = ;
+	p_config->pinLedGreen          = ;
+
+	p_config->flags.hasRelay       = ;
+	p_config->flags.pwmInverted    = ;
+	p_config->flags.hasSerial      = ;
+	p_config->flags.hasLed         = ;
+
+	p_config->deviceType           = ASSIGN_DEVICE_TYPE();
+
+	p_config->voltageMultiplier   = ;
+	p_config->currentMultiplier   = ;
+	p_config->voltageZero         = ;
+	p_config->currentZero         = ;
+	p_config->powerZero           = ;
+}
+*/
+
 void asCrownstone(boards_config_t* p_config) {
 	p_config->pinGpioPwm           = 12;
 	p_config->pinGpioRelayOn       = 10;
@@ -155,26 +182,9 @@ void asGuidestone(boards_config_t* p_config) {
 //	p_config->powerZero           = ; // unused
 }
 
-//void as(boards_config_t* p_config) {
-//	p_config->pinGpioPwm           = ;
-//	p_config->pinGpioRelayOn       = ;
-//	p_config->pinGpioRelayOff      = ;
-//	p_config->pinAinCurrent        = ;
-//	p_config->pinAinVoltage        = ;
-//	p_config->pinGpioRx            = ;
-//	p_config->pinGpioTx            = ;
-//	p_config->pinLedRed            = ;
-//	p_config->pinLedGreen          = ;
-//
-//	p_config->flags.hasRelay       = ;
-//	p_config->flags.switchInversed = ;
-//	p_config->flags.hasSerial      = ;
-//	p_config->flags.hasLed         = ;
-//}
-
 uint32_t configure_board(boards_config_t* p_config) {
 
-	uint32_t _hardwareBoard = NRF_UICR->CUSTOMER[0];
+	uint32_t _hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (_hardwareBoard == 0xFFFFFFFF) {
 		_hardwareBoard = ACR01B2C;
 	}
@@ -184,6 +194,7 @@ uint32_t configure_board(boards_config_t* p_config) {
 	case ACR01B1B:
 	case ACR01B1C:
 	case ACR01B1D:
+	case ACR01B1E:
 		asACR01B1A(p_config);
 		break;
 
