@@ -10,5 +10,6 @@ var searchData=
   ['reset',['reset',['../classTimer.html#a0506cca8fce7a509f2dba102ab843fba',1,'Timer']]],
   ['resettimeoutcounters',['resetTimeoutCounters',['../classTrackedDeviceList.html#a041c057a360838068e4f167ccb06013b',1,'TrackedDeviceList']]],
   ['restart',['restart',['../classMesh.html#a947e546bc7e345b05f645e8633c272fc',1,'Mesh']]],
+  ['resume',['resume',['../classMesh.html#a87fd99e234ddf456981dc33c6a25ae14',1,'Mesh']]],
   ['run',['run',['../classCrownstone.html#a315537a2d45fb2204f75b65afa5fbcc9',1,'Crownstone']]]
 ];

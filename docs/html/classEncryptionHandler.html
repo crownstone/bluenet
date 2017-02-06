@@ -120,9 +120,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:ace6c832bbfa3c3bfbd7adb021d556043"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEncryptionHandler.html#ace6c832bbfa3c3bfbd7adb021d556043">encrypt</a> (uint8_t *data, uint16_t dataLength, uint8_t *target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType=CTR)</td></tr>
 <tr class="memdesc:ace6c832bbfa3c3bfbd7adb021d556043"><td class="mdescLeft">&#160;</td><td class="mdescRight">This method encrypts the data and places the result into the target struct.  <a href="#ace6c832bbfa3c3bfbd7adb021d556043">More...</a><br /></td></tr>
 <tr class="separator:ace6c832bbfa3c3bfbd7adb021d556043"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c7384058bc070fde8fbcf7cf3143082"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEncryptionHandler.html#a9c7384058bc070fde8fbcf7cf3143082">encryptMesh</a> (uint8_t *data, uint8_t dataLength, uint8_t *target, uint8_t targetLength)</td></tr>
-<tr class="memdesc:a9c7384058bc070fde8fbcf7cf3143082"><td class="mdescLeft">&#160;</td><td class="mdescRight">The mesh only uses cafebabe as a validation and the admin key to encrypt.  <a href="#a9c7384058bc070fde8fbcf7cf3143082">More...</a><br /></td></tr>
-<tr class="separator:a9c7384058bc070fde8fbcf7cf3143082"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb86773128347762ddd794df3a7dd274"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEncryptionHandler.html#abb86773128347762ddd794df3a7dd274">encryptMesh</a> (mesh_nonce_t nonce, uint8_t *data, uint16_t dataLength, uint8_t *target, uint16_t targetLength)</td></tr>
+<tr class="memdesc:abb86773128347762ddd794df3a7dd274"><td class="mdescLeft">&#160;</td><td class="mdescRight">The mesh only uses cafebabe as a validation and the admin key to encrypt.  <a href="#abb86773128347762ddd794df3a7dd274">More...</a><br /></td></tr>
+<tr class="separator:abb86773128347762ddd794df3a7dd274"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3714ccfa0083b48b64e32edcad1be1bc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3714ccfa0083b48b64e32edcad1be1bc"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>decryptMesh</b> (uint8_t *encryptedDataPacket, uint16_t encryptedDataPacketLength, mesh_nonce_t *nonce, uint8_t *target, uint16_t targetLength)</td></tr>
+<tr class="separator:a3714ccfa0083b48b64e32edcad1be1bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a509f9ffbc67a5f78accec439ca55eeee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEncryptionHandler.html#a509f9ffbc67a5f78accec439ca55eeee">decrypt</a> (uint8_t *encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t *target, uint16_t targetLength, EncryptionAccessLevel &amp;userLevelInPackage, EncryptionType encryptionType=CTR)</td></tr>
 <tr class="memdesc:a509f9ffbc67a5f78accec439ca55eeee"><td class="mdescLeft">&#160;</td><td class="mdescRight">This method decrypts the package and places the decrypted blocks, in full, in the buffer.  <a href="#a509f9ffbc67a5f78accec439ca55eeee">More...</a><br /></td></tr>
 <tr class="separator:a509f9ffbc67a5f78accec439ca55eeee"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -300,20 +303,26 @@ static uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<a class="anchor" id="a9c7384058bc070fde8fbcf7cf3143082"></a>
+<a class="anchor" id="abb86773128347762ddd794df3a7dd274"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">bool EncryptionHandler::encryptMesh </td>
           <td>(</td>
+          <td class="paramtype">mesh_nonce_t&#160;</td>
+          <td class="paramname"><em>nonce</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">uint8_t *&#160;</td>
           <td class="paramname"><em>data</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramtype">uint16_t&#160;</td>
           <td class="paramname"><em>dataLength</em>, </td>
         </tr>
         <tr>
@@ -325,7 +334,7 @@ static uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramtype">uint16_t&#160;</td>
           <td class="paramname"><em>targetLength</em>&#160;</td>
         </tr>
         <tr>
