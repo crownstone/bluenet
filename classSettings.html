@@ -106,19 +106,20 @@ Collaboration diagram for Settings:</div>
 <div class="dyncontent">
 <div class="center"><img src="classSettings__coll__graph.png" border="0" usemap="#Settings_coll__map" alt="Collaboration graph"/></div>
 <map name="Settings_coll__map" id="Settings_coll__map">
-<area shape="rect" id="node2" href="classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="34,109,101,136"/>
+<area shape="rect" id="node2" href="classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="23,109,90,136"/>
 <area shape="rect" id="node3" href="classEventListener.html" title="Event listener. " alt="" coords="5,13,108,39"/>
-<area shape="rect" id="node4" href="structps__configuration__t.html" title="Struct used by the Configuration to store elements. " alt="" coords="134,109,262,136"/>
-<area shape="rect" id="node5" href="structps__storage__base__t.html" title="enable additional debug output " alt="" coords="132,13,264,39"/>
-<area shape="rect" id="node6" href="structps__configuration__t_1_1ps__beacon__t.html" title="beacon " alt="" coords="289,5,417,47"/>
+<area shape="rect" id="node4" href="structboards__config__t.html" title="BE SURE TO UPDATE cs_HardwareVersions.h IF YOU ADD A NEW BOARD!! " alt="" coords="114,109,229,136"/>
+<area shape="rect" id="node5" href="structps__configuration__t.html" title="Struct used by the Configuration to store elements. " alt="" coords="253,109,381,136"/>
+<area shape="rect" id="node6" href="structps__storage__base__t.html" title="enable additional debug output " alt="" coords="191,13,323,39"/>
+<area shape="rect" id="node7" href="structps__configuration__t_1_1ps__beacon__t.html" title="beacon " alt="" coords="347,5,475,47"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad47a8d3f696dcb0d38c1dc5088008885"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad47a8d3f696dcb0d38c1dc5088008885"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
-<tr class="separator:ad47a8d3f696dcb0d38c1dc5088008885"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0770694439ff0e73cf834db6a01c61b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af0770694439ff0e73cf834db6a01c61b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (<a class="el" href="structboards__config__t.html">boards_config_t</a> *boardsConfig)</td></tr>
+<tr class="separator:af0770694439ff0e73cf834db6a01c61b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09906d6d2259aeffc3a7d6532af6f6c9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a09906d6d2259aeffc3a7d6532af6f6c9"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isInitialized</b> ()</td></tr>
 <tr class="separator:a09906d6d2259aeffc3a7d6532af6f6c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -164,6 +165,9 @@ ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> (uint8_t 
 <tr class="memitem:a70a7573a75931c3342a2429cf69e37b1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a70a7573a75931c3342a2429cf69e37b1"></a>
 ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><b>set</b> (uint8_t type, void *target, bool persistent=false, uint16_t size=0)</td></tr>
 <tr class="separator:a70a7573a75931c3342a2429cf69e37b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef33d9dca5e3aa18955611f20df759db"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aef33d9dca5e3aa18955611f20df759db"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getSettingsItemSize</b> (uint8_t type)</td></tr>
+<tr class="separator:aef33d9dca5e3aa18955611f20df759db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -176,9 +180,6 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ac5e38ef925a3e0e68a0c1200c44f92ab"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac5e38ef925a3e0e68a0c1200c44f92ab"></a>
 ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><b>verify</b> (uint8_t type, uint8_t *payload, uint8_t length)</td></tr>
 <tr class="separator:ac5e38ef925a3e0e68a0c1200c44f92ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef33d9dca5e3aa18955611f20df759db"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aef33d9dca5e3aa18955611f20df759db"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getSettingsItemSize</b> (uint8_t type)</td></tr>
-<tr class="separator:aef33d9dca5e3aa18955611f20df759db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a74777e0dca68258599c85f8c1b41eaeb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a74777e0dca68258599c85f8c1b41eaeb"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>readFlag</b> (uint8_t type, bool &amp;value)</td></tr>
 <tr class="separator:a74777e0dca68258599c85f8c1b41eaeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -213,6 +214,9 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <tr class="memitem:af53e7936445f334af3ec8fdf9e63a4d0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af53e7936445f334af3ec8fdf9e63a4d0"></a>
 <a class="el" href="classStorage.html">Storage</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>_storage</b></td></tr>
 <tr class="separator:af53e7936445f334af3ec8fdf9e63a4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63250de2e298eedf1cc3aaad8c9f501d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a63250de2e298eedf1cc3aaad8c9f501d"></a>
+<a class="el" href="structboards__config__t.html">boards_config_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>_boardsConfig</b></td></tr>
+<tr class="separator:a63250de2e298eedf1cc3aaad8c9f501d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Load settings from and save settings to persistent storage. </p>

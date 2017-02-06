@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>Bluenet: # Bluenet protocol v0.7.0</title>
+<title>Bluenet: # Bluenet protocol v0.8.0</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -79,7 +79,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="headertitle">
-<div class="title"># Bluenet protocol v0.7.0 </div>  </div>
+<div class="title"># Bluenet protocol v0.8.0 </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="encryption"></a>Encryption</h1>
@@ -235,7 +235,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>1 </td><td>Showing external data </td><td>If this is 1, the shown ID and data is from another <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a>. </td></tr>
 <tr>
-<td>2 </td><td>Reserved </td><td>Reserved for future use. </td></tr>
+<td>2 </td><td>Error </td><td>If this is 1, the <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> has an error, you should check what error it is. </td></tr>
 <tr>
 <td>3 </td><td>Reserved </td><td>Reserved for future use. </td></tr>
 <tr>
@@ -269,10 +269,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>Control </td><td>24f00001-7d10-4805-bfc1-7663a01c3bff </td><td><a href="#control_packet">Control packet</a> </td><td>Write a command to the control characteristic </td><td align="center">x </td><td align="center">x </td><td align="center">x </td></tr>
 </table>
-<p><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> control | 24f00002-7d10-4805-bfc1-7663a01c3bff | <a href="#mesh_control_packet">Mesh control packet</a> | Write a command to the mesh control characteristic to send into the mesh | x | x | Config control | 24f00004-7d10-4805-bfc1-7663a01c3bff | <a href="#config_packet">Config packet</a> | Write or select a config setting | x | Config read | 24f00005-7d10-4805-bfc1-7663a01c3bff | <a href="#config_packet">Config packet</a> | Read or Notify on a previously selected config setting | x | <a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> control | 24f00006-7d10-4805-bfc1-7663a01c3bff | <a href="#state_packet">State packet</a> | Select a state variable | x | x | <a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> read | 24f00007-7d10-4805-bfc1-7663a01c3bff | <a href="#state_packet">State packet</a> | Read or Notify on a previously selected state variable | x | x | Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the <a href="#session_nonce">session nonce</a>. First 4 bytes are also used as session key. | | | ECB Recovery | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for <a href="#recovery">recovery</a>. |</p>
+<p><a class="anchor" id="mesh_control_characteristic"></a><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> control | 24f00002-7d10-4805-bfc1-7663a01c3bff | <a href="#mesh_control_packet">Mesh control packet</a> | Write a command to the mesh control characteristic to send into the mesh | x | x | Config control | 24f00004-7d10-4805-bfc1-7663a01c3bff | <a href="#config_packet">Config packet</a> | Write or select a config setting | x | Config read | 24f00005-7d10-4805-bfc1-7663a01c3bff | <a href="#config_packet">Config packet</a> | Read or Notify on a previously selected config setting | x | <a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> control | 24f00006-7d10-4805-bfc1-7663a01c3bff | <a href="#state_packet">State packet</a> | Select a state variable | x | x | <a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> read | 24f00007-7d10-4805-bfc1-7663a01c3bff | <a href="#state_packet">State packet</a> | Read or Notify on a previously selected state variable | x | x | Session nonce | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the <a href="#session_nonce">session nonce</a>. First 4 bytes are also used as session key. | | | ECB Recovery | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for <a href="#recovery">recovery</a>. |</p>
 <h5><a class="anchor" id="recovery"></a>Recovery</h5>
 <p>If you lose your encryption keys you can use this characteristic to factory reset the <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a>. This method is only available for 20 seconds after the <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> powers on. You need to write <b>0xDEADBEEF</b> to it. After this, the <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> disconnects and goes into Low TX mode so you'll have to be close to continue the factory reset. After this, you reconnect and write <b>0xDEADBEEF</b> again to this characteristic to factory reset the <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a>.</p>
-<h5>Return values</h5>
+<h5><a class="anchor" id="return_values"></a>Return values</h5>
 <p>The control characteristics (Control, <a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> Control, Config Control and <a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> Control) of the <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> service return a uint16 code on execution of the command. The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command was received before calling the next (either by polling or subscribing). The possible values of the return values are listed in the table below</p>
 <table class="doxtable">
 <tr>
@@ -287,6 +287,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <td>3 </td><td>UNKNOWN_OP_CODE </td><td>unknown operation code, e.g. notify for config read </td></tr>
 <tr>
 <td>5 </td><td>BUFFER_LOCKED </td><td>buffer is locked, failed queue command </td></tr>
+<tr>
+<td>6 </td><td>BUFFER_TOO_SMALL </td><td>buffer is too small to execute command </td></tr>
 <tr>
 <td>256 </td><td>COMMAND_NOT_FOUND </td><td>command type not found </td></tr>
 <tr>
@@ -753,7 +755,42 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td><a href="#schedule_entry_packet">schedule entry</a> </td><td>Entries </td><td>12 </td><td>Schedule entry list. </td></tr>
 </table>
+<h3><a class="anchor" id="mesh_message_packet"></a><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> message</h3>
+<p>This packet is a slightly modified version of the one used in <a href="https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh">OpenMesh</a>; we simply increased the content size.</p>
+<div class="image">
+<img src="../docs/diagrams/openmesh-packet.png"  alt="Mesh packet"/>
+</div>
+<p>Type | Name | Length | Description &mdash; | &mdash; | &mdash; | &mdash; uint 8 | Preamble | 1 | uint 32 | Access address | 4 | Number used to find relevant messages, set by application. uint 8 | Type | 1 | uint 8 | Length | 1 | uint 8 [] | Source address | 6 | Address of the node that put this message into the mesh. uint 8 | AD Length | 1 | Length of data after this field, excluding CRC. uint 8 | AD type | 1 | uint 16 | <a class="el" href="classService.html" title="Service as defined in the GATT Specification. ">Service</a> <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> | 2 | <a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> service <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a>. uint 16 | Handle | 2 | Handle of this message. uint 16 | Version | 2 | Used internally. <a href="#encrypted_mesh_packet">Encrypted mesh packet</a> | Payload | 104 | The encrypted mesh message. uint 8 [] | CRC | 3 | Checksum.</p>
+<h3><a class="anchor" id="encrypted_mesh_packet"></a>Encrypted mesh packet</h3>
+<p>This packet is sent over the mesh as payload in the mesh message.</p>
+<div class="image">
+<img src="../docs/diagrams/encrypted-mesh-packet.png"  alt="Encrypted mesh message"/>
+</div>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 32 </td><td>Message counter </td><td>4 </td><td>The message counter used to identify the message. Counter values are kept up seperately per handle. Note: This value is in plain text (unencrypted) </td></tr>
+<tr>
+<td>uint 32 </td><td>Random number </td><td>4 </td><td>The random number used for encryption/decryption, is sent itself unencrypted </td></tr>
+<tr>
+<td><a href="#mesh-packet">Mesh packet</a> </td><td>Encrypted payload </td><td>96 </td><td>The encrypted mesh packet. </td></tr>
+</table>
+<h3><a class="anchor" id="mesh-packet"></a><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> packet</h3>
+<p>This packet is encrypted and sent as payload in the encrypted mesh packet.</p>
+<div class="image">
+<img src="../docs/diagrams/mesh-packet.png"  alt="Mesh message"/>
+</div>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 32 </td><td>Message counter </td><td>4 </td><td>The message counter used to identify the message. Counter values are kept up seperately per handle. Note: This value will be compared after decryption to the message counter of the encrypted mesh message to make sure the message was not tampered with. </td></tr>
+<tr>
+<td><a href="#mesh_payload_packet">Mesh payload</a> </td><td>Payload </td><td>92 </td><td>Payload data </td></tr>
+</table>
 <h3><a class="anchor" id="mesh_control_packet"></a><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> control packet</h3>
+<p>This packet is sent to the <a href="#mesh_control_characteristic">Mesh control characteristic</a></p>
 <div class="image">
 <img src="../docs/diagrams/mesh-control-packet.png"  alt="Mesh control packet"/>
 </div>
@@ -767,55 +804,234 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>uint 16 </td><td>Length </td><td>2 </td><td>Length of the data. </td></tr>
 <tr>
-<td><a href="#mesh_payload_packet">Mesh Payload</a> </td><td>Payload </td><td>Length </td><td>Payload data. </td></tr>
+<td><a href="#mesh_payload_packet">Mesh payload</a> </td><td>Payload </td><td>0 - 92 </td><td>Payload data, max 92 bytes, but actual length is determined by the handle </td></tr>
 </table>
 <h3><a class="anchor" id="mesh_payload_packet"></a><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> payload packet</h3>
+<p>The mesh payload packet is defined by the handle. We have the following handles</p>
+<table class="doxtable">
+<tr>
+<th>Handle </th><th>Name </th><th>Type </th><th>Description  </th></tr>
+<tr>
+<td>1 </td><td>Keep alive channel </td><td><a href="#keep_alive_mesh_packet">Keep alive</a> </td><td>Channel on which the keep alive messages are sent. A message consists of a global timeout and a number of keep alive items (on per stone which is addressed) </td></tr>
+<tr>
+<td>2 </td><td><a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> broadcast channel </td><td><a href="#state_mesh_packet">State</a> </td><td>Each stone sends it's state periodically over the mesh. The message is designed as a circular buffer and a new item is added at the end (throwing out the oldest if full) </td></tr>
+<tr>
+<td>3 </td><td><a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> change channel </td><td><a href="#state_mesh_packet">State</a> </td><td>Each stone sends its' state on this channel if the state changes significantly, e.g. switch state changes. </td></tr>
+<tr>
+<td>4 </td><td>Command channel </td><td><a href="#command_mesh_packet">Command</a> </td><td>Commands can be sent to one, multiple or all stones sharing the mesh network. Once a stone receives a command it will send a reply on the reply channel </td></tr>
+<tr>
+<td>5 </td><td>Command reply channel </td><td><a href="#command_reply_packet">Command reply</a> </td><td>Every stone that was targeted with a command adds its reply to the reply message. </td></tr>
+<tr>
+<td>6 </td><td>Scan result channel </td><td><a href="#scan_result_packet">Scan result</a> </td><td>If a stone is scanning for devices it adds it's scanned devices periodically to this list to be sent over the mesh </td></tr>
+<tr>
+<td>7 </td><td>Big data channel </td><td>- </td><td>This channel is for the case when a stone needs to send big data, such as the history of eneregy usage, etc. </td></tr>
+</table>
+<h4><a class="anchor" id="keep_alive_mesh_packet"></a>Keep alive packet</h4>
 <div class="image">
-<img src="../docs/diagrams/mesh-payload-packet.png"  alt="Mesh payload packet"/>
+<img src="../docs/diagrams/keep-alive-mesh-packet.png"  alt="Keep Alive packet"/>
 </div>
 <table class="doxtable">
 <tr>
 <th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
 <tr>
-<td>uint 16 </td><td>Target <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> ID </td><td>2 </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> Identifier of the device at which this message is aimed at, all 0 for any device. </td></tr>
+<td>uint 16 </td><td>Timeout </td><td>2 </td><td>Timeout (in seconds), applies to all stones present in the list </td></tr>
 <tr>
-<td>uint 16 </td><td>Reason </td><td>2 </td><td>... </td></tr>
+<td>uint 8 </td><td>Size </td><td>1 </td><td>Number of keep alive items in the list </td></tr>
 <tr>
-<td>uint 16 </td><td>User ID </td><td>2 </td><td>... </td></tr>
-<tr>
-<td>uint 16 </td><td>Type </td><td>2 </td><td>Type of message, see table below. </td></tr>
-<tr>
-<td>uint 8 [] </td><td>Payload </td><td>0 to 91 </td><td>Payload data, depends on type. </td></tr>
+<td><a href="#keep_alive_mesh_item">Keep alive item</a> [] </td><td>List </td><td>N </td><td>The keep alive items are defined as <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> identifier and a combined action + switch state </td></tr>
 </table>
+<h5><a class="anchor" id="keep_alive_mesh_item"></a>Keep alive Item</h5>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 16 </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> ID </td><td>2 </td><td>The identifier of the crownstone to which this keep alive item is targeted </td></tr>
+<tr>
+<td><a href="#action_switch_state_keep_alive">Action + switch state</a> </td><td>Action + switch state </td><td>1 </td><td>A combined element for action and switch state, which should be executed by the targeted crownstone when the keep alive times out </td></tr>
+</table>
+<h5><a class="anchor" id="action_switch_state_keep_alive"></a>Action + switch state</h5>
+<table class="doxtable">
+<tr>
+<th>Value </th><th>Name  </th></tr>
+<tr>
+<td>255 </td><td>No action </td></tr>
+<tr>
+<td>... </td><td>... </td></tr>
+<tr>
+<td>default </td><td>see <a href="#switch_state_packet">Switch state</a> </td></tr>
+</table>
+<h4><a class="anchor" id="state_mesh_packet"></a><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> state packet</h4>
+<div class="image">
+<img src="../docs/diagrams/state-mesh-packet.png"  alt="Crownstone State packet"/>
+</div>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 8 </td><td>Head </td><td>1 </td><td>Keeps the index of the oldest element in the list (read pointer) </td></tr>
+<tr>
+<td>uint 8 </td><td>Tail </td><td>1 </td><td>Keeps the index where the next element can be inserted in the list (write pointer) </td></tr>
+<tr>
+<td>uint 8 </td><td>Size </td><td>1 </td><td>Number of elements in the list </td></tr>
+<tr>
+<td><a href="#state_mesh_item">Crownstone state item</a> [] </td><td>List </td><td>8 </td><td>Circular list with <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> state items </td></tr>
+</table>
+<h5><a class="anchor" id="state_mesh_item"></a><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> state item</h5>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 16 </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> ID </td><td>2 </td><td>The identifier of the crownstone which has this state </td></tr>
+<tr>
+<td>uint 8 </td><td><a class="el" href="classSwitch.html">Switch</a> state </td><td>1 </td><td>The current <a href="#switch_state_packet">Switch State</a> of the crownstone </td></tr>
+<tr>
+<td>int 32 </td><td>Power usage </td><td>4 </td><td>The current power usage of the crownstone (mW) </td></tr>
+<tr>
+<td>int 32 </td><td>Accumulated energy </td><td>4 </td><td>The accumulated energy since setup (Wh) </td></tr>
+</table>
+<h4><a class="anchor" id="command_mesh_packet"></a>Command packet</h4>
+<div class="image">
+<img src="../docs/diagrams/command-mesh-packet.png"  alt="Command packet"/>
+</div>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 16 </td><td><a href="#mesh_command_types">Command type</a> </td><td>2 </td><td>Type of command, see table below. </td></tr>
+<tr>
+<td>uint 8 </td><td>Number of IDs </td><td>1 </td><td>The number of IDs provided as targets, 0 for broadcast </td></tr>
+<tr>
+<td>uint16 [] </td><td>List of target IDs </td><td>Number of IDs </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> Identifiers of the devices at which this message is aimed, for broadcast, no IDs are provided and the command follows directly after the Number of IDs element </td></tr>
+<tr>
+<td>uint 8 </td><td>Command payload </td><td>N </td><td>The command payload data, which depends on the message type </td></tr>
+</table>
+<h5><a class="anchor" id="mesh_command_types"></a>Command types</h5>
 <table class="doxtable">
 <tr>
 <th>Type nr </th><th>Type name </th><th>Payload type </th><th>Payload description  </th></tr>
 <tr>
-<td>0 </td><td>Command </td><td><a href="#control_packet">Control</a> </td><td>Send a command over the mesh, see control packet </td></tr>
+<td>0 </td><td>Control </td><td><a href="#control_packet">Control</a> </td><td>Send a control command over the mesh, see control packet </td></tr>
 <tr>
-<td>1 </td><td>Beacon </td><td><a href="#beacon_mesh_data_packet">Beacon data</a> </td><td>Configure the iBeacon settings. </td></tr>
+<td>1 </td><td>Beacon </td><td><a href="#beacon_mesh_data_packet">Beacon Config</a> </td><td>Configure the iBeacon settings. </td></tr>
 <tr>
 <td>2 </td><td>Config </td><td><a href="#config_packet">Configuration</a> </td><td>Send/Request a configuration setting, see configuration packet </td></tr>
 <tr>
 <td>3 </td><td><a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> </td><td><a href="#state_packet">State</a> </td><td>Send/Request a state variable, see state packet </td></tr>
-<tr>
-<td>101 </td><td>Scan result </td><td><a href="#scan_result_list_packet">Scan result list</a> </td><td>List of scanned devices. </td></tr>
-<tr>
-<td>103 </td><td>Power Samples </td><td><a href="#power_samples_packet">Power samples</a> </td><td>List of power samples. </td></tr>
-<tr>
-<td>104 </td><td>Event </td><td>uint 16 </td><td>Event type that happened. </td></tr>
 </table>
-<h3><a class="anchor" id="beacon_mesh_data_packet"></a>Beacon mesh data packet</h3>
+<h5><a class="anchor" id="beacon_mesh_data_packet"></a>Beacon config packet</h5>
 <div class="image">
-<img src="../docs/diagrams/beacon-mesh-message-data-packet.png"  alt="Beacon data"/>
+<img src="../docs/diagrams/beacon-config-command-packet.png"  alt="Beacon data"/>
 </div>
-<p>Type | Name | Length | Description &mdash; | &mdash; | &mdash; | &mdash; uint 16 | Major | 1 | uint 16 | Minor | 1 | uint 8 | Proximity <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> | 16 | int 8 | TX Power | 1 | Received signal strength at 1 meter.</p>
-<h3><a class="anchor" id="mesh_message_packet"></a><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> message packet</h3>
-<p>This packet is a slightly modified version of the one used in <a href="https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh">OpenMesh</a>; we simply increased the content size.</p>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 16 </td><td>Major </td><td>1 </td><td>iBeacon major number </td></tr>
+<tr>
+<td>uint 16 </td><td>Minor </td><td>1 </td><td>iBeacon minor number </td></tr>
+<tr>
+<td>uint 8 </td><td>Proximity <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> </td><td>16 </td><td>iBeacon <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> </td></tr>
+<tr>
+<td>int 8 </td><td>TX power </td><td>1 </td><td>iBeacon signal strength at 1 meter. </td></tr>
+</table>
+<h4><a class="anchor" id="command_reply_mesh_packet"></a>Command reply packet</h4>
 <div class="image">
-<img src="../docs/diagrams/mesh-packet.png"  alt="Mesh packet"/>
+<img src="../docs/diagrams/command-reply-mesh-packet.png"  alt="Command Reply packet"/>
 </div>
-<p>Type | Name | Length | Description &mdash; | &mdash; | &mdash; | &mdash; uint 8 | Preamble | 1 | uint 32 | Access address | 4 | Number used to find relevant messages, set by application. uint 8 | Type | 1 | uint 8 | Length | 1 | uint 8 [] | Source address | 6 | Address of the node that put this message into the mesh. uint 8 | AD Length | 1 | Length of data after this field, excluding CRC. uint 8 | AD type | 1 | uint 16 | <a class="el" href="classService.html" title="Service as defined in the GATT Specification. ">Service</a> <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> | 2 | <a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> service <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a>. uint 16 | Handle | 2 | Handle of this message. uint 16 | Version | 2 | Used internally. <a href="#mesh_payload_packet">Mesh Payload</a> | Payload | 99 | Payload data. uint 8 [] | CRC | 3 | Checksum.</p>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 16 </td><td><a href="#mesh_reply_types">Reply type</a> </td><td>2 </td><td>Type of reply, see table below </td></tr>
+<tr>
+<td>uint 32 </td><td>Message counter </td><td>4 </td><td>The message number of the command to which this reply belongs </td></tr>
+<tr>
+<td>uint 8 </td><td>Number of replies </td><td>1 </td><td>Number of reply items in the list </td></tr>
+<tr>
+<td>uint 8 </td><td>List of replies </td><td>85 </td><td>List of replies, the format is defined by the type of reply </td></tr>
+</table>
+<h5><a class="anchor" id="mesh_reply_types"></a>Reply types</h5>
+<table class="doxtable">
+<tr>
+<th>Type nr </th><th>Type name </th><th>Payload type </th><th>Payload description  </th></tr>
+<tr>
+<td>0 </td><td><a class="el" href="structStatus.html" title="Status of a Characteristic. ">Status</a> reply </td><td><a href="#mesh_status_reply">Status reply item</a> </td><td>Send a status code back, used to report errors. And to report success for control and config write commands. </td></tr>
+<tr>
+<td>1 </td><td>Config reply </td><td><a href="#mesh_config_reply">Config reply item</a> </td><td>Return the requested config. </td></tr>
+<tr>
+<td>2 </td><td><a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> reply </td><td><a href="#mesh_state_reply">State reply item</a> </td><td>Return the requested state variable. </td></tr>
+</table>
+<h6><a class="anchor" id="mesh_status_reply"></a><a class="el" href="structStatus.html" title="Status of a Characteristic. ">Status</a> reply item</h6>
+<div class="image">
+<img src="../docs/diagrams/mesh-status-reply-item.png"  alt="Status reply item"/>
+</div>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 16 </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> ID </td><td>2 </td><td>The identifier of the crownstone which sent the status reply </td></tr>
+<tr>
+<td>uint 16 </td><td><a class="el" href="structStatus.html" title="Status of a Characteristic. ">Status</a> </td><td>2 </td><td>The status code of the reply, see <a href="#return_values">Return Values</a> </td></tr>
+</table>
+<h6><a class="anchor" id="mesh_config_reply"></a>Config reply item</h6>
+<div class="image">
+<img src="../docs/diagrams/mesh-config-reply-item.png"  alt="Config reply item"/>
+</div>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 16 </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> ID </td><td>2 </td><td>The identifier of the crownstone which sent the status reply </td></tr>
+<tr>
+<td>uint 8 </td><td>Type </td><td>1 </td><td>see <a href="#config_packet">Configuration Packet</a> </td></tr>
+<tr>
+<td>uint 8 </td><td>OpCode </td><td>1 </td><td>see <a href="#config_packet">Configuration Packet</a> </td></tr>
+<tr>
+<td>uint 16 </td><td>Length </td><td>2 </td><td>see <a href="#config_packet">Configuration Packet</a> </td></tr>
+<tr>
+<td>uint 8 </td><td>Payload </td><td>Length </td><td>see <a href="#config_packet">Configuration Packet</a> </td></tr>
+</table>
+<h6><a class="anchor" id="mesh_state_reply"></a><a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> reply item</h6>
+<div class="image">
+<img src="../docs/diagrams/mesh-state-reply-item.png"  alt="State Reply packet"/>
+</div>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 16 </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> ID </td><td>2 </td><td>The identifier of the crownstone which sent the status reply </td></tr>
+<tr>
+<td>uint 8 </td><td>Type </td><td>1 </td><td>see <a href="#state_packet">State Packet</a> </td></tr>
+<tr>
+<td>uint 8 </td><td>OpCode </td><td>1 </td><td>see <a href="#state_packet">State Packet</a> </td></tr>
+<tr>
+<td>uint 16 </td><td>Length </td><td>2 </td><td>see <a href="#state_packet">State Packet</a> </td></tr>
+<tr>
+<td>uint 8 </td><td>Payload </td><td>Length </td><td>see <a href="#state_packet">State Packet</a> </td></tr>
+</table>
+<h4><a class="anchor" id="scan_result_mesh_packet"></a>Scan result packet</h4>
+<div class="image">
+<img src="../docs/diagrams/scan-result-mesh-packet.png"  alt="Scan Result packet"/>
+</div>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 8 </td><td>Number of results </td><td>1 </td><td>Number of scan results in the list </td></tr>
+<tr>
+<td><a href="#scan_result_item">Scan Result item</a> [] </td><td>List </td><td>Number of results </td><td>A list of scanned devices with the ID of the crownstone that scanned the device </td></tr>
+</table>
+<h5><a class="anchor" id="mesh_scan_result_item"></a>Scan result item</h5>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 16 </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> ID </td><td>2 </td><td>The identifier of the <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> which scanned the device </td></tr>
+<tr>
+<td>uint 8 [6] </td><td>Scanned device address </td><td>6 </td><td>The MAC address of the scanned device </td></tr>
+<tr>
+<td>int 8 </td><td>RSSI </td><td>1 </td><td>The averaged RSSI value of the scanned device </td></tr>
+</table>
 <h3><a class="anchor" id="mesh_notification_packet"></a><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> notification packet</h3>
 <p>This packet is used to get the <a href="#mesh_message_packet">mesh messages</a> pushed over GATT notifications.</p>
 <div class="image">
