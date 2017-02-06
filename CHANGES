@@ -1,4 +1,7 @@
 Version 1.1.1:
+
+
+Version 1.1.1:
  - Update docs
  - added board ACR01B1E moved board in UICR from index 0 to 1 (because 0 is used for DFU by the bootloader)
  - Add release config for crownstone_builtin_1.1.1
