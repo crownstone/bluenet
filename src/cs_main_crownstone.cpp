@@ -649,14 +649,14 @@ void Crownstone::startUp() {
 		nrf_delay_ms(bootDelay);
 	}
 
+	//! start advertising
 #if EDDYSTONE==1
 	_eddystone->advertising_start();
 #else
-	//! start advertising
 	_stack->startAdvertising();
+#endif
 	//! have to give the stack a moment of pause to start advertising, otherwise we get into race conditions
 	nrf_delay_ms(50);
-#endif
 
 #if IS_CROWNSTONE(DEVICE_TYPE)
 	//! Start switch, so it can be used.
