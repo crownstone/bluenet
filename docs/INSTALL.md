@@ -121,7 +121,6 @@ The following variables have to be set before you can build the code:
 
 - Set `BLUETOOTH_NAME` to something you like, but make sure it's short (<9).
 - Set `HARDWARE_BOARD` to the board you're using. This determines the pin layout.
-- Set `HARDWARE_VERSION` to the correct version of the NRF52 chip you have. Use `$BLUENET_DIR/scripts/hardware_version.sh` to check your version.
 - Set `COMPILER_PATH` to the path where the compiler can be found (it should contain the `/bin` subdir).
 - Set `NRF51822_DIR` to wherever you installed the Nordic SDK. It should have the following subdirectories:
     - components
