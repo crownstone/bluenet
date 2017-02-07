@@ -28,6 +28,7 @@ enum MeshChannels {
 	COMMAND_REPLY_CHANNEL    = 5,
 	SCAN_RESULT_CHANNEL      = 6,
 	BIG_DATA_CHANNEL         = 7,
+	MULTI_SWITCH_CHANNEL     = 8,
 };
 
 enum MeshCommandTypes {
@@ -96,6 +97,46 @@ struct __attribute__((__packed__)) keep_alive_message_t {
 };
 
 inline bool has_keep_alive_item(keep_alive_message_t* message, id_type_t id, keep_alive_item_t** item) {
+
+	*item = message->list;
+	for (int i = 0; i < message->size; ++i) {
+		if ((*item)->id == id) {
+			return true;
+		}
+		++(*item);
+	}
+
+	return false;
+}
+
+/********************************************************************
+ * KEEP ALIVE
+ ********************************************************************/
+
+enum MultiSwitchIntent {
+	SPHERE_ENTER = 0,
+	SPHERE_EXIT  = 1,
+	ENTER        = 2,
+	EXIT         = 3,
+	MANUAL       = 4
+};
+
+struct __attribute__((__packed__)) multi_switch_item_t {
+	id_type_t id;
+	uint8_t switchState;
+	uint16_t timeout;
+	uint8_t intent; // intent = sphere enter, sphere exit, room enter, room exit, manual
+};
+
+#define MULTI_SWITCH_HEADER_SIZE (sizeof(uint8_t))
+#define MAX_MULTI_SWITCH_ITEMS ((MAX_MESH_MESSAGE_LENGTH - MULTI_SWITCH_HEADER_SIZE) / sizeof(multi_switch_item_t))
+
+struct __attribute__((__packed__)) multi_switch_message_t {
+	uint8_t size;
+	multi_switch_item_t list[MAX_KEEP_ALIVE_ITEMS];
+};
+
+inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id, multi_switch_item_t** item) {
 
 	*item = message->list;
 	for (int i = 0; i < message->size; ++i) {

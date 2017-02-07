@@ -94,6 +94,8 @@ void Mesh::init() {
 		APP_ERROR_CHECK(error_code);
 	}
 
+	_encryptionEnabled = Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED);
+
 //	error_code = rbc_mesh_value_enable(1);
 //	APP_ERROR_CHECK(error_code);
 //	error_code = rbc_mesh_value_enable(2);
@@ -206,11 +208,11 @@ uint32_t Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 	mesh_message_t message = {};
 //	memset(&message, 0, sizeof(mesh_message_t));
 
-	message.messageCounter = ++_messageCounter[handle];
+	message.messageCounter = ++_messageCounter[handle -1];
 	memcpy(&message.payload, p_data, length);
 
 #ifdef PRINT_MESH_VERBOSE
-	LOGd("message:");
+	LOGd("message %d:", message.messageCounter);
 	BLEutil::printArray((uint8_t*)&message, sizeof(mesh_message_t));
 #endif
 
@@ -310,7 +312,7 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 			LOGi("new is newer command reply");
 
 			// update message counter
-			_messageCounter[handle] = messageNew.messageCounter;
+			_messageCounter[handle -1] = messageNew.messageCounter;
 
 			// send resolved message into mesh
 			send(handle, replyMessageNew, sizeof(reply_message_t));
@@ -323,7 +325,7 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 			LOGi("old is newer command reply");
 
 			// update message counter
-			_messageCounter[handle] = messageOld.messageCounter;
+			_messageCounter[handle -1] = messageOld.messageCounter;
 
 			// send resolved message into mesh
 			send(handle, replyMessageOld, sizeof(reply_message_t));
@@ -375,7 +377,7 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 //				BLEutil::printArray(replyMessageOld, sizeof(reply_message_t));
 
 				//! update message counter
-				_messageCounter[handle] = messageNew.messageCounter;
+				_messageCounter[handle -1] = messageNew.messageCounter;
 
 				//! send resolved message into mesh
 				send(handle, replyMessageOld, sizeof(reply_message_t));
@@ -448,7 +450,7 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 //		BLEutil::printArray(stateMessageOld, sizeof(state_message_t));
 
 		//! update message counter
-		_messageCounter[handle] = messageNew.messageCounter;
+		_messageCounter[handle -1] = messageNew.messageCounter;
 
 		//! send resolved message into mesh
 		send(handle, stateMessageOld, sizeof(state_message_t));
@@ -539,9 +541,9 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 
 			if (decodeMessage(received, receivedLength, &message, sizeof(mesh_message_t))) {
 
-//				if (message.messageCounter > _messageCounter[handle]) {
+//				if (message.messageCounter > _messageCounter[handle -1]) {
 
-					_messageCounter[handle] = message.messageCounter;
+					_messageCounter[handle -1] = message.messageCounter;
 
 #ifdef PRINT_MESH_VERBOSE
 					LOGi("message:");
@@ -578,6 +580,7 @@ bool Mesh::encodeMessage(mesh_message_t* decoded, uint16_t decodedLength, encryp
 				(uint8_t*)encoded, sizeof(encrypted_mesh_message_t));
 	} else {
 		memcpy(encoded->encrypted_payload, decoded, decodedLength);
+		encoded->messageCounter = decoded->messageCounter;
 		return true;
 	}
 }
@@ -589,11 +592,11 @@ void Mesh::checkForMessages() {
 	while (rbc_mesh_event_get(&evt) == NRF_SUCCESS) {
 
 		uint8_t handle = evt.params.tx.value_handle;
-		if (_messageCounter[handle] == 0) {
+		if (_messageCounter[handle -1] == 0) {
 			encrypted_mesh_message_t* received = (encrypted_mesh_message_t*)evt.params.rx.p_data;
 
 #ifdef NDEBUG
-			_messageCounter[handle] = received->messageCounter;
+			_messageCounter[handle -1] = received->messageCounter;
 			LOGi("skip message %d on handle %d", received->messageCounter, handle);
 			continue;
 #else
@@ -601,7 +604,7 @@ void Mesh::checkForMessages() {
 				//! ok
 			} else {
 				//! skip the first message after a boot up but take over the message counter
-				_messageCounter[handle] = received->messageCounter;
+				_messageCounter[handle -1] = received->messageCounter;
 				LOGi("skip message %d on handle %d", received->messageCounter, handle);
 				continue;
 			}

@@ -10,6 +10,10 @@
 #include <drivers/cs_Timer.h>
 #include <events/cs_EventListener.h>
 
+#if BUILD_MESHING == 1
+#include <protocol/cs_MeshMessageTypes.h>
+#endif
+
 extern "C" {
 #include <cfg/cs_Boards.h>
 }
@@ -19,7 +23,7 @@ extern "C" {
 #ifdef EXTENDED_SWITCH_STATE
 struct switch_state_t {
 	uint8_t pwm_state : 7;
-	uint8_t relay_state : 1;
+	bool relay_state : 1;
 };
 #else
 typedef uint8_t switch_state_t;
@@ -57,8 +61,8 @@ public:
 
 	void setPwm(uint8_t value);
 
-	switch_state_t getValue();
-	void setValue(switch_state_t value);
+	switch_state_t getSwitchState();
+//	void setValue(switch_state_t value);
 
 	uint8_t getPwm();
 	bool getRelayState();
@@ -67,16 +71,24 @@ public:
 
 	void relayOff();
 
-	static void staticTimedSetRelay(Switch* ptr) { ptr->timedSetRelay(); }
+	static void staticTimedSwitch(Switch* ptr) { ptr->timedSwitch(); }
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
+#if BUILD_MESHING == 1
+	void handleMultiSwitch(multi_switch_item_t* p_item);
+#endif
+
+	void handle(switch_state_t* switchState);
+
+	void handleDelayed(switch_state_t* switchState, uint16_t delay);
 
 private:
 	Switch();
 
 	void updateSwitchState();
 
-	void timedSetRelay();
+	void timedSwitch();
 
 	void forcePwmOff();
 	void forceSwitchOff();
@@ -84,17 +96,19 @@ private:
 	switch_state_t _switchValue;
 
 #if (NORDIC_SDK_VERSION >= 11)
-	app_timer_t              _relayTimerData;
-	app_timer_id_t           _relayTimerId;
+	app_timer_t              _switchTimerData;
+	app_timer_id_t           _switchTimerId;
 #else
-	uint32_t                 _relayTimerId;
+	uint32_t                 _switchTimerId;
 #endif
 
-	uint8_t _nextRelayVal;
+//	uint8_t _nextRelayVal;
 
 	bool _hasRelay;
 	uint8_t _pinRelayOn;
 	uint8_t _pinRelayOff;
+
+	switch_state_t* _delayedSwitchState;
 
 };
 
