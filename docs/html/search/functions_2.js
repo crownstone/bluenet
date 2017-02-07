@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['decodedatamessage',['decodeDataMessage',['../classMeshControl.html#acf1130ed6d11cc295c985b30031c4256',1,'MeshControl']]],
   ['decrypt',['decrypt',['../classEncryptionHandler.html#a509f9ffbc67a5f78accec439ca55eeee',1,'EncryptionHandler']]],
   ['deinit',['deinit',['../classPWM.html#a2da4580f7aa0b7e475bdb0a408acbcaf',1,'PWM']]],
   ['delayedstart',['delayedStart',['../classScanner.html#a2df7d23cb7f5343901bfe02cde1e0d64',1,'Scanner::delayedStart(uint16_t delay)'],['../classScanner.html#a03ea3486fae4833c601c3cad6cc56229',1,'Scanner::delayedStart()']]],

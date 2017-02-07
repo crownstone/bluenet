@@ -11,6 +11,7 @@ extern "C" {
 #endif
 
 #include <cfg/cs_Debug.h>
+#include "stdint.h"
 
 /*
  * Commonly LOG functionality is provided with as first parameter the level of severity of the message. Subsequently
@@ -128,7 +129,7 @@ typedef enum
  * General configuration of the serial connection. This sets the pin to be used for UART, the baudrate, the parity
  * bits, etc.
  */
-void config_uart();
+void config_uart(uint8_t pinRx, uint8_t pinTx);
 
 /**
  * Write a string to the serial connection. Make sure you end with `\n` if you want to have new lines in the output.

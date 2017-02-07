@@ -12,6 +12,9 @@
 #include <protocol/cs_ConfigTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 
+extern "C" {
+#include <cfg/cs_Boards.h>
+}
 
 /**
  * Load settings from and save settings to persistent storage.
@@ -32,7 +35,7 @@ public:
 		return instance;
 	}
 
-	void init();
+	void init(boards_config_t* boardsConfig);
 
 	bool isInitialized() {
 		return _initialized;
@@ -105,6 +108,8 @@ protected:
 	std::string _wifiSettings;
 
 	Storage* _storage;
+
+	boards_config_t* _boardsConfig;
 
 	ERR_CODE verify(uint8_t type, uint8_t* payload, uint8_t length);
 

@@ -9,8 +9,8 @@
 
 #include <cstring>
 #include <cstdarg>
-#include <cstdio>
 #include <cstdlib>
+#include <cstdio>
 
 #include "app_util.h"
 #include "nrf.h"
@@ -31,15 +31,15 @@ static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVI
 /**
  * Configure the UART. Currently we set it on 38400 baud.
  */
-void config_uart() {
+void config_uart(uint8_t pinRx, uint8_t pinTx) {
 
 #if SERIAL_VERBOSITY<SERIAL_NONE
 	//! Enable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
 
 	//! Configure UART pins
-	NRF_UART0->PSELRXD = PIN_GPIO_RX;
-	NRF_UART0->PSELTXD = PIN_GPIO_TX;
+	NRF_UART0->PSELRXD = pinRx;
+	NRF_UART0->PSELTXD = pinTx;
 
 	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; //! do not enable hardware flow control.
 	NRF_UART0->BAUDRATE = m_baudrates[UART_BAUD_38K4];

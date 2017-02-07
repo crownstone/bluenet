@@ -58,12 +58,6 @@ PWM::PWM() :
 #endif
 
 #endif
-
-#ifdef SWITCH_INVERSED
-	_inverted = true;
-#else
-	_inverted = false;
-#endif
 }
 
 //! Flag indicating PWM status
@@ -113,10 +107,10 @@ void PWM::switchOff() {
 	}
 }
 
-uint32_t PWM::init(app_pwm_config_t & config) {
-
+uint32_t PWM::init(app_pwm_config_t & config, bool inverted) {
 #if PWM_ENABLE==1
 	_pwmCfg = config;
+	_inverted = inverted;
 
 	logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, FMT_INIT, "PWM");
 
@@ -147,10 +141,10 @@ uint32_t PWM::deinit() {
 	return ERR_PWM_NOT_ENABLED;
 }
 
-app_pwm_config_t & PWM::config1Ch(uint32_t period, uint32_t pin) {
+app_pwm_config_t & PWM::config1Ch(uint32_t period, uint32_t pin, bool inverted) {
 	static app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_1CH(period, pin);
 
-	if (_inverted) {
+	if (inverted) {
 		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
 	} else { 
 		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
@@ -159,10 +153,10 @@ app_pwm_config_t & PWM::config1Ch(uint32_t period, uint32_t pin) {
 	return cfg;
 }
 
-app_pwm_config_t & PWM::config2Ch(uint32_t period, uint32_t pin1, uint32_t pin2) {
+app_pwm_config_t & PWM::config2Ch(uint32_t period, uint32_t pin1, uint32_t pin2, bool inverted) {
 	static app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_2CH(period, pin1, pin2);
 
-	if (_inverted) {
+	if (inverted) {
 		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
 		cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_LOW;
 	} else {

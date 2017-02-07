@@ -10,6 +10,10 @@
 #include <drivers/cs_Timer.h>
 #include <events/cs_EventListener.h>
 
+extern "C" {
+#include <cfg/cs_Boards.h>
+}
+
 #define EXTENDED_SWITCH_STATE
 
 #ifdef EXTENDED_SWITCH_STATE
@@ -35,7 +39,7 @@ public:
 		return instance;
 	}
 
-	void init();
+	void init(boards_config_t* board);
 
 	void start();
 
@@ -74,6 +78,9 @@ private:
 
 	void timedSetRelay();
 
+	void forcePwmOff();
+	void forceSwitchOff();
+
 	switch_state_t _switchValue;
 
 #if (NORDIC_SDK_VERSION >= 11)
@@ -84,5 +91,10 @@ private:
 #endif
 
 	uint8_t _nextRelayVal;
+
+	bool _hasRelay;
+	uint8_t _pinRelayOn;
+	uint8_t _pinRelayOff;
+
 };
 

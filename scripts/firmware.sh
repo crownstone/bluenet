@@ -41,20 +41,20 @@ printf "oo  _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     \n"
 printf "oo  _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     \n"
 printf "oo  _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \n"
 
-# Use hidden .build file to store variables 
+# Use hidden .build file to store variables
 BUILD_PROCESS_FILE="$BLUENET_BUILD_DIR/.build"
 
 if ! [ -e "$BUILD_PROCESS_FILE" ]; then
 	BUILD_CYCLE=0
 	echo "BUILD_CYCLE=$BUILD_CYCLE" >> "$BUILD_PROCESS_FILE"
 fi
-	
+
 source "$BUILD_PROCESS_FILE"
 BUILD_CYCLE=$((BUILD_CYCLE + 1))
 sed -i "s/\(BUILD_CYCLE *= *\).*/\1$BUILD_CYCLE/" "$BUILD_PROCESS_FILE"
 if ! (($BUILD_CYCLE % 100)); then
 	printf "\n"
-	printf "oo Would you like to check for updates? [Y/n]: " 
+	printf "oo Would you like to check for updates? [Y/n]: "
 	read update_response
 	if [ "$update_response" == "n" ]; then
 		git_version=$(git rev-parse --short=25 HEAD)
@@ -64,7 +64,7 @@ if ! (($BUILD_CYCLE % 100)); then
 	fi
 fi
 printf "${normal}\n"
-                                                                 
+
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
@@ -76,7 +76,20 @@ build() {
 	# return $result
 }
 
+writeHardwareVersion() {
+	# info "HARDWARE_BOARD=$HARDWARE_BOARD"
+	HARDWARE_BOARD_INT=`cat $BLUENET_DIR/include/cfg/cs_Boards.h | grep -o "#define.*\b$HARDWARE_BOARD\b.*" | grep -w "$HARDWARE_BOARD" | awk 'NF>1{print $NF}'`
+	if [ $? -eq 0 ] && [ -n "$HARDWARE_BOARD_INT" ]; then
+			# info "HARDWARE_BOARD_INT=$HARDWARE_BOARD_INT"
+			${path}/_writebyte.sh 0x10001084 `printf "%x" $HARDWARE_BOARD_INT` $serial_num
+			checkError "Error writing hardware version"
+	else
+		err "Failed to extract HARDWARE_BOARD=$HARDWARE_BOARD from $BLUENET_DIR/include/cfg/cs_Boards.h"
+	fi
+}
+
 upload() {
+	# writeHardwareVersion
 	${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
 	checkError "Error with uploading firmware"
 }
@@ -127,6 +140,11 @@ bootloader() {
 
 	checkError "Error uploading bootloader"
 
+	# [26.01.17] uicr is cleared during bootloader upload, maybe because the bootloader needs
+	#  to store some values into the uicr as well, so write the hardware version again after
+	#  uploading the bootloader
+	writeHardwareVersion
+
 	# Mark current app as valid app
 	${path}/_writebyte.sh 0x0007F000 1 $serial_num
 
@@ -151,6 +169,11 @@ bootloader-only() {
 	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
 
 	checkError "Error uploading bootloader"
+
+	# [26.01.17] uicr is cleared during bootloader upload, maybe because the bootloader needs
+	#  to store some values into the uicr as well, so write the hardware version again after
+	#  uploading the bootloader
+	writeHardwareVersion
 
 	# Mark current app as invalid app
 	${path}/_writebyte.sh 0x0007F000 0 $serial_num
@@ -207,8 +230,11 @@ case "$cmd" in
 	release)
 		release
 		;;
+	writeHardwareVersion)
+		writeHardwareVersion
+		;;
 	*)
-		info $"Usage: $0 {build|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release}"
+		info $"Usage: $0 {build|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release|writeHardwareVersion}"
 		exit 1
 esac
 

@@ -1,3 +1,59 @@
+Version 1.1.1:
+ - Version bump to 1.1.1
+
+Version 1.1.1:
+
+
+Version 1.1.1:
+ - Update docs
+ - added board ACR01B1E moved board in UICR from index 0 to 1 (because 0 is used for DFU by the bootloader)
+ - Add release config for crownstone_builtin_1.1.1
+ - Update docs
+ - Merge branch 'hardware_version_refactor'
+ - Merge branch current-soft-fuse into hardware_version_refactor
+ - Set correct current thresholds.
+ - Do we still need those 50ms?
+ - Started on current based soft fuse.
+ - we should get rid of the service ticks
+ - Added error bitmask
+ - One more line about Nordic code.
+ - Clarifying commercial use
+ - changed boad handling so that firmware is independent of board, i.e. board layout is not determined at build time but at flash/run time. hardware board version is stored in UICR and read at boot, pinout is assigned based on board version read from UICR init drivers at boot with pinout/ board config updated CMakeBuild.config.default made device type dependent of board (by default, but overwriteable on compiletime)
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - bumped protocol version to 0.8.0
+ - updated _writebyte.sh, re-added _readbyte.sh
+ - write hardware version to UICR with script in firmware, read hardware version from UICR
+ - added ios lib to docs!
+ - Merge branch 'mesh'
+ - added missing #if BUILD_MESHING == 1
+ - minor wording changes to PROTOCOL.md
+ - updated protocol docs with new encrypted mesh message
+ - added random number to encrypted mesh message added encryption for mesh updated encryption to accomodate mesh ignore first message on mesh channels to avoid handling old messages
+ - bugfix MeshControl (missed a break)
+ - updated protocol with new mesh
+ - updated command reply with config and state replies updated config and state commands
+ - Remove references to dobots URLs.
+ - Remove references to bash shell.
+ - Remove serve_doc script
+ - Push new documentation
+ - increased mesh package size to 100
+ - disable RBC_MESH_DEBUG removed ble address from mesh updated mesh debugging/logging
+ - mesh protocol update send state broadcasts with interval send state change if switch state changes handle commands over mesh (single, multicast and broadcast) send reply when command is received (with status) handle keep alives over mesh preparation for mesh encryption resolve conflicts for state and command reply messages
+ - added missing errors
+ - advertise as not connectable during an open connection
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - disable log error in Service (not an error)
+ - use defines in EnOceanHandler logging
+ - fix for reserved pstorage data (so bootloader doesn't overwrite pstrogage during DFU)
+ - moved helper classes from Storage to StorageHelper (makes it easier to distinguish actual read/writes from flash vs read/writes from working memory)
+ - Added option (via define) to sample with only upper half of the current curve.
+ - Increased recovery timeout from 20s to 60s
+ - Version bump to 1.1.0
+ - Add release config for guidestone_1.1.0
+ - Update docs
+ - undo false commit
+ - updated create_release.sh to update device type
+
 Version 1.1.0:
 
 

@@ -43,6 +43,8 @@
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_Temperature.h>
 
+#include <cfg/cs_HardwareVersions.h>
+
 /**********************************************************************************************************************
  * Custom includes
  *********************************************************************************************************************/
@@ -58,10 +60,9 @@
  * Main functionality
  *********************************************************************************************************************/
 
-Crownstone::Crownstone() :
-#if IS_CROWNSTONE(DEVICE_TYPE)
+Crownstone::Crownstone(boards_config_t& board) :
+	_boardsConfig(board),
 	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL), _watchdog(NULL), _enOceanHandler(NULL),
-#endif
 	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
 	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
 	_scheduleService(NULL),
@@ -116,18 +117,18 @@ Crownstone::Crownstone() :
 	_mesh = &Mesh::getInstance();
 #endif
 
-#if IS_CROWNSTONE(DEVICE_TYPE)
-	// switch using PWM or Relay
-	_switch = &Switch::getInstance();
-	//! create temperature guard
-	_temperatureGuard = new TemperatureGuard();
+	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
+		// switch using PWM or Relay
+		_switch = &Switch::getInstance();
+		//! create temperature guard
+		_temperatureGuard = new TemperatureGuard();
 
-	_powerSampler = &PowerSampling::getInstance();
+		_powerSampler = &PowerSampling::getInstance();
 
-	_watchdog = &Watchdog::getInstance();
+		_watchdog = &Watchdog::getInstance();
 
-	_enOceanHandler = &EnOceanHandler::getInstance();
-#endif
+		_enOceanHandler = &EnOceanHandler::getInstance();
+	}
 
 };
 
@@ -285,11 +286,11 @@ void Crownstone::initDrivers() {
 	_storage->init();
 
 	LOGi("Loading configuration");
-	_settings->init();
+	_settings->init(&_boardsConfig);
 	_stateVars->init();
 
 	LOGd(FMT_INIT, "command handler");
-	_commandHandler->init();
+	_commandHandler->init(&_boardsConfig);
 
 	LOGd(FMT_INIT, "factory reset");
 	_factoryReset->init();
@@ -297,38 +298,33 @@ void Crownstone::initDrivers() {
 	LOGi(FMT_INIT, "encryption handler");
 	EncryptionHandler::getInstance().init();
 
-#if IS_CROWNSTONE(DEVICE_TYPE)
-	// switch / PWM init
-	LOGd(FMT_INIT, "switch / PWM");
-	_switch->init();
+	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
+		// switch / PWM init
+		LOGd(FMT_INIT, "switch / PWM");
+		_switch->init(&_boardsConfig);
 
-	LOGd(FMT_INIT, "temperature guard");
-	_temperatureGuard->init();
+		LOGd(FMT_INIT, "temperature guard");
+		_temperatureGuard->init();
 
-	LOGd(FMT_INIT, "power sampler");
-	_powerSampler->init();
+		LOGd(FMT_INIT, "power sampler");
+		_powerSampler->init(_boardsConfig.pinAinCurrent, _boardsConfig.pinAinVoltage);
 
-	LOGi(FMT_INIT, "watchdog");
-	_watchdog->init();
+		LOGi(FMT_INIT, "watchdog");
+		_watchdog->init();
 
-	_enOceanHandler->init();
-#endif
+		_enOceanHandler->init();
+	}
 
 	// init GPIOs
-#if HARDWARE_BOARD==PCA10001
-	LOGd("Configure LEDs");
-	nrf_gpio_cfg_output(PIN_GPIO_LED_CON);
-#endif
-
-#if HAS_LEDS==1
-	LOGd("Configure LEDs");
-	// Note: DO NOT USE THEM WHILE SCANNING OR MESHING ...
-	nrf_gpio_cfg_output(RED_LED);
-	nrf_gpio_cfg_output(GREEN_LED);
-	// setting the pin makes them turn off ....
-	nrf_gpio_pin_set(RED_LED);
-	nrf_gpio_pin_set(GREEN_LED);
-#endif
+	if (_boardsConfig.flags.hasLed) {
+		LOGd("Configure LEDs");
+		// Note: DO NOT USE THEM WHILE SCANNING OR MESHING ...
+		nrf_gpio_cfg_output(_boardsConfig.pinLedRed);
+		nrf_gpio_cfg_output(_boardsConfig.pinLedGreen);
+		// setting the pin makes them turn off ....
+		nrf_gpio_pin_set(_boardsConfig.pinLedRed);
+		nrf_gpio_pin_set(_boardsConfig.pinLedGreen);
+	}
 }
 
 /** Sets default parameters of the Bluetooth connection.
@@ -391,10 +387,6 @@ void Crownstone::configureStack() {
 #endif
 #endif
 
-#if HARDWARE_BOARD==PCA10001
-		nrf_gpio_pin_set(PIN_GPIO_LED_CON);
-#endif
-
 //		LOGd("clear gpregret on connect ...");
 		sd_power_gpregret_clr(0xFF);
 
@@ -408,10 +400,6 @@ void Crownstone::configureStack() {
 		LOGi("onDisconnect...");
 		//! of course this is not nice, but dirty! we immediately start advertising automatically after being
 		//! disconnected. but for now this will be the default behaviour.
-
-#if HARDWARE_BOARD==PCA10001
-		nrf_gpio_pin_clear(PIN_GPIO_LED_CON);
-#endif
 
 		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
 		//   disconnecting from the device. just calling startAdvertising is enough
@@ -504,9 +492,9 @@ void Crownstone::configureAdvertisement() {
 	_stack->setServiceData(_serviceData);
 
 	if (_settings->isSet(CONFIG_IBEACON_ENABLED)) {
-		_stack->configureIBeacon(_beacon, DEVICE_TYPE);
+		_stack->configureIBeacon(_beacon, _boardsConfig.deviceType);
 	} else {
-		_stack->configureBleDevice(DEVICE_TYPE);
+		_stack->configureBleDevice(_boardsConfig.deviceType);
 	}
 
 }
@@ -558,12 +546,12 @@ void Crownstone::createCrownstoneServices() {
 #endif
 
 #if POWER_SERVICE==1
-#if IS_CROWNSTONE(DEVICE_TYPE)
-	_powerService = new PowerService;
-	_stack->addService(_powerService);
-#else
-	LOGe("Power service not available");
-#endif
+	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
+		_powerService = new PowerService;
+		_stack->addService(_powerService);
+	} else {
+		LOGe("Power service not available");
+	}
 #endif
 
 #if SCHEDULE_SERVICE==1
@@ -649,14 +637,26 @@ void Crownstone::startUp() {
 		nrf_delay_ms(bootDelay);
 	}
 
+	//! start advertising
 #if EDDYSTONE==1
 	_eddystone->advertising_start();
 #else
-	//! start advertising
 	_stack->startAdvertising();
+#endif
 	//! have to give the stack a moment of pause to start advertising, otherwise we get into race conditions
 	nrf_delay_ms(50);
-#endif
+
+	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
+		//! Start switch, so it can be used.
+		_switch->start();
+
+		//! Start temperature guard regardless of operation mode
+		_temperatureGuard->startTicking();
+
+		//! Start power sampler regardless of operation mode (as it is used for the current based soft fuse)
+		LOGd(FMT_START, "power sampling");
+		_powerSampler->startSampling();
+	}
 
 	//! the rest we only execute if we are in normal operation
 	//! during setup mode, most of the crownstone's functionality is
@@ -675,21 +675,14 @@ void Crownstone::startUp() {
 		scheduleNextTick();
 		_stack->startTicking();
 
-#if IS_CROWNSTONE(DEVICE_TYPE)
-		_switch->start();
+		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 
-		// restore the last value. the switch reads the last state from the storage, but does
-		// not automatically update the pwm/relay values. so we read out the last value
-		// and set it again to update the pwm
-		uint8_t pwm = _switch->getPwm();
-		_switch->setPwm(pwm);
-
-		//! start ticking of peripherals
-		_temperatureGuard->startTicking();
-
-		LOGd(FMT_START, "power sampling");
-		_powerSampler->startSampling();
-#endif
+			// restore the last value. the switch reads the last state from the storage, but does
+			// not automatically update the pwm/relay values. so we read out the last value
+			// and set it again to update the pwm
+			uint8_t pwm = _switch->getPwm();
+			_switch->setPwm(pwm);
+		}
 
 		_scheduler->start();
 
@@ -728,6 +721,8 @@ void Crownstone::startUp() {
 }
 
 void Crownstone::tick() {
+	//! Right now, this function is only called in normal operation
+
 
 #if ADVERTISEMENT_IMPROVEMENT==1
 	//! update advertisement parameters (to improve scanning on (some) android phones)
@@ -808,7 +803,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case CONFIG_NAME: {
 		_stack->updateDeviceName(std::string((char*)p_data, length));
 		// need to reconfigure scan response package for updated name
-		_stack->configureScanResponse(DEVICE_TYPE);
+		_stack->configureScanResponse(_boardsConfig.deviceType);
 		_stack->setAdvertisementData();
 		break;
 	}
@@ -891,11 +886,11 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 #endif
 		_scanner->stop();
 
-#if IS_CROWNSTONE(DEVICE_TYPE)
-		_switch->pwmOff();
-		_switch->relayOff();
-		_powerSampler->stopSampling();
-#endif
+		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
+			_switch->pwmOff();
+			_switch->relayOff();
+			_powerSampler->stopSampling();
+		}
 
 		// now reset with brownout reset mask set.
 		// NOTE: do not clear the gpregret register, this way
@@ -922,8 +917,8 @@ void on_exit(void) {
  * If UART is enabled this will be the message printed out over a serial connection. Connectors are expensive, so UART
  * is not available in the final product.
  */
-void welcome() {
-	config_uart();
+void welcome(uint8_t pinRx, uint8_t pinTx) {
+	config_uart(pinRx, pinTx);
 
 	_log(SERIAL_INFO, SERIAL_CRLF);
 //	BLEutil::print_heap("Heap init");
@@ -938,6 +933,7 @@ void welcome() {
 #else
 	LOGi("Firmware version: %s", FIRMWARE_VERSION);
 #endif
+	LOGi("Hardware version: %s", get_hardware_version());
 }
 
 /**********************************************************************************************************************/
@@ -955,13 +951,18 @@ int main() {
 
 	atexit(on_exit);
 
+	uint32_t errCode;
+	boards_config_t board = {};
+	errCode = configure_board(&board);
+	APP_ERROR_CHECK(errCode);
+
 	//! int uart, be nice and say hello
-	welcome();
+	welcome(board.pinGpioRx, board.pinGpioTx);
 
 	BLEutil::print_heap("Heap welcome: ");
 	BLEutil::print_stack("Stack welcome: ");
 
-	Crownstone crownstone;
+	Crownstone crownstone(board);
 
 	BLEutil::print_heap("Heap crownstone construct: ");
 	BLEutil::print_stack("Stack crownstone construct: ");

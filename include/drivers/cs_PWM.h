@@ -33,13 +33,13 @@ public:
 //	static void pwmReadyCallback(uint32_t pwmId);
 
 	//! Initialize the pulse wide modulation settings
-	uint32_t init(app_pwm_config_t & config);
+	uint32_t init(app_pwm_config_t & config, bool inverted);
 
 	//! Returns configuration values for 1 Channel
-	app_pwm_config_t & config1Ch(uint32_t period_us, uint32_t pin);
+	app_pwm_config_t & config1Ch(uint32_t period_us, uint32_t pin, bool inverted);
 
 	//! Returns configuration values for 2 Channels
-	app_pwm_config_t & config2Ch(uint32_t period_us, uint32_t pin1, uint32_t pin2);
+	app_pwm_config_t & config2Ch(uint32_t period_us, uint32_t pin1, uint32_t pin2, bool inverted);
 
 	//! De-Initialize the PWM instance, i.e. free allocated resources
 	uint32_t deinit();

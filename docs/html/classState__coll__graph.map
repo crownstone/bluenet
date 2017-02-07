@@ -1,9 +1,9 @@
 <map id="State" name="State">
-<area shape="rect" id="node2" href="$classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY \&gt;" alt="" coords="190,5,445,61"/>
-<area shape="rect" id="node3" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="284,85,351,112"/>
-<area shape="rect" id="node4" href="$classEventListener.html" title="Event listener. " alt="" coords="21,85,123,112"/>
-<area shape="rect" id="node5" href="$classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY \&gt;" alt="" coords="212,136,423,192"/>
-<area shape="rect" id="node6" href="$structps__general__vars__t.html" title="Struct used to ... " alt="" coords="253,216,381,243"/>
-<area shape="rect" id="node7" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="6,216,138,243"/>
-<area shape="rect" id="node8" href="$classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY \&gt;" alt="" coords="223,267,411,323"/>
+<area shape="rect" id="node2" href="$classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY \&gt;" alt="" coords="187,5,441,61"/>
+<area shape="rect" id="node3" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="281,85,347,112"/>
+<area shape="rect" id="node4" href="$classEventListener.html" title="Event listener. " alt="" coords="20,85,123,112"/>
+<area shape="rect" id="node5" href="$classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY \&gt;" alt="" coords="209,136,419,192"/>
+<area shape="rect" id="node6" href="$structps__general__vars__t.html" title="Struct used to ... " alt="" coords="250,216,378,243"/>
+<area shape="rect" id="node7" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="5,216,137,243"/>
+<area shape="rect" id="node8" href="$classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY \&gt;" alt="" coords="220,267,408,323"/>
 </map>

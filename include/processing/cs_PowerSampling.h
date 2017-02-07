@@ -20,7 +20,7 @@ public:
 		return instance;
 	}
 
-	void init();
+	void init(uint8_t pinAinCurrent, uint8_t pinAinVoltage);
 
 	void stopSampling();
 
@@ -67,6 +67,8 @@ private:
 //	uint32_t _powerSamplingStartTimerId;
 	uint32_t _powerSamplingSentDoneTimerId;
 #endif
+
+	uint32_t _operationMode;
 
 	buffer_ptr_t _powerSamplesBuffer; //! Buffer that holds the data for burst or continuous sampling
 

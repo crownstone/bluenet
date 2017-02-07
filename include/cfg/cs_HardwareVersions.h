@@ -7,6 +7,17 @@
 #pragma once
 
 #include <cfg/cs_Boards.h>
+#include <util/cs_BleError.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "nrf52.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 /*
 	----------------------
@@ -24,92 +35,44 @@
 	  |--------------------  Family: 1 Crownstone
 */
 
-// CROWNSTONE BUILTINS
-#if (HARDWARE_BOARD==ACR01B1A)
-#define HARDWARE_VERSION_STRING "10103000100"
-#endif
-#if (HARDWARE_BOARD==ACR01B1B)
-#define HARDWARE_VERSION_STRING "10103000200"
-#endif
-#if (HARDWARE_BOARD==ACR01B1C)
-#define HARDWARE_VERSION_STRING "10103000300"
-#endif
-#if (HARDWARE_BOARD==ACR01B1D)
-#define HARDWARE_VERSION_STRING "10103000400"
-#endif
+inline const char* get_hardware_version() {
 
-// CROWNSTONE PLUGS
-#if (HARDWARE_BOARD==ACR01B2A)
-#define HARDWARE_VERSION_STRING "10102000100"
-#endif
-#if (HARDWARE_BOARD==ACR01B2B)
-#define HARDWARE_VERSION_STRING "10102000200"
-#endif
-#if (HARDWARE_BOARD==ACR01B2C)
-#define HARDWARE_VERSION_STRING "10102010000"
-#endif
+	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
+	if (hardwareBoard == 0xFFFFFFFF) {
+		hardwareBoard = ACR01B2C;
+	}
 
-// GUIDESTONE
-#if (HARDWARE_BOARD==GUIDESTONE)
-#define HARDWARE_VERSION_STRING "10104010000"
-#endif
+//	LOGi("UICR");
+//	BLEutil::printArray((uint8_t*)NRF_UICR->CUSTOMER, 128);
 
-/////////////////////////////////////////////////////////////////
-//// Old and Third Party Boards
-/////////////////////////////////////////////////////////////////
+	// CROWNSTONE PLUGS
+	if (hardwareBoard == ACR01B2A) return "10102000100";
+	if (hardwareBoard == ACR01B2B) return "10102000200";
+	if (hardwareBoard == ACR01B2C) return "10102010000";
 
-#if (HARDWARE_BOARD==VIRTUALMEMO)
-#define HARDWARE_VERSION_STRING "VIRTUALMEMO"
-#endif
-#if (HARDWARE_BOARD==CROWNSTONE)
-#define HARDWARE_VERSION_STRING "crownstone"
-#endif
-#if (HARDWARE_BOARD==CROWNSTONE2)
-#define HARDWARE_VERSION_STRING "crownstone_v0.86"
-#endif
-#if (HARDWARE_BOARD==CROWNSTONE3)
-#define HARDWARE_VERSION_STRING "crownstone_v0.90"
-#endif
-#if (HARDWARE_BOARD==CROWNSTONE4)
-#define HARDWARE_VERSION_STRING "crownstone_v0.92"
-#endif
-#if (HARDWARE_BOARD==CROWNSTONE5)
-#define HARDWARE_VERSION_STRING "plugin_quant"
-#endif
-#if (HARDWARE_BOARD==PLUGIN_FLEXPRINT_01)
-#define HARDWARE_VERSION_STRING "plugin_flexprint_01"
-#endif
-#if (HARDWARE_BOARD==DOBEACON)
-#define HARDWARE_VERSION_STRING "dobeacon_v0.7"
-#endif
-#if (HARDWARE_BOARD==DOBEACON2)
-#define HARDWARE_VERSION_STRING "dobeacon_v?"
-#endif
+	// CROWNSTONE BUILTINS
+	if (hardwareBoard == ACR01B1A) return "10103000100";
+	if (hardwareBoard == ACR01B1B) return "10103000200";
+	if (hardwareBoard == ACR01B1C) return "10103000300";
+	if (hardwareBoard == ACR01B1D) return "10103000400";
+	if (hardwareBoard == ACR01B1E) return "10103010000";
 
-// Nordic Boards
-#if (HARDWARE_BOARD==PCA10001)
-#define HARDWARE_VERSION_STRING "PCA10001"
-#endif
-#if (HARDWARE_BOARD==NRF6310)
-#define HARDWARE_VERSION_STRING "NRF6310"
-#endif
-#if (HARDWARE_BOARD==PCA10000)
-#define HARDWARE_VERSION_STRING "PCA10000"
-#endif
-#if (HARDWARE_BOARD==PCA10031)
-#define HARDWARE_VERSION_STRING "PCA10031"
-#endif
-#if (HARDWARE_BOARD==NORDIC_BEACON)
-#define HARDWARE_VERSION_STRING "NORDIC_BEACON"
-#endif
-#if (HARDWARE_BOARD==PCA10036)
-#define HARDWARE_VERSION_STRING "PCA10036"
-#endif
-#if (HARDWARE_BOARD==PCA10040)
-#define HARDWARE_VERSION_STRING "PCA10040"
-#endif
+	// GUIDESTONE
+	if (hardwareBoard == GUIDESTONE) return "10104010000";
 
-#ifndef HARDWARE_VERSION_STRING
-#error "Add HARDWARE_VERSION_STRING to cfg/cs_HardwareVersions.h"
-#endif
+	/////////////////////////////////////////////////////////////////
+	//// Old and Third Party Boards
+	/////////////////////////////////////////////////////////////////
 
+	if (hardwareBoard == CROWNSTONE5) return "plugin_quant";
+	if (hardwareBoard == PLUGIN_FLEXPRINT_01) return "plugin_flexprint_01";
+
+	// Nordic Boards
+	if (hardwareBoard == PCA10036) return "PCA10036";
+	if (hardwareBoard == PCA10040) return "PCA10040";
+
+	LOGe("Failed to define version for hardware board");
+	APP_ERROR_CHECK(1);
+
+	return "Unknown";
+}

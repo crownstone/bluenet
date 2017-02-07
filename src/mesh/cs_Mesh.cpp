@@ -66,7 +66,6 @@ const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_L
 void Mesh::init() {
 	_meshControl.init();
 
-	//nrf_gpio_pin_clear(PIN_GPIO_LED0);
 	LOGi(FMT_INIT, "Mesh");
 
 	// setup the timer
@@ -469,7 +468,6 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	uint16_t receivedLength;
 
 	TICK_PIN(28);
-//	nrf_gpio_gitpin_toggle(PIN_GPIO_LED1);
 
 	handle = evt->params.rx.value_handle;
 	received = (encrypted_mesh_message_t*)evt->params.rx.p_data;

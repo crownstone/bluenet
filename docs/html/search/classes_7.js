@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['hub_5fmesh_5fmessage_5ft',['hub_mesh_message_t',['../structhub__mesh__message__t.html',1,'']]]
+  ['ibeacon',['IBeacon',['../classIBeacon.html',1,'']]],
+  ['indoorlocalizationservice',['IndoorLocalizationService',['../classIndoorLocalizationService.html',1,'']]]
 ];
