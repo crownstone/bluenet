@@ -1,4 +1,4 @@
-# Bluenet protocol v0.8.0
+# Bluenet protocol v0.8.1
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -691,6 +691,7 @@ Handle | Name | Type | Description
 5 | Command reply channel | [Command reply](#command_reply_packet) | Every stone that was targeted with a command adds its reply to the reply message.
 6 | Scan result channel | [Scan result](#scan_result_packet) | If a stone is scanning for devices it adds it's scanned devices periodically to this list to be sent over the mesh
 7 | Big data channel | - | This channel is for the case when a stone needs to send big data, such as the history of eneregy usage, etc.
+8 | Multi switch channel | [Multi switch](#multi_switch_mesh_packet) | This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
 
 #### <a name="keep_alive_mesh_packet"></a>Keep alive packet
 
@@ -836,6 +837,34 @@ Type | Name | Length | Description
 uint 16 | Crownstone ID | 2 | The identifier of the Crownstone which scanned the device
 uint 8 [6] | Scanned device address | 6 | The MAC address of the scanned device
 int 8 | RSSI | 1 | The averaged RSSI value of the scanned device
+
+##### <a name="multi_switch_mesh_packet"></a></a>Multi switch packet
+
+![Keep Alive packet](../docs/diagrams/multi-switch-mesh-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Size | 1 | Number of keep alive items in the list
+[Multi switch item](#multi_switch_mesh_item) [] | List | N | a list of targeted crownstones with switch states, timeouts and intents
+
+##### <a name="multi_switch_mesh_item"></a>Multi switch item
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | The identifier of the crownstone to which this item is targeted
+[Switch state](#switch_state_packet) | Switch state | 1 | The switch state to be set by the targeted crownstone after the timeout expires
+uint 16 | Timeout | 2 | The timeout (in seconds) after which the state should be set
+uint 8 | [Intent](#multi_switch_intent) | 1 | The intent of the switch, see the table below
+
+###### <a name="multi_switch_intent"></a>Intent
+
+Value | Name
+--- | --- 
+0 | Sphere Enter
+1 | Sphere Exit
+2 | Enter
+3 | Exit
+4 | Manual
 
 ### <a name="mesh_notification_packet"></a>Mesh notification packet
 This packet is used to get the [mesh messages](#mesh_message_packet) pushed over GATT notifications.
