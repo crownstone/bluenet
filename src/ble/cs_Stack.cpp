@@ -1220,6 +1220,11 @@ void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	_disconnectingInProgress = false;
 	BLE_CALL(sd_ble_gap_conn_param_update, (p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params));
 
+//	ble_gap_addr_t* peerAddr = &p_ble_evt->evt.gap_evt.params.connected.peer_addr;
+//	LOGi("Connection from: %02X:%02X:%02X:%02X:%02X:%02X", peerAddr->addr[5],
+//	                       peerAddr->addr[4], peerAddr->addr[3], peerAddr->addr[2], peerAddr->addr[1],
+//	                       peerAddr->addr[0]);
+
 	if (_callback_connected) {
 		_callback_connected(p_ble_evt->evt.gap_evt.conn_handle);
 	}
