@@ -77,7 +77,7 @@ void RTC1_IRQHandler(void);
 void QDEC_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 
 //! The LP comparator
-void WUCOMP_COMP_IRQHandler(void);
+void LPCOMP_IRQHandler(void);
 
 void SWI0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
@@ -137,7 +137,7 @@ void (* const gVectors[])(void) =
 	WDT_IRQHandler,
 	RTC1_IRQHandler,
 	QDEC_IRQHandler,
-	WUCOMP_COMP_IRQHandler,
+	LPCOMP_IRQHandler,
 	SWI0_IRQHandler,
 	SWI1_IRQHandler,
 	SWI2_IRQHandler,
@@ -163,16 +163,20 @@ void ResetHandler(void) {
 	//! Enable all RAM banks.
 	//! See PAN_028_v1.6.pdf "16. POWER: RAMON reset value causes problems under certain conditions"
 	//! Note: this was for the nRF51
+//#ifdef NRF51
 //	NRF_POWER->RAMON |= 0xF;
+//#endif
 
 	//! Enable Peripherals.
 	//! See PAN_028_v1.6.pdf "26. System: Manual setup is required to enable use of peripherals"
 	//! WARNING. This is only true for OLD hardware (check with ./scripts/hardware_version.sh)
 	//! For new hardware this DISABLES for example the LPCOMP peripheral
 	//! Note: this was for the nRF51
+//#ifdef NRF51
 //#if(HARDWARE_VERSION == 0x001D)
 //	*(uint32_t *)0x40000504 = 0xC007FFDF;
 //	*(uint32_t *)0x40006C18 = 0x00008000;
+//#endif
 //#endif
 
 	//! start up crystal LF clock.

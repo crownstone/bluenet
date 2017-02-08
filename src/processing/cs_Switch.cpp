@@ -280,11 +280,13 @@ void Switch::toggle() {
 }
 
 void Switch::forcePwmOff() {
+	LOGw("forcePwmOff");
 	pwmOff();
 	EventDispatcher::getInstance().dispatch(EVT_PWM_FORCED_OFF);
 }
 
 void Switch::forceSwitchOff() {
+	LOGw("forceSwitchOff");
 	pwmOff();
 	relayOff();
 	EventDispatcher::getInstance().dispatch(EVT_SWITCH_FORCED_OFF);
@@ -306,7 +308,12 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		forcePwmOff();
 		break;
 	}
-	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD: {
+	case EVT_PWM_TEMP_ABOVE_THRESHOLD: {
+		forcePwmOff();
+		break;
+	}
+	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
+	case EVT_CHIP_TEMP_ABOVE_THRESHOLD: {
 		forceSwitchOff();
 		break;
 	}

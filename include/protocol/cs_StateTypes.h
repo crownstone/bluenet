@@ -24,6 +24,7 @@ enum StateTypes {
 	STATE_TIME,                           // 0x88 - 136
 	STATE_FACTORY_RESET,                  // 0x89 - 137
 	STATE_LEARNED_SWITCHES,               // 0x8A - 138
+	STATE_ERRORS,                         // 0x8B - 139
 	STATE_TYPES
 };
 

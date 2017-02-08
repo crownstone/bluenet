@@ -190,7 +190,7 @@ MIN_ENV_TEMP=2
 MAX_ENV_TEMP=10
 
 # Maximal chip temperature in degrees celsius
-MAX_CHIP_TEMP=80
+MAX_CHIP_TEMP=75
 
 # Time (ms) to wait with during booting
 BOOT_DELAY=400

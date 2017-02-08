@@ -395,9 +395,11 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 
 	// TODO: don't use hardcoded 220V here
 	if (powerMilliWatt > CURRENT_USAGE_THRESHOLD * 220) {
+		LOGd("current above threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 	}
 	else if (powerMilliWatt > CURRENT_USAGE_THRESHOLD_PWM  * 220) {
+		LOGd("current above pwm threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
 	}
 

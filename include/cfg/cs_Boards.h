@@ -57,6 +57,7 @@ typedef struct  {
 	uint8_t pinGpioRelayOff;
 	uint8_t pinAinCurrent;
 	uint8_t pinAinVoltage;
+	uint8_t pinAinPwmTemp;
 	uint8_t pinGpioRx;
 	uint8_t pinGpioTx;
 	uint8_t pinLedRed;
@@ -76,6 +77,9 @@ typedef struct  {
 	int32_t voltageZero;
 	int32_t currentZero;
 	int32_t powerZero;
+
+	float pwmTempVoltageThreshold; //! Voltage of PWM thermometer at which the PWM is too hot
+	float pwmTempVoltageThresholdDown; //! Voltage of PWM thermometer at which the PWM is cool enough again
 
 } boards_config_t;
 
