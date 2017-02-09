@@ -81,6 +81,9 @@ private:
 	void forcePwmOff();
 	void forceSwitchOff();
 
+	bool allowPwmOn();
+	bool allowSwitchOn();
+
 	switch_state_t _switchValue;
 
 #if (NORDIC_SDK_VERSION >= 11)

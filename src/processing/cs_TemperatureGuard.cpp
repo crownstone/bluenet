@@ -7,6 +7,8 @@
 
 #include "processing/cs_TemperatureGuard.h"
 
+#include "storage/cs_State.h"
+
 TemperatureGuard::TemperatureGuard() :
 		EventListener(CONFIG_MAX_CHIP_TEMP),
 #if (NORDIC_SDK_VERSION >= 11)
@@ -64,13 +66,18 @@ void TemperatureGuard::tick() {
 	GeneralEventType curEvent;
 
 	// Check chip temperature, send event if it changed
-	if (getTemperature() > _maxChipTemp) {
+	bool chipTempError = (getTemperature() > _maxChipTemp);
+	if (chipTempError) {
 		curEvent = EVT_CHIP_TEMP_ABOVE_THRESHOLD;
 	}
 	else {
 		curEvent = EVT_CHIP_TEMP_OK;
 	}
 	if (curEvent != _lastChipTempEvent) {
+
+		// Update chip temp error
+		State::getInstance().set(STATE_ERROR_CHIP_TEMP, &chipTempError, sizeof(chipTempError));
+
 		LOGd("Dispatch event %d", curEvent);
 		EventDispatcher::getInstance().dispatch(curEvent);
 		_lastChipTempEvent = curEvent;
@@ -78,13 +85,18 @@ void TemperatureGuard::tick() {
 
 	// Check PWM temperature, send event if it changed
 	uint32_t compVal = _comp->sample();
-	if (compVal) {
+	bool pwmTempError = (compVal > 0);
+	if (pwmTempError) {
 		curEvent = EVT_PWM_TEMP_ABOVE_THRESHOLD;
 	}
 	else {
 		curEvent = EVT_PWM_TEMP_OK;
 	}
 	if (curEvent != _lastPwmTempEvent) {
+
+		// Update pwm temp error
+		State::getInstance().set(STATE_ERROR_PWM_TEMP, &pwmTempError, sizeof(pwmTempError));
+
 		LOGd("Dispatch event %d", curEvent);
 		EventDispatcher::getInstance().dispatch(curEvent);
 		_lastPwmTempEvent = curEvent;
