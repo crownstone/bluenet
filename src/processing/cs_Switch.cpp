@@ -299,9 +299,9 @@ void Switch::forceSwitchOff() {
 bool Switch::allowPwmOn() {
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
-	uint32_t* errorsint = (uint32_t*)&stateErrors;
-	LOGd("state errors: %u", *errorsint);
-	//return !(stateErrors.chipTemp || stateErrors.overCurrent || stateErrors.overCurrentPwm || stateErrors.pwmTemp);
+//	uint32_t* errorsint = (uint32_t*)&stateErrors;
+//	LOGd("state errors: %u", *errorsint);
+//	return !(stateErrors.chipTemp || stateErrors.overCurrent || stateErrors.overCurrentPwm || stateErrors.pwmTemp);
 	return !(stateErrors.chipTemp || stateErrors.overCurrent || stateErrors.pwmTemp);
 }
 
