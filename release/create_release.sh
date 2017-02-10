@@ -108,28 +108,25 @@ while [[ $valid == 0 ]]; do
 	if [[ $version =~ ^[0-9]{1,2}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
 
 		info "Select model:"
-		options=("Crownstone Plug" "Crownstone Builtin" "Guidestone")
+		printf "$yellow"
+		options=("Crownstone" "Guidestone")
 		select opt in "${options[@]}"
 		do
 		    case $opt in
-		        "Crownstone Plug")
-					model="crownstone_plug"
-					device_type="DEVICE_CROWNSTONE_PLUG"
-					break
-		            ;;
-		        "Crownstone Builtin")
-					model="crownstone_builtin"
-					device_type="DEVICE_CROWNSTONE_BUILTIN"
+		        "Crownstone")
+					model="crownstone"
+					# device_type="DEVICE_CROWNSTONE_PLUG"
 					break
 		            ;;
 		        "Guidestone")
 					model="guidestone"
-					device_type="DEVICE_GUIDESTONE"
+					# device_type="DEVICE_GUIDESTONE"
 					break
 		            ;;
 		        *) echo invalid option;;
 		    esac
 		done
+		printf "$normal"
 
 		directory=$model"_"$version
 
@@ -164,8 +161,14 @@ if [[ $existing == 0 ]]; then
 ### Fill Default Config Values
 ###############################
 
+	if [[ $model == "crownstone" ]]; then
+		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Crown\"/" $path/$directory/CMakeBuild.config
+	elif [[ $model == "guidestone " ]]; then
+		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Guide\"/" $path/$directory/CMakeBuild.config
+	fi
+
 	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $path/$directory/CMakeBuild.config
-	sed -i "s/DEVICE_TYPE=.*/DEVICE_TYPE=$device_type/" $path/$directory/CMakeBuild.config
+	# sed -i "s/DEVICE_TYPE=.*/DEVICE_TYPE=$device_type/" $path/$directory/CMakeBuild.config
 
 	sed -i "s/NRF51822_DIR=/#NRF51822_DIR=/" $path/$directory/CMakeBuild.config
 	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $path/$directory/CMakeBuild.config
@@ -190,11 +193,38 @@ if [[ $existing == 0 ]]; then
 	log "After editing the config file, press [ENTER] to continue"
 	read
 else
-	err "Warn: Using existing configuration"
+	warn "Warn: Using existing configuration"
 fi
 
+info "Stable version? [Y/n]: "
+read stable
+if [[ $stable == "n" ]]; then
+	stable=0
+else
+	stable=1
+fi
 
-# modify paths
+########################
+### Update release index
+########################
+
+# NOTE: do this before modifying the paths otherwise BLUENET_RELEASE_DIR will point the the subdirectory
+#   but the index file is located in the root directory
+
+info "Update release index ..."
+if [[ $stable == 1 ]]; then
+	./update_release_index.py -t $model -v $version -s
+else
+	./update_release_index.py -t $model -v $version
+fi
+
+checkError "Failed"
+succ "Copy DONE"
+
+############################
+###  modify paths
+############################
+
 export BLUENET_CONFIG_DIR=$path/$directory
 export BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR/$directory
 export BLUENET_RELEASE_DIR=$BLUENET_RELEASE_DIR/$directory

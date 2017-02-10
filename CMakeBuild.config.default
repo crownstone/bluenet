@@ -261,6 +261,7 @@ BOOTLOADER_START_ADDRESS=0x00079000
 # nrf52: length = 0x00080000 - bootloader_start_address - size(bootloader_settings)=0x1000 - size(mbr_params_page)=0x1000
 BOOTLOADER_LENGTH=0x5000
 
+# the address (in UICR) where the hardware board type is written and read
 HARDWARE_BOARD_ADDRESS=0x10001084
 
 # The directory where the softdevice can be found
