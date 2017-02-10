@@ -32,6 +32,10 @@ log() {
 	printf "$normal$1$normal\n"
 }
 
+warn() {
+	printf "$magenta$1$magenta\n"
+}
+
 checkError() {
 	result=$?
 	if [ $result -ne 0 ]; then
