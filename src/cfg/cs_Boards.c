@@ -33,6 +33,7 @@ void as(boards_config_t* p_config) {
 	p_config->voltageZero         = ;
 	p_config->currentZero         = ;
 	p_config->powerZero           = ;
+	p_config->minTxPower          = ;
 }
 */
 
@@ -57,6 +58,7 @@ void asCrownstone(boards_config_t* p_config) {
 //	p_config->voltageZero         = ; // tbd
 //	p_config->currentZero         = ; // tbd
 //	p_config->powerZero           = ; // tbd
+	p_config->minTxPower          = -40;
 }
 
 void asACR01B1A(boards_config_t* p_config) {
@@ -82,6 +84,7 @@ void asACR01B1A(boards_config_t* p_config) {
 	p_config->voltageZero         = 2003;
 	p_config->currentZero         = 1997;
 	p_config->powerZero           = 1500;
+	p_config->minTxPower          = -30; // higher tx power for builtins
 }
 
 void asACR01B2A(boards_config_t* p_config) {
@@ -107,6 +110,7 @@ void asACR01B2A(boards_config_t* p_config) {
 	p_config->voltageZero         = 2003;
 	p_config->currentZero         = 1997;
 	p_config->powerZero           = 1500;
+	p_config->minTxPower          = -40;
 }
 
 void asPluginFlexprint(boards_config_t* p_config) {
@@ -130,6 +134,7 @@ void asPluginFlexprint(boards_config_t* p_config) {
 //	p_config->voltageZero         = ; // tbd
 //	p_config->currentZero         = ; // tbd
 //	p_config->powerZero           = ; // tbd
+	p_config->minTxPower          = -40;
 }
 
 void asPca10036(boards_config_t* p_config) {
@@ -155,6 +160,7 @@ void asPca10036(boards_config_t* p_config) {
 	p_config->voltageZero         = 0; // something
 	p_config->currentZero         = 0; // something
 	p_config->powerZero           = 0; // something
+	p_config->minTxPower          = -40;
 }
 
 void asGuidestone(boards_config_t* p_config) {
@@ -180,6 +186,7 @@ void asGuidestone(boards_config_t* p_config) {
 //	p_config->voltageZero         = ; // unused
 //	p_config->currentZero         = ; // unused
 //	p_config->powerZero           = ; // unused
+	p_config->minTxPower          = -40;
 }
 
 uint32_t configure_board(boards_config_t* p_config) {

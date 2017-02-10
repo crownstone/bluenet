@@ -97,6 +97,7 @@ typedef struct  {
 	int32_t voltageZero;
 	int32_t currentZero;
 	int32_t powerZero;
+	int8_t minTxPower;
 
 } boards_config_t;
 
