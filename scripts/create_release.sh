@@ -128,7 +128,7 @@ while [[ $valid == 0 ]]; do
 		done
 		printf "$normal"
 
-		directory=$model"_"$version
+		directory=$BLUENET_DIR/release/$model"_"$version
 
 		if [ -d $directory ]; then
 			err "Version already exists, are you sure? [y/N]: "
@@ -153,38 +153,38 @@ done
 
 if [[ $existing == 0 ]]; then
 	log "Creating new directory: "$directory
-	mkdir $model"_"$version &> /dev/null
+	mkdir $directory &> /dev/null
 
-	cp $BLUENET_DIR/CMakeBuild.config.default $path/$directory/CMakeBuild.config
+	cp $BLUENET_DIR/CMakeBuild.config.default $directory/CMakeBuild.config
 
 ###############################
 ### Fill Default Config Values
 ###############################
 
 	if [[ $model == "crownstone" ]]; then
-		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Crown\"/" $path/$directory/CMakeBuild.config
+		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Crown\"/" $directory/CMakeBuild.config
 	elif [[ $model == "guidestone " ]]; then
-		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Guide\"/" $path/$directory/CMakeBuild.config
+		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Guide\"/" $directory/CMakeBuild.config
 	fi
 
-	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $path/$directory/CMakeBuild.config
-	# sed -i "s/DEVICE_TYPE=.*/DEVICE_TYPE=$device_type/" $path/$directory/CMakeBuild.config
+	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $directory/CMakeBuild.config
+	# sed -i "s/DEVICE_TYPE=.*/DEVICE_TYPE=$device_type/" $directory/CMakeBuild.config
 
-	sed -i "s/NRF51822_DIR=/#NRF51822_DIR=/" $path/$directory/CMakeBuild.config
-	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $path/$directory/CMakeBuild.config
+	sed -i "s/NRF51822_DIR=/#NRF51822_DIR=/" $directory/CMakeBuild.config
+	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $directory/CMakeBuild.config
 
-	sed -i "s/CROWNSTONE_SERVICE=.*/CROWNSTONE_SERVICE=1/" $path/$directory/CMakeBuild.config
-	sed -i "s/INDOOR_SERVICE=.*/INDOOR_SERVICE=0/" $path/$directory/CMakeBuild.config
-	sed -i "s/GENERAL_SERVICE=.*/GENERAL_SERVICE=0/" $path/$directory/CMakeBuild.config
-	sed -i "s/POWER_SERVICE=.*/POWER_SERVICE=0/" $path/$directory/CMakeBuild.config
-	sed -i "s/SCHEDULE_SERVICE=.*/SCHEDULE_SERVICE=0/" $path/$directory/CMakeBuild.config
+	sed -i "s/CROWNSTONE_SERVICE=.*/CROWNSTONE_SERVICE=1/" $directory/CMakeBuild.config
+	sed -i "s/INDOOR_SERVICE=.*/INDOOR_SERVICE=0/" $directory/CMakeBuild.config
+	sed -i "s/GENERAL_SERVICE=.*/GENERAL_SERVICE=0/" $directory/CMakeBuild.config
+	sed -i "s/POWER_SERVICE=.*/POWER_SERVICE=0/" $directory/CMakeBuild.config
+	sed -i "s/SCHEDULE_SERVICE=.*/SCHEDULE_SERVICE=0/" $directory/CMakeBuild.config
 
-	sed -i "s/PERSISTENT_FLAGS_DISABLED=.*/PERSISTENT_FLAGS_DISABLED=0/" $path/$directory/CMakeBuild.config
-	sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Crown\"/" $path/$directory/CMakeBuild.config
-	sed -i "s/SERIAL_VERBOSITY=.*/SERIAL_VERBOSITY=SERIAL_NONE/" $path/$directory/CMakeBuild.config
-	sed -i "s/DEFAULT_OPERATION_MODE=.*/DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP/" $path/$directory/CMakeBuild.config
+	sed -i "s/PERSISTENT_FLAGS_DISABLED=.*/PERSISTENT_FLAGS_DISABLED=0/" $directory/CMakeBuild.config
+	sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Crown\"/" $directory/CMakeBuild.config
+	sed -i "s/SERIAL_VERBOSITY=.*/SERIAL_VERBOSITY=SERIAL_NONE/" $directory/CMakeBuild.config
+	sed -i "s/DEFAULT_OPERATION_MODE=.*/DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP/" $directory/CMakeBuild.config
 
-	xdg-open $path/$directory/CMakeBuild.config &> /dev/null
+	xdg-open $directory/CMakeBuild.config &> /dev/null
 
 	if [[ $? != 0 ]]; then
 		info "Open $directory/CMakeBuild.config in to edit the config"
@@ -211,6 +211,9 @@ fi
 # NOTE: do this before modifying the paths otherwise BLUENET_RELEASE_DIR will point the the subdirectory
 #   but the index file is located in the root directory
 
+# goto bluenet scripts dir
+pushd $BLUENET_DIR/scripts
+
 info "Update release index ..."
 if [[ $stable == 1 ]]; then
 	./update_release_index.py -t $model -v $version -s
@@ -221,13 +224,15 @@ fi
 checkError "Failed"
 succ "Copy DONE"
 
+popd
+
 ############################
 ###  modify paths
 ############################
 
-export BLUENET_CONFIG_DIR=$path/$directory
-export BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR/$directory
-export BLUENET_RELEASE_DIR=$BLUENET_RELEASE_DIR/$directory
+export BLUENET_CONFIG_DIR=$directory
+export BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR/$model"_"$version
+export BLUENET_RELEASE_DIR=$BLUENET_RELEASE_DIR/$model"_"$version
 export BLUENET_BIN_DIR=$BLUENET_RELEASE_DIR/bin
 
 ############################
@@ -322,7 +327,7 @@ pushd $BLUENET_DIR
 info "Add release config"
 
 # add new generated config to git
-git add $path/$directory
+git add $directory
 git commit -m "Add release config for "$model"_"$version
 
 info "Create git tag for release"

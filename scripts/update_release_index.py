@@ -7,24 +7,7 @@ from copy import deepcopy
 from collections import OrderedDict
 from datetime import datetime
 from shutil import copyfile
-from termcolor import colored
-
-###########################################
-## LOG HELPER
-
-def info(text):
-	print colored(text, "yellow")
-
-def log(text):
-	print text
-
-def warn(text):
-	print colored(text, "magenta")
-
-def err(text):
-	print colored(text, "red")
-
-###########################################
+from _utils import log, info, err
 
 template = '{"stable": "","latest": "","versions": [],"time": {"modified": ""}}'
 
