@@ -32,6 +32,10 @@ void debugprint(void * p_context) {
 State::State() :
 		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedEnergy(NULL),
 		_temperature(0), _powerUsage(0), _time(0), _factoryResetState(FACTORY_RESET_STATE_NORMAL) {
+	_errorState.overCurrent = false;
+	_errorState.overCurrentPwm = false;
+	_errorState.chipTemp = false;
+	_errorState.pwmTemp = false;
 }
 
 void State::init() {
@@ -207,39 +211,39 @@ uint16_t State::getStateItemSize(uint8_t type) {
 	}
 	case STATE_ACCUMULATED_ENERGY: {
 		return sizeof(accumulated_energy_t);
-		break;
 	}
 	case STATE_POWER_USAGE: {
 		return sizeof(_powerUsage);
-		break;
 	}
 	case STATE_TRACKED_DEVICES: {
 		return sizeof(tracked_device_list_t);
-		break;
 	}
 	case STATE_SCHEDULE: {
 		return sizeof(schedule_list_t);
-		break;
 	}
 	case STATE_OPERATION_MODE: {
 		return sizeof(uint8_t);
-		break;
 	}
 	case STATE_TEMPERATURE: {
 		return sizeof(_temperature);
-		break;
 	}
 	case STATE_FACTORY_RESET: {
 		return sizeof(_factoryResetState);
-		break;
 	}
 	case STATE_TIME: {
 		return sizeof(_time);
-		break;
 	}
 	case STATE_LEARNED_SWITCHES: {
 		return MAX_SWITCHES * sizeof(learned_enocean_t);
-		break;
+	}
+	case STATE_ERRORS: {
+		return sizeof(state_errors_t);
+	}
+	case STATE_ERROR_OVER_CURRENT:
+	case STATE_ERROR_OVER_CURRENT_PWM:
+	case STATE_ERROR_CHIP_TEMP:
+	case STATE_ERROR_PWM_TEMP: {
+		return sizeof(bool);
 	}
 	default: {
 		LOGw(FMT_STATE_NOT_FOUND, type);
@@ -259,7 +263,12 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 	case STATE_OPERATION_MODE:
 	case STATE_TEMPERATURE:
 	case STATE_FACTORY_RESET:
-	case STATE_TIME: {
+	case STATE_TIME:
+	case STATE_ERRORS:
+	case STATE_ERROR_OVER_CURRENT:
+	case STATE_ERROR_OVER_CURRENT_PWM:
+	case STATE_ERROR_CHIP_TEMP:
+	case STATE_ERROR_PWM_TEMP: {
 		success = size == getStateItemSize(type);
 		break;
 	}
@@ -278,7 +287,7 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 	if (success) {
 		return ERR_SUCCESS;
 	} else {
-		LOGw(FMT_VERIFICATION_FAILED);
+		LOGw(FMT_VERIFICATION_FAILED, type);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 }
@@ -353,6 +362,26 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 		case STATE_LEARNED_SWITCHES: {
 			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.learnedSwitches, size);
 			savePersistentStorageItem(_storageStruct.learnedSwitches, size);
+			break;
+		}
+		case STATE_ERRORS: {
+			_errorState = *(state_errors_t*)target;
+			break;
+		}
+		case STATE_ERROR_OVER_CURRENT: {
+			_errorState.overCurrent = *(bool*)target;
+			break;
+		}
+		case STATE_ERROR_OVER_CURRENT_PWM: {
+			_errorState.overCurrentPwm = *(bool*)target;
+			break;
+		}
+		case STATE_ERROR_CHIP_TEMP: {
+			_errorState.chipTemp = *(bool*)target;
+			break;
+		}
+		case STATE_ERROR_PWM_TEMP: {
+			_errorState.pwmTemp = *(bool*)target;
 			break;
 		}
 		case STATE_ACCUMULATED_ENERGY: {
@@ -453,7 +482,13 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 #endif
 			break;
 		}
-
+		case STATE_ERRORS: {
+			*(state_errors_t*)target = _errorState;
+#ifdef PRINT_DEBUG
+			LOGd(FMT_GET_INT_VAL, "errorState", *(state_errors_t*)target);
+#endif
+			break;
+		}
 		case STATE_ACCUMULATED_ENERGY: {
 //			break;
 		}

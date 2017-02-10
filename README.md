@@ -37,17 +37,17 @@ You can best communicate bugs and feature requests via the [issue tracker](https
 # Resources
 The different other software tools and online resources have been mentioned above, but here is a short list:
 
-- [Bluenet (this repos)](https://github.com/crownstone/bluenet)
-- [Bluenet documentation](http://crownstone.github.io/bluenet/)
-- [Bluenet documentation branch](https://github.com/crownstone/bluenet/tree/gh-pages)
-- [Android library](https://github.com/crownstone/bluenet-lib-android)
-- [iOS library](https://github.com/crownstone/bluenet-ios-lib)
-- [Python library](https://github.com/crownstone/bluenet-lib-python)
-- [Bootloader](https://github.com/crownstone/nrf51-dfu-bootloader-for-gcc-compiler)
-- [Crownstone website](http://crownstone.rocks)
-- [Crownstone Android app](https://play.google.com/store/apps/details?id=rocks.crownstone.consumerapp)
-- [Crownstone app source](https://github.com/crownstone/crownstone-app)
-- [Crownstone USB image](https://github.com/crownstone/crownstone-image)
+| Resource                                                                                              | Description                                                      |
+| ---                                                                                                   | ---                                                              |
+| [Bluenet firmware](https://github.com/crownstone/bluenet)                                             | This repository, open-source firmware (C++) for smart plugs      |
+| [Bluenet documentation](http://crownstone.github.io/bluenet/)                                         | Documentation of the firmware (doxygen-based)                    |
+| [Android library](https://github.com/crownstone/bluenet-lib-android)                                  | Android library (Java)                                           |
+| [iOS library](https://github.com/crownstone/bluenet-ios-lib)                                          | iOS library (Swift)                                              |
+| [Bootloader](https://github.com/crownstone/nrf51-dfu-bootloader-for-gcc-compiler)                     | Bootloader, fork of Nordic's bootloader for the smart plugs      |
+| [Crownstone website](http://crownstone.rocks)                                                         | Website and shop for the Crownstone plugs                        |
+| [Crownstone Android app](https://play.google.com/store/apps/details?id=rocks.crownstone.consumerapp)  | Android app on the Play Store                                    |
+| [Crownstone iOS app](https://itunes.apple.com/us/app/crownstone/id1136616106?mt=8)                    | iOS app on the Apple Store                                       |
+| [Crownstone app source](https://github.com/crownstone/crownstone-app)                                 | Source code for the cross-platform app (React Native)            |
 
 
 # Commercial use

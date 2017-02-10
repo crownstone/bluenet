@@ -156,7 +156,7 @@
 
 #define FMT_CONFIGURATION_NOT_FOUND              "There is no such configuration type (%d)."
 #define FMT_STATE_NOT_FOUND                      "There is no such state variable (%d)."
-#define FMT_VERIFICATION_FAILED                  "Verification failed"
+#define FMT_VERIFICATION_FAILED                  "Verification failed (%d)"
 
 #define FMT_USE_DEFAULT_VALUE                    "Use default value"
 #define FMT_FOUND_STORED_VALUE                   "Found stored value: %d"

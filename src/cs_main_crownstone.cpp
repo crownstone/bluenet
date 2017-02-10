@@ -121,7 +121,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 		// switch using PWM or Relay
 		_switch = &Switch::getInstance();
 		//! create temperature guard
-		_temperatureGuard = new TemperatureGuard();
+		_temperatureGuard = &TemperatureGuard::getInstance();
 
 		_powerSampler = &PowerSampling::getInstance();
 
@@ -304,7 +304,7 @@ void Crownstone::initDrivers() {
 		_switch->init(&_boardsConfig);
 
 		LOGd(FMT_INIT, "temperature guard");
-		_temperatureGuard->init();
+		_temperatureGuard->init(&_boardsConfig);
 
 		LOGd(FMT_INIT, "power sampler");
 		_powerSampler->init(_boardsConfig.pinAinCurrent, _boardsConfig.pinAinVoltage);
@@ -656,7 +656,7 @@ void Crownstone::startUp() {
 		_switch->start();
 
 		//! Start temperature guard regardless of operation mode
-		_temperatureGuard->startTicking();
+		_temperatureGuard->start();
 
 		//! Start power sampler regardless of operation mode (as it is used for the current based soft fuse)
 		LOGd(FMT_START, "power sampling");

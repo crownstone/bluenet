@@ -406,7 +406,7 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	_factoryResetCharacteristic->setUUID(UUID(getUUID(), FACTORY_RESET_UUID));
 	_factoryResetCharacteristic->setName(BLE_CHAR_FACTORY_RESET);
 	_factoryResetCharacteristic->setWritable(true);
-	_factoryResetCharacteristic->setNotifies(false);
+	_factoryResetCharacteristic->setNotifies(true);
 	_factoryResetCharacteristic->setDefaultValue(0);
 	_factoryResetCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_factoryResetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value) -> void {

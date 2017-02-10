@@ -24,6 +24,14 @@ enum StateTypes {
 	STATE_TIME,                           // 0x88 - 136
 	STATE_FACTORY_RESET,                  // 0x89 - 137
 	STATE_LEARNED_SWITCHES,               // 0x8A - 138
+	STATE_ERRORS,                         // 0x8B - 139
+	STATE_ERROR_OVER_CURRENT,             // 0x8C - 140
+	STATE_ERROR_OVER_CURRENT_PWM,         // 0x8D - 141
+	STATE_ERROR_CHIP_TEMP,                // 0x8E - 142
+	STATE_ERROR_PWM_TEMP,                 // 0x8F - 143
+
+
+
 	STATE_TYPES
 };
 

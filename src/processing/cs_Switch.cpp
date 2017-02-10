@@ -118,6 +118,10 @@ void Switch::updateSwitchState() {
 
 void Switch::setPwm(uint8_t value) {
 #ifndef PWM_DISABLE
+	if (value > 0 && !allowPwmOn()) {
+		LOGd("Don't turn on pwm");
+		return;
+	}
 #ifdef EXTENDED_SWITCH_STATE
 	_switchValue.pwm_state = value;
 #else
@@ -280,14 +284,31 @@ void Switch::toggle() {
 }
 
 void Switch::forcePwmOff() {
+	LOGw("forcePwmOff");
 	pwmOff();
 	EventDispatcher::getInstance().dispatch(EVT_PWM_FORCED_OFF);
 }
 
 void Switch::forceSwitchOff() {
+	LOGw("forceSwitchOff");
 	pwmOff();
 	relayOff();
 	EventDispatcher::getInstance().dispatch(EVT_SWITCH_FORCED_OFF);
+}
+
+bool Switch::allowPwmOn() {
+	state_errors_t stateErrors;
+	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+//	uint32_t* errorsint = (uint32_t*)&stateErrors;
+//	LOGd("state errors: %u", *errorsint);
+//	return !(stateErrors.chipTemp || stateErrors.overCurrent || stateErrors.overCurrentPwm || stateErrors.pwmTemp);
+	return !(stateErrors.chipTemp || stateErrors.overCurrent || stateErrors.pwmTemp);
+}
+
+bool Switch::allowSwitchOn() {
+	state_errors_t stateErrors;
+	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+	return (stateErrors.chipTemp || stateErrors.overCurrent);
 }
 
 void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
@@ -306,7 +327,12 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		forcePwmOff();
 		break;
 	}
-	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD: {
+	case EVT_PWM_TEMP_ABOVE_THRESHOLD: {
+		forcePwmOff();
+		break;
+	}
+	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
+	case EVT_CHIP_TEMP_ABOVE_THRESHOLD: {
 		forceSwitchOff();
 		break;
 	}

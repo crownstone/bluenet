@@ -70,6 +70,13 @@ struct state_vars_notifaction {
 	uint16_t dataLength;
 };
 
+struct state_errors_t {
+	bool overCurrent : 1;
+	bool overCurrentPwm : 1;
+	bool chipTemp : 1;
+	bool pwmTemp : 1;
+	uint32_t reserved : 28;
+};
 
 #define FACTORY_RESET_STATE_NORMAL 0
 #define FACTORY_RESET_STATE_LOWTX  1
@@ -203,6 +210,7 @@ protected:
 	int32_t _powerUsage;
 	uint32_t _time;
 	uint8_t _factoryResetState;
+	state_errors_t _errorState;
 
 };
 
