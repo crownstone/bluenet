@@ -71,37 +71,65 @@ extern "C" {
 //! BE SURE TO UPDATE cs_HardwareVersions.h IF YOU ADD A NEW BOARD!!
 
 typedef struct  {
+	//! the hardware board type (number)
 	uint32_t hardwareBoard;
 
+	//! gpio pin to control the igbt
 	uint8_t pinGpioPwm;
+	//! gpio pin to switch the relay on
 	uint8_t pinGpioRelayOn;
+	//! gpio pin to switch the relay off
 	uint8_t pinGpioRelayOff;
+	//! analog input pin to read the current
 	uint8_t pinAinCurrent;
+	//! analog input pin to read the voltage
 	uint8_t pinAinVoltage;
+	//! analog input pin to read the pwm temperature
 	uint8_t pinAinPwmTemp;
+	//! gpio pin to receive uart
 	uint8_t pinGpioRx;
+	//! gpio pin to send uart
 	uint8_t pinGpioTx;
+	//! gpio pin to control the "red" led
 	uint8_t pinLedRed;
+	//! gpio pin to control the "green" led
 	uint8_t pinLedGreen;
 
 	struct {
+		//! true if board has relays
 		bool hasRelay: 1;
+		//! true if the pwm is inverted (setting gpio high turns light off)
 		bool pwmInverted: 1;
+		//! true if the board has serial / uart
 		bool hasSerial: 1;
+		//! true if the board has leds
 		bool hasLed : 1;
 	} flags;
 
+	/* device type, e.g. crownstone plug, crownstone builtin, guidestone
+	   can be overwritten for debug purposes at compile time, but is otherwise
+	   determined by the board type */
 	uint8_t deviceType;
 
+	//! tbd
 	float voltageMultiplier;
+	//! tbd
 	float currentMultiplier;
+	//! tbd
 	int32_t voltageZero;
+	//! tbd
 	int32_t currentZero;
+	//! tbd
 	int32_t powerZero;
+
+	/* the minimum radio transmission power to be used, e.g. builtins need higher
+	   tx power because of surrounding metal */
 	int8_t minTxPower;
 
-	float pwmTempVoltageThreshold; //! Voltage of PWM thermometer at which the PWM is too hot
-	float pwmTempVoltageThresholdDown; //! Voltage of PWM thermometer at which the PWM is cool enough again
+	//! Voltage of PWM thermometer at which the PWM is too hot
+	float pwmTempVoltageThreshold;
+	//! Voltage of PWM thermometer at which the PWM is cool enough again
+	float pwmTempVoltageThresholdDown;
 
 } boards_config_t;
 
