@@ -49,7 +49,7 @@ struct ps_state_t : ps_storage_base_t {
 }; // FULL
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
-STATIC_ASSERT(sizeof(ps_state_t) <= 1024);
+STATIC_ASSERT(sizeof(ps_state_t) <= 0x1000);
 
 //todo: lists need to be adjusted to use cyclic storages for wear leveling
 /** Struct used to ...
@@ -62,7 +62,7 @@ struct __attribute__ ((aligned (4))) ps_general_vars_t : ps_storage_base_t {
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
-STATIC_ASSERT(sizeof(ps_general_vars_t) <= 1024);
+STATIC_ASSERT(sizeof(ps_general_vars_t) <= 0x1000);
 
 struct state_vars_notifaction {
 	uint8_t type;
