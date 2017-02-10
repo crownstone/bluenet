@@ -25,7 +25,7 @@ FIRMWARE_VERSION="0.6.0"
 # ACR01B2A             1500
 # ACR01B2B             1501
 # ACR01B2C             1502
-HARDWARE_BOARD=ACR01B2C
+# HARDWARE_BOARD=ACR01B2C
 
 # The device type defines how the device advertises itself, Apps and Bluenet Library
 # will use this to filter for device type.
@@ -263,6 +263,8 @@ BOOTLOADER_START_ADDRESS=0x00079000
 # Used in: gcc_nrf51_bootloader_xxaa.ld.in and dfu_types.h
 # nrf52: length = 0x00080000 - bootloader_start_address - size(bootloader_settings)=0x1000 - size(mbr_params_page)=0x1000
 BOOTLOADER_LENGTH=0x5000
+
+HARDWARE_BOARD_ADDRESS=0x10001084
 
 # The directory where the softdevice can be found
 # change if you want to use a different softdevice than the ones provided in the SDK

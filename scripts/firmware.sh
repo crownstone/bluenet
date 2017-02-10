@@ -26,6 +26,13 @@ if [[ $cmd != "help" ]]; then
 	source $path/_config.sh
 fi
 
+if [ -z "$HARDWARE_BOARD" ]; then
+	err "Need to specify HARDWARE_BOARD either in $BLUENET_CONFIG_DIR/_targets.sh"
+	err "for a given target, or by calling the script as"
+	err "   HARDWARE_BOARD=... ./firmware.sh"
+	exit 1
+fi
+
 # use $APPLICATION_START_ADDRESS as default if no address defined
 address=${address:-$APPLICATION_START_ADDRESS}
 
@@ -80,8 +87,8 @@ writeHardwareVersion() {
 	# info "HARDWARE_BOARD=$HARDWARE_BOARD"
 	HARDWARE_BOARD_INT=`cat $BLUENET_DIR/include/cfg/cs_Boards.h | grep -o "#define.*\b$HARDWARE_BOARD\b.*" | grep -w "$HARDWARE_BOARD" | awk 'NF>1{print $NF}'`
 	if [ $? -eq 0 ] && [ -n "$HARDWARE_BOARD_INT" ]; then
-			# info "HARDWARE_BOARD_INT=$HARDWARE_BOARD_INT"
-			${path}/_writebyte.sh 0x10001084 `printf "%x" $HARDWARE_BOARD_INT` $serial_num
+			info "HARDWARE_BOARD $HARDWARE_BOARD = $HARDWARE_BOARD_INT"
+			${path}/_writebyte.sh $HARDWARE_BOARD_ADDRESS `printf "%x" $HARDWARE_BOARD_INT` $serial_num
 			checkError "Error writing hardware version"
 	else
 		err "Failed to extract HARDWARE_BOARD=$HARDWARE_BOARD from $BLUENET_DIR/include/cfg/cs_Boards.h"
