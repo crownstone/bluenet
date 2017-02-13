@@ -1,5 +1,16 @@
 #!/bin/bash
 
+###################################################################
+# uses targets , e.g.
+#   ./dfuGenPkg.sh -t altair -b
+# to create bootloader dfu package for target altair
+# or
+#   ./dfuGenPkg.sh -t altair -a
+# to create application dfu package for target altair
+#
+# use dfuGenPkg.py if you want to specify the hex files yourself
+###################################################################
+
 dfu_target="crownstone"
 
 args=""

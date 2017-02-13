@@ -35,7 +35,7 @@ deviceTemplate = {
 }
 
 def hexFileToArr(filename):
-	log.i("filename" + filename)
+	log.i("filename " + filename)
 	ih = IntelHex(filename)
 	buf = ih.tobinarray()
 	log.d("End and start of the binary: " + str(ih._get_start_end()))
@@ -136,34 +136,56 @@ def writeToZip(path, type):
 		filename = path + '/' + type
 
 	shutil.make_archive(filename, 'zip', base_dir='.', root_dir='dfu_tmp')
+	shutil.rmtree('dfu_tmp')
 	# shutil.make_archive(type, 'zip', 'tmp')
 
+def extractOutputFile(outputFile, defaultPath, defaultName):
+	if outputFile:
+		path, nameExt = os.path.split(outputFile)
+		name, ext = os.path.splitext(nameExt)
+		if ext != '.zip':
+			name = name + ext
+		if not path:
+			path = defaultPath
+		if not name:
+			name = defaultName
+		return path, name
+	else:
+		return defaultPath, defaultName
 
-def createApplicationDFU(filename, sd_req):
+def createApplicationDFU(filename, sd_req, outputFile):
 	log.i("Create application dfu file")
 	prepare()
 	manifest = createDFU("application", filename, sd_req)
 	writeManifest(manifest);
-	writeToZip(os.path.dirname(filename), "application");
+	# writeToZip(os.path.dirname(filename), "application");
+	path, name = extractOutputFile(outputFile, os.path.dirname(filename), "application")
+	writeToZip(path, name);
 
-def createBootloaderDFU(filename, sd_req):
+def createBootloaderDFU(filename, sd_req, outputFile):
 	prepare()
 	manifest = createDFU("bootloader", filename, sd_req)
 	writeManifest(manifest);
-	writeToZip(os.path.dirname(filename), "bootloader");
+	# writeToZip(os.path.dirname(filename), "bootloader");
+	path, name = extractOutputFile(outputFile, os.path.dirname(filename), "bootloader")
+	writeToZip(path, name);
 
-def createSoftdeviceDFU(filename, sd_req):
+def createSoftdeviceDFU(filename, sd_req, outputFile):
 	prepare()
 	manifest = createDFU("softdevice", filename, sd_req)
 	writeManifest(manifest);
-	writeToZip(os.path.dirname(filename), "softdevice");
+	# writeToZip(os.path.dirname(filename), "softdevice");
+	path, name = extractOutputFile(outputFile, os.path.dirname(filename), "softdevice")
+	writeToZip(path, name);
 
-def createCombinedBlAppDFU(bootloaderFilename, applicationFilename, sd_req):
+def createCombinedBlAppDFU(bootloaderFilename, applicationFilename, sd_req, outputFile):
 	prepare()
 	manifest = createDFU("bootloader", bootloaderFilename, sd_req)
 	manifest = createDFU("application", applicationFilename, sd_req, manifest)
 	writeManifest(manifest);
-	writeToZip(os.path.dirname(bootloaderFilename), "combined_bl_app");
+	# writeToZip(os.path.dirname(bootloaderFilename), "combined_bl_app");
+	path, name = extractOutputFile(outputFile, os.path.dirname(filename), "combined_bl_app")
+	writeToZip(path, name);
 
 if __name__ == '__main__':
 
@@ -171,7 +193,7 @@ if __name__ == '__main__':
 
 	log = Logger(LogLevel.DEBUG)
 	try:
-		parser = optparse.OptionParser(usage='%prog -a <application_hex> -b <bootloader_hex> -s <softdevice_hex> -r <required_softdevice>\n\nExample:\n\t%prog.py -a crownstone.hex',
+		parser = optparse.OptionParser(usage='%prog -a <application_hex> -b <bootloader_hex> -s <softdevice_hex> -r <required_softdevice> -o <output_file>\n\nExample:\n\t%prog.py -a crownstone.hex',
 									   version='0.1')
 
 		parser.add_option('-a', '--application',
@@ -195,11 +217,6 @@ if __name__ == '__main__':
 				default=None,
 				help='Softdevice hex file'
 		)
-		parser.add_option('-c', '--combined',
-				action='store_true',
-				dest="combined",
-				help='Create combined zip'
-		)
 		parser.add_option('-r', '--sd-req',
 				action='store',
 				dest="sd_req",
@@ -216,6 +233,13 @@ if __name__ == '__main__':
 				action='store_true',
 				dest="debug",
 				help='Debug mode.'
+		)
+		parser.add_option('-o', '--output_file',
+				action='store',
+				dest="output_file",
+				type="string",
+				default=None,
+				help='Specify the output file name'
 		)
 
 		options, args = parser.parse_args()
@@ -242,18 +266,15 @@ if __name__ == '__main__':
 		log.setLevel(bleLog.D2)
 
 	try:
-		if options.combined:
-			if options.application_hex and options.bootloader_hex:
-				createCombinedBlAppDFU(options.bootloader_hex, options.application_hex, options.sd_req)
-		else:
-			if options.application_hex:
-				createApplicationDFU(options.application_hex, options.sd_req)
-
-			if options.bootloader_hex:
-				createBootloaderDFU(options.bootloader_hex, options.sd_req)
-
-			if options.softdevice_hex:
-				createSoftdeviceDFU(options.softdevice_hex, options.sd_req)
+		if options.application_hex and options.bootloader_hex:
+			createCombinedBlAppDFU(options.bootloader_hex, options.application_hex, options.sd_req, options.output_file)
+		elif options.application_hex:
+			createApplicationDFU(options.application_hex, options.sd_req, options.output_file)
+		elif options.bootloader_hex:
+			createBootloaderDFU(options.bootloader_hex, options.sd_req, options.output_file)
+		elif options.softdevice_hex:
+			createSoftdeviceDFU(options.softdevice_hex, options.sd_req, options.output_file)
 	finally:
 		log.i("Remove tmp directory, recursively")
-		shutil.rmtree('dfu_tmp')
+		if os.path.exists('dfu_tmp'):
+			shutil.rmtree('dfu_tmp')

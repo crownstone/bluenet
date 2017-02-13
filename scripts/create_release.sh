@@ -1,5 +1,19 @@
 #!/bin/bash
 
+#############################################################################
+# Create a new release
+#
+# This will:
+#  - Create a new CMakeBuild.config in $BLUENET_DIR/release/model_version/
+#  - Build firmware, bootloader, DFU packages and docs and copy
+#    them to $BLUENET_RELEASE_DIR/model_version/
+#  - Update the index.json file in $BLUENET_RELEASE_DIR to keep
+#    track of stable, latest, and release dates (for cloud)
+#  - Create a Change Log file from git commits since last release
+#  - Create a git tag with the version number
+#
+#############################################################################
+
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source $BLUENET_DIR/scripts/_utils.sh
@@ -17,7 +31,7 @@ if [ -z $BLUENET_BOOTLOADER_DIR ]; then
 	exit 1
 fi
 
-pushd $BLUENET_DIR
+pushd $BLUENET_DIR &> /dev/null
 
 # check current branch, releases should be made from master branch
 branch=$(git symbolic-ref --short -q HEAD)
@@ -70,7 +84,7 @@ if [ ! $(git rev-parse HEAD) = $(git ls-remote $(git rev-parse --abbrev-ref @{u}
 	fi
 fi
 
-popd
+popd &> /dev/null
 
 ############################
 ### Prepare
@@ -212,7 +226,7 @@ fi
 #   but the index file is located in the root directory
 
 # goto bluenet scripts dir
-pushd $BLUENET_DIR/scripts
+pushd $BLUENET_DIR/scripts &> /dev/null
 
 info "Update release index ..."
 if [[ $stable == 1 ]]; then
@@ -224,7 +238,7 @@ fi
 checkError "Failed"
 succ "Copy DONE"
 
-popd
+popd &> /dev/null
 
 ############################
 ###  modify paths
@@ -257,7 +271,7 @@ succ "Copy DONE"
 ###################
 
 # goto bluenet scripts dir
-pushd $BLUENET_DIR/scripts
+pushd $BLUENET_DIR/scripts &> /dev/null
 
 info "Build softdevice ..."
 ./softdevice.sh build
@@ -274,14 +288,14 @@ info "Build firmware ..."
 
 checkError
 succ "Build DONE"
-popd
+popd &> /dev/null
 
 ###################
 ### Bootloader
 ###################
 
 # goto bootloader scripts dir
-pushd $BLUENET_BOOTLOADER_DIR/scripts
+pushd $BLUENET_BOOTLOADER_DIR/scripts &> /dev/null
 
 info "Build bootloader ..."
 ./all.sh
@@ -289,7 +303,27 @@ info "Build bootloader ..."
 checkError
 succ "Build DONE"
 
-popd
+popd &> /dev/null
+
+###################
+### DFU
+###################
+
+# goto bluenet scripts dir
+pushd $BLUENET_DIR/scripts &> /dev/null
+
+info "Create DFU packages ..."
+./dfuGenPkg.py -a "$BLUENET_BIN_DIR/crownstone.hex" -o $model"_"$version
+
+bootloaderVersion=$(cat $BLUENET_BOOTLOADER_DIR/include/version.h | \
+	grep BOOTLOADER_VERSION | awk -F "\"" '{print $2}')
+
+./dfuGenPkg.py -b "$BLUENET_BIN_DIR/bootloader_dfu.hex" -o "bootloader_"$bootloaderVersion
+
+checkError
+succ "DFU DONE"
+
+popd &> /dev/null
 
 # build doc and copy to release directory
 
@@ -298,7 +332,7 @@ popd
 ###################
 
 # goto bluenet scripts dir
-pushd $BLUENET_DIR/scripts
+pushd $BLUENET_DIR/scripts &> /dev/null
 
 info "Build docs ..."
 ./gen_doc.sh
@@ -316,13 +350,13 @@ info "Update docs in git ..."
 git add $BLUENET_DIR/docs
 git commit -m "Update docs"
 
-popd
+popd &> /dev/null
 
 ####################
 ### GIT release tag
 ####################
 
-pushd $BLUENET_DIR
+pushd $BLUENET_DIR &> /dev/null
 
 info "Add release config"
 
@@ -373,4 +407,6 @@ else
     # git push origin --tags
 fi
 
-popd
+succ "DONE. Created Release "$model_$version
+
+popd &> /dev/null

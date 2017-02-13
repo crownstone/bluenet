@@ -92,7 +92,7 @@ writeHardwareVersion() {
 }
 
 upload() {
-	verifyHardwareBoardDefined
+	# verifyHardwareBoardDefined
 
 	if [ $? -eq 0 ]; then
 		# writeHardwareVersion
