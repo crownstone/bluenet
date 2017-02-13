@@ -159,9 +159,12 @@ protected:
 	app_timer_id_t                              _lowPowerTimeoutId;
 	app_timer_t                                 _secReqTimerData;
 	app_timer_id_t                              _secReqTimerId;
+	app_timer_t                                 _connectionKeepAliveTimerData;
+	app_timer_id_t                              _connectionKeepAliveTimerId;
 #else
 	uint32_t                                    _lowPowerTimeoutId;
 	uint32_t                                    _secReqTimerId;
+	uint32_t                                    _connectionKeepAliveTimerId;
 #endif
 	dm_handle_t                                 _peerHandle;
 
@@ -498,6 +501,10 @@ protected:
 	void onTxComplete(ble_evt_t * p_ble_evt);
 
 	static void lowPowerTimeout(void* p_context);
+
+	void startConnectionAliveTimer();
+	void stopConnectionAliveTimer();
+	void resetConnectionAliveTimer();
 
 };
 

@@ -23,6 +23,6 @@ else
 		err "To use different targets, copy _targets_template.sh to $BLUENET_CONFIG_DIR and rename to _targets.sh"
 		exit 1
 	else
-		log "NOTE: this is the old way of calling the scripts, you might want to check _targets_template.sh or the README"
+		warn "NOTE: this is the old way of calling the scripts, you might want to check _targets_template.sh or the README"
 	fi
 fi

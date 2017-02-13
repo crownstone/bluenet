@@ -8,8 +8,6 @@
 
 //#include <cstddef>
 
-#define VERSION_V2
-
 #include <ble_gap.h>
 
 extern "C" {
@@ -28,6 +26,7 @@ enum MeshChannels {
 	COMMAND_REPLY_CHANNEL    = 5,
 	SCAN_RESULT_CHANNEL      = 6,
 	BIG_DATA_CHANNEL         = 7,
+	MULTI_SWITCH_CHANNEL     = 8,
 };
 
 enum MeshCommandTypes {
@@ -96,6 +95,46 @@ struct __attribute__((__packed__)) keep_alive_message_t {
 };
 
 inline bool has_keep_alive_item(keep_alive_message_t* message, id_type_t id, keep_alive_item_t** item) {
+
+	*item = message->list;
+	for (int i = 0; i < message->size; ++i) {
+		if ((*item)->id == id) {
+			return true;
+		}
+		++(*item);
+	}
+
+	return false;
+}
+
+/********************************************************************
+ * KEEP ALIVE
+ ********************************************************************/
+
+enum MultiSwitchIntent {
+	SPHERE_ENTER = 0,
+	SPHERE_EXIT  = 1,
+	ENTER        = 2,
+	EXIT         = 3,
+	MANUAL       = 4
+};
+
+struct __attribute__((__packed__)) multi_switch_item_t {
+	id_type_t id;
+	uint8_t switchState;
+	uint16_t timeout;
+	uint8_t intent; // intent = sphere enter, sphere exit, room enter, room exit, manual
+};
+
+#define MULTI_SWITCH_HEADER_SIZE (sizeof(uint8_t))
+#define MAX_MULTI_SWITCH_ITEMS ((MAX_MESH_MESSAGE_LENGTH - MULTI_SWITCH_HEADER_SIZE) / sizeof(multi_switch_item_t))
+
+struct __attribute__((__packed__)) multi_switch_message_t {
+	uint8_t size;
+	multi_switch_item_t list[MAX_KEEP_ALIVE_ITEMS];
+};
+
+inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id, multi_switch_item_t** item) {
 
 	*item = message->list;
 	for (int i = 0; i < message->size; ++i) {
@@ -316,136 +355,3 @@ struct __attribute__((__packed__)) scan_result_message_t {
 	scan_result_item_t list[MAX_SCAN_RESULT_ITEMS];
 };
 
-//struct __attribute__((__packed__)) scan_result_item_t {
-//	uint8_t address[BLE_GAP_ADDR_LEN];
-//	int8_t rssi;
-//};
-//
-//#define SCAN_RESULT_HEADER_SIZE (sizeof(id_type_t) + sizeof(uint8_t))
-//#define MAX_SCAN_RESULT_ITEMS ((MAX_PAYLOAD_LENGTH - SCAN_RESULT_HEADER_SIZE) / sizeof(scan_result_item_t))
-//
-//struct __attribute__((__packed__)) scan_result_message_t {
-//	id_type_t id;
-//	uint8_t numOfResults;
-//	scan_result_item_t list[];
-//};
-
-
-
-
-
-
-
-
-
-//
-///** Event mesh message
-// */
-//struct __attribute__((__packed__)) event_mesh_message_t {
-//	uint16_t event;
-////	uint8_t data[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
-//};
-//
-//using control_mesh_message_t = stream_t<uint8_t, MAX_MESH_MESSAGE_DATA_LENGTH>;
-//using config_mesh_message_t = stream_t<uint8_t, MAX_MESH_MESSAGE_DATA_LENGTH>;
-//using state_mesh_message_t = stream_t<uint8_t, MAX_MESH_MESSAGE_DATA_LENGTH>;
-//
-//
-//#define NR_DEVICES_PER_MESSAGE SR_MAX_NR_DEVICES
-////#define NR_DEVICES_PER_MESSAGE 1
-////#define NR_DEVICES_PER_MESSAGE 10
-//
-///** Scan mesh message
-// */
-//struct __attribute__((__packed__)) scan_mesh_message_t {
-//	uint8_t numDevices;
-//	peripheral_device_t list[NR_DEVICES_PER_MESSAGE];
-//};
-//
-////#define POWER_SAMPLE_MESH_NUM_SAMPLES 43
-//////! 91 bytes in total
-////struct __attribute__((__packed__)) power_samples_mesh_message_t {
-////	uint32_t timestamp;
-//////	uint16_t firstSample;
-//////	int8_t sampleDiff[POWER_SAMPLE_MESH_NUM_SAMPLES-1];
-////	uint16_t samples[POWER_SAMPLE_MESH_NUM_SAMPLES];
-////	uint8_t reserved;
-//////	struct __attribute__((__packed__)) {
-//////		int8_t dt1 : 4;
-//////		int8_t dt2 : 4;
-//////	} timeDiffs[POWER_SAMPLE_MESH_NUM_SAMPLES / 2];
-////};
-//typedef power_samples_cont_message_t power_samples_mesh_message_t;
-//
-///** Test mesh message
-// */
-//struct __attribute__((__packed__)) test_mesh_message_t {
-//	uint32_t counter;
-//};
-//
-//struct __attribute__((__packed__)) service_data_mesh_message_t {
-//	uint16_t crownstoneId;
-//	uint8_t switchState;
-//	uint8_t eventBitmask;
-//	int32_t powerUsage;
-//	int32_t accumulatedEnergy;
-//	int32_t temperature;
-//};
-//
-//
-////#ifdef VERSION_V2
-//
-///** mesh header
-// */
-//struct __attribute__((__packed__)) mesh_header_v2_t {
-//	uint16_t crownstoneId;
-//	uint16_t reason;
-//	uint16_t userId;
-//	uint16_t messageType;
-//};
-//
-////#else
-//
-///** mesh header
-// */
-//struct __attribute__((__packed__)) mesh_header_t {
-//	uint8_t address[BLE_GAP_ADDR_LEN];
-//	uint16_t messageType;
-//};
-//
-////#endif
-//
-//
-//struct __attribute__((__packed__)) mesh_message_t {
-//	mesh_header_t header;
-//	uint8_t payload[1]; // dynamic size
-//};
-//
-///** Device mesh message
-// */
-//struct __attribute__((__packed__)) device_mesh_message_t {
-//	mesh_header_t header;
-//	union {
-//		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
-//		event_mesh_message_t evtMsg;
-//		beacon_mesh_message_t beaconMsg;
-//		control_mesh_message_t commandMsg;
-//		config_mesh_message_t configMsg;
-//	};
-//};
-//
-////struct __attribute__((__packed__)) hub_mesh_header_t {
-////	uint16_t sourceCrownstoneId;
-////	uint16_t messageType;
-////};
-//
-//struct __attribute__((__packed__)) hub_mesh_message_t {
-//	mesh_header_t header;
-//	union {
-//		uint8_t payload[MAX_MESH_MESSAGE_PAYLOAD_LENGTH];
-//		scan_mesh_message_t scanMsg;
-//		test_mesh_message_t testMsg;
-//		power_samples_mesh_message_t powerSamplesMsg;
-//		service_data_mesh_message_t serviceDataMsg;
-//	};
-//};

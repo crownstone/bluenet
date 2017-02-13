@@ -6,6 +6,27 @@ BLUETOOTH_NAME="Crown"
 
 FIRMWARE_VERSION="0.6.0"
 
+# The different boards that can be used:
+# ## old crownstones
+# CROWNSTONE5          0
+# PLUGIN_FLEXPRINT_01  1
+# ## nordic boards
+# PCA10036             40
+# PCA10040             41
+# ## square guidestone
+# GUIDESTONE           100
+# ## crownstone builtin
+# ACR01B1A             1000
+# ACR01B1B             1001
+# ACR01B1C             1002
+# ACR01B1D             1003
+# ACR01B1E             1004
+# ## crownstone plug
+# ACR01B2A             1500
+# ACR01B2B             1501
+# ACR01B2C             1502
+# HARDWARE_BOARD=ACR01B2C
+
 # The device type defines how the device advertises itself, Apps and Bluenet Library
 # will use this to filter for device type.
 # It is also used to enable/disable device type specific functionality.
@@ -134,26 +155,6 @@ DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP
 # SERIAL_NONE      5
 SERIAL_VERBOSITY=SERIAL_DEBUG
 
-# The different boards that can be used:
-# ## old crownstones
-# CROWNSTONE5          0
-# PLUGIN_FLEXPRINT_01  1
-# ## nordic boards
-# PCA10036             40
-# PCA10040             41
-# ## square guidestone
-# GUIDESTONE           100
-# ## crownstone builtin
-# ACR01B1A             1000
-# ACR01B1B             1001
-# ACR01B1C             1002
-# ACR01B1D             1003
-# ## crownstone plug
-# ACR01B2A             1500
-# ACR01B2B             1501
-# ACR01B2C             1502
-HARDWARE_BOARD=ACR01B2C
-
 NRF_SERIES=NRF52
 
 # Default transmission power
@@ -214,6 +215,9 @@ SCAN_FILTER_SEND_FRACTION=360
 # Some config introduced by anne
 RSSI_ENABLE=1
 
+# connection alive timeout. if no write command received within timeout the connection is closed by the device.
+CONNECTION_ALIVE_TIMEOUT=15000
+
 # NOTE: APP_DATA_RESERVED is obsolete. the bootloader obtains the value directly from PSTORAGE_RESERVED defined in
 #   include/third/nrf/pstorage_platform.h, but if desired it can still be used to increase the value over the
 #   PSTORAGE_RESERVED value (can't decrease the value)
@@ -256,6 +260,9 @@ BOOTLOADER_START_ADDRESS=0x00079000
 # Used in: gcc_nrf51_bootloader_xxaa.ld.in and dfu_types.h
 # nrf52: length = 0x00080000 - bootloader_start_address - size(bootloader_settings)=0x1000 - size(mbr_params_page)=0x1000
 BOOTLOADER_LENGTH=0x5000
+
+# the address (in UICR) where the hardware board type is written and read
+HARDWARE_BOARD_ADDRESS=0x10001084
 
 # The directory where the softdevice can be found
 # change if you want to use a different softdevice than the ones provided in the SDK

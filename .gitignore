@@ -11,3 +11,4 @@ build/
 CMakeBuild.config.local
 env.config
 node_modules
+*.pyc

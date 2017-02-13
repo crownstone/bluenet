@@ -9,6 +9,39 @@
 #define ASSIGN_DEVICE_TYPE(type) type
 #endif
 
+/** TEMPLATE
+void as(boards_config_t* p_config) {
+	p_config->pinGpioPwm           = ;
+	p_config->pinGpioRelayOn       = ;
+	p_config->pinGpioRelayOff      = ;
+	p_config->pinAinCurrent        = ;
+	p_config->pinAinVoltage        = ;
+	p_config->pinAinPwmTemp        = ;
+	p_config->pinGpioRx            = ;
+	p_config->pinGpioTx            = ;
+	p_config->pinLedRed            = ;
+	p_config->pinLedGreen          = ;
+
+	p_config->flags.hasRelay       = ;
+	p_config->flags.pwmInverted    = ;
+	p_config->flags.hasSerial      = ;
+	p_config->flags.hasLed         = ;
+
+	p_config->deviceType           = ASSIGN_DEVICE_TYPE();
+
+	p_config->voltageMultiplier   = ;
+	p_config->currentMultiplier   = ;
+	p_config->voltageZero         = ;
+	p_config->currentZero         = ;
+	p_config->powerZero           = ;
+
+	p_config->pwmTempVoltageThreshold     = ; 
+	p_config->pwmTempVoltageThresholdDown = ; 
+
+	p_config->minTxPower          = ;
+}
+*/
+
 void asCrownstone(boards_config_t* p_config) {
 	p_config->pinGpioPwm           = 12;
 	p_config->pinGpioRelayOn       = 10;
@@ -30,6 +63,8 @@ void asCrownstone(boards_config_t* p_config) {
 //	p_config->voltageZero         = ; // tbd
 //	p_config->currentZero         = ; // tbd
 //	p_config->powerZero           = ; // tbd
+
+	p_config->minTxPower          = -40;
 }
 
 void asACR01B1A(boards_config_t* p_config) {
@@ -59,6 +94,8 @@ void asACR01B1A(boards_config_t* p_config) {
 
 	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
 	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
+
+	p_config->minTxPower          = -30; // higher tx power for builtins
 }
 
 void asACR01B2A(boards_config_t* p_config) {
@@ -67,7 +104,6 @@ void asACR01B2A(boards_config_t* p_config) {
 	p_config->pinGpioRelayOff      = 7;
 	p_config->pinAinCurrent        = 2;
 	p_config->pinAinVoltage        = 1;
-	p_config->pinAinPwmTemp        = 3;
 	p_config->pinGpioRx            = 20;
 	p_config->pinGpioTx            = 19;
 	p_config->pinLedRed            = 10;
@@ -88,6 +124,8 @@ void asACR01B2A(boards_config_t* p_config) {
 
 	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
 	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
+
+	p_config->minTxPower          = -40;
 }
 
 void asPluginFlexprint(boards_config_t* p_config) {
@@ -111,6 +149,8 @@ void asPluginFlexprint(boards_config_t* p_config) {
 //	p_config->voltageZero         = ; // tbd
 //	p_config->currentZero         = ; // tbd
 //	p_config->powerZero           = ; // tbd
+
+	p_config->minTxPower          = -40;
 }
 
 void asPca10036(boards_config_t* p_config) {
@@ -140,6 +180,8 @@ void asPca10036(boards_config_t* p_config) {
 
 	p_config->pwmTempVoltageThreshold     = 3.0; // something
 	p_config->pwmTempVoltageThresholdDown = 1.0; // something
+
+	p_config->minTxPower          = -40;
 }
 
 void asGuidestone(boards_config_t* p_config) {
@@ -165,28 +207,13 @@ void asGuidestone(boards_config_t* p_config) {
 //	p_config->voltageZero         = ; // unused
 //	p_config->currentZero         = ; // unused
 //	p_config->powerZero           = ; // unused
+	
+	p_config->minTxPower          = -40;
 }
-
-//void as(boards_config_t* p_config) {
-//	p_config->pinGpioPwm           = ;
-//	p_config->pinGpioRelayOn       = ;
-//	p_config->pinGpioRelayOff      = ;
-//	p_config->pinAinCurrent        = ;
-//	p_config->pinAinVoltage        = ;
-//	p_config->pinGpioRx            = ;
-//	p_config->pinGpioTx            = ;
-//	p_config->pinLedRed            = ;
-//	p_config->pinLedGreen          = ;
-//
-//	p_config->flags.hasRelay       = ;
-//	p_config->flags.switchInversed = ;
-//	p_config->flags.hasSerial      = ;
-//	p_config->flags.hasLed         = ;
-//}
 
 uint32_t configure_board(boards_config_t* p_config) {
 
-	uint32_t _hardwareBoard = NRF_UICR->CUSTOMER[0];
+	uint32_t _hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (_hardwareBoard == 0xFFFFFFFF) {
 		_hardwareBoard = ACR01B2C;
 	}
@@ -196,6 +223,7 @@ uint32_t configure_board(boards_config_t* p_config) {
 	case ACR01B1B:
 	case ACR01B1C:
 	case ACR01B1D:
+	case ACR01B1E:
 		asACR01B1A(p_config);
 		break;
 

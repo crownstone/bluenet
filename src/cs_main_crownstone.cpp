@@ -406,6 +406,11 @@ void Crownstone::configureStack() {
 		//		bool wasScanning = _stack->isScanning();
 		//		_stack->stopScanning();
 
+		if (_operationMode == OPERATION_MODE_SETUP) {
+			// make sure device goes back to low tx power mode when in setup
+			_stack->changeToLowTxPowerMode();
+		}
+
 		_stateVars->disableNotifications();
 
 		_stack->setConnectable();

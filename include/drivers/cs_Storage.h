@@ -228,7 +228,7 @@ struct ps_configuration_t : ps_storage_base_t {
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
-STATIC_ASSERT(sizeof(ps_configuration_t) <= 1024);
+STATIC_ASSERT(sizeof(ps_configuration_t) <= 0x1000);
 
 /** Event handler for softdevice events. in particular, listen for
  *  NRF_EVT_RADIO_SESSION_CLOSED event to resume storage requests

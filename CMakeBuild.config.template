@@ -13,10 +13,10 @@ BLUETOOTH_NAME=
 # or if you use a PCA10000, then set
 #   HARDWARE_BOARD=PCA10000
 # For the complete overview of the hardware boards, see $BLUENET_DIR/CMakeBuild.config.default
-HARDWARE_BOARD=
+# HARDWARE_BOARD=
 
 # Version of the nrf51 chip, use script/hardware_version.sh to check your version
-HARDWARE_VERSION=
+# HARDWARE_VERSION=
 
 # By default, the values from the CmakeBuild.config.default
 # are used

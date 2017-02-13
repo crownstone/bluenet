@@ -46,13 +46,17 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0),
+				_dm_app_handle(0), _dm_initialized(false),
 #if (NORDIC_SDK_VERSION >= 11)
 				_lowPowerTimeoutId(NULL),
                 _secReqTimerId(NULL),
+                _connectionKeepAliveTimerId(NULL),
 #else
 				_lowPowerTimeoutId(UINT32_MAX),
                 _secReqTimerId(UINT32_MAX),
+                _connectionKeepAliveTimerId(UINT32_MAX),
 #endif
+                _advParamsCounter(0),
 				_adv_manuf_data(NULL),
                 _serviceData(NULL)
 {
@@ -61,6 +65,8 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 	_lowPowerTimeoutId = &_lowPowerTimeoutData;
 	_secReqTimerData = { {0} };
 	_secReqTimerId = &_secReqTimerData;
+	_connectionKeepAliveTimerData = { {0} };
+	_connectionKeepAliveTimerId = &_connectionKeepAliveTimerData;
 #endif
 
 	//! setup default values.
@@ -1124,6 +1130,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_WRITE: {
+		resetConnectionAliveTimer();
 
 		if (p_ble_evt->evt.gatts_evt.params.write.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
 
@@ -1214,6 +1221,32 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	}
 }
 
+#if CONNECTION_ALIVE_TIMEOUT>0
+static void connection_keep_alive_timeout(void* p_context) {
+	LOGw("connection keep alive timeout!");
+	Nrf51822BluetoothStack::getInstance().disconnect();
+}
+#endif
+
+void Nrf51822BluetoothStack::startConnectionAliveTimer() {
+#if CONNECTION_ALIVE_TIMEOUT>0
+	Timer::getInstance().createSingleShot(_connectionKeepAliveTimerId, connection_keep_alive_timeout);
+	Timer::getInstance().start(_connectionKeepAliveTimerId, MS_TO_TICKS(CONNECTION_ALIVE_TIMEOUT), NULL);
+#endif
+}
+
+void Nrf51822BluetoothStack::stopConnectionAliveTimer() {
+#if CONNECTION_ALIVE_TIMEOUT>0
+	Timer::getInstance().stop(_connectionKeepAliveTimerId);
+#endif
+}
+
+void Nrf51822BluetoothStack::resetConnectionAliveTimer() {
+#if CONNECTION_ALIVE_TIMEOUT>0
+	Timer::getInstance().reset(_connectionKeepAliveTimerId, MS_TO_TICKS(CONNECTION_ALIVE_TIMEOUT), NULL);
+#endif
+}
+
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
 	_advertising = false; //! it seems like maybe we automatically stop advertising when we're connected.
@@ -1232,6 +1265,8 @@ void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	for (Service* svc : _services) {
 		svc->on_ble_event(p_ble_evt);
 	}
+
+	startConnectionAliveTimer();
 }
 
 void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
@@ -1243,6 +1278,8 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 	for (Service* svc : _services) {
 		svc->on_ble_event(p_ble_evt);
 	}
+
+	stopConnectionAliveTimer();
 }
 
 void Nrf51822BluetoothStack::disconnect() {

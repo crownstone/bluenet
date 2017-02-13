@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['nrf51822bluetoothstack',['Nrf51822BluetoothStack',['../classNrf51822BluetoothStack.html',1,'']]]
+  ['opcode_5fmessage_5fpayload_5ft',['opcode_message_payload_t',['../structopcode__message__payload__t.html',1,'']]]
 ];

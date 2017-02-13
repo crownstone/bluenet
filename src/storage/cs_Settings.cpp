@@ -559,7 +559,7 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		break;
 	}
 	case CONFIG_LOW_TX_POWER: {
-		StorageHelper::getInt8(_storageStruct.lowTxPower, (int8_t*)target, LOW_TX_POWER);
+		StorageHelper::getInt8(_storageStruct.lowTxPower, (int8_t*)target, _boardsConfig->minTxPower);
 		break;
 	}
 	case CONFIG_VOLTAGE_MULTIPLIER: {
