@@ -32,11 +32,34 @@ public:
 
 //	void sendPowerSamplesMessage(power_samples_mesh_message_t* samples);
 
+	/** Send a service data message (state broadcast or state change) over the mesh
+	 *
+	 * @stateItem the state item to be appended to the message in the mesh
+	 * @event true if the state should be sent as a state change
+	 *        false if the state should be sent as a state broadcast
+	 */
 	void sendServiceDataMessage(state_item_t& stateItem, bool event);
 
+	/** Send a status reply message, e.g. to reply status code of the execution of a command
+	 *
+	 * @messageCounter the counter of the command message to which this reply belongs
+	 * @status the status code of the command execution
+	 */
 	void sendStatusReplyMessage(uint32_t messageCounter, ERR_CODE status);
+
+	/** Send a config reply over the mesh (for read/get config commands)
+	 *
+	 * @messageCounter the counter of the read/get config command message
+	 * @configReply the config to be sent
+	 */
 	void sendConfigReplyMessage(uint32_t messageCounter, config_reply_item_t* configReply);
-	void sendStateReplyMessage(uint32_t messageCounter, state_reply_item_t* configReply);
+
+	/** Send a state variable reply over the mesh (for read state variable commands)
+	 *
+	 * @messageCounter the counter of the read/get state variable command message
+	 * @stateReply the state variable to be sent
+	 */
+	void sendStateReplyMessage(uint32_t messageCounter, state_reply_item_t* stateReply);
 
 	/** Send a message into the mesh
 	 *
@@ -49,11 +72,13 @@ public:
 	/**
 	 * Get incoming messages and perform certain actions.
 	 * @channel the channel number, see <MeshChannels>
+	 *
 	 * @p_data a pointer to the data which was received
 	 * @length number of bytes received
 	 */
 	void process(uint8_t channel, void* p_data, uint16_t length);
 
+	/** Initialize the mesh */
 	void init();
 
 protected:
@@ -66,110 +91,28 @@ protected:
 	 */
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
-	/** Decode a received mesh data message
+	/** Decode a command message received over mesh or mesh characteristic
 	 *
-	 * @msg pointer to the message data
+	 * @type command type, see MeshCommandTypes
+	 * @messageCounter the message counter of the message which was received
+	 * @payload the payload of the command
+	 * @length length of payload in bytes
 	 */
 	void handleCommand(uint16_t type, uint32_t messageCounter, uint8_t* payload, uint16_t length);
 
-	void handleKeepAlive(keep_alive_item_t* p_item, uint16_t timeout);
-
-	/** Check if a message is valid
-	 * Checks the length parameter based on the type of the mesh message
+	/** Decode a keep alive message received over mesh or mesh characteristic
 	 *
-	 * @p_data pointer to the mesh message
-	 * @length number of bytes received
+	 * @msg the message payload
+	 * @length length of the message in bytes
 	 */
+	ERR_CODE handleKeepAlive(keep_alive_message_t* msg, uint16_t length);
 
-//	bool isValidMessage(mesh_message_t* msg, uint16_t length) {
-//
-//		switch (msg->header.messageType) {
-//		case CONTROL_MESSAGE:
-//		case CONFIG_MESSAGE: {
-//			//! command and config message have an array for parameters which don't have to be filled
-//			//! so we don't know in advance how long it needs to be exactly. can only give
-//			//! a lower and upper bound.
-//			uint16_t desiredLength = getMessageSize(msg->header.messageType);
-//			bool valid = length >= desiredLength && length <= MAX_MESH_MESSAGE_DATA_LENGTH;
-//			if (!valid) {
-//				LOGe("invalid message, length: %d <= %d", length, desiredLength);
-//			}
-//			return valid;
-//		}
-//		default:{
-//			uint16_t desiredLength = getMessageSize(msg->header.messageType);
-//			bool valid = length == desiredLength;
-//
-//			if (!valid) {
-//				LOGe("invalid message, length: %d != %d", length, desiredLength);
-//			}
-//			return valid;
-//		}
-//		}
-//	}
-
-	/** Returns the number of bytes required for a mesh message of the type
+	/** Decode a multi switch message received over mesh or mesh characteristic
 	 *
-	 * @messageType type of mesh message, see <MeshMessageTypes>
+	 * @msg the message payload
+	 * @length length of the message in bytes
 	 */
-//	uint16_t getMessageSize(uint16_t messageType) {
-//		switch(messageType) {
-//		case EVENT_MESSAGE:
-//			return sizeof(mesh_header_t) + sizeof(event_mesh_message_t);
-//		case BEACON_MESSAGE:
-//			return sizeof(mesh_header_t) + sizeof(beacon_mesh_message_t);
-//		case CONTROL_MESSAGE:
-//		case CONFIG_MESSAGE:
-//			return sizeof(mesh_header_t) + SB_HEADER_SIZE;
-//		case STATE_MESSAGE:
-//			return sizeof(mesh_message_t);
-//		default:
-//			return 0;
-//		}
-//	}
-
-////#ifdef VERSION_V2
-////	hub_mesh_message_t* createHubMessage(uint16_t messageType) {
-////		hub_mesh_message_t* message = new hub_mesh_message_t();
-////		memset(message, 0, sizeof(hub_mesh_message_t));
-////    	Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &message->header.crownstoneId);
-////		message->header.messageType = messageType;
-////		return message;
-////	}
-////#else
-//	hub_mesh_message_t* createHubMessage(uint16_t messageType) {
-//		hub_mesh_message_t* message = new hub_mesh_message_t();
-//		memset(message, 0, sizeof(hub_mesh_message_t));
-//		memcpy(&message->header.address, &_myAddr.addr, BLE_GAP_ADDR_LEN);
-//		message->header.messageType = messageType;
-//		return message;
-//	}
-////#endif
-//
-//	std::string getAddress(mesh_message_t* msg) {
-//		if (isNewVersion(msg)) {
-//			mesh_header_v2_t* header = (mesh_header_v2_t*)&msg->header;
-//			char buffer[32];
-//			sprintf(buffer, "%d", header->crownstoneId);
-//			return std::string(buffer);
-//		} else {
-//			mesh_header_t* header = &msg->header;
-//			char buffer[32];
-//			sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X", header->address[5],
-//						header->address[4], header->address[3], header->address[2],
-//						header->address[1], header->address[0]);
-//			return std::string(buffer);
-//		}
-//	}
-//
-//	// todo for the time being, as long as we don't user reason or userId, we can
-//	// continue with both versions to target crownstones. but this needs to be removed
-//	// in the final version for only one of the two cases, either crownstoneId or
-//	// mac address!
-//	bool isNewVersion(mesh_message_t* msg) {
-//		mesh_header_v2_t* header = (mesh_header_v2_t*)&msg->header;
-//		return (header->reason | header->userId) == 0;
-//	}
+	ERR_CODE handleMultiSwitch(multi_switch_message_t* msg, uint16_t length);
 
 private:
 	MeshControl();
@@ -177,6 +120,7 @@ private:
 	MeshControl(MeshControl const&); //! singleton, deny implementation
 	void operator=(MeshControl const &); //! singleton, deny implementation
 
+	/* The id assigned to this Crownstone during setup */
     id_type_t _myCrownstoneId;
 
 };

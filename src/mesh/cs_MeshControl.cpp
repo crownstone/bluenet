@@ -12,6 +12,7 @@
 #include <drivers/cs_RNG.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>
+#include <processing/cs_Switch.h>
 #include <mesh/cs_Mesh.h>
 #include <common/cs_Types.h>
 
@@ -19,12 +20,13 @@
 #define PRINT_DEBUG
 #define PRINT_MESHCONTROL_VERBOSE
 
-//#define PRINT_VERBOSE_KEEPALIVE
+#define PRINT_VERBOSE_KEEPALIVE
 //#define PRINT_VERBOSE_STATE_BROADCAST
 //#define PRINT_VERBOSE_STATE_CHANGE
 //#define PRINT_VERBOSE_SCAN_RESULT
 //#define PRINT_VERBOSE_COMMAND
 //#define PRINT_VERBOSE_COMMAND_REPLY
+#define PRINT_VERBOSE_MULTI_SWITCH
 
 MeshControl::MeshControl() : EventListener(EVT_ALL), _myCrownstoneId(0) {
 	EventDispatcher::getInstance().addListener(this);
@@ -51,29 +53,36 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		LOGi("received keep alive");
 #endif
 
-		keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
-		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
-		uint16_t timeout = msg->timeout;
+//		keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
+//		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
+//		uint16_t timeout = msg->timeout;
 
-		if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
-			BLEutil::printArray(p_data, length);
-			return;
-		}
+		handleKeepAlive((keep_alive_message_t*)p_data, length);
 
-		for (int i = 0; i < msg->size; ++i) {
-			if (p_item->id == _myCrownstoneId) {
-				handleKeepAlive(p_item, timeout);
-				return;
-			}
-			++p_item;
-		}
+//		if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
+//			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+//			BLEutil::printArray(p_data, length);
+//			return;
+//		}
+//
+//		keep_alive_item_t* p_item;
+//		if (has_keep_alive_item(msg, _myCrownstoneId, &p_item)) {
+//			return handleKeepAlive(p_item, timeout);
+//		}
+//
+//#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
+//		LOGi("keep alive, not for us");
+//		BLEutil::printArray(p_data, length);
+//#endif
 
-#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
-		LOGi("keep alive, not for us");
-		BLEutil::printArray(p_data, length);
+		break;
+	}
+	case MULTI_SWITCH_CHANNEL: {
+#if defined(PRINT_VERBOSE_MULTI_SWITCH)
+		LOGi("received multi switch");
 #endif
 
+		handleMultiSwitch((multi_switch_message_t*)p_data, length);
 		break;
 	}
 	case COMMAND_CHANNEL: {
@@ -163,6 +172,8 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		if (channel == STATE_BROADCAST_CHANNEL) {
 			break;
 		}
+#else
+		break;
 #endif
 
 		state_message_t* msg = (state_message_t*)p_data;
@@ -262,35 +273,86 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 	}
 }
 
-void MeshControl::handleKeepAlive(keep_alive_item_t* p_item, uint16_t timeout) {
+
+ERR_CODE MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t length) {
+
+	if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+		BLEutil::printArray(msg, length);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	keep_alive_item_t* p_item;
+	if (has_keep_alive_item(msg, _myCrownstoneId, &p_item)) {
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
-	LOGi("received keep alive over mesh:");
-	BLEutil::printArray(p_item, sizeof(keep_alive_item_t));
+		LOGi("received keep alive over mesh:");
+		BLEutil::printArray(p_item, sizeof(keep_alive_item_t));
 #endif
 
-	keep_alive_state_message_payload_t keepAlive;
+		keep_alive_state_message_payload_t keepAlive;
 
-	switch (p_item->actionSwitchState) {
-	case 255: {
-		keepAlive.action = 0;
-		break;
-	}
-	default: {
-		keepAlive.action = 1;
-		keepAlive.switchState.switchState = p_item->actionSwitchState;
-		break;
-	}
-	}
+		switch (p_item->actionSwitchState) {
+		case 255: {
+			keepAlive.action = 0;
+			break;
+		}
+		default: {
+			keepAlive.action = 1;
+			keepAlive.switchState.switchState = p_item->actionSwitchState;
+			break;
+		}
+		}
 
-	keepAlive.timeout = timeout;
+		keepAlive.timeout = msg->timeout;
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
-	LOGi("KeepAlive, action: %d, switchState: %d, timeout: %d",
-			keepAlive.action, keepAlive.switchState.switchState, keepAlive.timeout);
+		LOGi("KeepAlive, action: %d, switchState: %d, timeout: %d",
+				keepAlive.action, keepAlive.switchState.switchState, keepAlive.timeout);
 #endif
 
-	EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, &keepAlive, sizeof(keepAlive));
+		EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, &keepAlive, sizeof(keepAlive));
+	} else {
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
+		LOGi("keep alive, not for us");
+		BLEutil::printArray(msg, length);
+#endif
+	}
+
+	return ERR_SUCCESS;
+}
+
+ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t length) {
+
+	LOGi("handleMultiSwitch");
+	BLEutil::printArray(msg, length);
+
+	if (length < MULTI_SWITCH_HEADER_SIZE + msg->size * sizeof(multi_switch_item_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+		BLEutil::printArray(msg, length);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	multi_switch_item_t* p_item;
+	if (has_multi_switch_item(msg, _myCrownstoneId, &p_item)) {
+
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_MULTI_SWITCH)
+		LOGi("received multi switch over mesh:");
+		BLEutil::printArray(p_item, sizeof(multi_switch_item_t));
+#endif
+
+		Switch::getInstance().handleMultiSwitch(p_item);
+
+	} else {
+
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_MULTI_SWITCH)
+		LOGi("multi switch, not for us");
+		BLEutil::printArray(msg, length);
+#endif
+	}
+
+	return ERR_SUCCESS;
+
 }
 
 void MeshControl::handleCommand(uint16_t type, uint32_t messageCounter, uint8_t* payload, uint16_t length) {
@@ -620,28 +682,60 @@ ERR_CODE MeshControl::send(uint8_t channel, void* p_data, uint8_t length) {
 	}
 	case KEEP_ALIVE_CHANNEL: {
 
-		keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
-//		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
-		uint16_t timeout = msg->timeout;
+		// special case, if no data is provided with the keep alive, repeat the keep alive message
+		// currently in the keep alive channel
+		if (length == 0) {
+			LOGi("repeat last keep alive");
 
-		if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
-			BLEutil::printArray(p_data, length);
-			return ERR_WRONG_PAYLOAD_LENGTH;
+			keep_alive_message_t msg = {};
+			uint16_t length;
+
+			if (Mesh::getInstance().getLastMessage(KEEP_ALIVE_CHANNEL, &msg, length)) {
+
+				handleKeepAlive(&msg, length);
+
+				Mesh::getInstance().send(channel, &msg, length);
+			}
+
+		} else {
+
+			keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
+	//		keep_alive_item_t* p_item = (keep_alive_item_t*)msg->list;
+	//		uint16_t timeout = msg->timeout;
+
+			ERR_CODE errCode;
+			errCode = handleKeepAlive(msg, length);
+			if (errCode != ERR_SUCCESS) {
+				return errCode;
+			}
+
+	//		if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
+	//			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+	//			BLEutil::printArray(p_data, length);
+	//			return ERR_WRONG_PAYLOAD_LENGTH;
+	//		}
+	//
+	//		keep_alive_item_t* p_item;
+	//		if (has_keep_alive_item(msg, _myCrownstoneId, &p_item)) {
+	//			handleKeepAlive(p_item, timeout);
+	//		}
+
+	//		for (int i = 0; i < msg->size; ++i) {
+	//			if (p_item->id == _myCrownstoneId) {
+	//				handleKeepAlive(p_item, timeout);
+	//				break;
+	//			}
+	//			++p_item;
+	//		}
+
+			Mesh::getInstance().send(channel, p_data, length);
 		}
+		break;
+	}
+	case MULTI_SWITCH_CHANNEL: {
 
-		keep_alive_item_t* p_item;
-		if (has_keep_alive_item(msg, _myCrownstoneId, &p_item)) {
-			handleKeepAlive(p_item, timeout);
-		}
-
-//		for (int i = 0; i < msg->size; ++i) {
-//			if (p_item->id == _myCrownstoneId) {
-//				handleKeepAlive(p_item, timeout);
-//				break;
-//			}
-//			++p_item;
-//		}
+		multi_switch_message_t* msg = (multi_switch_message_t*)p_data;
+		handleMultiSwitch(msg, length);
 
 		Mesh::getInstance().send(channel, p_data, length);
 
