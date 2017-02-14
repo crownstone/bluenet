@@ -235,11 +235,15 @@ void ADC::update(nrf_saadc_value_t* buf) {
 		_doneCallbackData.buffer = buf;
 		_doneCallbackData.bufSize = CS_ADC_BUF_SIZE;
 		_doneCallbackData.bufNum = _currentBufInd;
+//		write("b %i %i\r\n", _currentBufInd, buf);
 		//! Decouple done callback from adc interrupt handler, and put it on app scheduler instead
 		app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
+	} else {
+//		write("d %i %i\r\n", _currentBufInd, buf);
 	}
 	_currentBufInd = _queuedBufInd;
 	_queuedBufInd = CS_ADC_NUM_BUFFERS;
+//	write("c %i %i\r\n", _currentBufInd, buf);
 }
 
 /** The interrupt handler for an ADC data ready event.
