@@ -33,10 +33,8 @@ fi
 checkError "Failed to get hardware version"
 
 log "The result should be something like:"
-log "    1000005C = 3C 00 FF FF"
+log "    10000104 = 30 42 41 41"
 log
-log "This would mean HARDWARE_VERSION=0x003C in the config file"
-log
-log "This means version 003C in the document:"
-log '    "Migrating to the latest nRF51822 chip version" "nWP-018" "White Paper v1.3"'
-
+log "This would mean the hardware version is AAB0 (read hex numbers from back to front)"
+log "See FICR in the product specification"
+log "B0 are the first 2 characters of the last 3 characters in the errata docs"
