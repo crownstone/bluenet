@@ -56,6 +56,10 @@
 
 #include <storage/cs_State.h>
 
+extern "C" {
+#include <nrf_nvmc.h>
+}
+
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -262,6 +266,13 @@ void Crownstone::configure() {
  */
 void Crownstone::initDrivers() {
 
+#ifdef ENABLE_LEDS
+	if (NRF_UICR->NFCPINS != 0) {
+		LOGd("enable gpio LEDs");
+		nrf_nvmc_write_word(0x1000120C, 0);
+	}
+#endif
+
 	LOGd(FMT_INIT, "stack");
 
 	// things that need to be configured on the stack **BEFORE** init is called
@@ -322,8 +333,13 @@ void Crownstone::initDrivers() {
 		nrf_gpio_cfg_output(_boardsConfig.pinLedRed);
 		nrf_gpio_cfg_output(_boardsConfig.pinLedGreen);
 		// setting the pin makes them turn off ....
-		nrf_gpio_pin_set(_boardsConfig.pinLedRed);
-		nrf_gpio_pin_set(_boardsConfig.pinLedGreen);
+		if (_boardsConfig.flags.ledInverted) {
+			nrf_gpio_pin_set(_boardsConfig.pinLedRed);
+			nrf_gpio_pin_set(_boardsConfig.pinLedGreen);
+		} else {
+			nrf_gpio_pin_clear(_boardsConfig.pinLedRed);
+			nrf_gpio_pin_clear(_boardsConfig.pinLedGreen);
+		}
 	}
 }
 

@@ -522,13 +522,18 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			LOGi("set led %d %s", led, enable ? "ON" : "OFF");
 
 			uint8_t ledPin = led == 1 ? _boardConfig->pinLedGreen : _boardConfig->pinLedRed;
+
+			if (_boardConfig->flags.ledInverted) {
+				enable = !enable;
+			}
+
 	//		switch_state_t switchState = {};
 			if (enable) {
 	//			switchState.pwm_state = 100;
-				nrf_gpio_pin_clear(ledPin);
+				nrf_gpio_pin_set(ledPin);
 			} else {
 	//			switchState.pwm_state = 10;
-				nrf_gpio_pin_set(ledPin);
+				nrf_gpio_pin_clear(ledPin);
 			}
 	//		EventDispatcher::getInstance().dispatch(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
 		} else {

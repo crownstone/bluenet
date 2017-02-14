@@ -104,6 +104,8 @@ typedef struct  {
 		bool hasSerial: 1;
 		//! true if the board has leds
 		bool hasLed : 1;
+		//! true if led off when gpio set high
+		bool ledInverted: 1;
 	} flags;
 
 	/* device type, e.g. crownstone plug, crownstone builtin, guidestone
