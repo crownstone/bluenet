@@ -167,9 +167,7 @@ TX_POWER=4
 ADVERTISEMENT_INTERVAL=160
 
 ## Mesh settings ##
-MESH_NUM_HANDLES=7
-# Don't process first mesh messages after boot for some time (ms)
-MESH_BOOT_TIME=2000
+MESH_NUM_HANDLES=8
 # Number to filter out messages that are not meant for the mesh
 MESH_ACCESS_ADDRESS=0xA641A69E
 # Minimum interval in ms for broadcasting values of handles (has to be smaller or equal to advertisement interval)

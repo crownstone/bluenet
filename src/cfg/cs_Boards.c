@@ -26,6 +26,7 @@ void as(boards_config_t* p_config) {
 	p_config->flags.pwmInverted    = ;
 	p_config->flags.hasSerial      = ;
 	p_config->flags.hasLed         = ;
+	p_config->flags.ledInverted    = ;
 
 	p_config->deviceType           = ASSIGN_DEVICE_TYPE();
 
@@ -83,6 +84,7 @@ void asACR01B1A(boards_config_t* p_config) {
 	p_config->flags.pwmInverted    = false;
 	p_config->flags.hasSerial      = false;
 	p_config->flags.hasLed         = true;
+	p_config->flags.ledInverted    = false;
 
 	p_config->deviceType           = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
 
@@ -95,7 +97,7 @@ void asACR01B1A(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
 	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
 
-	p_config->minTxPower          = -30; // higher tx power for builtins
+	p_config->minTxPower          = -20; // higher tx power for builtins
 }
 
 void asACR01B2A(boards_config_t* p_config) {
@@ -113,6 +115,7 @@ void asACR01B2A(boards_config_t* p_config) {
 	p_config->flags.pwmInverted    = false;
 	p_config->flags.hasSerial      = false;
 	p_config->flags.hasLed         = true;
+	p_config->flags.ledInverted    = false;
 
 	p_config->deviceType           = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
 
@@ -171,6 +174,7 @@ void asPca10036(boards_config_t* p_config) {
 	p_config->flags.pwmInverted    = true;
 	p_config->flags.hasSerial      = true;
 	p_config->flags.hasLed         = true;
+	p_config->flags.ledInverted    = true;
 
 	p_config->voltageMultiplier   = 0; // set to 0 to disable sampling checks
 	p_config->currentMultiplier   = 0; // set to 0 to disable sampling checks
