@@ -97,7 +97,7 @@ void asACR01B1A(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
 	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
 
-	p_config->minTxPower          = -30; // higher tx power for builtins
+	p_config->minTxPower          = -20; // higher tx power for builtins
 }
 
 void asACR01B2A(boards_config_t* p_config) {
