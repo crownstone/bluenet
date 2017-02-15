@@ -60,14 +60,14 @@ void State::init() {
 	switch_state_storage_t defaultSwitchState = defaultOn ? 100 : 0; // 100 for pwm
 
 #ifdef SWITCH_STATE_PERSISTENT
-	_switchState = new CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY>(_stateHandle,
+	_switchState = new CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY, small_seq_number_t>(_stateHandle,
 	        StorageHelper::getOffset(&state, state.switchState), defaultSwitchState);
 #else
 	_switchState = defaultSwitchState;
 #endif
-	_resetCounter = new CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY>(_stateHandle,
+	_resetCounter = new CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY, small_seq_number_t>(_stateHandle,
 	        StorageHelper::getOffset(&state, state.resetCounter), RESET_COUNTER_DEFAULT);
-	_accumulatedEnergy = new CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY>(_stateHandle,
+	_accumulatedEnergy = new CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY, large_seq_number_t>(_stateHandle,
 	        StorageHelper::getOffset(&state, state.accumulatedEnergy), ACCUMULATED_ENERGY_DEFAULT);
 
 #ifdef PRINT_DEBUG
@@ -96,7 +96,7 @@ ERR_CODE State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, b
 	switch(type) {
 	// uint32_t variables
 	case STATE_RESET_COUNTER: {
-		if (length == 4) {
+		if (length == 2) {
 			uint32_t value = ((uint32_t*) payload)[0];
 			if (value == 0) {
 				return set(type, payload, length);
@@ -125,7 +125,7 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 
 	switch(type) {
 	case STATE_RESET_COUNTER: {
-		size = sizeof(uint32_t);
+		size = sizeof(uint16_t);
 		break;
 	}
 	case STATE_SWITCH_STATE: {
@@ -332,7 +332,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_RESET_COUNTER: {
-			uint32_t value = *(uint32_t*)target;
+			uint16_t value = *(uint16_t*)target;
 			if (_resetCounter->read() != value) {
 				_resetCounter->store(value);
 			}
@@ -427,9 +427,9 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_RESET_COUNTER: {
-			*(uint32_t*)target = _resetCounter->read();
+			*(uint16_t*)target = _resetCounter->read();
 #ifdef PRINT_DEBUG
-			LOGd(FMT_GET_INT_VAL, "reset counter", *(uint32_t*)target);
+			LOGd(FMT_GET_INT_VAL, "reset counter", *(uint16_t*)target);
 #endif
 			break;
 		}

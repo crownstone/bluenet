@@ -7,6 +7,7 @@
 #pragma once
 
 #include <drivers/cs_Storage.h>
+#include <limits>
 //#include <pstorage_platform.h>
 //#include <stddef.h>
 //#include <structs/buffer/cs_CircularBuffer.h>
@@ -14,13 +15,13 @@
 
 //#define PRINT_DEBUG_CYCLIC_STORAGE
 
-template <class T, int U>
+template <class T, int U, class V>
 class CyclicStorage {
 
 public:
 
 	struct __attribute__((__packed__)) storage_element_t {
-		uint32_t seqNumber;
+		V seqNumber;
 		T value;
 	};
 
@@ -100,7 +101,7 @@ public:
 #endif
 
 		for (int i = 0; i < U; ++i) {
-			if ((buffer[i].seqNumber != UINT32_MAX) && (buffer[i].seqNumber >= _seqNumber)) {
+			if ((buffer[i].seqNumber != std::numeric_limits<V>::max()) && (buffer[i].seqNumber >= _seqNumber)) {
 				_seqNumber = buffer[i].seqNumber;
 				_value = buffer[i].value;
 				_tail = i;
@@ -127,7 +128,7 @@ private:
 	Storage* _storage;
 
 	uint16_t _tail;
-	uint32_t _seqNumber;
+	V _seqNumber;
 	T _value;
 	T _defaultValue;
 
