@@ -69,8 +69,10 @@ void Switch::init(boards_config_t* board) {
 		nrf_gpio_pin_clear(_pinRelayOn);
 	}
 
-	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
-	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
+	// For now: just turn it off on init, for safety.
+//	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
+//	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
+	pwmOff();
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_switchTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSwitch);

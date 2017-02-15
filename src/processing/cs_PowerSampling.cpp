@@ -173,6 +173,20 @@ void PowerSampling::sentDone() {
 
 
 void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
+//	// Connect pinAinCurrent to GND and pinAinVoltage to VDD to perform this test.
+//	for (int i=1; i<size; i++) {
+//		if (i % 2 == 0) {
+//			if (!(buf[i] < 4000)) {
+//				write("buf: ");
+//				for (int j=0; j<size; j++) {
+//					write("%d ", buf[j]);
+//					if ((j+1) % 30 == 0) write("\r\n");
+//				}
+//				write("\r\n");
+//			}
+//			assert(buf[i] < 4000, "wrong pin!");
+//		}
+//	}
 
 	uint16_t voltageIndex = 1;
 	uint16_t currentIndex = 0;
