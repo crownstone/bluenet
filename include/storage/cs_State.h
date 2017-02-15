@@ -1,8 +1,8 @@
 /*
  * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Copyright: Crownstone B.V. (https://crownstone.rocks)
  * Date: Apr 28, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache, MIT
  */
 #pragma once
 
@@ -36,8 +36,28 @@ typedef uint32_t switch_state_storage_t;
 #define ACCUMULATED_ENERGY_DEFAULT 0
 typedef int32_t accumulated_energy_t;
 
-/** Struct used to store elements that are changed frequently. each element
- *  will be stored separately. elements need to be 4 byte sized
+/** 
+ * The ps_state_t struct is used to store elements that are changed relatively frequently. Each element is stored 
+ * separately (the struct is not persisted in its entirety because that would lead to unnecessary writes to FLASH). 
+ * The writes to FLASH are on the level of words (4 bytes). This is a requirement enforced by pstorage and not
+ * conforming to it leads to runtime errors.
+ *
+ * The nRF52 has 512 kB FLASH at 0x00000000 to 0x00080000 in the memory map. The last page (addresses 0x7F000 to 
+ * 0x7FFFF) is the internal pstorage swap page. If there are two pages reserved for the application data, it is two 
+ * pages below the pstorage swap page in the memory map (addresses 7D000 to 7EFFF).
+ *
+ * The nRF52 has 10.000 erase/write cycles. The X_REDUNDANCY macros define redundancy in writing to FLASH. Each write
+ * a counter is shifted with the size of the field to be stored. This counter is stored with the field and is persisted
+ * as well. If not, we would not be able to  pick the right persisted value.
+ *
+ * A macro such as SWITCH_STATE_REDUNCACY equal to 10 means 100.000 erase/write cycles. Assuming a lifetime of 10 years,
+ * this amounts to 87.600 hours. Hence, this redundancy allows us to toggle state once an hour and persist that state.
+ * 
+ * The ACCUMULATED_ENERGY_REDUNDANCY at x72 is 720.000 erase/write cycles. There are 5.256.000 minutes in 10 years,
+ * hence this amounts to every 7 and a half minute.
+ *
+ * TODO: The seq_number_t counter struct is 32-bits, while 8-bits would already be sufficient.
+ * TODO: The switch_state_storage_t field is 32-bits, while 8-bits would be sufficient (1 on/off bit, 7 dimming bits).
  */
 struct ps_state_t : ps_storage_base_t {
 	// switch state
