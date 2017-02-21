@@ -23,8 +23,10 @@ COMP::COMP() {
 void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 	LOGd("init");
 	_lastEventTimestamp = RTC::getCount();
+#ifdef NRF52_PAN_12
 	applyWorkarounds();
 //	comp_work_around();
+#endif
 
 	nrf_comp_th_t threshold = {
 			.th_down = VOLTAGE_THRESHOLD_TO_INT(thresholdDown, 3.3),
