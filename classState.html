@@ -106,13 +106,14 @@ Collaboration diagram for State:</div>
 <div class="dyncontent">
 <div class="center"><img src="classState__coll__graph.png" border="0" usemap="#State_coll__map" alt="Collaboration graph"/></div>
 <map name="State_coll__map" id="State_coll__map">
-<area shape="rect" id="node2" href="classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY \&gt;" alt="" coords="187,5,441,61"/>
-<area shape="rect" id="node3" href="classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="281,85,347,112"/>
-<area shape="rect" id="node4" href="classEventListener.html" title="Event listener. " alt="" coords="20,85,123,112"/>
-<area shape="rect" id="node5" href="classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY \&gt;" alt="" coords="209,136,419,192"/>
-<area shape="rect" id="node6" href="structps__general__vars__t.html" title="Struct used to ... " alt="" coords="250,216,378,243"/>
-<area shape="rect" id="node7" href="structps__storage__base__t.html" title="enable additional debug output " alt="" coords="5,216,137,243"/>
-<area shape="rect" id="node8" href="classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY \&gt;" alt="" coords="220,267,408,323"/>
+<area shape="rect" id="node2" href="classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="287,5,353,32"/>
+<area shape="rect" id="node3" href="classEventListener.html" title="Event listener. " alt="" coords="20,5,123,32"/>
+<area shape="rect" id="node4" href="structstate__errors__t.html" title="state_errors_t" alt="" coords="269,56,371,83"/>
+<area shape="rect" id="node5" href="classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY, small\l_seq_number_t \&gt;" alt="" coords="213,107,427,178"/>
+<area shape="rect" id="node6" href="structps__general__vars__t.html" title="Struct used to ... " alt="" coords="256,203,384,229"/>
+<area shape="rect" id="node7" href="structps__storage__base__t.html" title="enable additional debug output " alt="" coords="5,203,137,229"/>
+<area shape="rect" id="node8" href="classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY, large_seq_number_t \&gt;" alt="" coords="189,253,451,309"/>
+<area shape="rect" id="node9" href="classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY, small_seq_number_t \&gt;" alt="" coords="187,333,453,389"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -140,6 +141,9 @@ ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a0be6c214cf1267dd5c734b231fc68ab6">get</a> (uint8_t type, uint32_t &amp;target)</td></tr>
 <tr class="memdesc:a0be6c214cf1267dd5c734b231fc68ab6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a state variable from storage (to be used in application) <br /></td></tr>
 <tr class="separator:a0be6c214cf1267dd5c734b231fc68ab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0228e3c1daf8e4346cbe78a1a6adde2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac0228e3c1daf8e4346cbe78a1a6adde2"></a>
+ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> (uint8_t type, uint16_t &amp;target)</td></tr>
+<tr class="separator:ac0228e3c1daf8e4346cbe78a1a6adde2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4e60cf1a0d723fb82e1fdd2a895685f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad4e60cf1a0d723fb82e1fdd2a895685f"></a>
 ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> (uint8_t type, uint8_t &amp;target)</td></tr>
 <tr class="separator:ad4e60cf1a0d723fb82e1fdd2a895685f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -150,6 +154,9 @@ ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> (uint8_t 
 ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a1774d15a37ebfa937c841aaa2991e15c">set</a> (uint8_t type, uint8_t value)</td></tr>
 <tr class="memdesc:a1774d15a37ebfa937c841aaa2991e15c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a state variable to storage. <br /></td></tr>
 <tr class="separator:a1774d15a37ebfa937c841aaa2991e15c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae38dd435f9ced653408dedba24138be0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae38dd435f9ced653408dedba24138be0"></a>
+ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><b>set</b> (uint8_t type, uint16_t value)</td></tr>
+<tr class="separator:ae38dd435f9ced653408dedba24138be0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af72633364cc280e53ee85f7d79e59925"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af72633364cc280e53ee85f7d79e59925"></a>
 ERR_CODE&#160;</td><td class="memItemRight" valign="bottom"><b>set</b> (uint8_t type, uint32_t value)</td></tr>
 <tr class="separator:af72633364cc280e53ee85f7d79e59925"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -222,18 +229,18 @@ pstorage_handle_t&#160;</td><td class="memItemRight" valign="bottom"><b>_structH
 <tr class="memitem:a576b0ba7a6dee6d865d350a9c1572aa8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a576b0ba7a6dee6d865d350a9c1572aa8"></a>
 <a class="el" href="structps__general__vars__t.html">ps_general_vars_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_storageStruct</b></td></tr>
 <tr class="separator:a576b0ba7a6dee6d865d350a9c1572aa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d7e20ec548d9c56b25b2a48c01a15f6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1d7e20ec548d9c56b25b2a48c01a15f6"></a>
-<a class="el" href="classCyclicStorage.html">CyclicStorage</a>&lt; reset_counter_t, RESET_COUNTER_REDUNDANCY &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a1d7e20ec548d9c56b25b2a48c01a15f6">_resetCounter</a></td></tr>
-<tr class="memdesc:a1d7e20ec548d9c56b25b2a48c01a15f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">counts application resets (only for debug purposes?) <br /></td></tr>
-<tr class="separator:a1d7e20ec548d9c56b25b2a48c01a15f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ee797c403a49bc478178bb88225efcd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5ee797c403a49bc478178bb88225efcd"></a>
-<a class="el" href="classCyclicStorage.html">CyclicStorage</a>&lt; switch_state_storage_t, SWITCH_STATE_REDUNDANCY &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a5ee797c403a49bc478178bb88225efcd">_switchState</a></td></tr>
-<tr class="memdesc:a5ee797c403a49bc478178bb88225efcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">keeps track of the switch state, i.e. current <a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> value <br /></td></tr>
-<tr class="separator:a5ee797c403a49bc478178bb88225efcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9cd06baf445642ac765c4201c0e53aaa"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9cd06baf445642ac765c4201c0e53aaa"></a>
-<a class="el" href="classCyclicStorage.html">CyclicStorage</a>&lt; accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a9cd06baf445642ac765c4201c0e53aaa">_accumulatedEnergy</a></td></tr>
-<tr class="memdesc:a9cd06baf445642ac765c4201c0e53aaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">keeps track of the accumulated power <br /></td></tr>
-<tr class="separator:a9cd06baf445642ac765c4201c0e53aaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58e041e31374bd9317e61c900fcc5bf0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a58e041e31374bd9317e61c900fcc5bf0"></a>
+<a class="el" href="classCyclicStorage.html">CyclicStorage</a>&lt; reset_counter_t, RESET_COUNTER_REDUNDANCY, small_seq_number_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a58e041e31374bd9317e61c900fcc5bf0">_resetCounter</a></td></tr>
+<tr class="memdesc:a58e041e31374bd9317e61c900fcc5bf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">counts application resets (only for debug purposes?) <br /></td></tr>
+<tr class="separator:a58e041e31374bd9317e61c900fcc5bf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1898f7c862fbd255dbd3a2e4a832445b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1898f7c862fbd255dbd3a2e4a832445b"></a>
+<a class="el" href="classCyclicStorage.html">CyclicStorage</a>&lt; switch_state_storage_t, SWITCH_STATE_REDUNDANCY, small_seq_number_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a1898f7c862fbd255dbd3a2e4a832445b">_switchState</a></td></tr>
+<tr class="memdesc:a1898f7c862fbd255dbd3a2e4a832445b"><td class="mdescLeft">&#160;</td><td class="mdescRight">keeps track of the switch state, i.e. current <a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> value <br /></td></tr>
+<tr class="separator:a1898f7c862fbd255dbd3a2e4a832445b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3daf9a7b83dc7fd65ca2efbf412094a6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3daf9a7b83dc7fd65ca2efbf412094a6"></a>
+<a class="el" href="classCyclicStorage.html">CyclicStorage</a>&lt; accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY, large_seq_number_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a3daf9a7b83dc7fd65ca2efbf412094a6">_accumulatedEnergy</a></td></tr>
+<tr class="memdesc:a3daf9a7b83dc7fd65ca2efbf412094a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">keeps track of the accumulated power <br /></td></tr>
+<tr class="separator:a3daf9a7b83dc7fd65ca2efbf412094a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2af1542e38b404b62403bcfd75ea157"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2af1542e38b404b62403bcfd75ea157"></a>
 std::vector&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>_notifyingStates</b></td></tr>
 <tr class="separator:ac2af1542e38b404b62403bcfd75ea157"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -250,6 +257,9 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>_time</b></td></t
 <tr class="memitem:ad921bb8f32898603c4764ed1498d909d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad921bb8f32898603c4764ed1498d909d"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>_factoryResetState</b></td></tr>
 <tr class="separator:ad921bb8f32898603c4764ed1498d909d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c3deff3eabe178e9d9a6e4c667b6dab"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6c3deff3eabe178e9d9a6e4c667b6dab"></a>
+<a class="el" href="structstate__errors__t.html">state_errors_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_errorState</b></td></tr>
+<tr class="separator:a6c3deff3eabe178e9d9a6e4c667b6dab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Load StateVars from and save StateVars to persistent storage. </p>

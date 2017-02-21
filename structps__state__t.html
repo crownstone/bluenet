@@ -94,7 +94,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
-<p>Struct used to store elements that are changed frequently.  
+<p>The <a class="el" href="structps__state__t.html" title="The ps_state_t struct is used to store elements that are changed relatively frequently. ">ps_state_t</a> struct is used to store elements that are changed relatively frequently.  
  <a href="structps__state__t.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="cs__State_8h_source.html">cs_State.h</a>&gt;</code></p>
@@ -117,19 +117,24 @@ Collaboration diagram for ps_state_t:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:afeccee35909d8f869c70dd01bd3497f9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afeccee35909d8f869c70dd01bd3497f9"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>switchState</b> [SWITCH_STATE_REDUNDANCY *ELEM_SIZE(switch_state_storage_t)]</td></tr>
-<tr class="separator:afeccee35909d8f869c70dd01bd3497f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38973e3bc9967070636bb8aa4484e1d3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a38973e3bc9967070636bb8aa4484e1d3"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>resetCounter</b> [RESET_COUNTER_REDUNDANCY *ELEM_SIZE(reset_counter_t)]</td></tr>
-<tr class="separator:a38973e3bc9967070636bb8aa4484e1d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa80f45c6353c56ba5350507d3dbb90de"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa80f45c6353c56ba5350507d3dbb90de"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>accumulatedEnergy</b> [ACCUMULATED_ENERGY_REDUNDANCY *ELEM_SIZE(accumulated_energy_t)]</td></tr>
-<tr class="separator:aa80f45c6353c56ba5350507d3dbb90de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a431bee2a50c2f17effe44d619cdf9490"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a431bee2a50c2f17effe44d619cdf9490"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>resetCounter</b> [RESET_COUNTER_REDUNDANCY *ELEM_SIZE(reset_counter_t, small_seq_number_t)]</td></tr>
+<tr class="separator:a431bee2a50c2f17effe44d619cdf9490"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aacccb53c382aa8a5b82f2dcee43fb168"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aacccb53c382aa8a5b82f2dcee43fb168"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>switchState</b> [SWITCH_STATE_REDUNDANCY *ELEM_SIZE(switch_state_storage_t, small_seq_number_t)]</td></tr>
+<tr class="separator:aacccb53c382aa8a5b82f2dcee43fb168"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a282b1e95dbff5c7f69eb5ce37733488a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a282b1e95dbff5c7f69eb5ce37733488a"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>accumulatedEnergy</b> [ACCUMULATED_ENERGY_REDUNDANCY *ELEM_SIZE(accumulated_energy_t, large_seq_number_t)]</td></tr>
+<tr class="separator:a282b1e95dbff5c7f69eb5ce37733488a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Struct used to store elements that are changed frequently. </p>
-<p>each element will be stored separately. elements need to be 4 byte sized </p>
+<div class="textblock"><p>The <a class="el" href="structps__state__t.html" title="The ps_state_t struct is used to store elements that are changed relatively frequently. ">ps_state_t</a> struct is used to store elements that are changed relatively frequently. </p>
+<p>Each element is stored separately (the struct is not persisted in its entirety because that would lead to unnecessary writes to FLASH). The writes to FLASH are on the level of words (4 bytes). This is a requirement enforced by pstorage and not conforming to it leads to runtime errors.</p>
+<p>The nRF52 has 512 kB FLASH at 0x00000000 to 0x00080000 in the memory map. With the bootloader at the end of the FLASH, the last page available for pstorage is from address 0x78000 to 0x79FFF and is used as internal pstorage swap page. If there are two pages reserved for the application data, it is two pages below the pstorage swap page in the memory map (addresses 76000 to 77FFF).</p>
+<p>The nRF52 has 10.000 erase/write cycles. The X_REDUNDANCY macros define redundancy in writing to FLASH. Each write a counter is shifted with the size of the field to be stored. This counter is stored with the field and is persisted as well. If not, we would not be able to pick the right persisted value.</p>
+<p>A macro such as SWITCH_STATE_REDUNCACY equal to 200 means 2.000.000 erase/write cycles. Assuming a lifetime of 10 years, this amounts to 87.600 hours. Hence, this redundancy allows us to toggle state 20 times per hour and persist that state.</p>
+<p>The ACCUMULATED_ENERGY_REDUNDANCY at 200 is 2.000.000 erase/write cycles. There are 5.256.000 minutes in 10 years, hence this amounts to every 2 and a half minute.</p>
+<p>TODO: The seq_number_t counter struct is 16-bits, while 8-bits would already be sufficient. TODO: The switch_state_storage_t field is 16-bits, while 8-bits would be sufficient (1 on/off bit, 7 dimming bits). </p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>include/storage/<a class="el" href="cs__State_8h_source.html">cs_State.h</a></li>
 </ul>

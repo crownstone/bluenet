@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['writable',['writable',['../structStatus.html#ab18e02b5adff9fe96b6e5e62fc1693a2',1,'Status']]]
+  ['voltagemultiplier',['voltageMultiplier',['../structboards__config__t.html#a13e960b6f7f53e167fcc2979dbe28b89',1,'boards_config_t']]],
+  ['voltagezero',['voltageZero',['../structboards__config__t.html#a429f9a7994d32d7ea18ad7e42927c479',1,'boards_config_t']]]
 ];

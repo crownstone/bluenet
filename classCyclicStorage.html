@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>Bluenet: CyclicStorage&lt; T, U &gt; Class Template Reference</title>
+<title>Bluenet: CyclicStorage&lt; T, U, V &gt; Class Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -91,11 +91,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classCyclicStorage-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">CyclicStorage&lt; T, U &gt; Class Template Reference</div>  </div>
+<div class="title">CyclicStorage&lt; T, U, V &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Author: Dominik Egger Copyright: Distributed Organisms B.V.  
+<p>Author: Dominik Egger Copyright: <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> B.V.  
  <a href="classCyclicStorage.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="cs__CyclicStorage_8h_source.html">cs_CyclicStorage.h</a>&gt;</code></p>
@@ -107,32 +107,91 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a925588d849ce79c3598d0e89c87e32ba"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a925588d849ce79c3598d0e89c87e32ba"></a>
+<tr class="memitem:a8c21438aae42f1841f6dcd76f5b5121e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8c21438aae42f1841f6dcd76f5b5121e"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>CyclicStorage</b> (pstorage_handle_t handle, pstorage_size_t offset, T defaultValue)</td></tr>
-<tr class="separator:a925588d849ce79c3598d0e89c87e32ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0e5437855e23b50689d8fb742840397"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af0e5437855e23b50689d8fb742840397"></a>
+<tr class="separator:a8c21438aae42f1841f6dcd76f5b5121e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20d376e93f52dbb0d207cd332bbefb7a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a20d376e93f52dbb0d207cd332bbefb7a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>store</b> (T value)</td></tr>
-<tr class="separator:af0e5437855e23b50689d8fb742840397"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c4fa1bfe906875138c2398e26ad742c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8c4fa1bfe906875138c2398e26ad742c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>print</b> ()</td></tr>
-<tr class="separator:a8c4fa1bfe906875138c2398e26ad742c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a853fe8fb183093cca447b14ed7d3db22"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a853fe8fb183093cca447b14ed7d3db22"></a>
-T&#160;</td><td class="memItemRight" valign="bottom"><b>read</b> ()</td></tr>
-<tr class="separator:a853fe8fb183093cca447b14ed7d3db22"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a76d829a2306dad76c65cf1745107e9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9a76d829a2306dad76c65cf1745107e9"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>loadFromStorage</b> ()</td></tr>
-<tr class="separator:a9a76d829a2306dad76c65cf1745107e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2af9d2b9af44325ea3442901d30f8260"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2af9d2b9af44325ea3442901d30f8260"></a>
+<tr class="separator:a20d376e93f52dbb0d207cd332bbefb7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bf33a0bada95d7ee62586e6a174c1c8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCyclicStorage.html#a7bf33a0bada95d7ee62586e6a174c1c8">print</a> () const </td></tr>
+<tr class="memdesc:a7bf33a0bada95d7ee62586e6a174c1c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The print function displays the entire buffer representing the value in FLASH.  <a href="#a7bf33a0bada95d7ee62586e6a174c1c8">More...</a><br /></td></tr>
+<tr class="separator:a7bf33a0bada95d7ee62586e6a174c1c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2522a8d344a60df5db0a19c75293ce2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab2522a8d344a60df5db0a19c75293ce2"></a>
+T&#160;</td><td class="memItemRight" valign="bottom"><b>read</b> () const </td></tr>
+<tr class="separator:ab2522a8d344a60df5db0a19c75293ce2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4900926596743c05f7673f672ca67429"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCyclicStorage.html#a4900926596743c05f7673f672ca67429">loadFromStorage</a> ()</td></tr>
+<tr class="memdesc:a4900926596743c05f7673f672ca67429"><td class="mdescLeft">&#160;</td><td class="mdescRight">A value can be stored at different locations in FLASH.  <a href="#a4900926596743c05f7673f672ca67429">More...</a><br /></td></tr>
+<tr class="separator:a4900926596743c05f7673f672ca67429"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5b8bab0baee98f2e2ee3ba39e443e66"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa5b8bab0baee98f2e2ee3ba39e443e66"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>reset</b> ()</td></tr>
-<tr class="separator:a2af9d2b9af44325ea3442901d30f8260"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:aa5b8bab0baee98f2e2ee3ba39e443e66"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;class T, int U&gt;<br />
-class CyclicStorage&lt; T, U &gt;</h3>
+<div class="textblock"><h3>template&lt;class T, int U, class V&gt;<br />
+class CyclicStorage&lt; T, U, V &gt;</h3>
 
-<p>Author: Dominik Egger Copyright: Distributed Organisms B.V. </p>
-<p>(DoBots) Date: Apr 28, 2016 License: LGPLv3+ </p>
-</div><hr/>The documentation for this class was generated from the following file:<ul>
+<p>Author: Dominik Egger Copyright: <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> B.V. </p>
+<p>(<a href="https://crownstone.rocks">https://crownstone.rocks</a>) Date: Apr 28, 2016 License: LGPLv3+, Apache, MIT </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a4900926596743c05f7673f672ca67429"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T, int U, class V&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classCyclicStorage.html">CyclicStorage</a>&lt; T, U, V &gt;::loadFromStorage </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>A value can be stored at different locations in FLASH. </p>
+<p>The size of the buffer is given by the template parameter U. The <a class="el" href="classCyclicStorage.html#a4900926596743c05f7673f672ca67429" title="A value can be stored at different locations in FLASH. ">loadFromStorage()</a> function iterates through the values and sets the one with the largest sequence number and the sequence number itself in fields of the class.</p>
+<p>The load function is automatically called from the constructor. After a store() it is not necessary to call <a class="el" href="classCyclicStorage.html#a4900926596743c05f7673f672ca67429" title="A value can be stored at different locations in FLASH. ">loadFromStorage()</a> before calling read().</p>
+<p>TODO: Minor issue. The wrap-around for sequence numbers near TYPE_MAX would return those numbers even if the sequence wrapped around to 0 again. It would be enough to assume an incremental counter. Say, if TYPE_MAX would be 16, then a buffer with U=10 can contain [14 15 0 1 2 3 10 11 12 13] and would need to return 3, not 15. If we calculate diff = ([(i-1)U]+U-[i])U it would be: [30-13 29-14 16-15 17-16 18-17 19-18 26-19 27-26 28-27 29-28]U = [1 1 1 1 1 1 7 1 1 1]. The highest value is 3. Even if the sequence counter skips so now and then, picking the maximum would be pretty robust. </p>
+
+</div>
+</div>
+<a class="anchor" id="a7bf33a0bada95d7ee62586e6a174c1c8"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T, int U, class V&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classCyclicStorage.html">CyclicStorage</a>&lt; T, U, V &gt;::print </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The print function displays the entire buffer representing the value in FLASH. </p>
+<p>It is not ordered in the sense that the most recent is displayed first. </p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>include/storage/<a class="el" href="cs__CyclicStorage_8h_source.html">cs_CyclicStorage.h</a></li>
 </ul>
 </div><!-- contents -->
