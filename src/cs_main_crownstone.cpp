@@ -240,7 +240,7 @@ void Crownstone::configure() {
 	configureStack();
 
 #ifdef RESET_COUNTER
-	uint32_t resetCounter;
+	uint16_t resetCounter;
 	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
 	++resetCounter;
 	LOGf("Reset counter at: %d", resetCounter);
@@ -592,14 +592,14 @@ void Crownstone::setName() {
 
 #if CHANGE_NAME_ON_RESET==1
 	//! get reset counter
-	uint32_t resetCounter;
+	uint16_t resetCounter;
 	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
 //	uint16_t minor;
 //	ps_configuration_t cfg = Settings::getInstance().getConfig();
 //	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
 	char devicename_resetCounter[32];
 	//! clip name to 5 chars and add reset counter at the end
-	sprintf(devicename_resetCounter, "%.*s_%lu", MIN(size, 5), device_name, resetCounter);
+	sprintf(devicename_resetCounter, "%.*s_%d", MIN(size, 5), device_name, resetCounter);
 	std::string deviceName = std::string(devicename_resetCounter);
 #else
 	std::string deviceName(device_name, size);

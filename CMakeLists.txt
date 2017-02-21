@@ -136,70 +136,52 @@ IF(${EDDYSTONE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Eddystone.cpp")
 ENDIF()
 
+IF(${MESHING} STRGREATER "0" AND ${BUILD_MESHING} STREQUAL "0")
+	MESSAGE(FATAL_ERROR "Need to set BUILD_MESHING=1 if MESHING should be enabled!")
+ENDIF()
+
 IF(${BUILD_MESHING} STRGREATER "0")
 
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshControl.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_Mesh.cpp")
 
-	IF(${USE_MESH_REPOSITORY} STRGREATER "0")
-		IF(IS_DIRECTORY "${MESH_DIR}")
-			MESSAGE(STATUS "Use directory ${MESH_DIR} for the mesh")
-		ELSE()
-			MESSAGE(FATAL_ERROR "Directory \"${MESH_DIR}\" does not exist! Clone https://github.com/mrquincle/nRF51-ble-bcast-mesh and switch to nrf52 branch.")
-		ENDIF()
-		EXECUTE_PROCESS(
-			COMMAND git rev-parse --abbrev-ref HEAD
-			WORKING_DIRECTORY ${MESH_DIR}
-			OUTPUT_VARIABLE MESH_BRANCH
-			OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-		IF(MESH_BRANCH STREQUAL "bluenet")
-			MESSAGE(STATUS "Using bluenet branch for the Mesh")
-		ELSE()
-			MESSAGE(FATAL_ERROR "Switch ${MESH_DIR} to bluenet branch. The master branch is not bluenet-compatible yet.")
-		ENDIF()
-
-		SET(INCLUDE_DIR "${INCLUDE_DIR}" "${MESH_DIR}" "${MESH_DIR}/include")
-		MESSAGE(STATUS "Include dirs: " ${INCLUDE_DIR})
-
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/event_handler.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/fifo.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/handle_storage.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_aci.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_gatt.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_packet.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/notification_buffer.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/radio_control.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/rand.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/rbc_mesh.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/timer.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/timeslot.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/timer_scheduler.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/transport_control.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/trickle.c")
-		LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/version_handler.c")
-
+	IF(IS_DIRECTORY "${MESH_DIR}")
+		MESSAGE(STATUS "Use directory ${MESH_DIR} for the mesh")
 	ELSE()
-		SET(INCLUDE_DIR "${INCLUDE_DIR}" "include/third/protocol")
-
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/event_handler.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/fifo.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/handle_storage.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/mesh_aci.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/mesh_gatt.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/mesh_packet.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/notification_buffer.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/radio_control.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/rand.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/rbc_mesh.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/timer.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/timer_scheduler.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/timeslot.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/transport_control.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/trickle.c")
-		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/protocol/version_handler.c")
-
+		MESSAGE(FATAL_ERROR "Directory \"${MESH_DIR}\" does not exist! Clone https://github.com/mrquincle/nRF51-ble-bcast-mesh and switch to nrf52 branch.")
 	ENDIF()
+	EXECUTE_PROCESS(
+		COMMAND git rev-parse --abbrev-ref HEAD
+		WORKING_DIRECTORY ${MESH_DIR}
+		OUTPUT_VARIABLE MESH_BRANCH
+		OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+	IF(MESH_BRANCH STREQUAL "bluenet")
+		MESSAGE(STATUS "Using bluenet branch for the Mesh")
+	ELSE()
+		MESSAGE(FATAL_ERROR "Switch ${MESH_DIR} to bluenet branch. The master branch is not bluenet-compatible yet.")
+	ENDIF()
+
+	SET(INCLUDE_DIR "${INCLUDE_DIR}" "${MESH_DIR}" "${MESH_DIR}/include")
+	MESSAGE(STATUS "Include dirs: " ${INCLUDE_DIR})
+
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/event_handler.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/fifo.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/handle_storage.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_aci.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_gatt.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_packet.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/notification_buffer.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/radio_control.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/rand.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/rbc_mesh.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/timer.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/timeslot.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/timer_scheduler.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/transport_control.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/trickle.c")
+	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/version_handler.c")
+
 ENDIF()
 
 IF(${BUILD_MESHING} STRGREATER "0")

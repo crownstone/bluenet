@@ -1,8 +1,8 @@
 /*
  * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Copyright: Crownstone B.V. (https://crownstone.rocks)
  * Date: Apr 28, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache, MIT
  */
 #pragma once
 
@@ -21,34 +21,56 @@
 #define OPERATION_MODE_FACTORY_RESET               0x02
 #define OPERATION_MODE_NORMAL                      0x10
 
-typedef uint32_t seq_number_t;
+typedef uint16_t small_seq_number_t;
+typedef uint32_t large_seq_number_t;
 
-#define ELEM_SIZE(e) (sizeof(e) + sizeof(seq_number_t))
+#define ELEM_SIZE(e, c) (sizeof(e) + sizeof(c))
 
-#define RESET_COUNTER_REDUNDANCY 10
+#define RESET_COUNTER_REDUNDANCY 20
 #define RESET_COUNTER_DEFAULT -1
-typedef uint32_t reset_counter_t;
+typedef uint16_t reset_counter_t;
 
-#define SWITCH_STATE_REDUNDANCY 10
-typedef uint32_t switch_state_storage_t;
+#define SWITCH_STATE_REDUNDANCY 200
+typedef uint16_t switch_state_storage_t;
 
-#define ACCUMULATED_ENERGY_REDUNDANCY 72
+#define ACCUMULATED_ENERGY_REDUNDANCY 200
 #define ACCUMULATED_ENERGY_DEFAULT 0
 typedef int32_t accumulated_energy_t;
 
-/** Struct used to store elements that are changed frequently. each element
- *  will be stored separately. elements need to be 4 byte sized
+/** 
+ * The ps_state_t struct is used to store elements that are changed relatively frequently. Each element is stored 
+ * separately (the struct is not persisted in its entirety because that would lead to unnecessary writes to FLASH). 
+ * The writes to FLASH are on the level of words (4 bytes). This is a requirement enforced by pstorage and not
+ * conforming to it leads to runtime errors.
+ *
+ * The nRF52 has 512 kB FLASH at 0x00000000 to 0x00080000 in the memory map. With the bootloader at the end of the FLASH,
+ * the last page available for pstorage is from address 0x78000 to 0x79FFF and is used as internal pstorage swap page.
+ * If there are two pages reserved for the application data, it is two pages below the pstorage swap page in the
+ * memory map (addresses 76000 to 77FFF).
+ *
+ * The nRF52 has 10.000 erase/write cycles. The X_REDUNDANCY macros define redundancy in writing to FLASH. Each write
+ * a counter is shifted with the size of the field to be stored. This counter is stored with the field and is persisted
+ * as well. If not, we would not be able to  pick the right persisted value.
+ *
+ * A macro such as SWITCH_STATE_REDUNCACY equal to 200 means 2.000.000 erase/write cycles. Assuming a lifetime of 10 years,
+ * this amounts to 87.600 hours. Hence, this redundancy allows us to toggle state 20 times per hour and persist that state.
+ * 
+ * The ACCUMULATED_ENERGY_REDUNDANCY at 200 is 2.000.000 erase/write cycles. There are 5.256.000 minutes in 10 years,
+ * hence this amounts to every 2 and a half minute.
+ *
+ * TODO: The seq_number_t counter struct is 16-bits, while 8-bits would already be sufficient.
+ * TODO: The switch_state_storage_t field is 16-bits, while 8-bits would be sufficient (1 on/off bit, 7 dimming bits).
  */
 struct ps_state_t : ps_storage_base_t {
-	// switch state
-	uint8_t switchState[SWITCH_STATE_REDUNDANCY * ELEM_SIZE(switch_state_storage_t)];
 	// counts resets
-	uint8_t resetCounter[RESET_COUNTER_REDUNDANCY * ELEM_SIZE(reset_counter_t)];
+	uint8_t resetCounter[RESET_COUNTER_REDUNDANCY * ELEM_SIZE(reset_counter_t, small_seq_number_t)];
+	// switch state
+	uint8_t switchState[SWITCH_STATE_REDUNDANCY * ELEM_SIZE(switch_state_storage_t, small_seq_number_t)];
 	// accumulated power
-	uint8_t accumulatedEnergy[ACCUMULATED_ENERGY_REDUNDANCY * ELEM_SIZE(accumulated_energy_t)];
-}; // FULL
+	uint8_t accumulatedEnergy[ACCUMULATED_ENERGY_REDUNDANCY * ELEM_SIZE(accumulated_energy_t, large_seq_number_t)];
+};
 
-//! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
+//! size of one block in eeprom can't be bigger than 0x1000 bytes. => create a new struct
 STATIC_ASSERT(sizeof(ps_state_t) <= 0x1000);
 
 //todo: lists need to be adjusted to use cyclic storages for wear leveling
@@ -61,7 +83,7 @@ struct __attribute__ ((aligned (4))) ps_general_vars_t : ps_storage_base_t {
 	uint8_t learnedSwitches[MAX_SWITCHES * sizeof(learned_enocean_t)] __attribute__ ((aligned (4)));
 };
 
-//! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
+//! size of one block in eeprom can't be bigger than 0x1000 bytes. => create a new struct
 STATIC_ASSERT(sizeof(ps_general_vars_t) <= 0x1000);
 
 struct state_vars_notifaction {
@@ -129,6 +151,9 @@ public:
 	ERR_CODE get(uint8_t type, uint32_t& target) {
 		return get(type, &target, sizeof(uint32_t));
 	}
+	ERR_CODE get(uint8_t type, uint16_t& target) {
+		return get(type, &target, sizeof(uint16_t));
+	}
 	ERR_CODE get(uint8_t type, uint8_t& target) {
 		return get(type, &target, sizeof(uint8_t));
 	}
@@ -141,6 +166,9 @@ public:
 	 */
 	ERR_CODE set(uint8_t type, uint8_t value) {
 		return set(type, &value, sizeof(uint8_t));
+	}
+	ERR_CODE set(uint8_t type, uint16_t value) {
+		return set(type, &value, sizeof(uint16_t));
 	}
 	ERR_CODE set(uint8_t type, uint32_t value) {
 		return set(type, &value, sizeof(uint32_t));
@@ -193,15 +221,15 @@ protected:
 	ps_general_vars_t _storageStruct;
 
 	//! counts application resets (only for debug purposes?)
-	CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY>* _resetCounter;
+	CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY, small_seq_number_t>* _resetCounter;
 	//! keeps track of the switch state, i.e. current PWM value
 #ifdef SWITCH_STATE_PERSISTENT
-	CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY>* _switchState;
+	CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY, small_seq_number_t>* _switchState;
 #else
 	uint8_t _switchState;
 #endif
 	//! keeps track of the accumulated power
-	CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY>* _accumulatedEnergy;
+	CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY, large_seq_number_t>* _accumulatedEnergy;
 
 	std::vector<uint8_t> _notifyingStates;
 
