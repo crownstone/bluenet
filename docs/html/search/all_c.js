@@ -10,5 +10,7 @@ var searchData=
   ['meshcontrol',['MeshControl',['../classMeshControl.html',1,'']]],
   ['minenvtemp',['minEnvTemp',['../structps__configuration__t.html#aeccdbcac318278a34dd5213ed840ed34',1,'ps_configuration_t']]],
   ['minor',['minor',['../classIBeacon.html#aa5f782308bd7fe44ed58c97c7ae3652a',1,'IBeacon']]],
-  ['mstoticks',['msToTicks',['../classRTC.html#acfadc7aec118a7c886cc721bc7bf01bf',1,'RTC']]]
+  ['mstoticks',['msToTicks',['../classRTC.html#acfadc7aec118a7c886cc721bc7bf01bf',1,'RTC']]],
+  ['multi_5fswitch_5fitem_5ft',['multi_switch_item_t',['../structmulti__switch__item__t.html',1,'']]],
+  ['multi_5fswitch_5fmessage_5ft',['multi_switch_message_t',['../structmulti__switch__message__t.html',1,'']]]
 ];
