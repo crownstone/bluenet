@@ -20,7 +20,7 @@
 //#define PRINT_ADC_VERBOSE
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
 
-ADC::ADC(): _timer(NULL)
+ADC::ADC()
 {
 	_timer = new nrf_drv_timer_t();
 	_timer->p_reg = CS_ADC_TIMER; // Or use CONCAT_2(NRF_TIMER, CS_ADC_TIMER_ID)
@@ -34,9 +34,7 @@ ADC::ADC(): _timer(NULL)
 	_doneCallbackData.buffer = NULL;
 	_doneCallbackData.bufSize = 0;
 	_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
-	_lastFilledBufInd = CS_ADC_NUM_BUFFERS; // Invalid nr
 	_currentBufInd = 0;
-	_queuedBufInd = 1;
 }
 
 /**
@@ -45,7 +43,7 @@ ADC::ADC(): _timer(NULL)
  *
  * @caller src/processing/cs_PowerSampling.cpp
  */
-uint32_t ADC::init(uint8_t pins[], uint8_t numPins) {
+uint32_t ADC::init(const uint8_t pins[], const uint8_t numPins) {
 	ret_code_t err_code;
 
 	for (uint8_t i=0; i<numPins; i++) {
@@ -207,13 +205,6 @@ bool ADC::releaseBuffer(uint8_t bufNum) {
 	_doneCallbackData.bufSize = 0;
 	_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
 
-	//! Put this buffer in queue again
-	if (_currentBufInd == CS_ADC_NUM_BUFFERS) {
-		_currentBufInd = bufNum;
-	}
-	else {
-		_queuedBufInd = bufNum;
-	}
 	ret_code_t err_code;
 	err_code = nrf_drv_saadc_buffer_convert(_bufferPointers[bufNum], CS_ADC_BUF_SIZE);
 	APP_ERROR_CHECK(err_code);
@@ -225,57 +216,25 @@ void adc_done(void * p_event_data, uint16_t event_size) {
 	cbData->callback(cbData->buffer, cbData->bufSize, cbData->bufNum);
 }
 
-void ADC::update(uint32_t value) {
-	//! nrf51 code goes here
-}
-
 void ADC::update(nrf_saadc_value_t* buf) {
-//	write("%i %i\r\n", _currentBufInd, buf);
 	if (_doneCallbackData.callback != NULL && _doneCallbackData.buffer == NULL) {
+		// Fill callback data object, should become available again in releaseBuffer()
 		_doneCallbackData.buffer = buf;
 		_doneCallbackData.bufSize = CS_ADC_BUF_SIZE;
 		_doneCallbackData.bufNum = _currentBufInd;
-//		write("b %i %i\r\n", _currentBufInd, buf);
-		//! Decouple done callback from adc interrupt handler, and put it on app scheduler instead
+
+		// Update index to buffer for next update()
+		_currentBufInd = _currentBufInd % CS_ADC_NUM_BUFFERS;
+
+		// Decouple done callback from adc interrupt handler, and put it on app scheduler instead
 		app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
 	} else {
-//		write("d %i %i\r\n", _currentBufInd, buf);
+		LOGe("Update events arriving too fast! Previous callback not yet handled!");
 	}
-	_currentBufInd = _queuedBufInd;
-	_queuedBufInd = CS_ADC_NUM_BUFFERS;
-//	write("c %i %i\r\n", _currentBufInd, buf);
 }
 
-/** The interrupt handler for an ADC data ready event.
- */
-//extern "C" void ADC_IRQHandler(void) {
-//#if (NORDIC_SDK_VERSION < 11)
-//	uint32_t adc_value;
-//
-//	//! Clear data-ready event
-//	NRF_ADC->EVENTS_END = 0;
-//
-//	//! Get value
-//	adc_value = NRF_ADC->RESULT;
-//	ADC &adc = ADC::getInstance();
-//	adc.update(adc_value);
-//
-////	//! Use the STOP task to save current. Workaround for PAN_028 rev1.5 anomaly 1.
-////	NRF_ADC->TASKS_STOP = 1;
-//
-////	//! next sample
-////	NRF_ADC->TASKS_START = 1;
-//#endif
-//}
-
-//extern "C" void TIMER1_IRQHandler(void) {
-//#if (NORDIC_SDK_VERSION < 11)
-//	CS_ADC_TIMER->EVENTS_COMPARE[0] = 0; // Clear compare match register
-//	CS_ADC_TIMER->TASKS_CLEAR = 1; // Reset timer
-//	NRF_ADC->TASKS_START = 1;
-//	ADC::getInstance()._lastStartTime = RTC::getCount();
-//#endif
-//}
+void ADC::staticTimerHandler(nrf_timer_event_t event_type, void* ptr) {
+}
 
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
 	if (p_event->type == NRF_DRV_SAADC_EVT_DONE) {
