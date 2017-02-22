@@ -128,7 +128,7 @@ public:
 	 * @param[in] size                 Size of the array.
 	 * @return                         Error code (0 means success).
 	 */
-	error_t init(const pin_id_t pins[], const uint8_t numPins);
+	error_t init(const pin_id_t pins[], const pin_count_t numPins);
 
 	/** Start the ADC sampling
 	 */

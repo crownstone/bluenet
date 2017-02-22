@@ -33,6 +33,7 @@ ADC::ADC()
 	_doneCallbackData.callback = NULL;
 	_doneCallbackData.buffer = NULL;
 	_doneCallbackData.bufSize = 0;
+	// TODO: misuse: overload of bufNum field to indicate also initialization
 	_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
 	_currentBufInd = 0;
 }
