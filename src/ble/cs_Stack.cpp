@@ -639,7 +639,7 @@ void Nrf51822BluetoothStack::restartAdvertising() {
 
 	if (_advertising) {
 		err_code = sd_ble_gap_adv_stop();
-		APP_ERROR_CHECK(err_code);
+		APP_ERROR_CHECK(err_code); // Got an error 8 here
 	}
 
 	err_code = sd_ble_gap_adv_start(&_adv_params);
@@ -1288,6 +1288,7 @@ void Nrf51822BluetoothStack::disconnect() {
 		LOGi("Forcibly disconnecting from device");
 		_disconnectingInProgress = true;
 		//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
+		// TODO: this sometimes gives us an error 8 (happened when phone was continously doing connect, write cmd, disconnect)
 		BLE_CALL(sd_ble_gap_disconnect, (_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
 	}
 }

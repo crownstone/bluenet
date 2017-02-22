@@ -15,6 +15,7 @@
   $(document).ready(function() { init_search(); });
 </script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -95,7 +96,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <h1>Usage</h1>
 <p>To use a device with bluenet code on it, you only need to know the Bluetooth protocol that bluenet uses. You can find the protocol definitions in the <a class="el" href="md_docs_PROTOCOL.html">protocol document</a>.</p>
 <h3>Libraries</h3>
-<p>We also provide libraries which take care of the protocol:</p>
+<p>We also provide libraries which implements this protocol (so if you build a smartphone app you will not be bogged down into Bluetooth Low Energy details):</p>
 <ul>
 <li><a href="https://github.com/crownstone/bluenet-lib-android">Android</a></li>
 <li><a href="https://github.com/crownstone/bluenet-ios-lib">iOS</a></li>
@@ -109,19 +110,28 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>You can best communicate bugs and feature requests via the <a href="https://github.com/crownstone/bluenet/issues">issue tracker</a>. For all other questions, please, feel free to ask us anything on our <a href="http://crownstone.rocks">website</a>.</p>
 <h1>Resources</h1>
 <p>The different other software tools and online resources have been mentioned above, but here is a short list:</p>
-<ul>
-<li><a href="https://github.com/crownstone/bluenet">Bluenet (this repos)</a></li>
-<li><a href="http://crownstone.github.io/bluenet/">Bluenet documentation</a></li>
-<li><a href="https://github.com/crownstone/bluenet/tree/gh-pages">Bluenet documentation branch</a></li>
-<li><a href="https://github.com/crownstone/bluenet-lib-android">Android library</a></li>
-<li><a href="https://github.com/crownstone/bluenet-ios-lib">iOS library</a></li>
-<li><a href="https://github.com/crownstone/bluenet-lib-python">Python library</a></li>
-<li><a href="https://github.com/crownstone/nrf51-dfu-bootloader-for-gcc-compiler">Bootloader</a></li>
-<li><a href="http://crownstone.rocks">Crownstone website</a></li>
-<li><a href="https://play.google.com/store/apps/details?id=rocks.crownstone.consumerapp">Crownstone Android app</a></li>
-<li><a href="https://github.com/crownstone/crownstone-app">Crownstone app source</a></li>
-<li><a href="https://github.com/crownstone/crownstone-image">Crownstone USB image</a></li>
-</ul>
+<table class="doxtable">
+<tr>
+<th>Resource </th><th>Description  </th></tr>
+<tr>
+<td><a href="https://github.com/crownstone/bluenet">Bluenet firmware</a> </td><td>This repository, open-source firmware (C++) for smart plugs </td></tr>
+<tr>
+<td><a href="http://crownstone.github.io/bluenet/">Bluenet documentation</a> </td><td>Documentation of the firmware (doxygen-based) </td></tr>
+<tr>
+<td><a href="https://github.com/crownstone/bluenet-lib-android">Android library</a> </td><td>Android library (Java) </td></tr>
+<tr>
+<td><a href="https://github.com/crownstone/bluenet-ios-lib">iOS library</a> </td><td>iOS library (Swift) </td></tr>
+<tr>
+<td><a href="https://github.com/crownstone/nrf51-dfu-bootloader-for-gcc-compiler">Bootloader</a> </td><td>Bootloader, fork of Nordic's bootloader for the smart plugs </td></tr>
+<tr>
+<td><a href="http://crownstone.rocks">Crownstone website</a> </td><td>Website and shop for the <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> plugs </td></tr>
+<tr>
+<td><a href="https://play.google.com/store/apps/details?id=rocks.crownstone.consumerapp">Crownstone Android app</a> </td><td>Android app on the Play Store </td></tr>
+<tr>
+<td><a href="https://itunes.apple.com/us/app/crownstone/id1136616106?mt=8">Crownstone iOS app</a> </td><td>iOS app on the Apple Store </td></tr>
+<tr>
+<td><a href="https://github.com/crownstone/crownstone-app">Crownstone app source</a> </td><td>Source code for the cross-platform app (React Native) </td></tr>
+</table>
 <h1>Commercial use</h1>
 <p>This code is used in a commercial product, the <a href="http://crownstone.rocks">Crownstone</a>. Our intellectual property exists on two levels:</p>
 <ul>

@@ -15,6 +15,7 @@
   $(document).ready(function() { init_search(); });
 </script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -95,7 +96,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
-<p>Protection against temperature exceeding certain threshold.  
+<p>Check if the temperature exceeds a certain threshold.  
  <a href="classTemperatureGuard.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="cs__TemperatureGuard_8h_source.html">cs_TemperatureGuard.h</a>&gt;</code></p>
@@ -118,20 +119,24 @@ Collaboration diagram for TemperatureGuard:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab819ebbfbf5f2d7a3418b474607a75cd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab819ebbfbf5f2d7a3418b474607a75cd"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
-<tr class="separator:ab819ebbfbf5f2d7a3418b474607a75cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa8c28bc6df37e052db24656e626fa563"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTemperatureGuard.html#aa8c28bc6df37e052db24656e626fa563">tick</a> ()</td></tr>
+<tr class="memitem:a303f4ef412ae3824a88b7c1e880d842e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a303f4ef412ae3824a88b7c1e880d842e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (<a class="el" href="structboards__config__t.html">boards_config_t</a> *boardConfig)</td></tr>
+<tr class="separator:a303f4ef412ae3824a88b7c1e880d842e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8c28bc6df37e052db24656e626fa563"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa8c28bc6df37e052db24656e626fa563"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>tick</b> ()</td></tr>
 <tr class="separator:aa8c28bc6df37e052db24656e626fa563"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac48027d3c6e50668043d99f7294a9446"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac48027d3c6e50668043d99f7294a9446"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>scheduleNextTick</b> ()</td></tr>
 <tr class="separator:ac48027d3c6e50668043d99f7294a9446"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87d61126f10f1078c40b10a8e7d78d23"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a87d61126f10f1078c40b10a8e7d78d23"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>startTicking</b> ()</td></tr>
-<tr class="separator:a87d61126f10f1078c40b10a8e7d78d23"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f8309a2ecff8a2697755b83e664ecff"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5f8309a2ecff8a2697755b83e664ecff"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>stopTicking</b> ()</td></tr>
-<tr class="separator:a5f8309a2ecff8a2697755b83e664ecff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acadae66fc40fcafb7775a95d42b034da"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acadae66fc40fcafb7775a95d42b034da"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>start</b> ()</td></tr>
+<tr class="separator:acadae66fc40fcafb7775a95d42b034da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff6877a18eb60f36910dd1fdb4d3bd94"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aff6877a18eb60f36910dd1fdb4d3bd94"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>stop</b> ()</td></tr>
+<tr class="separator:aff6877a18eb60f36910dd1fdb4d3bd94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c6a25422abcc8f38c0e76913d47f71d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1c6a25422abcc8f38c0e76913d47f71d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>handleCompEvent</b> (CompEvent_t event)</td></tr>
+<tr class="separator:a1c6a25422abcc8f38c0e76913d47f71d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07cdbc2580e005a6e46f24a030bc4c5b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a07cdbc2580e005a6e46f24a030bc4c5b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTemperatureGuard.html#a07cdbc2580e005a6e46f24a030bc4c5b">handleEvent</a> (uint16_t evt, void *p_data, uint16_t length)</td></tr>
 <tr class="memdesc:a07cdbc2580e005a6e46f24a030bc4c5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">handle events <br /></td></tr>
@@ -139,38 +144,17 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
+<tr class="memitem:aaacf07c10af8cd88f48b0207bdbc3656"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaacf07c10af8cd88f48b0207bdbc3656"></a>
+static <a class="el" href="classTemperatureGuard.html">TemperatureGuard</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTemperatureGuard.html#aaacf07c10af8cd88f48b0207bdbc3656">getInstance</a> ()</td></tr>
+<tr class="memdesc:aaacf07c10af8cd88f48b0207bdbc3656"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation) <br /></td></tr>
+<tr class="separator:aaacf07c10af8cd88f48b0207bdbc3656"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea29b8909c31d2643fe83da5a70ee093"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aea29b8909c31d2643fe83da5a70ee093"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticTick</b> (<a class="el" href="classTemperatureGuard.html">TemperatureGuard</a> *ptr)</td></tr>
 <tr class="separator:aea29b8909c31d2643fe83da5a70ee093"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Protection against temperature exceeding certain threshold. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="aa8c28bc6df37e052db24656e626fa563"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void TemperatureGuard::tick </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p><a class="el" href="classSwitch.html">Switch</a> off all channels </p>
-
-</div>
-</div>
-<hr/>The documentation for this class was generated from the following file:<ul>
+<div class="textblock"><p>Check if the temperature exceeds a certain threshold. </p>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
 <li>include/processing/<a class="el" href="cs__TemperatureGuard_8h_source.html">cs_TemperatureGuard.h</a></li>
 </ul>
 </div><!-- contents -->

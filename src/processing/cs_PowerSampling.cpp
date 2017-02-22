@@ -122,7 +122,7 @@ void PowerSampling::init(uint8_t pinAinCurrent, uint8_t pinAinVoltage) {
 	_powerSamples.assign(_powerSamplesBuffer, size);
 #endif
 
-	uint8_t pins[] = {pinAinCurrent, pinAinVoltage};
+	const pin_id_t pins[] = {pinAinCurrent, pinAinVoltage};
 	ADC::getInstance().init(pins, 2);
 
 #if CONTINUOUS_POWER_SAMPLER == 1

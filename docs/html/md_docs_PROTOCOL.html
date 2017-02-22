@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
-<title>Bluenet: # Bluenet protocol v0.8.0</title>
+<title>Bluenet: # Bluenet protocol v0.8.1</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -15,6 +15,7 @@
   $(document).ready(function() { init_search(); });
 </script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -79,7 +80,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="headertitle">
-<div class="title"># Bluenet protocol v0.8.0 </div>  </div>
+<div class="title"># Bluenet protocol v0.8.1 </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="encryption"></a>Encryption</h1>
@@ -381,7 +382,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>1 </td><td><a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> </td><td>uint 8 </td><td>Set <a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> to value, 0 = OFF, 100 = FULL ON </td><td align="center">x </td><td align="center">x </td><td align="center">x </td></tr>
 </table>
-<p>2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 UTC | x | x | 3 | Goto DFU | - | Reset device to DFU mode | x 4 | Reset | uint 8 | Reset device | x 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x 6 | Keep alive state | <a href="#cmd_keep_alive_payload">Keep alive payload</a> | Keep alive with state | x | x | 7 | Keep alive | - | Keep alive without state, uses last state transmitted with Keep alive state command | x | x | x 8 | Enable mesh | uint 8 | Enable/Disable <a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a>, 0 = OFF, other = ON | x 9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON | x 10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON | x 11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON, TBD | x 12 | Enable scanner | <a href="#cmd_enable_scanner_payload">Enable Scanner payload</a> | Enable/Disable scanner | x 13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON | x | 14 | User feedback | ... | User feedback ..., TBD | x | 15 | Schedule entry | ... | Schedule entry ..., TBD | x | x 16 | Relay | uint 8 | <a class="el" href="classSwitch.html">Switch</a> relay, 0 = OFF, 1 = ON | x | x | x 17 | <a class="anchor" id="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | .. 18 | Request <a class="el" href="classService.html" title="Service as defined in the GATT Specification. ">Service</a> Data | - | Causes the crownstone to send it's service data over the mesh | x | x | 19 | Disconnect | - | Causes the crownstone to send it's service data over the mesh | .. | .. | ..</p>
+<p>2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 UTC | x | x | 3 | Goto DFU | - | Reset device to DFU mode | x 4 | Reset | uint 8 | Reset device | x 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x 6 | Keep alive state | <a href="#cmd_keep_alive_payload">Keep alive payload</a> | Keep alive with state | x | x | 7 | Keep alive | - | Keep alive without state, uses last state transmitted with Keep alive state command | x | x | x 8 | Enable mesh | uint 8 | Enable/Disable <a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a>, 0 = OFF, other = ON | x 9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON | x 10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON | x 11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON, TBD | x 12 | Enable scanner | <a href="#cmd_enable_scanner_payload">Enable Scanner payload</a> | Enable/Disable scanner | x 13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON | x | 14 | User feedback | ... | User feedback ..., TBD | x | 15 | Schedule entry | ... | Schedule entry ..., TBD | x | x 16 | Relay | uint 8 | <a class="el" href="classSwitch.html">Switch</a> relay, 0 = OFF, 1 = ON | x | x | x 17 | <a class="anchor" id="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | .. 18 | Request <a class="el" href="classService.html" title="Service as defined in the GATT Specification. ">Service</a> Data | - | Causes the crownstone to send it's service data over the mesh | x | x | 19 | Disconnect | - | Causes the crownstone to disconnect | .. | .. | ..</p>
 <h4><a class="anchor" id="cmd_enable_scanner_payload"></a>Enable <a class="el" href="classScanner.html" title="Scanner scans for BLE devices. ">Scanner</a> payload</h4>
 <table class="doxtable">
 <tr>
@@ -825,6 +826,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <td>6 </td><td>Scan result channel </td><td><a href="#scan_result_packet">Scan result</a> </td><td>If a stone is scanning for devices it adds it's scanned devices periodically to this list to be sent over the mesh </td></tr>
 <tr>
 <td>7 </td><td>Big data channel </td><td>- </td><td>This channel is for the case when a stone needs to send big data, such as the history of eneregy usage, etc. </td></tr>
+<tr>
+<td>8 </td><td>Multi switch channel </td><td><a href="#multi_switch_mesh_packet">Multi switch</a> </td><td>This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message </td></tr>
 </table>
 <h4><a class="anchor" id="keep_alive_mesh_packet"></a>Keep alive packet</h4>
 <div class="image">
@@ -926,9 +929,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
 <tr>
-<td>uint 16 </td><td>Major </td><td>1 </td><td>iBeacon major number </td></tr>
+<td>uint 16 </td><td>Major </td><td>2 </td><td>iBeacon major number </td></tr>
 <tr>
-<td>uint 16 </td><td>Minor </td><td>1 </td><td>iBeacon minor number </td></tr>
+<td>uint 16 </td><td>Minor </td><td>2 </td><td>iBeacon minor number </td></tr>
 <tr>
 <td>uint 8 </td><td>Proximity <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> </td><td>16 </td><td>iBeacon <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> </td></tr>
 <tr>
@@ -1031,6 +1034,46 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <td>uint 8 [6] </td><td>Scanned device address </td><td>6 </td><td>The MAC address of the scanned device </td></tr>
 <tr>
 <td>int 8 </td><td>RSSI </td><td>1 </td><td>The averaged RSSI value of the scanned device </td></tr>
+</table>
+<h5><a class="anchor" id="multi_switch_mesh_packet"></a>Multi switch packet</h5>
+<div class="image">
+<img src="../docs/diagrams/multi-switch-mesh-packet.png"  alt="Keep Alive packet"/>
+</div>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 8 </td><td>Size </td><td>1 </td><td>Number of keep alive items in the list </td></tr>
+<tr>
+<td><a href="#multi_switch_mesh_item">Multi switch item</a> [] </td><td>List </td><td>N </td><td>a list of targeted crownstones with switch states, timeouts and intents </td></tr>
+</table>
+<h5><a class="anchor" id="multi_switch_mesh_item"></a>Multi switch item</h5>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 16 </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> ID </td><td>2 </td><td>The identifier of the crownstone to which this item is targeted </td></tr>
+<tr>
+<td><a href="#switch_state_packet">Switch state</a> </td><td><a class="el" href="classSwitch.html">Switch</a> state </td><td>1 </td><td>The switch state to be set by the targeted crownstone after the timeout expires </td></tr>
+<tr>
+<td>uint 16 </td><td>Timeout </td><td>2 </td><td>The timeout (in seconds) after which the state should be set </td></tr>
+<tr>
+<td>uint 8 </td><td><a href="#multi_switch_intent">Intent</a> </td><td>1 </td><td>The intent of the switch, see the table below </td></tr>
+</table>
+<h6><a class="anchor" id="multi_switch_intent"></a>Intent</h6>
+<table class="doxtable">
+<tr>
+<th>Value </th><th>Name  </th></tr>
+<tr>
+<td>0 </td><td>Sphere Enter </td></tr>
+<tr>
+<td>1 </td><td>Sphere Exit </td></tr>
+<tr>
+<td>2 </td><td>Enter </td></tr>
+<tr>
+<td>3 </td><td>Exit </td></tr>
+<tr>
+<td>4 </td><td>Manual </td></tr>
 </table>
 <h3><a class="anchor" id="mesh_notification_packet"></a><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> notification packet</h3>
 <p>This packet is used to get the <a href="#mesh_message_packet">mesh messages</a> pushed over GATT notifications.</p>

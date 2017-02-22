@@ -18,7 +18,7 @@ Bluenet is the code running on the [Crownstone](http://crownstone.rocks) and [Gu
 To use a device with bluenet code on it, you only need to know the Bluetooth protocol that bluenet uses. You can find the protocol definitions in the [protocol document](docs/PROTOCOL.md).
 
 ### Libraries
-We also provide libraries which take care of the protocol:
+We also provide libraries which implements this protocol (so if you build a smartphone app you will not be bogged down into Bluetooth Low Energy details):
 
 - [Android](https://github.com/crownstone/bluenet-lib-android)
 - [iOS](https://github.com/crownstone/bluenet-ios-lib)
