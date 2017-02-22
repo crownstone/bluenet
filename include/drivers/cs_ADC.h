@@ -17,13 +17,34 @@ extern "C" {
 #include "structs/buffer/cs_DifferentialBuffer.h"
 #include "cfg/cs_Config.h"
 
+//! Numeric reference to a pin
+typedef uint8_t pin_id_t;
+
+//! Numeric reference to a channel
+typedef uint8_t channel_id_t;
+
+//! Numeric reference to a buffer
+typedef uint8_t buffer_id_t;
+
+//! Pin count (number)
+typedef uint8_t pin_count_t;
+
+//! Buffer count (number)
+typedef uint8_t buffer_count_t;
+
+//! Buffer size (number)
+typedef uint16_t buffer_size_t;
+
+//! Error codes (number)
+typedef uint32_t error_t;
+
 /**
  * The typedef adc_done_cb_t is a function pointer to (1) a buffer with elements of type nrf_saadc_value_t (currently 
  * defined by Nordic to be int16_t), (2) the size of the buffer in the sense of the number of these elements, and 
  * (3) an index to the buffer. This function pointer can be given as argument to ADC::setDoneCallback to set a callback
  * on an ADC event. Currently, ADC::setDoneCallback is called from cs_PowerSampling.cpp.
  */
-typedef void (*adc_done_cb_t) (nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum);
+typedef void (*adc_done_cb_t) (nrf_saadc_value_t* buf, buffer_size_t size, buffer_id_t bufNum);
 
 /**
  * The struct adc_done_cb_data_t stores (1) a callback pointer, see adc_done_cb_t, (2) the arguments for this pointer,
@@ -35,9 +56,9 @@ struct adc_done_cb_data_t {
 	//! Buffer as argument for ADC callback 
 	nrf_saadc_value_t* buffer;
 	//! Buffer size as argument for ADC callback 
-	uint16_t bufSize;
+	buffer_size_t bufSize;
 	//! Buffer index as argument for ADC callback 
-	uint8_t bufNum;
+	buffer_id_t bufNum;
 };
 
 /** Analog-Digital conversion.
@@ -101,12 +122,13 @@ public:
 	 * The init function must called once before operating the AD converter. Call it after you start the SoftDevice.
 	 *
 	 * TODO: Not all pins can be used for ADC conversion. Check if the proper pins are assessed.
+	 * TODO: Send array by reference, waste of stack.
 	 *
 	 * @param[in] pins                 Array of pins to use as input (AIN<pin>). ADC will alternate between these pins.
 	 * @param[in] size                 Size of the array.
 	 * @return                         Error code (0 means success).
 	 */
-	uint32_t init(const uint8_t pins[], const uint8_t numPins);
+	error_t init(const pin_id_t pins[], const uint8_t numPins);
 
 	/** Start the ADC sampling
 	 */
@@ -121,7 +143,7 @@ public:
 	 * @param[in] bufNum               The buffer num as received in the done callback.
 	 * @return                         Boolean indicating success (true) or failure (false).
 	 */
-	bool releaseBuffer(uint8_t bufNum);
+	bool releaseBuffer(buffer_id_t bufNum);
 
 	/** Set the callback which is called when a buffer is filled.
 	 *
@@ -162,10 +184,10 @@ private:
 	void operator=(ADC const &);
 
 	//! Pins that will be used for the ADC. 
-	uint8_t _pins[CS_ADC_MAX_PINS];
+	pin_id_t _pins[CS_ADC_MAX_PINS];
 
 	//! Number of pins to be used for the ADC.
-	uint8_t _numPins;
+	pin_count_t _numPins;
 
 	//! Pointer to the timer to be used for sampling.
 	nrf_drv_timer_t* _timer;
@@ -177,14 +199,14 @@ private:
 	nrf_saadc_value_t* _bufferPointers[CS_ADC_NUM_BUFFERS];
 
 	//! In swap mode this is the buffer that will be the next one populated with values.
-	uint8_t _currentBufInd;
+	buffer_id_t _currentBufInd;
 
 	//! Arguments to the callback function
 	adc_done_cb_data_t _doneCallbackData;
 
 	//! Function to set the input pin, this can be done after each sample. Only used internally!
-	uint32_t configPin(uint8_t channal, uint8_t pin);
+	error_t configPin(const channel_id_t channel, const pin_id_t pin);
 
 	//! Function that returns the adc pin number, given the AIN number
-	nrf_saadc_input_t getAdcPin(uint8_t pinNum);
+	nrf_saadc_input_t getAdcPin(pin_id_t pinNum);
 };

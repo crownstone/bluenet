@@ -43,7 +43,7 @@ ADC::ADC()
  *
  * @caller src/processing/cs_PowerSampling.cpp
  */
-uint32_t ADC::init(const uint8_t pins[], const uint8_t numPins) {
+error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
 	ret_code_t err_code;
 
 	for (uint8_t i=0; i<numPins; i++) {
@@ -125,7 +125,7 @@ uint32_t ADC::init(const uint8_t pins[], const uint8_t numPins) {
  *   - do not set the prescaler for the reference voltage, this means voltage is expected between 0 and 1.2V (VGB)
  * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
  */
-uint32_t ADC::configPin(uint8_t channelNum, uint8_t pinNum) {
+error_t ADC::configPin(const channel_id_t channelNum, const pin_id_t pinNum) {
 	LOGd("Configuring channel %i, pin %i", channelNum, pinNum);
 	ret_code_t err_code;
 
@@ -154,7 +154,7 @@ uint32_t ADC::configPin(uint8_t channelNum, uint8_t pinNum) {
  * The NC field disables the ADC and is actually set to value 0. 
  * SAADC_CH_PSELP_PSELP_AnalogInput0 has value 1.
  */
-nrf_saadc_input_t ADC::getAdcPin(uint8_t pinNum) {
+nrf_saadc_input_t ADC::getAdcPin(const pin_id_t pinNum) {
 	switch (pinNum) {
 	case 0:
 		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput0;
@@ -189,7 +189,7 @@ void ADC::start() {
 	nrf_drv_timer_enable(_timer);
 }
 
-bool ADC::releaseBuffer(uint8_t bufNum) {
+bool ADC::releaseBuffer(buffer_id_t bufNum) {
 //	write("%i\r\n", bufNum);
 	if (_doneCallbackData.bufNum != bufNum) {
 		LOGe("bufNum mismatch! %i vs %i", _doneCallbackData.bufNum, bufNum);
