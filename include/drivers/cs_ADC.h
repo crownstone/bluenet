@@ -76,19 +76,19 @@ struct adc_done_cb_data_t {
  * The timer used to get new samples on regular time intervals. The timer should be able to run on at least 2kHz to
  * be able to get the fine-grained current and voltage data we want.
  *
- *   CS_ADC_TIMER                      The timer peripheral to use for the ADC peripheral.
- *   CS_ADC_INSTANCE_INDEX             The instance id of the timer. TODO: What is this?
- *   CS_ADC_TIMER_ID                   TODO: What is this?
+ *   - CS_ADC_TIMER                    The timer peripheral to use for the ADC peripheral.
+ *   - CS_ADC_INSTANCE_INDEX           The instance id of the timer. TODO: What is this?
+ *   - CS_ADC_TIMER_ID                 TODO: What is this?
  *
  * The buffers to be used internally. To have these buffers in the form of macros means that we can check at compile
  * time if they are small enough with respect to the nRF52 memory limitations.
  *
- *   CS_ADC_NUM_BUFFERS                The number of ADC buffers to use. 
- *   CS_ADC_BUF_SIZE                   The size of the buffer (first time used in init()).
+ *   - CS_ADC_NUM_BUFFERS              The number of ADC buffers to use. 
+ *   - CS_ADC_BUF_SIZE                 The size of the buffer (first time used in init()).
  *
  * The pins:
  *
- *   CS_ADC_MAX_PINS                   The maximum number of pins available for ADC.
+ *   - CS_ADC_MAX_PINS                 The maximum number of pins available for ADC.
  *
  * The sequence of events is as follows:
  *
@@ -101,12 +101,12 @@ struct adc_done_cb_data_t {
  * e.g. the cs_PowerSampling. In this particular case it ends up in PowerSampling::powerSampleAdcDone that after 
  * processing the data calls releaseBuffer(bufNum).
  *
- * Note. In the ADC it is assumed that the member object is still not updated (_doneCallbackData.bufName == bufNum).
- * It should not be possible to get a second interrupt in before releaseBuffer has been called. Scheduling a new ADC
- * task is only done at the end of the releaseBuffer function.
- *
  * 3. The releaseBuffer function clears the _doneCallbackData structure and queues a new buffer. Note that all 
  * processing has taken place by now.
+ 
+ * Note. In the ADC it is assumed that the member object is not updated (_doneCallbackData.bufName == bufNum) in the
+ * mean while. In other words, it should not be possible to get a second interrupt before releaseBuffer has been 
+ * called. Scheduling a new ADC task is only done at the end of the releaseBuffer function.
  */
 class ADC {
 
