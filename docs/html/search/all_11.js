@@ -97,6 +97,7 @@ var searchData=
   ['state_5freply_5fitem_5ft',['state_reply_item_t',['../structstate__reply__item__t.html',1,'']]],
   ['state_5fvars_5fnotifaction',['state_vars_notifaction',['../structstate__vars__notifaction.html',1,'']]],
   ['statictick',['staticTick',['../classCrownstone.html#aa9fd4dd6a0ae70614233a4bcb8817d42',1,'Crownstone']]],
+  ['statictimerhandler',['staticTimerHandler',['../classADC.html#a501d9c5cb17fbcc304d47d9677ef0383',1,'ADC']]],
   ['status',['Status',['../structStatus.html',1,'']]],
   ['status_5freply_5fitem_5ft',['status_reply_item_t',['../structstatus__reply__item__t.html',1,'']]],
   ['stop',['stop',['../classADC.html#af92b34ed7a2ed66b1da7858a58faf140',1,'ADC::stop()'],['../classTimer.html#a27947e817b21230c6a28b8429ec40f5a',1,'Timer::stop()'],['../classMesh.html#aed5eab5e82cea245f030be5d650d7daa',1,'Mesh::stop()'],['../classScanner.html#a31af9fbf8f40ab46ce25051e15ab5809',1,'Scanner::stop()']]],

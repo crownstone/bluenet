@@ -2,6 +2,7 @@ var searchData=
 [
   ['calculatedecryptionbufferlength',['calculateDecryptionBufferLength',['../classEncryptionHandler.html#a2643544d00fd05c0fd69eff5ab62571a',1,'EncryptionHandler']]],
   ['calculateencryptionbufferlength',['calculateEncryptionBufferLength',['../classEncryptionHandler.html#a049e814e46ef2b3cb3599e652d95a3c9',1,'EncryptionHandler']]],
+  ['callback',['callback',['../structadc__done__cb__data__t.html#a8435b644f1ad0232eae3fbc119f40b61',1,'adc_done_cb_data_t']]],
   ['callback_5fconnected_5ft',['callback_connected_t',['../classNrf51822BluetoothStack.html#af4b47236e29b96629d47e7258802f7ff',1,'Nrf51822BluetoothStack']]],
   ['callback_5fdisconnected_5ft',['callback_disconnected_t',['../classNrf51822BluetoothStack.html#ae6403ce07bb288bd9be5d12fd6a3a580',1,'Nrf51822BluetoothStack']]],
   ['callback_5fon_5fwrite_5ft',['callback_on_write_t',['../classCharacteristicGeneric.html#ac8184f33ec08fe68e44c01e7425d22d2',1,'CharacteristicGeneric']]],

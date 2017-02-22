@@ -90,7 +90,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pro-static-methods">Static Protected Member Functions</a> &#124;
 <a href="classADC-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">ADC Class Reference</div>  </div>
@@ -104,9 +104,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af12750cb15bdda3776cdd5d70b71c579"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#af12750cb15bdda3776cdd5d70b71c579">init</a> (uint8_t pins[], uint8_t numPins)</td></tr>
-<tr class="memdesc:af12750cb15bdda3776cdd5d70b71c579"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>.  <a href="#af12750cb15bdda3776cdd5d70b71c579">More...</a><br /></td></tr>
-<tr class="separator:af12750cb15bdda3776cdd5d70b71c579"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73feebcf274448da22166a4c74c098d5"><td class="memItemLeft" align="right" valign="top">error_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a73feebcf274448da22166a4c74c098d5">init</a> (const pin_id_t pins[], const pin_count_t numPins)</td></tr>
+<tr class="memdesc:a73feebcf274448da22166a4c74c098d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>.  <a href="#a73feebcf274448da22166a4c74c098d5">More...</a><br /></td></tr>
+<tr class="separator:a73feebcf274448da22166a4c74c098d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a77afa039c73f7e50d04fe64e8e79d412"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a77afa039c73f7e50d04fe64e8e79d412"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a77afa039c73f7e50d04fe64e8e79d412">start</a> ()</td></tr>
 <tr class="memdesc:a77afa039c73f7e50d04fe64e8e79d412"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> sampling. <br /></td></tr>
@@ -115,19 +115,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#af92b34ed7a2ed66b1da7858a58faf140">stop</a> ()</td></tr>
 <tr class="memdesc:af92b34ed7a2ed66b1da7858a58faf140"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> sampling. <br /></td></tr>
 <tr class="separator:af92b34ed7a2ed66b1da7858a58faf140"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2daf86b62e5fbc96806258a91598262a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a2daf86b62e5fbc96806258a91598262a">releaseBuffer</a> (uint8_t bufNum)</td></tr>
-<tr class="memdesc:a2daf86b62e5fbc96806258a91598262a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Release a buffer, so it can be used again by the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>.  <a href="#a2daf86b62e5fbc96806258a91598262a">More...</a><br /></td></tr>
-<tr class="separator:a2daf86b62e5fbc96806258a91598262a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7f2a9a7bd30cc52ae89857573ebd8be0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a7f2a9a7bd30cc52ae89857573ebd8be0">setDoneCallback</a> (adc_done_cb_t callback)</td></tr>
-<tr class="memdesc:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback which is called when a buffer is filled. <br /></td></tr>
+<tr class="memitem:ac2d7f1c352fc28b4fdd27634873f7f5a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ac2d7f1c352fc28b4fdd27634873f7f5a">releaseBuffer</a> (buffer_id_t bufNum)</td></tr>
+<tr class="memdesc:ac2d7f1c352fc28b4fdd27634873f7f5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Release a buffer, so it can be used again by the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>.  <a href="#ac2d7f1c352fc28b4fdd27634873f7f5a">More...</a><br /></td></tr>
+<tr class="separator:ac2d7f1c352fc28b4fdd27634873f7f5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a7f2a9a7bd30cc52ae89857573ebd8be0">setDoneCallback</a> (adc_done_cb_t callback)</td></tr>
+<tr class="memdesc:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback which is called when a buffer is filled.  <a href="#a7f2a9a7bd30cc52ae89857573ebd8be0">More...</a><br /></td></tr>
 <tr class="separator:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad64663b38d1eff6981e9166b046ddc20"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad64663b38d1eff6981e9166b046ddc20"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ad64663b38d1eff6981e9166b046ddc20">update</a> (uint32_t value)</td></tr>
-<tr class="memdesc:ad64663b38d1eff6981e9166b046ddc20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to be called from interrupt, do not do much there! <br /></td></tr>
-<tr class="separator:ad64663b38d1eff6981e9166b046ddc20"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6a5d07f41d656e760ea4fd55834574c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad6a5d07f41d656e760ea4fd55834574c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>update</b> (nrf_saadc_value_t *buf)</td></tr>
+<tr class="memitem:ad6a5d07f41d656e760ea4fd55834574c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ad6a5d07f41d656e760ea4fd55834574c">update</a> (nrf_saadc_value_t *buf)</td></tr>
+<tr class="memdesc:ad6a5d07f41d656e760ea4fd55834574c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update this object with a buffer with values from the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> conversion.  <a href="#ad6a5d07f41d656e760ea4fd55834574c">More...</a><br /></td></tr>
 <tr class="separator:ad6a5d07f41d656e760ea4fd55834574c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
@@ -136,34 +131,48 @@ Static Public Member Functions</h2></td></tr>
 static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a314f14380849b63758a4f919d2a3321f">getInstance</a> ()</td></tr>
 <tr class="memdesc:a314f14380849b63758a4f919d2a3321f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use static variant of singleton, no dynamic memory allocation. <br /></td></tr>
 <tr class="separator:a314f14380849b63758a4f919d2a3321f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a501d9c5cb17fbcc304d47d9677ef0383"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a501d9c5cb17fbcc304d47d9677ef0383"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticTimerHandler</b> (nrf_timer_event_t event_type, void *ptr)</td></tr>
-<tr class="separator:a501d9c5cb17fbcc304d47d9677ef0383"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a87ecc94f4ae64dd71f1da4fc7292c906"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a87ecc94f4ae64dd71f1da4fc7292c906"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>_lastStartTime</b></td></tr>
-<tr class="separator:a87ecc94f4ae64dd71f1da4fc7292c906"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-methods"></a>
+Static Protected Member Functions</h2></td></tr>
+<tr class="memitem:a501d9c5cb17fbcc304d47d9677ef0383"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a501d9c5cb17fbcc304d47d9677ef0383">staticTimerHandler</a> (nrf_timer_event_t event_type, void *ptr)</td></tr>
+<tr class="memdesc:a501d9c5cb17fbcc304d47d9677ef0383"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback for when the internal timer is started.  <a href="#a501d9c5cb17fbcc304d47d9677ef0383">More...</a><br /></td></tr>
+<tr class="separator:a501d9c5cb17fbcc304d47d9677ef0383"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Analog-Digital conversion. </p>
-<p>The <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> is a hardware peripheral that can be initialized for a particular pin. Subsequently, the analog signal is converted into a digital value. The resolution of the conversion is limited (default 10 bits). The conversion is used to get the current curve. </p>
+<p>The <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> is a hardware peripheral that can be initialized for a particular pin. Subsequently, the analog signal is converted into a digital value. The resolution of the conversion is limited (default 10 bits). The conversion is used to get the current curve.</p>
+<p>There is only one <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> hardware peripheral, hence this class conforms to the singleton design pattern.</p>
+<p>The constructor does NOT have arguments you might expect, such as the number of buffers to use, or the size of the buffers. These are all set through preprocessor macros. The <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> class requires access to the following macros (see below).</p>
+<p>The timer used to get new samples on regular time intervals. The timer should be able to run on at least 2kHz to be able to get the fine-grained current and voltage data we want.</p>
+<p>CS_ADC_TIMER The timer peripheral to use for the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> peripheral. CS_ADC_INSTANCE_INDEX The instance id of the timer. TODO: What is this? CS_ADC_TIMER_ID TODO: What is this?</p>
+<p>The buffers to be used internally. To have these buffers in the form of macros means that we can check at compile time if they are small enough with respect to the nRF52 memory limitations.</p>
+<p>CS_ADC_NUM_BUFFERS The number of <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> buffers to use. CS_ADC_BUF_SIZE The size of the buffer (first time used in <a class="el" href="classADC.html#a73feebcf274448da22166a4c74c098d5" title="Initialize ADC. ">init()</a>).</p>
+<p>The pins:</p>
+<p>CS_ADC_MAX_PINS The maximum number of pins available for <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>.</p>
+<p>The sequence of events is as follows:</p>
+<ol type="1">
+<li>The C interrupt service routine, saadc_callback(nrf_drv_saadc_evt_t const * p_event) can be found in the corresponding implementation file. This function uses the singleton feature to call update on an event from the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> peripheral, in particular, NRF_DRV_SAADC_EVT_DONE, with a buffer as argument.</li>
+<li>The <a class="el" href="classADC.html#ad6a5d07f41d656e760ea4fd55834574c" title="Update this object with a buffer with values from the ADC conversion. ">update()</a> routine puts an internal C function, adc_done, with _doneCallback as argument in the event queue of the scheduler. This calls the callback function set previously in <a class="el" href="classADC.html#a7f2a9a7bd30cc52ae89857573ebd8be0" title="Set the callback which is called when a buffer is filled. ">setDoneCallback()</a> by a particular caller, e.g. the cs_PowerSampling. In this particular case it ends up in <a class="el" href="classPowerSampling.html#ad0eab4314d0b6f14333b8982bc317194" title="Called when the sample burst is finished. ">PowerSampling::powerSampleAdcDone</a> that after processing the data calls releaseBuffer(bufNum).</li>
+</ol>
+<p>Note. In the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> it is assumed that the member object is still not updated (_doneCallbackData.bufName == bufNum). It should not be possible to get a second interrupt in before releaseBuffer has been called. Scheduling a new <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> task is only done at the end of the releaseBuffer function.</p>
+<ol type="1">
+<li>The releaseBuffer function clears the _doneCallbackData structure and queues a new buffer. Note that all processing has taken place by now. </li>
+</ol>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="af12750cb15bdda3776cdd5d70b71c579"></a>
+<a class="anchor" id="a73feebcf274448da22166a4c74c098d5"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint32_t ADC::init </td>
+          <td class="memname">error_t ADC::init </td>
           <td>(</td>
-          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramtype">const pin_id_t&#160;</td>
           <td class="paramname"><em>pins</em>[], </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramtype">const pin_count_t&#160;</td>
           <td class="paramname"><em>numPins</em>&#160;</td>
         </tr>
         <tr>
@@ -175,25 +184,27 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>_lastStartTime</b
 </div><div class="memdoc">
 
 <p>Initialize <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>. </p>
+<p>The init function must called once before operating the AD converter. Call it after you start the SoftDevice.</p>
+<p>TODO: Not all pins can be used for <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> conversion. Check if the proper pins are assessed. TODO: Send array by reference, waste of stack.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pins</td><td>Array of pins to use as input (AIN&lt;pin&gt;). <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> will alternate between these pins. </td></tr>
-    <tr><td class="paramname">size</td><td>Size of the array.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pins</td><td>Array of pins to use as input (AIN&lt;pin&gt;). <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> will alternate between these pins. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the array. </td></tr>
   </table>
   </dd>
 </dl>
-<p>The init function must called once before operating the AD converter. Call it after you start the SoftDevice. </p>
+<dl class="section return"><dt>Returns</dt><dd>Error code (0 means success). </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a2daf86b62e5fbc96806258a91598262a"></a>
+<a class="anchor" id="ac2d7f1c352fc28b4fdd27634873f7f5a"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">bool ADC::releaseBuffer </td>
           <td>(</td>
-          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramtype">buffer_id_t&#160;</td>
           <td class="paramname"><em>bufNum</em></td><td>)</td>
           <td></td>
         </tr>
@@ -203,11 +214,103 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>_lastStartTime</b
 <p>Release a buffer, so it can be used again by the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">bufNum</td><td>The buffer num as received in the done callback.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bufNum</td><td>The buffer num as received in the done callback. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>true on success. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Boolean indicating success (true) or failure (false). </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a7f2a9a7bd30cc52ae89857573ebd8be0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::setDoneCallback </td>
+          <td>(</td>
+          <td class="paramtype">adc_done_cb_t&#160;</td>
+          <td class="paramname"><em>callback</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the callback which is called when a buffer is filled. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">callback</td><td>Function to be called on an <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> event (any event)! </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a501d9c5cb17fbcc304d47d9677ef0383"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ADC::staticTimerHandler </td>
+          <td>(</td>
+          <td class="paramtype">nrf_timer_event_t&#160;</td>
+          <td class="paramname"><em>event_type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>ptr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Callback for when the internal timer is started. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">event_type</td><td>The <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> is coupled to a timer which emits events. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ptr</td><td>: What's this? </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ad6a5d07f41d656e760ea4fd55834574c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::update </td>
+          <td>(</td>
+          <td class="paramtype">nrf_saadc_value_t *&#160;</td>
+          <td class="paramname"><em>buf</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Update this object with a buffer with values from the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> conversion. </p>
+<p>This <a class="el" href="classADC.html#ad6a5d07f41d656e760ea4fd55834574c" title="Update this object with a buffer with values from the ADC conversion. ">update()</a> function is also called from the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> interrupt service routine. In this case an entire buffer has been made available. This is done by having the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> peripheral directly writing into a part of the FLASH using the Easy-DMA peripheral and inter-peripheral communication (called PPI). Note that this function is time-sensitive. The number of activities in it are limited to a minimal number. The values are only copied and not processed further.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">buf</td><td>A buffer with size defined in the constructor. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
