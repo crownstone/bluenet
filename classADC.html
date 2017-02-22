@@ -144,20 +144,27 @@ Static Protected Member Functions</h2></td></tr>
 <p>There is only one <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> hardware peripheral, hence this class conforms to the singleton design pattern.</p>
 <p>The constructor does NOT have arguments you might expect, such as the number of buffers to use, or the size of the buffers. These are all set through preprocessor macros. The <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> class requires access to the following macros (see below).</p>
 <p>The timer used to get new samples on regular time intervals. The timer should be able to run on at least 2kHz to be able to get the fine-grained current and voltage data we want.</p>
-<p>CS_ADC_TIMER The timer peripheral to use for the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> peripheral. CS_ADC_INSTANCE_INDEX The instance id of the timer. TODO: What is this? CS_ADC_TIMER_ID TODO: What is this?</p>
+<ul>
+<li>CS_ADC_TIMER The timer peripheral to use for the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> peripheral.</li>
+<li>CS_ADC_INSTANCE_INDEX The instance id of the timer. TODO: What is this?</li>
+<li>CS_ADC_TIMER_ID TODO: What is this?</li>
+</ul>
 <p>The buffers to be used internally. To have these buffers in the form of macros means that we can check at compile time if they are small enough with respect to the nRF52 memory limitations.</p>
-<p>CS_ADC_NUM_BUFFERS The number of <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> buffers to use. CS_ADC_BUF_SIZE The size of the buffer (first time used in <a class="el" href="classADC.html#a73feebcf274448da22166a4c74c098d5" title="Initialize ADC. ">init()</a>).</p>
+<ul>
+<li>CS_ADC_NUM_BUFFERS The number of <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> buffers to use.</li>
+<li>CS_ADC_BUF_SIZE The size of the buffer (first time used in <a class="el" href="classADC.html#a73feebcf274448da22166a4c74c098d5" title="Initialize ADC. ">init()</a>).</li>
+</ul>
 <p>The pins:</p>
-<p>CS_ADC_MAX_PINS The maximum number of pins available for <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>.</p>
+<ul>
+<li>CS_ADC_MAX_PINS The maximum number of pins available for <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a>.</li>
+</ul>
 <p>The sequence of events is as follows:</p>
 <ol type="1">
 <li>The C interrupt service routine, saadc_callback(nrf_drv_saadc_evt_t const * p_event) can be found in the corresponding implementation file. This function uses the singleton feature to call update on an event from the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> peripheral, in particular, NRF_DRV_SAADC_EVT_DONE, with a buffer as argument.</li>
 <li>The <a class="el" href="classADC.html#ad6a5d07f41d656e760ea4fd55834574c" title="Update this object with a buffer with values from the ADC conversion. ">update()</a> routine puts an internal C function, adc_done, with _doneCallback as argument in the event queue of the scheduler. This calls the callback function set previously in <a class="el" href="classADC.html#a7f2a9a7bd30cc52ae89857573ebd8be0" title="Set the callback which is called when a buffer is filled. ">setDoneCallback()</a> by a particular caller, e.g. the cs_PowerSampling. In this particular case it ends up in <a class="el" href="classPowerSampling.html#ad0eab4314d0b6f14333b8982bc317194" title="Called when the sample burst is finished. ">PowerSampling::powerSampleAdcDone</a> that after processing the data calls releaseBuffer(bufNum).</li>
+<li>The releaseBuffer function clears the _doneCallbackData structure and queues a new buffer. Note that all processing has taken place by now.</li>
 </ol>
-<p>Note. In the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> it is assumed that the member object is still not updated (_doneCallbackData.bufName == bufNum). It should not be possible to get a second interrupt in before releaseBuffer has been called. Scheduling a new <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> task is only done at the end of the releaseBuffer function.</p>
-<ol type="1">
-<li>The releaseBuffer function clears the _doneCallbackData structure and queues a new buffer. Note that all processing has taken place by now. </li>
-</ol>
+<p>Note. In the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> it is assumed that the member object is not updated (_doneCallbackData.bufName == bufNum) in the mean while. In other words, it should not be possible to get a second interrupt before releaseBuffer has been called. Scheduling a new <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> task is only done at the end of the releaseBuffer function. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a73feebcf274448da22166a4c74c098d5"></a>
 <div class="memitem">
