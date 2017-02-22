@@ -66,6 +66,7 @@ var searchData=
   ['startscanning',['startScanning',['../classNrf51822BluetoothStack.html#ae980e2cb0b0a728b3370482b1275e896',1,'Nrf51822BluetoothStack']]],
   ['startup',['startUp',['../classCrownstone.html#ac012844b9a0242710badb3f19713e8af',1,'Crownstone']]],
   ['statictick',['staticTick',['../classCrownstone.html#aa9fd4dd6a0ae70614233a4bcb8817d42',1,'Crownstone']]],
+  ['statictimerhandler',['staticTimerHandler',['../classADC.html#a501d9c5cb17fbcc304d47d9677ef0383',1,'ADC']]],
   ['stop',['stop',['../classADC.html#af92b34ed7a2ed66b1da7858a58faf140',1,'ADC::stop()'],['../classTimer.html#a27947e817b21230c6a28b8429ec40f5a',1,'Timer::stop()'],['../classMesh.html#aed5eab5e82cea245f030be5d650d7daa',1,'Mesh::stop()'],['../classScanner.html#a31af9fbf8f40ab46ce25051e15ab5809',1,'Scanner::stop()']]],
   ['stopscanning',['stopScanning',['../classNrf51822BluetoothStack.html#aba0f4ee759a075c3c2d6db262f8adde6',1,'Nrf51822BluetoothStack']]],
   ['streambuffer',['StreamBuffer',['../classStreamBuffer.html#aaba69ca1dfaa170ad55005c07973235f',1,'StreamBuffer']]],

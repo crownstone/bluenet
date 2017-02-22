@@ -94,23 +94,34 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">adc_done_cb_data_t Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>The struct <a class="el" href="structadc__done__cb__data__t.html" title="The struct adc_done_cb_data_t stores (1) a callback pointer, see adc_done_cb_t, (2) the arguments for...">adc_done_cb_data_t</a> stores (1) a callback pointer, see adc_done_cb_t, (2) the arguments for this pointer, see also adc_done_cb_t.  
+ <a href="structadc__done__cb__data__t.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="cs__ADC_8h_source.html">cs_ADC.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a8435b644f1ad0232eae3fbc119f40b61"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8435b644f1ad0232eae3fbc119f40b61"></a>
-adc_done_cb_t&#160;</td><td class="memItemRight" valign="bottom"><b>callback</b></td></tr>
+adc_done_cb_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__done__cb__data__t.html#a8435b644f1ad0232eae3fbc119f40b61">callback</a></td></tr>
+<tr class="memdesc:a8435b644f1ad0232eae3fbc119f40b61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function. <br /></td></tr>
 <tr class="separator:a8435b644f1ad0232eae3fbc119f40b61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a60d42b128ee672e05d8ecebae4bbca49"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a60d42b128ee672e05d8ecebae4bbca49"></a>
-nrf_saadc_value_t *&#160;</td><td class="memItemRight" valign="bottom"><b>buffer</b></td></tr>
+nrf_saadc_value_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__done__cb__data__t.html#a60d42b128ee672e05d8ecebae4bbca49">buffer</a></td></tr>
+<tr class="memdesc:a60d42b128ee672e05d8ecebae4bbca49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer as argument for <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> callback. <br /></td></tr>
 <tr class="separator:a60d42b128ee672e05d8ecebae4bbca49"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a02fd248eb9b4dbdfe59fbe6b110bb349"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a02fd248eb9b4dbdfe59fbe6b110bb349"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>bufSize</b></td></tr>
-<tr class="separator:a02fd248eb9b4dbdfe59fbe6b110bb349"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3dfebcb6d22e199d245b4c8c7ad8c5d5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3dfebcb6d22e199d245b4c8c7ad8c5d5"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>bufNum</b></td></tr>
-<tr class="separator:a3dfebcb6d22e199d245b4c8c7ad8c5d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56dd9e6c609d784ba54fc27b8a84ed72"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a56dd9e6c609d784ba54fc27b8a84ed72"></a>
+buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__done__cb__data__t.html#a56dd9e6c609d784ba54fc27b8a84ed72">bufSize</a></td></tr>
+<tr class="memdesc:a56dd9e6c609d784ba54fc27b8a84ed72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer size as argument for <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> callback. <br /></td></tr>
+<tr class="separator:a56dd9e6c609d784ba54fc27b8a84ed72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81c5505f9e990376c8cdbdc581354d70"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a81c5505f9e990376c8cdbdc581354d70"></a>
+buffer_id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__done__cb__data__t.html#a81c5505f9e990376c8cdbdc581354d70">bufNum</a></td></tr>
+<tr class="memdesc:a81c5505f9e990376c8cdbdc581354d70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer index as argument for <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> callback. <br /></td></tr>
+<tr class="separator:a81c5505f9e990376c8cdbdc581354d70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>The struct <a class="el" href="structadc__done__cb__data__t.html" title="The struct adc_done_cb_data_t stores (1) a callback pointer, see adc_done_cb_t, (2) the arguments for...">adc_done_cb_data_t</a> stores (1) a callback pointer, see adc_done_cb_t, (2) the arguments for this pointer, see also adc_done_cb_t. </p>
+</div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>include/drivers/<a class="el" href="cs__ADC_8h_source.html">cs_ADC.h</a></li>
 </ul>
 </div><!-- contents -->
