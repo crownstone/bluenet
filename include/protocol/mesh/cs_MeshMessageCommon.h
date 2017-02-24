@@ -11,7 +11,7 @@
 
 #ifndef RBC_MESH_VALUE_MAX_LEN
 // See rbc_mesh.h and src/radio_control.h
-#define RBC_MESH_VALUE_MAX_LEN (37 - 14)
+#define RBC_MESH_VALUE_MAX_LEN (RADIO_PCNF1_MAXLEN - 14)
 #endif
 
 typedef uint16_t id_type_t;

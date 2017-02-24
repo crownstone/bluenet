@@ -1,7 +1,5 @@
 #include <protocol/mesh/cs_MeshMessageState.h>
 
-#include <iostream>
-
 state_message::state_message(state_message_t & smt): _state_message_t(smt) {
 }
 
@@ -38,7 +36,7 @@ void state_message::clear() {
 	_state_message_t.head = 0;
 	_state_message_t.tail = 0;
 	_state_message_t.size = 0;
-	for (auto i = 0; i < MAX_STATE_ITEMS; ++i) {
+	for (uint32_t i = 0; i < MAX_STATE_ITEMS; ++i) {
 		_state_message_t.list[i] = {0,0,0,0};
 	}
 }

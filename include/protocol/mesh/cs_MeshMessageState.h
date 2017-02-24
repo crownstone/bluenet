@@ -2,8 +2,6 @@
 
 #include <protocol/mesh/cs_MeshMessageCommon.h>
 
-#include <iostream>
-
 struct __attribute__((__packed__)) state_item_t {
 	id_type_t id;
 	uint8_t switchState;
