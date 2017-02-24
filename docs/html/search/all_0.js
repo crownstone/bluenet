@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['_5faccumulatedenergy',['_accumulatedEnergy',['../classState.html#a9cd06baf445642ac765c4201c0e53aaa',1,'State']]],
+  ['_5faccumulatedenergy',['_accumulatedEnergy',['../classState.html#a3daf9a7b83dc7fd65ca2efbf412094a6',1,'State']]],
   ['_5fappearance',['_appearance',['../classNrf51822BluetoothStack.html#ac3aace0027be40d3e186d9645af1210d',1,'Nrf51822BluetoothStack']]],
   ['_5fapptimerid',['_appTimerId',['../classService.html#ad082bda9659c99667ae11ae909596940',1,'Service']]],
   ['_5fbuffer',['_buffer',['../classStreamBuffer.html#a22e8e83cdfbd482951dfc6c4cc0ac493',1,'StreamBuffer']]],
@@ -19,7 +19,7 @@ var searchData=
   ['_5fpasskey',['_passkey',['../classNrf51822BluetoothStack.html#a68b6dcfcdfb66dcb6657fee473a7e885',1,'Nrf51822BluetoothStack']]],
   ['_5fradio_5fnotify',['_radio_notify',['../classNrf51822BluetoothStack.html#acf9d3ad50c1cf347e7eb76ff44fbef04',1,'Nrf51822BluetoothStack']]],
   ['_5freadperm',['_readperm',['../classCharacteristicBase.html#a8e451eb1012f21eabec092deda1b07b2',1,'CharacteristicBase']]],
-  ['_5fresetcounter',['_resetCounter',['../classState.html#a1d7e20ec548d9c56b25b2a48c01a15f6',1,'State']]],
+  ['_5fresetcounter',['_resetCounter',['../classState.html#a58e041e31374bd9317e61c900fcc5bf0',1,'State']]],
   ['_5fservice',['_service',['../classCharacteristicBase.html#a5656184f753d9c86d8a63fa12bf4e24f',1,'CharacteristicBase']]],
   ['_5fstarted',['_started',['../classService.html#ab4edb9b7656e887c2c5fa404420fb40e',1,'Service']]],
   ['_5fstatehandle',['_stateHandle',['../classState.html#a31b66822ec2ed8e4b71211158d54c282',1,'State']]],
@@ -27,7 +27,7 @@ var searchData=
   ['_5fstoragehandle',['_storageHandle',['../classSettings.html#ac4d8f4b82f53974b10874ed80b599339',1,'Settings']]],
   ['_5fstoragestruct',['_storageStruct',['../classSettings.html#a109b6dc4322587359f56685fa18f4a6b',1,'Settings']]],
   ['_5fstreambuffer',['_streamBuffer',['../classCrownstoneService.html#af1314258e536cad6588540ed476611b5',1,'CrownstoneService']]],
-  ['_5fswitchstate',['_switchState',['../classState.html#a5ee797c403a49bc478178bb88225efcd',1,'State']]],
+  ['_5fswitchstate',['_switchState',['../classState.html#a1898f7c862fbd255dbd3a2e4a832445b',1,'State']]],
   ['_5ftemperature',['_temperature',['../classState.html#a24adc72600542eca0b86823650ae6b72',1,'State']]],
   ['_5ftype',['_type',['../classUUID.html#ad989399a12d1a86a87121322548e5e8b',1,'UUID']]],
   ['_5fuser_5fmem_5fblock',['_user_mem_block',['../classNrf51822BluetoothStack.html#a5f1e3a1ce3f45ef8c955cc6b3374126b',1,'Nrf51822BluetoothStack']]],

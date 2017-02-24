@@ -18,6 +18,9 @@ extern "C" {
 #include <structs/cs_StreamBuffer.h>
 #include <structs/cs_PowerSamples.h>
 
+#include <protocol/mesh/cs_MeshMessageCommon.h>
+#include <protocol/mesh/cs_MeshMessageState.h>
+
 enum MeshChannels {
 	KEEP_ALIVE_CHANNEL       = 1,
 	STATE_BROADCAST_CHANNEL  = 2,
@@ -54,16 +57,9 @@ enum MeshReplyTypes {
 ////! available number of bytes for the data of the message, for command and config messages
 //#define MAX_MESH_MESSAGE_DATA_LENGTH (MAX_MESH_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)
 
-typedef uint16_t id_type_t;
-
 /********************************************************************
  *
  ********************************************************************/
-
-#define ENCRYPTED_HEADER_SIZE (sizeof(uint32_t) + sizeof(uint32_t))
-#define MAX_ENCRYPTED_PAYLOAD_LENGTH ((RBC_MESH_VALUE_MAX_LEN - ENCRYPTED_HEADER_SIZE) - ((RBC_MESH_VALUE_MAX_LEN - ENCRYPTED_HEADER_SIZE) % 16))
-#define PAYLOAD_HEADER_SIZE (sizeof(uint32_t))
-#define MAX_MESH_MESSAGE_LENGTH (MAX_ENCRYPTED_PAYLOAD_LENGTH - PAYLOAD_HEADER_SIZE)
 
 struct encrypted_mesh_message_t {
 	uint32_t messageCounter;
@@ -150,29 +146,6 @@ inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id,
 /********************************************************************
  * STATE
  ********************************************************************/
-
-struct __attribute__((__packed__)) state_item_t {
-	id_type_t id;
-	uint8_t  switchState;
-	uint8_t  eventBitmask;
-	int32_t powerUsage;
-	int32_t accumulatedEnergy;
-};
-
-#define STATE_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t))
-#define MAX_STATE_ITEMS ((MAX_MESH_MESSAGE_LENGTH - STATE_HEADER_SIZE) / sizeof(state_item_t))
-
-/*
- * tail points to the index where the next element will be added
- * head points to the index where the first element can be read
- * size indicates the number of elements in the list
- */
-struct __attribute__((__packed__)) state_message_t {
-	uint8_t head; // Place of oldest item
-	uint8_t tail; // Place where a new item will be put
-	uint8_t size; // Number of items in the message
-	state_item_t list[MAX_STATE_ITEMS];
-};
 
 /*
  * HELPER FUNCTIONS

@@ -15,6 +15,7 @@
   $(document).ready(function() { init_search(); });
 </script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -381,6 +382,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>on_advertisement</b> 
 <tr class="memitem:ab12a11a34691bb52869225b61e2b3358"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classNrf51822BluetoothStack.html#ab12a11a34691bb52869225b61e2b3358">onTxComplete</a> (ble_evt_t *p_ble_evt)</td></tr>
 <tr class="memdesc:ab12a11a34691bb52869225b61e2b3358"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transmission complete event.  <a href="#ab12a11a34691bb52869225b61e2b3358">More...</a><br /></td></tr>
 <tr class="separator:ab12a11a34691bb52869225b61e2b3358"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a875d04ca5ecad8eb131f14903f3043f2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a875d04ca5ecad8eb131f14903f3043f2"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>startConnectionAliveTimer</b> ()</td></tr>
+<tr class="separator:a875d04ca5ecad8eb131f14903f3043f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae781660994965f6a3a3cbd2d7af15977"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae781660994965f6a3a3cbd2d7af15977"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>stopConnectionAliveTimer</b> ()</td></tr>
+<tr class="separator:ae781660994965f6a3a3cbd2d7af15977"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66c2d5f4b95110f2a016949fea605ac2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a66c2d5f4b95110f2a016949fea605ac2"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>resetConnectionAliveTimer</b> ()</td></tr>
+<tr class="separator:a66c2d5f4b95110f2a016949fea605ac2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-methods"></a>
 Static Protected Member Functions</h2></td></tr>
@@ -472,6 +482,9 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>_lowPowerTimeoutI
 <tr class="memitem:a3e9d86122df20bb6ebe1872979d1546b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3e9d86122df20bb6ebe1872979d1546b"></a>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>_secReqTimerId</b></td></tr>
 <tr class="separator:a3e9d86122df20bb6ebe1872979d1546b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c05f6d80d4751a46c85ff4b5614ca8f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2c05f6d80d4751a46c85ff4b5614ca8f"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>_connectionKeepAliveTimerId</b></td></tr>
+<tr class="separator:a2c05f6d80d4751a46c85ff4b5614ca8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17fc80a3cc1a236383a06d00598b6885"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a17fc80a3cc1a236383a06d00598b6885"></a>
 dm_handle_t&#160;</td><td class="memItemRight" valign="bottom"><b>_peerHandle</b></td></tr>
 <tr class="separator:a17fc80a3cc1a236383a06d00598b6885"><td class="memSeparator" colspan="2">&#160;</td></tr>

@@ -28,6 +28,7 @@ enum CommandHandlerTypes {
 	CMD_REQUEST_SERVICE_DATA        = 18,    //! 0x12
 	CMD_DISCONNECT                  = 19,    //! 0x13
 	CMD_SET_LED                     = 20,    //! 0x14
+	CMD_NOP                         = 21,    //! 0x15
 	CMD_TYPES
 };
 

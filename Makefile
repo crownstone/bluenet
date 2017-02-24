@@ -68,4 +68,8 @@ prepare:
 build: prepare
 	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DVERBOSITY='$(VERBOSITY)' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 
-.PHONY: all build release clean prepare
+host:
+	@mkdir -p $(BLUENET_BUILD_DIR)
+	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DVERBOSITY='7' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
+
+.PHONY: all build release clean prepare host

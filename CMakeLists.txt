@@ -18,6 +18,11 @@ ENDIF(COMMAND cmake_policy)
 SET(TEST_COMPILERS CXX C)
 #SET(TEST_COMPILERS "")
 
+# Load compiler options from configuration file
+SET(CONFIG_FILE ${CMAKE_SOURCE_DIR}/CMakeConfig.cmake)
+MESSAGE(STATUS "Load config file ${CONFIG_FILE}")
+INCLUDE(${CONFIG_FILE})
+
 # Set application shorthand
 SET(APPLICATION_SHORTHAND "crownstone")
 
@@ -35,6 +40,8 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 MESSAGE(STATUS "Search for FindX files in ${CMAKE_SOURCE_DIR}/cmake")
 
 SET(VERBOSITY                                "${VERBOSITY}"                   CACHE STRING "4" FORCE)
+
+MESSAGE(STATUS "Set verbosity to level ${VERBOSITY}")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
@@ -67,6 +74,9 @@ SET(INCLUDE_DIR "include" "include/third" "include/third/nrf" "include/ble")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
+IF((DEFINED COMPILATION_TARGET) AND "${COMPILATION_TARGET}" STREQUAL "host")
+	MESSAGE(STATUS "Run with host as compilation target")
+ELSE()
 # essential, code doesn't run without this file !!!
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_sysNrf51.c")
 
@@ -109,16 +119,16 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_TemperatureGuard.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_DeviceInformationService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_CrownstoneService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_SetupService.cpp")
-IF(${INDOOR_SERVICE} STRGREATER "0")
+IF(${INDOOR_SERVICE} AND ${INDOOR_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_IndoorLocalisationService.cpp")
 ENDIF()
-IF(${GENERAL_SERVICE} STRGREATER "0")
+IF(${GENERAL_SERVICE} AND ${GENERAL_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_GeneralService.cpp")
 ENDIF()
-IF(${POWER_SERVICE} STRGREATER "0")
+IF(${POWER_SERVICE} AND ${POWER_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_PowerService.cpp")
 ENDIF()
-IF(${SCHEDULE_SERVICE} STRGREATER "0")
+IF(${SCHEDULE_SERVICE} AND ${SCHEDULE_SERVICE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_ScheduleService.cpp")
 ENDIF()
 
@@ -132,34 +142,38 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Watchdog.cpp")
 # should be only when creating iBeacon
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_iBeacon.cpp")
 
-IF(${EDDYSTONE} STRGREATER "0")
+IF(${EDDYSTONE} AND ${EDDYSTONE} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Eddystone.cpp")
 ENDIF()
 
-IF(${MESHING} STRGREATER "0" AND ${BUILD_MESHING} STREQUAL "0")
+IF(${MESHING} AND ${MESHING} STRGREATER "0" AND ${BUILD_MESHING} AND ${BUILD_MESHING} STREQUAL "0")
 	MESSAGE(FATAL_ERROR "Need to set BUILD_MESHING=1 if MESHING should be enabled!")
 ENDIF()
 
-IF(${BUILD_MESHING} STRGREATER "0")
+IF(DEFINED ${BUILD_MESHING} AND ${BUILD_MESHING} STRGREATER "0")
+		
+	MESSAGE(STATUS "Use directory ${BUILD_MESHING} for the mesh")
 
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshControl.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_Mesh.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshMessageState.cpp")
 
 	IF(IS_DIRECTORY "${MESH_DIR}")
 		MESSAGE(STATUS "Use directory ${MESH_DIR} for the mesh")
 	ELSE()
-		MESSAGE(FATAL_ERROR "Directory \"${MESH_DIR}\" does not exist! Clone https://github.com/mrquincle/nRF51-ble-bcast-mesh and switch to nrf52 branch.")
+		MESSAGE(ERROR "Directory \"${MESH_DIR}\" does not exist! Clone https://github.com/mrquincle/nRF51-ble-bcast-mesh and switch to nrf52 branch.")
 	ENDIF()
+
 	EXECUTE_PROCESS(
 		COMMAND git rev-parse --abbrev-ref HEAD
-		WORKING_DIRECTORY ${MESH_DIR}
+		WORKING_DIRECTORY "${MESH_DIR}"
 		OUTPUT_VARIABLE MESH_BRANCH
 		OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 	IF(MESH_BRANCH STREQUAL "bluenet")
 		MESSAGE(STATUS "Using bluenet branch for the Mesh")
 	ELSE()
-		MESSAGE(FATAL_ERROR "Switch ${MESH_DIR} to bluenet branch. The master branch is not bluenet-compatible yet.")
+		MESSAGE(ERROR "Switch ${MESH_DIR} to bluenet branch. The master branch is not bluenet-compatible yet.")
 	ENDIF()
 
 	SET(INCLUDE_DIR "${INCLUDE_DIR}" "${MESH_DIR}" "${MESH_DIR}/include")
@@ -184,7 +198,7 @@ IF(${BUILD_MESHING} STRGREATER "0")
 
 ENDIF()
 
-IF(${BUILD_MESHING} STRGREATER "0")
+IF(${BUILD_MESHING} AND ${BUILD_MESHING} STRGREATER "0")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_timer.c")
 else()
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer.c")
@@ -275,6 +289,8 @@ IF(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_API)
 	INCLUDE_DIRECTORIES("${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}")
 ENDIF()
 
+ENDIF()
+
 # Show which directories are actually included to the user
 GET_PROPERTY(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 IF(VERBOSITY GREATER 4)
@@ -287,6 +303,14 @@ IF(NOT (DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
 	SET(${SOFTDEVICE_DIR}, "${NRF51822_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
 	SET(${SOFTDEVICE_DIR_HEX}, "hex")
 ENDIF()
+
+IF((DEFINED COMPILATION_TARGET) AND "${COMPILATION_TARGET}" STREQUAL "host")
+	MESSAGE(STATUS "Add testing files")
+
+	ENABLE_TESTING()
+
+	ADD_SUBDIRECTORY(test)
+ELSE()
 
 # Set up our main executable.
 IF(FOLDER_SOURCE STREQUAL "")
@@ -347,5 +371,9 @@ ELSE()
 
 	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBS})
 	INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+ENDIF()
+
+
+
 ENDIF()
 

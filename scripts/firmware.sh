@@ -65,6 +65,16 @@ if ! (($BUILD_CYCLE % 100)); then
 fi
 printf "${normal}\n"
 
+host() {
+	cd ${path}/..
+	info "oo Execute make (which will execute cmake)"
+	make -s host
+	# result=$?
+	checkError "oo Error building firmware"
+	cd $path
+	# return $result
+}
+
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
@@ -207,6 +217,9 @@ verifyHardwareBoardDefined() {
 case "$cmd" in
 	build)
 		build
+		;;
+	host)
+		host
 		;;
 	upload)
 		upload

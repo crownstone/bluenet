@@ -25,6 +25,7 @@ var searchData=
   ['stackbuffer',['StackBuffer',['../classStackBuffer.html',1,'']]],
   ['stackbuffer_3c_20uint16_5ft_20_3e',['StackBuffer&lt; uint16_t &gt;',['../classStackBuffer.html',1,'']]],
   ['state',['State',['../classState.html',1,'']]],
+  ['state_5ferrors_5ft',['state_errors_t',['../structstate__errors__t.html',1,'']]],
   ['state_5fitem_5ft',['state_item_t',['../structstate__item__t.html',1,'']]],
   ['state_5fmessage_5ft',['state_message_t',['../structstate__message__t.html',1,'']]],
   ['state_5freply_5fitem_5ft',['state_reply_item_t',['../structstate__reply__item__t.html',1,'']]],

@@ -25,13 +25,15 @@ var searchData=
   ['command_5fmessage_5ft',['command_message_t',['../structcommand__message__t.html',1,'']]],
   ['commandhandler',['CommandHandler',['../classCommandHandler.html',1,'']]],
   ['commissioning_5ftelegram_5ft',['commissioning_telegram_t',['../structcommissioning__telegram__t.html',1,'']]],
+  ['comp',['COMP',['../classCOMP.html',1,'']]],
+  ['comp_5fevent_5fcb_5fdata_5ft',['comp_event_cb_data_t',['../structcomp__event__cb__data__t.html',1,'']]],
   ['config_5freply_5fitem_5ft',['config_reply_item_t',['../structconfig__reply__item__t.html',1,'']]],
   ['conv8_5f16',['conv8_16',['../unionconv8__16.html',1,'']]],
   ['conv8_5f32',['conv8_32',['../unionconv8__32.html',1,'']]],
   ['crownstone',['Crownstone',['../classCrownstone.html',1,'']]],
   ['crownstoneservice',['CrownstoneService',['../classCrownstoneService.html',1,'']]],
   ['cyclicstorage',['CyclicStorage',['../classCyclicStorage.html',1,'']]],
-  ['cyclicstorage_3c_20accumulated_5fenergy_5ft_2c_20accumulated_5fenergy_5fredundancy_20_3e',['CyclicStorage&lt; accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY &gt;',['../classCyclicStorage.html',1,'']]],
-  ['cyclicstorage_3c_20reset_5fcounter_5ft_2c_20reset_5fcounter_5fredundancy_20_3e',['CyclicStorage&lt; reset_counter_t, RESET_COUNTER_REDUNDANCY &gt;',['../classCyclicStorage.html',1,'']]],
-  ['cyclicstorage_3c_20switch_5fstate_5fstorage_5ft_2c_20switch_5fstate_5fredundancy_20_3e',['CyclicStorage&lt; switch_state_storage_t, SWITCH_STATE_REDUNDANCY &gt;',['../classCyclicStorage.html',1,'']]]
+  ['cyclicstorage_3c_20accumulated_5fenergy_5ft_2c_20accumulated_5fenergy_5fredundancy_2c_20large_5fseq_5fnumber_5ft_20_3e',['CyclicStorage&lt; accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY, large_seq_number_t &gt;',['../classCyclicStorage.html',1,'']]],
+  ['cyclicstorage_3c_20reset_5fcounter_5ft_2c_20reset_5fcounter_5fredundancy_2c_20small_5fseq_5fnumber_5ft_20_3e',['CyclicStorage&lt; reset_counter_t, RESET_COUNTER_REDUNDANCY, small_seq_number_t &gt;',['../classCyclicStorage.html',1,'']]],
+  ['cyclicstorage_3c_20switch_5fstate_5fstorage_5ft_2c_20switch_5fstate_5fredundancy_2c_20small_5fseq_5fnumber_5ft_20_3e',['CyclicStorage&lt; switch_state_storage_t, SWITCH_STATE_REDUNDANCY, small_seq_number_t &gt;',['../classCyclicStorage.html',1,'']]]
 ];

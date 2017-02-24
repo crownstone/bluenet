@@ -1,7 +1,7 @@
 var searchData=
 [
   ['temperatureguard',['TemperatureGuard',['../classTemperatureGuard.html',1,'']]],
-  ['tick',['tick',['../classCrownstone.html#a7b4574c77454c31e919f91bd1f33f377',1,'Crownstone::tick()'],['../classTemperatureGuard.html#aa8c28bc6df37e052db24656e626fa563',1,'TemperatureGuard::tick()']]],
+  ['tick',['tick',['../classCrownstone.html#a7b4574c77454c31e919f91bd1f33f377',1,'Crownstone']]],
   ['tickstoms',['ticksToMs',['../classRTC.html#a027acf711855d4ef4065333f0d47fb06',1,'RTC']]],
   ['timer',['Timer',['../classTimer.html',1,'']]],
   ['toarray',['toArray',['../classDoBotsManufac.html#aa53d633ccda76455875d3c6ded4d39e7',1,'DoBotsManufac']]],

@@ -15,6 +15,7 @@
   $(document).ready(function() { init_search(); });
 </script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -107,19 +108,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="structboards__config__t_html"><div class="ttname"><a href="structboards__config__t.html">boards_config_t</a></div><div class="ttdoc">BE SURE TO UPDATE cs_HardwareVersions.h IF YOU ADD A NEW BOARD!! </div><div class="ttdef"><b>Definition:</b> cs_Boards.h:73</div></div>
 <div class="ttc" id="classPowerService_html"><div class="ttname"><a href="classPowerService.html">PowerService</a></div><div class="ttdoc">PowerService controls the relays on the Crownstone. </div><div class="ttdef"><b>Definition:</b> cs_PowerService.h:40</div></div>
 <div class="ttc" id="classCrownstone_html_ad148b7c0838452d967c724238aa052a4"><div class="ttname"><a href="classCrownstone.html#ad148b7c0838452d967c724238aa052a4">Crownstone::prepareNormalOperationMode</a></div><div class="ttdeci">void prepareNormalOperationMode()</div><div class="ttdoc">prepare crownstone for normal operation mode, this includes: </div></div>
-<div class="ttc" id="classSwitch_html"><div class="ttname"><a href="classSwitch.html">Switch</a></div><div class="ttdef"><b>Definition:</b> cs_Switch.h:34</div></div>
+<div class="ttc" id="classSwitch_html"><div class="ttname"><a href="classSwitch.html">Switch</a></div><div class="ttdef"><b>Definition:</b> cs_Switch.h:38</div></div>
 <div class="ttc" id="classEddystone_html"><div class="ttname"><a href="classEddystone.html">Eddystone</a></div><div class="ttdoc">Implementation of the Eddystone specification. </div><div class="ttdef"><b>Definition:</b> cs_Eddystone.h:25</div></div>
 <div class="ttc" id="classGeneralService_html"><div class="ttname"><a href="classGeneralService.html">GeneralService</a></div><div class="ttdoc">General Service for the Crownstone. </div><div class="ttdef"><b>Definition:</b> cs_GeneralService.h:25</div></div>
 <div class="ttc" id="classSetupService_html"><div class="ttname"><a href="classSetupService.html">SetupService</a></div><div class="ttdoc">Author: Dominik Egger Copyright: Distributed Organisms B.V. </div><div class="ttdef"><b>Definition:</b> cs_SetupService.h:29</div></div>
 <div class="ttc" id="classCrownstone_html_a3a117980a98576fd29bd9ba7308b0b17"><div class="ttname"><a href="classCrownstone.html#a3a117980a98576fd29bd9ba7308b0b17">Crownstone::initDrivers</a></div><div class="ttdeci">void initDrivers()</div><div class="ttdoc">initialize drivers (timer, storage, pwm, etc) </div></div>
 <div class="ttc" id="classScanner_html"><div class="ttname"><a href="classScanner.html">Scanner</a></div><div class="ttdoc">Scanner scans for BLE devices. </div><div class="ttdef"><b>Definition:</b> cs_Scanner.h:22</div></div>
-<div class="ttc" id="classState_html"><div class="ttname"><a href="classState.html">State</a></div><div class="ttdoc">Load StateVars from and save StateVars to persistent storage. </div><div class="ttdef"><b>Definition:</b> cs_State.h:86</div></div>
+<div class="ttc" id="classState_html"><div class="ttname"><a href="classState.html">State</a></div><div class="ttdoc">Load StateVars from and save StateVars to persistent storage. </div><div class="ttdef"><b>Definition:</b> cs_State.h:115</div></div>
 <div class="ttc" id="classSettings_html"><div class="ttname"><a href="classSettings.html">Settings</a></div><div class="ttdoc">Load settings from and save settings to persistent storage. </div><div class="ttdef"><b>Definition:</b> cs_Settings.h:22</div></div>
 <div class="ttc" id="classCrownstoneService_html"><div class="ttname"><a href="classCrownstoneService.html">CrownstoneService</a></div><div class="ttdoc">General Service for the Crownstone. </div><div class="ttdef"><b>Definition:</b> cs_CrownstoneService.h:28</div></div>
 <div class="ttc" id="classCommandHandler_html"><div class="ttname"><a href="classCommandHandler.html">CommandHandler</a></div><div class="ttdef"><b>Definition:</b> cs_CommandHandler.h:22</div></div>
 <div class="ttc" id="classPowerSampling_html"><div class="ttname"><a href="classPowerSampling.html">PowerSampling</a></div><div class="ttdoc">Author: Dominik Egger Copyright: Distributed Organisms B.V. </div><div class="ttdef"><b>Definition:</b> cs_PowerSampling.h:15</div></div>
 <div class="ttc" id="classWatchdog_html"><div class="ttname"><a href="classWatchdog.html">Watchdog</a></div><div class="ttdoc">Author: Dominik Egger Copyright: Distributed Organisms B.V. </div><div class="ttdef"><b>Definition:</b> cs_Watchdog.h:16</div></div>
-<div class="ttc" id="classTemperatureGuard_html"><div class="ttname"><a href="classTemperatureGuard.html">TemperatureGuard</a></div><div class="ttdoc">Protection against temperature exceeding certain threshold. </div><div class="ttdef"><b>Definition:</b> cs_TemperatureGuard.h:25</div></div>
+<div class="ttc" id="classTemperatureGuard_html"><div class="ttname"><a href="classTemperatureGuard.html">TemperatureGuard</a></div><div class="ttdoc">Check if the temperature exceeds a certain threshold. </div><div class="ttdef"><b>Definition:</b> cs_TemperatureGuard.h:24</div></div>
 <div class="ttc" id="classCrownstone_html_a4d204186745780f10b0ed4af8cea9763"><div class="ttname"><a href="classCrownstone.html#a4d204186745780f10b0ed4af8cea9763">Crownstone::configure</a></div><div class="ttdeci">void configure()</div><div class="ttdoc">configure the crownstone. </div></div>
 <div class="ttc" id="classDeviceInformationService_html"><div class="ttname"><a href="classDeviceInformationService.html">DeviceInformationService</a></div><div class="ttdoc">The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions...</div><div class="ttdef"><b>Definition:</b> cs_DeviceInformationService.h:14</div></div>
 <div class="ttc" id="classServiceData_html"><div class="ttname"><a href="classServiceData.html">ServiceData</a></div><div class="ttdef"><b>Definition:</b> cs_ServiceData.h:44</div></div>
