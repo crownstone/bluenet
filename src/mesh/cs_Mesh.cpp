@@ -267,7 +267,9 @@ bool Mesh::getLastMessage(uint8_t channel, void* p_data, uint16_t& length) {
 //		LOGd("message:");
 //		BLEutil::printArray(&message, length);
 
-		length = sizeof(message.payload);
+		if (length > sizeof(message.payload)) {
+			length = sizeof(message.payload);
+		}
 		memcpy((uint8_t*)p_data, message.payload, length);
 
 		//LOGi("recv ch: %d, len: %d", handle, length);
@@ -296,47 +298,46 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 	case COMMAND_REPLY_CHANNEL: {
 
 		reply_message_t *replyMessageOld, *replyMessageNew;
-
 		replyMessageOld = (reply_message_t*)messageOld.payload;
+		replyMessageNew = (reply_message_t*)messageNew.payload;
 
 //		LOGi("replyMessageOld:");
 //		BLEutil::printArray(replyMessageOld, sizeof(reply_message_t));
-
-		replyMessageNew = (reply_message_t*)messageNew.payload;
-
 //		LOGi("replyMessageNew:");
 //		BLEutil::printArray(replyMessageNew, sizeof(reply_message_t));
 
+		//! The message counter is used to identify the to which command this message replies to.
 		if (replyMessageNew->messageCounter > replyMessageOld->messageCounter) {
 
 			LOGi("new is newer command reply");
 
-			// update message counter
+			//! Update message counter
 			_messageCounter[handle -1] = messageNew.messageCounter;
 
-			// send resolved message into mesh
+			//! Send resolved message into mesh
 			send(handle, replyMessageNew, sizeof(reply_message_t));
 
-			// and process
-	//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
+			//! and process the new message
 			_meshControl.process(handle, &messageNew, sizeof(mesh_message_t));
 		} else if (replyMessageOld->messageCounter > replyMessageNew->messageCounter) {
 
 			LOGi("old is newer command reply");
 
-			// update message counter
+			//! Update message counter
 			_messageCounter[handle -1] = messageOld.messageCounter;
 
-			// send resolved message into mesh
+			//! Send resolved message into mesh
 			send(handle, replyMessageOld, sizeof(reply_message_t));
 
-			// and process
-	//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
+			//! and process the old message
 			_meshControl.process(handle, &messageOld, sizeof(mesh_message_t));
 		} else {
 
+
 //			LOGi("merge ...");
 
+			//! If messages are of different type, we have a problem...
+			//! TODO: what now?
 			if (replyMessageNew->messageType != replyMessageOld->messageType) {
 				LOGe("ohoh, different message types");
 				return;
@@ -344,30 +345,30 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 
 			if (replyMessageNew->messageType == STATUS_REPLY) {
 
+				//! Merge by pushing all items from the new message that are not in the old message to the old message.
 
+				//! Loop over all items in new message.
 				status_reply_item_t* srcItem;
 				for (int i = 0; i < replyMessageNew->numOfReplys; ++i) {
-
 					srcItem = &replyMessageNew->statusList[i];
 
+					//! Check if item is in old message.
 					status_reply_item_t* destItem;
 					bool found = false;
 					for (int j = 0; j < replyMessageOld->numOfReplys; ++j) {
 						destItem = &replyMessageOld->statusList[j];
-
 						if (destItem->id == srcItem->id) {
 //							LOGi("index %d found at %d", i, j);
 //							BLEutil::printArray(srcItem, sizeof(status_reply_item_t));
-
 							found = true;
 							break;
 						}
 					}
 
+					//! If item is not in old message, then push it to the old message.
 					if (!found) {
 //						LOGi("index %d not found, push back:", i);
 //						BLEutil::printArray(srcItem, sizeof(status_reply_item_t));
-
 						push_status_reply_item(replyMessageOld, srcItem);
 					}
 
@@ -383,10 +384,10 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 				send(handle, replyMessageOld, sizeof(reply_message_t));
 
 				//! and process
-		//		_meshControl.process(handle, stateMessageOld, sizeof(state_message_t));
 				_meshControl.process(handle, &messageOld, sizeof(mesh_message_t));
 
 			}
+			//! TODO: how to handle conflicts for state and config replies?
 		}
 
 
@@ -396,51 +397,47 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 	case STATE_CHANGE_CHANNEL: {
 
 		state_message_t *stateMessageOld, *stateMessageNew;
-
 		stateMessageOld = (state_message_t*)messageOld.payload;
+		stateMessageNew = (state_message_t*)messageNew.payload;
 
 //		LOGi("stateMessageOld:");
 //		BLEutil::printArray(stateMessageOld, sizeof(state_message_t));
-
-		stateMessageNew = (state_message_t*)messageNew.payload;
-
 //		LOGi("stateMessageNew:");
 //		BLEutil::printArray(stateMessageNew, sizeof(state_message_t));
 
-		if (stateMessageOld->head > stateMessageNew->head) {
-//			LOGi("update new head");
-			stateMessageNew->head = stateMessageOld->head;
-		} else if (stateMessageNew->head > stateMessageOld->head) {
-			stateMessageOld->head = stateMessageNew->head;
-//			LOGi("update old head");
-		}
+		// Skip items that were both in old and new message
+		// [2017-02-23] Bart: Leads to corrupt messages!
+//		if (stateMessageOld->head > stateMessageNew->head) {
+////			LOGi("update new head");
+//			stateMessageNew->head = stateMessageOld->head;
+//		} else if (stateMessageNew->head > stateMessageOld->head) {
+//			stateMessageOld->head = stateMessageNew->head;
+////			LOGi("update old head");
+//		}
 
-//			LOGi("merge ...");
+//		LOGi("merge ...");
+		//! Merge by pushing all items from the new message that are not in the old message to the old message.
 
+		//! Loop new message from oldest to newest item, so that the newest item is push lastly.
 		int16_t srcIndex = -1;
 		state_item_t* srcItem;
 		while (peek_next_state_item(stateMessageNew, &srcItem, srcIndex)) {
-
+			//! Check if item is in the old message.
 			bool found = false;
-
 			int16_t destIndex = -1;
 			state_item_t* destItem;
 			while (peek_next_state_item(stateMessageOld, &destItem, destIndex)) {
-
 				if (memcmp(destItem, srcItem, sizeof(state_item_t)) == 0) {
-
 //						LOGi("index %d found already:", srcIndex);
 //						BLEutil::printArray(srcItem, sizeof(state_item_t));
-
 					found = true;
 					break;
 				}
-
 			}
 
+			//! If item is not in old message, then push it to the old message.
 			if (!found) {
 				push_state_item(stateMessageOld, srcItem);
-
 //					LOGi("index %d not found, push back:", srcIndex);
 //					BLEutil::printArray(srcItem, sizeof(state_item_t));
 			}

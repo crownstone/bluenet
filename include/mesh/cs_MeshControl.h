@@ -40,6 +40,15 @@ public:
 	 */
 	void sendServiceDataMessage(state_item_t& stateItem, bool event);
 
+
+	/** Get the last state data message
+	 *
+	 * @message Pointer to a message where the last message will be copied to.
+	 * @size Size of the message. This is changed if the copied amount of data is smaller.
+	 * @changeChannel Whether to get the message from the state change channel.
+	 */
+	bool getLastStateDataMessage(state_message_t& message, uint16_t& size, bool changeChannel);
+
 	/** Send a status reply message, e.g. to reply status code of the execution of a command
 	 *
 	 * @messageCounter the counter of the command message to which this reply belongs

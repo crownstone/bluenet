@@ -160,4 +160,4 @@
 #define ADVERTISING_REFRESH_PERIOD               1000 //! Push the changes in the advertisement packet to the stack every x milliseconds
 #define ADVERTISING_REFRESH_PERIOD_SETUP         100 //! Push the changes in the advertisement packet to the stack every x milliseconds
 
-#define MESH_STATE_REFRESH_PERIOD                10000 // 1 Minute
+#define MESH_STATE_REFRESH_PERIOD                60000 // 60 seconds

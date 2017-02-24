@@ -41,42 +41,57 @@ enum ServiceBitmask {
 	SETUP_MODE_ENABLED    = 7
 };
 
+union service_data_t {
+	struct __attribute__((packed)) {
+		uint8_t  protocolVersion;
+		uint16_t crownstoneId;
+		uint8_t  switchState;
+		uint8_t  eventBitmask;
+		int8_t   temperature;
+		int32_t  powerUsage;
+		int32_t  accumulatedEnergy;
+		uint8_t  rand;
+		uint16_t counter;
+	} params;
+	uint8_t array[sizeof(params)] = {};
+};
+
 class ServiceData : EventListener {
 
 public:
 	ServiceData();
 
 	void updatePowerUsage(int32_t powerUsage) {
-		_params.powerUsage = powerUsage;
+		_serviceData.params.powerUsage = powerUsage;
 	}
 
 	void updateAccumulatedEnergy(int32_t accumulatedEnergy) {
-		_params.accumulatedEnergy = accumulatedEnergy;
+		_serviceData.params.accumulatedEnergy = accumulatedEnergy;
 	}
 
 	void updateCrownstoneId(uint16_t crownstoneId) {
-		_params.crownstoneId = crownstoneId;
+		_serviceData.params.crownstoneId = crownstoneId;
 	}
 
 	void updateSwitchState(uint8_t switchState) {
-		_params.switchState = switchState;
+		_serviceData.params.switchState = switchState;
 	}
 
 	void updateEventBitmask(uint8_t bitmask) {
-		_params.eventBitmask = bitmask;
+		_serviceData.params.eventBitmask = bitmask;
 	}
 
 	void updateTemperature(int8_t temperature) {
-		_params.temperature = temperature;
+		_serviceData.params.temperature = temperature;
 	}
 
 	void updateAdvertisement();
 
 	void updateEventBitmask(uint8_t bit, bool set) {
 		if (set) {
-			_params.eventBitmask |= 1 << bit;
+			_serviceData.params.eventBitmask |= 1 << bit;
 		} else {
-			_params.eventBitmask &= ~(1 << bit);
+			_serviceData.params.eventBitmask &= ~(1 << bit);
 		}
 	}
 
@@ -85,13 +100,13 @@ public:
 			return _encryptedArray;
 		}
 		else {
-			return _array;
+			return _serviceData.array;
 		}
 
 	}
 
 	uint16_t getArraySize() {
-		return sizeof(_params);
+		return sizeof(service_data_t);
 	}
 
 	void sendMeshState(bool event);
@@ -109,28 +124,35 @@ private:
 		ptr->updateAdvertisement();
 	}
 
-	union {
-		struct __attribute__((packed)) {
-			uint8_t  protocolVersion;
-			uint16_t crownstoneId;
-			uint8_t  switchState;
-			uint8_t  eventBitmask;
-			int8_t   temperature;
-			int32_t  powerUsage;
-			int32_t  accumulatedEnergy;
-			uint8_t  rand;
-			uint16_t counter;
-		} _params;
-		uint8_t _array[sizeof(_params)] = {};
-	};
+	service_data_t _serviceData;
+	service_data_t _serviceDataExt;
 
 	union {
 		struct __attribute__((packed)) {
 			uint8_t  protocolVersion;
 			uint8_t  payload[16];
 		} _encryptedParams;
-		uint8_t _encryptedArray[sizeof(_params)] = {};
+		uint8_t _encryptedArray[sizeof(service_data_t)] = {};
 	};
+
+	//! Counter that keeps up the number of times that the advertisement has been updated.
+	uint32_t _updateCount;
+
+#if BUILD_MESHING == 1
+	//! List of external crownstone IDs that have been advertised, used to determine which external crownstone to advertise.
+	struct advertised_ids_t {
+		uint8_t size;
+		int8_t head; // Index of last crownstone ID that was advertised
+		uint16_t list[MAX_STATE_ITEMS];
+	} _advertisedIds;
+
+	//! List that is used temporarily
+	advertised_ids_t _tempAdvertisedIds;
+
+	//! Number of times we should still advertise the change channel instead of the broadcast channel.
+	//! This is set to some number when we received a state changed message and then counts down.
+	uint8_t _numAdvertiseChangedStates;
+#endif
 
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 

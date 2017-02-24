@@ -61,7 +61,7 @@ typedef uint16_t id_type_t;
  ********************************************************************/
 
 #define ENCRYPTED_HEADER_SIZE (sizeof(uint32_t) + sizeof(uint32_t))
-#define MAX_ENCRYPTED_PAYLOAD_LENGTH (RBC_MESH_VALUE_MAX_LEN - ENCRYPTED_HEADER_SIZE)
+#define MAX_ENCRYPTED_PAYLOAD_LENGTH ((RBC_MESH_VALUE_MAX_LEN - ENCRYPTED_HEADER_SIZE) - ((RBC_MESH_VALUE_MAX_LEN - ENCRYPTED_HEADER_SIZE) % 16))
 #define PAYLOAD_HEADER_SIZE (sizeof(uint32_t))
 #define MAX_MESH_MESSAGE_LENGTH (MAX_ENCRYPTED_PAYLOAD_LENGTH - PAYLOAD_HEADER_SIZE)
 
@@ -153,12 +153,13 @@ inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id,
 
 struct __attribute__((__packed__)) state_item_t {
 	id_type_t id;
-	uint8_t switchState;
-	uint32_t powerUsage;
-	uint32_t accumulatedEnergy;
+	uint8_t  switchState;
+	uint8_t  eventBitmask;
+	int32_t powerUsage;
+	int32_t accumulatedEnergy;
 };
 
-#define STATE_HEADER_SIZE (sizeof(uint8_t) - sizeof(uint8_t) - sizeof(uint8_t))
+#define STATE_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t))
 #define MAX_STATE_ITEMS ((MAX_MESH_MESSAGE_LENGTH - STATE_HEADER_SIZE) / sizeof(state_item_t))
 
 /*
@@ -167,15 +168,32 @@ struct __attribute__((__packed__)) state_item_t {
  * size indicates the number of elements in the list
  */
 struct __attribute__((__packed__)) state_message_t {
-	uint8_t head;
-	uint8_t tail;
-	uint8_t size;
+	uint8_t head; // Place of oldest item
+	uint8_t tail; // Place where a new item will be put
+	uint8_t size; // Number of items in the message
 	state_item_t list[MAX_STATE_ITEMS];
 };
 
 /*
  * HELPER FUNCTIONS
  */
+
+inline void init_state_msg(state_message_t* message) {
+
+}
+
+inline bool is_valid_state_msg(state_message_t* message) {
+	if (message->size > MAX_STATE_ITEMS || message->head > MAX_STATE_ITEMS || message->tail > MAX_STATE_ITEMS) {
+		return false;
+	}
+	if (message->tail == message->head) {
+		return (message->size == 0 || message->size == MAX_STATE_ITEMS);
+	}
+	if ((message->tail + MAX_STATE_ITEMS - message->head) % MAX_STATE_ITEMS != message->size) {
+		return false;
+	}
+	return true;
+}
 
 inline void push_state_item(state_message_t* message, state_item_t* item) {
 	if (++message->size > MAX_STATE_ITEMS) {
@@ -186,10 +204,17 @@ inline void push_state_item(state_message_t* message, state_item_t* item) {
 	message->tail = (message->tail + 1) % MAX_STATE_ITEMS;
 }
 
+/* Use this function to loop over items from oldest to newest. Start with index -1, then keep calling this function.
+ * Example:
+ *     int16_t idx = -1;
+ *	   state_item_t* p_stateItem;
+ *	   while (peek_next_state_item(msg, &p_stateItem, idx))
+ */
 inline bool peek_next_state_item(state_message_t* message, state_item_t** item, int16_t& index) {
 	if (message->size == 0) {
 		return false;
-	} else if (index == -1) {
+	}
+	if (index == -1) {
 		index = message->head;
 	} else {
 		index = (index + 1) % MAX_STATE_ITEMS;
@@ -199,9 +224,33 @@ inline bool peek_next_state_item(state_message_t* message, state_item_t** item, 
 	return true;
 }
 
+/* Use this function to loop over items from newest to oldest. Start with index -1, then keep calling this function.
+ * Example:
+ *     int16_t idx = -1;
+ *	   state_item_t* p_stateItem;
+ *	   while (peek_prev_state_item(msg, &p_stateItem, idx))
+ */
+inline bool peek_prev_state_item(state_message_t* message, state_item_t** item, int16_t& index) {
+	if (message->size == 0) {
+		return false;
+	}
+	if (index == -1) {
+		index = (message->head + message->size) % MAX_STATE_ITEMS;
+		*item = &message->list[index];
+		return true;
+	} else {
+		index = (index - 1 + MAX_STATE_ITEMS) % MAX_STATE_ITEMS;
+	}
+	if (index == message->head) {
+		return false;
+	}
+	*item = &message->list[index];
+	return true;
+}
+
 inline bool pop_state_item(state_message_t* message, state_item_t* item) {
 	if (message->size > 0) {
-		memcpy(item, &message->list[message->tail], sizeof(state_item_t));
+		memcpy(item, &message->list[message->head], sizeof(state_item_t));
 		message->head = (message->head + 1) % MAX_STATE_ITEMS;
 		--message->size;
 		return true;

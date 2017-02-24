@@ -1,4 +1,4 @@
-# Bluenet protocol v0.8.1
+# Bluenet protocol v0.9.0
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -734,7 +734,8 @@ uint 8 | Size | 1 | Number of elements in the list
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | Crownstone ID | 2 | The identifier of the crownstone which has this state
-uint 8 | Switch state | 1 | The current [Switch State](#switch_state_packet) of the crownstone
+uint 8 | Switch state | 1 | The current [Switch state](#switch_state_packet) of the crownstone
+uint 8 | Event bitmask | 1 | The current [Event bitmask](#event_bitmask) of the crownstone
 int 32 | Power usage | 4 | The current power usage of the crownstone (mW)
 int 32 | Accumulated energy | 4 | The accumulated energy since setup (Wh)
 
