@@ -410,8 +410,10 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 		if (stateMessageOld->head > stateMessageNew->head) {
 //			LOGi("update new head");
 			stateMessageNew->head = stateMessageOld->head;
+			stateMessageNew->size = stateMessageOld->size;
 		} else if (stateMessageNew->head > stateMessageOld->head) {
 			stateMessageOld->head = stateMessageNew->head;
+			stateMessageOld->size = stateMessageNew->size;
 //			LOGi("update old head");
 		}
 

@@ -115,6 +115,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type) {
 ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel accessLevel) {
 
 	switch (type) {
+	case CMD_NOP: {
+		// a nop command to keep the connection alive
+		// don't need to do anything here, the connection keep alive is handled in the stack
+		break;
+	}
 	case CMD_GOTO_DFU: {
 		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "goto dfu");
