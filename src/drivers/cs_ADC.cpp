@@ -35,7 +35,7 @@ ADC::ADC()
 	_doneCallbackData.bufSize = 0;
 	// TODO: misuse: overload of bufNum field to indicate also initialization
 	_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
-	_currentBufInd = 0;
+	_numBuffersQueued = 0;
 }
 
 /**
@@ -44,7 +44,7 @@ ADC::ADC()
  *
  * @caller src/processing/cs_PowerSampling.cpp
  */
-error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
+cs_adc_error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
 	ret_code_t err_code;
 
 	for (uint8_t i=0; i<numPins; i++) {
@@ -68,14 +68,10 @@ error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
 	err_code = nrf_drv_timer_init(_timer, &timerConfig, staticTimerHandler);
 	APP_ERROR_CHECK(err_code);
 
-	//! Setup timer for compare event every 100ms
-//	uint32_t ticks = nrf_drv_timer_ms_to_ticks(_timer, 100);
-	//! Setup timer for compare event every 400us
+	//! Setup timer for compare event every CS_ADC_SAMPLE_INTERVAL_US us
 	uint32_t ticks = nrf_drv_timer_us_to_ticks(_timer, CS_ADC_SAMPLE_INTERVAL_US);
 //	LOGd("adc timer ticks: %u", ticks);
 	nrf_drv_timer_extended_compare(_timer, NRF_TIMER_CC_CHANNEL0, ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, false);
-//	nrf_drv_timer_extended_compare(_timer, NRF_TIMER_CC_CHANNEL0, ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
-//	nrf_drv_timer_enable(_timer);
 
 	uint32_t timer_compare_event_addr = nrf_drv_timer_compare_event_address_get(_timer, NRF_TIMER_CC_CHANNEL0);
 	uint32_t saadc_sample_event_addr = nrf_drv_saadc_sample_task_get();
@@ -107,10 +103,7 @@ error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
 		_bufferPointers[i] = new nrf_saadc_value_t[CS_ADC_BUF_SIZE];
 		/* Start conversion in non-blocking mode. Sampling is not triggered yet. */
-		if (i < 2) {
-			err_code = nrf_drv_saadc_buffer_convert(_bufferPointers[i], CS_ADC_BUF_SIZE);
-			APP_ERROR_CHECK(err_code);
-		}
+		addBufferToSampleQueue(_bufferPointers[i]);
 	}
 
 	return 0;
@@ -126,7 +119,7 @@ error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
  *   - do not set the prescaler for the reference voltage, this means voltage is expected between 0 and 1.2V (VGB)
  * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
  */
-error_t ADC::configPin(const channel_id_t channelNum, const pin_id_t pinNum) {
+cs_adc_error_t ADC::configPin(const channel_id_t channelNum, const pin_id_t pinNum) {
 	LOGd("Configuring channel %i, pin %i", channelNum, pinNum);
 	ret_code_t err_code;
 
@@ -190,14 +183,16 @@ void ADC::start() {
 	nrf_drv_timer_enable(_timer);
 }
 
-bool ADC::releaseBuffer(buffer_id_t bufNum) {
-//	write("%i\r\n", bufNum);
-	if (_doneCallbackData.bufNum != bufNum) {
-		LOGe("bufNum mismatch! %i vs %i", _doneCallbackData.bufNum, bufNum);
-		return false;
-	}
-	if (_doneCallbackData.buffer != _bufferPointers[bufNum]) {
-		LOGe("buffer mismatch! %i vs %i", _doneCallbackData.buffer, _bufferPointers[bufNum]);
+void ADC::addBufferToSampleQueue(nrf_saadc_value_t* buf) {
+	ret_code_t err_code;
+	err_code = nrf_drv_saadc_buffer_convert(buf, CS_ADC_BUF_SIZE);
+	APP_ERROR_CHECK(err_code);
+	_numBuffersQueued++;
+}
+
+bool ADC::releaseBuffer(nrf_saadc_value_t* buf) {
+	if (_doneCallbackData.buffer != buf) {
+		LOGe("buffer mismatch! %i vs %i", _doneCallbackData.buffer, buf);
 		return false;
 	}
 
@@ -206,9 +201,7 @@ bool ADC::releaseBuffer(buffer_id_t bufNum) {
 	_doneCallbackData.bufSize = 0;
 	_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
 
-	ret_code_t err_code;
-	err_code = nrf_drv_saadc_buffer_convert(_bufferPointers[bufNum], CS_ADC_BUF_SIZE);
-	APP_ERROR_CHECK(err_code);
+	addBufferToSampleQueue(buf);
 	return true;
 }
 
@@ -218,19 +211,19 @@ void adc_done(void * p_event_data, uint16_t event_size) {
 }
 
 void ADC::update(nrf_saadc_value_t* buf) {
+	_numBuffersQueued--;
 	if (_doneCallbackData.callback != NULL && _doneCallbackData.buffer == NULL) {
-		// Fill callback data object, should become available again in releaseBuffer()
+		//! Fill callback data object, should become available again in releaseBuffer()
 		_doneCallbackData.buffer = buf;
 		_doneCallbackData.bufSize = CS_ADC_BUF_SIZE;
-		_doneCallbackData.bufNum = _currentBufInd;
-
-		// Update index to buffer for next update()
-		_currentBufInd = _currentBufInd % CS_ADC_NUM_BUFFERS;
+		_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
 
 		// Decouple done callback from adc interrupt handler, and put it on app scheduler instead
 		app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
 	} else {
-		LOGe("Update events arriving too fast! Previous callback not yet handled!");
+		//! Skip the callback, just put buffer in queue again.
+		write("/!\\");
+		addBufferToSampleQueue(buf);
 	}
 }
 

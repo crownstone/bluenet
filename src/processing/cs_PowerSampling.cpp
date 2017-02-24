@@ -187,6 +187,8 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 //			assert(buf[i] < 4000, "wrong pin!");
 //		}
 //	}
+//	LOGd("buf=%d size=%d bufNum=%d", buf, size, bufNum);
+//	write("%d %d %d ... %d\r\n", buf[0], buf[1], buf[2], buf[size-1]);
 
 	uint16_t voltageIndex = 1;
 	uint16_t currentIndex = 0;
@@ -225,7 +227,7 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 #ifdef USE_LED_DEBUG
 	nrf_gpio_pin_toggle(PIN_GPIO_LED_3);
 #endif
-	ADC::getInstance().releaseBuffer(bufNum);
+	ADC::getInstance().releaseBuffer(buf);
 }
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {

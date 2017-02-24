@@ -36,7 +36,7 @@ typedef uint8_t buffer_count_t;
 typedef uint16_t buffer_size_t;
 
 //! Error codes (number)
-typedef uint32_t error_t;
+typedef uint32_t cs_adc_error_t;
 
 /**
  * The typedef adc_done_cb_t is a function pointer to (1) a buffer with elements of type nrf_saadc_value_t (currently 
@@ -57,7 +57,8 @@ struct adc_done_cb_data_t {
 	nrf_saadc_value_t* buffer;
 	//! Buffer size as argument for ADC callback 
 	buffer_size_t bufSize;
-	//! Buffer index as argument for ADC callback 
+	//! Buffer index as argument for ADC callback
+	//! TODO: remove this field
 	buffer_id_t bufNum;
 };
 
@@ -128,7 +129,7 @@ public:
 	 * @param[in] size                 Size of the array.
 	 * @return                         Error code (0 means success).
 	 */
-	error_t init(const pin_id_t pins[], const pin_count_t numPins);
+	cs_adc_error_t init(const pin_id_t pins[], const pin_count_t numPins);
 
 	/** Start the ADC sampling
 	 */
@@ -143,7 +144,8 @@ public:
 	 * @param[in] bufNum               The buffer num as received in the done callback.
 	 * @return                         Boolean indicating success (true) or failure (false).
 	 */
-	bool releaseBuffer(buffer_id_t bufNum);
+//	bool releaseBuffer(buffer_id_t bufNum);
+	bool releaseBuffer(nrf_saadc_value_t* buf);
 
 	/** Set the callback which is called when a buffer is filled.
 	 *
@@ -198,15 +200,18 @@ private:
 	//! Array of pointers to buffers.
 	nrf_saadc_value_t* _bufferPointers[CS_ADC_NUM_BUFFERS];
 
-	//! In swap mode this is the buffer that will be the next one populated with values.
-	buffer_id_t _currentBufInd;
+	//! Number of buffers that are queued to be populated by adc.
+	buffer_count_t _numBuffersQueued;
 
 	//! Arguments to the callback function
 	adc_done_cb_data_t _doneCallbackData;
 
 	//! Function to set the input pin, this can be done after each sample. Only used internally!
-	error_t configPin(const channel_id_t channel, const pin_id_t pin);
+	cs_adc_error_t configPin(const channel_id_t channel, const pin_id_t pin);
 
 	//! Function that returns the adc pin number, given the AIN number
 	nrf_saadc_input_t getAdcPin(pin_id_t pinNum);
+
+	//! Function that puts a buffer in queue to be populated with adc values.
+	void addBufferToSampleQueue(nrf_saadc_value_t* buf);
 };
