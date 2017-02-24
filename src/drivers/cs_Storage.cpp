@@ -144,6 +144,7 @@ void Storage::resumeRequests() {
 #endif
 				// count number of pending updates to decide when mesh can be resumed (if needed)
 				_pending++;
+				//! TODO: got an error 4 here when spam toggling relay.
 				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
 			} else {
 				// if scanning was started again, push it back on the buffer and try again during the next
