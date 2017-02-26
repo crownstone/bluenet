@@ -9,7 +9,8 @@ git:
 
 env:
 - BLUENET_WORKSPACE_DIR=$HOME/workspace
-
+- BLUENET_DIR=$TRAVIS_BUILD_DIR
+  
 # blocklist
 branches:
     except:

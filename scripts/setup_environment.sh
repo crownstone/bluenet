@@ -7,6 +7,8 @@ source $script_path/env.sh
 mkdir -p $BLUENET_CONFIG_DIR
 mkdir -p $BLUENET_BUILD_DIR
 mkdir -p $BLUENET_BIN_DIR
+mkdir -p $BLUENET_RELEASE_DIR
+mkdir -p $BLUENET_BOOTLOADER_DIR
 
 target="test"
 
