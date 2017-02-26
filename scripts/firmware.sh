@@ -30,7 +30,7 @@ fi
 address=${address:-$APPLICATION_START_ADDRESS}
 
 git-pull() {
-	printf "oo Pull from github\n"
+	info "Pull from github"
 	cd ${path}/.. && git pull
 }
 
@@ -40,6 +40,11 @@ printf "oo  _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| \n"
 printf "oo  _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     \n"
 printf "oo  _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     \n"
 printf "oo  _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \n"
+printf "${normal}\n"
+
+info "Configuration parameters loaded from files set up beforehand through e.g. _config.sh:"
+printf "\n"
+log_config
 
 # Use hidden .build file to store variables
 BUILD_PROCESS_FILE="$BLUENET_BUILD_DIR/.build"
@@ -54,7 +59,7 @@ BUILD_CYCLE=$((BUILD_CYCLE + 1))
 sed -i "s/\(BUILD_CYCLE *= *\).*/\1$BUILD_CYCLE/" "$BUILD_PROCESS_FILE"
 if ! (($BUILD_CYCLE % 100)); then
 	printf "\n"
-	printf "oo Would you like to check for updates? [Y/n]: "
+	printf "Would you like to check for updates? [Y/n]: "
 	read update_response
 	if [ "$update_response" == "n" ]; then
 		git_version=$(git rev-parse --short=25 HEAD)
@@ -67,8 +72,8 @@ printf "${normal}\n"
 
 host() {
 	cd ${path}/..
-	info "oo Execute make (which will execute cmake)"
-	make -s host
+	info "Execute make host-compile-target"
+	make -s host-compile-target
 	# result=$?
 	checkError "oo Error building firmware"
 	cd $path
@@ -78,8 +83,8 @@ host() {
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
-	info "oo Execute make (which will execute cmake)"
-	make -s all
+	info "Execute make cross-compile-target"
+	make -s cross-compile-target
 	# result=$?
 	checkError "oo Error building firmware"
 	cd $path

@@ -16,24 +16,26 @@ cyan=$(tput setaf 6)
 white=$(tput setaf 7)
 normal=$(tput sgr0)
 
+prefix='oo'
+
 err() {
-	printf "$red$1$normal\n"
+	printf "$red$prefix $1$normal\n"
 }
 
 info() {
-	printf "$yellow$1$normal\n"
+	printf "$yellow$prefix $1$normal\n"
 }
 
 succ() {
-	printf "$green$1$normal\n"
+	printf "$green$prefix $1$normal\n"
 }
 
 log() {
-	printf "$normal$1$normal\n"
+	printf "$normal$prefix $1$normal\n"
 }
 
 warn() {
-	printf "$magenta$1$magenta\n"
+	printf "$magenta$prefix $1$magenta\n"
 }
 
 checkError() {
