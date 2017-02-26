@@ -1,9 +1,14 @@
+before_install: source scripts/setup_environment.sh
+    
 install: scripts/firmware.sh host test
 
 compiler: gcc
 
 git:
     depth: 3
+
+env:
+- BLUENET_WORKSPACE_DIR=$HOME/workspace
 
 # blocklist
 branches:
