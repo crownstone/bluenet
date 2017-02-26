@@ -1,6 +1,12 @@
 #!/bin/bash
 
-source ./env.sh
+script_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source $script_path/env.sh
+
+mkdir -p $BLUENET_CONFIG_DIR
+mkdir -p $BLUENET_BUILD_DIR
+mkdir -p $BLUENET_BIN_DIR
 
 target="test"
 
@@ -11,7 +17,7 @@ echo 'COMPILER_PATH=/usr' >> $cfile
 echo 'COMPILER_TYPE=' >> $cfile
 echo 'COMPILATION_TARGET=host' >> $cfile
 
-cp _targets_template.sh ${BLUENET_CONFIG_DIR}/_targets.sh
+cp $script_path/_targets_template.sh ${BLUENET_CONFIG_DIR}/_targets.sh
 
 env
 
