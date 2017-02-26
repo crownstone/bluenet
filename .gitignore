@@ -1,5 +1,7 @@
-/CMakeBuild.config
-CMakeBuild.config.s*
+CMakeBuild.config
+CMakeBuild.config.*
+CMakeLists.txt
+*.cmake
 tags
 .cproject
 .project
@@ -8,7 +10,6 @@ build/
 .idea/
 .settings/
 .DS_Store
-CMakeBuild.config.local
 env.config
 node_modules
 *.pyc

@@ -1,0 +1,11 @@
+install: scripts/firmware.sh host test
+
+compiler: gcc
+
+git:
+    depth: 3
+
+# blocklist
+branches:
+    except:
+    - gh-pages

@@ -81,9 +81,9 @@ IF(NOT IN_TRY_COMPILE)
 INCLUDE(crownstone.defs)
 ENDIF()
 
-# Pass variables in defined in the configuration file to the compiler
-SET(NRF51822_DIR                                "${NRF51822_DIR}"                   CACHE STRING "NRF51822_DIR" FORCE)
-SET(NORDIC_SDK_VERSION                          "${NORDIC_SDK_VERSION}"             CACHE STRING "NORDIC_SDK_VERSION" FORCE)
+# Obtain variables to be used for the compiler
+SET(NRF51822_DIR                                "${NRF51822_DIR}"                   CACHE STRING "Nordic SDK Directory")
+SET(NORDIC_SDK_VERSION                          "${NORDIC_SDK_VERSION}"             CACHE STRING "Nordic SDK Version")
 SET(SOFTDEVICE_SERIES                           "${SOFTDEVICE_SERIES}"              CACHE STRING "SOFTDEVICE_SERIES" FORCE)
 SET(SOFTDEVICE_MAJOR                            "${SOFTDEVICE_MAJOR}"               CACHE STRING "SOFTDEVICE_MAJOR" FORCE)
 SET(SOFTDEVICE_MINOR                            "${SOFTDEVICE_MINOR}"               CACHE STRING "SOFTDEVICE_MINOR" FORCE)
@@ -203,18 +203,7 @@ MESSAGE(STATUS "C flags: ${CMAKE_C_FLAGS}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 
-# Set linker flags
-
-#enable_language(C)
-
-#try_compile(RESULT ${CMAKE_CURRENT_BINARY_DIR}
-#	${CMAKE_CURRENT_SOURCE_DIR}/src/util/cs_Syscalls.c
-#	OUTPUT_VARIABLE out
-#	)
-
-IF(IN_TRY_COMPILE)
-MESSAGE(FATAL_ERROR "Test")
-ELSE()
+IF(NOT IN_TRY_COMPILE)
 	# Tell the linker that we use a special memory layout
 	SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
 	SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
