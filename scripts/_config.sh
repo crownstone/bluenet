@@ -1,16 +1,5 @@
 #!/bin/bash
 
-#if [ -z $BLUENET_CONFIG_DIR ]; then
-#	log "ERROR: environment variable 'BLUENET_CONFIG_DIR' should be set."
-#	exit 1
-#fi
-
-# if [ ! -d "${BLUENET_DIR}" ]; then
-	# config_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-	# export BLUENET_DIR=${config_path}/..
-	# log "BLUENET_DIR does not exist. Use ${config_path}/.. as default"
-# fi
-
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/_utils.sh"
 
 log_config() {
@@ -24,6 +13,10 @@ log_config() {
 
 if [ ! -d "${BLUENET_DIR}" ] || [ ! -d "${BLUENET_CONFIG_DIR}" ] || [ -z "${BLUENET_BUILD_DIR}" ] || [ -z "${BLUENET_BIN_DIR}" ]; then
 	log_config
+	ls ${BLUENET_DIR}
+	ls ${BLUENET_CONFIG_DIR}
+	ls ${BLUENET_BUILD_DIR}
+	ls ${BLUENET_BIN_DIR}
 	err "ERROR: missing environment variables, or wrongly set!!"
 	err " make sure to source the PATH/TO/YOUR/BLUENET_DIR/scripts/env.sh"
 	err " in your bashrc file with"
