@@ -23,6 +23,7 @@ log_config() {
 }
 
 if [ ! -d "${BLUENET_DIR}" ] || [ ! -d "${BLUENET_CONFIG_DIR}" ] || [ -z "${BLUENET_BUILD_DIR}" ] || [ -z "${BLUENET_BIN_DIR}" ]; then
+	log_config
 	err "ERROR: missing environment variables, or wrongly set!!"
 	err " make sure to source the PATH/TO/YOUR/BLUENET_DIR/scripts/env.sh"
 	err " in your bashrc file with"
@@ -31,6 +32,7 @@ if [ ! -d "${BLUENET_DIR}" ] || [ ! -d "${BLUENET_CONFIG_DIR}" ] || [ -z "${BLUE
 	err "    $ cp PATH/TO/YOUR/BLUENET_DIR/env.config.template PATH/TO/YOUR/BLUENET_DIR/env.config"
 	err " and define the environment variables correctly in"
 	err " PATH/TO/YOUR/BLUENET_DIR/env.config"
+	env
 	exit 1
 fi
 
