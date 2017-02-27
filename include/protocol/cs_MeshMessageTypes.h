@@ -151,8 +151,8 @@ inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id,
  * HELPER FUNCTIONS
  */
 
-inline void init_state_msg(state_message_t* message) {
-
+inline void clear_state_msg(state_message_t* message) {
+	memset(message, 0, sizeof(state_message_t));
 }
 
 inline bool is_valid_state_msg(state_message_t* message) {

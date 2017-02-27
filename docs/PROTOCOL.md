@@ -1,4 +1,4 @@
-# Bluenet protocol v0.9.0
+# Bluenet protocol v0.9.1
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -345,6 +345,8 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 17 | <a name="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | ..
 18 | Request Service Data | - | Causes the crownstone to send it's service data over the mesh | x | x |
 19 | Disconnect | - | Causes the crownstone to disconnect | .. | .. | ..
+20 | Set LED | ?? | Enable or disabled LEDS | x
+21 | No operation | - | Does nothing | x | x | x
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 
@@ -453,15 +455,20 @@ Available state variables:
 
 Type nr | Type name | Payload type | Description | Persistent
 --- | --- | --- | --- | :---:
-128 | Reset counter | uint 32 | Counts the number of resets (DEBUG) | x
-129 | Switch state | uint 8 | Current Switch state, 0 = OFF, 100 = FULL ON |
-130 | Accumulated energy | uint 32 | Accumulated energy in ... over time, TBD | x
-131 | Power usage | uint 32 | Current power usage in ..., TBD |
-132 | Tracked devices | [Tracked devices](#tracked_device_list_packet) | List of tracked devices | x
-133 | Schedule | [Schedule List](#schedule_list_packet) | Schedule, TBD | x
+128 | Reset counter | uint 32 | Counts the number of resets (DEBUG). | x
+129 | [Switch state](#switch_state_packet) | uint 8 | Current Switch state. |
+130 | Accumulated energy | uint 32 | Accumulated energy in Wh | x
+131 | Power usage | uint 32 | Current power usage in mW |
+132 | Tracked devices | [Tracked devices](#tracked_device_list_packet) | List of tracked devices. | x
+133 | Schedule | [Schedule List](#schedule_list_packet) | Schedule list. | x
 134 | Operation Mode | uint 8 | ..., TBD | x
-135 | Temperature | int 32 | Chip temperature in °C |
-136 | Time | uint 32 | Get the current time
+135 | Temperature | int 32 | Chip temperature in °C. |
+136 | Time | uint 32 | Get the current time.
+139 | [Error bitmask](#state_error_bitmask) | uint 32 | Get the current error bitmask.
+140 | Error overcurrent | bool | Whether overcurrent was detected.
+141 | Error overcurrent dimmer | bool | Whether overcurrent for the dimmer was detected.
+142 | Error chip temp | bool | Whether the chip temperature is too high.
+143 | Error dimmer temp | bool | Whether the dimmer temperature is too high.
 
 OpCodes:
 
@@ -472,6 +479,16 @@ OpCode | Name | Description
 2 | Notify | Enable/Disable notifications for state variable. Every time the state variable is updated, the new value is written to the State Read Characteristic. To use effectively, enable GATT Notifications on the State Read Characteristic. Length has to be 1, and payload is 0 = disable, other = enable
 
 Note: On the State Read Characteristic, the OpCode is also set to distinguish between a one time read, and a continuous notification. In return, the length and payload will have actual data depending on the type.
+
+#### <a name="state_error_bitmask"></a>Error Bitmask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Overcurrent | If this is 1, overcurrent was detected.
+1 | Overcurrent dimmer | If this is 1, overcurrent for the dimmer was detected.
+2 | Chip temperature | If this is 1, the chip temperature is too high.
+3 | Dimmer temperature | If this is 1, the dimmer temperature is too high.
+4-31 | Reserved | Reserved for future use.
 
 
 ### <a name="power_samples_packet"></a>Power samples packet

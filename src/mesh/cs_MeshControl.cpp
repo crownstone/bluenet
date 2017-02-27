@@ -950,6 +950,10 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 	uint16_t messageSize = sizeof(message);
 	uint8_t channel;
 
+	if (!is_valid_state_msg(&message)) {
+		clear_state_msg(&message);
+	}
+
 	if (event) {
 		channel = STATE_CHANGE_CHANNEL;
 	} else {
