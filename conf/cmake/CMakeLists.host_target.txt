@@ -41,7 +41,7 @@ SET(GIT_HASH                                 "unset"                          CA
 SET(COMPILATION_DAY                          "unset"                          CACHE STRING "Day of compilation")
 SET(COMPILATION_TIME                         "unset"                          CACHE STRING "Time of day of compilation")
 
-MESSAGE(STATUS "Set verbosity to level: ${VERBOSITY}")
+MESSAGE(STATUS "CMakeLists.host: Set verbosity to level: ${VERBOSITY}")
 MESSAGE(STATUS "Git branch: ${GIT_BRANCH}")
 MESSAGE(STATUS "Git hash: ${GIT_HASH}")
 MESSAGE(STATUS "Day of compilation: ${COMPILATION_DAY}")

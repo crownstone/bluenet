@@ -172,13 +172,6 @@ ADD_DEFINITIONS("-DCHAR_SCHEDULE=${CHAR_SCHEDULE}")
 # only required if Nordic files are used
 ADD_DEFINITIONS("-DBOARD_NRF6310")
 
-# the bluetooth name is not optional
-IF(DEFINED BLUETOOTH_NAME)
-	ADD_DEFINITIONS("-DBLUETOOTH_NAME=${BLUETOOTH_NAME}")
-ELSE()
-	MESSAGE(WARNING "We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. \"Crown\" (with quotes)")
-ENDIF()
-
 # Publish all options as CMake options as well
 #
 #SET(CROWNSTONE_SERVICE                 "${CROWNSTONE_SERVICE}"                 CACHE STRING "Enable machine-centric service")

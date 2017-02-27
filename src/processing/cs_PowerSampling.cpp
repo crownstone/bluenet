@@ -384,7 +384,7 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 	int64_t pSum = 0;
 	uint32_t intervalUs = sampleIntervalUs;
 	uint16_t numSamples = acPeriodUs / intervalUs; //! one AC period
-	if (bufSize < numSamples*numChannels) {
+	if ((int)bufSize < numSamples*numChannels) {
 		LOGe("Should have at least a whole period in a buffer!");
 		//! Should have at least a whole period in a buffer!
 		return;

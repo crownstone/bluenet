@@ -2,12 +2,14 @@
 # The build systems uses CMake. All the automatically generated code falls under the Lesser General Public License
 # (LGPL GNU v3), the Apache License, or the MIT license, your choice.
 #
-# Author:	 Anne C. van Rossum (Distributed Organisms B.V.)
+# Author:	 Crownstone Team
 # Date: 	 Oct 28, 2013
 #
-# Copyright © 2013 Anne C. van Rossum <anne@dobots.nl>
+# Copyright © 2013 Crownstone B.V. <team@crownstone.rocks>
 #######################################################################################################################
 #Check http://www.cmake.org/Wiki/CMake_Cross_Compiling
+#
+# Note that the arm.toolchain.cmake is run BEFORE the variables of the CMakeLists.txt are set!
 
 # Set to Generic, or tests will fail (they will fail anyway)
 SET(CMAKE_SYSTEM_NAME Generic)
@@ -24,10 +26,10 @@ IF(EXISTS "${CONFIG_FILE}")
 	MESSAGE(STATUS "Load config file ${CONFIG_FILE}")
 	INCLUDE(${CONFIG_FILE})
 ELSE()
-	MESSAGE(FATAL_ERROR "Cannot find config file ${CONFIG_FILE}")
+	MESSAGE(WARNING "Cannot find config file ${CONFIG_FILE}")
 ENDIF()
 
-UNSET(CMAKE_TRY_COMPILE_CONFIGURATION)
+MESSAGE(STATUS "ARM cmake: Bluetooth name ${BLUETOOTH_NAME}")
 
 #######################################################################################################################
 # type of compiler we want to use, the COMPILER_TYPE can be empty if normal gcc and g++ compilers are intended
@@ -40,9 +42,7 @@ SET(CMAKE_CXX_OUTPUT_EXTENSION .o)
 
 # Make cross-compiler easy to find (but we will use absolute paths anyway)
 SET(PATH "${PATH}:${COMPILER_PATH}/bin")
-MESSAGE(STATUS "PATH is set to: ${PATH}")
-
-#SET(ARM_LINUX_SYSROOT /opt/compiler/gcc-arm-none-eabi-${COMPILER_VERSION} CACHE PATH "ARM cross compilation system root")
+MESSAGE(STATUS "ARM cmake: PATH is set to: ${PATH}")
 
 # Specify the cross compiler, linker, etc.
 SET(CMAKE_C_COMPILER                   ${COMPILER_PATH}/bin/${COMPILER_TYPE}gcc)
@@ -54,6 +54,17 @@ SET(CMAKE_OBJDUMP                      ${COMPILER_PATH}/bin/${COMPILER_TYPE}objd
 SET(CMAKE_OBJCOPY                      ${COMPILER_PATH}/bin/${COMPILER_TYPE}objcopy)
 SET(CMAKE_SIZE                         ${COMPILER_PATH}/bin/${COMPILER_TYPE}size)
 SET(CMAKE_NM                           ${COMPILER_PATH}/bin/${COMPILER_TYPE}nm)
+
+# Pure magic according following http://stackoverflow.com/questions/41589430/cmake-c-compiler-identification-fails
+# to get rid of the many try_compile attempts by CMake
+SET(CMAKE_C_COMPILER_WORKS TRUE CACHE INTERNAL "")
+SET(CMAKE_CXX_COMPILER_WORKS TRUE CACHE INTERNAL "")
+
+SET(CMAKE_C_COMPILER_FORCED TRUE CACHE INTERNAL "")
+SET(CMAKE_CXX_COMPILER_FORCED TRUE CACHE INTERNAL "")
+
+SET(CMAKE_C_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
+SET(CMAKE_CXX_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
 
 SET(DEFAULT_CXX_FLAGS       "-std=c++11 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions -fext-numeric-literals")
 SET(DEFAULT_C_FLAGS         "-std=gnu99")
@@ -67,26 +78,38 @@ SET(CMAKE_C_AND_CXX_FLAGS "${CMAKE_C_AND_CXX_FLAGS} -Os -fomit-frame-pointer")
 # There is a bug in CMAKE_OBJCOPY, it doesn't exist on execution for the first time
 SET(CMAKE_OBJCOPY_OVERLOAD                       ${COMPILER_PATH}/bin/${COMPILER_TYPE}objcopy)
 
-SET(CMAKE_CXX_FLAGS                              ${DEFAULT_CXX_FLAGS}          CACHE STRING "C++ flags")
-SET(CMAKE_C_FLAGS                                ${DEFAULT_C_FLAGS}            CACHE STRING "C flags")
-SET(CMAKE_C_AND_CXX_FLAGS                        ${DEFAULT_C_AND_CXX_FLAGS}    CACHE STRING "C and C++ flags")
-SET(CMAKE_SHARED_LINKER_FLAGS                    ""                            CACHE STRING "Shared linker flags")
-SET(CMAKE_MODULE_LINKER_FLAGS                    ""                            CACHE STRING "Module linker flags")
-SET(CMAKE_EXE_LINKER_FLAGS                       "-Wl,-z,nocopyreloc"          CACHE STRING "Executable linker flags")
+# The following require FORCE. Without it, the FLAGS end up to have duplication.
+SET(CMAKE_CXX_FLAGS                              ${DEFAULT_CXX_FLAGS}          CACHE STRING "C++ flags" FORCE)
+SET(CMAKE_C_FLAGS                                ${DEFAULT_C_FLAGS}            CACHE STRING "C flags" FORCE)
+SET(CMAKE_C_AND_CXX_FLAGS                        ${DEFAULT_C_AND_CXX_FLAGS}    CACHE STRING "C and C++ flags" FORCE)
+SET(CMAKE_SHARED_LINKER_FLAGS                    ""                            CACHE STRING "Shared linker flags" FORCE)
+SET(CMAKE_MODULE_LINKER_FLAGS                    ""                            CACHE STRING "Module linker flags" FORCE)
+SET(CMAKE_EXE_LINKER_FLAGS                       "-Wl,-z,nocopyreloc"          CACHE STRING "Executable linker flags" FORCE)
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS            "")
 SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "")
 
 # The directory with some of the FindXXX modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf/cmake")
-MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake")
+
+MESSAGE(STATUS "ARM cmake: C Compiler: ${CMAKE_C_COMPILER}")
+MESSAGE(STATUS "ARM cmake: Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 IF(NOT IN_TRY_COMPILE)
-INCLUDE(crownstone.defs)
+
+	INCLUDE(crownstone.defs)
+
+	# the bluetooth name is not optional
+	IF(DEFINED BLUETOOTH_NAME)
+		ADD_DEFINITIONS("-DBLUETOOTH_NAME=${BLUETOOTH_NAME}")
+	ELSE()
+		MESSAGE(FATAL_ERROR "We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. \"Crown\" (with quotes)")
+	ENDIF()
+
 ENDIF()
 
 # Obtain variables to be used for the compiler
-SET(NRF51822_DIR                                "${NRF51822_DIR}"                   CACHE STRING "Nordic SDK Directory")
-SET(NORDIC_SDK_VERSION                          "${NORDIC_SDK_VERSION}"             CACHE STRING "Nordic SDK Version")
+SET(NRF51822_DIR                                "${NRF51822_DIR}"                   CACHE STRING "Nordic SDK Directory" FORCE)
+SET(NORDIC_SDK_VERSION                          "${NORDIC_SDK_VERSION}"             CACHE STRING "Nordic SDK Version" FORCE)
 SET(SOFTDEVICE_SERIES                           "${SOFTDEVICE_SERIES}"              CACHE STRING "SOFTDEVICE_SERIES" FORCE)
 SET(SOFTDEVICE_MAJOR                            "${SOFTDEVICE_MAJOR}"               CACHE STRING "SOFTDEVICE_MAJOR" FORCE)
 SET(SOFTDEVICE_MINOR                            "${SOFTDEVICE_MINOR}"               CACHE STRING "SOFTDEVICE_MINOR" FORCE)
@@ -177,11 +200,11 @@ GET_DIRECTORY_PROPERTY( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITION
 
 FOREACH(definition ${DirDefs})
 	IF(VERBOSITY GREATER 4)
-		MESSAGE(STATUS "Definition: " ${definition})
+		MESSAGE(STATUS "ARM cmake: Definition: " ${definition})
 	ENDIF()
 	IF(${definition} MATCHES "=$")
 		IF(NOT ${definition} MATCHES "COMPILATION_TIME")
-			MESSAGE(STATUS "Definition ${definition} is not defined" )
+			MESSAGE(STATUS "ARM cmake: Definition ${definition} is not defined" )
 		ENDIF()
 	ENDIF()
 ENDFOREACH()
@@ -200,17 +223,15 @@ ENDIF()
 
 # Final collection of C/C++ compiler flags
 
-MESSAGE(STATUS "CXX flags: ${CMAKE_CXX_FLAGS}")
-MESSAGE(STATUS "C flags: ${CMAKE_C_FLAGS}")
+MESSAGE(STATUS "ARM cmake: CXX flags: ${CMAKE_CXX_FLAGS}")
+MESSAGE(STATUS "ARM cmake: C flags: ${CMAKE_C_FLAGS}")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 
-IF(NOT IN_TRY_COMPILE)
-	# Tell the linker that we use a special memory layout
-	SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
-	SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
-ENDIF()
+# Tell the linker that we use a special memory layout
+SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
+SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
 
 # http://public.kitware.com/Bug/view.php?id=12652
 # CMake does send the compiler flags also to the linker
@@ -224,9 +245,6 @@ SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} -Wl,--gc-s
 
 # We preferably want to run the cross-compiler tests without all the flags. This namely means we have to add for example the object out of syscalls.c to the compilation, etc. Or, differently, have different flags for the compiler tests. This is difficult to do!
 #SET(CMAKE_C_FLAGS "-nostdlib")
-
-#SET(CMAKE_C_COMPILER_WORKS 1)
-#SET(CMAKE_CXX_COMPILER_WORKS 1)
 
 # find the libraries
 # http://qmcpack.cmscc.org/getting-started/using-cmake-toolchain-file
@@ -243,12 +261,12 @@ SET(CMAKE_INSTALL_PREFIX ${DESTDIR}/usr/local)
 
 # the following doesn't seem to work so well
 SET(CMAKE_INCLUDE_PATH ${DESTDIR}/usr/local/include)
-MESSAGE(STATUS "Add include path: ${CMAKE_INCLUDE_PATH}")
+MESSAGE(STATUS "ARM cmake: Add include path: ${CMAKE_INCLUDE_PATH}")
 
 # indicate where the linker is allowed to search for library / headers
-SET(CMAKE_FIND_ROOT_PATH
+#SET(CMAKE_FIND_ROOT_PATH
 	#${ARM_LINUX_SYSROOT}
-	${DESTDIR})
+	#	${DESTDIR})
 #SET(CMAKE_FIND_ROOT_PATH ${CMAKE_FIND_ROOT_PATH} ${ARM_LINUX_SYSROOT})
 
 # search for programs in the build host directories

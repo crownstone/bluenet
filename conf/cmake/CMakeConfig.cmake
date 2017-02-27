@@ -5,8 +5,10 @@
 SET(DEFAULT_CONFIGURATION_FILE "CMakeBuild.config.default")
 SET(BLUENET_DIR "$ENV{BLUENET_DIR}")
 
-IF(EXISTS ${BLUENET_DIR}/${DEFAULT_CONFIGURATION_FILE})
-	file(STRINGS ${BLUENET_DIR}/${DEFAULT_CONFIGURATION_FILE} ConfigContents)
+SET(INSPECT_FILE ${BLUENET_DIR}/${DEFAULT_CONFIGURATION_FILE})
+
+IF(EXISTS ${INSPECT_FILE})
+	file(STRINGS ${INSPECT_FILE} ConfigContents)
 	foreach(NameAndValue ${ConfigContents})
 		# Strip leading spaces
 		string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
@@ -22,12 +24,12 @@ IF(EXISTS ${BLUENET_DIR}/${DEFAULT_CONFIGURATION_FILE})
 			# Set the variable
 			set(${Name} "${Value}")
 			IF(VERBOSITY GREATER 4)
-				MESSAGE(STATUS "Set default ${Name} to ${Value}")
+				MESSAGE(STATUS "CMakeConfig [${INSPECT_FILE}]: Set default ${Name} to ${Value}")
 			ENDIF()
 		endif()
 	endforeach()
 else()
-	MESSAGE(FATAL_ERROR "Could not find file ${BLUENET_DIR}/${DEFAULT_CONFIGURATION_FILE}!")
+	MESSAGE(FATAL_ERROR "Could not find file ${INSPECT_FILE}!")
 endif()
 
 ####################################
@@ -36,8 +38,10 @@ endif()
 
 SET(ENV_CONFIGURATION_FILE "CMakeBuild.config.local")
 
-IF(EXISTS ${BLUENET_DIR}/${ENV_CONFIGURATION_FILE})
-	file(STRINGS ${BLUENET_DIR}/${ENV_CONFIGURATION_FILE} ConfigContents)
+SET(INSPECT_FILE ${ENV_CONFIGURATION_FILE})
+
+IF(EXISTS ${INSPECT_FILE})
+	file(STRINGS ${INSPECT_FILE} ConfigContents)
 	foreach(NameAndValue ${ConfigContents})
 		# Strip leading spaces
 		string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
@@ -53,7 +57,7 @@ IF(EXISTS ${BLUENET_DIR}/${ENV_CONFIGURATION_FILE})
 			# Set the variable
 			set(${Name} "${Value}")
 			IF(VERBOSITY GREATER 4)
-				MESSAGE(STATUS "Overwrite ${Name} to ${Value}")
+				MESSAGE(STATUS "CMakeConfig [${INSPECT_FILE}]: Overwrite ${Name} to ${Value}")
 			ENDIF()
 		endif()
 	endforeach()
@@ -70,8 +74,10 @@ if(NOT EXISTS ${CONFIG_DIR}/${CONFIGURATION_FILE})
 	SET(CONFIG_DIR ${CMAKE_SOURCE_DIR})
 endif()
 
-IF(EXISTS ${CONFIG_DIR}/${CONFIGURATION_FILE})
-	file(STRINGS ${CONFIG_DIR}/${CONFIGURATION_FILE} ConfigContents)
+SET(INSPECT_FILE ${CONFIG_DIR}/${CONFIGURATION_FILE})
+
+IF(EXISTS ${INSPECT_FILE})
+	file(STRINGS ${INSPECT_FILE} ConfigContents)
 	foreach(NameAndValue ${ConfigContents})
 		# Strip leading spaces
 		string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
@@ -87,10 +93,10 @@ IF(EXISTS ${CONFIG_DIR}/${CONFIGURATION_FILE})
 			# Set the variable
 			set(${Name} "${Value}")
 			IF(VERBOSITY GREATER 4)
-				MESSAGE(STATUS "Overwrite ${Name} to ${Value}")
+				MESSAGE(STATUS "CMakeConfig [${INSPECT_FILE}]: Overwrite ${Name} to ${Value}")
 			ENDIF()
 		endif()
 	endforeach()
 else()
-	MESSAGE(FATAL_ERROR "Could not find file ${CONFIG_DIR}/${CONFIGURATION_FILE}, copy from ${CONFIGURATION_FILE}.default and adjust!")
+	MESSAGE(FATAL_ERROR "CMakeConfig: Could not find file ${INSPECT_FILE}, copy from ${CONFIGURATION_FILE}.default and adjust!")
 endif()
