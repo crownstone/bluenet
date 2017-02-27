@@ -4,7 +4,7 @@ compiler: gcc
 
 before_install: source scripts/setup_environment.sh
     
-install: scripts/firmware.sh host test
+install: scripts/firmware.sh --command=unit-test-host --target=test
 
 git:
     depth: 3

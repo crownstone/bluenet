@@ -3,15 +3,15 @@
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/_utils.sh"
 
 log_config() {
-	info "BLUENET_WORKSPACE_DIR is ${BLUENET_WORKSPACE_DIR}"
-	info "BLUENET_DIR is ${BLUENET_DIR}"
-	info "BLUENET_CONFIG_DIR is ${BLUENET_CONFIG_DIR}"
-	info "BLUENET_BUILD_DIR is ${BLUENET_BUILD_DIR}"
-	info "BLUENET_BIN_DIR is ${BLUENET_BIN_DIR}"
-	info "BLUENET_RELEASE_DIR is ${BLUENET_RELEASE_DIR}"
+	info "[_config.sh] BLUENET_WORKSPACE_DIR is ${BLUENET_WORKSPACE_DIR}"
+	info "[_config.sh] BLUENET_DIR is ${BLUENET_DIR}"
+	info "[_config.sh] BLUENET_CONFIG_DIR is ${BLUENET_CONFIG_DIR}"
+	info "[_config.sh] BLUENET_BUILD_DIR is ${BLUENET_BUILD_DIR}"
+	info "[_config.sh] BLUENET_BIN_DIR is ${BLUENET_BIN_DIR}"
+	info "[_config.sh] BLUENET_RELEASE_DIR is ${BLUENET_RELEASE_DIR}"
 }
 
-if [ ! -d "${BLUENET_DIR}" ] || [ ! -d "${BLUENET_CONFIG_DIR}" ] || [ -z "${BLUENET_BUILD_DIR}" ] || [ -z "${BLUENET_BIN_DIR}" ]; then
+if [ ! -d "${BLUENET_DIR}" ] || [ -z "${BLUENET_CONFIG_DIR}" ] || [ -z "${BLUENET_BUILD_DIR}" ] || [ -z "${BLUENET_BIN_DIR}" ]; then
 	log_config
 	ls ${BLUENET_DIR}
 	ls ${BLUENET_CONFIG_DIR}
@@ -38,8 +38,8 @@ if [ -e ${BLUENET_DIR}/CMakeBuild.config.local ]; then
 fi
 
 if [ ! -e ${BLUENET_CONFIG_DIR}/CMakeBuild.config ]; then
-	err "ERROR: could not find ${BLUENET_CONFIG_DIR}/CMakeBuild.config"
-	err "Don't forget to copy \"CMakeBuild.config.default\" to \"${BLUENET_CONFIG_DIR}/CMakeBuild.config\" and adjust the settings."
+	err "[_config.sh] ERROR: could not find ${BLUENET_CONFIG_DIR}/CMakeBuild.config"
+	err "[_config.sh] Don't forget to copy \"CMakeBuild.config.default\" to \"${BLUENET_CONFIG_DIR}/CMakeBuild.config\" and adjust the settings."
 	exit 1
 fi
 

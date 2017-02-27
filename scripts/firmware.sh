@@ -1,12 +1,81 @@
 #!/bin/bash
 
-cmd=${1:? "Usage: $0 \"cmd\", \"target\""}
+getopt --test > /dev/null
+if [[ $? -ne 4 ]]; then
+  echo "I’m sorry, `getopt --test` failed in this environment."
+  exit 1
+fi
 
-# optional target, use crownstone as default
-target=${2:-crownstone}
+SHORT=c:t:a:
+LONG=command:,target:,address:
 
-# optional address
-address=$3
+PARSED=`getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@"`
+if [[ $? -ne 0 ]]; then
+  exit 2
+fi
+
+eval set -- "$PARSED"
+
+while true; do
+	case "$1" in
+		-c|--command)
+			cmd=$2
+			shift 2
+			;;
+		-t|--target) 
+			target=$2
+			echo $2
+			shift 2
+			;;
+		-a|--address)
+			address=$2
+			echo $2
+			shift 2
+			;;
+		--)
+			shift
+			break
+			;;
+		*)
+			echo "Error in arguments."
+			echo $2
+			exit 3
+			;;
+	esac
+done
+
+usage() {
+  echo "Bluenet firmware bash script (Feb. 2017)"
+  echo
+  echo "usage: ./firmware.sh [arguments]            run script for bluenet-compatible firmware"
+  echo 
+  echo "Required arguments:"
+  echo "   -c command, --command=command            command to choose from this list:"
+  echo "      build                                 cross-compile target"
+  echo "      unit-test-host                        compile test units for host"
+  echo "      release                               create a release"
+  echo "      upload                                upload application firmware to target"
+  echo "      debug                                 debug application on target with gdb"
+  echo "      all                                   build, upload, and debug"
+  echo "      run                                   run application that is already uploaded"
+  echo "      clean                                 clean compilation folders"
+  echo "      bootloader-only                       upload bootloader"
+  echo "      bootloader                            upload bootloader (what's the diff?)"
+  echo "      debugbl                               debug bootloader"
+  echo "      writeHardwareVersion                  write hardware version to target"
+  echo 
+  echo "Optional arguments:"
+  echo "   -t target, --target=target               specify target (files are generated in separate directories)"
+  echo "   -a address, --address address            specify particular address to use"
+}
+
+if [ ! "$cmd" ]; then
+  usage
+  exit 4
+fi
+
+# Default target
+target=${target:-crownstone}
 
 # use the current path as the bluenet directory
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -70,7 +139,7 @@ if ! (($BUILD_CYCLE % 100)); then
 fi
 printf "${normal}\n"
 
-host() {
+unit-test-host() {
 	cd ${path}/..
 	info "Execute make host-compile-target"
 	make -s host-compile-target
@@ -223,8 +292,8 @@ case "$cmd" in
 	build)
 		build
 		;;
-	host)
-		host
+	unit-test-host)
+		unit-test-host
 		;;
 	upload)
 		upload
@@ -257,7 +326,7 @@ case "$cmd" in
 		writeHardwareVersion
 		;;
 	*)
-		info $"Usage: $0 {build|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release|writeHardwareVersion}"
+		info $"Usage: $0 {build|unit-test-host|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release|writeHardwareVersion}"
 		exit 1
 esac
 
