@@ -49,6 +49,16 @@ MESSAGE(STATUS "Time of day of compilation: ${COMPILATION_TIME}")
 
 #######################################################################################################################
 
+SET(DEFAULT_CXX_FLAGS        "-std=c++11 -fext-numeric-literals")
+SET(DEFAULT_C_FLAGS          "-std=gnu99")
+SET(DEFAULT_C_AND_CXX_FLAGS  "-g3 -Wall")
+
+SET(CMAKE_CXX_FLAGS          "${CMAKE_CXX_FLAGS} ${DEFAULT_CXX_FLAGS}"                   CACHE STRING "C++ flags" FORCE)
+SET(CMAKE_C_FLAGS            "${CMAKE_C_FLAGS} ${DEFAULT_C_FLAGS}"                       CACHE STRING "C flags" FORCE)
+SET(CMAKE_C_AND_CXX_FLAGS    "${CMAKE_C_AND_CXX_FLAGS} ${DEFAULT_C_AND_CXX_FLAGS}"       CACHE STRING "C and C++ flags")
+
+#######################################################################################################################
+
 # Libraries (math, stdc++ libraries, etc.)
 # Note that for a cross-compilation target it is useful to use the size-constrained *_s versions!
 #SET(LIBRARY_MATH "-lm")
@@ -58,7 +68,8 @@ SET(LIBS "-lstdc++ ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lc")
 
 # Some debug information
 IF(VERBOSITY GREATER 4)
-	MESSAGE(STATUS "\"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
+	MESSAGE(STATUS "Project \"${PROJECT_NAME}\" should have the following CXX flags: \"${DEFAULT_CXX_FLAGS}\"")
+	MESSAGE(STATUS "Project \"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
 	MESSAGE(STATUS "Linked libraries: ${LIBS}")
 ENDIF()
 
