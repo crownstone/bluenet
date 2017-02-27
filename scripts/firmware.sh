@@ -118,25 +118,28 @@ log_config
 # Use hidden .build file to store variables
 BUILD_PROCESS_FILE="$BLUENET_BUILD_DIR/.build"
 
-if ! [ -e "$BUILD_PROCESS_FILE" ]; then
-	BUILD_CYCLE=0
-	echo "BUILD_CYCLE=$BUILD_CYCLE" >> "$BUILD_PROCESS_FILE"
+if [ -e "$BLUENET_BUILD_DIR" ]; then
+  if ! [ -e "$BUILD_PROCESS_FILE" ]; then
+    BUILD_CYCLE=0
+    echo "BUILD_CYCLE=$BUILD_CYCLE" > "$BUILD_PROCESS_FILE"
+  fi
+  source "$BUILD_PROCESS_FILE"
+
+  BUILD_CYCLE=$((BUILD_CYCLE + 1))
+  sed -i "s/\(BUILD_CYCLE *= *\).*/\1$BUILD_CYCLE/" "$BUILD_PROCESS_FILE"
+  if ! (($BUILD_CYCLE % 100)); then
+    printf "\n"
+    printf "Would you like to check for updates? [Y/n]: "
+    read update_response
+    if [ "$update_response" == "n" ]; then
+      git_version=$(git rev-parse --short=25 HEAD)
+      printf "oo Git version: $git_version\n"
+    else
+      git-pull
+    fi
+  fi
 fi
 
-source "$BUILD_PROCESS_FILE"
-BUILD_CYCLE=$((BUILD_CYCLE + 1))
-sed -i "s/\(BUILD_CYCLE *= *\).*/\1$BUILD_CYCLE/" "$BUILD_PROCESS_FILE"
-if ! (($BUILD_CYCLE % 100)); then
-	printf "\n"
-	printf "Would you like to check for updates? [Y/n]: "
-	read update_response
-	if [ "$update_response" == "n" ]; then
-		git_version=$(git rev-parse --short=25 HEAD)
-		printf "oo Git version: $git_version\n"
-	else
-		git-pull
-	fi
-fi
 printf "${normal}\n"
 
 unit-test-host() {
