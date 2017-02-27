@@ -512,6 +512,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_SET_LED: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "set led");
 
 		if (_boardConfig->flags.hasLed) {
@@ -532,15 +533,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 				enable = !enable;
 			}
 
-	//		switch_state_t switchState = {};
 			if (enable) {
-	//			switchState.pwm_state = 100;
 				nrf_gpio_pin_set(ledPin);
 			} else {
-	//			switchState.pwm_state = 10;
 				nrf_gpio_pin_clear(ledPin);
 			}
-	//		EventDispatcher::getInstance().dispatch(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
 		} else {
 			LOGe("No LEDs on this board!");
 		}
