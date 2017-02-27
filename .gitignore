@@ -1,6 +1,7 @@
 ./CMakeBuild.config
 ./CMakeBuild.config.*
 ./CMakeLists.txt
+./CMake*
 ./*.cmake
 tags
 .cproject

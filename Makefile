@@ -67,7 +67,7 @@ define cross-compile-target-cleanup
 	@rm -f CMakeLists.txt
 	@rm -f arm.toolchain.cmake
 	@rm -f CMakeBuild.config.default
-	@rm -f CMakeConfig.config
+	@rm -f CMakeConfig.cmake
 endef
 
 define host-compile-target-prepare
