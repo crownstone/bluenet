@@ -59,14 +59,12 @@ COMPILE_FLAGS=-DCOMPILATION_DAY="\"${COMPILATION_DAY}\"" \
 define cross-compile-target-prepare
 	@cp conf/cmake/CMakeLists.txt .
 	@cp conf/cmake/arm.toolchain.cmake .
-	@cp conf/cmake/CMakeConfig.cmake .
 	@cp conf/cmake/CMakeBuild.config.default .
 endef
 
 define cross-compile-target-cleanup
 	@rm -f CMakeLists.txt
 	@rm -f arm.toolchain.cmake
-	@rm -f CMakeConfig.cmake
 	@rm -f CMakeBuild.config.default
 endef
 

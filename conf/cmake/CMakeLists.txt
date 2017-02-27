@@ -8,7 +8,7 @@
 # Copyright © 2013 Anne C. van Rossum <anne@dobots.nl>
 #######################################################################################################################
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 IF(COMMAND cmake_policy)
 	cmake_policy(SET CMP0003 NEW)
