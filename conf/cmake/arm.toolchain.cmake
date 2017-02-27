@@ -17,7 +17,8 @@ SET(CMAKE_SYSTEM_VERSION 1)
 SET(CMAKE_SYSTEM_PROCESSOR arm)
 SET(CMAKE_CROSSCOMPILING 1)
 
-# Load compiler options from configuration file
+# Load compiler options from the configuration file. This is done through CMakeConfig.cmake which on its turn will 
+# get the configuration data from the proper CMakeBuild.config file from some configuration directory.
 SET(CONFIG_FILE ${CMAKE_SOURCE_DIR}/CMakeConfig.cmake)
 IF(EXISTS "${CONFIG_FILE}")
 	MESSAGE(STATUS "Load config file ${CONFIG_FILE}")

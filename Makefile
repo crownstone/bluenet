@@ -60,12 +60,14 @@ define cross-compile-target-prepare
 	@cp conf/cmake/CMakeLists.txt .
 	@cp conf/cmake/arm.toolchain.cmake .
 	@cp conf/cmake/CMakeBuild.config.default .
+	@cp conf/cmake/CMakeConfig.cmake .
 endef
 
 define cross-compile-target-cleanup
 	@rm -f CMakeLists.txt
 	@rm -f arm.toolchain.cmake
 	@rm -f CMakeBuild.config.default
+	@rm -f CMakeConfig.config
 endef
 
 define host-compile-target-prepare
