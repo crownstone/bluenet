@@ -1,8 +1,12 @@
+language: cpp
+
+sudo: false
+
+compiler: gcc
+
 before_install: source scripts/setup_environment.sh
     
 install: scripts/firmware.sh host test
-
-compiler: gcc
 
 git:
     depth: 3
