@@ -6,7 +6,8 @@ end
 
 desc "Running unit tests"
 task :test do
-	sh "cd $BLUENET_BUILD_DIR && make test"
+	sh "echo $BLUENET_BUILD_DIR" 
+	sh "cd $BLUENET_BUILD_DIR/test && make test"
 end
 
 desc "Compiling debug version and running tests"
