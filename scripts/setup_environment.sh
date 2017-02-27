@@ -22,5 +22,8 @@ echo 'COMPILATION_TARGET=host' >> $cfile
 
 cp $script_path/_targets_template.sh ${BLUENET_CONFIG_DIR}/_targets.sh
 
-env
+echo "The gcc compilers"
+gcc --version
 
+echo "Show env. variables that contain the BLUENET string"
+env | grep BLUENET

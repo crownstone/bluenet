@@ -49,7 +49,7 @@ MESSAGE(STATUS "Time of day of compilation: ${COMPILATION_TIME}")
 
 #######################################################################################################################
 
-SET(DEFAULT_CXX_FLAGS        "-std=c++11 -fext-numeric-literals")
+SET(DEFAULT_CXX_FLAGS        "-std=c++0x")
 SET(DEFAULT_C_FLAGS          "-std=gnu99")
 SET(DEFAULT_C_AND_CXX_FLAGS  "-g3 -Wall")
 
