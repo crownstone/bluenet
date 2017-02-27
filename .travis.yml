@@ -1,0 +1,20 @@
+language: cpp
+
+sudo: false
+
+compiler: gcc
+
+before_install: source scripts/setup_environment.sh
+    
+install: scripts/firmware.sh host test
+
+git:
+    depth: 3
+
+env:
+- BLUENET_WORKSPACE_DIR=$HOME/workspace BLUENET_DIR=$TRAVIS_BUILD_DIR
+  
+# blocklist
+branches:
+    except:
+    - gh-pages

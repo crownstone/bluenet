@@ -227,7 +227,7 @@ CONNECTION_ALIVE_TIMEOUT=15000
 COMPILER_PATH=
 
 # The compiler type
-COMPILER_TYPE=arm-none-eabi
+COMPILER_TYPE=arm-none-eabi-
 
 # The JLink utility (when using the Segger to flash the nRF)
 JLINK=/usr/bin/JLinkExe

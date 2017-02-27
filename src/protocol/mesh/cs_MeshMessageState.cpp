@@ -10,12 +10,6 @@ state_message::iterator state_message::begin() {
 
 state_message::iterator state_message::end() {
 	auto index = _state_message_t.head + _state_message_t.size;
-//	if (_state_message_t.head == _state_message_t.tail + 1) {
-//		index = (_state_message_t.tail + MAX_STATE_ITEMS); 
-//	} else {
-//	one beyond what should be considered a valid pointer
-//		index = (_state_message_t.tail + MAX_STATE_ITEMS) % MAX_STATE_ITEMS;
-//	}
 	return state_message::iterator(&_state_message_t, index);
 }
 		

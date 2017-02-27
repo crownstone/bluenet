@@ -1,18 +1,26 @@
 #######################################################################################################################
-# The build systems uses CMake. All the automatically generated code falls under the Lesser General Public License
+# The build system uses CMake. All the automatically generated code falls under the Lesser General Public License
 # (LGPL GNU v3), the Apache License, or the MIT license, your choice.
 #
-# Author:	 Anne C. van Rossum (Distributed Organisms B.V.)
-# Date: 	 Oct 28, 2013
+# Authors:         Crownstone B.V. team
+# Creation date:   Feb. 26, 2017
+# License:         LGPLv3, MIT, Apache (triple-licensed)
 #
-# Copyright © 2013 Anne C. van Rossum <anne@dobots.nl>
+# Copyright © 2017 Crownstone B.V. (http://crownstone.rocks/team)
 #######################################################################################################################
 
 #!/bin/make -f
 
+#######################################################################################################################
+# Check for the existence of required environmental variables 
+#######################################################################################################################
+
+# The build directory should be defined as environmental variable. We do not assume a default build directory such
+# as ./build for example.
 ifndef BLUENET_BUILD_DIR
 $(error BLUENET_BUILD_DIR not defined!)
 endif
+
 ifndef BLUENET_BIN_DIR
 $(error BLUENET_BIN_DIR not defined!)
 endif
@@ -20,56 +28,81 @@ ifndef BLUENET_CONFIG_DIR
 $(error BLUENET_CONFIG_DIR not defined!)
 endif
 
-# BUILD_DIR=build
-SOURCE_DIR=$(shell pwd)
+#######################################################################################################################
+# Optional configuration parameters that will be set to defaults if not set before
+#######################################################################################################################
+
+ifndef VERBOSITY
+VERBOSITY=7
+endif
+
+ifndef COMPILE_WITH_J_PROCESSORS
 COMPILE_WITH_J_PROCESSORS=4
+endif
 
-all: build
-	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then printf "++ Copy binaries to ${BLUENET_BIN_DIR}\n"; mkdir -p ${BLUENET_BIN_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_BIN_DIR); fi
+#######################################################################################################################
+# Additional configuration options
+#######################################################################################################################
 
+SOURCE_DIR=$(shell pwd)
+COMPILATION_DAY=$(shell date --iso=date)
+COMPILATION_TIME=$(shell date '+%H:%M')
+GIT_BRANCH=$(shell git symbolic-ref --short -q HEAD)
+GIT_HASH=$(shell git rev-parse --short=25 HEAD)
 
-#	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
-#	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then echo "Copy binaries to ${BLUENET_BIN_DIR}"; mkdir -p ${BLUENET_BIN_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_BIN_DIR); fi
+COMPILE_FLAGS=-DCOMPILATION_DAY="\"${COMPILATION_DAY}\"" \
+			  -DCOMPILATION_TIME="\"${COMPILATION_TIME}\"" \
+			  -DVERBOSITY="${VERBOSITY}" \
+			  -DGIT_BRANCH="\"${GIT_BRANCH}\"" \
+			  -DGIT_HASH="\"${GIT_HASH}\""
 
-release: prepare
-	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=MinSizeRel $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
-	@if [ ! -z "${BLUENET_BUILD_DIR}" ]; then echo "Copy binaries to ${BLUENET_BIN_DIR}"; mkdir -p ${BLUENET_BIN_DIR}; cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf $(BLUENET_BIN_DIR); fi
+define cross-compile-target-prepare
+	@cp conf/cmake/CMakeLists.txt .
+	@cp conf/cmake/arm.toolchain.cmake .
+	@cp conf/cmake/CMakeConfig.cmake .
+	@cp conf/cmake/CMakeBuild.config.default .
+endef
+
+define cross-compile-target-cleanup
+	@rm -f CMakeLists.txt
+	@rm -f arm.toolchain.cmake
+	@rm -f CMakeConfig.cmake
+	@rm -f CMakeBuild.config.default
+endef
+
+define host-compile-target-prepare
+	@cp conf/cmake/CMakeLists.host_target.txt CMakeLists.txt
+endef
+
+define host-compile-target-cleanup
+	@rm -f CMakeLists.txt
+endef
+
+#######################################################################################################################
+# Targets
+#######################################################################################################################
+
+all: 
+	@echo "Please call make with cross-compile-target or host-compile target"
+	@echo "It is recommended to use the scripts/firmware.sh script"
+
+cross-compile-target:
+	$(call cross-compile-target-prepare)
+	@mkdir -p $(BLUENET_BUILD_DIR)
+	@cd $(BLUENET_BUILD_DIR) && cmake $(COMPILE_FLAGS) -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS}
+	$(call cross-compile-target-cleanup)
+
+host-compile-target:
+	$(call host-compile-target-prepare)
+	@mkdir -p $(BLUENET_BUILD_DIR)
+	@cd $(BLUENET_BUILD_DIR) && cmake $(COMPILE_FLAGS) -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
+	$(call host-compile-target-cleanup)
 
 clean:
-	@cd $(BLUENET_BUILD_DIR) && make clean
+	$(call cross-compile-target-cleanup)
+	$(call host-compile-target-cleanup)
 
-prepare:
-	@printf "++ Create build directory: $(BLUENET_BUILD_DIR)\n"
-	@mkdir -p $(BLUENET_BUILD_DIR)
-	@mkdir -p $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp
-	@cp -v CMakeConfig.cmake $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp
-	@if [ -e CMakeBuild.config ]; then cp -v CMakeBuild.config $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp; fi
-	@if [ -e ${BLUENET_CONFIG_DIR}/CMakeBuild.config ]; then cp -v ${BLUENET_CONFIG_DIR}/CMakeBuild.config $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp; fi
-	@mkdir -p $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp/conf
-	@cp conf/nRF51822-softdevice.ld.in conf/nRF51822-softdevice.ld
-	@sed -i "s/@APPLICATION_START_ADDRESS@/0x16000/" conf/nRF51822-softdevice.ld
-	@sed -i "s/@APPLICATION_LENGTH@/2000/" conf/nRF51822-softdevice.ld
-	@sed -i "s/@RAM_R1_BASE@/2000/" conf/nRF51822-softdevice.ld
-	@sed -i "s/@RAM_APPLICATION_AMOUNT@/0x4000/" conf/nRF51822-softdevice.ld
-	@sed -i "s/@HEAP_SIZE@/2700/" conf/nRF51822-softdevice.ld
-	#@sed -i $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp/conf/nRF51822-softdevice.ld
-	@cp conf/* $(BLUENET_BUILD_DIR)/CMakeFiles/CMakeTmp/conf
-	printf "Following should exist ${BLUENET_BUILD_DIR}/CMakeFiles/CMakeTmp/CMakeConfig.cmake\n"
-	if [ -e "${BLUENET_BUILD_DIR}/Makefile" ]; then \
-		printf "++ Skip try-compile step\n"; \
-	else \
-		printf "++ Add a try-compile step\n"; \
-		cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' --debug-trycompile -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug --target analyze $(SOURCE_DIR); \
-	fi
+list:
+	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
-# The build target is only executed when there is no build directory! So if there is a build directory, but the test
-# files cannot be found this will lead to an error on the first build. The next builds will be fine. So, the user only
-# needs to build two times in a row.
-build: prepare
-	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DVERBOSITY='$(VERBOSITY)' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
-
-host:
-	@mkdir -p $(BLUENET_BUILD_DIR)
-	@cd $(BLUENET_BUILD_DIR) && cmake -DCOMPILATION_TIME='"$(shell date --iso=date)"' -DVERBOSITY='7' -DGIT_BRANCH='"$(shell git symbolic-ref --short -q HEAD)"' -DGIT_HASH='"$(shell git rev-parse --short=25 HEAD)"' -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
-
-.PHONY: all build release clean prepare host
+.PHONY: all cross-compile-target host-compile-target clean list
