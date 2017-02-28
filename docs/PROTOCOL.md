@@ -340,7 +340,7 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 12 | Enable scanner | [Enable Scanner payload](#cmd_enable_scanner_payload) | Enable/Disable scanner | x
 13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON | x |
 14 | User feedback | ... | User feedback ..., TBD | x |
-15 | Schedule entry | ... | Schedule entry ..., TBD | x | x
+15 | Schedule entry | [Schedule entry payload](#schedule_entry_packet) | Add or remove a schedule entry | x | x
 16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
 17 | <a name="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | ..
 18 | Request Service Data | - | Causes the crownstone to send it's service data over the mesh | x | x |
@@ -602,15 +602,16 @@ Set power switch to a given value.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Pwm | 1 | Power switch value. Range 0-100, where 0 is off and 100 is fully on.
+uint 8 | Switch | 1 | Power switch value. Range 0-100, where 0 is off and 100 is fully on.
 uint 8 | Reserved | 2 | Unused.
 
 #### Action type 1
 Fade from current power switch value to a given power switch value, in X seconds.
+** Not implemented yet. **
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Pwm end | 1 | Power switch value after fading.
+uint 8 | Switch end | 1 | Power switch value after fading.
 uint 16 | Fade duration | 2 | Fade duration in seconds.
 
 #### Action type 2
@@ -628,7 +629,7 @@ Type | Name | Length | Description
 uint 8 | ID | 1 | Unique id of this schedule entry.
 uint 8 | Override mask | 1 | Bitmask of states to override. Presence mask = 1.
 uint 8 | Type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
-uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers.
+uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers. Set to 0 to remove this entry.
 [schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
 [schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
 
