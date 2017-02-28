@@ -348,6 +348,7 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 20 | Set LED | ?? | Enable or disabled LEDS | x
 21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
 22 | Increase TX | - | Temporarily increase the TX power when in setup mode | x | x | x
+23 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 
@@ -466,10 +467,6 @@ Type nr | Type name | Payload type | Description | Persistent
 135 | Temperature | int 32 | Chip temperature in °C. |
 136 | Time | uint 32 | Get the current time.
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Get the current error bitmask.
-140 | Error overcurrent | bool | Whether overcurrent was detected.
-141 | Error overcurrent dimmer | bool | Whether overcurrent for the dimmer was detected.
-142 | Error chip temp | bool | Whether the chip temperature is too high.
-143 | Error dimmer temp | bool | Whether the dimmer temperature is too high.
 
 OpCodes:
 

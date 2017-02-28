@@ -413,10 +413,12 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 	if (powerMilliWatt > CURRENT_USAGE_THRESHOLD * 220) {
 		LOGd("current above threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
+		State::getInstance().set(STATE_ERROR_OVER_CURRENT, (uint8_t)1);
 	}
 	else if (powerMilliWatt > CURRENT_USAGE_THRESHOLD_PWM  * 220) {
 		LOGd("current above pwm threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
+		State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, (uint8_t)1);
 	}
 
 	//! Exponential moving average

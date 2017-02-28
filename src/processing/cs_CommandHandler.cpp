@@ -555,6 +555,22 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		}
 		break;
 	}
+	case CMD_RESET_ERRORS: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "reset errors");
+		if (size != sizeof(state_errors_t)) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		state_errors_t* payload = (state_errors_t*) buffer;
+		state_errors_t state_errors;
+		State::getInstance().get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+		LOGd("old errors %d - reset %d", state_errors, *payload);
+		state_errors.asInt &= ~(payload->asInt);
+		LOGd("new errors %d", state_errors);
+		State::getInstance().set(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+		break;
+	}
 
 	// Crownstone specific commands are only available if device type is set to Crownstone.
 	// E.g. GuideStone does not support power measure or switching commands

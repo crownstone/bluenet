@@ -33,7 +33,7 @@ Switch::Switch():
 	_switchTimerData = { {0} };
 	_switchTimerId = &_switchTimerData;
 #else
-	_switchTimerId(UINT32_MAX)
+	_switchTimerId(UINT32_MAX);
 #endif
 }
 
@@ -41,8 +41,6 @@ void Switch::init(boards_config_t* board) {
 
 #ifndef PWM_DISABLE
 	PWM& pwm = PWM::getInstance();
-//	pwm.init(PWM::config1Ch(1600L, board->pinGpioPwm)); //! 625 Hz
-//	pwm.init(pwm.config1Ch(20000L, board->pinGpioPwm)); //! 50 Hz
 	uint32_t pwmPeriod;
 	Settings::getInstance().get(CONFIG_PWM_PERIOD, &pwmPeriod);
 	pwm.init(pwm.config1Ch(pwmPeriod, board->pinGpioPwm, board->flags.pwmInverted), board->flags.pwmInverted); //! 50 Hz
@@ -54,9 +52,6 @@ void Switch::init(boards_config_t* board) {
 		nrf_gpio_pin_clear(board->pinGpioPwm);
 	}
 #endif
-
-	// [23.06.16] overwrites stored value, so we can't restore old switch state
-	//	setValue(0);
 
 	_hasRelay = board->flags.hasRelay;
 	if (_hasRelay) {
@@ -160,6 +155,10 @@ bool Switch::getRelayState() {
 
 void Switch::relayOn() {
 	LOGd("relayOn");
+	if (!allowSwitchOn()) {
+		LOGd("Don't turn relay on");
+		return;
+	}
 //	LOGd("relayOn %u", _nextRelayVal);
 //	if (Nrf51822BluetoothStack::getInstance().isScanning()) {
 //		if (_nextRelayVal != SWITCH_NEXT_RELAY_VAL_NONE) {
@@ -366,16 +365,15 @@ void Switch::forceSwitchOff() {
 bool Switch::allowPwmOn() {
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
-//	uint32_t* errorsint = (uint32_t*)&stateErrors;
-//	LOGd("state errors: %u", *errorsint);
-//	return !(stateErrors.chipTemp || stateErrors.overCurrent || stateErrors.overCurrentPwm || stateErrors.pwmTemp);
-	return !(stateErrors.chipTemp || stateErrors.overCurrent || stateErrors.pwmTemp);
+	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp);
+//	return !(stateErrors.errors.chipTemp || stateErrors.errors.pwmTemp);
 }
 
 bool Switch::allowSwitchOn() {
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
-	return (stateErrors.chipTemp || stateErrors.overCurrent);
+	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.pwmTemp);
+//	return !(stateErrors.errors.chipTemp || stateErrors.errors.pwmTemp);
 }
 
 void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
@@ -395,7 +393,8 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 	case EVT_PWM_TEMP_ABOVE_THRESHOLD: {
-		forcePwmOff();
+//		forcePwmOff();
+		forceSwitchOff();
 		break;
 	}
 	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
