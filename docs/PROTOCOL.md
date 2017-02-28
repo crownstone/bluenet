@@ -334,9 +334,9 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 6 | Keep alive state | [Keep alive payload](#cmd_keep_alive_payload) | Keep alive with state | x | x |
 7 | Keep alive | - | Keep alive without state, uses last state transmitted with Keep alive state command | x | x | x
 8 | Enable mesh | uint 8 | Enable/Disable Mesh, 0 = OFF, other = ON | x
-9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON | x
+9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON. Only has effect after a reset. | x
 10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON | x
-11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON, TBD | x
+11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON. **Deprecated** | x
 12 | Enable scanner | [Enable Scanner payload](#cmd_enable_scanner_payload) | Enable/Disable scanner | x
 13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON | x |
 14 | User feedback | ... | User feedback ..., TBD | x |
@@ -346,7 +346,8 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 18 | Request Service Data | - | Causes the crownstone to send it's service data over the mesh | x | x |
 19 | Disconnect | - | Causes the crownstone to disconnect | .. | .. | ..
 20 | Set LED | ?? | Enable or disabled LEDS | x
-21 | No operation | - | Does nothing | x | x | x
+21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
+22 | Increase TX | - | Temporarily increase the TX power when in setup mode | x | x | x
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 
@@ -402,7 +403,7 @@ Type nr | Type name | Payload type | Description
 20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off.
 21 | Scan filter | uint 8 | Filter out certain types of devices from the scan results (1 for GuideStones, 2 for CrownStones, 3 for both).
 22 | Scan filter fraction | uint 16 | If scan filter is set, do *not* filter them out each every X scan results.
-23 | Current limit | uint 8 | Set current limit to **not implemented**
+23 | Current limit | uint 8 | Set current limit to **Deprecated**
 24 | Mesh enabled | uint 8 | Stores if mesh is enabled. *read only*
 25 | Encryption enabled | uint 8 | Stores if encryption is enabled. *read only*
 26 | iBeacon enabled | uint 8 | Stores if iBeacon is enabled. *read only*

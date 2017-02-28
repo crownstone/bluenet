@@ -379,6 +379,18 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		break;
 	}
+	case CMD_INCREASE_TX: {
+		uint8_t opMode;
+		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+		if (opMode == OPERATION_MODE_SETUP) {
+			Nrf51822BluetoothStack::getInstance().changeToNormalTxPowerMode();
+		}
+		else {
+			LOGw("validate setup only available in setup mode");
+			return ERR_NOT_AVAILABLE;
+		}
+		break;
+	}
 	case CMD_VALIDATE_SETUP: {
 		// we do not need to check for the setup validation since this is not encrypted
 		LOGi(STR_HANDLE_COMMAND, "validate setup");
