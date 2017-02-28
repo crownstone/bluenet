@@ -50,11 +50,19 @@ COMPILATION_TIME=$(shell date '+%H:%M')
 GIT_BRANCH=$(shell git symbolic-ref --short -q HEAD)
 GIT_HASH=$(shell git rev-parse --short=25 HEAD)
 
-COMPILE_FLAGS=-DCOMPILATION_DAY="\"${COMPILATION_DAY}\"" \
+DEBUG_COMPILE_FLAGS=-DCOMPILATION_DAY="\"${COMPILATION_DAY}\"" \
 			  -DCOMPILATION_TIME="\"${COMPILATION_TIME}\"" \
 			  -DVERBOSITY="${VERBOSITY}" \
 			  -DGIT_BRANCH="\"${GIT_BRANCH}\"" \
-			  -DGIT_HASH="\"${GIT_HASH}\""
+			  -DGIT_HASH="\"${GIT_HASH}\"" \
+			  -DCMAKE_BUILD_TYPE=Debug
+
+RELEASE_COMPILE_FLAGS=-DCOMPILATION_DAY="\"${COMPILATION_DAY}\"" \
+			  -DCOMPILATION_TIME="\"${COMPILATION_TIME}\"" \
+			  -DVERBOSITY="${VERBOSITY}" \
+			  -DGIT_BRANCH="\"${GIT_BRANCH}\"" \
+			  -DGIT_HASH="\"${GIT_HASH}\"" \
+			  -DCMAKE_BUILD_TYPE=MinSizeRel
 
 define cross-compile-target-prepare
 	@cp conf/cmake/CMakeLists.txt .
@@ -86,16 +94,24 @@ all:
 	@echo "Please call make with cross-compile-target or host-compile target"
 	@echo "It is recommended to use the scripts/firmware.sh script"
 
+release:
+	$(call cross-compile-target-prepare)
+	@cd $(BLUENET_BUILD_DIR) && cmake $(RELEASE_COMPILE_FLAGS) \
+		-DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
+	$(call cross-compile-target-cleanup)
+
 cross-compile-target:
 	$(call cross-compile-target-prepare)
 	@mkdir -p $(BLUENET_BUILD_DIR)
-	@cd $(BLUENET_BUILD_DIR) && cmake $(COMPILE_FLAGS) -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS}
+	@cd $(BLUENET_BUILD_DIR) && cmake $(DEBUG_COMPILE_FLAGS) \
+		$(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS}
 	$(call cross-compile-target-cleanup)
 
 host-compile-target:
 	$(call host-compile-target-prepare)
 	@mkdir -p $(BLUENET_BUILD_DIR)
-	@cd $(BLUENET_BUILD_DIR) && cmake $(COMPILE_FLAGS) -DCMAKE_BUILD_TYPE=Debug $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
+	@cd $(BLUENET_BUILD_DIR) && cmake $(COMPILE_FLAGS) \
+		$(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 	$(call host-compile-target-cleanup)
 
 clean:
@@ -105,4 +121,4 @@ clean:
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
-.PHONY: all cross-compile-target host-compile-target clean list
+.PHONY: all cross-compile-target host-compile-target clean list release
