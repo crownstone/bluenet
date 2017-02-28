@@ -92,12 +92,15 @@ struct state_vars_notifaction {
 	uint16_t dataLength;
 };
 
-struct state_errors_t {
-	bool overCurrent : 1;
-	bool overCurrentPwm : 1;
-	bool chipTemp : 1;
-	bool pwmTemp : 1;
-	uint32_t reserved : 28;
+union state_errors_t {
+	struct __attribute__((packed)) {
+		uint8_t overCurrent : 1;
+		uint8_t overCurrentPwm : 1;
+		uint8_t chipTemp : 1;
+		uint8_t pwmTemp : 1;
+		uint32_t reserved : 28;
+	} errors;
+	uint32_t asInt;
 };
 
 #define FACTORY_RESET_STATE_NORMAL 0

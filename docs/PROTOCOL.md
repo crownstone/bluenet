@@ -334,19 +334,21 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 6 | Keep alive state | [Keep alive payload](#cmd_keep_alive_payload) | Keep alive with state | x | x |
 7 | Keep alive | - | Keep alive without state, uses last state transmitted with Keep alive state command | x | x | x
 8 | Enable mesh | uint 8 | Enable/Disable Mesh, 0 = OFF, other = ON | x
-9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON | x
+9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON. Only has effect after a reset. | x
 10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON | x
-11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON, TBD | x
+11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON. **Deprecated** | x
 12 | Enable scanner | [Enable Scanner payload](#cmd_enable_scanner_payload) | Enable/Disable scanner | x
 13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON | x |
 14 | User feedback | ... | User feedback ..., TBD | x |
-15 | Schedule entry | ... | Schedule entry ..., TBD | x | x
+15 | Schedule entry | [Schedule entry payload](#schedule_entry_packet) | Add or remove a schedule entry | x | x
 16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
 17 | <a name="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | ..
 18 | Request Service Data | - | Causes the crownstone to send it's service data over the mesh | x | x |
 19 | Disconnect | - | Causes the crownstone to disconnect | .. | .. | ..
 20 | Set LED | ?? | Enable or disabled LEDS | x
-21 | No operation | - | Does nothing | x | x | x
+21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
+22 | Increase TX | - | Temporarily increase the TX power when in setup mode | x | x | x
+23 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 
@@ -402,7 +404,7 @@ Type nr | Type name | Payload type | Description
 20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off.
 21 | Scan filter | uint 8 | Filter out certain types of devices from the scan results (1 for GuideStones, 2 for CrownStones, 3 for both).
 22 | Scan filter fraction | uint 16 | If scan filter is set, do *not* filter them out each every X scan results.
-23 | Current limit | uint 8 | Set current limit to **not implemented**
+23 | Current limit | uint 8 | Set current limit to **Deprecated**
 24 | Mesh enabled | uint 8 | Stores if mesh is enabled. *read only*
 25 | Encryption enabled | uint 8 | Stores if encryption is enabled. *read only*
 26 | iBeacon enabled | uint 8 | Stores if iBeacon is enabled. *read only*
@@ -465,10 +467,6 @@ Type nr | Type name | Payload type | Description | Persistent
 135 | Temperature | int 32 | Chip temperature in °C. |
 136 | Time | uint 32 | Get the current time.
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Get the current error bitmask.
-140 | Error overcurrent | bool | Whether overcurrent was detected.
-141 | Error overcurrent dimmer | bool | Whether overcurrent for the dimmer was detected.
-142 | Error chip temp | bool | Whether the chip temperature is too high.
-143 | Error dimmer temp | bool | Whether the dimmer temperature is too high.
 
 OpCodes:
 
@@ -601,15 +599,16 @@ Set power switch to a given value.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Pwm | 1 | Power switch value. Range 0-100, where 0 is off and 100 is fully on.
+uint 8 | Switch | 1 | Power switch value. Range 0-100, where 0 is off and 100 is fully on.
 uint 8 | Reserved | 2 | Unused.
 
 #### Action type 1
 Fade from current power switch value to a given power switch value, in X seconds.
+** Not implemented yet. **
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Pwm end | 1 | Power switch value after fading.
+uint 8 | Switch end | 1 | Power switch value after fading.
 uint 16 | Fade duration | 2 | Fade duration in seconds.
 
 #### Action type 2
@@ -627,7 +626,7 @@ Type | Name | Length | Description
 uint 8 | ID | 1 | Unique id of this schedule entry.
 uint 8 | Override mask | 1 | Bitmask of states to override. Presence mask = 1.
 uint 8 | Type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
-uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers.
+uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers. Set to 0 to remove this entry.
 [schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
 [schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
 

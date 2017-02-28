@@ -32,10 +32,7 @@ void debugprint(void * p_context) {
 State::State() :
 		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedEnergy(NULL),
 		_temperature(0), _powerUsage(0), _time(0), _factoryResetState(FACTORY_RESET_STATE_NORMAL) {
-	_errorState.overCurrent = false;
-	_errorState.overCurrentPwm = false;
-	_errorState.chipTemp = false;
-	_errorState.pwmTemp = false;
+	_errorState.asInt = 0;
 }
 
 void State::init() {
@@ -221,7 +218,11 @@ uint16_t State::getStateItemSize(uint8_t type) {
 	case STATE_SCHEDULE: {
 		return sizeof(schedule_list_t);
 	}
-	case STATE_OPERATION_MODE: {
+	case STATE_OPERATION_MODE:
+	case STATE_ERROR_OVER_CURRENT:
+	case STATE_ERROR_OVER_CURRENT_PWM:
+	case STATE_ERROR_CHIP_TEMP:
+	case STATE_ERROR_PWM_TEMP: {
 		return sizeof(uint8_t);
 	}
 	case STATE_TEMPERATURE: {
@@ -238,12 +239,6 @@ uint16_t State::getStateItemSize(uint8_t type) {
 	}
 	case STATE_ERRORS: {
 		return sizeof(state_errors_t);
-	}
-	case STATE_ERROR_OVER_CURRENT:
-	case STATE_ERROR_OVER_CURRENT_PWM:
-	case STATE_ERROR_CHIP_TEMP:
-	case STATE_ERROR_PWM_TEMP: {
-		return sizeof(bool);
 	}
 	default: {
 		LOGw(FMT_STATE_NOT_FOUND, type);
@@ -369,19 +364,19 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_ERROR_OVER_CURRENT: {
-			_errorState.overCurrent = *(bool*)target;
+			_errorState.errors.overCurrent = *(uint8_t*)target;
 			break;
 		}
 		case STATE_ERROR_OVER_CURRENT_PWM: {
-			_errorState.overCurrentPwm = *(bool*)target;
+			_errorState.errors.overCurrentPwm = *(uint8_t*)target;
 			break;
 		}
 		case STATE_ERROR_CHIP_TEMP: {
-			_errorState.chipTemp = *(bool*)target;
+			_errorState.errors.chipTemp = *(uint8_t*)target;
 			break;
 		}
 		case STATE_ERROR_PWM_TEMP: {
-			_errorState.pwmTemp = *(bool*)target;
+			_errorState.errors.pwmTemp = *(uint8_t*)target;
 			break;
 		}
 		case STATE_ACCUMULATED_ENERGY: {

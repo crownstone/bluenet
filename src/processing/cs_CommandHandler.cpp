@@ -379,6 +379,18 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		break;
 	}
+	case CMD_INCREASE_TX: {
+		uint8_t opMode;
+		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+		if (opMode == OPERATION_MODE_SETUP) {
+			Nrf51822BluetoothStack::getInstance().changeToNormalTxPowerMode();
+		}
+		else {
+			LOGw("validate setup only available in setup mode");
+			return ERR_NOT_AVAILABLE;
+		}
+		break;
+	}
 	case CMD_VALIDATE_SETUP: {
 		// we do not need to check for the setup validation since this is not encrypted
 		LOGi(STR_HANDLE_COMMAND, "validate setup");
@@ -541,6 +553,22 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		} else {
 			LOGe("No LEDs on this board!");
 		}
+		break;
+	}
+	case CMD_RESET_ERRORS: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "reset errors");
+		if (size != sizeof(state_errors_t)) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		state_errors_t* payload = (state_errors_t*) buffer;
+		state_errors_t state_errors;
+		State::getInstance().get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+		LOGd("old errors %d - reset %d", state_errors, *payload);
+		state_errors.asInt &= ~(payload->asInt);
+		LOGd("new errors %d", state_errors);
+		State::getInstance().set(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
 		break;
 	}
 

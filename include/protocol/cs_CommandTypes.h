@@ -29,6 +29,8 @@ enum CommandHandlerTypes {
 	CMD_DISCONNECT                  = 19,    //! 0x13
 	CMD_SET_LED                     = 20,    //! 0x14
 	CMD_NOP                         = 21,    //! 0x15
+	CMD_INCREASE_TX                 = 22,    //! 0x16
+	CMD_RESET_ERRORS                = 23,    //! 0x17
 	CMD_TYPES
 };
 
