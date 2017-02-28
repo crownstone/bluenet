@@ -58,7 +58,9 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE
 
 # Libraries (math, stdc++ libraries, etc.) 
 # Note! We CANNOT use the size-constrained *_s versions! anymore
-SET(LIBS "-lstdc++ ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lc")
+# We don't seem to use any libraries anymore... except for including everything that comes with -std=c+11
+#SET(LIBS "-lc ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lstdc++")
+SET(LIBS "")
 
 # Some debug information
 IF(VERBOSITY GREATER 4)
@@ -204,6 +206,8 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME}.tmp ${PROJECT_NAME}.bin
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
+			COMMAND stat ${PROJECT_NAME}.bin | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "Size: %s bytes - totally available: 512kB - 110kB {softdevice} = 412kB. In dual bank: 206kB"
+			COMMAND echo
 			COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_NAME}
 			COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_NAME}.tmp
 			DEPENDS ${PROJECT_NAME}
