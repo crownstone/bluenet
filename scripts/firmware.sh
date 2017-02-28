@@ -24,12 +24,10 @@ while true; do
 			;;
 		-t|--target) 
 			target=$2
-			echo $2
 			shift 2
 			;;
 		-a|--address)
 			address=$2
-			echo $2
 			shift 2
 			;;
 		--)
@@ -48,6 +46,7 @@ usage() {
   echo "Bluenet firmware bash script (Feb. 2017)"
   echo
   echo "usage: ./firmware.sh [arguments]            run script for bluenet-compatible firmware"
+  echo "   or: VERBOSE=1 ./firmware.sh [arguments]  run script in verbose mode"
   echo 
   echo "Required arguments:"
   echo "   -c command, --command=command            command to choose from this list:"
@@ -93,6 +92,14 @@ if [[ $cmd != "help" ]]; then
 	# configure environment variables, load configuration files, check targets and
 	# assign serial_num from target
 	source $path/_config.sh
+fi
+
+if [ "$VERBOSE" == "1" ]; then
+  info "Verbose mode"
+  make_flag=""
+else
+  info "Silent mode"
+  make_flag="-s"
 fi
 
 # use $APPLICATION_START_ADDRESS as default if no address defined
@@ -145,7 +152,7 @@ printf "${normal}\n"
 unit-test-host() {
 	cd ${path}/..
 	info "Execute make host-compile-target"
-	make -s host-compile-target
+	make ${make_flag} host-compile-target
 	# result=$?
 	checkError "oo Error building firmware"
 	cd $path
@@ -156,7 +163,7 @@ unit-test-host() {
 build() {
 	cd ${path}/..
 	info "Execute make cross-compile-target"
-	make -s cross-compile-target
+	make ${make_flag} cross-compile-target
 	# result=$?
 	checkError "oo Error building firmware"
 	cd $path
@@ -220,7 +227,7 @@ run() {
 
 clean() {
 	cd ${path}/..
-	make -s clean
+	make ${make_flag} clean
 	checkError "Error cleaning up"
 }
 

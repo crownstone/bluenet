@@ -66,13 +66,14 @@ SET(CMAKE_CXX_COMPILER_FORCED TRUE CACHE INTERNAL "")
 SET(CMAKE_C_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
 SET(CMAKE_CXX_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
 
-SET(DEFAULT_CXX_FLAGS       "-std=c++11 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions -fext-numeric-literals")
+SET(DEFAULT_CXX_FLAGS       "-std=c++11 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
 SET(DEFAULT_C_FLAGS         "-std=gnu99")
 SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror")
 
 # Collect flags that have to do with optimization
 # We are optimizing for SIZE for now. If size turns out to be abundant, enable -O3 optimization.
 # Interesting options: -ffast-math, -flto (link time optimization)
+# Regarding size of the binary -ffast-math nor -flto makes a difference
 SET(CMAKE_C_AND_CXX_FLAGS "${CMAKE_C_AND_CXX_FLAGS} -Os -fomit-frame-pointer")
 
 # There is a bug in CMAKE_OBJCOPY, it doesn't exist on execution for the first time
