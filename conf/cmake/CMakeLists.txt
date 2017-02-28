@@ -56,11 +56,8 @@ MESSAGE(STATUS "CMakeLists: Time of day of compilation: ${COMPILATION_TIME}")
 MESSAGE(STATUS "CMakeLists: Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld)
 
-# Libraries (math, stdc++ libraries, etc., note that we use the size-constrained *_s versions!)
-#SET(LIBRARY_MATH "-lm")
-#SET(LIBRARY_RUNTIME "-lsupc++")
-
-#SET(LIBS "-lstdc++_s ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lc_s")
+# Libraries (math, stdc++ libraries, etc.) 
+# Note! We CANNOT use the size-constrained *_s versions! anymore
 SET(LIBS "-lstdc++ ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lc")
 
 # Some debug information
