@@ -76,6 +76,9 @@ define cross-compile-target-cleanup
 	@rm -f arm.toolchain.cmake
 	@rm -f CMakeBuild.config.default
 	@rm -f CMakeConfig.cmake
+	printf "++ Copy binaries to ${BLUENET_BIN_DIR}\n"
+	@mkdir -p "${BLUENET_BIN_DIR}"
+	@cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf "$(BLUENET_BIN_DIR)"
 endef
 
 define host-compile-target-prepare
