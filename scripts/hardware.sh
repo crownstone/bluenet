@@ -21,7 +21,7 @@ mkdir -p $TEMP_DIR
 # Run JLink gdb server
 gdb_server() {
 	info "Run JLink gdb server"
-	GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}-gdb
+	GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}gdb
 	$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 400 &
 }
 

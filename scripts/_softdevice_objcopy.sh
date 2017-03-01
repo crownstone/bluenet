@@ -31,7 +31,7 @@ NRF_MAIN_BIN=${SD_BINDIR}/softdevice_mainpart.bin
 rm -f ${NRF_MAIN_BIN}
 rm -f ${NRF_UICR_BIN}
 
-OBJCOPY=${COMPILER_PATH}/bin/${COMPILER_TYPE}-objcopy
+OBJCOPY=${COMPILER_PATH}/bin/${COMPILER_TYPE}objcopy
 
 
 if [ $SOFTDEVICE_NO_SEPARATE_UICR_SECTION == 1 ]; then

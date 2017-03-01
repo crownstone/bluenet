@@ -141,6 +141,10 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 		size = sizeof(uint32_t);
 		break;
 	}
+	case STATE_ERRORS: {
+		size = sizeof(state_errors_t);
+		break;
+	}
 	case STATE_TRACKED_DEVICES: {
 		size = sizeof(tracked_device_list_t);
 		uint8_t listBuffer[size];
