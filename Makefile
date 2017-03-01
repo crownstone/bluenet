@@ -32,9 +32,13 @@ endif
 # Optional configuration parameters that will be set to defaults if not set before
 #######################################################################################################################
 
+# The verbosity parameter is used in the cmake build files to e.g. display the definitions used.
+
 ifndef VERBOSITY
 VERBOSITY=7
 endif
+
+# TODO: Why not just use the -j flag instead of introducing a new one? This should not be hardcoded.
 
 ifndef COMPILE_WITH_J_PROCESSORS
 COMPILE_WITH_J_PROCESSORS=4
@@ -44,6 +48,13 @@ endif
 # Additional configuration options
 #######################################################################################################################
 
+# We have a Makefile with some additional configuration options. Note that if the configurations options change, 
+# cmake will force a rebuild of everything! That's why a COMPILATION_TIME macro, although useful, is not included 
+# for the DEBUG_COMPILE_FLAGS. If we do a release we want to be sure we building the latest, hence then 
+# COMPILATION_TIME as a macro is included.
+#
+# Also when the git hash changes this triggers a rebuild.
+
 SOURCE_DIR=$(shell pwd)
 COMPILATION_DAY=$(shell date --iso=date)
 COMPILATION_TIME=$(shell date '+%H:%M')
@@ -51,7 +62,6 @@ GIT_BRANCH=$(shell git symbolic-ref --short -q HEAD)
 GIT_HASH=$(shell git rev-parse --short=25 HEAD)
 
 DEBUG_COMPILE_FLAGS=-DCOMPILATION_DAY="\"${COMPILATION_DAY}\"" \
-			  -DCOMPILATION_TIME="\"${COMPILATION_TIME}\"" \
 			  -DVERBOSITY="${VERBOSITY}" \
 			  -DGIT_BRANCH="\"${GIT_BRANCH}\"" \
 			  -DGIT_HASH="\"${GIT_HASH}\"" \
@@ -72,10 +82,6 @@ define cross-compile-target-prepare
 endef
 
 define cross-compile-target-cleanup
-	#@rm -f CMakeLists.txt
-	#@rm -f arm.toolchain.cmake
-	#@rm -f CMakeBuild.config.default
-	#@rm -f CMakeConfig.cmake
 	printf "++ Copy binaries to ${BLUENET_BIN_DIR}\n"
 	@mkdir -p "${BLUENET_BIN_DIR}"
 	@cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf "$(BLUENET_BIN_DIR)"
