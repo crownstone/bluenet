@@ -15,6 +15,7 @@
 #include <protocol/cs_StateTypes.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
+#include <processing/cs_Switch.h>
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
@@ -416,9 +417,15 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 		State::getInstance().set(STATE_ERROR_OVER_CURRENT, (uint8_t)1);
 	}
 	else if (powerMilliWatt > CURRENT_USAGE_THRESHOLD_PWM  * 220) {
-		LOGd("current above pwm threshold");
+		//! Get the current pwm state before we dispatch the event (as that may change the pwm).
+		switch_state_t switchState;
+		State::getInstance().get(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
-		State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, (uint8_t)1);
+		//! If the pwm was on, set overcurrent error.
+		if (switchState.pwm_state != 0) {
+			LOGd("current above pwm threshold");
+			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, (uint8_t)1);
+		}
 	}
 
 	//! Exponential moving average
