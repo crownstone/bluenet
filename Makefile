@@ -65,17 +65,17 @@ RELEASE_COMPILE_FLAGS=-DCOMPILATION_DAY="\"${COMPILATION_DAY}\"" \
 			  -DCMAKE_BUILD_TYPE=MinSizeRel
 
 define cross-compile-target-prepare
-	@cp conf/cmake/CMakeLists.txt .
-	@cp conf/cmake/arm.toolchain.cmake .
-	@cp conf/cmake/CMakeBuild.config.default .
-	@cp conf/cmake/CMakeConfig.cmake .
+	@if [ ! -f "CMakeLists.txt" ]; then ln -s conf/cmake/CMakeLists.txt .; fi
+	@if [ ! -f "arm.toolchain.cmake" ]; then ln -s conf/cmake/arm.toolchain.cmake .; fi
+	@if [ ! -f "CMakeBuild.config.default" ]; then ln -s conf/cmake/CMakeBuild.config.default .; fi
+	@if [ ! -f "CMakeConfig.cmake" ]; then ln -s conf/cmake/CMakeConfig.cmake .; fi
 endef
 
 define cross-compile-target-cleanup
-	@rm -f CMakeLists.txt
-	@rm -f arm.toolchain.cmake
-	@rm -f CMakeBuild.config.default
-	@rm -f CMakeConfig.cmake
+	#@rm -f CMakeLists.txt
+	#@rm -f arm.toolchain.cmake
+	#@rm -f CMakeBuild.config.default
+	#@rm -f CMakeConfig.cmake
 	printf "++ Copy binaries to ${BLUENET_BIN_DIR}\n"
 	@mkdir -p "${BLUENET_BIN_DIR}"
 	@cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf "$(BLUENET_BIN_DIR)"
