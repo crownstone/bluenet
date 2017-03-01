@@ -3,6 +3,7 @@
 # Parameter is optional, provide target if wanted. If left out, default target is crownstone
 
 target=$1
+targetoption="-t $1"
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
@@ -24,14 +25,14 @@ succ "Softdevice DONE"
 
 info "Build firmware ..."
 
-$path/firmware.sh build $target
+$path/firmware.sh -c build $targetoption
 
 checkError
 succ "Build DONE"
 
 info "Upload firmware ..."
 
-$path/firmware.sh upload $target
+$path/firmware.sh -c upload $targetoption
 
 checkError
 succ "Upload DONE"
@@ -52,7 +53,7 @@ fi
 
 info "Upload bootloader"
 
-$path/firmware.sh bootloader $target
+$path/firmware.sh -c bootloader $targetoption
 
 checkError
 

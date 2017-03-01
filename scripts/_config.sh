@@ -29,11 +29,13 @@ if [ ! -d "${BLUENET_DIR}" ] || [ -z "${BLUENET_CONFIG_DIR}" ] || [ -z "${BLUENE
 	exit 1
 fi
 
-if [ -e ${BLUENET_DIR}/CMakeBuild.config.default ]; then
-	source ${BLUENET_DIR}/CMakeBuild.config.default
+if [ -e ${BLUENET_DIR}/conf/cmake/CMakeBuild.config.default ]; then
+	log "source ${BLUENET_DIR}/conf/cmake/CMakeBuild.config.default"	
+	source ${BLUENET_DIR}/conf/cmake/CMakeBuild.config.default
 fi
 
 if [ -e ${BLUENET_DIR}/CMakeBuild.config.local ]; then
+	log "source ${BLUENET_DIR}/CMakeBuild.config.local"
 	source ${BLUENET_DIR}/CMakeBuild.config.local
 fi
 
