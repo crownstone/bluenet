@@ -743,7 +743,7 @@ Type | Name | Length | Description
 uint 8 | Head | 1 | Keeps the index of the oldest element in the list (read pointer)
 uint 8 | Tail | 1 | Keeps the index where the next element can be inserted in the list (write pointer)
 uint 8 | Size | 1 | Number of elements in the list
-[Crownstone state item](#state_mesh_item) [] | List | 8 | Circular list with Crownstone state items
+[Crownstone state item](#state_mesh_item) [] | List | 7 | Circular list with Crownstone state items
 
 ##### <a name="state_mesh_item"></a>Crownstone state item
 
