@@ -299,7 +299,7 @@ verifyHardwareBoardDefined() {
 }
 
 case "$cmd" in
-	build)
+	build|unit-test-nrf5)
 		build
 		;;
 	unit-test-host)

@@ -35,7 +35,7 @@ endif
 # The verbosity parameter is used in the cmake build files to e.g. display the definitions used.
 
 ifndef VERBOSITY
-VERBOSITY=7
+VERBOSITY=1
 endif
 
 # TODO: Why not just use the -j flag instead of introducing a new one? This should not be hardcoded.

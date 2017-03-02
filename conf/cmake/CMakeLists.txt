@@ -45,6 +45,7 @@ MESSAGE(STATUS "CMakeLists: Git branch: ${GIT_BRANCH}")
 MESSAGE(STATUS "CMakeLists: Git hash: ${GIT_HASH}")
 MESSAGE(STATUS "CMakeLists: Day of compilation: ${COMPILATION_DAY}")
 MESSAGE(STATUS "CMakeLists: Time of day of compilation: ${COMPILATION_TIME}")
+MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
@@ -76,12 +77,12 @@ SET(INCLUDE_DIR "include" "include/third" "include/third/nrf" "include/ble")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
-IF((DEFINED COMPILATION_TARGET) AND "${COMPILATION_TARGET}" STREQUAL "host")
-	MESSAGE(STATUS "Run with host as compilation target")
+IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "nrf5")
+	MESSAGE(STATUS "Run test target. This will include source files as necessary")
 ELSE()
 	INCLUDE(crownstone.src)
 
-	IF(BUILD_MESHING AND ${BUILD_MESHING} STRGREATER "0")
+	IF(BUILD_MESHING AND "${BUILD_MESHING}" STRGREATER "0")
 		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_timer.c")
 	else()
 		LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer.c")
@@ -185,12 +186,14 @@ IF(NOT (DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
 	SET(${SOFTDEVICE_DIR_HEX}, "hex")
 ENDIF()
 
-IF((DEFINED COMPILATION_TARGET) AND "${COMPILATION_TARGET}" STREQUAL "host")
+IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "nrf5")
 	MESSAGE(STATUS "CMakeLists: Add testing files")
 
 	ENABLE_TESTING()
 
-	ADD_SUBDIRECTORY(test)
+	#	ADD_SUBDIRECTORY(test/nrf5)
+
+	INCLUDE(test/nrf5/CMakeLists.txt)
 ELSE()
 
 	# Set up our main executable.
