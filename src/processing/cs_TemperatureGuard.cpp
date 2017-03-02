@@ -75,8 +75,10 @@ void TemperatureGuard::tick() {
 	}
 	if (curEvent != _lastChipTempEvent) {
 
-		// Update chip temp error
-		State::getInstance().set(STATE_ERROR_CHIP_TEMP, chipTempError);
+		if (chipTempError) {
+			// Update chip temp error
+			State::getInstance().set(STATE_ERROR_CHIP_TEMP, chipTempError);
+		}
 
 		LOGd("Dispatch event %d", curEvent);
 		EventDispatcher::getInstance().dispatch(curEvent);
@@ -94,8 +96,10 @@ void TemperatureGuard::tick() {
 	}
 	if (curEvent != _lastPwmTempEvent) {
 
-		// Update pwm temp error
-		State::getInstance().set(STATE_ERROR_PWM_TEMP, pwmTempError);
+		if (pwmTempError) {
+			// Update pwm temp error
+			State::getInstance().set(STATE_ERROR_PWM_TEMP, pwmTempError);
+		}
 
 		LOGd("Dispatch event %d", curEvent);
 		EventDispatcher::getInstance().dispatch(curEvent);
