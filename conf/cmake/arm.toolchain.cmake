@@ -95,17 +95,13 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_
 MESSAGE(STATUS "ARM cmake: C Compiler: ${CMAKE_C_COMPILER}")
 MESSAGE(STATUS "ARM cmake: Search for FindX files in ${CMAKE_MODULE_PATH}")
 
-IF(NOT IN_TRY_COMPILE)
+INCLUDE(crownstone.defs)
 
-	INCLUDE(crownstone.defs)
-
-	# the bluetooth name is not optional
-	IF(DEFINED BLUETOOTH_NAME)
-		ADD_DEFINITIONS("-DBLUETOOTH_NAME=${BLUETOOTH_NAME}")
-	ELSE()
-		MESSAGE(FATAL_ERROR "We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. \"Crown\" (with quotes)")
-	ENDIF()
-
+# the bluetooth name is not optional
+IF(DEFINED BLUETOOTH_NAME)
+	ADD_DEFINITIONS("-DBLUETOOTH_NAME=${BLUETOOTH_NAME}")
+ELSE()
+	MESSAGE(FATAL_ERROR "We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. \"Crown\" (with quotes)")
 ENDIF()
 
 # Obtain variables to be used for the compiler

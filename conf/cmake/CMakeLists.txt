@@ -45,6 +45,7 @@ MESSAGE(STATUS "CMakeLists: Git branch: ${GIT_BRANCH}")
 MESSAGE(STATUS "CMakeLists: Git hash: ${GIT_HASH}")
 MESSAGE(STATUS "CMakeLists: Day of compilation: ${COMPILATION_DAY}")
 MESSAGE(STATUS "CMakeLists: Time of day of compilation: ${COMPILATION_TIME}")
+MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
@@ -76,12 +77,12 @@ SET(INCLUDE_DIR "include" "include/third" "include/third/nrf" "include/ble")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
-IF((DEFINED COMPILATION_TARGET) AND "${COMPILATION_TARGET}" STREQUAL "host")
-	MESSAGE(STATUS "Run with host as compilation target")
+IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "nrf5")
+	MESSAGE(STATUS "Run test target. This will include source files as necessary")
 ELSE()
 	INCLUDE(crownstone.src)
 
-	IF(BUILD_MESHING AND ${BUILD_MESHING} STRGREATER "0")
+	IF(BUILD_MESHING AND "${BUILD_MESHING}" STRGREATER "0")
 		LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_timer.c")
 	else()
 		LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer.c")
@@ -185,19 +186,21 @@ IF(NOT (DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
 	SET(${SOFTDEVICE_DIR_HEX}, "hex")
 ENDIF()
 
-IF((DEFINED COMPILATION_TARGET) AND "${COMPILATION_TARGET}" STREQUAL "host")
+IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "nrf5")
 	MESSAGE(STATUS "CMakeLists: Add testing files")
 
 	ENABLE_TESTING()
 
-	ADD_SUBDIRECTORY(test)
+	#	ADD_SUBDIRECTORY(test/nrf5)
+
+	INCLUDE(test/nrf5/CMakeLists.txt)
 ELSE()
 
 	# Set up our main executable.
 	IF(FOLDER_SOURCE STREQUAL "")
 		MESSAGE(FATAL_ERROR "No source code files found. Please add something")
 	ELSE()
-		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES})
+		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.tmp)
 
 		# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
 		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.tmp
@@ -206,16 +209,14 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME}.tmp ${PROJECT_NAME}.bin
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
-			COMMAND stat ${PROJECT_NAME}.bin | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "Size: %s bytes - totally available: 512kB - 110kB {softdevice} = 412kB. In dual bank: 206kB"
+			COMMAND stat ${PROJECT_NAME}.bin | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "** Size: %s bytes - totally available: 512kB - 110kB {softdevice} = 412kB. In dual bank: 206kB"
 			COMMAND echo
-			COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_NAME}
-			COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_NAME}.tmp
 			DEPENDS ${PROJECT_NAME}
 			COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
 
 		ADD_CUSTOM_TARGET(generate-dat
 			COMMAND echo
-			COMMAND echo "*** Use srec_cat to create the INIT .dat file for the DFU"
+			COMMAND echo "** Use srec_cat to create the INIT .dat file for the DFU"
 			COMMAND echo
 			COMMAND echo "srec_cat ${PROJECT_NAME}.hex -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o ${PROJECT_NAME}.dat -intel"
 			COMMAND srec_cat ${PROJECT_NAME}.hex -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o ${PROJECT_NAME}.dat -intel
@@ -225,7 +226,7 @@ ELSE()
 
 		ADD_CUSTOM_TARGET(combine
 			COMMAND echo
-			COMMAND echo "*** Use srec_cat to create one combined softdevice+app file"
+			COMMAND echo "** Use srec_cat to create one combined softdevice+app file"
 			COMMAND echo
 			COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
 			COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
@@ -235,23 +236,21 @@ ELSE()
 
 		ADD_CUSTOM_TARGET(analyze
 			COMMAND echo
-			COMMAND echo "*** Show headers"
+			COMMAND echo "** Show headers"
 			COMMAND ${CMAKE_READELF} --headers ${PROJECT_NAME}.elf
 			#COMMAND ${CMAKE_OBJDUMP} -h ${PROJECT_NAME}.elf
 			COMMAND echo
-			COMMAND echo "*** Show largest symbols / functions"
+			COMMAND echo "** Show largest symbols / functions"
 			COMMAND ${CMAKE_NM} --print-size --size-sort --radix=d ${PROJECT_NAME}.elf
 			COMMAND echo
-			COMMAND echo "*** Show size of sections"
+			COMMAND echo "** Show size of sections"
 			COMMAND ${CMAKE_SIZE} -A -d ${PROJECT_NAME}.elf
 			DEPENDS ${PROJECT_NAME}.tmp
 			COMMENT "Read headers ${PROJECT_NAME}.elf"
 			)
 
-		ADD_CUSTOM_TARGET(${PROJECT_NAME}.bin ALL DEPENDS ${PROJECT_NAME}.tmp)
-
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
-
+		
 		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBS})
 		INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 	ENDIF()
