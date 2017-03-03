@@ -48,8 +48,11 @@ ServiceData::ServiceData() : EventListener(EVT_ALL), _updateTimerId(NULL), _conn
 
 	//! Only send the state over the mesh in normal mode
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED) && _operationMode == OPERATION_MODE_NORMAL) {
-		//! start the mesh state timer
-		Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(MESH_STATE_REFRESH_PERIOD), this);
+		//! start the mesh state timer with a small random delay
+		uint8_t rand8;
+		RNG::fillBuffer(&rand8, 1);
+		uint32_t randMs = rand8*10;
+		Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(randMs), this);
 	}
 #endif
 
@@ -229,7 +232,8 @@ void ServiceData::sendMeshState(bool event) {
 			//! Start timer of MESH_STATE_REFRESH_PERIOD + rand(0,255)*10 ms
 			uint8_t rand8;
 			RNG::fillBuffer(&rand8, 1);
-			Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(MESH_STATE_REFRESH_PERIOD) + MS_TO_TICKS(rand8*10), this);
+			uint32_t randMs = rand8*10;
+			Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(MESH_STATE_REFRESH_PERIOD) + MS_TO_TICKS(randMs), this);
 		}
 	}
 #endif
