@@ -212,7 +212,7 @@ SCAN_FILTER_SEND_FRACTION=360
 RSSI_ENABLE=1
 
 # connection alive timeout. if no write command received within timeout the connection is closed by the device.
-CONNECTION_ALIVE_TIMEOUT=15000
+CONNECTION_ALIVE_TIMEOUT=20000
 
 # NOTE: APP_DATA_RESERVED is obsolete. the bootloader obtains the value directly from PSTORAGE_RESERVED defined in
 #   include/third/nrf/pstorage_platform.h, but if desired it can still be used to increase the value over the
