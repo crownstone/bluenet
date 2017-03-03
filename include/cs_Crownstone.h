@@ -44,10 +44,7 @@
 #include <mesh/cs_MeshControl.h>
 #endif
 #include <storage/cs_State.h>
-
-extern "C" {
 #include <cfg/cs_Boards.h>
-}
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality

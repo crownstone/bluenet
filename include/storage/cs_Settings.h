@@ -11,10 +11,7 @@
 #include <structs/cs_StreamBuffer.h>
 #include <protocol/cs_ConfigTypes.h>
 #include <protocol/cs_ErrorCodes.h>
-
-extern "C" {
 #include <cfg/cs_Boards.h>
-}
 
 /**
  * Load settings from and save settings to persistent storage.

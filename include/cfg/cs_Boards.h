@@ -14,17 +14,13 @@
  */
 #pragma once
 
-#include "stdbool.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include "stdbool.h"
 #include "nrf52.h"
-
-#ifdef __cplusplus
-}
-#endif
 
 /**
  *  We use part of the UICR to store information about the hardware board. So the firmware is independent on the
@@ -95,7 +91,7 @@ typedef struct  {
 	//! gpio pin to control the "green" led
 	uint8_t pinLedGreen;
 
-	struct {
+	struct __attribute__((__packed__)) {
 		//! true if board has relays
 		bool hasRelay: 1;
 		//! true if the pwm is inverted (setting gpio high turns light off)
@@ -137,3 +133,6 @@ typedef struct  {
 
 uint32_t configure_board(boards_config_t* p_config);
 
+#ifdef __cplusplus
+}
+#endif

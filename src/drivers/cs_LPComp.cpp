@@ -18,7 +18,6 @@
 //#include "nrf_sdm.h"
 //#endif
 //
-//#include "common/cs_Boards.h"
 #include "drivers/cs_Serial.h"
 #include "drivers/cs_PWM.h"
 #include "util/cs_BleError.h"

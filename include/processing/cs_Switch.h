@@ -9,14 +9,11 @@
 #include <ble/cs_Nordic.h>
 #include <drivers/cs_Timer.h>
 #include <events/cs_EventListener.h>
+#include <cfg/cs_Boards.h>
 
 #if BUILD_MESHING == 1
 #include <protocol/cs_MeshMessageTypes.h>
 #endif
-
-extern "C" {
-#include <cfg/cs_Boards.h>
-}
 
 #define EXTENDED_SWITCH_STATE
 
