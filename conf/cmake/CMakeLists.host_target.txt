@@ -102,5 +102,5 @@ MESSAGE(STATUS "Add testing files")
 
 ENABLE_TESTING()
 
-ADD_SUBDIRECTORY(test)
-
+#ADD_SUBDIRECTORY(test/host)
+INCLUDE(test/host/CMakeLists.txt)
