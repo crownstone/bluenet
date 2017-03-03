@@ -127,7 +127,7 @@ struct __attribute__((__packed__)) multi_switch_item_t {
 
 struct __attribute__((__packed__)) multi_switch_message_t {
 	uint8_t size;
-	multi_switch_item_t list[MAX_KEEP_ALIVE_ITEMS];
+	multi_switch_item_t list[MAX_MULTI_SWITCH_ITEMS];
 };
 
 inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id, multi_switch_item_t** item) {

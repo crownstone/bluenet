@@ -337,7 +337,7 @@ ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t le
 	LOGi("handleMultiSwitch");
 	BLEutil::printArray(msg, length);
 
-	if (length < MULTI_SWITCH_HEADER_SIZE + msg->size * sizeof(multi_switch_item_t)) {
+	if ((msg->size > MAX_MULTI_SWITCH_ITEMS) || (length < MULTI_SWITCH_HEADER_SIZE + msg->size * sizeof(multi_switch_item_t))) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 		BLEutil::printArray(msg, length);
 		return ERR_WRONG_PAYLOAD_LENGTH;
