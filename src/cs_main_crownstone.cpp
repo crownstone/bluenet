@@ -22,7 +22,6 @@
 
 #define RESET_COUNTER
 //#define MICRO_VIEW 1
-//#define CHANGE_NAME_ON_RESET
 //#define CHANGE_MINOR_ON_RESET
 
 /**********************************************************************************************************************

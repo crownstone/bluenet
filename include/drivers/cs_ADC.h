@@ -141,10 +141,9 @@ public:
 
 	/** Release a buffer, so it can be used again by the ADC. 
 	 *
-	 * @param[in] bufNum               The buffer num as received in the done callback.
+	 * @param[in] buf                  Pointer to the buffer, as received in the done callback.
 	 * @return                         Boolean indicating success (true) or failure (false).
 	 */
-//	bool releaseBuffer(buffer_id_t bufNum);
 	bool releaseBuffer(nrf_saadc_value_t* buf);
 
 	/** Set the callback which is called when a buffer is filled.
