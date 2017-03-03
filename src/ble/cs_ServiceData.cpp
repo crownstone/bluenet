@@ -126,10 +126,14 @@ void ServiceData::updateAdvertisement() {
 					_advertisedIds.head = 0;
 				}
 
-				uint8_t advertiseId = _advertisedIds.list[_advertisedIds.head];
+				uint8_t advertiseId = 0;
+				if (_advertisedIds.size > 0) {
+					advertiseId = _advertisedIds.list[_advertisedIds.head];
+				}
 
 				//! Add first id that is in the message, but not in the list (search from newest to oldest)
 				//! If this happens, advertise this id instead of the id at the head
+				//! Skip ids that are 0 or similar to own id
 				idx = -1;
 				while (peek_prev_state_item(&message, &p_stateItem, idx)) {
 					if (p_stateItem->id == 0 || p_stateItem->id == _serviceData.params.crownstoneId) {
@@ -153,25 +157,27 @@ void ServiceData::updateAdvertisement() {
 					}
 				}
 
-				//! Advertise the id at the head
-				idx = -1;
-				while (peek_prev_state_item(&message, &p_stateItem, idx)) {
-					if (p_stateItem->id == advertiseId) {
-						LOGd("Advertise external data");
-						serviceData = &_serviceDataExt;
-						serviceData->params.crownstoneId = p_stateItem->id;
-						serviceData->params.switchState = p_stateItem->switchState;
-						serviceData->params.eventBitmask = p_stateItem->eventBitmask;
-						serviceData->params.eventBitmask |= 1 << SHOWING_EXTERNAL_DATA;
-						serviceData->params.powerUsage = p_stateItem->powerUsage;
-						serviceData->params.accumulatedEnergy = p_stateItem->accumulatedEnergy;
-						break;
+				//! Advertise the selected id (if it's not 0)
+				if (advertiseId != 0) {
+					idx = -1;
+					while (peek_prev_state_item(&message, &p_stateItem, idx)) {
+						if (p_stateItem->id == advertiseId) {
+//							LOGd("Advertise external data");
+							serviceData = &_serviceDataExt;
+							serviceData->params.crownstoneId = p_stateItem->id;
+							serviceData->params.switchState = p_stateItem->switchState;
+							serviceData->params.eventBitmask = p_stateItem->eventBitmask;
+							serviceData->params.eventBitmask |= 1 << SHOWING_EXTERNAL_DATA;
+							serviceData->params.powerUsage = p_stateItem->powerUsage;
+							serviceData->params.accumulatedEnergy = p_stateItem->accumulatedEnergy;
+							break;
+						}
 					}
-				}
 
-				//! If we advertised the id at head, then increase the head
-				if (advertiseId == _advertisedIds.list[_advertisedIds.head]) {
-					_advertisedIds.head = (_advertisedIds.head + 1) % _advertisedIds.size;
+					//! If we advertised the id at head, then increase the head
+					if (advertiseId == _advertisedIds.list[_advertisedIds.head]) {
+						_advertisedIds.head = (_advertisedIds.head + 1) % _advertisedIds.size;
+					}
 				}
 			}
 		}
