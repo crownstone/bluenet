@@ -109,15 +109,11 @@ void Scheduler::tick() {
 	if (entry != NULL) {
 		switch (ScheduleEntry::getActionType(entry)) {
 			case SCHEDULE_ACTION_TYPE_PWM: {
-				uint8_t switchVal = entry->pwm.pwm;
+				switch_state_t switchVal;
 				//! TODO: use pwm here later on, for now: just switch on and off relay.
-				if (switchVal) {
-					Switch::getInstance().relayOn();
-				}
-				else {
-					Switch::getInstance().relayOff();
-				}
-//				PWM::getInstance().setValue(0, entry->pwm.pwm);
+				switchVal.relay_state = entry->pwm.pwm == 0 ? 0 : 1;
+				switchVal.pwm_state = 0;
+				Switch::getInstance().setSwitch(&switchVal);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_FADE:

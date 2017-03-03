@@ -73,7 +73,7 @@ void Watchdog::keepAliveTimeout() {
 
 	if (_hasKeepAliveState) {
 		if (_lastKeepAlive.action != NO_CHANGE) {
-			Switch::getInstance().handle((switch_state_t*)&_lastKeepAlive.switchState);
+			Switch::getInstance().setSwitch((switch_state_t*)&_lastKeepAlive.switchState);
 	//			Switch::getInstance().switch(_lastKeepAlive.switchState);
 //			CommandHandler::getInstance().handleCommand(CMD_SWITCH, (buffer_ptr_t)&_lastKeepAlive.switchState, sizeof(_lastKeepAlive.switchState), ADMIN);
 	//		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&_lastKeepAlive.switchState, sizeof(_lastKeepAlive.switchState), ADMIN);

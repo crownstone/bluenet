@@ -15,22 +15,16 @@
 #include <protocol/cs_MeshMessageTypes.h>
 #endif
 
-#define EXTENDED_SWITCH_STATE
-
-#ifdef EXTENDED_SWITCH_STATE
-struct switch_state_t {
+struct __attribute__((__packed__)) switch_state_t {
 	uint8_t pwm_state : 7;
 	bool relay_state : 1;
 };
-#else
-typedef uint8_t switch_state_t;
-#endif
 
-enum {
-	SWITCH_NEXT_RELAY_VAL_NONE,
-	SWITCH_NEXT_RELAY_VAL_ON,
-	SWITCH_NEXT_RELAY_VAL_OFF,
-};
+//enum {
+//	SWITCH_NEXT_RELAY_VAL_NONE,
+//	SWITCH_NEXT_RELAY_VAL_ON,
+//	SWITCH_NEXT_RELAY_VAL_OFF,
+//};
 
 class Switch : EventListener {
 public:
@@ -44,44 +38,87 @@ public:
 
 	void start();
 
-	void pwmOff();
-
-	void pwmOn();
-
+	/** Turn on the switch. Uses relay if available.
+	 */
 	void turnOn();
 
+	/** Turn off the switch. Uses relay if available.
+	 */
 	void turnOff();
 
+	/** Toggle the switch. Uses relay if available.
+	 */
 	void toggle();
 
-	void dim(uint8_t value);
 
+	/** Set switch state
+	 *
+	 * @param[in] switchState            State to set the switch to, includes both PWM and relay.
+	 */
+	void setSwitch(switch_state_t* switchState);
+
+	/** Get the current switch state.
+	 *
+	 * @return                           Current switch state.
+	 */
+	switch_state_t getSwitchState();
+
+	/** Turn on the PWM.
+	 */
+	void pwmOn();
+
+	/** Turn off the PWM.
+	 */
+	void pwmOff();
+
+	/** Set pwm value
+	 *
+	 *  @param[in] value                 Value to set the PWM to.
+	 */
 	void setPwm(uint8_t value);
 
-	switch_state_t getSwitchState();
-//	void setValue(switch_state_t value);
-
+	/** Get the current PWM value.
+	 *
+	 * @return                           Current PWM value.
+	 */
 	uint8_t getPwm();
-	bool getRelayState();
 
+
+	/** Turn on the relay.
+	 */
 	void relayOn();
 
+	/** Turn off the relay.
+	 */
 	void relayOff();
 
+	/** Get the current relay state.
+	 *
+	 * @return                           Whether or not the relay is on.
+	 */
+	bool getRelayState();
+
+
+	/** Used internally
+	 */
 	static void staticTimedSwitch(Switch* ptr) { ptr->timedSwitch(); }
 
+	/** Used internally
+	 */
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 #if BUILD_MESHING == 1
+	/** Used internally
+	 */
 	void handleMultiSwitch(multi_switch_item_t* p_item);
 #endif
 
-	void handle(switch_state_t* switchState);
-
-	void handleDelayed(switch_state_t* switchState, uint16_t delay);
-
 private:
 	Switch();
+
+	void _setPwm(uint8_t value);
+	void _relayOn();
+	void _relayOff();
 
 	void updateSwitchState();
 
@@ -93,14 +130,12 @@ private:
 	bool allowPwmOn();
 	bool allowSwitchOn();
 
+	void handleDelayed(switch_state_t* switchState, uint16_t delay);
+
 	switch_state_t _switchValue;
 
-#if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _switchTimerData;
 	app_timer_id_t           _switchTimerId;
-#else
-	uint32_t                 _switchTimerId;
-#endif
 
 //	uint8_t _nextRelayVal;
 
@@ -109,6 +144,7 @@ private:
 	uint8_t _pinRelayOff;
 
 	switch_state_t* _delayedSwitchState;
+	uint16_t _relayHighDuration;
 
 };
 

@@ -292,11 +292,17 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		state.get(STATE_SWITCH_STATE, stateItem.switchState);
 
-		// todo get event bitmask
+		//! TODO: implement setting the eventBitmask in a better way
+		//! Maybe get it from service data directly? Or should we store the eventBitmask in the State?
+		state_errors_t state_errors;
+		state.get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+		stateItem.eventBitmask = 0;
+		if (state_errors.asInt != 0) {
+			stateItem.eventBitmask |= 1 << SERVICE_BITMASK_ERROR;
+		}
 
 		state.get(STATE_POWER_USAGE, (int32_t&)stateItem.powerUsage);
 		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)stateItem.accumulatedEnergy);
-//		state.get(STATE_TEMPERATURE, (int32_t&)serviceData.temperature);
 
 		MeshControl::getInstance().sendServiceDataMessage(stateItem, true);
 #endif
@@ -614,20 +620,24 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		}
 
 		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-		uint8_t value = payload->switchState;
+		switch_state_t switchState;
+		switchState.pwm_state = 0;
+		switchState.relay_state = payload->switchState == 0 ? 0 : 1;
+//		switch_state_t switchState = payload->switchState;
 
-		//! Switch off pwm, as we're using the relay
-		uint8_t currentPwm = Switch::getInstance().getPwm();
-		if (currentPwm != 0) {
-			Switch::getInstance().setPwm(0);
-		}
+		Switch::getInstance().setSwitch(&switchState);
 
-		if (value == 0) {
-			Switch::getInstance().relayOff();
-		} else {
-			Switch::getInstance().relayOn();
-		}
-
+//		//! Switch off pwm, as we're using the relay
+//		uint8_t currentPwm = Switch::getInstance().getPwm();
+//		if (currentPwm != 0) {
+//			Switch::getInstance().setPwm(0);
+//		}
+//
+//		if (value == 0) {
+//			Switch::getInstance().relayOff();
+//		} else {
+//			Switch::getInstance().relayOn();
+//		}
 		break;
 	}
 	case CMD_RELAY: {

@@ -14,6 +14,7 @@
 #include <processing/cs_PowerSampling.h>
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <protocol/cs_StateTypes.h>
+#include <processing/cs_Switch.h>
 
 PowerService::PowerService() : EventListener(),
 		_pwmCharacteristic(NULL),
@@ -134,18 +135,12 @@ void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 	case STATE_SWITCH_STATE: {
-#ifdef EXTENDED_SWITCH_STATE
 		if (_pwmCharacteristic) {
 			(*_pwmCharacteristic) = ((switch_state_t*)p_data)->pwm_state;
 		}
 		if (_relayCharacteristic) {
 			(*_relayCharacteristic) = ((switch_state_t*)p_data)->relay_state;
 		}
-#else
-		if (_pwmCharacteristic) {
-			(*_pwmCharacteristic) = *(uint8_t*)p_data;
-		}
-#endif
 		break;
 	}
 	case EVT_POWER_SAMPLES_START: {

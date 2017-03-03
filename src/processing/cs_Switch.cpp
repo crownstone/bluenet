@@ -25,20 +25,15 @@
 
 Switch::Switch():
 //	_nextRelayVal(SWITCH_NEXT_RELAY_VAL_NONE),
-	_hasRelay(false), _pinRelayOn(0), _pinRelayOff(0), _delayedSwitchState(NULL)
+	_hasRelay(false), _pinRelayOn(0), _pinRelayOff(0), _delayedSwitchState(NULL), _relayHighDuration(0)
 {
 	LOGd(FMT_CREATE, "Switch");
 
-#if (NORDIC_SDK_VERSION >= 11)
 	_switchTimerData = { {0} };
 	_switchTimerId = &_switchTimerData;
-#else
-	_switchTimerId(UINT32_MAX);
-#endif
 }
 
 void Switch::init(boards_config_t* board) {
-
 #ifndef PWM_DISABLE
 	PWM& pwm = PWM::getInstance();
 	uint32_t pwmPeriod;
@@ -58,13 +53,15 @@ void Switch::init(boards_config_t* board) {
 		_pinRelayOff = board->pinGpioRelayOff;
 		_pinRelayOn = board->pinGpioRelayOn;
 
+		Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &_relayHighDuration);
+
 		nrf_gpio_cfg_output(_pinRelayOff);
 		nrf_gpio_pin_clear(_pinRelayOff);
 		nrf_gpio_cfg_output(_pinRelayOn);
 		nrf_gpio_pin_clear(_pinRelayOn);
 	}
 
-	// For now: just turn it off on init, for safety.
+	// For now: just turn pwm off on init, for safety.
 //	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
 //	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
 	pwmOff();
@@ -73,62 +70,16 @@ void Switch::init(boards_config_t* board) {
 	Timer::getInstance().createSingleShot(_switchTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSwitch);
 }
 
+
 void Switch::start() {
 
 }
 
-void Switch::pwmOff() {
-
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGd("PWM OFF");
-#endif
-
-	setPwm(0);
-}
-
-void Switch::pwmOn() {
-
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGd("PWM ON");
-#endif
-
-	setPwm(255);
-}
-
-void Switch::dim(uint8_t value) {
-
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGd("PWM %d", value);
-#endif
-
-	setPwm(value);
-}
 
 void Switch::updateSwitchState() {
 	State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t));
 }
 
-void Switch::setPwm(uint8_t value) {
-#ifndef PWM_DISABLE
-	if (value > 0 && !allowPwmOn()) {
-		LOGd("Don't turn on pwm");
-		return;
-	}
-#ifdef EXTENDED_SWITCH_STATE
-	_switchValue.pwm_state = value;
-#else
-	_switchValue = value;
-#endif
-	PWM::getInstance().setValue(0, value);
-	updateSwitchState();
-#else
-	LOGe("PWM disabled!!");
-#endif
-}
-
-//void Switch::setValue(switch_state_t value) {
-//	_switchValue = value;
-//}
 
 switch_state_t Switch::getSwitchState() {
 #ifdef PRINT_SWITCH_VERBOSE
@@ -137,103 +88,106 @@ switch_state_t Switch::getSwitchState() {
 	return _switchValue;
 }
 
-uint8_t Switch::getPwm() {
-#ifdef EXTENDED_SWITCH_STATE
-	return _switchValue.pwm_state;
-#else
-	return _switchValue;
+
+void Switch::turnOn() {
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGd("Turn ON");
 #endif
+	if (_hasRelay) {
+		relayOn();
+	} else {
+		pwmOn();
+	}
 }
 
-bool Switch::getRelayState() {
-#ifdef EXTENDED_SWITCH_STATE
-	return _switchValue.relay_state;
-#else
-	return _switchValue != 0;
+
+void Switch::turnOff() {
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGd("Turn OFF");
 #endif
+	if (_hasRelay) {
+		relayOff();
+	} else {
+		pwmOff();
+	}
 }
+
+
+void Switch::toggle() {
+	if ((_hasRelay && getRelayState()) || (!_hasRelay && getPwm())) {
+		turnOff();
+	} else {
+		turnOn();
+	}
+}
+
+
+void Switch::pwmOff() {
+	setPwm(0);
+}
+
+
+void Switch::pwmOn() {
+	setPwm(255);
+}
+
+
+void Switch::setPwm(uint8_t value) {
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGd("set PWM %d", value);
+#endif
+	_setPwm(value);
+	updateSwitchState();
+}
+
+
+uint8_t Switch::getPwm() {
+	return _switchValue.pwm_state;
+}
+
 
 void Switch::relayOn() {
-	LOGd("relayOn");
-	if (!allowSwitchOn()) {
-		LOGd("Don't turn relay on");
-		return;
-	}
-//	LOGd("relayOn %u", _nextRelayVal);
-//	if (Nrf51822BluetoothStack::getInstance().isScanning()) {
-//		if (_nextRelayVal != SWITCH_NEXT_RELAY_VAL_NONE) {
-//			_nextRelayVal = SWITCH_NEXT_RELAY_VAL_ON;
-//			return;
-//		}
-//		//! Try again later
-//		LOGd("Currently scanning, try again later");
-//		_nextRelayVal = SWITCH_NEXT_RELAY_VAL_ON;
-//		Timer::getInstance().start(_relayTimerId, MS_TO_TICKS(RELAY_DELAY), this);
-//		Scanner::getInstance().manualStopScan(); // TODO: stop scanning via stack, let stack send out an event?
-//		return;
-//	}
-//	_nextRelayVal = SWITCH_NEXT_RELAY_VAL_NONE;
-
-	// WHY READ IT EVERY TIME FROM SETTINGS AND NOT READ IT ONCE AT INIT AND USE THAT VALUE?
-	uint16_t relayHighDuration;
-	Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &relayHighDuration);
-
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGd("trigger relay on pin for %d ms", relayHighDuration);
-#endif
-
-	if (_hasRelay) {
-		nrf_gpio_pin_set(_pinRelayOn);
-		nrf_delay_ms(relayHighDuration);
-		nrf_gpio_pin_clear(_pinRelayOn);
-	}
-
-#ifdef EXTENDED_SWITCH_STATE
-	_switchValue.relay_state = true;
-#else
-	_switchValue = 255;
-#endif
+	_relayOn();
 	updateSwitchState();
 }
+
 
 void Switch::relayOff() {
-	LOGd("relayOff");
-//	LOGd("relayOff %u", _nextRelayVal);
-//	if (Nrf51822BluetoothStack::getInstance().isScanning()) {
-//		if (_nextRelayVal != SWITCH_NEXT_RELAY_VAL_NONE) {
-//			_nextRelayVal = SWITCH_NEXT_RELAY_VAL_OFF;
-//			return;
-//		}
-//		//! Try again later
-//		LOGd("Currently scanning, try again later");
-//		_nextRelayVal = SWITCH_NEXT_RELAY_VAL_OFF;
-//		Timer::getInstance().start(_relayTimerId, MS_TO_TICKS(RELAY_DELAY), this);
-////		Scanner::getInstance().manualStopScan(); // TODO: stop scanning via stack, let stack send out an event?
-//		return;
-//	}
-//	_nextRelayVal = SWITCH_NEXT_RELAY_VAL_NONE;
-
-	// WHY READ IT EVERY TIME FROM SETTINGS AND NOT READ IT ONCE AT INIT AND USE THAT VALUE?
-	uint16_t relayHighDuration;
-	Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &relayHighDuration);
-
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGi("trigger relay off pin for %d ms", relayHighDuration);
-#endif
-
-	if (_hasRelay) {
-		nrf_gpio_pin_set(_pinRelayOff);
-		nrf_delay_ms(relayHighDuration);
-		nrf_gpio_pin_clear(_pinRelayOff);
-	}
-
-#ifdef EXTENDED_SWITCH_STATE
-	_switchValue.relay_state = false;
-#else
-	_switchValue = 0;
-#endif
+	_relayOff();
 	updateSwitchState();
 }
+
+
+bool Switch::getRelayState() {
+	return _switchValue.relay_state;
+}
+
+
+void Switch::setSwitch(switch_state_t* switchState) {
+#ifdef PRINT_SWITCH_VERBOSE
+	LOGi("Set switch state: %d", *switchState);
+#endif
+
+	if (switchState->relay_state) {
+		_relayOn();
+	} else {
+		_relayOff();
+	}
+	_setPwm(switchState->pwm_state);
+
+	if (_delayedSwitchState != NULL) {
+#ifdef PRINT_SWITCH_VERBOSE
+		LOGi("clear delayed switch state");
+#endif
+
+		Timer::getInstance().stop(_switchTimerId);
+		free(_delayedSwitchState);
+		_delayedSwitchState = NULL;
+	}
+
+	updateSwitchState();
+}
+
 
 #if BUILD_MESHING == 1
 void Switch::handleMultiSwitch(multi_switch_item_t* p_item) {
@@ -252,7 +206,7 @@ void Switch::handleMultiSwitch(multi_switch_item_t* p_item) {
 	case MANUAL:
 		switch_state_t* pSwitchState = (switch_state_t*)&p_item->switchState;
 		if (p_item->timeout == 0) {
-			handle(pSwitchState);
+			setSwitch(pSwitchState);
 		} else {
 			handleDelayed(pSwitchState, p_item->timeout);
 		}
@@ -261,29 +215,6 @@ void Switch::handleMultiSwitch(multi_switch_item_t* p_item) {
 }
 #endif
 
-void Switch::handle(switch_state_t* switchState) {
-
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGi("trigger switch state: %d", *switchState);
-#endif
-
-	if (switchState->relay_state) {
-		relayOn();
-	} else {
-		relayOff();
-	}
-	setPwm(switchState->pwm_state);
-
-	if (_delayedSwitchState != NULL) {
-#ifdef PRINT_SWITCH_VERBOSE
-		LOGi("clear delayed switch state");
-#endif
-
-		Timer::getInstance().stop(_switchTimerId);
-		free(_delayedSwitchState);
-		_delayedSwitchState = NULL;
-	}
-}
 
 void Switch::handleDelayed(switch_state_t* switchState, uint16_t delay) {
 
@@ -304,49 +235,62 @@ void Switch::handleDelayed(switch_state_t* switchState, uint16_t delay) {
 	Timer::getInstance().start(_switchTimerId, MS_TO_TICKS(delay * 1000), this);
 }
 
+
 void Switch::timedSwitch() {
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGi("timed switch, set");
 #endif
 
 	if (_delayedSwitchState != NULL) {
-		handle(_delayedSwitchState);
+		setSwitch(_delayedSwitchState);
 	}
 }
 
-void Switch::turnOn() {
+
+void Switch::_setPwm(uint8_t value) {
+	if (value > 0 && !allowPwmOn()) {
+		LOGd("Don't turn on pwm");
+		return;
+	}
+	_switchValue.pwm_state = value;
+#ifndef PWM_DISABLE
+	PWM::getInstance().setValue(0, value);
+#endif
+}
+
+
+void Switch::_relayOn() {
+	LOGd("relayOn");
+	if (!allowSwitchOn()) {
+		LOGd("Don't turn relay on");
+		return;
+	}
 
 #ifdef PRINT_SWITCH_VERBOSE
-	LOGd("Turn ON");
+	LOGd("trigger relay on pin for %d ms", _relayHighDuration);
 #endif
 
 	if (_hasRelay) {
-		relayOn();
-	} else {
-		pwmOn();
+		nrf_gpio_pin_set(_pinRelayOn);
+		nrf_delay_ms(_relayHighDuration);
+		nrf_gpio_pin_clear(_pinRelayOn);
 	}
+	_switchValue.relay_state = true;
 }
 
-void Switch::turnOff() {
+void Switch::_relayOff() {
+	LOGd("relayOff");
 
 #ifdef PRINT_SWITCH_VERBOSE
-	LOGd("Turn OFF");
+	LOGi("trigger relay off pin for %d ms", _relayHighDuration);
 #endif
 
 	if (_hasRelay) {
-		relayOff();
-	} else {
-		pwmOff();
+		nrf_gpio_pin_set(_pinRelayOff);
+		nrf_delay_ms(_relayHighDuration);
+		nrf_gpio_pin_clear(_pinRelayOff);
 	}
-}
-
-void Switch::toggle() {
-
-	if ((_hasRelay && getRelayState()) || (!_hasRelay && getPwm())) {
-		turnOff();
-	} else {
-		turnOn();
-	}
+	_switchValue.relay_state = false;
 }
 
 void Switch::forcePwmOff() {
@@ -365,6 +309,7 @@ void Switch::forceSwitchOff() {
 bool Switch::allowPwmOn() {
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+	LOGd("errors=%d", stateErrors.asInt);
 	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp);
 //	return !(stateErrors.errors.chipTemp || stateErrors.errors.pwmTemp);
 }
