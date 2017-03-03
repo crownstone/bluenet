@@ -223,6 +223,8 @@ void ServiceData::sendMeshState(bool event) {
 		stateItem.id = _serviceData.params.crownstoneId;
 		stateItem.switchState = _serviceData.params.switchState;
 		stateItem.eventBitmask = _serviceData.params.eventBitmask;
+		//! Although probably not necessary, remove the "external data" bit
+		stateItem.eventBitmask &= ~(1 << SHOWING_EXTERNAL_DATA);
 		stateItem.powerUsage = _serviceData.params.powerUsage;
 		stateItem.accumulatedEnergy = _serviceData.params.accumulatedEnergy;
 
