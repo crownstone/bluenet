@@ -410,13 +410,17 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 	int64_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
 #endif
 
+	//! Get the current state errors
+	state_errors_t stateErrors;
+	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+
 	// TODO: don't use hardcoded 220V here
-	if (powerMilliWatt > CURRENT_USAGE_THRESHOLD * 220) {
+	if (powerMilliWatt > CURRENT_USAGE_THRESHOLD * 220 && !stateErrors.errors.overCurrent) {
 		LOGd("current above threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		State::getInstance().set(STATE_ERROR_OVER_CURRENT, (uint8_t)1);
 	}
-	else if (powerMilliWatt > CURRENT_USAGE_THRESHOLD_PWM  * 220) {
+	else if (powerMilliWatt > CURRENT_USAGE_THRESHOLD_PWM  * 220  && !stateErrors.errors.overCurrentPwm) {
 		//! Get the current pwm state before we dispatch the event (as that may change the pwm).
 		switch_state_t switchState;
 		State::getInstance().get(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));

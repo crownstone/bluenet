@@ -74,12 +74,6 @@ void TemperatureGuard::tick() {
 		curEvent = EVT_CHIP_TEMP_OK;
 	}
 	if (curEvent != _lastChipTempEvent) {
-
-		if (chipTempError) {
-			// Update chip temp error
-			State::getInstance().set(STATE_ERROR_CHIP_TEMP, chipTempError);
-		}
-
 		LOGd("Dispatch event %d", curEvent);
 		EventDispatcher::getInstance().dispatch(curEvent);
 		_lastChipTempEvent = curEvent;
@@ -95,15 +89,23 @@ void TemperatureGuard::tick() {
 		curEvent = EVT_PWM_TEMP_OK;
 	}
 	if (curEvent != _lastPwmTempEvent) {
-
-		if (pwmTempError) {
-			// Update pwm temp error
-			State::getInstance().set(STATE_ERROR_PWM_TEMP, pwmTempError);
-		}
-
 		LOGd("Dispatch event %d", curEvent);
 		EventDispatcher::getInstance().dispatch(curEvent);
 		_lastPwmTempEvent = curEvent;
+	}
+
+	//! Get the current state errors
+	state_errors_t stateErrors;
+	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+
+	if (pwmTempError && !stateErrors.errors.pwmTemp) {
+		//! Set pwm temp error
+		State::getInstance().set(STATE_ERROR_PWM_TEMP, pwmTempError);
+	}
+
+	if (chipTempError && !stateErrors.errors.chipTemp) {
+		//! Set chip temp error
+		State::getInstance().set(STATE_ERROR_CHIP_TEMP, chipTempError);
 	}
 
 	scheduleNextTick();
