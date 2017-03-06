@@ -61,9 +61,11 @@ void Switch::init(boards_config_t* board) {
 		nrf_gpio_pin_clear(_pinRelayOn);
 	}
 
-	// For now: just turn pwm off on init, for safety.
-//	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
+	//! Retrieve last switch state from persistent storage
+	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
 //	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
+
+	// For now: just turn pwm off on init, for safety.
 	pwmOff();
 
 	EventDispatcher::getInstance().addListener(this);
