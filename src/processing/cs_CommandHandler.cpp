@@ -571,7 +571,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		state_errors_t* payload = (state_errors_t*) buffer;
 		state_errors_t state_errors;
 		State::getInstance().get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
-		LOGd("old errors %d - reset %d", state_errors, *payload);
+		LOGd("old errors %u - reset %u", state_errors, *payload);
 		state_errors.asInt &= ~(payload->asInt);
 		LOGd("new errors %d", state_errors);
 		State::getInstance().set(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
@@ -598,7 +598,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		uint8_t value = payload->switchState;
 
 		uint8_t current = Switch::getInstance().getPwm();
-//		LOGi("current pwm: %d", current);
 		if (value != current) {
 			Switch::getInstance().setPwm(value);
 		}
@@ -612,7 +611,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "switch");
-		// For now, same as relay, but switch command should decide itself if relay or pwm is used
 
 		if (size != sizeof(switch_message_payload_t)) {
 			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
@@ -620,12 +618,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		}
 
 		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-		switch_state_t switchState;
-		switchState.pwm_state = 0;
-		switchState.relay_state = payload->switchState == 0 ? 0 : 1;
-//		switch_state_t switchState = payload->switchState;
-
-		Switch::getInstance().setSwitch(&switchState);
+		Switch::getInstance().setSwitch(payload->switchState);
 
 //		//! Switch off pwm, as we're using the relay
 //		uint8_t currentPwm = Switch::getInstance().getPwm();

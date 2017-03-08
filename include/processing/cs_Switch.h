@@ -17,7 +17,7 @@
 
 struct __attribute__((__packed__)) switch_state_t {
 	uint8_t pwm_state : 7;
-	bool relay_state : 1;
+	uint8_t relay_state : 1;
 };
 
 //enum {
@@ -51,11 +51,11 @@ public:
 	void toggle();
 
 
-	/** Set switch state
+	/** Set switch state. Whether to use pwm or relay is automatically determined.
 	 *
-	 * @param[in] switchState            State to set the switch to, includes both PWM and relay.
+	 * @param[in] switchState            State to set the switch to, ranges from 0-100.
 	 */
-	void setSwitch(switch_state_t* switchState);
+	void setSwitch(uint8_t switchState);
 
 	/** Get the current switch state.
 	 *
@@ -120,7 +120,7 @@ private:
 	void _relayOn();
 	void _relayOff();
 
-	void updateSwitchState();
+	void updateSwitchState(switch_state_t oldVal);
 
 	void timedSwitch();
 
@@ -130,7 +130,7 @@ private:
 	bool allowPwmOn();
 	bool allowSwitchOn();
 
-	void handleDelayed(switch_state_t* switchState, uint16_t delay);
+	void handleDelayed(uint8_t switchState, uint16_t delay);
 
 	switch_state_t _switchValue;
 
@@ -142,9 +142,10 @@ private:
 	bool _hasRelay;
 	uint8_t _pinRelayOn;
 	uint8_t _pinRelayOff;
-
-	switch_state_t* _delayedSwitchState;
 	uint16_t _relayHighDuration;
+
+	bool _delayedSwitchPending;
+	uint8_t _delayedSwitchState;
 
 };
 

@@ -700,8 +700,9 @@ void Crownstone::startUp() {
 			// restore the last value. the switch reads the last state from the storage, but does
 			// not automatically update the pwm/relay values. so we read out the last value
 			// and set it again to update the pwm
-			uint8_t pwm = _switch->getPwm();
-			_switch->setPwm(pwm);
+			// [08-03-2017] Bart: this was already done in the switch.init(), right?
+//			uint8_t pwm = _switch->getPwm();
+//			_switch->setPwm(pwm);
 		}
 
 		_scheduler->start();
@@ -907,8 +908,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_scanner->stop();
 
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-			_switch->pwmOff();
-			_switch->relayOff();
+			_switch->setSwitch(0);
 			_powerSampler->stopSampling();
 		}
 

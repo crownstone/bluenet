@@ -25,7 +25,7 @@
 
 Switch::Switch():
 //	_nextRelayVal(SWITCH_NEXT_RELAY_VAL_NONE),
-	_hasRelay(false), _pinRelayOn(0), _pinRelayOff(0), _delayedSwitchState(NULL), _relayHighDuration(0)
+	_hasRelay(false), _pinRelayOn(0), _pinRelayOff(0), _relayHighDuration(0), _delayedSwitchPending(false), _delayedSwitchState(0)
 {
 	LOGd(FMT_CREATE, "Switch");
 
@@ -77,9 +77,12 @@ void Switch::start() {
 
 }
 
-
-void Switch::updateSwitchState() {
-	State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t));
+void Switch::updateSwitchState(switch_state_t oldVal) {
+//	if (oldVal.pwm_state != _switchValue.pwm_state || oldVal.relay_state != _switchValue.relay_state) {
+	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
+		LOGd("updateSwitchState: %d", _switchValue);
+		State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t));
+	}
 }
 
 
@@ -135,11 +138,12 @@ void Switch::pwmOn() {
 
 
 void Switch::setPwm(uint8_t value) {
+	switch_state_t oldVal = _switchValue;
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGd("set PWM %d", value);
 #endif
 	_setPwm(value);
-	updateSwitchState();
+	updateSwitchState(oldVal);
 }
 
 
@@ -149,14 +153,16 @@ uint8_t Switch::getPwm() {
 
 
 void Switch::relayOn() {
+	switch_state_t oldVal = _switchValue;
 	_relayOn();
-	updateSwitchState();
+	updateSwitchState(oldVal);
 }
 
 
 void Switch::relayOff() {
+	switch_state_t oldVal = _switchValue;
 	_relayOff();
-	updateSwitchState();
+	updateSwitchState(oldVal);
 }
 
 
@@ -165,29 +171,36 @@ bool Switch::getRelayState() {
 }
 
 
-void Switch::setSwitch(switch_state_t* switchState) {
+void Switch::setSwitch(uint8_t switchState) {
 #ifdef PRINT_SWITCH_VERBOSE
-	LOGi("Set switch state: %d", *switchState);
+	LOGi("Set switch state: %d", switchState);
 #endif
+	switch_state_t oldVal = _switchValue;
 
-	if (switchState->relay_state) {
+	//! Relay on when value=100, relay off when value=0
+	if (switchState > 99) {
 		_relayOn();
 	} else {
 		_relayOff();
 	}
-	_setPwm(switchState->pwm_state);
+	//! Pwm when value is 1-99, else pwm off
+	if (switchState > 0 && switchState < 100) {
+		_setPwm(switchState);
+	}
+	else {
+		_setPwm(0);
+	}
 
-	if (_delayedSwitchState != NULL) {
+	if (_delayedSwitchPending) {
 #ifdef PRINT_SWITCH_VERBOSE
 		LOGi("clear delayed switch state");
 #endif
 
 		Timer::getInstance().stop(_switchTimerId);
-		free(_delayedSwitchState);
-		_delayedSwitchState = NULL;
+		_delayedSwitchPending = false;
 	}
 
-	updateSwitchState();
+	updateSwitchState(oldVal);
 }
 
 
@@ -206,11 +219,10 @@ void Switch::handleMultiSwitch(multi_switch_item_t* p_item) {
 	case ENTER:
 	case EXIT:
 	case MANUAL:
-		switch_state_t* pSwitchState = (switch_state_t*)&p_item->switchState;
 		if (p_item->timeout == 0) {
-			setSwitch(pSwitchState);
+			setSwitch(p_item->switchState);
 		} else {
-			handleDelayed(pSwitchState, p_item->timeout);
+			handleDelayed(p_item->switchState, p_item->timeout);
 		}
 	}
 
@@ -218,22 +230,21 @@ void Switch::handleMultiSwitch(multi_switch_item_t* p_item) {
 #endif
 
 
-void Switch::handleDelayed(switch_state_t* switchState, uint16_t delay) {
+void Switch::handleDelayed(uint8_t switchState, uint16_t delay) {
 
 #ifdef PRINT_SWITCH_VERBOSE
-	LOGi("trigger delayed switch state: %d, delay: %d", *switchState, delay);
+	LOGi("trigger delayed switch state: %d, delay: %d", switchState, delay);
 #endif
 
-	if (_delayedSwitchState != NULL) {
+	if (_delayedSwitchPending) {
 #ifdef PRINT_SWITCH_VERBOSE
 		LOGi("clear existing delayed switch state");
 #endif
 		Timer::getInstance().stop(_switchTimerId);
-		free(_delayedSwitchState);
 	}
 
-	_delayedSwitchState = new switch_state_t;
-	memcpy(_delayedSwitchState, switchState, sizeof(switch_state_t));
+	_delayedSwitchPending = true;
+	_delayedSwitchState = switchState;
 	Timer::getInstance().start(_switchTimerId, MS_TO_TICKS(delay * 1000), this);
 }
 
@@ -243,7 +254,7 @@ void Switch::timedSwitch() {
 	LOGi("timed switch, set");
 #endif
 
-	if (_delayedSwitchState != NULL) {
+	if (_delayedSwitchPending) {
 		setSwitch(_delayedSwitchState);
 	}
 }
@@ -277,7 +288,7 @@ void Switch::_relayOn() {
 		nrf_delay_ms(_relayHighDuration);
 		nrf_gpio_pin_clear(_pinRelayOn);
 	}
-	_switchValue.relay_state = true;
+	_switchValue.relay_state = 1;
 }
 
 void Switch::_relayOff() {
@@ -292,7 +303,7 @@ void Switch::_relayOff() {
 		nrf_delay_ms(_relayHighDuration);
 		nrf_gpio_pin_clear(_pinRelayOff);
 	}
-	_switchValue.relay_state = false;
+	_switchValue.relay_state = 0;
 }
 
 void Switch::forcePwmOff() {
@@ -303,8 +314,7 @@ void Switch::forcePwmOff() {
 
 void Switch::forceSwitchOff() {
 	LOGw("forceSwitchOff");
-	pwmOff();
-	relayOff();
+	setSwitch(0);
 	EventDispatcher::getInstance().dispatch(EVT_SWITCH_FORCED_OFF);
 }
 
