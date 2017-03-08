@@ -11,3 +11,4 @@ build/
 env.config
 node_modules
 *.pyc
+*.swp
