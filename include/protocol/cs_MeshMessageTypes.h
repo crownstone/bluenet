@@ -208,7 +208,7 @@ inline bool peek_prev_state_item(state_message_t* message, state_item_t** item, 
 		return false;
 	}
 	if (index == -1) {
-		index = (message->head + message->size) % MAX_STATE_ITEMS;
+		index = (message->head + message->size - 1) % MAX_STATE_ITEMS;
 		*item = &message->list[index];
 		return true;
 	} else {
@@ -285,6 +285,7 @@ inline bool is_command_for_us(command_message_t* message, id_type_t id) {
 			if (*p_id == id) {
 				return true;
 			}
+			++(*p_id);
 		}
 
 		return false;
