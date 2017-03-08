@@ -871,7 +871,7 @@ uint 8 | Size | 1 | Number of keep alive items in the list
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | Crownstone ID | 2 | The identifier of the crownstone to which this item is targeted
-[Switch state](#switch_state_packet) | Switch state | 1 | The switch state to be set by the targeted crownstone after the timeout expires
+uint 8 | Switch state | 1 | The switch state to be set by the targeted crownstone after the timeout expires. 0 = off, 100 = fully on.
 uint 16 | Timeout | 2 | The timeout (in seconds) after which the state should be set
 uint 8 | [Intent](#multi_switch_intent) | 1 | The intent of the switch, see the table below
 
