@@ -700,7 +700,7 @@ The mesh payload packet is defined by the handle. We have the following handles
 
 Handle | Name | Type | Description
 --- | --- | --- | ---
-1 | Keep alive channel | [Keep alive](#keep_alive_mesh_packet) | Channel on which the keep alive messages are sent. A message consists of a global timeout and a number of keep alive items (on per stone which is addressed). If the message length is 0, the existing keepalive message will be repeated.
+1 | Keep alive channel | [Keep alive](#keep_alive_mesh_packet) | Channel on which the keep alive messages are sent. A message consists of a global timeout and a number of keep alive items (on per stone which is addressed). If the length of the mesh control packet is 0, the existing keepalive message will be repeated.
 2 | State broadcast channel | [State](#state_mesh_packet) | Each stone sends it's state periodically over the mesh. The message is designed as a circular buffer and a new item is added at the end (throwing out the oldest if full)
 3 | State change channel | [State](#state_mesh_packet) | Each stone sends its' state on this channel if the state changes significantly, e.g. switch state changes.
 4 | Command channel | [Command](#command_mesh_packet) | Commands can be sent to one, multiple or all stones sharing the mesh network. Once a stone receives a command it will send a reply on the reply channel
@@ -713,7 +713,7 @@ Handle | Name | Type | Description
 
 ![Keep Alive packet](../docs/diagrams/keep-alive-mesh-packet.png)
 
-If the message length is 0, the existing keepalive message will be repeated.
+If the length of the mesh control packet is 0, the existing keepalive message will be repeated. This is used to delay the existing time outs by people who do not have permission to change the state.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
