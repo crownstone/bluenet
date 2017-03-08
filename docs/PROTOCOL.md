@@ -734,7 +734,7 @@ Value | Name
 --- | ---
 255 | No action
 ... | ...
-default | see [Switch state](#switch_state_packet)
+0-100 | Switch power: 0 = off, 100 = on, dimmed in between.
 
 #### <a name="state_mesh_packet"></a>Crownstone state packet
 
