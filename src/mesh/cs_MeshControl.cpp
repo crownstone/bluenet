@@ -191,12 +191,7 @@ void MeshControl::process(uint8_t channel, void* p_meshMessage, uint16_t message
 		int16_t idx = -1;
 		state_item_t* p_stateItem;
 		while (peek_next_state_item(msg, &p_stateItem, idx)) {
-			LOGi("idx: %d", idx);
-			LOGi("Crownstone Id %d", p_stateItem->id);
-			LOGi("  switch state: %d", p_stateItem->switchState);
-			LOGi("  bitmask: %d", p_stateItem->eventBitmask);
-			LOGi("  power usage: %d", p_stateItem->powerUsage);
-			LOGi("  accumulated energy: %d", p_stateItem->accumulatedEnergy);
+			LOGi("idx=%d id=%d switch=%d bitmask=%d P=%d E=%d", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerUsage, p_stateItem->accumulatedEnergy);
 		}
 
 #endif // PRINT_DEBUG
@@ -304,11 +299,12 @@ ERR_CODE MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t length
 
 		switch (p_item->actionSwitchState) {
 		case 255: {
-			keepAlive.action = 0;
+			keepAlive.action = NO_CHANGE;
+			keepAlive.switchState.switchState = 0; //! Not necessary
 			break;
 		}
 		default: {
-			keepAlive.action = 1;
+			keepAlive.action = CHANGE;
 			keepAlive.switchState.switchState = p_item->actionSwitchState;
 			break;
 		}
@@ -1014,6 +1010,16 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 #endif
 
 	Mesh::getInstance().send(channel, &message, sizeof(state_message_t));
+
+
+	//! On event, also add the message to the broadcast channel, otherwise there might be an old message in there.
+	if (event) {
+		//! Append state to message, regardless of whether the state of this crownstone is already in there.
+		state_message_t broadcastMessage = {};
+		Mesh::getInstance().getLastMessage(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
+		push_state_item(&broadcastMessage, &stateItem);
+		Mesh::getInstance().send(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
+	}
 }
 
 bool MeshControl::getLastStateDataMessage(state_message_t& message, uint16_t& size, bool changeChannel) {
