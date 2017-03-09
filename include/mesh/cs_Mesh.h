@@ -111,7 +111,10 @@ public:
 	//! send message
 	uint32_t send(uint8_t channel, void* p_data, uint8_t length);
 
-	//! returns last message on channel
+	//! Returns last message on channel
+	//! p_data should be a pointer to allocated data!
+	//! Allocates a whole message, and decrypts it every time you call this function!
+	//! TODO: have a better way to do this
 	bool getLastMessage(uint8_t channel, void* p_data, uint16_t& length);
 
 };
