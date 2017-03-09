@@ -93,7 +93,7 @@ void ServiceData::updateAdvertisement() {
 			else {
 				MeshControl::getInstance().getLastStateDataMessage(message, messageSize, false);
 			}
-			if (message.size) {
+			if (is_valid_state_msg(&message) && message.size) {
 				int16_t idx = -1;
 				state_item_t* p_stateItem;
 
