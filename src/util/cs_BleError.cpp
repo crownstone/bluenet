@@ -31,6 +31,19 @@ void app_error_handler (uint32_t error_code, uint32_t line_num, const uint8_t * 
 	while(1) {}
 }
 
+//! Called by softdevice
+void app_error_handler_bare(ret_code_t error_code)
+{
+	volatile uint32_t error __attribute__((unused)) = error_code;
+	volatile uint16_t line __attribute__((unused)) = 0;
+	volatile const uint8_t* file __attribute__((unused)) = NULL;
+
+	LOGf("FATAL ERROR %d", error);
+
+	__asm("BKPT");
+	while(1) {}
+}
+
 //called by NRF SDK when it has an internal error.
 void assert_nrf_callback (uint16_t line_num, const uint8_t *file_name) {
 	volatile uint16_t line __attribute__((unused)) = line_num;

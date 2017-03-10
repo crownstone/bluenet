@@ -12,29 +12,63 @@
 #include "ble/cs_Stack.h"
 #include "processing/cs_CommandHandler.h"
 
-FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0), _recoveryDisableTimer(0) {
+FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
+#if (NORDIC_SDK_VERSION >= 11)
+		_recoveryDisableTimerId(NULL),
+		_recoveryProcessTimerId(NULL)
+#else
+		_recoveryDisableTimerId(UINT32_MAX)
+#endif
+{
+#if (NORDIC_SDK_VERSION >= 11)
+	_recoveryDisableTimerData = { {0} };
+	_recoveryDisableTimerId = &_recoveryDisableTimerData;
 
+	_recoveryProcessTimerData = { {0} };
+	_recoveryProcessTimerId = &_recoveryProcessTimerData;
+#endif
 }
 
 void FactoryReset::init() {
-	Timer::getInstance().createSingleShot(_recoveryDisableTimer, (app_timer_timeout_handler_t)FactoryReset::staticTimeout);
+	Timer::getInstance().createSingleShot(_recoveryDisableTimerId, (app_timer_timeout_handler_t)FactoryReset::staticTimeout);
+	Timer::getInstance().createSingleShot(_recoveryProcessTimerId, (app_timer_timeout_handler_t)FactoryReset::staticProcess);
 	resetTimeout();
 }
 
 void FactoryReset::resetTimeout() {
 	_recoveryEnabled = true;
 	_rtcStartTime = RTC::getCount();
-	Timer::getInstance().start(_recoveryDisableTimer, MS_TO_TICKS(FACTORY_RESET_TIMEOUT), this);
+	//! stop the currently running timer, this does not cause problems if the timer has not been set yet.
+	Timer::getInstance().stop(_recoveryDisableTimerId);
+	Timer::getInstance().start(_recoveryDisableTimerId, MS_TO_TICKS(FACTORY_RESET_TIMEOUT), this);
 }
 
 void FactoryReset::timeout() {
 	_recoveryEnabled = false;
+	LOGi("recovery period expired.")
 	uint8_t resetState;
 	State::getInstance().get(STATE_FACTORY_RESET, resetState);
 	if (resetState == FACTORY_RESET_STATE_LOWTX) {
+		LOGi("change to  normal")
 		Nrf51822BluetoothStack::getInstance().changeToNormalTxPowerMode();
 	}
 	State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_NORMAL);
+}
+
+/**
+ * This has been put in a timer because we need to read the result after writing to see if the process is successful.
+ * Without the timer (and without logging) the disconenct is too fast for us to read the result.
+ */
+void FactoryReset::process() {
+	uint8_t resetState;
+	State::getInstance().get(STATE_FACTORY_RESET, resetState);
+	if (resetState == FACTORY_RESET_STATE_NORMAL) {
+		State::getInstance().set(STATE_FACTORY_RESET, (uint8_t) FACTORY_RESET_STATE_LOWTX);
+		LOGd("recovery: go to low tx");
+		Nrf51822BluetoothStack::getInstance().changeToLowTxPowerMode();
+		Nrf51822BluetoothStack::getInstance().disconnect();
+		resetTimeout();
+	}
 }
 
 void FactoryReset::enableRecovery(bool enable) {
@@ -43,25 +77,32 @@ void FactoryReset::enableRecovery(bool enable) {
 }
 
 bool FactoryReset::recover(uint32_t resetCode) {
+	//! we check the RTC in case the Timer is busy.
 	if (!_recoveryEnabled || RTC::difference(RTC::getCount(), _rtcStartTime) > RTC::msToTicks(FACTORY_RESET_TIMEOUT)) {
+		LOGi("recovery off")
 		return false;
 	}
+
+	if (!validateResetCode(resetCode)) {
+		LOGi("bad recovery code")
+		return false;
+	}
+
 	uint8_t resetState;
 	State::getInstance().get(STATE_FACTORY_RESET, resetState);
 	switch (resetState) {
 	case FACTORY_RESET_STATE_NORMAL:
-		State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_LOWTX);
-		LOGd("recovery: go to low tx");
-		Nrf51822BluetoothStack::getInstance().changeToLowTxPowerMode();
-		Nrf51822BluetoothStack::getInstance().disconnect();
-		resetTimeout();
+		//! just in case, we stop the timer so we cannot flood this mechanism.
+		Timer::getInstance().stop(_recoveryProcessTimerId);
+		Timer::getInstance().start(_recoveryProcessTimerId, MS_TO_TICKS(FACTORY_PROCESS_TIMEOUT), this);
 		return true;
 //		break;
 	case FACTORY_RESET_STATE_LOWTX:
 		State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_RESET);
 		LOGd("recovery: factory reset");
 
-		return factoryReset();
+		// the reset delayed in here should be sufficient
+		return performFactoryReset();
 //		break;
 	case FACTORY_RESET_STATE_RESET:
 		// What to do here?
@@ -72,14 +113,18 @@ bool FactoryReset::recover(uint32_t resetCode) {
 	return false;
 }
 
-bool FactoryReset::factoryReset(uint32_t resetCode) {
-	if (resetCode != FACTORY_RESET_CODE) {
-		return false;
-	}
-	return factoryReset();
+bool FactoryReset::validateResetCode(uint32_t resetCode) {
+	return resetCode == FACTORY_RESET_CODE;
 }
 
-bool FactoryReset::factoryReset() {
+bool FactoryReset::factoryReset(uint32_t resetCode) {
+	if (validateResetCode(resetCode)) {
+		return performFactoryReset();
+	}
+	return false;
+}
+
+bool FactoryReset::performFactoryReset() {
 	LOGf("factory reset");
 
 	//! Go into factory reset mode after next reset.
@@ -95,15 +140,11 @@ bool FactoryReset::finishFactoryReset() {
 	//! First clear sensitive data: keys
 	Settings::getInstance().factoryReset(FACTORY_RESET_CODE);
 
-	// Clear other data
-	//! TODO: this also set operation mode to setup
+	//! Clear other data
 	State::getInstance().factoryReset(FACTORY_RESET_CODE);
 
 	//! Remove bonded devices
-	// todo: might not be neccessary if we only use dm in setup mode we can handle it specifically
-	//   there. maybe with a mode factory reset
-	// todo: remove stack again from if we don't need it here
-	Nrf51822BluetoothStack::getInstance().device_manager_reset();
+	Nrf51822BluetoothStack::getInstance().device_manager_init(true);
 
 	//! Lastly, go into setup mode after next reset
 	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_SETUP);

@@ -9,6 +9,8 @@
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
 #include <storage/cs_Settings.h>
+#include "drivers/cs_Timer.h"
+#include <storage/cs_StorageHelper.h>
 
 #include <algorithm>
 
@@ -16,8 +18,12 @@
 //#define PRINT_DEBUG
 
 #ifdef PRINT_DEBUG
+#if (NORDIC_SDK_VERSION >= 11)
+app_timer_t _debugTimerData = { {0} };
+app_timer_id_t _debugTimer = &_debugTimerData;
+#else
 app_timer_id_t _debugTimer;
-
+#endif
 void debugprint(void * p_context) {
 	State::getInstance().print();
 }
@@ -26,6 +32,7 @@ void debugprint(void * p_context) {
 State::State() :
 		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedEnergy(NULL),
 		_temperature(0), _powerUsage(0), _time(0), _factoryResetState(FACTORY_RESET_STATE_NORMAL) {
+	_errorState.asInt = 0;
 }
 
 void State::init() {
@@ -46,18 +53,19 @@ void State::init() {
 	ps_state_t state;
 
 	bool defaultOn = Settings::getInstance().isSet(CONFIG_DEFAULT_ON);
+	// TODO: why use pwm for this?
 	switch_state_storage_t defaultSwitchState = defaultOn ? 100 : 0; // 100 for pwm
 
 #ifdef SWITCH_STATE_PERSISTENT
-	_switchState = new CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY>(_stateHandle,
-	        Storage::getOffset(&state, state.switchState), defaultSwitchState);
+	_switchState = new CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY, small_seq_number_t>(_stateHandle,
+	        StorageHelper::getOffset(&state, state.switchState), defaultSwitchState);
 #else
 	_switchState = defaultSwitchState;
 #endif
-	_resetCounter = new CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY>(_stateHandle,
-	        Storage::getOffset(&state, state.resetCounter), RESET_COUNTER_DEFAULT);
-	_accumulatedEnergy = new CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY>(_stateHandle,
-	        Storage::getOffset(&state, state.accumulatedEnergy), ACCUMULATED_ENERGY_DEFAULT);
+	_resetCounter = new CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY, small_seq_number_t>(_stateHandle,
+	        StorageHelper::getOffset(&state, state.resetCounter), RESET_COUNTER_DEFAULT);
+	_accumulatedEnergy = new CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY, large_seq_number_t>(_stateHandle,
+	        StorageHelper::getOffset(&state, state.accumulatedEnergy), ACCUMULATED_ENERGY_DEFAULT);
 
 #ifdef PRINT_DEBUG
 	Timer::getInstance().createSingleShot(_debugTimer, debugprint);
@@ -85,7 +93,7 @@ ERR_CODE State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, b
 	switch(type) {
 	// uint32_t variables
 	case STATE_RESET_COUNTER: {
-		if (length == 4) {
+		if (length == 2) {
 			uint32_t value = ((uint32_t*) payload)[0];
 			if (value == 0) {
 				return set(type, payload, length);
@@ -114,7 +122,7 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 
 	switch(type) {
 	case STATE_RESET_COUNTER: {
-		size = sizeof(uint32_t);
+		size = sizeof(uint16_t);
 		break;
 	}
 	case STATE_SWITCH_STATE: {
@@ -131,6 +139,10 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 	}
 	case STATE_TIME: {
 		size = sizeof(uint32_t);
+		break;
+	}
+	case STATE_ERRORS: {
+		size = sizeof(state_errors_t);
 		break;
 	}
 	case STATE_TRACKED_DEVICES: {
@@ -173,6 +185,7 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 		}
 		return error_code;
 	}
+	case STATE_LEARNED_SWITCHES:
 	default: {
 		LOGw(FMT_STATE_NOT_FOUND, type);
 		return ERR_STATE_NOT_FOUND;
@@ -188,48 +201,80 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 	return error_code;
 }
 
+uint16_t State::getStateItemSize(uint8_t type) {
+
+	switch(type) {
+	case STATE_RESET_COUNTER: {
+		return sizeof(reset_counter_t);
+	}
+	case STATE_SWITCH_STATE: {
+		return sizeof(uint8_t);
+	}
+	case STATE_ACCUMULATED_ENERGY: {
+		return sizeof(accumulated_energy_t);
+	}
+	case STATE_POWER_USAGE: {
+		return sizeof(_powerUsage);
+	}
+	case STATE_TRACKED_DEVICES: {
+		return sizeof(tracked_device_list_t);
+	}
+	case STATE_SCHEDULE: {
+		return sizeof(schedule_list_t);
+	}
+	case STATE_OPERATION_MODE:
+	case STATE_ERROR_OVER_CURRENT:
+	case STATE_ERROR_OVER_CURRENT_PWM:
+	case STATE_ERROR_CHIP_TEMP:
+	case STATE_ERROR_PWM_TEMP: {
+		return sizeof(uint8_t);
+	}
+	case STATE_TEMPERATURE: {
+		return sizeof(_temperature);
+	}
+	case STATE_FACTORY_RESET: {
+		return sizeof(_factoryResetState);
+	}
+	case STATE_TIME: {
+		return sizeof(_time);
+	}
+	case STATE_LEARNED_SWITCHES: {
+		return MAX_SWITCHES * sizeof(learned_enocean_t);
+	}
+	case STATE_ERRORS: {
+		return sizeof(state_errors_t);
+	}
+	default: {
+		LOGw(FMT_STATE_NOT_FOUND, type);
+		return 0;
+	}
+	}
+}
+
 ERR_CODE State::verify(uint8_t type, uint16_t size) {
 
 	bool success;
 	switch(type) {
-	case STATE_RESET_COUNTER: {
-		success = size == sizeof(reset_counter_t);
+	case STATE_RESET_COUNTER:
+	case STATE_SWITCH_STATE:
+	case STATE_ACCUMULATED_ENERGY:
+	case STATE_POWER_USAGE:
+	case STATE_OPERATION_MODE:
+	case STATE_TEMPERATURE:
+	case STATE_FACTORY_RESET:
+	case STATE_TIME:
+	case STATE_ERRORS:
+	case STATE_ERROR_OVER_CURRENT:
+	case STATE_ERROR_OVER_CURRENT_PWM:
+	case STATE_ERROR_CHIP_TEMP:
+	case STATE_ERROR_PWM_TEMP: {
+		success = size == getStateItemSize(type);
 		break;
 	}
-	case STATE_SWITCH_STATE: {
-		success = size == sizeof(uint8_t);
-		break;
-	}
-	case STATE_ACCUMULATED_ENERGY: {
-		success = size == sizeof(accumulated_energy_t);
-		break;
-	}
-	case STATE_POWER_USAGE: {
-		success = size == sizeof(_powerUsage);
-		break;
-	}
-	case STATE_TRACKED_DEVICES: {
-		success = size <= sizeof(tracked_device_list_t);
-		break;
-	}
-	case STATE_SCHEDULE: {
-		success = size <= sizeof(schedule_list_t);
-		break;
-	}
-	case STATE_OPERATION_MODE: {
-		success = size == sizeof(uint8_t);
-		break;
-	}
-	case STATE_TEMPERATURE: {
-		success = size == sizeof(_temperature);
-		break;
-	}
-	case STATE_FACTORY_RESET: {
-		success = size == sizeof(_factoryResetState);
-		break;
-	}
-	case STATE_TIME: {
-		success = size == sizeof(_time);
+	case STATE_TRACKED_DEVICES:
+	case STATE_SCHEDULE:
+	case STATE_LEARNED_SWITCHES: {
+		success = size <= getStateItemSize(type);
 		break;
 	}
 	default: {
@@ -241,7 +286,7 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 	if (success) {
 		return ERR_SUCCESS;
 	} else {
-		LOGw(FMT_VERIFICATION_FAILED);
+		LOGw(FMT_VERIFICATION_FAILED, type);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 }
@@ -278,15 +323,15 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 		case STATE_OPERATION_MODE: {
 			uint8_t value = *(uint8_t*)target;
 			uint32_t opMode;
-			Storage::getUint32(_storageStruct.operationMode, &opMode, OPERATION_MODE_SETUP);
+			StorageHelper::getUint32(_storageStruct.operationMode, &opMode, OPERATION_MODE_SETUP);
 			if (opMode != value) {
-				Storage::setUint32(value, _storageStruct.operationMode);
+				StorageHelper::setUint32(value, _storageStruct.operationMode);
 				savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));
 			}
 			break;
 		}
 		case STATE_RESET_COUNTER: {
-			uint32_t value = *(uint32_t*)target;
+			uint16_t value = *(uint16_t*)target;
 			if (_resetCounter->read() != value) {
 				_resetCounter->store(value);
 			}
@@ -304,13 +349,38 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_TRACKED_DEVICES: {
-			Storage::setArray((buffer_ptr_t)target, _storageStruct.trackedDevices, size);
+			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.trackedDevices, size);
 			savePersistentStorageItem(_storageStruct.trackedDevices, size);
 			break;
 		}
 		case STATE_SCHEDULE: {
-			Storage::setArray((buffer_ptr_t)target, _storageStruct.scheduleList, size);
+			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.scheduleList, size);
 			savePersistentStorageItem(_storageStruct.scheduleList, size);
+			break;
+		}
+		case STATE_LEARNED_SWITCHES: {
+			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.learnedSwitches, size);
+			savePersistentStorageItem(_storageStruct.learnedSwitches, size);
+			break;
+		}
+		case STATE_ERRORS: {
+			_errorState = *(state_errors_t*)target;
+			break;
+		}
+		case STATE_ERROR_OVER_CURRENT: {
+			_errorState.errors.overCurrent = *(uint8_t*)target;
+			break;
+		}
+		case STATE_ERROR_OVER_CURRENT_PWM: {
+			_errorState.errors.overCurrentPwm = *(uint8_t*)target;
+			break;
+		}
+		case STATE_ERROR_CHIP_TEMP: {
+			_errorState.errors.chipTemp = *(uint8_t*)target;
+			break;
+		}
+		case STATE_ERROR_PWM_TEMP: {
+			_errorState.errors.pwmTemp = *(uint8_t*)target;
 			break;
 		}
 		case STATE_ACCUMULATED_ENERGY: {
@@ -349,16 +419,16 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_OPERATION_MODE: {
-			Storage::getUint8(_storageStruct.operationMode, (uint8_t*)target, DEFAULT_OPERATION_MODE);
+			StorageHelper::getUint8(_storageStruct.operationMode, (uint8_t*)target, DEFAULT_OPERATION_MODE);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_INT_VAL, "operation mode", *(uint8_t*)target);
 #endif
 			break;
 		}
 		case STATE_RESET_COUNTER: {
-			*(uint32_t*)target = _resetCounter->read();
+			*(uint16_t*)target = _resetCounter->read();
 #ifdef PRINT_DEBUG
-			LOGd(FMT_GET_INT_VAL, "reset counter", *(uint32_t*)target);
+			LOGd(FMT_GET_INT_VAL, "reset counter", *(uint16_t*)target);
 #endif
 			break;
 		}
@@ -388,7 +458,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_TRACKED_DEVICES: {
-			Storage::getArray(_storageStruct.trackedDevices, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
+			StorageHelper::getArray(_storageStruct.trackedDevices, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_STR_VAL, "tracked devices", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
@@ -396,14 +466,28 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_SCHEDULE: {
-			Storage::getArray(_storageStruct.scheduleList, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
+			StorageHelper::getArray(_storageStruct.scheduleList, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_STR_VAL, "schedule list", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
 #endif
 			break;
 		}
-
+		case STATE_LEARNED_SWITCHES: {
+			StorageHelper::getArray(_storageStruct.learnedSwitches, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
+#ifdef PRINT_DEBUG
+			LOGd(FMT_GET_STR_VAL, "learned switches", "");
+			BLEutil::printArray((buffer_ptr_t)target, size);
+#endif
+			break;
+		}
+		case STATE_ERRORS: {
+			*(state_errors_t*)target = _errorState;
+#ifdef PRINT_DEBUG
+			LOGd(FMT_GET_INT_VAL, "errorState", *(state_errors_t*)target);
+#endif
+			break;
+		}
 		case STATE_ACCUMULATED_ENERGY: {
 //			break;
 		}
@@ -440,7 +524,7 @@ void State::savePersistentStorage() {
 }
 
 void State::savePersistentStorageItem(uint8_t* item, uint16_t size) {
-	uint32_t offset = Storage::getOffset(&_storageStruct, item);
+	uint32_t offset = StorageHelper::getOffset(&_storageStruct, item);
 	_storage->writeItem(_structHandle, offset, item, size);
 }
 

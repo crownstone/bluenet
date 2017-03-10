@@ -1,14 +1,21 @@
 var searchData=
 [
-  ['ibeacon',['IBeacon',['../classBLEpp_1_1IBeacon.html',1,'BLEpp']]],
-  ['ibeacon',['IBeacon',['../classBLEpp_1_1IBeacon.html#a7a09a42918a434858f7b83d0f124e8e4',1,'BLEpp::IBeacon']]],
+  ['ibeacon',['IBeacon',['../classIBeacon.html',1,'IBeacon'],['../classIBeacon.html#a7a79e5a9a77467de18127e719742af84',1,'IBeacon::IBeacon()']]],
   ['id',['id',['../structstorage__config__t.html#ab7384f28c79adf15576e2afc31677ff2',1,'storage_config_t']]],
+  ['indicates',['indicates',['../structStatus.html#a2834c97389c8ac4d2b7277870aa6c271',1,'Status']]],
   ['indoorlocalizationservice',['IndoorLocalizationService',['../classIndoorLocalizationService.html',1,'']]],
-  ['init',['init',['../classBLEpp_1_1CharacteristicBase.html#a027526f72c1bb016f2c1521a064898d1',1,'BLEpp::CharacteristicBase::init()'],['../classBLEpp_1_1Nrf51822BluetoothStack.html#a628e4bc88a6cc50e9dde35c7205b568d',1,'BLEpp::Nrf51822BluetoothStack::init()'],['../classBLEpp_1_1UUID.html#ab71534befdd75ca7f7d5f5c5d45fba7c',1,'BLEpp::UUID::init()'],['../classADC.html#a1271259ca033dcdbc1f0ae25e92bcd4e',1,'ADC::init()'],['../classPWM.html#a2c9d417fc1f30231f83799997e4a7128',1,'PWM::init()'],['../classCMesh.html#aad1c941cb60839d8394fae03ce161ad8',1,'CMesh::init()'],['../classAlertService.html#a15cb4d1e86f3e9e1715aa71a984b03d5',1,'AlertService::init()'],['../classDeviceInformationService.html#a5c430b8095dd9b0ccfda081dd3537d14',1,'DeviceInformationService::init()'],['../classGeneralService.html#a5b32e941560dadba2a1d948a37a823f1',1,'GeneralService::init()'],['../classIndoorLocalizationService.html#afa8e130ff27d8eb8d084a4db08e984e2',1,'IndoorLocalizationService::init()'],['../classPowerService.html#ab12ff5e1a1bc5b8e9b62372d0bb30f0b',1,'PowerService::init()'],['../classScheduleService.html#a531f8718fa51e62b768f83fa7beda27a',1,'ScheduleService::init()'],['../classCircularBuffer.html#ab7d547161d2639502c603e1de90d65ab',1,'CircularBuffer::init()'],['../classCircularDifferentialBuffer.html#a7a4a1ad36fc3ecc9951137d4fca47807',1,'CircularDifferentialBuffer::init()'],['../classTrackedDeviceList.html#afc8a48cdeb8558115058864f5fa9dde8',1,'TrackedDeviceList::init()']]],
+  ['init',['init',['../classCharacteristicBase.html#a00b72e7bee51d66cb50d3d47820d32c3',1,'CharacteristicBase::init()'],['../classNrf51822BluetoothStack.html#abfbd168a565f86230c453c96b33099c6',1,'Nrf51822BluetoothStack::init()'],['../classUUID.html#a16f6408107545b2cc754eb7c0ad5f547',1,'UUID::init()'],['../classCrownstone.html#af0d0e8238f3d7391fbe720f70369020d',1,'Crownstone::init()'],['../classADC.html#a73feebcf274448da22166a4c74c098d5',1,'ADC::init()'],['../classPWM.html#aad65eaa76ca02e0acb07f5e9ebe0e62c',1,'PWM::init()'],['../classMesh.html#ab5df5ad9aabcb888d69fbdef9de7305b',1,'Mesh::init()'],['../classMeshControl.html#a3788afcb8650827ca533d5149caacc85',1,'MeshControl::init()'],['../classEncryptionHandler.html#aacda513714de7b920091f490ed448798',1,'EncryptionHandler::init()'],['../classCircularBuffer.html#ab7d547161d2639502c603e1de90d65ab',1,'CircularBuffer::init()'],['../classCircularDifferentialBuffer.html#a7a4a1ad36fc3ecc9951137d4fca47807',1,'CircularDifferentialBuffer::init()'],['../classDifferentialBuffer.html#af0726daca2e3f35139ab7abdd85a92e9',1,'DifferentialBuffer::init()'],['../classStackBuffer.html#a97fe7ffd53579db1d03101b65a246ddd',1,'StackBuffer::init()'],['../classTrackedDeviceList.html#afc8a48cdeb8558115058864f5fa9dde8',1,'TrackedDeviceList::init()']]],
+  ['initdrivers',['initDrivers',['../classCrownstone.html#a3a117980a98576fd29bd9ba7308b0b17',1,'Crownstone']]],
+  ['initencryptionbuffer',['initEncryptionBuffer',['../classCharacteristicBase.html#a2c42c735d18f8c7835d50296b70391cd',1,'CharacteristicBase::initEncryptionBuffer()'],['../classCharacteristicGeneric.html#ad60800bf87475f95297a99ee7686a591',1,'CharacteristicGeneric::initEncryptionBuffer()']]],
+  ['initservices',['initServices',['../classNrf51822BluetoothStack.html#ad487adc3fee77126a7552f30de2e9e1f',1,'Nrf51822BluetoothStack']]],
   ['interrupt',['interrupt',['../classLPComp.html#a813242ed73aa4752afbff6c646770baa',1,'LPComp']]],
-  ['isassigned',['isAssigned',['../classCurrentCurve.html#a46275cadbf95e0e468ef8e0941fe5350',1,'CurrentCurve::isAssigned()'],['../classPowerCurve.html#abbcaa25922f887ba1e09dfa39eff6fc2',1,'PowerCurve::isAssigned()']]],
-  ['isfull',['isFull',['../classCurrentCurve.html#a5543a62ddced28f41de383dd8139eb90',1,'CurrentCurve::isFull()'],['../classPowerCurve.html#a2b4721e6a933881b4acf102d36ae54b2',1,'PowerCurve::isFull()']]],
+  ['invalidatesetupkey',['invalidateSetupKey',['../classEncryptionHandler.html#a2a0191c52573b062c1a7e61d3cedf2b4',1,'EncryptionHandler']]],
+  ['isaesenabled',['isAesEnabled',['../classCharacteristicBase.html#aafd21a41b34a247cfdd01f8f6ec4b913',1,'CharacteristicBase']]],
+  ['isdisconnecting',['isDisconnecting',['../classNrf51822BluetoothStack.html#ab131f8a2d0016c2978f9b23feef5476c',1,'Nrf51822BluetoothStack']]],
+  ['isempty',['isEmpty',['../classScheduleList.html#aefa69532331ec2ab64257c5056d6c555',1,'ScheduleList']]],
+  ['isfull',['isFull',['../classScheduleList.html#a8acda9e5672b20ccedf167d16e5545f2',1,'ScheduleList']]],
   ['isnearby',['isNearby',['../classTrackedDeviceList.html#a494dfc8ba95d36256377b130143a34c2',1,'TrackedDeviceList']]],
-  ['isscanning',['isScanning',['../classBLEpp_1_1Nrf51822BluetoothStack.html#af7a6a9c8aef1bee38a4897c03424816f',1,'BLEpp::Nrf51822BluetoothStack']]],
-  ['installation',['Installation',['../md_INSTALL.html',1,'']]]
+  ['isscanning',['isScanning',['../classNrf51822BluetoothStack.html#a1dfd19faaf0480877cdf957262a9c5f0',1,'Nrf51822BluetoothStack']]],
+  ['installation',['Installation',['../md_docs_INSTALL.html',1,'']]],
+  ['indoor_20localization',['Indoor Localization',['../md_docs_LOCALIZATION.html',1,'']]]
 ];

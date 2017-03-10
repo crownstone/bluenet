@@ -11,7 +11,6 @@
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
-#include <mesh/cs_MeshControl.h>
 #include <processing/cs_CommandHandler.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>
@@ -30,7 +29,7 @@ GeneralService::GeneralService() : EventListener(),
 void GeneralService::createCharacteristics() {
 	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_GENERAL);
 
-#if CHAR_TEMPERATURE==1 || DEVICE_TYPE==DEVICE_FRIDGE
+#if CHAR_TEMPERATURE==1
 	LOGi(FMT_CHAR_ADD, STR_CHAR_TEMPERATURE);
 	addTemperatureCharacteristic();
 #else
@@ -74,7 +73,7 @@ void GeneralService::addResetCharacteristic() {
 	_resetCharacteristic->setDefaultValue(0);
 	_resetCharacteristic->setWritable(true);
 	_resetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
-		CommandHandler::getInstance().handleCommand(CMD_RESET, (buffer_ptr_t)&value, 1);
+		CommandHandler::getInstance().resetDelayed(value);
 	});
 }
 

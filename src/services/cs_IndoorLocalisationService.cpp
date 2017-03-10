@@ -17,6 +17,10 @@ IndoorLocalizationService::IndoorLocalizationService() : EventListener(),
 		_rssiCharac(NULL), _scannedDeviceListCharac(NULL),
 		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL)
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerData = { {0} };
+	_appTimerId = &_appTimerData;
+#endif
 	EventDispatcher::getInstance().addListener(this);
 
 	setUUID(UUID(INDOORLOCALISATION_UUID));
@@ -181,7 +185,8 @@ void IndoorLocalizationService::on_ble_event(ble_evt_t * p_ble_evt) {
 #if CHAR_RSSI==1
 	case BLE_GAP_EVT_CONNECTED: {
 
-#if (SOFTDEVICE_SERIES == 130 && SOFTDEVICE_MAJOR == 1 && SOFTDEVICE_MINOR == 0) || \
+#if (NORDIC_SDK_VERSION >= 11) || \
+	(SOFTDEVICE_SERIES == 130 && SOFTDEVICE_MAJOR == 1 && SOFTDEVICE_MINOR == 0) || \
 	(SOFTDEVICE_SERIES == 110 && SOFTDEVICE_MAJOR == 8)
 		sd_ble_gap_rssi_start(p_ble_evt->evt.gap_evt.conn_handle, 0, 0);
 #else

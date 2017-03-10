@@ -1,0 +1,2608 @@
+Version 1.1.1:
+ - Version bump to 1.1.1
+
+Version 1.1.1:
+
+
+Version 1.1.1:
+ - Update docs
+ - added board ACR01B1E moved board in UICR from index 0 to 1 (because 0 is used for DFU by the bootloader)
+ - Add release config for crownstone_builtin_1.1.1
+ - Update docs
+ - Merge branch 'hardware_version_refactor'
+ - Merge branch current-soft-fuse into hardware_version_refactor
+ - Set correct current thresholds.
+ - Do we still need those 50ms?
+ - Started on current based soft fuse.
+ - we should get rid of the service ticks
+ - Added error bitmask
+ - One more line about Nordic code.
+ - Clarifying commercial use
+ - changed boad handling so that firmware is independent of board, i.e. board layout is not determined at build time but at flash/run time. hardware board version is stored in UICR and read at boot, pinout is assigned based on board version read from UICR init drivers at boot with pinout/ board config updated CMakeBuild.config.default made device type dependent of board (by default, but overwriteable on compiletime)
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - bumped protocol version to 0.8.0
+ - updated _writebyte.sh, re-added _readbyte.sh
+ - write hardware version to UICR with script in firmware, read hardware version from UICR
+ - added ios lib to docs!
+ - Merge branch 'mesh'
+ - added missing #if BUILD_MESHING == 1
+ - minor wording changes to PROTOCOL.md
+ - updated protocol docs with new encrypted mesh message
+ - added random number to encrypted mesh message added encryption for mesh updated encryption to accomodate mesh ignore first message on mesh channels to avoid handling old messages
+ - bugfix MeshControl (missed a break)
+ - updated protocol with new mesh
+ - updated command reply with config and state replies updated config and state commands
+ - Remove references to dobots URLs.
+ - Remove references to bash shell.
+ - Remove serve_doc script
+ - Push new documentation
+ - increased mesh package size to 100
+ - disable RBC_MESH_DEBUG removed ble address from mesh updated mesh debugging/logging
+ - mesh protocol update send state broadcasts with interval send state change if switch state changes handle commands over mesh (single, multicast and broadcast) send reply when command is received (with status) handle keep alives over mesh preparation for mesh encryption resolve conflicts for state and command reply messages
+ - added missing errors
+ - advertise as not connectable during an open connection
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - disable log error in Service (not an error)
+ - use defines in EnOceanHandler logging
+ - fix for reserved pstorage data (so bootloader doesn't overwrite pstrogage during DFU)
+ - moved helper classes from Storage to StorageHelper (makes it easier to distinguish actual read/writes from flash vs read/writes from working memory)
+ - Added option (via define) to sample with only upper half of the current curve.
+ - Increased recovery timeout from 20s to 60s
+ - Version bump to 1.1.0
+ - Add release config for guidestone_1.1.0
+ - Update docs
+ - undo false commit
+ - updated create_release.sh to update device type
+
+Version 1.1.0:
+
+
+Version 1.1.0:
+ - Add release config for crownstone_plug_1.1.0
+ - Update docs
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - add updated docs to git when creating release create separate commits
+ - add updated docs to git when creating release
+ - update Makefile for release
+ - release script updated (check current branch, added device type)
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - merged
+ - Calculate both current and voltage zero line by averaging all samples. This as a temp fix for the switching channel problem.
+ - Changed sample interval to 200us
+ - Update PROTOCOL.md
+ - added define to enable led debug in power sampling
+ - enOcean update, ignore messages with old sequence counter, only handle one either the press or the release event for one button press adjusted learning rssi threshold
+ - fixed wrong comment in cs_Boards.h
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - updated keep alive state message removed keep alive interval from config
+ - Cleaned up, added comments, initialize averages with some value, so we don't need the if statement.
+ - Tried to fix the switching channels again, hope this works.
+ - Merge branch 'power-measure'
+ - Power measurments seem to be working now. Some configs changed from float to int32, and some configs still have to be added.
+ - Fixed a bug in calculating power usage. There probably still is a bug in there.
+ - Fixed adc bug: using pin numbers as channel numbers. Fixed by in calculating 0. Fixed bug in calculating power usage. Removed a lot of code in power sampling, breaking continuous sampling. Made sending of power samples work again.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - bugfix mesh notifications_pending
+ - removed delay of relay during scanning
+ - added support for EnOcean Switch
+ - First version of new and improved power sampling!
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Changed default current and voltage multipliers due to new circuit.
+ - added ADVERTISEMENT_IMPROVEMENT to CMakeBuild.config
+ - renamed crownstone_1.0.0 to crownstone_plug_1.0.0 adjusted create_release script
+ - use random number in service data only if encryption is enabled (in order to distinguish from advertisement if encryption is enabled)
+ - update advertisement, switch between connectable and non-connectable, 2/s to improve scanning on some phones
+ - updated PROTOCOL with GotoDfuCharacteristic in Setup Service (setup mode)
+ - updated scan-response-service-data in PROTOCOL
+ - added command to set leds, updated boards with leds
+ - improved create_release script
+ - added CHANGE_NAME_ON_RESET to CMakeBuild.config
+
+Version 1.0.0:
+
+ - updated device types to plug and builtin bugfix MESH_ACCESS_ADDR in CMakeBuild.config
+ - added the missing function again (was removed during the merge??!!)
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - bugfix KeepAlive (use Switch command instead of PWM)
+ - added gotoDfuCharacteristic to SetupService
+ - bugfix session nonce
+ - Tracker works again, now relies on the scanner to start scanning.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Added filter for new crownstones and guidestones.
+ - Add License buttons
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - update ramBase update service UUIDs for crownstone plug, builtin and guidestone removed warnings in cs_MeshControl
+ - Update PROTOCOL.md
+ - When doing calculations in defined variables, make sure to enclose them in brackets.
+ - changed the RELAY_HIGH_DURATION to 15ms
+ - added missing nrf52 ifdef to timer.c updated CMakeLists.txt
+ - bugfix updatePasskey for s132
+ - added device type checks to compile to avoid compiling switch for guidestone
+ - prepared for hardware version
+ - fixed firmwarescript for uploading bootloader to multi target
+ - made mesh functional again prepared mesh to be replaced by nordic rbc_mesh repo
+ - merged with rbc_mesh nrf52
+ - bugfix verbosity make bugfix address in firmware.sh
+ - added keep alive message and keep alive interval config
+ - Ask for update every 100 times
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - fixed event bitmask
+ - Make sure compilation is not done twice every single time. Add some make-up for the developer
+ - fixed path in scripts to call outside scripts folder
+ - replace echo by printf
+ - improved scripts, added colors, added error reporting
+ - added BLUENET_BOOTLOADER_DIR added build bootloader step to all.sh script fix for ./firmware.sh clean
+ - Rescale image
+ - Add document about localization
+ - added a timer to the factory reset process so we have enough time to read the result of the factory reset process
+ - change permissions for setting switch after setup
+ - Gulp can be used to automatically build the project after code changes.
+ - bugfix CMakeBuild.config.default bugfix firmware.sh script
+ - moved check_targets out of config.sh again (buggy)
+ - source environemt variables in bashrc and only verify if assigned in config.sh script
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - copy softdevice to bin folder not build folder
+ - updated INSTALL.md
+ - Update PROTOCOL.md
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - added additional environment variables: BLUENET_WORKSPACE_DIR, BLUENET_BIN_DIR, BLUENET_RELEASE_DIR updated config.sh script moved check_targets into config script bootloader uses the same config script
+ - session packet -> session nonce
+ - Moved faq to FAQ.md. Attempt to improve encryption documentation.
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Set pwm at boot.
+ - Switch on relay after validating setup.
+ - Switch off pwm when setting relay via switch command.
+ - Merge remote-tracking branch 'origin/sdk_11' into sdk_11
+ - catch overflow case in encryption
+ - Update README.md
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Made pwm period configurable.
+ - pca10040 does have inversed switch after all
+ - pca10040 does have inversed switch after all
+ - Until meshing works again: disable by default.
+ - Improved recovery doc a bit.
+ - added timer for setup
+ - schedules an update of the servicedata content every second. This improved security since there is no temporal information other than connect/disconnect. It also allows us to change the random number, making sure we can listen to unique updates, whereby processing less that 10% of the advertisements. Saving phone battery!
+ - added todo to illustrate what to do when reset is disabled. This is a seperate commit since I will include this error message in the  ios lib.
+ - added log to indicate when recovery period has expired
+ - added responses to the factory reset process so the user is informed if the process has been successful.
+ - 1. Re-revert ACTIVE_LOW vs ACTIVE_HIGH as with the 2d25c9e commit. 2. Made config?Ch functions nonstatic member functions and only result static, so it can refer to class instance variables (such as _inverted). 3. Introduce _inverted rather than relying on the SWITCH_INVERSED macro.
+ - Run doxygen again
+ - Update links in TODO, but TODO itself is not up to date
+ - Relative link to docs, would be great if there was a ROOT variable
+ - Remove Apple DS_Store hidden file, blame Alex
+ - Have all documentation in docs/
+ - Move memory layout files to own directory. Move manuals to own directory.
+ - Revert "Move source code documentation from docs/ to docs/source-code/"
+ - Revert "Active high when switch is inversed"
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Move source code documentation from docs/ to docs/source-code/
+ - Active high when switch is inversed
+ - Make sure the pwm actually knows when SWITCH_INVERSED is defined
+ - Don't switch on pwm by default.
+ - Use relay by default, instead of pwm.
+ - Default behaviour should be that settings should be stored.
+ - Merge pull request #28 from marciwi/sdk_11
+ - added boards: builtin_acr01b1a and plugin_flexprint_01
+ - Merge remote-tracking branch 'origin/sdk_11' into sdk_11
+ - fixed bug in factory reset
+ - Add config script for Bluetooth with recent bluez
+ - Make Eddystone work, but with generating errors in updateAdvertisement
+ - Enable encryption by default.
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Add TX power level for Eddystone
+ - Use string for website
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Use http prefix for crownstone.rocks in Eddystone
+ - Merge branch 'sdk_11' of https://github.com/crownstone/bluenet into sdk_11
+ - A Physical Web Beacon is shown in the Nordic app, but it can't be found in the physical web browser
+ - Eddystone default 0
+ - Add BLE address at startup code
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Merge Eddystone functionality with sdk-11 branch
+ - Merge Eddystone functionality with sdk-11 branch
+ - Update scripts to use BLUENET_BUILD_DIR
+ - Merge branch 'sdk_11' of https://github.com/crownstone/bluenet into sdk_11
+ - Use BLUENET_BUILD_DIR in combine.sh. Update also upload_over_the_air.sh, but is used?
+ - Allow to go to DFU mode in GeneralService
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - When enabling mesh, make sure the proper branch is used
+ - Decode only payload
+ - Print STATE_MESSAGE in decode function
+ - Todo: probably I'm mixing up between mesh_message_t and mesh_header_t
+ - Set proper size for STATE_MESSAGE
+ - Merge branch 'sdk_11' of https://github.com/crownstone/bluenet into sdk_11
+ - Debugging mesh
+ - nRF51->nRF52. Add cs_sysNrf51.c IRQ handler names. No functional change.
+ - Use BLUENET_BUILD_DIR as environment variable, not just BLUENET_CONFIG_DIR/build
+ - Add option to use mesh code straight from repository
+ - Test: send 'Mesh online' message after mesh->start() in main
+ - nRF51->nRF52: Disable sd_nvic_EnableIRQ
+ - nRF51->nRF52: Use sd_ble_tx_packet_count_get rather than sd_ble_tx_buffer_count_get. Use BLE_ERROR_NO_TX_PACKETS rather than BLE_ERROR_NO_TX_BUFFERS.
+ - Undefined: SERIAL_CRLN -> SERIAL_CRLF
+ - nRF51->nRF52: Use NRF_RADIO_HFCLK_CFG_NO_GUARANTEE rather than NRF_RADIO_HFCLK_CFG_DEFAULT
+ - nRF51->nRF52: Use NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM rather than NRF_CLOCK_LFCLKSRC_XTAL_20_PPM
+ - nRF51->nRF52: Use nrf_clock_lf_cfg_t rather than nrf_clock_lfclksrc_t
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - The build directory in BLUENET_DIR, not in BLUENET_CONFIG_DIR
+ - fixed bug: when encryption is off, access is not provided by the encryption handler
+ - minor stuff
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Added relay delay: stop scanner when trying to switch the relay.
+ - Set pwm frequency to 50Hz. Should be made configurable.
+ - Changed remark about scan window/interval. We should look into this.
+ - Don't use tracked devices, this is outdated code.
+ - fixed double init of encryption handler and it now gets the operation mode from state, not from settings
+ - fixed factory reset timer issue. Factory reset tested and works
+ - Made sure factory reset oppertunity is only 10 sec, fixed authentication issue there. Fixed ddos possiblity (write before triggered disconnect applied,crash)
+ - Merge remote-tracking branch 'origin/sdk_11' into sdk_11
+ - made the counter in service more efficient, transferred the comments from the encryption cpp to the header file.
+ - Fixed adc gain, so we measure in the range 0 - 1.2V.
+ - updated service random to use counter for two bytes to save processing time.
+ - removed shorthand for encryption
+ - Merge remote-tracking branch 'origin/sdk_11' into sdk_11
+ - Merge remote-tracking branch 'origin/sdk_11' into sdk_11
+ - Merged
+ - removed print loop of mac
+ - ADC works again.
+ - Moved pwm timer config to cs_Config.h
+ - Renamed crln to crlf.
+ - Put max number of services in config.
+ - added clion setup doc
+ - Merge branch 'merge' into sdk_11
+ - added anne's hardfloat enable, restored the defaults
+ - updated arm toolchain
+ - Add definitions as CMake configuration values (with SET). Perhaps this will help some IDEs with syntax highlighting
+ - merge
+ - Merge branch 'nrf51' into sdk_11
+ - updated the encryption to all go through the .encrypt method. Introduces Encryption types enum. Made sessionNonce cafebabe ECB encrypted. Redesigned setup phase so we do not need to bond. Bonding causes issues with iphones which want to bond after setup as well. Iphones cannot clear the bonded history programmatically. Power service is not encrypted because it is using the encryption buffer. We need to rethink the providing of buffers to the characteristic. Added safeguard for disconnect in stack, now checks if we are even connected.  Removed ancient code. Removed a lot of commented out blocks, we have git for history. Fixed few bugs. Removed restoration of high tx on bonding due to security concerns. Updated protocol doc to 0.6 to include the new characteristics and encryption state of setup and power service
+ - Address all other warnings. Compiles without any now.
+ - Squash cast and unused var warnings
+ - Make all warnings into errors
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Clean up compiler flags
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Fixed bootloader not starting firmware
+ - Fixed having multiple services. Fixed memory issues by setting correct app start address?
+ - Fixed timer for indoor localization service
+ - Fixed timer for delayed reset
+ - Add hardware float to linker flags
+ - fixed protocol not being set in the encrypted advertisement buffer
+ - made sure crownstone does not revert to high TX after bonding, made specific advertisement case for setup, added automatic disconnect when the bonding fails
+ - Use 512kB rather than only 256kB
+ - Fixed writing of characteristics. Should get a better fix later.
+ - With this config it actually runs :)
+ - TimerData of services has to be made in the services themselves.
+ - Added some debug for ram usage/settings.
+ - Fixed all timer ids
+ - Fixed softdevice init
+ - Something is wrong with the hard float flags
+ - bit of refactoring with bart and made sure the instances for mesh and scanner are available everywhere. Triggered by bug that setup mode could not write to pstorage since mesh was enabled in settings but not running.
+ - Removed linker flags: -Wl,--wrap,__aeabi_unwind_cpp_pr0
+ - Added app_error_handler_bare()
+ - Copied app_timer.c from sdk.
+ - replaced magic number with define
+ - various sdk/sd calls fixed
+ - Compiler flags: can't use the small size libs (_s) anymore, because of the need for a new compiler.
+ - app_timer_id_t changed. BLE_ERROR_NO_TX_BUFFERS became BLE_ERROR_NO_TX_PACKETS. Fixed sd enable. device_manager_peripheral changed.
+ - merged
+ - fixed bug with session nonce being generated regardless of mode, leading to hardfault on connect and disconnect
+ - Update PROTOCOL.md
+ - Update PROTOCOL.md
+ - Update CMakeBuild.config.default
+ - disabled indoor service by default in order for the code to fit on the nrf51822
+ - ugly removal of adc and lpcomp code
+ - Use old clock source for old sdk version
+ - Changed serial verbosity level names, added option to not build the mesh, fixed pwm.
+ - -
+ - Merge branch 'master' into sdk_11
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Bumped version to 0.5.1
+ - Merge branch 'master' into sdk_11
+ - Merge pull request #24 from dobots/master
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Actually report power usage in mW.
+ - Updated protocol doc.
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - spaces, yeik
+ - No need to clear the value of power samples characteristic anymore?
+ - Changed advertisement packet, now has space for random bytes. Shortened some strings.
+ - Factory reset now happens on boot.
+ - Update PROTOCOL.md
+ - Update protocol
+ - need more heap :(
+ - on recovery timeout, set factory reset state back to normal
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Renamed USER to MEMBER.
+ - Advertisement shouldn't be encrypted in setup mode.
+ - Added factory reset via recovery characteristic.
+ - Merge branch 'sdk_8' of https://github.com/dobots/bluenet into sdk_8
+ - added calculation of decryption buffer size to encryption handler for dynamic characteristics
+ - Use power sample char also for 101hz samples
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Added disconnect command
+ - inited->initialized
+ - made default encryption level admin
+ - fixed bug in length determination
+ - Merge branch 'sdk_8' of https://github.com/dobots/bluenet into sdk_8
+ - added static function to enryptionHandler to dynamically calculate the buffer size for encryption
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - merged, removed namespace from encryption
+ - added setting for mesh access address, owner key is now called admin key, updated protocol, added option to o disable encryption on a characteristic
+ - Merge branch 'master' into sdk_8
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - updated notifications for multi part notifications removed BLEpp namespace removed BLEStack baseclass reduced MAX_CHAR_VALUE_STRING_LENGTH from 25 to 12
+ - added encryption to the scan response packet, tested ECB encryption
+ - added session nonce characteristic according to protocol v5 alpha
+ - tested the encryption, integrated with the characteristics, disconnect on failure
+ - added disconnect method to stack, updated encryption to return accesslevel on decryption. Ask dominik how to disconnect on write
+ - inserted encryption into the characteristics, updated the code, no need for seperate buffers! needs testings
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - include 4 byte for max gatt value length
+ - updated the encryption code to correspond to protocol v5alpha. needs testing, needs validation, needs integration
+ - updated the protocol doc
+ - Continuous power sampling is now set at 101Hz. Fixed some possible bugs in reading/sending of the data.
+ - Decrease default boot delay to 400ms
+ - Added mesh settings to config file, fixed bug in sendPowerSamplesMessage.
+ - Updated encryption protocol
+ - increased jlink speed in debug script to 4000
+ - bugfix characteristics updateValue
+ - updated switch state in protocol
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - increased upload speed to jlink bugfix pstorage update validate setup write switch state (pwm / relay) to characteristics
+ - cleaned up and prepared characteristics for aes encryption
+ - changed protocol to padding to use PKCS7, still need to add this in the code
+ - updated encryption protocol
+ - added encryption to the protocol, please review
+ - Merge branch 'sdk_8' of https://github.com/dobots/bluenet into sdk_8
+ - finalized the encryption class, needs testing
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Got rid of some warnings.
+ - Merge branch 'sdk_8' of https://github.com/dobots/bluenet into sdk_8
+ - made start for encryption, mostly Bart fixed includes in a lot of files
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - averaging window size for zero detection is now configurable
+ - default switch state
+ - updated service data, added protocol version, added temperature, changed PROTOCOL.md updated protocol version to 0.4.3
+ - Merge pull request #23 from dobots/master
+ - update struct (working memory) even if PERSISTENT_FLAGS_DISABLED==1
+ - removed old/unused code bugfix command handler (create/init in setup mode)
+ - updated protocol 0.4.2
+ - bugfix service data bugfix mesh start fix for settings flags (meshEnabled, scannerEnabled, etc)
+ - switch update added extended switch state added PWM_DISABLE define
+ - added pca10040 board
+ - some nrf52 changes
+ - fix softdevice dir in _config.sh added speed setting to hardware_version.sh
+ - updated mesh payload packet
+ - updated INSTALL document
+ - update CMakeBuild.config.default and *template update cs_Boards bugfix pstorage bugfix State get
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - bugfix use stored name if reset counter used
+ - updated CmakeBuild.config.default and *.template
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - fix log typo
+ - Make sampling interval configurable
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - use softdevice from the nordic sdk, removes dependencies and simplifies config
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Use relay for relay characteristic
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added cs_Debug.h to simplify enable of verbose logging
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - bugfix float size in settings increased brownout trigger voltage to 2.7
+ - saving space - use defined strings in cs_Strings.h - spread #define PRINT_VERBOSE around to reduce logging
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - merged
+ - added additional low level configs
+ - Increase relay switching period to 20ms
+ - For high sample rates: start timer after sample is finished. This guarantees ADC doesn't get started while it's already busy.
+ - Automatically determine zero line of voltage samples
+ - Don't switch default on/off
+ - added dobeacon board added brownout detection added device type check (switch, tempGuard and powerSampling, PowerService only for Crownstones)
+ - updated hardware_version.sh
+ - added temperature to service data (replaced one byte of reserved for now)
+ - added delayed execution to command handler
+ - replaced target mac address by target crownstone id for mesh messages
+ - added low level configs bugfixing pstorage addes service data over mesh bugfixing error code for ConfigControl and StateControl on success
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - update to count accidental resets (set gpregret to 0 on successful connect)
+ - set low tx power in setup mode
+ - simplified state class updated protocol
+ - added error codes (return values) to mesh control, config control and state control characteristics added error codes to settings and state functions
+ - updated setup service added error return code to control characteristic and handleCommands added relay, setTime and validatSetup commands added time to state variables
+ - plugin has relay
+ - reset counter fix (take 2)
+ - disable debug output for CyclicStorage
+ - fix for pstorage delay on startup (related to mesh)
+ - fix reset counter
+ - bug: setting name at runtime
+ - use MESHING define instead of CHAR_MESHING
+ - use -j4 for make update reset characteristic to use uint8 init mesh earlier
+ - bugfix if serial verbosity = none
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - fix error in CrownstoneService UUID
+ - Fixed bugs
+ - Use relay when it's there.
+ - pwm and relay are 1 byte
+ - Added power consumption calculation. Enabled power samples reading: data will be empty when data is invalid.
+ - added encyrption keys to settings (owner, member, guest)
+ - renamed advertisement-packet to adv-packet (github bug, did not show picture with old name ...)
+ - update protocol
+ - bugfix uart (initialize even earlier) bugfix state notification renamed doBeacon to guidstone
+ - bugfix state packet table in PROTOCL
+ - cont. refactoring updated service data enable/disable mesh
+ - changed UUIDs of Services and Characteristics added CrownstoneService, moved Control, Mesh, Config and State characteristics over from GeneralService added CrownstoneId to settings renamed StateVar to State updated mesh message types removed CharBuffer (use only StreamBuffer) renamed MeshCharacteristicMessage to MeshCommand (using StreamBuffer)
+ - fixed CMakeBuild.config.default after merge
+ - updated Protocol description
+ - Update README.md
+ - updated protocl with advertisement, scan response and service data packets
+ - Merge branch 'master' into sdk_8
+ - updated storage functions
+ - moved files around
+ - changed handling of name in settings
+ - Merge pull request #20 from dobots/master
+ - Updated doxygen docs to 0.3.0
+ - bumped to version 0.3.0
+ - Added LED pins to crownstone 5 board
+ - Attempted to fix ADC current draw, but this will be fixed in the next version.
+ - Make sure the PWM get initialized earlier and starts switched off.
+ - Documented mesh chars
+ - integrated new power sampling
+ - crownstone company id
+ - moving power sampling code to cs_PowerSampling
+ - Merge branch 'sdk_8' into refactoring
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added SetupService updated encryption for SetupService
+ - Added burst and continuous power sampling.
+ - rename of Command Char to Control Char renamed init of services to addCharacteristics
+ - introduced operation mode (setup, normal, dfu)
+ - bugfix config flags (init all flags to default value) store ibeacon settings with one call reorganized/restructured crownstone main bugfix pstorage if scanning cleaned up MeshControl use CommandHandler when sending commands over mesh bugfix CircularBuffer (use assigned buffer instead of allocating) update StateVars only if changed
+ - Merge branch 'sdk_8' into refactoring
+ - Merge branch 'sdk_8' into continuous_sampling
+ - reorganized main, cleaned up and made it more structured
+ - GeneralService updated added notification to StateVar read characteristic included config select in config set with different opcode changed UUIDs for GeneralService added temperature to statevars (not stored in flash) use reserved byte in StreamBuffer for opCode
+ - change relay pins of crownstone5
+ - added get and set functions for settings, replaces direct access to config struct
+ - moved code into separate classes (switch, power sampling, tracking, scheduling) added factory reset moved schedule list and tracked device list to state vars continued CommandHandler continued enable/disable with config
+ - enable/disable through settings
+ - moving code out of services use command handler
+ - Updated protocol
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Added some more info about advertisement / scan response data
+ - Update README.md
+ - Update README.md
+ - Update RESOURCE_ALLOCATION.md
+ - updated resource allocation
+ - updated resource allocation
+ - Added resource allocation doc
+ - Increased default attr table size. Set default heap size, oops.
+ - updated default config
+ - Updated protocol doc: config types
+ - Added little todo to scheduler
+ - Fixed bugs when mesh was not enabled
+ - added crownstone service data (switch state, power consumption, crownstone id, etc)
+ - made current limit into configuration value, removed from power service storage update (pause mesh, request buffer) settings update (state variables, write only element instead of whole struct) state variables update, added characteristic for read/write state variables bugfix master buffer (have payload word aligned)
+ - Added new board
+ - removed statevar from Settings, use separate StateVars instead
+ - use git hash as firmware revision and git branch as software revision, when compiling as debug
+ - disabled some meshing debug
+ - bugfix for mesh + storage (last fix did not work anymore because of the change to use scheduler everywhere)
+ - added state variables to storage (similar to settings) added cyclic storage for wear leveling
+ - device information service update (include branch name as software_revision) and include by default
+ - fixed pstorage bug, state_vars had the wrong handle number
+ - merged
+ - increased scheduler queue size iBeacon uuid fix
+ - fixed last fix ;p
+ - Added the Scan Response packet. Bart needs to do the images.
+ - fix merge error?
+ - Merge branch 'sdk_8' into continuous_sampling
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - updated advertisement for iBeacon, normal BleDevice updated iBeacon included ServiceData (not yet finished) added advertisement update with tick function
+ - added reset counter (can be read and reset through config)
+ - removed while loop from sampleCurrent use scheduler for mesh notifications
+ - clear pending notifications when notification disabled
+ - softdevice init with app scheduler serial print update
+ - Update INSTALL.md
+ - store schedule in flash
+ - Whoops! make it compile again.
+ - Added synching of schedule list when time is set.
+ - Updated protocol doc
+ - Added dim on distance demo
+ - Added little TODO
+ - MasterBuffer::getBuffer() is deprecated.
+ - MasterBuffer::getBuffer() is deprecated
+ - Forgot to commit the CHAR_SCHEDULE in toolchain.
+ - Added schedule entries.
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added log level check to _log(..) function
+ - debug output
+ - use timer/tick to sample current config values for sampling interval and pause time use timer with app scheduler removed repeated timers (use single shot timers instead)
+ - added missing ifdefs for ENCRYPTION
+ - updated bonding added security request timer increased max bonds to 8
+ - Really fixed tracked devices
+ - fixed track devices
+ - pwm period is in us
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - adjusted PSTORAGE_MAX_APPLICATIONS to 3 (1 for general service, 1 for indoor service, 1 for device manager) adjusted APP_DATA_RESERVED to 0x1000, to cover the whole pstorage memory
+ - updated protocol to new PWM
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - pwm code cleanup
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Use .md files in doxygen output
+ - PWM fix
+ - merged with master
+ - data diagrams more consistent
+ - Add corresponding documentation
+ - Finished writing oneliners for each class
+ - Cleaned up the readme
+ - Merge pull request #19 from dobots/master
+ - added data structure images
+ - Almost added all data packets
+ - Restructuring readme: WIP!
+ - First commit of protocol
+ - Less lists
+ - Update INSTALL.md
+ - updated the install doc
+ - merged with master
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added some more explanation in the hardware_version script
+ - Remove double ** around copyright statement
+ - Update document generation
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Update documentation
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - updated INSTALL.md and README.md with new links to SDK and softdevices
+ - Add exclamation mark to comments
+ - Add doxygen config file
+ - update for dobeacon leds
+ - added DOBEACON board with LEDs
+ - Merge branch 'master' into sdk_8
+ - switched relay pins
+ - moved show_scans.py to new repository (data analysis)
+ - Generalized filter function
+ - Filter in/out beacons via seperate function
+ - Added rssi and frequency plots
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Added parser for rssi measurements. Fixed plotScansAsDots
+ - Merge branch 'master' into sdk_8
+ - removed old CMakeBuild.config.local again
+ - added relay characteristic adjusted boards and config for relay
+ - Merge branch 'master' into relais_test
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added ATTR_TABLE_SIZE to increase gatt attribute table size (needed to enable all services/characteristics)
+ - Added better labels on x-axes
+ - added hub parsing and filters to show scans script
+ - added MESH_GATT_EVT_OPCODE_DATA_MULTIPART_START for mesh notifications, to improve detection of missing notification messages
+ - using random delayed start for interval scanner on boot ignore first mesh message if it arrives within certain time to avoid handling old messages on boot up cleaned up mesh code and scanner
+ - Merge branch 'sdk_8'
+ - added INTERVAL_SCANNER_ENABLED to CMakeBuild.config
+ - added max length to stream buffer (prevent using bigger length than available buffer size)
+ - Merge branch 'sdk_8'
+ - using different CMakeBuild.config at the same time
+ - Added config mesh message
+ - Fixed random scan start delay
+ - Added scan filter send fraction
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added scan filter (e.g. filter out crownstones and dobeacons in scan result) added command scanner start / stop over mesh
+ - added notification buffers for mesh notifications
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Added python script to visualize the mesh scans
+ - fixed settings bug when ibeacon==1
+ - Reduced settings code size
+ - temperature should be signed
+ - remove local config file
+ - Added settings: boot delay, scanner durations, max chip temp
+ - relay, not relais
+ - added "sequential" notifications to send complete mesh message as notification (the hacked way)
+ - Added disabling of handles that we don't use
+ - Added guard dog on incoming mesh messages
+ - Make sure power/current curve can't be larger than BLE_GATTS_VAR_ATTR_LEN_MAX
+ - Added options to change name/minor on boot
+ - Follow mesh integration docs: advertisement interval should be >= mesh timeslot period
+ - Follow the mesh integration docs: Init mesh before start_advertising, and don't call sd_enable.
+ - mesh payload of 99B is enough for 10 scan messages
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - still using sdk 6 update relais switching
+ - using different CMakeBuild.config at the same time
+ - fixed bootloader upload in firmware script
+ - using different CMakeBuild.config at the same time
+ - added DEVICE_INFO_SERVICE to CMakeBuild.config to enable/disable Device Information Service
+ - Merge branch 'master' into sdk_8
+ - Merge branch 'dfu_upload'
+ - switch update
+ - Fixed max mesh message length
+ - Added black list
+ - added white list to scan results
+ - undo using SENDER
+ - Mesh seems stable now, using new radio_control.c
+ - Wait some time before sending scan results, to make sure the node is synched with the mesh
+ - enabled multiple gdb sessions
+ - merged with master
+ - Added bootloader settings to config file
+ - CMakeLists update added missing MESH ifdefs
+ - update CLOCK_SOURCE
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - fix to run without services
+ - added measurement of frequency (this will break on overflow of RTC)
+ - added Scanner class
+ - added mesh tests for bandwidth
+ - added relais test. needs to be integrated properly
+ - merged mesh code with newest version of nRF51-ble-bcast-mesh, branch sdk-8-support added fixes to make it work again
+ - Fixed error when enabling indoor localization without mesh
+ - Cleaned up cs_Boards.h
+ - includes updated
+ - fixed Device Manager (wrong alignment of peer table)
+ - fixed PWM
+ - fixed values for S110 8.0.0, see CMakeBuild.config.default
+ - updated to NRF SDK 8.1 (for meshing) requires S130 1.0.0 to work (see CMakeBuild.config.default for udpates) PWM "broken" Device Manager "broken" S110 "broken", requires S110 8.0.0
+ - merged
+ - renamed cs_MeshMessage.h cs_MeshCharacteristicMessage.h renamed handle to channel for mesh messages added scan message as hub mesh message update scan result, averaging rssi and replace lowest RSSI instead of lowest occurence disabled logs for device_manager_central.c
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Make heap size configurable from config file
+ - partial undo of commit from 12.10.15 (code that shouldn't have been commited)
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - bugfix for device name
+ - seems like // is not for comments in .ld
+ - Added comments for 32kB chip
+ - 10s timeout for tracked device is too low
+ - Added temperature guard, fixed PWM::getValue()
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - fix for device type
+ - Explicitly don't start the HF clock
+ - Measure both voltage and current
+ - fix for printArray
+ - BugFix Advertisement
+ - BugFix s130
+ - fixed amplification factor for crownstone v0.8x
+ - Moved VOLTAGE_AMPLIFICATION and SHUNT_VALUE to cs_Boards.h. Crownstone now calculates power consumption instead of current consumption
+ - moved code from cs_Settings.h to cs_Settings.cpp added DEVICE_TYPE to CMakeBuild.config use device type to adjust advertisement package (will be used in library to filter for devices) update fridge max and min temp when config updated enable write on alert characteristic (to reset)
+ - Enable combined alerts
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - fixed timestamp overflow
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - improved current consumption calculation (still not verified though)
+ - Merge pull request #18 from dobots/master
+ - Update README.md
+ - Added LOW_POWER_MODE: avoids using the HF clock (saves a lot of power), and disables GPIO that we don't really need, like debug leds. Added PWM_ENABLE, so you can disable the PWM completely, which saves a lot of power.
+ - Only enable uart when debug level is < NONE, this might save some power
+ - Some indent and comment fixes
+ - turnOff() on boot when DEFAULT_ON==0, need this for inversed switches
+ - Don't always start Fridge
+ - updated binaries for dobeacon
+ - fixed schedule service uuid
+ - alert service doesn't need cs_storage
+ - Added schedule service
+ - Added more functions to and improved RTC.h
+ - added crownstone2 bin for dfu
+ - bugfix apptimer (if service doesn't have a tick) moved STRINGIFY to cs_Utils set default value on characteristics add hardware and firmware revision to DeviceInformation Service
+ - nordic beacon also used for sensors
+ - Added nordic beacon board (PCA20006)
+ - added new binaries for dfu upload
+ - added latest pcb version
+ - Merge pull request #17 from dobots/master
+ - add FIRMWARE_VERSION to CMakeBuild.config added DeviceInformation Service
+ - test version for dfu
+ - update APPLICATION_START_ADDRESS and APPLICATION_LENGTH for s130 0.9
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - removed static from m_peer_table (address has to be aligned to 4, but with static it is not!)
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Added way to inverse switch pin (define SWITCH_INVERSED in cs_Boards.h)
+ - fixed default config
+ - test dobeacon.bin
+ - update bin
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - update bin
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - change default s130 to version 0.9.0
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - added binary for dobeacon (as test for upload dfu)
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Added fridge temperature check
+ - Added alert service
+ - fixed bug in setting min and max env temp
+ - added device_manager_central.c for softdevice 130
+ - reset with timer after 100ms, so that write characteristic succeeds before reset
+ - streambuffer should include utils.h
+ - moved hz/ms to ticks macros to timer.h
+ - added default min and max env temp
+ - added min and max environment temperatures
+ - added passkey to persistent storage added timeout for low power mode
+ - restored settings go into low tx power during bonding
+ - disabled settings (for testing encryption) add static passkey and encryption
+ - compilation fix
+ - adjust tx power when trying to bond. go back to normal power when bonded
+ - Merge branch 'master' into security_test
+ - add serial number as first parameter (optional) to hardware_version.sh
+ - added hardware board CROWNSTONE3
+ - renamed helper scripts (scripts that are not called directly but through other scripts) from name.sh to _name.sh adjusted scripts firmware.sh, softdevice.sh to use _check_targets.sh to check for targets/serial number, see also _targets_template.sh moved unused/unreferenced scripts to graveyard
+ - Rename BOARD to HARDWARE_BOARD so that it does not conflict with Nordic's nomenclature in the bootloader
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Added configurable advertisement interval
+ - initial test with security, authorization, pin, etc
+ - small fixes
+ - Default tx power is defined in CMakeBuild.config, fixed storage getInt8
+ - Added configurable tx power
+ - added config value that anne introduced
+ - fix in log msg
+ - Merge branch 'mesh' into master
+ - added full path for nordic includes
+ - changed byte order for iBeacon UUID
+ - fixed code again commented debug logs from interrupt handlers (slows down event handling) set advertising interval back to 80
+ - Reference to DoBeacon doc
+ - Debugging meshing while getting a connection request. It's probably a PAN we didn't identify yet. For now the best solution is to disable meshing temporariliy on a connection request.
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - bug fix Settings (return if length not correct)
+ - Merge branch 'master' into mesh
+ - Merge pull request #28 from chaasfr/master
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Update link to SDK
+ - Reorganize reading material
+ - Link to issue tracker & muut
+ - removed debug code
+ - added target filter for mesh messages
+ - Update author list
+ - fixed wifi status writing issue in cs_Settings
+ - fixed wifi status writing issue in cs_Settings
+ - pulled new version
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - fixed wifi status writting
+ - updated settings write call with persistent parameter (only writes to persistent storage if parameter = true) adjusted mesh message type to 2 bytes added update of ibeacon parameters fixed mesh + pstorage
+ - reduced storage for test
+ - added missing include
+ - compilation fix
+ - Merge branch 'master' into mesh
+ - updated master buffer with offset
+ - added missing include
+ - Merge branch 'master' into mesh
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - fix for writing more than 20 bytes to a characteristic (long write)
+ - Include extended property option reliable_wr for long reads/writes
+ - new mesh message types adjusted data structure for mesh characteristic
+ - Write wifi settings as INFO
+ - updated mesh code to newest version added more logging
+ - Merge branch 'master' into mesh
+ - bugfix storage
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Log setting wifi
+ - fixed mesh message characteristic
+ - adjusted mesh message types
+ - added power message to mesh
+ - increased mesh message size
+ - Merge branch 'master' into mesh
+ - updated event type for mesh
+ - Just count config in hex
+ - bugfix firmware script
+ - adjusted makefile for build dir selection
+ - 88 bytes, not 83
+ - Clear after read
+ - Use {} as smallest valid json return. Clear string on read
+ - Use proper json
+ - Add CONFIG_WIFI_SETTINGS
+ - Make BEACON_* variables depend on IBEACON != 0
+ - Explain build target in Makefile
+ - firmware script fix for debug
+ - moved ibeacon config parametrs to CMakeBuild.config added ibeacon config events to EventDispatcher to update parameters removed old Dispatcher / Listener
+ - fixed firmware script for bootloader
+ - combined configuration in storage instead of per service bugfix for set name at startup
+ - use correct name at startup (try to get it from config/storage)
+ - Config moved from cs_GeneralService to cs_ConfigHelper updated StreamBuffer data structure (reserved byte for byte alignment)
+ - adjusted scripts for additional flexibility
+ - added beacon config values
+ - mesh test code
+ - added EventDispatcher adjusted meshing send / receive added events to be sent over mesh (e.g. POWER_ON / POWER_OFF)
+ - added PCA10000 as board added switch to ble_sys_dispatch, let scheduler only handle write events
+ - added wrapper functions for sd_ble_gatts_value_get and _set
+ - compile fix for CHAR_MESHING==0
+ - fixed meshing to work with softdevice_handler
+ - app_timer/app_scheduler/ble_eventhandler bug fix *let scheduler execute ble event (otherwise it will block all other interrupts handler functions while executing ble event) *change service ticks from repeated to single shot, otherwise long tick function will cause app_scheduler buffer to overflow. tick has to reschedule itself after execution. *increased scheduler buffer size to accomodate ble event
+ - merge fix
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - removed ALL trailing whitespaces recursively
+ - Merge pull request #23 (current limit LPComp with ADC)
+ - currrent limit LPComp with ADC
+ - code fixes for s130 version 0.9.0 and meshing
+ - adjusted RTC to use RTC0 clock when softdevice is used
+ - tab as indent
+ - removed TICK_CONTINUOUSLY from CMakeBuild.config.default
+ - moved service UUIDs to cs_UuidConfig.h
+ - bug fix merge increase service tick frequency
+ - Merge branch 'master' into scheduler
+ - changed timeslot_handler to use SWI1 instead of SWI0. SWI0 is used by the app_timer
+ - separated cs_BluetoothLE into cs_Stack, cs_Service, cs_Characteristic cleaned up includes removed header cs_nRF51822, replaced by nordic defines made crownstone main file into class restructured folders, moved files add DEFAULT_ON to CMakeBuild.config
+ - Explain MASTER_BUFFER_SIZE
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Read name from mem
+ - added IBEACON enable to config
+ - use scheduler and timer * added app_timer and app_scheduler * service tick functions now done with app_timer and app_scheduler * made tick part of Service class * RealTimeClock renamed to RTC and is now wrapper class for app_timer functions * removed TICK_CONTINUOUSLY (not applicable anymore) * increased GENERAL_BUFFER_SIZE to 500 * ble_evt handling through soft_device_handler, removed evt_buffer from stack * updated Sensor class for new ADC implementation
+ - disable indoor localization in default, since it won't work with S110
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - master buffer size is now set in CMakeBuildConfig
+ - removed cs_Serializable and cs_AllocatedBuffer (old and not used)
+ - Timestamp each ADC sample
+ - timestamps are uint32_t
+ - Update Timer to use app_timer
+ - Get rid of GenericService. Only leads to code bloat and more memory usage
+ - Make from status flags bit fields in struct for every characteristic
+ - Check if listeners != NULL for dispatch
+ - Remove vector from Dispatcher
+ - Remove vector from Dispatcher
+ - General services, strings -> cs_Strings.h
+ - Display current FLASH usage
+ - Add BLE_CHAR_TRACK macro for track characteristic
+ - Okay, buffer to 140
+ - Use const char * const instead of string for setName
+ - Factor out Battery service
+ - reduced master buffer size
+ - Refer to other characteristics in README
+ - Use std::string if you use string MACROs.
+ - And some more CHAR_
+ - One more CHAR
+ - Prepend all characteristic macros with CHAR
+ - Add char strings
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Add strings to separate header file
+ - Document a lot of defaults
+ - Generate documentation
+ - Comment some more function in cs_BluetoothLE.h
+ - Document destructors
+ - Comment typedefs
+ - Add some info on CharacteristicInit
+ - decrease master buffer size
+ - Exclude COMPILATION_TIME for the macros to check. Apparently it is not defined for the build directly after a cmake --trycompile
+ - Explain GenericService
+ - Merge restructured code. Add check to ensure that all definitions are defined. Run documentation generation.
+ - updated default config
+ - updated documentation
+ - updated documentation and cleaned up a bit
+ - cleaned up last trace of CharacteristicValue
+ - added subsampling
+ - increased buffer size, this seems to be the max now
+ - include stdlib for NULL
+ - added timestamps of current curve to output on uart
+ - fixed configuration of power service characteristics
+ - added options to enable/disable power service characteristics
+ - Added timestamps to current curve
+ - merged
+ - changed current curve/adc buffer, fixed some bugs in stream buffer
+ - changed MeshMessage from Serializable to BufferAccessor (untested)
+ - removed CharacteristicValue
+ - reverted callback_on_write_t to give value as parameter updated services
+ - reverted callback_on_write_t to give value as parameter updated services
+ - replaced uint8_t* with buffer_ptr_t for whenever master buffer is used updated assign and getBuffer of BufferAccessor
+ - renamed CharacteristicT to Characteristic
+ - Merge branch 'restructured' of github.com:dobots/bluenet into restructured
+ - added compiler directives to CMakeBuild.config to enable/disable characteristics
+ - removed stack parameter from service constructors and init calls and replaced it with  Service::getStack()
+ - add missing init in cs_IndoorLocalisationService.h
+ - Merge branch 'restructured' of github.com:dobots/bluenet into restructured
+ - updated ScanResult and TrackedDevice list to use master buffer added assert function to cs_BleError added release target to Makefile bugfix for buffers
+ - Solved some uint8_t <-> T mistakes in StreamBuffer
+ - Merge branch 'restructured' of github.com:dobots/bluenet into restructured
+ - Call addService at construction
+ - Merge branch 'restructured' of github.com:dobots/bluenet into restructured
+ - Update documentation for GeneralService
+ - Merge branch 'master' into restructured
+ - use cs_BleError.h instead of app_error.h
+ - changed cs_BleError to use const char * instead of std::string so that it can be used in c source files
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Update documentation for header files in common folder
+ - Merge pull request #20 from AlexDM0/master
+ - removed all 64bit times, reverted to Nordic vanilla
+ - updated because of Dominik's comments
+ - Add reference to report
+ - Explain the use of cldocs
+ - Some changes to files to make document generation possible
+ - Merge branch 'gh-pages' of github.com:dobots/bluenet
+ - Add common folder to docs
+ - Bug fix: get configuration works too. Apparently setting a buffer with length 0 doesn't set the pointer to the buffer.
+ - Restructuring:
+ - Keep buffers in user space memory
+ - converted all timekeeping to uint64_t to avoid the overflow issue until proper fix
+ - merged mesh to 0.6.2 from nordic (excluding the serial mesh interface) updated the git ignore to include idea IDE files
+ - Merge remote-tracking branch 'upstream/master'
+ - updated mesh?
+ - compilation fix cs_Serializable reverted to original state
+ - added Characteristic for buffer (uint8_t*) added BufferAccessor + Characteristic adjusted IndoorLocalisation and ScanResult to use buffer (uint8_t*)
+ - add reference in characteristic instead of value for buffer characteristics
+ - removed change name, room, and type characteristic (replaced by configuration characteristic)
+ - use master buffer for scan result
+ - removed characStatus which is using up too much HEAP for what we gain. Should be handled with precompiler directives (not yet done)
+ - Add MasterBuffer, allocate it in main()
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - updated uml
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Correct merge
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - added class diagram
+ - Merge with Dominik. Mainly whitespace.
+ - Explain options for major and minor version
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - removed app_scheduler (not used) removed old code (unused) fix for freeing data allocated for CharacteristicValue moved meshing irq to sys_evt_dispatch in cs_Handlers and removed duplicate handlers from cs_main_crownstone and cs_BluetoothLE removed ol cs_Serializable.h removed scanResult object in Service and use Characteristic instead free scanResult list once set in GATT server moved print_heap and print_stack to cs_Utils
+ - removed app_scheduler (not used) removed old code (unused) fix for freeing data allocated for CharacteristicValue moved meshing irq to sys_evt_dispatch in cs_Handlers and removed duplicate handlers from cs_main_crownstone and cs_BluetoothLE removed ol cs_Serializable.h removed scanResult object in Service and use Characteristic instead free scanResult list once set in GATT server moved print_heap and print_stack to cs_Utils
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Add print stack/heap functions
+ - Print some heap info
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Add SOFTDEVICE_MAJOR and SOFTDEVICE_MINOR to distinguish different softdevice library APIs
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - update Sensor class
+ - added micro view
+ - added sensor class, includes light sensor, thermistor, push button and switch added separate board for crownstone+sensors use gpio event handler for push button use adc for light sensor and thermistor
+ - BugFix voltage square mean (missed first element)
+ - RTC::now() added (returns current time in ms)
+ - default timeout as define
+ - fixed adc serialization
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - added new crownstone pin layout
+ - Working differential buffer for ADC, not a very neat implementation, class AdcSamples should become a characteristic
+ - get rid of order warning
+ - decreased advertising interval from 1600 to 100, results in roughly 16 Hz advertisement rate
+ - added MAX_CAPACITY o StreamBuffer.h (should be made into template)
+ - update pwm characteristic to read current value
+ - improving continuous adc
+ - fixed modulo
+ - Builds and runs smoothly with S130 alpha 0.9 version
+ - first attempt of continous ADC
+ - started to change adc buffer
+ - made StreamBuffer into template adjusted GeneralService for new StreamBuffer adjusted ScanResult constant names documented StreamBuffer
+ - added documentation to cs_CircularBuffer
+ - renamed cs_Buffer to cs_StackBuffer added cs_CircularBuffer replaced StackBuffer in ADC with CircularBuffer
+ - changed outgoing byte order of current curve
+ - decreased adc buffer size, so that gatttools don't crash
+ - fixed bug in nearby timeout config
+ - fixed fix
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - correct way of serializing scanresult occurences, untested
+ - fixed adc trigger
+ - use current curve characteristic
+ - added current curve characteristic
+ - BugFix currentCurve: clear streamBuffer before starting a new sampling
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - BugFix for StreamBuffer
+ - added nearby timeout to config
+ - added nearby timeout to pstorage
+ - added dynamic timeout for tracked device list
+ - added tracked devices to persistent storage
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Run memory visualization without the need to select a file
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - initialize LPComp after the voltage spike at the pin, this is a quick solution, not final!
+ - initialize ADC after the voltage spike at the pin
+ - added storage for IndoorLocalisation Service added set/getArray functions to Storage
+ - Merge branch 'master' of https://github.com/dobots/bluenet
+ - renamed include/cs_Serializeable.h to include/cs_AllocatedBuffer.h added new Serializable class, and let ScanResult, TrackDevices and StreamBuffer inherit it more documentation
+ - Add some more checks if variables have been set. Perhaps do these in the CMakeLists.txt file later
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Bug fix: ERR_CODE: 7 (0x7) on sd_ble_gatts_service_add solved by BLE_UUID_TYPE_UNKNOWN instead of BLE_UUID_TYPE_VENDOR_BEGIN
+ - Merged
+ - remove tracked device by giving it a positive rssi threshold, don't change PWM all the time, don't let counter overflow
+ - Keep on scanning after disconnect, increase scan window, added continuous tick option
+ - comments on seperate line
+ - Update doc. BLE and Beacon
+ - Update doc. BLE and Beacon
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Working version of reading/writing/selecting configuration characteristic on general service
+ - Added documentation for IBeacon
+ - iBeacon update (define parameters in cs_main_crownstone when enabling IBEACON) moved UUID to seperate files (to remove circular dependency between cs_BluetoothLE.h and cs_iBeacon.h)
+ - Add ScanResults to doc
+ - Add ScanResults to doc
+ - Dominik's documentation
+ - Add general configuration characteristic to common service
+ - added documentation to Storage
+ - removed old functions from storage class, updated initBlocks and clearBlock functions, updated set- / getUint32 functions
+ - added documentation to ScanResult
+ - changed buffer in ScanResult characteristic from fixed array to dynamic array
+ - Draft configuration characteristic
+ - fixed the rem tracked device
+ - renamed PowerService::addGetCurrentCharacteristic to PowerService::addSampleCurrentCharacteristic
+ - changed bluenet_dir to bluenet_config_dir
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - changed pwm modes
+ - Solve cp warning when build folder is BLUENET_DIR/build. Print when light turns on/off
+ - Add other reference material to README
+ - increase pwm frequency
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - re-ordered CMakeBuild.config.default
+ - combine.sh don't add bootloader by default, check result of srec_cat
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - fixed iBeacon
+ - Use STRINGIFY only for clang
+ - Add some more files for documentation
+ - Add some more files for documentation
+ - Update desciption and some urls
+ - Update desciption and some urls
+ - Add readme to docs
+ - Add readme to docs
+ - Document GeneralService
+ - Document GeneralService
+ - Document GeneralService
+ - Update docs
+ - Update docs
+ - Add script to publish documentation
+ - Documenting a bit more
+ - Explain folder is website
+ - Explain folder is website
+ - Start with doc generation through cldoc
+ - Start with doc generation through cldoc
+ - Code for iBeacon separated from main code
+ - Typo
+ - Mass erase on combined target
+ - Print name on serial and turn device by default on
+ - BugFix: initialize length and type for StreamBuffer
+ - CURRENT_GET_UUID renamed to SAMPLE_CURRENT_UUID
+ - Bugfix config.sh (missing quotes)
+ - Add more info on bootloader config
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Refer to dobots git repos in readme
+ - use BLUENET_DIR in flash.expect
+ - Set s110 as default
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - script fixes
+ - Write current curve buffer to characteristic
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - make sure script runs correctly when called outside of the scriptdir
+ - Upload .hex file, not .bin file
+ - Make flash_openocd script working again
+ - Always write byte on upload bootloader
+ - Set threshold higher than 0 for ADC
+ - Disable softdevice upload on bootloader. Only upload bootloader
+ - Quotes around paths
+ - Merge with scripts that use BLUENET config
+ - Debugging getting current profile
+ - fixed bug in firmware.sh
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Added default BLUENET_DIR
+ - Use proper defines for own softdevice handler
+ - Update meshing such that the default softdevice handler is used, but that still rbc_mesh_sd_irq_handler is called as well
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - if global config is not found, search in repository
+ - combine: use config file
+ - additional debug for storage
+ - BugFix: persistent storage restored (needs NRF softdevice handler!!)
+ - moved config file
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - softdevice binaries go to the build dir
+ - Make compiling when MESHING=1
+ - Merge pull request #12 from vliedel/master
+ - prepend files with cs_, use pragma once, checked class, function and var names
+ - Combine properly
+ - Bootloader
+ - Get rid of compiler warning in rng_vals[index++] construct
+ - Merge pull request #11 from AlexDM0/master
+ - added ./combine to readme
+ - fixed default compiler path and board
+ - make it compile again with MESHING=0
+ - disabled DEBUG RADIO
+ - removed out-commented code
+ - fixed RSSI
+ - Merge remote-tracking branch 'upstream/master'
+ - Disable RSSI. No segfaults
+ - disabled rssi, fixed led initialization board check
+ - Merge remote-tracking branch 'upstream/master'
+ - set debug flags, changed channel, removed check, enabled leds
+ - Explain adv parameters
+ - Set ifdef of board with buttons
+ - Merge pull request #10 from AlexDM0/master
+ - Wording: handle instead of channel
+ - can compile again :)
+ - Set more LED pins for Crownstone
+ - Merge pull request #9 from AlexDM0/master
+ - uncommented code
+ - Merge pull request #8 from AlexDM0/master
+ - added ifdef for buttons in main with meshing
+ - Merge remote-tracking branch 'upstream/master'
+ - Create characteristic to send messages over mesh network
+ - changed comments
+ - 1.) Squashed bug w.r.t. running make twice. The TryCompile option is fed specific files in the build target of the Makefile. 2.) The Mesh class is made into a singleton so it can be called from other parts in the application
+ - About udev. Cannot make first run of cmake work directly...
+ - Tell about ST-LINK
+ - Refer to proper tar ball for cross-compiler. Dependency cmake.
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Add nrf51.cfg file
+ - Merge remote-tracking branch 'upstream/master'
+ - added virtual memo board
+ - bug fixing track devices (start with alone until device first seen, update tracked device list characteristic, serialized size corrected)
+ - remove nRF51822-softdevice.ld
+ - remove nRF51822-softdevice.ld
+ - ignore nRF51822-softdevice.ld
+ - updated readme
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Moved serial verbosity setting to cmake build config
+ - Add file to combine softdevice, bootloader, and binary to single binary
+ - removed some old code
+ - Add file with list of possible ERROR codes
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Parallel meshing and services
+ - Merge pull request #7 from AlexDM0/master
+ - added random number generator
+ - added random number generator
+ - Update explanation about commands
+ - Add text about IBEACON
+ - Merge remote-tracking branch 'upstream/master'
+ - Explain about DFU and S110
+ - updated readme
+ - Merge remote-tracking branch 'upstream/master'
+ - Add general mesh.c file
+ - Merge remote-tracking branch 'upstream/master'
+ - stuff
+ - Working on making mesh networking possible in parallel
+ - More comments
+ - Add commentary to the code
+ - Add license text
+ - Grammar mistake
+ - Incorporate meshing functionality in the build chain, but keep it still totally separate from the current code.
+ - Set the to-be tracked device in the characteristic
+ - 1.) Rename loop to tick. 2.) Turn on/off lamp automatically when none of the people tracked is nearby
+ - Explain bootloader in README
+ - In track devices functionality .init() was not called
+ - Merge remote-tracking branch 'upstream/master'
+ - Get rid of some compiler warnings
+ - fix indent :P
+ - added hardcoded ble address to track
+ - added functions to remove and add ble addresses
+ - no need to check ble address for zeroes anymore
+ - enabled and disabled msgs should have same verbosity level
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - add tracked devices to indoor localization
+ - move adc init to other characteristic
+ - add low baudrate def
+ - set correct max len
+ - Check for hardware version macro
+ - Some bugs due to the merging
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Merge with master (esp. persistent storage of other characteristics)
+ - Add characteristic to enable a firmware update
+ - Add script to upload over the air
+ - Add .hex target for bootloader python script
+ - moved some code to CurrentLimit
+ - started device presence tracking
+ - PWM is a class now
+ - added todo to scanresult
+ - Removed number characteristics as they seem unused
+ - make sure current sampling works when no current is flowing: timeout adc
+ - check hardware version for PAN
+ - seperate characteristics to start and read current measurements
+ - Read and write bytes, i.e. for UICR memory section
+ - changes for voltage curve
+ - added analog reference pin
+ - changed pin names for clarity
+ - merged
+ - merged
+ - remove breakpoint at main
+ - removed continous read of current limit from flash
+ - added additional storage helper functions (uint16 and uint32)
+ - storage: added checks if read memory has been written or is unassigned
+ - compile bug fix (but why??)
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - improved persistent storage added device name, device type and room to persistent storage (strings)
+ - Bug fix: remove Storage destructor
+ - Merge remote-tracking branch 'upstream/master'
+ - Add openocd possibility to flash the NRF51822
+ - removed variables for singleton classes and replaced by ::getInstance() calls
+ - reorganized includes to avoid APP_ERROR_CHECK macro of nordic overwriting our macro moved BLE_CALL, BLE_THROW macros and ble_exception  to ble_error.h
+ - removed ^M characters
+ - 1.) Update boards config for devkit. 2.) Do not upload if build failed. 3.) Remove break at main
+ - Merge pull request #6 from vliedel/master
+ - merge i think
+ - current limit seems to work now
+ - Update memory layout pictures
+ - Merge remote-tracking branch 'upstream/master'
+ - Disable PAN 25. In new hardware this disables LPCOMP
+ - increased heap to 3000 adjusted includes (ble_error.h has to be included after handlers.h otherwise the APP_CHECK_ERROR macro will be overwritten by the default nordic version) (almost) all services and characteristics enabled
+ - Merge remote-tracking branch 'upstream/master'
+ - Add script to get hardware version
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Merge symbols that belong to same file in visualization tool
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - log calls fixed ScanResult improved
+ - Merge remote-tracking branch 'upstream/master'
+ - Improve memory usage
+ - First try of the current limit, using LPCOMP. Compiles, not tested yet!
+ - Generate .map file
+ - Use LOGf
+ - Downgrade importance of some logging in storage
+ - Merge branch 'master' of github.com:mrquincle/bluenet
+ - check if bluetooth name is set in cmake file
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Replace all log(INFO,) statements with LOGi and equivalents and introduce VERBOSITY variable to turn all messages below certain severity off
+ - removed virtual from function definitions in ScanResult.h Changed to characStatus definition in IndoorLocalisation added initialisation of characStatus capacity
+ - Create class of real time clock
+ - Merge branch 'master' of github.com:mrquincle/bluenet
+ - Disable timer for now
+ - Add stub for dimming functionality
+ - Solved copy-paste bug: &PowerService::addCurrentLimitCharacteristic
+ - Introducing listeners and dispatchers for events that need to be communicated between classes. Currently it seems we run into memory trouble though.
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - added company identifier to manufacturing data in advertisement package
+ - Turn on/off device
+ - Merge remote-tracking branch 'upstream/generic_add_characteristics'
+ - Minor things to try out with STR macro
+ - merged
+ - made the way of adding / enabling characteristics more generic
+ - moved device type and room charactersitic to general service changed localisation service uuid
+ - ScanResult.cpp moved
+ - ScanResult.cpp moved
+ - Upgrade temp to general service. Include name change characteristic
+ - Working persistent memory
+ - Assigning value to current limit characteristic fails
+ - Debug write and clear
+ - Merge conflict w.r.t. name
+ - Implementing persistent memory access. Clearing seems to interfer with softdevice. Writing operations seems not to be queued
+ - Round-trip for storing persistent memory w.r.t. current limiting. Bug fix required: PSTORAGE_LOAD_OP_CODE 0x03 is returned on reading from FLASH
+ - fixed advertisement package to work with 128bit UUID commented dummy characteristics so that they don't get created (memory issues)
+ - Add persistent storage files
+ - 1) Disable timer.h. 2) Memset fix of list in ScanResult
+ - moved ADC to PowerService
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - ScanResult arrays made dynamic, Boards.h updated, Services/Characteristics adjusted (new service PowerService), characteristics moved, CMakeLists corrected
+ - Update include for ScanResults
+ - Merge remote-tracking branch 'upstream/master'
+ - Make ADC into an object
+ - ScanResult files moved to characteristics folder. Advertisement corrected (to be used with app)
+ - Update license text in each file
+ - Remove reference to mbed. Update README. Use malloc for buffer in ADC
+ - len should be signed
+ - Add hard fail when memory allocation fails, so culprit is found directly. Crank up heap size to 2kB
+ - Remove Pool to save memory. Plet bug: uint8_t is too small for length var (len) to write over uart
+ - Resolve merge conflict manually
+ - Debugging around memory use
+ - bugfix merge problems. BEWARE, because we are using fixed arrays, increasing the size will cause memory and runtime problems.
+ - Merge branch 'master' of github.com:dobots/bluenet into cleaned
+ - onAdvertisement and scanResult variable moved to IndoorLocalisationService
+ - Merge pull request #4 from mrquincle/master
+ - Merge remote-tracking branch 'upstream/master'
+ - Merge remote-tracking branch 'refs/remotes/origin/master'
+ - Notifications fixed (tx buffer problems when too many notifications are sent) refactoring / renaming of member variables
+ - Merge pull request #9 from vliedel/master
+ - init pointers, fixed class var names
+ - merged, removed use of common/timer, replaced by nrf_rtc
+ - add rtc output to adc sampling, remove pwm at rssi change
+ - use correct pwm mode again
+ - init pwm
+ - use rtc1
+ - templated buffer
+ - no need for extern C?
+ - include rtc in adc, so it can write the time
+ - fixed .pop and templated buffer type
+ - remove app_timer
+ - ScanResult cleaned up shortcuts to serial.h added
+ - ScanResult fixed (memory problems because of malloc)
+ - Switch to S110 and wrap all ADV stuff in precompiler excludes
+ - Timing
+ - first attempt to rtc
+ - Merge branch 'master' of github.com:mrquincle/bluenet
+ - Creating timer
+ - Merge branch 'master' into cleaned
+ - merge contd. ScanResults debugging
+ - Merge pull request #3 from mrquincle/master
+ - Merge pull request #8 from dobots/master
+ - Bug in writing long strings
+ - Add BOARD as variable to CMakeBuild.config
+ - Merge branch 'master' into cleaned
+ - Merge pull request #7 from vliedel/master
+ - fixed rx/tx pins
+ - Merge pull request #2 from mrquincle/master
+ - Merge pull request #6 from dobots/master
+ - use pin_rx and pin_tx
+ - added evaluation board
+ - Show some more data
+ - Bug fix: pop. Remove array.
+ - Merge pull request #1 from mrquincle/master
+ - Bugfix for memory problem with buffer and serializable
+ - Use interrupt handler for ADC. Wasn't called because of C++ mangling. Use buffer to store results.
+ - Start pulling in some mbed files. Seems to work okay for now.
+ - Merge branch 'cleaned' of github.com:dobots/bluenet into cleaned
+ - ScanResult finalized, provided as Characteristic BluetoothLE library fixes
+ - Separate headers and sources. Stubs for protocol files. Adjust the AD file, because it interfers with the softdevice, not finished though.
+ - Merge with restructuring from Dominik
+ - error in loop, debug code instead of real temperature value
+ - build fix
+ - Plot voltage curve
+ - Merge pull request #4 from vliedel/master
+ - added adc, added compile date as device name
+ - Merge branch 'cleaned' of github.com:dobots/bluenet into cleaned
+ - Notifications fixed TemperatureService fixed iBeacon functionality added Characteristic properties fixed BLE scan result stored (initial version)
+ - Notifications fixed TemperatureService fixed iBeacon functionality added Characteristic properties fixed BLE scan result stored (initial version)
+ - bugfix for more than one custom service
+ - log, uart and temperature code moved to headers. services moved to separate files
+ - experimenting with pwm
+ - cleaned out the code. deleted everything that was not necessary!! code compiles, uploads and runs still.
+ - add volatile, see http://hg.cmason.com/nrf/commits/dcf31efcc133c8ad5cd2dd67f763c85764538a9b?at=default
+ - remove unused vars, see http://hg.cmason.com/nrf/commits/fed71cdc1af26f0168463928ed58df9f196d0d63?at=default
+ - Use SOFTDEVICE_DIR_API and preserve SOFTDEVICE_DIR
+ - Merge pull request #3 from vliedel/master
+ - use SOFTDEVICE_API_DIR
+ - Merge branch 'master' of https://github.com/mrquincle/bluenet
+ - bash instead of sh
+ - Update how to upload firmware
+ - Add other default configuration options
+ - Add SERIES in default config
+ - Merge branch 'master' of https://github.com/mrquincle/bluenet
+ - these scripts should run with bash
+ - Add support for uart in separate serial.h/cpp files
+ - Correct writing to UART.
+ - Playing around with UART
+ - Set RAM space to correct value, 6kB, not 10kB as wrongly indicated in the spec from Nordic
+ - Adjust available FLASH for application with larger s130
+ - Add defaults for RAM values for SoftDevice
+ - RAM_R1_BASE parameter for S130. Still heap seems to be overwritten or other issues are at hand
+ - Update default start address for s130 softdevice
+ - Feed configuration options also through the preprocessor/compiler.
+ - Compiles properly with the S130 softdevice, but it doesn't seem to get up yet
+ - Set default to S110 v7
+ - Make softdevice 7 and sdk 6 compilable
+ - Add tiny bit on usage of Crownstone
+ - Older
+ - Default config file update to several softdevice options
+ - Updating to SoftDevice v7 is a hassle. There are quite some ABI/API changes. Not done yet.
+ - Use parameters to define the size of the SoftDevice and start address of the application
+ - Correct upload script for softdevice
+ - DoBots inside
+ - Explain more in the README.md about the installation process
+ - Rewrote building process, so it is more reliable, emits less errors (which are no errors). Use CMake so configuration is easy adjusted. Generate object files in separate folder, so it is less cluttered.
+ - Working PWM, but code is now very ugly
+ - Remove temp files
+ - Remove redundant files. Working on analogWrite as in Arduino code
+ - Remove redundant files. Working on analogWrite as in Arduino code
+ - Working for the RFduino
+ - Sending RSSI values in main_ble.cpp
+ - Grammar
+ - Update year
+ - Commit from hg repos by Mason
+
+ - updated device types to plug and builtin bugfix MESH_ACCESS_ADDR in CMakeBuild.config
+ - added the missing function again (was removed during the merge??!!)
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - bugfix KeepAlive (use Switch command instead of PWM)
+ - added gotoDfuCharacteristic to SetupService
+ - bugfix session nonce
+ - Tracker works again, now relies on the scanner to start scanning.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Added filter for new crownstones and guidestones.
+ - Add License buttons
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - update ramBase update service UUIDs for crownstone plug, builtin and guidestone removed warnings in cs_MeshControl
+ - Update PROTOCOL.md
+ - When doing calculations in defined variables, make sure to enclose them in brackets.
+ - changed the RELAY_HIGH_DURATION to 15ms
+ - added missing nrf52 ifdef to timer.c updated CMakeLists.txt
+ - bugfix updatePasskey for s132
+ - added device type checks to compile to avoid compiling switch for guidestone
+ - prepared for hardware version
+ - fixed firmwarescript for uploading bootloader to multi target
+ - made mesh functional again prepared mesh to be replaced by nordic rbc_mesh repo
+ - merged with rbc_mesh nrf52
+ - bugfix verbosity make bugfix address in firmware.sh
+ - added keep alive message and keep alive interval config
+ - Ask for update every 100 times
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - fixed event bitmask
+ - Make sure compilation is not done twice every single time. Add some make-up for the developer
+ - fixed path in scripts to call outside scripts folder
+ - replace echo by printf
+ - improved scripts, added colors, added error reporting
+ - added BLUENET_BOOTLOADER_DIR added build bootloader step to all.sh script fix for ./firmware.sh clean
+ - Rescale image
+ - Add document about localization
+ - added a timer to the factory reset process so we have enough time to read the result of the factory reset process
+ - change permissions for setting switch after setup
+ - Gulp can be used to automatically build the project after code changes.
+ - bugfix CMakeBuild.config.default bugfix firmware.sh script
+ - moved check_targets out of config.sh again (buggy)
+ - source environemt variables in bashrc and only verify if assigned in config.sh script
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - copy softdevice to bin folder not build folder
+ - updated INSTALL.md
+ - Update PROTOCOL.md
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - added additional environment variables: BLUENET_WORKSPACE_DIR, BLUENET_BIN_DIR, BLUENET_RELEASE_DIR updated config.sh script moved check_targets into config script bootloader uses the same config script
+ - session packet -> session nonce
+ - Moved faq to FAQ.md. Attempt to improve encryption documentation.
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Set pwm at boot.
+ - Switch on relay after validating setup.
+ - Switch off pwm when setting relay via switch command.
+ - Merge remote-tracking branch 'origin/sdk_11' into sdk_11
+ - catch overflow case in encryption
+ - Update README.md
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Made pwm period configurable.
+ - pca10040 does have inversed switch after all
+ - pca10040 does have inversed switch after all
+ - Until meshing works again: disable by default.
+ - Improved recovery doc a bit.
+ - added timer for setup
+ - schedules an update of the servicedata content every second. This improved security since there is no temporal information other than connect/disconnect. It also allows us to change the random number, making sure we can listen to unique updates, whereby processing less that 10% of the advertisements. Saving phone battery!
+ - added todo to illustrate what to do when reset is disabled. This is a seperate commit since I will include this error message in the  ios lib.
+ - added log to indicate when recovery period has expired
+ - added responses to the factory reset process so the user is informed if the process has been successful.
+ - 1. Re-revert ACTIVE_LOW vs ACTIVE_HIGH as with the 2d25c9e commit. 2. Made config?Ch functions nonstatic member functions and only result static, so it can refer to class instance variables (such as _inverted). 3. Introduce _inverted rather than relying on the SWITCH_INVERSED macro.
+ - Run doxygen again
+ - Update links in TODO, but TODO itself is not up to date
+ - Relative link to docs, would be great if there was a ROOT variable
+ - Remove Apple DS_Store hidden file, blame Alex
+ - Have all documentation in docs/
+ - Move memory layout files to own directory. Move manuals to own directory.
+ - Revert "Move source code documentation from docs/ to docs/source-code/"
+ - Revert "Active high when switch is inversed"
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Move source code documentation from docs/ to docs/source-code/
+ - Active high when switch is inversed
+ - Make sure the pwm actually knows when SWITCH_INVERSED is defined
+ - Don't switch on pwm by default.
+ - Use relay by default, instead of pwm.
+ - Default behaviour should be that settings should be stored.
+ - Merge pull request #28 from marciwi/sdk_11
+ - added boards: builtin_acr01b1a and plugin_flexprint_01
+ - Merge remote-tracking branch 'origin/sdk_11' into sdk_11
+ - fixed bug in factory reset
+ - Add config script for Bluetooth with recent bluez
+ - Make Eddystone work, but with generating errors in updateAdvertisement
+ - Enable encryption by default.
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Add TX power level for Eddystone
+ - Use string for website
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Use http prefix for crownstone.rocks in Eddystone
+ - Merge branch 'sdk_11' of https://github.com/crownstone/bluenet into sdk_11
+ - A Physical Web Beacon is shown in the Nordic app, but it can't be found in the physical web browser
+ - Eddystone default 0
+ - Add BLE address at startup code
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Merge Eddystone functionality with sdk-11 branch
+ - Merge Eddystone functionality with sdk-11 branch
+ - Update scripts to use BLUENET_BUILD_DIR
+ - Merge branch 'sdk_11' of https://github.com/crownstone/bluenet into sdk_11
+ - Use BLUENET_BUILD_DIR in combine.sh. Update also upload_over_the_air.sh, but is used?
+ - Allow to go to DFU mode in GeneralService
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - When enabling mesh, make sure the proper branch is used
+ - Decode only payload
+ - Print STATE_MESSAGE in decode function
+ - Todo: probably I'm mixing up between mesh_message_t and mesh_header_t
+ - Set proper size for STATE_MESSAGE
+ - Merge branch 'sdk_11' of https://github.com/crownstone/bluenet into sdk_11
+ - Debugging mesh
+ - nRF51->nRF52. Add cs_sysNrf51.c IRQ handler names. No functional change.
+ - Use BLUENET_BUILD_DIR as environment variable, not just BLUENET_CONFIG_DIR/build
+ - Add option to use mesh code straight from repository
+ - Test: send 'Mesh online' message after mesh->start() in main
+ - nRF51->nRF52: Disable sd_nvic_EnableIRQ
+ - nRF51->nRF52: Use sd_ble_tx_packet_count_get rather than sd_ble_tx_buffer_count_get. Use BLE_ERROR_NO_TX_PACKETS rather than BLE_ERROR_NO_TX_BUFFERS.
+ - Undefined: SERIAL_CRLN -> SERIAL_CRLF
+ - nRF51->nRF52: Use NRF_RADIO_HFCLK_CFG_NO_GUARANTEE rather than NRF_RADIO_HFCLK_CFG_DEFAULT
+ - nRF51->nRF52: Use NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM rather than NRF_CLOCK_LFCLKSRC_XTAL_20_PPM
+ - nRF51->nRF52: Use nrf_clock_lf_cfg_t rather than nrf_clock_lfclksrc_t
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - The build directory in BLUENET_DIR, not in BLUENET_CONFIG_DIR
+ - fixed bug: when encryption is off, access is not provided by the encryption handler
+ - minor stuff
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Added relay delay: stop scanner when trying to switch the relay.
+ - Set pwm frequency to 50Hz. Should be made configurable.
+ - Changed remark about scan window/interval. We should look into this.
+ - Don't use tracked devices, this is outdated code.
+ - fixed double init of encryption handler and it now gets the operation mode from state, not from settings
+ - fixed factory reset timer issue. Factory reset tested and works
+ - Made sure factory reset oppertunity is only 10 sec, fixed authentication issue there. Fixed ddos possiblity (write before triggered disconnect applied,crash)
+ - Merge remote-tracking branch 'origin/sdk_11' into sdk_11
+ - made the counter in service more efficient, transferred the comments from the encryption cpp to the header file.
+ - Fixed adc gain, so we measure in the range 0 - 1.2V.
+ - updated service random to use counter for two bytes to save processing time.
+ - removed shorthand for encryption
+ - Merge remote-tracking branch 'origin/sdk_11' into sdk_11
+ - Merge remote-tracking branch 'origin/sdk_11' into sdk_11
+ - Merged
+ - removed print loop of mac
+ - ADC works again.
+ - Moved pwm timer config to cs_Config.h
+ - Renamed crln to crlf.
+ - Put max number of services in config.
+ - added clion setup doc
+ - Merge branch 'merge' into sdk_11
+ - added anne's hardfloat enable, restored the defaults
+ - updated arm toolchain
+ - Add definitions as CMake configuration values (with SET). Perhaps this will help some IDEs with syntax highlighting
+ - merge
+ - Merge branch 'nrf51' into sdk_11
+ - updated the encryption to all go through the .encrypt method. Introduces Encryption types enum. Made sessionNonce cafebabe ECB encrypted. Redesigned setup phase so we do not need to bond. Bonding causes issues with iphones which want to bond after setup as well. Iphones cannot clear the bonded history programmatically. Power service is not encrypted because it is using the encryption buffer. We need to rethink the providing of buffers to the characteristic. Added safeguard for disconnect in stack, now checks if we are even connected.  Removed ancient code. Removed a lot of commented out blocks, we have git for history. Fixed few bugs. Removed restoration of high tx on bonding due to security concerns. Updated protocol doc to 0.6 to include the new characteristics and encryption state of setup and power service
+ - Address all other warnings. Compiles without any now.
+ - Squash cast and unused var warnings
+ - Make all warnings into errors
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Clean up compiler flags
+ - Merge branch 'sdk_11' of github.com:crownstone/bluenet into sdk_11
+ - Fixed bootloader not starting firmware
+ - Fixed having multiple services. Fixed memory issues by setting correct app start address?
+ - Fixed timer for indoor localization service
+ - Fixed timer for delayed reset
+ - Add hardware float to linker flags
+ - fixed protocol not being set in the encrypted advertisement buffer
+ - made sure crownstone does not revert to high TX after bonding, made specific advertisement case for setup, added automatic disconnect when the bonding fails
+ - Use 512kB rather than only 256kB
+ - Fixed writing of characteristics. Should get a better fix later.
+ - With this config it actually runs :)
+ - TimerData of services has to be made in the services themselves.
+ - Added some debug for ram usage/settings.
+ - Fixed all timer ids
+ - Fixed softdevice init
+ - Something is wrong with the hard float flags
+ - bit of refactoring with bart and made sure the instances for mesh and scanner are available everywhere. Triggered by bug that setup mode could not write to pstorage since mesh was enabled in settings but not running.
+ - Removed linker flags: -Wl,--wrap,__aeabi_unwind_cpp_pr0
+ - Added app_error_handler_bare()
+ - Copied app_timer.c from sdk.
+ - replaced magic number with define
+ - various sdk/sd calls fixed
+ - Compiler flags: can't use the small size libs (_s) anymore, because of the need for a new compiler.
+ - app_timer_id_t changed. BLE_ERROR_NO_TX_BUFFERS became BLE_ERROR_NO_TX_PACKETS. Fixed sd enable. device_manager_peripheral changed.
+ - merged
+ - fixed bug with session nonce being generated regardless of mode, leading to hardfault on connect and disconnect
+ - Update PROTOCOL.md
+ - Update PROTOCOL.md
+ - Update CMakeBuild.config.default
+ - disabled indoor service by default in order for the code to fit on the nrf51822
+ - ugly removal of adc and lpcomp code
+ - Use old clock source for old sdk version
+ - Changed serial verbosity level names, added option to not build the mesh, fixed pwm.
+ - -
+ - Merge branch 'master' into sdk_11
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Bumped version to 0.5.1
+ - Merge branch 'master' into sdk_11
+ - Merge pull request #24 from dobots/master
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Actually report power usage in mW.
+ - Updated protocol doc.
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - spaces, yeik
+ - No need to clear the value of power samples characteristic anymore?
+ - Changed advertisement packet, now has space for random bytes. Shortened some strings.
+ - Factory reset now happens on boot.
+ - Update PROTOCOL.md
+ - Update protocol
+ - need more heap :(
+ - on recovery timeout, set factory reset state back to normal
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Renamed USER to MEMBER.
+ - Advertisement shouldn't be encrypted in setup mode.
+ - Added factory reset via recovery characteristic.
+ - Merge branch 'sdk_8' of https://github.com/dobots/bluenet into sdk_8
+ - added calculation of decryption buffer size to encryption handler for dynamic characteristics
+ - Use power sample char also for 101hz samples
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Added disconnect command
+ - inited->initialized
+ - made default encryption level admin
+ - fixed bug in length determination
+ - Merge branch 'sdk_8' of https://github.com/dobots/bluenet into sdk_8
+ - added static function to enryptionHandler to dynamically calculate the buffer size for encryption
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - merged, removed namespace from encryption
+ - added setting for mesh access address, owner key is now called admin key, updated protocol, added option to o disable encryption on a characteristic
+ - Merge branch 'master' into sdk_8
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - updated notifications for multi part notifications removed BLEpp namespace removed BLEStack baseclass reduced MAX_CHAR_VALUE_STRING_LENGTH from 25 to 12
+ - added encryption to the scan response packet, tested ECB encryption
+ - added session nonce characteristic according to protocol v5 alpha
+ - tested the encryption, integrated with the characteristics, disconnect on failure
+ - added disconnect method to stack, updated encryption to return accesslevel on decryption. Ask dominik how to disconnect on write
+ - inserted encryption into the characteristics, updated the code, no need for seperate buffers! needs testings
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - include 4 byte for max gatt value length
+ - updated the encryption code to correspond to protocol v5alpha. needs testing, needs validation, needs integration
+ - updated the protocol doc
+ - Continuous power sampling is now set at 101Hz. Fixed some possible bugs in reading/sending of the data.
+ - Decrease default boot delay to 400ms
+ - Added mesh settings to config file, fixed bug in sendPowerSamplesMessage.
+ - Updated encryption protocol
+ - increased jlink speed in debug script to 4000
+ - bugfix characteristics updateValue
+ - updated switch state in protocol
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - increased upload speed to jlink bugfix pstorage update validate setup write switch state (pwm / relay) to characteristics
+ - cleaned up and prepared characteristics for aes encryption
+ - changed protocol to padding to use PKCS7, still need to add this in the code
+ - updated encryption protocol
+ - added encryption to the protocol, please review
+ - Merge branch 'sdk_8' of https://github.com/dobots/bluenet into sdk_8
+ - finalized the encryption class, needs testing
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Got rid of some warnings.
+ - Merge branch 'sdk_8' of https://github.com/dobots/bluenet into sdk_8
+ - made start for encryption, mostly Bart fixed includes in a lot of files
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - averaging window size for zero detection is now configurable
+ - default switch state
+ - updated service data, added protocol version, added temperature, changed PROTOCOL.md updated protocol version to 0.4.3
+ - Merge pull request #23 from dobots/master
+ - update struct (working memory) even if PERSISTENT_FLAGS_DISABLED==1
+ - removed old/unused code bugfix command handler (create/init in setup mode)
+ - updated protocol 0.4.2
+ - bugfix service data bugfix mesh start fix for settings flags (meshEnabled, scannerEnabled, etc)
+ - switch update added extended switch state added PWM_DISABLE define
+ - added pca10040 board
+ - some nrf52 changes
+ - fix softdevice dir in _config.sh added speed setting to hardware_version.sh
+ - updated mesh payload packet
+ - updated INSTALL document
+ - update CMakeBuild.config.default and *template update cs_Boards bugfix pstorage bugfix State get
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - bugfix use stored name if reset counter used
+ - updated CmakeBuild.config.default and *.template
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - fix log typo
+ - Make sampling interval configurable
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - use softdevice from the nordic sdk, removes dependencies and simplifies config
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Use relay for relay characteristic
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added cs_Debug.h to simplify enable of verbose logging
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - bugfix float size in settings increased brownout trigger voltage to 2.7
+ - saving space - use defined strings in cs_Strings.h - spread #define PRINT_VERBOSE around to reduce logging
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - merged
+ - added additional low level configs
+ - Increase relay switching period to 20ms
+ - For high sample rates: start timer after sample is finished. This guarantees ADC doesn't get started while it's already busy.
+ - Automatically determine zero line of voltage samples
+ - Don't switch default on/off
+ - added dobeacon board added brownout detection added device type check (switch, tempGuard and powerSampling, PowerService only for Crownstones)
+ - updated hardware_version.sh
+ - added temperature to service data (replaced one byte of reserved for now)
+ - added delayed execution to command handler
+ - replaced target mac address by target crownstone id for mesh messages
+ - added low level configs bugfixing pstorage addes service data over mesh bugfixing error code for ConfigControl and StateControl on success
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - update to count accidental resets (set gpregret to 0 on successful connect)
+ - set low tx power in setup mode
+ - simplified state class updated protocol
+ - added error codes (return values) to mesh control, config control and state control characteristics added error codes to settings and state functions
+ - updated setup service added error return code to control characteristic and handleCommands added relay, setTime and validatSetup commands added time to state variables
+ - plugin has relay
+ - reset counter fix (take 2)
+ - disable debug output for CyclicStorage
+ - fix for pstorage delay on startup (related to mesh)
+ - fix reset counter
+ - bug: setting name at runtime
+ - use MESHING define instead of CHAR_MESHING
+ - use -j4 for make update reset characteristic to use uint8 init mesh earlier
+ - bugfix if serial verbosity = none
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - fix error in CrownstoneService UUID
+ - Fixed bugs
+ - Use relay when it's there.
+ - pwm and relay are 1 byte
+ - Added power consumption calculation. Enabled power samples reading: data will be empty when data is invalid.
+ - added encyrption keys to settings (owner, member, guest)
+ - renamed advertisement-packet to adv-packet (github bug, did not show picture with old name ...)
+ - update protocol
+ - bugfix uart (initialize even earlier) bugfix state notification renamed doBeacon to guidstone
+ - bugfix state packet table in PROTOCL
+ - cont. refactoring updated service data enable/disable mesh
+ - changed UUIDs of Services and Characteristics added CrownstoneService, moved Control, Mesh, Config and State characteristics over from GeneralService added CrownstoneId to settings renamed StateVar to State updated mesh message types removed CharBuffer (use only StreamBuffer) renamed MeshCharacteristicMessage to MeshCommand (using StreamBuffer)
+ - fixed CMakeBuild.config.default after merge
+ - updated Protocol description
+ - Update README.md
+ - updated protocl with advertisement, scan response and service data packets
+ - Merge branch 'master' into sdk_8
+ - updated storage functions
+ - moved files around
+ - changed handling of name in settings
+ - Merge pull request #20 from dobots/master
+ - Updated doxygen docs to 0.3.0
+ - bumped to version 0.3.0
+ - Added LED pins to crownstone 5 board
+ - Attempted to fix ADC current draw, but this will be fixed in the next version.
+ - Make sure the PWM get initialized earlier and starts switched off.
+ - Documented mesh chars
+ - integrated new power sampling
+ - crownstone company id
+ - moving power sampling code to cs_PowerSampling
+ - Merge branch 'sdk_8' into refactoring
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added SetupService updated encryption for SetupService
+ - Added burst and continuous power sampling.
+ - rename of Command Char to Control Char renamed init of services to addCharacteristics
+ - introduced operation mode (setup, normal, dfu)
+ - bugfix config flags (init all flags to default value) store ibeacon settings with one call reorganized/restructured crownstone main bugfix pstorage if scanning cleaned up MeshControl use CommandHandler when sending commands over mesh bugfix CircularBuffer (use assigned buffer instead of allocating) update StateVars only if changed
+ - Merge branch 'sdk_8' into refactoring
+ - Merge branch 'sdk_8' into continuous_sampling
+ - reorganized main, cleaned up and made it more structured
+ - GeneralService updated added notification to StateVar read characteristic included config select in config set with different opcode changed UUIDs for GeneralService added temperature to statevars (not stored in flash) use reserved byte in StreamBuffer for opCode
+ - change relay pins of crownstone5
+ - added get and set functions for settings, replaces direct access to config struct
+ - moved code into separate classes (switch, power sampling, tracking, scheduling) added factory reset moved schedule list and tracked device list to state vars continued CommandHandler continued enable/disable with config
+ - enable/disable through settings
+ - moving code out of services use command handler
+ - Updated protocol
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Added some more info about advertisement / scan response data
+ - Update README.md
+ - Update README.md
+ - Update RESOURCE_ALLOCATION.md
+ - updated resource allocation
+ - updated resource allocation
+ - Added resource allocation doc
+ - Increased default attr table size. Set default heap size, oops.
+ - updated default config
+ - Updated protocol doc: config types
+ - Added little todo to scheduler
+ - Fixed bugs when mesh was not enabled
+ - added crownstone service data (switch state, power consumption, crownstone id, etc)
+ - made current limit into configuration value, removed from power service storage update (pause mesh, request buffer) settings update (state variables, write only element instead of whole struct) state variables update, added characteristic for read/write state variables bugfix master buffer (have payload word aligned)
+ - Added new board
+ - removed statevar from Settings, use separate StateVars instead
+ - use git hash as firmware revision and git branch as software revision, when compiling as debug
+ - disabled some meshing debug
+ - bugfix for mesh + storage (last fix did not work anymore because of the change to use scheduler everywhere)
+ - added state variables to storage (similar to settings) added cyclic storage for wear leveling
+ - device information service update (include branch name as software_revision) and include by default
+ - fixed pstorage bug, state_vars had the wrong handle number
+ - merged
+ - increased scheduler queue size iBeacon uuid fix
+ - fixed last fix ;p
+ - Added the Scan Response packet. Bart needs to do the images.
+ - fix merge error?
+ - Merge branch 'sdk_8' into continuous_sampling
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - updated advertisement for iBeacon, normal BleDevice updated iBeacon included ServiceData (not yet finished) added advertisement update with tick function
+ - added reset counter (can be read and reset through config)
+ - removed while loop from sampleCurrent use scheduler for mesh notifications
+ - clear pending notifications when notification disabled
+ - softdevice init with app scheduler serial print update
+ - Update INSTALL.md
+ - store schedule in flash
+ - Whoops! make it compile again.
+ - Added synching of schedule list when time is set.
+ - Updated protocol doc
+ - Added dim on distance demo
+ - Added little TODO
+ - MasterBuffer::getBuffer() is deprecated.
+ - MasterBuffer::getBuffer() is deprecated
+ - Forgot to commit the CHAR_SCHEDULE in toolchain.
+ - Added schedule entries.
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added log level check to _log(..) function
+ - debug output
+ - use timer/tick to sample current config values for sampling interval and pause time use timer with app scheduler removed repeated timers (use single shot timers instead)
+ - added missing ifdefs for ENCRYPTION
+ - updated bonding added security request timer increased max bonds to 8
+ - Really fixed tracked devices
+ - fixed track devices
+ - pwm period is in us
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - adjusted PSTORAGE_MAX_APPLICATIONS to 3 (1 for general service, 1 for indoor service, 1 for device manager) adjusted APP_DATA_RESERVED to 0x1000, to cover the whole pstorage memory
+ - updated protocol to new PWM
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - pwm code cleanup
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Use .md files in doxygen output
+ - PWM fix
+ - merged with master
+ - data diagrams more consistent
+ - Add corresponding documentation
+ - Finished writing oneliners for each class
+ - Cleaned up the readme
+ - Merge pull request #19 from dobots/master
+ - added data structure images
+ - Almost added all data packets
+ - Restructuring readme: WIP!
+ - First commit of protocol
+ - Less lists
+ - Update INSTALL.md
+ - updated the install doc
+ - merged with master
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added some more explanation in the hardware_version script
+ - Remove double ** around copyright statement
+ - Update document generation
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Update documentation
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - updated INSTALL.md and README.md with new links to SDK and softdevices
+ - Add exclamation mark to comments
+ - Add doxygen config file
+ - update for dobeacon leds
+ - added DOBEACON board with LEDs
+ - Merge branch 'master' into sdk_8
+ - switched relay pins
+ - moved show_scans.py to new repository (data analysis)
+ - Generalized filter function
+ - Filter in/out beacons via seperate function
+ - Added rssi and frequency plots
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Added parser for rssi measurements. Fixed plotScansAsDots
+ - Merge branch 'master' into sdk_8
+ - removed old CMakeBuild.config.local again
+ - added relay characteristic adjusted boards and config for relay
+ - Merge branch 'master' into relais_test
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added ATTR_TABLE_SIZE to increase gatt attribute table size (needed to enable all services/characteristics)
+ - Added better labels on x-axes
+ - added hub parsing and filters to show scans script
+ - added MESH_GATT_EVT_OPCODE_DATA_MULTIPART_START for mesh notifications, to improve detection of missing notification messages
+ - using random delayed start for interval scanner on boot ignore first mesh message if it arrives within certain time to avoid handling old messages on boot up cleaned up mesh code and scanner
+ - Merge branch 'sdk_8'
+ - added INTERVAL_SCANNER_ENABLED to CMakeBuild.config
+ - added max length to stream buffer (prevent using bigger length than available buffer size)
+ - Merge branch 'sdk_8'
+ - using different CMakeBuild.config at the same time
+ - Added config mesh message
+ - Fixed random scan start delay
+ - Added scan filter send fraction
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - added scan filter (e.g. filter out crownstones and dobeacons in scan result) added command scanner start / stop over mesh
+ - added notification buffers for mesh notifications
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - Added python script to visualize the mesh scans
+ - fixed settings bug when ibeacon==1
+ - Reduced settings code size
+ - temperature should be signed
+ - remove local config file
+ - Added settings: boot delay, scanner durations, max chip temp
+ - relay, not relais
+ - added "sequential" notifications to send complete mesh message as notification (the hacked way)
+ - Added disabling of handles that we don't use
+ - Added guard dog on incoming mesh messages
+ - Make sure power/current curve can't be larger than BLE_GATTS_VAR_ATTR_LEN_MAX
+ - Added options to change name/minor on boot
+ - Follow mesh integration docs: advertisement interval should be >= mesh timeslot period
+ - Follow the mesh integration docs: Init mesh before start_advertising, and don't call sd_enable.
+ - mesh payload of 99B is enough for 10 scan messages
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - still using sdk 6 update relais switching
+ - using different CMakeBuild.config at the same time
+ - fixed bootloader upload in firmware script
+ - using different CMakeBuild.config at the same time
+ - added DEVICE_INFO_SERVICE to CMakeBuild.config to enable/disable Device Information Service
+ - Merge branch 'master' into sdk_8
+ - Merge branch 'dfu_upload'
+ - switch update
+ - Fixed max mesh message length
+ - Added black list
+ - added white list to scan results
+ - undo using SENDER
+ - Mesh seems stable now, using new radio_control.c
+ - Wait some time before sending scan results, to make sure the node is synched with the mesh
+ - enabled multiple gdb sessions
+ - merged with master
+ - Added bootloader settings to config file
+ - CMakeLists update added missing MESH ifdefs
+ - update CLOCK_SOURCE
+ - Merge branch 'sdk_8' of github.com:dobots/bluenet into sdk_8
+ - fix to run without services
+ - added measurement of frequency (this will break on overflow of RTC)
+ - added Scanner class
+ - added mesh tests for bandwidth
+ - added relais test. needs to be integrated properly
+ - merged mesh code with newest version of nRF51-ble-bcast-mesh, branch sdk-8-support added fixes to make it work again
+ - Fixed error when enabling indoor localization without mesh
+ - Cleaned up cs_Boards.h
+ - includes updated
+ - fixed Device Manager (wrong alignment of peer table)
+ - fixed PWM
+ - fixed values for S110 8.0.0, see CMakeBuild.config.default
+ - updated to NRF SDK 8.1 (for meshing) requires S130 1.0.0 to work (see CMakeBuild.config.default for udpates) PWM "broken" Device Manager "broken" S110 "broken", requires S110 8.0.0
+ - merged
+ - renamed cs_MeshMessage.h cs_MeshCharacteristicMessage.h renamed handle to channel for mesh messages added scan message as hub mesh message update scan result, averaging rssi and replace lowest RSSI instead of lowest occurence disabled logs for device_manager_central.c
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Make heap size configurable from config file
+ - partial undo of commit from 12.10.15 (code that shouldn't have been commited)
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - bugfix for device name
+ - seems like // is not for comments in .ld
+ - Added comments for 32kB chip
+ - 10s timeout for tracked device is too low
+ - Added temperature guard, fixed PWM::getValue()
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - fix for device type
+ - Explicitly don't start the HF clock
+ - Measure both voltage and current
+ - fix for printArray
+ - BugFix Advertisement
+ - BugFix s130
+ - fixed amplification factor for crownstone v0.8x
+ - Moved VOLTAGE_AMPLIFICATION and SHUNT_VALUE to cs_Boards.h. Crownstone now calculates power consumption instead of current consumption
+ - moved code from cs_Settings.h to cs_Settings.cpp added DEVICE_TYPE to CMakeBuild.config use device type to adjust advertisement package (will be used in library to filter for devices) update fridge max and min temp when config updated enable write on alert characteristic (to reset)
+ - Enable combined alerts
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - fixed timestamp overflow
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - improved current consumption calculation (still not verified though)
+ - Merge pull request #18 from dobots/master
+ - Update README.md
+ - Added LOW_POWER_MODE: avoids using the HF clock (saves a lot of power), and disables GPIO that we don't really need, like debug leds. Added PWM_ENABLE, so you can disable the PWM completely, which saves a lot of power.
+ - Only enable uart when debug level is < NONE, this might save some power
+ - Some indent and comment fixes
+ - turnOff() on boot when DEFAULT_ON==0, need this for inversed switches
+ - Don't always start Fridge
+ - updated binaries for dobeacon
+ - fixed schedule service uuid
+ - alert service doesn't need cs_storage
+ - Added schedule service
+ - Added more functions to and improved RTC.h
+ - added crownstone2 bin for dfu
+ - bugfix apptimer (if service doesn't have a tick) moved STRINGIFY to cs_Utils set default value on characteristics add hardware and firmware revision to DeviceInformation Service
+ - nordic beacon also used for sensors
+ - Added nordic beacon board (PCA20006)
+ - added new binaries for dfu upload
+ - added latest pcb version
+ - Merge pull request #17 from dobots/master
+ - add FIRMWARE_VERSION to CMakeBuild.config added DeviceInformation Service
+ - test version for dfu
+ - update APPLICATION_START_ADDRESS and APPLICATION_LENGTH for s130 0.9
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - removed static from m_peer_table (address has to be aligned to 4, but with static it is not!)
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Added way to inverse switch pin (define SWITCH_INVERSED in cs_Boards.h)
+ - fixed default config
+ - test dobeacon.bin
+ - update bin
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - update bin
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - change default s130 to version 0.9.0
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - added binary for dobeacon (as test for upload dfu)
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Added fridge temperature check
+ - Added alert service
+ - fixed bug in setting min and max env temp
+ - added device_manager_central.c for softdevice 130
+ - reset with timer after 100ms, so that write characteristic succeeds before reset
+ - streambuffer should include utils.h
+ - moved hz/ms to ticks macros to timer.h
+ - added default min and max env temp
+ - added min and max environment temperatures
+ - added passkey to persistent storage added timeout for low power mode
+ - restored settings go into low tx power during bonding
+ - disabled settings (for testing encryption) add static passkey and encryption
+ - compilation fix
+ - adjust tx power when trying to bond. go back to normal power when bonded
+ - Merge branch 'master' into security_test
+ - add serial number as first parameter (optional) to hardware_version.sh
+ - added hardware board CROWNSTONE3
+ - renamed helper scripts (scripts that are not called directly but through other scripts) from name.sh to _name.sh adjusted scripts firmware.sh, softdevice.sh to use _check_targets.sh to check for targets/serial number, see also _targets_template.sh moved unused/unreferenced scripts to graveyard
+ - Rename BOARD to HARDWARE_BOARD so that it does not conflict with Nordic's nomenclature in the bootloader
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Added configurable advertisement interval
+ - initial test with security, authorization, pin, etc
+ - small fixes
+ - Default tx power is defined in CMakeBuild.config, fixed storage getInt8
+ - Added configurable tx power
+ - added config value that anne introduced
+ - fix in log msg
+ - Merge branch 'mesh' into master
+ - added full path for nordic includes
+ - changed byte order for iBeacon UUID
+ - fixed code again commented debug logs from interrupt handlers (slows down event handling) set advertising interval back to 80
+ - Reference to DoBeacon doc
+ - Debugging meshing while getting a connection request. It's probably a PAN we didn't identify yet. For now the best solution is to disable meshing temporariliy on a connection request.
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - bug fix Settings (return if length not correct)
+ - Merge branch 'master' into mesh
+ - Merge pull request #28 from chaasfr/master
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Update link to SDK
+ - Reorganize reading material
+ - Link to issue tracker & muut
+ - removed debug code
+ - added target filter for mesh messages
+ - Update author list
+ - fixed wifi status writing issue in cs_Settings
+ - fixed wifi status writing issue in cs_Settings
+ - pulled new version
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - fixed wifi status writting
+ - updated settings write call with persistent parameter (only writes to persistent storage if parameter = true) adjusted mesh message type to 2 bytes added update of ibeacon parameters fixed mesh + pstorage
+ - reduced storage for test
+ - added missing include
+ - compilation fix
+ - Merge branch 'master' into mesh
+ - updated master buffer with offset
+ - added missing include
+ - Merge branch 'master' into mesh
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - fix for writing more than 20 bytes to a characteristic (long write)
+ - Include extended property option reliable_wr for long reads/writes
+ - new mesh message types adjusted data structure for mesh characteristic
+ - Write wifi settings as INFO
+ - updated mesh code to newest version added more logging
+ - Merge branch 'master' into mesh
+ - bugfix storage
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Log setting wifi
+ - fixed mesh message characteristic
+ - adjusted mesh message types
+ - added power message to mesh
+ - increased mesh message size
+ - Merge branch 'master' into mesh
+ - updated event type for mesh
+ - Just count config in hex
+ - bugfix firmware script
+ - adjusted makefile for build dir selection
+ - 88 bytes, not 83
+ - Clear after read
+ - Use {} as smallest valid json return. Clear string on read
+ - Use proper json
+ - Add CONFIG_WIFI_SETTINGS
+ - Make BEACON_* variables depend on IBEACON != 0
+ - Explain build target in Makefile
+ - firmware script fix for debug
+ - moved ibeacon config parametrs to CMakeBuild.config added ibeacon config events to EventDispatcher to update parameters removed old Dispatcher / Listener
+ - fixed firmware script for bootloader
+ - combined configuration in storage instead of per service bugfix for set name at startup
+ - use correct name at startup (try to get it from config/storage)
+ - Config moved from cs_GeneralService to cs_ConfigHelper updated StreamBuffer data structure (reserved byte for byte alignment)
+ - adjusted scripts for additional flexibility
+ - added beacon config values
+ - mesh test code
+ - added EventDispatcher adjusted meshing send / receive added events to be sent over mesh (e.g. POWER_ON / POWER_OFF)
+ - added PCA10000 as board added switch to ble_sys_dispatch, let scheduler only handle write events
+ - added wrapper functions for sd_ble_gatts_value_get and _set
+ - compile fix for CHAR_MESHING==0
+ - fixed meshing to work with softdevice_handler
+ - app_timer/app_scheduler/ble_eventhandler bug fix *let scheduler execute ble event (otherwise it will block all other interrupts handler functions while executing ble event) *change service ticks from repeated to single shot, otherwise long tick function will cause app_scheduler buffer to overflow. tick has to reschedule itself after execution. *increased scheduler buffer size to accomodate ble event
+ - merge fix
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - removed ALL trailing whitespaces recursively
+ - Merge pull request #23 (current limit LPComp with ADC)
+ - currrent limit LPComp with ADC
+ - code fixes for s130 version 0.9.0 and meshing
+ - adjusted RTC to use RTC0 clock when softdevice is used
+ - tab as indent
+ - removed TICK_CONTINUOUSLY from CMakeBuild.config.default
+ - moved service UUIDs to cs_UuidConfig.h
+ - bug fix merge increase service tick frequency
+ - Merge branch 'master' into scheduler
+ - changed timeslot_handler to use SWI1 instead of SWI0. SWI0 is used by the app_timer
+ - separated cs_BluetoothLE into cs_Stack, cs_Service, cs_Characteristic cleaned up includes removed header cs_nRF51822, replaced by nordic defines made crownstone main file into class restructured folders, moved files add DEFAULT_ON to CMakeBuild.config
+ - Explain MASTER_BUFFER_SIZE
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Read name from mem
+ - added IBEACON enable to config
+ - use scheduler and timer * added app_timer and app_scheduler * service tick functions now done with app_timer and app_scheduler * made tick part of Service class * RealTimeClock renamed to RTC and is now wrapper class for app_timer functions * removed TICK_CONTINUOUSLY (not applicable anymore) * increased GENERAL_BUFFER_SIZE to 500 * ble_evt handling through soft_device_handler, removed evt_buffer from stack * updated Sensor class for new ADC implementation
+ - disable indoor localization in default, since it won't work with S110
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - master buffer size is now set in CMakeBuildConfig
+ - removed cs_Serializable and cs_AllocatedBuffer (old and not used)
+ - Timestamp each ADC sample
+ - timestamps are uint32_t
+ - Update Timer to use app_timer
+ - Get rid of GenericService. Only leads to code bloat and more memory usage
+ - Make from status flags bit fields in struct for every characteristic
+ - Check if listeners != NULL for dispatch
+ - Remove vector from Dispatcher
+ - Remove vector from Dispatcher
+ - General services, strings -> cs_Strings.h
+ - Display current FLASH usage
+ - Add BLE_CHAR_TRACK macro for track characteristic
+ - Okay, buffer to 140
+ - Use const char * const instead of string for setName
+ - Factor out Battery service
+ - reduced master buffer size
+ - Refer to other characteristics in README
+ - Use std::string if you use string MACROs.
+ - And some more CHAR_
+ - One more CHAR
+ - Prepend all characteristic macros with CHAR
+ - Add char strings
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Add strings to separate header file
+ - Document a lot of defaults
+ - Generate documentation
+ - Comment some more function in cs_BluetoothLE.h
+ - Document destructors
+ - Comment typedefs
+ - Add some info on CharacteristicInit
+ - decrease master buffer size
+ - Exclude COMPILATION_TIME for the macros to check. Apparently it is not defined for the build directly after a cmake --trycompile
+ - Explain GenericService
+ - Merge restructured code. Add check to ensure that all definitions are defined. Run documentation generation.
+ - updated default config
+ - updated documentation
+ - updated documentation and cleaned up a bit
+ - cleaned up last trace of CharacteristicValue
+ - added subsampling
+ - increased buffer size, this seems to be the max now
+ - include stdlib for NULL
+ - added timestamps of current curve to output on uart
+ - fixed configuration of power service characteristics
+ - added options to enable/disable power service characteristics
+ - Added timestamps to current curve
+ - merged
+ - changed current curve/adc buffer, fixed some bugs in stream buffer
+ - changed MeshMessage from Serializable to BufferAccessor (untested)
+ - removed CharacteristicValue
+ - reverted callback_on_write_t to give value as parameter updated services
+ - reverted callback_on_write_t to give value as parameter updated services
+ - replaced uint8_t* with buffer_ptr_t for whenever master buffer is used updated assign and getBuffer of BufferAccessor
+ - renamed CharacteristicT to Characteristic
+ - Merge branch 'restructured' of github.com:dobots/bluenet into restructured
+ - added compiler directives to CMakeBuild.config to enable/disable characteristics
+ - removed stack parameter from service constructors and init calls and replaced it with  Service::getStack()
+ - add missing init in cs_IndoorLocalisationService.h
+ - Merge branch 'restructured' of github.com:dobots/bluenet into restructured
+ - updated ScanResult and TrackedDevice list to use master buffer added assert function to cs_BleError added release target to Makefile bugfix for buffers
+ - Solved some uint8_t <-> T mistakes in StreamBuffer
+ - Merge branch 'restructured' of github.com:dobots/bluenet into restructured
+ - Call addService at construction
+ - Merge branch 'restructured' of github.com:dobots/bluenet into restructured
+ - Update documentation for GeneralService
+ - Merge branch 'master' into restructured
+ - use cs_BleError.h instead of app_error.h
+ - changed cs_BleError to use const char * instead of std::string so that it can be used in c source files
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Update documentation for header files in common folder
+ - Merge pull request #20 from AlexDM0/master
+ - removed all 64bit times, reverted to Nordic vanilla
+ - updated because of Dominik's comments
+ - Add reference to report
+ - Explain the use of cldocs
+ - Some changes to files to make document generation possible
+ - Merge branch 'gh-pages' of github.com:dobots/bluenet
+ - Add common folder to docs
+ - Bug fix: get configuration works too. Apparently setting a buffer with length 0 doesn't set the pointer to the buffer.
+ - Restructuring:
+ - Keep buffers in user space memory
+ - converted all timekeeping to uint64_t to avoid the overflow issue until proper fix
+ - merged mesh to 0.6.2 from nordic (excluding the serial mesh interface) updated the git ignore to include idea IDE files
+ - Merge remote-tracking branch 'upstream/master'
+ - updated mesh?
+ - compilation fix cs_Serializable reverted to original state
+ - added Characteristic for buffer (uint8_t*) added BufferAccessor + Characteristic adjusted IndoorLocalisation and ScanResult to use buffer (uint8_t*)
+ - add reference in characteristic instead of value for buffer characteristics
+ - removed change name, room, and type characteristic (replaced by configuration characteristic)
+ - use master buffer for scan result
+ - removed characStatus which is using up too much HEAP for what we gain. Should be handled with precompiler directives (not yet done)
+ - Add MasterBuffer, allocate it in main()
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - updated uml
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Correct merge
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - added class diagram
+ - Merge with Dominik. Mainly whitespace.
+ - Explain options for major and minor version
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - removed app_scheduler (not used) removed old code (unused) fix for freeing data allocated for CharacteristicValue moved meshing irq to sys_evt_dispatch in cs_Handlers and removed duplicate handlers from cs_main_crownstone and cs_BluetoothLE removed ol cs_Serializable.h removed scanResult object in Service and use Characteristic instead free scanResult list once set in GATT server moved print_heap and print_stack to cs_Utils
+ - removed app_scheduler (not used) removed old code (unused) fix for freeing data allocated for CharacteristicValue moved meshing irq to sys_evt_dispatch in cs_Handlers and removed duplicate handlers from cs_main_crownstone and cs_BluetoothLE removed ol cs_Serializable.h removed scanResult object in Service and use Characteristic instead free scanResult list once set in GATT server moved print_heap and print_stack to cs_Utils
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Add print stack/heap functions
+ - Print some heap info
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Add SOFTDEVICE_MAJOR and SOFTDEVICE_MINOR to distinguish different softdevice library APIs
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - update Sensor class
+ - added micro view
+ - added sensor class, includes light sensor, thermistor, push button and switch added separate board for crownstone+sensors use gpio event handler for push button use adc for light sensor and thermistor
+ - BugFix voltage square mean (missed first element)
+ - RTC::now() added (returns current time in ms)
+ - default timeout as define
+ - fixed adc serialization
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - added new crownstone pin layout
+ - Working differential buffer for ADC, not a very neat implementation, class AdcSamples should become a characteristic
+ - get rid of order warning
+ - decreased advertising interval from 1600 to 100, results in roughly 16 Hz advertisement rate
+ - added MAX_CAPACITY o StreamBuffer.h (should be made into template)
+ - update pwm characteristic to read current value
+ - improving continuous adc
+ - fixed modulo
+ - Builds and runs smoothly with S130 alpha 0.9 version
+ - first attempt of continous ADC
+ - started to change adc buffer
+ - made StreamBuffer into template adjusted GeneralService for new StreamBuffer adjusted ScanResult constant names documented StreamBuffer
+ - added documentation to cs_CircularBuffer
+ - renamed cs_Buffer to cs_StackBuffer added cs_CircularBuffer replaced StackBuffer in ADC with CircularBuffer
+ - changed outgoing byte order of current curve
+ - decreased adc buffer size, so that gatttools don't crash
+ - fixed bug in nearby timeout config
+ - fixed fix
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - correct way of serializing scanresult occurences, untested
+ - fixed adc trigger
+ - use current curve characteristic
+ - added current curve characteristic
+ - BugFix currentCurve: clear streamBuffer before starting a new sampling
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - BugFix for StreamBuffer
+ - added nearby timeout to config
+ - added nearby timeout to pstorage
+ - added dynamic timeout for tracked device list
+ - added tracked devices to persistent storage
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Run memory visualization without the need to select a file
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - initialize LPComp after the voltage spike at the pin, this is a quick solution, not final!
+ - initialize ADC after the voltage spike at the pin
+ - added storage for IndoorLocalisation Service added set/getArray functions to Storage
+ - Merge branch 'master' of https://github.com/dobots/bluenet
+ - renamed include/cs_Serializeable.h to include/cs_AllocatedBuffer.h added new Serializable class, and let ScanResult, TrackDevices and StreamBuffer inherit it more documentation
+ - Add some more checks if variables have been set. Perhaps do these in the CMakeLists.txt file later
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Bug fix: ERR_CODE: 7 (0x7) on sd_ble_gatts_service_add solved by BLE_UUID_TYPE_UNKNOWN instead of BLE_UUID_TYPE_VENDOR_BEGIN
+ - Merged
+ - remove tracked device by giving it a positive rssi threshold, don't change PWM all the time, don't let counter overflow
+ - Keep on scanning after disconnect, increase scan window, added continuous tick option
+ - comments on seperate line
+ - Update doc. BLE and Beacon
+ - Update doc. BLE and Beacon
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Working version of reading/writing/selecting configuration characteristic on general service
+ - Added documentation for IBeacon
+ - iBeacon update (define parameters in cs_main_crownstone when enabling IBEACON) moved UUID to seperate files (to remove circular dependency between cs_BluetoothLE.h and cs_iBeacon.h)
+ - Add ScanResults to doc
+ - Add ScanResults to doc
+ - Dominik's documentation
+ - Add general configuration characteristic to common service
+ - added documentation to Storage
+ - removed old functions from storage class, updated initBlocks and clearBlock functions, updated set- / getUint32 functions
+ - added documentation to ScanResult
+ - changed buffer in ScanResult characteristic from fixed array to dynamic array
+ - Draft configuration characteristic
+ - fixed the rem tracked device
+ - renamed PowerService::addGetCurrentCharacteristic to PowerService::addSampleCurrentCharacteristic
+ - changed bluenet_dir to bluenet_config_dir
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - changed pwm modes
+ - Solve cp warning when build folder is BLUENET_DIR/build. Print when light turns on/off
+ - Add other reference material to README
+ - increase pwm frequency
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - re-ordered CMakeBuild.config.default
+ - combine.sh don't add bootloader by default, check result of srec_cat
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - fixed iBeacon
+ - Use STRINGIFY only for clang
+ - Add some more files for documentation
+ - Add some more files for documentation
+ - Update desciption and some urls
+ - Update desciption and some urls
+ - Add readme to docs
+ - Add readme to docs
+ - Document GeneralService
+ - Document GeneralService
+ - Document GeneralService
+ - Update docs
+ - Update docs
+ - Add script to publish documentation
+ - Documenting a bit more
+ - Explain folder is website
+ - Explain folder is website
+ - Start with doc generation through cldoc
+ - Start with doc generation through cldoc
+ - Code for iBeacon separated from main code
+ - Typo
+ - Mass erase on combined target
+ - Print name on serial and turn device by default on
+ - BugFix: initialize length and type for StreamBuffer
+ - CURRENT_GET_UUID renamed to SAMPLE_CURRENT_UUID
+ - Bugfix config.sh (missing quotes)
+ - Add more info on bootloader config
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Refer to dobots git repos in readme
+ - use BLUENET_DIR in flash.expect
+ - Set s110 as default
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - script fixes
+ - Write current curve buffer to characteristic
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - make sure script runs correctly when called outside of the scriptdir
+ - Upload .hex file, not .bin file
+ - Make flash_openocd script working again
+ - Always write byte on upload bootloader
+ - Set threshold higher than 0 for ADC
+ - Disable softdevice upload on bootloader. Only upload bootloader
+ - Quotes around paths
+ - Merge with scripts that use BLUENET config
+ - Debugging getting current profile
+ - fixed bug in firmware.sh
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Added default BLUENET_DIR
+ - Use proper defines for own softdevice handler
+ - Update meshing such that the default softdevice handler is used, but that still rbc_mesh_sd_irq_handler is called as well
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - if global config is not found, search in repository
+ - combine: use config file
+ - additional debug for storage
+ - BugFix: persistent storage restored (needs NRF softdevice handler!!)
+ - moved config file
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - softdevice binaries go to the build dir
+ - Make compiling when MESHING=1
+ - Merge pull request #12 from vliedel/master
+ - prepend files with cs_, use pragma once, checked class, function and var names
+ - Combine properly
+ - Bootloader
+ - Get rid of compiler warning in rng_vals[index++] construct
+ - Merge pull request #11 from AlexDM0/master
+ - added ./combine to readme
+ - fixed default compiler path and board
+ - make it compile again with MESHING=0
+ - disabled DEBUG RADIO
+ - removed out-commented code
+ - fixed RSSI
+ - Merge remote-tracking branch 'upstream/master'
+ - Disable RSSI. No segfaults
+ - disabled rssi, fixed led initialization board check
+ - Merge remote-tracking branch 'upstream/master'
+ - set debug flags, changed channel, removed check, enabled leds
+ - Explain adv parameters
+ - Set ifdef of board with buttons
+ - Merge pull request #10 from AlexDM0/master
+ - Wording: handle instead of channel
+ - can compile again :)
+ - Set more LED pins for Crownstone
+ - Merge pull request #9 from AlexDM0/master
+ - uncommented code
+ - Merge pull request #8 from AlexDM0/master
+ - added ifdef for buttons in main with meshing
+ - Merge remote-tracking branch 'upstream/master'
+ - Create characteristic to send messages over mesh network
+ - changed comments
+ - 1.) Squashed bug w.r.t. running make twice. The TryCompile option is fed specific files in the build target of the Makefile. 2.) The Mesh class is made into a singleton so it can be called from other parts in the application
+ - About udev. Cannot make first run of cmake work directly...
+ - Tell about ST-LINK
+ - Refer to proper tar ball for cross-compiler. Dependency cmake.
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Add nrf51.cfg file
+ - Merge remote-tracking branch 'upstream/master'
+ - added virtual memo board
+ - bug fixing track devices (start with alone until device first seen, update tracked device list characteristic, serialized size corrected)
+ - remove nRF51822-softdevice.ld
+ - remove nRF51822-softdevice.ld
+ - ignore nRF51822-softdevice.ld
+ - updated readme
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Moved serial verbosity setting to cmake build config
+ - Add file to combine softdevice, bootloader, and binary to single binary
+ - removed some old code
+ - Add file with list of possible ERROR codes
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Parallel meshing and services
+ - Merge pull request #7 from AlexDM0/master
+ - added random number generator
+ - added random number generator
+ - Update explanation about commands
+ - Add text about IBEACON
+ - Merge remote-tracking branch 'upstream/master'
+ - Explain about DFU and S110
+ - updated readme
+ - Merge remote-tracking branch 'upstream/master'
+ - Add general mesh.c file
+ - Merge remote-tracking branch 'upstream/master'
+ - stuff
+ - Working on making mesh networking possible in parallel
+ - More comments
+ - Add commentary to the code
+ - Add license text
+ - Grammar mistake
+ - Incorporate meshing functionality in the build chain, but keep it still totally separate from the current code.
+ - Set the to-be tracked device in the characteristic
+ - 1.) Rename loop to tick. 2.) Turn on/off lamp automatically when none of the people tracked is nearby
+ - Explain bootloader in README
+ - In track devices functionality .init() was not called
+ - Merge remote-tracking branch 'upstream/master'
+ - Get rid of some compiler warnings
+ - fix indent :P
+ - added hardcoded ble address to track
+ - added functions to remove and add ble addresses
+ - no need to check ble address for zeroes anymore
+ - enabled and disabled msgs should have same verbosity level
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - add tracked devices to indoor localization
+ - move adc init to other characteristic
+ - add low baudrate def
+ - set correct max len
+ - Check for hardware version macro
+ - Some bugs due to the merging
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Merge with master (esp. persistent storage of other characteristics)
+ - Add characteristic to enable a firmware update
+ - Add script to upload over the air
+ - Add .hex target for bootloader python script
+ - moved some code to CurrentLimit
+ - started device presence tracking
+ - PWM is a class now
+ - added todo to scanresult
+ - Removed number characteristics as they seem unused
+ - make sure current sampling works when no current is flowing: timeout adc
+ - check hardware version for PAN
+ - seperate characteristics to start and read current measurements
+ - Read and write bytes, i.e. for UICR memory section
+ - changes for voltage curve
+ - added analog reference pin
+ - changed pin names for clarity
+ - merged
+ - merged
+ - remove breakpoint at main
+ - removed continous read of current limit from flash
+ - added additional storage helper functions (uint16 and uint32)
+ - storage: added checks if read memory has been written or is unassigned
+ - compile bug fix (but why??)
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - improved persistent storage added device name, device type and room to persistent storage (strings)
+ - Bug fix: remove Storage destructor
+ - Merge remote-tracking branch 'upstream/master'
+ - Add openocd possibility to flash the NRF51822
+ - removed variables for singleton classes and replaced by ::getInstance() calls
+ - reorganized includes to avoid APP_ERROR_CHECK macro of nordic overwriting our macro moved BLE_CALL, BLE_THROW macros and ble_exception  to ble_error.h
+ - removed ^M characters
+ - 1.) Update boards config for devkit. 2.) Do not upload if build failed. 3.) Remove break at main
+ - Merge pull request #6 from vliedel/master
+ - merge i think
+ - current limit seems to work now
+ - Update memory layout pictures
+ - Merge remote-tracking branch 'upstream/master'
+ - Disable PAN 25. In new hardware this disables LPCOMP
+ - increased heap to 3000 adjusted includes (ble_error.h has to be included after handlers.h otherwise the APP_CHECK_ERROR macro will be overwritten by the default nordic version) (almost) all services and characteristics enabled
+ - Merge remote-tracking branch 'upstream/master'
+ - Add script to get hardware version
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Merge symbols that belong to same file in visualization tool
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - log calls fixed ScanResult improved
+ - Merge remote-tracking branch 'upstream/master'
+ - Improve memory usage
+ - First try of the current limit, using LPCOMP. Compiles, not tested yet!
+ - Generate .map file
+ - Use LOGf
+ - Downgrade importance of some logging in storage
+ - Merge branch 'master' of github.com:mrquincle/bluenet
+ - check if bluetooth name is set in cmake file
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - Replace all log(INFO,) statements with LOGi and equivalents and introduce VERBOSITY variable to turn all messages below certain severity off
+ - removed virtual from function definitions in ScanResult.h Changed to characStatus definition in IndoorLocalisation added initialisation of characStatus capacity
+ - Create class of real time clock
+ - Merge branch 'master' of github.com:mrquincle/bluenet
+ - Disable timer for now
+ - Add stub for dimming functionality
+ - Solved copy-paste bug: &PowerService::addCurrentLimitCharacteristic
+ - Introducing listeners and dispatchers for events that need to be communicated between classes. Currently it seems we run into memory trouble though.
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - added company identifier to manufacturing data in advertisement package
+ - Turn on/off device
+ - Merge remote-tracking branch 'upstream/generic_add_characteristics'
+ - Minor things to try out with STR macro
+ - merged
+ - made the way of adding / enabling characteristics more generic
+ - moved device type and room charactersitic to general service changed localisation service uuid
+ - ScanResult.cpp moved
+ - ScanResult.cpp moved
+ - Upgrade temp to general service. Include name change characteristic
+ - Working persistent memory
+ - Assigning value to current limit characteristic fails
+ - Debug write and clear
+ - Merge conflict w.r.t. name
+ - Implementing persistent memory access. Clearing seems to interfer with softdevice. Writing operations seems not to be queued
+ - Round-trip for storing persistent memory w.r.t. current limiting. Bug fix required: PSTORAGE_LOAD_OP_CODE 0x03 is returned on reading from FLASH
+ - fixed advertisement package to work with 128bit UUID commented dummy characteristics so that they don't get created (memory issues)
+ - Add persistent storage files
+ - 1) Disable timer.h. 2) Memset fix of list in ScanResult
+ - moved ADC to PowerService
+ - Merge branch 'master' of github.com:dobots/bluenet
+ - ScanResult arrays made dynamic, Boards.h updated, Services/Characteristics adjusted (new service PowerService), characteristics moved, CMakeLists corrected
+ - Update include for ScanResults
+ - Merge remote-tracking branch 'upstream/master'
+ - Make ADC into an object
+ - ScanResult files moved to characteristics folder. Advertisement corrected (to be used with app)
+ - Update license text in each file
+ - Remove reference to mbed. Update README. Use malloc for buffer in ADC
+ - len should be signed
+ - Add hard fail when memory allocation fails, so culprit is found directly. Crank up heap size to 2kB
+ - Remove Pool to save memory. Plet bug: uint8_t is too small for length var (len) to write over uart
+ - Resolve merge conflict manually
+ - Debugging around memory use
+ - bugfix merge problems. BEWARE, because we are using fixed arrays, increasing the size will cause memory and runtime problems.
+ - Merge branch 'master' of github.com:dobots/bluenet into cleaned
+ - onAdvertisement and scanResult variable moved to IndoorLocalisationService
+ - Merge pull request #4 from mrquincle/master
+ - Merge remote-tracking branch 'upstream/master'
+ - Merge remote-tracking branch 'refs/remotes/origin/master'
+ - Notifications fixed (tx buffer problems when too many notifications are sent) refactoring / renaming of member variables
+ - Merge pull request #9 from vliedel/master
+ - init pointers, fixed class var names
+ - merged, removed use of common/timer, replaced by nrf_rtc
+ - add rtc output to adc sampling, remove pwm at rssi change
+ - use correct pwm mode again
+ - init pwm
+ - use rtc1
+ - templated buffer
+ - no need for extern C?
+ - include rtc in adc, so it can write the time
+ - fixed .pop and templated buffer type
+ - remove app_timer
+ - ScanResult cleaned up shortcuts to serial.h added
+ - ScanResult fixed (memory problems because of malloc)
+ - Switch to S110 and wrap all ADV stuff in precompiler excludes
+ - Timing
+ - first attempt to rtc
+ - Merge branch 'master' of github.com:mrquincle/bluenet
+ - Creating timer
+ - Merge branch 'master' into cleaned
+ - merge contd. ScanResults debugging
+ - Merge pull request #3 from mrquincle/master
+ - Merge pull request #8 from dobots/master
+ - Bug in writing long strings
+ - Add BOARD as variable to CMakeBuild.config
+ - Merge branch 'master' into cleaned
+ - Merge pull request #7 from vliedel/master
+ - fixed rx/tx pins
+ - Merge pull request #2 from mrquincle/master
+ - Merge pull request #6 from dobots/master
+ - use pin_rx and pin_tx
+ - added evaluation board
+ - Show some more data
+ - Bug fix: pop. Remove array.
+ - Merge pull request #1 from mrquincle/master
+ - Bugfix for memory problem with buffer and serializable
+ - Use interrupt handler for ADC. Wasn't called because of C++ mangling. Use buffer to store results.
+ - Start pulling in some mbed files. Seems to work okay for now.
+ - Merge branch 'cleaned' of github.com:dobots/bluenet into cleaned
+ - ScanResult finalized, provided as Characteristic BluetoothLE library fixes
+ - Separate headers and sources. Stubs for protocol files. Adjust the AD file, because it interfers with the softdevice, not finished though.
+ - Merge with restructuring from Dominik
+ - error in loop, debug code instead of real temperature value
+ - build fix
+ - Plot voltage curve
+ - Merge pull request #4 from vliedel/master
+ - added adc, added compile date as device name
+ - Merge branch 'cleaned' of github.com:dobots/bluenet into cleaned
+ - Notifications fixed TemperatureService fixed iBeacon functionality added Characteristic properties fixed BLE scan result stored (initial version)
+ - Notifications fixed TemperatureService fixed iBeacon functionality added Characteristic properties fixed BLE scan result stored (initial version)
+ - bugfix for more than one custom service
+ - log, uart and temperature code moved to headers. services moved to separate files
+ - experimenting with pwm
+ - cleaned out the code. deleted everything that was not necessary!! code compiles, uploads and runs still.
+ - add volatile, see http://hg.cmason.com/nrf/commits/dcf31efcc133c8ad5cd2dd67f763c85764538a9b?at=default
+ - remove unused vars, see http://hg.cmason.com/nrf/commits/fed71cdc1af26f0168463928ed58df9f196d0d63?at=default
+ - Use SOFTDEVICE_DIR_API and preserve SOFTDEVICE_DIR
+ - Merge pull request #3 from vliedel/master
+ - use SOFTDEVICE_API_DIR
+ - Merge branch 'master' of https://github.com/mrquincle/bluenet
+ - bash instead of sh
+ - Update how to upload firmware
+ - Add other default configuration options
+ - Add SERIES in default config
+ - Merge branch 'master' of https://github.com/mrquincle/bluenet
+ - these scripts should run with bash
+ - Add support for uart in separate serial.h/cpp files
+ - Correct writing to UART.
+ - Playing around with UART
+ - Set RAM space to correct value, 6kB, not 10kB as wrongly indicated in the spec from Nordic
+ - Adjust available FLASH for application with larger s130
+ - Add defaults for RAM values for SoftDevice
+ - RAM_R1_BASE parameter for S130. Still heap seems to be overwritten or other issues are at hand
+ - Update default start address for s130 softdevice
+ - Feed configuration options also through the preprocessor/compiler.
+ - Compiles properly with the S130 softdevice, but it doesn't seem to get up yet
+ - Set default to S110 v7
+ - Make softdevice 7 and sdk 6 compilable
+ - Add tiny bit on usage of Crownstone
+ - Older
+ - Default config file update to several softdevice options
+ - Updating to SoftDevice v7 is a hassle. There are quite some ABI/API changes. Not done yet.
+ - Use parameters to define the size of the SoftDevice and start address of the application
+ - Correct upload script for softdevice
+ - DoBots inside
+ - Explain more in the README.md about the installation process
+ - Rewrote building process, so it is more reliable, emits less errors (which are no errors). Use CMake so configuration is easy adjusted. Generate object files in separate folder, so it is less cluttered.
+ - Working PWM, but code is now very ugly
+ - Remove temp files
+ - Remove redundant files. Working on analogWrite as in Arduino code
+ - Remove redundant files. Working on analogWrite as in Arduino code
+ - Working for the RFduino
+ - Sending RSSI values in main_ble.cpp
+ - Grammar
+ - Update year
+ - Commit from hg repos by Mason
+

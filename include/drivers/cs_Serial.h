@@ -11,6 +11,7 @@ extern "C" {
 #endif
 
 #include <cfg/cs_Debug.h>
+#include "stdint.h"
 
 /*
  * Commonly LOG functionality is provided with as first parameter the level of severity of the message. Subsequently
@@ -18,23 +19,23 @@ extern "C" {
  * requires a variadic macro as well, see http://www.wikiwand.com/en/Variadic_macro. The two ## are e.g. a gcc
  * specific extension that removes the , after __LINE__, so log(level, msg) can also be used without arguments.
  */
-#define DEBUG                0
-#define INFO                 1
-#define WARN                 2
-#define ERROR                3
-#define FATAL                4
-#define NONE                 5
+#define SERIAL_DEBUG                0
+#define SERIAL_INFO                 1
+#define SERIAL_WARN                 2
+#define SERIAL_ERROR                3
+#define SERIAL_FATAL                4
+#define SERIAL_NONE                 5
 
-#define CRLN "\r\n"
+#define SERIAL_CRLF "\r\n"
 
 #ifndef SERIAL_VERBOSITY
 #error "You have to specify SERIAL_VERBOSITY"
-#define SERIAL_VERBOSITY NONE
+#define SERIAL_VERBOSITY SERIAL_NONE
 #endif
 
 //#define INCLUDE_TIMESTAMPS
 
-#if SERIAL_VERBOSITY<NONE
+#if SERIAL_VERBOSITY<SERIAL_NONE
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -49,7 +50,7 @@ extern "C" {
 		_log(level, "[%-20.20s : %-5d](%d) " fmt, _FILE, __LINE__, now(), ##__VA_ARGS__)
 
 	#define logLN(level, fmt, ...) \
-		_log(level, "[%-20.20s : %-5d](%d) " fmt CRLN, _FILE, __LINE__, now(), ##__VA_ARGS__)
+		_log(level, "[%-20.20s : %-5d](%d) " fmt SERIAL_CRLF, _FILE, __LINE__, now(), ##__VA_ARGS__)
 
 #else
 
@@ -57,7 +58,7 @@ extern "C" {
 		_log(level, "[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
 
 	#define logLN(level, fmt, ...) \
-		_log(level, "[%-30.30s : %-5d] " fmt CRLN, _FILE, __LINE__, ##__VA_ARGS__)
+		_log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 
 #endif
 
@@ -67,33 +68,33 @@ extern "C" {
 	#define logLN(level, fmt, ...)
 #endif
 
-#define LOGd(fmt, ...) logLN(DEBUG, fmt, ##__VA_ARGS__)
-#define LOGi(fmt, ...) logLN(INFO, fmt, ##__VA_ARGS__)
-#define LOGw(fmt, ...) logLN(WARN, fmt, ##__VA_ARGS__)
-#define LOGe(fmt, ...) logLN(ERROR, fmt, ##__VA_ARGS__)
-#define LOGf(fmt, ...) logLN(FATAL, fmt, ##__VA_ARGS__)
+#define LOGd(fmt, ...) logLN(SERIAL_DEBUG, fmt, ##__VA_ARGS__)
+#define LOGi(fmt, ...) logLN(SERIAL_INFO, fmt, ##__VA_ARGS__)
+#define LOGw(fmt, ...) logLN(SERIAL_WARN, fmt, ##__VA_ARGS__)
+#define LOGe(fmt, ...) logLN(SERIAL_ERROR, fmt, ##__VA_ARGS__)
+#define LOGf(fmt, ...) logLN(SERIAL_FATAL, fmt, ##__VA_ARGS__)
 
-#if SERIAL_VERBOSITY>DEBUG
+#if SERIAL_VERBOSITY>SERIAL_DEBUG
 #undef LOGd
 #define LOGd(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY>INFO
+#if SERIAL_VERBOSITY>SERIAL_INFO
 #undef LOGi
 #define LOGi(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY>WARN
+#if SERIAL_VERBOSITY>SERIAL_WARN
 #undef LOGw
 #define LOGw(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY>ERROR
+#if SERIAL_VERBOSITY>SERIAL_ERROR
 #undef LOGe
 #define LOGe(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY>FATAL
+#if SERIAL_VERBOSITY>SERIAL_FATAL
 #undef LOGf
 #define LOGf(fmt, ...)
 #endif
@@ -128,7 +129,7 @@ typedef enum
  * General configuration of the serial connection. This sets the pin to be used for UART, the baudrate, the parity
  * bits, etc.
  */
-void config_uart();
+void config_uart(uint8_t pinRx, uint8_t pinTx);
 
 /**
  * Write a string to the serial connection. Make sure you end with `\n` if you want to have new lines in the output.

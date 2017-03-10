@@ -1,5 +1,5 @@
-CMakeBuild.config
-CMakeBuild.config.s*
+/CMake*
+/*.cmake
 tags
 .cproject
 .project
@@ -7,3 +7,8 @@ build/
 *~
 .idea/
 .settings/
+.DS_Store
+env.config
+node_modules
+*.pyc
+*.swp

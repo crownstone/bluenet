@@ -40,6 +40,7 @@ extern "C"
 
 #include "softdevice_handler_appsh.h"
 //#include "softdevice_handler.h"
+#include "nrf_nvic.h"
 
 #ifdef __cplusplus
 }

@@ -27,6 +27,10 @@ enum CommandHandlerTypes {
 	CMD_VALIDATE_SETUP              = 17,    //! 0x11
 	CMD_REQUEST_SERVICE_DATA        = 18,    //! 0x12
 	CMD_DISCONNECT                  = 19,    //! 0x13
+	CMD_SET_LED                     = 20,    //! 0x14
+	CMD_NOP                         = 21,    //! 0x15
+	CMD_INCREASE_TX                 = 22,    //! 0x16
+	CMD_RESET_ERRORS                = 23,    //! 0x17
 	CMD_TYPES
 };
 
@@ -51,4 +55,19 @@ struct __attribute__((__packed__)) factory_reset_message_payload_t {
 	uint32_t resetCode;
 };
 
+enum KeepAliveActionTypes {
+	NO_CHANGE = 0,
+	CHANGE    = 1
+};
+
+struct __attribute__((__packed__)) keep_alive_state_message_payload_t {
+	uint8_t action;
+	switch_message_payload_t switchState;
+	uint16_t timeout; // timeout in seconds
+};
+
+struct __attribute__((__packed__)) led_message_payload_t {
+	uint8_t led;
+	bool enable;
+};
 

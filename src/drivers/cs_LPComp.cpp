@@ -18,7 +18,6 @@
 //#include "nrf_sdm.h"
 //#endif
 //
-//#include "common/cs_Boards.h"
 #include "drivers/cs_Serial.h"
 #include "drivers/cs_PWM.h"
 #include "util/cs_BleError.h"
@@ -46,6 +45,7 @@ LPComp::~LPComp() {
  * The level can be set to from 0 to 6 , making it compare to 1/8 to 7/8 of the supply voltage.
  */
 uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
+#if (NORDIC_SDK_VERSION < 11)
 #if(NRF51_USE_SOFTDEVICE == 1)
 	LOGd("Run LPComp with SoftDevice");
 #else
@@ -116,7 +116,7 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
 
 	NRF_LPCOMP->POWER = LPCOMP_POWER_POWER_Enabled << LPCOMP_POWER_POWER_Pos;
 	NRF_LPCOMP->ENABLE = LPCOMP_ENABLE_ENABLE_Enabled << LPCOMP_ENABLE_ENABLE_Pos; //! Pin will be configured as analog input
-
+#endif // SDK 11
 	return 0;
 }
 
@@ -124,6 +124,7 @@ uint32_t LPComp::config(uint8_t pin, uint8_t level, Event_t event) {
  * Stop the LP comparator.
  */
 void LPComp::stop() {
+#if (NORDIC_SDK_VERSION < 11)
 	//! TODO: should we clear pending interrupts?
 #if(NRF51_USE_SOFTDEVICE == 1)
 	APP_ERROR_CHECK(sd_nvic_ClearPendingIRQ(LPCOMP_IRQn));
@@ -132,17 +133,20 @@ void LPComp::stop() {
 #endif
 	NRF_LPCOMP->TASKS_STOP = 1;
 	nrf_delay_us(100);
+#endif
 }
 
 /**
  * Start the LP comparator.
  */
 void LPComp::start() {
+#if (NORDIC_SDK_VERSION < 11)
 	LOGd(FMT_START, "LPComp");
 	NRF_LPCOMP->EVENTS_UP = 0;
 	NRF_LPCOMP->EVENTS_DOWN = 0;
 	NRF_LPCOMP->EVENTS_CROSS = 0;
 	NRF_LPCOMP->TASKS_START = 1;
+#endif
 }
 
 
@@ -157,6 +161,7 @@ void LPComp::interrupt() {
  * name defined in nRF51822.c
  */
 extern "C" void WUCOMP_COMP_IRQHandler(void) {
+#if (NORDIC_SDK_VERSION < 11)
 //	{
 //		LPComp &lpcomp = LPComp::getInstance();
 //		lpcomp.update(LPComp::NONE);
@@ -185,6 +190,7 @@ extern "C" void WUCOMP_COMP_IRQHandler(void) {
 		NRF_LPCOMP->EVENTS_DOWN = 0;
 //		NRF_LPCOMP->TASKS_START = 1; //! Do we need this?
 	}
+#endif
 }
 
 

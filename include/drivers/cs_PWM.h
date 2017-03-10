@@ -17,12 +17,6 @@ extern "C" {
 
 #define ERR_PWM_NOT_ENABLED 1
 
-//! To change the timer used for the PWM library replace the defines below
-#define PWM_TIMER               NRF_TIMER2
-//#define PWM_IRQHandler          TIMER2_IRQHandler
-#define PWM_IRQn                TIMER2_IRQn
-#define PWM_INSTANCE_INDEX      TIMER2_INSTANCE_INDEX
-
 /** Pulse Wide Modulation class
  *
  * To turn on/off the power, as well as all intermediate stages, for example with dimming, the PWM class is used.
@@ -39,12 +33,13 @@ public:
 //	static void pwmReadyCallback(uint32_t pwmId);
 
 	//! Initialize the pulse wide modulation settings
-	uint32_t init(app_pwm_config_t config);
+	uint32_t init(app_pwm_config_t & config, bool inverted);
 
 	//! Returns configuration values for 1 Channel
-	static app_pwm_config_t config1Ch(uint32_t period_us, uint32_t pin);
+	app_pwm_config_t & config1Ch(uint32_t period_us, uint32_t pin, bool inverted);
+
 	//! Returns configuration values for 2 Channels
-	static app_pwm_config_t config2Ch(uint32_t period_us, uint32_t pin1, uint32_t pin2);
+	app_pwm_config_t & config2Ch(uint32_t period_us, uint32_t pin1, uint32_t pin2, bool inverted);
 
 	//! De-Initialize the PWM instance, i.e. free allocated resources
 	uint32_t deinit();
@@ -56,6 +51,7 @@ public:
 	//! Also works when not initialized (useful for emergencies)
 	void switchOff();
 
+	//! Get current value from unit
 	uint32_t getValue(uint8_t channel);
 	
 private:
@@ -69,13 +65,22 @@ private:
 
 	//! PWM configuration
 	app_pwm_config_t _pwmCfg;
+
 	//! Array holding ready callbacks for the PWM instance
-	uint32_t _callbackArray[APP_PWM_CB_SIZE];
+#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
+	app_pwm_cb_t _controlBlock;
+#else
+	uint32_t _controlBlock[APP_PWM_CB_SIZE];
+#endif
 
 	//! Timer handling PWM
 	nrf_drv_timer_t* pwmTimer;
 	//! PWM instance
 	app_pwm_t* _pwmInstance;
 
+	//! Flag to indicate that the init function has been successfully performed
 	bool _initialized;
+
+	//! Invert switch mode
+	bool _inverted;
 };

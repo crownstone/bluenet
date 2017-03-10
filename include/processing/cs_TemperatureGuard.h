@@ -8,77 +8,66 @@
 #pragma once
 
 #include "drivers/cs_Timer.h"
-#include "drivers/cs_PWM.h"
 #include "drivers/cs_Temperature.h"
 #include <cstdint>
+//#include "cfg/cs_Config.h"
 #include "storage/cs_Settings.h"
 #include "events/cs_EventListener.h"
 #include "events/cs_EventDispatcher.h"
-#include "processing/cs_Switch.h"
+#include "drivers/cs_COMP.h"
+#include "cfg/cs_Boards.h"
 
-#define TEMPERATURE_UPDATE_FREQUENCY 0.2
+#define TEMPERATURE_UPDATE_FREQUENCY 10
 
-//todo: move to code to cpp
-
-/** Protection against temperature exceeding certain threshold
+/** Check if the temperature exceeds a certain threshold
  */
 class TemperatureGuard : EventListener {
 public:
-	TemperatureGuard() :
-		EventListener(CONFIG_MAX_CHIP_TEMP),
-		_appTimerId(0),
-		_maxTemp(MAX_CHIP_TEMP)
-	{
+	//! Gets a static singleton (no dynamic memory allocation)
+	static TemperatureGuard& getInstance() {
+		static TemperatureGuard instance;
+		return instance;
 	}
 
-	void init() {
-		EventDispatcher::getInstance().addListener(this);
+	void init(boards_config_t* boardConfig);
 
-		Settings::getInstance().get(CONFIG_MAX_CHIP_TEMP, &_maxTemp);
+	void tick();
 
-//		Timer::getInstance().createRepeated(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
-		Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
-	}
+	void scheduleNextTick();
 
-	void tick() {
-		if (getTemperature() > _maxTemp) {
-			//! Switch off all channels
-			Switch::getInstance().pwmOff();
-			Switch::getInstance().turnOff();
-//			PWM::getInstance().switchOff();
-//			//! Make sure pwm can't be set anymore
-//			PWM::getInstance().deinit();
-		}
-		// TODO: make next time to next tick depend on current temperature
-		scheduleNextTick();
-	}
+	void start();
 
-	void scheduleNextTick() {
-		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);
-	}
-
-	void startTicking() {
-		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);
-	}
-
-	void stopTicking() {
-		Timer::getInstance().stop(_appTimerId);
-	}
+	void stop();
 
 	static void staticTick(TemperatureGuard* ptr) {
 		ptr->tick();
 	}
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-		switch (evt) {
-		case CONFIG_MAX_CHIP_TEMP:
-			_maxTemp = *(int32_t*)p_data;
-			break;
-		}
-	}
+	void handleCompEvent(CompEvent_t event);
+
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
 private:
-	uint32_t _appTimerId;
-	int8_t _maxTemp;
+	/** Constructor
+	 */
+	TemperatureGuard();
+
+	//! This class is singleton, deny implementation
+	TemperatureGuard(TemperatureGuard const&);
+	//! This class is singleton, deny implementation
+	void operator=(TemperatureGuard const &);
+
+
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _appTimerData;
+	app_timer_id_t           _appTimerId;
+#else
+	uint32_t                 _appTimerId;
+#endif
+	int8_t _maxChipTemp;
+	COMP* _comp;
+	GeneralEventType _lastChipTempEvent;
+	GeneralEventType _lastPwmTempEvent;
 
 //	void scheduleNextTick() {
 //		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);

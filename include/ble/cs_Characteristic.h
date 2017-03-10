@@ -69,6 +69,9 @@ struct Status {
 	 * tx operations are completed
 	 */
 	boolean_t notificationPending                     : 1;
+	//! shared encryption buffer, if false, a buffer is allocated for the characteristic, if true,
+	//! the global EncryptionBuffer is used. In particular, big characteristics should use the global EncryptionBuffer
+	boolean_t sharedEncryptionBuffer                  : 1;
 };
 
 /** Non-template base class for Characteristics.
@@ -193,6 +196,10 @@ public:
 		return _handles.cccd_handle;
 	}
 
+	void setSharedEncryptionBuffer(bool val) {
+		_status.sharedEncryptionBuffer = val;
+	}
+
 	/** Return the maximum length of the value used by the gatt server
 	 *  In the case of aes encryption, this is the maximum length that
 	 *  the value can be when encrypted. for normal types (arithmetic
@@ -233,7 +240,7 @@ public:
 	 *  is stored
 	 */
 	uint8_t* getGattValuePtr() {
-		if (this->isAesEnabled()) {
+		if (this->isAesEnabled() && _minAccessLevel < ENCRYPTION_DISABLED) {
 			return this->getEncryptionBuffer();
 		} else {
 			return getValuePtr();
@@ -278,7 +285,7 @@ public:
 	 *  If somebody is also listening to notifications for the characteristic
 	 *  notifications will be sent.
 	 */
-	uint32_t updateValue(bool useSessionNonce = true);
+	uint32_t updateValue(EncryptionType encryptionType = CTR);
 
 	/** Notify any listening party.
 	 *
@@ -451,7 +458,6 @@ public:
 	//! Default empty destructor
 	virtual ~CharacteristicGeneric() {};
 
-	// todo ENCRYPTION: return unencrypted value
 	/** Return the value
 	 *  In the case of aes encryption, this is the unencrypted value
 	 */
@@ -477,6 +483,8 @@ public:
 	/** Assign a new value to the characteristic so that it can be read over ble.
 	 *  In the case of aes encryption, pass the unencrypted value, which will then be encrypted
 	 *  and updated at the gatt server
+	 *
+	 *  TODO: Alex - why don't we just use setValue for consistency??
 	 */
 	void operator=(const T& val) {
 		_value = val;
@@ -496,14 +504,18 @@ protected:
 	 *  aes encryption enabled. then calls the on write callback.
 	 */
 	void written(uint16_t len) {
+		//! We can flood the chip with writes and a potential forced disconnect will be delayed and could crash the chip.
+		//TODO: have this from the stack directly.
+		if (EncryptionHandler::getInstance().allowedToWrite()) {
+			LOGi("Not allowed to write, disconnect in progress")
+			return;
+		}
 
 		setGattValueLength(len);
 
 		EncryptionAccessLevel accessLevel = NOT_SET;
-
 		// when using encryption, the packet needs to be decrypted
 		if (_status.aesEncrypted && _minAccessLevel < ENCRYPTION_DISABLED) {
-			LOGi("decrypt ...");
 
 			// the arithmetic type- and the string type characteristics have their hardcoded length in the valueLength
 			// the getValueLength() for those two types will always be the same and the setValueLength does nothing there.
@@ -523,6 +535,7 @@ protected:
 
 			// disconnect on failure or if the user is not authenticated
 			if (!success || !EncryptionHandler::getInstance().allowAccess(_minAccessLevel , accessLevel)) {
+				LOGi("insufficient access")
 				EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
 				return;
 			}
@@ -552,15 +565,25 @@ protected:
 	/** Initialize / allocate a buffer for encryption */
 	void initEncryptionBuffer() {
 		if (_encryptionBuffer == NULL) {
-			CharacteristicBase::_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));
+			if (_status.sharedEncryptionBuffer) {
+				uint16_t size;
+				EncryptionBuffer::getInstance().getBuffer(_encryptionBuffer, size);
+				assert(_encryptionBuffer != NULL, "need to initialize encryption buffer for aes encryption");
+			} else {
+				_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));
+			}
 		}
 	}
 
 	/** Free / release the encryption buffer */
 	void freeEncryptionBuffer() {
-		if (CharacteristicBase::_encryptionBuffer != NULL) {
-			free(CharacteristicBase::_encryptionBuffer);
-			CharacteristicBase::_encryptionBuffer = NULL;
+		if (_encryptionBuffer != NULL) {
+			if (_status.sharedEncryptionBuffer) {
+				_encryptionBuffer = NULL;
+			} else {
+				free(_encryptionBuffer);
+				_encryptionBuffer = NULL;
+			}
 		}
 	}
 
@@ -638,7 +661,7 @@ public:
 
 	/** @inherit */
 	uint16_t getGattValueLength() {
-		if (this->isAesEnabled()) {
+		if (this->isAesEnabled() && CharacteristicBase::_minAccessLevel != ENCRYPTION_DISABLED) {
 			return EncryptionHandler::calculateEncryptionBufferLength(sizeof(T));
 			//return (1 + ((sizeof(T) + 4 - 1) / 16)) * 16 + 4; // ceil( sizeof(T) + 4 / 16 ) * 16 + 4
 		} else {
@@ -657,7 +680,17 @@ public:
  */
 template<>
 class Characteristic<std::string> : public CharacteristicGeneric<std::string> {
+private:
+
+	uint16_t _maxStringLength;
+
 public:
+
+	Characteristic<std::string>() : _maxStringLength(DEFAULT_CHAR_VALUE_STRING_LENGTH) {
+
+	}
+
+
 	/** @inherit */
 	void operator=(const std::string& val) {
 		CharacteristicGeneric<std::string>::operator=(val);
@@ -670,13 +703,17 @@ public:
 
 	/** @inherit */
 	uint16_t getValueLength() {
-		return MAX_CHAR_VALUE_STRING_LENGTH;
+		return _maxStringLength;
+	}
+
+	void setMaxStringLength(uint16_t length) {
+		_maxStringLength = length;
 	}
 
 	/** @inherit */
 	uint16_t getGattValueLength() {
-		if (this->isAesEnabled()) {
-			return EncryptionHandler::calculateEncryptionBufferLength(MAX_CHAR_VALUE_STRING_LENGTH);
+		if (this->isAesEnabled() && CharacteristicBase::_minAccessLevel != ENCRYPTION_DISABLED) {
+			return EncryptionHandler::calculateEncryptionBufferLength(_maxStringLength);
 			// (1 + ((MAX_CHAR_VALUE_STRING_LENGTH + 4 - 1) / 16)) * 16 + 4; // ceil( (MAX_STRING_LENGTH + 4) / 16 ) * 16 + 4
 		} else {
 			return getValueLength();
@@ -711,6 +748,11 @@ private:
 	uint16_t _notificationPendingOffset;
 
 public:
+
+	Characteristic<buffer_ptr_t>() : _maxGattValueLength(0), _valueLength(0), _gattValueLength(0),
+		_notificationPendingOffset(0) {
+		setSharedEncryptionBuffer(true);
+	}
 
 	uint32_t notify();
 
@@ -775,16 +817,20 @@ public:
 	virtual uint16_t getGattValueLength() {
 		return _gattValueLength;
 	}
-
-	void initEncryptionBuffer() {
-		uint16_t size;
-		EncryptionBuffer::getInstance().getBuffer(CharacteristicBase::_encryptionBuffer, size);
-		assert(CharacteristicBase::_encryptionBuffer != NULL, "need to initialize encryption buffer for aes encryption");
-	}
-
-	void freeEncryptionBuffer() {
-		CharacteristicBase::_encryptionBuffer = NULL;
-	}
+//
+//	void initEncryptionBuffer() {
+//		if (_encryptionBufferUsed) {
+//
+//		} else {
+//			uint16_t size;
+//			EncryptionBuffer::getInstance().getBuffer(CharacteristicBase::_encryptionBuffer, size);
+//			assert(CharacteristicBase::_encryptionBuffer != NULL, "need to initialize encryption buffer for aes encryption");
+//		}
+//	}
+//
+//	void freeEncryptionBuffer() {
+//		CharacteristicBase::_encryptionBuffer = NULL;
+//	}
 
 protected:
 

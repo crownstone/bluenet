@@ -8,15 +8,25 @@
 #include <processing/cs_Scheduler.h>
 
 #include <drivers/cs_Serial.h>
-#include <drivers/cs_PWM.h>
 #include <drivers/cs_RTC.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
+#include <processing/cs_Switch.h>
 
 //#define PRINT_DEBUG
 
 Scheduler::Scheduler() :
-		_rtcTimeStamp(0), _posixTimeStamp(0), _scheduleList(NULL) {
+#if (NORDIC_SDK_VERSION >= 11)
+		_appTimerId(NULL),
+#else
+		_appTimerId(UINT32_MAX),
+#endif
+		_rtcTimeStamp(0), _posixTimeStamp(0), _scheduleList(NULL)
+{
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerData = { {0} };
+	_appTimerId = &_appTimerData;
+#endif
 
 #if SCHEDULER_ENABLED==1
 	_scheduleList = new ScheduleList();
@@ -85,7 +95,8 @@ void Scheduler::tick() {
 		_posixTimeStamp++;
 		_rtcTimeStamp += RTC::msToTicks(1000);
 
-		State::getInstance().set(STATE_TIME, _posixTimeStamp);
+//		State::getInstance().set(STATE_TIME, _posixTimeStamp);
+
 //		EventDispatcher::getInstance().dispatch(EVT_TIME_UPDATED, &_posixTimeStamp, sizeof(_posixTimeStamp));
 		//		LOGd("posix time = %i", (uint32_t)(*_currentTimeCharacteristic));
 		//		long int timestamp = *_currentTimeCharacteristic;
@@ -97,12 +108,15 @@ void Scheduler::tick() {
 	schedule_entry_t* entry = _scheduleList->checkSchedule(_posixTimeStamp);
 	if (entry != NULL) {
 		switch (ScheduleEntry::getActionType(entry)) {
-			case SCHEDULE_ACTION_TYPE_PWM:
-			PWM::getInstance().setValue(0, entry->pwm.pwm);
-			break;
+			case SCHEDULE_ACTION_TYPE_PWM: {
+				//! TODO: use pwm here later on, for now: just switch on and off relay.
+				uint8_t switchState = entry->pwm.pwm == 0 ? 0 : 100;
+				Switch::getInstance().setSwitch(switchState);
+				break;
+			}
 			case SCHEDULE_ACTION_TYPE_FADE:
-			//TODO: implement this, make sure that if something else changes pwm during fade, that the fading is halted.
-			break;
+				//TODO: implement this, make sure that if something else changes pwm during fade, that the fading is halted.
+				break;
 		}
 	}
 #endif

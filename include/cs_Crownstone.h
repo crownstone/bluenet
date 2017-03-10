@@ -12,6 +12,9 @@
 
 #include <ble/cs_Stack.h>
 #include <ble/cs_iBeacon.h>
+#if EDDYSTONE==1
+#include <ble/cs_Eddystone.h>
+#endif
 
 #include <storage/cs_Settings.h>
 #include <events/cs_EventListener.h>
@@ -25,25 +28,29 @@
 #include <services/cs_CrownstoneService.h>
 
 #include <processing/cs_CommandHandler.h>
-#include <processing/cs_TemperatureGuard.h>
-#include <processing/cs_Sensors.h>
-#include <processing/cs_Fridge.h>
-#include <processing/cs_Switch.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Tracker.h>
-#include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
 
-#include <mesh/cs_Mesh.h>
-#include <storage/cs_State.h>
+#include <processing/cs_Switch.h>
+#include <processing/cs_TemperatureGuard.h>
+#include <processing/cs_PowerSampling.h>
+#include <processing/cs_Watchdog.h>
+#include <processing/cs_EnOceanHandler.h>
 
+#if BUILD_MESHING == 1
+#include <mesh/cs_Mesh.h>
+#include <mesh/cs_MeshControl.h>
+#endif
+#include <storage/cs_State.h>
+#include <cfg/cs_Boards.h>
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-#define CROWNSTONE_UPDATE_FREQUENCY 1 //! hz
+#define CROWNSTONE_UPDATE_FREQUENCY 2 //! hz
 
 /**
  * Crownstone encapsulates all functionality, stack, services, and configuration.
@@ -51,7 +58,7 @@
 class Crownstone : EventListener {
 
 public:
-	Crownstone();
+	Crownstone(boards_config_t& board);
 
 	/** initialize the crownstone:
 	 *    1. start UART
@@ -116,7 +123,7 @@ protected:
 	 *    - prepare tracker
 	 *    - ...
 	 */
-	void prepareCrownstone();
+	void prepareNormalOperationMode();
 
 	/** tick function for crownstone to update/execute periodically
 	 */
@@ -128,15 +135,20 @@ protected:
 
 private:
 
+	boards_config_t _boardsConfig;
+
 	// drivers
 	Nrf51822BluetoothStack* _stack;
 	Timer* _timer;
 	Storage* _storage;
 	Settings* _settings;
 	State* _stateVars;
+
 	Switch* _switch;
 	TemperatureGuard* _temperatureGuard;
 	PowerSampling* _powerSampler;
+	Watchdog* _watchdog;
+	EnOceanHandler* _enOceanHandler;
 
 	// services
 	DeviceInformationService* _deviceInformationService;
@@ -150,12 +162,15 @@ private:
 	// advertise
 	ServiceData* _serviceData;
 	IBeacon* _beacon;
+#if EDDYSTONE==1
+	Eddystone* _eddystone;
+#endif
 
 	// processing
+#if BUILD_MESHING == 1
 	Mesh* _mesh;
-	Sensors* _sensors;
-	Fridge* _fridge;
-	CommandHandler* _commandHandler;
+#endif
+    CommandHandler* _commandHandler;
 	Scanner* _scanner;
 	Tracker* _tracker;
 	Scheduler* _scheduler;
@@ -163,7 +178,12 @@ private:
 
 	bool _advertisementPaused;
 
-	app_timer_id_t _mainTimer;
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _mainTimerData;
+	app_timer_id_t           _mainTimerId;
+#else
+	uint32_t                 _mainTimerId;
+#endif
 
 	uint8_t _operationMode;
 

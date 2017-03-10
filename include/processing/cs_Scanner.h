@@ -17,13 +17,6 @@
 #define SCAN_FILTER_GUIDESTONE_MSK    (1 << SCAN_FILTER_GUIDESTONE_BIT)
 #define SCAN_FILTER_DOBOTS_MSK        SCAN_FILTER_CROWNSTONE_MSK | SCAN_FILTER_GUIDESTONE_MSK
 
-/** @brief Variable length data encapsulation in terms of length and pointer to data */
-typedef struct
-{
-    uint8_t     * p_data;                                         /** < Pointer to data. */
-    uint16_t      data_len;                                       /** < Length of data. */
-} data_t;
-
 /** Scanner scans for BLE devices.
  */
 class Scanner : EventListener {
@@ -48,6 +41,7 @@ public:
 
 	static void staticTick(Scanner* ptr);
 
+	void init();
 	//! start immediately
 	void start();
 	//! delay start by delay ms
@@ -87,7 +81,12 @@ private:
 
 	uint16_t _scanCount;
 
-	app_timer_id_t _appTimerId;
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _appTimerData;
+	app_timer_id_t           _appTimerId;
+#else
+	uint32_t                 _appTimerId;
+#endif
 
 	Nrf51822BluetoothStack* _stack;
 

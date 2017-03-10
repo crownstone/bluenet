@@ -6,11 +6,34 @@
  */
 #pragma once
 
+/**
+ * Provide a non-zero value here in applications that need to use several
+ * peripherals with the same ID that are sharing certain resources
+ * (for example, SPI0 and TWI0). Obviously, such peripherals cannot be used
+ * simultaneously. Therefore, this definition allows to initialize the driver
+ * for another peripheral from a given group only after the previously used one
+ * is uninitialized. Normally, this is not possible, because interrupt handlers
+ * are implemented in individual drivers.
+ * This functionality requires a more complicated interrupt handling and driver
+ * initialization, hence it is not always desirable to use it.
+ */
+#define PERIPHERAL_RESOURCE_SHARING_ENABLED 0
+
+
 /* CLOCK */
 //#define CLOCK_CONFIG_XTAL_FREQ          NRF_CLOCK_XTALFREQ_16MHz
 //#define CLOCK_CONFIG_LF_SRC             NRF_CLOCK_LF_SRC_Xtal
 //#define CLOCK_CONFIG_LF_RC_CAL_INTERVAL RC_2000MS_CALIBRATION_INTERVAL
 //#define CLOCK_CONFIG_IRQ_PRIORITY       APP_IRQ_PRIORITY_LOW
+
+/* SAADC */
+#define SAADC_ENABLED 1
+
+#if (SAADC_ENABLED == 1)
+#define SAADC_CONFIG_RESOLUTION      NRF_SAADC_RESOLUTION_10BIT
+#define SAADC_CONFIG_OVERSAMPLE      NRF_SAADC_OVERSAMPLE_DISABLED
+#define SAADC_CONFIG_IRQ_PRIORITY    APP_IRQ_PRIORITY_LOW
+#endif
 
 /* GPIOTE */
 #define GPIOTE_ENABLED 1
@@ -34,7 +57,7 @@
 #define TIMER0_INSTANCE_INDEX      0
 #endif
 
-#define TIMER1_ENABLED 0
+#define TIMER1_ENABLED 1
 
 #if (TIMER1_ENABLED == 1)
 #define TIMER1_CONFIG_FREQUENCY    NRF_TIMER_FREQ_16MHz
@@ -57,6 +80,30 @@
 #endif
 
 #define TIMER_COUNT (TIMER0_ENABLED + TIMER1_ENABLED + TIMER2_ENABLED)
+
+/* COMP */
+#define COMP_ENABLED 1
+
+#if (COMP_ENABLED == 1)
+#define COMP_CONFIG_REF     		NRF_COMP_REF_Int1V8
+#define COMP_CONFIG_MAIN_MODE		NRF_COMP_MAIN_MODE_SE
+#define COMP_CONFIG_SPEED_MODE		NRF_COMP_SP_MODE_High
+#define COMP_CONFIG_HYST			NRF_COMP_HYST_NoHyst
+#define COMP_CONFIG_ISOURCE			NRF_COMP_ISOURCE_Off
+#define COMP_CONFIG_IRQ_PRIORITY 	APP_IRQ_PRIORITY_LOW
+#define COMP_CONFIG_INPUT        	NRF_COMP_INPUT_0
+#endif
+
+/* LPCOMP */
+#define LPCOMP_ENABLED 0
+
+#if (LPCOMP_ENABLED == 1)
+#define LPCOMP_CONFIG_REFERENCE    NRF_LPCOMP_REF_SUPPLY_4_8
+#define LPCOMP_CONFIG_DETECTION    NRF_LPCOMP_DETECT_DOWN
+#define LPCOMP_CONFIG_IRQ_PRIORITY APP_IRQ_PRIORITY_LOW
+#define LPCOMP_CONFIG_INPUT        NRF_LPCOMP_INPUT_0
+#endif
+
 
 ///* RTC */
 //#define RTC0_ENABLED 0
@@ -107,16 +154,6 @@
 //#define QDEC_CONFIG_IRQ_PRIORITY APP_IRQ_PRIORITY_LOW
 //#define QDEC_CONFIG_DBFEN        false
 //#define QDEC_CONFIG_SAMPLE_INTEN false
-//#endif
-//
-///* LPCOMP */
-//#define LPCOMP_ENABLED 0
-//
-//#if (LPCOMP_ENABLED == 1)
-//#define LPCOMP_CONFIG_REFERENCE    NRF_LPCOMP_REF_SUPPLY_FOUR_EIGHT
-//#define LPCOMP_CONFIG_DETECTION    NRF_LPCOMP_DETECT_DOWN
-//#define LPCOMP_CONFIG_IRQ_PRIORITY APP_IRQ_PRIORITY_LOW
-//#define LPCOMP_CONFIG_INPUT        NRF_LPCOMP_INPUT_0
 //#endif
 //
 ///* WDT */

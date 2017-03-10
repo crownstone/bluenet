@@ -1,13 +1,8 @@
 var searchData=
 [
-  ['tick',['tick',['../classBLEpp_1_1Service.html#a1f8da19856b24a21baf25276e64e6d24',1,'BLEpp::Service::tick()'],['../classADC.html#a9d071f7a9616a617cf9e6d4136ce13f7',1,'ADC::tick()'],['../classTemperatureGuard.html#aa8c28bc6df37e052db24656e626fa563',1,'TemperatureGuard::tick()'],['../classAlertService.html#ac3aa4da58a38d42fa6fc1556f289f480',1,'AlertService::tick()'],['../classGeneralService.html#acc793990bf5d4aa82f3b55748fcb1368',1,'GeneralService::tick()'],['../classIndoorLocalizationService.html#ad1ee592df7f181ea4d61d36c98d879e4',1,'IndoorLocalizationService::tick()'],['../classPowerService.html#a04e30afd6f6b7669187f0ac03915a241',1,'PowerService::tick()'],['../classScheduleService.html#a8e2886e303348f1a72044853f647fa7a',1,'ScheduleService::tick()']]],
-  ['tickstoms',['ticksToMs',['../classRTC.html#a027acf711855d4ef4065333f0d47fb06',1,'RTC']]],
-  ['toarray',['toArray',['../classBLEpp_1_1DoBotsManufac.html#a4aaa44ab53ad7e8be8177fc7a8ea3cff',1,'BLEpp::DoBotsManufac::toArray()'],['../classBLEpp_1_1IBeacon.html#abdd55da7690e27f4bb789f58ab17216e',1,'BLEpp::IBeacon::toArray()']]],
-  ['tostring',['toString',['../classStreamBuffer.html#af87999040950d6f5231156114c01fb99',1,'StreamBuffer']]],
-  ['trackeddevice',['TrackedDevice',['../classTrackedDevice.html#afc874ce96bdaddd0117a9418eda7d66a',1,'TrackedDevice']]],
-  ['trackeddevicelist',['TrackedDeviceList',['../classTrackedDeviceList.html#a9c3d728a893db2cedcf83cbccaa28c29',1,'TrackedDeviceList']]],
-  ['tuple',['tuple',['../classtuple.html#a2739c6d30f8d1c85b06da220f463149b',1,'tuple']]],
-  ['turnoff',['turnOff',['../classPowerService.html#ad5ec8a0f72e80543a13aa411068241fd',1,'PowerService']]],
-  ['turnon',['turnOn',['../classPowerService.html#a77cea7466de151af311a00ddd92075ae',1,'PowerService']]],
-  ['type',['type',['../classStreamBuffer.html#a2b555ca47fef4aca4bbcaa4b33d1e69a',1,'StreamBuffer']]]
+  ['update',['update',['../classADC.html#ad6a5d07f41d656e760ea4fd55834574c',1,'ADC::update()'],['../classScanResult.html#a6ff76ed6d3973219c559120498bd14ae',1,'ScanResult::update()']]],
+  ['updateadvertisement',['updateAdvertisement',['../classNrf51822BluetoothStack.html#ab5b9a5fabc4f020cc7d0d7281eef29e5',1,'Nrf51822BluetoothStack']]],
+  ['updatedevicename',['updateDeviceName',['../classNrf51822BluetoothStack.html#aafc1669beef91b1722417b98d847ca1c',1,'Nrf51822BluetoothStack']]],
+  ['updatevalue',['updateValue',['../classCharacteristicBase.html#a93dfce87563f7c8113df69b0ee95013b',1,'CharacteristicBase']]],
+  ['uuid',['UUID',['../classUUID.html#a56b6dfa8d38418093502ad169a814dfb',1,'UUID::UUID()'],['../classUUID.html#a12e127ba070a7f883e31e9a02dc740db',1,'UUID::UUID(const char *fullUid)'],['../classUUID.html#a117287ee88059dfbe1b0ecdac81c3771',1,'UUID::UUID(uint16_t uuid)'],['../classUUID.html#a5870ad95d095f52e2a10ff38c18b7006',1,'UUID::UUID(UUID &amp;parent, uint16_t uidValue)'],['../classUUID.html#aa4c9baa1a13d474ef6caf12e0664d579',1,'UUID::UUID(const UUID &amp;rhs)'],['../classUUID.html#a4fc7b9c4a7e4aa5202a4d0077307bb56',1,'UUID::UUID(const ble_uuid_t &amp;value)']]]
 ];

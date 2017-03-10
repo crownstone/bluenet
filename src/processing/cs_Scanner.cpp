@@ -6,13 +6,17 @@
  */
 #include "processing/cs_Scanner.h"
 
+#if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
+#endif
 #include <storage/cs_Settings.h>
 
 #include <cfg/cs_DeviceTypes.h>
 #include <ble/cs_DoBotsManufac.h>
 
 #include <events/cs_EventDispatcher.h>
+
+#include <cfg/cs_UuidConfig.h>
 
 //#define PRINT_SCANNER_VERBOSE
 //#define PRINT_DEBUG
@@ -27,8 +31,17 @@ Scanner::Scanner() :
 	_scanFilter(SCAN_FILTER),
 	_filterSendFraction(SCAN_FILTER_SEND_FRACTION),
 	_scanCount(0),
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerId(NULL),
+#else
+	_appTimerId(UINT32_MAX),
+#endif
 	_stack(NULL)
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_appTimerData = { {0} };
+	_appTimerId = &_appTimerData;
+#endif
 
 	_scanResult = new ScanResult();
 
@@ -38,7 +51,9 @@ Scanner::Scanner() :
 	//! if we write / read from a characteristic that uses the master buffer
 	//! during a scan!
 	_scanResult->assign(_scanBuffer, sizeof(_scanBuffer));
+}
 
+void Scanner::init() {
 	Settings& settings = Settings::getInstance();
 	settings.get(CONFIG_SCAN_DURATION, &_scanDuration);
 	settings.get(CONFIG_SCAN_SEND_DELAY, &_scanSendDelay);
@@ -46,7 +61,6 @@ Scanner::Scanner() :
 	settings.get(CONFIG_SCAN_FILTER, &_scanFilter);
 
 	EventDispatcher::getInstance().addListener(this);
-
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Scanner::staticTick);
 }
 
@@ -65,7 +79,9 @@ void Scanner::manualStartScan() {
 	_scanning = true;
 
 	if (!_stack->isScanning()) {
+#ifdef PRINT_SCANNER_VERBOSE
 		LOGi(FMT_START, "Scanner");
+#endif
 		_stack->startScanning();
 	}
 }
@@ -79,7 +95,9 @@ void Scanner::manualStopScan() {
 	_scanning = false;
 
 	if (_stack->isScanning()) {
+#ifdef PRINT_SCANNER_VERBOSE
 		LOGi(FMT_STOP, "Scanner");
+#endif
 		_stack->stopScanning();
 	}
 }
@@ -202,9 +220,11 @@ void Scanner::notifyResults() {
 	LOGd("Notify scan results");
 #endif
 
+#if BUILD_MESHING == 1
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
 	}
+#endif
 
 	buffer_ptr_t buffer;
 	uint16_t length;
@@ -222,43 +242,7 @@ void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
 	}
 }
 
-/**
- * @brief Parses advertisement data, providing length and location of the field in case
- *        matching data is found.
- *
- * @param[in]  Type of data to be looked for in advertisement data.
- * @param[in]  Advertisement report length and pointer to report.
- * @param[out] If data type requested is found in the data report, type data length and
- *             pointer to data will be populated here.
- *
- * @retval NRF_SUCCESS if the data type is found in the report.
- * @retval NRF_ERROR_NOT_FOUND if the data type could not be found.
- */
-static uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata)
-{
-    uint32_t index = 0;
-    uint8_t * p_data;
-
-    p_data = p_advdata->p_data;
-
-    while (index < p_advdata->data_len)
-    {
-        uint8_t field_length = p_data[index];
-        uint8_t field_type = p_data[index+1];
-
-        if (field_type == type)
-        {
-            p_typedata->p_data = &p_data[index+2];
-            p_typedata->data_len = field_length-1;
-            return NRF_SUCCESS;
-        }
-        index += field_length+1;
-    }
-    return NRF_ERROR_NOT_FOUND;
-}
-
 bool Scanner::isFiltered(data_t* p_adv_data) {
-
 	//! If we want to send filtered scans once every N times, and now is that time, then just return false
 	if (_filterSendFraction > 0 && _scanCount == 0) {
 		return false;
@@ -266,12 +250,11 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 
 	data_t type_data;
 
-	uint32_t err_code = adv_report_parse(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
+	uint32_t err_code = BLEutil::adv_report_parse(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
 										 p_adv_data,
 										 &type_data);
-
 	if (err_code == NRF_SUCCESS) {
-//		_logFirst(INFO, "found manufac data:");
+//		_logFirst(SERIAL_INFO, "found manufac data:");
 //		BLEutil::printArray(type_data.p_data, type_data.data_len);
 
 		//! [28.01.16] can't cast to uint16_t because it's possible that p_data is not
@@ -281,7 +264,7 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 			companyIdentifier == CROWNSTONE_COMPANY_ID) {
 //			LOGi("is dobots device!");
 
-//			_logFirst(INFO, "parse data");
+//			_logFirst(SERIAL_INFO, "parse data");
 //			BLEutil::printArray(type_data.p_data+2, type_data.data_len-2);
 //
 			DoBotsManufac dobotsManufac;
@@ -292,7 +275,7 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 //				LOGi("found guidestone");
 				return _scanFilter & SCAN_FILTER_GUIDESTONE_MSK;
 			}
-			case DEVICE_CROWNSTONE: {
+			case DEVICE_CROWNSTONE_PLUG: {
 //				LOGi("found crownstone");
 				return _scanFilter & SCAN_FILTER_CROWNSTONE_MSK;
 			}
@@ -301,7 +284,28 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 			}
 
 		}
+	}
 
+	err_code = BLEutil::adv_report_parse(BLE_GAP_AD_TYPE_SERVICE_DATA,
+										 p_adv_data,
+										 &type_data);
+	if (err_code == NRF_SUCCESS) {
+		if (type_data.data_len == 19) {
+			uint16_t companyIdentifier = type_data.p_data[1] << 8 | type_data.p_data[0];
+			switch (companyIdentifier) {
+			case GUIDESTONE_SERVICE_DATA_UUID: {
+//				LOGi("found guidestone");
+				return _scanFilter & SCAN_FILTER_GUIDESTONE_MSK;
+			}
+			case CROWNSTONE_PLUG_SERVICE_DATA_UUID:
+			case CROWNSTONE_BUILT_SERVICE_DATA_UUID: {
+//				LOGi("found crownstone");
+				return _scanFilter & SCAN_FILTER_CROWNSTONE_MSK;
+			}
+			default:
+				return false;
+			}
+		}
 	}
 
 	return false;
@@ -310,6 +314,8 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 
 	if (isScanning()) {
+
+		EventDispatcher::getInstance().dispatch(EVT_DEVICE_SCANNED, p_adv_report, sizeof(ble_gap_evt_adv_report_t));
 		//! we do active scanning, to avoid handling each device twice, only
 		//! check the scan responses (as long as we don't care about the
 		//! advertisement data)

@@ -8,8 +8,13 @@
 
 #include <drivers/cs_Timer.h>
 
-/** Clock frequency of the RTC timer */
+/** 
+ * Clock frequency of the RTC timer.
+ *
+ * TODO: Collect all macros in general file.
+ */
 #define RTC_CLOCK_FREQ          32768
+
 /** Maximum value of the RTC counter. */
 //#define MAX_RTC_COUNTER_VAL     0x0007FFFF //! Where did this come from?
 #define MAX_RTC_COUNTER_VAL     0x00FFFFFF
@@ -19,6 +24,10 @@
  * if NRF51_USE_SOFTDEVICE==1 uses the RTC0 clock
  * managed by the softdevice
  * otherwise uses the RTC1 clock used by the app timer
+ *
+ * TODO: Implementation should be in a .cpp file
+ * TODO: Get rid of all these static functions. 
+ * TODO: We have hardware floating points now. Get rid of ROUNDED_DIV macro, etc.
  */
 class RTC {
 

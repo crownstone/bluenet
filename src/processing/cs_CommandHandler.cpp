@@ -9,15 +9,28 @@
 
 #include <storage/cs_Settings.h>
 #include <drivers/cs_Serial.h>
-#include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
-#include <processing/cs_Switch.h>
 #include <processing/cs_FactoryReset.h>
+
+#include <cfg/cs_Boards.h>
+
+#include <processing/cs_Switch.h>
+#include <processing/cs_TemperatureGuard.h>
+
+#if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
 #include <mesh/cs_Mesh.h>
+#endif
+
 #include <storage/cs_State.h>
 #include <cfg/cs_Strings.h>
+
+#if BUILD_MESHING == 1
+extern "C" {
+	#include <rbc_mesh.h>
+}
+#endif
 
 //#define PRINT_DEBUG
 
@@ -31,7 +44,7 @@ void reset(void* p_context) {
 		LOGi(MSG_RESET);
 	}
 
-	LOGi("executing reset: %d", cmd);
+	LOGi("Executing reset: %d", cmd);
 	//! copy to make sure this is nothing more than one value
 	uint8_t err_code;
 	err_code = sd_power_gpregret_clr(0xFF);
@@ -48,18 +61,37 @@ void execute_delayed(void * p_context) {
 	free(buf);
 }
 
-CommandHandler::CommandHandler() : _delayTimer(0) {
+CommandHandler::CommandHandler() :
+#if (NORDIC_SDK_VERSION >= 11)
+		_delayTimerId(NULL),
+		_resetTimerId(NULL),
+#else
+		_delayTimerId(UINT32_MAX),
+		_resetTimerId(UINT32_MAX),
+		_keepAliveTimerId(UINT32_MAX),
+#endif
+		_boardConfig(NULL)
+{
+#if (NORDIC_SDK_VERSION >= 11)
+		_delayTimerData = { {0} };
+		_delayTimerId = &_delayTimerData;
+		_resetTimerData = { {0} };
+		_resetTimerId = &_resetTimerData;
+#endif
 }
 
-void CommandHandler::init() {
-	Timer::getInstance().createSingleShot(_delayTimer, execute_delayed);
+void CommandHandler::init(boards_config_t* board) {
+	_boardConfig = board;
+	Timer::getInstance().createSingleShot(_delayTimerId, execute_delayed);
+	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t) reset);
 }
 
 void CommandHandler::resetDelayed(uint8_t opCode) {
 	static uint8_t resetOpCode = opCode;
-	app_timer_id_t resetTimer;
-	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
-	Timer::getInstance().start(resetTimer, MS_TO_TICKS(2000), &resetOpCode);
+	//! TODO: do we really have to make a new timer here every time?
+//	app_timer_id_t resetTimer;
+//	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
+	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(2000), &resetOpCode);
 //	//! Loop until reset trigger
 //	while(true) {}; //! TODO: this doesn't seem to work
 }
@@ -70,7 +102,7 @@ ERR_CODE CommandHandler::handleCommandDelayed(CommandHandlerTypes type, buffer_p
 	buf->buffer = new uint8_t[size];
 	memcpy(buf->buffer, buffer, size);
 	buf->size = size;
-	Timer::getInstance().start(_delayTimer, MS_TO_TICKS(delay), buf);
+	Timer::getInstance().start(_delayTimerId, MS_TO_TICKS(delay), buf);
 	LOGi("execute with delay %d", delay);
 	return NRF_SUCCESS;
 }
@@ -83,6 +115,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type) {
 ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel accessLevel) {
 
 	switch (type) {
+	case CMD_NOP: {
+		// a nop command to keep the connection alive
+		// don't need to do anything here, the connection keep alive is handled in the stack
+		break;
+	}
 	case CMD_GOTO_DFU: {
 		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "goto dfu");
@@ -93,16 +130,15 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "reset");
 
-		if (size != sizeof(opcode_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
+//		if (size != sizeof(opcode_message_payload_t)) {
+//			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+//			return ERR_WRONG_PAYLOAD_LENGTH;
+//		}
+//
+//		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
+//		uint8_t resetOp = payload->opCode;
 
-		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
-//		static uint8_t resetOp = payload->opCode;
-		uint8_t resetOp = payload->opCode;
-
-		resetDelayed(resetOp);
+		resetDelayed(GPREGRET_SOFT_RESET);
 		break;
 	}
 	case CMD_ENABLE_MESH: {
@@ -120,11 +156,13 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		LOGi("%s mesh", enable ? STR_ENABLE : STR_DISABLE);
 		Settings::getInstance().updateFlag(CONFIG_MESH_ENABLED, enable, true);
 
+#if BUILD_MESHING == 1
 		if (enable) {
 			Mesh::getInstance().start();
 		} else {
 			Mesh::getInstance().stop();
 		}
+#endif
 
 		break;
 	}
@@ -232,9 +270,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, dataLength);
 
+#if BUILD_MESHING == 1
 			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 				MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
 			}
+#endif
 		}
 
 		break;
@@ -243,21 +283,29 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "request service");
 
-		service_data_mesh_message_t serviceData;
-		memset(&serviceData, 0, sizeof(serviceData));
+#if BUILD_MESHING == 1
+		state_item_t stateItem;
+		memset(&stateItem, 0, sizeof(stateItem));
 
 		State& state = State::getInstance();
-		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &serviceData.crownstoneId);
+		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &stateItem.id);
 
-		state.get(STATE_SWITCH_STATE, serviceData.switchState);
+		state.get(STATE_SWITCH_STATE, stateItem.switchState);
 
-		// todo get event bitmask
+		//! TODO: implement setting the eventBitmask in a better way
+		//! Maybe get it from service data directly? Or should we store the eventBitmask in the State?
+		state_errors_t state_errors;
+		state.get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+		stateItem.eventBitmask = 0;
+		if (state_errors.asInt != 0) {
+			stateItem.eventBitmask |= 1 << SERVICE_BITMASK_ERROR;
+		}
 
-		state.get(STATE_POWER_USAGE, (int32_t&)serviceData.powerUsage);
-		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)serviceData.accumulatedEnergy);
-		state.get(STATE_TEMPERATURE, (int32_t&)serviceData.temperature);
+		state.get(STATE_POWER_USAGE, (int32_t&)stateItem.powerUsage);
+		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)stateItem.accumulatedEnergy);
 
-		MeshControl::getInstance().sendServiceDataMessage(&serviceData);
+		MeshControl::getInstance().sendServiceDataMessage(stateItem, true);
+#endif
 
 		break;
 	}
@@ -276,26 +324,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		if (!FactoryReset::getInstance().factoryReset(resetCode)) {
 			return ERR_WRONG_PARAMETER;
 		}
-
-//		if (resetCode == FACTORY_RESET_CODE) {
-////			LOGf("factory reset");
-//
-//			Settings::getInstance().factoryReset(resetCode);
-//			State::getInstance().factoryReset(resetCode);
-//			// todo: might not be neccessary if we only use dm in setup mode we can handle it specifically
-//			//   there. maybe with a mode factory reset
-//			// todo: remove stack again from CommandHandler if we don't need it here
-//			Nrf51822BluetoothStack::getInstance().device_manager_reset();
-//
-//			LOGi("factory reset done, rebooting device in 2s ...");
-//
-//			resetDelayed(GPREGRET_SOFT_RESET);
-//
-//		} else {
-//			LOGi("wrong code received: %p", resetCode);
-////			LOGi("factory reset code is: %p", FACTORY_RESET_CODE);
-//			return ERR_WRONG_PARAMETER;
-//		}
 
 		break;
 	}
@@ -357,6 +385,18 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		break;
 	}
+	case CMD_INCREASE_TX: {
+		uint8_t opMode;
+		State::getInstance().get(STATE_OPERATION_MODE, opMode);
+		if (opMode == OPERATION_MODE_SETUP) {
+			Nrf51822BluetoothStack::getInstance().changeToNormalTxPowerMode();
+		}
+		else {
+			LOGw("validate setup only available in setup mode");
+			return ERR_NOT_AVAILABLE;
+		}
+		break;
+	}
 	case CMD_VALIDATE_SETUP: {
 		// we do not need to check for the setup validation since this is not encrypted
 		LOGi(STR_HANDLE_COMMAND, "validate setup");
@@ -372,21 +412,21 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			if (settings.isSet(CONFIG_ENCRYPTION_ENABLED)) {
 				// validate encryption keys are not 0
-				settings.get(CONFIG_KEY_AMIN, key);
+				settings.get(CONFIG_KEY_ADMIN, key);
 				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-	//				LOGw("owner key is not set!");
+					LOGw("owner key is not set!");
 					return ERR_COMMAND_FAILED;
 				}
 
 				settings.get(CONFIG_KEY_MEMBER, key);
 				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-	//				LOGw("member key is not set!");
+					LOGw("member key is not set!");
 					return ERR_COMMAND_FAILED;
 				}
 
 				settings.get(CONFIG_KEY_GUEST, key);
 				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-	//				LOGw("guest key is not set!");
+					LOGw("guest key is not set!");
 					return ERR_COMMAND_FAILED;
 				}
 			}
@@ -396,7 +436,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			settings.get(CONFIG_CROWNSTONE_ID, &crownstoneId);
 
 			if (crownstoneId == 0) {
-//				LOGw("crownstone id has to be set during setup mode");
+				LOGw("crownstone id has to be set during setup mode");
 				return ERR_COMMAND_FAILED;
 			}
 
@@ -405,7 +445,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			settings.get(CONFIG_IBEACON_MAJOR, &major);
 
 			if (major == 0) {
-//				LOGw("ibeacon major is not set!");
+				LOGw("ibeacon major is not set!");
 				return ERR_COMMAND_FAILED;
 			}
 
@@ -413,7 +453,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			settings.get(CONFIG_IBEACON_MINOR, &minor);
 
 			if (minor == 0) {
-//				LOGw("ibeacon minor is not set!");
+				LOGw("ibeacon minor is not set!");
 				return ERR_COMMAND_FAILED;
 			}
 
@@ -424,12 +464,54 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			//! if validation ok, set opMode to normal mode
 			State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
 
+			//! Switch relay on
+			switch_message_payload_t switchPayload;
+			switchPayload.switchState = 1;
+			handleCommand(CMD_SWITCH, (uint8_t*)&switchPayload, 1, ADMIN);
+
 			//! then reset device
 			resetDelayed(GPREGRET_SOFT_RESET);
 		} else {
 			LOGw("validate setup only available in setup mode");
 			return ERR_NOT_AVAILABLE;
 		}
+
+		break;
+	}
+	case CMD_KEEP_ALIVE: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "keep alive");
+
+		EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE);
+
+//		Timer::getInstance().reset(_keepAliveTimerId, )
+
+		// no params
+
+		break;
+	}
+	case CMD_KEEP_ALIVE_STATE: {
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "keep alive state");
+
+		if (size != sizeof(keep_alive_state_message_payload_t)) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+//		keep_alive_state_message_payload_t state = *(keep_alive_state_message_payload_t*)buffer;
+//		LOGi("switch: %d", state.switchState.switchState);
+//		LOGi("timeout: %d s", state.timeout);
+
+		EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, buffer, size);
+
+		// state as param: pwm or on/off (switch state) as param
+		// timeout as param
+		//   + 1/2 interval
+
+		// in config
+
+		// 1 keepalive per 2 minutes
 
 		break;
 	}
@@ -442,38 +524,68 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		// todo: tbd
 		break;
 	}
-	case CMD_KEEP_ALIVE_STATE: {
-		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "keep alive");
-		return ERR_NOT_IMPLEMENTED;
-
-		// todo: tbd
-		break;
-	}
-	case CMD_KEEP_ALIVE: {
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "keep alive");
-		return ERR_NOT_IMPLEMENTED;
-
-		// todo: tbd
-		break;
-	}
 	case CMD_DISCONNECT: {
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "disconnect");
 		Nrf51822BluetoothStack::getInstance().disconnect();
 		break;
 	}
-#if DEVICE_TYPE==DEVICE_CROWNSTONE
+	case CMD_SET_LED: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "set led");
+
+		if (_boardConfig->flags.hasLed) {
+			if (size != sizeof(led_message_payload_t)) {
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+
+			led_message_payload_t* payload = (led_message_payload_t*) buffer;
+			uint8_t led = payload->led;
+			bool enable = payload->enable;
+
+			LOGi("set led %d %s", led, enable ? "ON" : "OFF");
+
+			uint8_t ledPin = led == 1 ? _boardConfig->pinLedGreen : _boardConfig->pinLedRed;
+
+			if (_boardConfig->flags.ledInverted) {
+				enable = !enable;
+			}
+
+			if (enable) {
+				nrf_gpio_pin_set(ledPin);
+			} else {
+				nrf_gpio_pin_clear(ledPin);
+			}
+		} else {
+			LOGe("No LEDs on this board!");
+		}
+		break;
+	}
+	case CMD_RESET_ERRORS: {
+		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "reset errors");
+		if (size != sizeof(state_errors_t)) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		state_errors_t* payload = (state_errors_t*) buffer;
+		state_errors_t state_errors;
+		State::getInstance().get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+		LOGd("old errors %u - reset %u", state_errors, *payload);
+		state_errors.asInt &= ~(payload->asInt);
+		LOGd("new errors %d", state_errors);
+		State::getInstance().set(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+		break;
+	}
+
 	// Crownstone specific commands are only available if device type is set to Crownstone.
 	// E.g. GuideStone does not support power measure or switching commands
-	case CMD_SWITCH: {
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "switch");
-		// for now, same as pwm, but switch command should decide itself if relay or
-		// pwm is used
-	}
 	case CMD_PWM: {
+		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+			return ERR_NOT_AVAILABLE;
+		}
+
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "PWM");
 
@@ -486,13 +598,47 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		uint8_t value = payload->switchState;
 
 		uint8_t current = Switch::getInstance().getPwm();
-//		LOGi("current pwm: %d", current);
 		if (value != current) {
 			Switch::getInstance().setPwm(value);
 		}
 		break;
 	}
+	case CMD_SWITCH: {
+		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+			return ERR_NOT_AVAILABLE;
+		}
+
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "switch");
+
+		if (size != sizeof(switch_message_payload_t)) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+
+		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
+		Switch::getInstance().setSwitch(payload->switchState);
+
+//		//! Switch off pwm, as we're using the relay
+//		uint8_t currentPwm = Switch::getInstance().getPwm();
+//		if (currentPwm != 0) {
+//			Switch::getInstance().setPwm(0);
+//		}
+//
+//		if (value == 0) {
+//			Switch::getInstance().relayOff();
+//		} else {
+//			Switch::getInstance().relayOn();
+//		}
+		break;
+	}
 	case CMD_RELAY: {
+		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+			return ERR_NOT_AVAILABLE;
+		}
+
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "relay");
 
@@ -513,6 +659,11 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		break;
 	}
 	case CMD_ENABLE_CONT_POWER_MEASURE: {
+		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+			return ERR_NOT_AVAILABLE;
+		}
+
 		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "enable cont power measure");
 		return ERR_NOT_IMPLEMENTED;
@@ -523,24 +674,13 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		}
 
 		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-		bool enable = payload->enable;
+		__attribute__((unused)) bool enable = payload->enable;
 
 		LOGi("%s continuous power measurements", enable ? STR_ENABLE : STR_DISABLE);
 
 		// todo: tbd
 		break;
 	}
-#else
-	// Crownstone specific commands are only available if device type is set to Crownstone.
-	// E.g. GuideStone does not support power measure or switching commands
-	case CMD_SWITCH:
-	case CMD_PWM:
-	case CMD_RELAY:
-	case CMD_ENABLE_CONT_POWER_MEASURE: {
-		LOGe("Commands not available for device type %d", DEVICE_TYPE);
-		return ERR_NOT_AVAILABLE;
-	}
-#endif
 	default: {
 		LOGe("Command type not found!!");
 		return ERR_COMMAND_NOT_FOUND;

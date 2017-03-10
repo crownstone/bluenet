@@ -11,7 +11,7 @@
 #include <structs/cs_StreamBuffer.h>
 #include <protocol/cs_ConfigTypes.h>
 #include <protocol/cs_ErrorCodes.h>
-
+#include <cfg/cs_Boards.h>
 
 /**
  * Load settings from and save settings to persistent storage.
@@ -32,7 +32,7 @@ public:
 		return instance;
 	}
 
-	void init();
+	void init(boards_config_t* boardsConfig);
 
 	bool isInitialized() {
 		return _initialized;
@@ -89,6 +89,8 @@ public:
 	ERR_CODE get(uint8_t type, void* target, uint16_t& size );
 	ERR_CODE set(uint8_t type, void* target, bool persistent = false, uint16_t size = 0);
 
+	uint16_t getSettingsItemSize(uint8_t type);
+
 protected:
 
 	bool _initialized;
@@ -104,9 +106,9 @@ protected:
 
 	Storage* _storage;
 
-	ERR_CODE verify(uint8_t type, uint8_t* payload, uint8_t length);
+	boards_config_t* _boardsConfig;
 
-	uint16_t getSettingsItemSize(uint8_t type);
+	ERR_CODE verify(uint8_t type, uint8_t* payload, uint8_t length);
 
 	bool readFlag(uint8_t type, bool& value);
 //	void initFlags();

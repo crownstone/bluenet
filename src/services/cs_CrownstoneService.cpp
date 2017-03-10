@@ -11,7 +11,9 @@
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
+#endif
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
 #include <storage/cs_State.h>
@@ -22,7 +24,9 @@ CrownstoneService::CrownstoneService() : EventListener(),
 		_controlCharacteristic(NULL),
 		_configurationControlCharacteristic(NULL), _configurationReadCharacteristic(NULL),
 		_streamBuffer(NULL),
+#if BUILD_MESHING == 1
 		_meshControlCharacteristic(NULL), _meshCommand(NULL),
+#endif
 		_stateControlCharacteristic(NULL), _stateReadCharacteristic(NULL),
 		_sessionNonceCharacteristic(NULL), _factoryResetCharacteristic(NULL)
 {
@@ -31,8 +35,8 @@ CrownstoneService::CrownstoneService() : EventListener(),
 	setUUID(UUID(CROWNSTONE_UUID));
 	setName(BLE_SERVICE_CROWNSTONE);
 
-//	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) CrownstoneService::staticTick);
 }
+
 
 StreamBuffer<uint8_t>* CrownstoneService::getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength) {
 	//! if it is not created yet, create a new stream buffer and assign the master buffer to it
@@ -68,14 +72,14 @@ void CrownstoneService::createCharacteristics() {
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_CONTROL);
 #endif
 
-#if CHAR_MESHING==1
+#if (BUILD_MESHING == 1) && (CHAR_MESHING == 1)
 	LOGi(FMT_CHAR_ADD, STR_CHAR_MESH);
 	addMeshCharacteristic();
 #else
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_MESH);
 #endif
 
-#if CHAR_CONFIGURATION==1 || DEVICE_TYPE==DEVICE_FRIDGE
+#if CHAR_CONFIGURATION==1
 	{
 		LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
 		_streamBuffer = getStreamBuffer(buffer, maxLength);
@@ -102,7 +106,7 @@ void CrownstoneService::createCharacteristics() {
 #endif
 
 	LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_NONCE);
-	addSessionNonceCharacteristic(buffer, maxLength);
+	addSessionNonceCharacteristic(_nonceBuffer, maxLength);
 
 	LOGi(FMT_CHAR_ADD, STR_CHAR_FACTORY_RESET);
 	addFactoryResetCharacteristic();
@@ -110,16 +114,9 @@ void CrownstoneService::createCharacteristics() {
 	addCharacteristicsDone();
 }
 
-//void CrownstoneService::tick() {
-//	scheduleNextTick();
-//}
-
-//void CrownstoneService::scheduleNextTick() {
-//	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(GENERAL_SERVICE_UPDATE_FREQUENCY), this);
-//}
 
 void CrownstoneService::addMeshCharacteristic() {
-
+#if BUILD_MESHING == 1
 	_meshCommand = new MeshCommand();
 //	_meshCommand = new StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>();
 
@@ -159,9 +156,11 @@ void CrownstoneService::addMeshCharacteristic() {
 		_meshControlCharacteristic->updateValue();
 
 	});
+#endif
 }
 
-void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+
+void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_controlCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_controlCharacteristic);
 
@@ -169,7 +168,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setWritable(true);
 	_controlCharacteristic->setValue(buffer);
-	_controlCharacteristic->setMinAccessLevel(GUEST);
+	_controlCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_controlCharacteristic->setMaxGattValueLength(size);
 	_controlCharacteristic->setValueLength(0);
 	_controlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
@@ -277,6 +276,7 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	});
 }
 
+
 void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_configurationReadCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_configurationReadCharacteristic);
@@ -290,6 +290,7 @@ void CrownstoneService::addConfigurationReadCharacteristic(buffer_ptr_t buffer, 
 	_configurationReadCharacteristic->setMaxGattValueLength(size);
 	_configurationReadCharacteristic->setValueLength(0);
 }
+
 
 void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size) {
 	_stateControlCharacteristic = new Characteristic<buffer_ptr_t>();
@@ -382,19 +383,21 @@ void CrownstoneService::addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t
 }
 
 
-void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size) {
+void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
 	_sessionNonceCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_sessionNonceCharacteristic);
 
 	_sessionNonceCharacteristic->setUUID(UUID(getUUID(), SESSION_NONCE_UUID));
 	_sessionNonceCharacteristic->setName(BLE_CHAR_SESSION_NONCE);
 	_sessionNonceCharacteristic->setWritable(false);
-	_sessionNonceCharacteristic->setNotifies(false);
+	_sessionNonceCharacteristic->setNotifies(true);
 	_sessionNonceCharacteristic->setValue(buffer);
-	_sessionNonceCharacteristic->setMinAccessLevel(GUEST);
+	_sessionNonceCharacteristic->setSharedEncryptionBuffer(false);
+	_sessionNonceCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_sessionNonceCharacteristic->setMaxGattValueLength(size);
 	_sessionNonceCharacteristic->setValueLength(0);
 }
+
 
 void CrownstoneService::addFactoryResetCharacteristic() {
 	_factoryResetCharacteristic = new Characteristic<uint32_t>();
@@ -403,11 +406,17 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	_factoryResetCharacteristic->setUUID(UUID(getUUID(), FACTORY_RESET_UUID));
 	_factoryResetCharacteristic->setName(BLE_CHAR_FACTORY_RESET);
 	_factoryResetCharacteristic->setWritable(true);
-	_factoryResetCharacteristic->setNotifies(false);
+	_factoryResetCharacteristic->setNotifies(true);
 	_factoryResetCharacteristic->setDefaultValue(0);
 	_factoryResetCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_factoryResetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value) -> void {
-		FactoryReset::getInstance().recover(value);
+		// TODO if settings --> factory reset disabled, we set the value to 2 to indicate reset is not possible.
+		bool success = FactoryReset::getInstance().recover(value);
+		uint32_t val = 0;
+		if (success) {
+			val = 1;
+		}
+		_factoryResetCharacteristic->operator=(val);
 	});
 }
 
@@ -415,19 +424,32 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_SESSION_NONCE_SET: {
-		_sessionNonceCharacteristic->setValueLength(SESSION_NONCE_LENGTH);
-		_sessionNonceCharacteristic->setValue((uint8_t*)p_data);
-		_sessionNonceCharacteristic->updateValue(false);
+		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_sessionNonceCharacteristic != NULL) {
+			_sessionNonceCharacteristic->setValueLength(length);
+			_sessionNonceCharacteristic->setValue((uint8_t *) p_data);
+			_sessionNonceCharacteristic->updateValue(ECB_GUEST_CAFEBABE);
+		}
+		break;
+	}
+	case EVT_BLE_CONNECT: {
+		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_factoryResetCharacteristic != NULL) {
+			_factoryResetCharacteristic->operator=(0);
+		}
 		break;
 	}
 	case EVT_BLE_DISCONNECT: {
-		_sessionNonceCharacteristic->setValueLength(0);
+		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_sessionNonceCharacteristic != NULL) {
+			_sessionNonceCharacteristic->setValueLength(0);
+		}
 		break;
 	}
 	case EVT_STATE_NOTIFICATION: {
 		if (_stateReadCharacteristic) {
 			state_vars_notifaction notification = *(state_vars_notifaction*)p_data;
-//			log(DEBUG, "send notification for %d, value:", notification.type);
+//			log(SERIAL_DEBUG, "send notification for %d, value:", notification.type);
 //			BLEutil::printArray(notification.data, notification.dataLength);
 
 			_streamBuffer->setPayload(notification.data, notification.dataLength);

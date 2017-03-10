@@ -50,9 +50,9 @@ void IBeacon::setUUID(ble_uuid128_t uuid) {
 	}
 
 #ifdef PRINT_IBEACON_VERBOSE
-	log(DEBUG, FMT_SET_STR_VAL "UUID", "");
+	log(SERIAL_DEBUG, FMT_SET_STR_VAL "UUID", "");
 	BLEutil::printInlineArray(_params.uuid.uuid128, 16);
-	_log(DEBUG, CRLN);
+	_log(SERIAL_DEBUG, SERIAL_CRLN);
 #endif
 }
 

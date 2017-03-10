@@ -11,7 +11,9 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 #include <events/cs_EventListener.h>
+#if BUILD_MESHING == 1
 #include <structs/cs_MeshCommand.h>
+#endif
 
 #define CROWNSTONE_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
@@ -42,7 +44,7 @@ public:
 
 //	void scheduleNextTick();
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	virtual void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 protected:
 	/** Initialize a CrownstoneService object
@@ -53,7 +55,7 @@ protected:
 
 	/** Enable the command characteristic.
  	 */
-	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
+	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel = GUEST);
 
 	/** Enable the set configuration characteristic.
 	 *
@@ -69,8 +71,9 @@ protected:
 
 	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 	inline void addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
-	inline void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size);
 	inline void addFactoryResetCharacteristic();
+
+	void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel = GUEST);
 
 	/** Enable the mesh characteristic.
 	 */
@@ -114,8 +117,12 @@ private:
 	 *
 	 * Sends a message over the mesh network
 	 */
+#if BUILD_MESHING == 1
 	Characteristic<buffer_ptr_t>* _meshControlCharacteristic;
 	MeshCommand* _meshCommand;
+#endif
+
+	uint8_t _nonceBuffer[SESSION_NONCE_LENGTH];
 
 	Characteristic<buffer_ptr_t>* _stateControlCharacteristic;
 	Characteristic<buffer_ptr_t>* _stateReadCharacteristic;

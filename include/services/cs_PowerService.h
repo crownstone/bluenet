@@ -20,7 +20,7 @@
 #include "structs/buffer/cs_StackBuffer.h"
 #include "structs/buffer/cs_DifferentialBuffer.h"
 #include "structs/cs_PowerSamples.h"
-#include "protocol/cs_MeshMessageTypes.h"
+//#include "protocol/cs_MeshMessageTypes.h"
 
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
@@ -61,21 +61,6 @@ public:
 
 //	void scheduleNextTick();
 
-	/** Switch off the relays.
-	 */
-	void turnOff();
-
-	/** Switch on the relays.
-	 */
-	void turnOn();
-
-	/** Dim the light by using PWM.
-	 *
-	 * You might need another way to dim the light! For example by only turning on for
-	 * a specific duty-cycle after the detection of a zero crossing.
-	 */
-	void dim(uint8_t value);
-
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 protected:
@@ -84,7 +69,7 @@ protected:
 	void addRelayCharacteristic();
 	void addPowerSamplesCharacteristic();
 	void addPowerConsumptionCharacteristic();
-	void addCurrentLimitCharacteristic();
+//	void addCurrentLimitCharacteristic();
 
 private:
 	//! References to characteristics that need to be written from other functions

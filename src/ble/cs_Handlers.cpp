@@ -15,7 +15,9 @@ extern "C" {
 #endif
 
 #include <pstorage.h>
-#include <third/protocol/rbc_mesh.h>
+#if BUILD_MESHING == 1
+#include <rbc_mesh.h>
+#endif
 
 /** Function for dispatching a system event (not a BLE event) to all modules with a system event handler. This can also
  * be events related to the radio, for example the NRF_EVT_RADIO_BLOCKED (4) and NRF_EVT_RADIO_SESSION_IDLE (7) events
@@ -35,11 +37,13 @@ void sys_evt_dispatch(uint32_t sys_evt) {
     	pstorage_sys_event_handler(sys_evt);
     }
 
+#if BUILD_MESHING == 1
     Settings& settings = Settings::getInstance();
     if (settings.isInitialized() && settings.isSet(CONFIG_MESH_ENABLED)) {
 		rbc_mesh_sd_evt_handler(sys_evt);
 		storage_sys_evt_handler(sys_evt);
     }
+#endif
 
     switch(sys_evt) {
     case NRF_EVT_POWER_FAILURE_WARNING: {

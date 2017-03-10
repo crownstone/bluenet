@@ -6,7 +6,9 @@
  */
 #pragma once
 
-#define DEVICE_UNDEF       0
-#define DEVICE_CROWNSTONE  1
-#define DEVICE_GUIDESTONE  2
-#define DEVICE_FRIDGE      3
+#define DEVICE_UNDEF               0
+#define DEVICE_CROWNSTONE_PLUG     1
+#define DEVICE_GUIDESTONE          2
+#define DEVICE_CROWNSTONE_BUILTIN  3
+
+#define IS_CROWNSTONE(a) (a==DEVICE_CROWNSTONE_PLUG || a==DEVICE_CROWNSTONE_BUILTIN)

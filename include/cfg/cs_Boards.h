@@ -1,350 +1,138 @@
 /*
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: 4 Nov., 2014
+ * Author: Dominik Egger
+ * Copyright: Crownstone
+ * Date: 2 Feb., 2017
  * License: LGPLv3+, Apache, and/or MIT, your choice
+ *
+ * Note: this file is written in C so that it can be used in the bootloader as well.
  */
 
 /**
  * Convention:
  *   * use TABS for identation, but use SPACES for column-wise representations!
+ *
  */
 #pragma once
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "stdbool.h"
+#include "nrf52.h"
+
+/**
+ *  We use part of the UICR to store information about the hardware board. So the firmware is independent on the
+ *  hardware board (we don't need to know the board at compile time). Instead the firmware reads the hardware board
+ *  type at runtime from the UICR and assigns the
+ */
+#define UICR_DFU_INDEX       0 // dfu is using the first 4 bytes in the UICR (0x10001080) for DFU INIT checks
+#define UICR_BOARD_INDEX     1 // we use the second 4 bytes in the UICR (0x10001084) to store the hardware board type
+
+
 //! Current accepted HARDWARE_BOARD types
 
-#define PCA10001             0
-#define NRF6310              1
-#define CROWNSTONE           5
-#define VIRTUALMEMO          7
-#define CROWNSTONE2          8
-#define CROWNSTONE_SENSOR    9
-#define PCA10000             10
-#define PCA10031             10 // same layout as PCA10000, just with 32k chip
-#define CROWNSTONE3          11
-#define CROWNSTONE4          12
-#define NORDIC_BEACON        13
-#define DOBEACON             14
-#define CROWNSTONE5          15
-#define DOBEACON2            16
+/*
+ * NOTE 1: If you add a new BOARD, also update the function get_hardware_version in
+ *         cs_HardwareVersions.h
+ */
+/*
+ * NOTE 2: If you add a new BOARD that has a different pin layout or other board changes
+ *         define a new function and add it as a switch case to the configure_board function
+ */
 
-#ifndef HARDWARE_BOARD
-#error "Add HARDWARE_BOARD=... to CMakeBuild.config"
-#endif
+#define CROWNSTONE5          0
+#define PLUGIN_FLEXPRINT_01  1
 
-#if(HARDWARE_BOARD==CROWNSTONE)
+// NORDIC DEV BOARDS
+#define PCA10036             40
+#define PCA10040             41
 
-#define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    0                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-//#define PIN_AIN_ADC          6                   //! ain6 is p0.05 or gpio 5
-//#define PIN_AIN_LPCOMP       5                   //! ain5 is p0.04 or gpio 4
-//#define PIN_AIN_LPCOMP_REF   0                   //! ref0 is p0.00 or gpio 0
-#define PIN_AIN_CURRENT      6                   //! ain6 is gpio 5
-#define PIN_AIN_VOLTAGE      5                   //! ain5 is gpio 4, actually also current sense
-#define PIN_GPIO_RX          6                   //! this is p0.06 or gpio 6
-#define PIN_GPIO_TX          1                   //! this is p0.01 or gpio 1
+// the square guidestones from china
+#define GUIDESTONE           100
 
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 120
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       1
-#endif
+// CROWNSTONE BUILTINS
+#define ACR01B1A             1000
+#define ACR01B1B             1001
+#define ACR01B1C             1002
+#define ACR01B1D             1003
+#define ACR01B1E             1004
 
+// CROWNSTONE PLUGS
+#define ACR01B2A             1500
+#define ACR01B2B             1501
+#define ACR01B2C             1502
 
-#if(HARDWARE_BOARD==CROWNSTONE2)
-//! v0.86
-#define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    5                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-//#define PIN_AIN_ADC          2                   //! ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP       2                   //! ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP_REF   0                   //! ref0 is p0.00 or gpio 0
-#define PIN_AIN_CURRENT      2                   //! ain2 is gpio 1
-#define PIN_AIN_VOLTAGE      6                   //! ain6 is gpio 5, not actually working
-#define PIN_GPIO_RX          4                   //! this is p0.04 or gpio 4
-#define PIN_GPIO_TX          2                   //! this is p0.02 or gpio 2
+//! BE SURE TO UPDATE cs_HardwareVersions.h IF YOU ADD A NEW BOARD!!
 
-#define HAS_RELAY true
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 20
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       5
-#endif
+typedef struct  {
+	//! the hardware board type (number)
+	uint32_t hardwareBoard;
 
+	//! gpio pin to control the igbt
+	uint8_t pinGpioPwm;
+	//! gpio pin to switch the relay on
+	uint8_t pinGpioRelayOn;
+	//! gpio pin to switch the relay off
+	uint8_t pinGpioRelayOff;
+	//! analog input pin to read the current
+	uint8_t pinAinCurrent;
+	//! analog input pin to read the voltage
+	uint8_t pinAinVoltage;
+	//! analog input pin to read the pwm temperature
+	uint8_t pinAinPwmTemp;
+	//! gpio pin to receive uart
+	uint8_t pinGpioRx;
+	//! gpio pin to send uart
+	uint8_t pinGpioTx;
+	//! gpio pin to control the "red" led
+	uint8_t pinLedRed;
+	//! gpio pin to control the "green" led
+	uint8_t pinLedGreen;
 
-#if(HARDWARE_BOARD==CROWNSTONE3)
-//! v0.90
-#define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    5                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-//#define PIN_AIN_ADC          2                   //! ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP       2                   //! ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP_REF   0                   //! ref0 is p0.00 or gpio 0
-#define PIN_AIN_CURRENT      2                   //! ain2 is gpio 1
-#define PIN_AIN_VOLTAGE      7                   //! ain7 is gpio 6
-#define PIN_GPIO_RX          2                   //! this is p0.02 or gpio 2
-#define PIN_GPIO_TX          4                   //! this is p0.04 or gpio 4
+	struct __attribute__((__packed__)) {
+		//! true if board has relays
+		bool hasRelay: 1;
+		//! true if the pwm is inverted (setting gpio high turns light off)
+		bool pwmInverted: 1;
+		//! true if the board has serial / uart
+		bool hasSerial: 1;
+		//! true if the board has leds
+		bool hasLed : 1;
+		//! true if led off when gpio set high
+		bool ledInverted: 1;
+	} flags;
 
-#define HAS_RELAY true
-//! Switch pin should be low to switch lights on
-#define SWITCH_INVERSED
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 1
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       80
-#endif
+	/* device type, e.g. crownstone plug, crownstone builtin, guidestone
+	   can be overwritten for debug purposes at compile time, but is otherwise
+	   determined by the board type */
+	uint8_t deviceType;
 
+	//! tbd
+	float voltageMultiplier;
+	//! tbd
+	float currentMultiplier;
+	//! tbd
+	int32_t voltageZero;
+	//! tbd
+	int32_t currentZero;
+	//! tbd
+	int32_t powerZero;
 
-#if(HARDWARE_BOARD==CROWNSTONE4)
-//! v0.92
-#define PIN_GPIO_SWITCH      4                   //! this is p0.04 or gpio 4
-#define PIN_GPIO_RELAY_ON    5                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-//#define PIN_AIN_ADC          2                   //! ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP       2                   //! ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP_REF   0                   //! ref0 is p0.00 or gpio 0
-#define PIN_AIN_CURRENT      2                   //! ain2 is p0.01 or gpio 1
-#define PIN_AIN_VOLTAGE      7                   //! ain7 is p0.06 or gpio 6
-#define PIN_GPIO_RX          2                   //! this is p0.02 or gpio 2
-#define PIN_GPIO_TX          3                   //! this is p0.03 or gpio 3
+	/* the minimum radio transmission power to be used, e.g. builtins need higher
+	   tx power because of surrounding metal */
+	int8_t minTxPower;
 
-#define HAS_RELAY true
-//! Switch pin should be low to switch lights on
-#define SWITCH_INVERSED
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 1
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       80
-#endif
+	//! Voltage of PWM thermometer at which the PWM is too hot
+	float pwmTempVoltageThreshold;
+	//! Voltage of PWM thermometer at which the PWM is cool enough again
+	float pwmTempVoltageThresholdDown;
 
-#if(HARDWARE_BOARD==CROWNSTONE5)
-//! plugin quant
-#define PIN_GPIO_SWITCH      12                  //! p0.12
-#define PIN_GPIO_RELAY_ON    10                  //! p0.10
-#define PIN_GPIO_RELAY_OFF   11                  //! p0.11
-#define PIN_AIN_CURRENT      7                   //! ain7 is p0.06
-#define PIN_AIN_VOLTAGE      6                   //! ain6 is p0.05
-#define PIN_GPIO_RX          15                  //! p0.15
-#define PIN_GPIO_TX          16                  //! p0.16
-#define PIN_LED_RED          8
-#define PIN_LED_GREEN        9
+} boards_config_t;
 
-#define HAS_RELAY true
-//! Switch pin should be low to switch lights on
-#define SWITCH_INVERSED
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 1
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       80
-#endif
+uint32_t configure_board(boards_config_t* p_config);
 
-#if(HARDWARE_BOARD==DOBEACON)
-//! doBeacon v0.7
-#define PIN_GPIO_SWITCH      4                   //! this is p0.04 or gpio 4
-#define PIN_GPIO_RELAY_ON    5                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-//#define PIN_AIN_ADC          2                   //! ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP       2                   //! ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP_REF   0                   //! ref0 is p0.00 or gpio 0
-#define PIN_AIN_CURRENT      2                   //! ain2 is p0.01 or gpio 1
-#define PIN_AIN_VOLTAGE      7                   //! ain7 is p0.06 or gpio 6
-#define PIN_GPIO_RX          2                   //! this is p0.02 or gpio 2
-#define PIN_GPIO_TX          3                   //! this is p0.03 or gpio 3
-
-#define HAS_RELAY true
-//! Switch pin should be low to switch lights on
-#define SWITCH_INVERSED
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 1
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       80
-#endif
-
-#if(HARDWARE_BOARD==DOBEACON2)
-// v0.92
-//#define PIN_GPIO_SWITCH      4                   // this is p0.04 or gpio 4
-//#define PIN_GPIO_RELAY_ON    0                   // something unused
-//#define PIN_GPIO_RELAY_OFF   0                   // something unused
-//#define PIN_AIN_ADC          2                   // ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP       2                   // ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP_REF   0                   // ref0 is p0.00 or gpio 0
-//#define PIN_AIN_CURRENT      0                   // ain2 is p0.01 or gpio 1
-//#define PIN_AIN_VOLTAGE      0                   // ain7 is p0.06 or gpio 6
-#define PIN_GPIO_RX          2                   // this is p0.02 or gpio 2
-#define PIN_GPIO_TX          3                   // this is p0.03 or gpio 3
-
-#define PIN_GPIO_LED_1       6					 // this is p0.07, GREEN
-#define PIN_GPIO_LED_2       7					 // this is p0.07, RED
-#define HAS_LEDS             1
-
-// Switch pin should be low to switch lights on
-//#define SWITCH_INVERSED
-// resistance of the shunt in milli ohm
-//#define SHUNT_VALUE                 1
-// amplification of the voltage over the shunt, to the adc input of the chip
-//#define VOLTAGE_AMPLIFICATION       80
-#endif
-
-
-#if(HARDWARE_BOARD==CROWNSTONE_SENSOR)
-
-#define PIN_GPIO_SWITCH      3                   //! this is p0.03 or gpio 3
-#define PIN_GPIO_RELAY_ON    5                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-//#define PIN_AIN_ADC          6                   //! ain6 is p0.05 or gpio 5
-//#define PIN_AIN_LPCOMP       5                   //! ain5 is p0.04 or gpio 4
-//#define PIN_AIN_LPCOMP_REF   0                   //! ref0 is p0.00 or gpio 0
-#define PIN_AIN_CURRENT      6                   //! ain6 is p0.05 or gpio 5
-#define PIN_AIN_VOLTAGE      5                   //! ain5 is p0.04 or gpio 4
-#define PIN_GPIO_RX          6                   //! this is p0.06 or gpio 6
-#define PIN_GPIO_TX          1                   //! this is p0.01 or gpio 1
-
-#define PIN_AIN_SENSOR       3                   //! ain3 is p0.02 or gpio 2
-#define PIN_GPIO_BUTTON      2
-
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 120
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       1
-#endif
-
-
-#if(HARDWARE_BOARD==NRF6310)
-
-#define PIN_GPIO_LED0        8                   //! this is p1.0 or gpio 8
-#define PIN_GPIO_LED1        9                   //! this is p1.1 or gpio 9
-#define PIN_GPIO_LED2        10
-#define PIN_GPIO_LED3        11
-#define PIN_GPIO_LED4        12
-#define PIN_GPIO_LED5        13
-#define PIN_GPIO_LED6        14
-#define PIN_GPIO_LED7        15
-
-#define PIN_GPIO_SWITCH      PIN_GPIO_LED1       //! show switch as LED
-#define PIN_GPIO_RELAY_ON    0                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-//#define PIN_AIN_ADC          2                   //! ain2 is p0.1 or gpio 1
-//#define PIN_AIN_LPCOMP       3                   //! ain3 is p0.2 or gpio 2
-//#define PIN_AIN_LPCOMP_REF   0                   //! ref0 is p0.00 or gpio 0
-#define PIN_AIN_CURRENT      2                   //! ain2 is p0.01 or gpio 1
-#define PIN_AIN_VOLTAGE      3                   //! ain3 is p0.02 or gpio 2
-#define PIN_GPIO_RX          16
-#define PIN_GPIO_TX          17
-
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 1
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       1
-#endif
-
-
-#if(HARDWARE_BOARD==PCA10001)
-
-#define PIN_GPIO_LED0        18                  //! led
-#define PIN_GPIO_LED1        19                  //! led
-
-//#define PIN_GPIO_LED_CON     PIN_GPIO_LED1       //! shows connection state on the evaluation board
-#define PIN_GPIO_SWITCH      PIN_GPIO_LED0       //! show switch as LED
-#define PIN_GPIO_RELAY_ON    0                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-//#define PIN_AIN_ADC          2                   //! ain2 is p0.01 or gpio 1
-//#define PIN_AIN_LPCOMP       3                   //! ain3 is p0.02 or gpio 2
-//#define PIN_AIN_LPCOMP_REF   0                   //! ref0 is p0.00 or gpio 0
-#define PIN_AIN_CURRENT      2                   //! ain2 is p0.01 or gpio 1
-#define PIN_AIN_VOLTAGE      3                   //! ain3 is p0.02 or gpio 2
-#define PIN_GPIO_RX          11                  //! this is p0.11 or gpio 11
-#define PIN_GPIO_TX          9                   //! this is p0.09 or gpio 9
-
-#define PIN_AIN_SENSOR       4
-#define BUTTON_0             16
-#define BUTTON_1             17
-
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 1
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       1
-#endif
-
-
-#if(HARDWARE_BOARD==PCA10000) || (HARDWARE_BOARD==PCA10031)
-
-#define LED_RGB_RED          21
-#define LED_RGB_GREEN        22
-#define LED_RGB_BLUE         23
-
-//#define PIN_GPIO_LED_CON     PIN_GPIO_GREEN       //! shows connection state on the evaluation board
-#define PIN_GPIO_SWITCH      LED_RGB_BLUE        //! show switch as LED
-#define PIN_GPIO_RELAY_ON    0                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-//#define PIN_AIN_ADC          2                   //! something unused
-//#define PIN_AIN_LPCOMP       2                   //! something unused
-//#define PIN_AIN_LPCOMP_REF   0                   //! something unused
-#define PIN_AIN_CURRENT      2                   //! something unused
-#define PIN_AIN_VOLTAGE      2                   //! something unused
-#define PIN_GPIO_RX          11                  //! this is p0.11 or gpio 11
-#define PIN_GPIO_TX          9                   //! this is p0.09 or gpio 9
-
-//! Switch pin should be low to switch lights on
-#define SWITCH_INVERSED
-//! resistance of the shunt in milli ohm
-#define SHUNT_VALUE                 1
-//! amplification of the voltage over the shunt, to the adc input of the chip
-#define VOLTAGE_AMPLIFICATION       1
-#endif
-
-
-#if(HARDWARE_BOARD==VIRTUALMEMO)
-
-#define PIN_GPIO_LED0        7                   //! this is p0.07 or gpio 7
-#define PIN_GPIO_LED1        8                   //! this is p0.08 or gpio 8
-#define PIN_GPIO_LED2        9
-#define PIN_GPIO_LED3        10
-#define PIN_GPIO_LED4        11
-#define PIN_GPIO_LED5        12
-#define PIN_GPIO_LED6        13
-#define PIN_GPIO_LED7        14
-
-#define PIN_GPIO_RX          15
-#define PIN_GPIO_TX          16
-
-#endif
-
-
-#if(HARDWARE_BOARD==NORDIC_BEACON)
-
-#define LED_RGB_RED          16                  //! this is p0.16 or gpio 16
-#define LED_RGB_GREEN        12                  //! this is p0.12 or gpio 12
-#define LED_RGB_BLUE         15                  //! this is p0.15 or gpio 15
-
-#define PIN_GPIO_RX          9                   //! this is p0.09 or gpio 9
-#define PIN_GPIO_TX          1                   //! this is p0.01 or gpio 1
-
-//#define PIN_GPIO_LED_CON     LED_RGB_GREEN       //! shows connection state on the evaluation board
-#define PIN_GPIO_SWITCH      LED_RGB_BLUE        //! show switch as LED
-#define PIN_GPIO_RELAY_ON    0                   //! something unused
-#define PIN_GPIO_RELAY_OFF   0                   //! something unused
-
-#define PIN_GPIO_BUTTON      20                  //! this is p0.20 or gpio 20
-
-#define SWITCH_INVERSED
-
-#endif
-
-#ifndef HAS_RELAY
-#define HAS_RELAY false
-#endif
-
-//! Sanity checks
-
-#ifndef PIN_GPIO_RX
-#error "For UART, PIN_RX must be defined"
-#endif
-
-#ifndef PIN_GPIO_TX
-#error "For UART, PIN_TX must be defined"
-#endif
-
-#ifndef HARDWARE_VERSION
-#error "You have to specify the hardware version of your chip"
+#ifdef __cplusplus
+}
 #endif

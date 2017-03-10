@@ -13,10 +13,6 @@
 
 #include <ble/cs_Stack.h>
 
-extern "C" {
-	#include <third/protocol/rbc_mesh.h>
-}
-
 struct delayed_command_t {
 	CommandHandlerTypes type;
 	uint16_t size;
@@ -31,7 +27,7 @@ public:
 		return instance;
 	}
 
-	void init();
+	void init(boards_config_t* board);
 
 	ERR_CODE handleCommand(CommandHandlerTypes type);
 
@@ -45,7 +41,16 @@ private:
 
 	CommandHandler();
 
-	app_timer_id_t _delayTimer;
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t              _delayTimerData;
+	app_timer_id_t           _delayTimerId;
+	app_timer_t              _resetTimerData;
+	app_timer_id_t           _resetTimerId;
+#else
+	uint32_t                 _delayTimerId;
+	uint32_t                 _resetTimerId;
+#endif
 
+	boards_config_t* _boardConfig;
 };
 

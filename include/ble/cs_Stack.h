@@ -20,6 +20,7 @@
 #include <third/std/function.h>
 #include <ble/cs_DoBotsManufac.h>
 #include <ble/cs_ServiceData.h>
+#include "nrf_sdm.h"
 
 /////////////////////////////////////////////////
 // test
@@ -90,7 +91,11 @@ public:
 	//! The default BLE appearance is currently set to a Generic Keyring (576)
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_KEYRING;
 	//! The low-frequency clock, currently generated from the high frequency clock
+#if (NORDIC_SDK_VERSION >= 11) 
+	static const nrf_clock_lf_cfg_t        defaultClockSource;
+#else
 	static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
+#endif
 	//! The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.
 //	static const uint8_t                   defaultMtu = BLE_L2CAP_MTU_DEF;
 	//! Minimum connection interval in 1.25 ms (400*1.25=500ms)
@@ -111,12 +116,17 @@ public:
 protected:
 	std::string                                 _device_name; //! 4
 	uint16_t                                    _appearance;
+	bool                                        _disconnectingInProgress = false;
 
 	// might want to change this to a linked list or something that
 	// we can loop over but doesn't allocate more space than needed
 	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  //! 32
 
+#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
+	nrf_clock_lf_cfg_t                          _clock_source;
+#else
 	nrf_clock_lfclksrc_t                        _clock_source; //4
+#endif
 //	uint8_t                                     _mtu_size;
 	int8_t                                      _tx_power_level;
 	ble_gap_conn_sec_mode_t                     _sec_mode;  //1
@@ -144,13 +154,24 @@ protected:
 	dm_application_instance_t                   _dm_app_handle;
 	bool                                        _dm_initialized;
 
+#if (NORDIC_SDK_VERSION >= 11)
+	app_timer_t                                 _lowPowerTimeoutData;
 	app_timer_id_t                              _lowPowerTimeoutId;
+	app_timer_t                                 _secReqTimerData;
 	app_timer_id_t                              _secReqTimerId;
+	app_timer_t                                 _connectionKeepAliveTimerData;
+	app_timer_id_t                              _connectionKeepAliveTimerId;
+#else
+	uint32_t                                    _lowPowerTimeoutId;
+	uint32_t                                    _secReqTimerId;
+	uint32_t                                    _connectionKeepAliveTimerId;
+#endif
 	dm_handle_t                                 _peerHandle;
 
 	ble_advdata_t                               _advdata;
 	ble_advdata_t                               _scan_resp;
 	ble_gap_adv_params_t                        _adv_params;
+	uint8_t										_advParamsCounter;
 
 	ble_advdata_manuf_data_t                    _manufac;
 	// todo: make part of DoBotsManufac (see iBeacon)
@@ -199,6 +220,13 @@ public:
 	 */
 	void stopTicking();
 
+	/**
+	 * In case a disconnect has been called, we cannot allow another write or we'll get an Fatal Error 8
+	 */
+	bool isDisconnecting();
+
+	bool isConnected();
+
 	/** Shutdown the BLE stack
 	 *
 	 * The function shutdown() is the counterpart of start(). It does stop all services. It does not check if these
@@ -220,10 +248,17 @@ public:
 		_device_name = deviceName;
 	}
 
+#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
+	void setClockSource(nrf_clock_lf_cfg_t clockSource) {
+		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
+		_clock_source = clockSource;
+	}
+#else
 	void setClockSource(nrf_clock_lfclksrc_t clockSource) {
 		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
 		_clock_source = clockSource;
 	}
+#endif
 
 	//! Advertising interval between 0x0020 and 0x4000 (32 and 16384) in 0.625 ms units (20ms to 10.24s)
 	void setAdvertisingInterval(uint16_t advertisingInterval){
@@ -332,10 +367,31 @@ public:
 
 	bool isAdvertising();
 
-	void updateAdvertisement();
+	void setAdvertisementData();
 
+	void restartAdvertising();
 	void startAdvertising();
 
+	void setConnectable();
+
+	void setNonConnectable();
+
+	/**
+	 * Updates the advertisement parameters while advertising. I.e. it stops advertising, configures the parameters
+	 * and starts scanning again.
+	 *
+	 * if toggle is set to true, every time the updateAdvertisementParameters function is called, the advertisement
+	 * toggles between connectable and non-connectable
+	 * if toggle is set to false, every advertisement will be set to connectable
+	 */
+	void updateAdvertisement(bool toggle = true);
+
+	/**
+	 * Configures the advertisement parameters. every time the configureAdvertisementParameters function is called,
+	 * the advertisement toggles between connectable and non-connectable.
+	 *
+	 * if resetCounter is set to true, the counter is reset and the advertisement will be set to connectable
+	 */
 	void configureAdvertisementParameters();
 	void configureScanResponse(uint8_t deviceType);
 	void configureBleDeviceAdvData();
@@ -364,7 +420,7 @@ public:
 	 *
 	 * Currently not used.
 	 */
-//	Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
+	Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 
 	bool connected() {
 		return _conn_handle != BLE_CONN_HANDLE_INVALID;
@@ -445,6 +501,10 @@ protected:
 	void onTxComplete(ble_evt_t * p_ble_evt);
 
 	static void lowPowerTimeout(void* p_context);
+
+	void startConnectionAliveTimer();
+	void stopConnectionAliveTimer();
+	void resetConnectionAliveTimer();
 
 };
 

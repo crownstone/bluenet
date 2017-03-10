@@ -36,8 +36,7 @@ public:
 
 	inline void init() {
 		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-//		APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
-		APP_TIMER_APPSH_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, true);
+		APP_TIMER_APPSH_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, true);
 	}
 
 	/** Create single shot timer. function will only be called once and after that timer will be
@@ -47,42 +46,36 @@ public:
 	 *
 	 * Create a timer for a specific purpose.
 	 */
-//	void createSingleShot(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func);
-	inline void createSingleShot(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func) {
+	inline void createSingleShot(app_timer_id_t& timer_handle, app_timer_timeout_handler_t func) {
 		BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_SINGLE_SHOT, func));
 	}
 
-	/** Create repeated timer. Timer will continue to trigger and function will be called until the
-	 * timer is stopped
-	 * @timer_handle            An id or handle to reference the timer, set by this function (actually, just a Uint32_t)
-	 * @func                    The function to be called
-	 *
-	 * Create a timer for a specific purpose.
-	 */
-	// Note: timer will be readded even if it is not processed in the mean time, thus might cause the list to overflow
-//	void createRepeated(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func);
-//	inline void createRepeated(app_timer_id_t & timer_handle, app_timer_timeout_handler_t func) {
-//		BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_REPEATED, func));
-//	}
 
 	/** Start a previously created timer
 	 * @timer_handle            Reference to previously created timer
 	 * @ticks                   Number of ticks till timeout (minimum is 5)
 	 * @obj                     Reference to the object on which the function should be executed
 	 */
-//	void start(app_timer_id_t & timer_handle, uint32_t ticks, void* obj);
-	inline void start(app_timer_id_t & timer_handle, uint32_t ticks, void* obj) {
+	inline void start(app_timer_id_t& timer_handle, uint32_t ticks, void* obj) {
 		BLE_CALL(app_timer_start, (timer_handle, ticks, obj));
 	}
 
 	/** Stop a timer
 	 * @timer_handle            Reference to previously created timer
 	 */
-//	void stop(app_timer_id_t & timer_handle);
-	inline void stop(app_timer_id_t & timer_handle) {
+	inline void stop(app_timer_id_t& timer_handle) {
 		BLE_CALL(app_timer_stop, (timer_handle));
 	}
 
-//	void dummyFunction(void * p_context);
+	/** Resets a timer (if already active) to the new ticks
+	 * @timer_handle            Reference to previously created timer
+	 * @ticks                   Number of ticks till timeout (minimum is 5)
+	 * @obj                     Reference to the object on which the function should be executed
+	 */
+	inline void reset(app_timer_id_t& timer_handle, uint32_t ticks, void* obj) {
+		BLE_CALL(app_timer_stop, (timer_handle));
+		BLE_CALL(app_timer_start, (timer_handle, ticks, obj));
+	}
+
 };
 

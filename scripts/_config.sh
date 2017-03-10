@@ -1,33 +1,47 @@
 #!/bin/bash
 
-#if [ -z $BLUENET_CONFIG_DIR ]; then
-#	echo "ERROR: environment variable 'BLUENET_CONFIG_DIR' should be set."
-#	exit 1
-#fi
-#
-if [ ! -d "${BLUENET_DIR}" ]; then
-	path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-	BLUENET_DIR=${path}/..
-	echo "BLUENET_DIR does not exist. Use ${path}/.. as default"
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/_utils.sh"
+
+log_config() {
+	info "[_config.sh] BLUENET_WORKSPACE_DIR is ${BLUENET_WORKSPACE_DIR}"
+	info "[_config.sh] BLUENET_DIR is ${BLUENET_DIR}"
+	info "[_config.sh] BLUENET_CONFIG_DIR is ${BLUENET_CONFIG_DIR}"
+	info "[_config.sh] BLUENET_BUILD_DIR is ${BLUENET_BUILD_DIR}"
+	info "[_config.sh] BLUENET_BIN_DIR is ${BLUENET_BIN_DIR}"
+	info "[_config.sh] BLUENET_RELEASE_DIR is ${BLUENET_RELEASE_DIR}"
+}
+
+if [ ! -d "${BLUENET_DIR}" ] || [ -z "${BLUENET_CONFIG_DIR}" ] || [ -z "${BLUENET_BUILD_DIR}" ] || [ -z "${BLUENET_BIN_DIR}" ]; then
+	log_config
+	ls ${BLUENET_DIR}
+	ls ${BLUENET_CONFIG_DIR}
+	ls ${BLUENET_BUILD_DIR}
+	ls ${BLUENET_BIN_DIR}
+	err "ERROR: missing environment variables, or wrongly set!!"
+	err " make sure to source the PATH/TO/YOUR/BLUENET_DIR/scripts/env.sh"
+	err " in your bashrc file with"
+	err "    $ echo \"source PATH/TO/YOUR/BLUENET_DIR/scripts/env.sh\" >> ~/.bashrc"
+	err " create a copy of the env.config"
+	err "    $ cp PATH/TO/YOUR/BLUENET_DIR/env.config.template PATH/TO/YOUR/BLUENET_DIR/env.config"
+	err " and define the environment variables correctly in"
+	err " PATH/TO/YOUR/BLUENET_DIR/env.config"
+	env
+	exit 1
 fi
 
-if [ -e ${BLUENET_DIR}/CMakeBuild.config.default ]; then
-	source ${BLUENET_DIR}/CMakeBuild.config.default
+if [ -e ${BLUENET_DIR}/conf/cmake/CMakeBuild.config.default ]; then
+	log "source ${BLUENET_DIR}/conf/cmake/CMakeBuild.config.default"	
+	source ${BLUENET_DIR}/conf/cmake/CMakeBuild.config.default
 fi
 
 if [ -e ${BLUENET_DIR}/CMakeBuild.config.local ]; then
+	log "source ${BLUENET_DIR}/CMakeBuild.config.local"
 	source ${BLUENET_DIR}/CMakeBuild.config.local
 fi
 
-if [ ! -d "${BLUENET_CONFIG_DIR}" ]; then
-	path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-	BLUENET_CONFIG_DIR=${path}/..
-	echo "BLUENET_CONFIG_DIR does not exist. Use ${path}/.. as default"
-fi
-
 if [ ! -e ${BLUENET_CONFIG_DIR}/CMakeBuild.config ]; then
-	echo "ERROR: could not find ${BLUENET_CONFIG_DIR}/CMakeBuild.config"
-	echo "Don't forget to copy \"CMakeBuild.config.default\" to \"${BLUENET_CONFIG_DIR}/CMakeBuild.config\" and adjust the settings."
+	err "[_config.sh] ERROR: could not find ${BLUENET_CONFIG_DIR}/CMakeBuild.config"
+	err "[_config.sh] Don't forget to copy \"CMakeBuild.config.default\" to \"${BLUENET_CONFIG_DIR}/CMakeBuild.config\" and adjust the settings."
 	exit 1
 fi
 

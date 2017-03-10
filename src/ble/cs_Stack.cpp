@@ -13,9 +13,11 @@
 
 #include "structs/buffer/cs_MasterBuffer.h"
 
+#if BUILD_MESHING == 1
 extern "C" {
-	#include <third/protocol/rbc_mesh.h>
+	#include <rbc_mesh.h>
 }
+#endif
 
 #include "ble_stack_handler_types.h"
 
@@ -44,8 +46,29 @@ Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_inited(false), _started(false), _advertising(false), _scanning(false),
 				_conn_handle(BLE_CONN_HANDLE_INVALID),
 				_radio_notify(0),
-				_adv_manuf_data(NULL), _serviceData(NULL)
+				_dm_app_handle(0), _dm_initialized(false),
+#if (NORDIC_SDK_VERSION >= 11)
+				_lowPowerTimeoutId(NULL),
+                _secReqTimerId(NULL),
+                _connectionKeepAliveTimerId(NULL),
+#else
+				_lowPowerTimeoutId(UINT32_MAX),
+                _secReqTimerId(UINT32_MAX),
+                _connectionKeepAliveTimerId(UINT32_MAX),
+#endif
+                _advParamsCounter(0),
+				_adv_manuf_data(NULL),
+                _serviceData(NULL)
 {
+#if (NORDIC_SDK_VERSION >= 11)
+	_lowPowerTimeoutData = { {0} };
+	_lowPowerTimeoutId = &_lowPowerTimeoutData;
+	_secReqTimerData = { {0} };
+	_secReqTimerId = &_secReqTimerData;
+	_connectionKeepAliveTimerData = { {0} };
+	_connectionKeepAliveTimerId = &_connectionKeepAliveTimerData;
+#endif
+
 	//! setup default values.
 	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
 
@@ -61,6 +84,13 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	shutdown();
 }
 
+#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
+const nrf_clock_lf_cfg_t Nrf51822BluetoothStack::defaultClockSource = {.source        = NRF_CLOCK_LF_SRC_RC,   \
+                                                                       .rc_ctiv       = 16,                    \
+                                                                       .rc_temp_ctiv  = 2,                     \
+                                                                       .xtal_accuracy = 0};
+#endif
+
 //! called by softdevice handler through ble_evt_dispatch on any event that passes through mesh and is not write
 //extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {
 //	Nrf51822BluetoothStack::getInstance().on_ble_evt((ble_evt_t *)p_event_data);
@@ -71,10 +101,16 @@ extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 //	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
 
+//! Example of how you can get the connection handle and role
+// conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+// role        = ble_conn_state_role(conn_handle);
+
+#if BUILD_MESHING == 1
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		//!  pass the incoming BLE event to the mesh framework
 		rbc_mesh_ble_evt_handler(p_ble_evt);
 	}
+#endif
 
 	//! Only dispatch functions to the scheduler which might take long to execute, such as ble write functions
 	//! and handle other ble events directly in the interrupt. Otherwise app scheduler buffer might overflow fast
@@ -107,8 +143,11 @@ void Nrf51822BluetoothStack::init() {
 	LOGi(MSG_BLE_SOFTDEVICE_INIT);
 	//! Initialize the SoftDevice handler module.
 	//! this would call with different clock!
-//	SOFTDEVICE_HANDLER_INIT(_clock_source, NULL);
+#if (NORDIC_SDK_VERSION >= 11)
+	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
+#else
 	SOFTDEVICE_HANDLER_APPSH_INIT(_clock_source, true);
+#endif
 
 	//! enable the BLE stack
 	LOGi(MSG_BLE_SOFTDEVICE_ENABLE);
@@ -116,13 +155,48 @@ void Nrf51822BluetoothStack::init() {
 	//! assign ble event handler, forwards ble_evt to stack
 	BLE_CALL(softdevice_ble_evt_handler_set, (ble_evt_dispatch));
 
-//#if(SOFTDEVICE_SERIES == 110)
+//! do not define the service_changed characteristic, of course allow future changes
+#define IS_SRVC_CHANGED_CHARACT_PRESENT  1
 
+#if (NORDIC_SDK_VERSION >= 11)
+
+#define CENTRAL_LINK_COUNT 0
+#define PERIPHERAL_LINK_COUNT 1
+
+	__attribute__((unused)) ret_code_t err_code;
+	ble_enable_params_t ble_enable_params;
+	memset(&ble_enable_params, 0, sizeof(ble_enable_params));
+	BLE_CALL(softdevice_enable_get_default_config, (CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT, &ble_enable_params) );
+	ble_enable_params.gatts_enable_params.attr_tab_size = ATTR_TABLE_SIZE;
+	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
+	ble_enable_params.common_enable_params.vs_uuid_count = MAX_NUM_VS_SERVICES;
+
+//	//! Check the ram settings against the used number of links
+//	CHECK_RAM_START_ADDR(CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT);
+
+	//! Enable BLE stack.
+//	BLE_CALL(softdevice_enable, (&ble_enable_params) );
+
+	uint32_t ramBase = RAM_R1_BASE;
+	//! While developing this will set ramBase to the minimal value
+	//! Print "ramBase" in gdb
+//	ramBase = 0;
+//	BLE_CALL(sd_ble_enable, (&ble_enable_params, &ramBase) );
+	err_code = sd_ble_enable(&ble_enable_params, &ramBase);
+	if (err_code == NRF_ERROR_NO_MEM) {
+		ramBase = 0;
+		sd_ble_enable(&ble_enable_params, &ramBase);
+		LOGe("RAM_R1_BASE should be: %p", ramBase);
+		APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
+	} else if (err_code != NRF_SUCCESS) {
+		LOGe("Error: %d (%p)", err_code, err_code);
+
+	}
+
+#else
 #if ((SOFTDEVICE_SERIES == 130) && (SOFTDEVICE_MINOR != 5)) || \
 	(SOFTDEVICE_SERIES == 110)
 #if(NORDIC_SDK_VERSION >= 6)
-	//! do not define the service_changed characteristic, of course allow future changes
-#define IS_SRVC_CHANGED_CHARACT_PRESENT  1
 	ble_enable_params_t ble_enable_params;
 	memset(&ble_enable_params, 0, sizeof(ble_enable_params));
 #ifdef ATTR_TABLE_SIZE
@@ -130,9 +204,9 @@ void Nrf51822BluetoothStack::init() {
 #endif
 	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
 	BLE_CALL(sd_ble_enable, (&ble_enable_params) );
-#endif
-#endif
-//#endif
+#endif // SDK 6
+#endif // S110 or S130.5
+#endif // SDK 11
 
 	//! according to the migration guide the address needs to be set directly after the sd_ble_enable call
 	//! due to "an issue present in the s110_nrf51822_7.0.0 release"
@@ -150,7 +224,9 @@ void Nrf51822BluetoothStack::init() {
 	version.company_id = 12;
 	BLE_CALL(sd_ble_version_get, (&version));
 
+#if (NORDIC_SDK_VERSION < 11)
 	sd_nvic_EnableIRQ(SWI2_IRQn);
+#endif
 
 	if (!_device_name.empty()) {
 		BLE_CALL(sd_ble_gap_device_name_set,
@@ -214,6 +290,7 @@ void Nrf51822BluetoothStack::initServices() {
 	_started = true;
 }
 
+// TODO: remove this function
 void Nrf51822BluetoothStack::startTicking() {
 	LOGi(FMT_START, "ticking");
 	for (Service* svc : _services) {
@@ -428,10 +505,19 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 	//	ble_advdata_service_data_t service_data;
 		memset(&_service_data, 0, sizeof(_service_data));
 
-		if (deviceType == DEVICE_GUIDESTONE) {
-			_service_data.service_uuid = GUIDESTONE_SERVICE_DATA_UUID;
-		} else { // if deviceType == DEVICE_CROWNSTONE
-			_service_data.service_uuid = CROWNSTONE_SERVICE_DATA_UUID;
+		switch(deviceType) {
+			case DEVICE_CROWNSTONE_PLUG: {
+				_service_data.service_uuid = CROWNSTONE_PLUG_SERVICE_DATA_UUID;
+				break;
+			}
+			case DEVICE_CROWNSTONE_BUILTIN: {
+				_service_data.service_uuid = CROWNSTONE_BUILT_SERVICE_DATA_UUID;
+				break;
+			}
+			case DEVICE_GUIDESTONE: {
+				_service_data.service_uuid = GUIDESTONE_SERVICE_DATA_UUID;
+				break;
+			}
 		}
 
 		_service_data.data.p_data = _serviceData->getArray();
@@ -507,7 +593,7 @@ void Nrf51822BluetoothStack::configureIBeacon(IBeacon* beacon, uint8_t deviceTyp
 
 	configureScanResponse(deviceType);
 
-	updateAdvertisement();
+	setAdvertisementData();
 
 	//! set advertisement parameters
 	configureAdvertisementParameters();
@@ -525,19 +611,45 @@ void Nrf51822BluetoothStack::configureBleDevice(uint8_t deviceType) {
 
 	configureScanResponse(deviceType);
 
-	updateAdvertisement();
+	setAdvertisementData();
 
 	//! set advertisement parameters
 	configureAdvertisementParameters();
 }
 
 void Nrf51822BluetoothStack::configureAdvertisementParameters() {
-	memset(&_adv_params, 0, sizeof(_adv_params));
 	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
 	_adv_params.p_peer_addr = NULL;                   //! Undirected advertisement
 	_adv_params.fp = BLE_GAP_ADV_FP_ANY;
 	_adv_params.interval = _interval;
 	_adv_params.timeout = _timeout;
+}
+
+void Nrf51822BluetoothStack::setConnectable() {
+	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+}
+
+void Nrf51822BluetoothStack::setNonConnectable() {
+	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_NONCONN_IND;
+}
+
+void Nrf51822BluetoothStack::restartAdvertising() {
+
+	uint32_t err_code;
+
+	if (_advertising) {
+		err_code = sd_ble_gap_adv_stop();
+		APP_ERROR_CHECK(err_code); // Got an error 8 here
+	}
+
+	err_code = sd_ble_gap_adv_start(&_adv_params);
+	if (err_code == NRF_ERROR_INVALID_PARAM) {
+		LOGf(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
+	}
+	APP_ERROR_CHECK(err_code);
+
+	_advertising = true;
+
 }
 
 void Nrf51822BluetoothStack::startAdvertising() {
@@ -564,20 +676,73 @@ void Nrf51822BluetoothStack::stopAdvertising() {
 
 	BLE_CALL(sd_ble_gap_adv_stop, ());
 
+	LOGi(MSG_BLE_ADVERTISING_STOPPED);
+
 	_advertising = false;
+}
+
+void Nrf51822BluetoothStack::updateAdvertisement(bool toggle) {
+	if (!_advertising)
+		//! only update if actually advertising
+		return;
+
+	if (isConnected() || isScanning()) {
+		//! skip as long as we are connected or it will interfere with connection
+		//! also skip while scanning or we will get invalid state results when stopping/starting advertisement
+		return;
+	} else {
+//		LOGi("UPDATE advertisement");
+
+//		uint32_t err_code;
+//		err_code = sd_ble_gap_adv_stop();
+//		APP_ERROR_CHECK(err_code);
+
+		//! if toggle is false, advertisement should be always connectable, otherwise, toggle between
+		//! connectable and non connectable
+		if (toggle) {
+			if (++_advParamsCounter %2) {
+				setConnectable();
+			} else {
+				setNonConnectable();
+			}
+		} else {
+			setConnectable();
+		}
+
+		restartAdvertising();
+
+//		err_code = sd_ble_gap_adv_start(&_adv_params);
+//		if (err_code == NRF_ERROR_INVALID_PARAM) {
+//			LOGf(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
+//		}
+//		APP_ERROR_CHECK(err_code);
+	}
 }
 
 bool Nrf51822BluetoothStack::isAdvertising() {
 	return _advertising;
 }
 
-void Nrf51822BluetoothStack::updateAdvertisement() {
+void Nrf51822BluetoothStack::setAdvertisementData() {
+//      Why disabled?
 //	if (!_advertising)
 //		return;
 
-//	BLE_CALL(sd_ble_gap_adv_stop, ());
-	BLE_CALL(ble_advdata_set, (&_advdata, &_scan_resp));
-//	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
+	uint32_t err;
+	err = ble_advdata_set(&_advdata, &_scan_resp);
+
+	switch(err) {
+	//case NRF_ERROR_INVALID_PARAMETER:
+	case NRF_SUCCESS:
+		break;
+	case 0x07:
+		LOGi("Invalid advertisement configuration");
+		break;
+	default:
+	//	BLE_CALL(sd_ble_gap_adv_stop, ());
+		BLE_CALL(ble_advdata_set, (&_advdata, &_scan_resp));
+	//	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
+	}
 }
 
 void Nrf51822BluetoothStack::startScanning() {
@@ -736,7 +901,7 @@ void Nrf51822BluetoothStack::setPasskey(uint8_t* passkey) {
 }
 
 void Nrf51822BluetoothStack::updatePasskey() {
-#if SOFTDEVICE_SERIES==130 || (SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR == 8)
+#if SOFTDEVICE_SERIES==130 || SOFTDEVICE_SERIES==132 || (SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR == 8)
 	ble_opt_t static_pin_option;
 	static_pin_option.gap_opt.passkey.p_passkey = _passkey;
 	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
@@ -809,13 +974,16 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
             break;
         case DM_EVT_SECURITY_SETUP:
         case DM_EVT_SECURITY_SETUP_REFRESH: {
-        	LOGi("going into low power mode for bonding ...");
+        	// [15.8.2016] ALEX: low tx will be set on boot not per default.
+
+//        	LOGi("going into low power mode for bonding ...");
 
         	//! schedule timeout
-        	Timer::getInstance().createSingleShot(_lowPowerTimeoutId, lowPowerTimeout);
-        	Timer::getInstance().start(_lowPowerTimeoutId, MS_TO_TICKS(60000), this);
+//        	Timer::getInstance().createSingleShot(_lowPowerTimeoutId, lowPowerTimeout);
+//        	Timer::getInstance().start(_lowPowerTimeoutId, MS_TO_TICKS(60000), this);
 
-        	changeToLowTxPowerMode();
+
+//        	changeToLowTxPowerMode();
         	break;
         }
         case DM_EVT_SECURITY_SETUP_COMPLETE: {
@@ -823,12 +991,15 @@ uint32_t Nrf51822BluetoothStack::deviceManagerEvtHandler(dm_handle_t const    * 
         		LOGi("bonding completed");
         	} else {
         		LOGe("bonding failed with error: %d (%p)", event_result, event_result);
+        		disconnect();
         	}
 
-        	//! clear timeout
-        	Timer::getInstance().stop(_lowPowerTimeoutId);
+        	// [15.8.2016] ALEX: we are in low tx for a reason. A single shot security
+        	// pass should not remove this. On disconnect it will remain high TX
+//        	changeToNormalTxPowerMode();
 
-			changeToNormalTxPowerMode();
+        	//! clear timeout
+ //       	Timer::getInstance().stop(_lowPowerTimeoutId);
         	break;
         }
         default:
@@ -875,16 +1046,12 @@ void Nrf51822BluetoothStack::device_manager_init(bool erase_bonds)
 
     //! Don't clear bonded centrals
     init_data.clear_persistent_data = erase_bonds;
-//!    init_data.clear_persistent_data = 1;//
 
     err_code = dm_init(&init_data);
     APP_ERROR_CHECK(err_code);
 
     memset(&register_param.sec_param, 0, sizeof(ble_gap_sec_params_t));
 
-#if SOFTDEVICE_SERIES==110 && SOFTDEVICE_MAJOR!=8
-    register_param.sec_param.timeout      = SEC_PARAM_TIMEOUT;
-#endif
     register_param.sec_param.bond         = SEC_PARAM_BOND;
     register_param.sec_param.oob          = SEC_PARAM_OOB;
     register_param.sec_param.min_key_size = SEC_PARAM_MIN_KEY_SIZE;
@@ -908,7 +1075,9 @@ void Nrf51822BluetoothStack::device_manager_init(bool erase_bonds)
 }
 
 void Nrf51822BluetoothStack::device_manager_reset() {
-	dm_device_delete_all(&_dm_app_handle);
+	uint32_t err_code;
+	err_code = dm_device_delete_all(&_dm_app_handle);
+	APP_ERROR_CHECK(err_code);
 }
 
 void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
@@ -924,7 +1093,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
-//		_log(INFO, "address: " );
+//		_log(SERIAL_INFO, "address: ");
 //		BLEutil::printArray(p_ble_evt->evt.gap_evt.params.connected.peer_addr.addr, BLE_GAP_ADDR_LEN);
 		on_connected(p_ble_evt);
 		EventDispatcher::getInstance().dispatch(EVT_BLE_CONNECT);
@@ -961,6 +1130,7 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 
 	case BLE_GATTS_EVT_WRITE: {
+		resetConnectionAliveTimer();
 
 		if (p_ble_evt->evt.gatts_evt.params.write.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
 
@@ -984,9 +1154,16 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 		} else {
 			for (Service* svc : _services) {
+#if (NORDIC_SDK_VERSION >= 11)
+				// TODO: this check is probably wrong
+//				if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.handle) {
+				//! TODO: better way of selection?
+				if (true) { //! Just let every service check for now...
+#else
 				if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
+#endif
 					svc->on_write(p_ble_evt->evt.gatts_evt.params.write, p_ble_evt->evt.gatts_evt.params.write.handle);
-					return;
+//					return;
 				}
 			}
 		}
@@ -996,7 +1173,12 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 
 	case BLE_GATTS_EVT_HVC:
 		for (Service* svc : _services) {
+#if (NORDIC_SDK_VERSION >= 11)
+			// TODO: this check is probably be wrong
+			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.handle) {
+#else
 			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.context.srvc_handle) {
+#endif
 				svc->on_ble_event(p_ble_evt);
 				return;
 			}
@@ -1039,11 +1221,42 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 	}
 }
 
+#if CONNECTION_ALIVE_TIMEOUT>0
+static void connection_keep_alive_timeout(void* p_context) {
+	LOGw("connection keep alive timeout!");
+	Nrf51822BluetoothStack::getInstance().disconnect();
+}
+#endif
+
+void Nrf51822BluetoothStack::startConnectionAliveTimer() {
+#if CONNECTION_ALIVE_TIMEOUT>0
+	Timer::getInstance().createSingleShot(_connectionKeepAliveTimerId, connection_keep_alive_timeout);
+	Timer::getInstance().start(_connectionKeepAliveTimerId, MS_TO_TICKS(CONNECTION_ALIVE_TIMEOUT), NULL);
+#endif
+}
+
+void Nrf51822BluetoothStack::stopConnectionAliveTimer() {
+#if CONNECTION_ALIVE_TIMEOUT>0
+	Timer::getInstance().stop(_connectionKeepAliveTimerId);
+#endif
+}
+
+void Nrf51822BluetoothStack::resetConnectionAliveTimer() {
+#if CONNECTION_ALIVE_TIMEOUT>0
+	Timer::getInstance().reset(_connectionKeepAliveTimerId, MS_TO_TICKS(CONNECTION_ALIVE_TIMEOUT), NULL);
+#endif
+}
+
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
 	_advertising = false; //! it seems like maybe we automatically stop advertising when we're connected.
-
+	_disconnectingInProgress = false;
 	BLE_CALL(sd_ble_gap_conn_param_update, (p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params));
+
+//	ble_gap_addr_t* peerAddr = &p_ble_evt->evt.gap_evt.params.connected.peer_addr;
+//	LOGi("Connection from: %02X:%02X:%02X:%02X:%02X:%02X", peerAddr->addr[5],
+//	                       peerAddr->addr[4], peerAddr->addr[3], peerAddr->addr[2], peerAddr->addr[1],
+//	                       peerAddr->addr[0]);
 
 	if (_callback_connected) {
 		_callback_connected(p_ble_evt->evt.gap_evt.conn_handle);
@@ -1052,6 +1265,8 @@ void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	for (Service* svc : _services) {
 		svc->on_ble_event(p_ble_evt);
 	}
+
+	startConnectionAliveTimer();
 }
 
 void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
@@ -1063,12 +1278,27 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 	for (Service* svc : _services) {
 		svc->on_ble_event(p_ble_evt);
 	}
+
+	stopConnectionAliveTimer();
 }
 
 void Nrf51822BluetoothStack::disconnect() {
-	LOGi("Forcibly disconnecting from device");
-	//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
-	BLE_CALL(sd_ble_gap_disconnect, (_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
+	//! Only disconnect when we are actually connected to something
+	if (_conn_handle != BLE_CONN_HANDLE_INVALID && _disconnectingInProgress == false) {
+		LOGi("Forcibly disconnecting from device");
+		_disconnectingInProgress = true;
+		//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
+		// TODO: this sometimes gives us an error 8 (happened when phone was continously doing connect, write cmd, disconnect)
+		BLE_CALL(sd_ble_gap_disconnect, (_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
+	}
+}
+
+bool Nrf51822BluetoothStack::isDisconnecting() {
+		return _disconnectingInProgress;
+};
+
+bool Nrf51822BluetoothStack::isConnected() {
+	return _conn_handle != BLE_CONN_HANDLE_INVALID;
 }
 
 void Nrf51822BluetoothStack::onTxComplete(ble_evt_t * p_ble_evt) {

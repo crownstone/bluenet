@@ -1,5 +1,19 @@
 var searchData=
 [
   ['passkey',['passkey',['../structps__configuration__t.html#a9078f29f181851cc3b50618848183bad',1,'ps_configuration_t']]],
-  ['presentation_5fformat',['presentation_format',['../structBLEpp_1_1CharacteristicInit.html#ab785cb73d9d56bcaaa00a8bd776c2a93',1,'BLEpp::CharacteristicInit']]]
+  ['pinaincurrent',['pinAinCurrent',['../structboards__config__t.html#a17856efe6d4dac133c0649f00e03aed6',1,'boards_config_t']]],
+  ['pinainpwmtemp',['pinAinPwmTemp',['../structboards__config__t.html#a27c3a6844692e4974b6b23a564bfa246',1,'boards_config_t']]],
+  ['pinainvoltage',['pinAinVoltage',['../structboards__config__t.html#aaade8456d67a5e93f10f88a7e38da813',1,'boards_config_t']]],
+  ['pingpiopwm',['pinGpioPwm',['../structboards__config__t.html#ab10354112a389ce12746bb47ad988861',1,'boards_config_t']]],
+  ['pingpiorelayoff',['pinGpioRelayOff',['../structboards__config__t.html#ab067d65e09e5376739412bed70bd6d4a',1,'boards_config_t']]],
+  ['pingpiorelayon',['pinGpioRelayOn',['../structboards__config__t.html#ae53d271b3796404c045c4368187a80f3',1,'boards_config_t']]],
+  ['pingpiorx',['pinGpioRx',['../structboards__config__t.html#ac2586ed67fe798342ffe14cbedcd22e8',1,'boards_config_t']]],
+  ['pingpiotx',['pinGpioTx',['../structboards__config__t.html#a9812ed9f406fedf55458386996a8b1c1',1,'boards_config_t']]],
+  ['pinledgreen',['pinLedGreen',['../structboards__config__t.html#af8f4dfe486e358eba6e9098f3824bc43',1,'boards_config_t']]],
+  ['pinledred',['pinLedRed',['../structboards__config__t.html#a4db10606c1a04da57180d89b6aa448b0',1,'boards_config_t']]],
+  ['powerzero',['powerZero',['../structboards__config__t.html#a488d1f81fc535992590459ebc9f877f8',1,'boards_config_t']]],
+  ['presentation_5fformat',['presentation_format',['../structCharacteristicInit.html#a0216e933ca9c133b0209ccd2eba11d42',1,'CharacteristicInit']]],
+  ['pwminverted',['pwmInverted',['../structboards__config__t.html#aaa8f487954302d7c4cb913d63c3d86ba',1,'boards_config_t']]],
+  ['pwmtempvoltagethreshold',['pwmTempVoltageThreshold',['../structboards__config__t.html#aca7741ed42538545936863444e57ca03',1,'boards_config_t']]],
+  ['pwmtempvoltagethresholddown',['pwmTempVoltageThresholdDown',['../structboards__config__t.html#a70bd38475536196ca64bb85f0535bb8b',1,'boards_config_t']]]
 ];

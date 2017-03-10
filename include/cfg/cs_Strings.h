@@ -40,7 +40,7 @@
 #define BLE_CHAR_STATE_CONTROL                   "State Control"
 #define BLE_CHAR_STATE_READ                      "State Read"
 #define BLE_CHAR_SESSION_NONCE                   "Session Nonce"
-#define BLE_CHAR_FACTORY_RESET                   "Factory Reset"
+#define BLE_CHAR_FACTORY_RESET                   "Recovery"
 #define BLE_CHAR_RSSI                            "RSSI"
 #define BLE_CHAR_SCAN_CONTROL                    "Scan Control"
 #define BLE_CHAR_SCAN_LIST                       "Scanned Devices"
@@ -58,6 +58,8 @@
 #define BLE_CHAR_FIRMWARE_REVISION               "Firmware Revision"
 #define BLE_CHAR_SOFTWARE_REVISION               "Software Revision"
 #define BLE_CHAR_MAC_ADDRES                      "MAC Address"
+#define BLE_CHAR_SETUP_KEY                       "Setup Encryption Key"
+#define BLE_CHAR_GOTO_DFU                        "GoTo DFU"
 
 #define STR_HANDLE_COMMAND                       "handle %s command"
 #define STR_ENABLE                               "Enable"
@@ -88,6 +90,7 @@
 #define STR_CHAR_CURRENT_TIME                    "Current Time"
 #define STR_CHAR_SCHEDULE                        "Schedule"
 #define STR_CHAR_MAC_ADDRESS                     "MAC Address"
+#define STR_CHAR_SETUP_KEY                       "Setup Encryption Key"
 
 #define STR_CREATE_ALL_SERVICES                  "Create all services"
 
@@ -122,6 +125,7 @@
 #define MSG_BLE_SOFTDEVICE_ENABLE_GAP            "Softdevice enable GAP"
 #define MSG_BLE_ADVERTISING_STARTING             "Start advertising"
 #define MSG_BLE_ADVERTISING_STARTED              "Advertising started"
+#define MSG_BLE_ADVERTISING_STOPPED              "Advertising stopped"
 #define MSG_BLE_NO_CUSTOM_SERVICES               "Services, no custom ones!"
 #define MSG_BLE_ADVERTISEMENT_TOO_BIG            "Advertisement too big"
 #define MSG_BLE_ADVERTISEMENT_CONFIG_INVALID     "Advertisement invalid config"
@@ -152,7 +156,7 @@
 
 #define FMT_CONFIGURATION_NOT_FOUND              "There is no such configuration type (%d)."
 #define FMT_STATE_NOT_FOUND                      "There is no such state variable (%d)."
-#define FMT_VERIFICATION_FAILED                  "Verification failed"
+#define FMT_VERIFICATION_FAILED                  "Verification failed (%d)"
 
 #define FMT_USE_DEFAULT_VALUE                    "Use default value"
 #define FMT_FOUND_STORED_VALUE                   "Found stored value: %d"
