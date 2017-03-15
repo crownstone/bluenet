@@ -215,7 +215,7 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		uint16_t delay = payload->delay;
 
 		if (size != sizeof(enable_scanner_message_payload_t)) {
-			//! if we want tod isable, we don't really need the delay, so
+			//! if we want to disable, we don't really need the delay, so
 			// we can accept the command as long as size is 1
 			if (size != 1 || enable) {
 				LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);

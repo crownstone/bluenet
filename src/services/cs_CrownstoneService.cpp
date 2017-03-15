@@ -194,7 +194,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 		}
 
 //		LOGi("err error_code: %d", error_code);
-		memcpy(value, &error_code, sizeof(error_code));
+		memcpy(value, &error_code, sizeof(error_code)); //! TODO: why is it written to "value" and not to _controlCharacteristic?
 		_controlCharacteristic->setValueLength(sizeof(error_code));
 		_controlCharacteristic->updateValue();
 	});

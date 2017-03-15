@@ -177,19 +177,25 @@ void Switch::setSwitch(uint8_t switchState) {
 #endif
 	switch_state_t oldVal = _switchValue;
 
-	//! Relay on when value=100, relay off when value=0
-	if (switchState > 99) {
+//	//! Relay on when value=100, relay off when value=0
+//	if (switchState > 99) {
+//		_relayOn();
+//	} else {
+//		_relayOff();
+//	}
+//	//! Pwm when value is 1-99, else pwm off
+//	if (switchState > 0 && switchState < 100) {
+//		_setPwm(switchState);
+//	}
+//	else {
+//		_setPwm(0);
+//	}
+	if (switchState > 0) {
 		_relayOn();
 	} else {
 		_relayOff();
 	}
-	//! Pwm when value is 1-99, else pwm off
-	if (switchState > 0 && switchState < 100) {
-		_setPwm(switchState);
-	}
-	else {
-		_setPwm(0);
-	}
+	_setPwm(0);
 
 	if (_delayedSwitchPending) {
 #ifdef PRINT_SWITCH_VERBOSE
