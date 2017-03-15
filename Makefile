@@ -62,6 +62,7 @@ GIT_BRANCH=$(shell git symbolic-ref --short -q HEAD)
 GIT_HASH=$(shell git rev-parse --short=25 HEAD)
 
 DEBUG_COMPILE_FLAGS=-DCOMPILATION_DAY="\"${COMPILATION_DAY}\"" \
+			  -DCOMPILATION_TIME="\"${COMPILATION_TIME}\"" \			  
 			  -DVERBOSITY="${VERBOSITY}" \
 			  -DGIT_BRANCH="\"${GIT_BRANCH}\"" \
 			  -DGIT_HASH="\"${GIT_HASH}\"" \
