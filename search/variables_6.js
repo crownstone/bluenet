@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['handle',['handle',['../structstorage__config__t.html#a169d449ebf6ab389f9bdd15d4bdec96b',1,'storage_config_t']]],
-  ['hardwareboard',['hardwareBoard',['../structboards__config__t.html#a9fd149fb8673de97cee492b7b4ed3153',1,'boards_config_t']]],
-  ['hasled',['hasLed',['../structboards__config__t.html#ab7fcce849d8ce4f31def11f28c8b43f8',1,'boards_config_t']]],
-  ['hasrelay',['hasRelay',['../structboards__config__t.html#a71d71d114ff20912ad99f243298aaf61',1,'boards_config_t']]],
-  ['hasserial',['hasSerial',['../structboards__config__t.html#a5fe3a69f4bb060136be48f690c4cda0a',1,'boards_config_t']]]
+  ['firstval',['firstVal',['../structdifferential__buffer__t.html#a803dc4d68be91ee095688a602aa795eb',1,'differential_buffer_t::firstVal()'],['../structdifferential__buffer__fixed__t.html#a3dafa4ec10992ad90a136001206ef078',1,'differential_buffer_fixed_t::firstVal()']]],
+  ['floor',['floor',['../structps__configuration__t.html#a43c75dd894593aee22f7b1dd794a616e',1,'ps_configuration_t']]]
 ];

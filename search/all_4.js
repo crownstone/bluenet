@@ -27,6 +27,5 @@ var searchData=
   ['differential_5fbuffer_5ft_3c_20uint32_5ft_20_3e',['differential_buffer_t&lt; uint32_t &gt;',['../structdifferential__buffer__t.html',1,'']]],
   ['differentialbuffer',['DifferentialBuffer',['../classDifferentialBuffer.html',1,'']]],
   ['differentialbuffer_3c_20uint32_5ft_20_3e',['DifferentialBuffer&lt; uint32_t &gt;',['../classDifferentialBuffer.html',1,'']]],
-  ['dim',['dim',['../classPowerService.html#a270df8161af8546891cf9007d5b50f0c',1,'PowerService']]],
   ['dobotsmanufac',['DoBotsManufac',['../classDoBotsManufac.html',1,'']]]
 ];

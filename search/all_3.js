@@ -2,7 +2,7 @@ var searchData=
 [
   ['calculatedecryptionbufferlength',['calculateDecryptionBufferLength',['../classEncryptionHandler.html#a2643544d00fd05c0fd69eff5ab62571a',1,'EncryptionHandler']]],
   ['calculateencryptionbufferlength',['calculateEncryptionBufferLength',['../classEncryptionHandler.html#a049e814e46ef2b3cb3599e652d95a3c9',1,'EncryptionHandler']]],
-  ['callback',['callback',['../structadc__done__cb__data__t.html#a8435b644f1ad0232eae3fbc119f40b61',1,'adc_done_cb_data_t']]],
+  ['callback',['callback',['../structadc__done__cb__data__t.html#a8435b644f1ad0232eae3fbc119f40b61',1,'adc_done_cb_data_t::callback()'],['../structcomp__event__cb__data__t.html#a46feb43d33b9b9c499395c9cbea67813',1,'comp_event_cb_data_t::callback()']]],
   ['callback_5fconnected_5ft',['callback_connected_t',['../classNrf51822BluetoothStack.html#af4b47236e29b96629d47e7258802f7ff',1,'Nrf51822BluetoothStack']]],
   ['callback_5fdisconnected_5ft',['callback_disconnected_t',['../classNrf51822BluetoothStack.html#ae6403ce07bb288bd9be5d12fd6a3a580',1,'Nrf51822BluetoothStack']]],
   ['callback_5fon_5fwrite_5ft',['callback_on_write_t',['../classCharacteristicGeneric.html#ac8184f33ec08fe68e44c01e7425d22d2',1,'CharacteristicGeneric']]],
@@ -34,7 +34,7 @@ var searchData=
   ['circularbuffer',['CircularBuffer',['../classCircularBuffer.html',1,'CircularBuffer&lt; T &gt;'],['../classCircularBuffer.html#a49a87ddc25d70df6c30dc7fdd6e0b364',1,'CircularBuffer::CircularBuffer()']]],
   ['circularbuffer_3c_20buffer_5felement_5ft_20_3e',['CircularBuffer&lt; buffer_element_t &gt;',['../classCircularBuffer.html',1,'']]],
   ['circulardifferentialbuffer',['CircularDifferentialBuffer',['../classCircularDifferentialBuffer.html',1,'CircularDifferentialBuffer&lt; T &gt;'],['../classCircularDifferentialBuffer.html#a4df0403155061d6b86defe628450b7a6',1,'CircularDifferentialBuffer::CircularDifferentialBuffer()']]],
-  ['clear',['clear',['../classCircularBuffer.html#a26caa4ec94de2f342f32b6558ac697eb',1,'CircularBuffer::clear()'],['../classCircularDifferentialBuffer.html#ac9995367206304245c111bf4d2885c24',1,'CircularDifferentialBuffer::clear()'],['../classScanResult.html#a8df16be6a60fb514ac1e3372f7d9d855',1,'ScanResult::clear()'],['../classScheduleList.html#abc5563f91901c2418a3911945cd15e9e',1,'ScheduleList::clear()'],['../classStreamBuffer.html#a81b11039328ac26f64fc763a78a5833e',1,'StreamBuffer::clear()'],['../classTrackedDeviceList.html#a199a33eb3ff55024226206b87411a08b',1,'TrackedDeviceList::clear()']]],
+  ['clear',['clear',['../classstate__message.html#a70d71876fe48cdc5813f47f0cdd7c699',1,'state_message::clear()'],['../classCircularBuffer.html#a26caa4ec94de2f342f32b6558ac697eb',1,'CircularBuffer::clear()'],['../classCircularDifferentialBuffer.html#ac9995367206304245c111bf4d2885c24',1,'CircularDifferentialBuffer::clear()'],['../classScanResult.html#a8df16be6a60fb514ac1e3372f7d9d855',1,'ScanResult::clear()'],['../classScheduleList.html#abc5563f91901c2418a3911945cd15e9e',1,'ScheduleList::clear()'],['../classStreamBuffer.html#a81b11039328ac26f64fc763a78a5833e',1,'StreamBuffer::clear()'],['../classTrackedDeviceList.html#a199a33eb3ff55024226206b87411a08b',1,'TrackedDeviceList::clear()']]],
   ['clearstorage',['clearStorage',['../classStorage.html#ae4e97a972d61055599fab0480dd40a87',1,'Storage']]],
   ['closeconnectionauthenticationfailure',['closeConnectionAuthenticationFailure',['../classEncryptionHandler.html#a2bc1228d54a46b9665122e670a704fce',1,'EncryptionHandler']]],
   ['command_5fmessage_5ft',['command_message_t',['../structcommand__message__t.html',1,'']]],
