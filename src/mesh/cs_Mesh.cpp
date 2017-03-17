@@ -137,7 +137,8 @@ void Mesh::start() {
 		LOGi("start mesh");
 #endif
 		startTicking();
-		app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
+		uint32_t errorCode = app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
+		APP_ERROR_CHECK(errorCode);
 	}
 }
 
@@ -148,7 +149,8 @@ void Mesh::stop() {
 		LOGi("stop mesh");
 #endif
 		stopTicking();
-		app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
+		uint32_t errorCode = app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
+		APP_ERROR_CHECK(errorCode);
 	}
 }
 
@@ -159,7 +161,8 @@ void Mesh::resume() {
 		LOGi("resume mesh");
 #endif
 		startTicking();
-		app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
+		uint32_t errorCode = app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
+		APP_ERROR_CHECK(errorCode);
 	}
 }
 
@@ -170,7 +173,8 @@ void Mesh::pause() {
 		LOGi("pause mesh");
 #endif
 		stopTicking();
-		app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
+		uint32_t errorCode = app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
+		APP_ERROR_CHECK(errorCode);
 	}
 }
 

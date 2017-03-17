@@ -149,7 +149,8 @@ void COMP::handleEvent(nrf_comp_event_t event) {
 		uint32_t curTime = RTC::getCount();
 		uint32_t timeDiff = RTC::difference(curTime, _lastEventTimestamp);
 		if (timeDiff > RTC::msToTicks(100)) {
-			app_sched_event_put(&_eventCallbackData, sizeof(_eventCallbackData), compEventCallback);
+			uint32_t errorCode = app_sched_event_put(&_eventCallbackData, sizeof(_eventCallbackData), compEventCallback);
+			APP_ERROR_CHECK(errorCode);
 		}
 		_lastEventTimestamp = RTC::getCount();
 	}

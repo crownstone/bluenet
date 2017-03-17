@@ -219,7 +219,8 @@ void ADC::update(nrf_saadc_value_t* buf) {
 		_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
 
 		// Decouple done callback from adc interrupt handler, and put it on app scheduler instead
-		app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
+		uint32_t errorCode = app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
+		APP_ERROR_CHECK(errorCode);
 	} else {
 		//! Skip the callback, just put buffer in queue again.
 		write("/!\\");

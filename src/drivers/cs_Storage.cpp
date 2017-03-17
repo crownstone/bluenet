@@ -113,13 +113,15 @@ void storage_sys_evt_handler(uint32_t evt) {
 		// once mesh is stopped, the softdevice will trigger the NRF_EVT_RADIO_SESSION_IDLE,
 		// now we can try to update the pstorage
 //		LOGd("NRF_EVT_RADIO_SESSION_IDLE");
-		app_sched_event_put(NULL, 0, resume_requests);
+		uint32_t errorCode = app_sched_event_put(NULL, 0, resume_requests);
+		APP_ERROR_CHECK(errorCode);
 		break;
 	}
 	case NRF_EVT_RADIO_SESSION_CLOSED: {
 //		LOGd("NRF_EVT_RADIO_SESSION_CLOSED");
 //			Storage::getInstance().resumeRequests();
-		app_sched_event_put(NULL, 0, resume_requests);
+		uint32_t errorCode = app_sched_event_put(NULL, 0, resume_requests);
+		APP_ERROR_CHECK(errorCode);
 		break;
 	}
 	}
@@ -185,7 +187,8 @@ void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 #endif
 			} else {
 				// otherwise, resume buffered pstorage update requests
-				app_sched_event_put(NULL, 0, resume_requests);
+				uint32_t errorCode = app_sched_event_put(NULL, 0, resume_requests);
+				APP_ERROR_CHECK(errorCode);
 			}
 		}
 		break;
