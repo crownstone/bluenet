@@ -38,7 +38,7 @@ void TemperatureGuard::init(boards_config_t* boardConfig) {
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
 
 	_comp = &COMP::getInstance();
-	_comp->init(boardConfig->pinAinPwmTemp, boardConfig->pwmTempVoltageThreshold, boardConfig->pwmTempVoltageThresholdDown);
+	_comp->init(boardConfig->pinAinPwmTemp, boardConfig->pwmTempVoltageThresholdDown, boardConfig->pwmTempVoltageThreshold);
 //	_comp->setEventCallback(comp_event_callback);
 
 	_lastChipTempEvent = EVT_CHIP_TEMP_OK;
