@@ -252,6 +252,10 @@ struct __attribute__((__packed__)) beacon_mesh_message_t {
 	int8_t txPower;
 };
 
+// TODO: how is this properly defined? 
+// ids[] is flexible
+// size of beacon_mesh_message_t does not seem to be forced to be the same as for control_mesh_message_t, so seems also flexible
+// payload[] is flexible
 struct __attribute__((__packed__)) command_message_t {
 	uint16_t messageType;
 	uint8_t numOfIds;
