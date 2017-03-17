@@ -335,7 +335,7 @@ popd &> /dev/null
 pushd $BLUENET_DIR/scripts &> /dev/null
 
 info "Build docs ..."
-./gen_doc.sh
+./documentation.sh generate
 
 checkError
 succ "Build DONE"
@@ -346,9 +346,13 @@ cp -r $BLUENET_DIR/docs $BLUENET_RELEASE_DIR/docs
 checkError
 succ "Copy DONE"
 
-info "Update docs in git ..."
-git add $BLUENET_DIR/docs
-git commit -m "Update docs"
+info "Publish docs to git ..."
+#git add $BLUENET_DIR/docs
+#git commit -m "Update docs"
+./documentation.sh publish
+
+checkError
+succ "Published docs DONE"
 
 popd &> /dev/null
 
