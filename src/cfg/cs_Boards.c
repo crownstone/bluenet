@@ -89,10 +89,10 @@ void asACR01B1A(boards_config_t* p_config) {
 	p_config->deviceType           = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
 
 	p_config->voltageMultiplier   = 0.2f;
-	p_config->currentMultiplier   = 0.0045f;
-	p_config->voltageZero         = 2003;
-	p_config->currentZero         = 1997;
-	p_config->powerZero           = 1500;
+	p_config->currentMultiplier   = 0.0044f;
+	p_config->voltageZero         = 1993;
+	p_config->currentZero         = 1980;
+	p_config->powerZero           = 3500;
 
 	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
 	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
