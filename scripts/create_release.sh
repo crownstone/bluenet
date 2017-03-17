@@ -169,7 +169,7 @@ if [[ $existing == 0 ]]; then
 	log "Creating new directory: "$directory
 	mkdir $directory &> /dev/null
 
-	cp $BLUENET_DIR/CMakeBuild.config.default $directory/CMakeBuild.config
+	cp $BLUENET_DIR/conf/cmake/CMakeBuild.config.default $directory/CMakeBuild.config
 
 ###############################
 ### Fill Default Config Values
@@ -284,7 +284,7 @@ succ "Softdevice DONE"
 ###################
 
 info "Build firmware ..."
-./firmware.sh release
+./firmware.sh -c release
 
 checkError
 succ "Build DONE"
