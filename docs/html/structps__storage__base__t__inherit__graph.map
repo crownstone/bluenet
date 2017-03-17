@@ -1,5 +1,5 @@
 <map id="ps_storage_base_t" name="ps_storage_base_t">
 <area shape="rect" id="node2" href="$structps__configuration__t.html" title="Struct used by the Configuration to store elements. " alt="" coords="5,80,133,107"/>
 <area shape="rect" id="node3" href="$structps__general__vars__t.html" title="Struct used to ... " alt="" coords="157,80,285,107"/>
-<area shape="rect" id="node4" href="$structps__state__t.html" title="The ps_state_t struct is used to store elements that are changed relatively frequently. " alt="" coords="309,80,392,107"/>
+<area shape="rect" id="node4" href="$structps__state__t.html" title="The ps_state_t struct is used to store elements that are changed relatively frequently. " alt="" coords="309,80,391,107"/>
 </map>

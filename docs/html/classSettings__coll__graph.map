@@ -1,8 +1,8 @@
 <map id="Settings" name="Settings">
-<area shape="rect" id="node2" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="23,109,90,136"/>
-<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener. " alt="" coords="5,13,108,39"/>
-<area shape="rect" id="node4" href="$structboards__config__t.html" title="BE SURE TO UPDATE cs_HardwareVersions.h IF YOU ADD A NEW BOARD!! " alt="" coords="114,109,229,136"/>
-<area shape="rect" id="node5" href="$structps__configuration__t.html" title="Struct used by the Configuration to store elements. " alt="" coords="253,109,381,136"/>
-<area shape="rect" id="node6" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="191,13,323,39"/>
-<area shape="rect" id="node7" href="$structps__configuration__t_1_1ps__beacon__t.html" title="beacon " alt="" coords="347,5,475,47"/>
+<area shape="rect" id="node2" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="23,112,89,139"/>
+<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener. " alt="" coords="5,13,107,40"/>
+<area shape="rect" id="node4" href="$structboards__config__t.html" title="BE SURE TO UPDATE cs_HardwareVersions.h IF YOU ADD A NEW BOARD!! " alt="" coords="113,112,228,139"/>
+<area shape="rect" id="node5" href="$structps__configuration__t.html" title="Struct used by the Configuration to store elements. " alt="" coords="252,112,380,139"/>
+<area shape="rect" id="node6" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="190,13,321,40"/>
+<area shape="rect" id="node7" href="$structps__configuration__t_1_1ps__beacon__t.html" title="beacon " alt="" coords="347,6,475,47"/>
 </map>

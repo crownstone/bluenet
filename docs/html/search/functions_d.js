@@ -1,15 +1,17 @@
 var searchData=
 [
-  ['readfromstorage',['readFromStorage',['../classSettings.html#ae153bcc455c5b483b2d3582dee0d6405',1,'Settings::readFromStorage()'],['../classState.html#a9d45ed6bc3531290645ab6ea5a49390d',1,'State::readFromStorage()']]],
-  ['readitem',['readItem',['../classStorage.html#aa8d49ccc35dbc711b8edec21965b94c8',1,'Storage']]],
-  ['readstorage',['readStorage',['../classStorage.html#abce072bd27cb4924fb282f50280392a3',1,'Storage']]],
-  ['release',['release',['../classCircularBuffer.html#a222562a5f17f3c51ec1be481b7aab41f',1,'CircularBuffer::release()'],['../classScanResult.html#a506998f214c4b5f2166ab5763a4c70c9',1,'ScanResult::release()'],['../classScheduleEntry.html#a21d4c48aa1817169705057c08e2ecaa1',1,'ScheduleEntry::release()'],['../classScheduleList.html#a928db7ac19ebaffab2342b7b84485e1e',1,'ScheduleList::release()'],['../classTrackedDeviceList.html#ab8a3b5d8304d1f6c01621a79dbf5fea9',1,'TrackedDeviceList::release()'],['../classTrackedDevice.html#a1e4428276ebc0a7e95d168e767a2f043',1,'TrackedDevice::release()']]],
-  ['releasebuffer',['releaseBuffer',['../classADC.html#ac2d7f1c352fc28b4fdd27634873f7f5a',1,'ADC']]],
-  ['rem',['rem',['../classScheduleList.html#acada6c0448b49eb34ed8ddf9a5a62ec1',1,'ScheduleList::rem()'],['../classTrackedDeviceList.html#aa297620e5a9afc8217a1fce25c6f57f6',1,'TrackedDeviceList::rem()']]],
-  ['removelistener',['removeListener',['../classEventDispatcher.html#a5dd4c72202e2b3d9e43bf402528415a5',1,'EventDispatcher']]],
-  ['reset',['reset',['../classTimer.html#a0506cca8fce7a509f2dba102ab843fba',1,'Timer']]],
-  ['resettimeoutcounters',['resetTimeoutCounters',['../classTrackedDeviceList.html#a041c057a360838068e4f167ccb06013b',1,'TrackedDeviceList']]],
-  ['restart',['restart',['../classMesh.html#a947e546bc7e345b05f645e8633c272fc',1,'Mesh']]],
-  ['resume',['resume',['../classMesh.html#a87fd99e234ddf456981dc33c6a25ae14',1,'Mesh']]],
-  ['run',['run',['../classCrownstone.html#a315537a2d45fb2204f75b65afa5fbcc9',1,'Crownstone']]]
+  ['pause',['pause',['../classMesh.html#a8ad96654ddb60d70d9a7522cbc6fd7bd',1,'Mesh']]],
+  ['payload',['payload',['../classStreamBuffer.html#a9e126b404c744e50653c8dcbd0eceab3',1,'StreamBuffer']]],
+  ['peek',['peek',['../classCircularBuffer.html#ae6078939f9c2e023b261c971cbcd4141',1,'CircularBuffer::peek()'],['../classCircularDifferentialBuffer.html#a388be34b435d059c843eb3c491b987d1',1,'CircularDifferentialBuffer::peek()']]],
+  ['pop',['pop',['../classCircularBuffer.html#a3033e4e62f336be929c776e912f3b549',1,'CircularBuffer::pop()'],['../classCircularDifferentialBuffer.html#a2520e5586b9b897aae88e12e610f0238',1,'CircularDifferentialBuffer::pop()']]],
+  ['powersampleadcdone',['powerSampleAdcDone',['../classPowerSampling.html#ad0eab4314d0b6f14333b8982bc317194',1,'PowerSampling']]],
+  ['powersamplefirststart',['powerSampleFirstStart',['../classPowerSampling.html#a6773442010a2487dbbd1277e678f4dea',1,'PowerSampling']]],
+  ['powerservice',['PowerService',['../classPowerService.html#a232bc8f47256f01905af4828fb0195fa',1,'PowerService']]],
+  ['preparenormaloperationmode',['prepareNormalOperationMode',['../classCrownstone.html#ad148b7c0838452d967c724238aa052a4',1,'Crownstone']]],
+  ['print',['print',['../classCyclicStorage.html#a7bf33a0bada95d7ee62586e6a174c1c8',1,'CyclicStorage::print()'],['../classState.html#a70f163051bd4e35f510b232a1dbd4d16',1,'State::print()'],['../classScanResult.html#a5c24982267f2a2e51b582b28425b56fc',1,'ScanResult::print()'],['../classScheduleList.html#a3794aae187049177607e975c0817994c',1,'ScheduleList::print()'],['../classTrackedDeviceList.html#a9ae18fc87cf58e9096dfef23622df717',1,'TrackedDeviceList::print(uint8_t *addr) const '],['../classTrackedDeviceList.html#afd2ff6cc3c1035fa0d0abf3bdd3f99cb',1,'TrackedDeviceList::print() const ']]],
+  ['process',['process',['../classMeshControl.html#a1fc2801652b0b03443aad6b1fa7e373c',1,'MeshControl']]],
+  ['push',['push',['../classCircularBuffer.html#aaa3d25987977c270542a525be8db7232',1,'CircularBuffer::push()'],['../classCircularDifferentialBuffer.html#adbf237e9d3e04f50973bbf6bcd01e52c',1,'CircularDifferentialBuffer::push()']]],
+  ['push_5fback',['push_back',['../classstate__message.html#a838800d064e3f5de90ed48bae8d597c6',1,'state_message']]],
+  ['pwmoff',['pwmOff',['../classSwitch.html#a60b5d22db91f1814a9a1d5d377865432',1,'Switch']]],
+  ['pwmon',['pwmOn',['../classSwitch.html#ad0efeace8feb330ce14ab583c3eb43d9',1,'Switch']]]
 ];

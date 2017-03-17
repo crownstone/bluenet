@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['voltagemultiplier',['voltageMultiplier',['../structboards__config__t.html#a13e960b6f7f53e167fcc2979dbe28b89',1,'boards_config_t']]],
-  ['voltagezero',['voltageZero',['../structboards__config__t.html#a429f9a7994d32d7ea18ad7e42927c479',1,'boards_config_t']]]
+  ['user_5fdesc_5fmetadata_5fmd',['user_desc_metadata_md',['../structCharacteristicInit.html#a63e28a7e0cfba2f9fdff2725053e2990',1,'CharacteristicInit']]],
+  ['uuid',['uuid',['../classIBeacon.html#a536dfe162fbb1c456f4ac56d65b1d225',1,'IBeacon']]]
 ];

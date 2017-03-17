@@ -7,13 +7,13 @@
 <area shape="rect" id="node13" href="$classCharacteristicGeneric.html" title="CharacteristicGeneric\l\&lt; uint32_t \&gt;" alt="" coords="203,409,351,450"/>
 <area shape="rect" id="node15" href="$classCharacteristicGeneric.html" title="CharacteristicGeneric\l\&lt; uint8_t * \&gt;" alt="" coords="203,474,351,515"/>
 <area shape="rect" id="node17" href="$classCharacteristicGeneric.html" title="CharacteristicGeneric\l\&lt; uint8_t \&gt;" alt="" coords="203,539,351,581"/>
-<area shape="rect" id="node3" href="$classCharacteristic.html" title="A default characteristic. " alt="" coords="434,5,569,32"/>
-<area shape="rect" id="node4" href="$classCharacteristic_3_01T_00_01typename_01std_1_1enable__if_3_01std_1_1is__arithmetic_3_01T_01_4_1_1value_01_4_1_1type_01_4.html" title="A characteristic for built&#45;in arithmetic types (int, float, etc) " alt="" coords="426,57,577,127"/>
-<area shape="rect" id="node6" href="$classCharacteristic_3_01buffer__ptr__t_01_4.html" title="This template implements the functions specific for a pointer to a buffer. " alt="" coords="427,151,575,193"/>
-<area shape="rect" id="node8" href="$classCharacteristic.html" title="Characteristic\&lt; int32_t \&gt;" alt="" coords="418,220,585,247"/>
-<area shape="rect" id="node10" href="$classCharacteristic.html" title="Characteristic\&lt; int8_t \&gt;" alt="" coords="422,285,581,312"/>
-<area shape="rect" id="node12" href="$classCharacteristic_3_01std_1_1string_01_4.html" title="A characteristic for strings. " alt="" coords="435,343,568,385"/>
-<area shape="rect" id="node14" href="$classCharacteristic.html" title="Characteristic\&lt; uint32_t \&gt;" alt="" coords="415,416,588,443"/>
-<area shape="rect" id="node16" href="$classCharacteristic.html" title="Characteristic\&lt; uint8\l_t * \&gt;" alt="" coords="430,474,573,515"/>
-<area shape="rect" id="node18" href="$classCharacteristic.html" title="Characteristic\&lt; uint8_t \&gt;" alt="" coords="418,547,585,573"/>
+<area shape="rect" id="node3" href="$classCharacteristic.html" title="A default characteristic. " alt="" coords="435,5,570,32"/>
+<area shape="rect" id="node4" href="$classCharacteristic_3_01T_00_01typename_01std_1_1enable__if_3_01std_1_1is__arithmetic_3_01T_01_4_1_1value_01_4_1_1type_01_4.html" title="A characteristic for built&#45;in arithmetic types (int, float, etc) " alt="" coords="427,57,578,127"/>
+<area shape="rect" id="node6" href="$classCharacteristic_3_01buffer__ptr__t_01_4.html" title="This template implements the functions specific for a pointer to a buffer. " alt="" coords="429,151,577,193"/>
+<area shape="rect" id="node8" href="$classCharacteristic.html" title="Characteristic\&lt; int32_t \&gt;" alt="" coords="419,220,586,247"/>
+<area shape="rect" id="node10" href="$classCharacteristic.html" title="Characteristic\&lt; int8_t \&gt;" alt="" coords="423,285,582,312"/>
+<area shape="rect" id="node12" href="$classCharacteristic_3_01std_1_1string_01_4.html" title="A characteristic for strings. " alt="" coords="436,343,569,385"/>
+<area shape="rect" id="node14" href="$classCharacteristic.html" title="Characteristic\&lt; uint32_t \&gt;" alt="" coords="416,416,589,443"/>
+<area shape="rect" id="node16" href="$classCharacteristic.html" title="Characteristic\&lt; uint8\l_t * \&gt;" alt="" coords="431,474,574,515"/>
+<area shape="rect" id="node18" href="$classCharacteristic.html" title="Characteristic\&lt; uint8_t \&gt;" alt="" coords="419,547,586,573"/>
 </map>
