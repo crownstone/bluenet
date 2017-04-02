@@ -88,6 +88,8 @@ Think of the following scenarios:
 + losing your smartphone plus the login information to the cloud;
 + bringing your own devices to your new home.
 
+Note that the time window in which someone can perform a factory reset is very limited. It is only within around 30 seconds after the Crownstone is powered on. You won't be able to do it by just being close alone, you have to switch off the power to that Crownstone as well.
+
 ## Firmware
 
 There is currently no firmware checksum applied. We are of the opinion that you should be able to put whatever firmware you
@@ -105,4 +107,7 @@ Yes, there are TODOs.
 
 Suppose you have given your friend a key, but your friend is your friend not anymore. This means that this key needs to be 
 renewed if that same key is used by a group of your friends. The alternative would be separate keys for any person, however, 
-that does not scale up if you have many friends. :-)
+that does not scale up if you have many friends. :-) 
+
+Moreover, we have to encrypt the advertisements with the same key or else no one will be able to read them except for the 
+owner. Hence, the only logical solution is to re-roll the encryption keys on every mutation of the guest list.
