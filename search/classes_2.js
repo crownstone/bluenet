@@ -31,6 +31,7 @@ var searchData=
   ['conv8_5f16',['conv8_16',['../unionconv8__16.html',1,'']]],
   ['conv8_5f32',['conv8_32',['../unionconv8__32.html',1,'']]],
   ['crownstone',['Crownstone',['../classCrownstone.html',1,'']]],
+  ['crownstonemanufacturer',['CrownstoneManufacturer',['../classCrownstoneManufacturer.html',1,'']]],
   ['crownstoneservice',['CrownstoneService',['../classCrownstoneService.html',1,'']]],
   ['cyclicstorage',['CyclicStorage',['../classCyclicStorage.html',1,'']]],
   ['cyclicstorage_3c_20accumulated_5fenergy_5ft_2c_20accumulated_5fenergy_5fredundancy_2c_20large_5fseq_5fnumber_5ft_20_3e',['CyclicStorage&lt; accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY, large_seq_number_t &gt;',['../classCyclicStorage.html',1,'']]],

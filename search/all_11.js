@@ -36,6 +36,7 @@ var searchData=
   ['serialize',['serialize',['../classCircularDifferentialBuffer.html#a8582de8f9eb043f14342b222044d1212',1,'CircularDifferentialBuffer']]],
   ['service',['Service',['../classService.html',1,'Service'],['../classService.html#acc246c9f7ed3c51e2d91d10fe257513f',1,'Service::Service()']]],
   ['service_5fdata_5ft',['service_data_t',['../unionservice__data__t.html',1,'']]],
+  ['servicebitmask',['ServiceBitmask',['../cs__ServiceData_8h.html#a50a5ba0d8db697f72733a394ac35fa76',1,'cs_ServiceData.h']]],
   ['servicedata',['ServiceData',['../classServiceData.html',1,'']]],
   ['set',['set',['../classState.html#a1774d15a37ebfa937c841aaa2991e15c',1,'State']]],
   ['setadvertisinginterval',['setAdvertisingInterval',['../classNrf51822BluetoothStack.html#aceae4990410282e860ef2d2ec7a6dc2d',1,'Nrf51822BluetoothStack']]],
@@ -124,5 +125,6 @@ var searchData=
   ['switch_5fmessage_5fpayload_5ft',['switch_message_payload_t',['../structswitch__message__payload__t.html',1,'']]],
   ['switch_5fstate_5ft',['switch_state_t',['../structswitch__state__t.html',1,'']]],
   ['switchoff',['switchOff',['../classPWM.html#aeb285d34c2e09c8c8e64f30280b8a634',1,'PWM']]],
-  ['sync',['sync',['../classScheduleList.html#a8ccb88d98db690a56dc5137d54cffeca',1,'ScheduleList']]]
+  ['sync',['sync',['../classScheduleList.html#a8ccb88d98db690a56dc5137d54cffeca',1,'ScheduleList']]],
+  ['sys_5fevt_5fdispatch',['sys_evt_dispatch',['../cs__Handlers_8h.html#a91139ae605ca5e880cc9950b656cebde',1,'cs_Handlers.h']]]
 ];
