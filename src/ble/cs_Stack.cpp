@@ -544,20 +544,20 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 //		_manufac.company_identifier = CROWNSTONE_COMPANY_ID; //! DoBots Company ID
 //		_manufac.data.size = 0;
 //
-//		DoBotsManufac dobotsManufac(deviceType);
+//		CrownstoneManufacturer crownstoneManufacturer(deviceType);
 //
-////		uint8_t adv_manuf_data[dobotsManufac.size()];
+////		uint8_t adv_manuf_data[crownstoneManufacturer.size()];
 //
 //		if (_adv_manuf_data != NULL) {
 //			free(_adv_manuf_data);
 //		}
 //
-//		_adv_manuf_data = new uint8_t[dobotsManufac.size()];
+//		_adv_manuf_data = new uint8_t[crownstoneManufacturer.size()];
 //		memset(_adv_manuf_data, 0, sizeof(*_adv_manuf_data));
-//		dobotsManufac.toArray(_adv_manuf_data);
+//		crownstoneManufacturer.toArray(_adv_manuf_data);
 //
 //		_manufac.data.p_data = _adv_manuf_data;
-//		_manufac.data.size = dobotsManufac.size();
+//		_manufac.data.size = crownstoneManufacturer.size();
 //
 //		_scan_resp.p_manuf_specific_data = &_manufac;
 //

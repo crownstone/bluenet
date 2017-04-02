@@ -19,15 +19,6 @@ extern "C" {
 #include <rbc_mesh.h>
 #endif
 
-/** Function for dispatching a system event (not a BLE event) to all modules with a system event handler. This can also
- * be events related to the radio, for example the NRF_EVT_RADIO_BLOCKED (4) and NRF_EVT_RADIO_SESSION_IDLE (7) events
- * that are defined for the timeslot API.
- *
- * This function is called from the scheduler in the main loop after a BLE stack
- *   event has been received.
- *
- * @sys_evt   System event.
- */
 void sys_evt_dispatch(uint32_t sys_evt) {
 
 //	LOGi("Sys evt dispatch: %d", sys_evt);

@@ -17,6 +17,11 @@ generate() {
 	doxygen doxygen.config
 }
 
+view() {
+	cd ../docs/html
+	xdg-open index.html
+}
+
 memory_map() {
 	cs_info "Get .map file in BLUENET_BUILD_DIR"
 	cd $BLUENET_BUILD_DIR
@@ -58,6 +63,9 @@ case $option in
 	;;
 	publish)
 		publish
+	;;
+	view)
+		view
 	;;
 	*)
 		cs_err "Unknown option: \"$option\""

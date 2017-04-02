@@ -51,7 +51,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventTypes.h>
 
-#include <ble/cs_DoBotsManufac.h>
+#include <ble/cs_CrownstoneManufacturer.h>
 
 #include <storage/cs_State.h>
 

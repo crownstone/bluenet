@@ -12,7 +12,7 @@
 #include <storage/cs_Settings.h>
 
 #include <cfg/cs_DeviceTypes.h>
-#include <ble/cs_DoBotsManufac.h>
+#include <ble/cs_CrownstoneManufacturer.h>
 
 #include <events/cs_EventDispatcher.h>
 
@@ -267,10 +267,10 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 //			_logFirst(SERIAL_INFO, "parse data");
 //			BLEutil::printArray(type_data.p_data+2, type_data.data_len-2);
 //
-			DoBotsManufac dobotsManufac;
-			dobotsManufac.parse(type_data.p_data+2, type_data.data_len-2);
+			CrownstoneManufacturer CrownstoneManufacturer;
+			CrownstoneManufacturer.parse(type_data.p_data+2, type_data.data_len-2);
 
-			switch (dobotsManufac.getDeviceType()) {
+			switch (CrownstoneManufacturer.getDeviceType()) {
 			case DEVICE_GUIDESTONE: {
 //				LOGi("found guidestone");
 				return _scanFilter & SCAN_FILTER_GUIDESTONE_MSK;

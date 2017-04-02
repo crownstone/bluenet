@@ -1,8 +1,11 @@
-/*
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: Sep 23, 2015
- * License: LGPLv3+
+/**
+ * @file
+ * Manufacturing data.
+ *
+ * @authors Crownstone Team
+ * @copyright Crownstone B.V.
+ * @date Sep 23, 2015
+ * @license LGPLv3+, Apache License, or MIT, your choice
  */
 #pragma once
 
@@ -10,9 +13,9 @@
 
 #include <cfg/cs_DeviceTypes.h>
 
-/** DoBotsManufac defines the different types of developed devices for within the advertisement packets.
+/** CrownstoneManufacturer defines the different types of developed devices for within the advertisement packets.
  */
-class DoBotsManufac {
+class CrownstoneManufacturer {
 
 private:
 	union {
@@ -23,15 +26,15 @@ private:
 	};
 
 public:
-	DoBotsManufac() {
+	CrownstoneManufacturer() {
 		_params.deviceType = DEVICE_UNDEF;
 	};
 
-	DoBotsManufac(uint8_t deviceType) {
+	CrownstoneManufacturer(uint8_t deviceType) {
 		_params.deviceType = deviceType;
 	};
 
-	virtual ~DoBotsManufac() {};
+	virtual ~CrownstoneManufacturer() {};
 
 	uint8_t size() {
 		return 1;

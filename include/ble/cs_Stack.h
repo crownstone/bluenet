@@ -1,9 +1,11 @@
-/*
- * Author: Christopher Mason
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: Apr 23, 2015
- * License: LGPLv3+
+/**
+ * @file
+ * Manufacturing data.
+ *
+ * @authors Crownstone Team, Christopher Mason
+ * @copyright Crownstone B.V.
+ * @date Apr 23, 2015
+ * @license LGPLv3+, Apache License, or MIT, your choice
  */
 #pragma once
 
@@ -18,7 +20,7 @@
 #include <common/cs_Tuple.h>
 #include <common/cs_Types.h>
 #include <third/std/function.h>
-#include <ble/cs_DoBotsManufac.h>
+#include <ble/cs_CrownstoneManufacturer.h>
 #include <ble/cs_ServiceData.h>
 #include "nrf_sdm.h"
 
@@ -174,7 +176,7 @@ protected:
 	uint8_t										_advParamsCounter;
 
 	ble_advdata_manuf_data_t                    _manufac;
-	// todo: make part of DoBotsManufac (see iBeacon)
+	// todo: make part of Crownstonefacturer (see iBeacon)
 	uint8_t*                                    _adv_manuf_data;
 
 	ble_advdata_manuf_data_t 					_manufac_apple;
