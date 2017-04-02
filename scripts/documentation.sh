@@ -51,7 +51,7 @@ publish() {
 	git add -u .
 	git commit 
 	git subtree push --prefix docs/html origin gh-pages
-	cs_info "Go to https://crownstone.github.com/bluenet"
+	cs_info "Go to https://crownstone.github.io/bluenet"
 }
 
 case $option in
