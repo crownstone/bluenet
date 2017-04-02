@@ -76,5 +76,6 @@ var searchData=
   ['stopscanning',['stopScanning',['../classNrf51822BluetoothStack.html#aba0f4ee759a075c3c2d6db262f8adde6',1,'Nrf51822BluetoothStack']]],
   ['streambuffer',['StreamBuffer',['../classStreamBuffer.html#aaba69ca1dfaa170ad55005c07973235f',1,'StreamBuffer']]],
   ['switchoff',['switchOff',['../classPWM.html#aeb285d34c2e09c8c8e64f30280b8a634',1,'PWM']]],
-  ['sync',['sync',['../classScheduleList.html#a8ccb88d98db690a56dc5137d54cffeca',1,'ScheduleList']]]
+  ['sync',['sync',['../classScheduleList.html#a8ccb88d98db690a56dc5137d54cffeca',1,'ScheduleList']]],
+  ['sys_5fevt_5fdispatch',['sys_evt_dispatch',['../cs__Handlers_8h.html#a91139ae605ca5e880cc9950b656cebde',1,'cs_Handlers.h']]]
 ];

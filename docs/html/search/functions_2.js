@@ -23,5 +23,7 @@ var searchData=
   ['createcrownstoneservices',['createCrownstoneServices',['../classCrownstone.html#a177a0ad4305de0541b8ff9b8c8c41083',1,'Crownstone']]],
   ['createsetupservices',['createSetupServices',['../classCrownstone.html#a40f3a94bfa98b56ebca77adf0abc7d1b',1,'Crownstone']]],
   ['createsingleshot',['createSingleShot',['../classTimer.html#a4e2c7d8592dfc1f1620352985879c0ea',1,'Timer']]],
-  ['crownstoneservice',['CrownstoneService',['../classCrownstoneService.html#a7e6cee61cc99320599b491c7f2eac03e',1,'CrownstoneService']]]
+  ['crownstoneservice',['CrownstoneService',['../classCrownstoneService.html#a7e6cee61cc99320599b491c7f2eac03e',1,'CrownstoneService']]],
+  ['cs_5fsd_5fble_5fgatts_5fvalue_5fget',['cs_sd_ble_gatts_value_get',['../cs__Softdevice_8h.html#adea2ca0261910c252623b245db15924b',1,'cs_Softdevice.h']]],
+  ['cs_5fsd_5fble_5fgatts_5fvalue_5fset',['cs_sd_ble_gatts_value_set',['../cs__Softdevice_8h.html#a0be6446e307b0b30267cf69a7087e2a0',1,'cs_Softdevice.h']]]
 ];

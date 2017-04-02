@@ -1,10 +1,12 @@
-/*
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: 21 Apr., 2015
- * License: LGPLv3+, Apache, and/or MIT, your choice
+/**
+ * @file
+ * Manufacturing data.
+ *
+ * @authors Crownstone Team
+ * @copyright Crownstone B.V.
+ * @date Apr 21, 2015
+ * @license LGPLv3+, Apache License, or MIT, your choice
  */
-
 #pragma once
 
 #ifdef __cplusplus

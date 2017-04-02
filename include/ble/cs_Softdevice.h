@@ -1,8 +1,11 @@
-/*
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: May 4, 2015
- * License: LGPLv3+
+/**
+ * @file
+ * Softdevice wrapper functions.
+ *
+ * @authors Crownstone Team, Christopher Mason.
+ * @copyright Crownstone B.V.
+ * @date May 4, 2015
+ * @license LGPLv3+, Apache License, or MIT, your choice
  */
 #pragma once
 

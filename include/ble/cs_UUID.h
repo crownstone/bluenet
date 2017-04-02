@@ -1,13 +1,13 @@
-/*
- * Author: Christopher Mason
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: Feb 23, 2015
- * License: LGPLv3+
+/**
+ * @file
+ * Universally Unique IDentifiers for BLE services and characteristics.
+ *
+ * @authors Crownstone Team, Christopher Mason.
+ * @copyright Crownstone B.V.
+ * @date May 4, 2015
+ * @license LGPLv3+, Apache License, or MIT, your choice
  */
 #pragma once
-
-//#include <cstdint>
 
 #include <ble/cs_Nordic.h>
 

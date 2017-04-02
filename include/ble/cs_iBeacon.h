@@ -1,10 +1,12 @@
-/*
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: Nov 4, 2014
- * License: LGPLv3+, Apache, and/or MIT, your choice
+/**
+ * @file
+ * Universally Unique IDentifiers for BLE services and characteristics.
+ *
+ * @authors Crownstone Team, Christopher Mason.
+ * @copyright Crownstone B.V.
+ * @date Nov 4, 2014
+ * @license LGPLv3+, Apache License, or MIT, your choice
  */
-
 #pragma once
 
 #include <ble/cs_UUID.h>

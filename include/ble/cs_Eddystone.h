@@ -1,8 +1,11 @@
-/*
- * Authors: Crownstone Team
- * Copyright: Crownstone B.V.
- * Date: Jun 3, 2016
- * License: LGPLv3+, Apache, or MIT, your choice
+/**
+ * @file
+ * Eddystone functionality.
+ *
+ * @authors Crownstone Team
+ * @copyright Crownstone B.V.
+ * @date Jun 3, 2016
+ * @license LGPLv3+, Apache License, or MIT, your choice
  */
 
 #pragma once

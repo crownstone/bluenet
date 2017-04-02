@@ -1,9 +1,11 @@
-/*
- * Author: Christopher Mason
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: Apr 23, 2015
- * License: LGPLv3+
+/**
+ * @file
+ * BLE service
+ *
+ * @authors Crownstone Team, Christopher Mason.
+ * @copyright Crownstone B.V.
+ * @date Apr 23, 2015
+ * @license LGPLv3+, Apache License, or MIT, your choice
  */
 #pragma once
 

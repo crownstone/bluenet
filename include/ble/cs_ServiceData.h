@@ -1,8 +1,11 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
- * Date: May 4, 2016
- * License: LGPLv3+
+ * @file
+ * Service data.
+ *
+ * @authors Crownstone Team, Christopher Mason.
+ * @copyright Crownstone B.V.
+ * @date May 4, 2016
+ * @license LGPLv3+, Apache License, or MIT, your choice
  */
 #pragma once
 
