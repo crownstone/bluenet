@@ -20,9 +20,9 @@ if [[ -e "$BLUENET_CONFIG_DIR/_targets.sh" ]]; then
 	source $BLUENET_CONFIG_DIR/_targets.sh $target
 else
 	if [[ $target != "crownstone" ]]; then
-		err "To use different targets, copy _targets_template.sh to $BLUENET_CONFIG_DIR and rename to _targets.sh"
+		cs_err "To use different targets, copy _targets_template.sh to $BLUENET_CONFIG_DIR and rename to _targets.sh"
 		exit 1
 	else
-		warn "NOTE: this is the old way of calling the scripts, you might want to check _targets_template.sh or the README"
+		cs_warn "NOTE: this is the old way of calling the scripts, you might want to check _targets_template.sh or the README"
 	fi
 fi

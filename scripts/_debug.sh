@@ -11,9 +11,7 @@ mkdir -p $TEMP_DIR
 GDB_SCRIPT=$TEMP_DIR/gdbinit
 cp gdb/gdbinit $GDB_SCRIPT
 
-
 GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}gdb
-#DEVICE=nrf51822
 DEVICE=nRF52832_xxAA
 
 TARGET=${1:? "$0 requires \"target\" as first argument"}
@@ -30,10 +28,10 @@ sed -i "s/@gdb_port@/${GDB_PORT}/" $GDB_SCRIPT
 
 # Run JLink gdb server
 if [ -z $SN ]; then
-	log "$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
+	cs_log "$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
 	$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
 else
-	log "$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
+	cs_log "$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
 	$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
 fi
 
@@ -44,5 +42,5 @@ cleanup() {
 }
 trap "cleanup" INT QUIT TERM EXIT
 
-log "$GDB -x $GDB_SCRIPT $TARGET"
+cs_log "$GDB -x $GDB_SCRIPT $TARGET"
 $GDB -x $GDB_SCRIPT $TARGET

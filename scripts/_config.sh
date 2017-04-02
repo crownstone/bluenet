@@ -3,12 +3,12 @@
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/_utils.sh"
 
 log_config() {
-	info "[_config.sh] BLUENET_WORKSPACE_DIR is ${BLUENET_WORKSPACE_DIR}"
-	info "[_config.sh] BLUENET_DIR is ${BLUENET_DIR}"
-	info "[_config.sh] BLUENET_CONFIG_DIR is ${BLUENET_CONFIG_DIR}"
-	info "[_config.sh] BLUENET_BUILD_DIR is ${BLUENET_BUILD_DIR}"
-	info "[_config.sh] BLUENET_BIN_DIR is ${BLUENET_BIN_DIR}"
-	info "[_config.sh] BLUENET_RELEASE_DIR is ${BLUENET_RELEASE_DIR}"
+	cs_info "[_config.sh] BLUENET_WORKSPACE_DIR is ${BLUENET_WORKSPACE_DIR}"
+	cs_info "[_config.sh] BLUENET_DIR is ${BLUENET_DIR}"
+	cs_info "[_config.sh] BLUENET_CONFIG_DIR is ${BLUENET_CONFIG_DIR}"
+	cs_info "[_config.sh] BLUENET_BUILD_DIR is ${BLUENET_BUILD_DIR}"
+	cs_info "[_config.sh] BLUENET_BIN_DIR is ${BLUENET_BIN_DIR}"
+	cs_info "[_config.sh] BLUENET_RELEASE_DIR is ${BLUENET_RELEASE_DIR}"
 }
 
 if [ ! -d "${BLUENET_DIR}" ] || [ -z "${BLUENET_CONFIG_DIR}" ] || [ -z "${BLUENET_BUILD_DIR}" ] || [ -z "${BLUENET_BIN_DIR}" ]; then
@@ -17,31 +17,31 @@ if [ ! -d "${BLUENET_DIR}" ] || [ -z "${BLUENET_CONFIG_DIR}" ] || [ -z "${BLUENE
 	ls ${BLUENET_CONFIG_DIR}
 	ls ${BLUENET_BUILD_DIR}
 	ls ${BLUENET_BIN_DIR}
-	err "ERROR: missing environment variables, or wrongly set!!"
-	err " make sure to source the PATH/TO/YOUR/BLUENET_DIR/scripts/env.sh"
-	err " in your bashrc file with"
-	err "    $ echo \"source PATH/TO/YOUR/BLUENET_DIR/scripts/env.sh\" >> ~/.bashrc"
-	err " create a copy of the env.config"
-	err "    $ cp PATH/TO/YOUR/BLUENET_DIR/env.config.template PATH/TO/YOUR/BLUENET_DIR/env.config"
-	err " and define the environment variables correctly in"
-	err " PATH/TO/YOUR/BLUENET_DIR/env.config"
+	cs_err "ERROR: missing environment variables, or wrongly set!!"
+	cs_err " make sure to source the PATH/TO/YOUR/BLUENET_DIR/scripts/env.sh"
+	cs_err " in your bashrc file with"
+	cs_err "    $ echo \"source PATH/TO/YOUR/BLUENET_DIR/scripts/env.sh\" >> ~/.bashrc"
+	cs_err " create a copy of the env.config"
+	cs_err "    $ cp PATH/TO/YOUR/BLUENET_DIR/env.config.template PATH/TO/YOUR/BLUENET_DIR/env.config"
+	cs_err " and define the environment variables correctly in"
+	cs_err " PATH/TO/YOUR/BLUENET_DIR/env.config"
 	env
 	exit 1
 fi
 
 if [ -e ${BLUENET_DIR}/conf/cmake/CMakeBuild.config.default ]; then
-	log "source ${BLUENET_DIR}/conf/cmake/CMakeBuild.config.default"	
+	cs_log "source ${BLUENET_DIR}/conf/cmake/CMakeBuild.config.default"	
 	source ${BLUENET_DIR}/conf/cmake/CMakeBuild.config.default
 fi
 
 if [ -e ${BLUENET_DIR}/CMakeBuild.config.local ]; then
-	log "source ${BLUENET_DIR}/CMakeBuild.config.local"
+	cs_log "source ${BLUENET_DIR}/CMakeBuild.config.local"
 	source ${BLUENET_DIR}/CMakeBuild.config.local
 fi
 
 if [ ! -e ${BLUENET_CONFIG_DIR}/CMakeBuild.config ]; then
-	err "[_config.sh] ERROR: could not find ${BLUENET_CONFIG_DIR}/CMakeBuild.config"
-	err "[_config.sh] Don't forget to copy \"CMakeBuild.config.default\" to \"${BLUENET_CONFIG_DIR}/CMakeBuild.config\" and adjust the settings."
+	cs_err "[_config.sh] ERROR: could not find ${BLUENET_CONFIG_DIR}/CMakeBuild.config"
+	cs_err "[_config.sh] Don't forget to copy \"CMakeBuild.config.default\" to \"${BLUENET_CONFIG_DIR}/CMakeBuild.config\" and adjust the settings."
 	exit 1
 fi
 

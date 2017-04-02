@@ -18,5 +18,5 @@ cd /opt/nrf51_dfu_linux
 cd $HOME/workspace/ble-automator
 
 file=${BLUENET_BIN_DIR}/$PROGRAM
-log "python dfu.py -f $file -a $ADDRESS"
+cs_log "python dfu.py -f $file -a $ADDRESS"
 python dfu.py -f $file -a $ADDRESS

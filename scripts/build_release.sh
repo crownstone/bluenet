@@ -29,19 +29,19 @@ buildOne() {
 
 	echo `pwd`
 
-	info "Build firmware for target $target ..."
+	cs_info "Build firmware for target $target ..."
 	./firmware.sh release
 
 	checkError
-	succ "Build DONE"
+	cs_succ "Build DONE"
 
-	info "Build bootloader ..."
+	cs_info "Build bootloader ..."
 	${BLUENET_BOOTLOADER_DIR}/scripts/all.sh
 
 	checkError
-	succ "Build DONE"
+	cs_succ "Build DONE"
 
-	info "Create DFU packets"
+	cs_info "Create DFU packets"
 
 	./dfuGenPkg.py -a "$BLUENET_BIN_DIR/crownstone.hex" -b "$BLUENET_BIN_DIR/bootloader_dfu.hex"
 

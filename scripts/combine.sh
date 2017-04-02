@@ -45,17 +45,14 @@ else
 	fi
 fi
 
-log "srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $ADD_BINARY $BOOTLOADER_SETTINGS -o combined.hex -intel"
+cs_log "srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $ADD_BINARY $BOOTLOADER_SETTINGS -o combined.hex -intel"
 srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $ADD_BINARY $BOOTLOADER_SETTINGS -o combined.hex -intel
 res=$?
 if [ ! $res -eq 0 ]; then
-	log "ERROR: srec_cat failed, check the results"
+	cs_log "ERROR: srec_cat failed, check the results"
 	exit 1
 fi
 
-#log "Now run:"
-#log "./flash_openocd.sh combined"
-#log "this will place the binary at location 0 of FLASH memory of the target device"
-log "Combined binary is: ${BLUENET_BIN_DIR}/combined.hex"
-log "Done!"
+cs_log "Combined binary is: ${BLUENET_BIN_DIR}/combined.hex"
+cs_log "Done!"
 

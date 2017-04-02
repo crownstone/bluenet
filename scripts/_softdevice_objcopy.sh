@@ -4,7 +4,7 @@ path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 
 if [ $# -ne 6 ]; then
-	err "Error: Usage $0 \"softdevice dir\" \"softdevice bin dir\" \"softdevice\" \"compiler dir\" \"compiler type\" \"no separate section\""
+	cs_err "Error: Usage $0 \"softdevice dir\" \"softdevice bin dir\" \"softdevice\" \"compiler dir\" \"compiler type\" \"no separate section\""
 	exit
 fi
 SOFTDEVICE_DIR=$1
@@ -17,7 +17,7 @@ SOFTDEVICE_NO_SEPARATE_UICR_SECTION=$6
 FULLNAME_SOFTDEVICE=${SOFTDEVICE_DIR}/${SOFTDEVICE}_softdevice.hex
 
 if [ ! -e ${FULLNAME_SOFTDEVICE} ]; then
-	log "Error: ${FULLNAME_SOFTDEVICE} does not exist..."
+	cs_err "Error: ${FULLNAME_SOFTDEVICE} does not exist..."
 	exit
 fi
 
@@ -35,19 +35,19 @@ OBJCOPY=${COMPILER_PATH}/bin/${COMPILER_TYPE}objcopy
 
 
 if [ $SOFTDEVICE_NO_SEPARATE_UICR_SECTION == 1 ]; then
-	log "SoftDevice has no separate UICR section"
-	log "$OBJCOPY -Iihex -Obinary ${FULLNAME_SOFTDEVICE} ${NRF_MAIN_BIN}"
+	cs_log "SoftDevice has no separate UICR section"
+	cs_log "$OBJCOPY -Iihex -Obinary ${FULLNAME_SOFTDEVICE} ${NRF_MAIN_BIN}"
 	$OBJCOPY -Iihex -Obinary ${FULLNAME_SOFTDEVICE} ${NRF_MAIN_BIN}
 else
-	log "Separately copy main and UICR section"
-	log "$OBJCOPY -Iihex -Obinary --only-section .sec3 ${FULLNAME_SOFTDEVICE} ${NRF_UICR_BIN}"
+	cs_log "Separately copy main and UICR section"
+	cs_log "$OBJCOPY -Iihex -Obinary --only-section .sec3 ${FULLNAME_SOFTDEVICE} ${NRF_UICR_BIN}"
 	$OBJCOPY -Iihex -Obinary --only-section .sec3 ${FULLNAME_SOFTDEVICE} ${NRF_UICR_BIN}
-	log "$OBJCOPY -Iihex -Obinary --remove-section .sec3 ${FULLNAME_SOFTDEVICE} ${NRF_MAIN_BIN}"
+	cs_log "$OBJCOPY -Iihex -Obinary --remove-section .sec3 ${FULLNAME_SOFTDEVICE} ${NRF_MAIN_BIN}"
 	$OBJCOPY -Iihex -Obinary --remove-section .sec3 ${FULLNAME_SOFTDEVICE} ${NRF_MAIN_BIN}
 fi
 
-log "Created file(s):"
+cs_log "Created file(s):"
 if [ ! $SOFTDEVICE_NO_SEPARATE_UICR_SECTION == 1 ]; then
-	log "  ${NRF_UICR_BIN}"
+	cs_log "  ${NRF_UICR_BIN}"
 fi
-log "  ${NRF_MAIN_BIN}"
+cs_log "  ${NRF_MAIN_BIN}"

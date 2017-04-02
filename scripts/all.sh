@@ -12,49 +12,49 @@ source $path/_utils.sh
 ### Softdevice
 ###################
 
-info "Build and upload softdevice ..."
+cs_info "Build and upload softdevice ..."
 
 $path/softdevice.sh all $target
 
 checkError
-succ "Softdevice DONE"
+cs_succ "Softdevice DONE"
 
 ###################
 ### Firmware
 ###################
 
-info "Build firmware ..."
+cs_info "Build firmware ..."
 
 $path/firmware.sh -c build $targetoption
 
 checkError
-succ "Build DONE"
+cs_succ "Build DONE"
 
-info "Upload firmware ..."
+cs_info "Upload firmware ..."
 
 $path/firmware.sh -c upload $targetoption
 
 checkError
-succ "Upload DONE"
+cs_succ "Upload DONE"
 
 ###################
 ### Bootloader
 ###################
 
 if [ -d "${BLUENET_BOOTLOADER_DIR}" ]; then
-	info "Build bootloader ..."
+	cs_info "Build bootloader ..."
 	${BLUENET_BOOTLOADER_DIR}/scripts/all.sh $target
 
 	checkError
-	succ "Build DONE"
+	cs_succ "Build DONE"
 else
-	err "BLUENET_BOOTLOADER_DIR not defined, skip bootloader!"
+	cs_err "BLUENET_BOOTLOADER_DIR not defined, skip bootloader!"
 fi
 
-info "Upload bootloader"
+cs_info "Upload bootloader"
 
 $path/firmware.sh -c bootloader $targetoption
 
 checkError
 
-succ "Success!!"
+cs_succ "Success!!"

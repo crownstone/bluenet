@@ -95,10 +95,10 @@ if [[ $cmd != "help" ]]; then
 fi
 
 if [ "$VERBOSE" == "1" ]; then
-  info "Verbose mode"
+  cs_info "Verbose mode"
   make_flag=""
 else
-  info "Silent mode"
+  cs_info "Silent mode"
   make_flag="-s"
 fi
 
@@ -106,7 +106,7 @@ fi
 address=${address:-$APPLICATION_START_ADDRESS}
 
 git-pull() {
-	info "Pull from github"
+	cs_info "Pull from github"
 	cd ${path}/.. && git pull
 }
 
@@ -118,7 +118,7 @@ printf "oo  _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     \n"
 printf "oo  _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \n"
 printf "${normal}\n"
 
-info "Configuration parameters loaded from files set up beforehand through e.g. _config.sh:"
+cs_info "Configuration parameters loaded from files set up beforehand through e.g. _config.sh:"
 printf "\n"
 log_config
 
@@ -151,7 +151,7 @@ printf "${normal}\n"
 
 unit-test-host() {
 	cd ${path}/..
-	info "Execute make host-compile-target"
+	cs_info "Execute make host-compile-target"
 	make ${make_flag} host-compile-target
 	# result=$?
 	checkError "oo Error building firmware"
@@ -162,7 +162,7 @@ unit-test-host() {
 # todo: add more code to check if target exists
 build() {
 	cd ${path}/..
-	info "Execute make cross-compile-target"
+	cs_info "Execute make cross-compile-target"
 	make ${make_flag} cross-compile-target
 	# result=$?
 	checkError "oo Error building firmware"
@@ -173,14 +173,14 @@ build() {
 writeHardwareVersion() {
 	verifyHardwareBoardDefined
 	if [ $? -eq 0 ]; then
-		# info "HARDWARE_BOARD=$HARDWARE_BOARD"
+		# cs_info "HARDWARE_BOARD=$HARDWARE_BOARD"
 		HARDWARE_BOARD_INT=`cat $BLUENET_DIR/include/cfg/cs_Boards.h | grep -o "#define.*\b$HARDWARE_BOARD\b.*" | grep -w "$HARDWARE_BOARD" | awk 'NF>1{print $NF}'`
 		if [ $? -eq 0 ] && [ -n "$HARDWARE_BOARD_INT" ]; then
-				info "HARDWARE_BOARD $HARDWARE_BOARD = $HARDWARE_BOARD_INT"
+				cs_info "HARDWARE_BOARD $HARDWARE_BOARD = $HARDWARE_BOARD_INT"
 				${path}/_writebyte.sh $HARDWARE_BOARD_ADDRESS `printf "%x" $HARDWARE_BOARD_INT` $serial_num
 				checkError "Error writing hardware version"
 		else
-			err "Failed to extract HARDWARE_BOARD=$HARDWARE_BOARD from $BLUENET_DIR/include/cfg/cs_Boards.h"
+			cs_err "Failed to extract HARDWARE_BOARD=$HARDWARE_BOARD from $BLUENET_DIR/include/cfg/cs_Boards.h"
 		fi
 	fi
 }
@@ -291,9 +291,9 @@ release() {
 
 verifyHardwareBoardDefined() {
 	if [ -z "$HARDWARE_BOARD" ]; then
-		err "Need to specify HARDWARE_BOARD either in $BLUENET_CONFIG_DIR/_targets.sh"
-		err "for a given target, or by calling the script as"
-		err "   HARDWARE_BOARD=... ./firmware.sh"
+		cs_err "Need to specify HARDWARE_BOARD either in $BLUENET_CONFIG_DIR/_targets.sh"
+		cs_err "for a given target, or by calling the script as"
+		cs_err "   HARDWARE_BOARD=... ./firmware.sh"
 		exit 1
 	fi
 }
@@ -336,7 +336,7 @@ case "$cmd" in
 		writeHardwareVersion
 		;;
 	*)
-		info $"Usage: $0 {build|unit-test-host|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release|writeHardwareVersion}"
+		cs_info $"Usage: $0 {build|unit-test-host|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release|writeHardwareVersion}"
 		exit 1
 esac
 

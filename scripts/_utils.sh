@@ -18,23 +18,23 @@ normal=$(tput sgr0)
 
 prefix='oo'
 
-err() {
+cs_err() {
 	printf "$red$prefix $1$normal\n"
 }
 
-info() {
+cs_info() {
 	printf "$yellow$prefix $1$normal\n"
 }
 
-succ() {
+cs_succ() {
 	printf "$green$prefix $1$normal\n"
 }
 
-log() {
+cs_log() {
 	printf "$normal$prefix $1$normal\n"
 }
 
-warn() {
+cs_warn() {
 	printf "$magenta$prefix $1$magenta\n"
 }
 
@@ -42,7 +42,7 @@ checkError() {
 	result=$?
 	if [ $result -ne 0 ]; then
 		if [ -n "$1" ]; then
-			err "$1"
+			cs_err "$1"
 		fi
 		exit $result
 	fi

@@ -16,21 +16,21 @@ mkdir -p $TEMP_DIR
 DEVICE=nRF52832_xxAA
 
 if [ ! -e ${SOFTDEVICE_DIR} ]; then
-	err "Error: ${SOFTDEVICE_DIR} does not exist..."
+	cs_err "Error: ${SOFTDEVICE_DIR} does not exist..."
 	exit 1
 fi
 
 sed "s|@SOFTDEVICE_DIR@|$SOFTDEVICE_DIR|" $SCRIPT_DIR/softdevice.script > $TEMP_DIR/softdevice.script
 
 if [ $SOFTDEVICE_NO_SEPARATE_UICR_SECTION == 1 ]; then
-	log "No UICR section, so remove line to flash it"
+	cs_log "No UICR section, so remove line to flash it"
 	sed -i '/uicr/d' $TEMP_DIR/softdevice.script
 fi
 
 if [ -z $SERIAL_NUM ]; then
-	log "$JLINK -Device $DEVICE -If SWD $TEMP_DIR/softdevice.script -ExitonError 1"
+	cs_log "$JLINK -Device $DEVICE -If SWD $TEMP_DIR/softdevice.script -ExitonError 1"
 	$JLINK -Device $DEVICE -If SWD $TEMP_DIR/softdevice.script -ExitonError 1
 else
-	log "$JLINK -Device $DEVICE -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/softdevice.script -ExitonError 1"
+	cs_log "$JLINK -Device $DEVICE -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/softdevice.script -ExitonError 1"
 	$JLINK -Device $DEVICE -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/softdevice.script -ExitonError 1
 fi

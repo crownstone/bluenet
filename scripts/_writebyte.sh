@@ -19,9 +19,9 @@ sed "s|@ADDRESS@|$ADDRESS|" $SCRIPT_DIR/writebyte.script > $TEMP_DIR/writebyte.s
 sed "s|@VALUE@|$VALUE|" $TEMP_DIR/writebyte.script.1 > $TEMP_DIR/writebyte.script
 
 if [ -z $SERIAL_NUM ]; then
-	log "$JLINK -Device $DEVICE -If SWD $TEMP_DIR/writebyte.script -ExitonError 1"
+	cs_log "$JLINK -Device $DEVICE -If SWD $TEMP_DIR/writebyte.script -ExitonError 1"
 	$JLINK -Device $DEVICE -speed 4000 -If SWD $TEMP_DIR/writebyte.script -ExitonError 1
 else
-	log "$JLINK -Device $DEVICE -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/writebyte.script -ExitonError 1"
+	cs_log "$JLINK -Device $DEVICE -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/writebyte.script -ExitonError 1"
 	$JLINK -Device $DEVICE -speed 4000 -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/writebyte.script -ExitonError 1
 fi

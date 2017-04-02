@@ -12,17 +12,17 @@ source $path/_utils.sh
 #source $path/_config.sh
 
 generate() {
-	info "Run doxygen with doxygen.config as configuration file"
+	cs_info "Run doxygen with doxygen.config as configuration file"
 	cd ..
 	doxygen doxygen.config
 }
 
 memory_map() {
-	info "Get .map file in BLUENET_BUILD_DIR"
+	cs_info "Get .map file in BLUENET_BUILD_DIR"
 	cd $BLUENET_BUILD_DIR
 
 	if  [ -e "prog.map" ]; then
-		info "Adjust prog.map for visualization"
+		cs_info "Adjust prog.map for visualization"
 		cp prog.map prog.tmp.map
 		ex -c '%g/\.text\S*[\s]*$/j' -c "wq" prog.map
 		ex -c '%g/\.rodata\S*[\s]*$/j' -c "wq" prog.map
@@ -36,8 +36,8 @@ memory_map() {
 
 	cd $path/../util/memory
 
-	log "Load now file prog.map from build directory in your browser"
-	log "Doesn't load automatically, load manually from $BLUENET_BUILD_DIR/prog.map"
+	cs_log "Load now file prog.map from build directory in your browser"
+	cs_log "Doesn't load automatically, load manually from $BLUENET_BUILD_DIR/prog.map"
 	google-chrome --allow-file-access-from-files index.html
 }
 
@@ -46,7 +46,7 @@ publish() {
 	git add -u .
 	git commit 
 	git subtree push --prefix docs/html origin gh-pages
-	info "Go to https://crownstone.github.com/bluenet"
+	cs_info "Go to https://crownstone.github.com/bluenet"
 }
 
 case $option in
@@ -60,6 +60,6 @@ case $option in
 		publish
 	;;
 	*)
-		err "Unknown option: \"$option\""
+		cs_err "Unknown option: \"$option\""
 	;;
 esac
