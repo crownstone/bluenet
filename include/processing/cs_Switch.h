@@ -26,6 +26,22 @@ struct __attribute__((__packed__)) switch_state_t {
 //	SWITCH_NEXT_RELAY_VAL_OFF,
 //};
 
+
+/* Power Switch
+ * 
+ * The Switch class governs the two (separate) pathways that enable power to the load (switch ON) 
+ * or disable power to the load (switch OFF)
+ * The two pathways are:
+ * * the Relay (for high current loads but slow switching times)
+ * * the IGBTs (for low current loads but fast switching times)
+ * Switching the IGBT pathway is done through Pulse Width Modulation (PWM)
+ * 
+ * #define variables used in this class
+ * 	 - PWM_DISABLE						If this is defined, the Switch class will ignore all attempts to switch PWM
+ *   - CONFIG_PWM_PERIOD          		Time between consecutive switch ON actions during PWM dim cycle
+ * 	 - CONFIG_RELAY_HIGH_DURATION		Duration of time in which power is supplied to the relay in order to switch it
+ * 
+ * */
 class Switch : EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
