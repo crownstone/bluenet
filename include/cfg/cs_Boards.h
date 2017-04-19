@@ -63,6 +63,7 @@ extern "C" {
 #define ACR01B2A             1500
 #define ACR01B2B             1501
 #define ACR01B2C             1502
+#define ACR01B2E             1503
 
 //! BE SURE TO UPDATE cs_HardwareVersions.h IF YOU ADD A NEW BOARD!!
 
@@ -80,6 +81,8 @@ typedef struct  {
 	uint8_t pinAinCurrent;
 	//! analog input pin to read the voltage
 	uint8_t pinAinVoltage;
+	//! analog input pin to read 'zero' line for current measurement
+	uint8_t pinAinZeroRef;
 	//! analog input pin to read the pwm temperature
 	uint8_t pinAinPwmTemp;
 	//! gpio pin to receive uart

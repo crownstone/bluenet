@@ -128,14 +128,16 @@ cs_adc_error_t ADC::configPin(const channel_id_t channelNum, const pin_id_t pinN
 		.resistor_n = NRF_SAADC_RESISTOR_DISABLED,
 //		.gain       = NRF_SAADC_GAIN2,   //! gain is 2/1, maps [0, 0.3] to [0, 0.6]
 //		.gain       = NRF_SAADC_GAIN1,   //! gain is 1/1, maps [0, 0.6] to [0, 0.6]
-		.gain       = NRF_SAADC_GAIN1_2, //! gain is 1/2, maps [0, 1.2] to [0, 0.6]
+//		.gain       = NRF_SAADC_GAIN1_2, //! gain is 1/2, maps [0, 1.2] to [0, 0.6]
 //		.gain       = NRF_SAADC_GAIN1_4, //! gain is 1/4, maps [0, 2.4] to [0, 0.6]
-//		.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
+		.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
 		.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
 		.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
-		.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
+//		.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
+		.mode		= NRF_SAADC_MODE_DIFFERENTIAL,
 		.pin_p      = getAdcPin(pinNum),
-		.pin_n      = NRF_SAADC_INPUT_DISABLED
+//		.pin_n      = NRF_SAADC_INPUT_DISABLED
+		.pin_n      = getAdcPin(0)
 	};
 
 	err_code = nrf_drv_saadc_channel_init(channelNum, &channelConfig);
