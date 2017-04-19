@@ -1,0 +1,2 @@
+mem @ADDRESS@ @NUM_BYTES@
+q
