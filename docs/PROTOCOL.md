@@ -422,7 +422,7 @@ Type nr | Type name | Payload type | Description
 38 | Default ON | uint 8 | Set's the default switch state to 255 if true, or to 0 if false. Value is 0 for false, or any other for true
 39 | Scan Interval | uint 16 | Set the scan interval to ...
 40 | Scan Window | uint 16 | Set the scan window to ...
-41 | Relay High Duration | uint 16 | Set the time/duration that the relay is set to high
+41 | Relay High Duration | uint 16 | Set the time/duration that the relay is set to high (ms)
 42 | Low Tx Power | int 8 | Set the tx power used when in low transmission power for bonding
 43 | Voltage Multiplier | float | Set the voltage multiplier (for power measurement)
 44 | Current Multiplier | float | Set the current multiplier (for power measurement)
