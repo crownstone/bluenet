@@ -1271,10 +1271,10 @@ void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 
 void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_disconnected_t disconnected_evt = p_ble_evt->evt.gap_evt.params.disconnected;
+	_conn_handle = BLE_CONN_HANDLE_INVALID;
 	if (_callback_connected) {
 		_callback_disconnected(p_ble_evt->evt.gap_evt.conn_handle);
 	}
-	_conn_handle = BLE_CONN_HANDLE_INVALID;
 	for (Service* svc : _services) {
 		svc->on_ble_event(p_ble_evt);
 	}
@@ -1285,11 +1285,15 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 void Nrf51822BluetoothStack::disconnect() {
 	//! Only disconnect when we are actually connected to something
 	if (_conn_handle != BLE_CONN_HANDLE_INVALID && _disconnectingInProgress == false) {
-		LOGi("Forcibly disconnecting from device");
 		_disconnectingInProgress = true;
+		LOGi("Forcibly disconnecting from device");
 		//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
-		// TODO: this sometimes gives us an error 8 (happened when phone was continously doing connect, write cmd, disconnect)
-		BLE_CALL(sd_ble_gap_disconnect, (_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
+		//! This sometimes gives us an NRF_ERROR_INVALID_STATE (disconnection is already in progress)
+		//! NRF_ERROR_INVALID_STATE can safely be ignored, see: https://devzone.nordicsemi.com/question/81108/handling-nrf_error_invalid_state-error-code/
+		uint32_t errorCode = sd_ble_gap_disconnect(_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+		if (errorCode != NRF_ERROR_INVALID_STATE) {
+			APP_ERROR_CHECK(errorCode);
+		}
 	}
 }
 
