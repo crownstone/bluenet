@@ -8,7 +8,8 @@
 #include <protocol/mesh/cs_MeshMessageCounter.h>
 
 #include <iostream>
-#include <cstdint>
+//#define __STDC_LIMIT_MACROS
+#include <stdint.h>
 
 using namespace std;
 
