@@ -503,9 +503,12 @@ void Crownstone::configureAdvertisement() {
 
 		_serviceData->updateTemperature(getTemperature());
 
-		int32_t powerUsage;
-		_stateVars->get(STATE_POWER_USAGE, powerUsage);
-		_serviceData->updatePowerUsage(powerUsage);
+//		int32_t powerUsage;
+//		_stateVars->get(STATE_POWER_USAGE, powerUsage);
+//		_serviceData->updatePowerUsage(powerUsage);
+//		int32_t accumulatedEnergy;
+//		_stateVars->get(STATE_ACCUMULATED_ENERGY, accumulatedEnergy);
+//		_serviceData->updateAccumulatedEnergy(accumulatedEnergy);
 	}
 
 	//! assign service data to stack

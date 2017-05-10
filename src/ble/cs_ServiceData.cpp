@@ -15,6 +15,7 @@
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
+#include <protocol/mesh/cs_MeshMessageState.h>
 #endif
 
 ServiceData::ServiceData() : EventListener(EVT_ALL), _updateTimerId(NULL), _connected(false)
@@ -85,15 +86,16 @@ void ServiceData::updateAdvertisement() {
 		if (_operationMode == OPERATION_MODE_NORMAL && _updateCount % 2 == 0 && Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 			state_message_t message = {};
 			uint16_t messageSize = sizeof(state_message_t);
+			bool hasStateMsg;
 
 			if (_numAdvertiseChangedStates > 0) {
-				MeshControl::getInstance().getLastStateDataMessage(message, messageSize, true);
+				hasStateMsg = MeshControl::getInstance().getLastStateDataMessage(message, messageSize, true);
 				_numAdvertiseChangedStates--;
 			}
 			else {
-				MeshControl::getInstance().getLastStateDataMessage(message, messageSize, false);
+				hasStateMsg = MeshControl::getInstance().getLastStateDataMessage(message, messageSize, false);
 			}
-			if (is_valid_state_msg(&message) && message.size) {
+			if (hasStateMsg && is_valid_state_msg(&message) && message.size) {
 				int16_t idx = -1;
 				state_item_t* p_stateItem;
 
@@ -101,6 +103,16 @@ void ServiceData::updateAdvertisement() {
 				_tempAdvertisedIds.size = 0;
 				for (auto i=0; i<_advertisedIds.size; i++) {
 					bool found = false;
+//					state_message stateMsgWrapper(&message);
+//					for (state_message::iterator iter = stateMsgWrapper.begin(); iter != stateMsgWrapper.end(); ++iter) {
+//						state_item_t stateItem = *iter;
+//						if (_advertisedIds.list[i] == stateItem.id) {
+//							//! First copy the ones that are in both to a temp list
+//							_tempAdvertisedIds.list[_tempAdvertisedIds.size++] = _advertisedIds.list[i];
+//							found = true;
+//							break;
+//						}
+//					}
 					idx = -1;
 					while (peek_next_state_item(&message, &p_stateItem, idx)) {
 						if (_advertisedIds.list[i] == p_stateItem->id) {
@@ -164,6 +176,7 @@ void ServiceData::updateAdvertisement() {
 				if (advertiseId != 0) {
 					idx = -1;
 					while (peek_prev_state_item(&message, &p_stateItem, idx)) {
+//						LOGd("idx=%d id=%d switch=%d bitmask=%d P=%d E=%d", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerUsage, p_stateItem->accumulatedEnergy);
 						if (p_stateItem->id == advertiseId) {
 //							LOGd("Advertise external data");
 							serviceData = &_serviceDataExt;
