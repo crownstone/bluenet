@@ -97,6 +97,8 @@ void Mesh::init() {
 
 	_encryptionEnabled = Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED);
 
+	_mesh_start_time = RTC::getCount();
+
 //	error_code = rbc_mesh_value_enable(1);
 //	APP_ERROR_CHECK(error_code);
 //	error_code = rbc_mesh_value_enable(2);
@@ -647,18 +649,19 @@ void Mesh::checkForMessages() {
 		if (isValidHandle(handle)) {
 
 			encrypted_mesh_message_t* received = (encrypted_mesh_message_t*)evt.params.rx.p_data;
-			if (getMessageCounter(handle).getVal() == 0) {
-				//! Skip handling the first message we receive on each handle, as it probably is an old message.
+//			if (getMessageCounter(handle).getVal() == 0) {
+//				//! Skip handling the first message we receive on each handle, as it probably is an old message.
+			if (getMessageCounter(handle).getVal() == 0 && RTC::difference(RTC::getCount(), _mesh_start_time) < RTC::msToTicks(MESH_BOOT_TIME)) {
+				//! Skip handling the first message we receive within the first X seconds after boot on each handle, as it probably is an old message.
 				//! This may lead to ignoring a message that should've been handled.
+				LOGi("skip message %d on handle %d", received->messageCounter, handle);
 				//! Skip the first message after a boot up but take over the message counter
 				getMessageCounter(handle).setVal(received->messageCounter);
-				LOGi("skip message %d on handle %d", received->messageCounter, handle);
 			}
 			else {
 				//! handle the message
 				handleMeshMessage(&evt);
 			}
-
 		}
 		else {
 			//! then free associated memory

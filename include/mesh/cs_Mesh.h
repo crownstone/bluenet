@@ -49,6 +49,9 @@ private:
 	//! Keeps up the message counters for each handle
 	MeshMessageCounter       _messageCounter[MESH_NUM_HANDLES];
 
+	//! Keeps up when the mesh was started
+	uint32_t                 _mesh_start_time = 0;
+
 	static const nrf_clock_lf_cfg_t  meshClockSource;
 
 	MeshControl&             _meshControl;

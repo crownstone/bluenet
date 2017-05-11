@@ -142,6 +142,7 @@ SET(MESH_NUM_HANDLES                            "${MESH_NUM_HANDLES}"           
 SET(MESH_ACCESS_ADDR                            "${MESH_ACCESS_ADDR}"               CACHE STRING "MESH_ACCESS_ADDR" FORCE)
 SET(MESH_INTERVAL_MIN_MS                        "${MESH_INTERVAL_MIN_MS}"           CACHE STRING "MESH_INTERVAL_MIN_MS" FORCE)
 SET(MESH_CHANNEL                                "${MESH_CHANNEL}"                   CACHE STRING "MESH_CHANNEL" FORCE)
+SET(MESH_BOOT_TIME                              "${MESH_BOOT_TIME}"                 CACHE STRING "MESH_BOOT_TIME" FORCE)
 SET(NRF_SERIES                                  "${NRF_SERIES}"                     CACHE STRING "NRF_SERIES" FORCE)
 SET(RAM_R1_BASE                                 "${RAM_R1_BASE}"                    CACHE STRING "RAM_R1_BASE" FORCE)
 SET(MAX_NUM_VS_SERVICES                         "${MAX_NUM_VS_SERVICES}"            CACHE STRING "MAX_NUM_VS_SERVICES" FORCE)
