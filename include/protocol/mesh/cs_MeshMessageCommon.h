@@ -7,7 +7,6 @@
 
 #pragma once
 
-#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
 #if (defined HOST_TARGET)

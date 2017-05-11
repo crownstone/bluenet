@@ -5,13 +5,14 @@
  * License: LGPLv3+, Apache License, or MIT, your choice
  */
 
+#include <limits>
 #include "protocol/mesh/cs_MeshMessageCounter.h"
 
 //! Size of the stick part of the lollipop (best to be an even number)
 #define MESH_MESSAGE_COUNTER_LOLLIPOP_LIMIT 200
 
 //! Size of the looping part of the lollipop
-#define MESH_MESSAGE_COUNTER_LOOP_SIZE (UINT32_MAX - MESH_MESSAGE_COUNTER_LOLLIPOP_LIMIT + 1)
+#define MESH_MESSAGE_COUNTER_LOOP_SIZE (std::numeric_limits<uint32_t>::max() - MESH_MESSAGE_COUNTER_LOLLIPOP_LIMIT + 1)
 
 MeshMessageCounter::MeshMessageCounter(): _counter(0) {
 
@@ -27,7 +28,7 @@ bool MeshMessageCounter::setVal(uint32_t val) {
 }
 
 MeshMessageCounter& MeshMessageCounter::operator++() {
-	if (_counter == UINT32_MAX) {
+	if (_counter == std::numeric_limits<uint32_t>::max()) {
 		_counter = MESH_MESSAGE_COUNTER_LOLLIPOP_LIMIT;
 	}
 	else {
@@ -42,11 +43,11 @@ int32_t MeshMessageCounter::calcDelta(uint32_t counter) {
 //
 //	if (oldCounter < MESH_MESSAGE_COUNTER_LOLLIPOP_LIMIT)	{
 //		int64_t delta = newCounter - oldCounter;
-//		return (delta > INT32_MAX) ? INT32_MAX : delta;
+//		return (delta > std::numeric_limits<int32_t>::max()) ? std::numeric_limits<int32_t>::max() : delta;
 //	}
 //	else if (newCounter < MESH_MESSAGE_COUNTER_LOLLIPOP_LIMIT) {
 //		int64_t delta = newCounter - oldCounter;
-//		return (delta < INT32_MIN) ? INT32_MIN : delta;
+//		return (delta < std::numeric_limits<int32_t>::min()) ? std::numeric_limits<int32_t>::min() : delta;
 //	}
 //	else {
 //		if (newCounter >= oldCounter) {
@@ -79,11 +80,11 @@ int32_t MeshMessageCounter::calcDelta(uint32_t oldCtr, uint32_t newCtr) {
 
 	if (oldCounter < MESH_MESSAGE_COUNTER_LOLLIPOP_LIMIT)	{
 		int64_t delta = newCounter - oldCounter;
-		return (delta > INT32_MAX) ? INT32_MAX : delta;
+		return (delta > std::numeric_limits<int32_t>::max()) ? std::numeric_limits<int32_t>::max() : delta;
 	}
 	else if (newCounter < MESH_MESSAGE_COUNTER_LOLLIPOP_LIMIT) {
 		int64_t delta = newCounter - oldCounter;
-		return (delta < INT32_MIN) ? INT32_MIN : delta;
+		return (delta < std::numeric_limits<int32_t>::min()) ? std::numeric_limits<int32_t>::min() : delta;
 	}
 	else {
 		if (newCounter >= oldCounter) {
