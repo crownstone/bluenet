@@ -705,7 +705,7 @@ Handle | Name | Type | Description
 3 | State change channel | [State](#state_mesh_packet) | Each stone sends its' state on this channel if the state changes significantly, e.g. switch state changes.
 4 | Command channel | [Command](#command_mesh_packet) | Commands can be sent to one, multiple or all stones sharing the mesh network. Once a stone receives a command it will send a reply on the reply channel
 5 | Command reply channel | [Command reply](#command_reply_packet) | Every stone that was targeted with a command adds its reply to the reply message.
-6 | Scan result channel | [Scan result](#scan_result_packet) | If a stone is scanning for devices it adds it's scanned devices periodically to this list to be sent over the mesh
+6 | Scan result channel | [Scan result](#scan_result_mesh_packet) | If a stone is scanning for devices it adds its scanned devices periodically to this list to be sent over the mesh
 7 | Big data channel | - | This channel is for the case when a stone needs to send big data, such as the history of eneregy usage, etc.
 8 | Multi switch channel | [Multi switch](#multi_switch_mesh_packet) | This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
 
