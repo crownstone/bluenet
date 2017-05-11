@@ -17,6 +17,7 @@
 #include <drivers/cs_Timer.h>
 #include <protocol/cs_MeshMessageTypes.h>
 #include <mesh/cs_MeshControl.h>
+#include <protocol/mesh/cs_MeshMessageCounter.h>
 
 extern "C" {
 
@@ -30,6 +31,7 @@ extern "C" {
 #define MESH_UPDATE_FREQUENCY 10
 //#define MESH_CLOCK_SOURCE (CLOCK_SOURCE)
 
+typedef rbc_mesh_value_handle_t mesh_handle_t;
 
 
 /** Wrapper class around the mesh protocol files.
@@ -38,21 +40,16 @@ class Mesh {
 private:
 
 	//! app timer id for tick function
-#if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _appTimerData;
 	app_timer_id_t           _appTimerId;
-#else
-	uint32_t                 _appTimerId;
-#endif
 
 	bool                     _started;
 	bool                     _running;
 
-	uint32_t                 _messageCounter[MESH_NUM_HANDLES];
+	//! Keeps up the message counters for each handle
+	MeshMessageCounter       _messageCounter[MESH_NUM_HANDLES];
 
-#if (NORDIC_SDK_VERSION >= 11) 
 	static const nrf_clock_lf_cfg_t  meshClockSource;
-#endif
 
 	MeshControl&             _meshControl;
 
@@ -76,13 +73,31 @@ private:
 	void checkForMessages();
 	void handleMeshMessage(rbc_mesh_event_t* evt);
 
+	//! Decrypts a message
+	//! Copies from encoded to decoded msg.
 	bool decodeMessage(encrypted_mesh_message_t* encoded, uint16_t encodedLength,
 			mesh_message_t* decoded, uint16_t decodedLength);
+
+	//! Encrypts a message
+	//! Copies from decoded to encoded msg.
 	bool encodeMessage(mesh_message_t* decoded, uint16_t decodedLength,
 			encrypted_mesh_message_t* encoded, uint16_t encodedLength);
 
-	void resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,
+	//! Allocates 2 mesh_message_t msgs, decrypts the two messages to those structs.
+	//! For the reply channel: send the one with the highest message counter, merge when equal.
+	//! For the state change and broadcast channels: merge
+
+	//! TODO: split up in a function per handle
+	void resolveConflict(mesh_handle_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,
 			encrypted_mesh_message_t* p_new, uint16_t length_new);
+
+	//! Returns the index of a given handle
+	//! Does not check if handle is valid!
+	uint16_t getMessageCounterIndex(mesh_handle_t handle);
+
+	//! Returns the message counter of a given handle
+	//! Does not check if handle is valid!
+	MeshMessageCounter& getMessageCounter(mesh_handle_t handle);
 
 public:
 	//! use static variant of singleton, no dynamic memory allocation
@@ -106,16 +121,29 @@ public:
 	//! pause the mesh
 	void pause();
 
-	inline bool isRunning() { return _running && _started; }
+	//! Returns whether the mesh is currently started and running.
+	bool isRunning();
 
-	//! send message
-	uint32_t send(uint8_t channel, void* p_data, uint8_t length);
+	bool isValidHandle(mesh_handle_t handle);
+
+	//! Returns the message counter value of a given handle
+	uint32_t getMessageCounterVal(mesh_handle_t handle);
+
+
+	//! Send message
+	//! This allocates a mesh_message_t on stack, and copies given data to it
+	//!   then allocates an encrypted_mesh_message_t and encrypts the message with encodeMessage()
+	//!   then sets the value of that handle in the rbc_mesh.
+	//! Returns message counter (or 0 when failed).
+	//! TODO: can we not do so much copying and allocating?
+	uint32_t send(mesh_handle_t handle, void* p_data, uint16_t length);
 
 	//! Returns last message on channel
-	//! p_data should be a pointer to allocated data!
-	//! Allocates a whole message, and decrypts it every time you call this function!
+	//! p_data should be a pointer to allocated data, length the size of allocated.
+	//! This allocates an encrypted_mesh_message_t, then allocates a mesh_message_t and decrypts to that.
+	//! The resulting message is then copied to p_data, length is set to the size of the message.
 	//! TODO: have a better way to do this
-	bool getLastMessage(uint8_t channel, void* p_data, uint16_t& length);
+	bool getLastMessage(mesh_handle_t handle, void* p_data, uint16_t& length);
 
 };
 

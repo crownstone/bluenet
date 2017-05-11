@@ -19,9 +19,12 @@
 
 typedef uint16_t id_type_t;
 
+//! Header size is size of the message counter + size of the random number.
 #define ENCRYPTED_HEADER_SIZE (sizeof(uint32_t) + sizeof(uint32_t))
+//! Encrypted payload is (max value length - encryption header size), rounded down to the closest multiple of 16
 #define MAX_ENCRYPTED_PAYLOAD_LENGTH ((RBC_MESH_VALUE_MAX_LEN - ENCRYPTED_HEADER_SIZE) - ((RBC_MESH_VALUE_MAX_LEN - ENCRYPTED_HEADER_SIZE) % 16))
 
+//! Header size is size of the message counter
 #define PAYLOAD_HEADER_SIZE (sizeof(uint32_t))
 #define MAX_MESH_MESSAGE_LENGTH (MAX_ENCRYPTED_PAYLOAD_LENGTH - PAYLOAD_HEADER_SIZE)
 

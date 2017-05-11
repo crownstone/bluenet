@@ -49,8 +49,10 @@ extern "C"  {
 
 } // extern "C"
 
-// NOTE: DO NOT CHANGE ORDER OF THE ELEMENTS OR THE FLASH
-//   STORAGE WILL GET MESSED UP!! NEW ENTRIES ALWAYS AT THE END
+// NOTE: DO NOT CHANGE ORDER OF THE ELEMENTS OR THE FLASH STORAGE WILL GET MESSED UP!!
+// New entries go at the end? or start? It seems like the first entry is at the lowest address.
+// TODO: find out what happens when a new page is added: does everything shift or not?
+// Should match with ps_storage_id ?
 static storage_config_t config[] {
 	{PS_ID_CONFIGURATION, {}, sizeof(ps_configuration_t)},
 	{PS_ID_GENERAL, {}, sizeof(ps_general_vars_t)},
@@ -79,9 +81,11 @@ void Storage::init() {
 	// todo: only create it if needed?
 //	requestBuffer = new CircularBuffer<buffer_element_t>(STORAGE_REQUEST_BUFFER_SIZE, false);
 
+	LOGd("Page size: %u", PSTORAGE_FLASH_PAGE_SIZE);
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
 		LOGd("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
 		initBlocks(config[i].storage_size, 1, config[i].handle);
+		LOGd("  handle: %p", config[i].handle);
 	}
 
 	_initialized = true;
@@ -248,6 +252,9 @@ void Storage::clearStorage(ps_storage_id storageID) {
 	BLE_CALL ( pstorage_block_identifier_get, (&config->handle, 0, &block_handle) );
 
 	BLE_CALL (pstorage_clear, (&block_handle, config->storage_size) );
+//	LOGd("pstorage_clear %d %d %d", block_handle.module_id, block_handle.block_id, PSTORAGE_FLASH_PAGE_SIZE);
+	// Can't clear this size, because we registered a smaller block size?
+//	BLE_CALL (pstorage_clear, (&block_handle, PSTORAGE_FLASH_PAGE_SIZE) );
 }
 
 void Storage::readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {

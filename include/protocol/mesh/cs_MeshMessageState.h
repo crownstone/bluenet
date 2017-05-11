@@ -10,7 +10,7 @@ struct __attribute__((__packed__)) state_item_t {
 	uint32_t accumulatedEnergy;
 };
 
-#define STATE_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t))
+#define STATE_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t) + 5*sizeof(uint8_t))
 #define MAX_STATE_ITEMS ((MAX_MESH_MESSAGE_LENGTH - STATE_HEADER_SIZE) / sizeof(state_item_t))
 
 /**
@@ -23,6 +23,8 @@ struct __attribute__((__packed__)) state_message_t {
 	uint8_t tail;
 	//! the number of elements in the list
 	uint8_t size;
+	//! currently there are 5 bytes left
+	uint8_t reserved[5];
 	//! the list itself
 	state_item_t list[MAX_STATE_ITEMS];
 };
@@ -32,7 +34,7 @@ struct __attribute__((__packed__)) state_message_t {
  * The class state_message wraps around state_message_t to provide it with accessor methods like iterators that can
  * be used in for loops, etc.
  */
-class state_message {
+class state_message { // Rename to StateMessage ?
 	private:
 		//! internal reference to a state message
 		state_message_t &_state_message_t;
@@ -43,9 +45,9 @@ class state_message {
 			private:
 				friend class state_message;
 
-				state_message_t *_smt;
+				state_message_t *_smt; // Rename to something more readable?
 				
-				uint8_t _current;
+				uint8_t _current; // What is this for?
 				
 				iterator(uint8_t current = 0): _current(current) {
 				}
@@ -65,6 +67,7 @@ class state_message {
 					iterator result = *this;
 					++(*this);
 					return result;
+					// No increment of _current?
 				}
 
 				bool operator==(const iterator it) {

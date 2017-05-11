@@ -61,13 +61,18 @@ enum MeshReplyTypes {
  *
  ********************************************************************/
 
-struct encrypted_mesh_message_t {
+struct __attribute__((__packed__)) encrypted_mesh_message_t {
+	//! Counter, used as message id, nonce, decryption validation, and conflict resolving
 	uint32_t messageCounter;
+	//! Random number used for nonce
 	uint32_t random;
 	uint8_t encrypted_payload[MAX_ENCRYPTED_PAYLOAD_LENGTH];
 };
 
-struct mesh_message_t {
+//! This struct will be encrypted, so the size has to be a multiple of 16
+struct __attribute__((__packed__)) mesh_message_t {
+	//! Counter, must be the same number as the one in the encrypted_mesh_message_t
+	//! Counter should never be 0
 	uint32_t messageCounter;
 	uint8_t payload[MAX_MESH_MESSAGE_LENGTH];
 };
@@ -81,14 +86,40 @@ struct __attribute__((__packed__)) keep_alive_item_t {
 	uint8_t actionSwitchState;
 };
 
-#define KEEP_ALIVE_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint8_t))
+#define KEEP_ALIVE_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint8_t) + 2*sizeof(uint8_t))
 #define MAX_KEEP_ALIVE_ITEMS ((MAX_MESH_MESSAGE_LENGTH - KEEP_ALIVE_HEADER_SIZE) / sizeof(keep_alive_item_t))
 
 struct __attribute__((__packed__)) keep_alive_message_t {
 	uint16_t timeout;
 	uint8_t size;
+	uint8_t reserved[2];
 	keep_alive_item_t list[MAX_KEEP_ALIVE_ITEMS];
 };
+
+inline bool is_valid_keep_alive_msg(keep_alive_message_t* msg, uint16_t length) {
+	//! First check if the header fits in the message
+	if (length < KEEP_ALIVE_HEADER_SIZE) {
+		return false;
+	}
+	//! Then check the header
+	if (msg->timeout == 0) {
+		//! We can't set a timer of 0s
+		//! TODO: don't use a timer instead
+		return false;
+	}
+	if (msg->size > MAX_KEEP_ALIVE_ITEMS) {
+		return false;
+	}
+	if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
+		return false;
+	}
+	//! Check if the message is not too large
+//	if (length > sizeof(keep_alive_message_t)) { this doesn't work, due to unused bytes
+	if (length > MAX_MESH_MESSAGE_LENGTH) {
+		return false;
+	}
+	return true;
+}
 
 inline bool has_keep_alive_item(keep_alive_message_t* message, id_type_t id, keep_alive_item_t** item) {
 
@@ -122,13 +153,34 @@ struct __attribute__((__packed__)) multi_switch_item_t {
 	uint8_t intent; // intent = sphere enter, sphere exit, room enter, room exit, manual
 };
 
-#define MULTI_SWITCH_HEADER_SIZE (sizeof(uint8_t))
+#define MULTI_SWITCH_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t))
 #define MAX_MULTI_SWITCH_ITEMS ((MAX_MESH_MESSAGE_LENGTH - MULTI_SWITCH_HEADER_SIZE) / sizeof(multi_switch_item_t))
 
 struct __attribute__((__packed__)) multi_switch_message_t {
 	uint8_t size;
+	uint8_t reserved;
 	multi_switch_item_t list[MAX_MULTI_SWITCH_ITEMS];
 };
+
+inline bool is_valid_multi_switch_message(multi_switch_message_t* msg, uint16_t length) {
+	//! First check if the header fits in the message
+	if (length < MULTI_SWITCH_HEADER_SIZE) {
+		return false;
+	}
+	//! Then check the header
+	if (msg->size > MAX_MULTI_SWITCH_ITEMS) {
+		return false;
+	}
+	if (length < MULTI_SWITCH_HEADER_SIZE + msg->size * sizeof(multi_switch_item_t)) {
+		return false;
+	}
+	//! Check if the message is not too large
+//	if (length > sizeof(multi_switch_message_t)) { this doesn't work, due to unused bytes
+	if (length > MAX_MESH_MESSAGE_LENGTH) {
+		return false;
+	}
+	return true;
+}
 
 inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id, multi_switch_item_t** item) {
 
@@ -166,6 +218,27 @@ inline bool is_valid_state_msg(state_message_t* message) {
 		return false;
 	}
 	return true;
+}
+
+inline bool is_valid_state_msg(state_message_t* msg, uint16_t length) {
+//	//! First check if the header fits in the message
+//	if (length < STATE_HEADER_SIZE) {
+//		return false;
+//	}
+//	//! Then check the header
+//	if (length < STATE_HEADER_SIZE + msg->size * sizeof(state_item_t)) {
+//		return false;
+//	}
+//	//! Check if the message is not too large
+//	if (length > sizeof(state_message_t)) {
+//		return false;
+//	}
+
+	//! Since this message can't be send via characteristic, the size should always be >= the message size
+	if (length < sizeof(state_message_t)) {
+		return false;
+	}
+	return is_valid_state_msg(msg);
 }
 
 inline void push_state_item(state_message_t* message, state_item_t* item) {
@@ -236,12 +309,17 @@ inline bool pop_state_item(state_message_t* message, state_item_t* item) {
  * COMMAND
  ********************************************************************/
 
+//! Size of message type + number of ids
 #define MIN_COMMAND_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint8_t))
-#define MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH (MAX_MESH_MESSAGE_LENGTH - MIN_COMMAND_HEADER_SIZE - SB_HEADER_SIZE)
 
-using control_mesh_message_t = stream_t<uint8_t, MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH>;
-using config_mesh_message_t = stream_t<uint8_t, MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH>;
-using state_mesh_message_t = stream_t<uint8_t, MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH>;
+//! Size of ids[] + command
+//TODO: why was SB_HEADER_SIZE subtracted here?
+//#define MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH (MAX_MESH_MESSAGE_LENGTH - MIN_COMMAND_HEADER_SIZE - SB_HEADER_SIZE)
+#define MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH (MAX_MESH_MESSAGE_LENGTH - MIN_COMMAND_HEADER_SIZE)
+
+using control_mesh_message_t = stream_t<uint8_t, (MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)>;
+using config_mesh_message_t =  stream_t<uint8_t, (MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)>;
+using state_mesh_message_t =   stream_t<uint8_t, (MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)>;
 
 /** Beacon mesh message
  */
@@ -261,9 +339,9 @@ struct __attribute__((__packed__)) command_message_t {
 	uint8_t numOfIds;
 	union {
 		struct {
-			id_type_t ids[];
+			id_type_t ids[0];
 			union {
-				uint8_t payload[];
+				uint8_t payload[0];
 				beacon_mesh_message_t beaconMsg;
 				control_mesh_message_t commandMsg;
 				config_mesh_message_t configMsg;
@@ -272,6 +350,24 @@ struct __attribute__((__packed__)) command_message_t {
 		uint8_t raw[MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH]; // dummy item, makes the reply_message_t a fixed size (for allocation)
 	};
 };
+
+//! Only checks if the ids array fits in the message, not if the payload fits
+inline bool is_valid_command_message(command_message_t* msg, uint16_t length) {
+	//! First check if the header fits in the message
+	if (length < MIN_COMMAND_HEADER_SIZE) {
+		return false;
+	}
+	//! Then check the header
+	if (length < MIN_COMMAND_HEADER_SIZE + msg->numOfIds * sizeof(id_type_t)) {
+		return false;
+	}
+	//! Check if the message is not too large
+//	if (length > sizeof(command_message_t)) { this doesn't work, due to unused bytes
+	if (length > MAX_MESH_MESSAGE_LENGTH) {
+		return false;
+	}
+	return true;
+}
 
 inline bool is_broadcast_command(command_message_t* message) {
 	return message->numOfIds == 0;
@@ -296,8 +392,12 @@ inline bool is_command_for_us(command_message_t* message, id_type_t id) {
 	}
 }
 
-inline void get_payload(command_message_t* message, uint16_t messageLength, uint8_t** payload, uint16_t& payloadLength) {
-	payloadLength =  messageLength - MIN_COMMAND_HEADER_SIZE + message->numOfIds * sizeof(id_type_t);
+//! Gets the payload data and payload length of a command message, based on the size of ids array.
+//! Assumes already checked if is_valid_command_message()!
+inline void get_command_msg_payload(command_message_t* message, uint16_t messageLength, uint8_t** payload, uint16_t& payloadLength) {
+	//TODO: why was the size of the ids array added to the payloadLength?
+//	payloadLength =  messageLength - MIN_COMMAND_HEADER_SIZE + message->numOfIds * sizeof(id_type_t);
+	payloadLength =  messageLength - MIN_COMMAND_HEADER_SIZE - message->numOfIds * sizeof(id_type_t);
 	*payload = (uint8_t*)message + MIN_COMMAND_HEADER_SIZE + message->numOfIds * sizeof(id_type_t);
 }
 
@@ -322,10 +422,10 @@ struct __attribute__((__packed__)) status_reply_item_t {
 	uint16_t status;
 };
 
-#define MAX_STATUS_REPLY_ITEMS ((MAX_MESH_MESSAGE_LENGTH - REPLY_HEADER_SIZE) / sizeof(status_reply_item_t))
+#define MAX_STATUS_REPLY_ITEMS (MAX_REPLY_LIST_SIZE / sizeof(status_reply_item_t))
 
 
-#define MAX_CONFIG_REPLY_DATA_LENGTH (MAX_MESH_MESSAGE_LENGTH - REPLY_HEADER_SIZE - sizeof(id_type_t) - SB_HEADER_SIZE)
+#define MAX_CONFIG_REPLY_DATA_LENGTH (MAX_REPLY_LIST_SIZE - sizeof(id_type_t) - SB_HEADER_SIZE)
 #define MAX_CONFIG_REPLY_ITEMS 1 // the safe is to request config one by one, but depending on the length of the config
 
 struct __attribute__((__packed__)) config_reply_item_t {
@@ -333,7 +433,7 @@ struct __attribute__((__packed__)) config_reply_item_t {
 	stream_t<uint8_t, MAX_CONFIG_REPLY_DATA_LENGTH> data;
 };
 
-#define MAX_STATE_REPLY_DATA_LENGTH (MAX_MESH_MESSAGE_LENGTH - REPLY_HEADER_SIZE - sizeof(id_type_t) - SB_HEADER_SIZE)
+#define MAX_STATE_REPLY_DATA_LENGTH (MAX_REPLY_LIST_SIZE - sizeof(id_type_t) - SB_HEADER_SIZE)
 #define MAX_STATE_REPLY_ITEMS 1 // the safe is to request state one by one, but depending on the length of the state
                                 // data that is requested, several states might fit in one mesh message
 
@@ -349,11 +449,66 @@ struct __attribute__((__packed__)) reply_message_t {
 	union {
 //		reply_item_t list[];
 		status_reply_item_t statusList[MAX_STATUS_REPLY_ITEMS];
-		config_reply_item_t configList[1];
-		state_reply_item_t stateList[1];
+		config_reply_item_t configList[MAX_CONFIG_REPLY_ITEMS];
+		state_reply_item_t stateList[MAX_STATE_REPLY_ITEMS];
 		uint8_t rawList[MAX_REPLY_LIST_SIZE]; // dummy item, makes the reply_message_t a fixed size (for allocation)
 	};
 };
+
+inline void cear_reply_msg(reply_message_t* msg) {
+	memset(msg, 0, sizeof(reply_message_t));
+}
+
+inline bool is_valid_reply_msg(reply_message_t* msg) {
+	switch (msg->messageType) {
+	case STATUS_REPLY:
+		return (msg->numOfReplys <= MAX_STATUS_REPLY_ITEMS);
+	case CONFIG_REPLY:
+		return (msg->numOfReplys <= MAX_CONFIG_REPLY_ITEMS);
+	case STATE_REPLY:
+		return (msg->numOfReplys <= MAX_STATE_REPLY_ITEMS);
+	default:
+		return false;
+	}
+	return true;
+}
+
+inline bool is_valid_reply_msg(reply_message_t* msg, uint16_t length) {
+	//! First check if the header fits in the message
+	if (length < REPLY_HEADER_SIZE) {
+		return false;
+	}
+	//! Check if the message is not too large
+//	if (length > sizeof(reply_message_t)) { this doesn't work, due to unused bytes
+	if (length > MAX_MESH_MESSAGE_LENGTH) {
+		return false;
+	}
+	//! Check array size
+	if (!is_valid_reply_msg(msg)) {
+		return false;
+	}
+
+	switch (msg->messageType) {
+	case STATUS_REPLY:
+		if (length < REPLY_HEADER_SIZE + msg->numOfReplys * sizeof(status_reply_item_t)) {
+			return false;
+		}
+		break;
+	case CONFIG_REPLY:
+		if (length < REPLY_HEADER_SIZE + msg->numOfReplys * sizeof(config_reply_item_t)) {
+			return false;
+		}
+		break;
+	case STATE_REPLY:
+		if (length < REPLY_HEADER_SIZE + msg->numOfReplys * sizeof(state_reply_item_t)) {
+			return false;
+		}
+		break;
+	default:
+		return false;
+	}
+	return true;
+}
 
 inline bool push_status_reply_item(reply_message_t* message, status_reply_item_t* item) {
 	if (message->numOfReplys == MAX_STATUS_REPLY_ITEMS) {
@@ -374,11 +529,32 @@ struct __attribute__((__packed__)) scan_result_item_t {
 	int8_t rssi;
 };
 
-#define SCAN_RESULT_HEADER_SIZE (sizeof(uint8_t))
+#define SCAN_RESULT_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t))
 #define MAX_SCAN_RESULT_ITEMS ((MAX_MESH_MESSAGE_LENGTH - SCAN_RESULT_HEADER_SIZE) / sizeof(scan_result_item_t))
 
 struct __attribute__((__packed__)) scan_result_message_t {
 	uint8_t numOfResults;
+	uint8_t reserved;
 	scan_result_item_t list[MAX_SCAN_RESULT_ITEMS];
 };
+
+inline bool is_valid_scan_result_message(scan_result_message_t* msg, uint16_t length) {
+	//! First check if the header fits in the message
+	if (length < SCAN_RESULT_HEADER_SIZE) {
+		return false;
+	}
+	//! Then check the header
+	if (msg->numOfResults > MAX_SCAN_RESULT_ITEMS) {
+		return false;
+	}
+	if (length < SCAN_RESULT_HEADER_SIZE + msg->numOfResults * sizeof(scan_result_item_t)) {
+		return false;
+	}
+	//! Check if the message is not too large
+//	if (length > sizeof(scan_result_message_t)) { this doesn't work, due to unused bytes
+	if (length > MAX_MESH_MESSAGE_LENGTH) {
+		return false;
+	}
+	return true;
+}
 

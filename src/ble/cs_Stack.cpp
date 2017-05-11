@@ -84,12 +84,18 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	shutdown();
 }
 
-#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
+/*
 const nrf_clock_lf_cfg_t Nrf51822BluetoothStack::defaultClockSource = {.source        = NRF_CLOCK_LF_SRC_RC,   \
                                                                        .rc_ctiv       = 16,                    \
                                                                        .rc_temp_ctiv  = 2,                     \
                                                                        .xtal_accuracy = 0};
-#endif
+*/
+///*
+const nrf_clock_lf_cfg_t Nrf51822BluetoothStack::defaultClockSource = { .source        = NRF_CLOCK_LF_SRC_XTAL,        \
+                                                                        .rc_ctiv       = 0,                     \
+                                                                        .rc_temp_ctiv  = 0,                     \
+                                                                        .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
+//*/
 
 //! called by softdevice handler through ble_evt_dispatch on any event that passes through mesh and is not write
 //extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {
@@ -731,6 +737,8 @@ void Nrf51822BluetoothStack::setAdvertisementData() {
 	uint32_t err;
 	err = ble_advdata_set(&_advdata, &_scan_resp);
 
+	//! TODO: why do we allow (and get) invalid configuration?
+	//! It seems like we setAdvertisementData before we configure as iBeacon (probably from the service data?)
 	switch(err) {
 	//case NRF_ERROR_INVALID_PARAMETER:
 	case NRF_SUCCESS:
@@ -1271,10 +1279,10 @@ void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 
 void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_disconnected_t disconnected_evt = p_ble_evt->evt.gap_evt.params.disconnected;
+	_conn_handle = BLE_CONN_HANDLE_INVALID;
 	if (_callback_connected) {
 		_callback_disconnected(p_ble_evt->evt.gap_evt.conn_handle);
 	}
-	_conn_handle = BLE_CONN_HANDLE_INVALID;
 	for (Service* svc : _services) {
 		svc->on_ble_event(p_ble_evt);
 	}
@@ -1285,11 +1293,15 @@ void Nrf51822BluetoothStack::on_disconnected(ble_evt_t * p_ble_evt) {
 void Nrf51822BluetoothStack::disconnect() {
 	//! Only disconnect when we are actually connected to something
 	if (_conn_handle != BLE_CONN_HANDLE_INVALID && _disconnectingInProgress == false) {
-		LOGi("Forcibly disconnecting from device");
 		_disconnectingInProgress = true;
+		LOGi("Forcibly disconnecting from device");
 		//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
-		// TODO: this sometimes gives us an error 8 (happened when phone was continously doing connect, write cmd, disconnect)
-		BLE_CALL(sd_ble_gap_disconnect, (_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION));
+		//! This sometimes gives us an NRF_ERROR_INVALID_STATE (disconnection is already in progress)
+		//! NRF_ERROR_INVALID_STATE can safely be ignored, see: https://devzone.nordicsemi.com/question/81108/handling-nrf_error_invalid_state-error-code/
+		uint32_t errorCode = sd_ble_gap_disconnect(_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+		if (errorCode != NRF_ERROR_INVALID_STATE) {
+			APP_ERROR_CHECK(errorCode);
+		}
 	}
 }
 

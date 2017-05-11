@@ -1,4 +1,4 @@
-# Bluenet protocol v0.9.1
+# Bluenet protocol v0.10.0
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -422,7 +422,7 @@ Type nr | Type name | Payload type | Description
 38 | Default ON | uint 8 | Set's the default switch state to 255 if true, or to 0 if false. Value is 0 for false, or any other for true
 39 | Scan Interval | uint 16 | Set the scan interval to ...
 40 | Scan Window | uint 16 | Set the scan window to ...
-41 | Relay High Duration | uint 16 | Set the time/duration that the relay is set to high
+41 | Relay High Duration | uint 16 | Set the time/duration that the relay is set to high (ms)
 42 | Low Tx Power | int 8 | Set the tx power used when in low transmission power for bonding
 43 | Voltage Multiplier | float | Set the voltage multiplier (for power measurement)
 44 | Current Multiplier | float | Set the current multiplier (for power measurement)
@@ -717,9 +717,10 @@ If the length of the mesh control packet is 0, the existing keepalive message wi
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Timeout | 2 | Timeout (in seconds), applies to all stones present in the list
-uint 8 | Size | 1 | Number of keep alive items in the list
-[Keep alive item](#keep_alive_mesh_item) [] | List | N | The keep alive items are defined as Crownstone identifier and a combined action + switch state
+uint 16 | Timeout | 2 | Timeout (in seconds), applies to all stones present in the list.
+uint 8 | Size | 1 | Number of keep alive items in the list.
+uint 8 [2] | Reserved | 2 | Reserved for future use.
+[Keep alive item](#keep_alive_mesh_item) [] | List | N | The keep alive items.
 
 ##### <a name="keep_alive_mesh_item"></a>Keep alive Item
 
@@ -745,6 +746,7 @@ Type | Name | Length | Description
 uint 8 | Head | 1 | Keeps the index of the oldest element in the list (read pointer)
 uint 8 | Tail | 1 | Keeps the index where the next element can be inserted in the list (write pointer)
 uint 8 | Size | 1 | Number of elements in the list
+uint 8 [5] | Reserved | 5 | Reserved for future use
 [Crownstone state item](#state_mesh_item) [] | List | 7 | Circular list with Crownstone state items
 
 ##### <a name="state_mesh_item"></a>Crownstone state item
@@ -847,6 +849,7 @@ uint 8 | Payload | Length | see [State Packet](#state_packet)
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Number of results | 1 | Number of scan results in the list
+uint 8 | Reserved | 1 | Reserved for future use
 [Scan Result item](#scan_result_item) [] | List | Number of results | A list of scanned devices with the ID of the crownstone that scanned the device
 
 ##### <a name="mesh_scan_result_item"></a>Scan result item
@@ -864,6 +867,7 @@ int 8 | RSSI | 1 | The averaged RSSI value of the scanned device
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Size | 1 | Number of keep alive items in the list
+uint 8 | Reserved | 1 | Reserved for future use
 [Multi switch item](#multi_switch_mesh_item) [] | List | N | a list of targeted crownstones with switch states, timeouts and intents
 
 ##### <a name="multi_switch_mesh_item"></a>Multi switch item

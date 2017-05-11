@@ -70,22 +70,22 @@ public:
 	 */
 	void sendStateReplyMessage(uint32_t messageCounter, state_reply_item_t* stateReply);
 
-	/** Send a message into the mesh
+	/** Send a message into the mesh, used by the mesh characteristic
 	 *
 	 * @channel the channel number, see <MeshChannels>
 	 * @p_data a pointer to the data which should be sent
 	 * @length number of bytes of data to with p_data points
 	 */
-	ERR_CODE send(uint8_t channel, void* p_data, uint8_t length);
+	ERR_CODE send(uint16_t channel, void* p_data, uint16_t length);
 
 	/**
-	 * Get incoming messages and perform certain actions.
+	 * Get incoming messages and perform certain actions. Messages have already been decrypted.
 	 * @channel the channel number, see <MeshChannels>
 	 *
 	 * @p_data a pointer to the data which was received
 	 * @length number of bytes received
 	 */
-	void process(uint8_t channel, void* p_data, uint16_t length);
+	void process(uint16_t channel, void* p_data, uint16_t length);
 
 	/** Initialize the mesh */
 	void init();
@@ -100,14 +100,12 @@ protected:
 	 */
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
-	/** Decode a command message received over mesh or mesh characteristic
+	/** Check if this command message (received via mesh or mesh characteristic) should be handled by this crownstone, if so: handle it.
 	 *
-	 * @type command type, see MeshCommandTypes
-	 * @messageCounter the message counter of the message which was received
-	 * @payload the payload of the command
-	 * @length length of payload in bytes
+	 * @msg the message payload
+	 * @length length of the message in bytes
 	 */
-	void handleCommand(uint16_t type, uint32_t messageCounter, uint8_t* payload, uint16_t length);
+	ERR_CODE handleCommand(command_message_t* msg, uint16_t length, uint32_t messageCounter);
 
 	/** Decode a keep alive message received over mesh or mesh characteristic
 	 *
@@ -122,6 +120,82 @@ protected:
 	 * @length length of the message in bytes
 	 */
 	ERR_CODE handleMultiSwitch(multi_switch_message_t* msg, uint16_t length);
+
+	/** Decode a state message received over mesh
+	 *
+	 * @msg the message payload
+	 * @length length of the message in bytes
+	 * @change whether or not this state message was received over the change handle
+	 */
+	ERR_CODE handleStateMessage(state_message_t* msg, uint16_t length, bool change);
+
+	/** Decode a command reply message received over mesh
+	 *
+	 * @msg the message payload
+	 * @length length of the message in bytes
+	 */
+	ERR_CODE handleCommandReplyMessage(reply_message_t* msg, uint16_t length);
+
+	/** Decode a scan result message received over mesh
+	 *
+	 * @msg the message payload
+	 * @length length of the message in bytes
+	 */
+	ERR_CODE handleScanResultMessage(scan_result_message_t* msg, uint16_t length);
+
+	/** Decode a command message (received over mesh or mesh characteristic) that is targeted at this crownstone.
+	 *
+	 * @type command type, see MeshCommandTypes
+	 * @messageCounter the message counter of the message that was received
+	 * @payload the payload of the command
+	 * @length length of payload in bytes
+	 */
+	void handleCommandForUs(uint16_t type, uint32_t messageCounter, uint8_t* payload, uint16_t length);
+
+
+	/** Decode a config message that is targeted at this crownstone.
+	 *
+	 * @msg the message payload
+	 * @length length of the message in bytes
+	 * @messageCounter the message counter of the message that was received
+	 * @result [out] the result of this command
+	 *
+	 * @return true when a reply message should be sent (with given result)
+	 */
+	bool handleConfigCommand(config_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, ERR_CODE& result);
+
+	/** Decode a state message that is targeted at this crownstone.
+	 *
+	 * @msg the message payload
+	 * @length length of the message in bytes
+	 * @messageCounter the message counter of the message that was received
+	 * @result [out] the result of this command
+	 *
+	 * @return true when a reply message should be sent (with given result)
+	 */
+	bool handleStateCommand(state_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, ERR_CODE& result);
+
+	/** Decode a control message that is targeted at this crownstone.
+	 *
+	 * @msg the message payload
+	 * @length length of the message in bytes
+	 * @messageCounter the message counter of the message that was received
+	 * @result [out] the result of this command
+	 *
+	 * @return true when a reply message should be sent (with given result)
+	 */
+	bool handleControlCommand(control_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, ERR_CODE& result);
+
+	/** Decode a beacon config message that is targeted at this crownstone.
+	 *
+	 * @msg the message payload
+	 * @length length of the message in bytes
+	 * @messageCounter the message counter of the message that was received
+	 * @result [out] the result of this command
+	 *
+	 * @return true when a reply message should be sent (with given result)
+	 */
+	bool handleBeaconConfigCommand(beacon_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, ERR_CODE& result);
 
 private:
 	MeshControl();

@@ -34,30 +34,31 @@ extern "C" {
 
 //#define PRINT_MESH_VERBOSE
 
+//! Init message counters at 0. See: http://stackoverflow.com/questions/23987515/zero-initializing-an-array-data-member-in-a-constructor
 Mesh::Mesh() :
-#if (NORDIC_SDK_VERSION >= 11)
 		_appTimerData({ {0}}),
 		_appTimerId(NULL),
-#else
-		_appTimerId(UINT32_MAX),
-#endif
 	_started(false), _running(true), _messageCounter(), _meshControl(MeshControl::getInstance()),
 	_encryptionEnabled(false)
 
 {
-#if (NORDIC_SDK_VERSION >= 11)
 	_appTimerData = { {0} };
 	_appTimerId = &_appTimerData;
-#endif
 
 }
 
-#if (NORDIC_SDK_VERSION >= 11)
+/*
 const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_LF_SRC_RC,   \
                                                     .rc_ctiv       = 16,                    \
                                                     .rc_temp_ctiv  = 2,                     \
                                                     .xtal_accuracy = 0};
-#endif
+*/
+///*
+const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_LF_SRC_XTAL, \
+                                                    .rc_ctiv       = 0,                     \
+                                                    .rc_temp_ctiv  = 0,                     \
+                                                    .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
+//*/
 
 /**
  * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
@@ -84,7 +85,7 @@ void Mesh::init() {
 	init_params.lfclksrc = MESH_CLOCK_SOURCE;
 #endif
 
-	uint8_t error_code;
+	uint32_t error_code;
 	//! checks if softdevice is enabled etc.
 	error_code = rbc_mesh_init(init_params);
 	APP_ERROR_CHECK(error_code);
@@ -107,15 +108,16 @@ void Mesh::init() {
 //	if (!Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 //		LOGi("mesh not enabled");
 		rbc_mesh_stop();
-		// [16.06.16] need to execute app scheduler, otherwise pstorage
-		// events will get lost ... maybe need to check why that actually happens??
+		// [16.06.16] need to execute app scheduler, otherwise pstorage events will get lost ...
+		// TODO: maybe need to check why that actually happens??
 		app_sched_execute();
 //	}
 
 }
 
 void start_stop_mesh(void * p_event_data, uint16_t event_size) {
-	if (*(bool*)p_event_data) {
+	bool start = *(bool*)p_event_data;
+	if (start) {
 		LOGi(FMT_START, "Mesh");
 		uint32_t err_code = rbc_mesh_start();
 		if (err_code != NRF_SUCCESS) {
@@ -178,6 +180,30 @@ void Mesh::pause() {
 	}
 }
 
+bool Mesh::isRunning() { return _running && _started; }
+
+bool Mesh::isValidHandle(mesh_handle_t handle) {
+	//! Currently, the handles are in the range: 1 to MESH_NUM_HANDLES
+	return (handle > 0 && handle <= MESH_NUM_HANDLES);
+}
+
+uint16_t Mesh::getMessageCounterIndex(mesh_handle_t handle) {
+	//! Currently, the handles are in the range: 1 to MESH_NUM_HANDLES
+	assert(handle > 0, "Handle < 1");
+	return handle - 1;
+}
+
+MeshMessageCounter& Mesh::getMessageCounter(mesh_handle_t handle) {
+	return _messageCounter[getMessageCounterIndex(handle)];
+}
+
+uint32_t Mesh::getMessageCounterVal(mesh_handle_t handle) {
+	if (isValidHandle(handle)) {
+		return getMessageCounter(handle).getVal();
+	}
+	return 0;
+}
+
 void Mesh::tick() {
 	checkForMessages();
 	scheduleNextTick();
@@ -197,8 +223,8 @@ void Mesh::stopTicking() {
 }
 
 
-uint32_t Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
-//	LOGe("length: %d, max: %d", length, MAX_MESH_MESSAGE_LENGTH);
+uint32_t Mesh::send(mesh_handle_t handle, void* p_data, uint16_t length) {
+	LOGd("Mesh send: handle=%d length=%d, max=%d", handle, length, MAX_MESH_MESSAGE_LENGTH);
 //	assert(length <= MAX_MESH_MESSAGE_LENGTH, STR_ERR_VALUE_TOO_LONG);
 	if (length > MAX_MESH_MESSAGE_LENGTH) {
 		LOGe(STR_ERR_VALUE_TOO_LONG);
@@ -209,10 +235,15 @@ uint32_t Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 		return 0;
 	}
 
+	if (!isValidHandle(handle)) {
+		LOGe("Invalid handle: %d", handle);
+		return 0;
+	}
+
 	mesh_message_t message = {};
 //	memset(&message, 0, sizeof(mesh_message_t));
 
-	message.messageCounter = ++_messageCounter[handle -1];
+	message.messageCounter = (++getMessageCounter(handle)).getVal();
 	memcpy(&message.payload, p_data, length);
 
 #ifdef PRINT_MESH_VERBOSE
@@ -234,15 +265,13 @@ uint32_t Mesh::send(uint8_t handle, void* p_data, uint8_t length) {
 #endif
 
 //	LOGd("send ch: %d, len: %d", handle, sizeof(encrypted_mesh_message_t));
-//	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-		APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)&encryptedMessage, encryptedLength));
-//		APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
-//	}
+	APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)&encryptedMessage, encryptedLength));
+//	APP_ERROR_CHECK(rbc_mesh_value_set(handle, (uint8_t*)p_data, length));
 
 	return message.messageCounter;
 }
 
-bool Mesh::getLastMessage(uint8_t channel, void* p_data, uint16_t& length) {
+bool Mesh::getLastMessage(mesh_handle_t handle, void* p_data, uint16_t& length) {
 //	assert(length <= MAX_MESH_MESSAGE_LENGTH, STR_ERR_VALUE_TOO_LONG);
 
 	if (!_started || !Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
@@ -255,9 +284,8 @@ bool Mesh::getLastMessage(uint8_t channel, void* p_data, uint16_t& length) {
 	encrypted_mesh_message_t encryptedMessage = {};
 	uint16_t encryptedLength = sizeof(encrypted_mesh_message_t);
 
-//	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-		APP_ERROR_CHECK(rbc_mesh_value_get(channel, (uint8_t*)&encryptedMessage, &encryptedLength));
-//	}
+	//! Get the last value from rbc_mesh. This copies the message to the given pointer.
+	APP_ERROR_CHECK(rbc_mesh_value_get(handle, (uint8_t*)&encryptedMessage, &encryptedLength));
 
 	if (encryptedLength != 0) {
 
@@ -266,7 +294,11 @@ bool Mesh::getLastMessage(uint8_t channel, void* p_data, uint16_t& length) {
 
 		mesh_message_t message = {};
 
-		decodeMessage(&encryptedMessage, encryptedLength, &message, sizeof(mesh_message_t));
+		bool validated = decodeMessage(&encryptedMessage, encryptedLength, &message, sizeof(mesh_message_t));
+		if (!validated) {
+			LOGe("Message not validated!");
+			return false;
+		}
 
 //		LOGd("message:");
 //		BLEutil::printArray(&message, length);
@@ -284,19 +316,30 @@ bool Mesh::getLastMessage(uint8_t channel, void* p_data, uint16_t& length) {
 	}
 }
 
-void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,
+void Mesh::resolveConflict(mesh_handle_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,
 		encrypted_mesh_message_t* p_new, uint16_t length_new)
 {
 
 	mesh_message_t messageOld, messageNew;
 
-//	LOGd("old data:");
-//	BLEutil::printArray(p_old, length_old);
-//	LOGd("new data:");
-//	BLEutil::printArray(p_new, length_new);
-
-	decodeMessage(p_old, length_old, &messageOld, sizeof(mesh_message_t));
-	decodeMessage(p_new, length_new, &messageNew, sizeof(mesh_message_t));
+	bool validatedOld = decodeMessage(p_old, length_old, &messageOld, sizeof(mesh_message_t));
+	bool validatedNew = decodeMessage(p_new, length_new, &messageNew, sizeof(mesh_message_t));
+	if (!validatedOld && validatedNew) {
+		LOGw("Old msg not validated");
+		// TODO: should we send a new message? All crownstones with same key should ignore the invalid one.
+//		getMessageCounter(handle).setVal(messageNew.messageCounter);
+//		send(handle, messageNew.payload, sizeof(messageNew.payload));
+//		_meshControl.process(handle, &messageNew, sizeof(mesh_message_t));
+		return;
+	}
+	else if (validatedOld && !validatedNew) {
+		LOGw("New msg not validated");
+		return;
+	}
+	else if (!validatedOld && !validatedNew) {
+		LOGw("Both msgs not validated");
+		return;
+	}
 
 	switch(handle) {
 	case COMMAND_REPLY_CHANNEL: {
@@ -305,30 +348,39 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 		replyMessageOld = (reply_message_t*)messageOld.payload;
 		replyMessageNew = (reply_message_t*)messageNew.payload;
 
-//		LOGi("replyMessageOld:");
-//		BLEutil::printArray(replyMessageOld, sizeof(reply_message_t));
-//		LOGi("replyMessageNew:");
-//		BLEutil::printArray(replyMessageNew, sizeof(reply_message_t));
+		//! Check if the reply msgs are valid (check numOfReplys field)
+		//! TODO: do we have to check the msg length here? Think not, since mesh messages are always full size.
+		if (!is_valid_reply_msg(replyMessageOld) || !is_valid_reply_msg(replyMessageNew)) {
+			return;
+		}
+
+#ifdef PRINT_MESH_VERBOSE
+		LOGi("replyMessageOld:");
+		BLEutil::printArray(replyMessageOld, sizeof(reply_message_t));
+		LOGi("replyMessageNew:");
+		BLEutil::printArray(replyMessageNew, sizeof(reply_message_t));
+#endif
 
 		//! The message counter is used to identify the to which command this message replies to.
-		if (replyMessageNew->messageCounter > replyMessageOld->messageCounter) {
+		int32_t delta = MeshMessageCounter::calcDelta(replyMessageOld->messageCounter, replyMessageNew->messageCounter);
+		if (delta > 0) {
 
 			LOGi("new is newer command reply");
 
 			//! Update message counter
-			_messageCounter[handle -1] = messageNew.messageCounter;
+			getMessageCounter(handle).setVal(messageNew.messageCounter);
 
 			//! Send resolved message into mesh
 			send(handle, replyMessageNew, sizeof(reply_message_t));
 
 			//! and process the new message
 			_meshControl.process(handle, &messageNew, sizeof(mesh_message_t));
-		} else if (replyMessageOld->messageCounter > replyMessageNew->messageCounter) {
+		} else if (delta < 0) {
 
 			LOGi("old is newer command reply");
 
 			//! Update message counter
-			_messageCounter[handle -1] = messageOld.messageCounter;
+			getMessageCounter(handle).setVal(messageOld.messageCounter);
 
 			//! Send resolved message into mesh
 			send(handle, replyMessageOld, sizeof(reply_message_t));
@@ -337,11 +389,7 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 			_meshControl.process(handle, &messageOld, sizeof(mesh_message_t));
 		} else {
 
-
-//			LOGi("merge ...");
-
-			//! If messages are of different type, we have a problem...
-			//! TODO: what now?
+			//! Replies should not be of a different type
 			if (replyMessageNew->messageType != replyMessageOld->messageType) {
 				LOGe("ohoh, different message types");
 				return;
@@ -362,8 +410,6 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 					for (int j = 0; j < replyMessageOld->numOfReplys; ++j) {
 						destItem = &replyMessageOld->statusList[j];
 						if (destItem->id == srcItem->id) {
-//							LOGi("index %d found at %d", i, j);
-//							BLEutil::printArray(srcItem, sizeof(status_reply_item_t));
 							found = true;
 							break;
 						}
@@ -371,18 +417,18 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 
 					//! If item is not in old message, then push it to the old message.
 					if (!found) {
-//						LOGi("index %d not found, push back:", i);
-//						BLEutil::printArray(srcItem, sizeof(status_reply_item_t));
 						push_status_reply_item(replyMessageOld, srcItem);
 					}
 
 				}
 
-//				LOGi("update final");
-//				BLEutil::printArray(replyMessageOld, sizeof(reply_message_t));
+#ifdef PRINT_MESH_VERBOSE
+				LOGi("merged:");
+				BLEutil::printArray(replyMessageOld, sizeof(reply_message_t));
+#endif
 
 				//! update message counter
-				_messageCounter[handle -1] = messageNew.messageCounter;
+				getMessageCounter(handle).setVal(messageNew.messageCounter);
 
 				//! send resolved message into mesh
 				send(handle, replyMessageOld, sizeof(reply_message_t));
@@ -391,7 +437,7 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 				_meshControl.process(handle, &messageOld, sizeof(mesh_message_t));
 
 			}
-			//! TODO: how to handle conflicts for state and config replies?
+			//! TODO: handle conflicts for state and config replies?
 		}
 
 
@@ -404,24 +450,18 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 		stateMessageOld = (state_message_t*)messageOld.payload;
 		stateMessageNew = (state_message_t*)messageNew.payload;
 
-//		LOGi("stateMessageOld:");
-//		BLEutil::printArray(stateMessageOld, sizeof(state_message_t));
-//		LOGi("stateMessageNew:");
-//		BLEutil::printArray(stateMessageNew, sizeof(state_message_t));
+		//! Check if the state msgs are valid (check head, tail, size fields)
+		if (!is_valid_state_msg(stateMessageOld) || !is_valid_state_msg(stateMessageNew)) {
+			return;
+		}
 
-		// Skip items that were both in old and new message
-		// [2017-02-23] Bart: Leads to corrupt messages!
-//		if (stateMessageOld->head > stateMessageNew->head) {
-////			LOGi("update new head");
-//			stateMessageNew->head = stateMessageOld->head;
-//			stateMessageNew->size = stateMessageOld->size;
-//		} else if (stateMessageNew->head > stateMessageOld->head) {
-//			stateMessageOld->head = stateMessageNew->head;
-//			stateMessageOld->size = stateMessageNew->size;
-////			LOGi("update old head");
-//		}
+#ifdef PRINT_MESH_VERBOSE
+		LOGi("stateMessageOld:");
+		BLEutil::printArray(stateMessageOld, sizeof(state_message_t));
+		LOGi("stateMessageNew:");
+		BLEutil::printArray(stateMessageNew, sizeof(state_message_t));
+#endif
 
-//		LOGi("merge ...");
 		//! Merge by pushing all items from the new message that are not in the old message to the old message.
 
 		//! Loop new message from oldest to newest item, so that the newest item is push lastly.
@@ -434,8 +474,6 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 			state_item_t* destItem;
 			while (peek_next_state_item(stateMessageOld, &destItem, destIndex)) {
 				if (memcmp(destItem, srcItem, sizeof(state_item_t)) == 0) {
-//						LOGi("index %d found already:", srcIndex);
-//						BLEutil::printArray(srcItem, sizeof(state_item_t));
 					found = true;
 					break;
 				}
@@ -444,16 +482,16 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 			//! If item is not in old message, then push it to the old message.
 			if (!found) {
 				push_state_item(stateMessageOld, srcItem);
-//					LOGi("index %d not found, push back:", srcIndex);
-//					BLEutil::printArray(srcItem, sizeof(state_item_t));
 			}
 		}
 
-//		LOGi("update final");
-//		BLEutil::printArray(stateMessageOld, sizeof(state_message_t));
+#ifdef PRINT_MESH_VERBOSE
+		LOGi("merged:");
+		BLEutil::printArray(stateMessageOld, sizeof(state_message_t));
+#endif
 
 		//! update message counter
-		_messageCounter[handle -1] = messageNew.messageCounter;
+		getMessageCounter(handle).setVal(messageNew.messageCounter);
 
 		//! send resolved message into mesh
 		send(handle, stateMessageOld, sizeof(state_message_t));
@@ -468,7 +506,7 @@ void Mesh::resolveConflict(uint8_t handle, encrypted_mesh_message_t* p_old, uint
 
 void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 {
-	rbc_mesh_value_handle_t handle;
+	mesh_handle_t handle;
 	encrypted_mesh_message_t* received;
 	uint16_t receivedLength;
 
@@ -502,8 +540,11 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	}
 #endif
 
-	if (handle > MESH_NUM_HANDLES) {
-		rbc_mesh_value_disable(handle);
+	//! Check if the handle is valid.
+	if (!isValidHandle(handle)) {
+		uint32_t error_code;
+		error_code = rbc_mesh_value_disable(handle);
+		APP_ERROR_CHECK(error_code);
 		return;
 	}
 
@@ -515,18 +556,19 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 			uint16_t storedLength = sizeof(encrypted_mesh_message_t);
 			APP_ERROR_CHECK(rbc_mesh_value_get(handle, (uint8_t*)&stored, &storedLength));
 
-			if (received->messageCounter >= stored.messageCounter) {
+			int32_t delta = MeshMessageCounter::calcDelta(stored.messageCounter, received->messageCounter);
+			if (delta >= 0) {
 
 //				LOGd("received data:");
 //				BLEutil::printArray(received, receivedLength);
 //				LOGd("stored data:");
 //				BLEutil::printArray(&stored, storedLength);
 
-				if (stored.messageCounter > received->messageCounter) {
-					resolveConflict(handle, received, receivedLength, &stored, storedLength);
-				} else {
-					resolveConflict(handle, &stored, storedLength, received, receivedLength);
-				}
+//				if (delta < 0) { // This seems impossible?
+//					resolveConflict(handle, received, receivedLength, &stored, storedLength);
+//				} else {
+				resolveConflict(handle, &stored, storedLength, received, receivedLength);
+//				}
 			}
 			break;
 		}
@@ -535,6 +577,7 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 
 //			LOGd("MESH RECEIVE");
 
+			//! Decrypt to a newly allocated message, so that we don't change the mesh handle value.
 			mesh_message_t message;
 
 #ifdef PRINT_MESH_VERBOSE
@@ -544,9 +587,10 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 
 			if (decodeMessage(received, receivedLength, &message, sizeof(mesh_message_t))) {
 
-//				if (message.messageCounter > _messageCounter[handle -1]) {
+				int32_t delta = getMessageCounter(handle).calcDelta(received->messageCounter);
+				if (delta > 0) {
 
-					_messageCounter[handle -1] = message.messageCounter;
+					getMessageCounter(handle).setVal(message.messageCounter);
 
 #ifdef PRINT_MESH_VERBOSE
 					LOGi("message:");
@@ -555,7 +599,10 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 
 					_meshControl.process(handle, &message, sizeof(mesh_message_t));
 
-//				}
+				}
+				else {
+					LOGw("Received older msg? received %d, stored %d", message.messageCounter, getMessageCounter(handle).getVal());
+				}
 			}
             break;
         }
@@ -594,30 +641,37 @@ void Mesh::checkForMessages() {
 	//! check if there are new messages
 	while (rbc_mesh_event_get(&evt) == NRF_SUCCESS) {
 
-		uint8_t handle = evt.params.tx.value_handle;
-		if (_messageCounter[handle -1] == 0) {
-			encrypted_mesh_message_t* received = (encrypted_mesh_message_t*)evt.params.rx.p_data;
+		mesh_handle_t handle = evt.params.tx.value_handle;
 
-#ifdef NDEBUG
-			_messageCounter[handle -1] = received->messageCounter;
-			LOGi("skip message %d on handle %d", received->messageCounter, handle);
-			continue;
-#else
-			if (received->messageCounter == 1) {
-				//! ok
-			} else {
-				//! skip the first message after a boot up but take over the message counter
-				_messageCounter[handle -1] = received->messageCounter;
+		//! Check if the handle is valid.
+		if (isValidHandle(handle)) {
+
+			encrypted_mesh_message_t* received = (encrypted_mesh_message_t*)evt.params.rx.p_data;
+			if (getMessageCounter(handle).getVal() == 0) {
+				//! Skip handling the first message we receive on each handle, as it probably is an old message.
+				//! This may lead to ignoring a message that should've been handled.
+				//! Skip the first message after a boot up but take over the message counter
+				getMessageCounter(handle).setVal(received->messageCounter);
 				LOGi("skip message %d on handle %d", received->messageCounter, handle);
-				continue;
 			}
-#endif
+			else {
+				//! handle the message
+				handleMeshMessage(&evt);
+			}
+
+		}
+		else {
+			//! then free associated memory
+			//! TODO: why do we have release the event pointer if we allocated the memory ourselves?
+			rbc_mesh_event_release(&evt);
+
+			uint32_t error_code;
+			error_code = rbc_mesh_value_disable(handle);
+			APP_ERROR_CHECK(error_code);
 		}
 
-		//! handle the message
-		handleMeshMessage(&evt);
-
 		//! then free associated memory
+		//! TODO: why do we have release the event pointer if we allocated the memory ourselves?
 		rbc_mesh_event_release(&evt);
 	}
 }

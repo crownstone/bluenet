@@ -31,7 +31,7 @@ extern "C" {
  * We are only storing data to the persistent storage in form of
  * structs, every value that needs to be stored has to be encapsulated
  * inside a struct with base class ps_storage_base_t. Each service that
- * needs to store data get's a struct which it takes care of. Values are
+ * needs to store data gets a struct which it takes care of. Values are
  * written and read to that struct, which is a local copy of the data
  * in memory. Changes to values are only kept once that struct is
  * written to memory.
@@ -228,7 +228,8 @@ struct ps_configuration_t : ps_storage_base_t {
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
-STATIC_ASSERT(sizeof(ps_configuration_t) <= 0x1000);
+//STATIC_ASSERT(sizeof(ps_configuration_t) <= 0x1000);
+STATIC_ASSERT(sizeof(ps_configuration_t) <= PSTORAGE_FLASH_PAGE_SIZE);
 
 /** Event handler for softdevice events. in particular, listen for
  *  NRF_EVT_RADIO_SESSION_CLOSED event to resume storage requests
