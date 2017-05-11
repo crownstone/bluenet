@@ -274,6 +274,7 @@ uint32_t configure_board(boards_config_t* p_config) {
 		break;
 
 	case ACR01B2E:
+	case ACR01B2F:
 		asACR01B2E(p_config);
 		break;
 

@@ -26,6 +26,7 @@ FIRMWARE_VERSION="0.6.0"
 # ACR01B2B             1501
 # ACR01B2C             1502
 # ACR01B2E             1503
+# ACR01B2F             1504
 # HARDWARE_BOARD=ACR01B2C
 
 # The device type defines how the device advertises itself, Apps and Bluenet Library
