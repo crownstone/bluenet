@@ -515,6 +515,14 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		break;
 	}
+	case CMD_KEEP_ALIVE_REPEAT_LAST: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "keep alive repeat");
+#if BUILD_MESHING == 1
+		MeshControl::getInstance().sendLastKeepAliveMessage();
+#endif
+		break;
+	}
 
 	case CMD_USER_FEEDBACK: {
 		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -656,6 +664,14 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 			Switch::getInstance().relayOn();
 		}
 
+		break;
+	}
+	case CMD_MULTI_SWITCH: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "multi switch");
+#if BUILD_MESHING == 1
+		MeshControl::getInstance().sendMultiSwitchMessage(buffer, size);
+#endif
 		break;
 	}
 	case CMD_ENABLE_CONT_POWER_MEASURE: {

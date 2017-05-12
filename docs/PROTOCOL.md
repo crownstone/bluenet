@@ -349,6 +349,9 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
 22 | Increase TX | - | Temporarily increase the TX power when in setup mode | x | x | x
 23 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
+24 | Keepalive mesh | - | Repeat the last keep alive message on the mesh. | x | x | x
+25 | Multi switch | [Multi switch packet](#multi_switch_mesh_packet) | Switch multiple crownstones with a command over the mesh. | x | x | x
+
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
 
@@ -713,7 +716,7 @@ Handle | Name | Type | Description
 
 ![Keep Alive packet](../docs/diagrams/keep-alive-mesh-packet.png)
 
-If the length of the mesh control packet is 0, the existing keepalive message will be repeated. This is used to delay the existing time outs by people who do not have permission to change the state.
+Deprecated: If the length of the mesh control packet is 0, the existing keepalive message will be repeated. This is used to delay the existing time outs by people who do not have permission to change the state.
 
 Type | Name | Length | Description
 --- | --- | --- | ---

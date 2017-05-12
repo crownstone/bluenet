@@ -70,6 +70,18 @@ public:
 	 */
 	void sendStateReplyMessage(uint32_t messageCounter, state_reply_item_t* stateReply);
 
+	/** Send the last sent keep alive message
+	 *
+	 * @return error code
+	 */
+	ERR_CODE sendLastKeepAliveMessage();
+
+	/** Send the last sent keep alive message
+	 *
+	 * @return error code
+	 */
+	ERR_CODE sendMultiSwitchMessage(multi_switch_message_t* msg, uint16_t length);
+
 	/** Send a message into the mesh, used by the mesh characteristic
 	 *
 	 * @channel the channel number, see <MeshChannels>

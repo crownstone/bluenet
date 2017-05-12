@@ -31,6 +31,8 @@ enum CommandHandlerTypes {
 	CMD_NOP                         = 21,    //! 0x15
 	CMD_INCREASE_TX                 = 22,    //! 0x16
 	CMD_RESET_ERRORS                = 23,    //! 0x17
+	CMD_KEEP_ALIVE_REPEAT_LAST      = 24,    //! 0x18
+	CMD_MULTI_SWITCH                = 25,    //! 0x19
 	CMD_TYPES
 };
 

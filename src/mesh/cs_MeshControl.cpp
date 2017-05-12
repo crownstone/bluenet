@@ -660,7 +660,6 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
 		{
-		id_type_t* id = message->data.ids;
 		if (message->numOfIds == 1 && *id == _myCrownstoneId) {
 			LOGd("Message is only for us");
 		} else if (is_broadcast_command(message)) {
@@ -706,48 +705,15 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 		break;
 	}
 	case KEEP_ALIVE_CHANNEL: {
+		keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
 
-		//! Special case: if no data is provided with the keep alive, repeat the keep alive message
-		//! currently in the keep alive channel
-		if (length == 0) {
-			LOGi("repeat last keep alive");
-
-			// TODO: do we have to make a copy here?
-			keep_alive_message_t msg = {};
-			uint16_t length = sizeof(msg);
-
-			if (!Mesh::getInstance().getLastMessage(KEEP_ALIVE_CHANNEL, &msg, length)) {
-				return ERR_NOT_AVAILABLE;
-			}
-//			if (!is_valid_keep_alive_msg(&msg, length)) { // Already checked in handleKeepAlive()
-//				LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
-//				return ERR_WRONG_PAYLOAD_LENGTH;
-//			}
-
-			ERR_CODE errCode;
-			errCode = handleKeepAlive(&msg, length);
-			if (errCode != ERR_SUCCESS) {
-				return errCode;
-			}
-
-			Mesh::getInstance().send(channel, &msg, length);
+		ERR_CODE errCode;
+		errCode = handleKeepAlive(msg, length);
+		if (errCode != ERR_SUCCESS) {
+			return errCode;
 		}
-		else {
 
-			keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
-//			if (!is_valid_keep_alive_msg(msg, length)) { // Already checked in handleKeepAlive()
-//				LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
-//				return ERR_WRONG_PAYLOAD_LENGTH;
-//			}
-
-			ERR_CODE errCode;
-			errCode = handleKeepAlive(msg, length);
-			if (errCode != ERR_SUCCESS) {
-				return errCode;
-			}
-
-			Mesh::getInstance().send(channel, p_data, length);
-		}
+		Mesh::getInstance().send(channel, p_data, length);
 		break;
 	}
 	case MULTI_SWITCH_CHANNEL: {
@@ -1015,6 +981,44 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 		push_state_item(&broadcastMessage, &stateItem);
 		Mesh::getInstance().send(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
 	}
+}
+
+ERR_CODE MeshControl::sendLastKeepAliveMessage() {
+	LOGi("repeat last keep alive");
+
+	// TODO: do we have to make a copy here?
+	keep_alive_message_t msg = {};
+	uint16_t length = sizeof(msg);
+
+	if (!Mesh::getInstance().getLastMessage(KEEP_ALIVE_CHANNEL, &msg, length)) {
+		return ERR_NOT_AVAILABLE;
+	}
+//	if (!is_valid_keep_alive_msg(&msg, length)) { // Already checked in handleKeepAlive()
+//		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+//		return ERR_WRONG_PAYLOAD_LENGTH;
+//	}
+
+	ERR_CODE errCode;
+	errCode = handleKeepAlive(&msg, length);
+	if (errCode != ERR_SUCCESS) {
+		return errCode;
+	}
+
+	if (Mesh::getInstance().send(KEEP_ALIVE_CHANNEL, &msg, length) == 0) {
+		return ERR_NOT_AVAILABLE;
+	}
+	return ERR_SUCCESS;
+}
+
+ERR_CODE MeshControl::sendMultiSwitchMessage(multi_switch_message_t* msg, uint16_t length) {
+	ERR_CODE errCode;
+	errCode = handleMultiSwitch(msg, length);
+	if (errCode != ERR_SUCCESS) {
+		return errCode;
+	}
+
+	Mesh::getInstance().send(MULTI_SWITCH_CHANNEL, msg, length);
+	return ERR_SUCCESS;
 }
 
 bool MeshControl::getLastStateDataMessage(state_message_t& message, uint16_t& size, bool changeChannel) {
