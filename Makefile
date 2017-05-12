@@ -139,7 +139,7 @@ cross-compile-target:
 host-compile-target:
 	$(call host-compile-target-prepare)
 	@mkdir -p $(BLUENET_BUILD_DIR)
-	@cd $(BLUENET_BUILD_DIR) && cmake $(COMPILE_FLAGS) \
+	@cd $(BLUENET_BUILD_DIR) && cmake $(RELEASE_COMPILE_FLAGS) \
 		$(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 	$(call host-compile-target-cleanup)
 
