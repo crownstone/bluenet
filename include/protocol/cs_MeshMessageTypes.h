@@ -379,14 +379,20 @@ inline bool is_command_for_us(command_message_t* message, id_type_t id) {
 		return true;
 	} else {
 		id_type_t* p_id;
-
 		p_id = message->data.ids;
 		for (int i = 0; i < message->numOfIds; ++i) {
 			if (*p_id == id) {
 				return true;
 			}
-			++(*p_id);
+			++p_id;
 		}
+
+		// Can't do this, because in the struct it says: ids[0]
+//		for (int i = 0; i < message->numOfIds; ++i) {
+//			if (message->data.ids[i] == id) {
+//				return true;
+//			}
+//		}
 
 		return false;
 	}
