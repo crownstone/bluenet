@@ -95,9 +95,10 @@ ERR_CODE MeshControl::handleCommand(command_message_t* msg, uint16_t length, uin
 	//! Only check if the ids array fits, the payload length will be checked in handleCommandForUs()
 //	[26-04-2017] I don't think we should be able to handle valid messages which are smaller than sizeof(command_message_t)
 //	[01-05-2017] But messages that come in via the mesh characteristic can be smaller.
-//	if (length < sizeof(command_message_t) || is_valid_command_message(msg, length)) {
-	if (is_valid_command_message(msg, length)) {
+//	if (length < sizeof(command_message_t) || !is_valid_command_message(msg, length)) {
+	if (!is_valid_command_message(msg, length)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+		BLEutil::printArray(msg, length);
 		sendStatusReplyMessage(messageCounter, ERR_WRONG_PAYLOAD_LENGTH);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
@@ -186,7 +187,7 @@ ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t le
 
 //	[26-04-2017] I don't think we should be able to receive/handle valid messages which are smaller than sizeof(multi_switch_message_t)
 //	[01-05-2017] But messages that come in via the mesh characteristic can be smaller.
-//	if (length < sizeof(multi_switch_message_t) || is_valid_multi_switch_message(msg, length)) {
+//	if (length < sizeof(multi_switch_message_t) || !is_valid_multi_switch_message(msg, length)) {
 	if (!is_valid_multi_switch_message(msg, length)) {
 	LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 		BLEutil::printArray(msg, length);
@@ -679,6 +680,9 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 		//! If the only id in there is for this crownstone, there is no need to send it into the mesh.
 		bool sendOverMesh = is_broadcast_command(message);
 		if (message->numOfIds == 1 && handleSelf) {
+			sendOverMesh = false;
+		}
+		else if (message->numOfIds > 0) {
 			sendOverMesh = true;
 		}
 
