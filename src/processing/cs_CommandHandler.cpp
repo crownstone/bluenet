@@ -670,7 +670,8 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "multi switch");
 #if BUILD_MESHING == 1
-		MeshControl::getInstance().sendMultiSwitchMessage(buffer, size);
+		multi_switch_message_t* multiSwitchMsg = (multi_switch_message_t*) buffer;
+		MeshControl::getInstance().sendMultiSwitchMessage(multiSwitchMsg, size);
 #endif
 		break;
 	}

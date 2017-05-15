@@ -660,6 +660,7 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
 		{
+		id_type_t* id = message->data.ids;
 		if (message->numOfIds == 1 && *id == _myCrownstoneId) {
 			LOGd("Message is only for us");
 		} else if (is_broadcast_command(message)) {
