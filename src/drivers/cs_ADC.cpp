@@ -134,8 +134,10 @@ cs_adc_error_t ADC::configPin(const channel_id_t channelNum, const pin_id_t pinN
 		.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
 		.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
 		.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
+//		.mode		= NRF_SAADC_MODE_DIFFERENTIAL,
 		.pin_p      = getAdcPin(pinNum),
 		.pin_n      = NRF_SAADC_INPUT_DISABLED
+//		.pin_n      = getAdcPin(0)
 	};
 
 	err_code = nrf_drv_saadc_channel_init(channelNum, &channelConfig);
