@@ -58,6 +58,7 @@ extern "C" {
 #define ACR01B1C             1002
 #define ACR01B1D             1003
 #define ACR01B1E             1004
+#define ACR01B6A             1005
 
 // CROWNSTONE PLUGS
 #define ACR01B2A             1500
