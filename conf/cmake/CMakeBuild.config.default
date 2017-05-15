@@ -4,7 +4,7 @@
 # Should be 10 characters or less (we need room for compilation date after it)
 BLUETOOTH_NAME="Crown"
 
-FIRMWARE_VERSION="0.6.0"
+FIRMWARE_VERSION="undefined"
 
 # The different boards that can be used:
 # ## old crownstones
