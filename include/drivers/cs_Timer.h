@@ -57,6 +57,10 @@ public:
 	 * @obj                     Reference to the object on which the function should be executed
 	 */
 	inline void start(app_timer_id_t& timer_handle, uint32_t ticks, void* obj) {
+		if (ticks < APP_TIMER_MIN_TIMEOUT_TICKS) {
+			LOGe("Tried to start a timer with %d ticks");
+			return;
+		}
 		BLE_CALL(app_timer_start, (timer_handle, ticks, obj));
 	}
 
