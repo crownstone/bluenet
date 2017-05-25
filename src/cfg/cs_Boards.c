@@ -101,6 +101,42 @@ void asACR01B1A(boards_config_t* p_config) {
 	p_config->minTxPower          = -20; // higher tx power for builtins
 }
 
+
+void asACR01B6A(boards_config_t* p_config) {
+	p_config->pinGpioPwm           = 8;
+	p_config->pinGpioRelayOn       = 6;
+	p_config->pinGpioRelayOff      = 7;
+	p_config->pinAinCurrent        = 2;
+	p_config->pinAinVoltage        = 1;
+	p_config->pinAinZeroRef        = 0;
+	p_config->pinAinPwmTemp        = 3;
+	p_config->pinGpioRx            = 20;
+	p_config->pinGpioTx            = 19;
+	p_config->pinLedRed            = 10;
+	p_config->pinLedGreen          = 9;
+
+	p_config->flags.hasRelay       = true;
+	p_config->flags.pwmInverted    = false;
+	p_config->flags.hasSerial      = false;
+	p_config->flags.hasLed         = true;
+	p_config->flags.ledInverted    = false;
+
+	p_config->deviceType           = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+
+	//TODO: The voltage multipliers and zeroes need to be (re)calibrated for this board!!
+	p_config->voltageMultiplier   = 0.2f;
+	p_config->currentMultiplier   = 0.0044f;
+	p_config->voltageZero         = 1993;
+	p_config->currentZero         = 1980;
+	p_config->powerZero           = 3500;
+
+	p_config->pwmTempVoltageThreshold     = 0.76;
+	p_config->pwmTempVoltageThresholdDown = 0.41;
+
+	p_config->minTxPower          = -20; // higher tx power for builtins
+}
+
+
 void asACR01B2A(boards_config_t* p_config) {
 	p_config->pinGpioPwm           = 8;
 	p_config->pinGpioRelayOn       = 6;
@@ -265,6 +301,10 @@ uint32_t configure_board(boards_config_t* p_config) {
 	case ACR01B1D:
 	case ACR01B1E:
 		asACR01B1A(p_config);
+		break;
+
+	case ACR01B6A:
+		asACR01B6A(p_config);
 		break;
 
 	case ACR01B2A:
