@@ -949,7 +949,7 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	//! To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)
 	//! For (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes)
 	LOGi("Welcome Crownstone");
-	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_TIME));
+	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_DAY));
 	LOGi("Compilation time: %s", __TIME__);
 #ifdef GIT_HASH
 	LOGi("Git hash: %s", GIT_HASH);

@@ -67,7 +67,6 @@ GIT_BRANCH=$(shell git symbolic-ref --short -q HEAD)
 GIT_HASH=$(shell git rev-parse --short=25 HEAD)
 
 DEBUG_COMPILE_FLAGS=-DCOMPILATION_DAY="\"${COMPILATION_DAY}\"" \
-			  -DCOMPILATION_TIME="\"${COMPILATION_TIME}\"" \			  
 			  -DVERBOSITY="${VERBOSITY}" \
 			  -DGIT_BRANCH="\"${GIT_BRANCH}\"" \
 			  -DGIT_HASH="\"${GIT_HASH}\"" \
@@ -77,7 +76,6 @@ RELEASE_COMPILE_FLAGS=-DCOMPILATION_DAY="\"${COMPILATION_DAY}\"" \
 			  -DCOMPILATION_TIME="\"${COMPILATION_TIME}\"" \
 			  -DVERBOSITY="${VERBOSITY}" \
 			  -DGIT_BRANCH="\"${GIT_BRANCH}\"" \
-			  -DGIT_HASH="\"${GIT_HASH}\"" \
 			  -DCMAKE_BUILD_TYPE=MinSizeRel
 
 # We copy the cmake files we need to the bluenet folder. This:
