@@ -9,13 +9,14 @@
 #include <ble/cs_Nordic.h>
 #include <drivers/cs_Timer.h>
 #include <structs/cs_ScheduleEntries.h>
+#include <events/cs_EventListener.h>
 
 //todo: just remove it totally if it's not necessary to disable it
 #define SCHEDULER_ENABLED 1
 
 #define SCHEDULER_UPDATE_FREQUENCY 2
 
-class Scheduler {
+class Scheduler : EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static Scheduler& getInstance() {
@@ -66,6 +67,10 @@ protected:
 
 	void publishScheduleEntries();
 
+	/* Handle events as EventListener
+	 */
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
 private:
 	Scheduler();
 
@@ -73,12 +78,8 @@ private:
 	uint8_t _schedulerBuffer[sizeof(schedule_list_t)];
 #endif
 
-#if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _appTimerData;
 	app_timer_id_t           _appTimerId;
-#else
-	uint32_t                 _appTimerId;
-#endif
 
 	uint32_t _rtcTimeStamp;
 	uint32_t _posixTimeStamp;

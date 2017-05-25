@@ -232,6 +232,11 @@ ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, 
 		EventDispatcher::getInstance().dispatch(EVT_EXTERNAL_STATE_CHANGE);
 	}
 
+	if (msg->timestamp != 0) {
+		//! Dispatch an event with the received timestamp
+		EventDispatcher::getInstance().dispatch(EVT_MESH_TIME, &(msg->timestamp), sizeof(msg->timestamp));
+	}
+
 #ifdef PRINT_DEBUG
 #if defined(PRINT_VERBOSE_STATE_BROADCAST) && defined(PRINT_VERBOSE_STATE_CHANGE)
 #elif defined(PRINT_VERBOSE_STATE_BROADCAST)
@@ -960,6 +965,13 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 		clear_state_msg(&message);
 	}
 	push_state_item(&message, &stateItem);
+
+	//! Set the timestamp to the current time
+	uint32_t timestamp;
+	if (State::getInstance().get(STATE_TIME, timestamp) != ERR_SUCCESS) {
+		timestamp = 0;
+	}
+	message.timestamp = timestamp;
 
 #endif // UPDATE_EXISTING
 

@@ -23,8 +23,10 @@ struct __attribute__((__packed__)) state_message_t {
 	uint8_t tail;
 	//! the number of elements in the list
 	uint8_t size;
-	//! currently there are 5 bytes left
-	uint8_t reserved[5];
+	//! reserved for future use
+	uint8_t reserved;
+	//! the time (posix) at which this message was originally sent (0 for unknown time)
+	uint32_t timestamp;
 	//! the list itself
 	state_item_t list[MAX_STATE_ITEMS];
 };
