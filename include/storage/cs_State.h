@@ -236,7 +236,7 @@ protected:
 
 	std::vector<uint8_t> _notifyingStates;
 
-	//! state variables which do not need to be stored in storage:
+	//! state variables which do not need to be stored in persistent storage:
 	int32_t _temperature;
 	int32_t _powerUsage;
 	uint32_t _time;

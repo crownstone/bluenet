@@ -248,11 +248,11 @@ ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, 
 
 	BLEutil::printArray(msg, length);
 
-	int16_t idx = -1;
-	state_item_t* p_stateItem;
-	while (peek_next_state_item(msg, &p_stateItem, idx)) {
-		LOGi("idx=%d id=%d switch=%d bitmask=%d P=%d E=%d", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerUsage, p_stateItem->accumulatedEnergy);
-	}
+//	int16_t idx = -1;
+//	state_item_t* p_stateItem;
+//	while (peek_next_state_item(msg, &p_stateItem, idx)) {
+//		LOGi("idx=%d id=%d switch=%d bitmask=%d P=%d E=%d", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerUsage, p_stateItem->accumulatedEnergy);
+//	}
 #endif // PRINT_DEBUG
 	return ERR_SUCCESS;
 }

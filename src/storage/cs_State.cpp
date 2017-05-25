@@ -534,6 +534,7 @@ bool State::isNotifying(uint8_t type) {
 }
 
 void State::setNotify(uint8_t type, bool enable) {
+	// TODO: why do we support notifications for multiple types at once?
 	if (enable) {
 		if (!isNotifying(type)) {
 #ifdef PRINT_DEBUG

@@ -9,7 +9,7 @@
 #include <events/cs_EventTypes.h>
 
 /** State variable types
- *
+ * Also used as event types
  * Use in the characteristic to read and write state variables in <CommonService>.
  */
 enum StateTypes {

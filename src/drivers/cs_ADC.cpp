@@ -225,7 +225,7 @@ void ADC::update(nrf_saadc_value_t* buf) {
 		APP_ERROR_CHECK(errorCode);
 	} else {
 		//! Skip the callback, just put buffer in queue again.
-		write("/!\\");
+//		write("/!\\");
 		addBufferToSampleQueue(buf);
 	}
 }
