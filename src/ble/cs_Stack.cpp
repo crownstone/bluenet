@@ -645,17 +645,31 @@ void Nrf51822BluetoothStack::restartAdvertising() {
 
 	if (_advertising) {
 		err_code = sd_ble_gap_adv_stop();
-		APP_ERROR_CHECK(err_code); // Got an error 8 here
+		//! Ignore invalid state error, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
+		if (err_code != NRF_ERROR_INVALID_STATE) {
+			APP_ERROR_CHECK(err_code);
+		}
+		else {
+			LOGw("adv_stop invalid state");
+		}
 	}
 
 	err_code = sd_ble_gap_adv_start(&_adv_params);
-	if (err_code == NRF_ERROR_INVALID_PARAM) {
+	switch (err_code) {
+	case NRF_ERROR_BUSY:
+		//! Docs say: retry again later.
+		//! Since restartAdvertising() gets called all the time anyway, I guess we don't have to schedule a retry.
+		LOGw("adv_start busy");
+		break;
+	case NRF_ERROR_INVALID_PARAM:
 		LOGf(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
+		APP_ERROR_CHECK(err_code);
+		_advertising = true;
+		break;
+	default:
+		APP_ERROR_CHECK(err_code);
+		_advertising = true;
 	}
-	APP_ERROR_CHECK(err_code);
-
-	_advertising = true;
-
 }
 
 void Nrf51822BluetoothStack::startAdvertising() {
@@ -680,7 +694,11 @@ void Nrf51822BluetoothStack::stopAdvertising() {
 	if (!_advertising)
 		return;
 
-	BLE_CALL(sd_ble_gap_adv_stop, ());
+	uint32_t err_code = sd_ble_gap_adv_stop();
+	//! Ignore invalid state error, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
+	if (err_code != NRF_ERROR_INVALID_STATE) {
+		APP_ERROR_CHECK(err_code);
+	}
 
 	LOGi(MSG_BLE_ADVERTISING_STOPPED);
 
@@ -743,10 +761,11 @@ void Nrf51822BluetoothStack::setAdvertisementData() {
 	//case NRF_ERROR_INVALID_PARAMETER:
 	case NRF_SUCCESS:
 		break;
-	case 0x07:
+	case NRF_ERROR_INVALID_PARAM:
 		LOGi("Invalid advertisement configuration");
 		break;
 	default:
+		LOGd("Retry setAdvData (err %d)", err);
 	//	BLE_CALL(sd_ble_gap_adv_stop, ());
 		BLE_CALL(ble_advdata_set, (&_advdata, &_scan_resp));
 	//	BLE_CALL(sd_ble_gap_adv_start, (&adv_params));
@@ -1216,6 +1235,9 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 		break;
 #endif
 	case BLE_GAP_EVT_TIMEOUT:
+		if (p_ble_evt->evt.gap_evt.params.timeout.src == BLE_GAP_TIMEOUT_SRC_ADVERTISING) {
+			_advertising = false; //! Advertising stops, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
+		}
 		break;
 
 	case BLE_EVT_TX_COMPLETE:
@@ -1257,7 +1279,7 @@ void Nrf51822BluetoothStack::resetConnectionAliveTimer() {
 
 void Nrf51822BluetoothStack::on_connected(ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
-	_advertising = false; //! it seems like maybe we automatically stop advertising when we're connected.
+	_advertising = false; //! Advertising stops on connect, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 	_disconnectingInProgress = false;
 	BLE_CALL(sd_ble_gap_conn_param_update, (p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params));
 

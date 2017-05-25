@@ -750,7 +750,7 @@ void Crownstone::tick() {
 
 #if ADVERTISEMENT_IMPROVEMENT==1
 	//! update advertisement parameters (to improve scanning on (some) android phones)
-	_stack->updateAdvertisement();
+	_stack->updateAdvertisement(true);
 #endif
 
 	//! update advertisement (to update service data)

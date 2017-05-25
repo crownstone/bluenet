@@ -73,6 +73,7 @@ void Eddystone::advertising_start(void) {
 	uint32_t err_code;
 
 	err_code = sd_ble_gap_adv_start(&m_adv_params);
+	LOGd("adv_start %d", err_code)
 	APP_ERROR_CHECK(err_code);
 }
 
