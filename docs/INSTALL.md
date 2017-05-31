@@ -76,11 +76,11 @@ The best way is to first [fork](https://github.com/dobots/bluenet/fork) the blue
 and download the code (We recommend to download the code into the workspace, but you can place it anywhere you want):
 
     cd ~/bluenet-workspace
-    git clone https://github.com/YOUR_GITHUB_USERNAME/bluenet
+    git clone https://github.com/YOUR_GITHUB_USERNAME/bluenet source
 
 and set the correct upstream:
 
-    cd bluenet
+    cd source
     git remote add upstream git@github.com:crownstone/bluenet.git
 
 Next make a dir for your config file(s), by default, this should be called `config` and be placed inside the workspace.
@@ -89,7 +89,7 @@ Next make a dir for your config file(s), by default, this should be called `conf
 
 Now we need to set up the environment variables to keep track of the different folders required to build bluenet
 
-    cd ~/bluenet_workspace/bluenet
+    cd ~/bluenet_workspace/source
     cp conf/cmake/env.config.template env.config
 
 Open the file then uncomment and assign the variable `BLUENET_WORKSPACE_DIR` to your workspace path, e.g.
@@ -107,11 +107,13 @@ Apply the environment variables:
 
     source ~/.bashrc
 
+If you have another shell, please do the above for your own shell.
+
 ## Configuration
 
 Copy the template config file to your config directory:
 
-    cp $BLUENET_DIR/CMakeBuild.config.template $BLUENET_CONFIG_DIR/CMakeBuild.config
+    cp $BLUENET_DIR/conf/cmake/CMakeBuild.config.template $BLUENET_CONFIG_DIR/CMakeBuild.config
 
 then open it to customize
 
@@ -179,7 +181,7 @@ First build and upload the SoftDevice:
 Now we can build our own software:
 
     cd $BLUENET_DIR/scripts
-    ./firmware.sh build
+    ./firmware.sh --command=build --target=default
 
 By default, the code is built inside the `$BLUENET_WORKSPACE_DIR/build` folder and if successful, the compiled binaries (*.hex, *.elf, *.bin) are copied to `$BLUENET_WORKSPACE_DIR/bin`. If you want to change either folder, you can uncomment and assign the following environment variables in `$BLUENET_DIR/env.config`
 
@@ -190,19 +192,19 @@ If the compilation fails due to misconfiguration, you might have to remove the b
 
 To upload the application with the JLink you can use:
 
-    ./firmware.sh upload
+    ./firmware.sh --command=upload --target=default
 
 To debug with `gdb` you can use:
 
-    ./firmware.sh debug
+    ./firmware.sh --command=debug --target=default
 
 There is a shortcut to build and upload you can use:
 
-    ./firmware.sh run
+    ./firmware.sh --command=run --target=default
 
 And another shortcut to build, upload, and debug:
 
-    ./firmware.sh all
+    ./firmware.sh --command=all --target=default
 
 ### Advanced Usage
 
@@ -213,9 +215,9 @@ The above scripts and configuration is sufficient if you work with one device an
 There are options which are the same for all configurations, such as the paths (`NRF51822_DIR`, `COMPILER_PATH`, etc.). Instead of defining them in every configuration file, you can create a file `$BLUENET_DIR/CMakeBuild.config.local` and store common configuration values there.
 This file is optional and not required. If it is available, it will overwrite the default values from $BLUENET_DIR/CMakeBuild.config.default`. The order of precedence of the configuration values in the 3 files is as follows:
 
-1. Values are loaded from `$BLUENET_DIR/CMakeBuild.config.default`
-2. Values are loaded from `$BLUENET_DIR/CMakeBuild.config.local`. This file is only read if it is present. It overwrites the values loaded at step 1.
-3. Values are loaded from `$BLUENET_CONFIG_DIR/CMakeBuild.config`. Values read here will overwrite values loaded at step 1 and 2.
+1. Values are loaded from `$BLUENET_DIR/conf/cmake/CMakeBuild.config.default`
+2. Values are loaded from `$BLUENET_DIR/conf/cmake/CMakeBuild.config.local`. This file is only read if it is present. It overwrites the values loaded at step 1.
+3. Values are loaded from `$BLUENET_CONFIG_DIR/conf/cmake/CMakeBuild.config`. Values read here will overwrite values loaded at step 1 and 2.
 
 #### Different Configurations
 
@@ -243,15 +245,15 @@ Now you can call the scripts above together with the target at the end of the ca
 
 E.g. to build and upload target `BLUE` execute:
 
-    ./firmware.sh run BLUE
+    ./firmware.sh --command=run --target=BLUE
 
 and to build, upload and debug target `RED` call:
 
-    ./firmware.sh all RED
+    ./firmware.sh --command=all --target=RED
 
 The following scripts support multi targets:
 
-- `firmware.sh`. Usage `./firmware.sh <COMMAND> <TARGET>`
+- `firmware.sh`. Usage `./firmware.sh --command=<COMMAND> --target=<TARGET>`
 - `softdevice.sh`. Usage `./softdevice.sh <COMMAND> <TARGET>`
 - `hardware_version.sh`. Usage `./hardware_version.sh <TARGET>`
 - 'all.sh'. Usage `./all.sh <TARGET>`
