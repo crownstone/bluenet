@@ -173,7 +173,7 @@ And set the following variables to the correct paths:
 ## Usage
 
 Once everything is installed and configured, the code can be compiled and uploaded.
-You will have to attach a programmer/debugger, like the JLink. Towards that you only need four pins: `GND`, `3V`, `SWDIO / RESET`, and `SWCLK / FACTORY`. The pin layout of the JLink connector is written out on the [DoBots blog](http://dobots.nl/2014/03/05/rfduino-without-rfduino-code/).
+You will have to attach a programmer/debugger, like the JLink. Towards that you only need four pins: `GND`, `3V`, `SWDIO / RESET`, and `SWCLK / FACTORY`. The pin layout of the JLink connector is written out on the [Crownstone blog](https://crownstone.rocks/2015/01/23/programming-the-nrf51822-with-the-st-link).
 
 ### Compiling, uploading and debugging
 
@@ -306,56 +306,6 @@ and then enter `ShowEmuList`, which gives a list of connected devices, e.g.
 Now if you call one of the scripts, with target `BLUE`,  e.g. `./firmware.sh run BLUE` it will compile config `BLUE` at `$BLUENET_CONFIG_DIR/BLUE/CMakeBuild.config` and upload it to `DEVICE1`. While calling `./firmware.sh run RED` will compile config `RED` at `$BLUENET_CONFIG_DIR/RED/CMakeBuild.config` and upload it to `DEVICE2`.
 
 And if you call `./firmware.sh run` it will compile the default config at `$BLUENET_CONFIG_DIR/CMakeBuild.config` and upload it to device `DEVICE2`.
-
-## Flashing with the ST-Link
-
-The above assumes you have the J-Link programmer from Nordic. If you do not have that device, you can still program something like the RFduino or the Crownstone, by using an ST-Link. A full explanation can be found on <https://dobots.nl/2015/01/23/programming-the-nrf51822-with-the-st-link/>.
-
-Disclaimer: no work has been done on the ST-Link scripts for quite some time, so things might not work anymore.
-
-### Combine softdevice and firmware
-
-First of all you should combine all the required binaries into one big binary. This is done by the script combine.sh. Before you use it, you will need to install srec_cat on your system.
-
-    sudo apt-get install srecord
-
-If you call the script it basically just runs srec_cat:
-
-    ./combine.sh
-
-And you will see that it runs something like this:
-
-    srec_cat /opt/softdevices/s110_nrf51822_7.0.0_softdevice.hex -intel crownstone.bin -binary -offset 0x00016000 -o combined.hex -intel
-
-You have to adjust that file on the moment manually to switch between softdevices or to add/remove the bootloader, sorry! Note that the result is a `.hex` file. Such a file does haveinformation across multiple memory sections. If you upload a `.bin` file often configuration bits/bytes will not be set!
-
-### Upload with OpenOCD
-
-Rather than downloading `openocd` from the Ubuntu repositories, it is recommended to get the newest software from the source:
-
-    cd /opt
-    git clone https://github.com/ntfreak/openocd
-    sudo aptitude install libtool automake libusb-1.0-0-dev expect
-    cd openocd
-    ./bootstrap
-    ./configure --enable-stlink
-    make
-    sudo make install
-
-Also, make sure you can use the USB ST-Link device without sudo rights:
-
-    sudo cp scripts/openocd/49-stlinkv2.rules /etc/udev/rules.d
-    sudo restart udev
-
-You can now use the `flash_openocd.sh` script in the `scripts` directory:
-
-    ./flash_openocd.sh init
-
-And in another console:
-
-    ./flash_openocd.sh upload combined.bin
-
-Here the binary `combined.bin` is the softdevice and application combined.
 
 ## UART
 
