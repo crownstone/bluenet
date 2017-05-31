@@ -96,8 +96,13 @@ Open the file then uncomment and assign the variable `BLUENET_WORKSPACE_DIR` to 
 
     BLUENET_WORKSPACE_DIR=~/bluenet_workspace
 
-If you placed the bluenet source code at a different place than `$BLUENET_WORKSPACE_DIR/bluenet`, then you can also uncomment and assign the `BLUENET_DIR` variable to the correct location.
-Same for the config directory, if you choose a different location than `$BLUENET_WORKSPACE_DIR/config`, assign the `BLUENET_CONFIG_DIR` to point to the correct location.
+And you can - if you like to - point to all folders independently:
+
+    BLUENET_DIR=~/bluenet_workspace/source
+    BLUENET_CONFIG_DIR=~/bluenet_workspace/config
+    BLUENET_BIN_DIR=~/bluenet_workspace/bin
+    BLUENET_BUILD_DIR=~/bluenet_workspace/build
+    BLUENET_RELEASE_DIR=~/bluenet_workspace/release
 
 Last we want to load the environments by default for every terminal session with the following command:
 
