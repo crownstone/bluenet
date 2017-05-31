@@ -106,7 +106,7 @@ And you can - if you like to - point to all folders independently:
 
 Last we want to load the environments by default for every terminal session with the following command:
 
-    echo "source ~/bluenet_workspace/bluenet/scripts/env.sh" >> ~/.bashrc
+    echo "source ~/bluenet_workspace/source/scripts/env.sh" >> ~/.bashrc
 
 Apply the environment variables:
 
