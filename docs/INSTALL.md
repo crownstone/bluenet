@@ -90,7 +90,7 @@ Next make a dir for your config file(s), by default, this should be called `conf
 Now we need to set up the environment variables to keep track of the different folders required to build bluenet
 
     cd ~/bluenet_workspace/bluenet
-    cp env.config.template env.config
+    cp conf/cmake/env.config.template env.config
 
 Open the file then uncomment and assign the variable `BLUENET_WORKSPACE_DIR` to your workspace path, e.g.
 
