@@ -990,8 +990,14 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 	if (event) {
 		//! Append state to message, regardless of whether the state of this crownstone is already in there.
 		state_message_t broadcastMessage = {};
-		Mesh::getInstance().getLastMessage(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
+		messageSize = sizeof(state_message_t);
+		success = Mesh::getInstance().getLastMessage(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
+		if (!success || !is_valid_state_msg(&broadcastMessage)) {
+			clear_state_msg(&broadcastMessage);
+		}
 		push_state_item(&broadcastMessage, &stateItem);
+		//! Set the timestamp to the current time
+		broadcastMessage.timestamp = timestamp;
 		Mesh::getInstance().send(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
 	}
 }

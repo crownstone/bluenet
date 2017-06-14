@@ -487,6 +487,13 @@ void Mesh::resolveConflict(mesh_handle_t handle, encrypted_mesh_message_t* p_old
 			}
 		}
 
+		//! Set the timestamp to the current time
+		uint32_t timestamp;
+		if (State::getInstance().get(STATE_TIME, timestamp) != ERR_SUCCESS) {
+			timestamp = 0;
+		}
+		stateMessageOld->timestamp = timestamp;
+
 #ifdef PRINT_MESH_VERBOSE
 		LOGi("merged:");
 		BLEutil::printArray(stateMessageOld, sizeof(state_message_t));
