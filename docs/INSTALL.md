@@ -76,11 +76,11 @@ The best way is to first [fork](https://github.com/dobots/bluenet/fork) the blue
 and download the code (We recommend to download the code into the workspace, but you can place it anywhere you want):
 
     cd ~/bluenet-workspace
-    git clone https://github.com/YOUR_GITHUB_USERNAME/bluenet
+    git clone https://github.com/YOUR_GITHUB_USERNAME/bluenet source
 
 and set the correct upstream:
 
-    cd bluenet
+    cd source
     git remote add upstream git@github.com:crownstone/bluenet.git
 
 Next make a dir for your config file(s), by default, this should be called `config` and be placed inside the workspace.
@@ -89,29 +89,36 @@ Next make a dir for your config file(s), by default, this should be called `conf
 
 Now we need to set up the environment variables to keep track of the different folders required to build bluenet
 
-    cd ~/bluenet_workspace/bluenet
-    cp env.config.template env.config
+    cd ~/bluenet_workspace/source
+    cp conf/cmake/env.config.template env.config
 
 Open the file then uncomment and assign the variable `BLUENET_WORKSPACE_DIR` to your workspace path, e.g.
 
     BLUENET_WORKSPACE_DIR=~/bluenet_workspace
 
-If you placed the bluenet source code at a different place than `$BLUENET_WORKSPACE_DIR/bluenet`, then you can also uncomment and assign the `BLUENET_DIR` variable to the correct location.
-Same for the config directory, if you choose a different location than `$BLUENET_WORKSPACE_DIR/config`, assign the `BLUENET_CONFIG_DIR` to point to the correct location.
+And you can - if you like to - point to all folders independently:
+
+    BLUENET_DIR=~/bluenet_workspace/source
+    BLUENET_CONFIG_DIR=~/bluenet_workspace/config
+    BLUENET_BIN_DIR=~/bluenet_workspace/bin
+    BLUENET_BUILD_DIR=~/bluenet_workspace/build
+    BLUENET_RELEASE_DIR=~/bluenet_workspace/release
 
 Last we want to load the environments by default for every terminal session with the following command:
 
-    echo "source ~/bluenet_workspace/bluenet/scripts/env.sh" >> ~/.bashrc
+    echo "source ~/bluenet_workspace/source/scripts/env.sh" >> ~/.bashrc
 
 Apply the environment variables:
 
     source ~/.bashrc
 
+If you have another shell, please do the above for your own shell.
+
 ## Configuration
 
 Copy the template config file to your config directory:
 
-    cp $BLUENET_DIR/CMakeBuild.config.template $BLUENET_CONFIG_DIR/CMakeBuild.config
+    cp $BLUENET_DIR/conf/cmake/CMakeBuild.config.template $BLUENET_CONFIG_DIR/CMakeBuild.config
 
 then open it to customize
 
@@ -166,7 +173,7 @@ And set the following variables to the correct paths:
 ## Usage
 
 Once everything is installed and configured, the code can be compiled and uploaded.
-You will have to attach a programmer/debugger, like the JLink. Towards that you only need four pins: `GND`, `3V`, `SWDIO / RESET`, and `SWCLK / FACTORY`. The pin layout of the JLink connector is written out on the [DoBots blog](http://dobots.nl/2014/03/05/rfduino-without-rfduino-code/).
+You will have to attach a programmer/debugger, like the JLink. Towards that you only need four pins: `GND`, `3V`, `SWDIO / RESET`, and `SWCLK / FACTORY`. The pin layout of the JLink connector is written out on the [Crownstone blog](https://crownstone.rocks/2015/01/23/programming-the-nrf51822-with-the-st-link).
 
 ### Compiling, uploading and debugging
 
@@ -179,7 +186,7 @@ First build and upload the SoftDevice:
 Now we can build our own software:
 
     cd $BLUENET_DIR/scripts
-    ./firmware.sh build
+    ./firmware.sh --command=build --target=default
 
 By default, the code is built inside the `$BLUENET_WORKSPACE_DIR/build` folder and if successful, the compiled binaries (*.hex, *.elf, *.bin) are copied to `$BLUENET_WORKSPACE_DIR/bin`. If you want to change either folder, you can uncomment and assign the following environment variables in `$BLUENET_DIR/env.config`
 
@@ -190,19 +197,19 @@ If the compilation fails due to misconfiguration, you might have to remove the b
 
 To upload the application with the JLink you can use:
 
-    ./firmware.sh upload
+    ./firmware.sh --command=upload --target=default
 
 To debug with `gdb` you can use:
 
-    ./firmware.sh debug
+    ./firmware.sh --command=debug --target=default
 
 There is a shortcut to build and upload you can use:
 
-    ./firmware.sh run
+    ./firmware.sh --command=run --target=default
 
 And another shortcut to build, upload, and debug:
 
-    ./firmware.sh all
+    ./firmware.sh --command=all --target=default
 
 ### Advanced Usage
 
@@ -213,9 +220,9 @@ The above scripts and configuration is sufficient if you work with one device an
 There are options which are the same for all configurations, such as the paths (`NRF51822_DIR`, `COMPILER_PATH`, etc.). Instead of defining them in every configuration file, you can create a file `$BLUENET_DIR/CMakeBuild.config.local` and store common configuration values there.
 This file is optional and not required. If it is available, it will overwrite the default values from $BLUENET_DIR/CMakeBuild.config.default`. The order of precedence of the configuration values in the 3 files is as follows:
 
-1. Values are loaded from `$BLUENET_DIR/CMakeBuild.config.default`
-2. Values are loaded from `$BLUENET_DIR/CMakeBuild.config.local`. This file is only read if it is present. It overwrites the values loaded at step 1.
-3. Values are loaded from `$BLUENET_CONFIG_DIR/CMakeBuild.config`. Values read here will overwrite values loaded at step 1 and 2.
+1. Values are loaded from `$BLUENET_DIR/conf/cmake/CMakeBuild.config.default`
+2. Values are loaded from `$BLUENET_DIR/conf/cmake/CMakeBuild.config.local`. This file is only read if it is present. It overwrites the values loaded at step 1.
+3. Values are loaded from `$BLUENET_CONFIG_DIR/conf/cmake/CMakeBuild.config`. Values read here will overwrite values loaded at step 1 and 2.
 
 #### Different Configurations
 
@@ -243,15 +250,15 @@ Now you can call the scripts above together with the target at the end of the ca
 
 E.g. to build and upload target `BLUE` execute:
 
-    ./firmware.sh run BLUE
+    ./firmware.sh --command=run --target=BLUE
 
 and to build, upload and debug target `RED` call:
 
-    ./firmware.sh all RED
+    ./firmware.sh --command=all --target=RED
 
 The following scripts support multi targets:
 
-- `firmware.sh`. Usage `./firmware.sh <COMMAND> <TARGET>`
+- `firmware.sh`. Usage `./firmware.sh --command=<COMMAND> --target=<TARGET>`
 - `softdevice.sh`. Usage `./softdevice.sh <COMMAND> <TARGET>`
 - `hardware_version.sh`. Usage `./hardware_version.sh <TARGET>`
 - 'all.sh'. Usage `./all.sh <TARGET>`
@@ -299,56 +306,6 @@ and then enter `ShowEmuList`, which gives a list of connected devices, e.g.
 Now if you call one of the scripts, with target `BLUE`,  e.g. `./firmware.sh run BLUE` it will compile config `BLUE` at `$BLUENET_CONFIG_DIR/BLUE/CMakeBuild.config` and upload it to `DEVICE1`. While calling `./firmware.sh run RED` will compile config `RED` at `$BLUENET_CONFIG_DIR/RED/CMakeBuild.config` and upload it to `DEVICE2`.
 
 And if you call `./firmware.sh run` it will compile the default config at `$BLUENET_CONFIG_DIR/CMakeBuild.config` and upload it to device `DEVICE2`.
-
-## Flashing with the ST-Link
-
-The above assumes you have the J-Link programmer from Nordic. If you do not have that device, you can still program something like the RFduino or the Crownstone, by using an ST-Link. A full explanation can be found on <https://dobots.nl/2015/01/23/programming-the-nrf51822-with-the-st-link/>.
-
-Disclaimer: no work has been done on the ST-Link scripts for quite some time, so things might not work anymore.
-
-### Combine softdevice and firmware
-
-First of all you should combine all the required binaries into one big binary. This is done by the script combine.sh. Before you use it, you will need to install srec_cat on your system.
-
-    sudo apt-get install srecord
-
-If you call the script it basically just runs srec_cat:
-
-    ./combine.sh
-
-And you will see that it runs something like this:
-
-    srec_cat /opt/softdevices/s110_nrf51822_7.0.0_softdevice.hex -intel crownstone.bin -binary -offset 0x00016000 -o combined.hex -intel
-
-You have to adjust that file on the moment manually to switch between softdevices or to add/remove the bootloader, sorry! Note that the result is a `.hex` file. Such a file does haveinformation across multiple memory sections. If you upload a `.bin` file often configuration bits/bytes will not be set!
-
-### Upload with OpenOCD
-
-Rather than downloading `openocd` from the Ubuntu repositories, it is recommended to get the newest software from the source:
-
-    cd /opt
-    git clone https://github.com/ntfreak/openocd
-    sudo aptitude install libtool automake libusb-1.0-0-dev expect
-    cd openocd
-    ./bootstrap
-    ./configure --enable-stlink
-    make
-    sudo make install
-
-Also, make sure you can use the USB ST-Link device without sudo rights:
-
-    sudo cp scripts/openocd/49-stlinkv2.rules /etc/udev/rules.d
-    sudo restart udev
-
-You can now use the `flash_openocd.sh` script in the `scripts` directory:
-
-    ./flash_openocd.sh init
-
-And in another console:
-
-    ./flash_openocd.sh upload combined.bin
-
-Here the binary `combined.bin` is the softdevice and application combined.
 
 ## UART
 
