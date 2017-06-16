@@ -28,6 +28,7 @@ extern "C" {
 #include <drivers/cs_RTC.h>
 
 #include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
 #include <cfg/cs_Strings.h>
 
 #include <processing/cs_EncryptionHandler.h>
