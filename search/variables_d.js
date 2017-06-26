@@ -4,6 +4,7 @@ var searchData=
   ['pinaincurrent',['pinAinCurrent',['../structboards__config__t.html#a17856efe6d4dac133c0649f00e03aed6',1,'boards_config_t']]],
   ['pinainpwmtemp',['pinAinPwmTemp',['../structboards__config__t.html#a27c3a6844692e4974b6b23a564bfa246',1,'boards_config_t']]],
   ['pinainvoltage',['pinAinVoltage',['../structboards__config__t.html#aaade8456d67a5e93f10f88a7e38da813',1,'boards_config_t']]],
+  ['pinainzeroref',['pinAinZeroRef',['../structboards__config__t.html#ae08ac936512bf631266344b62540fb49',1,'boards_config_t']]],
   ['pingpiopwm',['pinGpioPwm',['../structboards__config__t.html#ab10354112a389ce12746bb47ad988861',1,'boards_config_t']]],
   ['pingpiorelayoff',['pinGpioRelayOff',['../structboards__config__t.html#ab067d65e09e5376739412bed70bd6d4a',1,'boards_config_t']]],
   ['pingpiorelayon',['pinGpioRelayOn',['../structboards__config__t.html#ae53d271b3796404c045c4368187a80f3',1,'boards_config_t']]],

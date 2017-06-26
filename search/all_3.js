@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['calcdelta',['calcDelta',['../classMeshMessageCounter.html#a86eab7100f33fd868653f8e48f9c5454',1,'MeshMessageCounter']]],
   ['calculatedecryptionbufferlength',['calculateDecryptionBufferLength',['../classEncryptionHandler.html#a2643544d00fd05c0fd69eff5ab62571a',1,'EncryptionHandler']]],
   ['calculateencryptionbufferlength',['calculateEncryptionBufferLength',['../classEncryptionHandler.html#a049e814e46ef2b3cb3599e652d95a3c9',1,'EncryptionHandler']]],
   ['callback',['callback',['../structadc__done__cb__data__t.html#a8435b644f1ad0232eae3fbc119f40b61',1,'adc_done_cb_data_t::callback()'],['../structcomp__event__cb__data__t.html#a46feb43d33b9b9c499395c9cbea67813',1,'comp_event_cb_data_t::callback()']]],

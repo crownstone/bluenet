@@ -5,6 +5,7 @@ var searchData=
   ['tick',['tick',['../classCrownstone.html#a7b4574c77454c31e919f91bd1f33f377',1,'Crownstone']]],
   ['tickstoms',['ticksToMs',['../classRTC.html#a027acf711855d4ef4065333f0d47fb06',1,'RTC']]],
   ['timer',['Timer',['../classTimer.html',1,'']]],
+  ['timestamp',['timestamp',['../structstate__message__t.html#ae7b51c24ddf3f9c672c7ef0429307ac4',1,'state_message_t']]],
   ['toarray',['toArray',['../classCrownstoneManufacturer.html#a6780f5beffd465380122bb0c01c8361a',1,'CrownstoneManufacturer']]],
   ['toggle',['toggle',['../classSwitch.html#aebb09f3284d4d30cd030aea4f822d5b7',1,'Switch']]],
   ['tostring',['toString',['../classStreamBuffer.html#a1e57e06f9cc6821b2495a0c20ca84c3a',1,'StreamBuffer']]],

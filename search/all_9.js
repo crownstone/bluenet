@@ -15,6 +15,7 @@ var searchData=
   ['isempty',['isEmpty',['../classScheduleList.html#aefa69532331ec2ab64257c5056d6c555',1,'ScheduleList']]],
   ['isfull',['isFull',['../classScheduleList.html#a8acda9e5672b20ccedf167d16e5545f2',1,'ScheduleList']]],
   ['isnearby',['isNearby',['../classTrackedDeviceList.html#a494dfc8ba95d36256377b130143a34c2',1,'TrackedDeviceList']]],
+  ['isrunning',['isRunning',['../classMesh.html#a4f0056a385b86e06cc2de3af0be99361',1,'Mesh']]],
   ['isscanning',['isScanning',['../classNrf51822BluetoothStack.html#a1dfd19faaf0480877cdf957262a9c5f0',1,'Nrf51822BluetoothStack']]],
   ['iterator',['iterator',['../classstate__message_1_1iterator.html',1,'state_message']]],
   ['installation',['Installation',['../md_docs_INSTALL.html',1,'']]],
