@@ -20,6 +20,5 @@ var searchData=
   ['buffer_5felement_5ft',['buffer_element_t',['../structbuffer__element__t.html',1,'']]],
   ['bufferaccessor',['BufferAccessor',['../classBufferAccessor.html',1,'']]],
   ['bufnum',['bufNum',['../structadc__done__cb__data__t.html#a81c5505f9e990376c8cdbdc581354d70',1,'adc_done_cb_data_t']]],
-  ['bufsize',['bufSize',['../structadc__done__cb__data__t.html#a56dd9e6c609d784ba54fc27b8a84ed72',1,'adc_done_cb_data_t']]],
-  ['bluenet',['Bluenet',['../index.html',1,'']]]
+  ['bufsize',['bufSize',['../structadc__done__cb__data__t.html#a56dd9e6c609d784ba54fc27b8a84ed72',1,'adc_done_cb_data_t']]]
 ];

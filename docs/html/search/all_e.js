@@ -14,7 +14,7 @@ var searchData=
   ['operator_20ble_5fuuid128_5ft',['operator ble_uuid128_t',['../classUUID.html#a49ef2add2678262a3c56409b226f1247',1,'UUID']]],
   ['operator_20ble_5fuuid_5ft',['operator ble_uuid_t',['../classUUID.html#a5c0c8427ecdbe0c036017871cfc5eb0b',1,'UUID']]],
   ['operator_20t_20_26',['operator T &amp;',['../classCharacteristicGeneric.html#a378035d3ade0c05b2784fa2ae207989a',1,'CharacteristicGeneric']]],
-  ['operator_2b_2b',['operator++',['../classstate__message_1_1iterator.html#a7cceab8897b55e7ee183469bbf74bbdc',1,'state_message::iterator::operator++()'],['../classstate__message_1_1iterator.html#af96a7dd9875e3ef2431f027ee703cf4a',1,'state_message::iterator::operator++(int)']]],
+  ['operator_2b_2b',['operator++',['../classMeshMessageCounter.html#a175d7b6ca01036ec472c37b44d4a6636',1,'MeshMessageCounter::operator++()'],['../classstate__message_1_1iterator.html#a7cceab8897b55e7ee183469bbf74bbdc',1,'state_message::iterator::operator++()'],['../classstate__message_1_1iterator.html#af96a7dd9875e3ef2431f027ee703cf4a',1,'state_message::iterator::operator++(int)']]],
   ['operator_3d',['operator=',['../classCharacteristicGeneric.html#a799481d5f5f17c114991ddeacac90153',1,'CharacteristicGeneric']]],
   ['operator_5b_5d',['operator[]',['../classCircularBuffer.html#a7ff42476c066192e1844fc319ad587a4',1,'CircularBuffer']]]
 ];

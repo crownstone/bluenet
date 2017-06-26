@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['bluenet',['Bluenet',['../index.html',1,'']]]
+  ['faq',['FAQ',['../md_docs_FAQ.html',1,'']]]
 ];

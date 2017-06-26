@@ -1,10 +1,10 @@
 <map id="State" name="State">
-<area shape="rect" id="node2" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="287,5,353,32"/>
-<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener. " alt="" coords="20,5,123,32"/>
-<area shape="rect" id="node4" href="$unionstate__errors__t.html" title="state_errors_t" alt="" coords="269,56,371,83"/>
-<area shape="rect" id="node5" href="$classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY, small\l_seq_number_t \&gt;" alt="" coords="213,107,427,178"/>
-<area shape="rect" id="node6" href="$structps__general__vars__t.html" title="Struct used to ... " alt="" coords="256,203,384,229"/>
-<area shape="rect" id="node7" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="5,203,137,229"/>
-<area shape="rect" id="node8" href="$classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY, large_seq_number_t \&gt;" alt="" coords="189,253,451,309"/>
-<area shape="rect" id="node9" href="$classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY, small_seq_number_t \&gt;" alt="" coords="187,333,453,389"/>
+<area shape="rect" id="node2" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="289,5,356,32"/>
+<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener. " alt="" coords="21,5,123,32"/>
+<area shape="rect" id="node4" href="$unionstate__errors__t.html" title="state_errors_t" alt="" coords="271,56,374,83"/>
+<area shape="rect" id="node5" href="$classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY, small\l_seq_number_t \&gt;" alt="" coords="215,107,430,178"/>
+<area shape="rect" id="node6" href="$structps__general__vars__t.html" title="Struct used to ... " alt="" coords="259,203,387,229"/>
+<area shape="rect" id="node7" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="6,203,138,229"/>
+<area shape="rect" id="node8" href="$classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY, large_seq_number_t \&gt;" alt="" coords="191,253,454,309"/>
+<area shape="rect" id="node9" href="$classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY, small_seq_number_t \&gt;" alt="" coords="189,333,456,389"/>
 </map>

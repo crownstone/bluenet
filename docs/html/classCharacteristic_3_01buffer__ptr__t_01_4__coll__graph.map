@@ -1,13 +1,13 @@
 <map id="Characteristic&lt; buffer_ptr_t &gt;" name="Characteristic&lt; buffer_ptr_t &gt;">
-<area shape="rect" id="node2" href="$classCharacteristicGeneric.html" title="CharacteristicGeneric\l\&lt; buffer_ptr_t \&gt;" alt="" coords="1415,208,1563,249"/>
-<area shape="rect" id="node3" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics. " alt="" coords="1232,215,1365,242"/>
-<area shape="rect" id="node4" href="$classService.html" title="Service as defined in the GATT Specification. " alt="" coords="1064,145,1131,171"/>
-<area shape="rect" id="node5" href="$classtuple.html" title="tuple\&lt; CharacteristicBase * \&gt;" alt="" coords="724,129,919,155"/>
-<area shape="rect" id="node7" href="$classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. " alt="" coords="793,195,849,222"/>
-<area shape="rect" id="node8" href="$classNrf51822BluetoothStack.html" title="nRF51822 specific implementation of the BLEStack " alt="" coords="739,71,903,98"/>
-<area shape="rect" id="node9" href="$classServiceData.html" title="ServiceData" alt="" coords="446,71,541,98"/>
-<area shape="rect" id="node10" href="$classEventListener.html" title="Event listener. " alt="" coords="228,71,331,98"/>
-<area shape="rect" id="node11" href="$classfixed__tuple.html" title="fixed_tuple\&lt; Service\l *, MAX_SERVICE_COUNT \&gt;" alt="" coords="392,5,595,47"/>
-<area shape="rect" id="node12" href="$classtuple.html" title="tuple\&lt; Service * \&gt;" alt="" coords="216,13,343,39"/>
-<area shape="rect" id="node14" href="$structStatus.html" title="Status of a Characteristic. " alt="" coords="1067,277,1127,303"/>
+<area shape="rect" id="node2" href="$classCharacteristicGeneric.html" title="CharacteristicGeneric\l\&lt; buffer_ptr_t \&gt;" alt="" coords="1425,207,1573,249"/>
+<area shape="rect" id="node3" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics. " alt="" coords="1240,215,1373,241"/>
+<area shape="rect" id="node4" href="$classService.html" title="Service as defined in the GATT Specification. " alt="" coords="1072,144,1139,171"/>
+<area shape="rect" id="node5" href="$classtuple.html" title="tuple\&lt; CharacteristicBase * \&gt;" alt="" coords="731,128,925,155"/>
+<area shape="rect" id="node7" href="$classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. " alt="" coords="800,195,856,221"/>
+<area shape="rect" id="node8" href="$classNrf51822BluetoothStack.html" title="nRF51822 specific implementation of the BLEStack " alt="" coords="746,71,910,97"/>
+<area shape="rect" id="node9" href="$classServiceData.html" title="ServiceData" alt="" coords="451,71,546,97"/>
+<area shape="rect" id="node10" href="$classEventListener.html" title="Event listener. " alt="" coords="231,71,334,97"/>
+<area shape="rect" id="node11" href="$classfixed__tuple.html" title="fixed_tuple\&lt; Service\l *, MAX_SERVICE_COUNT \&gt;" alt="" coords="397,5,600,46"/>
+<area shape="rect" id="node12" href="$classtuple.html" title="tuple\&lt; Service * \&gt;" alt="" coords="219,12,346,39"/>
+<area shape="rect" id="node14" href="$structStatus.html" title="Status of a Characteristic. " alt="" coords="1075,276,1135,303"/>
 </map>
