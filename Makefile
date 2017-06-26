@@ -123,6 +123,7 @@ all:
 
 release:
 	$(call cross-compile-target-prepare)
+	@mkdir -p $(BLUENET_BUILD_DIR)
 	@cd $(BLUENET_BUILD_DIR) && cmake $(RELEASE_COMPILE_FLAGS) \
 		-DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake $(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 	$(call cross-compile-target-cleanup)
