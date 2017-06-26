@@ -282,6 +282,7 @@ bootloader-only() {
 
 release() {
 	cd ${path}/..
+	cs_info "Execute make release"
 	make release
 	checkError "Failed to build release"
 	# result=$?
