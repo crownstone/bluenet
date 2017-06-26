@@ -1,3 +1,70 @@
+Version 1.3.2:
+ - Add release config for crownstone_1.3.2
+ - Git hash is optional, don't set it to "unset".
+ - Fixed GIT_HASH being defined for a release build.
+ - Make build dir before cd-ing into it.
+ - Include state to get time.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Also set timestamps in state msg conflict resolving and on the state broadcast message on state change.
+ - Remove ST-Link. Deprecated.
+ - bluenet -> source
+ - List all possible env. vars for folders.
+ - Update multi-target use in documentation.
+ - Solve issue https://github.com/crownstone/bluenet/issues/51
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - [untested] Set time at State class. Use mesh state messages to broadcast time.
+ - Improved logging and some comments
+ - Improved error handling of sd_ble_gap_adv_start / stop.
+ - Make sure we don't set a timer with too few delay.
+ - Added COMPILATION_DAY and GIT_HASH again. Removed usage of COMPILATION_TIME.
+ - See PROTOCOL.md file
+ - added ACR01B6A builtin as a board
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Default firmware version is now "undefined".
+ - Merge pull request #48 from marciwi/master
+ - Ooops, fixed mesh compiling again.
+ - Added keepalive and multi switch to control commands.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Fixed not sending commands over the mesh.
+ - Fixed is_command_for_us()
+ - Do not use lang:cpp (and default make/build) but use custom build scripts.
+ - Use Ubuntu 14.04 LTS Trusty Tahr on Travis
+ - Use std::numeric_limits<uint32_t>::max() in test
+ - Use std::numeric_limits<uint32_t>::max(), etc. rather than UINT32_MAX. __STDC_LIMIT_MACROS is not needed anymore and Travis uses old 4.6.1 gcc version
+ - man page: 'C++ implementations should define INT32_MAX, etc. macros only when __STDC_LIMIT_MACROS is defined before is included'
+ - revert test with differential current measurement, this should be made board dependent
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Only skip the first mesh message within the 30s after boot.
+ - fixed link to mesh scan result packet
+ - added upcoming plug board
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - added howto for adding boards
+ - added howto add board
+ - Use climits instead?
+ - Merge remote-tracking branch 'upstream/master'
+ - Avoid UINT32_MAX in test cpp.
+ - How about now?
+ - Fix unit test?
+ - - Mesh: ... added more size checks ... added handle check ... added msg data checks ... split up code into functions ... added comments ... added reserved bytes to msgs ... fixed some length calculations ... added lollipop for mesh message counter ... handles are uint16_t - Protocol version bumped to 0.10.0. - Removed some old code that was for sdk 8. - Use XTAL instead of RC as clock source.
+ - Make sure we copy only 33 bytes for the hardware revision (as it's not 0 terminated).
+ - Ignore NRF_ERROR_INVALID_STATE for sd_ble_gap_disconnect.
+ - Relay high duration is in ms.
+ - Tried using flash page size for clearing, doesn't work.
+ - More flash memory documentation.
+ - Added flash memory docs.
+ - Merge branch 'master' of https://github.com/marciwi/bluenet
+ - added board for prototype ACR01B2E
+ - Update documentation link: .com -> .io
+ - Add @file for documentation to first files in include/ble
+ - Use @license for license. Use Crownstone, not DoBots.
+ - Use cs_ prefix for info(), log(), etc. to fix https://github.com/crownstone/bluenet/issues/35
+ - Update SECURITY.md
+ - Create SECURITY.md
+ - added too few lines of documentation comments
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Update INSTALL.md
+ - Update INSTALL.md
+
 Version 1.3.1:
 
 
