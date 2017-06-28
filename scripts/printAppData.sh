@@ -4,7 +4,7 @@
 #option=${1:? "Usage: $0 (version|power|reboot)"}
 
 # Optionally target as second argument to the script
-target=${1:-default}
+target=${1:-crownstone}
 
 # Load scripts from the current directory. The path is defined in this way so that it can also be called from 
 # another directory (and not only from this directory).
