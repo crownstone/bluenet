@@ -84,24 +84,24 @@ Nrf51822BluetoothStack::~Nrf51822BluetoothStack() {
 	shutdown();
 }
 
-///*
+/*
 const nrf_clock_lf_cfg_t Nrf51822BluetoothStack::defaultClockSource = {.source        = NRF_CLOCK_LF_SRC_RC,   \
                                                                        .rc_ctiv       = 16,                    \
                                                                        .rc_temp_ctiv  = 2,                     \
                                                                        .xtal_accuracy = 0};
-//*/
+*/
 /*
 const nrf_clock_lf_cfg_t Nrf51822BluetoothStack::defaultClockSource = {.source        = NRF_CLOCK_LF_SRC_SYNTH,\
                                                                        .rc_ctiv       = 0,                     \
                                                                        .rc_temp_ctiv  = 0,                     \
                                                                        .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_50_PPM};
 */
-/*
+///*
 const nrf_clock_lf_cfg_t Nrf51822BluetoothStack::defaultClockSource = { .source        = NRF_CLOCK_LF_SRC_XTAL,        \
                                                                         .rc_ctiv       = 0,                     \
                                                                         .rc_temp_ctiv  = 0,                     \
                                                                         .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
-*/
+//*/
 
 //! called by softdevice handler through ble_evt_dispatch on any event that passes through mesh and is not write
 //extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {

@@ -48,18 +48,18 @@ Mesh::Mesh() :
 
 }
 
-///*
+/*
 const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_LF_SRC_RC,   \
                                                     .rc_ctiv       = 16,                    \
                                                     .rc_temp_ctiv  = 2,                     \
                                                     .xtal_accuracy = 0};
-//*/
-/*
+*/
+///*
 const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_LF_SRC_XTAL, \
                                                     .rc_ctiv       = 0,                     \
                                                     .rc_temp_ctiv  = 0,                     \
                                                     .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
-*/
+//*/
 
 /**
  * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
