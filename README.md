@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://travis-ci.org/crownstone/bluenet.svg?branch=master)](https://travis-ci.org/crownstone/bluenet)
 
-Bluenet is the code running on the [Crownstone](http://crownstone.rocks) and [GuideStone](https://shop.crownstone.rocks/products/guidestones). Each Crownstone or GuideStone is a node in a network that uses signal strength for indoor localization of smartphones and wearables.
+Bluenet is code running on [Crownstone](http://crownstone.rocks) compatible devices such as [electronic connectors :euro:](https://shop.crownstone.rocks/products/built-in-crownstone), [electronic EU plugs :euro:](https://shop.crownstone.rocks/products/crownstone-plugs) and [grid-powered beacons, GuideStones :euro:](https://shop.crownstone.rocks/products/guidestones). Each Crownstone or GuideStone is a node in a network that uses signal strength for indoor localization of smartphones and wearables.
 
 
 ### Features
