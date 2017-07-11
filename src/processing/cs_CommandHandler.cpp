@@ -342,40 +342,28 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 		break;
 	}
-	case CMD_SCHEDULE_ENTRY: {
+	case CMD_SCHEDULE_ENTRY_SET: {
 		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "schedule entry");
-
-		Scheduler& scheduler = Scheduler::getInstance();
-
-		ScheduleEntry entry;
-
-		if (entry.assign(buffer, size)) {
-			return -1;
+		if (size < sizeof(schedule_command_t)) {
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		schedule_entry_t* entryStruct = entry.getStruct();
-		if (!entryStruct->nextTimestamp) {
-			scheduler.removeScheduleEntry(entryStruct);
+		schedule_command_t* entry = (schedule_command_t*)buffer;
+		ERR_CODE errCode = Scheduler::getInstance().setScheduleEntry(entry->id, &(entry->entry));
+		if (FAILURE(errCode)) {
+			return errCode;
 		}
-		else {
-
-			// Check if entry is correct
-			if (entryStruct->nextTimestamp < scheduler.getTime()) {
-				return -1;
-			}
-			switch (ScheduleEntry::getTimeType(entryStruct)) {
-			case SCHEDULE_TIME_TYPE_REPEAT:
-				if (entryStruct->repeat.repeatTime == 0) {
-					return -1;
-				}
-				break;
-			case SCHEDULE_TIME_TYPE_DAILY:
-				break;
-			case SCHEDULE_TIME_TYPE_ONCE:
-				break;
-			}
-
-			scheduler.addScheduleEntry(entryStruct);
+		break;
+	}
+	case CMD_SCHEDULE_ENTRY_CLEAR: {
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		if (size < 1) {
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		uint8_t id = buffer[0];
+		ERR_CODE errCode = Scheduler::getInstance().clearScheduleEntry(id);
+		if (FAILURE(errCode)) {
+			return errCode;
 		}
 		break;
 	}

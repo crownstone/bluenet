@@ -283,7 +283,7 @@ The schedule service has UUID 24f50000-7d10-4805-bfc1-7663a01c3bff.
 Characteristic | UUID | Date type | Description | A | U | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Set time        | 24f50001-7d10-4805-bfc1-7663a01c3bff | uint 32 | Sets the time. Timestamp is in seconds since epoch. | x
-Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule command](#schedule_command_packet) | Set or clear a schedule entry. To clear: only write the id. | x
+Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule command](#schedule_command_packet) | Set or clear a schedule entry. To clear: only write the index. | x
 Schedule read   | 24f50003-7d10-4805-bfc1-7663a01c3bff | [Schedule list](#schedule_list_packet) | Get a list of all schedule entries. | x
 
 
@@ -586,7 +586,7 @@ uint 8 | Size | 1 | Number of entries in the list.
 ### <a name="schedule_command_packet"></a>Schedule command packet
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | id | 1 | Id of the entry (corresponds to the Nth entry in the list).
+uint 8 | index | 1 | Index of the entry (corresponds to the Nth entry in the list).
 [schedule entry](#schedule_entry_packet) | Entry | 12 | Schedule entry.
 
 ### <a name="schedule_entry_packet"></a>Schedule entry packet
@@ -644,12 +644,12 @@ uint 8 | Switch | 1 | Power switch value. Range 0-100, where 0 is off and 100 is
 uint 8 | Reserved | 2 | Unused.
 
 #### Action type 1
-Fade from current power switch value to a given power switch value, in X seconds.
+Fade from current power switch value to a given power switch value, in X seconds. Starts fading at *next timestamp*.
 ** Not implemented yet. **
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Switch end | 1 | Power switch value after fading.
+uint 8 | Switch end | 1 | Power switch value after fading (at timestamp + fade duration).
 uint 16 | Fade duration | 2 | Fade duration in seconds.
 
 #### Action type 2

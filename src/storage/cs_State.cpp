@@ -148,6 +148,7 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 	}
 	case STATE_TRACKED_DEVICES: {
 		size = sizeof(tracked_device_list_t);
+		//! TODO: setPayload already copies, why do we have to allocate a whole tracked_device_list_t
 		uint8_t listBuffer[size];
 		//! wrap in an object to get correct size
 		TrackedDeviceList list;
@@ -168,13 +169,14 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 	}
 	case STATE_SCHEDULE: {
 		size = sizeof(schedule_list_t);
+		//! TODO: setPayload already copies, why do we have to allocate a whole schedule_list_t
 		uint8_t listBuffer[size];
 		//! wrap in an object to get correct size
 		ScheduleList list;
 		list.assign(listBuffer, size);
-		//! clear the list to make sure it is correctly
-		//! initialized
-		list.clear();
+//		//! clear the list to make sure it is correctly
+//		//! initialized
+//		list.clear();
 		//! read the list from storage
 		error_code = get(type, listBuffer, size);
 		if (SUCCESS(error_code)) {

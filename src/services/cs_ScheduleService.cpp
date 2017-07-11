@@ -75,8 +75,13 @@ void ScheduleService::addWriteScheduleEntryCharacteristic() {
 	_writeScheduleEntryCharacteristic->setValueLength(0);
 
 	_writeScheduleEntryCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
-		CommandHandler::getInstance().handleCommand(CMD_SCHEDULE_ENTRY, _writeScheduleEntryCharacteristic->getValue(),
-				_writeScheduleEntryCharacteristic->getValueLength());
+		uint16_t valueLength = _writeScheduleEntryCharacteristic->getValueLength();
+		if (valueLength == 1) {
+			CommandHandler::getInstance().handleCommand(CMD_SCHEDULE_ENTRY_CLEAR, _writeScheduleEntryCharacteristic->getValue(), valueLength);
+		}
+		else {
+			CommandHandler::getInstance().handleCommand(CMD_SCHEDULE_ENTRY_SET, _writeScheduleEntryCharacteristic->getValue(), valueLength);
+		}
 	});
 }
 

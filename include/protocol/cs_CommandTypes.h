@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include "structs/cs_ScheduleEntries.h"
+
 enum CommandHandlerTypes {
 	CMD_SWITCH                      = 0,     //! 0x00
 	CMD_PWM                         = 1,     //! 0x01
@@ -22,7 +24,7 @@ enum CommandHandlerTypes {
 	CMD_ENABLE_SCANNER              = 12,    //! 0x0C
 	CMD_SCAN_DEVICES                = 13,    //! 0x0D
 	CMD_USER_FEEDBACK               = 14,    //! 0x0E
-	CMD_SCHEDULE_ENTRY              = 15,    //! 0x0F
+	CMD_SCHEDULE_ENTRY_SET          = 15,    //! 0x0F
 	CMD_RELAY                       = 16,    //! 0x10
 	CMD_VALIDATE_SETUP              = 17,    //! 0x11
 	CMD_REQUEST_SERVICE_DATA        = 18,    //! 0x12
@@ -33,6 +35,7 @@ enum CommandHandlerTypes {
 	CMD_RESET_ERRORS                = 23,    //! 0x17
 	CMD_KEEP_ALIVE_REPEAT_LAST      = 24,    //! 0x18
 	CMD_MULTI_SWITCH                = 25,    //! 0x19
+	CMD_SCHEDULE_ENTRY_CLEAR        = 26,    //! 0x1A
 	CMD_TYPES
 };
 
@@ -71,5 +74,10 @@ struct __attribute__((__packed__)) keep_alive_state_message_payload_t {
 struct __attribute__((__packed__)) led_message_payload_t {
 	uint8_t led;
 	bool enable;
+};
+
+struct __attribute__((__packed__)) schedule_command_t {
+	uint8_t id;
+	schedule_entry_t entry;
 };
 

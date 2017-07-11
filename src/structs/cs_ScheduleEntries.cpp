@@ -8,14 +8,13 @@
 #include "structs/cs_ScheduleEntries.h"
 #include <util/cs_BleError.h>
 
-//#define PRINT_DEBUG
+#define PRINT_DEBUG
 
 bool ScheduleEntry::isActionTime(schedule_entry_t* entry, uint32_t timestamp) {
-	bool result = false;
 	if (entry->nextTimestamp == 0) {
-		//TODO: remove this entry
 		return false;
 	}
+	bool result = false;
 	if (entry->nextTimestamp < timestamp) {
 		result = true;
 #ifdef PRINT_DEBUG
@@ -96,6 +95,41 @@ uint8_t ScheduleEntry::getActionType(const schedule_entry_t* entry) {
 	return actionType;
 }
 
+bool ScheduleEntry::isValidEntry(const schedule_entry_t* entry) {
+//	if (entry->nextTimestamp == 0) {
+//		return false;
+//	}
+	switch (getTimeType(entry)) {
+	case SCHEDULE_TIME_TYPE_REPEAT:
+		if (entry->repeat.repeatTime < 1) {
+			return false;
+		}
+		break;
+	case SCHEDULE_TIME_TYPE_DAILY:
+		break;
+	case SCHEDULE_TIME_TYPE_ONCE:
+		break;
+	default:
+		return false;
+	}
+
+	switch (getActionType(entry)) {
+	case SCHEDULE_ACTION_TYPE_PWM:
+		break;
+	case SCHEDULE_ACTION_TYPE_FADE:
+		break;
+	case SCHEDULE_ACTION_TYPE_TOGGLE:
+		break;
+	default:
+		return false;
+	}
+	return true;
+}
+
+// Calculate day of week:
+// See: http://stackoverflow.com/questions/36357013/day-of-week-from-seconds-since-epoch
+// With timestamp=0 = Thursday 1-January-1970 00:00:00
+// (timestamp/(24*3600)+4)%7
 uint8_t ScheduleEntry::getDayOfWeek(uint32_t timestamp) {
 	return (timestamp / SECONDS_PER_DAY + 4) % 7;
 }
@@ -109,7 +143,7 @@ bool ScheduleEntry::isActionDay(uint8_t bitMask, uint8_t dayOfWeek) {
 
 void ScheduleEntry::print(const schedule_entry_t* entry) {
 
-	LOGd("id=%03u type=%02X override=%02X nextTimestamp=%u", entry->id, entry->type, entry->overrideMask, entry->nextTimestamp);
+	LOGd("type=%02X override=%02X nextTimestamp=%u", entry->type, entry->overrideMask, entry->nextTimestamp);
 
 	switch (getTimeType(entry)) {
 	case SCHEDULE_TIME_TYPE_REPEAT:
@@ -133,67 +167,62 @@ void ScheduleEntry::print(const schedule_entry_t* entry) {
 
 
 uint16_t ScheduleList::getSize() const {
-	assert(_buffer != NULL, FMT_BUFFER_NOT_ASSIGNED);
 	return _buffer->size;
 }
 
-bool ScheduleList::isEmpty() const {
-	return getSize() == 0;
-}
-
-bool ScheduleList::isFull() const {
-	return getSize() >= MAX_SCHEDULE_ENTRIES;
-}
-
 void ScheduleList::clear() {
-	assert(_buffer != NULL, FMT_BUFFER_NOT_ASSIGNED);
-	_buffer->size = 0;
+	for (uint16_t i=0; i<MAX_SCHEDULE_ENTRIES; ++i) {
+		_buffer->list[i].nextTimestamp = 0;
+	}
+	_buffer->size = MAX_SCHEDULE_ENTRIES;
 }
 
-bool ScheduleList::add(const schedule_entry_t* entry) {
-	bool success = false;
-	for (uint16_t i=0; i<getSize(); i++) {
-		if (_buffer->list[i].id == entry->id) {
-			LOGi("update id %u", entry->id);
-			_buffer->list[i] = *entry;
-			success = true;
-			break;
+void ScheduleList::checkAllEntries() {
+	//! If entry is invalid: clear the entry
+	for (uint8_t i=0; i<_buffer->size; ++i) {
+		if (!ScheduleEntry::isValidEntry(&(_buffer->list[i]))) {
+			clear(i);
 		}
 	}
-	if (!success && !isFull()) {
-		_buffer->list[_buffer->size++] = *entry;
-		LOGi("add id %u", entry->id);
-		success = true;
+
+	//! Make sure all entries exist
+	for (uint8_t i=_buffer->size; i<MAX_SCHEDULE_ENTRIES; ++i) {
+		_buffer->list[i].nextTimestamp = 0;
 	}
-	return success;
+	_buffer->size = MAX_SCHEDULE_ENTRIES;
 }
 
-bool ScheduleList::rem(const schedule_entry_t* entry) {
-	bool success = false;
-	for (uint16_t i=0; i<getSize(); i++) {
-		if (_buffer->list[i].id == entry->id) {
-			LOGi("rem id %u", entry->id);
-			success = true;
-			for (;i<_buffer->size-1; i++) {
-				_buffer->list[i] = _buffer->list[i+1];
-			}
-			_buffer->size--;
-			break;
-		}
+bool ScheduleList::set(uint8_t id, const schedule_entry_t* entry) {
+	if (id >= MAX_SCHEDULE_ENTRIES) {
+		return false;
 	}
-	return success;
+	LOGi("set id %u", id);
+	_buffer->size = MAX_SCHEDULE_ENTRIES;
+	if (!ScheduleEntry::isValidEntry(entry)) {
+		return false;
+	}
+	memcpy(&(_buffer->list[id]), entry, sizeof(schedule_entry_t));
+	return true;
 }
 
-schedule_entry_t* ScheduleList::checkSchedule(uint32_t currentTime) {
+bool ScheduleList::clear(uint8_t id) {
+	if (id >= MAX_SCHEDULE_ENTRIES) {
+		return false;
+	}
+	_buffer->list[id].nextTimestamp = 0;
+	return true;
+}
+
+schedule_entry_t* ScheduleList::isActionTime(uint32_t currentTime) {
 	schedule_entry_t* result = NULL;
-	for (uint16_t i=0; i<getSize(); i++) {
+	for (uint16_t i=0; i<getSize(); ++i) {
 		if (ScheduleEntry::isActionTime(&(_buffer->list[i]), currentTime)) {
 			result = &(_buffer->list[i]);
 #ifdef PRINT_DEBUG
 			LOGd("trigger:");
 #endif
 			ScheduleEntry::print(result);
-			break; // Break: if we have 2 entries with the same timestamp, it will be triggered next time.
+			break; // Break: if there is another entry with the same timestamp, it will be triggered next time.
 		}
 	}
 	return result;

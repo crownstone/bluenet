@@ -64,15 +64,9 @@ struct __attribute__((__packed__)) schedule_action_fade_t {
 	uint16_t fadeDuration; //! Number of seconds it takes to get to pwmEnd.
 };
 
-//struct __attribute__((__packed__)) schedule_action_t {
-//	union {
-//		schedule_action_pwm_t pwm;
-//		schedule_action_fade_t fade;
-//	};
-//};
-
 struct __attribute__((__packed__)) schedule_entry_t {
-	uint8_t id;
+	uint8_t reserved;
+
 	//! Combined time and action type.
 	//! Defined as SCHEDULE_TIME_TYPE_.. + (SCHEDULE_ACTION_TYPE_.. << 4)
 	uint8_t type;
@@ -96,13 +90,6 @@ struct __attribute__((__packed__)) schedule_list_t {
 	uint8_t size;
 	schedule_entry_t list[MAX_SCHEDULE_ENTRIES];
 };
-
-
-// Calculate day of week:
-// See: http://stackoverflow.com/questions/36357013/day-of-week-from-seconds-since-epoch
-// With timestamp=0 = Thursday 1-January-1970 00:00:00
-// (timestamp/(24*3600)+4)%7
-
 
 
 
@@ -138,6 +125,7 @@ public:
 	static void print(const schedule_entry_t* entry);
 	static uint8_t getTimeType(const schedule_entry_t* entry);
 	static uint8_t getActionType(const schedule_entry_t* entry);
+	static bool isValidEntry(const schedule_entry_t* entry);
 
 	/** Checks if this schedule entry should be executed. Also adjusts the timestamp to next scheduled time */
 	static bool isActionTime(schedule_entry_t* entry, uint32_t timestamp);
@@ -222,26 +210,23 @@ public:
 	/** Returns the current size of the list */
 	uint16_t getSize() const;
 
-	/** Returns true if the list is empty. */
-	bool isEmpty() const;
-
-	/** Returns true if the list is full. */
-	bool isFull() const;
-
 	/** Clears the list. */
 	void clear();
 
 	/** Adds/updates a schedule entry to/in the list. Returns true on success. */
-	bool add(const schedule_entry_t* entry);
+	bool set(uint8_t id, const schedule_entry_t* entry);
 
-	/** Removes a schedule entry from the list. Returns true on success, false when it's not in the list. */
-	bool rem(const schedule_entry_t* entry);
+	/** Removes a schedule entry from the list. Returns true on success. */
+	bool clear(uint8_t id);
+
+	/** Checks validity of all entries */
+	void checkAllEntries();
 
 	/** Checks the schedule entries with the current time.
 	 * Also reschedules the entries if they are repeated.
 	 * Returns an entry if its action has to be executed, NULL otherwise.
 	 */
-	schedule_entry_t* checkSchedule(uint32_t currentTime);
+	schedule_entry_t* isActionTime(uint32_t currentTime);
 
 	/** If there is a time jump, this function makes sure all entries are corrected.
 	 * Returns whether any schedule was adjusted.

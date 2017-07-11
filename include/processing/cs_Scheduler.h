@@ -39,9 +39,9 @@ public:
 		scheduleNextTick();
 	}
 
-	void addScheduleEntry(schedule_entry_t* entry);
+	ERR_CODE setScheduleEntry(uint8_t id, schedule_entry_t* entry);
 
-	void removeScheduleEntry(schedule_entry_t* entry);
+	ERR_CODE clearScheduleEntry(uint8_t id);
 
 	inline ScheduleList* getScheduleList() {
 		return _scheduleList;

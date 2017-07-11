@@ -57,22 +57,32 @@ void Scheduler::setTime(uint32_t time) {
 	printDebug();
 }
 
-void Scheduler::addScheduleEntry(schedule_entry_t* entry) {
-	LOGd("add");
-	if (_scheduleList->add(entry)) {
-		writeScheduleList(true);
-		printDebug();
-		publishScheduleEntries();
+ERR_CODE Scheduler::setScheduleEntry(uint8_t id, schedule_entry_t* entry) {
+	LOGd("set %u", id);
+//	if (entry->nextTimestamp == 0) {
+//		return clearScheduleEntry(id);
+//	}
+	if (entry->nextTimestamp <= _posixTimeStamp) {
+		return ERR_WRONG_PARAMETER;
 	}
+	if (!_scheduleList->set(id, entry)) {
+		return ERR_WRONG_PARAMETER;
+	}
+	writeScheduleList(true);
+	printDebug();
+	publishScheduleEntries();
+	return ERR_SUCCESS;
 }
 
-void Scheduler::removeScheduleEntry(schedule_entry_t* entry) {
-	LOGd("rem");
-	if (_scheduleList->rem(entry)) {
-		writeScheduleList(true);
-		printDebug();
-		publishScheduleEntries();
+ERR_CODE Scheduler::clearScheduleEntry(uint8_t id) {
+	LOGd("clear %u", id);
+	if (!_scheduleList->clear(id)) {
+		return ERR_WRONG_PARAMETER;
 	}
+	writeScheduleList(true);
+	printDebug();
+	publishScheduleEntries();
+	return ERR_SUCCESS;
 }
 
 void Scheduler::tick() {
@@ -95,7 +105,7 @@ void Scheduler::tick() {
 		//		LOGd("day of week = %i", datetime->tm_wday);
 	}
 
-	schedule_entry_t* entry = _scheduleList->checkSchedule(_posixTimeStamp);
+	schedule_entry_t* entry = _scheduleList->isActionTime(_posixTimeStamp);
 	if (entry != NULL) {
 		switch (ScheduleEntry::getActionType(entry)) {
 			case SCHEDULE_ACTION_TYPE_PWM: {
@@ -145,12 +155,11 @@ void Scheduler::readScheduleList() {
 	length = _scheduleList->getMaxLength();
 
 	State::getInstance().get(STATE_SCHEDULE, buffer, length);
+	_scheduleList->checkAllEntries();
 
-	if (!_scheduleList->isEmpty()) {
-		LOGi("restored schedule list (%d):", _scheduleList->getSize());
-		print();
-		publishScheduleEntries();
-	}
+	LOGi("restored schedule list (%d):", _scheduleList->getSize());
+	print();
+	publishScheduleEntries();
 }
 
 void Scheduler::publishScheduleEntries() {
