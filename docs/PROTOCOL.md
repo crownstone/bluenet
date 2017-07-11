@@ -327,7 +327,7 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 --- | --- | --- | --- | :---: | :---: | :---:
 0 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON | x | x | x
 1 | PWM | uint 8 | Set PWM to value, 0 = OFF, 100 = FULL ON | x | x | x
-2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 UTC | x | x |
+2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 | x | x |
 3 | Goto DFU | - | Reset device to DFU mode | x
 4 | Reset | uint 8 | Reset device | x
 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x
@@ -381,6 +381,7 @@ uint 8  | OpCode | 1 | The op code determines if it's a write or a read operatio
 uint 16 | Length | 2 | Length of the payload in bytes.
 uint 8 | Payload | Length | Payload data, depends on type.
 
+Most configuration changes will only be applied after a reboot.
 Available configurations types:
 
 Type nr | Type name | Payload type | Description
@@ -389,25 +390,25 @@ Type nr | Type name | Payload type | Description
 1 | Device type | char [] | **Deprecated.**
 2 | Room | uint 8 | **Deprecated.**
 3 | Floor | uint 8 | Floor number. **Deprecated**
-4 | Nearby timeout | uint 16 | Time in ms before switching off when none is nearby
+4 | Nearby timeout | uint 16 | Time in ms before switching off when none is nearby.
 5 | PWM period | uint 32 | Sets PWM period in μs. **Setting this to a wrong value may cause damage.**
 6 | <a name="ibeacon_major"></a>iBeacon major | uint 16 | iBeacon major number.
 7 | <a name="ibeacon_minor"></a>iBeacon minor | uint 16 | iBeacon minor number.
 8 | <a name="ibeacon_uuid"></a>iBeacon UUID | uint 8 [16] | iBeacon UUID.
 9 | iBeacon Tx Power | int 8 | iBeacon signal strength at 1 meter.
 11 | TX power | int 8 | TX power, can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4.
-12 | Advertisement interval | uint 16 | Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms.
+12 | Advertisement interval | uint 16 | Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms. *Not implemented yet.*
 13 | Passkey | uint 8 [6] | Passkey of the device: must be 6 digits.
-14 | Min env temp | int 8 | If temperature (in degrees Celcius) goes below this value, send an alert (not implemented yet).
-15 | Max env temp | int 8 | If temperature (in degrees Celcius) goes above this value, send an alert (not implemented yet).
+14 | Min env temp | int 8 | If temperature (in degrees Celcius) goes below this value, send an alert. *Not implemented yet.*
+15 | Max env temp | int 8 | If temperature (in degrees Celcius) goes above this value, send an alert. *Not implemented yet.*
 16 | Scan duration | uint 16 | Scan duration in ms. *Setting this too high may cause the device to reset during scanning.*
 17 | Scan send delay | uint 16 | Time in ms to wait before sending scan results over the mesh. *Setting this too low may cause the device to reset during scanning.*
 18 | Scan break duration | uint 16 | Waiting time in ms between sending results and next scan. *Setting this too low may cause the device to reset during scanning.*
-19 | Boot delay | uint 16 | Time to wait with radio after boot, **Setting this too low may cause the device to reset on boot.**
-20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off.
+19 | Boot delay | uint 16 | Time to wait with radio after boot (ms).                                                          **Setting this to a wrong value may cause damage.**
+20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off. **Setting this to a wrong value may cause damage.**
 21 | Scan filter | uint 8 | Filter out certain types of devices from the scan results (1 for GuideStones, 2 for CrownStones, 3 for both).
 22 | Scan filter fraction | uint 16 | If scan filter is set, do *not* filter them out each every X scan results.
-23 | Current limit | uint 8 | Set current limit to **Deprecated**
+23 | Current limit | uint 8 | Set current limit. **Deprecated**
 24 | Mesh enabled | uint 8 | Stores if mesh is enabled. *read only*
 25 | Encryption enabled | uint 8 | Stores if encryption is enabled. *read only*
 26 | iBeacon enabled | uint 8 | Stores if iBeacon is enabled. *read only*
@@ -418,22 +419,26 @@ Type nr | Type name | Payload type | Description
 31 | Power sample burst interval | ... | TBD
 32 | Power sample continuous interval | ... | TBD
 33 | Power sample continuous number samples | ... | TBD
-34 | <a name="crownstone_identifier"></a>Crownstone Identifier | uint 16 | Crownstone identifier used in advertisement package
-35 | <a name="admin_key"></a>Admin encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions
-36 | <a name="user_key"></a>Member encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions
-37 | <a name="guest_key"></a>Guest encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt guest access functions
-38 | Default ON | uint 8 | Set's the default switch state to 255 if true, or to 0 if false. Value is 0 for false, or any other for true
+34 | <a name="crownstone_identifier"></a>Crownstone Identifier | uint 16 | Crownstone identifier used in advertisement package.
+35 | <a name="admin_key"></a>Admin encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions.
+36 | <a name="user_key"></a>Member encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions.
+37 | <a name="guest_key"></a>Guest encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt guest access functions.
+38 | Default ON | uint 8 | Set's the default switch state to 255 if true, or to 0 if false. Value is 0 for false, or any other for true. **Deprecated**
 39 | Scan Interval | uint 16 | Set the scan interval to ...
 40 | Scan Window | uint 16 | Set the scan window to ...
-41 | Relay High Duration | uint 16 | Set the time/duration that the relay is set to high (ms)
-42 | Low Tx Power | int 8 | Set the tx power used when in low transmission power for bonding
-43 | Voltage Multiplier | float | Set the voltage multiplier (for power measurement)
-44 | Current Multiplier | float | Set the current multiplier (for power measurement)
-45 | Voltage Zero | int 32 | Set the voltage zero level (for power measurement)
-46 | Current Zero | int 32 | Set the current zero level (for power measurement)
-47 | Power Zero | int 32 | Set the power zero level in mW (for power measurement)
-48 | Power Average Window | uint16 | Deprecated
+41 | Relay High Duration | uint 16 | Set the time/duration that the relay is set to high (ms). **Setting this to a wrong value may cause damage.**
+42 | Low Tx Power | int 8 | Set the tx power used when in low transmission power for bonding (can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4).
+43 | Voltage Multiplier | float | Set the voltage multiplier (for power measurement). **Setting this to a wrong value may cause damage.**
+44 | Current Multiplier | float | Set the current multiplier (for power measurement). **Setting this to a wrong value may cause damage.**
+45 | Voltage Zero | int 32 | Set the voltage zero level (for power measurement).      **Setting this to a wrong value may cause damage.**
+46 | Current Zero | int 32 | Set the current zero level (for power measurement).      **Setting this to a wrong value may cause damage.**
+47 | Power Zero | int 32 | Set the power zero level in mW (for power measurement).    **Setting this to a wrong value may cause damage.**
+48 | Power Average Window | uint16 | **Deprecated**
 49 | <a name="mesh_access_address"></a>Mesh Access Address | uint32 | The access address of the mesh messages. This ensures that mesh messages of other groups will not interfere with your group.
+50 | Current consumption threshold | uint 16 | At how much mA the switch will be turned off (soft fuse).
+51 | Current consumption threshold dimmer | uint 16 | At how much mA the dimmer will be turned off (soft fuse).     **Setting this to a wrong value may cause damage.**
+52 | Dimmer temp up voltage | float | Voltage of upper threshold of the dimmer thermometer.                         **Setting this to a wrong value may cause damage.**
+53 | Dimmer temp down voltage | float | Voltage of lower threshold of the dimmer thermometer.                       **Setting this to a wrong value may cause damage.**
 
 OpCodes:
 

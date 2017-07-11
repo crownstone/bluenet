@@ -21,7 +21,7 @@
 
 /** Check if the temperature exceeds a certain threshold
  */
-class TemperatureGuard : EventListener {
+class TemperatureGuard {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static TemperatureGuard& getInstance() {
@@ -45,8 +45,6 @@ public:
 
 	void handleCompEvent(CompEvent_t event);
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
-
 private:
 	/** Constructor
 	 */
@@ -68,10 +66,6 @@ private:
 	COMP* _comp;
 	GeneralEventType _lastChipTempEvent;
 	GeneralEventType _lastPwmTempEvent;
-
-//	void scheduleNextTick() {
-//		Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);
-//	}
 };
 
 

@@ -36,7 +36,7 @@ enum ConfigurationTypes {
 	CONFIG_MAX_CHIP_TEMP                    = 20,     //! 0x14
 	CONFIG_SCAN_FILTER                      = 21,     //! 0x15
 	CONFIG_SCAN_FILTER_SEND_FRACTION        = 22,     //! 0x16
-	CONFIG_CURRENT_LIMIT                    = 23,     //! 0x17
+//	CONFIG_CURRENT_LIMIT                    = 23,     //! 0x17
 	CONFIG_MESH_ENABLED                     = 24,     //! 0x18
 	CONFIG_ENCRYPTION_ENABLED               = 25,     //! 0x19
 	CONFIG_IBEACON_ENABLED                  = 26,     //! 0x1A
@@ -63,6 +63,10 @@ enum ConfigurationTypes {
 	CONFIG_POWER_ZERO                       = 47,     //! 0x2F
 	CONFIG_POWER_ZERO_AVG_WINDOW            = 48,     //! 0x30
 	CONFIG_MESH_ACCESS_ADDRESS				= 49,	  //! 0x31
+	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD      = 50,     //! 0x32
+	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM  = 51,     //! 0x33
+	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP    = 52,     //! 0x34
+	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN  = 53,     //! 0x35
 
 	CONFIG_TYPES
 };

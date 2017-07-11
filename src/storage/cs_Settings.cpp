@@ -13,6 +13,9 @@
 #include <util/cs_Utils.h>
 #include <storage/cs_StorageHelper.h>
 
+//! enable to print additional debug
+//#define PRINT_DEBUG
+
 Settings::Settings() : _initialized(false), _storage(NULL), _boardsConfig(NULL) {
 };
 
@@ -150,7 +153,6 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	//// UINT 8
 	/////////////////////////////////////////////////
 	case CONFIG_SCAN_FILTER:
-	case CONFIG_CURRENT_LIMIT:
 	case CONFIG_FLOOR: {
 		if (length != 1) {
 			LOGw(FMT_ERR_EXPECTED, "uint8");
@@ -197,7 +199,9 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_IBEACON_MINOR:
 	case CONFIG_IBEACON_MAJOR:
 	case CONFIG_NEARBY_TIMEOUT:
-	case CONFIG_POWER_ZERO_AVG_WINDOW: {
+	case CONFIG_POWER_ZERO_AVG_WINDOW:
+	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
+	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM: {
 		if (length != 2) {
 			LOGw(FMT_ERR_EXPECTED, "uint16");
 			return ERR_WRONG_PAYLOAD_LENGTH;
@@ -237,7 +241,9 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	//// FLOAT
 	/////////////////////////////////////////////////
 	case CONFIG_VOLTAGE_MULTIPLIER:
-	case CONFIG_CURRENT_MULTIPLIER: {
+	case CONFIG_CURRENT_MULTIPLIER:
+	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
+	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN: {
 		if (length != 4) {
 			LOGw(FMT_ERR_EXPECTED, "float");
 			return ERR_WRONG_PAYLOAD_LENGTH;
@@ -314,7 +320,6 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	//// UINT 8
 	/////////////////////////////////////////////////
 	case CONFIG_SCAN_FILTER:
-	case CONFIG_CURRENT_LIMIT:
 	case CONFIG_FLOOR: {
 		return 1;
 	}
@@ -351,7 +356,9 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_IBEACON_MINOR:
 	case CONFIG_IBEACON_MAJOR:
 	case CONFIG_NEARBY_TIMEOUT:
-	case CONFIG_POWER_ZERO_AVG_WINDOW: {
+	case CONFIG_POWER_ZERO_AVG_WINDOW:
+	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
+	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM: {
 		return 2;
 	}
 
@@ -376,7 +383,9 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	//// FLOAT
 	/////////////////////////////////////////////////
 	case CONFIG_VOLTAGE_MULTIPLIER:
-	case CONFIG_CURRENT_MULTIPLIER: {
+	case CONFIG_CURRENT_MULTIPLIER:
+	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
+	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN: {
 		return 4;
 	}
 
@@ -421,6 +430,9 @@ ERR_CODE Settings::get(uint8_t type, void* target) {
 }
 
 ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
+#ifdef PRINT_DEBUG
+	LOGd("get %d", type);
+#endif
 	switch(type) {
 	case CONFIG_NAME: {
 		char default_name[32];
@@ -510,10 +522,6 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		StorageHelper::getUint16(_storageStruct.scanFilterSendFraction, (uint16_t*)target, SCAN_FILTER_SEND_FRACTION);
 		break;
 	}
-	case CONFIG_CURRENT_LIMIT: {
-		StorageHelper::getUint8(_storageStruct.currentLimit, (uint8_t*)target, CURRENT_LIMIT);
-		break;
-	}
 	case CONFIG_CROWNSTONE_ID: {
 		StorageHelper::getUint16(_storageStruct.crownstoneId, (uint16_t*)target, 0);
 		break;
@@ -592,6 +600,22 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 	}
 	case CONFIG_PWM_PERIOD: {
 		StorageHelper::getUint32(_storageStruct.pwmInterval, (uint32_t*)target, PWM_PERIOD);
+		break;
+	}
+	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD: {
+		StorageHelper::getUint16(_storageStruct.currentThreshold, (uint16_t*)target, CURRENT_USAGE_THRESHOLD);
+		break;
+	}
+	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM: {
+		StorageHelper::getUint16(_storageStruct.currentThresholdPwm, (uint16_t*)target, CURRENT_USAGE_THRESHOLD_PWM);
+		break;
+	}
+	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP: {
+		StorageHelper::getFloat(_storageStruct.pwmTempVoltageThresholdUp, (float*)target, _boardsConfig->pwmTempVoltageThreshold);
+		break;
+	}
+	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN: {
+		StorageHelper::getFloat(_storageStruct.pwmTempVoltageThresholdDown, (float*)target, _boardsConfig->pwmTempVoltageThresholdDown);
 		break;
 	}
 	default: {
@@ -709,11 +733,6 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.scanFilterSendFraction);
 		break;
 	}
-	case CONFIG_CURRENT_LIMIT: {
-		p_item = (uint8_t*)&_storageStruct.currentLimit;
-		StorageHelper::setUint8(*((uint8_t*)target), _storageStruct.currentLimit);
-		break;
-	}
 	case CONFIG_CROWNSTONE_ID: {
 		p_item = (uint8_t*)&_storageStruct.crownstoneId;
 		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.crownstoneId);
@@ -812,6 +831,26 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	case CONFIG_PWM_PERIOD:{
 		p_item = (uint8_t*)&_storageStruct.pwmInterval;
 		StorageHelper::setUint32(*((uint32_t*)target), _storageStruct.pwmInterval);
+		break;
+	}
+	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD: {
+		p_item = (uint8_t*)&_storageStruct.currentThreshold;
+		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.currentThreshold);
+		break;
+	}
+	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM: {
+		p_item = (uint8_t*)&_storageStruct.currentThresholdPwm;
+		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.currentThresholdPwm);
+		break;
+	}
+	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP: {
+		p_item = (uint8_t*)&_storageStruct.pwmTempVoltageThresholdUp;
+		StorageHelper::setFloat(*((float*)target), _storageStruct.pwmTempVoltageThresholdUp);
+		break;
+	}
+	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN: {
+		p_item = (uint8_t*)&_storageStruct.pwmTempVoltageThresholdDown;
+		StorageHelper::setFloat(*((float*)target), _storageStruct.pwmTempVoltageThresholdDown);
 		break;
 	}
 	default: {
@@ -920,7 +959,9 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 bool Settings::readFlag(uint8_t type, bool& value) {
 
 //	bool default_value;
-
+#ifdef PRINT_DEBUG
+	LOGd("read flag %d", type);
+#endif
 	switch(type) {
 	case CONFIG_MESH_ENABLED: {
 		StorageHelper::getUint8(_storageStruct.meshEnabled, (uint8_t*)&value, MESHING);

@@ -105,8 +105,8 @@ struct ps_configuration_t : ps_storage_base_t {
 		int32_t txPower;
 	} beacon;
 
-	//! current limit value
-	uint32_t currentLimit;
+	//! Current threshold in mA
+	uint32_t currentThreshold;
 
 	//! nearby timeout used for device tracking
 	uint32_t nearbyTimeout;
@@ -224,6 +224,11 @@ struct ps_configuration_t : ps_storage_base_t {
 	uint32_t meshAccessAddress;
 
 	uint32_t pwmInterval;
+
+	uint32_t currentThresholdPwm;
+
+	float pwmTempVoltageThresholdUp;
+	float pwmTempVoltageThresholdDown;
 
 };
 

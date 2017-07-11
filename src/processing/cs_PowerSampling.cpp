@@ -85,6 +85,8 @@ void PowerSampling::init(uint8_t pinAinCurrent, uint8_t pinAinVoltage) {
 	settings.get(CONFIG_CURRENT_ZERO, &_currentZero);
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
 //	settings.get(CONFIG_POWER_ZERO_AVG_WINDOW, &_zeroAvgWindow); // No longer used
+	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentThreshold);
+	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentThresholdPwm);
 
 	initAverages();
 	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
@@ -415,20 +417,21 @@ void PowerSampling::calculatePower(nrf_saadc_value_t* buf, size_t bufSize, uint1
 	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
 
 	// TODO: don't use hardcoded 220V here
-	if (powerMilliWatt > CURRENT_USAGE_THRESHOLD * 220 && !stateErrors.errors.overCurrent) {
+	if (powerMilliWatt > _currentThreshold * 220 && !stateErrors.errors.overCurrent) {
 		LOGd("current above threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		State::getInstance().set(STATE_ERROR_OVER_CURRENT, (uint8_t)1);
 	}
-	else if (powerMilliWatt > CURRENT_USAGE_THRESHOLD_PWM  * 220  && !stateErrors.errors.overCurrentPwm) {
+	else if (powerMilliWatt > _currentThresholdPwm * 220  && !stateErrors.errors.overCurrentPwm) {
 		//! Get the current pwm state before we dispatch the event (as that may change the pwm).
 		switch_state_t switchState;
 		State::getInstance().get(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
-		//! Then dispatch the event that will turn off the pwm
-		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
-		//! If the pwm was on, set overcurrent error.
 		if (switchState.pwm_state != 0) {
+			//! If the pwm was on:
 			LOGd("current above pwm threshold");
+			//! Dispatch the event that will turn off the pwm
+			EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
+			//! Set overcurrent error.
 			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, (uint8_t)1);
 		}
 	}

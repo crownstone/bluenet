@@ -8,9 +8,9 @@
 #include "processing/cs_TemperatureGuard.h"
 
 #include "storage/cs_State.h"
+#include <storage/cs_Settings.h>
 
 TemperatureGuard::TemperatureGuard() :
-		EventListener(CONFIG_MAX_CHIP_TEMP),
 #if (NORDIC_SDK_VERSION >= 11)
 		_appTimerId(NULL),
 #else
@@ -31,14 +31,17 @@ void comp_event_callback(CompEvent_t event) {
 }
 
 void TemperatureGuard::init(boards_config_t* boardConfig) {
-	EventDispatcher::getInstance().addListener(this);
 
 	Settings::getInstance().get(CONFIG_MAX_CHIP_TEMP, &_maxChipTemp);
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
 
 	_comp = &COMP::getInstance();
-	_comp->init(boardConfig->pinAinPwmTemp, boardConfig->pwmTempVoltageThresholdDown, boardConfig->pwmTempVoltageThreshold);
+	float pwmTempThresholdUp;
+	float pwmTempThresholdDown;
+	Settings::getInstance().get(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP, &pwmTempThresholdUp);
+	Settings::getInstance().get(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN, &pwmTempThresholdDown);
+	_comp->init(boardConfig->pinAinPwmTemp, pwmTempThresholdDown, pwmTempThresholdUp);
 //	_comp->setEventCallback(comp_event_callback);
 
 	_lastChipTempEvent = EVT_CHIP_TEMP_OK;
@@ -123,12 +126,4 @@ void TemperatureGuard::start() {
 
 void TemperatureGuard::stop() {
 	Timer::getInstance().stop(_appTimerId);
-}
-
-void TemperatureGuard::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch (evt) {
-	case CONFIG_MAX_CHIP_TEMP:
-		_maxChipTemp = *(int32_t*)p_data;
-		break;
-	}
 }

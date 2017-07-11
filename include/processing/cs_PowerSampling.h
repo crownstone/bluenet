@@ -101,6 +101,9 @@ private:
 	double _avgPower; //! Used for storing and calculating the average power
 	int32_t _avgPowerMilliWatt; //! Used to send out the average power
 
+	uint16_t _currentThreshold;
+	uint16_t _currentThresholdPwm;
+
 	/** Copies the adc samples to the power samples struct, to be sent over bluetooth
 	 */
 	void copyBufferToPowerSamples(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
