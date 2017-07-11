@@ -228,7 +228,7 @@ void Switch::handleMultiSwitch(multi_switch_item_t* p_item) {
 		if (p_item->timeout == 0) {
 			setSwitch(p_item->switchState);
 		} else {
-			handleDelayed(p_item->switchState, p_item->timeout);
+			delayedSwitch(p_item->switchState, p_item->timeout);
 		}
 	}
 
@@ -236,7 +236,7 @@ void Switch::handleMultiSwitch(multi_switch_item_t* p_item) {
 #endif
 
 
-void Switch::handleDelayed(uint8_t switchState, uint16_t delay) {
+void Switch::delayedSwitch(uint8_t switchState, uint16_t delay) {
 
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGi("trigger delayed switch state: %d, delay: %d", switchState, delay);

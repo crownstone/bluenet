@@ -186,6 +186,10 @@ void Crownstone::init() {
 //		//! use PIN encryption for setup mode
 //		_stack->setPinEncrypted(true);
 
+		if (_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
+			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
+		}
+
 		break;
 	}
 	case OPERATION_MODE_NORMAL: {
