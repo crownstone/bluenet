@@ -915,7 +915,8 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_scanner->stop();
 
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-			_switch->setSwitch(0);
+			// [11-jul-2017] Since we store the switch state, we don't have to switch here.
+//			_switch->setSwitch(0);
 			_powerSampler->stopSampling();
 		}
 
