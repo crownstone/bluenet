@@ -1,4 +1,4 @@
-# Bluenet protocol v0.11.0
+# Bluenet protocol v0.11.1
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -283,7 +283,7 @@ The schedule service has UUID 24f50000-7d10-4805-bfc1-7663a01c3bff.
 Characteristic | UUID | Date type | Description | A | U | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Set time        | 24f50001-7d10-4805-bfc1-7663a01c3bff | uint 32 | Sets the time. Timestamp is in seconds since epoch. | x
-Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule entry](#schedule_entry_packet) | Add or modify a schedule entry. Set nextTimestamp to 0 to remove the entry from the list. | x
+Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule command](#schedule_command_packet) | Set or clear a schedule entry. To clear: only write the id. | x
 Schedule read   | 24f50003-7d10-4805-bfc1-7663a01c3bff | [Schedule list](#schedule_list_packet) | Get a list of all schedule entries. | x
 
 
@@ -340,7 +340,7 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 12 | Enable scanner | [Enable Scanner payload](#cmd_enable_scanner_payload) | Enable/Disable scanner | x
 13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON | x |
 14 | User feedback | ... | User feedback ..., TBD | x |
-15 | Schedule entry | [Schedule entry payload](#schedule_entry_packet) | Add or remove a schedule entry | x | x
+15 | Schedule set | [Schedule command payload](#schedule_command_packet) | Set (overwrite) a schedule entry | x | x
 16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
 17 | <a name="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | ..
 18 | Request Service Data | - | Causes the crownstone to send it's service data over the mesh | x | x |
@@ -351,6 +351,7 @@ Type nr | Type name | Payload type | Payload Description | A | U | G
 23 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
 24 | Keepalive mesh | - | Repeat the last keep alive message on the mesh. | x | x | x
 25 | Multi switch | [Multi switch packet](#multi_switch_mesh_packet) | Switch multiple crownstones with a command over the mesh. | x | x | x
+26 | Schedule remove | uint 8 | Clear the Nth schedule entry of the [list](#schedule_list_packet). | x | x
 
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
@@ -580,14 +581,19 @@ uint 16 [] | Counters | size * 2 | Counter that keeps up how long ago the RSSI o
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Size | 1 | Number of entries in the list.
-[schedule entry](#schedule_entry_packet) | Entries | 12 | Schedule entry list.
+[schedule entry](#schedule_entry_packet) | Entries | size*12 | Schedule entry list. Entries with timestamp=0 can be considered empty.
 
+### <a name="schedule_command_packet"></a>Schedule command packet
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | id | 1 | Id of the entry (corresponds to the Nth entry in the list).
+[schedule entry](#schedule_entry_packet) | Entry | 12 | Schedule entry.
 
 ### <a name="schedule_entry_packet"></a>Schedule entry packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | ID | 1 | Unique id of this schedule entry.
+uint 8 | reserved | 1 | Reserved for future use.
 uint 8 | [Override mask](#schedule_override_mask) | 1 | Bitmask of switch commands to override.
 uint 8 | Type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
 uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers. Set to 0 to remove this entry.
