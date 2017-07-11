@@ -12,6 +12,7 @@
 #include <protocol/cs_ConfigTypes.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_RNG.h>
+#include <storage/cs_State.h>
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
@@ -260,23 +261,31 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	//! keep track of the BLE connection status. If we are connected we do not need to update the packet.
 	switch(evt) {
 	case EVT_BLE_CONNECT: {
-			_connected = true;
+		_connected = true;
+		break;
+	}
+	case EVT_BLE_DISCONNECT: {
+		_connected = false;
+		updateAdvertisement();
+		break;
+	}
+	case EVT_PWM_FORCED_OFF:
+	case EVT_SWITCH_FORCED_OFF:
+//	case EVT_CHIP_TEMP_ABOVE_THRESHOLD:
+//	case EVT_PWM_TEMP_ABOVE_THRESHOLD:
+		updateEventBitmask(SERVICE_BITMASK_ERROR, true);
+		break;
+	case STATE_ERRORS: {
+		if (length != sizeof(state_errors_t)) {
 			break;
 		}
-		case EVT_BLE_DISCONNECT: {
-			_connected = false;
-			updateAdvertisement();
-			break;
-		}
-		case EVT_PWM_FORCED_OFF:
-		case EVT_SWITCH_FORCED_OFF:
-		case EVT_CHIP_TEMP_ABOVE_THRESHOLD:
-		case EVT_PWM_TEMP_ABOVE_THRESHOLD:
-			updateEventBitmask(SERVICE_BITMASK_ERROR, true);
-			break;
-		default: {
-			//! continue with the rest of the method.
-		}
+		state_errors_t* stateErrors = (state_errors_t*)p_data;
+		updateEventBitmask(SERVICE_BITMASK_ERROR, stateErrors->asInt);
+		break;
+	}
+	default: {
+		//! continue with the rest of the method.
+	}
 	}
 
 	//! in case the operation mode is setup, we have a different advertisement package.
