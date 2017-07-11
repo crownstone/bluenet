@@ -17,12 +17,12 @@
 #include <common/cs_Types.h>
 
 // enable for additional debug output
-//#define PRINT_DEBUG
+#define PRINT_DEBUG
 //#define PRINT_MESHCONTROL_VERBOSE
 
 #define PRINT_VERBOSE_KEEPALIVE
-//#define PRINT_VERBOSE_STATE_BROADCAST
-//#define PRINT_VERBOSE_STATE_CHANGE
+#define PRINT_VERBOSE_STATE_BROADCAST
+#define PRINT_VERBOSE_STATE_CHANGE
 //#define PRINT_VERBOSE_SCAN_RESULT
 //#define PRINT_VERBOSE_COMMAND
 //#define PRINT_VERBOSE_COMMAND_REPLY
@@ -229,6 +229,8 @@ ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, 
 	}
 
 	if (change) {
+		//! Disable the state change handle for now, it causes old states to be taken for new.
+		return ERR_SUCCESS;
 		EventDispatcher::getInstance().dispatch(EVT_EXTERNAL_STATE_CHANGE);
 	}
 
@@ -253,11 +255,11 @@ ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, 
 
 	BLEutil::printArray(msg, length);
 
-//	int16_t idx = -1;
-//	state_item_t* p_stateItem;
-//	while (peek_next_state_item(msg, &p_stateItem, idx)) {
-//		LOGi("idx=%d id=%d switch=%d bitmask=%d P=%d E=%d", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerUsage, p_stateItem->accumulatedEnergy);
-//	}
+	int16_t idx = -1;
+	state_item_t* p_stateItem;
+	while (peek_next_state_item(msg, &p_stateItem, idx)) {
+		LOGi("idx=%d id=%d switch=%d bitmask=%d P=%d E=%d", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerUsage, p_stateItem->accumulatedEnergy);
+	}
 #endif // PRINT_DEBUG
 	return ERR_SUCCESS;
 }
@@ -912,11 +914,14 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 	uint16_t messageSize = sizeof(message);
 	uint8_t channel;
 
-	if (event) {
-		channel = STATE_CHANGE_CHANNEL;
-	} else {
-		channel = STATE_BROADCAST_CHANNEL;
-	}
+	//! For now: only use the state broadcast
+//	if (event) {
+//		channel = STATE_CHANGE_CHANNEL;
+//	} else {
+//		channel = STATE_BROADCAST_CHANNEL;
+//	}
+	channel = STATE_BROADCAST_CHANNEL;
+
 
 #ifdef UPDATE_EXISTING
 	//! Check if the state of this crownstone is in the message yet, if so: overwrite it, else append it.
