@@ -11,6 +11,7 @@
 #include "drivers/cs_RTC.h"
 #include "ble/cs_Stack.h"
 #include "processing/cs_CommandHandler.h"
+#include "processing/cs_Switch.h"
 
 FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
 #if (NORDIC_SDK_VERSION >= 11)
@@ -137,6 +138,9 @@ bool FactoryReset::performFactoryReset() {
 }
 
 bool FactoryReset::finishFactoryReset() {
+	//! Set switch to initial value: off
+	Switch::getInstance().setSwitch(0);
+
 	//! First clear sensitive data: keys
 	Settings::getInstance().factoryReset(FACTORY_RESET_CODE);
 
