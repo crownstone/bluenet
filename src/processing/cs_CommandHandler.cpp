@@ -62,22 +62,14 @@ void execute_delayed(void * p_context) {
 }
 
 CommandHandler::CommandHandler() :
-#if (NORDIC_SDK_VERSION >= 11)
 		_delayTimerId(NULL),
 		_resetTimerId(NULL),
-#else
-		_delayTimerId(UINT32_MAX),
-		_resetTimerId(UINT32_MAX),
-		_keepAliveTimerId(UINT32_MAX),
-#endif
 		_boardConfig(NULL)
 {
-#if (NORDIC_SDK_VERSION >= 11)
 		_delayTimerData = { {0} };
 		_delayTimerId = &_delayTimerData;
 		_resetTimerData = { {0} };
 		_resetTimerId = &_resetTimerData;
-#endif
 }
 
 void CommandHandler::init(boards_config_t* board) {

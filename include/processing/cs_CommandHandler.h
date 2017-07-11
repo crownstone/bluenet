@@ -41,15 +41,10 @@ private:
 
 	CommandHandler();
 
-#if (NORDIC_SDK_VERSION >= 11)
-	app_timer_t              _delayTimerData;
-	app_timer_id_t           _delayTimerId;
-	app_timer_t              _resetTimerData;
-	app_timer_id_t           _resetTimerId;
-#else
-	uint32_t                 _delayTimerId;
-	uint32_t                 _resetTimerId;
-#endif
+	app_timer_t      _delayTimerData;
+	app_timer_id_t   _delayTimerId;
+	app_timer_t      _resetTimerData;
+	app_timer_id_t   _resetTimerId;
 
 	boards_config_t* _boardConfig;
 };
