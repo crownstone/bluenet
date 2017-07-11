@@ -232,9 +232,9 @@ void asPca10036(boards_config_t* p_config) {
 	p_config->pinGpioPwm           = 17;
 	p_config->pinGpioRelayOn       = 11; // something unused
 	p_config->pinGpioRelayOff      = 12; // something unused
-	p_config->pinAinCurrent        = 0; // gpio2 something unused
-	p_config->pinAinVoltage        = 1; // gpio3 something unused
-	p_config->pinAinPwmTemp        = 2; // gpio4 something unused
+	p_config->pinAinCurrent        = 1; // gpio3 something unused
+	p_config->pinAinVoltage        = 2; // gpio4 something unused
+	p_config->pinAinPwmTemp        = 0; // gpio2 something unused
 	p_config->pinGpioRx            = 8;
 	p_config->pinGpioTx            = 6;
 	p_config->pinLedRed            = 19;
