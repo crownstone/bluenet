@@ -12,18 +12,18 @@
 #include <util/cs_BleError.h>
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_SCHEDULEENTRIES_VERBOSE
+#define PRINT_SCHEDULEENTRIES_VERBOSE
 
 #define SECONDS_PER_DAY         86400
 
-#define DAILY_REPEAT_SUNDAYS    1
-#define DAILY_REPEAT_MONDAYS    2
-#define DAILY_REPEAT_TUESDAYS   4
-#define DAILY_REPEAT_WEDNESDAYS 8
-#define DAILY_REPEAT_THURSDAYS  16
-#define DAILY_REPEAT_FRIDAYS    32
-#define DAILY_REPEAT_SATURDAYS  64
-#define DAILY_REPEAT_ALL_DAYS   128
+#define DAILY_REPEAT_BIT_SUNDAYS    0
+#define DAILY_REPEAT_BIT_MONDAYS    1
+#define DAILY_REPEAT_BIT_TUESDAYS   2
+#define DAILY_REPEAT_BIT_WEDNESDAYS 3
+#define DAILY_REPEAT_BIT_THURSDAYS  4
+#define DAILY_REPEAT_BIT_FRIDAYS    5
+#define DAILY_REPEAT_BIT_SATURDAYS  6
+#define DAILY_REPEAT_BIT_ALL_DAYS   7
 
 #define SCHEDULE_TIME_TYPE_REPEAT      0
 #define SCHEDULE_TIME_TYPE_DAILY       1
@@ -32,23 +32,22 @@
 #define SCHEDULE_ACTION_TYPE_PWM       0
 #define SCHEDULE_ACTION_TYPE_FADE      1
 #define SCHEDULE_ACTION_TYPE_TOGGLE    2
+// More action ideas:
+// scanning
+// respond to linked devices
+// advertising
+// recovery
+// lock
+// device type
+// max power usage
 
-
-#define SCHEDULE_OVERRIDE_PRESENCE     1
-#define SCHEDULE_OVERRIDE_RESERVED     2
-#define SCHEDULE_OVERRIDE_RESERVED2    4
-#define SCHEDULE_OVERRIDE_RESERVED3    8
-#define SCHEDULE_OVERRIDE_RESERVED4    16
-#define SCHEDULE_OVERRIDE_RESERVED5    32
-#define SCHEDULE_OVERRIDE_RESERVED6    64
-#define SCHEDULE_OVERRIDE_RESERVED7    128
 
 struct __attribute__((__packed__)) schedule_time_daily_t {
 	//! Only perform action on certain days these days of the week. Bitmask, see DAILY_REPEAT_*.
 	//! Check against (1 << current_day_of_week)
 	//! If (dayOfWeek & DAILY_REPEAT_ALL_DAYS), then the other bits are ignored.
-	uint8_t dayOfWeek;
-	uint8_t nextDayOfWeek; //! [0-6] 0=Sunday. Remember what day of week the nextTimestamp is.
+	uint8_t dayOfWeekBitmask;
+	uint8_t reserved;
 };
 
 struct __attribute__((__packed__)) schedule_time_repeat_t {
@@ -140,6 +139,20 @@ public:
 	static uint8_t getTimeType(const schedule_entry_t* entry);
 	static uint8_t getActionType(const schedule_entry_t* entry);
 
+	/** Checks if this schedule entry should be executed. Also adjusts the timestamp to next scheduled time */
+	static bool isActionTime(schedule_entry_t* entry, uint32_t timestamp);
+
+	/** After large time jumps, this function adjusts the timestamp to next scheduled time.
+	 * Returns whether the schedule was adjusted
+	 */
+	static bool syncTime(schedule_entry_t* entry, uint32_t timestamp);
+
+	/** Get the day of week of a given timestamp. Sun=0, Sat=6. */
+	static uint8_t getDayOfWeek(uint32_t timestamp);
+
+	/** Whether or not the day is one in the dayOfWeek bitmask */
+	static bool isActionDay(uint8_t bitMask, uint8_t dayOfWeek);
+
 
 	//////////// BufferAccessor ////////////////////////////
 
@@ -224,11 +237,16 @@ public:
 	/** Removes a schedule entry from the list. Returns true on success, false when it's not in the list. */
 	bool rem(const schedule_entry_t* entry);
 
-	/** Checks the schedule entries with the current time. Returns an entry if its action has to be executed, NULL otherwise. */
+	/** Checks the schedule entries with the current time.
+	 * Also reschedules the entries if they are repeated.
+	 * Returns an entry if its action has to be executed, NULL otherwise.
+	 */
 	schedule_entry_t* checkSchedule(uint32_t currentTime);
 
-	/** If there is a time jump, this function makes sure all entries are corrected. */
-	void sync(uint32_t currentTime);
+	/** If there is a time jump, this function makes sure all entries are corrected.
+	 * Returns whether any schedule was adjusted.
+	 */
+	bool sync(uint32_t currentTime);
 
 	/** Prints the schedule entry list */
 	void print() const;

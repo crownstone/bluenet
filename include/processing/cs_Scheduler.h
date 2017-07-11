@@ -11,9 +11,6 @@
 #include <structs/cs_ScheduleEntries.h>
 #include <events/cs_EventListener.h>
 
-//todo: just remove it totally if it's not necessary to disable it
-#define SCHEDULER_ENABLED 1
-
 #define SCHEDULER_UPDATE_FREQUENCY 2
 
 class Scheduler : EventListener {
@@ -47,11 +44,7 @@ public:
 	void removeScheduleEntry(schedule_entry_t* entry);
 
 	inline ScheduleList* getScheduleList() {
-#if SCHEDULER_ENABLED==1
 		return _scheduleList;
-#else
-		return NULL;
-#endif
 	}
 
 protected:
@@ -61,7 +54,7 @@ protected:
 
 	void tick();
 
-	void writeScheduleList();
+	void writeScheduleList(bool store);
 
 	void readScheduleList();
 
@@ -71,12 +64,14 @@ protected:
 	 */
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
+	void print();
+
+	void printDebug();
+
 private:
 	Scheduler();
 
-#if SCHEDULER_ENABLED==1
 	uint8_t _schedulerBuffer[sizeof(schedule_list_t)];
-#endif
 
 	app_timer_t              _appTimerData;
 	app_timer_id_t           _appTimerId;

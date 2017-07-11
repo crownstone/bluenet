@@ -10,14 +10,101 @@
 
 //#define PRINT_DEBUG
 
+bool ScheduleEntry::isActionTime(schedule_entry_t* entry, uint32_t timestamp) {
+	bool result = false;
+	if (entry->nextTimestamp == 0) {
+		//TODO: remove this entry
+		return false;
+	}
+	if (entry->nextTimestamp < timestamp) {
+		result = true;
+#ifdef PRINT_DEBUG
+		LOGd("found:");
+		print(entry);
+#endif
+		switch (getTimeType(entry)) {
+		case SCHEDULE_TIME_TYPE_REPEAT:
+			entry->nextTimestamp += entry->repeat.repeatTime * 60;
+			break;
+		case SCHEDULE_TIME_TYPE_DAILY: {
+			// Get day of week, before increasing it
+			uint8_t dayOfWeek = getDayOfWeek(entry->nextTimestamp);
+			// Daily task, reschedule in 24h
+			entry->nextTimestamp += SECONDS_PER_DAY;
+			// Check day of week
+			if (!isActionDay(entry->daily.dayOfWeekBitmask, dayOfWeek)) {
+				result = false;
+			}
+			break;
+		}
+		case SCHEDULE_TIME_TYPE_ONCE:
+			entry->nextTimestamp = 0; // Mark for deletion
+			break;
+		default:
+			entry->nextTimestamp = 0; // Mark for deletion
+			result = false;
+			break;
+		}
+#ifdef PRINT_DEBUG
+		LOGd("Update nextTimestamp=%u", entry->nextTimestamp);
+#endif
+	}
+	return result;
+}
+
+bool ScheduleEntry::syncTime(schedule_entry_t* entry, uint32_t timestamp) {
+	if (entry->nextTimestamp == 0) {
+		//TODO: remove this entry
+		return false;
+	}
+	bool adjusted = false;
+	//! Make sure nextTimestamp >= currentTime
+	if (entry->nextTimestamp < timestamp) {
+		switch (ScheduleEntry::getTimeType(entry)) {
+		case SCHEDULE_TIME_TYPE_REPEAT: {
+			uint32_t secondsPerRepeat = entry->repeat.repeatTime * 60;
+			uint32_t repeatDiff = (timestamp - entry->nextTimestamp + secondsPerRepeat - 1) / secondsPerRepeat;
+			entry->nextTimestamp += repeatDiff * secondsPerRepeat;
+			adjusted = (repeatDiff != 0);
+			break;
+		}
+		case SCHEDULE_TIME_TYPE_DAILY:{
+			uint32_t daysDiff = (timestamp - entry->nextTimestamp + SECONDS_PER_DAY - 1) / SECONDS_PER_DAY;
+			entry->nextTimestamp += daysDiff * SECONDS_PER_DAY;
+			adjusted = (daysDiff != 0);
+			break;
+		}
+		case SCHEDULE_TIME_TYPE_ONCE:
+			// TODO: remove this entry immediately
+			entry->nextTimestamp = 0; // Mark for deletion
+			break;
+		default:
+			entry->nextTimestamp = 0; // Mark for deletion
+			break;
+		}
+	}
+	return adjusted;
+}
+
 uint8_t ScheduleEntry::getTimeType(const schedule_entry_t* entry) {
-	uint8_t timeType = entry->type & 0x00FF;
+	uint8_t timeType = entry->type & 0x0F;
 	return timeType;
 }
 
 uint8_t ScheduleEntry::getActionType(const schedule_entry_t* entry) {
-	uint8_t actionType = (entry->type & 0xFF00) >> 4;
+	uint8_t actionType = (entry->type & 0xF0) >> 4;
 	return actionType;
+}
+
+uint8_t ScheduleEntry::getDayOfWeek(uint32_t timestamp) {
+	return (timestamp / SECONDS_PER_DAY + 4) % 7;
+}
+
+bool ScheduleEntry::isActionDay(uint8_t bitMask, uint8_t dayOfWeek) {
+#ifdef PRINT_DEBUG
+	LOGd("isActionDay: 0x%x %u", bitMask, dayOfWeek);
+#endif
+	return (bitMask & (1 << DAILY_REPEAT_BIT_ALL_DAYS)) || (bitMask & (1 << dayOfWeek));
 }
 
 void ScheduleEntry::print(const schedule_entry_t* entry) {
@@ -26,19 +113,19 @@ void ScheduleEntry::print(const schedule_entry_t* entry) {
 
 	switch (getTimeType(entry)) {
 	case SCHEDULE_TIME_TYPE_REPEAT:
-		LOGd("repeatTime=%u", entry->repeat.repeatTime);
+		LOGd("  repeatTime=%u", entry->repeat.repeatTime);
 		break;
 	case SCHEDULE_TIME_TYPE_DAILY:
-		LOGd("days=%02X nextDay=%u", entry->daily.dayOfWeek, entry->daily.nextDayOfWeek);
+		LOGd("  days=%02X", entry->daily.dayOfWeekBitmask);
 		break;
 	}
 
 	switch (getActionType(entry)) {
 	case SCHEDULE_ACTION_TYPE_PWM:
-		LOGd("pwm=%u", entry->pwm.pwm);
+		LOGd("  pwm=%u", entry->pwm.pwm);
 		break;
 	case SCHEDULE_ACTION_TYPE_FADE:
-		LOGd("pwmEnd=%u fadeTime=%u", entry->fade.pwmEnd, entry->fade.fadeDuration);
+		LOGd("  pwmEnd=%u fadeTime=%u", entry->fade.pwmEnd, entry->fade.fadeDuration);
 		break;
 	}
 }
@@ -67,9 +154,7 @@ bool ScheduleList::add(const schedule_entry_t* entry) {
 	bool success = false;
 	for (uint16_t i=0; i<getSize(); i++) {
 		if (_buffer->list[i].id == entry->id) {
-#ifdef PRINT_SE_VERBOSE
-			LOGd("update id %u", entry->id);
-#endif
+			LOGi("update id %u", entry->id);
 			_buffer->list[i] = *entry;
 			success = true;
 			break;
@@ -77,9 +162,7 @@ bool ScheduleList::add(const schedule_entry_t* entry) {
 	}
 	if (!success && !isFull()) {
 		_buffer->list[_buffer->size++] = *entry;
-#ifdef PRINT_SE_VERBOSE
-		LOGd("add id %u", entry->id);
-#endif
+		LOGi("add id %u", entry->id);
 		success = true;
 	}
 	return success;
@@ -89,9 +172,7 @@ bool ScheduleList::rem(const schedule_entry_t* entry) {
 	bool success = false;
 	for (uint16_t i=0; i<getSize(); i++) {
 		if (_buffer->list[i].id == entry->id) {
-#ifdef PRINT_SE_VERBOSE
-			LOGd("rem id %u", entry->id);
-#endif
+			LOGi("rem id %u", entry->id);
 			success = true;
 			for (;i<_buffer->size-1; i++) {
 				_buffer->list[i] = _buffer->list[i+1];
@@ -106,62 +187,24 @@ bool ScheduleList::rem(const schedule_entry_t* entry) {
 schedule_entry_t* ScheduleList::checkSchedule(uint32_t currentTime) {
 	schedule_entry_t* result = NULL;
 	for (uint16_t i=0; i<getSize(); i++) {
-		if (_buffer->list[i].nextTimestamp == 0) {
-			//TODO: remove this entry
-		}
-		if (_buffer->list[i].nextTimestamp < currentTime) {
+		if (ScheduleEntry::isActionTime(&(_buffer->list[i]), currentTime)) {
 			result = &(_buffer->list[i]);
-
-			switch (ScheduleEntry::getTimeType(result)) {
-			case SCHEDULE_TIME_TYPE_REPEAT:
-				result->nextTimestamp += result->repeat.repeatTime * 60;
-				break;
-			case SCHEDULE_TIME_TYPE_DAILY:
-				// Daily task, reschedule in 24h
-				result->nextTimestamp += SECONDS_PER_DAY;
-				// Check day of week
-				if (!(result->daily.dayOfWeek & DAILY_REPEAT_ALL_DAYS) && !(result->daily.dayOfWeek & (1 << result->daily.nextDayOfWeek))) {
-					result = NULL;
-				}
-				// Keep up the next day of week
-				_buffer->list[i].daily.nextDayOfWeek = (_buffer->list[i].daily.nextDayOfWeek + 1) % 7;
-				break;
-			case SCHEDULE_TIME_TYPE_ONCE:
-				result->nextTimestamp = 0; // Mark for deletion
-				break;
-			}
+#ifdef PRINT_DEBUG
+			LOGd("trigger:");
+#endif
+			ScheduleEntry::print(result);
+			break; // Break: if we have 2 entries with the same timestamp, it will be triggered next time.
 		}
 	}
 	return result;
 }
 
-void ScheduleList::sync(uint32_t currentTime) {
+bool ScheduleList::sync(uint32_t currentTime) {
+	bool adjusted = false;
 	for (uint16_t i=0; i<getSize(); i++) {
-		if (_buffer->list[i].nextTimestamp == 0) {
-			//TODO: remove this entry
-		}
-		//! Make sure nextTimestamp > currentTime
-		if (_buffer->list[i].nextTimestamp < currentTime) {
-			switch (ScheduleEntry::getTimeType(&(_buffer->list[i]))) {
-			case SCHEDULE_TIME_TYPE_REPEAT:
-				_buffer->list[i].nextTimestamp += ((currentTime - _buffer->list[i].nextTimestamp) / (_buffer->list[i].repeat.repeatTime*60) + 1) * (_buffer->list[i].repeat.repeatTime*60);
-				break;
-			case SCHEDULE_TIME_TYPE_DAILY:{
-				uint32_t daysDiff = (currentTime - _buffer->list[i].nextTimestamp) / SECONDS_PER_DAY + 1;
-				_buffer->list[i].nextTimestamp += daysDiff * SECONDS_PER_DAY;
-
-				// Keep up the next day of week
-				// TODO: is this correct?
-				_buffer->list[i].daily.nextDayOfWeek = (_buffer->list[i].daily.nextDayOfWeek + daysDiff) % 7;
-				break;
-			}
-			case SCHEDULE_TIME_TYPE_ONCE:
-				// TODO: remove this entry immediately
-				_buffer->list[i].nextTimestamp = 0; // Mark for deletion
-				break;
-			}
-		}
+		adjusted = adjusted || ScheduleEntry::syncTime(&(_buffer->list[i]), currentTime);
 	}
+	return adjusted;
 }
 
 void ScheduleList::print() const {

@@ -33,6 +33,7 @@ State::State() :
 		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedEnergy(NULL),
 		_temperature(0), _powerUsage(0), _time(0), _factoryResetState(FACTORY_RESET_STATE_NORMAL) {
 	_errorState.asInt = 0;
+	_overrideBitmask.asInt = 0;
 }
 
 void State::init() {
@@ -226,7 +227,9 @@ uint16_t State::getStateItemSize(uint8_t type) {
 	case STATE_ERROR_OVER_CURRENT:
 	case STATE_ERROR_OVER_CURRENT_PWM:
 	case STATE_ERROR_CHIP_TEMP:
-	case STATE_ERROR_PWM_TEMP: {
+	case STATE_ERROR_PWM_TEMP:
+	case STATE_IGNORE_LOCATION:
+	case STATE_IGNORE_ALL: {
 		return sizeof(uint8_t);
 	}
 	case STATE_TEMPERATURE: {
@@ -243,6 +246,9 @@ uint16_t State::getStateItemSize(uint8_t type) {
 	}
 	case STATE_ERRORS: {
 		return sizeof(state_errors_t);
+	}
+	case STATE_IGNORE_BITMASK: {
+		return sizeof(state_ignore_bitmask_t);
 	}
 	default: {
 		LOGw(FMT_STATE_NOT_FOUND, type);
@@ -267,7 +273,10 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 	case STATE_ERROR_OVER_CURRENT:
 	case STATE_ERROR_OVER_CURRENT_PWM:
 	case STATE_ERROR_CHIP_TEMP:
-	case STATE_ERROR_PWM_TEMP: {
+	case STATE_ERROR_PWM_TEMP:
+	case STATE_IGNORE_BITMASK:
+	case STATE_IGNORE_ALL:
+	case STATE_IGNORE_LOCATION: {
 		success = size == getStateItemSize(type);
 		break;
 	}
@@ -354,8 +363,12 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_SCHEDULE: {
+#ifdef PRINT_DEBUG
+			LOGd("set schedule pointer: %p size: %d", _storageStruct.scheduleList, size);
+#endif
 			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.scheduleList, size);
-			savePersistentStorageItem(_storageStruct.scheduleList, size);
+			//! Don't store, this should be done via savePersistentStorage, otherwise it happens too often.
+//			savePersistentStorageItem(_storageStruct.scheduleList, size);
 			break;
 		}
 		case STATE_LEARNED_SWITCHES: {
@@ -381,6 +394,18 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 		}
 		case STATE_ERROR_PWM_TEMP: {
 			_errorState.errors.pwmTemp = *(uint8_t*)target;
+			break;
+		}
+		case STATE_IGNORE_BITMASK: {
+			_overrideBitmask = *(state_ignore_bitmask_t*)target;
+			break;
+		}
+		case STATE_IGNORE_ALL: {
+			_overrideBitmask.mask.all = *(uint8_t*)target;
+			break;
+		}
+		case STATE_IGNORE_LOCATION: {
+			_overrideBitmask.mask.location = *(uint8_t*)target;
 			break;
 		}
 		case STATE_ACCUMULATED_ENERGY: {
@@ -488,6 +513,10 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 #endif
 			break;
 		}
+		case STATE_IGNORE_BITMASK: {
+			*(state_ignore_bitmask_t*)target = _overrideBitmask;
+			break;
+		}
 		case STATE_ACCUMULATED_ENERGY: {
 //			break;
 		}
@@ -523,9 +552,21 @@ void State::savePersistentStorage() {
 	_storage->writeStorage(_structHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
+void State::savePersistentStorageItem(uint8_t type) {
+#ifdef PRINT_DEBUG
+	LOGd("store type: %d", type);
+#endif
+	switch (type) {
+	case STATE_SCHEDULE: {
+		savePersistentStorageItem(_storageStruct.scheduleList, sizeof(schedule_list_t));
+	}
+	}
+}
+
 void State::savePersistentStorageItem(uint8_t* item, uint16_t size) {
 	uint32_t offset = StorageHelper::getOffset(&_storageStruct, item);
-	_storage->writeItem(_structHandle, offset, item, size);
+	uint16_t alignedSize = (size+4-1)/4*4;
+	_storage->writeItem(_structHandle, offset, item, alignedSize);
 }
 
 bool State::isNotifying(uint8_t type) {

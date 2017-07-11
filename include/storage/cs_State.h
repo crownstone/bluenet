@@ -103,6 +103,16 @@ union state_errors_t {
 	uint32_t asInt;
 };
 
+union state_ignore_bitmask_t {
+	struct __attribute__((packed)) {
+		uint8_t all : 1;
+		uint8_t location : 1;
+		// wall switch?
+		uint8_t reserved : 6;
+	} mask;
+	uint8_t asInt;
+};
+
 #define FACTORY_RESET_STATE_NORMAL 0
 #define FACTORY_RESET_STATE_LOWTX  1
 #define FACTORY_RESET_STATE_RESET  2
@@ -203,6 +213,10 @@ public:
 	 */
 	void savePersistentStorage();
 
+	/** Save a certain item type from struct (working memory) to flash.
+	 */
+	void savePersistentStorageItem(uint8_t type);
+
 	void savePersistentStorageItem(uint8_t* item, uint16_t size);
 
 	void setNotify(uint8_t type, bool enable);
@@ -242,7 +256,7 @@ protected:
 	uint32_t _time;
 	uint8_t _factoryResetState;
 	state_errors_t _errorState;
-
+	state_ignore_bitmask_t _overrideBitmask;
 };
 
 

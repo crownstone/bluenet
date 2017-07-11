@@ -346,7 +346,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "schedule entry");
 
-#if SCHEDULER_ENABLED==1
 		Scheduler& scheduler = Scheduler::getInstance();
 
 		ScheduleEntry entry;
@@ -371,9 +370,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 				}
 				break;
 			case SCHEDULE_TIME_TYPE_DAILY:
-				if (entryStruct->daily.nextDayOfWeek > 6) {
-					return -1;
-				}
 				break;
 			case SCHEDULE_TIME_TYPE_ONCE:
 				break;
@@ -381,8 +377,6 @@ ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t bu
 
 			scheduler.addScheduleEntry(entryStruct);
 		}
-#endif
-
 		break;
 	}
 	case CMD_INCREASE_TX: {

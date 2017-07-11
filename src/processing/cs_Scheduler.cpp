@@ -25,15 +25,11 @@ Scheduler::Scheduler() :
 	_appTimerData = { {0} };
 	_appTimerId = &_appTimerData;
 
-#if SCHEDULER_ENABLED==1
 	_scheduleList = new ScheduleList();
 	_scheduleList->assign(_schedulerBuffer, sizeof(_schedulerBuffer));
-#ifdef SCHEDULER_PRINT_DEBUG
-	_scheduleList->print();
-#endif
 
+	printDebug();
 	readScheduleList();
-#endif
 
 	//! Subscribe for events.
 	EventDispatcher::getInstance().addListener(this);
@@ -52,36 +48,31 @@ void Scheduler::setTime(uint32_t time) {
 	LOGi("Set time to %i", time);
 	_posixTimeStamp = time;
 	_rtcTimeStamp = RTC::getCount();
-#if SCHEDULER_ENABLED==1
-	_scheduleList->sync(time);
-#ifdef SCHEDULER_PRINT_DEBUG
-	_scheduleList->print();
-#endif
-#endif
+
+	printDebug();
+	bool adjusted = _scheduleList->sync(time);
+	if (adjusted) {
+		writeScheduleList(true);
+	}
+	printDebug();
 }
 
 void Scheduler::addScheduleEntry(schedule_entry_t* entry) {
-#if SCHEDULER_ENABLED==1
+	LOGd("add");
 	if (_scheduleList->add(entry)) {
-		writeScheduleList();
-#ifdef SCHEDULER_PRINT_DEBUG
-		_scheduleList->print();
-#endif
+		writeScheduleList(true);
+		printDebug();
 		publishScheduleEntries();
 	}
-#endif
 }
 
 void Scheduler::removeScheduleEntry(schedule_entry_t* entry) {
-#if SCHEDULER_ENABLED==1
+	LOGd("rem");
 	if (_scheduleList->rem(entry)) {
-		writeScheduleList();
-#ifdef SCHEDULER_PRINT_DEBUG
-		_scheduleList->print();
-#endif
+		writeScheduleList(true);
+		printDebug();
 		publishScheduleEntries();
 	}
-#endif
 }
 
 void Scheduler::tick() {
@@ -104,7 +95,6 @@ void Scheduler::tick() {
 		//		LOGd("day of week = %i", datetime->tm_wday);
 	}
 
-#if SCHEDULER_ENABLED==1
 	schedule_entry_t* entry = _scheduleList->checkSchedule(_posixTimeStamp);
 	if (entry != NULL) {
 		switch (ScheduleEntry::getActionType(entry)) {
@@ -113,30 +103,42 @@ void Scheduler::tick() {
 				//! TODO: use an event instead
 				uint8_t switchState = entry->pwm.pwm == 0 ? 0 : 100;
 				Switch::getInstance().setSwitch(switchState);
+				State::getInstance().set(STATE_IGNORE_BITMASK, entry->overrideMask);
 				break;
 			}
-			case SCHEDULE_ACTION_TYPE_FADE:
+			case SCHEDULE_ACTION_TYPE_FADE: {
 				//TODO: implement this, make sure that if something else changes pwm during fade, that the fading is halted.
 				//TODO: implement the fade function in the Switch class
+				//TODO: if (entry->fade.fadeDuration == 0), then just use SCHEDULE_ACTION_TYPE_PWM
+				uint8_t switchState = entry->fade.pwmEnd == 0 ? 0 : 100;
+				Switch::getInstance().setSwitch(switchState);
+				State::getInstance().set(STATE_IGNORE_BITMASK, entry->overrideMask);
 				break;
+			}
+			case SCHEDULE_ACTION_TYPE_TOGGLE: {
+				Switch::getInstance().toggle();
+				State::getInstance().set(STATE_IGNORE_BITMASK, entry->overrideMask);
+				break;
+			}
 		}
+		writeScheduleList(false);
 	}
-#endif
 
 	scheduleNextTick();
 }
 
-void Scheduler::writeScheduleList() {
-#if SCHEDULER_ENABLED==1
+void Scheduler::writeScheduleList(bool store) {
+	LOGd("store");
 	buffer_ptr_t buffer;
 	uint16_t length;
 	_scheduleList->getBuffer(buffer, length);
 	State::getInstance().set(STATE_SCHEDULE, buffer, length);
-#endif
+	if (store) {
+		State::getInstance().savePersistentStorageItem(STATE_SCHEDULE);
+	}
 }
 
 void Scheduler::readScheduleList() {
-#if SCHEDULER_ENABLED==1
 	buffer_ptr_t buffer;
 	uint16_t length;
 	_scheduleList->getBuffer(buffer, length);
@@ -145,22 +147,17 @@ void Scheduler::readScheduleList() {
 	State::getInstance().get(STATE_SCHEDULE, buffer, length);
 
 	if (!_scheduleList->isEmpty()) {
-#ifdef SCHEDULER_PRINT_DEBUG
 		LOGi("restored schedule list (%d):", _scheduleList->getSize());
-		_scheduleList->print();
-#endif
+		print();
 		publishScheduleEntries();
 	}
-#endif
 }
 
 void Scheduler::publishScheduleEntries() {
-#if SCHEDULER_ENABLED==1
 	buffer_ptr_t buffer;
 	uint16_t size;
 	_scheduleList->getBuffer(buffer, size);
 	EventDispatcher::getInstance().dispatch(EVT_SCHEDULE_ENTRIES_UPDATED, buffer, size);
-#endif
 }
 
 void Scheduler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
@@ -181,5 +178,15 @@ void Scheduler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 	}
+}
+
+void Scheduler::print() {
+	_scheduleList->print();
+}
+
+void Scheduler::printDebug() {
+#ifdef SCHEDULER_PRINT_DEBUG
+	print();
+#endif
 }
 

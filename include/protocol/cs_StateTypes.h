@@ -29,8 +29,9 @@ enum StateTypes {
 	STATE_ERROR_OVER_CURRENT_PWM,         // 0x8D - 141
 	STATE_ERROR_CHIP_TEMP,                // 0x8E - 142
 	STATE_ERROR_PWM_TEMP,                 // 0x8F - 143
-
-
+	STATE_IGNORE_BITMASK,                 // 0x90 - 144
+	STATE_IGNORE_ALL,                     // 0x91 - 145
+	STATE_IGNORE_LOCATION,                // 0x92 - 146
 
 	STATE_TYPES
 };
