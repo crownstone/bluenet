@@ -1,4 +1,4 @@
-# Bluenet protocol v0.10.0
+# Bluenet protocol v0.11.0
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -575,6 +575,33 @@ uint 8 | size | 1 | Number of tracked devices in the list.
 uint 16 [] | Counters | size * 2 | Counter that keeps up how long ago the RSSI of a device was above the threshold (for internal use).
 
 
+### <a name="schedule_list_packet"></a>Schedule list packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Size | 1 | Number of entries in the list.
+[schedule entry](#schedule_entry_packet) | Entries | 12 | Schedule entry list.
+
+
+### <a name="schedule_entry_packet"></a>Schedule entry packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | ID | 1 | Unique id of this schedule entry.
+uint 8 | [Override mask](#schedule_override_mask) | 1 | Bitmask of switch commands to override.
+uint 8 | Type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
+uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers. Set to 0 to remove this entry.
+[schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
+[schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
+
+### <a name="schedule_override_mask"></a>Schedule override mask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | All | Ignore any switch command. ** Not implemented yet. **
+1 | Location | Ignore any switch command that comes from location updates (enter/exit room/sphere). ** Not implemented yet. **
+2-7 | Reserved | Reserved for future use.
+
 ### <a name="schedule_repeat_packet"></a>Schedule repeat packet
 
 #### Repeat type 0
@@ -590,14 +617,14 @@ Perform action every 24h, but only on certain days these days of the week.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Day of week | 1 | Bitmask, with bits 0-6 for Sunday-Saturday and bit 7 for all days.
-uint 8 | Next day of week | 1 | Remember what day of week comes next. 0-6, where 0=Sunday.
+uint 8 | Reserved | 1 | Reserved for future use.
 
 #### Repeat type 2
 Perform action only once. Entry gets removed after action was performed.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Reserved | 2 | Unused.
+uint 8 | Reserved | 2 | Reserved for future use.
 
 
 ### <a name="schedule_action_packet"></a>Schedule action packet
@@ -624,27 +651,9 @@ Toggle the power switch.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Reserved | 3 | Unused.
+uint 8 | Reserved | 3 | Reserved for future use.
 
 
-### <a name="schedule_entry_packet"></a>Schedule entry packet
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | ID | 1 | Unique id of this schedule entry.
-uint 8 | Override mask | 1 | Bitmask of states to override. Presence mask = 1.
-uint 8 | Type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
-uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers. Set to 0 to remove this entry.
-[schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
-[schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
-
-
-### <a name="schedule_list_packet"></a>Schedule list packet
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Size | 1 | Number of entries in the list.
-[schedule entry](#schedule_entry_packet) | Entries | 12 | Schedule entry list.
 
 ### <a name="mesh_message_packet"></a>Mesh message
 This packet is a slightly modified version of the one used in [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh); we simply increased the content size.
