@@ -19,6 +19,8 @@
 #include <protocol/mesh/cs_MeshMessageState.h>
 #endif
 
+//#define ADVERTISE_EXTERNAL_DATA
+
 ServiceData::ServiceData() : EventListener(EVT_ALL), _updateTimerId(NULL), _connected(false)
 {
 	//! we want to update the advertisement packet on a fixed interval.
@@ -84,7 +86,7 @@ void ServiceData::updateAdvertisement() {
 
 		service_data_t* serviceData = &_serviceData;
 
-#if BUILD_MESHING == 1
+#if BUILD_MESHING == 1 && defined(ADVERTISE_EXTERNAL_DATA)
 		//! Every N updates, we advertise the state of another crownstone.
 		if (_operationMode == OPERATION_MODE_NORMAL && _updateCount % 2 == 0 && Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 			state_message_t message = {};
