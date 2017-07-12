@@ -160,6 +160,6 @@
 #define ADVERTISING_REFRESH_PERIOD               1000 //! Push the changes in the advertisement packet to the stack every x milliseconds
 #define ADVERTISING_REFRESH_PERIOD_SETUP         100 //! Push the changes in the advertisement packet to the stack every x milliseconds
 
-#define MESH_STATE_REFRESH_PERIOD                60000 // 60 seconds
+#define MESH_STATE_REFRESH_PERIOD                50000 // 50 seconds + some random amount of seconds
 
 #define SWITCH_ON_AT_SETUP_BOOT_DELAY            3600 //! Seconds until the switch turns on when in setup mode (Crownstone built-in only)

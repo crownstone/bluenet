@@ -53,11 +53,18 @@ ServiceData::ServiceData() : EventListener(EVT_ALL), _updateTimerId(NULL), _conn
 	//! Only send the state over the mesh in normal mode
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED) && _operationMode == OPERATION_MODE_NORMAL) {
 		//! Start the mesh state timer with a small random delay
-		uint8_t rand8;
-		RNG::fillBuffer(&rand8, 1);
 		//! Make sure delay is not 0, as that's an invalid delay.
-		//! Delay is 1-2551 ms
-		uint32_t randMs = rand8*10 + 1;
+
+//		//! Delay is 1-59926 ms
+//		uint8_t rand8;
+//		RNG::fillBuffer(&rand8, 8);
+//		uint32_t randMs = rand8*235 + 1;
+
+		//! Delay is 1-65537 ms
+		uint16_t rand16;
+		RNG::fillBuffer((uint8_t*)&rand16, 2);
+		uint32_t randMs = rand16 + 1;
+
 		Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(randMs), this);
 	}
 #endif
@@ -249,10 +256,10 @@ void ServiceData::sendMeshState(bool event) {
 		MeshControl::getInstance().sendServiceDataMessage(stateItem, event);
 
 		if (!event) {
-			//! Start timer of MESH_STATE_REFRESH_PERIOD + rand(0,255)*10 ms
+			//! Start timer of MESH_STATE_REFRESH_PERIOD + rand ms
 			uint8_t rand8;
 			RNG::fillBuffer(&rand8, 1);
-			uint32_t randMs = rand8*10;
+			uint32_t randMs = rand8*78; //! Range is 0-19890 ms (about 0-20s)
 			Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(MESH_STATE_REFRESH_PERIOD) + MS_TO_TICKS(randMs), this);
 		}
 	}
