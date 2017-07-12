@@ -155,7 +155,10 @@ void Scheduler::readScheduleList() {
 	length = _scheduleList->getMaxLength();
 
 	State::getInstance().get(STATE_SCHEDULE, buffer, length);
-	_scheduleList->checkAllEntries();
+	bool adjusted = _scheduleList->checkAllEntries();
+	if (adjusted) {
+		writeScheduleList(true);
+	}
 
 	LOGi("restored schedule list (%d):", _scheduleList->getSize());
 	print();

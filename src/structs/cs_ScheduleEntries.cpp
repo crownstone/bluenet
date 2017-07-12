@@ -106,6 +106,9 @@ bool ScheduleEntry::isValidEntry(const schedule_entry_t* entry) {
 		}
 		break;
 	case SCHEDULE_TIME_TYPE_DAILY:
+		if (entry->daily.dayOfWeekBitmask == 0) {
+			return false;
+		}
 		break;
 	case SCHEDULE_TIME_TYPE_ONCE:
 		break;
@@ -177,11 +180,14 @@ void ScheduleList::clear() {
 	_buffer->size = MAX_SCHEDULE_ENTRIES;
 }
 
-void ScheduleList::checkAllEntries() {
+bool ScheduleList::checkAllEntries() {
+	bool adjusted = _buffer->size != MAX_SCHEDULE_ENTRIES;
+
 	//! If entry is invalid: clear the entry
 	for (uint8_t i=0; i<_buffer->size; ++i) {
 		if (!ScheduleEntry::isValidEntry(&(_buffer->list[i]))) {
 			clear(i);
+			adjusted = true;
 		}
 	}
 
@@ -190,6 +196,8 @@ void ScheduleList::checkAllEntries() {
 		_buffer->list[i].nextTimestamp = 0;
 	}
 	_buffer->size = MAX_SCHEDULE_ENTRIES;
+
+	return adjusted;
 }
 
 bool ScheduleList::set(uint8_t id, const schedule_entry_t* entry) {

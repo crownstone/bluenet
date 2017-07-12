@@ -220,7 +220,7 @@ public:
 	bool clear(uint8_t id);
 
 	/** Checks validity of all entries */
-	void checkAllEntries();
+	bool checkAllEntries();
 
 	/** Checks the schedule entries with the current time.
 	 * Also reschedules the entries if they are repeated.
