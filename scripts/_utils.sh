@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 
 # colour assignments, see -> http://linuxtidbits.wordpress.com/2008/08/13/output-color-on-bash-scripts-advanced/
 # ORANGE="\033[38;5;214m"
