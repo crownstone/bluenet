@@ -16,6 +16,16 @@ cyan=$(tput setaf 6)
 white=$(tput setaf 7)
 normal=$(tput sgr0)
 
+export black=$black
+export red=$red
+export green=$green
+export yellow=$yellow
+export blue=$blue
+export magenta=$magenta
+export cyan=$cyan
+export white=$white
+export normal=$normal
+
 prefix='oo'
 
 cs_err() {
