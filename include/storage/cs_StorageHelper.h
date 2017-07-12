@@ -263,10 +263,10 @@ public:
 		}
 
 		if (isUnassigned) {
-			if (default_value != NULL) {
 #ifdef PRINT_ITEMS
-				LOGd("use default value");
+			LOGd("use default value");
 #endif
+			if (default_value != NULL) {
 				memcpy(dest, default_value, length * sizeof(T));
 			} else {
 				memset(dest, 0, length * sizeof(T));
