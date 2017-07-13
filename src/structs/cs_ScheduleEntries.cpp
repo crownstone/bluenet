@@ -74,7 +74,6 @@ bool ScheduleEntry::syncTime(schedule_entry_t* entry, uint32_t timestamp) {
 			break;
 		}
 		case SCHEDULE_TIME_TYPE_ONCE:
-			// TODO: remove this entry immediately
 			entry->nextTimestamp = 0; // Mark for deletion
 			break;
 		default:
@@ -139,21 +138,21 @@ uint8_t ScheduleEntry::getDayOfWeek(uint32_t timestamp) {
 
 bool ScheduleEntry::isActionDay(uint8_t bitMask, uint8_t dayOfWeek) {
 #ifdef PRINT_DEBUG
-	LOGd("isActionDay: 0x%x %u", bitMask, dayOfWeek);
+	LOGd("isActionDay: 0x%02x %u", bitMask, dayOfWeek);
 #endif
 	return (bitMask & (1 << DAILY_REPEAT_BIT_ALL_DAYS)) || (bitMask & (1 << dayOfWeek));
 }
 
 void ScheduleEntry::print(const schedule_entry_t* entry) {
 
-	LOGd("type=%02X override=%02X nextTimestamp=%u", entry->type, entry->overrideMask, entry->nextTimestamp);
+	LOGd("type=0x%02x override=0x%02x nextTimestamp=%u", entry->type, entry->overrideMask, entry->nextTimestamp);
 
 	switch (getTimeType(entry)) {
 	case SCHEDULE_TIME_TYPE_REPEAT:
 		LOGd("  repeatTime=%u", entry->repeat.repeatTime);
 		break;
 	case SCHEDULE_TIME_TYPE_DAILY:
-		LOGd("  days=%02X", entry->daily.dayOfWeekBitmask);
+		LOGd("  days=0x%02x", entry->daily.dayOfWeekBitmask);
 		break;
 	}
 
@@ -200,24 +199,24 @@ bool ScheduleList::checkAllEntries() {
 	return adjusted;
 }
 
-bool ScheduleList::set(uint8_t id, const schedule_entry_t* entry) {
-	if (id >= MAX_SCHEDULE_ENTRIES) {
+bool ScheduleList::set(uint8_t index, const schedule_entry_t* entry) {
+	if (index >= MAX_SCHEDULE_ENTRIES) {
 		return false;
 	}
-	LOGi("set id %u", id);
+	LOGi("set index %u", index);
 	_buffer->size = MAX_SCHEDULE_ENTRIES;
 	if (!ScheduleEntry::isValidEntry(entry)) {
 		return false;
 	}
-	memcpy(&(_buffer->list[id]), entry, sizeof(schedule_entry_t));
+	memcpy(&(_buffer->list[index]), entry, sizeof(schedule_entry_t));
 	return true;
 }
 
-bool ScheduleList::clear(uint8_t id) {
-	if (id >= MAX_SCHEDULE_ENTRIES) {
+bool ScheduleList::clear(uint8_t index) {
+	if (index >= MAX_SCHEDULE_ENTRIES) {
 		return false;
 	}
-	_buffer->list[id].nextTimestamp = 0;
+	_buffer->list[index].nextTimestamp = 0;
 	return true;
 }
 

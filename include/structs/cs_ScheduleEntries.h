@@ -214,10 +214,10 @@ public:
 	void clear();
 
 	/** Adds/updates a schedule entry to/in the list. Returns true on success. */
-	bool set(uint8_t id, const schedule_entry_t* entry);
+	bool set(uint8_t index, const schedule_entry_t* entry);
 
 	/** Removes a schedule entry from the list. Returns true on success. */
-	bool clear(uint8_t id);
+	bool clear(uint8_t index);
 
 	/** Checks validity of all entries */
 	bool checkAllEntries();
