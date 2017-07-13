@@ -52,6 +52,7 @@ usage() {
   echo "   -c command, --command=command            command to choose from this list:"
   echo "      build                                 cross-compile target"
   echo "      unit-test-host                        compile test units for host"
+  echo "      unit-test-nrf5                        compile test units for nrf5 target"
   echo "      release                               create a release"
   echo "      upload                                upload application firmware to target"
   echo "      debug                                 debug application on target with gdb"
@@ -337,7 +338,7 @@ case "$cmd" in
 		writeHardwareVersion
 		;;
 	*)
-		cs_info $"Usage: $0 {build|unit-test-host|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release|writeHardwareVersion}"
+		cs_info $"Usage: $0 {build|unit-test-host|unit-test-nrf5|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release|writeHardwareVersion}"
 		exit 1
 esac
 
