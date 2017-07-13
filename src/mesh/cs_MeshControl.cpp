@@ -18,15 +18,18 @@
 
 // enable for additional debug output
 #define PRINT_DEBUG
-//#define PRINT_MESHCONTROL_VERBOSE
+#define PRINT_MESHCONTROL_VERBOSE
 
 #define PRINT_VERBOSE_KEEPALIVE
 #define PRINT_VERBOSE_STATE_BROADCAST
 #define PRINT_VERBOSE_STATE_CHANGE
 //#define PRINT_VERBOSE_SCAN_RESULT
 //#define PRINT_VERBOSE_COMMAND
-//#define PRINT_VERBOSE_COMMAND_REPLY
+#define PRINT_VERBOSE_COMMAND_REPLY
 #define PRINT_VERBOSE_MULTI_SWITCH
+
+// Disables sending of command replies, and state items (service data).
+#define CRIPPLE_MESH_FUNCTIONALITY
 
 MeshControl::MeshControl() : EventListener(EVT_ALL), _myCrownstoneId(0) {
 	EventDispatcher::getInstance().addListener(this);
@@ -760,8 +763,10 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 
 }
 
-// this is where i was
 void MeshControl::sendStatusReplyMessage(uint32_t messageCounter, ERR_CODE status) {
+#ifdef CRIPPLE_MESH_FUNCTIONALITY
+	return;
+#endif
 
 #if defined(PRINT_MESHCONTROL_VERBOSE) && defined(PRINT_VERBOSE_COMMAND_REPLY)
 	LOGd("MESH SEND");
@@ -969,7 +974,10 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 	if (!success || !is_valid_state_msg(&message)) {
 		clear_state_msg(&message);
 	}
+
+#ifndef CRIPPLE_MESH_FUNCTIONALITY
 	push_state_item(&message, &stateItem);
+#endif
 
 	//! Set the timestamp to the current time
 	uint32_t timestamp;
