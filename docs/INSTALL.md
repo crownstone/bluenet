@@ -188,7 +188,7 @@ Now we can build our own software:
     cd $BLUENET_DIR/scripts
     ./firmware.sh --command=build --target=default
 
-By default, the code is built inside the `$BLUENET_WORKSPACE_DIR/build` folder and if successful, the compiled binaries (*.hex, *.elf, *.bin) are copied to `$BLUENET_WORKSPACE_DIR/bin`. If you want to change either folder, you can uncomment and assign the following environment variables in `$BLUENET_DIR/env.config`
+By default, the code is built inside the `$BLUENET_WORKSPACE_DIR/build` folder and if successful, the compiled binaries (\*.hex, \*.elf, \*.bin) are copied to `$BLUENET_WORKSPACE_DIR/bin`. If you want to change either folder, you can uncomment and assign the following environment variables in `$BLUENET_DIR/env.config`
 
     - `BLUENET_BUILD_DIR`. Set this variable to the path where the build files should be stored.
     - `BLUENET_BIN_DIR`. Set this variable to the path where the compiled binaries should be stored
@@ -306,6 +306,15 @@ and then enter `ShowEmuList`, which gives a list of connected devices, e.g.
 Now if you call one of the scripts, with target `BLUE`,  e.g. `./firmware.sh run BLUE` it will compile config `BLUE` at `$BLUENET_CONFIG_DIR/BLUE/CMakeBuild.config` and upload it to `DEVICE1`. While calling `./firmware.sh run RED` will compile config `RED` at `$BLUENET_CONFIG_DIR/RED/CMakeBuild.config` and upload it to `DEVICE2`.
 
 And if you call `./firmware.sh run` it will compile the default config at `$BLUENET_CONFIG_DIR/CMakeBuild.config` and upload it to device `DEVICE2`.
+
+## Unit tests
+
+You can also run unit tests for host or the target board through:
+
+    ./firmware.sh --command=unit-test-host --target=test
+    ./firmware.sh --command=unit-test-nrf5 --target=test
+
+Set `TEST_TARGET=`nrf5` in your `CMakeBuild.config` file in `test` to actually run the unit tests.
 
 ## UART
 
