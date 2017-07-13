@@ -46,6 +46,7 @@ Scheduler::Scheduler() :
  */
 void Scheduler::setTime(uint32_t time) {
 	LOGi("Set time to %i", time);
+
 	_posixTimeStamp = time;
 	_rtcTimeStamp = RTC::getCount();
 
@@ -86,7 +87,6 @@ ERR_CODE Scheduler::clearScheduleEntry(uint8_t id) {
 }
 
 void Scheduler::tick() {
-
 	//! RTC can overflow every 16s
 	uint32_t tickDiff = RTC::difference(RTC::getCount(), _rtcTimeStamp);
 
