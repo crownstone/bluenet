@@ -117,7 +117,7 @@ MAX_NUM_VS_SERVICES=6
 # Enable or disable characteristics
 # Crownstone Service
 CHAR_CONTROL=1
-CHAR_MESHING=1
+CHAR_MESHING=0
 CHAR_CONFIGURATION=1
 CHAR_STATE=1
 
