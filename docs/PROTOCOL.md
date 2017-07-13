@@ -1,4 +1,4 @@
-# Bluenet protocol v0.11.1
+# Bluenet protocol v0.11.2
 -------------------------
 
 # <a name="encryption"></a>Encryption
@@ -594,8 +594,8 @@ uint 8 | index | 1 | Index of the entry (corresponds to the Nth entry in the lis
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | reserved | 1 | Reserved for future use.
-uint 8 | [Override mask](#schedule_override_mask) | 1 | Bitmask of switch commands to override.
 uint 8 | Type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
+uint 8 | [Override mask](#schedule_override_mask) | 1 | Bitmask of switch commands to override.
 uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers. Set to 0 to remove this entry.
 [schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
 [schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
