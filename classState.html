@@ -106,7 +106,7 @@ Collaboration diagram for State:</div>
 <div class="dyncontent">
 <div class="center"><img src="classState__coll__graph.png" border="0" usemap="#State_coll__map" alt="Collaboration graph"/></div>
 <map name="State_coll__map" id="State_coll__map">
-<area shape="rect" id="node2" href="classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="289,5,356,32"/><area shape="rect" id="node3" href="classEventListener.html" title="Event listener. " alt="" coords="21,5,123,32"/><area shape="rect" id="node4" href="unionstate__errors__t.html" title="state_errors_t" alt="" coords="271,56,374,83"/><area shape="rect" id="node5" href="classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY, small\l_seq_number_t \&gt;" alt="" coords="215,107,430,178"/><area shape="rect" id="node6" href="structps__general__vars__t.html" title="Struct used to ... " alt="" coords="259,203,387,229"/><area shape="rect" id="node7" href="structps__storage__base__t.html" title="enable additional debug output " alt="" coords="6,203,138,229"/><area shape="rect" id="node8" href="classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY, large_seq_number_t \&gt;" alt="" coords="191,253,454,309"/><area shape="rect" id="node9" href="classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY, small_seq_number_t \&gt;" alt="" coords="189,333,456,389"/></map>
+<area shape="rect" id="node2" href="classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="289,13,356,40"/><area shape="rect" id="node3" href="classEventListener.html" title="Event listener. " alt="" coords="21,13,123,40"/><area shape="rect" id="node4" href="unionstate__ignore__bitmask__t.html" title="state_ignore_bitmask_t" alt="" coords="244,64,401,91"/><area shape="rect" id="node5" href="unionstate__errors__t.html" title="state_errors_t" alt="" coords="271,115,374,141"/><area shape="rect" id="node6" href="classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY, small\l_seq_number_t \&gt;" alt="" coords="215,166,430,237"/><area shape="rect" id="node7" href="structps__general__vars__t.html" title="Struct used to ... " alt="" coords="259,261,387,288"/><area shape="rect" id="node8" href="structps__storage__base__t.html" title="enable additional debug output " alt="" coords="6,261,138,288"/><area shape="rect" id="node9" href="classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY, large_seq_number_t \&gt;" alt="" coords="191,312,454,368"/><area shape="rect" id="node10" href="classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY, small_seq_number_t \&gt;" alt="" coords="189,392,456,448"/></map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -178,6 +178,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a300d534c474bfc6a378829ea7a7d1976">savePersistentStorage</a> ()</td></tr>
 <tr class="memdesc:a300d534c474bfc6a378829ea7a7d1976"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save the whole struct (working memory) to FLASH. <br/></td></tr>
 <tr class="separator:a300d534c474bfc6a378829ea7a7d1976"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a743df45e737673378a61f22e5489caa6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a743df45e737673378a61f22e5489caa6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a743df45e737673378a61f22e5489caa6">savePersistentStorageItem</a> (uint8_t type)</td></tr>
+<tr class="memdesc:a743df45e737673378a61f22e5489caa6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save a certain item type from struct (working memory) to flash. <br/></td></tr>
+<tr class="separator:a743df45e737673378a61f22e5489caa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46499fccb497f73c2eacaffd65b54534"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a46499fccb497f73c2eacaffd65b54534"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>savePersistentStorageItem</b> (uint8_t *item, uint16_t size)</td></tr>
 <tr class="separator:a46499fccb497f73c2eacaffd65b54534"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -260,6 +264,9 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>_factoryResetState
 <tr class="memitem:a6c3deff3eabe178e9d9a6e4c667b6dab"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6c3deff3eabe178e9d9a6e4c667b6dab"></a>
 <a class="el" href="unionstate__errors__t.html">state_errors_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_errorState</b></td></tr>
 <tr class="separator:a6c3deff3eabe178e9d9a6e4c667b6dab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad12517451b005503723331af727099db"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad12517451b005503723331af727099db"></a>
+<a class="el" href="unionstate__ignore__bitmask__t.html">state_ignore_bitmask_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_overrideBitmask</b></td></tr>
+<tr class="separator:ad12517451b005503723331af727099db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Load StateVars from and save StateVars to persistent storage. </p>

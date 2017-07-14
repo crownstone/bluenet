@@ -2,7 +2,7 @@ var searchData=
 [
   ['adc',['ADC',['../classADC.html',1,'']]],
   ['adc_5fdone_5fcb_5fdata_5ft',['adc_done_cb_data_t',['../structadc__done__cb__data__t.html',1,'']]],
-  ['add',['add',['../classScheduleList.html#aaec34c4918028d8e0f9e9b57d8dddac8',1,'ScheduleList::add()'],['../classStreamBuffer.html#a9f86cd69fdedcf5893796af31482c2d2',1,'StreamBuffer::add()'],['../classTrackedDeviceList.html#aacb5658c77b9bbc09464eab701869ade',1,'TrackedDeviceList::add()']]],
+  ['add',['add',['../classStreamBuffer.html#a9f86cd69fdedcf5893796af31482c2d2',1,'StreamBuffer::add()'],['../classTrackedDeviceList.html#aacb5658c77b9bbc09464eab701869ade',1,'TrackedDeviceList::add()']]],
   ['addcharacteristic',['addCharacteristic',['../classService.html#a69281e49b9a84d5ec36c8b2a42f525e0',1,'Service']]],
   ['addconfigurationcontrolcharacteristic',['addConfigurationControlCharacteristic',['../classCrownstoneService.html#a90d2fe42df74882005129944e97198d9',1,'CrownstoneService']]],
   ['addconfigurationreadcharacteristic',['addConfigurationReadCharacteristic',['../classCrownstoneService.html#a1daa93ff8b477a0d8158042403e2bc54',1,'CrownstoneService']]],
@@ -14,6 +14,7 @@ var searchData=
   ['addr',['addr',['../structperipheral__device__t.html#a8611f2972c066cad2319245673dd4b37',1,'peripheral_device_t::addr()'],['../structtracked__device__t.html#a1dcb74799cadcbedd2f28f25c5f863c4',1,'tracked_device_t::addr()']]],
   ['addresetcharacteristic',['addResetCharacteristic',['../classGeneralService.html#aa29f93eaf86c8ddfe79865cf2aa88929',1,'GeneralService']]],
   ['addtemperaturecharacteristic',['addTemperatureCharacteristic',['../classGeneralService.html#ab71a2038bcaa70d0efd4db95c05f0085',1,'GeneralService']]],
+  ['adjusttimestamp',['adjustTimestamp',['../classScheduleEntry.html#a92fc7cfb00061682ad3f2c7856a186ab',1,'ScheduleEntry']]],
   ['adv_5findicator',['adv_indicator',['../classIBeacon.html#a1e891c83fb2dacef1d496094c098dbc8',1,'IBeacon']]],
   ['adv_5freport_5fparse',['adv_report_parse',['../namespaceBLEutil.html#a4f644a1e77cc7657616c1117b7bee44e',1,'BLEutil']]],
   ['advinterval',['advInterval',['../structps__configuration__t.html#a014996077647e60bc06dc002cf5eb266',1,'ps_configuration_t']]],

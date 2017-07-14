@@ -157,6 +157,26 @@ static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>getTimeType
 <tr class="memitem:a08e64a4a61ccc518455318e41d5617e7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a08e64a4a61ccc518455318e41d5617e7"></a>
 static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>getActionType</b> (const <a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *entry)</td></tr>
 <tr class="separator:a08e64a4a61ccc518455318e41d5617e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec932218bc2cf098d4cccf1908e053b8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aec932218bc2cf098d4cccf1908e053b8"></a>
+static bool&#160;</td><td class="memItemRight" valign="bottom"><b>isValidEntry</b> (const <a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *entry)</td></tr>
+<tr class="separator:aec932218bc2cf098d4cccf1908e053b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a593e42c80e07675f79179474f49b8f33"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleEntry.html#a593e42c80e07675f79179474f49b8f33">isActionTime</a> (<a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *entry, uint32_t currentTime)</td></tr>
+<tr class="memdesc:a593e42c80e07675f79179474f49b8f33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if this schedule entry should be executed.  <a href="#a593e42c80e07675f79179474f49b8f33">More...</a><br/></td></tr>
+<tr class="separator:a593e42c80e07675f79179474f49b8f33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92fc7cfb00061682ad3f2c7856a186ab"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a92fc7cfb00061682ad3f2c7856a186ab"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleEntry.html#a92fc7cfb00061682ad3f2c7856a186ab">adjustTimestamp</a> (<a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *entry, uint32_t currentTime)</td></tr>
+<tr class="memdesc:a92fc7cfb00061682ad3f2c7856a186ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adjusts the timestamp to next scheduled time (but only if timestamp &lt; currentTime) <br/></td></tr>
+<tr class="separator:a92fc7cfb00061682ad3f2c7856a186ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab84585fe321dd31ec5b3bdde79e16666"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleEntry.html#ab84585fe321dd31ec5b3bdde79e16666">syncTime</a> (<a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *entry, uint32_t currentTime, int64_t timeDiff)</td></tr>
+<tr class="memdesc:ab84585fe321dd31ec5b3bdde79e16666"><td class="mdescLeft">&#160;</td><td class="mdescRight">After large time jumps, this function adjusts the timestamp to next scheduled time.  <a href="#ab84585fe321dd31ec5b3bdde79e16666">More...</a><br/></td></tr>
+<tr class="separator:ab84585fe321dd31ec5b3bdde79e16666"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49e19fcc4512f71e8762243ad1ecc314"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleEntry.html#a49e19fcc4512f71e8762243ad1ecc314">getDayOfWeek</a> (uint32_t timestamp)</td></tr>
+<tr class="memdesc:a49e19fcc4512f71e8762243ad1ecc314"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the day of week of a given timestamp.  <a href="#a49e19fcc4512f71e8762243ad1ecc314">More...</a><br/></td></tr>
+<tr class="separator:a49e19fcc4512f71e8762243ad1ecc314"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2abc7fae87009c789651bc10504d7fde"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2abc7fae87009c789651bc10504d7fde"></a>
+static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleEntry.html#a2abc7fae87009c789651bc10504d7fde">isActionDay</a> (uint8_t bitMask, uint8_t dayOfWeek)</td></tr>
+<tr class="memdesc:a2abc7fae87009c789651bc10504d7fde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not the day is one in the dayOfWeek bitmask. <br/></td></tr>
+<tr class="separator:a2abc7fae87009c789651bc10504d7fde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The <a class="el" href="classScheduleEntry.html" title="The ScheduleEntry object has a single schedule_entry_t struct as memory object. ">ScheduleEntry</a> object has a single <a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> struct as memory object. </p>
@@ -229,6 +249,33 @@ static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>getActionTy
 
 </div>
 </div>
+<a class="anchor" id="a49e19fcc4512f71e8762243ad1ecc314"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t ScheduleEntry::getDayOfWeek </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the day of week of a given timestamp. </p>
+<p>Sun=0, Sat=6. </p>
+
+</div>
+</div>
 <a class="anchor" id="a373751ea565192ad6b32c068e274a121"></a>
 <div class="memitem">
 <div class="memproto">
@@ -255,6 +302,85 @@ static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>getActionTy
 <dl class="section return"><dt>Returns</dt><dd>maximum possible length </dd></dl>
 
 <p>Implements <a class="el" href="classBufferAccessor.html#aa24c08cb06bbf47caaa67d1fc826aba0">BufferAccessor</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a593e42c80e07675f79179474f49b8f33"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool ScheduleEntry::isActionTime </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *&#160;</td>
+          <td class="paramname"><em>entry</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>currentTime</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Checks if this schedule entry should be executed. </p>
+
+</div>
+</div>
+<a class="anchor" id="ab84585fe321dd31ec5b3bdde79e16666"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool ScheduleEntry::syncTime </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *&#160;</td>
+          <td class="paramname"><em>entry</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>currentTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int64_t&#160;</td>
+          <td class="paramname"><em>timeDiff</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>After large time jumps, this function adjusts the timestamp to next scheduled time. </p>
+<p>Returns whether the schedule was adjusted </p>
 
 </div>
 </div>
