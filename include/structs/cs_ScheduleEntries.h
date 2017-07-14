@@ -127,13 +127,16 @@ public:
 	static uint8_t getActionType(const schedule_entry_t* entry);
 	static bool isValidEntry(const schedule_entry_t* entry);
 
-	/** Checks if this schedule entry should be executed. Also adjusts the timestamp to next scheduled time */
-	static bool isActionTime(schedule_entry_t* entry, uint32_t timestamp);
+	/** Checks if this schedule entry should be executed. */
+	static bool isActionTime(schedule_entry_t* entry, uint32_t currentTime);
+
+	/** Adjusts the timestamp to next scheduled time (but only if timestamp < currentTime) */
+	static void adjustTimestamp(schedule_entry_t* entry, uint32_t currentTime);
 
 	/** After large time jumps, this function adjusts the timestamp to next scheduled time.
 	 * Returns whether the schedule was adjusted
 	 */
-	static bool syncTime(schedule_entry_t* entry, uint32_t timestamp);
+	static bool syncTime(schedule_entry_t* entry, uint32_t currentTime, int64_t timeDiff);
 
 	/** Get the day of week of a given timestamp. Sun=0, Sat=6. */
 	static uint8_t getDayOfWeek(uint32_t timestamp);
@@ -224,6 +227,7 @@ public:
 
 	/** Checks the schedule entries with the current time.
 	 * Also reschedules the entries if they are repeated.
+	 * If multiple entries are found, the one with the biggest timestamp will be returned.
 	 * Returns an entry if its action has to be executed, NULL otherwise.
 	 */
 	schedule_entry_t* isActionTime(uint32_t currentTime);
@@ -231,7 +235,7 @@ public:
 	/** If there is a time jump, this function makes sure all entries are corrected.
 	 * Returns whether any schedule was adjusted.
 	 */
-	bool sync(uint32_t currentTime);
+	bool sync(uint32_t currentTime, int64_t timeDiff);
 
 	/** Prints the schedule entry list */
 	void print() const;

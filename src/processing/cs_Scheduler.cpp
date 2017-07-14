@@ -47,11 +47,14 @@ Scheduler::Scheduler() :
 void Scheduler::setTime(uint32_t time) {
 	LOGi("Set time to %i", time);
 
+	//! Update time
+	int64_t diff = time - _posixTimeStamp;
 	_posixTimeStamp = time;
 	_rtcTimeStamp = RTC::getCount();
 
+	//! If there is a time jump: sync the entries
 	printDebug();
-	bool adjusted = _scheduleList->sync(time);
+	bool adjusted = _scheduleList->sync(time, diff);
 	if (adjusted) {
 		writeScheduleList(true);
 	}
