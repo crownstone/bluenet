@@ -1,3 +1,10 @@
+Version 1.5.1:
+ - Add release config for crownstone_1.5.1
+ - Put firmware in the firmwares dir.
+ - Add docs dir to commit when publishing documentation.
+ - Enable mesh by default.
+ - updated docs
+
 Version 1.5.0:
  - Add release config for crownstone_1.5.0
  - Docs for 1.5.0 release
