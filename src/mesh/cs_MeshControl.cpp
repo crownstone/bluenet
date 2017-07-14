@@ -998,21 +998,21 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 	Mesh::getInstance().send(channel, &message, sizeof(state_message_t));
 
 
-	//! On event, also add the message to the broadcast channel, otherwise there might be an old message in there.
-	//! TODO: only broadcast when we are in the broadcast message?
-	if (event) {
-		//! Append state to message, regardless of whether the state of this crownstone is already in there.
-		state_message_t broadcastMessage = {};
-		messageSize = sizeof(state_message_t);
-		success = Mesh::getInstance().getLastMessage(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
-		if (!success || !is_valid_state_msg(&broadcastMessage)) {
-			clear_state_msg(&broadcastMessage);
-		}
-		push_state_item(&broadcastMessage, &stateItem);
-		//! Set the timestamp to the current time
-		broadcastMessage.timestamp = timestamp;
-		Mesh::getInstance().send(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
-	}
+//	//! On event, also add the message to the broadcast channel, otherwise there might be an old message in there.
+//	//! TODO: only broadcast when we are in the broadcast message?
+//	if (event) {
+//		//! Append state to message, regardless of whether the state of this crownstone is already in there.
+//		state_message_t broadcastMessage = {};
+//		messageSize = sizeof(state_message_t);
+//		success = Mesh::getInstance().getLastMessage(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
+//		if (!success || !is_valid_state_msg(&broadcastMessage)) {
+//			clear_state_msg(&broadcastMessage);
+//		}
+//		push_state_item(&broadcastMessage, &stateItem);
+//		//! Set the timestamp to the current time
+//		broadcastMessage.timestamp = timestamp;
+//		Mesh::getInstance().send(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
+//	}
 }
 
 ERR_CODE MeshControl::sendLastKeepAliveMessage() {
