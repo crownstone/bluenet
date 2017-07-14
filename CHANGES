@@ -1,3 +1,38 @@
+Version 1.5.0:
+ - Add release config for crownstone_1.5.0
+ - Docs for 1.5.0 release
+ - Since we changed to only using the state broadcast, we don't have to send another message to the state broadcast channel on event.
+ - When multiple schedule entries should be executed: execute the one with the largest timestamp. For timejumps smaller than 1.25h: don't sync the schedule entries.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Fixed bug in schedule entries sync function.
+ - Add explanation of nRF5 unit test to docs/INSTALL file
+ - Mesh: removed command replies, state broadcast, and service.
+ - Improved scheduler logging a bit.
+ - Disable meshing char for now.
+ - Protocol had reversed the overrideMask and type of schedule entry packet.
+ - Add unit-test-nrf5 as help option
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Show "use default value" log also for big chunks of data.
+ - Make sure a full schedule list is there when flash is default value.
+ - Make the delays of sending the state broadcast more random.
+ - Added define to disable advertising external data, until it's working well enough.
+ - Export color variables to use in other scripts
+ - Forgotten shebang at #/bin/sh
+ - Removed old app_timer structs.
+ - Scheduler always has 10 entries, which can be set and cleared. This is done via 2 different commands. Added validity checks for added schedule entries and loaded schedule list from pstorage.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Changed schedule protocol: id is now the Nth entry of the list. This makes removal easier (no need to shift entries).
+ - Updated protocol to v0.11.0.
+ - Fixed scheduler: fixed day of week, push changes to state, fixed sync. Still todo: Removal of entries that are marked for deletion. Checks in addScheduleEntry.
+ - Disabled the use of the state change channel, as it led to advertising old states.
+ - Don't switch on brownout.
+ - Changed ain pins for pca10040.
+ - Reset switch on a factory reset.
+ - Turn built-in on after some time after boot in setup mode.
+ - Made soft fuses configurable.
+ - Update error bit in service data when state errors change.
+ - Update README.md
+
 Version 1.4.0:
  - Add release config for crownstone_1.4.0
  - Use 32kHz cristal as LF clock source.
