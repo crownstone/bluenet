@@ -103,9 +103,9 @@ Collaboration diagram for schedule_entry_t:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a83b45a498d737a4693c9a3feff53d9c7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a83b45a498d737a4693c9a3feff53d9c7"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>id</b></td></tr>
-<tr class="separator:a83b45a498d737a4693c9a3feff53d9c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a425a3752d0d816e712abdc4aa7976550"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a425a3752d0d816e712abdc4aa7976550"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>reserved</b></td></tr>
+<tr class="separator:a425a3752d0d816e712abdc4aa7976550"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaaf87ebc3c6c3ecfc3f134e2e3920728"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structschedule__entry__t.html#aaaf87ebc3c6c3ecfc3f134e2e3920728">type</a></td></tr>
 <tr class="memdesc:aaaf87ebc3c6c3ecfc3f134e2e3920728"><td class="mdescLeft">&#160;</td><td class="mdescRight">Combined time and action type.  <a href="#aaaf87ebc3c6c3ecfc3f134e2e3920728">More...</a><br/></td></tr>
 <tr class="separator:aaaf87ebc3c6c3ecfc3f134e2e3920728"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -116,26 +116,26 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>overrideMask</b></
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structschedule__entry__t.html#ab0805007f92ed5808a8e08e384650120">nextTimestamp</a></td></tr>
 <tr class="memdesc:ab0805007f92ed5808a8e08e384650120"><td class="mdescLeft">&#160;</td><td class="mdescRight">What to override. Bitmask, see SCHEDULE_OVERRIDE_*. <br/></td></tr>
 <tr class="separator:ab0805007f92ed5808a8e08e384650120"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6c506d9804d0c8edb13219d4510da744"><td class="memItemLeft" ><a class="anchor" id="a6c506d9804d0c8edb13219d4510da744"></a>
+<tr class="memitem:a4b16999606f0da6ecbfb11f62bd0b30a"><td class="memItemLeft" ><a class="anchor" id="a4b16999606f0da6ecbfb11f62bd0b30a"></a>
 union {</td></tr>
-<tr class="memitem:a847f0b000491a6b5f2c82e9fee263852"><td class="memItemLeft" ><a class="anchor" id="a4014d4b82a9d880cc5f429c4236b0966"></a>
+<tr class="memitem:a60dff21b8d5c66251134a589fdb1afca"><td class="memItemLeft" ><a class="anchor" id="a4014d4b82a9d880cc5f429c4236b0966"></a>
 &#160;&#160;&#160;<a class="el" href="structschedule__time__repeat__t.html">schedule_time_repeat_t</a>&#160;&#160;&#160;<b>repeat</b></td></tr>
-<tr class="separator:a847f0b000491a6b5f2c82e9fee263852"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1032da502d551802e8a10ee3712f49f5"><td class="memItemLeft" ><a class="anchor" id="a614b85e1cbcff45bec99b286b12d73ca"></a>
+<tr class="separator:a60dff21b8d5c66251134a589fdb1afca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0370c4908d7e87736d682ae759f7c5ea"><td class="memItemLeft" ><a class="anchor" id="a614b85e1cbcff45bec99b286b12d73ca"></a>
 &#160;&#160;&#160;<a class="el" href="structschedule__time__daily__t.html">schedule_time_daily_t</a>&#160;&#160;&#160;<b>daily</b></td></tr>
-<tr class="separator:a1032da502d551802e8a10ee3712f49f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6c506d9804d0c8edb13219d4510da744"><td class="memItemLeft" valign="top">};&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
-<tr class="separator:a6c506d9804d0c8edb13219d4510da744"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afc49e49f29436721ff22c635e15a6f41"><td class="memItemLeft" ><a class="anchor" id="afc49e49f29436721ff22c635e15a6f41"></a>
+<tr class="separator:a0370c4908d7e87736d682ae759f7c5ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b16999606f0da6ecbfb11f62bd0b30a"><td class="memItemLeft" valign="top">};&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
+<tr class="separator:a4b16999606f0da6ecbfb11f62bd0b30a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55b44a528991c8f8b8dcfb7194f78fb1"><td class="memItemLeft" ><a class="anchor" id="a55b44a528991c8f8b8dcfb7194f78fb1"></a>
 union {</td></tr>
-<tr class="memitem:a03cc59d47c2089353c87f67fe63db037"><td class="memItemLeft" ><a class="anchor" id="a46f5e21b96bbf3cd978e0af74bb04d8a"></a>
+<tr class="memitem:aced7c73e024d0cdafc7c98bdac62eda3"><td class="memItemLeft" ><a class="anchor" id="a46f5e21b96bbf3cd978e0af74bb04d8a"></a>
 &#160;&#160;&#160;<a class="el" href="structschedule__action__pwm__t.html">schedule_action_pwm_t</a>&#160;&#160;&#160;<b>pwm</b></td></tr>
-<tr class="separator:a03cc59d47c2089353c87f67fe63db037"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2143b8988b1a590976c8a5214ada32cf"><td class="memItemLeft" ><a class="anchor" id="ac0e31153a0304ac208832fbca2efd77f"></a>
+<tr class="separator:aced7c73e024d0cdafc7c98bdac62eda3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63e5ac6154c0464dc9e1ceb836b8b471"><td class="memItemLeft" ><a class="anchor" id="ac0e31153a0304ac208832fbca2efd77f"></a>
 &#160;&#160;&#160;<a class="el" href="structschedule__action__fade__t.html">schedule_action_fade_t</a>&#160;&#160;&#160;<b>fade</b></td></tr>
-<tr class="separator:a2143b8988b1a590976c8a5214ada32cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afc49e49f29436721ff22c635e15a6f41"><td class="memItemLeft" valign="top">};&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
-<tr class="separator:afc49e49f29436721ff22c635e15a6f41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a63e5ac6154c0464dc9e1ceb836b8b471"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55b44a528991c8f8b8dcfb7194f78fb1"><td class="memItemLeft" valign="top">};&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
+<tr class="separator:a55b44a528991c8f8b8dcfb7194f78fb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a class="anchor" id="aaaf87ebc3c6c3ecfc3f134e2e3920728"></a>

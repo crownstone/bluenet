@@ -183,11 +183,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;        }</div>
 <div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;</div>
 <div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;        <span class="keywordflow">if</span> (isUnassigned) {</div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;            <span class="keywordflow">if</span> (default_value != NULL) {</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;<span class="preprocessor">#ifdef PRINT_ITEMS</span></div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;<span class="preprocessor"></span>                LOGd(<span class="stringliteral">&quot;use default value&quot;</span>);</div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;<span class="preprocessor"></span>                memcpy(dest, default_value, length * <span class="keyword">sizeof</span>(T));</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;<span class="preprocessor">#ifdef PRINT_ITEMS</span></div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;<span class="preprocessor"></span>            LOGd(<span class="stringliteral">&quot;use default value&quot;</span>);</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;<span class="preprocessor"></span>            <span class="keywordflow">if</span> (default_value != NULL) {</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;                memcpy(dest, default_value, length * <span class="keyword">sizeof</span>(T));</div>
 <div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;            } <span class="keywordflow">else</span> {</div>
 <div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;                memset(dest, 0, length * <span class="keyword">sizeof</span>(T));</div>
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;            }</div>

@@ -127,27 +127,25 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#a41d6608c57c5873310c6c797197809ba">getSize</a> () const </td></tr>
 <tr class="memdesc:a41d6608c57c5873310c6c797197809ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current size of the list. <br/></td></tr>
 <tr class="separator:a41d6608c57c5873310c6c797197809ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aefa69532331ec2ab64257c5056d6c555"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#aefa69532331ec2ab64257c5056d6c555">isEmpty</a> () const </td></tr>
-<tr class="memdesc:aefa69532331ec2ab64257c5056d6c555"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if the list is empty.  <a href="#aefa69532331ec2ab64257c5056d6c555">More...</a><br/></td></tr>
-<tr class="separator:aefa69532331ec2ab64257c5056d6c555"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8acda9e5672b20ccedf167d16e5545f2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#a8acda9e5672b20ccedf167d16e5545f2">isFull</a> () const </td></tr>
-<tr class="memdesc:a8acda9e5672b20ccedf167d16e5545f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if the list is full.  <a href="#a8acda9e5672b20ccedf167d16e5545f2">More...</a><br/></td></tr>
-<tr class="separator:a8acda9e5672b20ccedf167d16e5545f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc5563f91901c2418a3911945cd15e9e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#abc5563f91901c2418a3911945cd15e9e">clear</a> ()</td></tr>
 <tr class="memdesc:abc5563f91901c2418a3911945cd15e9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears the list.  <a href="#abc5563f91901c2418a3911945cd15e9e">More...</a><br/></td></tr>
 <tr class="separator:abc5563f91901c2418a3911945cd15e9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaec34c4918028d8e0f9e9b57d8dddac8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#aaec34c4918028d8e0f9e9b57d8dddac8">add</a> (const <a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *entry)</td></tr>
-<tr class="memdesc:aaec34c4918028d8e0f9e9b57d8dddac8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds/updates a schedule entry to/in the list.  <a href="#aaec34c4918028d8e0f9e9b57d8dddac8">More...</a><br/></td></tr>
-<tr class="separator:aaec34c4918028d8e0f9e9b57d8dddac8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acada6c0448b49eb34ed8ddf9a5a62ec1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#acada6c0448b49eb34ed8ddf9a5a62ec1">rem</a> (const <a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *entry)</td></tr>
-<tr class="memdesc:acada6c0448b49eb34ed8ddf9a5a62ec1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a schedule entry from the list.  <a href="#acada6c0448b49eb34ed8ddf9a5a62ec1">More...</a><br/></td></tr>
-<tr class="separator:acada6c0448b49eb34ed8ddf9a5a62ec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1de736494a78b00c2754395876d6a8d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#a1de736494a78b00c2754395876d6a8d6">checkSchedule</a> (uint32_t currentTime)</td></tr>
-<tr class="memdesc:a1de736494a78b00c2754395876d6a8d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks the schedule entries with the current time.  <a href="#a1de736494a78b00c2754395876d6a8d6">More...</a><br/></td></tr>
-<tr class="separator:a1de736494a78b00c2754395876d6a8d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ccb88d98db690a56dc5137d54cffeca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#a8ccb88d98db690a56dc5137d54cffeca">sync</a> (uint32_t currentTime)</td></tr>
-<tr class="memdesc:a8ccb88d98db690a56dc5137d54cffeca"><td class="mdescLeft">&#160;</td><td class="mdescRight">If there is a time jump, this function makes sure all entries are corrected.  <a href="#a8ccb88d98db690a56dc5137d54cffeca">More...</a><br/></td></tr>
-<tr class="separator:a8ccb88d98db690a56dc5137d54cffeca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a382cc1b07cdad620b5d2301e6a95b48e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#a382cc1b07cdad620b5d2301e6a95b48e">set</a> (uint8_t index, const <a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *entry)</td></tr>
+<tr class="memdesc:a382cc1b07cdad620b5d2301e6a95b48e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds/updates a schedule entry to/in the list.  <a href="#a382cc1b07cdad620b5d2301e6a95b48e">More...</a><br/></td></tr>
+<tr class="separator:a382cc1b07cdad620b5d2301e6a95b48e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64be4d4cf963d33afb545a4437c977cc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#a64be4d4cf963d33afb545a4437c977cc">clear</a> (uint8_t index)</td></tr>
+<tr class="memdesc:a64be4d4cf963d33afb545a4437c977cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a schedule entry from the list.  <a href="#a64be4d4cf963d33afb545a4437c977cc">More...</a><br/></td></tr>
+<tr class="separator:a64be4d4cf963d33afb545a4437c977cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9f550c530d6ba4d93ec9a89108db7d9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae9f550c530d6ba4d93ec9a89108db7d9"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#ae9f550c530d6ba4d93ec9a89108db7d9">checkAllEntries</a> ()</td></tr>
+<tr class="memdesc:ae9f550c530d6ba4d93ec9a89108db7d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks validity of all entries. <br/></td></tr>
+<tr class="separator:ae9f550c530d6ba4d93ec9a89108db7d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e9e6a322005658cce899b204478eb45"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#a5e9e6a322005658cce899b204478eb45">isActionTime</a> (uint32_t currentTime)</td></tr>
+<tr class="memdesc:a5e9e6a322005658cce899b204478eb45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks the schedule entries with the current time.  <a href="#a5e9e6a322005658cce899b204478eb45">More...</a><br/></td></tr>
+<tr class="separator:a5e9e6a322005658cce899b204478eb45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b497e92d83688d0cdb4e6ac882bcf03"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#a8b497e92d83688d0cdb4e6ac882bcf03">sync</a> (uint32_t currentTime, int64_t timeDiff)</td></tr>
+<tr class="memdesc:a8b497e92d83688d0cdb4e6ac882bcf03"><td class="mdescLeft">&#160;</td><td class="mdescRight">If there is a time jump, this function makes sure all entries are corrected.  <a href="#a8b497e92d83688d0cdb4e6ac882bcf03">More...</a><br/></td></tr>
+<tr class="separator:a8b497e92d83688d0cdb4e6ac882bcf03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3794aae187049177607e975c0817994c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3794aae187049177607e975c0817994c"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScheduleList.html#a3794aae187049177607e975c0817994c">print</a> () const </td></tr>
 <tr class="memdesc:a3794aae187049177607e975c0817994c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prints the schedule entry list. <br/></td></tr>
@@ -174,25 +172,6 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The <a class="el" href="classScheduleList.html" title="The ScheduleList object is a list of schedule entries. ">ScheduleList</a> object is a list of schedule entries. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="aaec34c4918028d8e0f9e9b57d8dddac8"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ScheduleList::add </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *&#160;</td>
-          <td class="paramname"><em>entry</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Adds/updates a schedule entry to/in the list. </p>
-<p>Returns true on success. </p>
-
-</div>
-</div>
 <a class="anchor" id="a51a08c950ff2d8f6523dc0d25436ba0e"></a>
 <div class="memitem">
 <div class="memproto">
@@ -233,25 +212,6 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 
 </div>
 </div>
-<a class="anchor" id="a1de736494a78b00c2754395876d6a8d6"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structschedule__entry__t.html">schedule_entry_t</a>* ScheduleList::checkSchedule </td>
-          <td>(</td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>currentTime</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Checks the schedule entries with the current time. </p>
-<p>Returns an entry if its action has to be executed, NULL otherwise. </p>
-
-</div>
-</div>
 <a class="anchor" id="abc5563f91901c2418a3911945cd15e9e"></a>
 <div class="memitem">
 <div class="memproto">
@@ -266,6 +226,25 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 </div><div class="memdoc">
 
 <p>Clears the list. </p>
+
+</div>
+</div>
+<a class="anchor" id="a64be4d4cf963d33afb545a4437c977cc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ScheduleList::clear </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Removes a schedule entry from the list. </p>
+<p>Returns true on success. </p>
 
 </div>
 </div>
@@ -326,65 +305,12 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 
 </div>
 </div>
-<a class="anchor" id="aefa69532331ec2ab64257c5056d6c555"></a>
+<a class="anchor" id="a5e9e6a322005658cce899b204478eb45"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool ScheduleList::isEmpty </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Returns true if the list is empty. </p>
-
-</div>
-</div>
-<a class="anchor" id="a8acda9e5672b20ccedf167d16e5545f2"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ScheduleList::isFull </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Returns true if the list is full. </p>
-
-</div>
-</div>
-<a class="anchor" id="acada6c0448b49eb34ed8ddf9a5a62ec1"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ScheduleList::rem </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *&#160;</td>
-          <td class="paramname"><em>entry</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Removes a schedule entry from the list. </p>
-<p>Returns true on success, false when it's not in the list. </p>
-
-</div>
-</div>
-<a class="anchor" id="a8ccb88d98db690a56dc5137d54cffeca"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ScheduleList::sync </td>
+          <td class="memname"><a class="el" href="structschedule__entry__t.html">schedule_entry_t</a>* ScheduleList::isActionTime </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>currentTime</em></td><td>)</td>
@@ -393,7 +319,66 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
       </table>
 </div><div class="memdoc">
 
+<p>Checks the schedule entries with the current time. </p>
+<p>Also reschedules the entries if they are repeated. If multiple entries are found, the one with the biggest timestamp will be returned. Returns an entry if its action has to be executed, NULL otherwise. </p>
+
+</div>
+</div>
+<a class="anchor" id="a382cc1b07cdad620b5d2301e6a95b48e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ScheduleList::set </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structschedule__entry__t.html">schedule_entry_t</a> *&#160;</td>
+          <td class="paramname"><em>entry</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Adds/updates a schedule entry to/in the list. </p>
+<p>Returns true on success. </p>
+
+</div>
+</div>
+<a class="anchor" id="a8b497e92d83688d0cdb4e6ac882bcf03"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ScheduleList::sync </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>currentTime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int64_t&#160;</td>
+          <td class="paramname"><em>timeDiff</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
 <p>If there is a time jump, this function makes sure all entries are corrected. </p>
+<p>Returns whether any schedule was adjusted. </p>
 
 </div>
 </div>

@@ -1,7 +1,7 @@
 var searchData=
 [
   ['data_5flen',['data_len',['../structdata__t.html#ab3dc53f26743ec5d46029f53e87fe115',1,'data_t']]],
-  ['dayofweek',['dayOfWeek',['../structschedule__time__daily__t.html#a735188285c043ebccb6c940eaa02ebac',1,'schedule_time_daily_t']]],
+  ['dayofweekbitmask',['dayOfWeekBitmask',['../structschedule__time__daily__t.html#a1ec9777e471941ce157015f2843bc1ca',1,'schedule_time_daily_t']]],
   ['defaultadvertisinginterval_5f0_5f625_5fms',['defaultAdvertisingInterval_0_625_ms',['../classNrf51822BluetoothStack.html#a6165a6bc64b7ee050e629b4aeac68ff7',1,'Nrf51822BluetoothStack']]],
   ['defaultadvertisingtimeout_5fseconds',['defaultAdvertisingTimeout_seconds',['../classNrf51822BluetoothStack.html#acaf96d8408425a7e73295d23e964c175',1,'Nrf51822BluetoothStack']]],
   ['defaultappearance',['defaultAppearance',['../classNrf51822BluetoothStack.html#a8ceaf5c7b8c5a2f127a5158a5c0e45fd',1,'Nrf51822BluetoothStack']]],

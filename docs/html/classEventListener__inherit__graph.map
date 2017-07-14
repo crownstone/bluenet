@@ -13,8 +13,7 @@
 <area shape="rect" id="node14" href="$classServiceData.html" title="ServiceData" alt="" coords="195,563,290,589"/>
 <area shape="rect" id="node15" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="209,613,276,640"/>
 <area shape="rect" id="node16" href="$classSwitch.html" title="Switch" alt="" coords="211,664,274,691"/>
-<area shape="rect" id="node17" href="$classTemperatureGuard.html" title="Check if the temperature exceeds a certain threshold. " alt="" coords="177,715,308,741"/>
-<area shape="rect" id="node18" href="$classTracker.html" title="Tracker" alt="" coords="209,765,276,792"/>
-<area shape="rect" id="node19" href="$classWatchdog.html" title="Author: Dominik Egger Copyright: Distributed Organisms B.V. " alt="" coords="202,816,283,843"/>
+<area shape="rect" id="node17" href="$classTracker.html" title="Tracker" alt="" coords="209,715,276,741"/>
+<area shape="rect" id="node18" href="$classWatchdog.html" title="Author: Dominik Egger Copyright: Distributed Organisms B.V. " alt="" coords="202,765,283,792"/>
 <area shape="rect" id="node4" href="$classSetupService.html" title="Author: Dominik Egger Copyright: Distributed Organisms B.V. " alt="" coords="377,56,477,83"/>
 </map>
