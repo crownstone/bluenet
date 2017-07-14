@@ -58,8 +58,8 @@ CHANGE_NAME_ON_RESET=0
 ADVERTISEMENT_IMPROVEMENT=1
 
 # Enable or disable meshing (1 or 0)
-MESHING=0
-BUILD_MESHING=0
+MESHING=1
+BUILD_MESHING=1
 
 # Use separate github repository https://github.com/crownstone/nRF51-ble-bcast-mesh/
 MESH_SUBDIR=nRF51-ble-bcast-mesh/nRF51/rbc_mesh
