@@ -4,7 +4,7 @@ var searchData=
   ['samplecurrentdone',['sampleCurrentDone',['../classPowerSampling.html#af101aa83b21642ccec52957f3e13fda0',1,'PowerSampling']]],
   ['saveibeaconpersistent',['saveIBeaconPersistent',['../classSettings.html#acee8d5fe826120a03526db05aa0b031c',1,'Settings']]],
   ['savepersistentstorage',['savePersistentStorage',['../classSettings.html#a18e9c66d76564d59c8ae1a1d80377200',1,'Settings::savePersistentStorage()'],['../classState.html#a300d534c474bfc6a378829ea7a7d1976',1,'State::savePersistentStorage()']]],
-  ['savepersistentstorageitem',['savePersistentStorageItem',['../classSettings.html#ab41648d9336181459c30be82afe3886e',1,'Settings']]],
+  ['savepersistentstorageitem',['savePersistentStorageItem',['../classSettings.html#ab41648d9336181459c30be82afe3886e',1,'Settings::savePersistentStorageItem()'],['../classState.html#a743df45e737673378a61f22e5489caa6',1,'State::savePersistentStorageItem()']]],
   ['scanresult',['ScanResult',['../classScanResult.html#ab63395f1e141a354464f651907f2e73e',1,'ScanResult']]],
   ['scheduleentry',['ScheduleEntry',['../classScheduleEntry.html#af565dac663cf65794c05194cd59dc8e4',1,'ScheduleEntry']]],
   ['schedulelist',['ScheduleList',['../classScheduleList.html#a4913b6083755a403d5836403e26f61e4',1,'ScheduleList']]],
@@ -21,7 +21,7 @@ var searchData=
   ['sentdone',['sentDone',['../classPowerSampling.html#ae67d914eb0344a67f78e5c7787a79139',1,'PowerSampling']]],
   ['serialize',['serialize',['../classCircularDifferentialBuffer.html#a8582de8f9eb043f14342b222044d1212',1,'CircularDifferentialBuffer']]],
   ['service',['Service',['../classService.html#acc246c9f7ed3c51e2d91d10fe257513f',1,'Service']]],
-  ['set',['set',['../classState.html#a1774d15a37ebfa937c841aaa2991e15c',1,'State']]],
+  ['set',['set',['../classState.html#a1774d15a37ebfa937c841aaa2991e15c',1,'State::set()'],['../classScheduleList.html#a382cc1b07cdad620b5d2301e6a95b48e',1,'ScheduleList::set()']]],
   ['setadvertisinginterval',['setAdvertisingInterval',['../classNrf51822BluetoothStack.html#aceae4990410282e860ef2d2ec7a6dc2d',1,'Nrf51822BluetoothStack']]],
   ['setadvertisingtimeoutseconds',['setAdvertisingTimeoutSeconds',['../classNrf51822BluetoothStack.html#ada23289ec72485e45c7bf72ffb725820',1,'Nrf51822BluetoothStack']]],
   ['setaesencrypted',['setAesEncrypted',['../classCharacteristicBase.html#af4d0867ab532b3841561d1e8c4cf8230',1,'CharacteristicBase']]],
@@ -78,6 +78,7 @@ var searchData=
   ['stopscanning',['stopScanning',['../classNrf51822BluetoothStack.html#aba0f4ee759a075c3c2d6db262f8adde6',1,'Nrf51822BluetoothStack']]],
   ['streambuffer',['StreamBuffer',['../classStreamBuffer.html#aaba69ca1dfaa170ad55005c07973235f',1,'StreamBuffer']]],
   ['switchoff',['switchOff',['../classPWM.html#aeb285d34c2e09c8c8e64f30280b8a634',1,'PWM']]],
-  ['sync',['sync',['../classScheduleList.html#a8ccb88d98db690a56dc5137d54cffeca',1,'ScheduleList']]],
+  ['sync',['sync',['../classScheduleList.html#a8b497e92d83688d0cdb4e6ac882bcf03',1,'ScheduleList']]],
+  ['synctime',['syncTime',['../classScheduleEntry.html#ab84585fe321dd31ec5b3bdde79e16666',1,'ScheduleEntry']]],
   ['sys_5fevt_5fdispatch',['sys_evt_dispatch',['../cs__Handlers_8h.html#a91139ae605ca5e880cc9950b656cebde',1,'cs_Handlers.h']]]
 ];

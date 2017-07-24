@@ -49,7 +49,8 @@ memory_map() {
 publish() {
 	cd ..
 	git add -u .
-	git commit 
+	git add docs
+	git commit
 	git subtree push --prefix docs/html origin gh-pages
 	cs_info "Go to https://crownstone.github.io/bluenet"
 }

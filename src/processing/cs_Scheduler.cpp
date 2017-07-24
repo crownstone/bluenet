@@ -46,11 +46,15 @@ Scheduler::Scheduler() :
  */
 void Scheduler::setTime(uint32_t time) {
 	LOGi("Set time to %i", time);
+
+	//! Update time
+	int64_t diff = time - _posixTimeStamp;
 	_posixTimeStamp = time;
 	_rtcTimeStamp = RTC::getCount();
 
+	//! If there is a time jump: sync the entries
 	printDebug();
-	bool adjusted = _scheduleList->sync(time);
+	bool adjusted = _scheduleList->sync(time, diff);
 	if (adjusted) {
 		writeScheduleList(true);
 	}
@@ -86,7 +90,6 @@ ERR_CODE Scheduler::clearScheduleEntry(uint8_t id) {
 }
 
 void Scheduler::tick() {
-
 	//! RTC can overflow every 16s
 	uint32_t tickDiff = RTC::difference(RTC::getCount(), _rtcTimeStamp);
 

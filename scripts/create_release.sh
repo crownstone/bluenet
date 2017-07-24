@@ -246,7 +246,7 @@ popd &> /dev/null
 
 export BLUENET_CONFIG_DIR=$directory
 export BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR/$model"_"$version
-export BLUENET_RELEASE_DIR=$BLUENET_RELEASE_DIR/$model"_"$version
+export BLUENET_RELEASE_DIR=$BLUENET_RELEASE_DIR/firmwares/$model"_"$version
 export BLUENET_BIN_DIR=$BLUENET_RELEASE_DIR/bin
 
 ############################

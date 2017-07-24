@@ -107,7 +107,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#define TEMPERATURE_UPDATE_FREQUENCY 10</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="classTemperatureGuard.html">   24</a></span>&#160;<span class="keyword">class </span><a class="code" href="classTemperatureGuard.html">TemperatureGuard</a> : <a class="code" href="classEventListener.html">EventListener</a> {</div>
+<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="classTemperatureGuard.html">   24</a></span>&#160;<span class="keyword">class </span><a class="code" href="classTemperatureGuard.html">TemperatureGuard</a> {</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="classTemperatureGuard.html#aaacf07c10af8cd88f48b0207bdbc3656">   27</a></span>&#160;    <span class="keyword">static</span> <a class="code" href="classTemperatureGuard.html">TemperatureGuard</a>&amp; <a class="code" href="classTemperatureGuard.html#aaacf07c10af8cd88f48b0207bdbc3656">getInstance</a>() {</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        <span class="keyword">static</span> <a class="code" href="classTemperatureGuard.html">TemperatureGuard</a> instance;</div>
@@ -130,38 +130,30 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordtype">void</span> handleCompEvent(CompEvent_t event);</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classTemperatureGuard.html#a07cdbc2580e005a6e46f24a030bc4c5b">handleEvent</a>(uint16_t evt, <span class="keywordtype">void</span>* p_data, uint16_t length);</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <a class="code" href="classTemperatureGuard.html">TemperatureGuard</a>();</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <a class="code" href="classTemperatureGuard.html">TemperatureGuard</a>(<a class="code" href="classTemperatureGuard.html">TemperatureGuard</a> <span class="keyword">const</span>&amp;);</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keywordtype">void</span> operator=(<a class="code" href="classTemperatureGuard.html">TemperatureGuard</a> <span class="keyword">const</span> &amp;);</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor">#if (NORDIC_SDK_VERSION &gt;= 11)</span></div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="preprocessor"></span>    app_timer_t              _appTimerData;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    app_timer_id_t           _appTimerId;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">#else</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor"></span>    uint32_t                 _appTimerId;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor"></span>    int8_t _maxChipTemp;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <a class="code" href="classCOMP.html">COMP</a>* _comp;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    GeneralEventType _lastChipTempEvent;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    GeneralEventType _lastPwmTempEvent;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <a class="code" href="classTemperatureGuard.html">TemperatureGuard</a>();</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <a class="code" href="classTemperatureGuard.html">TemperatureGuard</a>(<a class="code" href="classTemperatureGuard.html">TemperatureGuard</a> <span class="keyword">const</span>&amp;);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordtype">void</span> operator=(<a class="code" href="classTemperatureGuard.html">TemperatureGuard</a> <span class="keyword">const</span> &amp;);</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#if (NORDIC_SDK_VERSION &gt;= 11)</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor"></span>    app_timer_t              _appTimerData;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    app_timer_id_t           _appTimerId;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor"></span>    uint32_t                 _appTimerId;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor"></span>    int8_t _maxChipTemp;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <a class="code" href="classCOMP.html">COMP</a>* _comp;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    GeneralEventType _lastChipTempEvent;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    GeneralEventType _lastPwmTempEvent;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;};</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="comment">//  void scheduleNextTick() {</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment">//      Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="comment">//  }</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;};</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
 <div class="ttc" id="classTemperatureGuard_html_aaacf07c10af8cd88f48b0207bdbc3656"><div class="ttname"><a href="classTemperatureGuard.html#aaacf07c10af8cd88f48b0207bdbc3656">TemperatureGuard::getInstance</a></div><div class="ttdeci">static TemperatureGuard &amp; getInstance()</div><div class="ttdoc">Gets a static singleton (no dynamic memory allocation) </div><div class="ttdef"><b>Definition:</b> cs_TemperatureGuard.h:27</div></div>
 <div class="ttc" id="structboards__config__t_html"><div class="ttname"><a href="structboards__config__t.html">boards_config_t</a></div><div class="ttdoc">BE SURE TO UPDATE cs_HardwareVersions.h IF YOU ADD A NEW BOARD!! </div><div class="ttdef"><b>Definition:</b> cs_Boards.h:72</div></div>
 <div class="ttc" id="classTemperatureGuard_html"><div class="ttname"><a href="classTemperatureGuard.html">TemperatureGuard</a></div><div class="ttdoc">Check if the temperature exceeds a certain threshold. </div><div class="ttdef"><b>Definition:</b> cs_TemperatureGuard.h:24</div></div>
 <div class="ttc" id="classCOMP_html"><div class="ttname"><a href="classCOMP.html">COMP</a></div><div class="ttdoc">The comparator is a hardware peripheral on the nRF52. </div><div class="ttdef"><b>Definition:</b> cs_COMP.h:58</div></div>
-<div class="ttc" id="classTemperatureGuard_html_a07cdbc2580e005a6e46f24a030bc4c5b"><div class="ttname"><a href="classTemperatureGuard.html#a07cdbc2580e005a6e46f24a030bc4c5b">TemperatureGuard::handleEvent</a></div><div class="ttdeci">void handleEvent(uint16_t evt, void *p_data, uint16_t length)</div><div class="ttdoc">handle events </div></div>
-<div class="ttc" id="classEventListener_html"><div class="ttname"><a href="classEventListener.html">EventListener</a></div><div class="ttdoc">Event listener. </div><div class="ttdef"><b>Definition:</b> cs_EventListener.h:16</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

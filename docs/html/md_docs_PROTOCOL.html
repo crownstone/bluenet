@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>Bluenet: # Bluenet protocol v0.10.0</title>
+<title>Bluenet: # Bluenet protocol v0.11.2</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -79,7 +79,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="headertitle">
-<div class="title"># Bluenet protocol v0.10.0 </div>  </div>
+<div class="title"># Bluenet protocol v0.11.2 </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><h1><a class="anchor" id="encryption"></a>Encryption</h1>
@@ -345,7 +345,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p><a class="el" href="classCharacteristic.html" title="A default characteristic. ">Characteristic</a> | <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> | Date type | Description | A | U | G &mdash; | &mdash; | &mdash; | &mdash; | :&mdash;: | :&mdash;: | :&mdash;: Track control | 24f40001-7d10-4805-bfc1-7663a01c3bff | <a href="#tracked_device_packet">Tracked device</a> | Add or overwrite a tracked device. Set threshold larger than 0 to remove the tracked device from the list. | x Tracked devices | 24f40002-7d10-4805-bfc1-7663a01c3bff | <a href="#tracked_device_list_packet">Tracked device list</a> | Read the current list of tracked devices. | x Scan control | 24f40003-7d10-4805-bfc1-7663a01c3bff | uint 8 | Start or stop scanning. write 0 to stop, 1 to start. | x Scanned devices | 24f40004-7d10-4805-bfc1-7663a01c3bff | <a href="#scan_result_list_packet">Scan result list</a> | After stopping the scan, you can read the results here. | x RSSI | 24f40005-7d10-4805-bfc1-7663a01c3bff | uint 8 | RSSI to connected device. Notifications are available. | x</p>
 <h2>Schedule service</h2>
 <p>The schedule service has <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> 24f50000-7d10-4805-bfc1-7663a01c3bff.</p>
-<p><a class="el" href="classCharacteristic.html" title="A default characteristic. ">Characteristic</a> | <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> | Date type | Description | A | U | G &mdash; | &mdash; | &mdash; | &mdash; | :&mdash;: | :&mdash;: | :&mdash;: Set time | 24f50001-7d10-4805-bfc1-7663a01c3bff | uint 32 | Sets the time. Timestamp is in seconds since epoch. | x Schedule write | 24f50002-7d10-4805-bfc1-7663a01c3bff | <a href="#schedule_entry_packet">Schedule entry</a> | Add or modify a schedule entry. Set nextTimestamp to 0 to remove the entry from the list. | x Schedule read | 24f50003-7d10-4805-bfc1-7663a01c3bff | <a href="#schedule_list_packet">Schedule list</a> | Get a list of all schedule entries. | x</p>
+<p><a class="el" href="classCharacteristic.html" title="A default characteristic. ">Characteristic</a> | <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> | Date type | Description | A | U | G &mdash; | &mdash; | &mdash; | &mdash; | :&mdash;: | :&mdash;: | :&mdash;: Set time | 24f50001-7d10-4805-bfc1-7663a01c3bff | uint 32 | Sets the time. Timestamp is in seconds since epoch. | x Schedule write | 24f50002-7d10-4805-bfc1-7663a01c3bff | <a href="#schedule_command_packet">Schedule command</a> | Set or clear a schedule entry. To clear: only write the index. | x Schedule read | 24f50003-7d10-4805-bfc1-7663a01c3bff | <a href="#schedule_list_packet">Schedule list</a> | Get a list of all schedule entries. | x</p>
 <h2><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> <a class="el" href="classService.html" title="Service as defined in the GATT Specification. ">Service</a></h2>
 <p>The mesh service comes with <a href="https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh">OpenMesh</a> and has <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> 0000fee4-0000-1000-8000-00805f9b34fb</p>
 <p><a class="el" href="classCharacteristic.html" title="A default characteristic. ">Characteristic</a> | <a class="el" href="classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics. ">UUID</a> | Date type | Description | A | U | G &mdash; | &mdash; | &mdash; | &mdash; | :&mdash;: | :&mdash;: | :&mdash;: Meta data | 2a1e0004-fd51-d882-8ba8-b98c0000cd1e | | Get mesh configuration. | x Value | 2a1e0005-fd51-d882-8ba8-b98c0000cd1e | | <a class="el" href="classCharacteristic.html" title="A default characteristic. ">Characteristic</a> where the mesh values can be read. | x</p>
@@ -383,7 +383,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>1 </td><td><a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> </td><td>uint 8 </td><td>Set <a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> to value, 0 = OFF, 100 = FULL ON </td><td align="center">x </td><td align="center">x </td><td align="center">x </td></tr>
 </table>
-<p>2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 UTC | x | x | 3 | Goto DFU | - | Reset device to DFU mode | x 4 | Reset | uint 8 | Reset device | x 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x 6 | Keep alive state | <a href="#cmd_keep_alive_payload">Keep alive payload</a> | Keep alive with state | x | x | 7 | Keep alive | - | Keep alive without state, uses last state transmitted with Keep alive state command | x | x | x 8 | Enable mesh | uint 8 | Enable/Disable <a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a>, 0 = OFF, other = ON | x 9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON. Only has effect after a reset. | x 10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON | x 11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON. <b>Deprecated</b> | x 12 | Enable scanner | <a href="#cmd_enable_scanner_payload">Enable Scanner payload</a> | Enable/Disable scanner | x 13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON | x | 14 | User feedback | ... | User feedback ..., TBD | x | 15 | Schedule entry | <a href="#schedule_entry_packet">Schedule entry payload</a> | Add or remove a schedule entry | x | x 16 | Relay | uint 8 | <a class="el" href="classSwitch.html">Switch</a> relay, 0 = OFF, 1 = ON | x | x | x 17 | <a class="anchor" id="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | .. 18 | Request <a class="el" href="classService.html" title="Service as defined in the GATT Specification. ">Service</a> Data | - | Causes the crownstone to send it's service data over the mesh | x | x | 19 | Disconnect | - | Causes the crownstone to disconnect | .. | .. | .. 20 | Set LED | ?? | Enable or disabled LEDS | x 21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x 22 | Increase TX | - | Temporarily increase the TX power when in setup mode | x | x | x 23 | Reset errors | <a href="#state_error_bitmask">Error bitmask</a> | Reset all errors which are set in the written bitmask. | x 24 | Keepalive mesh | - | Repeat the last keep alive message on the mesh. | x | x | x 25 | Multi switch | <a href="#multi_switch_mesh_packet">Multi switch packet</a> | <a class="el" href="classSwitch.html">Switch</a> multiple crownstones with a command over the mesh. | x | x | x</p>
+<p>2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 | x | x | 3 | Goto DFU | - | Reset device to DFU mode | x 4 | Reset | uint 8 | Reset device | x 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x 6 | Keep alive state | <a href="#cmd_keep_alive_payload">Keep alive payload</a> | Keep alive with state | x | x | 7 | Keep alive | - | Keep alive without state, uses last state transmitted with Keep alive state command | x | x | x 8 | Enable mesh | uint 8 | Enable/Disable <a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a>, 0 = OFF, other = ON | x 9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON. Only has effect after a reset. | x 10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON | x 11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON. <b>Deprecated</b> | x 12 | Enable scanner | <a href="#cmd_enable_scanner_payload">Enable Scanner payload</a> | Enable/Disable scanner | x 13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON | x | 14 | User feedback | ... | User feedback ..., TBD | x | 15 | Schedule set | <a href="#schedule_command_packet">Schedule command payload</a> | Set (overwrite) a schedule entry | x | x 16 | Relay | uint 8 | <a class="el" href="classSwitch.html">Switch</a> relay, 0 = OFF, 1 = ON | x | x | x 17 | <a class="anchor" id="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | .. 18 | Request <a class="el" href="classService.html" title="Service as defined in the GATT Specification. ">Service</a> Data | - | Causes the crownstone to send it's service data over the mesh | x | x | 19 | Disconnect | - | Causes the crownstone to disconnect | .. | .. | .. 20 | Set LED | ?? | Enable or disabled LEDS | x 21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x 22 | Increase TX | - | Temporarily increase the TX power when in setup mode | x | x | x 23 | Reset errors | <a href="#state_error_bitmask">Error bitmask</a> | Reset all errors which are set in the written bitmask. | x 24 | Keepalive mesh | - | Repeat the last keep alive message on the mesh. | x | x | x 25 | Multi switch | <a href="#multi_switch_mesh_packet">Multi switch packet</a> | <a class="el" href="classSwitch.html">Switch</a> multiple crownstones with a command over the mesh. | x | x | x 26 | Schedule remove | uint 8 | Clear the Nth schedule entry of the <a href="#schedule_list_packet">list</a>. | x | x</p>
 <h4><a class="anchor" id="cmd_enable_scanner_payload"></a>Enable <a class="el" href="classScanner.html" title="Scanner scans for BLE devices. ">Scanner</a> payload</h4>
 <table class="doxtable">
 <tr>
@@ -421,7 +421,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>uint 8 </td><td>Payload </td><td>Length </td><td>Payload data, depends on type. </td></tr>
 </table>
-<p>Available configurations types:</p>
+<p>Most configuration changes will only be applied after a reboot. Available configurations types:</p>
 <table class="doxtable">
 <tr>
 <th>Type nr </th><th>Type name </th><th>Payload type </th><th>Description  </th></tr>
@@ -434,7 +434,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>3 </td><td>Floor </td><td>uint 8 </td><td>Floor number. <b>Deprecated</b> </td></tr>
 <tr>
-<td>4 </td><td>Nearby timeout </td><td>uint 16 </td><td>Time in ms before switching off when none is nearby </td></tr>
+<td>4 </td><td>Nearby timeout </td><td>uint 16 </td><td>Time in ms before switching off when none is nearby. </td></tr>
 <tr>
 <td>5 </td><td><a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> period </td><td>uint 32 </td><td>Sets <a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> period in μs. <b>Setting this to a wrong value may cause damage.</b> </td></tr>
 <tr>
@@ -448,13 +448,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>11 </td><td>TX power </td><td>int 8 </td><td>TX power, can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4. </td></tr>
 <tr>
-<td>12 </td><td>Advertisement interval </td><td>uint 16 </td><td>Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms. </td></tr>
+<td>12 </td><td>Advertisement interval </td><td>uint 16 </td><td>Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms. <em>Not implemented yet.</em> </td></tr>
 <tr>
 <td>13 </td><td>Passkey </td><td>uint 8 [6] </td><td>Passkey of the device: must be 6 digits. </td></tr>
 <tr>
-<td>14 </td><td>Min env temp </td><td>int 8 </td><td>If temperature (in degrees Celcius) goes below this value, send an alert (not implemented yet). </td></tr>
+<td>14 </td><td>Min env temp </td><td>int 8 </td><td>If temperature (in degrees Celcius) goes below this value, send an alert. <em>Not implemented yet.</em> </td></tr>
 <tr>
-<td>15 </td><td>Max env temp </td><td>int 8 </td><td>If temperature (in degrees Celcius) goes above this value, send an alert (not implemented yet). </td></tr>
+<td>15 </td><td>Max env temp </td><td>int 8 </td><td>If temperature (in degrees Celcius) goes above this value, send an alert. <em>Not implemented yet.</em> </td></tr>
 <tr>
 <td>16 </td><td>Scan duration </td><td>uint 16 </td><td>Scan duration in ms. <em>Setting this too high may cause the device to reset during scanning.</em> </td></tr>
 <tr>
@@ -462,15 +462,15 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>18 </td><td>Scan break duration </td><td>uint 16 </td><td>Waiting time in ms between sending results and next scan. <em>Setting this too low may cause the device to reset during scanning.</em> </td></tr>
 <tr>
-<td>19 </td><td>Boot delay </td><td>uint 16 </td><td>Time to wait with radio after boot, <b>Setting this too low may cause the device to reset on boot.</b> </td></tr>
+<td>19 </td><td>Boot delay </td><td>uint 16 </td><td>Time to wait with radio after boot (ms). <b>Setting this to a wrong value may cause damage.</b> </td></tr>
 <tr>
-<td>20 </td><td>Max chip temp </td><td>int 8 </td><td>If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off. </td></tr>
+<td>20 </td><td>Max chip temp </td><td>int 8 </td><td>If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off. <b>Setting this to a wrong value may cause damage.</b> </td></tr>
 <tr>
 <td>21 </td><td>Scan filter </td><td>uint 8 </td><td>Filter out certain types of devices from the scan results (1 for GuideStones, 2 for CrownStones, 3 for both). </td></tr>
 <tr>
 <td>22 </td><td>Scan filter fraction </td><td>uint 16 </td><td>If scan filter is set, do <em>not</em> filter them out each every X scan results. </td></tr>
 <tr>
-<td>23 </td><td>Current limit </td><td>uint 8 </td><td>Set current limit to <b>Deprecated</b> </td></tr>
+<td>23 </td><td>Current limit </td><td>uint 8 </td><td>Set current limit. <b>Deprecated</b> </td></tr>
 <tr>
 <td>24 </td><td><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> enabled </td><td>uint 8 </td><td>Stores if mesh is enabled. <em>read only</em> </td></tr>
 <tr>
@@ -492,37 +492,45 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>33 </td><td>Power sample continuous number samples </td><td>... </td><td>TBD </td></tr>
 <tr>
-<td>34 </td><td><a class="anchor" id="crownstone_identifier"></a><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> Identifier </td><td>uint 16 </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> identifier used in advertisement package </td></tr>
+<td>34 </td><td><a class="anchor" id="crownstone_identifier"></a><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> Identifier </td><td>uint 16 </td><td><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration. ">Crownstone</a> identifier used in advertisement package. </td></tr>
 <tr>
-<td>35 </td><td><a class="anchor" id="admin_key"></a>Admin encryption key </td><td>uint 8 [16] </td><td>16 byte key used to encrypt/decrypt owner access functions </td></tr>
+<td>35 </td><td><a class="anchor" id="admin_key"></a>Admin encryption key </td><td>uint 8 [16] </td><td>16 byte key used to encrypt/decrypt owner access functions. </td></tr>
 <tr>
-<td>36 </td><td><a class="anchor" id="user_key"></a>Member encryption key </td><td>uint 8 [16] </td><td>16 byte key used to encrypt/decrypt member access functions </td></tr>
+<td>36 </td><td><a class="anchor" id="user_key"></a>Member encryption key </td><td>uint 8 [16] </td><td>16 byte key used to encrypt/decrypt member access functions. </td></tr>
 <tr>
-<td>37 </td><td><a class="anchor" id="guest_key"></a>Guest encryption key </td><td>uint 8 [16] </td><td>16 byte key used to encrypt/decrypt guest access functions </td></tr>
+<td>37 </td><td><a class="anchor" id="guest_key"></a>Guest encryption key </td><td>uint 8 [16] </td><td>16 byte key used to encrypt/decrypt guest access functions. </td></tr>
 <tr>
-<td>38 </td><td>Default ON </td><td>uint 8 </td><td>Set's the default switch state to 255 if true, or to 0 if false. Value is 0 for false, or any other for true </td></tr>
+<td>38 </td><td>Default ON </td><td>uint 8 </td><td>Set's the default switch state to 255 if true, or to 0 if false. Value is 0 for false, or any other for true. <b>Deprecated</b> </td></tr>
 <tr>
 <td>39 </td><td>Scan Interval </td><td>uint 16 </td><td>Set the scan interval to ... </td></tr>
 <tr>
 <td>40 </td><td>Scan Window </td><td>uint 16 </td><td>Set the scan window to ... </td></tr>
 <tr>
-<td>41 </td><td>Relay High Duration </td><td>uint 16 </td><td>Set the time/duration that the relay is set to high (ms) </td></tr>
+<td>41 </td><td>Relay High Duration </td><td>uint 16 </td><td>Set the time/duration that the relay is set to high (ms). <b>Setting this to a wrong value may cause damage.</b> </td></tr>
 <tr>
-<td>42 </td><td>Low Tx Power </td><td>int 8 </td><td>Set the tx power used when in low transmission power for bonding </td></tr>
+<td>42 </td><td>Low Tx Power </td><td>int 8 </td><td>Set the tx power used when in low transmission power for bonding (can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4). </td></tr>
 <tr>
-<td>43 </td><td>Voltage Multiplier </td><td>float </td><td>Set the voltage multiplier (for power measurement) </td></tr>
+<td>43 </td><td>Voltage Multiplier </td><td>float </td><td>Set the voltage multiplier (for power measurement). <b>Setting this to a wrong value may cause damage.</b> </td></tr>
 <tr>
-<td>44 </td><td>Current Multiplier </td><td>float </td><td>Set the current multiplier (for power measurement) </td></tr>
+<td>44 </td><td>Current Multiplier </td><td>float </td><td>Set the current multiplier (for power measurement). <b>Setting this to a wrong value may cause damage.</b> </td></tr>
 <tr>
-<td>45 </td><td>Voltage Zero </td><td>int 32 </td><td>Set the voltage zero level (for power measurement) </td></tr>
+<td>45 </td><td>Voltage Zero </td><td>int 32 </td><td>Set the voltage zero level (for power measurement). <b>Setting this to a wrong value may cause damage.</b> </td></tr>
 <tr>
-<td>46 </td><td>Current Zero </td><td>int 32 </td><td>Set the current zero level (for power measurement) </td></tr>
+<td>46 </td><td>Current Zero </td><td>int 32 </td><td>Set the current zero level (for power measurement). <b>Setting this to a wrong value may cause damage.</b> </td></tr>
 <tr>
-<td>47 </td><td>Power Zero </td><td>int 32 </td><td>Set the power zero level in mW (for power measurement) </td></tr>
+<td>47 </td><td>Power Zero </td><td>int 32 </td><td>Set the power zero level in mW (for power measurement). <b>Setting this to a wrong value may cause damage.</b> </td></tr>
 <tr>
-<td>48 </td><td>Power Average Window </td><td>uint16 </td><td>Deprecated </td></tr>
+<td>48 </td><td>Power Average Window </td><td>uint16 </td><td><b>Deprecated</b> </td></tr>
 <tr>
 <td>49 </td><td><a class="anchor" id="mesh_access_address"></a><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> Access Address </td><td>uint32 </td><td>The access address of the mesh messages. This ensures that mesh messages of other groups will not interfere with your group. </td></tr>
+<tr>
+<td>50 </td><td>Current consumption threshold </td><td>uint 16 </td><td>At how much mA the switch will be turned off (soft fuse). </td></tr>
+<tr>
+<td>51 </td><td>Current consumption threshold dimmer </td><td>uint 16 </td><td>At how much mA the dimmer will be turned off (soft fuse). <b>Setting this to a wrong value may cause damage.</b> </td></tr>
+<tr>
+<td>52 </td><td>Dimmer temp up voltage </td><td>float </td><td>Voltage of upper threshold of the dimmer thermometer. <b>Setting this to a wrong value may cause damage.</b> </td></tr>
+<tr>
+<td>53 </td><td>Dimmer temp down voltage </td><td>float </td><td>Voltage of lower threshold of the dimmer thermometer. <b>Setting this to a wrong value may cause damage.</b> </td></tr>
 </table>
 <p>OpCodes:</p>
 <table class="doxtable">
@@ -690,6 +698,52 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <td>uint 8 </td><td>size </td><td>1 </td><td>Number of tracked devices in the list. </td></tr>
 </table>
 <p><a href="#tracked_device_packet">Tracked device</a> | size * 7 | Array of tracked device packets. uint 16 [] | Counters | size * 2 | Counter that keeps up how long ago the RSSI of a device was above the threshold (for internal use).</p>
+<h3><a class="anchor" id="schedule_list_packet"></a>Schedule list packet</h3>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 8 </td><td>Size </td><td>1 </td><td>Number of entries in the list. </td></tr>
+<tr>
+<td><a href="#schedule_entry_packet">schedule entry</a> </td><td>Entries </td><td>size*12 </td><td>Schedule entry list. Entries with timestamp=0 can be considered empty. </td></tr>
+</table>
+<h3><a class="anchor" id="schedule_command_packet"></a>Schedule command packet</h3>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 8 </td><td>index </td><td>1 </td><td>Index of the entry (corresponds to the Nth entry in the list). </td></tr>
+<tr>
+<td><a href="#schedule_entry_packet">schedule entry</a> </td><td>Entry </td><td>12 </td><td>Schedule entry. </td></tr>
+</table>
+<h3><a class="anchor" id="schedule_entry_packet"></a>Schedule entry packet</h3>
+<table class="doxtable">
+<tr>
+<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
+<tr>
+<td>uint 8 </td><td>reserved </td><td>1 </td><td>Reserved for future use. </td></tr>
+<tr>
+<td>uint 8 </td><td>Type </td><td>1 </td><td>Combined repeat and action type. Defined as <code>repeatType + (actionType &lt;&lt; 4)</code>. </td></tr>
+<tr>
+<td>uint 8 </td><td><a href="#schedule_override_mask">Override mask</a> </td><td>1 </td><td>Bitmask of switch commands to override. </td></tr>
+<tr>
+<td>uint 32 </td><td>Next timestamp </td><td>4 </td><td>Timestamp of the next time this entry triggers. Set to 0 to remove this entry. </td></tr>
+<tr>
+<td><a href="#schedule_repeat_packet">schedule repeat</a> </td><td>Repeat data </td><td>2 </td><td>Repeat time data, depends on the repeat type. </td></tr>
+<tr>
+<td><a href="#schedule_action_packet">schedule action</a> </td><td>Action data </td><td>3 </td><td>Action data, depends on the action type. </td></tr>
+</table>
+<h3><a class="anchor" id="schedule_override_mask"></a>Schedule override mask</h3>
+<table class="doxtable">
+<tr>
+<th>Bit </th><th>Name </th><th>Description  </th></tr>
+<tr>
+<td>0 </td><td>All </td><td>Ignore any switch command. ** Not implemented yet. ** </td></tr>
+<tr>
+<td>1 </td><td>Location </td><td>Ignore any switch command that comes from location updates (enter/exit room/sphere). ** Not implemented yet. ** </td></tr>
+<tr>
+<td>2-7 </td><td>Reserved </td><td>Reserved for future use. </td></tr>
+</table>
 <h3><a class="anchor" id="schedule_repeat_packet"></a>Schedule repeat packet</h3>
 <h4>Repeat type 0</h4>
 <p>Perform action every X minutes.</p>
@@ -707,7 +761,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <td>uint 8 </td><td>Day of week </td><td>1 </td><td>Bitmask, with bits 0-6 for Sunday-Saturday and bit 7 for all days. </td></tr>
 <tr>
-<td>uint 8 </td><td>Next day of week </td><td>1 </td><td>Remember what day of week comes next. 0-6, where 0=Sunday. </td></tr>
+<td>uint 8 </td><td>Reserved </td><td>1 </td><td>Reserved for future use. </td></tr>
 </table>
 <h4>Repeat type 2</h4>
 <p>Perform action only once. Entry gets removed after action was performed.</p>
@@ -715,7 +769,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
 <tr>
-<td>uint 8 </td><td>Reserved </td><td>2 </td><td>Unused. </td></tr>
+<td>uint 8 </td><td>Reserved </td><td>2 </td><td>Reserved for future use. </td></tr>
 </table>
 <h3><a class="anchor" id="schedule_action_packet"></a>Schedule action packet</h3>
 <h4>Action type 0</h4>
@@ -729,12 +783,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <td>uint 8 </td><td>Reserved </td><td>2 </td><td>Unused. </td></tr>
 </table>
 <h4>Action type 1</h4>
-<p>Fade from current power switch value to a given power switch value, in X seconds. ** Not implemented yet. **</p>
+<p>Fade from current power switch value to a given power switch value, in X seconds. Starts fading at <em>next timestamp</em>. ** Not implemented yet. **</p>
 <table class="doxtable">
 <tr>
 <th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
 <tr>
-<td>uint 8 </td><td><a class="el" href="classSwitch.html">Switch</a> end </td><td>1 </td><td>Power switch value after fading. </td></tr>
+<td>uint 8 </td><td><a class="el" href="classSwitch.html">Switch</a> end </td><td>1 </td><td>Power switch value after fading (at timestamp + fade duration). </td></tr>
 <tr>
 <td>uint 16 </td><td>Fade duration </td><td>2 </td><td>Fade duration in seconds. </td></tr>
 </table>
@@ -744,33 +798,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
 <tr>
-<td>uint 8 </td><td>Reserved </td><td>3 </td><td>Unused. </td></tr>
-</table>
-<h3><a class="anchor" id="schedule_entry_packet"></a>Schedule entry packet</h3>
-<table class="doxtable">
-<tr>
-<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
-<tr>
-<td>uint 8 </td><td>ID </td><td>1 </td><td>Unique id of this schedule entry. </td></tr>
-<tr>
-<td>uint 8 </td><td>Override mask </td><td>1 </td><td>Bitmask of states to override. Presence mask = 1. </td></tr>
-<tr>
-<td>uint 8 </td><td>Type </td><td>1 </td><td>Combined repeat and action type. Defined as <code>repeatType + (actionType &lt;&lt; 4)</code>. </td></tr>
-<tr>
-<td>uint 32 </td><td>Next timestamp </td><td>4 </td><td>Timestamp of the next time this entry triggers. Set to 0 to remove this entry. </td></tr>
-<tr>
-<td><a href="#schedule_repeat_packet">schedule repeat</a> </td><td>Repeat data </td><td>2 </td><td>Repeat time data, depends on the repeat type. </td></tr>
-<tr>
-<td><a href="#schedule_action_packet">schedule action</a> </td><td>Action data </td><td>3 </td><td>Action data, depends on the action type. </td></tr>
-</table>
-<h3><a class="anchor" id="schedule_list_packet"></a>Schedule list packet</h3>
-<table class="doxtable">
-<tr>
-<th>Type </th><th>Name </th><th>Length </th><th>Description  </th></tr>
-<tr>
-<td>uint 8 </td><td>Size </td><td>1 </td><td>Number of entries in the list. </td></tr>
-<tr>
-<td><a href="#schedule_entry_packet">schedule entry</a> </td><td>Entries </td><td>12 </td><td>Schedule entry list. </td></tr>
+<td>uint 8 </td><td>Reserved </td><td>3 </td><td>Reserved for future use. </td></tr>
 </table>
 <h3><a class="anchor" id="mesh_message_packet"></a><a class="el" href="classMesh.html" title="Wrapper class around the mesh protocol files. ">Mesh</a> message</h3>
 <p>This packet is a slightly modified version of the one used in <a href="https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh">OpenMesh</a>; we simply increased the content size.</p>

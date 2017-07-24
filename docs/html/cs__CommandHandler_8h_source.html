@@ -129,19 +129,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <a class="code" href="classCommandHandler.html">CommandHandler</a>();</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="preprocessor">#if (NORDIC_SDK_VERSION &gt;= 11)</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="preprocessor"></span>    app_timer_t              _delayTimerData;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    app_timer_id_t           _delayTimerId;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    app_timer_t              _resetTimerData;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    app_timer_id_t           _resetTimerId;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#else</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor"></span>    uint32_t                 _delayTimerId;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    uint32_t                 _resetTimerId;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <a class="code" href="structboards__config__t.html">boards_config_t</a>* _boardConfig;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;};</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    app_timer_t      _delayTimerData;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    app_timer_id_t   _delayTimerId;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    app_timer_t      _resetTimerData;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    app_timer_id_t   _resetTimerId;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <a class="code" href="structboards__config__t.html">boards_config_t</a>* _boardConfig;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;};</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
 <div class="ttc" id="cs__Stack_8h_html"><div class="ttname"><a href="cs__Stack_8h.html">cs_Stack.h</a></div><div class="ttdoc">Manufacturing data. </div></div>
 <div class="ttc" id="structboards__config__t_html"><div class="ttname"><a href="structboards__config__t.html">boards_config_t</a></div><div class="ttdoc">BE SURE TO UPDATE cs_HardwareVersions.h IF YOU ADD A NEW BOARD!! </div><div class="ttdef"><b>Definition:</b> cs_Boards.h:72</div></div>
 <div class="ttc" id="classCommandHandler_html_a80b8b2d1de27982b218449b56e9d4673"><div class="ttname"><a href="classCommandHandler.html#a80b8b2d1de27982b218449b56e9d4673">CommandHandler::getInstance</a></div><div class="ttdeci">static CommandHandler &amp; getInstance()</div><div class="ttdoc">Gets a static singleton (no dynamic memory allocation) </div><div class="ttdef"><b>Definition:</b> cs_CommandHandler.h:25</div></div>

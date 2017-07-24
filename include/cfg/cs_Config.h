@@ -77,6 +77,9 @@
 //! Max number of schedule entries in the schedule service.
 #define MAX_SCHEDULE_ENTRIES                     10
 
+//! How many seconds of time jump is regarded a big time jump
+#define SCHEDULE_BIG_TIME_JUMP                   (75*60)
+
 #define CURRENT_LIMIT							 0
 
 //! ----- TIMERS -----

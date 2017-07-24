@@ -157,6 +157,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a403861bd406a2601f23cc4c4aab496e3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSwitch.html#a403861bd406a2601f23cc4c4aab496e3">getRelayState</a> ()</td></tr>
 <tr class="memdesc:a403861bd406a2601f23cc4c4aab496e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current relay state.  <a href="#a403861bd406a2601f23cc4c4aab496e3">More...</a><br/></td></tr>
 <tr class="separator:a403861bd406a2601f23cc4c4aab496e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98932193371cbae1dfb2fda463f166fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSwitch.html#a98932193371cbae1dfb2fda463f166fb">delayedSwitch</a> (uint8_t switchState, uint16_t delay)</td></tr>
+<tr class="memdesc:a98932193371cbae1dfb2fda463f166fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set switch state with a delay.  <a href="#a98932193371cbae1dfb2fda463f166fb">More...</a><br/></td></tr>
+<tr class="separator:a98932193371cbae1dfb2fda463f166fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5de820416759d25fe213bf0ff5e7416a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5de820416759d25fe213bf0ff5e7416a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSwitch.html#a5de820416759d25fe213bf0ff5e7416a">handleEvent</a> (uint16_t evt, void *p_data, uint16_t length)</td></tr>
 <tr class="memdesc:a5de820416759d25fe213bf0ff5e7416a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used internally. <br/></td></tr>
@@ -174,6 +177,42 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <tr class="separator:a9c03ff89db493fe191dad71c322ed828"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a98932193371cbae1dfb2fda463f166fb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Switch::delayedSwitch </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>switchState</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>delay</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set switch state with a delay. </p>
+<p>Will be canceled if another switch or delayed switch is called.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">switchState</td><td><a class="el" href="classState.html" title="Load StateVars from and save StateVars to persistent storage. ">State</a> to set the switch to, ranges from 0-100. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">delay</td><td>Delay in seconds. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a2696bf3f3676d63896d056eeb31c1e03"></a>
 <div class="memitem">
 <div class="memproto">
