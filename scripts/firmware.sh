@@ -62,6 +62,7 @@ usage() {
   echo "      bootloader-only                       upload bootloader"
   echo "      bootloader                            upload bootloader (what's the diff?)"
   echo "      debugbl                               debug bootloader"
+  echo "      readHardwareVersion                   read hardware version from target"
   echo "      writeHardwareVersion                  write hardware version to target"
   echo 
   echo "Optional arguments:"
@@ -172,7 +173,7 @@ build() {
 }
 
 writeHardwareVersion() {
-	verifyHardwareBoardDefined
+	verifyHardwareBoardDefinedLocally
 	if [ $? -eq 0 ]; then
 		HARDWARE_BOARD_INT=`cat $BLUENET_DIR/include/cfg/cs_Boards.h | grep -o "#define.*\b$HARDWARE_BOARD\b.*" | grep -w "$HARDWARE_BOARD" | awk 'NF>1{print $NF}'`
 		if [ $? -eq 0 ] && [ -n "$HARDWARE_BOARD_INT" ]; then
@@ -290,13 +291,17 @@ release() {
 	# return $result
 }
 
-verifyHardwareBoardDefined() {
+verifyHardwareBoardDefinedLocally() {
 	if [ -z "$HARDWARE_BOARD" ]; then
 		cs_err "Need to specify HARDWARE_BOARD either in $BLUENET_CONFIG_DIR/_targets.sh"
 		cs_err "for a given target, or by calling the script as"
 		cs_err "   HARDWARE_BOARD=... ./firmware.sh"
 		exit 1
 	fi 
+}
+
+verifyHardwareBoardDefined() {
+	verifyHardwareBoardDefinedLocally
 	echo "Find hardware board version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
 	version=$(${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num)
 	if [ $version == 'FFFFFFFF' ]; then
