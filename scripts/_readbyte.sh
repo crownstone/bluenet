@@ -15,7 +15,9 @@ DEVICE=nRF52832_xxAA
 sed "s|@ADDRESS@|$ADDRESS|" $SCRIPT_DIR/readbyte.script > $TEMP_DIR/readbyte.script
 
 #echo "$JLINK -Device $DEVICE -speed 4000 -If SWD $TEMP_DIR/readbyte.script"
-$JLINK -Device $DEVICE -speed 4000 -If SWD $TEMP_DIR/readbyte.script | grep -A1 identified | tail -n1 | cut -f2 -d'=' | tr -d ' '
+result0=$($JLINK -Device $DEVICE -speed 4000 -If SWD $TEMP_DIR/readbyte.script | grep -A1 identified | tail -n1)
 
-#echo "The result should be something like:"
-#echo "    1000005C = 3C 00 FF FF"
+result1=$(echo "$result0" | cut -f2 -d'=' | sed 's/^ //g' | sed 's/ $//g' | tr -s ' ' ':')
+
+echo "$result1" | awk -v FS=":" '{print $4,$3,$2,$1}' | tr -d ' ' | tr '[:upper:]' '[:lower:]'
+
