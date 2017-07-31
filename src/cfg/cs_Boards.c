@@ -66,7 +66,7 @@ void asCrownstone(boards_config_t* p_config) {
 //	p_config->currentZero         = ; // tbd
 //	p_config->powerZero           = ; // tbd
 
-	p_config->minTxPower          = -40;
+	p_config->minTxPower          = -30;
 }
 
 void asACR01B1A(boards_config_t* p_config) {
@@ -165,7 +165,7 @@ void asACR01B2A(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
 	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
 
-	p_config->minTxPower          = -40;
+	p_config->minTxPower          = -30;
 }
 
 void asACR01B2E(boards_config_t* p_config) {
@@ -197,7 +197,7 @@ void asACR01B2E(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
 	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
 
-	p_config->minTxPower          = -40;
+	p_config->minTxPower          = -30;
 }
 
 void asPluginFlexprint(boards_config_t* p_config) {
@@ -225,7 +225,7 @@ void asPluginFlexprint(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
 	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
 
-	p_config->minTxPower          = -40;
+	p_config->minTxPower          = -30;
 }
 
 void asPca10036(boards_config_t* p_config) {
@@ -284,7 +284,7 @@ void asGuidestone(boards_config_t* p_config) {
 //	p_config->currentZero         = ; // unused
 //	p_config->powerZero           = ; // unused
 	
-	p_config->minTxPower          = -40;
+	p_config->minTxPower          = -30;
 }
 
 uint32_t configure_board(boards_config_t* p_config) {
