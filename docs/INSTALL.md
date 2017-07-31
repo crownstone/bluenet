@@ -45,6 +45,9 @@ Then install it:
 
     sudo dpkg -i jlink_5.12.8_x86_64.deb
 
+Check the [Segger forums](http://forum.segger.com/index.php?page=Thread&threadID=4089) for some help with the udev rules (there is one that comes with the Segger software).
+Note that it might be the case that UART is not enabled (idProduct `0101` rather than `0105`). You can enable this by typing `vcom enable` on the JLink command line.
+
 ### Cross compiler
 
 A cross-compiler for ARM is the GCC cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded).
