@@ -10,5 +10,5 @@ var searchData=
   ['tuple',['tuple',['../classtuple.html#a2739c6d30f8d1c85b06da220f463149b',1,'tuple']]],
   ['turnoff',['turnOff',['../classSwitch.html#a3f10d75adaf6a110de455d1f7bb49fc0',1,'Switch']]],
   ['turnon',['turnOn',['../classSwitch.html#a99dd23c2bbf0b6c87d13b543a69b32a6',1,'Switch']]],
-  ['type',['type',['../classStreamBuffer.html#a9357b2f84a850d7b00c007e0fb96af1c',1,'StreamBuffer']]]
+  ['type',['type',['../classStreamBuffer.html#a2dd87dee4754e47fe46a099ee020b985',1,'StreamBuffer']]]
 ];

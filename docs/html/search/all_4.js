@@ -21,6 +21,7 @@ var searchData=
   ['device_5fname',['device_name',['../structps__configuration__t.html#a968e2ab8ac914f463dd7125b22d757e3',1,'ps_configuration_t']]],
   ['device_5ftype',['device_type',['../structps__configuration__t.html#acd00ea7647216f23a5d2f6dd55958891',1,'ps_configuration_t']]],
   ['deviceinformationservice',['DeviceInformationService',['../classDeviceInformationService.html',1,'DeviceInformationService'],['../classDeviceInformationService.html#af13ec7c422220683c21553e14d904ec9',1,'DeviceInformationService::DeviceInformationService()']]],
+  ['devicetype',['deviceType',['../structboards__config__t.html#ab610d00cffa3e905a1b614124b8ba373',1,'boards_config_t']]],
   ['difference',['difference',['../classRTC.html#a47569127f5c4a0a4ee24015c803361e3',1,'RTC']]],
   ['differential_5fbuffer_5ffixed_5ft',['differential_buffer_fixed_t',['../structdifferential__buffer__fixed__t.html',1,'']]],
   ['differential_5fbuffer_5ffixed_5ft_3c_20uint32_5ft_2c_20power_5fsample_5fburst_5fnum_5fsamples_20_3e',['differential_buffer_fixed_t&lt; uint32_t, POWER_SAMPLE_BURST_NUM_SAMPLES &gt;',['../structdifferential__buffer__fixed__t.html',1,'']]],

@@ -22,8 +22,10 @@ COMP::COMP() {
 
 void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 	//! thresholdDown has to be lower than thresholdUp, else the comp shows weird behaviour (main thread hangs)
+
+	// TODO: If memory is not initialized, this assert becomes false!
 	assert(thresholdDown < thresholdUp, "thresholdDown should be lower than thresholdUp");
-	
+
 	LOGd("init %d %d", VOLTAGE_THRESHOLD_TO_INT(thresholdDown, 3.3), VOLTAGE_THRESHOLD_TO_INT(thresholdUp, 3.3));
 	_lastEventTimestamp = RTC::getCount();
 #ifdef NRF52_PAN_12

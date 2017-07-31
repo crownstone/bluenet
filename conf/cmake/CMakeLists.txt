@@ -33,7 +33,8 @@ SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile f
 SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
 #SET(GIT_HASH                                 "unset"       CACHE STRING "Current git hash")
 SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
-SET(COMPILATION_TIME                         "unset"       CACHE STRING "Time of day of compilation")
+# Do not include COMPILATION_TIME. It invalidates the cache all the time!
+#SET(COMPILATION_TIME                         "unset"       CACHE STRING "Time of day of compilation")
 SET(NRF51822_DIR                             "unset"       CACHE STRING "The nRF5 sdk directory")
 
 #######################################################################################################################
@@ -44,7 +45,8 @@ MESSAGE(STATUS "CMakeLists: Set verbosity to level: ${VERBOSITY}")
 MESSAGE(STATUS "CMakeLists: Git branch: ${GIT_BRANCH}")
 #MESSAGE(STATUS "CMakeLists: Git hash: ${GIT_HASH}")
 MESSAGE(STATUS "CMakeLists: Day of compilation: ${COMPILATION_DAY}")
-MESSAGE(STATUS "CMakeLists: Time of day of compilation: ${COMPILATION_TIME}")
+# Do not include COMPILATION_TIME. It invalidates the cache all the time!
+#MESSAGE(STATUS "CMakeLists: Time of day of compilation: ${COMPILATION_TIME}")
 MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
@@ -73,7 +75,13 @@ ENDIF()
 SET(SOURCE_DIR "src")
 
 # Add separately include directories if we are to lazy to specify e.g. "#include <protocol/rbc_mesh.h>"
-SET(INCLUDE_DIR "include" "include/third" "include/third/nrf" "include/ble")
+SET(INCLUDE_DIR "include" "include/ble" "include/third" "include/third/nrf")
+IF(NORDIC_SDK_VERSION VERSION_GREATER "11")
+	LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/components/toolchain/cmsis/include")
+	LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/config")
+	LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/components/libraries/fstorage")
+	LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/components/libraries/experimental_section_vars")
+ENDIF()
 
 SET(BOOTLOADER "_bootloader_.hex")
 
@@ -113,14 +121,17 @@ ELSE()
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/hal/nrf_saadc.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/comp/nrf_drv_comp.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/gpiote/nrf_drv_gpiote.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/delay/nrf_delay.c")
+
+	IF(NORDIC_SDK_VERSION VERSION_LESS "12")
+		LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/delay/nrf_delay.c")
+		LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/pstorage/pstorage.c")
+		LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer_appsh.c")
+	ENDIF()
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/ppi/nrf_drv_ppi.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/pstorage/pstorage.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/timer/nrf_drv_timer.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/saadc/nrf_drv_saadc.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/scheduler/app_scheduler.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/pwm/app_pwm.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer_appsh.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/util/app_util_platform.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler_appsh.c")

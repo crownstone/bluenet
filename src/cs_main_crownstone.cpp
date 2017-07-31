@@ -1,59 +1,40 @@
 /**
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone
  * Date: 14 Aug., 2014
  * License: LGPLv3+, Apache, or MIT, your choice
  */
 
 /**********************************************************************************************************************
- * The Crownstone is a high-voltage (domestic) switch. It can be used to combine:
+ *
+ * The Crownstone is a high-voltage (domestic) switch. It can be used for:
  *   - indoor localization
  *   - building automation
- * It is therefore one of the first real internet-of-things devices entering the market.
- * Read more on: https://dobots.nl/products/crownstone/
  *
- * A large part of the software is open-source. You can find it at: https://github.com/dobots/bluenet. The README
- * file at that repository will get you started.
+ * It is one of the first, or the first(?), open-source Internet-of-Things devices entering the market.
+ *
+ * Read more on: https://crownstone.rocks
  *
  * Almost all configuration options should be set in CMakeBuild.config.
- *********************************************************************************************************************/
-
-//! temporary defines
-
-#define RESET_COUNTER
-//#define MICRO_VIEW 1
-//#define CHANGE_MINOR_ON_RESET
-
-/**********************************************************************************************************************
- * General includes
+ *
  *********************************************************************************************************************/
 
 #include <cs_Crownstone.h>
-
-#include "cfg/cs_Boards.h"
-#include "drivers/cs_RTC.h"
-#include "drivers/cs_PWM.h"
-#include "util/cs_Utils.h"
-#include "drivers/cs_Timer.h"
-#include <processing/cs_EncryptionHandler.h>
-#include "structs/buffer/cs_MasterBuffer.h"
-#include "structs/buffer/cs_EncryptionBuffer.h"
-
-#include <drivers/cs_RNG.h>
-#include <drivers/cs_Temperature.h>
-
+#include <ble/cs_CrownstoneManufacturer.h>
+#include <cfg/cs_Boards.h>
 #include <cfg/cs_HardwareVersions.h>
-
-/**********************************************************************************************************************
- * Custom includes
- *********************************************************************************************************************/
-
+#include <drivers/cs_PWM.h>
+#include <drivers/cs_RNG.h>
+#include <drivers/cs_RTC.h>
+#include <drivers/cs_Temperature.h>
+#include <drivers/cs_Timer.h>
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventTypes.h>
-
-#include <ble/cs_CrownstoneManufacturer.h>
-
+#include <processing/cs_EncryptionHandler.h>
 #include <storage/cs_State.h>
+#include <structs/buffer/cs_MasterBuffer.h>
+#include <structs/buffer/cs_EncryptionBuffer.h>
+#include <util/cs_Utils.h>
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -75,17 +56,11 @@ Crownstone::Crownstone(boards_config_t& board) :
 #endif
 	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
 	_advertisementPaused(false),
-#if (NORDIC_SDK_VERSION >= 11)
 	_mainTimerId(NULL),
-#else
-	_mainTimerId(UINT32_MAX),
-#endif
 	_operationMode(0)
 {
-#if (NORDIC_SDK_VERSION >= 11)
 	_mainTimerData = { {0} };
 	_mainTimerId = &_mainTimerData;
-#endif
 
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
@@ -158,8 +133,6 @@ void Crownstone::init() {
 	LOGi(FMT_HEADER, "setup");
 
 	_stateVars->get(STATE_OPERATION_MODE, _operationMode);
-//	_operationMode = OPERATION_MODE_NORMAL;
-//	_operationMode = OPERATION_MODE_SETUP;
 
 	switch(_operationMode) {
 	case OPERATION_MODE_SETUP: {
@@ -234,6 +207,7 @@ void Crownstone::init() {
 	// [16.06.16] need to execute app scheduler, otherwise pstorage
 	// events will get lost ... maybe need to check why that actually happens??
 	app_sched_execute();
+
 }
 
 void Crownstone::configure() {
@@ -242,13 +216,11 @@ void Crownstone::configure() {
 	//! configure parameters for the Bluetooth stack
 	configureStack();
 
-#ifdef RESET_COUNTER
 	uint16_t resetCounter;
 	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
 	++resetCounter;
 	LOGf("Reset counter at: %d", resetCounter);
 	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
-#endif
 
 	//! set advertising parameters such as the device name and appearance.
 	//! Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
@@ -278,16 +250,6 @@ void Crownstone::initDrivers() {
 
 	LOGd(FMT_INIT, "stack");
 
-	// things that need to be configured on the stack **BEFORE** init is called
-#if (NORDIC_SDK_VERSION < 11)
-#if LOW_POWER_MODE==0
-	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM);
-#else
-	//! TODO: depends on board!
-//	_stack->setClockSource(NRF_CLOCK_LFCLKSRC_XTAL_50_PPM);
-	_stack->setClockSource(CLOCK_SOURCE);
-#endif
-#endif
 	//! start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	//! in particular we need it to set interrupt priorities.
 	_stack->init();
@@ -360,6 +322,11 @@ void Crownstone::initDrivers() {
  *   - advertising timeout (disabled, can be between 0x0001 and 0x3FFF, and is in steps of seconds)
  *
  * There is no whitelist defined, nor peer addresses.
+ *
+ * Process:
+ *   [31.05.16] we used to stop / start scanning after a disconnect, now starting advertising is enough
+ *   [23.06.16] restart the mesh on disconnect, otherwise we have ~10s delay until the device starts advertising.
+ *   [29.06.16] restart the mesh disabled, this was limited to pca10000, it does crash dobeacon v0.7
  */
 void Crownstone::configureStack() {
 
@@ -371,44 +338,33 @@ void Crownstone::configureStack() {
 	_stack->setAdvertisingInterval(ADVERTISEMENT_INTERVAL);
 	_stack->setAdvertisingTimeoutSeconds(ADVERTISING_TIMEOUT);
 
-	//! Set the stored tx power
+	// Set the stored tx power
 	int8_t txPower;
 	_settings->get(CONFIG_TX_POWER, &txPower);
 	LOGi("Set TX power to %i", txPower);
 	_stack->setTxPowerLevel(txPower);
 
-	//! Set the stored advertisement interval
+	// Set the stored advertisement interval
 	uint16_t advInterval;
 	_settings->get(CONFIG_ADV_INTERVAL, &advInterval);
 	_stack->setAdvertisingInterval(advInterval);
 
-	//! Retrieve and Set the PASSKEY for pairing
+	// Retrieve and Set the PASSKEY for pairing
 	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
 	_settings->get(CONFIG_PASSKEY, passkey);
+
+	// TODO: If key is not set, this leads to a crash
 	_stack->setPasskey(passkey);
 
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
-		//! todo this signature needs to change
-
-		//! first stop, see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
-		//! be neater about it... we do not need to stop, only after a disconnect we do...
+		// TODO: see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
+		// be neater about it... we do not need to stop, only after a disconnect we do...
 #if RSSI_ENABLE==1
-
 		sd_ble_gap_rssi_stop(conn_handle);
-
-#if (NORDIC_SDK_VERSION >= 11) || \
-	(SOFTDEVICE_SERIES == 130 && SOFTDEVICE_MAJOR == 1 && SOFTDEVICE_MINOR == 0) || \
-	(SOFTDEVICE_SERIES == 110 && SOFTDEVICE_MAJOR == 8)
 		sd_ble_gap_rssi_start(conn_handle, 0, 0);
-#else
-		sd_ble_gap_rssi_start(conn_handle);
 #endif
-#endif
-
-//		LOGd("clear gpregret on connect ...");
 		sd_power_gpregret_clr(0xFF);
-
 
 		_stack->setNonConnectable();
 		_stack->restartAdvertising();
@@ -417,16 +373,7 @@ void Crownstone::configureStack() {
 
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
-		//! of course this is not nice, but dirty! we immediately start advertising automatically after being
-		//! disconnected. but for now this will be the default behaviour.
-
-		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
-		//   disconnecting from the device. just calling startAdvertising is enough
-		//		bool wasScanning = _stack->isScanning();
-		//		_stack->stopScanning();
-
 		if (_operationMode == OPERATION_MODE_SETUP) {
-			// make sure device goes back to low tx power mode when in setup
 			_stack->changeToLowTxPowerMode();
 		}
 
@@ -434,26 +381,6 @@ void Crownstone::configureStack() {
 
 		_stack->setConnectable();
 		_stack->restartAdvertising();
-//		_stack->startAdvertising();
-
-		// [23.06.16] need to restart the mesh on disconnect, otherwise we have ~10s delay until the device starts
-		// advertising.
-		// [29.06.16] this happened on the pca10000, but doesn't seem to happen on the dobeacon v0.7 need to check
-		// on other versions. On the contrary, the reset seems to crash the dobeacon v0.7
-//#if HARDWARE_BOARD==PCA10031
-//#if BUILD_MESHING == 1
-//		if (_mesh->isRunning()) {
-//			_mesh->restart();
-//		}
-//#endif
-//#endif
-
-		// [31.05.16] it seems as if it is not necessary anmore to stop / start scanning when
-		//   disconnecting from the device. just calling startAdvertising is enough
-		//		if (wasScanning) {
-		//			_stack->startScanning();
-		//		}
-
 	});
 
 }
@@ -472,12 +399,6 @@ void Crownstone::configureAdvertisement() {
 	_settings->get(CONFIG_IBEACON_MINOR, &minor);
 	_settings->get(CONFIG_IBEACON_UUID, uuid.uuid128);
 	_settings->get(CONFIG_IBEACON_TXPOWER, &rssi);
-
-#ifdef CHANGE_MINOR_ON_RESET
-	minor++;
-	LOGi("Increase minor to %d", minor);
-	_settings->set(CONFIG_IBEACON_MINOR, &minor);
-#endif
 
 	//! create ibeacon object
 	_beacon = new IBeacon(uuid, major, minor, rssi);
@@ -689,14 +610,6 @@ void Crownstone::startUp() {
 	//! during setup mode, most of the crownstone's functionality is
 	//! disabled
 	if (_operationMode == OPERATION_MODE_NORMAL) {
-
-//#if (DEFAULT_ON==1)
-//		LOGi("Set power ON by default");
-//		_switch->turnOn();
-//#elif (DEFAULT_ON==0)
-//		LOGi("Set power OFF by default");
-//		_switch->turnOff();
-//#endif
 
 		//! start main tick
 		scheduleNextTick();

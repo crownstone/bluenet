@@ -12,5 +12,6 @@ var searchData=
   ['defaultslavelatencycount',['defaultSlaveLatencyCount',['../classNrf51822BluetoothStack.html#a64d40e2bdeba56342a1617b07db93233',1,'Nrf51822BluetoothStack']]],
   ['defaulttxpowerlevel',['defaultTxPowerLevel',['../classNrf51822BluetoothStack.html#a7ecb1757ed412338fe96b80b8af5a47a',1,'Nrf51822BluetoothStack']]],
   ['device_5fname',['device_name',['../structps__configuration__t.html#a968e2ab8ac914f463dd7125b22d757e3',1,'ps_configuration_t']]],
-  ['device_5ftype',['device_type',['../structps__configuration__t.html#acd00ea7647216f23a5d2f6dd55958891',1,'ps_configuration_t']]]
+  ['device_5ftype',['device_type',['../structps__configuration__t.html#acd00ea7647216f23a5d2f6dd55958891',1,'ps_configuration_t']]],
+  ['devicetype',['deviceType',['../structboards__config__t.html#ab610d00cffa3e905a1b614124b8ba373',1,'boards_config_t']]]
 ];

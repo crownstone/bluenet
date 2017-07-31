@@ -1,17 +1,28 @@
 #!/bin/bash
 
+# Use "echo $?" to find out which error you have been able to generate :-)
+
+ERR_GETOPT_TEST=101
+ERR_GETOPT_PARSE=102
+ERR_ARGUMENTS=103
+ERR_UNKNOWN_COMMAND=104
+ERR_VERIFY_HARDWARE_LOCALLY=105
+ERR_HARDWARE_VERSION_UNSET=106
+ERR_JLINK_NOT_FOUND=107
+ERR_HARDWARE_VERSION_MISMATCH=108
+
 getopt --test > /dev/null
 if [[ $? -ne 4 ]]; then
   echo "I’m sorry, `getopt --test` failed in this environment."
-  exit 1
+  exit $ERR_GETOPT_TEST
 fi
 
 SHORT=c:t:a:
 LONG=command:,target:,address:
 
-PARSED=`getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@"`
+PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
-  exit 2
+  exit $ERR_GETOPT_PARSE
 fi
 
 eval set -- "$PARSED"
@@ -37,7 +48,7 @@ while true; do
 		*)
 			echo "Error in arguments."
 			echo $2
-			exit 3
+			exit $ERR_ARGUMENTS
 			;;
 	esac
 done
@@ -72,7 +83,7 @@ usage() {
 
 if [ ! "$cmd" ]; then
   usage
-  exit 4
+  exit $ERR_UNKNOWN_COMMAND
 fi
 
 # Default target
@@ -297,22 +308,25 @@ verifyHardwareBoardDefinedLocally() {
 		cs_err "Need to specify HARDWARE_BOARD either in $BLUENET_CONFIG_DIR/_targets.sh"
 		cs_err "for a given target, or by calling the script as"
 		cs_err "   HARDWARE_BOARD=... ./firmware.sh"
-		exit 1
+		exit $ERR_VERIFY_HARDWARE_LOCALLY
 	fi 
 }
 
 verifyHardwareBoardDefined() {
 	verifyHardwareBoardDefinedLocally
-	echo "Find hardware board version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
+	cs_info "Find hardware board version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
 	version=$(${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num)
 	HARDWARE_BOARD_INT=$(cat $BLUENET_DIR/include/cfg/cs_Boards.h | grep -o "#define.*\b$HARDWARE_BOARD\b.*" | grep -w "$HARDWARE_BOARD" | awk 'NF>1{print $NF}')
 	board_version=$(printf "%08x" $HARDWARE_BOARD_INT)
-	if [ $version == 'FFFFFFFF' ]; then
+	if [ "$version" == 'FFFFFFFF' ]; then
 	  cs_err "You have to write the hardware version! It is still set to $version."
-	  exit 1
+	  exit $ERR_HARDWARE_VERSION_UNSET
+	elif [ "$version" == '<not found>' ]; then
+	  cs_err "Did you actually connect the JLink?"
+	  exit $ERR_JLINK_NOT_FOUND
 	elif [ "$version" != "$board_version" ]; then
 	  cs_err "You have to update the hardware version! It is set to $version rather than $board_version."
-	  exit 1
+	  exit $ERR_HARDWARE_VERSION_MISMATCH
 	else
 	  cs_info "Found hardware version: $version"
 	fi
@@ -360,6 +374,6 @@ case "$cmd" in
 		;;
 	*)
 		cs_info $"Usage: $0 {build|unit-test-host|unit-test-nrf5|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release|writeHardwareVersion}"
-		exit 1
+		exit $ERR_ARGUMENTS
 esac
 

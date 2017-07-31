@@ -1,6 +1,6 @@
 <map id="include/ble/cs_Eddystone.h" name="include/ble/cs_Eddystone.h">
-<area shape="rect" id="node2" href="$cs__UUID_8h.html" title="Universally Unique IDentifiers for BLE services and characteristics. " alt="" coords="891,80,1000,107"/>
-<area shape="rect" id="node22" href="$cs__Serial_8h_source.html" title="drivers/cs_Serial.h" alt="" coords="1024,80,1153,107"/>
-<area shape="rect" id="node3" href="$cs__Nordic_8h.html" title="Manufacturing data. " alt="" coords="889,155,1001,181"/>
-<area shape="rect" id="node23" href="$cs__Debug_8h_source.html" title="cfg/cs_Debug.h" alt="" coords="1029,155,1144,181"/>
+<area shape="rect" id="node2" href="$cs__UUID_8h.html" title="Universally Unique IDentifiers for BLE services and characteristics. " alt="" coords="1059,80,1169,107"/>
+<area shape="rect" id="node25" href="$cs__Serial_8h_source.html" title="drivers/cs_Serial.h" alt="" coords="1193,80,1323,107"/>
+<area shape="rect" id="node3" href="$cs__Nordic_8h.html" title="Import files from Nordic SDK. " alt="" coords="1057,155,1171,181"/>
+<area shape="rect" id="node26" href="$cs__Debug_8h_source.html" title="cfg/cs_Debug.h" alt="" coords="1198,155,1313,181"/>
 </map>

@@ -12,6 +12,7 @@ var searchData=
   ['messagecounter',['messageCounter',['../structencrypted__mesh__message__t.html#a2cd5eb69726b30c356ef25d66d354603',1,'encrypted_mesh_message_t::messageCounter()'],['../structmesh__message__t.html#ab20cd581001082b866a3f16c6d453aec',1,'mesh_message_t::messageCounter()']]],
   ['minenvtemp',['minEnvTemp',['../structps__configuration__t.html#aeccdbcac318278a34dd5213ed840ed34',1,'ps_configuration_t']]],
   ['minor',['minor',['../classIBeacon.html#aa5f782308bd7fe44ed58c97c7ae3652a',1,'IBeacon']]],
+  ['mintxpower',['minTxPower',['../structboards__config__t.html#a0bacc3ea9705ea972e7795f7296293ba',1,'boards_config_t']]],
   ['mstoticks',['msToTicks',['../classRTC.html#acfadc7aec118a7c886cc721bc7bf01bf',1,'RTC']]],
   ['multi_5fswitch_5fitem_5ft',['multi_switch_item_t',['../structmulti__switch__item__t.html',1,'']]],
   ['multi_5fswitch_5fmessage_5ft',['multi_switch_message_t',['../structmulti__switch__message__t.html',1,'']]]

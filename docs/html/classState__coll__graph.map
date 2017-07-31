@@ -1,11 +1,11 @@
 <map id="State" name="State">
-<area shape="rect" id="node2" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="289,13,356,40"/>
-<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener. " alt="" coords="21,13,123,40"/>
-<area shape="rect" id="node4" href="$unionstate__ignore__bitmask__t.html" title="state_ignore_bitmask_t" alt="" coords="244,64,401,91"/>
-<area shape="rect" id="node5" href="$unionstate__errors__t.html" title="state_errors_t" alt="" coords="271,115,374,141"/>
-<area shape="rect" id="node6" href="$classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY, small\l_seq_number_t \&gt;" alt="" coords="215,166,430,237"/>
-<area shape="rect" id="node7" href="$structps__general__vars__t.html" title="Struct used to ... " alt="" coords="259,261,387,288"/>
-<area shape="rect" id="node8" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="6,261,138,288"/>
-<area shape="rect" id="node9" href="$classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY, large_seq_number_t \&gt;" alt="" coords="191,312,454,368"/>
-<area shape="rect" id="node10" href="$classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY, small_seq_number_t \&gt;" alt="" coords="189,392,456,448"/>
+<area shape="rect" id="node2" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="287,12,353,39"/>
+<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener. " alt="" coords="20,12,123,39"/>
+<area shape="rect" id="node4" href="$unionstate__ignore__bitmask__t.html" title="state_ignore_bitmask_t" alt="" coords="241,63,399,89"/>
+<area shape="rect" id="node5" href="$unionstate__errors__t.html" title="state_errors_t" alt="" coords="269,113,371,140"/>
+<area shape="rect" id="node6" href="$classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY, small\l_seq_number_t \&gt;" alt="" coords="213,165,427,235"/>
+<area shape="rect" id="node7" href="$structps__general__vars__t.html" title="Struct used to ... " alt="" coords="256,260,384,287"/>
+<area shape="rect" id="node8" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="5,260,137,287"/>
+<area shape="rect" id="node9" href="$classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY, large_seq_number_t \&gt;" alt="" coords="189,311,451,367"/>
+<area shape="rect" id="node10" href="$classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY, small_seq_number_t \&gt;" alt="" coords="187,391,453,447"/>
 </map>

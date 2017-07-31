@@ -8,11 +8,11 @@ var searchData=
   ['onradionotificationinterrupt',['onRadioNotificationInterrupt',['../classNrf51822BluetoothStack.html#a9056197294656ad3d7abdcd436bbe218',1,'Nrf51822BluetoothStack']]],
   ['ontxcomplete',['onTxComplete',['../classCharacteristicBase.html#a57d6e19b6fea27e67b85ac07c7e253fc',1,'CharacteristicBase::onTxComplete()'],['../classCharacteristic_3_01buffer__ptr__t_01_4.html#ad61d03dd29381afc1939d22cca4fb1f7',1,'Characteristic&lt; buffer_ptr_t &gt;::onTxComplete()'],['../classService.html#aa31d62d5f7c838f3f7515e220ab93c42',1,'Service::onTxComplete()'],['../classNrf51822BluetoothStack.html#ab12a11a34691bb52869225b61e2b3358',1,'Nrf51822BluetoothStack::onTxComplete()']]],
   ['onwrite',['onWrite',['../classCharacteristicGeneric.html#afa4a09d7fcddfcdb90e74fea71456afe',1,'CharacteristicGeneric']]],
-  ['opcode',['opCode',['../classStreamBuffer.html#a3f63f1357d2f3f0432eb3b955b87148d',1,'StreamBuffer']]],
+  ['opcode',['opCode',['../classStreamBuffer.html#a93b4205827da8eaed637cfda709bbde5',1,'StreamBuffer']]],
   ['operator_20ble_5fuuid128_5ft',['operator ble_uuid128_t',['../classUUID.html#a49ef2add2678262a3c56409b226f1247',1,'UUID']]],
   ['operator_20ble_5fuuid_5ft',['operator ble_uuid_t',['../classUUID.html#a5c0c8427ecdbe0c036017871cfc5eb0b',1,'UUID']]],
-  ['operator_20t_20_26',['operator T &amp;',['../classCharacteristicGeneric.html#a378035d3ade0c05b2784fa2ae207989a',1,'CharacteristicGeneric']]],
+  ['operator_20t_20_26',['operator T &amp;',['../classCharacteristicGeneric.html#aba34f730c4c9982b44cdf2e75057dfb3',1,'CharacteristicGeneric']]],
   ['operator_2b_2b',['operator++',['../classMeshMessageCounter.html#a175d7b6ca01036ec472c37b44d4a6636',1,'MeshMessageCounter::operator++()'],['../classstate__message_1_1iterator.html#a7cceab8897b55e7ee183469bbf74bbdc',1,'state_message::iterator::operator++()'],['../classstate__message_1_1iterator.html#af96a7dd9875e3ef2431f027ee703cf4a',1,'state_message::iterator::operator++(int)']]],
   ['operator_3d',['operator=',['../classCharacteristicGeneric.html#a799481d5f5f17c114991ddeacac90153',1,'CharacteristicGeneric']]],
-  ['operator_5b_5d',['operator[]',['../classCircularBuffer.html#a7ff42476c066192e1844fc319ad587a4',1,'CircularBuffer']]]
+  ['operator_5b_5d',['operator[]',['../classCircularBuffer.html#aca1eae677eeeef6af682c06338c785a6',1,'CircularBuffer']]]
 ];

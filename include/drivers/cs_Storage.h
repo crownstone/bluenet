@@ -18,12 +18,15 @@
 #include "structs/buffer/cs_CircularBuffer.h"
 #include <events/cs_EventListener.h>
 
+#if NORDIC_SDK_VERSION<=11
 extern "C" {
 	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
 //	#include "pstorage_platform.h"
 	#include "pstorage.h"
 }
-
+#else
+	#include "fstorage.h"
+#endif
 /** enable additional debug output */
 //#define PRINT_ITEMS
 

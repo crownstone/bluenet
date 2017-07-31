@@ -68,6 +68,8 @@ void TemperatureGuard::handleCompEvent(CompEvent_t event) {
 void TemperatureGuard::tick() {
 	GeneralEventType curEvent;
 
+	return;
+
 	// Check chip temperature, send event if it changed
 	uint8_t chipTempError = getTemperature() > _maxChipTemp ? 1 : 0;
 	if (chipTempError) {

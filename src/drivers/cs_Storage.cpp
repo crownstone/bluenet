@@ -1,6 +1,6 @@
 /*
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone
  * Date: 24 Nov., 2014
  * License: LGPLv3+, Apache, and/or MIT, your choice
  */

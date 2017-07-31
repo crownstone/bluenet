@@ -1,6 +1,6 @@
 #!/bin/bash
 
-option=${1:? "Usage: $0 (generate|memory_map|publish)"}
+option=${1:? "Usage: $0 (generate|memory_map|publish|view)"}
 
 # optional target, have default option
 target=${1:-default}

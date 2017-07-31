@@ -1,18 +1,12 @@
 /*
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone
  * Date: May 6, 2015
- * License: LGPLv3+
+ * License: LGPLv3+, Apache 2.0, and/or MIT
  */
 #pragma once
 
-//#include <cstddef>
-
-#include <ble_gap.h>
-
-extern "C" {
-#include <rbc_mesh.h>
-}
+#include <ble/cs_NordicMesh.h>
 
 #include <structs/cs_ScanResult.h>
 #include <structs/cs_StreamBuffer.h>
@@ -330,10 +324,18 @@ struct __attribute__((__packed__)) beacon_mesh_message_t {
 	int8_t txPower;
 };
 
-// TODO: how is this properly defined? 
-// ids[] is flexible
-// size of beacon_mesh_message_t does not seem to be forced to be the same as for control_mesh_message_t, so seems also flexible
-// payload[] is flexible
+/** A command message that can be sent over the mesh.
+ *
+ * A command message exists out of a message type, the number of node identifiers, and data. The data can be in 
+ * structured or raw form (size MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH). The structure are the node identifiers themselves
+ * and the payload stemming from these nodes. The payload is a message: a beacon message, command message, or 
+ * configuration message.
+ *
+ * TODO: The construction of this struct makes use of nested anonymous unions. It surpringly compiles with g++, but
+ * will probably fail with other compilers. Both ids[] and payload[] are dynamic (so the size of the struct is hard to
+ * extract). Moreover, the size of beacon_mesh_message_t does not seem to be forced to be the same as that of 
+ * control_mesh_message_t.
+ */
 struct __attribute__((__packed__)) command_message_t {
 	uint16_t messageType;
 	uint8_t numOfIds;
@@ -423,6 +425,8 @@ inline void get_command_msg_payload(command_message_t* message, uint16_t message
 
 #define MAX_REPLY_LIST_SIZE (MAX_MESH_MESSAGE_LENGTH - REPLY_HEADER_SIZE)
 
+/** Reply to a status message.
+ */
 struct __attribute__((__packed__)) status_reply_item_t {
 	id_type_t id;
 	uint16_t status;
@@ -434,6 +438,8 @@ struct __attribute__((__packed__)) status_reply_item_t {
 #define MAX_CONFIG_REPLY_DATA_LENGTH (MAX_REPLY_LIST_SIZE - sizeof(id_type_t) - SB_HEADER_SIZE)
 #define MAX_CONFIG_REPLY_ITEMS 1 // the safe is to request config one by one, but depending on the length of the config
 
+/** Reply to a configuration message.
+ */
 struct __attribute__((__packed__)) config_reply_item_t {
 	id_type_t id;
 	stream_t<uint8_t, MAX_CONFIG_REPLY_DATA_LENGTH> data;
@@ -443,11 +449,15 @@ struct __attribute__((__packed__)) config_reply_item_t {
 #define MAX_STATE_REPLY_ITEMS 1 // the safe is to request state one by one, but depending on the length of the state
                                 // data that is requested, several states might fit in one mesh message
 
+/** Reply to a state message.
+ */
 struct __attribute__((__packed__)) state_reply_item_t {
 	id_type_t id;
 	stream_t<uint8_t, MAX_STATE_REPLY_DATA_LENGTH> data;
 };
 
+/** Reply for any type of message.
+ */
 struct __attribute__((__packed__)) reply_message_t {
 	uint16_t messageType;
 	uint32_t messageCounter;

@@ -1,21 +1,16 @@
 /*
- * Author: Bart van Vliet
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone
  * Date: 6 Nov., 2014
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
 #pragma once
 
-extern "C" {
-#include <nrf_drv_saadc.h>
-#include <nrf_drv_timer.h>
-#include <nrf_drv_ppi.h>
-}
-
-#include "structs/buffer/cs_CircularBuffer.h"
-#include "structs/buffer/cs_StackBuffer.h"
-#include "structs/buffer/cs_DifferentialBuffer.h"
-#include "cfg/cs_Config.h"
+#include <ble/cs_Nordic.h>
+#include <cfg/cs_Config.h>
+#include <structs/buffer/cs_CircularBuffer.h>
+#include <structs/buffer/cs_StackBuffer.h>
+#include <structs/buffer/cs_DifferentialBuffer.h>
 
 //! Numeric reference to a pin
 typedef uint8_t pin_id_t;
@@ -46,9 +41,11 @@ typedef uint32_t cs_adc_error_t;
  */
 typedef void (*adc_done_cb_t) (nrf_saadc_value_t* buf, buffer_size_t size, buffer_id_t bufNum);
 
-/**
+/** Struct storing data for ADC callback.
+ *
  * The struct adc_done_cb_data_t stores (1) a callback pointer, see adc_done_cb_t, (2) the arguments for this pointer,
- * see also adc_done_cb_t.
+ * see also adc_done_cb_t (a pointer to the buffer with data from the ADC conversion, the buffer size, and a unique
+ * number for the buffer).
  */
 struct adc_done_cb_data_t {
 	//! Callback function

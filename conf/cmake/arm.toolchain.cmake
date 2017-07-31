@@ -173,7 +173,7 @@ SET(BEACON_MAJOR                                "${BEACON_MAJOR}"               
 SET(BEACON_MINOR                                "${BEACON_MINOR}"                   CACHE STRING "BEACON_MINOR" FORCE)
 SET(BEACON_RSSI                                 "${BEACON_RSSI}"                    CACHE STRING "BEACON_RSSI" FORCE)
 
-SET(EDDYSTONE                                     "${EDDYSTONE}"                    CACHE STRING "EDDYSTONE" FORCE)
+SET(EDDYSTONE                                   "${EDDYSTONE}"                      CACHE STRING "EDDYSTONE" FORCE)
 
 # Add services
 SET(CROWNSTONE_SERVICE                          "${CROWNSTONE_SERVICE}"             CACHE STRING "CROWNSTONE_SERVICE" FORCE)

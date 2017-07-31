@@ -1,38 +1,29 @@
-/**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+/*
+ * Author: Crownstone
+ * Copyright: Crownstone
  * Date: May 18, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT
  */
 
-#include <processing/cs_CommandHandler.h>
 
-#include <storage/cs_Settings.h>
+#include <cfg/cs_Boards.h>
+#include <cfg/cs_Strings.h>
 #include <drivers/cs_Serial.h>
+#include <processing/cs_CommandHandler.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
 
-#include <cfg/cs_Boards.h>
-
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
+#include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
 
 #if BUILD_MESHING == 1
+#include <ble/cs_NordicMesh.h>
 #include <mesh/cs_MeshControl.h>
 #include <mesh/cs_Mesh.h>
 #endif
-
-#include <storage/cs_State.h>
-#include <cfg/cs_Strings.h>
-
-#if BUILD_MESHING == 1
-extern "C" {
-	#include <rbc_mesh.h>
-}
-#endif
-
-//#define PRINT_DEBUG
 
 void reset(void* p_context) {
 
@@ -72,7 +63,7 @@ CommandHandler::CommandHandler() :
 		_resetTimerId = &_resetTimerData;
 }
 
-void CommandHandler::init(boards_config_t* board) {
+void CommandHandler::init(const boards_config_t* board) {
 	_boardConfig = board;
 	Timer::getInstance().createSingleShot(_delayTimerId, execute_delayed);
 	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t) reset);
@@ -88,7 +79,8 @@ void CommandHandler::resetDelayed(uint8_t opCode) {
 //	while(true) {}; //! TODO: this doesn't seem to work
 }
 
-ERR_CODE CommandHandler::handleCommandDelayed(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, uint32_t delay) {
+ERR_CODE CommandHandler::handleCommandDelayed(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size, 
+		const uint32_t delay) {
 	delayed_command_t* buf = new delayed_command_t();
 	buf->type = type;
 	buf->buffer = new uint8_t[size];
@@ -99,12 +91,13 @@ ERR_CODE CommandHandler::handleCommandDelayed(CommandHandlerTypes type, buffer_p
 	return NRF_SUCCESS;
 }
 
-ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type) {
+ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type) {
 	return handleCommand(type, NULL, 0);
 }
 
 
-ERR_CODE CommandHandler::handleCommand(CommandHandlerTypes type, buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel accessLevel) {
+ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size, 
+		const EncryptionAccessLevel accessLevel) {
 
 	switch (type) {
 	case CMD_NOP: {
