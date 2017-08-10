@@ -13,9 +13,7 @@ source $path/_utils.sh
 ###################
 
 cs_info "Build and upload softdevice ..."
-
 $path/softdevice.sh all $target
-
 checkError
 cs_succ "Softdevice DONE"
 
@@ -24,16 +22,17 @@ cs_succ "Softdevice DONE"
 ###################
 
 cs_info "Build firmware ..."
-
 $path/firmware.sh -c build $targetoption
-
 checkError
 cs_succ "Build DONE"
 
+cs_info "Write hardware version ..."
+$path/firmware.sh -c writeHardwareVersion $targetoption
+checkError
+cs_succ "Write DONE"
+
 cs_info "Upload firmware ..."
-
 $path/firmware.sh -c upload $targetoption
-
 checkError
 cs_succ "Upload DONE"
 
