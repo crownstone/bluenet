@@ -1,7 +1,7 @@
 <map id="include/ble/cs_iBeacon.h" name="include/ble/cs_iBeacon.h">
-<area shape="rect" id="node2" href="$cs__UUID_8h.html" title="Universally Unique IDentifiers for BLE services and characteristics. " alt="" coords="1453,80,1563,107"/>
-<area shape="rect" id="node22" href="$cs__Serial_8h_source.html" title="drivers/cs_Serial.h" alt="" coords="2044,155,2173,181"/>
-<area shape="rect" id="node25" href="$cs__Utils_8h_source.html" title="util/cs_Utils.h" alt="" coords="2161,80,2263,107"/>
-<area shape="rect" id="node3" href="$cs__Nordic_8h.html" title="Manufacturing data. " alt="" coords="943,155,1056,181"/>
-<area shape="rect" id="node23" href="$cs__Debug_8h_source.html" title="cfg/cs_Debug.h" alt="" coords="2052,237,2167,264"/>
+<area shape="rect" id="node2" href="$cs__UUID_8h.html" title="Universally Unique IDentifiers for BLE services and characteristics. " alt="" coords="1762,80,1871,107"/>
+<area shape="rect" id="node25" href="$cs__Serial_8h_source.html" title="drivers/cs_Serial.h" alt="" coords="2439,155,2570,181"/>
+<area shape="rect" id="node28" href="$cs__Utils_8h_source.html" title="util/cs_Utils.h" alt="" coords="2556,80,2659,107"/>
+<area shape="rect" id="node3" href="$cs__Nordic_8h.html" title="Import files from Nordic SDK. " alt="" coords="1111,155,1224,181"/>
+<area shape="rect" id="node26" href="$cs__Debug_8h_source.html" title="cfg/cs_Debug.h" alt="" coords="2447,237,2562,263"/>
 </map>

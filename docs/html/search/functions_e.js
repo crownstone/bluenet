@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['read',['read',['../classCyclicStorage.html#a6020a910c311b36790eaa975e8dea749',1,'CyclicStorage']]],
   ['readfromstorage',['readFromStorage',['../classSettings.html#ae153bcc455c5b483b2d3582dee0d6405',1,'Settings::readFromStorage()'],['../classState.html#a9d45ed6bc3531290645ab6ea5a49390d',1,'State::readFromStorage()']]],
   ['readitem',['readItem',['../classStorage.html#aa8d49ccc35dbc711b8edec21965b94c8',1,'Storage']]],
   ['readstorage',['readStorage',['../classStorage.html#abce072bd27cb4924fb282f50280392a3',1,'Storage']]],
@@ -9,7 +10,8 @@ var searchData=
   ['releasebuffer',['releaseBuffer',['../classADC.html#ad4fef81b54aa4407903c5edb7b74da8d',1,'ADC']]],
   ['rem',['rem',['../classTrackedDeviceList.html#aa297620e5a9afc8217a1fce25c6f57f6',1,'TrackedDeviceList']]],
   ['removelistener',['removeListener',['../classEventDispatcher.html#a5dd4c72202e2b3d9e43bf402528415a5',1,'EventDispatcher']]],
-  ['reset',['reset',['../classTimer.html#a0506cca8fce7a509f2dba102ab843fba',1,'Timer']]],
+  ['reset',['reset',['../classTimer.html#a0506cca8fce7a509f2dba102ab843fba',1,'Timer::reset()'],['../classCyclicStorage.html#aa5b8bab0baee98f2e2ee3ba39e443e66',1,'CyclicStorage::reset()']]],
+  ['resetdelayed',['resetDelayed',['../classCommandHandler.html#a41a52e922d73865b44312c5922f89a58',1,'CommandHandler']]],
   ['resettimeoutcounters',['resetTimeoutCounters',['../classTrackedDeviceList.html#a041c057a360838068e4f167ccb06013b',1,'TrackedDeviceList']]],
   ['restart',['restart',['../classMesh.html#a947e546bc7e345b05f645e8633c272fc',1,'Mesh']]],
   ['resume',['resume',['../classMesh.html#a87fd99e234ddf456981dc33c6a25ae14',1,'Mesh']]],

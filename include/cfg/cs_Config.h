@@ -26,6 +26,13 @@
 #define GPREGRET_BROWNOUT_RESET                  96
 #define GPREGRET_SOFT_RESET                      0
 
+/** Priorities of the different peripherals
+ */
+#define SAADC_TIMER_CONFIG_IRQ_PRIORITY          2
+//#define SAADC_CONFIG_IRQ_PRIORITY                2
+//#define COMP_CONFIG_IRQ_PRIORITY                 3
+//#define LPCOMP_CONFIG_IRQ_PRIORITY               3
+
 /*
  */
 #define APP_TIMER_PRESCALER                      0
@@ -104,7 +111,8 @@
 #if CONTINUOUS_POWER_SAMPLER == 1
 #define CS_ADC_SAMPLE_RATE                       101
 #else
-#define CS_ADC_SAMPLE_RATE                       3000 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
+//#define CS_ADC_SAMPLE_RATE                       3000 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
+#define CS_ADC_SAMPLE_RATE                       500 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
 #endif
 
 #define POWER_SAMPLE_BURST_INTERVAL              3000 //! Time to next burst sampling (ms)

@@ -1,25 +1,24 @@
 <map id="include/ble/cs_Stack.h" name="include/ble/cs_Stack.h">
-<area shape="rect" id="node2" href="$cs__Nordic_8h.html" title="Manufacturing data. " alt="" coords="954,320,1067,347"/>
-<area shape="rect" id="node21" href="$cs__Service_8h.html" title="BLE service. " alt="" coords="1393,80,1511,107"/>
-<area shape="rect" id="node24" href="$cs__Config_8h_source.html" title="cfg/cs_Config.h" alt="" coords="2052,237,2167,264"/>
-<area shape="rect" id="node25" href="$cs__Strings_8h_source.html" title="cfg/cs_Strings.h" alt="" coords="636,237,752,264"/>
-<area shape="rect" id="node26" href="$cs__BleError_8h_source.html" title="util/cs_BleError.h" alt="" coords="1140,237,1263,264"/>
-<area shape="rect" id="node31" href="$cs__Types_8h_source.html" title="common/cs_Types.h" alt="" coords="1624,320,1768,347"/>
-<area shape="rect" id="node39" href="$cs__Tuple_8h_source.html" title="common/cs_Tuple.h" alt="" coords="2593,155,2732,181"/>
-<area shape="rect" id="node42" href="$cs__iBeacon_8h.html" title="Universally Unique IDentifiers for BLE services and characteristics. " alt="" coords="928,155,1051,181"/>
-<area shape="rect" id="node43" href="$cs__CrownstoneManufacturer_8h.html" title="Manufacturing data. " alt="" coords="2164,80,2385,107"/>
-<area shape="rect" id="node45" href="$cs__ServiceData_8h.html" title="Service data. " alt="" coords="1943,80,2089,107"/>
-<area shape="rect" id="node22" href="$cs__Characteristic_8h.html" title="Bluetooth Low Energy characteristics. " alt="" coords="1290,155,1445,181"/>
-<area shape="rect" id="node41" href="$cs__Timer_8h_source.html" title="drivers/cs_Timer.h" alt="" coords="1471,155,1600,181"/>
-<area shape="rect" id="node23" href="$cs__UUID_8h.html" title="Universally Unique IDentifiers for BLE services and characteristics. " alt="" coords="956,237,1065,264"/>
-<area shape="rect" id="node27" href="$cs__Serial_8h_source.html" title="drivers/cs_Serial.h" alt="" coords="1233,320,1363,347"/>
-<area shape="rect" id="node33" href="$cs__Utils_8h_source.html" title="util/cs_Utils.h" alt="" coords="829,237,931,264"/>
-<area shape="rect" id="node35" href="$cs__EncryptionBuffer_8h_source.html" title="structs/buffer/cs_Encryption\lBuffer.h" alt="" coords="1489,230,1676,271"/>
-<area shape="rect" id="node37" href="$cs__EncryptionHandler_8h_source.html" title="processing/cs_Encryption\lHandler.h" alt="" coords="1701,230,1872,271"/>
-<area shape="rect" id="node28" href="$cs__Debug_8h_source.html" title="cfg/cs_Debug.h" alt="" coords="2139,403,2253,429"/>
-<area shape="rect" id="node38" href="$cs__EventListener_8h_source.html" title="events/cs_EventListener.h" alt="" coords="2218,320,2395,347"/>
-<area shape="rect" id="node44" href="$cs__DeviceTypes_8h_source.html" title="cfg/cs_DeviceTypes.h" alt="" coords="2757,155,2909,181"/>
-<area shape="rect" id="node46" href="$cs__EventDispatcher_8h_source.html" title="events/cs_EventDispatcher.h" alt="" coords="2167,155,2361,181"/>
-<area shape="rect" id="node47" href="$cs__Settings_8h_source.html" title="storage/cs_Settings.h" alt="" coords="1993,155,2141,181"/>
-<area shape="rect" id="node48" href="$cs__State_8h_source.html" title="storage/cs_State.h" alt="" coords="2437,155,2568,181"/>
+<area shape="rect" id="node2" href="$cs__Nordic_8h.html" title="Import files from Nordic SDK. " alt="" coords="1233,319,1346,345"/>
+<area shape="rect" id="node24" href="$cs__Service_8h.html" title="BLE service. " alt="" coords="1687,80,1806,107"/>
+<area shape="rect" id="node27" href="$cs__Config_8h_source.html" title="cfg/cs_Config.h" alt="" coords="2259,237,2373,263"/>
+<area shape="rect" id="node28" href="$cs__Strings_8h_source.html" title="cfg/cs_Strings.h" alt="" coords="1861,237,1979,263"/>
+<area shape="rect" id="node29" href="$cs__BleError_8h_source.html" title="util/cs_BleError.h" alt="" coords="1155,237,1277,263"/>
+<area shape="rect" id="node32" href="$cs__Types_8h_source.html" title="common/cs_Types.h" alt="" coords="1917,319,2061,345"/>
+<area shape="rect" id="node39" href="$cs__Tuple_8h_source.html" title="common/cs_Tuple.h" alt="" coords="2138,155,2278,181"/>
+<area shape="rect" id="node42" href="$cs__iBeacon_8h.html" title="Universally Unique IDentifiers for BLE services and characteristics. " alt="" coords="896,155,1019,181"/>
+<area shape="rect" id="node43" href="$cs__CrownstoneManufacturer_8h.html" title="Manufacturing data. " alt="" coords="3005,80,3227,107"/>
+<area shape="rect" id="node45" href="$cs__ServiceData_8h.html" title="Service data. " alt="" coords="2349,80,2496,107"/>
+<area shape="rect" id="node25" href="$cs__Characteristic_8h.html" title="Bluetooth Low Energy characteristics. " alt="" coords="1549,155,1705,181"/>
+<area shape="rect" id="node41" href="$cs__Timer_8h_source.html" title="drivers/cs_Timer.h" alt="" coords="1932,155,2063,181"/>
+<area shape="rect" id="node26" href="$cs__UUID_8h.html" title="Universally Unique IDentifiers for BLE services and characteristics. " alt="" coords="971,237,1080,263"/>
+<area shape="rect" id="node30" href="$cs__Serial_8h_source.html" title="drivers/cs_Serial.h" alt="" coords="1077,319,1208,345"/>
+<area shape="rect" id="node34" href="$cs__Utils_8h_source.html" title="util/cs_Utils.h" alt="" coords="843,237,946,263"/>
+<area shape="rect" id="node35" href="$cs__EncryptionBuffer_8h_source.html" title="structs/buffer/cs_Encryption\lBuffer.h" alt="" coords="1403,229,1589,271"/>
+<area shape="rect" id="node37" href="$cs__EncryptionHandler_8h_source.html" title="processing/cs_Encryption\lHandler.h" alt="" coords="1665,229,1837,271"/>
+<area shape="rect" id="node38" href="$cs__EventListener_8h_source.html" title="events/cs_EventListener.h" alt="" coords="2559,319,2737,345"/>
+<area shape="rect" id="node44" href="$cs__DeviceTypes_8h_source.html" title="cfg/cs_DeviceTypes.h" alt="" coords="3106,155,3259,181"/>
+<area shape="rect" id="node46" href="$cs__EventDispatcher_8h_source.html" title="events/cs_EventDispatcher.h" alt="" coords="2785,155,2980,181"/>
+<area shape="rect" id="node47" href="$cs__Settings_8h_source.html" title="storage/cs_Settings.h" alt="" coords="2404,155,2553,181"/>
+<area shape="rect" id="node48" href="$cs__State_8h_source.html" title="storage/cs_State.h" alt="" coords="2578,155,2710,181"/>
 </map>

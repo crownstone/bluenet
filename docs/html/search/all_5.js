@@ -2,7 +2,7 @@ var searchData=
 [
   ['eddystone',['Eddystone',['../classEddystone.html',1,'']]],
   ['edstn_5fframe_5ft',['edstn_frame_t',['../structedstn__frame__t.html',1,'']]],
-  ['empty',['empty',['../classCircularBuffer.html#a919bdea4228c5f5707e9a875201621c9',1,'CircularBuffer::empty()'],['../classCircularDifferentialBuffer.html#ac72d8ea3f95e940f45e37d7449d95ea2',1,'CircularDifferentialBuffer::empty()']]],
+  ['empty',['empty',['../classCircularBuffer.html#a7509cc5ef0dd0a9f731c47b05929580c',1,'CircularBuffer::empty()'],['../classCircularDifferentialBuffer.html#a43613b6b9b213632a6a0ae0f1b579747',1,'CircularDifferentialBuffer::empty()']]],
   ['enable_5fmessage_5fpayload_5ft',['enable_message_payload_t',['../structenable__message__payload__t.html',1,'']]],
   ['enable_5fscanner_5fmessage_5fpayload_5ft',['enable_scanner_message_payload_t',['../structenable__scanner__message__payload__t.html',1,'']]],
   ['encrypt',['encrypt',['../classEncryptionHandler.html#ace6c832bbfa3c3bfbd7adb021d556043',1,'EncryptionHandler']]],

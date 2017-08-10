@@ -1,8 +1,8 @@
-/**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+/*
+ * Author: Crownstone Team
+ * Copyright: Crownstone
  * Date: Dec 8, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT
  */
 #pragma once
 
@@ -20,6 +20,8 @@
 
 #define MAX_SWITCHES 5
 
+/** Data telegram for EnOcean switch.
+ */
 struct __attribute__((packed)) data_telegram_t {
 	uint16_t companyId;
 	uint32_t seqCounter;
@@ -27,12 +29,16 @@ struct __attribute__((packed)) data_telegram_t {
 	uint32_t securitySignature;
 };
 
+/** Commissioning telegram for EnOcean switch.
+ */
 struct __attribute__((packed)) commissioning_telegram_t {
 	uint16_t companyId;
 	uint32_t seqCounter;
 	uint8_t securityKey[16];
 };
 
+/** Learned EnOcean switch, includes BLE address and security key.
+ */
 struct __attribute__((packed)) learned_enocean_t {
 	uint8_t addr[BLE_GAP_ADDR_LEN];
 	uint8_t securityKey[16];

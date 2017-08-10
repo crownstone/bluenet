@@ -3,7 +3,7 @@ var searchData=
   ['calcdelta',['calcDelta',['../classMeshMessageCounter.html#a86eab7100f33fd868653f8e48f9c5454',1,'MeshMessageCounter']]],
   ['calculatedecryptionbufferlength',['calculateDecryptionBufferLength',['../classEncryptionHandler.html#a2643544d00fd05c0fd69eff5ab62571a',1,'EncryptionHandler']]],
   ['calculateencryptionbufferlength',['calculateEncryptionBufferLength',['../classEncryptionHandler.html#a049e814e46ef2b3cb3599e652d95a3c9',1,'EncryptionHandler']]],
-  ['capacity',['capacity',['../classCircularBuffer.html#a66284651e94f313c0aa25b6958006d00',1,'CircularBuffer::capacity()'],['../classCircularDifferentialBuffer.html#ab3d97a7925808ca55ce9827c6e7f98df',1,'CircularDifferentialBuffer::capacity()']]],
+  ['capacity',['capacity',['../classCircularBuffer.html#a65c39205575ee64c08f7cd29478c42f4',1,'CircularBuffer::capacity()'],['../classCircularDifferentialBuffer.html#a2c09d9382879cf52e6fe63931d295b3d',1,'CircularDifferentialBuffer::capacity()']]],
   ['characteristicbase',['CharacteristicBase',['../classCharacteristicBase.html#a60c5f84396fb18d8769c461e5587d60e',1,'CharacteristicBase']]],
   ['checkallentries',['checkAllEntries',['../classScheduleList.html#ae9f550c530d6ba4d93ec9a89108db7d9',1,'ScheduleList']]],
   ['circularbuffer',['CircularBuffer',['../classCircularBuffer.html#a49a87ddc25d70df6c30dc7fdd6e0b364',1,'CircularBuffer']]],
@@ -26,5 +26,6 @@ var searchData=
   ['createsingleshot',['createSingleShot',['../classTimer.html#a4e2c7d8592dfc1f1620352985879c0ea',1,'Timer']]],
   ['crownstoneservice',['CrownstoneService',['../classCrownstoneService.html#a7e6cee61cc99320599b491c7f2eac03e',1,'CrownstoneService']]],
   ['cs_5fsd_5fble_5fgatts_5fvalue_5fget',['cs_sd_ble_gatts_value_get',['../cs__Softdevice_8h.html#adea2ca0261910c252623b245db15924b',1,'cs_Softdevice.h']]],
-  ['cs_5fsd_5fble_5fgatts_5fvalue_5fset',['cs_sd_ble_gatts_value_set',['../cs__Softdevice_8h.html#a0be6446e307b0b30267cf69a7087e2a0',1,'cs_Softdevice.h']]]
+  ['cs_5fsd_5fble_5fgatts_5fvalue_5fset',['cs_sd_ble_gatts_value_set',['../cs__Softdevice_8h.html#a0be6446e307b0b30267cf69a7087e2a0',1,'cs_Softdevice.h']]],
+  ['cyclicstorage',['CyclicStorage',['../classCyclicStorage.html#a8c21438aae42f1841f6dcd76f5b5121e',1,'CyclicStorage']]]
 ];

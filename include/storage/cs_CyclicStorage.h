@@ -1,6 +1,6 @@
-/**
- * Author: Dominik Egger
- * Copyright: Crownstone B.V. (https://crownstone.rocks)
+/*
+ * Author: Crownstone Team
+ * Copyright: Crownstone 
  * Date: Apr 28, 2016
  * License: LGPLv3+, Apache, MIT
  */
@@ -8,23 +8,25 @@
 
 #include <drivers/cs_Storage.h>
 #include <limits>
-//#include <pstorage_platform.h>
-//#include <stddef.h>
-//#include <structs/buffer/cs_CircularBuffer.h>
-//#include <cstdint>
 
 //#define PRINT_DEBUG_CYCLIC_STORAGE
 
+/**
+ * Cyclic storage is a wrapper around flash memory.
+ *
+ * The buffer stores individual elements together with a sequence number V to reduce wear on flash memory.
+ */
 template <class T, int U, class V>
 class CyclicStorage {
 
 public:
-
+	//! Storage element, sequence number combined with a value.
 	struct __attribute__((__packed__)) storage_element_t {
 		V seqNumber;
 		T value;
 	};
 
+	//! Construct the cyclic storage and load values from memory
 	CyclicStorage(pstorage_handle_t handle, pstorage_size_t offset, T defaultValue) :
 		_storage(NULL), _tail(-1), _seqNumber(0),
 		_value(defaultValue), _defaultValue(defaultValue),
@@ -34,6 +36,7 @@ public:
 		loadFromStorage();
 	}
 
+	//! Store individual value in memory
 	void store(T value) {
 		incTail();
 
@@ -55,7 +58,8 @@ public:
 		_value = value;
 	}
 
-	/**
+	/** Print a value from memory.
+	 *
 	 * The print function displays the entire buffer representing the value in FLASH. It is not ordered in the sense
 	 * that the most recent is displayed first.
 	 */
@@ -67,11 +71,13 @@ public:
 		BLEutil::printArray(buffer, sizeof(buffer));
 	}
 
+	//! Read value locally.
 	T read() const {
 		return _value;
 	}
 
-	/**
+	/** Load all values from memory.
+	 *
 	 * A value can be stored at different locations in FLASH. The size of the buffer is given by the template parameter
 	 * U. The loadFromStorage() function iterates through the values and sets the one with the largest sequence number
 	 * and the sequence number itself in fields of the class.
@@ -116,6 +122,7 @@ public:
 
 	}
 
+	//! Reset value and corresponding counter.
 	void reset() {
 		_value = _defaultValue;
 		_seqNumber = 0;

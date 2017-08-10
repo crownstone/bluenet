@@ -57,11 +57,12 @@ cs_adc_error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
 		APP_ERROR_CHECK(err_code);
 	}
 
+	// TODO: Where is this configuration set? We also have cs_Config.h and third/nrf/nrf_drv_config.h
 	nrf_drv_timer_config_t timerConfig = {
 		.frequency          = NRF_TIMER_FREQ_16MHz,
 		.mode               = (nrf_timer_mode_t)TIMER_MODE_MODE_Timer,
 		.bit_width          = (nrf_timer_bit_width_t)TIMER_BITMODE_BITMODE_32Bit,
-		.interrupt_priority = APP_IRQ_PRIORITY_LOW,
+		.interrupt_priority = SAADC_TIMER_CONFIG_IRQ_PRIORITY,
 		.p_context          = NULL
 	};
 
@@ -90,7 +91,7 @@ cs_adc_error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
 	nrf_drv_saadc_config_t adcConfig = {
 		.resolution         = NRF_SAADC_RESOLUTION_12BIT, //! 14 bit can only be achieved with oversampling
 		.oversample         = NRF_SAADC_OVERSAMPLE_DISABLED, //! Oversampling can only be used when sampling 1 channel
-		.interrupt_priority = APP_IRQ_PRIORITY_LOW
+		.interrupt_priority = SAADC_CONFIG_IRQ_PRIORITY
 	};
 
 	err_code = nrf_drv_saadc_init(&adcConfig, saadc_callback);
@@ -123,22 +124,42 @@ cs_adc_error_t ADC::configPin(const channel_id_t channelNum, const pin_id_t pinN
 	LOGd("Configuring channel %i, pin %i", channelNum, pinNum);
 	ret_code_t err_code;
 
-	nrf_saadc_channel_config_t channelConfig = {
-		.resistor_p = NRF_SAADC_RESISTOR_DISABLED,
-		.resistor_n = NRF_SAADC_RESISTOR_DISABLED,
-//		.gain       = NRF_SAADC_GAIN2,   //! gain is 2/1, maps [0, 0.3] to [0, 0.6]
-//		.gain       = NRF_SAADC_GAIN1,   //! gain is 1/1, maps [0, 0.6] to [0, 0.6]
-		.gain       = NRF_SAADC_GAIN1_2, //! gain is 1/2, maps [0, 1.2] to [0, 0.6]
-//		.gain       = NRF_SAADC_GAIN1_4, //! gain is 1/4, maps [0, 2.4] to [0, 0.6]
-//		.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
-		.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
-		.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
-		.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
-//		.mode		= NRF_SAADC_MODE_DIFFERENTIAL,
-		.pin_p      = getAdcPin(pinNum),
-		.pin_n      = NRF_SAADC_INPUT_DISABLED
-//		.pin_n      = getAdcPin(0)
-	};
+	nrf_saadc_channel_config_t channelConfig;
+	if (channelNum == 1)  {
+		// voltage sits on channel 1
+		channelConfig = {
+			.resistor_p = NRF_SAADC_RESISTOR_DISABLED,
+			.resistor_n = NRF_SAADC_RESISTOR_DISABLED,
+			//.gain       = NRF_SAADC_GAIN2,   //! gain is 2/1, maps [0, 0.3] to [0, 0.6]
+			//.gain       = NRF_SAADC_GAIN1,   //! gain is 1/1, maps [0, 0.6] to [0, 0.6]
+			//.gain       = NRF_SAADC_GAIN1_2, //! gain is 1/2, maps [0, 1.2] to [0, 0.6]
+			//		.gain       = NRF_SAADC_GAIN1_4, //! gain is 1/4, maps [0, 2.4] to [0, 0.6]
+			.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
+			.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
+			.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
+			//		.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
+			.mode		= NRF_SAADC_MODE_DIFFERENTIAL,
+			.pin_p      = getAdcPin(pinNum),
+			//		.pin_n      = NRF_SAADC_INPUT_DISABLED
+			.pin_n      = getAdcPin(0)
+		};
+	} else if (channelNum == 0) {
+		// current sits on channel 0
+		channelConfig = {
+			.resistor_p = NRF_SAADC_RESISTOR_DISABLED,
+			.resistor_n = NRF_SAADC_RESISTOR_DISABLED,
+			.gain       = NRF_SAADC_GAIN2,   //! gain is 2/1, maps [0, 0.3] to [0, 0.6]
+			//.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
+			.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
+			.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
+			.mode		= NRF_SAADC_MODE_DIFFERENTIAL,
+			.pin_p      = getAdcPin(pinNum),
+			.pin_n      = getAdcPin(0)
+		};
+	} else {
+		// no idea!!
+		assert(false, "Unknown channel");
+	}
 
 	err_code = nrf_drv_saadc_channel_init(channelNum, &channelConfig);
 	APP_ERROR_CHECK(err_code);

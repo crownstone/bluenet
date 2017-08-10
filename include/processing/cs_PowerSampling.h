@@ -1,6 +1,6 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Authors: Crownstone Team
+ * Copyright: Crownstone B.V.
  * Date: May 19, 2016
  * License: LGPLv3+
  */
@@ -54,19 +54,25 @@ public:
 	void sampleCurrentDone(uint8_t type);
 
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& size);
+	
+	/**
+	 * Struct that defines the buffer received from the ADC sampler in scanning mode.
+	 */
+	typedef struct {
+		nrf_saadc_value_t* buf;
+		uint16_t bufSize;
+		uint16_t numChannels;
+		uint16_t voltageIndex;
+		uint16_t currentIndex;
+		uint32_t sampleIntervalUs;
+		uint32_t acPeriodUs;
+	} power_t;
 
 private:
 	PowerSampling();
 
-#if (NORDIC_SDK_VERSION >= 11)
-//	app_timer_t              _powerSamplingStartTimerData;
-//	app_timer_id_t           _powerSamplingStartTimerId;
 	app_timer_t              _powerSamplingReadTimerData;
 	app_timer_id_t           _powerSamplingSentDoneTimerId;
-#else
-//	uint32_t _powerSamplingStartTimerId;
-	uint32_t _powerSamplingSentDoneTimerId;
-#endif
 
 	uint8_t _operationMode;
 
@@ -92,9 +98,10 @@ private:
 
 	bool _sendingSamples;
 
-	uint16_t _avgZeroVoltageDiscount;
-	uint16_t _avgZeroCurrentDiscount;
-	uint16_t _avgPowerDiscount;
+//	uint16_t _avgZeroVoltageDiscount;
+//	uint16_t _avgZeroCurrentDiscount;
+//	uint16_t _avgPowerDiscount;
+
 	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value
 	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value
 //	int64_t _avgPower; //! Used for storing and calculating the average power
@@ -106,7 +113,7 @@ private:
 
 	/** Copies the adc samples to the power samples struct, to be sent over bluetooth
 	 */
-	void copyBufferToPowerSamples(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex);
+	void copyBufferToPowerSamples(power_t power);
 
 	/** Function to be called when the power samples struct is ready to be sent over bluetooth
 	 */
@@ -115,21 +122,26 @@ private:
 	/** Initialize the moving averages
 	 */
 	void initAverages();
-
+	
 	/** Determine which index is actually the current index, this should not be necessary!
 	 */
-	uint16_t determineCurrentIndex(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs);
+	uint16_t determineCurrentIndex(power_t power);
 
 	/** Calculate the value of the zero line of the voltage samples
 	 */
-	void calculateVoltageZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs);
+	void calculateVoltageZero(power_t power);
 
 	/** Calculate the value of the zero line of the current samples
 	 */
-	void calculateCurrentZero(nrf_saadc_value_t* buf, uint16_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs);
+	void calculateCurrentZero(power_t power);
 
 	/** Calculate the average power usage
 	 */
-	void calculatePower(nrf_saadc_value_t* buf, size_t length, uint16_t numChannels, uint16_t voltageIndex, uint16_t currentIndex, uint32_t sampleIntervalUs, uint32_t acPeriodUs);
+	void calculatePower(power_t power);
+
+	/**
+	 * If current goes beyond predefined threshold levels, take action!
+	 */
+	void checkSoftfuse(int64_t powerMilliWatt);
 };
 

@@ -1,6 +1,6 @@
 /**
  * @file
- * Manufacturing data.
+ * Import files from Nordic SDK.
  *
  * @authors Crownstone Team
  * @copyright Crownstone B.V.
@@ -36,7 +36,17 @@ extern "C"
 #include "app_util.h"
 //#include "app_timer.h"
 #include "app_scheduler.h"
+#if NORDIC_SDK_VERSION<=11
 #include "app_timer_appsh.h"
+#endif
+
+#ifndef BOOTLOADER_COMPILATION
+// Refering to driver files
+#include "nrf_drv_saadc.h"
+#include "nrf_drv_timer.h"
+#include "nrf_drv_ppi.h"
+#endif
+
 #undef APP_ERROR_CHECK // undefine again, we want to use our own macro defined in util/cs_BleError.h
 #undef APP_ERROR_HANDLER
 

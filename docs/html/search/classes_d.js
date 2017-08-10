@@ -4,6 +4,7 @@ var searchData=
   ['peripheral_5fdevice_5ft',['peripheral_device_t',['../structperipheral__device__t.html',1,'']]],
   ['power_5fsamples_5fcont_5fmessage_5ft',['power_samples_cont_message_t',['../structpower__samples__cont__message__t.html',1,'']]],
   ['power_5fsamples_5ft',['power_samples_t',['../structpower__samples__t.html',1,'']]],
+  ['power_5ft',['power_t',['../structPowerSampling_1_1power__t.html',1,'PowerSampling']]],
   ['powersamples',['PowerSamples',['../classPowerSamples.html',1,'']]],
   ['powersampling',['PowerSampling',['../classPowerSampling.html',1,'']]],
   ['powerservice',['PowerService',['../classPowerService.html',1,'']]],
