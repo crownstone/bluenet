@@ -659,6 +659,14 @@ void Crownstone::startUp() {
 	log(SERIAL_INFO, "BLE Address: ");	
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN);
 
+#ifdef RELAY_DEFAULT_ON
+#if RELAY_DEFAULT_ON==0
+	Switch::getInstance().turnOff();
+#endif
+#if RELAY_DEFAULT_ON==1
+	Switch::getInstance().turnOn();
+#endif
+#endif
 }
 
 void Crownstone::tick() {

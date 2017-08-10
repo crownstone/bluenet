@@ -2,8 +2,8 @@
 #
 # Parameter is optional, provide target if wanted. If left out, default target is crownstone
 
-target=$1
-targetoption="-t $1"
+target=${1:-crownstone}
+targetoption="-t $target"
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
@@ -18,6 +18,12 @@ $path/softdevice.sh all $target
 
 checkError
 cs_succ "Softdevice DONE"
+
+###################
+### Hardware version
+###################
+
+$path/firmware.sh --command=writeHardwareVersion --target=$target
 
 ###################
 ### Firmware

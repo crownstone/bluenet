@@ -117,7 +117,7 @@ SET(APPLICATION_LENGTH                          "${APPLICATION_LENGTH}"         
 SET(COMPILATION_TIME                            "${COMPILATION_TIME}"               CACHE STRING "COMPILATION_TIME" FORCE)
 SET(COMPILATION_DAY                             "${COMPILATION_DAY}"                CACHE STRING "COMPILATION_DAY" FORCE)
 IF(DEFINED GIT_HASH)
-	SET(GIT_HASH                                    "${GIT_HASH}"                       CACHE STRING "GIT_HASH" FORCE)
+	SET(GIT_HASH                                "${GIT_HASH}"                       CACHE STRING "GIT_HASH" FORCE)
 ENDIF()
 #SET(HARDWARE_BOARD                              "${HARDWARE_BOARD}"                 CACHE STRING "HARDWARE_BOARD" FORCE)
 SET(SERIAL_VERBOSITY                            "${SERIAL_VERBOSITY}"               CACHE STRING "SERIAL_VERBOSITY" FORCE)
@@ -151,6 +151,9 @@ SET(NRF_SERIES                                  "${NRF_SERIES}"                 
 SET(RAM_R1_BASE                                 "${RAM_R1_BASE}"                    CACHE STRING "RAM_R1_BASE" FORCE)
 SET(MAX_NUM_VS_SERVICES                         "${MAX_NUM_VS_SERVICES}"            CACHE STRING "MAX_NUM_VS_SERVICES" FORCE)
 SET(ADVERTISEMENT_IMPROVEMENT                   "${ADVERTISEMENT_IMPROVEMENT}"      CACHE STRING "ADVERTISEMENT_IMPROVEMENT" FORCE)
+IF(DEFINED RELAY_DEFAULT_ON)
+SET(RELAY_DEFAULT_ON                            "${RELAY_DEFAULT_ON}"               CACHE STRING "RELAY_DEFAULT_ON" FORCE)
+ENDIF()
 SET(CONNECTION_ALIVE_TIMEOUT                    "${CONNECTION_ALIVE_TIMEOUT}"       CACHE STRING "CONNECTION_ALIVE_TIMEOUT" FORCE)
 
 # Set Attribute table size
