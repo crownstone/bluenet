@@ -342,7 +342,7 @@ void Nrf51822BluetoothStack::setTxPowerLevel(int8_t powerLevel) {
 
 	switch (powerLevel) {
 	case -40: break;
-	case -30: break;
+//	case -30: break; // -30 is only available on nrf51
 	case -20: break;
 	case -16: break;
 	case -12: break;

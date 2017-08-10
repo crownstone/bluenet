@@ -96,9 +96,9 @@ BEACON_MINOR=0
 # the rssi
 BEACON_RSSI=0xC4
 
-# Set to 1 to enable encryption of BLE Link (reading and writing to characteristics
-# needs bonding first)
+# Set to 1 to enable encryption of BLE (characteristics and advertisements)
 ENCRYPTION=1
+
 # the default passkey used for bonding. can be changed with configuration charac
 STATIC_PASSKEY="123456"
 
@@ -160,7 +160,7 @@ SERIAL_VERBOSITY=SERIAL_DEBUG
 NRF_SERIES=NRF52
 
 # Default transmission power
-# Can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4
+# Can be: -40, -20, -16, -12, -8, -4, 0, or 4
 TX_POWER=4
 
 # Default advertisement interval, in units of 0.625 ms

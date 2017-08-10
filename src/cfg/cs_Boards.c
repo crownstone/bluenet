@@ -66,7 +66,7 @@ void asCrownstone(boards_config_t* p_config) {
 //	p_config->currentZero         = ; // tbd
 //	p_config->powerZero           = ; // tbd
 
-	p_config->minTxPower          = -30;
+	p_config->minTxPower          = -20;
 }
 
 void asACR01B1A(boards_config_t* p_config) {
@@ -165,11 +165,11 @@ void asACR01B2A(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
 	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
 
-	p_config->minTxPower          = -30;
+	p_config->minTxPower          = -20;
 }
 
 void asACR01B2E(boards_config_t* p_config) {
-	p_config->pinGpioPwm           = 8;
+	p_config->pinGpioPwm           = 8; // Unused, actually 8
 	p_config->pinGpioRelayOn       = 6;
 	p_config->pinGpioRelayOff      = 7;
 	p_config->pinAinCurrent        = 2;
@@ -194,10 +194,12 @@ void asACR01B2E(boards_config_t* p_config) {
 	p_config->currentZero         = 1997;
 	p_config->powerZero           = 1500;
 
-	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
-	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
+//	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
+//	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
+	p_config->pwmTempVoltageThreshold     = 3.2;
+	p_config->pwmTempVoltageThresholdDown = 0.0;
 
-	p_config->minTxPower          = -30;
+	p_config->minTxPower          = -20;
 }
 
 void asPluginFlexprint(boards_config_t* p_config) {
@@ -225,7 +227,7 @@ void asPluginFlexprint(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
 	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
 
-	p_config->minTxPower          = -30;
+	p_config->minTxPower          = -20;
 }
 
 void asPca10036(boards_config_t* p_config) {
@@ -245,7 +247,7 @@ void asPca10036(boards_config_t* p_config) {
 	p_config->flags.hasRelay       = false;
 	p_config->flags.pwmInverted    = true;
 	p_config->flags.hasSerial      = true;
-	p_config->flags.hasLed         = true;
+	p_config->flags.hasLed         = false;
 	p_config->flags.ledInverted    = true;
 
 	p_config->voltageMultiplier   = 0; // set to 0 to disable sampling checks
@@ -284,7 +286,7 @@ void asGuidestone(boards_config_t* p_config) {
 //	p_config->currentZero         = ; // unused
 //	p_config->powerZero           = ; // unused
 	
-	p_config->minTxPower          = -30;
+	p_config->minTxPower          = -20;
 }
 
 uint32_t configure_board(boards_config_t* p_config) {
