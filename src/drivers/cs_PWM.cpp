@@ -5,70 +5,121 @@
  * License: LGPLv3+, Apache, and/or MIT, your choice
  */
 
-#include <drivers/cs_PWM.h>
-#include <util/cs_BleError.h>
-#include <drivers/cs_Serial.h>
-#include <cfg/cs_Strings.h>
-#include <cfg/cs_Config.h>
-#include <cfg/cs_Boards.h>
+#include "drivers/cs_PWM.h"
+#include "util/cs_BleError.h"
+#include "drivers/cs_Serial.h"
+#include "cfg/cs_Strings.h"
+#include "cfg/cs_Config.h"
+#include "protocol/cs_ErrorCodes.h"
 
-/**********************************************************************************************************************
- * MACROS used in pulse width modulation class
- *********************************************************************************************************************/
-
-// For increasing the level selectively for PWM, locally increase the log level via this macro.
-#define SERIAL_INCREASE_LOG_LEVEL 0
-
-// The PWM_ENABLE macro can be used to disable functionality at precompilation time.
-// #define PWM_ENABLE
+#include <nrf.h>
+#include <app_util_platform.h>
 
 /**********************************************************************************************************************
  * Pulse Width Modulation class
  *********************************************************************************************************************/
 
+//nrf_pwm_values_individual_t PWM::_nrfValues = { .channel_0 = 0, .channel_1 = 0, .channel_2 = 0, .channel_3 = 0 };
+//nrf_drv_pwm_t PWM::_nrfPwm0 = { .p_registers = NRF_PWM0, .drv_inst_idx = 0 };
+//nrf_pwm_sequence_t PWM::_nrfSeq = { .values.p_individual = &(PWM::_nrfValues), .length = NRF_PWM_VALUES_LENGTH(_nrfValues), .repeats = 0, .end_delay = 0 };
+nrf_drv_pwm_t PWM::_nrfPwm = {};
+nrf_pwm_values_individual_t PWM::_nrfValues = {};
+nrf_pwm_sequence_t PWM::_nrfSeq = {};
+
 PWM::PWM() :
-		pwmTimer(NULL), 
-		_pwmInstance(NULL), 
-		_initialized(false),
-		_inverted(false) {
+		_initialized(false)
+		{
+
+#if PWM_ENABLE==1
+//	_nrfPwm0 = NRF_DRV_PWM_INSTANCE(0);
+	_nrfPwm.p_registers = NRF_PWM0;
+	_nrfPwm.drv_inst_idx = 0;
+	_nrfSeq.values.p_individual = &_nrfValues;
+	_nrfSeq.length = NRF_PWM_VALUES_LENGTH(_nrfValues);
+	_nrfSeq.repeats = 0;
+	_nrfSeq.end_delay = 0;
+#endif
+}
+
+uint32_t PWM::init(pwm_config_t & config) {
+#if PWM_ENABLE==1
+	_config = config;
+
+	LOGi(FMT_INIT, "PWM");
+
+	/* is this true?
+	// The pwm peripheral starts the period off, then goes on at the end of the period.
+	// Since we want to start the period on, we have to invert the polarity and thus set the duty cycle at: max - value
+	 */
+
+	// PWM frequency = clock frequency / top_value (for NRF_PWM_MODE_UP)
+	// PWM period = clock period * top_value (for NRF_PWM_MODE_UP)
+	// Fully on is top_value
+
+	// NRF_PWM_MODE_UP_AND_DOWN means the counter first goes up, then down. See PS for a good explanation.
+
+	nrf_drv_pwm_config_t nrfConfig;
+	for (uint8_t i=0; i<NRF_PWM_CHANNEL_COUNT; ++i) {
+		nrfConfig.output_pins[i] = NRF_DRV_PWM_PIN_NOT_USED;
+	}
+	for (uint8_t i=0; i<_config.channelCount; ++i) {
+		nrfConfig.output_pins[i] = _config.channels[i].pin;
+		if (_config.channels[i].inverted == true) {
+			nrfConfig.output_pins[i] |= NRF_DRV_PWM_PIN_INVERTED;
+		}
+	}
+	nrfConfig.irq_priority = APP_IRQ_PRIORITY_LOW;
+	nrfConfig.base_clock  = NRF_PWM_CLK_1MHz;
+	nrfConfig.count_mode  = NRF_PWM_MODE_UP;
+	nrfConfig.top_value   = 10000; // 100Hz = 1MHz / 10000
+	nrfConfig.load_mode   = NRF_PWM_LOAD_INDIVIDUAL; // Each channel has different values
+	nrfConfig.step_mode   = NRF_PWM_STEP_AUTO;
+
+	uint32_t err_code = nrf_drv_pwm_init(&_nrfPwm, &nrfConfig, NULL);
+	APP_ERROR_CHECK(err_code);
+
+	_nrfValues.channel_0 = 0;
+	_nrfValues.channel_1 = 0;
+	_nrfValues.channel_2 = 0;
+	_nrfValues.channel_3 = 0;
+
+	uint32_t flags = NRF_DRV_PWM_FLAG_LOOP | NRF_DRV_PWM_FLAG_NO_EVT_FINISHED;
+//	uint32_t flags = NRF_DRV_PWM_FLAG_LOOP;
+	nrf_drv_pwm_simple_playback(&_nrfPwm, &_nrfSeq, 1, flags);
+	LOGd("pwm initialized!");
+
+	_initialized = true;
+	return ERR_SUCCESS;
+#endif
+
+	return ERR_PWM_NOT_ENABLED;
+}
+
+uint32_t PWM::deinit() {
 
 #if PWM_ENABLE==1
 
-	//! See APP_PWM_INSTANCE(name, num)
-#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
-	pwmTimer = new nrf_drv_timer_t();
-	pwmTimer->p_reg = PWM_TIMER; // Or use CONCAT_2(NRF_TIMER, PWM_TIMER_ID)
-	pwmTimer->instance_id = PWM_INSTANCE_INDEX; // Or use CONCAT_3(TIMER, PWM_TIMER_ID, _INSTANCE_INDEX)
-	pwmTimer->cc_channel_count = NRF_TIMER_CC_CHANNEL_COUNT(PWM_TIMER_ID);
+	LOGi("DeInit PWM");
 
-	_pwmInstance = new (app_pwm_t) {
-		.p_cb = &_controlBlock,
-		.p_timer = pwmTimer,
-	};
-#else
-	pwmTimer = new nrf_drv_timer_t();
-	pwmTimer->p_reg = PWM_TIMER;
-	pwmTimer->irq = PWM_IRQn;
-	pwmTimer->instance_id = PWM_INSTANCE_INDEX;
-
-	_pwmInstance = new (app_pwm_t) {
-		.p_cb = &_controlBlock,
-		.p_timer = pwmTimer,
-	};
+	_initialized = false;
+	return ERR_SUCCESS;
 #endif
 
-#endif
+	return ERR_PWM_NOT_ENABLED;
 }
 
-//! Flag indicating PWM status
-static volatile bool ready_flag;
-
-//! PWM callback function
-void pwm_ready_callback(uint32_t pwm_id) {   
-	ready_flag = true;
+void PWM::restart() {
+	if (!_initialized) {
+		LOGe(FMT_NOT_INITIALIZED, "PWM");
+		return;
+	}
+	// Tried, doesn't work
+//	uint32_t flags = NRF_DRV_PWM_FLAG_LOOP | NRF_DRV_PWM_FLAG_NO_EVT_FINISHED;
+//	nrf_drv_pwm_simple_playback(&_nrfPwm, &_nrfSeq, 1, flags);
 }
 
-void PWM::setValue(uint8_t channel, uint32_t value) {
+
+void PWM::setValue(uint8_t channel, uint16_t value) {
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
@@ -76,94 +127,48 @@ void PWM::setValue(uint8_t channel, uint32_t value) {
 	if (value > 100) {
 		value = 100;
 	}
+	value = value*100; // Should be top_value at value 100
 
-	logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Set PWM channel %d to %d", channel, value);
+	LOGd("Set PWM channel %d to %d", channel, value);
 
-	if (_inverted) {
-		logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Switch inversed");
-	} else {
-		logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "Switch not inversed");
+	switch (channel) {
+	case 0:
+		_nrfValues.channel_0 = value;
+		break;
+	case 1:
+		_nrfValues.channel_1 = value;
+		break;
+	case 2:
+		_nrfValues.channel_2 = value;
+		break;
+	case 3:
+		_nrfValues.channel_3 = value;
+		break;
+	default:
+		return;
 	}
 
-	while (app_pwm_channel_duty_set(_pwmInstance, channel, value) == NRF_ERROR_BUSY) {
-	};
+	// No need for this
+//	uint32_t flags = NRF_DRV_PWM_FLAG_LOOP | NRF_DRV_PWM_FLAG_NO_EVT_FINISHED;
+//	nrf_drv_pwm_simple_playback(&_nrfPwm, &_nrfSeq, 1, flags);
 }
 
-uint32_t PWM::getValue(uint8_t channel) {
+uint16_t PWM::getValue(uint8_t channel) {
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return 0;
 	}
-	return app_pwm_channel_duty_get(_pwmInstance, channel);
-}
 
-void PWM::switchOff() {
-	if (!_initialized) {
-		LOGe(FMT_NOT_INITIALIZED, "PWM");
-		return;
+	switch (channel) {
+	case 0:
+		return _nrfValues.channel_0;
+	case 1:
+		return _nrfValues.channel_1;
+	case 2:
+		return _nrfValues.channel_2;
+	case 3:
+		return _nrfValues.channel_3;
 	}
-	for (uint32_t i = 0; i < _pwmCfg.num_of_channels; ++i) {
-		setValue(i, 0);
-	}
-}
-
-uint32_t PWM::init(app_pwm_config_t & config, bool inverted) {
-#if PWM_ENABLE==1
-	_pwmCfg = config;
-	_inverted = inverted;
-
-	logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, FMT_INIT, "PWM");
-
-	BLE_CALL(app_pwm_init, (_pwmInstance, &_pwmCfg, pwm_ready_callback));
-	app_pwm_enable(_pwmInstance);
-
-	_initialized = true;
-
+	LOGe("Invalid channel");
 	return 0;
-#endif
-
-	return ERR_PWM_NOT_ENABLED;
-
 }
-
-uint32_t PWM::deinit() {
-
-#if PWM_ENABLE==1
-
-	logLN(SERIAL_DEBUG + SERIAL_INCREASE_LOG_LEVEL, "DeInit PWM");
-
-	app_pwm_disable(_pwmInstance);
-	BLE_CALL(app_pwm_uninit, (_pwmInstance));
-	_initialized = false;
-	return 0;
-#endif
-
-	return ERR_PWM_NOT_ENABLED;
-}
-
-app_pwm_config_t & PWM::config1Ch(uint32_t period, uint32_t pin, bool inverted) {
-	static app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_1CH(period, pin);
-
-	if (inverted) {
-		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
-	} else { 
-		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
-	}
-
-	return cfg;
-}
-
-app_pwm_config_t & PWM::config2Ch(uint32_t period, uint32_t pin1, uint32_t pin2, bool inverted) {
-	static app_pwm_config_t cfg = APP_PWM_DEFAULT_CONFIG_2CH(period, pin1, pin2);
-
-	if (inverted) {
-		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_LOW;
-		cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_LOW;
-	} else {
-		cfg.pin_polarity[0] = APP_PWM_POLARITY_ACTIVE_HIGH;
-		cfg.pin_polarity[1] = APP_PWM_POLARITY_ACTIVE_HIGH;
-	}
-
-	return cfg;
-}
-

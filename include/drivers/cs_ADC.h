@@ -161,6 +161,8 @@ public:
 	 */
 	void update(nrf_saadc_value_t* buf);
 
+	void limit(nrf_saadc_limit_t type);
+
 protected:
 
 	/** Callback for when the internal timer is started.

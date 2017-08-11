@@ -8,14 +8,26 @@
 
 #include <cstdint>
 
-#include <ble/cs_Nordic.h>
+#include "ble/cs_Nordic.h"
 
 extern "C" {
-#include "nrf_drv_timer.h"
-#include "app_pwm.h"
+#include "nrf_drv_pwm.h"
 }
 
 #define ERR_PWM_NOT_ENABLED 1
+
+#define PWM_MAX_CHANNELS 2
+
+typedef struct {
+	uint16_t pin;
+	bool inverted;
+} pwm_channel_config_t;
+
+typedef struct {
+	uint32_t period_us;
+	uint8_t channelCount;
+	pwm_channel_config_t channels[PWM_MAX_CHANNELS];
+} pwm_config_t;
 
 /** Pulse Wide Modulation class
  *
@@ -23,37 +35,29 @@ extern "C" {
  */
 class PWM {
 public:
-	//! Gets a static singleton (no dynamic memory allocation) of the PWM clss
+	//! Gets a static singleton (no dynamic memory allocation) of the PWM class
 	static PWM& getInstance() {
 		static PWM instance;
 		return instance;
 	}
 
-//	static volatile bool _pwmReady;
-//	static void pwmReadyCallback(uint32_t pwmId);
-
-	//! Initialize the pulse wide modulation settings
-	uint32_t init(app_pwm_config_t & config, bool inverted);
-
-	//! Returns configuration values for 1 Channel
-	app_pwm_config_t & config1Ch(uint32_t period_us, uint32_t pin, bool inverted);
-
-	//! Returns configuration values for 2 Channels
-	app_pwm_config_t & config2Ch(uint32_t period_us, uint32_t pin1, uint32_t pin2, bool inverted);
+	//! Initialize the PWM settings.
+	//! config can be safely deleted after calling this function.
+	uint32_t init(pwm_config_t& config);
 
 	//! De-Initialize the PWM instance, i.e. free allocated resources
 	uint32_t deinit();
 
 	//! Set the value of a specific channel
-	void setValue(uint8_t channel, uint32_t value);
+	void setValue(uint8_t channel, uint16_t value);
 
-	//! Switch off all channels
-	//! Also works when not initialized (useful for emergencies)
-	void switchOff();
+	//! Get current value of a specific channel
+	uint16_t getValue(uint8_t channel);
 
-	//! Get current value from unit
-	uint32_t getValue(uint8_t channel);
-	
+//	void start();
+//	void stop();
+	void restart();
+
 private:
 	//! Private PWM constructor
 	PWM();
@@ -63,24 +67,16 @@ private:
 	//! Private PWM copy assignment definition
 	void operator=(PWM const &);
 
-	//! PWM configuration
-	app_pwm_config_t _pwmCfg;
+	pwm_config_t _config;
 
-	//! Array holding ready callbacks for the PWM instance
-#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
-	app_pwm_cb_t _controlBlock;
-#else
-	uint32_t _controlBlock[APP_PWM_CB_SIZE];
-#endif
-
-	//! Timer handling PWM
-	nrf_drv_timer_t* pwmTimer;
-	//! PWM instance
-	app_pwm_t* _pwmInstance;
+	uint32_t values[PWM_MAX_CHANNELS];
 
 	//! Flag to indicate that the init function has been successfully performed
 	bool _initialized;
 
-	//! Invert switch mode
-	bool _inverted;
+	// -- Hardware specific --
+	// This array cannot be allocated on stack (hence "static") and it must be in RAM (hence no "const").
+	static nrf_pwm_values_individual_t _nrfValues;
+	static nrf_drv_pwm_t _nrfPwm;
+	static nrf_pwm_sequence_t _nrfSeq;
 };

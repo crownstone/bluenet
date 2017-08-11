@@ -84,6 +84,7 @@ private:
 //	uint16_t _powerSamplesCount;
 //	uint16_t _lastPowerSample;
 //	uint16_t _burstCount;
+	uint16_t _count;
 
 	PowerSamples _powerSamples;
 

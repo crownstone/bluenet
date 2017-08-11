@@ -95,7 +95,7 @@ void TemperatureGuard::tick() {
 	}
 	if (curEvent != _lastPwmTempEvent) {
 		LOGd("Dispatch event %d", curEvent);
-		EventDispatcher::getInstance().dispatch(curEvent);
+//		EventDispatcher::getInstance().dispatch(curEvent);
 		_lastPwmTempEvent = curEvent;
 	}
 
@@ -105,7 +105,7 @@ void TemperatureGuard::tick() {
 
 	if (pwmTempError && !stateErrors.errors.pwmTemp) {
 		//! Set pwm temp error
-		State::getInstance().set(STATE_ERROR_PWM_TEMP, pwmTempError);
+//		State::getInstance().set(STATE_ERROR_PWM_TEMP, pwmTempError);
 	}
 
 	if (chipTempError && !stateErrors.errors.chipTemp) {

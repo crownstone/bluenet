@@ -20,6 +20,8 @@ struct __attribute__((__packed__)) switch_state_t {
 	uint8_t relay_state : 1;
 };
 
+#define PWM_PIN 18
+
 #define SWITCH_ON 100
 //enum {
 //	SWITCH_NEXT_RELAY_VAL_NONE,
@@ -122,6 +124,8 @@ public:
 	 * @param[in] delay                  Delay in seconds.
 	 */
 	void delayedSwitch(uint8_t switchState, uint16_t delay);
+
+	void resetPwm();
 
 
 	/** Used internally

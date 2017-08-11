@@ -16,8 +16,11 @@
 #include "drivers/cs_RTC.h"
 #include "cfg/cs_Strings.h"
 #include "cfg/cs_Config.h"
+#include "processing/cs_Switch.h"
 
 //#define PRINT_ADC_VERBOSE
+#define TEST_PIN 18
+#define TEST_ZERO 1800
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
 
 ADC::ADC()
@@ -106,6 +109,9 @@ cs_adc_error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
 		/* Start conversion in non-blocking mode. Sampling is not triggered yet. */
 		addBufferToSampleQueue(_bufferPointers[i]);
 	}
+
+	nrf_gpio_cfg_output(TEST_PIN);
+	nrf_drv_saadc_limits_set(1, -2047, TEST_ZERO); // Triggers when above zero
 
 	return 0;
 }
@@ -251,12 +257,32 @@ void ADC::update(nrf_saadc_value_t* buf) {
 	}
 }
 
+void ADC::limit(nrf_saadc_limit_t type) {
+	if (type == NRF_SAADC_LIMIT_LOW) {
+		// NRF_SAADC_LIMIT_LOW  triggers when adc value is below lower limit
+		nrf_drv_saadc_limits_set(1, -2047, TEST_ZERO); // Triggers when above zero
+		nrf_gpio_pin_set(TEST_PIN);
+		Switch::getInstance().resetPwm();
+//		write("_");
+	}
+	else {
+		// NRF_SAADC_LIMIT_HIGH triggers when adc value is above upper limit
+		nrf_drv_saadc_limits_set(1, TEST_ZERO, 2046); // Triggers when below zero
+		nrf_gpio_pin_clear(TEST_PIN);
+//		Switch::getInstance().resetPwm();
+//		write("^");
+	}
+}
+
 void ADC::staticTimerHandler(nrf_timer_event_t event_type, void* ptr) {
 }
 
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
 	if (p_event->type == NRF_DRV_SAADC_EVT_DONE) {
 		ADC::getInstance().update(p_event->data.done.p_buffer);
+	}
+	if (p_event->type == NRF_DRV_SAADC_EVT_LIMIT) {
+		ADC::getInstance().limit(p_event->data.limit.limit_type);
 	}
 }
 

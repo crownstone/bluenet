@@ -18,7 +18,7 @@
 #include <processing/cs_Scanner.h>
 #include <events/cs_EventDispatcher.h>
 
-//#define PRINT_SWITCH_VERBOSE
+#define PRINT_SWITCH_VERBOSE
 
 // [18.07.16] added for first version of plugins to disable the use of the igbt
 //#define PWM_DISABLE
@@ -38,7 +38,14 @@ void Switch::init(boards_config_t* board) {
 	PWM& pwm = PWM::getInstance();
 	uint32_t pwmPeriod;
 	Settings::getInstance().get(CONFIG_PWM_PERIOD, &pwmPeriod);
-	pwm.init(pwm.config1Ch(pwmPeriod, board->pinGpioPwm, board->flags.pwmInverted), board->flags.pwmInverted); //! 50 Hz
+	LOGd("pwm pin %d", board->pinGpioPwm);
+
+	pwm_config_t pwmConfig;
+	pwmConfig.channelCount = 1;
+	pwmConfig.period_us = pwmPeriod;
+	pwmConfig.channels[0].pin = board->pinGpioPwm;
+	pwmConfig.channels[0].inverted = board->flags.pwmInverted;
+	pwm.init(pwmConfig);
 #else
 	nrf_gpio_cfg_output(board->pinGpioPwm);
 	if (board->flags.pwmInverted) {
@@ -66,7 +73,7 @@ void Switch::init(boards_config_t* board) {
 //	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
 
 	// For now: just turn pwm off on init, for safety.
-	pwmOff();
+//	pwmOff();
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_switchTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSwitch);
@@ -75,6 +82,14 @@ void Switch::init(boards_config_t* board) {
 
 void Switch::start() {
 
+}
+
+void Switch::resetPwm() {
+//	LOGd("resetPwm %u", _switchValue.pwm_state);
+//	PWM::getInstance().stop();
+//	PWM::getInstance().start();
+//	PWM::getInstance().setValue(0, _switchValue.pwm_state);
+	PWM::getInstance().restart();
 }
 
 void Switch::updateSwitchState(switch_state_t oldVal) {
@@ -274,6 +289,13 @@ void Switch::_setPwm(uint8_t value) {
 	_switchValue.pwm_state = value;
 #ifndef PWM_DISABLE
 	PWM::getInstance().setValue(0, value);
+#else
+	LOGd("setPwm %u", value);
+	if (value) {
+		nrf_gpio_pin_set(PWM_PIN);
+	} else {
+		nrf_gpio_pin_clear(PWM_PIN);
+	}
 #endif
 }
 

@@ -40,6 +40,8 @@ extern "C" {
 #include <nrf_nvmc.h>
 }
 
+//#define ENABLE_LEDS
+
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -207,7 +209,6 @@ void Crownstone::init() {
 	// [16.06.16] need to execute app scheduler, otherwise pstorage
 	// events will get lost ... maybe need to check why that actually happens??
 	app_sched_execute();
-
 }
 
 void Crownstone::configure() {
@@ -297,8 +298,8 @@ void Crownstone::initDrivers() {
 		// Note: DO NOT USE THEM WHILE SCANNING OR MESHING ...
 		nrf_gpio_cfg_output(_boardsConfig.pinLedRed);
 		nrf_gpio_cfg_output(_boardsConfig.pinLedGreen);
-		// setting the pin makes them turn off ....
 		if (_boardsConfig.flags.ledInverted) {
+			// setting the pin makes them turn off ....
 			nrf_gpio_pin_set(_boardsConfig.pinLedRed);
 			nrf_gpio_pin_set(_boardsConfig.pinLedGreen);
 		} else {
