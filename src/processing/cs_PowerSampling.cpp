@@ -269,35 +269,35 @@ void PowerSampling::calculatePower(power_t power) {
 */
 	_avgPower = _avgPowerMilliWatt;
 
-	static int printPower = 0;
-	if (printPower % 10 == 0) {
-		write("Sum: %lld\r\n", sum);
-		write("Sum1: %lld\r\n", sum1);
-		write("Power: ");
-		write("%d ", _avgPowerMilliWatt);
-		write("\r\n");
-		printPower = 0;
-		// current
-		write("Current: ");
+//	static int printPower = 0;
+//	if (printPower % 10 == 0) {
+//		write("Sum: %lld\r\n", sum);
+//		write("Sum1: %lld\r\n", sum1);
+//		write("Power: ");
+//		write("%d ", _avgPowerMilliWatt);
 //		write("\r\n");
-		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-			write("%d ", power.buf[i]);
-//			if (i % 80 == 80 - 2) {
-//				write("\r\n");
-//			}
-		}
-		write("\r\n");
-		write("Voltage: ");
+//		printPower = 0;
+//		// current
+//		write("Current: ");
+////		write("\r\n");
+//		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+//			write("%d ", power.buf[i]);
+////			if (i % 80 == 80 - 2) {
+////				write("\r\n");
+////			}
+//		}
 //		write("\r\n");
-		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-			write("%d ", power.buf[i]);
-//			if (i % 80 == 80 - 1) {
-//				write("\r\n");
-//			}
-		}
-		write("\r\n");
-	}
-	printPower++;
+//		write("Voltage: ");
+////		write("\r\n");
+//		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+//			write("%d ", power.buf[i]);
+////			if (i % 80 == 80 - 1) {
+////				write("\r\n");
+////			}
+//		}
+//		write("\r\n");
+//	}
+//	printPower++;
 }
 
 void PowerSampling::checkSoftfuse(int64_t powerMilliWatt) {

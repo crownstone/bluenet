@@ -10,10 +10,6 @@
 
 #include "ble/cs_Nordic.h"
 
-extern "C" {
-#include "nrf_drv_pwm.h"
-}
-
 #define ERR_PWM_NOT_ENABLED 1
 
 #define PWM_MAX_CHANNELS 2
@@ -74,9 +70,12 @@ private:
 	//! Flag to indicate that the init function has been successfully performed
 	bool _initialized;
 
-	// -- Hardware specific --
-	// This array cannot be allocated on stack (hence "static") and it must be in RAM (hence no "const").
-	static nrf_pwm_values_individual_t _nrfValues;
-	static nrf_drv_pwm_t _nrfPwm;
-	static nrf_pwm_sequence_t _nrfSeq;
+	// -- Implementation specific --
+	//! Pointer to the timer.
+	nrf_drv_timer_t* _timer;
+
+	//! PPI channels to be used to communicate from Timer to GPIOTE.
+	nrf_ppi_channel_t _ppiChannels[2*PWM_MAX_CHANNELS];
+
+	static void staticTimerHandler(nrf_timer_event_t event_type, void* ptr);
 };

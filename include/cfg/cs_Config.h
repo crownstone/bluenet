@@ -90,11 +90,12 @@
 #define CURRENT_LIMIT							 0
 
 //! ----- TIMERS -----
-#define PWM_TIMER                                NRF_TIMER2
-//#define PWM_IRQHandler                           TIMER2_IRQHandler
-#define PWM_IRQn                                 TIMER2_IRQn
-#define PWM_INSTANCE_INDEX                       TIMER2_INSTANCE_INDEX
-#define PWM_TIMER_ID                             2
+#define CS_PWM_TIMER                             NRF_TIMER2
+//#define PWM_IRQHandler                         TIMER2_IRQHandler
+#define CS_PWM_IRQn                              TIMER2_IRQn
+#define CS_PWM_INSTANCE_INDEX                    TIMER2_INSTANCE_INDEX
+#define CS_PWM_TIMER_ID                          2
+#define CS_PWM_TIMER_PRIORITY                    APP_IRQ_PRIORITY_LOW
 
 #define CS_ADC_TIMER                             NRF_TIMER1
 //#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
@@ -156,7 +157,8 @@
 #define CURRENT_USAGE_THRESHOLD                  (16000) // Power usage threshold in mA at which the switch should be turned off.
 #define CURRENT_USAGE_THRESHOLD_PWM              (1000)  // Power usage threshold in mA at which the PWM should be turned off.
 
-#define PWM_PERIOD                               20000L //! Interval in us: 1/20000e-6 = 50 Hz
+#define PWM_PERIOD                               10000L //! Interval in us: 1/10000e-6 = 100 Hz
+//#define PWM_PERIOD                               20000L
 
 #define KEEP_ALIVE_INTERVAL                      (2 * 60) // 2 minutes, in seconds
 
