@@ -91,7 +91,7 @@
 
 //! ----- TIMERS -----
 #define CS_PWM_TIMER                             NRF_TIMER2
-//#define PWM_IRQHandler                         TIMER2_IRQHandler
+#define PWM_IRQHandler                           TIMER2_IRQHandler
 #define CS_PWM_IRQn                              TIMER2_IRQn
 #define CS_PWM_INSTANCE_INDEX                    TIMER2_INSTANCE_INDEX
 #define CS_PWM_TIMER_ID                          2
