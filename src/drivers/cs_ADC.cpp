@@ -19,8 +19,11 @@
 #include "processing/cs_Switch.h"
 
 //#define PRINT_ADC_VERBOSE
-#define TEST_PIN 18
-#define TEST_ZERO 1800
+#define TEST_PIN 22
+//#define TEST_ZERO 1800
+#define TEST_ZERO 0
+#define TEST_OFFSET 100
+
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
 
 ADC::ADC()
@@ -139,15 +142,15 @@ cs_adc_error_t ADC::configPin(const channel_id_t channelNum, const pin_id_t pinN
 			//.gain       = NRF_SAADC_GAIN2,   //! gain is 2/1, maps [0, 0.3] to [0, 0.6]
 			//.gain       = NRF_SAADC_GAIN1,   //! gain is 1/1, maps [0, 0.6] to [0, 0.6]
 			//.gain       = NRF_SAADC_GAIN1_2, //! gain is 1/2, maps [0, 1.2] to [0, 0.6]
-			//		.gain       = NRF_SAADC_GAIN1_4, //! gain is 1/4, maps [0, 2.4] to [0, 0.6]
-			.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
+			.gain       = NRF_SAADC_GAIN1_4, //! gain is 1/4, maps [0, 2.4] to [0, 0.6]
+//			.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
 			.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
 			.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
 			//		.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
 			.mode		= NRF_SAADC_MODE_DIFFERENTIAL,
 			.pin_p      = getAdcPin(pinNum),
 			//		.pin_n      = NRF_SAADC_INPUT_DISABLED
-			.pin_n      = getAdcPin(0)
+			.pin_n      = getAdcPin(4) // gpio 28
 		};
 	} else if (channelNum == 0) {
 		// current sits on channel 0
@@ -160,7 +163,7 @@ cs_adc_error_t ADC::configPin(const channel_id_t channelNum, const pin_id_t pinN
 			.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
 			.mode		= NRF_SAADC_MODE_DIFFERENTIAL,
 			.pin_p      = getAdcPin(pinNum),
-			.pin_n      = getAdcPin(0)
+			.pin_n      = getAdcPin(4) // gpio 28
 		};
 	} else {
 		// no idea!!
@@ -262,14 +265,14 @@ void ADC::limit(nrf_saadc_limit_t type) {
 		// NRF_SAADC_LIMIT_LOW  triggers when adc value is below lower limit
 		nrf_drv_saadc_limits_set(1, -2047, TEST_ZERO); // Triggers when above zero
 		nrf_gpio_pin_set(TEST_PIN);
-		Switch::getInstance().resetPwm();
+//		Switch::getInstance().syncPwm();
 //		write("_");
 	}
 	else {
 		// NRF_SAADC_LIMIT_HIGH triggers when adc value is above upper limit
 		nrf_drv_saadc_limits_set(1, TEST_ZERO, 2046); // Triggers when below zero
 		nrf_gpio_pin_clear(TEST_PIN);
-//		Switch::getInstance().resetPwm();
+		Switch::getInstance().syncPwm();
 //		write("^");
 	}
 }

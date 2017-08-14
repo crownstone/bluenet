@@ -9,10 +9,10 @@
 #include <cstdint>
 
 #include "ble/cs_Nordic.h"
+#include "cfg/cs_Config.h"
 
 #define ERR_PWM_NOT_ENABLED 1
 
-#define PWM_MAX_CHANNELS 2
 
 typedef struct {
 	uint16_t pin;
@@ -22,7 +22,7 @@ typedef struct {
 typedef struct {
 	uint32_t period_us;
 	uint8_t channelCount;
-	pwm_channel_config_t channels[PWM_MAX_CHANNELS];
+	pwm_channel_config_t channels[CS_PWM_MAX_CHANNELS];
 } pwm_config_t;
 
 /** Pulse Wide Modulation class
@@ -52,7 +52,10 @@ public:
 
 //	void start();
 //	void stop();
-	void restart();
+	void sync();
+
+	//! Interrupt handler: internal function, implementation specific.
+	void _handleInterrupt();
 
 private:
 	//! Private PWM constructor
@@ -65,17 +68,46 @@ private:
 
 	pwm_config_t _config;
 
-	uint32_t values[PWM_MAX_CHANNELS];
+	uint32_t _values[CS_PWM_MAX_CHANNELS];
 
 	//! Flag to indicate that the init function has been successfully performed
 	bool _initialized;
 
-	// -- Implementation specific --
+	//! Init a channel
+	uint32_t initChannel(uint8_t index, pwm_channel_config_t& config);
+
+	// -----------------------------------
+	// ----- Implementation specific -----
+	// -----------------------------------
+
 	//! Pointer to the timer.
 	nrf_drv_timer_t* _timer;
 
-	//! PPI channels to be used to communicate from Timer to GPIOTE.
-	nrf_ppi_channel_t _ppiChannels[2*PWM_MAX_CHANNELS];
+	//! Max value of channel, in ticks.
+	uint32_t _maxTickVal;
 
-	static void staticTimerHandler(nrf_timer_event_t event_type, void* ptr);
+	//! Values of the channels in ticks.
+	uint32_t _tickValues[CS_PWM_MAX_CHANNELS];
+
+	//! PPI channels to be used to communicate from Timer to GPIOTE.
+	nrf_ppi_channel_t _ppiChannels[2*CS_PWM_MAX_CHANNELS];
+
+	//! GPIOTE init states cache
+	nrf_gpiote_outinit_t _gpioteInitStates[CS_PWM_MAX_CHANNELS];
+
+	//! Returns whether a channel is currently dimming (value > 0 and < max).
+	bool _isPwmEnabled[CS_PWM_MAX_CHANNELS];
+
+	//! Enables pwm for given channel (to be used when value is > 0 and < max).
+	void enablePwm(uint8_t channel);
+
+	//! Disables pwm for given channel (to be used when value is 0 or max).
+	void disablePwm(uint8_t channel);
+
+	//! Helper function to get the timer channel, given the index.
+	nrf_timer_cc_channel_t getTimerChannel(uint8_t index);
+	//! Helper function to get the gpiote task out, given the index.
+	nrf_gpiote_tasks_t getGpioteTaskOut(uint8_t index);
+	//! Helper function to get the ppi channel, given the index.
+	nrf_ppi_channel_t getPpiChannel(uint8_t index);
 };

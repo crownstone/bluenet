@@ -89,13 +89,16 @@
 
 #define CURRENT_LIMIT							 0
 
+#define CS_PWM_MAX_CHANNELS                      2
+
 //! ----- TIMERS -----
 #define CS_PWM_TIMER                             NRF_TIMER2
-#define PWM_IRQHandler                           TIMER2_IRQHandler
+#define CS_PWM_TIMER_IRQ                         TIMER2_IRQHandler
 #define CS_PWM_IRQn                              TIMER2_IRQn
 #define CS_PWM_INSTANCE_INDEX                    TIMER2_INSTANCE_INDEX
 #define CS_PWM_TIMER_ID                          2
 #define CS_PWM_TIMER_PRIORITY                    APP_IRQ_PRIORITY_LOW
+#define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_500kHz
 
 #define CS_ADC_TIMER                             NRF_TIMER1
 //#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
@@ -103,9 +106,17 @@
 #define CS_ADC_INSTANCE_INDEX                    TIMER1_INSTANCE_INDEX
 #define CS_ADC_TIMER_ID                          1
 
+
 //! ----- PPI -----
-//! Get auto assigned
-//#define CS_ADC_PPI_CHANNEL                       7
+//! TODO: adc gets auto assigned atm
+#define CS_ADC_PPI_CHANNEL_START                 0
+#define CS_ADC_PPI_CHANNEL_COUNT                 1
+#define CS_PWM_PPI_CHANNEL_START                 (CS_ADC_PPI_CHANNEL_START + CS_ADC_PPI_CHANNEL_COUNT)
+#define CS_PWM_PPI_CHANNEL_COUNT                 (2 * CS_PWM_MAX_CHANNELS)
+
+//! ----- GPIOTE -----
+#define CS_PWM_GPIOTE_CHANNEL_START              0
+#define CS_PWM_GPIOTE_CHANNEL_COUNT              (CS_PWM_MAX_CHANNELS)
 
 
 

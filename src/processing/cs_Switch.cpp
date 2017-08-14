@@ -84,12 +84,12 @@ void Switch::start() {
 
 }
 
-void Switch::resetPwm() {
-//	LOGd("resetPwm %u", _switchValue.pwm_state);
+void Switch::syncPwm() {
+//	LOGd("syncPwm %u", _switchValue.pwm_state);
 //	PWM::getInstance().stop();
 //	PWM::getInstance().start();
 //	PWM::getInstance().setValue(0, _switchValue.pwm_state);
-	PWM::getInstance().restart();
+	PWM::getInstance().sync();
 }
 
 void Switch::updateSwitchState(switch_state_t oldVal) {
