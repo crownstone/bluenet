@@ -88,8 +88,11 @@ uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 //		nrf_gpio_cfg_output(_config.channels[i].pin);
 
 	// Configure gpiote
-	_gpioteInitStates[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_LOW : NRF_GPIOTE_INITIAL_VALUE_HIGH;
-	nrf_gpiote_task_configure(channel, config.pin, NRF_GPIOTE_POLARITY_TOGGLE, _gpioteInitStates[channel]);
+//	_gpioteInitStates[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_LOW : NRF_GPIOTE_INITIAL_VALUE_HIGH;
+	_gpioteInitStates[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_HIGH : NRF_GPIOTE_INITIAL_VALUE_LOW;
+	_gpioteInitStatesInversed[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_LOW : NRF_GPIOTE_INITIAL_VALUE_HIGH;
+//	nrf_gpiote_task_configure(CS_PWM_GPIOTE_CHANNEL_START + channel, config.pin, NRF_GPIOTE_POLARITY_TOGGLE, _gpioteInitStates[channel]);
+//	nrf_gpiote_task_configure(CS_PWM_GPIOTE_CHANNEL_START + channel, config.pin, NRF_GPIOTE_POLARITY_TOGGLE, _gpioteInitStatesInversed[channel]);
 
 
 	// Cache ppi channels and gpiote tasks
@@ -154,6 +157,8 @@ void PWM::setValue(uint8_t channel, uint16_t value) {
 	default: {
 		_tickValues[channel] = _maxTickVal * value / 100;
 		LOGd("ticks=%u", _tickValues[channel]);
+		// Make the timer stop on end of period
+		nrf_timer_shorts_enable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
 		// Enable interrupt, set the value in there (at the end/start of the period).
 		nrf_timer_int_enable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
 	}
@@ -175,12 +180,19 @@ void PWM::sync() {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
 	}
-	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_CLEAR);
+	// Need to stop the timer, else the gpio state at start is not consistent.
+	// I guess this is because the gpiote toggle sometimes happens before, sometimes after the nrf_gpiote_task_force()
+	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
+	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_STOP);
+
 	for (uint8_t i=0; i<_config.channelCount; ++i) {
 		if (_isPwmEnabled[i]) {
-			nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + i, _gpioteInitStates[i]);
+			nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + i, _gpioteInitStatesInversed[i]);
 		}
 	}
+	// Set the counter back to 0, and start the timer again.
+	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_CLEAR);
+	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
 }
 
 
@@ -190,28 +202,38 @@ void PWM::sync() {
 
 void PWM::enablePwm(uint8_t channel) {
 	if (!_isPwmEnabled[channel]) {
+		nrf_gpiote_task_configure(CS_PWM_GPIOTE_CHANNEL_START + channel, _config.channels[channel].pin, NRF_GPIOTE_POLARITY_TOGGLE, _gpioteInitStatesInversed[channel]);
 		nrf_gpiote_task_enable(CS_PWM_GPIOTE_CHANNEL_START + channel);
+//		nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + channel, _gpioteInitStates[channel]);
 		_isPwmEnabled[channel] = true;
 	}
 }
 
 void PWM::disablePwm(uint8_t channel) {
 	nrf_gpiote_task_disable(CS_PWM_GPIOTE_CHANNEL_START + channel);
+	nrf_gpiote_te_default(CS_PWM_GPIOTE_CHANNEL_START + channel);
 	_isPwmEnabled[channel] = false;
 }
 
 void PWM::_handleInterrupt() {
+	// Disable interrupt until next change.
+	nrf_timer_int_disable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
+
 	// At the interrupt (end of period), set all channels that are dimming.
 	for (uint8_t i=0; i<_config.channelCount; ++i) {
 //		if ((!isPwmEnabled[i]) && (_tickValues[i] != 0) && (_tickValues[i] != _maxTickVal)) {
 		if ((_tickValues[i] != 0) && (_tickValues[i] != _maxTickVal)) {
 			nrf_timer_cc_write(CS_PWM_TIMER, getTimerChannel(i), _tickValues[i]);
 //			nrf_gpio_pin_write(_config.channels[i].pin, _config.channels[i].inverted ? 0 : 1);
+//			nrf_gpio_pin_write(_config.channels[i].pin, _config.channels[i].inverted ? 1 : 0);
 			enablePwm(i);
+//			nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + i, _gpioteInitStatesInversed[i]);
 		}
 	}
-	// When done, disable interrupt until next change.
-	nrf_timer_int_disable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
+
+	// Don't stop timer on end of period anymore, and start the timer again
+	nrf_timer_shorts_disable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
+	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
 }
 
 nrf_timer_cc_channel_t PWM::getTimerChannel(uint8_t index) {
@@ -303,8 +325,6 @@ nrf_ppi_channel_t PWM::getPpiChannel(uint8_t index) {
 extern "C" void CS_PWM_TIMER_IRQ(void) {
 //	if (nrf_timer_event_check(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX))) {
 	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
-	nrf_gpio_pin_toggle(18);
 	PWM::getInstance()._handleInterrupt();
-//	PWM &pwm = PWM::getInstance();
 //	}
 }

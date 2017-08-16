@@ -204,6 +204,9 @@ private:
 	//! Arguments to the callback function
 	adc_done_cb_data_t _doneCallbackData;
 
+	uint32_t _lastZeroCrossUpTime;
+	uint32_t _lastPwmSyncTime;
+
 	//! Function to set the input pin, this can be done after each sample. Only used internally!
 	cs_adc_error_t configPin(const channel_id_t channel, const pin_id_t pin);
 

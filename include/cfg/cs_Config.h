@@ -98,7 +98,8 @@
 #define CS_PWM_INSTANCE_INDEX                    TIMER2_INSTANCE_INDEX
 #define CS_PWM_TIMER_ID                          2
 #define CS_PWM_TIMER_PRIORITY                    APP_IRQ_PRIORITY_LOW
-#define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_500kHz
+//#define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_500kHz
+#define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_2MHz
 
 #define CS_ADC_TIMER                             NRF_TIMER1
 //#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
@@ -169,7 +170,6 @@
 #define CURRENT_USAGE_THRESHOLD_PWM              (1000)  // Power usage threshold in mA at which the PWM should be turned off.
 
 #define PWM_PERIOD                               10000L //! Interval in us: 1/10000e-6 = 100 Hz
-//#define PWM_PERIOD                               20000L
 
 #define KEEP_ALIVE_INTERVAL                      (2 * 60) // 2 minutes, in seconds
 

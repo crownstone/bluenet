@@ -94,6 +94,7 @@ private:
 
 	//! GPIOTE init states cache
 	nrf_gpiote_outinit_t _gpioteInitStates[CS_PWM_MAX_CHANNELS];
+	nrf_gpiote_outinit_t _gpioteInitStatesInversed[CS_PWM_MAX_CHANNELS];
 
 	//! Returns whether a channel is currently dimming (value > 0 and < max).
 	bool _isPwmEnabled[CS_PWM_MAX_CHANNELS];
