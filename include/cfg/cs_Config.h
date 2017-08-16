@@ -92,11 +92,11 @@
 #define CS_PWM_MAX_CHANNELS                      2
 
 //! ----- TIMERS -----
-#define CS_PWM_TIMER                             NRF_TIMER2
-#define CS_PWM_TIMER_IRQ                         TIMER2_IRQHandler
-#define CS_PWM_IRQn                              TIMER2_IRQn
-#define CS_PWM_INSTANCE_INDEX                    TIMER2_INSTANCE_INDEX
-#define CS_PWM_TIMER_ID                          2
+#define CS_PWM_TIMER                             NRF_TIMER4
+#define CS_PWM_TIMER_IRQ                         TIMER4_IRQHandler
+#define CS_PWM_IRQn                              TIMER4_IRQn
+#define CS_PWM_INSTANCE_INDEX                    TIMER4_INSTANCE_INDEX
+#define CS_PWM_TIMER_ID                          4
 #define CS_PWM_TIMER_PRIORITY                    APP_IRQ_PRIORITY_LOW
 //#define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_500kHz
 #define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_2MHz

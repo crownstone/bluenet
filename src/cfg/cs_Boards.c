@@ -138,9 +138,9 @@ void asACR01B6A(boards_config_t* p_config) {
 
 
 void asACR01B2A(boards_config_t* p_config) {
-//	p_config->pinGpioPwm           = 8;
+	p_config->pinGpioPwm           = 8;
 //	p_config->pinGpioPwm           = 22; // NC
-	p_config->pinGpioPwm           = 20; // RX
+//	p_config->pinGpioPwm           = 20; // RX
 	p_config->pinGpioRelayOn       = 6;
 	p_config->pinGpioRelayOff      = 7;
 	p_config->pinAinCurrent        = 2;

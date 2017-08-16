@@ -20,8 +20,8 @@
 
 //#define PRINT_ADC_VERBOSE
 //#define TEST_PIN 22
-#define TEST_PIN 8 // PWM pin
-//#define TEST_PIN 20 // RX pin
+//#define TEST_PIN 8 // PWM pin
+#define TEST_PIN 20 // RX pin
 #define TEST_ZERO 2000
 //#define TEST_ZERO 0
 #define TEST_ZERO_HYST 0
@@ -123,34 +123,34 @@ cs_adc_error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
 
 
 
-	// Setup timer
-	nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_TASK_CLEAR);
-	nrf_timer_bit_width_set(NRF_TIMER3, NRF_TIMER_BIT_WIDTH_32);
-	nrf_timer_frequency_set(NRF_TIMER3, NRF_TIMER_FREQ_4MHz);
-	nrf_timer_mode_set(NRF_TIMER3, NRF_TIMER_MODE_TIMER);
-
-	nrf_ppi_channel_endpoint_setup(
-			NRF_PPI_CHANNEL10,
-			(uint32_t)nrf_timer_event_address_get(NRF_TIMER3, NRF_TIMER_EVENT_COMPARE0),
-			nrf_gpiote_task_addr_get(NRF_GPIOTE_TASKS_OUT_2)
-	);
-	nrf_ppi_channel_enable(NRF_PPI_CHANNEL10);
-
-	nrf_ppi_channel_endpoint_setup(
-			NRF_PPI_CHANNEL11,
-			(uint32_t)nrf_timer_event_address_get(NRF_TIMER3, NRF_TIMER_EVENT_COMPARE1),
-			nrf_gpiote_task_addr_get(NRF_GPIOTE_TASKS_OUT_2)
-	);
-	nrf_ppi_channel_enable(NRF_PPI_CHANNEL11);
-
-
-	nrf_timer_shorts_enable(NRF_TIMER3, NRF_TIMER_SHORT_COMPARE1_CLEAR_MASK);
-	nrf_timer_shorts_enable(NRF_TIMER3, NRF_TIMER_SHORT_COMPARE1_STOP_MASK);
-	// 10 ms is 40000 ticks at 4MHz
-	uint16_t value = 15;
-	uint32_t valueTicks = 40000 * value / 100;
-	nrf_timer_cc_write(NRF_TIMER3, NRF_TIMER_CC_CHANNEL0, 20000 - valueTicks/2);
-	nrf_timer_cc_write(NRF_TIMER3, NRF_TIMER_CC_CHANNEL1, 20000 + valueTicks/2);
+//	// Setup timer
+//	nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_TASK_CLEAR);
+//	nrf_timer_bit_width_set(NRF_TIMER3, NRF_TIMER_BIT_WIDTH_32);
+//	nrf_timer_frequency_set(NRF_TIMER3, NRF_TIMER_FREQ_4MHz);
+//	nrf_timer_mode_set(NRF_TIMER3, NRF_TIMER_MODE_TIMER);
+//
+//	nrf_ppi_channel_endpoint_setup(
+//			NRF_PPI_CHANNEL10,
+//			(uint32_t)nrf_timer_event_address_get(NRF_TIMER3, NRF_TIMER_EVENT_COMPARE0),
+//			nrf_gpiote_task_addr_get(NRF_GPIOTE_TASKS_OUT_2)
+//	);
+//	nrf_ppi_channel_enable(NRF_PPI_CHANNEL10);
+//
+//	nrf_ppi_channel_endpoint_setup(
+//			NRF_PPI_CHANNEL11,
+//			(uint32_t)nrf_timer_event_address_get(NRF_TIMER3, NRF_TIMER_EVENT_COMPARE1),
+//			nrf_gpiote_task_addr_get(NRF_GPIOTE_TASKS_OUT_2)
+//	);
+//	nrf_ppi_channel_enable(NRF_PPI_CHANNEL11);
+//
+//
+//	nrf_timer_shorts_enable(NRF_TIMER3, NRF_TIMER_SHORT_COMPARE1_CLEAR_MASK);
+//	nrf_timer_shorts_enable(NRF_TIMER3, NRF_TIMER_SHORT_COMPARE1_STOP_MASK);
+//	// 10 ms is 40000 ticks at 4MHz
+//	uint16_t value = 15;
+//	uint32_t valueTicks = 40000 * value / 100;
+//	nrf_timer_cc_write(NRF_TIMER3, NRF_TIMER_CC_CHANNEL0, 20000 - valueTicks/2);
+//	nrf_timer_cc_write(NRF_TIMER3, NRF_TIMER_CC_CHANNEL1, 20000 + valueTicks/2);
 
 
 
@@ -306,38 +306,32 @@ void ADC::limit(nrf_saadc_limit_t type) {
 		// NRF_SAADC_LIMIT_LOW  triggers when adc value is below lower limit
 		nrf_drv_saadc_limits_set(1, NRF_DRV_SAADC_LIMITL_DISABLED + 1, TEST_ZERO + TEST_ZERO_HYST); // Triggers when above zero
 
-//		nrf_gpiote_task_configure(2, TEST_PIN, NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIOTE_INITIAL_VALUE_HIGH);
-		nrf_gpiote_task_configure(2, TEST_PIN, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
-		nrf_gpiote_task_enable(2);
-		nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_TASK_START);
-//		nrf_gpio_pin_set(TEST_PIN);
-//		Switch::getInstance().syncPwm();
+//		nrf_gpiote_task_configure(2, TEST_PIN, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
+//		nrf_gpiote_task_enable(2);
+//		nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_TASK_START);
 	}
 	else {
 		// NRF_SAADC_LIMIT_HIGH triggers when adc value is above upper limit
 		nrf_drv_saadc_limits_set(1, TEST_ZERO - TEST_ZERO_HYST, NRF_DRV_SAADC_LIMITH_DISABLED - 1); // Triggers when below zero
 
-		nrf_gpiote_task_configure(2, TEST_PIN, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
-		nrf_gpiote_task_enable(2);
-		nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_TASK_START);
-//		nrf_gpio_pin_clear(TEST_PIN);
-//		nrf_gpio_pin_toggle(TEST_PIN);
+//		nrf_gpiote_task_configure(2, TEST_PIN, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
+//		nrf_gpiote_task_enable(2);
+//		nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_TASK_START);
+		nrf_gpio_pin_toggle(TEST_PIN);
 
-/*
+
 		// Only call syncPwm when there was about 20ms between the two events.
 		// This makes it more likely that this was actually the correct zero crossing.
 		uint32_t curTime = RTC::getCount();
 		uint32_t diffTicks = RTC::difference(curTime, _lastZeroCrossUpTime);
 		if (diffTicks > RTC::msToTicks(19) && diffTicks < RTC::msToTicks(21)) {
 			if (RTC::difference(curTime, _lastPwmSyncTime) > RTC::msToTicks(100)) {
-//				Switch::getInstance().syncPwm();
+				Switch::getInstance().syncPwm();
 				_lastPwmSyncTime = curTime;
 			}
-
-//			nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_MODE_TIMER);
 		}
 		_lastZeroCrossUpTime = curTime;
-*/
+
 	}
 }
 

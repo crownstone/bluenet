@@ -62,7 +62,7 @@ void TIMER0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void TIMER1_IRQHandler(void);
 
 //! currently used for PWM
-void TIMER2_IRQHandler(void);
+void TIMER4_IRQHandler(void);
 
 void RTC0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void TEMP_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
@@ -85,8 +85,8 @@ void SWI2_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI3_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI4_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI5_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+void TIMER2_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void TIMER3_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
-void TIMER4_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void PWM0_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void PDM_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void MWU_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));

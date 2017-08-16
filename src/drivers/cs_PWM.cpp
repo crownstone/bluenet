@@ -19,9 +19,11 @@
  *********************************************************************************************************************/
 
 // Timer channel that determines the period is set to the last channel available.
-#define PERIOD_CHANNEL_IDX       3
-#define PERIOD_SHORT_CLEAR_MASK  NRF_TIMER_SHORT_COMPARE3_CLEAR_MASK
-#define PERIOD_SHORT_STOP_MASK   NRF_TIMER_SHORT_COMPARE3_STOP_MASK
+#define PERIOD_CHANNEL_IDX       5
+#define PERIOD_SHORT_CLEAR_MASK  NRF_TIMER_SHORT_COMPARE5_CLEAR_MASK
+#define PERIOD_SHORT_STOP_MASK   NRF_TIMER_SHORT_COMPARE5_STOP_MASK
+
+#define PWM_CENTERED
 
 PWM::PWM() :
 		_initialized(false)
@@ -100,17 +102,29 @@ uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 	_ppiChannels[channel*2 + 1] = getPpiChannel(CS_PWM_PPI_CHANNEL_START + channel*2 + 1);
 
 	// Make the timer compare event trigger the gpiote task
+#ifdef PWM_CENTERED
+	nrf_ppi_channel_endpoint_setup(
+			_ppiChannels[channel*2],
+			(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(channel*2)),
+			nrf_gpiote_task_addr_get(getGpioteTaskOut(CS_PWM_GPIOTE_CHANNEL_START + channel))
+	);
+	nrf_ppi_channel_endpoint_setup(
+			_ppiChannels[channel*2 + 1],
+			(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(channel*2+1)),
+			nrf_gpiote_task_addr_get(getGpioteTaskOut(CS_PWM_GPIOTE_CHANNEL_START + channel))
+	);
+#else
 	nrf_ppi_channel_endpoint_setup(
 			_ppiChannels[channel*2],
 			(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(channel)),
 			nrf_gpiote_task_addr_get(getGpioteTaskOut(CS_PWM_GPIOTE_CHANNEL_START + channel))
 	);
-
 	nrf_ppi_channel_endpoint_setup(
 			_ppiChannels[channel*2 + 1],
 			(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX)),
 			nrf_gpiote_task_addr_get(getGpioteTaskOut(CS_PWM_GPIOTE_CHANNEL_START + channel))
 	);
+#endif
 
 	// Enable ppi
 	nrf_ppi_channel_enable(_ppiChannels[channel*2]);
@@ -187,7 +201,11 @@ void PWM::sync() {
 
 	for (uint8_t i=0; i<_config.channelCount; ++i) {
 		if (_isPwmEnabled[i]) {
+#ifdef PWM_CENTERED
+			nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + i, _gpioteInitStates[i]);
+#else
 			nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + i, _gpioteInitStatesInversed[i]);
+#endif
 		}
 	}
 	// Set the counter back to 0, and start the timer again.
@@ -202,7 +220,11 @@ void PWM::sync() {
 
 void PWM::enablePwm(uint8_t channel) {
 	if (!_isPwmEnabled[channel]) {
+#ifdef PWM_CENTERED
+		nrf_gpiote_task_configure(CS_PWM_GPIOTE_CHANNEL_START + channel, _config.channels[channel].pin, NRF_GPIOTE_POLARITY_TOGGLE, _gpioteInitStates[channel]);
+#else
 		nrf_gpiote_task_configure(CS_PWM_GPIOTE_CHANNEL_START + channel, _config.channels[channel].pin, NRF_GPIOTE_POLARITY_TOGGLE, _gpioteInitStatesInversed[channel]);
+#endif
 		nrf_gpiote_task_enable(CS_PWM_GPIOTE_CHANNEL_START + channel);
 //		nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + channel, _gpioteInitStates[channel]);
 		_isPwmEnabled[channel] = true;
@@ -223,7 +245,12 @@ void PWM::_handleInterrupt() {
 	for (uint8_t i=0; i<_config.channelCount; ++i) {
 //		if ((!isPwmEnabled[i]) && (_tickValues[i] != 0) && (_tickValues[i] != _maxTickVal)) {
 		if ((_tickValues[i] != 0) && (_tickValues[i] != _maxTickVal)) {
+#ifdef PWM_CENTERED
+			nrf_timer_cc_write(CS_PWM_TIMER, getTimerChannel(2*i),   _maxTickVal/2 - _tickValues[i]/2);
+			nrf_timer_cc_write(CS_PWM_TIMER, getTimerChannel(2*i+1), _maxTickVal/2 + _tickValues[i]/2);
+#else
 			nrf_timer_cc_write(CS_PWM_TIMER, getTimerChannel(i), _tickValues[i]);
+#endif
 //			nrf_gpio_pin_write(_config.channels[i].pin, _config.channels[i].inverted ? 0 : 1);
 //			nrf_gpio_pin_write(_config.channels[i].pin, _config.channels[i].inverted ? 1 : 0);
 			enablePwm(i);
