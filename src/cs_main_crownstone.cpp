@@ -906,6 +906,23 @@ int main() {
 	errCode = configure_board(&board);
 	APP_ERROR_CHECK(errCode);
 
+	// Init gpio pins early in the process!
+	if (IS_CROWNSTONE(board.deviceType)) {
+		nrf_gpio_cfg_output(board.pinGpioPwm);
+		if (board.flags.pwmInverted) {
+			nrf_gpio_pin_set(board.pinGpioPwm);
+		} else {
+			nrf_gpio_pin_clear(board.pinGpioPwm);
+		}
+		//! Relay pins
+		if (board.flags.hasRelay) {
+			nrf_gpio_cfg_output(board.pinGpioRelayOff);
+			nrf_gpio_pin_clear(board.pinGpioRelayOff);
+			nrf_gpio_cfg_output(board.pinGpioRelayOn);
+			nrf_gpio_pin_clear(board.pinGpioRelayOn);
+		}
+	}
+
 	//! int uart, be nice and say hello
 	welcome(board.pinGpioRx, board.pinGpioTx);
 
