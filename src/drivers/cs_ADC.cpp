@@ -325,10 +325,10 @@ void ADC::limit(nrf_saadc_limit_t type) {
 		uint32_t curTime = RTC::getCount();
 		uint32_t diffTicks = RTC::difference(curTime, _lastZeroCrossUpTime);
 		if (diffTicks > RTC::msToTicks(19) && diffTicks < RTC::msToTicks(21)) {
-			if (RTC::difference(curTime, _lastPwmSyncTime) > RTC::msToTicks(100)) {
-				Switch::getInstance().syncPwm();
-				_lastPwmSyncTime = curTime;
-			}
+//			if (RTC::difference(curTime, _lastPwmSyncTime) > RTC::msToTicks(100)) {
+				Switch::getInstance().onZeroCrossing();
+//				_lastPwmSyncTime = curTime;
+//			}
 		}
 		_lastZeroCrossUpTime = curTime;
 

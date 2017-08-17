@@ -125,7 +125,7 @@ public:
 	 */
 	void delayedSwitch(uint8_t switchState, uint16_t delay);
 
-	void syncPwm();
+	void onZeroCrossing();
 
 
 	/** Used internally

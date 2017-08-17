@@ -52,7 +52,7 @@ public:
 
 //	void start();
 //	void stop();
-	void sync();
+	void onZeroCrossing();
 
 	//! Interrupt handler: internal function, implementation specific.
 	void _handleInterrupt();
@@ -98,6 +98,9 @@ private:
 
 	//! Returns whether a channel is currently dimming (value > 0 and < max).
 	bool _isPwmEnabled[CS_PWM_MAX_CHANNELS];
+
+	uint32_t _zeroCrossingCounter;
+	uint32_t _zeroCrossingTicksAvg;
 
 	//! Enables pwm for given channel (to be used when value is > 0 and < max).
 	void enablePwm(uint8_t channel);

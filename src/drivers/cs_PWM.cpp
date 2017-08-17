@@ -23,7 +23,11 @@
 #define PERIOD_SHORT_CLEAR_MASK  NRF_TIMER_SHORT_COMPARE5_CLEAR_MASK
 #define PERIOD_SHORT_STOP_MASK   NRF_TIMER_SHORT_COMPARE5_STOP_MASK
 
-#define PWM_CENTERED
+// Timer channel to capture the timer counter at the zero crossing
+#define CAPTURE_CHANNEL_IDX      4
+#define CAPTURE_TASK             NRF_TIMER_TASK_CAPTURE4
+
+//#define PWM_CENTERED
 
 PWM::PWM() :
 		_initialized(false)
@@ -78,6 +82,8 @@ uint32_t PWM::init(pwm_config_t & config) {
 	// Start the timer
 	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
 
+	_zeroCrossingCounter = 0;
+
     _initialized = true;
     return ERR_SUCCESS;
 //#endif
@@ -88,6 +94,8 @@ uint32_t PWM::init(pwm_config_t & config) {
 uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 	LOGd("Configure channel %u as pin %u", channel, _config.channels[channel].pin);
 //		nrf_gpio_cfg_output(_config.channels[i].pin);
+
+	_values[channel] = 0;
 
 	// Configure gpiote
 //	_gpioteInitStates[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_LOW : NRF_GPIOTE_INITIAL_VALUE_HIGH;
@@ -189,11 +197,69 @@ uint16_t PWM::getValue(uint8_t channel) {
 	return 0;
 }
 
-void PWM::sync() {
+void PWM::onZeroCrossing() {
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
 	}
+
+	nrf_timer_task_trigger(CS_PWM_TIMER, CAPTURE_TASK);
+	uint32_t ticks = nrf_timer_cc_read(CS_PWM_TIMER, getTimerChannel(CAPTURE_CHANNEL_IDX));
+
+	// Exponential moving average
+	uint32_t alpha = 500; // Discount factor
+	_zeroCrossingTicksAvg = ((1000-alpha) * _zeroCrossingTicksAvg + alpha * ticks) / 1000;
+
+//	_zeroCrossingCounter = (_zeroCrossingCounter + 1) % 5;
+	_zeroCrossingCounter++;
+
+	if (_zeroCrossingCounter % 10 == 0) {
+		int64_t maxTickVal = _maxTickVal;
+	//	int64_t targetTicks = _maxTickVal / 2;
+		int64_t targetTicks = 0;
+		int64_t errTicks = targetTicks - _zeroCrossingTicksAvg;
+	//	errTicks = (errTicks + maxTickVal/2) % maxTickVal - maxTickVal/2; // Correct for wrap around
+
+		if (errTicks > maxTickVal / 2) {
+			errTicks -= maxTickVal;
+		}
+		else if (errTicks < -maxTickVal / 2) {
+			errTicks += maxTickVal;
+		}
+
+		int32_t delta = -errTicks / 100; // Gain
+
+		// Limit the output
+		if (delta > maxTickVal / 1000) {
+			delta = maxTickVal / 1000;
+		}
+		if (delta < -maxTickVal / 1000) {
+			delta = -maxTickVal / 1000;
+		}
+		uint32_t newMaxTicks = maxTickVal + delta;
+
+		nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_STOP);
+		nrf_timer_task_trigger(CS_PWM_TIMER, CAPTURE_TASK);
+		ticks = nrf_timer_cc_read(CS_PWM_TIMER, getTimerChannel(CAPTURE_CHANNEL_IDX));
+		// Make sure that the new period compare value is not set lower than the current counter value.
+		if (newMaxTicks <= ticks) {
+			newMaxTicks = ticks+1;
+		}
+		nrf_timer_cc_write(CS_PWM_TIMER, getTimerChannel(PERIOD_CHANNEL_IDX), newMaxTicks);
+		nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
+
+		if (_zeroCrossingCounter % 50 == 0) {
+//			write("%u %u\r\n", ticks, _zeroCrossingTicksAvg);
+			write("%u  %u  %lli  %u\r\n", ticks, _zeroCrossingTicksAvg, errTicks, newMaxTicks);
+//			write("%u %u\r\n", ticks, newMaxTicks);
+		}
+	}
+
+
+
+	return;
+
+	// Start a new period
 	// Need to stop the timer, else the gpio state at start is not consistent.
 	// I guess this is because the gpiote toggle sometimes happens before, sometimes after the nrf_gpiote_task_force()
 	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
@@ -226,7 +292,7 @@ void PWM::enablePwm(uint8_t channel) {
 		nrf_gpiote_task_configure(CS_PWM_GPIOTE_CHANNEL_START + channel, _config.channels[channel].pin, NRF_GPIOTE_POLARITY_TOGGLE, _gpioteInitStatesInversed[channel]);
 #endif
 		nrf_gpiote_task_enable(CS_PWM_GPIOTE_CHANNEL_START + channel);
-//		nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + channel, _gpioteInitStates[channel]);
+		nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + channel, _gpioteInitStates[channel]);
 		_isPwmEnabled[channel] = true;
 	}
 }
