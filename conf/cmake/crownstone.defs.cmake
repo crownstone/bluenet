@@ -80,7 +80,7 @@ ENDIF()
 ADD_DEFINITIONS("-DNRF52_PAN_12")
 ADD_DEFINITIONS("-DNRF52_PAN_15")
 ADD_DEFINITIONS("-DNRF52_PAN_20")
-#ADD_DEFINITIONS("-DNRF52_PAN_28") # Although rev1 shouldn't have this PAN, defining it did fix our code
+ADD_DEFINITIONS("-DNRF52_PAN_28") # Although rev1 shouldn't have this PAN, defining it did fix our code
 ADD_DEFINITIONS("-DNRF52_PAN_31")
 ADD_DEFINITIONS("-DNRF52_PAN_36")
 ADD_DEFINITIONS("-DNRF52_PAN_51")

@@ -207,7 +207,7 @@ void PWM::onZeroCrossing() {
 	uint32_t ticks = nrf_timer_cc_read(CS_PWM_TIMER, getTimerChannel(CAPTURE_CHANNEL_IDX));
 
 	// Exponential moving average
-	uint32_t alpha = 500; // Discount factor
+	uint32_t alpha = 1000; // Discount factor
 	_zeroCrossingTicksAvg = ((1000-alpha) * _zeroCrossingTicksAvg + alpha * ticks) / 1000;
 
 //	_zeroCrossingCounter = (_zeroCrossingCounter + 1) % 5;
@@ -227,14 +227,14 @@ void PWM::onZeroCrossing() {
 			errTicks += maxTickVal;
 		}
 
-		int32_t delta = -errTicks / 100; // Gain
+		int32_t delta = -errTicks / 50; // Gain
 
 		// Limit the output
-		if (delta > maxTickVal / 2000) {
-			delta = maxTickVal / 2000;
+		if (delta > maxTickVal / 500) {
+			delta = maxTickVal / 500;
 		}
-		if (delta < -maxTickVal / 2000) {
-			delta = -maxTickVal / 2000;
+		if (delta < -maxTickVal / 500) {
+			delta = -maxTickVal / 500;
 		}
 		uint32_t newMaxTicks = maxTickVal + delta;
 
