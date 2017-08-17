@@ -213,7 +213,7 @@ void PWM::onZeroCrossing() {
 //	_zeroCrossingCounter = (_zeroCrossingCounter + 1) % 5;
 	_zeroCrossingCounter++;
 
-	if (_zeroCrossingCounter % 10 == 0) {
+	if (_zeroCrossingCounter % 2 == 0) {
 		int64_t maxTickVal = _maxTickVal;
 	//	int64_t targetTicks = _maxTickVal / 2;
 		int64_t targetTicks = 0;
@@ -230,11 +230,11 @@ void PWM::onZeroCrossing() {
 		int32_t delta = -errTicks / 100; // Gain
 
 		// Limit the output
-		if (delta > maxTickVal / 1000) {
-			delta = maxTickVal / 1000;
+		if (delta > maxTickVal / 2000) {
+			delta = maxTickVal / 2000;
 		}
-		if (delta < -maxTickVal / 1000) {
-			delta = -maxTickVal / 1000;
+		if (delta < -maxTickVal / 2000) {
+			delta = -maxTickVal / 2000;
 		}
 		uint32_t newMaxTicks = maxTickVal + delta;
 
