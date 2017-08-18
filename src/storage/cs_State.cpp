@@ -302,7 +302,7 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 	}
 }
 
-ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
+ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) {
 
 	ERR_CODE error_code;
 	error_code = verify(type, size);
@@ -323,7 +323,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 		case STATE_SWITCH_STATE: {
 			uint8_t value = *(uint8_t*)target;
 #ifdef SWITCH_STATE_PERSISTENT
-			if (_switchState->read() != value) {
+			if (persistent && _switchState->read() != value) {
 				_switchState->store(value);
 			}
 #else
@@ -335,7 +335,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 			uint8_t value = *(uint8_t*)target;
 			uint32_t opMode;
 			StorageHelper::getUint32(_storageStruct.operationMode, &opMode, OPERATION_MODE_SETUP);
-			if (opMode != value) {
+			if (persistent && opMode != value) {
 				StorageHelper::setUint32(value, _storageStruct.operationMode);
 				savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));
 			}
@@ -343,7 +343,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 		}
 		case STATE_RESET_COUNTER: {
 			uint16_t value = *(uint16_t*)target;
-			if (_resetCounter->read() != value) {
+			if (persistent && _resetCounter->read() != value) {
 				_resetCounter->store(value);
 			}
 			break;
@@ -361,7 +361,9 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 		}
 		case STATE_TRACKED_DEVICES: {
 			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.trackedDevices, size);
-			savePersistentStorageItem(_storageStruct.trackedDevices, size);
+			if (persistent) {
+				savePersistentStorageItem(_storageStruct.trackedDevices, size);
+			}
 			break;
 		}
 		case STATE_SCHEDULE: {
@@ -375,7 +377,9 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size) {
 		}
 		case STATE_LEARNED_SWITCHES: {
 			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.learnedSwitches, size);
-			savePersistentStorageItem(_storageStruct.learnedSwitches, size);
+			if (persistent) {
+				savePersistentStorageItem(_storageStruct.learnedSwitches, size);
+			}
 			break;
 		}
 		case STATE_ERRORS: {

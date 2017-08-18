@@ -96,7 +96,8 @@ void Switch::updateSwitchState(switch_state_t oldVal) {
 //	if (oldVal.pwm_state != _switchValue.pwm_state || oldVal.relay_state != _switchValue.relay_state) {
 	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
 		LOGd("updateSwitchState: %d", _switchValue);
-		State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t));
+		bool persistent = (oldVal.relay_state != _switchValue.relay_state);
+		State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t), persistent);
 	}
 }
 

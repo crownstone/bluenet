@@ -192,7 +192,7 @@ public:
 //	ERR_CODE set(uint8_t type, buffer_ptr_t buffer, uint16_t size);
 
 	ERR_CODE verify(uint8_t type, uint16_t size);
-	ERR_CODE set(uint8_t type, void* target, uint16_t size);
+	ERR_CODE set(uint8_t type, void* target, uint16_t size, bool persistent=true);
 	ERR_CODE get(uint8_t type, void* target, uint16_t size);
 
 	uint16_t getStateItemSize(uint8_t type);
