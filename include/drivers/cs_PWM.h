@@ -95,6 +95,12 @@ private:
 	//! PPI channels to be used to communicate from Timer to GPIOTE.
 	nrf_ppi_channel_t _ppiChannels[2*CS_PWM_MAX_CHANNELS];
 
+	//! PPI channels to be used for duty cycle transitions.
+	nrf_ppi_channel_t _ppiTransitionChannels[2];
+
+	//! PPI group, used to enable/disable ppi channels.
+	nrf_ppi_channel_group_t _ppiGroup;
+
 	//! GPIOTE init states cache
 	nrf_gpiote_outinit_t _gpioteInitStatesOn[CS_PWM_MAX_CHANNELS];
 	nrf_gpiote_outinit_t _gpioteInitStatesOff[CS_PWM_MAX_CHANNELS];
@@ -131,6 +137,8 @@ private:
 	void gpioteForce(uint8_t channel, bool initOn);
 	void gpioOn(uint8_t channel);
 	void gpioOff(uint8_t channel);
+	void writeCC(uint8_t channelIdx, uint32_t ticks);
+	uint32_t readCC(uint8_t channelIdx);
 
 
 	//! Enables the timer interrupt, to change the pwm value.
@@ -142,4 +150,10 @@ private:
 	nrf_gpiote_tasks_t getGpioteTaskOut(uint8_t index);
 	//! Helper function to get the ppi channel, given the index.
 	nrf_ppi_channel_t getPpiChannel(uint8_t index);
+	//! Helper function to get the ppi group, given the index.
+	nrf_ppi_channel_group_t getPpiGroup(uint8_t index);
+	//! Helper function to get the ppi enable task, given the group index.
+	nrf_ppi_task_t getPpiTaskEnable(uint8_t index);
+	//! Helper function to get the ppi disable task, given the group index.
+	nrf_ppi_task_t getPpiTaskDisable(uint8_t index);
 };

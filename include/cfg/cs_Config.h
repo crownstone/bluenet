@@ -113,7 +113,11 @@
 #define CS_ADC_PPI_CHANNEL_START                 0
 #define CS_ADC_PPI_CHANNEL_COUNT                 1
 #define CS_PWM_PPI_CHANNEL_START                 (CS_ADC_PPI_CHANNEL_START + CS_ADC_PPI_CHANNEL_COUNT)
-#define CS_PWM_PPI_CHANNEL_COUNT                 (2 * CS_PWM_MAX_CHANNELS)
+#define CS_PWM_PPI_CHANNEL_COUNT                 (2 + 2 * CS_PWM_MAX_CHANNELS)
+
+//! ----- PPI groups -----
+#define CS_PWM_PPI_GROUP_START                   0
+#define CS_PWM_PPI_GROUP_COUNT                   1
 
 //! ----- GPIOTE -----
 #define CS_PWM_GPIOTE_CHANNEL_START              0
