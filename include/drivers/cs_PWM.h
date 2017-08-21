@@ -83,8 +83,11 @@ private:
 	//! Pointer to the timer.
 	nrf_drv_timer_t* _timer;
 
-	//! Max value of channel, in ticks.
+	//! Max value of channel, in ticks. Set at init
 	uint32_t _maxTickVal;
+
+	//! Max value of channel, in ticks. Adjusted to sync with zero crossings.
+	uint32_t _newMaxTickVal;
 
 	//! Values of the channels in ticks.
 	uint32_t _tickValues[CS_PWM_MAX_CHANNELS];
@@ -93,8 +96,8 @@ private:
 	nrf_ppi_channel_t _ppiChannels[2*CS_PWM_MAX_CHANNELS];
 
 	//! GPIOTE init states cache
-	nrf_gpiote_outinit_t _gpioteInitStates[CS_PWM_MAX_CHANNELS];
-	nrf_gpiote_outinit_t _gpioteInitStatesInversed[CS_PWM_MAX_CHANNELS];
+	nrf_gpiote_outinit_t _gpioteInitStatesOn[CS_PWM_MAX_CHANNELS];
+	nrf_gpiote_outinit_t _gpioteInitStatesOff[CS_PWM_MAX_CHANNELS];
 
 	//! Returns whether a channel is currently dimming (value > 0 and < max).
 	bool _isPwmEnabled[CS_PWM_MAX_CHANNELS];
@@ -102,11 +105,36 @@ private:
 	uint32_t _zeroCrossingCounter;
 	uint32_t _zeroCrossingTicksAvg;
 
+	//! Sets pin on
+	void turnOn(uint8_t channel);
+
+	//! Sets pin off
+	void turnOff(uint8_t channel);
+
 	//! Enables pwm for given channel (to be used when value is > 0 and < max).
 	void enablePwm(uint8_t channel);
 
 	//! Disables pwm for given channel (to be used when value is 0 or max).
 	void disablePwm(uint8_t channel);
+
+//	//! Enables pwm for given channel and turns it on or off.
+//	void enablePwm(uint8_t channel, bool on);
+//
+	//! Disables pwm for given channel and turns it on or off.
+	void disablePwm(uint8_t channel, bool on);
+
+	// Some abstraction functions
+	void gpioteConfig(uint8_t channel, bool initOn);
+	void gpioteUnconfig(uint8_t channel);
+	void gpioteEnable(uint8_t channel);
+	void gpioteDisable(uint8_t channel);
+	void gpioteForce(uint8_t channel, bool initOn);
+	void gpioOn(uint8_t channel);
+	void gpioOff(uint8_t channel);
+
+
+	//! Enables the timer interrupt, to change the pwm value.
+	void enableInterrupt();
 
 	//! Helper function to get the timer channel, given the index.
 	nrf_timer_cc_channel_t getTimerChannel(uint8_t index);
