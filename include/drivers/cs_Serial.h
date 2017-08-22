@@ -68,11 +68,11 @@ extern "C" {
 	#define logLN(level, fmt, ...)
 #endif
 
-#define LOGd(fmt, ...) logLN(SERIAL_DEBUG, fmt, ##__VA_ARGS__)
-#define LOGi(fmt, ...) logLN(SERIAL_INFO, fmt, ##__VA_ARGS__)
-#define LOGw(fmt, ...) logLN(SERIAL_WARN, fmt, ##__VA_ARGS__)
-#define LOGe(fmt, ...) logLN(SERIAL_ERROR, fmt, ##__VA_ARGS__)
-#define LOGf(fmt, ...) logLN(SERIAL_FATAL, fmt, ##__VA_ARGS__)
+#define LOGd(fmt, ...) logLN(SERIAL_DEBUG, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOGi(fmt, ...) logLN(SERIAL_INFO,  "\033[34;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOGw(fmt, ...) logLN(SERIAL_WARN,  "\033[33;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOGe(fmt, ...) logLN(SERIAL_ERROR, "\033[35;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOGf(fmt, ...) logLN(SERIAL_FATAL, "\033[31;1m" fmt "\033[0m", ##__VA_ARGS__)
 
 #if SERIAL_VERBOSITY>SERIAL_DEBUG
 #undef LOGd

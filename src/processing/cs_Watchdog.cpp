@@ -58,7 +58,7 @@ void Watchdog::init() {
 
 void Watchdog::keepAlive() {
 	if (_hasKeepAliveState) {
-		LOGi("Reset keep alive");
+		LOGd("Reset keep alive");
 //		_lastKeepAliveTimestamp = RTC::now();
 		uint32_t timeout = _lastKeepAlive.timeout * 1000;
 //		LOGi("timeout in %d ms", timeout);
