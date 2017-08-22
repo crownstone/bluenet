@@ -220,7 +220,7 @@ void Crownstone::configure() {
 	uint16_t resetCounter;
 	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
 	++resetCounter;
-	LOGf("Reset counter at: %d", resetCounter);
+	LOGw("Reset counter at: %d", resetCounter);
 	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
 
 	//! set advertising parameters such as the device name and appearance.
@@ -642,6 +642,8 @@ void Crownstone::startUp() {
 
 		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
 #if BUILD_MESHING == 1
+//			nrf_delay_ms(500);
+			//! TODO: start with delay please
 			_mesh->start();
 #endif
 		} else {
