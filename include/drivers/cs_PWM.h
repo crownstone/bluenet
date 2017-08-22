@@ -87,7 +87,7 @@ private:
 	uint32_t _maxTickVal;
 
 	//! Max value of channel, in ticks. Adjusted to sync with zero crossings.
-	uint32_t _newMaxTickVal;
+	uint32_t _adjustedMaxTickVal;
 
 	//! Values of the channels in ticks.
 	uint32_t _tickValues[CS_PWM_MAX_CHANNELS];
