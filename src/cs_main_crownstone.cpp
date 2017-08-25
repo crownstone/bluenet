@@ -284,7 +284,7 @@ void Crownstone::initDrivers() {
 		_temperatureGuard->init(&_boardsConfig);
 
 		LOGd(FMT_INIT, "power sampler");
-		_powerSampler->init(_boardsConfig.pinAinCurrent, _boardsConfig.pinAinVoltage);
+		_powerSampler->init(_boardsConfig);
 
 		LOGi(FMT_INIT, "watchdog");
 		_watchdog->init();

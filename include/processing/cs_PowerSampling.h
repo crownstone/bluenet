@@ -9,8 +9,10 @@
 extern "C" {
 #include <nrf_drv_saadc.h>
 }
-#include <structs/cs_PowerSamples.h>
-#include <structs/buffer/cs_CircularBuffer.h>
+#include "structs/cs_PowerSamples.h"
+#include "structs/buffer/cs_CircularBuffer.h"
+#include "cfg/cs_Boards.h"
+#include "drivers/cs_ADC.h"
 
 class PowerSampling {
 public:
@@ -20,7 +22,7 @@ public:
 		return instance;
 	}
 
-	void init(uint8_t pinAinCurrent, uint8_t pinAinVoltage);
+	void init(const boards_config_t& boardConfig);
 
 	void stopSampling();
 
@@ -71,46 +73,47 @@ public:
 private:
 	PowerSampling();
 
+	//! Variable to keep up whether power sampling is initialized.
+	bool _isInitialized;
+
+	//! Reference to the ADC instance
+	ADC* _adc;
+
+	//! Timer instance
 	app_timer_t              _powerSamplingReadTimerData;
 	app_timer_id_t           _powerSamplingSentDoneTimerId;
 
+	//! Operation mode of this device.
 	uint8_t _operationMode;
 
-	buffer_ptr_t _powerSamplesBuffer; //! Buffer that holds the data for burst or continuous sampling
+	//! Buffer that holds the data of the power samples.
+	buffer_ptr_t _powerSamplesBuffer;
 
-//	CircularBuffer<uint16_t> _currentSampleCircularBuf;
-//	CircularBuffer<uint16_t> _voltageSampleCircularBuf;
-	power_samples_cont_message_t* _powerSamplesContMsg;
-//	uint16_t _powerSamplesCount;
-//	uint16_t _lastPowerSample;
-//	uint16_t _burstCount;
-	uint16_t _count;
-
+	//! Power samples to be sent via characteristic.
 	PowerSamples _powerSamples;
 
-	uint16_t _burstSamplingInterval;
-	uint16_t _contSamplingInterval;
-	float _voltageMultiplier;
-	float _currentMultiplier;
-	int32_t _voltageZero;
-	int32_t _currentZero;
-	int32_t _powerZero;
-//	uint16_t _zeroAvgWindow; // No longer used
 
-	bool _sendingSamples;
+	float _voltageMultiplier; //! Voltage multiplier from settings.
+	float _currentMultiplier; //! Current multiplier from settings.
+	int32_t _voltageZero; //! Voltage zero from settings.
+	int32_t _currentZero; //! Current zero from settings.
+	int32_t _powerZero; //! Power zero from settings.
 
-//	uint16_t _avgZeroVoltageDiscount;
-//	uint16_t _avgZeroCurrentDiscount;
-//	uint16_t _avgPowerDiscount;
+	bool _sendingSamples; //! Whether or not currently sending power samples.
 
-	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value
-	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value
-//	int64_t _avgPower; //! Used for storing and calculating the average power
-	double _avgPower; //! Used for storing and calculating the average power
-	int32_t _avgPowerMilliWatt; //! Used to send out the average power
+	uint16_t _avgZeroCurrentDiscount;
+	uint16_t _avgZeroVoltageDiscount;
+	uint16_t _avgPowerDiscount;
 
-	uint16_t _currentThreshold;
-	uint16_t _currentThresholdPwm;
+	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value (times 1000).
+	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value (times 1000).
+	bool _recalibrateZeroVoltage; //! Whether or not the zero voltage value should be recalculated.
+	bool _recalibrateZeroCurrent; //! Whether or not the zero current value should be recalculated.
+	double _avgPower; //! Used for storing and calculating the average power (in mW).
+	int32_t _avgPowerMilliWatt; //! Used to send out the average power (in mW).
+
+	uint16_t _currentThreshold; //! Current threshold from settings.
+	uint16_t _currentThresholdPwm; //! Current threshold when using dimmer from settings.
 
 	/** Copies the adc samples to the power samples struct, to be sent over bluetooth
 	 */

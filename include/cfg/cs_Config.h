@@ -106,10 +106,10 @@
 #define CS_ADC_TIMER_IRQn                        TIMER1_IRQn
 #define CS_ADC_INSTANCE_INDEX                    TIMER1_INSTANCE_INDEX
 #define CS_ADC_TIMER_ID                          1
+#define CS_ADC_TIMER_FREQ                        NRF_TIMER_FREQ_16MHz
 
 
 //! ----- PPI -----
-//! TODO: adc gets auto assigned atm
 #define CS_ADC_PPI_CHANNEL_START                 0
 #define CS_ADC_PPI_CHANNEL_COUNT                 1
 #define CS_PWM_PPI_CHANNEL_START                 (CS_ADC_PPI_CHANNEL_START + CS_ADC_PPI_CHANNEL_COUNT)
@@ -155,9 +155,12 @@
 */
 //#define POWER_ZERO_AVG_WINDOW                    100
 // Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
-#define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            20  // Is divided by 1000, so 20 is a discount of 0.02. //! 99% of the average is influenced by the last 228 values
-#define CURRENT_ZERO_EXP_AVG_DISCOUNT            100 // Is divided by 1000, so 100 is a discount of 0.1. //! 99% of the average is influenced by the last 44 values
+#define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            20  // Is divided by 1000, so 20 is a discount of 0.02. // 99% of the average is influenced by the last 228 values
+//#define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            1000 // No averaging
+#define CURRENT_ZERO_EXP_AVG_DISCOUNT            100 // Is divided by 1000, so 100 is a discount of 0.1. // 99% of the average is influenced by the last 44 values
+//#define CURRENT_ZERO_EXP_AVG_DISCOUNT            1000 // No averaging
 #define POWER_EXP_AVG_DISCOUNT                   50  // Is divided by 1000, so 50 is a discount of 0.05. //! 99% of the average is influenced by the last 90 values
+//#define POWER_EXP_AVG_DISCOUNT                   1000 // No averaging
 
 #define CURRENT_USAGE_THRESHOLD                  (16000) // Power usage threshold in mA at which the switch should be turned off.
 #define CURRENT_USAGE_THRESHOLD_PWM              (1000)  // Power usage threshold in mA at which the PWM should be turned off.

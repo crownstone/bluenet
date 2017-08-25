@@ -84,24 +84,34 @@ typedef struct  {
 
 	//! GPIO pin to control the IGBTs.
 	uint8_t pinGpioPwm;
+
 	//! GPIO pin to switch the relay on.
 	uint8_t pinGpioRelayOn;
+
 	//! GPIO pin to switch the relay off.
 	uint8_t pinGpioRelayOff;
+
 	//! Analog input pin to read the current.
 	uint8_t pinAinCurrent;
+
 	//! Analog input pin to read the voltage.
 	uint8_t pinAinVoltage;
-	//! Analog input pin to read 'zero' line for current measurement.
+
+	//! Analog input pin to read 'zero' line for current and voltage measurement (optional).
 	uint8_t pinAinZeroRef;
+
 	//! Analog input pin to read the pwm temperature.
 	uint8_t pinAinPwmTemp;
+
 	//! GPIO pin to receive uart.
 	uint8_t pinGpioRx;
+
 	//! GPIO pin to send uart.
 	uint8_t pinGpioTx;
+
 	//! GPIO pin to control the "red" led.
 	uint8_t pinLedRed;
+
 	//! GPIO pin to control the "green" led.
 	uint8_t pinLedGreen;
 
@@ -109,14 +119,21 @@ typedef struct  {
 	struct __attribute__((__packed__)) {
 		//! True if board has relays.
 		bool hasRelay: 1;
+
 		//! True if the pwm is inverted (setting gpio high turns light off).
 		bool pwmInverted: 1;
+
 		//! True if the board has serial / uart.
 		bool hasSerial: 1;
+
 		//! True if the board has leds.
 		bool hasLed : 1;
+
 		//! True if led off when GPIO set high.
 		bool ledInverted: 1;
+
+		//! True if the board has a zero ref pin for current and voltage measurements.
+		bool hasAdcZeroRef: 1;
 	} flags;
 
 	/** Device type, e.g. crownstone plug, crownstone builtin, guidestone.
@@ -125,16 +142,26 @@ typedef struct  {
 	 */
 	uint8_t deviceType;
 
-	//! Multiplication factor for voltage measurement.
-	float voltageMultiplier;
 	//! Multiplication factor for current measurement.
 	float currentMultiplier;
+
+	//! Multiplication factor for voltage measurement.
+	float voltageMultiplier;
+
 	//! Offset for voltage measurement.
 	int32_t voltageZero;
+
 	//! Offset for current measurement.
 	int32_t currentZero;
+
 	//! Offset for power measurement.
 	int32_t powerZero;
+
+	//! Default range in mV on the voltage pin. Example: if default should be [-0.6V, 0.6V] then voltageRange is 1200.
+	uint32_t voltageRange;
+
+	//! Default range in mV on the current pin. Example: if default should be [0V, 3.6V] then currentRange is 3600.
+	uint32_t currentRange;
 
 	/** The minimum radio transmission power to be used.
 	 * 

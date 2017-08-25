@@ -16,7 +16,7 @@
 #include "drivers/cs_RTC.h"
 #include "cfg/cs_Strings.h"
 #include "cfg/cs_Config.h"
-#include "processing/cs_Switch.h"
+//#include "processing/cs_Switch.h"
 
 //#define PRINT_ADC_VERBOSE
 //#define TEST_PIN 22
@@ -31,11 +31,6 @@ extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
 
 ADC::ADC()
 {
-	_timer = new nrf_drv_timer_t();
-	_timer->p_reg = CS_ADC_TIMER; // Or use CONCAT_2(NRF_TIMER, CS_ADC_TIMER_ID)
-	_timer->instance_id = CS_ADC_INSTANCE_INDEX; // Or use CONCAT_3(TIMER, CS_ADC_TIMER_ID, _INSTANCE_INDEX)
-	_timer->cc_channel_count = NRF_TIMER_CC_CHANNEL_COUNT(CS_ADC_TIMER_ID);
-
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
 		_bufferPointers[i] = NULL;
 	}
@@ -44,84 +39,72 @@ ADC::ADC()
 	_doneCallbackData.bufSize = 0;
 	// TODO: misuse: overload of bufNum field to indicate also initialization
 	_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
+	_zeroCrossingCallback = NULL;
 	_numBuffersQueued = 0;
 	_lastZeroCrossUpTime = 0;
-	_lastPwmSyncTime = 0;
 }
 
 /**
  * The initialization function for ADC has to configure the ADC channels, but
  * also a timer that dictates when to sample.
  *
+ *   - set the resolution to 12 bits
+ *
  * @caller src/processing/cs_PowerSampling.cpp
  */
-cs_adc_error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
-	ret_code_t err_code;
+cs_adc_error_t ADC::init(const adc_config_t & config) {
+	_config = config;
+//	memcpy(&_config, &config, sizeof(adc_config_t));
 
-	for (uint8_t i=0; i<numPins; i++) {
-		_pins[i] = pins[i];
-	}
-	_numPins = numPins;
+	// Setup timer
+	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
+	nrf_timer_bit_width_set(CS_ADC_TIMER, NRF_TIMER_BIT_WIDTH_32);
+	nrf_timer_frequency_set(CS_ADC_TIMER, CS_ADC_TIMER_FREQ);
+	uint32_t ticks = nrf_timer_us_to_ticks(_config.samplingPeriodUs, CS_ADC_TIMER_FREQ);
+	LOGd("maxTicks=%u", ticks);
+	nrf_timer_cc_write(CS_ADC_TIMER, NRF_TIMER_CC_CHANNEL0, ticks);
+	nrf_timer_mode_set(CS_ADC_TIMER, NRF_TIMER_MODE_TIMER);
+	nrf_timer_shorts_enable(CS_ADC_TIMER, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
+	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(0));
+	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(1));
+	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(2));
+	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(3));
+	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(4));
+	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(5));
 
-	err_code = nrf_drv_ppi_init();
-	if (err_code != MODULE_ALREADY_INITIALIZED) {
-		APP_ERROR_CHECK(err_code);
-	}
+	// Setup PPI
+	_ppiChannel = getPpiChannel(CS_ADC_PPI_CHANNEL_START);
 
-	// TODO: Where is this configuration set? We also have cs_Config.h and third/nrf/nrf_drv_config.h
-	nrf_drv_timer_config_t timerConfig = {
-		.frequency          = NRF_TIMER_FREQ_16MHz,
-		.mode               = (nrf_timer_mode_t)TIMER_MODE_MODE_Timer,
-		.bit_width          = (nrf_timer_bit_width_t)TIMER_BITMODE_BITMODE_32Bit,
-		.interrupt_priority = SAADC_TIMER_CONFIG_IRQ_PRIORITY,
-		.p_context          = NULL
-	};
+	nrf_ppi_channel_endpoint_setup(
+			_ppiChannel,
+			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMER, nrf_timer_compare_event_get(0)),
+			nrf_drv_saadc_sample_task_get()
+	);
 
-	err_code = nrf_drv_timer_init(_timer, &timerConfig, staticTimerHandler);
-	APP_ERROR_CHECK(err_code);
+	nrf_ppi_channel_enable(_ppiChannel);
 
-	//! Setup timer for compare event every CS_ADC_SAMPLE_INTERVAL_US us
-	uint32_t ticks = nrf_drv_timer_us_to_ticks(_timer, CS_ADC_SAMPLE_INTERVAL_US);
-//	LOGd("adc timer ticks: %u", ticks);
-	nrf_drv_timer_extended_compare(_timer, NRF_TIMER_CC_CHANNEL0, ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, false);
 
-	uint32_t timer_compare_event_addr = nrf_drv_timer_compare_event_address_get(_timer, NRF_TIMER_CC_CHANNEL0);
-	uint32_t saadc_sample_event_addr = nrf_drv_saadc_sample_task_get();
-
-	//! Setup ppi channel so that timer compare event is triggering sample task in SAADC
-	err_code = nrf_drv_ppi_channel_alloc(&_ppiChannel);
-	APP_ERROR_CHECK(err_code);
-
-	err_code = nrf_drv_ppi_channel_assign(_ppiChannel, timer_compare_event_addr, saadc_sample_event_addr);
-	APP_ERROR_CHECK(err_code);
-
-	err_code = nrf_drv_ppi_channel_enable(_ppiChannel);
-	APP_ERROR_CHECK(err_code);
-
-	//! Config adc
+	// Config adc
 	nrf_drv_saadc_config_t adcConfig = {
-		.resolution         = NRF_SAADC_RESOLUTION_12BIT, //! 14 bit can only be achieved with oversampling
-		.oversample         = NRF_SAADC_OVERSAMPLE_DISABLED, //! Oversampling can only be used when sampling 1 channel
-		.interrupt_priority = SAADC_CONFIG_IRQ_PRIORITY
+			.resolution         = NRF_SAADC_RESOLUTION_12BIT, // 14 bit can only be achieved with oversampling
+			.oversample         = NRF_SAADC_OVERSAMPLE_DISABLED, // Oversampling can only be used when sampling 1 channel
+			.interrupt_priority = SAADC_CONFIG_IRQ_PRIORITY
 	};
 
+	ret_code_t err_code;
 	err_code = nrf_drv_saadc_init(&adcConfig, saadc_callback);
 	APP_ERROR_CHECK(err_code);
 
-	for (int i=0; i<_numPins; i++) {
-		configPin(i, _pins[i]);
+	for (int i=0; i<_config.channelCount; ++i) {
+		initChannel(i, _config.channels[i]);
 	}
 
+	// Allocate buffers
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
 		_bufferPointers[i] = new nrf_saadc_value_t[CS_ADC_BUF_SIZE];
 		/* Start conversion in non-blocking mode. Sampling is not triggered yet. */
 		addBufferToSampleQueue(_bufferPointers[i]);
 	}
-
-	nrf_gpio_cfg_output(TEST_PIN);
-	nrf_drv_saadc_limits_set(1, NRF_DRV_SAADC_LIMITL_DISABLED + 1, TEST_ZERO + TEST_ZERO_HYST); // Triggers when above zero
-
-
 
 //	// Setup timer
 //	nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_TASK_CLEAR);
@@ -152,96 +135,68 @@ cs_adc_error_t ADC::init(const pin_id_t pins[], const pin_count_t numPins) {
 //	nrf_timer_cc_write(NRF_TIMER3, NRF_TIMER_CC_CHANNEL0, 20000 - valueTicks/2);
 //	nrf_timer_cc_write(NRF_TIMER3, NRF_TIMER_CC_CHANNEL1, 20000 + valueTicks/2);
 
-
-
 	return 0;
 }
 
-//#define CS_ADC_PIN_P(pinNum) CONCAT_2(NRF_SAADC_INPUT_AIN, pinNum)
-
-/** Configure the AD converter.
+/** Configure an ADC channel.
  *
- *   - set the resolution to 10 bits
+ *   - set acquire time to 10 micro seconds
+ *   - use the internal VGB reference of 0.6V (not the external one, so no need to use its multiplexer either)
  *   - set the prescaler for the input voltage (the input, not the input supply)
- *   - use the internal VGB reference (not the external one, so no need to use its multiplexer either)
- *   - do not set the prescaler for the reference voltage, this means voltage is expected between 0 and 1.2V (VGB)
- * The prescaler for input is set to 1/3. This means that the AIN input can be from 0 to 3.6V.
+ *   - set either differential mode (pin - ref_pin), or single ended mode (pin - 0)
  */
-cs_adc_error_t ADC::configPin(const channel_id_t channelNum, const pin_id_t pinNum) {
-	LOGd("Configuring channel %i, pin %i", channelNum, pinNum);
-	ret_code_t err_code;
+cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config) {
+
+	assert(config.pin < 8, "Invalid pin");
+	assert(config.referencePin < 8 || config.referencePin == CS_ADC_REF_PIN_NOT_AVAILABLE, "Invalid ref pin");
+	assert(config.pin != config.referencePin, "Pin and ref pin should be different");
 
 	nrf_saadc_channel_config_t channelConfig;
-	if (channelNum == 1)  {
-		// voltage sits on channel 1
-		channelConfig = {
-			.resistor_p = NRF_SAADC_RESISTOR_DISABLED,
-			.resistor_n = NRF_SAADC_RESISTOR_DISABLED,
-//			.gain       = NRF_SAADC_GAIN2,   //! gain is 2/1, maps [0, 0.3] to [0, 0.6]
-//			.gain       = NRF_SAADC_GAIN1,   //! gain is 1/1, maps [0, 0.6] to [0, 0.6]
-			.gain       = NRF_SAADC_GAIN1_2, //! gain is 1/2, maps [0, 1.2] to [0, 0.6]
-//			.gain       = NRF_SAADC_GAIN1_4, //! gain is 1/4, maps [0, 2.4] to [0, 0.6]
-//			.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
-			.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
-			.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
-			.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
-//			.mode		= NRF_SAADC_MODE_DIFFERENTIAL,
-			.pin_p      = getAdcPin(pinNum),
-			.pin_n      = NRF_SAADC_INPUT_DISABLED
-//			.pin_n      = getAdcPin(4) // gpio 28
-		};
-	} else if (channelNum == 0) {
-		// current sits on channel 0
-		channelConfig = {
-			.resistor_p = NRF_SAADC_RESISTOR_DISABLED,
-			.resistor_n = NRF_SAADC_RESISTOR_DISABLED,
-//			.gain       = NRF_SAADC_GAIN2,   //! gain is 2/1, maps [0, 0.3] to [0, 0.6]
-			.gain       = NRF_SAADC_GAIN1_2, //! gain is 1/2, maps [0, 1.2] to [0, 0.6]
-//			.gain       = NRF_SAADC_GAIN1_6, //! gain is 1/6, maps [0, 3.6] to [0, 0.6]
-			.reference  = NRF_SAADC_REFERENCE_INTERNAL, //! 0.6V
-			.acq_time   = NRF_SAADC_ACQTIME_10US, //! 10 micro seconds (10e-6 seconds)
-			.mode       = NRF_SAADC_MODE_SINGLE_ENDED,
-//			.mode		= NRF_SAADC_MODE_DIFFERENTIAL,
-			.pin_p      = getAdcPin(pinNum),
-			.pin_n      = NRF_SAADC_INPUT_DISABLED
-//			.pin_n      = getAdcPin(4) // gpio 28
-		};
-	} else {
-		// no idea!!
-		assert(false, "Unknown channel");
+	channelConfig.resistor_p = NRF_SAADC_RESISTOR_DISABLED;
+	channelConfig.resistor_n = NRF_SAADC_RESISTOR_DISABLED;
+//	channelConfig.gain = config.gain;
+	if (config.rangeMilliVolt <= 150) {
+		channelConfig.gain = NRF_SAADC_GAIN4;
+	}
+	else if (config.rangeMilliVolt <= 300) {
+		channelConfig.gain = NRF_SAADC_GAIN2;
+	}
+	else if (config.rangeMilliVolt <= 600) {
+		channelConfig.gain = NRF_SAADC_GAIN1;
+	}
+	else if (config.rangeMilliVolt <= 1200) {
+		channelConfig.gain = NRF_SAADC_GAIN1_2;
+	}
+	else if (config.rangeMilliVolt <= 1800) {
+		channelConfig.gain = NRF_SAADC_GAIN1_3;
+	}
+	else if (config.rangeMilliVolt <= 2400) {
+		channelConfig.gain = NRF_SAADC_GAIN1_4;
+	}
+	else if (config.rangeMilliVolt <= 3000) {
+		channelConfig.gain = NRF_SAADC_GAIN1_5;
+	}
+//	else if (config.rangeMilliVolt <= 3600) {
+	else {
+		channelConfig.gain = NRF_SAADC_GAIN1_6;
 	}
 
-	err_code = nrf_drv_saadc_channel_init(channelNum, &channelConfig);
+
+	channelConfig.reference = NRF_SAADC_REFERENCE_INTERNAL;
+	channelConfig.acq_time = NRF_SAADC_ACQTIME_10US;
+	if (config.referencePin == CS_ADC_REF_PIN_NOT_AVAILABLE) {
+		channelConfig.mode = NRF_SAADC_MODE_SINGLE_ENDED;
+		channelConfig.pin_n = NRF_SAADC_INPUT_DISABLED;
+	}
+	else {
+		channelConfig.mode = NRF_SAADC_MODE_DIFFERENTIAL;
+		channelConfig.pin_n = getAdcPin(config.pin);
+	}
+	channelConfig.pin_p = getAdcPin(config.pin);
+
+	ret_code_t err_code = nrf_drv_saadc_channel_init(channel, &channelConfig);
 	APP_ERROR_CHECK(err_code);
-
 	return 0;
-}
-
-/**
- * The NC field disables the ADC and is actually set to value 0. 
- * SAADC_CH_PSELP_PSELP_AnalogInput0 has value 1.
- */
-nrf_saadc_input_t ADC::getAdcPin(const pin_id_t pinNum) {
-	switch (pinNum) {
-	case 0:
-		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput0;
-	case 1:
-		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput1;
-	case 2:
-		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput2;
-	case 3:
-		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput3;
-	case 4:
-		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput4;
-	case 5:
-		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput5;
-	case 6:
-		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput6;
-	case 7:
-		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput7;
-	default:
-		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_NC;
-	}
 }
 
 void ADC::setDoneCallback(adc_done_cb_t callback) {
@@ -249,11 +204,13 @@ void ADC::setDoneCallback(adc_done_cb_t callback) {
 }
 
 void ADC::stop() {
-	nrf_drv_timer_disable(_timer);
+	// Stop or shutdown timer.
+//	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_SHUTDOWN);
+	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_STOP);
 }
 
 void ADC::start() {
-	nrf_drv_timer_enable(_timer);
+	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_START);
 }
 
 void ADC::addBufferToSampleQueue(nrf_saadc_value_t* buf) {
@@ -278,12 +235,32 @@ bool ADC::releaseBuffer(nrf_saadc_value_t* buf) {
 	return true;
 }
 
+void ADC::enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroVal) {
+//	nrf_gpio_cfg_output(TEST_PIN);
+	_zeroValue = zeroVal;
+	_zeroCrossingChannel = channel;
+
+	setLimitUp();
+
+	// Enable adc limit interrupts
+	nrf_saadc_int_enable(getAdcLimitLowInterruptMask(channel));
+	nrf_saadc_int_enable(getAdcLimitHighInterruptMask(channel));
+}
+
+void ADC::setLimitUp() {
+	nrf_saadc_channel_limits_set(_zeroCrossingChannel, -4096, _zeroValue);
+}
+
+void ADC::setLimitDown() {
+	nrf_saadc_channel_limits_set(_zeroCrossingChannel, _zeroValue, 4096);
+}
+
 void adc_done(void * p_event_data, uint16_t event_size) {
 	adc_done_cb_data_t* cbData = (adc_done_cb_data_t*)p_event_data;
 	cbData->callback(cbData->buffer, cbData->bufSize, cbData->bufNum);
 }
 
-void ADC::update(nrf_saadc_value_t* buf) {
+void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
 	_numBuffersQueued--;
 	if (_doneCallbackData.callback != NULL && _doneCallbackData.buffer == NULL) {
 		//! Fill callback data object, should become available again in releaseBuffer()
@@ -301,10 +278,10 @@ void ADC::update(nrf_saadc_value_t* buf) {
 	}
 }
 
-void ADC::limit(nrf_saadc_limit_t type) {
+void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 	if (type == NRF_SAADC_LIMIT_LOW) {
 		// NRF_SAADC_LIMIT_LOW  triggers when adc value is below lower limit
-		nrf_drv_saadc_limits_set(1, NRF_DRV_SAADC_LIMITL_DISABLED + 1, TEST_ZERO + TEST_ZERO_HYST); // Triggers when above zero
+		setLimitUp();
 
 //		nrf_gpiote_task_configure(2, TEST_PIN, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
 //		nrf_gpiote_task_enable(2);
@@ -312,7 +289,7 @@ void ADC::limit(nrf_saadc_limit_t type) {
 	}
 	else {
 		// NRF_SAADC_LIMIT_HIGH triggers when adc value is above upper limit
-		nrf_drv_saadc_limits_set(1, TEST_ZERO - TEST_ZERO_HYST, NRF_DRV_SAADC_LIMITH_DISABLED - 1); // Triggers when below zero
+		setLimitDown();
 
 //		nrf_gpiote_task_configure(2, TEST_PIN, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
 //		nrf_gpiote_task_enable(2);
@@ -320,31 +297,138 @@ void ADC::limit(nrf_saadc_limit_t type) {
 		nrf_gpio_pin_toggle(TEST_PIN);
 
 
-		// Only call syncPwm when there was about 20ms between the two events.
-		// This makes it more likely that this was actually the correct zero crossing.
+		// Only call zero crossing callback when there was about 20ms between the two events.
+		// This makes it more likely that this was an actual zero crossing.
 		uint32_t curTime = RTC::getCount();
 		uint32_t diffTicks = RTC::difference(curTime, _lastZeroCrossUpTime);
-		if (diffTicks > RTC::msToTicks(19) && diffTicks < RTC::msToTicks(21)) {
-//			if (RTC::difference(curTime, _lastPwmSyncTime) > RTC::msToTicks(100)) {
-				Switch::getInstance().onZeroCrossing();
-//				_lastPwmSyncTime = curTime;
-//			}
+		if ((_zeroCrossingCallback != NULL) && (diffTicks > RTC::msToTicks(19)) && (diffTicks < RTC::msToTicks(21))) {
+//			Switch::getInstance().onZeroCrossing();
+			_zeroCrossingCallback();
 		}
 		_lastZeroCrossUpTime = curTime;
 
 	}
 }
 
-void ADC::staticTimerHandler(nrf_timer_event_t event_type, void* ptr) {
-}
-
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
-	if (p_event->type == NRF_DRV_SAADC_EVT_DONE) {
-		ADC::getInstance().update(p_event->data.done.p_buffer);
-	}
-	if (p_event->type == NRF_DRV_SAADC_EVT_LIMIT) {
-		ADC::getInstance().limit(p_event->data.limit.limit_type);
+	switch(p_event->type) {
+	case NRF_DRV_SAADC_EVT_DONE:
+		ADC::getInstance()._handleAdcDoneInterrupt(p_event->data.done.p_buffer);
+		break;
+	case NRF_DRV_SAADC_EVT_LIMIT:
+		ADC::getInstance()._handleAdcLimitInterrupt(p_event->data.limit.limit_type);
+		break;
 	}
 }
 
+nrf_ppi_channel_t ADC::getPpiChannel(uint8_t index) {
+	assert(index < 16, "invalid ppi channel index");
+	switch(index) {
+	case 0:
+		return NRF_PPI_CHANNEL0;
+	case 1:
+		return NRF_PPI_CHANNEL1;
+	case 2:
+		return NRF_PPI_CHANNEL2;
+	case 3:
+		return NRF_PPI_CHANNEL3;
+	case 4:
+		return NRF_PPI_CHANNEL4;
+	case 5:
+		return NRF_PPI_CHANNEL5;
+	case 6:
+		return NRF_PPI_CHANNEL6;
+	case 7:
+		return NRF_PPI_CHANNEL7;
+	case 8:
+		return NRF_PPI_CHANNEL8;
+	case 9:
+		return NRF_PPI_CHANNEL9;
+	case 10:
+		return NRF_PPI_CHANNEL10;
+	case 11:
+		return NRF_PPI_CHANNEL11;
+	case 12:
+		return NRF_PPI_CHANNEL12;
+	case 13:
+		return NRF_PPI_CHANNEL13;
+	case 14:
+		return NRF_PPI_CHANNEL14;
+	case 15:
+		return NRF_PPI_CHANNEL15;
+	}
+	return NRF_PPI_CHANNEL0;
+}
 
+/**
+ * The NC field disables the ADC and is actually set to value 0.
+ * SAADC_CH_PSELP_PSELP_AnalogInput0 has value 1.
+ */
+nrf_saadc_input_t ADC::getAdcPin(const cs_adc_pin_id_t pinNum) {
+	switch (pinNum) {
+	case 0:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput0;
+	case 1:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput1;
+	case 2:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput2;
+	case 3:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput3;
+	case 4:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput4;
+	case 5:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput5;
+	case 6:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput6;
+	case 7:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_AnalogInput7;
+	default:
+		return (nrf_saadc_input_t)SAADC_CH_PSELP_PSELP_NC;
+	}
+}
+
+nrf_saadc_int_mask_t ADC::getAdcLimitLowInterruptMask(uint8_t index) {
+	switch(index) {
+	case 0:
+		return NRF_SAADC_INT_CH0LIMITL;
+	case 1:
+		return NRF_SAADC_INT_CH1LIMITL;
+	case 2:
+		return NRF_SAADC_INT_CH2LIMITL;
+	case 3:
+		return NRF_SAADC_INT_CH3LIMITL;
+	case 4:
+		return NRF_SAADC_INT_CH4LIMITL;
+	case 5:
+		return NRF_SAADC_INT_CH5LIMITL;
+	case 6:
+		return NRF_SAADC_INT_CH6LIMITL;
+	case 7:
+		return NRF_SAADC_INT_CH7LIMITL;
+	default:
+		return NRF_SAADC_INT_CH0LIMITL;
+	}
+}
+
+nrf_saadc_int_mask_t ADC::getAdcLimitHighInterruptMask(uint8_t index) {
+	switch(index) {
+	case 0:
+		return NRF_SAADC_INT_CH0LIMITH;
+	case 1:
+		return NRF_SAADC_INT_CH1LIMITH;
+	case 2:
+		return NRF_SAADC_INT_CH2LIMITH;
+	case 3:
+		return NRF_SAADC_INT_CH3LIMITH;
+	case 4:
+		return NRF_SAADC_INT_CH4LIMITH;
+	case 5:
+		return NRF_SAADC_INT_CH5LIMITH;
+	case 6:
+		return NRF_SAADC_INT_CH6LIMITH;
+	case 7:
+		return NRF_SAADC_INT_CH7LIMITH;
+	default:
+		return NRF_SAADC_INT_CH0LIMITH;
+	}
+}

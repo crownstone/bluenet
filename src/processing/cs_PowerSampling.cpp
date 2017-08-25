@@ -7,10 +7,8 @@
 
 #include <processing/cs_PowerSampling.h>
 
-#include <cfg/cs_Boards.h>
 #include <storage/cs_Settings.h>
 #include <drivers/cs_Serial.h>
-#include <drivers/cs_ADC.h>
 #include <drivers/cs_RTC.h>
 #include <protocol/cs_StateTypes.h>
 #include <events/cs_EventDispatcher.h>
@@ -23,13 +21,18 @@
 
 #define PRINT_POWERSAMPLING_VERBOSE
 
+#define VOLTAGE_CHANNEL_IDX 0
+#define CURRENT_CHANNEL_IDX 1
+
 PowerSampling::PowerSampling() :
+		_isInitialized(false),
+		_adc(NULL),
 		_powerSamplingSentDoneTimerId(NULL),
-		_powerSamplesBuffer(NULL),
-		_powerSamplesContMsg(NULL)
+		_powerSamplesBuffer(NULL)
 {
 	_powerSamplingReadTimerData = { {0} };
 	_powerSamplingSentDoneTimerId = &_powerSamplingReadTimerData;
+	_adc = &(ADC::getInstance());
 }
 
 // adc done callback is already decoupled from adc interrupt
@@ -37,7 +40,9 @@ void adc_done_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
 	PowerSampling::getInstance().powerSampleAdcDone(buf, size, bufNum);
 }
 
-void PowerSampling::init(uint8_t pinAinCurrent, uint8_t pinAinVoltage) {
+void PowerSampling::init(const boards_config_t& boardConfig) {
+//	memcpy(&_config, &config, sizeof(power_sampling_config_t));
+
 	Timer::getInstance().createSingleShot(_powerSamplingSentDoneTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
 
 	Settings& settings = Settings::getInstance();
@@ -50,16 +55,17 @@ void PowerSampling::init(uint8_t pinAinCurrent, uint8_t pinAinVoltage) {
 	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentThresholdPwm);
 
 	initAverages();
-//	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
-//	_avgZeroCurrentDiscount = CURRENT_ZERO_EXP_AVG_DISCOUNT;
-//	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
+	_recalibrateZeroVoltage = true;
+	_recalibrateZeroCurrent = true;
+	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
+	_avgZeroCurrentDiscount = CURRENT_ZERO_EXP_AVG_DISCOUNT;
+	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
 	_sendingSamples = false;
 
 	LOGi(FMT_INIT, "buffers");
-	uint16_t contSize = sizeof(power_samples_cont_message_t);
 	uint16_t burstSize = _powerSamples.getMaxLength();
 
-	size_t size = (burstSize > contSize) ? burstSize : contSize;
+	size_t size = burstSize;
 	_powerSamplesBuffer = (buffer_ptr_t) calloc(size, sizeof(uint8_t));
 #ifdef PRINT_POWERSAMPLING_VERBOSE
 	LOGd("power sample buffer=%u size=%u", _powerSamplesBuffer, size);
@@ -67,10 +73,21 @@ void PowerSampling::init(uint8_t pinAinCurrent, uint8_t pinAinVoltage) {
 
 	_powerSamples.assign(_powerSamplesBuffer, size);
 
-	const pin_id_t pins[] = {pinAinCurrent, pinAinVoltage};
-	ADC::getInstance().init(pins, 2);
+	LOGd(FMT_INIT, "ADC");
+	adc_config_t adcConfig;
+	adcConfig.channelCount = 2;
+	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin = boardConfig.pinAinVoltage;
+	adcConfig.channels[VOLTAGE_CHANNEL_IDX].rangeMilliVolt = boardConfig.voltageRange;
+	adcConfig.channels[VOLTAGE_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrent;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig.currentRange;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	adcConfig.samplingPeriodUs = CS_ADC_SAMPLE_INTERVAL_US;
+	_adc->init(adcConfig);
 
-	ADC::getInstance().setDoneCallback(adc_done_callback);
+	_adc->setDoneCallback(adc_done_callback);
+
+	_isInitialized = true;
 }
 
 void PowerSampling::startSampling() {
@@ -83,7 +100,7 @@ void PowerSampling::startSampling() {
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
 	_powerSamples.clear();
 
-	ADC::getInstance().start();
+	_adc->start();
 }
 
 void PowerSampling::stopSampling() {
@@ -103,29 +120,30 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 	power_t power;
 	power.buf = buf;
 	power.bufSize = size;
-	power.currentIndex = 0;
-	power.voltageIndex = 1;
+	power.voltageIndex = VOLTAGE_CHANNEL_IDX;
+	power.currentIndex = CURRENT_CHANNEL_IDX;
 	power.numChannels = 2;
 	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	power.acPeriodUs = 20000;
 
-	static int recalibrate_zeros = 0;
-
-	if (recalibrate_zeros == 1) {
-		calculateVoltageZero(power); // Takes 23 us
-		calculateCurrentZero(power);
-		recalibrate_zeros++;
+	if (_recalibrateZeroVoltage) {
+		calculateVoltageZero(power);
+//		_recalibrateZeroVoltage = false;
 	}
-	calculatePower(power); // Takes 17 us
+	if (_recalibrateZeroCurrent) {
+		calculateCurrentZero(power);
+//		_recalibrateZeroCurrent = false;
+	}
+	calculatePower(power);
 
 	if (_operationMode == OPERATION_MODE_NORMAL) {
 		if (!_sendingSamples) {
-			copyBufferToPowerSamples(power); // Takes 2 us
+			copyBufferToPowerSamples(power);
 		}
-
 		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt)); 
 	}
-	ADC::getInstance().releaseBuffer(buf);
+
+	_adc->releaseBuffer(buf);
 }
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
@@ -168,7 +186,7 @@ void PowerSampling::readyToSendPowerSamples() {
 	//! Dispatch event that samples are now filled and ready to be sent
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
 	//! Simply use an amount of time for sending, should be event based or polling based
-	Timer::getInstance().start(_powerSamplingSentDoneTimerId, MS_TO_TICKS(_burstSamplingInterval), this);
+	Timer::getInstance().start(_powerSamplingSentDoneTimerId, MS_TO_TICKS(3000), this);
 }
 
 void PowerSampling::initAverages() {
@@ -200,42 +218,40 @@ uint16_t PowerSampling::determineCurrentIndex(power_t power) {
  * period in microseconds and the sample interval also in microseconds.
  */
 void PowerSampling::calculateVoltageZero(power_t power) {
-
 	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
 
 	int64_t sum = 0;
 	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 		sum += power.buf[i];
 	}
-
-	_avgZeroVoltage = sum * 1000 / numSamples;
+//	_avgZeroVoltage = sum * 1000 / numSamples;
 	
 	//! Exponential moving average
-//	_avgZeroVoltage = ((1000 - _avgZeroVoltageDiscount) * _avgZeroVoltage + _avgZeroVoltageDiscount * vZero * 1000) / 1000;
+	_avgZeroVoltage = ((1000 - _avgZeroVoltageDiscount) * _avgZeroVoltage + _avgZeroVoltageDiscount * sum * 1000 / numSamples) / 1000;
 }
 
 /**
  * The same as for the voltage curve, but for the current.
  */
 void PowerSampling::calculateCurrentZero(power_t power) {
-
 	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
 
 	int64_t sum = 0;
 	for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 		sum += power.buf[i];
 	}
+//	_avgZeroCurrent = sum * 1000 / numSamples;
 
-	_avgZeroCurrent = sum * 1000 / numSamples;
 
 	//! Exponential moving average
-//	_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * cZero * 1000) / 1000;
+	_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * sum * 1000 / numSamples) / 1000;
+	write("sum=%lli numSamples=%u czero=%i \r\n", sum, numSamples, _avgZeroCurrent);
 }
 
 /**
  * Calculate power.
  *
- * The int64_t sum is large enough: 2^63 / (2^12 * 2^12) = 10^15. Many more samples than the 100 we use.
+ * The int64_t sum is large enough: 2^63 / (2^12 * 1000 * 2^12 * 1000) = 5*10^5. Many more samples than the 100 we use.
  */
 void PowerSampling::calculatePower(power_t power) {
 
@@ -246,52 +262,55 @@ void PowerSampling::calculatePower(power_t power) {
 		return;
 	}
 
-	int64_t sum = 0;
-	int64_t sum1 = 0;
-	for (int i = 0; i < numSamples * power.numChannels; i += power.numChannels) {
-		sum1 += (power.buf[i+power.currentIndex] * power.buf[i+power.voltageIndex]); 
-		sum += ((power.buf[i+power.currentIndex]*1000 - _avgZeroCurrent) * 
-			   (power.buf[i+power.voltageIndex]*1000 - _avgZeroVoltage)) / (1000*1000); 
+	int64_t pSum = 0;
+	int64_t cSquareSum = 0;
+	int64_t vSquareSum = 0;
+	int64_t current;
+	int64_t voltage;
+	for (uint16_t i = 0; i < numSamples * power.numChannels; i += power.numChannels) {
+		current = ((int64_t)power.buf[i+power.currentIndex]*1000 - _avgZeroCurrent);
+		voltage = ((int64_t)power.buf[i+power.voltageIndex]*1000 - _avgZeroVoltage);
+		cSquareSum += (current * current) / (1000*1000);
+		vSquareSum += (voltage * voltage) / (1000*1000);
+		pSum +=       (current * voltage) / (1000*1000);
 	}
-//	int64_t powerMilliWatt = sum / numSamples;
-	int64_t powerMilliWatt = sum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
-	_avgPowerMilliWatt = powerMilliWatt;
+	int64_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
+	// TODO: check if cSquareSum is much different from the previous X times, if so: probably an outlier.
 
-//	checkSoftfuse(powerMilliWatt);
+	checkSoftfuse(powerMilliWatt);
+
+//	_avgPower = powerMilliWatt;
 
 	//! Exponential moving average
 	//! TODO: should maybe make this an integer calculation, but that wasn't working when i tried.
-/*
 	double discount = _avgPowerDiscount / 1000.0;
-	_avgPower = ((1.0 - discount) * _avgPower + discount * powerMilliWatt * 1);
-*/
-	_avgPower = _avgPowerMilliWatt;
+	_avgPower = ((1.0 - discount) * _avgPower + discount * powerMilliWatt);
+
+	_avgPowerMilliWatt = _avgPower;
 
 //	static int printPower = 0;
-//	if (printPower % 10 == 0) {
-//		write("Sum: %lld\r\n", sum);
-//		write("Sum1: %lld\r\n", sum1);
-//		write("Power: ");
-//		write("%d ", _avgPowerMilliWatt);
-//		write("\r\n");
-//		printPower = 0;
+//	if (printPower % 100 == 0) {
+//		write("vZero=%i cZero=%i\r\n", _avgZeroVoltage, _avgZeroCurrent);
+//		write("pSum=%lld \r\n", pSum);
+//		write("power=%lld avg=%d\r\n",powerMilliWatt, _avgPowerMilliWatt);
+////		printPower = 0;
 //		// current
 //		write("Current: ");
 ////		write("\r\n");
 //		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 //			write("%d ", power.buf[i]);
-////			if (i % 80 == 80 - 2) {
-////				write("\r\n");
-////			}
+//			if (i % 40 == 40 - 1) {
+//				write("\r\n");
+//			}
 //		}
 //		write("\r\n");
 //		write("Voltage: ");
 ////		write("\r\n");
 //		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 //			write("%d ", power.buf[i]);
-////			if (i % 80 == 80 - 1) {
-////				write("\r\n");
-////			}
+//			if (i % 40 == 40 - 2) {
+//				write("\r\n");
+//			}
 //		}
 //		write("\r\n");
 //	}
@@ -308,7 +327,8 @@ void PowerSampling::checkSoftfuse(int64_t powerMilliWatt) {
 		LOGd("current above threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		State::getInstance().set(STATE_ERROR_OVER_CURRENT, (uint8_t)1);
-	} else if ((powerMilliWatt > _currentThresholdPwm * 220) && (!stateErrors.errors.overCurrentPwm)) {
+	}
+	else if ((powerMilliWatt > _currentThresholdPwm * 220) && (!stateErrors.errors.overCurrentPwm)) {
 		//! Get the current pwm state before we dispatch the event (as that may change the pwm).
 		switch_state_t switchState;
 		State::getInstance().get(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));

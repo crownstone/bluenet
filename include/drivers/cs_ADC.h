@@ -13,22 +13,22 @@
 #include <structs/buffer/cs_DifferentialBuffer.h>
 
 //! Numeric reference to a pin
-typedef uint8_t pin_id_t;
+typedef uint8_t cs_adc_pin_id_t;
 
 //! Numeric reference to a channel
-typedef uint8_t channel_id_t;
+typedef uint8_t cs_adc_channel_id_t;
 
 //! Numeric reference to a buffer
-typedef uint8_t buffer_id_t;
+typedef uint8_t cs_adc_buffer_id_t;
 
 //! Pin count (number)
-typedef uint8_t pin_count_t;
+typedef uint8_t cs_adc_pin_count_t;
 
 //! Buffer count (number)
-typedef uint8_t buffer_count_t;
+typedef uint8_t cs_adc_buffer_count_t;
 
 //! Buffer size (number)
-typedef uint16_t buffer_size_t;
+typedef uint16_t cs_adc_buffer_size_t;
 
 //! Error codes (number)
 typedef uint32_t cs_adc_error_t;
@@ -39,7 +39,9 @@ typedef uint32_t cs_adc_error_t;
  * (3) an index to the buffer. This function pointer can be given as argument to ADC::setDoneCallback to set a callback
  * on an ADC event. Currently, ADC::setDoneCallback is called from cs_PowerSampling.cpp.
  */
-typedef void (*adc_done_cb_t) (nrf_saadc_value_t* buf, buffer_size_t size, buffer_id_t bufNum);
+typedef void (*adc_done_cb_t) (nrf_saadc_value_t* buf, cs_adc_buffer_size_t size, cs_adc_buffer_id_t bufNum);
+
+typedef void (*adc_zero_crossing_cb_t) ();
 
 /** Struct storing data for ADC callback.
  *
@@ -53,10 +55,36 @@ struct adc_done_cb_data_t {
 	//! Buffer as argument for ADC callback 
 	nrf_saadc_value_t* buffer;
 	//! Buffer size as argument for ADC callback 
-	buffer_size_t bufSize;
+	cs_adc_buffer_size_t bufSize;
 	//! Buffer index as argument for ADC callback
 	//! TODO: remove this field
-	buffer_id_t bufNum;
+	cs_adc_buffer_id_t bufNum;
+};
+
+enum adc_gain_t {
+	CS_ADC_GAIN4   = NRF_SAADC_GAIN4,   // gain is 4/1, maps [0, 0.15] to [0, 0.6]
+	CS_ADC_GAIN2   = NRF_SAADC_GAIN2,   // gain is 2/1, maps [0, 0.3]  to [0, 0.6]
+	CS_ADC_GAIN1   = NRF_SAADC_GAIN1,   // gain is 1/1, maps [0, 0.6]  to [0, 0.6]
+	CS_ADC_GAIN1_2 = NRF_SAADC_GAIN1_2, // gain is 1/2, maps [0, 1.2]  to [0, 0.6]
+	CS_ADC_GAIN1_3 = NRF_SAADC_GAIN1_3, // gain is 1/3, maps [0, 1.8]  to [0, 0.6]
+	CS_ADC_GAIN1_4 = NRF_SAADC_GAIN1_4, // gain is 1/4, maps [0, 2.4]  to [0, 0.6]
+	CS_ADC_GAIN1_5 = NRF_SAADC_GAIN1_5, // gain is 1/5, maps [0, 3.0]  to [0, 0.6]
+	CS_ADC_GAIN1_6 = NRF_SAADC_GAIN1_6, // gain is 1/6, maps [0, 3.6]  to [0, 0.6]
+};
+
+#define CS_ADC_REF_PIN_NOT_AVAILABLE 255
+
+struct adc_channel_config_t {
+	cs_adc_pin_id_t pin;
+//	adc_gain_t gain;
+	uint32_t rangeMilliVolt;
+	cs_adc_pin_id_t referencePin;
+};
+
+struct adc_config_t {
+	cs_adc_channel_id_t channelCount;
+	adc_channel_config_t channels[CS_ADC_MAX_PINS];
+	uint32_t samplingPeriodUs; // Each sampling period, all channels are sampled.
 };
 
 /** Analog-Digital conversion.
@@ -117,16 +145,10 @@ public:
 
 	/** Initialize ADC.
 	 *
-	 * The init function must called once before operating the AD converter. Call it after you start the SoftDevice.
-	 *
-	 * TODO: Not all pins can be used for ADC conversion. Check if the proper pins are assessed.
-	 * TODO: Send array by reference, waste of stack.
-	 *
-	 * @param[in] pins                 Array of pins to use as input (AIN<pin>). ADC will alternate between these pins.
-	 * @param[in] size                 Size of the array.
+	 * @param[in] config               Config struct.
 	 * @return                         Error code (0 means success).
 	 */
-	cs_adc_error_t init(const pin_id_t pins[], const pin_count_t numPins);
+	cs_adc_error_t init(const adc_config_t& config);
 
 	/** Start the ADC sampling
 	 */
@@ -145,9 +167,17 @@ public:
 
 	/** Set the callback which is called when a buffer is filled.
 	 *
-	 * @param[in] callback             Function to be called on an ADC event (any event)!
+	 * @param[in] callback             Function to be called when a buffer is filled with samples.
 	 */
 	void setDoneCallback(adc_done_cb_t callback);
+
+	void enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroVal);
+
+	/** Set the callback which is called when a buffer is filled.
+	 *
+	 * @param[in] callback             Function to be called on a zero crossing event. This function will run at interrupt level!
+	 */
+	void setZeroCrossingCallback(adc_zero_crossing_cb_t callback);
 
 	/** Update this object with a buffer with values from the ADC conversion.
 	 *
@@ -159,18 +189,12 @@ public:
 	 *
 	 * @param[in] buf                  A buffer with size defined in the constructor.
 	 */
-	void update(nrf_saadc_value_t* buf);
+	void _handleAdcDoneInterrupt(nrf_saadc_value_t* buf);
 
-	void limit(nrf_saadc_limit_t type);
+	void _handleAdcLimitInterrupt(nrf_saadc_limit_t type);
 
 protected:
 
-	/** Callback for when the internal timer is started.
-	 *
-	 * @param[in] event_type           The ADC is coupled to a timer which emits events.
-	 * @param[in] ptr                  @TODO: What's this?
-	 */
-	static void staticTimerHandler(nrf_timer_event_t event_type, void* ptr);
 
 private:
 	/** Constructor
@@ -183,36 +207,66 @@ private:
 	//! This class is singleton, deny implementation
 	void operator=(ADC const &);
 
-	//! Pins that will be used for the ADC. 
-	pin_id_t _pins[CS_ADC_MAX_PINS];
-
-	//! Number of pins to be used for the ADC.
-	pin_count_t _numPins;
-
-	//! Pointer to the timer to be used for sampling.
-	nrf_drv_timer_t* _timer;
+	//! Configuration of this class
+	adc_config_t _config;
 
 	//! PPI channel to be used to communicate from Timer to ADC peripheral.
 	nrf_ppi_channel_t _ppiChannel;
+
+	//! Pins that will be used for the ADC. 
+//	cs_adc_pin_id_t _pins[CS_ADC_MAX_PINS];
+
+	//! Number of pins to be used for the ADC.
+//	cs_adc_pin_count_t _numPins;
+
+	//! Pointer to the timer to be used for sampling.
+//	nrf_drv_timer_t* _timer;
 
 	//! Array of pointers to buffers.
 	nrf_saadc_value_t* _bufferPointers[CS_ADC_NUM_BUFFERS];
 
 	//! Number of buffers that are queued to be populated by adc.
-	buffer_count_t _numBuffersQueued;
+	cs_adc_buffer_count_t _numBuffersQueued;
 
 	//! Arguments to the callback function
 	adc_done_cb_data_t _doneCallbackData;
 
+	//! The zero crossing callback.
+	adc_zero_crossing_cb_t _zeroCrossingCallback;
+
+	//! The channel which is checked for zero crossings.
+	cs_adc_channel_id_t _zeroCrossingChannel;
+
+	//! Store the timestamp of the last upwards zero crossing.
 	uint32_t _lastZeroCrossUpTime;
-	uint32_t _lastPwmSyncTime;
+
+	//! Store the zero value used to detect zero crossings.
+	int32_t _zeroValue;
 
 	//! Function to set the input pin, this can be done after each sample. Only used internally!
-	cs_adc_error_t configPin(const channel_id_t channel, const pin_id_t pin);
+//	cs_adc_error_t configPin(const cs_adc_channel_id_t channel, const cs_adc_pin_id_t pin);
+
+	//! Function to initialize the adc channels, this can be done after each sample.
+	cs_adc_error_t initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config);
+
+	//! Set the adc limit such that it triggers when going above zero
+	void setLimitUp();
+
+	//! Set the adc limit such that it triggers when going below zero
+	void setLimitDown();
 
 	//! Function that returns the adc pin number, given the AIN number
-	nrf_saadc_input_t getAdcPin(pin_id_t pinNum);
+	nrf_saadc_input_t getAdcPin(cs_adc_pin_id_t pinNum);
 
 	//! Function that puts a buffer in queue to be populated with adc values.
 	void addBufferToSampleQueue(nrf_saadc_value_t* buf);
+
+	//! Helper function to get the ppi channel, given the index.
+	nrf_ppi_channel_t getPpiChannel(uint8_t index);
+
+	//! Helper function to get the limit low interrupt mask, given the channel index.
+	nrf_saadc_int_mask_t getAdcLimitLowInterruptMask(uint8_t index);
+
+	//! Helper function to get the limit high interrupt mask, given the channel index.
+	nrf_saadc_int_mask_t getAdcLimitHighInterruptMask(uint8_t index);
 };
