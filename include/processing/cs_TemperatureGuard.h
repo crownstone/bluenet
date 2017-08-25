@@ -29,7 +29,7 @@ public:
 		return instance;
 	}
 
-	void init(boards_config_t* boardConfig);
+	void init(const boards_config_t& boardConfig);
 
 	void tick();
 
@@ -55,17 +55,13 @@ private:
 	//! This class is singleton, deny implementation
 	void operator=(TemperatureGuard const &);
 
-
-#if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _appTimerData;
 	app_timer_id_t           _appTimerId;
-#else
-	uint32_t                 _appTimerId;
-#endif
 	int8_t _maxChipTemp;
 	COMP* _comp;
 	GeneralEventType _lastChipTempEvent;
 	GeneralEventType _lastPwmTempEvent;
+	bool _pwmTempInverted;
 };
 
 

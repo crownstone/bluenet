@@ -11,18 +11,12 @@
 #include <storage/cs_Settings.h>
 
 TemperatureGuard::TemperatureGuard() :
-#if (NORDIC_SDK_VERSION >= 11)
 		_appTimerId(NULL),
-#else
-		_appTimerId(UINT32_MAX),
-#endif
 		_maxChipTemp(MAX_CHIP_TEMP),
 		_comp(NULL)
 	{
-#if (NORDIC_SDK_VERSION >= 11)
 		_appTimerData = { {0} };
 		_appTimerId = &_appTimerData;
-#endif
 	}
 
 // This callback is decoupled from interrupt
@@ -30,9 +24,11 @@ void comp_event_callback(CompEvent_t event) {
 	TemperatureGuard::getInstance().handleCompEvent(event);
 }
 
-void TemperatureGuard::init(boards_config_t* boardConfig) {
+void TemperatureGuard::init(const boards_config_t& boardConfig) {
 
 	Settings::getInstance().get(CONFIG_MAX_CHIP_TEMP, &_maxChipTemp);
+
+	_pwmTempInverted = boardConfig.flags.pwmTempInverted;
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
 
@@ -41,7 +37,7 @@ void TemperatureGuard::init(boards_config_t* boardConfig) {
 	float pwmTempThresholdDown;
 	Settings::getInstance().get(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP, &pwmTempThresholdUp);
 	Settings::getInstance().get(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN, &pwmTempThresholdDown);
-	_comp->init(boardConfig->pinAinPwmTemp, pwmTempThresholdDown, pwmTempThresholdUp);
+	_comp->init(boardConfig.pinAinPwmTemp, pwmTempThresholdDown, pwmTempThresholdUp);
 //	_comp->setEventCallback(comp_event_callback);
 
 	_lastChipTempEvent = EVT_CHIP_TEMP_OK;
@@ -86,7 +82,14 @@ void TemperatureGuard::tick() {
 
 	// Check PWM temperature, send event if it changed
 	uint32_t compVal = _comp->sample();
-	uint8_t pwmTempError = compVal > 0 ? 1 : 0;
+	uint8_t pwmTempError;
+	if (_pwmTempInverted) {
+		pwmTempError = compVal > 0 ? 0 : 1;
+	}
+	else {
+		pwmTempError = compVal > 0 ? 1 : 0;
+	}
+
 	if (pwmTempError) {
 		curEvent = EVT_PWM_TEMP_ABOVE_THRESHOLD;
 	}

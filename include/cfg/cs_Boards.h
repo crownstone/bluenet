@@ -134,6 +134,9 @@ typedef struct  {
 
 		//! True if the board has a zero ref pin for current and voltage measurements.
 		bool hasAdcZeroRef: 1;
+
+		//! True if the temperature sensor of the dimmer is inverted (NTC).
+		bool pwmTempInverted: 1;
 	} flags;
 
 	/** Device type, e.g. crownstone plug, crownstone builtin, guidestone.
@@ -169,9 +172,10 @@ typedef struct  {
 	 */
 	int8_t minTxPower;
 
-	//! Voltage of PWM thermometer at which the PWM is too hot.
+	//! Voltage of PWM thermometer at which the dimmer is too hot.
 	float pwmTempVoltageThreshold;
-	//! Voltage of PWM thermometer at which the PWM is cool enough again.
+
+	//! Voltage of PWM thermometer at which the dimmer is cool enough again.
 	float pwmTempVoltageThresholdDown;
 
 } boards_config_t;

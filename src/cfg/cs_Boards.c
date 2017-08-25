@@ -87,6 +87,7 @@ void asACR01B1A(boards_config_t* p_config) {
 	p_config->flags.hasLed                       = true;
 	p_config->flags.ledInverted                  = false;
 	p_config->flags.hasAdcZeroRef                = false;
+	p_config->flags.pwmTempInverted              = false;
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
 
@@ -124,6 +125,7 @@ void asACR01B6A(boards_config_t* p_config) {
 	p_config->flags.hasLed                       = true;
 	p_config->flags.ledInverted                  = false;
 	p_config->flags.hasAdcZeroRef                = true;
+	p_config->flags.pwmTempInverted              = true;
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
 
@@ -163,6 +165,7 @@ void asACR01B2A(boards_config_t* p_config) {
 	p_config->flags.hasLed                       = true;
 	p_config->flags.ledInverted                  = false;
 	p_config->flags.hasAdcZeroRef                = false;
+	p_config->flags.pwmTempInverted              = false;
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
 
@@ -198,6 +201,7 @@ void asACR01B2E(boards_config_t* p_config) {
 	p_config->flags.hasLed                       = true;
 	p_config->flags.ledInverted                  = false;
 	p_config->flags.hasAdcZeroRef                = true;
+	p_config->flags.pwmTempInverted              = true;
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
 
@@ -263,6 +267,7 @@ void asPca10036(boards_config_t* p_config) {
 	p_config->flags.hasLed                       = true;
 	p_config->flags.ledInverted                  = true;
 	p_config->flags.hasAdcZeroRef                = false;
+	p_config->flags.pwmTempInverted              = false;
 
 	p_config->voltageMultiplier                  = 0; // set to 0 to disable sampling checks
 	p_config->currentMultiplier                  = 0; // set to 0 to disable sampling checks
