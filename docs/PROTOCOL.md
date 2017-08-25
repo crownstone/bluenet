@@ -397,7 +397,7 @@ Type nr | Type name | Payload type | Description
 7 | <a name="ibeacon_minor"></a>iBeacon minor | uint 16 | iBeacon minor number.
 8 | <a name="ibeacon_uuid"></a>iBeacon UUID | uint 8 [16] | iBeacon UUID.
 9 | iBeacon Tx Power | int 8 | iBeacon signal strength at 1 meter.
-11 | TX power | int 8 | TX power, can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4.
+11 | TX power | int 8 | TX power, can be: -40, -20, -16, -12, -8, -4, 0, or 4.
 12 | Advertisement interval | uint 16 | Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms. *Not implemented yet.*
 13 | Passkey | uint 8 [6] | Passkey of the device: must be 6 digits.
 14 | Min env temp | int 8 | If temperature (in degrees Celcius) goes below this value, send an alert. *Not implemented yet.*
@@ -416,10 +416,10 @@ Type nr | Type name | Payload type | Description
 27 | Scanner enabled | uint 8 | Stores if device scanning is enabled. *read only*
 28 | Continuous power measurement enabled | uint 8 | Stores if continuous power measurement is enabled. *read only*
 29 | Tracker enabled | uint 8 | Stores if device tracking is enabled. *read only*
-30 | ADC sample rate | ... | TBD
-31 | Power sample burst interval | ... | TBD
-32 | Power sample continuous interval | ... | TBD
-33 | Power sample continuous number samples | ... | TBD
+30 | ADC sample rate | ... | **Deprecated**
+31 | Power sample burst interval | ... | **Deprecated**
+32 | Power sample continuous interval | ... | **Deprecated**
+33 | Power sample continuous number samples | ... | **Deprecated**
 34 | <a name="crownstone_identifier"></a>Crownstone Identifier | uint 16 | Crownstone identifier used in advertisement package.
 35 | <a name="admin_key"></a>Admin encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions.
 36 | <a name="user_key"></a>Member encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions.
@@ -428,7 +428,7 @@ Type nr | Type name | Payload type | Description
 39 | Scan Interval | uint 16 | Set the scan interval to ...
 40 | Scan Window | uint 16 | Set the scan window to ...
 41 | Relay High Duration | uint 16 | Set the time/duration that the relay is set to high (ms). **Setting this to a wrong value may cause damage.**
-42 | Low Tx Power | int 8 | Set the tx power used when in low transmission power for bonding (can be: -40, -30, -20, -16, -12, -8, -4, 0, or 4).
+42 | Low Tx Power | int 8 | Set the tx power used when in low transmission power for bonding (can be: -40, -20, -16, -12, -8, -4, 0, or 4).
 43 | Voltage Multiplier | float | Set the voltage multiplier (for power measurement). **Setting this to a wrong value may cause damage.**
 44 | Current Multiplier | float | Set the current multiplier (for power measurement). **Setting this to a wrong value may cause damage.**
 45 | Voltage Zero | int 32 | Set the voltage zero level (for power measurement).      **Setting this to a wrong value may cause damage.**

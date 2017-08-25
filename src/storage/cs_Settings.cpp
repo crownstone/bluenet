@@ -182,10 +182,10 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
-	case CONFIG_ADC_BURST_SAMPLE_RATE:
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
-	case CONFIG_ADC_CONT_SAMPLE_RATE:
+//	case CONFIG_ADC_BURST_SAMPLE_RATE:
+//	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
+//	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
+//	case CONFIG_ADC_CONT_SAMPLE_RATE:
 	case CONFIG_SCAN_INTERVAL:
 	case CONFIG_SCAN_WINDOW:
 	case CONFIG_RELAY_HIGH_DURATION:
@@ -339,10 +339,10 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
-	case CONFIG_ADC_BURST_SAMPLE_RATE:
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
-	case CONFIG_ADC_CONT_SAMPLE_RATE:
+//	case CONFIG_ADC_BURST_SAMPLE_RATE:
+//	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
+//	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
+//	case CONFIG_ADC_CONT_SAMPLE_RATE:
 	case CONFIG_SCAN_INTERVAL:
 	case CONFIG_SCAN_WINDOW:
 	case CONFIG_RELAY_HIGH_DURATION:
@@ -538,22 +538,22 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size) {
 		StorageHelper::getArray<uint8_t>(_storageStruct.encryptionKeys.guest, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
-	case CONFIG_ADC_BURST_SAMPLE_RATE: {
-		StorageHelper::getUint16(_storageStruct.adcBurstSampleRate, (uint16_t*)target, CS_ADC_SAMPLE_RATE);
-		break;
-	}
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
-		StorageHelper::getUint16(_storageStruct.powerSampleBurstInterval, (uint16_t*)target, POWER_SAMPLE_BURST_INTERVAL);
-		break;
-	}
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
-		StorageHelper::getUint16(_storageStruct.powerSampleContInterval, (uint16_t*)target, POWER_SAMPLE_CONT_INTERVAL);
-		break;
-	}
-	case CONFIG_ADC_CONT_SAMPLE_RATE: {
-		StorageHelper::getUint16(_storageStruct.adcContSampleRate, (uint16_t*)target, CS_ADC_SAMPLE_RATE);
-		break;
-	}
+//	case CONFIG_ADC_BURST_SAMPLE_RATE: {
+//		StorageHelper::getUint16(_storageStruct.adcBurstSampleRate, (uint16_t*)target, CS_ADC_SAMPLE_RATE);
+//		break;
+//	}
+//	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
+//		StorageHelper::getUint16(_storageStruct.powerSampleBurstInterval, (uint16_t*)target, POWER_SAMPLE_BURST_INTERVAL);
+//		break;
+//	}
+//	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
+//		StorageHelper::getUint16(_storageStruct.powerSampleContInterval, (uint16_t*)target, POWER_SAMPLE_CONT_INTERVAL);
+//		break;
+//	}
+//	case CONFIG_ADC_CONT_SAMPLE_RATE: {
+//		StorageHelper::getUint16(_storageStruct.adcContSampleRate, (uint16_t*)target, CS_ADC_SAMPLE_RATE);
+//		break;
+//	}
 	case CONFIG_SCAN_INTERVAL: {
 		StorageHelper::getUint16(_storageStruct.scanInterval, (uint16_t*)target, SCAN_INTERVAL);
 		break;
@@ -753,26 +753,26 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		StorageHelper::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.guest, ENCYRPTION_KEY_LENGTH);
 		break;
 	}
-	case CONFIG_ADC_BURST_SAMPLE_RATE: {
-		p_item = (uint8_t*)&_storageStruct.adcBurstSampleRate;
-		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.adcBurstSampleRate);
-		break;
-	}
-	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
-		p_item = (uint8_t*)&_storageStruct.powerSampleBurstInterval;
-		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.powerSampleBurstInterval);
-		break;
-	}
-	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
-		p_item = (uint8_t*)&_storageStruct.powerSampleContInterval;
-		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.powerSampleContInterval);
-		break;
-	}
-	case CONFIG_ADC_CONT_SAMPLE_RATE: {
-		p_item = (uint8_t*)&_storageStruct.adcContSampleRate;
-		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.adcContSampleRate);
-		break;
-	}
+//	case CONFIG_ADC_BURST_SAMPLE_RATE: {
+//		p_item = (uint8_t*)&_storageStruct.adcBurstSampleRate;
+//		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.adcBurstSampleRate);
+//		break;
+//	}
+//	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
+//		p_item = (uint8_t*)&_storageStruct.powerSampleBurstInterval;
+//		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.powerSampleBurstInterval);
+//		break;
+//	}
+//	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
+//		p_item = (uint8_t*)&_storageStruct.powerSampleContInterval;
+//		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.powerSampleContInterval);
+//		break;
+//	}
+//	case CONFIG_ADC_CONT_SAMPLE_RATE: {
+//		p_item = (uint8_t*)&_storageStruct.adcContSampleRate;
+//		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.adcContSampleRate);
+//		break;
+//	}
 	case CONFIG_SCAN_INTERVAL: {
 		p_item = (uint8_t*)&_storageStruct.scanInterval;
 		StorageHelper::setUint16(*((uint16_t*)target), _storageStruct.scanInterval);

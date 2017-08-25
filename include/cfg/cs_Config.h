@@ -125,18 +125,7 @@
 
 
 
-#if CONTINUOUS_POWER_SAMPLER == 1
-#define CS_ADC_SAMPLE_RATE                       101
-#else
-//#define CS_ADC_SAMPLE_RATE                       3000 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
-#define CS_ADC_SAMPLE_RATE                       500 //! Max 10000 / numpins (min about 500? to avoid too large difference in timestamps)
-#endif
-
-#define POWER_SAMPLE_BURST_INTERVAL              3000 //! Time to next burst sampling (ms)
 #define POWER_SAMPLE_BURST_NUM_SAMPLES           75 //! Number of voltage and current samples per burst
-
-#define POWER_SAMPLE_CONT_INTERVAL               50 //! Time to next buffer read and attempt to send msg (ms)
-#define POWER_SAMPLE_CONT_NUM_SAMPLES            80 //! Number of voltage and current samples in the buffer, written by ADC, read by power service
 
 #define CS_ADC_SAMPLE_INTERVAL_US                200
 

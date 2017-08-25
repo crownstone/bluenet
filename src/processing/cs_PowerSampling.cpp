@@ -41,8 +41,6 @@ void PowerSampling::init(uint8_t pinAinCurrent, uint8_t pinAinVoltage) {
 	Timer::getInstance().createSingleShot(_powerSamplingSentDoneTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
 
 	Settings& settings = Settings::getInstance();
-	settings.get(CONFIG_POWER_SAMPLE_BURST_INTERVAL, &_burstSamplingInterval);
-	settings.get(CONFIG_POWER_SAMPLE_CONT_INTERVAL, &_contSamplingInterval);
 	settings.get(CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier);
 	settings.get(CONFIG_CURRENT_MULTIPLIER, &_currentMultiplier);
 	settings.get(CONFIG_VOLTAGE_ZERO, &_voltageZero);
