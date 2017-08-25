@@ -53,7 +53,7 @@ public:
 		return instance;
 	}
 
-	void init(boards_config_t* board);
+	void init(const boards_config_t& board);
 
 	void start();
 

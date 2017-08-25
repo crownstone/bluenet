@@ -278,7 +278,7 @@ void Crownstone::initDrivers() {
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		// switch / PWM init
 		LOGd(FMT_INIT, "switch / PWM");
-		_switch->init(&_boardsConfig);
+		_switch->init(_boardsConfig);
 
 		LOGd(FMT_INIT, "temperature guard");
 		_temperatureGuard->init(&_boardsConfig);

@@ -33,32 +33,32 @@ Switch::Switch():
 	_switchTimerId = &_switchTimerData;
 }
 
-void Switch::init(boards_config_t* board) {
+void Switch::init(const boards_config_t& board) {
 #ifndef PWM_DISABLE
 	PWM& pwm = PWM::getInstance();
 	uint32_t pwmPeriod;
 	Settings::getInstance().get(CONFIG_PWM_PERIOD, &pwmPeriod);
-	LOGd("pwm pin %d", board->pinGpioPwm);
+	LOGd("pwm pin %d", board.pinGpioPwm);
 
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;
 	pwmConfig.period_us = pwmPeriod;
-	pwmConfig.channels[0].pin = board->pinGpioPwm;
-	pwmConfig.channels[0].inverted = board->flags.pwmInverted;
+	pwmConfig.channels[0].pin = board.pinGpioPwm;
+	pwmConfig.channels[0].inverted = board.flags.pwmInverted;
 	pwm.init(pwmConfig);
 #else
-	nrf_gpio_cfg_output(board->pinGpioPwm);
+	nrf_gpio_cfg_output(board.pinGpioPwm);
 	if (board->flags.pwmInverted) {
-		nrf_gpio_pin_set(board->pinGpioPwm);
+		nrf_gpio_pin_set(board.pinGpioPwm);
 	} else {
-		nrf_gpio_pin_clear(board->pinGpioPwm);
+		nrf_gpio_pin_clear(board.pinGpioPwm);
 	}
 #endif
 
-	_hasRelay = board->flags.hasRelay;
+	_hasRelay = board.flags.hasRelay;
 	if (_hasRelay) {
-		_pinRelayOff = board->pinGpioRelayOff;
-		_pinRelayOn = board->pinGpioRelayOn;
+		_pinRelayOff = board.pinGpioRelayOff;
+		_pinRelayOn = board.pinGpioRelayOn;
 
 		Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &_relayHighDuration);
 
@@ -287,8 +287,12 @@ void Switch::_setPwm(uint8_t value) {
 		LOGd("Don't turn on pwm");
 		return;
 	}
-	_switchValue.pwm_state = value;
+
 #ifndef PWM_DISABLE
+	// When the user wants to dim at 99%, assume the user actually wants full on, but doesn't want to use the relay.
+	if (value >= 99) {
+		value = 100;
+	}
 	PWM::getInstance().setValue(0, value);
 #else
 	LOGd("setPwm %u", value);
@@ -298,6 +302,7 @@ void Switch::_setPwm(uint8_t value) {
 		nrf_gpio_pin_clear(PWM_PIN);
 	}
 #endif
+	_switchValue.pwm_state = value;
 }
 
 
