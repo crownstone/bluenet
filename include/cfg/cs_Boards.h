@@ -32,11 +32,6 @@ extern "C" {
 // We use the second 4 bytes in the UICR (0x10001084) to store the hardware board type.
 #define UICR_BOARD_INDEX     1 
 
-// Crownstone 5 is one of the first Crownstone types. Not in production.
-#define CROWNSTONE5          0
-// A plug with a flexible print. Not in production.
-#define PLUGIN_FLEXPRINT_01  1
-
 // Nordic dev board, but with some hardware bugs.
 #define PCA10036             40
 // Nordic dev board in active use.

@@ -9,72 +9,13 @@
 #define ASSIGN_DEVICE_TYPE(type) type
 #endif
 
-/** TEMPLATE
-void as(boards_config_t* p_config) {
-	p_config->pinGpioPwm           = ;
-	p_config->pinGpioRelayOn       = ;
-	p_config->pinGpioRelayOff      = ;
-	p_config->pinAinCurrent        = ;
-	p_config->pinAinVoltage        = ;
-	p_config->pinAinZeroRef        = ;
-	p_config->pinAinPwmTemp        = ;
-	p_config->pinGpioRx            = ;
-	p_config->pinGpioTx            = ;
-	p_config->pinLedRed            = ;
-	p_config->pinLedGreen          = ;
-
-	p_config->flags.hasRelay       = ;
-	p_config->flags.pwmInverted    = ;
-	p_config->flags.hasSerial      = ;
-	p_config->flags.hasLed         = ;
-	p_config->flags.ledInverted    = ;
-
-	p_config->deviceType           = ASSIGN_DEVICE_TYPE();
-
-	p_config->voltageMultiplier   = ;
-	p_config->currentMultiplier   = ;
-	p_config->voltageZero         = ;
-	p_config->currentZero         = ;
-	p_config->powerZero           = ;
-
-	p_config->pwmTempVoltageThreshold     = ; 
-	p_config->pwmTempVoltageThresholdDown = ; 
-
-	p_config->minTxPower          = ;
-}
-*/
-
-void asCrownstone(boards_config_t* p_config) {
-	p_config->pinGpioPwm           = 12;
-	p_config->pinGpioRelayOn       = 10;
-	p_config->pinGpioRelayOff      = 11;
-	p_config->pinAinCurrent        = 7;
-	p_config->pinAinVoltage        = 6;
-	p_config->pinGpioRx            = 15;
-	p_config->pinGpioTx            = 16;
-
-	p_config->flags.hasRelay       = true;
-	p_config->flags.pwmInverted    = true;
-	p_config->flags.hasSerial      = true;
-	p_config->flags.hasLed         = false;
-
-	p_config->deviceType           = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
-
-//	p_config->voltageMultiplier   = ; // tbd
-//	p_config->currentMultiplier   = ; // tbd
-//	p_config->voltageZero         = ; // tbd
-//	p_config->currentZero         = ; // tbd
-//	p_config->powerZero           = ; // tbd
-
-	p_config->minTxPower          = -20;
-}
-
 void asACR01B1A(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
 	p_config->pinAinCurrent                      = 2;
 	p_config->pinAinVoltage                      = 1;
+//	p_config->pinAinZeroRef                      = -1; // Non existing
 	p_config->pinAinPwmTemp                      = 3;
 	p_config->pinGpioRx                          = 20;
 	p_config->pinGpioTx                          = 19;
@@ -146,14 +87,13 @@ void asACR01B6A(boards_config_t* p_config) {
 
 void asACR01B2A(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
-//	p_config->pinGpioPwm                         = 22; // NC
-//	p_config->pinGpioPwm                         = 20; // RX
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
 	p_config->pinAinCurrent                      = 2;
 	p_config->pinAinVoltage                      = 1;
-//	p_config->pinGpioRx                          = 20;
-	p_config->pinGpioRx                          = 22; // NC
+//	p_config->pinAinZeroRef                      = -1; // Non existing
+	p_config->pinAinPwmTemp                      = 3;
+	p_config->pinGpioRx                          = 20;
 	p_config->pinGpioTx                          = 19;
 	p_config->pinLedRed                          = 10;
 	p_config->pinLedGreen                        = 9;
@@ -168,8 +108,10 @@ void asACR01B2A(boards_config_t* p_config) {
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
 
-	p_config->voltageMultiplier                  = 0.2f;
-	p_config->currentMultiplier                  = 0.0045f;
+//	p_config->voltageMultiplier                  = 0.2f;
+//	p_config->currentMultiplier                  = 0.0045f;
+	p_config->voltageMultiplier                  = 0.0f;
+	p_config->currentMultiplier                  = 0.0f;
 	p_config->voltageZero                        = 2003; // 2010 seems better?
 	p_config->currentZero                        = 1997; // 1991 seems better?
 	p_config->powerZero                          = 1500;
@@ -189,6 +131,7 @@ void asACR01B2E(boards_config_t* p_config) {
 	p_config->pinAinCurrent                      = 2;
 	p_config->pinAinVoltage                      = 1;
 	p_config->pinAinZeroRef	                     = 0;
+	p_config->pinAinPwmTemp                      = 3;
 	p_config->pinGpioRx                          = 20;
 	p_config->pinGpioTx                          = 19;
 	p_config->pinLedRed                          = 10;
@@ -218,34 +161,6 @@ void asACR01B2E(boards_config_t* p_config) {
 	p_config->minTxPower                         = -20;
 }
 
-void asPluginFlexprint(boards_config_t* p_config) {
-	p_config->pinGpioPwm           = 15;
-	p_config->pinGpioRelayOn       = 16;
-	p_config->pinGpioRelayOff      = 17;
-	p_config->pinAinCurrent        = 3;
-	p_config->pinAinVoltage        = 2;
-	p_config->pinGpioRx            = 6;
-	p_config->pinGpioTx            = 7;
-
-	p_config->flags.hasRelay       = true;
-	p_config->flags.pwmInverted    = true;
-	p_config->flags.hasSerial      = false;
-	p_config->flags.hasLed         = false;
-
-	p_config->deviceType           = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
-
-	p_config->voltageMultiplier   = 0.2f;
-	p_config->currentMultiplier   = 0.0045f;
-	p_config->voltageZero         = 2003;
-	p_config->currentZero         = 1997;
-	p_config->powerZero           = 1500;
-
-	p_config->pwmTempVoltageThreshold     = 0.76; // About 1.5kOhm --> 90-100C
-	p_config->pwmTempVoltageThresholdDown = 0.41; // About 0.7kOhm --> 70-95C
-
-	p_config->minTxPower          = -20;
-}
-
 void asPca10036(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 17;
 	p_config->pinGpioRelayOn                     = 11; // something unused
@@ -259,8 +174,6 @@ void asPca10036(boards_config_t* p_config) {
 	p_config->pinLedRed                          = 19;
 	p_config->pinLedGreen                        = 20;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
-
 	p_config->flags.hasRelay                     = false;
 	p_config->flags.pwmInverted                  = true;
 	p_config->flags.hasSerial                    = true;
@@ -268,12 +181,13 @@ void asPca10036(boards_config_t* p_config) {
 	p_config->flags.ledInverted                  = true;
 	p_config->flags.hasAdcZeroRef                = false;
 	p_config->flags.pwmTempInverted              = false;
-//	p_config->flags.pwmTempInverted              = true;
 
-	p_config->voltageMultiplier                  = 0; // set to 0 to disable sampling checks
-	p_config->currentMultiplier                  = 0; // set to 0 to disable sampling checks
-	p_config->voltageZero                        = 0; // something
-	p_config->currentZero                        = 0; // something
+	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
+
+	p_config->voltageMultiplier                  = 1.0; // set to 0 to disable sampling checks
+	p_config->currentMultiplier                  = 1.0; // set to 0 to disable sampling checks
+	p_config->voltageZero                        = 1000; // something
+	p_config->currentZero                        = 1000; // something
 	p_config->powerZero                          = 0; // something
 	p_config->voltageRange                       = 3600; // 0V - 3.6V
 	p_config->currentRange                       = 3600; // 0V - 3.6V
@@ -340,14 +254,6 @@ uint32_t configure_board(boards_config_t* p_config) {
 	case ACR01B2E:
 	case ACR01B2F:
 		asACR01B2E(p_config);
-		break;
-
-	case CROWNSTONE5:
-		asCrownstone(p_config);
-		break;
-
-	case PLUGIN_FLEXPRINT_01:
-		asPluginFlexprint(p_config);
 		break;
 
 	case GUIDESTONE:

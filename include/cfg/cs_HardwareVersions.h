@@ -68,9 +68,6 @@ inline const char* get_hardware_version() {
 	//// Old and Third Party Boards
 	/////////////////////////////////////////////////////////////////
 
-	if (hardwareBoard == CROWNSTONE5) return "plugin_quant";
-	if (hardwareBoard == PLUGIN_FLEXPRINT_01) return "plugin_flexprint_01";
-
 	// Nordic Boards
 	if (hardwareBoard == PCA10036) return "PCA10036";
 	if (hardwareBoard == PCA10040) return "PCA10040";
