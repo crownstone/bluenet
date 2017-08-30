@@ -1,8 +1,8 @@
 /**
- * Author: Bart van Vliet
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone
  * Date: Oct 14, 2015
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
 
 #pragma once

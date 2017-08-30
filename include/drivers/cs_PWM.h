@@ -1,8 +1,8 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone
  * Date: 9 Mar., 2016
- * License: LGPLv3+, Apache, and/or MIT, your choice
+ * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
 #pragma once
 
@@ -39,7 +39,7 @@ public:
 
 	//! Initialize the PWM settings.
 	//! config can be safely deleted after calling this function.
-	uint32_t init(pwm_config_t& config);
+	uint32_t init(const pwm_config_t& config);
 
 	//! De-Initialize the PWM instance, i.e. free allocated resources
 	uint32_t deinit();
@@ -79,9 +79,6 @@ private:
 	// -----------------------------------
 	// ----- Implementation specific -----
 	// -----------------------------------
-
-	//! Pointer to the timer.
-	nrf_drv_timer_t* _timer;
 
 	//! Max value of channel, in ticks. Set at init
 	uint32_t _maxTickVal;
