@@ -50,19 +50,20 @@ publish() {
 	cs_log "We assume you have checked out the repository in docs/html again, but then the gh-pages branch"
 	cd ..
 	if [ ! -d "docs/html" ]; then
-		cs_error "The docs/html directory does not exist."
+		cs_err "The docs/html directory does not exist."
 		exit
 	fi
 	msg=$(git log -1 --oneline | cat)
 
 	cd docs/html
 	if [ ! -d ".git" ]; then
-		cs_error "The docs/html directory should be its own git repository. Check out bluenet in separate folder and mv to docs/html."
+		cs_err "The docs/html directory should be its own git repository. Check out bluenet in separate folder and mv to docs/html."
 		exit
 	fi
 	branch=$(git rev-parse --abbrev-ref HEAD)
-	if [ "$branch"!="gh-pages" ]; then
-		cs_error "The docs/html directory should be its own git repository. Check out bluenet in separate folder, mv to docs/html and checkout gh-pages."
+	echo $branch
+	if [ "$branch" != "gh-pages" ]; then
+		cs_err "The docs/html directory should be its own git repository. Check out bluenet in separate folder, mv to docs/html and checkout gh-pages."
 		exit
 	fi
 
