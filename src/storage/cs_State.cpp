@@ -60,6 +60,7 @@ void State::init() {
 #ifdef SWITCH_STATE_PERSISTENT
 	_switchState = new CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY, small_seq_number_t>(_stateHandle,
 	        StorageHelper::getOffset(&state, state.switchState), defaultSwitchState);
+	_switchStateCache = _switchState->read();
 #else
 	_switchState = defaultSwitchState;
 #endif
@@ -82,6 +83,7 @@ void State::print() {
 	LOGd("switch state:");
 #ifdef SWITCH_STATE_PERSISTENT
 	_switchState->print();
+	LOGd("switch cache: %u", _switchStateCache);
 #endif
 	LOGd("reset counter:");
 	_resetCounter->print();
@@ -326,6 +328,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 			if (persistent && _switchState->read() != value) {
 				_switchState->store(value);
 			}
+			_switchStateCache = value;
 #else
 			_switchState = value;
 #endif
@@ -465,7 +468,8 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 		}
 		case STATE_SWITCH_STATE: {
 #ifdef SWITCH_STATE_PERSISTENT
-			*(uint8_t*)target = _switchState->read();
+//			*(uint8_t*)target = _switchState->read();
+			*(uint8_t*)target = _switchStateCache;
 #else
 			*(uint8_t*)target = _switchState;
 #endif

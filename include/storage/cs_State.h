@@ -239,12 +239,18 @@ protected:
 
 	//! counts application resets (only for debug purposes?)
 	CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY, small_seq_number_t>* _resetCounter;
-	//! keeps track of the switch state, i.e. current PWM value
+
 #ifdef SWITCH_STATE_PERSISTENT
+	//! keeps track of the switch state in pstorage
 	CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY, small_seq_number_t>* _switchState;
+
+	//! keeps track of the switch state in ram
+	uint8_t _switchStateCache;
 #else
+	//! keeps track of the switch state in pstorage
 	uint8_t _switchState;
 #endif
+
 	//! keeps track of the accumulated power
 	CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY, large_seq_number_t>* _accumulatedEnergy;
 
