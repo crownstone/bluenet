@@ -1,8 +1,8 @@
-/*
- * Author: Bart van Vliet
- * Copyright: Distributed Organisms B.V. (DoBots)
+/**
+ * Author: Crownstone Team
+ * Copyright: Crownstone
  * Date: Feb 8, 2017
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
 
 #include "processing/cs_TemperatureGuard.h"
@@ -63,8 +63,6 @@ void TemperatureGuard::handleCompEvent(CompEvent_t event) {
 
 void TemperatureGuard::tick() {
 	GeneralEventType curEvent;
-
-	return;
 
 	// Check chip temperature, send event if it changed
 	uint8_t chipTempError = getTemperature() > _maxChipTemp ? 1 : 0;
