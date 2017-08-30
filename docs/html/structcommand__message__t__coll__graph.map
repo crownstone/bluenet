@@ -1,4 +1,0 @@
-<map id="command_message_t" name="command_message_t">
-<area shape="rect" id="node2" href="$structbeacon__mesh__message__t.html" title="Beacon mesh message. " alt="" coords="21,5,196,32"/>
-<area shape="rect" id="node3" href="$structstream__t.html" title="stream_t\&lt; uint8_t,\l(MAX_COMMAND_MESSAGE\l_PAYLOAD_LENGTH &#45; SB\l_HEADER_SIZE)\&gt;" alt="" coords="5,57,212,127"/>
-</map>

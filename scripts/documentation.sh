@@ -47,11 +47,37 @@ memory_map() {
 }
 
 publish() {
+	cs_log "We assume you have checked out the repository in docs/html again, but then the gh-pages branch"
 	cd ..
-	git add -u .
-	git add docs
-	git commit
-	git subtree push --prefix docs/html origin gh-pages
+	if [ ! -d "docs/html" ]; then
+		cs_error "The docs/html directory does not exist."
+		exit
+	fi
+	msg=$(git log -1 --oneline | cat)
+
+	cd docs/html
+	if [ ! -d ".git" ]; then
+		cs_error "The docs/html directory should be its own git repository. Check out bluenet in separate folder and mv to docs/html."
+		exit
+	fi
+	branch=$(git rev-parse --abbrev-ref HEAD)
+	if [ "$branch"!="gh-pages" ]; then
+		cs_error "The docs/html directory should be its own git repository. Check out bluenet in separate folder, mv to docs/html and checkout gh-pages."
+		exit
+	fi
+
+	cs_info "Add all documentation changes to git"
+	git add .
+
+	cs_info "Commit changes to git, use as message $msg"
+	git commit -m "$msg"
+
+	cs_info "Pull existing changes from remote gh-pages branch"
+	git pull
+
+	cs_info "Push new changes"
+	git push
+
 	cs_info "Go to https://crownstone.github.io/bluenet"
 }
 

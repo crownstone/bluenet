@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor. " alt="" coords="5,56,88,83"/>
-<area shape="rect" id="node2" href="$classfixed__tuple.html" title="A fixed tuple is a vector with a templated type and a reserved capacity. " alt="" coords="146,5,321,32"/>
-<area shape="rect" id="node3" href="$classtuple.html" title="tuple\&lt; CharacteristicBase * \&gt;" alt="" coords="136,56,331,83"/>
-<area shape="rect" id="node4" href="$classtuple.html" title="tuple\&lt; Service * \&gt;" alt="" coords="170,107,297,133"/>
-<area shape="rect" id="node5" href="$classfixed__tuple.html" title="fixed_tuple\&lt; Service\l *, MAX_SERVICE_COUNT \&gt;" alt="" coords="379,99,581,141"/>
-</map>
