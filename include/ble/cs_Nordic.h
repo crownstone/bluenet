@@ -43,9 +43,12 @@ extern "C"
 #ifndef BOOTLOADER_COMPILATION
 // Refering to driver files
 #include "nrf_drv_saadc.h"
-#include "nrf_drv_timer.h"
-#include "nrf_drv_ppi.h"
-#include "nrf_drv_gpiote.h"
+#include "nrf_timer.h"
+#include "nrf_ppi.h"
+#include "nrf_gpiote.h"
+//#include "nrf_drv_timer.h"
+//#include "nrf_drv_ppi.h"
+//#include "nrf_drv_gpiote.h"
 #endif
 
 #undef APP_ERROR_CHECK // undefine again, we want to use our own macro defined in util/cs_BleError.h

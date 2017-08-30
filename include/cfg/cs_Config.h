@@ -1,8 +1,8 @@
 /**
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone
  * Date: 4 Nov., 2014
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
 #pragma once
 
@@ -28,7 +28,7 @@
 
 /** Priorities of the different peripherals
  */
-#define SAADC_TIMER_CONFIG_IRQ_PRIORITY          2
+//#define SAADC_TIMER_CONFIG_IRQ_PRIORITY          2
 //#define SAADC_CONFIG_IRQ_PRIORITY                2
 //#define COMP_CONFIG_IRQ_PRIORITY                 3
 //#define LPCOMP_CONFIG_IRQ_PRIORITY               3
@@ -102,7 +102,7 @@
 #define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_2MHz
 
 #define CS_ADC_TIMER                             NRF_TIMER1
-//#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
+#define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler
 #define CS_ADC_TIMER_IRQn                        TIMER1_IRQn
 #define CS_ADC_INSTANCE_INDEX                    TIMER1_INSTANCE_INDEX
 #define CS_ADC_TIMER_ID                          1

@@ -171,13 +171,19 @@ public:
 	 */
 	void setDoneCallback(adc_done_cb_t callback);
 
-	void enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroVal);
-
-	/** Set the callback which is called when a buffer is filled.
+	/** Set the callback which is called on a zero crossing interrupt.
 	 *
 	 * @param[in] callback             Function to be called on a zero crossing event. This function will run at interrupt level!
 	 */
 	void setZeroCrossingCallback(adc_zero_crossing_cb_t callback);
+
+	/** Enable zero crossing detection on given channel, generating interrupts.
+	 *
+	 * @param[in] channel              The channel on which to check for zero crossings.
+	 * @param[in] zeroVal              The value of zero.
+	 */
+	void enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroVal);
+
 
 	/** Update this object with a buffer with values from the ADC conversion.
 	 *
@@ -263,10 +269,4 @@ private:
 
 	//! Helper function to get the ppi channel, given the index.
 	nrf_ppi_channel_t getPpiChannel(uint8_t index);
-
-	//! Helper function to get the limit low interrupt mask, given the channel index.
-	nrf_saadc_int_mask_t getAdcLimitLowInterruptMask(uint8_t index);
-
-	//! Helper function to get the limit high interrupt mask, given the channel index.
-	nrf_saadc_int_mask_t getAdcLimitHighInterruptMask(uint8_t index);
 };

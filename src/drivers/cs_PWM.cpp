@@ -1,8 +1,8 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone
  * Date: 9 Mar., 2016
- * License: LGPLv3+, Apache, and/or MIT, your choice
+ * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
 
 #include "drivers/cs_PWM.h"
@@ -33,10 +33,6 @@
 #define ZERO_CROSSING_CAPTURE_TASK  NRF_TIMER_TASK_CAPTURE3
 
 
-//#define PWM_DISABLE_BY_PPI_ENABLE
-//#define PWM_DISABLE_BY_GPIOTE_ENABLE
-#define PWM_DISABLE_BY_GPIOTE_CONFIG
-
 PWM::PWM() :
 		_initialized(false)
 		{
@@ -45,10 +41,11 @@ PWM::PWM() :
 #endif
 }
 
-uint32_t PWM::init(pwm_config_t & config) {
-//#if PWM_ENABLE==1
+uint32_t PWM::init(const pwm_config_t& config) {
+#if PWM_ENABLE==1
 	LOGi(FMT_INIT, "PWM");
 	_config = config;
+//	memcpy(&_config, &config, sizeof(pwm_config_t));
 
 	uint32_t err_code;
 
@@ -94,7 +91,7 @@ uint32_t PWM::init(pwm_config_t & config) {
 
     _initialized = true;
     return ERR_SUCCESS;
-//#endif
+#endif
 
     return ERR_PWM_NOT_ENABLED;
 }
@@ -362,8 +359,8 @@ void PWM::onZeroCrossing() {
 
 
 void PWM::enableInterrupt() {
-//	// Make the timer stop on end of period
-//	nrf_timer_shorts_enable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
+	// Make the timer stop on end of period
+	nrf_timer_shorts_enable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
 	// Enable interrupt, set the value in there (at the end/start of the period).
 	nrf_timer_int_enable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
 }
@@ -371,9 +368,9 @@ void PWM::enableInterrupt() {
 void PWM::_handleInterrupt() {
 	writeCC(PERIOD_CHANNEL_IDX, _adjustedMaxTickVal);
 
-//	// Don't stop timer on end of period anymore, and start the timer again
-//	nrf_timer_shorts_disable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
-//	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
+	// Don't stop timer on end of period anymore, and start the timer again
+	nrf_timer_shorts_disable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
+	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
 }
 
 
@@ -561,7 +558,7 @@ nrf_ppi_task_t PWM::getPpiTaskDisable(uint8_t index) {
 }
 
 
-// Interrupt handler
+// Timer interrupt handler
 extern "C" void CS_PWM_TIMER_IRQ(void) {
 //	if (nrf_timer_event_check(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX))) {
 	// Clear and disable interrupt until next change.

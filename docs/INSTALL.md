@@ -37,6 +37,12 @@ You can do that manually, or use
 
 from the root folder of the Nordic SDK to do it for you.
 
+In SDK 11, there is another bug that has to be fixed. In the file `nrf_drv_saadc.h`, replace the define of high limit disabled with:
+
+    #define NRF_DRV_SAADC_LIMITH_DISABLED (4095)
+
+
+
 ### J-Link
 
 Download and install J-Link Segger’s [software](https://www.segger.com/downloads/jlink). The current version is 6.0.6 [64bit .deb file version 6.0.6](https://www.segger.com/downloads/jlink/jlink_6.0.6_x86_64.deb) and can be found at the "J-Link Software and Documentation Pack" section. 
