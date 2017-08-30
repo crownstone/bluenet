@@ -13,3 +13,4 @@ node_modules
 *.pyc
 *.swp
 nohup.out
+docs/html
