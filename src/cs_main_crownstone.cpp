@@ -46,6 +46,10 @@ extern "C" {
  * Main functionality
  *********************************************************************************************************************/
 
+void handleZeroCrossing() {
+	PWM::getInstance().onZeroCrossing();
+}
+
 Crownstone::Crownstone(boards_config_t& board) :
 	_boardsConfig(board),
 	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL), _watchdog(NULL), _enOceanHandler(NULL),
@@ -244,21 +248,21 @@ void Crownstone::initDrivers() {
 
 #ifdef ENABLE_LEDS
 	if (NRF_UICR->NFCPINS != 0) {
-		LOGd("enable gpio LEDs");
+		LOGw("enable gpio LEDs");
 		nrf_nvmc_write_word(0x1000120C, 0);
 	}
 #endif
 
-	LOGd(FMT_INIT, "stack");
+	LOGi(FMT_INIT, "stack");
 
 	//! start up the softdevice early because we need it's functions to configure devices it ultimately controls.
 	//! in particular we need it to set interrupt priorities.
 	_stack->init();
 
-	LOGd(FMT_INIT, "timers");
+	LOGi(FMT_INIT, "timers");
 	_timer->init();
 
-	LOGd(FMT_INIT, "pstorage");
+	LOGi(FMT_INIT, "pstorage");
 	// initialization of storage and settings has to be done **AFTER** stack is initialized
 	_storage->init();
 
@@ -266,10 +270,10 @@ void Crownstone::initDrivers() {
 	_settings->init(&_boardsConfig);
 	_stateVars->init();
 
-	LOGd(FMT_INIT, "command handler");
+	LOGi(FMT_INIT, "command handler");
 	_commandHandler->init(&_boardsConfig);
 
-	LOGd(FMT_INIT, "factory reset");
+	LOGi(FMT_INIT, "factory reset");
 	_factoryReset->init();
 
 	LOGi(FMT_INIT, "encryption handler");
@@ -277,13 +281,13 @@ void Crownstone::initDrivers() {
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		// switch / PWM init
-		LOGd(FMT_INIT, "switch / PWM");
+		LOGi(FMT_INIT, "switch / PWM");
 		_switch->init(_boardsConfig);
 
-		LOGd(FMT_INIT, "temperature guard");
+		LOGi(FMT_INIT, "temperature guard");
 		_temperatureGuard->init(_boardsConfig);
 
-		LOGd(FMT_INIT, "power sampler");
+		LOGi(FMT_INIT, "power sampler");
 		_powerSampler->init(_boardsConfig);
 
 		LOGi(FMT_INIT, "watchdog");
@@ -294,7 +298,7 @@ void Crownstone::initDrivers() {
 
 	// init GPIOs
 	if (_boardsConfig.flags.hasLed) {
-		LOGd("Configure LEDs");
+		LOGi("Configure LEDs");
 		// Note: DO NOT USE THEM WHILE SCANNING OR MESHING ...
 		nrf_gpio_cfg_output(_boardsConfig.pinLedRed);
 		nrf_gpio_cfg_output(_boardsConfig.pinLedGreen);
@@ -600,10 +604,11 @@ void Crownstone::startUp() {
 		_switch->start();
 
 		//! Start temperature guard regardless of operation mode
+		LOGi(FMT_START, "temp guard");
 		_temperatureGuard->start();
 
 		//! Start power sampler regardless of operation mode (as it is used for the current based soft fuse)
-		LOGd(FMT_START, "power sampling");
+		LOGi(FMT_START, "power sampling");
 		_powerSampler->startSampling();
 	}
 
@@ -617,13 +622,11 @@ void Crownstone::startUp() {
 		_stack->startTicking();
 
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
+			// Let the power sampler call the PWM callback function on zero crossings.
+			_powerSampler->enableZeroCrossingInterrupt(handleZeroCrossing);
 
-			// restore the last value. the switch reads the last state from the storage, but does
-			// not automatically update the pwm/relay values. so we read out the last value
-			// and set it again to update the pwm
-			// [08-03-2017] Bart: this was already done in the switch.init(), right?
-//			uint8_t pwm = _switch->getPwm();
-//			_switch->setPwm(pwm);
+			// This way doesn't seem any better: https://stackoverflow.com/questions/2298242/callback-functions-in-c
+//			_powerSampler->enableZeroCrossingInterrupt(PWM::getInstance().onZeroCrossing);
 		}
 
 		_scheduler->start();
