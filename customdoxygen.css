@@ -1027,6 +1027,7 @@ table.fieldtable {
      width: 240px;
      height: 26px;
      margin-right: 20px;
+     background-color: white;
 }
 
 #MSearchBox .left {
@@ -1405,6 +1406,7 @@ tr.heading h2 {
 
 
 .navpath {
+     display: none;
      border: none;
 }
 
@@ -1432,5 +1434,81 @@ tr.heading h2 {
      background-image: none;
      color: white;
      text-shadow: none;
+}
+
+/**
+ * Doxygen changed css again (1.8.13). It is not easy to have a custom css file like that!
+ */
+
+.sm-dox {
+     background-color: #2f3a48;
+     background-image: none;
+}
+
+.sm-dox * {
+     background-image: none;
+}
+
+.sm-dox a,
+.sm-dox a:focus,
+.sm-dox a:hover,
+.sm-dox a:active {
+     background-image: none;
+}
+
+.sm-dox li a,
+.sm-dox li a:focus,
+.sm-dox li a:hover,
+.sm-dox li a:active {
+     font: 18px "Lato";
+     font-size: 20px;
+     text-shadow: none;
+     font-weight: bold;
+     color: white;
+     padding: 0 12px;
+     line-height: 44px;
+}
+
+.sm-dox li a:hover,
+.sm-dox a:active {
+     background-color: #51637b;
+}
+
+.sm-dox ul {
+     list-style: none;
+}
+
+.sm-dox ul a,
+.sm-dox ul a:focus,
+.sm-dox ul a:hover,
+.sm-dox ul a:active {
+     font: 18px "Lato";
+     font-size: 20px;
+     text-shadow: none;
+     font-weight: bold;
+     background-image: none;
+     line-height: 44px;
+}
+
+.sm-dox ul a {
+     color: #51637b;
+}
+
+.sm-dox ul a:focus,
+.sm-dox ul a:hover,
+.sm-dox ul a:active {
+     color: white;
+}
+
+.sm-dox a.has-submenu {
+     padding: 0 12px;
+}
+
+.sm-dox a span.sub-arrow {
+     display: none;
+}
+
+.sm-doxi ul a span.sub-arrow {
+     color: purple;
 }
 
