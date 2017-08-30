@@ -110,6 +110,12 @@ void PowerSampling::stopSampling() {
 void PowerSampling::sentDone() {
 	_sendingSamples = false;
 }
+
+void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) {
+	_adc->setZeroCrossingCallback(callback);
+	// Simply use the zero from the board config, that should be accurate enough for this purpose.
+	_adc->enableZeroCrossingInterrupt(VOLTAGE_CHANNEL_IDX, _voltageZero);
+}
 	
 /**
  * After ADC has finished, calculate power consumption, copy data if required, and release buffer.
@@ -245,7 +251,7 @@ void PowerSampling::calculateCurrentZero(power_t power) {
 
 	//! Exponential moving average
 	_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * sum * 1000 / numSamples) / 1000;
-	write("sum=%lli numSamples=%u czero=%i \r\n", sum, numSamples, _avgZeroCurrent);
+//	write("sum=%lli numSamples=%u czero=%i \r\n", sum, numSamples, _avgZeroCurrent);
 }
 
 /**
@@ -296,18 +302,18 @@ void PowerSampling::calculatePower(power_t power) {
 ////		printPower = 0;
 //		// current
 //		write("Current: ");
-////		write("\r\n");
+//		write("\r\n");
 //		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-//			write("%d ", power.buf[i]);
+//			write("%4d ", power.buf[i]);
 //			if (i % 40 == 40 - 1) {
 //				write("\r\n");
 //			}
 //		}
 //		write("\r\n");
 //		write("Voltage: ");
-////		write("\r\n");
+//		write("\r\n");
 //		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-//			write("%d ", power.buf[i]);
+//			write("%4d ", power.buf[i]);
 //			if (i % 40 == 40 - 2) {
 //				write("\r\n");
 //			}

@@ -14,6 +14,8 @@ extern "C" {
 #include "cfg/cs_Boards.h"
 #include "drivers/cs_ADC.h"
 
+typedef void (*ps_zero_crossing_cb_t) ();
+
 class PowerSampling {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
@@ -56,7 +58,13 @@ public:
 	void sampleCurrentDone(uint8_t type);
 
 	void getBuffer(buffer_ptr_t& buffer, uint16_t& size);
-	
+
+	/** Enable zero crossing detection on given channel, generating interrupts.
+	 *
+	 * @param[in] callback             Function to be called on a zero crossing event. This function will run at interrupt level!
+	 */
+	void enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback);
+
 	/**
 	 * Struct that defines the buffer received from the ADC sampler in scanning mode.
 	 */
@@ -69,6 +77,7 @@ public:
 		uint32_t sampleIntervalUs;
 		uint32_t acPeriodUs;
 	} power_t;
+
 
 private:
 	PowerSampling();
@@ -91,7 +100,6 @@ private:
 
 	//! Power samples to be sent via characteristic.
 	PowerSamples _powerSamples;
-
 
 	float _voltageMultiplier; //! Voltage multiplier from settings.
 	float _currentMultiplier; //! Current multiplier from settings.

@@ -58,10 +58,10 @@ void ADC_IRQHandler(void);
 
 void TIMER0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 
-//! currently used for ADC
+//! timer used for ADC
 void TIMER1_IRQHandler(void);
 
-//! currently used for PWM
+//! timer used for PWM
 void TIMER4_IRQHandler(void);
 
 void RTC0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
