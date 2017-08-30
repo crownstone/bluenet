@@ -1,6 +1,8 @@
 var searchData=
 [
   ['adc',['ADC',['../classADC.html',1,'']]],
+  ['adc_5fchannel_5fconfig_5ft',['adc_channel_config_t',['../structadc__channel__config__t.html',1,'']]],
+  ['adc_5fconfig_5ft',['adc_config_t',['../structadc__config__t.html',1,'']]],
   ['adc_5fdone_5fcb_5fdata_5ft',['adc_done_cb_data_t',['../structadc__done__cb__data__t.html',1,'']]],
   ['add',['add',['../classStreamBuffer.html#a9f86cd69fdedcf5893796af31482c2d2',1,'StreamBuffer::add()'],['../classTrackedDeviceList.html#aacb5658c77b9bbc09464eab701869ade',1,'TrackedDeviceList::add()']]],
   ['addcharacteristic',['addCharacteristic',['../classService.html#a69281e49b9a84d5ec36c8b2a42f525e0',1,'Service']]],

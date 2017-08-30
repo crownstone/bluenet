@@ -2,7 +2,8 @@ var searchData=
 [
   ['handle',['handle',['../structstorage__config__t.html#a169d449ebf6ab389f9bdd15d4bdec96b',1,'storage_config_t']]],
   ['handlebeaconconfigcommand',['handleBeaconConfigCommand',['../classMeshControl.html#a3eb45b3a31aa69ea75d73b49ffa396f0',1,'MeshControl']]],
-  ['handlecommand',['handleCommand',['../classMeshControl.html#a8affa786b8e73753becbb8ab7313389e',1,'MeshControl']]],
+  ['handlecommand',['handleCommand',['../classMeshControl.html#a8affa786b8e73753becbb8ab7313389e',1,'MeshControl::handleCommand()'],['../classCommandHandler.html#ac0ee61f58cde3bde6bafbc978a03a2cf',1,'CommandHandler::handleCommand(const CommandHandlerTypes type)'],['../classCommandHandler.html#a5265cdefc328f2a0faa0dc6d205a4f55',1,'CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel=ADMIN)']]],
+  ['handlecommanddelayed',['handleCommandDelayed',['../classCommandHandler.html#a2c98cee951dab995e1e2804ebf400f39',1,'CommandHandler']]],
   ['handlecommandforus',['handleCommandForUs',['../classMeshControl.html#a259d406d9836eabd7b4bf75151be3940',1,'MeshControl']]],
   ['handlecommandreplymessage',['handleCommandReplyMessage',['../classMeshControl.html#a27ad1d87270b89dceeffb9e9b4edd065',1,'MeshControl']]],
   ['handleconfigcommand',['handleConfigCommand',['../classMeshControl.html#ae30bef99101e7e4a7cb7c0628ee3c4b3',1,'MeshControl']]],
@@ -14,6 +15,7 @@ var searchData=
   ['handlestatecommand',['handleStateCommand',['../classMeshControl.html#a672c458b2114007342e323ad9ae7abea',1,'MeshControl']]],
   ['handlestatemessage',['handleStateMessage',['../classMeshControl.html#a789abd867285e5b5493f30a32ed1aad9',1,'MeshControl']]],
   ['hardwareboard',['hardwareBoard',['../structboards__config__t.html#a9fd149fb8673de97cee492b7b4ed3153',1,'boards_config_t']]],
+  ['hasadczeroref',['hasAdcZeroRef',['../structboards__config__t.html#aa95c1a927d99f3cd3a9e227778b6c9f1',1,'boards_config_t']]],
   ['hasled',['hasLed',['../structboards__config__t.html#ab7fcce849d8ce4f31def11f28c8b43f8',1,'boards_config_t']]],
   ['hasrelay',['hasRelay',['../structboards__config__t.html#a71d71d114ff20912ad99f243298aaf61',1,'boards_config_t']]],
   ['hasserial',['hasSerial',['../structboards__config__t.html#a5fe3a69f4bb060136be48f690c4cda0a',1,'boards_config_t']]],

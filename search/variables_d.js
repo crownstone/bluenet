@@ -15,6 +15,7 @@ var searchData=
   ['powerzero',['powerZero',['../structboards__config__t.html#a488d1f81fc535992590459ebc9f877f8',1,'boards_config_t']]],
   ['presentation_5fformat',['presentation_format',['../structCharacteristicInit.html#a0216e933ca9c133b0209ccd2eba11d42',1,'CharacteristicInit']]],
   ['pwminverted',['pwmInverted',['../structboards__config__t.html#aaa8f487954302d7c4cb913d63c3d86ba',1,'boards_config_t']]],
+  ['pwmtempinverted',['pwmTempInverted',['../structboards__config__t.html#a0c36af15c380e236e0695cfc5313d351',1,'boards_config_t']]],
   ['pwmtempvoltagethreshold',['pwmTempVoltageThreshold',['../structboards__config__t.html#aca7741ed42538545936863444e57ca03',1,'boards_config_t']]],
   ['pwmtempvoltagethresholddown',['pwmTempVoltageThresholdDown',['../structboards__config__t.html#a70bd38475536196ca64bb85f0535bb8b',1,'boards_config_t']]]
 ];

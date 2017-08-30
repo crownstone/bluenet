@@ -12,6 +12,8 @@ var searchData=
   ['_5fconfigurationcontrolcharacteristic',['_configurationControlCharacteristic',['../classCrownstoneService.html#ace07d12cafdc238c0ef53f4d94691b05',1,'CrownstoneService']]],
   ['_5fconfigurationreadcharacteristic',['_configurationReadCharacteristic',['../classCrownstoneService.html#a26b25339033d5a940eeaa75c100b5aef',1,'CrownstoneService']]],
   ['_5ffull',['_full',['../classUUID.html#acd35f30a8ccf9316343e5a881bebfcdc',1,'UUID']]],
+  ['_5fhandleadcdoneinterrupt',['_handleAdcDoneInterrupt',['../classADC.html#afe32c24ec01cea1b112f440eb72f614f',1,'ADC']]],
+  ['_5fhandleinterrupt',['_handleInterrupt',['../classPWM.html#a23e2ab3ee1ca1e9958435a4e0cda393b',1,'PWM']]],
   ['_5fhandles',['_handles',['../classCharacteristicBase.html#a045bd9e5d4ea809300abfc55ff0c3d7c',1,'CharacteristicBase']]],
   ['_5finited',['_inited',['../classNrf51822BluetoothStack.html#a2798a8d8a2e7de39cb077703bbd527ac',1,'Nrf51822BluetoothStack']]],
   ['_5fminaccesslevel',['_minAccessLevel',['../classCharacteristicBase.html#a0fb07ec8fbf376b6fe1a409850e4883e',1,'CharacteristicBase']]],

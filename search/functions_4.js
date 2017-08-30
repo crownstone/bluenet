@@ -1,7 +1,9 @@
 var searchData=
 [
-  ['empty',['empty',['../classCircularBuffer.html#a919bdea4228c5f5707e9a875201621c9',1,'CircularBuffer::empty()'],['../classCircularDifferentialBuffer.html#ac72d8ea3f95e940f45e37d7449d95ea2',1,'CircularDifferentialBuffer::empty()']]],
-  ['encrypt',['encrypt',['../classEncryptionHandler.html#ace6c832bbfa3c3bfbd7adb021d556043',1,'EncryptionHandler']]],
-  ['encryptmesh',['encryptMesh',['../classEncryptionHandler.html#abb86773128347762ddd794df3a7dd274',1,'EncryptionHandler']]],
-  ['end',['end',['../classstate__message.html#aad616f7f78eb2332bdb3bbc8ce50bce2',1,'state_message']]]
+  ['decrypt',['decrypt',['../classEncryptionHandler.html#a509f9ffbc67a5f78accec439ca55eeee',1,'EncryptionHandler']]],
+  ['deinit',['deinit',['../classPWM.html#a2da4580f7aa0b7e475bdb0a408acbcaf',1,'PWM']]],
+  ['delayedstart',['delayedStart',['../classScanner.html#a2df7d23cb7f5343901bfe02cde1e0d64',1,'Scanner::delayedStart(uint16_t delay)'],['../classScanner.html#a03ea3486fae4833c601c3cad6cc56229',1,'Scanner::delayedStart()']]],
+  ['delayedswitch',['delayedSwitch',['../classSwitch.html#a98932193371cbae1dfb2fda463f166fb',1,'Switch']]],
+  ['deviceinformationservice',['DeviceInformationService',['../classDeviceInformationService.html#af13ec7c422220683c21553e14d904ec9',1,'DeviceInformationService']]],
+  ['difference',['difference',['../classRTC.html#a47569127f5c4a0a4ee24015c803361e3',1,'RTC']]]
 ];

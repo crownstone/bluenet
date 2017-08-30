@@ -7,7 +7,7 @@ var searchData=
   ['characteristic_3c_20std_3a_3astring_20_3e',['Characteristic&lt; std::string &gt;',['../classCharacteristic_3_01std_1_1string_01_4.html',1,'']]],
   ['characteristic_3c_20t_2c_20typename_20std_3a_3aenable_5fif_3c_20std_3a_3ais_5farithmetic_3c_20t_20_3e_3a_3avalue_20_3e_3a_3atype_20_3e',['Characteristic&lt; T, typename std::enable_if&lt; std::is_arithmetic&lt; T &gt;::value &gt;::type &gt;',['../classCharacteristic_3_01T_00_01typename_01std_1_1enable__if_3_01std_1_1is__arithmetic_3_01T_01_4_1_1value_01_4_1_1type_01_4.html',1,'']]],
   ['characteristic_3c_20uint32_5ft_20_3e',['Characteristic&lt; uint32_t &gt;',['../classCharacteristic.html',1,'']]],
-  ['characteristic_3c_20uint8_5ft_20_2a_20_3e',['Characteristic&lt; uint8_t * &gt;',['../classCharacteristic.html',1,'']]],
+  ['characteristic_3c_20uint8_5ft_20_2a_3e',['Characteristic&lt; uint8_t *&gt;',['../classCharacteristic.html',1,'']]],
   ['characteristic_3c_20uint8_5ft_20_3e',['Characteristic&lt; uint8_t &gt;',['../classCharacteristic.html',1,'']]],
   ['characteristicbase',['CharacteristicBase',['../classCharacteristicBase.html',1,'']]],
   ['characteristicgeneric',['CharacteristicGeneric',['../classCharacteristicGeneric.html',1,'']]],

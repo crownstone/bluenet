@@ -4,6 +4,7 @@ var searchData=
   ['peripheral_5fdevice_5ft',['peripheral_device_t',['../structperipheral__device__t.html',1,'']]],
   ['power_5fsamples_5fcont_5fmessage_5ft',['power_samples_cont_message_t',['../structpower__samples__cont__message__t.html',1,'']]],
   ['power_5fsamples_5ft',['power_samples_t',['../structpower__samples__t.html',1,'']]],
+  ['power_5ft',['power_t',['../structPowerSampling_1_1power__t.html',1,'PowerSampling']]],
   ['powersamples',['PowerSamples',['../classPowerSamples.html',1,'']]],
   ['powersampling',['PowerSampling',['../classPowerSampling.html',1,'']]],
   ['powerservice',['PowerService',['../classPowerService.html',1,'']]],
@@ -12,5 +13,7 @@ var searchData=
   ['ps_5fgeneral_5fvars_5ft',['ps_general_vars_t',['../structps__general__vars__t.html',1,'']]],
   ['ps_5fstate_5ft',['ps_state_t',['../structps__state__t.html',1,'']]],
   ['ps_5fstorage_5fbase_5ft',['ps_storage_base_t',['../structps__storage__base__t.html',1,'']]],
-  ['pwm',['PWM',['../classPWM.html',1,'']]]
+  ['pwm',['PWM',['../classPWM.html',1,'']]],
+  ['pwm_5fchannel_5fconfig_5ft',['pwm_channel_config_t',['../structpwm__channel__config__t.html',1,'']]],
+  ['pwm_5fconfig_5ft',['pwm_config_t',['../structpwm__config__t.html',1,'']]]
 ];

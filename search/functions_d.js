@@ -1,17 +1,18 @@
 var searchData=
 [
-  ['pause',['pause',['../classMesh.html#a8ad96654ddb60d70d9a7522cbc6fd7bd',1,'Mesh']]],
-  ['payload',['payload',['../classStreamBuffer.html#a9e126b404c744e50653c8dcbd0eceab3',1,'StreamBuffer']]],
-  ['peek',['peek',['../classCircularBuffer.html#ae6078939f9c2e023b261c971cbcd4141',1,'CircularBuffer::peek()'],['../classCircularDifferentialBuffer.html#a388be34b435d059c843eb3c491b987d1',1,'CircularDifferentialBuffer::peek()']]],
-  ['pop',['pop',['../classCircularBuffer.html#a3033e4e62f336be929c776e912f3b549',1,'CircularBuffer::pop()'],['../classCircularDifferentialBuffer.html#a2520e5586b9b897aae88e12e610f0238',1,'CircularDifferentialBuffer::pop()']]],
-  ['powersampleadcdone',['powerSampleAdcDone',['../classPowerSampling.html#ad0eab4314d0b6f14333b8982bc317194',1,'PowerSampling']]],
-  ['powersamplefirststart',['powerSampleFirstStart',['../classPowerSampling.html#a6773442010a2487dbbd1277e678f4dea',1,'PowerSampling']]],
-  ['powerservice',['PowerService',['../classPowerService.html#a232bc8f47256f01905af4828fb0195fa',1,'PowerService']]],
-  ['preparenormaloperationmode',['prepareNormalOperationMode',['../classCrownstone.html#ad148b7c0838452d967c724238aa052a4',1,'Crownstone']]],
-  ['print',['print',['../classCyclicStorage.html#a7bf33a0bada95d7ee62586e6a174c1c8',1,'CyclicStorage::print()'],['../classState.html#a70f163051bd4e35f510b232a1dbd4d16',1,'State::print()'],['../classScanResult.html#a5c24982267f2a2e51b582b28425b56fc',1,'ScanResult::print()'],['../classScheduleList.html#a3794aae187049177607e975c0817994c',1,'ScheduleList::print()'],['../classTrackedDeviceList.html#a9ae18fc87cf58e9096dfef23622df717',1,'TrackedDeviceList::print(uint8_t *addr) const '],['../classTrackedDeviceList.html#afd2ff6cc3c1035fa0d0abf3bdd3f99cb',1,'TrackedDeviceList::print() const ']]],
-  ['process',['process',['../classMeshControl.html#abba1e0c7263bb5e8c71733f2d0a7aead',1,'MeshControl']]],
-  ['push',['push',['../classCircularBuffer.html#aaa3d25987977c270542a525be8db7232',1,'CircularBuffer::push()'],['../classCircularDifferentialBuffer.html#adbf237e9d3e04f50973bbf6bcd01e52c',1,'CircularDifferentialBuffer::push()']]],
-  ['push_5fback',['push_back',['../classstate__message.html#a838800d064e3f5de90ed48bae8d597c6',1,'state_message']]],
-  ['pwmoff',['pwmOff',['../classSwitch.html#a60b5d22db91f1814a9a1d5d377865432',1,'Switch']]],
-  ['pwmon',['pwmOn',['../classSwitch.html#ad0efeace8feb330ce14ab583c3eb43d9',1,'Switch']]]
+  ['on_5fble_5fevt',['on_ble_evt',['../classNrf51822BluetoothStack.html#a8c6808589f4b627fe4448ed453b7927a',1,'Nrf51822BluetoothStack']]],
+  ['on_5fconnected',['on_connected',['../classNrf51822BluetoothStack.html#a8de4dd2c650e34fb6f465e2a88f84c6d',1,'Nrf51822BluetoothStack']]],
+  ['on_5fdisconnect',['on_disconnect',['../classService.html#a8821a49b0022c636c8e279635aade7e4',1,'Service']]],
+  ['on_5fwrite',['on_write',['../classService.html#a73b29a6f04eafef5ec0f04e9c74e638b',1,'Service']]],
+  ['onnotifytxerror',['onNotifyTxError',['../classCharacteristicBase.html#af03f33031404fb103999a03df356162f',1,'CharacteristicBase']]],
+  ['onradionotificationinterrupt',['onRadioNotificationInterrupt',['../classNrf51822BluetoothStack.html#a9056197294656ad3d7abdcd436bbe218',1,'Nrf51822BluetoothStack']]],
+  ['ontxcomplete',['onTxComplete',['../classCharacteristicBase.html#a57d6e19b6fea27e67b85ac07c7e253fc',1,'CharacteristicBase::onTxComplete()'],['../classCharacteristic_3_01buffer__ptr__t_01_4.html#ad61d03dd29381afc1939d22cca4fb1f7',1,'Characteristic&lt; buffer_ptr_t &gt;::onTxComplete()'],['../classService.html#aa31d62d5f7c838f3f7515e220ab93c42',1,'Service::onTxComplete()'],['../classNrf51822BluetoothStack.html#ab12a11a34691bb52869225b61e2b3358',1,'Nrf51822BluetoothStack::onTxComplete()']]],
+  ['onwrite',['onWrite',['../classCharacteristicGeneric.html#afa4a09d7fcddfcdb90e74fea71456afe',1,'CharacteristicGeneric']]],
+  ['opcode',['opCode',['../classStreamBuffer.html#a93b4205827da8eaed637cfda709bbde5',1,'StreamBuffer']]],
+  ['operator_20ble_5fuuid128_5ft',['operator ble_uuid128_t',['../classUUID.html#a49ef2add2678262a3c56409b226f1247',1,'UUID']]],
+  ['operator_20ble_5fuuid_5ft',['operator ble_uuid_t',['../classUUID.html#a5c0c8427ecdbe0c036017871cfc5eb0b',1,'UUID']]],
+  ['operator_20t_20_26',['operator T &amp;',['../classCharacteristicGeneric.html#aba34f730c4c9982b44cdf2e75057dfb3',1,'CharacteristicGeneric']]],
+  ['operator_2b_2b',['operator++',['../classMeshMessageCounter.html#a175d7b6ca01036ec472c37b44d4a6636',1,'MeshMessageCounter::operator++()'],['../classstate__message_1_1iterator.html#a7cceab8897b55e7ee183469bbf74bbdc',1,'state_message::iterator::operator++()'],['../classstate__message_1_1iterator.html#af96a7dd9875e3ef2431f027ee703cf4a',1,'state_message::iterator::operator++(int)']]],
+  ['operator_3d',['operator=',['../classCharacteristicGeneric.html#a799481d5f5f17c114991ddeacac90153',1,'CharacteristicGeneric']]],
+  ['operator_5b_5d',['operator[]',['../classCircularBuffer.html#aca1eae677eeeef6af682c06338c785a6',1,'CircularBuffer']]]
 ];

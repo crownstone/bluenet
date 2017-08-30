@@ -1,8 +1,14 @@
 var searchData=
 [
-  ['update',['update',['../classADC.html#ad6a5d07f41d656e760ea4fd55834574c',1,'ADC::update()'],['../classScanResult.html#a6ff76ed6d3973219c559120498bd14ae',1,'ScanResult::update()']]],
-  ['updateadvertisement',['updateAdvertisement',['../classNrf51822BluetoothStack.html#ab5b9a5fabc4f020cc7d0d7281eef29e5',1,'Nrf51822BluetoothStack']]],
-  ['updatedevicename',['updateDeviceName',['../classNrf51822BluetoothStack.html#aafc1669beef91b1722417b98d847ca1c',1,'Nrf51822BluetoothStack']]],
-  ['updatevalue',['updateValue',['../classCharacteristicBase.html#a93dfce87563f7c8113df69b0ee95013b',1,'CharacteristicBase']]],
-  ['uuid',['UUID',['../classUUID.html#a56b6dfa8d38418093502ad169a814dfb',1,'UUID::UUID()'],['../classUUID.html#a12e127ba070a7f883e31e9a02dc740db',1,'UUID::UUID(const char *fullUid)'],['../classUUID.html#a117287ee88059dfbe1b0ecdac81c3771',1,'UUID::UUID(uint16_t uuid)'],['../classUUID.html#a5870ad95d095f52e2a10ff38c18b7006',1,'UUID::UUID(UUID &amp;parent, uint16_t uidValue)'],['../classUUID.html#aa4c9baa1a13d474ef6caf12e0664d579',1,'UUID::UUID(const UUID &amp;rhs)'],['../classUUID.html#a4fc7b9c4a7e4aa5202a4d0077307bb56',1,'UUID::UUID(const ble_uuid_t &amp;value)']]]
+  ['tick',['tick',['../classCrownstone.html#a7b4574c77454c31e919f91bd1f33f377',1,'Crownstone']]],
+  ['tickstoms',['ticksToMs',['../classRTC.html#a027acf711855d4ef4065333f0d47fb06',1,'RTC']]],
+  ['toarray',['toArray',['../classCrownstoneManufacturer.html#a6780f5beffd465380122bb0c01c8361a',1,'CrownstoneManufacturer']]],
+  ['toggle',['toggle',['../classSwitch.html#aebb09f3284d4d30cd030aea4f822d5b7',1,'Switch']]],
+  ['tostring',['toString',['../classStreamBuffer.html#a1e57e06f9cc6821b2495a0c20ca84c3a',1,'StreamBuffer']]],
+  ['trackeddevice',['TrackedDevice',['../classTrackedDevice.html#afc874ce96bdaddd0117a9418eda7d66a',1,'TrackedDevice']]],
+  ['trackeddevicelist',['TrackedDeviceList',['../classTrackedDeviceList.html#a9c3d728a893db2cedcf83cbccaa28c29',1,'TrackedDeviceList']]],
+  ['tuple',['tuple',['../classtuple.html#a2739c6d30f8d1c85b06da220f463149b',1,'tuple']]],
+  ['turnoff',['turnOff',['../classSwitch.html#a3f10d75adaf6a110de455d1f7bb49fc0',1,'Switch']]],
+  ['turnon',['turnOn',['../classSwitch.html#a99dd23c2bbf0b6c87d13b543a69b32a6',1,'Switch']]],
+  ['type',['type',['../classStreamBuffer.html#a2dd87dee4754e47fe46a099ee020b985',1,'StreamBuffer']]]
 ];
