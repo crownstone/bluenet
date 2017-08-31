@@ -75,13 +75,11 @@ void asACR01B6A(boards_config_t* p_config) {
 	p_config->voltageZero                        = 0; // TODO: calibrate
 	p_config->currentZero                        = 0; // TODO: calibrate
 	p_config->powerZero                          = 0; // TODO: calibrate
-	p_config->voltageRange                       = 3600; // 0V - 3.6V, or -1.8V - 1.8V
-	p_config->currentRange                       = 3600; // 0V - 3.6V, or -1.8V - 1.8V
+	p_config->voltageRange                       = 3600; // TODO: calibrate
+	p_config->currentRange                       = 3600; // TODO: calibrate
 
-//	p_config->pwmTempVoltageThreshold            = 2.29; // About 70 degrees C (according to model)
-//	p_config->pwmTempVoltageThresholdDown        = 1.87; // About 90 degrees C (according to model)
-	p_config->pwmTempVoltageThreshold            = 1.0; // About 20 degrees C in practice
-	p_config->pwmTempVoltageThresholdDown        = 0.3; // About ?? degrees C TODO: calibrate
+	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
 }
@@ -154,13 +152,13 @@ void asACR01B2E(boards_config_t* p_config) {
 	p_config->voltageZero                        = 0; // TODO: calibrate
 	p_config->currentZero                        = 0; // TODO: calibrate
 	p_config->powerZero                          = 0; // TODO: calibrate
-	p_config->voltageRange                       = 3600; // 0V - 3.6V, or -1.8V - 1.8V
-	p_config->currentRange                       = 3600; // 0V - 3.6V, or -1.8V - 1.8V
+//	p_config->voltageRange                       = 1800; // 0V - 1.8V, or -1.8V - 1.8V around zeroRef pin
+//	p_config->currentRange                       = 1800; // 0V - 1.8V, or -1.8V - 1.8V around zeroRef pin
+	p_config->voltageRange                       = 1200; // 0V - 1.2V, or -1.2V - 1.2V around zeroRef pin
+	p_config->currentRange                       = 1200; // 0V - 1.2V, or -1.2V - 1.2V around zeroRef pin
 
-//	p_config->pwmTempVoltageThreshold            = 2.29; // About 70 degrees C (according to model)
-//	p_config->pwmTempVoltageThresholdDown        = 1.87; // About 90 degrees C (according to model)
-	p_config->pwmTempVoltageThreshold            = 1.0; // About 20 degrees C in practice
-	p_config->pwmTempVoltageThresholdDown        = 0.3; // About ?? degrees C TODO: calibrate
+	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
 
 	p_config->minTxPower                         = -20;
 }
