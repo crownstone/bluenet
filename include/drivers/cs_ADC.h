@@ -74,17 +74,28 @@ enum adc_gain_t {
 
 #define CS_ADC_REF_PIN_NOT_AVAILABLE 255
 
+/** Struct to configure an adc channel.
+ *
+ * pin:               The AIN pin to sample.
+ * rangeMilliVolt:    The range in mV of the pin.
+ * referencePin:      The AIN pin to be subtracted from the measured voltage.
+ */
 struct adc_channel_config_t {
 	cs_adc_pin_id_t pin;
-//	adc_gain_t gain;
 	uint32_t rangeMilliVolt;
 	cs_adc_pin_id_t referencePin;
 };
 
+/** Struct to configure the adc.
+ *
+ * channelCount:      The amount of channels to sample.
+ * channels:          The channel configs.
+ * samplingPeriodUs:  The sampling period in us (each period, all channels are sampled once).
+ */
 struct adc_config_t {
 	cs_adc_channel_id_t channelCount;
 	adc_channel_config_t channels[CS_ADC_MAX_PINS];
-	uint32_t samplingPeriodUs; // Each sampling period, all channels are sampled.
+	uint32_t samplingPeriodUs;
 };
 
 /** Analog-Digital conversion.
@@ -197,6 +208,9 @@ public:
 	 */
 	void _handleAdcDoneInterrupt(nrf_saadc_value_t* buf);
 
+	/** Called when the sampled value is above upper limit, or below lower limit.
+	 *
+	 */
 	void _handleAdcLimitInterrupt(nrf_saadc_limit_t type);
 
 protected:
@@ -219,15 +233,6 @@ private:
 	//! PPI channel to be used to communicate from Timer to ADC peripheral.
 	nrf_ppi_channel_t _ppiChannel;
 
-	//! Pins that will be used for the ADC. 
-//	cs_adc_pin_id_t _pins[CS_ADC_MAX_PINS];
-
-	//! Number of pins to be used for the ADC.
-//	cs_adc_pin_count_t _numPins;
-
-	//! Pointer to the timer to be used for sampling.
-//	nrf_drv_timer_t* _timer;
-
 	//! Array of pointers to buffers.
 	nrf_saadc_value_t* _bufferPointers[CS_ADC_NUM_BUFFERS];
 
@@ -248,9 +253,6 @@ private:
 
 	//! Store the zero value used to detect zero crossings.
 	int32_t _zeroValue;
-
-	//! Function to set the input pin, this can be done after each sample. Only used internally!
-//	cs_adc_error_t configPin(const cs_adc_channel_id_t channel, const cs_adc_pin_id_t pin);
 
 	//! Function to initialize the adc channels, this can be done after each sample.
 	cs_adc_error_t initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config);

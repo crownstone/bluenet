@@ -44,14 +44,13 @@ public:
 	//! De-Initialize the PWM instance, i.e. free allocated resources
 	uint32_t deinit();
 
-	//! Set the value of a specific channel
+	//! Set the value of a specific channel.
 	void setValue(uint8_t channel, uint16_t value);
 
-	//! Get current value of a specific channel
+	//! Get current value of a specific channel.
 	uint16_t getValue(uint8_t channel);
 
-//	void start();
-//	void stop();
+	//! Function to be called on a zero crossing.
 	void onZeroCrossing();
 
 	//! Interrupt handler: internal function, implementation specific.
@@ -63,11 +62,14 @@ private:
 
 	//! Private PWM copy constructor
 	PWM(PWM const&);
+
 	//! Private PWM copy assignment definition
 	void operator=(PWM const &);
 
+	//! Config of the PWM.
 	pwm_config_t _config;
 
+	//! Duty cycle values of the channels in percentage.
 	uint32_t _values[CS_PWM_MAX_CHANNELS];
 
 	//! Flag to indicate that the init function has been successfully performed
@@ -86,7 +88,7 @@ private:
 	//! Max value of channel, in ticks. Adjusted to sync with zero crossings.
 	uint32_t _adjustedMaxTickVal;
 
-	//! Values of the channels in ticks.
+	//! Duty cycle values of the channels in ticks.
 	uint32_t _tickValues[CS_PWM_MAX_CHANNELS];
 
 	//! PPI channels to be used to communicate from Timer to GPIOTE.
@@ -105,7 +107,10 @@ private:
 	//! Returns whether a channel is currently dimming (value > 0 and < max).
 	bool _isPwmEnabled[CS_PWM_MAX_CHANNELS];
 
+	//! Counter to keep up the number of zero crossing callbacks.
 	uint32_t _zeroCrossingCounter;
+
+	//! Moving average amount of timer ticks at which the zero crossing callback was called.
 	uint32_t _zeroCrossingTicksAvg;
 
 	//! Sets pin on
@@ -126,15 +131,23 @@ private:
 	//! Disables pwm for given channel and turns it on or off.
 	void disablePwm(uint8_t channel, bool on);
 
-	// Some abstraction functions
+	//! Config gpiote
 	void gpioteConfig(uint8_t channel, bool initOn);
+	//! Unconfig gpiote
 	void gpioteUnconfig(uint8_t channel);
+	//! Enable gpiote
 	void gpioteEnable(uint8_t channel);
+	//! Disable gpiote
 	void gpioteDisable(uint8_t channel);
+	//! Force gpiote state
 	void gpioteForce(uint8_t channel, bool initOn);
+	//! Turn on with gpio
 	void gpioOn(uint8_t channel);
+	//! Turn off with gpio
 	void gpioOff(uint8_t channel);
+	//! Write CC of timer
 	void writeCC(uint8_t channelIdx, uint32_t ticks);
+	//! Read CC of timer
 	uint32_t readCC(uint8_t channelIdx);
 
 
