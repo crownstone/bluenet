@@ -143,19 +143,21 @@ void asACR01B2E(boards_config_t* p_config) {
 	p_config->flags.hasLed                       = true;
 	p_config->flags.ledInverted                  = false;
 	p_config->flags.hasAdcZeroRef                = true;
+//	p_config->flags.hasAdcZeroRef                = false;
 	p_config->flags.pwmTempInverted              = true;
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
 
-	p_config->voltageMultiplier                  = 0.2f; // TODO: calibrate
-	p_config->currentMultiplier                  = 0.0045f; // TODO: calibrate
-	p_config->voltageZero                        = 0; // TODO: calibrate
-	p_config->currentZero                        = 0; // TODO: calibrate
-	p_config->powerZero                          = 0; // TODO: calibrate
-//	p_config->voltageRange                       = 1800; // 0V - 1.8V, or -1.8V - 1.8V around zeroRef pin
-//	p_config->currentRange                       = 1800; // 0V - 1.8V, or -1.8V - 1.8V around zeroRef pin
-	p_config->voltageRange                       = 1200; // 0V - 1.2V, or -1.2V - 1.2V around zeroRef pin
-	p_config->currentRange                       = 1200; // 0V - 1.2V, or -1.2V - 1.2V around zeroRef pin
+	p_config->voltageMultiplier                  = 0.171f;  // Calibrated by noisy data from 1 crownstone
+	p_config->currentMultiplier                  = 0.0037f; // Calibrated by noisy data from 1 crownstone
+	p_config->voltageZero                        = -99;     // Calibrated by noisy data from 1 crownstone
+	p_config->currentZero                        = -270;    // Calibrated by noisy data from 1 crownstone
+	p_config->powerZero                          = -7000;   // Calibrated by noisy data from 1 crownstone
+	p_config->voltageRange                       = 1200; // 0V - 1.2V, or -1.2V - 1.2V around zeroRef pin // voltage ranges between 0.54 and 2.75, ref = 1.65
+//	p_config->currentRange                       = 1800; // 0V - 1.8V, or -1.8V - 1.8V around zeroRef pin // Able to measure up to about 20A.
+//	p_config->currentRange                       = 1200; // 0V - 1.2V, or -1.2V - 1.2V around zeroRef pin // Able to measure up to about 13A.
+	p_config->currentRange                       = 600;  // 0V - 0.6V, or -0.6V - 0.6V around zeroRef pin // Able to measure up to about 6A.
+//	p_config->currentRange                       = 1800;
 
 	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
 	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
