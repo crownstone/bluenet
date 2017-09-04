@@ -196,7 +196,7 @@ The following services are available (depending on state and config):
 
 ## <a name="crownstone_service"></a>Crownstone service
 
-The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following services
+The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following characteristics:
 
 Characteristic | UUID | Date type | Description | A | U | G
 --- | --- | --- | --- | :---: | :---: | :---:
@@ -210,12 +210,12 @@ Session nonce  | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the [s
 Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
 
 
-##### <a name="recovery"></a>Recovery
+#### <a name="recovery"></a>Recovery
 If you lose your encryption keys you can use this characteristic to factory reset the Crownstone.
 This method is only available for 20 seconds after the Crownstone powers on.
 You need to write **0xDEADBEEF** to it. After this, the Crownstone disconnects and goes into Low TX mode so you'll have to be close to continue the factory reset. After this, you reconnect and write **0xDEADBEEF** again to this characteristic to factory reset the Crownstone.
 
-##### <a name="return_values"></a>Return values
+#### <a name="return_values"></a>Return values
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
 The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command
 was received before calling the next (either by polling or subscribing). The possible values of the return values are listed in the table below
