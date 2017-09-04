@@ -1,11 +1,17 @@
 # Bluenet protocol v0.11.2
 -------------------------
 
-# <a name="encryption"></a>Encryption
-By default, Crownstones have encryption enabled as a security and privacy measure.
+# Index
+
+- [Setup](#setup). How to setup the crownstone.
+- [Encryption](#encryption). How to encrypt and decrypt the data.
+- [Advertisements](#advertisement_data). What data is broadcasted by the crownstones.
+- [Services and characteristics](#services). Which Bluetooth GATT services and characteristics the crownstones have.
+- [Data structures](#data_structs). The data structures used for the characteristics, advertisements, and mesh.
 
 
-### Setup mode
+
+# <a name="setup"></a>Setup mode
 When a Crownstone is new or factory reset, it will go into setup mode.
 
 Setup mode turns down the power of the antenna (low TX) so you can only communicate with it when you're close by. The purpose of this mode
@@ -29,6 +35,10 @@ The values are only valid for this connection session. The session key and the s
     - Phone gives Crownstone [its iBeacon Minor](#ibeacon_minor)
 - Phone commands Crownstone [to leave setup mode](#validate_setup)
 
+
+
+# <a name="encryption"></a>Encryption
+By default, Crownstones have encryption enabled as a security and privacy measure.
 
 ### Using encryption after setup (normal mode)
 
@@ -81,7 +91,7 @@ byte array | Padding |  | Zero-padding so that the whole packet is of size N*16 
 
 
 
-# Advertisements and scan response
+# <a name="advertisement_data"></a>Advertisements and scan response
 When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
 
 
@@ -146,7 +156,7 @@ Bit | Name |  Description
 --- | --- | ---
 0 | New data available | If you request something from the Crownstone and the result is available, this will be 1.
 1 | Showing external data |  If this is 1, the shown ID and data is from another Crownstone.
-2 | Error |  If this is 1, the Crownstone has an error, you should check what error it is.
+2 | Error |  If this is 1, the Crownstone has an error, you should check what error it is by reading the [error state](#state_packet).
 3 | Reserved  |  Reserved for future use.
 4 | Reserved |  Reserved for future use.
 5 | Reserved  |  Reserved for future use.
@@ -165,7 +175,7 @@ Bits 6-0 are used for PWM, where 100 is fully ON, 0 is OFF, dimmed in between.
 
 
 
-# Services
+# <a name="services"></a>Services
 When connected, the following services are available.
 
 The AUG columns indicate which users can use these characteristics if encryption is enabled. The access can be further restricted per packet. Dots (..)  indicate  encryption is not enabled for that characteristic.
@@ -173,6 +183,15 @@ The AUG columns indicate which users can use these characteristics if encryption
 - A = Admin
 - U = User
 - G = Guest
+
+The following services are available (depending on state and config):
+- [Crownstone service](#crownstone_service). Contains all you need: control, config and state.
+- [Setup service](#setup_service). Similar to the crownstone service, replaces it when in setup mode.
+- [General service](#general_service). Contains reset and temperature characteristics.
+- [Power service](#power_service). Contains dimmer and relay control, and reading out power samples and power usage.
+- [Indoor localization service](#localization_service). Contains tracked devices and scan control.
+- [Schedule service](#schedule_service). Contains the schedule control.
+- [Mesh service](#mesh_service). Contains direct mesh control, and mesh configuration.
 
 
 ## <a name="crownstone_service"></a>Crownstone service
@@ -241,7 +260,7 @@ Session nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the se
 The control characteristics (Control, and Config Control) of the Setup Service return a uint 16 code on execution of the command. The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command was received before calling the next (either by polling or subscribing). The possible values are the same as for the Crownstone Service, see above.
 
 
-## General service
+## <a name="general_service"></a>General service
 
 The general service has UUID 24f20000-7d10-4805-bfc1-7663a01c3bff.
 
@@ -251,7 +270,7 @@ Temperature    | 24f20001-7d10-4805-bfc1-7663a01c3bff | int 32 | Chip temperatur
 Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 1 to reset. Write 66 to go to DFU mode. | x
 
 
-## Power service
+## <a name="power_service"></a>Power service
 
 The power service has UUID 24f30000-7d10-4805-bfc1-7663a01c3bff. **Should be encrypted but it is not at the moment due to implementation.**
 
@@ -263,7 +282,7 @@ Power samples      | 24f30003-7d10-4805-bfc1-7663a01c3bff | [Power Samples](#pow
 Power consumption  | 24f30004-7d10-4805-bfc1-7663a01c3bff | uint 16 | The current power consumption. | x
 
 
-## Indoor localization service
+## <a name="localization_service"></a>Indoor localization service
 
 The localization service has UUID 24f40000-7d10-4805-bfc1-7663a01c3bff.
 
@@ -276,7 +295,7 @@ Scanned devices         | 24f40004-7d10-4805-bfc1-7663a01c3bff | [Scan result li
 RSSI                    | 24f40005-7d10-4805-bfc1-7663a01c3bff | uint 8 | RSSI to connected device. Notifications are available. | x
 
 
-## Schedule service
+## <a name="schedule_service"></a>Schedule service
 
 The schedule service has UUID 24f50000-7d10-4805-bfc1-7663a01c3bff.
 
@@ -287,7 +306,7 @@ Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule command](#sch
 Schedule read   | 24f50003-7d10-4805-bfc1-7663a01c3bff | [Schedule list](#schedule_list_packet) | Get a list of all schedule entries. | x
 
 
-## Mesh Service
+## <a name="mesh_service"></a>Mesh Service
 
 The mesh service comes with [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh) and has UUID 0000fee4-0000-1000-8000-00805f9b34fb
 
@@ -298,14 +317,22 @@ Value       | 2a1e0005-fd51-d882-8ba8-b98c0000cd1e | | Characteristic where the 
 
 
 
-# Data structures
+# <a name="data_structs"></a>Data structures
 
+Index:
+
+- [Control](#control_packet). Used to send commands to the crownstone.
+- [Config](#config_packet). Used to configure a crownstone.
+- [State](#state_packet). Used to read the state of a crownstone.
+    - [Scheduler](#schedule_list_packet). Scheduler packets.
+    - [Scans](#scan_result_list_packet). Packets of devices scanned by the crownstone.
+- [Mesh](#mesh_message_packet). Packets sent over the mesh.
 
 ### <a name="control_packet"></a>Control packet
 
 ![Control packet](../docs/diagrams/control-packet.png)
 
-#####If encryption is enabled, this packet must be encrypted using any of the keys where the box is checked.
+__If encryption is enabled, this packet must be encrypted using any of the keys where the box is checked.__
 In the case of the setup mode, only the Validate Setup command is available unencrypted.
 
 Type | Name | Length | Description
@@ -373,7 +400,7 @@ uint 16 | Timeout | Timeout in seconds after which the Switch should be adjusted
 
 ![Configuration packet](../docs/diagrams/config-packet.png)
 
-#####If encryption is enabled, this packet must be encrypted using the admin key.
+__If encryption is enabled, this packet must be encrypted using the admin key.__
 
 Type | Name | Length | Description
 --- | --- | --- | ---
