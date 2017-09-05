@@ -85,7 +85,8 @@ $(function() {
 </pre><p>With: </p><pre class="fragment">#define GCC_CAST_CPP (uint16_t)
 </pre><p>You can do that manually, or use </p><pre class="fragment">perl -p -i -e 's/#define GCC_CAST_CPP \(uint8_t\)/#define GCC_CAST_CPP \(uint16_t\)/g' `grep -ril "#define GCC_CAST_CPP (uint8_t)" *`
 </pre><p>from the root folder of the Nordic SDK to do it for you.</p>
-<h3>J-Link</h3>
+<p>In SDK 11, there is another bug that has to be fixed. In the file <code>nrf_drv_saadc.h</code>, replace the define of high limit disabled with: </p><pre class="fragment">#define NRF_DRV_SAADC_LIMITH_DISABLED (4095)
+</pre><h3>J-Link</h3>
 <p>Download and install J-Link Segger’s <a href="https://www.segger.com/downloads/jlink">software</a>. The current version is 6.0.6 <a href="https://www.segger.com/downloads/jlink/jlink_6.0.6_x86_64.deb">64bit .deb file version 6.0.6</a> and can be found at the "J-Link Software and Documentation Pack" section.</p>
 <p>Then install it: </p><pre class="fragment">sudo dpkg -i jlink_5.12.8_x86_64.deb
 </pre><p>Check the <a href="http://forum.segger.com/index.php?page=Thread&amp;threadID=4089">Segger forums</a> for some help with the udev rules (there is one that comes with the Segger software). Note that it might be the case that UART is not enabled (idProduct <code>0101</code> rather than <code>0105</code>). You can enable this by typing <code>vcom enable</code> on the JLink command line.</p>

@@ -77,9 +77,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a348d1f6c21bf882a8b732f8fb687d93a"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPWM.html#a348d1f6c21bf882a8b732f8fb687d93a">init</a> (<a class="el" href="structpwm__config__t.html">pwm_config_t</a> &amp;config)</td></tr>
-<tr class="memdesc:a348d1f6c21bf882a8b732f8fb687d93a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the <a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> settings.  <a href="#a348d1f6c21bf882a8b732f8fb687d93a">More...</a><br /></td></tr>
-<tr class="separator:a348d1f6c21bf882a8b732f8fb687d93a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a726432c3a53e26e0d69b51302a306736"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPWM.html#a726432c3a53e26e0d69b51302a306736">init</a> (const <a class="el" href="structpwm__config__t.html">pwm_config_t</a> &amp;config)</td></tr>
+<tr class="memdesc:a726432c3a53e26e0d69b51302a306736"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the <a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> settings.  <a href="#a726432c3a53e26e0d69b51302a306736">More...</a><br /></td></tr>
+<tr class="separator:a726432c3a53e26e0d69b51302a306736"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2da4580f7aa0b7e475bdb0a408acbcaf"><td class="memItemLeft" align="right" valign="top"><a id="a2da4580f7aa0b7e475bdb0a408acbcaf"></a>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPWM.html#a2da4580f7aa0b7e475bdb0a408acbcaf">deinit</a> ()</td></tr>
 <tr class="memdesc:a2da4580f7aa0b7e475bdb0a408acbcaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">De-Initialize the <a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> instance, i.e. free allocated resources. <br /></td></tr>
@@ -93,7 +93,8 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <tr class="memdesc:a28a2177340dee88d23e11531f3d04971"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current value of a specific channel. <br /></td></tr>
 <tr class="separator:a28a2177340dee88d23e11531f3d04971"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc48aac95cadcea380f0de3b597d0c98"><td class="memItemLeft" align="right" valign="top"><a id="acc48aac95cadcea380f0de3b597d0c98"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onZeroCrossing</b> ()</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPWM.html#acc48aac95cadcea380f0de3b597d0c98">onZeroCrossing</a> ()</td></tr>
+<tr class="memdesc:acc48aac95cadcea380f0de3b597d0c98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to be called on a zero crossing. <br /></td></tr>
 <tr class="separator:acc48aac95cadcea380f0de3b597d0c98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23e2ab3ee1ca1e9958435a4e0cda393b"><td class="memItemLeft" align="right" valign="top"><a id="a23e2ab3ee1ca1e9958435a4e0cda393b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPWM.html#a23e2ab3ee1ca1e9958435a4e0cda393b">_handleInterrupt</a> ()</td></tr>
@@ -111,8 +112,8 @@ static <a class="el" href="classPWM.html">PWM</a> &amp;&#160;</td><td class="mem
 <div class="textblock"><p>Pulse Wide Modulation class. </p>
 <p>To turn on/off the power, as well as all intermediate stages, for example with dimming, the <a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> class is used. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a348d1f6c21bf882a8b732f8fb687d93a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a348d1f6c21bf882a8b732f8fb687d93a">&#9670;&nbsp;</a></span>init()</h2>
+<a id="a726432c3a53e26e0d69b51302a306736"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a726432c3a53e26e0d69b51302a306736">&#9670;&nbsp;</a></span>init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -120,7 +121,7 @@ static <a class="el" href="classPWM.html">PWM</a> &amp;&#160;</td><td class="mem
         <tr>
           <td class="memname">uint32_t PWM::init </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structpwm__config__t.html">pwm_config_t</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="structpwm__config__t.html">pwm_config_t</a> &amp;&#160;</td>
           <td class="paramname"><em>config</em></td><td>)</td>
           <td></td>
         </tr>

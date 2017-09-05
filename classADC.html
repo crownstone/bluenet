@@ -94,17 +94,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a7f2a9a7bd30cc52ae89857573ebd8be0">setDoneCallback</a> (adc_done_cb_t callback)</td></tr>
 <tr class="memdesc:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback which is called when a buffer is filled.  <a href="#a7f2a9a7bd30cc52ae89857573ebd8be0">More...</a><br /></td></tr>
 <tr class="separator:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58275fd62a44a1138ab44366914f92b4"><td class="memItemLeft" align="right" valign="top"><a id="a58275fd62a44a1138ab44366914f92b4"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>enableZeroCrossingInterrupt</b> (cs_adc_channel_id_t channel, int32_t zeroVal)</td></tr>
-<tr class="separator:a58275fd62a44a1138ab44366914f92b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5bb4f20e32687098ec4d99b76c473b17"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a5bb4f20e32687098ec4d99b76c473b17">setZeroCrossingCallback</a> (adc_zero_crossing_cb_t callback)</td></tr>
-<tr class="memdesc:a5bb4f20e32687098ec4d99b76c473b17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback which is called when a buffer is filled.  <a href="#a5bb4f20e32687098ec4d99b76c473b17">More...</a><br /></td></tr>
+<tr class="memdesc:a5bb4f20e32687098ec4d99b76c473b17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback which is called on a zero crossing interrupt.  <a href="#a5bb4f20e32687098ec4d99b76c473b17">More...</a><br /></td></tr>
 <tr class="separator:a5bb4f20e32687098ec4d99b76c473b17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58275fd62a44a1138ab44366914f92b4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a58275fd62a44a1138ab44366914f92b4">enableZeroCrossingInterrupt</a> (cs_adc_channel_id_t channel, int32_t zeroVal)</td></tr>
+<tr class="memdesc:a58275fd62a44a1138ab44366914f92b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable zero crossing detection on given channel, generating interrupts.  <a href="#a58275fd62a44a1138ab44366914f92b4">More...</a><br /></td></tr>
+<tr class="separator:a58275fd62a44a1138ab44366914f92b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe32c24ec01cea1b112f440eb72f614f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#afe32c24ec01cea1b112f440eb72f614f">_handleAdcDoneInterrupt</a> (nrf_saadc_value_t *buf)</td></tr>
 <tr class="memdesc:afe32c24ec01cea1b112f440eb72f614f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update this object with a buffer with values from the <a class="el" href="classADC.html" title="Analog-Digital conversion. ">ADC</a> conversion.  <a href="#afe32c24ec01cea1b112f440eb72f614f">More...</a><br /></td></tr>
 <tr class="separator:afe32c24ec01cea1b112f440eb72f614f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3eda91590d8282a90a6717db296d0d5d"><td class="memItemLeft" align="right" valign="top"><a id="a3eda91590d8282a90a6717db296d0d5d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_handleAdcLimitInterrupt</b> (nrf_saadc_limit_t type)</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a3eda91590d8282a90a6717db296d0d5d">_handleAdcLimitInterrupt</a> (nrf_saadc_limit_t type)</td></tr>
+<tr class="memdesc:a3eda91590d8282a90a6717db296d0d5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when the sampled value is above upper limit, or below lower limit. <br /></td></tr>
 <tr class="separator:a3eda91590d8282a90a6717db296d0d5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
@@ -163,6 +164,43 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">buf</td><td>A buffer with size defined in the constructor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a58275fd62a44a1138ab44366914f92b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58275fd62a44a1138ab44366914f92b4">&#9670;&nbsp;</a></span>enableZeroCrossingInterrupt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::enableZeroCrossingInterrupt </td>
+          <td>(</td>
+          <td class="paramtype">cs_adc_channel_id_t&#160;</td>
+          <td class="paramname"><em>channel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>zeroVal</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Enable zero crossing detection on given channel, generating interrupts. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">channel</td><td>The channel on which to check for zero crossings. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">zeroVal</td><td>The value of zero. </td></tr>
   </table>
   </dd>
 </dl>
@@ -265,7 +303,7 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
       </table>
 </div><div class="memdoc">
 
-<p>Set the callback which is called when a buffer is filled. </p>
+<p>Set the callback which is called on a zero crossing interrupt. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">callback</td><td>Function to be called on a zero crossing event. This function will run at interrupt level! </td></tr>

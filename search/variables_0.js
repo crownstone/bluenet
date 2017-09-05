@@ -28,6 +28,7 @@ var searchData=
   ['_5fstoragestruct',['_storageStruct',['../classSettings.html#a109b6dc4322587359f56685fa18f4a6b',1,'Settings']]],
   ['_5fstreambuffer',['_streamBuffer',['../classCrownstoneService.html#af1314258e536cad6588540ed476611b5',1,'CrownstoneService']]],
   ['_5fswitchstate',['_switchState',['../classState.html#a1898f7c862fbd255dbd3a2e4a832445b',1,'State']]],
+  ['_5fswitchstatecache',['_switchStateCache',['../classState.html#a797ad21276cb677d5549a78226a62527',1,'State']]],
   ['_5ftemperature',['_temperature',['../classState.html#a24adc72600542eca0b86823650ae6b72',1,'State']]],
   ['_5ftype',['_type',['../classUUID.html#ad989399a12d1a86a87121322548e5e8b',1,'UUID']]],
   ['_5fuser_5fmem_5fblock',['_user_mem_block',['../classNrf51822BluetoothStack.html#a5f1e3a1ce3f45ef8c955cc6b3374126b',1,'Nrf51822BluetoothStack']]],

@@ -5,6 +5,7 @@ var searchData=
   ['empty',['empty',['../classCircularBuffer.html#a7509cc5ef0dd0a9f731c47b05929580c',1,'CircularBuffer::empty()'],['../classCircularDifferentialBuffer.html#a43613b6b9b213632a6a0ae0f1b579747',1,'CircularDifferentialBuffer::empty()']]],
   ['enable_5fmessage_5fpayload_5ft',['enable_message_payload_t',['../structenable__message__payload__t.html',1,'']]],
   ['enable_5fscanner_5fmessage_5fpayload_5ft',['enable_scanner_message_payload_t',['../structenable__scanner__message__payload__t.html',1,'']]],
+  ['enablezerocrossinginterrupt',['enableZeroCrossingInterrupt',['../classADC.html#a58275fd62a44a1138ab44366914f92b4',1,'ADC::enableZeroCrossingInterrupt()'],['../classPowerSampling.html#a7d98b9209ba9113630c3a1777c53cbad',1,'PowerSampling::enableZeroCrossingInterrupt()']]],
   ['encrypt',['encrypt',['../classEncryptionHandler.html#ace6c832bbfa3c3bfbd7adb021d556043',1,'EncryptionHandler']]],
   ['encrypted_5fmesh_5fmessage_5ft',['encrypted_mesh_message_t',['../structencrypted__mesh__message__t.html',1,'']]],
   ['encryptionbuffer',['EncryptionBuffer',['../classEncryptionBuffer.html',1,'']]],

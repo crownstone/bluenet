@@ -215,8 +215,12 @@ pstorage_handle_t&#160;</td><td class="memItemRight" valign="bottom"><b>_structH
 <tr class="separator:a58e041e31374bd9317e61c900fcc5bf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1898f7c862fbd255dbd3a2e4a832445b"><td class="memItemLeft" align="right" valign="top"><a id="a1898f7c862fbd255dbd3a2e4a832445b"></a>
 <a class="el" href="classCyclicStorage.html">CyclicStorage</a>&lt; switch_state_storage_t, SWITCH_STATE_REDUNDANCY, small_seq_number_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a1898f7c862fbd255dbd3a2e4a832445b">_switchState</a></td></tr>
-<tr class="memdesc:a1898f7c862fbd255dbd3a2e4a832445b"><td class="mdescLeft">&#160;</td><td class="mdescRight">keeps track of the switch state, i.e. current <a class="el" href="classPWM.html" title="Pulse Wide Modulation class. ">PWM</a> value <br /></td></tr>
+<tr class="memdesc:a1898f7c862fbd255dbd3a2e4a832445b"><td class="mdescLeft">&#160;</td><td class="mdescRight">keeps track of the switch state in pstorage <br /></td></tr>
 <tr class="separator:a1898f7c862fbd255dbd3a2e4a832445b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a797ad21276cb677d5549a78226a62527"><td class="memItemLeft" align="right" valign="top"><a id="a797ad21276cb677d5549a78226a62527"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a797ad21276cb677d5549a78226a62527">_switchStateCache</a></td></tr>
+<tr class="memdesc:a797ad21276cb677d5549a78226a62527"><td class="mdescLeft">&#160;</td><td class="mdescRight">keeps track of the switch state in ram <br /></td></tr>
+<tr class="separator:a797ad21276cb677d5549a78226a62527"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3daf9a7b83dc7fd65ca2efbf412094a6"><td class="memItemLeft" align="right" valign="top"><a id="a3daf9a7b83dc7fd65ca2efbf412094a6"></a>
 <a class="el" href="classCyclicStorage.html">CyclicStorage</a>&lt; accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY, large_seq_number_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a3daf9a7b83dc7fd65ca2efbf412094a6">_accumulatedEnergy</a></td></tr>
 <tr class="memdesc:a3daf9a7b83dc7fd65ca2efbf412094a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">keeps track of the accumulated power <br /></td></tr>
