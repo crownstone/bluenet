@@ -151,12 +151,12 @@ void asACR01B2E(boards_config_t* p_config) {
 	p_config->voltageMultiplier                  = 0.171f;  // Calibrated by noisy data from 1 crownstone
 
 //	p_config->currentMultiplier                  = 0.0037f; // Calibrated by noisy data from 1 crownstone
-	p_config->currentMultiplier                  = 0.0043f; // Calibrated by noisy data from 1 crownstone
+	p_config->currentMultiplier                  = 0.0042f; // Calibrated by noisy data from 2 crownstones
 
 	p_config->voltageZero                        = -99;     // Calibrated by noisy data from 1 crownstone
 	p_config->currentZero                        = -270;    // Calibrated by noisy data from 1 crownstone
 
-	p_config->powerZero                          = 10000;   // Calibrated by noisy data from 1 crownstone
+	p_config->powerZero                          = 8000;   // Calibrated by noisy data from 2 crownstones
 
 	p_config->voltageRange                       = 1200; // 0V - 1.2V, or -1.2V - 1.2V around zeroRef pin // voltage ranges between 0.54 and 2.75, ref = 1.65
 //	p_config->currentRange                       = 1800; // 0V - 1.8V, or -1.8V - 1.8V around zeroRef pin // Able to measure up to about 20A.
