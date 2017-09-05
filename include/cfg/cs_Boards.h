@@ -152,7 +152,7 @@ typedef struct  {
 	//! Offset for current measurement.
 	int32_t currentZero;
 
-	//! Offset for power measurement.
+	//! Measured power when there is no load (mW).
 	int32_t powerZero;
 
 	//! Default range in mV on the voltage pin. Example: if default should be [-0.6V, 0.6V] then voltageRange is 1200.
