@@ -350,6 +350,8 @@ void Switch::forceSwitchOff() {
 	LOGw("forceSwitchOff");
 	setSwitch(0);
 	EventDispatcher::getInstance().dispatch(EVT_SWITCH_FORCED_OFF);
+	// Try again a second later, in case the first one didn't work..
+	delayedSwitch(0, 1);
 }
 
 bool Switch::allowPwmOn() {
