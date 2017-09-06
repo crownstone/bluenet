@@ -108,10 +108,8 @@ void asACR01B2A(boards_config_t* p_config) {
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
 
-//	p_config->voltageMultiplier                  = 0.2f;
-//	p_config->currentMultiplier                  = 0.0045f;
-	p_config->voltageMultiplier                  = 0.0f;
-	p_config->currentMultiplier                  = 0.0f;
+	p_config->voltageMultiplier                  = 0.2f;
+	p_config->currentMultiplier                  = 0.0045f;
 	p_config->voltageZero                        = 2003; // 2010 seems better?
 	p_config->currentZero                        = 1997; // 1991 seems better?
 	p_config->powerZero                          = 1500;
