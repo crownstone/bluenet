@@ -65,6 +65,14 @@ Crownstone sells the Crownstone products through our [own channels](https://shop
 
 Crownstone also integrates their hardware technology in third-party products, ranging from lights to desks.
 
+# Contributors
+
+<!-- CONTRIBUTORS:START -->
+| [<img src="https://avatars.githubusercontent.com/u/2011969" width="110px;"/><br /><sub>Bart van Vliet</sub>](https://github.com/vliedel) | [<img src="https://avatars.githubusercontent.com/u/2161587" width="110px;"/><br /><sub>Dominik Egger</sub>](https://github.com/eggerdo) | [<img src="https://avatars.githubusercontent.com/u/1428585" width="110px;"/><br /><sub>Anne van Rossum</sub>](https://github.com/mrquincle) | [<img src="https://avatars.githubusercontent.com/u/5363277" width="110px;"/><br /><sub>Alex de Mulder</sub>](https://github.com/AlexDM0) | [<img src="https://avatars.githubusercontent.com/u/4710354" width="110px;"/><br /><sub>Marc Hulscher</sub>](https://github.com/marciwi) | [<img src="https://avatars2.githubusercontent.com/u/10497648" width="110px;"/><br /><sub>Christian Haas</sub>](https://github.com/chaasfr) 
+| :---: | :---: | :---: | :---: | :---: | :---: | 
+| [<img src="https://avatars2.githubusercontent.com/u/1262780" width="110px;"/><br /><sub><strong>Peet van Tooren</strong></sub>](https://github.com/kurkesmurfer) |
+<!-- CONTRIBUTORS:END -->
+
 # Copyrights
 
 The copyrights (2014-2017) belongs to the team of Crownstone B.V. and are provided under an noncontagious open-source license:
