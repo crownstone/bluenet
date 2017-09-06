@@ -258,6 +258,11 @@ void Switch::delayedSwitch(uint8_t switchState, uint16_t delay) {
 	LOGi("trigger delayed switch state: %d, delay: %d", switchState, delay);
 #endif
 
+	if (delay == 0) {
+		LOGw("delay can't be 0");
+		delay = 1;
+	}
+
 	if (_delayedSwitchPending) {
 #ifdef PRINT_SWITCH_VERBOSE
 		LOGi("clear existing delayed switch state");
@@ -350,8 +355,8 @@ void Switch::forceSwitchOff() {
 	LOGw("forceSwitchOff");
 	setSwitch(0);
 	EventDispatcher::getInstance().dispatch(EVT_SWITCH_FORCED_OFF);
-	// Try again a second later, in case the first one didn't work..
-	delayedSwitch(0, 1);
+	// Try again later, in case the first one didn't work..
+	delayedSwitch(0, 5);
 }
 
 bool Switch::allowPwmOn() {
