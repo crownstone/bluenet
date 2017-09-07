@@ -51,14 +51,14 @@ inline const char* get_hardware_version() {
 	if (hardwareBoard == ACR01B1C) return "10103000300";
 	if (hardwareBoard == ACR01B1D) return "10103000400";
 	if (hardwareBoard == ACR01B1E) return "10103000500";
-	if (hardwareBoard == ACR01B6A) return "10103020100";
+	if (hardwareBoard == ACR01B6C) return "10103010500";
 	
 	// CROWNSTONE PLUGS
 	if (hardwareBoard == ACR01B2A) return "10102000100";
 	if (hardwareBoard == ACR01B2B) return "10102000200";
 	if (hardwareBoard == ACR01B2C) return "10102010000";
 	if (hardwareBoard == ACR01B2E) return "10102010100";
-	if (hardwareBoard == ACR01B2F) return "10102010200";
+	if (hardwareBoard == ACR01B2G) return "10102010300";
 
 
 	// GUIDESTONE

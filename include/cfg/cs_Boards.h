@@ -50,7 +50,7 @@ extern "C" {
 #define ACR01B1C             1002
 #define ACR01B1D             1003
 #define ACR01B1E             1004
-#define ACR01B6A             1005
+#define ACR01B6C             1005
 
 // CROWNSTONE PLUGS
 
@@ -67,7 +67,7 @@ extern "C" {
 // offset to ADC.
 #define ACR01B2E             1503
 // Schematic change. Change power measurement resistor values.
-#define ACR01B2F             1504
+#define ACR01B2G             1504
 
 /** Board configuration
  *

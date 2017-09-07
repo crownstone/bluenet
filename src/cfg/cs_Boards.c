@@ -47,7 +47,7 @@ void asACR01B1A(boards_config_t* p_config) {
 }
 
 
-void asACR01B6A(boards_config_t* p_config) {
+void asACR01B6C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
@@ -70,13 +70,13 @@ void asACR01B6A(boards_config_t* p_config) {
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
 
-	p_config->voltageMultiplier                  = 0.2f; // TODO: calibrate
-	p_config->currentMultiplier                  = 0.0044f; // TODO: calibrate
-	p_config->voltageZero                        = 0; // TODO: calibrate
-	p_config->currentZero                        = 0; // TODO: calibrate
-	p_config->powerZero                          = 0; // TODO: calibrate
-	p_config->voltageRange                       = 3600; // TODO: calibrate
-	p_config->currentRange                       = 3600; // TODO: calibrate
+	p_config->voltageMultiplier                  = 0.171f; // TODO: calibrate
+	p_config->currentMultiplier                  = 0.0042f; // TODO: calibrate
+	p_config->voltageZero                        = -99; // TODO: calibrate
+	p_config->currentZero                        = -270; // TODO: calibrate
+	p_config->powerZero                          = 8000; // TODO: calibrate
+	p_config->voltageRange                       = 1200; // TODO: calibrate
+	p_config->currentRange                       = 600; // TODO: calibrate
 
 	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
 	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
@@ -122,7 +122,7 @@ void asACR01B2A(boards_config_t* p_config) {
 	p_config->minTxPower                         = -20;
 }
 
-void asACR01B2E(boards_config_t* p_config) {
+void asACR01B2G(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
@@ -248,8 +248,8 @@ uint32_t configure_board(boards_config_t* p_config) {
 		asACR01B1A(p_config);
 		break;
 
-	case ACR01B6A:
-		asACR01B6A(p_config);
+	case ACR01B6C:
+		asACR01B6C(p_config);
 		break;
 
 	case ACR01B2A:
@@ -259,8 +259,8 @@ uint32_t configure_board(boards_config_t* p_config) {
 		break;
 
 	case ACR01B2E:
-	case ACR01B2F:
-		asACR01B2E(p_config);
+	case ACR01B2G:
+		asACR01B2G(p_config);
 		break;
 
 	case GUIDESTONE:
