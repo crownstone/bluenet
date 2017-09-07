@@ -252,6 +252,7 @@ void Crownstone::initDrivers() {
 		nrf_nvmc_write_word(0x1000120C, 0);
 	}
 #endif
+	LOGd("NFC pins: %p", NRF_UICR->NFCPINS);
 
 	LOGi(FMT_INIT, "stack");
 

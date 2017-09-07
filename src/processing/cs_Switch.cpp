@@ -73,7 +73,7 @@ void Switch::init(const boards_config_t& board) {
 //	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
 
 	// For now: just turn pwm off on init, for safety.
-//	pwmOff();
+	pwmOff();
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_switchTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSwitch);

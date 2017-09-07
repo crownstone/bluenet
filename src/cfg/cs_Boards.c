@@ -191,8 +191,8 @@ void asPca10036(boards_config_t* p_config) {
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
 
-	p_config->voltageMultiplier                  = 1.0; // set to 0 to disable sampling checks
-	p_config->currentMultiplier                  = 1.0; // set to 0 to disable sampling checks
+	p_config->voltageMultiplier                  = 0.0; // set to 0 to disable sampling checks
+	p_config->currentMultiplier                  = 0.0; // set to 0 to disable sampling checks
 	p_config->voltageZero                        = 1000; // something
 	p_config->currentZero                        = 1000; // something
 	p_config->powerZero                          = 0; // something
