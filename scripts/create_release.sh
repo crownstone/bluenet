@@ -334,25 +334,22 @@ popd &> /dev/null
 # goto bluenet scripts dir
 pushd $BLUENET_DIR/scripts &> /dev/null
 
-cs_info "Build docs ..."
-./documentation.sh generate
+#cs_info "Build docs ..."
+#./documentation.sh generate
+#checkError
+#cs_succ "Build DONE"
 
-checkError
-cs_succ "Build DONE"
-
-cs_info "Copy docs to relase dir ..."
+cs_info "Copy docs to release dir ..."
 cp -r $BLUENET_DIR/docs $BLUENET_RELEASE_DIR/docs
-
 checkError
 cs_succ "Copy DONE"
 
-cs_info "Publish docs to git ..."
+#cs_info "Publish docs to git ..."
 #git add $BLUENET_DIR/docs
 #git commit -m "Update docs"
-./documentation.sh publish
-
-checkError
-cs_succ "Published docs DONE"
+#./documentation.sh publish
+#checkError
+#cs_succ "Published docs DONE"
 
 popd &> /dev/null
 
