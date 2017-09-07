@@ -182,6 +182,7 @@ void asPca10036(boards_config_t* p_config) {
 	p_config->pinLedGreen                        = 20;
 
 	p_config->flags.hasRelay                     = false;
+//	p_config->flags.hasRelay                     = true;
 	p_config->flags.pwmInverted                  = true;
 	p_config->flags.hasSerial                    = true;
 	p_config->flags.hasLed                       = true;
