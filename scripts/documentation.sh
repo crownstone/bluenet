@@ -57,13 +57,15 @@ publish() {
 
 	cd docs/html
 	if [ ! -d ".git" ]; then
-		cs_err "The docs/html directory should be its own git repository. Check out bluenet in separate folder and mv to docs/html."
+		cs_err "The docs/html directory should be its own git repository. Clone bluenet in separate folder and mv to docs/html."
+		cs_err "cd ~; git clone git@github.com:crownstone/bluenet; cd bluenet; git checkout gh-pages; cd ..; mv bluenet \$BLUENET_SOURCE_DIR/docs/html"
 		exit
 	fi
 	branch=$(git rev-parse --abbrev-ref HEAD)
 	echo $branch
 	if [ "$branch" != "gh-pages" ]; then
-		cs_err "The docs/html directory should be its own git repository. Check out bluenet in separate folder, mv to docs/html and checkout gh-pages."
+		cs_err "The docs/html directory should be its own git repository. Clone bluenet in separate folder, mv to docs/html and checkout gh-pages."
+		cs_err "cd ~; git clone git@github.com:crownstone/bluenet; cd bluenet; git checkout gh-pages; cd ..; mv bluenet \$BLUENET_SOURCE_DIR/docs/html"
 		exit
 	fi
 
