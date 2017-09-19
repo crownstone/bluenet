@@ -100,17 +100,17 @@ void FPU_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 __attribute__ ((section(".vectors"), used))
 void (* const gVectors[])(void) =
 {
-	(void (*)(void))((unsigned long)&_estack),	//!  0 ARM: Initial Stack Pointer
-	ResetHandler,					//!  1 ARM: Initial Program Counter
-	NMI_Handler,
+	(void (*)(void))((unsigned long)&_estack),   // 0 ARM: Initial Stack Pointer
+	ResetHandler,                                // 1 ARM: Initial Program Counter
+	NMI_Handler,                                 // 2
 	HardFault_Handler,
 	MemoryManagement_Handler,
 	BusFault_Handler,
 	UsageFault_Handler,
-	0,								//! reserved
+	0,                                           // reserved
 	0,
 	0,
-	0,
+	0,                                           // 10
 	SVC_Handler,
 	DebugMonitor_Handler,
 	0,
@@ -122,7 +122,7 @@ void (* const gVectors[])(void) =
 	RADIO_IRQHandler,
 	UART0_IRQHandler,
 	SPI0_TWI0_IRQHandler,
-	SPI1_TWI1_IRQHandler,
+	SPI1_TWI1_IRQHandler,                        // 20
 	NFCT_IRQHandler,
 	GPIOTE_IRQHandler,
 	ADC_IRQHandler,
@@ -132,7 +132,7 @@ void (* const gVectors[])(void) =
 	RTC0_IRQHandler,
 	TEMP_IRQHandler,
 	RNG_IRQHandler,
-	ECB_IRQHandler,
+	ECB_IRQHandler,                              // 30
 	CCM_AAR_IRQHandler,
 	WDT_IRQHandler,
 	RTC1_IRQHandler,
@@ -142,7 +142,7 @@ void (* const gVectors[])(void) =
 	SWI1_IRQHandler,
 	SWI2_IRQHandler,
 	SWI3_IRQHandler,
-	SWI4_IRQHandler,
+	SWI4_IRQHandler,                             // 40
 	SWI5_IRQHandler,
 	TIMER3_IRQHandler,
 	TIMER4_IRQHandler,
@@ -152,7 +152,7 @@ void (* const gVectors[])(void) =
 	PWM1_IRQHandler,
 	PWM2_IRQHandler,
 	SPIM2_SPIS2_SPI2_IRQHandler,
-	RTC2_IRQHandler,
+	RTC2_IRQHandler,                             // 50
 	I2S_IRQHandler,
 	FPU_IRQHandler
 };

@@ -97,7 +97,7 @@
 #define CS_PWM_IRQn                              TIMER4_IRQn
 #define CS_PWM_INSTANCE_INDEX                    TIMER4_INSTANCE_INDEX
 #define CS_PWM_TIMER_ID                          4
-#define CS_PWM_TIMER_PRIORITY                    APP_IRQ_PRIORITY_LOW
+#define CS_PWM_TIMER_IRQ_PRIORITY                APP_IRQ_PRIORITY_HIGH
 //#define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_500kHz
 #define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_2MHz
 

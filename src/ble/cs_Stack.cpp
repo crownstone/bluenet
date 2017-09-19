@@ -37,6 +37,9 @@ extern "C" {
 
 //#define PRINT_STACK_VERBOSE
 
+// Define test pin to enable gpio debug.
+//#define TEST_PIN 19
+
 Nrf51822BluetoothStack::Nrf51822BluetoothStack() :
 				_appearance(defaultAppearance), _clock_source(defaultClockSource),
 //				_mtu_size(defaultMtu),
@@ -143,6 +146,10 @@ void Nrf51822BluetoothStack::init() {
 
 	if (_inited)
 		return;
+
+#ifdef TEST_PIN
+	nrf_gpio_cfg_output(TEST_PIN);
+#endif
 
 	//! Initialise SoftDevice
 	uint8_t enabled;
@@ -265,7 +272,6 @@ void Nrf51822BluetoothStack::init() {
 	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
 
 	_inited = true;
-
 }
 
 void Nrf51822BluetoothStack::updateDeviceName(const std::string& deviceName) {
@@ -646,11 +652,16 @@ void Nrf51822BluetoothStack::setNonConnectable() {
 }
 
 void Nrf51822BluetoothStack::restartAdvertising() {
-
 	uint32_t err_code;
 
 	if (_advertising) {
-		err_code = sd_ble_gap_adv_stop();
+#ifdef TEST_PIN
+	nrf_gpio_pin_set(TEST_PIN);
+#endif
+		err_code = sd_ble_gap_adv_stop(); // This function call can take 30ms!
+#ifdef TEST_PIN
+	nrf_gpio_pin_clear(TEST_PIN);
+#endif
 		//! Ignore invalid state error, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 		if (err_code != NRF_ERROR_INVALID_STATE) {
 			APP_ERROR_CHECK(err_code);

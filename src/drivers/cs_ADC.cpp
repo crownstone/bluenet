@@ -18,9 +18,9 @@
 #include "cfg/cs_Config.h"
 
 //#define PRINT_ADC_VERBOSE
-#define TEST_PIN 22
-//#define TEST_PIN 8 // PWM pin
-//#define TEST_PIN 20 // RX pin
+
+// Define test pin to enable gpio debug.
+//#define TEST_PIN 22
 
 
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
@@ -102,35 +102,6 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 		/* Start conversion in non-blocking mode. Sampling is not triggered yet. */
 		addBufferToSampleQueue(_bufferPointers[i]);
 	}
-
-//	// Setup timer
-//	nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_TASK_CLEAR);
-//	nrf_timer_bit_width_set(NRF_TIMER3, NRF_TIMER_BIT_WIDTH_32);
-//	nrf_timer_frequency_set(NRF_TIMER3, NRF_TIMER_FREQ_4MHz);
-//	nrf_timer_mode_set(NRF_TIMER3, NRF_TIMER_MODE_TIMER);
-//
-//	nrf_ppi_channel_endpoint_setup(
-//			NRF_PPI_CHANNEL10,
-//			(uint32_t)nrf_timer_event_address_get(NRF_TIMER3, NRF_TIMER_EVENT_COMPARE0),
-//			nrf_gpiote_task_addr_get(NRF_GPIOTE_TASKS_OUT_2)
-//	);
-//	nrf_ppi_channel_enable(NRF_PPI_CHANNEL10);
-//
-//	nrf_ppi_channel_endpoint_setup(
-//			NRF_PPI_CHANNEL11,
-//			(uint32_t)nrf_timer_event_address_get(NRF_TIMER3, NRF_TIMER_EVENT_COMPARE1),
-//			nrf_gpiote_task_addr_get(NRF_GPIOTE_TASKS_OUT_2)
-//	);
-//	nrf_ppi_channel_enable(NRF_PPI_CHANNEL11);
-//
-//
-//	nrf_timer_shorts_enable(NRF_TIMER3, NRF_TIMER_SHORT_COMPARE1_CLEAR_MASK);
-//	nrf_timer_shorts_enable(NRF_TIMER3, NRF_TIMER_SHORT_COMPARE1_STOP_MASK);
-//	// 10 ms is 40000 ticks at 4MHz
-//	uint16_t value = 15;
-//	uint32_t valueTicks = 40000 * value / 100;
-//	nrf_timer_cc_write(NRF_TIMER3, NRF_TIMER_CC_CHANNEL0, 20000 - valueTicks/2);
-//	nrf_timer_cc_write(NRF_TIMER3, NRF_TIMER_CC_CHANNEL1, 20000 + valueTicks/2);
 
 	return 0;
 }
@@ -247,7 +218,9 @@ void ADC::setZeroCrossingCallback(adc_zero_crossing_cb_t callback) {
 
 void ADC::enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroVal) {
 	LOGd("enable zero chan=%u zero=%i", channel, zeroVal);
-//	nrf_gpio_cfg_output(TEST_PIN);
+#ifdef TEST_PIN
+	nrf_gpio_cfg_output(TEST_PIN);
+#endif
 	_zeroValue = zeroVal;
 	_zeroCrossingChannel = channel;
 
@@ -289,32 +262,23 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 	if (type == NRF_SAADC_LIMIT_LOW) {
 		// NRF_SAADC_LIMIT_LOW  triggers when adc value is below lower limit
 		setLimitUp();
-
-//		nrf_gpiote_task_configure(2, TEST_PIN, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
-//		nrf_gpiote_task_enable(2);
-//		nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_TASK_START);
 	}
 	else {
 		// NRF_SAADC_LIMIT_HIGH triggers when adc value is above upper limit
 		setLimitDown();
 
-//		nrf_gpiote_task_configure(2, TEST_PIN, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
-//		nrf_gpiote_task_enable(2);
-//		nrf_timer_task_trigger(NRF_TIMER3, NRF_TIMER_TASK_START);
+#ifdef TEST_PIN
 		nrf_gpio_pin_toggle(TEST_PIN);
-
+#endif
 
 		// Only call zero crossing callback when there was about 20ms between the two events.
 		// This makes it more likely that this was an actual zero crossing.
 		uint32_t curTime = RTC::getCount();
 		uint32_t diffTicks = RTC::difference(curTime, _lastZeroCrossUpTime);
 		if ((_zeroCrossingCallback != NULL) && (diffTicks > RTC::msToTicks(19)) && (diffTicks < RTC::msToTicks(21))) {
-//			Switch::getInstance().onZeroCrossing();
-//			LOGd("zero %p", _zeroCrossingCallback);
 			_zeroCrossingCallback();
 		}
 		_lastZeroCrossUpTime = curTime;
-
 	}
 }
 

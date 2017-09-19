@@ -679,8 +679,7 @@ void Crownstone::startUp() {
 void Crownstone::tick() {
 	//! Right now, this function is only called in normal operation
 
-
-#if ADVERTISEMENT_IMPROVEMENT==1
+#if ADVERTISEMENT_IMPROVEMENT==1 // TODO: remove this macro
 	//! update advertisement parameters (to improve scanning on (some) android phones)
 	_stack->updateAdvertisement(true);
 #endif
@@ -877,6 +876,8 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	config_uart(pinRx, pinTx);
 
 	_log(SERIAL_INFO, SERIAL_CRLF);
+//	LOGi("ispr: %u", __get_IPSR());
+
 //	BLEutil::print_heap("Heap init");
 //	BLEutil::print_stack("Stack init");
 	//! To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)

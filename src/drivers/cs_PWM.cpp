@@ -32,6 +32,8 @@
 #define ZERO_CROSSING_CHANNEL_IDX   3
 #define ZERO_CROSSING_CAPTURE_TASK  NRF_TIMER_TASK_CAPTURE3
 
+// Define test pin to enable gpio debug.
+//#define TEST_PIN 20
 
 PWM::PWM() :
 		_initialized(false)
@@ -78,7 +80,7 @@ uint32_t PWM::init(const pwm_config_t& config) {
 	_ppiGroup = getPpiGroup(CS_PWM_PPI_GROUP_START);
 
 	// Enable timer interrupt
-	err_code = sd_nvic_SetPriority(CS_PWM_IRQn, CS_PWM_TIMER_PRIORITY);
+	err_code = sd_nvic_SetPriority(CS_PWM_IRQn, CS_PWM_TIMER_IRQ_PRIORITY);
 	APP_ERROR_CHECK(err_code);
 	err_code = sd_nvic_EnableIRQ(CS_PWM_IRQn);
 	APP_ERROR_CHECK(err_code);
@@ -91,6 +93,10 @@ uint32_t PWM::init(const pwm_config_t& config) {
 
     _initialized = true;
     return ERR_SUCCESS;
+#endif
+
+#ifdef TEST_PIN
+    nrf_gpio_cfg_output(TEST_PIN);
 #endif
 
     return ERR_PWM_NOT_ENABLED;
@@ -359,13 +365,26 @@ void PWM::onZeroCrossing() {
 
 
 void PWM::enableInterrupt() {
-	// Make the timer stop on end of period
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
+
+	// The order of the function calls below are important:
+	// If we enable short stop first, the event might happen right after that,
+	//   stopping the timer, and not generating a new event for the interrupt to trigger.
+
+	// First clear the compare event, since it's still set from the last end of period event.
+	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
+
+	// Make the timer stop on end of period (it will be started again in the interrupt handler).
 	nrf_timer_shorts_enable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
-	// Enable interrupt, set the value in there (at the end/start of the period).
+
+	// Enable interrupt, set the new period value in there (at the end/start of the period).
 	nrf_timer_int_enable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
 }
 
 void PWM::_handleInterrupt() {
+	// Set the new period value.
 	writeCC(PERIOD_CHANNEL_IDX, _adjustedMaxTickVal);
 
 	// Don't stop timer on end of period anymore, and start the timer again
@@ -560,9 +579,11 @@ nrf_ppi_task_t PWM::getPpiTaskDisable(uint8_t index) {
 
 // Timer interrupt handler
 extern "C" void CS_PWM_TIMER_IRQ(void) {
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 //	if (nrf_timer_event_check(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX))) {
 	// Clear and disable interrupt until next change.
-	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
 	nrf_timer_int_disable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
 	PWM::getInstance()._handleInterrupt();
 //	}
