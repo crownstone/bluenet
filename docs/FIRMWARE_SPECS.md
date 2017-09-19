@@ -30,4 +30,21 @@ If the bluenet-compatible device is a power switch, it stores the state of a swi
 
 To ensure that an individual device has a technical lifetime of 10 years, it is important to not write to the same flash location each time due to wear. On the nRF52 it is possible to write 10 000 times to the same flash location. To increase the number of times you can write a value to flash, it can be stored to multiple locations together with a pointer/counter. Using such a cyclic buffer the lifetime of the flash memory is increased considerably.
 
+## Buffer reuse
 
+A buffer abstraction that allows for the reuse of RAM for multiple purposes to limit memory use.
+
+## App-specific scan responses
+
+It is possible to obtain information about energy usage (in an encrypted manner) by encapsulating it in scan responses.
+
+## Encryption
+
+Regardless of BLE security measures there is payload encryption/decryption using SHA-1.
+
+## Other features
+
+There are plenty of other software considerations / optimizations.
+
++ While being connected there are still non-connectable advertisements sent to help with the indoor localization.
++ Establishing a dimmer is not trivial. Rather than relying on unreliable zero-crossing events either due to jitter or drift, a timer peripheral is gradually adjusted by zero-crossing events. Everything uses the CPU as little as possible. Nordic provides for this the so-called Programmable Peripheral Interconnect (PPI) event system.
