@@ -90,6 +90,8 @@ uint32_t PWM::init(const pwm_config_t& config) {
 
 	_zeroCrossingCounter = 0;
 	_adjustedMaxTickVal = _maxTickVal;
+	_zeroCrossDeviationIntegral = 0;
+	_zeroCrossTicksDeviationAvg = 0;
 
     _initialized = true;
     return ERR_SUCCESS;
@@ -277,61 +279,56 @@ void PWM::onZeroCrossing() {
 	nrf_timer_task_trigger(CS_PWM_TIMER, ZERO_CROSSING_CAPTURE_TASK);
 	uint32_t ticks = nrf_timer_cc_read(CS_PWM_TIMER, getTimerChannel(ZERO_CROSSING_CHANNEL_IDX));
 
+	int64_t targetTicks = 0;
+	int64_t errTicks = targetTicks - ticks;
+
+	// Correct error for wrap around.
+	int64_t maxTickVal = _maxTickVal;
+//	errTicks = (errTicks + maxTickVal/2) % maxTickVal - maxTickVal/2;
+	if (errTicks > maxTickVal / 2) {
+		errTicks -= maxTickVal;
+	}
+	else if (errTicks < -maxTickVal / 2) {
+		errTicks += maxTickVal;
+	}
+
+	_zeroCrossDeviationIntegral += -errTicks;
+
 	// Exponential moving average
-	uint32_t alpha = 1000; // Discount factor
-	_zeroCrossingTicksAvg = ((1000-alpha) * _zeroCrossingTicksAvg + alpha * ticks) / 1000;
+	uint32_t alpha = 1000; // 1000: no averaging
+//	uint32_t alpha = 800; // Discount factor
+	_zeroCrossTicksDeviationAvg = ((1000-alpha) * _zeroCrossTicksDeviationAvg + alpha * errTicks) / 1000;
 
-//	_zeroCrossingCounter = (_zeroCrossingCounter + 1) % 5;
 	_zeroCrossingCounter++;
-
 	if (_zeroCrossingCounter % 10 == 0) {
-		int64_t maxTickVal = _maxTickVal;
-	//	int64_t targetTicks = _maxTickVal / 2;
-		int64_t targetTicks = 0;
-		int64_t errTicks = targetTicks - _zeroCrossingTicksAvg;
-	//	errTicks = (errTicks + maxTickVal/2) % maxTickVal - maxTickVal/2; // Correct for wrap around
+		// Calculate the new period value.
 
-		if (errTicks > maxTickVal / 2) {
-			errTicks -= maxTickVal;
-		}
-		else if (errTicks < -maxTickVal / 2) {
-			errTicks += maxTickVal;
-		}
+		// Proportional part
+		int32_t delta = -errTicks / (maxTickVal/400);
 
-		int32_t delta = -errTicks / 50; // Gain of 1/50
+		// Add an integral part to the delta.
+		delta += _zeroCrossDeviationIntegral / 1000 / (maxTickVal/400);
 
 		// Limit the output, make sure the minimum newMaxTicks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
-		if (delta > maxTickVal / 500) {
-			delta = maxTickVal / 500;
+		int32_t limitDelta = maxTickVal / 500;
+		if (delta > limitDelta) {
+			delta = limitDelta;
 		}
-		if (delta < -maxTickVal / 500) {
-			delta = -maxTickVal / 500;
+		if (delta < -limitDelta) {
+			delta = -limitDelta;
 		}
 		uint32_t newMaxTicks = maxTickVal + delta;
-
-
-//		// Stop the timer, so that the captured value isn't outdated.
-//		nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_STOP);
-//		nrf_timer_task_trigger(CS_PWM_TIMER, ZERO_CROSSING_CAPTURE_TASK);
-//		ticks = nrf_timer_cc_read(CS_PWM_TIMER, getTimerChannel(ZERO_CROSSING_CHANNEL_IDX));
-//		// Make sure that the new period compare value is not set lower than the current counter value.
-//		if (newMaxTicks <= ticks) {
-//			newMaxTicks = ticks+1;
-//		}
-//		nrf_timer_cc_write(CS_PWM_TIMER, getTimerChannel(PERIOD_CHANNEL_IDX), newMaxTicks);
-//		nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
-
 		_adjustedMaxTickVal = newMaxTicks;
 
 		// Set the new period time at the end of the current period.
 		enableInterrupt();
 
 		if (ticks > _maxTickVal + maxTickVal / 500) {
-			LOGe("%u  %u  %lli  %u\r\n", ticks, _zeroCrossingTicksAvg, errTicks, newMaxTicks);
+			LOGe("%u  %u  %u\r\n", ticks, errTicks, newMaxTicks);
 		}
 
 		if (_zeroCrossingCounter % 50 == 0) {
-//			write("%u  %u  %lli  %u\r\n", ticks, _zeroCrossingTicksAvg, errTicks, newMaxTicks);
+			write("%u  %lli  %lli  %lli %u\r\n", ticks, errTicks, _zeroCrossTicksDeviationAvg, _zeroCrossDeviationIntegral, newMaxTicks);
 		}
 	}
 
@@ -376,20 +373,24 @@ void PWM::enableInterrupt() {
 	// First clear the compare event, since it's still set from the last end of period event.
 	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
 
-	// Make the timer stop on end of period (it will be started again in the interrupt handler).
-	nrf_timer_shorts_enable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
+//	// Make the timer stop on end of period (it will be started again in the interrupt handler).
+//	nrf_timer_shorts_enable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
 
 	// Enable interrupt, set the new period value in there (at the end/start of the period).
 	nrf_timer_int_enable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
 }
 
 void PWM::_handleInterrupt() {
+	// At this point, the timer counter is close to 0.
+	// So we have about 10ms before the period compare event triggers again.
+	// This should be plenty of time to change the period value before it gets triggered.
+
 	// Set the new period value.
 	writeCC(PERIOD_CHANNEL_IDX, _adjustedMaxTickVal);
 
-	// Don't stop timer on end of period anymore, and start the timer again
-	nrf_timer_shorts_disable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
-	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
+//	// Don't stop timer on end of period anymore, and start the timer again
+//	nrf_timer_shorts_disable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
+//	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
 }
 
 

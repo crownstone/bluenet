@@ -99,7 +99,7 @@
 #define CS_PWM_TIMER_ID                          4
 #define CS_PWM_TIMER_IRQ_PRIORITY                APP_IRQ_PRIORITY_HIGH
 //#define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_500kHz
-#define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_2MHz
+#define CS_PWM_TIMER_FREQ                        NRF_TIMER_FREQ_4MHz // Max frequency, higher can give issues.
 
 #define CS_ADC_TIMER                             NRF_TIMER1
 #define CS_ADC_TIMER_IRQ                         TIMER1_IRQHandler

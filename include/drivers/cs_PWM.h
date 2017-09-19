@@ -110,8 +110,11 @@ private:
 	//! Counter to keep up the number of zero crossing callbacks.
 	uint32_t _zeroCrossingCounter;
 
-	//! Moving average amount of timer ticks at which the zero crossing callback was called.
-	uint32_t _zeroCrossingTicksAvg;
+	//! Moving average amount of timer ticks deviation compared to when the zero crossing callback was called.
+	int64_t _zeroCrossTicksDeviationAvg;
+
+	//! Integral of the tick deviations.
+	int64_t _zeroCrossDeviationIntegral;
 
 	//! Sets pin on
 	void turnOn(uint8_t channel);
