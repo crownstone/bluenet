@@ -119,6 +119,14 @@ private:
 	bool _recalibrateZeroCurrent; //! Whether or not the zero current value should be recalculated.
 	double _avgPower; //! Used for storing and calculating the average power (in mW).
 	int32_t _avgPowerMilliWatt; //! Used to send out the average power (in mW).
+	int32_t _avgCurrentRmsMilliAmp; //! Used for storing the average rms current (in mA).
+	int32_t _avgVoltageRmsMilliVolt; //! Used for storing the average rms voltage (in mV).
+
+	CircularBuffer<int32_t>* _powerMilliWattHist;      //! Used to store a history of the power
+	CircularBuffer<int32_t>* _currentRmsMilliAmpHist;  //! Used to store a history of the current_rms
+	CircularBuffer<int32_t>* _voltageRmsMilliVoltHist; //! Used to store a history of the voltage_rms
+	int32_t _histCopy[POWER_SAMPLING_WINDOW_SIZE];     //! Used to copy a history to (so it can be used to calculate the median)
+
 
 	uint16_t _currentThreshold; //! Current threshold from settings.
 	uint16_t _currentThresholdPwm; //! Current threshold when using dimmer from settings.

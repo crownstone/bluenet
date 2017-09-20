@@ -160,8 +160,9 @@
 //#define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            1000 // No averaging
 #define CURRENT_ZERO_EXP_AVG_DISCOUNT            100 // Is divided by 1000, so 100 is a discount of 0.1. // 99% of the average is influenced by the last 44 values
 //#define CURRENT_ZERO_EXP_AVG_DISCOUNT            1000 // No averaging
-#define POWER_EXP_AVG_DISCOUNT                   50  // Is divided by 1000, so 50 is a discount of 0.05. //! 99% of the average is influenced by the last 90 values
+#define POWER_EXP_AVG_DISCOUNT                   200 // Is divided by 1000, so 200 is a discount of 0.2. // 99% of the average is influenced by the last 21 values
 //#define POWER_EXP_AVG_DISCOUNT                   1000 // No averaging
+#define POWER_SAMPLING_WINDOW_SIZE               9 // Windows size used for filtering the power and current rms. Don't change! Function "opt_med9" assumes size of 9.
 
 #define CURRENT_USAGE_THRESHOLD                  (16000) // Power usage threshold in mA at which the switch should be turned off.
 #define CURRENT_USAGE_THRESHOLD_PWM              (1000)  // Power usage threshold in mA at which the PWM should be turned off.

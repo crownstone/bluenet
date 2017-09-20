@@ -14,10 +14,13 @@
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
 #include <processing/cs_Switch.h>
+#include <third/optmed.h>
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
 #endif
+
+#include <math.h>
 
 #define PRINT_POWERSAMPLING_VERBOSE
 
@@ -33,6 +36,9 @@ PowerSampling::PowerSampling() :
 	_powerSamplingReadTimerData = { {0} };
 	_powerSamplingSentDoneTimerId = &_powerSamplingReadTimerData;
 	_adc = &(ADC::getInstance());
+	_powerMilliWattHist = new CircularBuffer<int32_t>(POWER_SAMPLING_WINDOW_SIZE);
+	_currentRmsMilliAmpHist = new CircularBuffer<int32_t>(POWER_SAMPLING_WINDOW_SIZE);
+	_voltageRmsMilliVoltHist = new CircularBuffer<int32_t>(POWER_SAMPLING_WINDOW_SIZE);
 }
 
 // adc done callback is already decoupled from adc interrupt
@@ -72,6 +78,9 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 #endif
 
 	_powerSamples.assign(_powerSamplesBuffer, size);
+	_powerMilliWattHist->init(); // Allocates buffer
+	_currentRmsMilliAmpHist->init(); // Allocates buffer
+	_voltageRmsMilliVoltHist->init(); // Allocates buffer
 
 	LOGd(FMT_INIT, "ADC");
 	adc_config_t adcConfig;
@@ -280,19 +289,77 @@ void PowerSampling::calculatePower(power_t power) {
 		vSquareSum += (voltage * voltage) / (1000*1000);
 		pSum +=       (current * voltage) / (1000*1000);
 	}
-	int64_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
-	// TODO: check if cSquareSum is much different from the previous X times, if so: probably an outlier.
+	int32_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
+	int32_t currentRmsMilliAmp =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
+	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
 
+//	// Exponential moving average
+//	int64_t discountCurrent = 50;
+//	_avgCurrentRmsMilliAmp = ((1000-discountCurrent) * _avgCurrentRmsMilliAmp + discountCurrent * currentRmsMilliAmp) / 1000;
+
+	// Calculate median when there are enough values in history, else calculate the average.
+	_currentRmsMilliAmpHist->push(currentRmsMilliAmp);
+	if (_currentRmsMilliAmpHist->full()) {
+		memcpy(_histCopy, _currentRmsMilliAmpHist->getBuffer(), _currentRmsMilliAmpHist->getMaxByteSize());
+		_avgCurrentRmsMilliAmp = opt_med9(_histCopy);
+	}
+	else {
+		int64_t currentRmsMilliAmpSum = 0;
+		for (uint16_t i=0; i<_currentRmsMilliAmpHist->size(); ++i) {
+			currentRmsMilliAmpSum += _currentRmsMilliAmpHist->operator [](i);
+		}
+		_avgCurrentRmsMilliAmp = currentRmsMilliAmpSum / _currentRmsMilliAmpHist->size();
+	}
+
+
+	// TODO: use _avgCurrentRmsMilliAmp instead.
 	checkSoftfuse(powerMilliWatt);
 
-//	_avgPower = powerMilliWatt;
 
-	//! Exponential moving average
-	//! TODO: should maybe make this an integer calculation, but that wasn't working when i tried.
-	double discount = _avgPowerDiscount / 1000.0;
-	_avgPower = ((1.0 - discount) * _avgPower + discount * powerMilliWatt);
+	// Calculate median when there are enough values in history, else calculate the average.
+	_voltageRmsMilliVoltHist->push(voltageRmsMilliVolt);
+	if (_voltageRmsMilliVoltHist->full()) {
+		memcpy(_histCopy, _voltageRmsMilliVoltHist->getBuffer(), _voltageRmsMilliVoltHist->getMaxByteSize());
+		_avgVoltageRmsMilliVolt = opt_med9(_histCopy);
+	}
+	else {
+		int64_t voltageRmsMilliVoltSum = 0;
+		for (uint16_t i=0; i<_voltageRmsMilliVoltHist->size(); ++i) {
+			voltageRmsMilliVoltSum += _voltageRmsMilliVoltHist->operator [](i);
+		}
+		_avgVoltageRmsMilliVolt = voltageRmsMilliVoltSum / _voltageRmsMilliVoltHist->size();
+	}
 
-	_avgPowerMilliWatt = _avgPower;
+	// Instead of real power, calculate apparent power: current_rms * voltage_rms
+	powerMilliWatt = (int64_t)_avgCurrentRmsMilliAmp * _avgVoltageRmsMilliVolt / 1000;
+
+//	// Calculate median when there are enough values in history, else calculate the average.
+//	_powerMilliWattHist->push(powerMilliWatt);
+//	if (_powerMilliWattHist->full()) {
+//		memcpy(_histCopy, _powerMilliWattHist->getBuffer(), _powerMilliWattHist->getMaxByteSize());
+//		_avgPowerMilliWatt = opt_med9(_histCopy);
+//	}
+//	else {
+//		int64_t powerMilliWattSum = 0;
+//		for (uint16_t i=0; i<_powerMilliWattHist->size(); ++i) {
+//			powerMilliWattSum += _powerMilliWattHist->operator [](i);
+//		}
+//		_avgPowerMilliWatt = powerMilliWattSum / _powerMilliWattHist->size();
+//	}
+
+	// Exponential moving average
+	int64_t avgPowerDiscount = _avgPowerDiscount;
+	_avgPowerMilliWatt = ((1000-avgPowerDiscount) * _avgPowerMilliWatt + avgPowerDiscount * powerMilliWatt) / 1000;
+//	_avgPowerMilliWatt = powerMilliWatt;
+
+
+//	static int printPower = 0;
+//	if (printPower % 1 == 0) {
+//		write("%i %i\r\n", currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
+//		write("%i %i\r\n", voltageRmsMilliVolt, _avgVoltageRmsMilliVolt);
+//		write("%i %i\r\n", powerMilliWatt, _avgPowerMilliWatt);
+//	}
+//	printPower++;
 
 //	static int printPower = 0;
 //	if (printPower % 100 == 0) {
