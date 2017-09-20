@@ -284,7 +284,7 @@ void PWM::onZeroCrossing() {
 
 	// Correct error for wrap around.
 	int64_t maxTickVal = _maxTickVal;
-//	errTicks = (errTicks + maxTickVal/2) % maxTickVal - maxTickVal/2;
+//	errTicks = (errTicks + maxTickVal/2) % maxTickVal - maxTickVal/2; // Doesn't work?
 	if (errTicks > maxTickVal / 2) {
 		errTicks -= maxTickVal;
 	}
@@ -328,7 +328,7 @@ void PWM::onZeroCrossing() {
 		}
 
 		if (_zeroCrossingCounter % 50 == 0) {
-			write("%u  %lli  %lli  %lli %u\r\n", ticks, errTicks, _zeroCrossTicksDeviationAvg, _zeroCrossDeviationIntegral, newMaxTicks);
+//			write("%u  %lli  %lli  %lli %u\r\n", ticks, errTicks, _zeroCrossTicksDeviationAvg, _zeroCrossDeviationIntegral, newMaxTicks);
 		}
 	}
 
