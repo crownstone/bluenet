@@ -128,8 +128,8 @@ private:
 	int32_t _histCopy[POWER_SAMPLING_WINDOW_SIZE];     //! Used to copy a history to (so it can be used to calculate the median)
 
 
-	uint16_t _currentThreshold; //! Current threshold from settings.
-	uint16_t _currentThresholdPwm; //! Current threshold when using dimmer from settings.
+	uint16_t _currentMilliAmpThreshold;    //! Current threshold from settings.
+	uint16_t _currentMilliAmpThresholdPwm; //! Current threshold when using dimmer from settings.
 
 	/** Copies the adc samples to the power samples struct, to be sent over bluetooth
 	 */
@@ -155,6 +155,10 @@ private:
 	 */
 	void calculateCurrentZero(power_t power);
 
+	/** Filter the samples
+	 */
+	void filter(power_t power);
+
 	/** Calculate the average power usage
 	 */
 	void calculatePower(power_t power);
@@ -162,6 +166,6 @@ private:
 	/**
 	 * If current goes beyond predefined threshold levels, take action!
 	 */
-	void checkSoftfuse(int64_t powerMilliWatt);
+	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered);
 };
 

@@ -39,6 +39,8 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_FactoryReset.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_EnOceanHandler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_TemperatureGuard.cpp")
 
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/SortMedian.cc")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_DeviceInformationService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_CrownstoneService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_SetupService.cpp")

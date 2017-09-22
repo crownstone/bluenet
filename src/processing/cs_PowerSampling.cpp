@@ -21,8 +21,10 @@
 #endif
 
 #include <math.h>
+#include "third/SortMedian.h"
 
-#define PRINT_POWERSAMPLING_VERBOSE
+// Define test pin to enable gpio debug.
+//#define TEST_PIN 20
 
 #define VOLTAGE_CHANNEL_IDX 0
 #define CURRENT_CHANNEL_IDX 1
@@ -57,8 +59,8 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	settings.get(CONFIG_VOLTAGE_ZERO, &_voltageZero);
 	settings.get(CONFIG_CURRENT_ZERO, &_currentZero);
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
-	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentThreshold);
-	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentThresholdPwm);
+	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentMilliAmpThreshold);
+	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm);
 
 	initAverages();
 	_recalibrateZeroVoltage = true;
@@ -73,9 +75,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 
 	size_t size = burstSize;
 	_powerSamplesBuffer = (buffer_ptr_t) calloc(size, sizeof(uint8_t));
-#ifdef PRINT_POWERSAMPLING_VERBOSE
 	LOGd("power sample buffer=%u size=%u", _powerSamplesBuffer, size);
-#endif
 
 	_powerSamples.assign(_powerSamplesBuffer, size);
 	_powerMilliWattHist->init(); // Allocates buffer
@@ -100,9 +100,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 }
 
 void PowerSampling::startSampling() {
-#ifdef PRINT_POWERSAMPLING_VERBOSE
-	LOGd(FMT_START, "power sample");
-#endif
+	LOGi(FMT_START, "power sample");
 	// Get operation mode
 	State::getInstance().get(STATE_OPERATION_MODE, _operationMode);
 
@@ -149,6 +147,9 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 		calculateCurrentZero(power);
 //		_recalibrateZeroCurrent = false;
 	}
+
+	filter(power);
+
 	calculatePower(power);
 
 	if (_operationMode == OPERATION_MODE_NORMAL) {
@@ -263,6 +264,80 @@ void PowerSampling::calculateCurrentZero(power_t power) {
 //	write("sum=%lli numSamples=%u czero=%i \r\n", sum, numSamples, _avgZeroCurrent);
 }
 
+static int printPower = 0;
+
+void PowerSampling::filter(power_t power) {
+	if (printPower % 100 == 0) {
+		uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
+//	if (_avgCurrentRmsMilliAmp > _currentMilliAmpThresholdPwm || currentRmsMilliAmp > (int32_t)_currentMilliAmpThresholdPwm*5) {
+//	if (currentRmsMilliAmp > _currentMilliAmpThresholdPwm) {
+//		write("power=%lld avg=%d\r\n",powerMilliWatt, _avgPowerMilliWatt);
+//		printPower = 0;
+		// current
+		write("Current: ");
+//		write("\r\n");
+		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+			write("%4d ", power.buf[i]);
+			if (i % 40 == 40 - 1) {
+//				write("\r\n");
+			}
+		}
+		write("\r\n");
+		write("Voltage: ");
+//		write("\r\n");
+		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+			write("%4d ", power.buf[i]);
+			if (i % 40 == 40 - 2) {
+//				write("\r\n");
+			}
+		}
+		write("\r\n");
+	}
+
+
+
+	uint16_t bufSize = power.bufSize / power.numChannels;
+
+	// Parameters
+//	unsigned halfWindowSize = 5;
+	unsigned halfWindowSize = 16;
+	unsigned windowSize = halfWindowSize * 2 + 1;
+	unsigned blockCount = (bufSize + halfWindowSize*2) / windowSize; // Shouldn't have a remainder!
+	MedianFilter filterParams(halfWindowSize, blockCount);
+
+	Vector samples(bufSize + halfWindowSize*2);
+	Vector filtered(bufSize);
+
+
+	// Pad the start of the input vector with the first sample in the buffer
+	uint16_t j = 0;
+	for (; j<halfWindowSize; ++j) {
+		samples[j] = power.buf[power.currentIndex];
+	}
+	// Copy samples from buffer to input vector
+	uint16_t i = power.currentIndex;
+	for (; i<power.bufSize; i += power.numChannels) {
+		samples[j] = power.buf[i];
+		++j;
+	}
+	// Pad the end of the buffer with the last sample in the buffer
+	for (; j<bufSize+halfWindowSize; ++j) {
+		samples[j] = power.buf[i];
+	}
+
+	// Filter the data
+	sort_median(filterParams, samples, filtered);
+
+	// Copy filtered data back to buffer
+	j = 0;
+	i = power.currentIndex;
+	for (; i < power.bufSize; i += power.numChannels) {
+		power.buf[i] = filtered[j];
+		++j;
+	}
+}
+
+
 /**
  * Calculate power.
  *
@@ -293,27 +368,27 @@ void PowerSampling::calculatePower(power_t power) {
 	int32_t currentRmsMilliAmp =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
 	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
 
-//	// Exponential moving average
-//	int64_t discountCurrent = 50;
-//	_avgCurrentRmsMilliAmp = ((1000-discountCurrent) * _avgCurrentRmsMilliAmp + discountCurrent * currentRmsMilliAmp) / 1000;
-
 	// Calculate median when there are enough values in history, else calculate the average.
 	_currentRmsMilliAmpHist->push(currentRmsMilliAmp);
+	int32_t medianCurrentRmsMilliAmp;
 	if (_currentRmsMilliAmpHist->full()) {
 		memcpy(_histCopy, _currentRmsMilliAmpHist->getBuffer(), _currentRmsMilliAmpHist->getMaxByteSize());
-		_avgCurrentRmsMilliAmp = opt_med9(_histCopy);
+		medianCurrentRmsMilliAmp = opt_med9(_histCopy);
 	}
 	else {
 		int64_t currentRmsMilliAmpSum = 0;
 		for (uint16_t i=0; i<_currentRmsMilliAmpHist->size(); ++i) {
 			currentRmsMilliAmpSum += _currentRmsMilliAmpHist->operator [](i);
 		}
-		_avgCurrentRmsMilliAmp = currentRmsMilliAmpSum / _currentRmsMilliAmpHist->size();
+		medianCurrentRmsMilliAmp = currentRmsMilliAmpSum / _currentRmsMilliAmpHist->size();
 	}
 
+	// Exponential moving average of the median
+	int64_t discountCurrent = 200;
+	_avgCurrentRmsMilliAmp = ((1000-discountCurrent) * _avgCurrentRmsMilliAmp + discountCurrent * medianCurrentRmsMilliAmp) / 1000;
 
-	// TODO: use _avgCurrentRmsMilliAmp instead.
-	checkSoftfuse(powerMilliWatt);
+	// Now that Irms is known: first check the soft fuse.
+	checkSoftfuse(currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
 
 
 	// Calculate median when there are enough values in history, else calculate the average.
@@ -359,58 +434,64 @@ void PowerSampling::calculatePower(power_t power) {
 //		write("%i %i\r\n", voltageRmsMilliVolt, _avgVoltageRmsMilliVolt);
 //		write("%i %i\r\n", powerMilliWatt, _avgPowerMilliWatt);
 //	}
-//	printPower++;
+//	++printPower;
 
-//	static int printPower = 0;
-//	if (printPower % 100 == 0) {
+	if (printPower % 100 == 0) {
 //		write("vZero=%i cZero=%i\r\n", _avgZeroVoltage, _avgZeroCurrent);
 //		write("pSum=%lld \r\n", pSum);
+//	if (_avgCurrentRmsMilliAmp > _currentMilliAmpThresholdPwm || currentRmsMilliAmp > (int32_t)_currentMilliAmpThresholdPwm*5) {
+//	if (currentRmsMilliAmp > _currentMilliAmpThresholdPwm) {
+		write("Irms=%i avg=%i thresh=%i\r\n", currentRmsMilliAmp, _avgCurrentRmsMilliAmp, _currentMilliAmpThresholdPwm);
 //		write("power=%lld avg=%d\r\n",powerMilliWatt, _avgPowerMilliWatt);
-////		printPower = 0;
-//		// current
-//		write("Current: ");
+//		printPower = 0;
+		// current
+		write("Current: ");
 //		write("\r\n");
-//		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-//			write("%4d ", power.buf[i]);
-//			if (i % 40 == 40 - 1) {
+		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+			write("%4d ", power.buf[i]);
+			if (i % 40 == 40 - 1) {
 //				write("\r\n");
-//			}
-//		}
+			}
+		}
+		write("\r\n");
+		write("Voltage: ");
 //		write("\r\n");
-//		write("Voltage: ");
-//		write("\r\n");
-//		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-//			write("%4d ", power.buf[i]);
-//			if (i % 40 == 40 - 2) {
+		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+			write("%4d ", power.buf[i]);
+			if (i % 40 == 40 - 2) {
 //				write("\r\n");
-//			}
-//		}
-//		write("\r\n");
-//	}
-//	printPower++;
+			}
+		}
+		write("\r\n");
+	}
+	++printPower;
 }
 
-void PowerSampling::checkSoftfuse(int64_t powerMilliWatt) {
+void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered) {
 	//! Get the current state errors
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
 
-	// TODO: don't use hardcoded 220V here
-	if ((powerMilliWatt > _currentThreshold * 220) && (!stateErrors.errors.overCurrent)) {
-		LOGd("current above threshold");
+	// Check if the filtered Irms is above threshold.
+	if ((currentRmsMilliAmpFiltered > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {
+		LOGw("current above threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		State::getInstance().set(STATE_ERROR_OVER_CURRENT, (uint8_t)1);
+		return;
 	}
-	else if ((powerMilliWatt > _currentThresholdPwm * 220) && (!stateErrors.errors.overCurrentPwm)) {
-		//! Get the current pwm state before we dispatch the event (as that may change the pwm).
+
+	// When the dimmer is on: check if the filtered Irms is above threshold, or if the unfiltered Irms is way above threshold.
+//	if ((currentRmsMilliAmpFiltered > _currentMilliAmpThresholdPwm || currentRmsMilliAmp > (int32_t)_currentMilliAmpThresholdPwm*3) && (!stateErrors.errors.overCurrentPwm)) {
+	if ((currentRmsMilliAmpFiltered > _currentMilliAmpThresholdPwm) && (!stateErrors.errors.overCurrentPwm)) {
+		// Get the current pwm state before we dispatch the event (as that may change the pwm).
 		switch_state_t switchState;
 		State::getInstance().get(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
 		if (switchState.pwm_state != 0) {
-			//! If the pwm was on:
-			LOGd("current above pwm threshold");
-			//! Dispatch the event that will turn off the pwm
+			// If the pwm was on:
+			LOGw("current above pwm threshold");
+			// Dispatch the event that will turn off the pwm
 			EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
-			//! Set overcurrent error.
+			// Set overcurrent error.
 			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, (uint8_t)1);
 		}
 	}
