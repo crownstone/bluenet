@@ -13,6 +13,7 @@ extern "C" {
 #include "structs/buffer/cs_CircularBuffer.h"
 #include "cfg/cs_Boards.h"
 #include "drivers/cs_ADC.h"
+#include "third/Median.h"
 
 typedef void (*ps_zero_crossing_cb_t) ();
 
@@ -122,10 +123,15 @@ private:
 	int32_t _avgCurrentRmsMilliAmp; //! Used for storing the average rms current (in mA).
 	int32_t _avgVoltageRmsMilliVolt; //! Used for storing the average rms voltage (in mV).
 
+	PowerVector* _inputSamples;  //! Used for storing the samples to be filtered.
+	PowerVector* _outputSamples; //! Used for storing the filtered samples.
+	MedianFilter* _filterParams;  //! Stores the parameters for the moving median filter.
+
 	CircularBuffer<int32_t>* _powerMilliWattHist;      //! Used to store a history of the power
 	CircularBuffer<int32_t>* _currentRmsMilliAmpHist;  //! Used to store a history of the current_rms
+	CircularBuffer<int32_t>* _filteredCurrentRmsHistMA; //! Used to store a history of the filtered current_rms
 	CircularBuffer<int32_t>* _voltageRmsMilliVoltHist; //! Used to store a history of the voltage_rms
-	int32_t _histCopy[POWER_SAMPLING_WINDOW_SIZE];     //! Used to copy a history to (so it can be used to calculate the median)
+	int32_t _histCopy[POWER_SAMPLING_RMS_WINDOW_SIZE];     //! Used to copy a history to (so it can be used to calculate the median)
 
 
 	uint16_t _currentMilliAmpThreshold;    //! Current threshold from settings.

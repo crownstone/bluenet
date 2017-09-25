@@ -3,6 +3,6 @@
 
 #include "third/Median.h"
 
-void sort_median(MedianFilter f, const Vector& x, Vector& y);
+void sort_median(MedianFilter f, const PowerVector& x, PowerVector& y);
 
 #endif

@@ -4,7 +4,7 @@
 #include <vector>
 #include <stdint.h>
 
-using elem_t = int32_t;
-using Vector = std::vector<elem_t>;
+using power_elem_t = int32_t;
+using PowerVector = std::vector<power_elem_t>;
 
 #endif

@@ -4,14 +4,14 @@
 
 struct Buffer {
 public:
-    std::vector<std::pair<elem_t, unsigned>> sorted;
+    std::vector<std::pair<power_elem_t, unsigned>> sorted;
 
     explicit Buffer(MedianFilter f) :
         sorted(f.k),
         filter {f}
     {}
 
-    void init(const elem_t* p) {
+    void init(const power_elem_t* p) {
         for (unsigned i {0}; i < filter.k; ++i) {
             sorted[i] = std::make_pair(p[i], i);
         }
@@ -36,7 +36,7 @@ public:
         link(f.k + 1)
     {}
 
-    void init(const elem_t* p, const Buffer& buf) {
+    void init(const power_elem_t* p, const Buffer& buf) {
         data = p;
         init_links(buf);
         med = buf.sorted[filter.half].second;
@@ -85,8 +85,8 @@ public:
         ++small;
     }
 
-    inline elem_t peek() const {
-        return med == tail() ? std::numeric_limits<elem_t>::max() : data[med];
+    inline power_elem_t peek() const {
+        return med == tail() ? std::numeric_limits<power_elem_t>::max() : data[med];
     }
 
     inline bool at_end() const {
@@ -124,7 +124,7 @@ private:
     unsigned med;
     // Elements before med
     unsigned small;
-    const elem_t* data;
+    const power_elem_t* data;
     MedianFilter filter;
     std::vector<Link> link;
 };
@@ -139,7 +139,7 @@ public:
         b {f}
     {}
 
-    void run(const Vector& x, Vector& y) {
+    void run(const PowerVector& x, PowerVector& y) {
         init(x, 0);
         y[0] = b.peek();
         for (unsigned part {1}; part < filter.blocks; ++part) {
@@ -151,20 +151,20 @@ public:
     }
 
 private:
-    void init(const Vector& x, unsigned part) {
-        const elem_t* p = x.data() + filter.k * part;
+    void init(const PowerVector& x, unsigned part) {
+        const power_elem_t* p = x.data() + filter.k * part;
         buf.init(p);
         b.init(p, buf);
     }
 
-    void run_part(Vector& y, unsigned part) {
+    void run_part(PowerVector& y, unsigned part) {
         for (unsigned i {0}; i < filter.k; ++i) {
             a.del(i);
             b.add(i);
 //            assert(a.nsmall() + b.nsmall() <= filter.half);
             balance();
 //            assert(a.nsmall() + b.nsmall() == filter.half);
-            elem_t median {std::min(a.peek(), b.peek())};
+            power_elem_t median {std::min(a.peek(), b.peek())};
             y[(part - 1) * filter.k + i + 1] = median;
         }
 //        assert(a.nsmall() == 0);
@@ -198,7 +198,7 @@ private:
 };
 
 
-void sort_median(MedianFilter f, const Vector& x, Vector& y) {
+void sort_median(MedianFilter f, const PowerVector& x, PowerVector& y) {
     SortMedian m(f);
     m.run(x, y);
 }

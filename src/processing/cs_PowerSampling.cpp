@@ -38,9 +38,10 @@ PowerSampling::PowerSampling() :
 	_powerSamplingReadTimerData = { {0} };
 	_powerSamplingSentDoneTimerId = &_powerSamplingReadTimerData;
 	_adc = &(ADC::getInstance());
-	_powerMilliWattHist = new CircularBuffer<int32_t>(POWER_SAMPLING_WINDOW_SIZE);
-	_currentRmsMilliAmpHist = new CircularBuffer<int32_t>(POWER_SAMPLING_WINDOW_SIZE);
-	_voltageRmsMilliVoltHist = new CircularBuffer<int32_t>(POWER_SAMPLING_WINDOW_SIZE);
+	_powerMilliWattHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
+	_currentRmsMilliAmpHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
+	_voltageRmsMilliVoltHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
+	_filteredCurrentRmsHistMA = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
 }
 
 // adc done callback is already decoupled from adc interrupt
@@ -81,6 +82,18 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	_powerMilliWattHist->init(); // Allocates buffer
 	_currentRmsMilliAmpHist->init(); // Allocates buffer
 	_voltageRmsMilliVoltHist->init(); // Allocates buffer
+	_filteredCurrentRmsHistMA->init(); // Allocates buffer
+
+	// Init moving median filter
+	unsigned halfWindowSize = POWER_SAMPLING_CURVE_HALF_WINDOW_SIZE;
+//	unsigned halfWindowSize = 5;  // Takes 0.74ms
+//	unsigned halfWindowSize = 16; // Takes 0.93ms
+	unsigned windowSize = halfWindowSize * 2 + 1;
+	uint16_t bufSize = CS_ADC_BUF_SIZE / 2;
+	unsigned blockCount = (bufSize + halfWindowSize*2) / windowSize; // Shouldn't have a remainder!
+	_filterParams = new MedianFilter(halfWindowSize, blockCount);
+	_inputSamples = new PowerVector(bufSize + halfWindowSize*2);
+	_outputSamples = new PowerVector(bufSize);
 
 	LOGd(FMT_INIT, "ADC");
 	adc_config_t adcConfig;
@@ -95,6 +108,10 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	_adc->init(adcConfig);
 
 	_adc->setDoneCallback(adc_done_callback);
+
+#ifdef TEST_PIN
+	nrf_gpio_cfg_output(TEST_PIN);
+#endif
 
 	_isInitialized = true;
 }
@@ -130,6 +147,9 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
  * Only when in normal operation mode (e.g. not in setup mode) sent the information to a BLE characteristic.
  */
 void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 	power_t power;
 	power.buf = buf;
 	power.bufSize = size;
@@ -148,7 +168,13 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 //		_recalibrateZeroCurrent = false;
 	}
 
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 	filter(power);
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 
 	calculatePower(power);
 
@@ -159,6 +185,9 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt)); 
 	}
 
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 	_adc->releaseBuffer(buf);
 }
 
@@ -297,44 +326,44 @@ void PowerSampling::filter(power_t power) {
 
 
 	uint16_t bufSize = power.bufSize / power.numChannels;
-
-	// Parameters
-//	unsigned halfWindowSize = 5;
-	unsigned halfWindowSize = 16;
-	unsigned windowSize = halfWindowSize * 2 + 1;
-	unsigned blockCount = (bufSize + halfWindowSize*2) / windowSize; // Shouldn't have a remainder!
-	MedianFilter filterParams(halfWindowSize, blockCount);
-
-	Vector samples(bufSize + halfWindowSize*2);
-	Vector filtered(bufSize);
+//
+//	// Parameters
+//	unsigned halfWindowSize = 5;  // Takes 0.74ms
+////	unsigned halfWindowSize = 16; // Takes 0.93ms
+//	unsigned windowSize = halfWindowSize * 2 + 1;
+//	unsigned blockCount = (bufSize + halfWindowSize*2) / windowSize; // Shouldn't have a remainder!
+//	MedianFilter filterParams(halfWindowSize, blockCount);
+//
+//	Vector samples(bufSize + halfWindowSize*2);
+//	Vector filtered(bufSize);
 
 
 	// Pad the start of the input vector with the first sample in the buffer
 	uint16_t j = 0;
-	for (; j<halfWindowSize; ++j) {
-		samples[j] = power.buf[power.currentIndex];
+	for (; j<_filterParams->half; ++j) {
+		_inputSamples->at(j) = power.buf[power.currentIndex];
 	}
 	// Copy samples from buffer to input vector
 	uint16_t i = power.currentIndex;
 	for (; i<power.bufSize; i += power.numChannels) {
-		samples[j] = power.buf[i];
+		_inputSamples->at(j) = power.buf[i];
 		++j;
 	}
 	// Pad the end of the buffer with the last sample in the buffer
-	for (; j<bufSize+halfWindowSize; ++j) {
-		samples[j] = power.buf[i];
+	for (; j<bufSize+_filterParams->half; ++j) {
+		_inputSamples->at(j) = power.buf[i];
 	}
 
 	// Filter the data
-	sort_median(filterParams, samples, filtered);
+	sort_median(*_filterParams, *_inputSamples, *_outputSamples);
 
-	// Copy filtered data back to buffer
-	j = 0;
-	i = power.currentIndex;
-	for (; i < power.bufSize; i += power.numChannels) {
-		power.buf[i] = filtered[j];
-		++j;
-	}
+//	// Copy filtered data back to buffer
+//	j = 0;
+//	i = power.currentIndex;
+//	for (; i < power.bufSize; i += power.numChannels) {
+//		power.buf[i] = _outputSamples->at(j);
+//		++j;
+//	}
 }
 
 
@@ -352,44 +381,83 @@ void PowerSampling::calculatePower(power_t power) {
 		return;
 	}
 
+	//////////////////////////////////////////////////
+	// Calculatate power, Irms, and Vrms
+	//////////////////////////////////////////////////
+
 	int64_t pSum = 0;
 	int64_t cSquareSum = 0;
 	int64_t vSquareSum = 0;
 	int64_t current;
 	int64_t voltage;
 	for (uint16_t i = 0; i < numSamples * power.numChannels; i += power.numChannels) {
-		current = ((int64_t)power.buf[i+power.currentIndex]*1000 - _avgZeroCurrent);
-		voltage = ((int64_t)power.buf[i+power.voltageIndex]*1000 - _avgZeroVoltage);
+		current = (int64_t)power.buf[i+power.currentIndex]*1000 - _avgZeroCurrent;
+		voltage = (int64_t)power.buf[i+power.voltageIndex]*1000 - _avgZeroVoltage;
 		cSquareSum += (current * current) / (1000*1000);
 		vSquareSum += (voltage * voltage) / (1000*1000);
 		pSum +=       (current * voltage) / (1000*1000);
 	}
 	int32_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
-	int32_t currentRmsMilliAmp =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
+	int32_t currentRmsMA =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
 	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
 
+
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Calculate Irms of median filtered samples, and filter over multiple periods
+	////////////////////////////////////////////////////////////////////////////////
+
+	// Calculate Irms again, but now with the filtered current samples
+	for (uint16_t i=0; i<numSamples; ++i) {
+		current = (int64_t)_outputSamples->at(i)*1000 - _avgZeroCurrent;
+		cSquareSum += (current * current) / (1000*1000);
+	}
+	int32_t filteredCurrentRmsMA =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
+
 	// Calculate median when there are enough values in history, else calculate the average.
-	_currentRmsMilliAmpHist->push(currentRmsMilliAmp);
-	int32_t medianCurrentRmsMilliAmp;
+	_filteredCurrentRmsHistMA->push(filteredCurrentRmsMA);
+	int32_t filteredCurrentRmsMedianMA;
+	if (_filteredCurrentRmsHistMA->full()) {
+		memcpy(_histCopy, _filteredCurrentRmsHistMA->getBuffer(), _filteredCurrentRmsHistMA->getMaxByteSize());
+		filteredCurrentRmsMedianMA = opt_med9(_histCopy);
+	}
+	else {
+		int64_t currentRmsSumMA = 0;
+		for (uint16_t i=0; i<_filteredCurrentRmsHistMA->size(); ++i) {
+			currentRmsSumMA += _filteredCurrentRmsHistMA->operator [](i);
+		}
+		filteredCurrentRmsMedianMA = currentRmsSumMA / _filteredCurrentRmsHistMA->size();
+	}
+
+	// Now that Irms is known: first check the soft fuse.
+	checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA);
+
+
+
+	/////////////////////////////////////////////////////////
+	// Filter Irms, Vrms, and Power (over multiple periods)
+	/////////////////////////////////////////////////////////
+
+	// Calculate median when there are enough values in history, else calculate the average.
+	_currentRmsMilliAmpHist->push(currentRmsMA);
+	int32_t currentRmsMedianMA;
 	if (_currentRmsMilliAmpHist->full()) {
 		memcpy(_histCopy, _currentRmsMilliAmpHist->getBuffer(), _currentRmsMilliAmpHist->getMaxByteSize());
-		medianCurrentRmsMilliAmp = opt_med9(_histCopy);
+		currentRmsMedianMA = opt_med9(_histCopy);
 	}
 	else {
 		int64_t currentRmsMilliAmpSum = 0;
 		for (uint16_t i=0; i<_currentRmsMilliAmpHist->size(); ++i) {
 			currentRmsMilliAmpSum += _currentRmsMilliAmpHist->operator [](i);
 		}
-		medianCurrentRmsMilliAmp = currentRmsMilliAmpSum / _currentRmsMilliAmpHist->size();
+		currentRmsMedianMA = currentRmsMilliAmpSum / _currentRmsMilliAmpHist->size();
 	}
 
-	// Exponential moving average of the median
-	int64_t discountCurrent = 200;
-	_avgCurrentRmsMilliAmp = ((1000-discountCurrent) * _avgCurrentRmsMilliAmp + discountCurrent * medianCurrentRmsMilliAmp) / 1000;
-
-	// Now that Irms is known: first check the soft fuse.
-	checkSoftfuse(currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
-
+//	// Exponential moving average of the median
+//	int64_t discountCurrent = 200;
+//	_avgCurrentRmsMilliAmp = ((1000-discountCurrent) * _avgCurrentRmsMilliAmp + discountCurrent * medianCurrentRmsMilliAmp) / 1000;
+	// Use median as average
+	_avgCurrentRmsMilliAmp = currentRmsMedianMA;
 
 	// Calculate median when there are enough values in history, else calculate the average.
 	_voltageRmsMilliVoltHist->push(voltageRmsMilliVolt);
@@ -428,6 +496,11 @@ void PowerSampling::calculatePower(power_t power) {
 //	_avgPowerMilliWatt = powerMilliWatt;
 
 
+
+	/////////////////////////////////////////////////////////
+	// Debug prints
+	/////////////////////////////////////////////////////////
+
 //	static int printPower = 0;
 //	if (printPower % 1 == 0) {
 //		write("%i %i\r\n", currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
@@ -439,9 +512,9 @@ void PowerSampling::calculatePower(power_t power) {
 	if (printPower % 100 == 0) {
 //		write("vZero=%i cZero=%i\r\n", _avgZeroVoltage, _avgZeroCurrent);
 //		write("pSum=%lld \r\n", pSum);
-//	if (_avgCurrentRmsMilliAmp > _currentMilliAmpThresholdPwm || currentRmsMilliAmp > (int32_t)_currentMilliAmpThresholdPwm*5) {
-//	if (currentRmsMilliAmp > _currentMilliAmpThresholdPwm) {
-		write("Irms=%i avg=%i thresh=%i\r\n", currentRmsMilliAmp, _avgCurrentRmsMilliAmp, _currentMilliAmpThresholdPwm);
+//	if (currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > (int32_t)_currentMilliAmpThresholdPwm*5) {
+//	if (currentRmsMA > _currentMilliAmpThresholdPwm) {
+		write("Irms=%i median=%i filtered=%i filtered_median=%i\r\n", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA);
 //		write("power=%lld avg=%d\r\n",powerMilliWatt, _avgPowerMilliWatt);
 //		printPower = 0;
 		// current
@@ -467,13 +540,13 @@ void PowerSampling::calculatePower(power_t power) {
 	++printPower;
 }
 
-void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered) {
+void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
 	//! Get the current state errors
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
 
 	// Check if the filtered Irms is above threshold.
-	if ((currentRmsMilliAmpFiltered > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {
+	if ((currentRmsFilteredMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {
 		LOGw("current above threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		State::getInstance().set(STATE_ERROR_OVER_CURRENT, (uint8_t)1);
@@ -481,8 +554,8 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRms
 	}
 
 	// When the dimmer is on: check if the filtered Irms is above threshold, or if the unfiltered Irms is way above threshold.
-//	if ((currentRmsMilliAmpFiltered > _currentMilliAmpThresholdPwm || currentRmsMilliAmp > (int32_t)_currentMilliAmpThresholdPwm*3) && (!stateErrors.errors.overCurrentPwm)) {
-	if ((currentRmsMilliAmpFiltered > _currentMilliAmpThresholdPwm) && (!stateErrors.errors.overCurrentPwm)) {
+//	if ((currentRmsFilteredMA > _currentMilliAmpThresholdPwm || currentRmsMA > (int32_t)_currentMilliAmpThresholdPwm*5) && (!stateErrors.errors.overCurrentPwm)) {
+	if ((currentRmsFilteredMA > _currentMilliAmpThresholdPwm) && (!stateErrors.errors.overCurrentPwm)) {
 		// Get the current pwm state before we dispatch the event (as that may change the pwm).
 		switch_state_t switchState;
 		State::getInstance().get(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
