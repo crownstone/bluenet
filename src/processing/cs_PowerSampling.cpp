@@ -44,6 +44,15 @@ PowerSampling::PowerSampling() :
 	_filteredCurrentRmsHistMA = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
 }
 
+#if POWER_SAMPLING_RMS_WINDOW_SIZE == 7
+#define opt_med(arr) opt_med7(arr)
+#elif POWER_SAMPLING_RMS_WINDOW_SIZE == 9
+#define opt_med(arr) opt_med9(arr)
+#elif POWER_SAMPLING_RMS_WINDOW_SIZE == 25
+#define opt_med(arr) opt_med25(arr)
+#endif
+
+
 // adc done callback is already decoupled from adc interrupt
 void adc_done_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
 	PowerSampling::getInstance().powerSampleAdcDone(buf, size, bufNum);
@@ -159,6 +168,11 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	power.acPeriodUs = 20000;
 
+	filter(power);
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
+
 	if (_recalibrateZeroVoltage) {
 		calculateVoltageZero(power);
 //		_recalibrateZeroVoltage = false;
@@ -168,10 +182,6 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 //		_recalibrateZeroCurrent = false;
 	}
 
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
-	filter(power);
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
@@ -282,54 +292,27 @@ void PowerSampling::calculateCurrentZero(power_t power) {
 	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
 
 	int64_t sum = 0;
-	for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-		sum += power.buf[i];
+//	for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+//		sum += power.buf[i];
+//	}
+	for (int i = 0; i < numSamples; ++i) {
+		sum += _outputSamples->at(i);
 	}
 //	_avgZeroCurrent = sum * 1000 / numSamples;
 
 
 	//! Exponential moving average
 	_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * sum * 1000 / numSamples) / 1000;
-//	write("sum=%lli numSamples=%u czero=%i \r\n", sum, numSamples, _avgZeroCurrent);
 }
 
 static int printPower = 0;
 
 void PowerSampling::filter(power_t power) {
-	if (printPower % 100 == 0) {
-		uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
-//	if (_avgCurrentRmsMilliAmp > _currentMilliAmpThresholdPwm || currentRmsMilliAmp > (int32_t)_currentMilliAmpThresholdPwm*5) {
-//	if (currentRmsMilliAmp > _currentMilliAmpThresholdPwm) {
-//		write("power=%lld avg=%d\r\n",powerMilliWatt, _avgPowerMilliWatt);
-//		printPower = 0;
-		// current
-		write("Current: ");
-//		write("\r\n");
-		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-			write("%4d ", power.buf[i]);
-			if (i % 40 == 40 - 1) {
-//				write("\r\n");
-			}
-		}
-		write("\r\n");
-		write("Voltage: ");
-//		write("\r\n");
-		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-			write("%4d ", power.buf[i]);
-			if (i % 40 == 40 - 2) {
-//				write("\r\n");
-			}
-		}
-		write("\r\n");
-	}
-
-
-
 	uint16_t bufSize = power.bufSize / power.numChannels;
 //
 //	// Parameters
 //	unsigned halfWindowSize = 5;  // Takes 0.74ms
-////	unsigned halfWindowSize = 16; // Takes 0.93ms
+//	unsigned halfWindowSize = 16; // Takes 0.93ms
 //	unsigned windowSize = halfWindowSize * 2 + 1;
 //	unsigned blockCount = (bufSize + halfWindowSize*2) / windowSize; // Shouldn't have a remainder!
 //	MedianFilter filterParams(halfWindowSize, blockCount);
@@ -356,14 +339,6 @@ void PowerSampling::filter(power_t power) {
 
 	// Filter the data
 	sort_median(*_filterParams, *_inputSamples, *_outputSamples);
-
-//	// Copy filtered data back to buffer
-//	j = 0;
-//	i = power.currentIndex;
-//	for (; i < power.bufSize; i += power.numChannels) {
-//		power.buf[i] = _outputSamples->at(j);
-//		++j;
-//	}
 }
 
 
@@ -408,6 +383,7 @@ void PowerSampling::calculatePower(power_t power) {
 	////////////////////////////////////////////////////////////////////////////////
 
 	// Calculate Irms again, but now with the filtered current samples
+	cSquareSum = 0;
 	for (uint16_t i=0; i<numSamples; ++i) {
 		current = (int64_t)_outputSamples->at(i)*1000 - _avgZeroCurrent;
 		cSquareSum += (current * current) / (1000*1000);
@@ -419,7 +395,7 @@ void PowerSampling::calculatePower(power_t power) {
 	int32_t filteredCurrentRmsMedianMA;
 	if (_filteredCurrentRmsHistMA->full()) {
 		memcpy(_histCopy, _filteredCurrentRmsHistMA->getBuffer(), _filteredCurrentRmsHistMA->getMaxByteSize());
-		filteredCurrentRmsMedianMA = opt_med9(_histCopy);
+		filteredCurrentRmsMedianMA = opt_med(_histCopy);
 	}
 	else {
 		int64_t currentRmsSumMA = 0;
@@ -443,7 +419,7 @@ void PowerSampling::calculatePower(power_t power) {
 	int32_t currentRmsMedianMA;
 	if (_currentRmsMilliAmpHist->full()) {
 		memcpy(_histCopy, _currentRmsMilliAmpHist->getBuffer(), _currentRmsMilliAmpHist->getMaxByteSize());
-		currentRmsMedianMA = opt_med9(_histCopy);
+		currentRmsMedianMA = opt_med(_histCopy);
 	}
 	else {
 		int64_t currentRmsMilliAmpSum = 0;
@@ -463,7 +439,7 @@ void PowerSampling::calculatePower(power_t power) {
 	_voltageRmsMilliVoltHist->push(voltageRmsMilliVolt);
 	if (_voltageRmsMilliVoltHist->full()) {
 		memcpy(_histCopy, _voltageRmsMilliVoltHist->getBuffer(), _voltageRmsMilliVoltHist->getMaxByteSize());
-		_avgVoltageRmsMilliVolt = opt_med9(_histCopy);
+		_avgVoltageRmsMilliVolt = opt_med(_histCopy);
 	}
 	else {
 		int64_t voltageRmsMilliVoltSum = 0;
@@ -480,7 +456,7 @@ void PowerSampling::calculatePower(power_t power) {
 //	_powerMilliWattHist->push(powerMilliWatt);
 //	if (_powerMilliWattHist->full()) {
 //		memcpy(_histCopy, _powerMilliWattHist->getBuffer(), _powerMilliWattHist->getMaxByteSize());
-//		_avgPowerMilliWatt = opt_med9(_histCopy);
+//		_avgPowerMilliWatt = opt_med(_histCopy);
 //	}
 //	else {
 //		int64_t powerMilliWattSum = 0;
@@ -509,12 +485,12 @@ void PowerSampling::calculatePower(power_t power) {
 //	}
 //	++printPower;
 
-	if (printPower % 100 == 0) {
+//	if (printPower % 100 == 0) {
 //		write("vZero=%i cZero=%i\r\n", _avgZeroVoltage, _avgZeroCurrent);
 //		write("pSum=%lld \r\n", pSum);
 //	if (currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > (int32_t)_currentMilliAmpThresholdPwm*5) {
-//	if (currentRmsMA > _currentMilliAmpThresholdPwm) {
-		write("Irms=%i median=%i filtered=%i filtered_median=%i\r\n", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA);
+	if (printPower % 200 == 0 || currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > _currentMilliAmpThresholdPwm) {
+		write("Irms=%i median=%i filtered=%i filtered_median=%i cZero=%i\r\n", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA, _avgZeroCurrent);
 //		write("power=%lld avg=%d\r\n",powerMilliWatt, _avgPowerMilliWatt);
 //		printPower = 0;
 		// current
@@ -527,15 +503,25 @@ void PowerSampling::calculatePower(power_t power) {
 			}
 		}
 		write("\r\n");
-		write("Voltage: ");
+		write("Filtered: ");
 //		write("\r\n");
-		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-			write("%4d ", power.buf[i]);
-			if (i % 40 == 40 - 2) {
+		for (int i = 0; i < numSamples; ++i) {
+			write("%4d ", _outputSamples->at(i));
+			if (i % 40 == 40 - 1) {
 //				write("\r\n");
 			}
 		}
 		write("\r\n");
+
+//		write("Voltage: ");
+////		write("\r\n");
+//		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+//			write("%4d ", power.buf[i]);
+//			if (i % 40 == 40 - 2) {
+////				write("\r\n");
+//			}
+//		}
+//		write("\r\n");
 	}
 	++printPower;
 }
