@@ -33,7 +33,8 @@ PowerSampling::PowerSampling() :
 		_isInitialized(false),
 		_adc(NULL),
 		_powerSamplingSentDoneTimerId(NULL),
-		_powerSamplesBuffer(NULL)
+		_powerSamplesBuffer(NULL),
+		_consecutivePwmOvercurrent(0)
 {
 	_powerSamplingReadTimerData = { {0} };
 	_powerSamplingSentDoneTimerId = &_powerSamplingReadTimerData;
@@ -305,8 +306,6 @@ void PowerSampling::calculateCurrentZero(power_t power) {
 	_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * sum * 1000 / numSamples) / 1000;
 }
 
-static int printPower = 0;
-
 void PowerSampling::filter(power_t power) {
 	uint16_t bufSize = power.bufSize / power.numChannels;
 //
@@ -485,6 +484,8 @@ void PowerSampling::calculatePower(power_t power) {
 //	}
 //	++printPower;
 
+/*
+	static int printPower = 0;
 //	if (printPower % 100 == 0) {
 //		write("vZero=%i cZero=%i\r\n", _avgZeroVoltage, _avgZeroCurrent);
 //		write("pSum=%lld \r\n", pSum);
@@ -524,6 +525,7 @@ void PowerSampling::calculatePower(power_t power) {
 //		write("\r\n");
 	}
 	++printPower;
+*/
 }
 
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
@@ -541,7 +543,14 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 
 	// When the dimmer is on: check if the filtered Irms is above threshold, or if the unfiltered Irms is way above threshold.
 //	if ((currentRmsFilteredMA > _currentMilliAmpThresholdPwm || currentRmsMA > (int32_t)_currentMilliAmpThresholdPwm*5) && (!stateErrors.errors.overCurrentPwm)) {
-	if ((currentRmsFilteredMA > _currentMilliAmpThresholdPwm) && (!stateErrors.errors.overCurrentPwm)) {
+//	if ((currentRmsFilteredMA > _currentMilliAmpThresholdPwm) && (!stateErrors.errors.overCurrentPwm)) {
+	if (currentRmsMA > _currentMilliAmpThresholdPwm) {
+		++_consecutivePwmOvercurrent;
+	}
+	else {
+		_consecutivePwmOvercurrent = 0;
+	}
+	if ((_consecutivePwmOvercurrent > 20) && (!stateErrors.errors.overCurrentPwm)) {
 		// Get the current pwm state before we dispatch the event (as that may change the pwm).
 		switch_state_t switchState;
 		State::getInstance().get(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));

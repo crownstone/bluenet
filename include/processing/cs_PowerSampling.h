@@ -132,6 +132,7 @@ private:
 	CircularBuffer<int32_t>* _filteredCurrentRmsHistMA; //! Used to store a history of the filtered current_rms
 	CircularBuffer<int32_t>* _voltageRmsMilliVoltHist; //! Used to store a history of the voltage_rms
 	int32_t _histCopy[POWER_SAMPLING_RMS_WINDOW_SIZE];     //! Used to copy a history to (so it can be used to calculate the median)
+	uint16_t _consecutivePwmOvercurrent;
 
 
 	uint16_t _currentMilliAmpThreshold;    //! Current threshold from settings.
