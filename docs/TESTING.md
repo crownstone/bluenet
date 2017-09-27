@@ -13,16 +13,30 @@ The current soft fuse should turn off the switch in case of over current. The de
 
 #### Test plan current soft fuse when using IGBTs
 
+First see if the dimmer stays on (checking for false negatives):
+
 - Factory reset crownstone.
 - Setup crownstone.
 - Turn relay off.
 - Turn dimmer on (at 100%).
-- Plug in a load of 120W.
+- Plug in a load of 120W - 150W.
+- Place a phone right next to it, call it every 5 minutes for the first hours.
 - Check if this continues to stay on for hours.
 
-Now overload the IGBTs:
+Repeat, but now with actual dimming:
 
-- Plug in a load of 300W.
+- Turn relay off.
+- Turn dimmer on at 50%.
+- Plug in a load of 120W - 150W.
+- Place a phone right next to it, call it every 5 minutes for the first hours.
+- Check if this continues to stay on for hours.
+
+
+Next, overload the IGBTs:
+
+- Turn dimmer on (at 100%).
+- Plug in a light (so you can see when the dimmer turns off).
+- Additionally, plug in a load of 300W.
 - Check if this turns off immediately.
 - Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
 - Check if you can't turn on the dimmer anymore.
