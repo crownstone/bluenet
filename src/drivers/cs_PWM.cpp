@@ -292,7 +292,16 @@ void PWM::onZeroCrossing() {
 		errTicks += maxTickVal;
 	}
 
+	// Integrate error, but limit the integrated error (to prevent overflow and overshoot)
 	_zeroCrossDeviationIntegral += -errTicks;
+	int64_t integralAbsMax = maxTickVal * 1000;
+	if (_zeroCrossDeviationIntegral > integralAbsMax) {
+		_zeroCrossDeviationIntegral = integralAbsMax;
+	}
+	if (_zeroCrossDeviationIntegral < -integralAbsMax) {
+		_zeroCrossDeviationIntegral = -integralAbsMax;
+	}
+
 
 	// Exponential moving average
 	uint32_t alpha = 1000; // 1000: no averaging
@@ -302,13 +311,15 @@ void PWM::onZeroCrossing() {
 	_zeroCrossingCounter++;
 	if (_zeroCrossingCounter % 10 == 0) {
 		// Calculate the new period value.
+		int32_t delta = 0;
 
 		// Proportional part
-		int32_t delta = -errTicks / (maxTickVal/400);
+		int32_t deltaP = -errTicks / (maxTickVal/400);
 
 		// Add an integral part to the delta.
-		delta += _zeroCrossDeviationIntegral / 1000 / (maxTickVal/400);
+		int32_t deltaI = _zeroCrossDeviationIntegral / 1000 / (maxTickVal/400);
 
+		delta = deltaP + deltaI;
 		// Limit the output, make sure the minimum newMaxTicks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
 		int32_t limitDelta = maxTickVal / 120;
 		if (delta > limitDelta) {
