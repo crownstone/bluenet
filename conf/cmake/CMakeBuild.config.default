@@ -2,7 +2,7 @@
 
 # The name that is advertised.
 # Should be 10 characters or less (we need room for compilation date after it)
-BLUETOOTH_NAME="Crown"
+BLUETOOTH_NAME="Test"
 
 FIRMWARE_VERSION="undefined"
 
