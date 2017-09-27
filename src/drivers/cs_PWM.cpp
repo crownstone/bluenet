@@ -310,7 +310,7 @@ void PWM::onZeroCrossing() {
 		delta += _zeroCrossDeviationIntegral / 1000 / (maxTickVal/400);
 
 		// Limit the output, make sure the minimum newMaxTicks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
-		int32_t limitDelta = maxTickVal / 500;
+		int32_t limitDelta = maxTickVal / 120;
 		if (delta > limitDelta) {
 			delta = limitDelta;
 		}
@@ -323,7 +323,7 @@ void PWM::onZeroCrossing() {
 		// Set the new period time at the end of the current period.
 		enableInterrupt();
 
-		if (ticks > _maxTickVal + maxTickVal / 500) {
+		if (ticks > _maxTickVal + maxTickVal / 120) {
 			LOGe("%u  %u  %u\r\n", ticks, errTicks, newMaxTicks);
 		}
 
