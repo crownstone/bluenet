@@ -1,7 +1,7 @@
 # Configuration options, used by build systems and scripts.
 
 # The name that is advertised.
-# Should be 10 characters or less (we need room for compilation date after it)
+# Should be 8 characters or less
 BLUETOOTH_NAME="Test"
 
 FIRMWARE_VERSION="undefined"

@@ -123,6 +123,13 @@ Apply the environment variables:
 
 If you have another shell, please do the above for your own shell.
 
+## Get the mesh code
+
+The mesh code we use is a modification of Nordics OpenMesh.
+
+    cd $BLUENET_WORKSPACE_DIR
+    git clone -b bluenet https://github.com/crownstone/nRF51-ble-bcast-mesh
+
 ## Configuration
 
 Copy the template config file to your config directory:
@@ -149,7 +156,7 @@ Last, copy any lines that you want to adjust over from the default configuration
 
 E.g.
 
-- enable meshing by setting `MESHING=1`
+- enable meshing by setting `BUILD_MESHING=1` and `MESHING=1`
 - enable device scanner by setting `INTERVAL_SCANNER_ENABLED=1`
 - enable the power service by setting `POWER_SERVICE=1`
 - set serial verbosity to debug by setting `SERIAL_VERBOSITY=DEBUG`

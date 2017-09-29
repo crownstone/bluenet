@@ -3,8 +3,8 @@
 ########################################################################################################################
 
 # The name that is advertised.
-# Should be 9 characters or less. You can use up to 25, but the name in the advertisement package will be
-# truncated to 9 characters.
+# Should be 8 characters or less. You can use up to 25, but the name in the advertisement package will be
+# truncated to 8 characters.
 # BLUETOOTH_NAME=
 
 # The hardware board where you want to upload the firmware
