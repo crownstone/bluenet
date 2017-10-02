@@ -27,7 +27,7 @@
 //#define TEST_PIN 20
 
 // Define to print power samples
-#define PRINT_POWER_SAMPLES
+//#define PRINT_POWER_SAMPLES
 
 #define VOLTAGE_CHANNEL_IDX 0
 #define CURRENT_CHANNEL_IDX 1
