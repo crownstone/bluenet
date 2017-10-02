@@ -9,7 +9,7 @@
 #define ASSIGN_DEVICE_TYPE(type) type
 #endif
 
-void asACR01B1A(boards_config_t* p_config) {
+void asACR01B1D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
@@ -87,7 +87,7 @@ void asACR01B6C(boards_config_t* p_config) {
 }
 
 
-void asACR01B2A(boards_config_t* p_config) {
+void asACR01B2C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
@@ -170,7 +170,7 @@ void asACR01B2G(boards_config_t* p_config) {
 	p_config->minTxPower                         = -20;
 }
 
-void asPca10036(boards_config_t* p_config) {
+void asPca10040(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 17;
 	p_config->pinGpioRelayOn                     = 11; // something unused
 	p_config->pinGpioRelayOff                    = 12; // something unused
@@ -237,18 +237,18 @@ void asGuidestone(boards_config_t* p_config) {
 
 uint32_t configure_board(boards_config_t* p_config) {
 
-	uint32_t _hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (_hardwareBoard == 0xFFFFFFFF) {
-		_hardwareBoard = ACR01B2C;
+	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
+	if (hardwareBoard == 0xFFFFFFFF) {
+		hardwareBoard = ACR01B2C;
 	}
 
-	switch(_hardwareBoard) {
+	switch(hardwareBoard) {
 	case ACR01B1A:
 	case ACR01B1B:
 	case ACR01B1C:
 	case ACR01B1D:
 	case ACR01B1E:
-		asACR01B1A(p_config);
+		asACR01B1D(p_config);
 		break;
 
 	case ACR01B6C:
@@ -258,7 +258,7 @@ uint32_t configure_board(boards_config_t* p_config) {
 	case ACR01B2A:
 	case ACR01B2B:
 	case ACR01B2C:
-		asACR01B2A(p_config);
+		asACR01B2C(p_config);
 		break;
 
 	case ACR01B2E:
@@ -272,14 +272,15 @@ uint32_t configure_board(boards_config_t* p_config) {
 
 	case PCA10036:
 	case PCA10040:
-		asPca10036(p_config);
+		asPca10040(p_config);
 		break;
 
 	default:
 		// undefined board layout !!!
-		asACR01B2A(p_config);
+		asACR01B2C(p_config);
 		return NRF_ERROR_INVALID_PARAM;
 	}
+	p_config->hardwareBoard = hardwareBoard;
 
 	return NRF_SUCCESS;
 
