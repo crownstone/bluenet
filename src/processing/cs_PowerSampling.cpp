@@ -286,10 +286,12 @@ void PowerSampling::calculateVoltageZero(power_t power) {
 	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 		sum += power.buf[i];
 	}
-//	_avgZeroVoltage = sum * 1000 / numSamples;
+	int32_t zeroVoltage = sum * 1000 / numSamples;
+//	_avgZeroVoltage = zeroVoltage;
 	
-	//! Exponential moving average
-	_avgZeroVoltage = ((1000 - _avgZeroVoltageDiscount) * _avgZeroVoltage + _avgZeroVoltageDiscount * sum * 1000 / numSamples) / 1000;
+	// Exponential moving average
+	int64_t avgZeroVoltageDiscount = _avgZeroVoltageDiscount; // Make sure calculations are in int64_t
+	_avgZeroVoltage = ((1000 - avgZeroVoltageDiscount) * _avgZeroVoltage + avgZeroVoltageDiscount * zeroVoltage) / 1000;
 }
 
 /**
@@ -302,14 +304,16 @@ void PowerSampling::calculateCurrentZero(power_t power) {
 //	for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 //		sum += power.buf[i];
 //	}
+	// Use filtered samples to calculate the zero.
 	for (int i = 0; i < numSamples; ++i) {
 		sum += _outputSamples->at(i);
 	}
-//	_avgZeroCurrent = sum * 1000 / numSamples;
+	int32_t zeroCurrent = sum * 1000 / numSamples;
+//	_avgZeroCurrent = zeroCurrent;
 
-
-	//! Exponential moving average
-	_avgZeroCurrent = ((1000 - _avgZeroCurrentDiscount) * _avgZeroCurrent + _avgZeroCurrentDiscount * sum * 1000 / numSamples) / 1000;
+	// Exponential moving average
+	int64_t avgZeroCurrentDiscount = _avgZeroCurrentDiscount; // Make sure calculations are in int64_t
+	_avgZeroCurrent = ((1000 - avgZeroCurrentDiscount) * _avgZeroCurrent + avgZeroCurrentDiscount * zeroCurrent) / 1000;
 }
 
 void PowerSampling::filter(power_t power) {
