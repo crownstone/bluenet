@@ -174,5 +174,7 @@ private:
 	bool _delayedSwitchPending;
 	uint8_t _delayedSwitchState;
 
+	uint32_t _hardwareBoard;
+
 };
 
