@@ -17,7 +17,7 @@
 #include <common/cs_Types.h>
 
 // enable for additional debug output
-#define PRINT_DEBUG
+//#define PRINT_DEBUG
 #define PRINT_MESHCONTROL_VERBOSE
 
 #define PRINT_VERBOSE_KEEPALIVE
