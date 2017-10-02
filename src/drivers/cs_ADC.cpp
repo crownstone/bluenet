@@ -121,6 +121,10 @@ cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_
 
 	nrf_saadc_channel_config_t channelConfig;
 	channelConfig.resistor_p = NRF_SAADC_RESISTOR_DISABLED;
+//  // Measure ground
+//	if (config.referencePin == 7) {
+//		channelConfig.resistor_p = NRF_SAADC_RESISTOR_PULLDOWN;
+//	}
 	channelConfig.resistor_n = NRF_SAADC_RESISTOR_DISABLED;
 	if (config.rangeMilliVolt <= 150) {
 		LOGd("gain=4");

@@ -26,6 +26,9 @@
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 20
 
+// Define to print power samples
+#define PRINT_POWER_SAMPLES
+
 #define VOLTAGE_CHANNEL_IDX 0
 #define CURRENT_CHANNEL_IDX 1
 
@@ -53,6 +56,9 @@ PowerSampling::PowerSampling() :
 #define opt_med(arr) opt_med25(arr)
 #endif
 
+#ifdef PRINT_POWER_SAMPLES
+static int printPower = 0;
+#endif
 
 // adc done callback is already decoupled from adc interrupt
 void adc_done_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
@@ -476,56 +482,56 @@ void PowerSampling::calculatePower(power_t power) {
 	// Debug prints
 	/////////////////////////////////////////////////////////
 
-//	static int printPower = 0;
-//	if (printPower % 1 == 0) {
-//		write("%i %i\r\n", currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
-//		write("%i %i\r\n", voltageRmsMilliVolt, _avgVoltageRmsMilliVolt);
-//		write("%i %i\r\n", powerMilliWatt, _avgPowerMilliWatt);
-//	}
-//	++printPower;
+#ifdef PRINT_POWER_SAMPLES
+	if (printPower % 500 == 0) {
+//	if (printPower % 500 == 0 || currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > _currentMilliAmpThresholdPwm) {
 
-/*
-	static int printPower = 0;
-//	if (printPower % 100 == 0) {
-//		write("vZero=%i cZero=%i\r\n", _avgZeroVoltage, _avgZeroCurrent);
-//		write("pSum=%lld \r\n", pSum);
-//	if (currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > (int32_t)_currentMilliAmpThresholdPwm*5) {
-	if (printPower % 200 == 0 || currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > _currentMilliAmpThresholdPwm) {
-		write("Irms=%i median=%i filtered=%i filtered_median=%i cZero=%i\r\n", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA, _avgZeroCurrent);
-//		write("power=%lld avg=%d\r\n",powerMilliWatt, _avgPowerMilliWatt);
-//		printPower = 0;
-		// current
+		// Calculated values
+		write("Calc: ");
+//		write("%i %i ", currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
+//		write("%i %i ", voltageRmsMilliVolt, _avgVoltageRmsMilliVolt);
+//		write("%i %i ", powerMilliWatt, _avgPowerMilliWatt);
+		write("I=%i I_med=%i filt_I=%i filt_I_med=%i ", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA);
+		write("vZero=%i cZero=%i ", _avgZeroVoltage, _avgZeroCurrent);
+//		write("pSum=%lld ", pSum);
+//		write("power=%lld avg=%d ",powerMilliWatt, _avgPowerMilliWatt);
+		write("\r\n");
+
+		// Current wave
 		write("Current: ");
 //		write("\r\n");
 		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-			write("%4d ", power.buf[i]);
-			if (i % 40 == 40 - 1) {
-//				write("\r\n");
-			}
-		}
-		write("\r\n");
-		write("Filtered: ");
-//		write("\r\n");
-		for (int i = 0; i < numSamples; ++i) {
-			write("%4d ", _outputSamples->at(i));
+			write("%d ", power.buf[i]);
 			if (i % 40 == 40 - 1) {
 //				write("\r\n");
 			}
 		}
 		write("\r\n");
 
-//		write("Voltage: ");
-////		write("\r\n");
-//		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-//			write("%4d ", power.buf[i]);
-//			if (i % 40 == 40 - 2) {
-////				write("\r\n");
-//			}
-//		}
+		// Filtered current wave
+		write("Filtered: ");
 //		write("\r\n");
+		for (int i = 0; i < numSamples; ++i) {
+			write("%d ", _outputSamples->at(i));
+			if (i % 20 == 20 - 1) {
+//				write("\r\n");
+			}
+		}
+		write("\r\n");
+
+		// Voltage wave
+		write("Voltage: ");
+//		write("\r\n");
+		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+			write("%d ", power.buf[i]);
+			if (i % 40 == 40 - 2) {
+//				write("\r\n");
+			}
+		}
+		write("\r\n");
 	}
 	++printPower;
-*/
+#endif
 }
 
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {

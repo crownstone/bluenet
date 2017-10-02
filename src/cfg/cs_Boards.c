@@ -66,6 +66,7 @@ void asACR01B6C(boards_config_t* p_config) {
 	p_config->flags.hasLed                       = true;
 	p_config->flags.ledInverted                  = false;
 	p_config->flags.hasAdcZeroRef                = true;
+//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
@@ -77,6 +78,7 @@ void asACR01B6C(boards_config_t* p_config) {
 	p_config->powerZero                          = 8000; // TODO: calibrate
 	p_config->voltageRange                       = 1200; // TODO: calibrate
 	p_config->currentRange                       = 600; // TODO: calibrate
+//	p_config->currentRange                       = 1800; // Range used when not doing differential measurements.
 
 	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
 	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
@@ -141,7 +143,7 @@ void asACR01B2G(boards_config_t* p_config) {
 	p_config->flags.hasLed                       = true;
 	p_config->flags.ledInverted                  = false;
 	p_config->flags.hasAdcZeroRef                = true;
-//	p_config->flags.hasAdcZeroRef                = false;
+//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
@@ -160,7 +162,7 @@ void asACR01B2G(boards_config_t* p_config) {
 //	p_config->currentRange                       = 1800; // 0V - 1.8V, or -1.8V - 1.8V around zeroRef pin // Able to measure up to about 20A.
 //	p_config->currentRange                       = 1200; // 0V - 1.2V, or -1.2V - 1.2V around zeroRef pin // Able to measure up to about 13A.
 	p_config->currentRange                       = 600;  // 0V - 0.6V, or -0.6V - 0.6V around zeroRef pin // Able to measure up to about 6A.
-//	p_config->currentRange                       = 1800;
+//	p_config->currentRange                       = 1800; // Range used when not doing differential measurements.
 
 	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
 	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C

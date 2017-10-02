@@ -339,7 +339,7 @@ void PWM::onZeroCrossing() {
 		}
 
 		if (_zeroCrossingCounter % 50 == 0) {
-//			write("%u  %lli  %lli  %lli %u\r\n", ticks, errTicks, _zeroCrossTicksDeviationAvg, _zeroCrossDeviationIntegral, newMaxTicks);
+//			write("%u  %lli  %lli  %lli %i %u\r\n", ticks, errTicks, _zeroCrossTicksDeviationAvg, _zeroCrossDeviationIntegral, deltaI, newMaxTicks);
 		}
 	}
 

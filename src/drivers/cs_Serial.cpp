@@ -22,10 +22,6 @@
 #include <drivers/cs_RTC.h>
 #endif
 
-#define NRF_UART_1200_BAUD  0x0004F000UL
-#define NRF_UART_9600_BAUD  0x00275000UL
-#define NRF_UART_38400_BAUD 0x009D5000UL
-
 static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVISORS_ARRAY;
 
 /**
@@ -34,15 +30,16 @@ static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVI
 void config_uart(uint8_t pinRx, uint8_t pinTx) {
 
 #if SERIAL_VERBOSITY<SERIAL_NONE
-	//! Enable UART
+	// Enable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
 
-	//! Configure UART pins
+	// Configure UART pins
 	NRF_UART0->PSELRXD = pinRx;
 	NRF_UART0->PSELTXD = pinTx;
 
-	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; //! do not enable hardware flow control.
+	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; // Do not enable hardware flow control.
 	NRF_UART0->BAUDRATE = m_baudrates[UART_BAUD_38K4];
+//	NRF_UART0->BAUDRATE = m_baudrates[UART_BAUD_230K4]; // Highest baudrate that still worked.
 	NRF_UART0->TASKS_STARTTX = 1;
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
