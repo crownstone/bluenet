@@ -112,9 +112,8 @@ void Scheduler::tick() {
 	if (entry != NULL) {
 		switch (ScheduleEntry::getActionType(entry)) {
 			case SCHEDULE_ACTION_TYPE_PWM: {
-				//! TODO: use pwm here later on, for now: just switch on and off relay.
 				//! TODO: use an event instead
-				uint8_t switchState = entry->pwm.pwm == 0 ? 0 : 100;
+				uint8_t switchState = entry->pwm.pwm;
 				Switch::getInstance().setSwitch(switchState);
 				State::getInstance().set(STATE_IGNORE_BITMASK, entry->overrideMask);
 				break;
@@ -123,7 +122,7 @@ void Scheduler::tick() {
 				//TODO: implement this, make sure that if something else changes pwm during fade, that the fading is halted.
 				//TODO: implement the fade function in the Switch class
 				//TODO: if (entry->fade.fadeDuration == 0), then just use SCHEDULE_ACTION_TYPE_PWM
-				uint8_t switchState = entry->fade.pwmEnd == 0 ? 0 : 100;
+				uint8_t switchState = entry->fade.pwmEnd;
 				Switch::getInstance().setSwitch(switchState);
 				State::getInstance().set(STATE_IGNORE_BITMASK, entry->overrideMask);
 				break;
