@@ -45,7 +45,10 @@ void SysTick_Handler(void)	__attribute__ ((weak, alias("unused_isr")));
 
 void POWER_CLOCK_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void RADIO_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-void UART0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+
+//! Used for serial
+void UART0_IRQHandler(void);
+
 void SPI0_TWI0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SPI1_TWI1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void NFCT_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));

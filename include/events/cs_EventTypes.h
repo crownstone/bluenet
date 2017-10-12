@@ -13,6 +13,7 @@ enum EventType {
 	Configuration_Base = 0x000,
 	State_Base         = 0x080,
 	General_Base       = 0x100,
+	Uart_Base          = 0x180,
 };
 
 //! for Configuration event type see cs_ConfigHelper.h
@@ -60,5 +61,13 @@ enum GeneralEventType {
 	EVT_PWM_TEMP_OK,
 	EVT_EXTERNAL_STATE_CHANGE,
 	EVT_ALL = 0xFFFF
+};
+
+enum UartEventType {
+	EVT_SET_LOG_LEVEL = Uart_Base,
+	EVT_TOGGLE_LOG_POWER,
+	EVT_TOGGLE_LOG_CURRENT,
+	EVT_TOGGLE_LOG_VOLTAGE,
+	EVT_TOGGLE_LOG_FILTERED_CURRENT,
 };
 

@@ -27,7 +27,7 @@
 //#define TEST_PIN 20
 
 // Define to print power samples
-//#define PRINT_POWER_SAMPLES
+#define PRINT_POWER_SAMPLES
 
 #define VOLTAGE_CHANNEL_IDX 0
 #define CURRENT_CHANNEL_IDX 1
@@ -46,6 +46,7 @@ PowerSampling::PowerSampling() :
 	_currentRmsMilliAmpHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
 	_voltageRmsMilliVoltHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
 	_filteredCurrentRmsHistMA = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
+	_logsEnabled.asInt = 0;
 }
 
 #if POWER_SAMPLING_RMS_WINDOW_SIZE == 7
@@ -125,6 +126,8 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 
 	_adc->setDoneCallback(adc_done_callback);
 
+	EventDispatcher::getInstance().addListener(this);
+
 #ifdef TEST_PIN
 	nrf_gpio_cfg_output(TEST_PIN);
 #endif
@@ -156,7 +159,24 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 	// Simply use the zero from the board config, that should be accurate enough for this purpose.
 	_adc->enableZeroCrossingInterrupt(VOLTAGE_CHANNEL_IDX, _voltageZero);
 }
-	
+
+void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch (evt) {
+	case EVT_TOGGLE_LOG_POWER:
+		_logsEnabled.flags.power = !_logsEnabled.flags.power;
+		break;
+	case EVT_TOGGLE_LOG_CURRENT:
+		_logsEnabled.flags.current = !_logsEnabled.flags.current;
+		break;
+	case EVT_TOGGLE_LOG_VOLTAGE:
+		_logsEnabled.flags.voltage = !_logsEnabled.flags.voltage;
+		break;
+	case EVT_TOGGLE_LOG_FILTERED_CURRENT:
+		_logsEnabled.flags.filteredCurrent = !_logsEnabled.flags.filteredCurrent;
+		break;
+	}
+}
+
 /**
  * After ADC has finished, calculate power consumption, copy data if required, and release buffer.
  *
@@ -490,49 +510,57 @@ void PowerSampling::calculatePower(power_t power) {
 	if (printPower % 500 == 0) {
 //	if (printPower % 500 == 0 || currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > _currentMilliAmpThresholdPwm) {
 
-		// Calculated values
-		write("Calc: ");
-//		write("%i %i ", currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
-//		write("%i %i ", voltageRmsMilliVolt, _avgVoltageRmsMilliVolt);
-//		write("%i %i ", powerMilliWatt, _avgPowerMilliWatt);
-		write("I=%i I_med=%i filt_I=%i filt_I_med=%i ", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA);
-		write("vZero=%i cZero=%i ", _avgZeroVoltage, _avgZeroCurrent);
-//		write("pSum=%lld ", pSum);
-//		write("power=%lld avg=%d ",powerMilliWatt, _avgPowerMilliWatt);
-		write("\r\n");
-
-		// Current wave
-		write("Current: ");
-//		write("\r\n");
-		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-			write("%d ", power.buf[i]);
-			if (i % 40 == 40 - 1) {
-//				write("\r\n");
-			}
+		if (_logsEnabled.flags.power) {
+			// Calculated values
+			write("Calc: ");
+//			write("%i %i ", currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
+//			write("%i %i ", voltageRmsMilliVolt, _avgVoltageRmsMilliVolt);
+//			write("%i %i ", powerMilliWatt, _avgPowerMilliWatt);
+			write("I=%i I_med=%i filt_I=%i filt_I_med=%i ", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA);
+			write("vZero=%i cZero=%i ", _avgZeroVoltage, _avgZeroCurrent);
+//			write("pSum=%lld ", pSum);
+//			write("power=%lld avg=%d ",powerMilliWatt, _avgPowerMilliWatt);
+			write("\r\n");
 		}
-		write("\r\n");
 
-		// Filtered current wave
-		write("Filtered: ");
-//		write("\r\n");
-		for (int i = 0; i < numSamples; ++i) {
-			write("%d ", _outputSamples->at(i));
-			if (i % 20 == 20 - 1) {
-//				write("\r\n");
+		if (_logsEnabled.flags.current) {
+			// Current wave
+			write("Current: ");
+//			write("\r\n");
+			for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+				write("%d ", power.buf[i]);
+				if (i % 40 == 40 - 1) {
+//					write("\r\n");
+				}
 			}
+			write("\r\n");
 		}
-		write("\r\n");
 
-		// Voltage wave
-		write("Voltage: ");
-//		write("\r\n");
-		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-			write("%d ", power.buf[i]);
-			if (i % 40 == 40 - 2) {
-//				write("\r\n");
+		if (_logsEnabled.flags.filteredCurrent) {
+			// Filtered current wave
+			write("Filtered: ");
+//			write("\r\n");
+			for (int i = 0; i < numSamples; ++i) {
+				write("%d ", _outputSamples->at(i));
+				if (i % 20 == 20 - 1) {
+//					write("\r\n");
+				}
 			}
+			write("\r\n");
 		}
-		write("\r\n");
+
+		if (_logsEnabled.flags.voltage) {
+			// Voltage wave
+			write("Voltage: ");
+//			write("\r\n");
+			for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+				write("%d ", power.buf[i]);
+				if (i % 40 == 40 - 2) {
+//					write("\r\n");
+				}
+			}
+			write("\r\n");
+		}
 	}
 	++printPower;
 #endif

@@ -15,14 +15,22 @@
 #include "app_util.h"
 #include "nrf.h"
 
-#include <ble/cs_Nordic.h>
+#include "util/cs_BleError.h"
+#include <app_util_platform.h>
+
+#include "ble/cs_Nordic.h"
 #include "cfg/cs_Boards.h"
+
+#include "events/cs_EventDispatcher.h"
 
 #ifdef INCLUDE_TIMESTAMPS
 #include <drivers/cs_RTC.h>
 #endif
 
 static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVISORS_ARRAY;
+
+// Define test pin to enable gpio debug.
+//#define TEST_PIN 20
 
 /**
  * Configure the UART. Currently we set it on 38400 baud.
@@ -32,6 +40,17 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 #if SERIAL_VERBOSITY<SERIAL_NONE
 	// Enable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
+
+	// Enable interrupt
+	uint32_t err_code;
+	err_code = sd_nvic_SetPriority(UARTE0_UART0_IRQn, APP_IRQ_PRIORITY_MID);
+	APP_ERROR_CHECK(err_code);
+	err_code = sd_nvic_EnableIRQ(UARTE0_UART0_IRQn);
+	APP_ERROR_CHECK(err_code);
+
+	// Enable RX ready interrupts
+	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk;
+
 
 	// Configure UART pins
 	NRF_UART0->PSELRXD = pinRx;
@@ -51,6 +70,10 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 	NRF_UART0->TASKS_STOPRX = 1;
 	NRF_UART0->TASKS_STOPTX = 1;
 #endif
+
+#ifdef TEST_PIN
+    nrf_gpio_cfg_output(TEST_PIN);
+#endif
 }
 
 /**
@@ -64,18 +87,6 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 //		while(NRF_UART0->EVENTS_TXDRDY != 1) {}
 //	}
 //}
-
-/**
- * Read an individual character from UART.
- */
-uint8_t read_uart() {
-#if SERIAL_VERBOSITY<SERIAL_NONE
-	while(NRF_UART0->EVENTS_RXDRDY != 1) {}
-	NRF_UART0->EVENTS_RXDRDY = 0;
-	return (uint8_t)NRF_UART0->RXD;
-#endif
-	return -1;
-}
 
 /**
  * A write function with a format specifier.
@@ -127,3 +138,49 @@ int now() {
 #endif
 
 
+static uint8_t readByte;
+static bool readBusy = false;
+
+void onByteRead(void * data, uint16_t size) {
+	uint16_t event = 0;
+	switch (readByte) {
+	case 99: // c
+		event = EVT_TOGGLE_LOG_CURRENT;
+		break;
+	case 102: // f
+		event = EVT_TOGGLE_LOG_FILTERED_CURRENT;
+		break;
+	case 112: // p
+		event = EVT_TOGGLE_LOG_POWER;
+		break;
+	case 118: // v
+		event = EVT_TOGGLE_LOG_VOLTAGE;
+		break;
+	default:
+		readBusy = false;
+		return;
+	}
+
+	EventDispatcher::getInstance().dispatch(event);
+	readBusy = false;
+}
+
+// UART interrupt handler
+extern "C" void UART0_IRQHandler(void) {
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
+
+	readByte = (uint8_t)NRF_UART0->RXD;
+	write("read: %u\r\n", readByte);
+
+	if (!readBusy) {
+		readBusy = true;
+		// Decouple callback from uart interrupt handler, and put it on app scheduler instead
+		uint32_t errorCode = app_sched_event_put(&readByte, sizeof(readByte), onByteRead);
+		APP_ERROR_CHECK(errorCode);
+	}
+
+	// Clear event after reading the data: new data may be written to RXD immediately.
+	NRF_UART0->EVENTS_RXDRDY = 0;
+}

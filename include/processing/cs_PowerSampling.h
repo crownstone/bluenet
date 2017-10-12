@@ -14,10 +14,11 @@ extern "C" {
 #include "cfg/cs_Boards.h"
 #include "drivers/cs_ADC.h"
 #include "third/Median.h"
+#include "events/cs_EventListener.h"
 
 typedef void (*ps_zero_crossing_cb_t) ();
 
-class PowerSampling {
+class PowerSampling : EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static PowerSampling& getInstance() {
@@ -65,6 +66,10 @@ public:
 	 * @param[in] callback             Function to be called on a zero crossing event. This function will run at interrupt level!
 	 */
 	void enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback);
+
+	/** handle (crownstone) events
+	 */
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 	/**
 	 * Struct that defines the buffer received from the ADC sampler in scanning mode.
@@ -137,6 +142,16 @@ private:
 
 	uint16_t _currentMilliAmpThreshold;    //! Current threshold from settings.
 	uint16_t _currentMilliAmpThresholdPwm; //! Current threshold when using dimmer from settings.
+
+	union {
+		struct __attribute__((packed)) {
+			bool power : 1;
+			bool current : 1;
+			bool voltage : 1;
+			bool filteredCurrent : 1;
+		} flags;
+		uint32_t asInt;
+	} _logsEnabled;
 
 	/** Copies the adc samples to the power samples struct, to be sent over bluetooth
 	 */
