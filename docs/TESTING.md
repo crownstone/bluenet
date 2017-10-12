@@ -107,3 +107,12 @@ Now it should heat up (you should see the chip temperature rise) and turn off wi
 - Check if you can't turn on the relay anymore.
 - Check if you can't turn on the dimmer anymore.
 - Factory reset the crownstone.
+
+## Setup
+
+- Turn relay off.
+- Factory reset crownstone.
+- Setup crownstone.
+- Check if relay turns on when setup is complete.
+- Factory reset crownstone.
+- Check if relay turns off after factory reset.
