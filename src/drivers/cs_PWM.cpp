@@ -36,7 +36,9 @@
 //#define TEST_PIN 20
 
 PWM::PWM() :
-		_initialized(false)
+		_initialized(false),
+		_started(false),
+		_startOnZeroCrossing(false)
 		{
 #if PWM_ENABLE==1
 
@@ -53,9 +55,9 @@ uint32_t PWM::init(const pwm_config_t& config) {
 
 	// Setup timer
 	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_CLEAR);
-//	nrf_timer_bit_width_set(CS_PWM_TIMER, NRF_TIMER_BIT_WIDTH_32);
-	// Using 16 bit width is a dirty fix for sometimes missing the period compare event. With a 16bit timer it overflows quicker.
-	nrf_timer_bit_width_set(CS_PWM_TIMER, NRF_TIMER_BIT_WIDTH_16);
+	nrf_timer_bit_width_set(CS_PWM_TIMER, NRF_TIMER_BIT_WIDTH_32);
+//	// Using 16 bit width is a dirty fix for sometimes missing the period compare event. With a 16bit timer it overflows quicker.
+//	nrf_timer_bit_width_set(CS_PWM_TIMER, NRF_TIMER_BIT_WIDTH_16);
 	nrf_timer_frequency_set(CS_PWM_TIMER, CS_PWM_TIMER_FREQ);
 	_maxTickVal = nrf_timer_us_to_ticks(_config.period_us, CS_PWM_TIMER_FREQ);
 	LOGd("maxTicks=%u", _maxTickVal);
@@ -85,20 +87,18 @@ uint32_t PWM::init(const pwm_config_t& config) {
 	err_code = sd_nvic_EnableIRQ(CS_PWM_IRQn);
 	APP_ERROR_CHECK(err_code);
 
-	// Start the timer
-	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
-
+	// Init zero crossing variables
 	_zeroCrossingCounter = 0;
 	_adjustedMaxTickVal = _maxTickVal;
 	_zeroCrossDeviationIntegral = 0;
 	_zeroCrossTicksDeviationAvg = 0;
 
-    _initialized = true;
-    return ERR_SUCCESS;
-#endif
-
 #ifdef TEST_PIN
     nrf_gpio_cfg_output(TEST_PIN);
+#endif
+
+    _initialized = true;
+    return ERR_SUCCESS;
 #endif
 
     return ERR_PWM_NOT_ENABLED;
@@ -111,6 +111,7 @@ uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 //	nrf_gpio_cfg_output(_config.channels[i].pin);
 	nrf_gpio_pin_write(_config.channels[channel].pin, _config.channels[channel].inverted ? 1 : 0);
 	_values[channel] = 0;
+	_nextValues[channel] = 0;
 
 	// Configure gpiote
 	_gpioteInitStatesOn[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_LOW : NRF_GPIOTE_INITIAL_VALUE_HIGH;
@@ -159,11 +160,49 @@ uint32_t PWM::deinit() {
 	return ERR_PWM_NOT_ENABLED;
 }
 
+uint32_t PWM::start(bool onZeroCrossing) {
+	LOGi("Start");
+	_startOnZeroCrossing = onZeroCrossing;
+	if (!onZeroCrossing) {
+		start();
+	}
+	return ERR_SUCCESS;
+}
+
+void PWM::start() {
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
+
+	// Start the timer
+	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
+	_started = true;
+
+	// Set all values
+	if (_startOnZeroCrossing) {
+		//! TODO: currently this only works for 1 channel! (as it calls setValue too often)
+		for (uint8_t i=0; i<_config.channelCount; ++i) {
+			if (_values[i] != _nextValues[i]) {
+				setValue(i, _nextValues[i]);
+			}
+		}
+	}
+	// Don't log anything here, this function can be called from an interrupt.
+//	LOGi("Start");
+}
+
 void PWM::setValue(uint8_t channel, uint16_t newValue) {
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
 	}
+	if (!_started) {
+		LOGw("Not started yet");
+		// Remember what value was set, set it on start.
+		_nextValues[channel] = newValue;
+		return;
+	}
+
 	if (newValue > 100) {
 		newValue = 100;
 	}
@@ -275,6 +314,13 @@ void PWM::onZeroCrossing() {
 		return;
 	}
 
+	if (!_started) {
+		if (_startOnZeroCrossing) {
+			start();
+		}
+		return;
+	}
+
 #ifndef PWM_SYNC_IMMEDIATELY
 	nrf_timer_task_trigger(CS_PWM_TIMER, ZERO_CROSSING_CAPTURE_TASK);
 	uint32_t ticks = nrf_timer_cc_read(CS_PWM_TIMER, getTimerChannel(ZERO_CROSSING_CHANNEL_IDX));
@@ -308,7 +354,7 @@ void PWM::onZeroCrossing() {
 //	uint32_t alpha = 800; // Discount factor
 	_zeroCrossTicksDeviationAvg = ((1000-alpha) * _zeroCrossTicksDeviationAvg + alpha * errTicks) / 1000;
 
-	_zeroCrossingCounter++;
+	++_zeroCrossingCounter;
 	if (_zeroCrossingCounter % 10 == 0) {
 		// Calculate the new period value.
 		int32_t delta = 0;

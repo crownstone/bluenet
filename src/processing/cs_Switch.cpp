@@ -83,14 +83,10 @@ void Switch::init(const boards_config_t& board) {
 
 
 void Switch::start() {
-
+	PWM::getInstance().start(true);
 }
 
 void Switch::onZeroCrossing() {
-//	LOGd("syncPwm %u", _switchValue.pwm_state);
-//	PWM::getInstance().stop();
-//	PWM::getInstance().start();
-//	PWM::getInstance().setValue(0, _switchValue.pwm_state);
 	PWM::getInstance().onZeroCrossing();
 }
 

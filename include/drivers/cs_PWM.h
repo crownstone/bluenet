@@ -44,7 +44,14 @@ public:
 	//! De-Initialize the PWM instance, i.e. free allocated resources
 	uint32_t deinit();
 
+	/** Start PWM.
+	 *
+	 * @param[in] onZeroCrossing       Set to true to make it start at the first zero crossing.
+	 */
+	uint32_t start(bool onZeroCrossing);
+
 	//! Set the value of a specific channel.
+	//! TODO: currently calling this twice within 10ms, will lead to errors!
 	void setValue(uint8_t channel, uint16_t value);
 
 	//! Get current value of a specific channel.
@@ -75,8 +82,17 @@ private:
 	//! Flag to indicate that the init function has been successfully performed
 	bool _initialized;
 
+	//! Flag to indicate that the start functions has been successfully performed
+	bool _started;
+
+	//! Flag to indicate whether to wait for a zero crossing to start.
+	bool _startOnZeroCrossing;
+
 	//! Init a channel
 	uint32_t initChannel(uint8_t index, pwm_channel_config_t& config);
+
+	//! Actually start the PWM
+	void start();
 
 	// -----------------------------------
 	// ----- Implementation specific -----
@@ -87,6 +103,10 @@ private:
 
 	//! Max value of channel, in ticks. Adjusted to sync with zero crossings.
 	uint32_t _adjustedMaxTickVal;
+
+	//! New duty cycle values of the channels in percentage.
+	//! Used in case the value couldn't be adjusted yet at the moment of calling setValue.
+	uint32_t _nextValues[CS_PWM_MAX_CHANNELS];
 
 	//! Duty cycle values of the channels in ticks.
 	uint32_t _tickValues[CS_PWM_MAX_CHANNELS];
