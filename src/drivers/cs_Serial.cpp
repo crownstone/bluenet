@@ -141,12 +141,11 @@ static bool readBusy = false;
 void onByteRead(void * data, uint16_t size) {
 	uint16_t event = 0;
 	switch (readByte) {
-	case 70: // F
-		write("Paid respect\r\n");
-		break;
 	case 99: // c
 		event = EVT_TOGGLE_LOG_CURRENT;
 		break;
+	case 70: // F
+		write("Paid respect\r\n");
 	case 102: // f
 		event = EVT_TOGGLE_LOG_FILTERED_CURRENT;
 		break;
