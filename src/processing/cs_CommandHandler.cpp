@@ -70,6 +70,7 @@ void CommandHandler::init(const boards_config_t* board) {
 }
 
 void CommandHandler::resetDelayed(uint8_t opCode) {
+	LOGi("Reset in 2s, code=%u", opCode);
 	static uint8_t resetOpCode = opCode;
 	//! TODO: do we really have to make a new timer here every time?
 //	app_timer_id_t resetTimer;

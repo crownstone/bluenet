@@ -27,8 +27,6 @@
 #include <drivers/cs_RTC.h>
 #endif
 
-static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVISORS_ARRAY;
-
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 20
 
@@ -36,6 +34,9 @@ static const uint32_t m_baudrates[UART_BAUD_TABLE_MAX_SIZE] = UART_BAUDRATE_DEVI
  * Configure the UART. Currently we set it on 38400 baud.
  */
 void config_uart(uint8_t pinRx, uint8_t pinTx) {
+#ifdef TEST_PIN
+    nrf_gpio_cfg_output(TEST_PIN);
+#endif
 
 #if SERIAL_VERBOSITY<SERIAL_NONE
 	// Enable UART
@@ -51,28 +52,24 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 	// Enable RX ready interrupts
 	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk;
 
-
 	// Configure UART pins
 	NRF_UART0->PSELRXD = pinRx;
 	NRF_UART0->PSELTXD = pinTx;
 
 	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; // Do not enable hardware flow control.
-	NRF_UART0->BAUDRATE = m_baudrates[UART_BAUD_38K4];
-//	NRF_UART0->BAUDRATE = m_baudrates[UART_BAUD_230K4]; // Highest baudrate that still worked.
+	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud38400;
+//	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud230400; // Highest baudrate that still worked.
 	NRF_UART0->TASKS_STARTTX = 1;
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
 	NRF_UART0->EVENTS_TXDRDY = 0;
+
 #else
 	//! Disable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
 
 	NRF_UART0->TASKS_STOPRX = 1;
 	NRF_UART0->TASKS_STOPTX = 1;
-#endif
-
-#ifdef TEST_PIN
-    nrf_gpio_cfg_output(TEST_PIN);
 #endif
 }
 
@@ -92,7 +89,7 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
  * A write function with a format specifier.
  */
 int write(const char *str, ...) {
-#if SERIAL_VERBOSITY<SERIAL_NONE
+#if SERIAL_VERBOSITY<SERIAL_READ_ONLY
 	char buffer[128];
 	va_list ap;
 	va_start(ap, str);
@@ -144,6 +141,9 @@ static bool readBusy = false;
 void onByteRead(void * data, uint16_t size) {
 	uint16_t event = 0;
 	switch (readByte) {
+	case 70: // F
+		write("Paid respect\r\n");
+		break;
 	case 99: // c
 		event = EVT_TOGGLE_LOG_CURRENT;
 		break;
@@ -152,6 +152,9 @@ void onByteRead(void * data, uint16_t size) {
 		break;
 	case 112: // p
 		event = EVT_TOGGLE_LOG_POWER;
+		break;
+	case 114: // r
+		event = EVT_CMD_RESET;
 		break;
 	case 118: // v
 		event = EVT_TOGGLE_LOG_VOLTAGE;

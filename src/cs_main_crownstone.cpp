@@ -856,6 +856,10 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		sd_nvic_SystemReset();
 		break;
 	}
+	case EVT_CMD_RESET: {
+		CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
+		break;
+	}
 	default: return;
 	}
 

@@ -24,7 +24,8 @@ extern "C" {
 #define SERIAL_WARN                 2
 #define SERIAL_ERROR                3
 #define SERIAL_FATAL                4
-#define SERIAL_NONE                 5
+#define SERIAL_READ_ONLY            5
+#define SERIAL_NONE                 6
 
 #define SERIAL_CRLF "\r\n"
 
@@ -35,7 +36,7 @@ extern "C" {
 
 //#define INCLUDE_TIMESTAMPS
 
-#if SERIAL_VERBOSITY<SERIAL_NONE
+#if SERIAL_VERBOSITY<SERIAL_READ_ONLY
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -98,32 +99,6 @@ extern "C" {
 #undef LOGf
 #define LOGf(fmt, ...)
 #endif
-
-/** Available Baud rates for UART. */
-typedef enum
-{
-    UART_BAUD_2K4 = 0,        ///< 2400 baud
-    UART_BAUD_4K8,            ///< 4800 baud
-    UART_BAUD_9K6,            ///< 9600 baud
-    UART_BAUD_14K4,           ///< 14.4 kbaud
-    UART_BAUD_19K2,           ///< 19.2 kbaud
-    UART_BAUD_28K8,           ///< 28.8 kbaud
-    UART_BAUD_38K4,           ///< 38.4 kbaud
-    UART_BAUD_57K6,           ///< 57.6 kbaud
-    UART_BAUD_76K8,           ///< 76.8 kbaud
-    UART_BAUD_115K2,          ///< 115.2 kbaud
-    UART_BAUD_230K4,          ///< 230.4 kbaud
-    UART_BAUD_250K0,          ///< 250.0 kbaud
-    UART_BAUD_500K0,          ///< 500.0 kbaud
-    UART_BAUD_1M0,            ///< 1 mbaud
-    UART_BAUD_TABLE_MAX_SIZE  ///< Used to specify the size of the baudrate table.
-} uart_baudrate_t;
-
-/** @brief The baudrate devisors array, calculated for standard baudrates.
-    Number of elements defined by ::HAL_UART_BAUD_TABLE_MAX_SIZE*/
-#define UART_BAUDRATE_DEVISORS_ARRAY    { \
-    0x0009D000, 0x0013B000, 0x00275000, 0x003BA000, 0x004EA000, 0x0075F000, 0x009D4000, \
-    0x00EBE000, 0x013A9000, 0x01D7D000, 0x03AFB000, 0x03FFF000, 0x075F6000, 0x10000000  }
 
 /**
  * General configuration of the serial connection. This sets the pin to be used for UART, the baudrate, the parity

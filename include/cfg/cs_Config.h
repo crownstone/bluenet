@@ -87,8 +87,7 @@
 //! How many seconds of time jump is regarded a big time jump
 #define SCHEDULE_BIG_TIME_JUMP                   (75*60)
 
-#define CURRENT_LIMIT							 0
-
+//! How many channels the pwm can control. Limited by the amount of timer channels.
 #define CS_PWM_MAX_CHANNELS                      2
 
 //! ----- TIMERS -----
