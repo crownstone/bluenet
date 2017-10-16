@@ -169,26 +169,42 @@ uint32_t PWM::start(bool onZeroCrossing) {
 	return ERR_SUCCESS;
 }
 
+static void staticZeroCrossingStart(void* p_data, uint16_t len) {
+	PWM::getInstance()._zeroCrossingStart();
+}
+
 void PWM::start() {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	// Start the timer
+	// Start the timer as soon as possible.
 	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
+
+	// Mark as started, else the next zero crossing calls start() again.
+	// Also have to mark as started before setValue()
 	_started = true;
 
-	// Set all values
 	if (_startOnZeroCrossing) {
-		//! TODO: currently this only works for 1 channel! (as it calls setValue too often)
-		for (uint8_t i=0; i<_config.channelCount; ++i) {
-			if (_values[i] != _nextValues[i]) {
-				setValue(i, _nextValues[i]);
-			}
+		// Decouple from zero crossing interrupt
+		uint32_t errorCode = app_sched_event_put(NULL, 0, staticZeroCrossingStart);
+		APP_ERROR_CHECK(errorCode);
+	}
+	else {
+		LOGi("Started");
+	}
+}
+
+void PWM::_zeroCrossingStart() {
+	// Set all values
+	// TODO: currently this only works for 1 channel! (as it calls setValue too often)
+//	for (uint8_t i=0; i<_config.channelCount; ++i) {
+	for (uint8_t i=0; i<1; ++i) {
+		if (_values[i] != _nextValues[i]) {
+			setValue(i, _nextValues[i]);
 		}
 	}
-	// Don't log anything here, this function can be called from an interrupt.
-//	LOGi("Start");
+	LOGi("Started");
 }
 
 void PWM::setValue(uint8_t channel, uint16_t newValue) {

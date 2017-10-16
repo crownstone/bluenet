@@ -60,6 +60,9 @@ public:
 	//! Function to be called on a zero crossing.
 	void onZeroCrossing();
 
+	//! Internal use! Called when started from a zero crossing.
+	void _zeroCrossingStart();
+
 	//! Interrupt handler: internal function, implementation specific.
 	void _handleInterrupt();
 
