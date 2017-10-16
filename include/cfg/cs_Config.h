@@ -173,6 +173,8 @@
 
 #define KEEP_ALIVE_INTERVAL                      (2 * 60) // 2 minutes, in seconds
 
+#define SWITCH_DELAYED_STORE_MS                  10000 // in ms
+
 // stack config values
 //#define MIN_CONNECTION_INTERVAL                  16
 #define MIN_CONNECTION_INTERVAL                  6

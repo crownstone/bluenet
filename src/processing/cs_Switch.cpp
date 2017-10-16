@@ -25,12 +25,21 @@
 
 Switch::Switch():
 //	_nextRelayVal(SWITCH_NEXT_RELAY_VAL_NONE),
-	_hasRelay(false), _pinRelayOn(0), _pinRelayOff(0), _relayHighDuration(0), _delayedSwitchPending(false), _delayedSwitchState(0)
+	_hasRelay(false),
+	_pinRelayOn(0),
+	_pinRelayOff(0),
+	_relayHighDuration(0),
+	_delayedSwitchPending(false),
+	_delayedSwitchState(0),
+	_delayedStoreStatePending(false)
 {
 	LOGd(FMT_CREATE, "Switch");
 
 	_switchTimerData = { {0} };
 	_switchTimerId = &_switchTimerData;
+
+	_switchStoreStateTimerData = { {0} };
+	_switchStoreStateTimerId = &_switchStoreStateTimerData;
 }
 
 void Switch::init(const boards_config_t& board) {
@@ -71,32 +80,62 @@ void Switch::init(const boards_config_t& board) {
 	}
 
 	//! Retrieve last switch state from persistent storage
-	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, 1);
+	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t));
 //	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
-
-	// For now: just turn pwm off on init, for safety.
-	pwmOff();
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_switchTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSwitch);
+	Timer::getInstance().createSingleShot(_switchStoreStateTimerId, (app_timer_timeout_handler_t)Switch::staticTimedStoreSwitch);
 }
 
 
 void Switch::start() {
 	PWM::getInstance().start(true);
+	// Restore the pwm state. Use _setPwm(), so that we don't write to persistent storage again.
+	_setPwm(_switchValue.pwm_state);
 }
 
 void Switch::onZeroCrossing() {
 	PWM::getInstance().onZeroCrossing();
 }
 
-void Switch::updateSwitchState(switch_state_t oldVal) {
+void Switch::storeState(switch_state_t oldVal) {
+	bool persistent = false;
 //	if (oldVal.pwm_state != _switchValue.pwm_state || oldVal.relay_state != _switchValue.relay_state) {
 	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
-		LOGd("updateSwitchState: %d", _switchValue);
-		bool persistent = (oldVal.relay_state != _switchValue.relay_state);
+		LOGd("storeState: %u", _switchValue);
+		persistent = (oldVal.relay_state != _switchValue.relay_state);
 		State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t), persistent);
 	}
+
+	// If not written to persistent storage immediately, do it after a delay.
+	if (!persistent) {
+		delayedStoreState(SWITCH_DELAYED_STORE_MS);
+	}
+}
+
+void Switch::delayedStoreState(uint32_t delayMs) {
+	if (_delayedStoreStatePending) {
+		Timer::getInstance().stop(_switchStoreStateTimerId);
+	}
+	_delayedStoreStatePending = true;
+	Timer::getInstance().start(_switchStoreStateTimerId, MS_TO_TICKS(delayMs), this);
+}
+
+void Switch::delayedStoreStateExecute() {
+	if (!_delayedStoreStatePending) {
+		return;
+	}
+	// Can't check if it's different from the old value, as the state is already updated, but maybe not to persistent storage.
+//	switch_state_t oldVal;
+//	State::getInstance().get(STATE_SWITCH_STATE, &oldVal, sizeof(switch_state_t));
+//	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
+//		State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t), true);
+//	}
+
+	// Just write to persistent storage
+	LOGd("write to storage: %u", _switchValue);
+	State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t), true);
 }
 
 
@@ -157,7 +196,7 @@ void Switch::setPwm(uint8_t value) {
 	LOGd("set PWM %d", value);
 #endif
 	_setPwm(value);
-	updateSwitchState(oldVal);
+	storeState(oldVal);
 }
 
 
@@ -169,14 +208,14 @@ uint8_t Switch::getPwm() {
 void Switch::relayOn() {
 	switch_state_t oldVal = _switchValue;
 	_relayOn();
-	updateSwitchState(oldVal);
+	storeState(oldVal);
 }
 
 
 void Switch::relayOff() {
 	switch_state_t oldVal = _switchValue;
 	_relayOff();
-	updateSwitchState(oldVal);
+	storeState(oldVal);
 }
 
 
@@ -232,7 +271,7 @@ void Switch::setSwitch(uint8_t switchState) {
 		_delayedSwitchPending = false;
 	}
 
-	updateSwitchState(oldVal);
+	storeState(oldVal);
 }
 
 
@@ -286,9 +325,9 @@ void Switch::delayedSwitch(uint8_t switchState, uint16_t delay) {
 }
 
 
-void Switch::timedSwitch() {
+void Switch::delayedSwitchExecute() {
 #ifdef PRINT_SWITCH_VERBOSE
-	LOGi("timed switch, set");
+	LOGi("execute delayed switch");
 #endif
 
 	if (_delayedSwitchPending) {

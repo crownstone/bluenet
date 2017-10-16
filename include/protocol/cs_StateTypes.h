@@ -34,7 +34,7 @@ enum StateTypes {
 	STATE_IGNORE_LOCATION,                // 0x92 - 146
 
 	STATE_TYPES
-};
+}; // Current max is 255 (0xFF), see cs_EventTypes.h
 
 
 

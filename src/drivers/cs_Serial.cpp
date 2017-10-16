@@ -138,7 +138,7 @@ int now() {
 static uint8_t readByte;
 static bool readBusy = false;
 
-void onByteRead(void * data, uint16_t size) {
+static void onByteRead(void * data, uint16_t size) {
 	uint16_t event = 0;
 	switch (readByte) {
 	case 99: // c
