@@ -31,7 +31,7 @@
 // Disables sending of command replies, and state items (service data).
 #define CRIPPLE_MESH_FUNCTIONALITY
 
-MeshControl::MeshControl() : EventListener(EVT_ALL), _myCrownstoneId(0) {
+MeshControl::MeshControl() : _myCrownstoneId(0) {
 	EventDispatcher::getInstance().addListener(this);
 }
 

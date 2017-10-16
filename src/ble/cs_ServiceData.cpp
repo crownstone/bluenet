@@ -21,7 +21,7 @@
 
 //#define ADVERTISE_EXTERNAL_DATA
 
-ServiceData::ServiceData() : EventListener(EVT_ALL), _updateTimerId(NULL), _connected(false)
+ServiceData::ServiceData() : _updateTimerId(NULL), _connected(false)
 {
 	//! we want to update the advertisement packet on a fixed interval.
 	_updateTimerData = { {0} };

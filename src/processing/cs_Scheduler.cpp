@@ -16,7 +16,7 @@
 #define SCHEDULER_PRINT_DEBUG
 
 Scheduler::Scheduler() :
-	EventListener(EVT_ALL),
+//	EventListener(EVT_ALL),
 	_appTimerId(NULL),
 	_rtcTimeStamp(0),
 	_posixTimeStamp(0),
