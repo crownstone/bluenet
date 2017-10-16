@@ -138,14 +138,44 @@ You receive a MAC address on Android and an UUID on iOS for each advertisement p
 
 ![Scan Response ServiceData](../docs/diagrams/scan-response-service-data.png)
 
+The Protocol version determines how to parse the remaining 16 bytes.
+
+Version | Packet
+--- | ---
+1 | [Version 1](#encrypted_servicedata_v1_packet), initial version.
+2 | [Version 2](#encrypted_servicedata_v2_packet), with power factor.
+
+### <a name="encrypted_servicedata_v1_packet"></a>Encrypted service data packet v1
+This packet contains the state info. If encryption is enabled, it's encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
+You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
+
+![Scan Response ServiceData](../docs/diagrams/service-data-encrypted-v1.png)
+
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Protocol Version | 1 | Service data protocol version
 uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
 uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | [Event bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
-int 8 | Temperature | 1 | Chip temperature (°C)
-int 32 | Power usage | 4 | The power usage at this moment (mW).
+int 8 | Temperature | 1 | Chip temperature (°C).
+int 32 | Power usage | 4 | The power usage at this moment (mW). Divide by 1000 to get power usage in Watt.
+int 32 | Accumulated energy | 4 | The accumulated energy (Wh).
+uint 8[] | Rand | 3 | Random bytes.
+
+
+### <a name="encrypted_servicedata_v2_packet"></a>Encrypted service data packet v2
+This packet contains the state info. If encryption is enabled, it's encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
+You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
+
+![Scan Response ServiceData](../docs/diagrams/service-data-encrypted-v2.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 8 | [Event bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+int 8 | Temperature | 1 | Chip temperature (°C).
+int 16 | Power factor | 2 | The power factor at this moment. Divide by 1024 to get the actual power factor.
+uint 16 | Power usage | 2 | The apparent power usage at this moment (dW). Divide by 10 to get power usage in Watt.
 int 32 | Accumulated energy | 4 | The accumulated energy (Wh).
 uint 8[] | Rand | 3 | Random bytes.
 
