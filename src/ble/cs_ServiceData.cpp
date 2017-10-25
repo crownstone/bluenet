@@ -23,24 +23,24 @@
 
 ServiceData::ServiceData() : _updateTimerId(NULL), _connected(false)
 {
-	//! we want to update the advertisement packet on a fixed interval.
+	// we want to update the advertisement packet on a fixed interval.
 	_updateTimerData = { {0} };
 	_updateTimerId = &_updateTimerData;
 	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
 
-	//! get the operation mode from state
+	// get the operation mode from state
 	State::getInstance().get(STATE_OPERATION_MODE, _operationMode);
 
 	EventDispatcher::getInstance().addListener(this);
 
-	//! Initialize the service data
+	// Initialize the service data
 	memset(_serviceData.array, 0, sizeof(_serviceData.array));
 	_serviceData.params.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
 	memset(_serviceDataExt.array, 0, sizeof(_serviceDataExt.array));
 	_serviceDataExt.params.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
 	_encryptedParams.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION; // this part will not be written over
 
-	//! start the update timer
+	// start the update timer
 	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
 
 #if BUILD_MESHING == 1
@@ -50,17 +50,17 @@ ServiceData::ServiceData() : _updateTimerId(NULL), _connected(false)
 	_meshStateTimerId = &_meshStateTimerData;
 	Timer::getInstance().createSingleShot(_meshStateTimerId, (app_timer_timeout_handler_t)ServiceData::meshStateTick);
 
-	//! Only send the state over the mesh in normal mode
+	// Only send the state over the mesh in normal mode
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED) && _operationMode == OPERATION_MODE_NORMAL) {
-		//! Start the mesh state timer with a small random delay
-		//! Make sure delay is not 0, as that's an invalid delay.
+		// Start the mesh state timer with a small random delay
+		// Make sure delay is not 0, as that's an invalid delay.
 
-//		//! Delay is 1-59926 ms
+//		// Delay is 1-59926 ms
 //		uint8_t rand8;
 //		RNG::fillBuffer(&rand8, 8);
 //		uint32_t randMs = rand8*235 + 1;
 
-		//! Delay is 1-65537 ms
+		// Delay is 1-65537 ms
 		uint16_t rand16;
 		RNG::fillBuffer((uint8_t*)&rand16, 2);
 		uint32_t randMs = rand16 + 1;
@@ -77,24 +77,25 @@ ServiceData::ServiceData() : _updateTimerId(NULL), _connected(false)
 #endif
 
 	_updateCount = 0;
-	//! set the initial advertisement.
-	updateAdvertisement();
+
+	// set the initial advertisement.
+	updateAdvertisement(true);
 };
 
-void ServiceData::updateAdvertisement() {
+void ServiceData::updateAdvertisement(bool initial) {
 	Timer::getInstance().stop(_updateTimerId);
 
 	//! if we are connected, we do not need to update the packet.
 	if (_connected == false) {
 		_updateCount++;
 
-		//! in case the operation mode is setup, we have a different advertisement package.
+		// in case the operation mode is setup, we have a different advertisement package.
 		updateEventBitmask(SETUP_MODE_ENABLED, _operationMode == OPERATION_MODE_SETUP);
 
 		service_data_t* serviceData = &_serviceData;
 
 #if BUILD_MESHING == 1 && defined(ADVERTISE_EXTERNAL_DATA)
-		//! Every N updates, we advertise the state of another crownstone.
+		// Every N updates, we advertise the state of another crownstone.
 		if (_operationMode == OPERATION_MODE_NORMAL && _updateCount % 2 == 0 && Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 			state_message_t message = {};
 			uint16_t messageSize = sizeof(state_message_t);
@@ -111,7 +112,7 @@ void ServiceData::updateAdvertisement() {
 				int16_t idx = -1;
 				state_item_t* p_stateItem;
 
-				//! Remove ids that are in the list, but not in the message
+				// Remove ids that are in the list, but not in the message
 				_tempAdvertisedIds.size = 0;
 				for (auto i=0; i<_advertisedIds.size; i++) {
 					bool found = false;
@@ -128,24 +129,24 @@ void ServiceData::updateAdvertisement() {
 					idx = -1;
 					while (peek_next_state_item(&message, &p_stateItem, idx)) {
 						if (_advertisedIds.list[i] == p_stateItem->id) {
-							//! First copy the ones that are in both to a temp list
+							// First copy the ones that are in both to a temp list
 							_tempAdvertisedIds.list[_tempAdvertisedIds.size++] = _advertisedIds.list[i];
 							found = true;
 							break;
 						}
 					}
 					if (!found && i < _advertisedIds.head) {
-						//! Id at index before head got removed, so decrease head
+						// Id at index before head got removed, so decrease head
 						_advertisedIds.head--;
 					}
 				}
-				//! Then copy the temp list to the list
+				// Then copy the temp list to the list
 				for (auto i=0; i<_tempAdvertisedIds.size; i++) {
 					_advertisedIds.list[i] = _tempAdvertisedIds.list[i];
 				}
 				_advertisedIds.size = _tempAdvertisedIds.size;
 
-				//! Make sure the head is wrapped around correctly
+				// Make sure the head is wrapped around correctly
 				if (_advertisedIds.head < 0) {
 					_advertisedIds.head = _advertisedIds.size-1;
 				}
@@ -158,9 +159,9 @@ void ServiceData::updateAdvertisement() {
 					advertiseId = _advertisedIds.list[_advertisedIds.head];
 				}
 
-				//! Add first id that is in the message, but not in the list (search from newest to oldest)
-				//! If this happens, advertise this id instead of the id at the head
-				//! Skip ids that are 0 or similar to own id
+				// Add first id that is in the message, but not in the list (search from newest to oldest)
+				// If this happens, advertise this id instead of the id at the head
+				// Skip ids that are 0 or similar to own id
 				idx = -1;
 				while (peek_prev_state_item(&message, &p_stateItem, idx)) {
 					if (p_stateItem->id == 0 || p_stateItem->id == _serviceData.params.crownstoneId) {
@@ -174,17 +175,17 @@ void ServiceData::updateAdvertisement() {
 						}
 					}
 					if (!found) {
-						//! Add item to list
+						// Add item to list
 						_advertisedIds.list[_advertisedIds.size] = p_stateItem->id;
 						_advertisedIds.size++;
 
-						//! Advertise this id instead of head
+						// Advertise this id instead of head
 						advertiseId = p_stateItem->id;
 						break;
 					}
 				}
 
-				//! Advertise the selected id (if it's not 0)
+				// Advertise the selected id (if it's not 0)
 				if (advertiseId != 0) {
 					idx = -1;
 					while (peek_prev_state_item(&message, &p_stateItem, idx)) {
@@ -202,7 +203,7 @@ void ServiceData::updateAdvertisement() {
 						}
 					}
 
-					//! If we advertised the id at head, then increase the head
+					// If we advertised the id at head, then increase the head
 					if (advertiseId == _advertisedIds.list[_advertisedIds.head]) {
 						_advertisedIds.head = (_advertisedIds.head + 1) % _advertisedIds.size;
 					}
@@ -211,8 +212,8 @@ void ServiceData::updateAdvertisement() {
 		}
 #endif
 
-		//! We use one random number (only if encrypted) and a uint16 counter value for the last 2 bytes.
-		//! Counter is cheaper than random.
+		// We use one random number (only if encrypted) and a uint16 counter value for the last 2 bytes.
+		// Counter is cheaper than random.
 		serviceData->params.counter += 1;
 
 		//! encrypt the array using the guest key ECB if encryption is enabled.
@@ -228,10 +229,12 @@ void ServiceData::updateAdvertisement() {
 			                                         sizeof(_encryptedParams.payload), GUEST, ECB_GUEST);
 		}
 
-		EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
+		if (!initial) {
+			EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
+		}
 	}
 
-	//! start the timer again.
+	// start the timer again.
 	if (_operationMode == OPERATION_MODE_SETUP) {
 		Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD_SETUP), this);
 	}
@@ -275,7 +278,7 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case EVT_BLE_DISCONNECT: {
 		_connected = false;
-		updateAdvertisement();
+		updateAdvertisement(false);
 		break;
 	}
 	case EVT_PWM_FORCED_OFF:

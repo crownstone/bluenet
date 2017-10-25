@@ -90,12 +90,12 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_settings = &Settings::getInstance();
 	_stateVars = &State::getInstance();
 
-	//! create command handler
+	// create command handler
 	_commandHandler = &CommandHandler::getInstance();
 	_factoryReset = &FactoryReset::getInstance();
 
-	//! create instances for the scanner and mesh
-	//! actual initialization is done in their respective init methods
+	// create instances for the scanner and mesh
+	// actual initialization is done in their respective init methods
 	_scanner = &Scanner::getInstance();
 #if CHAR_TRACK_DEVICES == 1
 	_tracker = &Tracker::getInstance();
@@ -108,7 +108,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		// switch using PWM or Relay
 		_switch = &Switch::getInstance();
-		//! create temperature guard
+		// create temperature guard
 		_temperatureGuard = &TemperatureGuard::getInstance();
 
 		_powerSampler = &PowerSampling::getInstance();
@@ -149,24 +149,24 @@ void Crownstone::init() {
 
 		LOGd("Configure setup mode");
 
-		//! create services
+		// create services
 		createSetupServices();
 
-		//! loop through all services added to the stack and create the characteristics
+		// loop through all services added to the stack and create the characteristics
 		_stack->createCharacteristics();
 
-		//! set it by default into low tx mode
+		// set it by default into low tx mode
 		_stack->changeToLowTxPowerMode();
 
-		//! Because iPhones cannot programmatically clear their cache of paired devices, the phone that
-		//! did the setup is at risk of not being able to connect to the crownstone if the cs clears the device
-		//! manager. We use our own encryption scheme to counteract this.
+		// Because iPhones cannot programmatically clear their cache of paired devices, the phone that
+		// did the setup is at risk of not being able to connect to the crownstone if the cs clears the device
+		// manager. We use our own encryption scheme to counteract this.
 		if (_settings->isSet(CONFIG_ENCRYPTION_ENABLED)) {
 			LOGi(FMT_ENABLE, "AES encryption");
 			_stack->setAesEncrypted(true);
 		}
 //		LOGi(FMT_ENABLE, "PIN encryption");
-//		//! use PIN encryption for setup mode
+//		// use PIN encryption for setup mode
 //		_stack->setPinEncrypted(true);
 
 		if (_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
@@ -179,16 +179,16 @@ void Crownstone::init() {
 
 		LOGd("Configure normal operation mode");
 
-		//! setup normal operation mode
+		// setup normal operation mode
 		prepareNormalOperationMode();
 
-		//! create services
+		// create services
 		createCrownstoneServices();
 
-		//! loop through all services added to the stack and create the characteristics
+		// loop through all services added to the stack and create the characteristics
 		_stack->createCharacteristics();
 
-		//! use aes encryption for normal mode (if enabled)
+		// use aes encryption for normal mode (if enabled)
 		if (_settings->isSet(CONFIG_ENCRYPTION_ENABLED)) {
 			LOGi(FMT_ENABLE, "AES encryption");
 			_stack->setAesEncrypted(true);
@@ -222,7 +222,7 @@ void Crownstone::init() {
 void Crownstone::configure() {
 
 	LOGi("> stack ...");
-	//! configure parameters for the Bluetooth stack
+	// configure parameters for the Bluetooth stack
 	configureStack();
 
 	uint16_t resetCounter;
@@ -231,12 +231,12 @@ void Crownstone::configure() {
 	LOGw("Reset counter at: %d", resetCounter);
 	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
 
-	//! set advertising parameters such as the device name and appearance.
-	//! Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
+	// set advertising parameters such as the device name and appearance.
+	// Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
 	setName();
 
 	LOGi("> advertisement ...");
-	//! configure advertising parameters
+	// configure advertising parameters
 #if EDDYSTONE==1
 	_eddystone = new Eddystone();
 	_eddystone->advertising_init();
@@ -260,8 +260,8 @@ void Crownstone::initDrivers() {
 
 	LOGi(FMT_INIT, "stack");
 
-	//! start up the softdevice early because we need it's functions to configure devices it ultimately controls.
-	//! in particular we need it to set interrupt priorities.
+	// Start up the softdevice early because we need it's functions to configure devices it ultimately controls.
+	// in particular we need it to set interrupt priorities.
 	_stack->init();
 
 	LOGi(FMT_INIT, "timers");
@@ -339,15 +339,6 @@ void Crownstone::initDrivers() {
  *   [29.06.16] restart the mesh disabled, this was limited to pca10000, it does crash dobeacon v0.7
  */
 void Crownstone::configureStack() {
-
-	_stack->setTxPowerLevel(TX_POWER);
-	_stack->setMinConnectionInterval(MIN_CONNECTION_INTERVAL);
-	_stack->setMaxConnectionInterval(MAX_CONNECTION_INTERVAL);
-	_stack->setConnectionSupervisionTimeout(CONNECTION_SUPERVISION_TIMEOUT);
-	_stack->setSlaveLatency(SLAVE_LATENCY);
-	_stack->setAdvertisingInterval(ADVERTISEMENT_INTERVAL);
-	_stack->setAdvertisingTimeoutSeconds(ADVERTISING_TIMEOUT);
-
 	// Set the stored tx power
 	int8_t txPower;
 	_settings->get(CONFIG_TX_POWER, &txPower);
@@ -397,10 +388,10 @@ void Crownstone::configureStack() {
 
 void Crownstone::configureAdvertisement() {
 
-	//! create the iBeacon parameter object which will be used
-	//! to configure advertisement as an iBeacon
+	// Create the iBeacon parameter object which will be used
+	// to configure advertisement as an iBeacon
 
-	//! get values from config
+	// get values from config
 	uint16_t major, minor;
 	uint8_t rssi;
 	ble_uuid128_t uuid;
@@ -410,25 +401,26 @@ void Crownstone::configureAdvertisement() {
 	_settings->get(CONFIG_IBEACON_UUID, uuid.uuid128);
 	_settings->get(CONFIG_IBEACON_TXPOWER, &rssi);
 
-	//! create ibeacon object
+	// create ibeacon object
 	_beacon = new IBeacon(uuid, major, minor, rssi);
 
-	//! create the Service Data  object which will be used
-	//! to advertise certain state variables
+	// Create the Service Data object which will be used
+	// to advertise certain state variables
+
 	_serviceData = new ServiceData();
 
 	// initialize service data
 	uint8_t opMode;
 	State::getInstance().get(STATE_OPERATION_MODE, opMode);
 
-	// if we're in setup mode, do not alter the advertisement
-	if (opMode != OPERATION_MODE_SETUP) {
-		//! read crownstone id from storage
+	// Only in normal mode the service data is filled with the state
+	if (opMode == OPERATION_MODE_NORMAL) {
+		// read crownstone id from storage
 		uint16_t crownstoneId;
 		_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
 		LOGi("Set crownstone id to %d", crownstoneId);
 
-		//! and set it to the service data
+		// and set it to the service data
 		_serviceData->updateCrownstoneId(crownstoneId);
 
 		// fill service data with initial data
@@ -446,8 +438,11 @@ void Crownstone::configureAdvertisement() {
 //		_serviceData->updateAccumulatedEnergy(accumulatedEnergy);
 	}
 
-	//! assign service data to stack
+	// assign service data to stack
 	_stack->setServiceData(_serviceData);
+
+	// Need to init radio before configuring ibeacon?
+	_stack->initRadio();
 
 	if (_settings->isSet(CONFIG_IBEACON_ENABLED)) {
 		_stack->configureIBeacon(_beacon, _boardsConfig.deviceType);
@@ -545,7 +540,6 @@ void Crownstone::setName() {
 	//! assign name
 	LOGi(FMT_SET_STR_VAL, "name", deviceName.c_str());
 	_stack->updateDeviceName(deviceName); //! max len = ble_gap_devname_max_len (31)
-	_stack->updateAppearance(BLE_APPEARANCE_GENERIC_TAG);
 }
 
 void Crownstone::prepareNormalOperationMode() {
@@ -574,7 +568,6 @@ void Crownstone::prepareNormalOperationMode() {
 
 #if BUILD_MESHING == 1
 //	if (_settings->isEnabled(CONFIG_MESH_ENABLED)) {
-		_mesh = &Mesh::getInstance();
 		_mesh->init();
 //	}
 #endif
@@ -793,13 +786,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 	case CONFIG_ADV_INTERVAL: {
-		_stack->setAdvertisingInterval(*(uint32_t*)p_data);
-		_stack->configureAdvertisementParameters();
-
-		if (_stack->isAdvertising()) {
-			_stack->stopAdvertising();
-			_stack->startAdvertising();
-		}
+		_stack->updateAdvertisingInterval(*(uint32_t*)p_data, true);
 //		restartAdvertising = true;
 		break;
 	}

@@ -175,17 +175,16 @@
 
 #define SWITCH_DELAYED_STORE_MS                  10000 // in ms
 
-// stack config values
-//#define MIN_CONNECTION_INTERVAL                  16
-#define MIN_CONNECTION_INTERVAL                  6
-//#define MAX_CONNECTION_INTERVAL                  32
-#define MAX_CONNECTION_INTERVAL                  16
-#define CONNECTION_SUPERVISION_TIMEOUT           400
-#define SLAVE_LATENCY                            10
+// Stack config values
+// See: https://devzone.nordicsemi.com/question/60/what-is-connection-parameters/
+#define MIN_CONNECTION_INTERVAL                  6   // In units of 1.25ms. Lowest possible, see https://devzone.nordicsemi.com/question/161154/minimum-connection-interval/
+#define MAX_CONNECTION_INTERVAL                  16  // In units of 1.25ms.
+#define CONNECTION_SUPERVISION_TIMEOUT           400 // In units of 10ms.
+#define SLAVE_LATENCY                            10  // See: https://devzone.nordicsemi.com/question/14029/slave-latency-for-s110s120-connection/
 #define ADVERTISING_TIMEOUT                      0
-#define ADVERTISING_REFRESH_PERIOD               1000 //! Push the changes in the advertisement packet to the stack every x milliseconds
-#define ADVERTISING_REFRESH_PERIOD_SETUP         100 //! Push the changes in the advertisement packet to the stack every x milliseconds
+#define ADVERTISING_REFRESH_PERIOD               1000 // Push the changes in the advertisement packet to the stack every x milliseconds
+#define ADVERTISING_REFRESH_PERIOD_SETUP         100  // Push the changes in the advertisement packet to the stack every x milliseconds
 
 #define MESH_STATE_REFRESH_PERIOD                50000 // 50 seconds + some random amount of seconds
 
-#define SWITCH_ON_AT_SETUP_BOOT_DELAY            3600 //! Seconds until the switch turns on when in setup mode (Crownstone built-in only)
+#define SWITCH_ON_AT_SETUP_BOOT_DELAY            3600  // Seconds until the switch turns on when in setup mode (Crownstone built-in only)

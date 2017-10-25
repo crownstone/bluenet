@@ -143,6 +143,7 @@
 #define FMT_CREATE                               "Create %s"
 #define FMT_INIT                                 "Init %s"
 #define FMT_NOT_INITIALIZED                      "%s not initialized!"
+#define FMT_ALREADY_INITIALIZED                  "%s already initialized!"
 #define FMT_ERR_EXPECTED                         "Expected %s"
 #define FMT_ERR_EXPECTED_RECEIVED                "Expected length %d, received: %d"
 #define FMT_SET_INT_TYPE_VAL                     "Set %d to %d"

@@ -88,7 +88,9 @@ public:
 		_serviceData.params.temperature = temperature;
 	}
 
-	void updateAdvertisement();
+	// Set initial to true when this is just the initial data,
+	// when there's no need to send out the event EVT_ADVERTISEMENT_UPDATED.
+	void updateAdvertisement(bool initial);
 
 	void updateEventBitmask(uint8_t bit, bool set) {
 		if (set) {
@@ -124,7 +126,7 @@ private:
 
 	/* Static function for the timeout */
 	static void staticTimeout(ServiceData *ptr) {
-		ptr->updateAdvertisement();
+		ptr->updateAdvertisement(false);
 	}
 
 	service_data_t _serviceData;

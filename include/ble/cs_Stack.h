@@ -88,32 +88,17 @@ public:
 	//! Maximum number of services (currently set to 5)
 	static const uint8_t MAX_SERVICE_COUNT = 5;
 
-	//static const uint16_t                  defaultAppearance = BLE_APPEARANCE_UNKNOWN;
 
-	//! The default BLE appearance is currently set to a Generic Keyring (576)
-	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_KEYRING;
+	//! The default BLE appearance, for unknown reason set to generic tag. See: https://devzone.nordicsemi.com/question/2973/an36-ble_appearance/
+	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_TAG;
 	//! The low-frequency clock, currently generated from the high frequency clock
-#if (NORDIC_SDK_VERSION >= 11) 
 	static const nrf_clock_lf_cfg_t        defaultClockSource;
-#else
-	static const nrf_clock_lfclksrc_t      defaultClockSource = NRF_CLOCK_LFCLKSRC_SYNTH_250_PPM;
-#endif
-	//! The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.
+//	//! The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.
 //	static const uint8_t                   defaultMtu = BLE_L2CAP_MTU_DEF;
-	//! Minimum connection interval in 1.25 ms (400*1.25=500ms)
-	static const uint16_t                  defaultMinConnectionInterval_1_25_ms = 400;
-	//! Maximum connection interval in 1.25 ms (800*1.25=1 sec)
-	static const uint16_t                  defaultMaxConnectionInterval_1_25_ms = 800;
-	//! Default slave latency
-	static const uint16_t                  defaultSlaveLatencyCount = 0;
-	//! Connection timeout in 10ms (400*10=4 sec)
-	static const uint16_t                  defaultConnectionSupervisionTimeout_10_ms = 400;
-	//! Advertising interval in 0.625 ms (40*0.625=25 ms)
-	static const uint16_t                  defaultAdvertisingInterval_0_625_ms = 40;
-	//! Advertising timeout in seconds (180 sec)
-	static const uint16_t                  defaultAdvertisingTimeout_seconds = 180;
-	//! Default transmission power
-	static const int8_t                    defaultTxPowerLevel = -8;
+	//! Advertising interval in 0.625 ms.
+	static const uint16_t                  defaultAdvertisingInterval_0_625_ms = ADVERTISEMENT_INTERVAL;
+	//! Time after which advertising stops.
+	static const uint16_t                  defaultAdvertisingTimeout_seconds = ADVERTISING_TIMEOUT;
 
 protected:
 	std::string                                 _device_name; //! 4
@@ -139,7 +124,8 @@ protected:
 	ble_gap_conn_params_t                       _gap_conn_params; //! 8
 
 	bool                                        _inited;
-	bool                                        _started;
+	bool                                        _initializedServices;
+	bool                                        _initializedRadio;
 	bool                                        _advertising;
 	bool                                        _scanning;
 
@@ -193,7 +179,7 @@ public:
 	 *   - enables softdevice with own clock and assertion handler
 	 *   - enable service changed characteristic for S110
 	 *   - disable automatic address recycling for S110
-	 *   - enable IRQ (SWI2_IRQn) for the softdevice
+
 	 *   - set BLE device name
 	 *   - set appearance (e.g. used in GUIs to interface with BLE devices)
 	 *   - set connection parameters
@@ -201,6 +187,11 @@ public:
 	 *   - set the callback for BLE events (if we use Source/sd_common/softdevice_handler.c in Nordic's SDK)
 	 */
 	void init();
+
+	/** Initialization of the radio
+	 *
+	 */
+	void initRadio();
 
 	void createCharacteristics();
 
@@ -240,37 +231,17 @@ public:
 	 */
 	void shutdown();
 
-	void setAppearance(uint16_t appearance) {
-		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
-		_appearance = appearance;
-	}
+	//! Set initial appearance, not applied unless done before radio init.
+	void setAppearance(uint16_t appearance);
 
-	void setDeviceName(const std::string& deviceName) {
-		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
-		_device_name = deviceName;
-	}
+	//! Set initial device name, not applied unless done before radio init.
+	void setDeviceName(const std::string& deviceName);
 
-#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
-	void setClockSource(nrf_clock_lf_cfg_t clockSource) {
-		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
-		_clock_source = clockSource;
-	}
-#else
-	void setClockSource(nrf_clock_lfclksrc_t clockSource) {
-		if (_inited) BLE_THROW(MSG_BLE_STACK_INITIALIZED);
-		_clock_source = clockSource;
-	}
-#endif
+	//! Set initial clock source, not applied unless done before radio init.
+	void setClockSource(nrf_clock_lf_cfg_t clockSource);
 
-	//! Advertising interval between 0x0020 and 0x4000 (32 and 16384) in 0.625 ms units (20ms to 10.24s)
-	void setAdvertisingInterval(uint16_t advertisingInterval){
-		//! TODO: stop advertising?
-		LOGd(FMT_SET_INT_VAL, "advertising interval", advertisingInterval);
-		if (advertisingInterval < 0x0020 || advertisingInterval > 0x4000) {
-			return;
-		}
-		_interval = advertisingInterval;
-	}
+	//! Set initial advertising interval in 0.625 ms units, not applied unless done before radio init.
+	void setAdvertisingInterval(uint16_t advertisingInterval);
 
 	void setAdvertisingTimeoutSeconds(uint16_t advertisingTimeoutSeconds) {
 		//! TODO: stop advertising?
@@ -289,6 +260,9 @@ public:
 	void updateDeviceName(const std::string& deviceName);
 	std::string & getDeviceName() { return _device_name; }
 
+	//! Update the advertising interval in 0.625ms units. Set apply to true, if change should be immediately applied.
+	void updateAdvertisingInterval(uint16_t advertisingInterval, bool apply);
+
 	void setPasskey(uint8_t* passkey);
 
 	/** Set radio transmit power in dBm (accepted values are -40, -20, -16, -12, -8, -4, 0, and 4 dBm). */
@@ -299,43 +273,28 @@ public:
 	}
 
 	/** Set the minimum connection interval in units of 1.25 ms. */
-	void setMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
-		if (_gap_conn_params.min_conn_interval != connectionInterval_1_25_ms) {
-			_gap_conn_params.min_conn_interval = connectionInterval_1_25_ms;
-			if (_inited) updateConnParams();
-		}
-	}
+	void setMinConnectionInterval(uint16_t connectionInterval_1_25_ms);
 
 	/** Set the maximum connection interval in units of 1.25 ms. */
-	void setMaxConnectionInterval(uint16_t connectionInterval_1_25_ms) {
-		if (_gap_conn_params.max_conn_interval != connectionInterval_1_25_ms) {
-			_gap_conn_params.max_conn_interval = connectionInterval_1_25_ms;
-			if (_inited) updateConnParams();
-		}
-	}
+	void setMaxConnectionInterval(uint16_t connectionInterval_1_25_ms);
 
 	/** Set the slave latency count. */
-	void setSlaveLatency(uint16_t slaveLatency) {
-		if ( _gap_conn_params.slave_latency != slaveLatency ) {
-			_gap_conn_params.slave_latency = slaveLatency;
-			if (_inited) updateConnParams();
-		}
-	}
+	void setSlaveLatency(uint16_t slaveLatency);
 
 	/** Set the connection supervision timeout in units of 10 ms. */
-	void setConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms) {
-		if (_gap_conn_params.conn_sup_timeout != conSupTimeout_10_ms) {
-			_gap_conn_params.conn_sup_timeout = conSupTimeout_10_ms;
-			if (_inited) updateConnParams();
-		}
-	}
+	void setConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms);
 
 	void onConnect(const callback_connected_t& callback) {
 		//if (callback && _callback_connected) BLE_THROW("Connected callback already registered.");
 
 		_callback_connected = callback;
-		if (_inited) updateConnParams();
+
+		// TODO: why update connection parameters here?
+		if (_initializedRadio) {
+			updateConnParams();
+		}
 	}
+
 	void onDisconnect(const callback_disconnected_t& callback) {
 		//if (callback && _callback_disconnected) BLE_THROW("Disconnected callback already registered.");
 
@@ -388,13 +347,6 @@ public:
 	 */
 	void updateAdvertisement(bool toggle = true);
 
-	/**
-	 * Configures the advertisement parameters. every time the configureAdvertisementParameters function is called,
-	 * the advertisement toggles between connectable and non-connectable.
-	 *
-	 * if resetCounter is set to true, the counter is reset and the advertisement will be set to connectable
-	 */
-	void configureAdvertisementParameters();
 	void configureScanResponse(uint8_t deviceType);
 	void configureBleDeviceAdvData();
 	void configureIBeaconAdvData(IBeacon* beacon);
@@ -484,8 +436,12 @@ public:
 
 protected:
 
+	//! Update TX power, can be called when already initialized.
 	void updateTxPowerLevel();
+
+	//! Update connection parameters, can be called when already initialized.
 	void updateConnParams();
+
 	void updatePasskey();
 
 	/** Connection request
@@ -495,6 +451,8 @@ protected:
 	void on_connected(ble_evt_t * p_ble_evt);
 	void on_disconnected(ble_evt_t * p_ble_evt);
 	void on_advertisement(ble_evt_t * p_ble_evt);
+
+	void configureAdvertisementParameters();
 
 	/** Transmission complete event
 	 *

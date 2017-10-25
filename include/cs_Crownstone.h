@@ -56,7 +56,6 @@
  * Crownstone encapsulates all functionality, stack, services, and configuration.
  */
 class Crownstone : EventListener {
-
 public:
 	Crownstone(boards_config_t& board);
 
@@ -178,12 +177,8 @@ private:
 
 	bool _advertisementPaused;
 
-#if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;
-#else
-	uint32_t                 _mainTimerId;
-#endif
 
 	uint8_t _operationMode;
 
