@@ -141,6 +141,9 @@ static bool readBusy = false;
 static void onByteRead(void * data, uint16_t size) {
 	uint16_t event = 0;
 	switch (readByte) {
+	case 97: // a
+		event = EVT_TOGGLE_ADVERTISEMENT;
+		break;
 	case 99: // c
 		event = EVT_TOGGLE_LOG_CURRENT;
 		break;
@@ -149,8 +152,14 @@ static void onByteRead(void * data, uint16_t size) {
 	case 102: // f
 		event = EVT_TOGGLE_LOG_FILTERED_CURRENT;
 		break;
+	case 109: // m
+		event = EVT_TOGGLE_MESH;
+		break;
 	case 112: // p
 		event = EVT_TOGGLE_LOG_POWER;
+		break;
+	case 82: // R
+		write("radio: %u\r\n", NRF_RADIO->POWER);
 		break;
 	case 114: // r
 		event = EVT_CMD_RESET;
@@ -158,12 +167,10 @@ static void onByteRead(void * data, uint16_t size) {
 	case 118: // v
 		event = EVT_TOGGLE_LOG_VOLTAGE;
 		break;
-	default:
-		readBusy = false;
-		return;
 	}
-
-	EventDispatcher::getInstance().dispatch(event);
+	if (event != 0) {
+		EventDispatcher::getInstance().dispatch(event);
+	}
 	readBusy = false;
 }
 

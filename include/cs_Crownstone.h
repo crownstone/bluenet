@@ -175,8 +175,6 @@ private:
 	Scheduler* _scheduler;
 	FactoryReset* _factoryReset;
 
-	bool _advertisementPaused;
-
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;
 

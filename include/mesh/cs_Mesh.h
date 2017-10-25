@@ -43,6 +43,7 @@ private:
 	app_timer_t              _appTimerData;
 	app_timer_id_t           _appTimerId;
 
+	bool                     _initialized;
 	bool                     _started;
 	bool                     _running;
 

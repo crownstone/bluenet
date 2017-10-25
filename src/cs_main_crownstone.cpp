@@ -65,7 +65,6 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_mesh(NULL),
 #endif
 	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
-	_advertisementPaused(false),
 	_mainTimerId(NULL),
 	_operationMode(0)
 {
@@ -794,19 +793,24 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_stack->setPasskey((uint8_t*)p_data);
 		break;
 	}
-
-	case EVT_ADVERTISEMENT_PAUSE: {
+	case EVT_TOGGLE_ADVERTISEMENT: {
 		if (_stack->isAdvertising()) {
-			_advertisementPaused = true;
 			_stack->stopAdvertising();
+		}
+		else {
+			_stack->startAdvertising();
 		}
 		break;
 	}
-	case EVT_ADVERTISEMENT_RESUME: {
-		if (_advertisementPaused) {
-			_advertisementPaused = false;
-			_stack->startAdvertising();
+	case EVT_TOGGLE_MESH: {
+#if BUILD_MESHING == 1
+		if (_mesh->isRunning()) {
+			_mesh->stop();
 		}
+		else {
+			_mesh->start();
+		}
+#endif
 		break;
 	}
 	case CONFIG_IBEACON_ENABLED: {

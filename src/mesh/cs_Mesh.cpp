@@ -39,9 +39,8 @@ extern "C" {
 Mesh::Mesh() :
 		_appTimerData({ {0}}),
 		_appTimerId(NULL),
-	_started(false), _running(true), _messageCounter(), _meshControl(MeshControl::getInstance()),
-	_encryptionEnabled(false)
-
+		_initialized(false), _started(false), _running(true), _messageCounter(), _meshControl(MeshControl::getInstance()),
+		_encryptionEnabled(false)
 {
 	_appTimerData = { {0} };
 	_appTimerId = &_appTimerData;
@@ -117,6 +116,7 @@ void Mesh::init() {
 		app_sched_execute();
 //	}
 
+	_initialized = true;
 }
 
 void start_stop_mesh(void * p_event_data, uint16_t event_size) {
@@ -137,51 +137,55 @@ void start_stop_mesh(void * p_event_data, uint16_t event_size) {
 }
 
 void Mesh::start() {
-	if (!_started) {
-		_started = true;
-#ifdef PRINT_MESH_VERBOSE
-		LOGi("start mesh");
-#endif
-		startTicking();
-		uint32_t errorCode = app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
-		APP_ERROR_CHECK(errorCode);
+	if (!_initialized || _started) {
+		return;
 	}
+	_started = true;
+#ifdef PRINT_MESH_VERBOSE
+	LOGi("start mesh");
+#endif
+	startTicking();
+	uint32_t errorCode = app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
+	APP_ERROR_CHECK(errorCode);
 }
 
 void Mesh::stop() {
-	if (_started) {
-		_started = false;
-#ifdef PRINT_MESH_VERBOSE
-		LOGi("stop mesh");
-#endif
-		stopTicking();
-		uint32_t errorCode = app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
-		APP_ERROR_CHECK(errorCode);
+	if (!_initialized || !_started) {
+		return;
 	}
+	_started = false;
+#ifdef PRINT_MESH_VERBOSE
+	LOGi("stop mesh");
+#endif
+	stopTicking();
+	uint32_t errorCode = app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
+	APP_ERROR_CHECK(errorCode);
 }
 
 void Mesh::resume() {
-	if (!_running) {
-		_running = true;
-#ifdef PRINT_MESH_VERBOSE
-		LOGi("resume mesh");
-#endif
-		startTicking();
-		uint32_t errorCode = app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
-		APP_ERROR_CHECK(errorCode);
+	if (!_initialized || _running) {
+		return;
 	}
+	_running = true;
+#ifdef PRINT_MESH_VERBOSE
+	LOGi("resume mesh");
+#endif
+	startTicking();
+	uint32_t errorCode = app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
+	APP_ERROR_CHECK(errorCode);
 }
 
 void Mesh::pause() {
-	if (_running) {
-		_running = false;
-#ifdef PRINT_MESH_VERBOSE
-		LOGi("pause mesh");
-#endif
-		stopTicking();
-		uint32_t errorCode = app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
-		APP_ERROR_CHECK(errorCode);
+	if (!_initialized || !_running) {
+		return;
 	}
+	_running = false;
+#ifdef PRINT_MESH_VERBOSE
+	LOGi("pause mesh");
+#endif
+	stopTicking();
+	uint32_t errorCode = app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
+	APP_ERROR_CHECK(errorCode);
 }
 
 bool Mesh::isRunning() { return _running && _started; }
