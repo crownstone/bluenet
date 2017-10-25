@@ -14,6 +14,7 @@ enum ErrorCodesGeneral {
 	ERR_BUFFER_LOCKED               = 0x04,
 	ERR_ACCESS_NOT_ALLOWED          = 0x05,
 	ERR_BUFFER_TOO_SMALL            = 0x06,
+	ERR_INVALID_CHANNEL             = 0x07,
 };
 
 enum CommandErrorCodes {

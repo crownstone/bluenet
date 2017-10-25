@@ -126,6 +126,17 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 
 	_adc->setDoneCallback(adc_done_callback);
 
+	// init the adc config
+	_adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX] = boardConfig.voltageRange;
+	_adcConfig.rangeMilliVolt[CURRENT_CHANNEL_IDX] = boardConfig.currentRange;
+	_adcConfig.currentPin = boardConfig.pinAinCurrent;
+	_adcConfig.voltagePin = boardConfig.pinAinVoltage;
+	_adcConfig.zeroReferencePin = adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin;
+	_adcConfig.voltageChannelPin = _adcConfig.voltagePin;
+	_adcConfig.voltageChannelUsedAs = 0;
+	_adcConfig.currentDifferential = true;
+	_adcConfig.voltageDifferential = true;
+
 	EventDispatcher::getInstance().addListener(this);
 
 #ifdef TEST_PIN
@@ -173,6 +184,27 @@ void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	case EVT_TOGGLE_LOG_FILTERED_CURRENT:
 		_logsEnabled.flags.filteredCurrent = !_logsEnabled.flags.filteredCurrent;
+		break;
+	case EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
+		toggleVoltageChannelInput();
+		break;
+	case EVT_TOGGLE_ADC_DIFFERENTIAL_CURRENT:
+		toggleDifferentialModeCurrent();
+		break;
+	case EVT_TOGGLE_ADC_DIFFERENTIAL_VOLTAGE:
+		toggleDifferentialModeVoltage();
+		break;
+	case EVT_INC_VOLTAGE_RANGE:
+		changeRange(VOLTAGE_CHANNEL_IDX, 600);
+		break;
+	case EVT_DEC_VOLTAGE_RANGE:
+		changeRange(VOLTAGE_CHANNEL_IDX, -600);
+		break;
+	case EVT_INC_CURRENT_RANGE:
+		changeRange(CURRENT_CHANNEL_IDX, 600);
+		break;
+	case EVT_DEC_CURRENT_RANGE:
+		changeRange(CURRENT_CHANNEL_IDX, -600);
 		break;
 	}
 }
@@ -603,3 +635,68 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	}
 }
 
+void PowerSampling::toggleVoltageChannelInput() {
+	_adcConfig.voltageChannelUsedAs = (_adcConfig.voltageChannelUsedAs + 1) % 3;
+
+	switch (_adcConfig.voltageChannelUsedAs) {
+	case 0: // voltage pin
+		_adcConfig.voltageChannelPin = _adcConfig.voltagePin;
+		break;
+	case 1: // zero reference pin
+		if (_adcConfig.zeroReferencePin == CS_ADC_REF_PIN_NOT_AVAILABLE) {
+			// Skip this pin
+			_adcConfig.voltageChannelUsedAs = (_adcConfig.voltageChannelUsedAs + 1) % 3;
+			// No break here.
+		}
+		else {
+			_adcConfig.voltageChannelPin = _adcConfig.zeroReferencePin;
+			break;
+		}
+	case 2: // VDD
+		_adcConfig.voltageChannelPin = CS_ADC_PIN_VDD;
+		break;
+	}
+	adc_channel_config_t channelConfig;
+	channelConfig.pin = _adcConfig.voltageChannelPin;
+	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX];
+	channelConfig.referencePin = _adcConfig.voltageDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
+}
+
+void PowerSampling::toggleDifferentialModeCurrent() {
+	_adcConfig.currentDifferential = !_adcConfig.currentDifferential;
+	adc_channel_config_t channelConfig;
+	channelConfig.pin = _adcConfig.currentPin;
+	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[CURRENT_CHANNEL_IDX];
+	channelConfig.referencePin = _adcConfig.currentDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	_adc->changeChannel(CURRENT_CHANNEL_IDX, channelConfig);
+}
+
+void PowerSampling::toggleDifferentialModeVoltage() {
+	_adcConfig.voltageDifferential = !_adcConfig.voltageDifferential;
+	adc_channel_config_t channelConfig;
+	channelConfig.pin = _adcConfig.voltageChannelPin;
+	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX];
+	channelConfig.referencePin = _adcConfig.voltageDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
+}
+
+void PowerSampling::changeRange(uint8_t channel, int32_t amount) {
+	_adcConfig.rangeMilliVolt[channel] += amount;
+	if (_adcConfig.rangeMilliVolt[channel] < 150 || _adcConfig.rangeMilliVolt[channel] > 3600) {
+		_adcConfig.rangeMilliVolt[channel] -= amount;
+		return;
+	}
+
+	adc_channel_config_t channelConfig;
+	if (channel == VOLTAGE_CHANNEL_IDX) {
+		channelConfig.pin = _adcConfig.voltageChannelPin;
+		channelConfig.referencePin = _adcConfig.voltageDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	}
+	else {
+		channelConfig.pin = _adcConfig.currentPin;
+		channelConfig.referencePin = _adcConfig.currentDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	}
+	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[channel];
+	_adc->changeChannel(channel, channelConfig);
+}

@@ -16,6 +16,7 @@
 #include "drivers/cs_RTC.h"
 #include "cfg/cs_Strings.h"
 #include "cfg/cs_Config.h"
+#include "protocol/cs_ErrorCodes.h"
 
 //#define PRINT_ADC_VERBOSE
 
@@ -115,9 +116,9 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
  */
 cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config) {
 	LOGi("init channel %u on ain%u, range=%umV, ref=ain%u", channel, config.pin, config.rangeMilliVolt, config.referencePin);
-	assert(config.pin < 8, "Invalid pin");
+	assert(config.pin < 8 || config.pin == CS_ADC_PIN_VDD, "Invalid pin");
 	assert(config.referencePin < 8 || config.referencePin == CS_ADC_REF_PIN_NOT_AVAILABLE, "Invalid ref pin");
-	assert(config.pin != config.referencePin, "Pin and ref pin should be different");
+//	assert(config.pin != config.referencePin, "Pin and ref pin should be different");
 
 	nrf_saadc_channel_config_t channelConfig;
 	channelConfig.resistor_p = NRF_SAADC_RESISTOR_DISABLED;
@@ -127,36 +128,36 @@ cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_
 //	}
 	channelConfig.resistor_n = NRF_SAADC_RESISTOR_DISABLED;
 	if (config.rangeMilliVolt <= 150) {
-		LOGd("gain=4");
+		LOGd("gain=4 range=150mV");
 		channelConfig.gain = NRF_SAADC_GAIN4;
 	}
 	else if (config.rangeMilliVolt <= 300) {
-		LOGd("gain=2");
+		LOGd("gain=2 range=300mV");
 		channelConfig.gain = NRF_SAADC_GAIN2;
 	}
 	else if (config.rangeMilliVolt <= 600) {
-		LOGd("gain=1");
+		LOGd("gain=1 range=600mV");
 		channelConfig.gain = NRF_SAADC_GAIN1;
 	}
 	else if (config.rangeMilliVolt <= 1200) {
-		LOGd("gain=1/2");
+		LOGd("gain=1/2 range=1200mV");
 		channelConfig.gain = NRF_SAADC_GAIN1_2;
 	}
 	else if (config.rangeMilliVolt <= 1800) {
-		LOGd("gain=1/3");
+		LOGd("gain=1/3 range=1800mV");
 		channelConfig.gain = NRF_SAADC_GAIN1_3;
 	}
 	else if (config.rangeMilliVolt <= 2400) {
-		LOGd("gain=1/4");
+		LOGd("gain=1/4 range=2400mV");
 		channelConfig.gain = NRF_SAADC_GAIN1_4;
 	}
 	else if (config.rangeMilliVolt <= 3000) {
-		LOGd("gain=1/5");
+		LOGd("gain=1/5 range=3000mV");
 		channelConfig.gain = NRF_SAADC_GAIN1_5;
 	}
 //	else if (config.rangeMilliVolt <= 3600) {
 	else {
-		LOGd("gain=1/6");
+		LOGd("gain=1/6 range=3600mV");
 		channelConfig.gain = NRF_SAADC_GAIN1_6;
 	}
 
@@ -185,6 +186,7 @@ void ADC::setDoneCallback(adc_done_cb_t callback) {
 }
 
 void ADC::stop() {
+	// TODO: don't just
 	// Stop or shutdown timer.
 //	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_SHUTDOWN);
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_STOP);
@@ -207,11 +209,18 @@ bool ADC::releaseBuffer(nrf_saadc_value_t* buf) {
 		return false;
 	}
 
-	//! Clear the callback data
+	// Clear the callback data
 	_doneCallbackData.buffer = NULL;
 	_doneCallbackData.bufSize = 0;
 	_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
 
+	if (_changeConfig) {
+		// Don't queue up the the buffer, we need the adc to be idle.
+		if (_numBuffersQueued == 0) {
+			applyConfig();
+		}
+		return true;
+	}
 	addBufferToSampleQueue(buf);
 	return true;
 }
@@ -231,6 +240,36 @@ void ADC::enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroV
 	setLimitUp();
 }
 
+cs_adc_error_t ADC::changeChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config) {
+	if (channel >= _config.channelCount) {
+		return ERR_INVALID_CHANNEL;
+	}
+	// Copy the channel config
+	_config.channels[channel].pin = config.pin;
+	_config.channels[channel].rangeMilliVolt = config.rangeMilliVolt;
+	_config.channels[channel].referencePin = config.referencePin;
+	_changeConfig = true;
+
+//	cs_adc_error_t err = initChannel(channel, config);
+//	start();
+	return ERR_SUCCESS;
+}
+
+void ADC::applyConfig() {
+	// Apply channel configs
+	for (int i=0; i<_config.channelCount; ++i) {
+		initChannel(i, _config.channels[i]);
+	}
+
+	// Mark as done
+	_changeConfig = false;
+
+	// Add all buffers again
+	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
+		addBufferToSampleQueue(_bufferPointers[i]);
+	}
+}
+
 void ADC::setLimitUp() {
 	nrf_drv_saadc_limits_set(_zeroCrossingChannel, NRF_DRV_SAADC_LIMITL_DISABLED, _zeroValue);
 }
@@ -246,6 +285,13 @@ void adc_done(void * p_event_data, uint16_t event_size) {
 
 void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
 	_numBuffersQueued--;
+//	if (_changeConfig) {
+//		if (_numBuffersQueued == 0) {
+//			applyConfig();
+//		}
+//		return;
+//	}
+
 	if (_doneCallbackData.callback != NULL && _doneCallbackData.buffer == NULL) {
 		//! Fill callback data object, should become available again in releaseBuffer()
 		_doneCallbackData.buffer = buf;
@@ -256,8 +302,15 @@ void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
 		uint32_t errorCode = app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
 		APP_ERROR_CHECK(errorCode);
 	} else {
-		//! Skip the callback, just put buffer in queue again.
 //		write("/!\\");
+		// Don't queue up the the buffer, we need the adc to be idle.
+		if (_changeConfig) {
+			if (_numBuffersQueued == 0) {
+				applyConfig();
+			}
+			return;
+		}
+		//! Skip the callback, just put buffer in queue again.
 		addBufferToSampleQueue(buf);
 	}
 }
@@ -362,6 +415,8 @@ nrf_saadc_input_t ADC::getAdcPin(const cs_adc_pin_id_t pinNum) {
 		return NRF_SAADC_INPUT_AIN6;
 	case 7:
 		return NRF_SAADC_INPUT_AIN7;
+	case CS_ADC_PIN_VDD:
+		return NRF_SAADC_INPUT_VDD;
 	default:
 		return NRF_SAADC_INPUT_DISABLED;
 	}

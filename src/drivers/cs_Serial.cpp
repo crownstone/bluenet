@@ -141,14 +141,33 @@ static bool readBusy = false;
 static void onByteRead(void * data, uint16_t size) {
 	uint16_t event = 0;
 	switch (readByte) {
+	case 42: // *
+		event = EVT_INC_VOLTAGE_RANGE;
+		break;
+	case 47: // /
+		event = EVT_DEC_VOLTAGE_RANGE;
+		break;
+	case 43: // +
+		event = EVT_INC_CURRENT_RANGE;
+		break;
+	case 45: // -
+		event = EVT_DEC_CURRENT_RANGE;
+		break;
 	case 97: // a
 		event = EVT_TOGGLE_ADVERTISEMENT;
 		break;
 	case 99: // c
 		event = EVT_TOGGLE_LOG_CURRENT;
 		break;
+	case 68: // D
+		event = EVT_TOGGLE_ADC_DIFFERENTIAL_VOLTAGE;
+		break;
+	case 100: // d
+		event = EVT_TOGGLE_ADC_DIFFERENTIAL_CURRENT;
+		break;
 	case 70: // F
 		write("Paid respect\r\n");
+		break;
 	case 102: // f
 		event = EVT_TOGGLE_LOG_FILTERED_CURRENT;
 		break;
@@ -164,6 +183,9 @@ static void onByteRead(void * data, uint16_t size) {
 	case 114: // r
 		event = EVT_CMD_RESET;
 		break;
+	case 86: // V
+		event = EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN;
+		break;
 	case 118: // v
 		event = EVT_TOGGLE_LOG_VOLTAGE;
 		break;
@@ -174,6 +196,7 @@ static void onByteRead(void * data, uint16_t size) {
 	readBusy = false;
 }
 
+
 // UART interrupt handler
 extern "C" void UART0_IRQHandler(void) {
 #ifdef TEST_PIN
@@ -181,7 +204,6 @@ extern "C" void UART0_IRQHandler(void) {
 #endif
 
 	readByte = (uint8_t)NRF_UART0->RXD;
-	write("read: %u\r\n", readByte);
 
 	if (!readBusy) {
 		readBusy = true;
@@ -189,6 +211,7 @@ extern "C" void UART0_IRQHandler(void) {
 		uint32_t errorCode = app_sched_event_put(&readByte, sizeof(readByte), onByteRead);
 		APP_ERROR_CHECK(errorCode);
 	}
+	write("read: %u\r\n", readByte);
 
 	// Clear event after reading the data: new data may be written to RXD immediately.
 	NRF_UART0->EVENTS_RXDRDY = 0;

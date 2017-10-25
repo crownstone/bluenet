@@ -73,6 +73,7 @@ enum adc_gain_t {
 };
 
 #define CS_ADC_REF_PIN_NOT_AVAILABLE 255
+#define CS_ADC_PIN_VDD 100
 
 /** Struct to configure an adc channel.
  *
@@ -157,7 +158,7 @@ public:
 	/** Initialize ADC.
 	 *
 	 * @param[in] config               Config struct.
-	 * @return                         Error code (0 means success).
+	 * @return                         Error code (0 for success).
 	 */
 	cs_adc_error_t init(const adc_config_t& config);
 
@@ -195,6 +196,16 @@ public:
 	 */
 	void enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroVal);
 
+	/** Change channel config.
+	 *  Currently this config is applied immediately.
+	 *  TODO: Apply config after a buffer has been filled.
+	 *
+	 * @param[in] channel              Channel number.
+	 * @param[in] config               Config struct.
+	 * @return                         Error code (0 for success).
+	 */
+	cs_adc_error_t changeChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config);
+
 
 	/** Update this object with a buffer with values from the ADC conversion.
 	 *
@@ -227,6 +238,9 @@ private:
 	//! This class is singleton, deny implementation
 	void operator=(ADC const &);
 
+	//! Whether or not the config should be changed.
+	bool _changeConfig;
+
 	//! Configuration of this class
 	adc_config_t _config;
 
@@ -254,7 +268,7 @@ private:
 	//! Store the zero value used to detect zero crossings.
 	int32_t _zeroValue;
 
-	//! Function to initialize the adc channels, this can be done after each sample.
+	//! Function to initialize the adc channels.
 	cs_adc_error_t initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config);
 
 	//! Set the adc limit such that it triggers when going above zero
@@ -268,6 +282,9 @@ private:
 
 	//! Function that puts a buffer in queue to be populated with adc values.
 	void addBufferToSampleQueue(nrf_saadc_value_t* buf);
+
+	//! Function to apply a new config. Should be called when no buffers are are queued, nor being processed.
+	void applyConfig();
 
 	//! Helper function to get the ppi channel, given the index.
 	nrf_ppi_channel_t getPpiChannel(uint8_t index);
