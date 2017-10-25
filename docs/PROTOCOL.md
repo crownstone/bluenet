@@ -175,8 +175,8 @@ uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | [Event bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 16 | Power factor | 2 | The power factor at this moment. Divide by 1024 to get the actual power factor.
-uint 16 | Power usage | 2 | The apparent power usage at this moment (dW). Divide by 10 to get power usage in Watt.
-int 32 | Accumulated energy | 4 | The accumulated energy (Wh).
+uint 16 | Power usage | 2 | The apparent power usage at this moment. Divide by 16 to get power usage in Watt.
+int 32 | Energy used | 4 | The total energy used. Divide by 64 to get the energy used in Joule.
 uint 8[] | Rand | 3 | Random bytes.
 
 
