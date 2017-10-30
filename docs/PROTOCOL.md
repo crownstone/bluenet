@@ -27,7 +27,7 @@ The values are only valid for this connection session. The session key and the s
 - Phone starts setting up the Crownstone using the [config control](#setup_service) characteristic
     - Phone gives Crownstone [its identifier](#crownstone_identifier)
     - Phone gives Crownstone [the Admin key](#admin_key)
-    - Phone gives Crownstone [the User key](#user_key)
+    - Phone gives Crownstone [the Member key](#user_key)
     - Phone gives Crownstone [the Guest key](#guest_key)
     - Phone gives Crownstone [the Mesh Access Address](#mesh_access_address)
     - Phone gives Crownstone [its iBeacon UUID](#ibeacon_uuid)
@@ -76,7 +76,7 @@ We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_oper
 Type | Name | Length | Description
 --- | --- | --- | ---
 byte array | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of this message.
-uint 8 | User level | 1 | 0: Admin, 1: User, 2: Guest
+uint 8 | User level | 1 | 0: Admin, 1: Member, 2: Guest
 [Encrypted Payload](#encrypted_payload) | Encrypted Payload | N*16 | The encrypted payload of N blocks.
 
 ##### <a name="encrypted_payload"></a>Encrypted payload
@@ -210,9 +210,9 @@ When connected, the following services are available.
 
 The AUG columns indicate which users can use these characteristics if encryption is enabled. The access can be further restricted per packet. Dots (..)  indicate  encryption is not enabled for that characteristic.
 
-- A = Admin
-- U = User
-- G = Guest
+- A: Admin
+- M: Member  
+- G: Guest
 
 The following services are available (depending on state and config):
 - [Crownstone service](#crownstone_service). Contains all you need: control, config and state.
@@ -228,7 +228,7 @@ The following services are available (depending on state and config):
 
 The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following characteristics:
 
-Characteristic | UUID | Date type | Description | A | U | G
+Characteristic | UUID | Date type | Description | A | M | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Control        | 24f00001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the control characteristic | x | x | x
 <a name="mesh_control_characteristic"></a>Mesh control   | 24f00002-7d10-4805-bfc1-7663a01c3bff | [Mesh control packet](#mesh_control_packet) | Write a command to the mesh control characteristic to send into the mesh | x | x |
@@ -294,7 +294,7 @@ The control characteristics (Control, and Config Control) of the Setup Service r
 
 The general service has UUID 24f20000-7d10-4805-bfc1-7663a01c3bff.
 
-Characteristic | UUID | Date type | Description | A | U | G
+Characteristic | UUID | Date type | Description | A | M | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Temperature    | 24f20001-7d10-4805-bfc1-7663a01c3bff | int 32 | Chip temperature in Celcius. Notifications are available. | x
 Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 1 to reset. Write 66 to go to DFU mode. | x
@@ -304,7 +304,7 @@ Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 1 to rese
 
 The power service has UUID 24f30000-7d10-4805-bfc1-7663a01c3bff. **Should be encrypted but it is not at the moment due to implementation.**
 
-Characteristic | UUID | Date type | Description | A | U | G
+Characteristic | UUID | Date type | Description | A | M | G
 --- | --- | --- | --- | :---: | :---: | :---:
 PWM                | 24f30001-7d10-4805-bfc1-7663a01c3bff | uint 8 | Set PWM value. Value of 0 is completely off, 255 (100 on new devices) is completely on. | x
 Relay              | 24f30002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Switch Relay. Value of 0 is off, other is on. | x
@@ -316,7 +316,7 @@ Power consumption  | 24f30004-7d10-4805-bfc1-7663a01c3bff | uint 16 | The curren
 
 The localization service has UUID 24f40000-7d10-4805-bfc1-7663a01c3bff.
 
-Characteristic | UUID | Date type | Description | A | U | G
+Characteristic | UUID | Date type | Description | A | M | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Track control           | 24f40001-7d10-4805-bfc1-7663a01c3bff | [Tracked device](#tracked_device_packet) | Add or overwrite a tracked device. Set threshold larger than 0 to remove the tracked device from the list. | x
 Tracked devices         | 24f40002-7d10-4805-bfc1-7663a01c3bff | [Tracked device list](#tracked_device_list_packet) | Read the current list of tracked devices. | x
@@ -329,7 +329,7 @@ RSSI                    | 24f40005-7d10-4805-bfc1-7663a01c3bff | uint 8 | RSSI t
 
 The schedule service has UUID 24f50000-7d10-4805-bfc1-7663a01c3bff.
 
-Characteristic | UUID | Date type | Description | A | U | G
+Characteristic | UUID | Date type | Description | A | M | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Set time        | 24f50001-7d10-4805-bfc1-7663a01c3bff | uint 32 | Sets the time. Timestamp is in seconds since epoch. | x
 Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule command](#schedule_command_packet) | Set or clear a schedule entry. To clear: only write the index. | x
@@ -340,7 +340,7 @@ Schedule read   | 24f50003-7d10-4805-bfc1-7663a01c3bff | [Schedule list](#schedu
 
 The mesh service comes with [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh) and has UUID 0000fee4-0000-1000-8000-00805f9b34fb
 
-Characteristic | UUID | Date type | Description | A | U | G
+Characteristic | UUID | Date type | Description | A | M | G
 --- | --- | --- | --- | :---: | :---: | :---:
 Meta data   | 2a1e0004-fd51-d882-8ba8-b98c0000cd1e | | Get mesh configuration. | x
 Value       | 2a1e0005-fd51-d882-8ba8-b98c0000cd1e | | Characteristic where the mesh values can be read. | x
@@ -375,12 +375,12 @@ uint 8 | Payload | Length | Payload data, depends on type.
 The AUG columns indicate which users have access to these commands if encryption is enabled.
  Admin access means the packet is encrypted with the admin key.
 - A: Admin
-- U: User
+- M: Member  
 - G: Guest
 
 Available command types:
 
-Type nr | Type name | Payload type | Payload Description | A | U | G
+Type nr | Type name | Payload type | Payload Description | A | M | G
 --- | --- | --- | --- | :---: | :---: | :---:
 0 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON | x | x | x
 1 | PWM | uint 8 | Set PWM to value, 0 = OFF, 100 = FULL ON | x | x | x
@@ -638,7 +638,7 @@ uint 16 [] | Counters | size * 2 | Counter that keeps up how long ago the RSSI o
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Size | 1 | Number of entries in the list.
-[schedule entry](#schedule_entry_packet) | Entries | size*12 | Schedule entry list. Entries with timestamp=0 can be considered empty.
+[schedule entry](#schedule_entry_packet) | Entries | size * 12 | Schedule entry list. Entries with timestamp=0 can be considered empty.
 
 ### <a name="schedule_command_packet"></a>Schedule command packet
 Type | Name | Length | Description
