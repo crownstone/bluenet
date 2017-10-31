@@ -5,15 +5,15 @@ Crownstone tech can be used to enrich smart home and smart building solutions, b
 
 Integration can be done on multiple levels.
 
-1 - Control Crownstones from your own hardware.
-2 - Control Crownstones from within your own app.
-3 - Obtain data from the Crownstones.
-4 - Provide indoor localization functionality using the Crownstone app.
-5 - Provide indoor localization functionality using your own app.
-6 - Track wearables.
-7 - Identify devices.
+1. [Control Crownstones from your own hardware.](#control_via_own_hardware)
+2. [Control Crownstones from within your own app.](#control_via_own_app)
+3. [Obtain data from the Crownstones.](#read)
+4. [Provide indoor localization functionality using the Crownstone app.](#localization_via_rest)
+5. [Provide indoor localization functionality using your own app.](#localization_via_own_app)
+6. [Track wearables.](#track)
+7. [Identify devices.](#device_identification)
 
-1 - Control Crownstones from your own hardware
+1 -  <a name="control_via_own_hardware"></a>Control Crownstones from your own hardware
 =================
 
 Your hardware needs to have a Bluetooth low energy (BLE) radio or a USB port in which a Bluetooth low energy dongle can be plugged. The hardware needs to be able to run software that transforms requests towards commands that are sent over BLE. 
@@ -33,14 +33,14 @@ A (language-agnostic) binary will be provided on github (not yet available). It 
 c. Crownstone REST API
 A Crownstone REST API is available that uses the official Crownstone app to control devices that are in range of the phone of the user. 
 
-2 - Control Crownstones from within your own app
+2 - <a name="control_via_own_app"></a>Control Crownstones from within your own app
 =====
 
 - You can use our React Native app and integrate it with your RN app
 - You can use our Android and iOS libs to control Crownstones from your app
 
 
-3: Read out information from Crownstones
+3: <a name="read"></a>Read out information from Crownstones
 ====
 
 All data sent from the Crownstones is safely encrypted. If you want to be able to read the information, you will need the keys. These can be obtained from the Cloud through OAUTH2 or the explorer.
@@ -50,22 +50,22 @@ If you want to download the information from the cloud, use the REST service.
 If you want to read out the information from the Crownstones using a computer or raspberry pi, use the python lib, if you want to read it out through a phone, use the phone libs.
 
 
-4: use indoor localization from the Crownstone app to trigger my things 
+4: <a name="localization_via_rest"></a>Use indoor localization from the Crownstone app to trigger my things 
 ======
 
 You can use the REST interface to subscribe to a location change event.
 
 
-5: use indoor localization with my own app running on a phone 
+5: <a name="localization_via_own_app"></a>Use indoor localization with my own app running on a phone 
 === 
 
 You will have to use our indoor localization libs, provide your own UI for training locations and use our training helper libs to train these locations. You can optionally use our bluenet libs to get the ibeacon data and/or advertisements from the Crownstones. These can also be obtained though your own code. The indoor localization libs will provide you with a location per sample you give them.
 
-6: Track wearables
+6: <a name="track"></a>Track wearables
 ===
 We can't, yet.
 
-7: Identify devices
+7: <a name="device_identification"></a>Identify devices
 ====
 We can't, yet.
 
