@@ -60,6 +60,17 @@ const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_L
                                                     .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
 //*/
 
+const uint16_t Mesh::meshHandles[MESH_HANDLE_COUNT] = {
+		KEEP_ALIVE_CHANNEL,
+		STATE_BROADCAST_CHANNEL,
+		STATE_CHANGE_CHANNEL,
+		COMMAND_CHANNEL,
+		COMMAND_REPLY_CHANNEL,
+		SCAN_RESULT_CHANNEL,
+		BIG_DATA_CHANNEL,
+		MULTI_SWITCH_CHANNEL
+};
+
 /**
  * Function to test mesh functionality. We have to figure out if we have to enable the radio first, and that kind of
  * thing.
@@ -91,8 +102,8 @@ void Mesh::init() {
 	error_code = rbc_mesh_init(init_params);
 	APP_ERROR_CHECK(error_code);
 
-	for (int i = 0; i < MESH_NUM_HANDLES; ++i) {
-		error_code = rbc_mesh_value_enable(i+1);
+	for (int i = 0; i < MESH_HANDLE_COUNT; ++i) {
+		error_code = rbc_mesh_value_enable(meshHandles[i]);
 		APP_ERROR_CHECK(error_code);
 	}
 
@@ -190,26 +201,21 @@ void Mesh::pause() {
 
 bool Mesh::isRunning() { return _running && _started; }
 
-bool Mesh::isValidHandle(mesh_handle_t handle) {
-	//! Currently, the handles are in the range: 1 to MESH_NUM_HANDLES
-	return (handle > 0 && handle <= MESH_NUM_HANDLES);
-}
-
-uint16_t Mesh::getMessageCounterIndex(mesh_handle_t handle) {
-	//! Currently, the handles are in the range: 1 to MESH_NUM_HANDLES
-	assert(handle > 0, "Handle < 1");
-	return handle - 1;
+uint16_t Mesh::getHandleIndex(mesh_handle_t handle) {
+	for (uint16_t i=0; i<MESH_HANDLE_COUNT; ++i) {
+		if (meshHandles[i] == handle) {
+			return i;
+		}
+	}
+	return INVALID_HANDLE;
 }
 
 MeshMessageCounter& Mesh::getMessageCounter(mesh_handle_t handle) {
-	return _messageCounter[getMessageCounterIndex(handle)];
+	return _messageCounter[getHandleIndex(handle)];
 }
 
-uint32_t Mesh::getMessageCounterVal(mesh_handle_t handle) {
-	if (isValidHandle(handle)) {
-		return getMessageCounter(handle).getVal();
-	}
-	return 0;
+MeshMessageCounter& Mesh::getMessageCounterFromIndex(uint16_t handleIndex) {
+	return _messageCounter[handleIndex];
 }
 
 void Mesh::tick() {
@@ -243,7 +249,8 @@ uint32_t Mesh::send(mesh_handle_t handle, void* p_data, uint16_t length) {
 		return 0;
 	}
 
-	if (!isValidHandle(handle)) {
+	uint16_t handleIndex = getHandleIndex(handle);
+	if (handleIndex == INVALID_HANDLE) {
 		LOGe("Invalid handle: %d", handle);
 		return 0;
 	}
@@ -251,7 +258,7 @@ uint32_t Mesh::send(mesh_handle_t handle, void* p_data, uint16_t length) {
 	mesh_message_t message = {};
 //	memset(&message, 0, sizeof(mesh_message_t));
 
-	message.messageCounter = (++getMessageCounter(handle)).getVal();
+	message.messageCounter = (++getMessageCounterFromIndex(handleIndex)).getVal();
 	memcpy(&message.payload, p_data, length);
 
 #ifdef PRINT_MESH_VERBOSE
@@ -556,7 +563,8 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 #endif
 
 	//! Check if the handle is valid.
-	if (!isValidHandle(handle)) {
+	uint16_t handleIndex = getHandleIndex(handle);
+	if (handleIndex == INVALID_HANDLE) {
 		uint32_t error_code;
 		error_code = rbc_mesh_value_disable(handle);
 		APP_ERROR_CHECK(error_code);
@@ -602,10 +610,10 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 
 			if (decodeMessage(received, receivedLength, &message, sizeof(mesh_message_t))) {
 
-				int32_t delta = getMessageCounter(handle).calcDelta(received->messageCounter);
+				int32_t delta = getMessageCounterFromIndex(handleIndex).calcDelta(received->messageCounter);
 				if (delta > 0) {
 
-					getMessageCounter(handle).setVal(message.messageCounter);
+					getMessageCounterFromIndex(handleIndex).setVal(message.messageCounter);
 
 #ifdef PRINT_MESH_VERBOSE
 					LOGi("message:");
@@ -616,7 +624,7 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 
 				}
 				else {
-					LOGw("Received older msg? received %d, stored %d", message.messageCounter, getMessageCounter(handle).getVal());
+					LOGw("Received older msg? received %d, stored %d", message.messageCounter, getMessageCounterFromIndex(handleIndex).getVal());
 				}
 			}
             break;
@@ -653,23 +661,24 @@ bool Mesh::encodeMessage(mesh_message_t* decoded, uint16_t decodedLength, encryp
 void Mesh::checkForMessages() {
 	rbc_mesh_event_t evt;
 
-	//! check if there are new messages
+	// check if there are new messages
 	while (rbc_mesh_event_get(&evt) == NRF_SUCCESS) {
 
 		mesh_handle_t handle = evt.params.tx.value_handle;
 
-		//! Check if the handle is valid.
-		if (isValidHandle(handle)) {
+		// Check if the handle is valid.
+		uint16_t handleIndex = getHandleIndex(handle);
+		if (handleIndex != INVALID_HANDLE) {
 
 			encrypted_mesh_message_t* received = (encrypted_mesh_message_t*)evt.params.rx.p_data;
-//			if (getMessageCounter(handle).getVal() == 0) {
+//			if (getMessageCounterFromIndex(handleIndex).getVal() == 0) {
 //				//! Skip handling the first message we receive on each handle, as it probably is an old message.
-			if (getMessageCounter(handle).getVal() == 0 && RTC::difference(RTC::getCount(), _mesh_start_time) < RTC::msToTicks(MESH_BOOT_TIME)) {
+			if (getMessageCounterFromIndex(handleIndex).getVal() == 0 && RTC::difference(RTC::getCount(), _mesh_start_time) < RTC::msToTicks(MESH_BOOT_TIME)) {
 				//! Skip handling the first message we receive within the first X seconds after boot on each handle, as it probably is an old message.
 				//! This may lead to ignoring a message that should've been handled.
 				LOGi("skip message %d on handle %d", received->messageCounter, handle);
 				//! Skip the first message after a boot up but take over the message counter
-				getMessageCounter(handle).setVal(received->messageCounter);
+				getMessageCounterFromIndex(handleIndex).setVal(received->messageCounter);
 			}
 			else {
 				//! handle the message

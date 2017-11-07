@@ -48,12 +48,14 @@ private:
 	bool                     _running;
 
 	//! Keeps up the message counters for each handle
-	MeshMessageCounter       _messageCounter[MESH_NUM_HANDLES];
+	MeshMessageCounter       _messageCounter[MESH_HANDLE_COUNT];
 
 	//! Keeps up when the mesh was started
 	uint32_t                 _mesh_start_time = 0;
 
-	static const nrf_clock_lf_cfg_t  meshClockSource;
+	static const nrf_clock_lf_cfg_t meshClockSource;
+
+	static const uint16_t meshHandles[MESH_HANDLE_COUNT];
 
 	MeshControl&             _meshControl;
 
@@ -95,13 +97,13 @@ private:
 	void resolveConflict(mesh_handle_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,
 			encrypted_mesh_message_t* p_new, uint16_t length_new);
 
-	//! Returns the index of a given handle
-	//! Does not check if handle is valid!
-	uint16_t getMessageCounterIndex(mesh_handle_t handle);
-
 	//! Returns the message counter of a given handle
 	//! Does not check if handle is valid!
 	MeshMessageCounter& getMessageCounter(mesh_handle_t handle);
+
+	//! Returns the message counter of a given handle index
+	//! Returns NULL for an invalid handle index
+	MeshMessageCounter& getMessageCounterFromIndex(uint16_t handleIndex);
 
 public:
 	//! use static variant of singleton, no dynamic memory allocation
@@ -128,10 +130,8 @@ public:
 	//! Returns whether the mesh is currently started and running.
 	bool isRunning();
 
-	bool isValidHandle(mesh_handle_t handle);
-
-	//! Returns the message counter value of a given handle
-	uint32_t getMessageCounterVal(mesh_handle_t handle);
+	//! Returns the index of a given handle. Returns INVALID_HANDLE if it has no index.
+	uint16_t getHandleIndex(mesh_handle_t handle);
 
 
 	//! Send message
