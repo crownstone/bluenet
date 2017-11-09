@@ -707,12 +707,8 @@ void Nrf51822BluetoothStack::restartAdvertising() {
 		return;
 	}
 
-	// Only restart advertising when already advertising
-	if (!_advertising) {
-		return;
-	}
-
 	uint32_t err_code;
+	if (_advertising) {
 #ifdef TEST_PIN
 	nrf_gpio_pin_set(TEST_PIN);
 #endif
@@ -727,6 +723,7 @@ void Nrf51822BluetoothStack::restartAdvertising() {
 		else {
 			LOGw("adv_stop invalid state");
 		}
+	}
 
 	err_code = sd_ble_gap_adv_start(&_adv_params);
 	switch (err_code) {
@@ -747,8 +744,10 @@ void Nrf51822BluetoothStack::restartAdvertising() {
 }
 
 void Nrf51822BluetoothStack::startAdvertising() {
-	if (_advertising)
+	if (_advertising) {
+		LOGw("invalid state");
 		return;
+	}
 
 	LOGi(MSG_BLE_ADVERTISING_STARTING);
 
@@ -765,8 +764,10 @@ void Nrf51822BluetoothStack::startAdvertising() {
 }
 
 void Nrf51822BluetoothStack::stopAdvertising() {
-	if (!_advertising)
+	if (!_advertising) {
+		LOGw("invalid state");
 		return;
+	}
 
 	uint32_t err_code = sd_ble_gap_adv_stop();
 	// Ignore invalid state error, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
