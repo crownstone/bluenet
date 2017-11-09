@@ -62,8 +62,8 @@ const nrf_clock_lf_cfg_t Mesh::meshClockSource = {  .source        = NRF_CLOCK_L
 
 const uint16_t Mesh::meshHandles[MESH_HANDLE_COUNT] = {
 		KEEP_ALIVE_CHANNEL,
-		STATE_BROADCAST_CHANNEL,
-		STATE_CHANGE_CHANNEL,
+		STATE_CHANNEL_0,
+		STATE_CHANNEL_1,
 		COMMAND_CHANNEL,
 		COMMAND_REPLY_CHANNEL,
 		SCAN_RESULT_CHANNEL,
@@ -286,8 +286,14 @@ uint32_t Mesh::send(mesh_handle_t handle, void* p_data, uint16_t length) {
 	return message.messageCounter;
 }
 
-bool Mesh::getLastMessage(mesh_handle_t handle, void* p_data, uint16_t& length) {
-//	assert(length <= MAX_MESH_MESSAGE_LENGTH, STR_ERR_VALUE_TOO_LONG);
+bool Mesh::getLastMessage(mesh_handle_t handle, void* p_data, uint16_t length) {
+	if (length != MAX_MESH_MESSAGE_LENGTH) {
+		LOGe("invalid length? %u", length);
+	}
+	assert(length == MAX_MESH_MESSAGE_LENGTH, "invalid length");
+
+	// TODO: we allocate a whole mesh_message_t on stack, just because the p_data doesn't have the message counter.
+	// TODO: we can just use encryptedMessage as input and output for decryption, right?
 
 	if (!_started || !Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		LOGi("started: %s", _started ? "true" : "false");
@@ -302,33 +308,31 @@ bool Mesh::getLastMessage(mesh_handle_t handle, void* p_data, uint16_t& length) 
 	//! Get the last value from rbc_mesh. This copies the message to the given pointer.
 	APP_ERROR_CHECK(rbc_mesh_value_get(handle, (uint8_t*)&encryptedMessage, &encryptedLength));
 
-	if (encryptedLength != 0) {
+	if (encryptedLength == 0) {
+		return false;
+	}
 
-//		LOGd("encrypted message:");
-//		BLEutil::printArray(&encryptedMessage, length);
+//	LOGd("encrypted message:");
+//	BLEutil::printArray(&encryptedMessage, length);
 
-		mesh_message_t message = {};
+	mesh_message_t message = {};
 
-		bool validated = decodeMessage(&encryptedMessage, encryptedLength, &message, sizeof(mesh_message_t));
-		if (!validated) {
-			LOGe("Message not validated!");
-			return false;
-		}
+	bool validated = decodeMessage(&encryptedMessage, encryptedLength, &message, sizeof(mesh_message_t));
+	if (!validated) {
+		LOGe("Message not validated!");
+		return false;
+	}
 
 //		LOGd("message:");
 //		BLEutil::printArray(&message, length);
 
-		if (length > sizeof(message.payload)) {
-			length = sizeof(message.payload);
-		}
-		memcpy((uint8_t*)p_data, message.payload, length);
+//	if (length > sizeof(message.payload)) {
+//		length = sizeof(message.payload);
+//	}
+	memcpy((uint8_t*)p_data, message.payload, MAX_MESH_MESSAGE_LENGTH);
 
-		//LOGi("recv ch: %d, len: %d", handle, length);
-		return true;
-
-	} else {
-		return false;
-	}
+	//LOGi("recv ch: %d, len: %d", handle, length);
+	return true;
 }
 
 void Mesh::resolveConflict(mesh_handle_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,
@@ -458,8 +462,8 @@ void Mesh::resolveConflict(mesh_handle_t handle, encrypted_mesh_message_t* p_old
 
 		break;
 	}
-	case STATE_BROADCAST_CHANNEL:
-	case STATE_CHANGE_CHANNEL: {
+	case STATE_CHANNEL_0:
+	case STATE_CHANNEL_1: {
 
 		state_message_t *stateMessageOld, *stateMessageNew;
 		stateMessageOld = (state_message_t*)messageOld.payload;

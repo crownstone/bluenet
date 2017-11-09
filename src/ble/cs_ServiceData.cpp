@@ -19,7 +19,7 @@
 #include <protocol/mesh/cs_MeshMessageState.h>
 #endif
 
-//#define ADVERTISE_EXTERNAL_DATA
+#define ADVERTISE_EXTERNAL_DATA
 
 ServiceData::ServiceData() : _updateTimerId(NULL), _connected(false)
 {
@@ -44,8 +44,6 @@ ServiceData::ServiceData() : _updateTimerId(NULL), _connected(false)
 	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
 
 #if BUILD_MESHING == 1
-	_lastStateChangeMessage = {};
-
 	_meshStateTimerData = { {0} };
 	_meshStateTimerId = &_meshStateTimerData;
 	Timer::getInstance().createSingleShot(_meshStateTimerId, (app_timer_timeout_handler_t)ServiceData::meshStateTick);
@@ -94,123 +92,12 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 		service_data_t* serviceData = &_serviceData;
 
-#if BUILD_MESHING == 1 && defined(ADVERTISE_EXTERNAL_DATA)
-		// Every N updates, we advertise the state of another crownstone.
-		if (_operationMode == OPERATION_MODE_NORMAL && _updateCount % 2 == 0 && Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-			state_message_t message = {};
-			uint16_t messageSize = sizeof(state_message_t);
-			bool hasStateMsg;
-
-			if (_numAdvertiseChangedStates > 0) {
-				hasStateMsg = MeshControl::getInstance().getLastStateDataMessage(message, messageSize, true);
-				_numAdvertiseChangedStates--;
-			}
-			else {
-				hasStateMsg = MeshControl::getInstance().getLastStateDataMessage(message, messageSize, false);
-			}
-			if (hasStateMsg && is_valid_state_msg(&message) && message.size) {
-				int16_t idx = -1;
-				state_item_t* p_stateItem;
-
-				// Remove ids that are in the list, but not in the message
-				_tempAdvertisedIds.size = 0;
-				for (auto i=0; i<_advertisedIds.size; i++) {
-					bool found = false;
-//					state_message stateMsgWrapper(&message);
-//					for (state_message::iterator iter = stateMsgWrapper.begin(); iter != stateMsgWrapper.end(); ++iter) {
-//						state_item_t stateItem = *iter;
-//						if (_advertisedIds.list[i] == stateItem.id) {
-//							//! First copy the ones that are in both to a temp list
-//							_tempAdvertisedIds.list[_tempAdvertisedIds.size++] = _advertisedIds.list[i];
-//							found = true;
-//							break;
-//						}
-//					}
-					idx = -1;
-					while (peek_next_state_item(&message, &p_stateItem, idx)) {
-						if (_advertisedIds.list[i] == p_stateItem->id) {
-							// First copy the ones that are in both to a temp list
-							_tempAdvertisedIds.list[_tempAdvertisedIds.size++] = _advertisedIds.list[i];
-							found = true;
-							break;
-						}
-					}
-					if (!found && i < _advertisedIds.head) {
-						// Id at index before head got removed, so decrease head
-						_advertisedIds.head--;
-					}
-				}
-				// Then copy the temp list to the list
-				for (auto i=0; i<_tempAdvertisedIds.size; i++) {
-					_advertisedIds.list[i] = _tempAdvertisedIds.list[i];
-				}
-				_advertisedIds.size = _tempAdvertisedIds.size;
-
-				// Make sure the head is wrapped around correctly
-				if (_advertisedIds.head < 0) {
-					_advertisedIds.head = _advertisedIds.size-1;
-				}
-				if (_advertisedIds.head >= _advertisedIds.size) {
-					_advertisedIds.head = 0;
-				}
-
-				uint8_t advertiseId = 0;
-				if (_advertisedIds.size > 0) {
-					advertiseId = _advertisedIds.list[_advertisedIds.head];
-				}
-
-				// Add first id that is in the message, but not in the list (search from newest to oldest)
-				// If this happens, advertise this id instead of the id at the head
-				// Skip ids that are 0 or similar to own id
-				idx = -1;
-				while (peek_prev_state_item(&message, &p_stateItem, idx)) {
-					if (p_stateItem->id == 0 || p_stateItem->id == _serviceData.params.crownstoneId) {
-						continue;
-					}
-					bool found = false;
-					for (auto i=0; i<_advertisedIds.size; i++) {
-						if (_advertisedIds.list[i] == p_stateItem->id) {
-							found = true;
-							break;
-						}
-					}
-					if (!found) {
-						// Add item to list
-						_advertisedIds.list[_advertisedIds.size] = p_stateItem->id;
-						_advertisedIds.size++;
-
-						// Advertise this id instead of head
-						advertiseId = p_stateItem->id;
-						break;
-					}
-				}
-
-				// Advertise the selected id (if it's not 0)
-				if (advertiseId != 0) {
-					idx = -1;
-					while (peek_prev_state_item(&message, &p_stateItem, idx)) {
-//						LOGd("idx=%d id=%d switch=%d bitmask=%d P=%d E=%d", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerUsage, p_stateItem->accumulatedEnergy);
-						if (p_stateItem->id == advertiseId) {
-//							LOGd("Advertise external data");
-							serviceData = &_serviceDataExt;
-							serviceData->params.crownstoneId = p_stateItem->id;
-							serviceData->params.switchState = p_stateItem->switchState;
-							serviceData->params.eventBitmask = p_stateItem->eventBitmask;
-							serviceData->params.eventBitmask |= 1 << SHOWING_EXTERNAL_DATA;
-							serviceData->params.powerUsage = p_stateItem->powerUsage;
-							serviceData->params.accumulatedEnergy = p_stateItem->accumulatedEnergy;
-							break;
-						}
-					}
-
-					// If we advertised the id at head, then increase the head
-					if (advertiseId == _advertisedIds.list[_advertisedIds.head]) {
-						_advertisedIds.head = (_advertisedIds.head + 1) % _advertisedIds.size;
-					}
-				}
+		// Every 2 updates, we advertise the state of another crownstone.
+		if (_updateCount % 2 == 0) {
+			if (getExternalAdvertisement(_serviceData.params.crownstoneId, _serviceDataExt)) {
+				serviceData = &_serviceDataExt;
 			}
 		}
-#endif
 
 		// We use one random number (only if encrypted) and a uint16 counter value for the last 2 bytes.
 		// Counter is cheaper than random.
@@ -243,6 +130,209 @@ void ServiceData::updateAdvertisement(bool initial) {
 	}
 }
 
+bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& serviceData) {
+#if BUILD_MESHING == 1 && defined(ADVERTISE_EXTERNAL_DATA)
+
+	if (_operationMode != OPERATION_MODE_NORMAL || Settings::getInstance().isSet(CONFIG_MESH_ENABLED) == false) {
+		return false;
+	}
+
+	// TODO: don't put multiple messages on the stack. But getLastStateDataMessage() is also expensive..
+	state_message_t messages[MESH_STATE_HANDLE_COUNT];
+	bool hasStateMsg[MESH_STATE_HANDLE_COUNT];
+	uint16_t messageSize = sizeof(state_message_t);
+
+	// First check if there's any valid state message, and keep up which channels have a valid message
+	bool anyStateMsg = false;
+	for (uint8_t chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
+		hasStateMsg[chan] = MeshControl::getInstance().getLastStateDataMessage(messages[chan], messageSize, chan);
+		if (hasStateMsg[chan] && is_valid_state_msg(&(messages[chan])) && messages[chan].size) {
+			anyStateMsg = true;
+		}
+		else {
+			hasStateMsg[chan] = false;
+		}
+	}
+	if (!anyStateMsg) {
+		return false;
+	}
+
+	id_type_t advertiseId = 0;
+
+	if (_numAdvertiseChangedStates > 0) {
+		// Select an id which has a state triggered by an event.
+		advertiseId = chooseExternalId(ownId, messages, hasStateMsg, true);
+	}
+	if (advertiseId == 0) {
+		// Didn't select an id which has a state triggered by an event, so select a regular one.
+		_numAdvertiseChangedStates = 0;
+		advertiseId = chooseExternalId(ownId, messages, hasStateMsg, false);
+	}
+
+	if (advertiseId == 0) {
+		return false;
+	}
+
+	// Fill the service data with the data of the selected id
+	bool found = false;
+	for (uint8_t chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
+		if (!hasStateMsg[chan]) {
+			continue;
+		}
+
+		int16_t idx = -1;
+		state_item_t* p_stateItem;
+		while (peek_prev_state_item(&(messages[chan]), &p_stateItem, idx)) {
+			if (p_stateItem->id == advertiseId) {
+				serviceData.params.crownstoneId = p_stateItem->id;
+				serviceData.params.switchState = p_stateItem->switchState;
+				serviceData.params.eventBitmask = p_stateItem->eventBitmask;
+				serviceData.params.eventBitmask |= 1 << SHOWING_EXTERNAL_DATA;
+				serviceData.params.temperature = 0; // Unknown
+				serviceData.params.powerUsage = p_stateItem->powerUsageApparant;
+				serviceData.params.accumulatedEnergy = p_stateItem->accumulatedEnergy;
+				found = true;
+				break;
+			}
+		}
+		if (found) {
+			break;
+		}
+	}
+
+	// If we advertised the id at head, then increase the head
+	if (advertiseId == _advertisedIds.list[_advertisedIds.head]) {
+		_advertisedIds.head = (_advertisedIds.head + 1) % _advertisedIds.size;
+	}
+
+	return true;
+#else
+	return false;
+#endif
+}
+
+#if BUILD_MESHING == 1
+id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsgs[], bool hasStateMsg[], bool eventOnly) {
+	// Remove ids from the recent list that are not in the messages
+	_tempAdvertisedIds.size = 0;
+
+	for (uint8_t chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
+		if (!hasStateMsg[chan]) {
+			continue;
+		}
+		int16_t idx = -1;
+		state_item_t* p_stateItem;
+
+		for (uint8_t i=0; i<_advertisedIds.size; ++i) {
+			bool found = false;
+//			state_message stateMsgWrapper(&message);
+//			for (state_message::iterator iter = stateMsgWrapper.begin(); iter != stateMsgWrapper.end(); ++iter) {
+//				state_item_t stateItem = *iter;
+//				if (_advertisedIds.list[i] == stateItem.id) {
+//					//! First copy the ones that are in both to a temp list
+//					_tempAdvertisedIds.list[_tempAdvertisedIds.size++] = _advertisedIds.list[i];
+//					found = true;
+//					break;
+//				}
+//			}
+			idx = -1;
+			// First copy the ids that are in both the recent list and the message, to a temp list
+			while (peek_next_state_item(&(stateMsgs[chan]), &p_stateItem, idx)) {
+				if (_advertisedIds.list[i] == p_stateItem->id) {
+					// If eventsOnly is true, only copy the item if it has the event bit set.
+					// (this removes all ids without event flag from the recent list)
+					if (!eventOnly || isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
+						_tempAdvertisedIds.list[_tempAdvertisedIds.size++] = _advertisedIds.list[i];
+						found = true;
+					}
+					break;
+				}
+			}
+			if (!found && i < _advertisedIds.head) {
+				// Id at index before head is removed, so decrease head
+				_advertisedIds.head--;
+			}
+		}
+	}
+
+	// Then copy the temp list to the recent list
+	for (uint8_t i=0; i<_tempAdvertisedIds.size; ++i) {
+		_advertisedIds.list[i] = _tempAdvertisedIds.list[i];
+	}
+	_advertisedIds.size = _tempAdvertisedIds.size;
+
+	// Make sure the head is wrapped around correctly
+	if (_advertisedIds.head < 0) {
+		_advertisedIds.head = _advertisedIds.size-1;
+	}
+	if (_advertisedIds.head >= _advertisedIds.size) {
+		_advertisedIds.head = 0;
+	}
+	// Done removing ids from the recent list that are not in the messages
+
+
+	// Select which id to advertise, start with the head.
+	id_type_t advertiseId = 0;
+	if (_advertisedIds.size > 0) {
+		advertiseId = _advertisedIds.list[_advertisedIds.head];
+	}
+
+
+	// Add first id that is in the messages, but not in the recent list (search from newest to oldest)
+	// If this happens, advertise this id instead of the id at the head
+	// Skip ids that are 0 or similar to own id
+	// In case of eventOnly: also skip ids that don't have the event flag set
+	for (uint8_t chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
+		if (!hasStateMsg[chan]) {
+			continue;
+		}
+
+		int16_t idx = -1;
+		state_item_t* p_stateItem;
+		while (peek_prev_state_item(&(stateMsgs[chan]), &p_stateItem, idx)) {
+			if (p_stateItem->id == 0 || p_stateItem->id == ownId) {
+				continue;
+			}
+			if (eventOnly && !isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
+				continue;
+			}
+			bool found = false;
+			for (auto i=0; i<_advertisedIds.size; i++) {
+				if (_advertisedIds.list[i] == p_stateItem->id) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				// Add id to recent list
+				_advertisedIds.list[_advertisedIds.size] = p_stateItem->id;
+				_advertisedIds.size++;
+
+				// Advertise this id instead of head
+				advertiseId = p_stateItem->id;
+				break;
+			}
+		}
+	}
+	return advertiseId;
+}
+#endif
+
+#if BUILD_MESHING == 1
+void ServiceData::onMeshStateMsg(state_message_t* stateMsg) {
+	// Check if the last state item is from an event (external data bit is used for that)
+	// If so, only advertise states from events for some time
+	int16_t idx = -1;
+	state_item_t* p_stateItem;
+	while (peek_prev_state_item(stateMsg, &p_stateItem, idx)) {
+		if (isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
+			_numAdvertiseChangedStates = MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS;
+		}
+		break;
+	}
+}
+#endif
+
 void ServiceData::sendMeshState(bool event) {
 #if BUILD_MESHING == 1
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
@@ -251,15 +341,27 @@ void ServiceData::sendMeshState(bool event) {
 		stateItem.id = _serviceData.params.crownstoneId;
 		stateItem.switchState = _serviceData.params.switchState;
 		stateItem.eventBitmask = _serviceData.params.eventBitmask;
-		//! Although probably not necessary, remove the "external data" bit
-		stateItem.eventBitmask &= ~(1 << SHOWING_EXTERNAL_DATA);
-		stateItem.powerUsage = _serviceData.params.powerUsage;
+		if (event) {
+			// Use the "external data" bit to flag this data as coming from an event.
+			stateItem.eventBitmask |= 1 << SHOWING_EXTERNAL_DATA;
+		}
+		else {
+			// Although probably not necessary, remove the "external data" bit
+			stateItem.eventBitmask &= ~(1 << SHOWING_EXTERNAL_DATA);
+		}
+		// Translate advertisement v1 to advertisement v2
+		stateItem.powerFactor = 1024; // Assume a power factor of 1
+		stateItem.powerUsageApparant = 0;
+		if (_serviceData.params.powerUsage > 0) {
+			stateItem.powerUsageApparant = _serviceData.params.powerUsage * 16 / 1000;
+		}
 		stateItem.accumulatedEnergy = _serviceData.params.accumulatedEnergy;
 
 		MeshControl::getInstance().sendServiceDataMessage(stateItem, event);
 
 		if (!event) {
-			//! Start timer of MESH_STATE_REFRESH_PERIOD + rand ms
+			Timer::getInstance().stop(_meshStateTimerId);
+			// Start timer of MESH_STATE_REFRESH_PERIOD + rand ms
 			uint8_t rand8;
 			RNG::fillBuffer(&rand8, 1);
 			uint32_t randMs = rand8*78; //! Range is 0-19890 ms (about 0-20s)
@@ -330,9 +432,9 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			updateTemperature(*(int8_t*)p_data);
 			break;
 		}
-		case EVT_EXTERNAL_STATE_CHANGE: {
+		case EVT_EXTERNAL_STATE_MSG: {
 #if BUILD_MESHING == 1
-			_numAdvertiseChangedStates = MAX_STATE_ITEMS;
+			onMeshStateMsg((state_message_t*)p_data);
 #endif
 			break;
 		}

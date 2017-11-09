@@ -44,10 +44,10 @@ public:
 	/** Get the last state data message
 	 *
 	 * @message Pointer to a message where the last message will be copied to.
-	 * @size Size of the message. This is changed if the copied amount of data is smaller.
-	 * @changeChannel Whether to get the message from the state change channel.
+	 * @size    Size of the message.
+	 * @num     Which state channel to use (as there are multiple).
 	 */
-	bool getLastStateDataMessage(state_message_t& message, uint16_t& size, bool changeChannel);
+	bool getLastStateDataMessage(state_message_t& message, uint16_t size, uint8_t num);
 
 	/** Send a status reply message, e.g. to reply status code of the execution of a command
 	 *
@@ -139,7 +139,7 @@ protected:
 	 * @length length of the message in bytes
 	 * @change whether or not this state message was received over the change handle
 	 */
-	ERR_CODE handleStateMessage(state_message_t* msg, uint16_t length, bool change);
+	ERR_CODE handleStateMessage(state_message_t* msg, uint16_t length);
 
 	/** Decode a command reply message received over mesh
 	 *

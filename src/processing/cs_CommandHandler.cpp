@@ -269,29 +269,30 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "request service");
 
-#if BUILD_MESHING == 1
-		state_item_t stateItem;
-		memset(&stateItem, 0, sizeof(stateItem));
-
-		State& state = State::getInstance();
-		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &stateItem.id);
-
-		state.get(STATE_SWITCH_STATE, stateItem.switchState);
-
-		//! TODO: implement setting the eventBitmask in a better way
-		//! Maybe get it from service data directly? Or should we store the eventBitmask in the State?
-		state_errors_t state_errors;
-		state.get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
-		stateItem.eventBitmask = 0;
-		if (state_errors.asInt != 0) {
-			stateItem.eventBitmask |= 1 << SERVICE_BITMASK_ERROR;
-		}
-
-		state.get(STATE_POWER_USAGE, (int32_t&)stateItem.powerUsage);
-		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)stateItem.accumulatedEnergy);
-
-		MeshControl::getInstance().sendServiceDataMessage(stateItem, true);
-#endif
+		// TODO: use ServiceData function for this?
+//#if BUILD_MESHING == 1
+//		state_item_t stateItem;
+//		memset(&stateItem, 0, sizeof(stateItem));
+//
+//		State& state = State::getInstance();
+//		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &stateItem.id);
+//
+//		state.get(STATE_SWITCH_STATE, stateItem.switchState);
+//
+//		// TODO: implement setting the eventBitmask in a better way
+//		// Maybe get it from service data directly? Or should we store the eventBitmask in the State?
+//		state_errors_t state_errors;
+//		state.get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+//		stateItem.eventBitmask = 0;
+//		if (state_errors.asInt != 0) {
+//			stateItem.eventBitmask |= 1 << SERVICE_BITMASK_ERROR;
+//		}
+//
+//		state.get(STATE_POWER_USAGE, (int32_t&)stateItem.powerUsage);
+//		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)stateItem.accumulatedEnergy);
+//
+//		MeshControl::getInstance().sendServiceDataMessage(stateItem, true);
+//#endif
 
 		break;
 	}

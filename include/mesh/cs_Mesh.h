@@ -145,9 +145,9 @@ public:
 	//! Returns last message on channel
 	//! p_data should be a pointer to allocated data, length the size of allocated.
 	//! This allocates an encrypted_mesh_message_t, then allocates a mesh_message_t and decrypts to that.
-	//! The resulting message is then copied to p_data, length is set to the size of the message.
+	//! The resulting message is then copied to p_data.
 	//! TODO: have a better way to do this
-	bool getLastMessage(mesh_handle_t handle, void* p_data, uint16_t& length);
+	bool getLastMessage(mesh_handle_t handle, void* p_data, uint16_t length);
 
 };
 

@@ -129,6 +129,15 @@ private:
 		ptr->updateAdvertisement(false);
 	}
 
+	bool isBitSet(uint8_t bitMask, uint8_t bit) {
+		return bitMask & (1 << bit);
+	}
+
+	// Decide which crownstone's state to advertise.
+	// Fills the given serviceData.
+	// Returns false if there's no external state to advertise.
+	bool getExternalAdvertisement(uint16_t ownId, service_data_t& serviceData);
+
 	service_data_t _serviceData;
 	service_data_t _serviceDataExt;
 
@@ -144,18 +153,28 @@ private:
 	uint32_t _updateCount;
 
 #if BUILD_MESHING == 1
-	//! List of external crownstone IDs that have been advertised, used to determine which external crownstone to advertise.
 	struct advertised_ids_t {
 		uint8_t size;
 		int8_t head; // Index of last crownstone ID that was advertised
-		uint16_t list[MAX_STATE_ITEMS];
-	} _advertisedIds;
+		id_type_t list[MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS];
+	};
+
+	void onMeshStateMsg(state_message_t* stateMsg);
+
+	id_type_t chooseExternalId(id_type_t ownId, state_message_t stateMsgs[], bool hasStateMsg[], bool eventOnly);
+
+	//! List of external crownstone IDs that have been advertised, used to determine which external crownstone to advertise.
+	advertised_ids_t _advertisedIds;
+
+//	//! List of external crownstone IDs which changed due to and event and that have been advertised
+//	//! Used to determine which external crownstone to advertise.
+//	advertised_ids_t _eventAdvertisedIds;
 
 	//! List that is used temporarily
 	advertised_ids_t _tempAdvertisedIds;
 
-	//! Number of times we should still advertise the change channel instead of the broadcast channel.
-	//! This is set to some number when we received a state changed message and then counts down.
+	//! Number of times we should still only advertise states triggered by events.
+	//! This is set to some number when a state triggered by event was received, and then counts down.
 	uint8_t _numAdvertiseChangedStates;
 #endif
 
@@ -169,8 +188,6 @@ private:
 	static void meshStateTick(ServiceData *ptr) {
 		ptr->sendMeshState(false);
 	}
-
-	state_item_t _lastStateChangeMessage;
 #endif
 
 };

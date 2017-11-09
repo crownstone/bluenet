@@ -4,13 +4,14 @@
 
 struct __attribute__((__packed__)) state_item_t {
 	id_type_t id;
-	uint8_t switchState;
-	uint8_t  eventBitmask;
-	uint32_t powerUsage;
-	uint32_t accumulatedEnergy;
+	uint8_t   switchState;
+	uint8_t   eventBitmask;
+	int16_t   powerFactor;
+	uint16_t  powerUsageApparant;
+	uint32_t  accumulatedEnergy;
 };
 
-#define STATE_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t) + 5*sizeof(uint8_t))
+#define STATE_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t))
 #define MAX_STATE_ITEMS ((MAX_MESH_MESSAGE_LENGTH - STATE_HEADER_SIZE) / sizeof(state_item_t))
 
 /**

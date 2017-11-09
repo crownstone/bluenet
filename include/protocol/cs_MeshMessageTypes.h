@@ -22,12 +22,14 @@ enum MeshChannels {
 	SCAN_RESULT_CHANNEL      = 6,
 	BIG_DATA_CHANNEL         = 7,
 	MULTI_SWITCH_CHANNEL     = 8,
-	STATE_BROADCAST_CHANNEL  = 9,
-	STATE_CHANGE_CHANNEL     = 10,
+	STATE_CHANNEL_0          = 9,
+	STATE_CHANNEL_1          = 10,
 	INVALID_HANDLE           = 0xFFFF
 };
 
 #define MESH_HANDLE_COUNT 8
+
+#define MESH_STATE_HANDLE_COUNT 2 //! Number of handles used to relay state
 
 enum MeshCommandTypes {
 	CONTROL_MESSAGE          = 0,

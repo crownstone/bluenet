@@ -21,14 +21,13 @@
 #define PRINT_MESHCONTROL_VERBOSE
 
 #define PRINT_VERBOSE_KEEPALIVE
-#define PRINT_VERBOSE_STATE_BROADCAST
-#define PRINT_VERBOSE_STATE_CHANGE
+#define PRINT_VERBOSE_STATE
 //#define PRINT_VERBOSE_SCAN_RESULT
 //#define PRINT_VERBOSE_COMMAND
 #define PRINT_VERBOSE_COMMAND_REPLY
 #define PRINT_VERBOSE_MULTI_SWITCH
 
-// Disables sending of command replies, and state items (service data).
+// Disables sending of command replies.
 #define CRIPPLE_MESH_FUNCTIONALITY
 
 MeshControl::MeshControl() : _myCrownstoneId(0) {
@@ -56,37 +55,27 @@ void MeshControl::process(uint16_t channel, void* p_meshMessage, uint16_t messag
 #endif
 
 	switch(channel) {
-	case KEEP_ALIVE_CHANNEL: {
+	case KEEP_ALIVE_CHANNEL:
 		handleKeepAlive((keep_alive_message_t*)p_data, length);
 		break;
-	}
-	case MULTI_SWITCH_CHANNEL: {
+	case MULTI_SWITCH_CHANNEL:
 		handleMultiSwitch((multi_switch_message_t*)p_data, length);
 		break;
-	}
-	case COMMAND_CHANNEL: {
+	case COMMAND_CHANNEL:
 		handleCommand((command_message_t*)p_data, length, meshMessage->messageCounter);
 		break;
-	}
-	case STATE_BROADCAST_CHANNEL: {
-		handleStateMessage((state_message_t*)p_data, length, false);
+	case STATE_CHANNEL_0:
+	case STATE_CHANNEL_1:
+		handleStateMessage((state_message_t*)p_data, length);
 		break;
-	}
-	case STATE_CHANGE_CHANNEL: {
-		handleStateMessage((state_message_t*)p_data, length, true);
-		break;
-	}
-	case COMMAND_REPLY_CHANNEL: {
+	case COMMAND_REPLY_CHANNEL:
 		handleCommandReplyMessage((reply_message_t*)p_data, length);
 		break;
-	}
-	case SCAN_RESULT_CHANNEL: {
+	case SCAN_RESULT_CHANNEL:
 		handleScanResultMessage((scan_result_message_t*)p_data, length);
 		break;
-	}
-	case BIG_DATA_CHANNEL: {
+	case BIG_DATA_CHANNEL:
 		break;
-	}
 	}
 }
 
@@ -219,51 +208,33 @@ ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t le
 
 }
 
-ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, bool change) {
+ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length) {
 #ifdef PRINT_DEBUG
-	LOGd("handleStateMessage %s", change ? "change" : "broadcast");
+	LOGd("handleStateMessage");
 #endif
 	if (!is_valid_state_msg(msg, length)) {
 		LOGe("Invalid message:");
-#ifdef PRINT_DEBUG
 		BLEutil::printArray(msg, length);
-#endif
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	if (change) {
-		//! Disable the state change handle for now, it causes old states to be taken for new.
-		return ERR_SUCCESS;
-		EventDispatcher::getInstance().dispatch(EVT_EXTERNAL_STATE_CHANGE);
-	}
+	EventDispatcher::getInstance().dispatch(EVT_EXTERNAL_STATE_MSG, msg, sizeof(state_message_t));
 
 	if (msg->timestamp != 0) {
-		//! Dispatch an event with the received timestamp
+		// Dispatch an event with the received timestamp
 		EventDispatcher::getInstance().dispatch(EVT_MESH_TIME, &(msg->timestamp), sizeof(msg->timestamp));
 	}
 
-#ifdef PRINT_DEBUG
-#if defined(PRINT_VERBOSE_STATE_BROADCAST) && defined(PRINT_VERBOSE_STATE_CHANGE)
-#elif defined(PRINT_VERBOSE_STATE_BROADCAST)
-	if (change) {
-		return ERR_SUCCESS;
-	}
-#elif defined(PRINT_VERBOSE_STATE_CHANGE)
-	if (!change) {
-		return ERR_SUCCESS;
-	}
-#else
-	return ERR_SUCCESS;
-#endif // defined(PRINT_VERBOSE_STATE_BROADCAST) && defined(PRINT_VERBOSE_STATE_CHANGE)
-
+//#ifdef PRINT_DEBUG
+#ifdef PRINT_VERBOSE_STATE
 	BLEutil::printArray(msg, length);
 
 	int16_t idx = -1;
 	state_item_t* p_stateItem;
 	while (peek_next_state_item(msg, &p_stateItem, idx)) {
-		LOGi("idx=%d id=%d switch=%d bitmask=%d P=%d E=%d", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerUsage, p_stateItem->accumulatedEnergy);
+		LOGi("idx=%i id=%u switch=%u bitmask=%u PF=%i P=%u E=%i", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerFactor, p_stateItem->powerUsageApparant, p_stateItem->accumulatedEnergy);
 	}
-#endif // PRINT_DEBUG
+#endif
 	return ERR_SUCCESS;
 }
 
@@ -892,8 +863,6 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
 void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 
-//#define UPDATE_EXISTING
-
 #if defined(PRINT_DEBUG)
 	bool debug = false;
 #if defined(PRINT_VERBOSE_STATE_BROADCAST) && defined(PRINT_VERBOSE_STATE_CHANGE)
@@ -905,88 +874,37 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 #endif
 
 	if (debug) {
-		LOGd("MESH SEND");
-		LOGd("Send state %s", event ? "change" : "broadcast");
-
-		LOGi("Crownstone Id %d", stateItem.id);
-		LOGi("  switch state: %d", stateItem.switchState);
-		LOGi("  power usage: %d", stateItem.powerUsage);
-		LOGi("  accumulated energy: %d", stateItem.accumulatedEnergy);
+		LOGi("Send state event=%u id=%u switch=%u power=%i energy=%i", event, stateItem.id, stateItem.switchState, stateItem.powerUsage, stateItem.accumulatedEnergy);
 	}
 #endif
 
 	state_message_t message = {};
 	uint16_t messageSize = sizeof(message);
-	uint8_t channel;
+	uint8_t channel = STATE_CHANNEL_0;
 
-	//! For now: only use the state broadcast
-//	if (event) {
-//		channel = STATE_CHANGE_CHANNEL;
-//	} else {
-//		channel = STATE_BROADCAST_CHANNEL;
-//	}
-	channel = STATE_BROADCAST_CHANNEL;
-
-
-#ifdef UPDATE_EXISTING
-	//! Check if the state of this crownstone is in the message yet, if so: overwrite it, else append it.
-	int index = 0;
-	bool success = Mesh::getInstance().getLastMessage(channel, &message, messageSize);
-	if (!success || !is_valid_state_msg(&message)) {
-			clear_state_msg(&message);
-	}
-	else {
-		bool found = false;
-		for (uint8_t i = 0; i < MAX_STATE_ITEMS; ++i) {
-			index = (message.head + i) % MAX_STATE_ITEMS;
-
-			if (message.list[index].id == _myCrownstoneId) {
-#if defined(PRINT_DEBUG)
-				if (debug) {
-					LOGi("found at index %d", index);
-				}
-#endif
-				found = true;
-				break;
-			}
-
-			if (index == message.tail) break;
-		}
-
-		if (!found) {
-			message.tail = (message.tail + 1) % MAX_STATE_ITEMS;
-			index = message.tail;
-#if defined(PRINT_DEBUG)
-			if (debug) {
-				LOGd("not found, add at %d", message.tail);
-			}
-#endif
-			if (message.tail == message.head) {
-				message.head = (message.head + 1) % MAX_STATE_ITEMS;
-			}
-		}
+	// Use a "random" channel, but always the same channel!
+	// Otherwise, the state of this crownstone is on different channels,
+	// which leads to not knowing which state is the newest.
+	if (_myCrownstoneId % MESH_STATE_HANDLE_COUNT) {
+		channel = STATE_CHANNEL_1;
 	}
 
-	memcpy(&message.list[index], &stateItem, sizeof(state_item_t));
-#else // UPDATE_EXISTING
-	//! Append state to message, regardless of whether the state of this crownstone is already in there.
+	// Append state to message, regardless of whether the state of this crownstone is already in there.
+	// This way, states of crownstones that are no longer in the mesh, will be pushed out of the message.
 	bool success = Mesh::getInstance().getLastMessage(channel, &message, messageSize);
 	if (!success || !is_valid_state_msg(&message)) {
 		clear_state_msg(&message);
 	}
 
-#ifndef CRIPPLE_MESH_FUNCTIONALITY
 	push_state_item(&message, &stateItem);
-#endif
 
-	//! Set the timestamp to the current time
+	// Set the timestamp to the current time
 	uint32_t timestamp;
 	if (State::getInstance().get(STATE_TIME, timestamp) != ERR_SUCCESS) {
 		timestamp = 0;
 	}
 	message.timestamp = timestamp;
 
-#endif // UPDATE_EXISTING
 
 #if defined(PRINT_DEBUG)
 	if (debug) {
@@ -996,23 +914,6 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 #endif
 
 	Mesh::getInstance().send(channel, &message, sizeof(state_message_t));
-
-
-//	//! On event, also add the message to the broadcast channel, otherwise there might be an old message in there.
-//	//! TODO: only broadcast when we are in the broadcast message?
-//	if (event) {
-//		//! Append state to message, regardless of whether the state of this crownstone is already in there.
-//		state_message_t broadcastMessage = {};
-//		messageSize = sizeof(state_message_t);
-//		success = Mesh::getInstance().getLastMessage(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
-//		if (!success || !is_valid_state_msg(&broadcastMessage)) {
-//			clear_state_msg(&broadcastMessage);
-//		}
-//		push_state_item(&broadcastMessage, &stateItem);
-//		//! Set the timestamp to the current time
-//		broadcastMessage.timestamp = timestamp;
-//		Mesh::getInstance().send(STATE_BROADCAST_CHANNEL, &broadcastMessage, messageSize);
-//	}
 }
 
 ERR_CODE MeshControl::sendLastKeepAliveMessage() {
@@ -1053,10 +954,18 @@ ERR_CODE MeshControl::sendMultiSwitchMessage(multi_switch_message_t* msg, uint16
 	return ERR_SUCCESS;
 }
 
-bool MeshControl::getLastStateDataMessage(state_message_t& message, uint16_t& size, bool changeChannel) {
+bool MeshControl::getLastStateDataMessage(state_message_t& message, uint16_t size, uint8_t num) {
 	// TODO: check if message is valid.
-	if (changeChannel) {
-		return Mesh::getInstance().getLastMessage(STATE_CHANGE_CHANNEL, &message, size);
+	mesh_handle_t handle;
+	switch(num) {
+	case 0:
+		handle = STATE_CHANNEL_0;
+		break;
+	case 1:
+		handle = STATE_CHANNEL_1;
+		break;
+	default:
+		return false;
 	}
-	return Mesh::getInstance().getLastMessage(STATE_BROADCAST_CHANNEL, &message, size);
+	return Mesh::getInstance().getLastMessage(handle, &message, size);
 }
