@@ -174,7 +174,7 @@ MESH_ACCESS_ADDRESS=0xA641A69E
 # Minimum interval in ms for broadcasting values of handles (has to be smaller or equal to advertisement interval)
 MESH_INTERVAL_MIN_MS=100
 # Bluetooth channel to use for the mesh (37, 38, 39)
-MESH_CHANNEL=38
+MESH_CHANNEL=39
 # Don't process first mesh messages after boot for some time (ms)
 # Max interval of mesh is currently MESH_TRICKLE_I_MAX * MESH_INTERVAL_MIN_MS, which now is 12.8s
 MESH_BOOT_TIME=30000
