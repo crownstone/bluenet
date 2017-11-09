@@ -684,6 +684,9 @@ void Mesh::checkForMessages() {
 				//! handle the message
 				handleMeshMessage(&evt);
 			}
+			//! then free associated memory
+			//! TODO: why do we have release the event pointer if we allocated the memory ourselves?
+			rbc_mesh_event_release(&evt);
 		}
 		else {
 			//! then free associated memory
@@ -694,10 +697,6 @@ void Mesh::checkForMessages() {
 			error_code = rbc_mesh_value_disable(handle);
 			APP_ERROR_CHECK(error_code);
 		}
-
-		//! then free associated memory
-		//! TODO: why do we have release the event pointer if we allocated the memory ourselves?
-		rbc_mesh_event_release(&evt);
 	}
 }
 
