@@ -276,7 +276,7 @@ void Switch::setSwitch(uint8_t switchState) {
 
 
 #if BUILD_MESHING == 1
-void Switch::handleMultiSwitch(multi_switch_item_t* p_item) {
+void Switch::handleMultiSwitch(multi_switch_cmd_t* p_item) {
 
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGi("handle multi switch");

@@ -129,7 +129,7 @@ ERR_CODE MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t length
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	keep_alive_item_t* p_item;
+	keep_alive_cmd_t* p_item;
 	if (has_keep_alive_item(msg, _myCrownstoneId, &p_item)) {
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
@@ -186,7 +186,7 @@ ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t le
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	multi_switch_item_t* p_item;
+	multi_switch_cmd_t* p_item;
 	if (has_multi_switch_item(msg, _myCrownstoneId, &p_item)) {
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_MULTI_SWITCH)

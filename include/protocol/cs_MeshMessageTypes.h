@@ -16,14 +16,14 @@
 #include <protocol/mesh/cs_MeshMessageState.h>
 
 enum MeshChannels {
-	KEEP_ALIVE_CHANNEL       = 1,
 	COMMAND_CHANNEL          = 4,
 	COMMAND_REPLY_CHANNEL    = 5,
 	SCAN_RESULT_CHANNEL      = 6,
 	BIG_DATA_CHANNEL         = 7,
-	MULTI_SWITCH_CHANNEL     = 8,
 	STATE_CHANNEL_0          = 9,
 	STATE_CHANNEL_1          = 10,
+	KEEP_ALIVE_CHANNEL       = 11,
+	MULTI_SWITCH_CHANNEL     = 12,
 	INVALID_HANDLE           = 0xFFFF
 };
 
@@ -80,39 +80,66 @@ struct __attribute__((__packed__)) mesh_message_t {
  * KEEP ALIVE
  ********************************************************************/
 
-struct __attribute__((__packed__)) keep_alive_item_t {
+enum KeepAliveType {
+	SAME_TIMEOUT = 1,
+};
+
+struct __attribute__((__packed__)) keep_alive_cmd_t {
+	uint8_t actionSwitchState;
+	uint16_t timeout; // timeout in seconds
+};
+
+struct __attribute__((__packed__)) keep_alive_same_timeout_item_t {
 	id_type_t id;
 	uint8_t actionSwitchState;
 };
 
-#define KEEP_ALIVE_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint8_t) + 2*sizeof(uint8_t))
-#define MAX_KEEP_ALIVE_ITEMS ((MAX_MESH_MESSAGE_LENGTH - KEEP_ALIVE_HEADER_SIZE) / sizeof(keep_alive_item_t))
+#define KEEP_ALIVE_HEADER_SIZE     (sizeof(uint8_t))
+#define KEEPALIVE_PAYLOAD_SIZE     (MAX_MESH_MESSAGE_LENGTH - KEEP_ALIVE_HEADER_SIZE)
+
+#define KEEP_ALIVE_SAME_TIMEOUT_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t))
+#define KEEP_ALIVE_SAME_TIMEOUT_MAX_ITEMS   ((KEEPALIVE_PAYLOAD_SIZE - KEEP_ALIVE_SAME_TIMEOUT_HEADER_SIZE) / sizeof(keep_alive_same_timeout_item_t))
+
+struct __attribute__((__packed__)) keep_alive_same_timeout_t {
+	uint16_t timeout;
+	uint8_t count;
+	uint8_t reserved;
+	keep_alive_same_timeout_item_t list[KEEP_ALIVE_SAME_TIMEOUT_MAX_ITEMS];
+};
 
 struct __attribute__((__packed__)) keep_alive_message_t {
-	uint16_t timeout;
-	uint8_t size;
-	uint8_t reserved[2];
-	keep_alive_item_t list[MAX_KEEP_ALIVE_ITEMS];
+	uint8_t type;
+	union {
+		keep_alive_same_timeout_t sameTimeout;
+		// More later
+	};
 };
 
 inline bool is_valid_keep_alive_msg(keep_alive_message_t* msg, uint16_t length) {
-	//! First check if the header fits in the message
+	// First check if the header fits in the message
 	if (length < KEEP_ALIVE_HEADER_SIZE) {
 		return false;
 	}
-	//! Then check the header
-	if (msg->timeout == 0) {
-		//! We can't set a timer of 0s
-		//! TODO: don't use a timer instead
+	switch (msg->type) {
+	case SAME_TIMEOUT: {
+		if (length < KEEP_ALIVE_HEADER_SIZE + KEEP_ALIVE_SAME_TIMEOUT_HEADER_SIZE) {
+			return false;
+		}
+		// Can't set a timer of 0s.
+		// TODO: don't use a timer instead
+		if (msg->sameTimeout.timeout == 0) {
+			return false;
+		}
+		if (length < KEEP_ALIVE_HEADER_SIZE + KEEP_ALIVE_SAME_TIMEOUT_HEADER_SIZE + msg->sameTimeout.count * sizeof(keep_alive_same_timeout_item_t)) {
+			return false;
+		}
+		break;
+	}
+	default:
 		return false;
 	}
-	if (msg->size > MAX_KEEP_ALIVE_ITEMS) {
-		return false;
-	}
-	if (length < KEEP_ALIVE_HEADER_SIZE + msg->size * sizeof(keep_alive_item_t)) {
-		return false;
-	}
-	//! Check if the message is not too large
+
+	// Check if the message is not too large
 //	if (length > sizeof(keep_alive_message_t)) { this doesn't work, due to unused bytes
 	if (length > MAX_MESH_MESSAGE_LENGTH) {
 		return false;
@@ -120,7 +147,7 @@ inline bool is_valid_keep_alive_msg(keep_alive_message_t* msg, uint16_t length) 
 	return true;
 }
 
-inline bool has_keep_alive_item(keep_alive_message_t* message, id_type_t id, keep_alive_item_t** item) {
+inline bool has_keep_alive_item(keep_alive_message_t* message, id_type_t id, keep_alive_cmd_t** item) {
 
 	*item = message->list;
 	for (int i = 0; i < message->size; ++i) {
@@ -137,6 +164,10 @@ inline bool has_keep_alive_item(keep_alive_message_t* message, id_type_t id, kee
  * KEEP ALIVE
  ********************************************************************/
 
+enum MultiSwitchType {
+	LIST = 0,     // multi_switch_list_t
+};
+
 enum MultiSwitchIntent {
 	SPHERE_ENTER = 0,
 	SPHERE_EXIT  = 1,
@@ -145,35 +176,63 @@ enum MultiSwitchIntent {
 	MANUAL       = 4
 };
 
-struct __attribute__((__packed__)) multi_switch_item_t {
-	id_type_t id;
+
+struct __attribute__((__packed__)) multi_switch_cmd_t {
 	uint8_t switchState;
 	uint16_t timeout;
-	uint8_t intent; // intent = sphere enter, sphere exit, room enter, room exit, manual
+	uint8_t intent; // See MultiSwitchIntent
 };
 
-#define MULTI_SWITCH_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t))
-#define MAX_MULTI_SWITCH_ITEMS ((MAX_MESH_MESSAGE_LENGTH - MULTI_SWITCH_HEADER_SIZE) / sizeof(multi_switch_item_t))
+struct __attribute__((__packed__)) multi_switch_list_item_t {
+	id_type_t id;
+	multi_switch_cmd_t cmd;
+};
+
+#define MULTI_SWITCH_HEADER_SIZE       (sizeof(uint8_t))
+#define MULTI_SWITCH_MAX_PAYLOAD_SIZE  (MAX_MESH_MESSAGE_LENGTH - MULTI_SWITCH_HEADER_SIZE)
+
+#define MULTI_SWITCH_LIST_HEADER_SIZE  (sizeof(uint8_t))
+#define MULTI_SWITCH_LIST_MAX_ITEMS    ((MULTI_SWITCH_MAX_PAYLOAD_SIZE - MULTI_SWITCH_LIST_HEADER_SIZE) / sizeof(multi_switch_list_item_t))
+
+
+struct __attribute__((__packed__)) multi_switch_list_t {
+	uint8_t count;
+	multi_switch_list_item_t list[MULTI_SWITCH_LIST_MAX_ITEMS];
+};
 
 struct __attribute__((__packed__)) multi_switch_message_t {
-	uint8_t size;
-	uint8_t reserved;
-	multi_switch_item_t list[MAX_MULTI_SWITCH_ITEMS];
+	uint8_t type;
+	union {
+		multi_switch_list_t list;
+		// More later..
+	};
 };
 
 inline bool is_valid_multi_switch_message(multi_switch_message_t* msg, uint16_t length) {
-	//! First check if the header fits in the message
+	// First check if the header fits in the message
 	if (length < MULTI_SWITCH_HEADER_SIZE) {
 		return false;
 	}
-	//! Then check the header
-	if (msg->size > MAX_MULTI_SWITCH_ITEMS) {
+
+	switch (msg->type) {
+	case LIST: {
+		if (length < MULTI_SWITCH_HEADER_SIZE + MULTI_SWITCH_LIST_HEADER_SIZE) {
+			return false;
+		}
+		if (msg->list.count > MULTI_SWITCH_LIST_MAX_ITEMS) {
+			return false;
+		}
+		if (length < MULTI_SWITCH_HEADER_SIZE + MULTI_SWITCH_LIST_HEADER_SIZE + msg->list.count * sizeof(multi_switch_list_item_t)) {
+			return false;
+		}
+		break;
+	}
+	default: {
 		return false;
 	}
-	if (length < MULTI_SWITCH_HEADER_SIZE + msg->size * sizeof(multi_switch_item_t)) {
-		return false;
 	}
-	//! Check if the message is not too large
+
+	// Check if the message is not too large
 //	if (length > sizeof(multi_switch_message_t)) { this doesn't work, due to unused bytes
 	if (length > MAX_MESH_MESSAGE_LENGTH) {
 		return false;
@@ -181,16 +240,20 @@ inline bool is_valid_multi_switch_message(multi_switch_message_t* msg, uint16_t 
 	return true;
 }
 
-inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id, multi_switch_item_t** item) {
-
-	*item = message->list;
-	for (int i = 0; i < message->size; ++i) {
-		if ((*item)->id == id) {
-			return true;
+//! Returns true when the given id is in the message
+//! Sets cmd at the command of that id
+inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id, multi_switch_cmd_t** cmd) {
+	switch(message->type) {
+	case LIST:{
+		for (int i = 0; i < message->list.count; ++i) {
+			if (message->list.list[i].id == id) {
+				*cmd = &(message->list.list[i].cmd);
+				return true;
+			}
 		}
-		++(*item);
+		break;
 	}
-
+	}
 	return false;
 }
 

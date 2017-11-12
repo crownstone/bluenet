@@ -497,8 +497,6 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 		LOGi(STR_HANDLE_COMMAND, "user feedback");
 		return ERR_NOT_IMPLEMENTED;
-
-		// todo: tbd
 		break;
 	}
 	case CMD_DISCONNECT: {
