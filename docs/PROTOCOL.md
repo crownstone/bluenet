@@ -1,4 +1,4 @@
-# Bluenet protocol v0.11.2
+# Bluenet protocol v0.12.0
 -------------------------
 
 # Index
@@ -780,29 +780,35 @@ The mesh payload packet is defined by the handle. We have the following handles
 
 Handle | Name | Type | Description
 --- | --- | --- | ---
-1 | Keep alive channel | [Keep alive](#keep_alive_mesh_packet) | Channel on which the keep alive messages are sent. A message consists of a global timeout and a number of keep alive items (on per stone which is addressed). If the length of the mesh control packet is 0, the existing keepalive message will be repeated.
-2 | State broadcast channel | [State](#state_mesh_packet) | Each stone sends it's state periodically over the mesh. The message is designed as a circular buffer and a new item is added at the end (throwing out the oldest if full)
-3 | State change channel | [State](#state_mesh_packet) | Each stone sends its' state on this channel if the state changes significantly, e.g. switch state changes.
-4 | Command channel | [Command](#command_mesh_packet) | Commands can be sent to one, multiple or all stones sharing the mesh network. Once a stone receives a command it will send a reply on the reply channel
-5 | Command reply channel | [Command reply](#command_reply_packet) | Every stone that was targeted with a command adds its reply to the reply message.
-6 | Scan result channel | [Scan result](#scan_result_mesh_packet) | If a stone is scanning for devices it adds its scanned devices periodically to this list to be sent over the mesh
-7 | Big data channel | - | This channel is for the case when a stone needs to send big data, such as the history of eneregy usage, etc.
-8 | Multi switch channel | [Multi switch](#multi_switch_mesh_packet) | This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
+11 | Keep alive channel | [Keep alive](#keep_alive_mesh_packet) | Channel on which the keep alive messages are sent. A message consists of a global timeout and a number of keep alive items (on per stone which is addressed). If the length of the mesh control packet is 0, the existing keepalive message will be repeated.
+9  | State channel | [State](#state_mesh_packet) | Each stone sends its state periodically, and on significant state change, over the mesh. The message is designed as a circular buffer and a new item is added at the end (throwing out the oldest when full).
+10 | State channel | [State](#state_mesh_packet) | Each stone sends its state periodically, and on significant state change, over the mesh. The message is designed as a circular buffer and a new item is added at the end (throwing out the oldest when full).
+4  | Command channel | [Command](#command_mesh_packet) | Commands can be sent to one, multiple or all stones sharing the mesh network. Once a stone receives a command it will send a reply on the reply channel
+5  | Command reply channel | [Command reply](#command_reply_packet) | Every stone that was targeted with a command adds its reply to the reply message.
+6  | Scan result channel | [Scan result](#scan_result_mesh_packet) | If a stone is scanning for devices it adds its scanned devices periodically to this list to be sent over the mesh
+7  | Big data channel | - | This channel is for the case when a stone needs to send big data, such as the history of eneregy usage, etc.
+12 | Multi switch channel | [Multi switch](#multi_switch_mesh_packet) | This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
 
 #### <a name="keep_alive_mesh_packet"></a>Keep alive packet
 
-![Keep Alive packet](../docs/diagrams/keep-alive-mesh-packet.png)
+![Keep alive packet](../docs/diagrams/keep-alive-mesh-packet.png)
 
-Deprecated: If the length of the mesh control packet is 0, the existing keepalive message will be repeated. This is used to delay the existing time outs by people who do not have permission to change the state.
+Type nr | Type name | Payload type | Description
+--- | --- | --- | ---
+1 | [Same timeout](#keep_alive_same_timeout_mesh_packet) | Keep alive same timeout | Keep alive with same timeout for each Crownstone.
+
+#### <a name="keep_alive_same_timeout_mesh_packet"></a>Keep alive same timeout packet
+
+![Keep alive same timeout packet](../docs/diagrams/keep-alive-same-timeout-mesh-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | Timeout | 2 | Timeout (in seconds), applies to all stones present in the list.
-uint 8 | Size | 1 | Number of keep alive items in the list.
-uint 8 [2] | Reserved | 2 | Reserved for future use.
-[Keep alive item](#keep_alive_mesh_item) [] | List | N | The keep alive items.
+uint 8 | Count | 1 | Number of items in the list.
+uint 8 | Reserved | 1 | Reserved for future use.
+[Keep alive item](#keep_alive_mesh_item) [] | List | N | The keep alive same timeout items.
 
-##### <a name="keep_alive_mesh_item"></a>Keep alive Item
+##### <a name="keep_alive_mesh_item"></a>Keep alive same timeout item
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -828,7 +834,7 @@ uint 8 | Tail | 1 | Keeps the index where the next element can be inserted in th
 uint 8 | Size | 1 | Number of elements in the list
 uint 8 | Reserved | 1 | Reserved for future use
 uint 32 | Timestamp | 4 | Posix timestamp at which this message was originally sent (0 for unknown time)
-[Crownstone state item](#state_mesh_item) [] | List | 7 | Circular list with Crownstone state items
+[Crownstone state item](#state_mesh_item) [] | List | N | Circular list with Crownstone state items
 
 ##### <a name="state_mesh_item"></a>Crownstone state item
 
@@ -837,8 +843,9 @@ Type | Name | Length | Description
 uint 16 | Crownstone ID | 2 | The identifier of the crownstone which has this state
 uint 8 | Switch state | 1 | The current [Switch state](#switch_state_packet) of the crownstone
 uint 8 | Event bitmask | 1 | The current [Event bitmask](#event_bitmask) of the crownstone
-int 32 | Power usage | 4 | The current power usage of the crownstone (mW)
-int 32 | Accumulated energy | 4 | The accumulated energy since setup (Wh)
+int 16 | Power factor | 2 | The power factor at this moment. Divide by 1024 to get the actual power factor.
+uint 16 | Power usage | 2 | The apparent power usage at this moment. Divide by 16 to get power usage in Watt.
+int 32 | Energy used | 4 | The total energy used. Divide by 64 to get the energy used in Joule.
 
 #### <a name="command_mesh_packet"></a>Command packet
 
@@ -846,19 +853,19 @@ int 32 | Accumulated energy | 4 | The accumulated energy since setup (Wh)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | [Command type](#mesh_command_types) | 2 | Type of command, see table below.
-uint 8 | Number of IDs | 1 | The number of IDs provided as targets, 0 for broadcast
-uint16 [] | List of target IDs | Number of IDs | Crownstone Identifiers of the devices at which this message is aimed, for broadcast, no IDs are provided and the command follows directly after the Number of IDs element
-uint 8 | Command payload | N | The command payload data, which depends on the message type
+uint 16 | [Type](#mesh_command_types) | 2 | Type of command, see table below.
+uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast.
+uint16 [] | List of target IDs | Count * 2 | Crownstone Identifiers of the devices at which this message is aimed, for broadcast, no IDs are provided and the command follows directly after the Number of IDs element.
+uint 8 | Command payload | N | The command payload data, which depends on the type.
 
 ##### <a name="mesh_command_types"></a>Command types
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet
+0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet.
 1 | Beacon | [Beacon Config](#beacon_mesh_data_packet) | Configure the iBeacon settings.
-2 | Config | [Configuration](#config_packet) | Send/Request a configuration setting, see configuration packet
-3 | State | [State](#state_packet) | Send/Request a state variable, see state packet
+2 | Config | [Configuration](#config_packet) | Send/Request a configuration setting, see configuration packet.
+3 | State | [State](#state_packet) | Send/Request a state variable, see state packet.
 
 ##### <a name="beacon_mesh_data_packet"></a>Beacon config packet
 
@@ -877,10 +884,10 @@ int 8 | TX power | 1 | iBeacon signal strength at 1 meter.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | [Reply type](#mesh_reply_types) | 2 | Type of reply, see table below
-uint 32 | Message counter | 4 | The message number of the command to which this reply belongs
-uint 8 | Number of replies | 1 | Number of reply items in the list
-uint 8 | List of replies | 85 | List of replies, the format is defined by the type of reply
+uint 16 | [Reply type](#mesh_reply_types) | 2 | Type of reply, see table below.
+uint 32 | Message counter | 4 | The message number of the command to which this reply belongs.
+uint 8 | Count | 1 | Number of items in the list.
+uint 8 | List | 85 | List of replies, the format is defined by the type of reply.
 
 ##### <a name="mesh_reply_types"></a>Reply types
 
@@ -931,7 +938,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Number of results | 1 | Number of scan results in the list
 uint 8 | Reserved | 1 | Reserved for future use
-[Scan Result item](#scan_result_item) [] | List | Number of results | A list of scanned devices with the ID of the crownstone that scanned the device
+[Scan Result item](#scan_result_item) [] | List | N | A list of scanned devices with the ID of the crownstone that scanned the device
 
 ##### <a name="mesh_scan_result_item"></a>Scan result item
 
@@ -943,22 +950,29 @@ int 8 | RSSI | 1 | The averaged RSSI value of the scanned device
 
 ##### <a name="multi_switch_mesh_packet"></a></a>Multi switch packet
 
-![Keep Alive packet](../docs/diagrams/multi-switch-mesh-packet.png)
+![Multi switch packet](../docs/diagrams/multi-switch-mesh-packet.png)
+
+Type nr | Type name | Payload type | Description
+--- | --- | --- | ---
+0 | [List](#multi_switch_list_mesh_packet) | Multi switch list | Different switch command for each Crownstone.
+
+##### <a name="multi_switch_list_mesh_packet"></a></a>Multi switch list packet
+
+![Multi switch packet](../docs/diagrams/multi-switch-list-mesh-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Size | 1 | Number of keep alive items in the list
-uint 8 | Reserved | 1 | Reserved for future use
-[Multi switch item](#multi_switch_mesh_item) [] | List | N | a list of targeted crownstones with switch states, timeouts and intents
+uint 8 | Count | 1 | Number of multi switch list items in the list.
+[Multi switch list item](#multi_switch_list_mesh_item) [] | List | N | A list of switch commands.
 
-##### <a name="multi_switch_mesh_item"></a>Multi switch item
+##### <a name="multi_switch_list_mesh_item"></a>Multi switch list item
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Crownstone ID | 2 | The identifier of the crownstone to which this item is targeted
+uint 16 | Crownstone ID | 2 | The identifier of the crownstone to which this item is targeted.
 uint 8 | Switch state | 1 | The switch state to be set by the targeted crownstone after the timeout expires. 0 = off, 100 = fully on.
-uint 16 | Timeout | 2 | The timeout (in seconds) after which the state should be set
-uint 8 | [Intent](#multi_switch_intent) | 1 | The intent of the switch, see the table below
+uint 16 | Timeout | 2 | The timeout (in seconds) after which the state should be set.
+uint 8 | [Intent](#multi_switch_intent) | 1 | The intent of the switch, see the table below.
 
 ###### <a name="multi_switch_intent"></a>Intent
 
