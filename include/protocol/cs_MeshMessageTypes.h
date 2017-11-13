@@ -147,16 +147,21 @@ inline bool is_valid_keep_alive_msg(keep_alive_message_t* msg, uint16_t length) 
 	return true;
 }
 
-inline bool has_keep_alive_item(keep_alive_message_t* message, id_type_t id, keep_alive_cmd_t** item) {
-
-	*item = message->list;
-	for (int i = 0; i < message->size; ++i) {
-		if ((*item)->id == id) {
-			return true;
+//! Returns true when given id is in the message
+//! Sets cmd to the command for given id.
+inline bool has_keep_alive_item(keep_alive_message_t* message, id_type_t id, keep_alive_cmd_t& cmd) {
+	switch (message->type) {
+	case SAME_TIMEOUT:{
+		for (int i = 0; i < message->sameTimeout.count; ++i) {
+			if (message->sameTimeout.list[i].id == id) {
+				cmd.actionSwitchState = message->sameTimeout.list[i].actionSwitchState;
+				cmd.timeout = message->sameTimeout.timeout;
+				return true;
+			}
 		}
-		++(*item);
+		break;
 	}
-
+	}
 	return false;
 }
 
@@ -240,14 +245,16 @@ inline bool is_valid_multi_switch_message(multi_switch_message_t* msg, uint16_t 
 	return true;
 }
 
-//! Returns true when the given id is in the message
-//! Sets cmd at the command of that id
-inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id, multi_switch_cmd_t** cmd) {
+//! Returns true when given id is in the message
+//! Sets cmd to the command for given id.
+inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id, multi_switch_cmd_t& cmd) {
 	switch(message->type) {
 	case LIST:{
 		for (int i = 0; i < message->list.count; ++i) {
 			if (message->list.list[i].id == id) {
-				*cmd = &(message->list.list[i].cmd);
+				cmd.switchState = message->list.list[i].cmd.switchState;
+				cmd.timeout = message->list.list[i].cmd.timeout;
+				cmd.intent = message->list.list[i].cmd.intent;
 				return true;
 			}
 		}

@@ -37,10 +37,10 @@ MeshControl::MeshControl() : _myCrownstoneId(0) {
 void MeshControl::init() {
 	Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &_myCrownstoneId);
 
-	LOGd("Keep alive msg: size=%d items=%d", sizeof(keep_alive_message_t), MAX_KEEP_ALIVE_ITEMS);
+	LOGd("Keep alive msg: size=%d items=%d", sizeof(keep_alive_message_t), KEEP_ALIVE_SAME_TIMEOUT_MAX_ITEMS);
 	LOGd("State msg: size=%d items=%d", sizeof(state_message_t), MAX_STATE_ITEMS);
 	LOGd("Scan result msg: size=%d items=%d", sizeof(scan_result_message_t), MAX_SCAN_RESULT_ITEMS);
-	LOGd("Multi switch msg: size=%d items=%d", sizeof(multi_switch_message_t), MAX_MULTI_SWITCH_ITEMS);
+	LOGd("Multi switch msg: size=%d items=%d", sizeof(multi_switch_message_t), MULTI_SWITCH_LIST_MAX_ITEMS);
 }
 
 void MeshControl::process(uint16_t channel, void* p_meshMessage, uint16_t messageLength) {
@@ -129,8 +129,8 @@ ERR_CODE MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t length
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	keep_alive_cmd_t* p_item;
-	if (has_keep_alive_item(msg, _myCrownstoneId, &p_item)) {
+	keep_alive_cmd_t keepAliveCmd;
+	if (has_keep_alive_item(msg, _myCrownstoneId, keepAliveCmd)) {
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
 		LOGi("received keep alive over mesh:");
@@ -139,7 +139,7 @@ ERR_CODE MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t length
 
 		keep_alive_state_message_payload_t keepAlive;
 
-		switch (p_item->actionSwitchState) {
+		switch (keepAliveCmd.actionSwitchState) {
 		case 255: {
 			keepAlive.action = NO_CHANGE;
 			keepAlive.switchState.switchState = 0; //! Not necessary
@@ -147,12 +147,12 @@ ERR_CODE MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t length
 		}
 		default: {
 			keepAlive.action = CHANGE;
-			keepAlive.switchState.switchState = p_item->actionSwitchState;
+			keepAlive.switchState.switchState = keepAliveCmd.actionSwitchState;
 			break;
 		}
 		}
 
-		keepAlive.timeout = msg->timeout;
+		keepAlive.timeout = keepAliveCmd.timeout;
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
 		LOGi("KeepAlive, action: %d, switchState: %d, timeout: %d",
@@ -186,15 +186,15 @@ ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t le
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	multi_switch_cmd_t* p_item;
-	if (has_multi_switch_item(msg, _myCrownstoneId, &p_item)) {
+	multi_switch_cmd_t multiSwitchCmd;
+	if (has_multi_switch_item(msg, _myCrownstoneId, multiSwitchCmd)) {
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_MULTI_SWITCH)
 		LOGi("received multi switch over mesh:");
-		BLEutil::printArray(p_item, sizeof(multi_switch_item_t));
+		BLEutil::printArray(&multiSwitchCmd, sizeof(multi_switch_cmd_t));
 #endif
 
-		Switch::getInstance().handleMultiSwitch(p_item);
+		Switch::getInstance().handleMultiSwitch(&multiSwitchCmd);
 
 	} else {
 

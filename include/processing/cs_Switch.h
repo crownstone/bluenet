@@ -143,7 +143,7 @@ public:
 #if BUILD_MESHING == 1
 	/** Used internally
 	 */
-	void handleMultiSwitch(multi_switch_cmd_t* p_item);
+	void handleMultiSwitch(multi_switch_cmd_t* cmd);
 #endif
 
 private:
