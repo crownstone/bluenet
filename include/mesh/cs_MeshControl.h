@@ -70,14 +70,24 @@ public:
 	 */
 	void sendStateReplyMessage(uint32_t messageCounter, state_reply_item_t* stateReply);
 
-	/** Send the last sent keep alive message
+	/** Send a keep alive message into the mesh.
+	 *
+	 * @msg    pointer to the message.
+	 * @length length of the message in bytes.
+	 * @return error code.
+	 */
+	ERR_CODE sendKeepAliveMessage(keep_alive_message_t* msg, uint16_t length);
+
+	/** Send the last sent keep alive message into the mesh.
 	 *
 	 * @return error code
 	 */
 	ERR_CODE sendLastKeepAliveMessage();
 
-	/** Send the last sent keep alive message
+	/** Send a multi switch message into the mesh.
 	 *
+	 * @msg    pointer to the message.
+	 * @length length of the message in bytes.
 	 * @return error code
 	 */
 	ERR_CODE sendMultiSwitchMessage(multi_switch_message_t* msg, uint16_t length);
@@ -92,8 +102,8 @@ public:
 
 	/**
 	 * Get incoming messages and perform certain actions. Messages have already been decrypted.
-	 * @channel the channel number, see <MeshChannels>
 	 *
+	 * @channel the channel number, see <MeshChannels>
 	 * @p_data a pointer to the data which was received
 	 * @length number of bytes received
 	 */

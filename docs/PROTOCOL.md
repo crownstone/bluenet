@@ -406,9 +406,10 @@ Type nr | Type name | Payload type | Payload Description | A | M | G
 21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
 22 | Increase TX | - | Temporarily increase the TX power when in setup mode | x | x | x
 23 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
-24 | Keepalive mesh | - | Repeat the last keep alive message on the mesh. | x | x | x
+24 | Keepalive repeat | - | Repeat the last keep alive message on the mesh. | x | x | x
 25 | Multi switch | [Multi switch packet](#multi_switch_mesh_packet) | Switch multiple crownstones with a command over the mesh. | x | x | x
 26 | Schedule remove | uint 8 | Clear the Nth schedule entry of the [list](#schedule_list_packet). | x | x
+27 | Keepalive mesh | [Keep alive mesh packet](#keep_alive_mesh_packet) | Send keep alives via the mesh. | x | x |
 
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
@@ -834,7 +835,7 @@ uint 8 | Tail | 1 | Keeps the index where the next element can be inserted in th
 uint 8 | Size | 1 | Number of elements in the list
 uint 8 | Reserved | 1 | Reserved for future use
 uint 32 | Timestamp | 4 | Posix timestamp at which this message was originally sent (0 for unknown time)
-[Crownstone state item](#state_mesh_item) [] | List | N | Circular list with Crownstone state items
+[Crownstone state item](#state_mesh_item) [] | List | 84 | Circular list with Crownstone state items
 
 ##### <a name="state_mesh_item"></a>Crownstone state item
 

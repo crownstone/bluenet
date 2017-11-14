@@ -134,7 +134,7 @@ ERR_CODE MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t length
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)
 		LOGi("received keep alive over mesh:");
-		BLEutil::printArray(p_item, sizeof(keep_alive_item_t));
+		BLEutil::printArray(&keepAliveCmd, sizeof(keep_alive_cmd_t));
 #endif
 
 		keep_alive_state_message_payload_t keepAlive;
@@ -874,7 +874,7 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 #endif
 
 	if (debug) {
-		LOGi("Send state event=%u id=%u switch=%u power=%i energy=%i", event, stateItem.id, stateItem.switchState, stateItem.powerUsage, stateItem.accumulatedEnergy);
+		LOGi("Send state event=%u id=%u switch=%u bitmask=%u PF=%i P=%u E=%i", event, stateItem.id, stateItem.switchState, stateItem.eventBitmask, stateItem.powerFactor, stateItem.powerUsageApparant, stateItem.accumulatedEnergy);
 	}
 #endif
 
@@ -914,6 +914,17 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 #endif
 
 	Mesh::getInstance().send(channel, &message, sizeof(state_message_t));
+}
+
+ERR_CODE MeshControl::sendKeepAliveMessage(keep_alive_message_t* msg, uint16_t length) {
+	ERR_CODE errCode;
+	errCode = handleKeepAlive(msg, length);
+	if (errCode != ERR_SUCCESS) {
+		return errCode;
+	}
+
+	Mesh::getInstance().send(KEEP_ALIVE_CHANNEL, msg, length);
+	return ERR_SUCCESS;
 }
 
 ERR_CODE MeshControl::sendLastKeepAliveMessage() {

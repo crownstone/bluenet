@@ -36,6 +36,7 @@ enum CommandHandlerTypes {
 	CMD_KEEP_ALIVE_REPEAT_LAST      = 24,    //! 0x18
 	CMD_MULTI_SWITCH                = 25,    //! 0x19
 	CMD_SCHEDULE_ENTRY_CLEAR        = 26,    //! 0x1A
+	CMD_KEEP_ALIVE_MESH             = 27,    //! 0x1B
 	CMD_TYPES
 };
 

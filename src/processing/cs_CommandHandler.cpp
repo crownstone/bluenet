@@ -492,6 +492,15 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 #endif
 		break;
 	}
+	case CMD_KEEP_ALIVE_MESH: {
+		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "keep alive mesh");
+#if BUILD_MESHING == 1
+		keep_alive_message_t* keepAliveMsg = (keep_alive_message_t*) buffer;
+		MeshControl::getInstance().sendKeepAliveMessage(keepAliveMsg, size);
+#endif
+		break;
+	}
 
 	case CMD_USER_FEEDBACK: {
 		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
