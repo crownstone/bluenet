@@ -159,7 +159,7 @@ private:
 		id_type_t list[MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS];
 	};
 
-	void onMeshStateMsg(state_message_t* stateMsg);
+	void onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg);
 
 	id_type_t chooseExternalId(id_type_t ownId, state_message_t stateMsgs[], bool hasStateMsg[], bool eventOnly);
 

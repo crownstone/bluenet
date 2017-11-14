@@ -20,6 +20,8 @@
 #endif
 
 #define ADVERTISE_EXTERNAL_DATA
+//#define PRINT_DEBUG_EXTERNAL_DATA
+//#define PRINT_VERBOSE_EXTERNAL_DATA
 
 ServiceData::ServiceData() : _updateTimerId(NULL), _connected(false)
 {
@@ -159,9 +161,13 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 
 	id_type_t advertiseId = 0;
 
+#ifdef PRINT_VERBOSE_EXTERNAL_DATA
+	LOGd("getExternalAdvertisement changed=%u", _numAdvertiseChangedStates);
+#endif
 	if (_numAdvertiseChangedStates > 0) {
 		// Select an id which has a state triggered by an event.
 		advertiseId = chooseExternalId(ownId, messages, hasStateMsg, true);
+		_numAdvertiseChangedStates--;
 	}
 	if (advertiseId == 0) {
 		// Didn't select an id which has a state triggered by an event, so select a regular one.
@@ -205,6 +211,10 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 		_advertisedIds.head = (_advertisedIds.head + 1) % _advertisedIds.size;
 	}
 
+#ifdef PRINT_DEBUG_EXTERNAL_DATA
+	LOGd("serviceData: id=%u switch=%u bitmask=%u temp=%i P=%i E=%i", serviceData.params.crownstoneId, serviceData.params.switchState, serviceData.params.eventBitmask, serviceData.params.temperature, serviceData.params.powerUsage, serviceData.params.accumulatedEnergy);
+#endif
+
 	return true;
 #else
 	return false;
@@ -213,30 +223,48 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 
 #if BUILD_MESHING == 1
 id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsgs[], bool hasStateMsg[], bool eventOnly) {
-	// Remove ids from the recent list that are not in the messages
-	_tempAdvertisedIds.size = 0;
 
+#ifdef PRINT_VERBOSE_EXTERNAL_DATA
+	LOGd("chooseExternalId");
+	LOGd("head=%u list:", _advertisedIds.head);
+	for (uint8_t i=0; i<_advertisedIds.size; ++i) {
+		_log(SERIAL_DEBUG, " %u", _advertisedIds.list[i]);
+	}
+	_log(SERIAL_DEBUG, SERIAL_CRLF);
+
+	LOGd("msgs:");
 	for (uint8_t chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
 		if (!hasStateMsg[chan]) {
 			continue;
 		}
 		int16_t idx = -1;
 		state_item_t* p_stateItem;
+		while (peek_next_state_item(&(stateMsgs[chan]), &p_stateItem, idx)) {
+			_log(SERIAL_DEBUG, "  id=%u mask=%u", p_stateItem->id, p_stateItem->eventBitmask);
+		}
+	}
+	_log(SERIAL_DEBUG, SERIAL_CRLF);
+#endif
 
-		for (uint8_t i=0; i<_advertisedIds.size; ++i) {
-			bool found = false;
+	// Remove ids from the recent list that are not in the messages
+	_tempAdvertisedIds.size = 0;
+
+	// First copy the ids that are in both the recent list and the message, to a temp list.
+	// Make the recent list the outer loop, so that we don't get any doubles in the temp list.
+	uint8_t i;
+	for (i=0; i<_advertisedIds.size; ++i) {
+		bool found = false;
+
+		for (uint8_t chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
+			if (!hasStateMsg[chan]) {
+				continue;
+			}
+
 //			state_message stateMsgWrapper(&message);
 //			for (state_message::iterator iter = stateMsgWrapper.begin(); iter != stateMsgWrapper.end(); ++iter) {
 //				state_item_t stateItem = *iter;
-//				if (_advertisedIds.list[i] == stateItem.id) {
-//					//! First copy the ones that are in both to a temp list
-//					_tempAdvertisedIds.list[_tempAdvertisedIds.size++] = _advertisedIds.list[i];
-//					found = true;
-//					break;
-//				}
-//			}
-			idx = -1;
-			// First copy the ids that are in both the recent list and the message, to a temp list
+			int16_t idx = -1;
+			state_item_t* p_stateItem;
 			while (peek_next_state_item(&(stateMsgs[chan]), &p_stateItem, idx)) {
 				if (_advertisedIds.list[i] == p_stateItem->id) {
 					// If eventsOnly is true, only copy the item if it has the event bit set.
@@ -244,14 +272,14 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 					if (!eventOnly || isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
 						_tempAdvertisedIds.list[_tempAdvertisedIds.size++] = _advertisedIds.list[i];
 						found = true;
+						break;
 					}
-					break;
 				}
 			}
-			if (!found && i < _advertisedIds.head) {
-				// Id at index before head is removed, so decrease head
-				_advertisedIds.head--;
-			}
+		}
+		if (!found && i < _advertisedIds.head) {
+			// Id at index before head is removed, so decrease head
+			_advertisedIds.head--;
 		}
 	}
 
@@ -268,6 +296,13 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 	if (_advertisedIds.head >= _advertisedIds.size) {
 		_advertisedIds.head = 0;
 	}
+#ifdef PRINT_VERBOSE_EXTERNAL_DATA
+	LOGd("head=%u list:", _advertisedIds.head);
+	for (uint8_t i=0; i<_advertisedIds.size; ++i) {
+		_log(SERIAL_DEBUG, " %u", _advertisedIds.list[i]);
+	}
+	_log(SERIAL_DEBUG, SERIAL_CRLF);
+#endif
 	// Done removing ids from the recent list that are not in the messages
 
 
@@ -277,11 +312,11 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 		advertiseId = _advertisedIds.list[_advertisedIds.head];
 	}
 
-
 	// Add first id that is in the messages, but not in the recent list (search from newest to oldest)
 	// If this happens, advertise this id instead of the id at the head
 	// Skip ids that are 0 or similar to own id
 	// In case of eventOnly: also skip ids that don't have the event flag set
+	bool found;
 	for (uint8_t chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
 		if (!hasStateMsg[chan]) {
 			continue;
@@ -296,14 +331,17 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 			if (eventOnly && !isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
 				continue;
 			}
-			bool found = false;
-			for (auto i=0; i<_advertisedIds.size; i++) {
+			found = false;
+			for (uint8_t i=0; i<_advertisedIds.size; i++) {
 				if (_advertisedIds.list[i] == p_stateItem->id) {
 					found = true;
 					break;
 				}
 			}
 			if (!found) {
+#ifdef PRINT_VERBOSE_EXTERNAL_DATA
+				LOGd("found new: %u", p_stateItem->id);
+#endif
 				// Add id to recent list
 				_advertisedIds.list[_advertisedIds.size] = p_stateItem->id;
 				_advertisedIds.size++;
@@ -313,23 +351,32 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 				break;
 			}
 		}
+		if (!found) {
+			break;
+		}
 	}
+#ifdef PRINT_VERBOSE_EXTERNAL_DATA
+	LOGd("advertiseId=%u", advertiseId);
+#endif
 	return advertiseId;
 }
 #endif
 
 #if BUILD_MESHING == 1
-void ServiceData::onMeshStateMsg(state_message_t* stateMsg) {
+void ServiceData::onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg) {
 	// Check if the last state item is from an event (external data bit is used for that)
 	// If so, only advertise states from events for some time
 	int16_t idx = -1;
 	state_item_t* p_stateItem;
 	while (peek_prev_state_item(stateMsg, &p_stateItem, idx)) {
-		if (isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
+		if (isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA) && p_stateItem->id != ownId) {
 			_numAdvertiseChangedStates = MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS;
 		}
 		break;
 	}
+#ifdef PRINT_VERBOSE_EXTERNAL_DATA
+	LOGd("onMeshStateMsg: %u", _numAdvertiseChangedStates);
+#endif
 }
 #endif
 
@@ -434,7 +481,7 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		}
 		case EVT_EXTERNAL_STATE_MSG: {
 #if BUILD_MESHING == 1
-			onMeshStateMsg((state_message_t*)p_data);
+			onMeshStateMsg(_serviceData.params.crownstoneId, (state_message_t*)p_data);
 #endif
 			break;
 		}
