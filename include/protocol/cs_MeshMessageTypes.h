@@ -38,6 +38,10 @@ enum MeshCommandTypes {
 	STATE_MESSAGE            = 3,
 };
 
+enum MeshCommandBitmask {
+	REPLY_REQUEST            = 0,
+};
+
 enum MeshReplyTypes {
 	STATUS_REPLY             = 0,
 	CONFIG_REPLY             = 1,
@@ -378,12 +382,10 @@ inline bool pop_state_item(state_message_t* message, state_item_t* item) {
  * COMMAND
  ********************************************************************/
 
-//! Size of message type + number of ids
-#define MIN_COMMAND_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint8_t))
+//! Minimum header size, excludes id list.
+#define MIN_COMMAND_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t))
 
-//! Size of ids[] + command
-//TODO: why was SB_HEADER_SIZE subtracted here?
-//#define MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH (MAX_MESH_MESSAGE_LENGTH - MIN_COMMAND_HEADER_SIZE - SB_HEADER_SIZE)
+//! Maximum size of id list + command payload
 #define MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH (MAX_MESH_MESSAGE_LENGTH - MIN_COMMAND_HEADER_SIZE)
 
 using control_mesh_message_t = stream_t<uint8_t, (MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)>;
@@ -406,14 +408,15 @@ struct __attribute__((__packed__)) beacon_mesh_message_t {
  * and the payload stemming from these nodes. The payload is a message: a beacon message, command message, or 
  * configuration message.
  *
- * TODO: The construction of this struct makes use of nested anonymous unions. It surpringly compiles with g++, but
+ * TODO: The construction of this struct makes use of nested anonymous unions. It surprisingly compiles with g++, but
  * will probably fail with other compilers. Both ids[] and payload[] are dynamic (so the size of the struct is hard to
  * extract). Moreover, the size of beacon_mesh_message_t does not seem to be forced to be the same as that of 
  * control_mesh_message_t.
  */
 struct __attribute__((__packed__)) command_message_t {
-	uint16_t messageType;
-	uint8_t numOfIds;
+	uint8_t messageType;
+	uint8_t bitmask;
+	uint8_t idCount;
 	union {
 		struct {
 			id_type_t ids[0];
@@ -424,21 +427,21 @@ struct __attribute__((__packed__)) command_message_t {
 				config_mesh_message_t configMsg;
 			};
 		} data;
-		uint8_t raw[MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH]; // dummy item, makes the reply_message_t a fixed size (for allocation)
+		uint8_t raw[MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH]; // dummy item, makes the command_message_t a fixed size (for allocation)
 	};
 };
 
 //! Only checks if the ids array fits in the message, not if the payload fits
 inline bool is_valid_command_message(command_message_t* msg, uint16_t length) {
-	//! First check if the header fits in the message
+	// First check if the header fits in the message
 	if (length < MIN_COMMAND_HEADER_SIZE) {
 		return false;
 	}
-	//! Then check the header
-	if (length < MIN_COMMAND_HEADER_SIZE + msg->numOfIds * sizeof(id_type_t)) {
+	// Then check the header
+	if (length < MIN_COMMAND_HEADER_SIZE + msg->idCount * sizeof(id_type_t)) {
 		return false;
 	}
-	//! Check if the message is not too large
+	// Check if the message is not too large
 //	if (length > sizeof(command_message_t)) { this doesn't work, due to unused bytes
 	if (length > MAX_MESH_MESSAGE_LENGTH) {
 		return false;
@@ -446,42 +449,51 @@ inline bool is_valid_command_message(command_message_t* msg, uint16_t length) {
 	return true;
 }
 
+inline bool is_valid_command_control_mesh_message(control_mesh_message_t* msg, uint16_t length) {
+	if (length < SB_HEADER_SIZE) {
+		return false;
+	}
+	if (length < SB_HEADER_SIZE + msg->length) {
+		return false;
+	}
+	return true;
+}
+
 inline bool is_broadcast_command(command_message_t* message) {
-	return message->numOfIds == 0;
+	return message->idCount == 0;
 }
 
 inline bool is_command_for_us(command_message_t* message, id_type_t id) {
 
 	if (is_broadcast_command(message)) {
 		return true;
-	} else {
-		id_type_t* p_id;
-		p_id = message->data.ids;
-		for (int i = 0; i < message->numOfIds; ++i) {
-			if (*p_id == id) {
-				return true;
-			}
-			++p_id;
-		}
-
-		// Can't do this, because in the struct it says: ids[0]
-//		for (int i = 0; i < message->numOfIds; ++i) {
-//			if (message->data.ids[i] == id) {
-//				return true;
-//			}
-//		}
-
-		return false;
 	}
+
+	id_type_t* p_id;
+	p_id = message->data.ids;
+	for (int i = 0; i < message->idCount; ++i) {
+		if (*p_id == id) {
+			return true;
+		}
+		++p_id;
+	}
+
+	// Can't do this, because in the struct it says: ids[0]
+//	for (int i = 0; i < message->idCount; ++i) {
+//		if (message->data.ids[i] == id) {
+//			return true;
+//		}
+//	}
+
+	return false;
 }
 
-//! Gets the payload data and payload length of a command message, based on the size of ids array.
+//! Gets the payload data.
+//! Sets payloadLength to the length of the payload, based on the command message size.
 //! Assumes already checked if is_valid_command_message()!
 inline void get_command_msg_payload(command_message_t* message, uint16_t messageLength, uint8_t** payload, uint16_t& payloadLength) {
-	//TODO: why was the size of the ids array added to the payloadLength?
-//	payloadLength =  messageLength - MIN_COMMAND_HEADER_SIZE + message->numOfIds * sizeof(id_type_t);
-	payloadLength =  messageLength - MIN_COMMAND_HEADER_SIZE - message->numOfIds * sizeof(id_type_t);
-	*payload = (uint8_t*)message + MIN_COMMAND_HEADER_SIZE + message->numOfIds * sizeof(id_type_t);
+	payloadLength =  messageLength - MIN_COMMAND_HEADER_SIZE - message->idCount * sizeof(id_type_t);
+	*payload = (uint8_t*)message + MIN_COMMAND_HEADER_SIZE + message->idCount * sizeof(id_type_t);
 }
 
 /********************************************************************

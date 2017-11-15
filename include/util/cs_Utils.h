@@ -120,6 +120,16 @@ inline bool isBitSet(const T value, uint8_t bit) {
 	return value & 1 << bit;
 }
 
+template<typename T>
+inline bool setBit(T& value, uint8_t bit) {
+	return value |= 1 << bit;
+}
+
+template<typename T>
+inline bool clearBit(T& value, uint8_t bit) {
+	return value &= ~(1 << bit);
+}
+
 /**
  * @brief Parses advertisement data, providing length and location of the field in case
  *        matching data is found.

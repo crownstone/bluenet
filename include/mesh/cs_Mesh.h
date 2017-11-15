@@ -97,13 +97,16 @@ private:
 	void resolveConflict(mesh_handle_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,
 			encrypted_mesh_message_t* p_new, uint16_t length_new);
 
-	//! Returns the message counter of a given handle
-	//! Does not check if handle is valid!
-	MeshMessageCounter& getMessageCounter(mesh_handle_t handle);
+	//! Returns the index of a given handle. Returns INVALID_HANDLE if it has no index.
+	uint16_t getHandleIndex(mesh_handle_t handle);
 
 	//! Returns the message counter of a given handle index
 	//! Returns NULL for an invalid handle index
 	MeshMessageCounter& getMessageCounterFromIndex(uint16_t handleIndex);
+
+	//! Returns the message counter of a given handle
+	//! Does not check if handle is valid!
+	MeshMessageCounter& getMessageCounter(mesh_handle_t handle);
 
 public:
 	//! use static variant of singleton, no dynamic memory allocation
@@ -129,9 +132,6 @@ public:
 
 	//! Returns whether the mesh is currently started and running.
 	bool isRunning();
-
-	//! Returns the index of a given handle. Returns INVALID_HANDLE if it has no index.
-	uint16_t getHandleIndex(mesh_handle_t handle);
 
 
 	//! Send message

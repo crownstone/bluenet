@@ -37,6 +37,7 @@ enum CommandHandlerTypes {
 	CMD_MULTI_SWITCH                = 25,    //! 0x19
 	CMD_SCHEDULE_ENTRY_CLEAR        = 26,    //! 0x1A
 	CMD_KEEP_ALIVE_MESH             = 27,    //! 0x1B
+	CMD_MESH_COMMAND                = 28,    //! 0x1C
 	CMD_TYPES
 };
 

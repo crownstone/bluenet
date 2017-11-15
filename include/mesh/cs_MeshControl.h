@@ -70,7 +70,7 @@ public:
 	 */
 	void sendStateReplyMessage(uint32_t messageCounter, state_reply_item_t* stateReply);
 
-	/** Send a keep alive message into the mesh.
+	/** Send a keep alive message into the mesh, and handle it when targeted at this crownstone.
 	 *
 	 * @msg    pointer to the message.
 	 * @length length of the message in bytes.
@@ -78,19 +78,27 @@ public:
 	 */
 	ERR_CODE sendKeepAliveMessage(keep_alive_message_t* msg, uint16_t length);
 
-	/** Send the last sent keep alive message into the mesh.
+	/** Send the last sent keep alive message into the mesh, and handle it when targeted at this crownstone.
 	 *
 	 * @return error code
 	 */
 	ERR_CODE sendLastKeepAliveMessage();
 
-	/** Send a multi switch message into the mesh.
+	/** Send a multi switch message into the mesh, and handle it when targeted at this crownstone.
 	 *
 	 * @msg    pointer to the message.
 	 * @length length of the message in bytes.
 	 * @return error code
 	 */
 	ERR_CODE sendMultiSwitchMessage(multi_switch_message_t* msg, uint16_t length);
+
+	/** Send a command message into the mesh, and handle it when targeted at this crownstone.
+	 *
+	 * @msg    pointer to the message.
+	 * @length length of the message in bytes.
+	 * @return error code
+	 */
+	ERR_CODE sendCommandMessage(command_message_t* msg, uint16_t length);
 
 	/** Send a message into the mesh, used by the mesh characteristic
 	 *
@@ -147,7 +155,6 @@ protected:
 	 *
 	 * @msg the message payload
 	 * @length length of the message in bytes
-	 * @change whether or not this state message was received over the change handle
 	 */
 	ERR_CODE handleStateMessage(state_message_t* msg, uint16_t length);
 
@@ -168,11 +175,12 @@ protected:
 	/** Decode a command message (received over mesh or mesh characteristic) that is targeted at this crownstone.
 	 *
 	 * @type command type, see MeshCommandTypes
+	 * @bitmask command bitmask, see MeshCommandBitmask
 	 * @messageCounter the message counter of the message that was received
 	 * @payload the payload of the command
 	 * @length length of payload in bytes
 	 */
-	void handleCommandForUs(uint16_t type, uint32_t messageCounter, uint8_t* payload, uint16_t length);
+	void handleCommandForUs(uint8_t type, uint8_t bitmask, uint32_t messageCounter, uint8_t* payload, uint16_t length);
 
 
 	/** Decode a config message that is targeted at this crownstone.

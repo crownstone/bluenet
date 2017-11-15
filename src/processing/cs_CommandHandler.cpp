@@ -636,7 +636,8 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 
 		if (value == 0) {
 			Switch::getInstance().relayOff();
-		} else {
+		}
+		else {
 			Switch::getInstance().relayOn();
 		}
 
@@ -648,6 +649,42 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 #if BUILD_MESHING == 1
 		multi_switch_message_t* multiSwitchMsg = (multi_switch_message_t*) buffer;
 		MeshControl::getInstance().sendMultiSwitchMessage(multiSwitchMsg, size);
+#endif
+		break;
+	}
+	case CMD_MESH_COMMAND: {
+		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+		LOGi(STR_HANDLE_COMMAND, "mesh command");
+#if BUILD_MESHING == 1
+		command_message_t* commandMsg = (command_message_t*) buffer;
+		if (!is_valid_command_message(commandMsg, size)) {
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		uint8_t* payload;
+		uint16_t payloadLength;
+		get_command_msg_payload(commandMsg, size, &payload, payloadLength);
+		bool sendMeshMsg = false;
+		EncryptionAccessLevel requiredAccessLevel = NOT_SET;
+		switch (commandMsg->messageType) {
+		case CONTROL_MESSAGE: {
+			control_mesh_message_t* controlMsg = (control_mesh_message_t*)payload;
+			if (!is_valid_command_control_mesh_message(controlMsg, payloadLength)) {
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			switch (controlMsg->type) {
+			case CMD_SET_TIME: {
+				requiredAccessLevel = MEMBER;
+				sendMeshMsg = true;
+				break;
+			}
+			}
+			break;
+		}
+		}
+		if (sendMeshMsg && EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
+			// Send the message into the mesh.
+
+		}
 #endif
 		break;
 	}

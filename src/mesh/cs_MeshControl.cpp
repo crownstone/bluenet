@@ -15,6 +15,7 @@
 #include <processing/cs_Switch.h>
 #include <mesh/cs_Mesh.h>
 #include <common/cs_Types.h>
+#include <util/cs_Utils.h>
 
 // enable for additional debug output
 //#define PRINT_DEBUG
@@ -26,9 +27,6 @@
 //#define PRINT_VERBOSE_COMMAND
 #define PRINT_VERBOSE_COMMAND_REPLY
 #define PRINT_VERBOSE_MULTI_SWITCH
-
-// Disables sending of command replies.
-#define CRIPPLE_MESH_FUNCTIONALITY
 
 MeshControl::MeshControl() : _myCrownstoneId(0) {
 	EventDispatcher::getInstance().addListener(this);
@@ -91,20 +89,20 @@ ERR_CODE MeshControl::handleCommand(command_message_t* msg, uint16_t length, uin
 	if (!is_valid_command_message(msg, length)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 		BLEutil::printArray(msg, length);
-		sendStatusReplyMessage(messageCounter, ERR_WRONG_PAYLOAD_LENGTH);
+//		sendStatusReplyMessage(messageCounter, ERR_WRONG_PAYLOAD_LENGTH); // Can't check bitmask, cause maybe it's not there.
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	uint8_t* payload;
-	uint16_t payloadLength;
 
 	if (is_command_for_us(msg, _myCrownstoneId)) {
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
 		LOGi("is for us: ");
 		BLEutil::printArray(msg, length);
 #endif
+		uint8_t* payload;
+		uint16_t payloadLength;
 		get_command_msg_payload(msg, length, &payload, payloadLength);
-		handleCommandForUs(msg->messageType, messageCounter, payload, payloadLength);
+		handleCommandForUs(msg->messageType, msg->bitmask, messageCounter, payload, payloadLength);
 	}
 	else {
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
@@ -196,7 +194,8 @@ ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t le
 
 		Switch::getInstance().handleMultiSwitch(&multiSwitchCmd);
 
-	} else {
+	}
+	else {
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_MULTI_SWITCH)
 		LOGi("multi switch, not for us");
@@ -326,7 +325,7 @@ ERR_CODE MeshControl::handleScanResultMessage(scan_result_message_t* msg, uint16
 }
 
 
-void MeshControl::handleCommandForUs(uint16_t commandType, uint32_t messageCounter, uint8_t* commandPayload, uint16_t commandPayloadLength) {
+void MeshControl::handleCommandForUs(uint8_t commandType, uint8_t bitmask, uint32_t messageCounter, uint8_t* commandPayload, uint16_t commandPayloadLength) {
 
 	ERR_CODE statusResult;
 
@@ -368,7 +367,9 @@ void MeshControl::handleCommandForUs(uint16_t commandType, uint32_t messageCount
 
 	}
 
-	sendStatusReplyMessage(messageCounter, statusResult);
+	if (BLEutil::isBitSet(bitmask, REPLY_REQUEST)) {
+		sendStatusReplyMessage(messageCounter, statusResult);
+	}
 
 }
 
@@ -642,7 +643,7 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
 		{
 		id_type_t* id = message->data.ids;
-		if (message->numOfIds == 1 && *id == _myCrownstoneId) {
+		if (message->idCount == 1 && *id == _myCrownstoneId) {
 			LOGd("Message is only for us");
 		} else if (is_broadcast_command(message)) {
 			LOGd("Send broadcast and process");
@@ -660,10 +661,10 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 
 		//! If the only id in there is for this crownstone, there is no need to send it into the mesh.
 		bool sendOverMesh = is_broadcast_command(message);
-		if (message->numOfIds == 1 && handleSelf) {
+		if (message->idCount == 1 && handleSelf) {
 			sendOverMesh = false;
 		}
-		else if (message->numOfIds > 0) {
+		else if (message->idCount > 0) {
 			sendOverMesh = true;
 		}
 
@@ -682,7 +683,7 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 
 			get_command_msg_payload(message, length, &payload, payloadLength);
 			// TODO: this will send a reply message with replyMsg.messageCounter = 0, will that bring any trouble?
-			handleCommandForUs(message->messageType, messageCounter, payload, payloadLength);
+			handleCommandForUs(message->messageType, message->bitmask, messageCounter, payload, payloadLength);
 		}
 		break;
 	}
@@ -735,10 +736,6 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 }
 
 void MeshControl::sendStatusReplyMessage(uint32_t messageCounter, ERR_CODE status) {
-#ifdef CRIPPLE_MESH_FUNCTIONALITY
-	return;
-#endif
-
 #if defined(PRINT_MESHCONTROL_VERBOSE) && defined(PRINT_VERBOSE_COMMAND_REPLY)
 	LOGd("MESH SEND");
 	LOGi("Send StatusReply for message %d, status: %d", messageCounter, status);
@@ -923,6 +920,7 @@ ERR_CODE MeshControl::sendKeepAliveMessage(keep_alive_message_t* msg, uint16_t l
 		return errCode;
 	}
 
+	// TODO: only send when this message is (also) for other crownstones.
 	Mesh::getInstance().send(KEEP_ALIVE_CHANNEL, msg, length);
 	return ERR_SUCCESS;
 }
@@ -948,6 +946,7 @@ ERR_CODE MeshControl::sendLastKeepAliveMessage() {
 		return errCode;
 	}
 
+	// TODO: only send when this message is (also) for other crownstones.
 	if (Mesh::getInstance().send(KEEP_ALIVE_CHANNEL, &msg, length) == 0) {
 		return ERR_NOT_AVAILABLE;
 	}
@@ -961,7 +960,69 @@ ERR_CODE MeshControl::sendMultiSwitchMessage(multi_switch_message_t* msg, uint16
 		return errCode;
 	}
 
+	// TODO: only send when this message is (also) for other crownstones.
 	Mesh::getInstance().send(MULTI_SWITCH_CHANNEL, msg, length);
+	return ERR_SUCCESS;
+}
+
+ERR_CODE MeshControl::sendCommandMessage(command_message_t* msg, uint16_t length) {
+
+	// Only checks if the ids array fits, the payload length will be checked in handleCommandForUs()
+	if (!is_valid_command_message(msg, length)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+		BLEutil::printArray(msg, length);
+		return ERR_INVALID_MESSAGE;
+	}
+
+#if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
+	{
+	id_type_t* id = msg->data.ids;
+	if (msg->idCount == 1 && *id == _myCrownstoneId) {
+		LOGd("Message is only for us");
+	}
+	else if (is_broadcast_command(msg)) {
+		LOGd("Send broadcast and process");
+	}
+	else if (is_command_for_us(msg, _myCrownstoneId)) {
+		LOGd("Multicast message, send into mesh and process");
+	}
+	else {
+		LOGd("Message not for us, send into mesh");
+	}
+	LOGi("message:");
+	BLEutil::printArray((uint8_t*)msg, length);
+	}
+#endif
+
+	bool handleSelf = is_command_for_us(msg, _myCrownstoneId);
+
+	// If the only id in the message is for this crownstone, there is no need to send it into the mesh.
+	bool sendOverMesh = is_broadcast_command(msg);
+	if (msg->idCount == 1 && handleSelf) {
+		sendOverMesh = false;
+	}
+	else if (msg->idCount > 0) {
+		sendOverMesh = true;
+	}
+
+	uint32_t messageCounter = 0;
+	if (sendOverMesh) {
+		messageCounter = Mesh::getInstance().send(COMMAND_CHANNEL, msg, length);
+	}
+	else {
+		// TODO: get and inc message counter?????
+		// Make sure there is no reply?
+		BLEutil::clearBit(msg->bitmask, REPLY_REQUEST);
+	}
+
+	if (handleSelf) {
+		uint8_t* payload;
+		uint16_t payloadLength;
+
+		get_command_msg_payload(msg, length, &payload, payloadLength);
+		// TODO: this can send a reply message with replyMsg.messageCounter = 0, will that bring any trouble?
+		handleCommandForUs(msg->messageType, msg->bitmask, messageCounter, payload, payloadLength);
+	}
 	return ERR_SUCCESS;
 }
 

@@ -410,6 +410,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | G
 25 | Multi switch | [Multi switch packet](#multi_switch_mesh_packet) | Switch multiple crownstones with a command over the mesh. | x | x | x
 26 | Schedule remove | uint 8 | Clear the Nth schedule entry of the [list](#schedule_list_packet). | x | x
 27 | Keepalive mesh | [Keep alive mesh packet](#keep_alive_mesh_packet) | Send keep alives via the mesh. | x | x |
+28 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 
 
 #### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
@@ -854,7 +855,8 @@ int 32 | Energy used | 4 | The total energy used. Divide by 64 to get the energy
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | [Type](#mesh_command_types) | 2 | Type of command, see table below.
+uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
+uint 8 | [Bitmask](#mesh_command_bitmask) | 1 | Options of command, see table below.
 uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast.
 uint16 [] | List of target IDs | Count * 2 | Crownstone Identifiers of the devices at which this message is aimed, for broadcast, no IDs are provided and the command follows directly after the Number of IDs element.
 uint 8 | Command payload | N | The command payload data, which depends on the type.
@@ -867,6 +869,21 @@ Type nr | Type name | Payload type | Payload description
 1 | Beacon | [Beacon Config](#beacon_mesh_data_packet) | Configure the iBeacon settings.
 2 | Config | [Configuration](#config_packet) | Send/Request a configuration setting, see configuration packet.
 3 | State | [State](#state_packet) | Send/Request a state variable, see state packet.
+
+
+##### <a name="mesh_command_bitmask"></a>Command bitmask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Reply request | Set this to 1 to get a command reply.
+1 | Reserved |  Reserved for future use.
+2 | Reserved |  Reserved for future use.
+3 | Reserved |  Reserved for future use.
+4 | Reserved |  Reserved for future use.
+5 | Reserved |  Reserved for future use.
+6 | Reserved |  Reserved for future use.
+7 | Reserved |  Reserved for future use.
+
 
 ##### <a name="beacon_mesh_data_packet"></a>Beacon config packet
 
