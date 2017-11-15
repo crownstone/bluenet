@@ -785,7 +785,7 @@ Handle | Name | Type | Description
 11 | Keep alive channel | [Keep alive](#keep_alive_mesh_packet) | Channel on which the keep alive messages are sent. A message consists of a global timeout and a number of keep alive items (on per stone which is addressed). If the length of the mesh control packet is 0, the existing keepalive message will be repeated.
 9  | State channel | [State](#state_mesh_packet) | Each stone sends its state periodically, and on significant state change, over the mesh. The message is designed as a circular buffer and a new item is added at the end (throwing out the oldest when full).
 10 | State channel | [State](#state_mesh_packet) | Each stone sends its state periodically, and on significant state change, over the mesh. The message is designed as a circular buffer and a new item is added at the end (throwing out the oldest when full).
-4  | Command channel | [Command](#command_mesh_packet) | Commands can be sent to one, multiple or all stones sharing the mesh network. Once a stone receives a command it will send a reply on the reply channel
+13 | Command channel | [Command](#command_mesh_packet) | Commands can be sent to one, multiple or all stones sharing the mesh network. Once a stone receives a command it will send a reply on the reply channel
 5  | Command reply channel | [Command reply](#command_reply_packet) | Every stone that was targeted with a command adds its reply to the reply message.
 6  | Scan result channel | [Scan result](#scan_result_mesh_packet) | If a stone is scanning for devices it adds its scanned devices periodically to this list to be sent over the mesh
 7  | Big data channel | - | This channel is for the case when a stone needs to send big data, such as the history of eneregy usage, etc.

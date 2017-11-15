@@ -16,7 +16,6 @@
 #include <protocol/mesh/cs_MeshMessageState.h>
 
 enum MeshChannels {
-	COMMAND_CHANNEL          = 4,
 	COMMAND_REPLY_CHANNEL    = 5,
 	SCAN_RESULT_CHANNEL      = 6,
 	BIG_DATA_CHANNEL         = 7,
@@ -24,6 +23,7 @@ enum MeshChannels {
 	STATE_CHANNEL_1          = 10,
 	KEEP_ALIVE_CHANNEL       = 11,
 	MULTI_SWITCH_CHANNEL     = 12,
+	COMMAND_CHANNEL          = 13,
 	INVALID_HANDLE           = 0xFFFF
 };
 
