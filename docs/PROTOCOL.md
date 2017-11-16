@@ -386,7 +386,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | G
 1 | PWM | uint 8 | Set PWM to value, 0 = OFF, 100 = FULL ON | x | x | x
 2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 | x | x |
 3 | Goto DFU | - | Reset device to DFU mode | x
-4 | Reset | uint 8 | Reset device | x
+4 | Reset | - | Reset device | x
 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x
 6 | Keep alive state | [Keep alive payload](#cmd_keep_alive_payload) | Keep alive with state | x | x |
 7 | Keep alive | - | Keep alive without state, uses last state transmitted with Keep alive state command | x | x | x
@@ -395,14 +395,14 @@ Type nr | Type name | Payload type | Payload Description | A | M | G
 10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON | x
 11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON. **Deprecated** | x
 12 | Enable scanner | [Enable Scanner payload](#cmd_enable_scanner_payload) | Enable/Disable scanner | x
-13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON | x |
-14 | User feedback | ... | User feedback ..., TBD | x |
+13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON. **Deprecated** | x |
+14 | User feedback | ... | User feedback. **Not implemented yet** | x |
 15 | Schedule set | [Schedule command payload](#schedule_command_packet) | Set (overwrite) a schedule entry | x | x
 16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
 17 | <a name="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | ..
-18 | Request Service Data | - | Causes the crownstone to send it's service data over the mesh | x | x |
-19 | Disconnect | - | Causes the crownstone to disconnect | .. | .. | ..
-20 | Set LED | ?? | Enable or disabled LEDS | x
+18 | Request Service Data | - | Causes the crownstone to send its service data over the mesh. **Not implemented yet** | x | x |
+19 | Disconnect | - | Causes the crownstone to disconnect | x | x | x
+20 | Set LED | ?? | Enable or disabled LEDS. **Deprecated** | x
 21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
 22 | Increase TX | - | Temporarily increase the TX power when in setup mode | x | x | x
 23 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
@@ -418,7 +418,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | G
 Type | Name | Description
 --- | --- | ---
 uint 8 | enable | 0 = OFF, other = ON
-uint 16 | delay | start scanner with delay in ms
+uint 16 | delay | Start scanner with delay in ms, (required, but not used when stopping the scanner).
 
 #### <a name="cmd_keep_alive_payload"></a>Keep alive payload
 

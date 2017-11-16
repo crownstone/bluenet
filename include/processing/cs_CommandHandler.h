@@ -69,6 +69,37 @@ public:
 	 */
 	void resetDelayed(uint8_t opCode);
 
+
+	ERR_CODE handleCmdNop                   (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdGotoDfu               (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdReset                 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdEnableMesh            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdEnableEncryption      (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdEnableIbeacon         (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdEnableScanner         (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdScanDevices           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdRequestServiceData    (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdFactoryReset          (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdSetTime               (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdScheduleEntrySet      (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdScheduleEntryClear    (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdIncreaseTx            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdValidateSetup         (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdKeepAlive             (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdKeepAliveState        (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdKeepAliveRepeatLast   (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdKeepAliveMesh         (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdUserFeedBack          (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdDisconnect            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdSetLed                (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdResetErrors           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdPwm                   (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdSwitch                (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdRelay                 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdMultiSwitch           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdMeshCommand           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdEnableContPowerMeasure(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+
 private:
 
 	CommandHandler();

@@ -101,175 +101,252 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		const EncryptionAccessLevel accessLevel) {
 
 	switch (type) {
-	case CMD_NOP: {
-		// a nop command to keep the connection alive
-		// don't need to do anything here, the connection keep alive is handled in the stack
-		break;
+	case CMD_NOP:
+		return handleCmdNop(buffer, size, accessLevel);
+	case CMD_GOTO_DFU:
+		return handleCmdGotoDfu(buffer, size, accessLevel);
+	case CMD_RESET:
+		return handleCmdReset(buffer, size, accessLevel);
+	case CMD_ENABLE_MESH:
+		return handleCmdEnableMesh(buffer, size, accessLevel);
+	case CMD_ENABLE_ENCRYPTION:
+		return handleCmdEnableEncryption(buffer, size, accessLevel);
+	case CMD_ENABLE_IBEACON:
+		return handleCmdEnableIbeacon(buffer, size, accessLevel);
+	case CMD_ENABLE_SCANNER:
+		return handleCmdEnableScanner(buffer, size, accessLevel);
+	case CMD_SCAN_DEVICES:
+		return handleCmdScanDevices(buffer, size, accessLevel);
+	case CMD_REQUEST_SERVICE_DATA:
+		return handleCmdRequestServiceData(buffer, size, accessLevel);
+	case CMD_FACTORY_RESET:
+		return handleCmdFactoryReset(buffer, size, accessLevel);
+	case CMD_SET_TIME:
+		return handleCmdSetTime(buffer, size, accessLevel);
+	case CMD_SCHEDULE_ENTRY_SET:
+		return handleCmdScheduleEntrySet(buffer, size, accessLevel);
+	case CMD_SCHEDULE_ENTRY_CLEAR:
+		return handleCmdScheduleEntryClear(buffer, size, accessLevel);
+	case CMD_INCREASE_TX:
+		return handleCmdIncreaseTx(buffer, size, accessLevel);
+	case CMD_VALIDATE_SETUP:
+		return handleCmdValidateSetup(buffer, size, accessLevel);
+	case CMD_KEEP_ALIVE:
+		return handleCmdKeepAlive(buffer, size, accessLevel);
+	case CMD_KEEP_ALIVE_STATE:
+		return handleCmdKeepAliveState(buffer, size, accessLevel);
+	case CMD_KEEP_ALIVE_REPEAT_LAST:
+		return handleCmdKeepAliveRepeatLast(buffer, size, accessLevel);
+	case CMD_KEEP_ALIVE_MESH:
+		return handleCmdKeepAliveMesh(buffer, size, accessLevel);
+	case CMD_USER_FEEDBACK:
+		return handleCmdUserFeedBack(buffer, size, accessLevel);
+	case CMD_DISCONNECT:
+		return handleCmdDisconnect(buffer, size, accessLevel);
+	case CMD_SET_LED:
+		return handleCmdSetLed(buffer, size, accessLevel);
+	case CMD_RESET_ERRORS:
+		return handleCmdResetErrors(buffer, size, accessLevel);
+	case CMD_PWM:
+		return handleCmdPwm(buffer, size, accessLevel);
+	case CMD_SWITCH:
+		return handleCmdSwitch(buffer, size, accessLevel);
+	case CMD_RELAY:
+		return handleCmdRelay(buffer, size, accessLevel);
+	case CMD_MULTI_SWITCH:
+		return handleCmdMultiSwitch(buffer, size, accessLevel);
+	case CMD_MESH_COMMAND:
+		return handleCmdMeshCommand(buffer, size, accessLevel);
+	case CMD_ENABLE_CONT_POWER_MEASURE:
+		return handleCmdEnableContPowerMeasure(buffer, size, accessLevel);
+	default:
+		LOGe("Unknown type: %u", type);
+		return ERR_COMMAND_NOT_FOUND;
 	}
-	case CMD_GOTO_DFU: {
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "goto dfu");
-		resetDelayed(GPREGRET_DFU_RESET);
-		break;
+	return ERR_SUCCESS;
+}
+
+
+
+ERR_CODE CommandHandler::handleCmdNop(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	// A no operation command to keep the connection alive.
+	// No need to do anything here, the connection keep alive is handled in the stack.
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdGotoDfu(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "goto dfu");
+	resetDelayed(GPREGRET_DFU_RESET);
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdReset(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "reset");
+	resetDelayed(GPREGRET_SOFT_RESET);
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdEnableMesh(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "enable mesh");
+
+	if (size != sizeof(enable_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-	case CMD_RESET: {
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "reset");
 
-//		if (size != sizeof(opcode_message_payload_t)) {
-//			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-//			return ERR_WRONG_PAYLOAD_LENGTH;
-//		}
-//
-//		opcode_message_payload_t* payload = (opcode_message_payload_t*) buffer;
-//		uint8_t resetOp = payload->opCode;
+	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+	bool enable = payload->enable;
 
-		resetDelayed(GPREGRET_SOFT_RESET);
-		break;
-	}
-	case CMD_ENABLE_MESH: {
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "enable mesh");
-
-		if (size != sizeof(enable_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-
-		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-		bool enable = payload->enable;
-
-		LOGi("%s mesh", enable ? STR_ENABLE : STR_DISABLE);
-		Settings::getInstance().updateFlag(CONFIG_MESH_ENABLED, enable, true);
+	LOGi("%s mesh", enable ? STR_ENABLE : STR_DISABLE);
+	Settings::getInstance().updateFlag(CONFIG_MESH_ENABLED, enable, true);
 
 #if BUILD_MESHING == 1
-		if (enable) {
-			Mesh::getInstance().start();
-		} else {
-			Mesh::getInstance().stop();
-		}
+	if (enable) {
+		Mesh::getInstance().start();
+	} else {
+		Mesh::getInstance().stop();
+	}
 #endif
 
-		break;
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdEnableEncryption(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "enable encryption, tbd");
+
+	// TODO: make it only apply after reset.
+	return ERR_NOT_IMPLEMENTED;
+
+	if (size != sizeof(enable_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-	case CMD_ENABLE_ENCRYPTION: {
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "enable encryption, tbd");
-		return ERR_NOT_IMPLEMENTED;
 
-		if (size != sizeof(enable_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
+	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+	bool enable = payload->enable;
 
-		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-		bool enable = payload->enable;
+	LOGi("%s encryption", enable ? STR_ENABLE : STR_DISABLE);
+	Settings::getInstance().updateFlag(CONFIG_ENCRYPTION_ENABLED, enable, true);
 
-		LOGi("%s encryption", enable ? STR_ENABLE : STR_DISABLE);
-		Settings::getInstance().updateFlag(CONFIG_ENCRYPTION_ENABLED, enable, true);
-		// TODO: Clear keys on disable? Check if keys are set on enable?
-		// todo: stack/service/characteristics need to be refactored if we also want to update characteristics
-		// on the fly
-		// for now, this only takes effect on next reset
-//			EventDispatcher::getInstance().dispatch(EVT_ENABLED_ENCRYPTION, &enable, 1);
+	return ERR_SUCCESS;
+}
 
-		break;
+
+ERR_CODE CommandHandler::handleCmdEnableIbeacon(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "enable ibeacon");
+
+	if (size != sizeof(enable_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-	case CMD_ENABLE_IBEACON: {
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "enable ibeacon");
 
-		if (size != sizeof(enable_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
+	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+	bool enable = payload->enable;
 
-		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-		bool enable = payload->enable;
+	LOGi("%s ibeacon", enable ? STR_ENABLE : STR_DISABLE);
+	Settings::getInstance().updateFlag(CONFIG_IBEACON_ENABLED, enable, true);
 
-		LOGi("%s ibeacon", enable ? STR_ENABLE : STR_DISABLE);
-		Settings::getInstance().updateFlag(CONFIG_IBEACON_ENABLED, enable, true);
+	return ERR_SUCCESS;
+}
 
-		break;
+
+ERR_CODE CommandHandler::handleCmdEnableScanner(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "enable scanner");
+
+	// TODO: make it only apply after reset?
+
+	enable_scanner_message_payload_t* payload = (enable_scanner_message_payload_t*) buffer;
+	bool enable = payload->enable;
+	uint16_t delay = payload->delay;
+
+	if (size != sizeof(enable_scanner_message_payload_t)) {
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-	case CMD_ENABLE_SCANNER: {
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "enable scanner");
 
-		enable_scanner_message_payload_t* payload = (enable_scanner_message_payload_t*) buffer;
-		bool enable = payload->enable;
-		uint16_t delay = payload->delay;
-
-		if (size != sizeof(enable_scanner_message_payload_t)) {
-			//! if we want to disable, we don't really need the delay, so
-			// we can accept the command as long as size is 1
-			if (size != 1 || enable) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
+	LOGi("%s scanner", enable ? STR_ENABLE : STR_DISABLE);
+	if (enable) {
+		LOGi("delay: %d ms", delay);
+		if (delay) {
+			Scanner::getInstance().delayedStart(delay);
 		}
-
-		LOGi("%s scanner", enable ? STR_ENABLE : STR_DISABLE);
-		if (enable) {
-			LOGi("delay: %d ms", delay);
-			if (delay) {
-				Scanner::getInstance().delayedStart(delay);
-			} else {
-				Scanner::getInstance().start();
-			}
-		} else {
-			Scanner::getInstance().stop();
+		else {
+			Scanner::getInstance().start();
 		}
-
-		Settings::getInstance().updateFlag(CONFIG_SCANNER_ENABLED, enable, true);
-
-		break;
 	}
-	case CMD_SCAN_DEVICES: {
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "scan devices");
+	else {
+		Scanner::getInstance().stop();
+	}
 
-		if (size != sizeof(enable_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
+	// TODO: first update flag, then start scanner? The scanner is stopped to write to pstorage anyway.
+	Settings::getInstance().updateFlag(CONFIG_SCANNER_ENABLED, enable, true);
 
-		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-		bool start = payload->enable;
+	return ERR_SUCCESS;
+}
 
-		if (start) {
-			Scanner::getInstance().manualStartScan();
-		} else {
-			// todo: if not tracking. do we need that still?
+
+ERR_CODE CommandHandler::handleCmdScanDevices(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "scan devices");
+
+	if (size != sizeof(enable_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	// TODO: deprecate this function?
+	return ERR_NOT_IMPLEMENTED;
+
+	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+	bool start = payload->enable;
+
+	if (start) {
+		Scanner::getInstance().manualStartScan();
+	}
+	else {
+		// todo: if not tracking. do we need that still?
 //				if (!_trackMode) {
-			Scanner::getInstance().manualStopScan();
+		Scanner::getInstance().manualStopScan();
 
-			ScanResult* results = Scanner::getInstance().getResults();
+		ScanResult* results = Scanner::getInstance().getResults();
 
 #ifdef PRINT_DEBUG
-			results->print();
+		results->print();
 #endif
 
-			buffer_ptr_t buffer;
-			uint16_t dataLength;
-			results->getBuffer(buffer, dataLength);
+		buffer_ptr_t buffer;
+		uint16_t dataLength;
+		results->getBuffer(buffer, dataLength);
 
-			EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, dataLength);
+		EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, dataLength);
 
 #if BUILD_MESHING == 1
-			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-				MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
-			}
-#endif
+		if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+			MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
 		}
-
-		break;
+#endif
 	}
-	case CMD_REQUEST_SERVICE_DATA: {
-		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "request service");
 
-		// TODO: use ServiceData function for this?
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdRequestServiceData(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "request service");
+
+	return ERR_NOT_IMPLEMENTED;
+
+	// TODO: use ServiceData function for this?
 //#if BUILD_MESHING == 1
 //		state_item_t stateItem;
 //		memset(&stateItem, 0, sizeof(stateItem));
@@ -294,428 +371,475 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 //		MeshControl::getInstance().sendServiceDataMessage(stateItem, true);
 //#endif
 
-		break;
-	}
-	case CMD_FACTORY_RESET: {
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "factory reset");
+	return ERR_SUCCESS;
+}
 
-		if (size != sizeof(FACTORY_RESET_CODE)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, sizeof(FACTORY_RESET_CODE));
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
 
-		factory_reset_message_payload_t* payload = (factory_reset_message_payload_t*) buffer;
-		uint32_t resetCode = payload->resetCode;
+ERR_CODE CommandHandler::handleCmdFactoryReset(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "factory reset");
 
-		if (!FactoryReset::getInstance().factoryReset(resetCode)) {
-			return ERR_WRONG_PARAMETER;
-		}
-
-		break;
-	}
-	case CMD_SET_TIME: {
-		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "set time:");
-
-		if (size != sizeof(uint32_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-
-		uint32_t value = *(uint32_t*)buffer;
-
-		Scheduler::getInstance().setTime(value);
-
-		break;
-	}
-	case CMD_SCHEDULE_ENTRY_SET: {
-		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "schedule entry");
-		if (size < sizeof(schedule_command_t)) {
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		schedule_command_t* entry = (schedule_command_t*)buffer;
-		ERR_CODE errCode = Scheduler::getInstance().setScheduleEntry(entry->id, &(entry->entry));
-		if (FAILURE(errCode)) {
-			return errCode;
-		}
-		break;
-	}
-	case CMD_SCHEDULE_ENTRY_CLEAR: {
-		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		if (size < 1) {
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		uint8_t id = buffer[0];
-		ERR_CODE errCode = Scheduler::getInstance().clearScheduleEntry(id);
-		if (FAILURE(errCode)) {
-			return errCode;
-		}
-		break;
-	}
-	case CMD_INCREASE_TX: {
-		uint8_t opMode;
-		State::getInstance().get(STATE_OPERATION_MODE, opMode);
-		if (opMode == OPERATION_MODE_SETUP) {
-			Nrf51822BluetoothStack::getInstance().changeToNormalTxPowerMode();
-		}
-		else {
-			LOGw("validate setup only available in setup mode");
-			return ERR_NOT_AVAILABLE;
-		}
-		break;
-	}
-	case CMD_VALIDATE_SETUP: {
-		// we do not need to check for the setup validation since this is not encrypted
-		LOGi(STR_HANDLE_COMMAND, "validate setup");
-
-		uint8_t opMode;
-		State::getInstance().get(STATE_OPERATION_MODE, opMode);
-		if (opMode == OPERATION_MODE_SETUP) {
-
-			Settings& settings = Settings::getInstance();
-
-			uint8_t key[ENCYRPTION_KEY_LENGTH];
-			uint8_t blankKey[ENCYRPTION_KEY_LENGTH] = {};
-
-			if (settings.isSet(CONFIG_ENCRYPTION_ENABLED)) {
-				// validate encryption keys are not 0
-				settings.get(CONFIG_KEY_ADMIN, key);
-				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-					LOGw("owner key is not set!");
-					return ERR_COMMAND_FAILED;
-				}
-
-				settings.get(CONFIG_KEY_MEMBER, key);
-				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-					LOGw("member key is not set!");
-					return ERR_COMMAND_FAILED;
-				}
-
-				settings.get(CONFIG_KEY_GUEST, key);
-				if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
-					LOGw("guest key is not set!");
-					return ERR_COMMAND_FAILED;
-				}
-			}
-
-			// validate crownstone id is not 0
-			uint16_t crownstoneId;
-			settings.get(CONFIG_CROWNSTONE_ID, &crownstoneId);
-
-			if (crownstoneId == 0) {
-				LOGw("crownstone id has to be set during setup mode");
-				return ERR_COMMAND_FAILED;
-			}
-
-			// validate major and minor
-			uint16_t major;
-			settings.get(CONFIG_IBEACON_MAJOR, &major);
-
-			if (major == 0) {
-				LOGw("ibeacon major is not set!");
-				return ERR_COMMAND_FAILED;
-			}
-
-			uint16_t minor;
-			settings.get(CONFIG_IBEACON_MINOR, &minor);
-
-			if (minor == 0) {
-				LOGw("ibeacon minor is not set!");
-				return ERR_COMMAND_FAILED;
-			}
-
-			// TODO: check mesh access address
-
-			LOGi("Setup completed, resetting to normal mode");
-
-			//! if validation ok, set opMode to normal mode
-			State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
-
-			//! Switch relay on
-			switch_message_payload_t switchPayload;
-			switchPayload.switchState = SWITCH_ON;
-			handleCommand(CMD_SWITCH, (uint8_t*)&switchPayload, 1, ADMIN);
-
-			//! then reset device
-			resetDelayed(GPREGRET_SOFT_RESET);
-		} else {
-			LOGw("validate setup only available in setup mode");
-			return ERR_NOT_AVAILABLE;
-		}
-
-		break;
-	}
-	case CMD_KEEP_ALIVE: {
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "keep alive");
-
-		EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE);
-
-//		Timer::getInstance().reset(_keepAliveTimerId, )
-
-		// no params
-
-		break;
-	}
-	case CMD_KEEP_ALIVE_STATE: {
-		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "keep alive state");
-
-		if (size != sizeof(keep_alive_state_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-
-//		keep_alive_state_message_payload_t state = *(keep_alive_state_message_payload_t*)buffer;
-//		LOGi("switch: %d", state.switchState.switchState);
-//		LOGi("timeout: %d s", state.timeout);
-
-		EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, buffer, size);
-
-		// state as param: pwm or on/off (switch state) as param
-		// timeout as param
-		//   + 1/2 interval
-
-		// in config
-
-		// 1 keepalive per 2 minutes
-
-		break;
-	}
-	case CMD_KEEP_ALIVE_REPEAT_LAST: {
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "keep alive repeat");
-#if BUILD_MESHING == 1
-		MeshControl::getInstance().sendLastKeepAliveMessage();
-#endif
-		break;
-	}
-	case CMD_KEEP_ALIVE_MESH: {
-		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "keep alive mesh");
-#if BUILD_MESHING == 1
-		keep_alive_message_t* keepAliveMsg = (keep_alive_message_t*) buffer;
-		MeshControl::getInstance().sendKeepAliveMessage(keepAliveMsg, size);
-#endif
-		break;
+	if (size != sizeof(FACTORY_RESET_CODE)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, sizeof(FACTORY_RESET_CODE));
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	case CMD_USER_FEEDBACK: {
-		if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "user feedback");
-		return ERR_NOT_IMPLEMENTED;
-		break;
-	}
-	case CMD_DISCONNECT: {
-		LOGi(STR_HANDLE_COMMAND, "disconnect");
-		Nrf51822BluetoothStack::getInstance().disconnect();
-		break;
-	}
-	case CMD_SET_LED: {
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "set led");
+	factory_reset_message_payload_t* payload = (factory_reset_message_payload_t*) buffer;
+	uint32_t resetCode = payload->resetCode;
 
-		if (_boardConfig->flags.hasLed) {
-			if (size != sizeof(led_message_payload_t)) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-
-			led_message_payload_t* payload = (led_message_payload_t*) buffer;
-			uint8_t led = payload->led;
-			bool enable = payload->enable;
-
-			LOGi("set led %d %s", led, enable ? "ON" : "OFF");
-
-			uint8_t ledPin = led == 1 ? _boardConfig->pinLedGreen : _boardConfig->pinLedRed;
-
-			if (_boardConfig->flags.ledInverted) {
-				enable = !enable;
-			}
-
-			if (enable) {
-				nrf_gpio_pin_set(ledPin);
-			} else {
-				nrf_gpio_pin_clear(ledPin);
-			}
-		} else {
-			LOGe("No LEDs on this board!");
-		}
-		break;
-	}
-	case CMD_RESET_ERRORS: {
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "reset errors");
-		if (size != sizeof(state_errors_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		state_errors_t* payload = (state_errors_t*) buffer;
-		state_errors_t state_errors;
-		State::getInstance().get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
-		LOGd("old errors %u - reset %u", state_errors, *payload);
-		state_errors.asInt &= ~(payload->asInt);
-		LOGd("new errors %d", state_errors);
-		State::getInstance().set(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
-		break;
-	}
-
-	// Crownstone specific commands are only available if device type is set to Crownstone.
-	// E.g. GuideStone does not support power measure or switching commands
-	case CMD_PWM: {
-		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
-			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
-			return ERR_NOT_AVAILABLE;
-		}
-
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "PWM");
-
-		if (size != sizeof(switch_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-
-		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-		uint8_t value = payload->switchState;
-
-		uint8_t current = Switch::getInstance().getPwm();
-		if (value != current) {
-			Switch::getInstance().setPwm(value);
-		}
-		break;
-	}
-	case CMD_SWITCH: {
-		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
-			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
-			return ERR_NOT_AVAILABLE;
-		}
-
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "switch");
-
-		if (size != sizeof(switch_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-
-		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-		Switch::getInstance().setSwitch(payload->switchState);
-
-//		//! Switch off pwm, as we're using the relay
-//		uint8_t currentPwm = Switch::getInstance().getPwm();
-//		if (currentPwm != 0) {
-//			Switch::getInstance().setPwm(0);
-//		}
-//
-//		if (value == 0) {
-//			Switch::getInstance().relayOff();
-//		} else {
-//			Switch::getInstance().relayOn();
-//		}
-		break;
-	}
-	case CMD_RELAY: {
-		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
-			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
-			return ERR_NOT_AVAILABLE;
-		}
-
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "relay");
-
-		if (size != sizeof(switch_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-
-		switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-		uint8_t value = payload->switchState;
-
-		if (value == 0) {
-			Switch::getInstance().relayOff();
-		}
-		else {
-			Switch::getInstance().relayOn();
-		}
-
-		break;
-	}
-	case CMD_MULTI_SWITCH: {
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "multi switch");
-#if BUILD_MESHING == 1
-		multi_switch_message_t* multiSwitchMsg = (multi_switch_message_t*) buffer;
-		MeshControl::getInstance().sendMultiSwitchMessage(multiSwitchMsg, size);
-#endif
-		break;
-	}
-	case CMD_MESH_COMMAND: {
-		if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "mesh command");
-#if BUILD_MESHING == 1
-		command_message_t* commandMsg = (command_message_t*) buffer;
-		if (!is_valid_command_message(commandMsg, size)) {
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		uint8_t* payload;
-		uint16_t payloadLength;
-		get_command_msg_payload(commandMsg, size, &payload, payloadLength);
-		bool sendMeshMsg = false;
-		EncryptionAccessLevel requiredAccessLevel = NOT_SET;
-		switch (commandMsg->messageType) {
-		case CONTROL_MESSAGE: {
-			control_mesh_message_t* controlMsg = (control_mesh_message_t*)payload;
-			if (!is_valid_command_control_mesh_message(controlMsg, payloadLength)) {
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			switch (controlMsg->type) {
-			case CMD_SET_TIME: {
-				requiredAccessLevel = MEMBER;
-				sendMeshMsg = true;
-				break;
-			}
-			}
-			break;
-		}
-		}
-		if (sendMeshMsg && EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
-			// Send the message into the mesh.
-
-		}
-#endif
-		break;
-	}
-	case CMD_ENABLE_CONT_POWER_MEASURE: {
-		if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
-			LOGe("Commands not available for device type %d", _boardConfig->deviceType);
-			return ERR_NOT_AVAILABLE;
-		}
-
-		if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-		LOGi(STR_HANDLE_COMMAND, "enable cont power measure");
-		return ERR_NOT_IMPLEMENTED;
-
-		if (size != sizeof(enable_message_payload_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-
-		enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-		__attribute__((unused)) bool enable = payload->enable;
-
-		LOGi("%s continuous power measurements", enable ? STR_ENABLE : STR_DISABLE);
-
-		// todo: tbd
-		break;
-	}
-	default: {
-		LOGe("Command type not found!!");
-		return ERR_COMMAND_NOT_FOUND;
-	}
+	if (!FactoryReset::getInstance().factoryReset(resetCode)) {
+		return ERR_WRONG_PARAMETER;
 	}
 
 	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdSetTime(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "set time:");
+
+	if (size != sizeof(uint32_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	uint32_t value = *(uint32_t*)buffer;
+
+	Scheduler::getInstance().setTime(value);
+
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdScheduleEntrySet(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "schedule entry");
+	if (size < sizeof(schedule_command_t)) {
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	schedule_command_t* entry = (schedule_command_t*)buffer;
+	ERR_CODE errCode = Scheduler::getInstance().setScheduleEntry(entry->id, &(entry->entry));
+	if (FAILURE(errCode)) {
+		return errCode;
+	}
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdScheduleEntryClear(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	if (size < 1) {
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	uint8_t id = buffer[0];
+	ERR_CODE errCode = Scheduler::getInstance().clearScheduleEntry(id);
+	if (FAILURE(errCode)) {
+		return errCode;
+	}
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	uint8_t opMode;
+	State::getInstance().get(STATE_OPERATION_MODE, opMode);
+	if (opMode != OPERATION_MODE_SETUP) {
+		LOGw("only available in setup mode");
+		return ERR_NOT_AVAILABLE;
+	}
+	Nrf51822BluetoothStack::getInstance().changeToNormalTxPowerMode();
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdValidateSetup(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGi(STR_HANDLE_COMMAND, "validate setup");
+
+	uint8_t opMode;
+	State::getInstance().get(STATE_OPERATION_MODE, opMode);
+	if (opMode != OPERATION_MODE_SETUP) {
+		LOGw("only available in setup mode");
+		return ERR_NOT_AVAILABLE;
+	}
+
+	Settings& settings = Settings::getInstance();
+
+	uint8_t key[ENCYRPTION_KEY_LENGTH];
+	uint8_t blankKey[ENCYRPTION_KEY_LENGTH] = {};
+
+	if (settings.isSet(CONFIG_ENCRYPTION_ENABLED)) {
+		// validate encryption keys are not 0
+		settings.get(CONFIG_KEY_ADMIN, key);
+		if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+			LOGw("owner key is not set!");
+			return ERR_COMMAND_FAILED;
+		}
+
+		settings.get(CONFIG_KEY_MEMBER, key);
+		if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+			LOGw("member key is not set!");
+			return ERR_COMMAND_FAILED;
+		}
+
+		settings.get(CONFIG_KEY_GUEST, key);
+		if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+			LOGw("guest key is not set!");
+			return ERR_COMMAND_FAILED;
+		}
+	}
+
+	// validate crownstone id is not 0
+	uint16_t crownstoneId;
+	settings.get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+	if (crownstoneId == 0) {
+		LOGw("crownstone id has to be set during setup mode");
+		return ERR_COMMAND_FAILED;
+	}
+
+	// validate major and minor
+	uint16_t major;
+	settings.get(CONFIG_IBEACON_MAJOR, &major);
+	if (major == 0) {
+		LOGw("ibeacon major is not set!");
+		return ERR_COMMAND_FAILED;
+	}
+
+	uint16_t minor;
+	settings.get(CONFIG_IBEACON_MINOR, &minor);
+	if (minor == 0) {
+		LOGw("ibeacon minor is not set!");
+		return ERR_COMMAND_FAILED;
+	}
+
+	// TODO: check mesh access address
+
+	LOGi("Setup completed, resetting to normal mode");
+
+	// if validation ok, set opMode to normal mode
+	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
+
+	// Switch relay on
+	switch_message_payload_t switchPayload;
+	switchPayload.switchState = SWITCH_ON;
+	handleCommand(CMD_SWITCH, (uint8_t*)&switchPayload, 1, ADMIN);
+
+	// then reset device
+	resetDelayed(GPREGRET_SOFT_RESET);
+
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdKeepAlive(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "keep alive");
+
+	EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE);
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdKeepAliveState(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "keep alive state");
+
+	if (size != sizeof(keep_alive_state_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, buffer, size);
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdKeepAliveRepeatLast(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "keep alive repeat");
+#if BUILD_MESHING == 1
+	MeshControl::getInstance().sendLastKeepAliveMessage();
+#endif
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "keep alive mesh");
+#if BUILD_MESHING == 1
+	keep_alive_message_t* keepAliveMsg = (keep_alive_message_t*) buffer;
+	// This function also checks the validity of the msg.
+	return MeshControl::getInstance().sendKeepAliveMessage(keepAliveMsg, size);
+#endif
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdUserFeedBack(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "user feedback");
+	return ERR_NOT_IMPLEMENTED;
+}
+
+
+ERR_CODE CommandHandler::handleCmdDisconnect(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGi(STR_HANDLE_COMMAND, "disconnect");
+	Nrf51822BluetoothStack::getInstance().disconnect();
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdSetLed(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "set led");
+
+	if (_boardConfig->flags.hasLed) {
+		LOGe("No LEDs on this board!");
+		return ERR_NOT_AVAILABLE;
+	}
+
+	if (size != sizeof(led_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	led_message_payload_t* payload = (led_message_payload_t*) buffer;
+	uint8_t led = payload->led;
+	bool enable = payload->enable;
+	LOGi("set led %d %s", led, enable ? "ON" : "OFF");
+
+	uint8_t ledPin = led == 1 ? _boardConfig->pinLedGreen : _boardConfig->pinLedRed;
+	if (_boardConfig->flags.ledInverted) {
+		enable = !enable;
+	}
+	if (enable) {
+		nrf_gpio_pin_set(ledPin);
+	}
+	else {
+		nrf_gpio_pin_clear(ledPin);
+	}
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "reset errors");
+	if (size != sizeof(state_errors_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	state_errors_t* payload = (state_errors_t*) buffer;
+	state_errors_t state_errors;
+	State::getInstance().get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+	LOGd("old errors %u - reset %u", state_errors, *payload);
+	state_errors.asInt &= ~(payload->asInt);
+	LOGd("new errors %u", state_errors);
+	State::getInstance().set(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdPwm(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+		return ERR_NOT_AVAILABLE;
+	}
+
+	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "PWM");
+
+	if (size != sizeof(switch_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
+	uint8_t value = payload->switchState;
+
+	uint8_t current = Switch::getInstance().getPwm();
+	if (value != current) {
+		Switch::getInstance().setPwm(value);
+	}
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdSwitch(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+		return ERR_NOT_AVAILABLE;
+	}
+
+	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "switch");
+
+	if (size != sizeof(switch_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
+	Switch::getInstance().setSwitch(payload->switchState);
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+		return ERR_NOT_AVAILABLE;
+	}
+
+	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "relay");
+
+	if (size != sizeof(switch_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
+	uint8_t value = payload->switchState;
+	if (value == 0) {
+		Switch::getInstance().relayOff();
+	}
+	else {
+		Switch::getInstance().relayOn();
+	}
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "multi switch");
+#if BUILD_MESHING == 1
+	multi_switch_message_t* multiSwitchMsg = (multi_switch_message_t*) buffer;
+	// This function also checks the validity of the msg.
+	return MeshControl::getInstance().sendMultiSwitchMessage(multiSwitchMsg, size);
+#endif
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "mesh command");
+#if BUILD_MESHING == 1
+	command_message_t* commandMsg = (command_message_t*) buffer;
+	if (!is_valid_command_message(commandMsg, size)) {
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	uint8_t* payload;
+	uint16_t payloadLength;
+	get_command_msg_payload(commandMsg, size, &payload, payloadLength);
+	bool sendMeshMsg = false;
+	EncryptionAccessLevel requiredAccessLevel = NOT_SET;
+	switch (commandMsg->messageType) {
+	case CONTROL_MESSAGE: {
+		control_mesh_message_t* controlMsg = (control_mesh_message_t*)payload;
+		if (!is_valid_command_control_mesh_message(controlMsg, payloadLength)) {
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		switch (controlMsg->type) {
+		case CMD_SWITCH: {
+			requiredAccessLevel = GUEST;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_PWM: {
+			requiredAccessLevel = GUEST;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_RELAY: {
+			requiredAccessLevel = GUEST;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_SET_TIME: {
+			requiredAccessLevel = MEMBER;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_RESET: {
+			requiredAccessLevel = ADMIN;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_FACTORY_RESET: {
+			requiredAccessLevel = ADMIN;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_KEEP_ALIVE_STATE: {
+			requiredAccessLevel = MEMBER;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_KEEP_ALIVE: {
+			requiredAccessLevel = GUEST;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_ENABLE_SCANNER: {
+			requiredAccessLevel = ADMIN;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_USER_FEEDBACK: {
+			requiredAccessLevel = ADMIN;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_SCHEDULE_ENTRY_SET: {
+			requiredAccessLevel = MEMBER;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_REQUEST_SERVICE_DATA: {
+			requiredAccessLevel = MEMBER;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_SET_LED: {
+			requiredAccessLevel = ADMIN;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_RESET_ERRORS: {
+			requiredAccessLevel = ADMIN;
+			sendMeshMsg = true;
+			break;
+		}
+		case CMD_SCHEDULE_ENTRY_CLEAR: {
+			requiredAccessLevel = ADMIN;
+			sendMeshMsg = true;
+			break;
+		}
+
+		}
+		break;
+	}
+	}
+	if (sendMeshMsg && EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
+		// Send the message into the mesh.
+		MeshControl::getInstance().sendCommandMessage(commandMsg, size);
+	}
+#endif
+	return ERR_SUCCESS;
+}
+
+
+ERR_CODE CommandHandler::handleCmdEnableContPowerMeasure(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
+		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
+		return ERR_NOT_AVAILABLE;
+	}
+
+	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+	LOGi(STR_HANDLE_COMMAND, "enable cont power measure");
+	return ERR_NOT_IMPLEMENTED;
 }

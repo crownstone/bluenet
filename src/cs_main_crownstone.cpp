@@ -303,14 +303,15 @@ void Crownstone::initDrivers() {
 	// init GPIOs
 	if (_boardsConfig.flags.hasLed) {
 		LOGi("Configure LEDs");
-		// Note: DO NOT USE THEM WHILE SCANNING OR MESHING ...
+		// Note: DO NOT USE THEM WHILE SCANNING OR MESHING
 		nrf_gpio_cfg_output(_boardsConfig.pinLedRed);
 		nrf_gpio_cfg_output(_boardsConfig.pinLedGreen);
+		// Turn the leds off
 		if (_boardsConfig.flags.ledInverted) {
-			// setting the pin makes them turn off ....
 			nrf_gpio_pin_set(_boardsConfig.pinLedRed);
 			nrf_gpio_pin_set(_boardsConfig.pinLedGreen);
-		} else {
+		}
+		else {
 			nrf_gpio_pin_clear(_boardsConfig.pinLedRed);
 			nrf_gpio_pin_clear(_boardsConfig.pinLedGreen);
 		}
