@@ -76,7 +76,7 @@ We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_oper
 Type | Name | Length | Description
 --- | --- | --- | ---
 byte array | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of this message.
-uint 8 | User level | 1 | 0: Admin, 1: Member, 2: Guest
+uint 8 | User level | 1 | 0: Admin, 1: Member, 2: Guest, 100: Setup
 [Encrypted Payload](#encrypted_payload) | Encrypted Payload | N*16 | The encrypted payload of N blocks.
 
 ##### <a name="encrypted_payload"></a>Encrypted payload
@@ -372,18 +372,20 @@ uint 8  | Reserved | 1 | Not used: reserved for alignment.
 uint 16 | Length | 2 | Length of the payload in bytes.
 uint 8 | Payload | Length | Payload data, depends on type.
 
-The AUG columns indicate which users have access to these commands if encryption is enabled.
- Admin access means the packet is encrypted with the admin key.
+The AUGS columns indicate which users have access to these commands if encryption is enabled.
+Admin access means the packet is encrypted with the admin key.
+Setup access means the packet is available in setup mode, and encrypted with the temporay setup key, see [setup](#setup).
 - A: Admin
 - M: Member  
 - G: Guest
+- S: Setup
 
 Available command types:
 
-Type nr | Type name | Payload type | Payload Description | A | M | G
---- | --- | --- | --- | :---: | :---: | :---:
-0 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON | x | x | x
-1 | PWM | uint 8 | Set PWM to value, 0 = OFF, 100 = FULL ON | x | x | x
+Type nr | Type name | Payload type | Payload Description | A | M | G | S
+--- | --- | --- | --- | :---: | :---: | :---: | :--:
+0 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON | x | x | x |
+1 | PWM | uint 8 | Set PWM to value, 0 = OFF, 100 = FULL ON | x | x | x |
 2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 | x | x |
 3 | Goto DFU | - | Reset device to DFU mode | x
 4 | Reset | - | Reset device | x
@@ -399,12 +401,12 @@ Type nr | Type name | Payload type | Payload Description | A | M | G
 14 | User feedback | ... | User feedback. **Not implemented yet** | x |
 15 | Schedule set | [Schedule command payload](#schedule_command_packet) | Set (overwrite) a schedule entry | x | x
 16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
-17 | <a name="validate_setup"></a>Validate setup | - | Validate Setup, only available in setup mode, makes sure everything is configured, then reboots to normal mode | ..| .. | ..
+17 | <a name="validate_setup"></a>Validate setup | - | Validate Setup, makes sure everything is configured, then reboots to normal mode |  |  |  | x
 18 | Request Service Data | - | Causes the crownstone to send its service data over the mesh. **Not implemented yet** | x | x |
 19 | Disconnect | - | Causes the crownstone to disconnect | x | x | x
 20 | Set LED | ?? | Enable or disabled LEDS. **Deprecated** | x
 21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
-22 | Increase TX | - | Temporarily increase the TX power when in setup mode | x | x | x
+22 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 23 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
 24 | Keepalive repeat | - | Repeat the last keep alive message on the mesh. | x | x | x
 25 | Multi switch | [Multi switch packet](#multi_switch_mesh_packet) | Switch multiple crownstones with a command over the mesh. | x | x | x
