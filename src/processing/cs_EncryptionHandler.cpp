@@ -578,10 +578,14 @@ bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAcc
 			return true;
 		}
 
-		// 0 is the highest possible value: ADMIN. If the provided is larger than the minumum, it is not allowed.
+		if (minimum == SETUP && (provided != SETUP || _operationMode != OPERATION_MODE_SETUP || !_setupKeyValid)) {
+			LOGw("Setup mode required");
+			return false;
+		}
+
+		// 0 is the highest possible value: ADMIN. If the provided is larger than the minimum, it is not allowed.
 		if (provided > minimum) {
-//			LOGi("Insufficient accessLevel provided to use the characteristic.");
-			LOGi("Insufficient access.");
+			LOGw("Insufficient access");
 			return false;
 		}
 	}

@@ -442,12 +442,14 @@ ERR_CODE CommandHandler::handleCmdScheduleEntryClear(buffer_ptr_t buffer, const 
 
 
 ERR_CODE CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-	uint8_t opMode;
-	State::getInstance().get(STATE_OPERATION_MODE, opMode);
-	if (opMode != OPERATION_MODE_SETUP) {
-		LOGw("only available in setup mode");
-		return ERR_NOT_AVAILABLE;
-	}
+	LOGi(STR_HANDLE_COMMAND, "increase TX");
+	if (!EncryptionHandler::getInstance().allowAccess(SETUP, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+//	uint8_t opMode;
+//	State::getInstance().get(STATE_OPERATION_MODE, opMode);
+//	if (opMode != OPERATION_MODE_SETUP) {
+//		LOGw("only available in setup mode");
+//		return ERR_NOT_AVAILABLE;
+//	}
 	Nrf51822BluetoothStack::getInstance().changeToNormalTxPowerMode();
 	return ERR_SUCCESS;
 }
@@ -455,13 +457,13 @@ ERR_CODE CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uint16_t
 
 ERR_CODE CommandHandler::handleCmdValidateSetup(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "validate setup");
-
-	uint8_t opMode;
-	State::getInstance().get(STATE_OPERATION_MODE, opMode);
-	if (opMode != OPERATION_MODE_SETUP) {
-		LOGw("only available in setup mode");
-		return ERR_NOT_AVAILABLE;
-	}
+	if (!EncryptionHandler::getInstance().allowAccess(SETUP, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
+//	uint8_t opMode;
+//	State::getInstance().get(STATE_OPERATION_MODE, opMode);
+//	if (opMode != OPERATION_MODE_SETUP) {
+//		LOGw("only available in setup mode");
+//		return ERR_NOT_AVAILABLE;
+//	}
 
 	Settings& settings = Settings::getInstance();
 
@@ -584,6 +586,7 @@ ERR_CODE CommandHandler::handleCmdUserFeedBack(buffer_ptr_t buffer, const uint16
 
 
 ERR_CODE CommandHandler::handleCmdDisconnect(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "disconnect");
 	Nrf51822BluetoothStack::getInstance().disconnect();
 	return ERR_SUCCESS;
@@ -743,83 +746,9 @@ ERR_CODE CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const uint16_
 		if (!is_valid_command_control_mesh_message(controlMsg, payloadLength)) {
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		switch (controlMsg->type) {
-		case CMD_SWITCH: {
-			requiredAccessLevel = GUEST;
+		if (allowedAsMeshCommand((CommandHandlerTypes)controlMsg->type)) {
 			sendMeshMsg = true;
-			break;
-		}
-		case CMD_PWM: {
-			requiredAccessLevel = GUEST;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_RELAY: {
-			requiredAccessLevel = GUEST;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_SET_TIME: {
-			requiredAccessLevel = MEMBER;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_RESET: {
-			requiredAccessLevel = ADMIN;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_FACTORY_RESET: {
-			requiredAccessLevel = ADMIN;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_KEEP_ALIVE_STATE: {
-			requiredAccessLevel = MEMBER;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_KEEP_ALIVE: {
-			requiredAccessLevel = GUEST;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_ENABLE_SCANNER: {
-			requiredAccessLevel = ADMIN;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_USER_FEEDBACK: {
-			requiredAccessLevel = ADMIN;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_SCHEDULE_ENTRY_SET: {
-			requiredAccessLevel = MEMBER;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_REQUEST_SERVICE_DATA: {
-			requiredAccessLevel = MEMBER;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_SET_LED: {
-			requiredAccessLevel = ADMIN;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_RESET_ERRORS: {
-			requiredAccessLevel = ADMIN;
-			sendMeshMsg = true;
-			break;
-		}
-		case CMD_SCHEDULE_ENTRY_CLEAR: {
-			requiredAccessLevel = ADMIN;
-			sendMeshMsg = true;
-			break;
-		}
-
+			requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)controlMsg->type);
 		}
 		break;
 	}
@@ -842,4 +771,103 @@ ERR_CODE CommandHandler::handleCmdEnableContPowerMeasure(buffer_ptr_t buffer, co
 	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "enable cont power measure");
 	return ERR_NOT_IMPLEMENTED;
+}
+
+
+EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
+//	switch (type) {
+//	case CMD_SWITCH:
+//	case CMD_PWM:
+//	case CMD_SET_TIME:
+//	case CMD_GOTO_DFU:
+//	case CMD_RESET:
+//	case CMD_FACTORY_RESET:
+//	case CMD_KEEP_ALIVE_STATE:
+//	case CMD_KEEP_ALIVE:
+//	case CMD_ENABLE_MESH:
+//	case CMD_ENABLE_ENCRYPTION:
+//	case CMD_ENABLE_IBEACON:
+//	case CMD_ENABLE_CONT_POWER_MEASURE:
+//	case CMD_ENABLE_SCANNER:
+//	case CMD_SCAN_DEVICES:
+//	case CMD_USER_FEEDBACK:
+//	case CMD_SCHEDULE_ENTRY_SET:
+//	case CMD_RELAY:
+//	case CMD_VALIDATE_SETUP:
+//	case CMD_REQUEST_SERVICE_DATA:
+//	case CMD_DISCONNECT:
+//	case CMD_SET_LED:
+//	case CMD_NOP:
+//	case CMD_INCREASE_TX:
+//	case CMD_RESET_ERRORS:
+//	case CMD_KEEP_ALIVE_REPEAT_LAST:
+//	case CMD_MULTI_SWITCH:
+//	case CMD_SCHEDULE_ENTRY_CLEAR:
+//	case CMD_KEEP_ALIVE_MESH:
+//	case CMD_MESH_COMMAND:
+//	}
+
+	switch (type) {
+	case CMD_VALIDATE_SETUP:
+	case CMD_INCREASE_TX:
+		return GUEST; // These commands are only available in setup mode.
+
+	case CMD_SWITCH:
+	case CMD_PWM:
+	case CMD_RELAY:
+	case CMD_KEEP_ALIVE:
+	case CMD_DISCONNECT:
+	case CMD_NOP:
+	case CMD_KEEP_ALIVE_REPEAT_LAST:
+	case CMD_MULTI_SWITCH:
+	case CMD_MESH_COMMAND:
+		return GUEST;
+
+	case CMD_SET_TIME:
+	case CMD_KEEP_ALIVE_STATE:
+	case CMD_SCHEDULE_ENTRY_SET:
+	case CMD_REQUEST_SERVICE_DATA:
+	case CMD_SCHEDULE_ENTRY_CLEAR:
+	case CMD_KEEP_ALIVE_MESH:
+		return MEMBER;
+
+	case CMD_GOTO_DFU:
+	case CMD_RESET:
+	case CMD_FACTORY_RESET:
+	case CMD_ENABLE_MESH:
+	case CMD_ENABLE_ENCRYPTION:
+	case CMD_ENABLE_IBEACON:
+	case CMD_ENABLE_CONT_POWER_MEASURE:
+	case CMD_ENABLE_SCANNER:
+	case CMD_SCAN_DEVICES:
+	case CMD_USER_FEEDBACK:
+	case CMD_SET_LED:
+	case CMD_RESET_ERRORS:
+		return ADMIN;
+	}
+	return NOT_SET;
+}
+
+bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
+	switch (type) {
+	case CMD_SWITCH:
+	case CMD_PWM:
+	case CMD_RELAY:
+	case CMD_SET_TIME:
+	case CMD_RESET:
+	case CMD_FACTORY_RESET:
+	case CMD_KEEP_ALIVE_STATE:
+	case CMD_KEEP_ALIVE:
+	case CMD_ENABLE_SCANNER:
+	case CMD_USER_FEEDBACK:
+	case CMD_SCHEDULE_ENTRY_SET:
+	case CMD_REQUEST_SERVICE_DATA:
+	case CMD_SET_LED:
+	case CMD_RESET_ERRORS:
+	case CMD_SCHEDULE_ENTRY_CLEAR:
+		return true;
+	default:
+		return false;
+	}
+	return false;
 }

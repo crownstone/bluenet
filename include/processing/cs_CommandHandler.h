@@ -110,5 +110,8 @@ private:
 	app_timer_id_t   _resetTimerId;
 
 	const boards_config_t* _boardConfig;
+
+	EncryptionAccessLevel getRequiredAccessLevel(const CommandHandlerTypes type);
+	bool allowedAsMeshCommand(const CommandHandlerTypes type);
 };
 
