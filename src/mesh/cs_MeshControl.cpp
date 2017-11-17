@@ -255,7 +255,7 @@ ERR_CODE MeshControl::handleCommandReplyMessage(reply_message_t* msg, uint16_t l
 		LOGi("Received Status Reply for Message: %d", msg->messageCounter);
 
 #if defined(PRINT_DEBUG) and defined(PRINT_VERBOSE_COMMAND_REPLY)
-		for (int i = 0; i < msg->numOfReplys; ++i) {
+		for (int i = 0; i < msg->itemCount; ++i) {
 			LOGi("  ID %d: %d", msg->statusList[i].id, msg->statusList[i].status);
 		}
 #endif
@@ -265,7 +265,7 @@ ERR_CODE MeshControl::handleCommandReplyMessage(reply_message_t* msg, uint16_t l
 		LOGi("Received Config Reply for Message: %d", msg->messageCounter);
 
 #if defined(PRINT_DEBUG) and defined(PRINT_VERBOSE_COMMAND_REPLY)
-		for (int i = 0; i < msg->numOfReplys; ++i) {
+		for (int i = 0; i < msg->itemCount; ++i) {
 			config_reply_item_t* item = &msg->configList[i];
 			log(SERIAL_INFO, "  ID %d: Type: %d, Data: 0x", item->id, item->data.type);
 			BLEutil::printArray(item->data.payload, item->data.length);
@@ -277,7 +277,7 @@ ERR_CODE MeshControl::handleCommandReplyMessage(reply_message_t* msg, uint16_t l
 		LOGi("Received State Reply for Message: %d", msg->messageCounter);
 
 #if defined(PRINT_DEBUG) and defined(PRINT_VERBOSE_COMMAND_REPLY)
-		for (int i = 0; i < msg->numOfReplys; ++i) {
+		for (int i = 0; i < msg->itemCount; ++i) {
 			state_reply_item_t* item = &msg->stateList[i];
 			log(SERIAL_INFO, "  ID %d: Type: %d, Data: 0x", item->id, item->data.type);
 			BLEutil::printArray(item->data.payload, item->data.length);
@@ -776,7 +776,7 @@ void MeshControl::sendConfigReplyMessage(uint32_t messageCounter, config_reply_i
 	reply_message_t message = {};
 	message.messageType = CONFIG_REPLY;
 	message.messageCounter = messageCounter;
-	message.numOfReplys = 1;
+	message.itemCount = 1;
 	memcpy(&message.configList[0], configReply, sizeof(config_reply_item_t));
 
 #if defined(PRINT_DEBUG) &&  defined(PRINT_VERBOSE_COMMAND_REPLY)
@@ -798,7 +798,7 @@ void MeshControl::sendStateReplyMessage(uint32_t messageCounter, state_reply_ite
 	reply_message_t message = {};
 	message.messageType = STATE_REPLY;
 	message.messageCounter = messageCounter;
-	message.numOfReplys = 1;
+	message.itemCount = 1;
 	memcpy(&message.stateList[0], stateReply, sizeof(state_reply_item_t));
 
 #if defined(PRINT_DEBUG) &&  defined(PRINT_VERBOSE_COMMAND_REPLY)

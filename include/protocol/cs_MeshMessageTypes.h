@@ -500,7 +500,7 @@ inline void get_command_msg_payload(command_message_t* message, uint16_t message
  * REPLY
  ********************************************************************/
 
-#define REPLY_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint32_t) + sizeof(uint8_t))
+#define REPLY_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t))
 
 //struct __attribute__((__packed__)) reply_item_t {
 //	id_type_t id;
@@ -546,9 +546,10 @@ struct __attribute__((__packed__)) state_reply_item_t {
 /** Reply for any type of message.
  */
 struct __attribute__((__packed__)) reply_message_t {
-	uint16_t messageType;
+	uint8_t messageType;
+	uint8_t reserved;
 	uint32_t messageCounter;
-	uint8_t numOfReplys;
+	uint8_t itemCount;
 	union {
 //		reply_item_t list[];
 		status_reply_item_t statusList[MAX_STATUS_REPLY_ITEMS];
@@ -565,11 +566,11 @@ inline void cear_reply_msg(reply_message_t* msg) {
 inline bool is_valid_reply_msg(reply_message_t* msg) {
 	switch (msg->messageType) {
 	case STATUS_REPLY:
-		return (msg->numOfReplys <= MAX_STATUS_REPLY_ITEMS);
+		return (msg->itemCount <= MAX_STATUS_REPLY_ITEMS);
 	case CONFIG_REPLY:
-		return (msg->numOfReplys <= MAX_CONFIG_REPLY_ITEMS);
+		return (msg->itemCount <= MAX_CONFIG_REPLY_ITEMS);
 	case STATE_REPLY:
-		return (msg->numOfReplys <= MAX_STATE_REPLY_ITEMS);
+		return (msg->itemCount <= MAX_STATE_REPLY_ITEMS);
 	default:
 		return false;
 	}
@@ -593,17 +594,17 @@ inline bool is_valid_reply_msg(reply_message_t* msg, uint16_t length) {
 
 	switch (msg->messageType) {
 	case STATUS_REPLY:
-		if (length < REPLY_HEADER_SIZE + msg->numOfReplys * sizeof(status_reply_item_t)) {
+		if (length < REPLY_HEADER_SIZE + msg->itemCount * sizeof(status_reply_item_t)) {
 			return false;
 		}
 		break;
 	case CONFIG_REPLY:
-		if (length < REPLY_HEADER_SIZE + msg->numOfReplys * sizeof(config_reply_item_t)) {
+		if (length < REPLY_HEADER_SIZE + msg->itemCount * sizeof(config_reply_item_t)) {
 			return false;
 		}
 		break;
 	case STATE_REPLY:
-		if (length < REPLY_HEADER_SIZE + msg->numOfReplys * sizeof(state_reply_item_t)) {
+		if (length < REPLY_HEADER_SIZE + msg->itemCount * sizeof(state_reply_item_t)) {
 			return false;
 		}
 		break;
@@ -614,10 +615,10 @@ inline bool is_valid_reply_msg(reply_message_t* msg, uint16_t length) {
 }
 
 inline bool push_status_reply_item(reply_message_t* message, status_reply_item_t* item) {
-	if (message->numOfReplys == MAX_STATUS_REPLY_ITEMS) {
+	if (message->itemCount == MAX_STATUS_REPLY_ITEMS) {
 		return false;
 	} else {
-		memcpy(&message->statusList[message->numOfReplys++], item, sizeof(status_reply_item_t));
+		memcpy(&message->statusList[message->itemCount++], item, sizeof(status_reply_item_t));
 		return true;
 	}
 }

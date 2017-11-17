@@ -420,13 +420,13 @@ void Mesh::resolveConflict(mesh_handle_t handle, encrypted_mesh_message_t* p_old
 
 				//! Loop over all items in new message.
 				status_reply_item_t* srcItem;
-				for (int i = 0; i < replyMessageNew->numOfReplys; ++i) {
+				for (int i = 0; i < replyMessageNew->itemCount; ++i) {
 					srcItem = &replyMessageNew->statusList[i];
 
 					//! Check if item is in old message.
 					status_reply_item_t* destItem;
 					bool found = false;
-					for (int j = 0; j < replyMessageOld->numOfReplys; ++j) {
+					for (int j = 0; j < replyMessageOld->itemCount; ++j) {
 						destItem = &replyMessageOld->statusList[j];
 						if (destItem->id == srcItem->id) {
 							found = true;

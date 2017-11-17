@@ -904,7 +904,8 @@ int 8 | TX power | 1 | iBeacon signal strength at 1 meter.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | [Reply type](#mesh_reply_types) | 2 | Type of reply, see table below.
+uint 8 | [Reply type](#mesh_reply_types) | 1 | Type of reply, see table below.
+uint 8 | Reserved | 1 | Reserved for future use.
 uint 32 | Message counter | 4 | The message number of the command to which this reply belongs.
 uint 8 | Count | 1 | Number of items in the list.
 uint 8 | List | 85 | List of replies, the format is defined by the type of reply.
