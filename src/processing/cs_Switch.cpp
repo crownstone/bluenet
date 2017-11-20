@@ -234,19 +234,20 @@ void Switch::setSwitch(uint8_t switchState) {
 		case PCA10040:
 		case ACR01B2C:
 		case ACR01B1D: {
-			// Relay on when value >= 100, else off (as the dimmer is parallel)
-			if (switchState > 99) {
-				_relayOn();
-			}
-			else {
-				_relayOff();
-			}
+			// First pwm, then relay!
 			// Pwm when value is 1-99, else pwm off
 			if (switchState > 0 && switchState < 100) {
 				_setPwm(switchState);
 			}
 			else {
 				_setPwm(0);
+			}
+			// Relay on when value >= 100, else off (as the dimmer is parallel)
+			if (switchState > 99) {
+				_relayOn();
+			}
+			else {
+				_relayOff();
 			}
 			break;
 		}
