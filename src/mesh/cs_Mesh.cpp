@@ -293,7 +293,11 @@ bool Mesh::getLastMessage(mesh_handle_t handle, void* p_data, uint16_t& length) 
 	uint16_t encryptedLength = sizeof(encrypted_mesh_message_t);
 
 	//! Get the last value from rbc_mesh. This copies the message to the given pointer.
-	APP_ERROR_CHECK(rbc_mesh_value_get(handle, (uint8_t*)&encryptedMessage, &encryptedLength));
+	uint32_t errCode = rbc_mesh_value_get(handle, (uint8_t*)&encryptedMessage, &encryptedLength);
+	if (errCode != NRF_SUCCESS) {
+		LOGw("Failed to get last msg of handle %u", handle);
+		return false;
+	}
 
 	if (encryptedLength != 0) {
 
