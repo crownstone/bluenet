@@ -105,6 +105,10 @@ void Mesh::init() {
 	for (int i = 0; i < MESH_HANDLE_COUNT; ++i) {
 		error_code = rbc_mesh_value_enable(meshHandles[i]);
 		APP_ERROR_CHECK(error_code);
+		// Persist, so that data from other handles don't throw out the data of this handle.
+		// This means that RBC_MESH_DATA_CACHE_ENTRIES should be handleCount + 1.
+		error_code = rbc_mesh_persistence_set(meshHandles[i], true);
+		APP_ERROR_CHECK(error_code);
 	}
 
 	_encryptionEnabled = Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED);
@@ -308,7 +312,7 @@ bool Mesh::getLastMessage(mesh_handle_t handle, void* p_data, uint16_t length) {
 	//! Get the last value from rbc_mesh. This copies the message to the given pointer.
 	uint32_t errCode = rbc_mesh_value_get(handle, (uint8_t*)&encryptedMessage, &encryptedLength);
 	if (errCode != NRF_SUCCESS) {
-		LOGw("Failed to get last msg of handle %u", handle);
+		LOGw("Failed to get last msg of handle %u (err=%u)", handle, errCode);
 		return false;
 	}
 
@@ -701,6 +705,7 @@ void Mesh::checkForMessages() {
 			//! TODO: why do we have release the event pointer if we allocated the memory ourselves?
 			rbc_mesh_event_release(&evt);
 
+			LOGw("Disable handle %u", handle);
 			uint32_t error_code;
 			error_code = rbc_mesh_value_disable(handle);
 			APP_ERROR_CHECK(error_code);
