@@ -124,6 +124,49 @@ Check if dimmer restores after reset.
 - Check if it dims at 30% again (write down how long it takes).
 
 
+## Power measurements
+
+Check if the power measurements are ok.
+For each check, measure about 30 seconds.
+For each check, write down how much difference there is between the measured power by the Crownstone and the external reference.
+For each check, write down how stable the output is (are there peaks?, how much noise in W?).
+
+Off:
+- Turn relay off, dimmer off.
+- Check if measured power is about 0W.
+
+Relay:
+- Turn relay on, dimmer off.
+- Check if measured power is about 0W.
+- Plug in about 30W load
+- Check if measured power is about right, write down results.
+- Plug in about 60W load
+- Check if measured power is about right, write down results.
+- Plug in about 100W load
+- Check if measured power is about right, write down results.
+- Plug in about 800W load
+- Check if measured power is about right, write down results.
+
+Dimmer:
+- Turn relay off
+- Dimmer 100%
+- Check if measured power is about 0W.
+- Plug in about 30W load
+- Check if measured power is about right, write down results.
+- Plug in about 60W load
+- Check if measured power is about right, write down results.
+- Plug in about 100W load
+- Check if measured power is about right, write down results.
+
+Dimming:
+- Relay off, load of about 30W.
+- Dimmer at 25%
+- Check if measured power is about right, write down results.
+- Dimmer at 50%
+- Check if measured power is about right, write down results.
+- Dimmer at 75%
+- Check if measured power is about right, write down results.
+
 
 ## Setup
 
