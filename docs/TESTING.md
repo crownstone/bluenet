@@ -108,6 +108,23 @@ Now it should heat up (you should see the chip temperature rise) and turn off wi
 - Check if you can't turn on the dimmer anymore.
 - Factory reset the crownstone.
 
+
+
+## Dimmer
+
+Check dimmer stability with:
+- An incandescent lamp.
+- A halogen lamp.
+- A dimmable LED lamp.
+
+Check if dimmer restores after reset.
+- Set dimmer at 30%.
+- Plug out crownstone.
+- Plug in crownstone.
+- Check if it dims at 30% again (write down how long it takes).
+
+
+
 ## Setup
 
 - Turn relay off.
