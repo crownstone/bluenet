@@ -113,11 +113,13 @@ Now it should heat up (you should see the chip temperature rise) and turn off wi
 ## Dimmer
 
 Check dimmer stability with:
+
 - An incandescent lamp.
 - A halogen lamp.
 - A dimmable LED lamp.
 
-Check if dimmer restores after reset.
+Check if dimmer restores after reset:
+
 - Set dimmer at 30%.
 - Plug out crownstone.
 - Plug in crownstone.
@@ -132,10 +134,12 @@ For each check, write down how much difference there is between the measured pow
 For each check, write down how stable the output is (are there peaks?, how much noise in W?).
 
 Off:
+
 - Turn relay off, dimmer off.
 - Check if measured power is about 0W.
 
 Relay:
+
 - Turn relay on, dimmer off.
 - Check if measured power is about 0W.
 - Plug in about 30W load
@@ -148,6 +152,7 @@ Relay:
 - Check if measured power is about right, write down results.
 
 Dimmer:
+
 - Turn relay off
 - Dimmer 100%
 - Check if measured power is about 0W.
@@ -159,6 +164,7 @@ Dimmer:
 - Check if measured power is about right, write down results.
 
 Dimming:
+
 - Relay off, load of about 30W.
 - Dimmer at 25%
 - Check if measured power is about right, write down results.
