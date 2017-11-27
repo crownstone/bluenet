@@ -29,10 +29,10 @@ int main() {
 	sm.push_back(item4);
 	sm.push_back(item5);
 
-	cout << "Power usage [0]: " << smt.list[0].powerUsageApparant << endl;
-	cout << "Power usage [1]: " << smt.list[1].powerUsageApparant << endl;
-	cout << "Power usage [2]: " << smt.list[2].powerUsageApparant << endl;
-	cout << "Power usage [3]: " << smt.list[3].powerUsageApparant << endl;
+	cout << "Power usage [0]: " << smt.list[0].powerUsageApparent << endl;
+	cout << "Power usage [1]: " << smt.list[1].powerUsageApparent << endl;
+	cout << "Power usage [2]: " << smt.list[2].powerUsageApparent << endl;
+	cout << "Power usage [3]: " << smt.list[3].powerUsageApparent << endl;
 
 	cout << "Head: " << (int)smt.head << endl;
 	cout << "Tail: " << (int)smt.tail << endl;
@@ -40,6 +40,6 @@ int main() {
 
 	for (state_message::iterator iter = sm.begin(); iter != sm.end(); ++iter) {
 		state_item_t si = *iter;
-		cout << "Power usage [" <<  si.id << "]: " << si.powerUsageApparant << endl;
+		cout << "Power usage [" <<  si.id << "]: " << si.powerUsageApparent << endl;
 	}
 }

@@ -197,7 +197,7 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 				serviceData.params.eventBitmask = p_stateItem->eventBitmask;
 				serviceData.params.eventBitmask |= 1 << SHOWING_EXTERNAL_DATA;
 				serviceData.params.temperature = 0; // Unknown
-				serviceData.params.powerUsage = p_stateItem->powerUsageApparant;
+				serviceData.params.powerUsage = p_stateItem->powerUsageApparent;
 				serviceData.params.accumulatedEnergy = p_stateItem->accumulatedEnergy;
 				found = true;
 				break;
@@ -449,9 +449,9 @@ void ServiceData::sendMeshState(bool event) {
 		}
 		// Translate advertisement v1 to advertisement v2
 		stateItem.powerFactor = 1024; // Assume a power factor of 1
-		stateItem.powerUsageApparant = 0;
+		stateItem.powerUsageApparent = 0;
 		if (_serviceData.params.powerUsage > 0) {
-			stateItem.powerUsageApparant = _serviceData.params.powerUsage * 16 / 1000;
+			stateItem.powerUsageApparent = _serviceData.params.powerUsage * 16 / 1000;
 		}
 		stateItem.accumulatedEnergy = _serviceData.params.accumulatedEnergy;
 

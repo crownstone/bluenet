@@ -231,7 +231,7 @@ ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length) 
 	int16_t idx = -1;
 	state_item_t* p_stateItem;
 	while (peek_next_state_item(msg, &p_stateItem, idx)) {
-		LOGi("idx=%i id=%u switch=%u bitmask=%u PF=%i P=%u E=%i", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerFactor, p_stateItem->powerUsageApparant, p_stateItem->accumulatedEnergy);
+		LOGi("idx=%i id=%u switch=%u bitmask=%u PF=%i P=%u E=%i", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerFactor, p_stateItem->powerUsageApparent, p_stateItem->accumulatedEnergy);
 	}
 #endif
 	return ERR_SUCCESS;
@@ -871,7 +871,7 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 #endif
 
 	if (debug) {
-		LOGi("Send state event=%u id=%u switch=%u bitmask=%u PF=%i P=%u E=%i", event, stateItem.id, stateItem.switchState, stateItem.eventBitmask, stateItem.powerFactor, stateItem.powerUsageApparant, stateItem.accumulatedEnergy);
+		LOGi("Send state event=%u id=%u switch=%u bitmask=%u PF=%i P=%u E=%i", event, stateItem.id, stateItem.switchState, stateItem.eventBitmask, stateItem.powerFactor, stateItem.powerUsageApparent, stateItem.accumulatedEnergy);
 	}
 #endif
 
