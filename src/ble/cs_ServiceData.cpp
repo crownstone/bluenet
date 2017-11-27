@@ -13,6 +13,8 @@
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_RNG.h>
 #include <storage/cs_State.h>
+#include <util/cs_Utils.h>
+#include <drivers/cs_RTC.h>
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
@@ -372,12 +374,61 @@ void ServiceData::onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg) {
 		if (isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA) && p_stateItem->id != ownId) {
 			_numAdvertiseChangedStates = MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS;
 		}
+		onMeshStateSeen(ownId, p_stateItem);
 		break;
 	}
 #ifdef PRINT_VERBOSE_EXTERNAL_DATA
 	LOGd("onMeshStateMsg: %u", _numAdvertiseChangedStates);
 #endif
 }
+
+void ServiceData::onMeshStateSeen(id_type_t ownId, state_item_t* stateItem) {
+	if (stateItem->id == ownId) {
+		return;
+	}
+
+	uint16_t hash = BLEutil::calcHash((uint8_t*)stateItem, sizeof(state_item_t));
+	uint32_t currentTime = RTC::getCount();
+
+	// Check if id is already in the last seen table.
+	int i;
+	for (i=0; i<MESH_STATE_HANDLE_COUNT * 5; ++i) {
+		if (_lastSeenIds[i].id == stateItem->id) {
+			// Only adjust timestamp when hash isn't similar (aka this state is new)
+			if (_lastSeenIds[i].hash != hash) {
+				_lastSeenIds[i].timestamp = currentTime;
+				_lastSeenIds[i].hash = hash;
+			}
+			return;
+		}
+	}
+
+	// Else, write this id at the first empty spot.
+	for (i=0; i<MESH_STATE_HANDLE_COUNT * 5; ++i) {
+		if (_lastSeenIds[i].id == 0) {
+			_lastSeenIds[i].id = stateItem->id;
+			_lastSeenIds[i].timestamp = currentTime;
+			_lastSeenIds[i].hash = hash;
+			return;
+		}
+	}
+
+	// Else, write this id at the spot with oldest timestamp.
+	int oldestIdx = 0;
+	uint32_t largestDiff = 0;
+	uint32_t diff;
+	for (i=0; i<MESH_STATE_HANDLE_COUNT * 5; ++i) {
+		diff = RTC::difference(currentTime, _lastSeenIds[i].timestamp);
+		if (diff > largestDiff) {
+			largestDiff = diff;
+			oldestIdx = i;
+		}
+	}
+	_lastSeenIds[oldestIdx].id = stateItem->id;
+	_lastSeenIds[oldestIdx].timestamp = currentTime;
+	_lastSeenIds[oldestIdx].hash = hash;
+}
+
 #endif
 
 void ServiceData::sendMeshState(bool event) {

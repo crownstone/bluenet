@@ -166,4 +166,20 @@ inline uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_ty
 }
 
 
+/**
+ * @brief Calculates a hash of given data.
+ *
+ * @param[in] Pointer to the data.
+ * @param[in] Size of the data.
+ * @retval    The hash.
+ */
+inline uint16_t calcHash(const uint8_t* data, const uint16_t size) {
+	// Used implementation from here: http://www.cse.yorku.ca/~oz/hash.html
+	uint16_t hash = 5381;
+	for (int i=0; i<size; ++i) {
+		hash = ((hash << 5) + hash) + data[i];
+	}
+	return hash;
+}
+
 }

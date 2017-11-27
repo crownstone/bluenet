@@ -153,18 +153,29 @@ private:
 	uint32_t _updateCount;
 
 #if BUILD_MESHING == 1
-	struct advertised_ids_t {
+	struct __attribute__((packed)) advertised_ids_t {
 		uint8_t size;
 		int8_t head; // Index of last crownstone ID that was advertised
 		id_type_t list[MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS];
 	};
 
+	struct __attribute__((packed)) last_seen_id_t {
+		uint16_t id;
+		uint32_t timestamp;
+		uint16_t hash;
+	};
+
 	void onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg);
+
+	void onMeshStateSeen(id_type_t ownId, state_item_t* stateItem);
 
 	id_type_t chooseExternalId(id_type_t ownId, state_message_t stateMsgs[], bool hasStateMsg[], bool eventOnly);
 
 	//! List of external crownstone IDs that have been advertised, used to determine which external crownstone to advertise.
 	advertised_ids_t _advertisedIds;
+
+	//! List of external crownstone IDs with timestamp when they were last seen, and a hash of its data.
+	last_seen_id_t _lastSeenIds[MESH_STATE_HANDLE_COUNT * 5];
 
 //	//! List of external crownstone IDs which changed due to and event and that have been advertised
 //	//! Used to determine which external crownstone to advertise.
