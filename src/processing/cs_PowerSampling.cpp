@@ -510,8 +510,8 @@ void PowerSampling::calculatePower(power_t power) {
 		_avgVoltageRmsMilliVolt = voltageRmsMilliVoltSum / _voltageRmsMilliVoltHist->size();
 	}
 
-	// Instead of real power, calculate apparent power: current_rms * voltage_rms
-	powerMilliWatt = (int64_t)_avgCurrentRmsMilliAmp * _avgVoltageRmsMilliVolt / 1000;
+	// Calculate apparent power: current_rms * voltage_rms
+	__attribute__((unused)) uint32_t powerMilliWattApparent = (int64_t)_avgCurrentRmsMilliAmp * _avgVoltageRmsMilliVolt / 1000;
 
 //	// Calculate median when there are enough values in history, else calculate the average.
 //	_powerMilliWattHist->push(powerMilliWatt);
