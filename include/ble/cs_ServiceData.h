@@ -163,11 +163,16 @@ private:
 		uint16_t id;
 		uint32_t timestamp;
 		uint16_t hash;
+		uint8_t  timedout; // 0 when not timed out, 1 when timed out.
+		                   // We need this, or a clock overflow could mark a state as not timed out again.
 	};
 
-	void onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg);
+	void onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg, uint16_t stateChan);
 
-	void onMeshStateSeen(id_type_t ownId, state_item_t* stateItem);
+	void onMeshStateSeen(id_type_t ownId, state_item_t* stateItem, uint16_t stateChan);
+
+	//! Returns true when the state of given id is not considered timed out.
+	bool isMeshStateNotTimedOut(id_type_t id, uint16_t stateChan, uint32_t currentTime);
 
 	id_type_t chooseExternalId(id_type_t ownId, state_message_t stateMsgs[], bool hasStateMsg[], bool eventOnly);
 
@@ -175,7 +180,7 @@ private:
 	advertised_ids_t _advertisedIds;
 
 	//! List of external crownstone IDs with timestamp when they were last seen, and a hash of its data.
-	last_seen_id_t _lastSeenIds[MESH_STATE_HANDLE_COUNT * 5];
+	last_seen_id_t _lastSeenIds[MESH_STATE_HANDLE_COUNT][LAST_SEEN_COUNT_PER_STATE_CHAN];
 
 //	//! List of external crownstone IDs which changed due to and event and that have been advertised
 //	//! Used to determine which external crownstone to advertise.

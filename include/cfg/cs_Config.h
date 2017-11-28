@@ -207,5 +207,7 @@
 #define ADVERTISING_REFRESH_PERIOD_SETUP         100  // Push the changes in the advertisement packet to the stack every x milliseconds
 
 #define MESH_STATE_REFRESH_PERIOD                50000 // 50 seconds + some random amount of seconds
+#define MESH_STATE_TIMEOUT                       (3*MESH_STATE_REFRESH_PERIOD) // ms until state of a crownstone is considered to be timed out.
+#define LAST_SEEN_COUNT_PER_STATE_CHAN           3 // Number of last seen timestamps to store per state channel.
 
 #define SWITCH_ON_AT_SETUP_BOOT_DELAY            3600  // Seconds until the switch turns on when in setup mode (Crownstone built-in only)

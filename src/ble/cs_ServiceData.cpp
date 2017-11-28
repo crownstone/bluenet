@@ -52,6 +52,9 @@ ServiceData::ServiceData() : _updateTimerId(NULL), _connected(false)
 	_meshStateTimerId = &_meshStateTimerData;
 	Timer::getInstance().createSingleShot(_meshStateTimerId, (app_timer_timeout_handler_t)ServiceData::meshStateTick);
 
+	// Init _lastSeenIds
+	memset(&(_lastSeenIds[0][0]), 0, MESH_STATE_HANDLE_COUNT * LAST_SEEN_COUNT_PER_STATE_CHAN * sizeof(last_seen_id_t));
+
 	// Only send the state over the mesh in normal mode
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED) && _operationMode == OPERATION_MODE_NORMAL) {
 		// Start the mesh state timer with a small random delay
@@ -141,6 +144,8 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 		return false;
 	}
 
+	uint32_t currentTime = RTC::getCount();
+
 	// TODO: don't put multiple messages on the stack. But getLastStateDataMessage() is also expensive..
 	state_message_t messages[MESH_STATE_HANDLE_COUNT];
 	bool hasStateMsg[MESH_STATE_HANDLE_COUNT];
@@ -148,7 +153,7 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 
 	// First check if there's any valid state message, and keep up which channels have a valid message
 	bool anyStateMsg = false;
-	for (uint8_t chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
+	for (int chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
 		hasStateMsg[chan] = MeshControl::getInstance().getLastStateDataMessage(messages[chan], messageSize, chan);
 		if (hasStateMsg[chan] && is_valid_state_msg(&(messages[chan])) && messages[chan].size) {
 			anyStateMsg = true;
@@ -182,6 +187,7 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 	}
 
 	// Fill the service data with the data of the selected id
+	bool advertise = true;
 	bool found = false;
 	for (uint8_t chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
 		if (!hasStateMsg[chan]) {
@@ -192,6 +198,9 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 		state_item_t* p_stateItem;
 		while (peek_prev_state_item(&(messages[chan]), &p_stateItem, idx)) {
 			if (p_stateItem->id == advertiseId) {
+				if (!isMeshStateNotTimedOut(advertiseId, chan, currentTime)) {
+					advertise = false;
+				}
 				serviceData.params.crownstoneId = p_stateItem->id;
 				serviceData.params.switchState = p_stateItem->switchState;
 				serviceData.params.eventBitmask = p_stateItem->eventBitmask;
@@ -214,10 +223,10 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 	}
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
-	LOGd("serviceData: id=%u switch=%u bitmask=%u temp=%i P=%i E=%i", serviceData.params.crownstoneId, serviceData.params.switchState, serviceData.params.eventBitmask, serviceData.params.temperature, serviceData.params.powerUsage, serviceData.params.accumulatedEnergy);
+	LOGd("serviceData: id=%u switch=%u bitmask=%u temp=%i P=%i E=%i adv=%u", serviceData.params.crownstoneId, serviceData.params.switchState, serviceData.params.eventBitmask, serviceData.params.temperature, serviceData.params.powerUsage, serviceData.params.accumulatedEnergy, advertise);
 #endif
 
-	return true;
+	return advertise;
 #else
 	return false;
 #endif
@@ -365,7 +374,7 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 #endif
 
 #if BUILD_MESHING == 1
-void ServiceData::onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg) {
+void ServiceData::onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg, uint16_t stateChan) {
 	// Check if the last state item is from an event (external data bit is used for that)
 	// If so, only advertise states from events for some time
 	int16_t idx = -1;
@@ -374,7 +383,7 @@ void ServiceData::onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg) {
 		if (isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA) && p_stateItem->id != ownId) {
 			_numAdvertiseChangedStates = MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS;
 		}
-		onMeshStateSeen(ownId, p_stateItem);
+		onMeshStateSeen(ownId, p_stateItem, stateChan);
 		break;
 	}
 #ifdef PRINT_VERBOSE_EXTERNAL_DATA
@@ -382,7 +391,7 @@ void ServiceData::onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg) {
 #endif
 }
 
-void ServiceData::onMeshStateSeen(id_type_t ownId, state_item_t* stateItem) {
+void ServiceData::onMeshStateSeen(id_type_t ownId, state_item_t* stateItem, uint16_t stateChan) {
 	if (stateItem->id == ownId) {
 		return;
 	}
@@ -392,43 +401,81 @@ void ServiceData::onMeshStateSeen(id_type_t ownId, state_item_t* stateItem) {
 
 	// Check if id is already in the last seen table.
 	int i;
-	for (i=0; i<MESH_STATE_HANDLE_COUNT * 5; ++i) {
-		if (_lastSeenIds[i].id == stateItem->id) {
+	for (i=0; i<LAST_SEEN_COUNT_PER_STATE_CHAN; ++i) {
+		if (_lastSeenIds[stateChan][i].id == stateItem->id) {
 			// Only adjust timestamp when hash isn't similar (aka this state is new)
-			if (_lastSeenIds[i].hash != hash) {
-				_lastSeenIds[i].timestamp = currentTime;
-				_lastSeenIds[i].hash = hash;
+			if (_lastSeenIds[stateChan][i].hash != hash) {
+				_lastSeenIds[stateChan][i].timestamp = currentTime;
+				_lastSeenIds[stateChan][i].hash = hash;
+				_lastSeenIds[stateChan][i].timedout = 0;
+			}
+			else {
+				LOGd("same hash");
 			}
 			return;
 		}
 	}
 
 	// Else, write this id at the first empty spot.
-	for (i=0; i<MESH_STATE_HANDLE_COUNT * 5; ++i) {
-		if (_lastSeenIds[i].id == 0) {
-			_lastSeenIds[i].id = stateItem->id;
-			_lastSeenIds[i].timestamp = currentTime;
-			_lastSeenIds[i].hash = hash;
+	for (i=0; i<LAST_SEEN_COUNT_PER_STATE_CHAN; ++i) {
+		if (_lastSeenIds[stateChan][i].id == 0) {
+			_lastSeenIds[stateChan][i].id = stateItem->id;
+			_lastSeenIds[stateChan][i].timestamp = currentTime;
+			_lastSeenIds[stateChan][i].hash = hash;
+			_lastSeenIds[stateChan][i].timedout = 0;
 			return;
 		}
 	}
 
-	// Else, write this id at the spot with oldest timestamp.
+	// Else, write this id at the spot that is timed out or has the oldest timestamp.
 	int oldestIdx = 0;
 	uint32_t largestDiff = 0;
 	uint32_t diff;
-	for (i=0; i<MESH_STATE_HANDLE_COUNT * 5; ++i) {
-		diff = RTC::difference(currentTime, _lastSeenIds[i].timestamp);
+	for (i=0; i<LAST_SEEN_COUNT_PER_STATE_CHAN; ++i) {
+		if (_lastSeenIds[stateChan][i].timedout == 1) {
+			oldestIdx = i;
+			break;
+		}
+		diff = RTC::difference(currentTime, _lastSeenIds[stateChan][i].timestamp);
 		if (diff > largestDiff) {
 			largestDiff = diff;
 			oldestIdx = i;
 		}
 	}
-	_lastSeenIds[oldestIdx].id = stateItem->id;
-	_lastSeenIds[oldestIdx].timestamp = currentTime;
-	_lastSeenIds[oldestIdx].hash = hash;
+	_lastSeenIds[stateChan][oldestIdx].id = stateItem->id;
+	_lastSeenIds[stateChan][oldestIdx].timestamp = currentTime;
+	_lastSeenIds[stateChan][oldestIdx].hash = hash;
+	_lastSeenIds[stateChan][oldestIdx].timedout = 0;
 }
 
+bool ServiceData::isMeshStateNotTimedOut(id_type_t id, uint16_t stateChan, uint32_t currentTime) {
+	int numNonTimedOut = 0;
+	bool idNonTimedOut = false;
+	for (int i=0; i<LAST_SEEN_COUNT_PER_STATE_CHAN; ++i) {
+		// Check id
+		if (_lastSeenIds[stateChan][i].id == 0) {
+			continue;
+		}
+
+		if (_lastSeenIds[stateChan][i].timedout == 1) {
+			continue;
+		}
+
+		uint32_t diff = RTC::difference(currentTime, _lastSeenIds[stateChan][i].timestamp);
+//		LOGd("id=%u diff=%u ms=%u ticks=%u", _lastSeenIds[stateChan][i].id, diff, MESH_STATE_TIMEOUT, RTC::msToTicks(MESH_STATE_TIMEOUT));
+		if (diff > RTC::msToTicks(MESH_STATE_TIMEOUT)) {
+			_lastSeenIds[stateChan][i].timedout = 1;
+			continue;
+		}
+		// Valid id and not timed out
+		++numNonTimedOut;
+		if (_lastSeenIds[stateChan][i].id == id) {
+			idNonTimedOut = true;
+		}
+	}
+//	LOGd("id=%u num=%u", idNonTimedOut, numNonTimedOut);
+	return (idNonTimedOut || numNonTimedOut == LAST_SEEN_COUNT_PER_STATE_CHAN);
+}
 #endif
 
 void ServiceData::sendMeshState(bool event) {
@@ -470,7 +517,7 @@ void ServiceData::sendMeshState(bool event) {
 }
 
 void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	//! keep track of the BLE connection status. If we are connected we do not need to update the packet.
+	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
 	switch(evt) {
 	case EVT_BLE_CONNECT: {
 		_connected = true;
@@ -496,49 +543,51 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 	default: {
-		//! continue with the rest of the method.
+		// continue with the rest of the method.
 	}
 	}
 
-	//! in case the operation mode is setup, we have a different advertisement package.
+	// In case the operation mode is setup, we have a different advertisement package.
 	if (_operationMode == OPERATION_MODE_SETUP) {
 		return;
 	}
-	else {
-		switch(evt) {
-		case CONFIG_CROWNSTONE_ID: {
-			updateCrownstoneId(*(uint16_t*)p_data);
-			break;
-		}
-		case STATE_SWITCH_STATE: {
-			updateSwitchState(*(uint8_t*)p_data);
-			sendMeshState(true);
-			break;
-		}
-		case STATE_ACCUMULATED_ENERGY: {
-			updateAccumulatedEnergy(*(int32_t*)p_data);
-			// todo create mesh state event if changes significantly
-			break;
-		}
-		case STATE_POWER_USAGE: {
-			updatePowerUsage(*(int32_t*)p_data);
-			// todo create mesh state event if changes significantly
-			break;
-		}
-		case STATE_TEMPERATURE: {
-			// TODO: isn't the temperature an int32_t ?
-			updateTemperature(*(int8_t*)p_data);
-			break;
-		}
-		case EVT_EXTERNAL_STATE_MSG: {
+	switch(evt) {
+	case CONFIG_CROWNSTONE_ID: {
+		updateCrownstoneId(*(uint16_t*)p_data);
+		break;
+	}
+	case STATE_SWITCH_STATE: {
+		updateSwitchState(*(uint8_t*)p_data);
+		sendMeshState(true);
+		break;
+	}
+	case STATE_ACCUMULATED_ENERGY: {
+		updateAccumulatedEnergy(*(int32_t*)p_data);
+		// todo create mesh state event if changes significantly
+		break;
+	}
+	case STATE_POWER_USAGE: {
+		updatePowerUsage(*(int32_t*)p_data);
+		// todo create mesh state event if changes significantly
+		break;
+	}
+	case STATE_TEMPERATURE: {
+		// TODO: isn't the temperature an int32_t ?
+		updateTemperature(*(int8_t*)p_data);
+		break;
+	}
 #if BUILD_MESHING == 1
-			onMeshStateMsg(_serviceData.params.crownstoneId, (state_message_t*)p_data);
+	case EVT_EXTERNAL_STATE_MSG_CHAN_0: {
+		onMeshStateMsg(_serviceData.params.crownstoneId, (state_message_t*)p_data, 0);
+		break;
+	}
+	case EVT_EXTERNAL_STATE_MSG_CHAN_1: {
+		onMeshStateMsg(_serviceData.params.crownstoneId, (state_message_t*)p_data, 1);
+		break;
+	}
 #endif
-			break;
-		}
-		//! TODO: add bitmask events
-		default:
-			return;
-		}
+	// TODO: add bitmask events
+	default:
+		return;
 	}
 }

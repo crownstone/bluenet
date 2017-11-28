@@ -63,8 +63,10 @@ void MeshControl::process(uint16_t channel, void* p_meshMessage, uint16_t messag
 		handleCommand((command_message_t*)p_data, length, meshMessage->messageCounter);
 		break;
 	case STATE_CHANNEL_0:
+		handleStateMessage((state_message_t*)p_data, length, 0);
+		break;
 	case STATE_CHANNEL_1:
-		handleStateMessage((state_message_t*)p_data, length);
+		handleStateMessage((state_message_t*)p_data, length, 1);
 		break;
 	case COMMAND_REPLY_CHANNEL:
 		handleCommandReplyMessage((reply_message_t*)p_data, length);
@@ -207,7 +209,7 @@ ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t le
 
 }
 
-ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length) {
+ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, uint16_t stateChan) {
 #ifdef PRINT_DEBUG
 	LOGd("handleStateMessage");
 #endif
@@ -217,7 +219,14 @@ ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length) 
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	EventDispatcher::getInstance().dispatch(EVT_EXTERNAL_STATE_MSG, msg, sizeof(state_message_t));
+	switch (stateChan) {
+	case 0:
+		EventDispatcher::getInstance().dispatch(EVT_EXTERNAL_STATE_MSG_CHAN_0, msg, sizeof(state_message_t));
+		break;
+	case 1:
+		EventDispatcher::getInstance().dispatch(EVT_EXTERNAL_STATE_MSG_CHAN_1, msg, sizeof(state_message_t));
+		break;
+	}
 
 	if (msg->timestamp != 0) {
 		// Dispatch an event with the received timestamp
@@ -1026,10 +1035,10 @@ ERR_CODE MeshControl::sendCommandMessage(command_message_t* msg, uint16_t length
 	return ERR_SUCCESS;
 }
 
-bool MeshControl::getLastStateDataMessage(state_message_t& message, uint16_t size, uint8_t num) {
+bool MeshControl::getLastStateDataMessage(state_message_t& message, uint16_t size, uint8_t stateChan) {
 	// TODO: check if message is valid.
 	mesh_handle_t handle;
-	switch(num) {
+	switch(stateChan) {
 	case 0:
 		handle = STATE_CHANNEL_0;
 		break;

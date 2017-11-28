@@ -43,11 +43,11 @@ public:
 
 	/** Get the last state data message
 	 *
-	 * @message Pointer to a message where the last message will be copied to.
-	 * @size    Size of the message.
-	 * @num     Which state channel to use (as there are multiple).
+	 * @message   Pointer to a message where the last message will be copied to.
+	 * @size      Size of the message.
+	 * @stateChan Which state channel to use (as there are multiple).
 	 */
-	bool getLastStateDataMessage(state_message_t& message, uint16_t size, uint8_t num);
+	bool getLastStateDataMessage(state_message_t& message, uint16_t size, uint8_t stateChan);
 
 	/** Send a status reply message, e.g. to reply status code of the execution of a command
 	 *
@@ -153,10 +153,11 @@ protected:
 
 	/** Decode a state message received over mesh
 	 *
-	 * @msg the message payload
-	 * @length length of the message in bytes
+	 * @msg       The message payload
+	 * @length    Length of the message in bytes
+	 * @stateChan Which state channel (as there are multiple).
 	 */
-	ERR_CODE handleStateMessage(state_message_t* msg, uint16_t length);
+	ERR_CODE handleStateMessage(state_message_t* msg, uint16_t length, uint16_t stateChan);
 
 	/** Decode a command reply message received over mesh
 	 *
