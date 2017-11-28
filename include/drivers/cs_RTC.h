@@ -85,9 +85,9 @@ public:
 	inline static uint32_t msToTicks(uint32_t ms) {
 #if NRF51_USE_SOFTDEVICE==1
 		//! Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
-		return ms * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000;
+		return (uint64_t)ms * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000;
 #else
-		return ms * APP_TIMER_CLOCK_FREQ / (NRF_RTC1->PRESCALER + 1) / 1000;
+		return (uint64_t)ms * APP_TIMER_CLOCK_FREQ / (NRF_RTC1->PRESCALER + 1) / 1000;
 #endif
 	}
 };
