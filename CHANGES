@@ -1,3 +1,62 @@
+Version 1.7.0:
+ - Add release config for crownstone_1.7.0
+ - Try real power again.
+ - First change pwm, then relay.
+ - Don't crash when mesh message is unavailable.
+ - Fixed crash when receiving a mesh message on an invalid handle.
+ - Fixed advertising not starting after connect.
+ - Added compatible lights
+ - Small fixes in dimmer doc.
+ - Added dimmer doc.
+ - Improved integration doc.
+ - Update INTEGRATION.md
+ - Create INTEGRATION.md
+ - Protocol: User -> Member
+ - Multiple keys section
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Added uart commands: switch voltage channel pin, change adc range, toggle differential mode.
+ - Update License texts
+ - Add some more explanation to cs_Config.h
+ - Added uart commands: "m" to toggle mesh, "a" to toggle advertising.
+ - Little cs_Stack.cpp cleanup. Still plenty to do. - Seperated radio init from init. - Tried to make setX() and updateX() consistent. - Only restart advertising when already advertising.
+ - Updated advertisements v2 protocol. Energy used should now only overflow after 1 year of continuous 4000W power usage.
+ - Added new service data protocol.
+ - Event speed up: Removed eventListeners for just 1 event. Removed function to remove listeners.
+ - Increased max number of event listeners
+ - Decouple zero crossing interrupt from starting pwm with correct duty cycle.
+ - Store the switch state to persistent storage with a timeout of 10s.
+ - Fixed "F" uart command bug.
+ - Added option to use gpio debug for main.
+ - Added option for PWM to start on zero crossing.
+ - Added read_only option for uart. Added command "r" for reset.
+ - Added uart reading. Power sampling logs are now toggleable via uart.
+ - Added factory reset test.
+ - Fixed switch being set to 100 instead of 1 after setup. Enabled dimming in scheduler.
+ - Use hardware board to decide whether to allow dimming or not.
+ - Actually set boardConfig.hardwareBoard.
+ - Don't print extra mesh debug by default.
+ - Don't print power samples by default.
+ - Make sure calculations of zero line of power sampling are in int64_t.
+ - Improved / tidied up some uart debug. Added some commented out options for debugging.
+ - Added some explanation about how to get the meshing to work.
+ - PWM: added limit to error integral.
+ - Try out larger pwm period deviation limits.
+ - Check number of consecutive overcurrents for softfuse.
+ - Extended testing doc.
+ - Make the default name not the same as the release name.
+ - Filter current curve before calculating cZero. Fixed calculation of Irms of filtered current curve.
+ - Moving median filter is now used less hacky.
+ - First attempt at filtering the current curve with a median filter.
+ - Powersampling: calculate Irms and Vrms and filter it by taking the median. Then calculate power = Irms * Vrms and average the power a bit.
+ - Remove debug output of pwm.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Added integral part for the zero crossing sync.
+ - Update FIRMWARE_SPECS.md
+ - Fixed pwm low/high swap (see enableInterrupt function). Increased priority of interrupts, at APP LOW the interrupts seems to have equal priority to the main thread.. Removed test code to do dimming directly from ADC.
+ - Don't generate html documentation in the release script.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Commands to clone docs/html
+
 Version 1.6.0:
  - Add release config for crownstone_1.6.0
  - commit of some commented out code.
