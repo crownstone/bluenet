@@ -90,7 +90,7 @@ ServiceData::ServiceData() : _updateTimerId(NULL), _connected(false)
 void ServiceData::updateAdvertisement(bool initial) {
 	Timer::getInstance().stop(_updateTimerId);
 
-	//! if we are connected, we do not need to update the packet.
+	// if we are connected, we do not need to update the packet.
 	if (_connected == false) {
 		_updateCount++;
 
@@ -110,15 +110,15 @@ void ServiceData::updateAdvertisement(bool initial) {
 		// Counter is cheaper than random.
 		serviceData->params.counter += 1;
 
-		//! encrypt the array using the guest key ECB if encryption is enabled.
+		// encrypt the array using the guest key ECB if encryption is enabled.
 		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
 
-			//! populate the random field.
+			// populate the random field.
 			RNG::fillBuffer(&(serviceData->params.rand), 1);
 
 //			BLEutil::printArray(serviceData->array, sizeof(service_data_t));
 
-			//! encrypt the block.
+			// encrypt the block.
 			EncryptionHandler::getInstance().encrypt((serviceData->array) + 1, sizeof(service_data_t) - 1, _encryptedParams.payload,
 			                                         sizeof(_encryptedParams.payload), GUEST, ECB_GUEST);
 		}
@@ -258,7 +258,8 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 #endif
 
 	// Remove ids from the recent list that are not in the messages
-	_tempAdvertisedIds.size = 0;
+	advertised_ids_t tempAdvertisedIds;
+	tempAdvertisedIds.size = 0;
 
 	// First copy the ids that are in both the recent list and the message, to a temp list.
 	// Make the recent list the outer loop, so that we don't get any doubles in the temp list.
@@ -280,8 +281,8 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 				if (_advertisedIds.list[i] == p_stateItem->id) {
 					// If eventsOnly is true, only copy the item if it has the event bit set.
 					// (this removes all ids without event flag from the recent list)
-					if (!eventOnly || isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
-						_tempAdvertisedIds.list[_tempAdvertisedIds.size++] = _advertisedIds.list[i];
+					if (!eventOnly || BLEutil::isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
+						tempAdvertisedIds.list[tempAdvertisedIds.size++] = _advertisedIds.list[i];
 						found = true;
 						break;
 					}
@@ -295,10 +296,10 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 	}
 
 	// Then copy the temp list to the recent list
-	for (uint8_t i=0; i<_tempAdvertisedIds.size; ++i) {
-		_advertisedIds.list[i] = _tempAdvertisedIds.list[i];
+	for (uint8_t i=0; i<tempAdvertisedIds.size; ++i) {
+		_advertisedIds.list[i] = tempAdvertisedIds.list[i];
 	}
-	_advertisedIds.size = _tempAdvertisedIds.size;
+	_advertisedIds.size = tempAdvertisedIds.size;
 
 	// Make sure the head is wrapped around correctly
 	if (_advertisedIds.head < 0) {
@@ -339,7 +340,7 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 			if (p_stateItem->id == 0 || p_stateItem->id == ownId) {
 				continue;
 			}
-			if (eventOnly && !isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
+			if (eventOnly && !BLEutil::isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
 				continue;
 			}
 			found = false;
@@ -380,7 +381,7 @@ void ServiceData::onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg, uin
 	int16_t idx = -1;
 	state_item_t* p_stateItem;
 	while (peek_prev_state_item(stateMsg, &p_stateItem, idx)) {
-		if (isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA) && p_stateItem->id != ownId) {
+		if (BLEutil::isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA) && p_stateItem->id != ownId) {
 			_numAdvertiseChangedStates = MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS;
 		}
 		onMeshStateSeen(ownId, p_stateItem, stateChan);
