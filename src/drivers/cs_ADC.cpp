@@ -332,7 +332,8 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 		// This makes it more likely that this was an actual zero crossing.
 		uint32_t curTime = RTC::getCount();
 		uint32_t diffTicks = RTC::difference(curTime, _lastZeroCrossUpTime);
-		if ((_zeroCrossingCallback != NULL) && (diffTicks > RTC::msToTicks(19)) && (diffTicks < RTC::msToTicks(21))) {
+//		if ((_zeroCrossingCallback != NULL) && (diffTicks > RTC::msToTicks(19)) && (diffTicks < RTC::msToTicks(21))) {
+		if ((_zeroCrossingCallback != NULL) && (diffTicks > RTC::msToTicks(16)) && (diffTicks < RTC::msToTicks(17))) { // for 60Hz
 			_zeroCrossingCallback();
 		}
 		_lastZeroCrossUpTime = curTime;

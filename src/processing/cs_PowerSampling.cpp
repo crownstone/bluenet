@@ -225,7 +225,8 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 	power.currentIndex = CURRENT_CHANNEL_IDX;
 	power.numChannels = 2;
 	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
-	power.acPeriodUs = 20000;
+//	power.acPeriodUs = 20000;
+	power.acPeriodUs = 16667; // 60Hz
 
 	filter(power);
 #ifdef TEST_PIN
