@@ -48,9 +48,10 @@ extern "C" {
 #define ACR01B1B             1001
 // Prototype builtin. Not in production.
 #define ACR01B1C             1002
-#define ACR01B1D             1003
-#define ACR01B1E             1004
-#define ACR01B6C             1005
+#define ACR01B1D             1003 // released
+#define ACR01B1E             1004 // same as ACR01B1D, but with patch
+#define ACR01B6C             1005 // prototype
+#define ACR01B6D             1006 // prototype
 
 // CROWNSTONE PLUGS
 
@@ -86,8 +87,14 @@ typedef struct  {
 	//! GPIO pin to switch the relay off.
 	uint8_t pinGpioRelayOff;
 
-	//! Analog input pin to read the current.
+	//! Analog input pin to read the current with high gain.
 	uint8_t pinAinCurrent;
+
+	//! Analog input pin to read the current with medium gain.
+	uint8_t pinAinCurrentGainMed;
+
+	//! Analog input pin to read the current with low gain.
+	uint8_t pinAinCurrentGainLow;
 
 	//! Analog input pin to read the voltage.
 	uint8_t pinAinVoltage;
