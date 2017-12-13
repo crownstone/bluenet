@@ -91,8 +91,10 @@ void asACR01B6D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrent                      = 2;
-	p_config->pinAinVoltage                      = 1;
+	p_config->pinAinCurrent                      = 4; // highest gain
+	p_config->pinAinCurrentGainMed               = 5;
+	p_config->pinAinCurrentGainLow               = 6; // lowest gain
+	p_config->pinAinVoltage                      = 2;
 	p_config->pinAinZeroRef                      = 0;
 	p_config->pinAinPwmTemp                      = 3;
 	p_config->pinGpioRx                          = 20;
@@ -168,10 +170,8 @@ void asACR01B2G(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrent                      = 4; // highest gain
-	p_config->pinAinCurrentGainMed               = 5;
-	p_config->pinAinCurrentGainLow               = 6; // lowest gain
-	p_config->pinAinVoltage                      = 2;
+	p_config->pinAinCurrent                      = 2;
+	p_config->pinAinVoltage                      = 1;
 	p_config->pinAinZeroRef	                     = 0;
 	p_config->pinAinPwmTemp                      = 3;
 	p_config->pinGpioRx                          = 20;
