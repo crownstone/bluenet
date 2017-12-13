@@ -12,13 +12,16 @@
 #   Date: Feb. 3, 2014
 #######################################################################################################################
 
+target=${1:-crownstone}
+
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
+source ${path}/_check_targets.sh $target
 source $path/_config.sh
 
 cd ${BLUENET_BIN_DIR} && rm -f combined*
 
-add_bootloader=false
+add_bootloader=true
 add_softdevice=true
 add_binary=true
 
@@ -41,7 +44,7 @@ else
 		ADD_SOFTDEVICE="${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel"
 	fi
 	if [[ "$add_binary" == true ]]; then
-		ADD_BINARY="crownstone.bin -binary -offset 0x0001c000"
+		ADD_BINARY="crownstone.bin -binary -offset $APPLICATION_START_ADDRESS"
 	fi
 fi
 
