@@ -181,7 +181,7 @@ ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t le
 //	[01-05-2017] But messages that come in via the mesh characteristic can be smaller.
 //	if (length < sizeof(multi_switch_message_t) || !is_valid_multi_switch_message(msg, length)) {
 	if (!is_valid_multi_switch_message(msg, length)) {
-	LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 		BLEutil::printArray(msg, length);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
@@ -924,13 +924,24 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 
 ERR_CODE MeshControl::sendKeepAliveMessage(keep_alive_message_t* msg, uint16_t length) {
 	ERR_CODE errCode;
+
+	if (!is_valid_keep_alive_msg(msg, length)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+		BLEutil::printArray(msg, length);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	// TODO: only send when this message is (also) for other crownstones.
+	if (Mesh::getInstance().send(KEEP_ALIVE_CHANNEL, msg, length) == 0) {
+		return ERR_NOT_AVAILABLE;
+	}
+
+	// Handle message after sending it, else the message gets delayed too much.
 	errCode = handleKeepAlive(msg, length);
 	if (errCode != ERR_SUCCESS) {
 		return errCode;
 	}
 
-	// TODO: only send when this message is (also) for other crownstones.
-	Mesh::getInstance().send(KEEP_ALIVE_CHANNEL, msg, length);
 	return ERR_SUCCESS;
 }
 
@@ -944,33 +955,47 @@ ERR_CODE MeshControl::sendLastKeepAliveMessage() {
 	if (!Mesh::getInstance().getLastMessage(KEEP_ALIVE_CHANNEL, &msg, length)) {
 		return ERR_NOT_AVAILABLE;
 	}
-//	if (!is_valid_keep_alive_msg(&msg, length)) { // Already checked in handleKeepAlive()
-//		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
-//		return ERR_WRONG_PAYLOAD_LENGTH;
-//	}
 
-	ERR_CODE errCode;
-	errCode = handleKeepAlive(&msg, length);
-	if (errCode != ERR_SUCCESS) {
-		return errCode;
+	if (!is_valid_keep_alive_msg(&msg, length)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+		BLEutil::printArray(&msg, length);
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
 	// TODO: only send when this message is (also) for other crownstones.
 	if (Mesh::getInstance().send(KEEP_ALIVE_CHANNEL, &msg, length) == 0) {
 		return ERR_NOT_AVAILABLE;
 	}
+
+	// Handle message after sending it, else the message gets delayed too much.
+	ERR_CODE errCode;
+	errCode = handleKeepAlive(&msg, length);
+	if (errCode != ERR_SUCCESS) {
+		return errCode;
+	}
+
 	return ERR_SUCCESS;
 }
 
 ERR_CODE MeshControl::sendMultiSwitchMessage(multi_switch_message_t* msg, uint16_t length) {
 	ERR_CODE errCode;
+	if (!is_valid_multi_switch_message(msg, length)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+		BLEutil::printArray(msg, length);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	// TODO: only send when this message is (also) for other crownstones.
+	if (Mesh::getInstance().send(MULTI_SWITCH_CHANNEL, msg, length) == 0) {
+		return ERR_NOT_AVAILABLE;
+	}
+
+	// Handle message after sending it, else the message gets delayed too much.
 	errCode = handleMultiSwitch(msg, length);
 	if (errCode != ERR_SUCCESS) {
 		return errCode;
 	}
 
-	// TODO: only send when this message is (also) for other crownstones.
-	Mesh::getInstance().send(MULTI_SWITCH_CHANNEL, msg, length);
 	return ERR_SUCCESS;
 }
 
@@ -1016,6 +1041,7 @@ ERR_CODE MeshControl::sendCommandMessage(command_message_t* msg, uint16_t length
 
 	uint32_t messageCounter = 0;
 	if (sendOverMesh) {
+		// TODO: what if send() returns 0?
 		messageCounter = Mesh::getInstance().send(COMMAND_CHANNEL, msg, length);
 	}
 	else {
