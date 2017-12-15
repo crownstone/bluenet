@@ -22,7 +22,7 @@
 #endif
 
 #define ADVERTISE_EXTERNAL_DATA
-//#define PRINT_DEBUG_EXTERNAL_DATA
+#define PRINT_DEBUG_EXTERNAL_DATA
 //#define PRINT_VERBOSE_EXTERNAL_DATA
 
 ServiceData::ServiceData() : _updateTimerId(NULL), _connected(false)
@@ -206,7 +206,7 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 				serviceData.params.eventBitmask = p_stateItem->eventBitmask;
 				serviceData.params.eventBitmask |= 1 << SHOWING_EXTERNAL_DATA;
 				serviceData.params.temperature = 0; // Unknown
-				serviceData.params.powerUsage = p_stateItem->powerUsageApparent;
+				serviceData.params.powerUsage = p_stateItem->powerUsageApparent * 1000 / 16;
 				serviceData.params.accumulatedEnergy = p_stateItem->accumulatedEnergy;
 				found = true;
 				break;
