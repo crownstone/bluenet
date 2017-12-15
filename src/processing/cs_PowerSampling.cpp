@@ -553,7 +553,8 @@ void PowerSampling::calculatePower(power_t power) {
 			write("I=%i I_med=%i filt_I=%i filt_I_med=%i ", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA);
 			write("vZero=%i cZero=%i ", _avgZeroVoltage, _avgZeroCurrent);
 //			write("pSum=%lld ", pSum);
-//			write("power=%lld avg=%d ",powerMilliWatt, _avgPowerMilliWatt);
+			write("apparent=%u ", powerMilliWattApparent);
+			write("power=%d avg=%d ",powerMilliWatt, _avgPowerMilliWatt);
 			write("\r\n");
 		}
 
