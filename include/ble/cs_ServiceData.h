@@ -48,6 +48,13 @@ enum ServiceBitmask {
 union service_data_t {
 	struct __attribute__((packed)) {
 		uint8_t  protocolVersion;
+		encrypted_service_data_t data;
+	} params;
+	uint8_t array[sizeof(params)] = {};
+};
+
+union encrypted_service_data_t {
+	struct __attribute__((packed)) {
 		uint16_t crownstoneId;
 		uint8_t  switchState;
 		uint8_t  eventBitmask;
@@ -56,8 +63,19 @@ union service_data_t {
 		int32_t  accumulatedEnergy;
 		uint8_t  rand;
 		uint16_t counter;
-	} params;
-	uint8_t array[sizeof(params)] = {};
+	} v1;
+	struct __attribute__((packed)) {
+		uint8_t  type;
+		uint16_t crownstoneId;
+		uint8_t  switchState;
+		uint8_t  flagBitmask;
+		int8_t   temperature;
+		int8_t   powerFactor;
+		int16_t  powerUsageReal;
+		int32_t  accumulatedEnergy;
+		uint16_t partialTimestamp;
+		uint8_t  rand;
+	} v3;
 };
 
 class ServiceData : EventListener {
@@ -67,18 +85,26 @@ public:
 
 	/** Set the power usage field of the service data.
 	 *
-	 * @param[in] powerUsage      The power usage.
+	 * @param[in] powerUsage      The power usage in milliWatt.
 	 */
 	void updatePowerUsage(int32_t powerUsage) {
-		_serviceData.params.powerUsage = powerUsage;
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+		_serviceData.params.data.v1.powerUsage = powerUsage;
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+		_serviceData.params.data.v3.powerUsageReal = powerUsage / 125; // units of 1/8 W
+#endif
 	}
 
 	/** Set the energy used field of the service data.
 	 *
-	 * @param[in] energy          The energy used.
+	 * @param[in] energy          The energy used in Joule.
 	 */
 	void updateAccumulatedEnergy(int32_t energy) {
-		_serviceData.params.accumulatedEnergy = energy;
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+		_serviceData.params.data.v1.accumulatedEnergy = energy;
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+		_serviceData.params.data.v3.accumulatedEnergy = energy / 64; // units of 64 J
+#endif
 	}
 
 	/** Set the ID field of the service data.
@@ -86,7 +112,11 @@ public:
 	 * @param[in] crownstoneId    The Crownstone ID.
 	 */
 	void updateCrownstoneId(uint16_t crownstoneId) {
-		_serviceData.params.crownstoneId = crownstoneId;
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+		_serviceData.params.data.v1.crownstoneId = crownstoneId;
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+		_serviceData.params.data.v3.crownstoneId = crownstoneId;
+#endif
 	}
 
 	/** Set the switch state field of the service data.
@@ -94,7 +124,11 @@ public:
 	 * @param[in] switchState     The switch state.
 	 */
 	void updateSwitchState(uint8_t switchState) {
-		_serviceData.params.switchState = switchState;
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+		_serviceData.params.data.v1.switchState = switchState;
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+		_serviceData.params.data.v3.switchState = switchState;
+#endif
 	}
 
 	/** Set the event bitmask field of the service data.
@@ -102,7 +136,11 @@ public:
 	 * @param[in] bitmask         The bitmask.
 	 */
 	void updateEventBitmask(uint8_t bitmask) {
-		_serviceData.params.eventBitmask = bitmask;
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+		_serviceData.params.data.v1.eventBitmask = bitmask;
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+		_serviceData.params.data.v3.flagBitmask = bitmask;
+#endif
 	}
 
 	/** Set the temperature field of the service data.
@@ -110,7 +148,11 @@ public:
 	 * @param[in] temperature     The temperature.
 	 */
 	void updateTemperature(int8_t temperature) {
-		_serviceData.params.temperature = temperature;
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+		_serviceData.params.data.v1.temperature = temperature;
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+		_serviceData.params.data.v3.temperature = temperature;
+#endif
 	}
 
 	/** Update the advertisement.
@@ -131,9 +173,18 @@ public:
 	 */
 	void updateEventBitmask(uint8_t bit, bool set) {
 		if (set) {
-			_serviceData.params.eventBitmask |= 1 << bit;
-		} else {
-			_serviceData.params.eventBitmask &= ~(1 << bit);
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+			_serviceData.params.data.v1.eventBitmask |= 1 << bit;
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+			_serviceData.params.data.v3.flagBitmask |= 1 << bit;
+#endif
+		}
+		else {
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+			_serviceData.params.data.v1.eventBitmask &= ~(1 << bit);
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+			_serviceData.params.data.v3.flagBitmask &= ~(1 << bit);
+#endif
 		}
 	}
 

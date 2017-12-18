@@ -3,12 +3,14 @@
 #include <protocol/mesh/cs_MeshMessageCommon.h>
 
 struct __attribute__((__packed__)) state_item_t {
+	uint8_t   type;
 	id_type_t id;
 	uint8_t   switchState;
 	uint8_t   eventBitmask;
-	int16_t   powerFactor;
-	uint16_t  powerUsageApparent;
-	uint32_t  accumulatedEnergy;
+	int8_t    powerFactor;
+	int16_t   powerUsageReal;
+	uint16_t  partialAccumulatedEnergy;
+	uint16_t  partialTimestamp;
 };
 
 #define STATE_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t))

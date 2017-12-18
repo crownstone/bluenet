@@ -101,20 +101,31 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 		// Every 2 updates, we advertise the state of another crownstone.
 		if (_updateCount % 2 == 0) {
-			if (getExternalAdvertisement(_serviceData.params.crownstoneId, _serviceDataExt)) {
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+			if (getExternalAdvertisement(_serviceData.params.data.v1.crownstoneId, _serviceDataExt)) {
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+			if (getExternalAdvertisement(_serviceData.params.data.v3.crownstoneId, _serviceDataExt)) {
+#endif
 				serviceData = &_serviceDataExt;
 			}
 		}
 
 		// We use one random number (only if encrypted) and a uint16 counter value for the last 2 bytes.
 		// Counter is cheaper than random.
-		serviceData->params.counter += 1;
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+		serviceData->params.data.v1.counter += 1;
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+#endif
 
 		// encrypt the array using the guest key ECB if encryption is enabled.
 		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED)) {
 
 			// populate the random field.
-			RNG::fillBuffer(&(serviceData->params.rand), 1);
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+			RNG::fillBuffer(&(serviceData->params.data.v1.rand), 1);
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+			RNG::fillBuffer(&(serviceData->params.data.v3.rand), 1);
+#endif
 
 //			BLEutil::printArray(serviceData->array, sizeof(service_data_t));
 
