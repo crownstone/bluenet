@@ -79,7 +79,7 @@ uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
-uint 16 | Power usage | 2 | The apparent power usage at this moment. Divide by 16 to get power usage in VA. Multiply with power factor to get real power usage in Watt.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide by the power factor to get apparent power usage in VA.
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
 uint16 | Partial timestamp | 2 | The least significant bytes of the timestamp. Meaning of timestamp depends on type.
 uint 8 | Rand | 1 | Random byte.
@@ -102,7 +102,7 @@ uint 16 | Crownstone ID | 2 | The identifier of the crownstone which has this st
 uint 8 | Switch state | 1 | The current [Switch state](#switch_state_packet) of the crownstone.
 uint 8 | Event bitmask | 1 | The current [Event bitmask](#event_bitmask) of the crownstone.
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
-uint 16 | Power usage | 2 | The apparent power usage at this moment. Divide by 16 to get power usage in VA. Multiply with power factor to get real power usage in Watt.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide by the power factor to get apparent power usage in VA.
 uint 16 | Partial energy used | 2 | The least significant bytes of the energy used.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp. Meaning of timestamp depends on type.
 
@@ -117,6 +117,16 @@ Type | Description
 
 ## State variable size and resolution
 
+We are most interested in the real power, so that gets the most bits. To get the apparent power, you multiply the real power with the power factor, thus the apparent power will have a resolution equal to power factor resolution.
+
+### Power usage (real)
+
+Should be able to represent a number from -3840 to 3840 (16A * 240V = 3840W).
+
+Currently: int16 in units of 1/8W (2^15 / 8 = 4096)
+
+Better: use some exponential representation, precision is less needed for high power usage.
+
 ### Power factor
 
 Should be able to represent a decimal number from -1 to +1.
@@ -125,18 +135,20 @@ Currently: int8 in units of 1/127
 
 Better: ??
 
-### Power usage (apparent)
 
-Should be able to represent a number from 0 to 3840 (16A * 240V = 3840W).
-
-Currently: uint16 in units of 1/16W (2^16 / 16 = 4096)
-
-Better: use some exponential representation, precision is less needed for high power usage.
 
 ### Energy used
 
 Should be able to accumulate power usage over 10 years.
 
 Currently: int32 in units of 64J (2^31 / (3600 x 24 x 365 x 10) x 64 = 435W on average)
+
+Better: ??
+
+### Partial timestamp
+
+Should be able to figure out the time of a crownstone given that you know the current time.
+
+Currently: 2 bytes in units of seconds. (2**15 / (3600) = 9 hour time drift before you compensate the wrongly)
 
 Better: ??
