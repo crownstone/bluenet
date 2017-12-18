@@ -49,10 +49,10 @@ This leads to conflicting states, meaning the user can for example see the switc
 ### Considerations
 
 1. When entering sphere, phone needs to get state from all crownstones.
-- Phone shouldn't show old state when:
+2. Phone shouldn't show old state when:
     1. When toggling switch.
-    - When toggling switch multiple times (can still go wrong with current implementation, depends on mesh delay).
-- Multiple user with phones which are out of sync (more than 1s).
+    2. When toggling switch multiple times (can still go wrong with current implementation, depends on mesh delay).
+3. Multiple user with phones which are out of sync (more than 1s).
 
 ### Proposal
 
