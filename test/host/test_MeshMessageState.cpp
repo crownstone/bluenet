@@ -15,12 +15,12 @@ int main() {
 
 	sm.clear();
 
-	state_item_t item0 = { 0, 1, 1024, 100, 50};
-	state_item_t item1 = { 1, 1, 1024, 120, 40};
-	state_item_t item2 = { 2, 0, 1024, 220, 40};
-	state_item_t item3 = { 3, 0, 1024, 130, 20};
-	state_item_t item4 = { 4, 1, 1024, 30, 30};
-	state_item_t item5 = { 5, 1, 1024, 100, 100};
+	state_item_t item0 = { 0, 0, 10, 0, -75, -750, 1000, 2000}; // type, id, switch, bitmask, powerfactor, power, energy, timestamp
+	state_item_t item1 = { 0, 1, 11, 0, -50, -500, 1100, 2100};
+	state_item_t item2 = { 0, 2, 12, 0, -25, -250, 1200, 2200};
+	state_item_t item3 = { 0, 3, 13, 0, 20,  200,  1300, 2300};
+	state_item_t item4 = { 0, 4, 14, 0, 40,  400,  1400, 2400};
+	state_item_t item5 = { 0, 5, 15, 0, 80,  800,  1500, 2500};
 
 	sm.push_back(item0);
 	sm.push_back(item1);

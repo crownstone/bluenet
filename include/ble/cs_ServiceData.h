@@ -44,15 +44,13 @@ enum ServiceBitmask {
 	SETUP_MODE_ENABLED    = 7
 };
 
-//! Service data struct, this data type is what ends up in the advertisement.
-union service_data_t {
-	struct __attribute__((packed)) {
-		uint8_t  protocolVersion;
-		encrypted_service_data_t data;
-	} params;
-	uint8_t array[sizeof(params)] = {};
+enum ServiceDataType {
+	ALL_DATA_TIMESTAMP_LATEST             = 0,
+	ALL_DATA_TIMESTAMP_LAST_SWITCH_CHANGE = 1,
+	ALL_DATA_TIMESTAMP_LAST_POWER_CHANGE  = 2,
 };
 
+//! The data that is encrypted in the service data.
 union encrypted_service_data_t {
 	struct __attribute__((packed)) {
 		uint16_t crownstoneId;
@@ -78,6 +76,15 @@ union encrypted_service_data_t {
 	} v3;
 };
 
+//! Service data struct, this data type is what ends up in the advertisement.
+union service_data_t {
+	struct __attribute__((packed)) {
+		uint8_t  protocolVersion;
+		encrypted_service_data_t data;
+	} params;
+	uint8_t array[sizeof(params)] = {};
+};
+
 class ServiceData : EventListener {
 
 public:
@@ -91,19 +98,20 @@ public:
 #if SERVICE_DATA_PROTOCOL_VERSION == 1
 		_serviceData.params.data.v1.powerUsage = powerUsage;
 #elif SERVICE_DATA_PROTOCOL_VERSION == 3
-		_serviceData.params.data.v3.powerUsageReal = powerUsage / 125; // units of 1/8 W
+		_serviceData.params.data.v3.powerUsageReal = compressPowerUsageMilliWatt(powerUsage);
+		_serviceData.params.data.v3.powerFactor = 127;
 #endif
 	}
 
 	/** Set the energy used field of the service data.
 	 *
-	 * @param[in] energy          The energy used in Joule.
+	 * @param[in] energy          The energy used in units of 64 Joule.
 	 */
 	void updateAccumulatedEnergy(int32_t energy) {
 #if SERVICE_DATA_PROTOCOL_VERSION == 1
-		_serviceData.params.data.v1.accumulatedEnergy = energy;
+		_serviceData.params.data.v1.accumulatedEnergy = convertEnergyV3ToV1(energy);
 #elif SERVICE_DATA_PROTOCOL_VERSION == 3
-		_serviceData.params.data.v3.accumulatedEnergy = energy / 64; // units of 64 J
+		_serviceData.params.data.v3.accumulatedEnergy = energy; // units of 64 J
 #endif
 	}
 
@@ -213,8 +221,9 @@ public:
 	/** Send the service data over the mesh.
 	 *
 	 * @param[in] event           True when calling this function because the state changed significantly.
+	 * @param[in] eventType       Type of the event, only to be used when event is true.
 	 */
-	void sendMeshState(bool event);
+	void sendMeshState(bool event, uint16_t eventType);
 
 private:
 	//! Timer used to periodically update the advertisement.
@@ -264,6 +273,58 @@ private:
 	 * @param[in] length          Length of the data.
 	 */
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+
+
+
+	/** Compress power usage, according to service data protocol v3.
+	 *
+	 * @param[in] powerUsageMW    Power usage in milliWatt
+	 * @return                    Compressed representation of the power usage.
+	 */
+	int16_t compressPowerUsageMilliWatt(int32_t powerUsageMW);
+
+	/** Decompress power usage, according to service data protocol v3.
+	 *
+	 * @param[in] powerUsageMW    Compressed representation of the power usage.
+	 * @return                    Power usage in milliWatt.
+	 */
+	int32_t decompressPowerUsage(int16_t compressedPowerUsage);
+
+	/** Convert energy used from service data protocol v3 to service data protocol v1.
+	 *
+	 * @param[in] energyUsed      The accumulated energy in units of 64J.
+	 * @return                    The accumulated energy in units of Wh.
+	 */
+	int32_t convertEnergyV3ToV1(int32_t energyUsed);
+
+	/** Convert energy used from service data protocol v1 to service data protocol v3.
+	 *
+	 * @param[in] energyUsed      The accumulated energy in units of Wh.
+	 * @return                    The accumulated energy in units of 64J.
+	 */
+	int32_t convertEnergyV1ToV3(int32_t energyUsed);
+
+	/** Convert complete energy usage value to a partial energy usage value, according to service data protocol v3.
+	 *
+	 * @param[in] energyUsed      The accumulated energy in units of 64J.
+	 * @return                    The least significant part of the energy usage.
+	 */
+	uint16_t energyToPartialEnergy(int32_t energyUsed);
+
+	/** Convert partial energy usage value to a complete energy usage value, according to service data protocol v3.
+	 *
+	 * @param[in] partialEnergy   The least significant part of the energy usage.
+	 * @return                    Energy usage.
+	 */
+	int32_t partialEnergyToEnergy (uint16_t partialEnergy);
+
+	/** Convert timestamp to a partial timestamp, according to service data protocol v3.
+	 *
+	 * @param[in] timestamp       The timestamp.
+	 * @return                    The least significant part of the timestamp.
+	 */
+	uint16_t timestampToPartialTimestamp(uint32_t timestamp);
+
 
 #if BUILD_MESHING == 1
 	//! Timer used to periodically send the state to the mesh.
@@ -340,7 +401,7 @@ private:
 
 	/* Static function for the timeout */
 	static void meshStateTick(ServiceData *ptr) {
-		ptr->sendMeshState(false);
+		ptr->sendMeshState(false, 0);
 	}
 #endif
 

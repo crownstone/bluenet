@@ -6,7 +6,7 @@ struct __attribute__((__packed__)) state_item_t {
 	uint8_t   type;
 	id_type_t id;
 	uint8_t   switchState;
-	uint8_t   eventBitmask;
+	uint8_t   flagBitmask;
 	int8_t    powerFactor;
 	int16_t   powerUsageReal;
 	uint16_t  partialAccumulatedEnergy;

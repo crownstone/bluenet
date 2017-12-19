@@ -99,6 +99,13 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 		service_data_t* serviceData = &_serviceData;
 
+#if SERVICE_DATA_PROTOCOL_VERSION == 3
+		serviceData->params.data.v3.type = ALL_DATA_TIMESTAMP_LATEST;
+		uint32_t timestamp;
+		State::getInstance().get(STATE_TIME, timestamp);
+		serviceData->params.data.v3.partialTimestamp = timestampToPartialTimestamp(timestamp);
+#endif
+
 		// Every 2 updates, we advertise the state of another crownstone.
 		if (_updateCount % 2 == 0) {
 #if SERVICE_DATA_PROTOCOL_VERSION == 1
@@ -212,13 +219,26 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 				if (!isMeshStateNotTimedOut(advertiseId, chan, currentTime)) {
 					advertise = false;
 				}
-				serviceData.params.crownstoneId = p_stateItem->id;
-				serviceData.params.switchState = p_stateItem->switchState;
-				serviceData.params.eventBitmask = p_stateItem->eventBitmask;
-				serviceData.params.eventBitmask |= 1 << SHOWING_EXTERNAL_DATA;
-				serviceData.params.temperature = 0; // Unknown
-				serviceData.params.powerUsage = p_stateItem->powerUsageApparent * 1000 / 16;
-				serviceData.params.accumulatedEnergy = p_stateItem->accumulatedEnergy;
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+				serviceData.params.data.v1.crownstoneId = p_stateItem->id;
+				serviceData.params.data.v1.switchState = p_stateItem->switchState;
+				serviceData.params.data.v1.eventBitmask = p_stateItem->flagBitmask;
+				serviceData.params.data.v1.eventBitmask |= 1 << SHOWING_EXTERNAL_DATA;
+				serviceData.params.data.v1.temperature = 0; // Unknown
+				serviceData.params.data.v1.powerUsage = decompressPowerUsage(p_stateItem->powerUsageReal);
+				serviceData.params.data.v1.accumulatedEnergy = partialEnergyToEnergy(p_stateItem->partialAccumulatedEnergy);
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+				serviceData.params.data.v3.type = p_stateItem->type;
+				serviceData.params.data.v3.crownstoneId = p_stateItem->id;
+				serviceData.params.data.v3.switchState = p_stateItem->switchState;
+				serviceData.params.data.v3.flagBitmask = p_stateItem->flagBitmask;
+				serviceData.params.data.v3.flagBitmask |= 1 << SHOWING_EXTERNAL_DATA;
+				serviceData.params.data.v3.temperature = 0; // Unknown
+				serviceData.params.data.v3.powerFactor = p_stateItem->powerFactor;
+				serviceData.params.data.v3.powerUsageReal = p_stateItem->powerUsageReal;
+				serviceData.params.data.v3.accumulatedEnergy = partialEnergyToEnergy(p_stateItem->partialAccumulatedEnergy);
+				serviceData.params.data.v3.partialTimestamp = p_stateItem->partialTimestamp;
+#endif
 				found = true;
 				break;
 			}
@@ -234,7 +254,11 @@ bool ServiceData::getExternalAdvertisement(uint16_t ownId, service_data_t& servi
 	}
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
-	LOGd("serviceData: id=%u switch=%u bitmask=%u temp=%i P=%i E=%i adv=%u", serviceData.params.crownstoneId, serviceData.params.switchState, serviceData.params.eventBitmask, serviceData.params.temperature, serviceData.params.powerUsage, serviceData.params.accumulatedEnergy, advertise);
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+	LOGd("serviceData: id=%u switch=%u bitmask=%u temp=%i P=%i E=%i adv=%u", serviceData.params.data.v1.crownstoneId, serviceData.params.data.v1.switchState, serviceData.params.data.v1.eventBitmask, serviceData.params.data.v1.temperature, serviceData.params.data.v1.powerUsage, serviceData.params.data.v1.accumulatedEnergy, advertise);
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+	LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u adv=%u", serviceData.params.data.v3.type, serviceData.params.data.v3.crownstoneId, serviceData.params.data.v3.switchState, serviceData.params.data.v3.flagBitmask, serviceData.params.data.v3.temperature, serviceData.params.data.v3.powerUsageReal, serviceData.params.data.v3.accumulatedEnergy, serviceData.params.data.v3.partialTimestamp, advertise);
+#endif
 #endif
 
 	return advertise;
@@ -292,7 +316,7 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 				if (_advertisedIds.list[i] == p_stateItem->id) {
 					// If eventsOnly is true, only copy the item if it has the event bit set.
 					// (this removes all ids without event flag from the recent list)
-					if (!eventOnly || BLEutil::isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
+					if (!eventOnly || BLEutil::isBitSet(p_stateItem->flagBitmask, SHOWING_EXTERNAL_DATA)) {
 						tempAdvertisedIds.list[tempAdvertisedIds.size++] = _advertisedIds.list[i];
 						found = true;
 						break;
@@ -351,7 +375,7 @@ id_type_t ServiceData::chooseExternalId(uint16_t ownId, state_message_t stateMsg
 			if (p_stateItem->id == 0 || p_stateItem->id == ownId) {
 				continue;
 			}
-			if (eventOnly && !BLEutil::isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA)) {
+			if (eventOnly && !BLEutil::isBitSet(p_stateItem->flagBitmask, SHOWING_EXTERNAL_DATA)) {
 				continue;
 			}
 			found = false;
@@ -392,7 +416,7 @@ void ServiceData::onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg, uin
 	int16_t idx = -1;
 	state_item_t* p_stateItem;
 	while (peek_prev_state_item(stateMsg, &p_stateItem, idx)) {
-		if (BLEutil::isBitSet(p_stateItem->eventBitmask, SHOWING_EXTERNAL_DATA) && p_stateItem->id != ownId) {
+		if (BLEutil::isBitSet(p_stateItem->flagBitmask, SHOWING_EXTERNAL_DATA) && p_stateItem->id != ownId) {
 			_numAdvertiseChangedStates = MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS;
 		}
 		onMeshStateSeen(ownId, p_stateItem, stateChan);
@@ -490,29 +514,46 @@ bool ServiceData::isMeshStateNotTimedOut(id_type_t id, uint16_t stateChan, uint3
 }
 #endif
 
-void ServiceData::sendMeshState(bool event) {
+void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 #if BUILD_MESHING == 1
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 
 		state_item_t stateItem = {};
-		stateItem.id = _serviceData.params.crownstoneId;
-		stateItem.switchState = _serviceData.params.switchState;
-		stateItem.eventBitmask = _serviceData.params.eventBitmask;
+		stateItem.type = ALL_DATA_TIMESTAMP_LATEST;
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+		stateItem.id = _serviceData.params.data.v1.crownstoneId;
+		stateItem.switchState = _serviceData.params.data.v1.switchState;
+		stateItem.flagBitmask = _serviceData.params.data.v1.eventBitmask;
+		stateItem.powerFactor = 127; // Assume a power factor of 1
+		stateItem.powerUsageReal = compressPowerUsageMilliWatt(_serviceData.params.data.v1.powerUsage);
+		stateItem.partialAccumulatedEnergy = energyToPartialEnergy(convertEnergyV1ToV3(_serviceData.params.data.v1.accumulatedEnergy));
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+		stateItem.id = _serviceData.params.data.v1.crownstoneId;
+		stateItem.switchState = _serviceData.params.data.v3.switchState;
+		stateItem.flagBitmask = _serviceData.params.data.v3.flagBitmask;
+		stateItem.powerFactor = _serviceData.params.data.v3.powerFactor;
+		stateItem.powerUsageReal = _serviceData.params.data.v3.powerUsageReal;
+		stateItem.partialAccumulatedEnergy = energyToPartialEnergy(_serviceData.params.data.v3.accumulatedEnergy);
+#endif
+		uint32_t timestamp;
+		State::getInstance().get(STATE_TIME, timestamp);
+
 		if (event) {
 			// Use the "external data" bit to flag this data as coming from an event.
-			stateItem.eventBitmask |= 1 << SHOWING_EXTERNAL_DATA;
+			stateItem.flagBitmask |= 1 << SHOWING_EXTERNAL_DATA;
+			switch (eventType) {
+			case STATE_SWITCH_STATE:
+				stateItem.type = ALL_DATA_TIMESTAMP_LAST_SWITCH_CHANGE;
+//				timestamp = ..; // TODO: use stored timestamp?
+				break;
+			}
 		}
 		else {
 			// Although probably not necessary, remove the "external data" bit
-			stateItem.eventBitmask &= ~(1 << SHOWING_EXTERNAL_DATA);
+			stateItem.flagBitmask &= ~(1 << SHOWING_EXTERNAL_DATA);
 		}
-		// Translate advertisement v1 to advertisement v2
-		stateItem.powerFactor = 1024; // Assume a power factor of 1
-		stateItem.powerUsageApparent = 0;
-		if (_serviceData.params.powerUsage > 0) {
-			stateItem.powerUsageApparent = _serviceData.params.powerUsage * 16 / 1000;
-		}
-		stateItem.accumulatedEnergy = _serviceData.params.accumulatedEnergy;
+		stateItem.partialTimestamp = timestampToPartialTimestamp(timestamp);
+
 
 		MeshControl::getInstance().sendServiceDataMessage(stateItem, event);
 
@@ -570,7 +611,7 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case STATE_SWITCH_STATE: {
 		updateSwitchState(*(uint8_t*)p_data);
-		sendMeshState(true);
+		sendMeshState(true, STATE_SWITCH_STATE);
 		break;
 	}
 	case STATE_ACCUMULATED_ENERGY: {
@@ -590,11 +631,19 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 #if BUILD_MESHING == 1
 	case EVT_EXTERNAL_STATE_MSG_CHAN_0: {
-		onMeshStateMsg(_serviceData.params.crownstoneId, (state_message_t*)p_data, 0);
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+		onMeshStateMsg(_serviceData.params.data.v1.crownstoneId, (state_message_t*)p_data, 0);
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+		onMeshStateMsg(_serviceData.params.data.v3.crownstoneId, (state_message_t*)p_data, 0);
+#endif
 		break;
 	}
 	case EVT_EXTERNAL_STATE_MSG_CHAN_1: {
-		onMeshStateMsg(_serviceData.params.crownstoneId, (state_message_t*)p_data, 1);
+#if SERVICE_DATA_PROTOCOL_VERSION == 1
+		onMeshStateMsg(_serviceData.params.data.v1.crownstoneId, (state_message_t*)p_data, 1);
+#elif SERVICE_DATA_PROTOCOL_VERSION == 3
+		onMeshStateMsg(_serviceData.params.data.v3.crownstoneId, (state_message_t*)p_data, 1);
+#endif
 		break;
 	}
 #endif
@@ -602,4 +651,45 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	default:
 		return;
 	}
+}
+
+
+
+
+int16_t ServiceData::compressPowerUsageMilliWatt(int32_t powerUsageMW) {
+	// units of 1/8 W
+	int16_t retVal = powerUsageMW / 125; // similar to *8/1000, but then without chance to overflow
+	return retVal;
+}
+
+int32_t ServiceData::decompressPowerUsage(int16_t compressedPowerUsage) {
+	int32_t retVal = compressedPowerUsage * 125; // similar to /8*1000, but then without losing precision.
+	return retVal;
+}
+
+int32_t ServiceData::convertEnergyV3ToV1(int32_t energyUsed) {
+	int32_t retVal = ((int64_t)energyUsed) * 64 / 3600;
+	return retVal;
+}
+
+int32_t ServiceData::convertEnergyV1ToV3(int32_t energyUsed) {
+	int32_t retVal = ((int64_t)energyUsed) * 3600 / 64;
+	return retVal;
+}
+
+uint16_t ServiceData::energyToPartialEnergy(int32_t energyUsage) {
+//	uint16_t retVal = energyUsage & 0x0000FFFF; // TODO: also drops the sign
+	uint16_t retVal = abs(energyUsage) % (UINT16_MAX+1); // Safer
+	return retVal;
+}
+
+int32_t ServiceData::partialEnergyToEnergy (uint16_t partialEnergy) {
+	int32_t retVal = partialEnergy; // TODO: what else can we do?
+	return retVal;
+}
+
+uint16_t ServiceData::timestampToPartialTimestamp(uint32_t timestamp) {
+//	uint16_t retVal = timestamp & 0x0000FFFF;
+	uint16_t retVal = timestamp % (UINT16_MAX+1); // Safer
+	return retVal;
 }

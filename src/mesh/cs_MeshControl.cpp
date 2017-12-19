@@ -240,7 +240,7 @@ ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, 
 	int16_t idx = -1;
 	state_item_t* p_stateItem;
 	while (peek_next_state_item(msg, &p_stateItem, idx)) {
-		LOGi("idx=%i id=%u switch=%u bitmask=%u PF=%i P=%u E=%i", idx, p_stateItem->id, p_stateItem->switchState, p_stateItem->eventBitmask, p_stateItem->powerFactor, p_stateItem->powerUsageApparent, p_stateItem->accumulatedEnergy);
+		LOGi("idx=%i type=%u id=%u switch=%u bitmask=%u PF=%i P=%i E=%u time=%u", idx, p_stateItem->type, p_stateItem->id, p_stateItem->switchState, p_stateItem->flagBitmask, p_stateItem->powerFactor, p_stateItem->powerUsageReal, p_stateItem->partialAccumulatedEnergy, p_stateItem->partialTimestamp);
 	}
 #endif
 	return ERR_SUCCESS;
@@ -868,20 +868,8 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 //}
 
 void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
-
-#if defined(PRINT_DEBUG)
-	bool debug = false;
-#if defined(PRINT_VERBOSE_STATE_BROADCAST) && defined(PRINT_VERBOSE_STATE_CHANGE)
-	debug = true;
-#elif defined(PRINT_VERBOSE_STATE_BROADCAST)
-	debug = !event;
-#elif defined(PRINT_VERBOSE_STATE_CHANGE)
-	debug = event;
-#endif
-
-	if (debug) {
-		LOGi("Send state event=%u id=%u switch=%u bitmask=%u PF=%i P=%u E=%i", event, stateItem.id, stateItem.switchState, stateItem.eventBitmask, stateItem.powerFactor, stateItem.powerUsageApparent, stateItem.accumulatedEnergy);
-	}
+#ifdef PRINT_VERBOSE_STATE
+		LOGi("Send state event=%u type=%u id=%u switch=%u bitmask=%u PF=%i P=%i E=%u time=%u", event, stateItem.type, stateItem.id, stateItem.switchState, stateItem.flagBitmask, stateItem.powerFactor, stateItem.powerUsageReal, stateItem.partialAccumulatedEnergy, stateItem.partialTimestamp);
 #endif
 
 	state_message_t message = {};
@@ -912,11 +900,9 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 	message.timestamp = timestamp;
 
 
-#if defined(PRINT_DEBUG)
-	if (debug) {
+#ifdef PRINT_VERBOSE_STATE
 		LOGi("message data:");
 		BLEutil::printArray(&message, sizeof(state_message_t));
-	}
 #endif
 
 	Mesh::getInstance().send(channel, &message, sizeof(state_message_t));
