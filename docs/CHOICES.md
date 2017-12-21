@@ -38,3 +38,29 @@ So instead, the PWM is synchronized by slightly adjusting the period. The feedba
 This means that if the tick count is higher than 0, the period is decreased. While if the tick count is below zero (or actually a number above half the period number of ticks), the period is increased. This basically is a control system, that has to be properly tweaked, or else it can get instable.
 
 
+## Soft fuses
+
+There are several things we can monitor for protection: current and temperature.
+The IGBTs have a PTC or NTC to measure the temperature, and the chip has an on board temperature sensor. Temperature rises relatively slowly and should be the last line of defense. Current can be measured quickly (in order of ms), but interference can cause false readings, leading to a slower response time to avoid false positives.
+
+When the chip temperature is too high, the most likely cause is that a large current went through the relay for an extended period, while the Crownstone was unable to get rid of the generated heat.
+
+When the IGBT temperature is too high, the most likely cause is that a large current went thought the IGBTs for some time, while no over current was measured. In this case, the dimmer will be turned off.
+
+### Relay
+
+The relay (and dimmer) will be turned off when:
+
+- The current exceeds 16A.
+- The chip temperature is too high.
+
+A flag will be set, and the relay, nor the dimmer will be allowed to be turned on again.
+
+### Dimmer
+
+The dimmer will be turned off when:
+
+- The current exceeds about 0.5A.
+- The IGBT temperature is too high.
+
+There is a slight chance, however, that the dimmer is broken and unable to be switched off. This is why the relay is turned on as well (and remains on). This outranks the relay being turned off (or remain off) by the other events. This makes sure the overheating will be minimized, as the relay path generated the least heat.
