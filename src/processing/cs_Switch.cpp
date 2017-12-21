@@ -151,11 +151,7 @@ void Switch::turnOn() {
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGd("Turn ON");
 #endif
-	if (_hasRelay) {
-		relayOn();
-	} else {
-		pwmOn();
-	}
+	setSwitch(SWITCH_ON);
 }
 
 
@@ -163,19 +159,17 @@ void Switch::turnOff() {
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGd("Turn OFF");
 #endif
-	if (_hasRelay) {
-		relayOff();
-	} else {
-		pwmOff();
-	}
+	setSwitch(0);
 }
 
 
 void Switch::toggle() {
-	if ((_hasRelay && getRelayState()) || (!_hasRelay && getPwm())) {
-		turnOff();
-	} else {
-		turnOn();
+	// TODO: maybe check if pwm is larger than some value?
+	if (_switchValue.relay_state || _switchValue.pwm_state > 0) {
+		setSwitch(0);
+	}
+	else {
+		setSwitch(SWITCH_ON);
 	}
 }
 
@@ -234,16 +228,19 @@ void Switch::setSwitch(uint8_t switchState) {
 		case PCA10040:
 		case ACR01B2C:
 		case ACR01B1D: {
-			// First pwm, then relay!
+			// First pwm on, then relay off!
+			// Otherwise, if you go from 100 to 90, the power first turns off, then to 90.
+			// TODO: why not first relay on, then pwm off, when going from 90 to 100?
+
 			// Pwm when value is 1-99, else pwm off
-			if (switchState > 0 && switchState < 100) {
+			if (switchState > 0 && switchState < SWITCH_ON) {
 				_setPwm(switchState);
 			}
 			else {
 				_setPwm(0);
 			}
 			// Relay on when value >= 100, else off (as the dimmer is parallel)
-			if (switchState > 99) {
+			if (switchState >= SWITCH_ON) {
 				_relayOn();
 			}
 			else {
@@ -338,19 +335,19 @@ void Switch::delayedSwitchExecute() {
 
 
 void Switch::_setPwm(uint8_t value) {
+	LOGd("setPwm %u", value);
 	if (value > 0 && !allowPwmOn()) {
-		LOGd("Don't turn on pwm");
+		LOGi("Don't turn on pwm");
 		return;
 	}
 
 #ifndef PWM_DISABLE
 	// When the user wants to dim at 99%, assume the user actually wants full on, but doesn't want to use the relay.
-	if (value >= 99) {
-		value = 100;
+	if (value >= (SWITCH_ON - 1)) {
+		value = SWITCH_ON;
 	}
 	PWM::getInstance().setValue(0, value);
 #else
-	LOGd("setPwm %u", value);
 	if (value) {
 		nrf_gpio_pin_set(PWM_PIN);
 	} else {
@@ -363,16 +360,16 @@ void Switch::_setPwm(uint8_t value) {
 
 void Switch::_relayOn() {
 	LOGd("relayOn");
-	if (!allowSwitchOn()) {
-		LOGd("Don't turn relay on");
+	if (!allowRelayOn()) {
+		LOGi("Don't turn relay on");
 		return;
 	}
 
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGd("trigger relay on pin for %d ms", _relayHighDuration);
-#endif
 
 	if (_hasRelay) {
+#ifdef PRINT_SWITCH_VERBOSE
+		LOGd("trigger relay on pin for %d ms", _relayHighDuration);
+#endif
 		nrf_gpio_pin_set(_pinRelayOn);
 		nrf_delay_ms(_relayHighDuration);
 		nrf_gpio_pin_clear(_pinRelayOn);
@@ -382,12 +379,15 @@ void Switch::_relayOn() {
 
 void Switch::_relayOff() {
 	LOGd("relayOff");
-
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGi("trigger relay off pin for %d ms", _relayHighDuration);
-#endif
+	if (!allowRelayOff()) {
+		LOGi("Don't turn relay off");
+		return;
+	}
 
 	if (_hasRelay) {
+#ifdef PRINT_SWITCH_VERBOSE
+		LOGi("trigger relay off pin for %d ms", _relayHighDuration);
+#endif
 		nrf_gpio_pin_set(_pinRelayOff);
 		nrf_delay_ms(_relayHighDuration);
 		nrf_gpio_pin_clear(_pinRelayOff);
@@ -399,6 +399,14 @@ void Switch::forcePwmOff() {
 	LOGw("forcePwmOff");
 	pwmOff();
 	EventDispatcher::getInstance().dispatch(EVT_PWM_FORCED_OFF);
+}
+
+void Switch::forceRelayOn() {
+	LOGw("forceRelayOn");
+	relayOn();
+	EventDispatcher::getInstance().dispatch(EVT_RELAY_FORCED_ON);
+	// Try again later, in case the first one didn't work..
+	delayedSwitch(SWITCH_ON, 5);
 }
 
 void Switch::forceSwitchOff() {
@@ -417,11 +425,26 @@ bool Switch::allowPwmOn() {
 //	return !(stateErrors.errors.chipTemp || stateErrors.errors.pwmTemp);
 }
 
-bool Switch::allowSwitchOn() {
+bool Switch::allowRelayOff() {
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
-	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.pwmTemp);
-//	return !(stateErrors.errors.chipTemp || stateErrors.errors.pwmTemp);
+
+	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
+	return !(stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp);
+}
+
+bool Switch::allowRelayOn() {
+	state_errors_t stateErrors;
+	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+	LOGd("errors=%d", stateErrors.asInt);
+
+	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
+	if (stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp) {
+		return true;
+	}
+
+	// Otherwise, relay should stay off when the overall temperature was too high, or there was over current.
+	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent);
 }
 
 void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
@@ -436,19 +459,16 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		turnOff();
 		break;
 	}
-	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM: {
+	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM:
+	case EVT_PWM_TEMP_ABOVE_THRESHOLD:
+		// First set relay on, so that the switch doesn't first turn off, and late on again.
+		// The relay protects the dimmer, because the current will flow through the relay.
+		forceRelayOn();
 		forcePwmOff();
 		break;
-	}
-	case EVT_PWM_TEMP_ABOVE_THRESHOLD: {
-//		forcePwmOff();
-		forceSwitchOff();
-		break;
-	}
 	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
-	case EVT_CHIP_TEMP_ABOVE_THRESHOLD: {
+	case EVT_CHIP_TEMP_ABOVE_THRESHOLD:
 		forceSwitchOff();
 		break;
-	}
 	}
 }

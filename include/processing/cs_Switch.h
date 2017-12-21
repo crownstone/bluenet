@@ -166,10 +166,12 @@ private:
 	void delayedSwitchExecute();
 
 	void forcePwmOff();
+	void forceRelayOn();
 	void forceSwitchOff();
 
 	bool allowPwmOn();
-	bool allowSwitchOn();
+	bool allowRelayOff();
+	bool allowRelayOn();
 
 	switch_state_t _switchValue;
 
@@ -196,4 +198,3 @@ private:
 	uint32_t _hardwareBoard;
 
 };
-

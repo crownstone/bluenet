@@ -64,6 +64,10 @@ void TemperatureGuard::handleCompEvent(CompEvent_t event) {
 void TemperatureGuard::tick() {
 	GeneralEventType curEvent;
 
+	// Get the current state errors
+	state_errors_t stateErrors;
+	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+
 	// Check chip temperature, send event if it changed
 	uint8_t chipTempError = getTemperature() > _maxChipTemp ? 1 : 0;
 	if (chipTempError) {
@@ -72,11 +76,19 @@ void TemperatureGuard::tick() {
 	else {
 		curEvent = EVT_CHIP_TEMP_OK;
 	}
+
+	// Set state before dispatching event, so that errors are set when handling the event.
+	if (chipTempError && !stateErrors.errors.chipTemp) {
+		//! Set chip temp error
+		State::getInstance().set(STATE_ERROR_CHIP_TEMP, chipTempError);
+	}
+
 	if (curEvent != _lastChipTempEvent) {
 		LOGd("Dispatch event %d", curEvent);
 		EventDispatcher::getInstance().dispatch(curEvent);
 		_lastChipTempEvent = curEvent;
 	}
+
 
 	// Check PWM temperature, send event if it changed
 	uint32_t compVal = _comp->sample();
@@ -94,24 +106,17 @@ void TemperatureGuard::tick() {
 	else {
 		curEvent = EVT_PWM_TEMP_OK;
 	}
+
+	// Set state before dispatching event, so that errors are set when handling the event.
+	if (pwmTempError && !stateErrors.errors.pwmTemp) {
+		// Set pwm temp error
+		State::getInstance().set(STATE_ERROR_PWM_TEMP, pwmTempError);
+	}
+
 	if (curEvent != _lastPwmTempEvent) {
 		LOGd("Dispatch event %d", curEvent);
 		EventDispatcher::getInstance().dispatch(curEvent);
 		_lastPwmTempEvent = curEvent;
-	}
-
-	//! Get the current state errors
-	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
-
-	if (pwmTempError && !stateErrors.errors.pwmTemp) {
-		//! Set pwm temp error
-		State::getInstance().set(STATE_ERROR_PWM_TEMP, pwmTempError);
-	}
-
-	if (chipTempError && !stateErrors.errors.chipTemp) {
-		//! Set chip temp error
-		State::getInstance().set(STATE_ERROR_CHIP_TEMP, chipTempError);
 	}
 
 	scheduleNextTick();
