@@ -37,10 +37,10 @@ Next, overload the IGBTs:
 - Turn dimmer on (at 100%).
 - Plug in a light (so you can see when the dimmer turns off).
 - Additionally, plug in a load of 300W.
-- Check if this turns off immediately.
+- Check if the relay turns on immediately.
 - Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
 - Check if you can't turn on the dimmer anymore.
-- Check if you can still turn on the relay.
+- Check if you can't turn off the relay anymore.
 
 Now repeat the process below a couple of times with 300W and a couple of times with 2000W:
 
@@ -48,7 +48,7 @@ Now repeat the process below a couple of times with 300W and a couple of times w
 - Reset the error state (or reset the crownstone).
 - Turn dimmer on (at 100%).
 - Plug in the load.
-- Check if this turns off immediately.
+- Check if the relay turns on immediately.
 - Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
 
 
@@ -100,13 +100,79 @@ Now overload the dimmer:
 
 - Plug in load of 300W.
 
-Now it should heat up (you should see the chip temperature rise) and turn off within 15 minutes. If this doesn't happen, try with a load of 400W, or else 500W.
+Now it should heat up (you should see the chip temperature rise) and turn the relay on within 15 minutes. If this doesn't happen, try with a load of 400W, or else 500W.
 
-- Check if it turns off.
+- Check if the relay turns on.
 - Check if it reports the correct error state (`1000` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
-- Check if you can't turn on the relay anymore.
+- Check if you can't turn off the relay anymore.
 - Check if you can't turn on the dimmer anymore.
 - Factory reset the crownstone.
+
+
+
+## Dimmer
+
+Check dimmer stability with:
+
+- An incandescent lamp.
+- A halogen lamp.
+- A dimmable LED lamp.
+
+Check if dimmer restores after reset:
+
+- Set dimmer at 30%.
+- Plug out crownstone.
+- Plug in crownstone.
+- Check if it dims at 30% again (write down how long it takes).
+
+
+## Power measurements
+
+Check if the power measurements are ok.
+For each check, measure about 30 seconds.
+For each check, write down how much difference there is between the measured power by the Crownstone and the external reference.
+For each check, write down how stable the output is (are there peaks?, how much noise in W?).
+
+Off:
+
+- Turn relay off, dimmer off.
+- Check if measured power is about 0W.
+
+Relay:
+
+- Turn relay on, dimmer off.
+- Check if measured power is about 0W.
+- Plug in about 30W load
+- Check if measured power is about right, write down results.
+- Plug in about 60W load
+- Check if measured power is about right, write down results.
+- Plug in about 100W load
+- Check if measured power is about right, write down results.
+- Plug in about 800W load
+- Check if measured power is about right, write down results.
+
+Dimmer:
+
+- Turn relay off
+- Dimmer 100%
+- Check if measured power is about 0W.
+- Plug in about 30W load
+- Check if measured power is about right, write down results.
+- Plug in about 60W load
+- Check if measured power is about right, write down results.
+- Plug in about 100W load
+- Check if measured power is about right, write down results.
+
+Dimming:
+
+- Relay off, load of about 30W.
+- Dimmer at 25%
+- Check if measured power is about right, write down results.
+- Dimmer at 50%
+- Check if measured power is about right, write down results.
+- Dimmer at 75%
+- Check if measured power is about right, write down results.
+
 
 ## Setup
 
