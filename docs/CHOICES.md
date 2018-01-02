@@ -56,6 +56,8 @@ The main conceptual difference is that rather than seeing the Crownstones as sen
 * A Crownstone sends out at regular intervals information about states or events. It is a good idea to use an event representation (state + timestamp) in the case there is a potential race condition.
 * A Crownstone can send out different types of messages. It is not wise to summarize its entire state in one message. We need so-called opcodes in which a mesh network can be configured in such a way that more priority can be put on for example information transfer of energy messages rather than other types of messages. 
 
+An example of other type of messages that might benefit from an event representation is that of people entering or leaving a room. As soon as we start implementing Crownstones scanning for iBeacons, this information might be useful to obtain straight from the Crownstone network itself rather than from the cloud.
+
 ### Considerations
 
 1. When entering sphere, phone needs to get state from all crownstones.
