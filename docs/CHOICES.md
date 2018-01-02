@@ -58,6 +58,8 @@ The main conceptual difference is that rather than seeing the Crownstones as sen
 
 An example of other type of messages that might benefit from an event representation is that of people entering or leaving a room. As soon as we start implementing Crownstones scanning for iBeacons, this information might be useful to obtain straight from the Crownstone network itself rather than from the cloud.
 
+Note, that this also assumes a basic form of time synchronization is implemented. At https://www.cse.wustl.edu/~jain/cse574-06/ftp/time_sync/index.html you will see many advantages of having time (or more precise clock) synchronization, amongst which are: localization, proximity, and energy efficiency. 
+
 ### Considerations
 
 1. When entering sphere, phone needs to get state from all crownstones.
