@@ -50,6 +50,8 @@ This leads to conflicting states, meaning the user can for example see the switc
 
 Currently there is a single timestamp for a complete message containing state information about the switch state, the power value, power factor, etc. Each time that any of these fields change, the timestamp is updated for the entire message. The timestamp henceforth destroys information about when the Crownstone has switched. This subsequently introduces all kind of race conditions. If you get a message with switch state information you can not rely on the corresponding timestamp. That timestamp is namely corrupted by any field change (and energy updates are for example every minute). 
 
+To make it even more concrete. If the smartphone app receives a state message with a very recent timestamp T and state information X, Y, Z, it has no way to know if X, Y, or Z is new. It might very well be the case that X is extremely old and T refers only to Y. This means that even though the last time you turned on the Crownstones (state X) is a week ago, it still impossible for the smartphone app to use the information in the message to infer that X must be long ago. The smartphone app henceforth has to introduce additional latencies to make sure that race conditions are solved. For example waiting 10 seconds so it knows that its control messages have reached the target and that the state messages that have backpropagated are actually new. 
+
 ### Considerations
 
 1. When entering sphere, phone needs to get state from all crownstones.
