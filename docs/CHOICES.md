@@ -58,6 +58,8 @@ The main conceptual difference is that rather than seeing the Crownstones as sen
 
 An example of other type of messages that might benefit from an event representation is that of people entering or leaving a room. As soon as we start implementing Crownstones scanning for iBeacons, this information might be useful to obtain straight from the Crownstone network itself rather than from the cloud.
 
+If we assume that messages can be lost, the difference between state and event representation becomes smaller. In both cases we might want to wait say 10 seconds before we decide that a message apparently did not arrive at its destiny. In that case the toggle is reset back to "off" if an "on" message was sent. The main advantage of an event representation in this case is that every incoming message can be used to adjust the state. This means that we can easily set this delay to 5 minutes. If we then in the meantime get an incoming message about an state change to "off" while we sent ourselves an "on" message due to someone else sending a message, we can properly react to this. We do not need to wait 5 minutes before we can react to state messages. 
+
 Note, that this also assumes a basic form of time synchronization is implemented. At https://www.cse.wustl.edu/~jain/cse574-06/ftp/time_sync/index.html you will see many advantages of having time (or more precise clock) synchronization, amongst which are: localization, proximity, and energy efficiency. 
 
 ### Considerations
