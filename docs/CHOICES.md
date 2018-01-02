@@ -46,6 +46,10 @@ When using the mesh, a crownstone can advertise an old state of another crownsto
 
 This leads to conflicting states, meaning the user can for example see the switch state toggling multiple times.
 
+### More detailed problem statement
+
+Currently there is a single timestamp for a complete message containing state information about the switch state, the power value, power factor, etc. Each time that any of these fields change, the timestamp is updated for the entire message. The timestamp henceforth destroys information about when the Crownstone has switched. This subsequently introduces all kind of race conditions. If you get a message with switch state information you can not rely on the corresponding timestamp. That timestamp is namely corrupted by any field change (and energy updates are for example every minute). 
+
 ### Considerations
 
 1. When entering sphere, phone needs to get state from all crownstones.
