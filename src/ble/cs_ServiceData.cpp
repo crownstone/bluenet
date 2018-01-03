@@ -583,6 +583,7 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case EVT_PWM_FORCED_OFF:
 	case EVT_SWITCH_FORCED_OFF:
+	case EVT_RELAY_FORCED_ON:
 //	case EVT_CHIP_TEMP_ABOVE_THRESHOLD:
 //	case EVT_PWM_TEMP_ABOVE_THRESHOLD:
 		updateEventBitmask(SERVICE_BITMASK_ERROR, true);

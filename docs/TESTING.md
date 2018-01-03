@@ -37,10 +37,10 @@ Next, overload the IGBTs:
 - Turn dimmer on (at 100%).
 - Plug in a light (so you can see when the dimmer turns off).
 - Additionally, plug in a load of 300W.
-- Check if this turns off immediately.
+- Check if the relay turns on immediately.
 - Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
 - Check if you can't turn on the dimmer anymore.
-- Check if you can still turn on the relay.
+- Check if you can't turn off the relay anymore.
 
 Now repeat the process below a couple of times with 300W and a couple of times with 2000W:
 
@@ -48,7 +48,7 @@ Now repeat the process below a couple of times with 300W and a couple of times w
 - Reset the error state (or reset the crownstone).
 - Turn dimmer on (at 100%).
 - Plug in the load.
-- Check if this turns off immediately.
+- Check if the relay turns on immediately.
 - Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
 
 
@@ -100,11 +100,11 @@ Now overload the dimmer:
 
 - Plug in load of 300W.
 
-Now it should heat up (you should see the chip temperature rise) and turn off within 15 minutes. If this doesn't happen, try with a load of 400W, or else 500W.
+Now it should heat up (you should see the chip temperature rise) and turn the relay on within 15 minutes. If this doesn't happen, try with a load of 400W, or else 500W.
 
-- Check if it turns off.
+- Check if the relay turns on.
 - Check if it reports the correct error state (`1000` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
-- Check if you can't turn on the relay anymore.
+- Check if you can't turn off the relay anymore.
 - Check if you can't turn on the dimmer anymore.
 - Factory reset the crownstone.
 
