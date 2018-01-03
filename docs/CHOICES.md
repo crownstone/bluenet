@@ -74,6 +74,22 @@ When using the mesh, a crownstone can advertise an old state of another crownsto
 
 This leads to conflicting states, meaning the user can for example see the switch state toggling multiple times.
 
+### More detailed problem statement
+
+Currently there is a single timestamp for a complete message containing state information about the switch state, the power value, power factor, etc. Each time that any of these fields change, the timestamp is updated for the entire message. The timestamp henceforth destroys information about when the Crownstone has switched. This subsequently introduces all kind of race conditions. If you get a message with switch state information you can not rely on the corresponding timestamp. That timestamp is namely corrupted by any field change (and energy updates are for example every minute). 
+
+To make it even more concrete. If the smartphone app receives a state message with a very recent timestamp T and state information X, Y, Z, it has no way to know if X, Y, or Z is new. It might very well be the case that X is extremely old and T refers only to Y. This means that even though the last time you turned on the Crownstones (state X) is a week ago, it still impossible for the smartphone app to use the information in the message to infer that X must be long ago. The smartphone app henceforth has to introduce additional latencies to make sure that race conditions are solved. For example waiting 10 seconds so it knows that its control messages have reached the target and that the state messages that have backpropagated are actually new. The problem is that we do not know if 10 seconds is sufficient or not. We might see all kind of inconsistencies depending on the mesh topology.
+
+The main conceptual difference is that rather than seeing the Crownstones as sending out messages that define its state, this is seen as:
+* A Crownstone sends out at regular intervals information about states or events. It is a good idea to use an event representation (state + timestamp) in the case there is a potential race condition.
+* A Crownstone can send out different types of messages. It is not wise to summarize its entire state in one message. We need so-called opcodes in which a mesh network can be configured in such a way that more priority can be put on for example information transfer of energy messages rather than other types of messages. 
+
+An example of other type of messages that might benefit from an event representation is that of people entering or leaving a room. As soon as we start implementing Crownstones scanning for iBeacons, this information might be useful to obtain straight from the Crownstone network itself rather than from the cloud.
+
+If we assume that messages can be lost, the difference between state and event representation becomes smaller. In both cases we might want to wait say 10 seconds before we decide that a message apparently did not arrive at its destiny. In that case the toggle is reset back to "off" if an "on" message was sent. The main advantage of an event representation in this case is that every incoming message can be used to adjust the state. This means that we can easily set this delay to 5 minutes. If we then in the meantime get an incoming message about an state change to "off" while we sent ourselves an "on" message due to someone else sending a message, we can properly react to this. We do not need to wait 5 minutes before we can react to state messages. 
+
+Note, that this also assumes a basic form of time synchronization is implemented. At https://www.cse.wustl.edu/~jain/cse574-06/ftp/time_sync/index.html you will see many advantages of having time (or more precise clock) synchronization, amongst which are: localization, proximity, and energy efficiency. 
+
 ### Considerations
 
 1. When entering sphere, phone needs to get state from all crownstones.
