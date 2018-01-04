@@ -66,15 +66,15 @@ The dimmer will be turned off when:
 There is a slight chance, however, that the dimmer is broken and unable to be switched off. This is why the relay is turned on as well (and remains on). This outranks the relay being turned off (or remain off) by the other events. This makes sure the overheating will be minimized, as the relay path generated the least heat.
 
 
-## State propagation of Crownstones
+# State propagation of Crownstones
 
-### Problem
+## Problem
 
 When using the mesh, a crownstone can advertise an old state of another crownstone, which can be advertised after the new state is advertised.
 
 This leads to conflicting states, meaning the user can for example see the switch state toggling multiple times.
 
-### More detailed problem statement
+## More detailed problem statement
 
 Currently there is a single timestamp for a complete message containing state information about the switch state, the power value, power factor, etc. Each time that any of these fields change, the timestamp is updated for the entire message. The timestamp henceforth destroys information about when the Crownstone has switched. This subsequently introduces all kind of race conditions. If you get a message with switch state information you can not rely on the corresponding timestamp. That timestamp is namely corrupted by any field change (and energy updates are for example every minute). 
 
@@ -90,7 +90,7 @@ If we assume that messages can be lost, the difference between state and event r
 
 Note, that this also assumes a basic form of time synchronization is implemented. At https://www.cse.wustl.edu/~jain/cse574-06/ftp/time_sync/index.html you will see many advantages of having time (or more precise clock) synchronization, amongst which are: localization, proximity, and energy efficiency. 
 
-### Considerations
+## Considerations
 
 1. When entering sphere, phone needs to get state from all crownstones.
 2. Phone shouldn't show old state when:
@@ -98,7 +98,7 @@ Note, that this also assumes a basic form of time synchronization is implemented
     2. When toggling switch multiple times (can still go wrong with current implementation, depends on mesh delay).
 3. Multiple user with phones which are out of sync (more than 1s).
 
-### Proposal
+## Proposal
 
 Assumption: the crownstones clocks are synchronized (on the second). This should be the case when the clocks are regularly (daily?) set by the phone via the mesh.
 
@@ -112,58 +112,123 @@ To make room for the timestamp, we can reduce the size of the power factor to 1B
 
 We add a message type to the mesh state items to allow for more specialized types in the future.
 
-
-#### New service data packet:
+### New mesh state item:
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Type | 1 | Type of packet.
-uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
+uint 8 | Type | 1 | 0 (state with power usage)
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
 uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
-int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide by the power factor to get apparent power usage in VA.
-int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
-uint16 | Partial timestamp | 2 | The least significant bytes of the timestamp. Meaning of timestamp depends on type.
-uint 8 | Rand | 1 | Random byte.
-
-Types:
-
-Type | Description
----- | ----
-0 | Timestamp is the time when this state was sent.
-1 | Timestamp is the time when the switch was last changed.
-2 | Timestamp is the time when the power usage or power factor last changed significantly.
-
-
-#### New mesh state item:
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
+uint 8 | Reserved | 2 | Reserved for future use.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Type | 1 | Type of item.
-uint 16 | Crownstone ID | 2 | The identifier of the crownstone which has this state.
-uint 8 | Switch state | 1 | The current [Switch state](#switch_state_packet) of the crownstone.
-uint 8 | Event bitmask | 1 | The current [Event bitmask](#event_bitmask) of the crownstone.
+uint 8 | Type | 1 | 1 (state with energy used)
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
+uint 8 | Reserved | 2 | Reserved for future use.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Type | 1 | 2 (error)
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
+uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
+uint 32 | Timestamp | 4 | The timestamp when the first error occured.
+uint 8 | Reserved | 2 | Reserved for future use.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Type | 1 | 3 (last switch change)
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 32 | Timestamp | 4 | The timestamp when the switch last changed.
+uint 8 | Reserved | 5 | Reserved for future use.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Type | 1 | 4 (last significant power usage change)
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
-int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide by the power factor to get apparent power usage in VA.
-uint 16 | Partial energy used | 2 | The least significant bytes of the energy used.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
+uint 32 | Timestamp | 4 | The timestamp when the power usage last changed significantly.
+uint 8 | Reserved | 3 | Reserved for future use.
+
+
+### New service data packet:
+
+Protocol version: use 3 for the following data structs, 4 for a setup packet, 5 for dfu, 6 for unencrypted/guest.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Type | 1 | 0 (state)
+uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+int 8 | Temperature | 1 | Chip temperature (°C).
+int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
+int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp. Meaning of timestamp depends on type.
+uint 8 | Reserved | 2 | Reserved for future use.
 
-Types:
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Type | 1 | 1 (error)
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
+uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
+uint 32 | Timestamp | 4 | The timestamp when the first error occured.
+uint 8 | Reserved | 6 | Reserved for future use.
 
-Type | Description
----- | ----
-0 | Timestamp is the time when this state was sent.
-1 | Timestamp is the time when the switch was last changed.
-2 | Timestamp is the time when the power usage or power factor last changed significantly.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Type | 1 | 2 (external data with power usage)
+uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch of that Crownstone.
+uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of that Crownstone.
+int 8 | Temperature | 1 | Chip temperature (°C) of that Crownstone.
+int 8 | Power factor | 1 | The power factor of that Crownstone. Divide by 127 to get the actual power factor.
+int 16 | Power usage | 2 | The real power usage of that Crownstone. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of that Crownstone.
+uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch of that Crownstone.
+uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of that Crownstone.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of that Crownstone.
+uint 8 | Reserved | 1 | Reserved for future use.
+
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Type | 1 | 3 (external data with energy used)
+uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch of that Crownstone.
+uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of that Crownstone.
+int 32 | Energy used | 4 | The total energy used of that Crownstone. Multiply by 64 to get the energy used in Joule.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of that Crownstone.
+uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch of that Crownstone.
+uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of that Crownstone.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of that Crownstone.
+uint 8 | Reserved | 1 | Reserved for future use.
 
 
 ## State variable size and resolution
 
-We are most interested in the real power, so that gets the most bits. To get the apparent power, you multiply the real power with the power factor, thus the apparent power will have a resolution equal to power factor resolution.
+### Crownstone ID
+
+With the current mesh, we can probably not support more than 50 Crownstones, so 255 different ids should be plenty.
 
 ### Power usage (real)
+
+We are most interested in the real power, so that gets the most bits. To get the apparent power, you multiply the real power with the power factor, thus the apparent power will have a resolution equal to power factor resolution.
 
 Should be able to represent a number from -3840 to 3840 (16A * 240V = 3840W).
 
@@ -189,6 +254,12 @@ Currently: int32 in units of 64J (2^31 / (3600 x 24 x 365 x 10) x 64 = 435W on a
 
 Better: ??
 
+### Partial energy used
+
+Should be able to figure out the energy used, given that you know the energy used of some time ago.
+
+Currently: none, 2 least significant bytes can overflow in 5 minutes, 3 bytes can overflow in a day.
+
 ### Partial timestamp
 
 Should be able to figure out the time of a crownstone given that you know the current time.
@@ -196,3 +267,11 @@ Should be able to figure out the time of a crownstone given that you know the cu
 Currently: 2 bytes in units of seconds. (2**15 / (3600) = 9 hour time drift before you compensate the wrongly)
 
 Better: ??
+
+### Compressed timestamp
+
+Should be able to represent an absolute time for the last switch time etc.
+
+Currently: none, as it should be able to have seconds precision, but also be able to represent a certain day.
+
+Idea: use 3 least significant bytes, that only overflows in 97 days.
