@@ -316,18 +316,19 @@ Currently: none, as it should be able to have seconds precision, but also be abl
 
 Idea: use 3 least significant bytes, that only overflows in 97 days.
 
+Idea: in combination with partial timestamp: have a 2 byte float that represents the offset from the partial timestamp.
 
+# Multiswitch Merging
 
-## Multiswitch Merging
-
-Problem: 
+## Problem
 
 Assume a mesh delay of 3 seconds. If Alice switches CS1 on and a second later Bob switches CS2 on, there is a race condition where Bob's command will replace Alice's command before it reaches CS1. This means Alice will wait on a switch of CS1 which will never happen.
 
-Solution: 
+## Proposal
 
 Merge conflicting messages in the mesh. A conflict occurs when one Crownstone receives two mesh messages with the same version. Resolving this conflict has to be deterministic so every Crownstone with this conflict will resolve it to the same message, avoiding propagated conflicts.
 
 Rules for merger:
+
 - On is more important than Off.
 - Sort list by Crownstone ID.
