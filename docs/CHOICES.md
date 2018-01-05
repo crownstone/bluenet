@@ -78,7 +78,7 @@ This leads to conflicting states, meaning the user can for example see the switc
 
 Currently there is a single timestamp for a complete message containing state information about the switch state, the power value, power factor, etc. Each time that any of these fields change, the timestamp is updated for the entire message. The timestamp henceforth destroys information about when the Crownstone has switched. This subsequently introduces all kind of race conditions. If you get a message with switch state information you can not rely on the corresponding timestamp. That timestamp is namely corrupted by any field change (and energy updates are for example every minute). 
 
-To make it even more concrete. If the smartphone app receives a state message with a very recent timestamp T and state information X, Y, Z, it has no way to know if X, Y, or Z is new. It might very well be the case that X is extremely old and T refers only to Y. This means that even though the last time you turned on the Crownstones (state X) is a week ago, it still impossible for the smartphone app to use the information in the message to infer that X must be long ago. The smartphone app henceforth has to introduce additional latencies to make sure that race conditions are solved. For example waiting 10 seconds so it knows that its control messages have reached the target and that the state messages that have backpropagated are actually new. The problem is that we do not know if 10 seconds is sufficient or not. We might see all kind of inconsistencies depending on the mesh topology.
+To make it even more concrete. If the smartphone app receives a state message with a very recent timestamp T and state information X, Y, Z, it has no way to know if X, Y, or Z is new. It might very well be the case that X is extremely old and T refers only to Y. This means that even though the last time you turned on the Crownstones (state X) is a week ago, it still impossible for the smartphone app to use the information in the message to infer that X must be long ago. The smartphone app henceforth has to introduce additional latencies to make sure that race conditions are solved. For example waiting 10 seconds so it knows that its control messages have reached the target and that the state messages that have backpropagated are actually new. The problem is that we do not know if 10 seconds is sufficient or not. We might see all kind of inconsistencies depending on the mesh topology. However, if we take lost packets into account, we will need some kind of timeout regardless.
 
 The main conceptual difference is that rather than seeing the Crownstones as sending out messages that define its state, this is seen as:
 * A Crownstone sends out at regular intervals information about states or events. It is a good idea to use an event representation (state + timestamp) in the case there is a potential race condition.
@@ -86,7 +86,7 @@ The main conceptual difference is that rather than seeing the Crownstones as sen
 
 An example of other type of messages that might benefit from an event representation is that of people entering or leaving a room. As soon as we start implementing Crownstones scanning for iBeacons, this information might be useful to obtain straight from the Crownstone network itself rather than from the cloud.
 
-If we assume that messages can be lost, the difference between state and event representation becomes smaller. In both cases we might want to wait say 10 seconds before we decide that a message apparently did not arrive at its destiny. In that case the toggle is reset back to "off" if an "on" message was sent. The main advantage of an event representation in this case is that every incoming message can be used to adjust the state. This means that we can easily set this delay to 5 minutes. If we then in the meantime get an incoming message about an state change to "off" while we sent ourselves an "on" message due to someone else sending a message, we can properly react to this. We do not need to wait 5 minutes before we can react to state messages. 
+If we assume that messages can be lost, the difference between state and event representation becomes smaller. In both cases we might want to wait say 10 seconds before we decide that a message apparently did not arrive at its destiny. In that case the toggle is reset back to "off" if an "on" message was sent. The main advantage of an event representation in this case is that every incoming message can be used to adjust the state. This means that we can easily set this delay to 5 minutes. If we then in the meantime get an incoming message about an state change to "off" while we sent ourselves an "on" message due to someone else sending a message, we can properly react to this. We do not need to wait 5 minutes before we can react to state messages. However, in the case that the command has been superseded by another command to a different Crownstone, the result would be a 5 minute delay. We will need to implement merging of multiswitch commands to avoid this. Even if this is the case, it can happen that more Crownstones than the capacity of the multiswitch packet are switched, making it impossible to merge. Taking all these cases into account, a 5 minute delay is unreasonable.
 
 Note, that this also assumes a basic form of time synchronization is implemented. At https://www.cse.wustl.edu/~jain/cse574-06/ftp/time_sync/index.html you will see many advantages of having time (or more precise clock) synchronization, amongst which are: localization, proximity, and energy efficiency. 
 
@@ -275,3 +275,19 @@ Should be able to represent an absolute time for the last switch time etc.
 Currently: none, as it should be able to have seconds precision, but also be able to represent a certain day.
 
 Idea: use 3 least significant bytes, that only overflows in 97 days.
+
+
+
+## Multiswitch Merging
+
+Problem: 
+
+Assume a mesh delay of 3 seconds. If Alice switches CS1 on and a second later Bob switches CS2 on, there is a race condition where Bob's command will replace Alice's command before it reaches CS1. This means Alice will wait on a switch of CS1 which will never happen.
+
+Solution: 
+
+Merge conflicting messages in the mesh. A conflict occurs when one Crownstone receives two mesh messages with the same version. Resolving this conflict has to be deterministic so every Crownstone with this conflict will resolve it to the same message, avoiding propagated conflicts.
+
+Rules for merger:
+- On is more important than Off.
+- Sort list by Crownstone ID.
