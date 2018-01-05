@@ -247,7 +247,7 @@ uint 8 | Reserved | 2 | Reserved for future use.
 
 #### Setup mode
 
-When in setup mode, an unencrypted state is sent. The Crownstone ID is not set yet, and the timestamp is not needed, as the Crownstone will not be in a mesh yet. The energy used is not kept up, as nothing is stored yet. This creates space to also include the error bitmask and timestamp.
+When in setup mode, an unencrypted state is sent. The Crownstone ID is not set yet, and the timestamp is not needed, as the Crownstone will not be in a mesh yet. The energy used is not kept up, as nothing is stored yet. This creates space to also include the error bitmask.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -259,8 +259,7 @@ int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
 uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
-uint 32 | Timestamp | 4 | The timestamp when the first error occured (0 if none).
-uint 8 | Reserved | 1 | Reserved for future use.
+uint 8 | Reserved | 5 | Reserved for future use.
 
 
 
