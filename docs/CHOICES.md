@@ -122,14 +122,14 @@ We add a message type to the mesh state items to allow for more specialized type
 
 We increase the size of the mesh state item to 14 bytes, which decreases the number of items to 2x6. This makes the state item size closer to the service data size (16B), so that the mesh state can be advertised 1 to 1, while the chance of 12 crownstones having to send their state is rather small.
 
-### <a name="event_bitmask"></a>Flags Bitmask
+### <a name="flags_bitmask"></a>Flags Bitmask
 
 Bit | Name |  Description
 --- | --- | ---
-0 | Switch locked | When the switch state is locked, this will be 1.
-1 | Dimming available | When dimming is physically available, this will be 1.
-2 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
-3 | Reserved | Reserved for future use.
+0 | Dimming available | When dimming is physically available, this will be 1.
+1 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
+2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the error service data, or by reading the [error state](#state_packet).
+3 | Switch locked | When the switch state is locked, this will be 1.
 4 | Reserved | Reserved for future use.
 5 | Reserved | Reserved for future use.
 6 | Reserved | Reserved for future use.
@@ -144,7 +144,7 @@ Type | Name | Length | Description
 uint 8 | Type | 1 | 0 (current state)
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
 uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
-uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
@@ -158,7 +158,7 @@ uint 8 | Type | 1 | 1 (error)
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
 uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
 uint 32 | Timestamp | 4 | The timestamp when the first error occured.
-uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
 
@@ -189,7 +189,7 @@ uint 8 | Unencrypted opcode | 1 | 3 (encrypted data)
 uint 8 | Type | 1 | 0 (state)
 uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
 uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
-uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
@@ -207,7 +207,7 @@ uint 8 | Type | 1 | 1 (error)
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
 uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
 uint 32 | Timestamp | 4 | The timestamp when the first error occured.
-uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
@@ -221,7 +221,7 @@ uint 8 | Version | 1 | 3 (encrypted data)
 uint 8 | Type | 1 | 2 (external state)
 uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
 uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
-uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
@@ -239,7 +239,7 @@ uint 8 | Type | 1 | 3 (external error)
 uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
 uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
 uint 32 | Timestamp | 4 | The timestamp when the first error occured.
-uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
 uint 8 | Reserved | 2 | Reserved for future use.
@@ -254,7 +254,7 @@ Type | Name | Length | Description
 uint 8 | Version | 1 | 4 (setup mode)
 uint 8 | Type | 1 | 0 (state)
 uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
-uint 8 | [Flags bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
