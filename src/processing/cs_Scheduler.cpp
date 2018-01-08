@@ -90,7 +90,7 @@ ERR_CODE Scheduler::clearScheduleEntry(uint8_t id) {
 }
 
 void Scheduler::tick() {
-	//! RTC can overflow every 16s
+	//! RTC can overflow every 512s
 	uint32_t tickDiff = RTC::difference(RTC::getCount(), _rtcTimeStamp);
 
 	//! If more than 1s elapsed since last set rtc timestamp:

@@ -57,6 +57,10 @@ public:
 
 	void start();
 
+	/** Starts the pwm, call when pwm is physically allowed to be used.
+	 */
+	void startPwm();
+
 	/** Turn on the switch. Uses relay if available.
 	 */
 	void turnOn();
@@ -184,6 +188,9 @@ private:
 	app_timer_id_t           _switchStoreStateTimerId;
 
 //	uint8_t _nextRelayVal;
+
+	bool _pwmPowered; //! Whether or not the pwm has enough power to be used.
+	bool _relayPowered; //! Whether or not the relay has enough power to be used.
 
 	bool _hasRelay;
 	uint8_t _pinRelayOn;

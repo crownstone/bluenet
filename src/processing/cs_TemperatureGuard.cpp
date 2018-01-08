@@ -66,7 +66,7 @@ void TemperatureGuard::tick() {
 
 	// Get the current state errors
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 
 	// Check chip temperature, send event if it changed
 	uint8_t chipTempError = getTemperature() > _maxChipTemp ? 1 : 0;

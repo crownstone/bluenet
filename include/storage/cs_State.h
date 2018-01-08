@@ -98,7 +98,9 @@ union state_errors_t {
 		uint8_t overCurrentPwm : 1;
 		uint8_t chipTemp : 1;
 		uint8_t pwmTemp : 1;
-		uint32_t reserved : 28;
+		uint8_t dimmerOn : 1;
+		uint8_t dimmerOff : 1;
+		uint32_t reserved : 26;
 	} errors;
 	uint32_t asInt;
 };

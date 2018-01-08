@@ -233,7 +233,9 @@ uint16_t State::getStateItemSize(uint8_t type) {
 	case STATE_ERROR_CHIP_TEMP:
 	case STATE_ERROR_PWM_TEMP:
 	case STATE_IGNORE_LOCATION:
-	case STATE_IGNORE_ALL: {
+	case STATE_IGNORE_ALL:
+	case STATE_ERROR_DIMMER_ON_FAILURE:
+	case STATE_ERROR_DIMMER_OFF_FAILURE: {
 		return sizeof(uint8_t);
 	}
 	case STATE_TEMPERATURE: {
@@ -280,7 +282,9 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 	case STATE_ERROR_PWM_TEMP:
 	case STATE_IGNORE_BITMASK:
 	case STATE_IGNORE_ALL:
-	case STATE_IGNORE_LOCATION: {
+	case STATE_IGNORE_LOCATION:
+	case STATE_ERROR_DIMMER_ON_FAILURE:
+	case STATE_ERROR_DIMMER_OFF_FAILURE: {
 		success = size == getStateItemSize(type);
 		break;
 	}
@@ -313,6 +317,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 		switch(type) {
 		case STATE_TEMPERATURE: {
 			_temperature = *(int32_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 //#ifdef PRINT_DEBUG
 //			LOGd("Set temperature: %d", _temperature);
 //#endif
@@ -320,15 +325,17 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 		}
 		case STATE_FACTORY_RESET: {
 			_factoryResetState = *(uint8_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_SWITCH_STATE: {
 			uint8_t value = *(uint8_t*)target;
 #ifdef SWITCH_STATE_PERSISTENT
+			_switchStateCache = value;
+			publishUpdate(type, (uint8_t*)target, size); // Publish before storing, so that the event doesn't arrive late (store takes a long time)
 			if (persistent && _switchState->read() != value) {
 				_switchState->store(value);
 			}
-			_switchStateCache = value;
 #else
 			_switchState = value;
 #endif
@@ -336,6 +343,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 		}
 		case STATE_OPERATION_MODE: {
 			uint8_t value = *(uint8_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			uint32_t opMode;
 			StorageHelper::getUint32(_storageStruct.operationMode, &opMode, OPERATION_MODE_SETUP);
 			if (persistent && opMode != value) {
@@ -346,6 +354,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 		}
 		case STATE_RESET_COUNTER: {
 			uint16_t value = *(uint16_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			if (persistent && _resetCounter->read() != value) {
 				_resetCounter->store(value);
 			}
@@ -353,17 +362,17 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 		}
 		case STATE_POWER_USAGE: {
 			_powerUsage = *(int32_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_TIME: {
 			_time = *(uint32_t*)target;
-//#ifdef PRINT_DEBUG
-//			LOGd("set time: %d", _time);
-//#endif
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_TRACKED_DEVICES: {
 			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.trackedDevices, size);
+			publishUpdate(type, (uint8_t*)target, size);
 			if (persistent) {
 				savePersistentStorageItem(_storageStruct.trackedDevices, size);
 			}
@@ -374,12 +383,14 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 			LOGd("set schedule pointer: %p size: %d", _storageStruct.scheduleList, size);
 #endif
 			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.scheduleList, size);
-			//! Don't store, this should be done via savePersistentStorage, otherwise it happens too often.
+			publishUpdate(type, (uint8_t*)target, size);
+			// Don't store, this should be done via savePersistentStorage, otherwise it happens too often.
 //			savePersistentStorageItem(_storageStruct.scheduleList, size);
 			break;
 		}
 		case STATE_LEARNED_SWITCHES: {
 			StorageHelper::setArray((buffer_ptr_t)target, _storageStruct.learnedSwitches, size);
+			publishUpdate(type, (uint8_t*)target, size);
 			if (persistent) {
 				savePersistentStorageItem(_storageStruct.learnedSwitches, size);
 			}
@@ -387,34 +398,52 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 		}
 		case STATE_ERRORS: {
 			_errorState = *(state_errors_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_ERROR_OVER_CURRENT: {
 			_errorState.errors.overCurrent = *(uint8_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_ERROR_OVER_CURRENT_PWM: {
 			_errorState.errors.overCurrentPwm = *(uint8_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_ERROR_CHIP_TEMP: {
 			_errorState.errors.chipTemp = *(uint8_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_ERROR_PWM_TEMP: {
 			_errorState.errors.pwmTemp = *(uint8_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_IGNORE_BITMASK: {
 			_overrideBitmask = *(state_ignore_bitmask_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_IGNORE_ALL: {
 			_overrideBitmask.mask.all = *(uint8_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_IGNORE_LOCATION: {
 			_overrideBitmask.mask.location = *(uint8_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
+			break;
+		}
+		case STATE_ERROR_DIMMER_ON_FAILURE: {
+			_errorState.errors.dimmerOn = *(uint8_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
+			break;
+		}
+		case STATE_ERROR_DIMMER_OFF_FAILURE: {
+			_errorState.errors.dimmerOff = *(uint8_t*)target;
+			publishUpdate(type, (uint8_t*)target, size);
 			break;
 		}
 		case STATE_ACCUMULATED_ENERGY: {
@@ -424,7 +453,6 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 			return ERR_STATE_NOT_FOUND;
 		}
 
-		publishUpdate(type, (uint8_t*)target, size);
 		return ERR_SUCCESS;
 	}
 

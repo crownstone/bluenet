@@ -556,7 +556,9 @@ Bit | Name |  Description
 1 | Overcurrent dimmer | If this is 1, overcurrent for the dimmer was detected.
 2 | Chip temperature | If this is 1, the chip temperature is too high.
 3 | Dimmer temperature | If this is 1, the dimmer temperature is too high.
-4-31 | Reserved | Reserved for future use.
+4 | Dimmer on failure | If this is 1, the dimmer is broken, in an always (partial) on state.
+5 | Dimmer off failure | If this is 1, the dimmer is broken, in an always (partial) off state.
+6-31 | Reserved | Reserved for future use.
 
 
 ### <a name="power_samples_packet"></a>Power samples packet

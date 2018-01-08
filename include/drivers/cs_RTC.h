@@ -80,7 +80,7 @@ public:
 	}
 
 	/** Return time in ticks, given time in ms
-	 * Make sure time in ms is not too large! (limit is about 120,000 ms with current frequency)
+	 * Make sure time in ms is not too large! (limit is 512,000 ms with current frequency)
 	 */
 	inline static uint32_t msToTicks(uint32_t ms) {
 #if NRF51_USE_SOFTDEVICE==1

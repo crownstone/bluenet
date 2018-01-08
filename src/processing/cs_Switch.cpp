@@ -25,6 +25,8 @@
 
 Switch::Switch():
 //	_nextRelayVal(SWITCH_NEXT_RELAY_VAL_NONE),
+	_pwmPowered(false),
+	_relayPowered(false),
 	_hasRelay(false),
 	_pinRelayOn(0),
 	_pinRelayOff(0),
@@ -79,7 +81,7 @@ void Switch::init(const boards_config_t& board) {
 		nrf_gpio_pin_clear(_pinRelayOn);
 	}
 
-	//! Retrieve last switch state from persistent storage
+	// Retrieve last switch state from persistent storage
 	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t));
 //	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
 
@@ -90,8 +92,34 @@ void Switch::init(const boards_config_t& board) {
 
 
 void Switch::start() {
+	_relayPowered = true;
+//	// Restore the pwm state. Use _setPwm(), so that we don't write to persistent storage again.
+//	_setPwm(_switchValue.pwm_state);
+
+	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
+	if (_switchValue.pwm_state != 0) {
+		_setPwm(0);
+		relayOn();
+	}
+	else {
+		// Make sure the relay is in the stored position (no need to store)
+		if (_switchValue.relay_state == 1) {
+			_relayOn();
+		}
+		else {
+			_relayOff();
+		}
+	}
+}
+
+void Switch::startPwm() {
+	if (_pwmPowered) {
+		return;
+	}
+	_pwmPowered = true;
 	PWM::getInstance().start(true);
-	// Restore the pwm state. Use _setPwm(), so that we don't write to persistent storage again.
+
+	// Restore the pwm state.
 	_setPwm(_switchValue.pwm_state);
 }
 
@@ -180,7 +208,7 @@ void Switch::pwmOff() {
 
 
 void Switch::pwmOn() {
-	setPwm(255);
+	setPwm(SWITCH_ON);
 }
 
 
@@ -225,9 +253,18 @@ void Switch::setSwitch(uint8_t switchState) {
 	switch_state_t oldVal = _switchValue;
 
 	switch (_hardwareBoard) {
-		case PCA10040:
-		case ACR01B2C:
-		case ACR01B1D: {
+		case ACR01B1A: {
+			// Always use the relay
+			if (switchState) {
+				_relayOn();
+			}
+			else {
+				_relayOff();
+			}
+			_setPwm(0);
+			break;
+		}
+		default: {
 			// First pwm on, then relay off!
 			// Otherwise, if you go from 100 to 90, the power first turns off, then to 90.
 			// TODO: why not first relay on, then pwm off, when going from 90 to 100?
@@ -247,16 +284,6 @@ void Switch::setSwitch(uint8_t switchState) {
 				_relayOff();
 			}
 			break;
-		}
-		default: {
-			// Always use the relay
-			if (switchState) {
-				_relayOn();
-			}
-			else {
-				_relayOff();
-			}
-			_setPwm(0);
 		}
 	}
 
@@ -420,27 +447,27 @@ void Switch::forceSwitchOff() {
 
 bool Switch::allowPwmOn() {
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 	LOGd("errors=%d", stateErrors.asInt);
-	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp);
+	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
 //	return !(stateErrors.errors.chipTemp || stateErrors.errors.pwmTemp);
 }
 
 bool Switch::allowRelayOff() {
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
-	return !(stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp);
+	return !(stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
 }
 
 bool Switch::allowRelayOn() {
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 	LOGd("errors=%d", stateErrors.asInt);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
-	if (stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp) {
+	if (!allowRelayOff()) {
 		return true;
 	}
 
@@ -462,6 +489,7 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM:
 	case EVT_PWM_TEMP_ABOVE_THRESHOLD:
+	case EVT_DIMMER_ON_FAILURE_DETECTED:
 		// First set relay on, so that the switch doesn't first turn off, and late on again.
 		// The relay protects the dimmer, because the current will flow through the relay.
 		forceRelayOn();

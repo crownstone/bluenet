@@ -124,21 +124,21 @@
 
 
 
-#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 //! Number of voltage and current samples per burst
+#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 // Number of voltage and current samples per burst
 
 #define CS_ADC_SAMPLE_INTERVAL_US                200
 //#define CS_ADC_SAMPLE_INTERVAL_US                400
 
 #define CS_ADC_MAX_PINS                          2
-#define CS_ADC_NUM_BUFFERS                       2 //! ADC code is currently written for (max) 2
+#define CS_ADC_NUM_BUFFERS                       2 // ADC code is currently written for (max) 2
 #define CS_ADC_BUF_SIZE                          (2*20000/CS_ADC_SAMPLE_INTERVAL_US)
 //#define CS_ADC_BUF_SIZE                          (2*30000/CS_ADC_SAMPLE_INTERVAL_US)
 
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 
 #define FACTORY_RESET_CODE                       0xdeadbeef
-#define FACTORY_RESET_TIMEOUT                    60000 //! Timeout before recovery becomes unavailable after reset (ms)
-#define FACTORY_PROCESS_TIMEOUT                  200 //! Timeout before recovery process step is executed (ms)
+#define FACTORY_RESET_TIMEOUT                    60000 // Timeout before recovery becomes unavailable after reset (ms)
+#define FACTORY_PROCESS_TIMEOUT                  200 // Timeout before recovery process step is executed (ms)
 
 #define ENCYRPTION_KEY_LENGTH                    SOC_ECB_KEY_LENGTH //! 16 byte length
 
@@ -169,11 +169,13 @@
 #define CURRENT_USAGE_THRESHOLD                  (16000) // Power usage threshold in mA at which the switch should be turned off.
 #define CURRENT_USAGE_THRESHOLD_PWM              (1000)  // Power usage threshold in mA at which the PWM should be turned off.
 
-#define PWM_PERIOD                               10000L //! Interval in us: 1/10000e-6 = 100 Hz
+#define PWM_PERIOD                               10000L // Interval in us: 1/10000e-6 = 100 Hz
 
 #define KEEP_ALIVE_INTERVAL                      (2 * 60) // 2 minutes, in seconds
 
-#define SWITCH_DELAYED_STORE_MS                  10000 // in ms
+#define SWITCH_DELAYED_STORE_MS                  10000 // Timeout before storing the pwm switch value is stored.
+
+#define PWM_BOOT_DELAY_MS                        60000 // Delay after boot until pwm can be used. Has to be smaller than overflow time of RTC.
 
 // Stack config values
 // See: https://devzone.nordicsemi.com/question/60/what-is-connection-parameters/

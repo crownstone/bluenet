@@ -637,12 +637,12 @@ ERR_CODE CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const uint16_
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	state_errors_t* payload = (state_errors_t*) buffer;
-	state_errors_t state_errors;
-	State::getInstance().get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
-	LOGd("old errors %u - reset %u", state_errors, *payload);
-	state_errors.asInt &= ~(payload->asInt);
-	LOGd("new errors %u", state_errors);
-	State::getInstance().set(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
+	state_errors_t stateErrors;
+	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
+	LOGd("old errors %u - reset %u", stateErrors.asInt, *payload);
+	stateErrors.asInt &= ~(payload->asInt);
+	LOGd("new errors %u", stateErrors.asInt);
+	State::getInstance().set(STATE_ERRORS, stateErrors.asInt);
 	return ERR_SUCCESS;
 }
 

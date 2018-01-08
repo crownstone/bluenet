@@ -253,6 +253,7 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 		if (!_sendingSamples) {
 			copyBufferToPowerSamples(power);
 		}
+		// TODO: use State.set() for this.
 		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt)); 
 	}
 
@@ -604,7 +605,7 @@ void PowerSampling::calculatePower(power_t power) {
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
 	//! Get the current state errors
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors, sizeof(state_errors_t));
+	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 
 	// Check if the filtered Irms is above threshold.
 	if ((currentRmsFilteredMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {
@@ -634,6 +635,12 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
 			// Set overcurrent error.
 			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, (uint8_t)1);
+		}
+		else if (switchState.relay_state == 0) {
+			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
+			LOGe("IGBT failure detected");
+			EventDispatcher::getInstance().dispatch(EVT_DIMMER_ON_FAILURE_DETECTED);
+			State::getInstance().set(STATE_ERROR_DIMMER_ON_FAILURE, (uint8_t)1);
 		}
 	}
 }

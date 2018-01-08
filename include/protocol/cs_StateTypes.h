@@ -32,6 +32,8 @@ enum StateTypes {
 	STATE_IGNORE_BITMASK,                 // 0x90 - 144
 	STATE_IGNORE_ALL,                     // 0x91 - 145
 	STATE_IGNORE_LOCATION,                // 0x92 - 146
+	STATE_ERROR_DIMMER_ON_FAILURE,        // 0x93 - 147
+	STATE_ERROR_DIMMER_OFF_FAILURE,       // 0x94 - 148
 
 	STATE_TYPES
 }; // Current max is 255 (0xFF), see cs_EventTypes.h
