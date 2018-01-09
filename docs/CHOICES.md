@@ -314,39 +314,6 @@ Currently: 2 bytes in units of seconds. (2**15 / (3600) = 9 hour time drift befo
 
 Better: ??
 
-```swift
-// From iOS lib:
-func reconstructTimestamp(currentTimestamp: Double, LsbTimestamp : UInt16) -> Double {
-    // attempt restoration
-    var restoredTimestamp = _obtainTimestamp(fullTimeStamp : currentTimestamp, lsb: LsbTimestamp)
-    
-    let halfUInt16 : Double = 0x7FFF // roughly 9 hours in seconds
-    
-    // correct for overflows, check for drift from current time
-    if (currentTimestamp - restoredTimestamp < -halfUInt16) {
-        restoredTimestamp = _obtainTimestamp(fullTimeStamp: currentTimestamp - 0xFFFF, lsb: LsbTimestamp)
-    }
-    else if (currentTimestamp - restoredTimestamp > halfUInt16) {
-        restoredTimestamp = _obtainTimestamp(fullTimeStamp: currentTimestamp + 0xFFFF, lsb: LsbTimestamp)
-    }
-    
-    return restoredTimestamp
-}
-
-
-func _obtainTimestamp(fullTimeStamp : Double, lsb : UInt16) -> Double {
-    let timestamp : UInt32 = NSNumber(value: fullTimeStamp).uint32Value // cast to uint32 from double
-    let timestampArray = Conversion.uint32_to_uint8_array(timestamp)    // make into bytes
-    let LSB_timestampArray = Conversion.uint16_to_uint8_array(lsb)      // make lsb into bytes
-    
-    // assemble
-    let restoredTimestamp = Conversion.uint8_array_to_uint32([LSB_timestampArray[0],LSB_timestampArray[1],timestampArray[2],timestampArray[3]])
-    
-    // cast to double
-    return NSNumber(value: restoredTimestamp).doubleValue
-}
-```
-
 ### Compressed timestamp
 
 Should be able to represent an absolute time for the last switch time etc.
