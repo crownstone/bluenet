@@ -1164,9 +1164,9 @@ uint 8 | Payload | Length | see [State Packet](#state_packet)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Number of results | 1 | Number of scan results in the list
-uint 8 | Reserved | 1 | Reserved for future use
-[Scan Result item](#scan_result_item) [] | List | N | A list of scanned devices with the ID of the crownstone that scanned the device
+uint 8 | Number of results | 1 | Number of scan results in the list.
+uint 8 | Reserved | 3 | Reserved for future use.
+[Scan Result item](#scan_result_item) [] | List | N | A list of scanned devices with the ID of the crownstone that scanned the device.
 
 
 <a name="mesh_scan_result_item"></a>
@@ -1174,9 +1174,9 @@ uint 8 | Reserved | 1 | Reserved for future use
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Crownstone ID | 1 | The identifier of the Crownstone which scanned the device
-uint 8 [6] | Scanned device address | 6 | The MAC address of the scanned device
-int 8 | RSSI | 1 | The averaged RSSI value of the scanned device
+uint 8 | Crownstone ID | 1 | The identifier of the Crownstone which scanned the device.
+uint 8 [6] | Scanned device address | 6 | The MAC address of the scanned device.
+int 8 | RSSI | 1 | The averaged RSSI value of the scanned device.
 
 
 <a name="multi_switch_mesh_packet"></a>
