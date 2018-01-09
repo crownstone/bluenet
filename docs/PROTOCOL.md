@@ -1,4 +1,4 @@
-# Bluenet protocol v0.12.0
+# Bluenet protocol v0.13.0
 -------------------------
 
 # Index
@@ -10,8 +10,8 @@
 - [Data structures](#data_structs). The data structures used for the characteristics, advertisements, and mesh.
 
 
-
-# <a name="setup"></a>Setup mode
+<a name="setup"></a>
+# Setup mode
 When a Crownstone is new or factory reset, it will go into setup mode.
 
 Setup mode turns down the power of the antenna (low TX) so you can only communicate with it when you're close by. The purpose of this mode
@@ -36,8 +36,8 @@ The values are only valid for this connection session. The session key and the s
 - Phone commands Crownstone [to leave setup mode](#validate_setup)
 
 
-
-# <a name="encryption"></a>Encryption
+<a name="encryption"></a>
+# Encryption
 By default, Crownstones have encryption enabled as a security and privacy measure.
 
 ### Using encryption after setup (normal mode)
@@ -48,7 +48,8 @@ When encryption is enabled the following changes:
 - Values that are **read from** the characteristics will be encrypted
 - Values that are **written to** the characteristics will have to be encrypted
 
-#### <a name="session_nonce"></a>Session nonce
+<a name="session_nonce"></a>
+#### Session nonce
 
 After connecting, you first have to read the session nonce from the [Crownstone service](#crownstone_service). The session nonce is [ECB encrypted](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) with the guest key. After decryption, you should verify whether you have read and decrypted succesfully by checking if the validation key in the [data](#encrypted_session_nonce) is equal to **0xCAFEBABE**. If so, you now have the correct session nonce.
 
@@ -57,7 +58,8 @@ The session nonce has two purposes:
 - Encryption: the whole 5 bytes are used for the nonce, which is used for CTR encryption. The first 3 bytes of the nonce are the packet nonce (which should be randomly generated each time you write to a characteristic), the last 5 are the session nonce.
 The session nonce and validation key are only valid during the connection.
 
-##### <a name="encrypted_session_nonce"></a>Session nonce after ECB decryption
+<a name="encrypted_session_nonce"></a>
+##### Session nonce after ECB decryption
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 32 | Validation key | 4 | 0xCAFEBABE as validation.
@@ -65,11 +67,13 @@ byte array | Session nonce | 5 | The session nonce for this session.
 byte array | Padding | 7 | Zero-padding so that the whole packet is 16 bytes.
 
 
-### <a name="encrypted_write_read"></a>Reading and writing characteristics
+<a name="encrypted_write_read"></a>
+### Reading and writing characteristics
 
 We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29) method to encrypt everything that is written to- and read from characteristics. For this you need an 8 byte number called a **nonce**. The first 3 bytes of the nonce are sent with each packet, we call this the packet nonce. When writing to a characteristic, you should generate a new random packet nonce each time. The last 5 bytes of the nonce are called the session nonce, which should be read after connecting. When reading a characteristic, you should check if the (decrypted) validation key is equal to the validation key that was read [after connecting](#session_nonce).
 
-##### <a name="encrypted_packet"></a>Encrypted Packet
+<a name="encrypted_packet"></a>
+##### Encrypted Packet
 
 ![Encrypted packet](../docs/diagrams/encrypted-packet.png)
 
@@ -79,7 +83,8 @@ byte array | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of
 uint 8 | User level | 1 | 0: Admin, 1: Member, 2: Guest, 100: Setup
 [Encrypted Payload](#encrypted_payload) | Encrypted Payload | N*16 | The encrypted payload of N blocks.
 
-##### <a name="encrypted_payload"></a>Encrypted payload
+<a name="encrypted_payload"></a>
+##### Encrypted payload
 
 ![Encrypted payload](../docs/diagrams/encrypted-payload.png)
 
@@ -90,12 +95,12 @@ byte array | Payload |  | Whatever data would have been sent if encryption was d
 byte array | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes.
 
 
-
-# <a name="advertisement_data"></a>Advertisements and scan response
+<a name="advertisement_data"></a>
+# Advertisements and scan response
 When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
 
-
-### <a name="ibeacon_packet"></a>iBeacon advertisement packet
+<a name="ibeacon_packet"></a>
+### iBeacon advertisement packet
 This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
 
 ![Advertisement packet](../docs/diagrams/adv-packet.png)
@@ -115,15 +120,15 @@ uint 16 | Major | 2 |
 uint 16 | Minor | 2 |
 int 8 | TX Power | 1 | Received signal strength at 1 meter.
 
-
-### <a name="scan_response_packet"></a>Scan response packet
+<a name="scan_response_packet"></a>
+### Scan response packet
 The packet that is sent when a BLE central scans.
 
 ![Scan Response packet](../docs/diagrams/scan-response-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | AD Length | 1 | Length of the Name AD Structure (0x0A)
+uint 8 | AD Length | 1 | Length of the Name AD Structure
 uint 8 | AD Type | 1 | Shortened Local Name (0x08)
 char [] | Name Bytes | 8 | The shortened name of this device.
 uint 8 | AD Length | 1 | Length of the Service Data AD Structure (0x13)
@@ -132,24 +137,27 @@ uint 16 | Service UUID | 2 | Service UUID
 [Service data](#scan_response_servicedata_packet) | Service Data | 17 | Service data, state info.
 
 
-### <a name="scan_response_servicedata_packet"></a>Scan response service data packet
+<a name="scan_response_servicedata_packet"></a>
+### Scan response service data packet
 This packet contains the state info. If encryption is enabled, the last 16 bytes will be encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
 You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
 
-![Scan Response ServiceData](../docs/diagrams/scan-response-service-data.png)
+![Scan response service data](../docs/diagrams/scan-response-service-data.png)
 
-The Protocol version determines how to parse the remaining 16 bytes.
+The type determines how to parse the remaining 16 bytes.
 
-Version | Packet
+Type | Packet
 --- | ---
-1 | [Version 1](#encrypted_servicedata_v1_packet), initial version.
-2 | [Version 2](#encrypted_servicedata_v2_packet), with power factor.
+1 | [Deprecated](#encrypted_servicedata_v1_packet), encrypted data.
+3 | [Encrypted data](#servicedata_encrypted_packet). Advertised when in normal mode.
+4 | [Setup data](#servicedata_setup_packet). Advertised when in setup mode.
 
-### <a name="encrypted_servicedata_v1_packet"></a>Encrypted service data packet v1
+<a name="encrypted_servicedata_v1_packet"></a>
+### Deprecated encrypted service data packet
 This packet contains the state info. If encryption is enabled, it's encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
 You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
 
-![Scan Response ServiceData](../docs/diagrams/service-data-encrypted-v1.png)
+![Deprecated service data](../docs/diagrams/service-data-encrypted-v1.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -161,51 +169,164 @@ int 32 | Power usage | 4 | The power usage at this moment (mW). Divide by 1000 t
 int 32 | Accumulated energy | 4 | The accumulated energy (Wh).
 uint 8[] | Rand | 3 | Random bytes.
 
-
-### <a name="encrypted_servicedata_v2_packet"></a>Encrypted service data packet v2
-This packet contains the state info. If encryption is enabled, it's encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
-You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
-
-![Scan Response ServiceData](../docs/diagrams/service-data-encrypted-v2.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | Crownstone ID | 2 | ID that identifies this Crownstone.
-uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
-uint 8 | [Event bitmask](#event_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
-int 8 | Temperature | 1 | Chip temperature (°C).
-int 16 | Power factor | 2 | The power factor at this moment. Divide by 1024 to get the actual power factor.
-uint 16 | Power usage | 2 | The apparent usage at this moment. Divide by 16 to get power usage in VA. Multiply with power factor to get real power usage in Watt.
-int 32 | Energy used | 4 | The total energy used. Divide by 64 to get the energy used in Joule.
-uint 8[] | Rand | 3 | Random bytes.
-
-
-#### <a name="event_bitmask"></a>Event Bitmask
+<a name="event_bitmask"></a>
+#### Event Bitmask
 
 Bit | Name |  Description
 --- | --- | ---
 0 | New data available | If you request something from the Crownstone and the result is available, this will be 1.
 1 | Showing external data |  If this is 1, the shown ID and data is from another Crownstone.
 2 | Error |  If this is 1, the Crownstone has an error, you should check what error it is by reading the [error state](#state_packet).
-3 | Reserved  |  Reserved for future use.
-4 | Reserved |  Reserved for future use.
-5 | Reserved  |  Reserved for future use.
+3 | Reserved  |  Reserved for future use (switch locked).
+4 | Reserved |  Reserved for future use (marked as dimmable).
+5 | Reserved  |  Reserved for future use (not dimmable yet).
 6 | Reserved |  Reserved for future use.
 7 | Setup mode active |  If this is 1, the Crownstone is in setup mode.
 
-#### <a name="switch_state_packet"></a>Switch State Packet
+<a name="servicedata_encrypted_packet"></a>
+### Encrypted service data
+This packet contains the state info. If encryption is enabled, it's encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
+You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
 
-To be able to distinguish between switching with relay and switching with PWM, the switch state is a bit struct with
-the following layout
+![Encrypted service data](../docs/diagrams/service-data-encrypted.png)
+
+The following types are available:
+
+Type | Packet
+--- | ---
+0 | [State](#service_data_encrypted_state).
+1 | [Error](#service_data_encrypted_error).
+2 | [External state](#service_data_encrypted_ext_state).
+3 | [External error](#service_data_encrypted_ext_error).
+
+
+<a name="switch_state_packet"></a>
+#### Switch state
+To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
 
 ![Switch State Packet](../docs/diagrams/switch_state_packet.png)
 
 Bit 7 is used for the relay flag, where 0 = OFF, 1 = ON.
 Bits 6-0 are used for PWM, where 100 is fully ON, 0 is OFF, dimmed in between.
 
+<a name="flags_bitmask"></a>
+#### Flags bitmask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Dimming available | When dimming is physically available, this will be 1.
+1 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
+2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#service_data_encrypted_error), or by reading the [error state](#state_packet).
+3 | Switch locked | When the switch state is locked, this will be 1.
+4 | Reserved | Reserved for future use.
+5 | Reserved | Reserved for future use.
+6 | Reserved | Reserved for future use.
+7 | Reserved | Reserved for future use.
+
+<a name="service_data_encrypted_state"></a>
+#### State packet
+
+The following type gives the latest state of the Crownstone.
+
+![Encrypted service data state](../docs/diagrams/service-data-encrypted-state.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+int 8 | Temperature | 1 | Chip temperature (°C).
+int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
+int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
+uint 16 | Validation | 2 | Value is always `0xFACE`. Can be used to help validating that the decryption was successful.
+
+<a name="service_data_encrypted_error"></a>
+#### Error packet
+
+The following type only gets advertised in case there is an error. It will be interleaved with the state type.
+
+![Encrypted service data error](../docs/diagrams/service-data-encrypted-error.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
+uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
+uint 32 | Timestamp | 4 | The timestamp when the first error occured.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+int 8 | Temperature | 1 | Chip temperature (°C).
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
+
+<a name="service_data_encrypted_ext_state"></a>
+#### External state packet
+
+The following type sends out the last known state of another Crownstone. It will be interleaved with the state type (unless there's an error).
+
+![Encrypted service data external state](../docs/diagrams/service-data-encrypted-ext-state.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+int 8 | Temperature | 1 | Chip temperature (°C).
+int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
+int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
+uint 8 | Reserved | 2 | Reserved for future use.
+
+<a name="service_data_encrypted_ext_error"></a>
+#### External error packet
+
+The following type sends out the last known error of another Crownstone. It will be interleaved with the state type (unless there's an error).
+
+![Encrypted service data external error](../docs/diagrams/service-data-encrypted-ext-error.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
+uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
+uint 32 | Timestamp | 4 | The timestamp when the first error occured.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+int 8 | Temperature | 1 | Chip temperature (°C).
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
+uint 8 | Reserved | 2 | Reserved for future use.
 
 
-# <a name="services"></a>Services
+<a name="servicedata_setup_packet"></a>
+### Setup service data
+This packet contains the state info, it is unencrypted.
+
+![Setup service data](../docs/diagrams/service-data-setup.png)
+
+Type | Packet
+--- | ---
+0 | State.
+
+<a name="service_data_setup_state"></a>
+#### Setup state packet
+
+![Setup service data state](../docs/diagrams/service-data-setup-state.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+int 8 | Temperature | 1 | Chip temperature (°C).
+int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
+uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
+uint 8 | Counter | 1 | Simply counts up and overflows.
+uint 8 | Reserved | 4 | Reserved for future use.
+
+
+
+
+<a name="services"></a>
+# Services
 When connected, the following services are available.
 
 The AUG columns indicate which users can use these characteristics if encryption is enabled. The access can be further restricted per packet. Dots (..)  indicate  encryption is not enabled for that characteristic.
@@ -224,7 +345,8 @@ The following services are available (depending on state and config):
 - [Mesh service](#mesh_service). Contains direct mesh control, and mesh configuration.
 
 
-## <a name="crownstone_service"></a>Crownstone service
+<a name="crownstone_service"></a>
+## Crownstone service
 
 The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following characteristics:
 
@@ -240,12 +362,14 @@ Session nonce  | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the [s
 Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
 
 
-#### <a name="recovery"></a>Recovery
+<a name="recovery"></a>
+#### Recovery
 If you lose your encryption keys you can use this characteristic to factory reset the Crownstone.
 This method is only available for 20 seconds after the Crownstone powers on.
 You need to write **0xDEADBEEF** to it. After this, the Crownstone disconnects and goes into Low TX mode so you'll have to be close to continue the factory reset. After this, you reconnect and write **0xDEADBEEF** again to this characteristic to factory reset the Crownstone.
 
-#### <a name="return_values"></a>Return values
+<a name="return_values"></a>
+#### Return values
 The control characteristics (Control, Mesh Control, Config Control and State Control) of the Crownstone service return a uint16 code on execution of the command.
 The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command
 was received before calling the next (either by polling or subscribing). The possible values of the return values are listed in the table below
@@ -271,7 +395,8 @@ Value | Name | Description
 1025 | STATE_WRITE_DISABLED | writing to state disabled
 
 
-## <a name="setup_service"></a>Setup service
+<a name="setup_service"></a>
+## Setup service
 
 The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only available after a factory reset or when you first power on the Crownstone.
  When encryption is enabled, the control and both config characteristics are encrypted with AES CTR. The key and session Nonce for this are gotten from their
@@ -290,7 +415,8 @@ Session nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the se
 The control characteristics (Control, and Config Control) of the Setup Service return a uint 16 code on execution of the command. The code determines success or failure of the command. If commands have to be executed sequentially, make sure that the return value of the previous command was received before calling the next (either by polling or subscribing). The possible values are the same as for the Crownstone Service, see above.
 
 
-## <a name="general_service"></a>General service
+<a name="general_service"></a>
+## General service
 
 The general service has UUID 24f20000-7d10-4805-bfc1-7663a01c3bff.
 
@@ -300,7 +426,8 @@ Temperature    | 24f20001-7d10-4805-bfc1-7663a01c3bff | int 32 | Chip temperatur
 Reset          | 24f20002-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 1 to reset. Write 66 to go to DFU mode. | x
 
 
-## <a name="power_service"></a>Power service
+<a name="power_service"></a>
+## Power service
 
 The power service has UUID 24f30000-7d10-4805-bfc1-7663a01c3bff. **Should be encrypted but it is not at the moment due to implementation.**
 
@@ -312,7 +439,8 @@ Power samples      | 24f30003-7d10-4805-bfc1-7663a01c3bff | [Power Samples](#pow
 Power consumption  | 24f30004-7d10-4805-bfc1-7663a01c3bff | uint 16 | The current power consumption. | x
 
 
-## <a name="localization_service"></a>Indoor localization service
+<a name="localization_service"></a>
+## Indoor localization service
 
 The localization service has UUID 24f40000-7d10-4805-bfc1-7663a01c3bff.
 
@@ -325,7 +453,8 @@ Scanned devices         | 24f40004-7d10-4805-bfc1-7663a01c3bff | [Scan result li
 RSSI                    | 24f40005-7d10-4805-bfc1-7663a01c3bff | uint 8 | RSSI to connected device. Notifications are available. | x
 
 
-## <a name="schedule_service"></a>Schedule service
+<a name="schedule_service"></a>
+## Schedule service
 
 The schedule service has UUID 24f50000-7d10-4805-bfc1-7663a01c3bff.
 
@@ -336,7 +465,8 @@ Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule command](#sch
 Schedule read   | 24f50003-7d10-4805-bfc1-7663a01c3bff | [Schedule list](#schedule_list_packet) | Get a list of all schedule entries. | x
 
 
-## <a name="mesh_service"></a>Mesh Service
+<a name="mesh_service"></a>
+## Mesh Service
 
 The mesh service comes with [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh) and has UUID 0000fee4-0000-1000-8000-00805f9b34fb
 
@@ -347,7 +477,9 @@ Value       | 2a1e0005-fd51-d882-8ba8-b98c0000cd1e | | Characteristic where the 
 
 
 
-# <a name="data_structs"></a>Data structures
+
+<a name="data_structs"></a>
+# Data structures
 
 Index:
 
@@ -358,7 +490,9 @@ Index:
     - [Scans](#scan_result_list_packet). Packets of devices scanned by the crownstone.
 - [Mesh](#mesh_message_packet). Packets sent over the mesh.
 
-### <a name="control_packet"></a>Control packet
+
+<a name="control_packet"></a>
+### Control packet
 
 ![Control packet](../docs/diagrams/control-packet.png)
 
@@ -415,14 +549,16 @@ Type nr | Type name | Payload type | Payload Description | A | M | G | S
 28 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 
 
-#### <a name="cmd_enable_scanner_payload"></a>Enable Scanner payload
+<a name="cmd_enable_scanner_payload"></a>
+#### Enable Scanner payload
 
 Type | Name | Description
 --- | --- | ---
 uint 8 | enable | 0 = OFF, other = ON
 uint 16 | delay | Start scanner with delay in ms, (required, but not used when stopping the scanner).
 
-#### <a name="cmd_keep_alive_payload"></a>Keep alive payload
+<a name="cmd_keep_alive_payload"></a>
+#### Keep alive payload
 
 Type | Name | Description
 --- | --- | ---
@@ -430,7 +566,8 @@ uint 8 | Action | Action, 0 = No Change, 1 = Change
 uint 8 | Switch | Switch power, 0 = OFF, 100 = FULL ON
 uint 16 | Timeout | Timeout in seconds after which the Switch should be adjusted to the Switch value
 
-### <a name="config_packet"></a>Configuration packet
+<a name="config_packet"></a>
+### Configuration packet
 
 ![Configuration packet](../docs/diagrams/config-packet.png)
 
@@ -512,7 +649,8 @@ OpCode | Name | Description
 Note: On the Config Read Characteristic, the OpCode is set to Read (0), and the length and payload will have actual data depending on the type.
 
 
-### <a name="state_packet"></a>State packet
+<a name="state_packet"></a>
+### State packet
 
 ![State packet](../docs/diagrams/state-packet.png)
 
@@ -548,7 +686,9 @@ OpCode | Name | Description
 
 Note: On the State Read Characteristic, the OpCode is also set to distinguish between a one time read, and a continuous notification. In return, the length and payload will have actual data depending on the type.
 
-#### <a name="state_error_bitmask"></a>Error Bitmask
+
+<a name="state_error_bitmask"></a>
+#### Error Bitmask
 
 Bit | Name |  Description
 --- | --- | ---
@@ -561,7 +701,8 @@ Bit | Name |  Description
 6-31 | Reserved | Reserved for future use.
 
 
-### <a name="power_samples_packet"></a>Power samples packet
+<a name="power_samples_packet"></a>
+### Power samples packet
 
 ![Power samples packet](../docs/diagrams/power-samples-packet.png)
 
@@ -581,25 +722,8 @@ uint 32   | lastVoltageTimeStamp  | 4                      | Timestamp of last v
 int 8 []  | voltageTimeDiffs      | numVoltageTimeStamps-1 | Array of differences with previous timestamp.
 
 
-### <a name="power_curve_packet"></a>Power curve packet, deprecated
-
-![Power curve packet](../docs/diagrams/power-curve-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | numSamples     | 2              | Number of current samples + voltage samples, including the first samples.
-uint 16 | firstCurrent   | 2              | First current sample.
-uint 16 | lastCurrent    | 2              | Last current sample.
-uint 16 | firstVoltage   | 2              | First voltage sample.
-uint 16 | lastVoltage    | 2              | Last voltage sample.
-uint 32 | firstTimeStamp | 4              | Timestamp of first current sample.
-uint 32 | lastTimeStamp  | 4              | Timestamp of last sample.
-int 8 []| currentDiffs   | numSamples/2-1 | Array of differences with previous current sample.
-int 8 []| voltageDiffs   | numSamples/2-1 | Array of differences with previous voltage sample.
-int 8 []| timeDiffs      | numSamples-1   | Array of differences with previous timestamp.
-
-
-### <a name="scan_result_packet"></a>Scan result packet
+<a name="scan_result_packet"></a>
+### Scan result packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -608,7 +732,8 @@ int 8 | RSSI | 1 | Average RSSI to the scanned device.
 uint 16 | Occurrences | 2 | Number of times the devices was scanned.
 
 
-### <a name="scan_result_list_packet"></a>Scan result list packet
+<a name="scan_result_list_packet"></a>
+### Scan result list packet
 
 ![Scan result list packet](../docs/diagrams/scan-result-list-packet.png)
 
@@ -618,7 +743,8 @@ uint 8 | size | 1 | Number of scanned devices in the list.
 [Scan result](#scan_result_packet) | size * 9 | Array of scan result packets.
 
 
-### <a name="tracked_device_packet"></a>Tracked device packet
+<a name="tracked_device_packet"></a>
+### Tracked device packet
 
 ![Tracked device packet](../docs/diagrams/tracked-device-packet.png)
 
@@ -628,7 +754,8 @@ uint 8 [] | Address | 6 | Bluetooth address of the tracked device.
 int 8 | RSSI threshold | 1 | If the RSSI to this device is above the threshold, then switch on the power.
 
 
-### <a name="tracked_device_list_packet"></a>Tracked device list packet
+<a name="tracked_device_list_packet"></a>
+### Tracked device list packet
 
 ![Tracked device list packet](../docs/diagrams/tracked-device-list-packet.png)
 
@@ -639,20 +766,23 @@ uint 8 | size | 1 | Number of tracked devices in the list.
 uint 16 [] | Counters | size * 2 | Counter that keeps up how long ago the RSSI of a device was above the threshold (for internal use).
 
 
-### <a name="schedule_list_packet"></a>Schedule list packet
+<a name="schedule_list_packet"></a>
+### Schedule list packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Size | 1 | Number of entries in the list.
 [schedule entry](#schedule_entry_packet) | Entries | size * 12 | Schedule entry list. Entries with timestamp=0 can be considered empty.
 
-### <a name="schedule_command_packet"></a>Schedule command packet
+<a name="schedule_command_packet"></a>
+### Schedule command packet
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | index | 1 | Index of the entry (corresponds to the Nth entry in the list).
 [schedule entry](#schedule_entry_packet) | Entry | 12 | Schedule entry.
 
-### <a name="schedule_entry_packet"></a>Schedule entry packet
+<a name="schedule_entry_packet"></a>
+### Schedule entry packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -663,7 +793,8 @@ uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers. S
 [schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
 [schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
 
-### <a name="schedule_override_mask"></a>Schedule override mask
+<a name="schedule_override_mask"></a>
+### Schedule override mask
 
 Bit | Name |  Description
 --- | --- | ---
@@ -671,7 +802,9 @@ Bit | Name |  Description
 1 | Location | Ignore any switch command that comes from location updates (enter/exit room/sphere). ** Not implemented yet. **
 2-7 | Reserved | Reserved for future use.
 
-### <a name="schedule_repeat_packet"></a>Schedule repeat packet
+
+<a name="schedule_repeat_packet"></a>
+### Schedule repeat packet
 
 #### Repeat type 0
 Perform action every X minutes.
@@ -696,7 +829,8 @@ Type | Name | Length | Description
 uint 8 | Reserved | 2 | Reserved for future use.
 
 
-### <a name="schedule_action_packet"></a>Schedule action packet
+<a name="schedule_action_packet"></a>
+### Schedule action packet
 
 #### Action type 0
 Set power switch to a given value.
@@ -724,7 +858,8 @@ uint 8 | Reserved | 3 | Reserved for future use.
 
 
 
-### <a name="mesh_message_packet"></a>Mesh message
+<a name="mesh_message_packet"></a>
+### Mesh message
 This packet is a slightly modified version of the one used in [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh); we simply increased the content size.
 
 ![Mesh packet](../docs/diagrams/openmesh-packet.png)
@@ -744,7 +879,9 @@ uint 16 | Version | 2 | Used internally.
 [Encrypted mesh packet](#encrypted_mesh_packet) | Payload | 104 | The encrypted mesh message.
 uint 8 [] | CRC | 3 | Checksum.
 
-### <a name="encrypted_mesh_packet"></a>Encrypted mesh packet
+
+<a name="encrypted_mesh_packet"></a>
+### Encrypted mesh packet
 
 This packet is sent over the mesh as payload in the mesh message.
 
@@ -756,7 +893,9 @@ uint 32 | Message counter | 4 | The message counter used to identify the message
 uint 32 | Random number | 4 | The random number used for encryption/decryption, is sent itself unencrypted
 [Mesh packet](#mesh-packet) | Encrypted payload | 96 | The encrypted mesh packet.
 
-### <a name="mesh-packet"></a>Mesh packet
+
+<a name="mesh-packet"></a>
+### Mesh packet
 
 This packet is encrypted and sent as payload in the encrypted mesh packet.
 
@@ -767,7 +906,9 @@ Type | Name | Length | Description
 uint 32 | Message counter | 4 | The message counter used to identify the message. Counter values are kept up seperately per handle. Note: This value will be compared after decryption to the message counter of the encrypted mesh message to make sure the message was not tampered with.
 [Mesh payload](#mesh_payload_packet) | Payload | 92 | Payload data
 
-### <a name="mesh_control_packet"></a>Mesh control packet
+
+<a name="mesh_control_packet"></a>
+### Mesh control packet
 
 This packet is sent to the [Mesh control characteristic](#mesh_control_characteristic)
 
@@ -780,7 +921,9 @@ uint 8 | Reserved | 1 | Not used: reserved for alignment.
 uint 16 | Length | 2 | Length of the data.
 [Mesh payload](#mesh_payload_packet) | Payload | 0 - 92 | Payload data, max 92 bytes, but actual length is determined by the handle
 
-### <a name="mesh_payload_packet"></a>Mesh payload packet
+
+<a name="mesh_payload_packet"></a>
+### Mesh payload packet
 
 The mesh payload packet is defined by the handle. We have the following handles
 
@@ -795,7 +938,9 @@ Handle | Name | Type | Description
 7  | Big data channel | - | This channel is for the case when a stone needs to send big data, such as the history of eneregy usage, etc.
 12 | Multi switch channel | [Multi switch](#multi_switch_mesh_packet) | This channel is used to send different switch commands with individual timeouts, switch states and intents to different crownstones in one message
 
-#### <a name="keep_alive_mesh_packet"></a>Keep alive packet
+
+<a name="keep_alive_mesh_packet"></a>
+#### Keep alive packet
 
 ![Keep alive packet](../docs/diagrams/keep-alive-mesh-packet.png)
 
@@ -803,7 +948,9 @@ Type nr | Type name | Payload type | Description
 --- | --- | --- | ---
 1 | [Same timeout](#keep_alive_same_timeout_mesh_packet) | Keep alive same timeout | Keep alive with same timeout for each Crownstone.
 
-#### <a name="keep_alive_same_timeout_mesh_packet"></a>Keep alive same timeout packet
+
+<a name="keep_alive_same_timeout_mesh_packet"></a>
+#### Keep alive same timeout packet
 
 ![Keep alive same timeout packet](../docs/diagrams/keep-alive-same-timeout-mesh-packet.png)
 
@@ -814,14 +961,18 @@ uint 8 | Count | 1 | Number of items in the list.
 uint 8 | Reserved | 1 | Reserved for future use.
 [Keep alive item](#keep_alive_mesh_item) [] | List | N | The keep alive same timeout items.
 
-##### <a name="keep_alive_mesh_item"></a>Keep alive same timeout item
+
+<a name="keep_alive_mesh_item"></a>
+##### Keep alive same timeout item
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Crownstone ID | 2 | The identifier of the crownstone to which this keep alive item is targeted
-[Action + switch state](#action_switch_state_keep_alive) | Action + switch state | 1 | A combined element for action and switch state, which should be executed by the targeted crownstone when the keep alive times out
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this keep alive item is targeted.
+[Action + switch state](#action_switch_state_keep_alive) | Action + switch state | 1 | A combined element for action and switch state, which should be executed by the targeted crownstone when the keep alive times out.
 
-##### <a name="action_switch_state_keep_alive"></a>Action + switch state
+
+<a name="action_switch_state_keep_alive"></a>
+##### Action + switch state
 
 Value | Name
 --- | ---
@@ -829,9 +980,11 @@ Value | Name
 ... | ...
 0-100 | Switch power: 0 = off, 100 = on, dimmed in between.
 
-#### <a name="state_mesh_packet"></a>Crownstone state packet
 
-![Crownstone State packet](../docs/diagrams/state-mesh-packet.png)
+<a name="state_mesh_packet"></a>
+#### Mesh state packet
+
+![Mesh state packet](../docs/diagrams/state-mesh-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -842,18 +995,54 @@ uint 8 | Reserved | 1 | Reserved for future use
 uint 32 | Timestamp | 4 | Posix timestamp at which this message was originally sent (0 for unknown time)
 [Crownstone state item](#state_mesh_item) [] | List | 84 | Circular list with Crownstone state items
 
-##### <a name="state_mesh_item"></a>Crownstone state item
+
+<a name="state_mesh_item"></a>
+##### Mesh state item
+
+![Mesh state item](../docs/diagrams/mesh-state-item.png)
+
+The following types are available:
+
+Type | Packet
+--- | ---
+0 | [State](#mesh_state_item_state).
+1 | [Error](#mesh_state_item_error).
+
+
+<a name="mesh_state_item_state"></a>
+##### Mesh state item state
+
+![Mesh state item state](../docs/diagrams/mesh-state-item-state.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Crownstone ID | 2 | The identifier of the crownstone which has this state
-uint 8 | Switch state | 1 | The current [Switch state](#switch_state_packet) of the crownstone
-uint 8 | Event bitmask | 1 | The current [Event bitmask](#event_bitmask) of the crownstone
-int 16 | Power factor | 2 | The power factor at this moment. Divide by 1024 to get the actual power factor.
-uint 16 | Power usage | 2 | The apparent power usage at this moment. Divide by 16 to get power usage in Watt.
-int 32 | Energy used | 4 | The total energy used. Divide by 64 to get the energy used in Joule.
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+int 8 | Temperature | 1 | Chip temperature (°C).
+int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
+int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
 
-#### <a name="command_mesh_packet"></a>Command packet
+
+<a name="mesh_state_item_error"></a>
+##### Mesh state item error
+
+![Mesh state item error](../docs/diagrams/mesh-state-item-error.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
+uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
+uint 32 | Timestamp | 4 | The timestamp when the first error occured.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+int 8 | Temperature | 1 | Chip temperature (°C).
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
+
+
+<a name="command_mesh_packet"></a>
+#### Command packet
 
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
@@ -862,10 +1051,12 @@ Type | Name | Length | Description
 uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
 uint 8 | [Bitmask](#mesh_command_bitmask) | 1 | Options of command, see table below.
 uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast.
-uint16 [] | List of target IDs | Count * 2 | Crownstone Identifiers of the devices at which this message is aimed, for broadcast, no IDs are provided and the command follows directly after the Number of IDs element.
+uint8 [] | List of target IDs | Count | Crownstone identifiers of the devices at which this message is aimed. For broadcast, no IDs are provided and the command follows directly after the Count element.
 uint 8 | Command payload | N | The command payload data, which depends on the type.
 
-##### <a name="mesh_command_types"></a>Command types
+
+<a name="mesh_command_types"></a>
+##### Command types
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
@@ -875,7 +1066,8 @@ Type nr | Type name | Payload type | Payload description
 3 | State | [State](#state_packet) | Send/Request a state variable, see state packet.
 
 
-##### <a name="mesh_command_bitmask"></a>Command bitmask
+<a name="mesh_command_bitmask"></a>
+##### Command bitmask
 
 Bit | Name |  Description
 --- | --- | ---
@@ -889,7 +1081,8 @@ Bit | Name |  Description
 7 | Reserved |  Reserved for future use.
 
 
-##### <a name="beacon_mesh_data_packet"></a>Beacon config packet
+<a name="beacon_mesh_data_packet"></a>
+##### Beacon config packet
 
 ![Beacon data](../docs/diagrams/beacon-config-command-packet.png)
 
@@ -900,7 +1093,9 @@ uint 16 | Minor | 2 | iBeacon minor number
 uint 8 | Proximity UUID | 16 | iBeacon UUID
 int 8 | TX power | 1 | iBeacon signal strength at 1 meter.
 
-#### <a name="command_reply_mesh_packet"></a>Command reply packet
+
+<a name="command_reply_mesh_packet"></a>
+#### Command reply packet
 
 ![Command Reply packet](../docs/diagrams/command-reply-mesh-packet.png)
 
@@ -912,7 +1107,9 @@ uint 32 | Message counter | 4 | The message number of the command to which this 
 uint 8 | Count | 1 | Number of items in the list.
 uint 8 | List | 85 | List of replies, the format is defined by the type of reply.
 
-##### <a name="mesh_reply_types"></a>Reply types
+
+<a name="mesh_reply_types"></a>
+##### Reply types
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
@@ -920,40 +1117,48 @@ Type nr | Type name | Payload type | Payload description
 1 | Config reply | [Config reply item](#mesh_config_reply) | Return the requested config.
 2 | State reply | [State reply item](#mesh_state_reply) | Return the requested state variable.
 
-###### <a name="mesh_status_reply"></a>Status reply item
+
+<a name="mesh_status_reply"></a>
+###### Status reply item
 
 ![Status reply item](../docs/diagrams/mesh-status-reply-item.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Crownstone ID | 2 | The identifier of the crownstone which sent the status reply
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which sent the status reply.
 uint 16 | Status | 2 | The status code of the reply, see [Return Values](#return_values)
 
-###### <a name="mesh_config_reply"></a>Config reply item
+
+<a name="mesh_config_reply"></a>
+###### Config reply item
 
 ![Config reply item](../docs/diagrams/mesh-config-reply-item.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Crownstone ID | 2 | The identifier of the crownstone which sent the status reply
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which sent the config reply.
 uint 8 | Type | 1 | see [Configuration Packet](#config_packet)
 uint 8 | OpCode | 1 | see [Configuration Packet](#config_packet)
 uint 16 | Length | 2 | see [Configuration Packet](#config_packet)
 uint 8 | Payload | Length | see [Configuration Packet](#config_packet)
 
-###### <a name="mesh_state_reply"></a>State reply item
+
+<a name="mesh_state_reply"></a>
+###### State reply item
 
 ![State Reply packet](../docs/diagrams/mesh-state-reply-item.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Crownstone ID | 2 | The identifier of the crownstone which sent the status reply
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone which sent the state reply.
 uint 8 | Type | 1 | see [State Packet](#state_packet)
 uint 8 | OpCode | 1 | see [State Packet](#state_packet)
 uint 16 | Length | 2 | see [State Packet](#state_packet)
 uint 8 | Payload | Length | see [State Packet](#state_packet)
 
-#### <a name="scan_result_mesh_packet"></a>Scan result packet
+
+<a name="scan_result_mesh_packet"></a>
+#### Scan result packet
 
 ![Scan Result packet](../docs/diagrams/scan-result-mesh-packet.png)
 
@@ -963,15 +1168,19 @@ uint 8 | Number of results | 1 | Number of scan results in the list
 uint 8 | Reserved | 1 | Reserved for future use
 [Scan Result item](#scan_result_item) [] | List | N | A list of scanned devices with the ID of the crownstone that scanned the device
 
-##### <a name="mesh_scan_result_item"></a>Scan result item
+
+<a name="mesh_scan_result_item"></a>
+##### Scan result item
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Crownstone ID | 2 | The identifier of the Crownstone which scanned the device
+uint 8 | Crownstone ID | 1 | The identifier of the Crownstone which scanned the device
 uint 8 [6] | Scanned device address | 6 | The MAC address of the scanned device
 int 8 | RSSI | 1 | The averaged RSSI value of the scanned device
 
-##### <a name="multi_switch_mesh_packet"></a></a>Multi switch packet
+
+<a name="multi_switch_mesh_packet"></a>
+##### Multi switch packet
 
 ![Multi switch packet](../docs/diagrams/multi-switch-mesh-packet.png)
 
@@ -979,7 +1188,9 @@ Type nr | Type name | Payload type | Description
 --- | --- | --- | ---
 0 | [List](#multi_switch_list_mesh_packet) | Multi switch list | Different switch command for each Crownstone.
 
-##### <a name="multi_switch_list_mesh_packet"></a></a>Multi switch list packet
+
+<a name="multi_switch_list_mesh_packet"></a>
+##### Multi switch list packet
 
 ![Multi switch packet](../docs/diagrams/multi-switch-list-mesh-packet.png)
 
@@ -988,16 +1199,19 @@ Type | Name | Length | Description
 uint 8 | Count | 1 | Number of multi switch list items in the list.
 [Multi switch list item](#multi_switch_list_mesh_item) [] | List | N | A list of switch commands.
 
-##### <a name="multi_switch_list_mesh_item"></a>Multi switch list item
+
+<a name="multi_switch_list_mesh_item"></a>
+##### Multi switch list item
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Crownstone ID | 2 | The identifier of the crownstone to which this item is targeted.
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
 uint 8 | Switch state | 1 | The switch state to be set by the targeted crownstone after the timeout expires. 0 = off, 100 = fully on.
 uint 16 | Timeout | 2 | The timeout (in seconds) after which the state should be set.
 uint 8 | [Intent](#multi_switch_intent) | 1 | The intent of the switch, see the table below.
 
-###### <a name="multi_switch_intent"></a>Intent
+<a name="multi_switch_intent"></a>
+###### Intent
 
 Value | Name
 --- | --- 
@@ -1007,7 +1221,10 @@ Value | Name
 3 | Exit
 4 | Manual
 
-### <a name="mesh_notification_packet"></a>Mesh notification packet
+
+
+<a name="mesh_notification_packet"></a>
+### Mesh notification packet
 This packet is used to get the [mesh messages](#mesh_message_packet) pushed over GATT notifications.
 
 ![Mesh notification packet](../docs/diagrams/mesh-notification-packet.png)
@@ -1028,7 +1245,9 @@ Opcode | Type name | Payload type | Payload Description
 33 | MultipartMid | [Mesh data update](#mesh_data_update_packet) | Middle part of the multi part notification.
 34 | MultipartEnd | [Mesh data update](#mesh_data_update_packet) | Last part of the multi part notification.
 
-### <a name="mesh_data_update_packet"></a>Mesh data update packet
+
+<a name="mesh_data_update_packet"></a>
+### Mesh data update packet
 Each mesh data message is notified in multiple pieces, as a notification can only be 20 bytes. The op code of the [Mesh notification](#mesh_notification_packet) tells whether it is a single, or the first, last or a middle piece of a multipart message.
 
 ![Mesh data notification packet](../docs/diagrams/mesh-data-update-packet.png)
