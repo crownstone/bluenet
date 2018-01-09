@@ -147,7 +147,7 @@ uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
-int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
 
@@ -170,7 +170,7 @@ uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this sta
 uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 32 | Timestamp | 4 | The timestamp when the switch last changed.
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
-int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 uint 32 | Timestamp | 4 | The timestamp when the power usage last changed significantly.
 
 
@@ -192,7 +192,7 @@ uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
-int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
 uint 16 | Validation | 2 | Value is always `0xFACE`. Can be used to help validating that the decryption was successful.
@@ -210,7 +210,7 @@ uint 32 | Timestamp | 4 | The timestamp when the first error occured.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
-int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 
 
 The following type sends out the last known state of another Crownstone. It will be interleaved with the state type (unless there's an error).
@@ -224,7 +224,7 @@ uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
-int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
 uint 8 | Reserved | 2 | Reserved for future use.
@@ -259,7 +259,7 @@ uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
-int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Multiply real power usage by the power factor to get apparent power usage in VA.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
 uint 8 | Counter | 1 | Simply counts up and overflows.
 uint 8 | Reserved | 4 | Reserved for future use.
@@ -274,7 +274,7 @@ With the current mesh, we can probably not support more than 50 Crownstones, so 
 
 ### Power usage (real)
 
-We are most interested in the real power, so that gets the most bits. To get the apparent power, you multiply the real power with the power factor, thus the apparent power will have a resolution equal to power factor resolution.
+We are most interested in the real power, so that gets the most bits. To get the apparent power, you divide the real power with the power factor, thus the apparent power will have a resolution equal to power factor resolution.
 
 Should be able to represent a number from -3840 to 3840 (16A * 240V = 3840W).
 
