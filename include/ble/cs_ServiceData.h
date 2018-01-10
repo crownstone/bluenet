@@ -22,65 +22,142 @@
 #include <protocol/cs_MeshMessageTypes.h>
 #endif
 
-#define SERVICE_DATA_PROTOCOL_VERSION 1
 
-//! bitmask map (if bit is true, then):
-//! [0] New Data Available
-//! [1] ID shown is from external Crownstone
-//! [2] ....
-//! [3] ....
-//! [4] ....
-//! [5] ....
-//! [6] ....
-//! [7] operation mode setup
-enum ServiceBitmask {
-	NEW_DATA_AVAILABLE    = 0,
-	SHOWING_EXTERNAL_DATA = 1,
-	SERVICE_BITMASK_ERROR = 2,
-	RESERVED2             = 3,
-	RESERVED3             = 4,
-	RESERVED4             = 5,
-	RESERVED5             = 6,
-	SETUP_MODE_ENABLED    = 7
+//! Flags bitmask map (if bit is true, then):
+//enum ServiceDataFlagBitsV1 {
+//	SERVICE_DATA_FLAGS_V1_RESERVED0  = 0,
+//	SERVICE_DATA_FLAGS_V1_EXT_DATA   = 1,
+//	SERVICE_DATA_FLAGS_V1_ERROR      = 2,
+//	SERVICE_DATA_FLAGS_V1_RESERVED3  = 3,
+//	SERVICE_DATA_FLAGS_V1_RESERVED4  = 4,
+//	SERVICE_DATA_FLAGS_V1_RESERVED5  = 5,
+//	SERVICE_DATA_FLAGS_V1_RESERVED6  = 6,
+//	SERVICE_DATA_FLAGS_V1_SETUP_MODE = 7
+//};
+
+enum ServiceDataFlagBits {
+	SERVICE_DATA_FLAGS_DIMMING_AVAILABLE = 0,
+	SERVICE_DATA_FLAGS_MARKED_DIMMABLE   = 1,
+	SERVICE_DATA_FLAGS_ERROR             = 2,
+	SERVICE_DATA_FLAGS_SWITCH_LOCKED     = 3,
+	SERVICE_DATA_FLAGS_TIME_SET          = 4,
+	SERVICE_DATA_FLAGS_RESERVED5         = 5,
+	SERVICE_DATA_FLAGS_RESERVED6         = 6,
+	SERVICE_DATA_FLAGS_RESERVED7         = 7
 };
 
-enum ServiceDataType {
-	ALL_DATA_TIMESTAMP_LATEST             = 0,
-	ALL_DATA_TIMESTAMP_LAST_SWITCH_CHANGE = 1,
-	ALL_DATA_TIMESTAMP_LAST_POWER_CHANGE  = 2,
+enum ServiceDataUnencryptedType {
+	SERVICE_DATA_TYPE_V1 = 1,
+	SERVICE_DATA_TYPE_ENCRYPTED = 3,
+	SERVICE_DATA_TYPE_SETUP = 4,
 };
 
-//! The data that is encrypted in the service data.
-union encrypted_service_data_t {
-	struct __attribute__((packed)) {
-		uint16_t crownstoneId;
-		uint8_t  switchState;
-		uint8_t  eventBitmask;
-		int8_t   temperature;
-		int32_t  powerUsage;
-		int32_t  accumulatedEnergy;
-		uint8_t  rand;
-		uint16_t counter;
-	} v1;
-	struct __attribute__((packed)) {
-		uint8_t  type;
-		uint16_t crownstoneId;
-		uint8_t  switchState;
-		uint8_t  flagBitmask;
-		int8_t   temperature;
-		int8_t   powerFactor;
-		int16_t  powerUsageReal;
-		int32_t  accumulatedEnergy;
-		uint16_t partialTimestamp;
-		uint8_t  rand;
-	} v3;
+enum ServiceDataEncryptedType {
+	SERVICE_DATA_TYPE_STATE = 0,
+	SERVICE_DATA_TYPE_ERROR = 1,
+	SERVICE_DATA_TYPE_EXT_STATE = 2,
+	SERVICE_DATA_TYPE_EXT_ERROR = 3,
 };
+
+
+//struct __attribute__((packed)) service_data_v1_t {
+//	uint16_t crownstoneId;
+//	uint8_t  switchState;
+//	uint8_t  eventBitmask;
+//	int8_t   temperature;
+//	int32_t  powerUsage;
+//	int32_t  accumulatedEnergy;
+//	uint8_t  rand;
+//	uint16_t counter;
+//};
+
+
+
+struct __attribute__((packed)) service_data_encrypted_state_t {
+	uint8_t  id;
+	uint8_t  switchState;
+	uint8_t  flags;
+	int8_t   temperature;
+	int8_t   powerFactor;
+	int16_t  powerUsageReal;
+	int32_t  energyUsed;
+	uint16_t partialTimestamp;
+	uint16_t validation;
+};
+
+struct __attribute__((packed)) service_data_encrypted_error_t {
+	uint8_t  id;
+	uint32_t errors;
+	uint32_t timestamp;
+	uint8_t  flags;
+	int8_t   temperature;
+	uint16_t partialTimestamp;
+	int16_t  powerUsageReal;
+};
+
+struct __attribute__((packed)) service_data_encrypted_ext_state_t {
+	uint8_t  id;
+	uint8_t  switchState;
+	uint8_t  flags;
+	int8_t   temperature;
+	int8_t   powerFactor;
+	int16_t  powerUsageReal;
+	int32_t  energyUsed;
+	uint16_t partialTimestamp;
+	uint8_t  reserved[2];
+};
+
+struct __attribute__((packed)) service_data_encrypted_ext_error_t {
+	uint8_t  id;
+	uint32_t errors;
+	uint32_t timestamp;
+	uint8_t  flags;
+	int8_t   temperature;
+	uint16_t partialTimestamp;
+	uint8_t  reserved[2];
+};
+
+struct __attribute__((packed)) service_data_encrypted_t {
+	uint8_t type;
+	union {
+		service_data_encrypted_state_t state;
+		service_data_encrypted_error_t error;
+		service_data_encrypted_ext_state_t extState;
+		service_data_encrypted_ext_error_t extError;
+	};
+};
+
+
+
+struct __attribute__((packed)) service_data_setup_state_t {
+	uint8_t  switchState;
+	uint8_t  flags;
+	int8_t   temperature;
+	int8_t   powerFactor;
+	int16_t  powerUsageReal;
+	uint32_t errors;
+	uint8_t  counter;
+	uint8_t  reserved[4];
+};
+
+struct __attribute__((packed)) service_data_setup_t {
+	uint8_t type;
+	union {
+		service_data_setup_state_t state;
+	};
+};
+
+
 
 //! Service data struct, this data type is what ends up in the advertisement.
 union service_data_t {
 	struct __attribute__((packed)) {
 		uint8_t  protocolVersion;
-		encrypted_service_data_t data;
+		union {
+//			service_data_v1_t v1;
+			service_data_encrypted_t encrypted;
+			service_data_setup_t setup;
+		};
 	} params;
 	uint8_t array[sizeof(params)] = {};
 };
@@ -94,74 +171,44 @@ public:
 	 *
 	 * @param[in] powerUsage      The power usage in milliWatt.
 	 */
-	void updatePowerUsage(int32_t powerUsage) {
-#if SERVICE_DATA_PROTOCOL_VERSION == 1
-		_serviceData.params.data.v1.powerUsage = powerUsage;
-#elif SERVICE_DATA_PROTOCOL_VERSION == 3
-		_serviceData.params.data.v3.powerUsageReal = compressPowerUsageMilliWatt(powerUsage);
-		_serviceData.params.data.v3.powerFactor = 127;
-#endif
-	}
+	void updatePowerUsage(int32_t powerUsage);
 
 	/** Set the energy used field of the service data.
 	 *
 	 * @param[in] energy          The energy used in units of 64 Joule.
 	 */
-	void updateAccumulatedEnergy(int32_t energy) {
-#if SERVICE_DATA_PROTOCOL_VERSION == 1
-		_serviceData.params.data.v1.accumulatedEnergy = convertEnergyV3ToV1(energy);
-#elif SERVICE_DATA_PROTOCOL_VERSION == 3
-		_serviceData.params.data.v3.accumulatedEnergy = energy; // units of 64 J
-#endif
-	}
+	void updateAccumulatedEnergy(int32_t energy);
 
 	/** Set the ID field of the service data.
 	 *
 	 * @param[in] crownstoneId    The Crownstone ID.
 	 */
-	void updateCrownstoneId(uint16_t crownstoneId) {
-#if SERVICE_DATA_PROTOCOL_VERSION == 1
-		_serviceData.params.data.v1.crownstoneId = crownstoneId;
-#elif SERVICE_DATA_PROTOCOL_VERSION == 3
-		_serviceData.params.data.v3.crownstoneId = crownstoneId;
-#endif
-	}
+	void updateCrownstoneId(stone_id_t crownstoneId);
 
 	/** Set the switch state field of the service data.
 	 *
 	 * @param[in] switchState     The switch state.
 	 */
-	void updateSwitchState(uint8_t switchState) {
-#if SERVICE_DATA_PROTOCOL_VERSION == 1
-		_serviceData.params.data.v1.switchState = switchState;
-#elif SERVICE_DATA_PROTOCOL_VERSION == 3
-		_serviceData.params.data.v3.switchState = switchState;
-#endif
-	}
+	void updateSwitchState(uint8_t switchState);
 
 	/** Set the event bitmask field of the service data.
 	 *
 	 * @param[in] bitmask         The bitmask.
 	 */
-	void updateEventBitmask(uint8_t bitmask) {
-#if SERVICE_DATA_PROTOCOL_VERSION == 1
-		_serviceData.params.data.v1.eventBitmask = bitmask;
-#elif SERVICE_DATA_PROTOCOL_VERSION == 3
-		_serviceData.params.data.v3.flagBitmask = bitmask;
-#endif
-	}
+	void updateFlagsBitmask(uint8_t bitmask);
+
+	/** Set or unset a bit of the event bitmask.
+	 *
+	 * @param[in] bit             The bit position.
+	 * @param[in] set             True when setting the bit, false when unsetting it.
+	 */
+	void updateFlagsBitmask(uint8_t bit, bool set);
 
 	/** Set the temperature field of the service data.
 	 *
 	 * @param[in] temperature     The temperature.
 	 */
-	void updateTemperature(int8_t temperature) {
-#if SERVICE_DATA_PROTOCOL_VERSION == 1
-		_serviceData.params.data.v1.temperature = temperature;
-#elif SERVICE_DATA_PROTOCOL_VERSION == 3
-		_serviceData.params.data.v3.temperature = temperature;
-#endif
-	}
+	void updateTemperature(int8_t temperature);
 
 	/** Update the advertisement.
 	 *
@@ -174,49 +221,17 @@ public:
 	 */
 	void updateAdvertisement(bool initial);
 
-	/** Set or unset a bit of the event bitmask.
-	 *
-	 * @param[in] bit             The bit position.
-	 * @param[in] set             True when setting the bit, false when unsetting it.
-	 */
-	void updateEventBitmask(uint8_t bit, bool set) {
-		if (set) {
-#if SERVICE_DATA_PROTOCOL_VERSION == 1
-			_serviceData.params.data.v1.eventBitmask |= 1 << bit;
-#elif SERVICE_DATA_PROTOCOL_VERSION == 3
-			_serviceData.params.data.v3.flagBitmask |= 1 << bit;
-#endif
-		}
-		else {
-#if SERVICE_DATA_PROTOCOL_VERSION == 1
-			_serviceData.params.data.v1.eventBitmask &= ~(1 << bit);
-#elif SERVICE_DATA_PROTOCOL_VERSION == 3
-			_serviceData.params.data.v3.flagBitmask &= ~(1 << bit);
-#endif
-		}
-	}
-
 	/** Get the service data as array.
 	 *
 	 * @return                    Pointer to the service data array.
 	 */
-	uint8_t* getArray() {
-		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
-			return _encryptedArray;
-		}
-		else {
-			return _serviceData.array;
-		}
-
-	}
+	uint8_t* getArray();
 
 	/** Get the size of the service.
 	 *
 	 * @return                    Size of the service data.
 	 */
-	uint16_t getArraySize() {
-		return sizeof(service_data_t);
-	}
+	uint16_t getArraySize();
 
 	/** Send the service data over the mesh.
 	 *
@@ -230,11 +245,36 @@ private:
 	app_timer_t    _updateTimerData;
 	app_timer_id_t _updateTimerId;
 
-	//! Store the service data
+	//! Stores the last (current) advertised service data
 	service_data_t _serviceData;
 
-	//! Used to store the service data of an external Crownstone.
-	service_data_t _serviceDataExt;
+//	//! Used to store the service data of an external Crownstone.
+//	service_data_t _serviceDataExt;
+
+	//! Store own ID
+	stone_id_t _crownstoneId; // TODO: use State for this?
+
+	//! Store switch state
+	uint8_t _switchState; // TODO: use State for this?
+
+	//! Store flags
+	uint8_t _flags; // TODO: use State for this?
+
+	//! Store the temperature
+	int8_t  _temperature; // TODO: use State for this?
+
+	//! Store the power factor
+	int8_t  _powerFactor; // TODO: use State for this?
+
+	//! Store the power usage in mW
+	int32_t _powerUsageReal; // TODO: use State for this?
+
+	//! Store the energy used, in units of 64 J
+	int32_t _energyUsed; // TODO: use State for this?
+
+	//! Store timestamp of first error
+	uint32_t _firstErrorTimestamp; // TODO: use State for this?
+
 
 	//! Used to store the encrypted service data.
 	union {
@@ -247,6 +287,7 @@ private:
 
 	//! Store the operation mode.
 	uint8_t _operationMode;
+
 	//! Store whether a device is connected or not.
 	bool _connected;
 
@@ -264,7 +305,7 @@ private:
 	 * @param[out] serviceData    Service data to fill with the state of the selected Crownstone.
 	 * @return                    True when Crownstone was selected and service data has been filled.
 	 */
-	bool getExternalAdvertisement(uint16_t ownId, service_data_t& serviceData);
+	bool getExternalAdvertisement(stone_id_t ownId, service_data_t& serviceData);
 
 	/** Called when there are events to handle.
 	 *
@@ -326,22 +367,35 @@ private:
 	uint16_t timestampToPartialTimestamp(uint32_t timestamp);
 
 
+	/** When a timestamp is available, return partial timestamp, else returns a counter.
+	 *
+	 * @param[in] timestamp       The timestamp.
+	 * @param[in] counter         The counter.
+	 *
+	 * @return                    Counter, or the least significant part of the timestamp.
+	 */
+	uint16_t getPartialTimestampOrCounter(uint32_t timestamp, uint32_t counter);
+
+
 #if BUILD_MESHING == 1
 	//! Timer used to periodically send the state to the mesh.
 	app_timer_t    _meshStateTimerData;
 	app_timer_id_t _meshStateTimerId;
 
+	//! Counter used to count how often the state has been sent over the mesh.
+	uint16_t _meshSendCount;
+
 	struct __attribute__((packed)) advertised_ids_t {
-		uint8_t size;
-		int8_t head; // Index of last crownstone ID that was advertised
-		id_type_t list[MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS];
+		uint8_t   size;
+		int8_t    head; // Index of last crownstone ID that was advertised
+		stone_id_t list[MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS];
 	};
 
 	struct __attribute__((packed)) last_seen_id_t {
-		uint16_t id;
-		uint32_t timestamp;
-		uint16_t hash;
-		uint8_t  timedout; // 0 when not timed out, 1 when timed out.
+		stone_id_t id;
+		uint32_t  timestamp;
+		uint16_t  hash;
+		uint8_t   timedout; // 0 when not timed out, 1 when timed out.
 		                   // We need this, or a clock overflow could mark a state as not timed out again.
 	};
 
@@ -364,7 +418,7 @@ private:
 	 * @param[in] stateMsg        Pointer to the mesh state message.
 	 * @param[in] stateChan       Which state channel the message was received.
 	 */
-	void onMeshStateMsg(id_type_t ownId, state_message_t* stateMsg, uint16_t stateChan);
+	void onMeshStateMsg(stone_id_t ownId, state_message_t* stateMsg, uint16_t stateChan);
 
 	/** Process a mesh state item, keeps up the last seen table.
 	 *
@@ -375,7 +429,7 @@ private:
 	 * @param[in] stateMsg        Pointer to the mesh state message.
 	 * @param[in] stateChan       Which state channel the message was received.
 	 */
-	void onMeshStateSeen(id_type_t ownId, state_item_t* stateItem, uint16_t stateChan);
+	void onMeshStateSeen(stone_id_t ownId, state_item_t* stateItem, uint16_t stateChan);
 
 	/** Check if the state of given id is considered timed out.
 	 *
@@ -387,7 +441,7 @@ private:
 	 * @param[in] currentTime     Current time (RTC ticks).
 	 * @return                    True when state is not considered timed out.
 	 */
-	bool isMeshStateNotTimedOut(id_type_t id, uint16_t stateChan, uint32_t currentTime);
+	bool isMeshStateNotTimedOut(stone_id_t id, uint16_t stateChan, uint32_t currentTime);
 
 	/** Choose an external id to advertise the state of.
 	 *
@@ -397,7 +451,7 @@ private:
 	 * @param[in] eventOnly       True when only allowed to choose states which were triggered by event.
 	 * @return                    The chosen id.
 	 */
-	id_type_t chooseExternalId(id_type_t ownId, state_message_t stateMsgs[], bool hasStateMsg[], bool eventOnly);
+	stone_id_t chooseExternalId(stone_id_t ownId, state_message_t stateMsgs[], bool hasStateMsg[], bool eventOnly);
 
 	/* Static function for the timeout */
 	static void meshStateTick(ServiceData *ptr) {

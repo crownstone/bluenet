@@ -238,9 +238,19 @@ ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, 
 	BLEutil::printArray(msg, length);
 
 	int16_t idx = -1;
-	state_item_t* p_stateItem;
-	while (peek_next_state_item(msg, &p_stateItem, idx)) {
-		LOGi("idx=%i type=%u id=%u switch=%u bitmask=%u PF=%i P=%i E=%u time=%u", idx, p_stateItem->type, p_stateItem->id, p_stateItem->switchState, p_stateItem->flagBitmask, p_stateItem->powerFactor, p_stateItem->powerUsageReal, p_stateItem->partialAccumulatedEnergy, p_stateItem->partialTimestamp);
+	state_item_t* stateItem;
+	while (peek_next_state_item(msg, &stateItem, idx)) {
+		switch (stateItem->type) {
+		case MESH_STATE_ITEM_TYPE_STATE:
+		case MESH_STATE_ITEM_TYPE_EVENT_STATE:
+			LOGi("idx=%i type=%u id=%u switch=%u flags=%u temp=%i PF=%i P=%i E=%i time=%u", idx, stateItem->type, stateItem->state.id, stateItem->state.switchState, stateItem->state.flags, stateItem->state.temperature, stateItem->state.powerFactor, stateItem->state.powerUsageReal, stateItem->state.energyUsed, stateItem->state.partialTimestamp);
+			break;
+		case MESH_STATE_ITEM_TYPE_ERROR:
+			LOGi("idx=%i type=%u id=%u error=%u time=%u flags=%u temp=%i time=%u", idx, stateItem->type, stateItem->error.id, stateItem->error.errors, stateItem->error.timestamp, stateItem->error.flags, stateItem->error.temperature, stateItem->error.partialTimestamp);
+			break;
+		default:
+			LOGi("idx=%i type=%u", idx, stateItem->type);
+		}
 	}
 #endif
 	return ERR_SUCCESS;
@@ -651,7 +661,7 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
 		{
-		id_type_t* id = message->data.ids;
+		stone_id_t* id = message->data.ids;
 		if (message->idCount == 1 && *id == _myCrownstoneId) {
 			LOGd("Message is only for us");
 		} else if (is_broadcast_command(message)) {
@@ -869,7 +879,18 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
 void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 #ifdef PRINT_VERBOSE_STATE
-		LOGi("Send state event=%u type=%u id=%u switch=%u bitmask=%u PF=%i P=%i E=%u time=%u", event, stateItem.type, stateItem.id, stateItem.switchState, stateItem.flagBitmask, stateItem.powerFactor, stateItem.powerUsageReal, stateItem.partialAccumulatedEnergy, stateItem.partialTimestamp);
+	LOGi("Send state event=%u", event);
+	switch (stateItem.type) {
+	case MESH_STATE_ITEM_TYPE_STATE:
+	case MESH_STATE_ITEM_TYPE_EVENT_STATE:
+		LOGi("  type=%u id=%u switch=%u flags=%u temp=%i PF=%i P=%i E=%i time=%u", stateItem.type, stateItem.state.id, stateItem.state.switchState, stateItem.state.flags, stateItem.state.temperature, stateItem.state.powerFactor, stateItem.state.powerUsageReal, stateItem.state.energyUsed, stateItem.state.partialTimestamp);
+		break;
+	case MESH_STATE_ITEM_TYPE_ERROR:
+		LOGi("  type=%u id=%u error=%u time=%u flags=%u temp=%i time=%u", stateItem.type, stateItem.error.id, stateItem.error.errors, stateItem.error.timestamp, stateItem.error.flags, stateItem.error.temperature, stateItem.error.partialTimestamp);
+		break;
+	default:
+		LOGi("  type=%u", stateItem.type);
+	}
 #endif
 
 	state_message_t message = {};
@@ -996,7 +1017,7 @@ ERR_CODE MeshControl::sendCommandMessage(command_message_t* msg, uint16_t length
 
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_COMMAND)
 	{
-	id_type_t* id = msg->data.ids;
+	stone_id_t* id = msg->data.ids;
 	if (msg->idCount == 1 && *id == _myCrownstoneId) {
 		LOGd("Message is only for us");
 	}

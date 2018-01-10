@@ -2,15 +2,39 @@
 
 #include <protocol/mesh/cs_MeshMessageCommon.h>
 
-struct __attribute__((__packed__)) state_item_t {
-	uint8_t   type;
-	id_type_t id;
+enum MeshStateItemType {
+	MESH_STATE_ITEM_TYPE_STATE = 0,
+	MESH_STATE_ITEM_TYPE_ERROR = 1,
+	MESH_STATE_ITEM_TYPE_EVENT_STATE = 2,
+};
+
+struct __attribute__((__packed__)) state_item_state_t {
+	stone_id_t id;
 	uint8_t   switchState;
-	uint8_t   flagBitmask;
+	uint8_t   flags;
+	int8_t    temperature;
 	int8_t    powerFactor;
 	int16_t   powerUsageReal;
-	uint16_t  partialAccumulatedEnergy;
+	int32_t   energyUsed;
 	uint16_t  partialTimestamp;
+};
+
+struct __attribute__((__packed__)) state_item_error_t {
+	stone_id_t id;
+	uint32_t  errors;
+	uint32_t  timestamp;
+	uint8_t   flags;
+	int8_t    temperature;
+	uint16_t  partialTimestamp;
+};
+
+struct __attribute__((__packed__)) state_item_t {
+	uint8_t   type;
+	union {
+		state_item_state_t state;
+		state_item_error_t error;
+		state_item_state_t eventState; // Uses same struct as normal state
+	};
 };
 
 #define STATE_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t))
@@ -34,6 +58,26 @@ struct __attribute__((__packed__)) state_message_t {
 	state_item_t list[MAX_STATE_ITEMS];
 };
 
+inline stone_id_t meshStateItemGetId(state_item_t* item) {
+	switch (item->type) {
+	case MESH_STATE_ITEM_TYPE_STATE:
+		return item->state.id;
+	case MESH_STATE_ITEM_TYPE_ERROR:
+		return item->error.id;
+	case MESH_STATE_ITEM_TYPE_EVENT_STATE:
+		return item->eventState.id;
+	default:
+		return 0;
+	}
+}
+
+inline bool meshStateItemIsEventType(state_item_t* item) {
+	switch (item->type) {
+	case MESH_STATE_ITEM_TYPE_EVENT_STATE:
+		return true;
+	}
+	return false;
+}
 
 /**
  * The class state_message wraps around state_message_t to provide it with accessor methods like iterators that can

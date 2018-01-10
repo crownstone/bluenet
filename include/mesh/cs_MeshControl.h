@@ -235,6 +235,6 @@ private:
 	void operator=(MeshControl const &); //! singleton, deny implementation
 
 	/* The id assigned to this Crownstone during setup */
-    id_type_t _myCrownstoneId;
+    stone_id_t _myCrownstoneId;
 
 };

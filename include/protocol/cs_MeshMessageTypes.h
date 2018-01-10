@@ -94,20 +94,19 @@ struct __attribute__((__packed__)) keep_alive_cmd_t {
 };
 
 struct __attribute__((__packed__)) keep_alive_same_timeout_item_t {
-	id_type_t id;
+	stone_id_t id;
 	uint8_t actionSwitchState;
 };
 
 #define KEEP_ALIVE_HEADER_SIZE     (sizeof(uint8_t))
 #define KEEPALIVE_PAYLOAD_SIZE     (MAX_MESH_MESSAGE_LENGTH - KEEP_ALIVE_HEADER_SIZE)
 
-#define KEEP_ALIVE_SAME_TIMEOUT_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t))
+#define KEEP_ALIVE_SAME_TIMEOUT_HEADER_SIZE (sizeof(uint16_t) + sizeof(uint8_t))
 #define KEEP_ALIVE_SAME_TIMEOUT_MAX_ITEMS   ((KEEPALIVE_PAYLOAD_SIZE - KEEP_ALIVE_SAME_TIMEOUT_HEADER_SIZE) / sizeof(keep_alive_same_timeout_item_t))
 
 struct __attribute__((__packed__)) keep_alive_same_timeout_t {
 	uint16_t timeout;
 	uint8_t count;
-	uint8_t reserved;
 	keep_alive_same_timeout_item_t list[KEEP_ALIVE_SAME_TIMEOUT_MAX_ITEMS];
 };
 
@@ -153,7 +152,7 @@ inline bool is_valid_keep_alive_msg(keep_alive_message_t* msg, uint16_t length) 
 
 //! Returns true when given id is in the message
 //! Sets cmd to the command for given id.
-inline bool has_keep_alive_item(keep_alive_message_t* message, id_type_t id, keep_alive_cmd_t& cmd) {
+inline bool has_keep_alive_item(keep_alive_message_t* message, stone_id_t id, keep_alive_cmd_t& cmd) {
 	switch (message->type) {
 	case SAME_TIMEOUT:{
 		for (int i = 0; i < message->sameTimeout.count; ++i) {
@@ -193,7 +192,7 @@ struct __attribute__((__packed__)) multi_switch_cmd_t {
 };
 
 struct __attribute__((__packed__)) multi_switch_list_item_t {
-	id_type_t id;
+	stone_id_t id;
 	multi_switch_cmd_t cmd;
 };
 
@@ -251,7 +250,7 @@ inline bool is_valid_multi_switch_message(multi_switch_message_t* msg, uint16_t 
 
 //! Returns true when given id is in the message
 //! Sets cmd to the command for given id.
-inline bool has_multi_switch_item(multi_switch_message_t* message, id_type_t id, multi_switch_cmd_t& cmd) {
+inline bool has_multi_switch_item(multi_switch_message_t* message, stone_id_t id, multi_switch_cmd_t& cmd) {
 	switch(message->type) {
 	case LIST:{
 		for (int i = 0; i < message->list.count; ++i) {
@@ -419,7 +418,7 @@ struct __attribute__((__packed__)) command_message_t {
 	uint8_t idCount;
 	union {
 		struct {
-			id_type_t ids[0];
+			stone_id_t ids[0];
 			union {
 				uint8_t payload[0];
 				beacon_mesh_message_t beaconMsg;
@@ -438,7 +437,7 @@ inline bool is_valid_command_message(command_message_t* msg, uint16_t length) {
 		return false;
 	}
 	// Then check the header
-	if (length < MIN_COMMAND_HEADER_SIZE + msg->idCount * sizeof(id_type_t)) {
+	if (length < MIN_COMMAND_HEADER_SIZE + msg->idCount * sizeof(stone_id_t)) {
 		return false;
 	}
 	// Check if the message is not too large
@@ -463,13 +462,13 @@ inline bool is_broadcast_command(command_message_t* message) {
 	return message->idCount == 0;
 }
 
-inline bool is_command_for_us(command_message_t* message, id_type_t id) {
+inline bool is_command_for_us(command_message_t* message, stone_id_t id) {
 
 	if (is_broadcast_command(message)) {
 		return true;
 	}
 
-	id_type_t* p_id;
+	stone_id_t* p_id;
 	p_id = message->data.ids;
 	for (int i = 0; i < message->idCount; ++i) {
 		if (*p_id == id) {
@@ -492,8 +491,8 @@ inline bool is_command_for_us(command_message_t* message, id_type_t id) {
 //! Sets payloadLength to the length of the payload, based on the command message size.
 //! Assumes already checked if is_valid_command_message()!
 inline void get_command_msg_payload(command_message_t* message, uint16_t messageLength, uint8_t** payload, uint16_t& payloadLength) {
-	payloadLength =  messageLength - MIN_COMMAND_HEADER_SIZE - message->idCount * sizeof(id_type_t);
-	*payload = (uint8_t*)message + MIN_COMMAND_HEADER_SIZE + message->idCount * sizeof(id_type_t);
+	payloadLength =  messageLength - MIN_COMMAND_HEADER_SIZE - message->idCount * sizeof(stone_id_t);
+	*payload = (uint8_t*)message + MIN_COMMAND_HEADER_SIZE + message->idCount * sizeof(stone_id_t);
 }
 
 /********************************************************************
@@ -502,44 +501,36 @@ inline void get_command_msg_payload(command_message_t* message, uint16_t message
 
 #define REPLY_HEADER_SIZE (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint8_t))
 
-//struct __attribute__((__packed__)) reply_item_t {
-//	id_type_t id;
-//	union {
-//		uint8_t data[];
-//		uint8_t status;
-//	};
-//};
-
 #define MAX_REPLY_LIST_SIZE (MAX_MESH_MESSAGE_LENGTH - REPLY_HEADER_SIZE)
 
 /** Reply to a status message.
  */
 struct __attribute__((__packed__)) status_reply_item_t {
-	id_type_t id;
+	stone_id_t id;
 	uint16_t status;
 };
 
 #define MAX_STATUS_REPLY_ITEMS (MAX_REPLY_LIST_SIZE / sizeof(status_reply_item_t))
 
 
-#define MAX_CONFIG_REPLY_DATA_LENGTH (MAX_REPLY_LIST_SIZE - sizeof(id_type_t) - SB_HEADER_SIZE)
+#define MAX_CONFIG_REPLY_DATA_LENGTH (MAX_REPLY_LIST_SIZE - sizeof(stone_id_t) - SB_HEADER_SIZE)
 #define MAX_CONFIG_REPLY_ITEMS 1 // the safe is to request config one by one, but depending on the length of the config
 
 /** Reply to a configuration message.
  */
 struct __attribute__((__packed__)) config_reply_item_t {
-	id_type_t id;
+	stone_id_t id;
 	stream_t<uint8_t, MAX_CONFIG_REPLY_DATA_LENGTH> data;
 };
 
-#define MAX_STATE_REPLY_DATA_LENGTH (MAX_REPLY_LIST_SIZE - sizeof(id_type_t) - SB_HEADER_SIZE)
+#define MAX_STATE_REPLY_DATA_LENGTH (MAX_REPLY_LIST_SIZE - sizeof(stone_id_t) - SB_HEADER_SIZE)
 #define MAX_STATE_REPLY_ITEMS 1 // the safe is to request state one by one, but depending on the length of the state
                                 // data that is requested, several states might fit in one mesh message
 
 /** Reply to a state message.
  */
 struct __attribute__((__packed__)) state_reply_item_t {
-	id_type_t id;
+	stone_id_t id;
 	stream_t<uint8_t, MAX_STATE_REPLY_DATA_LENGTH> data;
 };
 
@@ -628,7 +619,7 @@ inline bool push_status_reply_item(reply_message_t* message, status_reply_item_t
  ********************************************************************/
 
 struct __attribute__((__packed__)) scan_result_item_t {
-	id_type_t id;
+	stone_id_t id;
 	uint8_t address[BLE_GAP_ADDR_LEN];
 	int8_t rssi;
 };
@@ -638,7 +629,7 @@ struct __attribute__((__packed__)) scan_result_item_t {
 
 struct __attribute__((__packed__)) scan_result_message_t {
 	uint8_t numOfResults;
-	uint8_t reserved;
+	uint8_t reserved[3];
 	scan_result_item_t list[MAX_SCAN_RESULT_ITEMS];
 };
 

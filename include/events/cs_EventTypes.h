@@ -43,8 +43,7 @@ enum GeneralEventType {
 	EVT_TRACKED_DEVICES,
 	EVT_TRACKED_DEVICE_IS_NEARBY,
 	EVT_TRACKED_DEVICE_NOT_NEARBY,
-//	EVT_TIME_UPDATED,
-	EVT_MESH_TIME,
+	EVT_MESH_TIME, // Sent when the mesh received the current time
 	EVT_SCHEDULE_ENTRIES_UPDATED,
 	EVT_BLE_EVENT,
 	EVT_BLE_CONNECT,
@@ -62,6 +61,7 @@ enum GeneralEventType {
 	EVT_PWM_TEMP_OK,
 	EVT_EXTERNAL_STATE_MSG_CHAN_0,
 	EVT_EXTERNAL_STATE_MSG_CHAN_1,
+	EVT_TIME_SET, // Sent when the time has been set or changed.
 	EVT_ALL = 0xFFFF
 };
 

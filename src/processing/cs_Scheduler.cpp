@@ -47,18 +47,19 @@ Scheduler::Scheduler() :
 void Scheduler::setTime(uint32_t time) {
 	LOGi("Set time to %i", time);
 
-	//! Update time
+	// Update time
 	int64_t diff = time - _posixTimeStamp;
 	_posixTimeStamp = time;
 	_rtcTimeStamp = RTC::getCount();
 
-	//! If there is a time jump: sync the entries
+	// If there is a time jump: sync the entries
 	printDebug();
 	bool adjusted = _scheduleList->sync(time, diff);
 	if (adjusted) {
 		writeScheduleList(true);
 	}
 	printDebug();
+	EventDispatcher::getInstance().dispatch(EVT_TIME_SET);
 }
 
 ERR_CODE Scheduler::setScheduleEntry(uint8_t id, schedule_entry_t* entry) {
@@ -100,12 +101,6 @@ void Scheduler::tick() {
 		_rtcTimeStamp += RTC::msToTicks(1000);
 
 		State::getInstance().set(STATE_TIME, _posixTimeStamp);
-
-//		EventDispatcher::getInstance().dispatch(EVT_TIME_UPDATED, &_posixTimeStamp, sizeof(_posixTimeStamp));
-		//		LOGd("posix time = %i", (uint32_t)(*_currentTimeCharacteristic));
-		//		long int timestamp = *_currentTimeCharacteristic;
-		//		tm* datetime = gmtime(&timestamp);
-		//		LOGd("day of week = %i", datetime->tm_wday);
 	}
 
 	schedule_entry_t* entry = _scheduleList->isActionTime(_posixTimeStamp);
@@ -177,15 +172,15 @@ void Scheduler::publishScheduleEntries() {
 void Scheduler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case STATE_TIME: {
-		//! Time was set via State.set().
-		//! This may have been us! So only use it when no time is set yet?
+		// Time was set via State.set().
+		// This may have been set by us! So only use it when no time is set yet?
 		if (_posixTimeStamp == 0 && length == sizeof(uint32_t)) {
 			setTime(*((uint32_t*)p_data));
 		}
 		break;
 	}
 	case EVT_MESH_TIME: {
-		//! Only set the time if there is currently no time set, as these timestamps may be old
+		// Only set the time if there is currently no time set, as these timestamps may be old
 		if (_posixTimeStamp == 0 && length == sizeof(uint32_t)) {
 			setTime(*((uint32_t*)p_data));
 		}

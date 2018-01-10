@@ -17,7 +17,7 @@
 #include <rbc_mesh.h>
 #endif
 
-typedef uint16_t id_type_t;
+typedef uint8_t stone_id_t;
 
 //! Header size is size of the message counter + size of the random number.
 #define ENCRYPTED_HEADER_SIZE (sizeof(uint32_t) + sizeof(uint32_t))
