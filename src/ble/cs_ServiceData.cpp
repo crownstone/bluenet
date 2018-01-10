@@ -324,7 +324,8 @@ bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& ser
 					serviceData.params.encrypted.extState.powerUsageReal = stateItem->state.powerUsageReal;
 					serviceData.params.encrypted.extState.energyUsed = stateItem->state.energyUsed;
 					serviceData.params.encrypted.extState.partialTimestamp = stateItem->state.partialTimestamp;
-					memset(serviceData.params.encrypted.extState.reserved, 0, sizeof(serviceData.params.encrypted.extState.reserved));
+//					memset(serviceData.params.encrypted.extState.reserved, 0, sizeof(serviceData.params.encrypted.extState.reserved));
+					serviceData.params.encrypted.extState.validation = 0xFACE;
 					break;
 				}
 				case MESH_STATE_ITEM_TYPE_ERROR: {
@@ -335,7 +336,8 @@ bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& ser
 					serviceData.params.encrypted.extError.flags = stateItem->error.flags;
 					serviceData.params.encrypted.extError.temperature = stateItem->error.temperature;
 					serviceData.params.encrypted.extError.partialTimestamp = stateItem->error.partialTimestamp;
-					memset(serviceData.params.encrypted.extError.reserved, 0, sizeof(serviceData.params.encrypted.extError.reserved));
+//					memset(serviceData.params.encrypted.extError.reserved, 0, sizeof(serviceData.params.encrypted.extError.reserved));
+					serviceData.params.encrypted.extError.validation = 0xFACE;
 					break;
 				}
 				}

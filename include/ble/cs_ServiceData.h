@@ -90,7 +90,8 @@ struct __attribute__((packed)) service_data_encrypted_ext_state_t {
 	int16_t  powerUsageReal;
 	int32_t  energyUsed;
 	uint16_t partialTimestamp;
-	uint8_t  reserved[2];
+//	uint8_t  reserved[2];
+	uint16_t validation;
 };
 
 struct __attribute__((packed)) service_data_encrypted_ext_error_t {
@@ -100,7 +101,8 @@ struct __attribute__((packed)) service_data_encrypted_ext_error_t {
 	uint8_t  flags;
 	int8_t   temperature;
 	uint16_t partialTimestamp;
-	uint8_t  reserved[2];
+//	uint8_t  reserved[2];
+	uint16_t validation;
 };
 
 struct __attribute__((packed)) service_data_encrypted_t {
