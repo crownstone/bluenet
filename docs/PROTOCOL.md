@@ -218,7 +218,7 @@ Bit | Name |  Description
 1 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
 2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#service_data_encrypted_error), or by reading the [error state](#state_packet).
 3 | Switch locked | When the switch state is locked, this will be 1.
-4 | Reserved | Reserved for future use.
+4 | Time set | If this is 1, the time is set on this Crownstone.
 5 | Reserved | Reserved for future use.
 6 | Reserved | Reserved for future use.
 7 | Reserved | Reserved for future use.
@@ -276,7 +276,7 @@ int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
-uint 8 | Reserved | 2 | Reserved for future use.
+uint 16 | Validation | 2 | Value is always `0xFACE`. Can be used to help validating that the decryption was successful.
 
 <a name="service_data_encrypted_ext_error"></a>
 #### External error packet
@@ -293,7 +293,7 @@ uint 32 | Timestamp | 4 | The timestamp when the first error occured.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
-uint 8 | Reserved | 2 | Reserved for future use.
+uint 16 | Validation | 2 | Value is always `0xFACE`. Can be used to help validating that the decryption was successful.
 
 
 <a name="servicedata_setup_packet"></a>
