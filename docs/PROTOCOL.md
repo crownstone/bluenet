@@ -239,7 +239,7 @@ int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
-uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
 uint 16 | Validation | 2 | Value is always `0xFACE`. Can be used to help validating that the decryption was successful.
 
 <a name="service_data_encrypted_error"></a>
@@ -256,7 +256,7 @@ uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crown
 uint 32 | Timestamp | 4 | The timestamp when the first error occured.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
-uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 
 <a name="service_data_encrypted_ext_state"></a>
@@ -275,7 +275,7 @@ int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
-uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
 uint 16 | Validation | 2 | Value is always `0xFACE`. Can be used to help validating that the decryption was successful.
 
 <a name="service_data_encrypted_ext_error"></a>
@@ -292,7 +292,7 @@ uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crown
 uint 32 | Timestamp | 4 | The timestamp when the first error occured.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
-uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
 uint 16 | Validation | 2 | Value is always `0xFACE`. Can be used to help validating that the decryption was successful.
 
 
