@@ -143,6 +143,9 @@ void Crownstone::init() {
 
 	_stateVars->get(STATE_OPERATION_MODE, _operationMode);
 
+	LOGi(FMT_CREATE, "Timer");
+	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
+
 	switch(_operationMode) {
 	case OPERATION_MODE_SETUP: {
 
@@ -544,9 +547,6 @@ void Crownstone::setName() {
 
 void Crownstone::prepareNormalOperationMode() {
 
-	LOGi(FMT_CREATE, "Timer");
-	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
-
 	//! create scanner object
 	_scanner->init();
 	_scanner->setStack(_stack);
@@ -614,9 +614,8 @@ void Crownstone::startUp() {
 	scheduleNextTick();
 	_stack->startTicking();
 
-	//! the rest we only execute if we are in normal operation
-	//! during setup mode, most of the crownstone's functionality is
-	//! disabled
+	// The rest we only execute if we are in normal operation.
+	// During other operation modes, most of the crownstone's functionality is disabled.
 	if (_operationMode == OPERATION_MODE_NORMAL) {
 
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
@@ -675,23 +674,27 @@ void Crownstone::startUp() {
 
 void Crownstone::tick() {
 
-	if (_operationMode == OPERATION_MODE_NORMAL) {
+	// Update temperature
+	int32_t temperature = getTemperature();
+	_stateVars->set(STATE_TEMPERATURE, temperature);
+
 #if ADVERTISEMENT_IMPROVEMENT==1 // TODO: remove this macro
+	// Update advertisement parameter
+	if (_operationMode == OPERATION_MODE_NORMAL) {
+
 		// update advertisement parameters (to improve scanning on (some) android phones)
 		_stack->updateAdvertisement(true);
-#endif
 
 		// update advertisement (to update service data)
 		_stack->setAdvertisementData();
-
-		// update temperature
-		int32_t temperature = getTemperature();
-		_stateVars->set(STATE_TEMPERATURE, temperature);
 	}
+#endif
 
 	// Check for timeouts
-	if (RTC::getCount() > RTC::msToTicks(PWM_BOOT_DELAY_MS)) {
-		_switch->startPwm();
+	if (_operationMode == OPERATION_MODE_NORMAL || _operationMode == OPERATION_MODE_SETUP) {
+		if (RTC::getCount() > RTC::msToTicks(PWM_BOOT_DELAY_MS)) {
+			_switch->startPwm();
+		}
 	}
 
 	scheduleNextTick();
@@ -962,6 +965,8 @@ int main() {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
+
+	// init drivers, configure(), create services and chars,
 	crownstone.init(); // 13 ms
 
 	BLEutil::print_heap("Heap crownstone init: ");
