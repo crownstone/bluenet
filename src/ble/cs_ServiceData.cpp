@@ -105,6 +105,7 @@ ServiceData::ServiceData() :
 
 void ServiceData::updatePowerUsage(int32_t powerUsage) {
 	_powerUsageReal = powerUsage;
+	_powerFactor = 127;
 }
 
 void ServiceData::updateAccumulatedEnergy(int32_t energy) {
@@ -211,7 +212,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 			_serviceData.params.encrypted.state.switchState = _switchState;
 			_serviceData.params.encrypted.state.flags = _flags;
 			_serviceData.params.encrypted.state.temperature = _temperature;
-			_serviceData.params.encrypted.state.powerFactor = 127;
+			_serviceData.params.encrypted.state.powerFactor = _powerFactor;
 			_serviceData.params.encrypted.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
 			_serviceData.params.encrypted.state.energyUsed = _energyUsed;
 			_serviceData.params.encrypted.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
@@ -638,7 +639,7 @@ void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 				stateItem.state.flags = _flags;
 				stateItem.state.temperature = _temperature;
 				stateItem.state.powerFactor = _powerFactor;
-				stateItem.state.powerUsageReal = _powerUsageReal;
+				stateItem.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
 				stateItem.state.energyUsed = _energyUsed;
 				stateItem.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _meshSendCount);
 				break;
@@ -651,7 +652,7 @@ void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 			stateItem.state.flags = _flags;
 			stateItem.state.temperature = _temperature;
 			stateItem.state.powerFactor = _powerFactor;
-			stateItem.state.powerUsageReal = _powerUsageReal;
+			stateItem.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
 			stateItem.state.energyUsed = _energyUsed;
 			stateItem.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _meshSendCount);
 		}
