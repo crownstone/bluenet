@@ -59,20 +59,6 @@ enum ServiceDataEncryptedType {
 	SERVICE_DATA_TYPE_EXT_ERROR = 3,
 };
 
-
-//struct __attribute__((packed)) service_data_v1_t {
-//	uint16_t crownstoneId;
-//	uint8_t  switchState;
-//	uint8_t  eventBitmask;
-//	int8_t   temperature;
-//	int32_t  powerUsage;
-//	int32_t  accumulatedEnergy;
-//	uint8_t  rand;
-//	uint16_t counter;
-//};
-
-
-
 struct __attribute__((packed)) service_data_encrypted_state_t {
 	uint8_t  id;
 	uint8_t  switchState;
@@ -157,6 +143,7 @@ union service_data_t {
 //			service_data_v1_t v1;
 			service_data_encrypted_t encrypted;
 			service_data_setup_t setup;
+			uint8_t encryptedArray[sizeof(service_data_encrypted_t)];
 		};
 	} params;
 	uint8_t array[sizeof(params)] = {};
@@ -248,9 +235,6 @@ private:
 	//! Stores the last (current) advertised service data
 	service_data_t _serviceData;
 
-//	//! Used to store the service data of an external Crownstone.
-//	service_data_t _serviceDataExt;
-
 	//! Store own ID
 	stone_id_t _crownstoneId; // TODO: use State for this?
 
@@ -274,16 +258,6 @@ private:
 
 	//! Store timestamp of first error
 	uint32_t _firstErrorTimestamp; // TODO: use State for this?
-
-
-	//! Used to store the encrypted service data.
-	union {
-		struct __attribute__((packed)) {
-			uint8_t  protocolVersion;
-			uint8_t  payload[16];
-		} _encryptedParams;
-		uint8_t _encryptedArray[sizeof(service_data_t)] = {};
-	};
 
 	//! Store the operation mode.
 	uint8_t _operationMode;

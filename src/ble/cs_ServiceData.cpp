@@ -140,12 +140,7 @@ void ServiceData::updateTemperature(int8_t temperature) {
 }
 
 uint8_t* ServiceData::getArray() {
-	if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
-		return _encryptedArray;
-	}
-	else {
-		return _serviceData.array;
-	}
+	return _serviceData.array;
 }
 
 uint16_t ServiceData::getArraySize() {
@@ -224,15 +219,19 @@ void ServiceData::updateAdvertisement(bool initial) {
 		}
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
+		LOGd("servideData:");
+		BLEutil::printArray(_serviceData.array, sizeof(service_data_t));
 //		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type, serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask, serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy, serviceData->params.partialTimestamp);
 #endif
 
 		// encrypt the array using the guest key ECB if encryption is enabled.
 		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
-
-			// encrypt the block.
-			EncryptionHandler::getInstance().encrypt((_serviceData.array) + 1, sizeof(service_data_t) - 1, _encryptedParams.payload,
-			                                         sizeof(_encryptedParams.payload), GUEST, ECB_GUEST);
+			EncryptionHandler::getInstance().encrypt(
+					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
+					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
+					GUEST, ECB_GUEST);
+//			EncryptionHandler::getInstance().encrypt((_serviceData.array) + 1, sizeof(service_data_t) - 1, _encryptedParams.payload,
+//			                                         sizeof(_encryptedParams.payload), GUEST, ECB_GUEST);
 		}
 
 		if (!initial) {
