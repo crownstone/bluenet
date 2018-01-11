@@ -83,7 +83,7 @@ void Switch::init(const boards_config_t& board) {
 
 	// Retrieve last switch state from persistent storage
 	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t));
-//	LOGd("switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
+	LOGd("Stored switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_switchTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSwitch);
@@ -98,7 +98,6 @@ void Switch::start() {
 
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
 	if (_switchValue.pwm_state != 0) {
-		_setPwm(0);
 		relayOn();
 	}
 	else {
@@ -117,10 +116,10 @@ void Switch::startPwm() {
 		return;
 	}
 	_pwmPowered = true;
-	PWM::getInstance().start(true);
 
 	// Restore the pwm state.
 	_setPwm(_switchValue.pwm_state);
+	PWM::getInstance().start(true); // Start after setting value, else there's a race condition.
 	if (_switchValue.pwm_state != 0 && _switchValue.relay_state) {
 		relayOff();
 	}
@@ -221,6 +220,11 @@ void Switch::setPwm(uint8_t value) {
 	LOGd("set PWM %d", value);
 #endif
 	_setPwm(value);
+	// Turn on relay instead, when trying to dim too soon after boot.
+	// Dimmer state will be restored when startPwm() is called.
+	if (_switchValue.relay_state == 0 && value != 0 && !_pwmPowered) {
+		_relayOn();
+	}
 	storeState(oldVal);
 }
 
@@ -280,7 +284,8 @@ void Switch::setSwitch(uint8_t switchState) {
 				_setPwm(0);
 			}
 			// Relay on when value >= 100, else off (as the dimmer is parallel)
-			if (switchState >= SWITCH_ON) {
+			// Or when user wants to dim, but dimmer isn't powered yet. Dimmer state will be restored when startPwm() is called.
+			if (switchState >= SWITCH_ON || (switchState != 0 && !_pwmPowered)) {
 				_relayOn();
 			}
 			else {
