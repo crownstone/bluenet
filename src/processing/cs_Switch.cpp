@@ -121,6 +121,9 @@ void Switch::startPwm() {
 
 	// Restore the pwm state.
 	_setPwm(_switchValue.pwm_state);
+	if (_switchValue.pwm_state != 0 && _switchValue.relay_state) {
+		relayOff();
+	}
 }
 
 void Switch::onZeroCrossing() {
