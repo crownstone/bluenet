@@ -13,7 +13,7 @@
 #include <storage/cs_State.h>
 #include <processing/cs_Switch.h>
 
-#define SCHEDULER_PRINT_DEBUG
+//#define SCHEDULER_PRINT_DEBUG
 
 Scheduler::Scheduler() :
 //	EventListener(EVT_ALL),
@@ -157,8 +157,10 @@ void Scheduler::readScheduleList() {
 		writeScheduleList(true);
 	}
 
+#ifdef SCHEDULER_PRINT_DEBUG
 	LOGi("restored schedule list (%d):", _scheduleList->getSize());
 	print();
+#endif
 	publishScheduleEntries();
 }
 

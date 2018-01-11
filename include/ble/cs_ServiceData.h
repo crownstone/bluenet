@@ -22,18 +22,7 @@
 #include <protocol/cs_MeshMessageTypes.h>
 #endif
 
-
-//! Flags bitmask map (if bit is true, then):
-//enum ServiceDataFlagBitsV1 {
-//	SERVICE_DATA_FLAGS_V1_RESERVED0  = 0,
-//	SERVICE_DATA_FLAGS_V1_EXT_DATA   = 1,
-//	SERVICE_DATA_FLAGS_V1_ERROR      = 2,
-//	SERVICE_DATA_FLAGS_V1_RESERVED3  = 3,
-//	SERVICE_DATA_FLAGS_V1_RESERVED4  = 4,
-//	SERVICE_DATA_FLAGS_V1_RESERVED5  = 5,
-//	SERVICE_DATA_FLAGS_V1_RESERVED6  = 6,
-//	SERVICE_DATA_FLAGS_V1_SETUP_MODE = 7
-//};
+//#define BUILD_MESHING 1
 
 enum ServiceDataFlagBits {
 	SERVICE_DATA_FLAGS_DIMMING_AVAILABLE = 0,

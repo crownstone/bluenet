@@ -22,7 +22,7 @@
 #endif
 
 #define ADVERTISE_EXTERNAL_DATA
-#define PRINT_DEBUG_EXTERNAL_DATA
+//#define PRINT_DEBUG_EXTERNAL_DATA
 //#define PRINT_VERBOSE_EXTERNAL_DATA
 
 ServiceData::ServiceData() :
