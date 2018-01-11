@@ -98,6 +98,11 @@ void Switch::start() {
 
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
 	if (_switchValue.pwm_state != 0) {
+		if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+			// This shouldn't happen, but let's check it to be sure.
+			_switchValue.pwm_state = 0;
+//			_setPwm(0);
+		}
 		relayOn();
 	}
 	else {
@@ -123,6 +128,7 @@ void Switch::startPwm() {
 	if (_switchValue.pwm_state != 0 && _switchValue.relay_state) {
 		relayOff();
 	}
+	EventDispatcher::getInstance().dispatch(EVT_PWM_POWERED);
 }
 
 void Switch::onZeroCrossing() {
@@ -219,6 +225,14 @@ void Switch::setPwm(uint8_t value) {
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGd("set PWM %d", value);
 #endif
+	if (Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+		LOGw("Switch locked!");
+		return;
+	}
+	if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+		LOGd("pwm not allowed");
+		return;
+	}
 	_setPwm(value);
 	// Turn on relay instead, when trying to dim too soon after boot.
 	// Dimmer state will be restored when startPwm() is called.
@@ -235,6 +249,10 @@ uint8_t Switch::getPwm() {
 
 
 void Switch::relayOn() {
+	if (Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+		LOGw("Switch locked!");
+		return;
+	}
 	switch_state_t oldVal = _switchValue;
 	_relayOn();
 	storeState(oldVal);
@@ -242,6 +260,10 @@ void Switch::relayOn() {
 
 
 void Switch::relayOff() {
+	if (Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+		LOGw("Switch locked!");
+		return;
+	}
 	switch_state_t oldVal = _switchValue;
 	_relayOff();
 	storeState(oldVal);
@@ -258,6 +280,10 @@ void Switch::setSwitch(uint8_t switchState) {
 	LOGi("Set switch state: %d", switchState);
 #endif
 	switch_state_t oldVal = _switchValue;
+	if (Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+		LOGw("Switch locked!");
+		return;
+	}
 
 	switch (_hardwareBoard) {
 		case ACR01B1A: {
@@ -369,6 +395,14 @@ void Switch::delayedSwitchExecute() {
 	}
 }
 
+void Switch::pwmNotAllowed() {
+	switch_state_t oldVal = _switchValue;
+	if (_switchValue.pwm_state != 0) {
+		_setPwm(0);
+		_relayOn();
+	}
+	storeState(oldVal);
+}
 
 void Switch::_setPwm(uint8_t value) {
 	LOGd("setPwm %u", value);
@@ -457,6 +491,7 @@ bool Switch::allowPwmOn() {
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 	LOGd("errors=%d", stateErrors.asInt);
+
 	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
 //	return !(stateErrors.errors.chipTemp || stateErrors.errors.pwmTemp);
 }
@@ -506,6 +541,11 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
 	case EVT_CHIP_TEMP_ABOVE_THRESHOLD:
 		forceSwitchOff();
+		break;
+	case EVT_PWM_ALLOWED:
+		if (*(bool*)p_data == false) {
+			pwmNotAllowed();
+		}
 		break;
 	}
 }

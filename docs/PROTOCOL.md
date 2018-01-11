@@ -547,6 +547,8 @@ Type nr | Type name | Payload type | Payload Description | A | M | G | S
 26 | Schedule remove | uint 8 | Clear the Nth schedule entry of the [list](#schedule_list_packet). | x | x
 27 | Keepalive mesh | [Keep alive mesh packet](#keep_alive_mesh_packet) | Send keep alives via the mesh. | x | x |
 28 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. | x | x | x
+29 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
+30 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 
 
 <a name="cmd_enable_scanner_payload"></a>
@@ -638,6 +640,8 @@ Type nr | Type name | Payload type | Description
 51 | Current consumption threshold dimmer | uint 16 | At how much mA the dimmer will be turned off (soft fuse).     **Setting this to a wrong value may cause damage.**
 52 | Dimmer temp up voltage | float | Voltage of upper threshold of the dimmer thermometer.                         **Setting this to a wrong value may cause damage.**
 53 | Dimmer temp down voltage | float | Voltage of lower threshold of the dimmer thermometer.                       **Setting this to a wrong value may cause damage.**
+54 | Pwm allowed | uint8 | Stores whether this Crownstone is allowed to dim. *read only*
+55 | Switch locked | uint8 | Stores whether this Crownstone is allowed to change the switch state. *read only*
 
 OpCodes:
 

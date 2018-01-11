@@ -62,6 +62,9 @@ enum GeneralEventType {
 	EVT_EXTERNAL_STATE_MSG_CHAN_0,
 	EVT_EXTERNAL_STATE_MSG_CHAN_1,
 	EVT_TIME_SET, // Sent when the time has been set or changed.
+	EVT_PWM_POWERED,
+	EVT_PWM_ALLOWED, // Sent when pwm allowed flag is set. Payload is boolean.
+	EVT_SWITCH_LOCKED, // Sent when switch locked flag is set. Payload is boolean.
 	EVT_ALL = 0xFFFF
 };
 

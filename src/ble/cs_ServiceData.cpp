@@ -26,18 +26,20 @@
 //#define PRINT_VERBOSE_EXTERNAL_DATA
 
 ServiceData::ServiceData() :
-	_updateTimerId(NULL),
-	_crownstoneId(0),
-	_switchState(0),
-	_flags(0),
-	_temperature(0),
-	_powerFactor(0),
-	_powerUsageReal(0),
-	_energyUsed(0),
-	_firstErrorTimestamp(0),
-	_connected(false),
-	_updateCount(0),
-	_meshSendCount(0)
+	_updateTimerId(NULL)
+	,_crownstoneId(0)
+	,_switchState(0)
+	,_flags(0)
+	,_temperature(0)
+	,_powerFactor(0)
+	,_powerUsageReal(0)
+	,_energyUsed(0)
+	,_firstErrorTimestamp(0)
+	,_connected(false)
+	,_updateCount(0)
+#if BUILD_MESHING == 1
+	,_meshSendCount(0)
+#endif
 {
 	// we want to update the advertisement packet on a fixed interval.
 	_updateTimerData = { {0} };
@@ -98,6 +100,10 @@ ServiceData::ServiceData() :
 	LOGd("State item size: %u", sizeof(state_item_t));
 	LOGd("State item list size: %u", MAX_STATE_ITEMS);
 #endif
+
+	// Init flags
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED));
 
 	// set the initial advertisement.
 	updateAdvertisement(true);
@@ -163,6 +169,10 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 		uint32_t timestamp;
 		State::getInstance().get(STATE_TIME, timestamp);
+
+//		// Update flag
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED));
 
 		// Set error timestamp
 		if (stateErrors.asInt == 0) {
@@ -625,6 +635,10 @@ void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 #if BUILD_MESHING == 1
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 
+//		// Update flag
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED));
+
 		uint32_t timestamp;
 		State::getInstance().get(STATE_TIME, timestamp);
 
@@ -735,6 +749,18 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case EVT_TIME_SET: {
 		updateFlagsBitmask(SERVICE_DATA_FLAGS_TIME_SET, true);
+		break;
+	}
+	case EVT_PWM_POWERED: {
+		updateFlagsBitmask(SERVICE_DATA_FLAGS_DIMMING_AVAILABLE, true);
+		break;
+	}
+	case EVT_PWM_ALLOWED: {
+		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, *(bool*)p_data);
+		break;
+	}
+	case EVT_SWITCH_LOCKED: {
+		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, *(bool*)p_data);
 		break;
 	}
 #if BUILD_MESHING == 1

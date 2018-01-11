@@ -169,6 +169,8 @@ private:
 	//! Set switch after the delay time has passed.
 	void delayedSwitchExecute();
 
+	void pwmNotAllowed();
+
 	void forcePwmOff();
 	void forceRelayOn();
 	void forceSwitchOff();

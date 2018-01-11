@@ -67,6 +67,8 @@ enum ConfigurationTypes {
 	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM  = 51,     //! 0x33
 	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP    = 52,     //! 0x34
 	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN  = 53,     //! 0x35
+	CONFIG_PWM_ALLOWED                      = 54,     //! 0x36
+	CONFIG_SWITCH_LOCKED                    = 55,     //! 0x37
 
 	CONFIG_TYPES
 }; // Current max is 127 (0x7F), see cs_EventTypes.h

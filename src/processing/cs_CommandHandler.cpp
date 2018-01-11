@@ -162,6 +162,10 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		return handleCmdMeshCommand(buffer, size, accessLevel);
 	case CMD_ENABLE_CONT_POWER_MEASURE:
 		return handleCmdEnableContPowerMeasure(buffer, size, accessLevel);
+	case CMD_ALLOW_DIMMING:
+		return handleCmdAllowDimming(buffer, size, accessLevel);
+	case CMD_LOCK_SWITCH:
+		return handleCmdLockSwitch(buffer, size, accessLevel);
 	default:
 		LOGe("Unknown type: %u", type);
 		return ERR_COMMAND_NOT_FOUND;
@@ -776,6 +780,41 @@ ERR_CODE CommandHandler::handleCmdEnableContPowerMeasure(buffer_ptr_t buffer, co
 	return ERR_NOT_IMPLEMENTED;
 }
 
+ERR_CODE CommandHandler::handleCmdAllowDimming(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGi(STR_HANDLE_COMMAND, "allow dimming");
+
+	if (size != sizeof(enable_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+	bool enable = payload->enable;
+
+	LOGi("allow dimming: %u", enable);
+
+	Settings::getInstance().updateFlag(CONFIG_PWM_ALLOWED, enable, true);
+	EventDispatcher::getInstance().dispatch(EVT_PWM_ALLOWED, &enable, sizeof(bool));
+	return ERR_SUCCESS;
+}
+
+ERR_CODE CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGi(STR_HANDLE_COMMAND, "lock switch");
+
+	if (size != sizeof(enable_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+	bool enable = payload->enable;
+
+	LOGi("lock switch: %u", enable);
+	Settings::getInstance().updateFlag(CONFIG_SWITCH_LOCKED, enable, true);
+	EventDispatcher::getInstance().dispatch(EVT_SWITCH_LOCKED, &enable, sizeof(bool));
+	return ERR_SUCCESS;
+}
+
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
 //	switch (type) {
@@ -846,6 +885,8 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CMD_USER_FEEDBACK:
 	case CMD_SET_LED:
 	case CMD_RESET_ERRORS:
+	case CMD_ALLOW_DIMMING:
+	case CMD_LOCK_SWITCH:
 		return ADMIN;
 	}
 	return NOT_SET;

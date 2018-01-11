@@ -233,6 +233,8 @@ struct ps_configuration_t : ps_storage_base_t {
 	float pwmTempVoltageThresholdUp;
 	float pwmTempVoltageThresholdDown;
 
+	uint32_t pwmAllowed; //! Flag indicating whether this crownstone is marked as dimmable.
+	uint32_t switchLocked; //! Flag indicating whether this crownstone is allowed to change switch state.
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct

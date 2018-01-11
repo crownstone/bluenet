@@ -938,6 +938,16 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 //		_storageStruct.flagsBit.defaultOff = !value;
 		break;
 	}
+	case CONFIG_PWM_ALLOWED: {
+		p_item = (uint8_t*)&_storageStruct.pwmAllowed;
+		StorageHelper::setUint8(value, _storageStruct.pwmAllowed);
+		break;
+	}
+	case CONFIG_SWITCH_LOCKED: {
+		p_item = (uint8_t*)&_storageStruct.switchLocked;
+		StorageHelper::setUint8(value, _storageStruct.switchLocked);
+		break;
+	}
 	default: {
 		return false;
 	}
@@ -999,6 +1009,14 @@ bool Settings::readFlag(uint8_t type, bool& value) {
 //		default_value = DEFAULT_ON;
 		break;
 	}
+	case CONFIG_PWM_ALLOWED: {
+		StorageHelper::getUint8(_storageStruct.pwmAllowed, (uint8_t*)&value, 0);
+		break;
+	}
+	case CONFIG_SWITCH_LOCKED: {
+		StorageHelper::getUint8(_storageStruct.switchLocked, (uint8_t*)&value, 0);
+		break;
+	}
 	default:
 		return false;
 	}
@@ -1014,12 +1032,14 @@ bool Settings::readFlag(uint8_t type, bool& value) {
 bool Settings::isSet(uint8_t type) {
 
 	switch(type) {
-	case CONFIG_DEFAULT_ON:
 	case CONFIG_MESH_ENABLED :
 	case CONFIG_ENCRYPTION_ENABLED :
 	case CONFIG_IBEACON_ENABLED :
 	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED :
+	case CONFIG_DEFAULT_ON:
+	case CONFIG_PWM_ALLOWED:
+	case CONFIG_SWITCH_LOCKED: {
 		bool enabled;
 		readFlag(type, enabled);
 		return enabled;
