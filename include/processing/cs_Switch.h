@@ -153,7 +153,13 @@ public:
 private:
 	Switch();
 
-	void _setPwm(uint8_t value);
+	/** Sets the pwm and udpates switch state.
+	 *
+	 * @param[in] value                  Pwm value (0-100)
+	 * @return                           True when the given value was set, false otherwise.
+	 */
+	bool _setPwm(uint8_t value);
+
 	void _relayOn();
 	void _relayOff();
 

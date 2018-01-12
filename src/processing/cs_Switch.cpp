@@ -98,6 +98,7 @@ void Switch::start() {
 
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
 	if (_switchValue.pwm_state != 0) {
+		LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
 		if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
 			// This shouldn't happen, but let's check it to be sure.
 			_switchValue.pwm_state = 0;
@@ -123,9 +124,9 @@ void Switch::startPwm() {
 	_pwmPowered = true;
 
 	// Restore the pwm state.
-	_setPwm(_switchValue.pwm_state);
+	bool success = _setPwm(_switchValue.pwm_state);
 	PWM::getInstance().start(true); // Start after setting value, else there's a race condition.
-	if (_switchValue.pwm_state != 0 && _switchValue.relay_state) {
+	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state) {
 		relayOff();
 	}
 	EventDispatcher::getInstance().dispatch(EVT_PWM_POWERED);
@@ -229,14 +230,16 @@ void Switch::setPwm(uint8_t value) {
 		LOGw("Switch locked!");
 		return;
 	}
-	if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
-		LOGd("pwm not allowed");
-		return;
-	}
-	_setPwm(value);
+//	LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
+//	if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+//		LOGd("pwm not allowed");
+//		return;
+//	}
+	bool success = _setPwm(value);
 	// Turn on relay instead, when trying to dim too soon after boot.
 	// Dimmer state will be restored when startPwm() is called.
-	if (_switchValue.relay_state == 0 && value != 0 && !_pwmPowered) {
+//	if (_switchValue.relay_state == 0 && value != 0 && !_pwmPowered) {
+	if (!success && _switchValue.relay_state == 0) {
 		_relayOn();
 	}
 	storeState(oldVal);
@@ -303,15 +306,17 @@ void Switch::setSwitch(uint8_t switchState) {
 			// TODO: why not first relay on, then pwm off, when going from 90 to 100?
 
 			// Pwm when value is 1-99, else pwm off
+			bool pwmOnSuccess = true;
 			if (switchState > 0 && switchState < SWITCH_ON) {
-				_setPwm(switchState);
+				pwmOnSuccess = _setPwm(switchState);
 			}
 			else {
 				_setPwm(0);
 			}
+
 			// Relay on when value >= 100, else off (as the dimmer is parallel)
-			// Or when user wants to dim, but dimmer isn't powered yet. Dimmer state will be restored when startPwm() is called.
-			if (switchState >= SWITCH_ON || (switchState != 0 && !_pwmPowered)) {
+			// Or when users wants to dim, but that's not possible (yet).
+			if (switchState >= SWITCH_ON || (!pwmOnSuccess && !_switchValue.relay_state)) {
 				_relayOn();
 			}
 			else {
@@ -404,11 +409,18 @@ void Switch::pwmNotAllowed() {
 	storeState(oldVal);
 }
 
-void Switch::_setPwm(uint8_t value) {
+bool Switch::_setPwm(uint8_t value) {
 	LOGd("setPwm %u", value);
 	if (value > 0 && !allowPwmOn()) {
 		LOGi("Don't turn on pwm");
-		return;
+		return false;
+	}
+
+	LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
+	if (value != 0 && !Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+		LOGd("pwm not allowed");
+		_switchValue.pwm_state = 0;
+		return false;
 	}
 
 #ifndef PWM_DISABLE
@@ -425,6 +437,11 @@ void Switch::_setPwm(uint8_t value) {
 	}
 #endif
 	_switchValue.pwm_state = value;
+	if (!_pwmPowered) {
+		// State stored, but not executed yet, so return false.
+		return false;
+	}
+	return true;
 }
 
 
