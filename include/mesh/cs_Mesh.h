@@ -28,7 +28,7 @@ extern "C" {
 }
 
 //! values are updated MESH_UPDATE_FREQUENCY times per second
-#define MESH_UPDATE_FREQUENCY 10
+#define MESH_UPDATE_FREQUENCY 100
 //#define MESH_CLOCK_SOURCE (CLOCK_SOURCE)
 
 typedef rbc_mesh_value_handle_t mesh_handle_t;
