@@ -127,7 +127,10 @@ void Switch::startPwm() {
 	bool success = _setPwm(_switchValue.pwm_state);
 	PWM::getInstance().start(true); // Start after setting value, else there's a race condition.
 	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state) {
-		relayOff();
+		// Don't use relayOff(), as that checks for switchLocked.
+		switch_state_t oldVal = _switchValue;
+		_relayOff();
+		storeState(oldVal);
 	}
 	EventDispatcher::getInstance().dispatch(EVT_PWM_POWERED);
 }
