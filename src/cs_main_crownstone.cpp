@@ -600,6 +600,7 @@ void Crownstone::startUp() {
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		//! Start switch, so it can be used.
 		_switch->start();
+//		Switch::getInstance().setPwm(90);
 
 		//! Start temperature guard regardless of operation mode
 		LOGi(FMT_START, "temp guard");
@@ -791,7 +792,6 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case CONFIG_TX_POWER: {
 //		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
 		_stack->setTxPowerLevel(*(int8_t*)p_data);
-
 		break;
 	}
 	case CONFIG_ADV_INTERVAL: {

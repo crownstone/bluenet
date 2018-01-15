@@ -240,6 +240,10 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->currentMultiplier                  = 0.0; // set to 0 to disable sampling checks
 	p_config->voltageZero                        = 1000; // something
 	p_config->currentZero                        = 1000; // something
+//	p_config->voltageMultiplier                  = 1.0;
+//	p_config->currentMultiplier                  = 1.0;
+//	p_config->voltageZero                        = 0;
+//	p_config->currentZero                        = 0;
 	p_config->powerZero                          = 0; // something
 	p_config->voltageRange                       = 3600; // 0V - 3.6V
 	p_config->currentRange                       = 3600; // 0V - 3.6V
