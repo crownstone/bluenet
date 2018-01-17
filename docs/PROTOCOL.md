@@ -1011,6 +1011,7 @@ Type | Packet
 --- | ---
 0 | [State](#mesh_state_item_state).
 1 | [Error](#mesh_state_item_error).
+2 | [Event State](#mesh_state_item_state).
 
 
 <a name="mesh_state_item_state"></a>

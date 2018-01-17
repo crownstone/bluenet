@@ -325,7 +325,8 @@ bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& ser
 					advertise = false;
 				}
 				switch (stateItem->type) {
-				case MESH_STATE_ITEM_TYPE_STATE: {
+				case MESH_STATE_ITEM_TYPE_STATE:
+				case MESH_STATE_ITEM_TYPE_EVENT_STATE: {
 					serviceData.params.encrypted.type = SERVICE_DATA_TYPE_EXT_STATE;
 					serviceData.params.encrypted.extState.id = stateItem->state.id;
 					serviceData.params.encrypted.extState.switchState = stateItem->state.switchState;
@@ -351,6 +352,8 @@ bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& ser
 					serviceData.params.encrypted.extError.validation = 0xFACE;
 					break;
 				}
+				default:
+					advertise = false;
 				}
 
 				found = true;
@@ -362,18 +365,23 @@ bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& ser
 		}
 	}
 
+	if (!found || !advertise) {
+		LOGw("Not advertising %u", advertiseId);
+	}
+#ifdef PRINT_DEBUG_EXTERNAL_DATA
+	else {
+//		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u adv=%u", serviceData.params.type, serviceData.params.crownstoneId, serviceData.params.switchState, serviceData.params.flagBitmask, serviceData.params.temperature, serviceData.params.powerUsageReal, serviceData.params.accumulatedEnergy, serviceData.params.partialTimestamp, advertise);
+		LOGd("serviceData:");
+		BLEutil::printArray(serviceData.array, sizeof(serviceData));
+	}
+#endif
+
 	// If we advertised the id at head, then increase the head
 	if (advertiseId == _advertisedIds.list[_advertisedIds.head]) {
 		_advertisedIds.head = (_advertisedIds.head + 1) % _advertisedIds.size;
 	}
 
-#ifdef PRINT_DEBUG_EXTERNAL_DATA
-//	LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u adv=%u", serviceData.params.type, serviceData.params.crownstoneId, serviceData.params.switchState, serviceData.params.flagBitmask, serviceData.params.temperature, serviceData.params.powerUsageReal, serviceData.params.accumulatedEnergy, serviceData.params.partialTimestamp, advertise);
-	LOGd("serviceData:");
-	BLEutil::printArray(serviceData.array, sizeof(serviceData));
-#endif
-
-	return advertise;
+	return advertise && found;
 #else
 	return false;
 #endif
