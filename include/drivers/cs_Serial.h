@@ -24,10 +24,16 @@ extern "C" {
 #define SERIAL_WARN                 2
 #define SERIAL_ERROR                3
 #define SERIAL_FATAL                4
-#define SERIAL_READ_ONLY            5
-#define SERIAL_NONE                 6
+#define SERIAL_BYTE_PROTOCOL_ONLY   5
+#define SERIAL_READ_ONLY            6
+#define SERIAL_NONE                 7
 
 #define SERIAL_CRLF "\r\n"
+
+                                           // bit:7654 3210
+#define SERIAL_START_BYTE           0x7E // "~"   0111 1110  resets the state
+#define SERIAL_ESCAPE_BYTE          0x5C // "\"   0101 1100  next byte gets bits flipped that are in flip mask
+#define SERIAL_ESCAPE_FLIP_MASK     0x40 //       0100 0000
 
 #ifndef SERIAL_VERBOSITY
 #error "You have to specify SERIAL_VERBOSITY"
@@ -107,15 +113,20 @@ extern "C" {
 void config_uart(uint8_t pinRx, uint8_t pinTx);
 
 /**
- * Write a string to the serial connection. Make sure you end with `\n` if you want to have new lines in the output.
- * Also flushing the buffer might be done around new lines.
- */
-//void write(const char *str);
-
-/**
  * Write a string with printf functionality.
  */
 int write(const char *str, ...);
+
+/** Write a buffer of data. Values get escaped when necessary.
+ *
+ * @param[in] data           Pointer to the data to write.
+ * @param[in] size           Size of the data.
+ */
+void writeBytes(uint8_t* data, const uint16_t size);
+
+/** Write the start byte
+ */
+void writeStartByte();
 
 #ifdef INCLUDE_TIMESTAMPS
 int now();

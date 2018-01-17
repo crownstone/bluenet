@@ -18,6 +18,9 @@
 #include "util/cs_BleError.h"
 #include <app_util_platform.h>
 
+#include "util/cs_Utils.h"
+#include "protocol/cs_UartParser.h"
+
 #include "ble/cs_Nordic.h"
 #include "cfg/cs_Boards.h"
 
@@ -29,6 +32,7 @@
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 20
+
 
 /**
  * Configure the UART. Currently we set it on 38400 baud.
@@ -56,6 +60,9 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 	NRF_UART0->PSELRXD = pinRx;
 	NRF_UART0->PSELTXD = pinTx;
 
+	// Init parser
+	UartParser::getInstance().init();
+
 	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; // Do not enable hardware flow control.
 	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud38400;
 //	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud230400; // Highest baudrate that still worked.
@@ -73,23 +80,19 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 #endif
 }
 
-/**
- * Write an individual character to UART.
- */
-//void write_uart(const char *str) {
-//	int16_t len = strlen(str);
-//	for(int i = 0; i < len; ++i) {
-//		NRF_UART0->EVENTS_TXDRDY = 0;
-//		NRF_UART0->TXD = (uint8_t)str[i];
-//		while(NRF_UART0->EVENTS_TXDRDY != 1) {}
-//	}
-//}
+inline void _writeByte(uint8_t val) {
+#if SERIAL_VERBOSITY<SERIAL_READ_ONLY
+	NRF_UART0->EVENTS_TXDRDY = 0;
+	NRF_UART0->TXD = val;
+	while(NRF_UART0->EVENTS_TXDRDY != 1) {}
+#endif
+}
 
 /**
  * A write function with a format specifier.
  */
 int write(const char *str, ...) {
-#if SERIAL_VERBOSITY<SERIAL_READ_ONLY
+#if SERIAL_VERBOSITY<SERIAL_BYTE_PROTOCOL_ONLY
 	char buffer[128];
 	va_list ap;
 	va_start(ap, str);
@@ -103,27 +106,42 @@ int write(const char *str, ...) {
 		va_start(ap, str);
 		len = vsprintf(buffer, str, ap);
 		va_end(ap);
-		for(int i = 0; i < len; ++i) {
-			NRF_UART0->EVENTS_TXDRDY = 0;
-			NRF_UART0->TXD = (uint8_t)buffer[i];
-			while(NRF_UART0->EVENTS_TXDRDY != 1) {}
-		}
+		writeBytes((uint8_t*)buffer, len);
 	} else {
 		char *p_buf = (char*)malloc(len + 1);
 		if (!p_buf) return -1;
 		va_start(ap, str);
 		len = vsprintf(p_buf, str, ap);
 		va_end(ap);
-		for(int i = 0; i < len; ++i) {
-			NRF_UART0->EVENTS_TXDRDY = 0;
-			NRF_UART0->TXD = (uint8_t)p_buf[i];
-			while(NRF_UART0->EVENTS_TXDRDY != 1) {}
-		}
+		writeBytes((uint8_t*)buffer, len);
 		free(p_buf);
 	}
 	return len;
 #endif
 	return 0;
+}
+
+void writeBytes(uint8_t* data, const uint16_t size) {
+#if SERIAL_VERBOSITY<SERIAL_READ_ONLY
+	for(int i = 0; i < size; ++i) {
+		uint8_t val = (uint8_t)data[i];
+		// Escape when necessary
+		switch (val) {
+			case SERIAL_START_BYTE:
+			case SERIAL_ESCAPE_BYTE:
+				_writeByte(SERIAL_ESCAPE_BYTE);
+				val ^= 0x40; // flip bits.
+				break;
+		}
+		_writeByte(val);
+	}
+#endif
+}
+
+void writeStartByte() {
+#if SERIAL_VERBOSITY<SERIAL_READ_ONLY
+	_writeByte(SERIAL_START_BYTE);
+#endif
 }
 
 #ifdef INCLUDE_TIMESTAMPS
@@ -136,66 +154,6 @@ int now() {
 
 
 static uint8_t readByte;
-static bool readBusy = false;
-
-static void onByteRead(void * data, uint16_t size) {
-	uint16_t event = 0;
-	switch (readByte) {
-	case 42: // *
-		event = EVT_INC_VOLTAGE_RANGE;
-		break;
-	case 47: // /
-		event = EVT_DEC_VOLTAGE_RANGE;
-		break;
-	case 43: // +
-		event = EVT_INC_CURRENT_RANGE;
-		break;
-	case 45: // -
-		event = EVT_DEC_CURRENT_RANGE;
-		break;
-	case 97: // a
-		event = EVT_TOGGLE_ADVERTISEMENT;
-		break;
-	case 99: // c
-		event = EVT_TOGGLE_LOG_CURRENT;
-		break;
-	case 68: // D
-		event = EVT_TOGGLE_ADC_DIFFERENTIAL_VOLTAGE;
-		break;
-	case 100: // d
-		event = EVT_TOGGLE_ADC_DIFFERENTIAL_CURRENT;
-		break;
-	case 70: // F
-		write("Paid respect\r\n");
-		break;
-	case 102: // f
-		event = EVT_TOGGLE_LOG_FILTERED_CURRENT;
-		break;
-	case 109: // m
-		event = EVT_TOGGLE_MESH;
-		break;
-	case 112: // p
-		event = EVT_TOGGLE_LOG_POWER;
-		break;
-	case 82: // R
-		write("radio: %u\r\n", NRF_RADIO->POWER);
-		break;
-	case 114: // r
-		event = EVT_CMD_RESET;
-		break;
-	case 86: // V
-		event = EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN;
-		break;
-	case 118: // v
-		event = EVT_TOGGLE_LOG_VOLTAGE;
-		break;
-	}
-	if (event != 0) {
-		EventDispatcher::getInstance().dispatch(event);
-	}
-	readBusy = false;
-}
-
 
 // UART interrupt handler
 extern "C" void UART0_IRQHandler(void) {
@@ -204,14 +162,7 @@ extern "C" void UART0_IRQHandler(void) {
 #endif
 
 	readByte = (uint8_t)NRF_UART0->RXD;
-
-	if (!readBusy) {
-		readBusy = true;
-		// Decouple callback from uart interrupt handler, and put it on app scheduler instead
-		uint32_t errorCode = app_sched_event_put(&readByte, sizeof(readByte), onByteRead);
-		APP_ERROR_CHECK(errorCode);
-	}
-	write("read: %u\r\n", readByte);
+	UartParser::getInstance().onRead(readByte);
 
 	// Clear event after reading the data: new data may be written to RXD immediately.
 	NRF_UART0->EVENTS_RXDRDY = 0;

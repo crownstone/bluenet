@@ -11,9 +11,8 @@
 #include <cstdlib>
 //
 
-//#include <common/cs_Types.h>
-
-#include <drivers/cs_Serial.h>
+#include "drivers/cs_Serial.h"
+#include "protocol/cs_ErrorCodes.h"
 
 #if __clang__
 #define STRINGIFY(str) #str
@@ -158,11 +157,13 @@ inline uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_ty
         {
             p_typedata->p_data = &p_data[index+2];
             p_typedata->data_len = field_length-1;
-            return NRF_SUCCESS;
+            return ERR_SUCCESS;
+//            return NRF_SUCCESS;
         }
         index += field_length+1;
     }
-    return NRF_ERROR_NOT_FOUND;
+    return ERR_NOT_FOUND;
+//    return NRF_ERROR_NOT_FOUND;
 }
 
 
