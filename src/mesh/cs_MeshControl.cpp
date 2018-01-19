@@ -401,8 +401,8 @@ bool MeshControl::handleConfigCommand(config_mesh_message_t* configMsg, uint16_t
 		statusResult = ERR_WRONG_PAYLOAD_LENGTH;
 		return true;
 	}
-	uint8_t configType = configMsg->type;
-	uint16_t configPayloadlength = configMsg->length;
+	uint8_t configType = configMsg->header.type;
+	uint16_t configPayloadlength = configMsg->header.length;
 	uint8_t* configPayload = configMsg->payload;
 
 	//! Check if the length given in the stream buffer actually fits in the message.
@@ -414,15 +414,15 @@ bool MeshControl::handleConfigCommand(config_mesh_message_t* configMsg, uint16_t
 		return true;
 	}
 
-	switch (configMsg->opCode) {
+	switch (configMsg->header.opCode) {
 	case READ_VALUE: {
 		config_reply_item_t configReply = {};
 		configReply.id = _myCrownstoneId;
-		configReply.data.opCode = READ_VALUE;
-		configReply.data.type = configType;
-		configReply.data.length = Settings::getInstance().getSettingsItemSize(configType);
+		configReply.data.header.opCode = READ_VALUE;
+		configReply.data.header.type = configType;
+		configReply.data.header.length = Settings::getInstance().getSettingsItemSize(configType);
 
-		if (configReply.data.length > sizeof(configReply.data.payload)) {
+		if (configReply.data.header.length > sizeof(configReply.data.payload)) {
 			statusResult = ERR_BUFFER_TOO_SMALL;
 		} else {
 			statusResult = Settings::getInstance().get(configType, configReply.data.payload);
@@ -455,24 +455,24 @@ bool MeshControl::handleStateCommand(state_mesh_message_t* stateMsg, uint16_t st
 		statusResult = ERR_WRONG_PAYLOAD_LENGTH;
 		return true;
 	}
-	uint8_t stateType = stateMsg->type;
+	uint8_t stateType = stateMsg->header.type;
 
 	//! Only the type and opcode seem to be used, not the stream buffer payload.
 	//! So no need to check the length field.
 
-	switch (stateMsg->opCode) {
+	switch (stateMsg->header.opCode) {
 	case READ_VALUE: {
 		state_reply_item_t stateReply = {};
 		stateReply.id = _myCrownstoneId;
-		stateReply.data.opCode = READ_VALUE;
-		stateReply.data.type = stateType;
-		stateReply.data.length = State::getInstance().getStateItemSize(stateType);
+		stateReply.data.header.opCode = READ_VALUE;
+		stateReply.data.header.type = stateType;
+		stateReply.data.header.length = State::getInstance().getStateItemSize(stateType);
 
-		if (stateReply.data.length > sizeof(stateReply.data.payload)) {
+		if (stateReply.data.header.length > sizeof(stateReply.data.payload)) {
 			statusResult = ERR_BUFFER_TOO_SMALL;
 		}
 		else {
-			statusResult = State::getInstance().get(stateType, stateReply.data.payload, stateReply.data.length);
+			statusResult = State::getInstance().get(stateType, stateReply.data.payload, stateReply.data.header.length);
 			if (statusResult == ERR_SUCCESS) {
 				sendStateReplyMessage(messageCounter, &stateReply);
 				//! Already send a state reply, no need to send a status reply
@@ -498,8 +498,8 @@ bool MeshControl::handleControlCommand(control_mesh_message_t* controlMsg, uint1
 		return true;
 	}
 
-	CommandHandlerTypes controlType = (CommandHandlerTypes)controlMsg->type;
-	uint16_t controlPayloadLength = controlMsg->length;
+	CommandHandlerTypes controlType = (CommandHandlerTypes)controlMsg->header.type;
+	uint16_t controlPayloadLength = controlMsg->header.length;
 	uint8_t* controlPayload = controlMsg->payload;
 
 	//! Check if the length given in the stream buffer actually fits in the message.

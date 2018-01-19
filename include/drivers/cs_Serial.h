@@ -30,11 +30,6 @@ extern "C" {
 
 #define SERIAL_CRLF "\r\n"
 
-                                           // bit:7654 3210
-#define SERIAL_START_BYTE           0x7E // "~"   0111 1110  resets the state
-#define SERIAL_ESCAPE_BYTE          0x5C // "\"   0101 1100  next byte gets bits flipped that are in flip mask
-#define SERIAL_ESCAPE_FLIP_MASK     0x40 //       0100 0000
-
 #ifndef SERIAL_VERBOSITY
 #error "You have to specify SERIAL_VERBOSITY"
 #define SERIAL_VERBOSITY SERIAL_NONE

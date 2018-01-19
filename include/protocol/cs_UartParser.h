@@ -23,6 +23,14 @@
 
 #include <cstdint>
 
+                                           // bit:7654 3210
+#define UART_START_BYTE           0x7E // "~"   0111 1110  resets the state
+#define UART_ESCAPE_BYTE          0x5C // "\"   0101 1100  next byte gets bits flipped that are in flip mask
+#define UART_ESCAPE_FLIP_MASK     0x40 //       0100 0000
+
+enum UartOpcode {
+	UART_OPCODE_CONTROL = 0,
+};
 
 struct __attribute__((__packed__)) uart_msg_header_t {
 	uint16_t opCode;

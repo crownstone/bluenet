@@ -34,7 +34,6 @@ private:
 
 	bool                               _hasKeepAliveState;
 	keep_alive_state_message_payload_t _lastKeepAlive;
-//	uint32_t                           _lastKeepAliveTimestamp;
 
 	app_timer_t                        _keepAliveTimerData;
 	app_timer_id_t                     _keepAliveTimerId;

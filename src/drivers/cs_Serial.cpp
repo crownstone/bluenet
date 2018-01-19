@@ -121,16 +121,17 @@ int write(const char *str, ...) {
 	return 0;
 }
 
+// TODO: use uart class for this.
 void writeBytes(uint8_t* data, const uint16_t size) {
 #if SERIAL_VERBOSITY<SERIAL_READ_ONLY
 	for(int i = 0; i < size; ++i) {
 		uint8_t val = (uint8_t)data[i];
 		// Escape when necessary
 		switch (val) {
-			case SERIAL_START_BYTE:
-			case SERIAL_ESCAPE_BYTE:
-				_writeByte(SERIAL_ESCAPE_BYTE);
-				val ^= 0x40; // flip bits.
+			case UART_START_BYTE:
+			case UART_ESCAPE_BYTE:
+				_writeByte(UART_ESCAPE_BYTE);
+				val ^= UART_ESCAPE_FLIP_MASK;
 				break;
 		}
 		_writeByte(val);
@@ -138,9 +139,10 @@ void writeBytes(uint8_t* data, const uint16_t size) {
 #endif
 }
 
+// TODO: use uart class for this.
 void writeStartByte() {
 #if SERIAL_VERBOSITY<SERIAL_READ_ONLY
-	_writeByte(SERIAL_START_BYTE);
+	_writeByte(UART_START_BYTE);
 #endif
 }
 

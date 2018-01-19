@@ -15,7 +15,7 @@
 
 //#define PRINT_STREAMBUFFER_VERBOSE
 
-#define SB_HEADER_SIZE 4
+
 
 #define SB_SUCCESS                               0
 #define SB_BUFFER_NOT_INITIALIZED                1
@@ -27,6 +27,17 @@ enum OpCode {
 	NOTIFY_VALUE
 };
 
+/** Header of a stream buffer
+ *
+ */
+struct __attribute__((__packed__)) stream_header_t {
+	uint8_t type;
+	uint8_t opCode; //! can be used as op code, see <OpCode>
+	uint16_t length;
+};
+
+#define SB_HEADER_SIZE                           sizeof(stream_header_t)
+
 /** Structure for a StreamBuffer
  *
  * typename T defines the type of the payload elements
@@ -34,9 +45,10 @@ enum OpCode {
  */
 template <typename T, int U>
 struct __attribute__((__packed__)) stream_t {
-	uint8_t type;
-	uint8_t opCode; //! can be used as op code, see <OpCode>
-	uint16_t length;
+//	uint8_t type;
+//	uint8_t opCode; //! can be used as op code, see <OpCode>
+//	uint16_t length;
+	stream_header_t header;
 	T payload[U];
 };
 
@@ -114,7 +126,7 @@ public:
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}
 		memcpy(_buffer->payload, str.c_str(), str.length());
-		_buffer->length = str.length();
+		_buffer->header.length = str.length();
 		return SB_SUCCESS;
 	}
 
@@ -134,11 +146,11 @@ public:
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
-		if (_buffer->length >= _max_items) {
+		if (_buffer->header.length >= _max_items) {
 			LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}
-		_buffer->payload[_buffer->length++] = value;
+		_buffer->payload[_buffer->header.length++] = value;
 		return SB_SUCCESS;
 	}
 
@@ -152,7 +164,7 @@ public:
 			return SB_BUFFER_NOT_INITIALIZED;
 		}
 		memset(_buffer->payload, 0, _max_items * _item_size);
-		_buffer->length = 0;
+		_buffer->header.length = 0;
 		return SB_SUCCESS;
 	}
 
@@ -160,13 +172,13 @@ public:
 	 *
 	 * @return the type, see <ConfigurationTypes>
 	 */
-	inline uint8_t type() const { return _buffer->type; }
+	inline uint8_t type() const { return _buffer->header.type; }
 
 	/** Get the length/size of the payload in number of elements
 	 *
 	 * @return number of elements stored
 	 */
-	inline uint16_t length() const { return std::min(_buffer->length, _maxLength); }
+	inline uint16_t length() const { return std::min(_buffer->header.length, _maxLength); }
 
 	/** Get a pointer to the payload array
 	 *
@@ -179,19 +191,19 @@ public:
 	 *
 	 * @type the type, see <ConfigurationTypes>
 	 */
-	inline void setType(uint8_t type) { _buffer->type = type; }
+	inline void setType(uint8_t type) { _buffer->header.type = type; }
 
 	/** Return the opcode assigned to the SreamBuffer
 	 *
 	 * @return the type, see <OpCode>
 	 */
-	inline uint8_t opCode() const { return _buffer->opCode; }
+	inline uint8_t opCode() const { return _buffer->header.opCode; }
 
 	/** Set the opcode for this stream buffer
 	 *
 	 * @type the type, see <OpCode>
 	 */
-	inline void setOpCode(uint8_t opCode) { _buffer->opCode = opCode; }
+	inline void setOpCode(uint8_t opCode) { _buffer->header.opCode = opCode; }
 
 	/** Set payload of the buffer.
 	 *
@@ -212,7 +224,7 @@ public:
 			LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}
-		_buffer->length = length;
+		_buffer->header.length = length;
 		//_buffer->length = ((length > _capacity) ? _capacity : plength);
 		memcpy(_buffer->payload, payload, length * _item_size);
 		return SB_SUCCESS;
@@ -226,7 +238,7 @@ public:
 
 	/** @inherit */
 	uint16_t getDataLength() const {
-		return SB_HEADER_SIZE + _buffer->length;
+		return SB_HEADER_SIZE + _buffer->header.length;
 	}
 
 	/** @inherit */

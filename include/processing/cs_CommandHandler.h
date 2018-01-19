@@ -69,6 +69,19 @@ public:
 	 */
 	void resetDelayed(uint8_t opCode);
 
+private:
+
+	CommandHandler();
+
+	app_timer_t      _delayTimerData;
+	app_timer_id_t   _delayTimerId;
+	app_timer_t      _resetTimerData;
+	app_timer_id_t   _resetTimerId;
+
+	const boards_config_t* _boardConfig;
+
+	EncryptionAccessLevel getRequiredAccessLevel(const CommandHandlerTypes type);
+	bool allowedAsMeshCommand(const CommandHandlerTypes type);
 
 	ERR_CODE handleCmdNop                   (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	ERR_CODE handleCmdGotoDfu               (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
@@ -102,18 +115,5 @@ public:
 	ERR_CODE handleCmdAllowDimming          (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	ERR_CODE handleCmdLockSwitch            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 
-private:
-
-	CommandHandler();
-
-	app_timer_t      _delayTimerData;
-	app_timer_id_t   _delayTimerId;
-	app_timer_t      _resetTimerData;
-	app_timer_id_t   _resetTimerId;
-
-	const boards_config_t* _boardConfig;
-
-	EncryptionAccessLevel getRequiredAccessLevel(const CommandHandlerTypes type);
-	bool allowedAsMeshCommand(const CommandHandlerTypes type);
 };
 

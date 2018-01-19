@@ -452,7 +452,7 @@ inline bool is_valid_command_control_mesh_message(control_mesh_message_t* msg, u
 	if (length < SB_HEADER_SIZE) {
 		return false;
 	}
-	if (length < SB_HEADER_SIZE + msg->length) {
+	if (length < SB_HEADER_SIZE + msg->header.length) {
 		return false;
 	}
 	return true;

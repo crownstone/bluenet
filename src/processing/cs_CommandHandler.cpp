@@ -753,9 +753,9 @@ ERR_CODE CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const uint16_
 		if (!is_valid_command_control_mesh_message(controlMsg, payloadLength)) {
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		if (allowedAsMeshCommand((CommandHandlerTypes)controlMsg->type)) {
+		if (allowedAsMeshCommand((CommandHandlerTypes)controlMsg->header.type)) {
 			sendMeshMsg = true;
-			requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)controlMsg->type);
+			requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)controlMsg->header.type);
 		}
 		break;
 	}

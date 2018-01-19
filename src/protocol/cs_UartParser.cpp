@@ -20,14 +20,18 @@
  *********************************************************************************************************************/
 
 #include "protocol/cs_UartParser.h"
-#include "drivers/cs_Serial.h"
 #include "util/cs_Utils.h"
 #include "protocol/cs_ErrorCodes.h"
 #include "util/cs_BleError.h"
 #include "ble/cs_Nordic.h"
 
-//#include <crc16.h>
-//#include <nrf.h>
+#include "structs/cs_StreamBuffer.h"
+#include "processing/cs_CommandHandler.h"
+
+
+// Define both test pin to enable gpio debug.
+#define TEST_PIN   22
+#define TEST_PIN2  23
 
 UartParser::UartParser():
 readBuffer(NULL),
@@ -46,11 +50,20 @@ void handle_msg(void * data, uint16_t size) {
 
 void UartParser::init() {
 	readBuffer = new uint8_t[UART_RX_BUFFER_SIZE];
+#ifdef TEST_PIN
+    nrf_gpio_cfg_output(TEST_PIN);
+#endif
+#ifdef TEST_PIN2
+    nrf_gpio_cfg_output(TEST_PIN2);
+#endif
 }
 
 void UartParser::reset() {
-	write("r\r\n");
-	BLEutil::printArray(readBuffer, readBufferIdx);
+//	write("r\r\n");
+//	BLEutil::printArray(readBuffer, readBufferIdx);
+#ifdef TEST_PIN2
+	nrf_gpio_pin_toggle(TEST_PIN2);
+#endif
 	readBufferIdx = 0;
 	startedReading = false;
 	escapeNextByte = false;
@@ -58,17 +71,15 @@ void UartParser::reset() {
 }
 
 void UartParser::escape(uint8_t& val) {
-	val ^= SERIAL_ESCAPE_FLIP_MASK;
+	val ^= UART_ESCAPE_FLIP_MASK;
 }
 
 void UartParser::unEscape(uint8_t& val) {
-	val ^= SERIAL_ESCAPE_FLIP_MASK;
+	val ^= UART_ESCAPE_FLIP_MASK;
 }
 
 
 void UartParser::onRead(uint8_t val) {
-	write("b\r\n");
-
 	// CRC error? Reset.
 	// Start char? Reset.
 	// Bad escaped value? Reset.
@@ -77,34 +88,39 @@ void UartParser::onRead(uint8_t val) {
 
 	// Can't read anything while processing the previous msg.
 	if (readBusy) {
-		write("i\r\n");
+#ifdef TEST_PIN2
+		nrf_gpio_pin_toggle(TEST_PIN2);
+#endif
 		return;
 	}
+
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 
 	// An escape shouldn't be followed by a special byte
 	if (escapeNextByte) {
 		switch (val) {
-		case SERIAL_START_BYTE:
-		case SERIAL_ESCAPE_BYTE:
+		case UART_START_BYTE:
+		case UART_ESCAPE_BYTE:
 			reset();
 			return;
 		}
 	}
 
-	if (val == SERIAL_START_BYTE) {
+	if (val == UART_START_BYTE) {
 		reset();
 		startedReading = true;
 		return;
 	}
 
 	if (!startedReading) {
-		write("n\r\n");
 		return;
 	}
 
-	if (val == SERIAL_ESCAPE_BYTE) {
+
+	if (val == UART_ESCAPE_BYTE) {
 		escapeNextByte = true;
-		write("e\r\n");
 		return;
 	}
 
@@ -113,14 +129,17 @@ void UartParser::onRead(uint8_t val) {
 		escapeNextByte = false;
 	}
 
+//#ifdef TEST_PIN
+//	nrf_gpio_pin_toggle(TEST_PIN);
+//#endif
+
 	readBuffer[readBufferIdx++] = val;
-	write("b\r\n");
 
 	if (readBufferIdx == sizeof(uart_msg_header_t)) {
 		// First check received size, then add header and tail size.
 		// Otherwise an overflow would lead to passing the size check.
 		readPacketSize = ((uart_msg_header_t*)readBuffer)->size;
-		if (readPacketSize > UART_RX_BUFFER_SIZE) {
+		if (readPacketSize > UART_RX_MAX_PAYLOAD_SIZE) {
 			reset();
 			return;
 		}
@@ -130,15 +149,6 @@ void UartParser::onRead(uint8_t val) {
 	if (readBufferIdx >= sizeof(uart_msg_header_t)) {
 		// Header was read.
 		if (readBufferIdx >= readPacketSize) {
-			// Check CRC
-			uint16_t calculatedCrc = crc16(readBuffer, readPacketSize - sizeof(uart_msg_tail_t));
-			uint16_t receivedCrc = *((uint16_t*)(readBuffer + readPacketSize - sizeof(uart_msg_tail_t)));
-			if (calculatedCrc != receivedCrc) {
-				LOGw("crc: %u vs %u", calculatedCrc, receivedCrc);
-				reset();
-				return;
-			}
-
 			readBusy = true;
 			// Decouple callback from interrupt handler, and put it on app scheduler instead
 			uint32_t errorCode = app_sched_event_put(readBuffer, readBufferIdx, handle_msg);
@@ -158,8 +168,37 @@ void UartParser::crc16(const uint8_t * data, const uint16_t size, uint16_t& crc)
 void UartParser::handleMsg(void * data, uint16_t size) {
 	LOGd("read:");
 	BLEutil::printArray(data, size);
-	readBufferIdx = 0;
+
+	// Check CRC
+	uint16_t calculatedCrc = crc16((uint8_t*)data, size - sizeof(uart_msg_tail_t));
+	uint16_t receivedCrc = *((uint16_t*)((uint8_t*)data + size - sizeof(uart_msg_tail_t)));
+	if (calculatedCrc != receivedCrc) {
+		readBusy = false;
+		reset();
+		return;
+	}
+
+	uart_msg_header_t* header = (uart_msg_header_t*)data;
+	uint8_t* payload = (uint8_t*)data + sizeof(uart_msg_header_t);
+
+	switch (header->opCode) {
+	case UART_OPCODE_CONTROL: {
+		stream_header_t* streamHeader = (stream_header_t*)payload;
+		if (header->size - sizeof(stream_header_t) < streamHeader->length) {
+			LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+			break;
+		}
+		uint8_t* streamPayload = (uint8_t*)payload + sizeof(stream_header_t);
+		CommandHandler::getInstance().handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
+		break;
+	}
+	}
+
+
+	// When done, ALWAYS reset and set readBusy to false!
+	// Reset invalidates the data, right?
 	readBusy = false;
+	reset();
 	return;
 
 
