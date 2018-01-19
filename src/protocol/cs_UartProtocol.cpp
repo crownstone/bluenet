@@ -19,7 +19,7 @@
  *
  *********************************************************************************************************************/
 
-#include "protocol/cs_UartParser.h"
+#include "protocol/cs_UartProtocol.h"
 #include "util/cs_Utils.h"
 #include "protocol/cs_ErrorCodes.h"
 #include "util/cs_BleError.h"
@@ -30,10 +30,10 @@
 
 
 // Define both test pin to enable gpio debug.
-#define TEST_PIN   22
-#define TEST_PIN2  23
+//#define TEST_PIN   22
+//#define TEST_PIN2  23
 
-UartParser::UartParser():
+UartProtocol::UartProtocol():
 readBuffer(NULL),
 readBufferIdx(0),
 startedReading(false),
@@ -45,10 +45,10 @@ readBusy(false)
 }
 
 void handle_msg(void * data, uint16_t size) {
-	UartParser::getInstance().handleMsg(data, size);
+	UartProtocol::getInstance().handleMsg(data, size);
 }
 
-void UartParser::init() {
+void UartProtocol::init() {
 	readBuffer = new uint8_t[UART_RX_BUFFER_SIZE];
 #ifdef TEST_PIN
     nrf_gpio_cfg_output(TEST_PIN);
@@ -58,7 +58,7 @@ void UartParser::init() {
 #endif
 }
 
-void UartParser::reset() {
+void UartProtocol::reset() {
 //	write("r\r\n");
 //	BLEutil::printArray(readBuffer, readBufferIdx);
 #ifdef TEST_PIN2
@@ -70,16 +70,16 @@ void UartParser::reset() {
 	readPacketSize = 0;
 }
 
-void UartParser::escape(uint8_t& val) {
+void UartProtocol::escape(uint8_t& val) {
 	val ^= UART_ESCAPE_FLIP_MASK;
 }
 
-void UartParser::unEscape(uint8_t& val) {
+void UartProtocol::unEscape(uint8_t& val) {
 	val ^= UART_ESCAPE_FLIP_MASK;
 }
 
 
-void UartParser::onRead(uint8_t val) {
+void UartProtocol::onRead(uint8_t val) {
 	// CRC error? Reset.
 	// Start char? Reset.
 	// Bad escaped value? Reset.
@@ -157,15 +157,15 @@ void UartParser::onRead(uint8_t val) {
 	}
 }
 
-uint16_t UartParser::crc16(const uint8_t * data, uint16_t size) {
+uint16_t UartProtocol::crc16(const uint8_t * data, uint16_t size) {
 	return crc16_compute(data, size, NULL);
 }
 
-void UartParser::crc16(const uint8_t * data, const uint16_t size, uint16_t& crc) {
+void UartProtocol::crc16(const uint8_t * data, const uint16_t size, uint16_t& crc) {
 	crc = crc16_compute(data, size, &crc);
 }
 
-void UartParser::handleMsg(void * data, uint16_t size) {
+void UartProtocol::handleMsg(void * data, uint16_t size) {
 	LOGd("read:");
 	BLEutil::printArray(data, size);
 

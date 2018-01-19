@@ -44,11 +44,11 @@ struct __attribute__((__packed__)) uart_msg_tail_t {
 #define UART_RX_BUFFER_SIZE            128
 #define UART_RX_MAX_PAYLOAD_SIZE       (UART_RX_BUFFER_SIZE - sizeof(uart_msg_header_t) - sizeof(uart_msg_tail_t))
 
-class UartParser {
+class UartProtocol {
 public:
 	//! Use static variant of singleton, no dynamic memory allocation
-	static UartParser& getInstance() {
-		static UartParser instance;
+	static UartProtocol& getInstance() {
+		static UartProtocol instance;
 		return instance;
 	}
 
@@ -64,13 +64,13 @@ public:
 
 private:
 	//! Constructor
-	UartParser();
+	UartProtocol();
 
 	//! This class is singleton, deny implementation
-	UartParser(UartParser const&);
+	UartProtocol(UartProtocol const&);
 
 	//! This class is singleton, deny implementation
-	void operator=(UartParser const &);
+	void operator=(UartProtocol const &);
 
 	uint8_t* readBuffer;
 	uint8_t readBufferIdx;
