@@ -19,7 +19,7 @@
 #include <app_util_platform.h>
 
 #include "util/cs_Utils.h"
-#include "protocol/cs_UartParser.h"
+#include "protocol/cs_UartProtocol.h"
 
 #include "ble/cs_Nordic.h"
 #include "cfg/cs_Boards.h"
@@ -61,7 +61,7 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 	NRF_UART0->PSELTXD = pinTx;
 
 	// Init parser
-	UartParser::getInstance().init();
+	UartProtocol::getInstance().init();
 
 	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; // Do not enable hardware flow control.
 	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud38400;
@@ -164,7 +164,7 @@ extern "C" void UART0_IRQHandler(void) {
 #endif
 
 	readByte = (uint8_t)NRF_UART0->RXD;
-	UartParser::getInstance().onRead(readByte);
+	UartProtocol::getInstance().onRead(readByte);
 
 	// Clear event after reading the data: new data may be written to RXD immediately.
 	NRF_UART0->EVENTS_RXDRDY = 0;

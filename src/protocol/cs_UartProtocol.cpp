@@ -79,6 +79,39 @@ void UartProtocol::unEscape(uint8_t& val) {
 }
 
 
+uint16_t UartProtocol::crc16(const uint8_t * data, uint16_t size) {
+	return crc16_compute(data, size, NULL);
+}
+
+void UartProtocol::crc16(const uint8_t * data, const uint16_t size, uint16_t& crc) {
+	crc = crc16_compute(data, size, &crc);
+}
+
+void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
+	if (size > UART_RX_MAX_PAYLOAD_SIZE) {
+		LOGw("msg too large");
+		return;
+	}
+
+	uart_msg_header_t header;
+	header.opCode = opCode;
+	header.size = size;
+
+	uint16_t crc = crc16((uint8_t*)(&header), sizeof(uart_msg_header_t));
+	crc16(data, size, crc);
+	uart_msg_tail_t tail;
+	tail.crc = crc;
+
+	LOGd("write opcode=%u len=%u crc=%u", opCode, size, crc);
+	BLEutil::printArray(data, size);
+
+	writeStartByte();
+	writeBytes((uint8_t*)(&header), sizeof(uart_msg_header_t));
+	writeBytes(data, size);
+	writeBytes((uint8_t*)(&tail), sizeof(uart_msg_tail_t));
+	write(SERIAL_CRLF); // Just so it still looks ok on minicom
+}
+
 void UartProtocol::onRead(uint8_t val) {
 	// CRC error? Reset.
 	// Start char? Reset.
@@ -157,13 +190,6 @@ void UartProtocol::onRead(uint8_t val) {
 	}
 }
 
-uint16_t UartProtocol::crc16(const uint8_t * data, uint16_t size) {
-	return crc16_compute(data, size, NULL);
-}
-
-void UartProtocol::crc16(const uint8_t * data, const uint16_t size, uint16_t& crc) {
-	crc = crc16_compute(data, size, &crc);
-}
 
 void UartProtocol::handleMsg(void * data, uint16_t size) {
 	LOGd("read:");
@@ -182,7 +208,7 @@ void UartProtocol::handleMsg(void * data, uint16_t size) {
 	uint8_t* payload = (uint8_t*)data + sizeof(uart_msg_header_t);
 
 	switch (header->opCode) {
-	case UART_OPCODE_CONTROL: {
+	case UART_OPCODE_RX_CONTROL: {
 		stream_header_t* streamHeader = (stream_header_t*)payload;
 		if (header->size - sizeof(stream_header_t) < streamHeader->length) {
 			LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);

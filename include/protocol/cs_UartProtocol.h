@@ -28,8 +28,13 @@
 #define UART_ESCAPE_BYTE          0x5C // "\"   0101 1100  next byte gets bits flipped that are in flip mask
 #define UART_ESCAPE_FLIP_MASK     0x40 //       0100 0000
 
-enum UartOpcode {
-	UART_OPCODE_CONTROL = 0,
+enum UartOpcodeRx {
+	UART_OPCODE_RX_CONTROL = 1,
+};
+
+enum UartOpcodeTx {
+	UART_OPCODE_TX_ACK = 0,
+	UART_OPCODE_TX_MESH_STATE_0 = 100, // For 1st handle, next handle has opcode of 1 larger.
 };
 
 struct __attribute__((__packed__)) uart_msg_header_t {
@@ -54,12 +59,23 @@ public:
 
 	void init();
 
+	/** Write a binary msg over UART.
+	 *
+	 * @param[in] opCode     OpCode of the msg.
+	 * @param[in] data       Pointer to the msg to be sent.
+	 * @param[in] size       Size of the msg.
+	 */
+	void writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size);
+
 	/** To be called when a byte was read. Can be called from interrupt
 	 *
 	 * @param[in] val        Value that was read.
 	 */
 	void onRead(uint8_t val);
 
+	/** Handles read msgs (private function)
+	 *
+	 */
 	void handleMsg(void * data, uint16_t size);
 
 private:

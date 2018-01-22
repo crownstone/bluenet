@@ -16,6 +16,8 @@
 #include <mesh/cs_Mesh.h>
 #include <common/cs_Types.h>
 #include <util/cs_Utils.h>
+#include <drivers/cs_Serial.h>
+#include <protocol/cs_UartProtocol.h>
 
 // enable for additional debug output
 //#define PRINT_DEBUG
@@ -221,9 +223,11 @@ ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, 
 
 	switch (stateChan) {
 	case 0:
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_STATE_0, (uint8_t*)msg, sizeof(state_message_t));
 		EventDispatcher::getInstance().dispatch(EVT_EXTERNAL_STATE_MSG_CHAN_0, msg, sizeof(state_message_t));
 		break;
 	case 1:
+		UartProtocol::getInstance().writeMsg((UartOpcodeTx)(UART_OPCODE_TX_MESH_STATE_0 + 1), (uint8_t*)msg, sizeof(state_message_t));
 		EventDispatcher::getInstance().dispatch(EVT_EXTERNAL_STATE_MSG_CHAN_1, msg, sizeof(state_message_t));
 		break;
 	}
