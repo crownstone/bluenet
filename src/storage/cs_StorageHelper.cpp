@@ -67,7 +67,7 @@ void StorageHelper::setString(const char* value, uint16_t length, char* target) 
 
 // helper function to get std::string from char array, or default value
 // if the value read is empty, unassigned (filled with FF) or too long
-void StorageHelper::getString(char* value, char* target, char* default_value, uint16_t& size) {
+void StorageHelper::getString(char* value, char* target, char* default_value, uint16_t& size, bool getDefaultValue) {
 
 #ifdef PRINT_ITEMS
 	_log(SERIAL_INFO, "get string (raw): \r\n");
@@ -78,7 +78,7 @@ void StorageHelper::getString(char* value, char* target, char* default_value, ui
 	// if the last char is equal to FF that means the memory
 	// is new and has not yet been written to, so we use the
 	// default value. same if the stored value is an empty string
-	if (stringValue == "" || value[MAX_STRING_STORAGE_SIZE] == 0xFF) {
+	if (getDefaultValue || value[MAX_STRING_STORAGE_SIZE] == 0xFF || stringValue == "") {
 		std::string stringDefault(default_value);
 #ifdef PRINT_ITEMS
 		LOGd("use default value: %s, len: %d", stringDefault.c_str(), stringDefault.length());
@@ -98,7 +98,7 @@ void StorageHelper::setUint8(uint8_t value, uint32_t& target) {
 	target = value;
 }
 
-void StorageHelper::getUint8(uint32_t value, uint8_t* target, uint8_t default_value) {
+void StorageHelper::getUint8(uint32_t value, uint8_t* target, uint8_t default_value, bool getDefaultValue) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
@@ -107,7 +107,7 @@ void StorageHelper::getUint8(uint32_t value, uint8_t* target, uint8_t default_va
 
 	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
-	if (value == UINT32_MAX) {
+	if (getDefaultValue || value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
@@ -125,7 +125,7 @@ void StorageHelper::setInt8(int8_t value, int32_t& target) {
 //	target &= 0x000000FF;
 }
 
-void StorageHelper::getInt8(int32_t value, int8_t* target, int8_t default_value) {
+void StorageHelper::getInt8(int32_t value, int8_t* target, int8_t default_value, bool getDefaultValue) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
@@ -134,7 +134,7 @@ void StorageHelper::getInt8(int32_t value, int8_t* target, int8_t default_value)
 
 	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
-	if ((uint32_t)value == UINT32_MAX) {
+	if (getDefaultValue || (uint32_t)value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
@@ -151,7 +151,7 @@ void StorageHelper::setUint16(uint16_t value, uint32_t& target) {
 	target = value;
 }
 
-void StorageHelper::getUint16(uint32_t value, uint16_t* target, uint16_t default_value) {
+void StorageHelper::getUint16(uint32_t value, uint16_t* target, uint16_t default_value, bool getDefaultValue) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
@@ -160,7 +160,7 @@ void StorageHelper::getUint16(uint32_t value, uint16_t* target, uint16_t default
 
 	// check if last byte is FF which means that memory is unassigned
 	// and value has to be ignored
-	if (value == UINT32_MAX) {
+	if (getDefaultValue || value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
@@ -180,14 +180,14 @@ void StorageHelper::setInt16(int16_t value, int32_t& target) {
 	target = value;
 }
 
-void StorageHelper::getInt16(int32_t value, int16_t* target, int16_t default_value) {
+void StorageHelper::getInt16(int32_t value, int16_t* target, int16_t default_value, bool getDefaultValue) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
 	LOGd(FMT_RAW_VALUE, tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
-	if ((uint32_t)value == UINT32_MAX) {
+	if (getDefaultValue || (uint32_t)value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
@@ -209,7 +209,7 @@ void StorageHelper::setUint32(uint32_t value, uint32_t& target) {
 	}
 }
 
-void StorageHelper::getUint32(uint32_t value, uint32_t* target, uint32_t default_value) {
+void StorageHelper::getUint32(uint32_t value, uint32_t* target, uint32_t default_value, bool getDefaultValue) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
@@ -218,7 +218,7 @@ void StorageHelper::getUint32(uint32_t value, uint32_t* target, uint32_t default
 
 	// check if value is equal to INT_MAX (FFFFFFFF) which means that memory is
 	// unassigned and value has to be ignored
-	if (value == UINT32_MAX) {
+	if (getDefaultValue || value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
@@ -240,14 +240,14 @@ void StorageHelper::setInt32(int32_t value, int32_t& target) {
 	}
 }
 
-void StorageHelper::getInt32(int32_t value, int32_t* target, int32_t default_value) {
+void StorageHelper::getInt32(int32_t value, int32_t* target, int32_t default_value, bool getDefaultValue) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
 	LOGd(FMT_RAW_VALUE, tmp[3], tmp[2], tmp[1], tmp[0]);
 #endif
 
-	if ((uint32_t)value == UINT32_MAX) {
+	if (getDefaultValue || (uint32_t)value == UINT32_MAX) {
 #ifdef PRINT_ITEMS
 		LOGd(FMT_USE_DEFAULT_VALUE);
 #endif
@@ -302,7 +302,7 @@ void StorageHelper::setFloat(float value, float& target) {
 	}
 }
 
-void StorageHelper::getFloat(float value, float* target, float default_value) {
+void StorageHelper::getFloat(float value, float* target, float default_value, bool getDefaultValue) {
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
@@ -314,7 +314,7 @@ void StorageHelper::getFloat(float value, float* target, float default_value) {
 	// unassigned and value has to be ignored
 //	if (*(uint32_t*)&value == UINT32_MAX) {
 	uint8_t* byteP = (uint8_t*)&value;
-	if (byteP[0] == 0xFF && byteP[1] == 0xFF && byteP[2] == 0xFF && byteP[3] == 0xFF) {
+	if (getDefaultValue || (byteP[0] == 0xFF && byteP[1] == 0xFF && byteP[2] == 0xFF && byteP[3] == 0xFF)) {
 //	if ((uint32_t)value == UINT32_MAX) { // This does not work!
 #ifdef PRINT_ITEMS
 		LOGd(FMT_USE_DEFAULT_VALUE);

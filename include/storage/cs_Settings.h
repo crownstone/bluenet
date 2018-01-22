@@ -85,8 +85,8 @@ public:
 
 	void factoryReset(uint32_t resetCode);
 
-	ERR_CODE get(uint8_t type, void* target);
-	ERR_CODE get(uint8_t type, void* target, uint16_t& size );
+	ERR_CODE get(uint8_t type, void* target, bool getDefaultValue = false);
+	ERR_CODE get(uint8_t type, void* target, uint16_t& size, bool getDefaultValue = false);
 	ERR_CODE set(uint8_t type, void* target, bool persistent = false, uint16_t size = 0);
 
 	uint16_t getSettingsItemSize(uint8_t type);

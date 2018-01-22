@@ -49,7 +49,7 @@ public:
 	 * value will be returned instead
 	 */
 //	static void getString(char* value, std::string& target, std::string default_value);
-	static void getString(char* value, char* target, char* default_value, uint16_t& size);
+	static void getString(char* value, char* target, char* default_value, uint16_t& size, bool getDefaultValue);
 
 	/** Helper function to set a byte in the field of a struct
 	 * @value the byte value to be copied to the struct
@@ -72,7 +72,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getUint8(uint32_t value, uint8_t* target, uint8_t default_value);
+	static void getUint8(uint32_t value, uint8_t* target, uint8_t default_value, bool getDefaultValue);
 
 	/** Helper function to set a short (uint16_t) in the field of a struct
 	 * @value the value to be copied to the struct
@@ -95,7 +95,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getUint16(uint32_t value, uint16_t* target, uint16_t default_value);
+	static void getUint16(uint32_t value, uint16_t* target, uint16_t default_value, bool getDefaultValue);
 
 	/** Helper function to set a signed short (int16_t) in the field of a struct
 	 * @value the value to be copied to the struct
@@ -118,7 +118,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getInt16(int32_t value, int16_t* target, int16_t default_value);
+	static void getInt16(int32_t value, int16_t* target, int16_t default_value, bool getDefaultValue);
 
 
 	/** Helper function to set an integer (uint32_t) in the field of a struct
@@ -142,7 +142,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getUint32(uint32_t value, uint32_t* target, uint32_t default_value);
+	static void getUint32(uint32_t value, uint32_t* target, uint32_t default_value, bool getDefaultValue);
 
 	/** Helper function to set an integer (int32_t) in the field of a struct
 	 * @value the value to be copied to the struct
@@ -165,7 +165,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getInt32(int32_t value, int32_t* target, int32_t default_value);
+	static void getInt32(int32_t value, int32_t* target, int32_t default_value, bool getDefaultValue);
 
 	/** Helper function to set a signed byte in the field of a struct
 	 * @value the byte value to be copied to the struct
@@ -188,7 +188,7 @@ public:
 	 *
 	 * If the field is unassigned, the default value will be returned instead
 	 */
-	static void getInt8(int32_t value, int8_t* target, int8_t default_value);
+	static void getInt8(int32_t value, int8_t* target, int8_t default_value, bool getDefaultValue);
 
 //	static void setDouble(double value, double& target);
 
@@ -196,7 +196,7 @@ public:
 
 	static void setFloat(float value, float& target);
 
-	static void getFloat(float value, float* target, float default_value);
+	static void getFloat(float value, float* target, float default_value, bool getDefaultValue);
 
 	/** Helper function to write/copy an array to the field of a struct
 	 * @T primitive type, such as uint8_t
@@ -246,7 +246,7 @@ public:
 	 * field will be copied to the destination array
 	 */
 	template<typename T>
-	static bool getArray(T* src, T* dest, T* default_value, uint16_t length) {
+	static bool getArray(T* src, T* dest, T* default_value, uint16_t length, bool getDefaultValue) {
 
 #ifdef PRINT_ITEMS
 		_log(SERIAL_INFO, "raw value: \r\n");
@@ -254,11 +254,13 @@ public:
 #endif
 
 		bool isUnassigned = true;
-		uint8_t* ptr = (uint8_t*)src;
-		for (uint32_t i = 0; i < length * sizeof(T); ++i) {
-			if (ptr[i] != 0xFF) {
-				isUnassigned = false;
-				break;
+		if (!getDefaultValue) {
+			uint8_t* ptr = (uint8_t*)src;
+			for (uint32_t i = 0; i < length * sizeof(T); ++i) {
+				if (ptr[i] != 0xFF) {
+					isUnassigned = false;
+					break;
+				}
 			}
 		}
 

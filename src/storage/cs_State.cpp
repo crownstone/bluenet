@@ -345,7 +345,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 			uint8_t value = *(uint8_t*)target;
 			publishUpdate(type, (uint8_t*)target, size);
 			uint32_t opMode;
-			StorageHelper::getUint32(_storageStruct.operationMode, &opMode, OPERATION_MODE_SETUP);
+			StorageHelper::getUint32(_storageStruct.operationMode, &opMode, OPERATION_MODE_SETUP, false);
 			if (persistent && opMode != value) {
 				StorageHelper::setUint32(value, _storageStruct.operationMode);
 				savePersistentStorageItem((uint8_t*) &_storageStruct.operationMode, sizeof(_storageStruct.operationMode));
@@ -481,7 +481,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_OPERATION_MODE: {
-			StorageHelper::getUint8(_storageStruct.operationMode, (uint8_t*)target, DEFAULT_OPERATION_MODE);
+			StorageHelper::getUint8(_storageStruct.operationMode, (uint8_t*)target, DEFAULT_OPERATION_MODE, false);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_INT_VAL, "operation mode", *(uint8_t*)target);
 #endif
@@ -521,7 +521,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_TRACKED_DEVICES: {
-			StorageHelper::getArray(_storageStruct.trackedDevices, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
+			StorageHelper::getArray(_storageStruct.trackedDevices, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size, false);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_STR_VAL, "tracked devices", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
@@ -529,7 +529,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_SCHEDULE: {
-			StorageHelper::getArray(_storageStruct.scheduleList, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
+			StorageHelper::getArray(_storageStruct.scheduleList, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size, false);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_STR_VAL, "schedule list", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
@@ -537,7 +537,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			break;
 		}
 		case STATE_LEARNED_SWITCHES: {
-			StorageHelper::getArray(_storageStruct.learnedSwitches, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size);
+			StorageHelper::getArray(_storageStruct.learnedSwitches, (buffer_ptr_t)target, (buffer_ptr_t) NULL, size, false);
 #ifdef PRINT_DEBUG
 			LOGd(FMT_GET_STR_VAL, "learned switches", "");
 			BLEutil::printArray((buffer_ptr_t)target, size);
