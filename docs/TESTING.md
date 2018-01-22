@@ -18,6 +18,7 @@ First see if the dimmer stays on (checking for false negatives):
 - Factory reset crownstone.
 - Setup crownstone.
 - Turn relay off.
+- Enable dimming.
 - Turn dimmer on (at 100%).
 - Plug in a load of 120W - 150W.
 - Place a phone right next to it, call it every 5 minutes for the first hours.
@@ -26,6 +27,7 @@ First see if the dimmer stays on (checking for false negatives):
 Repeat, but now with actual dimming:
 
 - Turn relay off.
+- Enable dimming.
 - Turn dimmer on at 50%.
 - Plug in a load of 120W - 150W.
 - Place a phone right next to it, call it every 5 minutes for the first hours.
@@ -34,19 +36,24 @@ Repeat, but now with actual dimming:
 
 Next, overload the IGBTs:
 
+- Enable dimming.
 - Turn dimmer on (at 100%).
+- Enable switch lock.
 - Plug in a light (so you can see when the dimmer turns off).
 - Additionally, plug in a load of 300W.
 - [ ] Check if the relay turns on immediately.
 - [ ] Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
 - [ ] Check if you can't turn on the dimmer anymore.
 - [ ] Check if you can't turn off the relay anymore.
+- Disable switch lock.
 
 Now repeat the process below a couple of times with 300W and a couple of times with 2000W:
 
 - Plug out the load.
 - Reset the error state (or reset the crownstone).
+- Enable dimming.
 - Turn dimmer on (at 100%).
+- Enable switch lock.
 - Plug in the load.
 - [ ] Check if the relay turns on immediately.
 - [ ] Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
@@ -98,6 +105,7 @@ Repeat the process a few times:
 
 Now overload the dimmer:
 
+- Enable switch lock.
 - Plug in load of 300W.
 
 Now it should heat up (you should see the chip temperature rise) and turn the relay on within 15 minutes. If this doesn't happen, try with a load of 400W, or else 500W.
@@ -107,6 +115,7 @@ Now it should heat up (you should see the chip temperature rise) and turn the re
 - [ ] Check if you can't turn off the relay anymore.
 - [ ] Check if you can't turn on the dimmer anymore.
 - Factory reset the crownstone.
+- Disable switch lock.
 
 
 
@@ -216,6 +225,18 @@ After boot:
 
 
 # Dimmer
+
+## Commands
+
+Test if dimming works via different ways:
+
+- Enable dimming.
+- [ ] Via switch.
+- [ ] Via IGBT.
+- [ ] Via multiswitch.
+- [ ] Via mesh.
+
+## Stability
 
 Check dimmer stability with:
 
