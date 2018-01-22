@@ -391,6 +391,10 @@ void Crownstone::configureStack() {
 
 void Crownstone::configureAdvertisement() {
 
+	// initialize service data
+	uint8_t opMode;
+	State::getInstance().get(STATE_OPERATION_MODE, opMode);
+
 	// Create the iBeacon parameter object which will be used
 	// to configure advertisement as an iBeacon
 
@@ -399,10 +403,11 @@ void Crownstone::configureAdvertisement() {
 	uint8_t rssi;
 	ble_uuid128_t uuid;
 
-	_settings->get(CONFIG_IBEACON_MAJOR, &major);
-	_settings->get(CONFIG_IBEACON_MINOR, &minor);
-	_settings->get(CONFIG_IBEACON_UUID, uuid.uuid128);
-	_settings->get(CONFIG_IBEACON_TXPOWER, &rssi);
+	bool defaultSetting = opMode != OPERATION_MODE_NORMAL;
+	_settings->get(CONFIG_IBEACON_MAJOR, &major, defaultSetting);
+	_settings->get(CONFIG_IBEACON_MINOR, &minor, defaultSetting);
+	_settings->get(CONFIG_IBEACON_UUID, uuid.uuid128, defaultSetting);
+	_settings->get(CONFIG_IBEACON_TXPOWER, &rssi, defaultSetting);
 
 	// create ibeacon object
 	_beacon = new IBeacon(uuid, major, minor, rssi);
@@ -412,9 +417,7 @@ void Crownstone::configureAdvertisement() {
 
 	_serviceData = new ServiceData();
 
-	// initialize service data
-	uint8_t opMode;
-	State::getInstance().get(STATE_OPERATION_MODE, opMode);
+
 
 	// Only in normal mode the service data is filled with the state
 	if (opMode == OPERATION_MODE_NORMAL) {
