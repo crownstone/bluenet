@@ -199,6 +199,7 @@ void UartProtocol::handleMsg(void * data, uint16_t size) {
 	uint16_t calculatedCrc = crc16((uint8_t*)data, size - sizeof(uart_msg_tail_t));
 	uint16_t receivedCrc = *((uint16_t*)((uint8_t*)data + size - sizeof(uart_msg_tail_t)));
 	if (calculatedCrc != receivedCrc) {
+		LOGw("crc mismatch: %u vs %u", calculatedCrc, receivedCrc);
 		readBusy = false;
 		reset();
 		return;
