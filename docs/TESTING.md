@@ -312,9 +312,11 @@ Check dimmer stability with:
 # Power measurements
 
 Check if the power measurements are ok.
-For each check, measure about 30 seconds.
-For each check, write down how much difference there is between the measured power by the Crownstone and the external reference.
-For each check, write down how stable the output is (are there peaks?, how much noise in W?).
+
+- Repeat this process for multiple crownstones.
+- For each check, measure about 30 seconds.
+- For each check, write down how much difference there is between the measured power by the Crownstone and the external reference.
+- For each check, write down how stable the output is (are there peaks?, how much noise in W?).
 
 Off:
 
