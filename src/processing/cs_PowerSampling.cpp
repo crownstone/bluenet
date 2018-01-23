@@ -37,7 +37,9 @@ PowerSampling::PowerSampling() :
 		_adc(NULL),
 		_powerSamplingSentDoneTimerId(NULL),
 		_powerSamplesBuffer(NULL),
-		_consecutivePwmOvercurrent(0)
+		_consecutivePwmOvercurrent(0),
+		_lastEnergyCalculationTicks(0),
+		_energyUsedmicroJoule(0)
 {
 	_powerSamplingReadTimerData = { {0} };
 	_powerSamplingSentDoneTimerId = &_powerSamplingReadTimerData;
@@ -248,13 +250,16 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 #endif
 
 	calculatePower(power);
+	calculateEnergy();
 
 	if (_operationMode == OPERATION_MODE_NORMAL) {
 		if (!_sendingSamples) {
 			copyBufferToPowerSamples(power);
 		}
 		// TODO: use State.set() for this.
-		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt)); 
+		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
+
+		EventDispatcher::getInstance().dispatch(STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
 	}
 
 #ifdef TEST_PIN
@@ -600,6 +605,14 @@ void PowerSampling::calculatePower(power_t power) {
 	}
 	++printPower;
 #endif
+}
+
+void PowerSampling::calculateEnergy() {
+	uint32_t rtcCount = RTC::getCount();
+	uint32_t diffTicks = RTC::difference(rtcCount, _lastEnergyCalculationTicks);
+	// TODO: using ms introduces more error (due to rounding to ms), maybe use ticks directly?
+	_energyUsedmicroJoule += (int64_t)_avgPowerMilliWatt * RTC::ticksToMs(diffTicks);
+	_lastEnergyCalculationTicks = rtcCount;
 }
 
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {

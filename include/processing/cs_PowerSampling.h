@@ -143,6 +143,9 @@ private:
 	uint16_t _currentMilliAmpThreshold;    //! Current threshold from settings.
 	uint16_t _currentMilliAmpThresholdPwm; //! Current threshold when using dimmer from settings.
 
+	uint32_t _lastEnergyCalculationTicks; //! Ticks of RTC when last energy calculation was performed.
+	int64_t _energyUsedmicroJoule; //! Energy used in micro joule
+
 	//! Store the adc config, so that the actual adc config can be changed.
 	struct __attribute__((packed)) {
 		uint16_t rangeMilliVolt[2];       // For both channels
@@ -198,6 +201,10 @@ private:
 	/** Calculate the average power usage
 	 */
 	void calculatePower(power_t power);
+
+	/** Calculate the energy used
+	 */
+	void calculateEnergy();
 
 	/**
 	 * If current goes beyond predefined threshold levels, take action!
