@@ -2,9 +2,9 @@
 
 Before releasing a new firmware version, several tests must be performed.
 
+
+
 # Soft fuses
-
-
 
 ## Current soft fuse
 
@@ -43,21 +43,33 @@ Next, overload the IGBTs:
 - Additionally, plug in a load of 300W.
 - [ ] Check if the relay turns on immediately.
 - [ ] Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- Disable switch lock.
 - [ ] Check if you can't turn on the dimmer anymore.
 - [ ] Check if you can't turn off the relay anymore.
-- Disable switch lock.
+
 
 Now repeat the process below a couple of times with 300W and a couple of times with 2000W:
 
 - Plug out the load.
 - Reset the error state (or reset the crownstone).
-- Enable dimming.
 - Turn dimmer on (at 100%).
 - Enable switch lock.
 - Plug in the load.
 - [ ] Check if the relay turns on immediately.
 - [ ] Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- Disable switch lock.
 
+Now try it in setup mode:
+
+- Factory reset crownstone.
+- Enable dimming.
+- Turn dimmer on.
+- Plug in a load of 300W or more.
+- [ ] Check if the relay turns on immediately.
+- [ ] Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if you can't turn on the dimmer anymore.
+- [ ] Check if you can't turn off the relay anymore.
+- Factory reset the crownstone.
 
 
 ## Temperature soft fuse
@@ -70,15 +82,19 @@ The default chip temperature threshold is set in the `CMakeBuild.config.default`
 
 - Factory reset crownstone.
 - Setup crownstone.
+- Enable dimming.
 - Turn relay on.
+- Enable switch lock.
 - Plug in a load of 3000W, or blow hot air on the chip.
 
 Now it should heat up (you should see the chip temperature rise) and turn off within an hour.
 
 - [ ] Check if it turns off.
 - [ ] Check if it reports the correct error state (`100` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- Disable switch lock.
 - [ ] Check if you can't turn on the relay anymore.
 - [ ] Check if you can't turn on the dimmer anymore.
+
 
 Repeat the process a few times:
 
@@ -91,10 +107,23 @@ Repeat the process a few times:
 - [ ] Check if you can't turn on the dimmer anymore.
 
 
+Now try it in setup mode:
+
+- Wait for it to cool off.
+- Factory reset crownstone.
+- Enable dimming.
+- Turn relay on.
+- [ ] Check if it turns off.
+- [ ] Check if it reports the correct error state (`100` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if you can't turn on the relay anymore.
+- [ ] Check if you can't turn on the dimmer anymore.
+
+
 ### Test plan dimmer temperature soft fuse
 
 - Factory reset crownstone.
 - Setup crownstone.
+- Enable dimming.
 - Turn relay off.
 - Set current threshold dimmer at 16000mA.
 - Reset crownstone.
@@ -112,11 +141,44 @@ Now it should heat up (you should see the chip temperature rise) and turn the re
 
 - [ ] Check if the relay turns on.
 - [ ] Check if it reports the correct error state (`1000` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- Disable switch lock.
 - [ ] Check if you can't turn off the relay anymore.
 - [ ] Check if you can't turn on the dimmer anymore.
 - Factory reset the crownstone.
-- Disable switch lock.
 
+
+## IGBT failure detection
+
+If one of the IGBTs failed, it will be always on or always off. The former case is the worst (as current will go through the IGBT when the relay is off), but also the easiest to detect.
+
+### Test plan IGBT always on
+
+- Get a crownstone with a broken IGBT.
+- Factory reset the crownstone.
+- Setup the crownstone.
+- Enable dimming.
+- Turn dimmer off.
+- Turn relay off.
+- Enable switch lock.
+- Plug in load of 300W.
+- [ ] Check if the relay turns on immediately.
+- [ ] Check if it reports the correct error state (`10000` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- Disable switch lock.
+- [ ] Check if you can't turn off the relay anymore.
+- [ ] Check if you can't turn on the dimmer anymore.
+
+
+Now try it in setup mode:
+
+- Factory reset the crownstone.
+- Enable dimming.
+- Turn dimmer off.
+- Turn relay off.
+- Plug in load of 300W.
+- [ ] Check if the relay turns on immediately.
+- [ ] Check if it reports the correct error state (`10000` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if you can't turn off the relay anymore.
+- [ ] Check if you can't turn on the dimmer anymore.
 
 
 # Switch
@@ -131,27 +193,27 @@ Check if the lock works when powered on:
 
 - Set switch on.
 - [ ] Check if advertisement data reports the switch is not locked.
-- Enable lock.
+- Enable switch lock.
 - [ ] Check if switching off does not work.
 - [ ] Check if advertisement data reports the switch is locked.
-- Disable lock
+- Disable switch lock.
 
 Check if the lock works when powered on:
 
 - Set switch off.
-- Enable lock.
+- Enable switch lock.
 - [ ] Check if switching on does not work.
-- Disable lock
+- Disable switch lock.
 
 Check if lock works with dimming:
 
 - Enable dimming.
 - Set switch at 50.
-- Enable lock.
+- Enable switch lock.
 - [ ] Check if switching on does not work.
 - [ ] Check if switching off does not work.
 - [ ] Check if you can't change the switch value anymore.
-- Disable lock
+- Disable switch lock.
 
 
 ## Dimming available
@@ -201,7 +263,7 @@ In combination with the lock:
 - Enable dimming.
 - [ ] Check if advertisement data reports dimming is allowed.
 - Set switch at 30.
-- Enable lock.
+- Enable switch lock.
 - Disable dimming.
 - [ ] Check if the relay turns on, and dimmer off.
 - [ ] Check if advertisement data reports dimming is not allowed.
@@ -210,6 +272,7 @@ In combination with the lock:
 - Plug in crownstone.
 - Wait 60s.
 - [ ] Check if crownstone isn't dimming.
+- Disable switch lock.
 
 After boot:
 
@@ -231,10 +294,10 @@ After boot:
 Test if dimming works via different ways:
 
 - Enable dimming.
-- [ ] Via switch.
-- [ ] Via IGBT.
-- [ ] Via multiswitch.
-- [ ] Via mesh.
+- [ ] Dim via switch.
+- [ ] Dim via IGBT.
+- [ ] Dim via multiswitch.
+- [ ] Dim via mesh.
 
 ## Stability
 
