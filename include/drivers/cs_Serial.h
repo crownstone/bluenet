@@ -37,7 +37,7 @@ extern "C" {
 
 //#define INCLUDE_TIMESTAMPS
 
-#if SERIAL_VERBOSITY<SERIAL_READ_ONLY
+#if SERIAL_VERBOSITY<SERIAL_BYTE_PROTOCOL_ONLY
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
