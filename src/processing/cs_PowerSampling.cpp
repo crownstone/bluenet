@@ -39,7 +39,10 @@ PowerSampling::PowerSampling() :
 		_powerSamplesBuffer(NULL),
 		_consecutivePwmOvercurrent(0),
 		_lastEnergyCalculationTicks(0),
-		_energyUsedmicroJoule(0)
+		_energyUsedmicroJoule(0),
+//		_lastSwitchState(0),
+		_lastSwitchOffTicks(0),
+		_lastSwitchOffTicksValid(false)
 {
 	_powerSamplingReadTimerData = { {0} };
 	_powerSamplingSentDoneTimerId = &_powerSamplingReadTimerData;
@@ -624,6 +627,36 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 
+	// Get the current switch state before we dispatch any event (as that may change the switch).
+	switch_state_t switchState;
+
+
+	// ---------- TODO: this should be kept up in the state ---------
+	switch_state_t prevSwitchState = _lastSwitchState;
+	State::getInstance().get(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
+	_lastSwitchState = switchState;
+
+	if (switchState.relay_state == 0 && switchState.pwm_state == 0 && (prevSwitchState.relay_state || prevSwitchState.pwm_state)) {
+		// switch has been turned off
+		_lastSwitchOffTicksValid = true;
+		_lastSwitchOffTicks = RTC::getCount();
+	}
+
+	bool justSwitchedOff = false;
+	if (_lastSwitchOffTicksValid) {
+		uint32_t tickDiff = RTC::difference(RTC::getCount(), _lastSwitchOffTicks);
+//		write("%u\r\n", tickDiff);
+		if (tickDiff < RTC::msToTicks(1000)) {
+			justSwitchedOff = true;
+		}
+		else {
+			// Timed out
+			_lastSwitchOffTicksValid = false;
+		}
+	}
+	// ---------------------- end of to do --------------------------
+
+
 	// Check if the filtered Irms is above threshold.
 	if ((currentRmsFilteredMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {
 		LOGw("current above threshold");
@@ -653,7 +686,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			// Set overcurrent error.
 			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, (uint8_t)1);
 		}
-		else if (switchState.relay_state == 0) {
+		else if (switchState.relay_state == 0 && !justSwitchedOff) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
 			LOGe("IGBT failure detected");
 			EventDispatcher::getInstance().dispatch(EVT_DIMMER_ON_FAILURE_DETECTED);

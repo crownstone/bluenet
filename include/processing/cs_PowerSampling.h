@@ -15,6 +15,7 @@ extern "C" {
 #include "drivers/cs_ADC.h"
 #include "third/Median.h"
 #include "events/cs_EventListener.h"
+#include "processing/cs_Switch.h"
 
 typedef void (*ps_zero_crossing_cb_t) ();
 
@@ -145,6 +146,10 @@ private:
 
 	uint32_t _lastEnergyCalculationTicks; //! Ticks of RTC when last energy calculation was performed.
 	int64_t _energyUsedmicroJoule; //! Energy used in micro joule
+
+	switch_state_t _lastSwitchState; //! Stores the last seen switch state.
+	uint32_t _lastSwitchOffTicks;    //! RTC ticks when the switch was last turned off.
+	bool _lastSwitchOffTicksValid;   //! Keep up whether the last switch off time is valid.
 
 	//! Store the adc config, so that the actual adc config can be changed.
 	struct __attribute__((packed)) {
