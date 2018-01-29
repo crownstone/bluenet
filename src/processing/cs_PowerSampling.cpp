@@ -611,7 +611,11 @@ void PowerSampling::calculateEnergy() {
 	uint32_t rtcCount = RTC::getCount();
 	uint32_t diffTicks = RTC::difference(rtcCount, _lastEnergyCalculationTicks);
 	// TODO: using ms introduces more error (due to rounding to ms), maybe use ticks directly?
-	_energyUsedmicroJoule += (int64_t)_avgPowerMilliWatt * RTC::ticksToMs(diffTicks);
+//	_energyUsedmicroJoule += (int64_t)_avgPowerMilliWatt * RTC::ticksToMs(diffTicks);
+//	_energyUsedmicroJoule += (int64_t)_avgPowerMilliWatt * diffTicks * (NRF_RTC0->PRESCALER + 1) * 1000 / RTC_CLOCK_FREQ;
+
+	// In order to keep more precision: multiply ticks by some number, then divide the result by the same number.
+	_energyUsedmicroJoule += (int64_t)_avgPowerMilliWatt * RTC::ticksToMs(1024*diffTicks) / 1024;
 	_lastEnergyCalculationTicks = rtcCount;
 }
 
