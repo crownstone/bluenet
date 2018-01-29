@@ -36,8 +36,12 @@
 /*
  */
 #define APP_TIMER_PRESCALER                      0
-#define APP_TIMER_MAX_TIMERS                     10
-#define APP_TIMER_OP_QUEUE_SIZE                  10
+
+/** Size of queues holding timer operations that are pending execution
+ *  Meaning: amount of timers that can be started simultaneously.
+ */
+//#define APP_TIMER_OP_QUEUE_SIZE                  10
+#define APP_TIMER_OP_QUEUE_SIZE                  20
 
 /*
  */
@@ -50,7 +54,11 @@
 */
 #define SCHED_MAX_EVENT_DATA_SIZE                128
 
-/** Maximum number of events in the scheduler queue. */
+/** Maximum number of events in the scheduler queue.
+ *
+ *  The scheduler will require a buffer of size:
+ *  (SCHED_MAX_EVENT_DATA_SIZE + APP_SCHED_EVENT_HEADER_SIZE) * (SCHED_QUEUE_SIZE + 1)
+ */
 #define SCHED_QUEUE_SIZE                         30
 
 //! See https://devzone.nordicsemi.com/question/84767/s132-scan-intervalwindow-adv-interval/

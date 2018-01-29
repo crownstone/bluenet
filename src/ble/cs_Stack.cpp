@@ -332,17 +332,17 @@ void Nrf51822BluetoothStack::initServices() {
 
 // TODO: remove this function
 void Nrf51822BluetoothStack::startTicking() {
-	LOGi(FMT_START, "ticking");
-	for (Service* svc : _services) {
-		svc->startTicking();
-	}
+//	LOGi(FMT_START, "ticking");
+//	for (Service* svc : _services) {
+//		svc->startTicking();
+//	}
 }
 
 void Nrf51822BluetoothStack::stopTicking() {
-	LOGi(FMT_STOP, "ticking");
-	for (Service* svc : _services) {
-		svc->stopTicking();
-	}
+//	LOGi(FMT_STOP, "ticking");
+//	for (Service* svc : _services) {
+//		svc->stopTicking();
+//	}
 }
 
 void Nrf51822BluetoothStack::shutdown() {

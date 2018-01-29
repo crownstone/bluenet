@@ -10,8 +10,8 @@
 #include <ble/cs_Characteristic.h>
 #include <events/cs_EventListener.h>
 
-//! The update frequence of the Tick routine in this service
-#define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10
+////! The update frequence of the Tick routine in this service
+//#define LOCALIZATION_SERVICE_UPDATE_FREQUENCY 10
 
 //#define PWM_ON_RSSI
 
@@ -38,8 +38,6 @@ public:
 	IndoorLocalizationService();
 
 	void tick();
-
-	void scheduleNextTick();
 
 	/** Initialize a IndoorLocalization object
 	 * @stack Bluetooth Stack to attach this service to

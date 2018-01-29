@@ -45,14 +45,6 @@ protected:
 	uint16_t                 _service_handle; //! provided by stack.
 	bool                     _started;
 
-	//! app timer id for tick function
-#if (NORDIC_SDK_VERSION >= 11)
-	app_timer_t              _appTimerData;
-	app_timer_id_t           _appTimerId;
-#else
-	uint32_t                 _appTimerId;
-#endif
-
 	// per BLE definition, there is no maximum number of characteristics per
 	// service. it is limited by the memory available to the GATT table over
 	// all services/characteristics
@@ -69,12 +61,8 @@ public:
 		_name(""),
 		_primary(true),
 		_service_handle(BLE_CONN_HANDLE_INVALID),
-		_started(false),
-#if (NORDIC_SDK_VERSION >= 11)
-		_appTimerId(NULL)
-#else
-		_appTimerId(UINT32_MAX)
-#endif
+		_started(false)
+//		,_appTimerId(NULL)
 {
 		//! Should be done in the service, if it wants a timer
 //#if (NORDIC_SDK_VERSION >= 11)
@@ -127,31 +115,11 @@ public:
 
 	virtual void createCharacteristics() = 0;
 
-	virtual void tick() {};
-	static void staticTick(Service* ptr) {
-		ptr->tick();
-	}
+//	virtual void tick() {};
+//	static void staticTick(Service* ptr) {
+//		ptr->tick();
+//	}
 
-	void startTicking() {
-//		LOGi("service startTicking");
-#if (NORDIC_SDK_VERSION >= 11)
-		if (_appTimerId != NULL) {
-#else
-		if (_appTimerId != UINT32_MAX) {
-#endif
-			Timer::getInstance().start(_appTimerId, APP_TIMER_TICKS(1, APP_TIMER_PRESCALER), this);
-		}
-	};
-
-	void stopTicking() {
-#if (NORDIC_SDK_VERSION >= 11)
-		if (_appTimerId != NULL) {
-#else
-		if (_appTimerId != UINT32_MAX) {
-#endif
-			Timer::getInstance().stop(_appTimerId);
-		}
-	};
 
 	virtual void init(Nrf51822BluetoothStack* stack);
 	virtual void stopAdvertising() {};

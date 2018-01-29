@@ -17,16 +17,14 @@ IndoorLocalizationService::IndoorLocalizationService() : EventListener(),
 		_rssiCharac(NULL), _scannedDeviceListCharac(NULL),
 		_trackedDeviceListCharac(NULL), _trackedDeviceCharac(NULL)
 {
-#if (NORDIC_SDK_VERSION >= 11)
-	_appTimerData = { {0} };
-	_appTimerId = &_appTimerData;
-#endif
+//#if (NORDIC_SDK_VERSION >= 11)
+//	_appTimerData = { {0} };
+//	_appTimerId = &_appTimerData;
+//#endif
 	EventDispatcher::getInstance().addListener(this);
 
 	setUUID(UUID(INDOORLOCALISATION_UUID));
 	setName(BLE_SERVICE_INDOOR_LOCALIZATION);
-	
-	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)IndoorLocalizationService::staticTick);
 }
 
 void IndoorLocalizationService::createCharacteristics() {
@@ -80,12 +78,6 @@ void IndoorLocalizationService::tick() {
 	}
 #endif
 #endif
-
-	scheduleNextTick();
-}
-
-void IndoorLocalizationService::scheduleNextTick() {
-	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(LOCALIZATION_SERVICE_UPDATE_FREQUENCY), this);
 }
 
 void IndoorLocalizationService::addRssiCharacteristic() {

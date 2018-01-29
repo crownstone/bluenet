@@ -72,9 +72,6 @@ void CommandHandler::init(const boards_config_t* board) {
 void CommandHandler::resetDelayed(uint8_t opCode) {
 	LOGi("Reset in 2s, code=%u", opCode);
 	static uint8_t resetOpCode = opCode;
-	//! TODO: do we really have to make a new timer here every time?
-//	app_timer_id_t resetTimer;
-//	Timer::getInstance().createSingleShot(resetTimer, (app_timer_timeout_handler_t) reset);
 	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(2000), &resetOpCode);
 //	//! Loop until reset trigger
 //	while(true) {}; //! TODO: this doesn't seem to work
