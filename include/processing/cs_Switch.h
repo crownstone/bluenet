@@ -40,7 +40,6 @@ struct __attribute__((__packed__)) switch_state_t {
  * Switching the IGBT pathway is done through Pulse Width Modulation (PWM)
  * 
  * #define variables used in this class
- * 	 - PWM_DISABLE						If this is defined, the Switch class will ignore all attempts to switch PWM
  *   - CONFIG_PWM_PERIOD          		Time between consecutive switch ON actions during PWM dim cycle
  * 	 - CONFIG_RELAY_HIGH_DURATION		Duration of time in which power is supplied to the relay in order to switch it
  * 
@@ -61,20 +60,30 @@ public:
 	 */
 	void startPwm();
 
-	/** Turn on the switch. Uses relay if available.
+	/** Turn on the switch.
+	 *
+	 * See setSwitch()
 	 */
 	void turnOn();
 
 	/** Turn off the switch. Uses relay if available.
+	 *
+	 * See setSwitch()
 	 */
 	void turnOff();
 
-	/** Toggle the switch. Uses relay if available.
+	/** Toggle the switch.
+	 *
+	 * See setSwitch()
 	 */
 	void toggle();
 
 
 	/** Set switch state. Whether to use pwm or relay is automatically determined.
+	 *
+	 * Checks for switch lock.
+	 * When dimming: turns on relay if pwm isn't powered up yet, then dimms when pwm is powered up.
+	 * Stores state.
 	 *
 	 * @param[in] switchState            State to set the switch to, ranges from 0-100.
 	 */
@@ -87,16 +96,24 @@ public:
 	switch_state_t getSwitchState();
 
 	/** Turn on the PWM.
+	 *
+	 * See setPwm()
 	 */
 	void pwmOn();
 
 	/** Turn off the PWM.
+	 *
+	 * See setPwm()
 	 */
 	void pwmOff();
 
 	/** Set pwm value
 	 *
-	 *  @param[in] value                 Value to set the PWM to.
+	 * Checks for switch lock.
+	 * Turns on relay if pwm isn't powered up yet, then dimms when pwm is powered up.
+	 * Stores state.
+	 *
+	 *  @param[in] value                 Value to set the PWM to, ranges from 0-100.
 	 */
 	void setPwm(uint8_t value);
 
@@ -108,10 +125,16 @@ public:
 
 
 	/** Turn on the relay.
+	 *
+	 * Checks for switch lock.
+	 * Stores state.
 	 */
 	void relayOn();
 
 	/** Turn off the relay.
+	 *
+	 * Checks for switch lock.
+	 * Stores state.
 	 */
 	void relayOff();
 
@@ -129,8 +152,8 @@ public:
 	 */
 	void delayedSwitch(uint8_t switchState, uint16_t delay);
 
-	void onZeroCrossing();
-
+//	//! To be called on zero crossings.
+//	void onZeroCrossing();
 
 	/** Used internally
 	 */
@@ -155,12 +178,29 @@ private:
 
 	/** Sets the pwm and udpates switch state.
 	 *
+	 * Does not store the state.
+	 * Checks if dimming is allowed.
+	 * Does not check for switch lock.
+	 *
 	 * @param[in] value                  Pwm value (0-100)
 	 * @return                           True when the given value was set, false otherwise.
 	 */
 	bool _setPwm(uint8_t value);
 
+	/** Turns the relay on.
+	 *
+	 * Does not store the state.
+	 * Checks if relay is allowed to be turned on.
+	 * Does not check for switch lock.
+	 */
 	void _relayOn();
+
+	/** Turns the relay off.
+	 *
+	 * Does not store the state.
+	 * Checks if relay is allowed to be turned off.
+	 * Does not check for switch lock.
+	 */
 	void _relayOff();
 
 	//! Store the switch state.

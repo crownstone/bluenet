@@ -20,9 +20,6 @@
 
 #define PRINT_SWITCH_VERBOSE
 
-// [18.07.16] added for first version of plugins to disable the use of the igbt
-//#define PWM_DISABLE
-
 Switch::Switch():
 //	_nextRelayVal(SWITCH_NEXT_RELAY_VAL_NONE),
 	_pwmPowered(false),
@@ -45,7 +42,6 @@ Switch::Switch():
 }
 
 void Switch::init(const boards_config_t& board) {
-#ifndef PWM_DISABLE
 	PWM& pwm = PWM::getInstance();
 	uint32_t pwmPeriod;
 	Settings::getInstance().get(CONFIG_PWM_PERIOD, &pwmPeriod);
@@ -57,14 +53,6 @@ void Switch::init(const boards_config_t& board) {
 	pwmConfig.channels[0].pin = board.pinGpioPwm;
 	pwmConfig.channels[0].inverted = board.flags.pwmInverted;
 	pwm.init(pwmConfig);
-#else
-	nrf_gpio_cfg_output(board.pinGpioPwm);
-	if (board->flags.pwmInverted) {
-		nrf_gpio_pin_set(board.pinGpioPwm);
-	} else {
-		nrf_gpio_pin_clear(board.pinGpioPwm);
-	}
-#endif
 
 	_hardwareBoard = board.hardwareBoard;
 
@@ -135,9 +123,9 @@ void Switch::startPwm() {
 	EventDispatcher::getInstance().dispatch(EVT_PWM_POWERED);
 }
 
-void Switch::onZeroCrossing() {
-	PWM::getInstance().onZeroCrossing();
-}
+//void Switch::onZeroCrossing() {
+//	PWM::getInstance().onZeroCrossing();
+//}
 
 void Switch::storeState(switch_state_t oldVal) {
 	bool persistent = false;
@@ -426,19 +414,11 @@ bool Switch::_setPwm(uint8_t value) {
 		return false;
 	}
 
-#ifndef PWM_DISABLE
 	// When the user wants to dim at 99%, assume the user actually wants full on, but doesn't want to use the relay.
 	if (value >= (SWITCH_ON - 1)) {
 		value = SWITCH_ON;
 	}
 	PWM::getInstance().setValue(0, value);
-#else
-	if (value) {
-		nrf_gpio_pin_set(PWM_PIN);
-	} else {
-		nrf_gpio_pin_clear(PWM_PIN);
-	}
-#endif
 	_switchValue.pwm_state = value;
 	if (!_pwmPowered) {
 		// State stored, but not executed yet, so return false.
@@ -487,13 +467,17 @@ void Switch::_relayOff() {
 
 void Switch::forcePwmOff() {
 	LOGw("forcePwmOff");
-	pwmOff();
+	switch_state_t oldVal = _switchValue;
+	_setPwm(0);
+	storeState(oldVal);
 	EventDispatcher::getInstance().dispatch(EVT_PWM_FORCED_OFF);
 }
 
 void Switch::forceRelayOn() {
 	LOGw("forceRelayOn");
-	relayOn();
+	switch_state_t oldVal = _switchValue;
+	_relayOn();
+	storeState(oldVal);
 	EventDispatcher::getInstance().dispatch(EVT_RELAY_FORCED_ON);
 	// Try again later, in case the first one didn't work..
 	delayedSwitch(SWITCH_ON, 5);
@@ -501,7 +485,10 @@ void Switch::forceRelayOn() {
 
 void Switch::forceSwitchOff() {
 	LOGw("forceSwitchOff");
-	setSwitch(0);
+	switch_state_t oldVal = _switchValue;
+	_setPwm(0);
+	_relayOff();
+	storeState(oldVal);
 	EventDispatcher::getInstance().dispatch(EVT_SWITCH_FORCED_OFF);
 	// Try again later, in case the first one didn't work..
 	delayedSwitch(0, 5);
@@ -553,7 +540,7 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM:
 	case EVT_PWM_TEMP_ABOVE_THRESHOLD:
 	case EVT_DIMMER_ON_FAILURE_DETECTED:
-		// First set relay on, so that the switch doesn't first turn off, and late on again.
+		// First set relay on, so that the switch doesn't first turn off, and later on again.
 		// The relay protects the dimmer, because the current will flow through the relay.
 		forceRelayOn();
 		forcePwmOff();
