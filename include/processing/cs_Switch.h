@@ -20,14 +20,7 @@ struct __attribute__((__packed__)) switch_state_t {
 	uint8_t relay_state : 1;
 };
 
-#define PWM_PIN 18
-
 #define SWITCH_ON 100
-//enum {
-//	SWITCH_NEXT_RELAY_VAL_NONE,
-//	SWITCH_NEXT_RELAY_VAL_ON,
-//	SWITCH_NEXT_RELAY_VAL_OFF,
-//};
 
 
 /* Power Switch
@@ -43,7 +36,14 @@ struct __attribute__((__packed__)) switch_state_t {
  *   - CONFIG_PWM_PERIOD          		Time between consecutive switch ON actions during PWM dim cycle
  * 	 - CONFIG_RELAY_HIGH_DURATION		Duration of time in which power is supplied to the relay in order to switch it
  * 
- * */
+ * There are several things that influence the switch behavior (in order of importance):
+ *   - IGBT overload (soft fuse).
+ *   - Relay overload (soft fuse).
+ *   - PWM powered (hardware restriction).
+ *   - Dimming allowed (config).
+ *   - Switch lock (config).
+ *
+ */
 class Switch : EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
@@ -179,7 +179,7 @@ private:
 	/** Sets the pwm and udpates switch state.
 	 *
 	 * Does not store the state.
-	 * Checks if dimming is allowed.
+	 * Checks if dimming is allowed (by config and soft fuse).
 	 * Does not check for switch lock.
 	 *
 	 * @param[in] value                  Pwm value (0-100)
@@ -190,7 +190,7 @@ private:
 	/** Turns the relay on.
 	 *
 	 * Does not store the state.
-	 * Checks if relay is allowed to be turned on.
+	 * Checks if relay is allowed to be turned on (by soft fuse).
 	 * Does not check for switch lock.
 	 */
 	void _relayOn();
@@ -198,7 +198,7 @@ private:
 	/** Turns the relay off.
 	 *
 	 * Does not store the state.
-	 * Checks if relay is allowed to be turned off.
+	 * Checks if relay is allowed to be turned off (by soft fuse).
 	 * Does not check for switch lock.
 	 */
 	void _relayOff();
