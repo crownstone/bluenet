@@ -632,7 +632,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	switch_state_t switchState;
 
 	// TODO: implement this differently
-	if (RTC::getCount() > RTC::msToTicks(1000)) {
+	if (RTC::getCount() > RTC::msToTicks(2000)) {
 		startIgbtFailureDetection();
 	}
 
