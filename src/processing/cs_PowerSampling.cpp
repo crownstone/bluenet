@@ -42,7 +42,8 @@ PowerSampling::PowerSampling() :
 		_energyUsedmicroJoule(0),
 //		_lastSwitchState(0),
 		_lastSwitchOffTicks(0),
-		_lastSwitchOffTicksValid(false)
+		_lastSwitchOffTicksValid(false),
+		_igbtFailureDetectionStarted(false)
 {
 	_powerSamplingReadTimerData = { {0} };
 	_powerSamplingSentDoneTimerId = &_powerSamplingReadTimerData;
@@ -630,6 +631,11 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	// Get the current switch state before we dispatch any event (as that may change the switch).
 	switch_state_t switchState;
 
+	// TODO: implement this differently
+	if (RTC::getCount() > RTC::msToTicks(1000)) {
+		startIgbtFailureDetection();
+	}
+
 
 	// ---------- TODO: this should be kept up in the state ---------
 	switch_state_t prevSwitchState = _lastSwitchState;
@@ -686,13 +692,17 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			// Set overcurrent error.
 			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, (uint8_t)1);
 		}
-		else if (switchState.relay_state == 0 && !justSwitchedOff) {
+		else if (switchState.relay_state == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
 			LOGe("IGBT failure detected");
 			EventDispatcher::getInstance().dispatch(EVT_DIMMER_ON_FAILURE_DETECTED);
 			State::getInstance().set(STATE_ERROR_DIMMER_ON_FAILURE, (uint8_t)1);
 		}
 	}
+}
+
+void PowerSampling::startIgbtFailureDetection() {
+	_igbtFailureDetectionStarted = true;
 }
 
 void PowerSampling::toggleVoltageChannelInput() {

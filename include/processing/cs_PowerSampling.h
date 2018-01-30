@@ -150,6 +150,7 @@ private:
 	switch_state_t _lastSwitchState; //! Stores the last seen switch state.
 	uint32_t _lastSwitchOffTicks;    //! RTC ticks when the switch was last turned off.
 	bool _lastSwitchOffTicksValid;   //! Keep up whether the last switch off time is valid.
+	bool _igbtFailureDetectionStarted; //! Keep up whether the IGBT failure detection has started yet.
 
 	//! Store the adc config, so that the actual adc config can be changed.
 	struct __attribute__((packed)) {
@@ -211,10 +212,13 @@ private:
 	 */
 	void calculateEnergy();
 
-	/**
-	 * If current goes beyond predefined threshold levels, take action!
+	/** If current goes beyond predefined threshold levels, take action!
 	 */
 	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered);
+
+	/** Start IGBT failure detection
+	 */
+	void startIgbtFailureDetection();
 
 	void toggleVoltageChannelInput();
 
