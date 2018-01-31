@@ -160,6 +160,7 @@ void Mesh::start() {
 	LOGi("start mesh");
 #endif
 	startTicking();
+	// TODO: why use the app scheduler here? First introduced here: https://github.com/crownstone/bluenet/commit/07fea79ce064a31c8997ae699366c07a39313d8c
 	uint32_t errorCode = app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
 	APP_ERROR_CHECK(errorCode);
 }
@@ -173,6 +174,7 @@ void Mesh::stop() {
 	LOGi("stop mesh");
 #endif
 	stopTicking();
+	// TODO: why use the app scheduler here? First introduced here: https://github.com/crownstone/bluenet/commit/07fea79ce064a31c8997ae699366c07a39313d8c
 	uint32_t errorCode = app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
 	APP_ERROR_CHECK(errorCode);
 }
@@ -186,6 +188,7 @@ void Mesh::resume() {
 	LOGi("resume mesh");
 #endif
 	startTicking();
+	// TODO: why use the app scheduler here? First introduced here: https://github.com/crownstone/bluenet/commit/07fea79ce064a31c8997ae699366c07a39313d8c
 	uint32_t errorCode = app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
 	APP_ERROR_CHECK(errorCode);
 }
@@ -199,6 +202,7 @@ void Mesh::pause() {
 	LOGi("pause mesh");
 #endif
 	stopTicking();
+	// TODO: why use the app scheduler here? First introduced here: https://github.com/crownstone/bluenet/commit/07fea79ce064a31c8997ae699366c07a39313d8c
 	uint32_t errorCode = app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
 	APP_ERROR_CHECK(errorCode);
 }

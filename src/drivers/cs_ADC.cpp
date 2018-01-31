@@ -17,6 +17,7 @@
 #include "cfg/cs_Strings.h"
 #include "cfg/cs_Config.h"
 #include "protocol/cs_ErrorCodes.h"
+#include "protocol/cs_UartProtocol.h"
 
 //#define PRINT_ADC_VERBOSE
 
@@ -260,6 +261,8 @@ void ADC::applyConfig() {
 	for (int i=0; i<_config.channelCount; ++i) {
 		initChannel(i, _config.channels[i]);
 	}
+
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_CONFIG, (uint8_t*)(&_config), sizeof(_config));
 
 	// Mark as done
 	_changeConfig = false;

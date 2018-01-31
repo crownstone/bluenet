@@ -43,16 +43,15 @@
 //#define APP_TIMER_OP_QUEUE_SIZE                  10
 #define APP_TIMER_OP_QUEUE_SIZE                  20
 
-/*
- */
 /** Maximum size of scheduler events. */
+// TODO: why this size (72)?
 /*
 #define SCHED_MAX_EVENT_DATA_SIZE                ((CEIL_DIV(MAX(MAX(BLE_STACK_EVT_MSG_BUF_SIZE,    \
                                                                     ANT_STACK_EVT_STRUCT_SIZE),    \
                                                                 SYS_EVT_MSG_BUF_SIZE),             \
                                                             sizeof(uint32_t))) * sizeof(uint32_t))
 */
-#define SCHED_MAX_EVENT_DATA_SIZE                128
+#define SCHED_MAX_EVENT_DATA_SIZE               (MAX(20, MAX(APP_TIMER_SCHED_EVT_SIZE, BLE_STACK_HANDLER_SCHED_EVT_SIZE)))
 
 /** Maximum number of events in the scheduler queue.
  *

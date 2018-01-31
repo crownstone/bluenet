@@ -101,40 +101,24 @@ const nrf_clock_lf_cfg_t Nrf51822BluetoothStack::defaultClockSource = { .source 
                                                                         .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
 //*/
 
-//! called by softdevice handler through ble_evt_dispatch on any event that passes through mesh and is not write
-//extern "C" void ble_evt_handler(void* p_event_data, uint16_t event_size) {
-//	Nrf51822BluetoothStack::getInstance().on_ble_evt((ble_evt_t *)p_event_data);
-//}
-
 //! called by softdevice handler on a ble event
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 //	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
 
-//! Example of how you can get the connection handle and role
+	// Example of how you can get the connection handle and role
 // conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
 // role        = ble_conn_state_role(conn_handle);
 
 #if BUILD_MESHING == 1
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-		//!  pass the incoming BLE event to the mesh framework
+		// Pass the incoming BLE event to the mesh framework
 		rbc_mesh_ble_evt_handler(p_ble_evt);
 	}
 #endif
 
-	//! Only dispatch functions to the scheduler which might take long to execute, such as ble write functions
-	//! and handle other ble events directly in the interrupt. Otherwise app scheduler buffer might overflow fast
-//	switch (p_ble_evt->header.evt_id) {
-//	case BLE_GATTS_EVT_WRITE:
-		//! let the scheduler execute the event handle function
-//		LOGi("BLE_WRITE");
-//		BLE_CALL(app_sched_event_put, (p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len, ble_evt_handler));
-//		break;
-//	default:
-//		ble_evt_handler(p_ble_evt, 0);
-		Nrf51822BluetoothStack::getInstance().on_ble_evt(p_ble_evt);
-//		break;
-//	}
+	// The events are already decoupled from interrupt by the app scheduler (as the soft device is initialized with app scheduler)
+	Nrf51822BluetoothStack::getInstance().on_ble_evt(p_ble_evt);
 }
 
 void Nrf51822BluetoothStack::init() {

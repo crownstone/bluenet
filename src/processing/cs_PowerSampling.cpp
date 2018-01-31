@@ -5,19 +5,21 @@
  * License: LGPLv3+
  */
 
-#include <processing/cs_PowerSampling.h>
+#include "processing/cs_PowerSampling.h"
 
-#include <storage/cs_Settings.h>
-#include <drivers/cs_Serial.h>
-#include <drivers/cs_RTC.h>
-#include <protocol/cs_StateTypes.h>
-#include <events/cs_EventDispatcher.h>
-#include <storage/cs_State.h>
-#include <processing/cs_Switch.h>
-#include <third/optmed.h>
+#include "storage/cs_Settings.h"
+#include "drivers/cs_Serial.h"
+#include "drivers/cs_RTC.h"
+#include "protocol/cs_StateTypes.h"
+#include "events/cs_EventDispatcher.h"
+#include "storage/cs_State.h"
+#include "processing/cs_Switch.h"
+#include "third/optmed.h"
+#include "protocol/cs_UartProtocol.h"
+#include "protocol/cs_UartMsgTypes.h"
 
 #if BUILD_MESHING == 1
-#include <mesh/cs_MeshControl.h>
+#include "mesh/cs_MeshControl.h"
 #endif
 
 #include <math.h>
@@ -440,7 +442,7 @@ void PowerSampling::calculatePower(power_t power) {
 		vSquareSum += (voltage * voltage) / (1000*1000);
 		pSum +=       (current * voltage) / (1000*1000);
 	}
-	int32_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
+	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
 	int32_t currentRmsMA =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
 	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
 
@@ -536,7 +538,7 @@ void PowerSampling::calculatePower(power_t power) {
 
 	// Exponential moving average
 	int64_t avgPowerDiscount = _avgPowerDiscount;
-	_avgPowerMilliWatt = ((1000-avgPowerDiscount) * _avgPowerMilliWatt + avgPowerDiscount * powerMilliWatt) / 1000;
+	_avgPowerMilliWatt = ((1000-avgPowerDiscount) * _avgPowerMilliWatt + avgPowerDiscount * powerMilliWattReal) / 1000;
 //	_avgPowerMilliWatt = powerMilliWatt;
 
 
@@ -551,55 +553,47 @@ void PowerSampling::calculatePower(power_t power) {
 
 		if (_logsEnabled.flags.power) {
 			// Calculated values
-			write("Calc: ");
-//			write("%i %i ", currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
-//			write("%i %i ", voltageRmsMilliVolt, _avgVoltageRmsMilliVolt);
-//			write("%i %i ", powerMilliWatt, _avgPowerMilliWatt);
-			write("I=%i I_med=%i filt_I=%i filt_I_med=%i ", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA);
-			write("vZero=%i cZero=%i ", _avgZeroVoltage, _avgZeroCurrent);
-//			write("pSum=%lld ", pSum);
-			write("apparent=%u ", powerMilliWattApparent);
-			write("power=%d avg=%d ",powerMilliWatt, _avgPowerMilliWatt);
-			write("\r\n");
+			uart_msg_power_t powerMsg;
+			powerMsg.currentRmsMA = currentRmsMA;
+			powerMsg.currentRmsMedianMA = currentRmsMedianMA;
+			powerMsg.filteredCurrentRmsMA = filteredCurrentRmsMA;
+			powerMsg.filteredCurrentRmsMedianMA = filteredCurrentRmsMedianMA;
+			powerMsg.avgZeroVoltage = _avgZeroVoltage;
+			powerMsg.avgZeroCurrent = _avgZeroCurrent;
+			powerMsg.powerMilliWattApparent = powerMilliWattApparent;
+			powerMsg.powerMilliWattReal = powerMilliWattReal;
+			powerMsg.avgPowerMilliWattReal = _avgPowerMilliWatt;
+
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_POWER_LOG_POWER, (uint8_t*)&powerMsg, sizeof(powerMsg));
 		}
 
 		if (_logsEnabled.flags.current) {
-			// Current wave
-			write("Current: ");
-//			write("\r\n");
+			// Write uart_msg_current_t without allocating a buffer.
+			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
 			for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				write("%d ", power.buf[i]);
-				if (i % 40 == 40 - 1) {
-//					write("\r\n");
-				}
+				UartProtocol::getInstance().writeMsgPart((uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
 			}
-			write("\r\n");
+			UartProtocol::getInstance().writeMsgEnd();
 		}
 
 		if (_logsEnabled.flags.filteredCurrent) {
-			// Filtered current wave
-			write("Filtered: ");
-//			write("\r\n");
+			// Write uart_msg_current_t without allocating a buffer.
+			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, sizeof(uart_msg_current_t));
+			int16_t val;
 			for (int i = 0; i < numSamples; ++i) {
-				write("%d ", _outputSamples->at(i));
-				if (i % 20 == 20 - 1) {
-//					write("\r\n");
-				}
+				val = _outputSamples->at(i);
+				UartProtocol::getInstance().writeMsgPart((uint8_t*)&val, sizeof(val));
 			}
-			write("\r\n");
+			UartProtocol::getInstance().writeMsgEnd();
 		}
 
 		if (_logsEnabled.flags.voltage) {
-			// Voltage wave
-			write("Voltage: ");
-//			write("\r\n");
+			// Write uart_msg_voltage_t without allocating a buffer.
+			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
 			for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				write("%d ", power.buf[i]);
-				if (i % 40 == 40 - 2) {
-//					write("\r\n");
-				}
+				UartProtocol::getInstance().writeMsgPart((uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
 			}
-			write("\r\n");
+			UartProtocol::getInstance().writeMsgEnd();
 		}
 	}
 	++printPower;
