@@ -284,10 +284,9 @@ void PowerSampling::copyBufferToPowerSamples(power_t power) {
 	// Dispatch event that samples are will be cleared
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
 	_powerSamples.clear();
-	// Use dummy timestamps for now, for backward compatibility
 	uint32_t startTime = RTC::getCount(); // Not really the start time
-	uint32_t dT = CS_ADC_SAMPLE_INTERVAL_US * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000 / 1000;
 
+	_powerSamples.setTimestamp(startTime);
 	for (int i = 0; i < power.bufSize; i += power.numChannels) {
 		if (_powerSamples.getCurrentSamplesBuffer()->full() || _powerSamples.getVoltageSamplesBuffer()->full()) {
 			readyToSendPowerSamples();
@@ -295,23 +294,19 @@ void PowerSampling::copyBufferToPowerSamples(power_t power) {
 		}
 		_powerSamples.getCurrentSamplesBuffer()->push(power.buf[i+power.currentIndex]);
 		_powerSamples.getVoltageSamplesBuffer()->push(power.buf[i+power.voltageIndex]);
-		if ((!_powerSamples.getCurrentTimestampsBuffer()->push(startTime + (i/power.numChannels) * dT)) || 
-				(!_powerSamples.getVoltageTimestampsBuffer()->push(startTime + (i/power.numChannels) * dT))) {
-			_powerSamples.getCurrentSamplesBuffer()->clear();
-			_powerSamples.getVoltageSamplesBuffer()->clear();
-			return;
-		}
 	}
-	//! TODO: are we actually ready here?
+	// TODO: are we actually ready here?
 	readyToSendPowerSamples();
 }
 
 void PowerSampling::readyToSendPowerSamples() {
-	//! Mark that the power samples are being sent now
+	// Mark that the power samples are being sent now
 	_sendingSamples = true;
-	//! Dispatch event that samples are now filled and ready to be sent
+
+	// Dispatch event that samples are now filled and ready to be sent
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
-	//! Simply use an amount of time for sending, should be event based or polling based
+
+	// Simply use an amount of time for sending, should be event based or polling based
 	Timer::getInstance().start(_powerSamplingSentDoneTimerId, MS_TO_TICKS(3000), this);
 }
 

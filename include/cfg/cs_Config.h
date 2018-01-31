@@ -136,7 +136,7 @@
 
 
 
-#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 // Number of voltage and current samples per burst
+//#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 // Number of voltage and current samples per burst
 
 #define CS_ADC_SAMPLE_INTERVAL_US                200
 //#define CS_ADC_SAMPLE_INTERVAL_US                400
@@ -145,6 +145,8 @@
 #define CS_ADC_NUM_BUFFERS                       2 // ADC code is currently written for (max) 2
 #define CS_ADC_BUF_SIZE                          (2*20000/CS_ADC_SAMPLE_INTERVAL_US)
 //#define CS_ADC_BUF_SIZE                          (2*30000/CS_ADC_SAMPLE_INTERVAL_US)
+
+#define POWER_SAMPLE_BURST_NUM_SAMPLES           (20000/CS_ADC_SAMPLE_INTERVAL_US) // Number of voltage and current samples per burst
 
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 
