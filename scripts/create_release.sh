@@ -5,7 +5,7 @@
 #
 # This will:
 #  - Create a new CMakeBuild.config in $BLUENET_DIR/release/model_version/
-#  - Build firmware, bootloader, DFU packages and docs and copy
+#  - Build firmware, DFU packages and docs and copy
 #    them to $BLUENET_RELEASE_DIR/model_version/
 #  - Update the index.json file in $BLUENET_RELEASE_DIR to keep
 #    track of stable, latest, and release dates (for cloud)
@@ -24,10 +24,6 @@ source $BLUENET_DIR/scripts/_utils.sh
 
 if [ -z $BLUENET_RELEASE_DIR ]; then
 	cs_err "BLUENET_RELEASE_DIR is not defined!"
-	exit 1
-fi
-if [ -z $BLUENET_BOOTLOADER_DIR ]; then
-	cs_err "BLUENET_BOOTLOADER_DIR is not defined!"
 	exit 1
 fi
 
@@ -285,24 +281,8 @@ cs_succ "Softdevice DONE"
 
 cs_info "Build firmware ..."
 ./firmware.sh -c release
-
 checkError
 cs_succ "Build DONE"
-popd &> /dev/null
-
-###################
-### Bootloader
-###################
-
-# goto bootloader scripts dir
-pushd $BLUENET_BOOTLOADER_DIR/scripts &> /dev/null
-
-cs_info "Build bootloader ..."
-./all.sh
-
-checkError
-cs_succ "Build DONE"
-
 popd &> /dev/null
 
 ###################
@@ -314,12 +294,6 @@ pushd $BLUENET_DIR/scripts &> /dev/null
 
 cs_info "Create DFU packages ..."
 ./dfuGenPkg.py -a "$BLUENET_BIN_DIR/crownstone.hex" -o $model"_"$version
-
-bootloaderVersion=$(cat $BLUENET_BOOTLOADER_DIR/include/version.h | \
-	grep BOOTLOADER_VERSION | awk -F "\"" '{print $2}')
-
-./dfuGenPkg.py -b "$BLUENET_BIN_DIR/bootloader_dfu.hex" -o "bootloader_"$bootloaderVersion
-
 checkError
 cs_succ "DFU DONE"
 
