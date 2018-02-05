@@ -53,12 +53,11 @@ enum UartOpcodeRx {
 
 enum UartOpcodeTx {
 	UART_OPCODE_TX_ACK = 0,
-	UART_OPCODE_TX_POWER_SAMPLES = 4,
 	UART_OPCODE_TX_MESH_STATE_0 = 100, // For 1st handle, next handle has opcode of 1 larger.
 
 	UART_OPCODE_TX_ADC_CONFIG =                       10100, // Current adc config (payload: adc_config_t)
 
-	UART_OPCODE_TX_POWER_LOG_CURRENT =                10200, // Enable writing current samples (payload: bool enable)
+	UART_OPCODE_TX_POWER_LOG_CURRENT =                10200,
 	UART_OPCODE_TX_POWER_LOG_VOLTAGE =                10201,
 	UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT =       10202,
 	UART_OPCODE_TX_POWER_LOG_FILTERED_VOLTAGE =       10203,

@@ -26,23 +26,26 @@
 #include <cstdint>
 
 struct __attribute__((__packed__)) uart_msg_power_t {
-	int32_t currentRmsMA;
-	int32_t currentRmsMedianMA;
-	int32_t filteredCurrentRmsMA;
-	int32_t filteredCurrentRmsMedianMA;
-	int32_t avgZeroVoltage;
-	int32_t avgZeroCurrent;
-	int32_t powerMilliWattApparent;
-	int32_t powerMilliWattReal;
-	int32_t avgPowerMilliWattReal;
+	uint32_t timestamp;
+	int32_t  currentRmsMA;
+	int32_t  currentRmsMedianMA;
+	int32_t  filteredCurrentRmsMA;
+	int32_t  filteredCurrentRmsMedianMA;
+	int32_t  avgZeroVoltage;
+	int32_t  avgZeroCurrent;
+	int32_t  powerMilliWattApparent;
+	int32_t  powerMilliWattReal;
+	int32_t  avgPowerMilliWattReal;
 };
 
 struct __attribute__((__packed__)) uart_msg_current_t {
-	int16_t samples[CS_ADC_BUF_SIZE/2];
+	uint32_t timestamp;
+	int16_t  samples[CS_ADC_BUF_SIZE/2];
 };
 
 struct __attribute__((__packed__)) uart_msg_voltage_t {
-	int16_t samples[CS_ADC_BUF_SIZE/2];
+	uint32_t timestamp;
+	int16_t  samples[CS_ADC_BUF_SIZE/2];
 };
 
 struct __attribute__((__packed__)) uart_msg_adc_channel_config_t {
