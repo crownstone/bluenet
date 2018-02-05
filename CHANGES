@@ -1,3 +1,116 @@
+Version 2.0.0:
+ - Add release config for crownstone_2.0.0
+ - Set serial verbosity to "byte protocol only" for releases.
+ - Increase igbt failure detection ignore time to 2s.
+ - Ignore igbt failure detection for 1s after boot.
+ - Added more comments to switch.h
+ - Fixed softfuse being overriden bij switch lock.
+ - Don't start pwm when in setup mode.
+ - Only include string.h when serial verbosity is fatal or lower.
+ - Fixed false positives for IGBT failure detection: was triggered by power measurement smoothing.
+ - Made energy calculation a bit more precise.
+ - Cleaned up some timers, and increased timer queue size.
+ - log uart crc mismatch
+ - Added first implementation of energy used calculation.
+ - Updated test doc: repeat power measurement test for several crownstones.
+ - Updated test plan doc: - disable switch lock before checking if you can't change switch state - added soft fuse tests in setup mode
+ - Expanded test doc: added switch lock to soft fuses, add testing of different ways to set switch.
+ - Added to test plan: - dimming available - dimming allowed - switch lock - setup mode for built-in
+ - Use default ibeacon config when not in normal operation mode.
+ - Added option to get the default value from config.
+ - Uart: implemented writeMsg().
+ - Rename uart parser to uart protocol.
+ - Uart parsing now works, had to change streambuffer a bit.
+ - Working on uart rx.
+ - Fixed advertising of unknown mesh state messages.
+ - Fixed case: switch being locked during dimmer boot delay.
+ - -
+ - Poll mesh messages more often, to decrease the hop delay.
+ - Fixed "allow dimming".
+ - Added switch locked and pwm allowed. Actually update pwm and switch service data flags.
+ - Remove some spammy debug by default.
+ - Use relay instead of dimmer, when dimmer is set too soon after boot.
+ - Turn off relay when restoring pwm state.
+ - Send compressed power usage instead of mW over the mesh.
+ - Added validation to ext state and ext error service data.
+ - Fixed service data to set correct opcode when encrypted.
+ - Updated test.
+ - Protocol update: partial timestamp is replaced by a counter, when time is not set.
+ - Fixed crash in factory reset mode (timer wasn't created).
+ - Use 1B stone id. Changed service data and mesh protocol, according to protocol 0.13.
+ - Added "time set" flag.
+ - Fixed doc of scan-result-mesh-packet.
+ - Removed title from packet diagram.
+ - Updated protocol.
+ - Merge branch 'mesh-state-broadcast' of github.com:crownstone/bluenet into mesh-state-broadcast
+ - Should divide real power by power factor to get apparent power.
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Added simple IGBT failure detection, dimmer boot delay, dimming allowed for all boards. Publish state updates before storing them (reduces delays).
+ - Added counter to setup service data.
+ - Re-added error flag.
+ - No need for timestamp in setup mode: time is not set in setup mode.
+ - Added new flags, changed setup mode packet.
+ - Added another idea for a compressed timestamp.
+ - Merge branch 'mesh-state-broadcast' of github.com:crownstone/bluenet into mesh-state-broadcast
+ - Changed proposal protocol again..
+ - Update CHOICES.md
+ - Updated proposal protocol for service data and state mesh msgs.
+ - Merge branch 'mesh-state-broadcast' of github.com:crownstone/bluenet into mesh-state-broadcast
+ - Merge branch 'master' into mesh-state-broadcast
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Added service data protocol v3. Finished change of mesh state item.
+ - work in progress: adding service data protocol v3.
+ - Use 16 bits for real power, as that's what is most interesting.
+ - Fixed list numbering.
+ - Added mesh state propagation considerations to choices doc.
+ - more power data logs.
+ - Power usage over mesh is different from service data.
+ - Send mesh message before handling them.
+ - Updated protocol, advertised power usage is apparent, since it can't be negative.
+ - Oops, switched pins of 1B6D at 1B2G.
+ - Use variables in combine.sh, and add optional targets.
+ - Added ACR01B6D to hardware versions.
+ - Updated protocol: power usage is reporting real power usage.
+ - Added board ACR01B6D. Added more current sense pins, can be selected to be used for the voltage channel.
+ - Added comments to cs_serviceData.
+ - Started on style doc.
+ - Mesh state timeout detection done. This relies on noise power measurements though.
+ - Fixed overflow in msToTicks().
+ - apparant -> apparent
+ - Started on mesh state timeout, with last seen table.
+ - Merge branch 'master' into mesh-state-broadcast
+ - Fixed testing doc.
+ - Added power measurement to test doc.
+ - Added dimmer tests to testing doc.
+ - Merge branch 'master' into mesh-state-broadcast
+ - Improved dealing with invalid handles.
+ - Merge branch 'master' into mesh-state-broadcast
+ - Reply message only need 1 byte for type.
+ - Check access level before handling the commands.
+ - Added setup level as encryption requirement. Added function that determines required access level for each command type. Added function that tells for each command type if it can be used in a mesh command message.
+ - Added setup access level to doc.
+ - Split up command handler function into seperate functions. Updated protocol doc.
+ - Changed handle of mesh command channel.
+ - Added bitmask to mesh command message. Added control command to send a mesh command message.
+ - Added control cmd: keep alive mesh.
+ - Fixed choosing external service data.
+ - Updated protocol: mesh messages has breaking changes.
+ - Changed mesh keep alive, and multi switch structs.
+ - Work in progress: changing keep-alive and multi-switch msgs.
+ - Change mesh channel to 39, so that it doesn't break old firmware.
+ - Fixed unit test.
+ - State mesh messages: - Use 2 broadcast channels - Added power factor to state messages - Use "external data" bit to flag state items being triggered by an event.
+ - Fixed crash when receiving a mesh message on an invalid handle.
+ - Fixed advertising not starting after connect.
+ - Changed state handles to 9 and 10, to prepare for new protocol.
+
 Version 1.7.1:
  - Add release config for crownstone_1.7.1
  - Changed tests for soft fuses, as soft fuses changed. Added dimmer and power measurements tests.
