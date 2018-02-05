@@ -30,6 +30,8 @@ Type  | Packet | Description
 1     | [Control msg](../docs/PROTOCOL.md#control_packet).
 10000 | uint8  | Enable/disable advertising. (Currently the packet is ignored, and it toggles instead)
 10001 | uint8  | Enable/disable mesh. (Currently the packet is ignored, and it toggles instead)
+10002 | -      | Get ID of this Crownstone.
+10003 | -      | Get MAC address of this Crownstone.
 10103 | -      | Increase the range on the current channel.
 10104 | -      | Decrease the range on the current channel.
 10105 | -      | Increase the range on the voltage channel.
@@ -51,6 +53,8 @@ Type  | Packet | Description
 0     | ?      | Ack. (Not implemented yet)
 100   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 0).
 101   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 1).
+10000 | uint8  | Own Crownstone ID.
+10001 | MAC    | Own mac address (6 bytes).
 10100 | ?      | ADC config. (Not implemented yet)
 10200 | [Current samples](#current_samples_packet) | Raw ADC samples of the current channel.
 10201 | [Voltage samples](#voltage_samples_packet) | Raw ADC samples of the voltage channel.

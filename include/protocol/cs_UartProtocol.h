@@ -32,6 +32,8 @@ enum UartOpcodeRx {
 	UART_OPCODE_RX_CONTROL =                          1,
 	UART_OPCODE_RX_ENABLE_ADVERTISEMENT =             10000, // Enable advertising (payload: bool enable)
 	UART_OPCODE_RX_ENABLE_MESH =                      10001, // Enable mesh (payload: bool enable)
+	UART_OPCODE_RX_GET_ID =                           10002, // Get ID of this Crownstone
+	UART_OPCODE_RX_GET_MAC =                          10003, // Get MAC address of this Crownstone
 
 //	UART_OPCODE_RX_ADC_CONFIG_GET =                   10100, // Get the adc config
 //	UART_OPCODE_RX_ADC_CONFIG_SET =                   10101, // Set an adc channel config (payload: uart_msg_adc_channel_config_t)
@@ -54,6 +56,9 @@ enum UartOpcodeRx {
 enum UartOpcodeTx {
 	UART_OPCODE_TX_ACK = 0,
 	UART_OPCODE_TX_MESH_STATE_0 = 100, // For 1st handle, next handle has opcode of 1 larger.
+
+	UART_OPCODE_TX_OWN_ID =                           10002, // Own id (payload: crownstone_id_t)
+	UART_OPCODE_TX_OWN_MAC =                          10003, // Own MAC address (payload: mac address (6B))
 
 	UART_OPCODE_TX_ADC_CONFIG =                       10100, // Current adc config (payload: adc_config_t)
 

@@ -241,6 +241,18 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	case UART_OPCODE_RX_ENABLE_MESH:
 		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_MESH);
 		break;
+	case UART_OPCODE_RX_GET_ID:
+		uint16_t crownstoneId;
+		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+		writeMsg(UART_OPCODE_TX_OWN_ID, (uint8_t*)&crownstoneId, sizeof(crownstoneId));
+		break;
+	case UART_OPCODE_RX_GET_MAC:
+		uint32_t err_code;
+		ble_gap_addr_t address;
+		err_code = sd_ble_gap_address_get(&address);
+		APP_ERROR_CHECK(err_code);
+		writeMsg(UART_OPCODE_TX_OWN_MAC, address.addr, sizeof(ble_gap_addr_t));
+		break;
 //	case UART_OPCODE_RX_ADC_CONFIG_GET:
 //		break;
 //	case UART_OPCODE_RX_ADC_CONFIG_SET:
