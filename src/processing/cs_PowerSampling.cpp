@@ -548,7 +548,8 @@ void PowerSampling::calculatePower(power_t power) {
 	/////////////////////////////////////////////////////////
 
 #ifdef PRINT_POWER_SAMPLES
-	if (printPower % 500 == 0) {
+	if (printPower % 1 == 0) {
+//	if (printPower % 500 == 0) {
 //	if (printPower % 500 == 0 || currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > _currentMilliAmpThresholdPwm) {
 
 		if (_logsEnabled.flags.power) {
