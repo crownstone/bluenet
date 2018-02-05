@@ -42,7 +42,53 @@ Type  | Packet | Description
 10202 | uint8  | Enable sending filtered current samples. (Currently the packet is ignored, and it toggles instead)
 10204 | uint8  | Enable sending calculated power samples. (Currently the packet is ignored, and it toggles instead)
 
+## TX OpCodes
 
+Opcodes for messages sent by the Crownstone.
 
+Type  | Packet | Description
+----- | ------ | ----
+0     | ?      | Ack. (Not implemented yet)
+100   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 0).
+101   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 1).
+10100 | ?      | ADC config. (Not implemented yet)
+10200 | [Current samples](#current_samples_packet) | Raw ADC samples of the current channel.
+10201 | [Voltage samples](#voltage_samples_packet) | Raw ADC samples of the voltage channel.
+10202 | [Filtered current samples](#current_samples_packet) | Filtered ADC samples of the current channel.
+10203 | [Filtered voltage samples](#voltage_samples_packet) | Filtered ADC samples of the voltage channel.
+10204 | [Power calculations](#power_calculation_packet) | Calculated power values.
 
+## Packets
+
+<a name="current_samples_packet"></a>
+### Current samples
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32  | Timestamp | 4 | Counter of the RTC (running at 32768 Hz, max value is 0x00FFFFFF).
+int16[] | Samples | 200 | Raw sample data.
+
+<a name="voltage_samples_packet"></a>
+### Voltage samples
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32  | Timestamp | 4 | Counter of the RTC (running at 32768 Hz, max value is 0x00FFFFFF).
+int16[] | Samples | 200 | Raw sample data.
+
+<a name="power_calculation_packet"></a>
+### Power calculations
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Timestamp | 4 | Counter of the RTC (running at 32768 Hz, max value is 0x00FFFFFF).
+int32  | currentRmsMA | 4 | 
+int32  | currentRmsMedianMA | 4 | 
+int32  | filteredCurrentRmsMA | 4 | 
+int32  | filteredCurrentRmsMedianMA | 4 | 
+int32  | avgZeroVoltage | 4 | 
+int32  | avgZeroCurrent | 4 | 
+int32  | powerMilliWattApparent | 4 | 
+int32  | powerMilliWattReal | 4 | 
+int32  | avgPowerMilliWattReal | 4 | 
 
