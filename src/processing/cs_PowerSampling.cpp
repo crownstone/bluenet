@@ -554,6 +554,7 @@ void PowerSampling::calculatePower(power_t power) {
 		if (_logsEnabled.flags.power) {
 			// Calculated values
 			uart_msg_power_t powerMsg;
+			powerMsg.timestamp = RTC::getCount();
 			powerMsg.currentRmsMA = currentRmsMA;
 			powerMsg.currentRmsMedianMA = currentRmsMedianMA;
 			powerMsg.filteredCurrentRmsMA = filteredCurrentRmsMA;
