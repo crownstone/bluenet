@@ -4,21 +4,21 @@
  * Date: May 4, 2016
  * License: LGPLv3+
  */
-#include <ble/cs_ServiceData.h>
+#include "ble/cs_ServiceData.h"
 
-#include <processing/cs_EncryptionHandler.h>
-
-#include <protocol/cs_StateTypes.h>
-#include <protocol/cs_ConfigTypes.h>
-#include <drivers/cs_Serial.h>
-#include <drivers/cs_RNG.h>
-#include <storage/cs_State.h>
-#include <util/cs_Utils.h>
-#include <drivers/cs_RTC.h>
+#include "processing/cs_EncryptionHandler.h"
+#include "protocol/cs_StateTypes.h"
+#include "protocol/cs_ConfigTypes.h"
+#include "drivers/cs_Serial.h"
+#include "drivers/cs_RNG.h"
+#include "storage/cs_State.h"
+#include "util/cs_Utils.h"
+#include "drivers/cs_RTC.h"
+#include "protocol/cs_UartProtocol.h"
 
 #if BUILD_MESHING == 1
-#include <mesh/cs_MeshControl.h>
-#include <protocol/mesh/cs_MeshMessageState.h>
+#include "mesh/cs_MeshControl.h"
+#include "protocol/mesh/cs_MeshMessageState.h"
 #endif
 
 #define ADVERTISE_EXTERNAL_DATA
@@ -234,6 +234,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 		BLEutil::printArray(_serviceData.array, sizeof(service_data_t));
 //		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type, serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask, serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy, serviceData->params.partialTimestamp);
 #endif
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(service_data_t));
 
 		// encrypt the array using the guest key ECB if encryption is enabled.
 		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {

@@ -51,6 +51,7 @@ Opcodes for messages sent by the Crownstone.
 Type  | Packet | Description
 ----- | ------ | ----
 0     | ?      | Ack. (Not implemented yet)
+2     | [Scan response](../docs/PROTOCOL.md#scan_response_servicedata_packet) | Service data of this Crownstone (before encryption).
 100   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 0).
 101   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 1).
 10000 | uint8  | Own Crownstone ID.

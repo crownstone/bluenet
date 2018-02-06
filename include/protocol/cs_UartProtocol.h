@@ -55,7 +55,8 @@ enum UartOpcodeRx {
 
 enum UartOpcodeTx {
 	UART_OPCODE_TX_ACK = 0,
-	UART_OPCODE_TX_MESH_STATE_0 = 100, // For 1st handle, next handle has opcode of 1 larger.
+	UART_OPCODE_TX_SERVICE_DATA =                     2, // Sent when the service data is updated (payload: service_data_t)
+	UART_OPCODE_TX_MESH_STATE_0 =                     100, // For 1st handle, next handle has opcode of 1 larger.
 
 	UART_OPCODE_TX_OWN_ID =                           10002, // Own id (payload: crownstone_id_t)
 	UART_OPCODE_TX_OWN_MAC =                          10003, // Own MAC address (payload: mac address (6B))
