@@ -184,16 +184,16 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_TOGGLE_LOG_POWER:
-		_logsEnabled.flags.power = !_logsEnabled.flags.power;
+		_logsEnabled.flags.power = *(uint8_t*)p_data;
 		break;
 	case EVT_TOGGLE_LOG_CURRENT:
-		_logsEnabled.flags.current = !_logsEnabled.flags.current;
+		_logsEnabled.flags.current = *(uint8_t*)p_data;
 		break;
 	case EVT_TOGGLE_LOG_VOLTAGE:
-		_logsEnabled.flags.voltage = !_logsEnabled.flags.voltage;
+		_logsEnabled.flags.voltage = *(uint8_t*)p_data;
 		break;
 	case EVT_TOGGLE_LOG_FILTERED_CURRENT:
-		_logsEnabled.flags.filteredCurrent = !_logsEnabled.flags.filteredCurrent;
+		_logsEnabled.flags.filteredCurrent = *(uint8_t*)p_data;
 		break;
 	case EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 		toggleVoltageChannelInput();

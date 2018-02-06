@@ -28,8 +28,8 @@ Opcodes for messages received by the Crownstone.
 Type  | Packet | Description
 ----- | ------ | ----
 1     | [Control msg](../docs/PROTOCOL.md#control_packet).
-10000 | uint8  | Enable/disable advertising. (Currently the packet is ignored, and it toggles instead)
-10001 | uint8  | Enable/disable mesh. (Currently the packet is ignored, and it toggles instead)
+10000 | uint8  | Enable/disable advertising.
+10001 | uint8  | Enable/disable mesh.
 10002 | -      | Get ID of this Crownstone.
 10003 | -      | Get MAC address of this Crownstone.
 10103 | -      | Increase the range on the current channel.
@@ -39,10 +39,10 @@ Type  | Packet | Description
 10108 | uint8  | Enable/disable differential mode on current channel. (Currently the packet is ignored, and it toggles instead)
 10109 | uint8  | Enable/disable differential mode on voltage channel. (Currently the packet is ignored, and it toggles instead)
 10110 | uint8  | Change the pin used on voltage channel. (Currently the packet is ignored, and it rotates between certain pins instead)
-10200 | uint8  | Enable sending current samples. (Currently the packet is ignored, and it toggles instead)
-10201 | uint8  | Enable sending voltage samples. (Currently the packet is ignored, and it toggles instead)
-10202 | uint8  | Enable sending filtered current samples. (Currently the packet is ignored, and it toggles instead)
-10204 | uint8  | Enable sending calculated power samples. (Currently the packet is ignored, and it toggles instead)
+10200 | uint8  | Enable sending current samples.
+10201 | uint8  | Enable sending voltage samples.
+10202 | uint8  | Enable sending filtered current samples.
+10204 | uint8  | Enable sending calculated power samples.
 
 ## TX OpCodes
 
@@ -54,8 +54,10 @@ Type  | Packet | Description
 2     | [Service data](../docs/PROTOCOL.md#scan_response_servicedata_packet) | Service data of this Crownstone (before encryption).
 100   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 0).
 101   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 1).
-10000 | uint8  | Own Crownstone ID.
-10001 | MAC    | Own mac address (6 bytes).
+10000 | uint8  | Whether advertising is enabled.
+10001 | uint8  | Whether mesh is enabled.
+10002 | uint8  | Own Crownstone ID.
+10003 | MAC    | Own mac address (6 bytes).
 10100 | ?      | ADC config. (Not implemented yet)
 10200 | [Current samples](#current_samples_packet) | Raw ADC samples of the current channel.
 10201 | [Voltage samples](#voltage_samples_packet) | Raw ADC samples of the voltage channel.
@@ -64,6 +66,28 @@ Type  | Packet | Description
 10204 | [Power calculations](#power_calculation_packet) | Calculated power values.
 
 ## Packets
+
+<a name="adc_config_packet"></a>
+### ADC config
+
+Sent when the ADC config changes.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Count | 1 | Number of channels.
+[channel_config](#adc_channel_config_packet)[] | Channels |  | List of channel configs.
+uint32 | Sampling period | 4 | Sampling period in μs, each period all channels are sampled once.
+
+
+<a name="adc_channel_config_packet"></a>
+### ADC channel config
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Pin | 1 | Analog pin number (AIN..). 100 for Vdd.
+uint32 | Range | 4 | Range in mV. Max is 3600.
+uint8 | RefPin | 1 | Reference pin for differential measurements. Set to 255 to disable differential measurements.
+
 
 <a name="current_samples_packet"></a>
 ### Current samples
@@ -96,4 +120,6 @@ int32  | avgZeroCurrent | 4 |
 int32  | powerMilliWattApparent | 4 | 
 int32  | powerMilliWattReal | 4 | 
 int32  | avgPowerMilliWattReal | 4 | 
+
+
 

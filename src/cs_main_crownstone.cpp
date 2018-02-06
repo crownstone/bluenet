@@ -19,22 +19,23 @@
  *
  *********************************************************************************************************************/
 
-#include <cs_Crownstone.h>
-#include <ble/cs_CrownstoneManufacturer.h>
-#include <cfg/cs_Boards.h>
-#include <cfg/cs_HardwareVersions.h>
-#include <drivers/cs_PWM.h>
-#include <drivers/cs_RNG.h>
-#include <drivers/cs_RTC.h>
-#include <drivers/cs_Temperature.h>
-#include <drivers/cs_Timer.h>
-#include <events/cs_EventDispatcher.h>
-#include <events/cs_EventTypes.h>
-#include <processing/cs_EncryptionHandler.h>
-#include <storage/cs_State.h>
-#include <structs/buffer/cs_MasterBuffer.h>
-#include <structs/buffer/cs_EncryptionBuffer.h>
-#include <util/cs_Utils.h>
+#include "cs_Crownstone.h"
+#include "ble/cs_CrownstoneManufacturer.h"
+#include "cfg/cs_Boards.h"
+#include "cfg/cs_HardwareVersions.h"
+#include "drivers/cs_PWM.h"
+#include "drivers/cs_RNG.h"
+#include "drivers/cs_RTC.h"
+#include "drivers/cs_Temperature.h"
+#include "drivers/cs_Timer.h"
+#include "events/cs_EventDispatcher.h"
+#include "events/cs_EventTypes.h"
+#include "processing/cs_EncryptionHandler.h"
+#include "storage/cs_State.h"
+#include "structs/buffer/cs_MasterBuffer.h"
+#include "structs/buffer/cs_EncryptionBuffer.h"
+#include "util/cs_Utils.h"
+#include "protocol/cs_UartProtocol.h"
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -807,22 +808,26 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 	case EVT_TOGGLE_ADVERTISEMENT: {
-		if (_stack->isAdvertising()) {
-			_stack->stopAdvertising();
-		}
-		else {
+		uint8_t enable = *(uint8_t*)p_data;
+		if (enable) {
 			_stack->startAdvertising();
 		}
+		else {
+			_stack->stopAdvertising();
+		}
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, &enable, 1);
 		break;
 	}
 	case EVT_TOGGLE_MESH: {
 #if BUILD_MESHING == 1
-		if (_mesh->isRunning()) {
-			_mesh->stop();
-		}
-		else {
+		uint8_t enable = *(uint8_t*)p_data;
+		if (enable) {
 			_mesh->start();
 		}
+		else {
+			_mesh->stop();
+		}
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
 #endif
 		break;
 	}
