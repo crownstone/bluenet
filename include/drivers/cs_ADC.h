@@ -81,7 +81,7 @@ enum adc_gain_t {
  * rangeMilliVolt:    The range in mV of the pin.
  * referencePin:      The AIN pin to be subtracted from the measured voltage.
  */
-struct adc_channel_config_t {
+struct __attribute__((packed)) adc_channel_config_t {
 	cs_adc_pin_id_t pin;
 	uint32_t rangeMilliVolt;
 	cs_adc_pin_id_t referencePin;
@@ -91,9 +91,9 @@ struct adc_channel_config_t {
  *
  * channelCount:      The amount of channels to sample.
  * channels:          The channel configs.
- * samplingPeriodUs:  The sampling period in us (each period, all channels are sampled once).
+ * samplingPeriodUs:  The sampling period in μs (each period, all channels are sampled once).
  */
-struct adc_config_t {
+struct __attribute__((packed)) adc_config_t {
 	cs_adc_channel_id_t channelCount;
 	adc_channel_config_t channels[CS_ADC_MAX_PINS];
 	uint32_t samplingPeriodUs;
