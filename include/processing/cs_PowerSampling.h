@@ -222,9 +222,9 @@ private:
 
 	void toggleVoltageChannelInput();
 
-	void toggleDifferentialModeCurrent();
+	void enableDifferentialModeCurrent(bool enable);
 
-	void toggleDifferentialModeVoltage();
+	void enableDifferentialModeVoltage(bool enable);
 
 	void changeRange(uint8_t channel, int32_t amount);
 };

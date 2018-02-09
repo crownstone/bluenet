@@ -807,7 +807,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_stack->setPasskey((uint8_t*)p_data);
 		break;
 	}
-	case EVT_TOGGLE_ADVERTISEMENT: {
+	case EVT_ENABLE_ADVERTISEMENT: {
 		uint8_t enable = *(uint8_t*)p_data;
 		if (enable) {
 			_stack->startAdvertising();
@@ -818,7 +818,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, &enable, 1);
 		break;
 	}
-	case EVT_TOGGLE_MESH: {
+	case EVT_ENABLE_MESH: {
 #if BUILD_MESHING == 1
 		uint8_t enable = *(uint8_t*)p_data;
 		if (enable) {

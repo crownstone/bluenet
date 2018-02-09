@@ -237,11 +237,11 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	}
 	case UART_OPCODE_RX_ENABLE_ADVERTISEMENT:
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_ADVERTISEMENT, payload, 1);
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADVERTISEMENT, payload, 1);
 		break;
 	case UART_OPCODE_RX_ENABLE_MESH:
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_MESH, payload, 1);
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_MESH, payload, 1);
 		break;
 	case UART_OPCODE_RX_GET_ID:
 		uint16_t crownstoneId;
@@ -274,32 +274,32 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 		EventDispatcher::getInstance().dispatch(EVT_DEC_VOLTAGE_RANGE);
 		break;
 	case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_CURRENT:
-		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_ADC_DIFFERENTIAL_CURRENT);
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT);
 		break;
 	case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_VOLTAGE:
-		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_ADC_DIFFERENTIAL_VOLTAGE);
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE);
 		break;
 	case UART_OPCODE_RX_ADC_CONFIG_VOLTAGE_PIN:
 		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 		break;
 	case UART_OPCODE_RX_POWER_LOG_CURRENT:
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_LOG_CURRENT, payload, 1);
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_CURRENT, payload, 1);
 		break;
 	case UART_OPCODE_RX_POWER_LOG_VOLTAGE:
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_LOG_VOLTAGE, payload, 1);
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_VOLTAGE, payload, 1);
 		break;
 	case UART_OPCODE_RX_POWER_LOG_FILTERED_CURRENT:
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_LOG_FILTERED_CURRENT, payload, 1);
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_FILTERED_CURRENT, payload, 1);
 		break;
 //	case UART_OPCODE_RX_POWER_LOG_FILTERED_VOLTAGE:
 //		EventDispatcher::getInstance().dispatch();
 //		break;
 	case UART_OPCODE_RX_POWER_LOG_POWER:
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_LOG_POWER, payload, 1);
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_POWER, payload, 1);
 		break;
 	}
 

@@ -183,26 +183,26 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 
 void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
-	case EVT_TOGGLE_LOG_POWER:
+	case EVT_ENABLE_LOG_POWER:
 		_logsEnabled.flags.power = *(uint8_t*)p_data;
 		break;
-	case EVT_TOGGLE_LOG_CURRENT:
+	case EVT_ENABLE_LOG_CURRENT:
 		_logsEnabled.flags.current = *(uint8_t*)p_data;
 		break;
-	case EVT_TOGGLE_LOG_VOLTAGE:
+	case EVT_ENABLE_LOG_VOLTAGE:
 		_logsEnabled.flags.voltage = *(uint8_t*)p_data;
 		break;
-	case EVT_TOGGLE_LOG_FILTERED_CURRENT:
+	case EVT_ENABLE_LOG_FILTERED_CURRENT:
 		_logsEnabled.flags.filteredCurrent = *(uint8_t*)p_data;
 		break;
 	case EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 		toggleVoltageChannelInput();
 		break;
-	case EVT_TOGGLE_ADC_DIFFERENTIAL_CURRENT:
-		toggleDifferentialModeCurrent();
+	case EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+		enableDifferentialModeCurrent(*(uint8_t*)p_data);
 		break;
-	case EVT_TOGGLE_ADC_DIFFERENTIAL_VOLTAGE:
-		toggleDifferentialModeVoltage();
+	case EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+		enableDifferentialModeVoltage(*(uint8_t*)p_data);
 		break;
 	case EVT_INC_VOLTAGE_RANGE:
 		changeRange(VOLTAGE_CHANNEL_IDX, 600);
@@ -737,8 +737,9 @@ void PowerSampling::toggleVoltageChannelInput() {
 	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
 }
 
-void PowerSampling::toggleDifferentialModeCurrent() {
-	_adcConfig.currentDifferential = !_adcConfig.currentDifferential;
+void PowerSampling::enableDifferentialModeCurrent(bool enable) {
+//	_adcConfig.currentDifferential = !_adcConfig.currentDifferential;
+	_adcConfig.currentDifferential = enable;
 	adc_channel_config_t channelConfig;
 	channelConfig.pin = _adcConfig.currentPinGainHigh;
 	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[CURRENT_CHANNEL_IDX];
@@ -746,8 +747,9 @@ void PowerSampling::toggleDifferentialModeCurrent() {
 	_adc->changeChannel(CURRENT_CHANNEL_IDX, channelConfig);
 }
 
-void PowerSampling::toggleDifferentialModeVoltage() {
-	_adcConfig.voltageDifferential = !_adcConfig.voltageDifferential;
+void PowerSampling::enableDifferentialModeVoltage(bool enable) {
+//	_adcConfig.voltageDifferential = !_adcConfig.voltageDifferential;
+	_adcConfig.voltageDifferential = enable;
 	adc_channel_config_t channelConfig;
 	channelConfig.pin = _adcConfig.voltageChannelPin;
 	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX];
