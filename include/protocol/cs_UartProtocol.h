@@ -70,6 +70,8 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT =       10202,
 	UART_OPCODE_TX_POWER_LOG_FILTERED_VOLTAGE =       10203,
 	UART_OPCODE_TX_POWER_LOG_POWER =                  10204,
+
+	UART_OPCODE_TX_TEXT =                             20000, // Payload is ascii text.
 };
 
 struct __attribute__((__packed__)) uart_msg_header_t {

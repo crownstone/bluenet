@@ -95,7 +95,7 @@ void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) 
 
 void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 	if (size > UART_TX_MAX_PAYLOAD_SIZE) {
-		LOGw("msg too large");
+//		LOGw("msg too large");
 		return;
 	}
 
@@ -117,7 +117,7 @@ void UartProtocol::writeMsgEnd() {
 	uart_msg_tail_t tail;
 	tail.crc = _crc;
 	writeBytes((uint8_t*)(&tail), sizeof(uart_msg_tail_t));
-	write(SERIAL_CRLF); // Just so it still looks ok on minicom
+//	write(SERIAL_CRLF); // Just so it still looks ok on minicom
 }
 
 
@@ -208,8 +208,8 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	uint8_t* data = msgData->msg;
 	uint16_t size = msgData->msgSize;
 
-	LOGd("read:");
-	BLEutil::printArray(data, size);
+//	LOGd("read:");
+//	BLEutil::printArray(data, size);
 
 	// Check CRC
 	uint16_t calculatedCrc = crc16(data, size - sizeof(uart_msg_tail_t));
