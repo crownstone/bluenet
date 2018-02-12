@@ -200,7 +200,7 @@ void ADC::start() {
 void ADC::addBufferToSampleQueue(nrf_saadc_value_t* buf) {
 	ret_code_t err_code;
 	err_code = nrf_drv_saadc_buffer_convert(buf, CS_ADC_BUF_SIZE);
-	APP_ERROR_CHECK(err_code);
+	APP_ERROR_CHECK(err_code); // TODO: got error 17 here (busy).
 	_numBuffersQueued++;
 }
 

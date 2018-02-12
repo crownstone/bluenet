@@ -117,6 +117,7 @@ void Switch::startPwm() {
 	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state) {
 		// Don't use relayOff(), as that checks for switchLocked.
 		switch_state_t oldVal = _switchValue;
+		// TODO: the pwm gets set at the start of a period, which lets the light flicker in case the relay is turned off..
 		_relayOff();
 		storeState(oldVal);
 	}
@@ -292,6 +293,7 @@ void Switch::setSwitch(uint8_t switchState) {
 			break;
 		}
 		default: {
+			// TODO: the pwm gets set at the start of a period, which lets the light flicker in case the relay is turned off..
 			// First pwm on, then relay off!
 			// Otherwise, if you go from 100 to 90, the power first turns off, then to 90.
 			// TODO: why not first relay on, then pwm off, when going from 90 to 100?
