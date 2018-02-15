@@ -84,6 +84,9 @@ void Switch::start() {
 //	// Restore the pwm state. Use _setPwm(), so that we don't write to persistent storage again.
 //	_setPwm(_switchValue.pwm_state);
 
+	// Already start PWM, so it can sync with the zero crossings. But don't set the value yet.
+	PWM::getInstance().start(true);
+
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
 	if (_switchValue.pwm_state != 0) {
 		LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
@@ -113,7 +116,8 @@ void Switch::startPwm() {
 
 	// Restore the pwm state.
 	bool success = _setPwm(_switchValue.pwm_state);
-	PWM::getInstance().start(true); // Start after setting value, else there's a race condition.
+	// PWM was already started in start(), so it could sync with zero crossings.
+//	PWM::getInstance().start(true); // Start after setting value, else there's a race condition.
 	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state) {
 		// Don't use relayOff(), as that checks for switchLocked.
 		switch_state_t oldVal = _switchValue;
