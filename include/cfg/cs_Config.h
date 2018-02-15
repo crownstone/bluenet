@@ -44,6 +44,7 @@
 #define APP_TIMER_OP_QUEUE_SIZE                  20
 
 /** Maximum size of scheduler events. */
+// Has to be word aligned?
 // TODO: why this size (72)?
 /*
 #define SCHED_MAX_EVENT_DATA_SIZE                ((CEIL_DIV(MAX(MAX(BLE_STACK_EVT_MSG_BUF_SIZE,    \

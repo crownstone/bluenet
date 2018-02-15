@@ -22,7 +22,9 @@
 //#define PRINT_ADC_VERBOSE
 
 // Define test pin to enable gpio debug.
-//#define TEST_PIN 22
+//#define TEST_PIN  24
+//#define TEST_PIN2 25
+//#define TEST_PIN3 26
 
 
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
@@ -54,6 +56,13 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	_config = config;
 //	memcpy(&_config, &config, sizeof(adc_config_t));
 	LOGi("init: period=%uus", _config.samplingPeriodUs);
+
+#ifdef TEST_PIN
+	nrf_gpio_cfg_output(TEST_PIN);
+#endif
+#ifdef TEST_PIN2
+	nrf_gpio_cfg_output(TEST_PIN2);
+#endif
 
 	// Setup timer
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
@@ -101,7 +110,7 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	// Allocate buffers
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
 		_bufferPointers[i] = new nrf_saadc_value_t[CS_ADC_BUF_SIZE];
-		/* Start conversion in non-blocking mode. Sampling is not triggered yet. */
+		// Start conversion in non-blocking mode. Sampling is not triggered yet.
 		addBufferToSampleQueue(_bufferPointers[i]);
 	}
 
@@ -116,6 +125,7 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
  *   - set either differential mode (pin - ref_pin), or single ended mode (pin - 0)
  */
 cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config) {
+	// TODO: No logs, this function can be called from interrupt
 	LOGi("init channel %u on ain%u, range=%umV, ref=ain%u", channel, config.pin, config.rangeMilliVolt, config.referencePin);
 	assert(config.pin < 8 || config.pin == CS_ADC_PIN_VDD, "Invalid pin");
 	assert(config.referencePin < 8 || config.referencePin == CS_ADC_REF_PIN_NOT_AVAILABLE, "Invalid ref pin");
@@ -198,6 +208,10 @@ void ADC::start() {
 }
 
 void ADC::addBufferToSampleQueue(nrf_saadc_value_t* buf) {
+	// No logs, this function can be called from interrupt
+#ifdef TEST_PIN2
+	nrf_gpio_pin_toggle(TEST_PIN2);
+#endif
 	ret_code_t err_code;
 	err_code = nrf_drv_saadc_buffer_convert(buf, CS_ADC_BUF_SIZE);
 	APP_ERROR_CHECK(err_code); // TODO: got error 17 here (busy).
@@ -205,10 +219,14 @@ void ADC::addBufferToSampleQueue(nrf_saadc_value_t* buf) {
 }
 
 bool ADC::releaseBuffer(nrf_saadc_value_t* buf) {
+//	write("r %p\r\n", buf);
 	if (_doneCallbackData.buffer != buf) {
 		LOGe("buffer mismatch! %i vs %i", _doneCallbackData.buffer, buf);
 		return false;
 	}
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 
 	// Clear the callback data
 	_doneCallbackData.buffer = NULL;
@@ -232,12 +250,8 @@ void ADC::setZeroCrossingCallback(adc_zero_crossing_cb_t callback) {
 
 void ADC::enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroVal) {
 	LOGd("enable zero chan=%u zero=%i", channel, zeroVal);
-#ifdef TEST_PIN
-	nrf_gpio_cfg_output(TEST_PIN);
-#endif
 	_zeroValue = zeroVal;
 	_zeroCrossingChannel = channel;
-
 	setLimitUp();
 }
 
@@ -258,42 +272,45 @@ cs_adc_error_t ADC::changeChannel(cs_adc_channel_id_t channel, adc_channel_confi
 
 void ADC::applyConfig() {
 	// Apply channel configs
+	// TODO: No logs, this function can be called from interrupt
+	LOGd("apply config");
 	for (int i=0; i<_config.channelCount; ++i) {
 		initChannel(i, _config.channels[i]);
 	}
 
 	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_CONFIG, (uint8_t*)(&_config), sizeof(_config));
 
-	// Mark as done
-	_changeConfig = false;
-
 	// Add all buffers again
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
 		addBufferToSampleQueue(_bufferPointers[i]);
 	}
+
+	// Mark as done
+	_changeConfig = false;
 }
 
 void ADC::setLimitUp() {
+	// No logs, this function can be called from interrupt
 	nrf_drv_saadc_limits_set(_zeroCrossingChannel, NRF_DRV_SAADC_LIMITL_DISABLED, _zeroValue);
 }
 
 void ADC::setLimitDown() {
+	// No logs, this function can be called from interrupt
 	nrf_drv_saadc_limits_set(_zeroCrossingChannel, _zeroValue, NRF_DRV_SAADC_LIMITH_DISABLED);
 }
 
 void adc_done(void * p_event_data, uint16_t event_size) {
 	adc_done_cb_data_t* cbData = (adc_done_cb_data_t*)p_event_data;
+//	write("d %p\r\n", cbData->buffer);
 	cbData->callback(cbData->buffer, cbData->bufSize, cbData->bufNum);
 }
 
 void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
+	// No logs, this function is called from interrupt
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 	_numBuffersQueued--;
-//	if (_changeConfig) {
-//		if (_numBuffersQueued == 0) {
-//			applyConfig();
-//		}
-//		return;
-//	}
 
 	if (_doneCallbackData.callback != NULL && _doneCallbackData.buffer == NULL) {
 		//! Fill callback data object, should become available again in releaseBuffer()
@@ -304,21 +321,22 @@ void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
 		// Decouple done callback from adc interrupt handler, and put it on app scheduler instead
 		uint32_t errorCode = app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
 		APP_ERROR_CHECK(errorCode);
-	} else {
-//		write("/!\\");
-		// Don't queue up the the buffer, we need the adc to be idle.
-		if (_changeConfig) {
-			if (_numBuffersQueued == 0) {
-				applyConfig();
-			}
-			return;
-		}
-		//! Skip the callback, just put buffer in queue again.
+	}
+	else {
+//		// Don't queue up the the buffer, we need the adc to be idle.
+//		if (_changeConfig) {
+//			if (_numBuffersQueued == 0) {
+//				applyConfig();
+//			}
+//			return;
+//		}
+		// Skip the callback, just put buffer in queue again.
 		addBufferToSampleQueue(buf);
 	}
 }
 
 void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
+	// No logs, this function is called from interrupt
 	if (type == NRF_SAADC_LIMIT_LOW) {
 		// NRF_SAADC_LIMIT_LOW  triggers when adc value is below lower limit
 		setLimitUp();
@@ -327,9 +345,9 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 		// NRF_SAADC_LIMIT_HIGH triggers when adc value is above upper limit
 		setLimitDown();
 
-#ifdef TEST_PIN
-		nrf_gpio_pin_toggle(TEST_PIN);
-#endif
+//#ifdef TEST_PIN
+//		nrf_gpio_pin_toggle(TEST_PIN);
+//#endif
 
 		// Only call zero crossing callback when there was about 20ms between the two events.
 		// This makes it more likely that this was an actual zero crossing.

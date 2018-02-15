@@ -59,8 +59,7 @@ void UartProtocol::init() {
 }
 
 void UartProtocol::reset() {
-//	write("r\r\n");
-//	BLEutil::printArray(readBuffer, readBufferIdx);
+	// No logs, this function can be called from interrupt
 #ifdef TEST_PIN2
 	nrf_gpio_pin_toggle(TEST_PIN2);
 #endif
@@ -75,6 +74,7 @@ void UartProtocol::escape(uint8_t& val) {
 }
 
 void UartProtocol::unEscape(uint8_t& val) {
+	// No logs, this function can be called from interrupt
 	val ^= UART_ESCAPE_FLIP_MASK;
 }
 
@@ -88,14 +88,15 @@ void UartProtocol::crc16(const uint8_t * data, const uint16_t size, uint16_t& cr
 }
 
 void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
+	// No logs, this function is called when logging
 	writeMsgStart(opCode, size);
 	writeMsgPart(data, size);
 	writeMsgEnd();
 }
 
 void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
+	// No logs, this function is called when logging
 	if (size > UART_TX_MAX_PAYLOAD_SIZE) {
-//		LOGw("msg too large");
 		return;
 	}
 
@@ -109,19 +110,21 @@ void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 }
 
 void UartProtocol::writeMsgPart(uint8_t * data, uint16_t size) {
+	// No logs, this function is called when logging
 	crc16(data, size, _crc);
 	writeBytes(data, size);
 }
 
 void UartProtocol::writeMsgEnd() {
+	// No logs, this function is called when logging
 	uart_msg_tail_t tail;
 	tail.crc = _crc;
 	writeBytes((uint8_t*)(&tail), sizeof(uart_msg_tail_t));
-//	write(SERIAL_CRLF); // Just so it still looks ok on minicom
 }
 
 
 void UartProtocol::onRead(uint8_t val) {
+	// No logs, this function can be called from interrupt
 	// CRC error? Reset.
 	// Start char? Reset.
 	// Bad escaped value? Reset.
@@ -223,6 +226,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 
 	uart_msg_header_t* header = (uart_msg_header_t*)data;
 	uint8_t* payload = data + sizeof(uart_msg_header_t);
+	LOGd("handle msg %u", header->opCode);
 
 	switch (header->opCode) {
 	case UART_OPCODE_RX_CONTROL: {

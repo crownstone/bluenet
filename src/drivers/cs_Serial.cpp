@@ -65,6 +65,9 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 
 	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; // Do not enable hardware flow control.
 //	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud38400;
+//	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud57600;
+//	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud76800;
+//	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud115200;
 	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud230400; // Highest baudrate that still worked.
 	NRF_UART0->TASKS_STARTTX = 1;
 	NRF_UART0->TASKS_STARTRX = 1;
@@ -168,6 +171,9 @@ extern "C" void UART0_IRQHandler(void) {
 	readByte = (uint8_t)NRF_UART0->RXD;
 	UartProtocol::getInstance().onRead(readByte);
 
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 	// Clear event after reading the data: new data may be written to RXD immediately.
 	NRF_UART0->EVENTS_RXDRDY = 0;
 }
