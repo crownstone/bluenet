@@ -305,9 +305,9 @@ void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
 //		write("/!\\");
 		// Don't queue up the the buffer, we need the adc to be idle.
 		if (_changeConfig) {
-			if (_numBuffersQueued == 0) {
-				applyConfig();
-			}
+//			if (_numBuffersQueued == 0) {
+//				applyConfig();
+//			}
 			return;
 		}
 		//! Skip the callback, just put buffer in queue again.
