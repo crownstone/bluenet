@@ -226,7 +226,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME}.tmp ${PROJECT_NAME}.bin
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
-			COMMAND stat ${PROJECT_NAME}.bin | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "** Size: %s bytes - totally available: 512kB - 110kB {softdevice} = 412kB. In dual bank: 206kB"
+			COMMAND stat ${PROJECT_NAME}.bin | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "** Size: %s bytes - totally available: 512kB - 110kB {softdevice} - {bootloader} - {app storage} = 360kB . In dual bank: 180kB (DFU_IMAGE_MAX_SIZE_BANKED)"
 			COMMAND echo
 			DEPENDS ${PROJECT_NAME}
 			COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
