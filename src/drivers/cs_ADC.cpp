@@ -63,6 +63,9 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 #ifdef TEST_PIN2
 	nrf_gpio_cfg_output(TEST_PIN2);
 #endif
+#ifdef TEST_PIN3
+	nrf_gpio_cfg_output(TEST_PIN3);
+#endif
 
 	// Setup timer
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
@@ -312,6 +315,7 @@ void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
 #endif
 	_numBuffersQueued--;
 
+	// If done callback is set and not currently busy, then call the callback.
 	if (_doneCallbackData.callback != NULL && _doneCallbackData.buffer == NULL) {
 		//! Fill callback data object, should become available again in releaseBuffer()
 		_doneCallbackData.buffer = buf;
@@ -323,13 +327,12 @@ void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
 		APP_ERROR_CHECK(errorCode);
 	}
 	else {
-//		// Don't queue up the the buffer, we need the adc to be idle.
-//		if (_changeConfig) {
-//			if (_numBuffersQueued == 0) {
-//				applyConfig();
-//			}
-//			return;
-//		}
+		// Don't queue up the the buffer, we need the adc to be idle.
+		if (_changeConfig) {
+			// Don't apply config, as the callback will try to release and add its buffer when done.
+			// So wait for the callback to be done, then apply the config.
+			return;
+		}
 		// Skip the callback, just put buffer in queue again.
 		addBufferToSampleQueue(buf);
 	}
