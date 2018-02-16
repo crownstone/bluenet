@@ -313,8 +313,13 @@ void Switch::setSwitch(uint8_t switchState) {
 
 			// Relay on when value >= 100, else off (as the dimmer is parallel)
 			// Or when users wants to dim, but that's not possible (yet).
-			if (switchState >= SWITCH_ON || (!pwmOnSuccess && !_switchValue.relay_state)) {
+			if (switchState >= SWITCH_ON) {
 				_relayOn();
+			}
+			else if (!pwmOnSuccess) {
+				if (!_switchValue.relay_state) {
+					_relayOn();
+				}
 			}
 			else {
 				_relayOff();

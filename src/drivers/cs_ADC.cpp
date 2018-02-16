@@ -331,6 +331,9 @@ void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
 		if (_changeConfig) {
 			// Don't apply config, as the callback will try to release and add its buffer when done.
 			// So wait for the callback to be done, then apply the config.
+//			if (_numBuffersQueued == 0) {
+//				applyConfig();
+//			}
 			return;
 		}
 		// Skip the callback, just put buffer in queue again.
