@@ -192,6 +192,7 @@ private:
 	 * Does not store the state.
 	 * Checks if relay is allowed to be turned on (by soft fuse).
 	 * Does not check for switch lock.
+	 * Does not check if relay is already on.
 	 */
 	void _relayOn();
 
@@ -200,6 +201,7 @@ private:
 	 * Does not store the state.
 	 * Checks if relay is allowed to be turned off (by soft fuse).
 	 * Does not check for switch lock.
+	 * Does not check if relay is already off.
 	 */
 	void _relayOff();
 

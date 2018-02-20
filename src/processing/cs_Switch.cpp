@@ -118,10 +118,9 @@ void Switch::startPwm() {
 	bool success = _setPwm(_switchValue.pwm_state);
 	// PWM was already started in start(), so it could sync with zero crossings.
 //	PWM::getInstance().start(true); // Start after setting value, else there's a race condition.
-	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state) {
+	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state == 1) {
 		// Don't use relayOff(), as that checks for switchLocked.
 		switch_state_t oldVal = _switchValue;
-		// TODO: the pwm gets set at the start of a period, which lets the light flicker in case the relay is turned off..
 		_relayOff();
 		storeState(oldVal);
 	}
@@ -198,7 +197,7 @@ void Switch::turnOff() {
 
 void Switch::toggle() {
 	// TODO: maybe check if pwm is larger than some value?
-	if (_switchValue.relay_state || _switchValue.pwm_state > 0) {
+	if (_switchValue.relay_state == 1 || _switchValue.pwm_state > 0) {
 		setSwitch(0);
 	}
 	else {
@@ -311,18 +310,17 @@ void Switch::setSwitch(uint8_t switchState) {
 				_setPwm(0);
 			}
 
-			// Relay on when value >= 100, else off (as the dimmer is parallel)
-			// Or when users wants to dim, but that's not possible (yet).
-			if (switchState >= SWITCH_ON) {
-				_relayOn();
-			}
-			else if (!pwmOnSuccess) {
-				if (!_switchValue.relay_state) {
+			// Relay on when value >= 100, or when trying to dim, but that was unsuccessful.
+			// Else off (as the dimmer is parallel)
+			if (switchState >= SWITCH_ON || !pwmOnSuccess) {
+				if (_switchValue.relay_state == 0) {
 					_relayOn();
 				}
 			}
 			else {
-				_relayOff();
+				if (_switchValue.relay_state == 1) {
+					_relayOff();
+				}
 			}
 			break;
 		}
