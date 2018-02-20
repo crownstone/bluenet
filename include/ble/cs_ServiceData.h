@@ -211,12 +211,9 @@ public:
 	 */
 	uint16_t getArraySize();
 
-	/** Send the service data over the mesh.
-	 *
-	 * @param[in] event           True when calling this function because the state changed significantly.
-	 * @param[in] eventType       Type of the event, only to be used when event is true.
+	/** Send the state over the mesh, to be called by timer.
 	 */
-	void sendMeshState(bool event, uint16_t eventType);
+	void _sendMeshState();
 
 private:
 	//! Timer used to periodically update the advertisement.
@@ -350,6 +347,12 @@ private:
 	//! Counter used to count how often the state has been sent over the mesh.
 	uint16_t _meshSendCount;
 
+	//! RTC counter when last mesh message was sent. RTC overflows every 512s!
+	uint32_t _meshLastSentTimestamp;
+
+	//! Event type of next mesh message. 0 for the regular interval msg.
+	uint16_t _meshNextEventType;
+
 	struct __attribute__((packed)) advertised_ids_t {
 		uint8_t   size;
 		int8_t    head; // Index of last crownstone ID that was advertised
@@ -418,9 +421,16 @@ private:
 	 */
 	stone_id_t chooseExternalId(stone_id_t ownId, state_message_t stateMsgs[], bool hasStateMsg[], bool eventOnly);
 
+	/** Send the state over the mesh.
+	 *
+	 * @param[in] event           True when calling this function because the state changed significantly.
+	 * @param[in] eventType       Type of the event, only to be used when event is true.
+	 */
+	void sendMeshState(bool event, uint16_t eventType);
+
 	/* Static function for the timeout */
 	static void meshStateTick(ServiceData *ptr) {
-		ptr->sendMeshState(false, 0);
+		ptr->_sendMeshState();
 	}
 #endif
 
