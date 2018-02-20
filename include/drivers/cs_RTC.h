@@ -16,14 +16,16 @@
 #define RTC_CLOCK_FREQ          32768
 
 /** Maximum value of the RTC counter. */
-//#define MAX_RTC_COUNTER_VAL     0x0007FFFF //! Where did this come from?
 #define MAX_RTC_COUNTER_VAL     0x00FFFFFF
+
 
 /** Wrapper class for RTC functions.
  *
  * if NRF51_USE_SOFTDEVICE==1 uses the RTC0 clock
  * managed by the softdevice
  * otherwise uses the RTC1 clock used by the app timer
+ *
+ * With the current clock frequency and max counter val, the RTC overflows every 512s.
  *
  * TODO: Implementation should be in a .cpp file
  * TODO: Get rid of all these static functions. 

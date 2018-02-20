@@ -882,8 +882,8 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 //}
 
 void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
-#ifdef PRINT_VERBOSE_STATE
 	LOGi("Send state event=%u", event);
+#ifdef PRINT_VERBOSE_STATE
 	switch (stateItem.type) {
 	case MESH_STATE_ITEM_TYPE_STATE:
 	case MESH_STATE_ITEM_TYPE_EVENT_STATE:

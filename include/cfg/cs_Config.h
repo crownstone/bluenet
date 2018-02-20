@@ -222,7 +222,8 @@
 #define ADVERTISING_REFRESH_PERIOD               1000 // Push the changes in the advertisement packet to the stack every x milliseconds
 #define ADVERTISING_REFRESH_PERIOD_SETUP         100  // Push the changes in the advertisement packet to the stack every x milliseconds
 
-#define MESH_STATE_REFRESH_PERIOD                50000 // 50 seconds + some random amount of seconds
+#define MESH_STATE_REFRESH_PERIOD                50000 // (ms) Every refresh period (+ some random amount of seconds), the state is sent over the mesh.
+#define MESH_STATE_MIN_INTERVAL                  3000  // (ms) There should be at least this much time between 2 mesh state messages.
 #define MESH_STATE_TIMEOUT                       (3*MESH_STATE_REFRESH_PERIOD) // ms until state of a crownstone is considered to be timed out.
 #define LAST_SEEN_COUNT_PER_STATE_CHAN           3 // Number of last seen timestamps to store per state channel.
 

@@ -39,6 +39,8 @@ ServiceData::ServiceData() :
 	,_updateCount(0)
 #if BUILD_MESHING == 1
 	,_meshSendCount(0)
+	,_meshLastSentTimestamp(0)
+	,_meshNextEventType(0)
 #endif
 {
 	// we want to update the advertisement packet on a fixed interval.
@@ -640,13 +642,28 @@ bool ServiceData::isMeshStateNotTimedOut(stone_id_t id, uint16_t stateChan, uint
 }
 #endif
 
-void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 #if BUILD_MESHING == 1
+void ServiceData::_sendMeshState() {
+	sendMeshState(_meshNextEventType == 0 ? false : true, _meshNextEventType);
+	_meshNextEventType = 0;
+}
+
+void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 
 //		// Update flag
 //		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
 //		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED));
+
+		uint32_t rtcCount = RTC::getCount();
+
+		// Only send a mesh message if the previous was at least some time ago.
+		if (RTC::difference(rtcCount, _meshLastSentTimestamp) < RTC::msToTicks(MESH_STATE_MIN_INTERVAL)) {
+			Timer::getInstance().stop(_meshStateTimerId);
+			_meshNextEventType = eventType;
+			Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(MESH_STATE_MIN_INTERVAL), this);
+			return;
+		}
 
 		uint32_t timestamp;
 		State::getInstance().get(STATE_TIME, timestamp);
@@ -682,18 +699,19 @@ void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 
 		MeshControl::getInstance().sendServiceDataMessage(stateItem, event);
 		_meshSendCount++;
+		_meshLastSentTimestamp = rtcCount;
 
-		if (!event) {
+//		if (!event) {
 			Timer::getInstance().stop(_meshStateTimerId);
 			// Start timer of MESH_STATE_REFRESH_PERIOD + rand ms
 			uint8_t rand8;
 			RNG::fillBuffer(&rand8, 1);
 			uint32_t randMs = rand8*78; //! Range is 0-19890 ms (about 0-20s)
 			Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(MESH_STATE_REFRESH_PERIOD) + MS_TO_TICKS(randMs), this);
-		}
+//		}
 	}
-#endif
 }
+#endif
 
 void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
