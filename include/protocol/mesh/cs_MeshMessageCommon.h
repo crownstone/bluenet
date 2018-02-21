@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 
+#include "common/cs_Types.h"
+
 #if (defined HOST_TARGET)
 // See rbc_mesh.h and src/radio_control.h, here it's just to set something more or less random
 #define RADIO_PCNF1_MAXLEN             118
@@ -16,8 +18,6 @@
 #else
 #include <rbc_mesh.h>
 #endif
-
-typedef uint8_t stone_id_t;
 
 //! Header size is size of the message counter + size of the random number.
 #define ENCRYPTED_HEADER_SIZE (sizeof(uint32_t) + sizeof(uint32_t))

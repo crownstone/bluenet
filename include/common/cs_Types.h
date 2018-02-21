@@ -14,3 +14,5 @@ typedef uint16_t buffer_size_t;
 typedef uint16_t ERR_CODE;
 
 typedef uint8_t boolean_t;
+
+typedef uint8_t stone_id_t;

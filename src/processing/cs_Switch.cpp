@@ -89,13 +89,17 @@ void Switch::start() {
 
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
 	if (_switchValue.pwm_state != 0) {
-		LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
-		if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
-			// This shouldn't happen, but let's check it to be sure.
-			_switchValue.pwm_state = 0;
-//			_setPwm(0);
-		}
-		relayOn();
+		switch_state_t oldVal = _switchValue;
+//		// This shouldn't happen, but let's check it to be sure.
+//		LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
+//		if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+//			_switchValue.pwm_state = 0;
+//		}
+		// Always set pwm state to 0, just use relay.
+		// This is for the case of a wall switch: you don't want to hear the relay turn on and off every time you power the crownstone.
+		_switchValue.pwm_state = 0;
+		_relayOn();
+		storeState(oldVal);
 	}
 	else {
 		// Make sure the relay is in the stored position (no need to store)
