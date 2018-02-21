@@ -338,3 +338,24 @@ Rules for merger:
 
 - On is more important than Off.
 - Sort list by Crownstone ID.
+
+
+# Switching, locking and dimming
+
+If a Crownstone is dimmable, generally speaking it's relay is off and the IGBTs are on. If the Crownstone is reset (wall switch), the relay goes on quickly, but after a minute (due to powersupply on the IGBTs) it toggles off again to set the dim value. Since this change after a minute is more strange than it is helpful, I propose to NOT to persist the dimstate after reboot. This makes for a clearer user experience.
+
+Alternatively, we could change this (later on, possibly) to fade to the last known dim value as long as it is significant ( less than 75% for instance). If there is a click after a minute that will not change a lot, I suggest we ignore it.
+
+### Locking
+
+Locking is added for the usecase of using Crownstones are power monitor on devices that are unlikely to every be turned off forcefully: Fridges, PCs etc. It does not make sense to lock a Crownstone in a dimming state. I propose to only allow locking for non-dimmable Crownstones.
+
+If we were to allow locking for dimmed states, they would have to persist after reset (from a wall socket) for consistency. This would interfere with the expected result of 1 minute full on and then back to dim state, leading to a bad user experience.
+
+### Cases
+
+- On boot, turn relay on when stored state was dimming, don't restore dim state.
+- When setting dim value before dimming is available, this is stored and set once dimming is available.
+- If lock is enabled, and dimming gets enabled: then disable lock.
+- If dimming is enabled, and lock gets enabled: deny enabling lock.
+
