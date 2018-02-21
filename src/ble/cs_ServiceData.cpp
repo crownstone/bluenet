@@ -646,7 +646,9 @@ void ServiceData::_sendMeshState() {
 	sendMeshState(_meshNextEventType == 0 ? false : true, _meshNextEventType);
 	_meshNextEventType = 0;
 }
+#endif
 
+#if BUILD_MESHING == 1
 void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 
@@ -755,7 +757,9 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case STATE_SWITCH_STATE: {
 		updateSwitchState(*(uint8_t*)p_data);
+#if BUILD_MESHING == 1
 		sendMeshState(true, STATE_SWITCH_STATE);
+#endif
 		break;
 	}
 	case STATE_ACCUMULATED_ENERGY: {

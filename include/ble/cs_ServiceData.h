@@ -433,6 +433,5 @@ private:
 		ptr->_sendMeshState();
 	}
 #endif
-
 };
 
