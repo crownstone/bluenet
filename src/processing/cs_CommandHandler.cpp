@@ -790,6 +790,13 @@ ERR_CODE CommandHandler::handleCmdAllowDimming(buffer_ptr_t buffer, const uint16
 
 	LOGi("allow dimming: %u", enable);
 
+	if (enable && Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+		LOGw("unlock switch");
+		bool lockEnable = false;
+		Settings::getInstance().updateFlag(CONFIG_SWITCH_LOCKED, lockEnable, true);
+		EventDispatcher::getInstance().dispatch(EVT_SWITCH_LOCKED, &lockEnable, sizeof(bool));
+	}
+
 	Settings::getInstance().updateFlag(CONFIG_PWM_ALLOWED, enable, true);
 	EventDispatcher::getInstance().dispatch(EVT_PWM_ALLOWED, &enable, sizeof(bool));
 	return ERR_SUCCESS;
@@ -807,6 +814,12 @@ ERR_CODE CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uint16_t
 	bool enable = payload->enable;
 
 	LOGi("lock switch: %u", enable);
+
+	if (enable && Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+		LOGw("can't lock switch");
+		return ERR_COMMAND_FAILED;
+	}
+
 	Settings::getInstance().updateFlag(CONFIG_SWITCH_LOCKED, enable, true);
 	EventDispatcher::getInstance().dispatch(EVT_SWITCH_LOCKED, &enable, sizeof(bool));
 	return ERR_SUCCESS;
