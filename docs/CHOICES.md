@@ -352,3 +352,10 @@ Locking is added for the usecase of using Crownstones are power monitor on devic
 
 If we were to allow locking for dimmed states, they would have to persist after reset (from a wall socket) for consistency. This would interfere with the expected result of 1 minute full on and then back to dim state, leading to a bad user experience.
 
+### Cases
+
+- On boot, turn relay on when stored state was dimming, don't restore dim state.
+- When setting dim value before dimming is available, this is stored and set once dimming is available.
+- If lock is enabled, and dimming gets enabled: then disable lock.
+- If dimming is enabled, and lock gets enabled: deny enabling lock.
+
