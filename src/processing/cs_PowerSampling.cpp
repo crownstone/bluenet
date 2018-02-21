@@ -551,13 +551,12 @@ void PowerSampling::calculatePower(power_t power) {
 	if (printPower % 1 == 0) {
 //	if (printPower % 500 == 0) {
 //	if (printPower % 500 == 0 || currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > _currentMilliAmpThresholdPwm) {
-//		uint32_t rtcCount = RTC::getCount();
-
+		uint32_t rtcCount = RTC::getCount();
 		if (_logsEnabled.flags.power) {
 			// Calculated values
 			uart_msg_power_t powerMsg;
-//			powerMsg.timestamp = rtcCount;
-			powerMsg.timestamp = RTC::getCount();
+			powerMsg.timestamp = rtcCount;
+//			powerMsg.timestamp = RTC::getCount();
 			powerMsg.currentRmsMA = currentRmsMA;
 			powerMsg.currentRmsMedianMA = currentRmsMedianMA;
 			powerMsg.filteredCurrentRmsMA = filteredCurrentRmsMA;
@@ -574,8 +573,7 @@ void PowerSampling::calculatePower(power_t power) {
 		if (_logsEnabled.flags.current) {
 			// Write uart_msg_current_t without allocating a buffer.
 			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
-//			uint32_t rtcCount = rtcCount;
-			uint32_t rtcCount = RTC::getCount();
+//			uint32_t rtcCount = RTC::getCount();
 			UartProtocol::getInstance().writeMsgPart((uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 				UartProtocol::getInstance().writeMsgPart((uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
@@ -586,8 +584,7 @@ void PowerSampling::calculatePower(power_t power) {
 		if (_logsEnabled.flags.filteredCurrent) {
 			// Write uart_msg_current_t without allocating a buffer.
 			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, sizeof(uart_msg_current_t));
-//			uint32_t rtcCount = rtcCount;
-			uint32_t rtcCount = RTC::getCount();
+//			uint32_t rtcCount = RTC::getCount();
 			UartProtocol::getInstance().writeMsgPart((uint8_t*)&(rtcCount), sizeof(rtcCount));
 			int16_t val;
 			for (int i = 0; i < numSamples; ++i) {
@@ -600,8 +597,7 @@ void PowerSampling::calculatePower(power_t power) {
 		if (_logsEnabled.flags.voltage) {
 			// Write uart_msg_voltage_t without allocating a buffer.
 			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
-//			uint32_t rtcCount = rtcCount;
-			uint32_t rtcCount = RTC::getCount();
+//			uint32_t rtcCount = RTC::getCount();
 			UartProtocol::getInstance().writeMsgPart((uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 				UartProtocol::getInstance().writeMsgPart((uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
