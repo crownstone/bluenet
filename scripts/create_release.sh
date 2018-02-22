@@ -89,6 +89,14 @@ popd &> /dev/null
 # check version number
 # enter version number?
 
+cs_info "Stable version? [Y/n]: "
+read stable
+if [[ $stable == "n" ]]; then
+	stable=0
+else
+	stable=1
+fi
+
 valid=0
 existing=0
 
@@ -100,8 +108,8 @@ if [ -f $BLUENET_DIR/VERSION ]; then
 	v_minor=${version_list[1]}
 	v_patch=${version_list[2]}
 	cs_log "Current version: $version_str"
-	v_minor=$((v_minor + 1))
-	v_patch=0
+	# v_minor=$((v_minor + 1))
+	# v_patch=0
 	suggested_version="$v_major.$v_minor.$v_patch"
 else
 	suggested_version="1.0.0"
@@ -116,7 +124,6 @@ while [[ $valid == 0 ]]; do
 	fi
 
 	if [[ $version =~ ^[0-9]{1,2}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-
 		cs_info "Select model:"
 		printf "$yellow"
 		options=("Crownstone" "Guidestone")
@@ -138,7 +145,23 @@ while [[ $valid == 0 ]]; do
 		done
 		printf "$normal"
 
-		directory=$BLUENET_DIR/release/$model"_"$version
+		directory="${BLUENET_DIR}/release/${model}_${version}"
+
+		# If release candidate, find the dir that doesn't exist yet. Keep up the RC number
+		rc_prefix="-RC"
+		rc_count=0
+		rc_str=""
+		if [[ stable == 0 ]]; then
+			while true; do
+				rc_str="${rc_prefix}${rc_count}"
+				version="${version}${rc_str}"
+				directory="${BLUENET_DIR}/release/${model}_${version}"
+				if [[ ! -d $directory ]]; then
+					break
+				fi
+				((rc_count++))
+			done
+		fi
 
 		if [ -d $directory ]; then
 			cs_err "Version already exists, are you sure? [y/N]: "
@@ -171,10 +194,11 @@ if [[ $existing == 0 ]]; then
 ### Fill Default Config Values
 ###############################
 
-	if [[ $model == "crownstone" ]]; then
-		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Crown\"/" $directory/CMakeBuild.config
-	elif [[ $model == "guidestone " ]]; then
+	# if [[ $model == "crownstone" ]]; then
+	if [[ $model == "guidestone " ]]; then
 		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Guide\"/" $directory/CMakeBuild.config
+	else
+		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Crown\"/" $directory/CMakeBuild.config
 	fi
 
 	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $directory/CMakeBuild.config
@@ -190,7 +214,6 @@ if [[ $existing == 0 ]]; then
 	sed -i "s/SCHEDULE_SERVICE=.*/SCHEDULE_SERVICE=0/" $directory/CMakeBuild.config
 
 	sed -i "s/PERSISTENT_FLAGS_DISABLED=.*/PERSISTENT_FLAGS_DISABLED=0/" $directory/CMakeBuild.config
-	sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Crown\"/" $directory/CMakeBuild.config
 	sed -i "s/SERIAL_VERBOSITY=.*/SERIAL_VERBOSITY=SERIAL_BYTE_PROTOCOL_ONLY/" $directory/CMakeBuild.config
 	sed -i "s/DEFAULT_OPERATION_MODE=.*/DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP/" $directory/CMakeBuild.config
 
@@ -204,14 +227,6 @@ if [[ $existing == 0 ]]; then
 	read
 else
 	cs_warn "Warn: Using existing configuration"
-fi
-
-cs_info "Stable version? [Y/n]: "
-read stable
-if [[ $stable == "n" ]]; then
-	stable=0
-else
-	stable=1
 fi
 
 ########################
@@ -228,7 +243,7 @@ cs_info "Update release index ..."
 if [[ $stable == 1 ]]; then
 	./update_release_index.py -t $model -v $version -s
 else
-	./update_release_index.py -t $model -v $version
+	# ./update_release_index.py -t $model -v $version
 fi
 
 checkError "Failed"
@@ -341,46 +356,12 @@ git commit -m "Add release config for "$model"_"$version
 
 cs_info "Create git tag for release"
 
-# if old version existed
-if [[ $version_str ]]; then
-	echo $version > VERSION
-
-	cs_log "Updating changes overview"
-	echo "Version $version:" > tmpfile
-	git log --pretty=format:" - %s" "v$version_str"...HEAD >> tmpfile
-	echo "" >> tmpfile
-	echo "" >> tmpfile
-	cat CHANGES >> tmpfile
-	mv tmpfile CHANGES
-
-	cs_log "Add to git"
-	git add CHANGES VERSION
-	git commit -m "Version bump to $version"
-
-	cs_log "Create tag"
-	git tag -a -m "Tagging version $version" "v$version"
-
-	# log "Push tag"
-	# git push origin --tags
-else
-	# setup first time
-	echo $version > VERSION
-
-	cs_log "Creating changes overview"
-	git log --pretty=format:" - %s" >> CHANGES
-	echo "" >> CHANGES
-	echo "" >> CHANGES
-
-	cs_log "Add to git"
-	git add VERSION CHANGES
-	git commit -m "Added VERSION and CHANGES files, Version bump to $version"
-
-	cs_log "Create tag"
-	git tag -a -m "Tagging version $version" "v$version"
-
-	# log "Push tag"
-	# git push origin --tags
-fi
+echo $version > VERSION
+cs_log "Add to git"
+git add VERSION
+git commit -m "Version bump to $version"
+cs_log "Create tag"
+git tag -a -m "Tagging version $version" "v$version"
 
 cs_succ "DONE. Created Release "$model_$version
 
