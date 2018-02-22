@@ -243,6 +243,7 @@ cs_info "Update release index ..."
 if [[ $stable == 1 ]]; then
 	./update_release_index.py -t $model -v $version -s
 else
+	:
 	# ./update_release_index.py -t $model -v $version
 fi
 
