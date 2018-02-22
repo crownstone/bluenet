@@ -102,12 +102,12 @@ existing=0
 
 # Get old version number
 if [ -f $BLUENET_DIR/VERSION ]; then
-	version_str=`cat $BLUENET_DIR/VERSION`
-	version_list=(`echo $version_str | tr '.' ' '`)
+	current_version_str=`cat $BLUENET_DIR/VERSION`
+	version_list=(`echo $current_version_str | tr '.' ' '`)
 	v_major=${version_list[0]}
 	v_minor=${version_list[1]}
 	v_patch=${version_list[2]}
-	cs_log "Current version: $version_str"
+	cs_log "Current version: $current_version_str"
 	# v_minor=$((v_minor + 1))
 	# v_patch=0
 	suggested_version="$v_major.$v_minor.$v_patch"
@@ -356,10 +356,29 @@ git commit -m "Add release config for "$model"_"$version
 
 cs_info "Create git tag for release"
 
-echo $version > VERSION
-cs_log "Add to git"
-git add VERSION
-git commit -m "Version bump to $version"
+if [[ $stable == 1 ]]; then
+	echo $version > VERSION
+
+	cs_log "Updating changes overview"
+	if [[ $current_version_str ]]; then
+		echo "Version $version:" > tmpfile
+		git log --pretty=format:" - %s" "v$current_version_str"...HEAD >> tmpfile
+		echo "" >> tmpfile
+		echo "" >> tmpfile
+		cat CHANGES >> tmpfile
+		mv tmpfile CHANGES
+	else
+		echo "Version $version:" > CHANGES
+		git log --pretty=format:" - %s" >> CHANGES
+		echo "" >> CHANGES
+		echo "" >> CHANGES
+	fi
+
+	cs_log "Add to git"
+	git add VERSION CHANGES
+	git commit -m "Version bump to $version"
+fi
+
 cs_log "Create tag"
 git tag -a -m "Tagging version $version" "v$version"
 
