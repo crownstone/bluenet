@@ -151,7 +151,7 @@ while [[ $valid == 0 ]]; do
 		rc_prefix="-RC"
 		rc_count=0
 		rc_str=""
-		if [[ stable == 0 ]]; then
+		if [[ $stable == 0 ]]; then
 			while true; do
 				rc_str="${rc_prefix}${rc_count}"
 				version="${version}${rc_str}"
