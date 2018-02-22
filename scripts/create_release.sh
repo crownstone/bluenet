@@ -311,6 +311,10 @@ pushd $BLUENET_DIR/scripts &> /dev/null
 cs_info "Create DFU packages ..."
 ./dfuGenPkg.py -a "$BLUENET_BIN_DIR/crownstone.hex" -o $model"_"$version
 checkError
+
+sha1sum "${BLUENET_BIN_DIR}/${model}_${version}.zip" | cut -f1 -d " " > "${BLUENET_BIN_DIR}/${model}_${version}.zip.sha1"
+checkError
+
 cs_succ "DFU DONE"
 
 popd &> /dev/null
