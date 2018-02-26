@@ -179,6 +179,15 @@ while [[ $valid == 0 ]]; do
 	fi
 done
 
+if [[ $stable == 0 ]]; then
+	cs_info "Release candidate ${rc_count} (version ${version}), is that correct? [Y/n]"
+	read version_response
+	if [[ $version_response == "n" ]]; then
+		cs_info "abort"
+		exit 1
+	fi
+fi
+
 #####################################
 ### Create Config file and directory
 #####################################
