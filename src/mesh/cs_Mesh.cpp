@@ -88,14 +88,13 @@ void Mesh::init() {
 	// the access address is a configurable parameter so we get it from the settings.
 	Settings::getInstance().get(CONFIG_MESH_ACCESS_ADDRESS, &init_params.access_addr);
 	LOGd("Mesh access address %p", init_params.access_addr);
-	init_params.enable_gatt_service = false;
-	init_params.interval_min_ms = MESH_INTERVAL_MIN_MS;
 	init_params.channel = MESH_CHANNEL;
-#if (NORDIC_SDK_VERSION >= 11)
+	init_params.interval_min_ms = MESH_INTERVAL_MIN_MS;
 	init_params.lfclksrc = meshClockSource;
-#else
-	init_params.lfclksrc = MESH_CLOCK_SOURCE;
-#endif
+	int8_t txPower;
+	Settings::getInstance().get(CONFIG_TX_POWER, &txPower);
+	init_params.tx_power = convertTxPower(txPower);
+	init_params.enable_gatt_service = false;
 
 	uint32_t error_code;
 	//! checks if softdevice is enabled etc.
@@ -224,6 +223,19 @@ MeshMessageCounter& Mesh::getMessageCounter(mesh_handle_t handle) {
 
 MeshMessageCounter& Mesh::getMessageCounterFromIndex(uint16_t handleIndex) {
 	return _messageCounter[handleIndex];
+}
+
+rbc_mesh_txpower_t Mesh::convertTxPower(int8_t txPower) {
+	switch (txPower) {
+	case 0:
+		return RBC_MESH_TXPOWER_0dBm;
+	case 4:
+		return RBC_MESH_TXPOWER_Pos4dBm;
+	case -4:
+		return RBC_MESH_TXPOWER_Neg4dBm;
+	default:
+		return RBC_MESH_TXPOWER_0dBm;
+	}
 }
 
 void Mesh::tick() {

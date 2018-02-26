@@ -151,7 +151,7 @@ while [[ $valid == 0 ]]; do
 		rc_prefix="-RC"
 		rc_count=0
 		rc_str=""
-		if [[ stable == 0 ]]; then
+		if [[ $stable == 0 ]]; then
 			while true; do
 				rc_str="${rc_prefix}${rc_count}"
 				version="${version}${rc_str}"
@@ -243,6 +243,7 @@ cs_info "Update release index ..."
 if [[ $stable == 1 ]]; then
 	./update_release_index.py -t $model -v $version -s
 else
+	:
 	# ./update_release_index.py -t $model -v $version
 fi
 
@@ -310,6 +311,10 @@ pushd $BLUENET_DIR/scripts &> /dev/null
 cs_info "Create DFU packages ..."
 ./dfuGenPkg.py -a "$BLUENET_BIN_DIR/crownstone.hex" -o $model"_"$version
 checkError
+
+sha1sum "${BLUENET_BIN_DIR}/${model}_${version}.zip" | cut -f1 -d " " > "${BLUENET_BIN_DIR}/${model}_${version}.zip.sha1"
+checkError
+
 cs_succ "DFU DONE"
 
 popd &> /dev/null
