@@ -108,6 +108,9 @@ private:
 	//! Does not check if handle is valid!
 	MeshMessageCounter& getMessageCounter(mesh_handle_t handle);
 
+	//! Converts tx number to enum.
+	rbc_mesh_txpower_t convertTxPower(int8_t txPower);
+
 public:
 	//! use static variant of singleton, no dynamic memory allocation
 	static Mesh& getInstance() {
