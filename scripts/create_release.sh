@@ -26,6 +26,7 @@ if [ -z $BLUENET_RELEASE_DIR ]; then
 	cs_err "BLUENET_RELEASE_DIR is not defined!"
 	exit 1
 fi
+BLUENET_RELEASE_CANDIDATE_DIR="${BLUENET_RELEASE_DIR}-candidate"
 
 pushd $BLUENET_DIR &> /dev/null
 
@@ -89,12 +90,12 @@ popd &> /dev/null
 # check version number
 # enter version number?
 
-cs_info "Stable version? [Y/n]: "
+cs_info "Stable version? [y/N]: "
 read stable
-if [[ $stable == "n" ]]; then
-	stable=0
-else
+if [[ $stable == "y" ]]; then
 	stable=1
+else
+	stable=0
 fi
 
 valid=0
@@ -154,13 +155,13 @@ while [[ $valid == 0 ]]; do
 		if [[ $stable == 0 ]]; then
 			while true; do
 				rc_str="${rc_prefix}${rc_count}"
-				version="${version}${rc_str}"
-				directory="${BLUENET_DIR}/release/${model}_${version}"
+				directory="${BLUENET_DIR}/release/${model}_${version}${rc_str}"
 				if [[ ! -d $directory ]]; then
 					break
 				fi
 				((rc_count++))
 			done
+			version="${version}${rc_str}"
 		fi
 
 		if [ -d $directory ]; then
@@ -258,6 +259,13 @@ popd &> /dev/null
 
 export BLUENET_CONFIG_DIR=$directory
 export BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR/$model"_"$version
+if [[ $stable == 0 ]]; then
+	# if [ -z $BLUENET_RELEASE_CANDIDATE_DIR ]; then
+	# 	cs_err "$BLUENET_RELEASE_CANDIDATE_DIR does not exist!"
+	# 	exit 1
+	# fi
+	export BLUENET_RELEASE_DIR=$BLUENET_RELEASE_CANDIDATE_DIR
+fi
 export BLUENET_RELEASE_DIR=$BLUENET_RELEASE_DIR/firmwares/$model"_"$version
 export BLUENET_BIN_DIR=$BLUENET_RELEASE_DIR/bin
 
@@ -350,6 +358,13 @@ popd &> /dev/null
 ####################
 ### GIT release tag
 ####################
+
+cs_info "Do you want to add a tag and commit to git? [Y/n]"
+read git_response
+if [[ $git_response == "n" ]]; then
+	cs_info "abort"
+	exit 1
+fi
 
 pushd $BLUENET_DIR &> /dev/null
 
