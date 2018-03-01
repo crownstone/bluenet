@@ -39,7 +39,8 @@ typedef uint32_t cs_adc_error_t;
  * (3) an index to the buffer. This function pointer can be given as argument to ADC::setDoneCallback to set a callback
  * on an ADC event. Currently, ADC::setDoneCallback is called from cs_PowerSampling.cpp.
  */
-typedef void (*adc_done_cb_t) (nrf_saadc_value_t* buf, cs_adc_buffer_size_t size, cs_adc_buffer_id_t bufNum);
+//typedef void (*adc_done_cb_t) (nrf_saadc_value_t* buf, cs_adc_buffer_size_t size, cs_adc_buffer_id_t bufNum);
+typedef void (*adc_done_cb_t) (cs_adc_buffer_id_t bufIndex);
 
 typedef void (*adc_zero_crossing_cb_t) ();
 
@@ -52,6 +53,7 @@ typedef void (*adc_zero_crossing_cb_t) ();
 struct adc_done_cb_data_t {
 	//! Callback function
 	adc_done_cb_t callback;
+	
 	//! Buffer as argument for ADC callback 
 	nrf_saadc_value_t* buffer;
 	//! Buffer size as argument for ADC callback 
@@ -59,6 +61,17 @@ struct adc_done_cb_data_t {
 	//! Buffer index as argument for ADC callback
 	//! TODO: remove this field
 	cs_adc_buffer_id_t bufNum;
+};
+
+/**
+ * Struct that is used to communicate to the rest of code.
+ */
+struct cs_adc_done_cb_data_t {
+	//! Callback function
+	adc_done_cb_t callback;
+	
+	//! Buffer index as argument for ADC callback
+	cs_adc_buffer_id_t bufIndex;
 };
 
 enum adc_gain_t {
@@ -175,13 +188,13 @@ public:
 	 * @param[in] buf                  Pointer to the buffer, as received in the done callback.
 	 * @return                         Boolean indicating success (true) or failure (false).
 	 */
-	bool releaseBuffer(nrf_saadc_value_t* buf);
+	bool releaseBuffer(cs_adc_buffer_id_t bufIndex);
 
 	/** Set the callback which is called when a buffer is filled.
 	 *
 	 * @param[in] callback             Function to be called when a buffer is filled with samples.
 	 */
-	void setDoneCallback(adc_done_cb_t callback);
+	void setDoneCallback(cs_adc_done_cb_t callback);
 
 	/** Set the callback which is called on a zero crossing interrupt.
 	 *
@@ -217,7 +230,7 @@ public:
 	 *
 	 * @param[in] buf                  A buffer with size defined in the constructor.
 	 */
-	void _handleAdcDoneInterrupt(nrf_saadc_value_t* buf);
+	void _handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex);
 
 	/** Called when the sampled value is above upper limit, or below lower limit.
 	 *
@@ -248,13 +261,24 @@ private:
 	nrf_ppi_channel_t _ppiChannel;
 
 	//! Array of pointers to buffers.
-	nrf_saadc_value_t* _bufferPointers[CS_ADC_NUM_BUFFERS];
+//	nrf_saadc_value_t* _bufferPointers[CS_ADC_NUM_BUFFERS];
 
 	//! Number of buffers that are queued to be populated by adc.
 	cs_adc_buffer_count_t _numBuffersQueued;
 
+	//! Buffers in progress 
+	bool _in_progress[CS_ADC_NUM_BUFFERS];
+
 	//! Arguments to the callback function
-	adc_done_cb_data_t _doneCallbackData;
+	cs_adc_done_cb_data_t _doneCallbackData;
+
+	inline bool dataCallbackRegistered() {
+		return (_doneCallbackData.callback != NULL);
+	}
+	
+	inline bool dataCallbackInProgress() {
+		return (_doneCallbackData.bufIndex != CS_ADC_BUF_SIZE);
+	}
 
 	//! The zero crossing callback.
 	adc_zero_crossing_cb_t _zeroCrossingCallback;
@@ -280,8 +304,11 @@ private:
 	//! Function that returns the adc pin number, given the AIN number
 	nrf_saadc_input_t getAdcPin(cs_adc_pin_id_t pinNum);
 
+	//! Initialize buffer queue
+	void initQueue();
+
 	//! Function that puts a buffer in queue to be populated with adc values.
-	void addBufferToSampleQueue(nrf_saadc_value_t* buf);
+	void addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex);
 
 	//! Function to apply a new config. Should be called when no buffers are are queued, nor being processed.
 	void applyConfig();

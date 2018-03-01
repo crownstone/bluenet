@@ -18,24 +18,32 @@
 #include "cfg/cs_Config.h"
 #include "protocol/cs_ErrorCodes.h"
 
+#include "structs/buffer/cs_InterleavedBuffer.h"
+
 //#define PRINT_ADC_VERBOSE
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 22
 
-
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
+
+void adc_done(void * p_event_data, uint16_t event_size) {
+	adc_done_cb_data_t* cbData = (adc_done_cb_data_t*)p_event_data;
+	cbData->callback(cbData->buffer, cbData->bufSize, cbData->bufNum);
+}
 
 ADC::ADC()
 {
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
-		_bufferPointers[i] = NULL;
+		InterleavedBuffer::getInstance().setBuffer(0, NULL);
 	}
+	/*
 	_doneCallbackData.callback = NULL;
 	_doneCallbackData.buffer = NULL;
 	_doneCallbackData.bufSize = 0;
 	// TODO: misuse: overload of bufNum field to indicate also initialization
 	_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
+	*/
 	_zeroCrossingCallback = NULL;
 	_numBuffersQueued = 0;
 	_lastZeroCrossUpTime = 0;
@@ -99,12 +107,27 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 
 	// Allocate buffers
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
-		_bufferPointers[i] = new nrf_saadc_value_t[CS_ADC_BUF_SIZE];
-		/* Start conversion in non-blocking mode. Sampling is not triggered yet. */
-		addBufferToSampleQueue(_bufferPointers[i]);
+		InterleavedBuffer::getInstance().setBuffer(i, new nrf_saadc_value_t[CS_ADC_BUF_SIZE]);
+		_in_progress[i] = false;
 	}
 
+	// Queue buffers
+	initQueue();
+
 	return 0;
+}
+
+/*
+ * Start conversion in non-blocking mode. Sampling is not triggered yet. This can only be done for max two buffers
+ * on the Nordic nRF51/nRF52.
+ */
+void ADC::initQueue() {
+	int max_queue = 2;
+	if (CS_ADC_NUM_BUFFERS < max_queue) max_queue = CS_ADC_NUM_BUFFERS;
+	for (int i = 0; i < max_queue; i++) {
+		addBufferToSampleQueue(i);
+//		addBufferToSampleQueue(InterleavedBuffer::getInstance().getBuffer(i));
+	}
 }
 
 /** Configure an ADC channel.
@@ -181,7 +204,7 @@ cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_
 	return 0;
 }
 
-void ADC::setDoneCallback(adc_done_cb_t callback) {
+void ADC::setDoneCallback(cs_adc_done_cb_t callback) {
 	_doneCallbackData.callback = callback;
 }
 
@@ -196,24 +219,19 @@ void ADC::start() {
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_START);
 }
 
-void ADC::addBufferToSampleQueue(nrf_saadc_value_t* buf) {
+void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
+	if (_in_progress[bufIndex]) {
+		LOGe("Buffer %i still in progress. Will not queue!", bufIndex);
+		return;
+	}
 	ret_code_t err_code;
+	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
 	err_code = nrf_drv_saadc_buffer_convert(buf, CS_ADC_BUF_SIZE);
 	APP_ERROR_CHECK(err_code);
 	_numBuffersQueued++;
 }
 
-bool ADC::releaseBuffer(nrf_saadc_value_t* buf) {
-	if (_doneCallbackData.buffer != buf) {
-		LOGe("buffer mismatch! %i vs %i", _doneCallbackData.buffer, buf);
-		return false;
-	}
-
-	// Clear the callback data
-	_doneCallbackData.buffer = NULL;
-	_doneCallbackData.bufSize = 0;
-	_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
-
+bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 	if (_changeConfig) {
 		// Don't queue up the the buffer, we need the adc to be idle.
 		if (_numBuffersQueued == 0) {
@@ -221,7 +239,10 @@ bool ADC::releaseBuffer(nrf_saadc_value_t* buf) {
 		}
 		return true;
 	}
-	addBufferToSampleQueue(buf);
+	_in_progress[bufIndex] = false;
+
+	cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS;
+	addBufferToSampleQueue(nextIndex);
 	return true;
 }
 
@@ -265,9 +286,7 @@ void ADC::applyConfig() {
 	_changeConfig = false;
 
 	// Add all buffers again
-	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
-		addBufferToSampleQueue(_bufferPointers[i]);
-	}
+	initQueue();
 }
 
 void ADC::setLimitUp() {
@@ -278,25 +297,17 @@ void ADC::setLimitDown() {
 	nrf_drv_saadc_limits_set(_zeroCrossingChannel, _zeroValue, NRF_DRV_SAADC_LIMITH_DISABLED);
 }
 
-void adc_done(void * p_event_data, uint16_t event_size) {
-	adc_done_cb_data_t* cbData = (adc_done_cb_data_t*)p_event_data;
-	cbData->callback(cbData->buffer, cbData->bufSize, cbData->bufNum);
-}
-
-void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
+/**
+ * The ADC is done with the interrupt. Now, depending on the fact if there is a callback registered, a callback struct
+ * is populated and put on the app scheduler. If there is no callback registered or there is a callback "in progress",
+ * immediately the next buffer needs to be queued.
+ */
+void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 	_numBuffersQueued--;
-//	if (_changeConfig) {
-//		if (_numBuffersQueued == 0) {
-//			applyConfig();
-//		}
-//		return;
-//	}
-
-	if (_doneCallbackData.callback != NULL && _doneCallbackData.buffer == NULL) {
-		//! Fill callback data object, should become available again in releaseBuffer()
-		_doneCallbackData.buffer = buf;
-		_doneCallbackData.bufSize = CS_ADC_BUF_SIZE;
-		_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
+	
+	if (dataCallbackRegistered() && !dataCallbackInProgress()) {
+		_doneCallbackData.bufIndex = bufIndex;
+		_in_progress[bufIndex] = true;
 
 		// Decouple done callback from adc interrupt handler, and put it on app scheduler instead
 		uint32_t errorCode = app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
@@ -310,8 +321,11 @@ void ADC::_handleAdcDoneInterrupt(nrf_saadc_value_t* buf) {
 //			}
 			return;
 		}
-		//! Skip the callback, just put buffer in queue again.
-		addBufferToSampleQueue(buf);
+		// Skip the callback, just put next buffer up. 
+		// If there are 2 buffers, this is the same buffer: (1 + 2) % 2 = 1, transitions: 0 -> 0, 1 -> 1
+		// If there are 3 buffers, this is: 0 -> 2, 1 -> 0, 2 -> 1.
+		cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS;
+		addBufferToSampleQueue(nextIndex);
 	}
 }
 
@@ -341,12 +355,16 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
 	switch(p_event->type) {
-	case NRF_DRV_SAADC_EVT_DONE:
-		ADC::getInstance()._handleAdcDoneInterrupt(p_event->data.done.p_buffer);
+	case NRF_DRV_SAADC_EVT_DONE: {
+		nrf_saadc_value_t *buf = p_event->data.done.p_buffer;
+		cs_adc_buffer_id_t bufIndex = InterleavedBuffer::getInstance().getIndex(buf);
+		ADC::getInstance()._handleAdcDoneInterrupt(bufIndex);
 		break;
-	case NRF_DRV_SAADC_EVT_LIMIT:
+	}
+	case NRF_DRV_SAADC_EVT_LIMIT: {
 		ADC::getInstance()._handleAdcLimitInterrupt(p_event->data.limit.limit_type);
 		break;
+	}
 	}
 }
 
