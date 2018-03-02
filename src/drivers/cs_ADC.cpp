@@ -27,9 +27,13 @@
 
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
 
+/*
+ * The 
+ */
 void adc_done(void * p_event_data, uint16_t event_size) {
 	adc_done_cb_data_t* cbData = (adc_done_cb_data_t*)p_event_data;
-	cbData->callback(cbData->buffer, cbData->bufSize, cbData->bufNum);
+//	cbData->callback(cbData->buffer, cbData->bufSize, cbData->bufNum);
+	cbData->callback(cbData->bufIndex);
 }
 
 ADC::ADC()
@@ -204,7 +208,7 @@ cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_
 	return 0;
 }
 
-void ADC::setDoneCallback(cs_adc_done_cb_t callback) {
+void ADC::setDoneCallback(adc_done_cb_t callback) {
 	_doneCallbackData.callback = callback;
 }
 
@@ -354,6 +358,7 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 }
 
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
+	/*
 	switch(p_event->type) {
 	case NRF_DRV_SAADC_EVT_DONE: {
 		nrf_saadc_value_t *buf = p_event->data.done.p_buffer;
@@ -365,7 +370,7 @@ extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
 		ADC::getInstance()._handleAdcLimitInterrupt(p_event->data.limit.limit_type);
 		break;
 	}
-	}
+	}*/
 }
 
 // Timer interrupt handler

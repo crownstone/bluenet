@@ -50,6 +50,7 @@ typedef void (*adc_zero_crossing_cb_t) ();
  * see also adc_done_cb_t (a pointer to the buffer with data from the ADC conversion, the buffer size, and a unique
  * number for the buffer).
  */
+/*
 struct adc_done_cb_data_t {
 	//! Callback function
 	adc_done_cb_t callback;
@@ -62,11 +63,11 @@ struct adc_done_cb_data_t {
 	//! TODO: remove this field
 	cs_adc_buffer_id_t bufNum;
 };
-
+*/
 /**
  * Struct that is used to communicate to the rest of code.
  */
-struct cs_adc_done_cb_data_t {
+struct adc_done_cb_data_t {
 	//! Callback function
 	adc_done_cb_t callback;
 	
@@ -194,7 +195,7 @@ public:
 	 *
 	 * @param[in] callback             Function to be called when a buffer is filled with samples.
 	 */
-	void setDoneCallback(cs_adc_done_cb_t callback);
+	void setDoneCallback(adc_done_cb_t callback);
 
 	/** Set the callback which is called on a zero crossing interrupt.
 	 *
@@ -270,7 +271,7 @@ private:
 	bool _in_progress[CS_ADC_NUM_BUFFERS];
 
 	//! Arguments to the callback function
-	cs_adc_done_cb_data_t _doneCallbackData;
+	adc_done_cb_data_t _doneCallbackData;
 
 	inline bool dataCallbackRegistered() {
 		return (_doneCallbackData.callback != NULL);
