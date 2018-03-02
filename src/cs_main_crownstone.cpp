@@ -19,22 +19,23 @@
  *
  *********************************************************************************************************************/
 
-#include <cs_Crownstone.h>
-#include <ble/cs_CrownstoneManufacturer.h>
-#include <cfg/cs_Boards.h>
-#include <cfg/cs_HardwareVersions.h>
-#include <drivers/cs_PWM.h>
-#include <drivers/cs_RNG.h>
-#include <drivers/cs_RTC.h>
-#include <drivers/cs_Temperature.h>
-#include <drivers/cs_Timer.h>
-#include <events/cs_EventDispatcher.h>
-#include <events/cs_EventTypes.h>
-#include <processing/cs_EncryptionHandler.h>
-#include <storage/cs_State.h>
-#include <structs/buffer/cs_MasterBuffer.h>
-#include <structs/buffer/cs_EncryptionBuffer.h>
-#include <util/cs_Utils.h>
+#include "cs_Crownstone.h"
+#include "ble/cs_CrownstoneManufacturer.h"
+#include "cfg/cs_Boards.h"
+#include "cfg/cs_HardwareVersions.h"
+#include "drivers/cs_PWM.h"
+#include "drivers/cs_RNG.h"
+#include "drivers/cs_RTC.h"
+#include "drivers/cs_Temperature.h"
+#include "drivers/cs_Timer.h"
+#include "events/cs_EventDispatcher.h"
+#include "events/cs_EventTypes.h"
+#include "processing/cs_EncryptionHandler.h"
+#include "storage/cs_State.h"
+#include "structs/buffer/cs_MasterBuffer.h"
+#include "structs/buffer/cs_EncryptionBuffer.h"
+#include "util/cs_Utils.h"
+#include "protocol/cs_UartProtocol.h"
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -712,49 +713,10 @@ void Crownstone::run() {
 
 	LOGi(FMT_HEADER, "running");
 
-	//! forever, run scheduler, wait for events and handle them
-#ifdef DEBUGGING_MESHING
-	int i = 0;
-#endif
+	// Forever, run scheduler, wait for events and handle them
 	while(1) {
-
 		app_sched_execute();
-
-#if(NORDIC_SDK_VERSION > 5)
 		BLE_CALL(sd_app_evt_wait, ());
-#else
-		BLE_CALL(sd_app_event_wait, () );
-#endif
-
-#ifdef DEBUGGING_MESHING
-		if (i == 100) {
-			LOGi("Nothing to do at t=100");
-		}
-		if (i == 200) {
-			LOGi("Send first message to ourselves");
-			
-			uint32_t err_code;
-			ble_gap_addr_t address;
-			err_code = sd_ble_gap_address_get(&address);
-			APP_ERROR_CHECK(err_code);
-
-			mesh_message_t test_msg;
-			memcpy(test_msg.header.address, address.addr, BLE_GAP_ADDR_LEN);
-			test_msg.header.messageType = STATE_MESSAGE;
-			test_msg.payload[0] = 66;
-
-			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, sizeof(mesh_message_t));
-		}
-		if ((i % 400000) == 0) {
-			LOGi("Send next message into mesh");
-			mesh_message_t test_msg;
-			test_msg.payload[0] = i / 400000;
-			memset(test_msg.header.address, 0, BLE_GAP_ADDR_LEN);
-			MeshControl::getInstance().send(DATA_CHANNEL, (void*)&test_msg, sizeof(mesh_message_t));
-		}
-
-		++i;
-#endif
 	}
 }
 
@@ -806,23 +768,27 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_stack->setPasskey((uint8_t*)p_data);
 		break;
 	}
-	case EVT_TOGGLE_ADVERTISEMENT: {
-		if (_stack->isAdvertising()) {
-			_stack->stopAdvertising();
-		}
-		else {
+	case EVT_ENABLE_ADVERTISEMENT: {
+		uint8_t enable = *(uint8_t*)p_data;
+		if (enable) {
 			_stack->startAdvertising();
 		}
+		else {
+			_stack->stopAdvertising();
+		}
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, &enable, 1);
 		break;
 	}
-	case EVT_TOGGLE_MESH: {
+	case EVT_ENABLE_MESH: {
 #if BUILD_MESHING == 1
-		if (_mesh->isRunning()) {
-			_mesh->stop();
-		}
-		else {
+		uint8_t enable = *(uint8_t*)p_data;
+		if (enable) {
 			_mesh->start();
 		}
+		else {
+			_mesh->stop();
+		}
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
 #endif
 		break;
 	}

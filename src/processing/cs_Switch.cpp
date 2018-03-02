@@ -122,7 +122,7 @@ void Switch::startPwm() {
 	bool success = _setPwm(_switchValue.pwm_state);
 	// PWM was already started in start(), so it could sync with zero crossings.
 //	PWM::getInstance().start(true); // Start after setting value, else there's a race condition.
-	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state) {
+	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state == 1) {
 		// Don't use relayOff(), as that checks for switchLocked.
 		switch_state_t oldVal = _switchValue;
 		_relayOff();
@@ -201,7 +201,7 @@ void Switch::turnOff() {
 
 void Switch::toggle() {
 	// TODO: maybe check if pwm is larger than some value?
-	if (_switchValue.relay_state || _switchValue.pwm_state > 0) {
+	if (_switchValue.relay_state == 1 || _switchValue.pwm_state > 0) {
 		setSwitch(0);
 	}
 	else {
@@ -300,6 +300,7 @@ void Switch::setSwitch(uint8_t switchState) {
 			break;
 		}
 		default: {
+			// TODO: the pwm gets set at the start of a period, which lets the light flicker in case the relay is turned off..
 			// First pwm on, then relay off!
 			// Otherwise, if you go from 100 to 90, the power first turns off, then to 90.
 			// TODO: why not first relay on, then pwm off, when going from 90 to 100?

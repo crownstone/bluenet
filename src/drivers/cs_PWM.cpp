@@ -306,6 +306,8 @@ void PWM::setValue(uint8_t channel, uint16_t newValue) {
 
 			writeCC(SECONDARY_CHANNEL_IDX, _tickValues[channel]);
 			nrf_ppi_group_enable(_ppiGroup);
+
+			// TODO: the secondary channel and the ppi transition channels are never stopped/cleared (if pwm value isn't changed)?
 		}
 	}
 	}

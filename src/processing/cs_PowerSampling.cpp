@@ -5,19 +5,21 @@
  * License: LGPLv3+
  */
 
-#include <processing/cs_PowerSampling.h>
+#include "processing/cs_PowerSampling.h"
 
-#include <storage/cs_Settings.h>
-#include <drivers/cs_Serial.h>
-#include <drivers/cs_RTC.h>
-#include <protocol/cs_StateTypes.h>
-#include <events/cs_EventDispatcher.h>
-#include <storage/cs_State.h>
-#include <processing/cs_Switch.h>
-#include <third/optmed.h>
+#include "storage/cs_Settings.h"
+#include "drivers/cs_Serial.h"
+#include "drivers/cs_RTC.h"
+#include "protocol/cs_StateTypes.h"
+#include "events/cs_EventDispatcher.h"
+#include "storage/cs_State.h"
+#include "processing/cs_Switch.h"
+#include "third/optmed.h"
+#include "protocol/cs_UartProtocol.h"
+#include "protocol/cs_UartMsgTypes.h"
 
 #if BUILD_MESHING == 1
-#include <mesh/cs_MeshControl.h>
+#include "mesh/cs_MeshControl.h"
 #endif
 
 #include <math.h>
@@ -188,26 +190,26 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 
 void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
-	case EVT_TOGGLE_LOG_POWER:
-		_logsEnabled.flags.power = !_logsEnabled.flags.power;
+	case EVT_ENABLE_LOG_POWER:
+		_logsEnabled.flags.power = *(uint8_t*)p_data;
 		break;
-	case EVT_TOGGLE_LOG_CURRENT:
-		_logsEnabled.flags.current = !_logsEnabled.flags.current;
+	case EVT_ENABLE_LOG_CURRENT:
+		_logsEnabled.flags.current = *(uint8_t*)p_data;
 		break;
-	case EVT_TOGGLE_LOG_VOLTAGE:
-		_logsEnabled.flags.voltage = !_logsEnabled.flags.voltage;
+	case EVT_ENABLE_LOG_VOLTAGE:
+		_logsEnabled.flags.voltage = *(uint8_t*)p_data;
 		break;
-	case EVT_TOGGLE_LOG_FILTERED_CURRENT:
-		_logsEnabled.flags.filteredCurrent = !_logsEnabled.flags.filteredCurrent;
+	case EVT_ENABLE_LOG_FILTERED_CURRENT:
+		_logsEnabled.flags.filteredCurrent = *(uint8_t*)p_data;
 		break;
 	case EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 		toggleVoltageChannelInput();
 		break;
-	case EVT_TOGGLE_ADC_DIFFERENTIAL_CURRENT:
-		toggleDifferentialModeCurrent();
+	case EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+		enableDifferentialModeCurrent(*(uint8_t*)p_data);
 		break;
-	case EVT_TOGGLE_ADC_DIFFERENTIAL_VOLTAGE:
-		toggleDifferentialModeVoltage();
+	case EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+		enableDifferentialModeVoltage(*(uint8_t*)p_data);
 		break;
 	case EVT_INC_VOLTAGE_RANGE:
 		changeRange(VOLTAGE_CHANNEL_IDX, 600);
@@ -291,10 +293,9 @@ void PowerSampling::copyBufferToPowerSamples(power_t power) {
 	// Dispatch event that samples are will be cleared
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
 	_powerSamples.clear();
-	// Use dummy timestamps for now, for backward compatibility
 	uint32_t startTime = RTC::getCount(); // Not really the start time
-	uint32_t dT = CS_ADC_SAMPLE_INTERVAL_US * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000 / 1000;
 
+	_powerSamples.setTimestamp(startTime);
 	for (int i = 0; i < power.bufSize; i += power.numChannels) {
 		if (_powerSamples.getCurrentSamplesBuffer()->full() || _powerSamples.getVoltageSamplesBuffer()->full()) {
 			readyToSendPowerSamples();
@@ -302,23 +303,19 @@ void PowerSampling::copyBufferToPowerSamples(power_t power) {
 		}
 		_powerSamples.getCurrentSamplesBuffer()->push(power.buf[i+power.currentIndex]);
 		_powerSamples.getVoltageSamplesBuffer()->push(power.buf[i+power.voltageIndex]);
-		if ((!_powerSamples.getCurrentTimestampsBuffer()->push(startTime + (i/power.numChannels) * dT)) || 
-				(!_powerSamples.getVoltageTimestampsBuffer()->push(startTime + (i/power.numChannels) * dT))) {
-			_powerSamples.getCurrentSamplesBuffer()->clear();
-			_powerSamples.getVoltageSamplesBuffer()->clear();
-			return;
-		}
 	}
-	//! TODO: are we actually ready here?
+	// TODO: are we actually ready here?
 	readyToSendPowerSamples();
 }
 
 void PowerSampling::readyToSendPowerSamples() {
-	//! Mark that the power samples are being sent now
+	// Mark that the power samples are being sent now
 	_sendingSamples = true;
-	//! Dispatch event that samples are now filled and ready to be sent
+
+	// Dispatch event that samples are now filled and ready to be sent
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
-	//! Simply use an amount of time for sending, should be event based or polling based
+
+	// Simply use an amount of time for sending, should be event based or polling based
 	Timer::getInstance().start(_powerSamplingSentDoneTimerId, MS_TO_TICKS(3000), this);
 }
 
@@ -452,7 +449,7 @@ void PowerSampling::calculatePower(power_t power) {
 		vSquareSum += (voltage * voltage) / (1000*1000);
 		pSum +=       (current * voltage) / (1000*1000);
 	}
-	int32_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
+	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
 	int32_t currentRmsMA =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
 	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
 
@@ -548,7 +545,7 @@ void PowerSampling::calculatePower(power_t power) {
 
 	// Exponential moving average
 	int64_t avgPowerDiscount = _avgPowerDiscount;
-	_avgPowerMilliWatt = ((1000-avgPowerDiscount) * _avgPowerMilliWatt + avgPowerDiscount * powerMilliWatt) / 1000;
+	_avgPowerMilliWatt = ((1000-avgPowerDiscount) * _avgPowerMilliWatt + avgPowerDiscount * powerMilliWattReal) / 1000;
 //	_avgPowerMilliWatt = powerMilliWatt;
 
 
@@ -558,60 +555,61 @@ void PowerSampling::calculatePower(power_t power) {
 	/////////////////////////////////////////////////////////
 
 #ifdef PRINT_POWER_SAMPLES
-	if (printPower % 500 == 0) {
+	if (printPower % 1 == 0) {
+//	if (printPower % 500 == 0) {
 //	if (printPower % 500 == 0 || currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > _currentMilliAmpThresholdPwm) {
-
+		uint32_t rtcCount = RTC::getCount();
 		if (_logsEnabled.flags.power) {
 			// Calculated values
-			write("Calc: ");
-//			write("%i %i ", currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
-//			write("%i %i ", voltageRmsMilliVolt, _avgVoltageRmsMilliVolt);
-//			write("%i %i ", powerMilliWatt, _avgPowerMilliWatt);
-			write("I=%i I_med=%i filt_I=%i filt_I_med=%i ", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA);
-			write("vZero=%i cZero=%i ", _avgZeroVoltage, _avgZeroCurrent);
-//			write("pSum=%lld ", pSum);
-			write("apparent=%u ", powerMilliWattApparent);
-			write("power=%d avg=%d ",powerMilliWatt, _avgPowerMilliWatt);
-			write("\r\n");
+			uart_msg_power_t powerMsg;
+			powerMsg.timestamp = rtcCount;
+//			powerMsg.timestamp = RTC::getCount();
+			powerMsg.currentRmsMA = currentRmsMA;
+			powerMsg.currentRmsMedianMA = currentRmsMedianMA;
+			powerMsg.filteredCurrentRmsMA = filteredCurrentRmsMA;
+			powerMsg.filteredCurrentRmsMedianMA = filteredCurrentRmsMedianMA;
+			powerMsg.avgZeroVoltage = _avgZeroVoltage;
+			powerMsg.avgZeroCurrent = _avgZeroCurrent;
+			powerMsg.powerMilliWattApparent = powerMilliWattApparent;
+			powerMsg.powerMilliWattReal = powerMilliWattReal;
+			powerMsg.avgPowerMilliWattReal = _avgPowerMilliWatt;
+
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_POWER_LOG_POWER, (uint8_t*)&powerMsg, sizeof(powerMsg));
 		}
 
 		if (_logsEnabled.flags.current) {
-			// Current wave
-			write("Current: ");
-//			write("\r\n");
+			// Write uart_msg_current_t without allocating a buffer.
+			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
+//			uint32_t rtcCount = RTC::getCount();
+			UartProtocol::getInstance().writeMsgPart((uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				write("%d ", power.buf[i]);
-				if (i % 40 == 40 - 1) {
-//					write("\r\n");
-				}
+				UartProtocol::getInstance().writeMsgPart((uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
 			}
-			write("\r\n");
+			UartProtocol::getInstance().writeMsgEnd();
 		}
 
 		if (_logsEnabled.flags.filteredCurrent) {
-			// Filtered current wave
-			write("Filtered: ");
-//			write("\r\n");
+			// Write uart_msg_current_t without allocating a buffer.
+			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, sizeof(uart_msg_current_t));
+//			uint32_t rtcCount = RTC::getCount();
+			UartProtocol::getInstance().writeMsgPart((uint8_t*)&(rtcCount), sizeof(rtcCount));
+			int16_t val;
 			for (int i = 0; i < numSamples; ++i) {
-				write("%d ", _outputSamples->at(i));
-				if (i % 20 == 20 - 1) {
-//					write("\r\n");
-				}
+				val = _outputSamples->at(i);
+				UartProtocol::getInstance().writeMsgPart((uint8_t*)&val, sizeof(val));
 			}
-			write("\r\n");
+			UartProtocol::getInstance().writeMsgEnd();
 		}
 
 		if (_logsEnabled.flags.voltage) {
-			// Voltage wave
-			write("Voltage: ");
-//			write("\r\n");
+			// Write uart_msg_voltage_t without allocating a buffer.
+			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
+//			uint32_t rtcCount = RTC::getCount();
+			UartProtocol::getInstance().writeMsgPart((uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				write("%d ", power.buf[i]);
-				if (i % 40 == 40 - 2) {
-//					write("\r\n");
-				}
+				UartProtocol::getInstance().writeMsgPart((uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
 			}
-			write("\r\n");
+			UartProtocol::getInstance().writeMsgEnd();
 		}
 	}
 	++printPower;
@@ -747,8 +745,9 @@ void PowerSampling::toggleVoltageChannelInput() {
 	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
 }
 
-void PowerSampling::toggleDifferentialModeCurrent() {
-	_adcConfig.currentDifferential = !_adcConfig.currentDifferential;
+void PowerSampling::enableDifferentialModeCurrent(bool enable) {
+//	_adcConfig.currentDifferential = !_adcConfig.currentDifferential;
+	_adcConfig.currentDifferential = enable;
 	adc_channel_config_t channelConfig;
 	channelConfig.pin = _adcConfig.currentPinGainHigh;
 	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[CURRENT_CHANNEL_IDX];
@@ -756,8 +755,9 @@ void PowerSampling::toggleDifferentialModeCurrent() {
 	_adc->changeChannel(CURRENT_CHANNEL_IDX, channelConfig);
 }
 
-void PowerSampling::toggleDifferentialModeVoltage() {
-	_adcConfig.voltageDifferential = !_adcConfig.voltageDifferential;
+void PowerSampling::enableDifferentialModeVoltage(bool enable) {
+//	_adcConfig.voltageDifferential = !_adcConfig.voltageDifferential;
+	_adcConfig.voltageDifferential = enable;
 	adc_channel_config_t channelConfig;
 	channelConfig.pin = _adcConfig.voltageChannelPin;
 	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX];

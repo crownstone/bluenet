@@ -17,13 +17,15 @@
 #include "cfg/cs_Strings.h"
 #include "cfg/cs_Config.h"
 #include "protocol/cs_ErrorCodes.h"
-
+#include "protocol/cs_UartProtocol.h"
 #include "structs/buffer/cs_InterleavedBuffer.h"
 
 //#define PRINT_ADC_VERBOSE
 
 // Define test pin to enable gpio debug.
-//#define TEST_PIN 22
+//#define TEST_PIN  24
+//#define TEST_PIN2 25
+//#define TEST_PIN3 26
 
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
 
@@ -65,6 +67,16 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	_config = config;
 //	memcpy(&_config, &config, sizeof(adc_config_t));
 	LOGi("init: period=%uus", _config.samplingPeriodUs);
+
+#ifdef TEST_PIN
+	nrf_gpio_cfg_output(TEST_PIN);
+#endif
+#ifdef TEST_PIN2
+	nrf_gpio_cfg_output(TEST_PIN2);
+#endif
+#ifdef TEST_PIN3
+	nrf_gpio_cfg_output(TEST_PIN3);
+#endif
 
 	// Setup timer
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
@@ -142,6 +154,7 @@ void ADC::initQueue() {
  *   - set either differential mode (pin - ref_pin), or single ended mode (pin - 0)
  */
 cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config) {
+	// TODO: No logs, this function can be called from interrupt
 	LOGi("init channel %u on ain%u, range=%umV, ref=ain%u", channel, config.pin, config.rangeMilliVolt, config.referencePin);
 	assert(config.pin < 8 || config.pin == CS_ADC_PIN_VDD, "Invalid pin");
 	assert(config.referencePin < 8 || config.referencePin == CS_ADC_REF_PIN_NOT_AVAILABLE, "Invalid ref pin");
@@ -256,12 +269,8 @@ void ADC::setZeroCrossingCallback(adc_zero_crossing_cb_t callback) {
 
 void ADC::enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroVal) {
 	LOGd("enable zero chan=%u zero=%i", channel, zeroVal);
-#ifdef TEST_PIN
-	nrf_gpio_cfg_output(TEST_PIN);
-#endif
 	_zeroValue = zeroVal;
 	_zeroCrossingChannel = channel;
-
 	setLimitUp();
 }
 
@@ -286,17 +295,22 @@ void ADC::applyConfig() {
 		initChannel(i, _config.channels[i]);
 	}
 
-	// Mark as done
-	_changeConfig = false;
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_CONFIG, (uint8_t*)(&_config), sizeof(_config));
+
 
 	// Add all buffers again
 	initQueue();
+
+	// Mark as done
+	_changeConfig = false;
 }
 
+// No logs, this function can be called from interrupt
 void ADC::setLimitUp() {
 	nrf_drv_saadc_limits_set(_zeroCrossingChannel, NRF_DRV_SAADC_LIMITL_DISABLED, _zeroValue);
 }
 
+// No logs, this function can be called from interrupt
 void ADC::setLimitDown() {
 	nrf_drv_saadc_limits_set(_zeroCrossingChannel, _zeroValue, NRF_DRV_SAADC_LIMITH_DISABLED);
 }
@@ -316,10 +330,12 @@ void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 		// Decouple done callback from adc interrupt handler, and put it on app scheduler instead
 		uint32_t errorCode = app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
 		APP_ERROR_CHECK(errorCode);
-	} else {
-//		write("/!\\");
+	}
+	else {
 		// Don't queue up the the buffer, we need the adc to be idle.
 		if (_changeConfig) {
+			// Don't apply config, as the callback will try to release and add its buffer when done.
+			// So wait for the callback to be done, then apply the config.
 //			if (_numBuffersQueued == 0) {
 //				applyConfig();
 //			}
@@ -333,6 +349,7 @@ void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 	}
 }
 
+// No logs, this function is called from interrupt
 void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 	if (type == NRF_SAADC_LIMIT_LOW) {
 		// NRF_SAADC_LIMIT_LOW  triggers when adc value is below lower limit
@@ -342,9 +359,9 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 		// NRF_SAADC_LIMIT_HIGH triggers when adc value is above upper limit
 		setLimitDown();
 
-#ifdef TEST_PIN
-		nrf_gpio_pin_toggle(TEST_PIN);
-#endif
+//#ifdef TEST_PIN
+//		nrf_gpio_pin_toggle(TEST_PIN);
+//#endif
 
 		// Only call zero crossing callback when there was about 20ms between the two events.
 		// This makes it more likely that this was an actual zero crossing.

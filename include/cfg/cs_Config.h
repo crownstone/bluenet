@@ -43,16 +43,16 @@
 //#define APP_TIMER_OP_QUEUE_SIZE                  10
 #define APP_TIMER_OP_QUEUE_SIZE                  20
 
-/*
- */
 /** Maximum size of scheduler events. */
+// Has to be word aligned?
+// TODO: why this size (72)?
 /*
 #define SCHED_MAX_EVENT_DATA_SIZE                ((CEIL_DIV(MAX(MAX(BLE_STACK_EVT_MSG_BUF_SIZE,    \
                                                                     ANT_STACK_EVT_STRUCT_SIZE),    \
                                                                 SYS_EVT_MSG_BUF_SIZE),             \
                                                             sizeof(uint32_t))) * sizeof(uint32_t))
 */
-#define SCHED_MAX_EVENT_DATA_SIZE                128
+#define SCHED_MAX_EVENT_DATA_SIZE               (MAX(20, MAX(APP_TIMER_SCHED_EVT_SIZE, BLE_STACK_HANDLER_SCHED_EVT_SIZE)))
 
 /** Maximum number of events in the scheduler queue.
  *
@@ -136,7 +136,7 @@
 
 
 
-#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 // Number of voltage and current samples per burst
+//#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 // Number of voltage and current samples per burst
 
 #define CS_ADC_SAMPLE_INTERVAL_US                200
 //#define CS_ADC_SAMPLE_INTERVAL_US                400
@@ -145,6 +145,8 @@
 #define CS_ADC_NUM_BUFFERS                       4
 #define CS_ADC_BUF_SIZE                          (2*20000/CS_ADC_SAMPLE_INTERVAL_US)
 //#define CS_ADC_BUF_SIZE                          (2*30000/CS_ADC_SAMPLE_INTERVAL_US)
+
+#define POWER_SAMPLE_BURST_NUM_SAMPLES           (20000/CS_ADC_SAMPLE_INTERVAL_US) // Number of voltage and current samples per burst
 
 #define STORAGE_REQUEST_BUFFER_SIZE              5
 
