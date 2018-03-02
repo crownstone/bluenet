@@ -602,6 +602,7 @@ void PowerSampling::calculatePower(power_t power) {
 		}
 
 		if (_logsEnabled.flags.voltage) {
+			LOGd("Write power over UART");
 			// Write uart_msg_voltage_t without allocating a buffer.
 			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
 //			uint32_t rtcCount = RTC::getCount();

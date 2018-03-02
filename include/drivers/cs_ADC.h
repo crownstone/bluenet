@@ -73,6 +73,8 @@ struct adc_done_cb_data_t {
 	
 	//! Buffer index as argument for ADC callback
 	cs_adc_buffer_id_t bufIndex;
+
+	bool in_progress;
 };
 
 enum adc_gain_t {
@@ -278,7 +280,8 @@ private:
 	}
 	
 	inline bool dataCallbackInProgress() {
-		return (_doneCallbackData.bufIndex != CS_ADC_BUF_SIZE);
+//		return (_in_progress[bufIndex] = true;
+		return (_doneCallbackData.in_progress);
 	}
 
 	//! The zero crossing callback.
