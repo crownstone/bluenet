@@ -23,6 +23,8 @@
 #include <math.h>
 #include "third/SortMedian.h"
 
+#include "structs/buffer/cs_InterleavedBuffer.h"
+
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 20
 
@@ -68,9 +70,14 @@ static int printPower = 0;
 #endif
 
 // adc done callback is already decoupled from adc interrupt
+void adc_done_callback(cs_adc_buffer_id_t bufIndex) {
+	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
+	PowerSampling::getInstance().powerSampleAdcDone(buf, CS_ADC_BUF_SIZE, bufIndex);
+}
+/*
 void adc_done_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
 	PowerSampling::getInstance().powerSampleAdcDone(buf, size, bufNum);
-}
+}*/
 
 void PowerSampling::init(const boards_config_t& boardConfig) {
 //	memcpy(&_config, &config, sizeof(power_sampling_config_t));
@@ -222,7 +229,7 @@ void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
  *
  * Only when in normal operation mode (e.g. not in setup mode) sent the information to a BLE characteristic.
  */
-void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
+void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs_adc_buffer_id_t bufIndex) {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
@@ -269,7 +276,7 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
-	_adc->releaseBuffer(buf);
+	_adc->releaseBuffer(bufIndex);
 }
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {

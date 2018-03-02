@@ -48,4 +48,4 @@ public:
 	bool exists(nrf_saadc_value_t *buffer) {
 		return (getIndex(buffer) != CS_ADC_NUM_BUFFERS);
 	}
-}
+};

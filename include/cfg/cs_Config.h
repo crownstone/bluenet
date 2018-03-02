@@ -142,7 +142,7 @@
 //#define CS_ADC_SAMPLE_INTERVAL_US                400
 
 #define CS_ADC_MAX_PINS                          2
-#define CS_ADC_NUM_BUFFERS                       2 // ADC code is currently written for (max) 2
+#define CS_ADC_NUM_BUFFERS                       4
 #define CS_ADC_BUF_SIZE                          (2*20000/CS_ADC_SAMPLE_INTERVAL_US)
 //#define CS_ADC_BUF_SIZE                          (2*30000/CS_ADC_SAMPLE_INTERVAL_US)
 

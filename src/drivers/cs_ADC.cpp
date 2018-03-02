@@ -358,7 +358,6 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 }
 
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
-	/*
 	switch(p_event->type) {
 	case NRF_DRV_SAADC_EVT_DONE: {
 		nrf_saadc_value_t *buf = p_event->data.done.p_buffer;
@@ -370,7 +369,7 @@ extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
 		ADC::getInstance()._handleAdcLimitInterrupt(p_event->data.limit.limit_type);
 		break;
 	}
-	}*/
+	}
 }
 
 // Timer interrupt handler
