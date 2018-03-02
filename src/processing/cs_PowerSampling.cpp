@@ -278,6 +278,9 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
+	// For now before releasing the buffer...
+	recognizeSwitch(power, bufIndex);
+
 	_adc->releaseBuffer(bufIndex);
 }
 
@@ -418,6 +421,59 @@ void PowerSampling::filter(power_t power) {
 	sort_median(*_filterParams, *_inputSamples, *_outputSamples);
 }
 
+static int count = 0;
+/**
+ * Todo: check if we can go through this array without power struct
+ */
+void PowerSampling::recognizeSwitch(power_t power, cs_adc_buffer_id_t bufIndex) {
+	if (count > 0) {
+		count--;
+		return;
+	}
+	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
+
+	cs_adc_buffer_id_t index0 = (bufIndex + CS_ADC_NUM_BUFFERS - 2) % CS_ADC_NUM_BUFFERS;
+	cs_adc_buffer_id_t index1 = (bufIndex + CS_ADC_NUM_BUFFERS - 1) % CS_ADC_NUM_BUFFERS;
+	cs_adc_buffer_id_t index2 = bufIndex;
+
+	nrf_saadc_value_t* buf0 = InterleavedBuffer::getInstance().getBuffer(index0);
+	nrf_saadc_value_t* buf1 = InterleavedBuffer::getInstance().getBuffer(index1);
+	nrf_saadc_value_t* buf2 = InterleavedBuffer::getInstance().getBuffer(index2);
+
+	// TODO: compare median curves, not just raw values
+	int16_t sum02 = 0, sum01 = 0, sum12 = 0;
+	// sum all difference between curve and 0 and 1
+	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+		 sum02 += (buf0[i] - buf2[i]);
+		 sum01 += (buf0[i] - buf1[i]);
+		 sum12 += (buf1[i] - buf2[i]);
+	}
+	/*
+	LOGd("02: %i", sum02);	
+	LOGd("01: %i", sum01);	
+	LOGd("12: %i", sum12);	
+*/
+	// When beyond certain threshold register 
+	int16_t upper_threshold = 400;
+	bool cond1 = (abs(sum12) > upper_threshold);
+//	bool cond2 = (sum12 > 0);
+//	bool cond3 = cond2 ? (sum01 < -upper_threshold) : (sum01 > upper_threshold);
+	bool cond3 = (abs(sum01) > upper_threshold);
+
+	int16_t lower_threshold = abs(sum12) / 2;
+	bool cond0 = (abs(sum02) < lower_threshold);
+/*
+	//if (cond0) LOGd("cond0 true");
+	if (cond1) LOGd("cond1 true");
+	//if (cond2) LOGd("cond2 true");
+	if (cond3) LOGd("cond3 true");
+*/
+	if (cond0 && cond1 && cond3) {
+//		LOGd("State switch recognized");
+		count = 50;
+		Switch::getInstance().toggle();
+	}
+}
 
 /**
  * Calculate power.
@@ -602,7 +658,7 @@ void PowerSampling::calculatePower(power_t power) {
 		}
 
 		if (_logsEnabled.flags.voltage) {
-			LOGd("Write power over UART");
+			//LOGd("Write power over UART");
 			// Write uart_msg_voltage_t without allocating a buffer.
 			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
 //			uint32_t rtcCount = RTC::getCount();

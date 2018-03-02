@@ -34,7 +34,7 @@ extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
  */
 void adc_done(void * p_event_data, uint16_t event_size) {
 	adc_done_cb_data_t* cbData = (adc_done_cb_data_t*)p_event_data;
-	LOGd("Handle buffer %i", cbData->bufIndex);
+//	LOGd("Handle buffer %i", cbData->bufIndex);
 	cbData->callback(cbData->bufIndex);
 }
 
@@ -237,7 +237,7 @@ void ADC::start() {
 }
 
 void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
-	LOGd("Add buffer %i to queue", bufIndex);
+//	LOGd("Add buffer %i to queue", bufIndex);
 	if (_in_progress[bufIndex]) {
 		LOGe("Buffer %i still in progress. Will not queue!", bufIndex);
 		return;
@@ -250,7 +250,7 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 }
 
 bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
-	LOGd("Release buffer %i", bufIndex);
+//	LOGd("Release buffer %i", bufIndex);
 	if (_changeConfig) {
 		// Don't queue up the the buffer, we need the adc to be idle.
 		if (_numBuffersQueued == 0) {
@@ -325,18 +325,18 @@ void ADC::setLimitDown() {
 void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 	_numBuffersQueued--;
 	
-	if (!dataCallbackRegistered()) {
-		LOGd("No callback registered");
-	}
+//	if (!dataCallbackRegistered()) {
+//		LOGd("No callback registered");
+//	}
 
-	if (dataCallbackInProgress()) {
-		LOGd("Data callback in progress for %i", bufIndex);
-	}
+//	if (dataCallbackInProgress()) {
+//		LOGd("Data callback in progress for %i", bufIndex);
+//	}
 	
 	if (dataCallbackRegistered()) { // && !dataCallbackInProgress()) {
 		_doneCallbackData.bufIndex = bufIndex;
 		_in_progress[bufIndex] = true;
-		LOGd("Set in progress for %i", bufIndex);
+//		LOGd("Set in progress for %i", bufIndex);
 
 		// Decouple done callback from adc interrupt handler, and put it on app scheduler instead
 		uint32_t errorCode = app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);

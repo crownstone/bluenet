@@ -212,6 +212,10 @@ private:
 	 */
 	void calculateEnergy();
 
+	/** Recognize switch state
+	 */
+	void recognizeSwitch(power_t power, cs_adc_buffer_id_t bufIndex);
+
 	/** If current goes beyond predefined threshold levels, take action!
 	 */
 	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered);
