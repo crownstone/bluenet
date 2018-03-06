@@ -403,22 +403,26 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 		}
 		case STATE_ERROR_OVER_CURRENT: {
 			_errorState.errors.overCurrent = *(uint8_t*)target;
-			publishUpdate(type, (uint8_t*)target, size);
+//			publishUpdate(type, (uint8_t*)target, size);
+			publishUpdate(STATE_ERRORS, (uint8_t*)(&_errorState), sizeof(_errorState));
 			break;
 		}
 		case STATE_ERROR_OVER_CURRENT_PWM: {
 			_errorState.errors.overCurrentPwm = *(uint8_t*)target;
-			publishUpdate(type, (uint8_t*)target, size);
+//			publishUpdate(type, (uint8_t*)target, size);
+			publishUpdate(STATE_ERRORS, (uint8_t*)(&_errorState), sizeof(_errorState));
 			break;
 		}
 		case STATE_ERROR_CHIP_TEMP: {
 			_errorState.errors.chipTemp = *(uint8_t*)target;
-			publishUpdate(type, (uint8_t*)target, size);
+//			publishUpdate(type, (uint8_t*)target, size);
+			publishUpdate(STATE_ERRORS, (uint8_t*)(&_errorState), sizeof(_errorState));
 			break;
 		}
 		case STATE_ERROR_PWM_TEMP: {
 			_errorState.errors.pwmTemp = *(uint8_t*)target;
-			publishUpdate(type, (uint8_t*)target, size);
+//			publishUpdate(type, (uint8_t*)target, size);
+			publishUpdate(STATE_ERRORS, (uint8_t*)(&_errorState), sizeof(_errorState));
 			break;
 		}
 		case STATE_IGNORE_BITMASK: {
