@@ -57,6 +57,9 @@ PowerSampling::PowerSampling() :
 	_voltageRmsMilliVoltHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
 	_filteredCurrentRmsHistMA = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
 	_logsEnabled.asInt = 0;
+	
+	// Skip the first N cycles
+	_skipSwitchDetectionTriggers = 200;
 }
 
 #if POWER_SAMPLING_RMS_WINDOW_SIZE == 7
@@ -387,6 +390,35 @@ void PowerSampling::calculateCurrentZero(power_t power) {
 	_avgZeroCurrent = ((1000 - avgZeroCurrentDiscount) * _avgZeroCurrent + avgZeroCurrentDiscount * zeroCurrent) / 1000;
 }
 
+/*
+ * The median filter uses its own data structure to optimally filter the data. A median filter does filter outliers by
+ * a particular smoothing operation. It sorts a sequence of values and picks the one in the center: the median. To
+ * optimize this operation it makes sense that if we slide the sliding window with sorted values we do not sort these
+ * values again and again. When moving the window we insert the new value from the right into the sorted array. For
+ * that it is logical to use a linked list. This means that the MedianFilter object we use requires us copying the
+ * data into it. An expensive operation.
+ *
+ * TODO: Do not work with "half window sizes". Just work with a window size and enforce its size to be odd. That 
+ * to pick the median you only need to sort half of the values (plus one) is an implementation detail. 
+ *
+ * TODO: Create an in-place version of a median filter. It is possible to have a linked list (of half the window size
+ * plus one) that contains a list of indices into the array with values. For example, let us assume a full window size
+ * of 5 and ignore the border starting at index 2. Now let's sort the first 5 values [4 2 0 1 3]. Hence, the value at
+ * index 4 is the smallest. We replace value at index 2 with the middle one (which is at index 0). Now we shift to the
+ * right, hence index 0 falls out [4 2 1 3], and index 5 shifts in. Let's assume 5 is a value between 4 and 2, then we
+ * have [4 5 2 1 3] and replace the value at index 3 with the value at index 2. Note that the value at index 0 is 
+ * copied into 2 and then into 3. If we do not want this, we need to have a separate array the size of the sliding
+ * window and only copy the value when it is shifted out. We will have a copy assignment operation for each value,
+ * however still our RAM use is much less because we only need place for values at the window. Note that we can 
+ * actually sort up to the half so the examples should be [4 2 0 ? ?], then [4 2 ? ?], then [4 5 2 ? ?]. In the 
+ * particular case where 5 > 2 we need an additional value [4 2 1 ?] or we do not know if it should be [4 2 5 ? ?] or
+ * [4 2 1 ? ?]. So in this case we would need a min(.) operation on half (minus one) of the remaining array.
+ *
+ * TODO: Keep the newest buffer at t=0 "raw" and only filter the t=-1. If the operation is done in-place we have also
+ * filtered buffers for t=-2 and t=-3 (assuming four buffers). We can use the buffer at t=0 and t=-2 for padding the
+ * buffer at t=-1. This means we do not pad with copies of values but with real values. All operations that require
+ * smoothed values will have a delay of one sine wave (20ms on 50Hz).
+ */
 void PowerSampling::filter(power_t power) {
 	uint16_t bufSize = power.bufSize / power.numChannels;
 //
@@ -421,13 +453,15 @@ void PowerSampling::filter(power_t power) {
 	sort_median(*_filterParams, *_inputSamples, *_outputSamples);
 }
 
-static int count = 0;
 /**
- * Todo: check if we can go through this array without power struct
+ * The recognizeSwitch function goes through a sequence of buffers to detect if a switch event happened in the buffer
+ * in the middle. For that it 
+ *
+ * TODO: check if we can go through this array without power struct
  */
 void PowerSampling::recognizeSwitch(power_t power, cs_adc_buffer_id_t bufIndex) {
-	if (count > 0) {
-		count--;
+	if (_skipSwitchDetectionTriggers > 0) {
+		skipSwitchDetectionTriggers--;
 		return;
 	}
 	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
@@ -448,11 +482,12 @@ void PowerSampling::recognizeSwitch(power_t power, cs_adc_buffer_id_t bufIndex) 
 		 sum01 += (buf0[i] - buf1[i]);
 		 sum12 += (buf1[i] - buf2[i]);
 	}
-	/*
+
+#ifdef VERBOSE_SWITCH
 	LOGd("02: %i", sum02);	
 	LOGd("01: %i", sum01);	
 	LOGd("12: %i", sum12);	
-*/
+#endif 
 	// When beyond certain threshold register 
 	int16_t upper_threshold = 400;
 	bool cond1 = (abs(sum12) > upper_threshold);
@@ -462,15 +497,11 @@ void PowerSampling::recognizeSwitch(power_t power, cs_adc_buffer_id_t bufIndex) 
 
 	int16_t lower_threshold = abs(sum12) / 2;
 	bool cond0 = (abs(sum02) < lower_threshold);
-/*
-	//if (cond0) LOGd("cond0 true");
-	if (cond1) LOGd("cond1 true");
-	//if (cond2) LOGd("cond2 true");
-	if (cond3) LOGd("cond3 true");
-*/
 	if (cond0 && cond1 && cond3) {
-//		LOGd("State switch recognized");
-		count = 50;
+#ifdef VERBOSE_SWITCH
+		LOGd("State switch recognized");
+#endif
+		skipSwitchDetectionTriggers = 50;
 		Switch::getInstance().toggle();
 	}
 }
