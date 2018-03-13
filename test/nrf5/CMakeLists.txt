@@ -1,5 +1,7 @@
 include_directories ( "include" )
 
+MESSAGE(STATUS "[test/nrf5/test_generate]")
+
 INCLUDE_DIRECTORIES(${INCLUDE_DIR})
 
 # Add to the -I flags
@@ -20,6 +22,7 @@ INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/saadc/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/util/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/timer/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/scheduler/")
+INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/crc16/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/softdevice/common/softdevice_handler/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/softdevice/s132/headers/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/toolchain/")
@@ -94,7 +97,7 @@ ADD_CUSTOM_COMMAND(OUTPUT ${TEST}.tmp
 	DEPENDS ${TEST}
 	COMMENT "Object copy ${TEST} to ${TEST}.bin")
 
-ADD_CUSTOM_TARGET(generate-dat
+ADD_CUSTOM_TARGET(generate-dat-${TEST}
 	COMMAND echo
 	COMMAND echo "** Use srec_cat to create the INIT .dat file for the DFU"
 	COMMAND echo
@@ -104,7 +107,7 @@ ADD_CUSTOM_TARGET(generate-dat
 	COMMENT "Generate the INIT .dat file for the DFU"
 	)
 
-ADD_CUSTOM_TARGET(combine
+ADD_CUSTOM_TARGET(combine-${TEST}
 	COMMAND echo
 	COMMAND echo "** Use srec_cat to create one combined softdevice+app file"
 	COMMAND echo
@@ -114,7 +117,7 @@ ADD_CUSTOM_TARGET(combine
 	COMMENT "Combine as one hex file"
 	)
 
-ADD_CUSTOM_TARGET(analyze
+ADD_CUSTOM_TARGET(analyze-${TEST}
 	COMMAND echo
 	COMMAND echo "** Show headers"
 	COMMAND ${CMAKE_READELF} --headers ${TEST}.elf
@@ -133,3 +136,4 @@ SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${TEST}.bin)
 
 TARGET_LINK_LIBRARIES(${TEST} ${LIBS})
 INSTALL(TARGETS ${TEST} RUNTIME DESTINATION bin)
+
