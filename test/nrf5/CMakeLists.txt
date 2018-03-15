@@ -7,7 +7,7 @@ INCLUDE_DIRECTORIES(${INCLUDE_DIR})
 # Add to the -I flags
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/common")
 #INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/ble_services")
-#INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/device_manager")
+INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/device_manager")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/device/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/common/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/gpiote/")
@@ -17,7 +17,7 @@ INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/ppi/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/pstorage/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/timer/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/saadc/")
-#INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/comp/")
+INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/comp/")
 #INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/pwm")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/util/")
 INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/timer/")
@@ -50,6 +50,8 @@ LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/softdevi
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler_appsh.c")
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer_appsh.c")
 
+LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/crc16/crc16.c")
+
 # In case of adding powersampling
 LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/pstorage/pstorage.c")
 
@@ -74,7 +76,13 @@ list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_StorageHelper.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_EventDispatcher.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_PowerSamples.cpp")
+
+list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/SortMedian.cc")
+
+# Somehow the following files are pulled in as well..., not nice..., should not be necessary
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_UUID.cpp")
+list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_UartProtocol.cpp")
+list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_EventDispatcher.cpp")
 
 set(TEST_SOURCE_FILES "${FOLDER_SOURCE}")
 

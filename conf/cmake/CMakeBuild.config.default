@@ -64,6 +64,9 @@ BUILD_MESHING=1
 # Use separate github repository https://github.com/crownstone/nRF51-ble-bcast-mesh/
 MESH_SUBDIR=nRF51-ble-bcast-mesh/nRF51/rbc_mesh
 
+# Switch on dimming by default (1 or 0)
+DIMMING=1
+
 # Build as iBeacon (Crownstone will advertise itself as iBeacon)
 IBEACON=1
 

@@ -64,8 +64,12 @@ void TIMER0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 //! timer used for ADC
 void TIMER1_IRQHandler(void);
 
-//! timer used for PWM
+//! timer used for dimming
+#if DIMMING==0
+void TIMER4_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+#else
 void TIMER4_IRQHandler(void);
+#endif
 
 void RTC0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void TEMP_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));

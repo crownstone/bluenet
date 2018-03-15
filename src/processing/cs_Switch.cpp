@@ -550,6 +550,10 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		turnOff();
 		break;
 	}
+	case EVT_POWER_TOGGLE: {
+		toggle();
+		break;
+	}
 	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM:
 	case EVT_PWM_TEMP_ABOVE_THRESHOLD:
 	case EVT_DIMMER_ON_FAILURE_DETECTED:

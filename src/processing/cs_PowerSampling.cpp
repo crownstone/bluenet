@@ -461,7 +461,7 @@ void PowerSampling::filter(power_t power) {
  */
 void PowerSampling::recognizeSwitch(power_t power, cs_adc_buffer_id_t bufIndex) {
 	if (_skipSwitchDetectionTriggers > 0) {
-		skipSwitchDetectionTriggers--;
+		_skipSwitchDetectionTriggers--;
 		return;
 	}
 	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
@@ -501,8 +501,8 @@ void PowerSampling::recognizeSwitch(power_t power, cs_adc_buffer_id_t bufIndex) 
 #ifdef VERBOSE_SWITCH
 		LOGd("State switch recognized");
 #endif
-		skipSwitchDetectionTriggers = 50;
-		Switch::getInstance().toggle();
+		_skipSwitchDetectionTriggers = 50;
+		EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
 	}
 }
 

@@ -26,8 +26,9 @@
 #include "ble/cs_Nordic.h"
 
 #include "structs/cs_StreamBuffer.h"
-#include "processing/cs_CommandHandler.h"
-
+#include "events/cs_EventDispatcher.h"
+#include "events/cs_EventTypes.h"
+#include "storage/cs_Settings.h"
 
 // Define both test pin to enable gpio debug.
 //#define TEST_PIN   22
@@ -235,8 +236,10 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 			LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			break;
 		}
-		uint8_t* streamPayload = (uint8_t*)payload + sizeof(stream_header_t);
-		CommandHandler::getInstance().handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
+//		uint8_t* streamPayload = (uint8_t*)payload + sizeof(stream_header_t);
+//		CommandHandler::getInstance().handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
+//		TODO: implement event dispatch..
+		EventDispatcher::getInstance().dispatch(EVT_RX_CONTROL, payload, 1);
 		break;
 	}
 	case UART_OPCODE_RX_ENABLE_ADVERTISEMENT:
