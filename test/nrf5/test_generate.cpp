@@ -24,6 +24,7 @@ const uint8_t sin_table[]= {0,0,1,2,4,6,9,12,16,20,24,29,35,40,46,53,59,66,73,81
 
 
 void initPwm() {
+	/*
 	nrf_pwm_config_t pwm_config = PWM_DEFAULT_CONFIG;
 
 	pwm_config.mode             = PWM_MODE_LED_255;
@@ -32,6 +33,7 @@ void initPwm() {
 
 	// Initialize the PWM library
 	nrf_pwm_init(&pwm_config);
+	*/
 }
 
 int main() {
@@ -44,16 +46,7 @@ int main() {
 
 	Timer::getInstance().init();
 	
-	//! Initialise SoftDevice
-/*
-	uint8_t enabled;
-	BLE_CALL(sd_softdevice_is_enabled, (&enabled));
-	if (enabled) {
-		LOGw("Softdevice running");
-		BLE_CALL(sd_softdevice_disable, ());
-	}
-*/	
-	nrf_clock_lf_cfg_t _clock_source = defaultClockSource;
+	//nrf_clock_lf_cfg_t _clock_source = defaultClockSource;
 
 	//! Some apeshit 
 //	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
@@ -85,7 +78,9 @@ int main() {
 		// 200 microseconds times 100 samples is 20 milliseconds for the entire wave, which is 50 Hz.
 		nrf_delay_us(200);
 
+		// value will be overwritten in trigger_switch if necessary
 		uint8_t value = sin_table[counter];
+
 		if (i++ % 5304 == 0) {
 			trigger_switch = true;
 		}
@@ -95,8 +90,7 @@ int main() {
 				case WITHOUT_LOAD: default: {
 					// We keep the value at [counter - switch_counter]: it stays the same.
 					index = (counter - 1 - switch_counter + sizeof(sin_table)) % sizeof(sin_table);
-					uint8_t value = sin_table[index];
-					nrf_pwm_set_value(0, value);
+					value = sin_table[index];
 				} break;
 				case WITH_LOAD: {
 					// We go slowly to the middle (255/2)
@@ -113,7 +107,7 @@ int main() {
 					// plot(1:length(x),x,'o')
 					value = (prev_value - end_value) * 80/100 + end_value;
 
-					nrf_pwm_set_value(0, value);
+					///nrf_pwm_set_value(0, value);
 					prev_value = value;
 					
 				} break;
@@ -123,9 +117,9 @@ int main() {
 				switch_counter = 0;
 			}
 		} else {
-			// Update sine wave
-			nrf_pwm_set_value(0, value);
+			// Update sine wave with value as is
 		}
 		counter = (counter + 1) % 100;
+//		nrf_pwm_set_value(0, value);
 	}
 }
