@@ -186,9 +186,9 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	// storing keys used for encryption
 	struct {
-		uint8_t owner[ENCYRPTION_KEY_LENGTH];
-		uint8_t member[ENCYRPTION_KEY_LENGTH];
-		uint8_t guest[ENCYRPTION_KEY_LENGTH];
+		uint8_t owner[ENCRYPTION_KEY_LENGTH];
+		uint8_t member[ENCRYPTION_KEY_LENGTH];
+		uint8_t guest[ENCRYPTION_KEY_LENGTH];
 	} encryptionKeys;
 
 	uint32_t adcBurstSampleRate;

@@ -68,6 +68,13 @@ public:
 	}
 
 	/**
+	 * Expose buffer lengths to accessors.
+	 */
+	inline const value_t getBufferLength() {
+		return INTERLEAVED_BUFFER_LENGTH;
+	}
+
+	/**
 	 * Given a pointer to a buffer return the buffer_id.
 	 */
 	cs_adc_buffer_id_t getIndex(nrf_saadc_value_t *buffer) {

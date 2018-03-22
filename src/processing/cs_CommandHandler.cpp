@@ -471,25 +471,25 @@ ERR_CODE CommandHandler::handleCmdValidateSetup(buffer_ptr_t buffer, const uint1
 
 	Settings& settings = Settings::getInstance();
 
-	uint8_t key[ENCYRPTION_KEY_LENGTH];
-	uint8_t blankKey[ENCYRPTION_KEY_LENGTH] = {};
+	uint8_t key[ENCRYPTION_KEY_LENGTH];
+	uint8_t blankKey[ENCRYPTION_KEY_LENGTH] = {};
 
 	if (settings.isSet(CONFIG_ENCRYPTION_ENABLED)) {
 		// validate encryption keys are not 0
 		settings.get(CONFIG_KEY_ADMIN, key);
-		if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+		if (memcmp(key, blankKey, ENCRYPTION_KEY_LENGTH) == 0) {
 			LOGw("owner key is not set!");
 			return ERR_COMMAND_FAILED;
 		}
 
 		settings.get(CONFIG_KEY_MEMBER, key);
-		if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+		if (memcmp(key, blankKey, ENCRYPTION_KEY_LENGTH) == 0) {
 			LOGw("member key is not set!");
 			return ERR_COMMAND_FAILED;
 		}
 
 		settings.get(CONFIG_KEY_GUEST, key);
-		if (memcmp(key, blankKey, ENCYRPTION_KEY_LENGTH) == 0) {
+		if (memcmp(key, blankKey, ENCRYPTION_KEY_LENGTH) == 0) {
 			LOGw("guest key is not set!");
 			return ERR_COMMAND_FAILED;
 		}

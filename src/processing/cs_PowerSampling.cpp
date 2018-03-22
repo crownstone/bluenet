@@ -74,7 +74,9 @@ PowerSampling::PowerSampling() :
 static int printPower = 0;
 #endif
 
-// adc done callback is already decoupled from adc interrupt
+/*
+ * At this moment in time is the function adc_done_callback already decoupled from the ADC interrupt. 
+ */
 void adc_done_callback(cs_adc_buffer_id_t bufIndex) {
 	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
 	PowerSampling::getInstance().powerSampleAdcDone(buf, CS_ADC_BUF_SIZE, bufIndex);
