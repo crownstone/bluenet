@@ -1,8 +1,8 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone 
  * Date: May 19, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache and/or MIT (triple-licensed for optimal compatibility)
  */
 
 #include "processing/cs_PowerSampling.h"
