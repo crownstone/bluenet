@@ -132,12 +132,11 @@ public:
 	 * @param[in] data       Pointer to the msg to be sent.
 	 * @param[in] size       Size of the msg.
 	 */
-	void writeMsgPart(uint8_t * data, uint16_t size);
+	void writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size);
 
 	/** Write the end of a binary msg over UART.
 	 */
-	void writeMsgEnd();
-
+	void writeMsgEnd(UartOpcodeTx opCode);
 
 	/** To be called when a byte was read. Can be called from interrupt
 	 *

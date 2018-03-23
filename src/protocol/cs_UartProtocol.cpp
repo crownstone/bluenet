@@ -98,11 +98,19 @@ void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) 
 	}
 	// No logs, this function is called when logging
 	writeMsgStart(opCode, size);
-	writeMsgPart(data, size);
-	writeMsgEnd();
+	writeMsgPart(opCode, data, size);
+	writeMsgEnd(opCode);
 }
 
 void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
+	// when debugging we would like to drop out of certain binary data coming over the console...
+	switch(opCode) {
+	    case UART_OPCODE_TX_TEXT:
+		break;
+	    default: 
+		return;
+	}
+
 	// No logs, this function is called when logging
 	if (size > UART_TX_MAX_PAYLOAD_SIZE) {
 		return;
@@ -117,13 +125,27 @@ void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 	writeBytes((uint8_t*)(&header), sizeof(uart_msg_header_t));
 }
 
-void UartProtocol::writeMsgPart(uint8_t * data, uint16_t size) {
+void UartProtocol::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
+	// when debugging we would like to drop out of certain binary data coming over the console...
+	switch(opCode) {
+	    case UART_OPCODE_TX_TEXT:
+		break;
+	    default: 
+		return;
+	}
 	// No logs, this function is called when logging
 	crc16(data, size, _crc);
 	writeBytes(data, size);
 }
 
-void UartProtocol::writeMsgEnd() {
+void UartProtocol::writeMsgEnd(UartOpcodeTx opCode) {
+	// when debugging we would like to drop out of certain binary data coming over the console...
+	switch(opCode) {
+	    case UART_OPCODE_TX_TEXT:
+		break;
+	    default: 
+		return;
+	}
 	// No logs, this function is called when logging
 	uart_msg_tail_t tail;
 	tail.crc = _crc;
