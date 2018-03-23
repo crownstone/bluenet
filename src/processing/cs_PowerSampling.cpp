@@ -25,6 +25,7 @@
 #include <math.h>
 #include "third/SortMedian.h"
 
+#include "processing/cs_RecognizeSwitch.h"
 #include "structs/buffer/cs_InterleavedBuffer.h"
 
 // Define test pin to enable gpio debug.
@@ -57,9 +58,6 @@ PowerSampling::PowerSampling() :
 	_voltageRmsMilliVoltHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
 	_filteredCurrentRmsHistMA = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
 	_logsEnabled.asInt = 0;
-	
-	// Skip the first N cycles
-	_skipSwitchDetectionTriggers = 200;
 }
 
 #if POWER_SAMPLING_RMS_WINDOW_SIZE == 7
@@ -263,9 +261,15 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs
 	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	power.acPeriodUs = 20000;
 
+#ifdef DELAY_FILTERING_VOLTAGE
 	// Filter the current immediately, filter the voltage in the buffer at time t-1 (so raw values are available)
 	filter(bufIndex, power.currentIndex);
 	filter(InterleavedBuffer::getInstance().getPrevious(bufIndex), power.voltageIndex);
+#else
+	// Filter both immediately, no raw values available
+	filter(bufIndex, power.currentIndex);
+	filter(bufIndex, power.voltageIndex);
+#endif
 
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
@@ -299,7 +303,10 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	recognizeSwitch(power, bufIndex);
+	bool switch_detected = RecognizeSwitch::getInstance().detect(bufIndex, power.voltageIndex);
+	if (switch_detected) {
+		EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
+	}
 
 	_adc->releaseBuffer(bufIndex);
 }
@@ -465,59 +472,6 @@ void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id
 	// Copy the result back into the buffer
 	for (int i = 0; i < InterleavedBuffer::getInstance().getChannelLength() - 1; ++i) {
 		InterleavedBuffer::getInstance().setValue(buffer_id, channel_id, i, _outputSamples->at(i));
-	}
-}
-
-/**
- * The recognizeSwitch function goes through a sequence of buffers to detect if a switch event happened in the buffer
- * in the middle. For that it 
- *
- * TODO: check if we can go through this array without power struct
- */
-void PowerSampling::recognizeSwitch(power_t power, cs_adc_buffer_id_t bufIndex) {
-	if (_skipSwitchDetectionTriggers > 0) {
-		_skipSwitchDetectionTriggers--;
-		return;
-	}
-	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
-
-	cs_adc_buffer_id_t index0 = (bufIndex + CS_ADC_NUM_BUFFERS - 2) % CS_ADC_NUM_BUFFERS;
-	cs_adc_buffer_id_t index1 = (bufIndex + CS_ADC_NUM_BUFFERS - 1) % CS_ADC_NUM_BUFFERS;
-	cs_adc_buffer_id_t index2 = bufIndex;
-
-	nrf_saadc_value_t* buf0 = InterleavedBuffer::getInstance().getBuffer(index0);
-	nrf_saadc_value_t* buf1 = InterleavedBuffer::getInstance().getBuffer(index1);
-	nrf_saadc_value_t* buf2 = InterleavedBuffer::getInstance().getBuffer(index2);
-
-	// TODO: compare median curves, not just raw values
-	int16_t sum02 = 0, sum01 = 0, sum12 = 0;
-	// sum all difference between curve and 0 and 1
-	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-		 sum02 += (buf0[i] - buf2[i]);
-		 sum01 += (buf0[i] - buf1[i]);
-		 sum12 += (buf1[i] - buf2[i]);
-	}
-
-#ifdef VERBOSE_SWITCH
-	LOGd("02: %i", sum02);	
-	LOGd("01: %i", sum01);	
-	LOGd("12: %i", sum12);	
-#endif 
-	// When beyond certain threshold register 
-	int16_t upper_threshold = 400;
-	bool cond1 = (abs(sum12) > upper_threshold);
-//	bool cond2 = (sum12 > 0);
-//	bool cond3 = cond2 ? (sum01 < -upper_threshold) : (sum01 > upper_threshold);
-	bool cond3 = (abs(sum01) > upper_threshold);
-
-	int16_t lower_threshold = abs(sum12) / 2;
-	bool cond0 = (abs(sum02) < lower_threshold);
-	if (cond0 && cond1 && cond3) {
-#ifdef VERBOSE_SWITCH
-		LOGd("State switch recognized");
-#endif
-		_skipSwitchDetectionTriggers = 50;
-		EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
 	}
 }
 
@@ -702,6 +656,9 @@ void PowerSampling::calculatePower(power_t power) {
 #endif
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::calculateEnergy() {
 	uint32_t rtcCount = RTC::getCount();
 	uint32_t diffTicks = RTC::difference(rtcCount, _lastEnergyCalculationTicks);
@@ -714,6 +671,9 @@ void PowerSampling::calculateEnergy() {
 	_lastEnergyCalculationTicks = rtcCount;
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
 	//! Get the current state errors
 	state_errors_t stateErrors;
@@ -792,10 +752,16 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	}
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::startIgbtFailureDetection() {
 	_igbtFailureDetectionStarted = true;
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::toggleVoltageChannelInput() {
 	_adcConfig.voltageChannelUsedAs = (_adcConfig.voltageChannelUsedAs + 1) % 5;
 
@@ -831,6 +797,9 @@ void PowerSampling::toggleVoltageChannelInput() {
 	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::enableDifferentialModeCurrent(bool enable) {
 	_adcConfig.currentDifferential = enable;
 	adc_channel_config_t channelConfig;
@@ -840,6 +809,9 @@ void PowerSampling::enableDifferentialModeCurrent(bool enable) {
 	_adc->changeChannel(CURRENT_CHANNEL_IDX, channelConfig);
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::enableDifferentialModeVoltage(bool enable) {
 	_adcConfig.voltageDifferential = enable;
 	adc_channel_config_t channelConfig;
@@ -849,6 +821,9 @@ void PowerSampling::enableDifferentialModeVoltage(bool enable) {
 	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::changeRange(uint8_t channel, int32_t amount) {
 	_adcConfig.rangeMilliVolt[channel] += amount;
 	if (_adcConfig.rangeMilliVolt[channel] < 150 || _adcConfig.rangeMilliVolt[channel] > 3600) {

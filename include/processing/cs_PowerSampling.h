@@ -116,9 +116,6 @@ private:
 	int32_t _currentZero; //! Current zero from settings.
 	int32_t _powerZero; //! Power zero from settings.
 
-	//! A number of cycles will be skipped not to have multiple switch detections in a row
-	uint8_t _skipSwitchDetectionTriggers;
-
 	bool _sendingSamples; //! Whether or not currently sending power samples.
 
 	uint16_t _avgZeroCurrentDiscount;
@@ -216,10 +213,6 @@ private:
 	/** Calculate the energy used
 	 */
 	void calculateEnergy();
-
-	/** Recognize switch state
-	 */
-	void recognizeSwitch(power_t power, cs_adc_buffer_id_t bufIndex);
 
 	/** If current goes beyond predefined threshold levels, take action!
 	 */

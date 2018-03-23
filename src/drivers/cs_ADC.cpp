@@ -117,7 +117,8 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	// Allocate buffers
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
 		LOGd("Allocate buffer %i", i);
-		InterleavedBuffer::getInstance().setBuffer(i, new nrf_saadc_value_t[CS_ADC_BUF_SIZE]);
+		nrf_saadc_value_t * buf = new nrf_saadc_value_t[CS_ADC_BUF_SIZE];
+		InterleavedBuffer::getInstance().setBuffer(i, buf);
 		_in_progress[i] = false;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Author: Anne van Rossum
+ * Author: Crownstone Team
  * Copyright: Crownstone B.V.
  * Date: Mar 1, 2018
  * License: LGPLv3+, MIT, Apache
@@ -7,9 +7,10 @@
 #pragma once
 
 #include <cstdlib>
-
+#include <nrf.h> 
 #include <cfg/cs_Config.h>
-#include <nrf.h>  
+#include <util/cs_Error.h>
+#include <drivers/cs_Serial.h>
 
 // The index type for a buffer is just a minimal-sized unsigned char as offset into an array.
 typedef uint8_t buffer_id_t;
@@ -20,8 +21,8 @@ typedef uint8_t channel_id_t;
 // The index type for a value can be negative to support padding.
 typedef int8_t value_id_t;
 
-// The value type
-typedef nrf_saadc_value_t value_t;
+// The value type, this should be the same as value_t, but we do not want to create a dependency from here.
+typedef int16_t value_t;
 
 // The number of buffers is to be defined statically
 static const uint8_t INTERLEAVED_BUFFER_COUNT = CS_ADC_NUM_BUFFERS;
@@ -45,7 +46,7 @@ static const value_t INTERLEAVED_CHANNEL_LENGTH = INTERLEAVED_BUFFER_LENGTH / IN
 class InterleavedBuffer {
 private:
 
-	nrf_saadc_value_t* _buf[INTERLEAVED_BUFFER_COUNT];
+	value_t* _buf[INTERLEAVED_BUFFER_COUNT];
 
 public:
 	/**
@@ -60,7 +61,7 @@ public:
 	/**
 	 * From the _buf array pick the one with the given buffer_id.
 	 */
-	nrf_saadc_value_t* getBuffer(buffer_id_t buffer_id) {
+	value_t* getBuffer(buffer_id_t buffer_id) {
 		assert (buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
 		return _buf[buffer_id];
 	}
@@ -69,7 +70,7 @@ public:
 	 * Set the buffer at the particular buffer_id by just writing a pointer to it. The code calling this function is
 	 * responsible for setting the right pointer. No checks w.r.t. this pointer are performed.
 	 */
-	void setBuffer(buffer_id_t buffer_id, nrf_saadc_value_t* ptr) {
+	void setBuffer(buffer_id_t buffer_id, value_t* ptr) {
 		assert (buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
 		_buf[buffer_id] = ptr;
 	}
@@ -105,8 +106,8 @@ public:
 	/**
 	 * Given a pointer to a buffer return the buffer_id.
 	 */
-	cs_adc_buffer_id_t getIndex(nrf_saadc_value_t *buffer) {
-		for (cs_adc_buffer_id_t i = 0; i < getBufferCount(); ++i) {
+	buffer_id_t getIndex(value_t *buffer) {
+		for (buffer_id_t i = 0; i < getBufferCount(); ++i) {
 			if (buffer == _buf[i]) 
 				return i;
 		}
@@ -123,7 +124,7 @@ public:
 	/**
 	 * Uses getIndex to find out if this pointer exists. 
 	 */
-	bool exists(nrf_saadc_value_t *buffer) {
+	bool exists(value_t *buffer) {
 		return (getIndex(buffer) != getBufferCount());
 	}
 
@@ -168,9 +169,9 @@ public:
 	 * @param[in] value_id                       Index to the value in the buffer (0 up to getChannelLength() - 1)
 	 * @return                                   Particular value
 	 */
-	nrf_saadc_value_t getValue(buffer_id_t buffer_id, channel_id_t channel_id, value_id_t value_id) {
+	value_t getValue(buffer_id_t buffer_id, channel_id_t channel_id, value_id_t value_id) {
 		value_t value;
-		nrf_saadc_value_t* buf;
+		value_t* buf;
 		if (value_id < 0) {
 			// use previous buffer, e.g. for padding
 			
@@ -219,7 +220,7 @@ public:
 	void setValue(buffer_id_t buffer_id, channel_id_t channel_id, value_id_t value_id, value_t value) {
 		assert(value_id >= 0, "value id should be positive");
 		assert(value_id < getChannelLength(), "value id should be smaller than channel size");
-		nrf_saadc_value_t* buf;
+		value_t* buf;
 		value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
 		buf = getBuffer(buffer_id);
 		buf[value_id_in_channel] = value;
