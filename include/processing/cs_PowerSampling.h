@@ -19,6 +19,8 @@ extern "C" {
 
 typedef void (*ps_zero_crossing_cb_t) ();
 
+typedef uint8_t channel_id_t;
+
 class PowerSampling : EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
@@ -205,7 +207,7 @@ private:
 
 	/** Filter the samples
 	 */
-	void filter(power_t power);
+	void filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id);
 
 	/** Calculate the average power usage
 	 */

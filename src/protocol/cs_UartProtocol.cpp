@@ -89,6 +89,13 @@ void UartProtocol::crc16(const uint8_t * data, const uint16_t size, uint16_t& cr
 }
 
 void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
+	// when debugging we would like to drop out of certain binary data coming over the console...
+	switch(opCode) {
+	    case UART_OPCODE_TX_TEXT:
+		break;
+	    default: 
+		return;
+	}
 	// No logs, this function is called when logging
 	writeMsgStart(opCode, size);
 	writeMsgPart(data, size);

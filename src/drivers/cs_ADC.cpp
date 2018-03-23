@@ -43,13 +43,6 @@ ADC::ADC()
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
 		InterleavedBuffer::getInstance().setBuffer(0, NULL);
 	}
-	/*
-	_doneCallbackData.callback = NULL;
-	_doneCallbackData.buffer = NULL;
-	_doneCallbackData.bufSize = 0;
-	// TODO: misuse: overload of bufNum field to indicate also initialization
-	_doneCallbackData.bufNum = CS_ADC_NUM_BUFFERS;
-	*/
 	_zeroCrossingCallback = NULL;
 	_numBuffersQueued = 0;
 	_lastZeroCrossUpTime = 0;
