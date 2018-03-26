@@ -11,12 +11,11 @@ function [result] = detector(data)
 
 	subdata = reshape(data, d, K)';
 
+	% not used
 	% make symmetrical
-	for i=1:K
-		subdata(i,:) = zero_crossing + abs( subdata(i,:) - zero_crossing );
-	end
-
-%	data_mirrored=reshape(subdata', 1, D);
+%	for i=1:K
+%		subdata(i,:) = zero_crossing + abs( subdata(i,:) - zero_crossing );
+%	end
 
 	checkdata = [];
 	for i=1+1:K-1
@@ -38,4 +37,8 @@ function [result] = detector(data)
 	end
 
 	% it seems this detects both types of events just fine!	
+
+	% not used
+	% data_mirrored=reshape(subdata', 1, D);
+
 end
