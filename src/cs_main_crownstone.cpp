@@ -46,8 +46,6 @@ extern "C" {
 // Define to enable leds. WARNING: this is stored in UICR and not easily reversible!
 //#define ENABLE_LEDS
 
-// Define to write board to UICR if none is set yet.
-//#define WRITE_UICR_BOARD_GUIDESTONE
 
 /**********************************************************************************************************************
  * Main functionality
@@ -974,12 +972,10 @@ int main() {
 
 
 	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-#ifdef WRITE_UICR_BOARD_GUIDESTONE
 	if (hardwareBoard == 0xFFFFFFFF) {
 		LOGw("write board");
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->CUSTOMER[UICR_BOARD_INDEX]), GUIDESTONE);
+		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
 	}
-#endif
 	LOGd("Board: %p", hardwareBoard);
 
 	// init drivers, configure(), create services and chars,

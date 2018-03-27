@@ -287,7 +287,7 @@ uint32_t configure_board(boards_config_t* p_config) {
 
 	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (hardwareBoard == 0xFFFFFFFF) {
-		hardwareBoard = ACR01B2C;
+		hardwareBoard = DEFAULT_HARDWARE_BOARD;
 	}
 
 	switch(hardwareBoard) {
