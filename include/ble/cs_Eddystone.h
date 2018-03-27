@@ -5,7 +5,7 @@
  * @authors Crownstone Team
  * @copyright Crownstone B.V.
  * @date Jun 3, 2016
- * @license LGPLv3+, Apache License, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #pragma once

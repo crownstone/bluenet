@@ -1,3 +1,9 @@
+/**
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Mar 27, 2018
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
 
 #include <processing/cs_RecognizeSwitch.h>
 
