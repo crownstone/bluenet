@@ -1,3 +1,12 @@
+Version 2.0.2:
+ - Add release config for guidestone_2.0.2
+ - Add release config for guidestone_2.0.2-RC0
+ - Fixed small bug in release script.
+ - Move default hardware board to config. Move UICR layout to config.
+ - Added option to write board guidestone to UICR. Don't use a magic address.
+ - Define TX and RX pins for guidestone, as the UART is used in releases.
+ - Factory reset: only switch when device type is crownstone.
+
 Version 2.0.1:
  - Add release config for crownstone_2.0.1
  - Add release config for crownstone_2.0.1-RC2
