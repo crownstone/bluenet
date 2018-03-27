@@ -305,6 +305,7 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs
 
 	bool switch_detected = RecognizeSwitch::getInstance().detect(bufIndex, power.voltageIndex);
 	if (switch_detected) {
+		LOGd("Switch event detected!");
 		EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
 	}
 

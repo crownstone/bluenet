@@ -59,6 +59,7 @@ bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId
 				LOGd("Threshold: %i", _threshold);	
 #endif 
 				condition0 = true;
+				break;
 			}
 		}
 	}
