@@ -205,7 +205,7 @@ if [[ $existing == 0 ]]; then
 ###############################
 
 	# if [[ $model == "crownstone" ]]; then
-	if [[ $model == "guidestone " ]]; then
+	if [[ $model == "guidestone" ]]; then
 		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Guide\"/" $directory/CMakeBuild.config
 		sed -i "s/DEFAULT_HARDWARE_BOARD=.*/DEFAULT_HARDWARE_BOARD=GUIDESTONE/" $directory/CMakeBuild.config
 	else
