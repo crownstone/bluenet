@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <structs/buffer/cs_CircularBuffer.h>
 #include <structs/buffer/cs_InterleavedBuffer.h>
 
 class RecognizeSwitch {
@@ -14,6 +15,13 @@ private:
 	//! A number of cycles will be skipped not to have multiple switch detections in a row
 	uint8_t _skipSwitchDetectionTriggers;
 
+	//! A threshold close to zero that defines the slope
+	int16_t _threshold;
+
+	//! A circular buffer to the sliding window
+	CircularBuffer<int16_t> * _circBuffer;
+
+	
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static RecognizeSwitch& getInstance() {
