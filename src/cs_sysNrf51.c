@@ -1,7 +1,8 @@
 /**
- * @author Christopher Mason
- * @author Anne van Rossum
- * License: LGPL v3+, Apache, MIT
+ * Author: Crownstone Team, Christopher Mason
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: 14 Aug., 2014
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include <stdint.h>
