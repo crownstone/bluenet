@@ -19,6 +19,18 @@ bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId
 
 	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
 
+
+	// calculate moving absolute average, this should be close to zero
+	// perhaps a linked list easiest... only 15 values, should be fine...
+//	int16_t vdifftot;
+//	for (int i = -ib.getChannelLength(); i < ib.getChannelLength(); ++i) {
+//		int16_t vdiff = abs(ib.getValue(bufIndex, voltageChannelId, i) - ib.getValue(bufIndex, voltageChannelId, i));
+		
+		//TODO: iterate over a window of 10
+		// then threshold close to zero
+//	}
+
+
 	// get previous buffer indices
 	buffer_id_t bufIndex_tmin0 = bufIndex;
 	buffer_id_t bufIndex_tmin1 = ib.getPrevious(bufIndex);

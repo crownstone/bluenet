@@ -1,11 +1,11 @@
 /**
  * Bluetooth Low Energy Characteristic
  *
- * Author: Christopher Mason
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Apr 23, 2015
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include "ble/cs_Characteristic.h"

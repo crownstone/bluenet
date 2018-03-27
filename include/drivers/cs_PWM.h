@@ -1,6 +1,6 @@
 /**
  * Author: Crownstone Team
- * Copyright: Crownstone
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: 9 Mar., 2016
  * Triple-license: LGPLv3+, Apache License, and/or MIT
  */

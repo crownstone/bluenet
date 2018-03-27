@@ -1,9 +1,9 @@
 /**
- * Author: Dominik Egger
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: 20 Jan., 2015
- * License: LGPLv3+, Apache, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include <mesh/cs_Mesh.h>

@@ -1,7 +1,7 @@
 /**
- * Author: Christopher Mason
- * Author: Anne van Rossum
- * License: TODO
+ * Author: Crownstone Team
+ * Author: Crownstone Team
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include "ble/cs_Handlers.h"

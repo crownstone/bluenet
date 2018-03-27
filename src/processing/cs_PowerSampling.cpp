@@ -1,8 +1,8 @@
 /**
  * Author: Crownstone Team
- * Copyright: Crownstone 
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 19, 2016
- * License: LGPLv3+, Apache and/or MIT (triple-licensed for optimal compatibility)
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include "processing/cs_PowerSampling.h"

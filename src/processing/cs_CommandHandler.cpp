@@ -1,10 +1,9 @@
 /*
- * Author: Crownstone
- * Copyright: Crownstone
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 18, 2016
- * License: LGPLv3+, Apache License 2.0, and/or MIT
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-
 
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_Strings.h>

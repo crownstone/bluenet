@@ -1,7 +1,7 @@
 /**
- * Author: Christopher Mason
+ * Author: Crownstone Team
  * Date: 21 Sep., 2013
- * License: TODO
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include "util/cs_BleError.h"

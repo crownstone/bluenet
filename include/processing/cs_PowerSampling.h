@@ -1,8 +1,8 @@
 /**
  * Authors: Crownstone Team
- * Copyright: Crownstone B.V.
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 19, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 

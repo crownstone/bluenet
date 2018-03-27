@@ -1,5 +1,5 @@
 /**
- * Author: Dominik Egger
+ * Author: Crownstone Team
  * Copyright: Distributed Organisms B.V. (DoBots)
  * Date: Mar 9, 2016
  * License: LGPLv3+
