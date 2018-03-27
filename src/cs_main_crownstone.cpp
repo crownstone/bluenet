@@ -201,8 +201,7 @@ void Crownstone::init() {
 	case OPERATION_MODE_FACTORY_RESET: {
 
 		LOGd("Configure factory reset mode");
-
-		FactoryReset::getInstance().finishFactoryReset();
+		FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
 		break;
 	}
 	case OPERATION_MODE_DFU: {
