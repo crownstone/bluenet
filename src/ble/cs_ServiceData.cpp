@@ -43,6 +43,10 @@ ServiceData::ServiceData() :
 	,_meshNextEventType(0)
 #endif
 {
+
+};
+
+void ServiceData::init() {
 	// we want to update the advertisement packet on a fixed interval.
 	_updateTimerData = { {0} };
 	_updateTimerId = &_updateTimerData;
@@ -109,7 +113,12 @@ ServiceData::ServiceData() :
 
 	// set the initial advertisement.
 	updateAdvertisement(true);
-};
+}
+
+void ServiceData::setDeviceType(uint8_t deviceType) {
+//	_deviceType = deviceType;
+	_serviceData.params.deviceType = deviceType;
+}
 
 void ServiceData::updatePowerUsage(int32_t powerUsage) {
 	_powerUsageReal = powerUsage;
@@ -185,6 +194,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 		}
 
 		if (_operationMode == OPERATION_MODE_SETUP) {
+			// In setup mode, only advertise this state.
 			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_SETUP;
 			_serviceData.params.setup.type = 0;
 			_serviceData.params.setup.state.switchState = _switchState;
@@ -228,7 +238,8 @@ void ServiceData::updateAdvertisement(bool initial) {
 			_serviceData.params.encrypted.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
 			_serviceData.params.encrypted.state.energyUsed = _energyUsed;
 			_serviceData.params.encrypted.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-			_serviceData.params.encrypted.state.validation = 0xFACE;
+			_serviceData.params.encrypted.state.reserved = 0;
+			_serviceData.params.encrypted.state.validation = SERVICE_DATA_VALIDATION;
 		}
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
@@ -339,7 +350,9 @@ bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& ser
 					serviceData.params.encrypted.extState.energyUsed = stateItem->state.energyUsed;
 					serviceData.params.encrypted.extState.partialTimestamp = stateItem->state.partialTimestamp;
 //					memset(serviceData.params.encrypted.extState.reserved, 0, sizeof(serviceData.params.encrypted.extState.reserved));
-					serviceData.params.encrypted.extState.validation = 0xFACE;
+//					serviceData.params.encrypted.extState.validation = 0xFACE;
+					serviceData.params.encrypted.extState.rssi = MeshControl::getInstance().getRssi(stateItem->state.id);
+					serviceData.params.encrypted.extState.validation = SERVICE_DATA_VALIDATION;
 					break;
 				}
 				case MESH_STATE_ITEM_TYPE_ERROR: {
@@ -351,7 +364,9 @@ bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& ser
 					serviceData.params.encrypted.extError.temperature = stateItem->error.temperature;
 					serviceData.params.encrypted.extError.partialTimestamp = stateItem->error.partialTimestamp;
 //					memset(serviceData.params.encrypted.extError.reserved, 0, sizeof(serviceData.params.encrypted.extError.reserved));
-					serviceData.params.encrypted.extError.validation = 0xFACE;
+//					serviceData.params.encrypted.extError.validation = 0xFACE;
+					serviceData.params.encrypted.extState.rssi = MeshControl::getInstance().getRssi(stateItem->state.id);
+					serviceData.params.encrypted.extState.validation = SERVICE_DATA_VALIDATION;
 					break;
 				}
 				default:

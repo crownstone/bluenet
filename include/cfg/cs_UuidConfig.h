@@ -44,8 +44,8 @@
 
 //! UUID used for the Service Data in the Scan Response packet
 #define CROWNSTONE_PLUG_SERVICE_DATA_UUID   0xC001
-#define CROWNSTONE_BUILT_SERVICE_DATA_UUID  0xC002
-#define GUIDESTONE_SERVICE_DATA_UUID        0xC003
+#define CROWNSTONE_BUILT_SERVICE_DATA_UUID  0xC002 // Deprecated
+#define GUIDESTONE_SERVICE_DATA_UUID        0xC003 // Deprecated
 
 enum CrownstoneCharacteristicsIDs {
 	CONTROL_UUID                            = 0x1,
