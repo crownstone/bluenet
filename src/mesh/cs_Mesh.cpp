@@ -76,8 +76,6 @@ const uint16_t Mesh::meshHandles[MESH_HANDLE_COUNT] = {
  * thing.
  */
 void Mesh::init() {
-	_meshControl.init();
-
 	LOGi(FMT_INIT, "Mesh");
 
 	// setup the timer
@@ -113,6 +111,8 @@ void Mesh::init() {
 	_encryptionEnabled = Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED);
 
 	_mesh_start_time = RTC::getCount();
+
+	_meshControl.init();
 
 //	error_code = rbc_mesh_value_enable(1);
 //	APP_ERROR_CHECK(error_code);
@@ -203,6 +203,15 @@ void Mesh::pause() {
 }
 
 bool Mesh::isRunning() { return _running && _started; }
+
+void Mesh::setId(uint8_t id) {
+	uint8_t address[6] = {id, 0, 0, 0, 0, 0};
+	rbc_mesh_set_custom_local_address(&(address[0]));
+}
+
+int8_t Mesh::getRssi(uint8_t id) {
+	return rbc_mesh_get_rssi(id);
+}
 
 uint16_t Mesh::getHandleIndex(mesh_handle_t handle) {
 	for (uint16_t i=0; i<MESH_HANDLE_COUNT; ++i) {
@@ -561,28 +570,35 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	handle = evt->params.rx.value_handle;
 	received = (encrypted_mesh_message_t*)evt->params.rx.p_data;
 	receivedLength = evt->params.rx.data_len;
+	uint8_t id = evt->params.rx.ble_adv_addr.addr[0];
+	int8_t rssi = evt->params.rx.rssi;
+
+	LOGd("id=%u rssi=%i", id, rssi);
+	if (rssi >=0 || rssi < -120) {
+		LOGw("INVALID RSSI");
+	}
 
 #ifdef PRINT_MESH_VERBOSE
 	switch (evt->type)
 	{
 	case RBC_MESH_EVENT_TYPE_CONFLICTING_VAL: {
-		LOGd("ch: %d, conflicting value", handle);
+		LOGd("h: %d, conflicting value", handle);
 		break;
 	}
 	case RBC_MESH_EVENT_TYPE_NEW_VAL:
-		LOGd("ch: %d, new value", handle);
+		LOGd("h: %d, new value", handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_UPDATE_VAL:
-//		LOGd("ch: %d, update value", handle);
+		LOGd("h: %d, update value", handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_INITIALIZED:
-		LOGd("ch: %d, initialized", handle);
+		LOGd("h: %d, initialized", handle);
 		break;
 	case RBC_MESH_EVENT_TYPE_TX:
-		LOGd("ch: %d, transmitted", handle);
+		LOGd("h: %d, transmitted", handle);
 		break;
 	default:
-		LOGd("ch: %d, evt: %d", handle, evt->type);
+		LOGd("h: %d, evt: %d", handle, evt->type);
 	}
 #endif
 

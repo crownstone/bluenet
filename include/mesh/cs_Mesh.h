@@ -136,6 +136,11 @@ public:
 	//! Returns whether the mesh is currently started and running.
 	bool isRunning();
 
+	//! Set the id of this crownstone.
+	void setId(uint8_t id);
+
+	//! Get the average rssi of given id. Returns 0 when unknown.
+	int8_t getRssi(uint8_t id);
 
 	//! Send message
 	//! This allocates a mesh_message_t on stack, and copies given data to it

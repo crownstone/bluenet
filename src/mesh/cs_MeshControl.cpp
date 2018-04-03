@@ -41,9 +41,11 @@ void MeshControl::init() {
 	LOGd("State msg: size=%d items=%d", sizeof(state_message_t), MAX_STATE_ITEMS);
 	LOGd("Scan result msg: size=%d items=%d", sizeof(scan_result_message_t), MAX_SCAN_RESULT_ITEMS);
 	LOGd("Multi switch msg: size=%d items=%d", sizeof(multi_switch_message_t), MULTI_SWITCH_LIST_MAX_ITEMS);
+
+	Mesh::getInstance().setId(_myCrownstoneId);
 }
 
-void MeshControl::process(uint16_t channel, void* p_meshMessage, uint16_t messageLength) {
+void MeshControl::process(uint16_t channel, mesh_message_t* p_meshMessage, uint16_t messageLength) {
 
 	mesh_message_t* meshMessage = (mesh_message_t*)p_meshMessage;
 	//! p_data is the payload data, length is the payload length.
@@ -1086,4 +1088,8 @@ bool MeshControl::getLastStateDataMessage(state_message_t& message, uint16_t siz
 		return false;
 	}
 	return Mesh::getInstance().getLastMessage(handle, &message, size);
+}
+
+int8_t MeshControl::getRssi(stone_id_t id) {
+	return Mesh::getInstance().getRssi(id);
 }

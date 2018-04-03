@@ -49,6 +49,13 @@ public:
 	 */
 	bool getLastStateDataMessage(state_message_t& message, uint16_t size, uint8_t stateChan);
 
+	/** Get the averaged rssi of given id.
+	 *
+	 * @id        Id of the crownstone.
+	 * @return    Averaged RSSI, or 0 when unknown.
+	 */
+	int8_t getRssi(stone_id_t id);
+
 	/** Send a status reply message, e.g. to reply status code of the execution of a command
 	 *
 	 * @messageCounter the counter of the command message to which this reply belongs
@@ -115,7 +122,7 @@ public:
 	 * @p_data a pointer to the data which was received
 	 * @length number of bytes received
 	 */
-	void process(uint16_t channel, void* p_data, uint16_t length);
+	void process(uint16_t channel, mesh_message_t* p_data, uint16_t length);
 
 	/** Initialize the mesh */
 	void init();
