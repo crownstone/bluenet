@@ -106,10 +106,12 @@ define cross-compile-target-cleanup
 endef
 
 define host-compile-target-prepare
+	printf "++ Use CMakeList.host_target.txt as CMakeLists.txt\n"
 	@cp conf/cmake/CMakeLists.host_target.txt CMakeLists.txt
 endef
 
 define host-compile-target-cleanup
+	printf "++ Clean up CMakeLists.txt\n"
 	@rm -f CMakeLists.txt
 endef
 

@@ -260,11 +260,13 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs
 	power.numChannels = 2;
 	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	power.acPeriodUs = 20000;
+	
+	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
 
 #ifdef DELAY_FILTERING_VOLTAGE
 	// Filter the current immediately, filter the voltage in the buffer at time t-1 (so raw values are available)
 	filter(bufIndex, power.currentIndex);
-	filter(InterleavedBuffer::getInstance().getPrevious(bufIndex), power.voltageIndex);
+	filter(prevIndex, power.voltageIndex);
 #else
 	// Filter both immediately, no raw values available
 	filter(bufIndex, power.currentIndex);
@@ -303,7 +305,7 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	bool switch_detected = RecognizeSwitch::getInstance().detect(bufIndex, power.voltageIndex);
+	bool switch_detected = RecognizeSwitch::getInstance().detect(prevIndex, power.voltageIndex);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
 		EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
@@ -676,6 +678,12 @@ void PowerSampling::calculateEnergy() {
  * TODO: What does this do?
  */
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
+
+#define ANNE_DOES_NOT_LIKE_ERRORS
+#ifdef ANNE_DOES_NOT_LIKE_ERRORS
+	return;
+#endif
+
 	//! Get the current state errors
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);

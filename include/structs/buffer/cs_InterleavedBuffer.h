@@ -7,7 +7,7 @@
 #pragma once
 
 #include <cstdlib>
-#include <nrf.h> 
+//#include <nrf.h> 
 #include <cfg/cs_Config.h>
 #include <util/cs_Error.h>
 #include <drivers/cs_Serial.h>
@@ -18,8 +18,11 @@ typedef uint8_t buffer_id_t;
 // The index type for a channel (a buffer within one of the buffers), organized like [A B A B A B]
 typedef uint8_t channel_id_t;
 
-// The index type for a value can be negative to support padding.
-typedef int8_t value_id_t;
+// The index type for a value is positive and at maximum 255
+typedef uint8_t value_id_t;
+
+// The index type for a value can be extended to negative values and is then a signed int16_t
+typedef int16_t ext_value_id_t;
 
 // The value type, this should be the same as value_t, but we do not want to create a dependency from here.
 typedef int16_t value_t;
@@ -142,8 +145,8 @@ public:
 	 * @param[in] buffer_id                      Index to the buffer (0 up to getBufferCount() - 1)
 	 * @return                                   Index to the previous buffer
 	 */
-	inline buffer_id_t getPrevious(buffer_id_t buffer_id) {
-		return (buffer_id + getBufferCount() - 1) % getBufferCount();
+	inline buffer_id_t getPrevious(buffer_id_t buffer_id, const uint8_t shift = 1) {
+		return (buffer_id + getBufferCount() - shift) % getBufferCount();
 	}
 
 	/**
@@ -153,8 +156,8 @@ public:
 	 * @param[in] buffer_id                      Index to the buffer (0 up to getBufferCount() - 1)
 	 * @return                                   Index to the next buffer
 	 */
-	inline buffer_id_t getNext(buffer_id_t buffer_id) {
-		return (buffer_id + 1) % getBufferCount();
+	inline buffer_id_t getNext(buffer_id_t buffer_id, const uint8_t shift = 1) {
+		return (buffer_id + shift) % getBufferCount();
 	}
 
 	/**
@@ -169,39 +172,49 @@ public:
 	 * @param[in] value_id                       Index to the value in the buffer (0 up to getChannelLength() - 1)
 	 * @return                                   Particular value
 	 */
-	value_t getValue(buffer_id_t buffer_id, channel_id_t channel_id, value_id_t value_id) {
+	value_t getValue(buffer_id_t buffer_id, channel_id_t channel_id, ext_value_id_t value_id) {
 		value_t value;
 		value_t* buf;
+
 		if (value_id < 0) {
 			// use previous buffer, e.g. for padding
-			
-			buffer_id_t prev_buffer_id = getPrevious(buffer_id);
+			uint8_t shift = ((-value_id - 1) / getChannelLength()) + 1;
+			buffer_id_t prev_buffer_id = getPrevious(buffer_id, shift);
 			bool buffer_exists = exists(prev_buffer_id);
 			assert (buffer_exists, "Previous buffer does not exist!");
+
+			value_id_t value_id_in_channel = getChannelLength() * shift + value_id;
+			value_id_in_channel = value_id_in_channel * getChannelCount() + channel_id;
+			assert(value_id_in_channel >= 0, "Index should be positive");
 
 			// a value such as -1 will be multiplied by 2, hence -2 and then used to count from the back of the 
 			// previous buffer, say of length 100, value_id = -1 will hence retrieve the last item from the
 			// previous buffer, prev_buffer[98] or prev_buffer[99] depending on channel_id
-			value_id_t prev_value_id_in_channel = getBufferLength() + (value_id * getChannelCount()) + channel_id;
 			buf = getBuffer(prev_buffer_id);
-			value = buf[prev_value_id_in_channel];
+			value = buf[value_id_in_channel];
 
 		} else if (value_id >= getChannelLength()) {
 			// use next buffer, e.g. for padding
 			
-			buffer_id_t next_buffer_id = getNext(buffer_id);
+			uint8_t shift = (value_id / getChannelLength());
+			
+			buffer_id_t next_buffer_id = getNext(buffer_id, shift);
 			bool buffer_exists = exists(next_buffer_id);
 			assert (buffer_exists, "Next buffer does not exist!");
+			
+			value_id_t value_id_in_channel = (value_id - getChannelLength() * shift);
+			value_id_in_channel = value_id_in_channel * getChannelCount() + channel_id;
+			assert(value_id_in_channel >= 0, "Index should be positive");
 
 			// a value such as 101 will be subtracted by the buffer length, say 100, hence result is 1, then
 			// the next buffer will be queried at next_buffer[2] or next_buffer[3] dependin on channel_id
-			value_id_t next_value_id_in_channel = (value_id - getChannelLength()) * getChannelCount() + channel_id;
 			buf = getBuffer(next_buffer_id);
-			value = buf[next_value_id_in_channel];
+			value = buf[value_id_in_channel];
 
 		} else {
 			// return value in given buffer
 			value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
+			assert(value_id_in_channel >= 0, "Index should be positive");
 			buf = getBuffer(buffer_id);
 			value = buf[value_id_in_channel];
 		}

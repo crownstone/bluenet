@@ -414,15 +414,15 @@ void Switch::pwmNotAllowed() {
 }
 
 bool Switch::_setPwm(uint8_t value) {
-	LOGd("setPwm %u", value);
+	LOGd("Set dimming to %u", value);
 	if (value > 0 && !allowPwmOn()) {
 		LOGi("Don't turn on pwm");
 		return false;
 	}
 
-	LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
+	LOGd("Dimming allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
 	if (value != 0 && !Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
-		LOGd("pwm not allowed");
+		LOGd("Dimming not allowed");
 		_switchValue.pwm_state = 0;
 		return false;
 	}
@@ -461,9 +461,9 @@ void Switch::_relayOn() {
 }
 
 void Switch::_relayOff() {
-	LOGd("relayOff");
+	LOGd("In function relayOff");
 	if (!allowRelayOff()) {
-		LOGi("Don't turn relay off");
+		LOGi("Relay off not allowed");
 		return;
 	}
 
@@ -516,7 +516,12 @@ bool Switch::allowPwmOn() {
 //	return !(stateErrors.errors.chipTemp || stateErrors.errors.pwmTemp);
 }
 
+#define DEBUGGING_SWITCH
+
 bool Switch::allowRelayOff() {
+#ifdef DEBUGGING_SWITCH
+	return true;
+#endif
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 
@@ -525,6 +530,9 @@ bool Switch::allowRelayOff() {
 }
 
 bool Switch::allowRelayOn() {
+#ifdef DEBUGGING_SWITCH
+	return true;
+#endif
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 	LOGd("errors=%d", stateErrors.asInt);

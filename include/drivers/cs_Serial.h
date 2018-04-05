@@ -13,6 +13,10 @@ extern "C" {
 #include <cfg/cs_Debug.h>
 #include "stdint.h"
 
+#ifdef HOST_TARGET
+#include "stdio.h"
+#endif
+
 /*
  * Commonly LOG functionality is provided with as first parameter the level of severity of the message. Subsequently
  * the message follows, eventually succeeded by content if the string contains format specifiers. This means that this
@@ -110,7 +114,11 @@ void config_uart(uint8_t pinRx, uint8_t pinTx);
 /**
  * Write a string with printf functionality.
  */
+#ifdef HOST_TARGET
+#define write printf
+#else
 int write(const char *str, ...);
+#endif
 
 /** Write a buffer of data. Values get escaped when necessary.
  *

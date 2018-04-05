@@ -26,7 +26,7 @@ function [result] = detector(data)
 
 	% just a consecutive series of differential values that are close to zero and which series is long enough
 	consecutive_min = 10;
-	consecutive_threshold = 1;
+	consecutive_threshold = 10;
 	for i=1:length(dc)-consecutive_min
 		zerosdetected = mean(abs(dc(1+i:consecutive_min+i)));
 		% a lot of zeros (should be under a threshold level)

@@ -13,8 +13,12 @@
 
 #if (defined HOST_TARGET)
 // See rbc_mesh.h and src/radio_control.h, here it's just to set something more or less random
+#ifndef RADIO_PCNF1_MAXLEN
 #define RADIO_PCNF1_MAXLEN             118
+#endif
+#ifndef RBC_MESH_VALUE_MAX_LEN
 #define RBC_MESH_VALUE_MAX_LEN         (RADIO_PCNF1_MAXLEN - 14)
+#endif
 #else
 #include <rbc_mesh.h>
 #endif
