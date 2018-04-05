@@ -11,7 +11,8 @@ FILENAMES = ["../docs/PROTOCOL.md", "../docs/SERVICE_DATA.md"]
 
 
 fontPath = "../docs/diagrams/fonts/LiberationSans-Regular.ttf"
-fontSize = 24
+fontSizeBlocks = 24
+fontSizeBytes = 16
 
 STEP_X = 50
 STEP_Y = 150
@@ -146,7 +147,7 @@ def drawTextLines(x, y, labels, width, height, vertical, zoom):
 			zoomed = pygame.transform.rotozoom(labels[i], 0, zoom)
 			drawX = xCenter - 0.5*labels[i].get_width()*zoom
 			drawY = yCenter - 0.5*textHeight + i*maxLineHeight
-			screen.blit(labels[i], (drawX, drawY))
+			screen.blit(zoomed, (drawX, drawY))
 			
 
 
@@ -196,7 +197,7 @@ def drawText(x, y, text, color, width, height, forceVertical=False):
 	labels = []
 	for line in lines:
 		# The text can only be a single line: newline characters are not rendered.
-		label = myFont.render(line, True, WHITE)
+		label = fontBlocks.render(line, True, WHITE)
 		labels.append(label)
 	for vert in verticals:
 		zoom = calcTextZoom(labels, width, height, vert)
@@ -219,7 +220,7 @@ def drawText(x, y, text, color, width, height, forceVertical=False):
 			labels = []
 			for line in lines:
 				# The text can only be a single line: newline characters are not rendered.
-				label = myFont.render(line, True, WHITE)
+				label = fontBlocks.render(line, True, WHITE)
 				labels.append(label)
 
 			# Calculate the required zoom for this text
@@ -265,14 +266,48 @@ def drawVarList(varList, filename):
 			totalLen += var[1]
 
 	size = [totalLen * STEP_X, STEP_Y]
+
+	# Add text "byte" to screen size
+	byteLabel = fontBytes.render("Byte", True, BLACK)
+	size[0] += byteLabel.get_width()
+	size[1] += byteLabel.get_height()
+
 	global screen
 	screen = pygame.display.set_mode(size)
 	screen.fill(WHITE)
 
 	x=0
 	y=0
+
+	# Draw the text "byte"
+	screen.blit(byteLabel, (x, y))
+	xVar = x + byteLabel.get_width()
+	yVar = y + byteLabel.get_height()
+	x += byteLabel.get_width()
+
+	byteNum = 0
+	byteNumKnown = True
 	for var in varList:
-		x = drawVar(x, y, var[0], var[1])
+		varName = var[0]
+		varLen = var[1]
+		varLenKnown = var[2]
+
+		# Draw the byte numbers
+		if byteNumKnown:
+			if varLenKnown:
+				for i in range(0, varLen):
+					byteLabel = fontBytes.render(str(byteNum), True, BLACK)
+					screen.blit(byteLabel, (x+0.5*STEP_X, y))
+					byteNum += 1
+					x += STEP_X
+			else:
+				byteLabel = fontBytes.render(str(byteNum), True, BLACK)
+				screen.blit(byteLabel, (x+0.5*STEP_X, y))
+				byteLabel = fontBytes.render("...", True, BLACK)
+				screen.blit(byteLabel, (x+1.5*STEP_X, y))
+				byteNumKnown = False
+
+		xVar = drawVar(xVar, yVar, varName, varLen)
 
 	pygame.image.save(screen, filename)
 
@@ -297,12 +332,14 @@ def parseFile(textFilename):
 				if (linkMatch):
 					varName = linkMatch[0]
 
+				varLenKnown = True
 				try:
 					varLen = int(match[0][1])
 				except:
+					varLenKnown = False
 					varLen = DEFAULT_VAR_LEN
 
-				varList.append((varName, varLen))
+				varList.append((varName, varLen, varLenKnown))
 				# print "varName=" + varName + " varLen=" + str(varLen)
 
 			else:
@@ -335,7 +372,8 @@ pygame.init()
 screen = None
 
 #myFont = pygame.font.SysFont("monospace", 15)
-myFont = pygame.font.Font(fontPath, fontSize)
+fontBlocks = pygame.font.Font(fontPath, fontSizeBlocks)
+fontBytes = pygame.font.Font(fontPath, fontSizeBytes)
 
 # Regex patterns
 patternFileNameString = "\\(" + DIR + "([^\\)]+)\\)" 
