@@ -408,6 +408,8 @@ void Crownstone::configureAdvertisement() {
 	// to advertise certain state variables
 
 	_serviceData = new ServiceData();
+	_serviceData->setDeviceType(_boardsConfig.deviceType);
+	_serviceData->init();
 
 
 

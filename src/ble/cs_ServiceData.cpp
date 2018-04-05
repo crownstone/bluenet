@@ -43,7 +43,8 @@ ServiceData::ServiceData() :
 	,_meshNextEventType(0)
 #endif
 {
-
+	// Initialize the service data
+	memset(_serviceData.array, 0, sizeof(_serviceData.array));
 };
 
 void ServiceData::init() {
@@ -56,13 +57,6 @@ void ServiceData::init() {
 	State::getInstance().get(STATE_OPERATION_MODE, _operationMode);
 
 	EventDispatcher::getInstance().addListener(this);
-
-	// Initialize the service data
-	memset(_serviceData.array, 0, sizeof(_serviceData.array));
-//	_serviceData.params.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
-//	memset(_serviceDataExt.array, 0, sizeof(_serviceDataExt.array));
-//	_serviceDataExt.params.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
-//	_encryptedParams.protocolVersion = SERVICE_DATA_PROTOCOL_VERSION;
 
 	// start the update timer
 	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
