@@ -60,6 +60,9 @@ The session nonce and validation key are only valid during the connection.
 
 <a name="encrypted_session_nonce"></a>
 ##### Session nonce after ECB decryption
+
+![Encrypted session nonce](../docs/diagrams/encrypted-session-nonce.png)
+
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 32 | Validation key | 4 | 0xCAFEBABE as validation.
@@ -81,7 +84,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 byte array | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of this message.
 uint 8 | User level | 1 | 0: Admin, 1: Member, 2: Guest, 100: Setup
-[Encrypted Payload](#encrypted_payload) | Encrypted Payload | N*16 | The encrypted payload of N blocks.
+[Encrypted payload](#encrypted_payload) | Encrypted payload | N*16 | The encrypted payload of N blocks.
 
 <a name="encrypted_payload"></a>
 ##### Encrypted payload
@@ -107,18 +110,18 @@ This packet is according to iBeacon spec, see for example [here](http://www.havl
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | AD Length | 1 | Length of the Flags AD Structure (0x02)
-uint 8 | AD Type | 1 | Flags (0x01)
+uint 8 | AD Length | 1 | Length of the next AD structure.
+uint 8 | AD Type | 1 | 0x01: flags.
 uint 8 | Flags | 1 |
-uint 8 | AD Length | 1 | Length of the Manufacturer AD Structure  (0x1A)
-uint 8 | AD Type | 1 | Manufacturer Specific Data (0xFF)
-uint 8 | Company Id | 2 | Apple (0x004C)
-uint 8 | iBeacon Type | 1 | IBeacon Type (0x02)
-uint 8 | iBeacon Length | 1 | IBeacon Length (0x15)
+uint 8 | AD Length | 1 | Length of the next AD structure.
+uint 8 | AD Type | 1 | 0xFF: manufacturer specific data.
+uint 8 | Company id | 2 | 0x004C: Apple.
+uint 8 | iBeacon type | 1 | 0x02: iBeacon.
+uint 8 | iBeacon length | 1 | iBeacon struct length (0x15).
 uint 8 | Proximity UUID | 16 |
 uint 16 | Major | 2 |
 uint 16 | Minor | 2 |
-int 8 | TX Power | 1 | Received signal strength at 1 meter.
+int 8 | TX power | 1 | Received signal strength at 1 meter.
 
 <a name="scan_response_packet"></a>
 ### Scan response packet
@@ -128,13 +131,13 @@ The packet that is sent when a BLE central scans.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | AD Length | 1 | Length of the Name AD Structure
-uint 8 | AD Type | 1 | Shortened Local Name
-char [] | Name Bytes | 8 | The shortened name of this device.
-uint 8 | AD Length | 1 | Length of the Service Data AD Structure
-uint 8 | AD Type | 1 | Service Data (0x16)
-uint 16 | Service UUID | 2 | Service UUID
-[Service data](SERVICE_DATA.md) | Service Data | AD Length | Service data, state info.
+uint 8 | AD Length | 1 | Length of the next AD structure.
+uint 8 | AD Type | 1 | 0x08: shortened local name.
+char [] | Name | length-1 | The shortened name of this device.
+uint 8 | AD Length | 1 | Length of the next AD structure.
+uint 8 | AD Type | 1 | 0x16: service data with 16 bit service UUID.
+uint 16 | Service UUID | 2 | Service UUID: 0xC001, 0xC002, or 0xC003. The last two are deprecated, see service data doc.
+[Service data](SERVICE_DATA.md) | Service Data | length-3 | Service data, contains state of the Crownstone.
 
 
 
@@ -155,7 +158,7 @@ Bit | Name |  Description
 --- | --- | ---
 0 | Dimming available | When dimming is physically available, this will be 1.
 1 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
-2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#service_data_encrypted_error), or by reading the [error state](#state_packet).
+2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](SERVICE_DATA.md#service_data_encrypted_error), or by reading the [error state](#state_packet).
 3 | Switch locked | When the switch state is locked, this will be 1.
 4 | Time set | If this is 1, the time is set on this Crownstone.
 5 | Reserved | Reserved for future use.
@@ -569,6 +572,8 @@ int 8 []  | voltageTimeDiffs      | numVoltageTimeStamps-1 | Array of difference
 <a name="scan_result_packet"></a>
 ### Scan result packet
 
+![Scan result packet](../docs/diagrams/scan-result-packet.png)
+
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 [] | Address | 6 | Bluetooth address of the scanned device.
@@ -583,8 +588,8 @@ uint 16 | Occurrences | 2 | Number of times the devices was scanned.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | size | 1 | Number of scanned devices in the list.
-[Scan result](#scan_result_packet) | size * 9 | Array of scan result packets.
+uint 8 | Size | 1 | Number of scanned devices in the list.
+[Scan result](#scan_result_packet) | List | Size * 9 | Array of scan result packets.
 
 
 <a name="tracked_device_packet"></a>
@@ -605,13 +610,15 @@ int 8 | RSSI threshold | 1 | If the RSSI to this device is above the threshold, 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | size | 1 | Number of tracked devices in the list.
-[Tracked device](#tracked_device_packet) | size * 7 | Array of tracked device packets.
-uint 16 [] | Counters | size * 2 | Counter that keeps up how long ago the RSSI of a device was above the threshold (for internal use).
+uint 8 | Size | 1 | Number of tracked devices in the list.
+[Tracked device](#tracked_device_packet) [] | List | Size * 7 | Array of tracked device packets.
+uint 16 [] | Counters | Size * 2 | Counter that keeps up how long ago the RSSI of a device was above the threshold (for internal use).
 
 
 <a name="schedule_list_packet"></a>
 ### Schedule list packet
+
+![Schedule list packet](../docs/diagrams/schedule-list-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -620,6 +627,9 @@ uint 8 | Size | 1 | Number of entries in the list.
 
 <a name="schedule_command_packet"></a>
 ### Schedule command packet
+
+![Schedule command packet](../docs/diagrams/schedule-command-packet.png)
+
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | index | 1 | Index of the entry (corresponds to the Nth entry in the list).
@@ -627,6 +637,8 @@ uint 8 | index | 1 | Index of the entry (corresponds to the Nth entry in the lis
 
 <a name="schedule_entry_packet"></a>
 ### Schedule entry packet
+
+![Schedule entry packet](../docs/diagrams/schedule-entry-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -716,7 +728,7 @@ uint 8 | Type | 1 |
 uint 8 | Length | 1 |
 uint 8 [] | Source address | 6 | Address of the node that put this message into the mesh.
 uint 8 | AD Length | 1 | Length of data after this field, excluding CRC.
-uint 8 | AD type | 1 |
+uint 8 | AD Type | 1 |
 uint 16 | Service UUID | 2 | Mesh service UUID.
 uint 16 | Handle | 2 | Handle of this message.
 uint 16 | Version | 2 | Used internally.
@@ -1017,6 +1029,8 @@ uint 8 | Reserved | 3 | Reserved for future use.
 <a name="mesh_scan_result_item"></a>
 ##### Scan result item
 
+![Scan result item](../docs/diagrams/mesh-scan-result-item.png)
+
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Crownstone ID | 1 | The identifier of the Crownstone which scanned the device.
@@ -1047,6 +1061,8 @@ uint 8 | Count | 1 | Number of multi switch list items in the list.
 
 <a name="multi_switch_list_mesh_item"></a>
 ##### Multi switch list item
+
+![Multi switch list item](../docs/diagrams/multi-switch-list-item.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---

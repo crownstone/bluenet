@@ -54,7 +54,7 @@ Bit | Name |  Description
 --- | --- | ---
 0 | New data available | If you request something from the Crownstone and the result is available, this will be 1.
 1 | Showing external data |  If this is 1, the shown ID and data is from another Crownstone.
-2 | Error |  If this is 1, the Crownstone has an error, you should check what error it is by reading the [error state](#state_packet).
+2 | Error |  If this is 1, the Crownstone has an error, you should check what error it is by reading the [error state](PROTOCOL.md#state_packet).
 3 | Reserved  |  Reserved for future use (switch locked).
 4 | Reserved |  Reserved for future use (marked as dimmable).
 5 | Reserved  |  Reserved for future use (not dimmable yet).
@@ -97,7 +97,7 @@ Bit | Name |  Description
 --- | --- | ---
 0 | Dimming available | When dimming is physically available, this will be 1.
 1 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
-2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#service_data_encrypted_error), or by reading the [error state](#state_packet).
+2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#service_data_encrypted_error), or by reading the [error state](PROTOCOL.md#state_packet).
 3 | Switch locked | When the switch state is locked, this will be 1.
 4 | Time set | If this is 1, the time is set on this Crownstone.
 5 | Reserved | Reserved for future use.
