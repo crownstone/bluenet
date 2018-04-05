@@ -99,16 +99,26 @@ COLOR_PALETTE.extend([REDS[3], REDS[5]])
 COLOR_PALETTE.extend([GREENS[4], GREENS[5]])
 COLOR_PALETTE.extend([PURPLES[4], PURPLES[5]])
 COLOR_PALETTE.extend([CHARTS[2], CHARTS[10]])
-COLOR_PALETTE.extend([GREYS[4]])
+# COLOR_PALETTE.extend([GREYS[4]])
 
 
 colorDict = {}
-#colorDict['Payload'] = ORANGE
-colorDict['Type'] = SKY_BLUES[3]
-colorDict['Length'] = SKY_BLUES[2]
-colorDict['AD Length'] = SKY_BLUES[6]
-colorDict['AD Type'] = SKY_BLUES[3]
-colorDict['Flags'] = SKY_BLUES[2]
+# All text in lower case
+colorDict['type'] = SKY_BLUES[3]
+colorDict['length'] = SKY_BLUES[2]
+colorDict['size'] = SKY_BLUES[2]
+colorDict['ad length'] = SKY_BLUES[6]
+colorDict['ad type'] = SKY_BLUES[3]
+colorDict['flags'] = SKY_BLUES[2]
+
+colorDict['etc'] = GREYS[4]
+colorDict['reserved'] = GREYS[4]
+colorDict['padding'] = GREYS[4]
+colorDict['rand'] = GREYS[4]
+
+colorDict['payload'] = CHARTS[2]
+colorDict['data'] = CHARTS[2]
+colorDict['list'] = CHARTS[2]
 
 
 
@@ -237,16 +247,12 @@ def drawText(x, y, text, color, width, height, forceVertical=False):
 
 	
 
-def drawVar(startX, y, varName, varLen):
+def drawVar(startX, y, varName, varLen, color):
 	if varLen > MAX_VAR_LEN:
 		varLen = MAX_VAR_LEN
 	width = varLen*STEP_X
 	height = STEP_Y
-	if varName in colorDict:
-		color = colorDict[varName]
-	else:
-		color = COLOR_PALETTE[randint(0, len(COLOR_PALETTE)-1)]
-		colorDict[varName] = color
+	
 	drawRect([startX, y, width, height], color)
 	drawText(startX+MARGIN, y+MARGIN, varName, WHITE, width-2*MARGIN, height-2*MARGIN, varLen < 3)
 	return startX + width
@@ -254,7 +260,9 @@ def drawVar(startX, y, varName, varLen):
 
 def drawVarList(varList, filename):
 	if not filename:
-		print "no filename"
+		print "no filename for:"
+		for var in varList:
+			print "  " + var[0]
 		return
 
 	totalLen = 0
@@ -285,6 +293,7 @@ def drawVarList(varList, filename):
 	yVar = y + byteLabel.get_height()
 	x += byteLabel.get_width()
 
+	prevColorInd = -1
 	byteNum = 0
 	byteNumKnown = True
 	for var in varList:
@@ -307,7 +316,26 @@ def drawVarList(varList, filename):
 				screen.blit(byteLabel, (x + 1.5*STEP_X - 0.5*byteLabel.get_width(), y))
 				byteNumKnown = False
 
-		xVar = drawVar(xVar, yVar, varName, varLen)
+		# Determine color
+		# First check if this var name already has an assigned color
+		varNameLower = varName.lower()
+		# print "in dict " + varNameLower + "=" + str(varNameLower in colorDict)
+		if varNameLower in colorDict:
+			color = colorDict[varNameLower]
+		else:
+			# Don't use the same color as the previous color
+			randColorInd = prevColorInd
+			while randColorInd == prevColorInd:
+				randColorInd = randint(0, len(COLOR_PALETTE)-1)
+			color = COLOR_PALETTE[randColorInd]
+			colorDict[varNameLower] = color
+		# Keep up last used color index
+		if (color in COLOR_PALETTE):
+			prevColorInd = COLOR_PALETTE.index(color)
+		else:
+			prevColorInd = -1
+
+		xVar = drawVar(xVar, yVar, varName, varLen, color)
 
 	pygame.image.save(screen, filename)
 
@@ -324,17 +352,17 @@ def parseFile(textFilename):
 	for line in file:
 		# print line
 		if (foundTableLines):
-			match = patternTable.findall(line)
+			match = patternTableRow.findall(line)
 			if (len(match)):
 				# print "found Line: " + line
-				varName = match[0][0]
+				varName = match[0][0].strip()
 				linkMatch = patternLink.findall(varName)
 				if (linkMatch):
 					varName = linkMatch[0]
 
 				varLenKnown = True
 				try:
-					varLen = int(match[0][1])
+					varLen = int(match[0][1].strip())
 				except:
 					varLenKnown = False
 					varLen = DEFAULT_VAR_LEN
@@ -379,7 +407,7 @@ fontBytes = pygame.font.Font(fontPath, fontSizeBytes)
 patternFileNameString = "\\(" + DIR + "([^\\)]+)\\)" 
 patternFileName = re.compile(patternFileNameString)
 patternTableHeader = re.compile("Type +\\| +Name +\\| +Length +\\| +Description")
-patternTable = re.compile("[^|]\\|\\s+([^|]+)\\s+\\|\\s+(\\S+)\\s+\\|.*")
+patternTableRow = re.compile("[^|]\\|([^|]+)\\|([^|]+)\\|.*")
 patternLink = re.compile("\\[([^]]+)\\]\\([^\\)]+\\)")
 
 for filename in FILENAMES:
