@@ -297,14 +297,14 @@ def drawVarList(varList, filename):
 			if varLenKnown:
 				for i in range(0, varLen):
 					byteLabel = fontBytes.render(str(byteNum), True, BLACK)
-					screen.blit(byteLabel, (x+0.5*STEP_X, y))
+					screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
 					byteNum += 1
 					x += STEP_X
 			else:
 				byteLabel = fontBytes.render(str(byteNum), True, BLACK)
-				screen.blit(byteLabel, (x+0.5*STEP_X, y))
+				screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
 				byteLabel = fontBytes.render("...", True, BLACK)
-				screen.blit(byteLabel, (x+1.5*STEP_X, y))
+				screen.blit(byteLabel, (x + 1.5*STEP_X - 0.5*byteLabel.get_width(), y))
 				byteNumKnown = False
 
 		xVar = drawVar(xVar, yVar, varName, varLen)
