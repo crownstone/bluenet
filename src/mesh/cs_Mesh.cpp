@@ -81,6 +81,9 @@ void Mesh::init() {
 	// setup the timer
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Mesh::staticTick);
 
+	// Init mesh control first, as it sets the id.
+	_meshControl.init();
+
 	rbc_mesh_init_params_t init_params;
 
 	// the access address is a configurable parameter so we get it from the settings.
@@ -111,8 +114,6 @@ void Mesh::init() {
 	_encryptionEnabled = Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED);
 
 	_mesh_start_time = RTC::getCount();
-
-	_meshControl.init();
 
 //	error_code = rbc_mesh_value_enable(1);
 //	APP_ERROR_CHECK(error_code);
@@ -205,12 +206,20 @@ void Mesh::pause() {
 bool Mesh::isRunning() { return _running && _started; }
 
 void Mesh::setId(uint8_t id) {
-	uint8_t address[6] = {id, 0, 0, 0, 0, 0};
-	rbc_mesh_set_custom_local_address(&(address[0]));
+//	uint8_t address[6] = {id, 0, 0, 0, 0, 0};
+//	rbc_mesh_set_custom_local_address(&(address[0]));
+	rbc_mesh_set_id_as_custom_local_address(id);
 }
 
 int8_t Mesh::getRssi(uint8_t id) {
 	return rbc_mesh_get_rssi(id);
+}
+
+void Mesh::printRssiList() {
+	uint8_t* list = rbc_mesh_get_rssi_list();
+	for (uint8_t i=0; i<10; i+=2) {
+		LOGd("id=%u rssi=%i", list[i], (int8_t)list[i+1]);
+	}
 }
 
 uint16_t Mesh::getHandleIndex(mesh_handle_t handle) {

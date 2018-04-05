@@ -142,6 +142,8 @@ public:
 	//! Get the average rssi of given id. Returns 0 when unknown.
 	int8_t getRssi(uint8_t id);
 
+	void printRssiList();
+
 	//! Send message
 	//! This allocates a mesh_message_t on stack, and copies given data to it
 	//!   then allocates an encrypted_mesh_message_t and encrypts the message with encodeMessage()
