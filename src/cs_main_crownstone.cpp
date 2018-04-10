@@ -882,7 +882,6 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	config_uart(pinRx, pinTx);
 
 	_log(SERIAL_INFO, SERIAL_CRLF);
-//	LOGi("ispr: %u", __get_IPSR());
 
 //	BLEutil::print_heap("Heap init");
 //	BLEutil::print_stack("Stack init");
@@ -897,6 +896,9 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	LOGi("Firmware version: %s", FIRMWARE_VERSION);
 #endif
 	LOGi("Hardware version: %s", get_hardware_version());
+
+	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/Cihfaaha.html
+//	LOGi("interrupt level=%u", __get_IPSR() & 0x1FF);
 }
 
 /**********************************************************************************************************************/

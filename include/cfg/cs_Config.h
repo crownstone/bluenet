@@ -146,7 +146,8 @@
 #define CS_ADC_BUF_SIZE                          (2*20000/CS_ADC_SAMPLE_INTERVAL_US)
 //#define CS_ADC_BUF_SIZE                          (2*30000/CS_ADC_SAMPLE_INTERVAL_US)
 
-#define STORAGE_REQUEST_BUFFER_SIZE              5
+// Buffer size for storage requests. Storage requests get buffered when the device is scanning or meshing.
+#define STORAGE_REQUEST_BUFFER_SIZE              5 // Should be at least 3, because setup pushes 3 storage requests (configs + operation mode + switch state).
 
 #define FACTORY_RESET_CODE                       0xdeadbeef
 #define FACTORY_RESET_TIMEOUT                    60000 // Timeout before recovery becomes unavailable after reset (ms)

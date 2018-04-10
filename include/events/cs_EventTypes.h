@@ -65,6 +65,7 @@ enum GeneralEventType {
 	EVT_PWM_POWERED,
 	EVT_PWM_ALLOWED, // Sent when pwm allowed flag is set. Payload is boolean.
 	EVT_SWITCH_LOCKED, // Sent when switch locked flag is set. Payload is boolean.
+	EVT_STORAGE_DONE, // Sent when storage is done and queue is empty.
 	EVT_ALL = 0xFFFF
 };
 

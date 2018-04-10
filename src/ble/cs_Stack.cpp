@@ -106,7 +106,8 @@ const nrf_clock_lf_cfg_t Nrf51822BluetoothStack::defaultClockSource = { .source 
 //	Nrf51822BluetoothStack::getInstance().on_ble_evt((ble_evt_t *)p_event_data);
 //}
 
-//! called by softdevice handler on a ble event
+// Called by softdevice handler on a ble event
+// Since we init the softdevice with app scheduler, this callback runs on the main thread.
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 //	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
@@ -121,20 +122,7 @@ extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 		rbc_mesh_ble_evt_handler(p_ble_evt);
 	}
 #endif
-
-	//! Only dispatch functions to the scheduler which might take long to execute, such as ble write functions
-	//! and handle other ble events directly in the interrupt. Otherwise app scheduler buffer might overflow fast
-//	switch (p_ble_evt->header.evt_id) {
-//	case BLE_GATTS_EVT_WRITE:
-		//! let the scheduler execute the event handle function
-//		LOGi("BLE_WRITE");
-//		BLE_CALL(app_sched_event_put, (p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len, ble_evt_handler));
-//		break;
-//	default:
-//		ble_evt_handler(p_ble_evt, 0);
-		Nrf51822BluetoothStack::getInstance().on_ble_evt(p_ble_evt);
-//		break;
-//	}
+	Nrf51822BluetoothStack::getInstance().on_ble_evt(p_ble_evt);
 }
 
 void Nrf51822BluetoothStack::init() {
@@ -1192,6 +1180,9 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
 //		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
 //	}
+
+//	LOGi("interrupt level=%u", __get_IPSR() & 0x1FF);
+	// No need to decouple with app scheduler: this handler is already running on the main thread, since sys_evt_dispatch is too.
 
 //    if (_dm_initialized && Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
 	if (_dm_initialized) {

@@ -39,9 +39,11 @@ extern "C"  {
 
 			LOGe("Opcode: %d, ERR_CODE: %d (%p)", op_code, result, result);
 			APP_ERROR_CHECK(result);
-		} else {
+		}
+		else {
 			LOGi("Opcode %d executed (no error)", op_code);
 			if (op_code == PSTORAGE_UPDATE_OP_CODE) {
+				// No need to decouple with app scheduler: this handler is already running on the main thread, since sys_evt_dispatch is too.
 				Storage::getInstance().onUpdateDone();
 			}
 		}
@@ -92,18 +94,20 @@ void Storage::init() {
 }
 
 void Storage::onUpdateDone() {
+//	LOGi("interrupt level=%u", __get_IPSR() & 0x1FF);
+
 	if (_pending) {
 		// track how many update requests are still pending
 		_pending--;
 		// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
 		if (!_pending) {
 			LOGi("pstorage update done");
-#if BUILD_MESHING == 1
-			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-				Mesh::getInstance().resume();
-			}
-#endif
+			EventDispatcher::getInstance().dispatch(EVT_STORAGE_DONE);
 		}
+	}
+	else {
+		// TODO: how can _pending be lower than 1 here?
+		LOGw("_pending=%u", _pending);
 	}
 }
 
@@ -112,20 +116,19 @@ void resume_requests(void* p_data, uint16_t len) {
 }
 
 void storage_sys_evt_handler(uint32_t evt) {
+//	LOGi("interrupt level=%u", __get_IPSR() & 0x1FF);
+	// No need to decouple with app scheduler: this handler is already running on the main thread, since sys_evt_dispatch is too.
 	switch(evt) {
 	case NRF_EVT_RADIO_SESSION_IDLE: {
 		// once mesh is stopped, the softdevice will trigger the NRF_EVT_RADIO_SESSION_IDLE,
 		// now we can try to update the pstorage
 //		LOGd("NRF_EVT_RADIO_SESSION_IDLE");
-		uint32_t errorCode = app_sched_event_put(NULL, 0, resume_requests);
-		APP_ERROR_CHECK(errorCode);
+		Storage::getInstance().resumeRequests();
 		break;
 	}
 	case NRF_EVT_RADIO_SESSION_CLOSED: {
 //		LOGd("NRF_EVT_RADIO_SESSION_CLOSED");
-//			Storage::getInstance().resumeRequests();
-		uint32_t errorCode = app_sched_event_put(NULL, 0, resume_requests);
-		APP_ERROR_CHECK(errorCode);
+		Storage::getInstance().resumeRequests();
 		break;
 	}
 	}
@@ -150,8 +153,18 @@ void Storage::resumeRequests() {
 #endif
 				// count number of pending updates to decide when mesh can be resumed (if needed)
 				_pending++;
-				//! TODO: got an error 4 here when spam toggling relay.
-				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
+				// TODO: got an error 4 (NO_MEM) here when spam toggling relay.
+//				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
+				uint32_t errorCode = pstorage_update(&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset);
+				if (errorCode == NRF_ERROR_NO_MEM) {
+					// Try again later
+					writeBuffer.push(elem);
+					// TODO: maybe use a timer instead?
+					errorCode = app_sched_event_put(NULL, 0, resume_requests);
+					APP_ERROR_CHECK(errorCode);
+					return;
+				}
+				APP_ERROR_CHECK(errorCode);
 			} else {
 				// if scanning was started again, push it back on the buffer and try again during the next
 				// scan break
@@ -336,6 +349,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 		}
 	} else {
 		// if neither scanning nor meshing, call the update directly
+		++_pending;
 		BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
 	}
 

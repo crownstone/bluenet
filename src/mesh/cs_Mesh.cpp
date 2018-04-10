@@ -132,6 +132,8 @@ void Mesh::init() {
 //	}
 
 	_initialized = true;
+
+	EventDispatcher::getInstance().addListener(this);
 }
 
 void start_stop_mesh(void * p_event_data, uint16_t event_size) {
@@ -747,6 +749,16 @@ void Mesh::checkForMessages() {
 			error_code = rbc_mesh_value_disable(handle);
 			APP_ERROR_CHECK(error_code);
 		}
+	}
+}
+
+void Mesh::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch (evt) {
+	case EVT_STORAGE_DONE:
+		if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+			Mesh::getInstance().resume();
+		}
+		break;
 	}
 }
 

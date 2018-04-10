@@ -18,6 +18,7 @@
 #include <protocol/cs_MeshMessageTypes.h>
 #include <mesh/cs_MeshControl.h>
 #include <protocol/mesh/cs_MeshMessageCounter.h>
+#include <events/cs_EventDispatcher.h>
 
 extern "C" {
 
@@ -36,7 +37,7 @@ typedef rbc_mesh_value_handle_t mesh_handle_t;
 
 /** Wrapper class around the mesh protocol files.
  */
-class Mesh {
+class Mesh : EventListener {
 private:
 
 	//! app timer id for tick function
@@ -158,6 +159,9 @@ public:
 	//! The resulting message is then copied to p_data.
 	//! TODO: have a better way to do this
 	bool getLastMessage(mesh_handle_t handle, void* p_data, uint16_t length);
+
+	// Implementation of EventListener.
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 };
 

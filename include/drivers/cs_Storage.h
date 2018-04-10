@@ -251,7 +251,7 @@ void storage_sys_evt_handler(uint32_t evt);
  *  closed before we can update the storage. so we need to buffer the
  *  storage requests.
  */
-struct buffer_element_t {
+struct __attribute__((__packed__)) buffer_element_t {
 	uint8_t* data;
 	uint16_t dataSize;
 	uint16_t storageOffset;
@@ -352,6 +352,7 @@ public:
 
 	void resumeRequests();
 
+	// Handle events as EventListener
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 	void onUpdateDone();
@@ -389,6 +390,7 @@ private:
 	CircularBuffer<buffer_element_t> writeBuffer;
 	buffer_element_t buffer[STORAGE_REQUEST_BUFFER_SIZE];
 
+	// Keeps up how many writes are pending in pstorage.
 	uint8_t _pending;
 
 };
