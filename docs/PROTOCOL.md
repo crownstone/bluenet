@@ -19,21 +19,15 @@ is to configure the Crownstone so only you, or people in your group, can communi
 
 The protocol here is as follows:
 
-1. Crownstone is in setup mode (low TX, [Setup Service active](#setup_service))
-- Phone is close and connects to the Crownstone
+- Crownstone is in setup mode (low TX, [Setup Service active](#setup_service))
+- Phone is close and connects to the Crownstone.
 - Phone reads the Crownstone [MAC address](#setup_service) (required for iOS). This characteristic is not encrypted.
 - Phone reads the session key and session nonce from the [setup service](#setup_service). These characteristics are not encrypted.
 The values are only valid for this connection session. The session key and the session nonce will be used to encrypt the rest of the setup phase using AES 128 CTR as explained [here](#encrypted_write_read).
-- Phone starts setting up the Crownstone using the [config control](#setup_service) characteristic
-    - Phone gives Crownstone [its identifier](#crownstone_identifier)
-    - Phone gives Crownstone [the Admin key](#admin_key)
-    - Phone gives Crownstone [the Member key](#user_key)
-    - Phone gives Crownstone [the Guest key](#guest_key)
-    - Phone gives Crownstone [the Mesh Access Address](#mesh_access_address)
-    - Phone gives Crownstone [its iBeacon UUID](#ibeacon_uuid)
-    - Phone gives Crownstone [its iBeacon Major](#ibeacon_major)
-    - Phone gives Crownstone [its iBeacon Minor](#ibeacon_minor)
-- Phone commands Crownstone [to leave setup mode](#validate_setup)
+- Phone subscribes to [control](#setup_service) characteristic.
+- Phone commands Crownstone to setup via the control characteristic.
+- Phone waits for control characteristic value to become SUCCESS (See [return values](#return_values)).
+- Crownstone will reboot to normal mode.
 
 
 <a name="encryption"></a>
@@ -219,17 +213,20 @@ was received before calling the next (either by polling or subscribing). The pos
 
 Value | Name | Description
 --- | --- | ---
-0 | SUCCESS | completed successfully
-1 | VALUE_UNDEFINED | no value provided
-2 | WRONG_PAYLOAD_LENGTH | wrong payload lenght provided
-3 | UNKNOWN_OP_CODE | unknown operation code, e.g. notify for config read
-5 | BUFFER_LOCKED | buffer is locked, failed queue command
-6 | BUFFER_TOO_SMALL | buffer is too small to execute command
-256 | COMMAND_NOT_FOUND | command type not found
-257 | NOT_AVAILABLE | command not available in this mode
-258 | WRONG_PARAMETER | wrong parameter provided
-259 | COMMAND_FAILED | other failure
-260 | NOT_IMPLEMENTED | command not implemented (only debug version)
+0 | SUCCESS | Completed successfully.
+1 | VALUE_UNDEFINED | No value provided.
+2 | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
+3 | UNKNOWN_OP_CODE | Unknown operation code, e.g. notify for config read.
+5 | BUFFER_LOCKED | Buffer is locked, failed queue command.
+6 | BUFFER_TOO_SMALL | Buffer is too small to execute command.
+7 | INVALID_CHANNEL | 
+8 | NOT_FOUND | 
+256 | COMMAND_NOT_FOUND | Command type not found.
+257 | NOT_AVAILABLE | Command not available in this mode.
+258 | WRONG_PARAMETER | Wrong parameter provided.
+259 | COMMAND_FAILED | Other failure.
+260 | NOT_IMPLEMENTED | Command not implemented (only debug version).
+261 | WAIT_FOR_SUCCESS | So far so good, wait for the value to become SUCCESS.
 512 | INVALID_MESSAGE | invalid mesh message provided
 768 | READ_CONFIG_FAILED | read configuration failed
 769 | WRITE_CONFIG_DISABLED | write configuration disalbed for this type
@@ -392,6 +389,25 @@ Type nr | Type name | Payload type | Payload Description | A | M | G | S
 28 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 29 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 30 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
+31 | Setup | [Setup packet](#setup_packet) | Perform setup. |  |  |  | x
+
+<a name="setup_packet"></a>
+#### Setup packet
+
+![Setup packet](../docs/diagrams/setup-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Type | 1 | Type of setup packet. Only 0 for now.
+uint 8 | ID | 1 | Crownstone ID.
+uint 8[] | Admin key  | 16 | 16 byte key used to encrypt/decrypt owner access functions.
+uint 8[] | Member key | 16 | 16 byte key used to encrypt/decrypt member access functions.
+uint 8[] | Guest key  | 16 | 16 byte key used to encrypt/decrypt guest access functions.
+uint 32 | Mesh access address | 4 | The access address of the mesh messages.
+uint 8[] | iBeacon UUID | 16 | The iBeacon UUID.
+uint 16 | iBeacon major | 2 | The iBeacon major.
+uint 16 | iBeacon minor | 2 | The iBeacon minor.
+
 
 
 <a name="cmd_enable_scanner_payload"></a>

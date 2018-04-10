@@ -3,8 +3,8 @@
 
 # Index
 
-- [Type header](#service_data_header)
-- [Deprecated](#encrypted_servicedata_v1_packet)
+- [Header](#service_data_header)
+- [Deprecated state](#encrypted_servicedata_v1_packet)
 - [Encrypted state](#servicedata_encrypted_packet)
 - [Setup state](#servicedata_setup_packet)
 - [Device type and encrypted state](#servicedata_device_type)
