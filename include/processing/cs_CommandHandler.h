@@ -31,7 +31,7 @@ struct delayed_command_t {
  * TODO: In handleCommand is every function by default executed at ADMIN level. This should be at the lowest privilege
  * level. 
  */
-class CommandHandler {
+class CommandHandler : EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static CommandHandler& getInstance() {
@@ -68,6 +68,9 @@ public:
 	 * There is a DFU reset or a GPREGRET reset.
 	 */
 	void resetDelayed(uint8_t opCode);
+
+	// Handle events as EventListener
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 private:
 
@@ -114,6 +117,7 @@ private:
 	ERR_CODE handleCmdEnableContPowerMeasure(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	ERR_CODE handleCmdAllowDimming          (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	ERR_CODE handleCmdLockSwitch            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdSetup                 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 
 };
 

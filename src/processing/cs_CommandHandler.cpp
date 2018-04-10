@@ -13,6 +13,7 @@
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
+#include <processing/cs_Setup.h>
 
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
@@ -65,6 +66,7 @@ CommandHandler::CommandHandler() :
 
 void CommandHandler::init(const boards_config_t* board) {
 	_boardConfig = board;
+	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_delayTimerId, execute_delayed);
 	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t) reset);
 }
@@ -459,6 +461,13 @@ ERR_CODE CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uint16_t
 }
 
 
+ERR_CODE CommandHandler::handleCmdSetup(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGi(STR_HANDLE_COMMAND, "setup");
+	ERR_CODE errCode = Setup::getInstance().handleCommand(buffer, size);
+	return errCode;
+}
+
+
 ERR_CODE CommandHandler::handleCmdValidateSetup(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "validate setup");
 //	if (!EncryptionHandler::getInstance().allowAccess(SETUP, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -826,6 +835,7 @@ ERR_CODE CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uint16_t
 }
 
 
+
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
 //	switch (type) {
 //	case CMD_SWITCH:
@@ -862,6 +872,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	switch (type) {
 	case CMD_VALIDATE_SETUP:
 	case CMD_INCREASE_TX:
+	case CMD_SETUP:
 		return GUEST; // These commands are only available in setup mode.
 
 	case CMD_SWITCH:
@@ -924,4 +935,18 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 		return false;
 	}
 	return false;
+}
+
+void CommandHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch (evt) {
+	case EVT_DO_RESET_DELAYED: {
+		if (length != 1) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+			return;
+		}
+		uint8_t opCode = *(uint8_t*)p_data;
+		resetDelayed(opCode);
+		break;
+	}
+	}
 }

@@ -40,6 +40,7 @@ enum CommandHandlerTypes {
 	CMD_MESH_COMMAND                = 28,    //! 0x1C
 	CMD_ALLOW_DIMMING               = 29,    //! 0x1D
 	CMD_LOCK_SWITCH                 = 30,    //! 0x1E
+	CMD_SETUP                       = 31,    //! 0x1F
 };
 
 struct __attribute__((__packed__)) switch_message_payload_t {

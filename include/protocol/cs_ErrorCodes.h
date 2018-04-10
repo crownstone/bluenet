@@ -24,6 +24,7 @@ enum CommandErrorCodes {
 	ERR_WRONG_PARAMETER,
 	ERR_COMMAND_FAILED,
 	ERR_NOT_IMPLEMENTED,
+	ERR_WAIT_FOR_SUCCESS,
 };
 
 enum MeshErrorCodes {

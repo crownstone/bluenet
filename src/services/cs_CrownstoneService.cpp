@@ -459,6 +459,16 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 			_stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
 			_stateReadCharacteristic->updateValue();
 		}
+		break;
+	}
+	case EVT_SETUP_DONE: {
+		if (_controlCharacteristic) {
+			ERR_CODE errorCode = ERR_SUCCESS;
+			_controlCharacteristic->setValue((uint8_t*)&errorCode);
+			_controlCharacteristic->setValueLength(sizeof(errorCode));
+			_controlCharacteristic->updateValue();
+		}
+		break;
 	}
 	}
 }
