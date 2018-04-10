@@ -153,7 +153,7 @@
 #define FACTORY_RESET_TIMEOUT                    60000 // Timeout before recovery becomes unavailable after reset (ms)
 #define FACTORY_PROCESS_TIMEOUT                  200 // Timeout before recovery process step is executed (ms)
 
-#define ENCYRPTION_KEY_LENGTH                    SOC_ECB_KEY_LENGTH //! 16 byte length
+#define ENCYRPTION_KEY_LENGTH                    16 // 16 byte length, just like SOC_ECB_KEY_LENGTH
 
 #define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
 

@@ -8,9 +8,13 @@
 #pragma once
 
 #include <cstdint>
+
 #include "common/cs_Types.h"
 #include "cfg/cs_Config.h"
 #include "events/cs_EventListener.h"
+#include "events/cs_EventDispatcher.h"
+
+#include <ble/cs_Nordic.h>
 
 struct __attribute__((__packed__)) setup_data_t {
 	uint8_t        type;

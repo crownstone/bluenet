@@ -165,6 +165,8 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		return handleCmdAllowDimming(buffer, size, accessLevel);
 	case CMD_LOCK_SWITCH:
 		return handleCmdLockSwitch(buffer, size, accessLevel);
+	case CMD_SETUP:
+		return handleCmdSetup(buffer, size, accessLevel);
 	default:
 		LOGe("Unknown type: %u", type);
 		return ERR_COMMAND_NOT_FOUND;

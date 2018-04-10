@@ -37,6 +37,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Scanner.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Scheduler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_FactoryReset.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_EnOceanHandler.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Setup.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_TemperatureGuard.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_UartProtocol.cpp")
 
