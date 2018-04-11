@@ -51,7 +51,7 @@ void ScheduleService::addCurrentTimeCharacteristic() {
 	_currentTimeCharacteristic->setName(BLE_CHAR_CURRENT_TIME);
 	_currentTimeCharacteristic->setDefaultValue(0);
 	_currentTimeCharacteristic->setWritable(true);
-	_currentTimeCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value) -> void {
+	_currentTimeCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value, uint16_t length) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_SET_TIME, (buffer_ptr_t)&value, sizeof(value));
 	});
 }
@@ -74,13 +74,12 @@ void ScheduleService::addWriteScheduleEntryCharacteristic() {
 	_writeScheduleEntryCharacteristic->setMaxGattValueLength(maxLength);
 	_writeScheduleEntryCharacteristic->setValueLength(0);
 
-	_writeScheduleEntryCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
-		uint16_t valueLength = _writeScheduleEntryCharacteristic->getValueLength();
-		if (valueLength == 1) {
-			CommandHandler::getInstance().handleCommand(CMD_SCHEDULE_ENTRY_CLEAR, _writeScheduleEntryCharacteristic->getValue(), valueLength);
+	_writeScheduleEntryCharacteristic->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
+		if (length == 1) {
+			CommandHandler::getInstance().handleCommand(CMD_SCHEDULE_ENTRY_CLEAR, _writeScheduleEntryCharacteristic->getValue(), length);
 		}
 		else {
-			CommandHandler::getInstance().handleCommand(CMD_SCHEDULE_ENTRY_SET, _writeScheduleEntryCharacteristic->getValue(), valueLength);
+			CommandHandler::getInstance().handleCommand(CMD_SCHEDULE_ENTRY_SET, _writeScheduleEntryCharacteristic->getValue(), length);
 		}
 	});
 }

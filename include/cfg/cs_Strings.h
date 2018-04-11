@@ -135,7 +135,7 @@
 #define FMT_CHAR_ADD                             "Characteristic %s added"
 #define FMT_CHAR_SKIP                            "Characteristic %s skipped"
 
-#define FMT_WRONG_PAYLOAD_LENGTH                 "Wrong payload length received: %d"
+#define FMT_WRONG_PAYLOAD_LENGTH                 "Wrong payload length received: %u"
 #define FMT_SELECT_TYPE                          "Select %s type: %d"
 #define FMT_WRITE_TYPE                           "Write %s type: %d"
 

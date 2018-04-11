@@ -421,10 +421,10 @@ bool MeshControl::handleConfigCommand(config_mesh_message_t* configMsg, uint16_t
 	}
 
 	switch (configMsg->header.opCode) {
-	case READ_VALUE: {
+	case OPCODE_READ_VALUE: {
 		config_reply_item_t configReply = {};
 		configReply.id = _myCrownstoneId;
-		configReply.data.header.opCode = READ_VALUE;
+		configReply.data.header.opCode = OPCODE_READ_VALUE;
 		configReply.data.header.type = configType;
 		configReply.data.header.length = Settings::getInstance().getSettingsItemSize(configType);
 
@@ -441,7 +441,7 @@ bool MeshControl::handleConfigCommand(config_mesh_message_t* configMsg, uint16_t
 		}
 		return true;
 	}
-	case WRITE_VALUE: {
+	case OPCODE_WRITE_VALUE: {
 		Settings::getInstance().writeToStorage(configType, configPayload, configPayloadlength);
 		statusResult = ERR_SUCCESS;
 		return true;
@@ -467,10 +467,10 @@ bool MeshControl::handleStateCommand(state_mesh_message_t* stateMsg, uint16_t st
 	//! So no need to check the length field.
 
 	switch (stateMsg->header.opCode) {
-	case READ_VALUE: {
+	case OPCODE_READ_VALUE: {
 		state_reply_item_t stateReply = {};
 		stateReply.id = _myCrownstoneId;
-		stateReply.data.header.opCode = READ_VALUE;
+		stateReply.data.header.opCode = OPCODE_READ_VALUE;
 		stateReply.data.header.type = stateType;
 		stateReply.data.header.length = State::getInstance().getStateItemSize(stateType);
 

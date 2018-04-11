@@ -911,8 +911,9 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CMD_ALLOW_DIMMING:
 	case CMD_LOCK_SWITCH:
 		return ADMIN;
+	default:
+		return NOT_SET;
 	}
-	return NOT_SET;
 }
 
 bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {

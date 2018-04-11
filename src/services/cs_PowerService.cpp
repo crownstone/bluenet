@@ -77,7 +77,7 @@ void PowerService::addPWMCharacteristic() {
 	_pwmCharacteristic->setName(BLE_CHAR_PWM);
 	_pwmCharacteristic->setDefaultValue(255);
 	_pwmCharacteristic->setWritable(true);
-	_pwmCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
+	_pwmCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value, uint16_t length) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_PWM, (buffer_ptr_t)&value, 1);
 	});
 }
@@ -90,7 +90,7 @@ void PowerService::addRelayCharacteristic() {
 	_relayCharacteristic->setName(BLE_CHAR_RELAY);
 	_relayCharacteristic->setDefaultValue(255);
 	_relayCharacteristic->setWritable(true);
-	_relayCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
+	_relayCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value, uint16_t length) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_RELAY, (buffer_ptr_t)&value, 1);
 	});
 }

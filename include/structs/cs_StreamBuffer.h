@@ -22,9 +22,10 @@
 #define SB_BUFFER_NOT_LARGE_ENOUGH               2
 
 enum OpCode {
-	READ_VALUE       = 0,
-	WRITE_VALUE,
-	NOTIFY_VALUE
+	OPCODE_READ_VALUE       = 0,
+	OPCODE_WRITE_VALUE,
+	OPCODE_NOTIFY_VALUE,
+	OPCODE_ERR_VALUE
 };
 
 /** Header of a stream buffer

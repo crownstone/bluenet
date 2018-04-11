@@ -25,7 +25,7 @@ void SetupService::createCharacteristics() {
 	uint16_t maxLength = 0;
 
 	_streamBuffer = getStreamBuffer(buffer, maxLength);
-	addControlCharacteristic(buffer, maxLength);
+	addControlCharacteristic(buffer, maxLength, SETUP);
 	LOGi(FMT_CHAR_ADD, STR_CHAR_CONTROL);
 
 	addMacAddressCharacteristic();
@@ -86,11 +86,12 @@ void SetupService::addGoToDfuCharacteristic() {
 	_gotoDfuCharacteristic->setWritable(true);
 	_gotoDfuCharacteristic->setDefaultValue(0);
 	_gotoDfuCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_gotoDfuCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
+	_gotoDfuCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value, uint16_t length) -> void {
 		if (value == GPREGRET_DFU_RESET) {
 			LOGi("goto dfu");
 			CommandHandler::getInstance().resetDelayed(value);
-		} else {
+		}
+		else {
 			LOGe("goto dfu failed, wrong value: %d", value);
 		}
 	});

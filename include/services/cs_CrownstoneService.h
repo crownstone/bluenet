@@ -111,6 +111,35 @@ protected:
 	//! buffer object to read/write configuration characteristics
 	StreamBuffer<uint8_t> *_streamBuffer;
 
+
+	/** Handle write on configuration write characteristic.
+	 *
+	 * @param[in]  accessLevel    Access level with which the value was written.
+	 * @param[in]  value          The (decrypted) data that was written.
+	 * @param[in]  length         Length of the data.
+	 * @param[out] writeErrCode   Whether or not to write the result.
+	 * @return                    Result of handling the data.
+	 */
+	ERR_CODE configOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode);
+
+	/** Handle write on state write characteristic.
+	 *
+	 * @param[in]  accessLevel    Access level with which the value was written.
+	 * @param[in]  value          The (decrypted) data that was written.
+	 * @param[in]  length         Length of the data.
+	 * @param[out] writeErrCode   Whether or not to write the result.
+	 * @return                    Result of handling the data.
+	 */
+	ERR_CODE stateOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode);
+
+	/** Write the error code to the control characteristic.
+	 *
+	 * @param[in] type            The command type that was handled.
+	 * @param[in] errCode         The result of handling the command.
+	 */
+	void controlWriteErrorCode(uint8_t type, ERR_CODE errCode);
+
+
 private:
 
 	/** Mesh characteristic

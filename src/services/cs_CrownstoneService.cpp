@@ -137,7 +137,7 @@ void CrownstoneService::addMeshCharacteristic() {
 	_meshControlCharacteristic->setMinAccessLevel(MEMBER);
 	_meshControlCharacteristic->setMaxGattValueLength(size);
 	_meshControlCharacteristic->setValueLength(0);
-	_meshControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
+	_meshControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
 		// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
 		// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
 		// If the user writes to this characteristic with insufficient rights, this method is not called
@@ -146,9 +146,13 @@ void CrownstoneService::addMeshCharacteristic() {
 
 		uint8_t handle = _meshCommand->type();
 		uint8_t* p_data = _meshCommand->payload();
-		uint16_t length = _meshCommand->length();
-
-		ERR_CODE error_code = MeshControl::getInstance().send(handle, p_data, length);
+		ERR_CODE error_code;
+		if (length < _meshCommand->getDataLength()) {
+			error_code = ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		else {
+			error_code = MeshControl::getInstance().send(handle, p_data, length);
+		}
 
 //		LOGi("err error_code: %d", error_code);
 		memcpy(value, &error_code, sizeof(error_code));
@@ -167,36 +171,40 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	_controlCharacteristic->setUUID(UUID(getUUID(), CONTROL_UUID));
 	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setWritable(true);
+	_controlCharacteristic->setNotifies(true);
 	_controlCharacteristic->setValue(buffer);
 	_controlCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_controlCharacteristic->setMaxGattValueLength(size);
 	_controlCharacteristic->setValueLength(0);
-	_controlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
+	_controlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
 		// encryption in the write stage verifies if the key is at least GUEST, command specific permissions are
 		// handled in the commandHandler
 
-		ERR_CODE error_code;
+		ERR_CODE errCode;
+		CommandHandlerTypes type = CMD_UNKNOWN;
 		MasterBuffer& mb = MasterBuffer::getInstance();
 		// at this point it is too late to check if mb was locked, because the softdevice doesn't care
 		// if the mb was locked, it writes to the buffer in any case
 		if (!mb.isLocked()) {
 			LOGi(MSG_CHAR_VALUE_WRITE);
-			CommandHandlerTypes type = (CommandHandlerTypes) _streamBuffer->type();
+			type = (CommandHandlerTypes) _streamBuffer->type();
 			uint8_t *payload = _streamBuffer->payload();
-			uint8_t length = _streamBuffer->length();
-
-			error_code = CommandHandler::getInstance().handleCommand(type, payload, length, accessLevel);
+			uint8_t payloadLength = _streamBuffer->length();
+			if (length < _streamBuffer->getDataLength()) {
+				LOGw("len=%u  sb len=%u", length, _streamBuffer->getDataLength());
+				errCode = ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			else {
+				errCode = CommandHandler::getInstance().handleCommand(type, payload, payloadLength, accessLevel);
+			}
 
 			mb.unlock();
-		} else {
-			LOGe(MSG_BUFFER_IS_LOCKED);
-			error_code = ERR_BUFFER_LOCKED;
 		}
-
-//		LOGi("err error_code: %d", error_code);
-		memcpy(value, &error_code, sizeof(error_code)); //! TODO: why is it written to "value" and not to _controlCharacteristic?
-		_controlCharacteristic->setValueLength(sizeof(error_code));
-		_controlCharacteristic->updateValue();
+		else {
+			LOGe(MSG_BUFFER_IS_LOCKED);
+			errCode = ERR_BUFFER_LOCKED;
+		}
+		controlWriteErrorCode(type, errCode);
 	});
 
 }
@@ -212,67 +220,19 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	_configurationControlCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_configurationControlCharacteristic->setMaxGattValueLength(size);
 	_configurationControlCharacteristic->setValueLength(0);
-	_configurationControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
-		// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
-		// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
-		// If the user writes to this characteristic with insufficient rights, this method is not called
-
-		ERR_CODE error_code;
-		if (!value) {
-			LOGw(MSG_CHAR_VALUE_UNDEFINED);
-			error_code = ERR_VALUE_UNDEFINED;
-		} else {
-			LOGi(MSG_CHAR_VALUE_WRITE);
-			MasterBuffer& mb = MasterBuffer::getInstance();
-			// at this point it is too late to check if mb was locked, because the softdevice doesn't care
-			// if the mb was locked, it writes to the buffer in any case
-			if (!mb.isLocked()) {
-				mb.lock();
-
-				//! TODO: check lenght with actual payload length!
-				uint8_t type = _streamBuffer->type();
-				uint8_t opCode = _streamBuffer->opCode();
-
-//				LOGi("opCode: %d", opCode);
-//				LOGi("type: %d", type);
-
-				if (opCode == READ_VALUE) {
-					LOGd(FMT_SELECT_TYPE, STR_CHAR_CONFIGURATION, type);
-
-					error_code = Settings::getInstance().readFromStorage(type, _streamBuffer);
-					if (SUCCESS(error_code)) {
-						_streamBuffer->setOpCode(READ_VALUE);
-						_configurationReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
-						_configurationReadCharacteristic->updateValue();
-//						LOGi("success");
-						mb.unlock();
-						return; // need to return here to avoid writing error_code, which would overwrite
-								// the read value on the read characteristic !!
-					} else {
-						LOGe(STR_FAILED);
-					}
-				} else if (opCode == WRITE_VALUE) {
-					LOGd(FMT_WRITE_TYPE, STR_CHAR_CONFIGURATION, type);
-
-					uint8_t *payload = _streamBuffer->payload();
-					uint8_t length = _streamBuffer->length();
-
-					error_code = Settings::getInstance().writeToStorage(type, payload, length);
-				} else {
-					error_code = ERR_UNKNOWN_OP_CODE;
-				}
-
-				mb.unlock();
-			} else {
-				LOGe(MSG_BUFFER_IS_LOCKED);
-				error_code = ERR_BUFFER_LOCKED;
-			}
+	_configurationControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
+		bool writeErrCode = true;
+		ERR_CODE errCode = configOnWrite(accessLevel, value, length, writeErrCode);
+		if (writeErrCode) {
+			// Leave type as is.
+//			_streamBuffer->setType()
+			_streamBuffer->setOpCode(OPCODE_ERR_VALUE);
+			_streamBuffer->setPayload((uint8_t*)&errCode, sizeof(errCode));
+			_configurationControlCharacteristic->setValueLength(_streamBuffer->getDataLength());
+//			memcpy(value, &errCode, sizeof(errCode));
+//			_configurationControlCharacteristic->setValueLength(sizeof(errCode));
+			_configurationControlCharacteristic->updateValue();
 		}
-
-//		LOGi("err error_code: %d", error_code);
-		memcpy(value, &error_code, sizeof(error_code));
-		_configurationControlCharacteristic->setValueLength(sizeof(error_code));
-		_configurationControlCharacteristic->updateValue();
 	});
 }
 
@@ -303,68 +263,19 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 	_stateControlCharacteristic->setMinAccessLevel(MEMBER);
 	_stateControlCharacteristic->setMaxGattValueLength(size);
 	_stateControlCharacteristic->setValueLength(0);
-	_stateControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value) -> void {
-		// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
-		// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
-		// If the user writes to this characteristic with insufficient rights, this method is not called
-
-		ERR_CODE error_code;
-		if (!value) {
-			LOGw(MSG_CHAR_VALUE_UNDEFINED);
-			error_code = ERR_VALUE_UNDEFINED;
-		} else {
-			LOGi(MSG_CHAR_VALUE_WRITE);
-			MasterBuffer& mb = MasterBuffer::getInstance();
-			// at this point it is too late to check if mb was locked, because the softdevice doesn't care
-			// if the mb was locked, it writes to the buffer in any case
-			if (!mb.isLocked()) {
-				mb.lock();
-
-				uint8_t type = _streamBuffer->type();
-				uint8_t opCode = _streamBuffer->opCode();
-
-				if (opCode == READ_VALUE || opCode == NOTIFY_VALUE) {
-					if (opCode == NOTIFY_VALUE) {
-//						LOGi("State notification, len: %d", _streamBuffer->length());
-						if (_streamBuffer->length() == 1) {
-							bool enable = *((bool*) _streamBuffer->payload());
-							State::getInstance().setNotify(type, enable);
-							error_code = ERR_SUCCESS;
-						} else {
-							LOGe(FMT_WRONG_PAYLOAD_LENGTH, _streamBuffer->length());
-							error_code = ERR_WRONG_PAYLOAD_LENGTH;
-						}
-					}
-
-					error_code = State::getInstance().readFromStorage(type, _streamBuffer);
-					LOGd(FMT_SELECT_TYPE, STR_CHAR_STATE, type);
-					if (SUCCESS(error_code)) {
-						_streamBuffer->setOpCode(READ_VALUE);
-						_stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
-						_stateReadCharacteristic->updateValue();
-//						LOGi("success");
-						mb.unlock();
-						return; // need to return here to avoid writing error_code, which would overwrite
-								// the read value on the read characteristic !!
-					}
-				} else if (opCode == WRITE_VALUE) {
-					LOGd(FMT_WRITE_TYPE, STR_CHAR_STATE, type);
-					error_code = State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length());
-				} else {
-					error_code = ERR_UNKNOWN_OP_CODE;
-				}
-
-				mb.unlock();
-			} else {
-				LOGe(MSG_BUFFER_IS_LOCKED);
-				error_code = ERR_BUFFER_LOCKED;
-			}
+	_stateControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
+		bool writeErrCode = true;
+		ERR_CODE errCode = stateOnWrite(accessLevel, value, length, writeErrCode);
+		if (writeErrCode) {
+			// Leave type as is.
+//			_streamBuffer->setType()
+			_streamBuffer->setOpCode(OPCODE_ERR_VALUE);
+			_streamBuffer->setPayload((uint8_t*)&errCode, sizeof(errCode));
+			_stateControlCharacteristic->setValueLength(_streamBuffer->getDataLength());
+//			memcpy(value, &errCode, sizeof(errCode));
+//			_stateControlCharacteristic->setValueLength(sizeof(errCode));
+			_stateControlCharacteristic->updateValue();
 		}
-
-//		LOGi("err error_code: %d", error_code);
-		memcpy(value, &error_code, sizeof(error_code));
-		_stateControlCharacteristic->setValueLength(sizeof(error_code));
-		_stateControlCharacteristic->updateValue();
 	});
 }
 
@@ -409,8 +320,9 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	_factoryResetCharacteristic->setNotifies(true);
 	_factoryResetCharacteristic->setDefaultValue(0);
 	_factoryResetCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_factoryResetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value) -> void {
+	_factoryResetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value, uint16_t length) -> void {
 		// TODO if settings --> factory reset disabled, we set the value to 2 to indicate reset is not possible.
+		// No need to check length, as value is not a pointer.
 		bool success = FactoryReset::getInstance().recover(value);
 		uint32_t val = 0;
 		if (success) {
@@ -420,11 +332,149 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	});
 }
 
+ERR_CODE CrownstoneService::configOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode) {
+	// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
+	// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
+	// If the user writes to this characteristic with insufficient rights, this method is not called
+
+	if (!value) {
+		LOGw(MSG_CHAR_VALUE_UNDEFINED);
+		return ERR_VALUE_UNDEFINED;
+	}
+	LOGi(MSG_CHAR_VALUE_WRITE);
+	MasterBuffer& mb = MasterBuffer::getInstance();
+	// at this point it is too late to check if mb was locked, because the softdevice doesn't care
+	// if the mb was locked, it writes to the buffer in any case
+	if (mb.isLocked()) {
+		LOGe(MSG_BUFFER_IS_LOCKED);
+		return ERR_BUFFER_LOCKED;
+	}
+	mb.lock();
+
+	if (length < _streamBuffer->getDataLength()) {
+		mb.unlock();
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	ERR_CODE errCode;
+	uint8_t type = _streamBuffer->type();
+	uint8_t opCode = _streamBuffer->opCode();
+	switch (opCode) {
+	case OPCODE_READ_VALUE: {
+		LOGd(FMT_SELECT_TYPE, STR_CHAR_CONFIGURATION, type);
+
+		errCode = Settings::getInstance().readFromStorage(type, _streamBuffer);
+		if (SUCCESS(errCode)) {
+			_streamBuffer->setOpCode(OPCODE_READ_VALUE);
+			_configurationReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
+			_configurationReadCharacteristic->updateValue();
+
+			// Writing the error code would overwrite the value on the read characteristic.
+			writeErrCode = false;
+		}
+		else {
+			LOGe(STR_FAILED);
+		}
+		break;
+	}
+	case OPCODE_WRITE_VALUE: {
+		LOGd(FMT_WRITE_TYPE, STR_CHAR_CONFIGURATION, type);
+
+		uint8_t *payload = _streamBuffer->payload();
+		uint16_t payloadLength = _streamBuffer->length();
+		errCode = Settings::getInstance().writeToStorage(type, payload, payloadLength);
+		break;
+	}
+	default:
+		errCode = ERR_UNKNOWN_OP_CODE;
+	}
+	mb.unlock();
+	return errCode;
+}
+
+void CrownstoneService::controlWriteErrorCode(uint8_t type, ERR_CODE errCode) {
+	if (_controlCharacteristic != NULL) {
+		_streamBuffer->setType(type);
+		_streamBuffer->setOpCode(OPCODE_ERR_VALUE);
+		_streamBuffer->setPayload((uint8_t*)&errCode, sizeof(errCode));
+
+		_controlCharacteristic->setValueLength(_streamBuffer->getDataLength());
+		_controlCharacteristic->updateValue();
+	}
+}
+
+ERR_CODE CrownstoneService::stateOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode) {
+	// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
+	// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
+	// If the user writes to this characteristic with insufficient rights, this method is not called
+
+	if (!value) {
+		LOGw(MSG_CHAR_VALUE_UNDEFINED);
+		return ERR_VALUE_UNDEFINED;
+	}
+
+	LOGi(MSG_CHAR_VALUE_WRITE);
+	MasterBuffer& mb = MasterBuffer::getInstance();
+	// at this point it is too late to check if mb was locked, because the softdevice doesn't care
+	// if the mb was locked, it writes to the buffer in any case
+	if (mb.isLocked()) {
+		LOGe(MSG_BUFFER_IS_LOCKED);
+		return ERR_BUFFER_LOCKED;
+	}
+	mb.lock();
+
+	if (length < _streamBuffer->getDataLength()) {
+		mb.unlock();
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	ERR_CODE errCode;
+	uint8_t type = _streamBuffer->type();
+	uint8_t opCode = _streamBuffer->opCode();
+
+	switch (opCode) {
+	case OPCODE_NOTIFY_VALUE: {
+		if (_streamBuffer->length() == 1) {
+			bool enable = *((bool*) _streamBuffer->payload());
+			State::getInstance().setNotify(type, enable);
+			errCode = ERR_SUCCESS;
+		}
+		else {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, _streamBuffer->length());
+			errCode = ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		// No break, fall through to read value.
+	}
+	case OPCODE_READ_VALUE: {
+		errCode = State::getInstance().readFromStorage(type, _streamBuffer);
+		LOGd(FMT_SELECT_TYPE, STR_CHAR_STATE, type);
+		if (SUCCESS(errCode)) {
+			_streamBuffer->setOpCode(OPCODE_READ_VALUE);
+			_stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
+			_stateReadCharacteristic->updateValue();
+
+			// Writing the error code would overwrite the value on the read characteristic.
+			writeErrCode = false;
+		}
+		break;
+	}
+	case OPCODE_WRITE_VALUE: {
+		LOGd(FMT_WRITE_TYPE, STR_CHAR_STATE, type);
+		errCode = State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length());
+		break;
+	}
+	default:
+		errCode = ERR_UNKNOWN_OP_CODE;
+	}
+	mb.unlock();
+	return errCode;
+}
+
 
 void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_SESSION_NONCE_SET: {
-		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
+		// Check if this characteristic exists first. In case of setup mode it does not for instance.
 		if (_sessionNonceCharacteristic != NULL) {
 			_sessionNonceCharacteristic->setValueLength(length);
 			_sessionNonceCharacteristic->setValue((uint8_t *) p_data);
@@ -433,7 +483,7 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 		break;
 	}
 	case EVT_BLE_CONNECT: {
-		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
+		// Check if this characteristic exists first. In case of setup mode it does not for instance.
 		if (_factoryResetCharacteristic != NULL) {
 			_factoryResetCharacteristic->operator=(0);
 		}
@@ -447,14 +497,14 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 		break;
 	}
 	case EVT_STATE_NOTIFICATION: {
-		if (_stateReadCharacteristic) {
+		if (_stateReadCharacteristic != NULL) {
 			state_vars_notifaction notification = *(state_vars_notifaction*)p_data;
 //			log(SERIAL_DEBUG, "send notification for %d, value:", notification.type);
 //			BLEutil::printArray(notification.data, notification.dataLength);
 
 			_streamBuffer->setPayload(notification.data, notification.dataLength);
 			_streamBuffer->setType(notification.type);
-			_streamBuffer->setOpCode(NOTIFY_VALUE);
+			_streamBuffer->setOpCode(OPCODE_NOTIFY_VALUE);
 
 			_stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
 			_stateReadCharacteristic->updateValue();
@@ -462,12 +512,7 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 		break;
 	}
 	case EVT_SETUP_DONE: {
-		if (_controlCharacteristic) {
-			ERR_CODE errorCode = ERR_SUCCESS;
-			_controlCharacteristic->setValue((uint8_t*)&errorCode);
-			_controlCharacteristic->setValueLength(sizeof(errorCode));
-			_controlCharacteristic->updateValue();
-		}
+		controlWriteErrorCode(CMD_SETUP, ERR_SUCCESS);
 		break;
 	}
 	}

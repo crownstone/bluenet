@@ -41,6 +41,8 @@ enum CommandHandlerTypes {
 	CMD_ALLOW_DIMMING               = 29,    //! 0x1D
 	CMD_LOCK_SWITCH                 = 30,    //! 0x1E
 	CMD_SETUP                       = 31,    //! 0x1F
+
+	CMD_UNKNOWN                     = 0xFF
 };
 
 struct __attribute__((__packed__)) switch_message_payload_t {
