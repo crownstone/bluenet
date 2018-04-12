@@ -386,7 +386,7 @@ void MeshControl::handleCommandForUs(uint8_t commandType, uint8_t bitmask, uint3
 	}
 	default: {
 		LOGi("Unknown message type %d. Don't know how to decode...", commandType);
-		statusResult = ERR_UNKNOWN_MESSAGE_TYPE;
+		statusResult = ERR_UNKNOWN_TYPE;
 		break;
 	}
 
@@ -429,7 +429,7 @@ bool MeshControl::handleConfigCommand(config_mesh_message_t* configMsg, uint16_t
 		configReply.data.header.length = Settings::getInstance().getSettingsItemSize(configType);
 
 		if (configReply.data.header.length > sizeof(configReply.data.payload)) {
-			statusResult = ERR_BUFFER_TOO_SMALL;
+			statusResult = ERR_WRONG_PAYLOAD_LENGTH;
 		} else {
 			statusResult = Settings::getInstance().get(configType, configReply.data.payload);
 			if (statusResult == ERR_SUCCESS) {
@@ -475,7 +475,7 @@ bool MeshControl::handleStateCommand(state_mesh_message_t* stateMsg, uint16_t st
 		stateReply.data.header.length = State::getInstance().getStateItemSize(stateType);
 
 		if (stateReply.data.header.length > sizeof(stateReply.data.payload)) {
-			statusResult = ERR_BUFFER_TOO_SMALL;
+			statusResult = ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		else {
 			statusResult = State::getInstance().get(stateType, stateReply.data.payload, stateReply.data.header.length);

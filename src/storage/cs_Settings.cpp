@@ -143,7 +143,7 @@ ERR_CODE Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBu
 		return error_code;
 	} else {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
-		return ERR_CONFIG_NOT_FOUND;
+		return ERR_UNKNOWN_TYPE;
 	}
 }
 
@@ -303,12 +303,12 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
 //		updateFlag(type, payload[0] != 0, persistent);
 		LOGe("Write disabled. Use commands to enable/disable");
-		return ERR_WRITE_CONFIG_DISABLED;
+		return ERR_WRITE_NOT_ALLOWED;
 	}
 
 	default: {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
-		return ERR_CONFIG_NOT_FOUND;
+		return ERR_UNKNOWN_TYPE;
 	}
 	}
 }
@@ -620,7 +620,7 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size, bool getDefau
 	}
 	default: {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
-		return ERR_CONFIG_NOT_FOUND;
+		return ERR_UNKNOWN_TYPE;
 	}
 	}
 	return ERR_SUCCESS;
@@ -855,7 +855,7 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	}
 	default: {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
-		return ERR_CONFIG_NOT_FOUND;
+		return ERR_UNKNOWN_TYPE;
 	}
 	}
 

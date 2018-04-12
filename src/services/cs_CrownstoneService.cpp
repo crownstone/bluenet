@@ -339,7 +339,7 @@ ERR_CODE CrownstoneService::configOnWrite(const EncryptionAccessLevel accessLeve
 
 	if (!value) {
 		LOGw(MSG_CHAR_VALUE_UNDEFINED);
-		return ERR_VALUE_UNDEFINED;
+		return ERR_BUFFER_UNASSIGNED;
 	}
 	LOGi(MSG_CHAR_VALUE_WRITE);
 	MasterBuffer& mb = MasterBuffer::getInstance();
@@ -410,7 +410,7 @@ ERR_CODE CrownstoneService::stateOnWrite(const EncryptionAccessLevel accessLevel
 
 	if (!value) {
 		LOGw(MSG_CHAR_VALUE_UNDEFINED);
-		return ERR_VALUE_UNDEFINED;
+		return ERR_BUFFER_UNASSIGNED;
 	}
 
 	LOGi(MSG_CHAR_VALUE_WRITE);

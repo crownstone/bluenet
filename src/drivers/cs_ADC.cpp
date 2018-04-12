@@ -242,7 +242,7 @@ void ADC::enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroV
 
 cs_adc_error_t ADC::changeChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config) {
 	if (channel >= _config.channelCount) {
-		return ERR_INVALID_CHANNEL;
+		return ERR_ADC_INVALID_CHANNEL;
 	}
 	// Copy the channel config
 	_config.channels[channel].pin = config.pin;
