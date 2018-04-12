@@ -480,6 +480,8 @@ ERR_CODE CommandHandler::handleCmdValidateSetup(buffer_ptr_t buffer, const uint1
 //		return ERR_NOT_AVAILABLE;
 //	}
 
+	return ERR_NOT_AVAILABLE;
+
 	Settings& settings = Settings::getInstance();
 
 	uint8_t key[ENCYRPTION_KEY_LENGTH];
