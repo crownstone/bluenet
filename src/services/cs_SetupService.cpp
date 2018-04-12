@@ -25,7 +25,7 @@ void SetupService::createCharacteristics() {
 	uint16_t maxLength = 0;
 
 	_streamBuffer = getStreamBuffer(buffer, maxLength);
-	addControlCharacteristic(buffer, maxLength, SETUP);
+	addControlCharacteristic(buffer, maxLength, SETUP_CONTROL_UUID, SETUP);
 	LOGi(FMT_CHAR_ADD, STR_CHAR_CONTROL);
 
 	addMacAddressCharacteristic();
@@ -35,9 +35,9 @@ void SetupService::createCharacteristics() {
 	LOGi(FMT_CHAR_ADD, STR_CHAR_SETUP_KEY);
 
 
-	LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
-	addConfigurationControlCharacteristic(buffer, maxLength);
-	addConfigurationReadCharacteristic(buffer, maxLength, SETUP);
+//	LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
+//	addConfigurationControlCharacteristic(buffer, maxLength);
+//	addConfigurationReadCharacteristic(buffer, maxLength, SETUP);
 
 	LOGi(FMT_CHAR_ADD, BLE_CHAR_GOTO_DFU);
 	addGoToDfuCharacteristic();

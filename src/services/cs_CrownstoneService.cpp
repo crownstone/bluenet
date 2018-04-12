@@ -67,7 +67,7 @@ void CrownstoneService::createCharacteristics() {
 #if CHAR_CONTROL==1
 	LOGi(FMT_CHAR_ADD, STR_CHAR_CONTROL);
 	_streamBuffer = getStreamBuffer(buffer, maxLength);
-	addControlCharacteristic(buffer, maxLength);
+	addControlCharacteristic(buffer, maxLength, CONTROL_UUID);
 #else
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_CONTROL);
 #endif
@@ -164,11 +164,11 @@ void CrownstoneService::addMeshCharacteristic() {
 }
 
 
-void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
+void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, uint16_t charUuid, EncryptionAccessLevel minimumAccessLevel) {
 	_controlCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_controlCharacteristic);
 
-	_controlCharacteristic->setUUID(UUID(getUUID(), CONTROL_UUID));
+	_controlCharacteristic->setUUID(UUID(getUUID(), charUuid));
 	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setWritable(true);
 	_controlCharacteristic->setNotifies(true);
