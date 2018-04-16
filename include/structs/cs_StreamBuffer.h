@@ -23,9 +23,9 @@
 
 enum OpCode {
 	OPCODE_READ_VALUE       = 0,
-	OPCODE_WRITE_VALUE,
-	OPCODE_NOTIFY_VALUE,
-	OPCODE_ERR_VALUE
+	OPCODE_WRITE_VALUE      = 1,
+	OPCODE_NOTIFY_VALUE     = 2,
+	OPCODE_ERR_VALUE        = 3
 };
 
 /** Header of a stream buffer
