@@ -100,7 +100,7 @@ Bit | Name |  Description
 2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#service_data_encrypted_error), or by reading the [error state](PROTOCOL.md#state_packet).
 3 | Switch locked | When the switch state is locked, this will be 1.
 4 | Time set | If this is 1, the time is set on this Crownstone.
-5 | Reserved | Reserved for future use.
+5 | Switchcraft | If this is 1, switchcraft is enabled on this Crownstone.
 6 | Reserved | Reserved for future use.
 7 | Reserved | Reserved for future use.
 
