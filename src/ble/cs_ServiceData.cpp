@@ -382,7 +382,7 @@ bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& ser
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
 	else {
 //		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u adv=%u", serviceData.params.type, serviceData.params.crownstoneId, serviceData.params.switchState, serviceData.params.flagBitmask, serviceData.params.temperature, serviceData.params.powerUsageReal, serviceData.params.accumulatedEnergy, serviceData.params.partialTimestamp, advertise);
-		LOGd("serviceData:");
+		LOGd("ext serviceData:");
 		BLEutil::printArray(serviceData.array, sizeof(serviceData));
 	}
 #endif
