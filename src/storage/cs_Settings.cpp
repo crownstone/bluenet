@@ -300,7 +300,10 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_ENCRYPTION_ENABLED :
 	case CONFIG_IBEACON_ENABLED :
 	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED :
+	case CONFIG_PWM_ALLOWED:
+	case CONFIG_SWITCH_LOCKED:
+	case CONFIG_SWITCHCRAFT_ENABLED: {
 //		updateFlag(type, payload[0] != 0, persistent);
 		LOGe("Write disabled. Use commands to enable/disable");
 		return ERR_WRITE_NOT_ALLOWED;
@@ -414,7 +417,10 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_ENCRYPTION_ENABLED :
 	case CONFIG_IBEACON_ENABLED :
 	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_SAMPLER_ENABLED : {
+	case CONFIG_CONT_POWER_SAMPLER_ENABLED :
+	case CONFIG_PWM_ALLOWED:
+	case CONFIG_SWITCH_LOCKED:
+	case CONFIG_SWITCHCRAFT_ENABLED: {
 		return 1;
 	}
 
@@ -948,6 +954,11 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 		StorageHelper::setUint8(value, _storageStruct.switchLocked);
 		break;
 	}
+	case CONFIG_SWITCHCRAFT_ENABLED: {
+		p_item = (uint8_t*)&_storageStruct.switchCraftEnabled;
+		StorageHelper::setUint8(value, _storageStruct.switchCraftEnabled);
+		break;
+	}
 	default: {
 		return false;
 	}
@@ -1017,6 +1028,10 @@ bool Settings::readFlag(uint8_t type, bool& value) {
 		StorageHelper::getUint8(_storageStruct.switchLocked, (uint8_t*)&value, 0, false);
 		break;
 	}
+	case CONFIG_SWITCHCRAFT_ENABLED: {
+		StorageHelper::getUint8(_storageStruct.switchCraftEnabled, (uint8_t*)&value, 0, false);
+		break;
+	}
 	default:
 		return false;
 	}
@@ -1039,7 +1054,8 @@ bool Settings::isSet(uint8_t type) {
 	case CONFIG_CONT_POWER_SAMPLER_ENABLED :
 	case CONFIG_DEFAULT_ON:
 	case CONFIG_PWM_ALLOWED:
-	case CONFIG_SWITCH_LOCKED: {
+	case CONFIG_SWITCH_LOCKED:
+	case CONFIG_SWITCHCRAFT_ENABLED: {
 		bool enabled;
 		readFlag(type, enabled);
 		return enabled;

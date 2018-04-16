@@ -41,6 +41,7 @@ enum CommandHandlerTypes {
 	CMD_ALLOW_DIMMING               = 29,    //! 0x1D
 	CMD_LOCK_SWITCH                 = 30,    //! 0x1E
 	CMD_SETUP                       = 31,    //! 0x1F
+	CMD_ENABLED_SWITCHCRAFT         = 32,    //! 0x20
 
 	CMD_UNKNOWN                     = 0xFF
 };

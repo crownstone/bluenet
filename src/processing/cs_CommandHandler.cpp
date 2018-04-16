@@ -167,6 +167,8 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		return handleCmdLockSwitch(buffer, size, accessLevel);
 	case CMD_SETUP:
 		return handleCmdSetup(buffer, size, accessLevel);
+	case CMD_ENABLED_SWITCHCRAFT:
+		return handleCmdEnableSwitchcraft(buffer, size, accessLevel);
 	default:
 		LOGe("Unknown type: %u", type);
 		return ERR_UNKNOWN_TYPE;
@@ -764,6 +766,22 @@ ERR_CODE CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uint16_t
 	return ERR_SUCCESS;
 }
 
+ERR_CODE CommandHandler::handleCmdEnableSwitchcraft(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGi(STR_HANDLE_COMMAND, "enable switchcraft");
+
+	if (size != sizeof(enable_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+	bool enable = payload->enable;
+
+	Settings::getInstance().updateFlag(CONFIG_SWITCHCRAFT_ENABLED, enable, true);
+//	EventDispatcher::getInstance().dispatch(EVT_, &enable, sizeof(bool));
+	return ERR_SUCCESS;
+}
+
 
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
@@ -838,6 +856,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CMD_RESET_ERRORS:
 	case CMD_ALLOW_DIMMING:
 	case CMD_LOCK_SWITCH:
+	case CMD_ENABLED_SWITCHCRAFT:
 		return ADMIN;
 	default:
 		return NOT_SET;

@@ -438,8 +438,8 @@ Type nr | Type name | Payload type | Payload Description | A | M | G | S
 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x
 6 | Keep alive state | [Keep alive payload](#cmd_keep_alive_payload) | Keep alive with state | x | x |
 7 | Keep alive | - | Keep alive without state, uses last state transmitted with Keep alive state command | x | x | x
-8 | Enable mesh | uint 8 | Enable/Disable Mesh, 0 = OFF, other = ON | x
-9 | Enable encryption | uint 8 | Enable/Disable Encryption, 0 = OFF, other = ON. Only has effect after a reset. | x
+8 | Enable mesh | uint 8 | Enable/Disable mesh, 0 = OFF, other = ON | x
+9 | Enable encryption | uint 8 | Enable/Disable encryption, 0 = OFF, other = ON. Only has effect after a reset. | x
 10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON | x
 11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON. **Deprecated** | x
 12 | Enable scanner | [Enable Scanner payload](#cmd_enable_scanner_payload) | Enable/Disable scanner | x
@@ -462,6 +462,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | G | S
 29 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 30 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 31 | Setup | [Setup packet](#setup_packet) | Perform setup. |  |  |  | x
+32 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
 
 
 
@@ -579,6 +580,7 @@ Type nr | Type name | Payload type | Description
 53 | Dimmer temp down voltage | float | Voltage of lower threshold of the dimmer thermometer.                       **Setting this to a wrong value may cause damage.**
 54 | Pwm allowed | uint8 | Stores whether this Crownstone is allowed to dim. *read only*
 55 | Switch locked | uint8 | Stores whether this Crownstone is allowed to change the switch state. *read only*
+56 | Switchcraft enabled | uint8 | Stores whether this Crownstone has switchcraft enabled. *read only*
 
 OpCodes:
 
