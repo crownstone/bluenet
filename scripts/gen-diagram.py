@@ -102,8 +102,10 @@ COLOR_PALETTE.extend([CHARTS[2], CHARTS[10]])
 # COLOR_PALETTE.extend([GREYS[4]])
 
 
-colorDict = {}
 # All text in lower case
+colorDict = {}
+
+
 colorDict['type'] = SKY_BLUES[3]
 colorDict['length'] = SKY_BLUES[2]
 colorDict['size'] = SKY_BLUES[2]
@@ -116,7 +118,9 @@ colorDict['reserved'] = GREYS[4]
 colorDict['padding'] = GREYS[4]
 colorDict['rand'] = GREYS[4]
 
+# Payload, data, etc
 colorDict['payload'] = CHARTS[2]
+colorDict['encrypted payload'] = CHARTS[2]
 colorDict['data'] = CHARTS[2]
 colorDict['list'] = CHARTS[2]
 
@@ -293,6 +297,7 @@ def drawVarList(varList, filename):
 	yVar = y + byteLabel.get_height()
 	x += byteLabel.get_width()
 
+	cycleColorInd = 0
 	prevColorInd = -1
 	byteNum = 0
 	byteNumKnown = True
@@ -324,11 +329,14 @@ def drawVarList(varList, filename):
 			color = colorDict[varNameLower]
 		else:
 			# Don't use the same color as the previous color
-			randColorInd = prevColorInd
-			while randColorInd == prevColorInd:
-				randColorInd = randint(0, len(COLOR_PALETTE)-1)
-			color = COLOR_PALETTE[randColorInd]
+			colorInd = prevColorInd
+			while colorInd == prevColorInd:
+				# colorInd = randint(0, len(COLOR_PALETTE)-1)
+				colorInd = cycleColorInd
+				cycleColorInd = (cycleColorInd + 1) % len(COLOR_PALETTE)
+			color = COLOR_PALETTE[colorInd]
 			colorDict[varNameLower] = color
+
 		# Keep up last used color index
 		if (color in COLOR_PALETTE):
 			prevColorInd = COLOR_PALETTE.index(color)
