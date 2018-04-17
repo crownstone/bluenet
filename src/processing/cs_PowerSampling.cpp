@@ -687,11 +687,6 @@ void PowerSampling::calculateEnergy() {
  */
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
 
-#define ANNE_DOES_NOT_LIKE_ERRORS
-#ifdef ANNE_DOES_NOT_LIKE_ERRORS
-	return;
-#endif
-
 	//! Get the current state errors
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
