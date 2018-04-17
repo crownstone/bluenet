@@ -29,10 +29,17 @@ public:
 		return instance;
 	}
 
-	/** Constructor sets some default values like number of times switch detection has to be skipped after a detection
-	 * event.
+	/** Constructor: sets some default config values.
 	 */
 	RecognizeSwitch();
+
+	/** Initialize: set initial values and allocate buffers.
+	 */
+	void init();
+
+	/** Deinitialize: deallocate buffers.
+	 */
+	void deinit();
 
 	/** Recognize switch state.
 	 *

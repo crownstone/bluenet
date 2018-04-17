@@ -8,17 +8,22 @@
 #include <processing/cs_RecognizeSwitch.h>
 
 RecognizeSwitch::RecognizeSwitch() {
+	int consecutive_samples = 20; // 20 and 450 for threshold works a bit
+	_circBuffer = new CircularBuffer<int16_t>(consecutive_samples);
+	_threshold = 200;
+}
+
+void RecognizeSwitch::init() {
 	// Skip the first N cycles
 	_skipSwitchDetectionTriggers = 200;
-
-	int consecutive_samples = 20; // 20 and 450 for threshold works a bit
-	_threshold = 200;
-
-	_circBuffer = new CircularBuffer<int16_t>(consecutive_samples); 
 	_circBuffer->init();
 }
 
-#define VERBOSE_SWITCH
+void RecognizeSwitch::deinit() {
+	_circBuffer->deinit();
+}
+
+// #define VERBOSE_SWITCH
 
 /**
  * The recognizeSwitch function goes through a sequence of buffers to detect if a switch event happened in the buffer

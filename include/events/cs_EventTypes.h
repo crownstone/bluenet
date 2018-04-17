@@ -69,6 +69,7 @@ enum GeneralEventType {
 	EVT_STORAGE_DONE, // Sent when storage is done and queue is empty.
 	EVT_SETUP_DONE, // Sent when setup was done (and all settings have been stored).
 	EVT_DO_RESET_DELAYED, // Sent to perform a reset in a few seconds (currently done by command handler). Payload is uint8_t opCode.
+	EVT_SWITCHCRAFT_ENABLED, // Sent when switchcraft flag is set. Payload is boolean.
 	EVT_ALL = 0xFFFF
 };
 

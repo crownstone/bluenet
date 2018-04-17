@@ -153,6 +153,7 @@ private:
 	uint32_t _lastSwitchOffTicks;    //! RTC ticks when the switch was last turned off.
 	bool _lastSwitchOffTicksValid;   //! Keep up whether the last switch off time is valid.
 	bool _igbtFailureDetectionStarted; //! Keep up whether the IGBT failure detection has started yet.
+	bool _switchcraftEnabled; // Keep up whether switchcraft is enabled.
 
 	//! Store the adc config, so that the actual adc config can be changed.
 	struct __attribute__((packed)) {
@@ -229,5 +230,7 @@ private:
 	void enableDifferentialModeVoltage(bool enable);
 
 	void changeRange(uint8_t channel, int32_t amount);
+
+	void enableSwitchcraft(bool enable);
 };
 

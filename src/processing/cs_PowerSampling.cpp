@@ -97,6 +97,9 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
 	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentMilliAmpThreshold);
 	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm);
+	_switchcraftEnabled = settings.isSet(CONFIG_SWITCHCRAFT_ENABLED);
+
+	enableSwitchcraft(_switchcraftEnabled);
 
 	initAverages();
 	_recalibrateZeroVoltage = true;
@@ -226,7 +229,10 @@ void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_DEC_CURRENT_RANGE:
 		changeRange(CURRENT_CHANNEL_IDX, -600);
 		break;
+	case EVT_SWITCHCRAFT_ENABLED:
+		enableSwitchcraft(*(bool*)p_data);
 	}
+
 }
 
 /**
@@ -305,10 +311,12 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	bool switch_detected = RecognizeSwitch::getInstance().detect(prevIndex, power.voltageIndex);
-	if (switch_detected) {
-		LOGd("Switch event detected!");
-		EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
+	if (_switchcraftEnabled) {
+		bool switch_detected = RecognizeSwitch::getInstance().detect(prevIndex, power.voltageIndex);
+		if (switch_detected) {
+			LOGd("Switch event detected!");
+//			EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
+		}
 	}
 
 	_adc->releaseBuffer(bufIndex);
@@ -851,4 +859,14 @@ void PowerSampling::changeRange(uint8_t channel, int32_t amount) {
 	}
 	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[channel];
 	_adc->changeChannel(channel, channelConfig);
+}
+
+void PowerSampling::enableSwitchcraft(bool enable) {
+	if (enable) {
+		RecognizeSwitch::getInstance().init();
+	}
+	else {
+		RecognizeSwitch::getInstance().deinit();
+	}
+	_switchcraftEnabled = enable;
 }

@@ -777,7 +777,7 @@ ERR_CODE CommandHandler::handleCmdEnableSwitchcraft(buffer_ptr_t buffer, const u
 	bool enable = payload->enable;
 
 	Settings::getInstance().updateFlag(CONFIG_SWITCHCRAFT_ENABLED, enable, true);
-//	EventDispatcher::getInstance().dispatch(EVT_, &enable, sizeof(bool));
+	EventDispatcher::getInstance().dispatch(EVT_SWITCHCRAFT_ENABLED, &enable, sizeof(bool));
 	return ERR_SUCCESS;
 }
 
