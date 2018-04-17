@@ -270,7 +270,7 @@ private:
 	cs_adc_buffer_count_t _numBuffersQueued;
 
 	//! Buffers in progress 
-	bool _in_progress[CS_ADC_NUM_BUFFERS];
+	bool _inProgress[CS_ADC_NUM_BUFFERS];
 
 	//! Arguments to the callback function
 	adc_done_cb_data_t _doneCallbackData;

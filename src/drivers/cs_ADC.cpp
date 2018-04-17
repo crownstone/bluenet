@@ -119,7 +119,7 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 		LOGd("Allocate buffer %i", i);
 		nrf_saadc_value_t * buf = new nrf_saadc_value_t[CS_ADC_BUF_SIZE];
 		InterleavedBuffer::getInstance().setBuffer(i, buf);
-		_in_progress[i] = false;
+		_inProgress[i] = false;
 	}
 
 	// Queue buffers
@@ -232,7 +232,7 @@ void ADC::start() {
 
 void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 //	LOGd("Add buffer %i to queue", bufIndex);
-	if (_in_progress[bufIndex]) {
+	if (_inProgress[bufIndex]) {
 		LOGe("Buffer %i still in progress. Will not queue!", bufIndex);
 		return;
 	}
@@ -252,7 +252,7 @@ bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 		}
 		return true;
 	}
-	_in_progress[bufIndex] = false;
+	_inProgress[bufIndex] = false;
 
 	cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS;
 	addBufferToSampleQueue(nextIndex);
@@ -329,7 +329,7 @@ void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 	
 	if (dataCallbackRegistered()) { // && !dataCallbackInProgress()) {
 		_doneCallbackData.bufIndex = bufIndex;
-		_in_progress[bufIndex] = true;
+		_inProgress[bufIndex] = true;
 //		LOGd("Set in progress for %i", bufIndex);
 
 		// Decouple done callback from adc interrupt handler, and put it on app scheduler instead
