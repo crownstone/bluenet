@@ -101,7 +101,7 @@ void IndoorLocalizationService::addScanControlCharacteristic() {
 	_scanControlCharac->setName(BLE_CHAR_SCAN_CONTROL);
 	_scanControlCharac->setDefaultValue(255);
 	_scanControlCharac->setWritable(true);
-	_scanControlCharac->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
+	_scanControlCharac->onWrite([&](const uint8_t accessLevel, const uint8_t& value, uint16_t length) -> void {
 		CommandHandler::getInstance().handleCommand(CMD_SCAN_DEVICES, (buffer_ptr_t)&value, 1);
 	});
 }
@@ -163,7 +163,7 @@ void IndoorLocalizationService::addTrackedDeviceCharacteristic() {
 	_trackedDeviceCharac->setMaxGattValueLength(maxLength);
 	_trackedDeviceCharac->setValueLength(0);
 
-	_trackedDeviceCharac->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value) -> void {
+	_trackedDeviceCharac->onWrite([&](const uint8_t accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
 		Tracker::getInstance().handleTrackedDeviceCommand(_trackedDeviceCharac->getValue(),
 				_trackedDeviceCharac->getValueLength());
 	});

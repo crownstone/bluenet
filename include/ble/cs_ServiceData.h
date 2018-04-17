@@ -22,7 +22,8 @@
 #include <protocol/cs_MeshMessageTypes.h>
 #endif
 
-//#define BUILD_MESHING 1
+#define BUILD_MESHING 1
+#define SERVICE_DATA_VALIDATION 0xFA
 
 enum ServiceDataFlagBits {
 	SERVICE_DATA_FLAGS_DIMMING_AVAILABLE = 0,
@@ -36,9 +37,8 @@ enum ServiceDataFlagBits {
 };
 
 enum ServiceDataUnencryptedType {
-	SERVICE_DATA_TYPE_V1 = 1,
-	SERVICE_DATA_TYPE_ENCRYPTED = 3,
-	SERVICE_DATA_TYPE_SETUP = 4,
+	SERVICE_DATA_TYPE_ENCRYPTED = 5,
+	SERVICE_DATA_TYPE_SETUP = 6,
 };
 
 enum ServiceDataEncryptedType {
@@ -57,7 +57,8 @@ struct __attribute__((packed)) service_data_encrypted_state_t {
 	int16_t  powerUsageReal;
 	int32_t  energyUsed;
 	uint16_t partialTimestamp;
-	uint16_t validation;
+	uint8_t  reserved;
+	uint8_t  validation;
 };
 
 struct __attribute__((packed)) service_data_encrypted_error_t {
@@ -80,7 +81,9 @@ struct __attribute__((packed)) service_data_encrypted_ext_state_t {
 	int32_t  energyUsed;
 	uint16_t partialTimestamp;
 //	uint8_t  reserved[2];
-	uint16_t validation;
+//	uint16_t validation;
+	int8_t   rssi;
+	uint8_t  validation;
 };
 
 struct __attribute__((packed)) service_data_encrypted_ext_error_t {
@@ -91,7 +94,9 @@ struct __attribute__((packed)) service_data_encrypted_ext_error_t {
 	int8_t   temperature;
 	uint16_t partialTimestamp;
 //	uint8_t  reserved[2];
-	uint16_t validation;
+//	uint16_t validation;
+	int8_t   rssi;
+	uint8_t  validation;
 };
 
 struct __attribute__((packed)) service_data_encrypted_t {
@@ -130,6 +135,7 @@ struct __attribute__((packed)) service_data_setup_t {
 union service_data_t {
 	struct __attribute__((packed)) {
 		uint8_t  protocolVersion;
+		uint8_t  deviceType;
 		union {
 //			service_data_v1_t v1;
 			service_data_encrypted_t encrypted;
@@ -144,6 +150,16 @@ class ServiceData : EventListener {
 
 public:
 	ServiceData();
+
+	/** Init the service data, make sure you set important fields first.
+	 */
+	void init();
+
+	/** Set the device type field of the service data.
+	 *
+	 * @param[in] deviceType      The device type, see cs_DeviceTypes.h
+	 */
+	void setDeviceType(uint8_t deviceType);
 
 	/** Set the power usage field of the service data.
 	 *

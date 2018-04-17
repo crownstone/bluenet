@@ -12,6 +12,7 @@
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
+#include <processing/cs_Setup.h>
 
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
@@ -64,6 +65,7 @@ CommandHandler::CommandHandler() :
 
 void CommandHandler::init(const boards_config_t* board) {
 	_boardConfig = board;
+	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_delayTimerId, execute_delayed);
 	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t) reset);
 }
@@ -97,7 +99,7 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		const EncryptionAccessLevel accessLevel) {
 
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
-		return ERR_ACCESS_NOT_ALLOWED;
+		return ERR_NO_ACCESS;
 	}
 	switch (type) {
 	case CMD_NOP:
@@ -162,9 +164,13 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		return handleCmdAllowDimming(buffer, size, accessLevel);
 	case CMD_LOCK_SWITCH:
 		return handleCmdLockSwitch(buffer, size, accessLevel);
+	case CMD_SETUP:
+		return handleCmdSetup(buffer, size, accessLevel);
+	case CMD_ENABLED_SWITCHCRAFT:
+		return handleCmdEnableSwitchcraft(buffer, size, accessLevel);
 	default:
 		LOGe("Unknown type: %u", type);
-		return ERR_COMMAND_NOT_FOUND;
+		return ERR_UNKNOWN_TYPE;
 	}
 	return ERR_SUCCESS;
 }
@@ -345,7 +351,7 @@ ERR_CODE CommandHandler::handleCmdScanDevices(buffer_ptr_t buffer, const uint16_
 
 ERR_CODE CommandHandler::handleCmdRequestServiceData(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-	LOGi(STR_HANDLE_COMMAND, "request service");
+	LOGi(STR_HANDLE_COMMAND, "request service data");
 
 	return ERR_NOT_IMPLEMENTED;
 
@@ -458,81 +464,16 @@ ERR_CODE CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uint16_t
 }
 
 
+ERR_CODE CommandHandler::handleCmdSetup(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGi(STR_HANDLE_COMMAND, "setup");
+	ERR_CODE errCode = Setup::getInstance().handleCommand(buffer, size);
+	return errCode;
+}
+
+
 ERR_CODE CommandHandler::handleCmdValidateSetup(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "validate setup");
-//	if (!EncryptionHandler::getInstance().allowAccess(SETUP, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-//	uint8_t opMode;
-//	State::getInstance().get(STATE_OPERATION_MODE, opMode);
-//	if (opMode != OPERATION_MODE_SETUP) {
-//		LOGw("only available in setup mode");
-//		return ERR_NOT_AVAILABLE;
-//	}
-
-	Settings& settings = Settings::getInstance();
-
-	uint8_t key[ENCRYPTION_KEY_LENGTH];
-	uint8_t blankKey[ENCRYPTION_KEY_LENGTH] = {};
-
-	if (settings.isSet(CONFIG_ENCRYPTION_ENABLED)) {
-		// validate encryption keys are not 0
-		settings.get(CONFIG_KEY_ADMIN, key);
-		if (memcmp(key, blankKey, ENCRYPTION_KEY_LENGTH) == 0) {
-			LOGw("owner key is not set!");
-			return ERR_COMMAND_FAILED;
-		}
-
-		settings.get(CONFIG_KEY_MEMBER, key);
-		if (memcmp(key, blankKey, ENCRYPTION_KEY_LENGTH) == 0) {
-			LOGw("member key is not set!");
-			return ERR_COMMAND_FAILED;
-		}
-
-		settings.get(CONFIG_KEY_GUEST, key);
-		if (memcmp(key, blankKey, ENCRYPTION_KEY_LENGTH) == 0) {
-			LOGw("guest key is not set!");
-			return ERR_COMMAND_FAILED;
-		}
-	}
-
-	// validate crownstone id is not 0
-	uint16_t crownstoneId;
-	settings.get(CONFIG_CROWNSTONE_ID, &crownstoneId);
-	if (crownstoneId == 0) {
-		LOGw("crownstone id has to be set during setup mode");
-		return ERR_COMMAND_FAILED;
-	}
-
-	// validate major and minor
-	uint16_t major;
-	settings.get(CONFIG_IBEACON_MAJOR, &major);
-	if (major == 0) {
-		LOGw("ibeacon major is not set!");
-		return ERR_COMMAND_FAILED;
-	}
-
-	uint16_t minor;
-	settings.get(CONFIG_IBEACON_MINOR, &minor);
-	if (minor == 0) {
-		LOGw("ibeacon minor is not set!");
-		return ERR_COMMAND_FAILED;
-	}
-
-	// TODO: check mesh access address
-
-	LOGi("Setup completed, resetting to normal mode");
-
-	// if validation ok, set opMode to normal mode
-	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
-
-	// Switch relay on
-	switch_message_payload_t switchPayload;
-	switchPayload.switchState = SWITCH_ON;
-	handleCommand(CMD_SWITCH, (uint8_t*)&switchPayload, 1, ADMIN);
-
-	// then reset device
-	resetDelayed(GPREGRET_SOFT_RESET);
-
-	return ERR_SUCCESS;
+	return ERR_NOT_IMPLEMENTED;
 }
 
 
@@ -816,13 +757,30 @@ ERR_CODE CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uint16_t
 
 	if (enable && Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
 		LOGw("can't lock switch");
-		return ERR_COMMAND_FAILED;
+		return ERR_NOT_AVAILABLE;
 	}
 
 	Settings::getInstance().updateFlag(CONFIG_SWITCH_LOCKED, enable, true);
 	EventDispatcher::getInstance().dispatch(EVT_SWITCH_LOCKED, &enable, sizeof(bool));
 	return ERR_SUCCESS;
 }
+
+ERR_CODE CommandHandler::handleCmdEnableSwitchcraft(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGi(STR_HANDLE_COMMAND, "enable switchcraft");
+
+	if (size != sizeof(enable_message_payload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+	bool enable = payload->enable;
+
+	Settings::getInstance().updateFlag(CONFIG_SWITCHCRAFT_ENABLED, enable, true);
+//	EventDispatcher::getInstance().dispatch(EVT_, &enable, sizeof(bool));
+	return ERR_SUCCESS;
+}
+
 
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
@@ -861,6 +819,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	switch (type) {
 	case CMD_VALIDATE_SETUP:
 	case CMD_INCREASE_TX:
+	case CMD_SETUP:
 		return GUEST; // These commands are only available in setup mode.
 
 	case CMD_SWITCH:
@@ -896,9 +855,11 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CMD_RESET_ERRORS:
 	case CMD_ALLOW_DIMMING:
 	case CMD_LOCK_SWITCH:
+	case CMD_ENABLED_SWITCHCRAFT:
 		return ADMIN;
+	default:
+		return NOT_SET;
 	}
-	return NOT_SET;
 }
 
 bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
@@ -923,4 +884,18 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 		return false;
 	}
 	return false;
+}
+
+void CommandHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch (evt) {
+	case EVT_DO_RESET_DELAYED: {
+		if (length != 1) {
+			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
+			return;
+		}
+		uint8_t opCode = *(uint8_t*)p_data;
+		resetDelayed(opCode);
+		break;
+	}
+	}
 }

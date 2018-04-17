@@ -66,6 +66,9 @@ enum GeneralEventType {
 	EVT_PWM_POWERED,
 	EVT_PWM_ALLOWED, // Sent when pwm allowed flag is set. Payload is boolean.
 	EVT_SWITCH_LOCKED, // Sent when switch locked flag is set. Payload is boolean.
+	EVT_STORAGE_DONE, // Sent when storage is done and queue is empty.
+	EVT_SETUP_DONE, // Sent when setup was done (and all settings have been stored).
+	EVT_DO_RESET_DELAYED, // Sent to perform a reset in a few seconds (currently done by command handler). Payload is uint8_t opCode.
 	EVT_ALL = 0xFFFF
 };
 

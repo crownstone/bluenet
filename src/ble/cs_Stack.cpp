@@ -101,7 +101,8 @@ const nrf_clock_lf_cfg_t Nrf51822BluetoothStack::defaultClockSource = { .source 
                                                                         .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
 //*/
 
-//! called by softdevice handler on a ble event
+// Called by softdevice handler on a ble event
+// Since we init the softdevice with app scheduler, this callback runs on the main thread.
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 
 //	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
@@ -566,20 +567,21 @@ void Nrf51822BluetoothStack::configureScanResponse(uint8_t deviceType) {
 	//	ble_advdata_service_data_t service_data;
 		memset(&_service_data, 0, sizeof(_service_data));
 
-		switch(deviceType) {
-			case DEVICE_CROWNSTONE_PLUG: {
-				_service_data.service_uuid = CROWNSTONE_PLUG_SERVICE_DATA_UUID;
-				break;
-			}
-			case DEVICE_CROWNSTONE_BUILTIN: {
-				_service_data.service_uuid = CROWNSTONE_BUILT_SERVICE_DATA_UUID;
-				break;
-			}
-			case DEVICE_GUIDESTONE: {
-				_service_data.service_uuid = GUIDESTONE_SERVICE_DATA_UUID;
-				break;
-			}
-		}
+//		switch(deviceType) {
+//			case DEVICE_CROWNSTONE_PLUG: {
+//				_service_data.service_uuid = CROWNSTONE_PLUG_SERVICE_DATA_UUID;
+//				break;
+//			}
+//			case DEVICE_CROWNSTONE_BUILTIN: {
+//				_service_data.service_uuid = CROWNSTONE_BUILT_SERVICE_DATA_UUID;
+//				break;
+//			}
+//			case DEVICE_GUIDESTONE: {
+//				_service_data.service_uuid = GUIDESTONE_SERVICE_DATA_UUID;
+//				break;
+//			}
+//		}
+		_service_data.service_uuid = CROWNSTONE_PLUG_SERVICE_DATA_UUID;
 
 		_service_data.data.p_data = _serviceData->getArray();
 		_service_data.data.size = _serviceData->getArraySize();
@@ -1175,6 +1177,9 @@ void Nrf51822BluetoothStack::on_ble_evt(ble_evt_t * p_ble_evt) {
 //	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED) {
 //		LOGi("on_ble_event: 0x%X", p_ble_evt->header.evt_id);
 //	}
+
+//	LOGi("interrupt level=%u", __get_IPSR() & 0x1FF);
+	// No need to decouple with app scheduler: this handler is already running on the main thread, since sys_evt_dispatch is too.
 
 //    if (_dm_initialized && Settings::getInstance().isEnabled(CONFIG_ENCRYPTION_ENABLED)) {
 	if (_dm_initialized) {

@@ -44,8 +44,6 @@
 #define APP_TIMER_OP_QUEUE_SIZE                  20
 
 /** Maximum size of scheduler events. */
-// Has to be word aligned?
-// TODO: why this size (72)?
 /*
 #define SCHED_MAX_EVENT_DATA_SIZE                ((CEIL_DIV(MAX(MAX(BLE_STACK_EVT_MSG_BUF_SIZE,    \
                                                                     ANT_STACK_EVT_STRUCT_SIZE),    \
@@ -148,13 +146,15 @@
 
 #define POWER_SAMPLE_BURST_NUM_SAMPLES           (20000/CS_ADC_SAMPLE_INTERVAL_US) // Number of voltage and current samples per burst
 
-#define STORAGE_REQUEST_BUFFER_SIZE              5
+
+// Buffer size for storage requests. Storage requests get buffered when the device is scanning or meshing.
+#define STORAGE_REQUEST_BUFFER_SIZE              5 // Should be at least 3, because setup pushes 3 storage requests (configs + operation mode + switch state).
 
 #define FACTORY_RESET_CODE                       0xdeadbeef
 #define FACTORY_RESET_TIMEOUT                    60000 // Timeout before recovery becomes unavailable after reset (ms)
 #define FACTORY_PROCESS_TIMEOUT                  200 // Timeout before recovery process step is executed (ms)
 
-#define ENCRYPTION_KEY_LENGTH                    SOC_ECB_KEY_LENGTH //! 16 byte length
+#define ENCRYPTION_KEY_LENGTH                    16 // 16 byte length, just like SOC_ECB_KEY_LENGTH
 
 #define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
 

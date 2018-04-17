@@ -115,7 +115,7 @@ ERR_CODE State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, b
 		LOGw(FMT_STATE_NOT_FOUND, type);
 	}
 
-	return STATE_WRITE_DISABLED;
+	return ERR_WRITE_DISABLED;
 }
 
 ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
@@ -193,7 +193,7 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 	case STATE_LEARNED_SWITCHES:
 	default: {
 		LOGw(FMT_STATE_NOT_FOUND, type);
-		return ERR_STATE_NOT_FOUND;
+		return ERR_UNKNOWN_TYPE;
 	}
 	}
 
@@ -296,7 +296,7 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 	}
 	default: {
 		LOGw(FMT_STATE_NOT_FOUND, type);
-		return ERR_STATE_NOT_FOUND;
+		return ERR_UNKNOWN_TYPE;
 	}
 	}
 
@@ -403,22 +403,26 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 		}
 		case STATE_ERROR_OVER_CURRENT: {
 			_errorState.errors.overCurrent = *(uint8_t*)target;
-			publishUpdate(type, (uint8_t*)target, size);
+//			publishUpdate(type, (uint8_t*)target, size);
+			publishUpdate(STATE_ERRORS, (uint8_t*)(&_errorState), sizeof(_errorState));
 			break;
 		}
 		case STATE_ERROR_OVER_CURRENT_PWM: {
 			_errorState.errors.overCurrentPwm = *(uint8_t*)target;
-			publishUpdate(type, (uint8_t*)target, size);
+//			publishUpdate(type, (uint8_t*)target, size);
+			publishUpdate(STATE_ERRORS, (uint8_t*)(&_errorState), sizeof(_errorState));
 			break;
 		}
 		case STATE_ERROR_CHIP_TEMP: {
 			_errorState.errors.chipTemp = *(uint8_t*)target;
-			publishUpdate(type, (uint8_t*)target, size);
+//			publishUpdate(type, (uint8_t*)target, size);
+			publishUpdate(STATE_ERRORS, (uint8_t*)(&_errorState), sizeof(_errorState));
 			break;
 		}
 		case STATE_ERROR_PWM_TEMP: {
 			_errorState.errors.pwmTemp = *(uint8_t*)target;
-			publishUpdate(type, (uint8_t*)target, size);
+//			publishUpdate(type, (uint8_t*)target, size);
+			publishUpdate(STATE_ERRORS, (uint8_t*)(&_errorState), sizeof(_errorState));
 			break;
 		}
 		case STATE_IGNORE_BITMASK: {
@@ -450,7 +454,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 //			break;
 		}
 		default:
-			return ERR_STATE_NOT_FOUND;
+			return ERR_UNKNOWN_TYPE;
 		}
 
 		return ERR_SUCCESS;
@@ -559,7 +563,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 //			break;
 		}
 		default:
-			return ERR_STATE_NOT_FOUND;
+			return ERR_UNKNOWN_TYPE;
 		}
 
 //		publishUpdate(type, (uint8_t*)target, size);

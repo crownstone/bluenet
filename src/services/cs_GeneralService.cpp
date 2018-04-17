@@ -72,7 +72,7 @@ void GeneralService::addResetCharacteristic() {
 	_resetCharacteristic->setName(BLE_CHAR_RESET);
 	_resetCharacteristic->setDefaultValue(0);
 	_resetCharacteristic->setWritable(true);
-	_resetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value) -> void {
+	_resetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value, uint16_t length) -> void {
 		CommandHandler::getInstance().resetDelayed(value);
 	});
 }

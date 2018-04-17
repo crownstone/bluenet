@@ -255,13 +255,15 @@ void asPca10040(boards_config_t* p_config) {
 }
 
 void asGuidestone(boards_config_t* p_config) {
+	// Guidestone has pads for pin 9, 10, 25, 26, 27, SWDIO, SWDCLK, GND, VDD
+
 //	p_config->pinGpioPwm           = ; // unused
 //	p_config->pinGpioRelayOn       = ; // unused
 //	p_config->pinGpioRelayOff      = ; // unused
 //	p_config->pinAinCurrent        = ; // unused
 //	p_config->pinAinVoltage        = ; // unused
-//	p_config->pinGpioRx            = ; // unused
-//	p_config->pinGpioTx            = ; // unused
+	p_config->pinGpioRx            = 25;
+	p_config->pinGpioTx            = 26;
 //	p_config->pinLedRed            = ; // unused
 //	p_config->pinLedGreen          = ; // unused
 
@@ -285,7 +287,7 @@ uint32_t configure_board(boards_config_t* p_config) {
 
 	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (hardwareBoard == 0xFFFFFFFF) {
-		hardwareBoard = ACR01B2C;
+		hardwareBoard = DEFAULT_HARDWARE_BOARD;
 	}
 
 	switch(hardwareBoard) {

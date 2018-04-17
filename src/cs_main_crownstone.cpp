@@ -47,6 +47,7 @@ extern "C" {
 // Define to enable leds. WARNING: this is stored in UICR and not easily reversible!
 //#define ENABLE_LEDS
 
+
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -202,8 +203,7 @@ void Crownstone::init() {
 	case OPERATION_MODE_FACTORY_RESET: {
 
 		LOGd("Configure factory reset mode");
-
-		FactoryReset::getInstance().finishFactoryReset();
+		FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
 		break;
 	}
 	case OPERATION_MODE_DFU: {
@@ -252,14 +252,6 @@ void Crownstone::configure() {
  * This must be called after the SoftDevice has started.
  */
 void Crownstone::initDrivers() {
-
-#ifdef ENABLE_LEDS
-	if (NRF_UICR->NFCPINS != 0) {
-		LOGw("enable gpio LEDs");
-		nrf_nvmc_write_word(0x1000120C, 0);
-	}
-#endif
-	LOGd("NFC pins: %p", NRF_UICR->NFCPINS);
 
 	LOGi(FMT_INIT, "stack");
 
@@ -417,6 +409,8 @@ void Crownstone::configureAdvertisement() {
 	// to advertise certain state variables
 
 	_serviceData = new ServiceData();
+	_serviceData->setDeviceType(_boardsConfig.deviceType);
+	_serviceData->init();
 
 
 
@@ -854,7 +848,6 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	config_uart(pinRx, pinTx);
 
 	_log(SERIAL_INFO, SERIAL_CRLF);
-//	LOGi("ispr: %u", __get_IPSR());
 
 //	BLEutil::print_heap("Heap init");
 //	BLEutil::print_stack("Stack init");
@@ -869,6 +862,9 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	LOGi("Firmware version: %s", FIRMWARE_VERSION);
 #endif
 	LOGi("Hardware version: %s", get_hardware_version());
+
+	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/Cihfaaha.html
+//	LOGi("interrupt level=%u", __get_IPSR() & 0x1FF);
 }
 
 /**********************************************************************************************************************/
@@ -934,6 +930,23 @@ int main() {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
+
+#ifdef ENABLE_LEDS
+	// WARNING: this is stored in UICR and not easily reversible!
+	if (NRF_UICR->NFCPINS != 0) {
+		LOGw("enable gpio LEDs");
+		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
+	}
+#endif
+	LOGd("NFC pins: %p", NRF_UICR->NFCPINS);
+
+
+	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
+	if (hardwareBoard == 0xFFFFFFFF) {
+		LOGw("write board");
+		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
+	}
+	LOGd("Board: %p", hardwareBoard);
 
 	// init drivers, configure(), create services and chars,
 	crownstone.init(); // 13 ms

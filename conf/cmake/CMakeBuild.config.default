@@ -30,6 +30,10 @@ FIRMWARE_VERSION="undefined"
 # ACR01B2G             1504
 # HARDWARE_BOARD=ACR01B2C
 
+# The default hardware board, in case no board is written in UICR.
+# This value will also be written to UICR.
+DEFAULT_HARDWARE_BOARD=ACR01B2C
+
 # The device type defines how the device advertises itself, Apps and Bluenet Library
 # will use this to filter for device type.
 # It is also used to enable/disable device type specific functionality.
@@ -266,7 +270,15 @@ BOOTLOADER_START_ADDRESS=0x00079000
 # nrf52: length = 0x00080000 - bootloader_start_address - size(bootloader_settings)=0x1000 - size(mbr_params_page)=0x1000
 BOOTLOADER_LENGTH=0x5000
 
-# the address (in UICR) where the hardware board type is written and read
+
+## UICR
+
+# DFU is using the first 4 bytes in the UICR (0x10001080) for DFU INIT checks.
+UICR_DFU_INDEX=0
+# We use the second 4 bytes in the UICR (0x10001084) to store the hardware board type.
+UICR_BOARD_INDEX=1
+
+# The address (in UICR) where the hardware board type is written and read
 HARDWARE_BOARD_ADDRESS=0x10001084
 
 # The directory where the softdevice can be found

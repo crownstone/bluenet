@@ -27,10 +27,6 @@ extern "C" {
  *  type at runtime from the UICR and assigns the
  */
 
-// DFU is using the first 4 bytes in the UICR (0x10001080) for DFU INIT checks.
-#define UICR_DFU_INDEX       0 
-// We use the second 4 bytes in the UICR (0x10001084) to store the hardware board type.
-#define UICR_BOARD_INDEX     1 
 
 // Nordic dev board, but with some hardware bugs.
 #define PCA10036             40

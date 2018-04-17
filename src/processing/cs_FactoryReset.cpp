@@ -137,20 +137,22 @@ bool FactoryReset::performFactoryReset() {
 	return true;
 }
 
-bool FactoryReset::finishFactoryReset() {
-	//! Set switch to initial value: off
-	Switch::getInstance().setSwitch(0);
+bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
+	if (IS_CROWNSTONE(deviceType)) {
+		// Set switch to initial value: off
+		Switch::getInstance().setSwitch(0);
+	}
 
-	//! First clear sensitive data: keys
+	// First clear sensitive data: keys
 	Settings::getInstance().factoryReset(FACTORY_RESET_CODE);
 
-	//! Clear other data
+	// Clear other data
 	State::getInstance().factoryReset(FACTORY_RESET_CODE);
 
-	//! Remove bonded devices
+	// Remove bonded devices
 	Nrf51822BluetoothStack::getInstance().device_manager_init(true);
 
-	//! Lastly, go into setup mode after next reset
+	// Lastly, go into setup mode after next reset
 	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_SETUP);
 
 	LOGi("Factory reset done, rebooting device in 2s ...");

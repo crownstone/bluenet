@@ -1,3 +1,42 @@
+Version 2.0.2:
+ - Add release config for guidestone_2.0.2
+ - Add release config for guidestone_2.0.2-RC0
+ - Fixed small bug in release script.
+ - Move default hardware board to config. Move UICR layout to config.
+ - Added option to write board guidestone to UICR. Don't use a magic address.
+ - Define TX and RX pins for guidestone, as the UART is used in releases.
+ - Factory reset: only switch when device type is crownstone.
+
+Version 2.0.1:
+ - Add release config for crownstone_2.0.1
+ - Add release config for crownstone_2.0.1-RC2
+ - Quickfix: error flag in service data was not set again when error were reset, but chip temp was still too high.
+ - Add release config for crownstone_2.0.1-RC1
+ - Added check to see if RC number is ok.
+ - Fixed issue with release script, and changed release dir for RCs.
+ - Mesh now uses TX power from config.
+ - Generate sha1 for dfu packet.
+ - Add release config for crownstone_2.0.1-RC0
+ - fixed bug in release script
+ - fixed bug in release script
+ - Re-added generation of change log.
+ - Updated release script to allow for release candidates.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Moved definition of stone_id_t to common types.
+ - should compile again when BUILD_MESHING=0.
+ - Send state over mesh at most once per 3s.
+ - Don't restore pwm state on boot, only turn on relay.
+ - Disable switch lock when enabling pwm. Don't enable switch lock when pwm is enabled.
+ - Update CHOICES.md
+ - Don't try to turn relay on when it's already on, and vice versa.
+ - Update CHOICES.md
+ - Fixed relay being turned off when dimming not allowed and relay already on.
+ - Fixed possible crash, when changing adc config.
+ - oops
+ - Set (currently) correct max app size.
+ - Start PWM earlier, so it can already sync with zero crossings.
+ - Don't add bootloader to firmware release.
+
 Version 2.0.0:
  - Add release config for crownstone_2.0.0
  - Set serial verbosity to "byte protocol only" for releases.

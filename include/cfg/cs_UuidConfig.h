@@ -44,8 +44,8 @@
 
 //! UUID used for the Service Data in the Scan Response packet
 #define CROWNSTONE_PLUG_SERVICE_DATA_UUID   0xC001
-#define CROWNSTONE_BUILT_SERVICE_DATA_UUID  0xC002
-#define GUIDESTONE_SERVICE_DATA_UUID        0xC003
+#define CROWNSTONE_BUILT_SERVICE_DATA_UUID  0xC002 // Deprecated
+#define GUIDESTONE_SERVICE_DATA_UUID        0xC003 // Deprecated
 
 enum CrownstoneCharacteristicsIDs {
 	CONTROL_UUID                            = 0x1,
@@ -60,12 +60,13 @@ enum CrownstoneCharacteristicsIDs {
 };
 
 enum SetupCharacteristicsIDs {
-	SETUP_CONTROL_UUID                      = 0x1,
+//	SETUP_CONTROL_UUID                      = 0x1, // Changed to 7, because old setup command is deprecated.
 	MAC_ADDRESS_UUID                        = 0x2,
 	SETUP_KEY_UUID                          = 0x3,
 //	CONFIG_CONTROL_UUID                     = 0x4, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
 //	CONFIG_READ_UUID                        = 0x5, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
 	GOTO_DFU_UUID                           = 0x6,
+	SETUP_CONTROL_UUID                      = 0x7,
 //	SESSION_NONCE_UUID                      = 0x8, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
 };
 

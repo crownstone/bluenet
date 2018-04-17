@@ -204,6 +204,10 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 		// GATT is public facing, getValue is internal
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
+#ifdef PRINT_CHARACTERISTIC_VERBOSE
+		_log(SERIAL_DEBUG, "data: ");
+		BLEutil::printArray(getValuePtr(), valueLength);
+#endif
 
 		// we calculate what size buffer we need
 		uint16_t encryptionBufferLength = EncryptionHandler::calculateEncryptionBufferLength(valueLength, encryptionType);
@@ -215,6 +219,10 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 			_minAccessLevel,
 			encryptionType
 		);
+#ifdef PRINT_CHARACTERISTIC_VERBOSE
+		_log(SERIAL_DEBUG, "encrypted: ");
+		BLEutil::printArray(valueGattAddress, encryptionBufferLength);
+#endif
 
 		if (!success) {
 			// clear the partially encrypted buffer.

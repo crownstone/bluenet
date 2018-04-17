@@ -41,9 +41,11 @@ void MeshControl::init() {
 	LOGd("State msg: size=%d items=%d", sizeof(state_message_t), MAX_STATE_ITEMS);
 	LOGd("Scan result msg: size=%d items=%d", sizeof(scan_result_message_t), MAX_SCAN_RESULT_ITEMS);
 	LOGd("Multi switch msg: size=%d items=%d", sizeof(multi_switch_message_t), MULTI_SWITCH_LIST_MAX_ITEMS);
+
+	Mesh::getInstance().setId(_myCrownstoneId);
 }
 
-void MeshControl::process(uint16_t channel, void* p_meshMessage, uint16_t messageLength) {
+void MeshControl::process(uint16_t channel, mesh_message_t* p_meshMessage, uint16_t messageLength) {
 
 	mesh_message_t* meshMessage = (mesh_message_t*)p_meshMessage;
 	//! p_data is the payload data, length is the payload length.
@@ -384,7 +386,7 @@ void MeshControl::handleCommandForUs(uint8_t commandType, uint8_t bitmask, uint3
 	}
 	default: {
 		LOGi("Unknown message type %d. Don't know how to decode...", commandType);
-		statusResult = ERR_UNKNOWN_MESSAGE_TYPE;
+		statusResult = ERR_UNKNOWN_TYPE;
 		break;
 	}
 
@@ -419,15 +421,15 @@ bool MeshControl::handleConfigCommand(config_mesh_message_t* configMsg, uint16_t
 	}
 
 	switch (configMsg->header.opCode) {
-	case READ_VALUE: {
+	case OPCODE_READ_VALUE: {
 		config_reply_item_t configReply = {};
 		configReply.id = _myCrownstoneId;
-		configReply.data.header.opCode = READ_VALUE;
+		configReply.data.header.opCode = OPCODE_READ_VALUE;
 		configReply.data.header.type = configType;
 		configReply.data.header.length = Settings::getInstance().getSettingsItemSize(configType);
 
 		if (configReply.data.header.length > sizeof(configReply.data.payload)) {
-			statusResult = ERR_BUFFER_TOO_SMALL;
+			statusResult = ERR_WRONG_PAYLOAD_LENGTH;
 		} else {
 			statusResult = Settings::getInstance().get(configType, configReply.data.payload);
 			if (statusResult == ERR_SUCCESS) {
@@ -439,7 +441,7 @@ bool MeshControl::handleConfigCommand(config_mesh_message_t* configMsg, uint16_t
 		}
 		return true;
 	}
-	case WRITE_VALUE: {
+	case OPCODE_WRITE_VALUE: {
 		Settings::getInstance().writeToStorage(configType, configPayload, configPayloadlength);
 		statusResult = ERR_SUCCESS;
 		return true;
@@ -465,15 +467,15 @@ bool MeshControl::handleStateCommand(state_mesh_message_t* stateMsg, uint16_t st
 	//! So no need to check the length field.
 
 	switch (stateMsg->header.opCode) {
-	case READ_VALUE: {
+	case OPCODE_READ_VALUE: {
 		state_reply_item_t stateReply = {};
 		stateReply.id = _myCrownstoneId;
-		stateReply.data.header.opCode = READ_VALUE;
+		stateReply.data.header.opCode = OPCODE_READ_VALUE;
 		stateReply.data.header.type = stateType;
 		stateReply.data.header.length = State::getInstance().getStateItemSize(stateType);
 
 		if (stateReply.data.header.length > sizeof(stateReply.data.payload)) {
-			statusResult = ERR_BUFFER_TOO_SMALL;
+			statusResult = ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		else {
 			statusResult = State::getInstance().get(stateType, stateReply.data.payload, stateReply.data.header.length);
@@ -1086,4 +1088,8 @@ bool MeshControl::getLastStateDataMessage(state_message_t& message, uint16_t siz
 		return false;
 	}
 	return Mesh::getInstance().getLastMessage(handle, &message, size);
+}
+
+int8_t MeshControl::getRssi(stone_id_t id) {
+	return Mesh::getInstance().getRssi(id);
 }
