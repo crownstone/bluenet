@@ -34,6 +34,9 @@
 //#define TEST_PIN   22
 //#define TEST_PIN2  23
 
+// Define to only print debug text (without header and tail).
+//#define DEBUGGING_CLEAN_UART
+
 UartProtocol::UartProtocol():
 _readBuffer(NULL),
 _readBufferIdx(0),
@@ -89,13 +92,17 @@ void UartProtocol::crc16(const uint8_t * data, const uint16_t size, uint16_t& cr
 }
 
 void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
+#ifdef DEBUGGING_CLEAN_UART
 	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
-	    case UART_OPCODE_TX_TEXT:
-		break;
-	    default: 
+	case UART_OPCODE_TX_TEXT:
+		// Now only the special chars get escaped, no header and tail.
+		writeBytes(data, size);
+		return;
+	default:
 		return;
 	}
+#endif
 	// No logs, this function is called when logging
 	writeMsgStart(opCode, size);
 	writeMsgPart(opCode, data, size);
@@ -105,12 +112,7 @@ void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) 
 void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 	// when debugging we would like to drop out of certain binary data coming over the console...
 #ifdef DEBUGGING_CLEAN_UART
-	switch(opCode) {
-	    case UART_OPCODE_TX_TEXT:
-		break;
-	    default: 
-		return;
-	}
+	return;
 #endif
 	// No logs, this function is called when logging
 	if (size > UART_TX_MAX_PAYLOAD_SIZE) {
@@ -130,9 +132,11 @@ void UartProtocol::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t si
 	// when debugging we would like to drop out of certain binary data coming over the console...
 #ifdef DEBUGGING_CLEAN_UART
 	switch(opCode) {
-	    case UART_OPCODE_TX_TEXT:
-		break;
-	    default: 
+	case UART_OPCODE_TX_TEXT:
+		// Now only the special chars get escaped, no header and tail.
+		writeBytes(data, size);
+		return;
+	default:
 		return;
 	}
 #endif
@@ -144,12 +148,7 @@ void UartProtocol::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t si
 void UartProtocol::writeMsgEnd(UartOpcodeTx opCode) {
 	// when debugging we would like to drop out of certain binary data coming over the console...
 #ifdef DEBUGGING_CLEAN_UART
-	switch(opCode) {
-	    case UART_OPCODE_TX_TEXT:
-		break;
-	    default: 
-		return;
-	}
+	return;
 #endif
 	// No logs, this function is called when logging
 	uart_msg_tail_t tail;
