@@ -516,12 +516,7 @@ bool Switch::allowPwmOn() {
 //	return !(stateErrors.errors.chipTemp || stateErrors.errors.pwmTemp);
 }
 
-#define DEBUGGING_SWITCH
-
 bool Switch::allowRelayOff() {
-#ifdef DEBUGGING_SWITCH
-	return true;
-#endif
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 
@@ -530,9 +525,6 @@ bool Switch::allowRelayOff() {
 }
 
 bool Switch::allowRelayOn() {
-#ifdef DEBUGGING_SWITCH
-	return true;
-#endif
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
 	LOGd("errors=%d", stateErrors.asInt);
