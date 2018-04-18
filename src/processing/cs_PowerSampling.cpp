@@ -275,8 +275,8 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs
 	filter(prevIndex, power.voltageIndex);
 #else
 	// Filter both immediately, no raw values available
-	filter(bufIndex, power.currentIndex);
 	filter(bufIndex, power.voltageIndex);
+	filter(bufIndex, power.currentIndex);
 #endif
 
 #ifdef TEST_PIN
@@ -652,7 +652,6 @@ void PowerSampling::calculatePower(power_t power) {
 		}
 
 		if (_logsEnabled.flags.voltage) {
-			//LOGd("Write power over UART");
 			// Write uart_msg_voltage_t without allocating a buffer.
 			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
 //			uint32_t rtcCount = RTC::getCount();
