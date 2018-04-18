@@ -254,7 +254,7 @@ bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 	}
 	_inProgress[bufIndex] = false;
 
-	cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS;
+	cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS; // TODO: 2 should be (CS_ADC_NUM_BUFFERS - saadc queue size)?
 	addBufferToSampleQueue(nextIndex);
 	return true;
 }
@@ -327,7 +327,7 @@ void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 //		LOGd("Data callback in progress for %i", bufIndex);
 //	}
 	
-	if (dataCallbackRegistered()) { // && !dataCallbackInProgress()) {
+	if (_numBuffersQueued && dataCallbackRegistered()) { // && !dataCallbackInProgress()) {
 		_doneCallbackData.bufIndex = bufIndex;
 		_inProgress[bufIndex] = true;
 //		LOGd("Set in progress for %i", bufIndex);
@@ -346,11 +346,14 @@ void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 //			}
 			return;
 		}
-		// Skip the callback, just put next buffer up. 
-		// If there are 2 buffers, this is the same buffer: (1 + 2) % 2 = 1, transitions: 0 -> 0, 1 -> 1
-		// If there are 3 buffers, this is: 0 -> 2, 1 -> 0, 2 -> 1.
-		cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS;
-		addBufferToSampleQueue(nextIndex);
+//		// Skip the callback, just queue put next buffer up.
+//		// If there are 2 buffers, this is the same buffer: (1 + 2) % 2 = 1, transitions: 0 -> 0, 1 -> 1
+//		// If there are 3 buffers, this is: 0 -> 2, 1 -> 0, 2 -> 1.
+//		cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS; // TODO: should always queue the same buffer index?
+//		addBufferToSampleQueue(nextIndex);
+
+		// Skip the callback, just queue this buffer again.
+		addBufferToSampleQueue(bufIndex);
 	}
 }
 
