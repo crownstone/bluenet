@@ -120,7 +120,7 @@
 
 //! ----- PPI -----
 #define CS_ADC_PPI_CHANNEL_START                 0
-#define CS_ADC_PPI_CHANNEL_COUNT                 1
+#define CS_ADC_PPI_CHANNEL_COUNT                 2
 #define CS_PWM_PPI_CHANNEL_START                 (CS_ADC_PPI_CHANNEL_START + CS_ADC_PPI_CHANNEL_COUNT)
 #define CS_PWM_PPI_CHANNEL_COUNT                 (2 + 2 * CS_PWM_MAX_CHANNELS)
 

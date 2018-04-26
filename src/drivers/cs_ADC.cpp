@@ -228,6 +228,15 @@ void ADC::stop() {
 
 void ADC::start() {
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_START);
+
+	nrf_ppi_channel_t ppiChannel = getPpiChannel(CS_ADC_PPI_CHANNEL_START+1);
+	nrf_ppi_channel_endpoint_setup(
+			ppiChannel,
+			(uint32_t)nrf_saadc_event_address_get(NRF_SAADC_EVENT_END),
+			nrf_saadc_task_address_get(NRF_SAADC_TASK_START)
+	);
+
+	nrf_ppi_channel_enable(ppiChannel);
 }
 
 void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
