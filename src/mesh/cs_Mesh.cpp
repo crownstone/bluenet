@@ -222,7 +222,7 @@ int8_t Mesh::getRssi(uint8_t id) {
 }
 
 void Mesh::printRssiList() {
-	uint8_t* list = rbc_mesh_get_rssi_list();
+	__attribute__((unused)) uint8_t* list = rbc_mesh_get_rssi_list();
 	for (uint8_t i=0; i<10; i+=2) {
 		LOGd("id=%u rssi=%i", list[i], (int8_t)list[i+1]);
 	}
@@ -585,9 +585,9 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	handle = evt->params.rx.value_handle;
 	received = (encrypted_mesh_message_t*)evt->params.rx.p_data;
 	receivedLength = evt->params.rx.data_len;
-	uint8_t id = evt->params.rx.ble_adv_addr.addr[0];
-	int8_t rssi = evt->params.rx.rssi;
 
+	__attribute__((unused)) uint8_t id = evt->params.rx.ble_adv_addr.addr[0];
+	__attribute__((unused)) int8_t rssi = evt->params.rx.rssi;
 	LOGd("id=%u rssi=%i", id, rssi);
 	if (rssi >=0 || rssi < -120) {
 		LOGw("INVALID RSSI");
