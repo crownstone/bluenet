@@ -136,7 +136,7 @@
 
 //#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 // Number of voltage and current samples per burst
 
-#define CS_ADC_SAMPLE_INTERVAL_US                200
+#define CS_ADC_SAMPLE_INTERVAL_US                200 // 100 samples per period of 50Hz wave
 //#define CS_ADC_SAMPLE_INTERVAL_US                400
 
 #define CS_ADC_MAX_PINS                          2

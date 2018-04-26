@@ -93,8 +93,8 @@ void UartProtocol::crc16(const uint8_t * data, const uint16_t size, uint16_t& cr
 
 void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
 #ifdef DEBUGGING_CLEAN_UART
-	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
+	// when debugging we would like to drop out of certain binary data coming over the console...
 	case UART_OPCODE_TX_TEXT:
 		// Now only the special chars get escaped, no header and tail.
 		writeBytes(data, size);
@@ -110,9 +110,12 @@ void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) 
 }
 
 void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
-	// when debugging we would like to drop out of certain binary data coming over the console...
 #ifdef DEBUGGING_CLEAN_UART
-	return;
+	// when debugging we would like to drop out of certain binary data coming over the console...
+	switch(opCode) {
+	default:
+		return;
+	}
 #endif
 	// No logs, this function is called when logging
 	if (size > UART_TX_MAX_PAYLOAD_SIZE) {
@@ -129,8 +132,8 @@ void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 }
 
 void UartProtocol::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
-	// when debugging we would like to drop out of certain binary data coming over the console...
 #ifdef DEBUGGING_CLEAN_UART
+	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
 	case UART_OPCODE_TX_TEXT:
 		// Now only the special chars get escaped, no header and tail.
@@ -146,9 +149,12 @@ void UartProtocol::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t si
 }
 
 void UartProtocol::writeMsgEnd(UartOpcodeTx opCode) {
-	// when debugging we would like to drop out of certain binary data coming over the console...
 #ifdef DEBUGGING_CLEAN_UART
-	return;
+	// when debugging we would like to drop out of certain binary data coming over the console...
+	switch(opCode) {
+	default:
+		return;
+	}
 #endif
 	// No logs, this function is called when logging
 	uart_msg_tail_t tail;

@@ -23,7 +23,7 @@ void RecognizeSwitch::deinit() {
 	_circBuffer->deinit();
 }
 
-// #define VERBOSE_SWITCH
+//#define VERBOSE_SWITCH
 
 /**
  * The recognizeSwitch function goes through a sequence of buffers to detect if a switch event happened in the buffer
