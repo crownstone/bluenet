@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <stdint.h>
+
 /**
  * Event types.
  */
@@ -68,7 +70,7 @@ enum GeneralEventType {
 	EVT_SWITCH_LOCKED, // Sent when switch locked flag is set. Payload is boolean.
 	EVT_STORAGE_DONE, // Sent when storage is done and queue is empty.
 	EVT_SETUP_DONE, // Sent when setup was done (and all settings have been stored).
-	EVT_DO_RESET_DELAYED, // Sent to perform a reset in a few seconds (currently done by command handler). Payload is uint8_t opCode.
+	EVT_DO_RESET_DELAYED, // Sent to perform a reset in a few seconds (currently done by command handler). Payload is evt_do_reset_delayed_t.
 	EVT_SWITCHCRAFT_ENABLED, // Sent when switchcraft flag is set. Payload is boolean.
 	EVT_ALL = 0xFFFF
 };
@@ -90,4 +92,9 @@ enum UartEventType {
 	EVT_INC_CURRENT_RANGE,
 	EVT_DEC_CURRENT_RANGE,
 	EVT_RX_CONTROL,
+};
+
+struct __attribute__((packed)) evt_do_reset_delayed_t {
+	uint8_t resetCode;
+	uint16_t delayMs;
 };

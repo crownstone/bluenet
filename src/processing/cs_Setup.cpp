@@ -83,9 +83,11 @@ void Setup::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			// set char value
 			EventDispatcher::getInstance().dispatch(EVT_SETUP_DONE);
 
-			// reset after X seconds
-			uint8_t opCode = GPREGRET_SOFT_RESET;
-			EventDispatcher::getInstance().dispatch(EVT_DO_RESET_DELAYED, &opCode, sizeof(opCode));
+			// reset after 1000 ms
+			evt_do_reset_delayed_t payload;
+			payload.resetCode = GPREGRET_SOFT_RESET;
+			payload.delayMs = 1000;
+			EventDispatcher::getInstance().dispatch(EVT_DO_RESET_DELAYED, &payload, sizeof(payload));
 		}
 		break;
 	}

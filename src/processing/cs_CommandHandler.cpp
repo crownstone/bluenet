@@ -70,10 +70,10 @@ void CommandHandler::init(const boards_config_t* board) {
 	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t) reset);
 }
 
-void CommandHandler::resetDelayed(uint8_t opCode) {
-	LOGi("Reset in 2s, code=%u", opCode);
+void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
+	LOGi("Reset in %u ms, code=%u", delayMs, opCode);
 	static uint8_t resetOpCode = opCode;
-	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(2000), &resetOpCode);
+	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(delayMs), &resetOpCode);
 //	//! Loop until reset trigger
 //	while(true) {}; //! TODO: this doesn't seem to work
 }
@@ -889,12 +889,12 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 void CommandHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_DO_RESET_DELAYED: {
-		if (length != 1) {
+		if (length != sizeof(evt_do_reset_delayed_t)) {
 			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 			return;
 		}
-		uint8_t opCode = *(uint8_t*)p_data;
-		resetDelayed(opCode);
+		evt_do_reset_delayed_t* payload = (evt_do_reset_delayed_t*)p_data;
+		resetDelayed(payload->resetCode, payload->delayMs);
 		break;
 	}
 	}
