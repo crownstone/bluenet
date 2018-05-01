@@ -67,7 +67,7 @@ public:
 	 *
 	 * There is a DFU reset or a GPREGRET reset.
 	 */
-	void resetDelayed(uint8_t opCode);
+	void resetDelayed(uint8_t opCode, uint16_t delayMs=2000);
 
 	// Handle events as EventListener
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
