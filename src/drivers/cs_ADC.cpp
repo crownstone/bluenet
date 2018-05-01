@@ -19,6 +19,7 @@
 #include "protocol/cs_ErrorCodes.h"
 #include "protocol/cs_UartProtocol.h"
 #include "structs/buffer/cs_InterleavedBuffer.h"
+#include "events/cs_EventDispatcher.h"
 
 //#define PRINT_ADC_VERBOSE
 
@@ -35,10 +36,18 @@ extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
 void adc_done(void * p_event_data, uint16_t event_size) {
 	adc_done_cb_data_t* cbData = (adc_done_cb_data_t*)p_event_data;
 //	LOGd("Handle buffer %i", cbData->bufIndex);
+	if (cbData->first) {
+		LOGd("adc restarted");
+		EventDispatcher::getInstance().dispatch(EVT_ADC_RESTARTED);
+	}
 	cbData->callback(cbData->bufIndex);
 }
 
-ADC::ADC()
+ADC::ADC() :
+		_changeConfig(false),
+		_validBuffer(true),
+		_nextBufferValid(false),
+		_firstBuffer(true)
 {
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
 		InterleavedBuffer::getInstance().setBuffer(0, NULL);
@@ -88,15 +97,20 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(5));
 
 	// Setup PPI
-	_ppiChannel = getPpiChannel(CS_ADC_PPI_CHANNEL_START);
-
+	_ppiChannelSample = getPpiChannel(CS_ADC_PPI_CHANNEL_START);
 	nrf_ppi_channel_endpoint_setup(
-			_ppiChannel,
+			_ppiChannelSample,
 			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMER, nrf_timer_compare_event_get(0)),
 			nrf_drv_saadc_sample_task_get()
 	);
+	nrf_ppi_channel_enable(_ppiChannelSample);
 
-	nrf_ppi_channel_enable(_ppiChannel);
+	_ppiChannelStart = getPpiChannel(CS_ADC_PPI_CHANNEL_START+1);
+	nrf_ppi_channel_endpoint_setup(
+			_ppiChannelStart,
+			(uint32_t)nrf_saadc_event_address_get(NRF_SAADC_EVENT_END),
+			nrf_saadc_task_address_get(NRF_SAADC_TASK_START)
+	);
 
 
 	// Config adc
@@ -125,12 +139,14 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	// Queue buffers
 	initQueue();
 
+	EventDispatcher::getInstance().addListener(this);
+
 	return 0;
 }
 
 /*
  * Start conversion in non-blocking mode. Sampling is not triggered yet. This can only be done for max two buffers
- * on the Nordic nRF51/nRF52.
+ * on the Nordic nRF52.
  */
 void ADC::initQueue() {
 	int max_queue = 2;
@@ -220,23 +236,22 @@ void ADC::setDoneCallback(adc_done_cb_t callback) {
 }
 
 void ADC::stop() {
-	// TODO: don't just
-	// Stop or shutdown timer.
-//	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_SHUTDOWN);
-	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_STOP);
+	// TODO
+//	nrf_ppi_channel_disable(_ppiChannelStart);
+//
+//	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_STOP);
+//	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(0));
+//	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
+//
+//	nrf_drv_saadc_abort();
 }
 
 void ADC::start() {
+	// TODO: queue buffers to nrf_drv_saadc, to start.
+
+
+	nrf_ppi_channel_enable(_ppiChannelStart);
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_START);
-
-	nrf_ppi_channel_t ppiChannel = getPpiChannel(CS_ADC_PPI_CHANNEL_START+1);
-	nrf_ppi_channel_endpoint_setup(
-			ppiChannel,
-			(uint32_t)nrf_saadc_event_address_get(NRF_SAADC_EVENT_END),
-			nrf_saadc_task_address_get(NRF_SAADC_TASK_START)
-	);
-
-	nrf_ppi_channel_enable(ppiChannel);
 }
 
 void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
@@ -245,8 +260,8 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 		LOGe("Buffer %i still in progress. Will not queue!", bufIndex);
 		return;
 	}
-	ret_code_t err_code;
 	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
+	ret_code_t err_code;
 	err_code = nrf_drv_saadc_buffer_convert(buf, CS_ADC_BUF_SIZE);
 	APP_ERROR_CHECK(err_code);
 	_numBuffersQueued++;
@@ -320,6 +335,23 @@ void ADC::setLimitDown() {
 	nrf_drv_saadc_limits_set(_zeroCrossingChannel, _zeroValue, NRF_DRV_SAADC_LIMITH_DISABLED);
 }
 
+void ADC::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch(evt) {
+	case EVT_STORAGE_WRITE: {
+		LOGd("valid=false");
+		_validBuffer = false;
+		break;
+	}
+	case EVT_STORAGE_WRITE_DONE: {
+		if (!_validBuffer) {
+			LOGd("next valid=true")
+			_nextBufferValid = true;
+		}
+		break;
+	}
+	}
+}
+
 /**
  * The ADC is done with the interrupt. Now, depending on the fact if there is a callback registered, a callback struct
  * is populated and put on the app scheduler. If there is no callback registered or there is a callback "in progress",
@@ -328,16 +360,14 @@ void ADC::setLimitDown() {
 void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 	_numBuffersQueued--;
 	
-//	if (!dataCallbackRegistered()) {
-//		LOGd("No callback registered");
-//	}
-
-//	if (dataCallbackInProgress()) {
-//		LOGd("Data callback in progress for %i", bufIndex);
-//	}
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 	
-	if (_numBuffersQueued && dataCallbackRegistered()) { // && !dataCallbackInProgress()) {
+	if (_validBuffer && _numBuffersQueued && dataCallbackRegistered()) { // && !dataCallbackInProgress()) {
 		_doneCallbackData.bufIndex = bufIndex;
+		_doneCallbackData.first = _firstBuffer;
+		_firstBuffer = false;
 		_inProgress[bufIndex] = true;
 //		LOGd("Set in progress for %i", bufIndex);
 
@@ -346,20 +376,19 @@ void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 		APP_ERROR_CHECK(errorCode);
 	}
 	else {
-		// Don't queue up the the buffer, we need the adc to be idle.
 		if (_changeConfig) {
-			// Don't apply config, as the callback will try to release and add its buffer when done.
-			// So wait for the callback to be done, then apply the config.
-//			if (_numBuffersQueued == 0) {
-//				applyConfig();
-//			}
+			// Don't queue up the the buffer, we need the adc to be idle.
+			// Config will be applied once all buffer is released.
 			return;
 		}
-//		// Skip the callback, just queue put next buffer up.
-//		// If there are 2 buffers, this is the same buffer: (1 + 2) % 2 = 1, transitions: 0 -> 0, 1 -> 1
-//		// If there are 3 buffers, this is: 0 -> 2, 1 -> 0, 2 -> 1.
-//		cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS; // TODO: should always queue the same buffer index?
-//		addBufferToSampleQueue(nextIndex);
+
+		if (_nextBufferValid) {
+			// Next buffer is valid again
+			_validBuffer = true;
+			_nextBufferValid = false;
+			// Mark as first buffer
+			_firstBuffer = true;
+		}
 
 		// Skip the callback, just queue this buffer again.
 		addBufferToSampleQueue(bufIndex);

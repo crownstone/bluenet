@@ -6,11 +6,12 @@
  */
 #pragma once
 
-#include <ble/cs_Nordic.h>
-#include <cfg/cs_Config.h>
-#include <structs/buffer/cs_CircularBuffer.h>
-#include <structs/buffer/cs_StackBuffer.h>
-#include <structs/buffer/cs_DifferentialBuffer.h>
+#include "ble/cs_Nordic.h"
+#include "cfg/cs_Config.h"
+#include "structs/buffer/cs_CircularBuffer.h"
+#include "structs/buffer/cs_StackBuffer.h"
+#include "structs/buffer/cs_DifferentialBuffer.h"
+#include "events/cs_EventListener.h"
 
 //! Numeric reference to a pin
 typedef uint8_t cs_adc_pin_id_t;
@@ -33,49 +34,6 @@ typedef uint16_t cs_adc_buffer_size_t;
 //! Error codes (number)
 typedef uint32_t cs_adc_error_t;
 
-/**
- * The typedef adc_done_cb_t is a function pointer to (1) a buffer with elements of type nrf_saadc_value_t (currently 
- * defined by Nordic to be int16_t), (2) the size of the buffer in the sense of the number of these elements, and 
- * (3) an index to the buffer. This function pointer can be given as argument to ADC::setDoneCallback to set a callback
- * on an ADC event. Currently, ADC::setDoneCallback is called from cs_PowerSampling.cpp.
- */
-//typedef void (*adc_done_cb_t) (nrf_saadc_value_t* buf, cs_adc_buffer_size_t size, cs_adc_buffer_id_t bufNum);
-typedef void (*adc_done_cb_t) (cs_adc_buffer_id_t bufIndex);
-
-typedef void (*adc_zero_crossing_cb_t) ();
-
-/** Struct storing data for ADC callback.
- *
- * The struct adc_done_cb_data_t stores (1) a callback pointer, see adc_done_cb_t, (2) the arguments for this pointer,
- * see also adc_done_cb_t (a pointer to the buffer with data from the ADC conversion, the buffer size, and a unique
- * number for the buffer).
- */
-/*
-struct adc_done_cb_data_t {
-	//! Callback function
-	adc_done_cb_t callback;
-	
-	//! Buffer as argument for ADC callback 
-	nrf_saadc_value_t* buffer;
-	//! Buffer size as argument for ADC callback 
-	cs_adc_buffer_size_t bufSize;
-	//! Buffer index as argument for ADC callback
-	//! TODO: remove this field
-	cs_adc_buffer_id_t bufNum;
-};
-*/
-/**
- * Struct that is used to communicate to the rest of code.
- */
-struct adc_done_cb_data_t {
-	//! Callback function
-	adc_done_cb_t callback;
-	
-	//! Buffer index as argument for ADC callback
-	cs_adc_buffer_id_t bufIndex;
-
-	bool in_progress;
-};
 
 enum adc_gain_t {
 	CS_ADC_GAIN4   = NRF_SAADC_GAIN4,   // gain is 4/1, maps [0, 0.15] to [0, 0.6]
@@ -114,6 +72,55 @@ struct __attribute__((packed)) adc_config_t {
 	adc_channel_config_t channels[CS_ADC_MAX_PINS];
 	uint32_t samplingPeriodUs;
 };
+
+
+/**
+ * The typedef adc_done_cb_t is a function pointer to (1) a buffer with elements of type nrf_saadc_value_t (currently 
+ * defined by Nordic to be int16_t), (2) the size of the buffer in the sense of the number of these elements, and 
+ * (3) an index to the buffer. This function pointer can be given as argument to ADC::setDoneCallback to set a callback
+ * on an ADC event. Currently, ADC::setDoneCallback is called from cs_PowerSampling.cpp.
+ */
+typedef void (*adc_done_cb_t) (cs_adc_buffer_id_t bufIndex);
+
+typedef void (*adc_zero_crossing_cb_t) ();
+
+/** Struct storing data for ADC callback.
+ *
+ * The struct adc_done_cb_data_t stores (1) a callback pointer, see adc_done_cb_t, (2) the arguments for this pointer,
+ * see also adc_done_cb_t (a pointer to the buffer with data from the ADC conversion, the buffer size, and a unique
+ * number for the buffer).
+ */
+/*
+struct adc_done_cb_data_t {
+	//! Callback function
+	adc_done_cb_t callback;
+	
+	//! Buffer as argument for ADC callback 
+	nrf_saadc_value_t* buffer;
+	//! Buffer size as argument for ADC callback 
+	cs_adc_buffer_size_t bufSize;
+	//! Buffer index as argument for ADC callback
+	//! TODO: remove this field
+	cs_adc_buffer_id_t bufNum;
+};
+*/
+/**
+ * Struct that is used to communicate to the rest of code.
+ */
+struct adc_done_cb_data_t {
+	// Callback function
+	adc_done_cb_t callback;
+	
+	// Buffer index as argument for ADC callback
+	cs_adc_buffer_id_t bufIndex;
+
+	// True when this is the first buffer of consecutive buffers.
+	// This buffer should not be compared to the previous buffer.
+	// Happens after a config change, timeout, or start of ADC.
+	bool first;
+};
+
+
 
 /** Analog-Digital conversion.
  *
@@ -162,7 +169,7 @@ struct __attribute__((packed)) adc_config_t {
  * mean while. In other words, it should not be possible to get a second interrupt before releaseBuffer has been 
  * called. Scheduling a new ADC task is only done at the end of the releaseBuffer function.
  */
-class ADC {
+class ADC : EventListener {
 
 public:
 	//! Use static variant of singleton, no dynamic memory allocation
@@ -222,6 +229,8 @@ public:
 	 */
 	cs_adc_error_t changeChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config);
 
+	// Handle events as EventListener.
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 	/** Update this object with a buffer with values from the ADC conversion.
 	 *
@@ -260,11 +269,21 @@ private:
 	//! Configuration of this class
 	adc_config_t _config;
 
-	//! PPI channel to be used to communicate from Timer to ADC peripheral.
-	nrf_ppi_channel_t _ppiChannel;
+	// PPI channel to be used to communicate from Timer to ADC peripheral.
+	nrf_ppi_channel_t _ppiChannelSample;
 
-	//! Array of pointers to buffers.
-//	nrf_saadc_value_t* _bufferPointers[CS_ADC_NUM_BUFFERS];
+	// PPI channel used to start the SAADC on the END event.
+	nrf_ppi_channel_t _ppiChannelStart;
+
+//	// Index of buffer that is next or currently being used.
+//	cs_adc_buffer_id_t _nextBufferIndex;
+//
+//	// Index of buffer that is in queue.
+//	cs_adc_buffer_id_t _queuedBufferIndex;
+
+	bool _validBuffer;
+	bool _nextBufferValid;
+	bool _firstBuffer;
 
 	//! Number of buffers that are queued to be populated by adc.
 	cs_adc_buffer_count_t _numBuffersQueued;
@@ -279,11 +298,6 @@ private:
 		return (_doneCallbackData.callback != NULL);
 	}
 	
-	inline bool dataCallbackInProgress() {
-//		return (_in_progress[bufIndex] = true;
-		return (_doneCallbackData.in_progress);
-	}
-
 	//! The zero crossing callback.
 	adc_zero_crossing_cb_t _zeroCrossingCallback;
 

@@ -102,7 +102,7 @@ void Storage::onUpdateDone() {
 		// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
 		if (!_pending) {
 			LOGi("pstorage update done");
-			EventDispatcher::getInstance().dispatch(EVT_STORAGE_DONE);
+			EventDispatcher::getInstance().dispatch(EVT_STORAGE_WRITE_DONE);
 		}
 	}
 	else {
@@ -155,9 +155,18 @@ void Storage::resumeRequests() {
 				_pending++;
 				// TODO: got an error 4 (NO_MEM) here when spam toggling relay.
 //				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
+				uint32_t count;
+				pstorage_access_status_get(&count);
+				if (count < PSTORAGE_CMD_QUEUE_SIZE) {
+					EventDispatcher::getInstance().dispatch(EVT_STORAGE_WRITE);
+				}
+				else {
+					LOGd("pstorage queue full");
+				}
 				uint32_t errorCode = pstorage_update(&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset);
 				if (errorCode == NRF_ERROR_NO_MEM) {
 					// Try again later
+					LOGd("try again later");
 					writeBuffer.push(elem);
 					// TODO: maybe use a timer instead?
 					errorCode = app_sched_event_put(NULL, 0, resume_requests);
@@ -264,6 +273,7 @@ void Storage::clearStorage(ps_storage_id storageID) {
 	pstorage_handle_t block_handle;
 	BLE_CALL ( pstorage_block_identifier_get, (&config->handle, 0, &block_handle) );
 
+	EventDispatcher::getInstance().dispatch(EVT_STORAGE_ERASE);
 	BLE_CALL (pstorage_clear, (&block_handle, config->storage_size) );
 //	LOGd("pstorage_clear %d %d %d", block_handle.module_id, block_handle.block_id, PSTORAGE_FLASH_PAGE_SIZE);
 	// Can't clear this size, because we registered a smaller block size?
@@ -350,6 +360,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 	} else {
 		// if neither scanning nor meshing, call the update directly
 		++_pending;
+		EventDispatcher::getInstance().dispatch(EVT_STORAGE_WRITE);
 		BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
 	}
 

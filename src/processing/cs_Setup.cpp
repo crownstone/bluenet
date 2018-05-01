@@ -78,7 +78,7 @@ ERR_CODE Setup::handleCommand(uint8_t* data, uint16_t size) {
 
 void Setup::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
-	case EVT_STORAGE_DONE:
+	case EVT_STORAGE_WRITE_DONE:
 		if (_setupDone) {
 			// set char value
 			EventDispatcher::getInstance().dispatch(EVT_SETUP_DONE);

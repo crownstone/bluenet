@@ -21,6 +21,8 @@ private:
 	//! A circular buffer to the sliding window
 	CircularBuffer<int16_t> * _circBuffer;
 
+	bool _running;
+
 	
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
@@ -41,6 +43,18 @@ public:
 	 */
 	void deinit();
 
+	/** Start detecting
+	 */
+	void start();
+
+	/** Stop detecting
+	 */
+	void stop();
+
+	/** Don't detect anything for num cycles.
+	 */
+	void skip(uint16_t num);
+
 	/** Recognize switch state.
 	 *
 	 * @param[in] bufIndex                       Buffer that was just populated with values.
@@ -48,5 +62,4 @@ public:
 	 * 
 	 */
 	bool detect(buffer_id_t bufIndex, channel_id_t voltageChannelId);
-
 };

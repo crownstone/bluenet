@@ -76,13 +76,8 @@ static int printPower = 0;
  * At this moment in time is the function adc_done_callback already decoupled from the ADC interrupt. 
  */
 void adc_done_callback(cs_adc_buffer_id_t bufIndex) {
-	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
-	PowerSampling::getInstance().powerSampleAdcDone(buf, CS_ADC_BUF_SIZE, bufIndex);
+	PowerSampling::getInstance().powerSampleAdcDone(bufIndex);
 }
-/*
-void adc_done_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
-	PowerSampling::getInstance().powerSampleAdcDone(buf, size, bufNum);
-}*/
 
 void PowerSampling::init(const boards_config_t& boardConfig) {
 //	memcpy(&_config, &config, sizeof(power_sampling_config_t));
@@ -97,9 +92,10 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
 	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentMilliAmpThreshold);
 	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm);
-	_switchcraftEnabled = settings.isSet(CONFIG_SWITCHCRAFT_ENABLED);
+	bool switchcraftEnabled = settings.isSet(CONFIG_SWITCHCRAFT_ENABLED);
 
-	enableSwitchcraft(_switchcraftEnabled);
+	RecognizeSwitch::getInstance().init();
+	enableSwitchcraft(switchcraftEnabled);
 
 	initAverages();
 	_recalibrateZeroVoltage = true;
@@ -231,6 +227,10 @@ void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	case EVT_SWITCHCRAFT_ENABLED:
 		enableSwitchcraft(*(bool*)p_data);
+		break;
+	case EVT_ADC_RESTARTED:
+		RecognizeSwitch::getInstance().skip(2);
+		break;
 	}
 
 }
@@ -254,13 +254,13 @@ void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
  * @param[in] size                               Size of the buffer.
  * @param[in] bufIndex                           The buffer index, can be used in InterleavedBuffer.
  */
-void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs_adc_buffer_id_t bufIndex) {
+void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 	power_t power;
-	power.buf = buf;
-	power.bufSize = size;
+	power.buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
+	power.bufSize = CS_ADC_BUF_SIZE;
 	power.voltageIndex = VOLTAGE_CHANNEL_IDX;
 	power.currentIndex = CURRENT_CHANNEL_IDX;
 	power.numChannels = 2;
@@ -311,12 +311,10 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, cs
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	if (_switchcraftEnabled) {
-		bool switch_detected = RecognizeSwitch::getInstance().detect(prevIndex, power.voltageIndex);
-		if (switch_detected) {
-			LOGd("Switch event detected!");
-			EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
-		}
+	bool switch_detected = RecognizeSwitch::getInstance().detect(prevIndex, power.voltageIndex);
+	if (switch_detected) {
+		LOGd("Switch event detected!");
+		EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
 	}
 
 	_adc->releaseBuffer(bufIndex);
@@ -857,10 +855,9 @@ void PowerSampling::changeRange(uint8_t channel, int32_t amount) {
 
 void PowerSampling::enableSwitchcraft(bool enable) {
 	if (enable) {
-		RecognizeSwitch::getInstance().init();
+		RecognizeSwitch::getInstance().start();
 	}
 	else {
-		RecognizeSwitch::getInstance().deinit();
+		RecognizeSwitch::getInstance().stop();
 	}
-	_switchcraftEnabled = enable;
 }

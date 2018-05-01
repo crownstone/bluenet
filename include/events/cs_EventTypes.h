@@ -68,10 +68,13 @@ enum GeneralEventType {
 	EVT_PWM_POWERED,
 	EVT_PWM_ALLOWED, // Sent when pwm allowed flag is set. Payload is boolean.
 	EVT_SWITCH_LOCKED, // Sent when switch locked flag is set. Payload is boolean.
-	EVT_STORAGE_DONE, // Sent when storage is done and queue is empty.
+	EVT_STORAGE_WRITE_DONE, // Sent when storage write is done and queue is empty.
 	EVT_SETUP_DONE, // Sent when setup was done (and all settings have been stored).
 	EVT_DO_RESET_DELAYED, // Sent to perform a reset in a few seconds (currently done by command handler). Payload is evt_do_reset_delayed_t.
 	EVT_SWITCHCRAFT_ENABLED, // Sent when switchcraft flag is set. Payload is boolean.
+	EVT_STORAGE_WRITE, // Sent when an item is going to be written to storage.
+	EVT_STORAGE_ERASE, // Sent when a flash page is going to be erased.
+	EVT_ADC_RESTARTED, // Sent when ADC has been restarted: the next buffer is expected to be different from the previous ones.
 	EVT_ALL = 0xFFFF
 };
 

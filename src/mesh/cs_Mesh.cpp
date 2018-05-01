@@ -758,7 +758,7 @@ void Mesh::checkForMessages() {
 
 void Mesh::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
-	case EVT_STORAGE_DONE:
+	case EVT_STORAGE_WRITE_DONE:
 		if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 			Mesh::getInstance().resume();
 		}

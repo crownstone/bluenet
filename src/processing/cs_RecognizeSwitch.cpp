@@ -7,20 +7,34 @@
 
 #include <processing/cs_RecognizeSwitch.h>
 
-RecognizeSwitch::RecognizeSwitch() {
+RecognizeSwitch::RecognizeSwitch() :
+	_running(false)
+{
 	int consecutive_samples = 20; // 20 and 450 for threshold works a bit
 	_circBuffer = new CircularBuffer<int16_t>(consecutive_samples);
 	_threshold = 200;
 }
 
 void RecognizeSwitch::init() {
-	// Skip the first N cycles
-	_skipSwitchDetectionTriggers = 200;
 	_circBuffer->init();
 }
 
 void RecognizeSwitch::deinit() {
 	_circBuffer->deinit();
+}
+
+void RecognizeSwitch::start() {
+	_running = true;
+	// Skip the first N cycles
+	_skipSwitchDetectionTriggers = 200;
+}
+
+void RecognizeSwitch::stop() {
+	_running = false;
+}
+
+void RecognizeSwitch::skip(uint16_t num) {
+	_skipSwitchDetectionTriggers = num;
 }
 
 //#define VERBOSE_SWITCH
@@ -31,6 +45,9 @@ void RecognizeSwitch::deinit() {
  */
 bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId) {
 	bool result = false;
+	if (!_running) {
+		return result;
+	}
 	if (_skipSwitchDetectionTriggers > 0) {
 		_skipSwitchDetectionTriggers--;
 		return result;
@@ -170,6 +187,3 @@ bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId
 
 	return result;
 }
-
-
-

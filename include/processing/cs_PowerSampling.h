@@ -46,7 +46,7 @@ public:
 	 *  Calculates the power usage, updates the state.
 	 *  Sends the samples if the central is subscribed for that.
 	 */
-	void powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum);
+	void powerSampleAdcDone(cs_adc_buffer_id_t bufIndex);
 
 	/** Called at a short interval.
 	 *  Reads out the buffer.
@@ -153,7 +153,6 @@ private:
 	uint32_t _lastSwitchOffTicks;    //! RTC ticks when the switch was last turned off.
 	bool _lastSwitchOffTicksValid;   //! Keep up whether the last switch off time is valid.
 	bool _igbtFailureDetectionStarted; //! Keep up whether the IGBT failure detection has started yet.
-	bool _switchcraftEnabled; // Keep up whether switchcraft is enabled.
 
 	//! Store the adc config, so that the actual adc config can be changed.
 	struct __attribute__((packed)) {
