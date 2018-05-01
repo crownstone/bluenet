@@ -101,6 +101,7 @@
 #define CS_PWM_MAX_CHANNELS                      2
 
 //! ----- TIMERS -----
+// Soft device uses timer 0
 #define CS_PWM_TIMER                             NRF_TIMER4
 #define CS_PWM_TIMER_IRQ                         TIMER4_IRQHandler
 #define CS_PWM_IRQn                              TIMER4_IRQn
@@ -119,12 +120,14 @@
 
 
 //! ----- PPI -----
+// Soft device uses 17-31
 #define CS_ADC_PPI_CHANNEL_START                 0
 #define CS_ADC_PPI_CHANNEL_COUNT                 2
 #define CS_PWM_PPI_CHANNEL_START                 (CS_ADC_PPI_CHANNEL_START + CS_ADC_PPI_CHANNEL_COUNT)
 #define CS_PWM_PPI_CHANNEL_COUNT                 (2 + 2 * CS_PWM_MAX_CHANNELS)
 
 //! ----- PPI groups -----
+// Soft device uses 4-5
 #define CS_PWM_PPI_GROUP_START                   0
 #define CS_PWM_PPI_GROUP_COUNT                   1
 
