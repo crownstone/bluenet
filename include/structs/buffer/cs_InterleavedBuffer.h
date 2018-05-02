@@ -65,7 +65,7 @@ public:
 	 * From the _buf array pick the one with the given buffer_id.
 	 */
 	value_t* getBuffer(buffer_id_t buffer_id) {
-		assert (buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
+//		assert(buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
 		return _buf[buffer_id];
 	}
 
@@ -74,7 +74,7 @@ public:
 	 * responsible for setting the right pointer. No checks w.r.t. this pointer are performed.
 	 */
 	void setBuffer(buffer_id_t buffer_id, value_t* ptr) {
-		assert (buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
+//		assert(buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
 		_buf[buffer_id] = ptr;
 	}
 
