@@ -275,15 +275,11 @@ private:
 	// PPI channel used to start the SAADC on the END event.
 	nrf_ppi_channel_t _ppiChannelStart;
 
-//	// Index of buffer that is next or currently being used.
-//	cs_adc_buffer_id_t _nextBufferIndex;
-//
-//	// Index of buffer that is in queue.
-//	cs_adc_buffer_id_t _queuedBufferIndex;
+	// Index of buffer that is currently being used to write samples to.
+	cs_adc_buffer_id_t _nextBufferIndex;
 
-	bool _validBuffer;
-	bool _nextBufferValid;
 	bool _firstBuffer;
+	bool _running;
 
 	//! Number of buffers that are queued to be populated by adc.
 	cs_adc_buffer_count_t _numBuffersQueued;
