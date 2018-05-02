@@ -288,6 +288,9 @@ bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 		return true;
 	}
 	_inProgress[bufIndex] = false;
+	if (!_running) {
+		LOGi("not running, don't queue buf");
+	}
 
 	cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS; // TODO: 2 should be (CS_ADC_NUM_BUFFERS - saadc queue size)?
 	addBufferToSampleQueue(nextIndex);
