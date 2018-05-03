@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////
 
 #define PRINT_STACK_VERBOSE
-#define PRINT_CHARACTERISTIC_VERBOSE
+//#define PRINT_CHARACTERISTIC_VERBOSE
 
 //#define PRINT_IBEACON_VERBOSE
 
@@ -51,7 +51,7 @@
 /////////////////////////////////////////////////////
 
 #ifdef STACK_VERBOSE
-#define PRINT_CHARACTERISTIC_VERBOSE
+//#define PRINT_CHARACTERISTIC_VERBOSE
 #define PRINT_STACK_VERBOSE
 #endif
 

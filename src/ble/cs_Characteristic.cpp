@@ -83,9 +83,7 @@ void CharacteristicBase::init(Service* svc) {
 	ci.attr_char_value.max_len = getGattValueMaxLength();
 	ci.attr_char_value.p_value = getGattValuePtr();
 
-#ifdef PRINT_CHARACTERISTIC_VERBOSE
 	LOGd("%s init with buffer[%i] with %p", _name, getGattValueMaxLength(), getGattValuePtr());
-#endif
 
 	////////////////////////
 	//! attribute metadata //
