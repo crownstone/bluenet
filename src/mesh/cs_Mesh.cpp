@@ -222,9 +222,10 @@ int8_t Mesh::getRssi(uint8_t id) {
 }
 
 void Mesh::printRssiList() {
+	// Very hacky, but this is for debug only anyway
 	__attribute__((unused)) uint8_t* list = rbc_mesh_get_rssi_list();
-	for (uint8_t i=0; i<10; i+=2) {
-		LOGd("id=%u rssi=%i", list[i], (int8_t)list[i+1]);
+	for (uint8_t i=0; i<10*4; i+=4) {
+		LOGd("id=%u rssi=%i count=%u", list[i], *((int16_t*)(list+i+1)) / 256, list[i+3]);
 	}
 }
 

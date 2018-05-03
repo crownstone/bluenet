@@ -19,6 +19,7 @@
 #if BUILD_MESHING == 1
 #include "mesh/cs_MeshControl.h"
 #include "protocol/mesh/cs_MeshMessageState.h"
+//#include "mesh/cs_Mesh.h"
 #endif
 
 #define ADVERTISE_EXTERNAL_DATA
@@ -242,6 +243,8 @@ void ServiceData::updateAdvertisement(bool initial) {
 //		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type, serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask, serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy, serviceData->params.partialTimestamp);
 #endif
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(service_data_t));
+
+//		Mesh::getInstance().printRssiList();
 
 		// encrypt the array using the guest key ECB if encryption is enabled.
 		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
