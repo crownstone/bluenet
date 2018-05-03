@@ -118,11 +118,18 @@
 #define CS_ADC_TIMER_ID                          1
 #define CS_ADC_TIMER_FREQ                        NRF_TIMER_FREQ_16MHz
 
+#define CS_ADC_TIMEOUT_TIMER                     NRF_TIMER2
+#define CS_ADC_TIMEOUT_TIMER_IRQ                 TIMER2_IRQHandler
+#define CS_ADC_TIMEOUT_TIMER_IRQn                TIMER2_IRQn
+#define CS_ADC_TIMEOUT_INSTANCE_INDEX            TIMER2_INSTANCE_INDEX
+#define CS_ADC_TIMEOUT_TIMER_ID                  2
+#define CS_ADC_TIMEOUT_TIMER_FREQ                NRF_TIMER_FREQ_16MHz
+
 
 //! ----- PPI -----
 // Soft device uses 17-31
 #define CS_ADC_PPI_CHANNEL_START                 0
-#define CS_ADC_PPI_CHANNEL_COUNT                 2
+#define CS_ADC_PPI_CHANNEL_COUNT                 5
 #define CS_PWM_PPI_CHANNEL_START                 (CS_ADC_PPI_CHANNEL_START + CS_ADC_PPI_CHANNEL_COUNT)
 #define CS_PWM_PPI_CHANNEL_COUNT                 (2 + 2 * CS_PWM_MAX_CHANNELS)
 

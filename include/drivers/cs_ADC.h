@@ -275,6 +275,16 @@ private:
 	// PPI channel used to start the SAADC on the END event.
 	nrf_ppi_channel_t _ppiChannelStart;
 
+	// PPI channel used to count the number of samples taken.
+	nrf_ppi_channel_t _ppiSampleCount;
+
+	// PPI channel used to stop the sample timer when no buffer is queued.
+	nrf_ppi_channel_t _ppiTimeout;
+
+	// PPI channel used to reset the timeout count.
+	nrf_ppi_channel_t _ppiTimeoutReset;
+
+
 	// Index of buffer that is currently being used to write samples to.
 	cs_adc_buffer_id_t _nextBufferIndex;
 

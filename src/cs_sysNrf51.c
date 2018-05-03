@@ -62,10 +62,11 @@ void ADC_IRQHandler(void);
 
 void TIMER0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 
-//! timer used for ADC
+// timers used for ADC
 void TIMER1_IRQHandler(void);
+void TIMER2_IRQHandler(void);
 
-//! timer used for dimming
+// timer used for dimming
 #if DIMMING==0
 void TIMER4_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 #else
@@ -93,7 +94,7 @@ void SWI2_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI3_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI4_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI5_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-void TIMER2_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+//void TIMER2_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void TIMER3_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void PWM0_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void PDM_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));

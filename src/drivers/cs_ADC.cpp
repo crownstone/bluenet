@@ -69,6 +69,7 @@ ADC::ADC() :
  * @caller src/processing/cs_PowerSampling.cpp
  */
 cs_adc_error_t ADC::init(const adc_config_t & config) {
+	ret_code_t err_code;
 	_config = config;
 //	memcpy(&_config, &config, sizeof(adc_config_t));
 	LOGi("init: period=%uus", _config.samplingPeriodUs);
@@ -83,12 +84,12 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	nrf_gpio_cfg_output(TEST_PIN3);
 #endif
 
-	// Setup timer
+	// Setup sample timer
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
 	nrf_timer_bit_width_set(CS_ADC_TIMER, NRF_TIMER_BIT_WIDTH_32);
 	nrf_timer_frequency_set(CS_ADC_TIMER, CS_ADC_TIMER_FREQ);
 	uint32_t ticks = nrf_timer_us_to_ticks(_config.samplingPeriodUs, CS_ADC_TIMER_FREQ);
-	LOGd("maxTicks=%u", ticks);
+	LOGd("ticks=%u", ticks);
 	nrf_timer_cc_write(CS_ADC_TIMER, NRF_TIMER_CC_CHANNEL0, ticks);
 	nrf_timer_mode_set(CS_ADC_TIMER, NRF_TIMER_MODE_TIMER);
 	nrf_timer_shorts_enable(CS_ADC_TIMER, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
@@ -96,10 +97,9 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(1));
 	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(2));
 	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(3));
-	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(4));
-	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(5));
 
-	// Setup PPI
+
+	// Setup PPI: call sample task on timer compare event
 	_ppiChannelSample = getPpiChannel(CS_ADC_PPI_CHANNEL_START);
 	nrf_ppi_channel_endpoint_setup(
 			_ppiChannelSample,
@@ -108,6 +108,58 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	);
 	nrf_ppi_channel_enable(_ppiChannelSample);
 
+
+	// Setup timeout timer
+	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CLEAR);
+	nrf_timer_bit_width_set(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_BIT_WIDTH_32);
+//	nrf_timer_frequency_set(CS_ADC_TIMER, CS_ADC_TIMEOUT_TIMER_FREQ);
+	uint32_t timeoutCount = CS_ADC_BUF_SIZE / _config.channelCount - 2;
+	LOGd("timeoutCount=%u", timeoutCount);
+	nrf_timer_cc_write(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_CC_CHANNEL0, ticks);
+	nrf_timer_mode_set(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_MODE_COUNTER);
+//	nrf_timer_shorts_enable(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
+	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(0));
+	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(1));
+	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(2));
+	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(3));
+
+	// Setup PPI: count samples
+	_ppiSampleCount = getPpiChannel(CS_ADC_PPI_CHANNEL_START+2);
+	nrf_ppi_channel_endpoint_setup(
+			_ppiTimeout,
+			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMER, nrf_timer_compare_event_get(0)),
+			nrf_timer_task_address_get(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_COUNT)
+	);
+	nrf_ppi_channel_enable(_ppiSampleCount);
+
+	// Setup timeout PPI: stop the sample timer on compare event.
+	_ppiTimeout = getPpiChannel(CS_ADC_PPI_CHANNEL_START+3);
+	nrf_ppi_channel_endpoint_setup(
+			_ppiTimeout,
+			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(0)),
+			nrf_timer_task_address_get(CS_ADC_TIMER, NRF_TIMER_TASK_STOP)
+	);
+	nrf_ppi_channel_enable(_ppiTimeout);
+
+	// Setup PPI: reset sample count on start task
+	_ppiTimeoutReset = getPpiChannel(CS_ADC_PPI_CHANNEL_START+4);
+	nrf_ppi_channel_endpoint_setup(
+			_ppiTimeoutReset,
+			(uint32_t)nrf_saadc_event_address_get(NRF_SAADC_EVENT_END),
+			nrf_timer_task_address_get(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CLEAR)
+	);
+	nrf_ppi_channel_enable(_ppiTimeoutReset);
+
+	// Enable timeout timer interrupt
+	err_code = sd_nvic_SetPriority(CS_ADC_TIMEOUT_TIMER_IRQn, CS_PWM_TIMER_IRQ_PRIORITY);
+	APP_ERROR_CHECK(err_code);
+	err_code = sd_nvic_EnableIRQ(CS_ADC_TIMEOUT_TIMER_IRQn);
+	APP_ERROR_CHECK(err_code);
+
+
+	// Setup PPI: call START on END.
+	// This avoids a SAMPLE being called before the START.
+	// See https://devzone.nordicsemi.com/f/nordic-q-a/20291/offset-in-saadc-samples-with-easy-dma-and-ble/79053
 	_ppiChannelStart = getPpiChannel(CS_ADC_PPI_CHANNEL_START+1);
 	nrf_ppi_channel_endpoint_setup(
 			_ppiChannelStart,
@@ -123,7 +175,6 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 			.interrupt_priority = SAADC_CONFIG_IRQ_PRIORITY
 	};
 
-	ret_code_t err_code;
 	err_code = nrf_drv_saadc_init(&adcConfig, saadc_callback);
 	APP_ERROR_CHECK(err_code);
 
