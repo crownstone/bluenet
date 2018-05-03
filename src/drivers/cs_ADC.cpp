@@ -21,7 +21,7 @@
 #include "structs/buffer/cs_InterleavedBuffer.h"
 #include "events/cs_EventDispatcher.h"
 
-//#define PRINT_ADC_VERBOSE
+//#define PRINT_DEBUG
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN  24
@@ -35,9 +35,11 @@ extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
  */
 void adc_done(void * p_event_data, uint16_t event_size) {
 	adc_done_cb_data_t* cbData = (adc_done_cb_data_t*)p_event_data;
+#ifdef PRINT_DEBUG
 	LOGd("Handle buf %u", cbData->bufIndex);
+#endif
 	if (cbData->first) {
-		LOGd("adc restarted");
+		LOGd("ADC restarted");
 		EventDispatcher::getInstance().dispatch(EVT_ADC_RESTARTED);
 	}
 	cbData->callback(cbData->bufIndex);
@@ -48,6 +50,7 @@ ADC::ADC() :
 		_nextBufferIndex(0),
 		_firstBuffer(true),
 		_running(false),
+		_numBuffersQueued(0),
 		_lastZeroCrossUpTime(0)
 {
 	_doneCallbackData.callback = NULL;
@@ -245,8 +248,8 @@ void ADC::stop() {
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_STOP);
 	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(0));
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
-
 	nrf_drv_saadc_abort();
+	_numBuffersQueued = 0;
 }
 
 void ADC::start() {
@@ -256,7 +259,6 @@ void ADC::start() {
 		return;
 	}
 	_running = true;
-	_numBuffersQueued = 0;
 	initQueue();
 	_firstBuffer = true;
 
@@ -265,11 +267,16 @@ void ADC::start() {
 }
 
 void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
+#ifdef PRINT_DEBUG
 	LOGd("Queued: %u", _numBuffersQueued);
 	LOGd("Queue buf %u", bufIndex);
+#endif
 	if (_inProgress[bufIndex]) {
-		LOGe("Buffer %i still in progress. Will not queue!", bufIndex);
+		LOGe("Buffer %u in progress", bufIndex);
 		return;
+	}
+	if (_numBuffersQueued > 1) {
+		LOGe("Too many buffers queued %u", _numBuffersQueued);
 	}
 	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
 	ret_code_t err_code;
@@ -279,7 +286,9 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 }
 
 bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
+#ifdef PRINT_DEBUG
 	LOGd("Release buf %u", bufIndex);
+#endif
 	if (_changeConfig) {
 		// Don't queue up the the buffer, we need the adc to be idle.
 		if (_numBuffersQueued == 0) {
@@ -290,6 +299,7 @@ bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 	_inProgress[bufIndex] = false;
 	if (!_running) {
 		LOGi("not running, don't queue buf");
+		return true;
 	}
 
 	cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS; // TODO: 2 should be (CS_ADC_NUM_BUFFERS - saadc queue size)?
@@ -373,7 +383,9 @@ void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 #endif
 	_numBuffersQueued--;
 
+#ifdef PRINT_DEBUG
 	LOGd("Done %u q=%u ind=%u", bufIndex, _numBuffersQueued, _nextBufferIndex);
+#endif
 	
 	if (_numBuffersQueued && dataCallbackRegistered()) {
 		// Update next buffer index.
@@ -382,7 +394,9 @@ void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 		_doneCallbackData.first = _firstBuffer;
 		_firstBuffer = false;
 		_inProgress[bufIndex] = true;
+#ifdef PRINT_DEBUG
 		LOGd("Schedule buf %u", bufIndex);
+#endif
 
 		// Decouple done callback from adc interrupt handler, and put it on app scheduler instead
 		uint32_t errorCode = app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
@@ -393,7 +407,9 @@ void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 		// Next buffer index remains the same.
 		addBufferToSampleQueue(bufIndex);
 	}
+#ifdef PRINT_DEBUG
 	LOGd("ind=%u", _nextBufferIndex);
+#endif
 }
 
 // No logs, this function is called from interrupt
@@ -430,7 +446,9 @@ extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
 			ADC::getInstance()._handleAdcDoneInterrupt(bufIndex);
 		}
 		else {
+#ifdef PRINT_DEBUG
 			LOGw("null buff");
+#endif
 		}
 		break;
 	}
