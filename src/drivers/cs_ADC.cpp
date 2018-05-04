@@ -35,14 +35,11 @@ extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event);
  */
 void adc_done(void * p_event_data, uint16_t event_size) {
 	adc_done_cb_data_t* cbData = (adc_done_cb_data_t*)p_event_data;
-#ifdef PRINT_DEBUG
-	LOGd("Handle buf %u", cbData->bufIndex);
-#endif
-	if (cbData->first) {
-		LOGd("ADC restarted");
-		EventDispatcher::getInstance().dispatch(EVT_ADC_RESTARTED);
-	}
-	cbData->callback(cbData->bufIndex);
+	ADC::getInstance().handleAdcDone(cbData->bufIndex);
+}
+
+void adc_timeout(void* pEventData, uint16_t dataSize) {
+	LOGw("timeout");
 }
 
 ADC::ADC() :
@@ -98,15 +95,28 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(2));
 	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(3));
 
-
-	// Setup PPI: call sample task on timer compare event
+	// Setup PPI: on timer compare event, call adc sample task, and count for timeout.
 	_ppiChannelSample = getPpiChannel(CS_ADC_PPI_CHANNEL_START);
 	nrf_ppi_channel_endpoint_setup(
 			_ppiChannelSample,
 			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMER, nrf_timer_compare_event_get(0)),
-			nrf_drv_saadc_sample_task_get()
+			nrf_saadc_task_address_get(NRF_SAADC_TASK_SAMPLE)
 	);
 	nrf_ppi_channel_enable(_ppiChannelSample);
+
+//	// Setup PPI: on timer compare event, call adc sample task, and count for timeout.
+//	_ppiChannelSample = getPpiChannel(CS_ADC_PPI_CHANNEL_START);
+//	nrf_ppi_channel_and_fork_endpoint_setup(
+//			_ppiChannelSample,
+//			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMER, nrf_timer_compare_event_get(0)),
+//			nrf_drv_saadc_sample_task_get(),
+//			(uint32_t)nrf_timer_task_address_get(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_COUNT)
+//	);
+//	nrf_ppi_channel_enable(_ppiChannelSample);
+
+
+
+
 
 
 	// Setup timeout timer
@@ -115,46 +125,56 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 //	nrf_timer_frequency_set(CS_ADC_TIMER, CS_ADC_TIMEOUT_TIMER_FREQ);
 	uint32_t timeoutCount = CS_ADC_BUF_SIZE / _config.channelCount - 2;
 	LOGd("timeoutCount=%u", timeoutCount);
-	nrf_timer_cc_write(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_CC_CHANNEL0, ticks);
+	nrf_timer_cc_write(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_CC_CHANNEL0, timeoutCount);
 	nrf_timer_mode_set(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_MODE_COUNTER);
-//	nrf_timer_shorts_enable(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
 	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(0));
 	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(1));
 	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(2));
 	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(3));
 
-	// Setup PPI: count samples
-	_ppiSampleCount = getPpiChannel(CS_ADC_PPI_CHANNEL_START+2);
-	nrf_ppi_channel_endpoint_setup(
-			_ppiTimeout,
-			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMER, nrf_timer_compare_event_get(0)),
-			nrf_timer_task_address_get(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_COUNT)
-	);
-	nrf_ppi_channel_enable(_ppiSampleCount);
+//	// Setup PPI: count samples.
+//	_ppiSampleCount = getPpiChannel(CS_ADC_PPI_CHANNEL_START+2);
+//	nrf_ppi_channel_endpoint_setup(
+//			_ppiTimeout,
+//			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMER, nrf_timer_compare_event_get(0)),
+//			(uint32_t)nrf_timer_task_address_get(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_COUNT)
+//	);
+//	nrf_ppi_channel_enable(_ppiSampleCount);
 
-	// Setup timeout PPI: stop the sample timer on compare event.
-	_ppiTimeout = getPpiChannel(CS_ADC_PPI_CHANNEL_START+3);
-	nrf_ppi_channel_endpoint_setup(
-			_ppiTimeout,
-			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(0)),
-			nrf_timer_task_address_get(CS_ADC_TIMER, NRF_TIMER_TASK_STOP)
-	);
-	nrf_ppi_channel_enable(_ppiTimeout);
 
-	// Setup PPI: reset sample count on start task
+
+	// Setup short: stop the timeout timer on compare event (timeout).
+	nrf_timer_shorts_enable(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_SHORT_COMPARE0_STOP_MASK);
+
+//	// Setup timeout PPI: on compare event (timeout), stop the sample timer.
+//	_ppiTimeout = getPpiChannel(CS_ADC_PPI_CHANNEL_START+3);
+//	nrf_ppi_channel_endpoint_setup(
+//			_ppiTimeout,
+//			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(0)),
+//			(uint32_t)nrf_timer_task_address_get(CS_ADC_TIMER, NRF_TIMER_TASK_STOP)
+//	);
+//	nrf_ppi_channel_enable(_ppiTimeout);
+
+	// Setup PPI: when saadc is started, reset sample count, and start the timer.
 	_ppiTimeoutReset = getPpiChannel(CS_ADC_PPI_CHANNEL_START+4);
-	nrf_ppi_channel_endpoint_setup(
+	nrf_ppi_channel_and_fork_endpoint_setup(
 			_ppiTimeoutReset,
-			(uint32_t)nrf_saadc_event_address_get(NRF_SAADC_EVENT_END),
-			nrf_timer_task_address_get(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CLEAR)
+			(uint32_t)nrf_saadc_event_address_get(NRF_SAADC_EVENT_STARTED),
+			(uint32_t)nrf_timer_task_address_get(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CLEAR),
+			(uint32_t)nrf_timer_task_address_get(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_START)
 	);
 	nrf_ppi_channel_enable(_ppiTimeoutReset);
 
-	// Enable timeout timer interrupt
-	err_code = sd_nvic_SetPriority(CS_ADC_TIMEOUT_TIMER_IRQn, CS_PWM_TIMER_IRQ_PRIORITY);
+	// Enable timeout timer interrupt.
+	err_code = sd_nvic_SetPriority(CS_ADC_TIMEOUT_TIMER_IRQn, CS_ADC_TIMEOUT_TIMER_IRQ_PRIORITY);
 	APP_ERROR_CHECK(err_code);
 	err_code = sd_nvic_EnableIRQ(CS_ADC_TIMEOUT_TIMER_IRQn);
 	APP_ERROR_CHECK(err_code);
+	nrf_timer_int_enable(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_int_get(0));
+
+	// Start the timeout timer
+	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_START);
+
 
 
 	// Setup PPI: call START on END.
@@ -206,6 +226,7 @@ void ADC::initQueue() {
 	for (int i = 0; i < max_queue; i++) {
 		addBufferToSampleQueue((i + _nextBufferIndex) % CS_ADC_NUM_BUFFERS);
 	}
+
 }
 
 /** Configure an ADC channel.
@@ -289,6 +310,7 @@ void ADC::setDoneCallback(adc_done_cb_t callback) {
 
 void ADC::stop() {
 	LOGd("stop");
+	_waitToStart = false;
 	if (!_running) {
 		LOGw("already stopped");
 		return;
@@ -299,7 +321,7 @@ void ADC::stop() {
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_STOP);
 	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(0));
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
-	nrf_drv_saadc_abort();
+//	nrf_drv_saadc_abort();
 	_numBuffersQueued = 0;
 }
 
@@ -309,6 +331,21 @@ void ADC::start() {
 		LOGw("already started");
 		return;
 	}
+	bool inProgress = false;
+	for (uint8_t i=0; i<CS_ADC_NUM_BUFFERS; ++i) {
+		if (_inProgress[i]) {
+			inProgress = true;
+		}
+	}
+	if (inProgress) {
+		// Wait for buffers to be released.
+		_waitToStart = true;
+#ifdef PRINT_DEBUG
+		LOGd("wait to start");
+#endif
+		return;
+	}
+	_waitToStart = false;
 	_running = true;
 	initQueue();
 	_firstBuffer = true;
@@ -328,6 +365,8 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 	}
 	if (_numBuffersQueued > 1) {
 		LOGe("Too many buffers queued %u", _numBuffersQueued);
+		APP_ERROR_CHECK(1);
+		return;
 	}
 	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
 	ret_code_t err_code;
@@ -340,6 +379,13 @@ bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 #ifdef PRINT_DEBUG
 	LOGd("Release buf %u", bufIndex);
 #endif
+	_inProgress[bufIndex] = false;
+
+	if (_waitToStart) {
+		start();
+		return true;
+	}
+
 	if (_changeConfig) {
 		// Don't queue up the the buffer, we need the adc to be idle.
 		if (_numBuffersQueued == 0) {
@@ -347,7 +393,7 @@ bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 		}
 		return true;
 	}
-	_inProgress[bufIndex] = false;
+
 	if (!_running) {
 		LOGi("not running, don't queue buf");
 		return true;
@@ -413,45 +459,51 @@ void ADC::setLimitDown() {
 void ADC::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch(evt) {
 	case EVT_STORAGE_WRITE: {
-		stop();
+//		stop();
 		break;
 	}
 	case EVT_STORAGE_WRITE_DONE: {
-		start();
+//		start();
 		break;
 	}
 	}
 }
 
-/**
- * The ADC is done with the interrupt. Now, depending on the fact if there is a callback registered, a callback struct
- * is populated and put on the app scheduler. If there is no callback registered or there is a callback "in progress",
- * immediately the next buffer needs to be queued.
- */
-void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
+
+
+void ADC::handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 	_numBuffersQueued--;
 
+//	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CAPTURE1);
+//	LOGd("%u", nrf_timer_cc_read(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_CC_CHANNEL1));
 #ifdef PRINT_DEBUG
 	LOGd("Done %u q=%u ind=%u", bufIndex, _numBuffersQueued, _nextBufferIndex);
 #endif
-	
+
+	if (_numBuffersQueued == 0) {
+		stop();
+		start();
+		return;
+	}
+
 	if (_numBuffersQueued && dataCallbackRegistered()) {
 		// Update next buffer index.
 		_nextBufferIndex = (_nextBufferIndex + 1) % CS_ADC_NUM_BUFFERS;
-		_doneCallbackData.bufIndex = bufIndex;
-		_doneCallbackData.first = _firstBuffer;
-		_firstBuffer = false;
 		_inProgress[bufIndex] = true;
-#ifdef PRINT_DEBUG
-		LOGd("Schedule buf %u", bufIndex);
-#endif
 
-		// Decouple done callback from adc interrupt handler, and put it on app scheduler instead
-		uint32_t errorCode = app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
-		APP_ERROR_CHECK(errorCode);
+		if (_firstBuffer) {
+			LOGd("ADC restarted");
+			EventDispatcher::getInstance().dispatch(EVT_ADC_RESTARTED);
+		}
+#ifdef PRINT_DEBUG
+		LOGd("process buf %u", bufIndex);
+#endif
+		_doneCallbackData.callback(bufIndex);
+
+		_firstBuffer = false;
 	}
 	else {
 		// Skip the callback, just queue this buffer again.
@@ -461,6 +513,18 @@ void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
 #ifdef PRINT_DEBUG
 	LOGd("ind=%u", _nextBufferIndex);
 #endif
+}
+
+/**
+ * The ADC is done with the interrupt. Now, depending on the fact if there is a callback registered, a callback struct
+ * is populated and put on the app scheduler. If there is no callback registered or there is a callback "in progress",
+ * immediately the next buffer needs to be queued.
+ */
+void ADC::_handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex) {
+	// Decouple handling of buffer from adc interrupt handler
+	_doneCallbackData.bufIndex = bufIndex;
+	uint32_t errorCode = app_sched_event_put(&_doneCallbackData, sizeof(_doneCallbackData), adc_done);
+	APP_ERROR_CHECK(errorCode);
 }
 
 // No logs, this function is called from interrupt
@@ -488,10 +552,21 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 	}
 }
 
+void ADC::_handleTimeoutInterrupt() {
+	// Decouple timeout handling from interrupt handler.
+	uint32_t errorCode = app_sched_event_put(NULL, 0, adc_timeout);
+	APP_ERROR_CHECK(errorCode);
+}
+
 extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
 	switch(p_event->type) {
 	case NRF_DRV_SAADC_EVT_DONE: {
 		nrf_saadc_value_t* buf = p_event->data.done.p_buffer;
+#ifdef PRINT_DEBUG
+		if (p_event->data.done.size != CS_ADC_BUF_SIZE) {
+			LOGw("wrong size");
+		}
+#endif
 		if (buf != NULL) {
 			cs_adc_buffer_id_t bufIndex = InterleavedBuffer::getInstance().getIndex(buf);
 			ADC::getInstance()._handleAdcDoneInterrupt(bufIndex);
@@ -512,6 +587,11 @@ extern "C" void saadc_callback(nrf_drv_saadc_evt_t const * p_event) {
 
 // Timer interrupt handler
 extern "C" void CS_ADC_TIMER_IRQ(void) {
+}
+
+extern "C" void CS_ADC_TIMEOUT_TIMER_IRQ(void) {
+	ADC::getInstance()._handleTimeoutInterrupt();
+	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(0));
 }
 
 nrf_ppi_channel_t ADC::getPpiChannel(uint8_t index) {

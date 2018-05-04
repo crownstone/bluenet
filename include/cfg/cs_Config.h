@@ -123,7 +123,7 @@
 #define CS_ADC_TIMEOUT_TIMER_IRQn                TIMER2_IRQn
 #define CS_ADC_TIMEOUT_INSTANCE_INDEX            TIMER2_INSTANCE_INDEX
 #define CS_ADC_TIMEOUT_TIMER_ID                  2
-#define CS_ADC_TIMEOUT_TIMER_FREQ                NRF_TIMER_FREQ_16MHz
+#define CS_ADC_TIMEOUT_TIMER_IRQ_PRIORITY        APP_IRQ_PRIORITY_MID
 
 
 //! ----- PPI -----

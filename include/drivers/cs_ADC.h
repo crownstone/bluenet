@@ -114,10 +114,10 @@ struct adc_done_cb_data_t {
 	// Buffer index as argument for ADC callback
 	cs_adc_buffer_id_t bufIndex;
 
-	// True when this is the first buffer of consecutive buffers.
-	// This buffer should not be compared to the previous buffer.
-	// Happens after a config change, timeout, or start of ADC.
-	bool first;
+//	// True when this is the first buffer of consecutive buffers.
+//	// This buffer should not be compared to the previous buffer.
+//	// Happens after a config change, timeout, or start of ADC.
+//	bool first;
 };
 
 
@@ -232,6 +232,9 @@ public:
 	// Handle events as EventListener.
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
+
+	void handleAdcDone(cs_adc_buffer_id_t bufIndex);
+
 	/** Update this object with a buffer with values from the ADC conversion.
 	 *
 	 * This update() function is also called from the ADC interrupt service routine. In this case an entire buffer has
@@ -248,6 +251,10 @@ public:
 	 *
 	 */
 	void _handleAdcLimitInterrupt(nrf_saadc_limit_t type);
+
+	/** Called when the timeout timer triggered.
+	 */
+	void _handleTimeoutInterrupt();
 
 protected:
 
@@ -290,6 +297,7 @@ private:
 
 	bool _firstBuffer;
 	bool _running;
+	bool _waitToStart; // True when we want to start, but we wait for buffers to be released.
 
 	//! Number of buffers that are queued to be populated by adc.
 	cs_adc_buffer_count_t _numBuffersQueued;
