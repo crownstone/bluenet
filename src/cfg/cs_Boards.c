@@ -254,6 +254,11 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->minTxPower                         = -40;
 }
 
+void asUsbDongle(boards_config_t* p_config) {
+	asPca10040(p_config);
+	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_USB);
+}
+
 void asGuidestone(boards_config_t* p_config) {
 	// Guidestone has pads for pin 9, 10, 25, 26, 27, SWDIO, SWDCLK, GND, VDD
 
@@ -325,6 +330,9 @@ uint32_t configure_board(boards_config_t* p_config) {
 	case PCA10036:
 	case PCA10040:
 		asPca10040(p_config);
+		break;
+	case CS_USB_DONGLE:
+		asUsbDongle(p_config);
 		break;
 
 	default:
