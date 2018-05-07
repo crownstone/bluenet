@@ -36,6 +36,10 @@ extern "C" {
 // Rectangular beacons from China.
 #define GUIDESTONE           100
 
+
+// Crownstone USB dongle
+#define CS_USB_DONGLE        200
+
 // CROWNSTONE BUILTINS
 
 // Prototype builtin. Not in production.

@@ -30,7 +30,7 @@ extern "C" {
 	  |  |  |    |  |  |---  Patch number of PCB version
 	  |  |  |    |  |------  Minor number of PCB version
 	  |  |  |    |---------  Major number of PCB version
-	  |  |  |--------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone
+	  |  |  |--------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 dongle
 	  |  |-----------------  Market: 1 EU, 2 US
 	  |--------------------  Family: 1 Crownstone
 */
@@ -42,6 +42,7 @@ inline const char* get_hardware_version() {
 		hardwareBoard = ACR01B2C;
 	}
 
+	// Can't use LOGe here, as the bootloader also uses this file.
 //	LOGi("UICR");
 //	BLEutil::printArray((uint8_t*)NRF_UICR->CUSTOMER, 128);
 	
@@ -65,6 +66,9 @@ inline const char* get_hardware_version() {
 	// GUIDESTONE
 	if (hardwareBoard == GUIDESTONE) return "10104010000";
 
+	// CROWNSTONE USB DONGLE
+	if (hardwareBoard == CS_USB_DONGLE) return "10105000000";
+
 	/////////////////////////////////////////////////////////////////
 	//// Old and Third Party Boards
 	/////////////////////////////////////////////////////////////////
@@ -73,7 +77,8 @@ inline const char* get_hardware_version() {
 	if (hardwareBoard == PCA10036) return "PCA10036";
 	if (hardwareBoard == PCA10040) return "PCA10040";
 
-	LOGe("Failed to define version for hardware board");
+	// Can't use LOGe here, as the bootloader also uses this file.
+//	LOGe("Failed to define version for hardware board");
 	APP_ERROR_CHECK(1);
 
 	return "Unknown";
