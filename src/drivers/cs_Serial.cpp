@@ -64,8 +64,8 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 	UartProtocol::getInstance().init();
 
 	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; // Do not enable hardware flow control.
-	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud38400;
-//	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud230400; // Highest baudrate that still worked.
+//	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud38400;
+	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud230400; // Highest baudrate that still worked.
 	NRF_UART0->TASKS_STARTTX = 1;
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
