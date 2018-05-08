@@ -5,6 +5,7 @@
 BLUETOOTH_NAME="Test"
 
 FIRMWARE_VERSION="undefined"
+BOOTLOADER_VERSION="undefined"
 
 # The different boards that can be used:
 # ## old crownstones
