@@ -5,11 +5,10 @@
 #
 # This will:
 #  - Create a new CMakeBuild.config in $BLUENET_DIR/release/model_version/
-#  - Build firmware, DFU packages and docs and copy
-#    them to $BLUENET_RELEASE_DIR/model_version/
+#  - Build firmware, DFU package and docs and copy them to $BLUENET_RELEASE_DIR/firmwares/
 #  - Update the index.json file in $BLUENET_RELEASE_DIR to keep
 #    track of stable, latest, and release dates (for cloud)
-#  - Create a Change Log file from git commits since last release
+#  - Create a change log file from git commits since last release
 #  - Create a git tag with the version number
 #
 #############################################################################
@@ -28,13 +27,18 @@ if [ -z $BLUENET_RELEASE_DIR ]; then
 fi
 BLUENET_RELEASE_CANDIDATE_DIR="${BLUENET_RELEASE_DIR}-candidate"
 
+
+##############################################
+### Check bluenet branch, changes, and remote
+##############################################
+
 pushd $BLUENET_DIR &> /dev/null
 
-# check current branch, releases should be made from master branch
+# Check current branch, releases should be made from master branch
 branch=$(git symbolic-ref --short -q HEAD)
 
 if [[ $branch != "master" ]]; then
-	cs_err "You are currently on branch '"$branch"'"
+	cs_err "Bluenet is currently on branch '"$branch"'"
 	cs_err "Releases should be made from master branch"
 	cs_err "Are you sure you want to continue? [y/N]"
 	read branch_response
@@ -44,7 +48,7 @@ if [[ $branch != "master" ]]; then
 	fi
 fi
 
-# check for modifications in bluenet code
+# Check for modifications
 modifications=$(git ls-files -m | wc -l)
 
 if [[ $modifications != 0 ]]; then
@@ -53,11 +57,11 @@ if [[ $modifications != 0 ]]; then
 	exit 1
 fi
 
-# check for untracked files
+# Check for untracked files
 untracked=$(git ls-files --others --exclude-standard | wc -l)
 
 if [[ $untracked != 0 ]]; then
-	cs_err "The following untracked files were found in the blunet code"
+	cs_err "The following untracked files were found in the bluenet code"
 	cs_err "Make sure you didn't forget to add anything important!"
 	git ls-files --others --exclude-standard
 	cs_info "Do you want to continue? [Y/n]"
@@ -127,22 +131,26 @@ while [[ $valid == 0 ]]; do
 	if [[ $version =~ ^[0-9]{1,2}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
 		cs_info "Select model:"
 		printf "$yellow"
-		options=("Crownstone" "Guidestone")
+		options=("Crownstone" "Guidestone" "Dongle")
 		select opt in "${options[@]}"
 		do
-		    case $opt in
-		        "Crownstone")
+			case $opt in
+				"Crownstone")
 					model="crownstone"
 					# device_type="DEVICE_CROWNSTONE_PLUG"
 					break
-		            ;;
-		        "Guidestone")
+					;;
+				"Guidestone")
 					model="guidestone"
 					# device_type="DEVICE_GUIDESTONE"
 					break
-		            ;;
-		        *) echo invalid option;;
-		    esac
+					;;
+				"Dongle")
+					model="dongle"
+					break
+					;;
+				*) echo invalid option;;
+			esac
 		done
 		printf "$normal"
 
@@ -214,7 +222,6 @@ if [[ $existing == 0 ]]; then
 	fi
 
 	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $directory/CMakeBuild.config
-	# sed -i "s/DEVICE_TYPE=.*/DEVICE_TYPE=$device_type/" $directory/CMakeBuild.config
 
 	sed -i "s/NRF51822_DIR=/#NRF51822_DIR=/" $directory/CMakeBuild.config
 	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $directory/CMakeBuild.config
@@ -327,7 +334,7 @@ popd &> /dev/null
 # goto bluenet scripts dir
 pushd $BLUENET_DIR/scripts &> /dev/null
 
-cs_info "Create DFU packages ..."
+cs_info "Create DFU package ..."
 ./dfuGenPkg.py -a "$BLUENET_BIN_DIR/crownstone.hex" -o $model"_"$version
 checkError
 
@@ -385,9 +392,8 @@ cs_info "Add release config"
 git add $directory
 git commit -m "Add release config for "$model"_"$version
 
-cs_info "Create git tag for release"
-
 if [[ $stable == 1 ]]; then
+	cs_info "Create git commit for release"
 	echo $version > VERSION
 
 	cs_log "Updating changes overview"
