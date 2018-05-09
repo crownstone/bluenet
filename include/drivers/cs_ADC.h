@@ -104,22 +104,28 @@ struct adc_done_cb_data_t {
 	cs_adc_buffer_id_t bufNum;
 };
 */
-/**
- * Struct that is used to communicate to the rest of code.
- */
-struct adc_done_cb_data_t {
-	// Callback function
-	adc_done_cb_t callback;
-	
-	// Buffer index as argument for ADC callback
-	cs_adc_buffer_id_t bufIndex;
+///**
+// * Struct that is used to communicate to the rest of code.
+// */
+//struct adc_done_cb_data_t {
+//	// Callback function
+//	adc_done_cb_t callback;
+//
+//	// Buffer index as argument for ADC callback
+//	cs_adc_buffer_id_t bufIndex;
+//
+////	// True when this is the first buffer of consecutive buffers.
+////	// This buffer should not be compared to the previous buffer.
+////	// Happens after a config change, timeout, or start of ADC.
+////	bool first;
+//};
 
-//	// True when this is the first buffer of consecutive buffers.
-//	// This buffer should not be compared to the previous buffer.
-//	// Happens after a config change, timeout, or start of ADC.
-//	bool first;
+
+enum adc_saadc_state_t {
+	ADC_SAADC_STATE_IDLE,
+	ADC_SAADC_STATE_BUSY,
+	ADC_SAADC_STATE_STOPPING
 };
-
 
 
 /** Analog-Digital conversion.
@@ -185,11 +191,14 @@ public:
 	 */
 	cs_adc_error_t init(const adc_config_t& config);
 
+	cs_adc_error_t initAdc(const adc_config_t & config);
+
 	/** Start the ADC sampling
 	 */
 	void start();
 
 	/** Stop the ADC sampling
+	 *  Only to be called from main thread.
 	 */
 	void stop();
 
@@ -235,6 +244,8 @@ public:
 
 	void handleAdcDone(cs_adc_buffer_id_t bufIndex);
 
+//	void _stopAdc();
+
 	/** Update this object with a buffer with values from the ADC conversion.
 	 *
 	 * This update() function is also called from the ADC interrupt service routine. In this case an entire buffer has
@@ -252,6 +263,10 @@ public:
 	 */
 	void _handleAdcLimitInterrupt(nrf_saadc_limit_t type);
 
+	/** Handles the ADC interrupt.
+	 */
+	void _handleAdcInterrupt();
+
 	/** Called when the timeout timer triggered.
 	 */
 	void _handleTimeoutInterrupt();
@@ -264,16 +279,16 @@ private:
 	 */
 	ADC();
 
-	//! This class is singleton, deny implementation
+	// This class is singleton, deny implementation
 	ADC(ADC const&);
 	
-	//! This class is singleton, deny implementation
+	// This class is singleton, deny implementation
 	void operator=(ADC const &);
 
-	//! Whether or not the config should be changed.
+	// Whether or not the config should be changed.
 	bool _changeConfig;
 
-	//! Configuration of this class
+	// Configuration of this class
 	adc_config_t _config;
 
 	// PPI channel to be used to communicate from Timer to ADC peripheral.
@@ -292,59 +307,102 @@ private:
 	nrf_ppi_channel_t _ppiTimeoutReset;
 
 
+
 	// Index of buffer that is currently being used to write samples to.
-	cs_adc_buffer_id_t _nextBufferIndex;
+	// **Used in interrupt!**
+	cs_adc_buffer_id_t _bufferIndex;
 
-	bool _firstBuffer;
-	bool _running;
-	bool _waitToStart; // True when we want to start, but we wait for buffers to be released.
+	// Index of next buffer to be used.
+	// **Used in interrupt!**
+	cs_adc_buffer_id_t _queuedBufferIndex;
 
-	//! Number of buffers that are queued to be populated by adc.
+	// Number of buffers that are queued to be populated by SAADC.
+	// **Used in interrupt!**
 	cs_adc_buffer_count_t _numBuffersQueued;
 
-	//! Buffers in progress 
+	// True when next buffer is the first after start.
+	bool _firstBuffer;
+
+	// True when ADC has been started.
+	bool _running;
+
+	// True when we want to start, but we wait for buffers to be released.
+	bool _waitToStart;
+
+	// True when SAADC is busy sampling.
+	// **Used in interrupt!**
+	volatile adc_saadc_state_t _saadcBusy;
+
+	// Keep up which buffers are being processed by callback.
 	bool _inProgress[CS_ADC_NUM_BUFFERS];
 
-	//! Arguments to the callback function
-	adc_done_cb_data_t _doneCallbackData;
+//	// Arguments to the callback function
+//	adc_done_cb_data_t _doneCallbackData;
+
+	// Callback function
+	adc_done_cb_t _doneCallback;
 
 	inline bool dataCallbackRegistered() {
-		return (_doneCallbackData.callback != NULL);
+//		return (_doneCallbackData.callback != NULL);
+		return (_doneCallback != NULL);
 	}
 	
-	//! The zero crossing callback.
+	// The zero crossing callback.
+	// **Used in interrupt!**
 	adc_zero_crossing_cb_t _zeroCrossingCallback;
 
-	//! The channel which is checked for zero crossings.
+	// The channel which is checked for zero crossings.
+	// **Used in interrupt!**
 	cs_adc_channel_id_t _zeroCrossingChannel;
 
-	//! Store the timestamp of the last upwards zero crossing.
+	// Cache limit event.
+	// **Used in interrupt!**
+	nrf_saadc_event_t _eventLimitLow;
+
+	// Cache limit event.
+	// **Used in interrupt!**
+	nrf_saadc_event_t _eventLimitHigh;
+
+	// Keep up whether zero crossing is enabled.
+	// **Used in interrupt!**
+	bool _zeroCrossingEnabled;
+
+	// Store the timestamp of the last upwards zero crossing.
+	// **Used in interrupt!**
 	uint32_t _lastZeroCrossUpTime;
 
-	//! Store the zero value used to detect zero crossings.
+	// Store the zero value used to detect zero crossings.
+	// **Used in interrupt!**
 	int32_t _zeroValue;
 
-	//! Function to initialize the adc channels.
+
+	// Function to initialize the adc channels.
 	cs_adc_error_t initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config);
 
-	//! Set the adc limit such that it triggers when going above zero
+	// Set the adc limit such that it triggers when going above zero
 	void setLimitUp();
 
-	//! Set the adc limit such that it triggers when going below zero
+	// Set the adc limit such that it triggers when going below zero
 	void setLimitDown();
 
-	//! Function that returns the adc pin number, given the AIN number
-	nrf_saadc_input_t getAdcPin(cs_adc_pin_id_t pinNum);
-
-	//! Initialize buffer queue
+	// Initialize buffer queue
 	void initQueue();
 
-	//! Function that puts a buffer in queue to be populated with adc values.
+	// Function that puts a buffer in queue to be populated with adc values.
 	void addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex);
 
-	//! Function to apply a new config. Should be called when no buffers are are queued, nor being processed.
+	// Function to apply a new config. Should be called when no buffers are are queued, nor being processed.
 	void applyConfig();
 
-	//! Helper function to get the ppi channel, given the index.
+	// Helper function that returns the adc pin number, given the AIN number.
+	nrf_saadc_input_t getAdcPin(cs_adc_pin_id_t pinNum);
+
+	// Helper function to get the ppi channel, given the index.
 	nrf_ppi_channel_t getPpiChannel(uint8_t index);
+
+	// Helper function to get the limit event, given the channel.
+	nrf_saadc_event_t getLimitLowEvent(cs_adc_channel_id_t channel);
+
+	// Helper function to get the limit event, given the channel.
+	nrf_saadc_event_t getLimitHighEvent(cs_adc_channel_id_t channel);
 };

@@ -42,7 +42,7 @@ extern "C"
 
 #ifndef BOOTLOADER_COMPILATION
 // Refering to driver files
-#include "nrf_drv_saadc.h"
+#include "nrf_saadc.h"
 #include "nrf_timer.h"
 #include "nrf_ppi.h"
 #include "nrf_gpiote.h"

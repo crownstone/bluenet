@@ -58,8 +58,9 @@ void GPIOTE_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 /**
  * AD converter should be implemented.
  */
-void ADC_IRQHandler(void);
+void SAADC_IRQHandler(void);
 
+// timer used by softdevice
 void TIMER0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 
 // timers used for ADC
@@ -134,7 +135,7 @@ void (* const gVectors[])(void) =
 	SPI1_TWI1_IRQHandler,                        // 20
 	NFCT_IRQHandler,
 	GPIOTE_IRQHandler,
-	ADC_IRQHandler,
+	SAADC_IRQHandler,
 	TIMER0_IRQHandler,
 	TIMER1_IRQHandler,
 	TIMER2_IRQHandler,

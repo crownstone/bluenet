@@ -6,9 +6,9 @@
  */
 #pragma once
 
-extern "C" {
-#include <nrf_drv_saadc.h>
-}
+//extern "C" {
+//#include <nrf_drv_saadc.h>
+//}
 #include "structs/cs_PowerSamples.h"
 #include "structs/buffer/cs_CircularBuffer.h"
 #include "cfg/cs_Boards.h"
