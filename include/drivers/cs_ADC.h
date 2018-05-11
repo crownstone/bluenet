@@ -246,17 +246,21 @@ public:
 
 //	void _stopAdc();
 
-	/** Update this object with a buffer with values from the ADC conversion.
-	 *
-	 * This update() function is also called from the ADC interrupt service routine. In this case an entire buffer has
-	 * been made available. This is done by having the ADC peripheral directly writing into a part of the FLASH using
-	 * the Easy-DMA peripheral and inter-peripheral communication (called PPI).
-	 * Note that this function is time-sensitive. The number of activities in it are limited to a minimal number. The 
-	 * values are only copied and not processed further.
-	 *
-	 * @param[in] buf                  A buffer with size defined in the constructor.
+//	/** Update this object with a buffer with values from the ADC conversion.
+//	 *
+//	 * This update() function is also called from the ADC interrupt service routine. In this case an entire buffer has
+//	 * been made available. This is done by having the ADC peripheral directly writing into a part of the FLASH using
+//	 * the Easy-DMA peripheral and inter-peripheral communication (called PPI).
+//	 * Note that this function is time-sensitive. The number of activities in it are limited to a minimal number. The
+//	 * values are only copied and not processed further.
+//	 *
+//	 * @param[in] buf                  A buffer with size defined in the constructor.
+//	 */
+//	void _handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex);
+
+	/** Handles timeout
 	 */
-	void _handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex);
+	void _handleTimeout();
 
 	/** Called when the sampled value is above upper limit, or below lower limit.
 	 *
@@ -304,7 +308,7 @@ private:
 	nrf_ppi_channel_t _ppiTimeout;
 
 	// PPI channel used to reset the timeout count.
-	nrf_ppi_channel_t _ppiTimeoutReset;
+	nrf_ppi_channel_t _ppiTimeoutStart;
 
 
 
@@ -394,6 +398,9 @@ private:
 	// Function to apply a new config. Should be called when no buffers are are queued, nor being processed.
 	void applyConfig();
 
+	// Function to stop the timeout timer.
+	void stopTimeout();
+
 	// Helper function that returns the adc pin number, given the AIN number.
 	nrf_saadc_input_t getAdcPin(cs_adc_pin_id_t pinNum);
 
@@ -405,4 +412,7 @@ private:
 
 	// Helper function to get the limit event, given the channel.
 	nrf_saadc_event_t getLimitHighEvent(cs_adc_channel_id_t channel);
+
+	// Helper function to get the gpiote task out, given the index.
+	nrf_gpiote_tasks_t getGpioteTaskOut(uint8_t index);
 };

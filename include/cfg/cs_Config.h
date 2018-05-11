@@ -139,7 +139,9 @@
 #define CS_PWM_PPI_GROUP_COUNT                   1
 
 // ----- GPIOTE -----
-#define CS_PWM_GPIOTE_CHANNEL_START              0
+#define CS_ADC_GPIOTE_CHANNEL_START              0
+#define CS_ADC_GPIOTE_CHANNEL_COUNT              1 // Actually only used for debug
+#define CS_PWM_GPIOTE_CHANNEL_START              (CS_ADC_GPIOTE_CHANNEL_START + CS_ADC_GPIOTE_CHANNEL_COUNT)
 #define CS_PWM_GPIOTE_CHANNEL_COUNT              (CS_PWM_MAX_CHANNELS)
 
 // ----- SAADC -----
