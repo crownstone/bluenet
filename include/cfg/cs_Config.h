@@ -148,19 +148,12 @@
 #define CS_ADC_IRQ                               SAADC_IRQHandler
 
 
-
-
-//#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 // Number of voltage and current samples per burst
-
-#define CS_ADC_SAMPLE_INTERVAL_US                (200*2) // 100 samples per period of 50Hz wave
-//#define CS_ADC_SAMPLE_INTERVAL_US                400
-
+#define CS_ADC_SAMPLE_INTERVAL_US                200 // 100 samples per period of 50Hz wave
 #define CS_ADC_MAX_PINS                          2
 #define CS_ADC_NUM_BUFFERS                       4
-#define CS_ADC_BUF_SIZE                          (2*20000*2/CS_ADC_SAMPLE_INTERVAL_US)
-//#define CS_ADC_BUF_SIZE                          (2*30000/CS_ADC_SAMPLE_INTERVAL_US)
+#define CS_ADC_BUF_SIZE                          (CS_ADC_MAX_PINS * 20000 / CS_ADC_SAMPLE_INTERVAL_US) // Make size so it fills up 20ms of data.
 
-#define POWER_SAMPLE_BURST_NUM_SAMPLES           (20000*2/CS_ADC_SAMPLE_INTERVAL_US) // Number of voltage and current samples per burst
+#define POWER_SAMPLE_BURST_NUM_SAMPLES           (20000/CS_ADC_SAMPLE_INTERVAL_US) // Number of voltage and current samples per burst
 
 
 // Buffer size for storage requests. Storage requests get buffered when the device is scanning or meshing.
