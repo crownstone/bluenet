@@ -21,12 +21,15 @@
 #include "structs/buffer/cs_InterleavedBuffer.h"
 #include "events/cs_EventDispatcher.h"
 
-#define PRINT_DEBUG
+//#define PRINT_DEBUG
 
 // Define test pin to enable gpio debug.
-//#define TEST_PIN  24
-//#define TEST_PIN2 25
-//#define TEST_PIN3 26
+//#define TEST_PIN_ZERO_CROSS 20
+//#define TEST_PIN_START      22
+//#define TEST_PIN_STOP       23
+//#define TEST_PIN_PROCESS    24
+//#define TEST_PIN_INT_END    25
+
 
 // Defines specific for implementation
 #define LIMIT_LOW_DISABLED  (-2048) // min adc value
@@ -42,7 +45,7 @@
  */
 void adc_done(void * p_event_data, uint16_t event_size) {
 	cs_adc_buffer_id_t* bufIndex = (cs_adc_buffer_id_t*)p_event_data;
-	ADC::getInstance().handleAdcDone(*bufIndex);
+	ADC::getInstance()._handleAdcDone(*bufIndex);
 }
 
 void adc_restart(void * p_event_data, uint16_t event_size) {
@@ -91,15 +94,22 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 //	memcpy(&_config, &config, sizeof(adc_config_t));
 	LOGi("init: period=%uus", _config.samplingPeriodUs);
 
-#ifdef TEST_PIN
-	nrf_gpio_cfg_output(TEST_PIN);
+#ifdef TEST_PIN_ZERO_CROSS
+	nrf_gpio_cfg_output(TEST_PIN_ZERO_CROSS);
 #endif
-#ifdef TEST_PIN2
-	nrf_gpio_cfg_output(TEST_PIN2);
+#ifdef TEST_PIN_START
+	nrf_gpio_cfg_output(TEST_PIN_START);
 #endif
-#ifdef TEST_PIN3
-	nrf_gpio_cfg_output(TEST_PIN3);
+#ifdef TEST_PIN_STOP
+	nrf_gpio_cfg_output(TEST_PIN_STOP);
 #endif
+#ifdef TEST_PIN_PROCESS
+	nrf_gpio_cfg_output(TEST_PIN_PROCESS);
+#endif
+#ifdef TEST_PIN_INT_END
+	nrf_gpio_cfg_output(TEST_PIN_INT_END);
+#endif
+
 
 	// Setup sample timer
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
@@ -283,7 +293,6 @@ void ADC::initQueue() {
  *   - set either differential mode (pin - ref_pin), or single ended mode (pin - 0)
  */
 cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config) {
-	// TODO: No logs, this function can be called from interrupt
 	LOGi("init channel %u on ain%u, range=%umV, ref=ain%u", channel, config.pin, config.rangeMilliVolt, config.referencePin);
 	assert(config.pin < 8 || config.pin == CS_ADC_PIN_VDD, "Invalid pin");
 	assert(config.referencePin < 8 || config.referencePin == CS_ADC_REF_PIN_NOT_AVAILABLE, "Invalid ref pin");
@@ -385,6 +394,9 @@ void ADC::stop() {
 		LOGw("already stopped");
 		return;
 	}
+#ifdef TEST_PIN_STOP
+	nrf_gpio_pin_toggle(TEST_PIN_STOP);
+#endif
 	_running = false;
 	nrf_saadc_int_disable(NRF_SAADC_INT_END); // Make sure the end interrupt doesn't interrupt this piece of code.
 
@@ -402,7 +414,7 @@ void ADC::stop() {
 #endif
 		nrf_saadc_event_clear(NRF_SAADC_EVENT_STOPPED);
 		nrf_saadc_int_enable(NRF_SAADC_INT_STOPPED);
-		// It seems that the stop task triggers an END interrupt.
+		// The stop task triggers an END interrupt.
 		nrf_saadc_task_trigger(NRF_SAADC_TASK_STOP);
 		// Wait for ADC being stopped.
 		while (_saadcBusy != ADC_SAADC_STATE_IDLE);
@@ -410,6 +422,9 @@ void ADC::stop() {
 	_numBuffersQueued = 0;
 	nrf_saadc_event_clear(NRF_SAADC_EVENT_END); // Clear any pending saadc END event.
 	nrf_saadc_int_enable(NRF_SAADC_INT_END); // Re-enable end interrupt.
+#ifdef TEST_PIN_STOP
+	nrf_gpio_pin_toggle(TEST_PIN_STOP);
+#endif
 }
 
 void ADC::start() {
@@ -418,6 +433,9 @@ void ADC::start() {
 		LOGw("already started");
 		return;
 	}
+#ifdef TEST_PIN_START
+	nrf_gpio_pin_toggle(TEST_PIN_START);
+#endif
 	bool inProgress = false;
 	for (uint8_t i=0; i<CS_ADC_NUM_BUFFERS; ++i) {
 		if (_inProgress[i]) {
@@ -464,11 +482,15 @@ void ADC::start() {
 
 	nrf_ppi_channel_enable(_ppiChannelStart);
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_START);
+#ifdef TEST_PIN_START
+	nrf_gpio_pin_toggle(TEST_PIN_START);
+#endif
 }
 
 void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 	if (_inProgress[bufIndex]) {
 		LOGe("Buffer %u in progress", bufIndex);
+		APP_ERROR_CHECK(NRF_ERROR_BUSY);
 		return;
 	}
 
@@ -526,6 +548,9 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 }
 
 bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
+#ifdef TEST_PIN_PROCESS
+	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
+#endif
 #ifdef PRINT_DEBUG
 	LOGd("Release buf %u", bufIndex);
 #endif
@@ -538,14 +563,14 @@ bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 
 	if (_changeConfig) {
 		// Don't queue up the the buffer, we need the adc to be idle.
-		if (_numBuffersQueued == 0) {
+		if (_numBuffersQueued == 0) { // TODO: don't check numBuffersQueued here? as it's modified in interrupt.
 			applyConfig();
 		}
 		return true;
 	}
 
 	if (!_running) {
-		LOGi("not running, don't queue buf");
+		LOGd("not running, don't queue buf");
 		return true;
 	}
 
@@ -621,45 +646,6 @@ void ADC::setLimitDown() {
 	nrf_saadc_int_disable(int_mask);
 }
 
-//void ADC::setLimit(bool up) {
-//	ASSERT(m_cb.state != NRF_DRV_STATE_UNINITIALIZED);
-//	ASSERT(m_cb.event_handler); // only non blocking mode supported
-//	ASSERT(limit_low>=NRF_DRV_SAADC_LIMITL_DISABLED);
-//	ASSERT(limit_high<=NRF_DRV_SAADC_LIMITH_DISABLED);
-//	ASSERT(limit_low<limit_high);
-//	int16_t limit_low;
-//	int16_t limit_high;
-//	if (up) {
-//		limit_low = NRF_DRV_SAADC_LIMITL_DISABLED;
-//		limit_high = _zeroValue;
-//	}
-//	else {
-//		limit_low = _zeroValue;
-//		limit_high = NRF_DRV_SAADC_LIMITH_DISABLED;
-//	}
-//
-//	nrf_saadc_channel_limits_set(_zeroCrossingChannel, limit_low, limit_high);
-//
-//	uint32_t int_mask = nrf_saadc_limit_int_get(_zeroCrossingChannel, NRF_SAADC_LIMIT_LOW);
-//	if (up) {
-//		m_cb.limits_enabled_flags &= ~(0x80000000 >> LIMIT_LOW_TO_FLAG(_zeroCrossingChannel));
-//		nrf_saadc_int_disable(int_mask);
-//	}
-//	else {
-//		m_cb.limits_enabled_flags |= (0x80000000 >> LIMIT_LOW_TO_FLAG(_zeroCrossingChannel));
-//		nrf_saadc_int_enable(int_mask);
-//	}
-//
-//	int_mask = nrf_saadc_limit_int_get(_zeroCrossingChannel, NRF_SAADC_LIMIT_HIGH);
-//	if (!up) {
-//		m_cb.limits_enabled_flags &= ~(0x80000000 >> LIMIT_HIGH_TO_FLAG(_zeroCrossingChannel));
-//		nrf_saadc_int_disable(int_mask);
-//	}
-//	else {
-//		m_cb.limits_enabled_flags |= (0x80000000 >> LIMIT_HIGH_TO_FLAG(_zeroCrossingChannel));
-//		nrf_saadc_int_enable(int_mask);
-//	}
-//}
 
 void ADC::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch(evt) {
@@ -676,27 +662,13 @@ void ADC::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 
 
-void ADC::handleAdcDone(cs_adc_buffer_id_t bufIndex) {
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
+void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
+#ifdef TEST_PIN_PROCESS
+	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
 #endif
-//	_numBuffersQueued--;
 
-//	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CAPTURE1);
-//	LOGd("%u", nrf_timer_cc_read(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_CC_CHANNEL1));
-//#ifdef PRINT_DEBUG
-//	LOGd("Done %u q=%u ind=%u", bufIndex, _numBuffersQueued, _bufferIndex);
-//#endif
-
-//	if (_numBuffersQueued == 0) {
-//		stop();
-//		start();
-//		return;
-//	}
 
 	if (dataCallbackRegistered()) {
-		// Update next buffer index.
-//		_bufferIndex = (_bufferIndex + 1) % CS_ADC_NUM_BUFFERS;
 		_inProgress[bufIndex] = true;
 
 		if (_firstBuffer) {
@@ -707,16 +679,12 @@ void ADC::handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 #ifdef PRINT_DEBUG
 		LOGd("process buf %u", bufIndex);
 #endif
-//		_doneCallbackData.callback(bufIndex);
 		_doneCallback(bufIndex);
 	}
 	else {
 		// Skip the callback: release immediately.
 		releaseBuffer(bufIndex);
 	}
-//#ifdef PRINT_DEBUG
-//	LOGd("ind=%u", _bufferIndex);
-//#endif
 }
 
 /**
@@ -741,9 +709,9 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 		// NRF_SAADC_LIMIT_HIGH triggers when adc value is above upper limit
 		setLimitDown();
 
-//#ifdef TEST_PIN
-//		nrf_gpio_pin_toggle(TEST_PIN);
-//#endif
+#ifdef TEST_PIN_ZERO_CROSS
+		nrf_gpio_pin_toggle(TEST_PIN_ZERO_CROSS);
+#endif
 
 		// Only call zero crossing callback when there was about 20ms between the two events.
 		// This makes it more likely that this was an actual zero crossing.
@@ -793,13 +761,20 @@ void ADC::_handleAdcInterrupt() {
 	if (nrf_saadc_event_check(NRF_SAADC_EVENT_END)) {
 		nrf_saadc_event_clear(NRF_SAADC_EVENT_END);
 
+#ifdef TEST_PIN_INT_END
+		nrf_gpio_pin_toggle(TEST_PIN_INT_END);
+#endif
+
 		cs_adc_buffer_id_t bufIndex = _bufferIndex;
-//		uint16_t bufSize = nrf_saadc_amount_get(); // Size in words (4B units)
+		__attribute__((unused)) uint16_t bufSize = nrf_saadc_amount_get();
+
 
 #ifdef PRINT_DEBUG
-		LOGd("Done %u q=%u ind=%u", bufIndex, _numBuffersQueued, _bufferIndex);
+		LOGd("Done %u q=%u ind=%u amount=%u", bufIndex, _numBuffersQueued, _bufferIndex, bufSize);
 #endif
 		if (_saadcBusy != ADC_SAADC_STATE_BUSY) {
+			// Don't handle end events when state is not busy.
+			// The end event also fires when we stop the saadc.
 			return;
 		}
 

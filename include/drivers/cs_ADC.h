@@ -241,8 +241,8 @@ public:
 	// Handle events as EventListener.
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
-
-	void handleAdcDone(cs_adc_buffer_id_t bufIndex);
+	// Handle buffer, called in main thread.
+	void _handleAdcDone(cs_adc_buffer_id_t bufIndex);
 
 //	void _stopAdc();
 

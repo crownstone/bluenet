@@ -566,7 +566,6 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			return ERR_UNKNOWN_TYPE;
 		}
 
-//		publishUpdate(type, (uint8_t*)target, size);
 		return ERR_SUCCESS;
 	}
 
