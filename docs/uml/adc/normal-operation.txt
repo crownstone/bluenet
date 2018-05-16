@@ -1,0 +1,151 @@
+@startuml
+
+participant "Processing" as proc
+participant "ADC main thread" as adc
+participant "ADC interrupt handler" as int
+
+control "Start PPI" as ppiStart
+participant "SAADC" as saadc
+control "Sample PPI" as ppiSample
+participant "Sample timer" as timer
+control "Timeout PPI" as ppiTimeout
+control "Start timeout\ntimer PPI" as ppiTimeoutStart
+participant "Timeout counter" as counter
+participant "Timeout timer\ninterrupt handler" as timerInt
+
+
+== Initialization ==
+proc -> adc: Init
+adc -> ppiSample: Enable
+activate ppiSample
+adc -> ppiTimeout: Enable
+activate ppiTimeout
+adc -> saadc: Enable
+
+hnote over adc, int
+current buffer: 0
+queued buffer: 1
+state: idle
+saadc state: idle
+endhnote
+
+
+== Start ==
+proc -> adc: Start
+hnote over adc, int
+state: busy
+saadc state: busy
+endhnote
+adc -> saadc: Set buffer 0
+adc -> saadc: Start
+activate saadc
+saadc -> adc: Started
+adc -> saadc: Set buffer 1
+adc -> ppiStart: Enable
+activate ppiStart
+adc -> counter: Clear
+hnote over counter: 0
+adc -> ppiTimeoutStart: Enable
+activate ppiTimeoutStart
+adc -> timer: Start
+activate timer
+
+== First buffer ==
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample 0
+ppiSample -> counter: Count
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample 1
+ppiSample -> counter: Count
+timer -> ppiSample: Tick
+......
+ppiSample -> saadc: Sample ...
+ppiSample -> counter: Count
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample N
+ppiSample -> counter: Count
+
+
+== Repetiton ==
+saadc -> ppiTimeoutStart: End
+ppiTimeoutStart -> counter: Clear
+hnote over counter: 0
+ppiTimeoutStart -> counter: Start
+activate counter
+saadc -> ppiStart: End
+ppiStart -> saadc: Start
+saadc -> int: End
+hnote over adc, int
+current buffer: 1
+queued buffer: none
+endhnote
+
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample 0
+ppiSample -> counter: Count
+hnote over counter: 1
+int -> adc: Done buffer 0
+adc -> proc: Done buffer 0
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample 1
+ppiSample -> counter: Count
+hnote over counter: 2
+......
+proc -> adc: Release buffer 0
+adc -> saadc: Set buffer 2
+hnote over adc, int
+current buffer: 1
+queued buffer: 2
+endhnote
+adc -> counter: Stop
+deactivate counter
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample ...
+ppiSample -> counter: Count
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample N
+ppiSample -> counter: Count
+
+
+== Repetiton ==
+saadc -> ppiTimeoutStart: End
+ppiTimeoutStart -> counter: Clear
+hnote over counter: 0
+ppiTimeoutStart -> counter: Start
+activate counter
+saadc -> ppiStart: End
+ppiStart -> saadc: Start
+saadc -> int: End
+hnote over adc, int
+current buffer: 2
+queued buffer: none
+endhnote
+
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample 0
+ppiSample -> counter: Count
+hnote over counter: 1
+int -> adc: Done buffer 1
+adc -> proc: Done buffer 1
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample 1
+ppiSample -> counter: Count
+hnote over counter: 2
+......
+proc -> adc: Release buffer 1
+adc -> saadc: Set buffer 3
+hnote over adc, int
+current buffer: 2
+queued buffer: 3
+endhnote
+adc -> counter: Stop
+deactivate counter
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample ...
+ppiSample -> counter: Count
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample N
+ppiSample -> counter: Count
+
+
+@enduml
