@@ -71,6 +71,8 @@ void UartProtocol::reset() {
 	_startedReading = false;
 	_escapeNextByte = false;
 	_readPacketSize = 0;
+
+	EventDispatcher::getInstance().addListener(this);
 }
 
 void UartProtocol::escape(uint8_t& val) {
@@ -360,4 +362,15 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 //	case 82: // R
 //		write("radio: %u\r\n", NRF_RADIO->POWER);
 //		break;
+}
+
+void UartProtocol::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch (evt) {
+//		writeMsgStart(UART_OPCODE_TX_EVT, length + sizeof(evt));
+//		writeMsgPart(UART_OPCODE_TX_EVT, (uint8_t*)&evt, sizeof(evt));
+//		writeMsgPart(UART_OPCODE_TX_EVT, (uint8_t*)p_data, length);
+//		writeMsgEnd(UART_OPCODE_TX_EVT);
+	default:
+		break;
+	}
 }

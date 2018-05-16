@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "events/cs_EventListener.h"
 #include <cstdint>
 
                                            // bit:7654 3210
@@ -54,7 +55,7 @@ enum UartOpcodeRx {
 };
 
 enum UartOpcodeTx {
-	UART_OPCODE_TX_ACK = 0,
+	UART_OPCODE_TX_ACK =                              0,
 	UART_OPCODE_TX_SERVICE_DATA =                     2, // Sent when the service data is updated (payload: service_data_t)
 	UART_OPCODE_TX_MESH_STATE_0 =                     100, // For 1st handle, next handle has opcode of 1 larger.
 
@@ -64,12 +65,16 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_OWN_MAC =                          10003, // Own MAC address (payload: mac address (6B))
 
 	UART_OPCODE_TX_ADC_CONFIG =                       10100, // Current adc config (payload: adc_config_t)
+	UART_OPCODE_TX_ADC_RESTART =                      10101,
 
 	UART_OPCODE_TX_POWER_LOG_CURRENT =                10200,
 	UART_OPCODE_TX_POWER_LOG_VOLTAGE =                10201,
 	UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT =       10202,
 	UART_OPCODE_TX_POWER_LOG_FILTERED_VOLTAGE =       10203,
 	UART_OPCODE_TX_POWER_LOG_POWER =                  10204,
+
+
+	UART_OPCODE_TX_EVT =                              10300, // Send internal events, this protocol may change
 
 	UART_OPCODE_TX_TEXT =                             20000, // Payload is ascii text.
 };
@@ -100,7 +105,7 @@ struct uart_handle_msg_data_t {
 };
 
 
-class UartProtocol {
+class UartProtocol : EventListener {
 public:
 	//! Use static variant of singleton, no dynamic memory allocation
 	static UartProtocol& getInstance() {
@@ -121,7 +126,6 @@ public:
 	/** Write a binary msg over UART.
 	 *
 	 * @param[in] opCode     OpCode of the msg.
-	 * @param[in] data       Pointer to the msg to be sent.
 	 * @param[in] size       Size of the msg.
 	 */
 	void writeMsgStart(UartOpcodeTx opCode, uint16_t size);
@@ -129,8 +133,8 @@ public:
 	/** Write a binary msg over UART.
 	 *
 	 * @param[in] opCode     OpCode of the msg.
-	 * @param[in] data       Pointer to the msg to be sent.
-	 * @param[in] size       Size of the msg.
+	 * @param[in] data       Pointer to the data part to be sent.
+	 * @param[in] size       Size of this data part.
 	 */
 	void writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size);
 
@@ -183,4 +187,7 @@ private:
 
 	uint16_t crc16(const uint8_t * data, uint16_t size);
 	void crc16(const uint8_t * data, const uint16_t size, uint16_t& crc);
+
+	// Handle events as EventListener.
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 };

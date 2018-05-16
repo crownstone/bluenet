@@ -229,6 +229,9 @@ void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		enableSwitchcraft(*(bool*)p_data);
 		break;
 	case EVT_ADC_RESTARTED:
+//		uint32_t timestamp = RTC::getCount();
+//		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, (uint8_t*)(&timestamp), sizeof(timestamp));
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 		RecognizeSwitch::getInstance().skip(2);
 		break;
 	}
@@ -601,6 +604,11 @@ void PowerSampling::calculatePower(power_t power) {
 	/////////////////////////////////////////////////////////
 	// Debug prints
 	/////////////////////////////////////////////////////////
+//	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+//		if (power.buf[i] < 100) {
+//			APP_ERROR_CHECK(1);
+//		}
+//	}
 
 #ifdef PRINT_POWER_SAMPLES
 	if (printPower % 1 == 0) {
