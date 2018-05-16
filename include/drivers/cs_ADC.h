@@ -13,25 +13,25 @@
 #include "structs/buffer/cs_DifferentialBuffer.h"
 #include "events/cs_EventListener.h"
 
-//! Numeric reference to a pin
+// Numeric reference to a pin
 typedef uint8_t cs_adc_pin_id_t;
 
-//! Numeric reference to a channel
+// Numeric reference to a channel
 typedef uint8_t cs_adc_channel_id_t;
 
-//! Numeric reference to a buffer
+// Numeric reference to a buffer
 typedef uint8_t cs_adc_buffer_id_t;
 
-//! Pin count (number)
+// Pin count (number)
 typedef uint8_t cs_adc_pin_count_t;
 
-//! Buffer count (number)
+// Buffer count (number)
 typedef uint8_t cs_adc_buffer_count_t;
 
-//! Buffer size (number)
+// Buffer size (number)
 typedef uint16_t cs_adc_buffer_size_t;
 
-//! Error codes (number)
+// Error codes (number)
 typedef uint32_t cs_adc_error_t;
 
 
@@ -49,7 +49,7 @@ enum adc_gain_t {
 #define CS_ADC_REF_PIN_NOT_AVAILABLE 255
 #define CS_ADC_PIN_VDD 100
 
-/** Struct to configure an adc channel.
+/** Struct to configure an ADC channel.
  *
  * pin:               The AIN pin to sample.
  * rangeMilliVolt:    The range in mV of the pin.
@@ -61,7 +61,7 @@ struct __attribute__((packed)) adc_channel_config_t {
 	cs_adc_pin_id_t referencePin;
 };
 
-/** Struct to configure the adc.
+/** Struct to configure the ADC.
  *
  * channelCount:      The amount of channels to sample.
  * channels:          The channel configs.
@@ -75,52 +75,22 @@ struct __attribute__((packed)) adc_config_t {
 
 
 /**
- * The typedef adc_done_cb_t is a function pointer to (1) a buffer with elements of type nrf_saadc_value_t (currently 
- * defined by Nordic to be int16_t), (2) the size of the buffer in the sense of the number of these elements, and 
- * (3) an index to the buffer. This function pointer can be given as argument to ADC::setDoneCallback to set a callback
- * on an ADC event. Currently, ADC::setDoneCallback is called from cs_PowerSampling.cpp.
+ * The typedef adc_done_cb_t is a function pointer to a function with the buffer index as argument.
+ * This function pointer can be set via ADC::setDoneCallback.
+ * Currently, ADC::setDoneCallback is called from cs_PowerSampling.cpp.
  */
 typedef void (*adc_done_cb_t) (cs_adc_buffer_id_t bufIndex);
 
 typedef void (*adc_zero_crossing_cb_t) ();
 
-/** Struct storing data for ADC callback.
- *
- * The struct adc_done_cb_data_t stores (1) a callback pointer, see adc_done_cb_t, (2) the arguments for this pointer,
- * see also adc_done_cb_t (a pointer to the buffer with data from the ADC conversion, the buffer size, and a unique
- * number for the buffer).
- */
-/*
-struct adc_done_cb_data_t {
-	//! Callback function
-	adc_done_cb_t callback;
-	
-	//! Buffer as argument for ADC callback 
-	nrf_saadc_value_t* buffer;
-	//! Buffer size as argument for ADC callback 
-	cs_adc_buffer_size_t bufSize;
-	//! Buffer index as argument for ADC callback
-	//! TODO: remove this field
-	cs_adc_buffer_id_t bufNum;
+// State of this class
+enum adc_state_t {
+	ADC_STATE_IDLE,
+	ADC_STATE_BUSY,
+	ADC_STATE_STARTING
 };
-*/
-///**
-// * Struct that is used to communicate to the rest of code.
-// */
-//struct adc_done_cb_data_t {
-//	// Callback function
-//	adc_done_cb_t callback;
-//
-//	// Buffer index as argument for ADC callback
-//	cs_adc_buffer_id_t bufIndex;
-//
-////	// True when this is the first buffer of consecutive buffers.
-////	// This buffer should not be compared to the previous buffer.
-////	// Happens after a config change, timeout, or start of ADC.
-////	bool first;
-//};
 
-
+// State of the SAADC
 enum adc_saadc_state_t {
 	ADC_SAADC_STATE_IDLE,
 	ADC_SAADC_STATE_BUSY,
@@ -130,11 +100,10 @@ enum adc_saadc_state_t {
 
 /** Analog-Digital conversion.
  *
- * The ADC is a hardware peripheral that can be initialized for a particular pin. Subsequently, the analog signal
- * is converted into a digital value. The resolution of the conversion is limited (default 10 bits). The conversion
- * is used to get the current curve.
+ * The ADC class can be used to convert an analog signal to a digital value on multiple pins.
+ * It's currently used for power measurement (measure voltage and current).
  *
- * There is only one ADC hardware peripheral, hence this class conforms to the singleton design pattern. 
+ * There is only one SAADC hardware peripheral, hence this class conforms to the singleton design pattern.
  *
  * The constructor does NOT have arguments you might expect, such as the number of buffers to use, or the size of the 
  * buffers. These are all set through preprocessor macros. The ADC class requires access to the following macros
@@ -144,36 +113,20 @@ enum adc_saadc_state_t {
  * be able to get the fine-grained current and voltage data we want.
  *
  *   - CS_ADC_TIMER                    The timer peripheral to use for the ADC peripheral.
- *   - CS_ADC_INSTANCE_INDEX           The instance id of the timer. TODO: What is this?
- *   - CS_ADC_TIMER_ID                 TODO: What is this?
+ *   - CS_ADC_INSTANCE_INDEX           The instance id of the timer, used by nrf_drv_config.
+ *   - CS_ADC_TIMER_ID                 Number of the timer.
  *
  * The buffers to be used internally. To have these buffers in the form of macros means that we can check at compile
  * time if they are small enough with respect to the nRF52 memory limitations.
  *
- *   - CS_ADC_NUM_BUFFERS              The number of ADC buffers to use. 
+ *   - CS_ADC_NUM_BUFFERS              The number of ADC buffers to use, should be at least 2.
  *   - CS_ADC_BUF_SIZE                 The size of the buffer (first time used in init()).
  *
  * The pins:
  *
  *   - CS_ADC_MAX_PINS                 The maximum number of pins available for ADC.
  *
- * The sequence of events is as follows:
- *
- * 1. The C interrupt service routine, saadc_callback(nrf_drv_saadc_evt_t const * p_event) can be found in the 
- * corresponding implementation file. This function uses the singleton feature to call update on an event from the 
- * ADC peripheral, in particular, NRF_DRV_SAADC_EVT_DONE, with a buffer as argument.
- *
- * 2. The update() routine puts an internal C function, adc_done, with _doneCallback as argument in the event queue
- * of the scheduler. This calls the callback function set previously in setDoneCallback() by a particular caller, 
- * e.g. the cs_PowerSampling. In this particular case it ends up in PowerSampling::powerSampleAdcDone that after 
- * processing the data calls releaseBuffer(bufNum).
- *
- * 3. The releaseBuffer function clears the _doneCallbackData structure and queues a new buffer. Note that all 
- * processing has taken place by now.
- 
- * Note. In the ADC it is assumed that the member object is not updated (_doneCallbackData.bufName == bufNum) in the
- * mean while. In other words, it should not be possible to get a second interrupt before releaseBuffer has been 
- * called. Scheduling a new ADC task is only done at the end of the releaseBuffer function.
+ * The sequence of events can be found in the uml diagrams under docs.
  */
 class ADC : EventListener {
 
@@ -244,20 +197,6 @@ public:
 	// Handle buffer, called in main thread.
 	void _handleAdcDone(cs_adc_buffer_id_t bufIndex);
 
-//	void _stopAdc();
-
-//	/** Update this object with a buffer with values from the ADC conversion.
-//	 *
-//	 * This update() function is also called from the ADC interrupt service routine. In this case an entire buffer has
-//	 * been made available. This is done by having the ADC peripheral directly writing into a part of the FLASH using
-//	 * the Easy-DMA peripheral and inter-peripheral communication (called PPI).
-//	 * Note that this function is time-sensitive. The number of activities in it are limited to a minimal number. The
-//	 * values are only copied and not processed further.
-//	 *
-//	 * @param[in] buf                  A buffer with size defined in the constructor.
-//	 */
-//	void _handleAdcDoneInterrupt(cs_adc_buffer_id_t bufIndex);
-
 	/** Handles timeout
 	 */
 	void _handleTimeout();
@@ -327,21 +266,17 @@ private:
 	// True when next buffer is the first after start.
 	bool _firstBuffer;
 
-	// True when ADC has been started.
-	bool _running;
-
-	// True when we want to start, but we wait for buffers to be released.
-	bool _waitToStart;
+	// State of this class.
+	adc_state_t _state;
 
 	// True when SAADC is busy sampling.
 	// **Used in interrupt!**
 	volatile adc_saadc_state_t _saadcState;
 
 	// Keep up which buffers are being processed by callback.
+	// This only accounts for the time between calling the doneCallback and releaseBuffer.
+	// TODO: mark all buffers in progress that processing could read (so all but bufIndex and queuedBuf).
 	bool _inProgress[CS_ADC_NUM_BUFFERS];
-
-//	// Arguments to the callback function
-//	adc_done_cb_data_t _doneCallbackData;
 
 	// Callback function
 	adc_done_cb_t _doneCallback;
