@@ -63,7 +63,7 @@ ADC::ADC() :
 		_firstBuffer(true),
 		_running(false),
 		_waitToStart(false),
-		_saadcBusy(ADC_SAADC_STATE_IDLE),
+		_saadcState(ADC_SAADC_STATE_IDLE),
 		_zeroCrossingChannel(0),
 		_zeroCrossingEnabled(false),
 		_lastZeroCrossUpTime(0),
@@ -177,7 +177,7 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	nrf_timer_shorts_enable(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_SHORT_COMPARE0_STOP_MASK);
 
 	// Setup timeout PPI: on compare event (timeout), stop the sample timer.
-	_ppiTimeout = getPpiChannel(CS_ADC_PPI_CHANNEL_START+3);
+	_ppiTimeout = getPpiChannel(CS_ADC_PPI_CHANNEL_START+2);
 #ifdef TEST_PIN_TIMEOUT
 	nrf_gpiote_task_configure(CS_ADC_GPIOTE_CHANNEL_START, TEST_PIN_TIMEOUT, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
 	nrf_gpiote_task_enable(CS_ADC_GPIOTE_CHANNEL_START);
@@ -197,7 +197,7 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	nrf_ppi_channel_enable(_ppiTimeout);
 
 	// Setup PPI: on saadc end event, reset sample count, and start the timer.
-	_ppiTimeoutStart = getPpiChannel(CS_ADC_PPI_CHANNEL_START+4);
+	_ppiTimeoutStart = getPpiChannel(CS_ADC_PPI_CHANNEL_START+3);
 	nrf_ppi_channel_and_fork_endpoint_setup(
 			_ppiTimeoutStart,
 			(uint32_t)nrf_saadc_event_address_get(NRF_SAADC_EVENT_END),
@@ -394,7 +394,7 @@ void ADC::stop() {
 	nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(0));
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
 
-	if (_saadcBusy != ADC_SAADC_STATE_IDLE) {
+	if (_saadcState != ADC_SAADC_STATE_IDLE) {
 #ifdef PRINT_DEBUG
 		LOGd("stop saadc");
 #endif
@@ -403,7 +403,7 @@ void ADC::stop() {
 		// The stop task triggers an END interrupt.
 		nrf_saadc_task_trigger(NRF_SAADC_TASK_STOP);
 		// Wait for ADC being stopped.
-		while (_saadcBusy != ADC_SAADC_STATE_IDLE);
+		while (_saadcState != ADC_SAADC_STATE_IDLE);
 	}
 	_numBuffersQueued = 0;
 	nrf_saadc_event_clear(NRF_SAADC_EVENT_END); // Clear any pending saadc END event.
@@ -486,7 +486,7 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 	LOGd("Queued: %u", _numBuffersQueued);
 	LOGd("Queue buf %u", bufIndex);
 #endif
-	if (_numBuffersQueued > 1) {
+	if (_numBuffersQueued > 1) { // TODO: check _queuedBufferIndex instead?
 		nrf_saadc_int_enable(NRF_SAADC_INT_END);
 		LOGe("Too many buffers queued %u", _numBuffersQueued);
 		APP_ERROR_CHECK(NRF_ERROR_RESOURCES);
@@ -495,7 +495,7 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 
 	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
 
-	switch (_saadcBusy) {
+	switch (_saadcState) {
 	case ADC_SAADC_STATE_BUSY: {
 		if (_queuedBufferIndex != BUFFER_INDEX_NONE) {
 			nrf_saadc_int_enable(NRF_SAADC_INT_END);
@@ -516,7 +516,7 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 		break;
 	}
 	case ADC_SAADC_STATE_IDLE: {
-		_saadcBusy = ADC_SAADC_STATE_BUSY;
+		_saadcState = ADC_SAADC_STATE_BUSY;
 		_bufferIndex = bufIndex;
 		_queuedBufferIndex = BUFFER_INDEX_NONE;
 		_numBuffersQueued++;
@@ -657,7 +657,7 @@ void ADC::_handleTimeout() {
 	LOGw("timeout");
 
 	nrf_saadc_int_disable(NRF_SAADC_INT_END); // Make sure the interrupt doesn't interrupt this piece of code.
-	_saadcBusy = ADC_SAADC_STATE_STOPPING;
+	_saadcState = ADC_SAADC_STATE_STOPPING;
 //	nrf_saadc_int_enable(NRF_SAADC_INT_END);
 	stop();
 	start();
@@ -737,7 +737,7 @@ void ADC::_handleAdcInterrupt() {
 #ifdef PRINT_DEBUG
 		LOGd("Done %u q=%u ind=%u amount=%u", bufIndex, _numBuffersQueued, _bufferIndex, bufSize);
 #endif
-		if (_saadcBusy != ADC_SAADC_STATE_BUSY) {
+		if (_saadcState != ADC_SAADC_STATE_BUSY) {
 			// Don't handle end events when state is not busy.
 			// The end event also fires when we stop the saadc.
 			return;
@@ -745,7 +745,7 @@ void ADC::_handleAdcInterrupt() {
 
 		--_numBuffersQueued;
 		if (_queuedBufferIndex == BUFFER_INDEX_NONE) {
-			_saadcBusy = ADC_SAADC_STATE_STOPPING;
+			_saadcState = ADC_SAADC_STATE_STOPPING;
 #ifdef PRINT_DEBUG
 			LOGw("No buffer queued");
 #endif
@@ -762,7 +762,7 @@ void ADC::_handleAdcInterrupt() {
 			// TODO: Maybe put outside the else? We can maybe still process this buffer, no? But it does delay the restart?
 			_bufferIndex = _queuedBufferIndex;
 			_queuedBufferIndex = BUFFER_INDEX_NONE;
-			// Decouple handling of buffer from adc interrupt handler
+			// Decouple handling of buffer from adc interrupt handler, copy buffer index.
 			uint32_t errorCode = app_sched_event_put(&bufIndex, sizeof(bufIndex), adc_done);
 			APP_ERROR_CHECK(errorCode);
 		}
@@ -772,7 +772,7 @@ void ADC::_handleAdcInterrupt() {
 #ifdef PRINT_DEBUG
 		LOGi("stopped");
 #endif
-		_saadcBusy = ADC_SAADC_STATE_IDLE;
+		_saadcState = ADC_SAADC_STATE_IDLE;
 	}
 	// No zero crossing events if we stop the SAADC.
 	else if (_zeroCrossingEnabled) {

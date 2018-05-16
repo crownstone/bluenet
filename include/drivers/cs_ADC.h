@@ -335,7 +335,7 @@ private:
 
 	// True when SAADC is busy sampling.
 	// **Used in interrupt!**
-	volatile adc_saadc_state_t _saadcBusy;
+	volatile adc_saadc_state_t _saadcState;
 
 	// Keep up which buffers are being processed by callback.
 	bool _inProgress[CS_ADC_NUM_BUFFERS];
