@@ -145,7 +145,7 @@
 #define CS_PWM_GPIOTE_CHANNEL_COUNT              (CS_PWM_MAX_CHANNELS)
 
 // ----- SAADC -----
-#define CS_ADC_RESOLUTION                        NRF_SAADC_RESOLUTION_10BIT
+#define CS_ADC_RESOLUTION                        NRF_SAADC_RESOLUTION_12BIT
 #define CS_ADC_IRQ_PRIORITY                      APP_IRQ_PRIORITY_HIGH
 #define CS_ADC_IRQ                               SAADC_IRQHandler
 
