@@ -12,8 +12,9 @@
 
 RecognizeSwitch::RecognizeSwitch() :
 	_running(false),
-	_thresholdDifferent(150000),
-	_thresholdSimilar(150000)
+	_thresholdDifferent(200000),
+	_thresholdSimilar(200000),
+	_thresholdRatio(2)
 {
 
 }
@@ -85,12 +86,16 @@ bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId
 			diffSum02 += diff02;
 		}
 //		LOGd("%f %f %f", diffSum01, diffSum12, diffSum02);
-		if (diffSum01 > _thresholdDifferent && diffSum12 > _thresholdDifferent && diffSum02 < _thresholdSimilar) {
-			result = true;
-			break;
+		if (diffSum01 > _thresholdDifferent && diffSum12 > _thresholdDifferent) {
+			float minDiffSum = diffSum01 < diffSum12 ? diffSum01 : diffSum12;
+			if (diffSum02 < _thresholdSimilar || minDiffSum / diffSum02 > _thresholdRatio) {
+				result = true;
+				break;
+			}
 		}
-		// TODO: sometimes the diffSum01 and diffSum12 are very large, but the diffSum02 is just above the threshold.
-		// Maybe look at the ratio then?
+//		else if (diffSum01 > diffSum02 && diffSum12 > diffSum02 && diffSum01 > _thresholdDifferent) {
+//			LOGd("%f %f %f", diffSum01, diffSum12, diffSum02);
+//		}
 	}
 	if (result) {
 #ifdef PRINT_DEBUG

@@ -25,6 +25,9 @@ private:
 	// Threshold below which buffers are considered to be similar.
 	float _thresholdSimilar;
 
+	// Alternative to thresholdSimilar.
+	float _thresholdRatio;
+
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static RecognizeSwitch& getInstance() {
