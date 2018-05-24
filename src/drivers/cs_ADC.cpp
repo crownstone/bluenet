@@ -21,7 +21,12 @@
 #include "structs/buffer/cs_InterleavedBuffer.h"
 #include "events/cs_EventDispatcher.h"
 
+// Define to print adc restarts
 //#define PRINT_DEBUG
+
+// Define to print buffers being queued etc.
+//#define PRINT_DEBUG_VERBOSE
+
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN_ZERO_CROSS 20
@@ -342,7 +347,9 @@ void ADC::setDoneCallback(adc_done_cb_t callback) {
 }
 
 void ADC::stop() {
+#ifdef PRINT_DEBUG
 	LOGd("stop");
+#endif
 	switch (_state) {
 	case ADC_STATE_IDLE:
 		LOGw("already stopped");
@@ -367,7 +374,7 @@ void ADC::stop() {
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
 
 	if (_saadcState != ADC_SAADC_STATE_IDLE) {
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_VERBOSE
 		LOGd("stop saadc");
 #endif
 		nrf_saadc_event_clear(NRF_SAADC_EVENT_STOPPED);
@@ -386,7 +393,9 @@ void ADC::stop() {
 }
 
 void ADC::start() {
+#ifdef PRINT_DEBUG
 	LOGd("start");
+#endif
 	switch (_state) {
 	case ADC_STATE_STARTING:
 	case ADC_STATE_BUSY:
@@ -407,7 +416,7 @@ void ADC::start() {
 	if (inProgress) {
 		// Wait for buffers to be released.
 		_state = ADC_STATE_STARTING;
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_VERBOSE
 		LOGd("wait to start");
 #endif
 		return;
@@ -451,7 +460,7 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 	}
 
 	nrf_saadc_int_disable(NRF_SAADC_INT_END); // Make sure the interrupt doesn't interrupt this piece of code.
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_VERBOSE
 	LOGd("Queued: %u", _numBuffersQueued);
 	LOGd("Queue buf %u", bufIndex);
 #endif
@@ -496,7 +505,7 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 		break;
 	}
 	default: {
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_VERBOSE
 		LOGw("don't queue");
 #endif
 	}
@@ -507,7 +516,7 @@ bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 #ifdef TEST_PIN_PROCESS
 	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
 #endif
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_VERBOSE
 	LOGd("Release buf %u", bufIndex);
 #endif
 	_inProgress[bufIndex] = false;
@@ -623,7 +632,9 @@ void ADC::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 
 void ADC::_handleTimeout() {
+#ifdef PRINT_DEBUG
 	LOGw("timeout");
+#endif
 
 	nrf_saadc_int_disable(NRF_SAADC_INT_END); // Make sure the interrupt doesn't interrupt this piece of code.
 	_saadcState = ADC_SAADC_STATE_STOPPING;
@@ -642,11 +653,13 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 		_inProgress[bufIndex] = true;
 
 		if (_firstBuffer) {
+#ifdef PRINT_DEBUG
 			LOGd("ADC restarted");
+#endif
 			EventDispatcher::getInstance().dispatch(EVT_ADC_RESTARTED);
 		}
 		_firstBuffer = false;
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_VERBOSE
 		LOGd("process buf %u", bufIndex);
 #endif
 		_doneCallback(bufIndex);
@@ -703,7 +716,7 @@ void ADC::_handleAdcInterrupt() {
 		__attribute__((unused)) uint16_t bufSize = nrf_saadc_amount_get();
 
 
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_VERBOSE
 		LOGd("Done %u q=%u ind=%u amount=%u", bufIndex, _numBuffersQueued, _bufferIndex, bufSize);
 #endif
 		if (_saadcState != ADC_SAADC_STATE_BUSY) {
@@ -715,7 +728,7 @@ void ADC::_handleAdcInterrupt() {
 		--_numBuffersQueued;
 		if (_queuedBufferIndex == BUFFER_INDEX_NONE) {
 			_saadcState = ADC_SAADC_STATE_STOPPING;
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_VERBOSE
 			LOGw("No buffer queued");
 #endif
 			_bufferIndex = bufIndex;
@@ -738,7 +751,7 @@ void ADC::_handleAdcInterrupt() {
 	}
 	if (nrf_saadc_event_check(NRF_SAADC_EVENT_STOPPED)) {
 		nrf_saadc_event_clear(NRF_SAADC_EVENT_STOPPED);
-#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG_VERBOSE
 		LOGi("stopped");
 #endif
 		_saadcState = ADC_SAADC_STATE_IDLE;
