@@ -87,19 +87,31 @@ void Switch::start() {
 	// Already start PWM, so it can sync with the zero crossings. But don't set the value yet.
 	PWM::getInstance().start(true);
 
+	// If switchcraft is enabled, assume a boot is due to a brownout caused by a too slow wall switch, so the pwm is already powered.
+	bool switchcraftEnabled = Settings::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED);
+	if (switchcraftEnabled) {
+		_pwmPowered = true;
+	}
+
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
 	if (_switchValue.pwm_state != 0) {
 		switch_state_t oldVal = _switchValue;
-//		// This shouldn't happen, but let's check it to be sure.
-//		LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
-//		if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
-//			_switchValue.pwm_state = 0;
-//		}
-		// Always set pwm state to 0, just use relay.
-		// This is for the case of a wall switch: you don't want to hear the relay turn on and off every time you power the crownstone.
-		_switchValue.pwm_state = 0;
-		_relayOn();
-		storeState(oldVal);
+		if (_pwmPowered) {
+			_setPwm(_switchValue.pwm_state);
+			_relayOff();
+		}
+		else {
+//			// This shouldn't happen, but let's check it to be sure.
+//			LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
+//			if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+//				_switchValue.pwm_state = 0;
+//			}
+			// Always set pwm state to 0, just use relay.
+			// This is for the case of a wall switch: you don't want to hear the relay turn on and off every time you power the crownstone.
+			_switchValue.pwm_state = 0;
+			_relayOn();
+			storeState(oldVal);
+		}
 	}
 	else {
 		// Make sure the relay is in the stored position (no need to store)
