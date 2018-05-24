@@ -173,9 +173,9 @@ void Crownstone::init() {
 //		// use PIN encryption for setup mode
 //		_stack->setPinEncrypted(true);
 
-		if (_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
-			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
-		}
+//		if (_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
+//			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
+//		}
 
 		break;
 	}
@@ -419,7 +419,7 @@ void Crownstone::configureAdvertisement() {
 		// read crownstone id from storage
 		uint16_t crownstoneId;
 		_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
-		LOGi("Set crownstone id to %d", crownstoneId);
+		LOGi("Set crownstone id to %u", crownstoneId);
 
 		// and set it to the service data
 		_serviceData->updateCrownstoneId(crownstoneId);
@@ -599,6 +599,10 @@ void Crownstone::startUp() {
 		//! Start switch, so it can be used.
 		_switch->start();
 //		Switch::getInstance().setPwm(90);
+
+		if (_operationMode == OPERATION_MODE_SETUP && _boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
+			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
+		}
 
 		//! Start temperature guard regardless of operation mode
 		LOGi(FMT_START, "temp guard");
