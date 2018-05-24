@@ -95,7 +95,7 @@ public:
 	/**
 	 * Expose channel lengths to accessors.
 	 */
-	inline const value_t getChannelLength() {
+	inline const ext_value_id_t getChannelLength() {
 		return INTERLEAVED_CHANNEL_LENGTH;
 	}
 	

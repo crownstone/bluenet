@@ -12,18 +12,19 @@
 
 class RecognizeSwitch {
 private:
-	//! A number of cycles will be skipped not to have multiple switch detections in a row
-	uint8_t _skipSwitchDetectionTriggers;
-
-	//! A threshold close to zero that defines the slope
-	int16_t _threshold;
-
-	//! A circular buffer to the sliding window
-	CircularBuffer<int16_t> * _circBuffer;
-
+	// Keep up whether this class is running (started).
 	bool _running;
 
-	
+	// Keep up number of detect() calls to skip.
+	// This is used to prevent multiple switch detections in a row, and to prevent switch detections on init.
+	uint8_t _skipSwitchDetectionTriggers;
+
+	// Threshold above which buffers are considered to be different.
+	float _thresholdDifferent;
+
+	// Threshold below which buffers are considered to be similar.
+	float _thresholdSimilar;
+
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static RecognizeSwitch& getInstance() {
@@ -51,13 +52,13 @@ public:
 	 */
 	void stop();
 
-	/** Don't detect anything for num cycles.
+	/** Don't detect anything for num detect() calls.
 	 */
 	void skip(uint16_t num);
 
 	/** Recognize switch state.
 	 *
-	 * @param[in] bufIndex                       Buffer that was just populated with values.
+	 * @param[in] bufIndex                       Buffer to check for a switch (should be previous buffer).
 	 * @parampin] voltageChannelId               Channel in which the voltage values can be found.
 	 * 
 	 */
