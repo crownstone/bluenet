@@ -456,7 +456,7 @@ bool Switch::_setPwm(uint8_t value) {
 void Switch::_relayOn() {
 	LOGd("relayOn");
 	if (!allowRelayOn()) {
-		LOGi("Don't turn relay on");
+		LOGi("Relay on not allowed");
 		return;
 	}
 
@@ -473,7 +473,7 @@ void Switch::_relayOn() {
 }
 
 void Switch::_relayOff() {
-	LOGd("In function relayOff");
+	LOGd("relayOff");
 	if (!allowRelayOff()) {
 		LOGi("Relay off not allowed");
 		return;

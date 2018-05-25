@@ -168,6 +168,8 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		return handleCmdSetup(buffer, size, accessLevel);
 	case CMD_ENABLED_SWITCHCRAFT:
 		return handleCmdEnableSwitchcraft(buffer, size, accessLevel);
+	case CMD_UART_MSG:
+		return handleCmdUartMsg(buffer, size, accessLevel);
 	default:
 		LOGe("Unknown type: %u", type);
 		return ERR_UNKNOWN_TYPE;
@@ -781,6 +783,18 @@ ERR_CODE CommandHandler::handleCmdEnableSwitchcraft(buffer_ptr_t buffer, const u
 	return ERR_SUCCESS;
 }
 
+ERR_CODE CommandHandler::handleCmdUartMsg(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGd(STR_HANDLE_COMMAND, "UART msg");
+
+	if (!size) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, buffer, size);
+	return ERR_SUCCESS;
+}
+
 
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
@@ -856,6 +870,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CMD_ALLOW_DIMMING:
 	case CMD_LOCK_SWITCH:
 	case CMD_ENABLED_SWITCHCRAFT:
+	case CMD_UART_MSG:
 		return ADMIN;
 	default:
 		return NOT_SET;
@@ -879,6 +894,7 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 	case CMD_SET_LED:
 	case CMD_RESET_ERRORS:
 	case CMD_SCHEDULE_ENTRY_CLEAR:
+	case CMD_UART_MSG:
 		return true;
 	default:
 		return false;
