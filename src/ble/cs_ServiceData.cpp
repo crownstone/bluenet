@@ -105,6 +105,7 @@ void ServiceData::init() {
 	// Init flags
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, Settings::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED));
 
 	// set the initial advertisement.
 	updateAdvertisement(true);
