@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python2
 
 import re
 import pygame
@@ -7,7 +7,7 @@ from random import randint
 
 DIR = "../docs/diagrams/"
 GEN_DIR = "../docs/diagrams/generated/"
-FILENAMES = ["../docs/PROTOCOL.md", "../docs/SERVICE_DATA.md"]
+FILENAMES = ["../docs/PROTOCOL.md", "../docs/SERVICE_DATA.md", "../docs/SERVICE_DATA_DEPRECATED.md"]
 
 
 fontPath = "../docs/diagrams/fonts/LiberationSans-Regular.ttf"
