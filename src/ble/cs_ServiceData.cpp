@@ -817,6 +817,10 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 #endif
+	case EVT_SWITCHCRAFT_ENABLED: {
+		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(bool*)p_data);
+		break;
+	}
 	// TODO: add bitmask events
 	default:
 		return;
