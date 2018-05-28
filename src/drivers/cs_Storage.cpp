@@ -42,7 +42,7 @@ extern "C"  {
 		}
 		else {
 			LOGi("Opcode %d executed (no error)", op_code);
-			if (op_code == PSTORAGE_UPDATE_OP_CODE) {
+			if (op_code == PSTORAGE_UPDATE_OP_CODE || op_code == PSTORAGE_STORE_OP_CODE) {
 				// No need to decouple with app scheduler: this handler is already running on the main thread, since sys_evt_dispatch is too.
 				Storage::getInstance().onUpdateDone();
 			}
@@ -148,9 +148,6 @@ void Storage::resumeRequests() {
 //			BLEutil::printArray((uint8_t*)&elem, sizeof(elem));
 
 			if (!_scanning) {
-#ifdef PRINT_STORAGE_VERBOSE
-				LOGd("pstorage_update");
-#endif
 				// count number of pending updates to decide when mesh can be resumed (if needed)
 				_pending++;
 				// TODO: got an error 4 (NO_MEM) here when spam toggling relay.
@@ -163,8 +160,21 @@ void Storage::resumeRequests() {
 				else {
 					LOGd("pstorage queue full");
 				}
-				uint32_t errorCode = pstorage_update(&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset);
+				uint32_t errorCode;
+				if (elem.update) {
+#ifdef PRINT_STORAGE_VERBOSE
+				LOGd("pstorage_update");
+#endif
+					errorCode = pstorage_update(&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset);
+				}
+				else {
+#ifdef PRINT_STORAGE_VERBOSE
+				LOGd("pstorage_store");
+#endif
+					errorCode = pstorage_store(&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset);
+				}
 				if (errorCode == NRF_ERROR_NO_MEM) {
+					// Error no_mem is returned when the queue of pstorage is full.
 					// Try again later
 					LOGd("try again later");
 					writeBuffer.push(elem);
@@ -312,7 +322,7 @@ void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t
 
 }
 
-void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size) {
+void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size, bool update) {
 	pstorage_handle_t block_handle;
 
 #ifdef PRINT_ITEMS
@@ -342,6 +352,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 			elem.storageOffset = offset;
 			elem.dataSize = size;
 			elem.data = item;
+			elem.update = update;
 			writeBuffer.push(elem);
 		} else {
 			LOGe("storage request buffer is full!");
@@ -361,7 +372,18 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 		// if neither scanning nor meshing, call the update directly
 		++_pending;
 		EventDispatcher::getInstance().dispatch(EVT_STORAGE_WRITE);
-		BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
+		if (update) {
+#ifdef PRINT_STORAGE_VERBOSE
+				LOGd("pstorage_update");
+#endif
+			BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
+		}
+		else {
+#ifdef PRINT_STORAGE_VERBOSE
+				LOGd("pstorage_store");
+#endif
+			BLE_CALL (pstorage_store, (&block_handle, item, size, offset) );
+		}
 	}
 
 }

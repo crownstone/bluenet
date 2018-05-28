@@ -9,6 +9,7 @@
 #include <drivers/cs_Storage.h>
 #include <limits>
 
+// Define for debug prints
 //#define PRINT_DEBUG_CYCLIC_STORAGE
 
 /**
@@ -50,11 +51,39 @@ public:
 
 		pstorage_size_t offset = _storageOffset + (_tail * sizeof(storage_element_t));
 
+		// Value can simply be written if the value in flash is currently all 1s.
+		storage_element_t curElement;
+		_storage->readItem(_storageHandle, offset, (uint8_t*)(&curElement), sizeof(storage_element_t));
+//		// TODO: only set update = true when _all_ bytes are FF
+//		// TODO: use something like: T val = 0; if (~val ^ curElement == 0) { curElement is all ones }
+//		bool update = false;
+//		uint8_t ones = 0xFF;
+//		for (size_t i=0; i<sizeof(storage_element_t); ++i) {
+//			if (memcmp(&curElement, &ones, 1) != 0) {
+//				update = true;
+//				break;
+//			}
+//		}
+		// TODO: sure this works for any type of int?
+		T temp = 0;
+		T ones = ~temp;
+		bool update = ((ones ^ curElement.value) != 0);
+
 #ifdef PRINT_DEBUG_CYCLIC_STORAGE
 		LOGd("offset: %d", offset);
+		LOGd("current val: %u %u == %u %u", curElement.seqNumber, curElement.value, _buffer[_tail].seqNumber, _buffer[_tail].value);
+		LOGd("update=%u", update);
 #endif
 
-		_storage->writeItem(_storageHandle, offset, (uint8_t*)&element, sizeof(storage_element_t));
+		if (update && _tail == 0) {
+			LOGi("clear cyclic storage");
+			memset(&_buffer, 0xFF, sizeof(_buffer));
+			_buffer[_tail] = element;
+			_storage->writeItem(_storageHandle, _storageOffset, (uint8_t*)&_buffer, sizeof(_buffer), true);
+		}
+		else {
+			_storage->writeItem(_storageHandle, offset, (uint8_t*)&element, sizeof(storage_element_t), update);
+		}
 		_value = value;
 	}
 
@@ -93,9 +122,9 @@ public:
 	 * Even if the sequence counter skips so now and then, picking the maximum would be pretty robust.
 	 */
 	void loadFromStorage() {
-		storage_element_t buffer[U];
+//		storage_element_t _buffer[U];
 
-		_storage->readItem(_storageHandle, _storageOffset, (uint8_t*)buffer, U * sizeof(storage_element_t));
+		_storage->readItem(_storageHandle, _storageOffset, (uint8_t*)_buffer, U * sizeof(storage_element_t));
 
 //		LOGd("tail: %d", _tail);
 //		LOGd("_value: %d", _value);
@@ -103,13 +132,13 @@ public:
 
 #ifdef PRINT_DEBUG_CYCLIC_STORAGE
 		LOGd("init cyclic storage:");
-		BLEutil::printArray(buffer, sizeof(buffer));
+		BLEutil::printArray(_buffer, sizeof(_buffer));
 #endif
 
 		for (int i = 0; i < U; ++i) {
-			if ((buffer[i].seqNumber != std::numeric_limits<V>::max()) && (buffer[i].seqNumber >= _seqNumber)) {
-				_seqNumber = buffer[i].seqNumber;
-				_value = buffer[i].value;
+			if ((_buffer[i].seqNumber != std::numeric_limits<V>::max()) && (_buffer[i].seqNumber >= _seqNumber)) {
+				_seqNumber = _buffer[i].seqNumber;
+				_value = _buffer[i].value;
 				_tail = i;
 			}
 		}
@@ -144,6 +173,9 @@ private:
 
 	//! needs to be word aligned!
 	storage_element_t element __attribute__ ((aligned (4)));
+
+	// Store the whole buffer, as in flash.
+	storage_element_t _buffer[U];
 
 	void incTail() {
 		++_tail;
