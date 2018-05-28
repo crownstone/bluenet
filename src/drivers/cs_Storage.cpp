@@ -1,8 +1,8 @@
 /*
  * Author: Crownstone Team
- * Copyright: Crownstone
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: 24 Nov., 2014
- * License: LGPLv3+, Apache, and/or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 /*
@@ -42,7 +42,7 @@ extern "C"  {
 		}
 		else {
 			LOGi("Opcode %d executed (no error)", op_code);
-			if (op_code == PSTORAGE_UPDATE_OP_CODE) {
+			if (op_code == PSTORAGE_UPDATE_OP_CODE || op_code == PSTORAGE_STORE_OP_CODE) {
 				// No need to decouple with app scheduler: this handler is already running on the main thread, since sys_evt_dispatch is too.
 				Storage::getInstance().onUpdateDone();
 			}
@@ -102,7 +102,7 @@ void Storage::onUpdateDone() {
 		// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
 		if (!_pending) {
 			LOGi("pstorage update done");
-			EventDispatcher::getInstance().dispatch(EVT_STORAGE_DONE);
+			EventDispatcher::getInstance().dispatch(EVT_STORAGE_WRITE_DONE);
 		}
 	}
 	else {
@@ -148,16 +148,35 @@ void Storage::resumeRequests() {
 //			BLEutil::printArray((uint8_t*)&elem, sizeof(elem));
 
 			if (!_scanning) {
-#ifdef PRINT_STORAGE_VERBOSE
-				LOGd("pstorage_update");
-#endif
 				// count number of pending updates to decide when mesh can be resumed (if needed)
 				_pending++;
 				// TODO: got an error 4 (NO_MEM) here when spam toggling relay.
 //				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
-				uint32_t errorCode = pstorage_update(&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset);
+				uint32_t count;
+				pstorage_access_status_get(&count);
+				if (count < PSTORAGE_CMD_QUEUE_SIZE) {
+					EventDispatcher::getInstance().dispatch(EVT_STORAGE_WRITE);
+				}
+				else {
+					LOGd("pstorage queue full");
+				}
+				uint32_t errorCode;
+				if (elem.update) {
+#ifdef PRINT_STORAGE_VERBOSE
+				LOGd("pstorage_update");
+#endif
+					errorCode = pstorage_update(&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset);
+				}
+				else {
+#ifdef PRINT_STORAGE_VERBOSE
+				LOGd("pstorage_store");
+#endif
+					errorCode = pstorage_store(&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset);
+				}
 				if (errorCode == NRF_ERROR_NO_MEM) {
+					// Error no_mem is returned when the queue of pstorage is full.
 					// Try again later
+					LOGd("try again later");
 					writeBuffer.push(elem);
 					// TODO: maybe use a timer instead?
 					errorCode = app_sched_event_put(NULL, 0, resume_requests);
@@ -264,6 +283,7 @@ void Storage::clearStorage(ps_storage_id storageID) {
 	pstorage_handle_t block_handle;
 	BLE_CALL ( pstorage_block_identifier_get, (&config->handle, 0, &block_handle) );
 
+	EventDispatcher::getInstance().dispatch(EVT_STORAGE_ERASE);
 	BLE_CALL (pstorage_clear, (&block_handle, config->storage_size) );
 //	LOGd("pstorage_clear %d %d %d", block_handle.module_id, block_handle.block_id, PSTORAGE_FLASH_PAGE_SIZE);
 	// Can't clear this size, because we registered a smaller block size?
@@ -302,7 +322,7 @@ void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t
 
 }
 
-void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size) {
+void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size, bool update) {
 	pstorage_handle_t block_handle;
 
 #ifdef PRINT_ITEMS
@@ -332,6 +352,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 			elem.storageOffset = offset;
 			elem.dataSize = size;
 			elem.data = item;
+			elem.update = update;
 			writeBuffer.push(elem);
 		} else {
 			LOGe("storage request buffer is full!");
@@ -350,7 +371,19 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 	} else {
 		// if neither scanning nor meshing, call the update directly
 		++_pending;
-		BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
+		EventDispatcher::getInstance().dispatch(EVT_STORAGE_WRITE);
+		if (update) {
+#ifdef PRINT_STORAGE_VERBOSE
+				LOGd("pstorage_update");
+#endif
+			BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
+		}
+		else {
+#ifdef PRINT_STORAGE_VERBOSE
+				LOGd("pstorage_store");
+#endif
+			BLE_CALL (pstorage_store, (&block_handle, item, size, offset) );
+		}
 	}
 
 }

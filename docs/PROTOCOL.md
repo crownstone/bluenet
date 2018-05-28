@@ -1,6 +1,8 @@
 # Bluenet protocol v2.1.0
 -------------------------
 
+This only documents the latest service data protocol, older versions can be found in the git history.
+
 # Index
 
 - [Setup](#setup). How to setup the crownstone.
@@ -143,7 +145,7 @@ uint8 | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes
 
 <a name="advertisement_data"></a>
 # Advertisements and scan response
-When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state.
+When no device is connected, [advertisements](#ibeacon_packet) will be sent at a regular interval (100ms by default). A device that actively scans, will also receive a [scan response packet](#scan_response_packet). This contains useful info about the state, in the [service data](SERVICE_DATA.md).
 
 <a name="ibeacon_packet"></a>
 ### iBeacon advertisement packet
@@ -161,9 +163,9 @@ uint 8 | AD Type | 1 | 0xFF: manufacturer specific data.
 uint 8 | Company id | 2 | 0x004C: Apple.
 uint 8 | iBeacon type | 1 | 0x02: iBeacon.
 uint 8 | iBeacon length | 1 | iBeacon struct length (0x15).
-uint 8 | Proximity UUID | 16 |
-uint 16 | Major | 2 |
-uint 16 | Minor | 2 |
+uint 8 | Proximity UUID | 16 | Configurable number.
+uint 16 | Major | 2 | Configurable number.
+uint 16 | Minor | 2 | Configurable number.
 int 8 | TX power | 1 | Received signal strength at 1 meter.
 
 <a name="scan_response_packet"></a>
@@ -267,12 +269,12 @@ The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only avai
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
-Control        | 24f10001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
 MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MAC address of the crownstone.
 Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be for encryption.
 Config control | 24f10004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Write or select a config setting. **Not enabled in release builds.**
 Config read    | 24f10005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or Notify on a previously selected config setting. **Not enabled in release builds.**
 GoTo DFU       | 24f10006-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 66 to go to DFU.
+Control        | 24f10007-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
 Session nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the session nonce. First 4 bytes are also used as validation key.
 
 The control characteristics (Control, Config control) return a [result packet](#command_result_packet).
@@ -441,16 +443,11 @@ Type nr | Type name | Payload type | Payload Description | A | M | G | S
 8 | Enable mesh | uint 8 | Enable/Disable mesh, 0 = OFF, other = ON | x
 9 | Enable encryption | uint 8 | Enable/Disable encryption, 0 = OFF, other = ON. Only has effect after a reset. | x
 10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON | x
-11 | Enable continuous power measurement | uint 8 | Enable/Disable continuous power measurement, 0 = OFF, other = ON. **Deprecated** | x
-12 | Enable scanner | [Enable Scanner payload](#cmd_enable_scanner_payload) | Enable/Disable scanner | x
-13 | Scan for devices | uint 8 | Scan for devices, 0 = OFF, other = ON. **Deprecated** | x |
 14 | User feedback | ... | User feedback. **Not implemented yet** | x |
 15 | Schedule set | [Schedule command payload](#schedule_command_packet) | Set (overwrite) a schedule entry | x | x
 16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
-17 | Validate setup | - | Validate Setup, makes sure everything is configured, then reboots to normal mode. **Deprecated** |  |  |  | x
 18 | Request Service Data | - | Causes the crownstone to send its service data over the mesh. **Not implemented yet** | x | x |
 19 | Disconnect | - | Causes the crownstone to disconnect | x | x | x
-20 | Set LED | ?? | Enable or disabled LEDS. **Deprecated** | x
 21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
 22 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 23 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
@@ -463,7 +460,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | G | S
 30 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 31 | Setup | [Setup packet](#setup_packet) | Perform setup. |  |  |  | x
 32 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
-
+33 | UART message | payload | Print the payload to UART. | x
 
 
 <a name="setup_packet"></a>
@@ -482,17 +479,6 @@ uint 32 | Mesh access address | 4 | The access address of the mesh messages.
 uint 8[] | iBeacon UUID | 16 | The iBeacon UUID.
 uint 16 | iBeacon major | 2 | The iBeacon major.
 uint 16 | iBeacon minor | 2 | The iBeacon minor.
-
-
-
-<a name="cmd_enable_scanner_payload"></a>
-#### Enable Scanner payload
-
-Type | Name | Description
---- | --- | ---
-uint 8 | enable | 0 = OFF, other = ON
-uint 16 | delay | Start scanner with delay in ms, (required, but not used when stopping the scanner).
-
 
 
 <a name="cmd_keep_alive_payload"></a>
@@ -547,17 +533,12 @@ Type nr | Type name | Payload type | Description
 20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off. **Setting this to a wrong value may cause damage.**
 21 | Scan filter | uint 8 | Filter out certain types of devices from the scan results (1 for GuideStones, 2 for CrownStones, 3 for both).
 22 | Scan filter fraction | uint 16 | If scan filter is set, do *not* filter them out each every X scan results.
-23 | Current limit | uint 8 | Set current limit. **Deprecated**
 24 | Mesh enabled | uint 8 | Stores if mesh is enabled. *read only*
 25 | Encryption enabled | uint 8 | Stores if encryption is enabled. *read only*
 26 | iBeacon enabled | uint 8 | Stores if iBeacon is enabled. *read only*
 27 | Scanner enabled | uint 8 | Stores if device scanning is enabled. *read only*
 28 | Continuous power measurement enabled | uint 8 | Stores if continuous power measurement is enabled. *read only*
 29 | Tracker enabled | uint 8 | Stores if device tracking is enabled. *read only*
-30 | ADC sample rate | ... | **Deprecated**
-31 | Power sample burst interval | ... | **Deprecated**
-32 | Power sample continuous interval | ... | **Deprecated**
-33 | Power sample continuous number samples | ... | **Deprecated**
 34 | <a name="crownstone_identifier"></a>Crownstone Identifier | uint 16 | Crownstone identifier used in advertisement package.
 35 | <a name="admin_key"></a>Admin encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions.
 36 | <a name="user_key"></a>Member encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions.
@@ -590,6 +571,7 @@ OpCode | Name | Description
 1 | Write | Write the configuration setting to storage.
 
 Note: On the Config Read Characteristic, the OpCode is set to Read (0), and the length and payload will have actual data depending on the type.
+
 
 
 <a name="state_packet"></a>
@@ -812,7 +794,7 @@ uint 8 | Reserved | 3 | Reserved for future use.
 
 <a name="mesh_message_packet"></a>
 ## Mesh message
-This packet is a slightly modified version of the one used in [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh); we simply increased the content size.
+This packet is a slightly modified version of the one used in [OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh); we simply increased the content size and changed the address.
 
 ![Mesh packet](../docs/diagrams/openmesh-packet.png)
 
@@ -822,7 +804,10 @@ uint 8 | Preamble | 1 |
 uint 32 | Access address | 4 | Number used to find relevant messages, set by application.
 uint 8 | Type | 1 |
 uint 8 | Length | 1 |
-uint 8 [] | Source address | 6 | Address of the node that put this message into the mesh.
+uint 8 | Crownstone ID | 1 | Crownstone ID of the node that sent (or relayed) this message.
+uint 8 | Crownstone ID | 1 | Crownstone ID of the node that sent (or relayed) this message.
+uint 8 | Crownstone ID | 1 | Crownstone ID of the node that sent (or relayed) this message.
+uint 8 [] | Reserved | 3 | Reserved for future use.
 uint 8 | AD Length | 1 | Length of data after this field, excluding CRC.
 uint 8 | AD Type | 1 |
 uint 16 | Service UUID | 2 | Mesh service UUID.

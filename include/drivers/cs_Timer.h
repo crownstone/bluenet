@@ -1,8 +1,8 @@
 /*
- * Author: Anne van Rossum
+ * Author: Crownstone Team
  * Copyrights: Distributed Organism B.V. (DoBots, http://dobots.nl)
  * Date: 21 Apr., 2015
- * License: LGPLv3+, Apache, and/or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 

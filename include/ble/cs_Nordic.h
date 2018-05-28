@@ -5,7 +5,7 @@
  * @authors Crownstone Team
  * @copyright Crownstone B.V.
  * @date Apr 21, 2015
- * @license LGPLv3+, Apache License, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
@@ -42,7 +42,7 @@ extern "C"
 
 #ifndef BOOTLOADER_COMPILATION
 // Refering to driver files
-#include "nrf_drv_saadc.h"
+#include "nrf_saadc.h"
 #include "nrf_timer.h"
 #include "nrf_ppi.h"
 #include "nrf_gpiote.h"

@@ -1,8 +1,8 @@
 /*
- * Author: Bart van Vliet
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 30, 2016
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #pragma once
@@ -13,34 +13,17 @@
 #include "structs/buffer/cs_DifferentialBuffer.h"
 #include "structs/cs_BufferAccessor.h"
 
-#define POWER_SAMPLE_CONT_NUM_SAMPLES_MSG 43
-//! 91 bytes in total
-struct __attribute__((__packed__)) power_samples_cont_message_t {
-	uint32_t timestamp;
-//	uint16_t firstSample;
-//	int8_t sampleDiff[POWER_SAMPLE_CONT_NUM_SAMPLES_MSG-1];
-	uint16_t samples[POWER_SAMPLE_CONT_NUM_SAMPLES_MSG];
-	uint8_t reserved;
-//	struct __attribute__((__packed__)) {
-//		int8_t dt1 : 4;
-//		int8_t dt2 : 4;
-//	} timeDiffs[POWER_SAMPLE_CONT_NUM_SAMPLES_MSG / 2];
-};
-
 struct __attribute__((__packed__)) power_samples_t {
-	stack_buffer_fixed_t<uint16_t, POWER_SAMPLE_BURST_NUM_SAMPLES> _currentSamples;
-	stack_buffer_fixed_t<uint16_t, POWER_SAMPLE_BURST_NUM_SAMPLES> _voltageSamples;
-	differential_buffer_fixed_t<uint32_t, POWER_SAMPLE_BURST_NUM_SAMPLES> _currentTimestamps;
-	differential_buffer_fixed_t<uint32_t, POWER_SAMPLE_BURST_NUM_SAMPLES> _voltageTimestamps;
+	stack_buffer_fixed_t<int16_t, POWER_SAMPLE_BURST_NUM_SAMPLES> _currentSamples;
+	stack_buffer_fixed_t<int16_t, POWER_SAMPLE_BURST_NUM_SAMPLES> _voltageSamples;
+	uint32_t _timestamp; //! Timestamp of first sample.
 };
 
 class PowerSamples : public BufferAccessor {
 private:
 	power_samples_t* _buffer;
-	StackBuffer<uint16_t> _currentBuffer;
-	StackBuffer<uint16_t> _voltageBuffer;
-	DifferentialBuffer<uint32_t> _currentTimestampsBuffer;
-	DifferentialBuffer<uint32_t> _voltageTimestampsBuffer;
+	StackBuffer<int16_t> _currentBuffer;
+	StackBuffer<int16_t> _voltageBuffer;
 	bool _allocatedSelf;
 
 public:
@@ -56,20 +39,20 @@ public:
 
 	bool full();
 
-	StackBuffer<uint16_t>* getCurrentSamplesBuffer() {
+	StackBuffer<int16_t>* getCurrentSamplesBuffer() {
 		return &_currentBuffer;
 	}
 
-	StackBuffer<uint16_t>* getVoltageSamplesBuffer() {
+	StackBuffer<int16_t>* getVoltageSamplesBuffer() {
 		return &_voltageBuffer;
 	}
 
-	DifferentialBuffer<uint32_t>* getCurrentTimestampsBuffer() {
-		return &_currentTimestampsBuffer;
+	void setTimestamp(uint32_t timestamp) {
+		_buffer->_timestamp = timestamp;
 	}
 
-	DifferentialBuffer<uint32_t>* getVoltageTimestampsBuffer() {
-		return &_voltageTimestampsBuffer;
+	uint32_t getTimestamp() {
+		return _buffer->_timestamp;
 	}
 
 	///////////! Bufferaccessor ////////////////////////////

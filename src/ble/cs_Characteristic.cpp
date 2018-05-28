@@ -1,11 +1,11 @@
 /**
  * Bluetooth Low Energy Characteristic
  *
- * Author: Christopher Mason
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Apr 23, 2015
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include "ble/cs_Characteristic.h"
@@ -83,9 +83,7 @@ void CharacteristicBase::init(Service* svc) {
 	ci.attr_char_value.max_len = getGattValueMaxLength();
 	ci.attr_char_value.p_value = getGattValuePtr();
 
-#ifdef PRINT_CHARACTERISTIC_VERBOSE
 	LOGd("%s init with buffer[%i] with %p", _name, getGattValueMaxLength(), getGattValuePtr());
-#endif
 
 	////////////////////////
 	//! attribute metadata //

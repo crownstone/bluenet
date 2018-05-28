@@ -1,9 +1,9 @@
 /**
- * Author: Dominik Egger
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: 20 Jan., 2015
- * License: LGPLv3+, Apache, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include <mesh/cs_Mesh.h>
@@ -162,6 +162,7 @@ void Mesh::start() {
 	LOGi("start mesh");
 #endif
 	startTicking();
+	// TODO: why use the app scheduler here? First introduced here: https://github.com/crownstone/bluenet/commit/07fea79ce064a31c8997ae699366c07a39313d8c
 	uint32_t errorCode = app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
 	APP_ERROR_CHECK(errorCode);
 }
@@ -175,6 +176,7 @@ void Mesh::stop() {
 	LOGi("stop mesh");
 #endif
 	stopTicking();
+	// TODO: why use the app scheduler here? First introduced here: https://github.com/crownstone/bluenet/commit/07fea79ce064a31c8997ae699366c07a39313d8c
 	uint32_t errorCode = app_sched_event_put(&_started, sizeof(_started), start_stop_mesh);
 	APP_ERROR_CHECK(errorCode);
 }
@@ -188,6 +190,7 @@ void Mesh::resume() {
 	LOGi("resume mesh");
 #endif
 	startTicking();
+	// TODO: why use the app scheduler here? First introduced here: https://github.com/crownstone/bluenet/commit/07fea79ce064a31c8997ae699366c07a39313d8c
 	uint32_t errorCode = app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
 	APP_ERROR_CHECK(errorCode);
 }
@@ -201,6 +204,7 @@ void Mesh::pause() {
 	LOGi("pause mesh");
 #endif
 	stopTicking();
+	// TODO: why use the app scheduler here? First introduced here: https://github.com/crownstone/bluenet/commit/07fea79ce064a31c8997ae699366c07a39313d8c
 	uint32_t errorCode = app_sched_event_put(&_running, sizeof(_running), start_stop_mesh);
 	APP_ERROR_CHECK(errorCode);
 }
@@ -218,9 +222,10 @@ int8_t Mesh::getRssi(uint8_t id) {
 }
 
 void Mesh::printRssiList() {
+	// Very hacky, but this is for debug only anyway
 	__attribute__((unused)) uint8_t* list = rbc_mesh_get_rssi_list();
-	for (uint8_t i=0; i<10; i+=2) {
-		LOGd("id=%u rssi=%i", list[i], (int8_t)list[i+1]);
+	for (uint8_t i=0; i<10*4; i+=4) {
+		LOGd("id=%u rssi=%i count=%u", list[i], *((int16_t*)(list+i+1)) / 256, list[i+3]);
 	}
 }
 
@@ -581,9 +586,9 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	handle = evt->params.rx.value_handle;
 	received = (encrypted_mesh_message_t*)evt->params.rx.p_data;
 	receivedLength = evt->params.rx.data_len;
-	__attribute__((unused)) uint8_t id = evt->params.rx.ble_adv_addr.addr[0];
-	int8_t rssi = evt->params.rx.rssi;
 
+	__attribute__((unused)) uint8_t id = evt->params.rx.ble_adv_addr.addr[0];
+	__attribute__((unused)) int8_t rssi = evt->params.rx.rssi;
 	LOGd("id=%u rssi=%i", id, rssi);
 	if (rssi >=0 || rssi < -120) {
 		LOGw("INVALID RSSI");
@@ -754,7 +759,7 @@ void Mesh::checkForMessages() {
 
 void Mesh::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
-	case EVT_STORAGE_DONE:
+	case EVT_STORAGE_WRITE_DONE:
 		if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 			Mesh::getInstance().resume();
 		}

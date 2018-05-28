@@ -1,8 +1,8 @@
 /*
- * Author: Bart van Vliet
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Jun 2, 2016
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include <cstdlib>
@@ -15,8 +15,6 @@ PowerSamples::PowerSamples():
 	_buffer(NULL),
 	_currentBuffer(POWER_SAMPLE_BURST_NUM_SAMPLES),
 	_voltageBuffer(POWER_SAMPLE_BURST_NUM_SAMPLES),
-	_currentTimestampsBuffer(POWER_SAMPLE_BURST_NUM_SAMPLES),
-	_voltageTimestampsBuffer(POWER_SAMPLE_BURST_NUM_SAMPLES),
 	_allocatedSelf(false)
 {
 
@@ -40,8 +38,6 @@ bool PowerSamples::init() {
 
 	_currentBuffer.assign((buffer_ptr_t)&_buffer->_currentSamples, sizeof(_buffer->_currentSamples));
 	_voltageBuffer.assign((buffer_ptr_t)&_buffer->_voltageSamples, sizeof(_buffer->_voltageSamples));
-	_currentTimestampsBuffer.assign((buffer_ptr_t)&_buffer->_currentTimestamps, sizeof(_buffer->_currentTimestamps));
-	_voltageTimestampsBuffer.assign((buffer_ptr_t)&_buffer->_voltageTimestamps, sizeof(_buffer->_voltageTimestamps));
 
 	//! Also call clear to make sure we start with a clean buffer
 	clear();
@@ -58,16 +54,12 @@ bool PowerSamples::deinit() {
 
 	_currentBuffer.release();
 	_voltageBuffer.release();
-	_currentTimestampsBuffer.release();
-	_voltageTimestampsBuffer.release();
 	return true;
 }
 
 void PowerSamples::clear() {
 	_currentBuffer.clear();
 	_voltageBuffer.clear();
-	_currentTimestampsBuffer.clear();
-	_voltageTimestampsBuffer.clear();
 }
 
 uint16_t PowerSamples::size() {
@@ -79,10 +71,7 @@ uint16_t PowerSamples::size() {
 
 bool PowerSamples::full() {
 	// TODO: should be OR or AND?
-	return _currentBuffer.full() || \
-			_voltageBuffer.full() || \
-			_currentTimestampsBuffer.full() || \
-			_voltageTimestampsBuffer.full();
+	return _currentBuffer.full() || _voltageBuffer.full();
 }
 
 
@@ -102,8 +91,6 @@ int PowerSamples::assign(buffer_ptr_t buffer, uint16_t size) {
 
 	_currentBuffer.assign((buffer_ptr_t)&_buffer->_currentSamples, sizeof(_buffer->_currentSamples));
 	_voltageBuffer.assign((buffer_ptr_t)&_buffer->_voltageSamples, sizeof(_buffer->_voltageSamples));
-	_currentTimestampsBuffer.assign((buffer_ptr_t)&_buffer->_currentTimestamps, sizeof(_buffer->_currentTimestamps));
-	_voltageTimestampsBuffer.assign((buffer_ptr_t)&_buffer->_voltageTimestamps, sizeof(_buffer->_voltageTimestamps));
 
 	return 0;
 }

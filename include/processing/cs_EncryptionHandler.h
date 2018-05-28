@@ -1,8 +1,8 @@
 /*
- * Author: Alex de Mulder
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: July 19, 2016
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #pragma once

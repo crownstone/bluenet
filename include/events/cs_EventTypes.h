@@ -1,10 +1,12 @@
 /*
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 6, 2015
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
+
+#include <stdint.h>
 
 /**
  * Event types.
@@ -24,6 +26,7 @@ enum EventType {
 enum GeneralEventType {
 	EVT_POWER_OFF = General_Base,
 	EVT_POWER_ON,
+	EVT_POWER_TOGGLE,
 	EVT_ADVERTISEMENT_UPDATED,
 	EVT_SCAN_STARTED,
 	EVT_SCAN_STOPPED,
@@ -65,26 +68,36 @@ enum GeneralEventType {
 	EVT_PWM_POWERED,
 	EVT_PWM_ALLOWED, // Sent when pwm allowed flag is set. Payload is boolean.
 	EVT_SWITCH_LOCKED, // Sent when switch locked flag is set. Payload is boolean.
-	EVT_STORAGE_DONE, // Sent when storage is done and queue is empty.
+	EVT_STORAGE_WRITE_DONE, // Sent when storage write is done and queue is empty.
 	EVT_SETUP_DONE, // Sent when setup was done (and all settings have been stored).
-	EVT_DO_RESET_DELAYED, // Sent to perform a reset in a few seconds (currently done by command handler). Payload is uint8_t opCode.
+	EVT_DO_RESET_DELAYED, // Sent to perform a reset in a few seconds (currently done by command handler). Payload is evt_do_reset_delayed_t.
+	EVT_SWITCHCRAFT_ENABLED, // Sent when switchcraft flag is set. Payload is boolean.
+	EVT_STORAGE_WRITE, // Sent when an item is going to be written to storage.
+	EVT_STORAGE_ERASE, // Sent when a flash page is going to be erased.
+	EVT_ADC_RESTARTED, // Sent when ADC has been restarted: the next buffer is expected to be different from the previous ones.
 	EVT_ALL = 0xFFFF
 };
 
 enum UartEventType {
 	EVT_SET_LOG_LEVEL = Uart_Base,
-	EVT_TOGGLE_LOG_POWER,
-	EVT_TOGGLE_LOG_CURRENT,
-	EVT_TOGGLE_LOG_VOLTAGE,
-	EVT_TOGGLE_LOG_FILTERED_CURRENT,
+	EVT_ENABLE_LOG_POWER,
+	EVT_ENABLE_LOG_CURRENT,
+	EVT_ENABLE_LOG_VOLTAGE,
+	EVT_ENABLE_LOG_FILTERED_CURRENT,
 	EVT_CMD_RESET,
-	EVT_TOGGLE_ADVERTISEMENT,
-	EVT_TOGGLE_MESH,
+	EVT_ENABLE_ADVERTISEMENT,
+	EVT_ENABLE_MESH,
 	EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN,
-	EVT_TOGGLE_ADC_DIFFERENTIAL_CURRENT,
-	EVT_TOGGLE_ADC_DIFFERENTIAL_VOLTAGE,
+	EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT,
+	EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,
 	EVT_INC_VOLTAGE_RANGE,
 	EVT_DEC_VOLTAGE_RANGE,
 	EVT_INC_CURRENT_RANGE,
 	EVT_DEC_CURRENT_RANGE,
+	EVT_RX_CONTROL,
+};
+
+struct __attribute__((packed)) evt_do_reset_delayed_t {
+	uint8_t resetCode;
+	uint16_t delayMs;
 };

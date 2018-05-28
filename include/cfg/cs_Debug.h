@@ -1,8 +1,8 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Jun 30, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////
 
 #define PRINT_STACK_VERBOSE
-#define PRINT_CHARACTERISTIC_VERBOSE
+//#define PRINT_CHARACTERISTIC_VERBOSE
 
 //#define PRINT_IBEACON_VERBOSE
 
@@ -51,7 +51,7 @@
 /////////////////////////////////////////////////////
 
 #ifdef STACK_VERBOSE
-#define PRINT_CHARACTERISTIC_VERBOSE
+//#define PRINT_CHARACTERISTIC_VERBOSE
 #define PRINT_STACK_VERBOSE
 #endif
 

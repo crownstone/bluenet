@@ -1,8 +1,8 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 19, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
@@ -192,6 +192,7 @@ private:
 	 * Does not store the state.
 	 * Checks if relay is allowed to be turned on (by soft fuse).
 	 * Does not check for switch lock.
+	 * Does not check if relay is already on.
 	 */
 	void _relayOn();
 
@@ -200,6 +201,7 @@ private:
 	 * Does not store the state.
 	 * Checks if relay is allowed to be turned off (by soft fuse).
 	 * Does not check for switch lock.
+	 * Does not check if relay is already off.
 	 */
 	void _relayOff();
 

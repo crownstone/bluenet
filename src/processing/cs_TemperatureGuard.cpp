@@ -1,8 +1,8 @@
 /**
  * Author: Crownstone Team
- * Copyright: Crownstone
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Feb 8, 2017
- * Triple-license: LGPLv3+, Apache License, and/or MIT
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include "processing/cs_TemperatureGuard.h"

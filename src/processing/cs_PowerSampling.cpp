@@ -1,27 +1,32 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 19, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <processing/cs_PowerSampling.h>
+#include "processing/cs_PowerSampling.h"
 
-#include <storage/cs_Settings.h>
-#include <drivers/cs_Serial.h>
-#include <drivers/cs_RTC.h>
-#include <protocol/cs_StateTypes.h>
-#include <events/cs_EventDispatcher.h>
-#include <storage/cs_State.h>
-#include <processing/cs_Switch.h>
-#include <third/optmed.h>
+#include "storage/cs_Settings.h"
+#include "drivers/cs_Serial.h"
+#include "drivers/cs_RTC.h"
+#include "protocol/cs_StateTypes.h"
+#include "events/cs_EventDispatcher.h"
+#include "storage/cs_State.h"
+#include "processing/cs_Switch.h"
+#include "third/optmed.h"
+#include "protocol/cs_UartProtocol.h"
+#include "protocol/cs_UartMsgTypes.h"
 
 #if BUILD_MESHING == 1
-#include <mesh/cs_MeshControl.h>
+#include "mesh/cs_MeshControl.h"
 #endif
 
 #include <math.h>
 #include "third/SortMedian.h"
+
+#include "processing/cs_RecognizeSwitch.h"
+#include "structs/buffer/cs_InterleavedBuffer.h"
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 20
@@ -67,9 +72,11 @@ PowerSampling::PowerSampling() :
 static int printPower = 0;
 #endif
 
-// adc done callback is already decoupled from adc interrupt
-void adc_done_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
-	PowerSampling::getInstance().powerSampleAdcDone(buf, size, bufNum);
+/*
+ * At this moment in time is the function adc_done_callback already decoupled from the ADC interrupt. 
+ */
+void adc_done_callback(cs_adc_buffer_id_t bufIndex) {
+	PowerSampling::getInstance().powerSampleAdcDone(bufIndex);
 }
 
 void PowerSampling::init(const boards_config_t& boardConfig) {
@@ -85,6 +92,10 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	settings.get(CONFIG_POWER_ZERO, &_powerZero);
 	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentMilliAmpThreshold);
 	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm);
+	bool switchcraftEnabled = settings.isSet(CONFIG_SWITCHCRAFT_ENABLED);
+
+	RecognizeSwitch::getInstance().init();
+	enableSwitchcraft(switchcraftEnabled);
 
 	initAverages();
 	_recalibrateZeroVoltage = true;
@@ -181,26 +192,26 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 
 void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
-	case EVT_TOGGLE_LOG_POWER:
-		_logsEnabled.flags.power = !_logsEnabled.flags.power;
+	case EVT_ENABLE_LOG_POWER:
+		_logsEnabled.flags.power = *(uint8_t*)p_data;
 		break;
-	case EVT_TOGGLE_LOG_CURRENT:
-		_logsEnabled.flags.current = !_logsEnabled.flags.current;
+	case EVT_ENABLE_LOG_CURRENT:
+		_logsEnabled.flags.current = *(uint8_t*)p_data;
 		break;
-	case EVT_TOGGLE_LOG_VOLTAGE:
-		_logsEnabled.flags.voltage = !_logsEnabled.flags.voltage;
+	case EVT_ENABLE_LOG_VOLTAGE:
+		_logsEnabled.flags.voltage = *(uint8_t*)p_data;
 		break;
-	case EVT_TOGGLE_LOG_FILTERED_CURRENT:
-		_logsEnabled.flags.filteredCurrent = !_logsEnabled.flags.filteredCurrent;
+	case EVT_ENABLE_LOG_FILTERED_CURRENT:
+		_logsEnabled.flags.filteredCurrent = *(uint8_t*)p_data;
 		break;
 	case EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 		toggleVoltageChannelInput();
 		break;
-	case EVT_TOGGLE_ADC_DIFFERENTIAL_CURRENT:
-		toggleDifferentialModeCurrent();
+	case EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+		enableDifferentialModeCurrent(*(uint8_t*)p_data);
 		break;
-	case EVT_TOGGLE_ADC_DIFFERENTIAL_VOLTAGE:
-		toggleDifferentialModeVoltage();
+	case EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+		enableDifferentialModeVoltage(*(uint8_t*)p_data);
 		break;
 	case EVT_INC_VOLTAGE_RANGE:
 		changeRange(VOLTAGE_CHANNEL_IDX, 600);
@@ -214,39 +225,72 @@ void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_DEC_CURRENT_RANGE:
 		changeRange(CURRENT_CHANNEL_IDX, -600);
 		break;
+	case EVT_SWITCHCRAFT_ENABLED:
+		enableSwitchcraft(*(bool*)p_data);
+		break;
+	case EVT_ADC_RESTARTED:
+//		uint32_t timestamp = RTC::getCount();
+//		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, (uint8_t*)(&timestamp), sizeof(timestamp));
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
+		RecognizeSwitch::getInstance().skip(2);
+		break;
 	}
+
 }
 
 /**
  * After ADC has finished, calculate power consumption, copy data if required, and release buffer.
- *
  * Only when in normal operation mode (e.g. not in setup mode) sent the information to a BLE characteristic.
+ * Responsibilities of this function:
+ *
+ * 1. This function fills first a power struct with information about the number of channels, which is the voltage and
+ * which the current channel, the current buffer, the buffer size, the sample interval and the AC period in 
+ * microseconds.
+ * 2. The function filters the current curve.
+ * 3. The zero-crossings of voltage and current are calculated.
+ * 4. Power and energy are calculated.
+ * 5. The data is send over Bluetooth in normal mode.
+ * 6. It tries to recognize a physical switch event using the voltage curve.
+ * 7. It releases the buffer to the ADC.
+ *
+ * @param[in] buf                                Buffer populated by the ADC peripheral.
+ * @param[in] size                               Size of the buffer.
+ * @param[in] bufIndex                           The buffer index, can be used in InterleavedBuffer.
  */
-void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
+void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 	power_t power;
-	power.buf = buf;
-	power.bufSize = size;
+	power.buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
+	power.bufSize = CS_ADC_BUF_SIZE;
 	power.voltageIndex = VOLTAGE_CHANNEL_IDX;
 	power.currentIndex = CURRENT_CHANNEL_IDX;
 	power.numChannels = 2;
 	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	power.acPeriodUs = 20000;
+	
+	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
 
-	filter(power);
+#ifdef DELAY_FILTERING_VOLTAGE
+	// Filter the current immediately, filter the voltage in the buffer at time t-1 (so raw values are available)
+	filter(bufIndex, power.currentIndex);
+	filter(prevIndex, power.voltageIndex);
+#else
+	// Filter both immediately, no raw values available
+	filter(bufIndex, power.voltageIndex);
+	filter(bufIndex, power.currentIndex);
+#endif
+
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
 	if (_recalibrateZeroVoltage) {
 		calculateVoltageZero(power);
-//		_recalibrateZeroVoltage = false;
 	}
 	if (_recalibrateZeroCurrent) {
 		calculateCurrentZero(power);
-//		_recalibrateZeroCurrent = false;
 	}
 
 #ifdef TEST_PIN
@@ -257,19 +301,26 @@ void PowerSampling::powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, ui
 	calculateEnergy();
 
 	if (_operationMode == OPERATION_MODE_NORMAL) {
+		// Note, sendingSamples is a mutex. If we are already sending smples, we will not wait and just skip.
 		if (!_sendingSamples) {
 			copyBufferToPowerSamples(power);
 		}
 		// TODO: use State.set() for this.
 		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
-
 		EventDispatcher::getInstance().dispatch(STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
 	}
 
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
-	_adc->releaseBuffer(buf);
+
+	bool switch_detected = RecognizeSwitch::getInstance().detect(prevIndex, power.voltageIndex);
+	if (switch_detected) {
+		LOGd("Switch event detected!");
+		EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
+	}
+
+	_adc->releaseBuffer(bufIndex);
 }
 
 void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
@@ -277,17 +328,18 @@ void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
 }
 
 /**
- * Fill the number of samples in the characteristic.
+ * Fill the number of samples in the Bluetooth Low Energy characteristic. This clears the old samples actively. A
+ * warning is dispatched beforehand, EVT_POWER_SAMPLES_START so other listeners know (which ones) they should 
+ * invalidate the current buffer.
+ *
+ * @param[in] power                              Reference to buffer, current and voltage channel
  */
 void PowerSampling::copyBufferToPowerSamples(power_t power) {
-	// First clear the old samples
-	// Dispatch event that samples are will be cleared
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
 	_powerSamples.clear();
-	// Use dummy timestamps for now, for backward compatibility
 	uint32_t startTime = RTC::getCount(); // Not really the start time
-	uint32_t dT = CS_ADC_SAMPLE_INTERVAL_US * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000 / 1000;
 
+	_powerSamples.setTimestamp(startTime);
 	for (int i = 0; i < power.bufSize; i += power.numChannels) {
 		if (_powerSamples.getCurrentSamplesBuffer()->full() || _powerSamples.getVoltageSamplesBuffer()->full()) {
 			readyToSendPowerSamples();
@@ -295,23 +347,19 @@ void PowerSampling::copyBufferToPowerSamples(power_t power) {
 		}
 		_powerSamples.getCurrentSamplesBuffer()->push(power.buf[i+power.currentIndex]);
 		_powerSamples.getVoltageSamplesBuffer()->push(power.buf[i+power.voltageIndex]);
-		if ((!_powerSamples.getCurrentTimestampsBuffer()->push(startTime + (i/power.numChannels) * dT)) || 
-				(!_powerSamples.getVoltageTimestampsBuffer()->push(startTime + (i/power.numChannels) * dT))) {
-			_powerSamples.getCurrentSamplesBuffer()->clear();
-			_powerSamples.getVoltageSamplesBuffer()->clear();
-			return;
-		}
 	}
-	//! TODO: are we actually ready here?
+	// TODO: are we actually ready here?
 	readyToSendPowerSamples();
 }
 
 void PowerSampling::readyToSendPowerSamples() {
-	//! Mark that the power samples are being sent now
+	// Mark that the power samples are being sent now
 	_sendingSamples = true;
-	//! Dispatch event that samples are now filled and ready to be sent
+
+	// Dispatch event that samples are now filled and ready to be sent
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
-	//! Simply use an amount of time for sending, should be event based or polling based
+
+	// Simply use an amount of time for sending, should be event based or polling based
 	Timer::getInstance().start(_powerSamplingSentDoneTimerId, MS_TO_TICKS(3000), this);
 }
 
@@ -351,7 +399,6 @@ void PowerSampling::calculateVoltageZero(power_t power) {
 		sum += power.buf[i];
 	}
 	int32_t zeroVoltage = sum * 1000 / numSamples;
-//	_avgZeroVoltage = zeroVoltage;
 	
 	// Exponential moving average
 	int64_t avgZeroVoltageDiscount = _avgZeroVoltageDiscount; // Make sure calculations are in int64_t
@@ -365,55 +412,80 @@ void PowerSampling::calculateCurrentZero(power_t power) {
 	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
 
 	int64_t sum = 0;
-//	for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-//		sum += power.buf[i];
-//	}
 	// Use filtered samples to calculate the zero.
 	for (int i = 0; i < numSamples; ++i) {
 		sum += _outputSamples->at(i);
 	}
 	int32_t zeroCurrent = sum * 1000 / numSamples;
-//	_avgZeroCurrent = zeroCurrent;
 
 	// Exponential moving average
 	int64_t avgZeroCurrentDiscount = _avgZeroCurrentDiscount; // Make sure calculations are in int64_t
 	_avgZeroCurrent = ((1000 - avgZeroCurrentDiscount) * _avgZeroCurrent + avgZeroCurrentDiscount * zeroCurrent) / 1000;
+	
 }
 
-void PowerSampling::filter(power_t power) {
-	uint16_t bufSize = power.bufSize / power.numChannels;
-//
-//	// Parameters
-//	unsigned halfWindowSize = 5;  // Takes 0.74ms
-//	unsigned halfWindowSize = 16; // Takes 0.93ms
-//	unsigned windowSize = halfWindowSize * 2 + 1;
-//	unsigned blockCount = (bufSize + halfWindowSize*2) / windowSize; // Shouldn't have a remainder!
-//	MedianFilter filterParams(halfWindowSize, blockCount);
-//
-//	Vector samples(bufSize + halfWindowSize*2);
-//	Vector filtered(bufSize);
+/*
+ * The median filter uses its own data structure to optimally filter the data. A median filter does filter outliers by
+ * a particular smoothing operation. It sorts a sequence of values and picks the one in the center: the median. To
+ * optimize this operation it makes sense that if we slide the sliding window with sorted values we do not sort these
+ * values again and again. When moving the window we insert the new value from the right into the sorted array. For
+ * that it is logical to use a linked list. This means that the MedianFilter object we use requires us copying the
+ * data into it. An expensive operation.
+ *
+ * TODO: Do not work with "half window sizes". Just work with a window size and enforce its size to be odd. That 
+ * to pick the median you only need to sort half of the values (plus one) is an implementation detail. 
+ *
+ * TODO: Create an in-place version of a median filter. It is possible to have a linked list (of half the window size
+ * plus one) that contains a list of indices into the array with values. For example, let us assume a full window size
+ * of 5 and ignore the border starting at index 2. Now let's sort the first 5 values [4 2 0 1 3]. Hence, the value at
+ * index 4 is the smallest. We replace value at index 2 with the middle one (which is at index 0). Now we shift to the
+ * right, hence index 0 falls out [4 2 1 3], and index 5 shifts in. Let's assume 5 is a value between 4 and 2, then we
+ * have [4 5 2 1 3] and replace the value at index 3 with the value at index 2. Note that the value at index 0 is 
+ * copied into 2 and then into 3. If we do not want this, we need to have a separate array the size of the sliding
+ * window and only copy the value when it is shifted out. We will have a copy assignment operation for each value,
+ * however still our RAM use is much less because we only need place for values at the window. Note that we can 
+ * actually sort up to the half so the examples should be [4 2 0 ? ?], then [4 2 ? ?], then [4 5 2 ? ?]. In the 
+ * particular case where 5 > 2 we need an additional value [4 2 1 ?] or we do not know if it should be [4 2 5 ? ?] or
+ * [4 2 1 ? ?]. So in this case we would need a min(.) operation on half (minus one) of the remaining array.
+ *
+ * TODO: Keep the newest buffer at t=0 "raw" and only filter the t=-1. If the operation is done in-place we have also
+ * filtered buffers for t=-2 and t=-3 (assuming four buffers). We can use the buffer at t=0 and t=-2 for padding the
+ * buffer at t=-1. This means we do not pad with copies of values but with real values. All operations that require
+ * smoothed values will have a delay of one sine wave (20ms on 50Hz).
+ */
 
-
+/**
+ * This function performs a median filter with respect to the given channel.
+ */
+void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id) {
+	
 	// Pad the start of the input vector with the first sample in the buffer
 	uint16_t j = 0;
-	for (; j<_filterParams->half; ++j) {
-		_inputSamples->at(j) = power.buf[power.currentIndex];
+	value_t padded_value = InterleavedBuffer::getInstance().getValue(buffer_id, channel_id, 0);
+	for (uint16_t i = 0; i < _filterParams->half; ++i, ++j) {
+		_inputSamples->at(j) = padded_value;
 	}
 	// Copy samples from buffer to input vector
-	uint16_t i = power.currentIndex;
-	for (; i<power.bufSize; i += power.numChannels) {
-		_inputSamples->at(j) = power.buf[i];
-		++j;
+	uint8_t channel_length = InterleavedBuffer::getInstance().getChannelLength();
+	for (int i = 0; i < channel_length - 1; ++i, ++j) {
+		_inputSamples->at(j) = InterleavedBuffer::getInstance().getValue(buffer_id, channel_id, i);
 	}
 	// Pad the end of the buffer with the last sample in the buffer
-	for (; j<bufSize+_filterParams->half; ++j) {
-		_inputSamples->at(j) = power.buf[i];
+	padded_value = InterleavedBuffer::getInstance().getValue(buffer_id, channel_id, channel_length - 1);
+	for (uint16_t i = 0; i < _filterParams->half; ++i, ++j) {
+		_inputSamples->at(j) = padded_value;
 	}
 
 	// Filter the data
 	sort_median(*_filterParams, *_inputSamples, *_outputSamples);
-}
 
+	// TODO: Note that this is a lot of copying back and forth. Filtering should actually be done in-place.
+	
+	// Copy the result back into the buffer
+	for (int i = 0; i < InterleavedBuffer::getInstance().getChannelLength() - 1; ++i) {
+		InterleavedBuffer::getInstance().setValue(buffer_id, channel_id, i, _outputSamples->at(i));
+	}
+}
 
 /**
  * Calculate power.
@@ -445,7 +517,7 @@ void PowerSampling::calculatePower(power_t power) {
 		vSquareSum += (voltage * voltage) / (1000*1000);
 		pSum +=       (current * voltage) / (1000*1000);
 	}
-	int32_t powerMilliWatt = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
+	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
 	int32_t currentRmsMA =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
 	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
 
@@ -525,92 +597,81 @@ void PowerSampling::calculatePower(power_t power) {
 	// Calculate apparent power: current_rms * voltage_rms
 	__attribute__((unused)) uint32_t powerMilliWattApparent = (int64_t)_avgCurrentRmsMilliAmp * _avgVoltageRmsMilliVolt / 1000;
 
-//	// Calculate median when there are enough values in history, else calculate the average.
-//	_powerMilliWattHist->push(powerMilliWatt);
-//	if (_powerMilliWattHist->full()) {
-//		memcpy(_histCopy, _powerMilliWattHist->getBuffer(), _powerMilliWattHist->getMaxByteSize());
-//		_avgPowerMilliWatt = opt_med(_histCopy);
-//	}
-//	else {
-//		int64_t powerMilliWattSum = 0;
-//		for (uint16_t i=0; i<_powerMilliWattHist->size(); ++i) {
-//			powerMilliWattSum += _powerMilliWattHist->operator [](i);
-//		}
-//		_avgPowerMilliWatt = powerMilliWattSum / _powerMilliWattHist->size();
-//	}
-
 	// Exponential moving average
 	int64_t avgPowerDiscount = _avgPowerDiscount;
-	_avgPowerMilliWatt = ((1000-avgPowerDiscount) * _avgPowerMilliWatt + avgPowerDiscount * powerMilliWatt) / 1000;
-//	_avgPowerMilliWatt = powerMilliWatt;
-
-
+	_avgPowerMilliWatt = ((1000-avgPowerDiscount) * _avgPowerMilliWatt + avgPowerDiscount * powerMilliWattReal) / 1000;
 
 	/////////////////////////////////////////////////////////
 	// Debug prints
 	/////////////////////////////////////////////////////////
+//	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+//		if (power.buf[i] < 100) {
+//			APP_ERROR_CHECK(1);
+//		}
+//	}
 
 #ifdef PRINT_POWER_SAMPLES
-	if (printPower % 500 == 0) {
+	if (printPower % 1 == 0) {
+//	if (printPower % 500 == 0) {
 //	if (printPower % 500 == 0 || currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > _currentMilliAmpThresholdPwm) {
-
+		uint32_t rtcCount = RTC::getCount();
 		if (_logsEnabled.flags.power) {
 			// Calculated values
-			write("Calc: ");
-//			write("%i %i ", currentRmsMilliAmp, _avgCurrentRmsMilliAmp);
-//			write("%i %i ", voltageRmsMilliVolt, _avgVoltageRmsMilliVolt);
-//			write("%i %i ", powerMilliWatt, _avgPowerMilliWatt);
-			write("I=%i I_med=%i filt_I=%i filt_I_med=%i ", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA);
-			write("vZero=%i cZero=%i ", _avgZeroVoltage, _avgZeroCurrent);
-//			write("pSum=%lld ", pSum);
-			write("apparent=%u ", powerMilliWattApparent);
-			write("power=%d avg=%d ",powerMilliWatt, _avgPowerMilliWatt);
-			write("\r\n");
+			uart_msg_power_t powerMsg;
+			powerMsg.timestamp = rtcCount;
+//			powerMsg.timestamp = RTC::getCount();
+			powerMsg.currentRmsMA = currentRmsMA;
+			powerMsg.currentRmsMedianMA = currentRmsMedianMA;
+			powerMsg.filteredCurrentRmsMA = filteredCurrentRmsMA;
+			powerMsg.filteredCurrentRmsMedianMA = filteredCurrentRmsMedianMA;
+			powerMsg.avgZeroVoltage = _avgZeroVoltage;
+			powerMsg.avgZeroCurrent = _avgZeroCurrent;
+			powerMsg.powerMilliWattApparent = powerMilliWattApparent;
+			powerMsg.powerMilliWattReal = powerMilliWattReal;
+			powerMsg.avgPowerMilliWattReal = _avgPowerMilliWatt;
+
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_POWER_LOG_POWER, (uint8_t*)&powerMsg, sizeof(powerMsg));
 		}
 
 		if (_logsEnabled.flags.current) {
-			// Current wave
-			write("Current: ");
-//			write("\r\n");
+			// Write uart_msg_current_t without allocating a buffer.
+			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
+			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				write("%d ", power.buf[i]);
-				if (i % 40 == 40 - 1) {
-//					write("\r\n");
-				}
+				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
 			}
-			write("\r\n");
+			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_CURRENT);
 		}
 
 		if (_logsEnabled.flags.filteredCurrent) {
-			// Filtered current wave
-			write("Filtered: ");
-//			write("\r\n");
+			// Write uart_msg_current_t without allocating a buffer.
+			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, sizeof(uart_msg_current_t));
+			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&(rtcCount), sizeof(rtcCount));
+			int16_t val;
 			for (int i = 0; i < numSamples; ++i) {
-				write("%d ", _outputSamples->at(i));
-				if (i % 20 == 20 - 1) {
-//					write("\r\n");
-				}
+				val = _outputSamples->at(i);
+				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&val, sizeof(val));
 			}
-			write("\r\n");
+			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT);
 		}
 
 		if (_logsEnabled.flags.voltage) {
-			// Voltage wave
-			write("Voltage: ");
-//			write("\r\n");
+			// Write uart_msg_voltage_t without allocating a buffer.
+			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
+			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				write("%d ", power.buf[i]);
-				if (i % 40 == 40 - 2) {
-//					write("\r\n");
-				}
+				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
 			}
-			write("\r\n");
+			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
 		}
 	}
 	++printPower;
 #endif
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::calculateEnergy() {
 	uint32_t rtcCount = RTC::getCount();
 	uint32_t diffTicks = RTC::difference(rtcCount, _lastEnergyCalculationTicks);
@@ -623,7 +684,11 @@ void PowerSampling::calculateEnergy() {
 	_lastEnergyCalculationTicks = rtcCount;
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
+
 	//! Get the current state errors
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
@@ -701,10 +766,16 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	}
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::startIgbtFailureDetection() {
 	_igbtFailureDetectionStarted = true;
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::toggleVoltageChannelInput() {
 	_adcConfig.voltageChannelUsedAs = (_adcConfig.voltageChannelUsedAs + 1) % 5;
 
@@ -740,8 +811,11 @@ void PowerSampling::toggleVoltageChannelInput() {
 	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
 }
 
-void PowerSampling::toggleDifferentialModeCurrent() {
-	_adcConfig.currentDifferential = !_adcConfig.currentDifferential;
+/**
+ * TODO: What does this do?
+ */
+void PowerSampling::enableDifferentialModeCurrent(bool enable) {
+	_adcConfig.currentDifferential = enable;
 	adc_channel_config_t channelConfig;
 	channelConfig.pin = _adcConfig.currentPinGainHigh;
 	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[CURRENT_CHANNEL_IDX];
@@ -749,8 +823,11 @@ void PowerSampling::toggleDifferentialModeCurrent() {
 	_adc->changeChannel(CURRENT_CHANNEL_IDX, channelConfig);
 }
 
-void PowerSampling::toggleDifferentialModeVoltage() {
-	_adcConfig.voltageDifferential = !_adcConfig.voltageDifferential;
+/**
+ * TODO: What does this do?
+ */
+void PowerSampling::enableDifferentialModeVoltage(bool enable) {
+	_adcConfig.voltageDifferential = enable;
 	adc_channel_config_t channelConfig;
 	channelConfig.pin = _adcConfig.voltageChannelPin;
 	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX];
@@ -758,6 +835,9 @@ void PowerSampling::toggleDifferentialModeVoltage() {
 	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
 }
 
+/**
+ * TODO: What does this do?
+ */
 void PowerSampling::changeRange(uint8_t channel, int32_t amount) {
 	_adcConfig.rangeMilliVolt[channel] += amount;
 	if (_adcConfig.rangeMilliVolt[channel] < 150 || _adcConfig.rangeMilliVolt[channel] > 3600) {
@@ -776,4 +856,13 @@ void PowerSampling::changeRange(uint8_t channel, int32_t amount) {
 	}
 	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[channel];
 	_adc->changeChannel(channel, channelConfig);
+}
+
+void PowerSampling::enableSwitchcraft(bool enable) {
+	if (enable) {
+		RecognizeSwitch::getInstance().start();
+	}
+	else {
+		RecognizeSwitch::getInstance().stop();
+	}
 }

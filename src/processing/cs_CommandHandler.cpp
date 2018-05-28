@@ -1,10 +1,9 @@
 /*
- * Author: Crownstone
- * Copyright: Crownstone
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 18, 2016
- * License: LGPLv3+, Apache License 2.0, and/or MIT
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-
 
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_Strings.h>
@@ -14,9 +13,9 @@
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_FactoryReset.h>
 #include <processing/cs_Setup.h>
-
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
+#include <protocol/cs_UartProtocol.h>
 #include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
 
@@ -71,10 +70,10 @@ void CommandHandler::init(const boards_config_t* board) {
 	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t) reset);
 }
 
-void CommandHandler::resetDelayed(uint8_t opCode) {
-	LOGi("Reset in 2s, code=%u", opCode);
+void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
+	LOGi("Reset in %u ms, code=%u", delayMs, opCode);
 	static uint8_t resetOpCode = opCode;
-	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(2000), &resetOpCode);
+	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(delayMs), &resetOpCode);
 //	//! Loop until reset trigger
 //	while(true) {}; //! TODO: this doesn't seem to work
 }
@@ -169,6 +168,8 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		return handleCmdSetup(buffer, size, accessLevel);
 	case CMD_ENABLED_SWITCHCRAFT:
 		return handleCmdEnableSwitchcraft(buffer, size, accessLevel);
+	case CMD_UART_MSG:
+		return handleCmdUartMsg(buffer, size, accessLevel);
 	default:
 		LOGe("Unknown type: %u", type);
 		return ERR_UNKNOWN_TYPE;
@@ -778,7 +779,19 @@ ERR_CODE CommandHandler::handleCmdEnableSwitchcraft(buffer_ptr_t buffer, const u
 	bool enable = payload->enable;
 
 	Settings::getInstance().updateFlag(CONFIG_SWITCHCRAFT_ENABLED, enable, true);
-//	EventDispatcher::getInstance().dispatch(EVT_, &enable, sizeof(bool));
+	EventDispatcher::getInstance().dispatch(EVT_SWITCHCRAFT_ENABLED, &enable, sizeof(bool));
+	return ERR_SUCCESS;
+}
+
+ERR_CODE CommandHandler::handleCmdUartMsg(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGd(STR_HANDLE_COMMAND, "UART msg");
+
+	if (!size) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, buffer, size);
 	return ERR_SUCCESS;
 }
 
@@ -857,6 +870,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CMD_ALLOW_DIMMING:
 	case CMD_LOCK_SWITCH:
 	case CMD_ENABLED_SWITCHCRAFT:
+	case CMD_UART_MSG:
 		return ADMIN;
 	default:
 		return NOT_SET;
@@ -880,6 +894,7 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 	case CMD_SET_LED:
 	case CMD_RESET_ERRORS:
 	case CMD_SCHEDULE_ENTRY_CLEAR:
+	case CMD_UART_MSG:
 		return true;
 	default:
 		return false;
@@ -890,12 +905,12 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 void CommandHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_DO_RESET_DELAYED: {
-		if (length != 1) {
+		if (length != sizeof(evt_do_reset_delayed_t)) {
 			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 			return;
 		}
-		uint8_t opCode = *(uint8_t*)p_data;
-		resetDelayed(opCode);
+		evt_do_reset_delayed_t* payload = (evt_do_reset_delayed_t*)p_data;
+		resetDelayed(payload->resetCode, payload->delayMs);
 		break;
 	}
 	}

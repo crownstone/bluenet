@@ -1,0 +1,139 @@
+@startuml
+
+participant "Processing"                         as proc
+participant "ADC main thread"                    as adc
+participant "ADC interrupt handler"              as int
+control "Start PPI"                              as ppiStart
+participant "SAADC"                              as saadc
+control "Sample PPI"                             as ppiSample
+participant "Sample timer"                       as timer
+control "Start timeout\ntimer PPI"               as ppiTimeoutStart
+participant "Timeout counter"                    as counter
+control "Timeout PPI"                            as ppiTimeout
+participant "Timeout counter\ninterrupt handler" as counterInt
+
+activate ppiStart
+activate ppiSample
+activate ppiTimeout
+activate saadc
+activate ppiTimeoutStart
+activate timer
+
+......
+
+hnote over adc, int
+current buffer: 0
+queued buffer: 1
+endhnote
+
+== ADC interrupt is delayed ==
+saadc -> ppiTimeoutStart: End
+ppiTimeoutStart -> counter: Clear
+hnote over counter: 0
+ppiTimeoutStart -> counter: Start
+activate counter
+saadc -> ppiStart: End
+ppiStart -> saadc: Start
+
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample 0
+ppiSample -> counter: Count
+hnote over counter: 1
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample 1
+ppiSample -> counter: Count
+hnote over counter: 2
+......
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample N-2
+ppiSample -> counter: Count
+hnote over counter: N-1
+== Timeout ==
+counter -> counter: Stop
+deactivate counter
+counter -> ppiTimeout: Trigger
+ppiTimeout -> timer: Stop
+deactivate timer
+
+......
+saadc -> int: End
+hnote over adc, int
+current buffer: 1
+queued buffer: none
+endhnote
+
+counter -> counterInt: Trigger
+note left: Counter interrupt triggers\nafter SAADC interrupt\nas the priority is lower.
+
+int -> adc: Done buffer 0
+hnote over adc: buffers being processed: [0]
+adc -> proc: Done buffer 0
+
+counterInt -> adc: Timeout
+note right: Timeout is called after Done\nas the app scheduler is fifo.
+hnote over adc, int: saadc state: stopping
+adc -> adc: Stop
+hnote over adc: adc state: idle
+adc -> ppiStart: disable
+deactivate ppiStart
+adc -> ppiTimeoutStart: disable
+deactivate ppiTimeoutStart
+adc -> timer: Stop
+adc -> timer: Clear
+
+adc -> saadc: Stop
+saadc -> int: Stopped
+deactivate saadc
+hnote over adc, int: saadc state: idle
+saadc -> int: End
+note over int: End is not handled,\nas saadc state is not busy.
+
+
+== Start ==
+adc -> adc: Start
+note over adc: Not starting, as buffers\nare being processed.
+hnote over adc: adc state: starting
+
+......
+
+proc -> adc: Release buffer 0
+hnote over adc: buffers being processed: []
+adc -> adc: Start
+
+hnote over adc, int
+current buffer: 1
+queued buffer: 2
+adc state: busy
+saadc state: busy
+endhnote
+adc -> saadc: Set buffer 1
+adc -> saadc: Start
+activate saadc
+saadc -> adc: Started
+adc -> saadc: Set buffer 2
+adc -> ppiStart: Enable
+activate ppiStart
+adc -> counter: Clear
+hnote over counter: 0
+adc -> ppiTimeoutStart: Enable
+activate ppiTimeoutStart
+adc -> timer: Start
+activate timer
+
+== First buffer ==
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample 0
+ppiSample -> counter: Count
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample 1
+ppiSample -> counter: Count
+timer -> ppiSample: Tick
+......
+ppiSample -> saadc: Sample ...
+ppiSample -> counter: Count
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample N-1
+ppiSample -> counter: Count
+
+
+@enduml

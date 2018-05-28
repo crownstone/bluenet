@@ -1,8 +1,8 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Nov 4, 2014
- * License: LGPLv3+, Apache, and/or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include <ble/cs_iBeacon.h>

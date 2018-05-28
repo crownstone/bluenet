@@ -1,8 +1,8 @@
 /*
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: 24 Nov., 2014
- * License: LGPLv3+, Apache, and/or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
@@ -186,9 +186,9 @@ struct ps_configuration_t : ps_storage_base_t {
 
 	// storing keys used for encryption
 	struct {
-		uint8_t owner[ENCYRPTION_KEY_LENGTH];
-		uint8_t member[ENCYRPTION_KEY_LENGTH];
-		uint8_t guest[ENCYRPTION_KEY_LENGTH];
+		uint8_t owner[ENCRYPTION_KEY_LENGTH];
+		uint8_t member[ENCRYPTION_KEY_LENGTH];
+		uint8_t guest[ENCRYPTION_KEY_LENGTH];
 	} encryptionKeys;
 
 	uint32_t adcBurstSampleRate;
@@ -257,6 +257,7 @@ struct __attribute__((__packed__)) buffer_element_t {
 	uint16_t dataSize;
 	uint16_t storageOffset;
 	pstorage_handle_t storageHandle;
+	bool update;
 };
 
 /** Class to store items persistently in FLASH
@@ -348,8 +349,10 @@ public:
 	 * @size size of the item (eg. 4 for integer, 1 for a byte, 8 for a byte array of length 8, etc)
 	 * @offset the offset in bytes at which the item should be stored. (the offset is relative to the
 	 *   beginning of the block defined by the handle)
+	 * @update True when updating the value, meaning any value can be written.
+	 *   False when just writing the value, meaning only 1s can become 0s.
 	 */
-	void writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size);
+	void writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size, bool update=true);
 
 	void resumeRequests();
 

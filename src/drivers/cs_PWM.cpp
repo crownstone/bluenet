@@ -1,8 +1,8 @@
 /**
  * Author: Crownstone Team
- * Copyright: Crownstone
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: 9 Mar., 2016
- * Triple-license: LGPLv3+, Apache License, and/or MIT
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include "drivers/cs_PWM.h"
@@ -306,6 +306,8 @@ void PWM::setValue(uint8_t channel, uint16_t newValue) {
 
 			writeCC(SECONDARY_CHANNEL_IDX, _tickValues[channel]);
 			nrf_ppi_group_enable(_ppiGroup);
+
+			// TODO: the secondary channel and the ppi transition channels are never stopped/cleared (if pwm value isn't changed)?
 		}
 	}
 	}

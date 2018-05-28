@@ -1,8 +1,8 @@
 /*
  * Author: Crownstone Team
- * Copyright: Crownstone
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: 2 Feb., 2017
- * License: LGPLv3+, Apache, and/or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  *
  * NOTE 1: This file is written in C so that it can be used in the bootloader as well.
  *

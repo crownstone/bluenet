@@ -1,24 +1,25 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 4, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-#include <ble/cs_ServiceData.h>
+#include "ble/cs_ServiceData.h"
 
-#include <processing/cs_EncryptionHandler.h>
-
-#include <protocol/cs_StateTypes.h>
-#include <protocol/cs_ConfigTypes.h>
-#include <drivers/cs_Serial.h>
-#include <drivers/cs_RNG.h>
-#include <storage/cs_State.h>
-#include <util/cs_Utils.h>
-#include <drivers/cs_RTC.h>
+#include "processing/cs_EncryptionHandler.h"
+#include "protocol/cs_StateTypes.h"
+#include "protocol/cs_ConfigTypes.h"
+#include "drivers/cs_Serial.h"
+#include "drivers/cs_RNG.h"
+#include "storage/cs_State.h"
+#include "util/cs_Utils.h"
+#include "drivers/cs_RTC.h"
+#include "protocol/cs_UartProtocol.h"
 
 #if BUILD_MESHING == 1
-#include <mesh/cs_MeshControl.h>
-#include <protocol/mesh/cs_MeshMessageState.h>
+#include "mesh/cs_MeshControl.h"
+#include "protocol/mesh/cs_MeshMessageState.h"
+//#include "mesh/cs_Mesh.h"
 #endif
 
 #define ADVERTISE_EXTERNAL_DATA
@@ -104,6 +105,7 @@ void ServiceData::init() {
 	// Init flags
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, Settings::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED));
 
 	// set the initial advertisement.
 	updateAdvertisement(true);
@@ -241,6 +243,9 @@ void ServiceData::updateAdvertisement(bool initial) {
 		BLEutil::printArray(_serviceData.array, sizeof(service_data_t));
 //		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type, serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask, serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy, serviceData->params.partialTimestamp);
 #endif
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(service_data_t));
+
+//		Mesh::getInstance().printRssiList();
 
 		// encrypt the array using the guest key ECB if encryption is enabled.
 		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
@@ -813,6 +818,10 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		break;
 	}
 #endif
+	case EVT_SWITCHCRAFT_ENABLED: {
+		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(bool*)p_data);
+		break;
+	}
 	// TODO: add bitmask events
 	default:
 		return;

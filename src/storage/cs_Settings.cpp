@@ -1,9 +1,9 @@
 /** Store settings in RAM or persistent memory
  *
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Sep 22, 2015
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include "storage/cs_Settings.h"
@@ -284,8 +284,8 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_KEY_ADMIN :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
-		if (length != ENCYRPTION_KEY_LENGTH) {
-			LOGe(FMT_ERR_EXPECTED_RECEIVED, ENCYRPTION_KEY_LENGTH, length);
+		if (length != ENCRYPTION_KEY_LENGTH) {
+			LOGe(FMT_ERR_EXPECTED_RECEIVED, ENCRYPTION_KEY_LENGTH, length);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		log(SERIAL_INFO, FMT_SET_STR_TYPE_VAL, type, "");
@@ -407,7 +407,7 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_KEY_ADMIN :
 	case CONFIG_KEY_MEMBER :
 	case CONFIG_KEY_GUEST : {
-		return ENCYRPTION_KEY_LENGTH;
+		return ENCRYPTION_KEY_LENGTH;
 	}
 
 	/////////////////////////////////////////////////
@@ -533,15 +533,15 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size, bool getDefau
 		break;
 	}
 	case CONFIG_KEY_ADMIN : {
-		StorageHelper::getArray<uint8_t>(_storageStruct.encryptionKeys.owner, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH, getDefaultValue);
+		StorageHelper::getArray<uint8_t>(_storageStruct.encryptionKeys.owner, (uint8_t*)target, NULL, ENCRYPTION_KEY_LENGTH, getDefaultValue);
 		break;
 	}
 	case CONFIG_KEY_MEMBER : {
-		StorageHelper::getArray<uint8_t>(_storageStruct.encryptionKeys.member, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH, getDefaultValue);
+		StorageHelper::getArray<uint8_t>(_storageStruct.encryptionKeys.member, (uint8_t*)target, NULL, ENCRYPTION_KEY_LENGTH, getDefaultValue);
 		break;
 	}
 	case CONFIG_KEY_GUEST : {
-		StorageHelper::getArray<uint8_t>(_storageStruct.encryptionKeys.guest, (uint8_t*)target, NULL, ENCYRPTION_KEY_LENGTH, getDefaultValue);
+		StorageHelper::getArray<uint8_t>(_storageStruct.encryptionKeys.guest, (uint8_t*)target, NULL, ENCRYPTION_KEY_LENGTH, getDefaultValue);
 		break;
 	}
 //	case CONFIG_ADC_BURST_SAMPLE_RATE: {
@@ -746,17 +746,17 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	}
 	case CONFIG_KEY_ADMIN : {
 		p_item = (uint8_t*)&_storageStruct.encryptionKeys.owner;
-		StorageHelper::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.owner, ENCYRPTION_KEY_LENGTH);
+		StorageHelper::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.owner, ENCRYPTION_KEY_LENGTH);
 		break;
 	}
 	case CONFIG_KEY_MEMBER : {
 		p_item = (uint8_t*)&_storageStruct.encryptionKeys.member;
-		StorageHelper::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.member, ENCYRPTION_KEY_LENGTH);
+		StorageHelper::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.member, ENCRYPTION_KEY_LENGTH);
 		break;
 	}
 	case CONFIG_KEY_GUEST : {
 		p_item = (uint8_t*)&_storageStruct.encryptionKeys.guest;
-		StorageHelper::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.guest, ENCYRPTION_KEY_LENGTH);
+		StorageHelper::setArray<uint8_t>((uint8_t*)target, _storageStruct.encryptionKeys.guest, ENCRYPTION_KEY_LENGTH);
 		break;
 	}
 //	case CONFIG_ADC_BURST_SAMPLE_RATE: {

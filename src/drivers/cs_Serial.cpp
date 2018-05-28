@@ -1,8 +1,8 @@
 /**
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: 10 Oct., 2014
- * License: LGPLv3+, Apache, and/or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include "drivers/cs_Serial.h"
@@ -65,6 +65,9 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 
 	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; // Do not enable hardware flow control.
 //	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud38400;
+//	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud57600;
+//	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud76800;
+//	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud115200;
 	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud230400; // Highest baudrate that still worked.
 	NRF_UART0->TASKS_STARTTX = 1;
 	NRF_UART0->TASKS_STARTRX = 1;
@@ -106,14 +109,16 @@ int write(const char *str, ...) {
 		va_start(ap, str);
 		len = vsprintf(buffer, str, ap);
 		va_end(ap);
-		writeBytes((uint8_t*)buffer, len);
+//		writeBytes((uint8_t*)buffer, len);
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)buffer, len);
 	} else {
 		char *p_buf = (char*)malloc(len + 1);
 		if (!p_buf) return -1;
 		va_start(ap, str);
 		len = vsprintf(p_buf, str, ap);
 		va_end(ap);
-		writeBytes((uint8_t*)buffer, len);
+//		writeBytes((uint8_t*)p_buf, len);
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)p_buf, len);
 		free(p_buf);
 	}
 	return len;
@@ -166,6 +171,9 @@ extern "C" void UART0_IRQHandler(void) {
 	readByte = (uint8_t)NRF_UART0->RXD;
 	UartProtocol::getInstance().onRead(readByte);
 
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
 	// Clear event after reading the data: new data may be written to RXD immediately.
 	NRF_UART0->EVENTS_RXDRDY = 0;
 }

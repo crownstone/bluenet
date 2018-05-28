@@ -1,8 +1,8 @@
 /**
  * Author: Crownstone Team
- * Copyright: Crownstone
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Jan 17, 2018
- * License: LGPLv3+, Apache, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 /**********************************************************************************************************************
@@ -26,30 +26,34 @@
 #include "ble/cs_Nordic.h"
 
 #include "structs/cs_StreamBuffer.h"
-#include "processing/cs_CommandHandler.h"
-
+#include "events/cs_EventDispatcher.h"
+#include "events/cs_EventTypes.h"
+#include "storage/cs_Settings.h"
 
 // Define both test pin to enable gpio debug.
 //#define TEST_PIN   22
 //#define TEST_PIN2  23
 
+// Define to only print debug text (without header and tail).
+//#define DEBUGGING_CLEAN_UART
+
 UartProtocol::UartProtocol():
-readBuffer(NULL),
-readBufferIdx(0),
-startedReading(false),
-escapeNextByte(false),
-readPacketSize(0),
-readBusy(false)
+_readBuffer(NULL),
+_readBufferIdx(0),
+_startedReading(false),
+_escapeNextByte(false),
+_readPacketSize(0),
+_readBusy(false)
 {
 
 }
 
 void handle_msg(void * data, uint16_t size) {
-	UartProtocol::getInstance().handleMsg(data, size);
+	UartProtocol::getInstance().handleMsg((uart_handle_msg_data_t*)data);
 }
 
 void UartProtocol::init() {
-	readBuffer = new uint8_t[UART_RX_BUFFER_SIZE];
+	_readBuffer = new uint8_t[UART_RX_BUFFER_SIZE];
 #ifdef TEST_PIN
     nrf_gpio_cfg_output(TEST_PIN);
 #endif
@@ -59,15 +63,16 @@ void UartProtocol::init() {
 }
 
 void UartProtocol::reset() {
-//	write("r\r\n");
-//	BLEutil::printArray(readBuffer, readBufferIdx);
+	// No logs, this function can be called from interrupt
 #ifdef TEST_PIN2
 	nrf_gpio_pin_toggle(TEST_PIN2);
 #endif
-	readBufferIdx = 0;
-	startedReading = false;
-	escapeNextByte = false;
-	readPacketSize = 0;
+	_readBufferIdx = 0;
+	_startedReading = false;
+	_escapeNextByte = false;
+	_readPacketSize = 0;
+
+	EventDispatcher::getInstance().addListener(this);
 }
 
 void UartProtocol::escape(uint8_t& val) {
@@ -75,6 +80,7 @@ void UartProtocol::escape(uint8_t& val) {
 }
 
 void UartProtocol::unEscape(uint8_t& val) {
+	// No logs, this function can be called from interrupt
 	val ^= UART_ESCAPE_FLIP_MASK;
 }
 
@@ -88,31 +94,79 @@ void UartProtocol::crc16(const uint8_t * data, const uint16_t size, uint16_t& cr
 }
 
 void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
-	if (size > UART_RX_MAX_PAYLOAD_SIZE) {
-		LOGw("msg too large");
+#ifdef DEBUGGING_CLEAN_UART
+	switch(opCode) {
+	// when debugging we would like to drop out of certain binary data coming over the console...
+	case UART_OPCODE_TX_TEXT:
+		// Now only the special chars get escaped, no header and tail.
+		writeBytes(data, size);
+		return;
+	default:
+		return;
+	}
+#endif
+	// No logs, this function is called when logging
+	writeMsgStart(opCode, size);
+	writeMsgPart(opCode, data, size);
+	writeMsgEnd(opCode);
+}
+
+void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
+#ifdef DEBUGGING_CLEAN_UART
+	// when debugging we would like to drop out of certain binary data coming over the console...
+	switch(opCode) {
+	default:
+		return;
+	}
+#endif
+	// No logs, this function is called when logging
+	if (size > UART_TX_MAX_PAYLOAD_SIZE) {
 		return;
 	}
 
 	uart_msg_header_t header;
 	header.opCode = opCode;
 	header.size = size;
-
-	uint16_t crc = crc16((uint8_t*)(&header), sizeof(uart_msg_header_t));
-	crc16(data, size, crc);
-	uart_msg_tail_t tail;
-	tail.crc = crc;
-
-	LOGd("write opcode=%u len=%u crc=%u", opCode, size, crc);
-	BLEutil::printArray(data, size);
+	_crc = crc16((uint8_t*)(&header), sizeof(uart_msg_header_t));
 
 	writeStartByte();
 	writeBytes((uint8_t*)(&header), sizeof(uart_msg_header_t));
-	writeBytes(data, size);
-	writeBytes((uint8_t*)(&tail), sizeof(uart_msg_tail_t));
-	write(SERIAL_CRLF); // Just so it still looks ok on minicom
 }
 
+void UartProtocol::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
+#ifdef DEBUGGING_CLEAN_UART
+	// when debugging we would like to drop out of certain binary data coming over the console...
+	switch(opCode) {
+	case UART_OPCODE_TX_TEXT:
+		// Now only the special chars get escaped, no header and tail.
+		writeBytes(data, size);
+		return;
+	default:
+		return;
+	}
+#endif
+	// No logs, this function is called when logging
+	crc16(data, size, _crc);
+	writeBytes(data, size);
+}
+
+void UartProtocol::writeMsgEnd(UartOpcodeTx opCode) {
+#ifdef DEBUGGING_CLEAN_UART
+	// when debugging we would like to drop out of certain binary data coming over the console...
+	switch(opCode) {
+	default:
+		return;
+	}
+#endif
+	// No logs, this function is called when logging
+	uart_msg_tail_t tail;
+	tail.crc = _crc;
+	writeBytes((uint8_t*)(&tail), sizeof(uart_msg_tail_t));
+}
+
+
 void UartProtocol::onRead(uint8_t val) {
+	// No logs, this function can be called from interrupt
 	// CRC error? Reset.
 	// Start char? Reset.
 	// Bad escaped value? Reset.
@@ -120,7 +174,7 @@ void UartProtocol::onRead(uint8_t val) {
 	// Haven't seen a start char in too long? Reset anyway.
 
 	// Can't read anything while processing the previous msg.
-	if (readBusy) {
+	if (_readBusy) {
 #ifdef TEST_PIN2
 		nrf_gpio_pin_toggle(TEST_PIN2);
 #endif
@@ -132,7 +186,7 @@ void UartProtocol::onRead(uint8_t val) {
 #endif
 
 	// An escape shouldn't be followed by a special byte
-	if (escapeNextByte) {
+	if (_escapeNextByte) {
 		switch (val) {
 		case UART_START_BYTE:
 		case UART_ESCAPE_BYTE:
@@ -143,70 +197,78 @@ void UartProtocol::onRead(uint8_t val) {
 
 	if (val == UART_START_BYTE) {
 		reset();
-		startedReading = true;
+		_startedReading = true;
 		return;
 	}
 
-	if (!startedReading) {
+	if (!_startedReading) {
 		return;
 	}
 
 
 	if (val == UART_ESCAPE_BYTE) {
-		escapeNextByte = true;
+		_escapeNextByte = true;
 		return;
 	}
 
-	if (escapeNextByte) {
+	if (_escapeNextByte) {
 		unEscape(val);
-		escapeNextByte = false;
+		_escapeNextByte = false;
 	}
 
 //#ifdef TEST_PIN
 //	nrf_gpio_pin_toggle(TEST_PIN);
 //#endif
 
-	readBuffer[readBufferIdx++] = val;
+	_readBuffer[_readBufferIdx++] = val;
 
-	if (readBufferIdx == sizeof(uart_msg_header_t)) {
+	if (_readBufferIdx == sizeof(uart_msg_header_t)) {
 		// First check received size, then add header and tail size.
 		// Otherwise an overflow would lead to passing the size check.
-		readPacketSize = ((uart_msg_header_t*)readBuffer)->size;
-		if (readPacketSize > UART_RX_MAX_PAYLOAD_SIZE) {
+		_readPacketSize = ((uart_msg_header_t*)_readBuffer)->size;
+		if (_readPacketSize > UART_RX_MAX_PAYLOAD_SIZE) {
 			reset();
 			return;
 		}
-		readPacketSize += sizeof(uart_msg_header_t) + sizeof(uart_msg_tail_t);
+		_readPacketSize += sizeof(uart_msg_header_t) + sizeof(uart_msg_tail_t);
 	}
 
-	if (readBufferIdx >= sizeof(uart_msg_header_t)) {
+	if (_readBufferIdx >= sizeof(uart_msg_header_t)) {
 		// Header was read.
-		if (readBufferIdx >= readPacketSize) {
-			readBusy = true;
+		if (_readBufferIdx >= _readPacketSize) {
+			// Block reading until the buffer has been handled.
+			_readBusy = true;
 			// Decouple callback from interrupt handler, and put it on app scheduler instead
-			uint32_t errorCode = app_sched_event_put(readBuffer, readBufferIdx, handle_msg);
+			uart_handle_msg_data_t msgData;
+			msgData.msg = _readBuffer;
+			msgData.msgSize = _readBufferIdx;
+			uint32_t errorCode = app_sched_event_put(&msgData, sizeof(uart_handle_msg_data_t), handle_msg);
 			APP_ERROR_CHECK(errorCode);
 		}
 	}
 }
 
 
-void UartProtocol::handleMsg(void * data, uint16_t size) {
-	LOGd("read:");
-	BLEutil::printArray(data, size);
+void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
+	uint8_t* data = msgData->msg;
+	uint16_t size = msgData->msgSize;
+
+//	LOGd("read:");
+//	BLEutil::printArray(data, size);
 
 	// Check CRC
-	uint16_t calculatedCrc = crc16((uint8_t*)data, size - sizeof(uart_msg_tail_t));
-	uint16_t receivedCrc = *((uint16_t*)((uint8_t*)data + size - sizeof(uart_msg_tail_t)));
+	uint16_t calculatedCrc = crc16(data, size - sizeof(uart_msg_tail_t));
+	uint16_t receivedCrc = *((uint16_t*)(data + size - sizeof(uart_msg_tail_t)));
 	if (calculatedCrc != receivedCrc) {
 		LOGw("crc mismatch: %u vs %u", calculatedCrc, receivedCrc);
-		readBusy = false;
+		_readBusy = false;
 		reset();
 		return;
 	}
 
 	uart_msg_header_t* header = (uart_msg_header_t*)data;
-	uint8_t* payload = (uint8_t*)data + sizeof(uart_msg_header_t);
+	uint8_t* payload = data + sizeof(uart_msg_header_t);
+	LOGd("handle msg %u", header->opCode);
 
 	switch (header->opCode) {
 	case UART_OPCODE_RX_CONTROL: {
@@ -215,73 +277,100 @@ void UartProtocol::handleMsg(void * data, uint16_t size) {
 			LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			break;
 		}
-		uint8_t* streamPayload = (uint8_t*)payload + sizeof(stream_header_t);
-		CommandHandler::getInstance().handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
+//		uint8_t* streamPayload = (uint8_t*)payload + sizeof(stream_header_t);
+//		CommandHandler::getInstance().handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
+//		TODO: implement event dispatch..
+		EventDispatcher::getInstance().dispatch(EVT_RX_CONTROL, payload, 1);
 		break;
 	}
+	case UART_OPCODE_RX_ENABLE_ADVERTISEMENT:
+		if (header->size < 1) { break; }
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADVERTISEMENT, payload, 1);
+		break;
+	case UART_OPCODE_RX_ENABLE_MESH:
+		if (header->size < 1) { break; }
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_MESH, payload, 1);
+		break;
+	case UART_OPCODE_RX_GET_ID:
+		uint16_t crownstoneId;
+		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+		writeMsg(UART_OPCODE_TX_OWN_ID, (uint8_t*)&crownstoneId, sizeof(crownstoneId));
+		break;
+	case UART_OPCODE_RX_GET_MAC:
+		uint32_t err_code;
+		ble_gap_addr_t address;
+		err_code = sd_ble_gap_address_get(&address);
+		APP_ERROR_CHECK(err_code);
+		writeMsg(UART_OPCODE_TX_OWN_MAC, address.addr, sizeof(ble_gap_addr_t));
+		break;
+//	case UART_OPCODE_RX_ADC_CONFIG_GET:
+//		break;
+//	case UART_OPCODE_RX_ADC_CONFIG_SET:
+//		break;
+//	case UART_OPCODE_RX_ADC_CONFIG_SET_RANGE:
+//		break;
+	case UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_CURRENT:
+		EventDispatcher::getInstance().dispatch(EVT_INC_CURRENT_RANGE);
+		break;
+	case UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_CURRENT:
+		EventDispatcher::getInstance().dispatch(EVT_DEC_CURRENT_RANGE);
+		break;
+	case UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_VOLTAGE:
+		EventDispatcher::getInstance().dispatch(EVT_INC_VOLTAGE_RANGE);
+		break;
+	case UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_VOLTAGE:
+		EventDispatcher::getInstance().dispatch(EVT_DEC_VOLTAGE_RANGE);
+		break;
+	case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_CURRENT:
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT);
+		break;
+	case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_VOLTAGE:
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE);
+		break;
+	case UART_OPCODE_RX_ADC_CONFIG_VOLTAGE_PIN:
+		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
+		break;
+	case UART_OPCODE_RX_POWER_LOG_CURRENT:
+		if (header->size < 1) { break; }
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_CURRENT, payload, 1);
+		break;
+	case UART_OPCODE_RX_POWER_LOG_VOLTAGE:
+		if (header->size < 1) { break; }
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_VOLTAGE, payload, 1);
+		break;
+	case UART_OPCODE_RX_POWER_LOG_FILTERED_CURRENT:
+		if (header->size < 1) { break; }
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_FILTERED_CURRENT, payload, 1);
+		break;
+//	case UART_OPCODE_RX_POWER_LOG_FILTERED_VOLTAGE:
+//		EventDispatcher::getInstance().dispatch();
+//		break;
+	case UART_OPCODE_RX_POWER_LOG_POWER:
+		if (header->size < 1) { break; }
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_POWER, payload, 1);
+		break;
 	}
 
 
 	// When done, ALWAYS reset and set readBusy to false!
 	// Reset invalidates the data, right?
-	readBusy = false;
+	_readBusy = false;
 	reset();
 	return;
 
 
-//	uint16_t event = 0;
-//	switch (readByte) {
-//	case 42: // *
-//		event = EVT_INC_VOLTAGE_RANGE;
-//		break;
-//	case 47: // /
-//		event = EVT_DEC_VOLTAGE_RANGE;
-//		break;
-//	case 43: // +
-//		event = EVT_INC_CURRENT_RANGE;
-//		break;
-//	case 45: // -
-//		event = EVT_DEC_CURRENT_RANGE;
-//		break;
-//	case 97: // a
-//		event = EVT_TOGGLE_ADVERTISEMENT;
-//		break;
-//	case 99: // c
-//		event = EVT_TOGGLE_LOG_CURRENT;
-//		break;
-//	case 68: // D
-//		event = EVT_TOGGLE_ADC_DIFFERENTIAL_VOLTAGE;
-//		break;
-//	case 100: // d
-//		event = EVT_TOGGLE_ADC_DIFFERENTIAL_CURRENT;
-//		break;
-//	case 70: // F
-//		write("Paid respect\r\n");
-//		break;
-//	case 102: // f
-//		event = EVT_TOGGLE_LOG_FILTERED_CURRENT;
-//		break;
-//	case 109: // m
-//		event = EVT_TOGGLE_MESH;
-//		break;
-//	case 112: // p
-//		event = EVT_TOGGLE_LOG_POWER;
-//		break;
 //	case 82: // R
 //		write("radio: %u\r\n", NRF_RADIO->POWER);
 //		break;
-//	case 114: // r
-//		event = EVT_CMD_RESET;
-//		break;
-//	case 86: // V
-//		event = EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN;
-//		break;
-//	case 118: // v
-//		event = EVT_TOGGLE_LOG_VOLTAGE;
-//		break;
-//	}
-//	if (event != 0) {
-//		EventDispatcher::getInstance().dispatch(event);
-//	}
-//	readBusy = false;
+}
+
+void UartProtocol::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	switch (evt) {
+//		writeMsgStart(UART_OPCODE_TX_EVT, length + sizeof(evt));
+//		writeMsgPart(UART_OPCODE_TX_EVT, (uint8_t*)&evt, sizeof(evt));
+//		writeMsgPart(UART_OPCODE_TX_EVT, (uint8_t*)p_data, length);
+//		writeMsgEnd(UART_OPCODE_TX_EVT);
+	default:
+		break;
+	}
 }

@@ -5,7 +5,7 @@
  * @authors Crownstone Team, Christopher Mason.
  * @copyright Crownstone B.V.
  * @date May 4, 2016
- * @license LGPLv3+, Apache License, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
@@ -26,14 +26,14 @@
 #define SERVICE_DATA_VALIDATION 0xFA
 
 enum ServiceDataFlagBits {
-	SERVICE_DATA_FLAGS_DIMMING_AVAILABLE = 0,
-	SERVICE_DATA_FLAGS_MARKED_DIMMABLE   = 1,
-	SERVICE_DATA_FLAGS_ERROR             = 2,
-	SERVICE_DATA_FLAGS_SWITCH_LOCKED     = 3,
-	SERVICE_DATA_FLAGS_TIME_SET          = 4,
-	SERVICE_DATA_FLAGS_RESERVED5         = 5,
-	SERVICE_DATA_FLAGS_RESERVED6         = 6,
-	SERVICE_DATA_FLAGS_RESERVED7         = 7
+	SERVICE_DATA_FLAGS_DIMMING_AVAILABLE   = 0,
+	SERVICE_DATA_FLAGS_MARKED_DIMMABLE     = 1,
+	SERVICE_DATA_FLAGS_ERROR               = 2,
+	SERVICE_DATA_FLAGS_SWITCH_LOCKED       = 3,
+	SERVICE_DATA_FLAGS_TIME_SET            = 4,
+	SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED = 5,
+	SERVICE_DATA_FLAGS_RESERVED6           = 6,
+	SERVICE_DATA_FLAGS_RESERVED7           = 7
 };
 
 enum ServiceDataUnencryptedType {

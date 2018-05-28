@@ -1,8 +1,8 @@
 /*
- * Author: Dominik Egger
- * Copyright: Crownstone B.V. (https://crownstone.rocks)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Apr 28, 2016
- * License: LGPLv3+, Apache, MIT
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 

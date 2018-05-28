@@ -1,8 +1,8 @@
 /*
- * Author: Bart van Vliet
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Aug 4, 2016
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include "processing/cs_FactoryReset.h"

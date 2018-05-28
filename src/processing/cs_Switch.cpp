@@ -1,8 +1,8 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 19, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include <processing/cs_Switch.h>
@@ -87,19 +87,31 @@ void Switch::start() {
 	// Already start PWM, so it can sync with the zero crossings. But don't set the value yet.
 	PWM::getInstance().start(true);
 
+	// If switchcraft is enabled, assume a boot is due to a brownout caused by a too slow wall switch, so the pwm is already powered.
+	bool switchcraftEnabled = Settings::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED);
+	if (switchcraftEnabled) {
+		_pwmPowered = true;
+	}
+
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
 	if (_switchValue.pwm_state != 0) {
 		switch_state_t oldVal = _switchValue;
-//		// This shouldn't happen, but let's check it to be sure.
-//		LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
-//		if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
-//			_switchValue.pwm_state = 0;
-//		}
-		// Always set pwm state to 0, just use relay.
-		// This is for the case of a wall switch: you don't want to hear the relay turn on and off every time you power the crownstone.
-		_switchValue.pwm_state = 0;
-		_relayOn();
-		storeState(oldVal);
+		if (_pwmPowered) {
+			_setPwm(_switchValue.pwm_state);
+			_relayOff();
+		}
+		else {
+//			// This shouldn't happen, but let's check it to be sure.
+//			LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
+//			if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+//				_switchValue.pwm_state = 0;
+//			}
+			// Always set pwm state to 0, just use relay.
+			// This is for the case of a wall switch: you don't want to hear the relay turn on and off every time you power the crownstone.
+			_switchValue.pwm_state = 0;
+			_relayOn();
+			storeState(oldVal);
+		}
 	}
 	else {
 		// Make sure the relay is in the stored position (no need to store)
@@ -122,7 +134,7 @@ void Switch::startPwm() {
 	bool success = _setPwm(_switchValue.pwm_state);
 	// PWM was already started in start(), so it could sync with zero crossings.
 //	PWM::getInstance().start(true); // Start after setting value, else there's a race condition.
-	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state) {
+	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state == 1) {
 		// Don't use relayOff(), as that checks for switchLocked.
 		switch_state_t oldVal = _switchValue;
 		_relayOff();
@@ -201,7 +213,7 @@ void Switch::turnOff() {
 
 void Switch::toggle() {
 	// TODO: maybe check if pwm is larger than some value?
-	if (_switchValue.relay_state || _switchValue.pwm_state > 0) {
+	if (_switchValue.relay_state == 1 || _switchValue.pwm_state > 0) {
 		setSwitch(0);
 	}
 	else {
@@ -300,6 +312,7 @@ void Switch::setSwitch(uint8_t switchState) {
 			break;
 		}
 		default: {
+			// TODO: the pwm gets set at the start of a period, which lets the light flicker in case the relay is turned off..
 			// First pwm on, then relay off!
 			// Otherwise, if you go from 100 to 90, the power first turns off, then to 90.
 			// TODO: why not first relay on, then pwm off, when going from 90 to 100?
@@ -413,15 +426,15 @@ void Switch::pwmNotAllowed() {
 }
 
 bool Switch::_setPwm(uint8_t value) {
-	LOGd("setPwm %u", value);
+	LOGd("Set dimming to %u", value);
 	if (value > 0 && !allowPwmOn()) {
 		LOGi("Don't turn on pwm");
 		return false;
 	}
 
-	LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
+	LOGd("Dimming allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
 	if (value != 0 && !Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
-		LOGd("pwm not allowed");
+		LOGd("Dimming not allowed");
 		_switchValue.pwm_state = 0;
 		return false;
 	}
@@ -443,7 +456,7 @@ bool Switch::_setPwm(uint8_t value) {
 void Switch::_relayOn() {
 	LOGd("relayOn");
 	if (!allowRelayOn()) {
-		LOGi("Don't turn relay on");
+		LOGi("Relay on not allowed");
 		return;
 	}
 
@@ -462,7 +475,7 @@ void Switch::_relayOn() {
 void Switch::_relayOff() {
 	LOGd("relayOff");
 	if (!allowRelayOff()) {
-		LOGi("Don't turn relay off");
+		LOGi("Relay off not allowed");
 		return;
 	}
 
@@ -547,6 +560,10 @@ void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case EVT_POWER_OFF:
 	case EVT_TRACKED_DEVICE_NOT_NEARBY: {
 		turnOff();
+		break;
+	}
+	case EVT_POWER_TOGGLE: {
+		toggle();
 		break;
 	}
 	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM:

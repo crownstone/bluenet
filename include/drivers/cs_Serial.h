@@ -1,8 +1,8 @@
 /**
- * Author: Anne van Rossum
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: 10 Oct., 2014
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
@@ -12,6 +12,10 @@ extern "C" {
 
 #include <cfg/cs_Debug.h>
 #include "stdint.h"
+
+#ifdef HOST_TARGET
+#include "stdio.h"
+#endif
 
 /*
  * Commonly LOG functionality is provided with as first parameter the level of severity of the message. Subsequently
@@ -110,7 +114,11 @@ void config_uart(uint8_t pinRx, uint8_t pinTx);
 /**
  * Write a string with printf functionality.
  */
+#ifdef HOST_TARGET
+#define write printf
+#else
 int write(const char *str, ...);
+#endif
 
 /** Write a buffer of data. Values get escaped when necessary.
  *

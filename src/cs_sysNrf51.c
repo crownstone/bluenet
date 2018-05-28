@@ -1,7 +1,8 @@
 /**
- * @author Christopher Mason
- * @author Anne van Rossum
- * License: LGPL v3+, Apache, MIT
+ * Author: Crownstone Team, Christopher Mason
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: 14 Aug., 2014
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include <stdint.h>
@@ -57,15 +58,21 @@ void GPIOTE_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 /**
  * AD converter should be implemented.
  */
-void ADC_IRQHandler(void);
+void SAADC_IRQHandler(void);
 
+// timer used by softdevice
 void TIMER0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 
-//! timer used for ADC
+// timers used for ADC
 void TIMER1_IRQHandler(void);
+void TIMER2_IRQHandler(void);
 
-//! timer used for PWM
+// timer used for dimming
+#if DIMMING==0
+void TIMER4_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
+#else
 void TIMER4_IRQHandler(void);
+#endif
 
 void RTC0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void TEMP_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
@@ -88,7 +95,7 @@ void SWI2_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI3_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI4_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI5_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
-void TIMER2_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
+//void TIMER2_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void TIMER3_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void PWM0_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 void PDM_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
@@ -128,7 +135,7 @@ void (* const gVectors[])(void) =
 	SPI1_TWI1_IRQHandler,                        // 20
 	NFCT_IRQHandler,
 	GPIOTE_IRQHandler,
-	ADC_IRQHandler,
+	SAADC_IRQHandler,
 	TIMER0_IRQHandler,
 	TIMER1_IRQHandler,
 	TIMER2_IRQHandler,

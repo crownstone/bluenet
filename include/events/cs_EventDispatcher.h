@@ -1,15 +1,15 @@
 /*
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 6, 2015
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
 #include <events/cs_EventTypes.h>
 #include <events/cs_EventListener.h>
 
-#define MAX_EVENT_LISTENERS 20
+#define MAX_EVENT_LISTENERS 30
 
 /**
  * Event dispatcher.

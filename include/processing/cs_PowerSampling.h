@@ -1,14 +1,14 @@
 /**
  * Authors: Crownstone Team
- * Copyright: Crownstone B.V.
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 19, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
-extern "C" {
-#include <nrf_drv_saadc.h>
-}
+//extern "C" {
+//#include <nrf_drv_saadc.h>
+//}
 #include "structs/cs_PowerSamples.h"
 #include "structs/buffer/cs_CircularBuffer.h"
 #include "cfg/cs_Boards.h"
@@ -18,6 +18,8 @@ extern "C" {
 #include "processing/cs_Switch.h"
 
 typedef void (*ps_zero_crossing_cb_t) ();
+
+typedef uint8_t channel_id_t;
 
 class PowerSampling : EventListener {
 public:
@@ -44,7 +46,7 @@ public:
 	 *  Calculates the power usage, updates the state.
 	 *  Sends the samples if the central is subscribed for that.
 	 */
-	void powerSampleAdcDone(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum);
+	void powerSampleAdcDone(cs_adc_buffer_id_t bufIndex);
 
 	/** Called at a short interval.
 	 *  Reads out the buffer.
@@ -202,7 +204,7 @@ private:
 
 	/** Filter the samples
 	 */
-	void filter(power_t power);
+	void filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id);
 
 	/** Calculate the average power usage
 	 */
@@ -222,10 +224,12 @@ private:
 
 	void toggleVoltageChannelInput();
 
-	void toggleDifferentialModeCurrent();
+	void enableDifferentialModeCurrent(bool enable);
 
-	void toggleDifferentialModeVoltage();
+	void enableDifferentialModeVoltage(bool enable);
 
 	void changeRange(uint8_t channel, int32_t amount);
+
+	void enableSwitchcraft(bool enable);
 };
 

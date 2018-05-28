@@ -1,8 +1,8 @@
 /*
  * Author: Crownstone Team
- * Copyright: Crownstone
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: May 18, 2016
- * License: LGPLv3+, Apache License 2.0, and/or MIT
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
@@ -67,7 +67,7 @@ public:
 	 *
 	 * There is a DFU reset or a GPREGRET reset.
 	 */
-	void resetDelayed(uint8_t opCode);
+	void resetDelayed(uint8_t opCode, uint16_t delayMs=2000);
 
 	// Handle events as EventListener
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
@@ -119,6 +119,7 @@ private:
 	ERR_CODE handleCmdLockSwitch            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	ERR_CODE handleCmdSetup                 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	ERR_CODE handleCmdEnableSwitchcraft     (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	ERR_CODE handleCmdUartMsg               (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 
 };
 

@@ -1,8 +1,8 @@
 /**
  * Author: Crownstone Team
- * Copyright: Crownstone
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Jan 17, 2018
- * License: LGPLv3+, Apache, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 /**********************************************************************************************************************
@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "events/cs_EventListener.h"
 #include <cstdint>
 
                                            // bit:7654 3210
@@ -29,12 +30,54 @@
 #define UART_ESCAPE_FLIP_MASK     0x40 //       0100 0000
 
 enum UartOpcodeRx {
-	UART_OPCODE_RX_CONTROL = 1,
+	UART_OPCODE_RX_CONTROL =                          1,
+	UART_OPCODE_RX_ENABLE_ADVERTISEMENT =             10000, // Enable advertising (payload: bool enable)
+	UART_OPCODE_RX_ENABLE_MESH =                      10001, // Enable mesh (payload: bool enable)
+	UART_OPCODE_RX_GET_ID =                           10002, // Get ID of this Crownstone
+	UART_OPCODE_RX_GET_MAC =                          10003, // Get MAC address of this Crownstone
+
+//	UART_OPCODE_RX_ADC_CONFIG_GET =                   10100, // Get the adc config
+//	UART_OPCODE_RX_ADC_CONFIG_SET =                   10101, // Set an adc channel config (payload: uart_msg_adc_channel_config_t)
+//	UART_OPCODE_RX_ADC_CONFIG_SET_RANGE =             10102, // Set range of given channel (payload: channel, range)
+	UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_CURRENT =     10103, // Increase the range on the current channel
+	UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_CURRENT =     10104, // Decrease the range on the current channel
+	UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_VOLTAGE =     10105, // Increase the range on the voltage channel
+	UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_VOLTAGE =     10106, // Decrease the range on the voltage channel
+	UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_CURRENT =  10108, // Enable differential mode on current channel (payload: bool enable)
+	UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_VOLTAGE =  10109, // Enable differential mode on voltage channel (payload: bool enable)
+	UART_OPCODE_RX_ADC_CONFIG_VOLTAGE_PIN =           10110, // Change the pin used on voltage channel (payload: enum of pins)
+
+	UART_OPCODE_RX_POWER_LOG_CURRENT =                10200, // Enable writing current samples (payload: bool enable)
+	UART_OPCODE_RX_POWER_LOG_VOLTAGE =                10201, // Enable writing voltage samples (payload: bool enable)
+	UART_OPCODE_RX_POWER_LOG_FILTERED_CURRENT =       10202, // Enable writing filtered current samples (payload: bool enable)
+//	UART_OPCODE_RX_POWER_LOG_FILTERED_VOLTAGE =       10203, // Enable writing filtered voltage samples (payload: bool enable)
+	UART_OPCODE_RX_POWER_LOG_POWER =                  10204, // Enable writing calculated power (payload: bool enable)
 };
 
 enum UartOpcodeTx {
-	UART_OPCODE_TX_ACK = 0,
-	UART_OPCODE_TX_MESH_STATE_0 = 100, // For 1st handle, next handle has opcode of 1 larger.
+	UART_OPCODE_TX_ACK =                              0,
+	UART_OPCODE_TX_SERVICE_DATA =                     2, // Sent when the service data is updated (payload: service_data_t)
+	UART_OPCODE_TX_BLE_MSG =                          3, // Sent by command (CMD_UART_MSG), payload: buffer.
+	UART_OPCODE_TX_MESH_STATE_0 =                     100, // For 1st handle, next handle has opcode of 1 larger.
+
+	UART_OPCODE_TX_ADVERTISEMENT_ENABLED =            10000, // Whether advertising is enabled (payload: bool)
+	UART_OPCODE_TX_MESH_ENABLED =                     10001, // Whether mesh is enabled (payload: bool)
+	UART_OPCODE_TX_OWN_ID =                           10002, // Own id (payload: crownstone_id_t)
+	UART_OPCODE_TX_OWN_MAC =                          10003, // Own MAC address (payload: mac address (6B))
+
+	UART_OPCODE_TX_ADC_CONFIG =                       10100, // Current adc config (payload: adc_config_t)
+	UART_OPCODE_TX_ADC_RESTART =                      10101,
+
+	UART_OPCODE_TX_POWER_LOG_CURRENT =                10200,
+	UART_OPCODE_TX_POWER_LOG_VOLTAGE =                10201,
+	UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT =       10202,
+	UART_OPCODE_TX_POWER_LOG_FILTERED_VOLTAGE =       10203,
+	UART_OPCODE_TX_POWER_LOG_POWER =                  10204,
+
+
+	UART_OPCODE_TX_EVT =                              10300, // Send internal events, this protocol may change
+
+	UART_OPCODE_TX_TEXT =                             20000, // Payload is ascii text.
 };
 
 struct __attribute__((__packed__)) uart_msg_header_t {
@@ -49,7 +92,21 @@ struct __attribute__((__packed__)) uart_msg_tail_t {
 #define UART_RX_BUFFER_SIZE            128
 #define UART_RX_MAX_PAYLOAD_SIZE       (UART_RX_BUFFER_SIZE - sizeof(uart_msg_header_t) - sizeof(uart_msg_tail_t))
 
-class UartProtocol {
+#define UART_TX_MAX_PAYLOAD_SIZE       500
+
+
+/** Struct storing data for handle msg callback.
+ *
+ * This struct is the data sent with the callback from the app scheduler.
+ * It should not contain large chunks of data, as all data is copied.
+ */
+struct uart_handle_msg_data_t {
+	uint8_t* msg;  //! Pointer to the msg.
+	uint16_t msgSize; //! Size of the msg.
+};
+
+
+class UartProtocol : EventListener {
 public:
 	//! Use static variant of singleton, no dynamic memory allocation
 	static UartProtocol& getInstance() {
@@ -67,6 +124,25 @@ public:
 	 */
 	void writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size);
 
+	/** Write a binary msg over UART.
+	 *
+	 * @param[in] opCode     OpCode of the msg.
+	 * @param[in] size       Size of the msg.
+	 */
+	void writeMsgStart(UartOpcodeTx opCode, uint16_t size);
+
+	/** Write a binary msg over UART.
+	 *
+	 * @param[in] opCode     OpCode of the msg.
+	 * @param[in] data       Pointer to the data part to be sent.
+	 * @param[in] size       Size of this data part.
+	 */
+	void writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size);
+
+	/** Write the end of a binary msg over UART.
+	 */
+	void writeMsgEnd(UartOpcodeTx opCode);
+
 	/** To be called when a byte was read. Can be called from interrupt
 	 *
 	 * @param[in] val        Value that was read.
@@ -76,7 +152,7 @@ public:
 	/** Handles read msgs (private function)
 	 *
 	 */
-	void handleMsg(void * data, uint16_t size);
+	void handleMsg(uart_handle_msg_data_t* msgData);
 
 private:
 	//! Constructor
@@ -88,14 +164,19 @@ private:
 	//! This class is singleton, deny implementation
 	void operator=(UartProtocol const &);
 
-	uint8_t* readBuffer;
-	uint8_t readBufferIdx;
-	bool startedReading;
-	bool escapeNextByte;
+	// RX variables
+	uint8_t* _readBuffer;     //! Pointer to the read buffer
+	uint16_t _readBufferIdx;   //! Where to read the next byte into the read buffer
+	bool _startedReading;     //! Keeps up whether we started reading into the read buffer
+	bool _escapeNextByte;     //! Keeps up whether to escape the next read byte
+	uint16_t _readPacketSize; //! Size of the msg to read, including header and tail.
+	bool _readBusy;           //! Whether reading is busy (if true, can't read anything, until the read buffer was processed)
 
-	//! Size of the msg to read, including header and tail.
-	uint16_t readPacketSize;
-	bool readBusy;
+	// TX variables
+//	bool _msgStarted;         //! True when a msg has been started to be written.
+//	uint16_t _writeSize;      //! Keeps up the size of the payload.
+//	uint16_t _writtenBytes;   //! Keeps up how many bytes payload have been written so far.
+	uint16_t _crc;            //! Keeps up the crc so far.
 
 	void reset();
 
@@ -107,4 +188,7 @@ private:
 
 	uint16_t crc16(const uint8_t * data, uint16_t size);
 	void crc16(const uint8_t * data, const uint16_t size, uint16_t& crc);
+
+	// Handle events as EventListener.
+	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 };

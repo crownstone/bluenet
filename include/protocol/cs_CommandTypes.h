@@ -1,8 +1,8 @@
 /**
- * Author: Dominik Egger
- * Copyright: Distributed Organisms B.V. (DoBots)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Jun 3, 2016
- * License: LGPLv3+
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
@@ -42,6 +42,7 @@ enum CommandHandlerTypes {
 	CMD_LOCK_SWITCH                 = 30,    //! 0x1E
 	CMD_SETUP                       = 31,    //! 0x1F
 	CMD_ENABLED_SWITCHCRAFT         = 32,    //! 0x20
+	CMD_UART_MSG                    = 33,    //! 0x21
 
 	CMD_UNKNOWN                     = 0xFF
 };

@@ -1,8 +1,8 @@
 /*
- * Author: Bart van Vliet
- * Copyright: Crownstone B.V. (https://crownstone.rocks)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Apr 25, 2017
- * License: LGPLv3+, Apache License, or MIT, your choice
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include <limits>

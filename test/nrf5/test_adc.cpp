@@ -3,6 +3,8 @@
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_Timer.h>
 
+#include "third/nrf/nrf_drv_config.h"
+
 /**
  * Identified issue:
  *
@@ -31,6 +33,8 @@ const nrf_clock_lf_cfg_t defaultClockSource = {  .source        = NRF_CLOCK_LF_S
                                                  .rc_ctiv       = 0,                                         \
                                                  .rc_temp_ctiv  = 0,                                         \
                                                  .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
+
+static uint8_t buf_index;
 
 void adc_test_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
 	const int threshold = 20;
@@ -73,12 +77,17 @@ void adc_test_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
 	LOGd("buf=%d size=%d bufCount=%d", buf, size, bufNum);
 #endif
 	write("%d %d %d ... %d\r\n", buf[0], buf[1], buf[2], buf[size-1]); 
-	ADC::getInstance().releaseBuffer(buf);
+	ADC::getInstance().releaseBuffer(buf_index);
 }
 
 int main() {
 	// enabled hard float, without it, we get a hardfaults
 	SCB->CPACR |= (3UL << 20) | (3UL << 22); __DSB(); __ISB();
+	
+	uint32_t errCode;
+	boards_config_t board = {};
+	errCode = configure_board(&board);
+	APP_ERROR_CHECK(errCode);
 
 	config_uart(8, 6);
 
@@ -100,7 +109,7 @@ int main() {
 	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
 
 #ifdef POWER_SAMPLING
-	PowerSampling::getInstance().init(0, 1);
+	PowerSampling::getInstance().init(board);
 	PowerSampling::getInstance().startSampling();
 #else
 	// ADC stuff

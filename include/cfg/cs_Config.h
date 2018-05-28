@@ -1,6 +1,6 @@
 /**
  * Author: Crownstone Team
- * Copyright: Crownstone
+ * Copyright: Crownstone (https://crownstone.rocks)
  * Date: 4 Nov., 2014
  * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
@@ -8,7 +8,7 @@
 
 #define CROWNSTONE_COMPANY_ID                    0x038E
 
-//! size of the buffer used for characteristics
+// size of the buffer used for characteristics
 //#define GENERAL_BUFFER_SIZE                      300
 
 /** maximum length of strings used for characteristic values */
@@ -43,8 +43,6 @@
 //#define APP_TIMER_OP_QUEUE_SIZE                  10
 #define APP_TIMER_OP_QUEUE_SIZE                  20
 
-/*
- */
 /** Maximum size of scheduler events. */
 /*
 #define SCHED_MAX_EVENT_DATA_SIZE                ((CEIL_DIV(MAX(MAX(BLE_STACK_EVT_MSG_BUF_SIZE,    \
@@ -52,7 +50,7 @@
                                                                 SYS_EVT_MSG_BUF_SIZE),             \
                                                             sizeof(uint32_t))) * sizeof(uint32_t))
 */
-#define SCHED_MAX_EVENT_DATA_SIZE                128
+#define SCHED_MAX_EVENT_DATA_SIZE               (MAX(20, MAX(APP_TIMER_SCHED_EVT_SIZE, BLE_STACK_HANDLER_SCHED_EVT_SIZE)))
 
 /** Maximum number of events in the scheduler queue.
  *
@@ -61,8 +59,8 @@
  */
 #define SCHED_QUEUE_SIZE                         30
 
-//! See https://devzone.nordicsemi.com/question/84767/s132-scan-intervalwindow-adv-interval/
-//! Old https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
+// See https://devzone.nordicsemi.com/question/84767/s132-scan-intervalwindow-adv-interval/
+// Old https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
 /** Determines scan interval in units of 0.625 millisecond. */
 #define SCAN_INTERVAL                            0x00A0
 /** Determines scan window in units of 0.625 millisecond. */
@@ -70,7 +68,7 @@
 /** Determines scan window in units of 0.625 millisecond. */
 #define SCAN_WINDOW                              0x009E
 
-//! bonding / security
+// bonding / security
 #define SEC_PARAM_TIMEOUT                        30                                          /** < Timeout for Pairing Request or Security Request (in seconds). */
 #define SEC_PARAM_BOND                           1                                           /** < Perform bonding. */
 #define SEC_PARAM_MITM                           1                                           /** < Man In The Middle protection not required. */
@@ -81,28 +79,29 @@
 
 #define SECURITY_REQUEST_DELAY                   1500                                        /**< Delay after connection until security request is sent, if necessary (ms). */
 
-//! tx power used for low power mode during bonding
+// tx power used for low power mode during bonding
 /* moved to boards config in cs_Boards.c
 #define LOW_TX_POWER                             -40
  */
 
 //#define CLOCK_SOURCE                             NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_8000MS_CALIBRATION
 
-//! duration (in ms) how long the relay pins should be set to high
+// duration (in ms) how long the relay pins should be set to high
 #define RELAY_HIGH_DURATION                      15 //! ms
-//! duration (in ms) how long to retry switching the relay if there was not enough power to switch.
+// duration (in ms) how long to retry switching the relay if there was not enough power to switch.
 #define RELAY_DELAY                              50 //! ms
 
-//! Max number of schedule entries in the schedule service.
+// Max number of schedule entries in the schedule service.
 #define MAX_SCHEDULE_ENTRIES                     10
 
-//! How many seconds of time jump is regarded a big time jump
+// How many seconds of time jump is regarded a big time jump
 #define SCHEDULE_BIG_TIME_JUMP                   (75*60)
 
-//! How many channels the pwm can control. Limited by the amount of timer channels.
+// How many channels the pwm can control. Limited by the amount of timer channels.
 #define CS_PWM_MAX_CHANNELS                      2
 
-//! ----- TIMERS -----
+// ----- TIMERS -----
+// Soft device uses timer 0
 #define CS_PWM_TIMER                             NRF_TIMER4
 #define CS_PWM_TIMER_IRQ                         TIMER4_IRQHandler
 #define CS_PWM_IRQn                              TIMER4_IRQn
@@ -119,32 +118,45 @@
 #define CS_ADC_TIMER_ID                          1
 #define CS_ADC_TIMER_FREQ                        NRF_TIMER_FREQ_16MHz
 
+#define CS_ADC_TIMEOUT_TIMER                     NRF_TIMER2
+#define CS_ADC_TIMEOUT_TIMER_IRQ                 TIMER2_IRQHandler
+#define CS_ADC_TIMEOUT_TIMER_IRQn                TIMER2_IRQn
+#define CS_ADC_TIMEOUT_INSTANCE_INDEX            TIMER2_INSTANCE_INDEX
+#define CS_ADC_TIMEOUT_TIMER_ID                  2
+#define CS_ADC_TIMEOUT_TIMER_IRQ_PRIORITY        APP_IRQ_PRIORITY_MID // MUST be lower than CS_ADC_IRQ_PRIORITY
 
-//! ----- PPI -----
+
+// ----- PPI -----
+// Soft device uses 17-31
 #define CS_ADC_PPI_CHANNEL_START                 0
-#define CS_ADC_PPI_CHANNEL_COUNT                 1
+#define CS_ADC_PPI_CHANNEL_COUNT                 4
 #define CS_PWM_PPI_CHANNEL_START                 (CS_ADC_PPI_CHANNEL_START + CS_ADC_PPI_CHANNEL_COUNT)
 #define CS_PWM_PPI_CHANNEL_COUNT                 (2 + 2 * CS_PWM_MAX_CHANNELS)
 
-//! ----- PPI groups -----
+// ----- PPI groups -----
+// Soft device uses 4-5
 #define CS_PWM_PPI_GROUP_START                   0
 #define CS_PWM_PPI_GROUP_COUNT                   1
 
-//! ----- GPIOTE -----
-#define CS_PWM_GPIOTE_CHANNEL_START              0
+// ----- GPIOTE -----
+#define CS_ADC_GPIOTE_CHANNEL_START              0
+#define CS_ADC_GPIOTE_CHANNEL_COUNT              1 // Actually only used for debug
+#define CS_PWM_GPIOTE_CHANNEL_START              (CS_ADC_GPIOTE_CHANNEL_START + CS_ADC_GPIOTE_CHANNEL_COUNT)
 #define CS_PWM_GPIOTE_CHANNEL_COUNT              (CS_PWM_MAX_CHANNELS)
 
+// ----- SAADC -----
+#define CS_ADC_RESOLUTION                        NRF_SAADC_RESOLUTION_12BIT
+#define CS_ADC_IRQ_PRIORITY                      APP_IRQ_PRIORITY_HIGH
+#define CS_ADC_IRQ                               SAADC_IRQHandler
 
 
-#define POWER_SAMPLE_BURST_NUM_SAMPLES           75 // Number of voltage and current samples per burst
-
-#define CS_ADC_SAMPLE_INTERVAL_US                200
-//#define CS_ADC_SAMPLE_INTERVAL_US                400
-
+#define CS_ADC_SAMPLE_INTERVAL_US                200 // 100 samples per period of 50Hz wave
 #define CS_ADC_MAX_PINS                          2
-#define CS_ADC_NUM_BUFFERS                       2 // ADC code is currently written for (max) 2
-#define CS_ADC_BUF_SIZE                          (2*20000/CS_ADC_SAMPLE_INTERVAL_US)
-//#define CS_ADC_BUF_SIZE                          (2*30000/CS_ADC_SAMPLE_INTERVAL_US)
+#define CS_ADC_NUM_BUFFERS                       4
+#define CS_ADC_BUF_SIZE                          (CS_ADC_MAX_PINS * 20000 / CS_ADC_SAMPLE_INTERVAL_US) // Make size so it fills up 20ms of data.
+
+#define POWER_SAMPLE_BURST_NUM_SAMPLES           (20000/CS_ADC_SAMPLE_INTERVAL_US) // Number of voltage and current samples per burst
+
 
 // Buffer size for storage requests. Storage requests get buffered when the device is scanning or meshing.
 #define STORAGE_REQUEST_BUFFER_SIZE              5 // Should be at least 3, because setup pushes 3 storage requests (configs + operation mode + switch state).
@@ -153,7 +165,7 @@
 #define FACTORY_RESET_TIMEOUT                    60000 // Timeout before recovery becomes unavailable after reset (ms)
 #define FACTORY_PROCESS_TIMEOUT                  200 // Timeout before recovery process step is executed (ms)
 
-#define ENCYRPTION_KEY_LENGTH                    16 // 16 byte length, just like SOC_ECB_KEY_LENGTH
+#define ENCRYPTION_KEY_LENGTH                    16 // 16 byte length, just like SOC_ECB_KEY_LENGTH
 
 #define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
 
