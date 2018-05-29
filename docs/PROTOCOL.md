@@ -590,7 +590,7 @@ Available state variables:
 
 Type nr | Type name | Payload type | Description | Persistent
 --- | --- | --- | --- | :---:
-128 | Reset counter | uint 32 | Counts the number of resets (DEBUG). | x
+128 | Reset counter | uint 16 | Counts the number of resets (DEBUG). | x
 129 | [Switch state](#switch_state_packet) | uint 8 | Current Switch state. |
 130 | Accumulated energy | uint 32 | Accumulated energy in Wh | x
 131 | Power usage | uint 32 | Current power usage in mW |
