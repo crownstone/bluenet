@@ -60,6 +60,7 @@ void UartProtocol::init() {
 #ifdef TEST_PIN2
     nrf_gpio_cfg_output(TEST_PIN2);
 #endif
+    EventDispatcher::getInstance().addListener(this);
 }
 
 void UartProtocol::reset() {
@@ -71,8 +72,6 @@ void UartProtocol::reset() {
 	_startedReading = false;
 	_escapeNextByte = false;
 	_readPacketSize = 0;
-
-	EventDispatcher::getInstance().addListener(this);
 }
 
 void UartProtocol::escape(uint8_t& val) {
