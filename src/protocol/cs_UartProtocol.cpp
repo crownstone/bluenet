@@ -271,15 +271,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 
 	switch (header->opCode) {
 	case UART_OPCODE_RX_CONTROL: {
-		stream_header_t* streamHeader = (stream_header_t*)payload;
-		if (header->size - sizeof(stream_header_t) < streamHeader->length) {
-			LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
-			break;
-		}
-//		uint8_t* streamPayload = (uint8_t*)payload + sizeof(stream_header_t);
-//		CommandHandler::getInstance().handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
-//		TODO: implement event dispatch..
-		EventDispatcher::getInstance().dispatch(EVT_RX_CONTROL, payload, 1);
+		EventDispatcher::getInstance().dispatch(EVT_RX_CONTROL, payload, header->size);
 		break;
 	}
 	case UART_OPCODE_RX_ENABLE_ADVERTISEMENT:

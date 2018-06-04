@@ -913,5 +913,14 @@ void CommandHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		resetDelayed(payload->resetCode, payload->delayMs);
 		break;
 	}
+	case EVT_RX_CONTROL: {
+		stream_header_t* streamHeader = (stream_header_t*)p_data;
+		if (length - sizeof(stream_header_t) < streamHeader->length) {
+			LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+			break;
+		}
+		uint8_t* streamPayload = (uint8_t*)p_data + sizeof(stream_header_t);
+		handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
+	}
 	}
 }
