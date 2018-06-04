@@ -199,6 +199,7 @@ void Switch::turnOn() {
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGd("Turn ON");
 #endif
+	// TODO: if dimming is allowed and available: use dimmer instead of relay?
 	setSwitch(SWITCH_ON);
 }
 
@@ -217,6 +218,7 @@ void Switch::toggle() {
 		setSwitch(0);
 	}
 	else {
+		// TODO: if dimming is allowed and available: use dimmer instead of relay?
 		setSwitch(SWITCH_ON);
 	}
 }

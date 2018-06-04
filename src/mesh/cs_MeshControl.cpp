@@ -21,14 +21,14 @@
 
 // enable for additional debug output
 //#define PRINT_DEBUG
-#define PRINT_MESHCONTROL_VERBOSE
+//#define PRINT_MESHCONTROL_VERBOSE
 
-#define PRINT_VERBOSE_KEEPALIVE
+//#define PRINT_VERBOSE_KEEPALIVE
 //#define PRINT_VERBOSE_STATE
 //#define PRINT_VERBOSE_SCAN_RESULT
 //#define PRINT_VERBOSE_COMMAND
-#define PRINT_VERBOSE_COMMAND_REPLY
-#define PRINT_VERBOSE_MULTI_SWITCH
+//#define PRINT_VERBOSE_COMMAND_REPLY
+//#define PRINT_VERBOSE_MULTI_SWITCH
 
 MeshControl::MeshControl() : _myCrownstoneId(0) {
 	EventDispatcher::getInstance().addListener(this);
