@@ -49,6 +49,7 @@ extern "C"
 //#include "nrf_drv_timer.h"
 //#include "nrf_drv_ppi.h"
 //#include "nrf_drv_gpiote.h"
+#include "nrf_uart.h"
 #include "crc16.h"
 #endif
 

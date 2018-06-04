@@ -913,11 +913,13 @@ int main() {
 		}
 	}
 
-	//! int uart, be nice and say hello
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
-	welcome(board.pinGpioRx, board.pinGpioTx);
+	if (board.flags.hasSerial) {
+		// init uart, be nice and say hello
+		welcome(board.pinGpioRx, board.pinGpioTx);
+	}
 
 	BLEutil::print_heap("Heap welcome: ");
 	BLEutil::print_stack("Stack welcome: ");

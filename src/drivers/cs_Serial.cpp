@@ -30,9 +30,12 @@
 #include <drivers/cs_RTC.h>
 #endif
 
-// Define test pin to enable gpio debug.
-//#define TEST_PIN 20
+// Define test pins to enable gpio debug.
+//#define TEST_PIN    20
+//#define ERROR_PIN   22
+//#define TIMEOUT_PIN 23
 
+static bool uart_initialized = false;
 
 /**
  * Configure the UART. Currently we set it on 38400 baud.
@@ -40,6 +43,12 @@
 void config_uart(uint8_t pinRx, uint8_t pinTx) {
 #ifdef TEST_PIN
     nrf_gpio_cfg_output(TEST_PIN);
+#endif
+#ifdef ERROR_PIN
+    nrf_gpio_cfg_output(ERROR_PIN);
+#endif
+#ifdef TIMEOUT_PIN
+    nrf_gpio_cfg_output(TIMEOUT_PIN);
 #endif
 
 #if SERIAL_VERBOSITY<SERIAL_NONE
@@ -55,6 +64,9 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 
 	// Enable RX ready interrupts
 	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk;
+	// TODO: handle error event.
+//	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk | UART_INTENSET_ERROR_Msk | UART_INTENSET_RXTO_Msk;
+
 
 	// Configure UART pins
 	NRF_UART0->PSELRXD = pinRx;
@@ -73,6 +85,7 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
 	NRF_UART0->EVENTS_TXDRDY = 0;
+	uart_initialized = true;
 
 #else
 	//! Disable UART
@@ -85,9 +98,11 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 
 inline void _writeByte(uint8_t val) {
 #if SERIAL_VERBOSITY<SERIAL_READ_ONLY
-	NRF_UART0->EVENTS_TXDRDY = 0;
-	NRF_UART0->TXD = val;
-	while(NRF_UART0->EVENTS_TXDRDY != 1) {}
+	if (uart_initialized) {
+		NRF_UART0->EVENTS_TXDRDY = 0;
+		NRF_UART0->TXD = val;
+		while(NRF_UART0->EVENTS_TXDRDY != 1) {}
+	}
 #endif
 }
 
@@ -164,16 +179,36 @@ static uint8_t readByte;
 
 // UART interrupt handler
 extern "C" void UART0_IRQHandler(void) {
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
+	if (NRF_UART0->EVENTS_ERROR && nrf_uart_int_enable_check(NRF_UART0, NRF_UART_INT_MASK_ERROR)) {
+#ifdef ERROR_PIN
+		nrf_gpio_pin_toggle(ERROR_PIN);
 #endif
+//		nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_ERROR);
+		// TODO: disable rx and error interrupts, stop UART, call nrf_uart_errorsrc_get_and_clear().
+		// Once RXTO triggers, it actually stopped.
+	}
 
-	readByte = (uint8_t)NRF_UART0->RXD;
-	UartProtocol::getInstance().onRead(readByte);
-
+	else if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_RXDRDY) && nrf_uart_int_enable_check(NRF_UART0, NRF_UART_INT_MASK_RXDRDY)) {
 #ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
+		nrf_gpio_pin_toggle(TEST_PIN);
 #endif
-	// Clear event after reading the data: new data may be written to RXD immediately.
-	NRF_UART0->EVENTS_RXDRDY = 0;
+		// Clear event _before_ reading the data.
+		nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
+
+		// Read RXD only once.
+		readByte = nrf_uart_rxd_get(NRF_UART0);
+		UartProtocol::getInstance().onRead(readByte);
+#ifdef TEST_PIN
+		nrf_gpio_pin_toggle(TEST_PIN);
+#endif
+	}
+
+	else if (NRF_UART0->EVENTS_RXTO && nrf_uart_int_enable_check(NRF_UART0, NRF_UART_INT_MASK_RXTO)) {
+#ifdef TIMEOUT_PIN
+		nrf_gpio_pin_toggle(TIMEOUT_PIN);
+#endif
+//		nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXTO);
+		// TODO: init and start UART.
+	}
+
 }
