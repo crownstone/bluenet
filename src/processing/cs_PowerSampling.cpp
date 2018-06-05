@@ -95,6 +95,9 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	bool switchcraftEnabled = settings.isSet(CONFIG_SWITCHCRAFT_ENABLED);
 
 	RecognizeSwitch::getInstance().init();
+	float switchcraftThreshold;
+	settings.get(CONFIG_SWITCHCRAFT_THRESHOLD, &switchcraftThreshold);
+	RecognizeSwitch::getInstance().configure(switchcraftThreshold);
 	enableSwitchcraft(switchcraftEnabled);
 
 	initAverages();

@@ -29,7 +29,7 @@ private:
 	float _thresholdRatio;
 
 public:
-	//! Gets a static singleton (no dynamic memory allocation)
+	// Gets a static singleton (no dynamic memory allocation)
 	static RecognizeSwitch& getInstance() {
 		static RecognizeSwitch instance;
 		return instance;
@@ -46,6 +46,12 @@ public:
 	/** Deinitialize: deallocate buffers.
 	 */
 	void deinit();
+
+	/** Configure threshold
+	 *
+	 * @param[in] threshold                      Sets threshold different and similar.
+	 */
+	void configure(float threshold);
 
 	/** Start detecting
 	 */

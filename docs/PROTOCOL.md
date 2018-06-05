@@ -562,6 +562,7 @@ Type nr | Type name | Payload type | Description
 54 | Pwm allowed | uint8 | Stores whether this Crownstone is allowed to dim. *read only*
 55 | Switch locked | uint8 | Stores whether this Crownstone is allowed to change the switch state. *read only*
 56 | Switchcraft enabled | uint8 | Stores whether this Crownstone has switchcraft enabled. *read only*
+57 | Switchcraft threshold | float | Sets the threshold for switchcraft. A higher threshold will usually make it less likely to detect a switch (less true and false positives). However, there are cases (for example when the net frequency is off or when the net is noisy) where a higher threshold may increase the likeliness switch being detected.
 
 OpCodes:
 

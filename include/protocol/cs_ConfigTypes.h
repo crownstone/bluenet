@@ -70,6 +70,7 @@ enum ConfigurationTypes {
 	CONFIG_PWM_ALLOWED                      = 54,     //! 0x36
 	CONFIG_SWITCH_LOCKED                    = 55,     //! 0x37
 	CONFIG_SWITCHCRAFT_ENABLED              = 56,     //! 0x38
+	CONFIG_SWITCHCRAFT_THRESHOLD            = 57,     //! 0x39
 
 	CONFIG_TYPES
 }; // Current max is 127 (0x7F), see cs_EventTypes.h

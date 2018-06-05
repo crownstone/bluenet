@@ -194,6 +194,8 @@
 #define CURRENT_USAGE_THRESHOLD                  (16000) // Power usage threshold in mA at which the switch should be turned off.
 #define CURRENT_USAGE_THRESHOLD_PWM              (1000)  // Power usage threshold in mA at which the PWM should be turned off.
 
+#define SWITCHCRAFT_THRESHOLD                    (200000) // Threshold for switch recognition (float).
+
 #define PWM_PERIOD                               10000L // Interval in us: 1/10000e-6 = 100 Hz
 
 #define KEEP_ALIVE_INTERVAL                      (2 * 60) // 2 minutes, in seconds

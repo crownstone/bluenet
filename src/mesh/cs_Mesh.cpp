@@ -587,9 +587,11 @@ void Mesh::handleMeshMessage(rbc_mesh_event_t* evt)
 	received = (encrypted_mesh_message_t*)evt->params.rx.p_data;
 	receivedLength = evt->params.rx.data_len;
 
-	__attribute__((unused)) uint8_t id = evt->params.rx.ble_adv_addr.addr[0];
 	__attribute__((unused)) int8_t rssi = evt->params.rx.rssi;
+#ifdef PRINT_MESH_VERBOSE
+	__attribute__((unused)) uint8_t id = evt->params.rx.ble_adv_addr.addr[0];
 	LOGd("id=%u rssi=%i", id, rssi);
+#endif
 	if (rssi >=0 || rssi < -120) {
 		LOGw("INVALID RSSI");
 	}

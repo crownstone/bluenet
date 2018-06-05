@@ -5,16 +5,17 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <processing/cs_RecognizeSwitch.h>
+#include "processing/cs_RecognizeSwitch.h"
+#include "cfg/cs_Config.h"
 
 // Define to print debug
 #define PRINT_DEBUG
 
 RecognizeSwitch::RecognizeSwitch() :
 	_running(false),
-	_thresholdDifferent(200000),
-	_thresholdSimilar(200000),
-	_thresholdRatio(2)
+	_thresholdDifferent(SWITCHCRAFT_THRESHOLD),
+	_thresholdSimilar(SWITCHCRAFT_THRESHOLD),
+	_thresholdRatio(100)
 {
 
 }
@@ -23,6 +24,12 @@ void RecognizeSwitch::init() {
 }
 
 void RecognizeSwitch::deinit() {
+}
+
+void RecognizeSwitch::configure(float threshold) {
+	_thresholdDifferent = threshold;
+	_thresholdSimilar = threshold;
+	LOGd("config: diff=%f similar=%f ratio=%f", _thresholdDifferent, _thresholdSimilar, _thresholdRatio);
 }
 
 void RecognizeSwitch::start() {
@@ -90,6 +97,9 @@ bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId
 			float minDiffSum = diffSum01 < diffSum12 ? diffSum01 : diffSum12;
 			if (diffSum02 < _thresholdSimilar || minDiffSum / diffSum02 > _thresholdRatio) {
 				result = true;
+#ifdef PRINT_DEBUG
+				LOGd("Found switch: %f %f %f %f", diffSum01, diffSum12, diffSum02, minDiffSum / diffSum02);
+#endif
 				break;
 			}
 		}
@@ -98,9 +108,6 @@ bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId
 //		}
 	}
 	if (result) {
-#ifdef PRINT_DEBUG
-		LOGd("Found switch: %f %f %f", diffSum01, diffSum12, diffSum02);
-#endif
 		_skipSwitchDetectionTriggers = 5;
 	}
 

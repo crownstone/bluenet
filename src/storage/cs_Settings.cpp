@@ -243,7 +243,8 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	case CONFIG_VOLTAGE_MULTIPLIER:
 	case CONFIG_CURRENT_MULTIPLIER:
 	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
-	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN: {
+	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
+	case CONFIG_SWITCHCRAFT_THRESHOLD: {
 		if (length != 4) {
 			LOGw(FMT_ERR_EXPECTED, "float");
 			return ERR_WRONG_PAYLOAD_LENGTH;
@@ -388,7 +389,8 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	case CONFIG_VOLTAGE_MULTIPLIER:
 	case CONFIG_CURRENT_MULTIPLIER:
 	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
-	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN: {
+	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
+	case CONFIG_SWITCHCRAFT_THRESHOLD: {
 		return 4;
 	}
 
@@ -622,6 +624,10 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size, bool getDefau
 	}
 	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN: {
 		StorageHelper::getFloat(_storageStruct.pwmTempVoltageThresholdDown, (float*)target, _boardsConfig->pwmTempVoltageThresholdDown, getDefaultValue);
+		break;
+	}
+	case CONFIG_SWITCHCRAFT_THRESHOLD: {
+		StorageHelper::getFloat(_storageStruct.switchcraftThreshold, (float*)target, SWITCHCRAFT_THRESHOLD, getDefaultValue);
 		break;
 	}
 	default: {
@@ -859,6 +865,11 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 		StorageHelper::setFloat(*((float*)target), _storageStruct.pwmTempVoltageThresholdDown);
 		break;
 	}
+	case CONFIG_SWITCHCRAFT_THRESHOLD: {
+		p_item = (uint8_t*)&_storageStruct.switchcraftThreshold;
+		StorageHelper::setFloat(*((float*)target), _storageStruct.switchcraftThreshold);
+		break;
+	}
 	default: {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_UNKNOWN_TYPE;
@@ -955,8 +966,8 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 		break;
 	}
 	case CONFIG_SWITCHCRAFT_ENABLED: {
-		p_item = (uint8_t*)&_storageStruct.switchCraftEnabled;
-		StorageHelper::setUint8(value, _storageStruct.switchCraftEnabled);
+		p_item = (uint8_t*)&_storageStruct.switchcraftEnabled;
+		StorageHelper::setUint8(value, _storageStruct.switchcraftEnabled);
 		break;
 	}
 	default: {
@@ -1029,7 +1040,7 @@ bool Settings::readFlag(uint8_t type, bool& value) {
 		break;
 	}
 	case CONFIG_SWITCHCRAFT_ENABLED: {
-		StorageHelper::getUint8(_storageStruct.switchCraftEnabled, (uint8_t*)&value, 0, false);
+		StorageHelper::getUint8(_storageStruct.switchcraftEnabled, (uint8_t*)&value, 0, false);
 		break;
 	}
 	default:
