@@ -237,8 +237,10 @@ void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 		RecognizeSwitch::getInstance().skip(2);
 		break;
+	case CONFIG_SWITCHCRAFT_THRESHOLD:
+		RecognizeSwitch::getInstance().configure(*(float*)p_data);
+		break;
 	}
-
 }
 
 /**
