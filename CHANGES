@@ -1,3 +1,157 @@
+Version 2.1.0:
+ - Add release config for crownstone_2.1.0
+ - Add release config for guidestone_2.1.0-RC0
+ - Add release config for crownstone_2.1.0-RC1
+ - Apply switchcraft threshold without reset.
+ - Increase default switchcraft threshold.
+ - Switchcraft threshold is now configurable.
+ - Don't have verbose prints on by default.
+ - Use event to dispatch control command.
+ - Fixed uart bug causing RX to stop working. UART now only enabled for certain board types. TODO: handle uart error.
+ - Don't addListener in reset function.
+ - reset counter is uint16
+ - Add release config for crownstone_2.1.0-RC0
+ - Merge branch 'sluusje'
+ - control characteristic uuid in setup service changed.
+ - Improved cyclic storage: use pstorage_store() instead of pstorage_update() most of the times.
+ - Fixed: set correct switchcraft flag on boot.
+ - Added deprecated service data as input file.
+ - Fixed: missing header.
+ - Added command uart msg.
+ - Added switchcraft bit in service data flags.
+ - Updated protocol doc: - added cs id in mesh packet - (re)moved some deprecated things
+ - Call delayedSwitch() after starting the switch.
+ - If switchcraft is enabled, assume a boot is due to a brownout caused by a too slow wall switch, so the pwm is already powered.
+ - Less ADC debug prints.
+ - Added ratio threshold.
+ - Changed recognize switch algorithm.
+ - 12 bit adc
+ - Cleaned up ADC code.
+ - Added sequence diagrams for adc delayed processing and delayed interrupts.
+ - Add ADC restart to uart protocol.
+ - ADC uses 4 PPI channels, instead of 5.
+ - Added ADC sequence diagram.
+ - ADC: implemented timeout, seems to work well now!
+ - ADC sampling now seems stable, and automatically restarts when buffer is released too late. TODO: when interrupt is delayed a lot, the adc isn't restarted, this should be done by the timeout timer.
+ - Back to 100 samples per 50Hz wave.
+ - Don't use saadc_drv, implement it in cs_ADC instead.
+ - Define bootloader version in config.
+ - Updated release script: added device type dongle.
+ - Baudrate increased to 230400.
+ - Make it compilable without debug too.
+ - Added crownstone usb dongle board type.
+ - Added crownstone usb dongle board type.
+ - WIP: Tried timeout timer and bookkeeping of num samples.
+ - WIP: timeout timer for ADC.
+ - Fixed ADC queueing buffer while not started.
+ - Remove logs of gatt data.
+ - Fixed printRssiList.
+ - Bugfix: queue too many buffers.
+ - WIP: stop adc when writing to flash.
+ - No asserts.
+ - Don't process adc buffers when storage is busy. Added event when ADC has been "restarted".
+ - Oops, should be added with previous commit.
+ - Use a different time to reboot for setup.
+ - Write down what timers and ppi the soft device uses.
+ - Don't use PAN_28 workaround. /!\ THIS REQUIRES YOU TO EDIT NRF_DRV_SAADC /!\
+ - Do toggle power when wall switch was detected.
+ - Make it compile without debug logs
+ - Power calculations still make use of _outputSamples, so filter current last.
+ - Make sure the ADC keeps sampling, else the buffer starts at a different point in the period.
+ - Don't commit code that disables softfuses.
+ - Don't commit code that disables soft fuses.
+ - Fixed hardware board regex.
+ - Added define to only print debug text.
+ - Enable/disable switchcraft via command. Only init switchcraft when enabled.
+ - Typo was fixed.
+ - Use camel case varnames.
+ - Merge branch 'mesh-rssi' into sluusje
+ - Added switchcraft enable config and command.
+ - Write out all opcodes.
+ - Removed old setup command.
+ - added service data protocol doc
+ - ignore generated diagrams dir
+ - Updated protocol: - added multipart notification - tried to better explain encryption - added command result packet - protocol version now matches firmware version
+ - Diagram generator: don't use random colors, but cycle through color palette.
+ - Added generated diagrams.
+ - Moved old diagrams to another dir.
+ - Just some debug/comments.
+ - Disable old setup command.
+ - Change uuid of setup control char. Remove config chars of setup service.
+ - Changed error codes.
+ - Control characteristic: enable notifications. Characteristics: check length. Control characteristics: use streambuffer for returning error code.
+ - Made setup command work. Didn't test response code yet.
+ - Added new setup process to protocol doc.
+ - Added setup command: - All settings done at once. - Control char will notify when completely done (also storage).
+ - Added device type crownstone usb.
+ - Added an event for storage done. When pstorage write buffer is full, use own queue. Researched what interrupt level the sys and ble handler is running.
+ - Switch works 90% of the time.
+ - gen-diagrams: better color picking, fixed trailing spaces issue.
+ - Improved protocol docs.
+ - Added fonts for gen-diagram.
+ - gen-diagram: center byte numbers
+ - Diagram generator: add byte numbers.
+ - Crownstone id is now correctly set as address in mesh. Added a debug function for the rssi averaging.
+ - Device type is now correctly set in service data.
+ - Added script to generate diagrams for documentation.
+ - Add rssi to other crownstones in service data. Added device type in service data. Updated protocol.
+ - Enable getting RSSI between mesh nodes.
+ - Enable UART binary parts again.
+ - Second implementation of switch detection by using deltas and thresholding this.
+ - Submit update license script. Should become in the end script that checks all headers properly.
+ - Update license also in .c files
+ - Some more license updates.
+ - Update copyright and license info
+ - Comment stuff not used in octave script.
+ - Add matlab test unit
+ - Use opcode for UART
+ - Add script to generate switch like behavior
+ - Have separate RecognizeSwitch class.
+ - Make use of InterleavedBuffer in filter()
+ - Spelling encryption
+ - Create getValue in InterleavedBuffer class that can get values in previous/next buffers for wrapping.
+ - Add test_generate file. Does not use PWM yet.
+ - Make the nrf5/test_adc file compilable.
+ - Remove nrf_drv_timer.c from CMakeLists.txt
+ - Add crc16 include dir
+ - Add explanation of preferred median filter implementation.
+ - First functional implementation of switchcraft / sluusje.
+ - Just do not check yet if they are in progress.
+ - Merge branch 'develop' into sluusje
+ - Add scp script
+ - Compile for 4 buffers in ADC.
+ - Up to saadc_callback
+ - Start refactoring to more than 2 buffers in ADC sampler.
+ - Merge branch 'master' into develop
+ - Re-added generation of change log.
+ - Updated release script to allow for release candidates.
+ - Merge branch 'master' into develop
+ - Use same rtccount for all uart power msgs.
+ - should compile again when BUILD_MESHING=0.
+ - Send state over mesh at most once per 3s.
+ - Don't try to turn relay on when it's already on, and vice versa.
+ - Merge branch 'master' into develop
+ - ADC: Apply config only after callback is done.
+ - Merge branch 'master' into develop
+ - Merge branch 'master' into develop
+ - Added comments, cleaned up some old code. Changed some test pins. Removed ADC applyConfig() from the interrupt for now, should be looked into.
+ - added some TODOs
+ - Wrap logs in uart protocol.
+ - Changed differential mode to enable instead of toggle.
+ - Uart protocol now uses "enable" args.
+ - Made adc config structs packed.
+ - -
+ - Added service data to uart protocol.
+ - Added ID and MAC address to UART protocol.
+ - Merge branch 'master' into develop
+ - send every power sample.
+ - oops.
+ - Incrased baudrate to 230400. Added timestamp to power msgs.
+ - Expanded uart protocol doc.
+ - Started on uart protocol doc
+ - Added uart protocol for hardware tests. Reduced app scheduler event size. Added functions to write uart msgs without the need for a buffer.
+ - Changed power samples struct.
+
 Version 2.0.2:
  - Add release config for guidestone_2.0.2
  - Add release config for guidestone_2.0.2-RC0
