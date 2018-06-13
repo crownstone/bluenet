@@ -15,7 +15,7 @@ In normal operation the ADC works roughly like this:
 - The 1st buffer is given to the SAADC.
 - Etc.
 
-A detailed diagram can be found [here](uml/adc/normal-operations.svg)
+A detailed diagram can be found [here](uml/adc/normal-operation.svg).
 
 
 ## Delays
@@ -31,4 +31,4 @@ See the detailed diagrams for [delayed processing](uml/adc/delayed-processing.sv
 
 ## Configuration change
 
-The config of the ADC can be reconfigured on the fly. The ADC will wait until a buffer is filled, then it will stop the ADC, reconfigure the SAADC, restart, and finally let the buffer be processed. Again, it will only actually start when the buffer has been processed. See the [diagram](uml/adc/config-change.svg)
+The config of the ADC can be reconfigured on the fly. The ADC will wait until a buffer is filled, then it will stop the ADC, reconfigure the SAADC, restart, and finally let the buffer be processed. Again, it will only actually start when the buffer has been processed. See the [diagram](uml/adc/config-change.svg).
