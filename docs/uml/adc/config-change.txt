@@ -21,7 +21,12 @@ activate timer
 
 ......
 
-== Processing is delayed ==
+hnote over adc, int
+current buffer: 0
+queued buffer: 1
+endhnote
+
+== Normal operation ==
 saadc -> ppiTimeoutStart: End
 ppiTimeoutStart -> counter: Clear
 hnote over counter: 0
@@ -46,23 +51,49 @@ timer -> ppiSample: Tick
 ppiSample -> saadc: Sample 1
 ppiSample -> counter: Count
 hnote over counter: 2
-
 ......
+== Config is changed ==
+hnote over adc: change_config: true
+......
+proc -> adc: Release buffer 0
+hnote over adc: buffers being processed: []
+adc -> saadc: Set buffer 2
+hnote over adc, int
+current buffer: 1
+queued buffer: 2
+endhnote
+adc -> counter: Stop
+deactivate counter
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample ...
+ppiSample -> counter: Count
+timer -> ppiSample: Tick
+ppiSample -> saadc: Sample N-1
+ppiSample -> counter: Count
+
+
+== End of buffer ==
+saadc -> ppiTimeoutStart: End
+ppiTimeoutStart -> counter: Clear
+hnote over counter: 0
+ppiTimeoutStart -> counter: Start
+activate counter
+saadc -> ppiStart: End
+ppiStart -> saadc: Start
+saadc -> int: End
+hnote over adc, int
+current buffer: 2
+queued buffer: none
+endhnote
 
 timer -> ppiSample: Tick
-ppiSample -> saadc: Sample N-2
+ppiSample -> saadc: Sample 0
 ppiSample -> counter: Count
-hnote over counter: N-1
-== Timeout ==
-counter -> counter: Stop
-deactivate counter
-counter -> ppiTimeout: Trigger
-ppiTimeout -> timer: Stop
-deactivate timer
-counter -> counterInt: Trigger
+hnote over counter: 1
+int -> adc: Done buffer 1
+hnote over adc: buffers being processed: [1]
 
-counterInt -> adc: Timeout
-
+== Stop ==
 adc -> adc: Stop
 hnote over adc: adc state: idle
 adc -> ppiStart: disable
@@ -81,30 +112,35 @@ hnote over adc, int: saadc state: idle
 saadc -> int: End
 note over int: End is not handled,\nas saadc state is not busy.
 
+== Apply config ==
+adc -> saadc: Init channels
+hnote over adc: change_config: false
 
 == Start ==
 adc -> adc: Start
 note over adc: Not starting, as buffers\nare being processed.
 hnote over adc: adc state: waiting to start
 
+adc -> proc: Done buffer 1
+
 ......
 
-proc -> adc: Release buffer 0
+proc -> adc: Release buffer 1
 hnote over adc: buffers being processed: []
 hnote over adc: adc state: ready to start
 adc -> adc: Start
 
 hnote over adc, int
-current buffer: 1
-queued buffer: 2
+current buffer: 2
+queued buffer: 3
 adc state: busy
 saadc state: busy
 endhnote
-adc -> saadc: Set buffer 1
+adc -> saadc: Set buffer 2
 adc -> saadc: Start
 activate saadc
 saadc -> adc: Started
-adc -> saadc: Set buffer 2
+adc -> saadc: Set buffer 3
 adc -> ppiStart: Enable
 activate ppiStart
 adc -> counter: Clear
@@ -128,6 +164,5 @@ ppiSample -> counter: Count
 timer -> ppiSample: Tick
 ppiSample -> saadc: Sample N-1
 ppiSample -> counter: Count
-
 
 @enduml

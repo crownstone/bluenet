@@ -20,6 +20,7 @@ activate ppiSample
 adc -> ppiTimeout: Enable
 activate ppiTimeout
 adc -> saadc: Enable
+adc -> saadc: Init channels
 
 hnote over adc, int
 current buffer: 0

@@ -71,16 +71,18 @@ adc -> proc: Done buffer 0
 
 counterInt -> adc: Timeout
 note right: Timeout is called after Done\nas the app scheduler is fifo.
-hnote over adc, int: saadc state: stopping
+
 adc -> adc: Stop
 hnote over adc: adc state: idle
 adc -> ppiStart: disable
 deactivate ppiStart
 adc -> ppiTimeoutStart: disable
 deactivate ppiTimeoutStart
+adc -> counter: Stop
 adc -> timer: Stop
 adc -> timer: Clear
 
+hnote over adc, int: saadc state: stopping
 adc -> saadc: Stop
 saadc -> int: Stopped
 deactivate saadc
@@ -92,12 +94,13 @@ note over int: End is not handled,\nas saadc state is not busy.
 == Start ==
 adc -> adc: Start
 note over adc: Not starting, as buffers\nare being processed.
-hnote over adc: adc state: starting
+hnote over adc: adc state: waiting to start
 
 ......
 
 proc -> adc: Release buffer 0
 hnote over adc: buffers being processed: []
+hnote over adc: adc state: ready to start
 adc -> adc: Start
 
 hnote over adc, int
