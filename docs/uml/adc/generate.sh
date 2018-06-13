@@ -11,3 +11,5 @@ java -jar $plantuml -tsvg delayed-processing.txt
 java -jar $plantuml -tpng delayed-processing.txt
 java -jar $plantuml -tsvg delayed-interrupt.txt
 java -jar $plantuml -tpng delayed-interrupt.txt
+java -jar $plantuml -tsvg config-change.txt
+java -jar $plantuml -tpng config-change.txt
