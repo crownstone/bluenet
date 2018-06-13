@@ -87,14 +87,15 @@ typedef void (*adc_zero_crossing_cb_t) ();
 enum adc_state_t {
 	ADC_STATE_IDLE,
 	ADC_STATE_BUSY,
-	ADC_STATE_STARTING
+	ADC_STATE_WAITING_TO_START,
+	ADC_STATE_READY_TO_START    // This state is a dummy, to work around the state check in start(). It is set just before calling start() again.
 };
 
 // State of the SAADC
 enum adc_saadc_state_t {
-	ADC_SAADC_STATE_IDLE,
-	ADC_SAADC_STATE_BUSY,
-	ADC_SAADC_STATE_STOPPING
+	ADC_SAADC_STATE_IDLE,    // When saadc is idle.
+	ADC_SAADC_STATE_BUSY,    // When saadc is busy sampling.
+	ADC_SAADC_STATE_STOPPING // When saadc is or will be commanded to stop.
 };
 
 
@@ -194,7 +195,12 @@ public:
 	// Handle events as EventListener.
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
-	// Handle buffer, called in main thread.
+	/** Restart
+	 */
+	void _restart();
+
+	/** Handle buffer, called in main thread.
+	 */
 	void _handleAdcDone(cs_adc_buffer_id_t bufIndex);
 
 	/** Handles timeout
@@ -246,7 +252,7 @@ private:
 	// PPI channel used to stop the sample timer when no buffer is queued.
 	nrf_ppi_channel_t _ppiTimeout;
 
-	// PPI channel used to reset the timeout count.
+	// PPI channel used to clear and start the timeout count.
 	nrf_ppi_channel_t _ppiTimeoutStart;
 
 
@@ -269,7 +275,7 @@ private:
 	// State of this class.
 	adc_state_t _state;
 
-	// True when SAADC is busy sampling.
+	// Keep up the state of the SAADC peripheral.
 	// **Used in interrupt!**
 	volatile adc_saadc_state_t _saadcState;
 

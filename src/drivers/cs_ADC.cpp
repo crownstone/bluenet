@@ -51,8 +51,7 @@ void adc_done(void * p_event_data, uint16_t event_size) {
 
 // Called by app scheduler, from saadc interrupt.
 void adc_restart(void * p_event_data, uint16_t event_size) {
-	ADC::getInstance().stop();
-	ADC::getInstance().start();
+	ADC::getInstance()._restart();
 }
 
 // Called by app scheduler, from timeout timer interrupt.
@@ -357,16 +356,16 @@ void ADC::stop() {
 	default:
 		break;
 	}
+	nrf_saadc_int_disable(NRF_SAADC_INT_END); // Make sure the interrupt doesn't interrupt this piece of code.
 	// TODO: state = stopping ?
 	_state = ADC_STATE_IDLE;
 #ifdef TEST_PIN_STOP
 	nrf_gpio_pin_toggle(TEST_PIN_STOP);
 #endif
-	nrf_saadc_int_disable(NRF_SAADC_INT_END); // Make sure the end interrupt doesn't interrupt this piece of code.
-
 
 	nrf_ppi_channel_disable(_ppiChannelStart);
 	nrf_ppi_channel_disable(_ppiTimeoutStart);
+	stopTimeout();
 
 	// Stop sample timer
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_STOP);
@@ -377,6 +376,8 @@ void ADC::stop() {
 #ifdef PRINT_DEBUG_VERBOSE
 		LOGd("stop saadc");
 #endif
+		_saadcState = ADC_SAADC_STATE_STOPPING;
+
 		nrf_saadc_event_clear(NRF_SAADC_EVENT_STOPPED);
 		nrf_saadc_int_enable(NRF_SAADC_INT_STOPPED);
 		// The stop task triggers an END interrupt.
@@ -397,7 +398,7 @@ void ADC::start() {
 	LOGd("start");
 #endif
 	switch (_state) {
-	case ADC_STATE_STARTING:
+	case ADC_STATE_WAITING_TO_START:
 	case ADC_STATE_BUSY:
 		LOGw("already started");
 		return;
@@ -415,7 +416,7 @@ void ADC::start() {
 	}
 	if (inProgress) {
 		// Wait for buffers to be released.
-		_state = ADC_STATE_STARTING;
+		_state = ADC_STATE_WAITING_TO_START;
 #ifdef PRINT_DEBUG_VERBOSE
 		LOGd("wait to start");
 #endif
@@ -521,16 +522,9 @@ bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 #endif
 	_inProgress[bufIndex] = false;
 
-	if (_state == ADC_STATE_STARTING) {
+	if (_state == ADC_STATE_WAITING_TO_START) {
+		_state = ADC_STATE_READY_TO_START;
 		start();
-		return true;
-	}
-
-	if (_changeConfig) {
-		// Don't queue up the the buffer, we need the adc to be idle.
-		if (_numBuffersQueued == 0) { // TODO: don't check numBuffersQueued here? as it's modified in interrupt.
-			applyConfig();
-		}
 		return true;
 	}
 
@@ -568,9 +562,6 @@ cs_adc_error_t ADC::changeChannel(cs_adc_channel_id_t channel, adc_channel_confi
 	_config.channels[channel].rangeMilliVolt = config.rangeMilliVolt;
 	_config.channels[channel].referencePin = config.referencePin;
 	_changeConfig = true;
-
-//	cs_adc_error_t err = initChannel(channel, config);
-//	start();
 	return ERR_SUCCESS;
 }
 
@@ -581,12 +572,6 @@ void ADC::applyConfig() {
 	}
 
 	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_CONFIG, (uint8_t*)(&_config), sizeof(_config));
-
-
-	// Add all buffers again
-	initQueue();
-
-	// Mark as done
 	_changeConfig = false;
 }
 
@@ -631,14 +616,18 @@ void ADC::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 }
 
 
+void ADC::_restart() {
+#ifdef PRINT_DEBUG
+	LOGi("restart");
+#endif
+	stop();
+	start();
+}
+
 void ADC::_handleTimeout() {
 #ifdef PRINT_DEBUG
 	LOGw("timeout");
 #endif
-
-	nrf_saadc_int_disable(NRF_SAADC_INT_END); // Make sure the interrupt doesn't interrupt this piece of code.
-	_saadcState = ADC_SAADC_STATE_STOPPING;
-//	nrf_saadc_int_enable(NRF_SAADC_INT_END); // No need to enable, it's already enabled in stop()
 	stop();
 	start();
 }
@@ -659,6 +648,13 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 			EventDispatcher::getInstance().dispatch(EVT_ADC_RESTARTED);
 		}
 		_firstBuffer = false;
+
+		if (_changeConfig) {
+			stop();
+			applyConfig();
+			start();
+		}
+
 #ifdef PRINT_DEBUG_VERBOSE
 		LOGd("process buf %u", bufIndex);
 #endif

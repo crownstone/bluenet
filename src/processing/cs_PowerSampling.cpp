@@ -614,6 +614,7 @@ void PowerSampling::calculatePower(power_t power) {
 //			APP_ERROR_CHECK(1);
 //		}
 //	}
+//	LOGd("I=%u %u %u %u P=%i %i %i", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA, _avgPowerMilliWatt, powerMilliWattReal, powerMilliWattApparent);
 
 #ifdef PRINT_POWER_SAMPLES
 	if (printPower % 1 == 0) {
