@@ -882,6 +882,12 @@ Handle | Name | Type | Description
 
 ![Keep alive packet](../docs/diagrams/keep-alive-mesh-packet.png)
 
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | type | 1 | Determines type of packet, see below.
+uint 8 [] | payload | N | Depends on type of packet, see below.
+
+
 Type nr | Type name | Payload type | Description
 --- | --- | --- | ---
 1 | [Same timeout](#keep_alive_same_timeout_mesh_packet) | Keep alive same timeout | Keep alive with same timeout for each Crownstone.
@@ -896,7 +902,6 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | Timeout | 2 | Timeout (in seconds), applies to all stones present in the list.
 uint 8 | Count | 1 | Number of items in the list.
-uint 8 | Reserved | 1 | Reserved for future use.
 [Keep alive item](#keep_alive_mesh_item) [] | List | N | The keep alive same timeout items.
 
 
