@@ -41,6 +41,12 @@ extern "C" {
 
 //#define INCLUDE_TIMESTAMPS
 
+typedef enum {
+	SERIAL_ENABLE_NONE      = 0,
+	SERIAL_ENABLE_RX_ONLY   = 1,
+	SERIAL_ENABLE_RX_AND_TX = 3,
+} serial_enable_t;
+
 #if SERIAL_VERBOSITY<SERIAL_BYTE_PROTOCOL_ONLY
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
@@ -108,8 +114,20 @@ extern "C" {
 /**
  * General configuration of the serial connection. This sets the pin to be used for UART, the baudrate, the parity
  * bits, etc.
+ * Should only be called once.
  */
-void config_uart(uint8_t pinRx, uint8_t pinTx);
+void serial_config(uint8_t pinRx, uint8_t pinTx);
+
+/**
+ * Init the UART.
+ * Make sure it has been configured first.
+ */
+void serial_init(serial_enable_t enabled);
+
+/**
+ * Change what is enabled.
+ */
+void serial_enable(serial_enable_t enabled);
 
 /**
  * Write a string with printf functionality.

@@ -270,6 +270,14 @@ void Crownstone::initDrivers() {
 	_settings->init(&_boardsConfig);
 	_stateVars->init();
 
+	// If not done already, init UART
+	if (!_boardsConfig.flags.hasSerial) {
+		serial_config(_boardsConfig.pinGpioRx, _boardsConfig.pinGpioTx);
+		uint8_t uartEnabled;
+		_settings->get(CONFIG_UART_ENABLED, &uartEnabled);
+		serial_enable((serial_enable_t)uartEnabled);
+	}
+
 	LOGi(FMT_INIT, "command handler");
 	_commandHandler->init(&_boardsConfig);
 
@@ -849,7 +857,8 @@ void on_exit(void) {
  * is not available in the final product.
  */
 void welcome(uint8_t pinRx, uint8_t pinTx) {
-	config_uart(pinRx, pinTx);
+	serial_config(pinRx, pinTx);
+	serial_init(SERIAL_ENABLE_RX_AND_TX);
 
 	_log(SERIAL_INFO, SERIAL_CRLF);
 

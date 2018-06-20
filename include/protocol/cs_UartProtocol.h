@@ -164,6 +164,9 @@ private:
 	//! This class is singleton, deny implementation
 	void operator=(UartProtocol const &);
 
+	// Keep up the state
+	bool _initialized;
+
 	// RX variables
 	uint8_t* _readBuffer;     //! Pointer to the read buffer
 	uint16_t _readBufferIdx;   //! Where to read the next byte into the read buffer

@@ -35,45 +35,57 @@
 //#define ERROR_PIN   22
 //#define TIMEOUT_PIN 23
 
-static bool uart_initialized = false;
+static uint8_t _pinRx = 0;
+static uint8_t _pinTx = 0;
+static bool _initialized = false;
+static bool _initializedUart = false;
+static bool _initializedRx = false;
+static bool _initializedTx = false;
 
-/**
- * Configure the UART. Currently we set it on 38400 baud.
- */
-void config_uart(uint8_t pinRx, uint8_t pinTx) {
+void serial_config(uint8_t pinRx, uint8_t pinTx) {
+	_pinRx = pinRx;
+	_pinTx = pinTx;
+}
+
+// Initializes anything but the UART peripheral.
+// Only to be called once.
+void init() {
+	if (_initialized) {
+		return;
+	}
+	_initialized = true;
+
 #ifdef TEST_PIN
-    nrf_gpio_cfg_output(TEST_PIN);
+	nrf_gpio_cfg_output(TEST_PIN);
 #endif
 #ifdef ERROR_PIN
-    nrf_gpio_cfg_output(ERROR_PIN);
+	nrf_gpio_cfg_output(ERROR_PIN);
 #endif
 #ifdef TIMEOUT_PIN
-    nrf_gpio_cfg_output(TIMEOUT_PIN);
+	nrf_gpio_cfg_output(TIMEOUT_PIN);
 #endif
 
-#if SERIAL_VERBOSITY<SERIAL_NONE
-	// Enable UART
-	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
+	// Init parser
+	UartProtocol::getInstance().init();
 
-	// Enable interrupt
+	// Enable interrupt handling
 	uint32_t err_code;
 	err_code = sd_nvic_SetPriority(UARTE0_UART0_IRQn, APP_IRQ_PRIORITY_MID);
 	APP_ERROR_CHECK(err_code);
 	err_code = sd_nvic_EnableIRQ(UARTE0_UART0_IRQn);
 	APP_ERROR_CHECK(err_code);
+}
 
-	// Enable RX ready interrupts
-	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk;
-	// TODO: handle error event.
-//	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk | UART_INTENSET_ERROR_Msk | UART_INTENSET_RXTO_Msk;
-
+// Initializes the UART peripheral, and enables interrupt.
+void init_uart() {
+	if (_initializedUart) {
+		return;
+	}
+	_initializedUart = true;
 
 	// Configure UART pins
-	NRF_UART0->PSELRXD = pinRx;
-	NRF_UART0->PSELTXD = pinTx;
-
-	// Init parser
-	UartProtocol::getInstance().init();
+	NRF_UART0->PSELRXD = _pinRx;
+	NRF_UART0->PSELTXD = _pinTx;
 
 	//NRF_UART0->CONFIG = NRF_UART0->CONFIG_HWFC_ENABLED; // Do not enable hardware flow control.
 //	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud38400;
@@ -81,28 +93,112 @@ void config_uart(uint8_t pinRx, uint8_t pinTx) {
 //	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud76800;
 //	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud115200;
 	NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud230400; // Highest baudrate that still worked.
-	NRF_UART0->TASKS_STARTTX = 1;
+
+	// Enable UART
+	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
+}
+
+void deinit_uart() {
+	if (!_initializedUart) {
+		return;
+	}
+	_initializedUart = false;
+
+	// Disable UART
+	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
+}
+
+void init_rx() {
+	if (_initializedRx) {
+		return;
+	}
+	_initializedRx = true;
+
+	// Enable RX ready interrupts
+	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk;
+	// TODO: handle error event.
+//	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk | UART_INTENSET_ERROR_Msk | UART_INTENSET_RXTO_Msk;
+
+	// Start RX
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
-	NRF_UART0->EVENTS_TXDRDY = 0;
-	uart_initialized = true;
+}
 
-#else
-	//! Disable UART
-	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
+void deinit_rx() {
+	if (!_initializedRx) {
+		return;
+	}
+	_initializedRx = false;
 
-	NRF_UART0->TASKS_STOPRX = 1;
+	// Disable interrupt
+	NRF_UART0->INTENCLR = UART_INTENSET_RXDRDY_Msk | UART_INTENSET_ERROR_Msk | UART_INTENSET_RXTO_Msk;
+
+	// Stop RX
 	NRF_UART0->TASKS_STOPTX = 1;
+	NRF_UART0->EVENTS_RXDRDY = 0;
+}
+
+void init_tx() {
+	if (_initializedTx) {
+		return;
+	}
+	_initializedTx = true;
+
+	// Start TX
+	NRF_UART0->TASKS_STARTTX = 1;
+	NRF_UART0->EVENTS_TXDRDY = 0;
+}
+
+void deinit_tx() {
+	if (!_initializedTx) {
+		return;
+	}
+	_initializedTx = false;
+
+	// Stop TX
+	NRF_UART0->TASKS_STOPTX = 1;
+	NRF_UART0->EVENTS_TXDRDY = 0;
+}
+
+void serial_init(serial_enable_t enabled) {
+#if SERIAL_VERBOSITY<SERIAL_NONE
+	init();
+	switch (enabled) {
+	case SERIAL_ENABLE_NONE:
+		deinit_rx();
+		deinit_tx();
+		deinit_uart();
+		break;
+
+	case SERIAL_ENABLE_RX_ONLY:
+		init_uart();
+		init_rx();
+		break;
+	case SERIAL_ENABLE_RX_AND_TX:
+		init_uart();
+		init_rx();
+		init_tx();
+		break;
+	}
+#else
+	// Disable UART
+	deinit_rx();
+	deinit_tx();
+	deinit_uart();
 #endif
+}
+
+void serial_enable(serial_enable_t enabled) {
+	serial_init(enabled);
 }
 
 inline void _writeByte(uint8_t val) {
 #if SERIAL_VERBOSITY<SERIAL_READ_ONLY
-	if (uart_initialized) {
+//	if (_initializedTx) {
 		NRF_UART0->EVENTS_TXDRDY = 0;
 		NRF_UART0->TXD = val;
 		while(NRF_UART0->EVENTS_TXDRDY != 1) {}
-	}
+//	}
 #endif
 }
 
@@ -111,6 +207,9 @@ inline void _writeByte(uint8_t val) {
  */
 int write(const char *str, ...) {
 #if SERIAL_VERBOSITY<SERIAL_BYTE_PROTOCOL_ONLY
+	if (!_initializedTx) {
+		return 0;
+	}
 	char buffer[128];
 	va_list ap;
 	va_start(ap, str);
@@ -119,12 +218,11 @@ int write(const char *str, ...) {
 
 	if (len < 0) return len;
 
-	//! if strings are small we do not need to allocate by malloc
+	// if strings are small we do not need to allocate by malloc
 	if (sizeof buffer >= len + 1UL) {
 		va_start(ap, str);
 		len = vsprintf(buffer, str, ap);
 		va_end(ap);
-//		writeBytes((uint8_t*)buffer, len);
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)buffer, len);
 	} else {
 		char *p_buf = (char*)malloc(len + 1);
@@ -132,7 +230,6 @@ int write(const char *str, ...) {
 		va_start(ap, str);
 		len = vsprintf(p_buf, str, ap);
 		va_end(ap);
-//		writeBytes((uint8_t*)p_buf, len);
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)p_buf, len);
 		free(p_buf);
 	}
@@ -144,6 +241,9 @@ int write(const char *str, ...) {
 // TODO: use uart class for this.
 void writeBytes(uint8_t* data, const uint16_t size) {
 #if SERIAL_VERBOSITY<SERIAL_READ_ONLY
+	if (!_initializedTx) {
+		return;
+	}
 	for(int i = 0; i < size; ++i) {
 		uint8_t val = (uint8_t)data[i];
 		// Escape when necessary

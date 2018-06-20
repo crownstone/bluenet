@@ -97,7 +97,7 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type) {
 
 ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size, 
 		const EncryptionAccessLevel accessLevel) {
-
+	LOGd("cmd=%u lvl=%u", type, accessLevel);
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		return ERR_NO_ACCESS;
 	}

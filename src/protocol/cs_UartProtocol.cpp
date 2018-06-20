@@ -38,6 +38,7 @@
 //#define DEBUGGING_CLEAN_UART
 
 UartProtocol::UartProtocol():
+_initialized(false),
 _readBuffer(NULL),
 _readBufferIdx(0),
 _startedReading(false),
@@ -53,6 +54,10 @@ void handle_msg(void * data, uint16_t size) {
 }
 
 void UartProtocol::init() {
+	if (_initialized) {
+		return;
+	}
+	_initialized = true;
 	_readBuffer = new uint8_t[UART_RX_BUFFER_SIZE];
 #ifdef TEST_PIN
     nrf_gpio_cfg_output(TEST_PIN);

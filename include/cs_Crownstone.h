@@ -94,7 +94,7 @@ public:
 
 protected:
 
-	/** initialize drivers (timer, storage, pwm, etc)
+	/** initialize drivers (stack, timer, storage, pwm, etc), loads settings from storage.
 	 */
 	void initDrivers();
 
