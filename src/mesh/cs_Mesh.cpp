@@ -88,8 +88,8 @@ void Mesh::init() {
 
 	// the access address is a configurable parameter so we get it from the settings.
 	Settings::getInstance().get(CONFIG_MESH_ACCESS_ADDRESS, &init_params.access_addr);
-	LOGd("Mesh access address %p", init_params.access_addr);
-	init_params.channel = MESH_CHANNEL;
+	Settings::getInstance().get(CONFIG_MESH_CHANNEL, &init_params.channel);
+	LOGd("Mesh access address %p  channel %u", init_params.access_addr, init_params.channel);
 	init_params.interval_min_ms = MESH_INTERVAL_MIN_MS;
 	init_params.lfclksrc = meshClockSource;
 	int8_t txPower;
