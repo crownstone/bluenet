@@ -153,7 +153,9 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	//// UINT 8
 	/////////////////////////////////////////////////
 	case CONFIG_SCAN_FILTER:
-	case CONFIG_FLOOR: {
+	case CONFIG_FLOOR:
+	case CONFIG_MESH_CHANNEL:
+	case CONFIG_UART_ENABLED: {
 		if (length != 1) {
 			LOGw(FMT_ERR_EXPECTED, "uint8");
 			return ERR_WRONG_PAYLOAD_LENGTH;
@@ -324,7 +326,9 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 	//// UINT 8
 	/////////////////////////////////////////////////
 	case CONFIG_SCAN_FILTER:
-	case CONFIG_FLOOR: {
+	case CONFIG_FLOOR:
+	case CONFIG_MESH_CHANNEL:
+	case CONFIG_UART_ENABLED: {
 		return 1;
 	}
 
@@ -630,6 +634,14 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size, bool getDefau
 		StorageHelper::getFloat(_storageStruct.switchcraftThreshold, (float*)target, SWITCHCRAFT_THRESHOLD, getDefaultValue);
 		break;
 	}
+	case CONFIG_MESH_CHANNEL: {
+		StorageHelper::getUint8(_storageStruct.meshChannel, (uint8_t*)target, MESH_CHANNEL, getDefaultValue);
+		break;
+	}
+	case CONFIG_UART_ENABLED: {
+		StorageHelper::getUint8(_storageStruct.uartEnabled, (uint8_t*)target, 0, getDefaultValue);
+		break;
+	}
 	default: {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_UNKNOWN_TYPE;
@@ -868,6 +880,16 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	case CONFIG_SWITCHCRAFT_THRESHOLD: {
 		p_item = (uint8_t*)&_storageStruct.switchcraftThreshold;
 		StorageHelper::setFloat(*((float*)target), _storageStruct.switchcraftThreshold);
+		break;
+	}
+	case CONFIG_MESH_CHANNEL: {
+		p_item = (uint8_t*)&_storageStruct.meshChannel;
+		StorageHelper::setUint8(*((uint8_t*)target), _storageStruct.meshChannel);
+		break;
+	}
+	case CONFIG_UART_ENABLED: {
+		p_item = (uint8_t*)&_storageStruct.uartEnabled;
+		StorageHelper::setUint8(*((uint8_t*)target), _storageStruct.uartEnabled);
 		break;
 	}
 	default: {

@@ -233,11 +233,17 @@ struct ps_configuration_t : ps_storage_base_t {
 	float pwmTempVoltageThresholdUp;
 	float pwmTempVoltageThresholdDown;
 
-	uint32_t pwmAllowed; //! Flag indicating whether this crownstone is marked as dimmable.
-	uint32_t switchLocked; //! Flag indicating whether this crownstone is allowed to change switch state.
+	uint32_t pwmAllowed; // Flag indicating whether this crownstone is marked as dimmable.
+	uint32_t switchLocked; // Flag indicating whether this crownstone is allowed to change switch state.
 	uint32_t switchcraftEnabled; // Flag indicating whether this crownstone has switchcraft enabled.
 
 	float switchcraftThreshold;
+
+	uint32_t meshChannel; // Mesh channel to use.
+
+	// Indicating whether UART should be enabled (uint8 enum, see cs_Serial.h).
+	uint32_t uartEnabled;
+
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct

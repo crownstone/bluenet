@@ -71,6 +71,8 @@ enum ConfigurationTypes {
 	CONFIG_SWITCH_LOCKED                    = 55,     //! 0x37
 	CONFIG_SWITCHCRAFT_ENABLED              = 56,     //! 0x38
 	CONFIG_SWITCHCRAFT_THRESHOLD            = 57,     //! 0x39
+	CONFIG_MESH_CHANNEL                     = 58,     //! 0x3A
+	CONFIG_UART_ENABLED                     = 59,     //! 0x3B
 
 	CONFIG_TYPES
 }; // Current max is 127 (0x7F), see cs_EventTypes.h
