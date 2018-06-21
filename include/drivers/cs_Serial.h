@@ -130,6 +130,11 @@ void serial_init(serial_enable_t enabled);
 void serial_enable(serial_enable_t enabled);
 
 /**
+ * Get the state of the serial.
+ */
+serial_enable_t serial_get_state();
+
+/**
  * Write a string with printf functionality.
  */
 #ifdef HOST_TARGET

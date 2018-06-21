@@ -150,6 +150,9 @@ void Crownstone::init() {
 
 	switch(_operationMode) {
 	case OPERATION_MODE_SETUP: {
+		if (serial_get_state() == SERIAL_ENABLE_NONE) {
+			serial_enable(SERIAL_ENABLE_RX_ONLY);
+		}
 
 		LOGd("Configure setup mode");
 
@@ -772,6 +775,10 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case CONFIG_PASSKEY: {
 		_stack->setPasskey((uint8_t*)p_data);
+		break;
+	}
+	case CONFIG_UART_ENABLED: {
+		serial_enable(*(serial_enable_t*)p_data);
 		break;
 	}
 	case EVT_ENABLE_ADVERTISEMENT: {

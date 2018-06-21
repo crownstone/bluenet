@@ -41,6 +41,7 @@ static bool _initialized = false;
 static bool _initializedUart = false;
 static bool _initializedRx = false;
 static bool _initializedTx = false;
+static serial_enable_t _state = SERIAL_ENABLE_NONE;
 
 void serial_config(uint8_t pinRx, uint8_t pinTx) {
 	_pinRx = pinRx;
@@ -136,6 +137,8 @@ void deinit_rx() {
 	// Stop RX
 	NRF_UART0->TASKS_STOPTX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
+	NRF_UART0->EVENTS_ERROR = 0;
+	NRF_UART0->EVENTS_RXTO = 0;
 }
 
 void init_tx() {
@@ -162,6 +165,7 @@ void deinit_tx() {
 
 void serial_init(serial_enable_t enabled) {
 #if SERIAL_VERBOSITY<SERIAL_NONE
+	_state = enabled;
 	init();
 	switch (enabled) {
 	case SERIAL_ENABLE_NONE:
@@ -169,10 +173,10 @@ void serial_init(serial_enable_t enabled) {
 		deinit_tx();
 		deinit_uart();
 		break;
-
 	case SERIAL_ENABLE_RX_ONLY:
 		init_uart();
 		init_rx();
+		deinit_tx();
 		break;
 	case SERIAL_ENABLE_RX_AND_TX:
 		init_uart();
@@ -190,6 +194,10 @@ void serial_init(serial_enable_t enabled) {
 
 void serial_enable(serial_enable_t enabled) {
 	serial_init(enabled);
+}
+
+serial_enable_t serial_get_state() {
+	return _state;
 }
 
 inline void _writeByte(uint8_t val) {
