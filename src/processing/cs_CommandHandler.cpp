@@ -166,7 +166,7 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		return handleCmdLockSwitch(buffer, size, accessLevel);
 	case CMD_SETUP:
 		return handleCmdSetup(buffer, size, accessLevel);
-	case CMD_ENABLED_SWITCHCRAFT:
+	case CMD_ENABLE_SWITCHCRAFT:
 		return handleCmdEnableSwitchcraft(buffer, size, accessLevel);
 	case CMD_UART_MSG:
 		return handleCmdUartMsg(buffer, size, accessLevel);
@@ -869,7 +869,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CMD_RESET_ERRORS:
 	case CMD_ALLOW_DIMMING:
 	case CMD_LOCK_SWITCH:
-	case CMD_ENABLED_SWITCHCRAFT:
+	case CMD_ENABLE_SWITCHCRAFT:
 	case CMD_UART_MSG:
 		return ADMIN;
 	default:
