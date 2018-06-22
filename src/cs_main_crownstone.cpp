@@ -777,10 +777,6 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 		_stack->setPasskey((uint8_t*)p_data);
 		break;
 	}
-	case CONFIG_UART_ENABLED: {
-		serial_enable(*(serial_enable_t*)p_data);
-		break;
-	}
 	case EVT_ENABLE_ADVERTISEMENT: {
 		uint8_t enable = *(uint8_t*)p_data;
 		if (enable) {

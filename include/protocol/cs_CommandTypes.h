@@ -43,6 +43,7 @@ enum CommandHandlerTypes {
 	CMD_SETUP                       = 31,    //! 0x1F
 	CMD_ENABLE_SWITCHCRAFT          = 32,    //! 0x20
 	CMD_UART_MSG                    = 33,    //! 0x21
+	CMD_UART_ENABLE                 = 34,    //! 0x22
 
 	CMD_UNKNOWN                     = 0xFF
 };

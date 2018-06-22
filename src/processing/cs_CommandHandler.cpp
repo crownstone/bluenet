@@ -170,6 +170,8 @@ ERR_CODE CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_pt
 		return handleCmdEnableSwitchcraft(buffer, size, accessLevel);
 	case CMD_UART_MSG:
 		return handleCmdUartMsg(buffer, size, accessLevel);
+	case CMD_UART_ENABLE:
+		return handleCmdUartEnable(buffer, size, accessLevel);
 	default:
 		LOGe("Unknown type: %u", type);
 		return ERR_UNKNOWN_TYPE;
@@ -795,6 +797,23 @@ ERR_CODE CommandHandler::handleCmdUartMsg(buffer_ptr_t buffer, const uint16_t si
 	return ERR_SUCCESS;
 }
 
+ERR_CODE CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGd(STR_HANDLE_COMMAND, "UART enable");
+
+	if (size != 1) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	uint8_t enable = *(uint8_t*) buffer;
+//	ERR_CODE errCode = Settings::getInstance().writeToStorage(CONFIG_UART_ENABLED, buffer, size);
+	ERR_CODE errCode = Settings::getInstance().set(CONFIG_UART_ENABLED, buffer, size);
+	if (errCode != ERR_SUCCESS) {
+		return errCode;
+	}
+	serial_enable((serial_enable_t)enable);
+	return ERR_SUCCESS;
+}
+
 
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
@@ -871,6 +890,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CMD_LOCK_SWITCH:
 	case CMD_ENABLE_SWITCHCRAFT:
 	case CMD_UART_MSG:
+	case CMD_UART_ENABLE:
 		return ADMIN;
 	default:
 		return NOT_SET;

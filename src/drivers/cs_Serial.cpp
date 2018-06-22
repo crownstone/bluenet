@@ -31,9 +31,12 @@
 #endif
 
 // Define test pins to enable gpio debug.
-//#define TEST_PIN    20
+//#define RX_PIN      20
 //#define ERROR_PIN   22
 //#define TIMEOUT_PIN 23
+//#define INIT_UART_PIN 20
+//#define INIT_TX_PIN   22
+//#define INIT_RX_PIN   23
 
 static uint8_t _pinRx = 0;
 static uint8_t _pinTx = 0;
@@ -56,14 +59,23 @@ void init() {
 	}
 	_initialized = true;
 
-#ifdef TEST_PIN
-	nrf_gpio_cfg_output(TEST_PIN);
+#ifdef RX_PIN
+	nrf_gpio_cfg_output(RX_PIN);
 #endif
 #ifdef ERROR_PIN
 	nrf_gpio_cfg_output(ERROR_PIN);
 #endif
 #ifdef TIMEOUT_PIN
 	nrf_gpio_cfg_output(TIMEOUT_PIN);
+#endif
+#ifdef INIT_UART_PIN
+	nrf_gpio_cfg_output(INIT_UART_PIN);
+#endif
+#ifdef INIT_TX_PIN
+	nrf_gpio_cfg_output(INIT_TX_PIN);
+#endif
+#ifdef INIT_RX_PIN
+	nrf_gpio_cfg_output(INIT_RX_PIN);
 #endif
 
 	// Init parser
@@ -83,6 +95,9 @@ void init_uart() {
 		return;
 	}
 	_initializedUart = true;
+#ifdef INIT_UART_PIN
+	nrf_gpio_pin_toggle(INIT_UART_PIN);
+#endif
 
 	// Configure UART pins
 	NRF_UART0->PSELRXD = _pinRx;
@@ -97,6 +112,9 @@ void init_uart() {
 
 	// Enable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
+#ifdef INIT_UART_PIN
+	nrf_gpio_pin_toggle(INIT_UART_PIN);
+#endif
 }
 
 void deinit_uart() {
@@ -104,9 +122,15 @@ void deinit_uart() {
 		return;
 	}
 	_initializedUart = false;
+#ifdef INIT_UART_PIN
+	nrf_gpio_pin_toggle(INIT_UART_PIN);
+#endif
 
 	// Disable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
+#ifdef INIT_UART_PIN
+	nrf_gpio_pin_toggle(INIT_UART_PIN);
+#endif
 }
 
 void init_rx() {
@@ -114,6 +138,9 @@ void init_rx() {
 		return;
 	}
 	_initializedRx = true;
+#ifdef INIT_RX_PIN
+	nrf_gpio_pin_toggle(INIT_RX_PIN);
+#endif
 
 	// Enable RX ready interrupts
 	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk;
@@ -123,6 +150,9 @@ void init_rx() {
 	// Start RX
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
+#ifdef INIT_RX_PIN
+	nrf_gpio_pin_toggle(INIT_RX_PIN);
+#endif
 }
 
 void deinit_rx() {
@@ -130,6 +160,9 @@ void deinit_rx() {
 		return;
 	}
 	_initializedRx = false;
+#ifdef INIT_RX_PIN
+	nrf_gpio_pin_toggle(INIT_RX_PIN);
+#endif
 
 	// Disable interrupt
 	NRF_UART0->INTENCLR = UART_INTENSET_RXDRDY_Msk | UART_INTENSET_ERROR_Msk | UART_INTENSET_RXTO_Msk;
@@ -139,6 +172,9 @@ void deinit_rx() {
 	NRF_UART0->EVENTS_RXDRDY = 0;
 	NRF_UART0->EVENTS_ERROR = 0;
 	NRF_UART0->EVENTS_RXTO = 0;
+#ifdef INIT_RX_PIN
+	nrf_gpio_pin_toggle(INIT_RX_PIN);
+#endif
 }
 
 void init_tx() {
@@ -146,10 +182,16 @@ void init_tx() {
 		return;
 	}
 	_initializedTx = true;
+#ifdef INIT_TX_PIN
+	nrf_gpio_pin_toggle(INIT_TX_PIN);
+#endif
 
 	// Start TX
 	NRF_UART0->TASKS_STARTTX = 1;
 	NRF_UART0->EVENTS_TXDRDY = 0;
+#ifdef INIT_TX_PIN
+	nrf_gpio_pin_toggle(INIT_TX_PIN);
+#endif
 }
 
 void deinit_tx() {
@@ -157,10 +199,16 @@ void deinit_tx() {
 		return;
 	}
 	_initializedTx = false;
+#ifdef INIT_TX_PIN
+	nrf_gpio_pin_toggle(INIT_TX_PIN);
+#endif
 
 	// Stop TX
 	NRF_UART0->TASKS_STOPTX = 1;
 	NRF_UART0->EVENTS_TXDRDY = 0;
+#ifdef INIT_TX_PIN
+	nrf_gpio_pin_toggle(INIT_TX_PIN);
+#endif
 }
 
 void serial_init(serial_enable_t enabled) {
@@ -202,7 +250,7 @@ serial_enable_t serial_get_state() {
 
 inline void _writeByte(uint8_t val) {
 #if SERIAL_VERBOSITY<SERIAL_READ_ONLY
-//	if (_initializedTx) {
+//	if (_initializedTx) { // Check this in functions that call this function.
 		NRF_UART0->EVENTS_TXDRDY = 0;
 		NRF_UART0->TXD = val;
 		while(NRF_UART0->EVENTS_TXDRDY != 1) {}
@@ -270,7 +318,9 @@ void writeBytes(uint8_t* data, const uint16_t size) {
 // TODO: use uart class for this.
 void writeStartByte() {
 #if SERIAL_VERBOSITY<SERIAL_READ_ONLY
-	_writeByte(UART_START_BYTE);
+	if (_initializedTx) {
+		_writeByte(UART_START_BYTE);
+	}
 #endif
 }
 
@@ -297,8 +347,8 @@ extern "C" void UART0_IRQHandler(void) {
 	}
 
 	else if (nrf_uart_event_check(NRF_UART0, NRF_UART_EVENT_RXDRDY) && nrf_uart_int_enable_check(NRF_UART0, NRF_UART_INT_MASK_RXDRDY)) {
-#ifdef TEST_PIN
-		nrf_gpio_pin_toggle(TEST_PIN);
+#ifdef RX_PIN
+		nrf_gpio_pin_toggle(RX_PIN);
 #endif
 		// Clear event _before_ reading the data.
 		nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXDRDY);
@@ -306,8 +356,8 @@ extern "C" void UART0_IRQHandler(void) {
 		// Read RXD only once.
 		readByte = nrf_uart_rxd_get(NRF_UART0);
 		UartProtocol::getInstance().onRead(readByte);
-#ifdef TEST_PIN
-		nrf_gpio_pin_toggle(TEST_PIN);
+#ifdef RX_PIN
+		nrf_gpio_pin_toggle(RX_PIN);
 #endif
 	}
 

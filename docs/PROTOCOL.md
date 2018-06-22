@@ -461,6 +461,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | G | S
 31 | Setup | [Setup packet](#setup_packet) | Perform setup. |  |  |  | x
 32 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
 33 | UART message | payload | Print the payload to UART. | x
+34 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
 
 
 <a name="setup_packet"></a>
@@ -563,6 +564,9 @@ Type nr | Type name | Payload type | Description
 55 | Switch locked | uint8 | Stores whether this Crownstone is allowed to change the switch state. *read only*
 56 | Switchcraft enabled | uint8 | Stores whether this Crownstone has switchcraft enabled. *read only*
 57 | Switchcraft threshold | float | Sets the threshold for switchcraft. A higher threshold will usually make it less likely to detect a switch (less true and false positives). However, there are cases (for example when the net frequency is off or when the net is noisy) where a higher threshold may increase the likeliness switch being detected.
+58 | Mesh channel | uint 8 | Which channel to use for the mesh. Options: 37, 38, or 39.
+59 | UART enabled | uint 8 | Whether UART is enabled, 0 = none, 1 = RX only, 3 = TX and RX.
+
 
 OpCodes:
 
