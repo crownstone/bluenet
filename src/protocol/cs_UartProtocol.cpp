@@ -318,10 +318,10 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 		EventDispatcher::getInstance().dispatch(EVT_DEC_VOLTAGE_RANGE);
 		break;
 	case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_CURRENT:
-		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT);
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT, payload, 1);
 		break;
 	case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_VOLTAGE:
-		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE);
+		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE, payload, 1);
 		break;
 	case UART_OPCODE_RX_ADC_CONFIG_VOLTAGE_PIN:
 		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
