@@ -47,47 +47,89 @@ void asACR01B1D(boards_config_t* p_config) {
 }
 
 
-void asACR01B6C(boards_config_t* p_config) {
-	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioRelayOn                     = 6;
-	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrent                      = 2;
-	p_config->pinAinVoltage                      = 1;
-	p_config->pinAinZeroRef                      = 0;
-	p_config->pinAinPwmTemp                      = 3;
-	p_config->pinGpioRx                          = 20;
-	p_config->pinGpioTx                          = 19;
-	p_config->pinLedRed                          = 10;
-	p_config->pinLedGreen                        = 9;
+//void asACR01B6C(boards_config_t* p_config) {
+//	p_config->pinGpioPwm                         = 8;
+//	p_config->pinGpioRelayOn                     = 6;
+//	p_config->pinGpioRelayOff                    = 7;
+//	p_config->pinAinCurrent                      = 2;
+//	p_config->pinAinVoltage                      = 1;
+//	p_config->pinAinZeroRef                      = 0;
+//	p_config->pinAinPwmTemp                      = 3;
+//	p_config->pinGpioRx                          = 20;
+//	p_config->pinGpioTx                          = 19;
+//	p_config->pinLedRed                          = 10;
+//	p_config->pinLedGreen                        = 9;
+//
+//	p_config->flags.hasRelay                     = true;
+//	p_config->flags.pwmInverted                  = false;
+//	p_config->flags.hasSerial                    = false;
+//	p_config->flags.hasLed                       = true;
+//	p_config->flags.ledInverted                  = false;
+//	p_config->flags.hasAdcZeroRef                = true;
+////	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
+//	p_config->flags.pwmTempInverted              = true;
+//
+//	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+//
+//	p_config->voltageMultiplier                  = 0.171f; // TODO: calibrate
+//	p_config->currentMultiplier                  = 0.0042f; // TODO: calibrate
+//	p_config->voltageZero                        = -99; // TODO: calibrate
+//	p_config->currentZero                        = -270; // TODO: calibrate
+//	p_config->powerZero                          = 8000; // TODO: calibrate
+//	p_config->voltageRange                       = 1200; // TODO: calibrate
+//	p_config->currentRange                       = 600; // TODO: calibrate
+////	p_config->currentRange                       = 1800; // Range used when not doing differential measurements.
+//
+//	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
+//
+//	p_config->minTxPower                         = -20; // higher tx power for builtins
+//}
+//
+//
+//void asACR01B6D(boards_config_t* p_config) {
+//	p_config->pinGpioPwm                         = 8;
+//	p_config->pinGpioRelayOn                     = 6;
+//	p_config->pinGpioRelayOff                    = 7;
+//	p_config->pinAinCurrent                      = 4; // highest gain
+//	p_config->pinAinCurrentGainMed               = 5;
+//	p_config->pinAinCurrentGainLow               = 6; // lowest gain
+//	p_config->pinAinVoltage                      = 2;
+//	p_config->pinAinZeroRef                      = 0;
+//	p_config->pinAinPwmTemp                      = 3;
+//	p_config->pinGpioRx                          = 20;
+//	p_config->pinGpioTx                          = 19;
+//	p_config->pinLedRed                          = 10;
+//	p_config->pinLedGreen                        = 9;
+//
+//	p_config->flags.hasRelay                     = true;
+//	p_config->flags.pwmInverted                  = false;
+//	p_config->flags.hasSerial                    = false;
+//	p_config->flags.hasLed                       = true;
+//	p_config->flags.ledInverted                  = false;
+//	p_config->flags.hasAdcZeroRef                = true;
+////	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
+//	p_config->flags.pwmTempInverted              = true;
+//
+//	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+//
+//	p_config->voltageMultiplier                  = 0.171f; // TODO: calibrate
+//	p_config->currentMultiplier                  = 0.0042f; // TODO: calibrate
+//	p_config->voltageZero                        = -99; // TODO: calibrate
+//	p_config->currentZero                        = -270; // TODO: calibrate
+//	p_config->powerZero                          = 8000; // TODO: calibrate
+//	p_config->voltageRange                       = 1200; // TODO: calibrate
+//	p_config->currentRange                       = 600; // TODO: calibrate
+////	p_config->currentRange                       = 1800; // Range used when not doing differential measurements.
+//
+//	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
+//
+//	p_config->minTxPower                         = -20; // higher tx power for builtins
+//}
 
-	p_config->flags.hasRelay                     = true;
-	p_config->flags.pwmInverted                  = false;
-	p_config->flags.hasSerial                    = false;
-	p_config->flags.hasLed                       = true;
-	p_config->flags.ledInverted                  = false;
-	p_config->flags.hasAdcZeroRef                = true;
-//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
-	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
-
-	p_config->voltageMultiplier                  = 0.171f; // TODO: calibrate
-	p_config->currentMultiplier                  = 0.0042f; // TODO: calibrate
-	p_config->voltageZero                        = -99; // TODO: calibrate
-	p_config->currentZero                        = -270; // TODO: calibrate
-	p_config->powerZero                          = 8000; // TODO: calibrate
-	p_config->voltageRange                       = 1200; // TODO: calibrate
-	p_config->currentRange                       = 600; // TODO: calibrate
-//	p_config->currentRange                       = 1800; // Range used when not doing differential measurements.
-
-	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
-	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
-
-	p_config->minTxPower                         = -20; // higher tx power for builtins
-}
-
-
-void asACR01B6D(boards_config_t* p_config) {
+void asACR01B7B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
@@ -99,8 +141,8 @@ void asACR01B6D(boards_config_t* p_config) {
 	p_config->pinAinPwmTemp                      = 3;
 	p_config->pinGpioRx                          = 20;
 	p_config->pinGpioTx                          = 19;
-	p_config->pinLedRed                          = 10;
-	p_config->pinLedGreen                        = 9;
+	p_config->pinLedRed                          = 10; // Bad!
+	p_config->pinLedGreen                        = 9;  // Bad!
 
 	p_config->flags.hasRelay                     = true;
 	p_config->flags.pwmInverted                  = false;
@@ -304,12 +346,16 @@ uint32_t configure_board(boards_config_t* p_config) {
 		asACR01B1D(p_config);
 		break;
 
-	case ACR01B6C:
-		asACR01B6C(p_config);
-		break;
+//	case ACR01B6C:
+//		asACR01B6C(p_config);
+//		break;
+//
+//	case ACR01B6D:
+//		asACR01B6D(p_config);
+//		break;
 
-	case ACR01B6D:
-		asACR01B6D(p_config);
+	case ACR01B7B:
+		asACR01B7B(p_config);
 		break;
 
 	case ACR01B2A:
