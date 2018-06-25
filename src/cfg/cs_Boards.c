@@ -160,7 +160,7 @@ void asACR01B7B(boards_config_t* p_config) {
 	p_config->voltageZero                        = -99; // TODO: calibrate
 	p_config->currentZero                        = -270; // TODO: calibrate
 	p_config->powerZero                          = 8000; // TODO: calibrate
-	p_config->voltageRange                       = 1200; // TODO: calibrate
+	p_config->voltageRange                       = 1800;
 	p_config->currentRange                       = 600; // TODO: calibrate
 //	p_config->currentRange                       = 1800; // Range used when not doing differential measurements.
 
