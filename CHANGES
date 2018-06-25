@@ -1,3 +1,9 @@
+Version 2.1.2:
+ - Add release config for crownstone_2.1.2
+ - Add release config for crownstone_2.1.2-RC0
+ - Change default mesh channel to 37, as the signal strenght seems better on that channel.
+ - Fixed keep-alive-mesh-packet doc.
+
 Version 2.1.1:
  - Add release config for guidestone_2.1.1
 
