@@ -138,7 +138,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin = boardConfig.pinAinVoltage;
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].rangeMilliVolt = boardConfig.voltageRange;
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrent;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrentGainMed;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig.currentRange;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
 	adcConfig.samplingPeriodUs = CS_ADC_SAMPLE_INTERVAL_US;
@@ -149,7 +149,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	// init the adc config
 	_adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX] = boardConfig.voltageRange;
 	_adcConfig.rangeMilliVolt[CURRENT_CHANNEL_IDX] = boardConfig.currentRange;
-	_adcConfig.currentPinGainHigh = boardConfig.pinAinCurrent;
+	_adcConfig.currentPinGainHigh = boardConfig.pinAinCurrentGainHigh;
 	_adcConfig.currentPinGainMed  = boardConfig.pinAinCurrentGainMed;
 	_adcConfig.currentPinGainLow  = boardConfig.pinAinCurrentGainLow;
 	_adcConfig.voltagePin = boardConfig.pinAinVoltage;
@@ -802,8 +802,8 @@ void PowerSampling::toggleVoltageChannelInput() {
 	case 2: // VDD
 		_adcConfig.voltageChannelPin = CS_ADC_PIN_VDD;
 		break;
-	case 3: // Current med gain
-		_adcConfig.voltageChannelPin  = _adcConfig.currentPinGainMed;
+	case 3: // Current high gain
+		_adcConfig.voltageChannelPin  = _adcConfig.currentPinGainHigh;
 		break;
 	case 4: // Current low gain
 		_adcConfig.voltageChannelPin  = _adcConfig.currentPinGainLow;
@@ -845,11 +845,32 @@ void PowerSampling::enableDifferentialModeVoltage(bool enable) {
  * TODO: What does this do?
  */
 void PowerSampling::changeRange(uint8_t channel, int32_t amount) {
-	_adcConfig.rangeMilliVolt[channel] += amount;
-	if (_adcConfig.rangeMilliVolt[channel] < 150 || _adcConfig.rangeMilliVolt[channel] > 3600) {
-		_adcConfig.rangeMilliVolt[channel] -= amount;
+	uint16_t newRange = _adcConfig.rangeMilliVolt[channel] + amount;
+	switch (_adcConfig.rangeMilliVolt[channel]) {
+	case 600:
+		if (amount < 0) {
+			newRange = 300;
+		}
+		break;
+	case 300:
+		if (amount < 0) {
+			newRange = 150;
+		}
+		else {
+			newRange = 600;
+		}
+		break;
+	case 150:
+		if (amount > 0) {
+			newRange = 300;
+		}
+		break;
+	}
+
+	if (newRange < 150 || newRange > 3600) {
 		return;
 	}
+	_adcConfig.rangeMilliVolt[channel] = newRange;
 
 	adc_channel_config_t channelConfig;
 	if (channel == VOLTAGE_CHANNEL_IDX) {
@@ -857,7 +878,7 @@ void PowerSampling::changeRange(uint8_t channel, int32_t amount) {
 		channelConfig.referencePin = _adcConfig.voltageDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
 	}
 	else {
-		channelConfig.pin = _adcConfig.currentPinGainHigh;
+		channelConfig.pin = _adcConfig.currentPinGainMed;
 		channelConfig.referencePin = _adcConfig.currentDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
 	}
 	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[channel];

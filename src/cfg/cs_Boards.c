@@ -13,7 +13,7 @@ void asACR01B1D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrent                      = 2;
+	p_config->pinAinCurrentGainMed               = 2;
 	p_config->pinAinVoltage                      = 1;
 //	p_config->pinAinZeroRef                      = -1; // Non existing
 	p_config->pinAinPwmTemp                      = 3;
@@ -51,7 +51,7 @@ void asACR01B1D(boards_config_t* p_config) {
 //	p_config->pinGpioPwm                         = 8;
 //	p_config->pinGpioRelayOn                     = 6;
 //	p_config->pinGpioRelayOff                    = 7;
-//	p_config->pinAinCurrent                      = 2;
+//	p_config->pinAinCurrentGainMed               = 2;
 //	p_config->pinAinVoltage                      = 1;
 //	p_config->pinAinZeroRef                      = 0;
 //	p_config->pinAinPwmTemp                      = 3;
@@ -91,7 +91,7 @@ void asACR01B1D(boards_config_t* p_config) {
 //	p_config->pinGpioPwm                         = 8;
 //	p_config->pinGpioRelayOn                     = 6;
 //	p_config->pinGpioRelayOff                    = 7;
-//	p_config->pinAinCurrent                      = 4; // highest gain
+//	p_config->pinAinCurrentGainHigh              = 4; // highest gain
 //	p_config->pinAinCurrentGainMed               = 5;
 //	p_config->pinAinCurrentGainLow               = 6; // lowest gain
 //	p_config->pinAinVoltage                      = 2;
@@ -133,7 +133,7 @@ void asACR01B7B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrent                      = 4; // highest gain
+	p_config->pinAinCurrentGainHigh              = 4; // highest gain
 	p_config->pinAinCurrentGainMed               = 5;
 	p_config->pinAinCurrentGainLow               = 6; // lowest gain
 	p_config->pinAinVoltage                      = 2;
@@ -155,14 +155,15 @@ void asACR01B7B(boards_config_t* p_config) {
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
 
-	p_config->voltageMultiplier                  = 0.171f; // TODO: calibrate
-	p_config->currentMultiplier                  = 0.0042f; // TODO: calibrate
-	p_config->voltageZero                        = -99; // TODO: calibrate
-	p_config->currentZero                        = -270; // TODO: calibrate
-	p_config->powerZero                          = 8000; // TODO: calibrate
+//	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
+//	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
+	p_config->voltageMultiplier                  = 0.0f;
+	p_config->currentMultiplier                  = 0.0f;
+	p_config->voltageZero                        = -45; // for range -1800 - 1800 mV
+	p_config->currentZero                        = -20; // for range -3000 - 3000 mV on pin 5
+	p_config->powerZero                          = 0; // TODO: calibrate
 	p_config->voltageRange                       = 1800;
-	p_config->currentRange                       = 600; // TODO: calibrate
-//	p_config->currentRange                       = 1800; // Range used when not doing differential measurements.
+	p_config->currentRange                       = 3000;
 
 	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
 	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
@@ -175,7 +176,7 @@ void asACR01B2C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrent                      = 2;
+	p_config->pinAinCurrentGainMed               = 2;
 	p_config->pinAinVoltage                      = 1;
 //	p_config->pinAinZeroRef                      = -1; // Non existing
 	p_config->pinAinPwmTemp                      = 3;
@@ -212,7 +213,7 @@ void asACR01B2G(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrent                      = 2;
+	p_config->pinAinCurrentGainMed               = 2;
 	p_config->pinAinVoltage                      = 1;
 	p_config->pinAinZeroRef	                     = 0;
 	p_config->pinAinPwmTemp                      = 3;
@@ -258,7 +259,7 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 17;
 	p_config->pinGpioRelayOn                     = 11; // something unused
 	p_config->pinGpioRelayOff                    = 12; // something unused
-	p_config->pinAinCurrent                      = 1; // gpio3
+	p_config->pinAinCurrentGainMed               = 1; // gpio3
 	p_config->pinAinVoltage                      = 2; // gpio4
 	p_config->pinAinZeroRef	                     = 4; // gpio28
 	p_config->pinAinPwmTemp                      = 0; // gpio2

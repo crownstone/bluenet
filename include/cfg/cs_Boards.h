@@ -89,7 +89,7 @@ typedef struct  {
 	uint8_t pinGpioRelayOff;
 
 	//! Analog input pin to read the current with high gain.
-	uint8_t pinAinCurrent;
+	uint8_t pinAinCurrentGainHigh;
 
 	//! Analog input pin to read the current with medium gain.
 	uint8_t pinAinCurrentGainMed;
