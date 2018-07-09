@@ -27,6 +27,8 @@ fi
 
 eval set -- "$PARSED"
 
+autoyes=false
+
 while true; do
 	case "$1" in
 		-c|--command)
@@ -40,6 +42,10 @@ while true; do
 		-a|--address)
 			address=$2
 			shift 2
+			;;
+		-y|--yes)
+			autoyes=true
+			shift 1
 			;;
 		--)
 			shift
@@ -79,6 +85,7 @@ usage() {
   echo "Optional arguments:"
   echo "   -t target, --target=target               specify target (files are generated in separate directories)"
   echo "   -a address, --address address            specify particular address to use"
+  echo "   -y, --yes                                automatically respond yes (non-interactive mode)"
 }
 
 if [ ! "$cmd" ]; then
@@ -304,33 +311,46 @@ release() {
 	# return $result
 }
 
+# The hardware board version should be defined in the file:
+#   $BLUENET_CONFIG_DIR/$target/CMakeBuild.config
+# If it is not defined it is impossible to check if we actually flash the right firmware so the script will exit.
 verifyHardwareBoardDefinedLocally() {
 	if [ -z "$HARDWARE_BOARD" ]; then
-		cs_err "Need to specify HARDWARE_BOARD either in $BLUENET_CONFIG_DIR/_targets.sh"
-		cs_err "for a given target, or by calling the script as"
-		cs_err "   HARDWARE_BOARD=... ./firmware.sh"
+		cs_err 'Need to specify HARDWARE_BOARD through $BLUENET_CONFIG_DIR/_targets.sh'
+		cs_err 'Which pulls in $BLUENET_CONFIG_DIR/$target/CMakeBuild.config'
+		cs_err 'for a given target, or by calling the script as'
+		cs_err '   HARDWARE_BOARD=... ./firmware.sh'
 		exit $ERR_VERIFY_HARDWARE_LOCALLY
 	fi 
 }
 
+# The hardware board is actually physically checked. 
 verifyHardwareBoardDefined() {
 	verifyHardwareBoardDefinedLocally
 	cs_info "Find hardware board version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
-	version=$(${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num)
+	hardware_board_version=$(${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num)
 #	HARDWARE_BOARD_INT=$(cat $BLUENET_DIR/include/cfg/cs_Boards.h | grep -o "#define.*\b$HARDWARE_BOARD\b.*" | grep -w "$HARDWARE_BOARD" | awk 'NF>1{print $NF}')
 	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
-	board_version=$(printf "%08x" $HARDWARE_BOARD_INT)
-	if [ "$version" == 'FFFFFFFF' ]; then
-	  cs_err "You have to write the hardware version! It is still set to $version."
-	  exit $ERR_HARDWARE_VERSION_UNSET
-	elif [ "$version" == '<not found>' ]; then
+	config_board_version=$(printf "%08x" $HARDWARE_BOARD_INT)
+	if [ "$hardware_board_version" == 'FFFFFFFF' ] || [ "$hardware_board_version" == 'ffffffff' ]; then
+	  if [ "$autoyes" == 'false' ]; then
+	    echo -n "Do you want to overwrite the hardware version [y/N]? "
+	    read autoyes
+	  fi
+	  if [ "$autoyes" == 'true' ] || [ "$autoyes" == 'Y' ] || [ "$autoyes" == 'y' ]; then 
+	    writeHardwareVersion
+	  else 
+	    cs_err "You have to write the hardware version! It is still set to $hardware_board_version."
+	    exit $ERR_HARDWARE_VERSION_UNSET
+	  fi
+	elif [ "$hardware_board_version" == '<not found>' ]; then
 	  cs_err "Did you actually connect the JLink?"
 	  exit $ERR_JLINK_NOT_FOUND
-	elif [ "$version" != "$board_version" ]; then
-	  cs_err "You have to update the hardware version! It is set to $version rather than $board_version."
+	elif [ "$hardware_board_version" != "$config_board_version" ]; then
+	  cs_err "You have an incorrect hardware version on your board! It is set to $hardware_board_version rather than $config_board_version."
 	  exit $ERR_HARDWARE_VERSION_MISMATCH
 	else
-	  cs_info "Found hardware version: $version"
+	  cs_info "Found hardware version: $hardware_board_version"
 	fi
 }
 
