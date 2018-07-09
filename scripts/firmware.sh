@@ -17,8 +17,8 @@ if [[ $? -ne 4 ]]; then
   exit $ERR_GETOPT_TEST
 fi
 
-SHORT=c:t:a:ybs
-LONG=command:,target:,address:
+SHORT=c:t:a:ybsu
+LONG=command:,target:,address:yes,bootloader,softdevice,use_combined
 
 PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -26,8 +26,6 @@ if [[ $? -ne 0 ]]; then
 fi
 
 eval set -- "$PARSED"
-
-autoyes=false
 
 while true; do
 	case "$1" in
@@ -53,6 +51,10 @@ while true; do
 			;;
 		-s|--softdevice)
 			include_softdevice=true
+			shift 1
+			;;
+		-u|--use_combined)
+			use_combined=true
 			shift 1
 			;;
 		--)
@@ -96,6 +98,7 @@ usage() {
   echo "   -a address, --address address            specify particular address to use"
   echo "   -b, --bootloader                         include bootloader"
   echo "   -s, --softdevice                         include softdevice"
+  echo "   -u, --use_combined                       run combine script and use combined binary"
   echo "   -y, --yes                                automatically respond yes (non-interactive mode)"
 }
 
@@ -118,10 +121,12 @@ if [[ $cmd != "help" ]]; then
 	# adjust targets and sets serial_num
 	# call it with the . so that it get's the same arguments as the call to this script
 	# and so that the variables assigned in the script will be persistent afterwards
+	cs_info "Load configuration from: ${path}/_check_targets.sh $target"
 	source ${path}/_check_targets.sh $target
 
 	# configure environment variables, load configuration files, check targets and
 	# assign serial_num from target
+	cs_info "Load configuration from: ${path}/_config.sh"
 	source $path/_config.sh
 fi
 
@@ -153,7 +158,7 @@ cs_info "Configuration parameters loaded from files set up beforehand through e.
 printf "\n"
 log_config
 
-# Use hidden .build file to store variables
+# Use hidden .build file to store variables (it is just used to increment a number and ask for a rebuild every 100x)
 BUILD_PROCESS_FILE="$BLUENET_BUILD_DIR/.build"
 
 if [ -e "$BLUENET_BUILD_DIR" ]; then
@@ -204,12 +209,11 @@ build() {
 writeHardwareVersion() {
 	verifyHardwareBoardDefinedLocally
 	if [ $? -eq 0 ]; then
-#		HARDWARE_BOARD_INT=$(cat $BLUENET_DIR/include/cfg/cs_Boards.h | grep -o "#define.*\b$HARDWARE_BOARD\b.*" | grep -w "$HARDWARE_BOARD" | awk 'NF>1{print $NF}')
 		HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
 		if [ $? -eq 0 ] && [ -n "$HARDWARE_BOARD_INT" ]; then
 			cs_info "HARDWARE_BOARD $HARDWARE_BOARD = $HARDWARE_BOARD_INT"
-			board_version=$(printf "%x" $HARDWARE_BOARD_INT)
-			${path}/_writebyte.sh $HARDWARE_BOARD_ADDRESS $board_version $serial_num
+			HARDWARE_BOARD_HEX=$(printf "%x" $HARDWARE_BOARD_INT)
+			${path}/_writebyte.sh $HARDWARE_BOARD_ADDRESS $HARDWARE_BOARD_HEX $serial_num
 			checkError "Error writing hardware version"
 		else
 			cs_err "Failed to extract HARDWARE_BOARD=$HARDWARE_BOARD from $BLUENET_DIR/include/cfg/cs_Boards.h"
@@ -218,8 +222,11 @@ writeHardwareVersion() {
 }
 
 upload() {
-	verifyHardwareBoardDefined
-
+	if [ $use_combined ]; then
+		cs_info "Upload all at once"
+	else
+		verifyHardwareBoardDefined
+	fi
 	if [ $? -eq 0 ]; then
 	        if [ $include_bootloader ]; then
 		      bootloader
@@ -228,9 +235,19 @@ upload() {
 		      softdevice
 		fi
 		# Upload application firmware
-		${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
-		checkError "Error with uploading firmware"
+		if [ $use_combined ]; then
+		      combine
+		      ${path}/_upload.sh $BLUENET_BIN_DIR/combined.hex $address $serial_num
+		      checkError "Error with uploading firmware"
+		else
+		      ${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
+		      checkError "Error with uploading firmware"
+		fi
 	fi
+}
+
+combine() {
+	./combine.sh $target
 }
 
 debug() {
@@ -354,11 +371,13 @@ verifyHardwareBoardDefined() {
 	verifyHardwareBoardDefinedLocally
 	cs_info "Find hardware board version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
 	hardware_board_version=$(${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num)
-#	HARDWARE_BOARD_INT=$(cat $BLUENET_DIR/include/cfg/cs_Boards.h | grep -o "#define.*\b$HARDWARE_BOARD\b.*" | grep -w "$HARDWARE_BOARD" | awk 'NF>1{print $NF}')
 	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
 	config_board_version=$(printf "%08x" $HARDWARE_BOARD_INT)
 	if [ "$hardware_board_version" == 'FFFFFFFF' ] || [ "$hardware_board_version" == 'ffffffff' ]; then
-	  if [ "$autoyes" == 'false' ]; then
+	  if [ $autoyes ]; then
+	    cs_info "Automatically overwriting hardware version (now at 0xFFFFFFFF)"
+	  else
+	    cs_info "Hardware version is $hardware_board_version"
 	    echo -n "Do you want to overwrite the hardware version [y/N]? "
 	    read autoyes
 	  fi

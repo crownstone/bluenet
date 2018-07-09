@@ -95,9 +95,9 @@ IF(DEFINED BUILD_MESHING AND "${BUILD_MESHING}" STRGREATER "0")
 	ENDIF()
 
 	IF(IS_DIRECTORY "${MESH_DIR}")
-		MESSAGE(STATUS "Use directory ${MESH_DIR} for the mesh")
+		MESSAGE(STATUS "crownstone.src.cmake: Use directory ${MESH_DIR} for the mesh")
 	ELSE()
-		MESSAGE(FATAL_ERROR "Directory \"${MESH_DIR}\" does not exist! Clone https://github.com/crownstone/nRF51-ble-bcast-mesh and switch to the bluenet branch.")
+		MESSAGE(FATAL_ERROR "crownstone.src.cmake: Directory \"${MESH_DIR}\" does not exist! Clone https://github.com/crownstone/nRF51-ble-bcast-mesh and switch to the bluenet branch.")
 	ENDIF()
 
 	EXECUTE_PROCESS(
@@ -107,9 +107,9 @@ IF(DEFINED BUILD_MESHING AND "${BUILD_MESHING}" STRGREATER "0")
 		OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 	IF(MESH_BRANCH STREQUAL "bluenet")
-		MESSAGE(STATUS "Using bluenet branch for the Mesh")
+		MESSAGE(STATUS "crownstone.src.cmake: Using bluenet branch for the Mesh")
 	ELSE()
-		MESSAGE(FATAL_ERROR "Switch ${MESH_DIR} to bluenet branch. The master branch is not bluenet-compatible yet.")
+		MESSAGE(FATAL_ERROR "crownstone.src.cmake: Switch ${MESH_DIR} to bluenet branch. The master branch is not bluenet-compatible yet.")
 	ENDIF()
 
 	SET(INCLUDE_DIR "${INCLUDE_DIR}" "${MESH_DIR}" "${MESH_DIR}/include")
