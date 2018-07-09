@@ -17,7 +17,7 @@ if [[ $? -ne 4 ]]; then
   exit $ERR_GETOPT_TEST
 fi
 
-SHORT=c:t:a:
+SHORT=c:t:a:ybs
 LONG=command:,target:,address:
 
 PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
@@ -45,6 +45,14 @@ while true; do
 			;;
 		-y|--yes)
 			autoyes=true
+			shift 1
+			;;
+		-b|--bootloader)
+			include_bootloader=true
+			shift 1
+			;;
+		-s|--softdevice)
+			include_softdevice=true
 			shift 1
 			;;
 		--)
@@ -77,7 +85,8 @@ usage() {
   echo "      run                                   run application that is already uploaded"
   echo "      clean                                 clean compilation folders"
   echo "      bootloader-only                       upload bootloader"
-  echo "      bootloader                            upload bootloader (what's the diff?)"
+  echo "      bootloader                            upload bootloader and application"
+  echo "      softdevice                            upload softdevice"
   echo "      debugbl                               debug bootloader"
   echo "      readHardwareVersion                   read hardware version from target"
   echo "      writeHardwareVersion                  write hardware version to target"
@@ -85,6 +94,8 @@ usage() {
   echo "Optional arguments:"
   echo "   -t target, --target=target               specify target (files are generated in separate directories)"
   echo "   -a address, --address address            specify particular address to use"
+  echo "   -b, --bootloader                         include bootloader"
+  echo "   -s, --softdevice                         include softdevice"
   echo "   -y, --yes                                automatically respond yes (non-interactive mode)"
 }
 
@@ -210,7 +221,13 @@ upload() {
 	verifyHardwareBoardDefined
 
 	if [ $? -eq 0 ]; then
-		# writeHardwareVersion
+	        if [ $include_bootloader ]; then
+		      bootloader
+		fi
+	        if [ $include_softdevice ]; then
+		      softdevice
+		fi
+		# Upload application firmware
 		${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
 		checkError "Error with uploading firmware"
 	fi
@@ -281,6 +298,14 @@ uploadBootloader() {
 	fi
 }
 
+softdevice() {
+	verifyHardwareBoardDefined
+
+	if [ $? -eq 0 ]; then
+		${path}/softdevice.sh all
+	fi
+}
+
 bootloader() {
 	uploadBootloader
 	if [ $? -eq 0 ]; then
@@ -294,10 +319,10 @@ bootloader() {
 bootloader-only() {
 	uploadBootloader
 	if [ $? -eq 0 ]; then
-		# Mark current app as invalid app
+		# Mark current app as an invalid app
 		${path}/_writebyte.sh 0x0007F000 0 $serial_num
 
-		checkError "Error marking app invalid"
+		checkError "Error marking app invalid, note INVALID (only a bootloader is flashed, no valid app)"
 	fi
 }
 
