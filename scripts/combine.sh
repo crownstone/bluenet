@@ -40,10 +40,15 @@ if [[ "$add_bootloader" == true ]]; then
 fi
 
 if [[ "$add_board_info" == true ]]; then
-	cs_info "Obtain hardware board from $BLUENET_DIR/include/cfg/cs_Boards.h"
-	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
+	BOARD_FILE="$BLUENET_DIR/include/cfg/cs_Boards.h"
+	cs_info "Obtain hardware board from $BOARD_FILE"
+	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BOARD_FILE | grep -oP "\d+$")
+	if [[ ! "$HARDWARE_BOARD_INT" ]]; then
+		cs_err "ERROR: No hardware board defined (check target=$target in $BOARD_FILE)"
+		exit 1
+	fi
 	HARDWARE_BOARD_HEX=$(printf "0x%08x" $HARDWARE_BOARD_INT)
-	echo "Hardware address: $HARDWARE_BOARD_ADDRESS"
+	cs_info "Write $HARDWARE_BOARD_HEX to address: $HARDWARE_BOARD_ADDRESS"
 	HARDWARE_BOARD_CONFIG="-exclude 0x10001084 0x10001088 -generate 0x10001084 0x10001088 -l-e-constant $HARDWARE_BOARD_HEX 4"
 fi
 
@@ -52,10 +57,11 @@ if [[ "$add_softdevice" == true ]]; then
 fi
 if [[ "$add_binary" == true ]]; then
 	ADD_BINARY="crownstone.bin -binary -offset $APPLICATION_START_ADDRESS"
+	BINARY_VALID_FLAG="-exclude 0x7F000 0x7F004 -generate 0x7F000 0x7F004 -le-constant 0x00000001 4"
 fi
 
-cs_log "srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $HARDWARE_BOARD_CONFIG $ADD_BINARY $BOOTLOADER_SETTINGS -o combined.hex -intel"
-srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $HARDWARE_BOARD_CONFIG $ADD_BINARY $BOOTLOADER_SETTINGS -o combined.hex -intel
+cs_log "srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $HARDWARE_BOARD_CONFIG $ADD_BINARY $BINARY_VALID_FLAG $BOOTLOADER_SETTINGS -o combined.hex -intel"
+srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $HARDWARE_BOARD_CONFIG $ADD_BINARY $BINARY_VALID_FLAG $BOOTLOADER_SETTINGS -o combined.hex -intel
 res=$?
 if [ ! $res -eq 0 ]; then
 	cs_log "ERROR: srec_cat failed, check the results"
