@@ -131,11 +131,11 @@ if [[ $cmd != "help" ]]; then
 fi
 
 if [ "$VERBOSE" == "1" ]; then
-  cs_info "Verbose mode"
-  make_flag=""
+	cs_info "Verbose mode"
+	make_flag=""
 else
-  cs_info "Silent mode"
-  make_flag="-s"
+	cs_info "Silent mode"
+	make_flag="-s"
 fi
 
 # use $APPLICATION_START_ADDRESS as default if no address defined
@@ -162,25 +162,25 @@ log_config
 BUILD_PROCESS_FILE="$BLUENET_BUILD_DIR/.build"
 
 if [ -e "$BLUENET_BUILD_DIR" ]; then
-  if ! [ -e "$BUILD_PROCESS_FILE" ]; then
-    BUILD_CYCLE=0
-    echo "BUILD_CYCLE=$BUILD_CYCLE" > "$BUILD_PROCESS_FILE"
-  fi
-  source "$BUILD_PROCESS_FILE"
+	if ! [ -e "$BUILD_PROCESS_FILE" ]; then
+		BUILD_CYCLE=0
+		echo "BUILD_CYCLE=$BUILD_CYCLE" > "$BUILD_PROCESS_FILE"
+	fi
+	source "$BUILD_PROCESS_FILE"
 
-  BUILD_CYCLE=$((BUILD_CYCLE + 1))
-  sed -i "s/\(BUILD_CYCLE *= *\).*/\1$BUILD_CYCLE/" "$BUILD_PROCESS_FILE"
-  if ! (($BUILD_CYCLE % 100)); then
-    printf "\n"
-    printf "Would you like to check for updates? [Y/n]: "
-    read update_response
-    if [ "$update_response" == "n" ]; then
-      git_version=$(git rev-parse --short=25 HEAD)
-      printf "oo Git version: $git_version\n"
-    else
-      git-pull
-    fi
-  fi
+	BUILD_CYCLE=$((BUILD_CYCLE + 1))
+	sed -i "s/\(BUILD_CYCLE *= *\).*/\1$BUILD_CYCLE/" "$BUILD_PROCESS_FILE"
+	if ! (($BUILD_CYCLE % 100)); then
+		printf "\n"
+		printf "Would you like to check for updates? [Y/n]: "
+		read update_response
+		if [ "$update_response" == "n" ]; then
+			git_version=$(git rev-parse --short=25 HEAD)
+			printf "oo Git version: $git_version\n"
+		else
+			git-pull
+		fi
+	fi
 fi
 
 printf "${normal}\n"
@@ -247,6 +247,7 @@ upload() {
 }
 
 combine() {
+	compileBootloader
 	./combine.sh $target
 }
 
@@ -323,7 +324,20 @@ softdevice() {
 	fi
 }
 
+compileBootloader() {
+	if [ -d "${BLUENET_BOOTLOADER_DIR}" ]; then
+		cs_info "Build bootloader ..."
+		${BLUENET_BOOTLOADER_DIR}/scripts/all.sh $target
+
+		checkError
+		cs_succ "Build DONE"
+	else
+		cs_err "BLUENET_BOOTLOADER_DIR not defined, skip bootloader!"
+	fi
+}
+
 bootloader() {
+	compileBootloader
 	uploadBootloader
 	if [ $? -eq 0 ]; then
 		# Mark current app as valid app
@@ -374,27 +388,27 @@ verifyHardwareBoardDefined() {
 	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
 	config_board_version=$(printf "%08x" $HARDWARE_BOARD_INT)
 	if [ "$hardware_board_version" == 'FFFFFFFF' ] || [ "$hardware_board_version" == 'ffffffff' ]; then
-	  if [ $autoyes ]; then
-	    cs_info "Automatically overwriting hardware version (now at 0xFFFFFFFF)"
-	  else
-	    cs_info "Hardware version is $hardware_board_version"
-	    echo -n "Do you want to overwrite the hardware version [y/N]? "
-	    read autoyes
-	  fi
-	  if [ "$autoyes" == 'true' ] || [ "$autoyes" == 'Y' ] || [ "$autoyes" == 'y' ]; then 
-	    writeHardwareVersion
-	  else 
-	    cs_err "You have to write the hardware version! It is still set to $hardware_board_version."
-	    exit $ERR_HARDWARE_VERSION_UNSET
-	  fi
+		if [ $autoyes ]; then
+			cs_info "Automatically overwriting hardware version (now at 0xFFFFFFFF)"
+		else
+			cs_info "Hardware version is $hardware_board_version"
+			echo -n "Do you want to overwrite the hardware version [y/N]? "
+			read autoyes
+		fi
+		if [ "$autoyes" == 'true' ] || [ "$autoyes" == 'Y' ] || [ "$autoyes" == 'y' ]; then 
+			writeHardwareVersion
+		else 
+			cs_err "You have to write the hardware version! It is still set to $hardware_board_version."
+			exit $ERR_HARDWARE_VERSION_UNSET
+		fi
 	elif [ "$hardware_board_version" == '<not found>' ]; then
-	  cs_err "Did you actually connect the JLink?"
-	  exit $ERR_JLINK_NOT_FOUND
+		cs_err "Did you actually connect the JLink?"
+		exit $ERR_JLINK_NOT_FOUND
 	elif [ "$hardware_board_version" != "$config_board_version" ]; then
-	  cs_err "You have an incorrect hardware version on your board! It is set to $hardware_board_version rather than $config_board_version."
-	  exit $ERR_HARDWARE_VERSION_MISMATCH
+		cs_err "You have an incorrect hardware version on your board! It is set to $hardware_board_version rather than $config_board_version."
+		exit $ERR_HARDWARE_VERSION_MISMATCH
 	else
-	  cs_info "Found hardware version: $hardware_board_version"
+		cs_info "Found hardware version: $hardware_board_version"
 	fi
 }
 
