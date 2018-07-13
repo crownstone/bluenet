@@ -227,9 +227,21 @@ And another shortcut to build, upload, and debug:
 
     ./firmware.sh --command=all --target=default
 
+### Uploading combined files
+
+You can also upload a binary that combines the application, the softdevice, and the bootloader. Let us explain these with short options (`-c` rather than `--command` for example). The following uploads the softdevice (`-s`), and the bootloader (`-b`) as well:
+
+    ./firmware.sh -c upload -t default -s -b
+
+This uploads all these binaries separately. It is also possible to combine everything into one binary (`-u`, or `--use_combined`):
+
+    ./firmware.sh -c upload -t default -u
+    
+In the combined binary the hardware version is set as well in a `UICR` register. It also writes an app valid bit.
+
 ### Advanced Usage
 
-The above scripts and configuration is sufficient if you work with one device and one configuration file. However, if you want to quickly switch between different configurations or have more than one device connected, you might want to try out the support for multiple targets.
+The above scripts and configuration are sufficient if you work with one device and one configuration file. However, if you want to quickly switch between different configurations or have more than one device connected, you might want to try out the support for multiple targets.
 
 #### Local config file
 
