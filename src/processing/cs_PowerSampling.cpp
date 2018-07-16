@@ -840,7 +840,7 @@ void PowerSampling::toggleVoltageChannelInput() {
 void PowerSampling::enableDifferentialModeCurrent(bool enable) {
 	_adcConfig.currentDifferential = enable;
 	adc_channel_config_t channelConfig;
-	channelConfig.pin = _adcConfig.currentPinGainHigh;
+	channelConfig.pin = _adcConfig.currentPinGainMed;
 	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[CURRENT_CHANNEL_IDX];
 	channelConfig.referencePin = _adcConfig.currentDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
 	_adc->changeChannel(CURRENT_CHANNEL_IDX, channelConfig);
