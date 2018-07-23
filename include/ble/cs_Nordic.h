@@ -34,11 +34,7 @@ extern "C"
 #include "nrf_error.h"
 
 #include "app_util.h"
-//#include "app_timer.h"
 #include "app_scheduler.h"
-#if NORDIC_SDK_VERSION<=11
-#include "app_timer_appsh.h"
-#endif
 
 #ifndef BOOTLOADER_COMPILATION
 // Refering to driver files
@@ -46,9 +42,6 @@ extern "C"
 #include "nrf_timer.h"
 #include "nrf_ppi.h"
 #include "nrf_gpiote.h"
-//#include "nrf_drv_timer.h"
-//#include "nrf_drv_ppi.h"
-//#include "nrf_drv_gpiote.h"
 #include "nrf_uart.h"
 #include "crc16.h"
 #endif
@@ -56,8 +49,6 @@ extern "C"
 #undef APP_ERROR_CHECK // undefine again, we want to use our own macro defined in util/cs_BleError.h
 #undef APP_ERROR_HANDLER
 
-#include "softdevice_handler_appsh.h"
-//#include "softdevice_handler.h"
 #include "nrf_nvic.h"
 
 #ifdef __cplusplus

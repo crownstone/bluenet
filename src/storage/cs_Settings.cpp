@@ -13,9 +13,6 @@
 #include <util/cs_Utils.h>
 #include <storage/cs_StorageHelper.h>
 
-//! enable to print additional debug
-//#define PRINT_DEBUG
-
 Settings::Settings() : _initialized(false), _storage(NULL), _boardsConfig(NULL) {
 };
 
@@ -28,55 +25,13 @@ void Settings::init(boards_config_t* boardsConfig) {
 		return;
 	}
 
-	_storage->getHandle(PS_ID_CONFIGURATION, _storageHandle);
 	loadPersistentStorage();
-
-	// need to initialize the flags if they are uninitialized, e.g. first time
-//	if (_storageStruct.flagsBit.flagsUninitialized) {
-//		initFlags();
-//	}
 
 	_initialized = true;
 }
 
-//	void writeToStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 ERR_CODE Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent) {
 
-	/////////////////////////////////////////////////
-	//// SPECIAL CASES
-	/////////////////////////////////////////////////
-	switch(type) {
-//	case CONFIG_WIFI_SETTINGS: {
-//		LOGi("Temporarily store wifi settings");
-//		//! max length '{ "ssid": "32 bytes", "key": "32 bytes"}', 64+24 bytes = 88 bytes
-//		if (length > 88) {
-//			LOGe("Wifi settings string too long");
-//			return ERR_WRONG_PAYLOAD_LENGTH;
-//		}
-//		_wifiSettings = std::string((char*)payload, length);
-//		LOGi("Stored wifi settings [%i]: %s", length, _wifiSettings.c_str());
-//		return ERR_SUCCESS;
-//	}
-
-	// todo: if we want to disable write access for encryption keys outside the setup mode
-//	/////////////////////////////////////////////////
-//	//// WRITE DISABLED
-//	/////////////////////////////////////////////////
-//	case CONFIG_KEY_OWNER :
-//	case CONFIG_KEY_MEMBER :
-//	case CONFIG_KEY_GUEST : {
-//		uint8_t opMode;
-//		State::getInstance().get(STATE_OPERATION_MODE, opMode);
-//		if (opMode != OPERATION_MODE_SETUP) {
-//			LOGw("Reading encryption keys only available in setup mode!");
-//			return false;
-//		}
-//	}
-	}
-
-	/////////////////////////////////////////////////
-	//// DEFAULT
-	/////////////////////////////////////////////////
 	ERR_CODE error_code;
 	error_code = verify(type, payload, length);
 	if (SUCCESS(error_code)) {
@@ -88,46 +43,6 @@ ERR_CODE Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t lengt
 
 ERR_CODE Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 
-	/////////////////////////////////////////////////
-	//// SPECIAL CASES
-	/////////////////////////////////////////////////
-	switch(type) {
-//	case CONFIG_WIFI_SETTINGS: {
-//		LOGd("Read wifi settings. Does reset it.");
-//		//! copy string, because we clear it on read
-//		std::string str;
-//		if (_wifiSettings == "") {
-//			str = "{}";
-//		} else {
-//			str = _wifiSettings;
-//		}
-//		streamBuffer->fromString(str);
-//		streamBuffer->setType(type);
-//		_wifiSettings = "";
-//		LOGd("Wifi settings read");
-//		return ERR_SUCCESS;
-//	}
-
-	// todo: if we want to disable read access for encryption keys outside the setup mode
-//	/////////////////////////////////////////////////
-//	//// READ DISABLED
-//	/////////////////////////////////////////////////
-//	case CONFIG_KEY_OWNER :
-//	case CONFIG_KEY_MEMBER :
-//	case CONFIG_KEY_GUEST : {
-//		uint8_t opMode;
-//		State::getInstance().get(STATE_OPERATION_MODE, opMode);
-//		if (opMode != OPERATION_MODE_SETUP) {
-//			LOGw("Reading encryption keys only avilable in setup mode!");
-//			return false;
-//		}
-//	}
-
-	}
-
-	/////////////////////////////////////////////////
-	//// DEFAULT
-	/////////////////////////////////////////////////
 	ERR_CODE error_code;
 	uint16_t plen = getSettingsItemSize(type);
 	if (plen > 0) {
@@ -184,10 +99,6 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 	/////////////////////////////////////////////////
 	//// UINT 16
 	/////////////////////////////////////////////////
-//	case CONFIG_ADC_BURST_SAMPLE_RATE:
-//	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
-//	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
-//	case CONFIG_ADC_CONT_SAMPLE_RATE:
 	case CONFIG_SCAN_INTERVAL:
 	case CONFIG_SCAN_WINDOW:
 	case CONFIG_RELAY_HIGH_DURATION:
@@ -550,22 +461,6 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size, bool getDefau
 		StorageHelper::getArray<uint8_t>(_storageStruct.encryptionKeys.guest, (uint8_t*)target, NULL, ENCRYPTION_KEY_LENGTH, getDefaultValue);
 		break;
 	}
-//	case CONFIG_ADC_BURST_SAMPLE_RATE: {
-//		StorageHelper::getUint16(_storageStruct.adcBurstSampleRate, (uint16_t*)target, CS_ADC_SAMPLE_RATE);
-//		break;
-//	}
-//	case CONFIG_POWER_SAMPLE_BURST_INTERVAL: {
-//		StorageHelper::getUint16(_storageStruct.powerSampleBurstInterval, (uint16_t*)target, POWER_SAMPLE_BURST_INTERVAL);
-//		break;
-//	}
-//	case CONFIG_POWER_SAMPLE_CONT_INTERVAL: {
-//		StorageHelper::getUint16(_storageStruct.powerSampleContInterval, (uint16_t*)target, POWER_SAMPLE_CONT_INTERVAL);
-//		break;
-//	}
-//	case CONFIG_ADC_CONT_SAMPLE_RATE: {
-//		StorageHelper::getUint16(_storageStruct.adcContSampleRate, (uint16_t*)target, CS_ADC_SAMPLE_RATE);
-//		break;
-//	}
 	case CONFIG_SCAN_INTERVAL: {
 		StorageHelper::getUint16(_storageStruct.scanInterval, (uint16_t*)target, SCAN_INTERVAL, getDefaultValue);
 		break;
@@ -1109,13 +1004,13 @@ bool Settings::isSet(uint8_t type) {
  * Hence, there is an entire struct that can be filled and flashed at once.
  */
 void Settings::loadPersistentStorage() {
-	_storage->readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+	//TODO: _storage->readStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 
 void Settings::savePersistentStorageItem(uint8_t* item, uint8_t size) {
-	uint32_t offset = StorageHelper::getOffset(&_storageStruct, item);
-	_storage->writeItem(_storageHandle, offset, item, size);
+	// TODO: uint32_t offset = StorageHelper::getOffset(&_storageStruct, item);
+	// _storage->writeItem(_storageHandle, offset, item, size);
 }
 
 void Settings::savePersistentStorageItem(int32_t* item) {
@@ -1131,7 +1026,7 @@ void Settings::savePersistentStorageItem(uint32_t* item) {
  *  savePersistentStorageItem functions
  */
 void Settings::savePersistentStorage() {
-	_storage->writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
+	// TODO: _storage->writeStorage(_storageHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void Settings::saveIBeaconPersistent() {
@@ -1144,8 +1039,6 @@ void Settings::factoryReset(uint32_t resetCode) {
 		return;
 	}
 
-	_storage->clearStorage(PS_ID_CONFIGURATION);
+	// TODO:	_storage->clearStorage(PS_ID_CONFIGURATION);
 	memset(&_storageStruct, 0xFF, sizeof(_storageStruct));
-//	initFlags();
-//	loadPersistentStorage();
 }

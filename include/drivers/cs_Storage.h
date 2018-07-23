@@ -18,15 +18,8 @@
 #include "structs/buffer/cs_CircularBuffer.h"
 #include <events/cs_EventListener.h>
 
-#if NORDIC_SDK_VERSION<=11
-extern "C" {
-	// the authors of the Nordic pstorage.h file forgot to include extern "C" wrappers
-//	#include "pstorage_platform.h"
-	#include "pstorage.h"
-}
-#else
-	#include "fstorage.h"
-#endif
+#include "nrf_fstorage.h"
+
 /** enable additional debug output */
 //#define PRINT_ITEMS
 
@@ -82,9 +75,9 @@ struct storage_config_t {
 	//! enum <ps_storage_id> defines the type of storage structure
 	ps_storage_id id;
 	//! handle to the storage in FLASH
-	pstorage_handle_t handle;
+	// TODO: doesn't exist anymore pstorage_handle_t handle;
 	//! size of the storage structure
-	pstorage_size_t storage_size;
+	// TODO: replace by fstorage pstorage_size_t storage_size;
 };
 
 // Configuration ///////////////////////////////
@@ -247,8 +240,7 @@ struct ps_configuration_t : ps_storage_base_t {
 };
 
 //! size of one block in eeprom can't be bigger than 1024 bytes. => create a new struct
-//STATIC_ASSERT(sizeof(ps_configuration_t) <= 0x1000);
-STATIC_ASSERT(sizeof(ps_configuration_t) <= PSTORAGE_FLASH_PAGE_SIZE);
+// TODO: STATIC_ASSERT(sizeof(ps_configuration_t) <= PSTORAGE_FLASH_PAGE_SIZE);
 
 /** Event handler for softdevice events. in particular, listen for
  *  NRF_EVT_RADIO_SESSION_CLOSED event to resume storage requests
@@ -264,7 +256,7 @@ struct __attribute__((__packed__)) buffer_element_t {
 	uint8_t* data;
 	uint16_t dataSize;
 	uint16_t storageOffset;
-	pstorage_handle_t storageHandle;
+	//TODO: pstorage_handle_t storageHandle;
 	bool update;
 };
 
@@ -309,7 +301,7 @@ public:
 	 *
 	 * @return true if operation successful, false otherwise
 	 */
-	bool getHandle(ps_storage_id storageID, pstorage_handle_t& handle);
+//TODO:	bool getHandle(ps_storage_id storageID, pstorage_handle_t& handle);
 
 	/** Clears the block for the given handle
 	 * @handle the handle to the persistent memory which was obtained by
@@ -317,7 +309,7 @@ public:
 	 * @storageID the enum defining the storage struct type, used to
 	 *   get the size of the struct
 	 */
-	void clearStorage(ps_storage_id storageID);
+//TODO:	void clearStorage(ps_storage_id storageID);
 
 	/** Get the struct stored in persistent memory at the position defined by the handle
 	 * @handle the handle to the persistent memory where the struct is stored.
@@ -326,7 +318,7 @@ public:
 	 *   should be copied into
 	 * @size size of the structure (usually sizeof(struct))
 	 */
-	void readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
+//TODO:	void readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
 
 	/** Write the struct to persistent memory at the position defined by the handle
 	 * @handle the handle to the persistent memory where the struct should be stored.
@@ -334,7 +326,10 @@ public:
 	 * @item pointer to the structure which data should be stored into persitent memory
 	 * @size size of the structure (usually sizeof(struct))
 	 */
-	void writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
+//TODO:	void writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size);
+//TODO: Something just like: 
+//      ret_code_t rc;
+//      rc = fds_record_write(&record_desc, &record);
 
 	/** Read a single item (variable) from persistent memory at the position defined by the handle
 	 * and the offset
@@ -346,7 +341,7 @@ public:
 	 * @offset the offset in bytes at which the item should be stored. (the offset is relative to the
 	 *   beginning of the block defined by the handle)
 	 */
-	void readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size);
+//TODO:	void readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size);
 
 	/** Write a single item (variable) to persistent memory at the position defined by the handle
 	 * and the offset
@@ -360,7 +355,7 @@ public:
 	 * @update True when updating the value, meaning any value can be written.
 	 *   False when just writing the value, meaning only 1s can become 0s.
 	 */
-	void writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size, bool update=true);
+//TODO:	void writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size, bool update=true);
 
 	void resumeRequests();
 
@@ -385,7 +380,7 @@ private:
 	 * @handle pointer to the handle which points to the persistent memory that
 	 *   was initialized
 	 */
-	void initBlocks(pstorage_size_t size, pstorage_size_t count, pstorage_handle_t& handle);
+//TODO:	void initBlocks(pstorage_size_t size, pstorage_size_t count, pstorage_handle_t& handle);
 
 	/** Helper function to obtain the config for the given storage ID
 	 * @storageID enum which defines the storage struct for which the

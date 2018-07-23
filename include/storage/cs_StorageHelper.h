@@ -26,7 +26,7 @@ public:
 	 * @variable pointer to the variable inside the struct
 	 * @return returns the offset in bytes
 	 */
-	static pstorage_size_t getOffset(ps_storage_base_t* storage, uint8_t* variable);
+	//TODO: static pstorage_size_t getOffset(ps_storage_base_t* storage, uint8_t* variable);
 
 	/** Helper function to convert std::string to char array
 	 * @value the input string

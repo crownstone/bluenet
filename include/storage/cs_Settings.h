@@ -96,7 +96,7 @@ protected:
 	bool _initialized;
 
 	//! handle to storage (required to write to and read from FLASH)
-	pstorage_handle_t _storageHandle;
+	//TODO: pstorage_handle_t _storageHandle;
 
 	//! struct that storage object understands
 	ps_configuration_t _storageStruct;

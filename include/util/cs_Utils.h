@@ -14,12 +14,6 @@
 #include "drivers/cs_Serial.h"
 #include "protocol/cs_ErrorCodes.h"
 
-#if __clang__
-#define STRINGIFY(str) #str
-#else
-#define STRINGIFY(str) str
-#endif
-
 /** @brief Variable length data encapsulation in terms of length and pointer to data */
 typedef struct
 {
