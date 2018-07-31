@@ -1,4 +1,13 @@
-/**
+/** StreamBuffer wraps an array of U elements of type T.
+ *
+ * The number of elements in the StreamBuffer is defined at compile time to be U. The type of the elements is T.
+ * The StreamBuffer also contains a so-called header that defines a type, opcode and length. 
+ *   The type typically is set to e.g. 'STATE_SWITCH_STATE', 'STATE_TEMPERATURE', etc.
+ *   The opcode is meant for advertising, e.g. 'READ', 'WRITE', 'NOTIFY'.
+ *   The memory allows U chunks, however the length parameter allows the use of fewer than U elements.
+ *
+ * The StreamBuffer is typically used in the CrownstoneService class.
+ *
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Jan. 30, 2015
@@ -7,15 +16,11 @@
 
 #pragma once
 
+#include <cfg/cs_Strings.h>
+#include <common/cs_Types.h>
 #include <structs/cs_BufferAccessor.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
-#include <common/cs_Types.h>
-#include <cfg/cs_Strings.h>
-
-//#define PRINT_STREAMBUFFER_VERBOSE
-
-
 
 #define SB_SUCCESS                               0
 #define SB_BUFFER_NOT_INITIALIZED                1
@@ -46,9 +51,6 @@ struct __attribute__((__packed__)) stream_header_t {
  */
 template <typename T, int U>
 struct __attribute__((__packed__)) stream_t {
-//	uint8_t type;
-//	uint8_t opCode; //! can be used as op code, see <OpCode>
-//	uint16_t length;
 	stream_header_t header;
 	T payload[U];
 };
@@ -56,7 +58,7 @@ struct __attribute__((__packed__)) stream_t {
 //! default payload length for a stream buffer. needs <MASTER_BUFFER_SIZE> to be defined
 #define DEFAULT_PAYLOAD_LENGTH ((MASTER_BUFFER_SIZE-SB_HEADER_SIZE)/sizeof(T))
 
-/** General StreamBuffer with type, op code, length, and payload
+/** General StreamBuffer with type, opcode, length, and payload
  *
  * General class that can be used to send arrays of values over Bluetooth. For the structure, see the
  * <stream_t> struct.
@@ -88,17 +90,6 @@ public:
 		_maxLength = size;
 		return 0;
 	}
-
-//	/** Release the buffer
-//	 *
-//	 * Sets pointer to zero, does not deallocate memory.
-//	 */
-//	void release() {
-//#ifdef PRINT_STREAMBUFFER_VERBOSE
-//		LOGw("Release stream buffer. This will screw up SoftDevice if characteristic is not deleted.");
-//#endif
-//		_buffer = NULL;
-//	}
 
 	/** Create a string from payload.
 	 *
@@ -196,13 +187,13 @@ public:
 
 	/** Return the opcode assigned to the SreamBuffer
 	 *
-	 * @return the type, see <OpCode>
+	 * @return the opcode, see <OpCode>
 	 */
 	inline uint8_t opCode() const { return _buffer->header.opCode; }
 
 	/** Set the opcode for this stream buffer
 	 *
-	 * @type the type, see <OpCode>
+	 * @opcode the opcode, see <OpCode>
 	 */
 	inline void setOpCode(uint8_t opCode) { _buffer->header.opCode = opCode; }
 
@@ -226,7 +217,6 @@ public:
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
 		}
 		_buffer->header.length = length;
-		//_buffer->length = ((length > _capacity) ? _capacity : plength);
 		memcpy(_buffer->payload, payload, length * _item_size);
 		return SB_SUCCESS;
 	}
@@ -262,7 +252,6 @@ private:
 	uint16_t _maxLength;
 
 	const size_t _item_size = sizeof(T);
-//	const size_t _max_items = (MASTER_BUFFER_SIZE-SB_HEADER_SIZE) / _item_size;
 	const size_t _max_items = U;
 
 };

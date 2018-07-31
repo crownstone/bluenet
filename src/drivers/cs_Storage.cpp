@@ -14,7 +14,7 @@
  * For more information see:
  * http://developer.nordicsemi.com/nRF51_SDK/doc/7.0.1/s110/html/a00763.html#ga0a57b964c8945eaca2d267835ef6688c
  */
-#include "drivers/cs_Storage.h"
+#include <drivers/cs_Storage.h>
 
 #include <climits>
 #include <float.h>
@@ -29,6 +29,7 @@
 
 extern "C"  {
 
+	/*
 	static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
 			uint32_t data_len) {
 		// we might want to check if things are actually stored, by using this callback
@@ -48,6 +49,7 @@ extern "C"  {
 			}
 		}
 	}
+	*/
 
 } // extern "C"
 
@@ -55,17 +57,17 @@ extern "C"  {
 // New entries go at the end? or start? It seems like the first entry is at the lowest address.
 // TODO: find out what happens when a new page is added: does everything shift or not?
 // Should match with ps_storage_id ?
+/*
 static storage_config_t config[] {
 	{PS_ID_CONFIGURATION, {}, sizeof(ps_configuration_t)},
 	{PS_ID_GENERAL, {}, sizeof(ps_general_vars_t)},
 	{PS_ID_STATE, {}, sizeof(ps_state_t)}
 };
-
+*/
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
 Storage::Storage() : EventListener(),
 		_initialized(false), _scanning(false), writeBuffer(STORAGE_REQUEST_BUFFER_SIZE), _pending(0)
-//		, pendingStorageRequests(0)
 {
 	LOGd(FMT_CREATE, "Storage");
 
@@ -80,9 +82,6 @@ void Storage::init() {
 	// call once before using any other API calls of the persistent storage module
 	BLE_CALL(pstorage_init, ());
 
-	// todo: only create it if needed?
-//	requestBuffer = new CircularBuffer<buffer_element_t>(STORAGE_REQUEST_BUFFER_SIZE, false);
-
 	LOGd("Page size: %u", PSTORAGE_FLASH_PAGE_SIZE);
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
 		LOGd("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
@@ -94,7 +93,6 @@ void Storage::init() {
 }
 
 void Storage::onUpdateDone() {
-//	LOGi("interrupt level=%u", __get_IPSR() & 0x1FF);
 
 	if (_pending) {
 		// track how many update requests are still pending
@@ -116,18 +114,15 @@ void resume_requests(void* p_data, uint16_t len) {
 }
 
 void storage_sys_evt_handler(uint32_t evt) {
-//	LOGi("interrupt level=%u", __get_IPSR() & 0x1FF);
 	// No need to decouple with app scheduler: this handler is already running on the main thread, since sys_evt_dispatch is too.
 	switch(evt) {
 	case NRF_EVT_RADIO_SESSION_IDLE: {
 		// once mesh is stopped, the softdevice will trigger the NRF_EVT_RADIO_SESSION_IDLE,
 		// now we can try to update the pstorage
-//		LOGd("NRF_EVT_RADIO_SESSION_IDLE");
 		Storage::getInstance().resumeRequests();
 		break;
 	}
 	case NRF_EVT_RADIO_SESSION_CLOSED: {
-//		LOGd("NRF_EVT_RADIO_SESSION_CLOSED");
 		Storage::getInstance().resumeRequests();
 		break;
 	}
@@ -143,9 +138,6 @@ void Storage::resumeRequests() {
 		while (!writeBuffer.empty()) {
 			//! get the next buffered storage request
 			buffer_element_t elem = writeBuffer.pop();
-
-//			LOGd("elem:");
-//			BLEutil::printArray((uint8_t*)&elem, sizeof(elem));
 
 			if (!_scanning) {
 				// count number of pending updates to decide when mesh can be resumed (if needed)

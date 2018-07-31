@@ -218,6 +218,14 @@ void Nrf51822BluetoothStack::initRadio() {
 	}
 	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
 
+	// BLE address with which we will broadcast, store in object field
+	err_code = sd_ble_gap_address_get(&_connectable_address);
+	APP_ERROR_CHECK(err_code);
+	err_code = sd_ble_gap_address_get(&_nonconnectable_address);
+	APP_ERROR_CHECK(err_code);
+	// have non-connectable address one value higher than connectable one
+	_nonconnectable_address.addr[0] += 0x1; 
+
 	_initializedRadio = true;
 
 	updateConnParams();
@@ -677,14 +685,24 @@ void Nrf51822BluetoothStack::configureAdvertisementParameters() {
 	_adv_params.fp = BLE_GAP_ADV_FP_ANY;
 	_adv_params.interval = _interval;
 	_adv_params.timeout = _timeout;
+#ifdef ADV_BROADCAST_OVER_ONE_CHANNEL
+	_adv_params.channel_mask.ch_38_off = 1;
+	_adv_params.channel_mask.ch_39_off = 1;
+#endif
 }
 
 void Nrf51822BluetoothStack::setConnectable() {
 	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+	uint32_t err_code;
+	err_code = sd_ble_gap_address_set(BLE_GAP_ADDR_CYCLE_MODE_NONE, &_connectable_address);
+	APP_ERROR_CHECK(err_code);
 }
 
 void Nrf51822BluetoothStack::setNonConnectable() {
 	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_NONCONN_IND;
+	uint32_t err_code;
+	err_code = sd_ble_gap_address_set(BLE_GAP_ADDR_CYCLE_MODE_NONE, &_nonconnectable_address);
+	APP_ERROR_CHECK(err_code);
 }
 
 void Nrf51822BluetoothStack::restartAdvertising() {
@@ -696,17 +714,16 @@ void Nrf51822BluetoothStack::restartAdvertising() {
 	uint32_t err_code;
 	if (_advertising) {
 #ifdef TEST_PIN
-	nrf_gpio_pin_set(TEST_PIN);
+		nrf_gpio_pin_set(TEST_PIN);
 #endif
 		err_code = sd_ble_gap_adv_stop(); // This function call can take 30ms!
 #ifdef TEST_PIN
-	nrf_gpio_pin_clear(TEST_PIN);
+		nrf_gpio_pin_clear(TEST_PIN);
 #endif
 		// Ignore invalid state error, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 		if (err_code != NRF_ERROR_INVALID_STATE) {
 			APP_ERROR_CHECK(err_code);
-		}
-		else {
+		} else {
 			LOGw("adv_stop invalid state");
 		}
 	}
@@ -736,7 +753,7 @@ void Nrf51822BluetoothStack::startAdvertising() {
 	}
 
 	LOGi(MSG_BLE_ADVERTISING_STARTING);
-
+	
 	uint32_t err_code;
 	err_code = sd_ble_gap_adv_start(&_adv_params);
 	if (err_code == NRF_ERROR_INVALID_PARAM) {
@@ -778,7 +795,6 @@ void Nrf51822BluetoothStack::updateAdvertisement(bool toggle) {
 	} else {
 //		LOGi("UPDATE advertisement");
 
-//		uint32_t err_code;
 //		err_code = sd_ble_gap_adv_stop();
 //		APP_ERROR_CHECK(err_code);
 

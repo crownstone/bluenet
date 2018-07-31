@@ -76,3 +76,31 @@ enum ConfigurationTypes {
 
 	CONFIG_TYPES
 }; // Current max is 127 (0x7F), see cs_EventTypes.h
+
+/**
+ * For each type define the proper typedef so we can use strong typing in our functions.
+ * Use the TYPIFY macro rather than typing CONFIG_ROOM_TYPE etc. explicitly.
+ * The size of the type can be easily obtained through:
+ *   sizeof(TYPIFY(CONFIG_ROOM)).
+ */
+
+#define TYPIFY(NAME) NAME ## _TYPE 
+
+typedef uint8_t TYPIFY(CONFIG_DEVICE_TYPE);
+typedef uint8_t TYPIFY(CONFIG_ROOM);
+
+/**
+ * Use some template magic to also be able to do:
+ *   var config_id = CONFIG_ROOM;
+ *   Type<config_id>::type ...
+ * And
+ *   sizeof(Type<config_id>::type)
+ * The latter is now the same as uint8_t... as defined above. Everything is defined at compile time.
+ */
+template<uint16_t X> struct Type { };
+
+template<> struct Type<CONFIG_DEVICE_TYPE> { TYPIFY(CONFIG_DEVICE_TYPE) type; };
+template<> struct Type<CONFIG_ROOM> { TYPIFY(CONFIG_ROOM) type; };
+
+
+

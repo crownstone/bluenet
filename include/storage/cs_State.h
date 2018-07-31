@@ -6,9 +6,9 @@
  */
 #pragma once
 
+#include <drivers/cs_Storage.h>
 #include <events/cs_EventTypes.h>
 #include <structs/cs_StreamBuffer.h>
-#include <storage/cs_CyclicStorage.h>
 #include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <processing/cs_EnOceanHandler.h>
@@ -131,10 +131,7 @@ class State {
 
 private:
 	State();
-
-	//! This class is singleton, deny implementation
 	State(State const&);
-	//! This class is singleton, deny implementation
 	void operator=(State const &);
 
 public:
@@ -240,11 +237,11 @@ protected:
 	ps_general_vars_t _storageStruct;
 
 	//! counts application resets (only for debug purposes?)
-	CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY, small_seq_number_t>* _resetCounter;
+	//CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY, small_seq_number_t>* _resetCounter;
 
 #ifdef SWITCH_STATE_PERSISTENT
 	//! keeps track of the switch state in pstorage
-	CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY, small_seq_number_t>* _switchState;
+	//CyclicStorage<switch_state_storage_t, SWITCH_STATE_REDUNDANCY, small_seq_number_t>* _switchState;
 
 	//! keeps track of the switch state in ram
 	uint8_t _switchStateCache;
@@ -254,7 +251,7 @@ protected:
 #endif
 
 	//! keeps track of the accumulated power
-	CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY, large_seq_number_t>* _accumulatedEnergy;
+	//CyclicStorage<accumulated_energy_t, ACCUMULATED_ENERGY_REDUNDANCY, large_seq_number_t>* _accumulatedEnergy;
 
 	std::vector<uint8_t> _notifyingStates;
 

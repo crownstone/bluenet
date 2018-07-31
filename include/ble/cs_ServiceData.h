@@ -22,7 +22,7 @@
 #include <protocol/cs_MeshMessageTypes.h>
 #endif
 
-#define BUILD_MESHING 1
+// TODO: #define BUILD_MESHING 1
 #define SERVICE_DATA_VALIDATION 0xFA
 
 enum ServiceDataFlagBits {

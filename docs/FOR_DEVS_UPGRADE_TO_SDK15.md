@@ -17,3 +17,16 @@ List of things:
 * Use templated file `modules/nrfx/templates/nRF52832/nrfx_config.h` in `./include/third`.
 * Remove STRINGIFY from csUtils. Is now implemented by Nordic.
 * It makes sense to use the Flash Data Storage functions. These are experimental, but `fstorage` itself is also labeled experimental. You can read more in the [documentation](http://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v15.0.0%2Flib_fstorage.html&cp=4_0_0_3_49). Matters to consider: The overload per record seems quite high. There is a `NRF_FSTORAGE_SD_MAX_WRITE_SIZE` option that increases the changes for the SoftDevice to do the write operation in-between radio events. Note that the current mesh implementation is bare-metal and might still need love. 
+
+There is a lot of casting and casting again... Let's see if we can remove it.
+
+* Settings::get has as arguments `(uint8_t type, void* dest, uint16_t &size)`
+* StorageHelper::getUint8(...), ::getUint16, ::getString, ::getArray<type> etc. cast all to this void pointer.
+
+There are also many long functions, that do a lot of things almost the same. 
+
+* For example, `publishUpdate` is called many times in a large switch statement. Maybe call it then every time. Or set a boolean for the few times that it does not need to be called.
+
+There are a lot of monster functions with `void *` and then a range of things have to be cast to that target.
+
+

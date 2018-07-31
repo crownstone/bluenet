@@ -170,6 +170,8 @@ protected:
 
 	ServiceData*                                _serviceData;
 
+	ble_gap_addr_t                              _connectable_address;
+	ble_gap_addr_t                              _nonconnectable_address;
 public:
 
 	/** Initialization of the BLE stack

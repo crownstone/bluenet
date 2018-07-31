@@ -1,4 +1,6 @@
-/** Store settings in RAM or persistent memory
+/** Store settings in RAM or persistent memory.
+ *
+ * This files serves as a little indirection between loading data from RAM or FLASH.
  *
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
@@ -8,6 +10,7 @@
 
 #include "storage/cs_Settings.h"
 
+#include <cfg/cs_Config.h>
 #include <ble/cs_UUID.h>
 #include <events/cs_EventDispatcher.h>
 #include <util/cs_Utils.h>
@@ -352,6 +355,7 @@ ERR_CODE Settings::get(uint8_t type, void* target, bool getDefaultValue) {
 	return get(type, target, size, getDefaultValue);
 }
 
+/*
 ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size, bool getDefaultValue) {
 #ifdef PRINT_DEBUG
 	LOGd("get %d", type);
@@ -803,26 +807,10 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 	}
 	return ERR_SUCCESS;
 }
+*/
 
-//void Settings::initFlags() {
-//	// set all flags to their default value
-//	_storageStruct.flagsBit.meshDisabled = !MESHING;
-//	_storageStruct.flagsBit.encryptionDisabled = !ENCRYPTION;
-//	_storageStruct.flagsBit.iBeaconDisabled = !IBEACON;
-//	_storageStruct.flagsBit.scannerDisabled = !INTERVAL_SCANNER_ENABLED;
-//	_storageStruct.flagsBit.continuousPowerSamplerDisabled = !CONTINUOUS_POWER_SAMPLER;
-//	_storageStruct.flagsBit.defaultOff = !DEFAULT_ON;
-//	_storageStruct.flagsBit.flagsUninitialized = false;
-//}
-
+/*
 bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
-
-	// should not happen, but better to check
-//	if (_storageStruct.flagsBit.flagsUninitialized) {
-//		// before updating a flag, we need to initialize all flags to their default
-//		// value, otherwise they will be wrongly read after the update
-//		initFlags();
-//	}
 
 	// as long as persistent flag storage is disabled, do not do any checks, but still
 	// update the struct so that other functions can check if the flag is set or not
@@ -992,10 +980,7 @@ bool Settings::isSet(uint8_t type) {
 		return false;
 	}
 }
-
-//ps_configuration_t& Settings::getConfig() {
-//	return _storageStruct;
-//}
+*/
 
 /** Get a handle to the persistent storage struct and load it from FLASH.
  *
@@ -1030,7 +1015,7 @@ void Settings::savePersistentStorage() {
 }
 
 void Settings::saveIBeaconPersistent() {
-	savePersistentStorageItem((uint8_t*)&_storageStruct.beacon, sizeof(_storageStruct.beacon));
+	// TODO: savePersistentStorageItem((uint8_t*)&_storageStruct.beacon, sizeof(_storageStruct.beacon));
 }
 
 void Settings::factoryReset(uint32_t resetCode) {
@@ -1040,5 +1025,5 @@ void Settings::factoryReset(uint32_t resetCode) {
 	}
 
 	// TODO:	_storage->clearStorage(PS_ID_CONFIGURATION);
-	memset(&_storageStruct, 0xFF, sizeof(_storageStruct));
+	// TODO: memset(&_storageStruct, 0xFF, sizeof(_storageStruct));
 }

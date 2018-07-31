@@ -30,7 +30,7 @@ void debugprint(void * p_context) {
 #endif
 
 State::State() :
-		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedEnergy(NULL),
+		_initialized(false), _storage(NULL), 
 		_temperature(0), _powerUsage(0), _time(0), _factoryResetState(FACTORY_RESET_STATE_NORMAL) {
 	_errorState.asInt = 0;
 	_overrideBitmask.asInt = 0;
@@ -43,6 +43,8 @@ void State::init() {
 		LOGe(FMT_NOT_INITIALIZED, "Storage");
 		return;
 	}
+
+	/*
 
 //	LOGd("loading state variables");
 	_storage->getHandle(PS_ID_STATE, _stateHandle);
@@ -76,6 +78,7 @@ void State::init() {
 //	LOGd("loading general struct")
 	_storage->getHandle(PS_ID_GENERAL, _structHandle);
 	loadPersistentStorage();
+	*/
 }
 
 void State::print() {
@@ -120,8 +123,9 @@ ERR_CODE State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, b
 
 ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 
-	uint16_t size;
 	ERR_CODE error_code;
+	/*
+	uint16_t size;
 
 	switch(type) {
 	case STATE_RESET_COUNTER: {
@@ -203,11 +207,13 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 		streamBuffer->setPayload(payload, size);
 		streamBuffer->setType(type);
 	}
+	*/
 	return error_code;
 }
 
 uint16_t State::getStateItemSize(uint8_t type) {
 
+	/*
 	switch(type) {
 	case STATE_RESET_COUNTER: {
 		return sizeof(reset_counter_t);
@@ -260,12 +266,14 @@ uint16_t State::getStateItemSize(uint8_t type) {
 		LOGw(FMT_STATE_NOT_FOUND, type);
 		return 0;
 	}
-	}
+	}*/
+	return 0;
 }
 
 ERR_CODE State::verify(uint8_t type, uint16_t size) {
 
-	bool success;
+	bool success = false;
+	/*
 	switch(type) {
 	case STATE_RESET_COUNTER:
 	case STATE_SWITCH_STATE:
@@ -299,7 +307,7 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 		return ERR_UNKNOWN_TYPE;
 	}
 	}
-
+	*/
 	if (success) {
 		return ERR_SUCCESS;
 	} else {
@@ -311,6 +319,7 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) {
 
 	ERR_CODE error_code;
+	/*
 	error_code = verify(type, size);
 
 	if (SUCCESS(error_code)) {
@@ -459,13 +468,14 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 
 		return ERR_SUCCESS;
 	}
-
+	*/
 	return error_code;
 }
 
 ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 
 	ERR_CODE error_code;
+	/*
 	error_code = verify(type, size);
 
 	if (SUCCESS(error_code)) {
@@ -568,7 +578,7 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 
 		return ERR_SUCCESS;
 	}
-
+	*/
 	return error_code;
 }
 
@@ -586,14 +596,15 @@ void State::publishUpdate(uint8_t type, uint8_t* data, uint16_t size) {
 }
 
 void State::loadPersistentStorage() {
-	_storage->readStorage(_structHandle, &_storageStruct, sizeof(_storageStruct));
+	//_storage->readStorage(_structHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void State::savePersistentStorage() {
-	_storage->writeStorage(_structHandle, &_storageStruct, sizeof(_storageStruct));
+	//_storage->writeStorage(_structHandle, &_storageStruct, sizeof(_storageStruct));
 }
 
 void State::savePersistentStorageItem(uint8_t type) {
+	/*
 #ifdef PRINT_DEBUG
 	LOGd("store type: %d", type);
 #endif
@@ -602,12 +613,15 @@ void State::savePersistentStorageItem(uint8_t type) {
 		savePersistentStorageItem(_storageStruct.scheduleList, sizeof(schedule_list_t));
 	}
 	}
+	*/
 }
 
 void State::savePersistentStorageItem(uint8_t* item, uint16_t size) {
+	/*
 	uint32_t offset = StorageHelper::getOffset(&_storageStruct, item);
 	uint16_t alignedSize = (size+4-1)/4*4;
 	_storage->writeItem(_structHandle, offset, item, alignedSize);
+	*/
 }
 
 bool State::isNotifying(uint8_t type) {
@@ -653,9 +667,13 @@ void State::factoryReset(uint32_t resetCode) {
 	LOGw("resetting state variables");
 
 	// clear the storage in flash
-	_storage->clearStorage(PS_ID_STATE);
-	_storage->clearStorage(PS_ID_GENERAL);
+	//_storage->clearStorage(PS_ID_STATE);
+	//_storage->clearStorage(PS_ID_GENERAL);
+	
+	_storage->remove(Storage::FILE_STATE);
+	_storage->remove(Storage::FILE_GENERAL);
 
+	/*
 	// reload struct
 	memset(&_storageStruct, 0xFF, sizeof(_storageStruct));
 //	loadPersistentStorage();
@@ -666,4 +684,5 @@ void State::factoryReset(uint32_t resetCode) {
 #endif
 	_resetCounter->reset();
 	_accumulatedEnergy->reset();
+	*/
 }

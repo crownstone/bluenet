@@ -6,26 +6,21 @@
  */
 #pragma once
 
-#include <events/cs_EventTypes.h>
+#include <cfg/cs_Boards.h>
 #include <drivers/cs_Storage.h>
-#include <structs/cs_StreamBuffer.h>
+#include <events/cs_EventTypes.h>
 #include <protocol/cs_ConfigTypes.h>
 #include <protocol/cs_ErrorCodes.h>
-#include <cfg/cs_Boards.h>
+#include <structs/cs_StreamBuffer.h>
 
 /**
  * Load settings from and save settings to persistent storage.
  */
 class Settings {
-
 private:
 	Settings();
-
-	//! This class is singleton, deny implementation
 	Settings(Settings const&);
-	//! This class is singleton, deny implementation
 	void operator=(Settings const &);
-
 public:
 	static Settings& getInstance() {
 		static Settings instance;
@@ -95,15 +90,6 @@ protected:
 
 	bool _initialized;
 
-	//! handle to storage (required to write to and read from FLASH)
-	//TODO: pstorage_handle_t _storageHandle;
-
-	//! struct that storage object understands
-	ps_configuration_t _storageStruct;
-
-	//! non-persistent configuration options
-	std::string _wifiSettings;
-
 	Storage* _storage;
 
 	boards_config_t* _boardsConfig;
@@ -111,7 +97,6 @@ protected:
 	ERR_CODE verify(uint8_t type, uint8_t* payload, uint8_t length);
 
 	bool readFlag(uint8_t type, bool& value);
-//	void initFlags();
 
 	/**
 	 * Helper functions to write single item from the configuration struct to storage (FLASH).

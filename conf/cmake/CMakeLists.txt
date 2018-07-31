@@ -31,10 +31,7 @@ MESSAGE(STATUS "CMakeLists: Search for FindX files in ${CMAKE_MODULE_PATH}")
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
 SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
 SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
-#SET(GIT_HASH                                 "unset"       CACHE STRING "Current git hash")
 SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
-# Do not include COMPILATION_TIME. It invalidates the cache all the time!
-#SET(COMPILATION_TIME                         "unset"       CACHE STRING "Time of day of compilation")
 SET(NRF51822_DIR                             "unset"       CACHE STRING "The nRF5 sdk directory")
 
 #######################################################################################################################
@@ -43,10 +40,7 @@ SET(NRF51822_DIR                             "unset"       CACHE STRING "The nRF
 
 MESSAGE(STATUS "CMakeLists: Set verbosity to level: ${VERBOSITY}")
 MESSAGE(STATUS "CMakeLists: Git branch: ${GIT_BRANCH}")
-#MESSAGE(STATUS "CMakeLists: Git hash: ${GIT_HASH}")
 MESSAGE(STATUS "CMakeLists: Day of compilation: ${COMPILATION_DAY}")
-# Do not include COMPILATION_TIME. It invalidates the cache all the time!
-#MESSAGE(STATUS "CMakeLists: Time of day of compilation: ${COMPILATION_TIME}")
 MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
@@ -76,12 +70,15 @@ SET(SOURCE_DIR "src")
 
 # Add separately include directories if we are to lazy to specify e.g. "#include <protocol/rbc_mesh.h>"
 SET(INCLUDE_DIR "include" "include/ble" "include/third" "include/third/nrf")
-IF(NORDIC_SDK_VERSION VERSION_GREATER "11")
-	LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/components/toolchain/cmsis/include")
-	LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/config")
-	LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/components/libraries/fstorage")
-	LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/components/libraries/experimental_section_vars")
-ENDIF()
+
+# TODO: Just only include th NRF5 directory and refer to the header files using that relative path in the source files
+# Then we do not need to update the CMakeLists.txt file all the time
+LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}")
+
+LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/components/toolchain/cmsis/include")
+LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/config")
+LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/components/libraries/fstorage")
+LIST(APPEND INCLUDE_DIR "${NRF51822_DIR}/components/libraries/experimental_section_vars")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
@@ -117,6 +114,7 @@ ELSE()
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/drivers/src/nrfx_saadc.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/hal/nrf_nvmc.c")
+	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/fds/fds.h")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/fstorage/nrf_fstorage.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/crc16/crc16.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/scheduler/app_scheduler.c")
