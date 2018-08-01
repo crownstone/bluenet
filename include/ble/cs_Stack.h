@@ -28,7 +28,6 @@
 // test
 
 extern "C" {
-#include "device_manager.h"
 #include "sdk_errors.h"
 }
 
@@ -44,12 +43,12 @@ class Service;
 
 /** nRF51822 specific implementation of the BLEStack
  *
- * The Nrf51822BluetoothStack class is a direct descendant from BLEStack. It is implemented as a singleton, such
+ * The Stack class is a direct descendant from BLEStack. It is implemented as a singleton, such
  * that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt
  * handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this
  * stack object as an argument w.r.t. this object. This makes dependencies traceable for the user.
  */
-class Nrf51822BluetoothStack {
+class Stack {
 	//! Friend for BLE stack event handling
 //	friend void SWI2_IRQHandler();
 
@@ -63,19 +62,19 @@ private:
 	 * the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the init()
 	 * function.
 	 */
-	Nrf51822BluetoothStack();
-	Nrf51822BluetoothStack(Nrf51822BluetoothStack const&);
-	void operator=(Nrf51822BluetoothStack const &);
+	Stack();
+	Stack(Stack const&);
+	void operator=(Stack const &);
 
 	/**
 	 * The destructor shuts down the stack.
 	 *
 	 * TODO: The SoftDevice should be disabled as well.
 	 */
-	~Nrf51822BluetoothStack();
+	~Stack();
 public:
-	static Nrf51822BluetoothStack& getInstance() {
-		static Nrf51822BluetoothStack instance;
+	static Stack& getInstance() {
+		static Stack instance;
 		return instance;
 	}
 	//! Format of the callback when a connection has been made
@@ -93,8 +92,6 @@ public:
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_TAG;
 	//! The low-frequency clock, currently generated from the high frequency clock
 	static const nrf_clock_lf_cfg_t        defaultClockSource;
-//	//! The default MTU (Maximum Transmission Unit), 672 bytes is the default MTU, but can range from 48 bytes to 64kB.
-//	static const uint8_t                   defaultMtu = BLE_L2CAP_MTU_DEF;
 	//! Advertising interval in 0.625 ms.
 	static const uint16_t                  defaultAdvertisingInterval_0_625_ms = ADVERTISEMENT_INTERVAL;
 	//! Time after which advertising stops.
@@ -109,16 +106,9 @@ protected:
 	// we can loop over but doesn't allocate more space than needed
 	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  //! 32
 
-#if (NORDIC_SDK_VERSION >= 11) //! Not sure if 11 is the first version
 	nrf_clock_lf_cfg_t                          _clock_source;
-#else
-	nrf_clock_lfclksrc_t                        _clock_source; //4
-#endif
-//	uint8_t                                     _mtu_size;
 	int8_t                                      _tx_power_level;
 	ble_gap_conn_sec_mode_t                     _sec_mode;  //1
-	//ble_gap_sec_params_t                        _sec_params; //6
-	//ble_gap_adv_params_t                        _adv_params; //! 20
 	uint16_t                                    _interval;
 	uint16_t                                    _timeout;
 	ble_gap_conn_params_t                       _gap_conn_params; //! 8
@@ -142,22 +132,15 @@ protected:
 	dm_application_instance_t                   _dm_app_handle;
 	bool                                        _dm_initialized;
 
-#if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t                                 _lowPowerTimeoutData;
 	app_timer_id_t                              _lowPowerTimeoutId;
 	app_timer_t                                 _secReqTimerData;
 	app_timer_id_t                              _secReqTimerId;
 	app_timer_t                                 _connectionKeepAliveTimerData;
 	app_timer_id_t                              _connectionKeepAliveTimerId;
-#else
-	uint32_t                                    _lowPowerTimeoutId;
-	uint32_t                                    _secReqTimerId;
-	uint32_t                                    _connectionKeepAliveTimerId;
-#endif
-	dm_handle_t                                 _peerHandle;
 
-	ble_advdata_t                               _advdata;
-	ble_advdata_t                               _scan_resp;
+	uint8_t                                     _adv_handle;
+	ble_gap_adv_data_t                          _adv_data;
 	ble_gap_adv_params_t                        _adv_params;
 	uint8_t										_advParamsCounter;
 
@@ -328,7 +311,7 @@ public:
 
 	void stopAdvertising();
 
-	bool isAdvertising();
+	bool isAdvertising(bool check = false, bool expectation = true);
 
 	void setAdvertisementData();
 
@@ -376,7 +359,7 @@ public:
 	 *
 	 * Currently not used.
 	 */
-	Nrf51822BluetoothStack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
+	Stack& onRadioNotificationInterrupt(uint32_t distanceUs, callback_radio_t callback);
 
 	bool connected() {
 		return _conn_handle != BLE_CONN_HANDLE_INVALID;
@@ -405,31 +388,14 @@ public:
 	 * TODO: Currently we loop through every service and send e.g. BLE_GATTS_EVT_WRITE only when some handle matches. It
 	 * is faster to set up maps from handles to directly the right function.
 	 */
-	void on_ble_evt(ble_evt_t * p_ble_evt);
-
-	/*
-	 * Function to initialize the device manager.
-	 *
-	 * The device manager keeps track of the bonded devices and stores the bond information
-	 * in persistent storage.
-	 */
-	void device_manager_init(bool erase_bonds);
-
-	void device_manager_reset();
+	void on_ble_evt(ble_evt_t * p_ble_evt, void * p_event);
 
 	void secReqTimeoutHandler(void * p_context);
-
-	/*
-	 * Callback handler for device manager events
-	 */
-	uint32_t deviceManagerEvtHandler(dm_handle_t const    * p_handle, dm_event_t const     * p_event,
-			ret_code_t           event_result);
 
 	void setServiceData(ServiceData* serviceData) {
 		_serviceData = serviceData;
 	}
 
-	void setPinEncrypted(bool encrypted);
 	void setAesEncrypted(bool encrypted);
 	void disconnect();
 	void changeToLowTxPowerMode();

@@ -79,7 +79,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 	EventDispatcher::getInstance().addListener(this);
 
 	//! set up the bluetooth stack that controls the hardware.
-	_stack = &Nrf51822BluetoothStack::getInstance();
+	_stack = &Stack::getInstance();
 
 	// create all the objects that are needed for execution, but make sure they
 	// don't execute any softdevice related code. do that in an init function

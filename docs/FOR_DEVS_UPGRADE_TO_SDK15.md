@@ -56,7 +56,43 @@ The PRESCALER parameter has been removed from the APP_TIMER_TICKS macro. Therefo
 
 `app_timer_cnt_diff_compute` API change - The tick diff value is now returned by the function and not by the pointer. Therefore, you must change the following code: `err_code = app_timer_cnt_diff_compute(ticks_to, ticks_from, &ticks_diff);` to: `ticks_diff = app_timer_cnt_diff_compute(ticks_to, ticks_from);`.
 
+## Peer Manager
+
+The device manager is now the peer manager. This module has been introduced to be able to handle central and peripheral 
+devices simultaneously. Not really a use case for Crownstone, but device manager is obsolete now. Internally does
+the peer manager rely on fstorage rather than pstorage.
+
+[Tutorial](https://devzone.nordicsemi.com/tutorials/b/software-development-kit/posts/migrating-to-peer-manager).
+
+And then it is newer than that again. Version v14. 
+
+[Tutorial again](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v14.0.0%2Flib_softdevice_handler.html)
+
+`ble_evt_handler` instead of `pm_on_ble_evt`
+
+`BLE_GATTS_EVT_HVN_TX_COMPLETE` vs `BLE_EVT_TX_COMPLETE`
+
+# Common Errors
+
+The following stems from using `C` constructs within `C++`:
+
+`sorry, unimplemented: non-trivial designated initializers not supported`
+
+This is probably because the C guys did not actually use the right order or forgot to include a field:
+
+For example `.ext_ref` was forgotten in 
+
+    .reference          = (nrf_comp_ref_t)NRFX_COMP_CONFIG_REF,             \
+    .ext_ref            = (nrf_comp_ext_ref_t)0,                            \
+    .main_mode          = (nrf_comp_main_mode_t)NRFX_COMP_CONFIG_MAIN_MODE, \
+
+This is not related to using `extern "C"`.
+
 # Unclear Decisions
 
 There is a `third` directory with for example `src/third/nrf/app_timer.c`. It makes sense to assume that there have
 been changes to the original files, but which ones?
+
+# Nice to do next!
+
+There is now a separate `ble_adv_primary_phy` and `ble_adv_secondary_phy` advertising GAP physical address.

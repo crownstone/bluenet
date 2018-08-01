@@ -54,6 +54,12 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
 			}                                                                       \
 		} while (0)
 
+#define APP_ERROR_CHECK_EXCEPT(ERR_CODE, EXCEPTION)                                 \
+		if (ERR_CODE == EXCEPTION) {                                                \
+			LOGw(STRINGIFY(EXCEPTION));                                             \
+		} else {                                                                    \
+			APP_ERROR_CHECK(ERR_CODE);                                              \
+		}
 
 #ifdef __EXCEPTIONS
 

@@ -51,7 +51,7 @@ void FactoryReset::timeout() {
 	State::getInstance().get(STATE_FACTORY_RESET, resetState);
 	if (resetState == FACTORY_RESET_STATE_LOWTX) {
 		LOGi("change to  normal")
-		Nrf51822BluetoothStack::getInstance().changeToNormalTxPowerMode();
+		Stack::getInstance().changeToNormalTxPowerMode();
 	}
 	State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_NORMAL);
 }
@@ -66,8 +66,8 @@ void FactoryReset::process() {
 	if (resetState == FACTORY_RESET_STATE_NORMAL) {
 		State::getInstance().set(STATE_FACTORY_RESET, (uint8_t) FACTORY_RESET_STATE_LOWTX);
 		LOGd("recovery: go to low tx");
-		Nrf51822BluetoothStack::getInstance().changeToLowTxPowerMode();
-		Nrf51822BluetoothStack::getInstance().disconnect();
+		Stack::getInstance().changeToLowTxPowerMode();
+		Stack::getInstance().disconnect();
 		resetTimeout();
 	}
 }
@@ -150,7 +150,7 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 	State::getInstance().factoryReset(FACTORY_RESET_CODE);
 
 	// Remove bonded devices
-	Nrf51822BluetoothStack::getInstance().device_manager_init(true);
+	Stack::getInstance().device_manager_init(true);
 
 	// Lastly, go into setup mode after next reset
 	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_SETUP);
