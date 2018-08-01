@@ -17,7 +17,7 @@
 
 const char* Service::defaultServiceName = "unnamed";
 
-void Service::init(Nrf51822BluetoothStack* stack) {
+void Service::init(Stack* stack) {
 
 	_stack = stack;
 

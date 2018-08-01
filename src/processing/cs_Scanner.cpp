@@ -64,7 +64,7 @@ void Scanner::init() {
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Scanner::staticTick);
 }
 
-void Scanner::setStack(Nrf51822BluetoothStack* stack) {
+void Scanner::setStack(Stack* stack) {
 	_stack = stack;
 }
 

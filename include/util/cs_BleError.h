@@ -76,6 +76,7 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
 
 	//! A macro to throw an std::exception if the given function does not have the result NRF_SUCCESS
 	//#define BLE_CALL(function, args) do { uint32_t result = function args; if (result != NRF_SUCCESS) throw ble_exception(#function, __FILE__, __LINE__); } while(0)
+	
 	#define BLE_CALL(function, args)                                    \
 			do {                                                        \
 				uint32_t result = function args;                        \

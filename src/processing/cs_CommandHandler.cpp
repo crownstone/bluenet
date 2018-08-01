@@ -463,7 +463,7 @@ ERR_CODE CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uint16_t
 //		LOGw("only available in setup mode");
 //		return ERR_NOT_AVAILABLE;
 //	}
-	Nrf51822BluetoothStack::getInstance().changeToNormalTxPowerMode();
+	Stack::getInstance().changeToNormalTxPowerMode();
 	return ERR_SUCCESS;
 }
 
@@ -536,7 +536,7 @@ ERR_CODE CommandHandler::handleCmdUserFeedBack(buffer_ptr_t buffer, const uint16
 ERR_CODE CommandHandler::handleCmdDisconnect(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "disconnect");
-	Nrf51822BluetoothStack::getInstance().disconnect();
+	Stack::getInstance().disconnect();
 	return ERR_SUCCESS;
 }
 

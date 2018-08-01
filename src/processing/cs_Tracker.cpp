@@ -56,7 +56,7 @@ void Tracker::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 //	}
 }
 
-void Tracker::setStack(Nrf51822BluetoothStack* stack) {
+void Tracker::setStack(Stack* stack) {
 	_stack = stack;
 }
 

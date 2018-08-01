@@ -22,7 +22,7 @@
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
-class Nrf51822BluetoothStack;
+class Stack;
 class CharacteristicBase;
 
 /** Service as defined in the GATT Specification.
@@ -38,7 +38,7 @@ public:
 
 protected:
 
-	Nrf51822BluetoothStack*  _stack;
+	Stack*  _stack;
 	UUID                     _uuid;
 	std::string              _name;
 	bool                     _primary;
@@ -99,7 +99,7 @@ public:
 		return *this;
 	}
 
-	Nrf51822BluetoothStack* getStack() {
+	Stack* getStack() {
 		return _stack;
 	}
 
@@ -121,7 +121,7 @@ public:
 //	}
 
 
-	virtual void init(Nrf51822BluetoothStack* stack);
+	virtual void init(Stack* stack);
 	virtual void stopAdvertising() {};
 
 	virtual void on_ble_event(ble_evt_t * p_ble_evt);

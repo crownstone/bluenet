@@ -23,6 +23,7 @@
 #include <ble/cs_CrownstoneManufacturer.h>
 #include <ble/cs_ServiceData.h>
 #include "nrf_sdm.h"
+#include <string>
 
 /////////////////////////////////////////////////
 // test
@@ -49,13 +50,8 @@ class Service;
  * stack object as an argument w.r.t. this object. This makes dependencies traceable for the user.
  */
 class Stack {
-	//! Friend for BLE stack event handling
-//	friend void SWI2_IRQHandler();
-
-	//! Friend for radio notification handling
-//	friend void ::SWI1_IRQHandler();
-
 private:
+
 	/** Constructor of the BLE stack on the NRF51822
 	 *
 	 * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. However,
@@ -98,6 +94,8 @@ public:
 	static const uint16_t                  defaultAdvertisingTimeout_seconds = ADVERTISING_TIMEOUT;
 
 protected:
+	enum condition_t { C_STACK_INITIALIZED, C_RADIO_INITIALIZED, C_ADVERTISING };
+
 	std::string                                 _device_name; //! 4
 	uint16_t                                    _appearance;
 	bool                                        _disconnectingInProgress = false;
@@ -113,7 +111,7 @@ protected:
 	uint16_t                                    _timeout;
 	ble_gap_conn_params_t                       _gap_conn_params; //! 8
 
-	bool                                        _inited;
+	bool                                        _initializedStack;
 	bool                                        _initializedServices;
 	bool                                        _initializedRadio;
 	bool                                        _advertising;
@@ -140,6 +138,8 @@ protected:
 	app_timer_id_t                              _connectionKeepAliveTimerId;
 
 	uint8_t                                     _adv_handle;
+	ble_advdata_t                               _advdata;
+	ble_advdata_t                               _scanrsp;
 	ble_gap_adv_data_t                          _adv_data;
 	ble_gap_adv_params_t                        _adv_params;
 	uint8_t                                     _conn_cfg_tag;
@@ -313,7 +313,7 @@ public:
 
 	void stopAdvertising();
 
-	bool isAdvertising(bool check = false, bool expectation = true);
+	bool checkCondition(condition_t condition, bool expectation);
 
 	void setAdvertisementData();
 

@@ -42,7 +42,7 @@ Stack::Stack() :
 	_tx_power_level(TX_POWER), _sec_mode({ }),
 	_interval(defaultAdvertisingInterval_0_625_ms), _timeout(defaultAdvertisingTimeout_seconds),
 	_gap_conn_params( { }),
-	_inited(false), _initializedServices(false), _initializedRadio(false), _advertising(false), _scanning(false),
+	_initializedStack(false), _initializedServices(false), _initializedRadio(false), _advertising(false), _scanning(false),
 	_conn_handle(BLE_CONN_HANDLE_INVALID),
 	_radio_notify(0),
 	_dm_app_handle(0), _dm_initialized(false),
@@ -76,58 +76,33 @@ Stack::~Stack() {
 	shutdown();
 }
 
-/*
-const nrf_clock_lf_cfg_t Stack::defaultClockSource = {.source        = NRF_CLOCK_LF_SRC_RC,   \
-                                                                       .rc_ctiv       = 16,                    \
-                                                                       .rc_temp_ctiv  = 2,                     \
-                                                                       .xtal_accuracy = 0};
-*/
-/*
-const nrf_clock_lf_cfg_t Stack::defaultClockSource = {.source        = NRF_CLOCK_LF_SRC_SYNTH,\
-                                                                       .rc_ctiv       = 0,                     \
-                                                                       .rc_temp_ctiv  = 0,                     \
-                                                                       .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_50_PPM};
-*/
-///*
-const nrf_clock_lf_cfg_t Stack::defaultClockSource = { .source        = NRF_CLOCK_LF_SRC_XTAL,        \
-                                                                        .rc_ctiv       = 0,                     \
-                                                                        .rc_temp_ctiv  = 0,                     \
-                                                                        .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
-//*/
+const nrf_clock_lf_cfg_t Stack::defaultClockSource = { 
+	.source        = NRF_CLOCK_LF_SRC_XTAL,        
+	.rc_ctiv       = 0,                     
+	.rc_temp_ctiv  = 0,                     
+	.xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM 
+};
 
-// Called by softdevice handler on a ble event
-// Since we init the softdevice with app scheduler, this callback runs on the main thread.
+/**
+ * Called by the Softdevice handler on any BLE event. It is initialized from the SoftDevice using the app scheduler.
+ * This means that the callback runs on the main thread. 
+ */
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
-
-//	LOGi("Dispatch event %i", p_ble_evt->header.evt_id);
-
-	// Example of how you can get the connection handle and role
-// conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
-// role        = ble_conn_state_role(conn_handle);
-
 #if BUILD_MESHING == 1
 	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
-		// Pass the incoming BLE event to the mesh framework
 		rbc_mesh_ble_evt_handler(p_ble_evt);
 	}
 #endif
-
-	// The events are already decoupled from interrupt by the app scheduler (as the soft device is initialized with app scheduler)
 	Stack::getInstance().on_ble_evt(p_ble_evt);
 }
 
+/**
+ * Initialize SoftDevice, handlers, and brown-out.
+ */
 void Stack::init() {
+	if (checkCondition(C_STACK_INITIALIZED, false)) return;
 
-	if (_inited) {
-		LOGw("Already initialized");
-		return;
-	}
-
-#ifdef TEST_PIN
-	nrf_gpio_cfg_output(TEST_PIN);
-#endif
-
-	// Initialize SoftDevice
+	// Check if SoftDevice is already running and disable it in that case (to restart later)
 	uint8_t enabled;
 	BLE_CALL(sd_softdevice_is_enabled, (&enabled));
 	if (enabled) {
@@ -146,7 +121,6 @@ void Stack::init() {
 	// Assign ble event handler, forward ble_evt to stack
 	BLE_CALL(softdevice_ble_evt_handler_set, (ble_evt_dispatch));
 
-
 	// Set system event handler
 	BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
 
@@ -155,67 +129,63 @@ void Stack::init() {
 	// set threshold value, if power falls below threshold,
 	// an NRF_EVT_POWER_FAILURE_WARNING will be triggered.
 	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
+	
+	_adv_data.adv_data = _advdata;
+	_adv_data.scan_rsp_data = _scanrsp;
 
-	_inited = true;
+	_initializedStack = true;
 }
 
+/** Initialize or configure the BLE radio.
+ */
 void Stack::initRadio() {
-	if (!_inited) {
-		LOGw(FMT_NOT_INITIALIZED, "stack");
-		return;
-	}
-	if (_initializedRadio) {
-		LOGw(FMT_ALREADY_INITIALIZED, "radio");
-		return;
-	}
-
-	// Do not define the service_changed characteristic, of course allow future changes
-#define IS_SRVC_CHANGED_CHARACT_PRESENT  1
-
-#define CENTRAL_LINK_COUNT 0
-#define PERIPHERAL_LINK_COUNT 1
+	if (!checkCondition(C_STACK_INITIALIZED, true)) return;
+	if (checkCondition(C_RADIO_INITIALIZED, false)) return;
 
 	// Set BLE stack parameters
 	ble_enable_params_t ble_enable_params;
 	memset(&ble_enable_params, 0, sizeof(ble_enable_params));
-	BLE_CALL(softdevice_enable_get_default_config, (CENTRAL_LINK_COUNT, PERIPHERAL_LINK_COUNT, &ble_enable_params) );
+	
+	ble_enable_params.gap_enable_params.periph_conn_count = 1;
+	ble_enable_params.gap_enable_params.central_conn_count = 0;
+	ble_enable_params.gap_enable_params.central_sec_count = 1;
 	ble_enable_params.gatts_enable_params.attr_tab_size = ATTR_TABLE_SIZE;
-	ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;
+	ble_enable_params.gatts_enable_params.service_changed = 1;
 	ble_enable_params.common_enable_params.vs_uuid_count = MAX_NUM_VS_SERVICES;
 
-	// Enable BLE stack.
+	// Enable BLE stack
 	ret_code_t err_code;
 	uint32_t ramBase = RAM_R1_BASE;
 	err_code = sd_ble_enable(&ble_enable_params, &ramBase);
 	if (err_code == NRF_ERROR_NO_MEM) {
-		ramBase = 0;
-		// This sets ramBase to the minimal value.
-		sd_ble_enable(&ble_enable_params, &ramBase);
-		LOGe("RAM_R1_BASE should be: %p", ramBase);
+		LOGe("Unrecoverable, memory softdevice and app overlaps: %p", ramBase);
 		APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
 	}
 	APP_ERROR_CHECK(err_code);
+	if (ramBase != RAM_R1_BASE) {
+		LOGw("Application address is too high, memory is unused: %p", ramBase);
+	}
 
 	// Version is not saved or shown yet
 	ble_version_t version( { });
 	version.company_id = 12;
-	BLE_CALL(sd_ble_version_get, (&version));
+	err_code = sd_ble_version_get(&version);
+	APP_ERROR_CHECK(err_code);
 
+	std::string device_name = "noname";
 	if (!_device_name.empty()) {
-		BLE_CALL(sd_ble_gap_device_name_set,
-				(&_sec_mode, (uint8_t*) _device_name.c_str(), _device_name.length()));
+		device_name = _device_name;
 	}
-	else {
-		std::string name = "noname";
-		BLE_CALL(sd_ble_gap_device_name_set,
-				(&_sec_mode, (uint8_t*) name.c_str(), name.length()));
-	}
-	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
+	err_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) device_name.c_str(), device_name.length());
+	APP_ERROR_CHECK(err_code);
+	
+	err_code = sd_ble_gap_appearance_set(_appearance);
+	APP_ERROR_CHECK(err_code);
 
 	// BLE address with which we will broadcast, store in object field
-	err_code = sd_ble_gap_address_get(&_connectable_address);
+	err_code = sd_ble_gap_addr_get(&_connectable_address);
 	APP_ERROR_CHECK(err_code);
-	err_code = sd_ble_gap_address_get(&_nonconnectable_address);
+	err_code = sd_ble_gap_addr_get(&_nonconnectable_address);
 	APP_ERROR_CHECK(err_code);
 	// have non-connectable address one value higher than connectable one
 	_nonconnectable_address.addr[0] += 0x1; 
@@ -223,14 +193,8 @@ void Stack::initRadio() {
 	_initializedRadio = true;
 
 	updateConnParams();
-
 	updatePasskey();
-
 	updateTxPowerLevel();
-
-	// TODO: if initRadio is called later, the advertisement data should be set.
-//	if (_advdata ... && _scan_resp ... ?
-//	setAdvertisementData();
 }
 
 
@@ -339,7 +303,7 @@ void Stack::shutdown() {
 		svc->stopAdvertising();
 	}
 
-	_inited = false;
+	_initializedStack = false;
 }
 
 void Stack::addService(Service* svc) {
@@ -376,7 +340,9 @@ void Stack::setTxPowerLevel(int8_t powerLevel) {
 }
 
 void Stack::updateTxPowerLevel() {
-	BLE_CALL(sd_ble_gap_tx_power_set, (_tx_power_level));
+	uint32_t err_code;
+	err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _tx_power_level, _adv_handle);
+	APP_ERROR_CHECK(err_code);
 }
 
 void Stack::setMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
@@ -451,6 +417,7 @@ void Stack::configureIBeaconAdvData(IBeacon* beacon) {
  *   2 bytes for tx level (1 byte for type,  1 byte  for data)
  *  17 bytes for uuid     (1 byte for type, 16 bytes for data)
  *   7 bytes undefined
+ * TODO: TX power is only set here. Why not when configuring as iBeacon?
  */
 void Stack::configureBleDeviceAdvData() {
 
@@ -462,7 +429,6 @@ void Stack::configureBleDeviceAdvData() {
 
 	memset(&_advdata, 0, sizeof(_advdata));
 	_advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-	// TODO: TX power is only set here. Why not when configuring as iBeacon?
 	_advdata.p_tx_power_level = &_tx_power_level;
 }
 
@@ -477,8 +443,8 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 
 	uint8_t serviceDataLength = 0;
 
-	memset(&_scan_resp, 0, sizeof(_scan_resp));
-	_scan_resp.name_type = BLE_ADVDATA_SHORT_NAME;
+	memset(&_scanrsp, 0, sizeof(_scanrsp));
+	_scanrsp.name_type = BLE_ADVDATA_SHORT_NAME;
 
 	if (_serviceData && deviceType != DEVICE_UNDEF) {
 		memset(&_service_data, 0, sizeof(_service_data));
@@ -488,8 +454,8 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 		_service_data.data.p_data = _serviceData->getArray();
 		_service_data.data.size = _serviceData->getArraySize();
 
-		_scan_resp.p_service_data_array = &_service_data;
-		_scan_resp.service_data_count = 1;
+		_scanrsp.p_service_data_array = &_service_data;
+		_scanrsp.service_data_count = 1;
 
 		serviceDataLength += 2 + sizeof(_service_data.service_uuid) + _service_data.data.size;
 	}
@@ -497,8 +463,7 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 	const uint8_t maxDataLength = 29;
 	uint8_t nameLength = maxDataLength - serviceDataLength;
 	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
-	_scan_resp.short_name_len = nameLength;
-
+	_scanrsp.short_name_len = nameLength;
 }
 
 void Stack::configureIBeacon(IBeacon* beacon, uint8_t deviceType) {
@@ -518,28 +483,28 @@ void Stack::configureBleDevice(uint8_t deviceType) {
 }
 
 void Stack::configureAdvertisementParameters() {
-	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
-	_adv_params.p_peer_addr = NULL;                   // Undirected advertisement
-	_adv_params.fp = BLE_GAP_ADV_FP_ANY;
+	_adv_params.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
+	_adv_params.p_peer_addr = NULL;
+	_adv_params.filter_policy = BLE_GAP_ADV_FP_ANY;
 	_adv_params.interval = _interval;
-	_adv_params.timeout = _timeout;
-#ifdef ADV_BROADCAST_OVER_ONE_CHANNEL
-	_adv_params.channel_mask.ch_38_off = 1;
-	_adv_params.channel_mask.ch_39_off = 1;
-#endif
+	_adv_params.duration = _timeout;
 }
 
 void Stack::setConnectable() {
-	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_IND;
+	_adv_params.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
 	uint32_t err_code;
-	err_code = sd_ble_gap_address_set(BLE_GAP_ADDR_CYCLE_MODE_NONE, &_connectable_address);
+	do {
+		err_code = sd_ble_gap_addr_set(&_connectable_address);
+	} while (err_code == NRF_ERROR_INVALID_STATE);
 	APP_ERROR_CHECK(err_code);
 }
 
 void Stack::setNonConnectable() {
-	_adv_params.type = BLE_GAP_ADV_TYPE_ADV_NONCONN_IND;
+	_adv_params.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED;
 	uint32_t err_code;
-	err_code = sd_ble_gap_address_set(BLE_GAP_ADDR_CYCLE_MODE_NONE, &_nonconnectable_address);
+	do {
+		err_code = sd_ble_gap_addr_set(&_nonconnectable_address);
+	} while (err_code == NRF_ERROR_INVALID_STATE);
 	APP_ERROR_CHECK(err_code);
 }
 
@@ -564,7 +529,7 @@ void Stack::startAdvertising() {
 
 	LOGi(MSG_BLE_ADVERTISING_STARTING);
 	
-	uint32_t err_code = sd_ble_gap_adv_start(&_adv_handle, _conn_cfg_tag);
+	uint32_t err_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag);
 	switch (err_code) {
 	case NRF_ERROR_BUSY:
 		// Docs say: retry again later.
@@ -641,7 +606,7 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
 		}
 		break;
 	case C_STACK_INITIALIZED:
-		field = _initialized;
+		field = _initializedStack;
 		if (expectation != field) {
 			LOGw("Stack init %i", field);
 		}
@@ -649,7 +614,7 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
 	case C_RADIO_INITIALIZED:
 		field = _initializedRadio;
 		if (expectation != field) {
-			LOGw("Stack init %i", field);
+			LOGw("Radio init %i", field);
 		}
 		break;
 	}

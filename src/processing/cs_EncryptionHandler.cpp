@@ -66,12 +66,12 @@ uint8_t* EncryptionHandler::getSessionNonce() {
 
 
 void EncryptionHandler::closeConnectionAuthenticationFailure() {
-	Nrf51822BluetoothStack::getInstance().disconnect();
+	Stack::getInstance().disconnect();
 }
 
 
 bool EncryptionHandler::allowedToWrite() {
-	return Nrf51822BluetoothStack::getInstance().isDisconnecting();
+	return Stack::getInstance().isDisconnecting();
 }
 
 

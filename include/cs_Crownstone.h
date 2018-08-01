@@ -137,7 +137,7 @@ private:
 	boards_config_t _boardsConfig;
 
 	// drivers
-	Nrf51822BluetoothStack* _stack;
+	Stack* _stack;
 	Timer* _timer;
 	Storage* _storage;
 	Settings* _settings;

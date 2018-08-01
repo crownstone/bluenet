@@ -22,7 +22,7 @@ public:
 
 	void init();
 
-	void setStack(Nrf51822BluetoothStack* stack);
+	void setStack(Stack* stack);
 
 	static void staticTick(Tracker* ptr);
 
@@ -69,7 +69,7 @@ private:
 
 	TrackedDeviceList* _trackedDeviceList;
 
-	Nrf51822BluetoothStack* _stack;
+	Stack* _stack;
 
 #if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _appTimerData;

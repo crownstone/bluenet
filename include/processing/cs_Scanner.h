@@ -28,7 +28,7 @@ public:
 		return instance;
 	}
 
-	void setStack(Nrf51822BluetoothStack* stack);
+	void setStack(Stack* stack);
 
 	void onBleEvent(ble_evt_t * p_ble_evt);
 
@@ -88,7 +88,7 @@ private:
 	uint32_t                 _appTimerId;
 #endif
 
-	Nrf51822BluetoothStack* _stack;
+	Stack* _stack;
 
 	uint8_t _scanBuffer[sizeof(peripheral_device_list_t)];
 	ScanResult* _scanResult;
