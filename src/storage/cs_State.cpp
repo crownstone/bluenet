@@ -123,7 +123,7 @@ ERR_CODE State::writeToStorage(uint8_t type, uint8_t* payload, uint8_t length, b
 
 ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 
-	ERR_CODE error_code;
+	ERR_CODE error_code = ERR_SUCCESS;
 	/*
 	uint16_t size;
 
@@ -318,7 +318,7 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 
 ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) {
 
-	ERR_CODE error_code;
+	ERR_CODE error_code = ERR_SUCCESS;
 	/*
 	error_code = verify(type, size);
 
@@ -474,7 +474,7 @@ ERR_CODE State::set(uint8_t type, void* target, uint16_t size, bool persistent) 
 
 ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 
-	ERR_CODE error_code;
+	ERR_CODE error_code = ERR_SUCCESS;
 	/*
 	error_code = verify(type, size);
 

@@ -26,6 +26,8 @@ extern "C"
 #include "ble_hci.h"
 
 //! Refering to files in the Nordic SDK
+#include "nrfx_glue.h"
+
 #include "nrf.h"
 #include "nrf_gpio.h"
 #include "nrf_gpiote.h"

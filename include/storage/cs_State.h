@@ -61,6 +61,7 @@ typedef int32_t accumulated_energy_t;
  * TODO: The seq_number_t counter struct is 16-bits, while 8-bits would already be sufficient.
  * TODO: The switch_state_storage_t field is 16-bits, while 8-bits would be sufficient (1 on/off bit, 7 dimming bits).
  */
+/*
 struct ps_state_t : ps_storage_base_t {
 	// counts resets
 	uint8_t resetCounter[RESET_COUNTER_REDUNDANCY * ELEM_SIZE(reset_counter_t, small_seq_number_t)];
@@ -68,23 +69,24 @@ struct ps_state_t : ps_storage_base_t {
 	uint8_t switchState[SWITCH_STATE_REDUNDANCY * ELEM_SIZE(switch_state_storage_t, small_seq_number_t)];
 	// accumulated power
 	uint8_t accumulatedEnergy[ACCUMULATED_ENERGY_REDUNDANCY * ELEM_SIZE(accumulated_energy_t, large_seq_number_t)];
-};
+};*/
 
 //! size of one block in eeprom can't be bigger than 0x1000 bytes. => create a new struct
-STATIC_ASSERT(sizeof(ps_state_t) <= 0x1000);
+//STATIC_ASSERT(sizeof(ps_state_t) <= 0x1000);
 
 //todo: lists need to be adjusted to use cyclic storages for wear leveling
 /** Struct used to ...
  */
+/*
 struct __attribute__ ((aligned (4))) ps_general_vars_t : ps_storage_base_t {
 	uint32_t operationMode;
 	uint8_t trackedDevices[sizeof(tracked_device_list_t)] __attribute__ ((aligned (4)));
 	uint8_t scheduleList[sizeof(schedule_list_t)] __attribute__ ((aligned (4)));
 	uint8_t learnedSwitches[MAX_SWITCHES * sizeof(learned_enocean_t)] __attribute__ ((aligned (4)));
-};
+};*/
 
 //! size of one block in eeprom can't be bigger than 0x1000 bytes. => create a new struct
-STATIC_ASSERT(sizeof(ps_general_vars_t) <= 0x1000);
+//STATIC_ASSERT(sizeof(ps_general_vars_t) <= 0x1000);
 
 struct state_vars_notifaction {
 	uint8_t type;
@@ -231,10 +233,9 @@ protected:
 	Storage* _storage;
 
 	//! handle to the storage
-	pstorage_handle_t _stateHandle;
-
-	pstorage_handle_t _structHandle;
-	ps_general_vars_t _storageStruct;
+	//pstorage_handle_t _stateHandle;
+	//pstorage_handle_t _structHandle;
+	//ps_general_vars_t _storageStruct;
 
 	//! counts application resets (only for debug purposes?)
 	//CyclicStorage<reset_counter_t, RESET_COUNTER_REDUNDANCY, small_seq_number_t>* _resetCounter;

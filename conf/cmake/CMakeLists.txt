@@ -136,15 +136,18 @@ ELSE()
 	INCLUDE_DIRECTORIES(${INCLUDE_DIR})
 
 	# Add to the -I flags
+	# This is required for the Nordic files internally. They refer only to header files without component paths.
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/modules/nrfx/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/modules/nrfx/mdk/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/modules/nrfx/hal/")
+	INCLUDE_DIRECTORIES("${NRF51822_DIR}/modules/nrfx/drivers/include/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/common")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/ble_services")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/device_manager")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/device/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/common/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/comp/")
+	INCLUDE_DIRECTORIES("${NRF51822_DIR}/integration/nrfx/legacy/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/fstorage/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/experimental_section_vars/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/delay/")

@@ -12,7 +12,9 @@
 
 // TODO: collect external dependencies to Nordic drivers in one file
 extern "C" {
+#include <nrfx_comp.h>
 #include <nrf_drv_comp.h>
+#include <app_util_platform.h>
 }
 
 /**

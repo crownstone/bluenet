@@ -1,6 +1,6 @@
 var gulp = require('gulp');
 var exec = require('child_process').exec;
-var buildCommand = "cd scripts && ./firmware.sh --command=build --target=new_plug";
+var buildCommand = "cd scripts && ./firmware.sh --command=build --target=sdk15";
 
 gulp.task('build',function(){
 	exec(buildCommand, function (error, stdout, stderr) {

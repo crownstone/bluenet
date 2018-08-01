@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include <util/cs_Syscalls.h>
+
 #ifdef	NDEBUG
 
 //! for release version ignore asserts
@@ -18,7 +20,7 @@
 #define assert(expr, message) \
 	if (!(expr)) { \
 		LOGe("%s", message); \
-		exit(1); \
+		_exit(1); \
 	}
 
 #endif

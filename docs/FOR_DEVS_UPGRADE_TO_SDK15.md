@@ -1,8 +1,20 @@
 # Log of upgrading to SDK15
 
 To download SDK15, navigate to the [Nordic website](https://www.nordicsemi.com/eng/Products/Bluetooth-low-energy/nRF5-SDK) or the [SDK download page](https://www.nordicsemi.com/eng/nordic/Products/nRF5-SDK/nRF5-SDK-zip/59011).
+Download in particular version 15.0.0: <https://www.nordicsemi.com/eng/nordic/download_resource/59011/71/4720878/116085>
 
-Download In particular version 15.0.0: <https://www.nordicsemi.com/eng/nordic/download_resource/59011/71/4720878/116085>
+## Strategy
+
+The largest refactoring is with respect to persistent storage. Also the way settings are stored requires cleaning up.
+There is a lot of back and forth casting. A few convenient compile time template functions or macros should be 
+sufficient. 
+
+* First make it compile with the new SDK. Comment out most of the code.
+* Make it run with the new SDK without segfaults.
+* Make sure the functions are all working, but not yet with persistent memory (all within RAM).
+* Write and use persistent memory functions.
+
+## Observations
 
 List of things:
 
@@ -29,4 +41,22 @@ There are also many long functions, that do a lot of things almost the same.
 
 There are a lot of monster functions with `void *` and then a range of things have to be cast to that target.
 
+# Migration Tips
 
+## Timer
+
+The `app_timer_appsh` module has been removed.
+
+Replace calls to `APP_TIMER_APPSH_INIT` with calls to `app_timer_init` and enable the `APP_TIMER_CONFIG_USE_SCHEDULER` option in `sdk_config.h`.
+
+Change: `APP_TIMER_INIT(PRESCALER, OP_QUEUE_SIZE, SCHEDULER_FUNC);` to: `err_code = app_timer_init();`
+
+The PRESCALER parameter has been removed from the APP_TIMER_TICKS macro. Therefore, you must change the following code:
+`ticks = APP_TIMER_TICKS(MS, PRESCALER);` to: `ticks = APP_TIMER_TICKS(MS);`
+
+`app_timer_cnt_diff_compute` API change - The tick diff value is now returned by the function and not by the pointer. Therefore, you must change the following code: `err_code = app_timer_cnt_diff_compute(ticks_to, ticks_from, &ticks_diff);` to: `ticks_diff = app_timer_cnt_diff_compute(ticks_to, ticks_from);`.
+
+# Unclear Decisions
+
+There is a `third` directory with for example `src/third/nrf/app_timer.c`. It makes sense to assume that there have
+been changes to the original files, but which ones?

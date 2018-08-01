@@ -270,6 +270,7 @@ cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_
 //	assert(config.pin != config.referencePin, "Pin and ref pin should be different");
 
 	nrf_saadc_channel_config_t channelConfig;
+	channelConfig.burst      = NRF_SAADC_BURST_DISABLED;
 	channelConfig.resistor_p = NRF_SAADC_RESISTOR_DISABLED;
 //  // Measure ground
 //	if (config.referencePin == 7) {

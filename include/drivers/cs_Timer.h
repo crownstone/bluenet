@@ -12,11 +12,12 @@
 #include <cfg/cs_Config.h>
 
 extern "C" {
-#include <app_scheduler.h>
+#include <components/libraries/timer/app_timer.h>
+#include <components/libraries/scheduler/app_scheduler.h>
 }
 
-#define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz, APP_TIMER_PRESCALER)
-#define MS_TO_TICKS(ms) APP_TIMER_TICKS(ms, APP_TIMER_PRESCALER)
+#define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz)
+#define MS_TO_TICKS(ms) APP_TIMER_TICKS(ms)
 
 /** Timer on top of the timer peripheral.
  */
@@ -35,8 +36,10 @@ public:
 	}
 
 	inline void init() {
-		APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-		APP_TIMER_APPSH_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, true);
+		uint32_t err_code = app_timer_init();
+		APP_ERROR_CHECK(err_code);
+		//APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
+		//APP_TIMER_APPSH_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, true);
 	}
 
 	/** Create single shot timer. function will only be called once and after that timer will be

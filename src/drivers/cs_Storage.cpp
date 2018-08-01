@@ -66,18 +66,20 @@ static storage_config_t config[] {
 */
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
-Storage::Storage() : EventListener(),
-		_initialized(false), _scanning(false), writeBuffer(STORAGE_REQUEST_BUFFER_SIZE), _pending(0)
+Storage::Storage() : EventListener() //,
+//		_initialized(false), _scanning(false), writeBuffer(STORAGE_REQUEST_BUFFER_SIZE), _pending(0)
 {
-	LOGd(FMT_CREATE, "Storage");
+	//LOGd(FMT_CREATE, "Storage");
 
 	EventDispatcher::getInstance().addListener(this);
 
+	/*
 	memset(buffer, 0, sizeof(buffer));
 	writeBuffer.assign((uint8_t*)buffer, sizeof(buffer));
-
+	*/
 }
 
+/*
 void Storage::init() {
 	// call once before using any other API calls of the persistent storage module
 	BLE_CALL(pstorage_init, ());
@@ -91,7 +93,9 @@ void Storage::init() {
 
 	_initialized = true;
 }
+*/
 
+/*
 void Storage::onUpdateDone() {
 
 	if (_pending) {
@@ -108,11 +112,15 @@ void Storage::onUpdateDone() {
 		LOGw("_pending=%u", _pending);
 	}
 }
+*/
 
+/*
 void resume_requests(void* p_data, uint16_t len) {
 	Storage::getInstance().resumeRequests();
 }
+*/
 
+/*
 void storage_sys_evt_handler(uint32_t evt) {
 	// No need to decouple with app scheduler: this handler is already running on the main thread, since sys_evt_dispatch is too.
 	switch(evt) {
@@ -128,7 +136,9 @@ void storage_sys_evt_handler(uint32_t evt) {
 	}
 	}
 }
+*/
 
+/*
 void Storage::resumeRequests() {
 	if (!writeBuffer.empty()) {
 #ifdef PRINT_STORAGE_VERBOSE
@@ -190,7 +200,9 @@ void Storage::resumeRequests() {
 		}
 	}
 }
+*/
 
+/*
 void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 
 	switch(evt) {
@@ -224,7 +236,9 @@ void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 
 }
+*/
 
+/*
 storage_config_t* Storage::getStorageConfig(ps_storage_id storageID) {
 
 	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
@@ -235,7 +249,9 @@ storage_config_t* Storage::getStorageConfig(ps_storage_id storageID) {
 
 	return NULL;
 }
+*/
 
+/*
 bool Storage::getHandle(ps_storage_id storageID, pstorage_handle_t& handle) {
 	storage_config_t* config;
 
@@ -246,10 +262,12 @@ bool Storage::getHandle(ps_storage_id storageID, pstorage_handle_t& handle) {
 		return false;
 	}
 }
+*/
 
 /**
  * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
  */
+/*
 void Storage::initBlocks(pstorage_size_t size, pstorage_size_t count, pstorage_handle_t& handle) {
 	// set parameter
 	pstorage_module_param_t param;
@@ -260,10 +278,12 @@ void Storage::initBlocks(pstorage_size_t size, pstorage_size_t count, pstorage_h
 	// register
 	BLE_CALL ( pstorage_register, (&param, &handle) );
 }
+*/
 
 /**
  * Nordic bug: We have to clear the entire block!
  */
+/*
 void Storage::clearStorage(ps_storage_id storageID) {
 
 	storage_config_t* config;
@@ -277,11 +297,9 @@ void Storage::clearStorage(ps_storage_id storageID) {
 
 	EventDispatcher::getInstance().dispatch(EVT_STORAGE_ERASE);
 	BLE_CALL (pstorage_clear, (&block_handle, config->storage_size) );
-//	LOGd("pstorage_clear %d %d %d", block_handle.module_id, block_handle.block_id, PSTORAGE_FLASH_PAGE_SIZE);
-	// Can't clear this size, because we registered a smaller block size?
-//	BLE_CALL (pstorage_clear, (&block_handle, PSTORAGE_FLASH_PAGE_SIZE) );
 }
-
+*/
+/*
 void Storage::readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
 	pstorage_handle_t block_handle;
 
@@ -295,11 +313,15 @@ void Storage::readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uin
 #endif
 
 }
+*/
 
+/*
 void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
 	writeItem(handle, 0, (uint8_t*)item, size);
 }
+*/
 
+/*
 void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size) {
 	pstorage_handle_t block_handle;
 
@@ -313,7 +335,9 @@ void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t
 #endif
 
 }
+*/
 
+/*
 void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size, bool update) {
 	pstorage_handle_t block_handle;
 
@@ -379,3 +403,4 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 	}
 
 }
+*/

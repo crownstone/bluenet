@@ -13,6 +13,7 @@
 //! helper functions
 ////////////////////////////////////////////////////////////////////////////////////////
 
+/*
 pstorage_size_t StorageHelper::getOffset(ps_storage_base_t* storage, uint8_t* var) {
 	uint32_t p_storage = (uint32_t)storage;
 	uint32_t p_var = (uint32_t)var;
@@ -26,6 +27,7 @@ pstorage_size_t StorageHelper::getOffset(ps_storage_base_t* storage, uint8_t* va
 
 	return offset;
 }
+*/
 
 void StorageHelper::setString(std::string value, char* target) {
 	setString(value.c_str(), value.length(), target);
