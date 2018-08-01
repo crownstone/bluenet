@@ -49,7 +49,7 @@ Stack::Stack() :
 	_lowPowerTimeoutId(NULL),
 	_secReqTimerId(NULL),
 	_connectionKeepAliveTimerId(NULL),
-	_advParamsCounter(0),
+	_advInterleaveCounter(0),
 	_adv_manuf_data(NULL),
 	_serviceData(NULL)
 {
@@ -564,7 +564,7 @@ void Stack::startAdvertising() {
 
 	LOGi(MSG_BLE_ADVERTISING_STARTING);
 	
-	uint32_t err_code = sd_ble_gap_adv_start(&_adv_params);
+	uint32_t err_code = sd_ble_gap_adv_start(&_adv_handle, _conn_cfg_tag);
 	switch (err_code) {
 	case NRF_ERROR_BUSY:
 		// Docs say: retry again later.
@@ -608,7 +608,7 @@ void Stack::stopAdvertising() {
  * @param toggle  When false, use connectable, when true toggle between connectable and non-connectable.
  */
 void Stack::updateAdvertisement(bool toggle) {
-	if (!isAdvertising(true,true)) return;
+	if (!checkCondition(C_ADVERTISING, true)) return;
 
 	if (isConnected() || isScanning()) {
 		return;
@@ -616,7 +616,7 @@ void Stack::updateAdvertisement(bool toggle) {
 
 	bool connectable = true;
 	if (toggle) {
-		connectable = (++_advParamsCounter % 2);
+		connectable = (++_advInterleaveCounter % 2);
 	}
 
 	if (connectable) {
@@ -628,26 +628,36 @@ void Stack::updateAdvertisement(bool toggle) {
 	restartAdvertising();
 }
 
-/** Current state 
+/** Utility function which logs unexpected state
  * 
  */
-bool Stack::isAdvertising(bool check, bool expectation) {
-	if (check && (expectation != _advertising)) {
-		if (_advertising) {
-			LOGw("Expected no advertising");
+bool Stack::checkCondition(condition_t condition, bool expectation) {
+	bool field;
+	switch(condition) {
+	case C_ADVERTISING: 
+		field = _advertising;
+		if (expectation != field) {
+			LOGw("Advertising %i", field);
 		}
-		else {
-			LOGw("Expected advertising");
+		break;
+	case C_STACK_INITIALIZED:
+		field = _initialized;
+		if (expectation != field) {
+			LOGw("Stack init %i", field);
 		}
+		break;
+	case C_RADIO_INITIALIZED:
+		field = _initializedRadio;
+		if (expectation != field) {
+			LOGw("Stack init %i", field);
+		}
+		break;
 	}
-	return _advertising;
+	return field;
 }
 
 void Stack::setAdvertisementData() {
-	if (!_initializedRadio) {
-		LOGw(FMT_NOT_INITIALIZED, "radio");
-		return;
-	}
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 
 	uint32_t err;
 	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);

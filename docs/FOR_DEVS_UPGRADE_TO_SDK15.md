@@ -72,6 +72,8 @@ And then it is newer than that again. Version v14.
 
 `BLE_GATTS_EVT_HVN_TX_COMPLETE` vs `BLE_EVT_TX_COMPLETE`
 
+The question is, do we actually need the peer manager, or is this module only required for bonding devices?
+
 # Common Errors
 
 The following stems from using `C` constructs within `C++`:

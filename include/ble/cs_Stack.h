@@ -142,7 +142,9 @@ protected:
 	uint8_t                                     _adv_handle;
 	ble_gap_adv_data_t                          _adv_data;
 	ble_gap_adv_params_t                        _adv_params;
-	uint8_t										_advParamsCounter;
+	uint8_t                                     _conn_cfg_tag;
+
+	uint8_t										_advInterleaveCounter;
 
 	ble_advdata_manuf_data_t                    _manufac;
 	// todo: make part of Crownstonefacturer (see iBeacon)
