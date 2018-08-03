@@ -1,11 +1,11 @@
 /**
  * @file
- * Import files from Nordic SDK.
+ * import files from nordic sdk.
  *
- * @authors Crownstone Team
- * @copyright Crownstone B.V.
- * @date Apr 21, 2015
- * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ * @authors crownstone team
+ * @copyright crownstone b.v.
+ * @date apr 21, 2015
+ * license: lgplv3+, apache license 2.0, and/or mit (triple-licensed)
  */
 #pragma once
 
@@ -27,6 +27,8 @@ extern "C"
 
 //! Refering to files in the Nordic SDK
 #include "nrfx_glue.h"
+#include "nrf_sdh.h"
+#include "nrf_sdh_ble.h"
 
 #include "nrf.h"
 #include "nrf_gpio.h"

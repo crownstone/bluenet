@@ -12354,7 +12354,7 @@
 
 // <o> NRF_SDH_BLE_PERIPHERAL_LINK_COUNT - Maximum number of peripheral links. 
 #ifndef NRF_SDH_BLE_PERIPHERAL_LINK_COUNT
-#define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 0
+#define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
 #endif
 
 // <o> NRF_SDH_BLE_CENTRAL_LINK_COUNT - Maximum number of central links. 
@@ -12383,19 +12383,19 @@
 
 // <o> NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE - Attribute Table size in bytes. The size must be a multiple of 4. 
 #ifndef NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE
-#define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE 1408
+#define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE ATTR_TABLE_SIZE
 #endif
 
 // <o> NRF_SDH_BLE_VS_UUID_COUNT - The number of vendor-specific UUIDs. 
 #ifndef NRF_SDH_BLE_VS_UUID_COUNT
-#define NRF_SDH_BLE_VS_UUID_COUNT 0
+#define NRF_SDH_BLE_VS_UUID_COUNT MAX_NUM_VS_SERVICES
 #endif
 
 // <q> NRF_SDH_BLE_SERVICE_CHANGED  - Include the Service Changed characteristic in the Attribute Table.
  
 
 #ifndef NRF_SDH_BLE_SERVICE_CHANGED
-#define NRF_SDH_BLE_SERVICE_CHANGED 0
+#define NRF_SDH_BLE_SERVICE_CHANGED 1
 #endif
 
 // </h> 

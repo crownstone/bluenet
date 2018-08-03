@@ -290,11 +290,7 @@ uint32_t CharacteristicBase::notify() {
 	if (err_code != NRF_SUCCESS) {
 
 
-#if (NORDIC_SDK_VERSION >= 11)
-		if (err_code == BLE_ERROR_NO_TX_PACKETS) {
-#else
-		if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
-#endif
+		if (err_code == NRF_ERROR_RESOURCES) {
 			//! Dominik: this happens if several characteristics want to send a notification,
 			//!   but the system only has a limited number of tx buffers available. so queueing up
 			//!   notifications faster than being able to send them out from the stack results
@@ -396,11 +392,7 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 
 		if (err_code != NRF_SUCCESS) {
 
-#if (NORDIC_SDK_VERSION >= 11)
-			if (err_code == BLE_ERROR_NO_TX_PACKETS) {
-#else
-			if (err_code == BLE_ERROR_NO_TX_BUFFERS) {
-#endif
+			if (err_code == NRF_ERROR_RESOURCES) {
 				//! Dominik: this happens if several characteristics want to send a notification,
 				//!   but the system only has a limited number of tx buffers available. so queueing up
 				//!   notifications faster than being able to send them out from the stack results

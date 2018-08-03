@@ -295,7 +295,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	case UART_OPCODE_RX_GET_MAC:
 		uint32_t err_code;
 		ble_gap_addr_t address;
-		err_code = sd_ble_gap_address_get(&address);
+		err_code = sd_ble_gap_addr_get(&address);
 		APP_ERROR_CHECK(err_code);
 		writeMsg(UART_OPCODE_TX_OWN_MAC, address.addr, sizeof(ble_gap_addr_t));
 		break;

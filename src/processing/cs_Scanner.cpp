@@ -311,24 +311,26 @@ bool Scanner::isFiltered(data_t* p_adv_data) {
 	return false;
 }
 
+/** Advertisement handler
+ *
+ * We do so-called "active" scanning. This means we will get a scan response besides the advertisement packet itself
+ * when the device we are scanning for supports this. For now we ignore devices that do not send a scan response.
+ * The advantage is that we avoid handling a device twice (once for the advertisement and once for the scan response).
+ * This is of course only useful as long as we do not care about the advertisement data.
+ */
 void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 
-	if (isScanning()) {
+	if (!isScanning()) return;
 
-		EventDispatcher::getInstance().dispatch(EVT_DEVICE_SCANNED, p_adv_report, sizeof(ble_gap_evt_adv_report_t));
-		//! we do active scanning, to avoid handling each device twice, only
-		//! check the scan responses (as long as we don't care about the
-		//! advertisement data)
-		if (p_adv_report->scan_rsp) {
-            data_t adv_data;
+	EventDispatcher::getInstance().dispatch(EVT_DEVICE_SCANNED, p_adv_report, sizeof(ble_gap_evt_adv_report_t));
+	if (p_adv_report->type.scan_response) {
+		data_t adv_data;
 
-            //! Initialize advertisement report for parsing.
-            adv_data.p_data = (uint8_t *)p_adv_report->data;
-            adv_data.data_len = p_adv_report->dlen;
+		adv_data.p_data = p_adv_report->data.p_data;
+		adv_data.data_len = p_adv_report->data.len;
 
-			if (!isFiltered(&adv_data)) {
-				_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
-			}
+		if (!isFiltered(&adv_data)) {
+			_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
 		}
 	}
 }

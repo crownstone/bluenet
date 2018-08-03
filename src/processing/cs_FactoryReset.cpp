@@ -149,9 +149,6 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 	// Clear other data
 	State::getInstance().factoryReset(FACTORY_RESET_CODE);
 
-	// Remove bonded devices
-	Stack::getInstance().device_manager_init(true);
-
 	// Lastly, go into setup mode after next reset
 	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_SETUP);
 

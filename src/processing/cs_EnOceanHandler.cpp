@@ -399,7 +399,6 @@ bool EnOceanHandler::triggerEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 
 	} else {
 #ifdef ENOCEAN_DEBUG
-//			LOGi("rssi: %d", p_adv_report->rssi);
 		LOGw("Ignore! old seqCounter: %d", telegram->seqCounter);
 #endif
 	}
@@ -413,8 +412,8 @@ bool EnOceanHandler::parseAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) 
 	data_t adv_data;
 
 	//! Initialize advertisement report for parsing.
-	adv_data.p_data = (uint8_t *)p_adv_report->data;
-	adv_data.data_len = p_adv_report->dlen;
+	adv_data.p_data = p_adv_report->data.p_data;
+	adv_data.data_len = p_adv_report->data.len;
 
 	uint32_t err_code = BLEutil::adv_report_parse(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
 										 &adv_data,

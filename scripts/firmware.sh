@@ -13,15 +13,15 @@ ERR_HARDWARE_VERSION_MISMATCH=108
 
 getopt --test > /dev/null
 if [[ $? -ne 4 ]]; then
-  echo "I’m sorry, `getopt --test` failed in this environment."
+  echo "I’m sorry, 'getopt --test' failed in this environment."
   exit $ERR_GETOPT_TEST
 fi
 
 SHORT=c:t:a:ybsu
 LONG=command:,target:,address:yes,bootloader,softdevice,use_combined
 
-PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
-if [[ $? -ne 0 ]]; then
+if ! PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
+then
   exit $ERR_GETOPT_PARSE
 fi
 
@@ -63,7 +63,7 @@ while true; do
 			;;
 		*)
 			echo "Error in arguments."
-			echo $2
+			echo "$2"
 			exit $ERR_ARGUMENTS
 			;;
 	esac
@@ -112,7 +112,8 @@ target=${target:-crownstone}
 
 # use the current path as the bluenet directory
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/_utils.sh
+# shellcheck source=./_util.sh
+source "$path/_utils.sh"
 
 export BLUENET_DIR=$(readlink -m ${path}/..)
 

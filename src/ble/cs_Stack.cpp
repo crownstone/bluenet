@@ -1,6 +1,5 @@
 /*
  * Author: Crownstone Team
- * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Apr 23, 2015
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
@@ -45,7 +44,8 @@ Stack::Stack() :
 	_initializedStack(false), _initializedServices(false), _initializedRadio(false), _advertising(false), _scanning(false),
 	_conn_handle(BLE_CONN_HANDLE_INVALID),
 	_radio_notify(0),
-	_dm_app_handle(0), _dm_initialized(false),
+	//_dm_app_handle(0), 
+	_dm_initialized(false),
 	_lowPowerTimeoutId(NULL),
 	_secReqTimerId(NULL),
 	_connectionKeepAliveTimerId(NULL),
@@ -76,12 +76,14 @@ Stack::~Stack() {
 	shutdown();
 }
 
+/*
 const nrf_clock_lf_cfg_t Stack::defaultClockSource = { 
 	.source        = NRF_CLOCK_LF_SRC_XTAL,        
 	.rc_ctiv       = 0,                     
 	.rc_temp_ctiv  = 0,                     
 	.xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM 
 };
+*/
 
 /**
  * Called by the Softdevice handler on any BLE event. It is initialized from the SoftDevice using the app scheduler.
@@ -111,18 +113,6 @@ void Stack::init() {
 	}
 
 	LOGi(MSG_BLE_SOFTDEVICE_INIT);
-	// Initialize the SoftDevice handler module.
-	// This would call with different clock!
-	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
-
-	// Enable the softdevice
-	LOGi(MSG_BLE_SOFTDEVICE_ENABLE);
-
-	// Assign ble event handler, forward ble_evt to stack
-	BLE_CALL(softdevice_ble_evt_handler_set, (ble_evt_dispatch));
-
-	// Set system event handler
-	BLE_CALL(softdevice_sys_evt_handler_set, (sys_evt_dispatch));
 
 	// Enable power-fail comparator
 	sd_power_pof_enable(true);
@@ -130,41 +120,51 @@ void Stack::init() {
 	// an NRF_EVT_POWER_FAILURE_WARNING will be triggered.
 	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
 	
-	_adv_data.adv_data = _advdata;
-	_adv_data.scan_rsp_data = _scanrsp;
+	//_adv_data.adv_data = _advdata;
+	//_adv_data.scan_rsp_data = _scanrsp;
 
 	_initializedStack = true;
 }
 
 /** Initialize or configure the BLE radio.
+ *
+ * We are using the S132 softdevice. Online documentation can be found at the Nordic website:
+ *
+ * - http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.softdevices52/dita/softdevices/s130/s130api.html
+ * - http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.s132.api.v6.0.0/modules.html
+ * - http://infocenter.nordicsemi.com/pdf/S132_SDS_v6.0.pdf
+ *
+ * The easiest is to follow the migration documents.
+ *
+ * - https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.0.0/migration.html?cp=4_0_0_1_9
+ * - https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v14.0.0/migration.html?cp=4_0_3_1_7
+ *
+ * Set BLE parameters now in <third/nrf/sdk_config.h>:
+ *   NRF_SDH_BLE_PERIPHERAL_LINK_COUNT = 1
+ *   NRF_SDH_BLE_CENTRAL_LINK_COUNT = 0
  */
 void Stack::initRadio() {
+	ret_code_t err_code;
 	if (!checkCondition(C_STACK_INITIALIZED, true)) return;
 	if (checkCondition(C_RADIO_INITIALIZED, false)) return;
 
-	// Set BLE stack parameters
-	ble_enable_params_t ble_enable_params;
-	memset(&ble_enable_params, 0, sizeof(ble_enable_params));
-	
-	ble_enable_params.gap_enable_params.periph_conn_count = 1;
-	ble_enable_params.gap_enable_params.central_conn_count = 0;
-	ble_enable_params.gap_enable_params.central_sec_count = 1;
-	ble_enable_params.gatts_enable_params.attr_tab_size = ATTR_TABLE_SIZE;
-	ble_enable_params.gatts_enable_params.service_changed = 1;
-	ble_enable_params.common_enable_params.vs_uuid_count = MAX_NUM_VS_SERVICES;
+	nrf_sdh_enable_request(); 
 
 	// Enable BLE stack
-	ret_code_t err_code;
-	uint32_t ramBase = RAM_R1_BASE;
-	err_code = sd_ble_enable(&ble_enable_params, &ramBase);
+	uint32_t ram_start = RAM_R1_BASE;
+	uint32_t const conn_cfg_tag = 1;
+	err_code = nrf_sdh_ble_default_cfg_set(conn_cfg_tag, &ram_start); 
 	if (err_code == NRF_ERROR_NO_MEM) {
-		LOGe("Unrecoverable, memory softdevice and app overlaps: %p", ramBase);
+		LOGe("Unrecoverable, memory softdevice and app overlaps: %p", ram_start);
 		APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
 	}
 	APP_ERROR_CHECK(err_code);
-	if (ramBase != RAM_R1_BASE) {
-		LOGw("Application address is too high, memory is unused: %p", ramBase);
+	if (ram_start != RAM_R1_BASE) {
+		LOGw("Application address is too high, memory is unused: %p", ram_start);
 	}
+
+	err_code = nrf_sdh_ble_enable(&ram_start);
+	APP_ERROR_CHECK(err_code);
 
 	// Version is not saved or shown yet
 	ble_version_t version( { });
@@ -529,6 +529,7 @@ void Stack::startAdvertising() {
 
 	LOGi(MSG_BLE_ADVERTISING_STARTING);
 	
+	//uint32_t err_code = ble_advertising_start(_ble_adv_mode);
 	uint32_t err_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag);
 	switch (err_code) {
 	case NRF_ERROR_BUSY:
@@ -597,7 +598,7 @@ void Stack::updateAdvertisement(bool toggle) {
  * 
  */
 bool Stack::checkCondition(condition_t condition, bool expectation) {
-	bool field;
+	bool field = false;
 	switch(condition) {
 	case C_ADVERTISING: 
 		field = _advertising;
@@ -717,8 +718,6 @@ void Stack::updatePasskey() {
 	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
 }
 
-//#define SECURITY_REQUEST_DELAY          APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)  /*< Delay after connection until Security Request is sent, if necessary (ticks). */
-
 void Stack::lowPowerTimeout(void* p_context) {
 	LOGw("bonding timeout!");
 	((Stack*)p_context)->changeToNormalTxPowerMode();
@@ -736,7 +735,7 @@ void Stack::changeToNormalTxPowerMode() {
 	setTxPowerLevel(txPower);
 }
 
-void Stack::on_ble_evt(ble_evt_t * p_ble_evt, void * p_context) {
+void Stack::on_ble_evt(ble_evt_t * p_ble_evt) {//, void * p_context) {
 
 	if (_dm_initialized) {
 		// Note: peer manager is removed

@@ -372,7 +372,9 @@ void Crownstone::configureStack() {
 		sd_ble_gap_rssi_stop(conn_handle);
 		sd_ble_gap_rssi_start(conn_handle, 0, 0);
 #endif
-		sd_power_gpregret_clr(0xFF);
+		uint32_t gpregret_id = 0;
+		uint32_t gpregret_msk = 0xFF;
+		sd_power_gpregret_clr(gpregret_id, gpregret_msk);
 
 		_stack->setNonConnectable();
 		_stack->restartAdvertising();
@@ -586,8 +588,9 @@ void Crownstone::startUp() {
 
 	LOGi(FMT_HEADER, "startup");
 
+	uint32_t gpregret_id = 0;
 	uint32_t gpregret;
-	sd_power_gpregret_get(&gpregret);
+	sd_power_gpregret_get(gpregret_id, &gpregret);
 	LOGi("Soft reset count: %d", gpregret);
 
 	uint16_t bootDelay;
@@ -670,7 +673,7 @@ void Crownstone::startUp() {
 
 	uint32_t err_code;
 	ble_gap_addr_t address;
-	err_code = sd_ble_gap_address_get(&address);
+	err_code = sd_ble_gap_addr_get(&address);
 	APP_ERROR_CHECK(err_code);
 
 	log(SERIAL_INFO, "BLE Address: ");	
@@ -830,10 +833,12 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 			_powerSampler->stopSampling();
 		}
 
+		uint32_t gpregret_id = 0;
+		uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
 		// now reset with brownout reset mask set.
 		// NOTE: do not clear the gpregret register, this way
 		//   we can count the number of brownouts in the bootloader
-		sd_power_gpregret_set(GPREGRET_BROWNOUT_RESET);
+		sd_power_gpregret_set(gpregret_id, gpregret_msk);
 		// soft reset, because brownout can't be distinguished from
 		// hard reset otherwise
 		sd_nvic_SystemReset();

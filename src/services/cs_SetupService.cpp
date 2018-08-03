@@ -50,31 +50,31 @@ void SetupService::createCharacteristics() {
 
 
 void SetupService::addMacAddressCharacteristic() {
-    sd_ble_gap_address_get(&_myAddr);
+    sd_ble_gap_addr_get(&_myAddr);
 
-	_macAddressCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_macAddressCharacteristic);
+    _macAddressCharacteristic = new Characteristic<buffer_ptr_t>();
+    addCharacteristic(_macAddressCharacteristic);
 
-	_macAddressCharacteristic->setUUID(UUID(getUUID(), MAC_ADDRESS_UUID));
-	_macAddressCharacteristic->setName(BLE_CHAR_MAC_ADDRES);
-	_macAddressCharacteristic->setWritable(false);
-	_macAddressCharacteristic->setValue(_myAddr.addr);
-	_macAddressCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_macAddressCharacteristic->setMaxGattValueLength(BLE_GAP_ADDR_LEN);
-	_macAddressCharacteristic->setValueLength(BLE_GAP_ADDR_LEN);
+    _macAddressCharacteristic->setUUID(UUID(getUUID(), MAC_ADDRESS_UUID));
+    _macAddressCharacteristic->setName(BLE_CHAR_MAC_ADDRES);
+    _macAddressCharacteristic->setWritable(false);
+    _macAddressCharacteristic->setValue(_myAddr.addr);
+    _macAddressCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
+    _macAddressCharacteristic->setMaxGattValueLength(BLE_GAP_ADDR_LEN);
+    _macAddressCharacteristic->setValueLength(BLE_GAP_ADDR_LEN);
 }
 
 void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size) {
     _setupKeyCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_setupKeyCharacteristic);
+    addCharacteristic(_setupKeyCharacteristic);
 
-	_setupKeyCharacteristic->setUUID(UUID(getUUID(), SETUP_KEY_UUID));
-	_setupKeyCharacteristic->setName(BLE_CHAR_SETUP_KEY);
-	_setupKeyCharacteristic->setWritable(false);
-	_setupKeyCharacteristic->setValue(buffer);
-	_setupKeyCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_setupKeyCharacteristic->setMaxGattValueLength(size);
-	_setupKeyCharacteristic->setValueLength(0);
+    _setupKeyCharacteristic->setUUID(UUID(getUUID(), SETUP_KEY_UUID));
+    _setupKeyCharacteristic->setName(BLE_CHAR_SETUP_KEY);
+    _setupKeyCharacteristic->setWritable(false);
+    _setupKeyCharacteristic->setValue(buffer);
+    _setupKeyCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
+    _setupKeyCharacteristic->setMaxGattValueLength(size);
+    _setupKeyCharacteristic->setValueLength(0);
 }
 
 void SetupService::addGoToDfuCharacteristic() {

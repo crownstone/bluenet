@@ -38,9 +38,11 @@ void reset(void* p_context) {
 	LOGi("Executing reset: %d", cmd);
 	//! copy to make sure this is nothing more than one value
 	uint8_t err_code;
-	err_code = sd_power_gpregret_clr(0xFF);
+	uint32_t gpregret_id = 0;
+	uint32_t gpregret_msk = 0xFF;
+	err_code = sd_power_gpregret_clr(gpregret_id, gpregret_msk);
 	APP_ERROR_CHECK(err_code);
-	err_code = sd_power_gpregret_set(cmd);
+	err_code = sd_power_gpregret_set(gpregret_id, cmd);
 	APP_ERROR_CHECK(err_code);
 	sd_nvic_SystemReset();
 }

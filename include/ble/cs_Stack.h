@@ -127,7 +127,7 @@ protected:
 	ble_user_mem_block_t 						_user_mem_block; //! used for user memory (long write)
 
 	uint8_t                            			_passkey[BLE_GAP_PASSKEY_LEN];
-	dm_application_instance_t                   _dm_app_handle;
+	//dm_application_instance_t                   _dm_app_handle;
 	bool                                        _dm_initialized;
 
 	app_timer_t                                 _lowPowerTimeoutData;
@@ -390,7 +390,8 @@ public:
 	 * TODO: Currently we loop through every service and send e.g. BLE_GATTS_EVT_WRITE only when some handle matches. It
 	 * is faster to set up maps from handles to directly the right function.
 	 */
-	void on_ble_evt(ble_evt_t * p_ble_evt, void * p_event);
+	//void on_ble_evt(ble_evt_t * p_ble_evt, void * p_event);
+	void on_ble_evt(ble_evt_t * p_ble_evt);
 
 	void secReqTimeoutHandler(void * p_context);
 
