@@ -42,7 +42,7 @@ extern "C" {
 }
 
 // Define test pin to enable gpio debug.
-//#define TEST_PIN 20
+#define TEST_PIN 20
 
 // Define to enable leds. WARNING: this is stored in UICR and not easily reversible!
 //#define ENABLE_LEDS
@@ -900,7 +900,9 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 int main() {
 #ifdef TEST_PIN
 	nrf_gpio_cfg_output(TEST_PIN);
-	nrf_gpio_pin_toggle(TEST_PIN);
+	nrf_gpio_pin_set(TEST_PIN);
+	_exit(1);
+	//nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
 	// this enabled the hard float, without it, we get a hardfaults
@@ -937,6 +939,7 @@ int main() {
 		// init uart, be nice and say hello
 		welcome(board.pinGpioRx, board.pinGpioTx);
 	}
+	welcome(board.pinGpioRx, board.pinGpioTx);
 
 	BLEutil::print_heap("Heap welcome: ");
 	BLEutil::print_stack("Stack welcome: ");
@@ -989,4 +992,5 @@ int main() {
 #endif
 	crownstone.run();
 
+	return 0;
 }

@@ -241,6 +241,7 @@ upload() {
 		      ${path}/_upload.sh $BLUENET_BIN_DIR/combined.hex $address $serial_num
 		      checkError "Error with uploading firmware"
 		else
+		      cs_info "${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num"
 		      ${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
 		      checkError "Error with uploading firmware"
 		fi
