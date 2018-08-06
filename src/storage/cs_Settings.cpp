@@ -35,18 +35,21 @@ void Settings::init(boards_config_t* boardsConfig) {
 
 ERR_CODE Settings::writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent) {
 
-	ERR_CODE error_code;
+	ERR_CODE error_code = ERR_NOT_IMPLEMENTED;
+	/*
 	error_code = verify(type, payload, length);
 	if (SUCCESS(error_code)) {
 		error_code = set(type, payload, persistent, length);
 		EventDispatcher::getInstance().dispatch(type, payload, length);
 	}
+	*/
 	return error_code;
 }
 
 ERR_CODE Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
 
-	ERR_CODE error_code;
+	ERR_CODE error_code = ERR_NOT_IMPLEMENTED;
+	/*
 	uint16_t plen = getSettingsItemSize(type);
 	if (plen > 0) {
 		// todo: do we really want to reload the current working copy?
@@ -58,11 +61,12 @@ ERR_CODE Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBu
 			streamBuffer->setPayload(payload, plen);
 			streamBuffer->setType(type);
 		}
-		return error_code;
 	} else {
+		error_code = ERR_UNKNOWN_TYPE;
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
-		return ERR_UNKNOWN_TYPE;
 	}
+	*/
+	return error_code;
 }
 
 ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
@@ -351,8 +355,11 @@ uint16_t Settings::getSettingsItemSize(uint8_t type) {
 }
 
 ERR_CODE Settings::get(uint8_t type, void* target, bool getDefaultValue) {
-	uint16_t size = 0;
+	ERR_CODE error_code = ERR_NOT_IMPLEMENTED;
+	return error_code;
+/*	uint16_t size = 0;
 	return get(type, target, size, getDefaultValue);
+	*/
 }
 
 /*

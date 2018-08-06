@@ -5,7 +5,9 @@
  */
 #pragma once
 
+extern "C" {
 #include <util/cs_Syscalls.h>
+}
 
 #ifdef	NDEBUG
 

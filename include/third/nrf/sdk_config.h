@@ -2660,7 +2660,7 @@
 // <e> LPCOMP_ENABLED - nrf_drv_lpcomp - LPCOMP peripheral driver - legacy layer
 //==========================================================
 #ifndef LPCOMP_ENABLED
-#define LPCOMP_ENABLED 0
+#define LPCOMP_ENABLED 1
 #endif
 // <o> LPCOMP_CONFIG_REFERENCE  - Reference voltage
  
@@ -4107,7 +4107,7 @@
 // <e> NRFX_SAADC_ENABLED - nrfx_saadc - SAADC peripheral driver
 //==========================================================
 #ifndef NRFX_SAADC_ENABLED
-#define NRFX_SAADC_ENABLED 0
+#define NRFX_SAADC_ENABLED 1
 #endif
 // <o> NRFX_SAADC_CONFIG_RESOLUTION  - Resolution
  
@@ -6802,7 +6802,7 @@
 // <e> APP_SCHEDULER_ENABLED - app_scheduler - Events scheduler
 //==========================================================
 #ifndef APP_SCHEDULER_ENABLED
-#define APP_SCHEDULER_ENABLED 0
+#define APP_SCHEDULER_ENABLED 1
 #endif
 // <q> APP_SCHEDULER_WITH_PAUSE  - Enabling pause feature
  
@@ -6868,7 +6868,7 @@
 // <e> APP_TIMER_ENABLED - app_timer - Application timer functionality
 //==========================================================
 #ifndef APP_TIMER_ENABLED
-#define APP_TIMER_ENABLED 0
+#define APP_TIMER_ENABLED 1
 #endif
 // <o> APP_TIMER_CONFIG_RTC_FREQUENCY  - Configure RTC prescaler.
  
@@ -7168,7 +7168,7 @@
  
 
 #ifndef CRC16_ENABLED
-#define CRC16_ENABLED 0
+#define CRC16_ENABLED 1
 #endif
 
 // <q> CRC32_ENABLED  - crc32 - CRC32 calculation routines
@@ -7188,7 +7188,7 @@
 // <e> FDS_ENABLED - fds - Flash data storage module
 //==========================================================
 #ifndef FDS_ENABLED
-#define FDS_ENABLED 0
+#define FDS_ENABLED 1
 #endif
 // <h> Pages - Virtual page settings
 
@@ -7296,7 +7296,7 @@
 // <e> HARDFAULT_HANDLER_ENABLED - hardfault_default - HardFault default handler for debugging and release
 //==========================================================
 #ifndef HARDFAULT_HANDLER_ENABLED
-#define HARDFAULT_HANDLER_ENABLED 0
+#define HARDFAULT_HANDLER_ENABLED 1
 #endif
 // <q> HARDFAULT_HANDLER_GDB_PSP_BACKTRACE  - Bypass the GDB problem with multiple stack pointers backtrace
  
@@ -7725,7 +7725,7 @@
 // <e> NRF_FSTORAGE_ENABLED - nrf_fstorage - Flash abstraction library
 //==========================================================
 #ifndef NRF_FSTORAGE_ENABLED
-#define NRF_FSTORAGE_ENABLED 0
+#define NRF_FSTORAGE_ENABLED 1
 #endif
 // <h> nrf_fstorage - Common settings
 
@@ -12336,7 +12336,7 @@
 // <e> NRF_SDH_BLE_ENABLED - nrf_sdh_ble - SoftDevice BLE event handler
 //==========================================================
 #ifndef NRF_SDH_BLE_ENABLED
-#define NRF_SDH_BLE_ENABLED 0
+#define NRF_SDH_BLE_ENABLED 1
 #endif
 // <h> BLE Stack configuration - Stack configuration parameters
 
@@ -12726,7 +12726,7 @@
 // <e> NRF_SDH_ENABLED - nrf_sdh - SoftDevice handler
 //==========================================================
 #ifndef NRF_SDH_ENABLED
-#define NRF_SDH_ENABLED 0
+#define NRF_SDH_ENABLED 1
 #endif
 // <h> Dispatch model 
 

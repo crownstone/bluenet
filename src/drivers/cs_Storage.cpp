@@ -79,6 +79,11 @@ Storage::Storage() : EventListener() //,
 	*/
 }
 
+ret_code_t Storage::remove(file_id_t file_id) {
+	ret_code_t        ret_code;
+	ret_code = fds_file_delete(file_id);
+	return ret_code;
+}
 /*
 void Storage::init() {
 	// call once before using any other API calls of the persistent storage module

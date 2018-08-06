@@ -3,7 +3,8 @@
  * Date: 21 Sep., 2013
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-#ifdef SYSCALLS
+//#ifdef SYSCALLS
+
 extern int errno;
 
 int _kill(int pid, int sig)
@@ -127,4 +128,4 @@ void * _sbrk(int incr)
 #endif
 
 
-#endif
+//#endif

@@ -111,11 +111,7 @@ public:
 		return ret_code;
 	}
 
-	ret_code_t remove(file_id_t file_id) {
-		ret_code_t        ret_code;
-		ret_code = fds_file_delete(file_id);
-		return ret_code;
-	}
+	ret_code_t remove(file_id_t file_id);
 
 	ret_code_t remove(file_id_t file_id, key_t key) {
 		fds_record_desc_t record_desc;

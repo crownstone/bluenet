@@ -200,7 +200,7 @@ unit-test-host() {
 build() {
 	cd ${path}/..
 	cs_info "Execute make cross-compile-target"
-	make ${make_flag} cross-compile-target
+	make ${make_flag} cross-compile-target 
 	# result=$?
 	checkError "oo Error building firmware"
 	cd $path
@@ -284,7 +284,7 @@ run() {
 
 clean() {
 	cd ${path}/..
-	make ${make_flag} clean
+	make ${make_flag} clean 
 	checkError "Error cleaning up"
 }
 
@@ -361,7 +361,7 @@ bootloader-only() {
 release() {
 	cd ${path}/..
 	cs_info "Execute make release"
-	make release
+	make release 
 	checkError "Failed to build release"
 	# result=$?
 	cd $path

@@ -87,7 +87,7 @@ void RTC1_IRQHandler(void);
 void QDEC_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 
 //! The LP comparator
-void LPCOMP_IRQHandler(void);
+void COMP_LPCOMP_IRQHandler(void) __attribute__ ((weak, alias("unused_isr")));
 
 void SWI0_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
 void SWI1_IRQHandler(void)	__attribute__ ((weak, alias("unused_isr")));
@@ -147,7 +147,7 @@ void (* const gVectors[])(void) =
 	WDT_IRQHandler,
 	RTC1_IRQHandler,
 	QDEC_IRQHandler,
-	LPCOMP_IRQHandler,
+	COMP_LPCOMP_IRQHandler,
 	SWI0_IRQHandler,
 	SWI1_IRQHandler,
 	SWI2_IRQHandler,
@@ -180,7 +180,7 @@ void ResetHandler(void) {
 	//! Enable Peripherals.
 	//! See PAN_028_v1.6.pdf "26. System: Manual setup is required to enable use of peripherals"
 	//! WARNING. This is only true for OLD hardware (check with ./scripts/hardware_version.sh)
-	//! For new hardware this DISABLES for example the LPCOMP peripheral
+	//! For new hardware this DISABLES for example the COMP_LPCOMP peripheral
 	//! Note: this was for the nRF51
 //#ifdef NRF51
 //#if(HARDWARE_VERSION == 0x001D)

@@ -29,6 +29,8 @@ extern "C"
 #include "nrfx_glue.h"
 #include "nrf_sdh.h"
 #include "nrf_sdh_ble.h"
+#include "nrf_fstorage.h"
+#include "fds.h"
 
 #include "nrf.h"
 #include "nrf_gpio.h"
