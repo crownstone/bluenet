@@ -118,6 +118,14 @@ endef
 #######################################################################################################################
 # Targets
 #######################################################################################################################
+	#> log.txt 2>&1
+	#@cat log.txt | sed 's/CMakeFiles\/crownstone.dir//g' | \
+		sed 's/\/home\/anne\/software\/nrf5_sdk\/nRF5_SDK_15.0.0_a53641a/$$NRF5_DIR/g' | \
+		sed 's/\/home\/anne\/workspace\/bluenet\/source//g' | \
+		sed ''s/\\\(error\\\)/$$(printf "\\\n\\\t\033[31m")\\1$$(printf "\033[0m")/'' | \
+		sed ''s/\\\(undefined\ reference\\\)/$$(printf "\\\n\\\t\033[31m")\\1$$(printf "\033[0m")/'' | \
+		sed ''s/:\\\([0-9]\\+\\\):/$$(printf "[\033[33m")\\1$$(printf "\033[0m]:")/'' | \
+		head
 
 all: 
 	@echo "Please call make with cross-compile-target or host-compile target"
@@ -135,16 +143,9 @@ cross-compile-target:
 	$(call cross-compile-target-prepare)
 	@mkdir -p $(BLUENET_BUILD_DIR)
 	@cd $(BLUENET_BUILD_DIR) 
-	@rm log.txt
+	@rm -f log.txt
 	cmake $(DEBUG_COMPILE_FLAGS) \
-		$(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS} > log.txt 2>&1
-	@cat log.txt | sed 's/CMakeFiles\/crownstone.dir//g' | \
-		sed 's/\/home\/anne\/software\/nrf5_sdk\/nRF5_SDK_15.0.0_a53641a/$$NRF5_DIR/g' | \
-		sed 's/\/home\/anne\/workspace\/bluenet\/source//g' | \
-		sed ''s/\\\(error\\\)/$$(printf "\\\n\\\t\033[31m")\\1$$(printf "\033[0m")/'' | \
-		sed ''s/\\\(undefined\ reference\\\)/$$(printf "\\\n\\\t\033[31m")\\1$$(printf "\033[0m")/'' | \
-		sed ''s/:\\\([0-9]\\+\\\):/$$(printf "[\033[33m")\\1$$(printf "\033[0m]:")/'' | \
-		head
+		$(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS} 
 	$(call cross-compile-target-cleanup)
 
 host-compile-target:

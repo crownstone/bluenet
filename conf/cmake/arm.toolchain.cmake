@@ -47,7 +47,7 @@ MESSAGE(STATUS "arm.toolchain.cmake: PATH is set to: ${PATH}")
 # Specify the cross compiler, linker, etc.
 SET(CMAKE_C_COMPILER                   ${COMPILER_PATH}/bin/${COMPILER_TYPE}gcc)
 SET(CMAKE_CXX_COMPILER                 ${COMPILER_PATH}/bin/${COMPILER_TYPE}g++)
-SET(CMAKE_ASM                          ${COMPILER_PATH}/bin/${COMPILER_TYPE}as)
+SET(CMAKE_ASM_COMPILER                 ${COMPILER_PATH}/bin/${COMPILER_TYPE}as)
 SET(CMAKE_LINKER                       ${COMPILER_PATH}/bin/${COMPILER_TYPE}ld)
 SET(CMAKE_READELF                      ${COMPILER_PATH}/bin/${COMPILER_TYPE}readelf)
 SET(CMAKE_OBJDUMP                      ${COMPILER_PATH}/bin/${COMPILER_TYPE}objdump)
@@ -55,6 +55,8 @@ SET(CMAKE_OBJCOPY                      ${COMPILER_PATH}/bin/${COMPILER_TYPE}objc
 SET(CMAKE_SIZE                         ${COMPILER_PATH}/bin/${COMPILER_TYPE}size)
 SET(CMAKE_NM                           ${COMPILER_PATH}/bin/${COMPILER_TYPE}nm)
 
+#ENABLE_LANGUAGE(ASM)
+	
 # Pure magic according following http://stackoverflow.com/questions/41589430/cmake-c-compiler-identification-fails
 # to get rid of the many try_compile attempts by CMake
 SET(CMAKE_C_COMPILER_WORKS TRUE CACHE INTERNAL "")
@@ -71,6 +73,9 @@ SET(DISABLE_NORDIC_COMPILE_ERRORS "-Wno-unused-variable -Wno-unused-but-set-vari
 SET(DEFAULT_CXX_FLAGS       "-std=c++11 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
 SET(DEFAULT_C_FLAGS         "-std=gnu99 ${DISABLE_NORDIC_COMPILE_ERRORS}")
 SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -fmax-errors=1 -fdiagnostics-color=always")
+
+SET(ASM_OPTIONS "-x assembler-with-cpp")
+SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS}" )
 
 # Collect flags that have to do with optimization
 # We are optimizing for SIZE for now. If size turns out to be abundant, enable -O3 optimization.
@@ -236,8 +241,13 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 
 # Tell the linker that we use a special memory layout
-SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
-SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
+#SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
+#SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
+
+SET(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
+SET(PATH_FILE_MEMORY "-L${NRF51822_DIR}/config/nrf52832/armgcc/")
+
+SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF51822_DIR}/modules/nrfx/mdk/")
 
 # http://public.kitware.com/Bug/view.php?id=12652
 # CMake does send the compiler flags also to the linker

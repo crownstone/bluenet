@@ -362,8 +362,8 @@ ERR_CODE Settings::get(uint8_t type, void* target, bool getDefaultValue) {
 	*/
 }
 
-/*
 ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size, bool getDefaultValue) {
+	/*
 #ifdef PRINT_DEBUG
 	LOGd("get %d", type);
 #endif
@@ -552,12 +552,12 @@ ERR_CODE Settings::get(uint8_t type, void* target, uint16_t& size, bool getDefau
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_UNKNOWN_TYPE;
 	}
-	}
+	}*/
 	return ERR_SUCCESS;
 }
 
 ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t size) {
-
+	/*
 	uint8_t* p_item;
 
 	switch(type) {
@@ -811,14 +811,14 @@ ERR_CODE Settings::set(uint8_t type, void* target, bool persistent, uint16_t siz
 			size = 4;
 		}
 		savePersistentStorageItem(p_item, size);
-	}
+	}*/
 	return ERR_SUCCESS;
 }
-*/
+
+bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
+	bool default_value = false;
 
 /*
-bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
-
 	// as long as persistent flag storage is disabled, do not do any checks, but still
 	// update the struct so that other functions can check if the flag is set or not
 #if PERSISTENT_FLAGS_DISABLED==0
@@ -896,13 +896,13 @@ bool Settings::updateFlag(uint8_t type, bool value, bool persistent) {
 #else
 	LOGw("persistent storage for flags disabled!!");
 #endif
-
-	return true;
+	*/
+	return default_value;
 }
 
 bool Settings::readFlag(uint8_t type, bool& value) {
-
-//	bool default_value;
+	bool default_value = false;
+	/*
 #ifdef PRINT_DEBUG
 	LOGd("read flag %d", type);
 #endif
@@ -963,12 +963,13 @@ bool Settings::readFlag(uint8_t type, bool& value) {
 //		value = default_value;
 //		return true;
 //	}
+	*/
 
-	return true;
+	return default_value;
 }
 
 bool Settings::isSet(uint8_t type) {
-
+	bool enabled = false;
 	switch(type) {
 	case CONFIG_MESH_ENABLED :
 	case CONFIG_ENCRYPTION_ENABLED :
@@ -978,16 +979,12 @@ bool Settings::isSet(uint8_t type) {
 	case CONFIG_DEFAULT_ON:
 	case CONFIG_PWM_ALLOWED:
 	case CONFIG_SWITCH_LOCKED:
-	case CONFIG_SWITCHCRAFT_ENABLED: {
-		bool enabled;
+	case CONFIG_SWITCHCRAFT_ENABLED: 
 		readFlag(type, enabled);
-		return enabled;
+	default: {}
 	}
-	default:
-		return false;
-	}
+	return enabled;
 }
-*/
 
 /** Get a handle to the persistent storage struct and load it from FLASH.
  *

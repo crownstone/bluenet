@@ -110,6 +110,8 @@ extern unsigned long _heap_end;
  * This implementation uses a heap with a fixed size, it doesn't grow till the stack pointer. However, you will now
  * run into memory allocation problems probably.
  */
+
+/*
 void * _sbrk(int incr)
 {
     static char *heap_base = (char *)&_heap_start;
@@ -125,6 +127,7 @@ void * _sbrk(int incr)
     heap_base += incr;
     return prev;
 }
+*/
 #endif
 
 

@@ -50,8 +50,9 @@ MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
 
-MESSAGE(STATUS "CMakeLists: Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld)
+#MESSAGE(STATUS "CMakeLists: Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
+#CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld)
+#CONFIGURE_FILE(${NRF51822_DIR}/config/nrf52840/armgcc
 
 # Libraries (math, stdc++ libraries, etc.) 
 # Note! We CANNOT use the size-constrained *_s versions! anymore
@@ -110,18 +111,27 @@ ELSE()
 
 	# We add the source files explicitly. This is recommended in the cmake system and will also force us all the time to
 	# consider the size of the final binary. Do not include things, if not necessary!
+	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
+
+	set_property(SOURCE "${NRF51822_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
+
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/ble/common/ble_advdata.c")
+	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/ble/common/ble_srv_common.c")
+	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/mdk/system_nrf51.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/drivers/src/nrfx_saadc.c")
+	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/drivers/src/prs/nrfx_prs.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/hal/nrf_nvmc.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/fds/fds.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/fstorage/nrf_fstorage.c")
+	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/experimental_section_vars/nrf_section_iter.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/atomic/nrf_atomic.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/atomic_fifo/nrf_atfifo.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/crc16/crc16.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/scheduler/app_scheduler.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/util/app_util_platform.c")
+	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/util/app_error_weak.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/nrf_sdh.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/nrf_sdh_ble.c")
 
@@ -154,10 +164,12 @@ ELSE()
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/integration/nrfx/legacy/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/atomic/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/atomic_fifo/")
+	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/balloc/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/fds/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/fstorage/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/experimental_log/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/experimental_log/src/")
+	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/experimental_memobj/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/experimental_section_vars/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/delay/")
 	INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/crc16/")

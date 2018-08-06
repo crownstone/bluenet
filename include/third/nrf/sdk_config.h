@@ -7232,7 +7232,7 @@
 // <2=> NRF_FSTORAGE_SD 
 
 #ifndef FDS_BACKEND
-#define FDS_BACKEND 2
+#define FDS_BACKEND NRF_FSTORAGE_SD
 #endif
 
 // </h> 
@@ -12894,7 +12894,7 @@
 // <e> NRF_SDH_SOC_ENABLED - nrf_sdh_soc - SoftDevice SoC event handler
 //==========================================================
 #ifndef NRF_SDH_SOC_ENABLED
-#define NRF_SDH_SOC_ENABLED 0
+#define NRF_SDH_SOC_ENABLED 1
 #endif
 // <h> SoC Observers - Observers and priority levels
 
