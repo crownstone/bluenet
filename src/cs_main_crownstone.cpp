@@ -42,7 +42,7 @@ extern "C" {
 }
 
 // Define test pin to enable gpio debug.
-#define TEST_PIN 20
+#define TEST_PIN 18
 
 // Define to enable leds. WARNING: this is stored in UICR and not easily reversible!
 //#define ENABLE_LEDS
@@ -900,9 +900,7 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 int main() {
 #ifdef TEST_PIN
 	nrf_gpio_cfg_output(TEST_PIN);
-	nrf_gpio_pin_set(TEST_PIN);
-	_exit(1);
-	//nrf_gpio_pin_toggle(TEST_PIN);
+	nrf_gpio_pin_clear(TEST_PIN);
 #endif
 
 	// this enabled the hard float, without it, we get a hardfaults
@@ -932,7 +930,7 @@ int main() {
 		}
 	}
 
-#ifdef TEST_PIN
+#ifdef TEST_PIN1
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 	if (board.flags.hasSerial) {
@@ -944,7 +942,7 @@ int main() {
 	BLEutil::print_heap("Heap welcome: ");
 	BLEutil::print_stack("Stack welcome: ");
 
-#ifdef TEST_PIN
+#ifdef TEST_PIN1
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 	Crownstone crownstone(board); // 250 ms
@@ -953,7 +951,7 @@ int main() {
 	BLEutil::print_stack("Stack crownstone construct: ");
 
 	// initialize crownstone (depends on the operation mode) ...
-#ifdef TEST_PIN
+#ifdef TEST_PIN1
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
@@ -981,13 +979,13 @@ int main() {
 	BLEutil::print_stack("Stack crownstone init: ");
 
 	//! start up phase, start ticking (depends on the operation mode) ...
-#ifdef TEST_PIN
+#ifdef TEST_PIN1
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 	crownstone.startUp(); // 500 ms
 
 	//! run forever ...
-#ifdef TEST_PIN
+#ifdef TEST_PIN1
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 	crownstone.run();

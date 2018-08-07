@@ -245,6 +245,8 @@ upload() {
 		      ${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
 		      checkError "Error with uploading firmware"
 		fi
+	else 
+	    cs_err "Something went wrong"
 	fi
 }
 
@@ -285,8 +287,9 @@ run() {
 
 clean() {
 	cd ${path}/..
-	make ${make_flag} clean 
+	make ${make_flag} clean-all
 	checkError "Error cleaning up"
+	cs_info "Cleaned up!"
 }
 
 uploadBootloader() {
@@ -384,6 +387,7 @@ verifyHardwareBoardDefinedLocally() {
 
 # The hardware board is actually physically checked. 
 verifyHardwareBoardDefined() {
+  return 0
 	verifyHardwareBoardDefinedLocally
 	cs_info "Find hardware board version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
 	hardware_board_version=$(${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num)
@@ -455,7 +459,7 @@ case "$cmd" in
 		writeHardwareVersion
 		;;
 	*)
-		cs_info $"Usage: $0 {build|unit-test-host|unit-test-nrf5|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release|writeHardwareVersion}"
+		cs_info $"Usage: $0 {build|unit-test-host|unit-test-nrf5|upload|debug|all|run|clean|bootloader-only|bootloader|debugbl|release|readHardwareVersion|writeHardwareVersion}"
 		exit $ERR_ARGUMENTS
 esac
 

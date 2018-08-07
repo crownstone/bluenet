@@ -159,6 +159,10 @@ clean:
 	$(call cross-compile-target-cleanup)
 	$(call host-compile-target-cleanup)
 
+clean-all:
+	@mkdir -p $(BLUENET_BUILD_DIR)
+	@cd $(BLUENET_BUILD_DIR) && make clean
+
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 

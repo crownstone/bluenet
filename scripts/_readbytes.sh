@@ -17,4 +17,4 @@ sed "s|@ADDRESS@|$ADDRESS|" $SCRIPT_DIR/readbytes.script > $TEMP_DIR/readbytes.s
 sed -i "s|@NUM_BYTES@|$NUM_BYTES|" $TEMP_DIR/readbytes.script
 
 echo "$JLINK -Device $DEVICE -speed 4000 -If SWD $TEMP_DIR/readbytes.script"
-$JLINK -Device $DEVICE -speed 4000 -If SWD $TEMP_DIR/readbytes.script
+$JLINK -Device $DEVICE -speed 4000 -If SWD $TEMP_DIR/readbytes.script 

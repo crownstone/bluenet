@@ -50,9 +50,8 @@ MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
 
-#MESSAGE(STATUS "CMakeLists: Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
-#CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld)
-#CONFIGURE_FILE(${NRF51822_DIR}/config/nrf52840/armgcc
+MESSAGE(STATUS "CMakeLists: Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld)
 
 # Libraries (math, stdc++ libraries, etc.) 
 # Note! We CANNOT use the size-constrained *_s versions! anymore
@@ -117,6 +116,7 @@ ELSE()
 
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/ble/common/ble_advdata.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/ble/common/ble_srv_common.c")
+	# should be our own code, but SystemInit here contains a lot of PANs we don't have to solve subsequently...
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/mdk/system_nrf51.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/modules/nrfx/drivers/src/nrfx_saadc.c")

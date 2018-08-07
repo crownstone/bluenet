@@ -29,8 +29,8 @@ fi
 
 if [ -z $SERIAL_NUM ]; then
 	cs_log "$JLINK -Device $DEVICE -If SWD $TEMP_DIR/softdevice.script -ExitonError 1"
-	$JLINK -Device $DEVICE -If SWD $TEMP_DIR/softdevice.script -ExitonError 1
+	$JLINK -Device $DEVICE -Speed 4000 -If SWD $TEMP_DIR/softdevice.script -ExitonError 1
 else
 	cs_log "$JLINK -Device $DEVICE -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/softdevice.script -ExitonError 1"
-	$JLINK -Device $DEVICE -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/softdevice.script -ExitonError 1
+	$JLINK -Device $DEVICE -Speed 4000 -SelectEmuBySN $SERIAL_NUM -If SWD $TEMP_DIR/softdevice.script -ExitonError 1
 fi

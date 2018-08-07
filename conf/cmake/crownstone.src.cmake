@@ -1,6 +1,6 @@
 
 # essential, code doesn't run without this file !!!
-#LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_sysNrf51.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_sysNrf.c")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cfg/cs_Boards.c")
 

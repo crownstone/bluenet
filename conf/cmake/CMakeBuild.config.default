@@ -305,21 +305,24 @@ HARDWARE_BOARD_ADDRESS=0x10001084
 # RAM_APPLICATION_AMOUNT               - size of softdevice in RAM
 
 #######################################################################################################################
-# S132 2.0
+# S132 6.0 (comes with SDK 15)
 #######################################################################################################################
-SOFTDEVICE_MAJOR=2
+SOFTDEVICE_MAJOR=6
 SOFTDEVICE_MINOR=0
 SOFTDEVICE_SERIES=132
-SOFTDEVICE=s132_nrf52_2.0.0
+SOFTDEVICE=s132_nrf52_6.0.0
 
 #APPLICATION_START_ADDRESS=0x0001C000
 #APPLICATION_START_ADDRESS=0x0002CF70
 # We get APPLICATION_START_ADDRESS from $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld
-APPLICATION_START_ADDRESS=0x0002D000
+#APPLICATION_START_ADDRESS=0x0002D000
+
+APPLICATION_START_ADDRESS=0x00026000
 
 # This should be a chip with 512kB, so 0x80000 - 0x1C000 = 0x64000
 #
-APPLICATION_LENGTH=0x53000
+#APPLICATION_LENGTH=0x53000
+APPLICATION_LENGTH=0x5A000
 
 #APPLICATION_LENGTH=0x64000
 #RAM_R1_BASE=0x20002C00

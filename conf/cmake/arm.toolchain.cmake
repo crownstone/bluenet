@@ -237,8 +237,11 @@ ENDIF()
 MESSAGE(STATUS "arm.toolchain.cmake: CXX flags: ${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
 MESSAGE(STATUS "arm.toolchain.cmake: C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
 
+# __STARTUP_CONFIG is defined in gcc_startup_nrf52.S
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
+
 
 # Tell the linker that we use a special memory layout
 #SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
@@ -256,8 +259,12 @@ SET(FLAG_WRITE_MAP_FILE "-Wl,-Map,prog.map")
 #SET(FLAG_REMOVE_UNWINDING_CODE "-Wl,--wrap,__aeabi_unwind_cpp_pr0")
 SET(FLAG_REMOVE_UNWINDING_CODE "")
 
+# Hardcode start address
+#SET(FLAG_HARDCODE_STARTING_ADDRESS "-e0x2d000")
+SET(FLAG_HARDCODE_STARTING_ADDRESS "")
+
 # do not define above as multiple linker flags, or else you will get redefines of MEMORY etc.
-SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} -Wl,--gc-sections ${CMAKE_EXE_LINKER_FLAGS} ${FLOAT_FLAGS} ${FLAG_WRITE_MAP_FILE} ${FLAG_REMOVE_UNWINDING_CODE}")
+SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} -Wl,--gc-sections ${CMAKE_EXE_LINKER_FLAGS} ${FLOAT_FLAGS} ${FLAG_WRITE_MAP_FILE} ${FLAG_REMOVE_UNWINDING_CODE} ${FLAG_HARDCODE_STARTING_ADDRESS}")
 
 # We preferably want to run the cross-compiler tests without all the flags. This namely means we have to add for example the object out of syscalls.c to the compilation, etc. Or, differently, have different flags for the compiler tests. This is difficult to do!
 #SET(CMAKE_C_FLAGS "-nostdlib")
