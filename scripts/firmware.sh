@@ -387,7 +387,6 @@ verifyHardwareBoardDefinedLocally() {
 
 # The hardware board is actually physically checked. 
 verifyHardwareBoardDefined() {
-  return 0
 	verifyHardwareBoardDefinedLocally
 	cs_info "Find hardware board version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
 	hardware_board_version=$(${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num)

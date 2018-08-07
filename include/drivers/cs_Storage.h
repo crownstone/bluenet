@@ -12,21 +12,6 @@
 #include <string>
 #include <util/cs_Utils.h>
 
-extern "C" {
-	// Define event handler for errors during initialization
-	static void fds_evt_handler(fds_evt_t const * p_fds_evt) {
-		switch (p_fds_evt->id) {
-			case FDS_EVT_INIT:
-				if (p_fds_evt->result != FDS_SUCCESS) {
-					// TODO: indicate that initialization failed.
-				}
-				break;
-			default:
-				break;
-		}
-	}
-}
-
 /** Class to store items persistently in flash (persistent) memory.
  *
  * This class provides functions to initialize, clear, write and read persistent memory (flash) through the use of 
@@ -53,24 +38,9 @@ public:
 		return instance;
 	}
 
-	ret_code_t init() {
-		// clear fds token before first use 
-		memset(&ftok, 0x00, sizeof(fds_find_token_t));
-
-		// register and initialize module
-		ret_code_t ret_code;
-		ret_code = fds_register(fds_evt_handler);
-		if (ret_code != FDS_SUCCESS) {
-			// TODO: Registering of the FDS event handler has failed.
-		}
-		ret_code = fds_init();
-		if (ret_code != FDS_SUCCESS) {
-			// TODO: Handle error.
-		}
-		return ret_code;
-	}
-
-	bool isInitialized() {
+	ret_code_t init();
+	
+	inline bool isInitialized() {
 		return _initialized;
 	}
 

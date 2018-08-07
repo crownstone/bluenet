@@ -265,11 +265,11 @@ void Crownstone::initDrivers() {
 	LOGi(FMT_INIT, "timers");
 	_timer->init();
 
-	LOGi(FMT_INIT, "pstorage");
+	LOGi(FMT_INIT, "storage");
 	// initialization of storage and settings has to be done **AFTER** stack is initialized
 	_storage->init();
 
-	LOGi("Loading configuration");
+	LOGi(FMT_INIT, "board config");
 	_settings->init(&_boardsConfig);
 	_stateVars->init();
 
@@ -890,6 +890,25 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 
 /**********************************************************************************************************************/
 
+/** Overwrite the hardware version.
+ *
+ * The firmware is compiled with particular defaults. When a particular product comes from the factory line it has
+ * by default FFFF FFFF in this UICR location. If this is the case, there are two options to cope with this:
+ *   1. Create a custom firmware per device type where this field is adjusted at runtime. 
+ *   2. Create a custom firmware per device type with the UICR field settings in the .hex file. In the latter case,
+ *      if the UICR fields are already set, this might lead to a conflict.
+ * There is chosen for the first option. Even if rare cases where there are devices types with FFFF FFFF in the field, 
+ * the runtime always tries to overwrite it with the (let's hope) proper settings.
+ */
+void overwrite_hardware_version() {
+	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
+	if (hardwareBoard == 0xFFFFFFFF) {
+		LOGw("write board");
+		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
+	}
+	LOGd("Board: %p", hardwareBoard);
+}
+
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
  * the code within the bootloader has been processed before. But also after the bootloader, the code in
@@ -903,7 +922,7 @@ int main() {
 	nrf_gpio_pin_clear(TEST_PIN);
 #endif
 
-	// this enabled the hard float, without it, we get a hardfaults
+	// this enabled the hard float, without it, we get a hardfault
 	SCB->CPACR |= (3UL << 20) | (3UL << 22); __DSB(); __ISB();
 
 	atexit(on_exit);
@@ -937,7 +956,6 @@ int main() {
 		// init uart, be nice and say hello
 		welcome(board.pinGpioRx, board.pinGpioTx);
 	}
-	welcome(board.pinGpioRx, board.pinGpioTx);
 
 	BLEutil::print_heap("Heap welcome: ");
 	BLEutil::print_stack("Stack welcome: ");
@@ -964,13 +982,7 @@ int main() {
 #endif
 	LOGd("NFC pins: %p", NRF_UICR->NFCPINS);
 
-
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		LOGw("write board");
-		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
-	}
-	LOGd("Board: %p", hardwareBoard);
+	overwrite_hardware_version();
 
 	// init drivers, configure(), create services and chars,
 	crownstone.init(); // 13 ms

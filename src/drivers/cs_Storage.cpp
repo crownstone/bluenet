@@ -27,31 +27,20 @@
 #include <mesh/cs_Mesh.h>
 #endif
 
-extern "C"  {
-
-	/*
-	static void pstorage_callback_handler(pstorage_handle_t * handle, uint8_t op_code, uint32_t result, uint8_t * p_data,
-			uint32_t data_len) {
-		// we might want to check if things are actually stored, by using this callback
-		if (result != NRF_SUCCESS) {
-//			if (op_code == PSTORAGE_LOAD_OP_CODE) {
-//				LOGe("Error with loading data");
-//			}
-
-			LOGe("Opcode: %d, ERR_CODE: %d (%p)", op_code, result, result);
-			APP_ERROR_CHECK(result);
-		}
-		else {
-			LOGi("Opcode %d executed (no error)", op_code);
-			if (op_code == PSTORAGE_UPDATE_OP_CODE || op_code == PSTORAGE_STORE_OP_CODE) {
-				// No need to decouple with app scheduler: this handler is already running on the main thread, since sys_evt_dispatch is too.
-				Storage::getInstance().onUpdateDone();
-			}
+extern "C" {
+	// Define event handler for errors during initialization
+	static void fds_evt_handler(fds_evt_t const * p_fds_evt) {
+		switch (p_fds_evt->id) {
+			case FDS_EVT_INIT:
+				if (p_fds_evt->result != FDS_SUCCESS) {
+					// TODO: indicate that initialization failed.
+				}
+				break;
+			default:
+				break;
 		}
 	}
-	*/
-
-} // extern "C"
+}
 
 // NOTE: DO NOT CHANGE ORDER OF THE ELEMENTS OR THE FLASH STORAGE WILL GET MESSED UP!!
 // New entries go at the end? or start? It seems like the first entry is at the lowest address.
@@ -66,9 +55,7 @@ static storage_config_t config[] {
 */
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
-Storage::Storage() : EventListener() //,
-//		_initialized(false), _scanning(false), writeBuffer(STORAGE_REQUEST_BUFFER_SIZE), _pending(0)
-{
+Storage::Storage() : EventListener() {
 	//LOGd(FMT_CREATE, "Storage");
 
 	EventDispatcher::getInstance().addListener(this);
@@ -82,6 +69,27 @@ Storage::Storage() : EventListener() //,
 ret_code_t Storage::remove(file_id_t file_id) {
 	ret_code_t        ret_code;
 	ret_code = fds_file_delete(file_id);
+	return ret_code;
+}
+
+
+ret_code_t Storage::init() {
+	// clear fds token before first use 
+	memset(&ftok, 0x00, sizeof(fds_find_token_t));
+
+	// register and initialize module
+	ret_code_t ret_code;
+	ret_code = fds_register(fds_evt_handler);
+	if (ret_code != FDS_SUCCESS) {
+		// TODO: Registering of the FDS event handler has failed.
+	}
+	ret_code = fds_init();
+	if (ret_code != FDS_SUCCESS) {
+		// TODO: Handle error.
+	}
+	if (ret_code == FDS_SUCCESS) {
+		_initialized = true;
+	}
 	return ret_code;
 }
 /*

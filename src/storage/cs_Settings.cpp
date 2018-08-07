@@ -70,288 +70,46 @@ ERR_CODE Settings::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBu
 }
 
 ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
-	switch(type) {
-	/////////////////////////////////////////////////
-	//// UINT 8
-	/////////////////////////////////////////////////
-	case CONFIG_SCAN_FILTER:
-	case CONFIG_FLOOR:
-	case CONFIG_MESH_CHANNEL:
-	case CONFIG_UART_ENABLED: {
-		if (length != 1) {
-			LOGw(FMT_ERR_EXPECTED, "uint8");
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		LOGi(FMT_SET_INT_TYPE_VAL, type, payload[0]);
-		return ERR_SUCCESS;
-	}
 
-	/////////////////////////////////////////////////
-	//// INT 8
-	/////////////////////////////////////////////////
-	case CONFIG_LOW_TX_POWER:
-	case CONFIG_MAX_CHIP_TEMP:
-	case CONFIG_MAX_ENV_TEMP:
-	case CONFIG_MIN_ENV_TEMP:
-	case CONFIG_TX_POWER:
-	case CONFIG_IBEACON_TXPOWER: {
-		if (length != 1) {
-			LOGw(FMT_ERR_EXPECTED, "int8");
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		LOGi(FMT_SET_INT_TYPE_VAL, type, (int8_t)payload[0]);
-		return ERR_SUCCESS;
-	}
-
-	/////////////////////////////////////////////////
-	//// UINT 16
-	/////////////////////////////////////////////////
-	case CONFIG_SCAN_INTERVAL:
-	case CONFIG_SCAN_WINDOW:
-	case CONFIG_RELAY_HIGH_DURATION:
-	case CONFIG_CROWNSTONE_ID:
-	case CONFIG_SCAN_FILTER_SEND_FRACTION:
-	case CONFIG_BOOT_DELAY:
-	case CONFIG_SCAN_BREAK_DURATION:
-	case CONFIG_SCAN_DURATION:
-	case CONFIG_SCAN_SEND_DELAY:
-	case CONFIG_ADV_INTERVAL:
-	case CONFIG_IBEACON_MINOR:
-	case CONFIG_IBEACON_MAJOR:
-	case CONFIG_NEARBY_TIMEOUT:
-	case CONFIG_POWER_ZERO_AVG_WINDOW:
-	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
-	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM: {
-		if (length != 2) {
-			LOGw(FMT_ERR_EXPECTED, "uint16");
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		LOGi(FMT_SET_INT_TYPE_VAL, type, *(uint16_t*)payload);
-		return ERR_SUCCESS;
-	}
-
-	/////////////////////////////////////////////////
-	//// UINT 32
-	/////////////////////////////////////////////////
-	case CONFIG_PWM_PERIOD:
-	case CONFIG_MESH_ACCESS_ADDRESS: {
-	if (length != 4) {
-			LOGw(FMT_ERR_EXPECTED, "uint32");
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		LOGi(FMT_SET_INT_TYPE_VAL, type, *(uint32_t*)payload);
-		return ERR_SUCCESS;
-	}
-
-	/////////////////////////////////////////////////
-	//// INT 32
-	/////////////////////////////////////////////////
-	case CONFIG_VOLTAGE_ZERO:
-	case CONFIG_CURRENT_ZERO:
-	case CONFIG_POWER_ZERO: {
-		if (length != 4) {
-			LOGw(FMT_ERR_EXPECTED, "int32");
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		LOGi(FMT_SET_INT_TYPE_VAL, type, *(int32_t*)payload);
-		return ERR_SUCCESS;
-	}
-
-	/////////////////////////////////////////////////
-	//// FLOAT
-	/////////////////////////////////////////////////
-	case CONFIG_VOLTAGE_MULTIPLIER:
-	case CONFIG_CURRENT_MULTIPLIER:
-	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
-	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
-	case CONFIG_SWITCHCRAFT_THRESHOLD: {
-		if (length != 4) {
-			LOGw(FMT_ERR_EXPECTED, "float");
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		LOGi(FMT_SET_FLOAT_TYPE_VAL, type, *(float*)payload);
-		return ERR_SUCCESS;
-	}
-
-	/////////////////////////////////////////////////
-	//// BYTE ARRAY
-	/////////////////////////////////////////////////
-	case CONFIG_IBEACON_UUID: {
-		if (length != 16) {
-			LOGw(FMT_ERR_EXPECTED, "16 bytes");
-//			LOGw("Expected 16 bytes for UUID, received: %d", length);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		log(SERIAL_INFO, FMT_SET_STR_TYPE_VAL, type, "");
-		log(SERIAL_INFO, "Set uuid to: "); BLEutil::printArray(payload, 16);
-		return ERR_SUCCESS;
-	}
-	case CONFIG_PASSKEY: {
-		if (length != BLE_GAP_PASSKEY_LEN) {
-			LOGw(FMT_ERR_EXPECTED_RECEIVED, BLE_GAP_PASSKEY_LEN, length);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		LOGi(FMT_SET_STR_TYPE_VAL, type, std::string((char*)payload, length).c_str());
-		return ERR_SUCCESS;
-	}
-	case CONFIG_NAME: {
-		if (length > MAX_STRING_STORAGE_SIZE) {
-			LOGe(MSG_NAME_TOO_LONG);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		LOGi(FMT_SET_STR_TYPE_VAL, type, std::string((char*)payload, length).c_str());
-		return ERR_SUCCESS;
-	}
-	case CONFIG_KEY_ADMIN :
-	case CONFIG_KEY_MEMBER :
-	case CONFIG_KEY_GUEST : {
-		if (length != ENCRYPTION_KEY_LENGTH) {
-			LOGe(FMT_ERR_EXPECTED_RECEIVED, ENCRYPTION_KEY_LENGTH, length);
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		log(SERIAL_INFO, FMT_SET_STR_TYPE_VAL, type, "");
-		BLEutil::printArray((uint8_t*)payload, length);
-		return ERR_SUCCESS;
-	}
-
-	/////////////////////////////////////////////////
-	//// WRITE DISABLED
-	/////////////////////////////////////////////////
-	case CONFIG_MESH_ENABLED :
-	case CONFIG_ENCRYPTION_ENABLED :
-	case CONFIG_IBEACON_ENABLED :
-	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_SAMPLER_ENABLED :
-	case CONFIG_PWM_ALLOWED:
-	case CONFIG_SWITCH_LOCKED:
-	case CONFIG_SWITCHCRAFT_ENABLED: {
-//		updateFlag(type, payload[0] != 0, persistent);
-		LOGe("Write disabled. Use commands to enable/disable");
-		return ERR_WRITE_NOT_ALLOWED;
-	}
-
-	default: {
+	if (type > sizeof(ConfigurationTypeSizes)) {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		return ERR_UNKNOWN_TYPE;
 	}
+
+	switch(type) {
+		case CONFIG_MESH_ENABLED :
+		case CONFIG_ENCRYPTION_ENABLED :
+		case CONFIG_IBEACON_ENABLED :
+		case CONFIG_SCANNER_ENABLED :
+		case CONFIG_CONT_POWER_SAMPLER_ENABLED :
+		case CONFIG_PWM_ALLOWED:
+		case CONFIG_SWITCH_LOCKED:
+		case CONFIG_SWITCHCRAFT_ENABLED: {
+			LOGe("Write disabled. Use commands to enable/disable");
+			return ERR_WRITE_NOT_ALLOWED;
+		}
+	}
+
+	uint8_t size = ConfigurationTypeSizes[type];
+
+	bool correct = false;
+	if (size == length) {
+		correct = true;
+	} else if ((size > length) && (type == CONFIG_NAME)) {
+		correct = true;
+	}
+
+	if (correct) {
+		LOGi(FMT_SET_STR_TYPE_VAL, type, std::string((char*)payload, length).c_str());
+		return ERR_SUCCESS;
+	} else {
+		LOGw(FMT_ERR_EXPECTED, "size");
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 }
 
-uint16_t Settings::getSettingsItemSize(uint8_t type) {
-
-	switch(type) {
-	/////////////////////////////////////////////////
-	//// UINT 8
-	/////////////////////////////////////////////////
-	case CONFIG_SCAN_FILTER:
-	case CONFIG_FLOOR:
-	case CONFIG_MESH_CHANNEL:
-	case CONFIG_UART_ENABLED: {
-		return 1;
-	}
-
-	/////////////////////////////////////////////////
-	//// INT 8
-	/////////////////////////////////////////////////
-	case CONFIG_LOW_TX_POWER:
-	case CONFIG_MAX_CHIP_TEMP:
-	case CONFIG_MAX_ENV_TEMP:
-	case CONFIG_MIN_ENV_TEMP:
-	case CONFIG_TX_POWER:
-	case CONFIG_IBEACON_TXPOWER: {
-		return 1;
-	}
-
-	/////////////////////////////////////////////////
-	//// UINT 16
-	/////////////////////////////////////////////////
-//	case CONFIG_ADC_BURST_SAMPLE_RATE:
-//	case CONFIG_POWER_SAMPLE_BURST_INTERVAL:
-//	case CONFIG_POWER_SAMPLE_CONT_INTERVAL:
-//	case CONFIG_ADC_CONT_SAMPLE_RATE:
-	case CONFIG_SCAN_INTERVAL:
-	case CONFIG_SCAN_WINDOW:
-	case CONFIG_RELAY_HIGH_DURATION:
-	case CONFIG_CROWNSTONE_ID:
-	case CONFIG_SCAN_FILTER_SEND_FRACTION:
-	case CONFIG_BOOT_DELAY:
-	case CONFIG_SCAN_BREAK_DURATION:
-	case CONFIG_SCAN_DURATION:
-	case CONFIG_SCAN_SEND_DELAY:
-	case CONFIG_ADV_INTERVAL:
-	case CONFIG_IBEACON_MINOR:
-	case CONFIG_IBEACON_MAJOR:
-	case CONFIG_NEARBY_TIMEOUT:
-	case CONFIG_POWER_ZERO_AVG_WINDOW:
-	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
-	case CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM: {
-		return 2;
-	}
-
-	/////////////////////////////////////////////////
-	//// UINT 32
-	/////////////////////////////////////////////////
-	case CONFIG_PWM_PERIOD:
-	case CONFIG_MESH_ACCESS_ADDRESS: {
-		return 4;
-	}
-
-	/////////////////////////////////////////////////
-	//// INT 32
-	/////////////////////////////////////////////////
-	case CONFIG_VOLTAGE_ZERO:
-	case CONFIG_CURRENT_ZERO:
-	case CONFIG_POWER_ZERO: {
-		return 4;
-	}
-
-	/////////////////////////////////////////////////
-	//// FLOAT
-	/////////////////////////////////////////////////
-	case CONFIG_VOLTAGE_MULTIPLIER:
-	case CONFIG_CURRENT_MULTIPLIER:
-	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
-	case CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
-	case CONFIG_SWITCHCRAFT_THRESHOLD: {
-		return 4;
-	}
-
-	/////////////////////////////////////////////////
-	//// BYTE ARRAY
-	/////////////////////////////////////////////////
-	case CONFIG_IBEACON_UUID: {
-		return 16;
-	}
-	case CONFIG_PASSKEY: {
-		return BLE_GAP_PASSKEY_LEN;
-	}
-	case CONFIG_NAME: {
-		return MAX_STRING_STORAGE_SIZE+1;
-	}
-	case CONFIG_KEY_ADMIN :
-	case CONFIG_KEY_MEMBER :
-	case CONFIG_KEY_GUEST : {
-		return ENCRYPTION_KEY_LENGTH;
-	}
-
-	/////////////////////////////////////////////////
-	//// FLAGS
-	/////////////////////////////////////////////////
-	case CONFIG_MESH_ENABLED :
-	case CONFIG_ENCRYPTION_ENABLED :
-	case CONFIG_IBEACON_ENABLED :
-	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_SAMPLER_ENABLED :
-	case CONFIG_PWM_ALLOWED:
-	case CONFIG_SWITCH_LOCKED:
-	case CONFIG_SWITCHCRAFT_ENABLED: {
-		return 1;
-	}
-
-	default:
-		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
-		return 0;
-	}
+uint16_t Settings::getSettingsItemSize(const uint8_t type) {
+	return ConfigurationTypeSizes[type];	
 }
 
 ERR_CODE Settings::get(uint8_t type, void* target, bool getDefaultValue) {

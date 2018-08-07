@@ -7,6 +7,8 @@
 #pragma once
 
 #include <events/cs_EventTypes.h>
+#include <cfg/cs_Config.h>
+#include <ble/cs_Nordic.h>
 
 /** Configuration types
  *
@@ -77,6 +79,7 @@ enum ConfigurationTypes {
 	CONFIG_TYPES
 }; // Current max is 127 (0x7F), see cs_EventTypes.h
 
+
 /**
  * For each type define the proper typedef so we can use strong typing in our functions.
  * Use the TYPIFY macro rather than typing CONFIG_ROOM_TYPE etc. explicitly.
@@ -85,9 +88,124 @@ enum ConfigurationTypes {
  */
 
 #define TYPIFY(NAME) NAME ## _TYPE 
+	
+typedef  uint8_t TYPIFY(CONFIG_SCAN_FILTER);
+typedef  uint8_t TYPIFY(CONFIG_FLOOR);
+typedef  uint8_t TYPIFY(CONFIG_MESH_CHANNEL);
+typedef  uint8_t TYPIFY(CONFIG_UART_ENABLED); 
 
-typedef uint8_t TYPIFY(CONFIG_DEVICE_TYPE);
-typedef uint8_t TYPIFY(CONFIG_ROOM);
+typedef   int8_t TYPIFY(CONFIG_LOW_TX_POWER);
+typedef   int8_t TYPIFY(CONFIG_MAX_CHIP_TEMP);
+typedef   int8_t TYPIFY(CONFIG_MAX_ENV_TEMP);
+typedef   int8_t TYPIFY(CONFIG_MIN_ENV_TEMP);
+typedef   int8_t TYPIFY(CONFIG_TX_POWER);
+typedef   int8_t TYPIFY(CONFIG_IBEACON_TXPOWER); 
+	
+typedef uint16_t TYPIFY(CONFIG_SCAN_INTERVAL);
+typedef uint16_t TYPIFY(CONFIG_SCAN_WINDOW);
+typedef uint16_t TYPIFY(CONFIG_RELAY_HIGH_DURATION);
+typedef uint16_t TYPIFY(CONFIG_CROWNSTONE_ID);
+typedef uint16_t TYPIFY(CONFIG_SCAN_FILTER_SEND_FRACTION);
+typedef uint16_t TYPIFY(CONFIG_BOOT_DELAY);
+typedef uint16_t TYPIFY(CONFIG_SCAN_BREAK_DURATION);
+typedef uint16_t TYPIFY(CONFIG_SCAN_DURATION);
+typedef uint16_t TYPIFY(CONFIG_SCAN_SEND_DELAY);
+typedef uint16_t TYPIFY(CONFIG_ADV_INTERVAL);
+typedef uint16_t TYPIFY(CONFIG_IBEACON_MINOR);
+typedef uint16_t TYPIFY(CONFIG_IBEACON_MAJOR);
+typedef uint16_t TYPIFY(CONFIG_NEARBY_TIMEOUT);
+typedef uint16_t TYPIFY(CONFIG_POWER_ZERO_AVG_WINDOW);
+typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD);
+typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM); 
+	
+typedef uint32_t TYPIFY(CONFIG_PWM_PERIOD);
+typedef uint32_t TYPIFY(CONFIG_MESH_ACCESS_ADDRESS); 
+
+typedef  int32_t TYPIFY(CONFIG_VOLTAGE_ZERO);
+typedef  int32_t TYPIFY(CONFIG_CURRENT_ZERO);
+typedef  int32_t TYPIFY(CONFIG_POWER_ZERO); 
+
+typedef    float TYPIFY(CONFIG_VOLTAGE_MULTIPLIER);
+typedef    float TYPIFY(CONFIG_CURRENT_MULTIPLIER);
+typedef    float TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP);
+typedef    float TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN);
+typedef    float TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD); 
+
+typedef     bool TYPIFY(CONFIG_CONT_POWER_SAMPLER_ENABLED);
+typedef     bool TYPIFY(CONFIG_DEFAULT_ON);
+typedef     bool TYPIFY(CONFIG_ENCRYPTION_ENABLED);
+typedef     bool TYPIFY(CONFIG_IBEACON_ENABLED);
+typedef     bool TYPIFY(CONFIG_MESH_ENABLED);
+typedef     bool TYPIFY(CONFIG_PWM_ALLOWED);
+typedef     bool TYPIFY(CONFIG_SCANNER_ENABLED);
+typedef     bool TYPIFY(CONFIG_SWITCH_LOCKED);
+typedef     bool TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
+typedef     bool TYPIFY(CONFIG_TRACKER_ENABLED);
+
+									   //typedef uint8_t TYPIFY(CONFIG_DEVICE_TYPE);
+									   //typedef uint8_t TYPIFY(CONFIG_ROOM);
+static const uint8_t ConfigurationTypeSizes [] = {
+    MAX_STRING_STORAGE_SIZE+1, // CONFIG_NAME
+    0, // CONFIG_DEVICE_TYPE
+    0, // CONFIG_ROOM
+    sizeof(TYPIFY(CONFIG_FLOOR)), 
+    sizeof(TYPIFY(CONFIG_NEARBY_TIMEOUT)),
+    sizeof(TYPIFY(CONFIG_PWM_PERIOD)),
+    sizeof(TYPIFY(CONFIG_IBEACON_MAJOR)), 
+    sizeof(TYPIFY(CONFIG_IBEACON_MINOR)),
+    16, // CONFIG_IBEACON_UUID
+    sizeof(TYPIFY(CONFIG_IBEACON_TXPOWER)),
+    0, // CONFIG_WIFI_SETTINGS
+    sizeof(TYPIFY(CONFIG_TX_POWER)),
+    sizeof(TYPIFY(CONFIG_ADV_INTERVAL)),
+    BLE_GAP_PASSKEY_LEN, // CONFIG_PASSKEY
+    sizeof(TYPIFY(CONFIG_MIN_ENV_TEMP)),
+    sizeof(TYPIFY(CONFIG_MAX_ENV_TEMP)),
+    sizeof(TYPIFY(CONFIG_SCAN_DURATION)),
+    sizeof(TYPIFY(CONFIG_SCAN_SEND_DELAY)),
+    sizeof(TYPIFY(CONFIG_SCAN_BREAK_DURATION)),
+    sizeof(TYPIFY(CONFIG_BOOT_DELAY)),
+    sizeof(TYPIFY(CONFIG_MAX_CHIP_TEMP)),
+    sizeof(TYPIFY(CONFIG_SCAN_FILTER)),
+    sizeof(TYPIFY(CONFIG_SCAN_FILTER_SEND_FRACTION)),
+    0, // CONFIG_CURRENT_LIMIT)),
+    sizeof(TYPIFY(CONFIG_MESH_ENABLED)),
+    sizeof(TYPIFY(CONFIG_ENCRYPTION_ENABLED)),
+    sizeof(TYPIFY(CONFIG_IBEACON_ENABLED)),
+    sizeof(TYPIFY(CONFIG_SCANNER_ENABLED)),
+    sizeof(TYPIFY(CONFIG_CONT_POWER_SAMPLER_ENABLED)),
+    sizeof(TYPIFY(CONFIG_TRACKER_ENABLED)),
+    0, // CONFIG_ADC_BURST_SAMPLE_RATE)),
+    0, // CONFIG_POWER_SAMPLE_BURST_INTERVAL)),
+    0, // CONFIG_POWER_SAMPLE_CONT_INTERVAL)),
+    0, // CONFIG_ADC_CONT_SAMPLE_RATE)),
+    sizeof(TYPIFY(CONFIG_CROWNSTONE_ID)),
+    ENCRYPTION_KEY_LENGTH, // CONFIG_KEY_ADMIN
+    ENCRYPTION_KEY_LENGTH, // CONFIG_KEY_MEMBER
+    ENCRYPTION_KEY_LENGTH, // CONFIG_KEY_GUEST
+    sizeof(TYPIFY(CONFIG_DEFAULT_ON)),
+    sizeof(TYPIFY(CONFIG_SCAN_INTERVAL)),
+    sizeof(TYPIFY(CONFIG_SCAN_WINDOW)),
+    sizeof(TYPIFY(CONFIG_RELAY_HIGH_DURATION)),
+    sizeof(TYPIFY(CONFIG_LOW_TX_POWER)),
+    sizeof(TYPIFY(CONFIG_VOLTAGE_MULTIPLIER)),
+    sizeof(TYPIFY(CONFIG_CURRENT_MULTIPLIER)),
+    0, // CONFIG_VOLTAGE_ZERO)),
+    sizeof(TYPIFY(CONFIG_CURRENT_ZERO)),
+    sizeof(TYPIFY(CONFIG_POWER_ZERO)),
+    sizeof(TYPIFY(CONFIG_POWER_ZERO_AVG_WINDOW)),
+    0, // CONFIG_MESH_ACCESS_ADDRESS)),
+    sizeof(TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD)),
+    sizeof(TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM)),
+    sizeof(TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP)),
+    sizeof(TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN)),
+    sizeof(TYPIFY(CONFIG_PWM_ALLOWED)),
+    sizeof(TYPIFY(CONFIG_SWITCH_LOCKED)),
+    sizeof(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)),
+    sizeof(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)),
+    sizeof(TYPIFY(CONFIG_MESH_CHANNEL)),
+    sizeof(TYPIFY(CONFIG_UART_ENABLED))
+}; 
 
 /**
  * Use some template magic to also be able to do:
@@ -97,10 +215,10 @@ typedef uint8_t TYPIFY(CONFIG_ROOM);
  *   sizeof(Type<config_id>::type)
  * The latter is now the same as uint8_t... as defined above. Everything is defined at compile time.
  */
-template<uint16_t X> struct Type { };
+//template<uint16_t X> struct Type { };
+//template<> struct Type<CONFIG_SCAN_FILTER> { TYPIFY(CONFIG_SCAN_FILTER) type; };
 
-template<> struct Type<CONFIG_DEVICE_TYPE> { TYPIFY(CONFIG_DEVICE_TYPE) type; };
-template<> struct Type<CONFIG_ROOM> { TYPIFY(CONFIG_ROOM) type; };
-
+//template<> struct Type<CONFIG_DEVICE_TYPE> { TYPIFY(CONFIG_DEVICE_TYPE) type; };
+//template<> struct Type<CONFIG_ROOM> { TYPIFY(CONFIG_ROOM) type; };
 
 
