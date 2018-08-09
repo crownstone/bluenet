@@ -72,7 +72,7 @@ SET(DISABLE_NORDIC_COMPILE_ERRORS "-Wno-unused-variable -Wno-unused-but-set-vari
 
 SET(DEFAULT_CXX_FLAGS       "-std=c++11 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
 SET(DEFAULT_C_FLAGS         "-std=gnu99 ${DISABLE_NORDIC_COMPILE_ERRORS}")
-SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -fmax-errors=1 -fdiagnostics-color=always")
+SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -fmax-errors=3 -fdiagnostics-color=always")
 
 SET(ASM_OPTIONS "-x assembler-with-cpp")
 SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS}" )

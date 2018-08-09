@@ -42,32 +42,16 @@ extern "C" {
 	}
 }
 
-// NOTE: DO NOT CHANGE ORDER OF THE ELEMENTS OR THE FLASH STORAGE WILL GET MESSED UP!!
-// New entries go at the end? or start? It seems like the first entry is at the lowest address.
-// TODO: find out what happens when a new page is added: does everything shift or not?
-// Should match with ps_storage_id ?
-/*
-static storage_config_t config[] {
-	{PS_ID_CONFIGURATION, {}, sizeof(ps_configuration_t)},
-	{PS_ID_GENERAL, {}, sizeof(ps_general_vars_t)},
-	{PS_ID_STATE, {}, sizeof(ps_state_t)}
-};
-*/
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
 Storage::Storage() : EventListener() {
 	//LOGd(FMT_CREATE, "Storage");
 
 	EventDispatcher::getInstance().addListener(this);
-
-	/*
-	memset(buffer, 0, sizeof(buffer));
-	writeBuffer.assign((uint8_t*)buffer, sizeof(buffer));
-	*/
 }
 
 ret_code_t Storage::remove(file_id_t file_id) {
-	ret_code_t        ret_code;
+	ret_code_t ret_code;
 	ret_code = fds_file_delete(file_id);
 	return ret_code;
 }
@@ -75,7 +59,7 @@ ret_code_t Storage::remove(file_id_t file_id) {
 
 ret_code_t Storage::init() {
 	// clear fds token before first use 
-	memset(&ftok, 0x00, sizeof(fds_find_token_t));
+	memset(&_ftok, 0x00, sizeof(fds_find_token_t));
 
 	// register and initialize module
 	ret_code_t ret_code;
@@ -92,6 +76,80 @@ ret_code_t Storage::init() {
 	}
 	return ret_code;
 }
+
+ret_code_t Storage::write(file_id_t file_id, file_data_t file_data) {
+	fds_record_t        record;
+	fds_record_desc_t   record_desc;
+
+	record.file_id           = file_id;
+	record.key               = file_data.key;
+	record.data.p_data       = file_data.value;
+	record.data.length_words = file_data.size; 
+
+	ret_code_t ret_code;
+	ret_code = fds_record_write(&record_desc, &record);
+	return ret_code;
+}
+
+ret_code_t Storage::read(file_id_t file_id, file_data_t file_data) {
+	fds_flash_record_t flash_record;
+	fds_record_desc_t  record_desc;
+	ret_code_t         ret_code;
+
+	ret_code = FDS_ERR_NOT_FOUND;
+
+	// go through all records with given file_id and key (can be multiple)
+	while (fds_record_find(file_id, file_data.key, &record_desc, &_ftok) == FDS_SUCCESS) {
+		ret_code = fds_record_open(&record_desc, &flash_record);
+		if (ret_code != FDS_SUCCESS) break;
+
+		// map flash_record.p_data to value
+		file_data.size = flash_record.p_header->length_words;
+		memcpy(file_data.value, flash_record.p_data, file_data.size);
+
+		// invalidates the record	
+		ret_code = fds_record_close(&record_desc);
+		if (ret_code != FDS_SUCCESS) break;
+	}
+	return ret_code;
+}
+
+ret_code_t Storage::remove(file_id_t file_id, key_t key) {
+	fds_record_desc_t record_desc;
+	ret_code_t        ret_code;
+
+	ret_code = FDS_ERR_NOT_FOUND;
+
+	// go through all records with given file_id and key (can be multiple)
+	while (fds_record_find(file_id, key, &record_desc, &_ftok) == FDS_SUCCESS) {
+		ret_code = fds_record_delete(&record_desc);
+		if (ret_code != FDS_SUCCESS) break;
+	}
+	return ret_code;
+}
+
+ret_code_t Storage::exists(file_id_t file_id) {
+	// not yet implemented
+	ret_code_t        ret_code;
+	ret_code = FDS_ERR_NOT_FOUND;
+	return ret_code;
+}
+
+ret_code_t Storage::exists(file_id_t file_id, key_t key) {
+	fds_record_desc_t record_desc;
+	ret_code_t        ret_code;
+
+	ret_code = FDS_ERR_NOT_FOUND;
+	while (fds_record_find(file_id, key, &record_desc, &_ftok) == FDS_SUCCESS) {
+		return FDS_SUCCESS;
+	}
+	return ret_code;
+}
+
+void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+	// should handle event
+}
+
 /*
 void Storage::init() {
 	// call once before using any other API calls of the persistent storage module

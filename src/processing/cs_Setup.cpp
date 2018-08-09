@@ -49,19 +49,16 @@ ERR_CODE Setup::handleCommand(uint8_t* data, uint16_t size) {
 		return ERR_WRONG_PARAMETER;
 	}
 
-
 	// Save all settings.
-	// Since all settings are at the same flash page, we only store to persistent storage at the end.
 	Settings& settings = Settings::getInstance();
-	settings.set(CONFIG_CROWNSTONE_ID,       &(setupData->id),                  false, sizeof(setupData->id));
-	settings.set(CONFIG_KEY_ADMIN,           setupData->adminKey,               false, sizeof(setupData->adminKey));
-	settings.set(CONFIG_KEY_MEMBER,          setupData->memberKey,              false, sizeof(setupData->memberKey));
-	settings.set(CONFIG_KEY_GUEST,           setupData->guestKey,               false, sizeof(setupData->guestKey));
-	settings.set(CONFIG_MESH_ACCESS_ADDRESS, &(setupData->meshAccessAddress),   false, sizeof(setupData->meshAccessAddress));
-	settings.set(CONFIG_IBEACON_UUID,        &(setupData->ibeaconUuid.uuid128), false, sizeof(setupData->ibeaconUuid));
-	settings.set(CONFIG_IBEACON_MAJOR,       &(setupData->ibeaconMajor),        false, sizeof(setupData->ibeaconMajor));
-	settings.set(CONFIG_IBEACON_MINOR,       &(setupData->ibeaconMinor),        false, sizeof(setupData->ibeaconMinor));
-	settings.savePersistentStorage();
+	settings.set(CONFIG_CROWNSTONE_ID,       &(setupData->id),                  true, sizeof(setupData->id));
+	settings.set(CONFIG_KEY_ADMIN,           setupData->adminKey,               true, sizeof(setupData->adminKey));
+	settings.set(CONFIG_KEY_MEMBER,          setupData->memberKey,              true, sizeof(setupData->memberKey));
+	settings.set(CONFIG_KEY_GUEST,           setupData->guestKey,               true, sizeof(setupData->guestKey));
+	settings.set(CONFIG_MESH_ACCESS_ADDRESS, &(setupData->meshAccessAddress),   true, sizeof(setupData->meshAccessAddress));
+	settings.set(CONFIG_IBEACON_UUID,        &(setupData->ibeaconUuid.uuid128), true, sizeof(setupData->ibeaconUuid));
+	settings.set(CONFIG_IBEACON_MAJOR,       &(setupData->ibeaconMajor),        true, sizeof(setupData->ibeaconMajor));
+	settings.set(CONFIG_IBEACON_MINOR,       &(setupData->ibeaconMinor),        true, sizeof(setupData->ibeaconMinor));
 
 	// Set operation mode to normal mode
 	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);

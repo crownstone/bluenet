@@ -28,7 +28,7 @@ enum ConfigurationTypes {
 //	CONFIG_WIFI_SETTINGS                    = 10,     //! 0x0A
 	CONFIG_TX_POWER                         = 11,     //! 0x0B
 	CONFIG_ADV_INTERVAL                     = 12,     //! 0x0C
-	CONFIG_PASSKEY							= 13,     //! 0x0D
+	CONFIG_PASSKEY                          = 13,     //! 0x0D
 	CONFIG_MIN_ENV_TEMP                     = 14,     //! 0x0E
 	CONFIG_MAX_ENV_TEMP                     = 15,     //! 0x0F
 	CONFIG_SCAN_DURATION                    = 16,     //! 0x10
@@ -60,11 +60,11 @@ enum ConfigurationTypes {
 	CONFIG_LOW_TX_POWER                     = 42,     //! 0x2A
 	CONFIG_VOLTAGE_MULTIPLIER               = 43,     //! 0x2B
 	CONFIG_CURRENT_MULTIPLIER               = 44,     //! 0x2C
-	CONFIG_VOLTAGE_ZERO					    = 45,     //! 0x2D
+	CONFIG_VOLTAGE_ZERO                     = 45,     //! 0x2D
 	CONFIG_CURRENT_ZERO                     = 46,     //! 0x2E
 	CONFIG_POWER_ZERO                       = 47,     //! 0x2F
 	CONFIG_POWER_ZERO_AVG_WINDOW            = 48,     //! 0x30
-	CONFIG_MESH_ACCESS_ADDRESS				= 49,	  //! 0x31
+	CONFIG_MESH_ACCESS_ADDRESS              = 49,     //! 0x31
 	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD      = 50,     //! 0x32
 	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM  = 51,     //! 0x33
 	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP    = 52,     //! 0x34
@@ -142,8 +142,6 @@ typedef     bool TYPIFY(CONFIG_SWITCH_LOCKED);
 typedef     bool TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
 typedef     bool TYPIFY(CONFIG_TRACKER_ENABLED);
 
-									   //typedef uint8_t TYPIFY(CONFIG_DEVICE_TYPE);
-									   //typedef uint8_t TYPIFY(CONFIG_ROOM);
 static const uint8_t ConfigurationTypeSizes [] = {
     MAX_STRING_STORAGE_SIZE+1, // CONFIG_NAME
     0, // CONFIG_DEVICE_TYPE
@@ -206,19 +204,4 @@ static const uint8_t ConfigurationTypeSizes [] = {
     sizeof(TYPIFY(CONFIG_MESH_CHANNEL)),
     sizeof(TYPIFY(CONFIG_UART_ENABLED))
 }; 
-
-/**
- * Use some template magic to also be able to do:
- *   var config_id = CONFIG_ROOM;
- *   Type<config_id>::type ...
- * And
- *   sizeof(Type<config_id>::type)
- * The latter is now the same as uint8_t... as defined above. Everything is defined at compile time.
- */
-//template<uint16_t X> struct Type { };
-//template<> struct Type<CONFIG_SCAN_FILTER> { TYPIFY(CONFIG_SCAN_FILTER) type; };
-
-//template<> struct Type<CONFIG_DEVICE_TYPE> { TYPIFY(CONFIG_DEVICE_TYPE) type; };
-//template<> struct Type<CONFIG_ROOM> { TYPIFY(CONFIG_ROOM) type; };
-
 

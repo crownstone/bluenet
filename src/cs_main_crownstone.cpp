@@ -533,7 +533,7 @@ void Crownstone::createCrownstoneServices() {
  */
 void Crownstone::setName() {
 	char device_name[32];
-	uint16_t size;
+	uint16_t size = 0;
 	_settings->get(CONFIG_NAME, device_name, size);
 
 #if CHANGE_NAME_ON_RESET==1

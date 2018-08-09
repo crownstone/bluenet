@@ -36,31 +36,11 @@ public:
 	/** Read the configuration from the buffer and store in working memory.
 	 *  If persistent is true, also store in FLASH
 	 */
-	ERR_CODE writeToStorage(uint8_t type, uint8_t* payload, uint16_t length, bool persistent = true);
+	ERR_CODE writeToStorage(uint8_t type, uint8_t* data, size_t size, bool persistent = true);
 
 	/** Read the configuration from storage and write to streambuffer (to be read from characteristic)
 	 */
 	ERR_CODE readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer);
-
-	/** Return the struct containing the configuration values in current working memory
-	 */
-//	ps_configuration_t& getConfig();
-
-	/** Get a handle to the persistent storage struct and load it from FLASH into working memory.
-	 *
-	 * Persistent storage is implemented in FLASH. Just as with SSDs, it is important to realize that
-	 * writing less than a minimal block strains the memory just as much as flashing the entire block.
-	 * Hence, there is an entire struct that can be filled and flashed at once.
-	 */
-	void loadPersistentStorage();
-
-	/** Save the whole configuration struct (working memory) to FLASH.
-	 */
-	void savePersistentStorage();
-
-	/** Save the whole iBeacon struct to FLASH
-	 */
-	void saveIBeaconPersistent();
 
 	/** Retrieve the Bluetooth name from the object representing the BLE stack.
 	 *
@@ -76,15 +56,18 @@ public:
 	void setBLEName(const std::string &name, bool persistent = true);
 
 	bool isSet(uint8_t type);
+
 	bool updateFlag(uint8_t type, bool value, bool persistent);
 
 	void factoryReset(uint32_t resetCode);
 
-	ERR_CODE get(uint8_t type, void* target, bool getDefaultValue = false);
-	ERR_CODE get(uint8_t type, void* target, uint16_t& size, bool getDefaultValue = false);
-	ERR_CODE set(uint8_t type, void* target, bool persistent = false, uint16_t size = 0);
+	ERR_CODE get(uint8_t type, void* data, bool getDefaultValue = false);
 
-	uint16_t getSettingsItemSize(uint8_t type);
+	ERR_CODE get(uint8_t type, void* data, size_t & size, bool getDefaultValue = false);
+
+	ERR_CODE set(uint8_t type, void* data, size_t size = 0, bool persistent = false);
+
+	size_t getSettingsItemSize(uint8_t type);
 
 protected:
 
@@ -97,13 +80,6 @@ protected:
 	ERR_CODE verify(uint8_t type, uint8_t* payload, uint8_t length);
 
 	bool readFlag(uint8_t type, bool& value);
-
-	/**
-	 * Helper functions to write single item from the configuration struct to storage (FLASH).
-	 */
-	void savePersistentStorageItem(uint32_t* item);
-	void savePersistentStorageItem(int32_t* item);
-	void savePersistentStorageItem(uint8_t* item, uint8_t size = 1);
 
 };
 
