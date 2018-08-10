@@ -1,10 +1,11 @@
 var gulp = require('gulp');
-//var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
-var buildCommand = "cd scripts && ./firmware.sh --command=build --target=sdk15";
+
+var command = 'build';
+var target  = 'sdk15';
 
 gulp.task('build',function(cb){
-	var cmd = spawn('./firmware.sh', ['-c', 'build', '-t', 'sdk15'], { cwd: 'scripts/', stdio: 'inherit'});
+	var cmd = spawn('./firmware.sh', ['-c', command, '-t', target], { cwd: 'scripts/', stdio: 'inherit'});
 	cmd.on(('error'), function(error) {
 		console.log("Firmware call failure ", error);
 		cb(error);
@@ -13,11 +14,6 @@ gulp.task('build',function(cb){
 		console.log("Firmware script exited with code " + code);
 		cb(0);
 	});
-//	exec(buildCommand, function (error, stdout, stderr) {
-//		console.log(stdout);
-//		console.log(stderr);
-//		cb(error);
-//	});
 });
 
 gulp.task('watch', function() {

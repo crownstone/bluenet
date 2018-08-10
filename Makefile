@@ -131,22 +131,32 @@ all:
 	@echo "Please call make with cross-compile-target or host-compile target"
 	@echo "It is recommended to use the scripts/firmware.sh script"
 
+.ONESHELL:
 release:
 	$(call cross-compile-target-prepare)
 	@mkdir -p $(BLUENET_BUILD_DIR)
-	@cd $(BLUENET_BUILD_DIR) && cmake $(RELEASE_COMPILE_FLAGS) \
+	@cd $(BLUENET_BUILD_DIR) 
+	@echo "++ Jumped to directory `pwd`"
+	cmake $(RELEASE_COMPILE_FLAGS) \
 		$(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS} 
+	result=$$?
+	@echo "++ Result of make command (0 means success): $$result"
 	$(call cross-compile-target-cleanup)
+	return $$result
 
 .ONESHELL:
 cross-compile-target:
 	$(call cross-compile-target-prepare)
 	@mkdir -p $(BLUENET_BUILD_DIR)
 	@cd $(BLUENET_BUILD_DIR) 
+	@echo "++ Jumped to directory `pwd`"
 	@rm -f log.txt
-	cmake $(DEBUG_COMPILE_FLAGS) \
+	@cmake $(DEBUG_COMPILE_FLAGS) \
 		$(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS} 
+	result=$$?
+	@echo "++ Result of make command (0 means success): $$result"
 	$(call cross-compile-target-cleanup)
+	return $$result
 
 host-compile-target:
 	$(call host-compile-target-prepare)
