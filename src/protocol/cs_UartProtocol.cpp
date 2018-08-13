@@ -28,14 +28,11 @@
 #include "structs/cs_StreamBuffer.h"
 #include "events/cs_EventDispatcher.h"
 #include "events/cs_EventTypes.h"
-#include "storage/cs_Settings.h"
+#include "storage/cs_State.h"
 
 // Define both test pin to enable gpio debug.
 //#define TEST_PIN   22
 //#define TEST_PIN2  23
-
-// Define to only print debug text (without header and tail).
-//#define DEBUGGING_CLEAN_UART
 
 UartProtocol::UartProtocol():
 _initialized(false),
@@ -98,7 +95,7 @@ void UartProtocol::crc16(const uint8_t * data, const uint16_t size, uint16_t& cr
 }
 
 void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
-#ifdef DEBUGGING_CLEAN_UART
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	switch(opCode) {
 	// when debugging we would like to drop out of certain binary data coming over the console...
 	case UART_OPCODE_TX_TEXT:
@@ -116,7 +113,7 @@ void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) 
 }
 
 void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
-#ifdef DEBUGGING_CLEAN_UART
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
 	default:
@@ -138,7 +135,7 @@ void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 }
 
 void UartProtocol::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
-#ifdef DEBUGGING_CLEAN_UART
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
 	case UART_OPCODE_TX_TEXT:
@@ -155,7 +152,7 @@ void UartProtocol::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t si
 }
 
 void UartProtocol::writeMsgEnd(UartOpcodeTx opCode) {
-#ifdef DEBUGGING_CLEAN_UART
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
 	default:
@@ -289,7 +286,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 		break;
 	case UART_OPCODE_RX_GET_ID:
 		uint16_t crownstoneId;
-		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+		State::getInstance().get(CONFIG_CROWNSTONE_ID, &crownstoneId);
 		writeMsg(UART_OPCODE_TX_OWN_ID, (uint8_t*)&crownstoneId, sizeof(crownstoneId));
 		break;
 	case UART_OPCODE_RX_GET_MAC:

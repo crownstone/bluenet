@@ -32,7 +32,7 @@
  */
 
 #include <processing/cs_Watchdog.h>
-#include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
 #include <drivers/cs_RTC.h>
 #include <processing/cs_CommandHandler.h>
 #include <drivers/cs_Timer.h>

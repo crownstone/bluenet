@@ -100,7 +100,7 @@ void Scheduler::tick() {
 		_posixTimeStamp++;
 		_rtcTimeStamp += RTC::msToTicks(1000);
 
-		State::getInstance().set(STATE_TIME, _posixTimeStamp);
+		State::getInstance().set(STATE_TIME, &_posixTimeStamp);
 	}
 
 	schedule_entry_t* entry = _scheduleList->isActionTime(_posixTimeStamp);
@@ -110,7 +110,7 @@ void Scheduler::tick() {
 				//! TODO: use an event instead
 				uint8_t switchState = entry->pwm.pwm;
 				Switch::getInstance().setSwitch(switchState);
-				State::getInstance().set(STATE_IGNORE_BITMASK, entry->overrideMask);
+				State::getInstance().set(STATE_IGNORE_BITMASK, &entry->overrideMask);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_FADE: {
@@ -119,12 +119,12 @@ void Scheduler::tick() {
 				//TODO: if (entry->fade.fadeDuration == 0), then just use SCHEDULE_ACTION_TYPE_PWM
 				uint8_t switchState = entry->fade.pwmEnd;
 				Switch::getInstance().setSwitch(switchState);
-				State::getInstance().set(STATE_IGNORE_BITMASK, entry->overrideMask);
+				State::getInstance().set(STATE_IGNORE_BITMASK, &entry->overrideMask);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_TOGGLE: {
 				Switch::getInstance().toggle();
-				State::getInstance().set(STATE_IGNORE_BITMASK, entry->overrideMask);
+				State::getInstance().set(STATE_IGNORE_BITMASK, &entry->overrideMask);
 				break;
 			}
 		}
@@ -135,14 +135,11 @@ void Scheduler::tick() {
 }
 
 void Scheduler::writeScheduleList(bool store) {
-	LOGd("store");
+	LOGe("store");
 	buffer_ptr_t buffer;
-	uint16_t length;
-	_scheduleList->getBuffer(buffer, length);
-	State::getInstance().set(STATE_SCHEDULE, buffer, length);
-	if (store) {
-		State::getInstance().savePersistentStorageItem(STATE_SCHEDULE);
-	}
+	uint16_t size;
+	_scheduleList->getBuffer(buffer, size);
+	State::getInstance().set(STATE_SCHEDULE, buffer, size);
 }
 
 void Scheduler::readScheduleList() {

@@ -49,11 +49,12 @@ cs_warn() {
 }
 
 checkError() {
-	result=$?
-	if [ $result -ne 0 ]; then
-		if [ -n "$1" ]; then
-			cs_err "$1"
+	result=$1
+	if [ "$result" -ne 0 ]; then
+		if [ -n "$2" ]; then
+			cs_err "$2 (error code $1)"
 		fi
 		exit $result
 	fi
+	return $result
 }

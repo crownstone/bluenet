@@ -5,28 +5,25 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "processing/cs_PowerSampling.h"
 
-#include "storage/cs_Settings.h"
-#include "drivers/cs_Serial.h"
-#include "drivers/cs_RTC.h"
-#include "protocol/cs_StateTypes.h"
-#include "events/cs_EventDispatcher.h"
-#include "storage/cs_State.h"
-#include "processing/cs_Switch.h"
-#include "third/optmed.h"
-#include "protocol/cs_UartProtocol.h"
-#include "protocol/cs_UartMsgTypes.h"
-
-#if BUILD_MESHING == 1
-#include "mesh/cs_MeshControl.h"
-#endif
-
+#include <drivers/cs_Serial.h>
+#include <drivers/cs_RTC.h>
+#include <protocol/cs_StateTypes.h>
+#include <events/cs_EventDispatcher.h>
+#include <storage/cs_State.h>
 #include <math.h>
-#include "third/SortMedian.h"
-
-#include "processing/cs_RecognizeSwitch.h"
-#include "structs/buffer/cs_InterleavedBuffer.h"
+#if BUILD_MESHING == 1
+#include <mesh/cs_MeshControl.h>
+#endif
+#include <processing/cs_Switch.h>
+#include <processing/cs_PowerSampling.h>
+#include <processing/cs_RecognizeSwitch.h>
+#include <protocol/cs_UartProtocol.h>
+#include <protocol/cs_UartMsgTypes.h>
+#include <storage/cs_State.h>
+#include <structs/buffer/cs_InterleavedBuffer.h>
+#include <third/optmed.h>
+#include <third/SortMedian.h>
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 20
@@ -84,7 +81,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 
 	Timer::getInstance().createSingleShot(_powerSamplingSentDoneTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
 
-	Settings& settings = Settings::getInstance();
+	State& settings = State::getInstance();
 	settings.get(CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier);
 	settings.get(CONFIG_CURRENT_MULTIPLIER, &_currentMultiplier);
 	settings.get(CONFIG_VOLTAGE_ZERO, &_voltageZero);
@@ -171,7 +168,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 void PowerSampling::startSampling() {
 	LOGi(FMT_START, "power sample");
 	// Get operation mode
-	State::getInstance().get(STATE_OPERATION_MODE, _operationMode);
+	State::getInstance().get(STATE_OPERATION_MODE, &_operationMode);
 
 	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
 	_powerSamples.clear();
@@ -697,7 +694,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 
 	//! Get the current state errors
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
+	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
 
 	// Get the current switch state before we dispatch any event (as that may change the switch).
 	switch_state_t switchState;
@@ -738,7 +735,8 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	if ((currentRmsFilteredMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {
 		LOGw("current above threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
-		State::getInstance().set(STATE_ERROR_OVER_CURRENT, (uint8_t)1);
+		uint8_t error = 1;
+		State::getInstance().set(STATE_ERROR_OVER_CURRENT, &error);
 		return;
 	}
 
@@ -761,13 +759,15 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			// Dispatch the event that will turn off the pwm
 			EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
 			// Set overcurrent error.
-			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, (uint8_t)1);
+			uint8_t error = 1;
+			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, &error);
 		}
 		else if (switchState.relay_state == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
 			LOGe("IGBT failure detected");
 			EventDispatcher::getInstance().dispatch(EVT_DIMMER_ON_FAILURE_DETECTED);
-			State::getInstance().set(STATE_ERROR_DIMMER_ON_FAILURE, (uint8_t)1);
+			uint8_t error = 1;
+			State::getInstance().set(STATE_ERROR_DIMMER_ON_FAILURE, &error);
 		}
 	}
 }

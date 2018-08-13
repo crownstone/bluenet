@@ -16,7 +16,6 @@
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
 #include <protocol/cs_UartProtocol.h>
-#include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
 
 #if BUILD_MESHING == 1
@@ -219,7 +218,7 @@ ERR_CODE CommandHandler::handleCmdEnableMesh(buffer_ptr_t buffer, const uint16_t
 	bool enable = payload->enable;
 
 	LOGi("%s mesh", enable ? STR_ENABLE : STR_DISABLE);
-	Settings::getInstance().updateFlag(CONFIG_MESH_ENABLED, enable, true);
+	State::getInstance().updateFlag(CONFIG_MESH_ENABLED, enable, true);
 
 #if BUILD_MESHING == 1
 	if (enable) {
@@ -249,7 +248,7 @@ ERR_CODE CommandHandler::handleCmdEnableEncryption(buffer_ptr_t buffer, const ui
 	bool enable = payload->enable;
 
 	LOGi("%s encryption", enable ? STR_ENABLE : STR_DISABLE);
-	Settings::getInstance().updateFlag(CONFIG_ENCRYPTION_ENABLED, enable, true);
+	State::getInstance().updateFlag(CONFIG_ENCRYPTION_ENABLED, enable, true);
 
 	return ERR_SUCCESS;
 }
@@ -268,7 +267,7 @@ ERR_CODE CommandHandler::handleCmdEnableIbeacon(buffer_ptr_t buffer, const uint1
 	bool enable = payload->enable;
 
 	LOGi("%s ibeacon", enable ? STR_ENABLE : STR_DISABLE);
-	Settings::getInstance().updateFlag(CONFIG_IBEACON_ENABLED, enable, true);
+	State::getInstance().updateFlag(CONFIG_IBEACON_ENABLED, enable, true);
 
 	return ERR_SUCCESS;
 }
@@ -303,7 +302,7 @@ ERR_CODE CommandHandler::handleCmdEnableScanner(buffer_ptr_t buffer, const uint1
 	}
 
 	// TODO: first update flag, then start scanner? The scanner is stopped to write to pstorage anyway.
-	Settings::getInstance().updateFlag(CONFIG_SCANNER_ENABLED, enable, true);
+	State::getInstance().updateFlag(CONFIG_SCANNER_ENABLED, enable, true);
 
 	return ERR_SUCCESS;
 }
@@ -345,7 +344,7 @@ ERR_CODE CommandHandler::handleCmdScanDevices(buffer_ptr_t buffer, const uint16_
 		EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, dataLength);
 
 #if BUILD_MESHING == 1
-		if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+		if (State::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 			MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
 		}
 #endif
@@ -367,7 +366,7 @@ ERR_CODE CommandHandler::handleCmdRequestServiceData(buffer_ptr_t buffer, const 
 //		memset(&stateItem, 0, sizeof(stateItem));
 //
 //		State& state = State::getInstance();
-//		Settings::getInstance().get(CONFIG_CROWNSTONE_ID, &stateItem.id);
+//		State::getInstance().get(CONFIG_CROWNSTONE_ID, &stateItem.id);
 //
 //		state.get(STATE_SWITCH_STATE, stateItem.switchState);
 //
@@ -585,11 +584,11 @@ ERR_CODE CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const uint16_
 	}
 	state_errors_t* payload = (state_errors_t*) buffer;
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
+	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
 	LOGd("old errors %u - reset %u", stateErrors.asInt, *payload);
 	stateErrors.asInt &= ~(payload->asInt);
 	LOGd("new errors %u", stateErrors.asInt);
-	State::getInstance().set(STATE_ERRORS, stateErrors.asInt);
+	State::getInstance().set(STATE_ERRORS, &stateErrors.asInt);
 	return ERR_SUCCESS;
 }
 
@@ -736,14 +735,14 @@ ERR_CODE CommandHandler::handleCmdAllowDimming(buffer_ptr_t buffer, const uint16
 
 	LOGi("allow dimming: %u", enable);
 
-	if (enable && Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+	if (enable && State::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
 		LOGw("unlock switch");
 		bool lockEnable = false;
-		Settings::getInstance().updateFlag(CONFIG_SWITCH_LOCKED, lockEnable, true);
+		State::getInstance().updateFlag(CONFIG_SWITCH_LOCKED, lockEnable, true);
 		EventDispatcher::getInstance().dispatch(EVT_SWITCH_LOCKED, &lockEnable, sizeof(bool));
 	}
 
-	Settings::getInstance().updateFlag(CONFIG_PWM_ALLOWED, enable, true);
+	State::getInstance().updateFlag(CONFIG_PWM_ALLOWED, enable, true);
 	EventDispatcher::getInstance().dispatch(EVT_PWM_ALLOWED, &enable, sizeof(bool));
 	return ERR_SUCCESS;
 }
@@ -761,12 +760,12 @@ ERR_CODE CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uint16_t
 
 	LOGi("lock switch: %u", enable);
 
-	if (enable && Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+	if (enable && State::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
 		LOGw("can't lock switch");
 		return ERR_NOT_AVAILABLE;
 	}
 
-	Settings::getInstance().updateFlag(CONFIG_SWITCH_LOCKED, enable, true);
+	State::getInstance().updateFlag(CONFIG_SWITCH_LOCKED, enable, true);
 	EventDispatcher::getInstance().dispatch(EVT_SWITCH_LOCKED, &enable, sizeof(bool));
 	return ERR_SUCCESS;
 }
@@ -782,7 +781,7 @@ ERR_CODE CommandHandler::handleCmdEnableSwitchcraft(buffer_ptr_t buffer, const u
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 	bool enable = payload->enable;
 
-	Settings::getInstance().updateFlag(CONFIG_SWITCHCRAFT_ENABLED, enable, true);
+	State::getInstance().updateFlag(CONFIG_SWITCHCRAFT_ENABLED, enable, true);
 	EventDispatcher::getInstance().dispatch(EVT_SWITCHCRAFT_ENABLED, &enable, sizeof(bool));
 	return ERR_SUCCESS;
 }
@@ -807,8 +806,8 @@ ERR_CODE CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const uint16_t
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	uint8_t enable = *(uint8_t*) buffer;
-//	ERR_CODE errCode = Settings::getInstance().writeToStorage(CONFIG_UART_ENABLED, buffer, size);
-	ERR_CODE errCode = Settings::getInstance().set(CONFIG_UART_ENABLED, buffer, size);
+//	ERR_CODE errCode = State::getInstance().writeToStorage(CONFIG_UART_ENABLED, buffer, size);
+	ERR_CODE errCode = State::getInstance().set(CONFIG_UART_ENABLED, buffer, size);
 	if (errCode != ERR_SUCCESS) {
 		return errCode;
 	}

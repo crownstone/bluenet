@@ -24,7 +24,13 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 	//! thresholdDown has to be lower than thresholdUp, else the comp shows weird behaviour (main thread hangs)
 
 	// TODO: If memory is not initialized, this assert becomes false!
+#ifdef ALLOW_ASSERTS
 	assert(thresholdDown < thresholdUp, "thresholdDown should be lower than thresholdUp");
+#else
+	if (thresholdDown >= thresholdUp) {
+		thresholdUp = thresholdDown + 100;
+	}
+#endif
 
 	LOGd("init %d %d", VOLTAGE_THRESHOLD_TO_INT(thresholdDown, 3.3), VOLTAGE_THRESHOLD_TO_INT(thresholdUp, 3.3));
 	_lastEventTimestamp = RTC::getCount();
@@ -79,10 +85,20 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 	}
 
 	ret_code_t err_code = nrf_drv_comp_init(&config, comp_callback);
+	switch(err_code) {
+		case NRF_ERROR_INVALID_PARAM:
+			LOGe("Comparator: invalid param");
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			LOGe("Comparator: invalid state");
+			break;
+		case NRF_ERROR_BUSY:
+			LOGe("Comparator: is already initialized");
+			break;
+	}
+	return; // for now skip check
 	APP_ERROR_CHECK(err_code);
 }
-
-
 
 void COMP::start(CompEvent_t event) {
 	LOGd("start");

@@ -165,6 +165,8 @@ DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP
 # SERIAL_NONE      5
 SERIAL_VERBOSITY=SERIAL_DEBUG
 
+CS_UART_BINARY_PROTOCOL_ENABLED=1
+
 NRF_SERIES=NRF52
 
 # Default transmission power
@@ -312,37 +314,38 @@ SOFTDEVICE_MINOR=0
 SOFTDEVICE_SERIES=132
 SOFTDEVICE=s132_nrf52_6.0.0
 
-#APPLICATION_START_ADDRESS=0x0001C000
-#APPLICATION_START_ADDRESS=0x0002CF70
 # We get APPLICATION_START_ADDRESS from $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld
-#APPLICATION_START_ADDRESS=0x0002D000
-
+# We repeat them here, but you will have to adjust that file...
+# TODO: Copy the relevant files to the local repository again...
 APPLICATION_START_ADDRESS=0x00026000
 
-# This should be a chip with 512kB, so 0x80000 - 0x1C000 = 0x64000
-#
-#APPLICATION_LENGTH=0x53000
+# This should be a chip with 512kB, so 0x80000 - 0x26000 = 0x5A000
 APPLICATION_LENGTH=0x5A000
-
-#APPLICATION_LENGTH=0x64000
-#RAM_R1_BASE=0x20002C00
-# For the 64kB chip:
-#RAM_APPLICATION_AMOUNT=0xD400
-#HEAP_SIZE=5000;
 
 ## To enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
 ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x580, so if you
 ## increase the ATTR_TABLE_SIZE, the RAM_R1_BASE has to be increased by the same value and the RAM_APPLICATION_AMOUNT
 ## has to be decreased by the same value (and most likely the HEAP_SIZE as well), e.g.
 
-# Minimum for the bootloader
-#RAM_R1_BASE=0x200025E0
+# TODO: Calculate new attr table size, and adjust RAM_R1_BASE accordingly
 
-ATTR_TABLE_SIZE=0xC00
+# WARNING, WARNING
+# The following values are not used...
+# Adjust them in $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld for now!
+
+ATTR_TABLE_SIZE=0x400
+#ATTR_TABLE_SIZE=0x100
+MAX_NUM_VS_SERVICES=2
+
+#RAM_R1_BASE=0x20001628
+
 #RAM_R1_BASE=0x200026B8
 #RAM_APPLICATION_AMOUNT=0xD948
 
-RAM_R1_BASE=0x20001F30
-RAM_APPLICATION_AMOUNT=0xE0D0
+#RAM_R1_BASE=0x20001F30
+#RAM_APPLICATION_AMOUNT=0xE0D0
+
+RAM_R1_BASE=0x20002430
+RAM_APPLICATION_AMOUNT=0xDAD0
 
 HEAP_SIZE=20000

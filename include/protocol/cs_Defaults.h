@@ -8,7 +8,40 @@
 #pragma once
 
 #include <cfg/cs_Config.h>
-#include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
+
+
+/**
+ * The configuration parameters here will have the following format:
+ *   LABEL
+ * and
+ *   CONFIG_LABEL_DEFAULT
+ * It would be cumbersome for the user to type CONFIG and DEFAULT all the time, so the incoming macro is assumed
+ * to be just LABEL. Hence, you will have a macro that can be used within the firmware:
+ *
+ *   #ifdef LABEL
+ *     #define CONFIG_LABEL_DEFAULT LABEL
+ *   #else
+ *     #define CONFIG_LABEL_DEFAULT ...
+ *   #endif
+ *
+ * In this way we will be able to quickly rewrite the code if there is a conflict. For example, prepending each
+ * config macro with a Crownstone specific prefix (parallel to the Nordic prefix, NRF_, we might go for CBN_ as
+ * Crownstone bluenet abbreviation). If we use a short abbreviation we can have exactly the same macro for the
+ * user.
+ *
+ * There are values that indicate if parts of the code base will be compiled such as:
+ *
+ *   CBN_MESH_COMPILED
+ *
+ *   CBN_MESH_ENABLED
+ *   CBN_ENCRYPTION_ENABLED
+ *   CBN_IBEACON_ENABLED
+ *   CBN_SCANNER_ENABLED
+ *   CBN_POWER_SAMPLER_ENABLED
+ *   CBN_RELAY_START_STATE
+ *   CBN_PWM_ENABLED
+ */
 
 #if defined MESHING 
 #define CONFIG_MESH_DEFAULT MESHING
@@ -121,9 +154,9 @@
 #define CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP_DEFAULT 0
 #endif
 
-#if defined CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN_DEFAULT
-#else
+#ifndef CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN_DEFAULT
 #define CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN_DEFAULT 0
 #endif
+
 
 void getDefaults(uint8_t configurationType, void* default_type, size_t & default_size);

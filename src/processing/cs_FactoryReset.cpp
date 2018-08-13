@@ -48,12 +48,13 @@ void FactoryReset::timeout() {
 	_recoveryEnabled = false;
 	LOGi("recovery period expired.")
 	uint8_t resetState;
-	State::getInstance().get(STATE_FACTORY_RESET, resetState);
+	State::getInstance().get(STATE_FACTORY_RESET, &resetState);
 	if (resetState == FACTORY_RESET_STATE_LOWTX) {
 		LOGi("change to  normal")
 		Stack::getInstance().changeToNormalTxPowerMode();
 	}
-	State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_NORMAL);
+	resetState = FACTORY_RESET_STATE_NORMAL;
+	State::getInstance().set(STATE_FACTORY_RESET, &resetState);
 }
 
 /**
@@ -62,9 +63,10 @@ void FactoryReset::timeout() {
  */
 void FactoryReset::process() {
 	uint8_t resetState;
-	State::getInstance().get(STATE_FACTORY_RESET, resetState);
+	State::getInstance().get(STATE_FACTORY_RESET, &resetState);
 	if (resetState == FACTORY_RESET_STATE_NORMAL) {
-		State::getInstance().set(STATE_FACTORY_RESET, (uint8_t) FACTORY_RESET_STATE_LOWTX);
+		resetState = FACTORY_RESET_STATE_LOWTX;
+		State::getInstance().set(STATE_FACTORY_RESET, &resetState);
 		LOGd("recovery: go to low tx");
 		Stack::getInstance().changeToLowTxPowerMode();
 		Stack::getInstance().disconnect();
@@ -90,7 +92,7 @@ bool FactoryReset::recover(uint32_t resetCode) {
 	}
 
 	uint8_t resetState;
-	State::getInstance().get(STATE_FACTORY_RESET, resetState);
+	State::getInstance().get(STATE_FACTORY_RESET, &resetState);
 	switch (resetState) {
 	case FACTORY_RESET_STATE_NORMAL:
 		//! just in case, we stop the timer so we cannot flood this mechanism.
@@ -99,7 +101,8 @@ bool FactoryReset::recover(uint32_t resetCode) {
 		return true;
 //		break;
 	case FACTORY_RESET_STATE_LOWTX:
-		State::getInstance().set(STATE_FACTORY_RESET, (uint8_t)FACTORY_RESET_STATE_RESET);
+		resetState = FACTORY_RESET_STATE_NORMAL;
+		State::getInstance().set(STATE_FACTORY_RESET, &resetState);
 		LOGd("recovery: factory reset");
 
 		// the reset delayed in here should be sufficient
@@ -129,7 +132,8 @@ bool FactoryReset::performFactoryReset() {
 	LOGf("factory reset");
 
 	//! Go into factory reset mode after next reset.
-	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_FACTORY_RESET);
+	uint8_t mode = OPERATION_MODE_FACTORY_RESET;
+	State::getInstance().set(STATE_OPERATION_MODE, &mode);
 
 	LOGi("Going into factory reset mode, rebooting device in 2s ...");
 	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
@@ -142,9 +146,6 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 		// Set switch to initial value: off
 		Switch::getInstance().setSwitch(0);
 	}
-
-	// First clear sensitive data: keys
-	Settings::getInstance().factoryReset(FACTORY_RESET_CODE);
 
 	// Clear other data
 	State::getInstance().factoryReset(FACTORY_RESET_CODE);

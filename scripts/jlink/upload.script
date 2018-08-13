@@ -1,2 +1,3 @@
 loadbin @BIN@ @START_ADDRESS@
+r
 q

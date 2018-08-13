@@ -13,6 +13,30 @@
 #include <util/cs_Utils.h>
 #include <vector>
 
+typedef uint16_t st_file_id_t;
+typedef uint16_t st_key_t;
+
+typedef struct { 
+	st_key_t key;
+	uint8_t *value;
+	uint16_t size;
+	bool persistent;
+} st_file_data_t;
+
+typedef union {
+	int8_t    s8;
+	int16_t   s16;
+	int32_t   s32;
+	uint8_t   u8;
+	uint16_t  u16;
+	uint32_t  u32;
+} __ALIGN(4) st_value_t;
+
+static const st_file_id_t FILE_DO_NOT_USE     = 0x0000;
+static const st_file_id_t FILE_STATE          = 0x0001;
+static const st_file_id_t FILE_GENERAL        = 0x0002;
+static const st_file_id_t FILE_CONFIGURATION  = 0x0003;
+
 /** Class to store items persistently in flash (persistent) memory.
  *
  * This class provides functions to initialize, clear, write and read persistent memory (flash) through the use of 
@@ -23,20 +47,6 @@
  */
 class Storage : EventListener {
 public:
-
-	typedef uint16_t file_id_t;
-	typedef uint16_t key_t;
-	typedef struct { 
-		key_t key;
-		uint8_t *value;
-		uint16_t size;
-		bool persistent;
-	} file_data_t;
-	
-	// Keep the file identifiers in the Storage class itself
-	static const file_id_t FILE_STATE          = 0x0000;
-	static const file_id_t FILE_GENERAL        = 0x0001;
-	static const file_id_t FILE_CONFIGURATION  = 0x0002;
 
 	/** Returns the singleton instance of this class
 	 *
@@ -54,22 +64,30 @@ public:
 	}
 
 	/** Write to persistent storage.
-	 */
-	ret_code_t write(file_id_t file_id, file_data_t file_contents);
+	*/
+	ret_code_t write(st_file_id_t file_id, st_file_data_t file_contents);
 
 	/** Read from persistent storage.
 	 */
-	ret_code_t read(file_id_t file_id, file_data_t file_contents);
+	ret_code_t read(st_file_id_t file_id, st_file_data_t file_contents);
 
-	ret_code_t remove(file_id_t file_id);
+	ret_code_t remove(st_file_id_t file_id);
 
-	ret_code_t remove(file_id_t file_id, key_t key);
+	ret_code_t remove(st_file_id_t file_id, st_key_t key);
 	
-	ret_code_t exists(file_id_t file_id);
+	ret_code_t exists(st_file_id_t file_id);
 
-	ret_code_t exists(file_id_t file_id, key_t key);
+	ret_code_t exists(st_file_id_t file_id, st_key_t key);
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	ret_code_t exists(st_file_id_t file_id, st_key_t key, fds_record_desc_t record_fd);
+
+	// Handle Crownstone events
+	void handleEvent(uint16_t evt, void* p_data, uint16_t size) {
+	};
+
+	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
+	
+	ret_code_t garbageCollect();
 
 private:
 	Storage();
@@ -80,7 +98,7 @@ private:
 
 	fds_find_token_t _ftok;
 
-	std::vector<file_data_t> _records_in_memory;	
+	std::vector<st_file_data_t> _records_in_memory;	
 
 };
 

@@ -27,17 +27,22 @@ build() {
 	cs_log "However, we still need to extract the binary and the config blob"
 	cs_log "  from $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX"
 	$path/_softdevice_objcopy.sh $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX $SD_BINDIR $SOFTDEVICE $COMPILER_PATH $COMPILER_TYPE $SOFTDEVICE_NO_SEPARATE_UICR_SECTION
-	checkError "Error with building softdevice"
+	result=$?
+	checkError $result "Error with building softdevice"
 }
 
 upload() {
 	$path/_softdevice_upload.sh $SD_BINDIR $serial_num
-	checkError "Error with uploading softdevice"
+	result=$?
+	checkError $result "Error with uploading softdevice"
+	echo "Check which version we have uploaded"
+	./software_firmware_id.sh
 }
 
 all() {
 	build
-	if [ $? -eq 0 ]; then
+	result=$?
+	if [ $result -eq 0 ]; then
 		sleep 1
 		upload
 	fi

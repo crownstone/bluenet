@@ -46,7 +46,7 @@ endif
 # TODO: Why not just use the -j flag instead of introducing a new one? This should not be hardcoded.
 
 ifndef COMPILE_WITH_J_PROCESSORS
-COMPILE_WITH_J_PROCESSORS=1
+COMPILE_WITH_J_PROCESSORS=4
 endif
 
 #######################################################################################################################

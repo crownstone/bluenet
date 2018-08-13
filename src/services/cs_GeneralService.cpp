@@ -5,13 +5,11 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <services/cs_GeneralService.h>
-
-#include <storage/cs_Settings.h>
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
 #include <processing/cs_CommandHandler.h>
+#include <services/cs_GeneralService.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>
 

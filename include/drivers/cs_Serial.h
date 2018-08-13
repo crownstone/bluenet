@@ -53,7 +53,7 @@ typedef enum {
 
 	#define _log(level, fmt, ...) \
 			   if (level >= SERIAL_VERBOSITY) { \
-				   write(fmt, ##__VA_ARGS__); \
+				   cs_write(fmt, ##__VA_ARGS__); \
 			   }
 
 #ifdef INCLUDE_TIMESTAMPS
@@ -138,9 +138,9 @@ serial_enable_t serial_get_state();
  * Write a string with printf functionality.
  */
 #ifdef HOST_TARGET
-#define write printf
+#define cs_write printf
 #else
-int write(const char *str, ...);
+int cs_write(const char *str, ...);
 #endif
 
 /** Write a buffer of data. Values get escaped when necessary.

@@ -11,7 +11,6 @@
 
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
-#include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
 #include "drivers/cs_Timer.h"
 #include "cfg/cs_Config.h"

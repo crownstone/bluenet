@@ -9,7 +9,7 @@
 #if BUILD_MESHING == 1
 #include <mesh/cs_MeshControl.h>
 #endif
-#include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
 
 #include <cfg/cs_DeviceTypes.h>
 #include <ble/cs_CrownstoneManufacturer.h>
@@ -54,7 +54,7 @@ Scanner::Scanner() :
 }
 
 void Scanner::init() {
-	Settings& settings = Settings::getInstance();
+	State& settings = State::getInstance();
 	settings.get(CONFIG_SCAN_DURATION, &_scanDuration);
 	settings.get(CONFIG_SCAN_SEND_DELAY, &_scanSendDelay);
 	settings.get(CONFIG_SCAN_BREAK_DURATION, &_scanBreakDuration);
@@ -221,7 +221,7 @@ void Scanner::notifyResults() {
 #endif
 
 #if BUILD_MESHING == 1
-	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+	if (State::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
 	}
 #endif

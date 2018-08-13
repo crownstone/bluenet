@@ -38,5 +38,35 @@ enum StateTypes {
 	STATE_TYPES
 }; // Current max is 255 (0xFF), see cs_EventTypes.h
 
+/**
+ * Custom structs
+ */
 
+struct state_vars_notifaction {
+	uint8_t type;
+	uint8_t* data;
+	uint16_t dataLength;
+};
+
+union state_errors_t {
+	struct __attribute__((packed)) {
+		uint8_t overCurrent : 1;
+		uint8_t overCurrentPwm : 1;
+		uint8_t chipTemp : 1;
+		uint8_t pwmTemp : 1;
+		uint8_t dimmerOn : 1;
+		uint8_t dimmerOff : 1;
+		uint32_t reserved : 26;
+	} errors;
+	uint32_t asInt;
+};
+
+union state_ignore_bitmask_t {
+	struct __attribute__((packed)) {
+		uint8_t all : 1;
+		uint8_t location : 1;
+		uint8_t reserved : 6;
+	} mask;
+	uint8_t asInt;
+};
 

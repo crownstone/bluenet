@@ -1,7 +1,7 @@
 var gulp = require('gulp');
 var spawn = require('child_process').spawn;
 
-var command = 'build';
+var command = 'run';
 var target  = 'sdk15';
 
 gulp.task('build',function(cb){

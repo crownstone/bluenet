@@ -261,7 +261,7 @@ inline void _writeByte(uint8_t val) {
 /**
  * A write function with a format specifier.
  */
-int write(const char *str, ...) {
+int cs_write(const char *str, ...) {
 #if SERIAL_VERBOSITY<SERIAL_BYTE_PROTOCOL_ONLY
 	if (!_initializedTx) {
 		return 0;

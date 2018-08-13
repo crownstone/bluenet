@@ -115,6 +115,7 @@ protected:
 	bool                                        _initializedServices;
 	bool                                        _initializedRadio;
 	bool                                        _advertising;
+	bool                                        _advertisingConfigured;
 	bool                                        _scanning;
 
 	uint16_t                                    _conn_handle;

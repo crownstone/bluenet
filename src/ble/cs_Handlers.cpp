@@ -6,7 +6,7 @@
 #include <ble/cs_Handlers.h>
 #include <drivers/cs_RTC.h>
 #include <events/cs_EventDispatcher.h>
-#include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
 
 #ifdef __cplusplus
 extern "C" {

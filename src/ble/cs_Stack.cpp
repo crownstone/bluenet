@@ -5,12 +5,12 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "ble/cs_Stack.h"
+#include <ble/cs_Stack.h>
 
-#include "cfg/cs_Config.h"
-#include "ble/cs_Handlers.h"
+#include <cfg/cs_Config.h>
+#include <ble/cs_Handlers.h>
 
-#include "structs/buffer/cs_MasterBuffer.h"
+#include <structs/buffer/cs_MasterBuffer.h>
 
 #if BUILD_MESHING == 1
 extern "C" {
@@ -19,12 +19,12 @@ extern "C" {
 #endif
 
 extern "C" {
-#include "app_util.h"
+#include <app_util.h>
 }
 
 #include <drivers/cs_Storage.h>
-#include <storage/cs_Settings.h>
-#include "util/cs_Utils.h"
+#include <storage/cs_State.h>
+#include <util/cs_Utils.h>
 #include <cfg/cs_UuidConfig.h>
 
 #include <events/cs_EventDispatcher.h>
@@ -41,7 +41,10 @@ Stack::Stack() :
 	_tx_power_level(TX_POWER), _sec_mode({ }),
 	_interval(defaultAdvertisingInterval_0_625_ms), _timeout(defaultAdvertisingTimeout_seconds),
 	_gap_conn_params( { }),
-	_initializedStack(false), _initializedServices(false), _initializedRadio(false), _advertising(false), _scanning(false),
+	_initializedStack(false), _initializedServices(false), _initializedRadio(false), 
+	_advertising(false), 
+	_advertisingConfigured(false), 
+	_scanning(false),
 	_conn_handle(BLE_CONN_HANDLE_INVALID),
 	_radio_notify(0),
 	//_dm_app_handle(0), 
@@ -91,7 +94,7 @@ const nrf_clock_lf_cfg_t Stack::defaultClockSource = {
  */
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 #if BUILD_MESHING == 1
-	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+	if (State::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 		rbc_mesh_ble_evt_handler(p_ble_evt);
 	}
 #endif
@@ -102,17 +105,19 @@ extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
  * Initialize SoftDevice, handlers, and brown-out.
  */
 void Stack::init() {
-	if (checkCondition(C_STACK_INITIALIZED, false)) return;
+	if (checkCondition(C_STACK_INITIALIZED, false)) {
+		LOGw("Stack already initialized");
+		return;
+	}
 
 	// Check if SoftDevice is already running and disable it in that case (to restart later)
+	LOGi(FMT_INIT, "softdevice");
 	uint8_t enabled;
 	BLE_CALL(sd_softdevice_is_enabled, (&enabled));
 	if (enabled) {
 		LOGw(MSG_BLE_SOFTDEVICE_RUNNING);
 		BLE_CALL(sd_softdevice_disable, ());
 	}
-
-	LOGi(MSG_BLE_SOFTDEVICE_INIT);
 
 	// Enable power-fail comparator
 	sd_power_pof_enable(true);
@@ -148,15 +153,23 @@ void Stack::initRadio() {
 	if (!checkCondition(C_STACK_INITIALIZED, true)) return;
 	if (checkCondition(C_RADIO_INITIALIZED, false)) return;
 
-	nrf_sdh_enable_request(); 
-
+	err_code = nrf_sdh_enable_request(); 
+	if (err_code == NRF_ERROR_INVALID_STATE) {
+		LOGw("Softdevice, already initialized");
+		return;
+	}
 	// Enable BLE stack
 	uint32_t ram_start = RAM_R1_BASE;
 	uint32_t const conn_cfg_tag = 1;
+	LOGd("RAM base address: %p", ram_start);
 	err_code = nrf_sdh_ble_default_cfg_set(conn_cfg_tag, &ram_start); 
-	if (err_code == NRF_ERROR_NO_MEM) {
-		LOGe("Unrecoverable, memory softdevice and app overlaps: %p", ram_start);
-		APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
+	switch(err_code) {
+		case NRF_ERROR_NO_MEM:
+			LOGe("Unrecoverable, memory softdevice and app overlaps: %p", ram_start);
+			break;
+		case NRF_ERROR_INVALID_LENGTH:
+			LOGe("RAM, invalid length");
+			break;
 	}
 	APP_ERROR_CHECK(err_code);
 	if (ram_start != RAM_R1_BASE) {
@@ -164,6 +177,17 @@ void Stack::initRadio() {
 	}
 
 	err_code = nrf_sdh_ble_enable(&ram_start);
+	switch(err_code) {
+		case NRF_ERROR_INVALID_STATE:
+			LOGe("BLE: invalid radio state");
+			break;
+		case NRF_ERROR_INVALID_ADDR:
+			LOGe("BLE: invalid memory address");
+			break;
+		case NRF_ERROR_NO_MEM:
+			LOGe("BLE: no memory available");
+			break;
+	}
 	APP_ERROR_CHECK(err_code);
 
 	// Version is not saved or shown yet
@@ -269,6 +293,7 @@ void Stack::initServices() {
 		LOGw(FMT_NOT_INITIALIZED, "radio");
 		return;
 	}
+	LOGd("Init services");
 	if (_initializedServices) {
 		LOGw(FMT_ALREADY_INITIALIZED, "services");
 		return;
@@ -312,24 +337,29 @@ void Stack::addService(Service* svc) {
 	_services.push_back(svc);
 }
 
-//! accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm
-//! Can be done at any moment (also when advertising)
+/**
+ * The accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm.
+ * The -30 is not accepted on the nRF52.
+ *
+ * This function can be called at any moment (also when advertising).
+ */
 void Stack::setTxPowerLevel(int8_t powerLevel) {
 #ifdef PRINT_STACK_VERBOSE
 	LOGd(FMT_SET_INT_VAL, "tx power", powerLevel);
 #endif
 
 	switch (powerLevel) {
-	case -40: break;
-//	case -30: break; // -30 is only available on nrf51
-	case -20: break;
-	case -16: break;
-	case -12: break;
-	case -8: break;
-	case -4: break;
-	case 0: break;
-	case 4: break;
-	default: return;
+		case -40: 
+		case -20: 
+		case -16: 
+		case -12: 
+		case -8: 
+		case -4: 
+		case 0: 
+		case 4: 
+			break;
+		default: 
+			return;
 	}
 	if (_tx_power_level != powerLevel) {
 		_tx_power_level = powerLevel;
@@ -340,9 +370,19 @@ void Stack::setTxPowerLevel(int8_t powerLevel) {
 }
 
 void Stack::updateTxPowerLevel() {
+#ifdef NO_TX_BUFFER_ERROR_ANYMORE
 	uint32_t err_code;
 	err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _tx_power_level, _adv_handle);
+	switch(err_code) {
+		case BLE_ERROR_NO_TX_BUFFERS:
+			LOGe("No tx buffers");
+			break;
+	}
 	APP_ERROR_CHECK(err_code);
+#else
+	LOGw("TODO: update tx power level %i", _tx_power_level);
+	return;
+#endif
 }
 
 void Stack::setMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
@@ -523,13 +563,12 @@ void Stack::restartAdvertising() {
 
 void Stack::startAdvertising() {
 	if (_advertising) {
-		LOGw("invalid state");
+		LOGw("Should not already be advertising");
 		return;
 	}
 
 	LOGi(MSG_BLE_ADVERTISING_STARTING);
 	
-	//uint32_t err_code = ble_advertising_start(_ble_adv_mode);
 	uint32_t err_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag);
 	switch (err_code) {
 	case NRF_ERROR_BUSY:
@@ -538,16 +577,17 @@ void Stack::startAdvertising() {
 		LOGw("adv_start busy");
 		break;
 	case NRF_ERROR_INVALID_PARAM:
-		LOGf(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
-		APP_ERROR_CHECK(err_code);
-		_advertising = true;
+		LOGe(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
 		break;
-	default:
-		APP_ERROR_CHECK(err_code);
+	case NRF_ERROR_INVALID_STATE:
+		LOGe("Invalid state");
+		break;
+	case NRF_SUCCESS:
 		_advertising = true;
+	default:
+		LOGe("Unknown error code");
 	}
-
-	_advertising = true;
+	APP_ERROR_CHECK(err_code);
 }
 
 void Stack::stopAdvertising() {
@@ -625,9 +665,10 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
 void Stack::setAdvertisementData() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 
+	LOGd("Set advertisement data");
+
 	uint32_t err;
 	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
-//	err = ble_advdata_set(&_advdata, &_scan_resp);
 
 	//! TODO: why do we allow (and get) invalid configuration?
 	//! It seems like we setAdvertisementData before we configure as iBeacon (probably from the service data?)
@@ -636,12 +677,12 @@ void Stack::setAdvertisementData() {
 		break;
 	case NRF_ERROR_INVALID_PARAM:
 		LOGw("Invalid advertisement configuration");
-		// TODO: why not APP_ERROR_CHECK?
 		break;
 	default:
 		LOGd("Retry setAdvData (err %d)", err);
 		BLE_CALL(sd_ble_gap_adv_set_configure, (&_adv_handle, &_adv_data, &_adv_params));
 	}
+	APP_ERROR_CHECK(err);
 }
 
 void Stack::startScanning() {
@@ -657,8 +698,8 @@ void Stack::startScanning() {
 	p_scan_params.active = 0;
 	p_scan_params.timeout = 0x0000;
 
-	Settings::getInstance().get(CONFIG_SCAN_INTERVAL, &p_scan_params.interval);
-	Settings::getInstance().get(CONFIG_SCAN_WINDOW, &p_scan_params.window);
+	State::getInstance().get(CONFIG_SCAN_INTERVAL, &p_scan_params.interval);
+	State::getInstance().get(CONFIG_SCAN_WINDOW, &p_scan_params.window);
 
 	//! todo: which fields to set here?
 	// TODO: p_adv_report_buffer
@@ -700,7 +741,6 @@ void Stack::setPasskey(uint8_t* passkey) {
 #ifdef PRINT_STACK_VERBOSE
 	LOGd(FMT_SET_STR_VAL, "passkey", std::string((char*)passkey, BLE_GAP_PASSKEY_LEN).c_str());
 #endif
-
 	memcpy(_passkey, passkey, BLE_GAP_PASSKEY_LEN);
 
 	if (_initializedRadio) {
@@ -725,13 +765,13 @@ void Stack::lowPowerTimeout(void* p_context) {
 
 void Stack::changeToLowTxPowerMode() {
 	int8_t lowTxPower;
-	Settings::getInstance().get(CONFIG_LOW_TX_POWER, &lowTxPower);
+	State::getInstance().get(CONFIG_LOW_TX_POWER, &lowTxPower);
 	setTxPowerLevel(lowTxPower);
 }
 
 void Stack::changeToNormalTxPowerMode() {
 	int8_t txPower;
-	Settings::getInstance().get(CONFIG_TX_POWER, &txPower);
+	State::getInstance().get(CONFIG_TX_POWER, &txPower);
 	setTxPowerLevel(txPower);
 }
 

@@ -55,7 +55,7 @@ void ServiceData::init() {
 	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
 
 	// get the operation mode from state
-	State::getInstance().get(STATE_OPERATION_MODE, _operationMode);
+	State::getInstance().get(STATE_OPERATION_MODE, &_operationMode);
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -71,7 +71,7 @@ void ServiceData::init() {
 	memset(&(_lastSeenIds[0][0]), 0, MESH_STATE_HANDLE_COUNT * LAST_SEEN_COUNT_PER_STATE_CHAN * sizeof(last_seen_id_t));
 
 	// Only send the state over the mesh in normal mode
-	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED) && _operationMode == OPERATION_MODE_NORMAL) {
+	if (State::getInstance().isSet(CONFIG_MESH_ENABLED) && _operationMode == OPERATION_MODE_NORMAL) {
 		// Start the mesh state timer with a small random delay
 		// Make sure delay is not 0, as that's an invalid delay.
 
@@ -103,9 +103,9 @@ void ServiceData::init() {
 #endif
 
 	// Init flags
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED));
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, Settings::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CONFIG_PWM_ALLOWED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CONFIG_SWITCH_LOCKED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, State::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED));
 
 	// set the initial advertisement.
 	updateAdvertisement(true);
@@ -172,14 +172,14 @@ void ServiceData::updateAdvertisement(bool initial) {
 		bool serviceDataSet = false;
 
 		state_errors_t stateErrors;
-		State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
+		State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
 
 		uint32_t timestamp;
-		State::getInstance().get(STATE_TIME, timestamp);
+		State::getInstance().get(STATE_TIME, &timestamp);
 
 //		// Update flag
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CONFIG_PWM_ALLOWED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CONFIG_SWITCH_LOCKED));
 
 		// Set error timestamp
 		if (stateErrors.asInt == 0) {
@@ -248,7 +248,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 //		Mesh::getInstance().printRssiList();
 
 		// encrypt the array using the guest key ECB if encryption is enabled.
-		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
+		if (State::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
 			EncryptionHandler::getInstance().encrypt(
 					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
 					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
@@ -274,7 +274,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& serviceData) {
 #if BUILD_MESHING == 1 && defined(ADVERTISE_EXTERNAL_DATA)
 
-	if (_operationMode != OPERATION_MODE_NORMAL || Settings::getInstance().isSet(CONFIG_MESH_ENABLED) == false) {
+	if (_operationMode != OPERATION_MODE_NORMAL || State::getInstance().isSet(CONFIG_MESH_ENABLED) == false) {
 		return false;
 	}
 
@@ -664,11 +664,11 @@ void ServiceData::_sendMeshState() {
 
 #if BUILD_MESHING == 1
 void ServiceData::sendMeshState(bool event, uint16_t eventType) {
-	if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+	if (State::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 
 //		// Update flag
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CONFIG_PWM_ALLOWED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CONFIG_SWITCH_LOCKED));
 
 		uint32_t rtcCount = RTC::getCount();
 

@@ -12,7 +12,7 @@
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_PWM.h>
 #include <storage/cs_State.h>
-#include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
 #include <cfg/cs_Strings.h>
 #include <ble/cs_Stack.h>
 #include <processing/cs_Scanner.h>
@@ -44,7 +44,7 @@ Switch::Switch():
 void Switch::init(const boards_config_t& board) {
 	PWM& pwm = PWM::getInstance();
 	uint32_t pwmPeriod;
-	Settings::getInstance().get(CONFIG_PWM_PERIOD, &pwmPeriod);
+	State::getInstance().get(CONFIG_PWM_PERIOD, &pwmPeriod);
 	LOGd("pwm pin %d", board.pinGpioPwm);
 
 	pwm_config_t pwmConfig;
@@ -61,7 +61,7 @@ void Switch::init(const boards_config_t& board) {
 		_pinRelayOff = board.pinGpioRelayOff;
 		_pinRelayOn = board.pinGpioRelayOn;
 
-		Settings::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &_relayHighDuration);
+		State::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &_relayHighDuration);
 
 		nrf_gpio_cfg_output(_pinRelayOff);
 		nrf_gpio_pin_clear(_pinRelayOff);
@@ -88,7 +88,7 @@ void Switch::start() {
 	PWM::getInstance().start(true);
 
 	// If switchcraft is enabled, assume a boot is due to a brownout caused by a too slow wall switch, so the pwm is already powered.
-	bool switchcraftEnabled = Settings::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED);
+	bool switchcraftEnabled = State::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED);
 	if (switchcraftEnabled) {
 		_pwmPowered = true;
 	}
@@ -102,8 +102,8 @@ void Switch::start() {
 		}
 		else {
 //			// This shouldn't happen, but let's check it to be sure.
-//			LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
-//			if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+//			LOGd("pwm allowed: %u", State::getInstance().isSet(CONFIG_PWM_ALLOWED));
+//			if (!State::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
 //				_switchValue.pwm_state = 0;
 //			}
 			// Always set pwm state to 0, just use relay.
@@ -239,12 +239,12 @@ void Switch::setPwm(uint8_t value) {
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGd("set PWM %d", value);
 #endif
-	if (Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
-//	LOGd("pwm allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
-//	if (!Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+//	LOGd("pwm allowed: %u", State::getInstance().isSet(CONFIG_PWM_ALLOWED));
+//	if (!State::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
 //		LOGd("pwm not allowed");
 //		return;
 //	}
@@ -265,7 +265,7 @@ uint8_t Switch::getPwm() {
 
 
 void Switch::relayOn() {
-	if (Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
@@ -276,7 +276,7 @@ void Switch::relayOn() {
 
 
 void Switch::relayOff() {
-	if (Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
@@ -296,7 +296,7 @@ void Switch::setSwitch(uint8_t switchState) {
 	LOGi("Set switch state: %d", switchState);
 #endif
 	switch_state_t oldVal = _switchValue;
-	if (Settings::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
@@ -434,8 +434,10 @@ bool Switch::_setPwm(uint8_t value) {
 		return false;
 	}
 
-	LOGd("Dimming allowed: %u", Settings::getInstance().isSet(CONFIG_PWM_ALLOWED));
-	if (value != 0 && !Settings::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+	uint8_t config_pwm = 0;
+	State::getInstance().isSet(config_pwm);
+	LOGd("Dimming allowed: %u", config_pwm);
+	if (value != 0 && !config_pwm) {
 		LOGd("Dimming not allowed");
 		_switchValue.pwm_state = 0;
 		return false;
@@ -523,7 +525,7 @@ void Switch::forceSwitchOff() {
 
 bool Switch::allowPwmOn() {
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
+	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
 	LOGd("errors=%d", stateErrors.asInt);
 
 	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
@@ -532,7 +534,7 @@ bool Switch::allowPwmOn() {
 
 bool Switch::allowRelayOff() {
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
+	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
 	return !(stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
@@ -540,7 +542,7 @@ bool Switch::allowRelayOff() {
 
 bool Switch::allowRelayOn() {
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, stateErrors.asInt);
+	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
 	LOGd("errors=%d", stateErrors.asInt);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.

@@ -9,21 +9,9 @@
 
 #include <ble/cs_Nordic.h>
 
-//#include "nrf.h"
-//#include "nrf_delay.h"
-//#include "nrf_gpio.h"
-//
-//
-//#if(NRF51_USE_SOFTDEVICE == 1)
-//#include "nrf_sdm.h"
-//#endif
-//
 #include "drivers/cs_Serial.h"
 #include "drivers/cs_PWM.h"
 #include "util/cs_BleError.h"
-//
-//#include "cs_nRF51822.h"
-
 #include "nrf_delay.h"
 #include <cfg/cs_Strings.h>
 

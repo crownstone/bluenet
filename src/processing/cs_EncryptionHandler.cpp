@@ -5,19 +5,18 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <processing/cs_EncryptionHandler.h>
-#include <storage/cs_Settings.h>
-#include <drivers/cs_Serial.h>
 #include <ble/cs_Stack.h>
+#include <drivers/cs_Serial.h>
 #include <events/cs_EventDispatcher.h>
+#include <processing/cs_EncryptionHandler.h>
+#include <storage/cs_State.h>
 
 //#define TESTING_ENCRYPTION true
-
 
 void EncryptionHandler::init() {
 	_defaultValidationKey.b = DEFAULT_SESSION_KEY;
 	EventDispatcher::getInstance().addListener(this);
-	State::getInstance().get(STATE_OPERATION_MODE, _operationMode);
+	State::getInstance().get(STATE_OPERATION_MODE, &_operationMode);
 }
 
 uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength, EncryptionType encryptionType) {
@@ -53,7 +52,7 @@ uint16_t EncryptionHandler::calculateDecryptionBufferLength(uint16_t encryptedPa
 void EncryptionHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	switch (evt) {
 	case EVT_BLE_CONNECT:
-		if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED))
+		if (State::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED))
 			_generateSessionNonce();
 		break;
 	}
@@ -126,7 +125,7 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 
 bool EncryptionHandler::encryptMesh(mesh_nonce_t nonce, uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength) {
 
-	Settings::getInstance().get(CONFIG_KEY_ADMIN, _block.key);
+	State::getInstance().get(CONFIG_KEY_ADMIN, _block.key);
 
 	// first MESH_OVERHEAD bytes of the target are overhead, which is a random number + nonce (message number)
 	uint16_t targetNetLength = targetLength - MESH_OVERHEAD;
@@ -166,7 +165,7 @@ bool EncryptionHandler::decryptMesh(uint8_t* encryptedDataPacket, uint16_t encry
 		return false;
 	}
 
-	Settings::getInstance().get(CONFIG_KEY_ADMIN, _block.key);
+	State::getInstance().get(CONFIG_KEY_ADMIN, _block.key);
 
 	// the actual encrypted part is after the overhead
 	uint16_t sourceNetLength = encryptedDataPacketLength - MESH_OVERHEAD;
@@ -504,7 +503,7 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 	}
 
 	// get the key from the storage
-	Settings::getInstance().get(keyConfigType, _block.key);
+	State::getInstance().get(keyConfigType, _block.key);
 	return true;
 }
 
@@ -569,7 +568,7 @@ bool EncryptionHandler::_validateBlockLength(uint16_t length) {
 
 bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided) {
 	// always allow access when encryption is disabled.
-	if (Settings::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) == false) {
+	if (State::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) == false) {
 		return true;
 	}
 

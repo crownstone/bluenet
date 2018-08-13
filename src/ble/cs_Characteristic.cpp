@@ -10,7 +10,7 @@
 
 #include "ble/cs_Characteristic.h"
 #include <ble/cs_Softdevice.h>
-#include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
 
 //#define PRINT_CHARACTERISTIC_VERBOSE
 

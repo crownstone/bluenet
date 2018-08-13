@@ -25,6 +25,7 @@ enum ErrorCodesGeneral {
 	ERR_NOT_AVAILABLE               = 0x40,
 	ERR_NOT_IMPLEMENTED             = 0x41,
 //	ERR_WRONG_SETTING               = 0x42,
+	ERR_NOT_INITIALIZED             = 0x43,
 
 	ERR_WRITE_DISABLED              = 0x50,
 	ERR_WRITE_NOT_ALLOWED           = 0x51,

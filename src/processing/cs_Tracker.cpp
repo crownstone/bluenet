@@ -7,9 +7,8 @@
 
 #include <processing/cs_Tracker.h>
 
-#include <storage/cs_Settings.h>
-#include <drivers/cs_Serial.h>
 #include <storage/cs_State.h>
+#include <drivers/cs_Serial.h>
 
 //#define PRINT_TRACKER_VERBOSE
 //#define PRINT_DEBUG
@@ -40,7 +39,7 @@ Tracker::Tracker() : EventListener(),
 void Tracker::init() {
 	readTrackedDevices();
 
-	Settings::getInstance().get(CONFIG_NEARBY_TIMEOUT, &_timeoutCounts);
+	State::getInstance().get(CONFIG_NEARBY_TIMEOUT, &_timeoutCounts);
 	_trackedDeviceList->setTimeout(_timeoutCounts);
 
 

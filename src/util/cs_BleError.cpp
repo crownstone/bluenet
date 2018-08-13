@@ -26,6 +26,14 @@ void app_error_handler (uint32_t error_code, uint32_t line_num, const uint8_t * 
 	volatile const uint8_t* file __attribute__((unused)) = p_file_name;
 
 	LOGf("FATAL ERROR %d, at %s:%d", error, file, line);
+	switch (error) {
+		case NRF_ERROR_INVALID_LENGTH:
+			LOGf("Too slow, app scheduler filled up? (use app_sched_execute)");
+			break;
+		case NRF_ERROR_NO_MEM:
+			LOGf("Run out of memory");
+			break;
+	}
 
 	__asm("BKPT");
 	while(1) {}
@@ -39,6 +47,14 @@ void app_error_handler_bare(ret_code_t error_code)
 	volatile const uint8_t* file __attribute__((unused)) = NULL;
 
 	LOGf("FATAL ERROR %d", error);
+	switch (error) {
+		case NRF_ERROR_INVALID_LENGTH:
+			LOGf("Too slow, app scheduler filled up? (use app_sched_execute)");
+			break;
+		case NRF_ERROR_NO_MEM:
+			LOGf("Run out of memory");
+			break;
+	}
 
 	__asm("BKPT");
 	while(1) {}

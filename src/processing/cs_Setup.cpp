@@ -7,7 +7,6 @@
 
 #include "processing/cs_Setup.h"
 #include "drivers/cs_Serial.h"
-#include "storage/cs_Settings.h"
 #include "storage/cs_State.h"
 
 Setup::Setup(): _setupDone(false) {
@@ -16,7 +15,7 @@ Setup::Setup(): _setupDone(false) {
 
 ERR_CODE Setup::handleCommand(uint8_t* data, uint16_t size) {
 	uint8_t opMode;
-	State::getInstance().get(STATE_OPERATION_MODE, opMode);
+	State::getInstance().get(STATE_OPERATION_MODE, &opMode);
 	if (opMode != OPERATION_MODE_SETUP) {
 		LOGw("only available in setup mode");
 		return ERR_NOT_AVAILABLE;
@@ -50,7 +49,7 @@ ERR_CODE Setup::handleCommand(uint8_t* data, uint16_t size) {
 	}
 
 	// Save all settings.
-	Settings& settings = Settings::getInstance();
+	State& settings = State::getInstance();
 	settings.set(CONFIG_CROWNSTONE_ID,       &(setupData->id),                  true, sizeof(setupData->id));
 	settings.set(CONFIG_KEY_ADMIN,           setupData->adminKey,               true, sizeof(setupData->adminKey));
 	settings.set(CONFIG_KEY_MEMBER,          setupData->memberKey,              true, sizeof(setupData->memberKey));
@@ -61,7 +60,8 @@ ERR_CODE Setup::handleCommand(uint8_t* data, uint16_t size) {
 	settings.set(CONFIG_IBEACON_MINOR,       &(setupData->ibeaconMinor),        true, sizeof(setupData->ibeaconMinor));
 
 	// Set operation mode to normal mode
-	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_NORMAL);
+	uint8_t mode = OPERATION_MODE_NORMAL;
+	State::getInstance().set(STATE_OPERATION_MODE, &mode);
 
 	// Switch relay on
 	EventDispatcher::getInstance().dispatch(EVT_POWER_ON);

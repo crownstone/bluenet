@@ -15,36 +15,31 @@
 #if EDDYSTONE==1
 #include <ble/cs_Eddystone.h>
 #endif
-
-#include <storage/cs_Settings.h>
+#include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
-
+#include <processing/cs_CommandHandler.h>
+#include <processing/cs_EnOceanHandler.h>
+#include <processing/cs_FactoryReset.h>
+#include <processing/cs_PowerSampling.h>
+#include <processing/cs_Scanner.h>
+#include <processing/cs_Scheduler.h>
+#include <processing/cs_Switch.h>
+#include <processing/cs_TemperatureGuard.h>
+#include <processing/cs_Tracker.h>
+#include <processing/cs_Watchdog.h>
+#include <services/cs_CrownstoneService.h>
+#include <services/cs_DeviceInformationService.h>
 #include <services/cs_IndoorLocalisationService.h>
 #include <services/cs_GeneralService.h>
 #include <services/cs_PowerService.h>
 #include <services/cs_ScheduleService.h>
-#include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>
-#include <services/cs_CrownstoneService.h>
-
-#include <processing/cs_CommandHandler.h>
-#include <processing/cs_Scanner.h>
-#include <processing/cs_Tracker.h>
-#include <processing/cs_Scheduler.h>
-#include <processing/cs_FactoryReset.h>
-
-#include <processing/cs_Switch.h>
-#include <processing/cs_TemperatureGuard.h>
-#include <processing/cs_PowerSampling.h>
-#include <processing/cs_Watchdog.h>
-#include <processing/cs_EnOceanHandler.h>
-
+#include <storage/cs_State.h>
+#include <storage/cs_State.h>
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
 #include <mesh/cs_MeshControl.h>
 #endif
-#include <storage/cs_State.h>
-#include <cfg/cs_Boards.h>
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
@@ -140,8 +135,7 @@ private:
 	Stack* _stack;
 	Timer* _timer;
 	Storage* _storage;
-	Settings* _settings;
-	State* _stateVars;
+	State* _state;
 
 	Switch* _switch;
 	TemperatureGuard* _temperatureGuard;

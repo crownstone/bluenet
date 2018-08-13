@@ -1,3 +1,7 @@
+# Disabled the following:
+#   https://github.com/cyrus-and/gdb-dashboard
+#   Would have been nice, but requires Python support for gdb
+#source ~/.gdbinit
 set history filename .gdb_history
 set history save
 set print object
@@ -38,6 +42,8 @@ monitor reset
 #p _value
 #c
 #end
+
+#b cs_Stack.cpp:Stack::initRadio()
 
 #b main_fitbit.cpp:107
 

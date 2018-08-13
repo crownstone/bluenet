@@ -19,23 +19,23 @@
  *
  *********************************************************************************************************************/
 
-#include "cs_Crownstone.h"
-#include "ble/cs_CrownstoneManufacturer.h"
-#include "cfg/cs_Boards.h"
-#include "cfg/cs_HardwareVersions.h"
-#include "drivers/cs_PWM.h"
-#include "drivers/cs_RNG.h"
-#include "drivers/cs_RTC.h"
-#include "drivers/cs_Temperature.h"
-#include "drivers/cs_Timer.h"
-#include "events/cs_EventDispatcher.h"
-#include "events/cs_EventTypes.h"
-#include "processing/cs_EncryptionHandler.h"
-#include "storage/cs_State.h"
-#include "structs/buffer/cs_MasterBuffer.h"
-#include "structs/buffer/cs_EncryptionBuffer.h"
-#include "util/cs_Utils.h"
-#include "protocol/cs_UartProtocol.h"
+#include <ble/cs_CrownstoneManufacturer.h>
+#include <cfg/cs_Boards.h>
+#include <cfg/cs_HardwareVersions.h>
+#include <cs_Crownstone.h>
+#include <drivers/cs_PWM.h>
+#include <drivers/cs_RNG.h>
+#include <drivers/cs_RTC.h>
+#include <drivers/cs_Temperature.h>
+#include <drivers/cs_Timer.h>
+#include <events/cs_EventDispatcher.h>
+#include <events/cs_EventTypes.h>
+#include <processing/cs_EncryptionHandler.h>
+#include <protocol/cs_UartProtocol.h>
+#include <storage/cs_State.h>
+#include <structs/buffer/cs_MasterBuffer.h>
+#include <structs/buffer/cs_EncryptionBuffer.h>
+#include <util/cs_Utils.h>
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -88,8 +88,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 
 	// persistent storage, configuration, state
 	_storage = &Storage::getInstance();
-	_settings = &Settings::getInstance();
-	_stateVars = &State::getInstance();
+	_state = &State::getInstance();
 
 	// create command handler
 	_commandHandler = &CommandHandler::getInstance();
@@ -122,98 +121,106 @@ Crownstone::Crownstone(boards_config_t& board) :
 };
 
 void Crownstone::init() {
-	LOGi(FMT_HEADER, "init");
-
 	//! initialize drivers
+	LOGi(FMT_HEADER, "init");
 	initDrivers();
 	BLEutil::print_heap("Heap initDrivers: ");
 	BLEutil::print_stack("Stack initDrivers: ");
+	
+	LOGi(FMT_HEADER, "mode");
+	_state->get(STATE_OPERATION_MODE, &_operationMode);
+	LOGd("Operation mode: %i", _operationMode);
 
-
-	LOGi(FMT_HEADER, "configure");
+	switch(_operationMode) {
+		case OPERATION_MODE_SETUP: 
+		case OPERATION_MODE_NORMAL: 
+		case OPERATION_MODE_FACTORY_RESET: 
+		case OPERATION_MODE_DFU: 
+			break;
+		default:
+			LOGd("Set default mode to setup");
+			_operationMode = OPERATION_MODE_SETUP;
+			_state->set(STATE_OPERATION_MODE, &_operationMode);
+	}
+	
+	_state->get(STATE_OPERATION_MODE, &_operationMode);
+	LOGd("Operation mode: %i", _operationMode);
 
 	//! configure the crownstone
+	LOGi(FMT_HEADER, "configure");
 	configure();
 	BLEutil::print_heap("Heap configure: ");
 	BLEutil::print_stack("Stack configure: ");
 
-	LOGi(FMT_INIT, "encryption handler");
-	BLEutil::print_heap("Heap encryption: ");
-	BLEutil::print_stack("Stack encryption: ");
-
-	LOGi(FMT_HEADER, "setup");
-
-	_stateVars->get(STATE_OPERATION_MODE, _operationMode);
-
-	LOGi(FMT_CREATE, "Timer");
+	LOGi(FMT_CREATE, "timer");
 	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
 
 	switch(_operationMode) {
-	case OPERATION_MODE_SETUP: {
-		if (serial_get_state() == SERIAL_ENABLE_NONE) {
-			serial_enable(SERIAL_ENABLE_RX_ONLY);
+		case OPERATION_MODE_SETUP: {
+			if (serial_get_state() == SERIAL_ENABLE_NONE) {
+				serial_enable(SERIAL_ENABLE_RX_ONLY);
+			}
+
+			LOGd("Configure setup mode");
+
+			// create services
+			createSetupServices();
+
+			// loop through all services added to the stack and create the characteristics
+			_stack->createCharacteristics();
+
+			// set it by default into low tx mode
+			_stack->changeToLowTxPowerMode();
+
+			// Because iPhones cannot programmatically clear their cache of paired devices, the phone that
+			// did the setup is at risk of not being able to connect to the crownstone if the cs clears the device
+			// manager. We use our own encryption scheme to counteract this.
+			if (_state->isSet(CONFIG_ENCRYPTION_ENABLED)) {
+				LOGi(FMT_ENABLE, "AES encryption");
+				_stack->setAesEncrypted(true);
+			}
+			//		LOGi(FMT_ENABLE, "PIN encryption");
+			//		// use PIN encryption for setup mode
+			//		_stack->setPinEncrypted(true);
+
+			//		if (_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
+			//			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
+			//		}
+
+			break;
 		}
+		case OPERATION_MODE_NORMAL: {
 
-		LOGd("Configure setup mode");
+			LOGd("Configure normal operation mode");
 
-		// create services
-		createSetupServices();
+			// setup normal operation mode
+			prepareNormalOperationMode();
 
-		// loop through all services added to the stack and create the characteristics
-		_stack->createCharacteristics();
+			// create services
+			createCrownstoneServices();
 
-		// set it by default into low tx mode
-		_stack->changeToLowTxPowerMode();
+			// loop through all services added to the stack and create the characteristics
+			_stack->createCharacteristics();
 
-		// Because iPhones cannot programmatically clear their cache of paired devices, the phone that
-		// did the setup is at risk of not being able to connect to the crownstone if the cs clears the device
-		// manager. We use our own encryption scheme to counteract this.
-		if (_settings->isSet(CONFIG_ENCRYPTION_ENABLED)) {
-			LOGi(FMT_ENABLE, "AES encryption");
-			_stack->setAesEncrypted(true);
+			// use aes encryption for normal mode (if enabled)
+			if (_state->isSet(CONFIG_ENCRYPTION_ENABLED)) {
+				LOGi(FMT_ENABLE, "AES encryption");
+				_stack->setAesEncrypted(true);
+			}
+
+			break;
 		}
-//		LOGi(FMT_ENABLE, "PIN encryption");
-//		// use PIN encryption for setup mode
-//		_stack->setPinEncrypted(true);
+		case OPERATION_MODE_FACTORY_RESET: {
 
-//		if (_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
-//			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
-//		}
-
-		break;
-	}
-	case OPERATION_MODE_NORMAL: {
-
-		LOGd("Configure normal operation mode");
-
-		// setup normal operation mode
-		prepareNormalOperationMode();
-
-		// create services
-		createCrownstoneServices();
-
-		// loop through all services added to the stack and create the characteristics
-		_stack->createCharacteristics();
-
-		// use aes encryption for normal mode (if enabled)
-		if (_settings->isSet(CONFIG_ENCRYPTION_ENABLED)) {
-			LOGi(FMT_ENABLE, "AES encryption");
-			_stack->setAesEncrypted(true);
+			LOGd("Configure factory reset mode");
+			FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
+			break;
 		}
+		case OPERATION_MODE_DFU: {
 
-		break;
-	}
-	case OPERATION_MODE_FACTORY_RESET: {
-
-		LOGd("Configure factory reset mode");
-		FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
-		break;
-	}
-	case OPERATION_MODE_DFU: {
-
-		CommandHandler::getInstance().handleCommand(CMD_GOTO_DFU);
-		break;
-	}
+			CommandHandler::getInstance().handleCommand(CMD_GOTO_DFU);
+			break;
+		}
 	}
 
 	LOGi(FMT_HEADER, "init services");
@@ -231,11 +238,13 @@ void Crownstone::configure() {
 	// configure parameters for the Bluetooth stack
 	configureStack();
 
+	Storage::getInstance().garbageCollect();
+
 	uint16_t resetCounter;
-	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
+	State::getInstance().get(STATE_RESET_COUNTER, &resetCounter);
 	++resetCounter;
 	LOGw("Reset counter at: %d", resetCounter);
-	State::getInstance().set(STATE_RESET_COUNTER, resetCounter);
+	State::getInstance().set(STATE_RESET_COUNTER, &resetCounter);
 
 	// set advertising parameters such as the device name and appearance.
 	// Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
@@ -258,7 +267,7 @@ void Crownstone::initDrivers() {
 
 	LOGi(FMT_INIT, "stack");
 
-	// Start up the softdevice early because we need it's functions to configure devices it ultimately controls.
+	// Start up the softdevice early because we need its functions to configure devices it ultimately controls.
 	// in particular we need it to set interrupt priorities.
 	_stack->init();
 
@@ -266,18 +275,17 @@ void Crownstone::initDrivers() {
 	_timer->init();
 
 	LOGi(FMT_INIT, "storage");
-	// initialization of storage and settings has to be done **AFTER** stack is initialized
+	// initialization of storage and state has to be done **AFTER** stack is initialized
 	_storage->init();
 
 	LOGi(FMT_INIT, "board config");
-	_settings->init(&_boardsConfig);
-	_stateVars->init();
+	_state->init(&_boardsConfig);
 
 	// If not done already, init UART
 	if (!_boardsConfig.flags.hasSerial) {
 		serial_config(_boardsConfig.pinGpioRx, _boardsConfig.pinGpioTx);
 		uint8_t uartEnabled;
-		_settings->get(CONFIG_UART_ENABLED, &uartEnabled);
+		_state->get(CONFIG_UART_ENABLED, &uartEnabled);
 		serial_enable((serial_enable_t)uartEnabled);
 	}
 
@@ -304,6 +312,7 @@ void Crownstone::initDrivers() {
 		LOGi(FMT_INIT, "watchdog");
 		_watchdog->init();
 
+		LOGi(FMT_INIT, "enocean");
 		_enOceanHandler->init();
 	}
 
@@ -348,21 +357,21 @@ void Crownstone::initDrivers() {
 void Crownstone::configureStack() {
 	// Set the stored tx power
 	int8_t txPower;
-	_settings->get(CONFIG_TX_POWER, &txPower);
+	_state->get(CONFIG_TX_POWER, &txPower);
 	LOGi("Set TX power to %i", txPower);
 	_stack->setTxPowerLevel(txPower);
 
 	// Set the stored advertisement interval
 	uint16_t advInterval;
-	_settings->get(CONFIG_ADV_INTERVAL, &advInterval);
+	_state->get(CONFIG_ADV_INTERVAL, &advInterval);
 	_stack->setAdvertisingInterval(advInterval);
 
 	// Retrieve and Set the PASSKEY for pairing
 	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
-	_settings->get(CONFIG_PASSKEY, passkey);
+	_state->get(CONFIG_PASSKEY, passkey);
 
 	// TODO: If key is not set, this leads to a crash
-	_stack->setPasskey(passkey);
+//	_stack->setPasskey(passkey);
 
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
@@ -387,7 +396,7 @@ void Crownstone::configureStack() {
 			_stack->changeToLowTxPowerMode();
 		}
 
-		_stateVars->disableNotifications();
+		_state->disableNotifications();
 
 		_stack->setConnectable();
 		_stack->restartAdvertising();
@@ -397,23 +406,28 @@ void Crownstone::configureStack() {
 
 void Crownstone::configureAdvertisement() {
 
+	LOGd("Configure advertisement");
+
 	// initialize service data
-	uint8_t opMode;
-	State::getInstance().get(STATE_OPERATION_MODE, opMode);
+	uint8_t u_opMode;
+	State::getInstance().get(STATE_OPERATION_MODE, &u_opMode);
+	int8_t opMode = (int8_t)u_opMode;
+	LOGd("Opmode %i", opMode);
 
 	// Create the iBeacon parameter object which will be used
 	// to configure advertisement as an iBeacon
 
 	// get values from config
 	uint16_t major, minor;
-	uint8_t rssi;
+	TYPIFY(CONFIG_IBEACON_TXPOWER) rssi;
 	ble_uuid128_t uuid;
 
 	bool defaultSetting = opMode != OPERATION_MODE_NORMAL;
-	_settings->get(CONFIG_IBEACON_MAJOR, &major, defaultSetting);
-	_settings->get(CONFIG_IBEACON_MINOR, &minor, defaultSetting);
-	_settings->get(CONFIG_IBEACON_UUID, uuid.uuid128, defaultSetting);
-	_settings->get(CONFIG_IBEACON_TXPOWER, &rssi, defaultSetting);
+	_state->get(CONFIG_IBEACON_MAJOR, &major, defaultSetting);
+	_state->get(CONFIG_IBEACON_MINOR, &minor, defaultSetting);
+	_state->get(CONFIG_IBEACON_UUID, uuid.uuid128, defaultSetting);
+	_state->get(CONFIG_IBEACON_TXPOWER, &rssi, defaultSetting);
+	LOGd("iBeacon: major=%i, minor=%i, rssi_on_1m=%i", major, minor, (int8_t)rssi);
 
 	// create ibeacon object
 	_beacon = new IBeacon(uuid, major, minor, rssi);
@@ -425,13 +439,12 @@ void Crownstone::configureAdvertisement() {
 	_serviceData->setDeviceType(_boardsConfig.deviceType);
 	_serviceData->init();
 
-
-
 	// Only in normal mode the service data is filled with the state
 	if (opMode == OPERATION_MODE_NORMAL) {
+		LOGd("Normal mode, fill with state info");
 		// read crownstone id from storage
 		uint16_t crownstoneId;
-		_settings->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+		_state->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
 		LOGi("Set crownstone id to %u", crownstoneId);
 
 		// and set it to the service data
@@ -439,16 +452,16 @@ void Crownstone::configureAdvertisement() {
 
 		// fill service data with initial data
 		uint8_t switchState;
-		_stateVars->get(STATE_SWITCH_STATE, switchState);
+		_state->get(STATE_SWITCH_STATE, &switchState);
 		_serviceData->updateSwitchState(switchState);
 
 		_serviceData->updateTemperature(getTemperature());
 
 //		int32_t powerUsage;
-//		_stateVars->get(STATE_POWER_USAGE, powerUsage);
+//		_state->get(STATE_POWER_USAGE, powerUsage);
 //		_serviceData->updatePowerUsage(powerUsage);
 //		int32_t accumulatedEnergy;
-//		_stateVars->get(STATE_ACCUMULATED_ENERGY, accumulatedEnergy);
+//		_state->get(STATE_ACCUMULATED_ENERGY, accumulatedEnergy);
 //		_serviceData->updateAccumulatedEnergy(accumulatedEnergy);
 	}
 
@@ -458,7 +471,7 @@ void Crownstone::configureAdvertisement() {
 	// Need to init radio before configuring ibeacon?
 	_stack->initRadio();
 
-	if (_settings->isSet(CONFIG_IBEACON_ENABLED)) {
+	if (_state->isSet(CONFIG_IBEACON_ENABLED)) {
 		_stack->configureIBeacon(_beacon, _boardsConfig.deviceType);
 	} else {
 		_stack->configureBleDevice(_boardsConfig.deviceType);
@@ -534,7 +547,7 @@ void Crownstone::createCrownstoneServices() {
 void Crownstone::setName() {
 	char device_name[32];
 	uint16_t size = 0;
-	_settings->get(CONFIG_NAME, device_name, size);
+	_state->get(CONFIG_NAME, device_name, size);
 
 #if CHANGE_NAME_ON_RESET==1
 	//! get reset counter
@@ -563,7 +576,7 @@ void Crownstone::prepareNormalOperationMode() {
 	_scanner->setStack(_stack);
 	BLEutil::print_heap("Heap scanner: ");
 	BLEutil::print_stack("Stack scanner: ");
-//	if (_settings->isSet(CONFIG_TRACKER_ENABLED)) {
+//	if (_state->isSet(CONFIG_TRACKER_ENABLED)) {
 #if CHAR_TRACK_DEVICES == 1
 	_tracker->init();
 	BLEutil::print_heap("Heap tracker: ");
@@ -578,7 +591,7 @@ void Crownstone::prepareNormalOperationMode() {
 
 
 #if BUILD_MESHING == 1
-//	if (_settings->isEnabled(CONFIG_MESH_ENABLED)) {
+//	if (_state->isEnabled(CONFIG_MESH_ENABLED)) {
 		_mesh->init();
 //	}
 #endif
@@ -594,7 +607,7 @@ void Crownstone::startUp() {
 	LOGi("Soft reset count: %d", gpregret);
 
 	uint16_t bootDelay;
-	_settings->get(CONFIG_BOOT_DELAY, &bootDelay);
+	_state->get(CONFIG_BOOT_DELAY, &bootDelay);
 	if (bootDelay) {
 		LOGi("Boot delay: %d ms", bootDelay);
 		nrf_delay_ms(bootDelay);
@@ -645,19 +658,19 @@ void Crownstone::startUp() {
 
 		_scheduler->start();
 
-		if (_settings->isSet(CONFIG_SCANNER_ENABLED)) {
+		if (_state->isSet(CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
 			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
 			_scanner->delayedStart(delay);
 		}
 
-//		if (_settings->isSet(CONFIG_TRACKER_ENABLED)) {
+//		if (_state->isSet(CONFIG_TRACKER_ENABLED)) {
 #if CHAR_TRACK_DEVICES == 1
 			_tracker->startTracking();
 #endif
 //		}
 
-		if (_settings->isSet(CONFIG_MESH_ENABLED)) {
+		if (_state->isSet(CONFIG_MESH_ENABLED)) {
 #if BUILD_MESHING == 1
 //			nrf_delay_ms(500);
 			//! TODO: start with delay please
@@ -693,7 +706,7 @@ void Crownstone::tick() {
 
 	// Update temperature
 	int32_t temperature = getTemperature();
-	_stateVars->set(STATE_TEMPERATURE, temperature);
+	_state->set(STATE_TEMPERATURE, &temperature);
 
 #if ADVERTISEMENT_IMPROVEMENT==1 // TODO: remove this macro
 	// Update advertisement parameter
@@ -851,7 +864,7 @@ void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	default: return;
 	}
 
-	if (reconfigureBeacon && _settings->isSet(CONFIG_IBEACON_ENABLED)) {
+	if (reconfigureBeacon && _state->isSet(CONFIG_IBEACON_ENABLED)) {
 		_stack->setAdvertisementData();
 	}
 }
@@ -895,15 +908,15 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
  * The firmware is compiled with particular defaults. When a particular product comes from the factory line it has
  * by default FFFF FFFF in this UICR location. If this is the case, there are two options to cope with this:
  *   1. Create a custom firmware per device type where this field is adjusted at runtime. 
- *   2. Create a custom firmware per device type with the UICR field settings in the .hex file. In the latter case,
+ *   2. Create a custom firmware per device type with the UICR field state in the .hex file. In the latter case,
  *      if the UICR fields are already set, this might lead to a conflict.
  * There is chosen for the first option. Even if rare cases where there are devices types with FFFF FFFF in the field, 
- * the runtime always tries to overwrite it with the (let's hope) proper settings.
+ * the runtime always tries to overwrite it with the (let's hope) proper state.
  */
 void overwrite_hardware_version() {
 	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (hardwareBoard == 0xFFFFFFFF) {
-		LOGw("write board");
+		LOGw("Write board type into UICR");
 		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
 	}
 	LOGd("Board: %p", hardwareBoard);

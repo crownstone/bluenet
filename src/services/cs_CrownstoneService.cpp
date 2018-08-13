@@ -7,7 +7,7 @@
 
 #include <services/cs_CrownstoneService.h>
 
-#include <storage/cs_Settings.h>
+#include <storage/cs_State.h>
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
@@ -31,6 +31,7 @@ CrownstoneService::CrownstoneService() : EventListener(),
 		_sessionNonceCharacteristic(NULL), _factoryResetCharacteristic(NULL)
 {
 	EventDispatcher::getInstance().addListener(this);
+	LOGi("Add crownstone service");
 
 	setUUID(UUID(CROWNSTONE_UUID));
 	setName(BLE_SERVICE_CROWNSTONE);
@@ -363,7 +364,7 @@ ERR_CODE CrownstoneService::configOnWrite(const EncryptionAccessLevel accessLeve
 	case OPCODE_READ_VALUE: {
 		LOGd(FMT_SELECT_TYPE, STR_CHAR_CONFIGURATION, type);
 
-		errCode = Settings::getInstance().readFromStorage(type, _streamBuffer);
+		errCode = State::getInstance().readFromStorage(type, _streamBuffer);
 		if (SUCCESS(errCode)) {
 			_streamBuffer->setOpCode(OPCODE_READ_VALUE);
 			_configurationReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
@@ -382,7 +383,7 @@ ERR_CODE CrownstoneService::configOnWrite(const EncryptionAccessLevel accessLeve
 
 		uint8_t *payload = _streamBuffer->payload();
 		uint16_t payloadLength = _streamBuffer->length();
-		errCode = Settings::getInstance().writeToStorage(type, payload, payloadLength);
+		errCode = State::getInstance().writeToStorage(type, payload, payloadLength);
 		break;
 	}
 	default:

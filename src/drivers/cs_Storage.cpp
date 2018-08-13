@@ -20,7 +20,6 @@
 #include <float.h>
 
 #include <drivers/cs_Serial.h>
-#include <storage/cs_Settings.h>
 #include <storage/cs_State.h>
 #include <events/cs_EventDispatcher.h>
 #if BUILD_MESHING == 1
@@ -30,27 +29,23 @@
 extern "C" {
 	// Define event handler for errors during initialization
 	static void fds_evt_handler(fds_evt_t const * p_fds_evt) {
-		switch (p_fds_evt->id) {
-			case FDS_EVT_INIT:
-				if (p_fds_evt->result != FDS_SUCCESS) {
-					// TODO: indicate that initialization failed.
-				}
-				break;
-			default:
-				break;
-		}
+		Storage::getInstance().handleFileStorageEvent(p_fds_evt);
 	}
 }
 
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
 Storage::Storage() : EventListener() {
-	//LOGd(FMT_CREATE, "Storage");
+	LOGd(FMT_CREATE, "Storage");
 
 	EventDispatcher::getInstance().addListener(this);
 }
 
-ret_code_t Storage::remove(file_id_t file_id) {
+ret_code_t Storage::remove(st_file_id_t file_id) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
 	ret_code_t ret_code;
 	ret_code = fds_file_delete(file_id);
 	return ret_code;
@@ -58,6 +53,8 @@ ret_code_t Storage::remove(file_id_t file_id) {
 
 
 ret_code_t Storage::init() {
+	LOGd(FMT_INIT, "storage");
+
 	// clear fds token before first use 
 	memset(&_ftok, 0x00, sizeof(fds_find_token_t));
 
@@ -65,46 +62,102 @@ ret_code_t Storage::init() {
 	ret_code_t ret_code;
 	ret_code = fds_register(fds_evt_handler);
 	if (ret_code != FDS_SUCCESS) {
-		// TODO: Registering of the FDS event handler has failed.
+		LOGe("Registering FDS event handler failed (err=%i)", ret_code);
+		return ret_code;
 	}
 	ret_code = fds_init();
 	if (ret_code != FDS_SUCCESS) {
-		// TODO: Handle error.
-	}
-	if (ret_code == FDS_SUCCESS) {
-		_initialized = true;
+		LOGe("Init FDS failed (err=%i)", ret_code);
+		return ret_code;
 	}
 	return ret_code;
 }
 
-ret_code_t Storage::write(file_id_t file_id, file_data_t file_data) {
+ret_code_t Storage::garbageCollect() {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
+	ret_code_t ret_code;
+	LOGd("Perform garbage collection");
+	ret_code = fds_gc();
+	if (ret_code != FDS_SUCCESS) {
+		LOGw("No success (err=%i)", ret_code);
+	}
+	return ret_code;
+}
+
+ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
 	fds_record_t        record;
 	fds_record_desc_t   record_desc;
+	ret_code_t ret_code;
 
 	record.file_id           = file_id;
 	record.key               = file_data.key;
 	record.data.p_data       = file_data.value;
 	record.data.length_words = file_data.size; 
 
-	ret_code_t ret_code;
-	ret_code = fds_record_write(&record_desc, &record);
+	if (exists(file_id, file_data.key, record_desc)) {
+		LOGd("Update file %i record %i", file_id, file_data.key);
+		ret_code = fds_record_update(&record_desc, &record);
+		switch(ret_code) {
+			case FDS_SUCCESS:
+				LOGd("Update successful");
+				break;
+			default:
+				LOGd("Update not successful (error=%i)", ret_code);
+		}
+	}
+	else {
+		LOGd("Write to file %i record %i", file_id, file_data.key);
+		ret_code = fds_record_write(&record_desc, &record);
+		static bool garbage_collection = false;
+		switch(ret_code) {
+			case FDS_ERR_NO_SPACE_IN_FLASH:
+				LOGd("No space left");
+				if (!garbage_collection) {
+					garbage_collection = true;
+					garbageCollect();
+					// try again, just once
+					ret_code = write(file_id, file_data);
+					garbage_collection = false;
+				}
+				break;
+			case FDS_SUCCESS:
+				LOGd("Write successful");
+				break;
+			default:
+				LOGd("Write not successful (error=%i)", ret_code);
+		}
+	}
 	return ret_code;
 }
 
-ret_code_t Storage::read(file_id_t file_id, file_data_t file_data) {
+ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
 	fds_flash_record_t flash_record;
 	fds_record_desc_t  record_desc;
 	ret_code_t         ret_code;
 
 	ret_code = FDS_ERR_NOT_FOUND;
 
+	//LOGd("Read from file %i record %i", file_id, file_data.key);
 	// go through all records with given file_id and key (can be multiple)
 	while (fds_record_find(file_id, file_data.key, &record_desc, &_ftok) == FDS_SUCCESS) {
+		LOGd("Found record %i", file_data.key);
 		ret_code = fds_record_open(&record_desc, &flash_record);
 		if (ret_code != FDS_SUCCESS) break;
 
 		// map flash_record.p_data to value
 		file_data.size = flash_record.p_header->length_words;
+		LOGd("Found record %i of size %i", file_data.key, file_data.size);
 		memcpy(file_data.value, flash_record.p_data, file_data.size);
 
 		// invalidates the record	
@@ -114,7 +167,11 @@ ret_code_t Storage::read(file_id_t file_id, file_data_t file_data) {
 	return ret_code;
 }
 
-ret_code_t Storage::remove(file_id_t file_id, key_t key) {
+ret_code_t Storage::remove(st_file_id_t file_id, st_key_t key) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
 	fds_record_desc_t record_desc;
 	ret_code_t        ret_code;
 
@@ -128,350 +185,85 @@ ret_code_t Storage::remove(file_id_t file_id, key_t key) {
 	return ret_code;
 }
 
-ret_code_t Storage::exists(file_id_t file_id) {
+ret_code_t Storage::exists(st_file_id_t file_id) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
 	// not yet implemented
 	ret_code_t        ret_code;
 	ret_code = FDS_ERR_NOT_FOUND;
 	return ret_code;
 }
 
-ret_code_t Storage::exists(file_id_t file_id, key_t key) {
+ret_code_t Storage::exists(st_file_id_t file_id, st_key_t key) {
 	fds_record_desc_t record_desc;
+	return exists(file_id, key, record_desc);
+}
+
+ret_code_t Storage::exists(st_file_id_t file_id, st_key_t key, fds_record_desc_t record_fd) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
 	ret_code_t        ret_code;
 
 	ret_code = FDS_ERR_NOT_FOUND;
-	while (fds_record_find(file_id, key, &record_desc, &_ftok) == FDS_SUCCESS) {
+	while (fds_record_find(file_id, key, &record_fd, &_ftok) == FDS_SUCCESS) {
 		return FDS_SUCCESS;
 	}
 	return ret_code;
 }
 
-void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	// should handle event
-}
-
-/*
-void Storage::init() {
-	// call once before using any other API calls of the persistent storage module
-	BLE_CALL(pstorage_init, ());
-
-	LOGd("Page size: %u", PSTORAGE_FLASH_PAGE_SIZE);
-	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
-		LOGd("Init %i bytes persistent storage (FLASH) for id %d, handle: %p", config[i].storage_size, config[i].id, config[i].handle.block_id);
-		initBlocks(config[i].storage_size, 1, config[i].handle);
-		LOGd("  handle: %p", config[i].handle);
-	}
-
-	_initialized = true;
-}
-*/
-
-/*
-void Storage::onUpdateDone() {
-
-	if (_pending) {
-		// track how many update requests are still pending
-		_pending--;
-		// if meshing is enabled and all update requests were handled by pstorage, start the mesh again
-		if (!_pending) {
-			LOGi("pstorage update done");
-			EventDispatcher::getInstance().dispatch(EVT_STORAGE_WRITE_DONE);
-		}
-	}
-	else {
-		// TODO: how can _pending be lower than 1 here?
-		LOGw("_pending=%u", _pending);
-	}
-}
-*/
-
-/*
-void resume_requests(void* p_data, uint16_t len) {
-	Storage::getInstance().resumeRequests();
-}
-*/
-
-/*
-void storage_sys_evt_handler(uint32_t evt) {
-	// No need to decouple with app scheduler: this handler is already running on the main thread, since sys_evt_dispatch is too.
-	switch(evt) {
-	case NRF_EVT_RADIO_SESSION_IDLE: {
-		// once mesh is stopped, the softdevice will trigger the NRF_EVT_RADIO_SESSION_IDLE,
-		// now we can try to update the pstorage
-		Storage::getInstance().resumeRequests();
-		break;
-	}
-	case NRF_EVT_RADIO_SESSION_CLOSED: {
-		Storage::getInstance().resumeRequests();
-		break;
-	}
-	}
-}
-*/
-
-/*
-void Storage::resumeRequests() {
-	if (!writeBuffer.empty()) {
-#ifdef PRINT_STORAGE_VERBOSE
-		LOGd("Resume pstorage write requests");
-#endif
-
-		while (!writeBuffer.empty()) {
-			//! get the next buffered storage request
-			buffer_element_t elem = writeBuffer.pop();
-
-			if (!_scanning) {
-				// count number of pending updates to decide when mesh can be resumed (if needed)
-				_pending++;
-				// TODO: got an error 4 (NO_MEM) here when spam toggling relay.
-//				BLE_CALL (pstorage_update, (&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset) );
-				uint32_t count;
-				pstorage_access_status_get(&count);
-				if (count < PSTORAGE_CMD_QUEUE_SIZE) {
-					EventDispatcher::getInstance().dispatch(EVT_STORAGE_WRITE);
-				}
-				else {
-					LOGd("pstorage queue full");
-				}
-				uint32_t errorCode;
-				if (elem.update) {
-#ifdef PRINT_STORAGE_VERBOSE
-				LOGd("pstorage_update");
-#endif
-					errorCode = pstorage_update(&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset);
-				}
-				else {
-#ifdef PRINT_STORAGE_VERBOSE
-				LOGd("pstorage_store");
-#endif
-					errorCode = pstorage_store(&elem.storageHandle, elem.data, elem.dataSize, elem.storageOffset);
-				}
-				if (errorCode == NRF_ERROR_NO_MEM) {
-					// Error no_mem is returned when the queue of pstorage is full.
-					// Try again later
-					LOGd("try again later");
-					writeBuffer.push(elem);
-					// TODO: maybe use a timer instead?
-					errorCode = app_sched_event_put(NULL, 0, resume_requests);
-					APP_ERROR_CHECK(errorCode);
-					return;
-				}
-				APP_ERROR_CHECK(errorCode);
+void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
+	switch (p_fds_evt->id) {
+		case FDS_EVT_INIT:
+			if (p_fds_evt->result != FDS_SUCCESS) {
+				LOGe("Storage: Initialization failed");
 			} else {
-				// if scanning was started again, push it back on the buffer and try again during the next
-				// scan break
-				writeBuffer.push(elem);
-//				LOGe("scan started before all pstorage write requests were processed!");
-				return;
+				LOGd("Storage: Initialization successful");
+				_initialized = true;
 			}
-
-#ifdef PRINT_STORAGE_VERBOSE
-			LOGd("resume done");
-#endif
-		}
-	}
-}
-*/
-
-/*
-void Storage::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-
-	switch(evt) {
-	case EVT_SCAN_STARTED: {
-//		LOGd("EVT_SCAN_STARTED");
-		_scanning = true;
-		break;
-	}
-	case EVT_SCAN_STOPPED: {
-//		LOGd("EVT_SCAN_STOPPED");
-		_scanning = false;
-
-		// if there are pstorage update requests buffered
-		if (!writeBuffer.empty()) {
-			// if meshing, need to stop the mesh first before updating pstorage
-			if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED))	{
-#if BUILD_MESHING == 1
-#ifdef PRINT_STORAGE_VERBOSE
-				LOGd("pause mesh on scan stop");
-#endif
-				Mesh::getInstance().resume();
-#endif
-			} else {
-				// otherwise, resume buffered pstorage update requests
-				uint32_t errorCode = app_sched_event_put(NULL, 0, resume_requests);
-				APP_ERROR_CHECK(errorCode);
+			break;
+		case FDS_EVT_WRITE:
+			if (p_fds_evt->result != FDS_SUCCESS) {
+				LOGe("Storage: write failed");
 			}
-		}
-		break;
-	}
-	}
-
-}
-*/
-
-/*
-storage_config_t* Storage::getStorageConfig(ps_storage_id storageID) {
-
-	for (int i = 0; i < NR_CONFIG_ELEMENTS; i++) {
-		if (config[i].id == storageID) {
-			return &config[i];
-		}
-	}
-
-	return NULL;
-}
-*/
-
-/*
-bool Storage::getHandle(ps_storage_id storageID, pstorage_handle_t& handle) {
-	storage_config_t* config;
-
-	if ((config = getStorageConfig(storageID))) {
-		handle = config->handle;
-		return true;
-	} else {
-		return false;
-	}
-}
-*/
-
-/**
- * We allocate a single block of size "size". Biggest allocated size is 640 bytes.
- */
-/*
-void Storage::initBlocks(pstorage_size_t size, pstorage_size_t count, pstorage_handle_t& handle) {
-	// set parameter
-	pstorage_module_param_t param;
-	param.block_size = size;
-	param.block_count = 1;
-	param.cb = pstorage_callback_handler;
-
-	// register
-	BLE_CALL ( pstorage_register, (&param, &handle) );
-}
-*/
-
-/**
- * Nordic bug: We have to clear the entire block!
- */
-/*
-void Storage::clearStorage(ps_storage_id storageID) {
-
-	storage_config_t* config;
-	if (!(config = getStorageConfig(storageID))) {
-		// if no config was found for the given storage ID return
-		return;
+			break;
+		case FDS_EVT_UPDATE:
+			if (p_fds_evt->result != FDS_SUCCESS) {
+				LOGe("Storage: update failed");
+			}
+			break;
+		case FDS_EVT_DEL_RECORD:
+			if (p_fds_evt->result != FDS_SUCCESS) {
+				LOGe("Storage: delete record failed");
+			}
+			break;
+		case FDS_EVT_DEL_FILE:
+			if (p_fds_evt->result != FDS_SUCCESS) {
+				LOGe("Storage: delete file failed");
+			}
+			break;
+		case FDS_EVT_GC:
+			if (p_fds_evt->result != FDS_SUCCESS) {
+				LOGe("Storage: garbage collection failed");
+			}
+			break;
+		default:
+			LOGd("Storage evt %i with value %i", p_fds_evt->id, p_fds_evt->result);
+			break;
 	}
 
-	pstorage_handle_t block_handle;
-	BLE_CALL ( pstorage_block_identifier_get, (&config->handle, 0, &block_handle) );
-
-	EventDispatcher::getInstance().dispatch(EVT_STORAGE_ERASE);
-	BLE_CALL (pstorage_clear, (&block_handle, config->storage_size) );
-}
-*/
-/*
-void Storage::readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
-	pstorage_handle_t block_handle;
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
-
-	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, size, 0) );
-
-#ifdef PRINT_ITEMS
-	_log(SERIAL_INFO, "get struct: \r\n");
-	BLEutil::printArray((uint8_t*)item, size);
-#endif
-
-}
-*/
-
-/*
-void Storage::writeStorage(pstorage_handle_t handle, ps_storage_base_t* item, uint16_t size) {
-	writeItem(handle, 0, (uint8_t*)item, size);
-}
-*/
-
-/*
-void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size) {
-	pstorage_handle_t block_handle;
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
-
-	BLE_CALL (pstorage_load, (item, &block_handle, size, offset) );
-
-#ifdef PRINT_ITEMS
-	_log(SERIAL_INFO, "read item: \r\n");
-	BLEutil::printArray(item, size);
-#endif
-
-}
-*/
-
-/*
-void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t* item, uint16_t size, bool update) {
-	pstorage_handle_t block_handle;
-
-#ifdef PRINT_ITEMS
-	_log(SERIAL_INFO, "write item: \r\n");
-	BLEutil::printArray((uint8_t*)item, size);
-#endif
-
-	BLE_CALL ( pstorage_block_identifier_get, (&handle, 0, &block_handle) );
-
-	// [23.06.16] If the device is scanning or meshing, then pstorage_updates are queued by the softdevice.
-	//    unfortunately, they are not automatically resumed once the softdevice has time to process them. they
-	//    are staying queued until the first pstorage_update is called while the device is not scanning. to
-	//    avoid this, we queue the write calls ourselves, and only trigger the pstorage_update calls once the
-	//    device stopped scanning and meshing
-#if BUILD_MESHING == 1
-	bool meshRunning = Mesh::getInstance().isRunning();
-#else
-	bool meshRunning = false;
-#endif
-	// if scanning or meshing, we need to buffer the storage update requests until the softdevice has time to process
-	// the pstorage. this is only possible if not scanning and mesh is stopped.
-	if (_scanning || meshRunning) {
-		LOGd("buffer storage request")
-		if (!writeBuffer.full()) {
-			buffer_element_t elem;
-			elem.storageHandle = block_handle;
-			elem.storageOffset = offset;
-			elem.dataSize = size;
-			elem.data = item;
-			elem.update = update;
-			writeBuffer.push(elem);
-		} else {
-			LOGe("storage request buffer is full!");
-		}
-
-		// if not scanning, stop the mesh and wait for the NRF_EVT_RADIO_SESSION_IDLE to arrive to access pstorage
-		// if scannig, wait for the EVT_SCAN_STOPPED
-		if (meshRunning && !_scanning) {
-#if BUILD_MESHING == 1
-#ifdef PRINT_STORAGE_VERBOSE
-			LOGd("pause mesh on pstorage update");
-#endif
-			Mesh::getInstance().pause();
-#endif
-		}
-	} else {
-		// if neither scanning nor meshing, call the update directly
-		++_pending;
-		EventDispatcher::getInstance().dispatch(EVT_STORAGE_WRITE);
-		if (update) {
-#ifdef PRINT_STORAGE_VERBOSE
-				LOGd("pstorage_update");
-#endif
-			BLE_CALL (pstorage_update, (&block_handle, item, size, offset) );
-		}
-		else {
-#ifdef PRINT_STORAGE_VERBOSE
-				LOGd("pstorage_store");
-#endif
-			BLE_CALL (pstorage_store, (&block_handle, item, size, offset) );
-		}
+	switch(p_fds_evt->result) {
+		case FDS_ERR_NOT_FOUND:
+			LOGe("Not found");
+			break;
+		case FDS_SUCCESS:
+			break;
+		default:
+			LOGe("Error value is: %i", p_fds_evt->result);
+			break;
 	}
-
 }
-*/
+

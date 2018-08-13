@@ -285,7 +285,8 @@ all() {
 
 run() {
   build
-  if [ $? -eq 0 ]; then
+  result=$?
+  if [ $result -eq 0 ]; then
     sleep 1
     upload
   fi
