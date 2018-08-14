@@ -6907,7 +6907,7 @@
 // <i> will fail.
 
 #ifndef APP_TIMER_CONFIG_OP_QUEUE_SIZE
-#define APP_TIMER_CONFIG_OP_QUEUE_SIZE 10
+#define APP_TIMER_CONFIG_OP_QUEUE_SIZE 40
 #endif
 
 // <q> APP_TIMER_CONFIG_USE_SCHEDULER  - Enable scheduling app_timer events to app_scheduler

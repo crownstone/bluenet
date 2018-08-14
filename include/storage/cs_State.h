@@ -72,11 +72,11 @@ public:
 
 	void factoryReset(uint32_t resetCode);
 
-	ERR_CODE get(uint8_t type, void* data, bool getDefaultValue = false);
+	ERR_CODE get(const uint8_t type, void* data, const bool getDefaultValue = false);
 
-	ERR_CODE get(uint8_t type, void* data, size_t & size, bool getDefaultValue = false);
+	ERR_CODE get(const uint8_t type, void* data, size_t & size, const bool getDefaultValue = false);
 
-	ERR_CODE set(uint8_t type, void* data, size_t size = 0, bool persistent = false);
+	ERR_CODE set(uint8_t type, void* data, size_t size, bool persistent);
 
 	size_t getStateItemSize(uint8_t type);
 
@@ -99,6 +99,8 @@ protected:
 	bool readFlag(uint8_t type, bool& value);
 
 	std::vector<uint8_t> _notifyingStates;
+
+	std::vector<st_file_data_t> _not_persistent;
 };
 
 

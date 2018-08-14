@@ -36,6 +36,9 @@ extern "C" {
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 19
 
+// BLE_CONN_HANDLE_INVALID is 0xFFFF (32 bits)
+#define BLE_ADV_HANDLE_INVALID 0xFF
+
 Stack::Stack() :
 	_appearance(BLE_APPEARANCE_GENERIC_TAG), //_clock_source(defaultClockSource),
 	_tx_power_level(TX_POWER), _sec_mode({ }),
@@ -52,6 +55,7 @@ Stack::Stack() :
 	_lowPowerTimeoutId(NULL),
 	_secReqTimerId(NULL),
 	_connectionKeepAliveTimerId(NULL),
+	_adv_handle(BLE_ADV_HANDLE_INVALID),
 	_advInterleaveCounter(0),
 	_adv_manuf_data(NULL),
 	_serviceData(NULL)
@@ -125,8 +129,12 @@ void Stack::init() {
 	// an NRF_EVT_POWER_FAILURE_WARNING will be triggered.
 	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
 	
-	//_adv_data.adv_data = _advdata;
-	//_adv_data.scan_rsp_data = _scanrsp;
+	_data_advdata.p_data = NULL;
+	_data_advdata.len = 0;
+	_adv_data.adv_data = _data_advdata;
+	_data_scanrsp.p_data = NULL;
+	_data_scanrsp.len = 0;
+	_adv_data.scan_rsp_data = _data_scanrsp;
 
 	_initializedStack = true;
 }
@@ -152,6 +160,8 @@ void Stack::initRadio() {
 	ret_code_t err_code;
 	if (!checkCondition(C_STACK_INITIALIZED, true)) return;
 	if (checkCondition(C_RADIO_INITIALIZED, false)) return;
+		
+	LOGd("nrf_sdh_enable_request");
 
 	err_code = nrf_sdh_enable_request(); 
 	if (err_code == NRF_ERROR_INVALID_STATE) {
@@ -160,9 +170,9 @@ void Stack::initRadio() {
 	}
 	// Enable BLE stack
 	uint32_t ram_start = RAM_R1_BASE;
-	uint32_t const conn_cfg_tag = 1;
-	LOGd("RAM base address: %p", ram_start);
-	err_code = nrf_sdh_ble_default_cfg_set(conn_cfg_tag, &ram_start); 
+	_conn_cfg_tag = 1;
+	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
+	err_code = nrf_sdh_ble_default_cfg_set(_conn_cfg_tag, &ram_start); 
 	switch(err_code) {
 		case NRF_ERROR_NO_MEM:
 			LOGe("Unrecoverable, memory softdevice and app overlaps: %p", ram_start);
@@ -176,6 +186,7 @@ void Stack::initRadio() {
 		LOGw("Application address is too high, memory is unused: %p", ram_start);
 	}
 
+	LOGd("nrf_sdh_ble_enable");
 	err_code = nrf_sdh_ble_enable(&ram_start);
 	switch(err_code) {
 		case NRF_ERROR_INVALID_STATE:
@@ -200,6 +211,7 @@ void Stack::initRadio() {
 	if (!_device_name.empty()) {
 		device_name = _device_name;
 	}
+	LOGd("sd_ble_gap_device_name_set");
 	err_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) device_name.c_str(), device_name.length());
 	APP_ERROR_CHECK(err_code);
 	
@@ -370,19 +382,16 @@ void Stack::setTxPowerLevel(int8_t powerLevel) {
 }
 
 void Stack::updateTxPowerLevel() {
-#ifdef NO_TX_BUFFER_ERROR_ANYMORE
-	uint32_t err_code;
-	err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _tx_power_level, _adv_handle);
-	switch(err_code) {
-		case BLE_ERROR_NO_TX_BUFFERS:
-			LOGe("No tx buffers");
-			break;
+	if (!_initializedRadio || _adv_handle == BLE_ADV_HANDLE_INVALID) {
+		LOGw("Radio not initialized yet");
+		return;
 	}
+	uint32_t err_code;
+	LOGd("Update tx power level %i", _tx_power_level);
+	err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _tx_power_level, _adv_handle);
 	APP_ERROR_CHECK(err_code);
-#else
-	LOGw("TODO: update tx power level %i", _tx_power_level);
-	return;
-#endif
+//	LOGw("TODO: update tx power level %i", _tx_power_level);
+//	return;
 }
 
 void Stack::setMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
@@ -443,10 +452,10 @@ void Stack::configureIBeaconAdvData(IBeacon* beacon) {
 	_manufac_apple.data.p_data = beacon->getArray();
 	_manufac_apple.data.size = beacon->size();
 
-	memset(&_advdata, 0, sizeof(_advdata));
+	memset(&_config_advdata, 0, sizeof(_config_advdata));
 
-	_advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-	_advdata.p_manuf_specific_data = &_manufac_apple;
+	_config_advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
+	_config_advdata.p_manuf_specific_data = &_manufac_apple;
 }
 
 /** Configurate advertisement data according to Crowstone specification.
@@ -467,9 +476,9 @@ void Stack::configureBleDeviceAdvData() {
 		LOGw(MSG_BLE_NO_CUSTOM_SERVICES);
 	}
 
-	memset(&_advdata, 0, sizeof(_advdata));
-	_advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-	_advdata.p_tx_power_level = &_tx_power_level;
+	memset(&_config_advdata, 0, sizeof(_config_advdata));
+	_config_advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
+	_config_advdata.p_tx_power_level = &_tx_power_level;
 }
 
 /** Configurate scan response according to Crowstone specification.
@@ -483,8 +492,8 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 
 	uint8_t serviceDataLength = 0;
 
-	memset(&_scanrsp, 0, sizeof(_scanrsp));
-	_scanrsp.name_type = BLE_ADVDATA_SHORT_NAME;
+	memset(&_config_scanrsp, 0, sizeof(_config_scanrsp));
+	_config_scanrsp.name_type = BLE_ADVDATA_SHORT_NAME;
 
 	if (_serviceData && deviceType != DEVICE_UNDEF) {
 		memset(&_service_data, 0, sizeof(_service_data));
@@ -494,8 +503,8 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 		_service_data.data.p_data = _serviceData->getArray();
 		_service_data.data.size = _serviceData->getArraySize();
 
-		_scanrsp.p_service_data_array = &_service_data;
-		_scanrsp.service_data_count = 1;
+		_config_scanrsp.p_service_data_array = &_service_data;
+		_config_scanrsp.service_data_count = 1;
 
 		serviceDataLength += 2 + sizeof(_service_data.service_uuid) + _service_data.data.size;
 	}
@@ -503,26 +512,27 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 	const uint8_t maxDataLength = 29;
 	uint8_t nameLength = maxDataLength - serviceDataLength;
 	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
-	_scanrsp.short_name_len = nameLength;
+	_config_scanrsp.short_name_len = nameLength;
 }
 
 void Stack::configureIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	LOGi(FMT_BLE_CONFIGURE_AS, "iBeacon");
 	configureIBeaconAdvData(beacon);
 	configureScanResponse(deviceType);
-	setAdvertisementData();
 	configureAdvertisementParameters();
+	setAdvertisementData();
 }
 
 void Stack::configureBleDevice(uint8_t deviceType) {
 	LOGi(FMT_BLE_CONFIGURE_AS, "BleDevice");
 	configureBleDeviceAdvData();
 	configureScanResponse(deviceType);
-	setAdvertisementData();
 	configureAdvertisementParameters();
+	setAdvertisementData();
 }
 
 void Stack::configureAdvertisementParameters() {
+	LOGd("set _adv_params");
 	_adv_params.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
 	_adv_params.p_peer_addr = NULL;
 	_adv_params.filter_policy = BLE_GAP_ADV_FP_ANY;
@@ -569,23 +579,10 @@ void Stack::startAdvertising() {
 
 	LOGi(MSG_BLE_ADVERTISING_STARTING);
 	
+	LOGd("sd_ble_gap_adv_start");
 	uint32_t err_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag);
-	switch (err_code) {
-	case NRF_ERROR_BUSY:
-		// Docs say: retry again later.
-		// Since restartAdvertising() gets called all the time anyway, I guess we don't have to schedule a retry.
-		LOGw("adv_start busy");
-		break;
-	case NRF_ERROR_INVALID_PARAM:
-		LOGe(MSG_BLE_ADVERTISEMENT_CONFIG_INVALID);
-		break;
-	case NRF_ERROR_INVALID_STATE:
-		LOGe("Invalid state");
-		break;
-	case NRF_SUCCESS:
+	if (err_code == NRF_SUCCESS) {
 		_advertising = true;
-	default:
-		LOGe("Unknown error code");
 	}
 	APP_ERROR_CHECK(err_code);
 }
@@ -665,23 +662,20 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
 void Stack::setAdvertisementData() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 
-	LOGd("Set advertisement data");
-
 	uint32_t err;
-	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
-
-	//! TODO: why do we allow (and get) invalid configuration?
-	//! It seems like we setAdvertisementData before we configure as iBeacon (probably from the service data?)
-	switch(err) {
-	case NRF_SUCCESS:
-		break;
-	case NRF_ERROR_INVALID_PARAM:
-		LOGw("Invalid advertisement configuration");
-		break;
-	default:
-		LOGd("Retry setAdvData (err %d)", err);
-		BLE_CALL(sd_ble_gap_adv_set_configure, (&_adv_handle, &_adv_data, &_adv_params));
+	
+	bool first_time = false;
+	if (_adv_handle == BLE_ADV_HANDLE_INVALID) {
+		first_time = true;
 	}
+
+	if (!first_time) {
+		// update now does not just allow adv_data to point to something else...
+		return; // for now
+	}
+
+	LOGd("sd_ble_gap_adv_set_configure");
+	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
 	APP_ERROR_CHECK(err);
 }
 

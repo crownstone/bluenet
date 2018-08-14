@@ -110,7 +110,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 		_switch = &Switch::getInstance();
 		// create temperature guard
 		_temperatureGuard = &TemperatureGuard::getInstance();
-
+ 
 		_powerSampler = &PowerSampling::getInstance();
 
 		_watchdog = &Watchdog::getInstance();
@@ -124,13 +124,11 @@ void Crownstone::init() {
 	//! initialize drivers
 	LOGi(FMT_HEADER, "init");
 	initDrivers();
-	BLEutil::print_heap("Heap initDrivers: ");
-	BLEutil::print_stack("Stack initDrivers: ");
+	BLEutil::print_heap("init, heap:");
+	BLEutil::print_stack("init, stack:");
 	
 	LOGi(FMT_HEADER, "mode");
 	_state->get(STATE_OPERATION_MODE, &_operationMode);
-	LOGd("Operation mode: %i", _operationMode);
-
 	switch(_operationMode) {
 		case OPERATION_MODE_SETUP: 
 		case OPERATION_MODE_NORMAL: 
@@ -140,8 +138,18 @@ void Crownstone::init() {
 		default:
 			LOGd("Set default mode to setup");
 			_operationMode = OPERATION_MODE_SETUP;
-			_state->set(STATE_OPERATION_MODE, &_operationMode);
+			_state->set(STATE_OPERATION_MODE, &_operationMode, sizeof(_operationMode), true);
 	}
+	LOGd("Set default mode to setup");
+	_operationMode = OPERATION_MODE_SETUP;
+	_state->set(STATE_OPERATION_MODE, &_operationMode, sizeof(_operationMode), true);
+	
+	_state->get(STATE_OPERATION_MODE, &_operationMode);
+	LOGd("Operation mode: %i", _operationMode);
+	
+	LOGd("Set default mode to setup again");
+	_operationMode = OPERATION_MODE_SETUP;
+	_state->set(STATE_OPERATION_MODE, &_operationMode, sizeof(_operationMode), true);
 	
 	_state->get(STATE_OPERATION_MODE, &_operationMode);
 	LOGd("Operation mode: %i", _operationMode);
@@ -149,8 +157,8 @@ void Crownstone::init() {
 	//! configure the crownstone
 	LOGi(FMT_HEADER, "configure");
 	configure();
-	BLEutil::print_heap("Heap configure: ");
-	BLEutil::print_stack("Stack configure: ");
+//	BLEutil::print_heap("Heap configure: ");
+//	BLEutil::print_stack("Stack configure: ");
 
 	LOGi(FMT_CREATE, "timer");
 	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
@@ -244,7 +252,7 @@ void Crownstone::configure() {
 	State::getInstance().get(STATE_RESET_COUNTER, &resetCounter);
 	++resetCounter;
 	LOGw("Reset counter at: %d", resetCounter);
-	State::getInstance().set(STATE_RESET_COUNTER, &resetCounter);
+	State::getInstance().set(STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), true);
 
 	// set advertising parameters such as the device name and appearance.
 	// Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
@@ -312,8 +320,8 @@ void Crownstone::initDrivers() {
 		LOGi(FMT_INIT, "watchdog");
 		_watchdog->init();
 
-		LOGi(FMT_INIT, "enocean");
-		_enOceanHandler->init();
+		//LOGi(FMT_INIT, "enocean");
+		//_enOceanHandler->init();
 	}
 
 	// init GPIOs
@@ -358,7 +366,6 @@ void Crownstone::configureStack() {
 	// Set the stored tx power
 	int8_t txPower;
 	_state->get(CONFIG_TX_POWER, &txPower);
-	LOGi("Set TX power to %i", txPower);
 	_stack->setTxPowerLevel(txPower);
 
 	// Set the stored advertisement interval
@@ -406,13 +413,11 @@ void Crownstone::configureStack() {
 
 void Crownstone::configureAdvertisement() {
 
-	LOGd("Configure advertisement");
-
 	// initialize service data
 	uint8_t u_opMode;
 	State::getInstance().get(STATE_OPERATION_MODE, &u_opMode);
 	int8_t opMode = (int8_t)u_opMode;
-	LOGd("Opmode %i", opMode);
+	LOGd("Operation mode: %i", opMode);
 
 	// Create the iBeacon parameter object which will be used
 	// to configure advertisement as an iBeacon
@@ -434,7 +439,7 @@ void Crownstone::configureAdvertisement() {
 
 	// Create the Service Data object which will be used
 	// to advertise certain state variables
-
+	
 	_serviceData = new ServiceData();
 	_serviceData->setDeviceType(_boardsConfig.deviceType);
 	_serviceData->init();
@@ -464,6 +469,8 @@ void Crownstone::configureAdvertisement() {
 //		_state->get(STATE_ACCUMULATED_ENERGY, accumulatedEnergy);
 //		_serviceData->updateAccumulatedEnergy(accumulatedEnergy);
 	}
+	
+	LOGd("Init radio");
 
 	// assign service data to stack
 	_stack->setServiceData(_serviceData);
@@ -472,8 +479,10 @@ void Crownstone::configureAdvertisement() {
 	_stack->initRadio();
 
 	if (_state->isSet(CONFIG_IBEACON_ENABLED)) {
+		LOGd("Configure iBeacon");
 		_stack->configureIBeacon(_beacon, _boardsConfig.deviceType);
 	} else {
+		LOGd("Configure BLE device");
 		_stack->configureBleDevice(_boardsConfig.deviceType);
 	}
 
@@ -546,18 +555,17 @@ void Crownstone::createCrownstoneServices() {
  */
 void Crownstone::setName() {
 	char device_name[32];
-	uint16_t size = 0;
+	size_t size = 0;
 	_state->get(CONFIG_NAME, device_name, size);
+	if (size == 0) {
+		_state->get(CONFIG_NAME, device_name, size, true);
+	}
 
 #if CHANGE_NAME_ON_RESET==1
-	//! get reset counter
+	//! clip name to 5 chars and add reset counter at the end
 	uint16_t resetCounter;
 	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
-//	uint16_t minor;
-//	ps_configuration_t cfg = Settings::getInstance().getConfig();
-//	Storage::getUint16(cfg.beacon.minor, minor, BEACON_MINOR);
 	char devicename_resetCounter[32];
-	//! clip name to 5 chars and add reset counter at the end
 	sprintf(devicename_resetCounter, "%.*s_%d", MIN(size, 5), device_name, resetCounter);
 	std::string deviceName = std::string(devicename_resetCounter);
 #else
@@ -706,7 +714,7 @@ void Crownstone::tick() {
 
 	// Update temperature
 	int32_t temperature = getTemperature();
-	_state->set(STATE_TEMPERATURE, &temperature);
+	_state->set(STATE_TEMPERATURE, &temperature, sizeof(temperature), false);
 
 #if ADVERTISEMENT_IMPROVEMENT==1 // TODO: remove this macro
 	// Update advertisement parameter

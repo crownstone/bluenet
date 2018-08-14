@@ -6,9 +6,8 @@
 #pragma once
 
 #include <ble/cs_Nordic.h>
+#include <drivers/cs_Serial.h>
 #include <util/cs_Error.h>
-
-#include "drivers/cs_Serial.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -27,6 +26,12 @@ void assert_nrf_callback (uint16_t line_num, const uint8_t *file_name);
 
 //called by soft device when it has an internal error.
 void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name);
+
+void fds_pretty_print(ret_code_t ret_code);
+
+/** @brief Macro for FDS error handling (will not abort)
+ */
+#define FDS_ERROR_CHECK fds_pretty_print
 
 /** @brief Macro for calling error handler function.
  *

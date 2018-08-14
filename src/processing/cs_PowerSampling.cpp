@@ -692,6 +692,13 @@ void PowerSampling::calculateEnergy() {
  */
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
 
+	static int warning = 0;
+	if (!warning) {
+		LOGw("Disabled soft fuse for now!");
+		warning++;
+	}
+	return;
+
 	//! Get the current state errors
 	state_errors_t stateErrors;
 	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
@@ -736,7 +743,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		LOGw("current above threshold");
 		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		uint8_t error = 1;
-		State::getInstance().set(STATE_ERROR_OVER_CURRENT, &error);
+		State::getInstance().set(STATE_ERROR_OVER_CURRENT, &error, sizeof(error), true);
 		return;
 	}
 
@@ -760,14 +767,14 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
 			// Set overcurrent error.
 			uint8_t error = 1;
-			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, &error);
+			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, &error, sizeof(error), true);
 		}
 		else if (switchState.relay_state == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
 			LOGe("IGBT failure detected");
 			EventDispatcher::getInstance().dispatch(EVT_DIMMER_ON_FAILURE_DETECTED);
 			uint8_t error = 1;
-			State::getInstance().set(STATE_ERROR_DIMMER_ON_FAILURE, &error);
+			State::getInstance().set(STATE_ERROR_DIMMER_ON_FAILURE, &error, sizeof(error), true);
 		}
 	}
 }

@@ -93,7 +93,7 @@ void Tracker::writeTrackedDevices() {
 	buffer_ptr_t buffer;
 	uint16_t length;
 	_trackedDeviceList->getBuffer(buffer, length);
-	State::getInstance().set(STATE_TRACKED_DEVICES, buffer, _trackedDeviceList->getMaxLength());
+	State::getInstance().set(STATE_TRACKED_DEVICES, buffer, _trackedDeviceList->getMaxLength(), true);
 }
 
 void Tracker::readTrackedDevices() {

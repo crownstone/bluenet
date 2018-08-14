@@ -139,9 +139,13 @@ protected:
 	app_timer_id_t                              _connectionKeepAliveTimerId;
 
 	uint8_t                                     _adv_handle;
-	ble_advdata_t                               _advdata;
-	ble_advdata_t                               _scanrsp;
+	ble_advdata_t                               _config_advdata;
+	ble_advdata_t                               _config_scanrsp;
+	
 	ble_gap_adv_data_t                          _adv_data;
+	ble_data_t                                  _data_advdata;
+	ble_data_t                                  _data_scanrsp;
+
 	ble_gap_adv_params_t                        _adv_params;
 	uint8_t                                     _conn_cfg_tag;
 

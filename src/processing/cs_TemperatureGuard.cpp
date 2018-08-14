@@ -79,7 +79,7 @@ void TemperatureGuard::tick() {
 	// Set state before dispatching event, so that errors are set when handling the event.
 	if (chipTempError && !stateErrors.errors.chipTemp) {
 		//! Set chip temp error
-		State::getInstance().set(STATE_ERROR_CHIP_TEMP, &chipTempError);
+		State::getInstance().set(STATE_ERROR_CHIP_TEMP, &chipTempError, sizeof(chipTempError), true);
 	}
 
 	if (curEvent != _lastChipTempEvent) {
@@ -109,7 +109,7 @@ void TemperatureGuard::tick() {
 	// Set state before dispatching event, so that errors are set when handling the event.
 	if (pwmTempError && !stateErrors.errors.pwmTemp) {
 		// Set pwm temp error
-		State::getInstance().set(STATE_ERROR_PWM_TEMP, &pwmTempError);
+		State::getInstance().set(STATE_ERROR_PWM_TEMP, &pwmTempError, sizeof(pwmTempError), true);
 	}
 
 	if (curEvent != _lastPwmTempEvent) {

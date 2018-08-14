@@ -588,7 +588,7 @@ ERR_CODE CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const uint16_
 	LOGd("old errors %u - reset %u", stateErrors.asInt, *payload);
 	stateErrors.asInt &= ~(payload->asInt);
 	LOGd("new errors %u", stateErrors.asInt);
-	State::getInstance().set(STATE_ERRORS, &stateErrors.asInt);
+	State::getInstance().set(STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors), true);
 	return ERR_SUCCESS;
 }
 
@@ -806,8 +806,7 @@ ERR_CODE CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const uint16_t
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	uint8_t enable = *(uint8_t*) buffer;
-//	ERR_CODE errCode = State::getInstance().writeToStorage(CONFIG_UART_ENABLED, buffer, size);
-	ERR_CODE errCode = State::getInstance().set(CONFIG_UART_ENABLED, buffer, size);
+	ERR_CODE errCode = State::getInstance().set(CONFIG_UART_ENABLED, buffer, size, true);
 	if (errCode != ERR_SUCCESS) {
 		return errCode;
 	}

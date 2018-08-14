@@ -18,13 +18,10 @@
 
 #include <climits>
 #include <float.h>
-
 #include <drivers/cs_Serial.h>
 #include <storage/cs_State.h>
 #include <events/cs_EventDispatcher.h>
-#if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
-#endif
 
 extern "C" {
 	// Define event handler for errors during initialization
@@ -104,21 +101,15 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 	if (exists(file_id, file_data.key, record_desc)) {
 		LOGd("Update file %i record %i", file_id, file_data.key);
 		ret_code = fds_record_update(&record_desc, &record);
-		switch(ret_code) {
-			case FDS_SUCCESS:
-				LOGd("Update successful");
-				break;
-			default:
-				LOGd("Update not successful (error=%i)", ret_code);
-		}
+		FDS_ERROR_CHECK(ret_code);
 	}
 	else {
 		LOGd("Write to file %i record %i", file_id, file_data.key);
 		ret_code = fds_record_write(&record_desc, &record);
+		FDS_ERROR_CHECK(ret_code);
 		static bool garbage_collection = false;
 		switch(ret_code) {
 			case FDS_ERR_NO_SPACE_IN_FLASH:
-				LOGd("No space left");
 				if (!garbage_collection) {
 					garbage_collection = true;
 					garbageCollect();
@@ -130,8 +121,6 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 			case FDS_SUCCESS:
 				LOGd("Write successful");
 				break;
-			default:
-				LOGd("Write not successful (error=%i)", ret_code);
 		}
 	}
 	return ret_code;
@@ -185,34 +174,31 @@ ret_code_t Storage::remove(st_file_id_t file_id, st_key_t key) {
 	return ret_code;
 }
 
-ret_code_t Storage::exists(st_file_id_t file_id) {
+bool Storage::exists(st_file_id_t file_id) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	// not yet implemented
-	ret_code_t        ret_code;
-	ret_code = FDS_ERR_NOT_FOUND;
-	return ret_code;
+	return false;
 }
 
-ret_code_t Storage::exists(st_file_id_t file_id, st_key_t key) {
+bool Storage::exists(st_file_id_t file_id, st_key_t key) {
 	fds_record_desc_t record_desc;
 	return exists(file_id, key, record_desc);
 }
 
-ret_code_t Storage::exists(st_file_id_t file_id, st_key_t key, fds_record_desc_t record_fd) {
+bool Storage::exists(st_file_id_t file_id, st_key_t key, fds_record_desc_t record_fd) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
-	ret_code_t        ret_code;
-
-	ret_code = FDS_ERR_NOT_FOUND;
 	while (fds_record_find(file_id, key, &record_fd, &_ftok) == FDS_SUCCESS) {
-		return FDS_SUCCESS;
+		LOGd("Record exists: %i, %i", file_id, key);
+		return true;
 	}
-	return ret_code;
+	LOGd("Record does not exist: %i, %i", file_id, key);
+	return false;
 }
 
 void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {

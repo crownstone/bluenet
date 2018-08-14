@@ -1,11 +1,8 @@
 /**
- * @file
- * import files from nordic sdk.
- *
- * @authors crownstone team
- * @copyright crownstone b.v.
- * @date apr 21, 2015
- * license: lgplv3+, apache license 2.0, and/or mit (triple-licensed)
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Apr. 21, 2015
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
@@ -14,51 +11,46 @@ extern "C"
 {
 #endif
 
-//! The header files for the SoftDevice. We're trying really hard to only them only here.
-//! The user should not need to include files under a Nordic license.
-//! This means that we can distribute our files in the end without the corresponding Nordic header files.
-#include "ble_gap.h"
-#include "ble.h"
-#include "ble_advdata.h"
-#include "ble_srv_common.h"
-#include "ble_gatts.h"
-#include "ble_gatt.h"
-#include "ble_hci.h"
-
-//! Refering to files in the Nordic SDK
-#include "nrfx_glue.h"
-#include "nrf_sdh.h"
-#include "nrf_sdh_ble.h"
-#include "nrf_fstorage.h"
-#include "fds.h"
-
-#include "nrf.h"
-#include "nrf_gpio.h"
-#include "nrf_gpiote.h"
-#include "nrf_delay.h"
-#include "nrf_sdm.h"
-#include "nrf_error.h"
-
-#include "app_util.h"
-#include "app_scheduler.h"
+//! The header files in the Nordic SDK. Keep all the includes here, not dispersed over all the header files.
+#include <app_util.h>
+#include <app_scheduler.h>
+#include <ble.h>
+#include <ble_advdata.h>
+#include <ble_srv_common.h>
+#include <ble_gatt.h>
+#include <ble_gatts.h>
+#include <ble_hci.h>
+#include <fds.h>
+#include <nrf.h>
+#include <nrf_delay.h>
+#include <nrf_error.h>
+#include <nrf_fstorage.h>
+#include <nrf_gpio.h>
+#include <nrf_gpiote.h>
+#include <nrf_nvic.h>
+#include <nrf_sdh.h>
+#include <nrf_sdh_ble.h>
+#include <nrf_sdm.h>
+#include <nrfx_glue.h>
 
 #ifndef BOOTLOADER_COMPILATION
-// Refering to driver files
-#include "nrf_saadc.h"
-#include "nrf_timer.h"
-#include "nrf_ppi.h"
-#include "nrf_gpiote.h"
-#include "nrf_uart.h"
-#include "crc16.h"
+#include <crc16.h>
+#include <nrf_gpiote.h>
+#include <nrf_ppi.h>
+#include <nrf_saadc.h>
+#include <nrf_timer.h>
+#include <nrf_uart.h>
 #endif
 
-#undef APP_ERROR_CHECK // undefine again, we want to use our own macro defined in util/cs_BleError.h
-#undef APP_ERROR_HANDLER
+// undefine the following macros, we will use our macros as defined in <util/cs_BleError.h>
+#ifdef APP_ERROR_CHECK
+#undef APP_ERROR_CHECK
+#endif
 
-#include "nrf_nvic.h"
+#ifdef APP_ERROR_HANDLER
+#undef APP_ERROR_HANDLER
+#endif
 
 #ifdef __cplusplus
 }
 #endif
-
-

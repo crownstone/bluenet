@@ -15,7 +15,7 @@
 #include <protocol/cs_MeshMessageTypes.h>
 #endif
 
-struct __attribute__((__packed__)) switch_state_t {
+struct __attribute__((__packed__)) __attribute__((__aligned__(4))) switch_state_t {
 	uint8_t pwm_state : 7;
 	uint8_t relay_state : 1;
 };

@@ -11,13 +11,13 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 # Set application shorthand
-SET(APPLICATION_SHORTHAND "Crownstone")
+SET(APPLICATION_SHORTHAND "crownstone")
 
 # Set name of project
 SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
 
 # Set the main file to use for this application
-SET(MAIN_FILE "cs_${APPLICATION_SHORTHAND}.cpp")
+SET(MAIN_FILE "cs_Crownstone.cpp")
 
 # Start a project
 PROJECT(${PROJECT_NAME}) # ${TEST_COMPILERS})

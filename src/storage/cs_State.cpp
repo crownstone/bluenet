@@ -14,7 +14,6 @@
 #include <events/cs_EventDispatcher.h>
 #include <protocol/cs_Defaults.h>
 #include <storage/cs_State.h>
-#include <storage/cs_StorageHelper.h>
 #include <util/cs_Utils.h>
 
 State::State() : _initialized(false), _storage(NULL), _boardsConfig(NULL) {
@@ -123,24 +122,32 @@ size_t State::getStateItemSize(const uint8_t type) {
 	return ConfigurationTypeSizes[type];	
 }
 
-ERR_CODE State::get(uint8_t type, void* target, bool getDefaultValue) {
+ERR_CODE State::get(const uint8_t type, void* target, const bool getDefaultValue) {
 	size_t size = 0;
 	return get(type, target, size, getDefaultValue);
 }
 
-ERR_CODE State::get(uint8_t type, void* target, size_t & size, bool getDefaultValue) {
+ERR_CODE State::get(const uint8_t type, void* target, size_t & size, const bool getDefaultValue) {
+	ret_code_t ret_code;
 	if (getDefaultValue || (!_storage->exists(FILE_CONFIGURATION, type))) {
-		LOGd("Get default %i", type);
+		// LOGd("Get default %i", type);
 		getDefaults(type, target, size);
-		return ERR_SUCCESS;
+		ret_code = ERR_SUCCESS;
+		return ret_code;
 	}
 	st_file_data_t data;
 	data.key = type;
 	data.value = (uint8_t*)target;
-	LOGd("Get type %i", type);
-	_storage->read(FILE_CONFIGURATION, data);
+	//LOGd("Get type %i", type);
+	ret_code =_storage->read(FILE_CONFIGURATION, data);
+	if (ret_code == FDS_ERR_NOT_FOUND) {
+		//LOGd("Not found, use default");
+		getDefaults(type, target, size);
+		ret_code = ERR_SUCCESS;
+		return ret_code;
+	}
 	size = data.size;
-	return ERR_SUCCESS;
+	return ret_code;
 }
 
 /**
@@ -152,6 +159,22 @@ ERR_CODE State::set(uint8_t type, void* target, size_t size, bool persistent) {
 	data.value = (uint8_t*)target;
 	data.size = size;
 	data.persistent = persistent;
+	if (!data.persistent) {
+		bool exist = false;
+		for (size_t i = 0; i < _not_persistent.size(); ++i) {
+			if (_not_persistent[i].key == type) {
+				_not_persistent[i].key = data.key;
+				_not_persistent[i].value = data.value;
+				_not_persistent[i].size = data.size;
+				_not_persistent[i].persistent = data.persistent;
+				exist = true;
+			}
+		}
+		if (!exist) {
+			_not_persistent.push_back(data);
+		}
+		return true;
+	}
 	return _storage->write(FILE_CONFIGURATION, data);
 }
 

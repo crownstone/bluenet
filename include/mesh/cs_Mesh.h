@@ -12,7 +12,7 @@
 
 #pragma once
 
-//#include <common/cs_Types.h>
+#if BUILD_MESHING == 1
 
 #include <drivers/cs_Timer.h>
 #include <protocol/cs_MeshMessageTypes.h>
@@ -165,3 +165,4 @@ public:
 
 };
 
+#endif

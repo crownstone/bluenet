@@ -11,7 +11,8 @@ mkdir -p $TEMP_DIR
 GDB_SCRIPT=$TEMP_DIR/gdbinit
 cp gdb/gdbinit $GDB_SCRIPT
 
-GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}gdb
+#GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}gdb
+GDB=/opt/arm-none-eabi-2018q2/bin/${COMPILER_TYPE}gdb
 DEVICE=nRF52832_xxAA
 
 TARGET=${1:? "$0 requires \"target\" as first argument"}

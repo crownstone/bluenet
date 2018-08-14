@@ -87,8 +87,10 @@ enum ConfigurationTypes {
  *   sizeof(TYPIFY(CONFIG_ROOM)).
  */
 
+#ifndef TYPIFY
 #define TYPIFY(NAME) NAME ## _TYPE 
-	
+#endif
+
 typedef  uint8_t TYPIFY(CONFIG_SCAN_FILTER);
 typedef  uint8_t TYPIFY(CONFIG_FLOOR);
 typedef  uint8_t TYPIFY(CONFIG_MESH_CHANNEL);

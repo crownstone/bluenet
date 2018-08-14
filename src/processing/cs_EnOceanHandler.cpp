@@ -4,14 +4,14 @@
  * Date: Dec 8, 2016
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
+#include <drivers/cs_RTC.h>
+#include <drivers/cs_Serial.h>
+#include <drivers/cs_Timer.h>
+#include <events/cs_EventDispatcher.h>
 #include <processing/cs_EnOceanHandler.h>
-#include "drivers/cs_Serial.h"
-#include "util/cs_BleError.h"
-#include "events/cs_EventDispatcher.h"
-#include "drivers/cs_Timer.h"
-#include "processing/cs_Switch.h"
-#include "storage/cs_State.h"
-#include "drivers/cs_RTC.h"
+#include <processing/cs_Switch.h>
+#include <storage/cs_State.h>
+#include <util/cs_BleError.h>
 
 #define TOGGLES 4
 #define DEBOUNCE_TIMEOUT 5000 // 5 seconds
@@ -266,7 +266,7 @@ void EnOceanHandler::save() {
 	BLEutil::printArray(_learnedSwitches, sizeof(_learnedSwitches));
 #endif
 
-	State::getInstance().set(STATE_LEARNED_SWITCHES, _learnedSwitches, MAX_SWITCHES * sizeof(learned_enocean_t));
+	State::getInstance().set(STATE_LEARNED_SWITCHES, _learnedSwitches, MAX_SWITCHES * sizeof(learned_enocean_t), true);
 }
 
 bool EnOceanHandler::learnEnOcean(uint8_t * adrs_ptr, data_t* p_data) {

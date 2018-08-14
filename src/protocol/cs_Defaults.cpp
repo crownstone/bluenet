@@ -3,6 +3,7 @@
 void getDefaults(uint8_t configurationType, void* default_value, size_t & default_size) {
     
     default_size = ConfigurationTypeSizes[configurationType];
+    // LOGd("Get default, size=%i", default_size);
 
     switch(configurationType) {
 	case CONFIG_NAME: {
@@ -155,6 +156,69 @@ void getDefaults(uint8_t configurationType, void* default_value, size_t & defaul
 	    break;
 	case CONFIG_UART_ENABLED:
 	    *(TYPIFY(CONFIG_UART_ENABLED)*)default_value = UART_ENABLED;
+	    break;
+	case STATE_RESET_COUNTER:
+	    *(TYPIFY(STATE_RESET_COUNTER)*)default_value = STATE_RESET_COUNTER_DEFAULT;
+	    break;
+	case STATE_SWITCH_STATE:
+	    *(TYPIFY(STATE_SWITCH_STATE)*)default_value = STATE_SWITCH_STATE_DEFAULT;
+	    break;
+	case STATE_ACCUMULATED_ENERGY:
+	    *(TYPIFY(STATE_ACCUMULATED_ENERGY)*)default_value = STATE_ACCUMULATED_ENERGY_DEFAULT;
+	    break;
+	case STATE_POWER_USAGE:
+	    *(TYPIFY(STATE_POWER_USAGE)*)default_value = STATE_POWER_USAGE_DEFAULT;
+	    break;
+	case STATE_TRACKED_DEVICES:
+	    *(TYPIFY(STATE_TRACKED_DEVICES)*)default_value = STATE_TRACKED_DEVICES_DEFAULT;
+	    break;
+	case STATE_SCHEDULE:
+	    *(TYPIFY(STATE_SCHEDULE)*)default_value = STATE_SCHEDULE_DEFAULT;
+	    break;
+	case STATE_OPERATION_MODE:
+	    *(TYPIFY(STATE_OPERATION_MODE)*)default_value = STATE_OPERATION_MODE_DEFAULT;
+	    break;
+	case STATE_TEMPERATURE:
+	    *(TYPIFY(STATE_TEMPERATURE)*)default_value = STATE_TEMPERATURE_DEFAULT;
+	    break;
+	case STATE_TIME:
+	    *(TYPIFY(STATE_TIME)*)default_value = STATE_TIME_DEFAULT;
+	    break;
+	case STATE_FACTORY_RESET:
+	    *(TYPIFY(STATE_FACTORY_RESET)*)default_value = STATE_FACTORY_RESET_DEFAULT;
+	    break;
+	case STATE_LEARNED_SWITCHES:
+	    *(TYPIFY(STATE_LEARNED_SWITCHES)*)default_value = STATE_LEARNED_SWITCHES_DEFAULT;
+	    break;
+	case STATE_ERRORS:
+	    *(TYPIFY(STATE_ERRORS)*)default_value = STATE_ERRORS_DEFAULT;
+	    break;
+	case STATE_ERROR_OVER_CURRENT:
+	    *(TYPIFY(STATE_ERROR_OVER_CURRENT)*)default_value = STATE_ERROR_OVER_CURRENT_DEFAULT;
+	    break;
+	case STATE_ERROR_OVER_CURRENT_PWM:
+	    *(TYPIFY(STATE_ERROR_OVER_CURRENT_PWM)*)default_value = STATE_ERROR_OVER_CURRENT_PWM_DEFAULT;
+	    break;
+	case STATE_ERROR_CHIP_TEMP:
+	    *(TYPIFY(STATE_ERROR_CHIP_TEMP)*)default_value = STATE_ERROR_CHIP_TEMP_DEFAULT;
+	    break;
+	case STATE_ERROR_PWM_TEMP:
+	    *(TYPIFY(STATE_ERROR_PWM_TEMP)*)default_value = STATE_ERROR_PWM_TEMP_DEFAULT;
+	    break;
+	case STATE_IGNORE_BITMASK:
+	    *(TYPIFY(STATE_IGNORE_BITMASK)*)default_value = STATE_IGNORE_BITMASK_DEFAULT;
+	    break;
+	case STATE_IGNORE_ALL:
+	    *(TYPIFY(STATE_IGNORE_ALL)*)default_value = STATE_IGNORE_ALL_DEFAULT;
+	    break;
+	case STATE_IGNORE_LOCATION:
+	    *(TYPIFY(STATE_IGNORE_LOCATION)*)default_value = STATE_IGNORE_LOCATION_DEFAULT;
+	    break;
+	case STATE_ERROR_DIMMER_ON_FAILURE:
+	    *(TYPIFY(STATE_ERROR_DIMMER_ON_FAILURE)*)default_value = STATE_ERROR_DIMMER_ON_FAILURE_DEFAULT;
+	    break;
+	case STATE_ERROR_DIMMER_OFF_FAILURE:
+	    *(TYPIFY(STATE_ERROR_DIMMER_OFF_FAILURE)*)default_value = STATE_ERROR_DIMMER_OFF_FAILURE_DEFAULT;
 	    break;
 	default:
 	    LOGw("Unknown default for %i", configurationType);

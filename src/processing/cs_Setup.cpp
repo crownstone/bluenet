@@ -61,7 +61,7 @@ ERR_CODE Setup::handleCommand(uint8_t* data, uint16_t size) {
 
 	// Set operation mode to normal mode
 	uint8_t mode = OPERATION_MODE_NORMAL;
-	State::getInstance().set(STATE_OPERATION_MODE, &mode);
+	State::getInstance().set(STATE_OPERATION_MODE, &mode, sizeof(mode), true);
 
 	// Switch relay on
 	EventDispatcher::getInstance().dispatch(EVT_POWER_ON);

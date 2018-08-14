@@ -24,7 +24,7 @@
  */
 #define GPREGRET_DFU_RESET                       66
 #define GPREGRET_BROWNOUT_RESET                  96
-#define GPREGRET_SOFT_RESET                      0
+#define GPREGRET_SOFT_RESET                      1
 
 /** Priorities of the different peripherals
  */
@@ -50,14 +50,15 @@
                                                                 SYS_EVT_MSG_BUF_SIZE),             \
                                                             sizeof(uint32_t))) * sizeof(uint32_t))
 */
-#define SCHED_MAX_EVENT_DATA_SIZE               (MAX(20, MAX(APP_TIMER_SCHED_EVT_SIZE, BLE_STACK_HANDLER_SCHED_EVT_SIZE)))
+#define SCHED_MAX_EVENT_DATA_SIZE               20
+//(MAX(20, APP_TIMER_SCHED_EVT_SIZE))
 
 /** Maximum number of events in the scheduler queue.
  *
  *  The scheduler will require a buffer of size:
  *  (SCHED_MAX_EVENT_DATA_SIZE + APP_SCHED_EVENT_HEADER_SIZE) * (SCHED_QUEUE_SIZE + 1)
  */
-#define SCHED_QUEUE_SIZE                         30
+#define SCHED_QUEUE_SIZE                         40
 
 // See https://devzone.nordicsemi.com/question/84767/s132-scan-intervalwindow-adv-interval/
 // Old https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/

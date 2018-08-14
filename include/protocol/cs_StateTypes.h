@@ -38,6 +38,32 @@ enum StateTypes {
 	STATE_TYPES
 }; // Current max is 255 (0xFF), see cs_EventTypes.h
 
+#ifndef TYPIFY
+#define TYPIFY(NAME) NAME ## _TYPE 
+#endif
+
+typedef  uint8_t TYPIFY(STATE_RESET_COUNTER);
+typedef  uint8_t TYPIFY(STATE_SWITCH_STATE);
+typedef  uint8_t TYPIFY(STATE_ACCUMULATED_ENERGY);
+typedef  uint8_t TYPIFY(STATE_POWER_USAGE);
+typedef  uint8_t TYPIFY(STATE_TRACKED_DEVICES);
+typedef  uint8_t TYPIFY(STATE_SCHEDULE);
+typedef  uint8_t TYPIFY(STATE_OPERATION_MODE);
+typedef  uint8_t TYPIFY(STATE_TEMPERATURE);
+typedef  uint8_t TYPIFY(STATE_TIME);
+typedef  uint8_t TYPIFY(STATE_FACTORY_RESET);
+typedef  uint8_t TYPIFY(STATE_LEARNED_SWITCHES);
+typedef  uint8_t TYPIFY(STATE_ERRORS);
+typedef  uint8_t TYPIFY(STATE_ERROR_OVER_CURRENT);
+typedef  uint8_t TYPIFY(STATE_ERROR_OVER_CURRENT_PWM);
+typedef  uint8_t TYPIFY(STATE_ERROR_CHIP_TEMP);
+typedef  uint8_t TYPIFY(STATE_ERROR_PWM_TEMP);
+typedef  uint8_t TYPIFY(STATE_IGNORE_BITMASK);
+typedef  uint8_t TYPIFY(STATE_IGNORE_ALL);
+typedef  uint8_t TYPIFY(STATE_IGNORE_LOCATION);
+typedef  uint8_t TYPIFY(STATE_ERROR_DIMMER_ON_FAILURE);
+typedef  uint8_t TYPIFY(STATE_ERROR_DIMMER_OFF_FAILURE);
+
 /**
  * Custom structs
  */

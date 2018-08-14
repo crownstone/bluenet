@@ -18,7 +18,7 @@ typedef uint16_t st_key_t;
 
 typedef struct { 
 	st_key_t key;
-	uint8_t *value;
+	uint8_t *value __attribute__((aligned(4)));
 	uint16_t size;
 	bool persistent;
 } st_file_data_t;
@@ -75,11 +75,11 @@ public:
 
 	ret_code_t remove(st_file_id_t file_id, st_key_t key);
 	
-	ret_code_t exists(st_file_id_t file_id);
+	bool exists(st_file_id_t file_id);
 
-	ret_code_t exists(st_file_id_t file_id, st_key_t key);
+	bool exists(st_file_id_t file_id, st_key_t key);
 
-	ret_code_t exists(st_file_id_t file_id, st_key_t key, fds_record_desc_t record_fd);
+	bool exists(st_file_id_t file_id, st_key_t key, fds_record_desc_t record_fd);
 
 	// Handle Crownstone events
 	void handleEvent(uint16_t evt, void* p_data, uint16_t size) {

@@ -54,7 +54,7 @@ void FactoryReset::timeout() {
 		Stack::getInstance().changeToNormalTxPowerMode();
 	}
 	resetState = FACTORY_RESET_STATE_NORMAL;
-	State::getInstance().set(STATE_FACTORY_RESET, &resetState);
+	State::getInstance().set(STATE_FACTORY_RESET, &resetState, sizeof(resetState), true);
 }
 
 /**
@@ -66,7 +66,7 @@ void FactoryReset::process() {
 	State::getInstance().get(STATE_FACTORY_RESET, &resetState);
 	if (resetState == FACTORY_RESET_STATE_NORMAL) {
 		resetState = FACTORY_RESET_STATE_LOWTX;
-		State::getInstance().set(STATE_FACTORY_RESET, &resetState);
+		State::getInstance().set(STATE_FACTORY_RESET, &resetState, sizeof(resetState), true);
 		LOGd("recovery: go to low tx");
 		Stack::getInstance().changeToLowTxPowerMode();
 		Stack::getInstance().disconnect();
@@ -102,7 +102,7 @@ bool FactoryReset::recover(uint32_t resetCode) {
 //		break;
 	case FACTORY_RESET_STATE_LOWTX:
 		resetState = FACTORY_RESET_STATE_NORMAL;
-		State::getInstance().set(STATE_FACTORY_RESET, &resetState);
+		State::getInstance().set(STATE_FACTORY_RESET, &resetState, sizeof(resetState), true);
 		LOGd("recovery: factory reset");
 
 		// the reset delayed in here should be sufficient
@@ -133,7 +133,7 @@ bool FactoryReset::performFactoryReset() {
 
 	//! Go into factory reset mode after next reset.
 	uint8_t mode = OPERATION_MODE_FACTORY_RESET;
-	State::getInstance().set(STATE_OPERATION_MODE, &mode);
+	State::getInstance().set(STATE_OPERATION_MODE, &mode, sizeof(mode), true);
 
 	LOGi("Going into factory reset mode, rebooting device in 2s ...");
 	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
@@ -151,7 +151,7 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 	State::getInstance().factoryReset(FACTORY_RESET_CODE);
 
 	// Lastly, go into setup mode after next reset
-	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_SETUP);
+	State::getInstance().set(STATE_OPERATION_MODE, (uint8_t)OPERATION_MODE_SETUP, sizeof(uint8_t), true);
 
 	LOGi("Factory reset done, rebooting device in 2s ...");
 	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
