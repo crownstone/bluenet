@@ -242,4 +242,4 @@
 #define STATE_ERROR_DIMMER_OFF_FAILURE_DEFAULT 0
 #endif
 
-void getDefaults(uint8_t configurationType, void* default_type, size_t & default_size);
+void getDefaults(CS_TYPE configurationType, void* default_type, size16_t & default_size);

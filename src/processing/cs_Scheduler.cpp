@@ -58,7 +58,8 @@ void Scheduler::setTime(uint32_t time) {
 		writeScheduleList(true);
 	}
 	printDebug();
-	EventDispatcher::getInstance().dispatch(EVT_TIME_SET);
+	event_t event(CS_TYPE::EVT_TIME_SET);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 ERR_CODE Scheduler::setScheduleEntry(uint8_t id, schedule_entry_t* entry) {
@@ -99,7 +100,7 @@ void Scheduler::tick() {
 		_posixTimeStamp++;
 		_rtcTimeStamp += RTC::msToTicks(1000);
 
-		State::getInstance().set(STATE_TIME, &_posixTimeStamp, sizeof(_posixTimeStamp), true);
+		State::getInstance().set(CS_TYPE::STATE_TIME, &_posixTimeStamp, sizeof(_posixTimeStamp), PersistenceMode::RAM);
 	}
 
 	schedule_entry_t* entry = _scheduleList->isActionTime(_posixTimeStamp);
@@ -109,7 +110,7 @@ void Scheduler::tick() {
 				//! TODO: use an event instead
 				uint8_t switchState = entry->pwm.pwm;
 				Switch::getInstance().setSwitch(switchState);
-				State::getInstance().set(STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), true);
+				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::RAM);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_FADE: {
@@ -118,12 +119,12 @@ void Scheduler::tick() {
 				//TODO: if (entry->fade.fadeDuration == 0), then just use SCHEDULE_ACTION_TYPE_PWM
 				uint8_t switchState = entry->fade.pwmEnd;
 				Switch::getInstance().setSwitch(switchState);
-				State::getInstance().set(STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), true);
+				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::RAM);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_TOGGLE: {
 				Switch::getInstance().toggle();
-				State::getInstance().set(STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), true);
+				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::RAM);
 				break;
 			}
 		}
@@ -138,7 +139,7 @@ void Scheduler::writeScheduleList(bool store) {
 	buffer_ptr_t buffer;
 	uint16_t size;
 	_scheduleList->getBuffer(buffer, size);
-	State::getInstance().set(STATE_SCHEDULE, buffer, size, true);
+	State::getInstance().set(CS_TYPE::STATE_SCHEDULE, buffer, size, PersistenceMode::FLASH);
 }
 
 void Scheduler::readScheduleList() {
@@ -147,7 +148,7 @@ void Scheduler::readScheduleList() {
 	_scheduleList->getBuffer(buffer, length);
 	length = _scheduleList->getMaxLength();
 
-	State::getInstance().get(STATE_SCHEDULE, buffer, length);
+	State::getInstance().get(CS_TYPE::STATE_SCHEDULE, buffer, length, PersistenceMode::FLASH);
 	bool adjusted = _scheduleList->checkAllEntries();
 	if (adjusted) {
 		writeScheduleList(true);
@@ -164,26 +165,28 @@ void Scheduler::publishScheduleEntries() {
 	buffer_ptr_t buffer;
 	uint16_t size;
 	_scheduleList->getBuffer(buffer, size);
-	EventDispatcher::getInstance().dispatch(EVT_SCHEDULE_ENTRIES_UPDATED, buffer, size);
+	event_t event(CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED, buffer, size);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
-void Scheduler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch (evt) {
-	case STATE_TIME: {
-		// Time was set via State.set().
-		// This may have been set by us! So only use it when no time is set yet?
-		if (_posixTimeStamp == 0 && length == sizeof(uint32_t)) {
-			setTime(*((uint32_t*)p_data));
+void Scheduler::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::STATE_TIME: {
+			// Time was set via State.set().
+			// This may have been set by us! So only use it when no time is set yet?
+			if (_posixTimeStamp == 0 && event.size == sizeof(TYPIFY(STATE_TIME))) {
+				setTime(*((TYPIFY(STATE_TIME)*)event.data));
+			}
+			break;
 		}
-		break;
-	}
-	case EVT_MESH_TIME: {
-		// Only set the time if there is currently no time set, as these timestamps may be old
-		if (_posixTimeStamp == 0 && length == sizeof(uint32_t)) {
-			setTime(*((uint32_t*)p_data));
+		case CS_TYPE::EVT_MESH_TIME: {
+			// Only set the time if there is currently no time set, as these timestamps may be old
+			if (_posixTimeStamp == 0 && event.size == sizeof(TYPIFY(EVT_MESH_TIME))) {
+				setTime(*((TYPIFY(EVT_MESH_TIME)*)event.data));
+			}
+			break;
 		}
-		break;
-	}
+		default: {}
 	}
 }
 

@@ -551,7 +551,7 @@ void Mesh::resolveConflict(mesh_handle_t handle, encrypted_mesh_message_t* p_old
 
 		//! Set the timestamp to the current time
 		uint32_t timestamp;
-		if (State::getInstance().get(STATE_TIME, timestamp) != ERR_SUCCESS) {
+		if (State::getInstance().get(CS_TYPE::STATE_TIME, timestamp) != ERR_SUCCESS) {
 			timestamp = 0;
 		}
 		stateMessageOld->timestamp = timestamp;
@@ -759,9 +759,9 @@ void Mesh::checkForMessages() {
 	}
 }
 
-void Mesh::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+void Mesh::handleEvent(event_t & event) {
 	switch (evt) {
-	case EVT_STORAGE_WRITE_DONE:
+	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 		if (Settings::getInstance().isSet(CONFIG_MESH_ENABLED)) {
 			Mesh::getInstance().resume();
 		}

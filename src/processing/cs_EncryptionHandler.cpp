@@ -16,7 +16,7 @@
 void EncryptionHandler::init() {
 	_defaultValidationKey.b = DEFAULT_SESSION_KEY;
 	EventDispatcher::getInstance().addListener(this);
-	State::getInstance().get(STATE_OPERATION_MODE, &_operationMode);
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, PersistenceMode::RAM);
 }
 
 uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength, EncryptionType encryptionType) {
@@ -49,12 +49,13 @@ uint16_t EncryptionHandler::calculateDecryptionBufferLength(uint16_t encryptedPa
 	return encryptedPacketLength - overhead;
 }
 
-void EncryptionHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch (evt) {
-	case EVT_BLE_CONNECT:
-		if (State::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED))
+void EncryptionHandler::handleEvent(event_t & event) {
+	switch (event.type) {
+	case CS_TYPE::EVT_BLE_CONNECT:
+		if (State::getInstance().isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED))
 			_generateSessionNonce();
 		break;
+	default: {}
 	}
 }
 
@@ -125,7 +126,7 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 
 bool EncryptionHandler::encryptMesh(mesh_nonce_t nonce, uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength) {
 
-	State::getInstance().get(CONFIG_KEY_ADMIN, _block.key);
+	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, PersistenceMode::RAM);
 
 	// first MESH_OVERHEAD bytes of the target are overhead, which is a random number + nonce (message number)
 	uint16_t targetNetLength = targetLength - MESH_OVERHEAD;
@@ -165,7 +166,7 @@ bool EncryptionHandler::decryptMesh(uint8_t* encryptedDataPacket, uint16_t encry
 		return false;
 	}
 
-	State::getInstance().get(CONFIG_KEY_ADMIN, _block.key);
+	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, PersistenceMode::RAM);
 
 	// the actual encrypted part is after the overhead
 	uint16_t sourceNetLength = encryptedDataPacketLength - MESH_OVERHEAD;
@@ -477,16 +478,16 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 		return false;
 	}
 
-	ConfigurationTypes keyConfigType;
+	CS_TYPE keyConfigType;
 	switch (userLevel) {
 	case ADMIN:
-		keyConfigType = CONFIG_KEY_ADMIN;
+		keyConfigType = CS_TYPE::CONFIG_KEY_ADMIN;
 		break;
 	case MEMBER:
-		keyConfigType = CONFIG_KEY_MEMBER;
+		keyConfigType = CS_TYPE::CONFIG_KEY_MEMBER;
 		break;
 	case GUEST:
-		keyConfigType = CONFIG_KEY_GUEST;
+		keyConfigType = CS_TYPE::CONFIG_KEY_GUEST;
 		break;
 	case SETUP: {
 		if (_operationMode == OPERATION_MODE_SETUP && _setupKeyValid) {
@@ -503,7 +504,7 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 	}
 
 	// get the key from the storage
-	State::getInstance().get(keyConfigType, _block.key);
+	State::getInstance().get(keyConfigType, _block.key, PersistenceMode::RAM);
 	return true;
 }
 
@@ -527,7 +528,8 @@ void EncryptionHandler::_generateSessionNonce() {
 #else
 	RNG::fillBuffer(_sessionNonce, SESSION_NONCE_LENGTH);
 #endif
-	EventDispatcher::getInstance().dispatch(EVT_SESSION_NONCE_SET, _sessionNonce, SESSION_NONCE_LENGTH);
+	event_t event(CS_TYPE::EVT_SESSION_NONCE_SET, _sessionNonce, SESSION_NONCE_LENGTH);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 /**
@@ -568,7 +570,7 @@ bool EncryptionHandler::_validateBlockLength(uint16_t length) {
 
 bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided) {
 	// always allow access when encryption is disabled.
-	if (State::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) == false) {
+	if (State::getInstance().isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) == false) {
 		return true;
 	}
 

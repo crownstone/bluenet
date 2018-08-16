@@ -237,19 +237,20 @@ void IndoorLocalizationService::setRSSILevel(int8_t RSSILevel) {
 	}
 }
 
-void IndoorLocalizationService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch(evt) {
-	case EVT_SCANNED_DEVICES: {
-		_scannedDeviceListCharac->setValue((buffer_ptr_t)p_data);
-		_scannedDeviceListCharac->setValueLength(length);
-		_scannedDeviceListCharac->updateValue();
-		break;
-	}
-	case EVT_TRACKED_DEVICES: {
-		_trackedDeviceListCharac->setValue((buffer_ptr_t)p_data);
-		_trackedDeviceListCharac->setValueLength(length);
-		_trackedDeviceListCharac->updateValue();
-		break;
-	}
+void IndoorLocalizationService::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::EVT_SCANNED_DEVICES: {
+			_scannedDeviceListCharac->setValue((buffer_ptr_t)event.data);
+			_scannedDeviceListCharac->setValueLength(event.size);
+			_scannedDeviceListCharac->updateValue();
+			break;
+		}
+		case CS_TYPE::EVT_TRACKED_DEVICES: {
+			_trackedDeviceListCharac->setValue((buffer_ptr_t)event.data);
+			_trackedDeviceListCharac->setValueLength(event.size);
+			_trackedDeviceListCharac->updateValue();
+			break;
+		}
+		default: {}
 	}
 }

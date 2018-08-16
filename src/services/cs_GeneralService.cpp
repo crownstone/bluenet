@@ -20,8 +20,6 @@ GeneralService::GeneralService() : EventListener(),
 
 	setUUID(UUID(GENERAL_UUID));
 	setName(BLE_SERVICE_GENERAL);
-
-//	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) GeneralService::staticTick);
 }
 
 void GeneralService::createCharacteristics() {
@@ -43,14 +41,6 @@ void GeneralService::createCharacteristics() {
 
 	addCharacteristicsDone();
 }
-
-//void GeneralService::tick() {
-//	scheduleNextTick();
-//}
-
-//void GeneralService::scheduleNextTick() {
-//	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(GENERAL_SERVICE_UPDATE_FREQUENCY), this);
-//}
 
 void GeneralService::addTemperatureCharacteristic() {
 	_temperatureCharacteristic = new Characteristic<int32_t>();
@@ -75,20 +65,16 @@ void GeneralService::addResetCharacteristic() {
 	});
 }
 
-void GeneralService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch (evt) {
-	case STATE_TEMPERATURE: {
-		if (_temperatureCharacteristic) {
-			int32_t temperature = *(int32_t*)p_data;
-//			LOGd("udpate temperature characteristic: %d", temperature);
-			*_temperatureCharacteristic = temperature;
+void GeneralService::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::STATE_TEMPERATURE: {
+			if (_temperatureCharacteristic) {
+				TYPIFY(STATE_TEMPERATURE) temperature = *(TYPIFY(STATE_TEMPERATURE)*)event.data;
+				*_temperatureCharacteristic = temperature;
+			}
+			break;
 		}
-#ifdef MICRO_VIEW
-		//! Update temperature at the display
-		write("1 %i\r\n", temp);
-#endif
-		break;
-	}
+		default: {}
 	}
 }
 

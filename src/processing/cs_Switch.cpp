@@ -44,7 +44,7 @@ Switch::Switch():
 void Switch::init(const boards_config_t& board) {
 	PWM& pwm = PWM::getInstance();
 	uint32_t pwmPeriod;
-	State::getInstance().get(CONFIG_PWM_PERIOD, &pwmPeriod);
+	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, PersistenceMode::FLASH);
 	LOGd("pwm pin %d", board.pinGpioPwm);
 
 	pwm_config_t pwmConfig;
@@ -61,7 +61,7 @@ void Switch::init(const boards_config_t& board) {
 		_pinRelayOff = board.pinGpioRelayOff;
 		_pinRelayOn = board.pinGpioRelayOn;
 
-		State::getInstance().get(CONFIG_RELAY_HIGH_DURATION, &_relayHighDuration);
+		State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, &_relayHighDuration, PersistenceMode::FLASH);
 
 		nrf_gpio_cfg_output(_pinRelayOff);
 		nrf_gpio_pin_clear(_pinRelayOff);
@@ -70,7 +70,8 @@ void Switch::init(const boards_config_t& board) {
 	}
 
 	// Retrieve last switch state from persistent storage
-	State::getInstance().get(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t));
+	size16_t size = sizeof(switch_state_t);
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::FLASH);
 	LOGd("Stored switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
 
 	EventDispatcher::getInstance().addListener(this);
@@ -88,7 +89,7 @@ void Switch::start() {
 	PWM::getInstance().start(true);
 
 	// If switchcraft is enabled, assume a boot is due to a brownout caused by a too slow wall switch, so the pwm is already powered.
-	bool switchcraftEnabled = State::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED);
+	bool switchcraftEnabled = State::getInstance().isSet(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 	if (switchcraftEnabled) {
 		_pwmPowered = true;
 	}
@@ -102,8 +103,8 @@ void Switch::start() {
 		}
 		else {
 //			// This shouldn't happen, but let's check it to be sure.
-//			LOGd("pwm allowed: %u", State::getInstance().isSet(CONFIG_PWM_ALLOWED));
-//			if (!State::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+//			LOGd("pwm allowed: %u", State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
+//			if (!State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED)) {
 //				_switchValue.pwm_state = 0;
 //			}
 			// Always set pwm state to 0, just use relay.
@@ -140,7 +141,8 @@ void Switch::startPwm() {
 		_relayOff();
 		storeState(oldVal);
 	}
-	EventDispatcher::getInstance().dispatch(EVT_PWM_POWERED);
+	event_t event(CS_TYPE::EVT_PWM_POWERED);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 //void Switch::onZeroCrossing() {
@@ -149,11 +151,12 @@ void Switch::startPwm() {
 
 void Switch::storeState(switch_state_t oldVal) {
 	bool persistent = false;
-//	if (oldVal.pwm_state != _switchValue.pwm_state || oldVal.relay_state != _switchValue.relay_state) {
 	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
 		LOGd("storeState: %u", _switchValue);
 		persistent = (oldVal.relay_state != _switchValue.relay_state);
-		State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t), persistent);
+		PersistenceMode pmode = persistent ? PersistenceMode::FLASH : PersistenceMode::RAM;
+		size16_t size = sizeof(switch_state_t);
+		State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, pmode);
 	}
 
 	// If not written to persistent storage immediately, do it after a delay.
@@ -174,16 +177,11 @@ void Switch::delayedStoreStateExecute() {
 	if (!_delayedStoreStatePending) {
 		return;
 	}
-	// Can't check if it's different from the old value, as the state is already updated, but maybe not to persistent storage.
-//	switch_state_t oldVal;
-//	State::getInstance().get(STATE_SWITCH_STATE, &oldVal, sizeof(switch_state_t));
-//	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
-//		State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t), true);
-//	}
 
 	// Just write to persistent storage
 	LOGd("write to storage: %u", _switchValue);
-	State::getInstance().set(STATE_SWITCH_STATE, &_switchValue, sizeof(switch_state_t), true);
+	size16_t size = sizeof(switch_state_t);
+	State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::FLASH);
 }
 
 
@@ -239,12 +237,12 @@ void Switch::setPwm(uint8_t value) {
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGd("set PWM %d", value);
 #endif
-	if (State::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
-//	LOGd("pwm allowed: %u", State::getInstance().isSet(CONFIG_PWM_ALLOWED));
-//	if (!State::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+//	LOGd("pwm allowed: %u", State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
+//	if (!State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED)) {
 //		LOGd("pwm not allowed");
 //		return;
 //	}
@@ -265,7 +263,7 @@ uint8_t Switch::getPwm() {
 
 
 void Switch::relayOn() {
-	if (State::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
@@ -276,7 +274,7 @@ void Switch::relayOn() {
 
 
 void Switch::relayOff() {
-	if (State::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
@@ -296,7 +294,7 @@ void Switch::setSwitch(uint8_t switchState) {
 	LOGi("Set switch state: %d", switchState);
 #endif
 	switch_state_t oldVal = _switchValue;
-	if (State::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
@@ -434,10 +432,9 @@ bool Switch::_setPwm(uint8_t value) {
 		return false;
 	}
 
-	uint8_t config_pwm = 0;
-	State::getInstance().isSet(config_pwm);
-	LOGd("Dimming allowed: %u", config_pwm);
-	if (value != 0 && !config_pwm) {
+	bool pwm_allowed = State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED);
+	LOGd("Dimming allowed: %u", pwm_allowed);
+	if (value != 0 && !pwm_allowed) {
 		LOGd("Dimming not allowed");
 		_switchValue.pwm_state = 0;
 		return false;
@@ -499,7 +496,8 @@ void Switch::forcePwmOff() {
 	switch_state_t oldVal = _switchValue;
 	_setPwm(0);
 	storeState(oldVal);
-	EventDispatcher::getInstance().dispatch(EVT_PWM_FORCED_OFF);
+	event_t event(CS_TYPE::EVT_PWM_FORCED_OFF);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 void Switch::forceRelayOn() {
@@ -507,7 +505,8 @@ void Switch::forceRelayOn() {
 	switch_state_t oldVal = _switchValue;
 	_relayOn();
 	storeState(oldVal);
-	EventDispatcher::getInstance().dispatch(EVT_RELAY_FORCED_ON);
+	event_t event(CS_TYPE::EVT_RELAY_FORCED_ON);
+	EventDispatcher::getInstance().dispatch(event);
 	// Try again later, in case the first one didn't work..
 	delayedSwitch(SWITCH_ON, 5);
 }
@@ -518,14 +517,15 @@ void Switch::forceSwitchOff() {
 	_setPwm(0);
 	_relayOff();
 	storeState(oldVal);
-	EventDispatcher::getInstance().dispatch(EVT_SWITCH_FORCED_OFF);
+	event_t event(CS_TYPE::EVT_SWITCH_FORCED_OFF);
+	EventDispatcher::getInstance().dispatch(event);
 	// Try again later, in case the first one didn't work..
 	delayedSwitch(0, 5);
 }
 
 bool Switch::allowPwmOn() {
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
 	LOGd("errors=%d", stateErrors.asInt);
 
 	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
@@ -534,7 +534,7 @@ bool Switch::allowPwmOn() {
 
 bool Switch::allowRelayOff() {
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
 	return !(stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
@@ -542,7 +542,7 @@ bool Switch::allowRelayOff() {
 
 bool Switch::allowRelayOn() {
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
 	LOGd("errors=%d", stateErrors.asInt);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
@@ -554,38 +554,39 @@ bool Switch::allowRelayOn() {
 	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent);
 }
 
-void Switch::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch (evt) {
-	case EVT_POWER_ON:
-	case EVT_TRACKED_DEVICE_IS_NEARBY: {
-		turnOn();
-		break;
-	}
-	case EVT_POWER_OFF:
-	case EVT_TRACKED_DEVICE_NOT_NEARBY: {
-		turnOff();
-		break;
-	}
-	case EVT_POWER_TOGGLE: {
-		toggle();
-		break;
-	}
-	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM:
-	case EVT_PWM_TEMP_ABOVE_THRESHOLD:
-	case EVT_DIMMER_ON_FAILURE_DETECTED:
-		// First set relay on, so that the switch doesn't first turn off, and later on again.
-		// The relay protects the dimmer, because the current will flow through the relay.
-		forceRelayOn();
-		forcePwmOff();
-		break;
-	case EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
-	case EVT_CHIP_TEMP_ABOVE_THRESHOLD:
-		forceSwitchOff();
-		break;
-	case EVT_PWM_ALLOWED:
-		if (*(bool*)p_data == false) {
-			pwmNotAllowed();
+void Switch::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::EVT_POWER_ON:
+		case CS_TYPE::EVT_TRACKED_DEVICE_IS_NEARBY: {
+			turnOn();
+			break;
 		}
-		break;
+		case CS_TYPE::EVT_POWER_OFF:
+		case CS_TYPE::EVT_TRACKED_DEVICE_NOT_NEARBY: {
+			turnOff();
+			break;
+		}
+		case CS_TYPE::EVT_POWER_TOGGLE: {
+			toggle();
+			break;
+		}
+		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM:
+		case CS_TYPE::EVT_PWM_TEMP_ABOVE_THRESHOLD:
+		case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
+			// First set relay on, so that the switch doesn't first turn off, and later on again.
+			// The relay protects the dimmer, because the current will flow through the relay.
+			forceRelayOn();
+			forcePwmOff();
+			break;
+		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
+		case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
+			forceSwitchOff();
+			break;
+		case CS_TYPE::EVT_PWM_ALLOWED:
+			if (*(TYPIFY(EVT_PWM_ALLOWED)*)event.data == false) {
+				pwmNotAllowed();
+			}
+			break;
+		default: {}
 	}
 }

@@ -55,7 +55,7 @@ void ServiceData::init() {
 	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
 
 	// get the operation mode from state
-	State::getInstance().get(STATE_OPERATION_MODE, &_operationMode);
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, PersistenceMode::FLASH);
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -71,7 +71,7 @@ void ServiceData::init() {
 	memset(&(_lastSeenIds[0][0]), 0, MESH_STATE_HANDLE_COUNT * LAST_SEEN_COUNT_PER_STATE_CHAN * sizeof(last_seen_id_t));
 
 	// Only send the state over the mesh in normal mode
-	if (State::getInstance().isSet(CONFIG_MESH_ENABLED) && _operationMode == OPERATION_MODE_NORMAL) {
+	if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED) && _operationMode == OPERATION_MODE_NORMAL) {
 		// Start the mesh state timer with a small random delay
 		// Make sure delay is not 0, as that's an invalid delay.
 
@@ -103,9 +103,9 @@ void ServiceData::init() {
 #endif
 
 	// Init flags
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CONFIG_PWM_ALLOWED));
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CONFIG_SWITCH_LOCKED));
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, State::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, State::getInstance().isSet(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED));
 
 	// set the initial advertisement.
 	updateAdvertisement(true);
@@ -172,14 +172,14 @@ void ServiceData::updateAdvertisement(bool initial) {
 		bool serviceDataSet = false;
 
 		state_errors_t stateErrors;
-		State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
+		State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
 
 		uint32_t timestamp;
-		State::getInstance().get(STATE_TIME, &timestamp);
+		State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, PersistenceMode::RAM);
 
 //		// Update flag
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CONFIG_PWM_ALLOWED));
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CONFIG_SWITCH_LOCKED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED));
 
 		// Set error timestamp
 		if (stateErrors.asInt == 0) {
@@ -248,7 +248,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 //		Mesh::getInstance().printRssiList();
 
 		// encrypt the array using the guest key ECB if encryption is enabled.
-		if (State::getInstance().isSet(CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
+		if (State::getInstance().isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
 			EncryptionHandler::getInstance().encrypt(
 					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
 					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
@@ -258,7 +258,8 @@ void ServiceData::updateAdvertisement(bool initial) {
 		}
 
 		if (!initial) {
-			EventDispatcher::getInstance().dispatch(EVT_ADVERTISEMENT_UPDATED);
+			event_t event(CS_TYPE::EVT_ADVERTISEMENT_UPDATED);
+			EventDispatcher::getInstance().dispatch(event);
 		}
 	}
 
@@ -274,7 +275,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& serviceData) {
 #if BUILD_MESHING == 1 && defined(ADVERTISE_EXTERNAL_DATA)
 
-	if (_operationMode != OPERATION_MODE_NORMAL || State::getInstance().isSet(CONFIG_MESH_ENABLED) == false) {
+	if (_operationMode != OPERATION_MODE_NORMAL || State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED) == false) {
 		return false;
 	}
 
@@ -664,11 +665,11 @@ void ServiceData::_sendMeshState() {
 
 #if BUILD_MESHING == 1
 void ServiceData::sendMeshState(bool event, uint16_t eventType) {
-	if (State::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+	if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
 
 //		// Update flag
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CONFIG_PWM_ALLOWED));
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CONFIG_SWITCH_LOCKED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED));
 
 		uint32_t rtcCount = RTC::getCount();
 
@@ -681,7 +682,7 @@ void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 		}
 
 		uint32_t timestamp;
-		State::getInstance().get(STATE_TIME, timestamp);
+		State::getInstance().get(CS_TYPE::STATE_TIME, timestamp);
 
 		state_item_t stateItem = {};
 		if (event) {
@@ -728,108 +729,104 @@ void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 }
 #endif
 
-void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+void ServiceData::handleEvent(event_t & event) {
 	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
-	switch(evt) {
-	case EVT_BLE_CONNECT: {
-		_connected = true;
-		break;
-	}
-	case EVT_BLE_DISCONNECT: {
-		_connected = false;
-		updateAdvertisement(false);
-		break;
-	}
-	case EVT_PWM_FORCED_OFF:
-	case EVT_SWITCH_FORCED_OFF:
-	case EVT_RELAY_FORCED_ON:
-//	case EVT_CHIP_TEMP_ABOVE_THRESHOLD:
-//	case EVT_PWM_TEMP_ABOVE_THRESHOLD:
-		updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, true);
-		break;
-	case STATE_ERRORS: {
-		if (length != sizeof(state_errors_t)) {
+	switch(event.type) {
+		case CS_TYPE::EVT_BLE_CONNECT: {
+			_connected = true;
 			break;
 		}
-		state_errors_t* stateErrors = (state_errors_t*)p_data;
-		updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors->asInt);
-		break;
-	}
-	default: {
-		// continue with the rest of the method.
-	}
+		case CS_TYPE::EVT_BLE_DISCONNECT: {
+			_connected = false;
+			updateAdvertisement(false);
+			break;
+		}
+		case CS_TYPE::EVT_PWM_FORCED_OFF:
+		case CS_TYPE::EVT_SWITCH_FORCED_OFF:
+		case CS_TYPE::EVT_RELAY_FORCED_ON:
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, true);
+			break;
+		case CS_TYPE::STATE_ERRORS: {
+			if (event.size != sizeof(state_errors_t)) {
+				break;
+			}
+			state_errors_t* stateErrors = (state_errors_t*)event.data;
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors->asInt);
+			break;
+		}
+		default: {
+			// continue with the rest of the method.
+		}
 	}
 
 	// In case the operation mode is setup, we have a different advertisement package.
 	if (_operationMode == OPERATION_MODE_SETUP) {
 		return;
 	}
-	switch(evt) {
-	case CONFIG_CROWNSTONE_ID: {
-		updateCrownstoneId(*(uint16_t*)p_data);
-		break;
-	}
-	case STATE_SWITCH_STATE: {
-		updateSwitchState(*(uint8_t*)p_data);
+
+	switch(event.type) {
+		case CS_TYPE::CONFIG_CROWNSTONE_ID: {
+			updateCrownstoneId(*(TYPIFY(CONFIG_CROWNSTONE_ID)*)event.data);
+			break;
+		}
+		case CS_TYPE::STATE_SWITCH_STATE: {
+			updateSwitchState(*(TYPIFY(STATE_SWITCH_STATE)*)event.data);
 #if BUILD_MESHING == 1
-		sendMeshState(true, STATE_SWITCH_STATE);
+			sendMeshState(true, STATE_SWITCH_STATE);
 #endif
-		break;
-	}
-	case STATE_ACCUMULATED_ENERGY: {
-		int32_t energyUsed = (*(int64_t*)p_data) / 1000 / 1000 / 64;
-		updateAccumulatedEnergy(energyUsed);
-		// todo create mesh state event if changes significantly
-		break;
-	}
-	case STATE_POWER_USAGE: {
-		updatePowerUsage(*(int32_t*)p_data);
-		// todo create mesh state event if changes significantly
-		break;
-	}
-	case STATE_TEMPERATURE: {
-		// TODO: isn't the temperature an int32_t ?
-		updateTemperature(*(int8_t*)p_data);
-		break;
-	}
-	case EVT_TIME_SET: {
-		updateFlagsBitmask(SERVICE_DATA_FLAGS_TIME_SET, true);
-		break;
-	}
-	case EVT_PWM_POWERED: {
-		updateFlagsBitmask(SERVICE_DATA_FLAGS_DIMMING_AVAILABLE, true);
-		break;
-	}
-	case EVT_PWM_ALLOWED: {
-		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, *(bool*)p_data);
-		break;
-	}
-	case EVT_SWITCH_LOCKED: {
-		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, *(bool*)p_data);
-		break;
-	}
+			break;
+		}
+		case CS_TYPE::STATE_ACCUMULATED_ENERGY: {
+			LOGw("Explicit cast, int32_t");
+			int32_t energyUsed = (*(TYPIFY(STATE_ACCUMULATED_ENERGY)*)event.data) / 1000 / 1000 / 64;
+			updateAccumulatedEnergy(energyUsed);
+			// todo create mesh state event if changes significantly
+			break;
+		}
+		case CS_TYPE::STATE_POWER_USAGE: {
+			updatePowerUsage(*(TYPIFY(STATE_POWER_USAGE)*)event.data);
+			// todo create mesh state event if changes significantly
+			break;
+		}
+		case CS_TYPE::STATE_TEMPERATURE: {
+			updateTemperature(*(TYPIFY(STATE_TEMPERATURE)*)event.data);
+			break;
+		}
+		case CS_TYPE::EVT_TIME_SET: {
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_TIME_SET, true);
+			break;
+		}
+		case CS_TYPE::EVT_PWM_POWERED: {
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_DIMMING_AVAILABLE, true);
+			break;
+		}
+		case CS_TYPE::EVT_PWM_ALLOWED: {
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, *(bool*)event.data);
+			break;
+		}
+		case CS_TYPE::EVT_SWITCH_LOCKED: {
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, *(bool*)event.data);
+			break;
+		}
 #if BUILD_MESHING == 1
-	case EVT_EXTERNAL_STATE_MSG_CHAN_0: {
-		onMeshStateMsg(_crownstoneId, (state_message_t*)p_data, 0);
-		break;
-	}
-	case EVT_EXTERNAL_STATE_MSG_CHAN_1: {
-		onMeshStateMsg(_crownstoneId, (state_message_t*)p_data, 1);
-		break;
-	}
+		case CS_TYPE::EVT_EXTERNAL_STATE_MSG_CHAN_0: {
+			onMeshStateMsg(_crownstoneId, (state_message_t*)event.data, 0);
+			break;
+		}
+		case CS_TYPE::EVT_EXTERNAL_STATE_MSG_CHAN_1: {
+			onMeshStateMsg(_crownstoneId, (state_message_t*)event.data, 1);
+			break;
+		}
 #endif
-	case EVT_SWITCHCRAFT_ENABLED: {
-		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(bool*)p_data);
-		break;
-	}
-	// TODO: add bitmask events
-	default:
-		return;
+		case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: {
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(bool*)event.data);
+			break;
+		}
+		// TODO: add bitmask events
+		default:
+			return;
 	}
 }
-
-
-
 
 int16_t ServiceData::compressPowerUsageMilliWatt(int32_t powerUsageMW) {
 	// units of 1/8 W

@@ -98,7 +98,7 @@ const nrf_clock_lf_cfg_t Stack::defaultClockSource = {
  */
 extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
 #if BUILD_MESHING == 1
-	if (State::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+	if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
 		rbc_mesh_ble_evt_handler(p_ble_evt);
 	}
 #endif
@@ -692,15 +692,16 @@ void Stack::startScanning() {
 	p_scan_params.active = 0;
 	p_scan_params.timeout = 0x0000;
 
-	State::getInstance().get(CONFIG_SCAN_INTERVAL, &p_scan_params.interval);
-	State::getInstance().get(CONFIG_SCAN_WINDOW, &p_scan_params.window);
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &p_scan_params.interval, PersistenceMode::RAM);
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &p_scan_params.window, PersistenceMode::RAM);
 
 	//! todo: which fields to set here?
 	// TODO: p_adv_report_buffer
 	//BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params));
 	_scanning = true;
 
-	EventDispatcher::getInstance().dispatch(EVT_SCAN_STARTED);
+	event_t event(CS_TYPE::EVT_SCAN_STARTED, NULL, 0);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 
@@ -716,7 +717,8 @@ void Stack::stopScanning() {
 	BLE_CALL(sd_ble_gap_scan_stop, ());
 	_scanning = false;
 
-	EventDispatcher::getInstance().dispatch(EVT_SCAN_STOPPED);
+	event_t event(CS_TYPE::EVT_SCAN_STOPPED, NULL, 0);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 bool Stack::isScanning() {
@@ -759,13 +761,13 @@ void Stack::lowPowerTimeout(void* p_context) {
 
 void Stack::changeToLowTxPowerMode() {
 	int8_t lowTxPower;
-	State::getInstance().get(CONFIG_LOW_TX_POWER, &lowTxPower);
+	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, PersistenceMode::RAM);
 	setTxPowerLevel(lowTxPower);
 }
 
 void Stack::changeToNormalTxPowerMode() {
 	int8_t txPower;
-	State::getInstance().get(CONFIG_TX_POWER, &txPower);
+	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, PersistenceMode::RAM);
 	setTxPowerLevel(txPower);
 }
 
@@ -776,10 +778,12 @@ void Stack::on_ble_evt(ble_evt_t * p_ble_evt) {//, void * p_context) {
 	}
 
 	switch (p_ble_evt->header.evt_id) {
-	case BLE_GAP_EVT_CONNECTED:
+	case BLE_GAP_EVT_CONNECTED: {
 		on_connected(p_ble_evt);
-		EventDispatcher::getInstance().dispatch(EVT_BLE_CONNECT);
+		event_t event(CS_TYPE::EVT_BLE_CONNECT, NULL, 0);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
+	}
 	case BLE_EVT_USER_MEM_REQUEST: {
 
 		buffer_ptr_t buffer = NULL;
@@ -795,10 +799,12 @@ void Stack::on_ble_evt(ble_evt_t * p_ble_evt) {//, void * p_context) {
 	case BLE_EVT_USER_MEM_RELEASE:
 		//! nothing to do
 		break;
-	case BLE_GAP_EVT_DISCONNECTED:
+	case BLE_GAP_EVT_DISCONNECTED: {
 		on_disconnected(p_ble_evt);
-		EventDispatcher::getInstance().dispatch(EVT_BLE_DISCONNECT);
+		event_t event(CS_TYPE::EVT_BLE_DISCONNECT, NULL, 0);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
+	}
 	case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
 	case BLE_GATTS_EVT_TIMEOUT:
 	case BLE_GAP_EVT_RSSI_CHANGED:
@@ -860,9 +866,11 @@ void Stack::on_ble_evt(ble_evt_t * p_ble_evt) {//, void * p_context) {
 		break;
 	}
 
-	case BLE_GAP_EVT_ADV_REPORT:
-		EventDispatcher::getInstance().dispatch(EVT_BLE_EVENT, p_ble_evt, -1);
+	case BLE_GAP_EVT_ADV_REPORT: {
+		event_t event(CS_TYPE::EVT_BLE_EVENT, p_ble_evt, sizeof(p_ble_evt));
+		EventDispatcher::getInstance().dispatch(event);
 		break;
+	}
 	case BLE_GAP_EVT_TIMEOUT:
 		LOGw("Timeout!");
 		// BLE_GAP_TIMEOUT_SRC_ADVERTISING does not exist anymore...

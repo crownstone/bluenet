@@ -124,48 +124,41 @@ void PowerService::addPowerConsumptionCharacteristic() {
 	_powerConsumptionCharacteristic->setNotifies(true);
 }
 
-void PowerService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch(evt) {
-	case EVT_POWER_OFF:
-	case EVT_POWER_ON: {
-		if (_pwmCharacteristic) {
-//			LOGi("pwm update");
-			(*_pwmCharacteristic) = *(uint8_t*)p_data;
+void PowerService::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::EVT_POWER_OFF:
+			if (_pwmCharacteristic) {
+				(*_pwmCharacteristic) = *(TYPIFY(EVT_POWER_OFF)*)event.data;
+			}
+			break;
+		case CS_TYPE::EVT_POWER_ON: {
+			if (_pwmCharacteristic) {
+				(*_pwmCharacteristic) = *(TYPIFY(EVT_POWER_ON)*)event.data;
+			}
+			break;
 		}
-		break;
-	}
-	case STATE_SWITCH_STATE: {
-		if (_pwmCharacteristic) {
-			(*_pwmCharacteristic) = ((switch_state_t*)p_data)->pwm_state;
+		case CS_TYPE::STATE_SWITCH_STATE: {
+			if (_pwmCharacteristic) {
+				(*_pwmCharacteristic) = ((switch_state_t*)event.data)->pwm_state;
+			}
+			if (_relayCharacteristic) {
+				(*_relayCharacteristic) = ((switch_state_t*)event.data)->relay_state;
+			}
+			break;
 		}
-		if (_relayCharacteristic) {
-			(*_relayCharacteristic) = ((switch_state_t*)p_data)->relay_state;
+		case CS_TYPE::EVT_POWER_SAMPLES_END: {
+			if (_powerSamplesCharacteristic) {
+				_powerSamplesCharacteristic->setValueLength(event.size);
+				_powerSamplesCharacteristic->updateValue();
+			}
+			break;
 		}
-		break;
-	}
-	case EVT_POWER_SAMPLES_START: {
-//		if (_powerSamplesCharacteristic) {
-////			LOGd("power samples update");
-//			_powerSamplesCharacteristic->setValueLength(0);
-//			_powerSamplesCharacteristic->updateValue();
-//		}
-		break;
-	}
-	case EVT_POWER_SAMPLES_END: {
-		if (_powerSamplesCharacteristic) {
-//			LOGd("power samples update");
-//			LOGi("set power samples %d", length);
-			_powerSamplesCharacteristic->setValueLength(length);
-			_powerSamplesCharacteristic->updateValue();
+		case CS_TYPE::STATE_POWER_USAGE: {
+			if (_powerConsumptionCharacteristic) {
+				(*_powerConsumptionCharacteristic) = *(TYPIFY(STATE_POWER_USAGE)*)event.data;
+			}
 		}
-		break;
-	}
-	case STATE_POWER_USAGE: {
-		if (_powerConsumptionCharacteristic) {
-//			LOGi("power consumption update");
-			(*_powerConsumptionCharacteristic) = *(int32_t*)p_data;
-		}
-	}
+		default: {}
 	}
 }
 

@@ -290,7 +290,7 @@ private:
 	 * @param[in] p_data          Pointer to the data.
 	 * @param[in] length          Length of the data.
 	 */
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	void handleEvent(event_t & event);
 
 
 

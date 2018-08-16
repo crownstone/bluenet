@@ -478,7 +478,7 @@ bool MeshControl::handleStateCommand(state_mesh_message_t* stateMsg, uint16_t st
 			statusResult = ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		else {
-			statusResult = State::getInstance().get(stateType, stateReply.data.payload, stateReply.data.header.length);
+			statusResult = State::getInstance().get(CS_TYPE::stateType, stateReply.data.payload, stateReply.data.header.length);
 			if (statusResult == ERR_SUCCESS) {
 				sendStateReplyMessage(messageCounter, &stateReply);
 				//! Already send a state reply, no need to send a status reply
@@ -639,8 +639,8 @@ bool MeshControl::handleBeaconConfigCommand(beacon_mesh_message_t* beaconMsg, ui
 
 //! handle event triggered by the EventDispatcher, in case we want to send events
 //! into the mesh, e.g. for power on/off
-void MeshControl::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch(evt) {
+void MeshControl::handleEvent(event_t & event) {
+	switch(event.type) {
 	case CONFIG_CROWNSTONE_ID: {
 		_myCrownstoneId = *(uint16_t*)p_data;
 		break;
@@ -921,7 +921,7 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 
 	// Set the timestamp to the current time
 	uint32_t timestamp;
-	if (State::getInstance().get(STATE_TIME, timestamp) != ERR_SUCCESS) {
+	if (State::getInstance().get(CS_TYPE::STATE_TIME, timestamp) != ERR_SUCCESS) {
 		timestamp = 0;
 	}
 	message.timestamp = timestamp;

@@ -29,7 +29,7 @@ public:
 	 */
 	void createCharacteristics();
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	void handleEvent(event_t & event);
 
 protected:
 

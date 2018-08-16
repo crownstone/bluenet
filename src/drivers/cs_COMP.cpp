@@ -141,7 +141,7 @@ void compEventCallback(void * p_event_data, uint16_t event_size) {
 	cbData->callback(cbData->event);
 }
 
-void COMP::handleEvent(nrf_comp_event_t event) {
+void COMP::handleEvent(nrf_comp_event_t & event) {
 	switch (event) {
 	case NRF_COMP_EVENT_READY:
 		break;
@@ -174,6 +174,6 @@ void COMP::handleEvent(nrf_comp_event_t event) {
 	}
 }
 
-extern "C" void comp_callback(nrf_comp_event_t event) {
-	COMP::getInstance().handleEvent(event);
+extern "C" void comp_callback(nrf_comp_event_t nrf_comp_event) {
+	COMP::getInstance().handleEvent(nrf_comp_event);
 }

@@ -104,20 +104,21 @@ void ScheduleService::addListScheduleEntriesCharacteristic() {
 }
 
 
-void ScheduleService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch(evt) {
-	case STATE_TIME: {
-		if (_currentTimeCharacteristic) {
-			*_currentTimeCharacteristic = *(uint32_t*)p_data;
+void ScheduleService::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::STATE_TIME: {
+			if (_currentTimeCharacteristic) {
+				*_currentTimeCharacteristic = *(TYPIFY(STATE_TIME)*)event.data;
+			}
+			break;
 		}
-		break;
-	}
-	case EVT_SCHEDULE_ENTRIES_UPDATED: {
-		if (_listScheduleEntriesCharacteristic) {
-			_listScheduleEntriesCharacteristic->setValue((buffer_ptr_t)p_data);
-			_listScheduleEntriesCharacteristic->setValueLength(length);
-			_listScheduleEntriesCharacteristic->notify();
+		case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED: {
+			if (_listScheduleEntriesCharacteristic) {
+				_listScheduleEntriesCharacteristic->setValue((buffer_ptr_t)event.data);
+				_listScheduleEntriesCharacteristic->setValueLength(event.size);
+				_listScheduleEntriesCharacteristic->notify();
+			}
 		}
-	}
+		default: {}
 	}
 }

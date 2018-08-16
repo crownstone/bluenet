@@ -31,7 +31,7 @@ enum Value : uint8_t {
    DEFAULT_PROPERTY0,
    FLASH,
    RAM,
-   PRECOMPILE_DEFAULT,
+   FIRMWARE_DEFAULT,
    UNKNOWN
 };
 
@@ -56,8 +56,8 @@ class Iterator {
 };
 
 /*
- * Define an operator +, which allows to cast to underlying uint8_t or other type. This is a static cast.
- * Do not use it if not necessary.
+ * Define an operator +, which allows to cast to underlying uint8_t, CS_TYPE, or other type. This is a static
+ * cast. Do not use it if not necessary.
  */
 template <typename T>
 constexpr auto operator+(T e) noexcept 
@@ -108,7 +108,7 @@ constexpr ::std::array<Value, STATE_TYPES> Property0() {
 }
 
 /*
- * We can now have a nice switch statement that is entire compile time, really pretty.
+ * We can now have a nice switch statement that is entirely compile time, really pretty.
  */
 constexpr Value Property1(CS_TYPE const & type) {
    switch(type) {
@@ -122,6 +122,42 @@ constexpr Value Property1(CS_TYPE const & type) {
       default:
 	 return UNKNOWN;
    }
+};
+
+#define STRINGIFY(s) STRINGIFY_HELPER(s)
+#define STRINGIFY_HELPER(s) #s
+
+#ifdef NAME_DEFAULT
+	#define CONFIG_NAME_DEFAULT STRINGIFY(NAME_DEFAULT)
+#else
+	#define CONFIG_NAME_DEFAULT "Donnie"
+#endif
+
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
+/**
+ * I don't know if constexpr makes sense here. 
+ */
+constexpr void Property2(CS_TYPE const & type, void * data, const size_t max_size) {
+   switch(type) {
+      case CS_TYPE::STATE_RESET_COUNTER:
+	 memcpy(data, "reset", MIN(max_size, sizeof("reset")));
+	 break;
+      case CS_TYPE::STATE_SWITCH_STATE:
+      case CS_TYPE::STATE_ACCUMULATED_ENERGY:
+      case CS_TYPE::STATE_POWER_USAGE:
+      case CS_TYPE::STATE_TRACKED_DEVICES:
+      case CS_TYPE::STATE_SCHEDULE:
+	 memcpy(data, CONFIG_NAME_DEFAULT, MIN(max_size, sizeof(CONFIG_NAME_DEFAULT)));
+	 break;
+      default:
+	 memcpy(data, "default", MIN(max_size, sizeof("default")));
+   }
+}
+
+constexpr const CS_TYPE TO_CS_TYPE(uint8_t const & type) {
+   // can we make this safer?
+   return static_cast<CS_TYPE>(type);
 };
 
 constexpr const ::std::array<Value, STATE_TYPES> property0 = Property0();
@@ -164,6 +200,7 @@ int main() {
    static_assert (Property1(CS_TYPE::STATE_RESET_COUNTER) == RAM);
    // the following statement actually works fine, it is indeed defined as UNKNOWN at compile time!
    static_assert (Property1(static_cast<CS_TYPE>(0x90)) == UNKNOWN);
+   static_assert (TO_CS_TYPE(0x80) == CS_TYPE::STATE_RESET_COUNTER);
 
    // Note the cast is only because an uint8_t is shown as a char
    std::cout << "Use instead an enum class and a templated custom iterator" << std::endl;
@@ -176,7 +213,8 @@ int main() {
    std::cout << std::endl;
 
    for (uint8_t i = 0; i < STATE_TYPES + OVERFLOW; i++) {
-      auto ltype = static_cast<CS_TYPE>(i);
+//      auto ltype = static_cast<CS_TYPE>(i);
+      auto ltype = TO_CS_TYPE(i);
       std::cout << Property1(ltype) << ' ';
       if (!((i % 20) - 20 + 1))
 	 std::cout << std::endl;
@@ -193,5 +231,11 @@ int main() {
    uint8_t t;
    std::cout << "Type uint8_t: " << typeid(t).name() << std::endl;
    std::cout << "Type CS_TYPE: " << typeid(CS_TYPE).name() << std::endl;
+   
+   std::cout << std::endl;
 
+   size_t max_size = 10;
+   uint8_t name[max_size];
+   Property2(CS_TYPE::STATE_SWITCH_STATE, name, max_size);
+   std::cout << "Name: " << name << std::endl;
 }

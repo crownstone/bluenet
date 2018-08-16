@@ -39,7 +39,7 @@ Tracker::Tracker() : EventListener(),
 void Tracker::init() {
 	readTrackedDevices();
 
-	State::getInstance().get(CONFIG_NEARBY_TIMEOUT, &_timeoutCounts);
+	State::getInstance().get(CS_TYPE::CONFIG_NEARBY_TIMEOUT, &_timeoutCounts, PersistenceMode::FLASH);
 	_trackedDeviceList->setTimeout(_timeoutCounts);
 
 
@@ -73,10 +73,12 @@ void Tracker::tick() {
 		//! Only send event on change of nearby state
 		if (deviceNearby && !_trackIsNearby) {
 			LOGd("send event: is nearby");
-			EventDispatcher::getInstance().dispatch(EVT_TRACKED_DEVICE_IS_NEARBY);
+			event_t event(CS_TYPE::EVT_TRACKED_DEVICE_IS_NEARBY);
+			EventDispatcher::getInstance().dispatch(event);
 		} else if (!deviceNearby && _trackIsNearby) {
 			LOGd("send event: is not nearby");
-			EventDispatcher::getInstance().dispatch(EVT_TRACKED_DEVICE_NOT_NEARBY);
+			event_t event(CS_TYPE::EVT_TRACKED_DEVICE_NOT_NEARBY);
+			EventDispatcher::getInstance().dispatch(event);
 		}
 		_trackIsNearby = deviceNearby;
 
@@ -93,7 +95,7 @@ void Tracker::writeTrackedDevices() {
 	buffer_ptr_t buffer;
 	uint16_t length;
 	_trackedDeviceList->getBuffer(buffer, length);
-	State::getInstance().set(STATE_TRACKED_DEVICES, buffer, _trackedDeviceList->getMaxLength(), true);
+	State::getInstance().set(CS_TYPE::STATE_TRACKED_DEVICES, buffer, _trackedDeviceList->getMaxLength(), PersistenceMode::FLASH);
 }
 
 void Tracker::readTrackedDevices() {
@@ -101,7 +103,8 @@ void Tracker::readTrackedDevices() {
 	uint16_t length;
 	_trackedDeviceList->getBuffer(buffer, length);
 
-	State::getInstance().get(STATE_TRACKED_DEVICES, buffer, _trackedDeviceList->getMaxLength());
+	size16_t size = _trackedDeviceList->getMaxLength();
+	State::getInstance().get(CS_TYPE::STATE_TRACKED_DEVICES, buffer, size, PersistenceMode::RAM);
 	_trackedDeviceList->resetTimeoutCounters();
 
 	if (!_trackedDeviceList->isEmpty()) {
@@ -110,7 +113,8 @@ void Tracker::readTrackedDevices() {
 		_trackedDeviceList->print();
 #endif
 		// inform listeners (like the indoor localisation service, i.e. trackedDeviceListCharacteristic)
-		EventDispatcher::getInstance().dispatch(EVT_TRACKED_DEVICES, buffer, length);
+		event_t event(CS_TYPE::EVT_TRACKED_DEVICES, buffer, length);
+		EventDispatcher::getInstance().dispatch(event);
 	}
 }
 
@@ -207,7 +211,8 @@ void Tracker::publishTrackedDevices() {
 	_trackedDeviceList->getBuffer(buffer, length);
 
 	// inform listeners (like the indoor localisation service, i.e. trackedDeviceListCharacteristic)
-	EventDispatcher::getInstance().dispatch(EVT_TRACKED_DEVICES, buffer, length);
+	event_t event(CS_TYPE::EVT_TRACKED_DEVICES, buffer, length);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 void Tracker::handleTrackedDeviceCommand(buffer_ptr_t buffer, uint16_t size) {
@@ -254,11 +259,12 @@ void Tracker::handleTrackedDeviceCommand(buffer_ptr_t buffer, uint16_t size) {
 
 }
 
-void Tracker::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch (evt) {
-	case EVT_BLE_EVENT: {
-		onBleEvent((ble_evt_t*)p_data);
-		break;
-	}
+void Tracker::handleEvent(event_t & event) {
+	switch (event.type) {
+		case CS_TYPE::EVT_BLE_EVENT: {
+			onBleEvent((ble_evt_t*)event.data);
+			break;
+		}
+		default: {}
 	}
 }

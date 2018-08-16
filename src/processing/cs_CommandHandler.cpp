@@ -218,7 +218,7 @@ ERR_CODE CommandHandler::handleCmdEnableMesh(buffer_ptr_t buffer, const uint16_t
 	bool enable = payload->enable;
 
 	LOGi("%s mesh", enable ? STR_ENABLE : STR_DISABLE);
-	State::getInstance().updateFlag(CONFIG_MESH_ENABLED, enable, true);
+	State::getInstance().updateFlag(CS_TYPE::CONFIG_MESH_ENABLED, enable, PersistenceMode::FLASH);
 
 #if BUILD_MESHING == 1
 	if (enable) {
@@ -248,7 +248,7 @@ ERR_CODE CommandHandler::handleCmdEnableEncryption(buffer_ptr_t buffer, const ui
 	bool enable = payload->enable;
 
 	LOGi("%s encryption", enable ? STR_ENABLE : STR_DISABLE);
-	State::getInstance().updateFlag(CONFIG_ENCRYPTION_ENABLED, enable, true);
+	State::getInstance().updateFlag(CS_TYPE::CONFIG_ENCRYPTION_ENABLED, enable, PersistenceMode::FLASH);
 
 	return ERR_SUCCESS;
 }
@@ -267,7 +267,7 @@ ERR_CODE CommandHandler::handleCmdEnableIbeacon(buffer_ptr_t buffer, const uint1
 	bool enable = payload->enable;
 
 	LOGi("%s ibeacon", enable ? STR_ENABLE : STR_DISABLE);
-	State::getInstance().updateFlag(CONFIG_IBEACON_ENABLED, enable, true);
+	State::getInstance().updateFlag(CS_TYPE::CONFIG_IBEACON_ENABLED, enable, PersistenceMode::FLASH);
 
 	return ERR_SUCCESS;
 }
@@ -302,7 +302,7 @@ ERR_CODE CommandHandler::handleCmdEnableScanner(buffer_ptr_t buffer, const uint1
 	}
 
 	// TODO: first update flag, then start scanner? The scanner is stopped to write to pstorage anyway.
-	State::getInstance().updateFlag(CONFIG_SCANNER_ENABLED, enable, true);
+	State::getInstance().updateFlag(CS_TYPE::CONFIG_SCANNER_ENABLED, enable, PersistenceMode::FLASH);
 
 	return ERR_SUCCESS;
 }
@@ -341,10 +341,11 @@ ERR_CODE CommandHandler::handleCmdScanDevices(buffer_ptr_t buffer, const uint16_
 		uint16_t dataLength;
 		results->getBuffer(buffer, dataLength);
 
-		EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, dataLength);
+		event_t event(CS_TYPE::EVT_SCANNED_DEVICES, buffer, dataLength);
+		EventDispatcher::getInstance().dispatch(event);
 
 #if BUILD_MESHING == 1
-		if (State::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+		if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
 			MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
 		}
 #endif
@@ -366,7 +367,7 @@ ERR_CODE CommandHandler::handleCmdRequestServiceData(buffer_ptr_t buffer, const 
 //		memset(&stateItem, 0, sizeof(stateItem));
 //
 //		State& state = State::getInstance();
-//		State::getInstance().get(CONFIG_CROWNSTONE_ID, &stateItem.id);
+//		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &stateItem.id);
 //
 //		state.get(STATE_SWITCH_STATE, stateItem.switchState);
 //
@@ -459,7 +460,7 @@ ERR_CODE CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uint16_t
 	LOGi(STR_HANDLE_COMMAND, "increase TX");
 //	if (!EncryptionHandler::getInstance().allowAccess(SETUP, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 //	uint8_t opMode;
-//	State::getInstance().get(STATE_OPERATION_MODE, opMode);
+//	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, opMode);
 //	if (opMode != OPERATION_MODE_SETUP) {
 //		LOGw("only available in setup mode");
 //		return ERR_NOT_AVAILABLE;
@@ -486,7 +487,8 @@ ERR_CODE CommandHandler::handleCmdKeepAlive(buffer_ptr_t buffer, const uint16_t 
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "keep alive");
 
-	EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE);
+	event_t event(CS_TYPE::EVT_KEEP_ALIVE);
+	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
 
@@ -500,7 +502,8 @@ ERR_CODE CommandHandler::handleCmdKeepAliveState(buffer_ptr_t buffer, const uint
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, buffer, size);
+	event_t event(CS_TYPE::EVT_KEEP_ALIVE, buffer, size);
+	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
 
@@ -584,11 +587,11 @@ ERR_CODE CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const uint16_
 	}
 	state_errors_t* payload = (state_errors_t*) buffer;
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::FLASH);
 	LOGd("old errors %u - reset %u", stateErrors.asInt, *payload);
 	stateErrors.asInt &= ~(payload->asInt);
 	LOGd("new errors %u", stateErrors.asInt);
-	State::getInstance().set(STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors), true);
+	State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors), PersistenceMode::FLASH);
 	return ERR_SUCCESS;
 }
 
@@ -735,15 +738,17 @@ ERR_CODE CommandHandler::handleCmdAllowDimming(buffer_ptr_t buffer, const uint16
 
 	LOGi("allow dimming: %u", enable);
 
-	if (enable && State::getInstance().isSet(CONFIG_SWITCH_LOCKED)) {
+	if (enable && State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("unlock switch");
 		bool lockEnable = false;
-		State::getInstance().updateFlag(CONFIG_SWITCH_LOCKED, lockEnable, true);
-		EventDispatcher::getInstance().dispatch(EVT_SWITCH_LOCKED, &lockEnable, sizeof(bool));
+		State::getInstance().updateFlag(CS_TYPE::CONFIG_SWITCH_LOCKED, lockEnable, PersistenceMode::FLASH);
+		event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &lockEnable, sizeof(bool));
+		EventDispatcher::getInstance().dispatch(event);
 	}
 
-	State::getInstance().updateFlag(CONFIG_PWM_ALLOWED, enable, true);
-	EventDispatcher::getInstance().dispatch(EVT_PWM_ALLOWED, &enable, sizeof(bool));
+	State::getInstance().updateFlag(CS_TYPE::CONFIG_PWM_ALLOWED, enable, PersistenceMode::FLASH);
+	event_t event(CS_TYPE::EVT_PWM_ALLOWED, &enable, sizeof(bool));
+	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
 
@@ -760,13 +765,14 @@ ERR_CODE CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uint16_t
 
 	LOGi("lock switch: %u", enable);
 
-	if (enable && State::getInstance().isSet(CONFIG_PWM_ALLOWED)) {
+	if (enable && State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED)) {
 		LOGw("can't lock switch");
 		return ERR_NOT_AVAILABLE;
 	}
 
-	State::getInstance().updateFlag(CONFIG_SWITCH_LOCKED, enable, true);
-	EventDispatcher::getInstance().dispatch(EVT_SWITCH_LOCKED, &enable, sizeof(bool));
+	State::getInstance().updateFlag(CS_TYPE::CONFIG_SWITCH_LOCKED, enable, PersistenceMode::FLASH);
+	event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &enable, sizeof(bool));
+	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
 
@@ -781,8 +787,9 @@ ERR_CODE CommandHandler::handleCmdEnableSwitchcraft(buffer_ptr_t buffer, const u
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 	bool enable = payload->enable;
 
-	State::getInstance().updateFlag(CONFIG_SWITCHCRAFT_ENABLED, enable, true);
-	EventDispatcher::getInstance().dispatch(EVT_SWITCHCRAFT_ENABLED, &enable, sizeof(bool));
+	State::getInstance().updateFlag(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED, enable, PersistenceMode::FLASH);
+	event_t event(CS_TYPE::EVT_SWITCHCRAFT_ENABLED, &enable, sizeof(bool));
+	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
 
@@ -806,7 +813,7 @@ ERR_CODE CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const uint16_t
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	uint8_t enable = *(uint8_t*) buffer;
-	ERR_CODE errCode = State::getInstance().set(CONFIG_UART_ENABLED, buffer, size, true);
+	ERR_CODE errCode = State::getInstance().set(CS_TYPE::CONFIG_UART_ENABLED, buffer, size, PersistenceMode::FLASH);
 	if (errCode != ERR_SUCCESS) {
 		return errCode;
 	}
@@ -922,25 +929,26 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 	return false;
 }
 
-void CommandHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch (evt) {
-	case EVT_DO_RESET_DELAYED: {
-		if (length != sizeof(evt_do_reset_delayed_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
-			return;
-		}
-		evt_do_reset_delayed_t* payload = (evt_do_reset_delayed_t*)p_data;
-		resetDelayed(payload->resetCode, payload->delayMs);
-		break;
-	}
-	case EVT_RX_CONTROL: {
-		stream_header_t* streamHeader = (stream_header_t*)p_data;
-		if (length - sizeof(stream_header_t) < streamHeader->length) {
-			LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+void CommandHandler::handleEvent(event_t & event) {
+	switch (event.type) {
+		case CS_TYPE::EVT_DO_RESET_DELAYED: {
+			if (event.size != sizeof(evt_do_reset_delayed_t)) {
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, event.size);
+				return;
+			}
+			evt_do_reset_delayed_t* payload = (evt_do_reset_delayed_t*)event.data;
+			resetDelayed(payload->resetCode, payload->delayMs);
 			break;
 		}
-		uint8_t* streamPayload = (uint8_t*)p_data + sizeof(stream_header_t);
-		handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
-	}
+		case CS_TYPE::EVT_RX_CONTROL: {
+			stream_header_t* streamHeader = (stream_header_t*)event.data;
+			if (event.size - sizeof(stream_header_t) < streamHeader->length) {
+				LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+				break;
+			}
+			uint8_t* streamPayload = (uint8_t*)event.data + sizeof(stream_header_t);
+			handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
+		}
+		default: {}
 	}
 }

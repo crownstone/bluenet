@@ -15,13 +15,12 @@
 #include <protocol/cs_MeshMessageTypes.h>
 #endif
 
+#define SWITCH_ON 100
+
 struct __attribute__((__packed__)) __attribute__((__aligned__(4))) switch_state_t {
 	uint8_t pwm_state : 7;
 	uint8_t relay_state : 1;
 };
-
-#define SWITCH_ON 100
-
 
 /* Power Switch
  * 
@@ -165,7 +164,7 @@ public:
 
 	/** Used internally
 	 */
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	void handleEvent(event_t & event);
 
 #if BUILD_MESHING == 1
 	/** Used internally

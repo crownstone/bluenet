@@ -12,6 +12,7 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_Config.h>
 #include <events/cs_EventDispatcher.h>
+#include <events/cs_EventTypes.h>
 #include <protocol/cs_Defaults.h>
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
@@ -31,73 +32,74 @@ void State::init(boards_config_t* boardsConfig) {
 	_initialized = true;
 }
 
-ERR_CODE State::writeToStorage(uint8_t type, uint8_t* data, size_t size, bool persistent) {
+ERR_CODE State::writeToStorage(CS_TYPE type, uint8_t* data, size16_t size, PersistenceMode mode) {
 
 	ERR_CODE error_code = ERR_NOT_IMPLEMENTED;
 	error_code = verify(type, data, size);
 	if (SUCCESS(error_code)) {
 		LOGi("Write to storage");
-		error_code = set(type, data, size, persistent);
-		EventDispatcher::getInstance().dispatch(type, data, size);
+		error_code = set(type, data, size, mode);
+		event_t event(type, data, size);
+		EventDispatcher::getInstance().dispatch(event);
 	}
 	return error_code;
 }
 
-ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer) {
+ERR_CODE State::readFromStorage(CS_TYPE type, StreamBuffer<uint8_t>* streamBuffer) {
 
 	ERR_CODE error_code = ERR_NOT_IMPLEMENTED;
-	if (type > sizeof(ConfigurationTypeSizes) || ConfigurationTypeSizes[type] == 0) {
+	if (TypeSize(type) == 0) {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		error_code = ERR_UNKNOWN_TYPE;
 		return error_code;
 	}
 	
 	// temporarily put data on stack(?)
-	size_t plen = ConfigurationTypeSizes[type];
+	size16_t plen = TypeSize(type);
 	uint8_t payload[plen];
-	error_code = get(type, payload, plen);
+	error_code = get(type, payload, plen, PersistenceMode::FLASH);
 	if (SUCCESS(error_code)) {
 		streamBuffer->setPayload(payload, plen);
-		streamBuffer->setType(type);
+		uint8_t unsafe_type = +type;
+		streamBuffer->setType(unsafe_type);
 	}
 	return error_code;
 }
 
-ERR_CODE State::verify(uint8_t type, uint8_t* payload, uint8_t size) {
+ERR_CODE State::verify(CS_TYPE type, uint8_t* payload, uint8_t size) {
 	ERR_CODE error_code = ERR_NOT_IMPLEMENTED;
-	
-	if (type > sizeof(ConfigurationTypeSizes)) {
-		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
-		error_code = ERR_UNKNOWN_TYPE;
-		return error_code;
-	}
 
-	switch(type) {
-		case CONFIG_MESH_ENABLED :
-		case CONFIG_ENCRYPTION_ENABLED :
-		case CONFIG_IBEACON_ENABLED :
-		case CONFIG_SCANNER_ENABLED :
-		case CONFIG_CONT_POWER_SAMPLER_ENABLED :
-		case CONFIG_PWM_ALLOWED:
-		case CONFIG_SWITCH_LOCKED:
-		case CONFIG_SWITCHCRAFT_ENABLED: {
-			LOGe("Write disabled. Use commands to enable/disable");
-			error_code = ERR_WRITE_NOT_ALLOWED;
-			return error_code;
-		}
-	}
-
-	uint8_t check_size = ConfigurationTypeSizes[type];
+	size16_t check_size = TypeSize(type);
 	if (check_size == 0) {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		error_code = ERR_UNKNOWN_TYPE;
 		return error_code;
 	}
 
+	switch(type) {
+		case CS_TYPE::CONFIG_MESH_ENABLED :
+		case CS_TYPE::CONFIG_ENCRYPTION_ENABLED :
+		case CS_TYPE::CONFIG_IBEACON_ENABLED :
+		case CS_TYPE::CONFIG_SCANNER_ENABLED :
+		case CS_TYPE::CONFIG_CONT_POWER_SAMPLER_ENABLED :
+		case CS_TYPE::CONFIG_PWM_ALLOWED:
+		case CS_TYPE::CONFIG_SWITCH_LOCKED:
+		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: {
+			LOGe("Write disabled. Use commands to enable/disable");
+			error_code = ERR_WRITE_NOT_ALLOWED;
+			return error_code;
+		}
+		default:
+			// go on
+			;
+	}
+
 	bool correct = false;
 	if (check_size == size) {
 		correct = true;
-	} else if ((check_size > size) && (type == CONFIG_NAME)) {
+	} 
+	// handle CONFIG_NAME separately, check_size can be size (which is just the maximum size)
+	if ((check_size > size) && (type == CS_TYPE::CONFIG_NAME)) {
 		correct = true;
 	}
 
@@ -115,85 +117,115 @@ ERR_CODE State::verify(uint8_t type, uint8_t* payload, uint8_t size) {
 	return error_code;
 }
 
-size_t State::getStateItemSize(const uint8_t type) {
-	if (type > sizeof(ConfigurationTypeSizes)) {
-		return 0;
-	}
-	return ConfigurationTypeSizes[type];	
+//size16_t State::getStateItemSize(const CS_TYPE type) {
+//	return TypeSize(type);
+//}
+
+ERR_CODE State::get(const CS_TYPE type, void* target, const PersistenceMode mode) {
+	size16_t size = 0;
+	return get(type, target, size, mode);
 }
 
-ERR_CODE State::get(const uint8_t type, void* target, const bool getDefaultValue) {
-	size_t size = 0;
-	return get(type, target, size, getDefaultValue);
-}
+ERR_CODE State::get(const CS_TYPE type, void* target, size16_t & size, const PersistenceMode mode) {
+	ret_code_t ret_code = FDS_ERR_NOT_FOUND;
+	
+	PersistenceMode p_mode = mode;
 
-ERR_CODE State::get(const uint8_t type, void* target, size_t & size, const bool getDefaultValue) {
-	ret_code_t ret_code;
-	if (getDefaultValue || (!_storage->exists(FILE_CONFIGURATION, type))) {
-		// LOGd("Get default %i", type);
-		getDefaults(type, target, size);
-		ret_code = ERR_SUCCESS;
-		return ret_code;
+	if (p_mode == PersistenceMode::DEFAULT_PERSISTENCE) {
+			p_mode = DefaultPersistence(type);
 	}
-	st_file_data_t data;
-	data.key = type;
-	data.value = (uint8_t*)target;
-	//LOGd("Get type %i", type);
-	ret_code =_storage->read(FILE_CONFIGURATION, data);
+	switch(p_mode) {
+		case PersistenceMode::FIRMWARE_DEFAULT:
+			break;
+		case PersistenceMode::RAM: {
+			bool exist = false;
+			//exist = loadFromRam(type, target, size);
+			if (!exist) ret_code = FDS_ERR_NOT_FOUND;
+			break;
+		}
+		case PersistenceMode::FLASH:
+			st_file_data_t data;
+			data.key = +type;
+			data.value = (uint8_t*)target;
+			ret_code =_storage->read(FILE_CONFIGURATION, data);
+			size = data.size;
+			break;
+		default:
+			LOGw("Unknown persistence p_mode");
+	}
+
 	if (ret_code == FDS_ERR_NOT_FOUND) {
-		//LOGd("Not found, use default");
 		getDefaults(type, target, size);
 		ret_code = ERR_SUCCESS;
-		return ret_code;
 	}
-	size = data.size;
 	return ret_code;
+}
+
+ERR_CODE State::storeInRam(const st_file_data_t & data) {
+	// TODO: Check if enough RAM is available
+	bool exist = false;
+	for (size16_t i = 0; i < _not_persistent.size(); ++i) {
+		if (_not_persistent[i].key == data.key) {
+			_not_persistent[i].key = data.key;
+			_not_persistent[i].value = data.value;
+			_not_persistent[i].size = data.size;
+			_not_persistent[i].persistent = data.persistent;
+			exist = true;
+			break;
+		}
+	}
+	if (!exist) {
+		_not_persistent.push_back(data);
+	}
+	return ERR_SUCCESS;
+}
+
+ERR_CODE State::loadFromRam(st_file_data_t & data) {
+	bool exist = false;
+	for (size16_t i = 0; i < _not_persistent.size(); ++i) {
+		if (_not_persistent[i].key == data.key) {
+			data.key = _not_persistent[i].key;
+			data.value = _not_persistent[i].value;
+			data.size = _not_persistent[i].size;
+			data.persistent = _not_persistent[i].persistent;
+			exist = true;
+			break;
+		}
+	}
+	return exist;
 }
 
 /**
  * For now always write all settings to persistent storage.
  */
-ERR_CODE State::set(uint8_t type, void* target, size_t size, bool persistent) {
+ERR_CODE State::set(CS_TYPE type, void* target, size16_t size, const PersistenceMode mode) {
 	st_file_data_t data;
-	data.key = type;
+	data.key = +type;
 	data.value = (uint8_t*)target;
 	data.size = size;
-	data.persistent = persistent;
-	if (!data.persistent) {
-		bool exist = false;
-		for (size_t i = 0; i < _not_persistent.size(); ++i) {
-			if (_not_persistent[i].key == type) {
-				_not_persistent[i].key = data.key;
-				_not_persistent[i].value = data.value;
-				_not_persistent[i].size = data.size;
-				_not_persistent[i].persistent = data.persistent;
-				exist = true;
-			}
-		}
-		if (!exist) {
-			_not_persistent.push_back(data);
-		}
-		return true;
-	}
+	//data.persistent = persistent;
+	//if (!data.persistent) {
+	//	return storeInRam(data);
+	//}
 	return _storage->write(FILE_CONFIGURATION, data);
 }
 
-bool State::updateFlag(uint8_t type, bool value, bool persistent) {
+bool State::updateFlag(CS_TYPE type, bool value, const PersistenceMode mode) {
 	uint8_t tmp = value;
 	st_file_data_t data;
-	data.key = type;
+	data.key = +type;
 	data.value = &tmp;
 	data.size = 1;
-	data.persistent = persistent;
+	//data.persistent = persistent;
 	return _storage->write(FILE_CONFIGURATION, data);
 }
 
-bool State::readFlag(uint8_t type, bool& value) {
+bool State::readFlag(CS_TYPE type, bool& value) {
 	ERR_CODE error_code;
 	
 	uint8_t tmp = value;
 	st_file_data_t data;
-	data.key = type;
+	data.key = +type;
 	data.value = &tmp;
 	data.size = 1;
 	
@@ -202,37 +234,37 @@ bool State::readFlag(uint8_t type, bool& value) {
 	return error_code;
 }
 
-bool State::isSet(uint8_t type) {
+bool State::isSet(CS_TYPE type) {
 	bool enabled = false;
 	switch(type) {
-	case CONFIG_MESH_ENABLED :
-	case CONFIG_ENCRYPTION_ENABLED :
-	case CONFIG_IBEACON_ENABLED :
-	case CONFIG_SCANNER_ENABLED :
-	case CONFIG_CONT_POWER_SAMPLER_ENABLED :
-	case CONFIG_DEFAULT_ON:
-	case CONFIG_PWM_ALLOWED:
-	case CONFIG_SWITCH_LOCKED:
-	case CONFIG_SWITCHCRAFT_ENABLED: 
-		readFlag(type, enabled);
-	default: {}
+		case CS_TYPE::CONFIG_MESH_ENABLED:
+		case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
+		case CS_TYPE::CONFIG_IBEACON_ENABLED:
+		case CS_TYPE::CONFIG_SCANNER_ENABLED:
+		case CS_TYPE::CONFIG_CONT_POWER_SAMPLER_ENABLED:
+		case CS_TYPE::CONFIG_DEFAULT_ON:
+		case CS_TYPE::CONFIG_PWM_ALLOWED:
+		case CS_TYPE::CONFIG_SWITCH_LOCKED:
+		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: 
+			readFlag(type, enabled);
+		default: {}
 	}
 	return enabled;
 }
 
-bool State::isNotifying(uint8_t type) {
-	std::vector<uint8_t>::iterator it = find(_notifyingStates.begin(), _notifyingStates.end(), type);
+bool State::isNotifying(CS_TYPE type) {
+	std::vector<CS_TYPE>::iterator it = find(_notifyingStates.begin(), _notifyingStates.end(), type);
 	return it != _notifyingStates.end();
 }
 
-void State::setNotify(uint8_t type, bool enable) {
+void State::setNotify(CS_TYPE type, bool enable) {
 	if (enable) {
 		if (!isNotifying(type)) {
 			_notifyingStates.push_back(type);
 			_notifyingStates.shrink_to_fit();
 		}
 	} else {
-		std::vector<uint8_t>::iterator it = find(_notifyingStates.begin(), _notifyingStates.end(), type);
+		std::vector<CS_TYPE>::iterator it = find(_notifyingStates.begin(), _notifyingStates.end(), type);
 		if (it != _notifyingStates.end()) {
 			_notifyingStates.erase(it);
 			_notifyingStates.shrink_to_fit();

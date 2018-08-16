@@ -18,17 +18,13 @@ EventDispatcher::EventDispatcher() : _listenerCount(0)
 
 }
 
-void EventDispatcher::dispatch(uint16_t evt) {
-	dispatch(evt, NULL, 0);
-}
-
-void EventDispatcher::dispatch(uint16_t evt, void* p_data, uint16_t length) {
+void EventDispatcher::dispatch(event_t & event) {
 #ifdef PRINT_EVENTDISPATCHER_VERBOSE
-	LOGi("dispatch event: %d", evt);
+	LOGi("dispatch event: %d", event.type);
 #endif
 
 	for (int i = 0; i < _listenerCount; i++) {
-		_listeners[i]->handleEvent(evt, p_data, length);
+		_listeners[i]->handleEvent(event);
 	}
 }
 

@@ -124,11 +124,10 @@ void Crownstone::init() {
 	//! initialize drivers
 	LOGi(FMT_HEADER, "init");
 	initDrivers();
-	BLEutil::print_heap("init, heap:");
-	BLEutil::print_stack("init, stack:");
+	LOG_MEMORY;
 	
 	LOGi(FMT_HEADER, "mode");
-	_state->get(STATE_OPERATION_MODE, &_operationMode);
+	_state->get(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, PersistenceMode::FLASH);
 	switch(_operationMode) {
 		case OPERATION_MODE_SETUP: 
 		case OPERATION_MODE_NORMAL: 
@@ -138,27 +137,25 @@ void Crownstone::init() {
 		default:
 			LOGd("Set default mode to setup");
 			_operationMode = OPERATION_MODE_SETUP;
-			_state->set(STATE_OPERATION_MODE, &_operationMode, sizeof(_operationMode), true);
+			_state->set(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, sizeof(_operationMode), PersistenceMode::FLASH);
 	}
 	LOGd("Set default mode to setup");
 	_operationMode = OPERATION_MODE_SETUP;
-	_state->set(STATE_OPERATION_MODE, &_operationMode, sizeof(_operationMode), true);
+	_state->set(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, sizeof(_operationMode), PersistenceMode::FLASH);
 	
-	_state->get(STATE_OPERATION_MODE, &_operationMode);
+	_state->get(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, PersistenceMode::FLASH);
 	LOGd("Operation mode: %i", _operationMode);
 	
 	LOGd("Set default mode to setup again");
 	_operationMode = OPERATION_MODE_SETUP;
-	_state->set(STATE_OPERATION_MODE, &_operationMode, sizeof(_operationMode), true);
+	_state->set(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, sizeof(_operationMode), PersistenceMode::FLASH);
 	
-	_state->get(STATE_OPERATION_MODE, &_operationMode);
+	_state->get(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, PersistenceMode::FLASH);
 	LOGd("Operation mode: %i", _operationMode);
 
 	//! configure the crownstone
 	LOGi(FMT_HEADER, "configure");
 	configure();
-//	BLEutil::print_heap("Heap configure: ");
-//	BLEutil::print_stack("Stack configure: ");
 
 	LOGi(FMT_CREATE, "timer");
 	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
@@ -183,7 +180,7 @@ void Crownstone::init() {
 			// Because iPhones cannot programmatically clear their cache of paired devices, the phone that
 			// did the setup is at risk of not being able to connect to the crownstone if the cs clears the device
 			// manager. We use our own encryption scheme to counteract this.
-			if (_state->isSet(CONFIG_ENCRYPTION_ENABLED)) {
+			if (_state->isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
 				LOGi(FMT_ENABLE, "AES encryption");
 				_stack->setAesEncrypted(true);
 			}
@@ -211,7 +208,7 @@ void Crownstone::init() {
 			_stack->createCharacteristics();
 
 			// use aes encryption for normal mode (if enabled)
-			if (_state->isSet(CONFIG_ENCRYPTION_ENABLED)) {
+			if (_state->isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
 				LOGi(FMT_ENABLE, "AES encryption");
 				_stack->setAesEncrypted(true);
 			}
@@ -249,14 +246,16 @@ void Crownstone::configure() {
 	Storage::getInstance().garbageCollect();
 
 	uint16_t resetCounter;
-	State::getInstance().get(STATE_RESET_COUNTER, &resetCounter);
+	State::getInstance().get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, PersistenceMode::FLASH);
 	++resetCounter;
 	LOGw("Reset counter at: %d", resetCounter);
-	State::getInstance().set(STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), true);
+	State::getInstance().set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), PersistenceMode::FLASH);
 
 	// set advertising parameters such as the device name and appearance.
 	// Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
 	setName();
+
+	writeDefaults();
 
 	LOGi("> advertisement ...");
 	// configure advertising parameters
@@ -293,7 +292,7 @@ void Crownstone::initDrivers() {
 	if (!_boardsConfig.flags.hasSerial) {
 		serial_config(_boardsConfig.pinGpioRx, _boardsConfig.pinGpioTx);
 		uint8_t uartEnabled;
-		_state->get(CONFIG_UART_ENABLED, &uartEnabled);
+		_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, PersistenceMode::FLASH);
 		serial_enable((serial_enable_t)uartEnabled);
 	}
 
@@ -365,17 +364,17 @@ void Crownstone::initDrivers() {
 void Crownstone::configureStack() {
 	// Set the stored tx power
 	int8_t txPower;
-	_state->get(CONFIG_TX_POWER, &txPower);
+	_state->get(CS_TYPE::CONFIG_TX_POWER, &txPower, PersistenceMode::FLASH);
 	_stack->setTxPowerLevel(txPower);
 
 	// Set the stored advertisement interval
 	uint16_t advInterval;
-	_state->get(CONFIG_ADV_INTERVAL, &advInterval);
+	_state->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, PersistenceMode::FLASH);
 	_stack->setAdvertisingInterval(advInterval);
 
 	// Retrieve and Set the PASSKEY for pairing
 	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
-	_state->get(CONFIG_PASSKEY, passkey);
+	_state->get(CS_TYPE::CONFIG_PASSKEY, passkey, PersistenceMode::FLASH);
 
 	// TODO: If key is not set, this leads to a crash
 //	_stack->setPasskey(passkey);
@@ -415,7 +414,7 @@ void Crownstone::configureAdvertisement() {
 
 	// initialize service data
 	uint8_t u_opMode;
-	State::getInstance().get(STATE_OPERATION_MODE, &u_opMode);
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &u_opMode, PersistenceMode::FLASH);
 	int8_t opMode = (int8_t)u_opMode;
 	LOGd("Operation mode: %i", opMode);
 
@@ -427,11 +426,11 @@ void Crownstone::configureAdvertisement() {
 	TYPIFY(CONFIG_IBEACON_TXPOWER) rssi;
 	ble_uuid128_t uuid;
 
-	bool defaultSetting = opMode != OPERATION_MODE_NORMAL;
-	_state->get(CONFIG_IBEACON_MAJOR, &major, defaultSetting);
-	_state->get(CONFIG_IBEACON_MINOR, &minor, defaultSetting);
-	_state->get(CONFIG_IBEACON_UUID, uuid.uuid128, defaultSetting);
-	_state->get(CONFIG_IBEACON_TXPOWER, &rssi, defaultSetting);
+	//bool defaultSetting = opMode != OPERATION_MODE_NORMAL;
+	_state->get(CS_TYPE::CONFIG_IBEACON_MAJOR, &major, PersistenceMode::FLASH);
+	_state->get(CS_TYPE::CONFIG_IBEACON_MINOR, &minor, PersistenceMode::FLASH);
+	_state->get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, PersistenceMode::FLASH);
+	_state->get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, PersistenceMode::FLASH);
 	LOGd("iBeacon: major=%i, minor=%i, rssi_on_1m=%i", major, minor, (int8_t)rssi);
 
 	// create ibeacon object
@@ -449,7 +448,7 @@ void Crownstone::configureAdvertisement() {
 		LOGd("Normal mode, fill with state info");
 		// read crownstone id from storage
 		uint16_t crownstoneId;
-		_state->get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+		_state->get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, PersistenceMode::FLASH);
 		LOGi("Set crownstone id to %u", crownstoneId);
 
 		// and set it to the service data
@@ -457,17 +456,10 @@ void Crownstone::configureAdvertisement() {
 
 		// fill service data with initial data
 		uint8_t switchState;
-		_state->get(STATE_SWITCH_STATE, &switchState);
+		_state->get(CS_TYPE::STATE_SWITCH_STATE, &switchState, PersistenceMode::FLASH);
 		_serviceData->updateSwitchState(switchState);
 
 		_serviceData->updateTemperature(getTemperature());
-
-//		int32_t powerUsage;
-//		_state->get(STATE_POWER_USAGE, powerUsage);
-//		_serviceData->updatePowerUsage(powerUsage);
-//		int32_t accumulatedEnergy;
-//		_state->get(STATE_ACCUMULATED_ENERGY, accumulatedEnergy);
-//		_serviceData->updateAccumulatedEnergy(accumulatedEnergy);
 	}
 	
 	LOGd("Init radio");
@@ -478,7 +470,7 @@ void Crownstone::configureAdvertisement() {
 	// Need to init radio before configuring ibeacon?
 	_stack->initRadio();
 
-	if (_state->isSet(CONFIG_IBEACON_ENABLED)) {
+	if (_state->isSet(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
 		LOGd("Configure iBeacon");
 		_stack->configureIBeacon(_beacon, _boardsConfig.deviceType);
 	} else {
@@ -507,31 +499,22 @@ void Crownstone::createCrownstoneServices() {
 	_deviceInformationService = new DeviceInformationService();
 	_stack->addService(_deviceInformationService);
 
-	BLEutil::print_heap("Heap DeviceInformationService: ");
-	BLEutil::print_stack("Stack DeviceInformationService: ");
-
 #if CROWNSTONE_SERVICE==1
 	//! should be available always
 	_crownstoneService = new CrownstoneService();
 	_stack->addService(_crownstoneService);
-	BLEutil::print_heap("Heap CrownstoneService: ");
-	BLEutil::print_stack("Stack CrownstoneService: ");
 #endif
 
 #if GENERAL_SERVICE==1
 	//! general services, such as internal temperature, setting names, etc.
 	_generalService = new GeneralService;
 	_stack->addService(_generalService);
-	BLEutil::print_heap("Heap GeneralService: ");
-	BLEutil::print_stack("Stack GeneralService: ");
 #endif
 
 #if INDOOR_SERVICE==1
 	//! now, build up the services and characteristics.
 	_localizationService = new IndoorLocalizationService;
 	_stack->addService(_localizationService);
-	BLEutil::print_heap("Heap IndoorLocalizationService: ");
-	BLEutil::print_stack("Stack IndoorLocalizationService: ");
 #endif
 
 #if POWER_SERVICE==1
@@ -555,16 +538,16 @@ void Crownstone::createCrownstoneServices() {
  */
 void Crownstone::setName() {
 	char device_name[32];
-	size_t size = 0;
-	_state->get(CONFIG_NAME, device_name, size);
+	size16_t size = 0;
+	_state->get(CS_TYPE::CONFIG_NAME, device_name, size, PersistenceMode::FLASH);
 	if (size == 0) {
-		_state->get(CONFIG_NAME, device_name, size, true);
+		_state->get(CS_TYPE::CONFIG_NAME, device_name, size, PersistenceMode::FIRMWARE_DEFAULT);
 	}
 
 #if CHANGE_NAME_ON_RESET==1
 	//! clip name to 5 chars and add reset counter at the end
 	uint16_t resetCounter;
-	State::getInstance().get(STATE_RESET_COUNTER, resetCounter);
+	State::getInstance().get(CS_TYPE::STATE_RESET_COUNTER, resetCounter);
 	char devicename_resetCounter[32];
 	sprintf(devicename_resetCounter, "%.*s_%d", MIN(size, 5), device_name, resetCounter);
 	std::string deviceName = std::string(devicename_resetCounter);
@@ -582,20 +565,14 @@ void Crownstone::prepareNormalOperationMode() {
 	//! create scanner object
 	_scanner->init();
 	_scanner->setStack(_stack);
-	BLEutil::print_heap("Heap scanner: ");
-	BLEutil::print_stack("Stack scanner: ");
 //	if (_state->isSet(CONFIG_TRACKER_ENABLED)) {
 #if CHAR_TRACK_DEVICES == 1
 	_tracker->init();
-	BLEutil::print_heap("Heap tracker: ");
-	BLEutil::print_stack("Stack tracker: ");
 #endif
 //	}
 
 	//! create scheduler
 	_scheduler = &Scheduler::getInstance();
-	BLEutil::print_heap("Heap scheduler: ");
-	BLEutil::print_stack("Stack scheduler: ");
 
 
 #if BUILD_MESHING == 1
@@ -603,6 +580,15 @@ void Crownstone::prepareNormalOperationMode() {
 		_mesh->init();
 //	}
 #endif
+}
+
+void Crownstone::writeDefaults() {
+	st_value_t value;
+	value.u8 = 0;
+	_state->set(CS_TYPE::STATE_TEMPERATURE, &value, sizeof(value), PersistenceMode::FLASH);
+
+	_state->set(CS_TYPE::STATE_TIME, &value, sizeof(value), PersistenceMode::RAM);
+	_state->set(CS_TYPE::STATE_ERRORS, &value, sizeof(value), PersistenceMode::RAM);
 }
 
 void Crownstone::startUp() {
@@ -615,7 +601,7 @@ void Crownstone::startUp() {
 	LOGi("Soft reset count: %d", gpregret);
 
 	uint16_t bootDelay;
-	_state->get(CONFIG_BOOT_DELAY, &bootDelay);
+	_state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, PersistenceMode::FLASH);
 	if (bootDelay) {
 		LOGi("Boot delay: %d ms", bootDelay);
 		nrf_delay_ms(bootDelay);
@@ -666,7 +652,7 @@ void Crownstone::startUp() {
 
 		_scheduler->start();
 
-		if (_state->isSet(CONFIG_SCANNER_ENABLED)) {
+		if (_state->isSet(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
 			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
 			_scanner->delayedStart(delay);
@@ -678,7 +664,7 @@ void Crownstone::startUp() {
 #endif
 //		}
 
-		if (_state->isSet(CONFIG_MESH_ENABLED)) {
+		if (_state->isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
 #if BUILD_MESHING == 1
 //			nrf_delay_ms(500);
 			//! TODO: start with delay please
@@ -687,8 +673,6 @@ void Crownstone::startUp() {
 		} else {
 			LOGi("Mesh not enabled");
 		}
-//		BLEutil::print_heap("Heap startup: ");
-//		BLEutil::print_stack("Stack startup: ");
 
 	}
 
@@ -714,7 +698,7 @@ void Crownstone::tick() {
 
 	// Update temperature
 	int32_t temperature = getTemperature();
-	_state->set(STATE_TEMPERATURE, &temperature, sizeof(temperature), false);
+	_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature), PersistenceMode::RAM);
 
 #if ADVERTISEMENT_IMPROVEMENT==1 // TODO: remove this macro
 	// Update advertisement parameter
@@ -753,126 +737,122 @@ void Crownstone::run() {
 	}
 }
 
-void Crownstone::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-
-//	LOGi("handleEvent: %d", evt);
+void Crownstone::handleEvent(event_t & event) {
 
 	bool reconfigureBeacon = false;
-	switch(evt) {
+	switch(event.type) {
 
-	case CONFIG_NAME: {
-		_stack->updateDeviceName(std::string((char*)p_data, length));
-		// need to reconfigure scan response package for updated name
-		_stack->configureScanResponse(_boardsConfig.deviceType);
-		_stack->setAdvertisementData();
-		break;
-	}
-	case CONFIG_IBEACON_MAJOR: {
-		_beacon->setMajor(*(uint32_t*)p_data);
-		reconfigureBeacon = true;
-		break;
-	}
-	case CONFIG_IBEACON_MINOR: {
-		_beacon->setMinor(*(uint32_t*)p_data);
-		reconfigureBeacon = true;
-		break;
-	}
-	case CONFIG_IBEACON_UUID: {
-		_beacon->setUUID(*(ble_uuid128_t*)p_data);
-		reconfigureBeacon = true;
-		break;
-	}
-	case CONFIG_IBEACON_TXPOWER: {
-		_beacon->setTxPower(*(int8_t*)p_data);
-		reconfigureBeacon = true;
-		break;
-	}
-	case CONFIG_TX_POWER: {
-//		LOGd("setTxPowerLevel %d", *(int8_t*)p_data);
-		_stack->setTxPowerLevel(*(int8_t*)p_data);
-		break;
-	}
-	case CONFIG_ADV_INTERVAL: {
-		_stack->updateAdvertisingInterval(*(uint32_t*)p_data, true);
-//		restartAdvertising = true;
-		break;
-	}
-	case CONFIG_PASSKEY: {
-		_stack->setPasskey((uint8_t*)p_data);
-		break;
-	}
-	case EVT_ENABLE_ADVERTISEMENT: {
-		uint8_t enable = *(uint8_t*)p_data;
-		if (enable) {
-			_stack->startAdvertising();
+		case CS_TYPE::CONFIG_NAME: {
+			_stack->updateDeviceName(std::string((char*)event.data, event.size));
+			// need to reconfigure scan response package for updated name
+			_stack->configureScanResponse(_boardsConfig.deviceType);
+			_stack->setAdvertisementData();
+			break;
 		}
-		else {
-			_stack->stopAdvertising();
+		case CS_TYPE::CONFIG_IBEACON_MAJOR: {
+			_beacon->setMajor(*(TYPIFY(CONFIG_IBEACON_MAJOR)*)event.data);
+			reconfigureBeacon = true;
+			break;
 		}
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, &enable, 1);
-		break;
-	}
-	case EVT_ENABLE_MESH: {
+		case CS_TYPE::CONFIG_IBEACON_MINOR: {
+			_beacon->setMinor(*(TYPIFY(CONFIG_IBEACON_MINOR)*)event.data);
+			reconfigureBeacon = true;
+			break;
+		}
+		case CS_TYPE::CONFIG_IBEACON_UUID: {
+			_beacon->setUUID(*(ble_uuid128_t*)event.data);
+			reconfigureBeacon = true;
+			break;
+		}
+		case CS_TYPE::CONFIG_IBEACON_TXPOWER: {
+			_beacon->setTxPower(*(TYPIFY(CONFIG_IBEACON_TXPOWER)*)event.data);
+			reconfigureBeacon = true;
+			break;
+		}
+		case CS_TYPE::CONFIG_TX_POWER: {
+			_stack->setTxPowerLevel(*(TYPIFY(CONFIG_TX_POWER)*)event.data);
+			break;
+		}
+		case CS_TYPE::CONFIG_ADV_INTERVAL: {
+			_stack->updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data, true);
+			break;
+		}
+		case CS_TYPE::CONFIG_PASSKEY: {
+			_stack->setPasskey((uint8_t*)event.data);
+			break;
+		}
+		case CS_TYPE::EVT_ENABLE_ADVERTISEMENT: {
+			TYPIFY(EVT_ENABLE_ADVERTISEMENT) enable = *(TYPIFY(EVT_ENABLE_ADVERTISEMENT)*)event.data;
+			if (enable) {
+				_stack->startAdvertising();
+			}
+			else {
+				_stack->stopAdvertising();
+			}
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, &enable, 1);
+			break;
+		}
+		case CS_TYPE::EVT_ENABLE_MESH: {
 #if BUILD_MESHING == 1
-		uint8_t enable = *(uint8_t*)p_data;
-		if (enable) {
-			_mesh->start();
-		}
-		else {
-			_mesh->stop();
-		}
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
+			uint8_t enable = *(uint8_t*)event.data;
+			if (enable) {
+				_mesh->start();
+			}
+			else {
+				_mesh->stop();
+			}
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
 #endif
-		break;
-	}
-	case CONFIG_IBEACON_ENABLED: {
-		bool enabled = *(bool*)p_data;
-		if (enabled) {
-			_stack->configureIBeaconAdvData(_beacon);
-		} else {
-			_stack->configureBleDeviceAdvData();
+			break;
 		}
-		_stack->setAdvertisementData();
-		break;
-	}
-	case EVT_ADVERTISEMENT_UPDATED: {
-		_stack->setAdvertisementData();
-		break;
-	}
-	case EVT_BROWNOUT_IMPENDING: {
-		// turn everything off that consumes power
-		LOGf("brownout impending!! force shutdown ...")
+		case CS_TYPE::CONFIG_IBEACON_ENABLED: {
+			TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
+			if (enabled) {
+				_stack->configureIBeaconAdvData(_beacon);
+			} else {
+				_stack->configureBleDeviceAdvData();
+			}
+			_stack->setAdvertisementData();
+			break;
+		}
+		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: {
+			_stack->setAdvertisementData();
+			break;
+		}
+		case CS_TYPE::EVT_BROWNOUT_IMPENDING: {
+			// turn everything off that consumes power
+			LOGf("brownout impending!! force shutdown ...")
 
 #if BUILD_MESHING == 1
-		rbc_mesh_stop();
+				rbc_mesh_stop();
 #endif
-		_scanner->stop();
+			_scanner->stop();
 
-		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-			// [11-jul-2017] Since we store the switch state, we don't have to switch here.
-//			_switch->setSwitch(0);
-			_powerSampler->stopSampling();
+			if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
+				// [11-jul-2017] Since we store the switch state, we don't have to switch here.
+				//			_switch->setSwitch(0);
+				_powerSampler->stopSampling();
+			}
+
+			uint32_t gpregret_id = 0;
+			uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
+			// now reset with brownout reset mask set.
+			// NOTE: do not clear the gpregret register, this way
+			//   we can count the number of brownouts in the bootloader
+			sd_power_gpregret_set(gpregret_id, gpregret_msk);
+			// soft reset, because brownout can't be distinguished from
+			// hard reset otherwise
+			sd_nvic_SystemReset();
+			break;
 		}
-
-		uint32_t gpregret_id = 0;
-		uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
-		// now reset with brownout reset mask set.
-		// NOTE: do not clear the gpregret register, this way
-		//   we can count the number of brownouts in the bootloader
-		sd_power_gpregret_set(gpregret_id, gpregret_msk);
-		// soft reset, because brownout can't be distinguished from
-		// hard reset otherwise
-		sd_nvic_SystemReset();
-		break;
-	}
-	case EVT_CMD_RESET: {
-		CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
-		break;
-	}
-	default: return;
+		case CS_TYPE::EVT_CMD_RESET: {
+			CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
+			break;
+		}
+		default: return;
 	}
 
-	if (reconfigureBeacon && _state->isSet(CONFIG_IBEACON_ENABLED)) {
+	if (reconfigureBeacon && _state->isSet(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
 		_stack->setAdvertisementData();
 	}
 }
@@ -882,31 +862,38 @@ void on_exit(void) {
 }
 
 /**
- * If UART is enabled this will be the message printed out over a serial connection. Connectors are expensive, so UART
- * is not available in the final product.
+ * If UART is enabled this will be the message printed out over a serial connection. In release mode we will not by
+ * default use the UART, it will need to be turned on.
+ *
+ * For DFU, application should be at (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED). For
+ * example, for (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes).
  */
 void welcome(uint8_t pinRx, uint8_t pinTx) {
 	serial_config(pinRx, pinTx);
 	serial_init(SERIAL_ENABLE_RX_AND_TX);
-
 	_log(SERIAL_INFO, SERIAL_CRLF);
 
-//	BLEutil::print_heap("Heap init");
-//	BLEutil::print_stack("Stack init");
-	//! To have DFU, keep application limited to (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED)
-	//! For (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes)
-	LOGi("Welcome Crownstone");
+#ifdef GIT_HASH
+#undef FIRMWARE_VERSION
+#define FIRMWARE_VERSION GIT_HASH
+#endif
+
+	size16_t size = sizeof(STRINGIFY(FIRMWARE_VERSION));
+	char version[sizeof(STRINGIFY(FIRMWARE_VERSION))];
+	memcpy(version, STRINGIFY(FIRMWARE_VERSION), size);
+
+	_log(SERIAL_INFO, "Welcome! Bluenet firmware, version %s\r\n\r\n", version);
+	_log(SERIAL_INFO, " _|_|_|    _|                                            _|     \r\n");
+	_log(SERIAL_INFO, " _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| \r\n");
+	_log(SERIAL_INFO, " _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     \r\n");
+	_log(SERIAL_INFO, " _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     \r\n");
+	_log(SERIAL_INFO, " _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \r\n\r\n");
+
 	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_DAY));
 	LOGi("Compilation time: %s", __TIME__);
-#ifdef GIT_HASH
-	LOGi("Git hash: %s", GIT_HASH);
-#else
-	LOGi("Firmware version: %s", FIRMWARE_VERSION);
-#endif
 	LOGi("Hardware version: %s", get_hardware_version());
 
-	// See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/Cihfaaha.html
-//	LOGi("interrupt level=%u", __get_IPSR() & 0x1FF);
+	LOG_MEMORY;
 }
 
 /**********************************************************************************************************************/
@@ -978,16 +965,10 @@ int main() {
 		welcome(board.pinGpioRx, board.pinGpioTx);
 	}
 
-	BLEutil::print_heap("Heap welcome: ");
-	BLEutil::print_stack("Stack welcome: ");
-
 #ifdef TEST_PIN1
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 	Crownstone crownstone(board); // 250 ms
-
-	BLEutil::print_heap("Heap crownstone construct: ");
-	BLEutil::print_stack("Stack crownstone construct: ");
 
 	// initialize crownstone (depends on the operation mode) ...
 #ifdef TEST_PIN1
@@ -1007,9 +988,6 @@ int main() {
 
 	// init drivers, configure(), create services and chars,
 	crownstone.init(); // 13 ms
-
-	BLEutil::print_heap("Heap crownstone init: ");
-	BLEutil::print_stack("Stack crownstone init: ");
 
 	//! start up phase, start ticking (depends on the operation mode) ...
 #ifdef TEST_PIN1

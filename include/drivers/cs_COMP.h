@@ -106,7 +106,7 @@ public:
 	 *
 	 * @param[in] event            Handle a particular event.
 	 */
-	void handleEvent(nrf_comp_event_t event);
+	void handleEvent(nrf_comp_event_t & nrf_comp_event);
 
 private:
 	//! This class is singleton, constructor is private

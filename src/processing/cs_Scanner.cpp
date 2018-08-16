@@ -55,10 +55,10 @@ Scanner::Scanner() :
 
 void Scanner::init() {
 	State& settings = State::getInstance();
-	settings.get(CONFIG_SCAN_DURATION, &_scanDuration);
-	settings.get(CONFIG_SCAN_SEND_DELAY, &_scanSendDelay);
-	settings.get(CONFIG_SCAN_BREAK_DURATION, &_scanBreakDuration);
-	settings.get(CONFIG_SCAN_FILTER, &_scanFilter);
+	settings.get(CS_TYPE::CONFIG_SCAN_DURATION, &_scanDuration, PersistenceMode::FLASH);
+	settings.get(CS_TYPE::CONFIG_SCAN_SEND_DELAY, &_scanSendDelay, PersistenceMode::FLASH);
+	settings.get(CS_TYPE::CONFIG_SCAN_BREAK_DURATION, &_scanBreakDuration, PersistenceMode::FLASH);
+	settings.get(CS_TYPE::CONFIG_SCAN_FILTER, &_scanFilter, PersistenceMode::FLASH);
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Scanner::staticTick);
@@ -221,7 +221,7 @@ void Scanner::notifyResults() {
 #endif
 
 #if BUILD_MESHING == 1
-	if (State::getInstance().isSet(CONFIG_MESH_ENABLED)) {
+	if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
 		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
 	}
 #endif
@@ -230,7 +230,8 @@ void Scanner::notifyResults() {
 	uint16_t length;
 	_scanResult->getBuffer(buffer, length);
 
-	EventDispatcher::getInstance().dispatch(EVT_SCANNED_DEVICES, buffer, length);
+	event_t event(CS_TYPE::EVT_SCANNED_DEVICES, buffer, length);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
@@ -322,7 +323,8 @@ void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 
 	if (!isScanning()) return;
 
-	EventDispatcher::getInstance().dispatch(EVT_DEVICE_SCANNED, p_adv_report, sizeof(ble_gap_evt_adv_report_t));
+	event_t event(CS_TYPE::EVT_DEVICE_SCANNED, p_adv_report, sizeof(ble_gap_evt_adv_report_t));
+	EventDispatcher::getInstance().dispatch(event);
 	if (p_adv_report->type.scan_response) {
 		data_t adv_data;
 
@@ -335,32 +337,35 @@ void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
 	}
 }
 
-void Scanner::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch (evt) {
-	case EVT_BLE_EVENT: {
-		onBleEvent((ble_evt_t*)p_data);
-		break;
-	}
-	case CONFIG_SCAN_DURATION: {
-		_scanDuration = *(uint32_t*)p_data;
-		break;
-	}
-	case CONFIG_SCAN_SEND_DELAY: {
-		_scanSendDelay = *(uint32_t*)p_data;
-		break;
-	}
-	case CONFIG_SCAN_BREAK_DURATION: {
-		_scanBreakDuration = *(uint32_t*)p_data;
-		break;
-	}
-	case CONFIG_SCAN_FILTER: {
-		_scanFilter = *(uint8_t*)p_data;
-		break;
-	}
-	case CONFIG_SCAN_FILTER_SEND_FRACTION: {
-		_filterSendFraction = *(uint32_t*)p_data;
-		break;
-	}
+void Scanner::handleEvent(event_t & event) {
+	switch (event.type) {
+		case CS_TYPE::EVT_BLE_EVENT: {
+			onBleEvent((ble_evt_t*)event.data);
+			return;
+		}
+		case CS_TYPE::CONFIG_SCAN_DURATION: {
+			_scanDuration = *(TYPIFY(CONFIG_SCAN_DURATION)*)event.data;
+			break;
+		}
+		case CS_TYPE::CONFIG_SCAN_SEND_DELAY: {
+			_scanSendDelay = *(TYPIFY(CONFIG_SCAN_SEND_DELAY)*)event.data;
+			break;
+		}
+		case CS_TYPE::CONFIG_SCAN_BREAK_DURATION: {
+			_scanBreakDuration = *(TYPIFY(CONFIG_SCAN_BREAK_DURATION)*)event.data;
+			break;
+		}
+		case CS_TYPE::CONFIG_SCAN_FILTER: {
+			_scanFilter = *(TYPIFY(CONFIG_SCAN_FILTER)*)event.data;
+			break;
+		}
+		case CS_TYPE::CONFIG_SCAN_FILTER_SEND_FRACTION: {
+			_filterSendFraction = *(TYPIFY(CONFIG_SCAN_FILTER_SEND_FRACTION)*)event.data;
+			break;
+		}
+		default:
+			// no other types should be handled
+			;
 	}
 
 }

@@ -25,7 +25,7 @@ void comp_event_callback(CompEvent_t event) {
 
 void TemperatureGuard::init(const boards_config_t& boardConfig) {
 
-	State::getInstance().get(CONFIG_MAX_CHIP_TEMP, &_maxChipTemp);
+	State::getInstance().get(CS_TYPE::CONFIG_MAX_CHIP_TEMP, &_maxChipTemp, PersistenceMode::FLASH);
 
 	_pwmTempInverted = boardConfig.flags.pwmTempInverted;
 
@@ -34,13 +34,13 @@ void TemperatureGuard::init(const boards_config_t& boardConfig) {
 	_comp = &COMP::getInstance();
 	float pwmTempThresholdUp;
 	float pwmTempThresholdDown;
-	State::getInstance().get(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP, &pwmTempThresholdUp);
-	State::getInstance().get(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN, &pwmTempThresholdDown);
+	State::getInstance().get(CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP, &pwmTempThresholdUp, PersistenceMode::FLASH);
+	State::getInstance().get(CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN, &pwmTempThresholdDown, PersistenceMode::FLASH);
 	_comp->init(boardConfig.pinAinPwmTemp, pwmTempThresholdDown, pwmTempThresholdUp);
 //	_comp->setEventCallback(comp_event_callback);
 
-	_lastChipTempEvent = EVT_CHIP_TEMP_OK;
-	_lastPwmTempEvent = EVT_PWM_TEMP_OK;
+	_lastChipTempEvent = CS_TYPE::EVT_CHIP_TEMP_OK;
+	_lastPwmTempEvent = CS_TYPE::EVT_PWM_TEMP_OK;
 }
 
 
@@ -61,30 +61,31 @@ void TemperatureGuard::handleCompEvent(CompEvent_t event) {
 }
 
 void TemperatureGuard::tick() {
-	GeneralEventType curEvent;
+	CS_TYPE curEvent;
 
 	// Get the current state errors
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
 
 	// Check chip temperature, send event if it changed
 	uint8_t chipTempError = getTemperature() > _maxChipTemp ? 1 : 0;
 	if (chipTempError) {
-		curEvent = EVT_CHIP_TEMP_ABOVE_THRESHOLD;
+		curEvent = CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD;
 	}
 	else {
-		curEvent = EVT_CHIP_TEMP_OK;
+		curEvent = CS_TYPE::EVT_CHIP_TEMP_OK;
 	}
 
 	// Set state before dispatching event, so that errors are set when handling the event.
 	if (chipTempError && !stateErrors.errors.chipTemp) {
 		//! Set chip temp error
-		State::getInstance().set(STATE_ERROR_CHIP_TEMP, &chipTempError, sizeof(chipTempError), true);
+		State::getInstance().set(CS_TYPE::STATE_ERROR_CHIP_TEMP, &chipTempError, sizeof(chipTempError), PersistenceMode::FLASH);
 	}
 
 	if (curEvent != _lastChipTempEvent) {
 		LOGd("Dispatch event %d", curEvent);
-		EventDispatcher::getInstance().dispatch(curEvent);
+		event_t event(curEvent);
+		EventDispatcher::getInstance().dispatch(event);
 		_lastChipTempEvent = curEvent;
 	}
 
@@ -100,21 +101,22 @@ void TemperatureGuard::tick() {
 	}
 
 	if (pwmTempError) {
-		curEvent = EVT_PWM_TEMP_ABOVE_THRESHOLD;
+		curEvent = CS_TYPE::EVT_PWM_TEMP_ABOVE_THRESHOLD;
 	}
 	else {
-		curEvent = EVT_PWM_TEMP_OK;
+		curEvent = CS_TYPE::EVT_PWM_TEMP_OK;
 	}
 
 	// Set state before dispatching event, so that errors are set when handling the event.
 	if (pwmTempError && !stateErrors.errors.pwmTemp) {
 		// Set pwm temp error
-		State::getInstance().set(STATE_ERROR_PWM_TEMP, &pwmTempError, sizeof(pwmTempError), true);
+		State::getInstance().set(CS_TYPE::STATE_ERROR_PWM_TEMP, &pwmTempError, sizeof(pwmTempError), PersistenceMode::FLASH);
 	}
 
 	if (curEvent != _lastPwmTempEvent) {
 		LOGd("Dispatch event %d", curEvent);
-		EventDispatcher::getInstance().dispatch(curEvent);
+		event_t event(curEvent);
+		EventDispatcher::getInstance().dispatch(event);
 		_lastPwmTempEvent = curEvent;
 	}
 

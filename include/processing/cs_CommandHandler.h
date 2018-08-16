@@ -70,7 +70,7 @@ public:
 	void resetDelayed(uint8_t opCode, uint16_t delayMs=2000);
 
 	// Handle events as EventListener
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	void handleEvent(event_t & event);
 
 private:
 

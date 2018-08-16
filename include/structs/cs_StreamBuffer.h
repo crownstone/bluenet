@@ -251,7 +251,7 @@ protected:
 private:
 	uint16_t _maxLength;
 
-	const size_t _item_size = sizeof(T);
-	const size_t _max_items = U;
+	const size16_t _item_size = sizeof(T);
+	const size16_t _max_items = U;
 
 };

@@ -58,8 +58,8 @@ private:
 	app_timer_id_t           _appTimerId;
 	int8_t _maxChipTemp;
 	COMP* _comp;
-	GeneralEventType _lastChipTempEvent;
-	GeneralEventType _lastPwmTempEvent;
+	CS_TYPE _lastChipTempEvent;
+	CS_TYPE _lastPwmTempEvent;
 	bool _pwmTempInverted;
 };
 

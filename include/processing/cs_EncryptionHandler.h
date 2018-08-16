@@ -94,7 +94,7 @@ public:
 	/**
 	 * make sure we create a new nonce for each connection
 	 */
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	void handleEvent(event_t & event);
 
 	/**
 	 * Allow characteristics to get the sessionNonce. Length of the sessionNonce is 5 bytes.

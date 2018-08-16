@@ -48,7 +48,8 @@ EnOceanHandler::EnOceanHandler() :
 }
 
 void EnOceanHandler::init() {
-	State::getInstance().get(STATE_LEARNED_SWITCHES, _learnedSwitches, MAX_SWITCHES * sizeof(learned_enocean_t));
+	size16_t size = MAX_SWITCHES * sizeof(learned_enocean_t);
+	State::getInstance().get(CS_TYPE::STATE_LEARNED_SWITCHES, _learnedSwitches, size, PersistenceMode::FLASH);
 
 #ifdef ENOCEAN_VERBOSE
 	_log(SERIAL_INFO, "learned switches:");
@@ -266,7 +267,7 @@ void EnOceanHandler::save() {
 	BLEutil::printArray(_learnedSwitches, sizeof(_learnedSwitches));
 #endif
 
-	State::getInstance().set(STATE_LEARNED_SWITCHES, _learnedSwitches, MAX_SWITCHES * sizeof(learned_enocean_t), true);
+	State::getInstance().set(CS_TYPE::STATE_LEARNED_SWITCHES, _learnedSwitches, MAX_SWITCHES * sizeof(learned_enocean_t), PersistenceMode::FLASH);
 }
 
 bool EnOceanHandler::learnEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
@@ -442,13 +443,14 @@ bool EnOceanHandler::parseAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) 
 
 }
 
-void EnOceanHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch(evt) {
-	case EVT_DEVICE_SCANNED: {
-		ble_gap_evt_adv_report_t* p_adv_report = (ble_gap_evt_adv_report_t*)p_data;
-		parseAdvertisement(p_adv_report);
-		break;
-	}
+void EnOceanHandler::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			ble_gap_evt_adv_report_t* p_adv_report = (ble_gap_evt_adv_report_t*)event.data;
+			parseAdvertisement(p_adv_report);
+			break;
+		}
+		default: {}
 	}
 }
 

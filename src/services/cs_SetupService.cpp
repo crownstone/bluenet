@@ -97,21 +97,22 @@ void SetupService::addGoToDfuCharacteristic() {
 	});
 }
 
-void SetupService::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
+void SetupService::handleEvent(event_t & event) {
 	// make sure the session nonce is poplated.
-	CrownstoneService::handleEvent(evt, p_data, length);
-	switch (evt) {
-	case EVT_BLE_CONNECT: {
+	CrownstoneService::handleEvent(event);
+	switch(event.type) {
+	    case CS_TYPE::EVT_BLE_CONNECT: {
 		uint8_t* key = EncryptionHandler::getInstance().generateNewSetupKey();
 		_setupKeyCharacteristic->setValueLength(SOC_ECB_KEY_LENGTH);
 		_setupKeyCharacteristic->setValue(key);
 		_setupKeyCharacteristic->updateValue();
 		break;
-	}
-	case EVT_BLE_DISCONNECT: {
+	    }
+	    case CS_TYPE::EVT_BLE_DISCONNECT: {
 		EncryptionHandler::getInstance().invalidateSetupKey();
 		break;
-	}
+	    }
+	    default: {}
 	}
 }
 

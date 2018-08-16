@@ -39,11 +39,8 @@ public:
 	//! Add a listener
 	bool addListener(EventListener *listener);
 
-	//! Dispatch an event without data
-	void dispatch(uint16_t evt);
-
 	//! Dispatch an event with data
-	void dispatch(uint16_t evt, void* p_data, uint16_t length);
+	void dispatch(event_t & event);
 };
 
 

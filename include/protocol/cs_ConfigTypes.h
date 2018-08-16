@@ -15,6 +15,7 @@
  * Use in the characteristic to read and write configurations in <CommonService>.
  */
 enum ConfigurationTypes {
+    /*
 	CONFIG_NAME                             = Configuration_Base,
 	CONFIG_DEVICE_TYPE                      = 1,      //! 0x01
 	CONFIG_ROOM                             = 2,      //! 0x02
@@ -75,7 +76,7 @@ enum ConfigurationTypes {
 	CONFIG_SWITCHCRAFT_THRESHOLD            = 57,     //! 0x39
 	CONFIG_MESH_CHANNEL                     = 58,     //! 0x3A
 	CONFIG_UART_ENABLED                     = 59,     //! 0x3B
-
+*/
 	CONFIG_TYPES
 }; // Current max is 127 (0x7F), see cs_EventTypes.h
 
@@ -90,7 +91,7 @@ enum ConfigurationTypes {
 #ifndef TYPIFY
 #define TYPIFY(NAME) NAME ## _TYPE 
 #endif
-
+/*
 typedef  uint8_t TYPIFY(CONFIG_SCAN_FILTER);
 typedef  uint8_t TYPIFY(CONFIG_FLOOR);
 typedef  uint8_t TYPIFY(CONFIG_MESH_CHANNEL);
@@ -144,7 +145,7 @@ typedef     bool TYPIFY(CONFIG_SWITCH_LOCKED);
 typedef     bool TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
 typedef     bool TYPIFY(CONFIG_TRACKER_ENABLED);
 
-static const uint8_t ConfigurationTypeSizes [] = {
+const uint8_t ConfigurationTypeSizes [] = {
     MAX_STRING_STORAGE_SIZE+1, // CONFIG_NAME
     0, // CONFIG_DEVICE_TYPE
     0, // CONFIG_ROOM
@@ -207,3 +208,5 @@ static const uint8_t ConfigurationTypeSizes [] = {
     sizeof(TYPIFY(CONFIG_UART_ENABLED))
 }; 
 
+*/
+extern char const *ConfigurationNames[];

@@ -254,17 +254,17 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	uint8_t* data = msgData->msg;
 	uint16_t size = msgData->msgSize;
 
-//	LOGd("read:");
-//	BLEutil::printArray(data, size);
+	//	LOGd("read:");
+	//	BLEutil::printArray(data, size);
 
 	// Check CRC
 	uint16_t calculatedCrc = crc16(data, size - sizeof(uart_msg_tail_t));
 	uint16_t receivedCrc = *((uint16_t*)(data + size - sizeof(uart_msg_tail_t)));
 	if (calculatedCrc != receivedCrc) {
-		LOGw("crc mismatch: %u vs %u", calculatedCrc, receivedCrc);
-		_readBusy = false;
-		reset();
-		return;
+	    LOGw("crc mismatch: %u vs %u", calculatedCrc, receivedCrc);
+	    _readBusy = false;
+	    reset();
+	    return;
 	}
 
 	uart_msg_header_t* header = (uart_msg_header_t*)data;
@@ -272,76 +272,96 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	LOGd("handle msg %u", header->opCode);
 
 	switch (header->opCode) {
-	case UART_OPCODE_RX_CONTROL: {
-		EventDispatcher::getInstance().dispatch(EVT_RX_CONTROL, payload, header->size);
+	    case UART_OPCODE_RX_CONTROL: {
+		event_t event(CS_TYPE::EVT_RX_CONTROL, payload, header->size);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	}
-	case UART_OPCODE_RX_ENABLE_ADVERTISEMENT:
+	    }
+	    case UART_OPCODE_RX_ENABLE_ADVERTISEMENT: {
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADVERTISEMENT, payload, 1);
+		event_t event(CS_TYPE::EVT_ENABLE_ADVERTISEMENT, payload, 1);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_ENABLE_MESH:
+	    }
+	    case UART_OPCODE_RX_ENABLE_MESH: {
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_ENABLE_MESH, payload, 1);
+		event_t event(CS_TYPE::EVT_ENABLE_MESH, payload, 1);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_GET_ID:
+	    }
+	    case UART_OPCODE_RX_GET_ID: {
 		uint16_t crownstoneId;
-		State::getInstance().get(CONFIG_CROWNSTONE_ID, &crownstoneId);
+		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, PersistenceMode::FLASH);
 		writeMsg(UART_OPCODE_TX_OWN_ID, (uint8_t*)&crownstoneId, sizeof(crownstoneId));
 		break;
-	case UART_OPCODE_RX_GET_MAC:
+	    }
+	    case UART_OPCODE_RX_GET_MAC: {
 		uint32_t err_code;
 		ble_gap_addr_t address;
 		err_code = sd_ble_gap_addr_get(&address);
 		APP_ERROR_CHECK(err_code);
 		writeMsg(UART_OPCODE_TX_OWN_MAC, address.addr, sizeof(ble_gap_addr_t));
 		break;
-//	case UART_OPCODE_RX_ADC_CONFIG_GET:
-//		break;
-//	case UART_OPCODE_RX_ADC_CONFIG_SET:
-//		break;
-//	case UART_OPCODE_RX_ADC_CONFIG_SET_RANGE:
-//		break;
-	case UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_CURRENT:
-		EventDispatcher::getInstance().dispatch(EVT_INC_CURRENT_RANGE);
+	    }
+	    case UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_CURRENT: {
+		event_t event(CS_TYPE::EVT_INC_CURRENT_RANGE);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_CURRENT:
-		EventDispatcher::getInstance().dispatch(EVT_DEC_CURRENT_RANGE);
+	    }
+	    case UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_CURRENT: {
+		event_t event(CS_TYPE::EVT_DEC_CURRENT_RANGE);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_VOLTAGE:
-		EventDispatcher::getInstance().dispatch(EVT_INC_VOLTAGE_RANGE);
+	    }
+	    case UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_VOLTAGE: {
+		event_t event(CS_TYPE::EVT_INC_VOLTAGE_RANGE);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_VOLTAGE:
-		EventDispatcher::getInstance().dispatch(EVT_DEC_VOLTAGE_RANGE);
+	    }
+	    case UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_VOLTAGE: {
+		event_t event(CS_TYPE::EVT_DEC_VOLTAGE_RANGE);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_CURRENT:
-		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT, payload, 1);
+	    }
+	    case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_CURRENT: {
+		event_t event(CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT, payload, 1);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_VOLTAGE:
-		EventDispatcher::getInstance().dispatch(EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE, payload, 1);
+	    }
+	    case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_VOLTAGE: {
+		event_t event(CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE, payload, 1);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_ADC_CONFIG_VOLTAGE_PIN:
-		EventDispatcher::getInstance().dispatch(EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
+	    }
+	    case UART_OPCODE_RX_ADC_CONFIG_VOLTAGE_PIN: {
+		event_t event(CS_TYPE::EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_POWER_LOG_CURRENT:
+	    }
+	    case UART_OPCODE_RX_POWER_LOG_CURRENT: {
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_CURRENT, payload, 1);
+		event_t event(CS_TYPE::EVT_ENABLE_LOG_CURRENT, payload, 1);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_POWER_LOG_VOLTAGE:
+	    }
+	    case UART_OPCODE_RX_POWER_LOG_VOLTAGE: {
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_VOLTAGE, payload, 1);
+		event_t event(CS_TYPE::EVT_ENABLE_LOG_VOLTAGE, payload, 1);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-	case UART_OPCODE_RX_POWER_LOG_FILTERED_CURRENT:
+	    }
+	    case UART_OPCODE_RX_POWER_LOG_FILTERED_CURRENT: {
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_FILTERED_CURRENT, payload, 1);
+		event_t event(CS_TYPE::EVT_ENABLE_LOG_FILTERED_CURRENT, payload, 1);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
-//	case UART_OPCODE_RX_POWER_LOG_FILTERED_VOLTAGE:
-//		EventDispatcher::getInstance().dispatch();
-//		break;
-	case UART_OPCODE_RX_POWER_LOG_POWER:
+	    }
+	    case UART_OPCODE_RX_POWER_LOG_POWER: {
 		if (header->size < 1) { break; }
-		EventDispatcher::getInstance().dispatch(EVT_ENABLE_LOG_POWER, payload, 1);
+		event_t event(CS_TYPE::EVT_ENABLE_LOG_POWER, payload, 1);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
+	    }
 	}
 
 
@@ -349,21 +369,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	// Reset invalidates the data, right?
 	_readBusy = false;
 	reset();
-	return;
-
-
-//	case 82: // R
-//		write("radio: %u\r\n", NRF_RADIO->POWER);
-//		break;
 }
 
-void UartProtocol::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch (evt) {
-//		writeMsgStart(UART_OPCODE_TX_EVT, length + sizeof(evt));
-//		writeMsgPart(UART_OPCODE_TX_EVT, (uint8_t*)&evt, sizeof(evt));
-//		writeMsgPart(UART_OPCODE_TX_EVT, (uint8_t*)p_data, length);
-//		writeMsgEnd(UART_OPCODE_TX_EVT);
-	default:
-		break;
-	}
+void UartProtocol::handleEvent(event_t & event) {
 }

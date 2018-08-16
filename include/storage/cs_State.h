@@ -23,7 +23,6 @@
 #define FACTORY_RESET_STATE_LOWTX  1
 #define FACTORY_RESET_STATE_RESET  2
 
-
 /**
  * Load settings from and save settings to persistent storage.
  */
@@ -44,45 +43,38 @@ public:
 		return _initialized;
 	}
 
-	/** Read the configuration from the buffer and store in working memory.
-	 *  If persistent is true, also store in FLASH
+	/** Write the buffer to flash or ram.
 	 */
-	ERR_CODE writeToStorage(uint8_t type, uint8_t* data, size_t size, bool persistent = true);
+	ERR_CODE writeToStorage(CS_TYPE type, uint8_t* data, size16_t size, PersistenceMode mode);
 
 	/** Read the configuration from storage and write to streambuffer (to be read from characteristic)
 	 */
-	ERR_CODE readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffer);
+	ERR_CODE readFromStorage(CS_TYPE type, StreamBuffer<uint8_t>* streamBuffer);
 
-	/** Retrieve the Bluetooth name from the object representing the BLE stack.
-	 *
-	 * @return name of the device
-	 */
-	std::string & getBLEName();
+	bool isSet(CS_TYPE type);
 
-	/** Write the Bluetooth name to the object representing the BLE stack.
-	 *
-	 * This updates the Bluetooth name immediately, however, it does not update the name persistently. It
-	 * has to be written to FLASH in that case.
-	 */
-	void setBLEName(const std::string &name, bool persistent = true);
-
-	bool isSet(uint8_t type);
-
-	bool updateFlag(uint8_t type, bool value, bool persistent);
+	bool updateFlag(CS_TYPE type, bool value, PersistenceMode mode);
 
 	void factoryReset(uint32_t resetCode);
 
-	ERR_CODE get(const uint8_t type, void* data, const bool getDefaultValue = false);
+	ERR_CODE get(const CS_TYPE type, void* data, const PersistenceMode mode);
 
-	ERR_CODE get(const uint8_t type, void* data, size_t & size, const bool getDefaultValue = false);
+	/*
+	 * @param type           One of the types from the CS_TYPE enumeration class.
+	 * @param data           Pointer to where we have to write the data.
+	 * @param size[inout]    If size is non-zero, it will indicate maximum size available. Afterwards it will have
+	 *                       the size of the data.
+	 * @param mode           Indicates to get data from RAM, FLASH, PRECOMPILER_DEFAULT, or a combination of this.
+	 */
+	ERR_CODE get(const CS_TYPE type, void* data, size16_t & size, const PersistenceMode mode);
 
-	ERR_CODE set(uint8_t type, void* data, size_t size, bool persistent);
+	ERR_CODE set(CS_TYPE type, void* data, size16_t size, PersistenceMode mode);
 
-	size_t getStateItemSize(uint8_t type);
+	//size16_t getStateItemSize(CS_TYPE type);
 
-	void setNotify(uint8_t type, bool enable);
+	void setNotify(CS_TYPE type, bool enable);
 
-	bool isNotifying(uint8_t type);
+	bool isNotifying(CS_TYPE type);
 	
 	void disableNotifications();
 
@@ -94,11 +86,15 @@ protected:
 
 	boards_config_t* _boardsConfig;
 
-	ERR_CODE verify(uint8_t type, uint8_t* payload, uint8_t length);
+	ERR_CODE verify(CS_TYPE type, uint8_t* payload, uint8_t length);
 
-	bool readFlag(uint8_t type, bool& value);
+	bool readFlag(CS_TYPE type, bool& value);
 
-	std::vector<uint8_t> _notifyingStates;
+	ERR_CODE storeInRam(const st_file_data_t & data);
+
+	ERR_CODE loadFromRam(st_file_data_t & data);
+
+	std::vector<CS_TYPE> _notifyingStates;
 
 	std::vector<st_file_data_t> _not_persistent;
 };

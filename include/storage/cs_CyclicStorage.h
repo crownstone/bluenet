@@ -58,7 +58,7 @@ public:
 //		// TODO: use something like: T val = 0; if (~val ^ curElement == 0) { curElement is all ones }
 //		bool update = false;
 //		uint8_t ones = 0xFF;
-//		for (size_t i=0; i<sizeof(storage_element_t); ++i) {
+//		for (size16_t i=0; i<sizeof(storage_element_t); ++i) {
 //			if (memcmp(&curElement, &ones, 1) != 0) {
 //				update = true;
 //				break;

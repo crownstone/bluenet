@@ -135,7 +135,7 @@ protected:
 	 * @p_data pointer to the data which was sent with the dispatch, can be NULL
 	 * @length number of bytes of data provided
 	 */
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	void handleEvent(event_t & event);
 
 	/** Check if this command message (received via mesh or mesh characteristic) should be handled by this crownstone, if so: handle it.
 	 *

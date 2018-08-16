@@ -25,7 +25,7 @@ public:
 
 	void keepAliveTimeout();
 
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	void handleEvent(event_t & event);
 
 private:
 	Watchdog();

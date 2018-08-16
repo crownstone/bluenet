@@ -82,18 +82,19 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	Timer::getInstance().createSingleShot(_powerSamplingSentDoneTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
 
 	State& settings = State::getInstance();
-	settings.get(CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier);
-	settings.get(CONFIG_CURRENT_MULTIPLIER, &_currentMultiplier);
-	settings.get(CONFIG_VOLTAGE_ZERO, &_voltageZero);
-	settings.get(CONFIG_CURRENT_ZERO, &_currentZero);
-	settings.get(CONFIG_POWER_ZERO, &_powerZero);
-	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentMilliAmpThreshold);
-	settings.get(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm);
-	bool switchcraftEnabled = settings.isSet(CONFIG_SWITCHCRAFT_ENABLED);
+	PersistenceMode pmode = PersistenceMode::FLASH;
+	settings.get(CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier, pmode);
+	settings.get(CS_TYPE::CONFIG_CURRENT_MULTIPLIER, &_currentMultiplier, pmode);
+	settings.get(CS_TYPE::CONFIG_VOLTAGE_ZERO, &_voltageZero, pmode);
+	settings.get(CS_TYPE::CONFIG_CURRENT_ZERO, &_currentZero, pmode);
+	settings.get(CS_TYPE::CONFIG_POWER_ZERO, &_powerZero, pmode);
+	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentMilliAmpThreshold, pmode);
+	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm, pmode);
+	bool switchcraftEnabled = settings.isSet(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 
 	RecognizeSwitch::getInstance().init();
 	float switchcraftThreshold;
-	settings.get(CONFIG_SWITCHCRAFT_THRESHOLD, &switchcraftThreshold);
+	settings.get(CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD, &switchcraftThreshold, pmode);
 	RecognizeSwitch::getInstance().configure(switchcraftThreshold);
 	enableSwitchcraft(switchcraftEnabled);
 
@@ -108,7 +109,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	LOGi(FMT_INIT, "buffers");
 	uint16_t burstSize = _powerSamples.getMaxLength();
 
-	size_t size = burstSize;
+	size16_t size = burstSize;
 	_powerSamplesBuffer = (buffer_ptr_t) calloc(size, sizeof(uint8_t));
 	LOGd("power sample buffer=%u size=%u", _powerSamplesBuffer, size);
 
@@ -168,9 +169,10 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 void PowerSampling::startSampling() {
 	LOGi(FMT_START, "power sample");
 	// Get operation mode
-	State::getInstance().get(STATE_OPERATION_MODE, &_operationMode);
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, PersistenceMode::RAM);
 
-	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
+	event_t event(CS_TYPE::EVT_POWER_SAMPLES_START);
+	EventDispatcher::getInstance().dispatch(event);
 	_powerSamples.clear();
 
 	_adc->start();
@@ -190,53 +192,52 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 	_adc->enableZeroCrossingInterrupt(VOLTAGE_CHANNEL_IDX, _voltageZero);
 }
 
-void PowerSampling::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch (evt) {
-	case EVT_ENABLE_LOG_POWER:
-		_logsEnabled.flags.power = *(uint8_t*)p_data;
-		break;
-	case EVT_ENABLE_LOG_CURRENT:
-		_logsEnabled.flags.current = *(uint8_t*)p_data;
-		break;
-	case EVT_ENABLE_LOG_VOLTAGE:
-		_logsEnabled.flags.voltage = *(uint8_t*)p_data;
-		break;
-	case EVT_ENABLE_LOG_FILTERED_CURRENT:
-		_logsEnabled.flags.filteredCurrent = *(uint8_t*)p_data;
-		break;
-	case EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
-		toggleVoltageChannelInput();
-		break;
-	case EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT:
-		enableDifferentialModeCurrent(*(uint8_t*)p_data);
-		break;
-	case EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
-		enableDifferentialModeVoltage(*(uint8_t*)p_data);
-		break;
-	case EVT_INC_VOLTAGE_RANGE:
-		changeRange(VOLTAGE_CHANNEL_IDX, 600);
-		break;
-	case EVT_DEC_VOLTAGE_RANGE:
-		changeRange(VOLTAGE_CHANNEL_IDX, -600);
-		break;
-	case EVT_INC_CURRENT_RANGE:
-		changeRange(CURRENT_CHANNEL_IDX, 600);
-		break;
-	case EVT_DEC_CURRENT_RANGE:
-		changeRange(CURRENT_CHANNEL_IDX, -600);
-		break;
-	case EVT_SWITCHCRAFT_ENABLED:
-		enableSwitchcraft(*(bool*)p_data);
-		break;
-	case EVT_ADC_RESTARTED:
-//		uint32_t timestamp = RTC::getCount();
-//		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, (uint8_t*)(&timestamp), sizeof(timestamp));
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
-		RecognizeSwitch::getInstance().skip(2);
-		break;
-	case CONFIG_SWITCHCRAFT_THRESHOLD:
-		RecognizeSwitch::getInstance().configure(*(float*)p_data);
-		break;
+void PowerSampling::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::EVT_ENABLE_LOG_POWER:
+			_logsEnabled.flags.power = *(TYPIFY(EVT_ENABLE_LOG_POWER)*)event.data;
+			break;
+		case CS_TYPE::EVT_ENABLE_LOG_CURRENT:
+			_logsEnabled.flags.current = *(TYPIFY(EVT_ENABLE_LOG_CURRENT)*)event.data;
+			break;
+		case CS_TYPE::EVT_ENABLE_LOG_VOLTAGE:
+			_logsEnabled.flags.voltage = *(TYPIFY(EVT_ENABLE_LOG_VOLTAGE)*)event.data;
+			break;
+		case CS_TYPE::EVT_ENABLE_LOG_FILTERED_CURRENT:
+			_logsEnabled.flags.filteredCurrent = *(TYPIFY(EVT_ENABLE_LOG_FILTERED_CURRENT)*)event.data;
+			break;
+		case CS_TYPE::EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
+			toggleVoltageChannelInput();
+			break;
+		case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+			enableDifferentialModeCurrent(*(TYPIFY(EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT)*)event.data);
+			break;
+		case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+			enableDifferentialModeVoltage(*(TYPIFY(EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE)*)event.data);
+			break;
+		case CS_TYPE::EVT_INC_VOLTAGE_RANGE:
+			changeRange(VOLTAGE_CHANNEL_IDX, 600);
+			break;
+		case CS_TYPE::EVT_DEC_VOLTAGE_RANGE:
+			changeRange(VOLTAGE_CHANNEL_IDX, -600);
+			break;
+		case CS_TYPE::EVT_INC_CURRENT_RANGE:
+			changeRange(CURRENT_CHANNEL_IDX, 600);
+			break;
+		case CS_TYPE::EVT_DEC_CURRENT_RANGE:
+			changeRange(CURRENT_CHANNEL_IDX, -600);
+			break;
+		case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
+			enableSwitchcraft(*(TYPIFY(EVT_SWITCHCRAFT_ENABLED)*)event.data);
+			break;
+		case CS_TYPE::EVT_ADC_RESTARTED:
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
+			RecognizeSwitch::getInstance().skip(2);
+			break;
+		case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
+			RecognizeSwitch::getInstance().configure(*(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)*)event.data);
+			break;
+		default: {}
 	}
 }
 
@@ -308,8 +309,10 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 			copyBufferToPowerSamples(power);
 		}
 		// TODO: use State.set() for this.
-		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
-		EventDispatcher::getInstance().dispatch(STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
+		event_t event1(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
+		EventDispatcher::getInstance().dispatch(event1);
+		event_t event2(CS_TYPE::STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
+		EventDispatcher::getInstance().dispatch(event2);
 	}
 
 #ifdef TEST_PIN
@@ -319,7 +322,8 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	bool switch_detected = RecognizeSwitch::getInstance().detect(prevIndex, power.voltageIndex);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
-		EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
+		event_t event(CS_TYPE::EVT_POWER_TOGGLE);
+		EventDispatcher::getInstance().dispatch(event);
 	}
 
 	_adc->releaseBuffer(bufIndex);
@@ -337,7 +341,8 @@ void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
  * @param[in] power                              Reference to buffer, current and voltage channel
  */
 void PowerSampling::copyBufferToPowerSamples(power_t power) {
-	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_START);
+	event_t event(CS_TYPE::EVT_POWER_SAMPLES_START);
+	EventDispatcher::getInstance().dispatch(event);
 	_powerSamples.clear();
 	uint32_t startTime = RTC::getCount(); // Not really the start time
 
@@ -359,7 +364,8 @@ void PowerSampling::readyToSendPowerSamples() {
 	_sendingSamples = true;
 
 	// Dispatch event that samples are now filled and ready to be sent
-	EventDispatcher::getInstance().dispatch(EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
+	event_t event(CS_TYPE::EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
+	EventDispatcher::getInstance().dispatch(event);
 
 	// Simply use an amount of time for sending, should be event based or polling based
 	Timer::getInstance().start(_powerSamplingSentDoneTimerId, MS_TO_TICKS(3000), this);
@@ -701,7 +707,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 
 	//! Get the current state errors
 	state_errors_t stateErrors;
-	State::getInstance().get(STATE_ERRORS, &stateErrors.asInt);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
 
 	// Get the current switch state before we dispatch any event (as that may change the switch).
 	switch_state_t switchState;
@@ -714,7 +720,8 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 
 	// ---------- TODO: this should be kept up in the state ---------
 	switch_state_t prevSwitchState = _lastSwitchState;
-	State::getInstance().get(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
+	size16_t size = sizeof(switch_state_t);
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, size, PersistenceMode::RAM);
 	_lastSwitchState = switchState;
 
 	if (switchState.relay_state == 0 && switchState.pwm_state == 0 && (prevSwitchState.relay_state || prevSwitchState.pwm_state)) {
@@ -741,9 +748,10 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	// Check if the filtered Irms is above threshold.
 	if ((currentRmsFilteredMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {
 		LOGw("current above threshold");
-		EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
+		event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
+		EventDispatcher::getInstance().dispatch(event);
 		uint8_t error = 1;
-		State::getInstance().set(STATE_ERROR_OVER_CURRENT, &error, sizeof(error), true);
+		State::getInstance().set(CS_TYPE::STATE_ERROR_OVER_CURRENT, &error, sizeof(error), PersistenceMode::FLASH);
 		return;
 	}
 
@@ -759,22 +767,27 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	if ((_consecutivePwmOvercurrent > 20) && (!stateErrors.errors.overCurrentPwm)) {
 		// Get the current pwm state before we dispatch the event (as that may change the pwm).
 		switch_state_t switchState;
-		State::getInstance().get(STATE_SWITCH_STATE, &switchState, sizeof(switch_state_t));
+		size16_t size = sizeof(switch_state_t);
+		State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, size, PersistenceMode::RAM);
 		if (switchState.pwm_state != 0) {
 			// If the pwm was on:
 			LOGw("current above pwm threshold");
 			// Dispatch the event that will turn off the pwm
-			EventDispatcher::getInstance().dispatch(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
+			event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
+			EventDispatcher::getInstance().dispatch(event);
 			// Set overcurrent error.
 			uint8_t error = 1;
-			State::getInstance().set(STATE_ERROR_OVER_CURRENT_PWM, &error, sizeof(error), true);
+			size = sizeof(error);
+			State::getInstance().set(CS_TYPE::STATE_ERROR_OVER_CURRENT_PWM, &error, size, PersistenceMode::FLASH);
 		}
 		else if (switchState.relay_state == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
 			LOGe("IGBT failure detected");
-			EventDispatcher::getInstance().dispatch(EVT_DIMMER_ON_FAILURE_DETECTED);
+			event_t event(CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED);
+			EventDispatcher::getInstance().dispatch(event);
 			uint8_t error = 1;
-			State::getInstance().set(STATE_ERROR_DIMMER_ON_FAILURE, &error, sizeof(error), true);
+			size = sizeof(error);
+			State::getInstance().set(CS_TYPE::STATE_ERROR_DIMMER_ON_FAILURE, &error, size, PersistenceMode::FLASH);
 		}
 	}
 }

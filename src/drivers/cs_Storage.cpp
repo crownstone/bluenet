@@ -14,14 +14,16 @@
  * For more information see:
  * http://developer.nordicsemi.com/nRF51_SDK/doc/7.0.1/s110/html/a00763.html#ga0a57b964c8945eaca2d267835ef6688c
  */
-#include <drivers/cs_Storage.h>
 
 #include <climits>
-#include <float.h>
 #include <drivers/cs_Serial.h>
-#include <storage/cs_State.h>
+#include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
+#include <float.h>
 #include <mesh/cs_Mesh.h>
+#include <protocol/cs_ConfigTypes.h>
+#include <protocol/cs_StateTypes.h>
+#include <storage/cs_State.h>
 
 extern "C" {
 	// Define event handler for errors during initialization
@@ -104,7 +106,7 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 		FDS_ERROR_CHECK(ret_code);
 	}
 	else {
-		LOGd("Write to file %i record %i", file_id, file_data.key);
+		LOGd("Write file %i, record %i, ptr %p", file_id, file_data.key, file_data.value);
 		ret_code = fds_record_write(&record_desc, &record);
 		FDS_ERROR_CHECK(ret_code);
 		static bool garbage_collection = false;
@@ -125,6 +127,22 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 	}
 	return ret_code;
 }
+	
+void Storage::print(const std::string & prefix, st_key_t key) {
+	CS_TYPE type = static_cast<CS_TYPE>(key);
+	LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), key);
+	/*
+	if (key < CONFIG_TYPES) {
+		LOGd("%s %s (%i)", prefix.c_str(), ConfigurationNames[key], key);
+	} 
+	else if ((key > State_Base) && (key < STATE_TYPES)) {
+		LOGd("%s %s (%i)", prefix.c_str(), StateNames[key - State_Base], key);
+	}
+	else {
+		LOGd("%s (%i)", prefix.c_str(), key);
+	}
+	*/
+}
 
 ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 	if (!_initialized) {
@@ -140,13 +158,13 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 	//LOGd("Read from file %i record %i", file_id, file_data.key);
 	// go through all records with given file_id and key (can be multiple)
 	while (fds_record_find(file_id, file_data.key, &record_desc, &_ftok) == FDS_SUCCESS) {
-		LOGd("Found record %i", file_data.key);
 		ret_code = fds_record_open(&record_desc, &flash_record);
 		if (ret_code != FDS_SUCCESS) break;
+		print("Found: ", file_data.key);
 
 		// map flash_record.p_data to value
 		file_data.size = flash_record.p_header->length_words;
-		LOGd("Found record %i of size %i", file_data.key, file_data.size);
+		LOGd("Record has size %i", file_data.size);
 		memcpy(file_data.value, flash_record.p_data, file_data.size);
 
 		// invalidates the record	
@@ -194,10 +212,10 @@ bool Storage::exists(st_file_id_t file_id, st_key_t key, fds_record_desc_t recor
 		return ERR_NOT_INITIALIZED;
 	}
 	while (fds_record_find(file_id, key, &record_fd, &_ftok) == FDS_SUCCESS) {
-		LOGd("Record exists: %i, %i", file_id, key);
+		print("Exists:", key);
 		return true;
 	}
-	LOGd("Record does not exist: %i, %i", file_id, key);
+	print("Does not exist:", key);
 	return false;
 }
 

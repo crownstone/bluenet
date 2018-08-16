@@ -86,18 +86,19 @@ void Watchdog::keepAliveTimeout() {
 	}
 }
 
-void Watchdog::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch(evt) {
-	case EVT_KEEP_ALIVE: {
-		if (length != 0 && length == sizeof(keep_alive_state_message_payload_t)) {
-			_lastKeepAlive = *(keep_alive_state_message_payload_t*)p_data;
+void Watchdog::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::EVT_KEEP_ALIVE: {
+			if (event.size != 0 && event.size == sizeof(keep_alive_state_message_payload_t)) {
+				_lastKeepAlive = *(keep_alive_state_message_payload_t*)event.data;
 #ifdef PRINT_VERBOSE_WATCHDOG
-			LOGd("action=%u switch=%u timeout=%u", _lastKeepAlive.action, _lastKeepAlive.switchState.switchState, _lastKeepAlive.timeout);
+				LOGd("action=%u switch=%u timeout=%u", _lastKeepAlive.action, _lastKeepAlive.switchState.switchState, _lastKeepAlive.timeout);
 #endif
-			_hasKeepAliveState = true;
+				_hasKeepAliveState = true;
+			}
+			keepAlive();
+			break;
 		}
-		keepAlive();
-		break;
-	}
+		default: {}
 	}
 }

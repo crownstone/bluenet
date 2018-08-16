@@ -603,16 +603,17 @@ void ADC::stopTimeout() {
 }
 
 
-void ADC::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
-	switch(evt) {
-	case EVT_STORAGE_WRITE: {
-//		stop();
-		break;
-	}
-	case EVT_STORAGE_WRITE_DONE: {
-//		start();
-		break;
-	}
+void ADC::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::EVT_STORAGE_WRITE: {
+			//		stop();
+			break;
+		}
+		case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
+			//		start();
+			break;
+		}
+		default: {}
 	}
 }
 
@@ -646,7 +647,8 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 #ifdef PRINT_DEBUG
 			LOGd("ADC restarted");
 #endif
-			EventDispatcher::getInstance().dispatch(EVT_ADC_RESTARTED);
+			event_t event(CS_TYPE::EVT_ADC_RESTARTED, NULL, 0);
+			EventDispatcher::getInstance().dispatch(event);
 		}
 		_firstBuffer = false;
 

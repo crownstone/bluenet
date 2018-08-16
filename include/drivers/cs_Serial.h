@@ -47,7 +47,8 @@ typedef enum {
 	SERIAL_ENABLE_RX_AND_TX = 3,
 } serial_enable_t;
 
-#if SERIAL_VERBOSITY<SERIAL_BYTE_PROTOCOL_ONLY
+#if SERIAL_VERBOSITY < SERIAL_BYTE_PROTOCOL_ONLY
+
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -85,6 +86,13 @@ typedef enum {
 #define LOGw(fmt, ...) logLN(SERIAL_WARN,  "\033[33;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGe(fmt, ...) logLN(SERIAL_ERROR, "\033[35;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGf(fmt, ...) logLN(SERIAL_FATAL, "\033[31;1m" fmt "\033[0m", ##__VA_ARGS__)
+
+#define LOG_MEMORY \
+	uint8_t *p = (uint8_t*)malloc(1); \
+	void* sp; \
+	asm("mov %0, sp" : "=r"(sp) : : ); \
+	LOGd("Memory %s() heap=%p, stack=%p", __func__, p, (uint8_t*)sp); \
+	free(p); 
 
 #if SERIAL_VERBOSITY>SERIAL_DEBUG
 #undef LOGd

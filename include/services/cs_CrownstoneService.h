@@ -44,7 +44,7 @@ public:
 
 //	void scheduleNextTick();
 
-	virtual void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	virtual void handleEvent(event_t & event);
 
 protected:
 	/** Initialize a CrownstoneService object

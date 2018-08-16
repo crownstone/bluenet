@@ -79,7 +79,7 @@ public:
 
 	/** handle (crownstone) events
 	 */
-	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
+	void handleEvent(event_t & event);
 
 	/** tick function called by app timer
 	 */
@@ -103,6 +103,8 @@ protected:
 	void configureStack();
 	void configureAdvertisement();
 	void setName();
+
+	void writeDefaults();
 
 	/** create services available in setup mode
 	 */

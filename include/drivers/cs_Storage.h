@@ -16,13 +16,6 @@
 typedef uint16_t st_file_id_t;
 typedef uint16_t st_key_t;
 
-typedef struct { 
-	st_key_t key;
-	uint8_t *value __attribute__((aligned(4)));
-	uint16_t size;
-	bool persistent;
-} st_file_data_t;
-
 typedef union {
 	int8_t    s8;
 	int16_t   s16;
@@ -31,6 +24,13 @@ typedef union {
 	uint16_t  u16;
 	uint32_t  u32;
 } __ALIGN(4) st_value_t;
+
+typedef struct { 
+	st_key_t key;
+	uint8_t *value;
+	uint16_t size;
+	bool persistent;
+} st_file_data_t;
 
 static const st_file_id_t FILE_DO_NOT_USE     = 0x0000;
 static const st_file_id_t FILE_STATE          = 0x0001;
@@ -81,9 +81,10 @@ public:
 
 	bool exists(st_file_id_t file_id, st_key_t key, fds_record_desc_t record_fd);
 
+	void print(const std::string & prefix, st_key_t key);
+
 	// Handle Crownstone events
-	void handleEvent(uint16_t evt, void* p_data, uint16_t size) {
-	};
+	void handleEvent(event_t & event) {};
 
 	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
 	
