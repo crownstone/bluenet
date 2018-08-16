@@ -329,20 +329,23 @@ typedef  uint8_t TYPIFY(EVT_TRACKED_DEVICE_IS_NEARBY);
 typedef  uint8_t TYPIFY(EVT_TRACKED_DEVICE_NOT_NEARBY);
 
 /**
- * Store values in FLASH or RAM. Load values from DEFAULTS, FLASH or RAM. 
+ * Store values in FLASH or RAM. Load values from FIRMWARE_DEFAULT, FLASH or RAM. 
  *
  * 1. Values that are written fairly often and are not important over reboots should be stored in and read from RAM.
  * For example, we can measure continuously the temperature of the chip. We can also all the time read this value 
  * from one of the BLE services. There is no reason to do a roundtrip to FLASH.
  *
- * 2. Values like CONFIG_BOOT_DELAY should be known over reboots of the device. So, it seems that they should be
- * stored in FLASH. However, with a new firmware update, these values might change. The new FIRMWARE_DEFAULT should
- * then take precedence. Henceforth, you will not be able to store items in FLASH that are set to use the
- * FIRMWARE_DEFAULT.
+ * 2. Values like CONFIG_BOOT_DELAY should be known over reboots of the device. Moreover, they should also persist
+ * over firmware updates. These values are stored in FLASH. If the values are actually not changed by the user (or via
+ * the smartphone app), they should NOT be stored to FLASH. They can then immediately be read from the 
+ * FIRMWARE_DEFAULT. They will be stored only if they are explicitly overwritten. If these values are stored in FLASH
+ * they always take precedence over FIRMWARE_DEFAULT values. 
  *
- * 3. Values like CONFIG_IBEACON_MINOR can be configured over BLE. In other words, they are set by the user. These
- * values should persist over reboots. Although a FIRMWARE_DEFAULT might be present, this will be written to FLASH.
- * Afterwards with a new firmware update, these values also persist across the firmware update.
+ * NOTE. Suppose we have a new firmware available and we definitely want to use a new FIRMWARE_DEFAULT value. For 
+ * example, we use more peripherals and need to have a CONFIG_BOOT_DELAY that is higher or else it will be in an 
+ * infinite reboot loop. Before we upload the new firmware to the Crownstone, we need to explicitly clear the value. 
+ * Only after we have deleted the FLASH record we can upload the new firmware. Then the new FIRMWARE_DEFAULT is used
+ * automatically.
  */
 enum class PersistenceMode: uint8_t {
     DEFAULT_PERSISTENCE, // not recommended, please, be explicit
