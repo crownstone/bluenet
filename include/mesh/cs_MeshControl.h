@@ -61,7 +61,7 @@ public:
 	 * @messageCounter the counter of the command message to which this reply belongs
 	 * @status the status code of the command execution
 	 */
-	void sendStatusReplyMessage(uint32_t messageCounter, ERR_CODE status);
+	void sendStatusReplyMessage(uint32_t messageCounter, cs_ret_code_t status);
 
 	/** Send a config reply over the mesh (for read/get config commands)
 	 *
@@ -83,13 +83,13 @@ public:
 	 * @length length of the message in bytes.
 	 * @return error code.
 	 */
-	ERR_CODE sendKeepAliveMessage(keep_alive_message_t* msg, uint16_t length);
+	cs_ret_code_t sendKeepAliveMessage(keep_alive_message_t* msg, uint16_t length);
 
 	/** Send the last sent keep alive message into the mesh, and handle it when targeted at this crownstone.
 	 *
 	 * @return error code
 	 */
-	ERR_CODE sendLastKeepAliveMessage();
+	cs_ret_code_t sendLastKeepAliveMessage();
 
 	/** Send a multi switch message into the mesh, and handle it when targeted at this crownstone.
 	 *
@@ -97,7 +97,7 @@ public:
 	 * @length length of the message in bytes.
 	 * @return error code
 	 */
-	ERR_CODE sendMultiSwitchMessage(multi_switch_message_t* msg, uint16_t length);
+	cs_ret_code_t sendMultiSwitchMessage(multi_switch_message_t* msg, uint16_t length);
 
 	/** Send a command message into the mesh, and handle it when targeted at this crownstone.
 	 *
@@ -105,7 +105,7 @@ public:
 	 * @length length of the message in bytes.
 	 * @return error code
 	 */
-	ERR_CODE sendCommandMessage(command_message_t* msg, uint16_t length);
+	cs_ret_code_t sendCommandMessage(command_message_t* msg, uint16_t length);
 
 	/** Send a message into the mesh, used by the mesh characteristic
 	 *
@@ -113,7 +113,7 @@ public:
 	 * @p_data a pointer to the data which should be sent
 	 * @length number of bytes of data to with p_data points
 	 */
-	ERR_CODE send(uint16_t channel, void* p_data, uint16_t length);
+	cs_ret_code_t send(uint16_t channel, void* p_data, uint16_t length);
 
 	/**
 	 * Get incoming messages and perform certain actions. Messages have already been decrypted.
@@ -142,21 +142,21 @@ protected:
 	 * @msg the message payload
 	 * @length length of the message in bytes
 	 */
-	ERR_CODE handleCommand(command_message_t* msg, uint16_t length, uint32_t messageCounter);
+	cs_ret_code_t handleCommand(command_message_t* msg, uint16_t length, uint32_t messageCounter);
 
 	/** Decode a keep alive message received over mesh or mesh characteristic
 	 *
 	 * @msg the message payload
 	 * @length length of the message in bytes
 	 */
-	ERR_CODE handleKeepAlive(keep_alive_message_t* msg, uint16_t length);
+	cs_ret_code_t handleKeepAlive(keep_alive_message_t* msg, uint16_t length);
 
 	/** Decode a multi switch message received over mesh or mesh characteristic
 	 *
 	 * @msg the message payload
 	 * @length length of the message in bytes
 	 */
-	ERR_CODE handleMultiSwitch(multi_switch_message_t* msg, uint16_t length);
+	cs_ret_code_t handleMultiSwitch(multi_switch_message_t* msg, uint16_t length);
 
 	/** Decode a state message received over mesh
 	 *
@@ -164,21 +164,21 @@ protected:
 	 * @length    Length of the message in bytes
 	 * @stateChan Which state channel (as there are multiple).
 	 */
-	ERR_CODE handleStateMessage(state_message_t* msg, uint16_t length, uint16_t stateChan);
+	cs_ret_code_t handleStateMessage(state_message_t* msg, uint16_t length, uint16_t stateChan);
 
 	/** Decode a command reply message received over mesh
 	 *
 	 * @msg the message payload
 	 * @length length of the message in bytes
 	 */
-	ERR_CODE handleCommandReplyMessage(reply_message_t* msg, uint16_t length);
+	cs_ret_code_t handleCommandReplyMessage(reply_message_t* msg, uint16_t length);
 
 	/** Decode a scan result message received over mesh
 	 *
 	 * @msg the message payload
 	 * @length length of the message in bytes
 	 */
-	ERR_CODE handleScanResultMessage(scan_result_message_t* msg, uint16_t length);
+	cs_ret_code_t handleScanResultMessage(scan_result_message_t* msg, uint16_t length);
 
 	/** Decode a command message (received over mesh or mesh characteristic) that is targeted at this crownstone.
 	 *
@@ -200,7 +200,7 @@ protected:
 	 *
 	 * @return true when a reply message should be sent (with given result)
 	 */
-	bool handleConfigCommand(config_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, ERR_CODE& result);
+	bool handleConfigCommand(config_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, cs_ret_code_t& result);
 
 	/** Decode a state message that is targeted at this crownstone.
 	 *
@@ -211,7 +211,7 @@ protected:
 	 *
 	 * @return true when a reply message should be sent (with given result)
 	 */
-	bool handleStateCommand(state_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, ERR_CODE& result);
+	bool handleStateCommand(state_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, cs_ret_code_t& result);
 
 	/** Decode a control message that is targeted at this crownstone.
 	 *
@@ -222,7 +222,7 @@ protected:
 	 *
 	 * @return true when a reply message should be sent (with given result)
 	 */
-	bool handleControlCommand(control_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, ERR_CODE& result);
+	bool handleControlCommand(control_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, cs_ret_code_t& result);
 
 	/** Decode a beacon config message that is targeted at this crownstone.
 	 *
@@ -233,7 +233,7 @@ protected:
 	 *
 	 * @return true when a reply message should be sent (with given result)
 	 */
-	bool handleBeaconConfigCommand(beacon_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, ERR_CODE& result);
+	bool handleBeaconConfigCommand(beacon_mesh_message_t* msg, uint16_t length, uint32_t messageCounter, cs_ret_code_t& result);
 
 private:
 	MeshControl();

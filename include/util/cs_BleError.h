@@ -35,35 +35,35 @@ void fds_pretty_print(ret_code_t ret_code);
 
 /** @brief Macro for calling error handler function.
  *
- * @param[in] ERR_CODE Error code supplied to the error handler.
+ * @param[in] cs_ret_code_t Error code supplied to the error handler.
  */
-#define APP_ERROR_HANDLER(ERR_CODE)                                         \
+#define APP_ERROR_HANDLER(cs_ret_code_t)                                         \
 		do                                                                  \
 		{                                                                   \
-			app_error_handler((ERR_CODE), __LINE__, (uint8_t*) __FILE__);   \
+			app_error_handler((cs_ret_code_t), __LINE__, (uint8_t*) __FILE__);   \
 		} while (0)
 
 
 /** @brief Macro for calling error handler function if supplied error code any other than NRF_SUCCESS.
  *
- * @param[in] ERR_CODE Error code supplied to the error handler.
+ * @param[in] cs_ret_code_t Error code supplied to the error handler.
  */
-#define APP_ERROR_CHECK(ERR_CODE)                                                   \
+#define APP_ERROR_CHECK(cs_ret_code_t)                                                   \
 		do                                                                          \
 		{                                                                           \
-			const uint32_t LOCAL_ERR_CODE = (ERR_CODE);                             \
-			if (LOCAL_ERR_CODE != NRF_SUCCESS)                                      \
+			const uint32_t LOCAL_cs_ret_code_t = (cs_ret_code_t);                             \
+			if (LOCAL_cs_ret_code_t != NRF_SUCCESS)                                      \
 			{                                                                       \
-				LOGd("ERR_CODE: %d (0x%X)", LOCAL_ERR_CODE, LOCAL_ERR_CODE);		\
-				APP_ERROR_HANDLER(LOCAL_ERR_CODE);                                  \
+				LOGd("cs_ret_code_t: %d (0x%X)", LOCAL_cs_ret_code_t, LOCAL_cs_ret_code_t);		\
+				APP_ERROR_HANDLER(LOCAL_cs_ret_code_t);                                  \
 			}                                                                       \
 		} while (0)
 
-#define APP_ERROR_CHECK_EXCEPT(ERR_CODE, EXCEPTION)                                 \
-		if (ERR_CODE == EXCEPTION) {                                                \
+#define APP_ERROR_CHECK_EXCEPT(cs_ret_code_t, EXCEPTION)                                 \
+		if (cs_ret_code_t == EXCEPTION) {                                                \
 			LOGw(STRINGIFY(EXCEPTION));                                             \
 		} else {                                                                    \
-			APP_ERROR_CHECK(ERR_CODE);                                              \
+			APP_ERROR_CHECK(cs_ret_code_t);                                              \
 		}
 
 #ifdef __EXCEPTIONS

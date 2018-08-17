@@ -96,17 +96,17 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 	ret_code_t ret_code;
 
 	record.file_id           = file_id;
-	record.key               = file_data.key;
+	record.key               = +file_data.type;
 	record.data.p_data       = file_data.value;
 	record.data.length_words = file_data.size; 
 
-	if (exists(file_id, file_data.key, record_desc)) {
-		LOGd("Update file %i record %i", file_id, file_data.key);
+	if (exists(file_id, file_data.type, record_desc)) {
+		LOGd("Update file %i record %i", file_id, record.key);
 		ret_code = fds_record_update(&record_desc, &record);
 		FDS_ERROR_CHECK(ret_code);
 	}
 	else {
-		LOGd("Write file %i, record %i, ptr %p", file_id, file_data.key, file_data.value);
+		LOGd("Write file %i, record %i, ptr %p", file_id, record.key, record.data.p_data);
 		ret_code = fds_record_write(&record_desc, &record);
 		FDS_ERROR_CHECK(ret_code);
 		static bool garbage_collection = false;
@@ -127,21 +127,9 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 	}
 	return ret_code;
 }
-	
-void Storage::print(const std::string & prefix, st_key_t key) {
-	CS_TYPE type = static_cast<CS_TYPE>(key);
-	LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), key);
-	/*
-	if (key < CONFIG_TYPES) {
-		LOGd("%s %s (%i)", prefix.c_str(), ConfigurationNames[key], key);
-	} 
-	else if ((key > State_Base) && (key < STATE_TYPES)) {
-		LOGd("%s %s (%i)", prefix.c_str(), StateNames[key - State_Base], key);
-	}
-	else {
-		LOGd("%s (%i)", prefix.c_str(), key);
-	}
-	*/
+
+void Storage::print(const std::string & prefix, CS_TYPE type) {
+	LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), type);
 }
 
 ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
@@ -157,10 +145,10 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 
 	//LOGd("Read from file %i record %i", file_id, file_data.key);
 	// go through all records with given file_id and key (can be multiple)
-	while (fds_record_find(file_id, file_data.key, &record_desc, &_ftok) == FDS_SUCCESS) {
+	while (fds_record_find(file_id, +file_data.type, &record_desc, &_ftok) == FDS_SUCCESS) {
 		ret_code = fds_record_open(&record_desc, &flash_record);
 		if (ret_code != FDS_SUCCESS) break;
-		print("Found: ", file_data.key);
+		print("Found: ", file_data.type);
 
 		// map flash_record.p_data to value
 		file_data.size = flash_record.p_header->length_words;
@@ -174,7 +162,7 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 	return ret_code;
 }
 
-ret_code_t Storage::remove(st_file_id_t file_id, st_key_t key) {
+ret_code_t Storage::remove(st_file_id_t file_id, CS_TYPE type) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -185,7 +173,7 @@ ret_code_t Storage::remove(st_file_id_t file_id, st_key_t key) {
 	ret_code = FDS_ERR_NOT_FOUND;
 
 	// go through all records with given file_id and key (can be multiple)
-	while (fds_record_find(file_id, key, &record_desc, &_ftok) == FDS_SUCCESS) {
+	while (fds_record_find(file_id, +type, &record_desc, &_ftok) == FDS_SUCCESS) {
 		ret_code = fds_record_delete(&record_desc);
 		if (ret_code != FDS_SUCCESS) break;
 	}
@@ -201,21 +189,21 @@ bool Storage::exists(st_file_id_t file_id) {
 	return false;
 }
 
-bool Storage::exists(st_file_id_t file_id, st_key_t key) {
+bool Storage::exists(st_file_id_t file_id, CS_TYPE type) {
 	fds_record_desc_t record_desc;
-	return exists(file_id, key, record_desc);
+	return exists(file_id, type, record_desc);
 }
 
-bool Storage::exists(st_file_id_t file_id, st_key_t key, fds_record_desc_t record_fd) {
+bool Storage::exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t record_fd) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
-	while (fds_record_find(file_id, key, &record_fd, &_ftok) == FDS_SUCCESS) {
-		print("Exists:", key);
+	while (fds_record_find(file_id, +type, &record_fd, &_ftok) == FDS_SUCCESS) {
+		print("Exists:", type);
 		return true;
 	}
-	print("Does not exist:", key);
+	print("Does not exist:", type);
 	return false;
 }
 

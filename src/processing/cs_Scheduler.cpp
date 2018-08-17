@@ -62,7 +62,7 @@ void Scheduler::setTime(uint32_t time) {
 	EventDispatcher::getInstance().dispatch(event);
 }
 
-ERR_CODE Scheduler::setScheduleEntry(uint8_t id, schedule_entry_t* entry) {
+cs_ret_code_t Scheduler::setScheduleEntry(uint8_t id, schedule_entry_t* entry) {
 	LOGd("set %u", id);
 //	if (entry->nextTimestamp == 0) {
 //		return clearScheduleEntry(id);
@@ -79,7 +79,7 @@ ERR_CODE Scheduler::setScheduleEntry(uint8_t id, schedule_entry_t* entry) {
 	return ERR_SUCCESS;
 }
 
-ERR_CODE Scheduler::clearScheduleEntry(uint8_t id) {
+cs_ret_code_t Scheduler::clearScheduleEntry(uint8_t id) {
 	LOGd("clear %u", id);
 	if (!_scheduleList->clear(id)) {
 		return ERR_WRONG_PARAMETER;

@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include <cfg/cs_Config.h>
-#include <storage/cs_State.h>
-
+//#include <cfg/cs_Config.h>
+//#include <storage/cs_State.h>
 
 /**
  * The configuration parameters here will have the following format:
@@ -242,4 +241,4 @@
 #define STATE_ERROR_DIMMER_OFF_FAILURE_DEFAULT 0
 #endif
 
-void getDefaults(CS_TYPE configurationType, void* default_type, size16_t & default_size);
+//void getDefaults(CS_TYPE configurationType, void* default_type, size16_t & default_size);

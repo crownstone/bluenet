@@ -304,7 +304,7 @@ uint32_t CharacteristicBase::notify() {
 			//!   ignore
 
 			//! this is not a serious error, but better to at least write it to the log
-			LOGe("ERR_CODE: %d (0x%X)", err_code, err_code);
+			LOGe("cs_ret_code_t: %d (0x%X)", err_code, err_code);
 
 			// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
 			_status.notificationPending = false;
@@ -408,7 +408,7 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 				//!   ignore
 
 				//! this is not a serious error, but better to at least write it to the log
-				LOGe("ERR_CODE: %d (0x%X)", err_code, err_code);
+				LOGe("cs_ret_code_t: %d (0x%X)", err_code, err_code);
 
 				// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
 				_notificationPendingOffset = 0;

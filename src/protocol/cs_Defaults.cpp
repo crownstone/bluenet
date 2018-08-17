@@ -1,5 +1,6 @@
 #include <protocol/cs_Defaults.h>
 
+/*
 void getDefaults(CS_TYPE configurationType, void* default_value, size16_t & default_size) {
 
     default_size = TypeSize(configurationType);
@@ -226,4 +227,4 @@ void getDefaults(CS_TYPE configurationType, void* default_value, size16_t & defa
 
     }
 }
-
+*/

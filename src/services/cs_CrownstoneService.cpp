@@ -147,7 +147,7 @@ void CrownstoneService::addMeshCharacteristic() {
 
 		uint8_t handle = _meshCommand->type();
 		uint8_t* p_data = _meshCommand->payload();
-		ERR_CODE error_code;
+		cs_ret_code_t error_code;
 		if (length < _meshCommand->getDataLength()) {
 			error_code = ERR_WRONG_PAYLOAD_LENGTH;
 		}
@@ -181,7 +181,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 		// encryption in the write stage verifies if the key is at least GUEST, command specific permissions are
 		// handled in the commandHandler
 
-		ERR_CODE errCode;
+		cs_ret_code_t errCode;
 		CommandHandlerTypes type = CMD_UNKNOWN;
 		MasterBuffer& mb = MasterBuffer::getInstance();
 		// at this point it is too late to check if mb was locked, because the softdevice doesn't care
@@ -223,7 +223,7 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	_configurationControlCharacteristic->setValueLength(0);
 	_configurationControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
 		bool writeErrCode = true;
-		ERR_CODE errCode = configOnWrite(accessLevel, value, length, writeErrCode);
+		cs_ret_code_t errCode = configOnWrite(accessLevel, value, length, writeErrCode);
 		if (writeErrCode) {
 			// Leave type as is.
 //			_streamBuffer->setType()
@@ -266,7 +266,7 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 	_stateControlCharacteristic->setValueLength(0);
 	_stateControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
 		bool writeErrCode = true;
-		ERR_CODE errCode = stateOnWrite(accessLevel, value, length, writeErrCode);
+		cs_ret_code_t errCode = stateOnWrite(accessLevel, value, length, writeErrCode);
 		if (writeErrCode) {
 			// Leave type as is.
 //			_streamBuffer->setType()
@@ -333,7 +333,7 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	});
 }
 
-ERR_CODE CrownstoneService::configOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode) {
+cs_ret_code_t CrownstoneService::configOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode) {
 	// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
 	// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
 	// If the user writes to this characteristic with insufficient rights, this method is not called
@@ -357,7 +357,7 @@ ERR_CODE CrownstoneService::configOnWrite(const EncryptionAccessLevel accessLeve
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	ERR_CODE errCode;
+	cs_ret_code_t errCode;
 	CS_TYPE type = static_cast<CS_TYPE>(_streamBuffer->type());
 	uint8_t opCode = _streamBuffer->opCode();
 	switch (opCode) {
@@ -393,7 +393,7 @@ ERR_CODE CrownstoneService::configOnWrite(const EncryptionAccessLevel accessLeve
 	return errCode;
 }
 
-void CrownstoneService::controlWriteErrorCode(uint8_t type, ERR_CODE errCode) {
+void CrownstoneService::controlWriteErrorCode(uint8_t type, cs_ret_code_t errCode) {
 	if (_controlCharacteristic != NULL) {
 		_streamBuffer->setType(type);
 		_streamBuffer->setOpCode(OPCODE_ERR_VALUE);
@@ -404,7 +404,7 @@ void CrownstoneService::controlWriteErrorCode(uint8_t type, ERR_CODE errCode) {
 	}
 }
 
-ERR_CODE CrownstoneService::stateOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode) {
+cs_ret_code_t CrownstoneService::stateOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode) {
 	// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
 	// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
 	// If the user writes to this characteristic with insufficient rights, this method is not called
@@ -429,7 +429,7 @@ ERR_CODE CrownstoneService::stateOnWrite(const EncryptionAccessLevel accessLevel
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	ERR_CODE errCode;
+	cs_ret_code_t errCode;
 	CS_TYPE type = static_cast<CS_TYPE>(_streamBuffer->type());
 	uint8_t opCode = _streamBuffer->opCode();
 

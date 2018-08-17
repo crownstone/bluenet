@@ -84,7 +84,7 @@ void MeshControl::process(uint16_t channel, mesh_message_t* p_meshMessage, uint1
 }
 
 
-ERR_CODE MeshControl::handleCommand(command_message_t* msg, uint16_t length, uint32_t messageCounter) {
+cs_ret_code_t MeshControl::handleCommand(command_message_t* msg, uint16_t length, uint32_t messageCounter) {
 #if defined(PRINT_MESHCONTROL_VERBOSE)
 	LOGi("handleCommand");
 #endif
@@ -120,7 +120,7 @@ ERR_CODE MeshControl::handleCommand(command_message_t* msg, uint16_t length, uin
 }
 
 
-ERR_CODE MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t length) {
+cs_ret_code_t MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t length) {
 #if defined(PRINT_MESHCONTROL_VERBOSE)
 		LOGi("handleKeepAlive");
 #endif
@@ -175,7 +175,7 @@ ERR_CODE MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t length
 	return ERR_SUCCESS;
 }
 
-ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t length) {
+cs_ret_code_t MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t length) {
 #if defined(PRINT_VERBOSE_MULTI_SWITCH)
 	LOGi("handleMultiSwitch");
 	BLEutil::printArray(msg, length);
@@ -213,7 +213,7 @@ ERR_CODE MeshControl::handleMultiSwitch(multi_switch_message_t* msg, uint16_t le
 
 }
 
-ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, uint16_t stateChan) {
+cs_ret_code_t MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, uint16_t stateChan) {
 #ifdef PRINT_DEBUG
 	LOGd("handleStateMessage");
 #endif
@@ -263,7 +263,7 @@ ERR_CODE MeshControl::handleStateMessage(state_message_t* msg, uint16_t length, 
 }
 
 
-ERR_CODE MeshControl::handleCommandReplyMessage(reply_message_t* msg, uint16_t length) {
+cs_ret_code_t MeshControl::handleCommandReplyMessage(reply_message_t* msg, uint16_t length) {
 	LOGi("handleCommandReplyMessage");
 	BLEutil::printArray(msg, length);
 
@@ -318,7 +318,7 @@ ERR_CODE MeshControl::handleCommandReplyMessage(reply_message_t* msg, uint16_t l
 	return ERR_SUCCESS;
 }
 
-ERR_CODE MeshControl::handleScanResultMessage(scan_result_message_t* msg, uint16_t length) {
+cs_ret_code_t MeshControl::handleScanResultMessage(scan_result_message_t* msg, uint16_t length) {
 	LOGi("Received scan results");
 
 	if (!is_valid_scan_result_message(msg, length)) {
@@ -352,7 +352,7 @@ ERR_CODE MeshControl::handleScanResultMessage(scan_result_message_t* msg, uint16
 
 void MeshControl::handleCommandForUs(uint8_t commandType, uint8_t bitmask, uint32_t messageCounter, uint8_t* commandPayload, uint16_t commandPayloadLength) {
 
-	ERR_CODE statusResult;
+	cs_ret_code_t statusResult;
 
 	//! TODO: use StreamBuffer class to wrap around the stream buffers.
 	switch(commandType) {
@@ -399,7 +399,7 @@ void MeshControl::handleCommandForUs(uint8_t commandType, uint8_t bitmask, uint3
 }
 
 
-bool MeshControl::handleConfigCommand(config_mesh_message_t* configMsg, uint16_t configMsgLength, uint32_t messageCounter, ERR_CODE& statusResult) {
+bool MeshControl::handleConfigCommand(config_mesh_message_t* configMsg, uint16_t configMsgLength, uint32_t messageCounter, cs_ret_code_t& statusResult) {
 	//! Before reading the header, check if the header fits in the msg
 	if (configMsgLength < SB_HEADER_SIZE) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, configMsgLength);
@@ -453,7 +453,7 @@ bool MeshControl::handleConfigCommand(config_mesh_message_t* configMsg, uint16_t
 	}
 }
 
-bool MeshControl::handleStateCommand(state_mesh_message_t* stateMsg, uint16_t stateMsgLength, uint32_t messageCounter, ERR_CODE& statusResult) {
+bool MeshControl::handleStateCommand(state_mesh_message_t* stateMsg, uint16_t stateMsgLength, uint32_t messageCounter, cs_ret_code_t& statusResult) {
 	//! Before reading the header, check if the header fits in the msg
 	if (stateMsgLength < SB_HEADER_SIZE) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, stateMsgLength);
@@ -495,7 +495,7 @@ bool MeshControl::handleStateCommand(state_mesh_message_t* stateMsg, uint16_t st
 	return true;
 }
 
-bool MeshControl::handleControlCommand(control_mesh_message_t* controlMsg, uint16_t controlMsgLength, uint32_t messageCounter, ERR_CODE& statusResult) {
+bool MeshControl::handleControlCommand(control_mesh_message_t* controlMsg, uint16_t controlMsgLength, uint32_t messageCounter, cs_ret_code_t& statusResult) {
 	//! Before reading the header, check if the header fits in the msg
 	if (controlMsgLength < SB_HEADER_SIZE) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, controlMsgLength);
@@ -572,7 +572,7 @@ bool MeshControl::handleControlCommand(control_mesh_message_t* controlMsg, uint1
 	}
 }
 
-bool MeshControl::handleBeaconConfigCommand(beacon_mesh_message_t* beaconMsg, uint16_t beaconMsgLength, uint32_t messageCounter, ERR_CODE& statusResult) {
+bool MeshControl::handleBeaconConfigCommand(beacon_mesh_message_t* beaconMsg, uint16_t beaconMsgLength, uint32_t messageCounter, cs_ret_code_t& statusResult) {
 	if (beaconMsgLength < sizeof(beacon_mesh_message_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, beaconMsgLength);
 		BLEutil::printArray(beaconMsg, beaconMsgLength);
@@ -651,7 +651,7 @@ void MeshControl::handleEvent(event_t & event) {
 }
 
 //! Used by the mesh characteristic to send a message into the mesh
-ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
+cs_ret_code_t MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 
 	switch(channel) {
 	case COMMAND_CHANNEL: {
@@ -715,7 +715,7 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 	case KEEP_ALIVE_CHANNEL: {
 		keep_alive_message_t* msg = (keep_alive_message_t*)p_data;
 
-		ERR_CODE errCode;
+		cs_ret_code_t errCode;
 		errCode = handleKeepAlive(msg, length);
 		if (errCode != ERR_SUCCESS) {
 			return errCode;
@@ -727,7 +727,7 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 	case MULTI_SWITCH_CHANNEL: {
 
 		multi_switch_message_t* msg = (multi_switch_message_t*)p_data;
-		ERR_CODE errCode;
+		cs_ret_code_t errCode;
 		errCode = handleMultiSwitch(msg, length);
 		if (errCode != ERR_SUCCESS) {
 			return errCode;
@@ -760,7 +760,7 @@ ERR_CODE MeshControl::send(uint16_t channel, void* p_data, uint16_t length) {
 
 }
 
-void MeshControl::sendStatusReplyMessage(uint32_t messageCounter, ERR_CODE status) {
+void MeshControl::sendStatusReplyMessage(uint32_t messageCounter, cs_ret_code_t status) {
 #if defined(PRINT_MESHCONTROL_VERBOSE) && defined(PRINT_VERBOSE_COMMAND_REPLY)
 	LOGd("MESH SEND");
 	LOGi("Send StatusReply for message %d, status: %d", messageCounter, status);
@@ -935,8 +935,8 @@ void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 	Mesh::getInstance().send(channel, &message, sizeof(state_message_t));
 }
 
-ERR_CODE MeshControl::sendKeepAliveMessage(keep_alive_message_t* msg, uint16_t length) {
-	ERR_CODE errCode;
+cs_ret_code_t MeshControl::sendKeepAliveMessage(keep_alive_message_t* msg, uint16_t length) {
+	cs_ret_code_t errCode;
 
 	if (!is_valid_keep_alive_msg(msg, length)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
@@ -958,7 +958,7 @@ ERR_CODE MeshControl::sendKeepAliveMessage(keep_alive_message_t* msg, uint16_t l
 	return ERR_SUCCESS;
 }
 
-ERR_CODE MeshControl::sendLastKeepAliveMessage() {
+cs_ret_code_t MeshControl::sendLastKeepAliveMessage() {
 	LOGi("repeat last keep alive");
 
 	// TODO: do we have to make a copy here?
@@ -981,7 +981,7 @@ ERR_CODE MeshControl::sendLastKeepAliveMessage() {
 	}
 
 	// Handle message after sending it, else the message gets delayed too much.
-	ERR_CODE errCode;
+	cs_ret_code_t errCode;
 	errCode = handleKeepAlive(&msg, length);
 	if (errCode != ERR_SUCCESS) {
 		return errCode;
@@ -990,8 +990,8 @@ ERR_CODE MeshControl::sendLastKeepAliveMessage() {
 	return ERR_SUCCESS;
 }
 
-ERR_CODE MeshControl::sendMultiSwitchMessage(multi_switch_message_t* msg, uint16_t length) {
-	ERR_CODE errCode;
+cs_ret_code_t MeshControl::sendMultiSwitchMessage(multi_switch_message_t* msg, uint16_t length) {
+	cs_ret_code_t errCode;
 	if (!is_valid_multi_switch_message(msg, length)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, length);
 		BLEutil::printArray(msg, length);
@@ -1012,7 +1012,7 @@ ERR_CODE MeshControl::sendMultiSwitchMessage(multi_switch_message_t* msg, uint16
 	return ERR_SUCCESS;
 }
 
-ERR_CODE MeshControl::sendCommandMessage(command_message_t* msg, uint16_t length) {
+cs_ret_code_t MeshControl::sendCommandMessage(command_message_t* msg, uint16_t length) {
 
 	// Only checks if the ids array fits, the payload length will be checked in handleCommandForUs()
 	if (!is_valid_command_message(msg, length)) {

@@ -59,21 +59,21 @@ struct CharacteristicInit {
  * The status can be initialized, with notifications, writable, etc.
  */
 struct Status {
-	boolean_t initialized                             : 1;
-	boolean_t notifies                                : 1; //! Whether this characteristic has notifications
-	boolean_t writable                                : 1;
-	boolean_t notifyingEnabled                        : 1; //! Whether server registered for notifications
-	boolean_t indicates                               : 1;
-	boolean_t pinEncrypted                            : 1;
-	boolean_t aesEncrypted                            : 1;
+	bool initialized                             : 1;
+	bool notifies                                : 1; //! Whether this characteristic has notifications
+	bool writable                                : 1;
+	bool notifyingEnabled                        : 1; //! Whether server registered for notifications
+	bool indicates                               : 1;
+	bool pinEncrypted                            : 1;
+	bool aesEncrypted                            : 1;
 
 	/** Flag to indicate if notification is pending to be sent once currently waiting
 	 * tx operations are completed
 	 */
-	boolean_t notificationPending                     : 1;
+	bool notificationPending                     : 1;
 	//! shared encryption buffer, if false, a buffer is allocated for the characteristic, if true,
 	//! the global EncryptionBuffer is used. In particular, big characteristics should use the global EncryptionBuffer
-	boolean_t sharedEncryptionBuffer                  : 1;
+	bool sharedEncryptionBuffer                  : 1;
 };
 
 /** Non-template base class for Characteristics.

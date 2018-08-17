@@ -97,7 +97,7 @@ public:
 	 * use the length field to establish the length of the array to be used. So, the array does not have to
 	 * have a null-terminated byte.
 	 */
-	ERR_CODE toString(std::string &str) {
+	cs_ret_code_t toString(std::string &str) {
 		if (!_buffer) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 			return SB_BUFFER_NOT_INITIALIZED;
@@ -112,7 +112,7 @@ public:
 	 *
 	 *
 	 */
-	ERR_CODE fromString(std::string& str) {
+	cs_ret_code_t fromString(std::string& str) {
 		if (str.length() > (_max_items * _item_size)) {
 			LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			return SB_BUFFER_NOT_LARGE_ENOUGH;
@@ -133,7 +133,7 @@ public:
 	 *         1 if buffer is full,
 	 *         2 if buffer is not initialized
 	 */
-	ERR_CODE add(T value) {
+	cs_ret_code_t add(T value) {
 		if (!_buffer) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 			return SB_BUFFER_NOT_INITIALIZED;
@@ -150,7 +150,7 @@ public:
 	 *
 	 * Reset the payload array and set "length" to 0
 	 */
-	ERR_CODE clear() {
+	cs_ret_code_t clear() {
 		if (!_buffer) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 			return SB_BUFFER_NOT_INITIALIZED;
@@ -207,7 +207,7 @@ public:
 	 *
 	 * If length is larger than the capacity, the function returns an error.
 	 */
-	ERR_CODE setPayload(T *payload, uint16_t length) {
+	cs_ret_code_t setPayload(T *payload, uint16_t length) {
 		if (!_buffer->payload) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 			return SB_BUFFER_NOT_INITIALIZED;

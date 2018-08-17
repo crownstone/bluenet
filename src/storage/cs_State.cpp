@@ -12,12 +12,11 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_Config.h>
 #include <events/cs_EventDispatcher.h>
-#include <events/cs_EventTypes.h>
 #include <protocol/cs_Defaults.h>
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
 
-State::State() : _initialized(false), _storage(NULL), _boardsConfig(NULL) {
+State::State() : _storage(NULL), _boardsConfig(NULL) {
 };
 
 void State::init(boards_config_t* boardsConfig) {
@@ -29,12 +28,12 @@ void State::init(boards_config_t* boardsConfig) {
 		return;
 	}
 
-	_initialized = true;
+	setInitialized();
 }
 
-ERR_CODE State::writeToStorage(CS_TYPE type, uint8_t* data, size16_t size, PersistenceMode mode) {
+cs_ret_code_t State::writeToStorage(CS_TYPE type, uint8_t* data, size16_t size, PersistenceMode mode) {
 
-	ERR_CODE error_code = ERR_NOT_IMPLEMENTED;
+	cs_ret_code_t error_code = ERR_NOT_IMPLEMENTED;
 	error_code = verify(type, data, size);
 	if (SUCCESS(error_code)) {
 		LOGi("Write to storage");
@@ -45,9 +44,9 @@ ERR_CODE State::writeToStorage(CS_TYPE type, uint8_t* data, size16_t size, Persi
 	return error_code;
 }
 
-ERR_CODE State::readFromStorage(CS_TYPE type, StreamBuffer<uint8_t>* streamBuffer) {
+cs_ret_code_t State::readFromStorage(CS_TYPE type, StreamBuffer<uint8_t>* streamBuffer) {
 
-	ERR_CODE error_code = ERR_NOT_IMPLEMENTED;
+	cs_ret_code_t error_code = ERR_NOT_IMPLEMENTED;
 	if (TypeSize(type) == 0) {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
 		error_code = ERR_UNKNOWN_TYPE;
@@ -66,8 +65,9 @@ ERR_CODE State::readFromStorage(CS_TYPE type, StreamBuffer<uint8_t>* streamBuffe
 	return error_code;
 }
 
-ERR_CODE State::verify(CS_TYPE type, uint8_t* payload, uint8_t size) {
-	ERR_CODE error_code = ERR_NOT_IMPLEMENTED;
+cs_ret_code_t State::verify(CS_TYPE type, uint8_t* payload, uint8_t size) {
+
+	cs_ret_code_t error_code = ERR_NOT_IMPLEMENTED;
 
 	size16_t check_size = TypeSize(type);
 	if (check_size == 0) {
@@ -117,59 +117,81 @@ ERR_CODE State::verify(CS_TYPE type, uint8_t* payload, uint8_t size) {
 	return error_code;
 }
 
-//size16_t State::getStateItemSize(const CS_TYPE type) {
-//	return TypeSize(type);
-//}
-
-ERR_CODE State::get(const CS_TYPE type, void* target, const PersistenceMode mode) {
+cs_ret_code_t State::get(const CS_TYPE type, void* target, const PersistenceMode mode) {
 	size16_t size = 0;
 	return get(type, target, size, mode);
 }
 
-ERR_CODE State::get(const CS_TYPE type, void* target, size16_t & size, const PersistenceMode mode) {
-	ret_code_t ret_code = FDS_ERR_NOT_FOUND;
-	
-	PersistenceMode p_mode = mode;
+/** Get value from FLASH or RAM.
+ *
+ * The implementation casts type to the underlying type. The pointer to target is stored in data.value and the
+ * size is 
+ */
+cs_ret_code_t State::get(const CS_TYPE type, void* target, size16_t & size, const PersistenceMode mode) {
+	st_file_data_t data;
+	data.type = type;
+	data.value = (uint8_t*)target;
+	data.size = size;
+	ret_code_t ret_code = get(data, mode);
+	size = data.size;
+	return ret_code;
+}
 
-	if (p_mode == PersistenceMode::DEFAULT_PERSISTENCE) {
-			p_mode = DefaultPersistence(type);
-	}
-	switch(p_mode) {
+cs_ret_code_t State::get(st_file_data_t & data, const PersistenceMode mode) {
+	ret_code_t ret_code = FDS_ERR_NOT_FOUND;
+	switch(mode) {
 		case PersistenceMode::FIRMWARE_DEFAULT:
+			getDefault(data);
 			break;
 		case PersistenceMode::RAM: {
-			bool exist = false;
-			//exist = loadFromRam(type, target, size);
-			if (!exist) ret_code = FDS_ERR_NOT_FOUND;
-			break;
+			bool exist = loadFromRam(data);
+			return exist ? ERR_SUCCESS : ERR_NOT_FOUND;
 		}
 		case PersistenceMode::FLASH:
-			st_file_data_t data;
-			data.key = +type;
-			data.value = (uint8_t*)target;
-			ret_code =_storage->read(FILE_CONFIGURATION, data);
-			size = data.size;
+			return _storage->read(FILE_CONFIGURATION, data);
+		case PersistenceMode::STRATEGY1: {
+			switch(DefaultLocation(data.type)) {
+				case PersistenceMode::RAM: {
+					bool exist = loadFromRam(data);
+					return exist ? ERR_SUCCESS : ERR_NOT_FOUND;
+				}
+				case PersistenceMode::FLASH:
+					break;
+				default:
+					LOGe("PM not implemented");
+					return ERR_NOT_IMPLEMENTED;
+			}
+			bool exist = loadFromRam(data);
+			if (exist) return ERR_SUCCESS;
+
+			ret_code = _storage->read(FILE_CONFIGURATION, data);
+			switch(ret_code) {
+				case FDS_SUCCESS:
+					storeInRam(data);
+					return ret_code;
+				case FDS_ERR_NOT_FOUND:
+					getDefault(data);
+					return ERR_SUCCESS;
+				default: {
+					LOGe("Should not happen");
+				}
+			}
+
 			break;
+		}
 		default:
 			LOGw("Unknown persistence p_mode");
-	}
-
-	if (ret_code == FDS_ERR_NOT_FOUND) {
-		getDefaults(type, target, size);
-		ret_code = ERR_SUCCESS;
 	}
 	return ret_code;
 }
 
-ERR_CODE State::storeInRam(const st_file_data_t & data) {
+cs_ret_code_t State::storeInRam(const st_file_data_t & data) {
 	// TODO: Check if enough RAM is available
 	bool exist = false;
 	for (size16_t i = 0; i < _not_persistent.size(); ++i) {
-		if (_not_persistent[i].key == data.key) {
-			_not_persistent[i].key = data.key;
+		if (_not_persistent[i].type == data.type) {
 			_not_persistent[i].value = data.value;
 			_not_persistent[i].size = data.size;
-			_not_persistent[i].persistent = data.persistent;
 			exist = true;
 			break;
 		}
@@ -180,14 +202,12 @@ ERR_CODE State::storeInRam(const st_file_data_t & data) {
 	return ERR_SUCCESS;
 }
 
-ERR_CODE State::loadFromRam(st_file_data_t & data) {
+cs_ret_code_t State::loadFromRam(st_file_data_t & data) {
 	bool exist = false;
 	for (size16_t i = 0; i < _not_persistent.size(); ++i) {
-		if (_not_persistent[i].key == data.key) {
-			data.key = _not_persistent[i].key;
+		if (_not_persistent[i].type == data.type) {
 			data.value = _not_persistent[i].value;
 			data.size = _not_persistent[i].size;
-			data.persistent = _not_persistent[i].persistent;
 			exist = true;
 			break;
 		}
@@ -196,24 +216,67 @@ ERR_CODE State::loadFromRam(st_file_data_t & data) {
 }
 
 /**
- * For now always write all settings to persistent storage.
+ * For now always write all settings to persistent storage. 
  */
-ERR_CODE State::set(CS_TYPE type, void* target, size16_t size, const PersistenceMode mode) {
+cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const PersistenceMode mode) {
 	st_file_data_t data;
-	data.key = +type;
+	data.type = type;
 	data.value = (uint8_t*)target;
 	data.size = size;
-	//data.persistent = persistent;
-	//if (!data.persistent) {
-	//	return storeInRam(data);
-	//}
-	return _storage->write(FILE_CONFIGURATION, data);
+	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
+	switch(mode) {
+		case PersistenceMode::RAM: {
+			return storeInRam(data);
+		}
+		case PersistenceMode::FLASH: {
+			return _storage->write(FILE_CONFIGURATION, data);
+		}
+		case PersistenceMode::STRATEGY1: {
+			// first get if default location is RAM or FLASH
+			switch(DefaultLocation(type)) {
+				case PersistenceMode::RAM:
+					return storeInRam(data);
+				case PersistenceMode::FLASH:
+					break;
+				default:
+					LOGe("PM not implemented");
+					return ERR_NOT_IMPLEMENTED;
+			}
+			// it is general, but not a fast implementation, better to directly compare with the default without
+			// copying to a local variable
+			st_file_data_t data_compare;
+			data_compare.type = type;
+			data_compare.value = (uint8_t*)malloc(size);
+			data_compare.size = size;
+			ret_code = get(data_compare, PersistenceMode::FIRMWARE_DEFAULT);
+			if (data == data_compare) {
+				return ERR_SUCCESS; // do nothing	
+			}
+			// we cannot assume that the value is already in RAM, it might be the first time it is accessed
+			ret_code = get(data_compare, PersistenceMode::FLASH);
+			if ((ret_code == ERR_SUCCESS) && (data == data_compare)) {
+				return ERR_SUCCESS; // do nothing
+			}
+			// either value is not present in FLASH, or it is different, update it!	
+			ret_code = storeInRam(data);
+			if (ret_code != ERR_SUCCESS) {
+				LOGw("Failure to store in RAM, will still try to store in FLASH");
+			}
+			return _storage->write(FILE_CONFIGURATION, data);
+		}
+		case PersistenceMode::FIRMWARE_DEFAULT: {
+			LOGe("Default cannot be written");
+			ret_code = ERR_WRITE_NOT_ALLOWED;
+			break;
+		}
+	}
+	return ret_code;
 }
 
 bool State::updateFlag(CS_TYPE type, bool value, const PersistenceMode mode) {
 	uint8_t tmp = value;
 	st_file_data_t data;
-	data.key = +type;
+	data.type = type;
 	data.value = &tmp;
 	data.size = 1;
 	//data.persistent = persistent;
@@ -221,11 +284,11 @@ bool State::updateFlag(CS_TYPE type, bool value, const PersistenceMode mode) {
 }
 
 bool State::readFlag(CS_TYPE type, bool& value) {
-	ERR_CODE error_code;
+	cs_ret_code_t error_code;
 	
 	uint8_t tmp = value;
 	st_file_data_t data;
-	data.key = +type;
+	data.type = type;
 	data.value = &tmp;
 	data.size = 1;
 	

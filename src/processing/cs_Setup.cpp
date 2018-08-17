@@ -13,7 +13,7 @@ Setup::Setup(): _setupDone(false) {
 	EventDispatcher::getInstance().addListener(this);
 }
 
-ERR_CODE Setup::handleCommand(uint8_t* data, uint16_t size) {
+cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	uint8_t opMode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &opMode, PersistenceMode::FLASH);
 	if (opMode != OPERATION_MODE_SETUP) {

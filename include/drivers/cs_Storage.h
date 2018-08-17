@@ -7,30 +7,13 @@
 #pragma once
 
 #include <ble/cs_Nordic.h>
+#include <common/cs_Types.h>
 #include <events/cs_EventListener.h>
 #include <components/libraries/fds/fds.h>
 #include <string>
 #include <util/cs_Utils.h>
 #include <vector>
 
-typedef uint16_t st_file_id_t;
-typedef uint16_t st_key_t;
-
-typedef union {
-	int8_t    s8;
-	int16_t   s16;
-	int32_t   s32;
-	uint8_t   u8;
-	uint16_t  u16;
-	uint32_t  u32;
-} __ALIGN(4) st_value_t;
-
-typedef struct { 
-	st_key_t key;
-	uint8_t *value;
-	uint16_t size;
-	bool persistent;
-} st_file_data_t;
 
 static const st_file_id_t FILE_DO_NOT_USE     = 0x0000;
 static const st_file_id_t FILE_STATE          = 0x0001;
@@ -45,7 +28,7 @@ static const st_file_id_t FILE_CONFIGURATION  = 0x0003;
  * The information on the Flash Data Storage from Nordic can be found at the link:
  *   https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk%2Fdita%2Fsdk%2Fnrf5_sdk.html
  */
-class Storage : EventListener {
+class Storage : public EventListener {
 public:
 
 	/** Returns the singleton instance of this class
@@ -72,16 +55,16 @@ public:
 	ret_code_t read(st_file_id_t file_id, st_file_data_t file_contents);
 
 	ret_code_t remove(st_file_id_t file_id);
-
-	ret_code_t remove(st_file_id_t file_id, st_key_t key);
 	
+	ret_code_t remove(st_file_id_t file_id, CS_TYPE type);
+
 	bool exists(st_file_id_t file_id);
 
-	bool exists(st_file_id_t file_id, st_key_t key);
+	bool exists(st_file_id_t file_id, CS_TYPE type);
 
-	bool exists(st_file_id_t file_id, st_key_t key, fds_record_desc_t record_fd);
+	bool exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t record_fd);
 
-	void print(const std::string & prefix, st_key_t key);
+	void print(const std::string & prefix, CS_TYPE type);
 
 	// Handle Crownstone events
 	void handleEvent(event_t & event) {};

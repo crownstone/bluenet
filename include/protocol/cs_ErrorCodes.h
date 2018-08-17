@@ -31,6 +31,8 @@ enum ErrorCodesGeneral {
 	ERR_WRITE_NOT_ALLOWED           = 0x51,
 
 	ERR_ADC_INVALID_CHANNEL         = 0x60,
+
+	ERR_UNSPECIFIED                 = 0x70,
 };
 
 #define SUCCESS(code) code == ERR_SUCCESS
